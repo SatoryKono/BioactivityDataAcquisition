@@ -15,8 +15,12 @@ from __future__ import annotations
 import asyncio
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
+from bioetl.domain.contracts.gold.composite import (
+    CompositeMoleculeGoldSchema,
+    CompositePublicationGoldSchema,
+)
 from bioetl.domain.types import HealthStatus
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
@@ -40,6 +44,13 @@ class StorageAdapter:
     Implements StoragePort protocol from domain/ports.py.
     Delegates to specialized writers for each layer.
     """
+
+    _COMPOSITE_GOLD_SCHEMAS: ClassVar[dict[str, Any]] = {
+        "composite/publication": CompositePublicationGoldSchema,
+        "composite_publication": CompositePublicationGoldSchema,
+        "composite/molecule": CompositeMoleculeGoldSchema,
+        "composite_molecule": CompositeMoleculeGoldSchema,
+    }
 
     # Protocol compliance marker
     REQUIRES_SILVER_SCHEMA: bool = True
@@ -265,10 +276,13 @@ class StorageAdapter:
             sources_used: Optional list of source pipelines used in merge.
             preserve_column_order: If True, skip canonical reordering.
         """
+        schema = self._COMPOSITE_GOLD_SCHEMAS.get(table_name)
+
         await self.gold.write_gold_merged(
             table_name,
             records,
             primary_keys,
+            schema=schema,
             run_id=run_id,
             sources_used=sources_used,
             preserve_column_order=preserve_column_order,

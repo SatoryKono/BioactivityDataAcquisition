@@ -13,9 +13,9 @@ Int→Float coercion note:
     documented in RULES.md §2.6.
 
 Note on strict mode:
-    Composite schemas use `strict = False` because the actual columns depend on
-    which enrichers succeeded. The schema validates core required fields while
-    allowing additional qualified columns from enrichers.
+    Composite schemas use `strict = "filter"` because the actual columns depend on
+    which enrichers succeeded. The schema validates core required fields and
+    filters optional qualified columns from enrichers.
 """
 
 from __future__ import annotations
@@ -41,20 +41,36 @@ class CompositePublicationGoldSchema(pa.DataFrameModel):
         - Title (required for valid publication)
         - Lineage metadata (_composite_run_id, etc.)
 
-    Note: Uses strict=False to allow variable enricher columns.
+    Note: Uses strict="filter" to enforce required fields while allowing variable enricher columns.
     """
 
     # =========================================================================
     # System Fields (from seed)
     # =========================================================================
-    entity_id: Series[str] = pa.Field(nullable=False)
-    content_hash: Series[str] = pa.Field(nullable=False)
+    entity_id: Series[str] = pa.Field(
+        nullable=False,
+        description="Stable business identifier for merged publication entity.",
+    )
+    content_hash: Series[str] = pa.Field(
+        nullable=False,
+        description="Deterministic SHA-256 hash for SCD Type 2 change tracking.",
+    )
 
     # =========================================================================
     # DQ Fields (from seed)
     # =========================================================================
-    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
-    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
+    dq_warn: Series[bool] = pa.Field(
+        nullable=False,
+        default=False,
+        alias="_dq_warn",
+        description="Soft data-quality warning flag.",
+    )
+    dq_error: Series[bool] = pa.Field(
+        nullable=False,
+        default=False,
+        alias="_dq_error",
+        description="Hard data-quality error flag.",
+    )
 
     # =========================================================================
     # Lineage Metadata (from seed)
@@ -108,16 +124,19 @@ class CompositePublicationGoldSchema(pa.DataFrameModel):
     # - openalex.publication.subject_topics
     # - semanticscholar.publication.tldr
     #
-    # Since columns are dynamically determined by enrichers, we use strict=False
+    # Since columns are dynamically determined by enrichers, we use strict="filter"
 
     class Config:
         """Pandera configuration.
 
-        Note: strict=False allows additional columns from enrichers.
+        Note: strict="filter" keeps required columns while filtering additional enricher columns.
         The actual columns depend on which enrichers succeeded and the merge strategy.
         """
 
-        strict = False  # Allow additional qualified columns from enrichers
+        # Keep required contract columns strict while filtering optional
+        # provider-qualified columns that are not part of the canonical
+        # composite contract.
+        strict = "filter"
         coerce = True  # Enable type coercion for nullable integers
 
 
@@ -141,20 +160,36 @@ class CompositeMoleculeGoldSchema(pa.DataFrameModel):
         - Seed primary key (molecule_chembl_id)
         - Lineage metadata (_composite_run_id, etc.)
 
-    Note: Uses strict=False to allow variable enricher columns.
+    Note: Uses strict="filter" to enforce required fields while allowing variable enricher columns.
     """
 
     # =========================================================================
     # System Fields (from seed)
     # =========================================================================
-    entity_id: Series[str] = pa.Field(nullable=False)
-    content_hash: Series[str] = pa.Field(nullable=False)
+    entity_id: Series[str] = pa.Field(
+        nullable=False,
+        description="Stable business identifier for merged molecule entity.",
+    )
+    content_hash: Series[str] = pa.Field(
+        nullable=False,
+        description="Deterministic SHA-256 hash for SCD Type 2 change tracking.",
+    )
 
     # =========================================================================
     # DQ Fields (from seed)
     # =========================================================================
-    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
-    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
+    dq_warn: Series[bool] = pa.Field(
+        nullable=False,
+        default=False,
+        alias="_dq_warn",
+        description="Soft data-quality warning flag.",
+    )
+    dq_error: Series[bool] = pa.Field(
+        nullable=False,
+        default=False,
+        alias="_dq_error",
+        description="Hard data-quality error flag.",
+    )
 
     # =========================================================================
     # Lineage Metadata (from seed)
@@ -203,16 +238,19 @@ class CompositeMoleculeGoldSchema(pa.DataFrameModel):
     # - pubchem.compound.xlogp
     # - pubchem.compound.iupac_name
     #
-    # Since columns are dynamically determined by enrichers, we use strict=False
+    # Since columns are dynamically determined by enrichers, we use strict="filter"
 
     class Config:
         """Pandera configuration.
 
-        Note: strict=False allows additional columns from enrichers.
+        Note: strict="filter" keeps required columns while filtering additional enricher columns.
         The actual columns depend on which enrichers succeeded and the merge strategy.
         """
 
-        strict = False  # Allow additional qualified columns from enrichers
+        # Keep required contract columns strict while filtering optional
+        # provider-qualified columns that are not part of the canonical
+        # composite contract.
+        strict = "filter"
         coerce = True  # Enable type coercion for nullable integers
 
 
