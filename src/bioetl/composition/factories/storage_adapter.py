@@ -27,6 +27,8 @@ from bioetl.infrastructure.storage.silver_writer import SilverWriter
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
+    from pandera.api.dataframe.container import DataFrameSchema
+
     from bioetl.domain.models.metadata import SourceMetadata
     from bioetl.domain.types import ArrowSchema, BatchID, RunID, RunType
 
@@ -233,6 +235,7 @@ class StorageAdapter:
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.
             preserve_column_order: If True, skip canonical reordering.
+            schema: Optional Pandera schema for strict contract validation.
         """
         await self.silver.write_silver_merged(
             table_name,
@@ -252,6 +255,7 @@ class StorageAdapter:
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
+        schema: DataFrameSchema | None = None,
     ) -> None:
         """Write merged records to Gold layer without Pandera schema.
 
@@ -264,6 +268,7 @@ class StorageAdapter:
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.
             preserve_column_order: If True, skip canonical reordering.
+            schema: Optional Pandera schema for strict contract validation.
         """
         await self.gold.write_gold_merged(
             table_name,
@@ -272,6 +277,7 @@ class StorageAdapter:
             run_id=run_id,
             sources_used=sources_used,
             preserve_column_order=preserve_column_order,
+            schema=schema,
         )
 
     async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
