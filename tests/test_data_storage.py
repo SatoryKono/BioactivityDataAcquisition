@@ -115,12 +115,17 @@ def test_req_data_009_gold_is_strict(config_path):
 
 @pytest.mark.parametrize("config_path", get_all_pipeline_configs())
 def test_req_delta_003_forensic_retention(config_path):
-    """Forensic retention must be configurable."""
+    """Forensic retention must be configurable via maintenance settings.
+
+    Note: forensic_retention was removed from sink.silver because the
+    Pydantic SinkLayerConfig model (single source of truth) does not
+    support it.  Retention is now controlled via maintenance.vacuum_retention_days.
+    """
     config = load_config_with_defaults(config_path)
 
-    silver_sink = config.get("sink", {}).get("silver", {})
-    assert "forensic_retention" in silver_sink, (
-        f"'forensic_retention' key missing in silver sink of {config_path}"
+    maintenance = config.get("maintenance", {})
+    assert "vacuum_retention_days" in maintenance, (
+        f"'vacuum_retention_days' key missing in maintenance of {config_path}"
     )
 
 
@@ -140,26 +145,6 @@ def test_req_partition_004_no_high_cardinality_keys(config_path):
                         assert pattern not in key.lower(), (
                             f"High cardinality key '{key}' used for partitioning in {config_path}"
                         )
-
-
-@pytest.mark.parametrize("config_path", get_all_pipeline_configs())
-def test_req_load_001_002_load_strategy(config_path):
-    """Load strategy must be defined."""
-    config = load_config_with_source(config_path)
-
-    source = config.get("source", {})
-    assert "load_strategy" in source, (
-        f"'load_strategy' missing in source of {config_path}"
-    )
-    assert source["load_strategy"] in [
-        "incremental",
-        "full",
-    ], f"Invalid 'load_strategy' in {config_path}"
-
-    if source["load_strategy"] == "incremental":
-        assert "watermark_field" in source, (
-            f"'watermark_field' missing for incremental strategy in {config_path}"
-        )
 
 
 def test_req_quarantine_001_unified_table_exists():

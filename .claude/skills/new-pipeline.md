@@ -69,8 +69,8 @@ make lint && pytest tests/unit/application/pipelines/{provider}/ -v --tb=short
 #
 # Convention-based defaults:
 #   source_file: ../../sources/{provider}.yaml
-#   dq_config_file: ../../dq/entities/{provider}/{entity}.yaml
-#   filter_config_file: ../../filter/entities/{provider}/{entity}.yaml
+#   dq_config_file: ../../quality/entities/{provider}/{entity}.yaml
+#   filter_config_file: ../../filters/entities/{provider}/{entity}.yaml
 #   sink.*.path: data/output/{layer}/{provider}/{entity}
 
 pipeline_name: {provider}_{entity}
@@ -90,7 +90,7 @@ checkpoint_interval: 1000
 
 ### 2. DQ Config
 
-**Путь:** `configs/dq/entities/{provider}/{entity}.yaml`
+**Путь:** `configs/quality/entities/{provider}/{entity}.yaml`
 
 ```yaml
 # =============================================================================
@@ -119,7 +119,7 @@ entity_conditional_validations: []
 
 ### 3. Filter Config
 
-**Путь:** `configs/filter/entities/{provider}/{entity}.yaml`
+**Путь:** `configs/filters/entities/{provider}/{entity}.yaml`
 
 ```yaml
 # =============================================================================
@@ -456,8 +456,8 @@ Claude: Создаю пайплайн для ChEMBL Mechanism...
 
 Создаю файлы:
 ✓ configs/pipelines/chembl/mechanism.yaml
-✓ configs/dq/entities/chembl/mechanism.yaml
-✓ configs/filter/entities/chembl/mechanism.yaml
+✓ configs/quality/entities/chembl/mechanism.yaml
+✓ configs/filters/entities/chembl/mechanism.yaml
 ✓ src/bioetl/domain/entities/chembl.py (updated)
 ✓ src/bioetl/application/pipelines/chembl/mechanism_transformer.py
 ✓ src/bioetl/domain/contracts/gold/chembl.py (updated)

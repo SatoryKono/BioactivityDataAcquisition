@@ -12,7 +12,7 @@ boundary between infrastructure (YAML parsing) and domain (business logic).
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Any, Literal
+from typing import Any, Literal
 
 from pydantic import (
     BaseModel,
@@ -23,8 +23,6 @@ from pydantic import (
 )
 
 from bioetl.domain.config import DQConfig as DomainDQConfig
-from bioetl.domain.configs.base import BaseClientConfig, RateLimitConfig
-from bioetl.domain.models.metadata import GovernanceLineageConfig, QualityExpectations
 from bioetl.domain.resilience import CircuitBreakerConfig as DomainCircuitBreakerConfig
 from bioetl.infrastructure.schemas.base_schemas import (
     BaseFilterColumnSchema,
@@ -36,9 +34,6 @@ from bioetl.infrastructure.schemas.base_schemas import (
     BaseInputFilterConfig,
 )
 from bioetl.infrastructure.schemas.composite_config import ColumnGroupSchema
-
-if TYPE_CHECKING:
-    from bioetl.domain.models.metadata import GovernanceMetadata
 
 
 class FieldValidationConfig(BaseModel):
@@ -62,6 +57,10 @@ class FieldValidationConfig(BaseModel):
     nullable: bool = Field(default=True, description="Whether field can be null")
     severity: Literal["error", "warn"] = Field(
         default="error", description="Severity level (error or warn)"
+    )
+    severity_enricher: Literal["error", "warn"] | None = Field(
+        default=None,
+        description="Override severity when running as enricher in composite pipeline",
     )
     # Range validation
     min: float | None = Field(default=None, description="Minimum value (range)")
@@ -90,6 +89,9 @@ class CrossFieldValidationConfig(BaseModel):
         "conditional_required",
         "custom",
     ] = Field(description="Validation condition type")
+    severity: Literal["error", "warn"] = Field(
+        default="error", description="Severity level (error or warn)"
+    )
     trigger_field: str | None = Field(
         default=None, description="Field that triggers conditional requirement"
     )
@@ -201,6 +203,7 @@ class DQConfig(BaseModel):
                 validation_type=fv.type,
                 nullable=fv.nullable,
                 severity=fv.severity,
+                severity_enricher=fv.severity_enricher,
                 min_value=fv.min,
                 max_value=fv.max,
                 pattern=fv.pattern,
@@ -218,6 +221,7 @@ class DQConfig(BaseModel):
                 name=cfv.name,
                 fields=tuple(cfv.fields),
                 condition=cfv.condition,
+                severity=cfv.severity,
                 trigger_field=cfv.trigger_field,
                 required_field=cfv.required_field,
                 validator=cfv.validator,
@@ -242,6 +246,8 @@ class DQConfig(BaseModel):
                         field=tv.field,
                         validation_type=tv.type,
                         nullable=tv.nullable,
+                        severity=tv.severity,
+                        severity_enricher=tv.severity_enricher,
                         min_value=tv.min,
                         max_value=tv.max,
                         pattern=tv.pattern,
@@ -350,34 +356,15 @@ class MaintenanceConfig(BaseModel):
 
 
 class ApiConfig(BaseModel):
-    """Configuration for API connection details.
-
-    Pydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.
-    """
+    """Configuration for API connection details."""
 
     base_url: str | None = None
-    rate_limit: float | None = None
-    timeout: int | None = None
     from_db: str | None = Field(
         default=None, description="Source database for ID mapping (e.g., ChEMBL)"
     )
     to_db: str | None = Field(
         default=None, description="Target database for ID mapping (e.g., UniProtKB)"
     )
-
-    def to_domain(self) -> BaseClientConfig:
-        """Convert to domain BaseClientConfig dataclass.
-
-        Returns:
-            BaseClientConfig: Immutable domain configuration.
-        """
-        return BaseClientConfig(
-            base_url=self.base_url,
-            timeout=self.timeout or 30,
-            rate_limit=RateLimitConfig(
-                requests_per_second=self.rate_limit or 5.0,
-            ),
-        )
 
 
 class RateLimitSourceConfig(BaseModel):
@@ -418,40 +405,22 @@ class SourceConfig(BaseModel):
 
     Parses both pipeline source settings and configs/sources/*.yaml structure.
     The `rate_limit`, `circuit_breaker`, and `provider_config` fields capture
-    settings from source configuration files that were previously ignored.
+    settings from source configuration files.
     """
 
+    model_config = ConfigDict(extra="ignore")
+
     # Common fields
-    load_strategy: Literal["full", "incremental"] = "full"
-    search_term: str | None = None
     email: str | None = None
     api_key: str | None = None
     fields: list[dict[str, str]] = Field(default_factory=list)
     api: ApiConfig = Field(default_factory=ApiConfig)
 
-    input_path: str | None = Field(
-        default=None, description="Path to input file for file-based sources"
-    )
-
     # Source file fields (from configs/sources/*.yaml)
-    type: Literal["api", "file"] = "api"
     batch_size: int = Field(default=100, ge=1, le=5000)
     rate_limit: RateLimitSourceConfig = Field(default_factory=RateLimitSourceConfig)
     circuit_breaker: CircuitBreakerConfig = Field(default_factory=CircuitBreakerConfig)
     provider_config: ProviderSourceConfig = Field(default_factory=ProviderSourceConfig)
-
-
-class SortByConfig(BaseModel):
-    """Configuration for deterministic sorting.
-
-    Example YAML:
-        sort_by:
-          columns: [target_chembl_id, pref_name]
-          ascending: true
-    """
-
-    columns: list[str] = Field(default_factory=list)
-    ascending: bool = True
 
 
 class SinkDQReportConfig(BaseModel):
@@ -471,123 +440,10 @@ class SinkDQReportConfig(BaseModel):
     )
 
 
-# Alias for sink layer quality configuration (same schema as QualityExpectations)
-SinkQualityExpectationsConfig = QualityExpectations
-
-
-class SinkLineageConfig(BaseModel):
-    """Lineage configuration within sink metadata.
-
-    Captures static lineage information for governance purposes.
-    """
-
-    source_system: str | None = Field(
-        default=None, description="Source system identifier"
-    )
-    source_version: str | None = Field(
-        default=None, description="Version of source system"
-    )
-    extraction_method: str | None = Field(
-        default=None, description="Extraction method (api, csv, parquet)"
-    )
-    source_layer: str | None = Field(
-        default=None, description="Source Medallion layer (bronze, silver)"
-    )
-    transformations: list[str] = Field(
-        default_factory=list, description="Transformation steps applied"
-    )
-    filters_applied: bool | None = Field(
-        default=None, description="Whether filters were applied"
-    )
-    business_domain: str | None = Field(
-        default=None, description="Business domain classification"
-    )
-    use_cases: list[str] = Field(default_factory=list, description="Intended use cases")
-
-
-class SinkMetadataConfig(BaseModel):
-    """Governance metadata configuration for sink layers.
-
-    Captures data stewardship and compliance information from pipeline YAML.
-    This is written to the _metadata.yaml sidecar file alongside execution metadata.
-
-    Example YAML:
-        sink:
-          bronze:
-            save_metadata: true
-            metadata:
-              owner: "data-team"
-              steward: "chembl-owner"
-              description: "Raw ChEMBL activity data"
-              tags: ["chembl", "activity", "raw"]
-              retention_days: 90
-              sla_freshness_hours: 24
-              lineage:
-                source_system: "chembl"
-                extraction_method: "api"
-    """
-
-    owner: str | None = Field(default=None, description="Data owner team/individual")
-    steward: str | None = Field(default=None, description="Data steward")
-    description: str | None = Field(
-        default=None, description="Human-readable data description"
-    )
-    tags: list[str] = Field(
-        default_factory=list, description="Classification tags for discovery"
-    )
-    retention_days: int | None = Field(
-        default=None, ge=1, description="Data retention period in days"
-    )
-    sla_freshness_hours: int | None = Field(
-        default=None, ge=1, description="SLA for data freshness in hours"
-    )
-    lineage: SinkLineageConfig = Field(
-        default_factory=SinkLineageConfig,
-        description="Static lineage configuration",
-    )
-    quality_expectations: SinkQualityExpectationsConfig = Field(
-        default_factory=QualityExpectations,
-        description="Target quality metrics",
-    )
-    classification: str | None = Field(
-        default=None, description="Data classification (public, internal, restricted)"
-    )
-
-    def to_domain(self) -> GovernanceMetadata:
-        """Convert to domain GovernanceMetadata model.
-
-        Returns:
-            GovernanceMetadata: Domain model for sidecar file.
-        """
-        from bioetl.domain.models.metadata import GovernanceMetadata
-
-        return GovernanceMetadata(
-            owner=self.owner,
-            steward=self.steward,
-            description=self.description,
-            tags=self.tags,
-            retention_days=self.retention_days,
-            sla_freshness_hours=self.sla_freshness_hours,
-            lineage=GovernanceLineageConfig(
-                source_system=self.lineage.source_system,
-                source_version=self.lineage.source_version,
-                extraction_method=self.lineage.extraction_method,
-                source_layer=self.lineage.source_layer,
-                transformations=self.lineage.transformations,
-                filters_applied=self.lineage.filters_applied,
-                business_domain=self.lineage.business_domain,
-                use_cases=self.lineage.use_cases,
-            ),
-            quality_expectations=QualityExpectations(
-                completeness=self.quality_expectations.completeness,
-                accuracy=self.quality_expectations.accuracy,
-            ),
-            classification=self.classification,
-        )
-
-
 class SinkLayerConfig(BaseModel):
     """Configuration for a specific data layer (Bronze, Silver, Gold)."""
+
+    model_config = ConfigDict(extra="forbid")
 
     enabled: bool = True
     path: str | None = None
@@ -599,13 +455,6 @@ class SinkLayerConfig(BaseModel):
         description="Save _metadata.yaml sidecar file with lineage and QC info",
     )
     csv_export: CsvExportConfig = Field(default_factory=CsvExportConfig)
-    # Deterministic write settings
-    primary_key: list[str] = Field(default_factory=list)
-    partition_by: list[str] = Field(default_factory=list)
-    sort_by: SortByConfig = Field(default_factory=SortByConfig)
-    deterministic: bool = Field(
-        default=True, description="Enable deterministic write order"
-    )
     # Schema drift handling
     on_schema_mismatch: Literal["error", "evolve", "ignore"] = Field(
         default="error", description="How to handle schema drift"
@@ -615,17 +464,26 @@ class SinkLayerConfig(BaseModel):
         default_factory=SinkDQReportConfig,
         description="DQ report generation settings for this layer",
     )
+    # Deterministic write order (Gold layer)
+    deterministic: bool = Field(
+        default=True,
+        description="Enable deterministic write order for Gold layer output",
+    )
+    # Partitioning (Silver layer)
+    partition_by: list[str] = Field(
+        default_factory=list,
+        description="Columns to partition Delta tables by (Silver layer)",
+    )
+    # SCD Type 2 configuration (Gold layer)
+    scd_config: dict[str, str] | None = Field(
+        default=None,
+        description="SCD Type 2 column mapping (valid_from, valid_to, is_current, version)",
+    )
     # Flat structure mode
     flat_structure: bool = Field(
         default=False,
         description="If True, Delta data written directly to path without table_name subdirectory. "
         "CSV, metadata, and DQ reports use {table_name}_* naming pattern.",
-    )
-    # Governance metadata configuration
-    metadata: SinkMetadataConfig | None = Field(
-        default=None,
-        description="Governance metadata configuration for sidecar files. "
-        "Includes owner, steward, tags, retention, SLA, and lineage info.",
     )
 
 
@@ -738,6 +596,19 @@ class TransformConfig(BaseModel):
         return v
 
 
+class ContentHashConfig(BaseModel):
+    """Configures include/exclude field policy for content hash generation."""
+
+    include: list[str] = Field(
+        default_factory=list,
+        description="Optional allowlist of fields included in content hash.",
+    )
+    exclude: list[str] = Field(
+        default_factory=list,
+        description="Optional denylist of fields excluded from content hash.",
+    )
+
+
 class PipelineYamlConfig(BaseModel):
     """Strict schema for pipeline YAML configuration.
 
@@ -750,7 +621,7 @@ class PipelineYamlConfig(BaseModel):
         the file-based configuration.
     """
 
-    model_config = ConfigDict(populate_by_name=True, extra="ignore")
+    model_config = ConfigDict(populate_by_name=True, extra="forbid")
 
     pipeline_name: str
     provider: str
@@ -765,7 +636,16 @@ class PipelineYamlConfig(BaseModel):
         default=None,
         ge=1,
         le=5000,
-        description="Batch size when input_filter is active. Overrides batch_size.",
+        description="Deprecated: use source pagination.id_batch_size instead. "
+        "Batch size when input_filter is active. Overrides batch_size.",
+    )
+    page_size_override: int | None = Field(
+        default=None,
+        ge=1,
+        le=10000,
+        description="Override source pagination page_size for this pipeline. "
+        "The only pagination parameter a pipeline may set. "
+        "Source config defines pagination strategy and defaults.",
     )
     checkpoint_interval: int = Field(default=1000, ge=100)
 
@@ -791,7 +671,7 @@ class PipelineYamlConfig(BaseModel):
         default=None,
         description="Path to filter config file relative to pipeline config. "
         "When set, filter config is loaded from the hierarchical filter system. "
-        "Example: ../../filter/entities/chembl/activity.yaml",
+        "Example: ../../filters/entities/chembl/activity.yaml",
     )
     filter_rules: dict[str, Any] | None = Field(
         default=None,
@@ -804,12 +684,27 @@ class PipelineYamlConfig(BaseModel):
         default=None,
         description="Path to column group config file relative to pipeline config.",
     )
+    schema_file: str = Field(
+        ...,
+        min_length=1,
+        description="Required path to schema config file relative to pipeline config. "
+        "Example: ../../schemas/chembl/activity.yaml",
+    )
     data_schema_file: str | None = Field(
         default=None,
-        description="Path to data schema file with layer-specific columns (silver/gold).",
+        description="Deprecated alias for schema_file. Kept for backward compatibility.",
     )
 
-    primary_keys: list[str] = Field(min_length=1)
+    business_primary_keys: list[str] | None = Field(default=None, min_length=1)
+    technical_primary_key: str = Field(
+        default="entity_id",
+        min_length=1,
+        description="Technical immutable record key in Silver (defaults to entity_id).",
+    )
+    primary_keys: list[str] | None = Field(
+        default=None,
+        description="Deprecated alias for business_primary_keys (kept for migration).",
+    )
     silver_table: str = Field(min_length=1)
     gold_table: str | None = Field(default=None, min_length=1)
     silver_filters: GoldFiltersConfig = Field(default_factory=GoldFiltersConfig)
@@ -824,6 +719,12 @@ class PipelineYamlConfig(BaseModel):
         default_factory=list,
         description="Optional column ordering groups for Silver/Gold output",
     )
+
+    content_hash: ContentHashConfig = Field(
+        default_factory=ContentHashConfig,
+        description="Content-hash include/exclude rules loaded from schema config.",
+    )
+
     extraction_params: dict[str, str | int | bool] = Field(
         default_factory=dict,
         description="Server-side API query parameters for Bronze extraction (ADR-028 §3). "
@@ -853,6 +754,44 @@ class PipelineYamlConfig(BaseModel):
         if not v.islower():
             raise ValueError("provider must be lowercase")
         return v
+
+    @model_validator(mode="after")
+    def validate_primary_key_split(self) -> PipelineYamlConfig:
+        """Validate explicit separation between business and technical PKs.
+
+        Migration rules:
+        - business_primary_keys is canonical.
+        - primary_keys is accepted as legacy alias.
+        - If both are provided, values MUST match exactly.
+        """
+        if self.business_primary_keys is None and self.primary_keys is None:
+            raise ValueError(
+                "business_primary_keys is required (or legacy primary_keys during migration)"
+            )
+
+        if self.business_primary_keys is None:
+            self.business_primary_keys = self.primary_keys
+
+        if (
+            self.primary_keys is not None
+            and self.business_primary_keys is not None
+            and tuple(self.primary_keys) != tuple(self.business_primary_keys)
+        ):
+            raise ValueError(
+                "primary_keys and business_primary_keys mismatch; "
+                "use business_primary_keys as canonical naming"
+            )
+
+        if (
+            self.business_primary_keys is not None
+            and self.technical_primary_key in self.business_primary_keys
+            and len(self.business_primary_keys) > 1
+        ):
+            raise ValueError(
+                "technical_primary_key MUST NOT be part of composite business_primary_keys"
+            )
+
+        return self
 
     @model_validator(mode="after")
     def validate_entity_type_canonical(self) -> PipelineYamlConfig:

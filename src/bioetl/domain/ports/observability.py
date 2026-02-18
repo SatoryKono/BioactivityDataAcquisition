@@ -48,7 +48,7 @@ class TracingPort(Protocol):
           NoOp default for local-only deployment.
     """
 
-    def get_tracer(self, name: str) -> Any:
+    def get_tracer(self, name: str) -> Any:  # Any: OTel Tracer (avoids op...
         """Return an OpenTelemetry-compatible tracer instance.
 
         The returned object exposes ``start_as_current_span(name, attributes=...)``
@@ -154,29 +154,33 @@ class LoggerPort(Protocol):
     should be fast and non-blocking by design.
     """
 
-    def bind(self, **kwargs: Any) -> Self:
+    def bind(self, **kwargs: Any) -> Self:  # Any: structlog-compatible a...
         """Bind additional context to the logger.
 
         Returns a new logger instance with the bound context.
         """
         ...
 
-    def info(self, _event: str, **kwargs: Any) -> Any:
+    def info(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible a...
         """Log an informational message."""
         ...
 
+    # Any: structlog-compatible a...
     def warning(self, _event: str, **kwargs: Any) -> Any:
         """Log a warning message."""
         ...
 
+    # Any: structlog-compatible a...
     def error(self, _event: str, **kwargs: Any) -> Any:
         """Log an error message."""
         ...
 
+    # Any: structlog-compatible a...
     def debug(self, _event: str, **kwargs: Any) -> Any:
         """Log a debug message."""
         ...
 
+    # Any: structlog-compatible a...
     def exception(self, _event: str, **kwargs: Any) -> Any:
         """Log an exception with traceback."""
         ...
@@ -240,7 +244,7 @@ class DQMonitorPort(Protocol):
     def add_metric(
         self,
         metric_name: str,
-        baseline: Any,  # Sequence[float]
+        baseline: Any,  # Any: Sequence[float] (avoid...
         min_threshold: float | None = None,
         max_threshold: float | None = None,
     ) -> None:
@@ -280,7 +284,7 @@ class DQMonitorPort(Protocol):
     def check_quality(
         self,
         metrics: dict[str, float],
-    ) -> list[Any]:
+    ) -> list[Any]:  # Any: list[Anomaly] (avoids importing Anomaly in domain port)
         """Check current metrics against baseline for anomalies.
 
         Args:

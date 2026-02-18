@@ -1,199 +1,328 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "CrossRef Publication Gold Contract",
-  "description": "Gold layer data contract for CrossRef Publication Gold Contract. Auto-generated from Pandera schema CrossRefPublicationGoldSchema.",
+  "title": "CrossRefPublicationGoldSchema Contract",
+  "description": "Gold layer data contract for crossref_publication. Auto-generated from Pandera schema CrossRefPublicationGoldSchema.",
   "type": "object",
   "properties": {
     "entity_id": {
-      "type": "string"
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "content_hash": {
-      "type": "string"
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "doi": {
-      "type": "string"
-    },
-    "pmid": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "pmc_id": {
-      "type": [
-        "string",
-        "null"
-      ]
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "title": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "authors": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "journal": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "issn": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "issn_list": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "publisher": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "volume": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "issue": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
-    "first_page": {
+    "page_first": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
-    "last_page": {
+    "page_last": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
-    "year": {
+    "publication_year": {
       "type": [
         "number",
         "null"
       ],
-      "minimum": 1900,
-      "maximum": 2100
+      "nullable": true,
+      "description": ""
     },
     "publication_date": {
       "type": [
         "string",
         "null"
       ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+      "nullable": true,
+      "description": ""
     },
     "published_print": {
       "type": [
         "string",
         "null"
       ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+      "nullable": true,
+      "description": ""
     },
     "published_online": {
       "type": [
         "string",
         "null"
       ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+      "nullable": true,
+      "description": ""
     },
-    "doc_type": {
+    "publication_type": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
-    "citation_count": {
+    "citations_received": {
       "type": [
         "number",
         "null"
       ],
-      "minimum": 0
+      "nullable": true,
+      "description": ""
     },
-    "reference_count": {
+    "citations_made": {
       "type": [
         "number",
         "null"
       ],
-      "minimum": 0
+      "nullable": true,
+      "description": ""
     },
     "language": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "license_url": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
-    "subjects": {
+    "subject_keywords": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
-    "source": {
+    "content_domain_domains": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "content_domain_crossmark_restriction": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "alternative_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "published": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "journal_name_short": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "issn_print": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "issn_electronic": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "author_keys": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "author_orcids": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "author_details": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "references": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_source": {
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "_lookup_method": {
-      "type": [
-        "string",
-        "null"
-      ]
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "_original_id": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "_dq_warn": {
-      "type": "boolean"
+      "type": "boolean",
+      "nullable": false,
+      "description": ""
     },
     "_dq_error": {
-      "type": "boolean"
+      "type": "boolean",
+      "nullable": false,
+      "description": ""
     },
     "_run_id": {
-      "type": "string"
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "_run_type": {
-      "type": "string"
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "_source_batch_id": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "_ingestion_ts": {
-      "type": "string"
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "_index": {
-      "type": "integer"
+      "type": "integer",
+      "nullable": false,
+      "description": ""
     }
   },
   "required": [
@@ -201,8 +330,10 @@
     "_dq_warn",
     "_index",
     "_ingestion_ts",
+    "_lookup_method",
     "_run_id",
     "_run_type",
+    "_source",
     "content_hash",
     "doi",
     "entity_id"

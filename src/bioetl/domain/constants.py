@@ -21,5 +21,8 @@ META_FIELDS: frozenset[str] = frozenset(
         "_dq_error",
         "_source_batch_id",
         "_index",
+        "_lookup_method",
+        "_original_id",
+        "_source",
     }
 )

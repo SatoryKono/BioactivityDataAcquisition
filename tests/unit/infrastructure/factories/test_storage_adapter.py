@@ -36,6 +36,7 @@ def mock_gold_writer() -> MagicMock:
     """Create mock gold writer."""
     writer = MagicMock()
     writer.write_gold = AsyncMock()
+    writer.write_gold_merged = AsyncMock()
     return writer
 
 
@@ -309,3 +310,38 @@ class TestStorageAdapterOptimize:
         )
 
         mock_bronze_writer.cleanup_old_files.assert_not_called()
+
+
+@pytest.mark.unit
+class TestStorageAdapterWriteGoldMerged:
+    """Tests for composite Gold schema binding in write_gold_merged."""
+
+    @pytest.mark.asyncio
+    async def test_write_gold_merged_binds_composite_publication_schema(
+        self,
+        storage_adapter: StorageAdapter,
+        mock_gold_writer: MagicMock,
+    ) -> None:
+        """Composite publication table should pass bound schema to GoldWriter."""
+        await storage_adapter.write_gold_merged(
+            table_name="composite/publication",
+            records=[{"entity_id": "pub:1", "content_hash": "h1"}],
+        )
+
+        call_kwargs = mock_gold_writer.write_gold_merged.call_args[1]
+        assert call_kwargs["schema"].__name__ == "CompositePublicationGoldSchema"
+
+    @pytest.mark.asyncio
+    async def test_write_gold_merged_unknown_table_uses_no_schema(
+        self,
+        storage_adapter: StorageAdapter,
+        mock_gold_writer: MagicMock,
+    ) -> None:
+        """Unknown merged table keeps backward-compatible schema=None behavior."""
+        await storage_adapter.write_gold_merged(
+            table_name="custom/merged",
+            records=[{"entity_id": "x", "content_hash": "y"}],
+        )
+
+        call_kwargs = mock_gold_writer.write_gold_merged.call_args[1]
+        assert call_kwargs["schema"] is None

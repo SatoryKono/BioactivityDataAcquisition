@@ -53,6 +53,7 @@ from bioetl.infrastructure.storage.base_delta_writer import (
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from bioetl.domain.config import KeyNullabilityRule
     from bioetl.domain.ports import (
         AuditPort,
         LoggerPort,
@@ -371,6 +372,49 @@ class SilverWriter(BaseDeltaWriter):
                     missing=optional_missing,
                 )
 
+    def _validate_key_nullability(
+        self,
+        records: list[dict[str, Any]],
+        primary_keys: list[str],
+        partition_cols: list[str] | None,
+        key_nullability_rules: list[KeyNullabilityRule] | None,
+        table_name: str,
+    ) -> None:
+        """Validate nullability policy for merge and partition keys."""
+        if not records or not key_nullability_rules:
+            return
+
+        rules = {(rule.field, rule.key_type): rule for rule in key_nullability_rules}
+
+        def collect_violations(
+            field: str,
+            key_type: Literal["merge", "partition"],
+        ) -> int:
+            rule = rules.get((field, key_type))
+            if rule is None or rule.nullable:
+                return 0
+            return sum(1 for record in records if record.get(field) is None)
+
+        violations: list[tuple[str, str, int]] = []
+
+        for key in primary_keys:
+            if count := collect_violations(key, "merge"):
+                violations.append((key, "merge", count))
+
+        for key in partition_cols or []:
+            if count := collect_violations(key, "partition"):
+                violations.append((key, "partition", count))
+
+        if violations:
+            details = [
+                f"{key_type}:{field} null_count={count}"
+                for field, key_type, count in violations
+            ]
+            raise ValueError(
+                "Key nullability policy violation for table "
+                f"'{table_name}': {'; '.join(details)}"
+            )
+
     def _validate_silver_pandera(
         self, records: list[dict[str, Any]], table_name: str
     ) -> None:
@@ -529,6 +573,7 @@ class SilverWriter(BaseDeltaWriter):
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
         column_order: list[str] | None = None,
         bronze_refs: list[BronzeWriteResult] | None = None,
+        key_nullability_rules: list[KeyNullabilityRule] | None = None,
     ) -> SilverWriteResult | None:
         """Write normalized records to Silver layer (Delta Lake merge/upsert).
 
@@ -578,6 +623,13 @@ class SilverWriter(BaseDeltaWriter):
             self._enforce_write_policy(validated_mode, table_name)
 
             self._validate_records(records, table_name, schema)
+            self._validate_key_nullability(
+                records,
+                primary_keys,
+                partition_cols,
+                key_nullability_rules,
+                table_name,
+            )
 
             # Validate records using Pandera schema (if configured)
             self._validate_silver_pandera(records, table_name)
@@ -924,8 +976,9 @@ class SilverWriter(BaseDeltaWriter):
         self,
         table_name: str,
         target_size: int | None = None,
-        partition_filters: list[tuple[str, str, Any]] | None = None,
-    ) -> dict[str, Any]:
+        partition_filters: list[tuple[str, str, Any]]
+        | None = None,  # Any: Delta Lake filter value type varies
+    ) -> dict[str, Any]:  # Any: compaction result metrics
         """Optimize table layout (compaction).
 
         Delegates to RetentionManager for maintenance operations.

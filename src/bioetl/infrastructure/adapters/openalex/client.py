@@ -728,7 +728,7 @@ def _create_openalex_adapter(
     http_client: UnifiedHTTPClient | None,
     logger: LoggerPort | None,
     settings: Settings | None,
-    **kwargs: Any,
+    **kwargs: Any,  # Any: forward arbitrary adap...
 ) -> OpenAlexAdapter:
     """Custom creator for OpenAlex adapter.
 

@@ -234,7 +234,7 @@ configuration. Explicit paths can still be specified to override the defaults.
 
 ```
 configs/
-├── dq/                                # DQ Configuration Hierarchy (ADR-027)
+├── quality/                              # DQ Configuration Hierarchy (ADR-027)
 │   ├── _defaults.yaml                 # Global defaults (thresholds, common validations)
 │   ├── providers/
 │   │   ├── chembl.yaml                # ChEMBL provider overrides
@@ -251,10 +251,21 @@ configs/
 │       └── uniprot/
 │           └── target.yaml
 │
+├── filters/                              # Filter Configuration Hierarchy (ADR-028)
+│   ├── _defaults.yaml                 # Global defaults (batch_size=100)
+│   ├── providers/
+│   │   ├── chembl.yaml                # ChEMBL batch_size=1000
+│   │   └── ...                        # Other providers
+│   └── entities/
+│       ├── chembl/
+│       │   ├── activity.yaml          # Activity-specific filters
+│       │   └── ...
+│       └── ...
+│
 ├── pipelines/                         # Pipeline orchestration configs
-│   ├── _defaults.yaml                 # Base pipeline defaults
+│   ├── _base.yaml                     # Unified base defaults (ADR-025)
 │   ├── chembl/
-│   │   ├── activity.yaml              # References dq_config_file
+│   │   ├── activity.yaml              # Convention-based path resolution
 │   │   ├── assay.yaml
 │   │   ├── molecule.yaml
 │   │   └── target.yaml
@@ -272,17 +283,25 @@ configs/
     └── .env.example
 ```
 
-### DQ Config Hierarchy
+### DQ Config Hierarchy (ADR-027)
 
 | Level | Path | Purpose |
 |-------|------|---------|
-| Global | `dq/_defaults.yaml` | Base thresholds (0.05/0.20), common validations |
-| Provider | `dq/providers/{provider}.yaml` | Provider-specific overrides |
-| Entity | `dq/entities/{provider}/{entity}.yaml` | Entity-specific rules |
+| Global | `quality/_defaults.yaml` | Base thresholds (0.05/0.20), common validations |
+| Provider | `quality/providers/{provider}.yaml` | Provider-specific overrides |
+| Entity | `quality/entities/{provider}/{entity}.yaml` | Entity-specific rules |
 
-**Merge order**: defaults → provider → entity → inline overrides
+### Filter Config Hierarchy (ADR-028)
 
-See [DQ Configuration Guide](dq-configuration.md) for details.
+| Level | Path | Purpose |
+|-------|------|---------|
+| Global | `filters/_defaults.yaml` | Default batch_size (100) |
+| Provider | `filters/providers/{provider}.yaml` | Provider-specific batch sizes |
+| Entity | `filters/entities/{provider}/{entity}.yaml` | Entity-specific filter rules |
+
+**Merge order** (both hierarchies): defaults → provider → entity → inline overrides
+
+See [DQ Configuration Guide](dq-configuration.md) and [Pipeline Configuration Guide](pipeline-configuration.md) for details.
 
 ## Migration from S3
 

@@ -1,23 +1,23 @@
 # ChEMBL Assay Parameters Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.19*
+*Version 1.2.0 | Aligned with RULES.md v5.20*
 
----
+______________________________________________________________________
 
 ## 1. Identification
 
-| Parameter | Value |
-|-----------|-------|
-| **Pipeline ID** | `chembl_assay_parameters` |
-| **Provider** | ChEMBL (EBI) |
-| **Entity** | assay_parameters |
+| Parameter        | Value                                                  |
+| ---------------- | ------------------------------------------------------ |
+| **Pipeline ID**  | `chembl_assay_parameters`                              |
+| **Provider**     | ChEMBL (EBI)                                           |
+| **Entity**       | assay_parameters                                       |
 | **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/assay` (nested) |
-| **Library** | `chembl_webresource_client` |
-| **Rate Limit** | None |
-| **Health Check** | `/chembl/api/data/status.json` |
-| **Auth Type** | None (public API) |
+| **Library**      | `chembl_webresource_client`                            |
+| **Rate Limit**   | None                                                   |
+| **Health Check** | `/chembl/api/data/status.json`                         |
+| **Auth Type**    | None (public API)                                      |
 
----
+______________________________________________________________________
 
 ## 2. Business Context
 
@@ -33,45 +33,47 @@ Assay Parameters describe **experimental conditions** for assays:
 ### 2.2. Use Cases
 
 1. **Protocol Reproducibility**: Understand exact experimental conditions
-2. **Condition Filtering**: Find assays with specific parameters
-3. **Standardization**: Compare normalized vs original values
-4. **Quality Control**: Validate experimental setups
+1. **Condition Filtering**: Find assays with specific parameters
+1. **Standardization**: Compare normalized vs original values
+1. **Quality Control**: Validate experimental setups
 
 ### 2.3. Entity Relationships
 
 ```
 assay_parameters
     │
-    └──FK──► assay.assay_chembl_id (M:1)
+    └──FK──► assay.assay_id (M:1)
 ```
 
----
+______________________________________________________________________
 
 ## 3. Extraction (Bronze Layer)
 
 ### 3.1. API Fields
 
-| # | API Field | Type | Nullable | Description |
-|---|-----------|------|----------|-------------|
-| 1 | `assay_param_id` | int | No | Primary key |
-| 2 | `assay_chembl_id` | string | No | FK to assay |
-| 3 | `type` | string | No | Parameter type |
-| 4 | `relation` | string | Yes | Relation operator |
-| 5 | `value` | float | Yes | Numeric value |
-| 6 | `units` | string | Yes | Original units |
-| 7 | `text_value` | string | Yes | Text value |
-| 8 | `comments` | string | Yes | Comments |
-| 9 | `standard_type` | string | Yes | Standardized type |
-| 10 | `standard_relation` | string | Yes | Standardized relation |
-| 11 | `standard_value` | float | Yes | Standardized value |
-| 12 | `standard_units` | string | Yes | Standardized units |
-| 13 | `standard_text_value` | string | Yes | Standardized text |
+| #   | API Field             | Type   | Nullable | Description           |
+| --- | --------------------- | ------ | -------- | --------------------- |
+| 1   | `assay_param_id`      | int    | No       | Primary key           |
+| 2   | `assay_id`            | string | No       | FK to assay           |
+| 3   | `type`                | string | No       | Parameter type        |
+| 4   | `relation`            | string | Yes      | Relation operator     |
+| 5   | `value`               | float  | Yes      | Numeric value         |
+| 6   | `units`               | string | Yes      | Original units        |
+| 7   | `text_value`          | string | Yes      | Text value            |
+| 8   | `comments`            | string | Yes      | Comments              |
+| 9   | `standard_type`       | string | Yes      | Standardized type     |
+| 10  | `standard_relation`   | string | Yes      | Standardized relation |
+| 11  | `standard_value`      | float  | Yes      | Standardized value    |
+| 12  | `standard_units`      | string | Yes      | Standardized units    |
+| 13  | `standard_text_value` | string | Yes      | Standardized text     |
 
----
+______________________________________________________________________
 
 ## 4. Validation
 
 ### 4.1. Pandera Schema
+
+> Migration note: public Pandera contract uses canonical PK names; legacy aliases are accepted only during transition via ingestion/transform alias mapping and will be removed in the next major release.
 
 ```python
 class AssayParametersSchema(ETLRecordSchema):
@@ -84,7 +86,7 @@ class AssayParametersSchema(ETLRecordSchema):
     )
 
     # === Foreign Key ===
-    assay_chembl_id: Series[str] = pa.Field(
+    assay_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=r"^CHEMBL\d+$",
     )
@@ -112,7 +114,7 @@ class AssayParametersSchema(ETLRecordSchema):
         coerce = True
 ```
 
----
+______________________________________________________________________
 
 ## 5. Pipeline Configuration
 
@@ -133,7 +135,7 @@ gold_filters:
 input_filter:
   enabled: true
   source_path: "data/input/assay.csv"
-  column_name: "assay_chembl_id"
-  filter_field: "assay_chembl_id"
+  column_name: "assay_id"
+  filter_field: "assay_id"
   batch_size: 20
 ```

@@ -21,7 +21,7 @@ class ExtractorUtils:
     }
 
     @staticmethod
-    def serialize_list(value: Any) -> str | None:
+    def serialize_list(value: Any) -> str | None:  # Any: untyped API JSON
         """Serialize a list to JSON string.
 
         Args:
@@ -36,7 +36,7 @@ class ExtractorUtils:
         return result
 
     @staticmethod
-    def count_list(value: Any) -> int | None:
+    def count_list(value: Any) -> int | None:  # Any: untyped API JSON
         """Count items in a list.
 
         Args:
@@ -52,7 +52,7 @@ class ExtractorUtils:
         return None
 
     @staticmethod
-    def is_reviewed(entry_type: Any) -> bool:
+    def is_reviewed(entry_type: Any) -> bool:  # Any: untyped API JSON
         """Check if entry is Swiss-Prot (reviewed).
 
         Args:
@@ -64,6 +64,7 @@ class ExtractorUtils:
         return "Swiss-Prot" in str(entry_type or "")
 
     @classmethod
+    # Any: untyped JSON
     def extract_protein_existence(cls, existence: Any) -> str | None:
         """Extract and normalize protein existence level.
 
@@ -80,7 +81,8 @@ class ExtractorUtils:
 
     @staticmethod
     def _extract_values_from_list(
-        data: list[dict[str, Any]], key: str = "value"
+        data: list[dict[str, Any]],
+        key: str = "value",  # Any: record vals vary
     ) -> list[str]:
         """Extract values from a list of dictionaries.
 
@@ -95,6 +97,7 @@ class ExtractorUtils:
         return [v for v in values if v]
 
     @staticmethod
+    # Any: JSON vals
     def extract_short_names(recommended_name: dict[str, Any] | None) -> str | None:
         """Extract short names from recommended name.
 
@@ -113,7 +116,7 @@ class ExtractorUtils:
         return orjson.dumps(values).decode("utf-8") if values else None
 
     @staticmethod
-    def extract_alternative_names(protein_desc: Any) -> str | None:
+    def extract_alternative_names(protein_desc: Any) -> str | None:  # Any: untyped JSON
         """Extract alternative protein names.
 
         Args:
@@ -140,6 +143,7 @@ class ExtractorUtils:
         return orjson.dumps(values).decode("utf-8") if values else None
 
     @staticmethod
+    # Any: JSON vals
     def extract_ec_numbers(recommended_name: dict[str, Any] | None) -> str | None:
         """Extract EC numbers from recommended name.
 
@@ -158,7 +162,7 @@ class ExtractorUtils:
         return orjson.dumps(values).decode("utf-8") if values else None
 
     @staticmethod
-    def parse_uniprot_date(date_str: Any) -> date | None:
+    def parse_uniprot_date(date_str: Any) -> date | None:  # Any: untyped API JSON
         """Parse UniProt date string to datetime.date.
 
         UniProt API returns dates in ISO 8601 format (YYYY-MM-DD).

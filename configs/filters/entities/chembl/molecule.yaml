@@ -20,6 +20,53 @@ input_filter:
   filter_field: "molecule_id"
   batch_size: 20
 
+# ---------------------------------------------------------------------------
+# Extraction-Level Filtering (ADR-028 §3)
+# ---------------------------------------------------------------------------
+# Server-side query parameters appended to every ChEMBL Molecule API request.
+# Syntax: ChEMBL django-style lookups (__in, __isnull, __gte, etc.)
+# Reference: https://chembl.gitbook.io/chembl-interface-documentation/web-services/chembl-data-web-services
+#
+# These params reduce API traffic by excluding non-drug-like molecules
+# (biologics, inorganic compounds, molecules without MOL structures)
+# at the API level.
+# Does NOT affect content_hash (ADR-014).
+# Logged in SourceMetadata.query_string for audit/reproducibility.
+#
+# Resulting API URL pattern:
+#   /chembl/api/data/molecule?format=json&limit=1000&offset=0
+#     &molecule_type=Small+molecule
+#     &structure_type=MOL
+#     &inorganic_flag=0
+extraction_params:
+    # Small molecules only (exclude Protein, Antibody, Oligosaccharide, etc.)
+    molecule_type: "Small molecule"
+
+    # Must have MOL structure representation (exclude NONE, SEQ, BOTH)
+    structure_type: "MOL"
+
+    # Exclude inorganic compounds (0 = organic)
+    inorganic_flag: 0
+
+# -----------------------------------------------------------------------------
+# Silver Filters — Domain-level quality gates (applied BEFORE Silver write)
+# -----------------------------------------------------------------------------
+# Records that fail these filters are excluded from the Silver layer entirely.
+# Defence-in-depth: mirrors extraction_params to catch API inconsistencies.
+silver_filters:
+    # Column value filters — strict inclusion lists
+    columns:
+        # Small molecules only
+        molecule_type: [Small molecule]
+        # Must have MOL structure
+        structure_type: [MOL]
+        # Exclude inorganic compounds
+        inorganic_flag: ["0"]
+
+    # Required fields — must be non-null for silver
+    required_fields:
+        - molecule_id
+
 # -----------------------------------------------------------------------------
 # Gold Filters
 # -----------------------------------------------------------------------------

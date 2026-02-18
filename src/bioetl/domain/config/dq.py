@@ -36,6 +36,21 @@ class DQReportConfig:
 
 
 @dataclass(frozen=True, slots=True)
+class KeyNullabilityRule:
+    """Nullability rule for key fields used by Silver writes.
+
+    Attributes:
+        field: Field name.
+        key_type: Key role in Silver writes.
+        nullable: Whether null is allowed for this key field.
+    """
+
+    field: str
+    key_type: Literal["merge", "partition"]
+    nullable: bool = False
+
+
+@dataclass(frozen=True, slots=True)
 class DQConfig:
     """Configuration for Data Quality thresholds and validations.
 
@@ -60,6 +75,7 @@ class DQConfig:
     conditional_validations: tuple[ConditionalValidation, ...] = ()
     invalid_record_policy: Literal["quarantine", "skip", "fail"] = "quarantine"
     report: DQReportConfig = field(default_factory=DQReportConfig)
+    key_nullability_rules: tuple[KeyNullabilityRule, ...] = ()
 
     def __post_init__(self) -> None:
         """Validate threshold invariants on creation."""
@@ -69,7 +85,12 @@ class DQConfig:
         )
         freeze_sequences(
             self,
-            ("field_validations", "cross_field_validations", "conditional_validations"),
+            (
+                "field_validations",
+                "cross_field_validations",
+                "conditional_validations",
+                "key_nullability_rules",
+            ),
         )
 
     @staticmethod

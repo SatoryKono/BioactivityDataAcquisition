@@ -9,10 +9,12 @@
 pipeline_name: chembl_compound_record
 provider: chembl
 entity_type: compound_record
+schema_file: ../../schemas/chembl/compound_record.yaml
 version: "1.2.0"
 description: "Extract compound records from ChEMBL API"
 
-primary_keys: ["record_id"]
+business_primary_keys: ["record_id"]
+technical_primary_key: "entity_id"
 silver_table: "chembl_compound_record"
 gold_table: "chembl_compound_record"
 
@@ -38,4 +40,10 @@ gold_table: "chembl_compound_record"
 sink:
   bronze: {}
   silver: {}
-  gold: {}
+  gold:
+    mode: scd2
+    scd_config:
+      valid_from: _valid_from
+      valid_to: _valid_to
+      is_current: _is_current
+      version: _version

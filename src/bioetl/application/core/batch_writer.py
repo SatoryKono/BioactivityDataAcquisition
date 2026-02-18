@@ -319,9 +319,15 @@ class BatchWriter:
                 primary_keys=list(self._table_config.primary_keys),
                 schema=self._silver_schema,
                 mode=self._silver_mode,
+                partition_cols=list(self._table_config.partition_cols),
                 on_schema_mismatch=self._table_config.on_schema_mismatch,
                 column_order=column_order,
                 bronze_refs=bronze_refs,
+                key_nullability_rules=(
+                    list(self._config.dq_config.key_nullability_rules)
+                    if self._config.dq_config is not None
+                    else None
+                ),
             )
             self._end_span(span)
             return silver_result
@@ -396,6 +402,7 @@ class BatchWriter:
                 schema=self._gold_schema,
                 primary_keys=list(self._table_config.primary_keys),
                 mode=self._gold_mode,
+                scd_config=self._config.scd_config,
                 column_order=column_order,
                 ingestion_ts=self._context.started_at,
                 run_id=self._context.run_id,
@@ -406,7 +413,7 @@ class BatchWriter:
             self._end_span(span, e)
             raise
 
-    def _get_schema_columns(self, schema: Any) -> set[str] | None:
+    def _get_schema_columns(self, schema: Any) -> set[str] | None:  # Any: schema type
         """Extract column names from Pandera schema.
 
         Args:

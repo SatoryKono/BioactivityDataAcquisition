@@ -157,8 +157,8 @@
   "protein_classification_ids": {
     "checks": [],
     "coerce": false,
-    "description": "List of protein classification IDs.",
-    "dtype": "object",
+    "description": "Canonical JSON array of protein classification IDs.",
+    "dtype": "str",
     "nullable": true,
     "required": false,
     "unique": false

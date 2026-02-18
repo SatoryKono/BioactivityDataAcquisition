@@ -6,10 +6,12 @@
 pipeline_name: chembl_target
 provider: chembl
 entity_type: target
+schema_file: ../../schemas/chembl/target.yaml
 version: "1.2.0"
 description: "Extract biological targets from ChEMBL API"
 
-primary_keys: ["target_id"]
+business_primary_keys: ["target_id"]
+technical_primary_key: "entity_id"
 silver_table: "chembl_target"
 gold_table: "chembl_target"
 
@@ -32,39 +34,20 @@ gold_table: "chembl_target"
 # Add inline overrides below only when extending/differing from entity filter config.
 
 # -----------------------------------------------------------------------------
-# Inline DQ Overrides (applied on top of dq_config_file)
+# DQ Configuration (ADR-027)
 # -----------------------------------------------------------------------------
-# Only overrides that EXTEND or DIFFER from entity DQ config are kept here.
-dq_overrides:
-  field_validations:
-    # Override: Extended enum with more target types than entity config (17 vs 8)
-    - field: "target_type"
-      type: "enum"
-      allowed: ["SINGLE PROTEIN", "PROTEIN COMPLEX", "PROTEIN FAMILY", "SELECTIVITY GROUP", "ORGANISM", "TISSUE", "CELL-LINE", "SUBCELLULAR", "UNKNOWN", "CHIMERIC PROTEIN", "PROTEIN-PROTEIN INTERACTION", "NUCLEIC-ACID", "METAL", "LIPID", "MACROMOLECULE", "PHENOTYPE", "ADMET"]
-      nullable: true
-    # Unique: Not in entity config
-    - field: "organism"
-      type: "pattern"
-      pattern: "^[A-Z][a-z]+ [a-z]+.*$"
-      nullable: true
-      error_message: "organism should be in binomial nomenclature"
-    # Unique: Not in entity config
-    - field: "tax_id"
-      type: "range"
-      min: 1
-      max: 10000000
-      nullable: true
-
-  # Unique cross-field validation (not in entity config)
-  cross_field_validations:
-    - name: "target_identifiable"
-      fields: ["target_id", "pref_name"]
-      condition: "all_present"
-      error_message: "Target must have ID and preferred name"
+# All DQ rules externalized to configs/quality/entities/chembl/target.yaml.
+# No inline overrides needed — entity config is authoritative.
 
 # Entity-specific sink overrides
 sink:
   bronze: {}
   silver:
     partition_by: ["target_type"]
-  gold: {}
+  gold:
+    mode: scd2
+    scd_config:
+      valid_from: _valid_from
+      valid_to: _valid_to
+      is_current: _is_current
+      version: _version

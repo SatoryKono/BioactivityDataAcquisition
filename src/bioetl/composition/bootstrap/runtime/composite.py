@@ -28,6 +28,13 @@ from bioetl.domain.composite.config import (
     DependencyConfig,
     EnricherConfig,
 )
+from bioetl.domain.contracts import (
+    CompositeActivityGoldSchema,
+    CompositeAssayGoldSchema,
+    CompositeMoleculeGoldSchema,
+    CompositePublicationGoldSchema,
+    CompositeTargetGoldSchema,
+)
 from bioetl.domain.ports import LoggerPort
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.config.field_group_loader import (
@@ -35,7 +42,9 @@ from bioetl.infrastructure.config.field_group_loader import (
     load_field_groups,
 )
 from bioetl.infrastructure.locking.memory_lock import MemoryLock
-from bioetl.infrastructure.schemas.composite_config import CompositeConfigFileSchema
+from bioetl.infrastructure.schemas.composite_config import (
+    validate_composite_config_payload,
+)
 from bioetl.infrastructure.storage.delta_reader import DeltaReader
 
 if TYPE_CHECKING:
@@ -60,7 +69,22 @@ COMPOSITE_CONFIG_DIR = Path("configs/pipelines/composite")
 FIELD_GROUP_CONFIG_DIR = Path("configs/composite/field_groups")
 
 
-def _to_id_str(val: Any) -> str:
+COMPOSITE_GOLD_SCHEMA_REGISTRY: dict[str, type] = {
+    "activity": CompositeActivityGoldSchema,
+    "assay": CompositeAssayGoldSchema,
+    "molecule": CompositeMoleculeGoldSchema,
+    "publication": CompositePublicationGoldSchema,
+    "target": CompositeTargetGoldSchema,
+}
+
+
+def _resolve_composite_gold_schema(composite_name: str) -> type | None:
+    """Resolve composite Gold contract by composite pipeline name."""
+    key = composite_name.removeprefix("composite_")
+    return COMPOSITE_GOLD_SCHEMA_REGISTRY.get(key)
+
+
+def _to_id_str(val: Any) -> str:  # Any: accepts int, float, st...
     """Convert value to ID string, handling float-to-int conversion.
 
     External APIs (like ChEMBL) often expect integer IDs and return 400
@@ -97,7 +121,7 @@ def load_composite_config(name: str) -> CompositeConfig:
 
     try:
         # Validate using Pydantic schema
-        schema = CompositeConfigFileSchema.model_validate(raw)
+        schema = validate_composite_config_payload(raw)
         # Convert to immutable domain objects
         config: CompositeConfig = schema.to_domain()
         return config
@@ -361,6 +385,7 @@ def bootstrap_composite_runner(
             filter_ids=filter_ids,
             filter_field=filter_field,
             fallback_mapping=fallback_mapping,
+            execution_context="enricher",
             **_enricher_bronze_opts,  # type: ignore[arg-type]
         )
         ctx = build_pipeline_context(pipeline_name, options)
@@ -447,6 +472,7 @@ def bootstrap_composite_runner(
             multi_filter_ids=multi_filter_ids,
             ignore_yaml_filter=True,
             skip_gold=True,
+            execution_context="dependency",
             **_dependency_bronze_opts,  # type: ignore[arg-type]
         )
         ctx = build_pipeline_context(pipeline_name, options)
@@ -496,6 +522,7 @@ def bootstrap_composite_runner(
         delta_reader=delta_reader,
         field_group_registry=field_group_registry,
         cross_validator=cross_validator,
+        gold_schema=_resolve_composite_gold_schema(config.name),
     )
 
     checkpoint_dir = Path(settings.data_dir) / "checkpoints" / "composite"

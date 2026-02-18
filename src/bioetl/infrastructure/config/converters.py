@@ -82,13 +82,16 @@ def yaml_config_to_domain(
     )
 
     table = TableConfig(
-        primary_keys=tuple(yaml_config.primary_keys),
+        primary_keys=tuple(yaml_config.business_primary_keys or ()),
         silver_table=yaml_config.silver_table,
         gold_table=yaml_config.gold_table,
         silver_write_mode=write_mode,
         gold_write_mode=gold_write_mode,
         on_schema_mismatch=on_schema_mismatch,
     )
+
+    gold_config = yaml_config.sink.get("gold")
+    scd_config = gold_config.scd_config if gold_config else None
 
     return PipelineConfig(
         pipeline_name=yaml_config.pipeline_name,
@@ -105,4 +108,5 @@ def yaml_config_to_domain(
         transform_version=transform_version,
         transform_steps=transform_steps,
         loading_strategy=yaml_config.loading_strategy,
+        scd_config=scd_config,
     )

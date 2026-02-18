@@ -42,7 +42,7 @@ from bioetl.domain.value_objects.base import ValueObject
 # ============================================================================
 
 
-def _coerce_int(value: Any) -> int:
+def _coerce_int(value: Any) -> int:  # Any: raw API input (validated in caller)
     """Coerce *value* to ``int``, raising ``ValueError`` on failure."""
     if isinstance(value, bool):
         raise ValueError(f"Expected int, got {type(value).__name__}")
@@ -57,7 +57,7 @@ def _coerce_int(value: Any) -> int:
         raise ValueError(f"Cannot convert {value!r} to int") from exc
 
 
-def _coerce_float(value: Any) -> float:
+def _coerce_float(value: Any) -> float:  # Any: raw API input (validated in caller)
     """Coerce *value* to ``float``, raising ``ValueError`` on failure."""
     if isinstance(value, bool):
         raise ValueError(f"Expected float, got {type(value).__name__}")
@@ -86,13 +86,14 @@ class _BoundedIntVO(ValueObject[int]):
     _MAX: int
     _LABEL: str
 
-    def _validate(self, value: Any) -> int:
+    def _validate(self, value: Any) -> int:  # Any: raw API input (validat...
         n = _coerce_int(value)
         if not self._MIN <= n <= self._MAX:
             raise ValueError(f"{self._LABEL} {n} outside [{self._MIN}, {self._MAX}]")
         return n
 
     @classmethod
+    # Any: raw API input (validat...
     def from_raw(cls, raw: Any) -> _BoundedIntVO | None:
         """Create from raw value; returns ``None`` on invalid input."""
         if raw is None:
@@ -147,13 +148,14 @@ class _BoundedFloatVO(ValueObject[float]):
     _LABEL: str
     _PRECISION: int = 10
 
-    def _validate(self, value: Any) -> float:
+    def _validate(self, value: Any) -> float:  # Any: raw API input (validat...
         f = _coerce_float(value)
         if not self._MIN <= f <= self._MAX:
             raise ValueError(f"{self._LABEL} {f} outside [{self._MIN}, {self._MAX}]")
         return round(f, self._PRECISION)
 
     @classmethod
+    # Any: raw API input (validat...
     def from_raw(cls, raw: Any) -> _BoundedFloatVO | None:
         """Create from raw value; returns ``None`` on invalid input."""
         if raw is None:

@@ -31,8 +31,7 @@ See also:
 from __future__ import annotations
 
 # Re-export all Gold schemas for convenient access
-from bioetl.domain.contracts.gold import (
-    # ChEMBL schemas
+from bioetl.domain.contracts.gold import (  # ChEMBL schemas; Composite schemas; CrossRef schemas; OpenAlex schemas; PubChem schemas; PubMed schemas; SemanticScholar schemas; UniProt schemas
     ChEMBLActivityGoldSchema,
     ChEMBLAssayGoldSchema,
     ChEMBLAssayParametersGoldSchema,
@@ -47,17 +46,16 @@ from bioetl.domain.contracts.gold import (
     ChEMBLTargetComponentGoldSchema,
     ChEMBLTargetGoldSchema,
     ChEMBLTissueGoldSchema,
-    # CrossRef schemas
+    CompositeActivityGoldSchema,
+    CompositeAssayGoldSchema,
+    CompositeMoleculeGoldSchema,
+    CompositePublicationGoldSchema,
+    CompositeTargetGoldSchema,
     CrossRefPublicationGoldSchema,
-    # OpenAlex schemas
     OpenAlexPublicationGoldSchema,
-    # PubChem schemas
     PubChemCompoundGoldSchema,
-    # PubMed schemas
     PubMedPublicationGoldSchema,
-    # SemanticScholar schemas
     SemanticScholarPublicationGoldSchema,
-    # UniProt schemas
     UniProtIDMappingGoldSchema,
     UniProtProteinGoldSchema,
 )
@@ -83,6 +81,12 @@ __all__ = [
     "ChEMBLTargetComponentGoldSchema",
     "ChEMBLTargetGoldSchema",
     "ChEMBLTissueGoldSchema",
+    # Composite
+    "CompositeActivityGoldSchema",
+    "CompositeAssayGoldSchema",
+    "CompositeMoleculeGoldSchema",
+    "CompositePublicationGoldSchema",
+    "CompositeTargetGoldSchema",
     # CrossRef
     "CrossRefPublicationGoldSchema",
     # OpenAlex

@@ -71,11 +71,13 @@ silver_filters:
             max: 9
 
     # Required fields — must be non-null for silver
+    # NOTE: Use Silver-layer field names (after transformation).
+    # target_chembl_id is mapped to target_id by AssayTransformer.
     required_fields:
         - assay_id
         - assay_type
         - description
-        - target_chembl_id
+        - target_id
 
 # -----------------------------------------------------------------------------
 # Gold Filters

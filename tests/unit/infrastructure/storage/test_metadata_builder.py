@@ -170,7 +170,14 @@ class TestGoldMetadataBuilder:
         """Should build valid GoldMetadata for merged composite data."""
         builder = GoldMetadataBuilder()
         records = [
-            {"id": 1, "name": "test1"},
+            {
+                "id": 1,
+                "name": "test1",
+                "_composite_run_id": "run-456",
+                "_source_providers": "['seed', 'openalex']",
+                "_enrichment_status": "{'openalex': 'ok'}",
+                "_lineage_created_at": "2026-01-01T10:00:00+00:00",
+            },
             {"id": 2, "name": "test2"},
         ]
         metadata = builder.build_merged_metadata(
@@ -186,8 +193,11 @@ class TestGoldMetadataBuilder:
         assert metadata.pipeline.name == "composite_publication"
         assert metadata.pipeline.provider == "composite"
         assert metadata.pipeline.entity == "publication"
-        assert metadata.dq_summary.total_records == 2
         assert metadata.output.record_count == 2
+        assert metadata.output.composite_run_id == "run-456"
+        assert metadata.output_ext.composite_run_id == "run-456"
+        assert metadata.output_ext.source_providers == ["seed", "openalex"]
+        assert metadata.output_ext.enrichment_status == {"openalex": "ok"}
 
     def test_build_merged_metadata_with_transform_steps(self) -> None:
         """Should use custom transform steps."""

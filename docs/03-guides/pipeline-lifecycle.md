@@ -100,6 +100,39 @@ metrics:
 
 См. [ADR-008: Graceful Shutdown Strategy](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)
 
+## Жизненный цикл Composite Pipeline
+
+Composite pipelines используют отдельный оркестратор (`CompositePipelineRunner`)
+вместо стандартного `PipelineRunner` + `Transformer`.
+
+```mermaid
+sequenceDiagram
+    participant CLI
+    participant Composite as CompositePipelineRunner
+    participant Seed as Seed Pipeline
+    participant Deps as Dependency Pipelines
+    participant Enrichers as EnrichmentCoordinator
+    participant Merge as MergeService
+    participant Gold as GoldWriter
+
+    CLI->>Composite: run_composite()
+    Composite->>Seed: run (standard pipeline)
+    Composite->>Deps: run dependencies (chained)
+    Composite->>Enrichers: fan-out enrichers (parallel)
+    Enrichers-->>Composite: enriched Silver data
+    Composite->>Merge: merge(seed + enrichers)
+    Merge->>Gold: write merged Gold
+```
+
+### Ключевые отличия
+
+1. **Без трансформеров**: Composite не использует `*Transformer` классы
+2. **Оркестрация**: `application/composite/` содержит 15 модулей сервисов
+3. **Merge**: `MergeService` выполняет JOIN по `join_key` из конфига
+4. **Fan-out**: Enrichers могут выполняться параллельно (если `optional: true`)
+
+См. [ADR-026: Composite Pipeline Pattern](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)
+
 ## Связанные документы
 
 - [ADR-012: Storage Clear Contract](../02-architecture/decisions/ADR-012-storage-clear-contract-and-run-id.md)

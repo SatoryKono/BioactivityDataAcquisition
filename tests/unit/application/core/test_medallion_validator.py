@@ -31,6 +31,9 @@ def mock_config() -> Mock:
     config = Mock()
     config.table.silver_write_mode = "merge"
     config.table.gold_write_mode = "merge"
+    config.table.primary_keys = ["record_id"]
+    config.table.partition_cols = []
+    config.dq.key_nullability_rules = []
     return config
 
 

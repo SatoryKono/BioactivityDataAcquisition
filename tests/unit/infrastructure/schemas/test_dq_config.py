@@ -283,6 +283,61 @@ class TestDQConfigFileToDomain:
         assert "common_rule" in names
         assert "entity_rule" in names
 
+    def test_to_domain_cross_field_severity_preserved(self) -> None:
+        """Cross-field validation severity is preserved through to_domain()."""
+        config = DQConfigFile(
+            entity_cross_field_validations=[
+                CrossFieldValidationConfig(
+                    name="publication_identifiable",
+                    fields=["publication_id", "title"],
+                    condition="all_present",
+                    severity="error",
+                ),
+                CrossFieldValidationConfig(
+                    name="has_cross_reference",
+                    fields=["publication_pmid", "publication_doi"],
+                    condition="any_present",
+                    severity="warn",
+                ),
+            ],
+        )
+        domain = config.to_domain()
+
+        assert len(domain.cross_field_validations) == 2
+
+        identifiable = next(
+            cfv
+            for cfv in domain.cross_field_validations
+            if cfv.name == "publication_identifiable"
+        )
+        assert identifiable.severity == "error"
+        assert identifiable.condition == "all_present"
+        assert identifiable.fields == ("publication_id", "title")
+
+        cross_ref = next(
+            cfv
+            for cfv in domain.cross_field_validations
+            if cfv.name == "has_cross_reference"
+        )
+        assert cross_ref.severity == "warn"
+        assert cross_ref.condition == "any_present"
+        assert cross_ref.fields == ("publication_pmid", "publication_doi")
+
+    def test_to_domain_cross_field_severity_defaults_error(self) -> None:
+        """Cross-field validation severity defaults to 'error' in domain."""
+        config = DQConfigFile(
+            entity_cross_field_validations=[
+                CrossFieldValidationConfig(
+                    name="rule_no_severity",
+                    fields=["a", "b"],
+                    condition="all_present",
+                ),
+            ],
+        )
+        domain = config.to_domain()
+
+        assert domain.cross_field_validations[0].severity == "error"
+
     def test_to_domain_conditional_validations(self) -> None:
         """Conditional validations are converted with nested validations."""
         config = DQConfigFile(
@@ -455,3 +510,32 @@ class TestCrossFieldValidationConfig:
             condition="mutually_exclusive",
         )
         assert cfv.condition == "mutually_exclusive"
+
+    def test_severity_defaults_to_error(self) -> None:
+        """Severity should default to 'error' when not specified."""
+        cfv = CrossFieldValidationConfig(
+            name="strict_rule",
+            fields=["pk", "title"],
+            condition="all_present",
+        )
+        assert cfv.severity == "error"
+
+    def test_severity_warn(self) -> None:
+        """Severity 'warn' should be accepted."""
+        cfv = CrossFieldValidationConfig(
+            name="soft_rule",
+            fields=["pmid", "doi"],
+            condition="any_present",
+            severity="warn",
+        )
+        assert cfv.severity == "warn"
+
+    def test_severity_invalid_rejected(self) -> None:
+        """Invalid severity value should raise ValidationError."""
+        with pytest.raises(ValidationError, match="Input should be"):
+            CrossFieldValidationConfig(
+                name="bad_rule",
+                fields=["a", "b"],
+                condition="all_present",
+                severity="critical",  # type: ignore[arg-type]
+            )

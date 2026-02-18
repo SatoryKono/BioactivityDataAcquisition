@@ -21,9 +21,11 @@ class PaginatedFetcherMixin:
 
     async def paginated_fetch(
         self,
-        fetch_func: Callable[[Any | None, int], Awaitable[tuple[list[T], Any | None]]],
+        fetch_func: Callable[
+            [Any | None, int], Awaitable[tuple[list[T], Any | None]]
+        ],  # Any: cursor type varies per API
         limit: int | None = None,
-        initial_cursor: Any | None = None,
+        initial_cursor: Any | None = None,  # Any: cursor type varies per...
     ) -> AsyncIterator[T]:
         """Fetch all pages using the provided fetch function.
 

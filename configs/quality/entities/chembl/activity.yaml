@@ -2,7 +2,7 @@
 # ChEMBL Activity-specific DQ rules
 # Inherits from: _defaults.yaml → providers/chembl.yaml
 
-version: "1.0.0"
+version: "1.1.0"
 provider: chembl
 entity: activity
 
@@ -18,12 +18,13 @@ field_validations:
     nullable: false
     error_message: "Activity ID is required"
 
-  # Standard value must be non-negative when present
+  # Standard value must be non-negative and below 1B (extreme outlier guard)
   - field: standard_value
     type: range
     min: 0
+    max: 1000000000
     nullable: true
-    error_message: "Standard value must be non-negative"
+    error_message: "standard_value must be non-negative and below 1B"
 
   # pChEMBL value must be in valid range (0-15)
   - field: pchembl_value
@@ -33,7 +34,7 @@ field_validations:
     nullable: true
     error_message: "pChEMBL value must be between 0 and 15"
 
-  # Standard type validation
+  # Standard type validation (comprehensive list of measurement types)
   - field: standard_type
     type: enum
     allowed:
@@ -43,13 +44,16 @@ field_validations:
       - EC50
       - AC50
       - GI50
+      - ED50
+      - MIC
+      - CC50
       - Potency
       - Activity
       - Inhibition
     nullable: true
     error_message: "Invalid standard_type value"
 
-  # Standard units validation
+  # Standard units validation (includes mass-based units)
   - field: standard_units
     type: enum
     allowed:
@@ -59,6 +63,8 @@ field_validations:
       - pM
       - M
       - "%"
+      - "ug.mL-1"
+      - "mg.kg-1"
     nullable: true
     error_message: "Invalid standard_units value"
 
@@ -76,6 +82,15 @@ cross_field_validations:
     required_field: standard_units
     error_message: "standard_units required when standard_value is present"
 
+  # Complete activity data requires value, units, and type
+  - name: activity_completeness
+    fields:
+      - standard_value
+      - standard_units
+      - standard_type
+    condition: all_present
+    error_message: "Complete activity data requires value, units, and type"
+
 # =============================================================================
 # Conditional Validations
 # =============================================================================
@@ -90,3 +105,24 @@ conditional_validations:
         type: required
         nullable: false
         error_message: "Binding assays must have a target"
+
+  # IC50 values have a tighter expected range
+  - name: ic50_range_check
+    condition_field: standard_type
+    condition_value: IC50
+    condition_operator: eq
+    then_validations:
+      - field: standard_value
+        type: range
+        min: 0.001
+        max: 100000
+        nullable: false
+
+# =============================================================================
+# Key Nullability Policy for Silver writes
+# =============================================================================
+# Documented per pipeline: merge(primary) and partition key nullability.
+key_nullability:
+  - field: activity_id
+    key_type: merge
+    nullable: false

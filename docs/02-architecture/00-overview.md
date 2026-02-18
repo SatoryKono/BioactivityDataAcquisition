@@ -1,6 +1,6 @@
 # Architecture Overview
 
-*Synced with RULES.md v5.19 (2026-02-16)*
+*Synced with RULES.md v5.20 (2026-02-16)*
 
 ## Quick Navigation
 

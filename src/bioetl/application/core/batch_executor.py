@@ -475,11 +475,11 @@ class BatchExecutor:
     async def _execute_with_span(
         self,
         name: str,
-        coro: Any,
+        coro: Any,  # Any: Awaitable (generic coroutine)
         batch_id: BatchID,
         count: int,
-        on_error: Any = None,
-    ) -> Any:
+        on_error: Any = None,  # Any: fallback return value type varies
+    ) -> Any:  # Any: coroutine return type varies
         """Execute coroutine with tracing span."""
         span = self._tracing.start_layer_span(name, batch_id, count)
         try:
@@ -632,7 +632,7 @@ class BatchExecutor:
         self,
         records: list[dict[str, Any]],
         batch_id: BatchID,
-        bronze_result: Any,
+        bronze_result: Any,  # Any: BronzeWriteResult (avoids circular import)
         silver_records: list[dict[str, Any]],
         gold_records: list[dict[str, Any]],
     ) -> None:
@@ -670,7 +670,7 @@ class BatchExecutor:
 
     def _build_dataframe_from_records(
         self, records: list[dict[str, Any]]
-    ) -> Any | None:
+    ) -> Any | None:  # Any: pl.DataFrame (avoids polars import at module level)
         """Build a Polars DataFrame from records, returning None on failure."""
         if not records:
             return None
@@ -733,6 +733,16 @@ class BatchExecutor:
         gold_data = self._build_dataframe_from_records(self._gold_records_for_dq)
         primary_keys = list(self._config.table_config.primary_keys)
         soft_threshold, hard_threshold = self._get_dq_thresholds()
+        key_nullability_rules = None
+        if self._config.dq_config is not None:
+            key_nullability_rules = [
+                {
+                    "field": rule.field,
+                    "key_type": rule.key_type,
+                    "nullable": rule.nullable,
+                }
+                for rule in self._config.dq_config.key_nullability_rules
+            ]
 
         # Get current date for Bronze DQ report filename
         current_date_str = datetime.now(UTC).strftime("%Y-%m-%d")
@@ -762,6 +772,7 @@ class BatchExecutor:
             silver_input_count=self.records_fetched,
             silver_quarantined_count=self.records_quarantined,
             silver_output_path=self._config.silver_output_path,
+            silver_key_nullability_rules=key_nullability_rules,
             # Gold context
             gold_data=gold_data,
             gold_target_table=self._config.table_config.gold_table,

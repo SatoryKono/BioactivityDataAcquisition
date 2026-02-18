@@ -95,6 +95,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
+        contract_policy: Any = None,
     ):
         """Initialize PubMed publication transformer.
 
@@ -108,6 +109,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
             data_normalizer: Optional data normalization service for DOI normalization.
+            contract_policy: Optional pipeline contract policy.
 
         """
         super().__init__(
@@ -120,8 +122,11 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             identity_service=identity_service,
             pii_hasher=pii_hasher,
             data_normalizer=data_normalizer,
+            contract_policy=contract_policy,
         )
         self._cached_xml_root = None
+        self._author_extractor = AuthorExtractor()
+        self._date_extractor = DateExtractor()
 
     def _pre_extract_validation(
         self,
@@ -224,16 +229,20 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         chemicals = ClassificationExtractor.parse_chemicals(medline)
 
         return {
-            "publication_types": publication_types,
+            "publication_types": self.serialize_json_list(publication_types),
             "publication_type_list": self.serialize_json_list(publication_types),
-            "subject_keywords": subject_keywords,
+            "subject_keywords": self.serialize_json_list(subject_keywords),
             "keyword_count": len(subject_keywords) if subject_keywords else 0,
-            "subject_mesh": subject_mesh,
+            "subject_mesh": self.serialize_json_list(subject_mesh),
             "mesh_heading_count": len(subject_mesh) if subject_mesh else 0,
-            "chemicals": chemicals,
+            "chemicals": self.serialize_json_list(chemicals),
             "chemical_count": len(chemicals) if chemicals else 0,
-            "gene_symbols": ClassificationExtractor.parse_gene_symbols(medline),
-            "databanks": ClassificationExtractor.parse_databanks(medline),
+            "gene_symbols": self.serialize_json_list(
+                ClassificationExtractor.parse_gene_symbols(medline)
+            ),
+            "databanks": self.serialize_json_list(
+                ClassificationExtractor.parse_databanks(medline)
+            ),
         }
 
     def _extract_author_block(
@@ -341,7 +350,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         medline = root.find(".//MedlineCitation")
         pubmed_data = root.find(".//PubmedData")
 
-        raw_author_data = AuthorExtractor().extract(article) or []
+        raw_author_data = self._author_extractor.extract(article) or []
 
         return {
             **identifiers,
@@ -604,7 +613,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             return None, None
 
         # Use DateExtractor logic to support MedlineDate parsing
-        raw_date = DateExtractor().extract(pub_date_node)
+        raw_date = self._date_extractor.extract(pub_date_node)
         if not raw_date:
             return None, None
 
@@ -696,8 +705,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "date_revised": date_revised,
         }
 
-    @staticmethod
-    def entity_to_silver_record(entity: Any) -> dict[str, Any]:
+        # Any: accepts any dataclass ...
+
+    def entity_to_silver_record(self, entity: Any) -> dict[str, Any]:
         """Convert Domain Entity to SilverRecord, excluding certain fields.
 
         Overrides base implementation to remove fields not needed for PubMed.
@@ -709,10 +719,8 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             SilverRecord dictionary without excluded fields.
 
         """
-        from bioetl.application.core.base_transformer import BaseTransformer
-
         # Get base silver record
-        silver_record = BaseTransformer.entity_to_silver_record(entity)
+        silver_record = super().entity_to_silver_record(entity)
 
         # Remove excluded fields (API deprecated or not available)
         silver_record.pop("vernacular_title", None)

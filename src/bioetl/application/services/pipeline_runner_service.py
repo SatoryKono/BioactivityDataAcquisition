@@ -157,6 +157,8 @@ class RunOptions:
     log_level: str = "INFO"
     ignore_yaml_filter: bool = False
     skip_gold: bool = False  # Skip Gold layer writing (composite sub-pipelines)
+    # Execution context for severity resolution in DQ rules
+    execution_context: str = "isolated"  # isolated | enricher | dependency
     # Cached Bronze mode options
     use_cached_bronze: bool = False
     cached_bronze_path: str | None = None

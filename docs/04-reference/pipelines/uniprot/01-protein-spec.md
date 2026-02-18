@@ -1,6 +1,6 @@
 # UniProt Protein Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.19*
+*Version 1.2.0 | Aligned with RULES.md v5.20*
 
 ______________________________________________________________________
 
@@ -159,6 +159,8 @@ ______________________________________________________________________
 
 ### 5.1. Pandera Schema
 
+> Migration note: public Pandera contract uses canonical PK names; legacy aliases are accepted only during transition via ingestion/transform alias mapping and will be removed in the next major release.
+
 ```python
 class UniprotTargetSchema(ETLRecordSchema):
     """UniProt Target validation schema for Silver layer."""
@@ -257,7 +259,7 @@ ______________________________________________________________________
 | This Entity Field | Maps To       | Provider | Field                        |
 | ----------------- | ------------- | -------- | ---------------------------- |
 | `accession`       | ChEMBL        | ChEMBL   | `target_component.accession` |
-| `chembl_ids[*]`   | ChEMBL        | ChEMBL   | `target_chembl_id`           |
+| `chembl_ids[*]`   | ChEMBL        | ChEMBL   | `target_id`                  |
 | `drugbank_ids[*]` | DrugBank      | DrugBank | `drugbank_id`                |
 | `taxonomy_id`     | NCBI Taxonomy | NCBI     | `tax_id`                     |
 

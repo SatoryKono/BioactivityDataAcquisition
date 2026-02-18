@@ -45,7 +45,7 @@ class SubcellularFractionDataSource(_SourceMetadataDelegationMixin):
         self,
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
-        exc_tb: Any,
+        exc_tb: Any,  # Any: TracebackType | None (standard __aexit__ signature)
     ) -> None:
         """Exit async context."""
         await self._data_source.__aexit__(exc_type, exc_val, exc_tb)
@@ -57,7 +57,7 @@ class SubcellularFractionDataSource(_SourceMetadataDelegationMixin):
         query: str | None = None,
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[dict[str, Any]]:  # Any: heterogeneous record values
         """Fetch records, extracting subcellular fractions if requested."""
         if entity_type == self.TARGET_ENTITY_TYPE:
             async for record in self._fetch_subcellular_fractions(
@@ -80,10 +80,10 @@ class SubcellularFractionDataSource(_SourceMetadataDelegationMixin):
         query: str | None,
         filter_ids: list[str] | None,
         filter_field: str | None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[dict[str, Any]]:  # Any: heterogeneous record values
         """Fetch assays and extract unique subcellular fraction records."""
         self._seen_fractions = set()
-        records: dict[str, dict[str, Any]] = {}
+        records: dict[str, dict[str, Any]] = {}  # Any: heterogeneous record values
 
         async for assay in self._data_source.fetch(
             entity_type=self.SOURCE_ENTITY_TYPE,
@@ -116,6 +116,7 @@ class SubcellularFractionDataSource(_SourceMetadataDelegationMixin):
             yield record
 
     @staticmethod
+    # Any: untyped API field value
     def _normalize_fraction(raw_fraction: Any) -> str | None:
         """Normalize subcellular fraction string."""
         if raw_fraction is None:
@@ -134,9 +135,9 @@ class SubcellularFractionDataSource(_SourceMetadataDelegationMixin):
 
     def _create_fraction_record(
         self,
-        assay: dict[str, Any],
+        assay: dict[str, Any],  # Any: heterogeneous record values
         fraction: str,
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any]:  # Any: heterogeneous record values
         """Create a subcellular fraction record."""
         assay_id = assay.get("assay_id") or assay.get("assay_chembl_id")
         return {
@@ -169,7 +170,7 @@ class SubcellularFractionDataSource(_SourceMetadataDelegationMixin):
         filter_ids: list[str],
         filter_field: str,
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[dict[str, Any]]:  # Any: heterogeneous record values
         """Fetch filtered records with subcellular fraction extraction."""
         filterable = self._ensure_filterable("fetch_filtered")
 
@@ -198,7 +199,7 @@ class SubcellularFractionDataSource(_SourceMetadataDelegationMixin):
         entity_type: str,
         filters: dict[str, list[str]],
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[dict[str, Any]]:  # Any: heterogeneous record values
         """Fetch multi-filtered records with subcellular fraction extraction."""
         filterable = self._ensure_filterable("fetch_multi_filtered")
 
@@ -227,7 +228,7 @@ class SubcellularFractionDataSource(_SourceMetadataDelegationMixin):
         filter_field: str,
         fallback_mapping: dict[str, str],
         limit: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[dict[str, Any]]:  # Any: heterogeneous record values
         """Fetch records with fallback and subcellular fraction extraction."""
         filterable = self._ensure_filterable("fetch_filtered_with_fallback")
 
@@ -255,12 +256,12 @@ class SubcellularFractionDataSource(_SourceMetadataDelegationMixin):
 
     async def _fetch_filtered_fractions(
         self,
-        assays: AsyncIterator[dict[str, Any]],
+        assays: AsyncIterator[dict[str, Any]],  # Any: heterogeneous record values
         limit: int | None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[dict[str, Any]]:  # Any: heterogeneous record values
         """Extract subcellular fractions from a filtered assay stream."""
         self._seen_fractions = set()
-        records: dict[str, dict[str, Any]] = {}
+        records: dict[str, dict[str, Any]] = {}  # Any: heterogeneous record values
 
         async for assay in assays:
             raw_fraction = assay.get("assay_subcellular_fraction")

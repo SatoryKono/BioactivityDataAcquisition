@@ -289,6 +289,7 @@ class TestOtherProvidersUnpackTriple:
             entity_type="compound",
             primary_keys=["compound_id"],
             silver_table="compound",
+            schema_file="../../schemas/pubchem/compound.yaml",
         )
         assert config.extraction_params == {}
 
@@ -302,6 +303,7 @@ class TestOtherProvidersUnpackTriple:
             entity_type="activity",
             primary_keys=["activity_id"],
             silver_table="activity",
+            schema_file="../../schemas/chembl/activity.yaml",
             extraction_params={
                 "standard_type__in": "IC50,Ki",
                 "standard_units": "nM",

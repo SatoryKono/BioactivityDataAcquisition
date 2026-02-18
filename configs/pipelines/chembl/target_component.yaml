@@ -6,10 +6,12 @@
 pipeline_name: chembl_target_component
 provider: chembl
 entity_type: target_component
+schema_file: ../../schemas/chembl/target_component.yaml
 version: "1.2.0"
 description: "ChEMBL Target Components (protein sequences, etc.)"
 
-primary_keys: ["component_id"]
+business_primary_keys: ["component_id"]
+technical_primary_key: "entity_id"
 silver_table: chembl_target_component
 gold_table: chembl_target_component
 
@@ -36,4 +38,10 @@ sink:
   bronze: {}
   silver:
     partition_by: ["organism"]
-  gold: {}
+  gold:
+    mode: scd2
+    scd_config:
+      valid_from: _valid_from
+      valid_to: _valid_to
+      is_current: _is_current
+      version: _version

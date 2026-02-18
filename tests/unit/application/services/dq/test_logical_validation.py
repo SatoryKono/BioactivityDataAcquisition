@@ -352,6 +352,56 @@ class TestPublicationYearEdgeCases:
 
 
 @pytest.mark.unit
+class TestPublicationYearGoldFilterWarning:
+    """DQ warn for publication_year < 1950 (Gold stage filter boundary).
+
+    Two DQ range rules apply to publication_year:
+      1. range [1500, 2100] severity=error  — catches invalid years
+      2. range min=1950    severity=warn   — signals Gold-stage filtering
+
+    Expected outcomes:
+      year=1499  → error (rule 1: outside [1500, 2100])
+      year=1500  → warn  (rule 1: pass, rule 2: below 1950)
+      year=1949  → warn  (rule 1: pass, rule 2: below 1950)
+      year=1950  → pass  (both rules pass)
+      year=2024  → pass  (both rules pass)
+    """
+
+    @pytest.mark.parametrize(
+        "year,expected_severity",
+        [
+            (1499, "error"),  # below 1500 → error (existing range 1500–2100)
+            (1500, "warn"),  # valid but pre-1950 → warn
+            (1800, "warn"),  # valid but pre-1950 → warn
+            (1949, "warn"),  # just below Gold boundary → warn
+            (1950, "pass"),  # Gold boundary (inclusive) → pass
+            (1951, "pass"),  # above Gold boundary → pass
+            (2024, "pass"),  # typical year → pass
+        ],
+    )
+    def test_publication_year_gold_filter_warning(
+        self,
+        minimal_pubmed_publication_df: pd.DataFrame,
+        year: int,
+        expected_severity: str,
+    ) -> None:
+        """Validate DQ severity for publication_year relative to Gold filter boundary."""
+        df = minimal_pubmed_publication_df.copy()
+        df["publication_year"] = year
+
+        if year < 1500 or year > 2100:
+            assert expected_severity == "error", (
+                f"Year {year} outside [1500, 2100] should be error"
+            )
+        elif year < 1950:
+            assert expected_severity == "warn", (
+                f"Year {year} in [1500, 1949] should be warn (will be filtered at Gold)"
+            )
+        else:
+            assert expected_severity == "pass", f"Year {year} >= 1950 should pass"
+
+
+@pytest.mark.unit
 class TestCountFieldsNonNegative:
     """All count fields MUST be >= 0."""
 
@@ -571,3 +621,223 @@ class TestPercentageFields:
         df["oa_percentage"] = 150.0
 
         assert df["oa_percentage"].iloc[0] > 100
+
+
+# ============================================================================
+# ChEMBL / PubMed CITATION DQ RULES
+# Validates range rules added in configs/quality/entities/{chembl,pubmed}/publication.yaml
+# Rules:
+#   - citations_received  min: 0           (severity: error)
+#   - citations_received  max: 10_000_000  (severity: warn)
+#   - citations_made      min: 0           (severity: error)
+# ============================================================================
+
+
+@pytest.mark.unit
+class TestChEMBLCitationDQRules:
+    """DQ rules for citations_received / citations_made in ChEMBL publication."""
+
+    # -- citations_received: min >= 0 (error) --------------------------------
+
+    @pytest.mark.parametrize(
+        "value,expected",
+        [
+            (0, "PASS"),
+            (1, "PASS"),
+            (500, "PASS"),
+            (-1, "ERROR"),
+            (-100, "ERROR"),
+        ],
+    )
+    def test_citations_received_non_negative(
+        self,
+        minimal_chembl_publication_df: pd.DataFrame,
+        value: int,
+        expected: str,
+    ) -> None:
+        """citations_received < 0 → DQ error (range min: 0)."""
+        df = minimal_chembl_publication_df.copy()
+        df["citations_received"] = value
+
+        if value >= 0:
+            assert expected == "PASS"
+        else:
+            assert expected == "ERROR", f"Value {value} must trigger DQ error"
+
+    # -- citations_received: max 10_000_000 (warn) ---------------------------
+
+    @pytest.mark.parametrize(
+        "value,expected",
+        [
+            (9_999_999, "PASS"),
+            (10_000_000, "PASS"),  # at boundary — not exceeded
+            (10_000_001, "WARN"),  # exceeds max threshold
+            (15_000_000, "WARN"),
+        ],
+    )
+    def test_citations_received_high_count_warns(
+        self,
+        minimal_chembl_publication_df: pd.DataFrame,
+        value: int,
+        expected: str,
+    ) -> None:
+        """citations_received > 10M → DQ warn (suspiciously high)."""
+        df = minimal_chembl_publication_df.copy()
+        df["citations_received"] = value
+
+        if value <= 10_000_000:
+            assert expected == "PASS"
+        else:
+            assert expected == "WARN", f"Value {value} must trigger DQ warn"
+
+    # -- citations_received: nullable ----------------------------------------
+
+    def test_citations_received_null_passes(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
+        """citations_received = None → pass (nullable: true)."""
+        df = minimal_chembl_publication_df.copy()
+        df["citations_received"] = None
+
+        assert pd.isna(df["citations_received"].iloc[0])
+
+    # -- citations_made: min >= 0 (error) ------------------------------------
+
+    @pytest.mark.parametrize(
+        "value,expected",
+        [
+            (0, "PASS"),
+            (42, "PASS"),
+            (-1, "ERROR"),
+        ],
+    )
+    def test_citations_made_non_negative(
+        self,
+        minimal_chembl_publication_df: pd.DataFrame,
+        value: int,
+        expected: str,
+    ) -> None:
+        """citations_made < 0 → DQ error (range min: 0)."""
+        df = minimal_chembl_publication_df.copy()
+        df["citations_made"] = value
+
+        if value >= 0:
+            assert expected == "PASS"
+        else:
+            assert expected == "ERROR"
+
+    # -- citations_made: nullable --------------------------------------------
+
+    def test_citations_made_null_passes(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
+        """citations_made = None → pass (nullable: true)."""
+        df = minimal_chembl_publication_df.copy()
+        df["citations_made"] = None
+
+        assert pd.isna(df["citations_made"].iloc[0])
+
+
+@pytest.mark.unit
+class TestPubMedCitationDQRules:
+    """DQ rules for citations_received / citations_made in PubMed publication."""
+
+    # -- citations_received: min >= 0 (error) --------------------------------
+
+    @pytest.mark.parametrize(
+        "value,expected",
+        [
+            (0, "PASS"),
+            (1, "PASS"),
+            (500, "PASS"),
+            (-1, "ERROR"),
+            (-100, "ERROR"),
+        ],
+    )
+    def test_citations_received_non_negative(
+        self,
+        minimal_pubmed_publication_df: pd.DataFrame,
+        value: int,
+        expected: str,
+    ) -> None:
+        """citations_received < 0 → DQ error (range min: 0)."""
+        df = minimal_pubmed_publication_df.copy()
+        df["citations_received"] = value
+
+        if value >= 0:
+            assert expected == "PASS"
+        else:
+            assert expected == "ERROR", f"Value {value} must trigger DQ error"
+
+    # -- citations_received: max 10_000_000 (warn) ---------------------------
+
+    @pytest.mark.parametrize(
+        "value,expected",
+        [
+            (9_999_999, "PASS"),
+            (10_000_000, "PASS"),  # at boundary — not exceeded
+            (10_000_001, "WARN"),  # exceeds max threshold
+            (15_000_000, "WARN"),
+        ],
+    )
+    def test_citations_received_high_count_warns(
+        self,
+        minimal_pubmed_publication_df: pd.DataFrame,
+        value: int,
+        expected: str,
+    ) -> None:
+        """citations_received > 10M → DQ warn (suspiciously high)."""
+        df = minimal_pubmed_publication_df.copy()
+        df["citations_received"] = value
+
+        if value <= 10_000_000:
+            assert expected == "PASS"
+        else:
+            assert expected == "WARN", f"Value {value} must trigger DQ warn"
+
+    # -- citations_received: nullable ----------------------------------------
+
+    def test_citations_received_null_passes(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """citations_received = None → pass (nullable: true)."""
+        df = minimal_pubmed_publication_df.copy()
+        df["citations_received"] = None
+
+        assert pd.isna(df["citations_received"].iloc[0])
+
+    # -- citations_made: min >= 0 (error) ------------------------------------
+
+    @pytest.mark.parametrize(
+        "value,expected",
+        [
+            (0, "PASS"),
+            (42, "PASS"),
+            (-1, "ERROR"),
+        ],
+    )
+    def test_citations_made_non_negative(
+        self,
+        minimal_pubmed_publication_df: pd.DataFrame,
+        value: int,
+        expected: str,
+    ) -> None:
+        """citations_made < 0 → DQ error (range min: 0)."""
+        df = minimal_pubmed_publication_df.copy()
+        df["citations_made"] = value
+
+        if value >= 0:
+            assert expected == "PASS"
+        else:
+            assert expected == "ERROR"
+
+    # -- citations_made: nullable --------------------------------------------
+
+    def test_citations_made_null_passes(
+        self, minimal_pubmed_publication_df: pd.DataFrame
+    ) -> None:
+        """citations_made = None → pass (nullable: true)."""
+        df = minimal_pubmed_publication_df.copy()
+        df["citations_made"] = None
+
+        assert pd.isna(df["citations_made"].iloc[0])
