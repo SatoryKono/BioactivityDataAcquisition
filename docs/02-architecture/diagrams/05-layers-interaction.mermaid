@@ -17,7 +17,7 @@ flowchart TB
 
     subgraph Application["Application Layer"]
         Runner[PipelineRunner]
-        Executor[PipelineExecutor]
+        BatchExec[BatchExecutor]
         Transformer[BaseTransformer]
         Services[PipelineServices]
 
@@ -27,8 +27,8 @@ flowchart TB
             Merger[MergeService]
         end
 
-        Runner --> Executor
-        Executor --> Transformer
+        Runner --> BatchExec
+        BatchExec --> Transformer
         Runner --> Services
         CompositeRunner --> Coordinator
         CompositeRunner --> Merger
