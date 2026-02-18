@@ -277,6 +277,10 @@ class MetadataCoordinator:
             if input_data.dq_metrics
             else DQSummary(total_records=rec_count, valid_records=rec_count)
         )
+        if input_data.dq_rule_provenance:
+            dq_summary = dq_summary.model_copy(
+                update={"rule_provenance": input_data.dq_rule_provenance}
+            )
 
         # Calculate duration if both timestamps provided
         duration_seconds = (

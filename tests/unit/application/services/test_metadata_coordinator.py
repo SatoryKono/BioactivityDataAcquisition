@@ -16,9 +16,7 @@ from bioetl.composition.services.metadata_coordinator import (
     MetadataCoordinator,
     SilverMetadataInput,
 )
-from bioetl.domain.ports.metadata_coordinator import SilverRef
-from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
-from bioetl.domain.medallion import Layer
+from bioetl.domain.medallion import GoldWriteMode, Layer, SilverWriteMode
 from bioetl.domain.models.metadata import (
     BronzeMetadata,
     GoldMetadata,
@@ -29,6 +27,7 @@ from bioetl.domain.models.metadata import (
     SilverMetadata,
     SourceMetadata,
 )
+from bioetl.domain.ports.metadata_coordinator import SilverRef
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.run_context import RunContext
 
@@ -445,6 +444,34 @@ class TestSilverMetadata:
         assert metadata.delta.primary_key == ["id"]
         assert metadata.delta.version_after == 10
         assert metadata.delta.rows_inserted == 10
+
+    def test_silver_metadata_includes_rule_provenance(
+        self, coordinator: MetadataCoordinator
+    ) -> None:
+        """Silver metadata should include DQ rule provenance when provided."""
+        records = [{"id": 1}]
+        provenance = [
+            {
+                "rule_id": "R_TRACE_01",
+                "config_path": "configs/quality/entities/chembl/activity.yaml",
+                "layer": "gold",
+                "field": "value",
+                "severity": "error",
+                "decision": "quarantine",
+            }
+        ]
+
+        input_data = SilverMetadataInput(
+            table_path="/data/silver/chembl/activity",
+            records=records,
+            primary_keys=["id"],
+            mode=SilverWriteMode.MERGE,
+            dq_rule_provenance=provenance,
+        )
+
+        metadata = coordinator.create_silver_metadata(input_data)
+
+        assert metadata.dq_summary.rule_provenance == provenance
 
     def test_silver_mode_to_operation_mapping(
         self, coordinator: MetadataCoordinator

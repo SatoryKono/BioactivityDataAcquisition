@@ -296,6 +296,11 @@ class BusinessRuleResult:
     description: str
     passed: bool
     violations: int | None  # None indicates unknown (e.g., exception during check)
+    config_path: str | None = None
+    layer: str | None = None
+    field: str | None = None
+    severity: str | None = None
+    decision: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

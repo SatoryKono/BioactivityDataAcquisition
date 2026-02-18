@@ -584,6 +584,13 @@ class DQSummary(BaseModel):
     data_freshness_hours: float | None = Field(
         default=None, description="Data freshness in hours"
     )
+    rule_provenance: list[dict[str, str | None]] = Field(
+        default_factory=list,
+        description=(
+            "DQ rule provenance entries with rule_id, config_path, layer, "
+            "field, severity, and decision"
+        ),
+    )
 
     @property
     def null_rates(self) -> dict[str, float]:
