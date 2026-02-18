@@ -101,6 +101,7 @@ def check_business_rules(
     rules_failed = 0
 
     for rule in rules:
+        column = rule.get("column")
         try:
             passed, violations = _evaluate_single_rule(df, rule)
         except Exception:
@@ -120,6 +121,11 @@ def check_business_rules(
                 description=rule.get("description", ""),
                 passed=passed,
                 violations=violations,
+                config_path=rule.get("config_path"),
+                layer=rule.get("layer", "gold"),
+                field=rule.get("field", column),
+                severity=rule.get("severity", "error"),
+                decision=rule.get("decision", "pass" if passed else "fail"),
             )
         )
 

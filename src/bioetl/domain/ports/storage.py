@@ -25,6 +25,9 @@ from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 if TYPE_CHECKING:
+    from pandera.api.dataframe.container import DataFrameSchema
+
+    from bioetl.domain.config import KeyNullabilityRule
     from bioetl.domain.models.metadata import SourceMetadata
 
 
@@ -86,6 +89,7 @@ class StoragePort(Protocol):
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
         column_order: list[str] | None = None,
         bronze_refs: list[BronzeWriteResult] | None = None,
+        key_nullability_rules: list[KeyNullabilityRule] | None = None,
     ) -> SilverWriteResult | None:
         """Write transformed records to the Silver layer.
 
@@ -216,11 +220,13 @@ class StoragePort(Protocol):
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
+        schema: DataFrameSchema | None = None,  # type: ignore[type-arg]
     ) -> None:
         """Write merged records to Gold layer without Pandera schema.
 
         Used by composite pipelines where schema is dynamically determined
-        by the merge operation. No Pandera validation is performed.
+        by the merge operation. Optional Pandera validation can be applied
+        when a composite contract is available.
 
         Args:
             table_name: The name of the table to write to.
@@ -231,10 +237,10 @@ class StoragePort(Protocol):
             preserve_column_order: If True, skip canonical_column_order()
                 and preserve the column order from records (e.g. semantic
                 ordering applied by ColumnOrderer in composite pipelines).
+            schema: Optional Pandera schema used for strict contract validation.
 
         Note:
-            This method bypasses Pandera validation since merged data
-            has a dynamically determined schema from multiple sources.
+            When schema is None, this method bypasses Pandera validation.
         """
         ...
 

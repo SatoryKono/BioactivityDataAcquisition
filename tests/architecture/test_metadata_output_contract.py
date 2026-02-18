@@ -6,6 +6,8 @@ output metadata pattern.
 
 from __future__ import annotations
 
+import types
+
 from bioetl.domain.models.metadata import (
     BaseOutputMetadata,
     BronzeMetadata,
@@ -44,9 +46,16 @@ def test_all_layer_metadata_have_output_ext() -> None:
         )
 
         field_info = cls.model_fields["output_ext"]
-        assert field_info.annotation == ext_cls, (
-            f"{cls.__name__}.output_ext should be {ext_cls.__name__}, got {field_info.annotation}"
-        )
+        annotation = field_info.annotation
+        # Support Union types (e.g., GoldOutputExt | CompositeOutputExt)
+        if isinstance(annotation, types.UnionType):
+            assert ext_cls in annotation.__args__, (
+                f"{cls.__name__}.output_ext should include {ext_cls.__name__}, got {annotation}"
+            )
+        else:
+            assert annotation == ext_cls, (
+                f"{cls.__name__}.output_ext should be {ext_cls.__name__}, got {annotation}"
+            )
 
 
 def test_base_output_metadata_has_required_fields() -> None:

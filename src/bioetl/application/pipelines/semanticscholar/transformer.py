@@ -90,6 +90,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
+        contract_policy: Any = None,
     ) -> None:
         """Initialize transformer.
 
@@ -103,6 +104,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names.
             data_normalizer: Optional data normalization service for DOI normalization.
+            contract_policy: Optional pipeline contract policy.
 
         """
         super().__init__(
@@ -115,6 +117,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             identity_service=identity_service,
             pii_hasher=pii_hasher,
             data_normalizer=data_normalizer,
+            contract_policy=contract_policy,
         )
 
     # Any: raw API JSON
@@ -281,8 +284,9 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         """
         return SemanticScholarPublicationEntity
 
-    @staticmethod
-    def entity_to_silver_record(entity: Any) -> dict[str, Any]:  # Any: record vals vary
+    def entity_to_silver_record(
+        self, entity: Any
+    ) -> dict[str, Any]:  # Any: record vals vary
         """Convert Domain Entity to SilverRecord, preserving base schema fields.
 
         Note: pmc_id is kept with None value to satisfy PublicationBaseSchema
@@ -295,9 +299,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             SilverRecord dictionary with all base schema fields.
 
         """
-        from bioetl.application.core.base_transformer import BaseTransformer
-
-        silver_record = BaseTransformer.entity_to_silver_record(entity)
+        silver_record = super().entity_to_silver_record(entity)
 
         # Note: Do NOT remove pmc_id - it inherits from PublicationBaseSchema
         # and must exist in DataFrame even if set to None (Pandera requires

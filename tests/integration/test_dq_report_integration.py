@@ -9,7 +9,7 @@ Tests the end-to-end flow of DQ report generation including:
 from __future__ import annotations
 
 import json
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -335,6 +335,67 @@ class TestDQReportIntegration:
             )
             is True
         )
+
+    @pytest.mark.asyncio
+    async def test_gold_dq_report_includes_rule_provenance_traceability(
+        self,
+        tmp_path: Path,
+        mock_logger: MagicMock,
+        dq_context: DQReportContext,
+    ) -> None:
+        """Gold DQ report JSON should include business rule provenance fields."""
+        import polars as pl
+
+        context = DQReportContext(
+            run_id=dq_context.run_id,
+            pipeline_name=dq_context.pipeline_name,
+            timestamp=dq_context.timestamp,
+            provider="chembl",
+            entity="activity",
+            gold_data=pl.DataFrame({"value": [-1.0, 2.0]}),
+            gold_target_table="chembl.activity",
+            gold_required_fields=["value"],
+            gold_business_rules=[
+                {
+                    "rule_id": "R_TRACE_01",
+                    "name": "non_negative",
+                    "column": "value",
+                    "condition": "range",
+                    "min": 0,
+                    "config_path": "configs/quality/entities/chembl/activity.yaml",
+                    "layer": "gold",
+                    "field": "value",
+                    "severity": "error",
+                    "decision": "quarantine",
+                }
+            ],
+            dq_soft_threshold=0.05,
+            dq_hard_threshold=0.20,
+        )
+
+        service = DQReportService(
+            logger=mock_logger,
+            gold_analyzer=DQServicesFactory.create_gold_analyzer(),
+            report_writer=DQServicesFactory.create_report_writer(tmp_path, mock_logger),
+        )
+
+        result = await service.generate_reports(
+            context=context,
+            gold_config=GoldDQReportConfig(enabled=True, format="json"),
+        )
+
+        assert result.gold_report_path is not None
+        report_content = json.loads(result.gold_report_path.read_text())
+        rules = report_content["checks"]["business_rules"]["rules"]
+        assert len(rules) == 1
+        assert rules[0]["rule_id"] == "R_TRACE_01"
+        assert (
+            rules[0]["config_path"] == "configs/quality/entities/chembl/activity.yaml"
+        )
+        assert rules[0]["layer"] == "gold"
+        assert rules[0]["field"] == "value"
+        assert rules[0]["severity"] == "error"
+        assert rules[0]["decision"] == "quarantine"
 
 
 @pytest.mark.integration

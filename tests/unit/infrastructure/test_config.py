@@ -23,6 +23,7 @@ def test_yaml_config_to_domain_mapping():
         entity_type="entity",
         primary_keys=["id"],
         silver_table="silver.test",
+        schema_file="../../schemas/chembl/activity.yaml",
         dq_overrides=YamlDQConfig(),
         sink={"silver": SinkLayerConfig(mode="append")},
     )
@@ -45,6 +46,7 @@ def test_yaml_config_to_domain_default_mode():
         entity_type="entity",
         primary_keys=["id"],
         silver_table="silver.test",
+        schema_file="../../schemas/chembl/activity.yaml",
         dq_overrides=YamlDQConfig(),
     )
 
@@ -61,6 +63,7 @@ def test_pipeline_yaml_config_accepts_dq_overrides_key() -> None:
         "entity_type": "entity",
         "primary_keys": ["id"],
         "silver_table": "silver.test",
+        "schema_file": "../../schemas/chembl/activity.yaml",
     }
 
     cfg = PipelineYamlConfig.model_validate(
@@ -120,6 +123,7 @@ class TestMaintenanceConfig:
             entity_type="entity",
             primary_keys=["id"],
             silver_table="silver.test",
+            schema_file="../../schemas/chembl/activity.yaml",
         )
 
         assert yaml_config.maintenance is not None
@@ -134,6 +138,7 @@ class TestMaintenanceConfig:
             "entity_type": "entity",
             "primary_keys": ["id"],
             "silver_table": "silver.test",
+            "schema_file": "../../schemas/chembl/activity.yaml",
             "maintenance": {
                 "auto_vacuum": True,
                 "vacuum_retention_days": 14,
@@ -160,6 +165,7 @@ class TestMedallionFormatValidation:
             "entity_type": "entity",
             "primary_keys": ["id"],
             "silver_table": "silver.test",
+            "schema_file": "../../schemas/chembl/activity.yaml",
             "sink": {
                 "silver": {"format": "parquet"},
             },
@@ -176,6 +182,7 @@ class TestMedallionFormatValidation:
             "entity_type": "entity",
             "primary_keys": ["id"],
             "silver_table": "silver.test",
+            "schema_file": "../../schemas/chembl/activity.yaml",
             "sink": {
                 "gold": {"format": "parquet"},
             },
@@ -193,6 +200,7 @@ class TestMedallionFormatValidation:
             "entity_type": "entity",
             "primary_keys": ["id"],
             "silver_table": "silver.test",
+            "schema_file": "../../schemas/chembl/activity.yaml",
             "sink": {
                 "silver": {"format": "delta"},
             },
@@ -209,6 +217,7 @@ class TestMedallionFormatValidation:
             "entity_type": "entity",
             "primary_keys": ["id"],
             "silver_table": "silver.test",
+            "schema_file": "../../schemas/chembl/activity.yaml",
             "sink": {
                 "gold": {"format": "delta"},
             },
@@ -225,6 +234,7 @@ class TestMedallionFormatValidation:
             "entity_type": "entity",
             "primary_keys": ["id"],
             "silver_table": "silver.test",
+            "schema_file": "../../schemas/chembl/activity.yaml",
             "sink": {
                 "bronze": {"format": "jsonl"},
             },
@@ -245,6 +255,7 @@ class TestMedallionFormatValidation:
             "entity_type": "entity",
             "primary_keys": ["id"],
             "silver_table": "silver.test",
+            "schema_file": "../../schemas/chembl/activity.yaml",
             "sink": {
                 "bronze": {"format": "delta"},
             },
@@ -266,6 +277,7 @@ class TestMedallionFormatValidation:
             "entity_type": "entity",
             "primary_keys": ["id"],
             "silver_table": "silver.test",
+            "schema_file": "../../schemas/chembl/activity.yaml",
             "sink": {
                 "bronze": {"format": "parquet"},
             },
@@ -289,6 +301,7 @@ class TestMedallionFormatValidation:
             "entity_type": "entity",
             "primary_keys": ["id"],
             "silver_table": "silver.test",
+            "schema_file": "../../schemas/chembl/activity.yaml",
             "sink": {
                 "silver": {"format": "jsonl"},
             },
@@ -311,6 +324,7 @@ class TestMedallionFormatValidation:
             "entity_type": "entity",
             "primary_keys": ["id"],
             "silver_table": "silver.test",
+            "schema_file": "../../schemas/chembl/activity.yaml",
             "sink": {
                 "silver": {"format": "csv"},
             },
@@ -391,6 +405,7 @@ class TestTransformConfig:
             entity_type="entity",
             primary_keys=["id"],
             silver_table="silver.test",
+            schema_file="../../schemas/chembl/activity.yaml",
         )
 
         assert yaml_config.transform is not None
@@ -405,6 +420,7 @@ class TestTransformConfig:
             "entity_type": "entity",
             "primary_keys": ["id"],
             "silver_table": "silver.test",
+            "schema_file": "../../schemas/chembl/activity.yaml",
             "transform": {
                 "version": "1.0.0",
                 "steps": ["step1", "step2"],
@@ -426,6 +442,7 @@ class TestTransformConfig:
             entity_type="entity",
             primary_keys=["id"],
             silver_table="silver.test",
+            schema_file="../../schemas/chembl/activity.yaml",
             transform=TransformConfig(
                 version="2.0.0",
                 steps=["normalize", "validate", "hash"],
@@ -445,6 +462,7 @@ class TestTransformConfig:
             entity_type="entity",
             primary_keys=["id"],
             silver_table="silver.test",
+            schema_file="../../schemas/chembl/activity.yaml",
         )
 
         domain_config = yaml_config_to_domain(yaml_config)

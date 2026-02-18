@@ -7,6 +7,7 @@
 pipeline_name: chembl_publication
 provider: chembl
 entity_type: publication
+schema_file: ../../schemas/chembl/publication.yaml
 version: "2.1.0"
 description: "Extract scientific publications from ChEMBL API"
 
@@ -21,7 +22,8 @@ page_size_override: 16
 # - watermark_based: Placeholder for future incremental loading (not implemented)
 loading_strategy: full_scan_only
 
-primary_keys: ["publication_id"]
+business_primary_keys: ["publication_id"]
+technical_primary_key: "entity_id"
 silver_table: "chembl_publication"
 gold_table: "chembl_publication"
 

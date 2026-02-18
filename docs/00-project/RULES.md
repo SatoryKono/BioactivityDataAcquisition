@@ -424,7 +424,7 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 - **Dates**: Приводятся к единому ISO-формату `YYYY-MM-DD`.
 - **Strings**: Удаление пробелов по краям (`strip()`).
 
-**Исключения**: Из расчета хэша исключаются технические мета-поля: `_ingestion_ts`, `_run_id`, `_run_type`, `_dq_*`.
+**Исключения**: Из расчета хэша исключаются технические мета-поля, включая все поля с префиксом `_` (например: `_ingestion_ts`, `_run_id`, `_run_type`, `_dq_*`, `_source_batch_id`, `_index`, `_lookup_method`, `_original_id`, `_source`).
 
 - **Детекция Коллизий**: При upsert проверять `_source_record_id`; если отличается — конфликт, логировать обе записи.
 
@@ -1131,7 +1131,7 @@ async with services:  # __aenter__ инициализирует ресурсы
 1. **Time Source**: `datetime.now()` **MUST NOT** вызываться в `infrastructure` слое (за исключением мониторинга реального времени). Все временные метки (`ingestion_ts`, `processing_ts`) **MUST** генерироваться в `Application` слое (`PipelineContext.started_at`) и передаваться вниз.
 1. **Retry Jitter**: При `deterministic=True`, jitter **MUST** вычисляться детерминистично (на основе хэша попытки и URL). Реализация: `domain/resilience.py:RetryConfig.calculate_delay()` использует MD5-based jitter.
 1. **Ordering**: Запись в Delta Lake **MUST** происходить после сортировки данных по Primary Keys (Silver) или Business Keys (Gold).
-1. **Content Hash**: Исключать из расчёта хэша технические мета-поля: `_ingestion_ts`, `_run_id`, `_run_type`, `_source_batch_id`, `_index`, `_dq_*`. Реализация: `domain/constants.py:META_FIELDS` (re-exported через `domain/transformations.py`).
+1. **Content Hash**: Исключать из расчёта хэша технические мета-поля. Canonical policy: см. `docs/02-architecture/policies/content-hash-identity-policy.md`; все поля с префиксом `_` исключаются из identity/hash (включая `_ingestion_ts`, `_run_id`, `_run_type`, `_source_batch_id`, `_index`, `_dq_*`, `_lookup_method`, `_original_id`, `_source`). Реализация: `domain/constants.py:META_FIELDS` + `domain/transformations.py:_should_include_field()`.
 
 #### Архитектурные Тесты Детерминизма
 
@@ -1526,7 +1526,7 @@ entity_type: activity
 version: "1.2.0"
 description: "Extract biological activity records from ChEMBL API"
 
-primary_keys: ["activity_id"]
+business_primary_keys: ["activity_id"]
 silver_table: "chembl_activity"
 gold_table: "chembl_activity"
 

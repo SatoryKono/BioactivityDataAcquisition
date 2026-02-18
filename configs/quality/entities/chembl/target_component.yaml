@@ -54,3 +54,15 @@ cross_field_validations:
 # Conditional Validations
 # =============================================================================
 conditional_validations: []
+
+# =============================================================================
+# Key Nullability Policy for Silver writes
+# =============================================================================
+# Documented per pipeline: merge(primary) and partition key nullability.
+key_nullability:
+  - field: component_id
+    key_type: merge
+    nullable: false
+  - field: organism
+    key_type: partition
+    nullable: false

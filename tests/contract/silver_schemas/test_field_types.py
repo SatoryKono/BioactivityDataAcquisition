@@ -17,6 +17,16 @@ from tests.contract.silver_schemas.conftest import (
 )
 
 
+def _has_nullable_int_dtype_guard(annotation_repr: str, dtype_repr: str) -> bool:
+    """Return True when nullable-int annotation has explicit pandas dtype guard."""
+    if "int" not in dtype_repr.lower():
+        return True
+
+    has_nullable_union = "None" in annotation_repr or "Optional" in annotation_repr
+    has_nullable_int_dtype = "Int64Dtype" in annotation_repr
+    return has_nullable_union and has_nullable_int_dtype
+
+
 @pytest.mark.contracts
 @pytest.mark.no_api
 class TestFieldTypes:
@@ -235,6 +245,75 @@ class TestFieldTypes:
                 )
                 + "\n\nUse Series[bool] for boolean fields."
             )
+
+    @pytest.mark.parametrize(
+        "schema_name,guard_fields",
+        [
+            ("chembl_publication", {"src_id"}),
+            ("pubmed_publication", {"pub_month", "pub_day", "author_count"}),
+            (
+                "semanticscholar_publication",
+                {"corpus_id", "influential_citation_count"},
+            ),
+            (
+                "chembl_molecule",
+                {
+                    "hba_count",
+                    "hbd_count",
+                    "rotatable_bond_count",
+                    "ro5_violation_count",
+                    "heavy_atom_count",
+                    "aromatic_ring_count",
+                },
+            ),
+        ],
+    )
+    def test_nullable_int_fields_have_explicit_dtype_guard(
+        self, schema_name: str, guard_fields: set[str]
+    ) -> None:
+        """Critical nullable-int fields MUST keep explicit pandas Int64 dtype guard."""
+        schema_class = SILVER_SCHEMAS[schema_name]
+        schema_model = schema_class.to_schema()
+        annotations = schema_class.__annotations__
+
+        violations: list[str] = []
+        for field_name in sorted(guard_fields):
+            col_schema = schema_model.columns[field_name]
+            dtype_repr = str(col_schema.dtype)
+            annotation_repr = str(annotations.get(field_name, ""))
+            if not _has_nullable_int_dtype_guard(annotation_repr, dtype_repr):
+                violations.append(
+                    f"{field_name}: dtype={dtype_repr}, annotation={annotation_repr}"
+                )
+
+        if violations:
+            pytest.fail(
+                f"{schema_name}: nullable-int fields must have explicit dtype guard:\n"
+                + "\n".join(f"  - {item}" for item in violations)
+                + "\n\nUse: Series[pd.Int64Dtype] | None = pa.Field(nullable=True)"
+            )
+
+
+@pytest.mark.contracts
+@pytest.mark.no_api
+class TestNullableIntGuardRegression:
+    """Regression tests for nullable-int dtype guard helper."""
+
+    @pytest.mark.parametrize(
+        "annotation_repr,dtype_repr,expected",
+        [
+            ("Series[pd.Int64Dtype] | None", "int64", True),
+            ("Optional[Series[pd.Int64Dtype]]", "int64", True),
+            ("Series[int] | None", "int64", False),
+            ("Series[pd.Int64Dtype]", "int64", False),
+            ("Series[str] | None", "string", True),
+        ],
+    )
+    def test_has_nullable_int_dtype_guard(
+        self, annotation_repr: str, dtype_repr: str, expected: bool
+    ) -> None:
+        """Guard helper must detect nullable-int annotations reliably."""
+        assert _has_nullable_int_dtype_guard(annotation_repr, dtype_repr) is expected
 
 
 @pytest.mark.contracts

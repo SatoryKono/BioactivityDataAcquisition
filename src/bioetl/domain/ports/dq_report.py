@@ -103,6 +103,7 @@ class SilverDQAnalyzerPort(Protocol):
         input_record_count: int | None = None,
         quarantined_count: int = 0,
         previous_schema: dict[str, str] | None = None,
+        key_nullability_rules: list[dict[str, Any]] | None = None,
     ) -> SilverDQReport:
         """Analyze Silver data and generate DQ report.
 

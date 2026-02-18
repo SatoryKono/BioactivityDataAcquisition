@@ -82,7 +82,7 @@ def yaml_config_to_domain(
     )
 
     table = TableConfig(
-        primary_keys=tuple(yaml_config.primary_keys),
+        primary_keys=tuple(yaml_config.business_primary_keys or ()),
         silver_table=yaml_config.silver_table,
         gold_table=yaml_config.gold_table,
         silver_write_mode=write_mode,

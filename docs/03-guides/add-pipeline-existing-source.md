@@ -9,12 +9,12 @@
 
 ## Общий алгоритм
 
-1.  **Анализ данных**: Изучить структуру данных новой сущности в API провайдера.
-2.  **Конфигурация**: Создать YAML-файл конфигурации.
-3.  **Реализация пайплайна**: Создать класс пайплайна в слое Application.
-4.  **Регистрация**: Добавить пайплайн в `bootstrap.py`.
+1. **Анализ данных**: Изучить структуру данных новой сущности в API провайдера.
+1. **Конфигурация**: Создать YAML-файл конфигурации.
+1. **Реализация пайплайна**: Создать класс пайплайна в слое Application.
+1. **Регистрация**: Добавить пайплайн в `bootstrap.py`.
 
----
+______________________________________________________________________
 
 ## Шаг 1: Конфигурация
 
@@ -30,7 +30,7 @@ entity_type: target
 version: "1.2.0"
 description: "Extract biological targets from ChEMBL API"
 
-primary_keys: ["target_chembl_id"]
+business_primary_keys: ["target_chembl_id"]
 silver_table: "chembl_target"
 gold_table: "chembl_target"
 
@@ -105,7 +105,9 @@ class ChEMBLTargetTransformer(BaseChemblTransformer):
 Откройте `src/bioetl/composition/factories/pipeline_factories.py` и добавьте определение:
 
 ```python
-from bioetl.application.pipelines.chembl.target_transformer import ChEMBLTargetTransformer
+from bioetl.application.pipelines.chembl.target_transformer import (
+    ChEMBLTargetTransformer,
+)
 from bioetl.application.pipelines.generic import GenericPipeline
 from bioetl.infrastructure.schemas.silver import CHEMBL_TARGET_SCHEMA
 
@@ -118,12 +120,14 @@ chembl_target_factory = GenericPipelineFactory(
     transformer_class=ChEMBLTargetTransformer,
 )
 
+
 def register_all_pipelines() -> None:
     # ...
     PipelineRegistry.register_factory(chembl_target_factory)
 ```
 
 Теперь пайплайн доступен для запуска:
+
 ```bash
 python -m bioetl run --pipeline chembl_target
 ```

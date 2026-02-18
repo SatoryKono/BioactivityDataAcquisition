@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, TypeVar
 
 import pandera as pandera_pa
@@ -374,6 +374,7 @@ class GoldWriter(BaseDeltaWriter):
             primary_keys=primary_keys or [],
             run_id=run_id,
             sources_used=sources_used,
+            schema=schema,
         )
 
     async def _write_gold_merged_metadata(
@@ -384,6 +385,7 @@ class GoldWriter(BaseDeltaWriter):
         primary_keys: list[str],
         run_id: str | None = None,
         sources_used: list[str] | None = None,
+        schema: DataFrameSchema | None = None,
     ) -> None:
         """Write Gold layer metadata sidecar for merged composite data.
 
@@ -394,14 +396,12 @@ class GoldWriter(BaseDeltaWriter):
             primary_keys: Primary key columns used.
             run_id: Composite run ID for tracking.
             sources_used: List of source pipelines (e.g., ['seed', 'crossref', 'openalex']).
+            schema: Optional strict schema used for pre-write validation.
         """
         if not records:
             return
 
-        from bioetl.infrastructure.storage.metadata_builder import (
-            GoldMetadataBuilder,
-            _parse_table_name,
-        )
+        from bioetl.infrastructure.storage.metadata_builder import _parse_table_name
 
         provider_name, entity_name = _parse_table_name(table_name)
 
@@ -413,18 +413,22 @@ class GoldWriter(BaseDeltaWriter):
             )
             return
 
-        # Build metadata using the extracted builder
-        builder = GoldMetadataBuilder(
-            transform_version=self._transform_version,
-            transform_steps=self._transform_steps,
-        )
-        metadata = builder.build_merged_metadata(
-            table_path=table_path,
-            table_name=table_name,
-            records=records,
-            primary_keys=primary_keys,
-            run_id=run_id,
-            sources_used=sources_used,
+        from bioetl.domain.ports import GoldMetadataInput
+
+        metadata = self._metadata_coordinator.create_gold_metadata(
+            GoldMetadataInput(
+                table_path=table_path,
+                table_name=table_name,
+                records=records,
+                mode=GoldWriteMode.OVERWRITE,
+                completed_at=datetime.now(UTC),
+                transform_version=self._transform_version,
+                transform_steps=self._transform_steps,
+                total_bytes=0,
+                partition_count=0,
+                schema_validation_enabled=schema is not None,
+                schema_validation_strict=True if schema is not None else None,
+            )
         )
 
         await self._metadata_writer.write_gold_metadata(

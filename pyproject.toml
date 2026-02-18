@@ -120,6 +120,8 @@ dev = [
     "pytest-archon>=0.0.6",
     # Snapshot testing for transformers
     "syrupy>=4.0",
+    # JSON Schema validation (scripts/validate_pipeline_configs.py)
+    "jsonschema>=4.20",
     # Code complexity analysis (RULES.md)
     "xenon>=0.9",
     "radon>=6.0",
