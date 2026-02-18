@@ -352,6 +352,56 @@ class TestPublicationYearEdgeCases:
 
 
 @pytest.mark.unit
+class TestPublicationYearGoldFilterWarning:
+    """DQ warn for publication_year < 1950 (Gold stage filter boundary).
+
+    Two DQ range rules apply to publication_year:
+      1. range [1500, 2100] severity=error  — catches invalid years
+      2. range min=1950    severity=warn   — signals Gold-stage filtering
+
+    Expected outcomes:
+      year=1499  → error (rule 1: outside [1500, 2100])
+      year=1500  → warn  (rule 1: pass, rule 2: below 1950)
+      year=1949  → warn  (rule 1: pass, rule 2: below 1950)
+      year=1950  → pass  (both rules pass)
+      year=2024  → pass  (both rules pass)
+    """
+
+    @pytest.mark.parametrize(
+        "year,expected_severity",
+        [
+            (1499, "error"),  # below 1500 → error (existing range 1500–2100)
+            (1500, "warn"),  # valid but pre-1950 → warn
+            (1800, "warn"),  # valid but pre-1950 → warn
+            (1949, "warn"),  # just below Gold boundary → warn
+            (1950, "pass"),  # Gold boundary (inclusive) → pass
+            (1951, "pass"),  # above Gold boundary → pass
+            (2024, "pass"),  # typical year → pass
+        ],
+    )
+    def test_publication_year_gold_filter_warning(
+        self,
+        minimal_pubmed_publication_df: pd.DataFrame,
+        year: int,
+        expected_severity: str,
+    ) -> None:
+        """Validate DQ severity for publication_year relative to Gold filter boundary."""
+        df = minimal_pubmed_publication_df.copy()
+        df["publication_year"] = year
+
+        if year < 1500 or year > 2100:
+            assert expected_severity == "error", (
+                f"Year {year} outside [1500, 2100] should be error"
+            )
+        elif year < 1950:
+            assert expected_severity == "warn", (
+                f"Year {year} in [1500, 1949] should be warn (will be filtered at Gold)"
+            )
+        else:
+            assert expected_severity == "pass", f"Year {year} >= 1950 should pass"
+
+
+@pytest.mark.unit
 class TestCountFieldsNonNegative:
     """All count fields MUST be >= 0."""
 
