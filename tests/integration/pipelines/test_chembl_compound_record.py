@@ -93,7 +93,7 @@ class TestChemblCompoundRecordPipeline(IntegrationPipelineTestCase):
         assert len(bronze_files) > 0, f"No bronze files found in {self.bronze_path}"
 
         # Verify Silver Delta Table
-        silver_table_name = runner.pipeline.config.effective_silver_table
+        silver_table_name = runner._pipeline.config.effective_silver_table
         silver_table_path = f"{self.silver_path}/{silver_table_name}"
 
         dt_silver = DeltaTable(silver_table_path)
@@ -112,11 +112,11 @@ class TestChemblCompoundRecordPipeline(IntegrationPipelineTestCase):
         assert "src_id" in silver_df.column_names
 
         # Verify Gold Delta Table
-        gold_table_name = runner.pipeline.config.effective_gold_table
+        gold_table_name = runner._pipeline.config.effective_gold_table
         if not gold_table_name:
             gold_table_name = (
-                f"{runner.pipeline.config.provider}."
-                f"{runner.pipeline.config.entity_type}"
+                f"{runner._pipeline.config.provider}."
+                f"{runner._pipeline.config.entity_type}"
             )
 
         gold_table_path = f"{self.gold_path}/{gold_table_name.replace('.', '/')}"

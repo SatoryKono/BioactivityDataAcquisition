@@ -27,7 +27,7 @@ make lint && make test
 ```
 
 **Главные ресурсы:**
-1. `docs/RULES.md` — Конституция проекта (RFC 2119 keywords)
+1. `docs/00-project/RULES.md` — Конституция проекта (RFC 2119 keywords)
 2. `.claude/PROJECT_CONTEXT.md` — Компактный контекст
 3. `AGENT.md` — Детальные инструкции для агента
 4. `docs/archived/refactoring-plan.md` — Архив плана рефакторинга (исторический справочник)
@@ -41,7 +41,7 @@ make lint && make test
 
 > **Цель**: Исключить ложные утверждения о состоянии кодовой базы.
 > **Причина**: Анализ 2025-12-27 выявил ~50% ложных утверждений в планах рефакторинга.
-> **Регламент**: См. `docs/RULES.md` §7 "Протокол Архитектурных Обзоров" (REQ-ARCH-040)
+> **Регламент**: См. `docs/00-project/RULES.md` §7 "Протокол Архитектурных Обзоров" (REQ-ARCH-040)
 
 ### Двойная Верификация
 
@@ -129,7 +129,7 @@ ls tests/architecture/test_*.py
 | **Python-файлов** | ~1,114 (534 src + 580 tests) |
 | **Строк кода** | ~115,656 (src/bioetl/) |
 | **Тестов** | ~11,985 (функций test_) |
-| **ADR** | 34 |
+| **ADR** | 36 |
 | **Провайдеров** | 7 |
 | **Pipeline-конфигураций** | 27 |
 | **Конфиг-файлов всего** | 123 (pipelines, quality, filters, sources, schemas) |
@@ -138,7 +138,7 @@ ls tests/architecture/test_*.py
 
 ## 2. Архитектура Слоёв
 
-> **Полная документация**: См. `docs/RULES.md` §1 "Архитектура и Слои"
+> **Полная документация**: См. `docs/00-project/RULES.md` §1 "Архитектура и Слои"
 
 ```
 src/bioetl/
@@ -230,7 +230,7 @@ src/bioetl/
    - **Осознанное решение**: Pandas/Polars исторически не поддерживали nullable integers без `Int64` (capital I)
    - Float — единственный способ представить `int + NULL` без потери данных; `NaN` = отсутствующее значение
    - Затронуто ~34 поля: `record_id`, `src_id`, `taxonomy_id`, `year`, `first_approval` и др.
-   - См. `docs/RULES.md` §2.6 "Int→Float Coercion для Nullable Integers"
+   - См. `docs/00-project/RULES.md` §2.6 "Int→Float Coercion для Nullable Integers"
    - **НЕ баг**, а паттерн для nullable integer handling
 
 ### 2.3.1. Причины Ложных Утверждений (Избегать!)
@@ -322,7 +322,7 @@ cat docs/archived/refactoring-plan.md | head -60
 
 ## 3. Medallion Architecture и Обработка Ошибок
 
-> **Полная документация**: См. `docs/RULES.md` §2 (Medallion) и §3 (Ошибки)
+> **Полная документация**: См. `docs/00-project/RULES.md` §2 (Medallion) и §3 (Ошибки)
 
 **Medallion** (Bronze → Silver → Gold):
 - **Bronze**: JSONL + zstd, append-only, 90d retention
@@ -334,14 +334,14 @@ cat docs/archived/refactoring-plan.md | head -60
 - **Recoverable**: Retry с backoff (429, 502/504)
 - **Data Quality**: Лог + пропуск (>5% warning, >20% fail batch)
 
-**Circuit Breaker**: 5 consecutive errors → Open 5 мин (см. [ADR-007](docs/02-architecture/decisions/ADR-007-circuit-breaker-implementation.md))
+**Circuit Breaker**: 5 consecutive errors → Open 5 мин (см. [ADR-007](../../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md))
 
-**32 ADR** определяют архитектурные решения: `docs/02-architecture/decisions/ADR-{NNN}-*.md`
-(полный реестр в `docs/RULES.md` Приложение F)
+**36 ADR** определяют архитектурные решения: `docs/02-architecture/decisions/ADR-{NNN}-*.md`
+(полный реестр в `docs/00-project/RULES.md` Приложение F)
 
 ---
 
-## 5. Блокировки (Locking)
+## 4. Блокировки (Locking)
 
 | Параметр | Значение |
 |----------|----------|
@@ -385,9 +385,9 @@ async def aclose() -> None                             # Graceful shutdown
 
 ---
 
-## 6. Тестирование
+## 5. Тестирование
 
-> **Полная документация**: См. `docs/RULES.md` §4.2 "Политика Тестирования"
+> **Полная документация**: См. `docs/00-project/RULES.md` §4.2 "Политика Тестирования"
 
 | Уровень | Директория | Тестов | Правила |
 |---------|------------|--------|---------|
@@ -414,9 +414,9 @@ pytest tests/e2e/ -v -m e2e  # E2E тесты
 
 ---
 
-## 7. Стек Технологий и Провайдеры
+## 6. Стек Технологий и Провайдеры
 
-> **Полная документация**: См. `docs/RULES.md` §4.1 (Стек) и Приложение А (Провайдеры)
+> **Полная документация**: См. `docs/00-project/RULES.md` §4.1 (Стек) и Приложение А (Провайдеры)
 
 **Ключевые инструменты:** httpx (`UnifiedHTTPClient`), Polars, Delta Lake, Pandera, Ruff + mypy, Click
 
@@ -429,7 +429,7 @@ pytest tests/e2e/ -v -m e2e  # E2E тесты
 
 ---
 
-## 8. Ключевые Файлы
+## 7. Ключевые Файлы
 
 | Артефакт | Путь |
 |----------|------|
@@ -444,9 +444,9 @@ pytest tests/e2e/ -v -m e2e  # E2E тесты
 
 ---
 
-## 9. Anti-Patterns и Чек-лист
+## 8. Anti-Patterns и Чек-лист
 
-> **Полный чек-лист**: См. `docs/RULES.md` и `AGENT.md` §9 "Чек-Лист Ревью"
+> **Полный чек-лист**: См. `docs/00-project/RULES.md` и `AGENT.md` §9 "Чек-Лист Ревью"
 
 **Критичные запреты:**
 - ❌ Импорт `infrastructure` в `domain`/`application`
@@ -460,9 +460,9 @@ pytest tests/e2e/ -v -m e2e  # E2E тесты
 
 ---
 
-## 10. Git Workflow и Создание Компонентов
+## 9. Git Workflow и Создание Компонентов
 
-> **Полная документация**: См. `docs/RULES.md` §8 (Git) и `AGENT.md` §7 (Компоненты)
+> **Полная документация**: См. `docs/00-project/RULES.md` §8 (Git) и `AGENT.md` §7 (Компоненты)
 
 **Conventional Commits:** `<type>(<scope>): <description>`
 - Типы: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`
@@ -473,7 +473,7 @@ pytest tests/e2e/ -v -m e2e  # E2E тесты
 
 ---
 
-## 11. Диагностика
+## 10. Диагностика
 
 | Ошибка | Решение |
 |--------|---------|
@@ -484,18 +484,18 @@ pytest tests/e2e/ -v -m e2e  # E2E тесты
 
 ---
 
-## 12. Полная Документация
+## 11. Полная Документация
 
 | Документ | Описание |
 |----------|----------|
-| `docs/RULES.md` | **Конституция проекта** — единственный источник истины для архитектурных правил |
-| `docs/00-project/agent/AGENT.md` | Инструкции для агента (персона, workflow, специфика работы) |
+| `docs/00-project/RULES.md` | **Конституция проекта** — единственный источник истины для архитектурных правил |
+| `docs/00-project/agents/AGENT.md` | Инструкции для агента (персона, workflow, специфика работы) |
 | `.claude/PROJECT_CONTEXT.md` | Компактный контекст для быстрой справки |
-| `docs/02-architecture/decisions/` | ADR (001-033) — архитектурные решения |
+| `docs/02-architecture/decisions/` | ADR (001-036) — архитектурные решения |
 | `docs/REQUIREMENTS.md` | 127 тестируемых требований |
 
-> **Иерархия документации**: При противоречиях приоритет имеет `docs/RULES.md`.
-> CLAUDE файл (`docs/00-project/agent/CLAUDE.md`) содержит специфику для Claude Code и протокол верификации.
+> **Иерархия документации**: При противоречиях приоритет имеет `docs/00-project/RULES.md`.
+> CLAUDE файл (`docs/00-project/agents/CLAUDE.md`) содержит специфику для Claude Code и протокол верификации.
 
 ---
 
