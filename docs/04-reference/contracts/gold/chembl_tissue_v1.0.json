@@ -1,60 +1,40 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBLTissueGoldSchema Contract",
-  "description": "Gold layer data contract for chembl_tissue. Auto-generated from Pandera schema ChEMBLTissueGoldSchema.",
+  "title": "ChemblTissueSilverSchema Contract",
+  "description": "AUTO-GENERATED from canonical schema registry for chembl_tissue.",
   "type": "object",
   "properties": {
-    "tissue_id": {
-      "type": "string",
-      "nullable": false,
-      "description": "ChEMBL tissue ID"
-    },
-    "pref_name": {
-      "type": "string",
-      "nullable": false,
-      "description": "Preferred tissue name"
-    },
-    "bto_id": {
+    "entity_id": {
       "type": [
         "string",
         "null"
       ],
       "nullable": true,
-      "description": "BRENDA Tissue Ontology ID"
+      "description": ""
     },
-    "caloha_id": {
+    "content_hash": {
       "type": [
         "string",
         "null"
       ],
       "nullable": true,
-      "description": "CALIPHO ID"
-    },
-    "efo_id": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": "Experimental Factor Ontology ID"
-    },
-    "uberon_id": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": "Uberon Ontology ID"
+      "description": ""
     },
     "_run_id": {
-      "type": "string",
-      "nullable": false,
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
     "_run_type": {
-      "type": "string",
-      "nullable": false,
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
     "_source_batch_id": {
@@ -66,22 +46,85 @@
       "description": ""
     },
     "_ingestion_ts": {
-      "type": "string",
-      "nullable": false,
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
     "_index": {
-      "type": "integer",
-      "nullable": false,
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "bto_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "caloha_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "efo_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "pref_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "tissue_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "uberon_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_dq_error": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_dq_warn": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     }
   },
-  "required": [
-    "_index",
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
-    "pref_name",
-    "tissue_id"
-  ]
+  "required": []
 }

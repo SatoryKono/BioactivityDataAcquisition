@@ -1,33 +1,72 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBLDocumentTermGoldSchema Contract",
-  "description": "Gold layer data contract for chembl_document_term. Auto-generated from Pandera schema ChEMBLDocumentTermGoldSchema.",
+  "title": "ChemblDocumentTermSilverSchema Contract",
+  "description": "AUTO-GENERATED from canonical schema registry for chembl_document_term.",
   "type": "object",
   "properties": {
     "entity_id": {
-      "type": "string",
-      "nullable": false,
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
     "content_hash": {
-      "type": "string",
-      "nullable": false,
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_run_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_run_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_source_batch_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_ingestion_ts": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_index": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
     "publication_id": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "term": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "term_type": {
-      "type": "string",
-      "nullable": false,
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
     "mesh_id": {
@@ -46,17 +85,7 @@
       "nullable": true,
       "description": ""
     },
-    "_run_id": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_run_type": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_source_batch_id": {
+    "term": {
       "type": [
         "string",
         "null"
@@ -64,26 +93,30 @@
       "nullable": true,
       "description": ""
     },
-    "_ingestion_ts": {
-      "type": "string",
-      "nullable": false,
+    "term_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
-    "_index": {
-      "type": "integer",
-      "nullable": false,
+    "_dq_error": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_dq_warn": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     }
   },
-  "required": [
-    "_index",
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
-    "content_hash",
-    "entity_id",
-    "publication_id",
-    "term",
-    "term_type"
-  ]
+  "required": []
 }

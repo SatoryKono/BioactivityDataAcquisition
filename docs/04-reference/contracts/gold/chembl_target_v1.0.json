@@ -1,26 +1,19 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBLTargetGoldSchema Contract",
-  "description": "Gold layer data contract for chembl_target. Auto-generated from Pandera schema ChEMBLTargetGoldSchema.",
+  "title": "ChemblTargetSilverSchema Contract",
+  "description": "AUTO-GENERATED from canonical schema registry for chembl_target.",
   "type": "object",
   "properties": {
     "entity_id": {
-      "type": "string",
-      "nullable": false,
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
     "content_hash": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "target_id": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "pref_name": {
       "type": [
         "string",
         "null"
@@ -28,7 +21,7 @@
       "nullable": true,
       "description": ""
     },
-    "target_type": {
+    "_run_id": {
       "type": [
         "string",
         "null"
@@ -36,7 +29,7 @@
       "nullable": true,
       "description": ""
     },
-    "organism": {
+    "_run_type": {
       "type": [
         "string",
         "null"
@@ -44,7 +37,23 @@
       "nullable": true,
       "description": ""
     },
-    "taxonomy_id": {
+    "_source_batch_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_ingestion_ts": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_index": {
       "type": [
         "number",
         "null"
@@ -52,9 +61,9 @@
       "nullable": true,
       "description": ""
     },
-    "species_group_flag": {
+    "cross_references": {
       "type": [
-        "boolean",
+        "string",
         "null"
       ],
       "nullable": true,
@@ -76,6 +85,14 @@
       "nullable": true,
       "description": ""
     },
+    "organism": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "pipeline_stages": {
       "type": [
         "string",
@@ -84,31 +101,7 @@
       "nullable": true,
       "description": ""
     },
-    "target_components": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "cross_references": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "target_component_synonyms": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "component_accessions": {
+    "pref_name": {
       "type": [
         "string",
         "null"
@@ -124,7 +117,15 @@
       "nullable": true,
       "description": ""
     },
-    "component_ids": {
+    "species_group_flag": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_component_synonyms": {
       "type": [
         "string",
         "null"
@@ -132,7 +133,7 @@
       "nullable": true,
       "description": ""
     },
-    "component_types": {
+    "target_components": {
       "type": [
         "string",
         "null"
@@ -140,7 +141,7 @@
       "nullable": true,
       "description": ""
     },
-    "component_relationships": {
+    "target_id": {
       "type": [
         "string",
         "null"
@@ -148,17 +149,7 @@
       "nullable": true,
       "description": ""
     },
-    "_run_id": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_run_type": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_source_batch_id": {
+    "target_type": {
       "type": [
         "string",
         "null"
@@ -166,24 +157,30 @@
       "nullable": true,
       "description": ""
     },
-    "_ingestion_ts": {
-      "type": "string",
-      "nullable": false,
+    "taxonomy_id": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
-    "_index": {
-      "type": "integer",
-      "nullable": false,
+    "_dq_error": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_dq_warn": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     }
   },
-  "required": [
-    "_index",
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
-    "content_hash",
-    "entity_id",
-    "target_id"
-  ]
+  "required": []
 }

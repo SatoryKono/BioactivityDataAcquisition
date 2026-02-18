@@ -1,26 +1,83 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "UniProtIDMappingGoldSchema Contract",
-  "description": "Gold layer data contract for uniprot_idmapping. Auto-generated from Pandera schema UniProtIDMappingGoldSchema.",
+  "title": "UniprotIdmappingSilverSchema Contract",
+  "description": "AUTO-GENERATED from canonical schema registry for uniprot_idmapping.",
   "type": "object",
   "properties": {
     "entity_id": {
-      "type": "string",
-      "nullable": false,
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
     "content_hash": {
-      "type": "string",
-      "nullable": false,
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
-    "target_id": {
-      "type": "string",
-      "nullable": false,
+    "_run_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
-    "uniprot_accession": {
+    "_run_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_source_batch_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_ingestion_ts": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_index": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "all_mappings": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "annotation_score": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "gene_primary": {
       "type": [
         "string",
         "null"
@@ -29,19 +86,6 @@
       "description": ""
     },
     "mapping_status": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "uniprot_entry_name": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "organism_scientific": {
       "type": [
         "string",
         "null"
@@ -57,9 +101,9 @@
       "nullable": true,
       "description": ""
     },
-    "taxonomy_id": {
+    "organism_scientific": {
       "type": [
-        "number",
+        "string",
         "null"
       ],
       "nullable": true,
@@ -73,9 +117,9 @@
       "nullable": true,
       "description": ""
     },
-    "gene_primary": {
+    "reviewed": {
       "type": [
-        "string",
+        "boolean",
         "null"
       ],
       "nullable": true,
@@ -97,15 +141,15 @@
       "nullable": true,
       "description": ""
     },
-    "reviewed": {
+    "target_id": {
       "type": [
-        "boolean",
+        "string",
         "null"
       ],
       "nullable": true,
       "description": ""
     },
-    "annotation_score": {
+    "taxonomy_id": {
       "type": [
         "number",
         "null"
@@ -113,57 +157,38 @@
       "nullable": true,
       "description": ""
     },
-    "all_mappings": {
+    "uniprot_accession": {
       "type": [
         "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "uniprot_entry_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_dq_error": {
+      "type": [
+        "boolean",
         "null"
       ],
       "nullable": true,
       "description": ""
     },
     "_dq_warn": {
-      "type": "boolean",
-      "nullable": false,
-      "description": ""
-    },
-    "_run_id": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_run_type": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_source_batch_id": {
       "type": [
-        "string",
+        "boolean",
         "null"
       ],
       "nullable": true,
       "description": ""
-    },
-    "_ingestion_ts": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_index": {
-      "type": "integer",
-      "nullable": false,
-      "description": ""
     }
   },
-  "required": [
-    "_dq_warn",
-    "_index",
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
-    "content_hash",
-    "entity_id",
-    "mapping_status",
-    "target_id"
-  ]
+  "required": []
 }

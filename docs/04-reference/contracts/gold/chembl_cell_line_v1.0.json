@@ -1,28 +1,72 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBLCellLineGoldSchema Contract",
-  "description": "Gold layer data contract for chembl_cell_line. Auto-generated from Pandera schema ChEMBLCellLineGoldSchema.",
+  "title": "ChemblCellLineSilverSchema Contract",
+  "description": "AUTO-GENERATED from canonical schema registry for chembl_cell_line.",
   "type": "object",
   "properties": {
     "entity_id": {
-      "type": "string",
-      "nullable": false,
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
     "content_hash": {
-      "type": "string",
-      "nullable": false,
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_run_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_run_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_source_batch_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_ingestion_ts": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_index": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
     "cell_id": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "cell_name": {
-      "type": "string",
-      "nullable": false,
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
     "cell_description": {
@@ -33,7 +77,7 @@
       "nullable": true,
       "description": ""
     },
-    "cell_source_tissue": {
+    "cell_name": {
       "type": [
         "string",
         "null"
@@ -49,9 +93,9 @@
       "nullable": true,
       "description": ""
     },
-    "cell_source_taxonomy_id": {
+    "cell_source_tissue": {
       "type": [
-        "number",
+        "string",
         "null"
       ],
       "nullable": true,
@@ -81,43 +125,22 @@
       "nullable": true,
       "description": ""
     },
-    "_run_id": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_run_type": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_source_batch_id": {
+    "_dq_error": {
       "type": [
-        "string",
+        "boolean",
         "null"
       ],
       "nullable": true,
       "description": ""
     },
-    "_ingestion_ts": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_index": {
-      "type": "integer",
-      "nullable": false,
+    "_dq_warn": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     }
   },
-  "required": [
-    "_index",
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
-    "cell_id",
-    "cell_name",
-    "content_hash",
-    "entity_id"
-  ]
+  "required": []
 }

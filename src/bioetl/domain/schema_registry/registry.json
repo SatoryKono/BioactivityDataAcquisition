@@ -1,0 +1,3605 @@
+{
+  "generated": true,
+  "generated_by": "src/tools/scripts/generate_schema_artifacts.py",
+  "entities": [
+    {
+      "slug": "chembl_activity",
+      "provider": "chembl",
+      "entity": "activity",
+      "schema_constant": "CHEMBL_ACTIVITY_SCHEMA",
+      "primary_keys": [],
+      "columns": [
+        {
+          "name": "entity_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "content_hash",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_source_batch_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_ingestion_ts",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_index",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "action_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "action_type_description",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "action_type_parent_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "activity_comment",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "activity_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "activity_properties",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "assay_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "assay_description",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "assay_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "assay_variant_accession",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "assay_variant_mutation",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "bao_endpoint",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "bao_format",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "bao_label",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "canonical_smiles",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "data_validity_comment",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "data_validity_description",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "publication_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "journal",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "publication_year",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "ligand_efficiency_bei",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "ligand_efficiency_le",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "ligand_efficiency_lle",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "ligand_efficiency_sei",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "manual_curation_flag",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "molecule_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "molecule_pref_name",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "original_activity_id",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "parent_molecule_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "pchembl_value",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "potential_duplicate",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "qudt_units",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "record_id",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "relation",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "src_id",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "standard_flag",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "standard_relation",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "standard_text_value",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "standard_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "standard_units",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "standard_upper_value",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "standard_value",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "target_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "target_organism",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "target_pref_name",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "target_taxonomy_id",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "text_value",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "toid",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "units",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "uo_units",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "upper_value",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "value",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_error",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_warn",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "slug": "chembl_assay_parameters",
+      "provider": "chembl",
+      "entity": "assay_parameters",
+      "schema_constant": "CHEMBL_ASSAY_PARAMETERS_SCHEMA",
+      "primary_keys": [],
+      "columns": [
+        {
+          "name": "entity_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "content_hash",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_source_batch_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_ingestion_ts",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_index",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "assay_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "assay_param_id",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "comments",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "relation",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "standard_relation",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "standard_text_value",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "standard_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "standard_units",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "standard_value",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "text_value",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "units",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "value",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_error",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_warn",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "slug": "chembl_assay",
+      "provider": "chembl",
+      "entity": "assay",
+      "schema_constant": "CHEMBL_ASSAY_SCHEMA",
+      "primary_keys": [],
+      "columns": [
+        {
+          "name": "entity_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "content_hash",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_source_batch_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_ingestion_ts",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_index",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "aidx",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "assay_category",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "assay_cell_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "assay_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "assay_classifications",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "assay_group",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "assay_organism",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "assay_parameters",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "assay_pref_name",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "assay_strain",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "assay_subcellular_fraction",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "assay_taxonomy_id",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "assay_test_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "assay_tissue",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "assay_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "assay_type_description",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "bao_format",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "bao_label",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "cell_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "confidence_description",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "confidence_score",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "description",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "publication_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "relationship_description",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "relationship_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "score",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "src_assay_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "src_id",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "target_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "tissue_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "variant_accession",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "variant_isoform",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "variant_mutation",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "variant_organism",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "variant_sequence",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "variant_sequence_json",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "variant_taxonomy_id",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_error",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_warn",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "slug": "chembl_cell_line",
+      "provider": "chembl",
+      "entity": "cell_line",
+      "schema_constant": "CHEMBL_CELL_LINE_SCHEMA",
+      "primary_keys": [],
+      "columns": [
+        {
+          "name": "entity_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "content_hash",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_source_batch_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_ingestion_ts",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_index",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "cell_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "cell_description",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "cell_name",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "cell_source_organism",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "cell_source_tissue",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "cellosaurus_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "cl_lincs_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "efo_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_error",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_warn",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "slug": "chembl_compound_record",
+      "provider": "chembl",
+      "entity": "compound_record",
+      "schema_constant": "CHEMBL_COMPOUND_RECORD_SCHEMA",
+      "primary_keys": [],
+      "columns": [
+        {
+          "name": "entity_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "content_hash",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_source_batch_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_ingestion_ts",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_index",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "compound_key",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "compound_name",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "publication_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "molecule_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "record_id",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "src_compound_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "src_id",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_error",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_warn",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "slug": "chembl_document_similarity",
+      "provider": "chembl",
+      "entity": "document_similarity",
+      "schema_constant": "CHEMBL_DOCUMENT_SIMILARITY_SCHEMA",
+      "primary_keys": [],
+      "columns": [
+        {
+          "name": "entity_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "content_hash",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_source_batch_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_ingestion_ts",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_index",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "avg_tani",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "doc_1",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "doc_2",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "max_tani",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "mol_tani",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "pubmed_id1",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "pubmed_id2",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "sim_id",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "tid_tani",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_error",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_warn",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "slug": "chembl_document_term",
+      "provider": "chembl",
+      "entity": "document_term",
+      "schema_constant": "CHEMBL_DOCUMENT_TERM_SCHEMA",
+      "primary_keys": [],
+      "columns": [
+        {
+          "name": "entity_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "content_hash",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_source_batch_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_ingestion_ts",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_index",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "publication_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "mesh_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "qualifier",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "term",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "term_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_error",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_warn",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "slug": "chembl_molecule",
+      "provider": "chembl",
+      "entity": "molecule",
+      "schema_constant": "CHEMBL_MOLECULE_SCHEMA",
+      "primary_keys": [],
+      "columns": [
+        {
+          "name": "entity_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "content_hash",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_source_batch_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_ingestion_ts",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_index",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "atc_classifications",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "availability_type",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "black_box_warning",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "canonical_smiles",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "chirality",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "cross_references",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "dosed_ingredient",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "first_approval",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "first_in_class",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "helm_notation",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "hierarchy_active_chembl_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "hierarchy_child_chembl_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "hierarchy_parent_chembl_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "inchi_key",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "inorganic_flag",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "max_phase",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "molecule_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "molecule_hierarchy",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "molecule_properties",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "molecule_species",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "molecule_structures",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "molecule_synonyms",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "molecule_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "natural_product",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "oral",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "parenteral",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "polymer_flag",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "pref_name",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "prodrug",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "aromatic_ring_count",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "hba_count",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "hbd_count",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "heavy_atom_count",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "logp",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "logp_method",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "molecular_formula",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "molecular_weight",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "mw_freebase",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "polar_surface_area",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "qed_score",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "ro3_pass",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "ro5_violation_count",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "rotatable_bond_count",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "standard_inchi",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "structure_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "therapeutic_flag",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "topical",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "usan_stem",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "usan_stem_definition",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "usan_substem",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "usan_year",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "withdrawn_flag",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_error",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_warn",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "slug": "chembl_protein_class",
+      "provider": "chembl",
+      "entity": "protein_class",
+      "schema_constant": "CHEMBL_PROTEIN_CLASS_SCHEMA",
+      "primary_keys": [],
+      "columns": [
+        {
+          "name": "entity_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "content_hash",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_source_batch_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_ingestion_ts",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_index",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "class_level",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "definition",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "downgraded",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "parent_id",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "pref_name",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "protein_class_desc",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "protein_class_id",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "replaced_by",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "short_name",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "sort_order",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_error",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_warn",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "slug": "chembl_document",
+      "provider": "chembl",
+      "entity": "document",
+      "schema_constant": "CHEMBL_PUBLICATION_SCHEMA",
+      "primary_keys": [],
+      "columns": [
+        {
+          "name": "entity_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "content_hash",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_source_batch_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_source",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_ingestion_ts",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_index",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "_lookup_method",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_original_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "authors",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "title",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "journal",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "publication_year",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "volume",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "issue",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "page_first",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "page_last",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "publication_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "doi",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "pmc_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "pmid",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "abstract",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "affiliation_list",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "author_keys",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "author_orcids",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "publication_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "publication_class",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "is_oa",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "src_id",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "citations_received",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "chembl_release",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "creation_date",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_error",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_warn",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "slug": "chembl_subcellular_fraction",
+      "provider": "chembl",
+      "entity": "subcellular_fraction",
+      "schema_constant": "CHEMBL_SUBCELLULAR_FRACTION_SCHEMA",
+      "primary_keys": [],
+      "columns": [
+        {
+          "name": "entity_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "content_hash",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_source_batch_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_ingestion_ts",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_index",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "assay_count",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "example_assay_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "subcellular_fraction",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_error",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_warn",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "slug": "chembl_target_component",
+      "provider": "chembl",
+      "entity": "target_component",
+      "schema_constant": "CHEMBL_TARGET_COMPONENT_SCHEMA",
+      "primary_keys": [],
+      "columns": [
+        {
+          "name": "entity_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "content_hash",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_source_batch_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_ingestion_ts",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_index",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "accession",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "component_id",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "component_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "description",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "organism",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "protein_classification_id",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "protein_classifications",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "target_component_synonyms",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "target_component_xrefs",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "taxonomy_id",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_error",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_warn",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "slug": "chembl_target",
+      "provider": "chembl",
+      "entity": "target",
+      "schema_constant": "CHEMBL_TARGET_SCHEMA",
+      "primary_keys": [],
+      "columns": [
+        {
+          "name": "entity_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "content_hash",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_source_batch_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_ingestion_ts",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_index",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "cross_references",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "description",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "downgraded",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "organism",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "pipeline_stages",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "pref_name",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "primary_component_id",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "species_group_flag",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "target_component_synonyms",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "target_components",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "target_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "target_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "taxonomy_id",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_error",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_warn",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "slug": "chembl_tissue",
+      "provider": "chembl",
+      "entity": "tissue",
+      "schema_constant": "CHEMBL_TISSUE_SCHEMA",
+      "primary_keys": [],
+      "columns": [
+        {
+          "name": "entity_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "content_hash",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_source_batch_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_ingestion_ts",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_index",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "bto_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "caloha_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "efo_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "pref_name",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "tissue_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "uberon_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_error",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_warn",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "slug": "crossref_publication",
+      "provider": "crossref",
+      "entity": "publication",
+      "schema_constant": "CROSSREF_PUBLICATION_SCHEMA",
+      "primary_keys": [],
+      "columns": [
+        {
+          "name": "entity_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "content_hash",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_source_batch_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_source",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_ingestion_ts",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_index",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "_lookup_method",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_original_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "abstract",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "author_details",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "author_keys",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "author_orcids",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "authors",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "citations_made",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "content_domain_crossmark_restriction",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "doi",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "issn",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "issn_electronic",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "issn_list",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "issn_print",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "issue",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "journal",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "journal_name_short",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "language",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "license_url",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "page_first",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "page_last",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "pmc_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "pmid",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "publication_class",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "publication_date",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "publication_year",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "published",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "published_online",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "published_print",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "publisher",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "references",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "title",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "volume",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_error",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_warn",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "slug": "openalex_publication",
+      "provider": "openalex",
+      "entity": "publication",
+      "schema_constant": "OPENALEX_PUBLICATION_SCHEMA",
+      "primary_keys": [],
+      "columns": [
+        {
+          "name": "entity_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "content_hash",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_source_batch_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_source",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_ingestion_ts",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_index",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "_lookup_method",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_original_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "abstract",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "affiliation_list",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "author_keys",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "author_openalex_ids",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "author_orcids",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "authors",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "citations_made",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "citations_received",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "doi",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "fwci",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "grants",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "is_oa",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "is_retracted",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "issn",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "issue",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "journal",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "language",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "mag_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "oa_status",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "openalex_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "page_first",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "page_last",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "pmc_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "pmid",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "primary_topic",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "publication_class",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "publication_date",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "publication_year",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "publisher",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "ror_ids",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "subject_topics",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "title",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "volume",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_error",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_warn",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "slug": "pubchem_compound",
+      "provider": "pubchem",
+      "entity": "compound",
+      "schema_constant": "PUBCHEM_COMPOUND_SCHEMA",
+      "primary_keys": [],
+      "columns": [
+        {
+          "name": "entity_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "content_hash",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_source_batch_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_ingestion_ts",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_index",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "canonical_smiles",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "molecule_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "complexity",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "conformer_count_3d",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "conformer_rmsd_3d",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "effective_rotor_count_3d",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "exact_mass",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "feature_acceptor_count_3d",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "feature_anion_count_3d",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "feature_cation_count_3d",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "feature_count_3d",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "feature_donor_count_3d",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "feature_hydrophobe_count_3d",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "feature_ring_count_3d",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "inchi",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "inchi_key",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "isomeric_smiles",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "iupac_name",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "molecular_formula",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "molecular_weight",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "monoisotopic_mass",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "tpsa",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "x_steric_quadrupole_3d",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "xlogp",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "y_steric_quadrupole_3d",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "z_steric_quadrupole_3d",
+          "dtype": "pa.float64()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_error",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_warn",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "slug": "pubmed_publication",
+      "provider": "pubmed",
+      "entity": "publication",
+      "schema_constant": "PUBMED_PUBLICATION_SCHEMA",
+      "primary_keys": [],
+      "columns": [
+        {
+          "name": "entity_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "content_hash",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_source_batch_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_source",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_ingestion_ts",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_index",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "_lookup_method",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_original_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "abstract",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "affiliation_list",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "affiliation_structured",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "author_count",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "author_keys",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "authors",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "authors_with_affiliations",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "chemical_count",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "chemicals",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "citation_subset",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "citations_made",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "country",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "databanks",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "date_completed",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "date_revised",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "doi",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "gene_symbols",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "grant_count",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "issn",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "issue",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "journal",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "journal_iso_abbrev",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "journal_issn_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "journal_name_short",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "keyword_count",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "language",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "medline_pgn",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "mesh_heading_count",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "nlm_unique_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "page_first",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "page_last",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "page_range",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "pmc_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "pmid",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "pub_date",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "pub_day",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "pub_month",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "publication_class",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "publication_date",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "publication_status",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "publication_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "publication_type_list",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "publication_year",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "title",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "volume",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_error",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_warn",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "slug": "semanticscholar_publication",
+      "provider": "semanticscholar",
+      "entity": "publication",
+      "schema_constant": "SEMANTICSCHOLAR_PUBLICATION_SCHEMA",
+      "primary_keys": [],
+      "columns": [
+        {
+          "name": "entity_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "content_hash",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_source_batch_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_source",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_ingestion_ts",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_index",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "_lookup_method",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_original_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "abstract",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "affiliation_list",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "author_h_indices",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "author_keys",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "author_orcids",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "author_s2_ids",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "citation_contexts",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "citations_made",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "citations_received",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "corpus_id",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "dblp_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "doi",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "influential_citation_count",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "is_oa",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "issue",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "journal",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "oa_status",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "open_access_url",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "page_first",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "page_last",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "page_range",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "paper_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "pmid",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "publication_class",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "publication_date",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "publication_types",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "publication_year",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "subject_fields",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "title",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "tldr",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "volume",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_error",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_warn",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "slug": "uniprot_idmapping",
+      "provider": "uniprot",
+      "entity": "idmapping",
+      "schema_constant": "UNIPROT_ID_MAPPING_SCHEMA",
+      "primary_keys": [],
+      "columns": [
+        {
+          "name": "entity_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "content_hash",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_source_batch_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_ingestion_ts",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_index",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "all_mappings",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "annotation_score",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "gene_primary",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "mapping_status",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "organism_common",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "organism_scientific",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "protein_name",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "reviewed",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "sequence_length",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "sequence_mass",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "target_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "taxonomy_id",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "uniprot_accession",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "uniprot_entry_name",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_error",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_warn",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "slug": "uniprot_protein",
+      "provider": "uniprot",
+      "entity": "protein",
+      "schema_constant": "UNIPROT_PROTEIN_SCHEMA",
+      "primary_keys": [],
+      "columns": [
+        {
+          "name": "entity_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "content_hash",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_run_type",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_source_batch_id",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_ingestion_ts",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_index",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "accession",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "acetylation",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "active_sites",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "activity_regulation",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "annotation_score",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "binding_sites",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "catalytic_activity",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "cellular_component",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "chembl_ids",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "disease_involvement",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "disulfide_bond",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "domains",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "drugbank_ids",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "entry_name",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "features_json",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "function_comment",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "genus",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "glycosylation",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "go_terms",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "interpro_xrefs",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "intramembrane",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "isoform_ids",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "isoform_names",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "isoform_synonyms",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "lipidation",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "modified_residue",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "molecular_function",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "organism_id",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "pathway",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "pdb_xrefs",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "pfam_xrefs",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "phosphorylation",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "phylum",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "propeptide",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "protein_existence",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "protein_name",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "reaction_ec_numbers",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "reactions",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "reactome_xrefs",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "reviewed",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "sequence_length",
+          "dtype": "pa.int64()",
+          "nullable": true
+        },
+        {
+          "name": "signal_peptide",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "similarity_comment",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "subcellular_location",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "superkingdom",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "tissue_specificity",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "topology",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "transmembrane",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "ubiquitination",
+          "dtype": "pa.string()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_error",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        },
+        {
+          "name": "_dq_warn",
+          "dtype": "pa.bool_()",
+          "nullable": true
+        }
+      ]
+    }
+  ]
+}

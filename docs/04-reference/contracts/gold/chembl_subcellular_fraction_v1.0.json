@@ -1,49 +1,40 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBLSubcellularFractionGoldSchema Contract",
-  "description": "Gold layer data contract for chembl_subcellular_fraction. Auto-generated from Pandera schema ChEMBLSubcellularFractionGoldSchema.",
+  "title": "ChemblSubcellularFractionSilverSchema Contract",
+  "description": "AUTO-GENERATED from canonical schema registry for chembl_subcellular_fraction.",
   "type": "object",
   "properties": {
     "entity_id": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "content_hash": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "subcellular_fraction": {
-      "type": "string",
-      "nullable": false,
-      "description": "Subcellular fraction name"
-    },
-    "assay_count": {
-      "type": [
-        "number",
-        "null"
-      ],
-      "nullable": true,
-      "description": "Number of assays using this fraction"
-    },
-    "example_assay_id": {
       "type": [
         "string",
         "null"
       ],
       "nullable": true,
-      "description": "Example assay ChEMBL ID"
+      "description": ""
+    },
+    "content_hash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
     },
     "_run_id": {
-      "type": "string",
-      "nullable": false,
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
     "_run_type": {
-      "type": "string",
-      "nullable": false,
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
     "_source_batch_id": {
@@ -55,23 +46,61 @@
       "description": ""
     },
     "_ingestion_ts": {
-      "type": "string",
-      "nullable": false,
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
     "_index": {
-      "type": "integer",
-      "nullable": false,
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "assay_count": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "example_assay_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "subcellular_fraction": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_dq_error": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_dq_warn": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     }
   },
-  "required": [
-    "_index",
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
-    "content_hash",
-    "entity_id",
-    "subcellular_fraction"
-  ]
+  "required": []
 }

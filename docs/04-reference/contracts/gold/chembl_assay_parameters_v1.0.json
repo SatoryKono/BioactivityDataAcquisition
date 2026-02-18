@@ -1,36 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBLAssayParametersGoldSchema Contract",
-  "description": "Gold layer data contract for chembl_assay_parameters. Auto-generated from Pandera schema ChEMBLAssayParametersGoldSchema.",
+  "title": "ChemblAssayParametersSilverSchema Contract",
+  "description": "AUTO-GENERATED from canonical schema registry for chembl_assay_parameters.",
   "type": "object",
   "properties": {
     "entity_id": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "content_hash": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "assay_param_id": {
-      "type": "number",
-      "nullable": false,
-      "description": ""
-    },
-    "assay_id": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "type": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "relation": {
       "type": [
         "string",
         "null"
@@ -38,7 +13,47 @@
       "nullable": true,
       "description": ""
     },
-    "value": {
+    "content_hash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_run_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_run_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_source_batch_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_ingestion_ts": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_index": {
       "type": [
         "number",
         "null"
@@ -46,7 +61,7 @@
       "nullable": true,
       "description": ""
     },
-    "units": {
+    "assay_id": {
       "type": [
         "string",
         "null"
@@ -54,9 +69,9 @@
       "nullable": true,
       "description": ""
     },
-    "text_value": {
+    "assay_param_id": {
       "type": [
-        "string",
+        "number",
         "null"
       ],
       "nullable": true,
@@ -70,7 +85,7 @@
       "nullable": true,
       "description": ""
     },
-    "standard_type": {
+    "relation": {
       "type": [
         "string",
         "null"
@@ -86,9 +101,17 @@
       "nullable": true,
       "description": ""
     },
-    "standard_value": {
+    "standard_text_value": {
       "type": [
-        "number",
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "standard_type": {
+      "type": [
+        "string",
         "null"
       ],
       "nullable": true,
@@ -102,7 +125,15 @@
       "nullable": true,
       "description": ""
     },
-    "standard_text_value": {
+    "standard_value": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "text_value": {
       "type": [
         "string",
         "null"
@@ -110,17 +141,7 @@
       "nullable": true,
       "description": ""
     },
-    "_run_id": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_run_type": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_source_batch_id": {
+    "type": {
       "type": [
         "string",
         "null"
@@ -128,26 +149,38 @@
       "nullable": true,
       "description": ""
     },
-    "_ingestion_ts": {
-      "type": "string",
-      "nullable": false,
+    "units": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
-    "_index": {
-      "type": "integer",
-      "nullable": false,
+    "value": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_dq_error": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_dq_warn": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     }
   },
-  "required": [
-    "_index",
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
-    "assay_id",
-    "assay_param_id",
-    "content_hash",
-    "entity_id",
-    "type"
-  ]
+  "required": []
 }

@@ -1,31 +1,107 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBLActivityGoldSchema Contract",
-  "description": "Gold layer data contract for chembl_activity. Auto-generated from Pandera schema ChEMBLActivityGoldSchema.",
+  "title": "ChemblActivitySilverSchema Contract",
+  "description": "AUTO-GENERATED from canonical schema registry for chembl_activity.",
   "type": "object",
   "properties": {
     "entity_id": {
-      "type": "string",
-      "nullable": false,
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
     "content_hash": {
-      "type": "string",
-      "nullable": false,
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_run_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_run_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_source_batch_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_ingestion_ts": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_index": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "action_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "action_type_description": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "action_type_parent_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "activity_comment": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
     "activity_id": {
-      "type": "string",
-      "nullable": false,
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
-    "molecule_id": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "target_id": {
+    "activity_properties": {
       "type": [
         "string",
         "null"
@@ -41,87 +117,15 @@
       "nullable": true,
       "description": ""
     },
-    "publication_id": {
+    "assay_description": {
       "type": [
         "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "record_id": {
-      "type": [
-        "number",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "src_id": {
-      "type": [
-        "number",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "canonical_smiles": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "molecule_pref_name": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "parent_molecule_id": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "target_pref_name": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "target_organism": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "target_taxonomy_id": {
-      "type": [
-        "number",
         "null"
       ],
       "nullable": true,
       "description": ""
     },
     "assay_type": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "assay_description": {
       "type": [
         "string",
         "null"
@@ -169,7 +173,7 @@
       "nullable": true,
       "description": ""
     },
-    "type": {
+    "canonical_smiles": {
       "type": [
         "string",
         "null"
@@ -177,15 +181,7 @@
       "nullable": true,
       "description": ""
     },
-    "value": {
-      "type": [
-        "number",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "units": {
+    "data_validity_comment": {
       "type": [
         "string",
         "null"
@@ -193,7 +189,7 @@
       "nullable": true,
       "description": ""
     },
-    "relation": {
+    "data_validity_description": {
       "type": [
         "string",
         "null"
@@ -201,15 +197,7 @@
       "nullable": true,
       "description": ""
     },
-    "upper_value": {
-      "type": [
-        "number",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "text_value": {
+    "publication_id": {
       "type": [
         "string",
         "null"
@@ -217,7 +205,7 @@
       "nullable": true,
       "description": ""
     },
-    "standard_type": {
+    "journal": {
       "type": [
         "string",
         "null"
@@ -225,55 +213,7 @@
       "nullable": true,
       "description": ""
     },
-    "standard_value": {
-      "type": [
-        "number",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "standard_units": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "standard_relation": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "standard_upper_value": {
-      "type": [
-        "number",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "standard_text_value": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "standard_flag": {
-      "type": [
-        "number",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "pchembl_value": {
+    "publication_year": {
       "type": [
         "number",
         "null"
@@ -313,31 +253,7 @@
       "nullable": true,
       "description": ""
     },
-    "qudt_units": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "uo_units": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "journal": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "publication_year": {
+    "manual_curation_flag": {
       "type": [
         "number",
         "null"
@@ -345,7 +261,7 @@
       "nullable": true,
       "description": ""
     },
-    "publication_doi": {
+    "molecule_id": {
       "type": [
         "string",
         "null"
@@ -353,7 +269,7 @@
       "nullable": true,
       "description": ""
     },
-    "publication_pmid": {
+    "molecule_pref_name": {
       "type": [
         "string",
         "null"
@@ -361,7 +277,15 @@
       "nullable": true,
       "description": ""
     },
-    "publication_pmc_id": {
+    "original_activity_id": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "parent_molecule_id": {
       "type": [
         "string",
         "null"
@@ -369,25 +293,9 @@
       "nullable": true,
       "description": ""
     },
-    "activity_comment": {
+    "pchembl_value": {
       "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "data_validity_comment": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "data_validity_description": {
-      "type": [
-        "string",
+        "number",
         "null"
       ],
       "nullable": true,
@@ -401,7 +309,7 @@
       "nullable": true,
       "description": ""
     },
-    "action_type": {
+    "qudt_units": {
       "type": [
         "string",
         "null"
@@ -409,7 +317,15 @@
       "nullable": true,
       "description": ""
     },
-    "action_type_description": {
+    "record_id": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "relation": {
       "type": [
         "string",
         "null"
@@ -417,7 +333,23 @@
       "nullable": true,
       "description": ""
     },
-    "action_type_parent_type": {
+    "src_id": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "standard_flag": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "standard_relation": {
       "type": [
         "string",
         "null"
@@ -425,7 +357,79 @@
       "nullable": true,
       "description": ""
     },
-    "activity_properties": {
+    "standard_text_value": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "standard_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "standard_units": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "standard_upper_value": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "standard_value": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_organism": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_pref_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_taxonomy_id": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "text_value": {
       "type": [
         "string",
         "null"
@@ -441,17 +445,7 @@
       "nullable": true,
       "description": ""
     },
-    "_run_id": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_run_type": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_source_batch_id": {
+    "type": {
       "type": [
         "string",
         "null"
@@ -459,25 +453,54 @@
       "nullable": true,
       "description": ""
     },
-    "_ingestion_ts": {
-      "type": "string",
-      "nullable": false,
+    "units": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
-    "_index": {
-      "type": "integer",
-      "nullable": false,
+    "uo_units": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "upper_value": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "value": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_dq_error": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_dq_warn": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     }
   },
-  "required": [
-    "_index",
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
-    "activity_id",
-    "content_hash",
-    "entity_id",
-    "molecule_id"
-  ]
+  "required": []
 }

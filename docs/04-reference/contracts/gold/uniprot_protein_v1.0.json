@@ -1,26 +1,75 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "UniProtProteinGoldSchema Contract",
-  "description": "Gold layer data contract for uniprot_protein. Auto-generated from Pandera schema UniProtProteinGoldSchema.",
+  "title": "UniprotProteinSilverSchema Contract",
+  "description": "AUTO-GENERATED from canonical schema registry for uniprot_protein.",
   "type": "object",
   "properties": {
     "entity_id": {
-      "type": "string",
-      "nullable": false,
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
     "content_hash": {
-      "type": "string",
-      "nullable": false,
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_run_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_run_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_source_batch_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_ingestion_ts": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_index": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
     "accession": {
-      "type": "string",
-      "nullable": false,
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
-    "entry_name": {
+    "acetylation": {
       "type": [
         "string",
         "null"
@@ -36,31 +85,23 @@
       "nullable": true,
       "description": ""
     },
-    "binding_sites": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "domains": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "features_json": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
     "activity_regulation": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "annotation_score": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "binding_sites": {
       "type": [
         "string",
         "null"
@@ -76,47 +117,7 @@
       "nullable": true,
       "description": ""
     },
-    "disease_involvement": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "function_comment": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "pathway": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "similarity_comment": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "subcellular_location": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "tissue_specificity": {
+    "cellular_component": {
       "type": [
         "string",
         "null"
@@ -132,7 +133,71 @@
       "nullable": true,
       "description": ""
     },
+    "disease_involvement": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "disulfide_bond": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "domains": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "drugbank_ids": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "entry_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "features_json": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "function_comment": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "genus": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "glycosylation": {
       "type": [
         "string",
         "null"
@@ -156,6 +221,78 @@
       "nullable": true,
       "description": ""
     },
+    "intramembrane": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "isoform_ids": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "isoform_names": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "isoform_synonyms": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "lipidation": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "modified_residue": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "molecular_function": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "organism_id": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "pathway": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "pdb_xrefs": {
       "type": [
         "string",
@@ -172,7 +309,7 @@
       "nullable": true,
       "description": ""
     },
-    "reactome_xrefs": {
+    "phosphorylation": {
       "type": [
         "string",
         "null"
@@ -180,7 +317,7 @@
       "nullable": true,
       "description": ""
     },
-    "gene_names": {
+    "phylum": {
       "type": [
         "string",
         "null"
@@ -188,9 +325,17 @@
       "nullable": true,
       "description": ""
     },
-    "organism_id": {
+    "propeptide": {
       "type": [
-        "number",
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "protein_existence": {
+      "type": [
+        "string",
         "null"
       ],
       "nullable": true,
@@ -204,23 +349,23 @@
       "nullable": true,
       "description": ""
     },
-    "sequence_length": {
+    "reaction_ec_numbers": {
       "type": [
-        "number",
+        "string",
         "null"
       ],
       "nullable": true,
       "description": ""
     },
-    "annotation_score": {
+    "reactions": {
       "type": [
-        "number",
+        "string",
         "null"
       ],
       "nullable": true,
       "description": ""
     },
-    "protein_existence": {
+    "reactome_xrefs": {
       "type": [
         "string",
         "null"
@@ -236,17 +381,15 @@
       "nullable": true,
       "description": ""
     },
-    "_run_id": {
-      "type": "string",
-      "nullable": false,
+    "sequence_length": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
-    "_run_type": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_source_batch_id": {
+    "signal_peptide": {
       "type": [
         "string",
         "null"
@@ -254,24 +397,78 @@
       "nullable": true,
       "description": ""
     },
-    "_ingestion_ts": {
-      "type": "string",
-      "nullable": false,
+    "similarity_comment": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
-    "_index": {
-      "type": "integer",
-      "nullable": false,
+    "subcellular_location": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "superkingdom": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "tissue_specificity": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "topology": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "transmembrane": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "ubiquitination": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_dq_error": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_dq_warn": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     }
   },
-  "required": [
-    "_index",
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
-    "accession",
-    "content_hash",
-    "entity_id"
-  ]
+  "required": []
 }

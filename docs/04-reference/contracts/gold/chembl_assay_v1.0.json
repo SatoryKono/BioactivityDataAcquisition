@@ -1,26 +1,19 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBLAssayGoldSchema Contract",
-  "description": "Gold layer data contract for chembl_assay. Auto-generated from Pandera schema ChEMBLAssayGoldSchema.",
+  "title": "ChemblAssaySilverSchema Contract",
+  "description": "AUTO-GENERATED from canonical schema registry for chembl_assay.",
   "type": "object",
   "properties": {
     "entity_id": {
-      "type": "string",
-      "nullable": false,
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
     "content_hash": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "assay_id": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "target_id": {
       "type": [
         "string",
         "null"
@@ -28,7 +21,7 @@
       "nullable": true,
       "description": ""
     },
-    "publication_id": {
+    "_run_id": {
       "type": [
         "string",
         "null"
@@ -36,7 +29,7 @@
       "nullable": true,
       "description": ""
     },
-    "cell_id": {
+    "_run_type": {
       "type": [
         "string",
         "null"
@@ -44,7 +37,7 @@
       "nullable": true,
       "description": ""
     },
-    "tissue_id": {
+    "_source_batch_id": {
       "type": [
         "string",
         "null"
@@ -52,7 +45,15 @@
       "nullable": true,
       "description": ""
     },
-    "src_id": {
+    "_ingestion_ts": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_index": {
       "type": [
         "number",
         "null"
@@ -60,31 +61,7 @@
       "nullable": true,
       "description": ""
     },
-    "src_assay_id": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
     "aidx": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "assay_type": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "assay_type_description": {
       "type": [
         "string",
         "null"
@@ -100,7 +77,23 @@
       "nullable": true,
       "description": ""
     },
-    "assay_test_type": {
+    "assay_cell_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "assay_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "assay_classifications": {
       "type": [
         "string",
         "null"
@@ -124,15 +117,7 @@
       "nullable": true,
       "description": ""
     },
-    "assay_taxonomy_id": {
-      "type": [
-        "number",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "assay_cell_type": {
+    "assay_parameters": {
       "type": [
         "string",
         "null"
@@ -140,7 +125,7 @@
       "nullable": true,
       "description": ""
     },
-    "assay_tissue": {
+    "assay_pref_name": {
       "type": [
         "string",
         "null"
@@ -164,6 +149,46 @@
       "nullable": true,
       "description": ""
     },
+    "assay_taxonomy_id": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "assay_test_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "assay_tissue": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "assay_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "assay_type_description": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "bao_format": {
       "type": [
         "string",
@@ -180,7 +205,15 @@
       "nullable": true,
       "description": ""
     },
-    "description": {
+    "cell_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "confidence_description": {
       "type": [
         "string",
         "null"
@@ -196,7 +229,7 @@
       "nullable": true,
       "description": ""
     },
-    "confidence_description": {
+    "description": {
       "type": [
         "string",
         "null"
@@ -204,7 +237,7 @@
       "nullable": true,
       "description": ""
     },
-    "relationship_type": {
+    "publication_id": {
       "type": [
         "string",
         "null"
@@ -220,7 +253,7 @@
       "nullable": true,
       "description": ""
     },
-    "assay_pref_name": {
+    "relationship_type": {
       "type": [
         "string",
         "null"
@@ -231,6 +264,38 @@
     "score": {
       "type": [
         "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "src_assay_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "src_id": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "target_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "tissue_id": {
+      "type": [
+        "string",
         "null"
       ],
       "nullable": true,
@@ -276,14 +341,6 @@
       "nullable": true,
       "description": ""
     },
-    "variant_taxonomy_id": {
-      "type": [
-        "number",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
     "variant_sequence_json": {
       "type": [
         "string",
@@ -292,58 +349,30 @@
       "nullable": true,
       "description": ""
     },
-    "assay_classifications": {
+    "variant_taxonomy_id": {
       "type": [
-        "string",
+        "number",
         "null"
       ],
       "nullable": true,
       "description": ""
     },
-    "assay_parameters": {
+    "_dq_error": {
       "type": [
-        "string",
+        "boolean",
         "null"
       ],
       "nullable": true,
       "description": ""
     },
-    "_run_id": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_run_type": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_source_batch_id": {
+    "_dq_warn": {
       "type": [
-        "string",
+        "boolean",
         "null"
       ],
       "nullable": true,
-      "description": ""
-    },
-    "_ingestion_ts": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_index": {
-      "type": "integer",
-      "nullable": false,
       "description": ""
     }
   },
-  "required": [
-    "_index",
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
-    "assay_id",
-    "content_hash",
-    "entity_id"
-  ]
+  "required": []
 }

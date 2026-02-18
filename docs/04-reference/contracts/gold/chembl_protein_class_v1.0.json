@@ -1,26 +1,59 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBLProteinClassGoldSchema Contract",
-  "description": "Gold layer data contract for chembl_protein_class. Auto-generated from Pandera schema ChEMBLProteinClassGoldSchema.",
+  "title": "ChemblProteinClassSilverSchema Contract",
+  "description": "AUTO-GENERATED from canonical schema registry for chembl_protein_class.",
   "type": "object",
   "properties": {
     "entity_id": {
-      "type": "string",
-      "nullable": false,
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
     "content_hash": {
-      "type": "string",
-      "nullable": false,
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
-    "protein_class_id": {
-      "type": "number",
-      "nullable": false,
+    "_run_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
-    "parent_id": {
+    "_run_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_source_batch_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_ingestion_ts": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_index": {
       "type": [
         "number",
         "null"
@@ -36,7 +69,7 @@
       "nullable": true,
       "description": ""
     },
-    "pref_name": {
+    "definition": {
       "type": [
         "string",
         "null"
@@ -44,7 +77,23 @@
       "nullable": true,
       "description": ""
     },
-    "short_name": {
+    "downgraded": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "parent_id": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "pref_name": {
       "type": [
         "string",
         "null"
@@ -60,15 +109,7 @@
       "nullable": true,
       "description": ""
     },
-    "definition": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "sort_order": {
+    "protein_class_id": {
       "type": [
         "number",
         "null"
@@ -84,25 +125,7 @@
       "nullable": true,
       "description": ""
     },
-    "downgraded": {
-      "type": [
-        "number",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "_run_id": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_run_type": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
-    "_source_batch_id": {
+    "short_name": {
       "type": [
         "string",
         "null"
@@ -110,24 +133,30 @@
       "nullable": true,
       "description": ""
     },
-    "_ingestion_ts": {
-      "type": "string",
-      "nullable": false,
+    "sort_order": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     },
-    "_index": {
-      "type": "integer",
-      "nullable": false,
+    "_dq_error": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_dq_warn": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "nullable": true,
       "description": ""
     }
   },
-  "required": [
-    "_index",
-    "_ingestion_ts",
-    "_run_id",
-    "_run_type",
-    "content_hash",
-    "entity_id",
-    "protein_class_id"
-  ]
+  "required": []
 }
