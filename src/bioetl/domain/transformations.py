@@ -85,7 +85,7 @@ _NORMALIZE_DISPATCH = (
 # Any: record field type varies
 def _should_include_field(key: str, value: Any, exclude_none: bool) -> bool:
     """Check if field should be included in hash calculation."""
-    if key in META_FIELDS:
+    if key.startswith("_") or key in META_FIELDS:
         return False
     return not (exclude_none and value is None)
 
