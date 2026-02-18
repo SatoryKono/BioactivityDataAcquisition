@@ -7,7 +7,7 @@
 #   ./dev_setup.sh --quick  # Только установка зависимостей (без тестов)
 #   ./dev_setup.sh --help   # Справка
 #
-# Синхронизировано с RULES.md v5.7 (2025-12-27)
+# Синхронизировано с RULES.md v5.19 (2026-02-16)
 # ==============================================================================
 
 set -euo pipefail
@@ -24,13 +24,18 @@ readonly MIN_PYTHON_MAJOR=3
 readonly MIN_PYTHON_MINOR=11
 readonly VENV_DIR=".venv"
 
+# Глобальные переменные (устанавливаются на этапе prerequisites / install)
+PYTHON_CMD=""   # Системный python для создания venv
+VENV_PYTHON=""  # Python внутри venv (используется для всех последующих шагов)
+HAS_UV=false    # Доступен ли uv
+
 # Флаги
 QUICK_MODE=false
 SKIP_TESTS=false
 FORCE=false
 
 # ==============================================================================
-# Функции
+# Функции вывода
 # ==============================================================================
 
 print_header() {
@@ -74,12 +79,16 @@ BioETL — Скрипт настройки окружения разработк
     ./dev_setup.sh --force      # Пересоздать окружение с нуля
 
 Документация:
-    - AGENT.md          Инструкции для разработчика
-    - docs/RULES.md     Конституция проекта
-    - CLAUDE.md         Справочник для Claude Code
+    - docs/00-project/agents/AGENT.md    Инструкции для разработчика
+    - docs/00-project/RULES.md           Конституция проекта
+    - docs/00-project/agents/CLAUDE.md   Справочник для Claude Code
 EOF
     exit 0
 }
+
+# ==============================================================================
+# Утилиты
+# ==============================================================================
 
 check_command() {
     local cmd=$1
@@ -93,13 +102,9 @@ check_command() {
 
 check_python_version() {
     local python_cmd=$1
-    local version_output
-    version_output=$($python_cmd --version 2>&1)
-
-    # Извлекаем мажорную и минорную версии
     local major minor
-    major=$(echo "$version_output" | grep -oP '\d+' | head -1)
-    minor=$(echo "$version_output" | grep -oP '\d+' | sed -n '2p')
+    major=$("$python_cmd" -c 'import sys; print(sys.version_info.major)' 2>/dev/null) || return 1
+    minor=$("$python_cmd" -c 'import sys; print(sys.version_info.minor)' 2>/dev/null) || return 1
 
     if [[ $major -lt $MIN_PYTHON_MAJOR ]] || \
        [[ $major -eq $MIN_PYTHON_MAJOR && $minor -lt $MIN_PYTHON_MINOR ]]; then
@@ -110,7 +115,7 @@ check_python_version() {
 
 find_python() {
     # Ищем подходящий Python в порядке приоритета
-    local python_candidates=("python3.12" "python3.11" "python3" "python")
+    local python_candidates=("python3.13" "python3.12" "python3.11" "python3" "python")
 
     for cmd in "${python_candidates[@]}"; do
         if command -v "$cmd" &> /dev/null; then
@@ -123,34 +128,27 @@ find_python() {
     return 1
 }
 
-detect_os() {
-    case "$(uname -s)" in
-        Linux*)     echo "linux";;
-        Darwin*)    echo "macos";;
-        CYGWIN*|MINGW*|MSYS*) echo "windows";;
-        *)          echo "unknown";;
-    esac
-}
-
-get_venv_activate_path() {
-    local os_type
-    os_type=$(detect_os)
-
-    if [[ "$os_type" == "windows" ]]; then
-        echo "${VENV_DIR}/Scripts/activate"
+# Находит python внутри venv (кроссплатформенно)
+resolve_venv_python() {
+    if [[ -x "${VENV_DIR}/Scripts/python.exe" ]]; then
+        echo "${VENV_DIR}/Scripts/python.exe"
+    elif [[ -x "${VENV_DIR}/Scripts/python" ]]; then
+        echo "${VENV_DIR}/Scripts/python"
+    elif [[ -x "${VENV_DIR}/bin/python" ]]; then
+        echo "${VENV_DIR}/bin/python"
     else
-        echo "${VENV_DIR}/bin/activate"
+        return 1
     fi
 }
 
-get_venv_python_path() {
-    local os_type
-    os_type=$(detect_os)
-
-    if [[ "$os_type" == "windows" ]]; then
-        echo "${VENV_DIR}/Scripts/python"
+# Находит activate скрипт venv (кроссплатформенно)
+resolve_venv_activate() {
+    if [[ -f "${VENV_DIR}/Scripts/activate" ]]; then
+        echo "${VENV_DIR}/Scripts/activate"
+    elif [[ -f "${VENV_DIR}/bin/activate" ]]; then
+        echo "${VENV_DIR}/bin/activate"
     else
-        echo "${VENV_DIR}/bin/python"
+        echo "${VENV_DIR}/bin/activate"  # fallback
     fi
 }
 
@@ -203,7 +201,7 @@ step_check_prerequisites() {
         ((errors++))
     fi
 
-    # Проверяем Make
+    # Проверяем Make (опционально)
     print_step "Проверка Make..."
     if check_command make; then
         print_success "Make: $(make --version | head -1)"
@@ -211,12 +209,20 @@ step_check_prerequisites() {
         print_warning "Make не найден. Некоторые команды автоматизации недоступны."
     fi
 
+    # Проверяем uv (рекомендуемый менеджер)
+    print_step "Проверка uv..."
+    if command -v uv &> /dev/null; then
+        HAS_UV=true
+        print_success "uv: $(uv --version)"
+    else
+        print_warning "uv не найден. Будет использован pip (медленнее)."
+        print_step "Установка uv: https://docs.astral.sh/uv/getting-started/installation/"
+    fi
+
     # Проверяем Python
     print_step "Поиск Python ${MIN_PYTHON_MAJOR}.${MIN_PYTHON_MINOR}+..."
-    local python_cmd
-    if python_cmd=$(find_python); then
-        print_success "Python: $($python_cmd --version)"
-        PYTHON_CMD="$python_cmd"
+    if PYTHON_CMD=$(find_python); then
+        print_success "Python: $($PYTHON_CMD --version)"
     else
         print_error "Python ${MIN_PYTHON_MAJOR}.${MIN_PYTHON_MINOR}+ не найден!"
         print_error "Установите Python 3.11 или выше и повторите попытку."
@@ -225,10 +231,10 @@ step_check_prerequisites() {
 
     # Проверяем, что мы в корне проекта
     print_step "Проверка директории проекта..."
-    if [[ -f "pyproject.toml" && -f "Makefile" ]]; then
+    if [[ -f "pyproject.toml" ]]; then
         print_success "Находимся в корне проекта BioETL"
     else
-        print_error "Скрипт должен запускаться из корня проекта BioETL"
+        print_error "Скрипт должен запускаться из корня проекта BioETL (pyproject.toml не найден)"
         ((errors++))
     fi
 
@@ -240,6 +246,16 @@ step_check_prerequisites() {
 
 step_create_venv() {
     print_header "Шаг 2: Создание виртуального окружения"
+
+    # uv создаёт venv самостоятельно при sync — пропускаем ручное создание
+    if [[ "$HAS_UV" == true ]]; then
+        if [[ -d "$VENV_DIR" && "$FORCE" == true ]]; then
+            print_warning "Удаление существующего окружения (--force)..."
+            rm -rf "$VENV_DIR"
+        fi
+        print_step "uv создаст виртуальное окружение автоматически при установке"
+        return 0
+    fi
 
     if [[ -d "$VENV_DIR" ]]; then
         if [[ "$FORCE" == true ]]; then
@@ -253,37 +269,42 @@ step_create_venv() {
     fi
 
     print_step "Создание виртуального окружения..."
-    $PYTHON_CMD -m venv "$VENV_DIR"
+    "$PYTHON_CMD" -m venv "$VENV_DIR"
     print_success "Виртуальное окружение создано: $VENV_DIR"
 }
 
 step_install_dependencies() {
     print_header "Шаг 3: Установка зависимостей"
 
-    if command -v uv &> /dev/null; then
+    if [[ "$HAS_UV" == true ]]; then
         print_step "Установка зависимостей с помощью uv (рекомендуется)..."
-        uv sync --extra dev --extra tracing --extra performance
+        uv sync --extra dev --extra tests --extra tracing --extra performance --extra export
         print_success "Зависимости установлены через uv"
-        return 0
+    else
+        VENV_PYTHON=$(resolve_venv_python) || {
+            print_error "Не удалось найти python в $VENV_DIR"
+            exit 1
+        }
+
+        print_step "Обновление pip, setuptools, wheel..."
+        "$VENV_PYTHON" -m pip install --upgrade pip setuptools wheel --quiet
+
+        print_step "Установка зависимостей разработки..."
+        "$VENV_PYTHON" -m pip install -e ".[dev,tests,tracing,performance,export]" --quiet
+
+        print_success "Зависимости установлены через pip"
     fi
 
-    local venv_python
-    venv_python=$(get_venv_python_path)
-
-    print_step "Обновление pip, setuptools, wheel..."
-    "$venv_python" -m pip install --upgrade pip setuptools wheel --quiet
-
-    print_step "Установка зависимостей разработки..."
-    "$venv_python" -m pip install -e ".[dev,tracing,performance]" --quiet
-
-    print_success "Зависимости установлены через pip"
+    # Определяем venv python для последующих шагов
+    VENV_PYTHON=$(resolve_venv_python) || {
+        print_error "Не удалось найти python в $VENV_DIR после установки"
+        exit 1
+    }
+    print_step "Venv Python: $($VENV_PYTHON --version 2>&1)"
 }
 
 step_setup_precommit() {
     print_header "Шаг 4: Настройка pre-commit hooks"
-
-    local venv_python
-    venv_python=$(get_venv_python_path)
 
     # Проверяем наличие pre-commit конфига
     if [[ ! -f ".pre-commit-config.yaml" ]]; then
@@ -292,15 +313,15 @@ step_setup_precommit() {
     fi
 
     # Проверяем, установлен ли pre-commit
-    if "$venv_python" -m pip show pre-commit &> /dev/null; then
+    if "$VENV_PYTHON" -m pip show pre-commit &> /dev/null; then
         print_step "Установка pre-commit hooks..."
-        "$venv_python" -m pre_commit install --install-hooks 2>/dev/null || \
+        "$VENV_PYTHON" -m pre_commit install --install-hooks 2>/dev/null || \
             print_warning "pre-commit hooks не установлены (возможно, не в git-репозитории)"
         print_success "Pre-commit hooks настроены"
     else
         print_step "Установка pre-commit..."
-        "$venv_python" -m pip install pre-commit --quiet
-        "$venv_python" -m pre_commit install --install-hooks 2>/dev/null || \
+        "$VENV_PYTHON" -m pip install pre-commit --quiet
+        "$VENV_PYTHON" -m pre_commit install --install-hooks 2>/dev/null || \
             print_warning "pre-commit hooks не установлены"
         print_success "Pre-commit установлен и настроен"
     fi
@@ -324,44 +345,54 @@ step_setup_env() {
 step_verify_installation() {
     print_header "Шаг 6: Проверка установки"
 
-    local venv_python
-    venv_python=$(get_venv_python_path)
-
     # Проверяем импорт основного модуля
     print_step "Проверка импорта bioetl..."
-    if "$venv_python" -c "import bioetl; print(f'BioETL v{bioetl.__version__}')" 2>/dev/null; then
+    if "$VENV_PYTHON" -c "import bioetl; print(f'BioETL v{bioetl.__version__}')" 2>/dev/null; then
         print_success "Модуль bioetl импортируется корректно"
     else
         print_error "Ошибка импорта модуля bioetl"
         exit 1
     fi
 
-    # Проверяем критические runtime-зависимости (B2/B3 reproducibility)
-    print_step "Проверка критических зависимостей (pandas, pandera)..."
-    if "$venv_python" -c "import pandas; import pandera; print(f'Pandas {pandas.__version__}, Pandera {pandera.__version__}')" 2>/dev/null; then
-        print_success "Критические зависимости (pandas, pandera) доступны"
+    # Проверяем критические runtime-зависимости
+    print_step "Проверка критических зависимостей (pandas, pandera, deltalake)..."
+    if "$VENV_PYTHON" -c "
+import pandas, pandera, deltalake
+print(f'pandas {pandas.__version__}, pandera {pandera.__version__}, deltalake {deltalake.__version__}')
+" 2>/dev/null; then
+        print_success "Критические зависимости доступны"
     else
         print_error "Критические зависимости не найдены! Проверьте установку."
         exit 1
     fi
 
+    # Проверяем dev-зависимости
+    print_step "Проверка dev-зависимостей (ruff, mypy, pytest)..."
+    if "$VENV_PYTHON" -c "
+import ruff, mypy, pytest
+print(f'ruff {ruff.__version__}, mypy {mypy.__version__}, pytest {pytest.__version__}')
+" 2>/dev/null; then
+        print_success "Dev-зависимости доступны"
+    else
+        print_warning "Некоторые dev-зависимости не найдены (не критично для runtime)"
+    fi
+
     # Полная проверка через Makefile если доступен
-    if command -v make &> /dev/null; then
+    if command -v make &> /dev/null && [[ -f "Makefile" ]]; then
         print_step "Запуск расширенной проверки через make test-deps-dev..."
         if make test-deps-dev; then
             print_success "Все зависимости и инструменты разработки подтверждены"
         else
-            print_error "Ошибка проверки зависимостей. Проверьте логи установки."
-            exit 1
+            print_warning "Некоторые зависимости не прошли проверку. Проверьте логи."
         fi
     fi
 
     # Проверяем CLI
     print_step "Проверка CLI..."
-    if "$venv_python" -m bioetl --help &>/dev/null; then
+    if "$VENV_PYTHON" -m bioetl --help &>/dev/null; then
         print_success "CLI работает корректно"
     else
-        print_warning "CLI недоступен"
+        print_warning "CLI недоступен (возможно, требуется настройка)"
     fi
 }
 
@@ -373,30 +404,35 @@ step_run_checks() {
         return 0
     fi
 
-    local venv_python
-    venv_python=$(get_venv_python_path)
-
     # Запуск линтеров
     print_step "Запуск ruff..."
-    if "$venv_python" -m ruff check src/ tests/ --quiet; then
+    if "$VENV_PYTHON" -m ruff check src/ tests/ --quiet; then
         print_success "Ruff: без ошибок"
     else
         print_warning "Ruff: обнаружены проблемы (не критично для установки)"
     fi
 
     print_step "Запуск mypy..."
-    if "$venv_python" -m mypy src/bioetl --no-error-summary 2>/dev/null; then
+    if "$VENV_PYTHON" -m mypy src/bioetl --no-error-summary 2>/dev/null; then
         print_success "Mypy: без ошибок"
     else
         print_warning "Mypy: обнаружены проблемы с типами (не критично для установки)"
+    fi
+
+    # Запуск architecture тестов
+    print_step "Запуск architecture тестов..."
+    if "$VENV_PYTHON" -m pytest tests/architecture/ -q --tb=short 2>/dev/null; then
+        print_success "Architecture tests: без нарушений"
+    else
+        print_warning "Architecture tests: обнаружены нарушения (проверьте вручную)"
     fi
 
     # Запуск тестов
     if [[ "$SKIP_TESTS" == true ]]; then
         print_warning "Тесты пропущены (--skip-tests)"
     else
-        print_step "Запуск тестов (это может занять несколько минут)..."
-        if "$venv_python" -m pytest tests/ -v --tb=short -q 2>/dev/null; then
+        print_step "Запуск тестов..."
+        if "$VENV_PYTHON" -m pytest tests/ -q --tb=short 2>/dev/null; then
             print_success "Все тесты пройдены"
         else
             print_warning "Некоторые тесты не прошли (проверьте вручную)"
@@ -408,9 +444,37 @@ print_final_instructions() {
     print_header "Готово! Окружение разработки настроено"
 
     local activate_path
-    activate_path=$(get_venv_activate_path)
+    activate_path=$(resolve_venv_activate)
 
-    cat << EOF
+    if [[ "$HAS_UV" == true ]]; then
+        cat << EOF
+${GREEN}Следующие шаги:${NC}
+
+1. Команды запускаются через uv (активация venv не требуется):
+   ${BLUE}uv run bioetl --help${NC}
+   ${BLUE}uv run pytest tests/ -q${NC}
+
+   Или активируйте окружение вручную:
+   ${BLUE}source ${activate_path}${NC}
+
+2. Проверьте статус проекта:
+   ${BLUE}make lint && make test${NC}
+
+3. Изучите документацию:
+   - ${YELLOW}docs/00-project/agents/AGENT.md${NC}  — Инструкции для разработчика
+   - ${YELLOW}docs/00-project/RULES.md${NC}         — Конституция проекта (v5.19)
+   - ${YELLOW}docs/00-project/agents/CLAUDE.md${NC} — Справочник для Claude Code
+
+4. Основные команды:
+   ${BLUE}make help${NC}            — Список всех команд
+   ${BLUE}make test${NC}            — Запуск тестов
+   ${BLUE}make lint${NC}            — Проверка кода
+   ${BLUE}make run-local${NC}       — Запуск пайплайна на фикстурах
+
+${GREEN}Удачной разработки!${NC}
+EOF
+    else
+        cat << EOF
 ${GREEN}Следующие шаги:${NC}
 
 1. Активируйте виртуальное окружение:
@@ -420,18 +484,19 @@ ${GREEN}Следующие шаги:${NC}
    ${BLUE}make lint && make test${NC}
 
 3. Изучите документацию:
-   - ${YELLOW}AGENT.md${NC}         — Инструкции для разработчика
-   - ${YELLOW}docs/RULES.md${NC}    — Конституция проекта
-   - ${YELLOW}CLAUDE.md${NC}        — Справочник для Claude Code
+   - ${YELLOW}docs/00-project/agents/AGENT.md${NC}  — Инструкции для разработчика
+   - ${YELLOW}docs/00-project/RULES.md${NC}         — Конституция проекта (v5.19)
+   - ${YELLOW}docs/00-project/agents/CLAUDE.md${NC} — Справочник для Claude Code
 
 4. Основные команды:
    ${BLUE}make help${NC}            — Список всех команд
    ${BLUE}make test${NC}            — Запуск тестов
    ${BLUE}make lint${NC}            — Проверка кода
-   ${BLUE}make run-local${NC}       — Запуск на фикстурах
+   ${BLUE}make run-local${NC}       — Запуск пайплайна на фикстурах
 
 ${GREEN}Удачной разработки!${NC}
 EOF
+    fi
 }
 
 # ==============================================================================

@@ -121,8 +121,8 @@
   "alternative_id": {
     "checks": [],
     "coerce": false,
-    "description": "Alternative IDs (publisher-specific, e.g., PII)",
-    "dtype": "object",
+    "description": "Canonical JSON array of alternative IDs (publisher-specific, e.g., PII).",
+    "dtype": "str",
     "nullable": true,
     "required": true,
     "unique": false
@@ -136,19 +136,19 @@
     "required": true,
     "unique": false
   },
-  "author_orcids": {
+  "author_keys": {
     "checks": [],
     "coerce": false,
-    "description": "JSON array of author ORCID identifiers (format: 0000-0000-0000-000X)",
+    "description": "Pipe-delimited short author keys (Surname_F format)",
     "dtype": "str",
     "nullable": true,
     "required": false,
     "unique": false
   },
-  "author_ormolecule_ids": {
+  "author_orcids": {
     "checks": [],
     "coerce": false,
-    "description": "Backward-compatible author identifier field (legacy alias for cross-provider pipelines).",
+    "description": "JSON array of author ORCID identifiers (format: 0000-0000-0000-000X)",
     "dtype": "str",
     "nullable": true,
     "required": false,
@@ -203,8 +203,8 @@
   "content_domain_domains": {
     "checks": [],
     "coerce": false,
-    "description": "Content domain domains (list of strings)",
-    "dtype": "object",
+    "description": "Canonical JSON array of content domain domains.",
+    "dtype": "str",
     "nullable": true,
     "required": true,
     "unique": false

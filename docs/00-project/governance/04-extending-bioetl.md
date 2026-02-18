@@ -1,15 +1,15 @@
 # Расширение BioETL: Добавление новых Pipeline
 
-*Синхронизировано с RULES.md v5.18 | Последнее обновление: 2026-01-14*
+*Синхронизировано с RULES.md v5.20 | Последнее обновление: 2026-01-14*
 
----
+______________________________________________________________________
 
 ## Обзор
 
 Данный документ описывает процесс добавления новых pipeline в BioETL,
 включая создание конфигураций, трансформеров и тестов.
 
----
+______________________________________________________________________
 
 ## 1. Чек-лист создания нового Pipeline
 
@@ -22,7 +22,7 @@
 - [ ] Написать unit и integration тесты
 - [ ] Обновить документацию провайдера
 
----
+______________________________________________________________________
 
 ## 2. Шаблон Entity Config
 
@@ -40,17 +40,17 @@
 
 ### 2.2. Обязательные поля
 
-| Поле | Тип | Описание | Требование |
-|------|-----|----------|------------|
-| `pipeline_name` | string | Формат `{provider}_{entity}` | MUST |
-| `provider` | enum | Один из: chembl, pubchem, uniprot, pubmed, crossref, openalex, semanticscholar | MUST |
-| `entity_type` | string | Тип сущности | MUST |
-| `version` | string | Семантическая версия `X.Y.Z` | MUST |
-| `primary_keys` | array | Первичный ключ | MUST |
-| `silver_table` | string | Имя Silver таблицы | MUST |
-| `gold_table` | string | Имя Gold таблицы | MUST |
-| `sink` | object | Конфигурация слоёв | MUST |
-| `sink.*.sort_by` | object | Сортировка для детерминизма | MUST |
+| Поле                    | Тип    | Описание                                                                       | Требование |
+| ----------------------- | ------ | ------------------------------------------------------------------------------ | ---------- |
+| `pipeline_name`         | string | Формат `{provider}_{entity}`                                                   | MUST       |
+| `provider`              | enum   | Один из: chembl, pubchem, uniprot, pubmed, crossref, openalex, semanticscholar | MUST       |
+| `entity_type`           | string | Тип сущности                                                                   | MUST       |
+| `version`               | string | Семантическая версия `X.Y.Z`                                                   | MUST       |
+| `business_primary_keys` | array  | Первичный ключ                                                                 | MUST       |
+| `silver_table`          | string | Имя Silver таблицы                                                             | MUST       |
+| `gold_table`            | string | Имя Gold таблицы                                                               | MUST       |
+| `sink`                  | object | Конфигурация слоёв                                                             | MUST       |
+| `sink.*.sort_by`        | object | Сортировка для детерминизма                                                    | MUST       |
 
 ### 2.3. sort_by — Обязательное требование (ADR-014)
 
@@ -69,11 +69,12 @@ sink:
 ```
 
 **Почему это важно:**
+
 - Гарантирует детерминизм выходных файлов
 - Обеспечивает воспроизводимость результатов
 - Стабилизирует diff-сравнения между запусками
 
----
+______________________________________________________________________
 
 ## 3. Валидация через JSON Schema
 
@@ -82,6 +83,7 @@ sink:
 Все entity configs валидируются через `configs/pipelines/_schema.json`.
 
 **Pre-commit hook:**
+
 ```yaml
 # .pre-commit-config.yaml
 - repo: local
@@ -111,15 +113,15 @@ make validate-configs
 
 Схема `_schema.json` проверяет:
 
-| Проверка | Описание |
-|----------|----------|
-| `required` | Наличие обязательных полей |
-| `pattern` | Формат `pipeline_name` (`^[a-z]+_[a-z_]+$`) |
-| `enum` | Допустимые значения `provider` |
-| `type` | Типы данных полей |
-| `minimum/maximum` | Ограничения числовых значений |
+| Проверка          | Описание                                    |
+| ----------------- | ------------------------------------------- |
+| `required`        | Наличие обязательных полей                  |
+| `pattern`         | Формат `pipeline_name` (`^[a-z]+_[a-z_]+$`) |
+| `enum`            | Допустимые значения `provider`              |
+| `type`            | Типы данных полей                           |
+| `minimum/maximum` | Ограничения числовых значений               |
 
----
+______________________________________________________________________
 
 ## 4. Создание трансформера
 
@@ -176,7 +178,7 @@ class <Provider><Entity>Pipeline:
     transformer_class = <Provider><Entity>Transformer
 ```
 
----
+______________________________________________________________________
 
 ## 5. Тестирование
 
@@ -240,17 +242,17 @@ def test_<provider>_<entity>_has_sort_by():
     assert "sort_by" in config["sink"]["gold"]
 ```
 
----
+______________________________________________________________________
 
 ## 6. Документация провайдера
 
 После создания pipeline обновите документацию:
 
 1. **`docs/providers/<provider>/README.md`** — добавить entity в список
-2. **`docs/00-map.md`** — обновить счётчик pipelines
-3. **`CLAUDE.md`** — обновить метрики (если существенные изменения)
+1. **`docs/00-map.md`** — обновить счётчик pipelines
+1. **`CLAUDE.md`** — обновить метрики (если существенные изменения)
 
----
+______________________________________________________________________
 
 ## 7. Пример: Добавление chembl_target_component
 
@@ -264,7 +266,7 @@ entity_type: target_component
 version: "1.0.0"
 description: "Extract target component records from ChEMBL API"
 
-primary_keys: ["component_id"]
+business_primary_keys: ["component_id"]
 silver_table: "chembl_target_component"
 gold_table: "chembl_target_component"
 
@@ -306,7 +308,7 @@ input_filter:
 python scripts/validate_pipeline_configs.py configs/pipelines/chembl/target_component.yaml
 ```
 
----
+______________________________________________________________________
 
 ## Связанные документы
 
@@ -315,6 +317,6 @@ python scripts/validate_pipeline_configs.py configs/pipelines/chembl/target_comp
 - [ADR-025: Pipeline Config Unification](../02-architecture/decisions/ADR-025-pipeline-config-unification.md)
 - [03-guides/add-new-source.md](../03-guides/add-new-source.md) — Добавление нового провайдера
 
----
+______________________________________________________________________
 
 *Последнее обновление: 2026-01-14*

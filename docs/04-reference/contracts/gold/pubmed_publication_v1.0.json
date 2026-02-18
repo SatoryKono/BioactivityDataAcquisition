@@ -1,343 +1,469 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "PubMed Publication Gold Contract",
-  "description": "Gold layer data contract for PubMed Publication Gold Contract. Auto-generated from Pandera schema PubMedPublicationGoldSchema.",
+  "title": "PubMedPublicationGoldSchema Contract",
+  "description": "Gold layer data contract for pubmed_publication. Auto-generated from Pandera schema PubMedPublicationGoldSchema.",
   "type": "object",
   "properties": {
     "entity_id": {
-      "type": "string"
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "content_hash": {
-      "type": "string"
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "pmid": {
-      "type": "string"
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "doi": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "pmc_id": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "title": {
-      "type": [
-        "string",
-        "null"
-      ]
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "abstract": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "abstract_structured": {
       "type": [
         "boolean",
         "null"
-      ]
-    },
-    "vernacular_title": {
-      "type": [
-        "string",
-        "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "journal": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
-    "journal_abbrev": {
+    "journal_name_short": {
       "type": [
         "string",
         "null"
-      ]
-    },
-    "journal_title": {
-      "type": [
-        "string",
-        "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "journal_iso_abbrev": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "journal_issn_type": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "issn": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "nlm_unique_id": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "volume": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "issue": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
-    "pages": {
+    "page_range": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "medline_pgn": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
-    "first_page": {
+    "page_first": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
-    "last_page": {
+    "page_last": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "authors": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
-    "pub_date": {
+    "author_keys": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "affiliation_list": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "authors_with_affiliations": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "affiliation_structured": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "pii": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "mid": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "publisher_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
     },
     "pub_month": {
       "type": [
         "number",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "pub_day": {
       "type": [
         "number",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "publication_date": {
       "type": [
         "string",
         "null"
       ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-    },
-    "year": {
-      "type": [
-        "number",
-        "null"
-      ]
+      "nullable": true,
+      "description": ""
     },
     "publication_year": {
       "type": [
         "number",
         "null"
-      ]
-    },
-    "accepted_date": {
-      "type": [
-        "string",
-        "null"
       ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-    },
-    "received_date": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-    },
-    "revised_date": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-    },
-    "epub_date": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+      "nullable": true,
+      "description": ""
     },
     "date_completed": {
       "type": [
         "string",
         "null"
       ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+      "nullable": true,
+      "description": ""
     },
     "date_revised": {
       "type": [
         "string",
         "null"
       ],
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+      "nullable": true,
+      "description": ""
     },
     "publication_status": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "publication_type_list": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "publication_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
     },
     "publication_types": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
-    "keywords": {
+    "subject_keywords": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
-    "mesh_terms": {
+    "subject_mesh": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "chemicals": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "databanks": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "gene_symbols": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
     },
     "citation_subset": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "language": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "country": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "author_count": {
       "type": [
         "number",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "mesh_heading_count": {
       "type": [
         "number",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "keyword_count": {
       "type": [
         "number",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "grant_count": {
       "type": [
         "number",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
-    "reference_count": {
+    "citations_made": {
       "type": [
         "number",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "chemical_count": {
       "type": [
         "number",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
-    "source": {
-      "type": [
-        "string",
-        "null"
-      ]
+    "_source": {
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "_lookup_method": {
-      "type": [
-        "string",
-        "null"
-      ]
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "_original_id": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "_dq_warn": {
-      "type": "boolean"
+      "type": "boolean",
+      "nullable": false,
+      "description": ""
     },
     "_dq_error": {
-      "type": "boolean"
+      "type": "boolean",
+      "nullable": false,
+      "description": ""
     },
     "_run_id": {
-      "type": "string"
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "_run_type": {
-      "type": "string"
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "_source_batch_id": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "_ingestion_ts": {
-      "type": "string"
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "_index": {
-      "type": "integer"
+      "type": "integer",
+      "nullable": false,
+      "description": ""
     }
   },
   "required": [
@@ -345,10 +471,13 @@
     "_dq_warn",
     "_index",
     "_ingestion_ts",
+    "_lookup_method",
     "_run_id",
     "_run_type",
+    "_source",
     "content_hash",
     "entity_id",
-    "pmid"
+    "pmid",
+    "title"
   ]
 }

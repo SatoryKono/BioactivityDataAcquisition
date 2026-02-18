@@ -282,6 +282,11 @@ class TestDomainComplexity:
             "_expand_abbreviated_page": 7,  # CC=6 - Page range expansion with digit extraction and rollover
             # Cross-validation domain models (ADR-026)
             "FieldComparisonSpec": 8,  # CC=7 - Field comparison spec __post_init__ with type validation
+            # Author/affiliation normalization helpers (type-checking branches)
+            "normalize_affiliations": 7,  # CC=6 - Affiliation normalization with walrus + None filtering
+            "_extract_name_from_item": 7,  # CC=6 - Name extraction from str or dict
+            "_extract_single_affiliation": 8,  # CC=7 - Affiliation extraction with multi-key probe
+            "collect_affiliations_from_authors": 9,  # CC=8 - Author affiliation collection with type checks
         }
 
         violations = []

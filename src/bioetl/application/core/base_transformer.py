@@ -14,6 +14,7 @@ Implements DRY principle by extracting shared logic from entity transformers.
 from __future__ import annotations
 
 import dataclasses
+import datetime
 import time
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
@@ -43,6 +44,27 @@ T = TypeVar("T", bound="BaseEntity")
 V = TypeVar("V", covariant=True)
 
 
+@dataclasses.dataclass(frozen=True)
+class _DefaultContractPolicy:
+    """Fallback contract policy when none is injected."""
+
+    primary_key: list[str] = dataclasses.field(default_factory=lambda: ["entity_id"])
+    merge_keys: list[str] = dataclasses.field(default_factory=lambda: ["entity_id"])
+    rename_map: dict[str, str] = dataclasses.field(
+        default_factory=lambda: {
+            "run_id": "_run_id",
+            "run_type": "_run_type",
+            "source_batch_id": "_source_batch_id",
+            "ingestion_ts": "_ingestion_ts",
+            "source": "_source",
+        }
+    )
+    hash_include: list[str] = dataclasses.field(default_factory=list)
+    hash_exclude: list[str] = dataclasses.field(
+        default_factory=lambda: ["_ingestion_ts", "_run_id", "_run_type"]
+    )
+
+
 @runtime_checkable
 class ValueObjectWithFromRaw(Protocol[V]):
     """Protocol for Value Objects with from_raw() class method.
@@ -52,12 +74,12 @@ class ValueObjectWithFromRaw(Protocol[V]):
     """
 
     @classmethod
-    def from_raw(cls, raw: Any) -> V | None:
+    def from_raw(cls, raw: Any) -> V | None:  # Any: raw input
         """Create Value Object from raw value, returning None if invalid."""
         ...
 
     @property
-    def value(self) -> Any:
+    def value(self) -> Any:  # Any: VO value type varies (str | int | float)
         """Get the internal value."""
         ...
 
@@ -121,6 +143,7 @@ class BaseTransformer(ABC):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
+        contract_policy: Any = None,  # Any: PipelineContractPolicy from composition
     ) -> None:
         """Initialize transformer with provider name and observability.
 
@@ -156,6 +179,9 @@ class BaseTransformer(ABC):
             data_normalizer
             if data_normalizer is not None
             else DataNormalizationService()
+        )
+        self._contract_policy = (
+            contract_policy if contract_policy is not None else _DefaultContractPolicy()
         )
 
     # ========================================================================
@@ -196,8 +222,8 @@ class BaseTransformer(ABC):
 
     @staticmethod
     def validate_value_object(
-        vo_class: type[ValueObjectWithFromRaw[Any]],
-        value: Any,
+        vo_class: type[ValueObjectWithFromRaw[Any]],  # Any: generic VO type param
+        value: Any,  # Any: raw input from API (str | int | None)
         *,
         as_string: bool = True,
     ) -> str | int | None:
@@ -233,8 +259,8 @@ class BaseTransformer(ABC):
 
     @staticmethod
     def validate_value_objects(
-        vo_class: type[ValueObjectWithFromRaw[Any]],
-        values: list[Any] | None,
+        vo_class: type[ValueObjectWithFromRaw[Any]],  # Any: generic VO type param
+        values: list[Any] | None,  # Any: raw inputs from API
         *,
         as_string: bool = True,
     ) -> list[str | int] | None:
@@ -413,7 +439,7 @@ class BaseTransformer(ABC):
         """
         ...
 
-    def should_write_silver(
+    def should_write_silver(  # Any: record dict has varied values
         self, _context: PipelineContext, record: dict[str, Any]
     ) -> bool:
         """Determine if a transformed record should be written to Silver.
@@ -433,7 +459,7 @@ class BaseTransformer(ABC):
             return True
         return self._silver_filters.should_include(record)
 
-    def should_write_gold(
+    def should_write_gold(  # Any: record dict has varied values
         self, _context: PipelineContext, record: dict[str, Any]
     ) -> bool:
         """Determine if a Silver record should be written to Gold.
@@ -453,9 +479,9 @@ class BaseTransformer(ABC):
             return True
         return self._gold_filters.should_include(record)
 
-    def transform_for_gold(
+    def transform_for_gold(  # Any: record dicts have varied values
         self, _context: PipelineContext, silver_record: dict[str, Any]
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any]:  # Any: varied values
         """Transform Silver record for Gold layer.
 
         Removes JSON string fields that are retained only in Silver for forensic purposes.
@@ -475,7 +501,7 @@ class BaseTransformer(ABC):
 
     def compute_content_hash(
         self,
-        business_data: dict[str, Any],
+        business_data: dict[str, Any],  # Any: varied values
         *,
         exclude_none: bool = True,
     ) -> ContentHash:
@@ -495,16 +521,17 @@ class BaseTransformer(ABC):
             ContentHash: SHA256 hash of normalized record.
 
         """
+        hash_input = self._apply_hash_policy(business_data)
         return self._identity.compute_content_hash(
             self.provider,
-            business_data,
+            hash_input,
             exclude_none=exclude_none,
         )
 
     def compute_entity_id(
         self,
         source_id: str | None,
-        record: dict[str, Any],
+        record: dict[str, Any],  # Any: varied values
     ) -> EntityID:
         """Generate stable entity identifier.
 
@@ -529,7 +556,7 @@ class BaseTransformer(ABC):
         )
 
     @staticmethod
-    def serialize_json(value: Any) -> str | int | float | bool | None:
+    def serialize_json(value: Any) -> str | int | float | bool | None:  # Any: any JSON
         """Serialize dict/list to JSON string or native type for Silver layer.
 
         Empty collections → None; single-element lists → unwrapped native type;
@@ -548,13 +575,13 @@ class BaseTransformer(ABC):
         return value
 
     @staticmethod
-    def _serialize_dict(d: dict[str, Any]) -> str | None:
+    def _serialize_dict(d: dict[str, Any]) -> str | None:  # Any: JSON values
         if not d:
             return None
         return orjson.dumps(d, option=orjson.OPT_SORT_KEYS).decode("utf-8")
 
     @staticmethod
-    def _serialize_list(lst: list[Any]) -> str | int | float | bool | None:
+    def _serialize_list(lst: list[Any]) -> str | int | float | bool | None:  # Any: JSON
         if not lst:
             return None
         if len(lst) == 1:
@@ -569,7 +596,7 @@ class BaseTransformer(ABC):
         return orjson.dumps(lst, option=orjson.OPT_SORT_KEYS).decode("utf-8")
 
     @staticmethod
-    def serialize_json_list(value: list[Any] | None) -> str | None:
+    def serialize_json_list(value: list[Any] | None) -> str | None:  # Any: JSON values
         """Serialize list to JSON string without unwrapping single elements.
 
         Unlike serialize_json(), this method always preserves the array format,
@@ -599,7 +626,7 @@ class BaseTransformer(ABC):
     @classmethod
     def serialize_json_fields(
         cls,
-        record: dict[str, Any],
+        record: dict[str, Any],  # Any: varied values
         field_names: Sequence[str],
     ) -> dict[str, str | int | float | bool | None]:
         """Serialize multiple JSON fields at once.
@@ -624,52 +651,51 @@ class BaseTransformer(ABC):
         """
         return {name: cls.serialize_json(record.get(name)) for name in field_names}
 
-    @staticmethod
-    def entity_to_silver_record(entity: Any) -> dict[str, Any]:
-        """Convert Domain Entity to SilverRecord format.
-
-        Handles lineage fields renaming and formatting:
-        - run_id → _run_id (str)
-        - run_type → _run_type (str value)
-        - source_batch_id → _source_batch_id (str)
-        - ingestion_ts → _ingestion_ts (ISO string)
-
-        Args:
-            entity: Domain entity (dataclass).
-
-        Returns:
-            SilverRecord dictionary with renamed lineage fields.
-
-        """
-        # Use dataclasses.asdict to ensure fields from slots (BaseEntity) are included
+    def entity_to_silver_record(
+        self, entity: Any
+    ) -> dict[str, Any]:  # Any: generic entity
+        """Convert Domain Entity to SilverRecord format using policy rename map."""
         silver_record = dataclasses.asdict(entity)
 
-        # Handle lineage fields renaming and formatting
-        if "run_id" in silver_record:
-            silver_record["_run_id"] = str(silver_record.pop("run_id"))
-
-        if "run_type" in silver_record:
-            silver_record["_run_type"] = str(silver_record.pop("run_type").value)
-
-        # Handle source_batch_id which might be None
-        if "source_batch_id" in silver_record:
-            source_batch_id = silver_record.pop("source_batch_id")
-            silver_record["_source_batch_id"] = (
-                str(source_batch_id) if source_batch_id else None
-            )
-
-        if "ingestion_ts" in silver_record:
-            silver_record["_ingestion_ts"] = silver_record.pop(
-                "ingestion_ts"
-            ).isoformat()
-
-        # Handle source field renaming: source → _source
-        # Some entities use 'source' (PublicationEntityBase), others use '_source' (ChemblPublication)
-        # Silver schema expects '_source' as the system metadata field
-        if "source" in silver_record and "_source" not in silver_record:
-            silver_record["_source"] = silver_record.pop("source")
+        rename_map = self._contract_policy.rename_map
+        for source_key, target_key in rename_map.items():
+            if source_key in silver_record and target_key not in silver_record:
+                value = silver_record.pop(source_key)
+                silver_record[target_key] = self._normalize_lineage_value(
+                    source_key, value
+                )
 
         return silver_record
+
+    def _apply_hash_policy(self, business_data: dict[str, Any]) -> dict[str, Any]:
+        """Apply include/exclude hash policy from contract config."""
+        include_fields = self._contract_policy.hash_include
+        exclude_fields = set(self._contract_policy.hash_exclude)
+
+        if include_fields:
+            scoped = {
+                k: business_data.get(k) for k in include_fields if k in business_data
+            }
+        else:
+            scoped = dict(business_data)
+
+        for field in exclude_fields:
+            scoped.pop(field, None)
+
+        return scoped
+
+    @staticmethod
+    def _normalize_lineage_value(field_name: str, value: Any) -> Any:
+        """Normalize lineage/meta field values after rename."""
+        if field_name == "run_id" and value is not None:
+            return str(value)
+        if field_name == "run_type" and value is not None:
+            return str(value.value)
+        if field_name == "source_batch_id":
+            return str(value) if value else None
+        if field_name == "ingestion_ts" and isinstance(value, datetime.datetime):
+            return value.isoformat()
+        return value
 
     # ==================== Helper Methods ====================
 
@@ -679,7 +705,7 @@ class BaseTransformer(ABC):
         field: str,
         *,
         allow_empty: bool = False,
-    ) -> Any:
+    ) -> Any:  # Any: record field value type varies by field
         """Extract and validate a required field from the record.
 
         Args:
@@ -715,8 +741,8 @@ class BaseTransformer(ABC):
     def _extract_by_path(
         record: BronzeRecord,
         keys: Sequence[str],
-        default: Any = None,
-    ) -> Any:
+        default: Any = None,  # Any: caller-defined default type
+    ) -> Any:  # Any: nested dict value type unknown at compile time
         """Safely extract a value from nested dictionaries using a sequence of keys.
 
         Optimized version of _extract_nested that avoids string splitting.
@@ -731,7 +757,7 @@ class BaseTransformer(ABC):
             Extracted value or default.
 
         """
-        current: Any = record
+        current: Any = record  # Any: traverses nested dicts
         for key in keys:
             if not isinstance(current, dict):
                 return default
@@ -744,8 +770,8 @@ class BaseTransformer(ABC):
     def _extract_nested(
         record: BronzeRecord,
         path: str,
-        default: Any = None,
-    ) -> Any:
+        default: Any = None,  # Any: caller-defined default type
+    ) -> Any:  # Any: nested dict value type unknown at compile time
         """Safely extract a value from nested dictionaries using dot notation.
 
         Supports paths like "organism.taxonId" or "proteinDescription.recommendedName.fullName.value".
@@ -776,7 +802,7 @@ class BaseTransformer(ABC):
         entity_id: str,
         content_hash: str,
         index: int,
-        **business_data: Any,
+        **business_data: Any,  # Any: entity-specific fields vary by subclass
     ) -> T:
         """Create a domain entity with lineage metadata.
 

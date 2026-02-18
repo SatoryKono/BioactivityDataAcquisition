@@ -28,6 +28,8 @@ from bioetl.domain.types import BatchID
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
+    from opentelemetry.trace import Span
+
     from bioetl.application.core.checkpoint_manager import CheckpointManager
     from bioetl.application.core.config import RecordProcessorConfig
     from bioetl.application.core.pipeline_services import PipelineServices
@@ -62,7 +64,7 @@ class BatchResult:
 class BatchExecutor:
     """Unified executor for ETL batches: fetch → transform → write with tracing."""
 
-    DEFAULT_BATCH_SIZE = 100
+    DEFAULT_BATCH_SIZE = 1000
     DEFAULT_CHECKPOINT_INTERVAL = 1000
 
     def __init__(
@@ -198,37 +200,26 @@ class BatchExecutor:
         self,
         limit: int | None,
         query: str | None = None,
+        offset: int | None = None,
     ) -> None:
-        """Execute the pipeline with memory-efficient adaptive batch sizing.
-
-        Orchestrates the complete data flow: fetch → transform → write for
-        all records from the data source. Handles graceful shutdown and
-        checkpointing.
+        """Execute the pipeline: fetch → transform → write.
 
         Args:
             limit: Maximum number of records to process. None means no limit.
             query: Optional query string for data source filtering.
+            offset: Starting offset for checkpoint resume (records already processed).
 
         Raises:
             PipelineShutdownError: If shutdown signal received during execution.
-            Exception: Any exception from data source or processing.
-
-        Note:
-            After execution, counters are updated:
-            - records_fetched: Total records retrieved from source
-            - records_bronze: Records written to Bronze layer
-            - records_silver: Records written to Silver layer
-            - records_gold: Records written to Gold layer
-            - records_quarantined: Records sent to quarantine
 
         """
-        # Store query string for metadata enrichment
+        self._resume_offset = offset or 0
         self._query_string = query
 
         root_span = self._tracing.start_execution_span()
 
         try:
-            await self._run_extraction_loop(limit, query)
+            await self._run_extraction_loop(limit, query, offset=offset)
             self._tracing.set_execution_stats(
                 root_span,
                 total_fetched=self.records_fetched,
@@ -248,21 +239,21 @@ class BatchExecutor:
         else:
             self._tracing.end_span(root_span)
 
-    async def _run_extraction_loop(self, limit: int | None, query: str | None) -> None:
-        """Run the main extraction and processing loop.
-
-        Args:
-            limit: Maximum number of records to process.
-            query: Optional query string for data source.
-
-        """
+    async def _run_extraction_loop(
+        self,
+        limit: int | None,
+        query: str | None,
+        offset: int | None = None,
+    ) -> None:
+        """Run the main extraction and processing loop."""
         batch: list[dict[str, Any]] = []
         current_batch_size = self.batch_size
         check_interval = self._get_memory_check_interval()
 
-        async for raw_record in self._extract(limit, query):
+        async for raw_record in self._extract(limit, query, offset=offset):
             if self._shutdown_signal.is_requested:
-                await self._checkpoint_manager.save_checkpoint(self.records_fetched)
+                total = self._resume_offset + self.records_fetched
+                await self._checkpoint_manager.save_checkpoint(total)
                 raise PipelineShutdownError("Shutdown during extraction")
 
             batch.append(raw_record)
@@ -279,7 +270,8 @@ class BatchExecutor:
                 current_batch_size = self._maybe_recover_batch_size(current_batch_size)
 
             if self.records_fetched % self.checkpoint_interval == 0:
-                await self._checkpoint_manager.save_checkpoint(self.records_fetched)
+                total = self._resume_offset + self.records_fetched
+                await self._checkpoint_manager.save_checkpoint(total)
 
         if batch:
             start_index = self.records_fetched - len(batch)
@@ -483,11 +475,11 @@ class BatchExecutor:
     async def _execute_with_span(
         self,
         name: str,
-        coro: Any,
+        coro: Any,  # Any: Awaitable (generic coroutine)
         batch_id: BatchID,
         count: int,
-        on_error: Any = None,
-    ) -> Any:
+        on_error: Any = None,  # Any: fallback return value type varies
+    ) -> Any:  # Any: coroutine return type varies
         """Execute coroutine with tracing span."""
         span = self._tracing.start_layer_span(name, batch_id, count)
         try:
@@ -523,10 +515,11 @@ class BatchExecutor:
             self._tracing.end_span(span, e)
             raise
 
-    async def _handle_shutdown(self, span: Any | None) -> None:
+    async def _handle_shutdown(self, span: Span | None) -> None:
         """Handle graceful shutdown with checkpoint save."""
         try:
-            await self._checkpoint_manager.save_checkpoint(self.records_fetched)
+            total = self._resume_offset + self.records_fetched
+            await self._checkpoint_manager.save_checkpoint(total)
         except Exception:
             pass  # Ignore errors during emergency checkpoint save
 
@@ -609,22 +602,17 @@ class BatchExecutor:
     # -------------------------------------------------------------------------
 
     async def _extract(
-        self, limit: int | None, query: str | None = None
+        self,
+        limit: int | None,
+        query: str | None = None,
+        offset: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Extract records from data source.
-
-        Args:
-            limit: Maximum number of records to extract. None means no limit.
-            query: Optional query string for server-side filtering.
-
-        Yields:
-            Raw records as dictionaries from the data source.
-
-        """
+        """Extract records from data source."""
         async for record in self._services.data_source.fetch(
             entity_type=self._config.entity_type,
             limit=limit,
             query=query,
+            offset=offset,
         ):
             yield record
 
@@ -644,7 +632,7 @@ class BatchExecutor:
         self,
         records: list[dict[str, Any]],
         batch_id: BatchID,
-        bronze_result: Any,
+        bronze_result: Any,  # Any: BronzeWriteResult (avoids circular import)
         silver_records: list[dict[str, Any]],
         gold_records: list[dict[str, Any]],
     ) -> None:
@@ -682,7 +670,7 @@ class BatchExecutor:
 
     def _build_dataframe_from_records(
         self, records: list[dict[str, Any]]
-    ) -> Any | None:
+    ) -> Any | None:  # Any: pl.DataFrame (avoids polars import at module level)
         """Build a Polars DataFrame from records, returning None on failure."""
         if not records:
             return None
@@ -745,6 +733,16 @@ class BatchExecutor:
         gold_data = self._build_dataframe_from_records(self._gold_records_for_dq)
         primary_keys = list(self._config.table_config.primary_keys)
         soft_threshold, hard_threshold = self._get_dq_thresholds()
+        key_nullability_rules = None
+        if self._config.dq_config is not None:
+            key_nullability_rules = [
+                {
+                    "field": rule.field,
+                    "key_type": rule.key_type,
+                    "nullable": rule.nullable,
+                }
+                for rule in self._config.dq_config.key_nullability_rules
+            ]
 
         # Get current date for Bronze DQ report filename
         current_date_str = datetime.now(UTC).strftime("%Y-%m-%d")
@@ -774,6 +772,7 @@ class BatchExecutor:
             silver_input_count=self.records_fetched,
             silver_quarantined_count=self.records_quarantined,
             silver_output_path=self._config.silver_output_path,
+            silver_key_nullability_rules=key_nullability_rules,
             # Gold context
             gold_data=gold_data,
             gold_target_table=self._config.table_config.gold_table,

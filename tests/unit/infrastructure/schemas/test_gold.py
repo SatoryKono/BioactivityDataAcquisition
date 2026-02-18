@@ -102,7 +102,7 @@ class TestGoldPublicationSchemaCrossRefFields:
     @pytest.mark.parametrize(
         "schema_class,name",
         [
-            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
+            # ChEMBL excluded: uses publication_doi (prefixed naming convention)
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
@@ -114,10 +114,17 @@ class TestGoldPublicationSchemaCrossRefFields:
         fields = get_schema_fields(schema_class)
         assert "doi" in fields, f"{name} missing doi field"
 
+    def test_chembl_schema_has_publication_doi_field(self):
+        """ChEMBL Document uses publication_doi (prefixed naming convention)."""
+        fields = get_schema_fields(ChEMBLDocumentGoldSchema)
+        assert "publication_doi" in fields, (
+            "ChEMBL Document missing publication_doi field"
+        )
+
     @pytest.mark.parametrize(
         "schema_class,name",
         [
-            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
+            # ChEMBL excluded: uses publication_pmid (prefixed naming convention)
             # CrossRef excluded: pmid explicitly excluded from transformer output
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
@@ -128,6 +135,13 @@ class TestGoldPublicationSchemaCrossRefFields:
         """All Gold publication schemas should have pmid field."""
         fields = get_schema_fields(schema_class)
         assert "pmid" in fields, f"{name} missing pmid field"
+
+    def test_chembl_schema_has_publication_pmid_field(self):
+        """ChEMBL Document uses publication_pmid (prefixed naming convention)."""
+        fields = get_schema_fields(ChEMBLDocumentGoldSchema)
+        assert "publication_pmid" in fields, (
+            "ChEMBL Document missing publication_pmid field"
+        )
 
     @pytest.mark.parametrize(
         "schema_class,name",
@@ -173,7 +187,7 @@ class TestGoldPublicationSchemaCoreFields:
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
             # SemanticScholar excluded: transformer pops raw authors,
-            # uses author_s2_ids/author_ormolecule_ids instead
+            # uses author_s2_ids/author_orcids instead
         ],
     )
     def test_schema_has_authors_field(self, schema_class, name):
@@ -358,6 +372,7 @@ class TestGoldSchemaValidation:
             "page_first": "100",
             "page_last": "110",
             "authors": '["Author One", "Author Two"]',
+            "author_keys": "One_A|Two_A",
             "affiliation_list": '["University A", "University B"]',
             "affiliation_structured": '[{"text": "University A", "ror_id": null}]',
             "authors_with_affiliations": '[{"name_hash": "abc123", "initials": "AO", "affiliations": []}]',
@@ -373,13 +388,13 @@ class TestGoldSchemaValidation:
             "date_revised": "2024-03-20",
             "publication_status": "ppublish",
             "publication_type_list": '["Journal Article"]',
-            "publication_type": "PUBLICATION",
-            "publication_types": ["Journal Article"],
-            "subject_keywords": ["test"],
-            "subject_mesh": ["Testing"],
-            "chemicals": ["Aspirin"],
-            "databanks": ["GenBank"],
-            "gene_symbols": ["TP53"],
+            "publication_type": "journal-article",
+            "publication_types": '["Journal Article"]',
+            "subject_keywords": '["test"]',
+            "subject_mesh": '["Testing"]',
+            "chemicals": '["Aspirin"]',
+            "databanks": '["GenBank"]',
+            "gene_symbols": '["TP53"]',
             "citation_subset": "AIM",
             "language": "eng",
             "country": "United States",
@@ -414,14 +429,15 @@ class TestGoldSchemaValidation:
             "entity_id": "chembl_CHEMBL12345",
             "content_hash": "xyz789",
             "publication_id": "CHEMBL12345",
-            "pmid": "12345678",
-            # pmc_id excluded: not available from ChEMBL API
-            "doi": "10.1234/test",
+            # Cross-reference IDs use publication_ prefix (ChEMBL naming convention)
+            "publication_doi": "10.1234/test",
+            "publication_pmid": "12345678",
+            "publication_pmc_id": None,
             # patent_id excluded from unified publication schema
             "title": "Test Publication",
             "authors": '["Author One"]',
             "abstract": "Test abstract",
-            "publication_type": "PUBLICATION",
+            "publication_type": "journal-article",
             "journal": "Test Journal",
             "publication_year": 2024,
             # publication_date excluded: not available from ChEMBL API
@@ -435,7 +451,6 @@ class TestGoldSchemaValidation:
             # ChEMBL release metadata
             "chembl_release": "CHEMBL_34",
             "creation_date": "2024-01-01",
-            # Примечание: citation_count маппится в citations_received; is_oa и language исключены
             "_lookup_method": "direct",
             "_original_id": "CHEMBL12345",
             "_source": "chembl",
@@ -446,9 +461,6 @@ class TestGoldSchemaValidation:
             "_source_batch_id": "batch-001",
             "_ingestion_ts": "2024-01-01T00:00:00Z",
             "_index": 0,
-            "publication_pmid": "12345678",
-            "publication_doi": "10.1234/test",
-            "publication_pmc_id": None,
         }
 
         df = pd.DataFrame([valid_record])

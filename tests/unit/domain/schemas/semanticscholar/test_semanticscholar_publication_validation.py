@@ -744,27 +744,6 @@ class TestAuthorS2IdsBaseValidation:
 
 
 @pytest.mark.unit
-class TestAuthorOrmolecule_idsBaseValidation:
-    """Base validation tests for author_ormolecule_ids."""
-
-    def test_author_ormolecule_ids_valid(
-        self, minimal_semanticscholar_publication_df: pd.DataFrame
-    ) -> None:
-        """PASS: valid author_ormolecule_ids value."""
-        SemanticScholarPublicationSchema.validate(
-            minimal_semanticscholar_publication_df
-        )
-
-    def test_author_ormolecule_ids_null_allowed(
-        self, minimal_semanticscholar_publication_df: pd.DataFrame
-    ) -> None:
-        """SKIP: author_ormolecule_ids is nullable."""
-        df = minimal_semanticscholar_publication_df.copy()
-        df["author_ormolecule_ids"] = None
-        SemanticScholarPublicationSchema.validate(df)
-
-
-@pytest.mark.unit
 class TestAuthorHIndicesBaseValidation:
     """Base validation tests for author_h_indices."""
 

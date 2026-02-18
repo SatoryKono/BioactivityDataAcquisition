@@ -1,20 +1,20 @@
 # ChEMBL Subcellular Fraction Pipeline Specification
 
-*Version 1.0.0 | Aligned with RULES.md v5.18*
+*Version 1.0.0 | Aligned with RULES.md v5.20*
 
----
+______________________________________________________________________
 
 ## 1. Identification
 
-| Parameter | Value |
-|-----------|-------|
-| **Pipeline ID** | `chembl_subcellular_fraction` |
-| **Provider** | ChEMBL (EBI) |
-| **Entity** | subcellular_fraction |
-| **Source Entity** | assay |
-| **Strategy** | Derived Entity (Extracted from Assay records) |
+| Parameter         | Value                                         |
+| ----------------- | --------------------------------------------- |
+| **Pipeline ID**   | `chembl_subcellular_fraction`                 |
+| **Provider**      | ChEMBL (EBI)                                  |
+| **Entity**        | subcellular_fraction                          |
+| **Source Entity** | assay                                         |
+| **Strategy**      | Derived Entity (Extracted from Assay records) |
 
----
+______________________________________________________________________
 
 ## 2. Business Context
 
@@ -28,9 +28,9 @@ Subcellular Fractions represent specific **cellular compartments** (like mitocho
 ### 2.2. Use Cases
 
 1. **Compartmental Analysis**: Study drug effects specifically on mitochondrial or microsomal enzymes.
-2. **Assay Enrichment**: Group assays by the subcellular fraction used in the experiment.
+1. **Assay Enrichment**: Group assays by the subcellular fraction used in the experiment.
 
----
+______________________________________________________________________
 
 ## 3. Extraction & Transformation
 
@@ -38,13 +38,13 @@ This is a **derived entity** created by extracting unique values from the `assay
 
 ### 3.1. Fields
 
-| # | Field | Type | Nullable | Description |
-|---|-------|------|----------|-------------|
-| 1 | `subcellular_fraction` | string | No | Primary key (normalized name) |
-| 2 | `assay_count` | integer | Yes | Number of assays using this fraction |
-| 3 | `example_assay_chembl_id` | string | Yes | Reference to an example assay |
+| #   | Field                  | Type    | Nullable | Description                          |
+| --- | ---------------------- | ------- | -------- | ------------------------------------ |
+| 1   | `subcellular_fraction` | string  | No       | Primary key (normalized name)        |
+| 2   | `assay_count`          | integer | Yes      | Number of assays using this fraction |
+| 3   | `example_assay_id`     | string  | Yes      | Reference to an example assay        |
 
----
+______________________________________________________________________
 
 ## 4. Validation
 
@@ -67,7 +67,7 @@ class ChEMBLSubcellularFractionGoldSchema(pa.DataFrameModel):
     )
 
     # Example reference
-    example_assay_chembl_id: Series[str] | None = pa.Field(
+    example_assay_id: Series[str] | None = pa.Field(
         nullable=True,
     )
 
@@ -75,7 +75,7 @@ class ChEMBLSubcellularFractionGoldSchema(pa.DataFrameModel):
         strict = True
 ```
 
----
+______________________________________________________________________
 
 ## 5. Pipeline Configuration
 

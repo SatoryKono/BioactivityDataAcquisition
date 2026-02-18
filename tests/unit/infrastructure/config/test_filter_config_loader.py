@@ -505,6 +505,187 @@ extraction_params:
         assert extraction_params.params["standard_type__in"] == "Ki"
 
 
+class TestAssayExtractionParamsLoading:
+    """Tests for assay extraction_params loading via FilterConfigLoader."""
+
+    def test_assay_extraction_params_loaded(self, tmp_path: Path) -> None:
+        """Extraction params should be loaded from assay entity config."""
+        filter_root = tmp_path / "filters"
+        filter_root.mkdir()
+
+        (filter_root / "_defaults.yaml").write_text(
+            """
+version: "1.0.0"
+input_filter:
+  enabled: false
+  batch_size: 100
+gold_filters:
+  required_fields: []
+"""
+        )
+
+        entities = filter_root / "entities" / "chembl"
+        entities.mkdir(parents=True)
+        (entities / "assay.yaml").write_text(
+            """
+version: "1.0.0"
+provider: chembl
+entity: assay
+input_filter:
+  enabled: true
+  source_path: "data/input/assay.csv"
+  column_name: "assay_chembl_id"
+  filter_field: "assay_id"
+  batch_size: 20
+extraction_params:
+  assay_type__in: "B,F"
+  confidence_score__gte: 8
+  relationship_type: "D"
+  target_chembl_id__isnull: false
+silver_filters:
+  columns:
+    assay_type: [B, F]
+    relationship_type: [D]
+  ranges:
+    confidence_score:
+      min: 8
+      max: 9
+  required_fields:
+    - assay_id
+    - assay_type
+    - description
+    - target_chembl_id
+gold_filters:
+  columns:
+    assay_type: [B, F]
+    confidence_score: ["8", "9"]
+    relationship_type: [D]
+  required_fields:
+    - assay_type
+    - description
+"""
+        )
+
+        loader = FilterConfigLoader(tmp_path)
+        input_filter, silver_filters, gold_filters, extraction_params = loader.load(
+            "chembl", "assay"
+        )
+
+        # Extraction params loaded
+        assert not extraction_params.is_empty
+        assert extraction_params.params["assay_type__in"] == "B,F"
+        assert extraction_params.params["confidence_score__gte"] == 8
+        assert extraction_params.params["relationship_type"] == "D"
+        assert extraction_params.params["target_chembl_id__isnull"] is False
+
+        # Input filter still enabled alongside extraction_params
+        assert input_filter.enabled is True
+        assert input_filter.filter_field == "assay_id"
+
+    def test_assay_extraction_params_no_input_filter_overlap(
+        self, tmp_path: Path
+    ) -> None:
+        """Assay extraction_params keys should not overlap with input_filter field."""
+        filter_root = tmp_path / "filters"
+        filter_root.mkdir()
+
+        (filter_root / "_defaults.yaml").write_text(
+            """
+version: "1.0.0"
+input_filter:
+  enabled: false
+gold_filters:
+  required_fields: []
+"""
+        )
+
+        entities = filter_root / "entities" / "chembl"
+        entities.mkdir(parents=True)
+        (entities / "assay.yaml").write_text(
+            """
+version: "1.0.0"
+provider: chembl
+entity: assay
+input_filter:
+  enabled: true
+  source_path: "data/input/assay.csv"
+  column_name: "assay_chembl_id"
+  filter_field: "assay_id"
+  batch_size: 20
+extraction_params:
+  assay_type__in: "B,F"
+  confidence_score__gte: 8
+  relationship_type: "D"
+  target_chembl_id__isnull: false
+gold_filters:
+  required_fields: []
+"""
+        )
+
+        loader = FilterConfigLoader(tmp_path)
+        input_filter, _, _, extraction_params = loader.load("chembl", "assay")
+
+        # No overlap: input_filter uses "assay_id", extraction_params has other keys
+        assert input_filter.filter_field not in extraction_params.params
+
+    def test_assay_silver_filters_loaded(self, tmp_path: Path) -> None:
+        """Silver filters should be loaded from assay entity config."""
+        filter_root = tmp_path / "filters"
+        filter_root.mkdir()
+
+        (filter_root / "_defaults.yaml").write_text(
+            """
+version: "1.0.0"
+input_filter:
+  enabled: false
+gold_filters:
+  required_fields: []
+"""
+        )
+
+        entities = filter_root / "entities" / "chembl"
+        entities.mkdir(parents=True)
+        (entities / "assay.yaml").write_text(
+            """
+version: "1.0.0"
+provider: chembl
+entity: assay
+silver_filters:
+  columns:
+    assay_type: [B, F]
+    relationship_type: [D]
+  ranges:
+    confidence_score:
+      min: 8
+      max: 9
+  required_fields:
+    - assay_id
+    - assay_type
+    - description
+    - target_chembl_id
+gold_filters:
+  required_fields: []
+"""
+        )
+
+        loader = FilterConfigLoader(tmp_path)
+        _, silver_filters, _, _ = loader.load("chembl", "assay")
+
+        assert isinstance(silver_filters, SilverFilterConfig)
+        # Column filters
+        columns = {cf.column for cf in silver_filters.column_filters}
+        assert "assay_type" in columns
+        assert "relationship_type" in columns
+        # Range filter
+        assert len(silver_filters.range_filters) == 1
+        assert silver_filters.range_filters[0].column == "confidence_score"
+        assert silver_filters.range_filters[0].min_value == 8
+        assert silver_filters.range_filters[0].max_value == 9
+        # Required fields
+        assert "assay_id" in silver_filters.required_fields
+        assert "target_chembl_id" in silver_filters.required_fields
+
+
 class TestFilterConfigLoaderIntegration:
     """Integration tests with actual filter config structure."""
 

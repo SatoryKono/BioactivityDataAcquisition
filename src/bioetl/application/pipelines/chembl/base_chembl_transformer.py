@@ -28,7 +28,7 @@ if TYPE_CHECKING:
         PiiHasherPort,
         TracingPort,
     )
-    from bioetl.domain.types import BronzeRecord, SilverRecord
+    from bioetl.domain.types import BronzeRecord, PrimaryId, SilverRecord
 
 
 class BaseChemblTransformer(BaseTransformer):
@@ -69,6 +69,7 @@ class BaseChemblTransformer(BaseTransformer):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
+        contract_policy: Any = None,  # Any: PipelineContractPolicy from composition
     ) -> None:
         """Initialize ChEMBL transformer.
 
@@ -84,6 +85,8 @@ class BaseChemblTransformer(BaseTransformer):
             pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
             data_normalizer: Data normalization service for text normalization
                 (DOI, PMID, authors, HTML). Defaults to DataNormalizationService.
+            contract_policy: Optional pipeline contract policy for field renaming
+                and hash include/exclude rules.
 
         """
         # Derive entity_type from entity_class if not provided
@@ -101,6 +104,7 @@ class BaseChemblTransformer(BaseTransformer):
             identity_service=identity_service,
             pii_hasher=pii_hasher,
             data_normalizer=data_normalizer,
+            contract_policy=contract_policy,
         )
 
     async def _transform_impl(
@@ -160,7 +164,7 @@ class BaseChemblTransformer(BaseTransformer):
     def _extract_business_data(
         self,
         record: BronzeRecord,
-        primary_id: Any,
+        primary_id: PrimaryId,
     ) -> dict[str, Any]:
         """Extract business data from the bronze record.
 

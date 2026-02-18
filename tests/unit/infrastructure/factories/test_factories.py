@@ -127,6 +127,7 @@ class TestStorageAdapter:
             partition_cols=None,
             on_schema_mismatch="error",
             bronze_refs=None,
+            key_nullability_rules=None,
         )
 
     async def test_write_gold_delegates(self, storage_adapter, mock_gold_writer):
@@ -149,6 +150,7 @@ class TestStorageAdapter:
             schema=mock_schema,
             primary_keys=None,
             mode="overwrite",
+            scd_config=None,
             column_order=None,
             ingestion_ts=None,
             run_id=None,

@@ -104,7 +104,6 @@ class TestFieldNaming:
             "smiles",
             "inchi",
             "inchi_key",
-            "ormolecule_id",
             "max",
             "min",
             "avg",
@@ -359,7 +358,8 @@ class TestCrossProviderNaming:
             # Check for legacy field names (should be renamed)
             legacy_fields = {
                 "citation_count": "Use citations_received instead (5.14.0)",
-                "author_ormolecule_id_list": "Use author_ormolecule_ids instead (5.14.0)",
+                "author_ormolecule_id_list": "Use author_orcids instead (5.14.0)",
+                "author_ormolecule_ids": "Use author_orcids instead (5.17.0)",
             }
 
             found_legacy = [

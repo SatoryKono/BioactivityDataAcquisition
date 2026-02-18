@@ -205,7 +205,6 @@ composite:
         fields:
           - molecular_weight
           - molecular_formula
-          - molecular_weight
           - logp
           - logp_method
           - polar_surface_area
@@ -286,64 +285,16 @@ composite:
   # ---------------------------------------------------------------------------
   # Data Quality Configuration
   # ---------------------------------------------------------------------------
+  # Thresholds, required_fields, and field_validations externalized to:
+  #   configs/quality/entities/composite/molecule.yaml
+  # Only pipeline-specific enricher_overrides remain inline.
   dq_overrides:
-    # Composite-level thresholds (applied to merge result)
-    soft_fail_threshold: 0.10  # 10% errors = warning
-    hard_fail_threshold: 0.30  # 30% errors = failure
-
     # Per-enricher threshold overrides
     enricher_overrides:
       # PubChem may have many records without InChIKey match
       pubchem_compound:
         soft_fail_threshold: 0.20
         hard_fail_threshold: 0.50
-
-    # Required fields in final Gold output
-    required_fields:
-      - molecule_id
-      - entity_id
-
-    # Field-level validation rules
-    field_validations:
-      # === Structural Identifiers ===
-      inchi_key:
-        type: string
-        nullable: true
-        pattern: "^[A-Z]{14}-[A-Z]{10}-[A-Z]$"
-        description: "InChIKey (27 characters, XXXXX-YYYYY-Z format)"
-
-      canonical_smiles:
-        type: string
-        nullable: true
-        description: "Canonical SMILES representation"
-
-      # === Numeric Properties ===
-      molecular_weight:
-        type: float
-        nullable: true
-        min_value: 1.0
-        max_value: 50000.0
-        description: "Molecular weight in Daltons"
-
-      logp:
-        type: float
-        nullable: true
-        min_value: -20.0
-        max_value: 30.0
-        description: "LogP (AlogP/XlogP coalesced)"
-
-      polar_surface_area:
-        type: float
-        nullable: true
-        min_value: 0.0
-        max_value: 2000.0
-        description: "Polar Surface Area"
-
-      # === Clinical Data ===
-      max_phase:
-        type: float
-        nullable: true
-        description: "Maximum clinical phase reached (0-4)"
 
   # ---------------------------------------------------------------------------
   # Execution Options
@@ -393,18 +344,11 @@ composite:
       - hbd_count
 
 # -----------------------------------------------------------------------------
-# Gold Filters (applied to merged output)
-# -----------------------------------------------------------------------------
-gold_filters:
-  # Only include molecules with primary key
-  required_fields:
-    - molecule_id
-
-# -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
-# Filter rules loaded from hierarchical config files
-filter_config_file: ../../filter/entities/composite/molecule.yaml
+# Gold filters and filter rules loaded from hierarchical config files.
+# No inline gold_filters needed — filter entity config is authoritative.
+filter_config_file: ../../filters/entities/composite/molecule.yaml
 
 # -----------------------------------------------------------------------------
 # Maintenance Configuration

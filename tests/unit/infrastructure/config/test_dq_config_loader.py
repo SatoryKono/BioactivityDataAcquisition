@@ -98,6 +98,11 @@ entity_cross_field_validations:
       - field_a
       - field_b
     condition: all_present
+
+key_nullability:
+  - field: entity_id
+    key_type: merge
+    nullable: false
 """
     )
 
@@ -142,6 +147,8 @@ class TestDQConfigLoaderBasics:
         assert len(config.field_validations) == 4
         # Cross-field from entity
         assert len(config.cross_field_validations) == 1
+        assert len(config.key_nullability_rules) == 1
+        assert config.key_nullability_rules[0].field == "entity_id"
 
 
 class TestDQConfigLoaderMerge:
@@ -229,6 +236,29 @@ class TestDQConfigLoaderInlineOverrides:
 
         field_names = [fv.field for fv in config.field_validations]
         assert "inline_field" in field_names
+
+    def test_inline_override_key_nullability_rules(
+        self, loader: DQConfigLoader
+    ) -> None:
+        """Inline key nullability rules should be normalized and merged."""
+        config = loader.load(
+            "test_provider",
+            "test_entity",
+            inline_overrides={
+                "key_nullability_rules": [
+                    {
+                        "field": "partition_col",
+                        "key_type": "partition",
+                        "nullable": True,
+                    }
+                ]
+            },
+        )
+
+        rules = {
+            (r.field, r.key_type, r.nullable) for r in config.key_nullability_rules
+        }
+        assert ("partition_col", "partition", True) in rules
 
 
 class TestDQConfigLoaderCaching:
@@ -343,7 +373,7 @@ class TestDeepMerge:
         assert result["outer"]["inner3"] == "d"  # added
 
     def test_validation_list_concatenate(self, loader: DQConfigLoader) -> None:
-        """Validation lists should concatenate with dedup by field."""
+        """Validation lists should concatenate with dedup by (field, type, severity)."""
         base: dict[str, Any] = {
             "entity_field_validations": [
                 {"field": "a", "type": "required"},
@@ -352,7 +382,10 @@ class TestDeepMerge:
         }
         override: dict[str, Any] = {
             "entity_field_validations": [
-                {"field": "b", "type": "pattern"},  # Override existing
+                {
+                    "field": "b",
+                    "type": "pattern",
+                },  # Different type → kept alongside range
                 {"field": "c", "type": "enum"},  # Add new
             ]
         }
@@ -360,10 +393,12 @@ class TestDeepMerge:
         result = loader._deep_merge(base, override)
 
         validations = result["entity_field_validations"]
-        assert len(validations) == 3
-        # field 'b' should be overridden
-        b_validation = next(v for v in validations if v["field"] == "b")
-        assert b_validation["type"] == "pattern"
+        # a(required) + b(range) + b(pattern) + c(enum) = 4
+        assert len(validations) == 4
+        b_validations = [v for v in validations if v["field"] == "b"]
+        assert len(b_validations) == 2
+        b_types = {v["type"] for v in b_validations}
+        assert b_types == {"range", "pattern"}
 
     def test_non_validation_list_override(self, loader: DQConfigLoader) -> None:
         """Non-validation lists should be overridden, not concatenated."""
@@ -397,21 +432,50 @@ class TestDeepMerge:
 class TestMergeValidationLists:
     """Tests for _merge_validation_lists logic."""
 
-    def test_dedupe_by_field(self, loader: DQConfigLoader) -> None:
-        """Validations should be deduped by field name."""
+    def test_dedupe_by_composite_key(self, loader: DQConfigLoader) -> None:
+        """Validations dedup by (field, type, severity), not field alone."""
         base = [
             {"field": "a", "type": "required"},
             {"field": "b", "type": "range"},
         ]
         override = [
-            {"field": "b", "type": "pattern"},  # Same field, different type
+            {"field": "b", "type": "pattern"},  # Same field, different type → kept
+        ]
+
+        result = loader._merge_validation_lists(base, override)
+
+        # a + b(range) + b(pattern) = 3
+        assert len(result) == 3
+        b_items = [v for v in result if v["field"] == "b"]
+        assert len(b_items) == 2
+        assert {v["type"] for v in b_items} == {"range", "pattern"}
+
+    def test_dedupe_same_field_type_severity(self, loader: DQConfigLoader) -> None:
+        """Same field+type+severity → override wins."""
+        base = [
+            {"field": "b", "type": "range", "min": 0},
+        ]
+        override = [
+            {"field": "b", "type": "range", "min": 10},  # Same composite key
+        ]
+
+        result = loader._merge_validation_lists(base, override)
+
+        assert len(result) == 1
+        assert result[0]["min"] == 10  # Override wins
+
+    def test_same_field_different_severity_kept(self, loader: DQConfigLoader) -> None:
+        """Same field+type but different severity → both kept."""
+        base = [
+            {"field": "year", "type": "range", "min": 1500, "max": 2100},
+        ]
+        override = [
+            {"field": "year", "type": "range", "severity": "warn", "min": 1950},
         ]
 
         result = loader._merge_validation_lists(base, override)
 
         assert len(result) == 2
-        b_item = next(v for v in result if v["field"] == "b")
-        assert b_item["type"] == "pattern"  # Override wins
 
     def test_dedupe_by_name(self, loader: DQConfigLoader) -> None:
         """Cross-field validations should be deduped by name."""

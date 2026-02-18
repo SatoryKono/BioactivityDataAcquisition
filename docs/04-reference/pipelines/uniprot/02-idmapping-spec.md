@@ -1,6 +1,6 @@
 # UniProt ID Mapping Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.18*
+*Version 1.2.0 | Aligned with RULES.md v5.20*
 
 ---
 
@@ -105,7 +105,7 @@ results = await client.get(results_url)
 
 | Parameter | Value |
 |-----------|-------|
-| **Entity ID Field** | `target_chembl_id` (input ID) |
+| **Entity ID Field** | `target_id` (input ChEMBL target ID) |
 | **ID Source** | `from_input` |
 | **Format** | ChEMBL ID (CHEMBL[0-9]+) |
 
@@ -113,12 +113,19 @@ results = await client.get(results_url)
 
 | Field | Type | Source | Description |
 |-------|------|--------|-------------|
-| `target_chembl_id` | str | Input | Source ChEMBL ID |
+| `target_id` | str | Input | Source ChEMBL target ID |
 | `uniprot_accession` | str | API | Mapped UniProt accession |
 | `uniprot_entry_name` | str | API | Entry name |
-| `mapping_status` | str | Derived | found/not_found/multiple |
-| `uniprot_organism` | str | API | Organism name |
-| `uniprot_tax_id` | int | API | Taxonomy ID |
+| `mapping_status` | str | Derived | found/not_found/multiple/error |
+| `organism_scientific` | str | API | Scientific organism name |
+| `organism_common` | str | API | Common organism name |
+| `taxonomy_id` | int | API | NCBI Taxonomy ID |
+| `protein_name` | str | API | Recommended protein name |
+| `gene_primary` | str | API | Primary gene name |
+| `sequence_length` | int | API | Protein sequence length |
+| `sequence_mass` | int | API | Molecular weight in Daltons |
+| `reviewed` | bool | API | True if Swiss-Prot (reviewed) |
+| `annotation_score` | int | API | Quality score 1-5 |
 | `all_mappings` | str | API | JSON array if multiple |
 
 ### 4.3. Content Hash Specification
@@ -126,7 +133,7 @@ results = await client.get(results_url)
 ```python
 # Fields included in hash
 hash_fields = [
-    "target_chembl_id",
+    "target_id",
     "uniprot_accession",
     "mapping_status",
 ]
@@ -146,7 +153,7 @@ class UniprotIdMappingSchema(ETLRecordSchema):
     """UniProt ID Mapping validation schema for Silver layer."""
 
     # === Primary Key (Input ID) ===
-    target_chembl_id: Series[str] = pa.Field(
+    target_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=r"^CHEMBL\d+$",
         description="Source ChEMBL target ID",
@@ -167,9 +174,38 @@ class UniprotIdMappingSchema(ETLRecordSchema):
         description="Mapping result status",
     )
 
-    # === Additional Metadata ===
-    uniprot_organism: Series[str] | None = pa.Field(nullable=True)
-    uniprot_tax_id: Series[int] | None = pa.Field(nullable=True, ge=1)
+    # === Organism & Taxonomy ===
+    organism_scientific: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Scientific organism name",
+    )
+    organism_common: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Common organism name",
+    )
+    taxonomy_id: Series[int] | None = pa.Field(nullable=True, ge=1)
+
+    # === Protein Metadata ===
+    protein_name: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Recommended protein name",
+    )
+    gene_primary: Series[str] | None = pa.Field(
+        nullable=True,
+        description="Primary gene name",
+    )
+    sequence_length: Series[int] | None = pa.Field(nullable=True, ge=1)
+    sequence_mass: Series[int] | None = pa.Field(nullable=True, ge=1)
+    reviewed: Series[bool] | None = pa.Field(
+        nullable=True,
+        description="True if Swiss-Prot (reviewed)",
+    )
+    annotation_score: Series[int] | None = pa.Field(
+        nullable=True, ge=1, le=5,
+        description="Quality score 1-5",
+    )
+
+    # === Multiple Mappings ===
     all_mappings: Series[str] | None = pa.Field(
         nullable=True,
         description="JSON array for multiple mappings",
@@ -203,7 +239,7 @@ class UniprotIdMappingSchema(ETLRecordSchema):
 ```
 Path: silver/uniprot/idmapping/
 Format: Delta Lake (delta-rs)
-Mode: Merge on [target_chembl_id]
+Mode: Merge on [target_id]
 Partition: None
 Retention: Permanent
 ```
@@ -228,10 +264,10 @@ Mode: Overwrite
 pipeline_name: uniprot_idmapping
 provider: uniprot
 entity_type: idmapping
-version: "1.2.0"
-description: "Maps ChEMBL target IDs to UniProt accessions"
+version: "1.1.0"
+description: "Maps ChEMBL target IDs to UniProt accessions via UniProt ID Mapping API"
 
-primary_keys: ["target_chembl_id"]
+primary_keys: ["target_id"]
 silver_table: "uniprot_idmapping"
 gold_table: "uniprot_idmapping"
 
@@ -253,14 +289,14 @@ sink:
     enabled: false  # No Bronze for ID mapping
   silver:
     path: "data/output/silver"
-    primary_key: ["target_chembl_id"]
+    primary_key: ["target_id"]
     partition_by: []
   gold:
     path: "data/output/gold"
 
 gold_filters:
   required_fields:
-    - target_chembl_id
+    - target_id
     - mapping_status
 
 input_filter:

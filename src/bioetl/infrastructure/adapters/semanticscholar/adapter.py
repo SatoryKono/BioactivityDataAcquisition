@@ -134,6 +134,7 @@ class SemanticScholarAdapter(BaseHttpAdapter):
         query: str | None = None,
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
+        offset: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch publications via search (for incremental sync).
 

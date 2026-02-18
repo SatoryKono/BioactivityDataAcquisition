@@ -77,12 +77,9 @@ class PublicationBaseSchema(ETLRecordSchema):
         nullable=True,
         description="JSON array of author ORCID identifiers (format: 0000-0000-0000-000X)",
     )
-    author_ormolecule_ids: Series[str] | None = pa.Field(
+    author_keys: Series[str] | None = pa.Field(
         nullable=True,
-        description=(
-            "Backward-compatible author identifier field "
-            "(legacy alias for cross-provider pipelines)."
-        ),
+        description="Pipe-delimited short author keys (Surname_F format)",
     )
 
     # === Publication metadata (common to all providers) ===
@@ -175,12 +172,13 @@ class PublicationBaseSchema(ETLRecordSchema):
 
     # @pa.check("title", name="title_not_empty")
     # @classmethod
-    # def _check_title(cls, series: Any) -> Any:
+    # def _check_title(cls, series: Any) -> Any:  # Any: Pandera coerce target ...
     #     """Validate title is not empty when present (null is allowed)."""
     #     return cast("Series[bool]", series.isna() | (series.str.len() >= 1))
 
     # @pa.check("author_orcids", name="orcid_format")
     # @classmethod
+    # Any: Pandera coerce target ...
     # def _check_author_orcids(cls, series: Any) -> Any:
     #     """Validate ORCID format in JSON array elements."""
     #     _pattern = re.compile(ORCID_PATTERN)

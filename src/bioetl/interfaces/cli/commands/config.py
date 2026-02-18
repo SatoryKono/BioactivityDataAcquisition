@@ -15,7 +15,7 @@ from bioetl.composition.entrypoints import get_config_service
 from bioetl.interfaces.cli.formatters import echo_error, echo_info
 
 
-def _config_to_dict(config: Any) -> dict[str, Any]:
+def _config_to_dict(config: Any) -> dict[str, Any]:  # Any: accepts Pydantic model...
     """Convert a Pydantic model or dataclass to a JSON-serializable dict."""
     if hasattr(config, "model_dump"):
         result: dict[str, Any] = config.model_dump()

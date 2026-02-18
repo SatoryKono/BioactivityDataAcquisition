@@ -6,8 +6,6 @@
 # Data License: Public Domain (US Government)
 
 source:
-    type: api
-    load_strategy: full
     batch_size: 100
     provider_config:
         provider: pubmed
@@ -18,6 +16,10 @@ source:
         client:
             timeout_sec: 60.0
             max_retries: 3
+        pagination:
+            page_size: 100          # Records per E-utilities efetch batch
+            id_batch_size: 100      # PMIDs per batch
+            strategy: offset
         default_email: "bioetl-bot@example.com"
 
     circuit_breaker:

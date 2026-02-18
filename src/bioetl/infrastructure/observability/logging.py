@@ -75,7 +75,7 @@ class StructlogLogger:
         """
         self._logger = logger
 
-    def bind(self, **kwargs: Any) -> Self:
+    def bind(self, **kwargs: Any) -> Self:  # Any: structlog-compatible a...
         """Bind additional context to the logger.
 
         Returns a new StructlogLogger instance with the bound context.
@@ -89,7 +89,7 @@ class StructlogLogger:
         bound = self._logger.bind(**kwargs)
         return self.__class__(bound)
 
-    def info(self, _event: str, **kwargs: Any) -> Any:
+    def info(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog context kwar...
         """Log an informational message.
 
         Args:
@@ -98,6 +98,7 @@ class StructlogLogger:
         """
         return self._logger.info(_event, **kwargs)
 
+    # Any: structlog context kwar...
     def warning(self, _event: str, **kwargs: Any) -> Any:
         """Log a warning message.
 
@@ -107,6 +108,7 @@ class StructlogLogger:
         """
         return self._logger.warning(_event, **kwargs)
 
+    # Any: structlog context kwar...
     def error(self, _event: str, **kwargs: Any) -> Any:
         """Log an error message.
 
@@ -116,6 +118,7 @@ class StructlogLogger:
         """
         return self._logger.error(_event, **kwargs)
 
+    # Any: structlog context kwar...
     def debug(self, _event: str, **kwargs: Any) -> Any:
         """Log a debug message.
 
@@ -125,6 +128,7 @@ class StructlogLogger:
         """
         return self._logger.debug(_event, **kwargs)
 
+    # Any: structlog context kwar...
     def exception(self, _event: str, **kwargs: Any) -> Any:
         """Log an exception with traceback.
 

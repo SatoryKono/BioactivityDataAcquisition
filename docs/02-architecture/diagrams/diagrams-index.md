@@ -1,10 +1,13 @@
 # BioETL Architecture Diagrams
 
-*Updated: 2026-02-09*
+*Updated: 2026-02-17*
 
-В каталоге 34 исходных файла диаграмм Mermaid, документирующих архитектуру BioETL.
+В каталоге 59 исходных файлов диаграмм Mermaid, документирующих архитектуру BioETL.
+Диаграммы 26–50 созданы на основе TOP-25 из 500 архитектурных предложений (см. `top-50-diagram-selection.md`).
 
 ## Diagram Overview
+
+### Foundation Diagrams (01–25)
 
 | # | File | Description |
 |---|------|-------------|
@@ -28,6 +31,7 @@
 | 09 | `09-full-er-diagram.mermaid` | Entity-relationship diagram |
 | 10 | `10-infrastructure-layer-class-diagram.mermaid` | Infrastructure layer classes |
 | 11 | `11-lock-acquisition-sequence.mermaid` | Lock acquisition sequence |
+| 12 | `12-local-deployment-architecture.mermaid` | Local deployment architecture (ADR-010 Local-Only) |
 | 13 | `13-domain-models-relationship.mermaid` | Domain model relationships |
 | 14 | `14-provider-health-states.mermaid` | Provider health states |
 | 15 | `15-dq-check-workflow.mermaid` | Data quality check workflow |
@@ -42,99 +46,78 @@
 | 24 | `24-hash-service-class.mermaid` | Hash service class diagram |
 | 25 | `25-circuit-breaker-observer-class.mermaid` | CircuitBreaker class diagram |
 
-## Rendering to PNG
+### TOP-25 Architecture Diagrams (26–50)
 
-### Option 1: Mermaid CLI (Recommended)
+Ranked by architectural importance (Priority score). PNG renderings in `png/` subdirectory.
 
-```bash
-# Install mermaid-cli
-npm install -g @mermaid-js/mermaid-cli
+| # | File | Type | Priority | Description |
+|---|------|------|----------|-------------|
+| 26 | `26-hexagonal-ports-adapters.mermaid` | flowchart | 9.38 | Hexagonal Architecture — all 24 ports mapped to adapter implementations |
+| 27 | `27-import-matrix-enforcement.mermaid` | flowchart | 9.00 | ARCH-001 Import Matrix — 5-layer dependency rules with allowed/forbidden imports |
+| 28 | `28-composition-root-di-graph.mermaid` | flowchart | 9.00 | Composition Root DI Graph — full dependency injection assembly |
+| 29 | `29-composite-pipeline-workflow.mermaid` | sequenceDiagram | 8.94 | Composite Pipeline (ADR-026) — Seed→Deps→FanOut→Merge→Gold |
+| 30 | `30-port-adapter-mapping.mermaid` | flowchart | 8.88 | Port → Adapter Reference — all 24 ports with concrete + NoOp implementations |
+| 31 | `31-pipeline-run-lifecycle.mermaid` | stateDiagram | 8.81 | PipelineRun Aggregate FSM — PENDING→LOCKING→PREFLIGHT→…→COMPLETED/FAILED |
+| 32 | `32-single-record-journey.mermaid` | flowchart | 8.75 | Single Record Journey — API→Bronze→Transform→Validate→Silver/Quarantine→Gold |
+| 33 | `33-cli-run-interaction.mermaid` | sequenceDiagram | 8.69 | CLI → PipelineRunnerService full interaction sequence |
+| 34 | `34-batch-processing-flow.mermaid` | sequenceDiagram | 8.63 | Batch Processing — BatchExecutor extract→transform→validate→write cycle |
+| 35 | `35-bootstrap-sequence.mermaid` | sequenceDiagram | 8.56 | Bootstrap 9-step Sequence — Logger→Config→Obs→Storage→HTTP→DataSource→Services→Runner |
+| 36 | `36-architecture-principles-mindmap.mermaid` | mindmap | 8.50 | Architecture Principles Mindmap — all ADRs and design principles |
+| 37 | `37-cli-entry-full-chain.mermaid` | sequenceDiagram | 8.44 | CLI Entry → Exit Code full chain with error handling |
+| 38 | `38-runtime-assembly-sequence.mermaid` | sequenceDiagram | 8.38 | Runtime Assembly — assembly.py phases 1–8 factory orchestration |
+| 39 | `39-medallion-invariants.mermaid` | flowchart | 8.31 | Medallion Invariants — ARCH-007 RunType clear policy (INCREMENTAL/BACKFILL/REBUILD) |
+| 40 | `40-application-core-collaboration.mermaid` | flowchart | 8.25 | Application Core — PipelineRunner orchestrating all services |
+| 41 | `41-error-classification-tree.mermaid` | flowchart | 8.19 | Error Classification — HTTP errors → Domain errors → Actions (retry/abort/quarantine) |
+| 42 | `42-pipeline-runner-class.mermaid` | classDiagram | 8.13 | PipelineRunner Class — all 14 DI dependencies |
+| 43 | `43-fan-out-fan-in-pattern.mermaid` | sequenceDiagram | 8.06 | Fan-Out/Fan-In — asyncio.gather parallel enrichment |
+| 44 | `44-cross-provider-enrichment.mermaid` | flowchart | 8.00 | Cross-Provider Enrichment — 5-provider publication flow |
+| 45 | `45-template-method-transformer.mermaid` | classDiagram | 7.94 | Template Method Pattern — BaseTransformer hierarchy with 11 concrete transformers |
+| 46 | `46-yaml-config-resolution.mermaid` | flowchart | 7.38 | YAML Config Resolution — hierarchical merge (defaults→provider→entity→inline) |
+| 47 | `47-publication-merge-sources.mermaid` | sequenceDiagram | 7.38 | Publication Composite — multi-source merge with field priority resolution |
+| 48 | `48-composite-phase-lifecycle.mermaid` | stateDiagram | 7.31 | Composite Pipeline FSM — CompositePipelineState 10-state lifecycle |
+| 49 | `49-composite-runner-class.mermaid` | classDiagram | 7.31 | CompositePipelineRunner — component diagram with all services |
+| 50 | `50-exception-hierarchy.mermaid` | flowchart | 7.25 | Exception Hierarchy — BioETLError full tree (Critical/Recoverable/DataQuality) |
 
-# Render single diagram
-mmdc -i 01-full-system-component.mermaid \
-     -o 01-full-system-component.png \
-     -w 1200 \
-     -b transparent
+## Deprecated / Historical
 
-# Render all diagrams
-for f in *.mermaid; do
-    mmdc -i "$f" -o "${f%.mermaid}.png" -w 1200 -b transparent
-done
-```
+- Historical filename: `12-full-aws-deployment.mermaid` (deprecated naming).
+- Active diagram: `12-local-deployment-architecture.mermaid` in `mermaid/`.
+- Context source: [ADR-010 Local-Only Deployment](../decisions/ADR-010-local-only-deployment.md).
 
-### Option 2: Python Script
+## Definition of Done для новой диаграммы
 
-Use the included `render_diagrams.py` script:
+- [ ] Добавлен исходник `.mermaid` в `docs/02-architecture/diagrams/mermaid/`.
+- [ ] Сгенерирован `.png` в `docs/02-architecture/diagrams/png/`.
+- [ ] Добавлена строка в этот индекс (`diagrams-index.md`).
+- [ ] На архитектурной странице `docs/02-architecture/*.md` есть контекстный абзац со ссылкой на диаграмму.
+
+## Правило поддержки актуальности индекса
+
+При добавлении/удалении `*.mermaid` файлов в `mermaid/` обязательно обновлять таблицу **Diagram Overview** в том же PR.
+
+Полуавтоматическая проверка:
 
 ```bash
 cd docs/02-architecture/diagrams
-python render_diagrams.py
+python - <<'PY'
+from pathlib import Path
+import re
+
+idx = Path("diagrams-index.md").read_text(encoding="utf-8")
+table_files = sorted(set(re.findall(r"`([^`]+\.mermaid)`", idx)))
+disk_files = sorted(p.name for p in Path("mermaid").glob("*.mermaid"))
+
+missing_in_index = sorted(set(disk_files) - set(table_files))
+missing_on_disk = sorted(set(table_files) - set(disk_files))
+
+print("Missing in index:", missing_in_index or "none")
+print("Missing on disk:", missing_on_disk or "none")
+PY
 ```
 
-### Option 3: VS Code Extension
+## Rendering to PNG
 
-1. Install "Markdown Preview Mermaid Support" extension
-2. Open any `.mermaid` file
-3. Use the preview pane to view diagrams
-4. Right-click to export as PNG/SVG
-
-### Option 4: Online Viewer
-
-1. Visit [Mermaid Live Editor](https://mermaid.live/)
-2. Paste diagram content
-3. Export as PNG/SVG
-
-## Style Configuration
-
-All diagrams use the following Mermaid theme configuration:
-
+```bash
+cd docs/02-architecture/diagrams
+./render_diagrams.sh
 ```
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
-```
-
-## Key Parameters Referenced
-
-| Parameter | Value | Source |
-|-----------|-------|--------|
-| Lock TTL | 90s | RuntimeConfig |
-| Heartbeat Interval | 30s | LockManager |
-| Circuit Breaker Threshold | 5 failures | CircuitBreaker |
-| Recovery Timeout | 300s (5 min) | CircuitBreaker |
-| DQ Soft Threshold | 5% | DQConfig |
-| DQ Hard Threshold | 20% | DQConfig |
-| Bronze Retention | 90 days | MedallionPolicy |
-| Quarantine Retention | 30 days | QuarantineWriter |
-| Silver/Gold Retention | Permanent | StoragePort |
-
-## Architecture Layers
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     INTERFACES LAYER                        │
-│  CLI, Orchestration (Signal Handling)                       │
-├─────────────────────────────────────────────────────────────┤
-│                    APPLICATION LAYER                        │
-│  PipelineRunner, PipelineExecutor, RecordProcessor,         │
-│  Transformers, Services (Lock, Checkpoint, DQ)              │
-├─────────────────────────────────────────────────────────────┤
-│                      DOMAIN LAYER                           │
-│  Ports (Protocols), Entities, Config, Types                 │
-├─────────────────────────────────────────────────────────────┤
-│                   INFRASTRUCTURE LAYER                      │
-│  Adapters (ChEMBL, PubChem, UniProt, PubMed, CrossRef,      │
-│  OpenAlex, Semantic Scholar),                                │
-│  Storage (Bronze, Silver, Gold), Locking, Observability     │
-├─────────────────────────────────────────────────────────────┤
-│                    COMPOSITION LAYER                        │
-│  Bootstrap, Factories, Registry (DI Container)              │
-└─────────────────────────────────────────────────────────────┘
-```
-
-## Validation
-
-After rendering, validate diagrams against:
-
-- [ ] Class names match `src/bioetl/` codebase
-- [ ] Lock parameters: TTL=90s, Heartbeat=30s
-- [ ] Circuit Breaker: threshold=5, timeout=300s
-- [ ] Retention: Bronze=90d, Silver=permanent, Quarantine=30d

@@ -84,6 +84,7 @@ class ValueObject(ABC, Generic[T]):
         """String representation of the value."""
         return str(self._value)
 
+    # Any: standard __setattr__ s...
     def __setattr__(self, name: str, value: Any) -> None:
         """Prevent mutation of Value Object."""
         if hasattr(self, "_value"):

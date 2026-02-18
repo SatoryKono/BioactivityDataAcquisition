@@ -25,6 +25,8 @@ from bioetl.domain.events import PipelineEvent
 if TYPE_CHECKING:
     from types import TracebackType
 
+    from opentelemetry.trace import Span
+
     from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
     from bioetl.domain.types import RunID, RunType
 
@@ -60,20 +62,20 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         self.pipeline_name = pipeline_name
         self.run_id = str(run_id)
         self.run_type = run_type.value
-        self.metrics = metrics
-        self.logger = logger
-        self.tracer = tracer
+        self._metrics = metrics
+        self._logger = logger
+        self._tracer = tracer
 
         self.start_time: float | None = None
-        self.span: Any = None
+        self.span: Span | None = None
 
     def __enter__(self) -> PipelineObserver:
         """Start observation (Span + Log + Metric)."""
         self.start_time = time.monotonic()
 
         # 1. Start Trace Span
-        if self.tracer:
-            otel_tracer = self.tracer.get_tracer("bioetl.pipeline")
+        if self._tracer:
+            otel_tracer = self._tracer.get_tracer("bioetl.pipeline")
             self.span = otel_tracer.start_as_current_span(
                 f"pipeline.{self.pipeline_name}",
                 attributes={
@@ -85,7 +87,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
             self.span.__enter__()
 
         # 2. Log Start
-        self.logger.info(PipelineEvent.START, run_type=self.run_type)
+        self._logger.info(PipelineEvent.START, run_type=self.run_type)
 
         return self
 
@@ -110,7 +112,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
                 status = "failed"
 
         # 1. Metrics (Histogram)
-        self.metrics.observe_histogram(
+        self._metrics.observe_histogram(
             "bioetl_pipeline_duration_seconds",
             duration,
             labels={
@@ -119,7 +121,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
                 "status": status,
             },
         )
-        self.metrics.increment_counter(
+        self._metrics.increment_counter(
             "bioetl_pipeline_runs_total",
             1,
             labels={
@@ -135,16 +137,16 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
             "status": status,
         }
         if status == "failed":
-            self.logger.error(
+            self._logger.error(
                 PipelineEvent.FAILED,
                 **log_ctx,
                 error=str(exc_val),
                 error_type=type(exc_val).__name__,
             )
         elif status == "shutdown":
-            self.logger.warning(PipelineEvent.SHUTDOWN, **log_ctx)
+            self._logger.warning(PipelineEvent.SHUTDOWN, **log_ctx)
         else:
-            self.logger.info(PipelineEvent.COMPLETE, **log_ctx)
+            self._logger.info(PipelineEvent.COMPLETE, **log_ctx)
 
         # 3. End Trace Span (O3: handle close errors gracefully)
         if self.span:
@@ -152,7 +154,8 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
                 self.span.set_attribute("bioetl.status", status)
                 self.span.set_attribute("bioetl.duration_ms", duration * 1000)
                 if status == "failed":
-                    self.span.record_exception(exc_val)
+                    if exc_val is not None:
+                        self.span.record_exception(exc_val)
                     self.span.set_attribute("error", True)
                 self.span.__exit__(exc_type, exc_val, exc_tb)
             except Exception:
@@ -168,7 +171,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         event_name: str,
         phase: LifecyclePhase,
         level: str = "info",
-        **extra: Any,
+        **extra: Any,  # Any: structlog-compatible context kwargs
     ) -> None:
         """Emit a structured lifecycle event through unified observability.
 
@@ -188,7 +191,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
             **extra,
         }
 
-        log_method = getattr(self.logger, level, self.logger.info)
+        log_method = getattr(self._logger, level, self._logger.info)
         log_method(event_name, **ctx)
 
         # Add span event if tracing is active
@@ -201,7 +204,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
     def emit_phase_started(
         self,
         phase: LifecyclePhase,
-        **extra: Any,
+        **extra: Any,  # Any: structlog-compatible context kwargs
     ) -> float:
         """Emit phase start event and return start timestamp.
 
@@ -220,7 +223,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         phase: LifecyclePhase,
         start_time: float,
         success: bool = True,
-        **extra: Any,
+        **extra: Any,  # Any: structlog-compatible context kwargs
     ) -> None:
         """Emit phase completion event with duration.
 
@@ -243,7 +246,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         )
 
         # Record phase duration metric
-        self.metrics.observe_histogram(
+        self._metrics.observe_histogram(
             "bioetl_phase_duration_seconds",
             duration,
             labels={
@@ -258,7 +261,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         component: str,
         healthy: bool,
         duration_ms: float | None = None,
-        **extra: Any,
+        **extra: Any,  # Any: structlog-compatible context kwargs
     ) -> None:
         """Emit health check result for a component.
 
@@ -280,7 +283,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
             **extra,
         )
 
-        self.metrics.set_gauge(
+        self._metrics.set_gauge(
             "pipeline_health_check_passed",
             1.0 if healthy else 0.0,
             {"pipeline": self.pipeline_name, "component": component},
@@ -293,7 +296,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         anomaly_type: str,
         current_value: float,
         baseline_mean: float | None = None,
-        **extra: Any,
+        **extra: Any,  # Any: structlog-compatible context kwargs
     ) -> None:
         """Emit data quality anomaly detection event.
 
@@ -318,7 +321,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
             **extra,
         )
 
-        self.metrics.increment_counter(
+        self._metrics.increment_counter(
             "dq_anomaly_detected",
             1,
             {
@@ -335,7 +338,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         table: str,
         files_removed: int,
         success: bool = True,
-        **extra: Any,
+        **extra: Any,  # Any: structlog-compatible context kwargs
     ) -> None:
         """Emit VACUUM operation result.
 
@@ -358,7 +361,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         )
 
         if success:
-            self.metrics.increment_counter(
+            self._metrics.increment_counter(
                 "vacuum_files_removed",
                 files_removed,
                 {"pipeline": self.pipeline_name, "layer": layer},

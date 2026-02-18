@@ -51,18 +51,25 @@ field_validations:
     nullable: true
     error_message: "Publication year out of valid range"
 
-  - field: pub_type
+  - field: publication_year
+    type: range
+    min: 1950
+    nullable: true
+    severity: warn
+    error_message: "Publication year before 1950 — will be filtered at Gold stage"
+
+  - field: publication_type
     type: enum
     allowed:
-      - Journal Article
-      - Review
-      - Letter
-      - Editorial
-      - Clinical Trial
-      - Meta-Analysis
-      - Case Reports
-      - Comparative Study
-      - Evaluation Study
+      - journal-article
+      - review
+      - letter
+      - editorial
+      - clinical-trial
+      - meta-analysis
+      - case-reports
+      - comparative-study
+      - evaluation-study
     nullable: true
 
   - field: pmc_id
@@ -114,3 +121,12 @@ cross_field_validations:
 # Conditional Validations
 # =============================================================================
 conditional_validations: []
+
+# =============================================================================
+# Key Nullability Policy for Silver writes
+# =============================================================================
+# Documented per pipeline: merge(primary) and partition key nullability.
+key_nullability:
+  - field: pmid
+    key_type: merge
+    nullable: false

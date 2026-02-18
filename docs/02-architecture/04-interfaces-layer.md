@@ -101,7 +101,7 @@ ______________________________________________________________________
 | Диаграмма               | Файл                                                                                               | Описание                              |
 | ----------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------- |
 | Five Layer Architecture | [diagrams/mermaid/01_five_layer_architecture.mmd](diagrams/mermaid/01_five_layer_architecture.mmd) | Полная архитектура с Interfaces слоем |
-| Layers Interaction      | [05-layers-interaction.mermaid](diagrams/05-layers-interaction.mermaid)                            | Взаимодействие слоёв                  |
+| Layers Interaction      | [05-layers-interaction.mermaid](diagrams/mermaid/05-layers-interaction.mermaid)                    | Взаимодействие слоёв                  |
 | Graceful Shutdown       | [diagrams/mermaid/24_graceful_shutdown.mmd](diagrams/mermaid/24_graceful_shutdown.mmd)             | Sequence diagram graceful shutdown    |
 
 ### Связанные ADR

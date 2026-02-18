@@ -187,12 +187,46 @@ TARGET_COMPONENT_RELATIONSHIPS: frozenset[str] = frozenset(
 
 PUBLICATION_TYPES: frozenset[str] = frozenset(
     [
-        "PUBLICATION",
-        "PATENT",
-        "DATASET",
-        "BOOK",
+        # Canonical kebab-case values after normalization by
+        # normalize_publication_type() (see domain.mapping.publication_type_mapping).
+        "journal-article",
+        "patent",
+        "dataset",
+        "book",
+        "review",
+        "letter",
+        "editorial",
+        "clinical-trial",
+        "meta-analysis",
+        "case-reports",
+        "comparative-study",
+        "evaluation-study",
+        "preprint",
+        "book-chapter",
+        "proceedings-article",
+        "posted-content",
+        "report",
+        "standard",
+        "dissertation",
+        "other",
     ]
 )
+
+# =============================================================================
+# CANONICAL VALIDATION BOUNDS (Gold / Composite layer)
+# =============================================================================
+# Unified bounds for fields shared across providers (ChEMBL, PubChem).
+# Silver schemas retain provider-specific bounds; these apply to Gold output.
+# RF-NORM-02: Normalization Unification Plan.
+
+CANONICAL_MOLECULAR_WEIGHT_RANGE: tuple[float, float] = (0.0, 100_000.0)
+CANONICAL_HBA_COUNT_RANGE: tuple[int, int] = (0, 200)
+CANONICAL_HBD_COUNT_RANGE: tuple[int, int] = (0, 200)
+CANONICAL_ROTATABLE_BOND_COUNT_RANGE: tuple[int, int] = (0, 500)
+CANONICAL_HEAVY_ATOM_COUNT_RANGE: tuple[int, int] = (0, 2000)
+CANONICAL_LOGP_RANGE: tuple[float, float] = (-30.0, 30.0)
+CANONICAL_POLAR_SURFACE_AREA_RANGE: tuple[float, float] = (0.0, 5000.0)
+CANONICAL_SMILES_MAX_LENGTH: int = 20_000
 
 # =============================================================================
 # EXPORTS (for explicit re-export in __init__.py)
@@ -206,6 +240,15 @@ __all__ = [
     # Assay enums
     "ASSAY_TYPES",
     "BAO_ID_PATTERN",
+    # Canonical validation bounds (Gold / Composite)
+    "CANONICAL_HBA_COUNT_RANGE",
+    "CANONICAL_HBD_COUNT_RANGE",
+    "CANONICAL_HEAVY_ATOM_COUNT_RANGE",
+    "CANONICAL_LOGP_RANGE",
+    "CANONICAL_MOLECULAR_WEIGHT_RANGE",
+    "CANONICAL_POLAR_SURFACE_AREA_RANGE",
+    "CANONICAL_ROTATABLE_BOND_COUNT_RANGE",
+    "CANONICAL_SMILES_MAX_LENGTH",
     "CELLOSAURUS_ID_PATTERN",
     # Regex patterns
     "CHEMBL_ID_PATTERN",

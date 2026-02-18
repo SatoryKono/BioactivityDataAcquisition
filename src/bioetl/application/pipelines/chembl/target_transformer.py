@@ -20,7 +20,7 @@ from bioetl.domain.value_objects import TaxonomyId
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import BronzeRecord, SilverRecord
+    from bioetl.domain.types import BronzeRecord, PrimaryId, SilverRecord
 
 
 class TargetTransformer(BaseChemblTransformer):
@@ -126,7 +126,7 @@ class TargetTransformer(BaseChemblTransformer):
     def _extract_business_data(
         self,
         record: BronzeRecord,
-        primary_id: Any,
+        primary_id: PrimaryId,
     ) -> dict[str, Any]:
         """Extract Target business data from bronze record.
 
@@ -145,6 +145,10 @@ class TargetTransformer(BaseChemblTransformer):
 
         # Extract flattened components
         flattened_components = self._flatten_target_components(target_components)
+        serialized_flattened_components = {
+            key: self.serialize_json_list(value) if isinstance(value, list) else None
+            for key, value in flattened_components.items()
+        }
 
         # Extract primary component_id (first element) for enricher join key
         component_ids = flattened_components.get("component_ids")
@@ -184,5 +188,5 @@ class TargetTransformer(BaseChemblTransformer):
             "target_component_synonyms": self._aggregate_synonyms(target_components),
             "cross_references": self._aggregate_component_xrefs(target_components),
             # Flattened components
-            **flattened_components,
+            **serialized_flattened_components,
         }

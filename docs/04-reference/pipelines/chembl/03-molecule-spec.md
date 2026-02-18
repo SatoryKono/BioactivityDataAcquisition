@@ -1,6 +1,6 @@
 # ChEMBL Molecule Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.18*
+*Version 1.2.0 | Aligned with RULES.md v5.20*
 
 ______________________________________________________________________
 
@@ -43,9 +43,9 @@ Molecules represent **chemical compounds** in ChEMBL with their structural and p
 ```
 molecule
     │
-    ├──◄──FK──activity.molecule_chembl_id (1:M)
+    ├──◄──FK──activity.molecule_id (1:M)
     │
-    ├──◄──FK──compound_record.molecule_chembl_id (1:M)
+    ├──◄──FK──compound_record.molecule_id (1:M)
     │
     └── molecule_hierarchy (nested)
         ├── parent_chembl_id
@@ -72,8 +72,8 @@ ______________________________________________________________________
 from chembl_webresource_client.new_client import new_client
 
 molecule = new_client.molecule
-# Filter by input CSV molecule_chembl_ids
-results = molecule.filter(molecule_chembl_id__in=chembl_ids)
+# Filter by input CSV molecule_ids
+results = molecule.filter(molecule_id__in=chembl_ids)
 ```
 
 ### 3.2. Complete API Fields (23 поля)
@@ -82,7 +82,7 @@ results = molecule.filter(molecule_chembl_id__in=chembl_ids)
 
 | #   | API Field             | JSON Type | Nullable | Nested | Description          | Example            |
 | --- | --------------------- | --------- | -------- | ------ | -------------------- | ------------------ |
-| 1   | `molecule_chembl_id`  | string    | No       | -      | Primary key          | `"CHEMBL25"`       |
+| 1   | `molecule_id`         | string    | No       | -      | Primary key          | `"CHEMBL25"`       |
 | 2   | `pref_name`           | string    | Yes      | -      | Preferred name       | `"ASPIRIN"`        |
 | 3   | `molecule_type`       | string    | Yes      | -      | Type                 | `"Small molecule"` |
 | 4   | `max_phase`           | number    | Yes      | -      | Clinical phase       | `4`                |
@@ -143,7 +143,7 @@ ______________________________________________________________________
 
 | Parameter           | Value                    |
 | ------------------- | ------------------------ |
-| **Entity ID Field** | `molecule_chembl_id`     |
+| **Entity ID Field** | `molecule_id`            |
 | **ID Source**       | `from_api`               |
 | **Format**          | ChEMBL ID (CHEMBL[0-9]+) |
 
@@ -151,7 +151,7 @@ ______________________________________________________________________
 
 | Field                          | Normalization       | Before               | After                  |
 | ------------------------------ | ------------------- | -------------------- | ---------------------- |
-| `molecule_chembl_id`           | Validate regex      | `"CHEMBL25"`         | `"CHEMBL25"`           |
+| `molecule_id`                  | Validate regex      | `"CHEMBL25"`         | `"CHEMBL25"`           |
 | `pref_name`                    | strip().upper()     | `" aspirin "`        | `"ASPIRIN"`            |
 | `max_phase`                    | Cast to float       | `"4"`                | `4.0`                  |
 | `structure_standard_inchi_key` | Extract from nested | `{...}`              | `"BSYNRYMUTXBXSQ-..."` |
@@ -182,7 +182,7 @@ hash_fields = [
     "first_in_class",
     "inorganic_flag",
     "max_phase",
-    "molecule_chembl_id",
+    "molecule_id",
     "molecule_hierarchy",
     "molecule_properties",
     "molecule_structures",
@@ -211,6 +211,8 @@ ______________________________________________________________________
 
 ### 5.1. Pandera Schema
 
+> Migration note: public Pandera contract uses canonical PK names; legacy aliases are accepted only during transition via ingestion/transform alias mapping and will be removed in the next major release.
+
 ```python
 # src/bioetl/domain/schemas/chembl/molecule.py
 # 52 entity-specific fields (excluding ETL metadata from ETLRecordSchema)
@@ -220,7 +222,7 @@ class MoleculeSchema(ETLRecordSchema):
     """Molecule validation schema for Silver layer."""
 
     # === Identifiers ===
-    molecule_chembl_id: Series[str] = pa.Field(
+    molecule_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=CHEMBL_ID_PATTERN,
         description="ChEMBL ID.",
@@ -244,10 +246,18 @@ class MoleculeSchema(ETLRecordSchema):
     molecule_type: Series[str] | None = pa.Field(
         nullable=True,
         isin=[
-            "Small molecule", "Antibody", "Antibody drug conjugate",
-            "Protein", "Oligonucleotide", "Oligosaccharide",
-            "Cell", "Enzyme", "Unknown", "Unclassified",
-            "Inorganic small molecule", "Polymeric small molecule",
+            "Small molecule",
+            "Antibody",
+            "Antibody drug conjugate",
+            "Protein",
+            "Oligonucleotide",
+            "Oligosaccharide",
+            "Cell",
+            "Enzyme",
+            "Unknown",
+            "Unclassified",
+            "Inorganic small molecule",
+            "Polymeric small molecule",
         ],
     )
     first_approval: Series[float] | None = pa.Field(nullable=True)
@@ -268,7 +278,9 @@ class MoleculeSchema(ETLRecordSchema):
     # === Other Properties ===
     chirality: Series[int] | None = pa.Field(nullable=True, isin=[-1, 0, 1, 2])
     dosed_ingredient: Series[int] | None = pa.Field(nullable=True, isin=[0, 1])
-    availability_type: Series[float] | None = pa.Field(nullable=True, isin=[-2, -1, 0, 1, 2])
+    availability_type: Series[float] | None = pa.Field(
+        nullable=True, isin=[-2, -1, 0, 1, 2]
+    )
     usan_year: Series[float] | None = pa.Field(nullable=True)
     usan_stem: Series[str] | None = pa.Field(nullable=True)
     usan_substem: Series[str] | None = pa.Field(nullable=True)
@@ -278,13 +290,16 @@ class MoleculeSchema(ETLRecordSchema):
 
     # === Hierarchy Fields (flattened from molecule_hierarchy) ===
     hierarchy_parent_chembl_id: Series[str] | None = pa.Field(
-        nullable=True, str_matches=CHEMBL_ID_PATTERN,
+        nullable=True,
+        str_matches=CHEMBL_ID_PATTERN,
     )
     hierarchy_active_chembl_id: Series[str] | None = pa.Field(
-        nullable=True, str_matches=CHEMBL_ID_PATTERN,
+        nullable=True,
+        str_matches=CHEMBL_ID_PATTERN,
     )
     hierarchy_child_chembl_id: Series[str] | None = pa.Field(
-        nullable=True, str_matches=CHEMBL_ID_PATTERN,
+        nullable=True,
+        str_matches=CHEMBL_ID_PATTERN,
     )
 
     # === Property Fields (flattened from molecule_properties) ===
@@ -306,7 +321,8 @@ class MoleculeSchema(ETLRecordSchema):
     canonical_smiles: Series[str] | None = pa.Field(nullable=True)
     standard_inchi: Series[str] | None = pa.Field(nullable=True)
     inchikey: Series[str] | None = pa.Field(
-        nullable=True, str_matches=INCHI_KEY_REGEX_PATTERN,
+        nullable=True,
+        str_matches=INCHI_KEY_REGEX_PATTERN,
     )
 
     # === Complex Fields (JSON Strings) ===
@@ -327,7 +343,7 @@ class MoleculeSchema(ETLRecordSchema):
 
 | Field                          | Type  | Nullable | Constraints             | DQ Level | Failure Action |
 | ------------------------------ | ----- | -------- | ----------------------- | -------- | -------------- |
-| `molecule_chembl_id`           | str   | No       | regex `^CHEMBL\d+$`     | CRITICAL | Quarantine     |
+| `molecule_id`                  | str   | No       | regex `^CHEMBL\d+$`     | CRITICAL | Quarantine     |
 | `structure_standard_inchi_key` | str   | Yes      | InChI Key format        | WARNING  | Log            |
 | `pref_name`                    | str   | Yes      | -                       | INFO     | Log            |
 | `max_phase`                    | float | Yes      | isin [-1,0,0.5,1,2,3,4] | WARNING  | Log            |
@@ -336,11 +352,11 @@ class MoleculeSchema(ETLRecordSchema):
 
 ### 5.3. DQ Thresholds
 
-| Threshold           | Value                      | Action            |
-| ------------------- | -------------------------- | ----------------- |
-| Soft                | 5%                         | Warning, continue |
-| Hard                | 20%                        | Fail batch        |
-| Critical field null | molecule_chembl_id is null | Fail immediately  |
+| Threshold           | Value               | Action            |
+| ------------------- | ------------------- | ----------------- |
+| Soft                | 5%                  | Warning, continue |
+| Hard                | 20%                 | Fail batch        |
+| Critical field null | molecule_id is null | Fail immediately  |
 
 ______________________________________________________________________
 
@@ -360,7 +376,7 @@ Retention: 90 days → Archive
 ```
 Path: silver/chembl/molecule/
 Format: Delta Lake (delta-rs)
-Mode: Merge on [molecule_chembl_id]
+Mode: Merge on [molecule_id]
 Partition: ["molecule_type"]
 Retention: Permanent
 ```
@@ -414,7 +430,7 @@ entity_type: molecule
 version: "1.2.0"
 description: "Extract molecules from ChEMBL API"
 
-primary_keys: ["molecule_chembl_id"]
+primary_keys: ["molecule_id"]
 silver_table: "chembl_molecule"
 gold_table: "chembl_molecule"
 
@@ -422,14 +438,14 @@ source_file: ../../sources/chembl.yaml
 
 gold_filters:
   required_fields:
-    - molecule_chembl_id
+    - molecule_id
 
 sink:
   bronze:
     path: "data/output/bronze"
   silver:
     path: "data/output/silver"
-    primary_key: ["molecule_chembl_id"]
+    primary_key: ["molecule_id"]
     partition_by: ["molecule_type"]
     csv_export:
       path: "data/output/csv/silver"
@@ -441,8 +457,8 @@ sink:
 input_filter:
   enabled: true
   source_path: "data/input/molecule.csv"
-  column_name: "molecule_chembl_id"
-  filter_field: "molecule_chembl_id"
+  column_name: "molecule_id"
+  filter_field: "molecule_id"
   batch_size: 20
 ```
 

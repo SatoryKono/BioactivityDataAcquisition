@@ -30,7 +30,7 @@ from bioetl.domain.config._converters import (
     freeze_sequences,
     resolve_loading_strategy,
 )
-from bioetl.domain.config.dq import DQConfig, DQReportConfig
+from bioetl.domain.config.dq import DQConfig, DQReportConfig, KeyNullabilityRule
 from bioetl.domain.config.memory import MemoryConfig
 from bioetl.domain.config.pipeline import PipelineConfig
 from bioetl.domain.config.runtime import RuntimeConfig
@@ -45,23 +45,17 @@ from bioetl.domain.config.validation import (
 
 __all__ = [
     "DEFAULT_VALIDATION_CONFIG",
-    # Validation
     "ConditionalValidation",
     "CrossFieldValidation",
-    # Data Quality
     "DQConfig",
     "DQReportConfig",
     "FieldValidation",
-    # Memory
+    "KeyNullabilityRule",
     "MemoryConfig",
-    # Pipeline
     "PipelineConfig",
-    # Runtime
     "RuntimeConfig",
-    # Table
     "TableConfig",
     "ValidationConfig",
-    # Converters (public utilities)
     "convert_write_mode",
     "freeze_sequences",
     "resolve_loading_strategy",

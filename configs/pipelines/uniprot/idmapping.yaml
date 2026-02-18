@@ -10,10 +10,12 @@
 pipeline_name: uniprot_idmapping
 provider: uniprot
 entity_type: idmapping
+schema_file: ../../schemas/uniprot/idmapping.yaml
 version: "1.1.0"
 description: "Maps ChEMBL target IDs to UniProt accessions via UniProt ID Mapping API"
 
-primary_keys: ["target_id"]
+business_primary_keys: ["target_id"]
+technical_primary_key: "entity_id"
 silver_table: "uniprot_idmapping"
 gold_table: "uniprot_idmapping"
 
@@ -21,11 +23,6 @@ gold_table: "uniprot_idmapping"
 
 # Entity-specific source overrides for ID Mapping
 source:
-  type: file
-  load_strategy: full
-  # Input CSV file containing ChEMBL target IDs
-  input_path: data/input/target.csv
-
   # ID Mapping API configuration
   api:
     base_url: https://rest.uniprot.org
@@ -62,4 +59,10 @@ sink:
     # NOTE: enabled: false is not yet implemented in code, so Bronze is still written
   silver:
     partition_by: []  # No partitioning - small dataset
-  gold: {}
+  gold:
+    mode: scd2
+    scd_config:
+      valid_from: _valid_from
+      valid_to: _valid_to
+      is_current: _is_current
+      version: _version

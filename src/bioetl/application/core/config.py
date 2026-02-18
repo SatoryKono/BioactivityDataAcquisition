@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config import DQConfig, MemoryConfig, TableConfig
+from bioetl.domain.types import ArrowSchema
 
 if TYPE_CHECKING:
+    import pandera
+
     from bioetl.domain.types import RunType
 
 
@@ -19,12 +22,14 @@ class RecordProcessorConfig:
     pipeline_name: str
     provider: str
     entity_type: str
-    silver_schema: Any
-    gold_schema: Any
+    silver_schema: ArrowSchema | None
+    gold_schema: type[pandera.DataFrameModel]
     dq_config: DQConfig | None = None
     table_config: TableConfig = field(default_factory=TableConfig)
     memory_config: MemoryConfig = field(default_factory=MemoryConfig)
     column_groups: tuple[ColumnGroupConfig, ...] = ()
+    # SCD Type 2 configuration (Gold layer)
+    scd_config: dict[str, str] | None = None
     # DQ report output paths (for flat_structure support)
     bronze_output_path: str | None = None
     silver_output_path: str | None = None

@@ -72,6 +72,7 @@ class SilverDQCheckType(StrEnum):
     SCHEMA_DRIFT = "schema_drift"
     DEDUPLICATION_STATS = "deduplication_stats"
     CONTENT_HASH_INTEGRITY = "content_hash_integrity"
+    KEY_NULLABILITY = "key_nullability"
 
 
 # =============================================================================
@@ -296,6 +297,11 @@ class BusinessRuleResult:
     description: str
     passed: bool
     violations: int | None  # None indicates unknown (e.g., exception during check)
+    config_path: str | None = None
+    layer: str | None = None
+    field: str | None = None
+    severity: str | None = None
+    decision: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

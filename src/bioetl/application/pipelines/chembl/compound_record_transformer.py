@@ -16,7 +16,7 @@ from bioetl.domain.entities import CompoundRecord
 from bioetl.domain.transformations import safe_int
 
 if TYPE_CHECKING:
-    from bioetl.domain.types import BronzeRecord
+    from bioetl.domain.types import BronzeRecord, PrimaryId
 
 
 class CompoundRecordTransformer(BaseChemblTransformer):
@@ -32,7 +32,7 @@ class CompoundRecordTransformer(BaseChemblTransformer):
     def _extract_business_data(
         self,
         record: BronzeRecord,
-        primary_id: Any,
+        primary_id: PrimaryId,
     ) -> dict[str, Any]:
         """Extract CompoundRecord business data from bronze record.
 

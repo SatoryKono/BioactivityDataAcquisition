@@ -149,6 +149,11 @@ composite:
     # Multiple sources with field overlap. Seed values take priority.
     preserve_all_sources: false
 
+    # Field renames for namespace disambiguation
+    field_mappings:
+      # target_component.description conflicts with target.description
+      "chembl.target_component.description": "component_description"
+
     # Output paths for merged data
     output:
       silver: data/output/silver/composite/target
@@ -232,7 +237,7 @@ composite:
       - name: enriched_components
         fields:
           - component_type
-          - description
+          - component_description
           - protein_classification_id
           - protein_classification_ids
         provider_order: [chembl]
@@ -353,12 +358,11 @@ composite:
   # ---------------------------------------------------------------------------
   # Data Quality Configuration
   # ---------------------------------------------------------------------------
+  # Thresholds, required_fields, and field_validations externalized to:
+  #   configs/quality/entities/composite/target.yaml
+  # Only pipeline-specific enricher_overrides remain inline.
   dq_overrides:
-    # Composite-level thresholds (applied to merge result)
-    soft_fail_threshold: 0.10  # 10% errors = warning
-    hard_fail_threshold: 0.30  # 30% errors = failure
-
-    # Per-dependency threshold overrides
+    # Per-dependency threshold overrides (pipeline-specific)
     enricher_overrides:
       # Many non-protein targets -> UniProt mapping_status="not_found" is expected
       uniprot_idmapping:
@@ -368,69 +372,6 @@ composite:
       uniprot_protein:
         soft_fail_threshold: 0.20  # 20% missing is acceptable
         hard_fail_threshold: 0.60  # Only fail if >60% errors
-
-    # Required fields in final Gold output
-    required_fields:
-      - target_id
-      - pref_name
-
-    # Field-level validation rules
-    field_validations:
-      target_id:
-        type: string
-        nullable: false
-        pattern: "^CHEMBL\\d+$"
-        description: "ChEMBL target ID (primary key)"
-
-      uniprot_accession:
-        type: string
-        nullable: true
-        pattern: "^[A-Z0-9]{6,10}$"
-        description: "UniProt accession (null if not_found)"
-
-      mapping_status:
-        type: enum
-        nullable: true
-        allowed: ["found", "not_found", "error"]
-        description: "UniProt ID mapping resolution status"
-
-      target_type:
-        type: string
-        nullable: true
-        description: "Target classification (SINGLE PROTEIN, ORGANISM, etc.)"
-
-      taxonomy_id:
-        type: integer
-        nullable: true
-        min_value: 1
-        description: "NCBI Taxonomy ID"
-
-      function_comment:
-        type: string
-        nullable: true
-        description: "Functional description from UniProt FUNCTION comment"
-
-      go_terms:
-        type: string
-        nullable: true
-        description: "Gene Ontology terms (JSON-serialized list)"
-
-      disease_involvement:
-        type: string
-        nullable: true
-        description: "Disease associations from UniProt DISEASE comment"
-
-      subcellular_location:
-        type: string
-        nullable: true
-        description: "Subcellular localization from UniProt"
-
-      annotation_score:
-        type: integer
-        nullable: true
-        min_value: 1
-        max_value: 5
-        description: "UniProt annotation score (1-5)"
 
   # ---------------------------------------------------------------------------
   # Execution Options
@@ -477,19 +418,8 @@ composite:
       - organism          # Overlapping between ChEMBL and UniProt
 
 # -----------------------------------------------------------------------------
-# Gold Filters (applied to merged output)
-# -----------------------------------------------------------------------------
-gold_filters:
-  # Only include targets with primary key and name
-  required_fields:
-    - target_id
-    - pref_name
-
-# -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
-# Filter rules are loaded from hierarchical config files:
-#   1. configs/filters/_defaults.yaml (global defaults)
-#   2. configs/filters/providers/composite.yaml (provider-specific)
-#   3. configs/filters/entities/composite/target.yaml (entity-specific)
-filter_config_file: ../../filter/entities/composite/target.yaml
+# Gold filters and filter rules loaded from hierarchical config files.
+# No inline gold_filters needed — filter entity config is authoritative.
+filter_config_file: ../../filters/entities/composite/target.yaml

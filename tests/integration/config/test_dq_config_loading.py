@@ -226,6 +226,154 @@ class TestDQConfigFileStructure:
 
 
 @pytest.mark.integration
+@pytest.mark.integration
+class TestChemblPublicationCrossFieldRules:
+    """Tests for harmonized ChEMBL publication cross-field DQ rules."""
+
+    def test_chembl_publication_identifiable_rule(
+        self, dq_loader: DQConfigLoader
+    ) -> None:
+        """publication_identifiable should use all_present(pk, title) with error severity."""
+        config = dq_loader.load("chembl", "publication")
+
+        identifiable = next(
+            (
+                cfv
+                for cfv in config.cross_field_validations
+                if cfv.name == "publication_identifiable"
+            ),
+            None,
+        )
+        assert identifiable is not None, "Missing publication_identifiable rule"
+        assert identifiable.condition == "all_present"
+        assert "publication_id" in identifiable.fields
+        assert "title" in identifiable.fields
+        assert identifiable.severity == "error"
+
+    def test_chembl_has_cross_reference_rule(self, dq_loader: DQConfigLoader) -> None:
+        """has_cross_reference should use any_present(pmid, doi) with warn severity."""
+        config = dq_loader.load("chembl", "publication")
+
+        cross_ref = next(
+            (
+                cfv
+                for cfv in config.cross_field_validations
+                if cfv.name == "has_cross_reference"
+            ),
+            None,
+        )
+        assert cross_ref is not None, "Missing has_cross_reference rule"
+        assert cross_ref.condition == "any_present"
+        assert "publication_pmid" in cross_ref.fields
+        assert "publication_doi" in cross_ref.fields
+        assert cross_ref.severity == "warn"
+
+    def test_all_publication_providers_have_identifiable_rule(
+        self, dq_loader: DQConfigLoader
+    ) -> None:
+        """All providers should have publication_identifiable with all_present(pk, title)."""
+        providers_and_pks = {
+            "chembl": "publication_id",
+            "pubmed": "pmid",
+            "crossref": "doi",
+            "openalex": "openalex_id",
+            "semanticscholar": "paper_id",
+        }
+
+        for provider, expected_pk in providers_and_pks.items():
+            entity_path = Path(f"configs/quality/entities/{provider}/publication.yaml")
+            if not entity_path.exists():
+                continue
+
+            config = dq_loader.load(provider, "publication")
+            identifiable = next(
+                (
+                    cfv
+                    for cfv in config.cross_field_validations
+                    if cfv.name == "publication_identifiable"
+                ),
+                None,
+            )
+            assert identifiable is not None, (
+                f"Missing publication_identifiable for {provider}"
+            )
+            assert identifiable.condition == "all_present", (
+                f"{provider}: publication_identifiable should use all_present"
+            )
+            assert expected_pk in identifiable.fields, (
+                f"{provider}: publication_identifiable should include {expected_pk}"
+            )
+            assert "title" in identifiable.fields, (
+                f"{provider}: publication_identifiable should include title"
+            )
+
+
+@pytest.mark.integration
+class TestPublicationYearWarnRule:
+    """Verify publication_year < 1950 warn rule is loaded from DQ configs."""
+
+    @pytest.mark.parametrize(
+        "provider",
+        ["chembl", "crossref", "openalex", "pubmed", "semanticscholar"],
+    )
+    def test_publication_year_warn_rule_present(
+        self, dq_loader: DQConfigLoader, provider: str
+    ) -> None:
+        """Each provider's publication DQ config has a year < 1950 warn rule."""
+        config = dq_loader.load(provider, "publication")
+
+        year_rules = [
+            fv
+            for fv in config.field_validations
+            if fv.field == "publication_year" and fv.validation_type == "range"
+        ]
+
+        # Should have at least 2 range rules: error (1500-2100) and warn (min 1950)
+        assert len(year_rules) >= 2, (
+            f"{provider}: expected ≥2 publication_year range rules, got {len(year_rules)}"
+        )
+
+        # Find the warn rule
+        warn_rules = [r for r in year_rules if r.severity == "warn"]
+        assert len(warn_rules) == 1, (
+            f"{provider}: expected 1 warn rule for publication_year, got {len(warn_rules)}"
+        )
+
+        warn_rule = warn_rules[0]
+        assert warn_rule.min_value == 1950, (
+            f"{provider}: warn rule min should be 1950, got {warn_rule.min_value}"
+        )
+        assert warn_rule.max_value is None, (
+            f"{provider}: warn rule should have no max, got {warn_rule.max_value}"
+        )
+
+    @pytest.mark.parametrize(
+        "provider",
+        ["chembl", "crossref", "openalex", "pubmed", "semanticscholar"],
+    )
+    def test_publication_year_error_rule_unchanged(
+        self, dq_loader: DQConfigLoader, provider: str
+    ) -> None:
+        """Existing error rule (1500-2100) remains intact alongside new warn rule."""
+        config = dq_loader.load(provider, "publication")
+
+        year_rules = [
+            fv
+            for fv in config.field_validations
+            if fv.field == "publication_year" and fv.validation_type == "range"
+        ]
+
+        error_rules = [r for r in year_rules if r.severity == "error"]
+        assert len(error_rules) == 1, (
+            f"{provider}: expected 1 error rule for publication_year"
+        )
+
+        error_rule = error_rules[0]
+        assert error_rule.min_value == 1500
+        assert error_rule.max_value == 2100
+
+
+@pytest.mark.integration
 class TestBackwardCompatibility:
     """Tests for backward compatibility with inline dq_overrides."""
 

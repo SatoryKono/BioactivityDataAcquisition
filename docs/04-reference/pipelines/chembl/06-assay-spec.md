@@ -1,6 +1,6 @@
 # ChEMBL Assay Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.18*
+*Version 1.2.0 | Aligned with RULES.md v5.20*
 
 ______________________________________________________________________
 
@@ -42,13 +42,13 @@ Assays represent **experimental protocols** used to measure bioactivity:
 ```
 assay
     │
-    ├──FK──► target.target_chembl_id (M:1, optional)
+    ├──FK──► target.target_id (M:1, optional)
     │
-    ├──FK──► document.document_chembl_id (M:1, optional)
+    ├──FK──► document.publication_id (M:1, optional)
     │
-    ├──FK──► cell_line.cell_chembl_id (M:1, optional)
+    ├──FK──► cell_line.cell_id (M:1, optional)
     │
-    ├──◄──FK──activity.assay_chembl_id (1:M)
+    ├──◄──FK──activity.assay_id (1:M)
     │
     └──◄──FK──assay_parameters (1:M)
 ```
@@ -69,7 +69,7 @@ ______________________________________________________________________
 
 | #   | API Field                    | JSON Type | Nullable | Description                |
 | --- | ---------------------------- | --------- | -------- | -------------------------- |
-| 1   | `assay_chembl_id`            | string    | No       | Primary key                |
+| 1   | `assay_id`                   | string    | No       | Primary key                |
 | 2   | `description`                | string    | Yes      | Assay description          |
 | 3   | `assay_type`                 | string    | Yes      | B/F/A/T/P/U                |
 | 4   | `assay_test_type`            | string    | Yes      | In vivo/vitro/ex vivo      |
@@ -80,15 +80,15 @@ ______________________________________________________________________
 | 9   | `assay_tissue`               | string    | Yes      | Tissue                     |
 | 10  | `assay_cell_type`            | string    | Yes      | Cell type                  |
 | 11  | `assay_subcellular_fraction` | string    | Yes      | Subcellular fraction       |
-| 12  | `target_chembl_id`           | string    | Yes      | FK to target               |
+| 12  | `target_id`                  | string    | Yes      | FK to target               |
 | 13  | `relationship_type`          | string    | Yes      | D/H/M/N/S/U                |
 | 14  | `relationship_description`   | string    | Yes      | Relationship desc          |
 | 15  | `confidence_score`           | integer   | Yes      | 0-9 score                  |
 | 16  | `confidence_description`     | string    | Yes      | Confidence desc            |
 | 17  | `src_id`                     | integer   | Yes      | Source ID                  |
 | 18  | `src_assay_id`               | string    | Yes      | Source assay ID            |
-| 19  | `document_chembl_id`         | string    | Yes      | FK to document             |
-| 20  | `cell_chembl_id`             | string    | Yes      | FK to cell_line            |
+| 19  | `publication_id`             | string    | Yes      | FK to document             |
+| 20  | `cell_id`                    | string    | Yes      | FK to cell_line            |
 | 21  | `tissue_chembl_id`           | string    | Yes      | FK to tissue               |
 | 22  | `bao_format`                 | string    | Yes      | BAO format ID              |
 | 23  | `bao_label`                  | string    | Yes      | BAO label                  |
@@ -104,7 +104,7 @@ ______________________________________________________________________
 
 | Parameter           | Value                    |
 | ------------------- | ------------------------ |
-| **Entity ID Field** | `assay_chembl_id`        |
+| **Entity ID Field** | `assay_id`               |
 | **ID Source**       | `from_api`               |
 | **Format**          | ChEMBL ID (CHEMBL[0-9]+) |
 
@@ -126,12 +126,14 @@ ______________________________________________________________________
 
 ### 5.1. Pandera Schema
 
+> Migration note: public Pandera contract uses canonical PK names; legacy aliases are accepted only during transition via ingestion/transform alias mapping and will be removed in the next major release.
+
 ```python
 class AssaySchema(ETLRecordSchema):
     """Assay validation schema for Silver layer."""
 
     # === Primary Key ===
-    assay_chembl_id: Series[str] = pa.Field(
+    assay_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=r"^CHEMBL\d+$",
     )
@@ -159,7 +161,7 @@ class AssaySchema(ETLRecordSchema):
     assay_cell_type: Series[str] | None = pa.Field(nullable=True)
 
     # === Target & Relationship ===
-    target_chembl_id: Series[str] | None = pa.Field(
+    target_id: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=r"^CHEMBL\d+$",
     )
@@ -174,11 +176,11 @@ class AssaySchema(ETLRecordSchema):
     )
 
     # === Foreign Keys ===
-    document_chembl_id: Series[str] | None = pa.Field(
+    publication_id: Series[str] | None = pa.Field(
         nullable=True,
         str_matches=r"^CHEMBL\d+$",
     )
-    cell_chembl_id: Series[str] | None = pa.Field(nullable=True)
+    cell_id: Series[str] | None = pa.Field(nullable=True)
     tissue_chembl_id: Series[str] | None = pa.Field(nullable=True)
 
     # === Ontologies ===
@@ -208,10 +210,10 @@ class AssaySchema(ETLRecordSchema):
 
 | Field              | Type | Nullable | Constraints         | DQ Level |
 | ------------------ | ---- | -------- | ------------------- | -------- |
-| `assay_chembl_id`  | str  | No       | regex `^CHEMBL\d+$` | CRITICAL |
+| `assay_id`         | str  | No       | regex `^CHEMBL\d+$` | CRITICAL |
 | `assay_type`       | str  | Yes      | isin [B,F,A,T,P,U]  | WARNING  |
 | `confidence_score` | int  | Yes      | [0, 9]              | WARNING  |
-| `target_chembl_id` | str  | Yes      | regex `^CHEMBL\d+$` | INFO     |
+| `target_id`        | str  | Yes      | regex `^CHEMBL\d+$` | INFO     |
 
 ______________________________________________________________________
 
@@ -223,7 +225,7 @@ provider: chembl
 entity_type: assay
 version: "1.2.0"
 
-primary_keys: ["assay_chembl_id"]
+primary_keys: ["assay_id"]
 silver_table: "chembl_assay"
 gold_table: "chembl_assay"
 
@@ -236,8 +238,8 @@ gold_filters:
 input_filter:
   enabled: true
   source_path: "data/input/assay.csv"
-  column_name: "assay_chembl_id"
-  filter_field: "assay_chembl_id"
+  column_name: "assay_id"
+  filter_field: "assay_id"
   batch_size: 20
 ```
 

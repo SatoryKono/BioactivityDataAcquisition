@@ -230,8 +230,8 @@ class TestRegistryFactoryProtocol:
     """Test that PipelineRegistry has proper factory protocol."""
 
     def test_pipeline_factory_protocol_is_runtime_checkable(self) -> None:
-        """PipelineFactoryProtocol must be @runtime_checkable."""
-        from bioetl.composition.registry import PipelineFactoryProtocol
+        """PipelineFactoryPort must be @runtime_checkable."""
+        from bioetl.composition.registry import PipelineFactoryPort
 
         # Test by attempting isinstance() - non-runtime_checkable raises TypeError
         class DummyImpl:
@@ -240,38 +240,32 @@ class TestRegistryFactoryProtocol:
             pass
 
         try:
-            isinstance(DummyImpl(), PipelineFactoryProtocol)
+            isinstance(DummyImpl(), PipelineFactoryPort)
             is_runtime_checkable = True
         except TypeError:
             is_runtime_checkable = False
 
-        assert is_runtime_checkable, (
-            "PipelineFactoryProtocol MUST be @runtime_checkable"
-        )
+        assert is_runtime_checkable, "PipelineFactoryPort MUST be @runtime_checkable"
 
     def test_pipeline_factory_protocol_has_required_attributes(self) -> None:
-        """PipelineFactoryProtocol must define pipeline_name and silver_schema."""
-        from bioetl.composition.registry import PipelineFactoryProtocol
+        """PipelineFactoryPort must define pipeline_name and silver_schema."""
+        from bioetl.composition.registry import PipelineFactoryPort
 
         # Check annotations or attributes
-        hints = typing.get_type_hints(PipelineFactoryProtocol)
+        hints = typing.get_type_hints(PipelineFactoryPort)
 
-        assert "pipeline_name" in hints, (
-            "PipelineFactoryProtocol MUST have pipeline_name"
-        )
-        assert "silver_schema" in hints, (
-            "PipelineFactoryProtocol MUST have silver_schema"
-        )
+        assert "pipeline_name" in hints, "PipelineFactoryPort MUST have pipeline_name"
+        assert "silver_schema" in hints, "PipelineFactoryPort MUST have silver_schema"
 
     def test_pipeline_factory_protocol_has_create_methods(self) -> None:
-        """PipelineFactoryProtocol must have create_with_services and create_runner."""
-        from bioetl.composition.registry import PipelineFactoryProtocol
+        """PipelineFactoryPort must have create_with_services and create_runner."""
+        from bioetl.composition.registry import PipelineFactoryPort
 
-        assert hasattr(PipelineFactoryProtocol, "create_with_services"), (
-            "PipelineFactoryProtocol MUST have create_with_services()"
+        assert hasattr(PipelineFactoryPort, "create_with_services"), (
+            "PipelineFactoryPort MUST have create_with_services()"
         )
-        assert hasattr(PipelineFactoryProtocol, "create_runner"), (
-            "PipelineFactoryProtocol MUST have create_runner()"
+        assert hasattr(PipelineFactoryPort, "create_runner"), (
+            "PipelineFactoryPort MUST have create_runner()"
         )
 
 

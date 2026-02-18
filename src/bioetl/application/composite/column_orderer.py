@@ -10,6 +10,10 @@ import re
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
+from bioetl.application.core.publication_aliases import (
+    LEGACY_PUBLICATION_ALIASES_CUTOFF_DATE,
+    PUBLICATION_SCHEMA_FIELD_ALIASES,
+)
 from bioetl.domain.schemas.column_order import DQ_FIELDS_SUFFIX
 from bioetl.domain.value_objects.column_order import (
     DEFAULT_COLUMN_ORDER,
@@ -115,6 +119,7 @@ class ColumnOrderer:
         self._logger = logger
         self._config = config or DEFAULT_COLUMN_ORDER
         self._column_groups = tuple(column_groups) if column_groups else None
+        self._warned_legacy_aliases: set[str] = set()
 
     def order_columns(self, df: pl.DataFrame) -> pl.DataFrame:
         """Order DataFrame columns by semantic groups.
@@ -379,18 +384,24 @@ class ColumnOrderer:
     def _field_aliases(self, field_name: str) -> set[str]:
         """Return compatibility aliases for evolving field names."""
         aliases = {field_name}
-        legacy_to_unified = {
-            "pmid": "publication_pmid",
-            "pmc_id": "publication_pmc_id",
-            "doi": "publication_doi",
-            "author_orcids": "author_ormolecule_ids",
-        }
+        legacy_to_unified = PUBLICATION_SCHEMA_FIELD_ALIASES
+
         if field_name in legacy_to_unified:
             aliases.add(legacy_to_unified[field_name])
-        # Allow reverse matching when config already uses unified names
+            if field_name not in self._warned_legacy_aliases:
+                self._logger.warning(
+                    "Legacy publication field alias used on read path",
+                    legacy_field=field_name,
+                    canonical_field=legacy_to_unified[field_name],
+                    deprecation_cutoff_date=LEGACY_PUBLICATION_ALIASES_CUTOFF_DATE,
+                )
+                self._warned_legacy_aliases.add(field_name)
+
+        # Allow reverse matching when config already uses canonical names.
         for legacy, unified in legacy_to_unified.items():
             if field_name == unified:
                 aliases.add(legacy)
+
         return aliases
 
     def filter_by_layer_config(

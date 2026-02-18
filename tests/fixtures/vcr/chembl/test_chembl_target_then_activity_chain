@@ -29,7 +29,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:07:00 GMT
+      - Mon, 16 Feb 2026 12:15:41 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -53,7 +53,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/target?format=json
+    uri: https://www.ebi.ac.uk/chembl/api/data/target?format=json&target_type=SINGLE+PROTEIN&organism__isnull=false&tax_id__isnull=false
   response:
     body:
       string: '{"page_meta": {"limit": 20, "next": "/chembl/api/data/target.json?limit=20&offset=20",
@@ -6650,7 +6650,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:07:03 GMT
+      - Mon, 16 Feb 2026 12:15:44 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -6660,7 +6660,7 @@ interactions:
       X-ChEMBL-in-cache:
       - 'True'
       X-ChEMBL-retrieval-time:
-      - '2.1080305576324463'
+      - '2.3915367126464844'
     status:
       code: 200
       message: OK
@@ -6694,7 +6694,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:07:16 GMT
+      - Mon, 16 Feb 2026 12:15:49 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -6718,7 +6718,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/activity?format=json&limit=5&offset=0&standard_type__in=IC50%2CKi&standard_units=nM&standard_relation=%3D&assay_type__in=B%2CF&potential_duplicate=0&data_validity_comment__isnull=true&pchembl_value__isnull=false&standard_flag=1
+    uri: https://www.ebi.ac.uk/chembl/api/data/activity?format=json&limit=5&offset=0&standard_type__in=IC50%2CKi&standard_units=nM&standard_relation=%3D&assay_type__in=B%2CF&potential_duplicate=0&data_validity_comment__isnull=true&pchembl_value__isnull=false&standard_flag=1&target_tax_id__isnull=false
   response:
     body:
       string: '{"activities": [{"action_type": null, "activity_comment": null, "activity_id":
@@ -6813,8 +6813,8 @@ interactions:
         "Peroxisomal acyl-coenzyme A oxidase 1", "target_tax_id": "10116", "text_value":
         null, "toid": null, "type": "IC50", "units": "nM", "uo_units": "UO_0000065",
         "upper_value": null, "value": "180.0"}], "page_meta": {"limit": 5, "next":
-        "/chembl/api/data/activity.json?limit=5&offset=5&standard_type__in=IC50%2CKi&standard_units=nM&standard_relation=%3D&assay_type__in=B%2CF&potential_duplicate=0&data_validity_comment__isnull=true&pchembl_value__isnull=false&standard_flag=1",
-        "offset": 0, "previous": null, "total_count": 2712214}}'
+        "/chembl/api/data/activity.json?limit=5&offset=5&standard_type__in=IC50%2CKi&standard_units=nM&standard_relation=%3D&assay_type__in=B%2CF&potential_duplicate=0&data_validity_comment__isnull=true&pchembl_value__isnull=false&standard_flag=1&target_tax_id__isnull=false",
+        "offset": 0, "previous": null, "total_count": 2428355}}'
     headers:
       Cache-Control:
       - max-age=30000000, s-maxage=30000000
@@ -6823,11 +6823,11 @@ interactions:
       Content-Disposition:
       - inline
       Content-Length:
-      - '7829'
+      - '7857'
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:07:17 GMT
+      - Mon, 16 Feb 2026 12:15:51 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -6837,7 +6837,7 @@ interactions:
       X-ChEMBL-in-cache:
       - 'True'
       X-ChEMBL-retrieval-time:
-      - '0.6676349639892578'
+      - '0.34448719024658203'
     status:
       code: 200
       message: OK

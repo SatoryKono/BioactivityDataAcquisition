@@ -8,6 +8,7 @@
 pipeline_name: pubmed_publication
 provider: pubmed
 entity_type: publication
+schema_file: ../../schemas/pubmed/publication.yaml
 version: "1.2.0"
 description: "Extract publication metadata from PubMed via Entrez API"
 
@@ -16,7 +17,8 @@ description: "Extract publication metadata from PubMed via Entrez API"
 # Deduplication is handled on Silver layer via content_hash.
 loading_strategy: full_scan_only
 
-primary_keys: ["pmid"]
+business_primary_keys: ["pmid"]
+technical_primary_key: "entity_id"
 silver_table: "pubmed_publication"
 gold_table: "pubmed_publication"
 
@@ -24,16 +26,13 @@ gold_table: "pubmed_publication"
 # Source Configuration (provider-specific API settings)
 # -----------------------------------------------------------------------------
 source:
-  search_term: "bioinformatics[Title/Abstract] AND drug discovery[Title/Abstract]"
   email: "${BIOETL_PUBMED_EMAIL}"
   api_key: "${BIOETL_PUBMED_API_KEY}"
 
 # -----------------------------------------------------------------------------
 # Data Schema Configuration (Column Ordering)
 # -----------------------------------------------------------------------------
-# Use data_schema_file for layer-specific column configuration (silver/gold).
-data_schema_file: ../../schemas/pubmed/publication.yaml
-
+# data_schema_file auto-resolved via convention: ../../schemas/pubmed/publication.yaml
 
 # -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
@@ -48,7 +47,12 @@ sink:
   bronze:
     flat_structure: true  # Path already includes provider/entity
   silver:
-    partition_by: ["pub_year"]
     flat_structure: true
   gold:
+    mode: scd2
+    scd_config:
+      valid_from: _valid_from
+      valid_to: _valid_to
+      is_current: _is_current
+      version: _version
     flat_structure: true

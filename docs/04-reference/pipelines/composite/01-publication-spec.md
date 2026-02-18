@@ -1,6 +1,6 @@
 # Composite Publication Pipeline
 
-*Updated: 2026-02-03*
+*Updated: 2026-02-15*
 
 ## Overview
 
@@ -28,6 +28,13 @@ Merges publication data from multiple providers into a unified composite publica
 |-------|------|
 | Silver | `data/output/silver/composite/publication` |
 | Gold | `data/output/gold/composite/publication` |
+
+## Merge Features
+
+- **Conflict Resolution**: `seed_priority` — seed (ChEMBL) values always win over enricher values
+- **Preserve All Sources**: `true` — keeps provider-qualified columns (e.g., `crossref.publication.title`)
+- **Cross-Validation**: Compares paired fields (doi, title, volume, issue, page_first, page_last, publication_year, citations_received) between seed and each enricher before merge. Mismatches trigger warnings, errors, or quarantine.
+- **Exclude Fields**: 40 redundant enricher columns excluded from output (CV-validated fields that duplicate seed values, plus low-value fields)
 
 ## Related Configs
 

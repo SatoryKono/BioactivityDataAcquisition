@@ -1,6 +1,6 @@
 # PubChem Compound Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.18*
+*Version 1.2.0 | Aligned with RULES.md v5.20*
 
 ______________________________________________________________________
 
@@ -100,11 +100,11 @@ ______________________________________________________________________
 
 ### 4.1. Entity ID Strategy
 
-| Parameter           | Value              |
-| ------------------- | ------------------ |
-| **Entity ID Field** | `cid`              |
-| **ID Source**       | `from_api`         |
-| **Format**          | Integer (positive) |
+| Parameter           | Value                              |
+| ------------------- | ---------------------------------- |
+| **Entity ID Field** | `molecule_id` (derived from `CID`) |
+| **ID Source**       | `from_api`                         |
+| **Format**          | String (stringified CID)           |
 
 ### 4.2. Field Normalization
 
@@ -127,7 +127,7 @@ class PubchemMoleculeSchema(ETLRecordSchema):
     """PubChem Molecule validation schema for Silver layer."""
 
     # === Primary Key ===
-    cid: Series[int] = pa.Field(nullable=False, ge=1)
+    molecule_id: Series[str] = pa.Field(nullable=False)
 
     # === Structural Identifiers ===
     canonical_smiles: Series[str] | None = pa.Field(nullable=True)
@@ -191,7 +191,7 @@ ______________________________________________________________________
 | This Entity Field | Maps To          | Provider | Field                          |
 | ----------------- | ---------------- | -------- | ------------------------------ |
 | `inchi_key`       | ChEMBL           | ChEMBL   | `structure_standard_inchi_key` |
-| `cid`             | PubChem BioAssay | PubChem  | CID                            |
+| `molecule_id`     | PubChem BioAssay | PubChem  | CID                            |
 
 ______________________________________________________________________
 
@@ -203,7 +203,7 @@ provider: pubchem
 entity_type: compound
 version: "1.2.0"
 
-primary_keys: ["cid"]
+primary_keys: ["molecule_id"]
 silver_table: "pubchem_compound"
 gold_table: "pubchem_compound"
 
@@ -216,7 +216,7 @@ sink:
     path: "data/output/bronze"
   silver:
     path: "data/output/silver"
-    primary_key: ["cid"]
+    primary_key: ["molecule_id"]
     partition_by: []
   gold:
     path: "data/output/gold"

@@ -27,7 +27,7 @@ class BaseFieldExtractor(ABC):
     """
 
     @abstractmethod
-    def extract(self, element: Element | None) -> Any:
+    def extract(self, element: Element | None) -> Any:  # Any: XML-derived dict values
         """Извлечь сырые данные из XML элемента.
 
         Args:
@@ -39,7 +39,7 @@ class BaseFieldExtractor(ABC):
         ...
 
     @abstractmethod
-    def normalize(self, raw_value: Any) -> Any:
+    def normalize(self, raw_value: Any) -> Any:  # Any: XML-derived dict values
         """Нормализовать извлечённое значение.
 
         Args:
@@ -50,7 +50,7 @@ class BaseFieldExtractor(ABC):
         """
         ...
 
-    def process(self, element: Element | None) -> Any:
+    def process(self, element: Element | None) -> Any:  # Any: XML-derived dict values
         """Template method: extract → normalize.
 
         Выполняет полный цикл извлечения и нормализации данных.

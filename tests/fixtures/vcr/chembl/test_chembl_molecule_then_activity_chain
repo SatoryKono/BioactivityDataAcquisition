@@ -29,7 +29,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:07:30 GMT
+      - Mon, 16 Feb 2026 12:15:56 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -53,13 +53,13 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/molecule?format=json&limit=3&offset=0
+    uri: https://www.ebi.ac.uk/chembl/api/data/molecule?format=json&molecule_type=Small+molecule&structure_type=MOL&inorganic_flag=0&limit=3&offset=0
   response:
     body:
       string: '{"molecules": [{"atc_classifications": [], "availability_type": -1,
         "biotherapeutic": null, "black_box_warning": 0, "chemical_probe": 0, "chirality":
         -1, "cross_references": [], "dosed_ingredient": false, "first_approval": null,
-        "first_in_class": -1, "helm_notation": null, "inorganic_flag": -1, "max_phase":
+        "first_in_class": -1, "helm_notation": null, "inorganic_flag": 0, "max_phase":
         null, "molecule_chembl_id": "CHEMBL6329", "molecule_hierarchy": {"active_chembl_id":
         "CHEMBL6329", "molecule_chembl_id": "CHEMBL6329", "parent_chembl_id": "CHEMBL6329"},
         "molecule_properties": {"alogp": "2.11", "aromatic_rings": 3, "full_molformula":
@@ -94,7 +94,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL6328",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL6328",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL6328", "molecule_chembl_id":
         "CHEMBL6328", "parent_chembl_id": "CHEMBL6328"}, "molecule_properties": {"alogp":
         "1.33", "aromatic_rings": 3, "full_molformula": "C18H12N4O3", "full_mwt":
@@ -130,7 +130,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL265667",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL265667",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL265667", "molecule_chembl_id":
         "CHEMBL265667", "parent_chembl_id": "CHEMBL265667"}, "molecule_properties":
         {"alogp": "2.27", "aromatic_rings": 3, "full_molformula": "C18H16ClN3O3",
@@ -178,7 +178,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:07:31 GMT
+      - Mon, 16 Feb 2026 12:15:59 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -188,7 +188,7 @@ interactions:
       X-ChEMBL-in-cache:
       - 'True'
       X-ChEMBL-retrieval-time:
-      - '0.6545929908752441'
+      - '0.9046766757965088'
     status:
       code: 200
       message: OK
@@ -222,7 +222,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:07:43 GMT
+      - Mon, 16 Feb 2026 12:16:02 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -246,7 +246,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/activity?format=json&limit=5&offset=0&standard_type__in=IC50%2CKi&standard_units=nM&standard_relation=%3D&assay_type__in=B%2CF&potential_duplicate=0&data_validity_comment__isnull=true&pchembl_value__isnull=false&standard_flag=1
+    uri: https://www.ebi.ac.uk/chembl/api/data/activity?format=json&limit=5&offset=0&standard_type__in=IC50%2CKi&standard_units=nM&standard_relation=%3D&assay_type__in=B%2CF&potential_duplicate=0&data_validity_comment__isnull=true&pchembl_value__isnull=false&standard_flag=1&target_tax_id__isnull=false
   response:
     body:
       string: '{"activities": [{"action_type": null, "activity_comment": null, "activity_id":
@@ -341,8 +341,8 @@ interactions:
         "Peroxisomal acyl-coenzyme A oxidase 1", "target_tax_id": "10116", "text_value":
         null, "toid": null, "type": "IC50", "units": "nM", "uo_units": "UO_0000065",
         "upper_value": null, "value": "180.0"}], "page_meta": {"limit": 5, "next":
-        "/chembl/api/data/activity.json?limit=5&offset=5&standard_type__in=IC50%2CKi&standard_units=nM&standard_relation=%3D&assay_type__in=B%2CF&potential_duplicate=0&data_validity_comment__isnull=true&pchembl_value__isnull=false&standard_flag=1",
-        "offset": 0, "previous": null, "total_count": 2712214}}'
+        "/chembl/api/data/activity.json?limit=5&offset=5&standard_type__in=IC50%2CKi&standard_units=nM&standard_relation=%3D&assay_type__in=B%2CF&potential_duplicate=0&data_validity_comment__isnull=true&pchembl_value__isnull=false&standard_flag=1&target_tax_id__isnull=false",
+        "offset": 0, "previous": null, "total_count": 2428355}}'
     headers:
       Cache-Control:
       - max-age=30000000, s-maxage=30000000
@@ -351,11 +351,11 @@ interactions:
       Content-Disposition:
       - inline
       Content-Length:
-      - '7829'
+      - '7857'
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:07:44 GMT
+      - Mon, 16 Feb 2026 12:16:04 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -365,7 +365,7 @@ interactions:
       X-ChEMBL-in-cache:
       - 'True'
       X-ChEMBL-retrieval-time:
-      - '0.5133810043334961'
+      - '0.28797459602355957'
     status:
       code: 200
       message: OK

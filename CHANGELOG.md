@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.0.0] - 2026-02-18
+
 ### Added
+
+- **Author Keys Normalization**: Added `author_keys` field (pipe-delimited `Surname_F` format) across all publication pipelines
+  - Propagated to all 5 publication Silver PyArrow schemas, 4 publication Gold Pandera schemas, and field group mapping
+  - Field group: `AUTHOR_AND_AFFILIATIONS` — ensures inclusion in Gold output
+  - Updated all contract tests, schema stability snapshots, and pipeline contract expectations
+  - Files: `silver.py`, `publications.py`, `publication_field_groups.py`, plus 3 test files
 
 - **Publication Classification Fields in Silver Output**: Classification fields now present in Silver Delta tables
   - Added 3 classification fields to all 5 publication PyArrow schemas: `publication_type_unified` (Level 3: 214 types), `publication_subclass` (Level 2: ~25 groupings), `publication_class` (Level 1: EXP/REV/PEER)
@@ -30,6 +38,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `APIRequestCollector.to_source_metadata()` accepts `query_string` parameter
   - Integration tests in `tests/integration/chembl/test_activity_extraction_params.py`
   - Provider documentation: `docs/providers/chembl.md`
+
+- **Cross-Validation for Composite Publication Pipeline**: Enricher data is now validated
+  against seed before merge (ADR-026 extension)
+  - Compares paired fields (doi, title, volume, issue, page_first, page_last, publication_year, citations_received) between seed and each enricher
+  - Mismatch thresholds: 1 mismatch → WARNING, 2+ → ENRICHER_ERROR (nullify enricher fields), 2+ enrichers with errors → QUARANTINE seed record
+  - Supports `exact`, `fuzzy` (Levenshtein threshold=0.8), and `numeric_tolerance` (10%) comparison methods
+  - Configuration: `configs/pipelines/composite/publication.yaml` → `cross_validation` section
+
+- **Composite Publication Exclude Fields**: 40 redundant enricher columns removed from output
+  - 31 CV-validated enricher fields excluded (doi, title, volume, issue, page_first, page_last, publication_year, pmid per enricher) — seed_priority makes these redundant
+  - 9 additional low-value fields excluded (publication_subclass, publication_type_unified, language, is_oa, citations_made, publication_date, content_domain_domains, pmc_id, dblp_id)
+  - `citations_received` intentionally kept — providers may report different counts
+  - Configuration: `configs/pipelines/composite/publication.yaml` → `merge.exclude_fields`
+
+- **ChEMBL Adapter Pagination Skip Optimization**: Skips limit/offset pagination for batch
+  requests where filter field equals primary key and batch fits in one page
+  - Reduces unnecessary API overhead for 1:1 key lookups (e.g., molecule_chembl_id → molecule)
+  - File: `src/bioetl/infrastructure/adapters/chembl/client.py`
+
+### Changed
+
+- **Gold Contract JSON Sync**: Regenerated all 4 publication Gold contract JSONs from Pandera schemas
+  - PubMed, CrossRef, OpenAlex, SemanticScholar contracts updated with all current fields
+  - Added missing fields: `author_keys`, `affiliation_list`, `author_orcids`, classification fields, and more
+  - Contracts now match actual Gold Pandera schemas exactly
+
+- **Enum Validation Audit Report**: Comprehensive audit of all enum-validated fields
+  - Report: `reports/enum_validation_audit_2026-02-16.md`
+  - Covers: Pandera `isin=` validations, DQ configs (`type: enum`), Gold filter configs
+  - Documents all centralized constants, domain StrEnums, and 3-level publication type taxonomy
+
+- **Documentation Metrics Sync**: Updated codebase statistics across all docs
+  - ADR count: 33 → 34 (ADR-034: Schema↔Domain Configuration Pairs)
+  - Test functions: ~7,090 → ~11,985
+  - Python files: ~1,094 → ~1,114 (534 src + 580 tests)
+  - RULES.md bumped to v5.19
+  - Affected files: RULES.md, 00-map.md, CLAUDE.md, 00-overview.md, decisions/README.md, README.md
+
+### Fixed
+
+- **CrossRef Silver Path Mismatch**: Changed `entity_type: work` → `entity_type: publication`
+  in `configs/pipelines/crossref/publication.yaml`
+  - Root cause: CrossRef used API term `work` as entity_type, causing Silver data to be written
+    to `silver/crossref/work/`. The composite merger reads from `silver/crossref/publication`
+    (inferred from pipeline name `crossref_publication`), resulting in empty enrichment results.
+  - All other publication providers already use `entity_type: publication`
+  - CrossRef adapter accepts both `work` and `publication` values — no adapter changes needed
+  - Updated stale config comments and provider reference documentation
+
 ## [5.14.0] - 2026-02-09
 
 ### Changed

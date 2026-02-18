@@ -1,0 +1,88 @@
+# configs/schemas/composite/activity.yaml
+# =============================================================================
+# Data Schema for Composite Activity Pipeline
+# =============================================================================
+
+version: "1.0.0"
+entity: activity
+
+column_groups:
+  - name: system
+    fields:
+      - entity_id
+      - content_hash
+      - _run_id
+      - _run_type
+      - _source_batch_id
+      - _source
+      - _ingestion_ts
+      - _index
+      - _lookup_method
+      - _original_id
+
+  - name: lineage
+    pattern: "^_composite_|^_source_providers|^_enrichment_|^_lineage_|^_dq_"
+
+  - name: identifiers
+    fields:
+      - activity_id
+      - molecule_id
+      - assay_id
+      - target_id
+      - publication_id
+    provider_order: [chembl]
+
+  - name: activity_values
+    fields:
+      - standard_type
+      - standard_relation
+      - standard_value
+      - standard_units
+      - standard_flag
+      - pchembl_value
+      - activity_comment
+      - data_validity_comment
+      - data_validity_description
+    provider_order: [chembl]
+
+  - name: provenance
+    fields:
+      - source_type
+      - src_id
+      - src_compound_id
+      - src_assay_id
+      - src_relation
+      - chembl_release
+      - creation_date
+    provider_order: [chembl]
+
+silver:
+  include_all_groups: true
+  exclude_groups: []
+
+gold:
+  exclude_groups: []
+  exclude_fields: []
+
+gold_columns:
+  - activity_id
+  - molecule_id
+  - assay_id
+  - target_id
+  - publication_id
+  - standard_type
+  - standard_relation
+  - standard_value
+  - standard_units
+  - standard_flag
+  - pchembl_value
+  - activity_comment
+  - data_validity_comment
+  - data_validity_description
+  - source_type
+  - src_id
+  - src_compound_id
+  - src_assay_id
+  - src_relation
+  - chembl_release
+  - creation_date

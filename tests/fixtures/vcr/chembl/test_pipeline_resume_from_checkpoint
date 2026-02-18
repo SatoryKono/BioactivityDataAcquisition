@@ -29,7 +29,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:03:49 GMT
+      - Mon, 16 Feb 2026 12:18:37 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -53,7 +53,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/activity?format=json&limit=3&offset=0&standard_type__in=IC50%2CKi&standard_units=nM&standard_relation=%3D&assay_type__in=B%2CF&potential_duplicate=0&data_validity_comment__isnull=true&pchembl_value__isnull=false&standard_flag=1
+    uri: https://www.ebi.ac.uk/chembl/api/data/activity?format=json&limit=3&offset=0&standard_type__in=IC50%2CKi&standard_units=nM&standard_relation=%3D&assay_type__in=B%2CF&potential_duplicate=0&data_validity_comment__isnull=true&pchembl_value__isnull=false&standard_flag=1&target_tax_id__isnull=false
   response:
     body:
       string: '{"activities": [{"action_type": null, "activity_comment": null, "activity_id":
@@ -109,8 +109,8 @@ interactions:
         "CHEMBL4632", "target_organism": "Rattus norvegicus", "target_pref_name":
         "Peroxisomal acyl-coenzyme A oxidase 1", "target_tax_id": "10116", "text_value":
         null, "toid": null, "type": "IC50", "units": "uM", "uo_units": "UO_0000065",
-        "upper_value": null, "value": "4.0"}], "page_meta": {"limit": 3, "next": "/chembl/api/data/activity.json?limit=3&offset=3&standard_type__in=IC50%2CKi&standard_units=nM&standard_relation=%3D&assay_type__in=B%2CF&potential_duplicate=0&data_validity_comment__isnull=true&pchembl_value__isnull=false&standard_flag=1",
-        "offset": 0, "previous": null, "total_count": 2712214}}'
+        "upper_value": null, "value": "4.0"}], "page_meta": {"limit": 3, "next": "/chembl/api/data/activity.json?limit=3&offset=3&standard_type__in=IC50%2CKi&standard_units=nM&standard_relation=%3D&assay_type__in=B%2CF&potential_duplicate=0&data_validity_comment__isnull=true&pchembl_value__isnull=false&standard_flag=1&target_tax_id__isnull=false",
+        "offset": 0, "previous": null, "total_count": 2428355}}'
     headers:
       Cache-Control:
       - max-age=30000000, s-maxage=30000000
@@ -119,11 +119,11 @@ interactions:
       Content-Disposition:
       - inline
       Content-Length:
-      - '4767'
+      - '4795'
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:03:51 GMT
+      - Mon, 16 Feb 2026 12:18:38 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -133,7 +133,7 @@ interactions:
       X-ChEMBL-in-cache:
       - 'True'
       X-ChEMBL-retrieval-time:
-      - '0.39366650581359863'
+      - '0.29476141929626465'
     status:
       code: 200
       message: OK
@@ -167,7 +167,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:03:59 GMT
+      - Mon, 16 Feb 2026 12:18:41 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -191,7 +191,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/activity?format=json&limit=3&offset=0&standard_type__in=IC50%2CKi&standard_units=nM&standard_relation=%3D&assay_type__in=B%2CF&potential_duplicate=0&data_validity_comment__isnull=true&pchembl_value__isnull=false&standard_flag=1
+    uri: https://www.ebi.ac.uk/chembl/api/data/activity?format=json&limit=3&offset=0&standard_type__in=IC50%2CKi&standard_units=nM&standard_relation=%3D&assay_type__in=B%2CF&potential_duplicate=0&data_validity_comment__isnull=true&pchembl_value__isnull=false&standard_flag=1&target_tax_id__isnull=false
   response:
     body:
       string: '{"activities": [{"action_type": null, "activity_comment": null, "activity_id":
@@ -247,8 +247,8 @@ interactions:
         "CHEMBL4632", "target_organism": "Rattus norvegicus", "target_pref_name":
         "Peroxisomal acyl-coenzyme A oxidase 1", "target_tax_id": "10116", "text_value":
         null, "toid": null, "type": "IC50", "units": "uM", "uo_units": "UO_0000065",
-        "upper_value": null, "value": "4.0"}], "page_meta": {"limit": 3, "next": "/chembl/api/data/activity.json?limit=3&offset=3&standard_type__in=IC50%2CKi&standard_units=nM&standard_relation=%3D&assay_type__in=B%2CF&potential_duplicate=0&data_validity_comment__isnull=true&pchembl_value__isnull=false&standard_flag=1",
-        "offset": 0, "previous": null, "total_count": 2712214}}'
+        "upper_value": null, "value": "4.0"}], "page_meta": {"limit": 3, "next": "/chembl/api/data/activity.json?limit=3&offset=3&standard_type__in=IC50%2CKi&standard_units=nM&standard_relation=%3D&assay_type__in=B%2CF&potential_duplicate=0&data_validity_comment__isnull=true&pchembl_value__isnull=false&standard_flag=1&target_tax_id__isnull=false",
+        "offset": 0, "previous": null, "total_count": 2428355}}'
     headers:
       Cache-Control:
       - max-age=30000000, s-maxage=30000000
@@ -257,11 +257,11 @@ interactions:
       Content-Disposition:
       - inline
       Content-Length:
-      - '4767'
+      - '4795'
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:04:01 GMT
+      - Mon, 16 Feb 2026 12:18:42 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -271,7 +271,7 @@ interactions:
       X-ChEMBL-in-cache:
       - 'True'
       X-ChEMBL-retrieval-time:
-      - '0.3250429630279541'
+      - '0.5893821716308594'
     status:
       code: 200
       message: OK

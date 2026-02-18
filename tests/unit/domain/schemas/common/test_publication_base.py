@@ -47,12 +47,11 @@ def valid_base_record() -> dict:
         "abstract": "This is a test abstract for the publication.",
         "authors": '["John Doe", "Jane Smith"]',  # JSON array
         "affiliation_list": '["University of Testing"]',  # JSON array (unified)
-        "author_ormolecule_ids": '["0000-0001-2345-6789"]',  # JSON array of ORCID IDs
         # === Publication metadata ===
         "journal": "Journal of Testing",
         "publication_year": 2024,
         "publication_date": "2024-06-15",
-        "publication_type": "PUBLICATION",
+        "publication_type": "journal-article",
         "publication_type_unified": None,
         "publication_subclass": None,
         "publication_class": None,

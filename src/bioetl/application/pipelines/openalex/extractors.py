@@ -15,7 +15,6 @@ __all__ = [
     "extract_affiliations",
     "extract_author_ids",
     "extract_author_orcids",
-    "extract_author_ormolecule_ids",
     "extract_authors",
     "extract_biblio_info",
     "extract_doi",
@@ -35,11 +34,6 @@ __all__ = [
 ]
 
 
-# Backward-compatible alias (legacy name preserved for tests/older callers)
-def extract_author_ormolecule_ids(authorships: list[dict[str, Any]]) -> list[str]:
-    return extract_author_orcids(authorships)
-
-
 def _extract_id_from_url(url: str | None) -> str | None:
     """Extract ID from OpenAlex URL (helper function).
 
@@ -54,7 +48,7 @@ def _extract_id_from_url(url: str | None) -> str | None:
     return url.rstrip("/").split("/")[-1] if "/" in url else url
 
 
-def _get_nested_display_name(obj: Any) -> str | None:
+def _get_nested_display_name(obj: Any) -> str | None:  # Any: OpenAlex API returns u...
     """Get display_name from nested dict (helper function).
 
     Args:
@@ -204,7 +198,22 @@ def extract_author_orcids(authorships: list[dict[str, Any]]) -> list[str]:
 
 
 def extract_affiliations(authorships: list[dict[str, Any]]) -> list[str]:
-    """Extract unique affiliations from authorships (sorted)."""
+    """Extract unique affiliations from authorships (sorted).
+
+    .. deprecated:: 2.2.0
+        This function is deprecated and will be removed in version 3.0.0.
+        Use :meth:`~bioetl.domain.services.author_normalization_service.AuthorNormalizationService.normalize_affiliations`
+        instead for unified cross-provider affiliation normalization with HTML cleanup
+        and case-insensitive deduplication.
+    """
+    import warnings
+
+    warnings.warn(
+        "extract_affiliations() is deprecated and will be removed in version 3.0.0. "
+        "Use AuthorNormalizationService.normalize_affiliations() for unified affiliation normalization.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     affiliations: set[str] = set()
     for authorship in authorships:
         institutions = authorship.get("institutions", [])
@@ -272,35 +281,11 @@ def extract_institution_country_codes(authorships: list[dict[str, Any]]) -> list
 def extract_institution_ror_ids(authorships: list[dict[str, Any]]) -> list[str]:
     """Extract unique ROR IDs from authorships institutions.
 
-    ROR (Research Organization Registry) provides persistent identifiers for
-    research institutions. OpenAlex includes ROR IDs in institution objects
-    when available.
-
     Args:
         authorships: List of authorship dicts from OpenAlex API.
 
     Returns:
-        Sorted list of unique ROR IDs (full URL format, e.g.,
-        ["https://ror.org/0123456789", "https://ror.org/9876543210"]).
-
-    Note:
-        OpenAlex Works API may not return `ror` field by default depending
-        on the API endpoint and select parameters. If `ror` is missing from
-        institution objects, this returns an empty list.
-
-        For comprehensive ROR coverage, consider:
-        - Using PubMed structured affiliations (preferred, has explicit ROR)
-        - Enriching via OpenAlex Institutions API (separate lookup)
-        - Building OpenAlex ID → ROR mapping from data snapshot
-
-    Example:
-        >>> authorships = [
-        ...     {"institutions": [{"ror": "https://ror.org/0123456789"}]},
-        ...     {"institutions": [{"ror": "https://ror.org/9876543210"}]},
-        ... ]
-        >>> extract_institution_ror_ids(authorships)
-        ['https://ror.org/0123456789', 'https://ror.org/9876543210']
-
+        Sorted list of unique ROR IDs (full URL format).
     """
     ror_ids: set[str] = set()
     for authorship in authorships:

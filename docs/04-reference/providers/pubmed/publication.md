@@ -36,10 +36,22 @@
 | `issue` | `str` | Выпуск |
 | `pages` | `str` | Страницы |
 
+### Авторы и аффилиации
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `author_keys` | `str \| None` | Нормализованные ключи авторов в формате `Surname_F`, разделённые `\|` |
+| `affiliation_list` | `str \| None` | JSON-массив уникальных аффилиаций |
+| `authors_with_affiliations` | `str \| None` | JSON-массив: автор → аффилиации |
+| `affiliation_structured` | `str \| None` | JSON-массив с ROR/GRID идентификаторами |
+
 ### Классификация
 
 | Поле | Тип | Описание |
 |------|-----|----------|
+| `publication_class` | `str` | Класс публикации: EXP, REV, PEER |
+| `publication_subclass` | `str \| None` | Подкласс (L2): ~16 групп |
+| `publication_type_unified` | `str \| None` | Унифицированный тип (L3): 214 значений |
 | `mesh_terms` | `list[str]` | MeSH термины |
 | `keywords` | `list[str]` | Ключевые слова |
 | `publication_types` | `list[str]` | Типы публикации |
@@ -103,4 +115,4 @@ bioetl run pubmed_publication --run-type rebuild
 
 ---
 
-*Последнее обновление: 2025-12-27*
+*Последнее обновление: 2026-02-16*

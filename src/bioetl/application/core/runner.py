@@ -90,9 +90,9 @@ class PipelineRunner:
         self._context = context
         self._executor = executor
         self._checkpoint_manager = checkpoint_manager
-        self.shutdown_signal = shutdown_signal
+        self._shutdown_signal = shutdown_signal
         self._logger = logger
-        self.pipeline = pipeline
+        self._pipeline = pipeline
         self._tracer = tracer
 
         # Services injected directly via DI (created in composition layer)
@@ -106,6 +106,11 @@ class PipelineRunner:
     def logger(self) -> LoggerPort:
         """Get the logger instance."""
         return self._logger
+
+    @property
+    def shutdown_signal(self) -> ShutdownSignal:
+        """Shutdown signal for graceful termination (RunnablePort contract)."""
+        return self._shutdown_signal
 
     @property
     def services(self) -> PipelineServices:
@@ -141,11 +146,17 @@ class PipelineRunner:
                         runtime=self._runtime,
                     )
 
-                    # Execute pipeline
-                    await self._checkpoint_manager.load_checkpoint()
+                    # Execute pipeline (with checkpoint-based offset resume)
+                    checkpoint_meta = await self._checkpoint_manager.load_checkpoint()
+                    offset = (
+                        checkpoint_meta.get("records_processed")
+                        if checkpoint_meta
+                        else None
+                    )
                     await self._executor.execute(
                         limit=self._runtime.limit,
                         query=self._runtime.query,
+                        offset=offset,
                     )
 
                     # Post-run: DQ checks, DQ reports, and VACUUM

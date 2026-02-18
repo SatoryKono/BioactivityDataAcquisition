@@ -1,0 +1,7 @@
+{
+  "provider": "chembl",
+  "entity": "activity",
+  "contract_version": "1.0.0",
+  "policy_fingerprint": "ef8bd2fc221c45f691b00b43c08215553f5b4d31a30aed58bd8e376743fcd41d",
+  "migration_note": "Initial hash policy baseline for chembl/activity."
+}

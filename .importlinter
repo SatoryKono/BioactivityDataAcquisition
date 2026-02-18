@@ -27,12 +27,13 @@ forbidden_modules =
     bioetl.interfaces
 
 [importlinter:contract:infrastructure-independence]
-name = Infrastructure layer must not import from application or interfaces
+name = Infrastructure layer must not import from application, composition or interfaces
 type = forbidden
 source_modules =
     bioetl.infrastructure
 forbidden_modules =
     bioetl.application
+    bioetl.composition
     bioetl.interfaces
 
 [importlinter:contract:composition-no-interfaces]

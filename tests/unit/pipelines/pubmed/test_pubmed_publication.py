@@ -142,7 +142,7 @@ async def test_transform_bronze_to_silver(pipeline, pipeline_context):
     assert silver_record["title"] == "Test Title"
     assert silver_record["journal"] == "Test Journal"
     assert silver_record["abstract"] == "Test Abstract"
-    # Authors are now JSON-serialized
+    # Authors are stored as names (not hashed)
     assert json.loads(silver_record["authors"]) == ["Doe, J"]
     # Date fields
     assert silver_record["publication_year"] == 2023
@@ -156,8 +156,8 @@ async def test_transform_bronze_to_silver(pipeline, pipeline_context):
     # Classification
     assert silver_record["doi"] == "10.1234/test.2023"
     assert silver_record["pmc_id"] == "PMC123456"
-    assert silver_record["publication_types"] == ["Journal Article"]
-    assert silver_record["subject_keywords"] == ["bioinformatics", "drug discovery"]
+    assert silver_record["publication_types"] == '["Journal Article"]'
+    assert silver_record["subject_keywords"] == '["bioinformatics","drug discovery"]'
     assert silver_record["language"] == "eng"
     assert silver_record["country"] == "United States"
     # Metadata

@@ -57,15 +57,15 @@
 | `journal` | `str \| None` | Название журнала |
 | `volume` | `str \| None` | Том |
 | `pages` | `str \| None` | Страницы |
-| `year` | `int \| None` | Год публикации (1500-2100) |
+| `publication_year` | `int \| None` | Год публикации (1500-2100) |
 | `publication_date` | `str \| None` | Дата публикации (YYYY-MM-DD) |
 
 ### Метрики цитирования
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `citation_count` | `int \| None` | Количество цитирований |
-| `reference_count` | `int \| None` | Количество ссылок в публикации |
+| `citations_received` | `int \| None` | Количество цитирований |
+| `citations_made`     | `int \| None` | Количество ссылок в публикации |
 
 ### Open Access
 
@@ -75,11 +75,22 @@
 | `open_access_url` | `str \| None` | Прямая ссылка на PDF |
 | `open_access_status` | `str \| None` | Статус OA: GREEN, GOLD, HYBRID, BRONZE |
 
+### Авторы и идентификаторы
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `author_keys` | `str \| None` | Нормализованные ключи авторов (`Surname_F`), разделённые `\|` |
+| `author_s2_ids` | `str \| None` | JSON-массив Semantic Scholar author IDs |
+| `author_orcids` | `str \| None` | JSON-массив ORCID идентификаторов |
+| `author_h_indices` | `str \| None` | JSON-массив h-index значений |
+| `affiliation_list` | `str \| None` | JSON-массив аффилиаций |
+
 ### Классификация
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `fields_of_study` | `str` | JSON-массив научных областей |
+| `publication_class` | `str` | Класс публикации: EXP, REV, PEER |
+| `subject_fields` | `str \| None` | JSON-массив научных областей |
 | `publication_types` | `str` | JSON-массив типов публикации |
 
 ### Lookup Metadata
@@ -337,10 +348,10 @@ gold_filters:
   "volume": "523",
   "pages": "561-567",
   "venue": "Nature",
-  "year": 2015,
+  "publication_year": 2015,
   "publication_date": "2015-07-22",
-  "citation_count": 892,
-  "reference_count": 50,
+  "citations_received": 892,
+  "citations_made": 50,
   "is_open_access": true,
   "open_access_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4536825/pdf/...",
   "open_access_status": "GREEN",
@@ -388,4 +399,4 @@ GET https://api.semanticscholar.org/graph/v1/paper/search?query=...&fields=...&l
 
 ---
 
-*Последнее обновление: 2026-01-06*
+*Последнее обновление: 2026-02-16*

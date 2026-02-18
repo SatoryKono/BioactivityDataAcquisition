@@ -23,11 +23,10 @@ Pipeline configs имели следующие проблемы:
 configs/
 ├── pipelines/
 │   ├── _base.yaml           # Unified Base Schema v2.0.0 (единый источник defaults)
-│   ├── _schema.json         # JSON Schema для валидации entity configs
 │   ├── chembl/              # ChEMBL provider configs
 │   │   ├── activity.yaml
 │   │   ├── assay.yaml
-│   │   └── ...              # 12 entity configs
+│   │   └── ...              # 14 entity configs
 │   ├── pubchem/
 │   │   └── compound.yaml
 │   ├── uniprot/
@@ -42,11 +41,14 @@ configs/
 │   ├── semanticscholar/
 │   │   └── publication.yaml
 │   └── composite/           # Composite pipelines (ADR-026)
+│       ├── activity.yaml
+│       ├── assay.yaml
+│       ├── molecule.yaml
 │       ├── publication.yaml
 │       └── target.yaml
 ├── sources/
 │   └── <provider>.yaml      # Provider-level API settings (7 файлов)
-└── dq/
+└── quality/
     ├── _defaults.yaml       # Global DQ defaults
     ├── providers/           # Provider-level DQ rules
     └── entities/            # Entity-level DQ rules
@@ -104,9 +106,9 @@ sink:
 
 **Rationale**: Детерминизм выходных данных, воспроизводимость результатов.
 
-### 4. JSON Schema валидация
+### 4. Pydantic Schema валидация
 
-Файл `configs/pipelines/_schema.json` (v2.0) проверяет entity configs:
+Валидация entity configs выполняется Pydantic-схемами в `src/bioetl/infrastructure/schemas/pipeline_config.py`:
 
 ```bash
 # Валидация всех конфигов
@@ -129,7 +131,7 @@ Schema проверяет:
 | `gold_table` | `<provider>_<entity>` | `chembl_activity` |
 | Config path | `configs/pipelines/<provider>/<entity>.yaml` | `configs/pipelines/chembl/activity.yaml` |
 
-**Статус**: Консистентность по всем 19 entity configs + 2 composite (верифицировано 2026-02-03).
+**Статус**: Консистентность по всем 21 entity configs + 5 composite (верифицировано 2026-02-17).
 
 ### 6. Source Config Separation
 
@@ -172,13 +174,13 @@ configs/quality/
 ```
 
 Entity configs могут:
-1. Ссылаться на DQ файл: `dq_config_file: ../../dq/entities/chembl/activity.yaml`
+1. Ссылаться на DQ файл: `dq_config_file: ../../quality/entities/chembl/activity.yaml`
 2. Определять inline правила в `dq_overrides:`
 3. Комбинировать оба подхода (inline overrides поверх файла)
 
 ```yaml
 # configs/pipelines/chembl/activity.yaml
-dq_config_file: ../../dq/entities/chembl/activity.yaml
+dq_config_file: ../../quality/entities/chembl/activity.yaml
 
 dq_overrides:
   field_validations:
@@ -193,8 +195,8 @@ dq_overrides:
 ### Positive
 
 1. **Единый источник defaults**: `_base.yaml` v2.0.0 — нет дублирования
-2. **Детерминизм выходных данных**: `sort_by` во всех 19 entity configs (ADR-014)
-3. **Автоматическая валидация**: JSON Schema (`_schema.json`) валидирует структуру
+2. **Детерминизм выходных данных**: `sort_by` во всех 21 entity configs (ADR-014)
+3. **Автоматическая валидация**: Pydantic schemas валидируют структуру
 4. **Консистентные пути**: `{layer}/{provider}/{entity}` упрощает навигацию
 5. **Provider knowledge captured**: API limits, auth requirements в source configs
 6. **Иерархические DQ правила**: Централизация через `configs/quality/` (ADR-027)
@@ -207,7 +209,7 @@ dq_overrides:
 
 ### Neutral
 
-1. **19 entity configs + 2 composite**: Все используют единый формат и наследование от `_base.yaml`
+1. **21 entity configs + 5 composite**: Все используют единый формат и наследование от `_base.yaml`
 2. **7 source configs**: Один на провайдера, DRY для API settings
 
 ## Alternatives Considered
@@ -245,9 +247,9 @@ pipeline_name: chembl_activity
 | Requirement | Status | Notes |
 |-------------|--------|-------|
 | `sink.silver.format: delta` | ✅ PASS | All configs inherit from `_base.yaml` |
-| `sink.silver.primary_key` | ✅ PASS | All 19 entity configs specify (auto-propagated) |
-| `sink.silver.sort_by` | ✅ PASS | All 19 entity configs (ADR-014, auto-propagated from primary_keys) |
-| `sink.gold.sort_by` | ✅ PASS | All 19 entity configs (ADR-014, auto-propagated from primary_keys) |
+| `sink.silver.primary_key` | ✅ PASS | All 21 entity configs specify (auto-propagated) |
+| `sink.silver.sort_by` | ✅ PASS | All 21 entity configs (ADR-014, auto-propagated from primary_keys) |
+| `sink.gold.sort_by` | ✅ PASS | All 21 entity configs (ADR-014, auto-propagated from primary_keys) |
 | `dq_overrides` thresholds | ✅ PASS | 0.05/0.20 in `_base.yaml` defaults |
 | `circuit_breaker` settings | ✅ PASS | 5/300 in `_base.yaml` and source configs |
 | `rate_limit` per provider | ✅ PASS | In 7 source configs |
@@ -257,13 +259,13 @@ pipeline_name: chembl_activity
 
 ## References
 
-- [RULES.md v5.18, Appendix D](../../RULES.md) - Reference schema
+- [RULES.md v5.20, Appendix D](../../RULES.md) - Reference schema
 - [ADR-014: Deterministic Writes](ADR-014-deterministic-writes.md) - sort_by requirement
 - [ADR-027: DQ Rules Externalization](ADR-027-dq-rules-externalization.md) - Hierarchical DQ config
 - [03-file-policy.md](../../00-project-rules/03-file-policy.md) - File structure documentation
 - [04-extending-bioetl.md](../../00-project-rules/04-extending-bioetl.md) - Entity config template
 - [configs/pipelines/_base.yaml](../../../configs/pipelines/_base.yaml) - Unified Base Schema v2.0.0
-- [configs/pipelines/_schema.json](../../../configs/pipelines/_schema.json) - JSON Schema v2.0
+- [Pipeline Pydantic Schema](../../../src/bioetl/infrastructure/schemas/pipeline_config.py) - Pydantic validation schema
 
 ## Changelog
 
@@ -280,3 +282,7 @@ pipeline_name: chembl_activity
 | 2026-02-03 | Claude Code | Fixed: Config counts (19 entity + 2 composite = 21 total) |
 | 2026-02-03 | Claude Code | Added: Reference to ADR-026 for composite pipelines |
 | 2026-02-03 | Claude Code | Fixed: ChEMBL has 12 entity configs, pubmed uses publication.yaml |
+| 2026-02-17 | Claude Code | Fixed: Config counts (21 entity + 5 composite), ChEMBL has 14 entity configs |
+| 2026-02-17 | Claude Code | Fixed: DQ path `configs/dq/` → `configs/quality/` (consistent with ADR-027) |
+| 2026-02-17 | Claude Code | Fixed: Removed `_schema.json` reference (validation via Pydantic schemas) |
+| 2026-02-17 | Claude Code | Fixed: Composite directory listing (activity, assay, molecule, publication, target) |

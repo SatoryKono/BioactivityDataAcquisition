@@ -42,6 +42,8 @@ def test_build_pipeline_runner_wires_dependencies() -> None:
         return SimpleNamespace(
             maintenance={"retain_days": 7},
             input_filter=SimpleNamespace(),
+            business_primary_keys=["activity_id"],
+            technical_primary_key="entity_id",
         )
 
     logger_calls: list[tuple[str, dict[str, object]]] = []
@@ -126,7 +128,12 @@ def test_build_pipeline_runner_uses_default_registry() -> None:
         )
 
     def load_pipeline_config_fn(_: str) -> SimpleNamespace:
-        return SimpleNamespace(maintenance=None, input_filter=None)
+        return SimpleNamespace(
+            maintenance=None,
+            input_filter=None,
+            business_primary_keys=["activity_id"],
+            technical_primary_key="entity_id",
+        )
 
     def build_observability_bundle_fn(**_: object) -> SimpleNamespace:
         return SimpleNamespace(

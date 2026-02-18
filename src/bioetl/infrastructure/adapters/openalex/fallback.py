@@ -29,7 +29,7 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
     def __init__(
         self,
         logger: LoggerPort,
-        search_fn: Callable[[str, int], Any],  # Coroutine returning list[dict]
+        search_fn: Callable[[str, int], Any],  # Any: coroutine returning list[dict]
     ) -> None:
         """Initialize fallback handler.
 

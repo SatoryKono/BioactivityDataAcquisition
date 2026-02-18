@@ -10,47 +10,31 @@
 pipeline_name: chembl_assay
 provider: chembl
 entity_type: assay
+schema_file: ../../schemas/chembl/assay.yaml
 version: "1.2.0"
 description: "Extract bioassay definitions from ChEMBL API"
 
-primary_keys: ["assay_id"]
+business_primary_keys: ["assay_id"]
+technical_primary_key: "entity_id"
 silver_table: "chembl_assay"
 gold_table: "chembl_assay"
 
 # -----------------------------------------------------------------------------
-# DQ Overrides (applied on top of entity DQ config)
+# DQ Configuration (ADR-027)
 # -----------------------------------------------------------------------------
-dq_overrides:
-  field_validations:
-    # Override: Entity has nullable:true, pipeline requires non-null
-    - field: "assay_type"
-      type: "enum"
-      allowed: ["B", "F", "A", "T", "P", "U"]
-      nullable: false
-      error_message: "assay_type must be one of B, F, A, T, P, U"
-    # Unique: Not in entity config
-    - field: "confidence_score"
-      type: "range"
-      min: 0
-      max: 9
-      nullable: true
-    # Unique: Not in entity config
-    - field: "relationship_type"
-      type: "enum"
-      allowed: ["D", "H", "M", "N", "S", "U"]
-      nullable: true
-
-  cross_field_validations:
-    - name: "assay_identifiable"
-      fields: ["assay_id", "description"]
-      condition: "all_present"
-      error_message: "Assay must have ID and description"
+# All DQ rules externalized to configs/quality/entities/chembl/assay.yaml.
+# No inline overrides needed — entity config is authoritative.
 
 # -----------------------------------------------------------------------------
 # Sink Overrides (only non-convention values)
 # -----------------------------------------------------------------------------
-# Note: partition_by is entity-specific and differs from convention
 sink:
   silver:
     partition_by: ["assay_type"]
-  gold: {}
+  gold:
+    mode: scd2
+    scd_config:
+      valid_from: _valid_from
+      valid_to: _valid_to
+      is_current: _is_current
+      version: _version

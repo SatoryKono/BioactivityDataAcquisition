@@ -28,16 +28,16 @@ from bioetl.infrastructure.adapters.chembl.constants import (
     _SILVER_TO_CHEMBL_API_FIELD,
     CHEMBL_DTO_MODELS,
 )
+from bioetl.infrastructure.adapters.chembl.deduplication import (
+    compute_composite_key,
+    is_duplicate_record,
+    is_duplicate_record_composite,
+)
 from bioetl.infrastructure.adapters.chembl.entity_mapper import (
     ChemblEntityMapper,
 )
 from bioetl.infrastructure.adapters.chembl.health import ChemblHealthMixin
 from bioetl.infrastructure.adapters.chembl.metadata import ChemblMetadataMixin
-from bioetl.infrastructure.adapters.chembl.utils import (
-    compute_composite_key,
-    is_duplicate_record,
-    is_duplicate_record_composite,
-)
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
 )
@@ -257,17 +257,27 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
             self._handle_error(e)
 
     async def _page_iterator(
-        self, entity_type: str, limit: int | None = None
+        self,
+        entity_type: str,
+        limit: int | None = None,
+        start_offset: int = 0,
     ) -> AsyncIterator[list[dict[str, Any]]]:
-        """Yield pages of records."""
+        """Yield pages of records.
+
+        Args:
+            entity_type: Type of entity to fetch.
+            limit: Maximum number of records to yield.
+            start_offset: API offset to start fetching from (for checkpoint resume).
+        """
         url = self._mapper.get_resource_url(entity_type)
-        offset = 0
+        offset = start_offset
+        records_yielded = 0
         while True:
             params = self._build_params(offset, entity_type)
             # Optimize limit: if we have a global limit and it's smaller than effective batch size
             # Skip for entities that don't support pagination
             if limit is not None and "limit" in params:
-                remaining = limit - offset
+                remaining = limit - records_yielded
                 if remaining > 0:
                     params["limit"] = min(params["limit"], remaining)
                 elif remaining <= 0:
@@ -277,6 +287,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
             if not records:
                 break
             yield records
+            records_yielded += len(records)
             if not has_next:
                 break
             # Fix: increment by actual records fetched to handle dynamic limits correctly
@@ -415,7 +426,21 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         seen_ids: set[str] = set()
         pk_field = self._get_api_pk_field(entity_type)
         pk_fields = self._get_api_dedup_fields(entity_type)
+
+        # Detect 1:1 PK filter: filter on entity's own single PK, batch fits in page.
+        # N IDs → at most N records → no limit/offset pagination needed.
+        # For 1:N (e.g. activity by molecule_id) pagination is preserved.
+        api_filter_field = self._normalize_filter_field(entity_type, filter_field)
+        skip_pagination = (
+            len(pk_fields) == 1
+            and pk_fields[0] == api_filter_field
+            and len(id_batch) <= self._page_size
+        )
+
         params = self._build_params(0, entity_type)
+        if skip_pagination:
+            params.pop("limit", None)
+            params.pop("offset", None)
         params.update(self._build_filter_params(entity_type, filter_field, id_batch))
 
         records, has_next = await self._fetch_page(url, params, entity_type)
@@ -694,21 +719,18 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         self,
         entity_type: str,
         limit: int | None,
+        offset: int = 0,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Perform standard paginated fetch with client-side deduplication.
-
-        ChEMBL API pagination can return duplicate records across pages
-        due to unstable sorting or data changes between requests.
-        This method deduplicates records using composite key for entities
-        with multiple primary key fields, or single field otherwise.
-        """
+        """Perform standard paginated fetch with client-side deduplication."""
         total_fetched = 0
         seen_keys: set[str] = set()
         pk_field = self._get_api_pk_field(entity_type)
         pk_fields = self._get_api_dedup_fields(entity_type)
         use_composite = len(pk_fields) > 1
 
-        async for records in self._page_iterator(entity_type, limit):
+        async for records in self._page_iterator(
+            entity_type, limit, start_offset=offset
+        ):
             for record in records:
                 if use_composite:
                     composite_key = self._compute_composite_key(record, pk_fields)
@@ -748,6 +770,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         query: str | None = None,
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
+        offset: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch records from ChEMBL.
 
@@ -759,6 +782,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
             query: Unused for ChEMBL
             filter_ids: List of IDs to filter by (for deterministic batching)
             filter_field: Field name to filter on
+            offset: API offset to start from (for checkpoint resume)
 
         Yields:
             Dictionary records from ChEMBL API
@@ -770,7 +794,9 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
             ):
                 yield record
         else:
-            async for record in self._fetch_standard(entity_type, limit):
+            async for record in self._fetch_standard(
+                entity_type, limit, offset=offset or 0
+            ):
                 yield record
 
     async def fetch_filtered(

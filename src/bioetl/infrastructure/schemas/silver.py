@@ -52,6 +52,7 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         # === Other fields (alphabetical) ===
         pa.field("abstract", pa.string()),
         pa.field("affiliation_list", pa.string()),  # JSON array (None for ChEMBL)
+        pa.field("author_keys", pa.string()),  # Pipe-delimited Surname_F keys
         pa.field("author_orcids", pa.string()),
         pa.field("publication_type", pa.string()),  # Unified: from doc_type
         pa.field(
@@ -334,6 +335,7 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("affiliation_list", pa.string()),  # JSON array of unique affiliations
         pa.field("affiliation_structured", pa.string()),  # JSON array with ROR/GRID
         pa.field("author_count", pa.int64()),
+        pa.field("author_keys", pa.string()),  # Pipe-delimited Surname_F keys
         pa.field("authors", pa.string()),  # JSON-serialized list
         pa.field("authors_with_affiliations", pa.string()),  # JSON array
         pa.field("chemical_count", pa.int64()),
@@ -461,11 +463,11 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
-        pa.field("component_accessions", pa.list_(pa.string())),
-        pa.field("component_descriptions", pa.list_(pa.string())),
-        pa.field("component_ids", pa.list_(pa.int64())),
-        pa.field("component_relationships", pa.list_(pa.string())),
-        pa.field("component_types", pa.list_(pa.string())),
+        pa.field("component_accessions", pa.string()),
+        pa.field("component_descriptions", pa.string()),
+        pa.field("component_ids", pa.string()),
+        pa.field("component_relationships", pa.string()),
+        pa.field("component_types", pa.string()),
         pa.field("cross_references", pa.string()),
         pa.field("description", pa.string()),
         pa.field("downgraded", pa.bool_()),
@@ -506,7 +508,7 @@ CHEMBL_TARGET_COMPONENT_SCHEMA = pa.schema(
         pa.field("description", pa.string()),
         pa.field("organism", pa.string()),
         pa.field("protein_classification_id", pa.int64()),
-        pa.field("protein_classification_ids", pa.list_(pa.int64())),
+        pa.field("protein_classification_ids", pa.string()),
         pa.field("protein_classifications", pa.string()),  # Forensic JSON
         pa.field("target_component_synonyms", pa.string()),
         pa.field("target_component_xrefs", pa.string()),
@@ -767,6 +769,7 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("affiliation_list", pa.string()),  # JSON array
         # Author identifiers (for author-level analytics)
         pa.field("author_h_indices", pa.string()),  # JSON array of h-index values
+        pa.field("author_keys", pa.string()),  # Pipe-delimited Surname_F keys
         pa.field("author_orcids", pa.string()),
         pa.field("author_s2_ids", pa.string()),  # JSON array of S2 author IDs
         pa.field("citation_contexts", pa.string()),  # JSON array of context sentences
@@ -834,8 +837,11 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field(
             "affiliation_list", pa.string()
         ),  # Not available from CrossRef (None values)
-        pa.field("alternative_id", pa.list_(pa.string())),  # Publisher-specific IDs
+        pa.field(
+            "alternative_id", pa.string()
+        ),  # Publisher-specific IDs (canonical JSON)
         pa.field("author_details", pa.string()),  # JSON array of author objects
+        pa.field("author_keys", pa.string()),  # Pipe-delimited Surname_F keys
         pa.field("author_orcids", pa.string()),
         pa.field("authors", pa.string()),  # JSON-serialized list
         pa.field("citations_made", pa.int64()),  # Unified: from references-count
@@ -843,7 +849,7 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
             "citations_received", pa.int64()
         ),  # Unified: from is-referenced-by-count
         pa.field("content_domain_crossmark_restriction", pa.bool_()),
-        pa.field("content_domain_domains", pa.list_(pa.string())),
+        pa.field("content_domain_domains", pa.string()),
         # Note: doc_type excluded; CrossRef uses raw 'type' field instead
         # doi: Digital Object Identifier (lowercase, without "https://doi.org/") - Primary key
         pa.field("doi", pa.string()),
@@ -909,6 +915,7 @@ OPENALEX_PUBLICATION_SCHEMA = pa.schema(
         pa.field("abstract", pa.string()),
         pa.field("affiliation_list", pa.string()),  # JSON array
         # Author identifiers (JSON arrays preserving author order)
+        pa.field("author_keys", pa.string()),  # Pipe-delimited Surname_F keys
         pa.field("author_openalex_ids", pa.string()),  # OpenAlex author IDs
         pa.field("author_orcids", pa.string()),
         pa.field("authors", pa.string()),  # JSON-serialized list

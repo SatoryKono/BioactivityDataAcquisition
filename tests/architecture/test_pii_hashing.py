@@ -157,9 +157,10 @@ class TestPiiFieldsInTransformers:
         )
         content = transformer_path.read_text()
 
-        # Check that hash_pii_list is called for authors
-        assert "hash_pii_list" in content, (
-            "CrossRefPublicationTransformer MUST use hash_pii_list() for authors field"
+        # Unified normalization: normalize_author_list() handles parse+hash+serialize
+        assert "normalize_author_list" in content, (
+            "CrossRefPublicationTransformer MUST use normalize_author_list() "
+            "for authors field"
         )
 
     def test_pubmed_transformer_hashes_authors(self) -> None:
@@ -169,8 +170,9 @@ class TestPiiFieldsInTransformers:
         )
         content = transformer_path.read_text()
 
-        assert "hash_pii_list" in content, (
-            "PubMedPublicationTransformer MUST use hash_pii_list() for authors field"
+        assert "normalize_author_list" in content, (
+            "PubMedPublicationTransformer MUST use normalize_author_list() "
+            "for authors field"
         )
 
     def test_chembl_publication_transformer_hashes_authors(self) -> None:
@@ -180,8 +182,9 @@ class TestPiiFieldsInTransformers:
         )
         content = transformer_path.read_text()
 
-        # ChEMBL parses concatenated string to list and uses hash_pii_list
+        # ChEMBL parses concatenated string to list and uses normalize_author_list
         # (unified authors format across all providers)
-        assert "hash_pii_list" in content, (
-            "ChEMBL PublicationTransformer MUST use hash_pii_list() for authors field"
+        assert "normalize_author_list" in content, (
+            "ChEMBL PublicationTransformer MUST use normalize_author_list() "
+            "for authors field"
         )

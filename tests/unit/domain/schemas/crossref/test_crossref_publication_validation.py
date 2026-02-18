@@ -684,25 +684,6 @@ class TestIssnElectronicBaseValidation:
 
 
 @pytest.mark.unit
-class TestAuthorOrmolecule_idsBaseValidation:
-    """Base validation tests for author_ormolecule_ids."""
-
-    def test_author_ormolecule_ids_valid(
-        self, minimal_crossref_publication_df: pd.DataFrame
-    ) -> None:
-        """PASS: valid author_ormolecule_ids value."""
-        PublicationEnrichedSchema.validate(minimal_crossref_publication_df)
-
-    def test_author_ormolecule_ids_null_allowed(
-        self, minimal_crossref_publication_df: pd.DataFrame
-    ) -> None:
-        """SKIP: author_ormolecule_ids is nullable."""
-        df = minimal_crossref_publication_df.copy()
-        df["author_ormolecule_ids"] = None
-        PublicationEnrichedSchema.validate(df)
-
-
-@pytest.mark.unit
 class TestAuthorDetailsBaseValidation:
     """Base validation tests for author_details."""
 

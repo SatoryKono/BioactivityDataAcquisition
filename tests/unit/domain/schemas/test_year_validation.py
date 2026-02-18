@@ -98,7 +98,6 @@ class TestCrossRefYearValidation:
             # Author affiliations
             "affiliation_list": None,
             # Author and reference fields
-            "author_ormolecule_ids": None,
             "author_details": None,
             "references": None,
         }
@@ -156,7 +155,7 @@ class TestSemanticScholarYearValidation:
             "journal": "Nature",
             "publication_year": 2020,
             "publication_date": "2020-06-15",  # Unified date field
-            "publication_type": "PUBLICATION",
+            "publication_type": "journal-article",
             "publication_type_unified": None,
             "publication_subclass": None,
             "publication_class": None,
@@ -188,7 +187,6 @@ class TestSemanticScholarYearValidation:
             "affiliation_list": None,
             # Author identifiers
             "author_s2_ids": None,
-            "author_ormolecule_ids": None,
             "author_h_indices": None,
             # Citation context
             "citation_contexts": None,
@@ -247,7 +245,7 @@ class TestChemblYearValidation:
             "journal": "Nature",
             "publication_year": 2020,
             "publication_date": None,  # Always NULL for ChEMBL
-            "publication_type": "PUBLICATION",
+            "publication_type": "journal-article",
             "publication_type_unified": None,
             "publication_subclass": None,
             "publication_class": None,
@@ -271,8 +269,6 @@ class TestChemblYearValidation:
             "issue": "1",
             "page_first": "1",
             "page_last": "10",
-            # Author identifiers
-            "author_ormolecule_ids": None,
             # ChEMBL release metadata
             "chembl_release": "CHEMBL_34",
             "creation_date": "2024-01-15",
@@ -336,7 +332,7 @@ class TestPubMedYearValidation:
             "journal_name_short": "Nature",  # PubMed-specific abbreviation (unified)
             "publication_year": 2020,
             "publication_date": "2020-05-15",  # Unified date field
-            "publication_type": "PUBLICATION",
+            "publication_type": "journal-article",
             "publication_type_unified": None,
             "publication_subclass": None,
             "publication_class": None,
@@ -388,8 +384,6 @@ class TestPubMedYearValidation:
             "gene_symbols": None,
             "publication_types": None,
             # Note: affiliation_list inherited from base (unified field name)
-            # Author identifiers
-            "author_ormolecule_ids": None,
             # Author-affiliation mapping
             "authors_with_affiliations": None,
         }

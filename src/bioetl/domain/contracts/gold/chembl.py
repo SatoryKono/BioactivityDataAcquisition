@@ -315,8 +315,6 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     content_hash: Series[str] = pa.Field(nullable=False)
     publication_id: Series[str] = pa.Field(nullable=False)
     # Cross-reference IDs for linking publications across providers
-    pmid: Series[str] = pa.Field(nullable=True)
-    doi: Series[str] = pa.Field(nullable=True)
     publication_doi: Series[str] = pa.Field(nullable=True)
     publication_pmid: Series[str] = pa.Field(nullable=True)
     publication_pmc_id: Series[str] = pa.Field(nullable=True)
@@ -575,13 +573,13 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
     target_components: Series[str] = pa.Field(nullable=True)
     cross_references: Series[str] = pa.Field(nullable=True)
     target_component_synonyms: Series[str] = pa.Field(nullable=True)
-    component_accessions: Series[object] = pa.Field(nullable=True)  # list[str]
+    component_accessions: Series[str] = pa.Field(nullable=True)  # list[str]
     primary_component_id: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # int → float (nullable)
-    component_ids: Series[object] = pa.Field(nullable=True)  # list[int]
-    component_types: Series[object] = pa.Field(nullable=True)  # list[str]
-    component_relationships: Series[object] = pa.Field(nullable=True)  # list[str]
+    component_ids: Series[str] = pa.Field(nullable=True)  # list[int]
+    component_types: Series[str] = pa.Field(nullable=True)  # list[str]
+    component_relationships: Series[str] = pa.Field(nullable=True)  # list[str]
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -617,7 +615,7 @@ class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
     protein_classification_id: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # int → float (nullable)
-    protein_classification_ids: Series[object] = pa.Field(nullable=True)  # list[int]
+    protein_classification_ids: Series[str] = pa.Field(nullable=True)  # list[int]
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -636,13 +634,13 @@ class ChEMBLTissueGoldSchema(pa.DataFrameModel):
     """Gold schema for ChEMBL Tissue entity.
 
     Validates:
-    - tissue_chembl_id: Required, CHEMBL format
+    - tissue_id: Required, CHEMBL format (aliased from tissue_chembl_id by transformer)
     - pref_name: Required, non-empty
     - Ontology IDs: Optional, format validation
     """
 
-    # Primary key
-    tissue_chembl_id: Series[str] = pa.Field(
+    # Primary key (transformer maps tissue_chembl_id → tissue_id)
+    tissue_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=r"^CHEMBL\d+$",
         description="ChEMBL tissue ID",

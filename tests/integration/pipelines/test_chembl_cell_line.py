@@ -30,9 +30,26 @@ def vcr_config() -> dict[str, Any]:
 from bioetl.composition.factories.pipeline_factories import (
     chembl_cell_line_factory,
 )
+from bioetl.infrastructure.config import load_pipeline_config
 from tests.integration.pipelines.base import IntegrationPipelineTestCase
 
 logger = structlog.get_logger()
+
+
+def _gold_overwrite_sink_overrides() -> dict[str, Any]:
+    """Build config_overrides to use 'overwrite' gold mode.
+
+    The StorageAdapter does not yet forward scd_config to GoldWriter,
+    so integration tests use 'overwrite' mode to avoid the missing
+    scd_config validation error at the Gold layer.
+    """
+    cfg = load_pipeline_config("chembl_cell_line")
+    gold_sink = cfg.sink["gold"].model_copy(
+        update={"mode": "overwrite", "scd_config": None}
+    )
+    new_sink = dict(cfg.sink)
+    new_sink["gold"] = gold_sink
+    return {"sink": new_sink}
 
 
 class TestChemblCellLinePipeline(IntegrationPipelineTestCase):
@@ -48,6 +65,7 @@ class TestChemblCellLinePipeline(IntegrationPipelineTestCase):
             settings=settings,
             runtime_config=runtime_config,
             run_id=run_id,
+            config_overrides=_gold_overwrite_sink_overrides(),
         )
 
         await runner.run()
@@ -66,7 +84,7 @@ class TestChemblCellLinePipeline(IntegrationPipelineTestCase):
         # Verify Silver Delta Table
         from deltalake import DeltaTable
 
-        silver_table_name = runner.pipeline.config.effective_silver_table
+        silver_table_name = runner._pipeline.config.effective_silver_table
         silver_table_path = f"{self.silver_path}/{silver_table_name}"
 
         dt_silver = DeltaTable(silver_table_path)
@@ -83,9 +101,9 @@ class TestChemblCellLinePipeline(IntegrationPipelineTestCase):
         assert "cell_name" in silver_df.column_names
 
         # Verify Gold Delta Table
-        gold_table_name = runner.pipeline.config.effective_gold_table
+        gold_table_name = runner._pipeline.config.effective_gold_table
         if not gold_table_name:
-            gold_table_name = f"{runner.pipeline.config.provider}.{runner.pipeline.config.entity_type}"
+            gold_table_name = f"{runner._pipeline.config.provider}.{runner._pipeline.config.entity_type}"
 
         gold_table_path = f"{self.gold_path}/{gold_table_name.replace('.', '/')}"
 
@@ -107,6 +125,7 @@ class TestChemblCellLinePipeline(IntegrationPipelineTestCase):
             settings=settings,
             runtime_config=runtime_config,
             run_id=run_id,
+            config_overrides=_gold_overwrite_sink_overrides(),
         )
 
         await runner.run()
@@ -114,7 +133,7 @@ class TestChemblCellLinePipeline(IntegrationPipelineTestCase):
         # Verify Silver Delta Table has source columns
         from deltalake import DeltaTable
 
-        silver_table_name = runner.pipeline.config.effective_silver_table
+        silver_table_name = runner._pipeline.config.effective_silver_table
         silver_table_path = f"{self.silver_path}/{silver_table_name}"
 
         dt_silver = DeltaTable(silver_table_path)

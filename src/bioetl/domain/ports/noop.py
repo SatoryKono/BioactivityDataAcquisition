@@ -35,10 +35,13 @@ if TYPE_CHECKING:
 
 
 class _NoOpSpan:
-    """No-op span that does nothing.
+    """No-op span that mirrors the ``opentelemetry.trace.Span`` interface.
 
-    Implements the span interface used by OpenTelemetry tracers.
-    Supports context manager protocol for use with `with` statements.
+    This class intentionally reproduces the OTel Span API surface
+    (``set_attribute``, ``set_status``, ``record_exception``, context manager)
+    so that application code can use the same calling convention regardless
+    of whether real tracing is enabled.  See TracingPort module docstring
+    for the OTel facade rationale.
     """
 
     def __enter__(self) -> Self:
@@ -53,10 +56,11 @@ class _NoOpSpan:
     ) -> None:
         """Context manager exit."""
 
+    # Any: OTel Tracer facade (Nu...
     def set_attribute(self, key: str, value: Any) -> None:
         """Set span attribute (no-op)."""
 
-    def set_status(self, status: Any) -> None:
+    def set_status(self, status: Any) -> None:  # Any: OTel Tracer facade (Null Object)
         """Set span status (no-op)."""
 
     def record_exception(self, exception: Exception) -> None:
@@ -64,11 +68,15 @@ class _NoOpSpan:
 
 
 class _NoOpOtelTracer:
-    """No-op OpenTelemetry tracer.
+    """No-op tracer that mirrors the ``opentelemetry.trace.Tracer`` interface.
 
-    Returns _NoOpSpan instances that implement the span interface.
+    Exposes ``start_as_current_span`` — the standard OTel entry point for
+    creating spans — and returns ``_NoOpSpan`` instances.  This ensures
+    application code written against the OTel calling convention works
+    transparently when tracing is disabled.
     """
 
+    # Any: OTel Tracer facade (Nu...
     def start_as_current_span(self, *_args: Any, **_kwargs: Any) -> _NoOpSpan:
         """Start a new span (no-op).
 
@@ -81,19 +89,26 @@ class _NoOpOtelTracer:
 
 
 class NoOpTracing:
-    """No-op implementation of TracingPort.
+    """No-op implementation of TracingPort (Null Object Pattern).
+
+    Returns ``_NoOpOtelTracer`` instances that mirror the OpenTelemetry
+    ``Tracer`` API surface.  This is a deliberate design choice: all
+    application code uses the OTel calling convention
+    (``get_tracer → start_as_current_span → span context manager``)
+    regardless of whether real tracing is active.  See ADR-022 for the
+    full rationale.
 
     Used when distributed tracing is disabled or not configured.
-    All operations are silently ignored.
+    All operations are silently ignored with zero overhead.
 
     Implements:
-        TracingPort: Domain port for distributed tracing.
+        TracingPort: Domain port for distributed tracing (OTel facade).
 
     Example:
         >>> tracer = NoOpTracing()
         >>> otel_tracer = tracer.get_tracer("bioetl.transformer")
         >>> with otel_tracer.start_as_current_span("operation"):
-        ...     # span is a no-op
+        ...     # span is a no-op — same calling convention as real OTel
         ...     pass
 
     """

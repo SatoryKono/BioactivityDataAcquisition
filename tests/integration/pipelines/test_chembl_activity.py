@@ -105,7 +105,7 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
 
         # Config says silver_table is 'chembl_activity' (underscore) not slash
         silver_table_name = (
-            runner.pipeline.config.effective_silver_table
+            runner._pipeline.config.effective_silver_table
         )  # e.g., chembl_activity
         silver_table_path = f"{self.silver_path}/{silver_table_name}"
 
@@ -120,9 +120,9 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
 
         # Verify Gold Delta Table
         # Check what the factory uses if gold_table is None
-        # runner.pipeline.config.effective_gold_table might be None if config doesn't set it.
+        # runner._pipeline.config.effective_gold_table might be None if config doesn't set it.
         # But GoldWriter usually gets a default or config must exist.
-        gold_table_name = runner.pipeline.config.effective_gold_table
+        gold_table_name = runner._pipeline.config.effective_gold_table
 
         # If config returns None, it means the pipeline default is used or config is incomplete for tests.
         # ChEMBL Activity usually has `gold_table: chembl.activity` or `chembl_activity`.
@@ -136,7 +136,7 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
             # which is chembl.activity.
             # BUT filesystem shows chembl/activity.
             # SilverWriter replaces . with /.
-            gold_table_name = f"{runner.pipeline.config.provider}.{runner.pipeline.config.entity_type}"
+            gold_table_name = f"{runner._pipeline.config.provider}.{runner._pipeline.config.entity_type}"
 
         gold_table_path = f"{self.gold_path}/{gold_table_name.replace('.', '/')}"
 

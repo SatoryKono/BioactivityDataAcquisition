@@ -514,8 +514,11 @@ class TestExtractBusinessData:
         assert result["doi"] == "10.1234/test.2023"
         assert result["title"] == "Complete Test Article"
         assert result["abstract"] == "Full abstract text here."
-        # Authors are now JSON-serialized
-        assert json.loads(result["authors"]) == ["Doe, J", "Smith, Jane"]
+        # Authors are now JSON-serialized (unhashed names)
+        assert json.loads(result["authors"]) == [
+            "Doe, J",
+            "Smith, Jane",
+        ]
         assert result["journal"] == "Test Journal"
         assert result["journal_name_short"] == "Test J"
         assert result["issn"] == "1234-5678"
@@ -523,9 +526,9 @@ class TestExtractBusinessData:
         assert result["issue"] == "5"
         assert result["pub_date"] == "2023-03-15"
         assert result["publication_year"] == 2023
-        assert result["publication_types"] == ["Journal Article", "Review"]
-        assert result["subject_keywords"] == ["keyword1", "keyword2"]
-        assert result["subject_mesh"] == ["Proteins"]
+        assert result["publication_types"] == '["Journal Article","Review"]'
+        assert result["subject_keywords"] == '["keyword1","keyword2"]'
+        assert result["subject_mesh"] == '["Proteins"]'
         assert result["language"] == "eng"
         assert result["country"] == "United States"
         assert result["pmc_id"] == "PMC123456"
@@ -688,8 +691,11 @@ class TestTransformImplCollectiveAuthors:
         result = await transformer._transform_impl(pipeline_context, bronze_record, 0)
 
         assert result is not None
-        # Authors are now JSON-serialized
-        assert json.loads(result["authors"]) == ["Doe, J", "WHO Collaborative Group"]
+        # Authors are now JSON-serialized (unhashed names)
+        assert json.loads(result["authors"]) == [
+            "Doe, J",
+            "WHO Collaborative Group",
+        ]
 
 
 class TestTransformImplSpecialCharacters:
@@ -730,8 +736,11 @@ class TestTransformImplSpecialCharacters:
 
         assert result is not None
         assert result["title"] == "Effect of α-tocopherol on β-cells"
-        # Authors are now JSON-serialized
-        assert json.loads(result["authors"]) == ["Müller, H", "García, M"]
+        # Authors are now JSON-serialized (unhashed names)
+        assert json.loads(result["authors"]) == [
+            "Müller, H",
+            "García, M",
+        ]
 
 
 class TestTransformImplXMLEntities:

@@ -19,6 +19,8 @@ from bioetl.application.core.batch_writer import BatchWriter
 from bioetl.application.core.quarantine_manager import QuarantineManager
 
 if TYPE_CHECKING:
+    from opentelemetry.trace import Span
+
     from bioetl.application.core.config import RecordProcessorConfig
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.application.core.protocols import (
@@ -99,7 +101,11 @@ class RecordProcessor:
         )
 
     async def process_batch(
-        self, records: list[dict[str, Any]], batch_id: BatchID, start_index: int = 0
+        # Any: record vals vary
+        self,
+        records: list[dict[str, Any]],
+        batch_id: BatchID,
+        start_index: int = 0,
     ) -> BatchResult:
         """Process batch through Bronze -> Silver -> Gold with tracing."""
         ingestion_ts = self._context.started_at
@@ -165,8 +171,13 @@ class RecordProcessor:
         )
 
     async def _execute_with_span(
-        self, name: str, coro: Any, batch_id: BatchID, count: int, on_error: Any = None
-    ) -> Any:
+        self,
+        name: str,
+        coro: Any,  # Any: coroutine type varies per pipeline stage
+        batch_id: BatchID,
+        count: int,
+        on_error: Any = None,  # Any: error callback type varies per caller
+    ) -> Any:  # Any: callback return type varies
         """Execute coroutine with tracing span."""
         span = self._start_span(name, batch_id, count)
         try:
@@ -180,7 +191,11 @@ class RecordProcessor:
             raise
 
     async def _execute_transform_with_span(
-        self, records: list[dict[str, Any]], batch_id: BatchID, start_index: int
+        # Any: record vals vary
+        self,
+        records: list[dict[str, Any]],
+        batch_id: BatchID,
+        start_index: int,
     ) -> TransformResult:
         """Execute transformation with extended span attributes."""
         span = self._start_span("transform", batch_id, len(records), input_count=True)
@@ -200,7 +215,7 @@ class RecordProcessor:
 
     def _start_span(
         self, name: str, batch_id: BatchID, count: int, input_count: bool = False
-    ) -> Any:
+    ) -> Any:  # Any: OTel Span (avoids opentelemetry import)
         """Start a tracing span if tracer is available."""
         if not self._tracer:
             return None
@@ -212,7 +227,7 @@ class RecordProcessor:
         span.__enter__()
         return span
 
-    def _end_span(self, span: Any, error: Exception | None = None) -> None:
+    def _end_span(self, span: Span, error: Exception | None = None) -> None:
         """End a tracing span."""
         if not span:
             return

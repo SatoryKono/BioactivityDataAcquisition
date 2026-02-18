@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-__version__ = "5.14.0"
+__version__ = "6.0.0"
 
 # Project-wide monkeypatch for Pandera compatibility with Pandas 3.0.0 on Python 3.14
 # Registers pd.Series in Pandera's function dispatch registry to avoid KeyError.
