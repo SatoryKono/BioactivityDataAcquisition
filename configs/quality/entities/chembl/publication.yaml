@@ -34,6 +34,13 @@ field_validations:
     nullable: true
     error_message: "Publication year must be between 1500 and 2100"
 
+  - field: publication_year
+    type: range
+    min: 1950
+    nullable: true
+    severity: warn
+    error_message: "Publication year before 1950 — will be filtered at Gold stage"
+
   - field: publication_pmid
     type: range
     min: 1
