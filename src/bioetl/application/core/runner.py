@@ -108,6 +108,11 @@ class PipelineRunner:
         return self._logger
 
     @property
+    def shutdown_signal(self) -> ShutdownSignal:
+        """Shutdown signal for graceful termination (RunnablePort contract)."""
+        return self._shutdown_signal
+
+    @property
     def services(self) -> PipelineServices:
         """Access injected services."""
         return self._services
