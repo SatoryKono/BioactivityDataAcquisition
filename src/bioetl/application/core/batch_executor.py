@@ -733,6 +733,16 @@ class BatchExecutor:
         gold_data = self._build_dataframe_from_records(self._gold_records_for_dq)
         primary_keys = list(self._config.table_config.primary_keys)
         soft_threshold, hard_threshold = self._get_dq_thresholds()
+        key_nullability_rules = None
+        if self._config.dq_config is not None:
+            key_nullability_rules = [
+                {
+                    "field": rule.field,
+                    "key_type": rule.key_type,
+                    "nullable": rule.nullable,
+                }
+                for rule in self._config.dq_config.key_nullability_rules
+            ]
 
         # Get current date for Bronze DQ report filename
         current_date_str = datetime.now(UTC).strftime("%Y-%m-%d")
@@ -762,6 +772,7 @@ class BatchExecutor:
             silver_input_count=self.records_fetched,
             silver_quarantined_count=self.records_quarantined,
             silver_output_path=self._config.silver_output_path,
+            silver_key_nullability_rules=key_nullability_rules,
             # Gold context
             gold_data=gold_data,
             gold_target_table=self._config.table_config.gold_table,

@@ -9,6 +9,7 @@
 pipeline_name: chembl_subcellular_fraction
 provider: chembl
 entity_type: subcellular_fraction
+schema_file: ../../schemas/chembl/subcellular_fraction.yaml
 version: "1.0.0"
 description: "Extract unique subcellular fractions from ChEMBL Assay records"
 
@@ -19,7 +20,8 @@ loading_strategy: full_scan_only
 
 # Primary key is the normalized subcellular_fraction name
 # entity_id is generated as SHA256 hash of normalized name
-primary_keys: ["entity_id"]
+business_primary_keys: ["entity_id"]
+technical_primary_key: "entity_id"
 silver_table: "chembl_subcellular_fraction"
 gold_table: "chembl_subcellular_fraction"
 

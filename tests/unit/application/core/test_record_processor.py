@@ -30,6 +30,20 @@ def _write_temp_pipeline_config(
     config_dir.mkdir(parents=True, exist_ok=True)
     config_path = config_dir / f"{entity}.yaml"
 
+    # Create schema file (required by schema_file)
+    schema_dir = base_path / "configs" / "schemas" / provider
+    schema_dir.mkdir(parents=True, exist_ok=True)
+    schema_path = schema_dir / f"{entity}.yaml"
+    schema_path.write_text(
+        "\n".join(
+            [
+                "version: '1.0.0'",
+                "fields: []",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
     config_path.write_text(
         "\n".join(
             [
@@ -41,6 +55,7 @@ def _write_temp_pipeline_config(
                 "batch_size: 10",
                 "checkpoint_interval: 100",
                 "sink: {}",
+                f"schema_file: '../../schemas/{provider}/{entity}.yaml'",
                 "dq_overrides:",
                 f"  soft_fail_threshold: {soft_threshold}",
                 f"  hard_fail_threshold: {hard_threshold}",

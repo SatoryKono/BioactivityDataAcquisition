@@ -22,6 +22,11 @@ from bioetl.application.core.field_specs import (
     map_field_groups,
     simple_fields,
 )
+from bioetl.application.core.publication_aliases import (
+    LEGACY_PUBLICATION_ALIASES_CUTOFF_DATE,
+    PUBLICATION_SCHEMA_FIELD_ALIASES,
+    build_publication_legacy_to_canonical_map,
+)
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
@@ -96,6 +101,14 @@ _PUBLICATION_GROUPS: tuple[FieldGroup, ...] = (
     _SOURCE_INFO,
 )
 
+# Legacy -> canonical table assembled from FieldSpec(target=...) + field_aliases.
+PUBLICATION_LEGACY_TO_CANONICAL: dict[str, str] = (
+    build_publication_legacy_to_canonical_map(
+        _PUBLICATION_GROUPS,
+        field_aliases=PUBLICATION_SCHEMA_FIELD_ALIASES,
+    )
+)
+
 
 class PublicationTransformer(BaseChemblTransformer):
     """Transforms ChEMBL bronze publication records to silver.
@@ -117,13 +130,25 @@ class PublicationTransformer(BaseChemblTransformer):
         index: int,
     ) -> SilverRecord | None:
         """Support both unified and legacy publication identifier field names."""
-        if (
-            "publication_id" not in record
-            and record.get("document_chembl_id") is not None
-        ):
-            record = dict(record)
-            record["publication_id"] = record.get("document_chembl_id")
-        return await super()._transform_impl(context, record, index)
+        aliased_record = dict(record)
+        used_legacy_aliases: list[str] = []
+
+        for legacy_name, canonical_name in PUBLICATION_LEGACY_TO_CANONICAL.items():
+            if (
+                canonical_name not in aliased_record
+                and aliased_record.get(legacy_name) is not None
+            ):
+                aliased_record[canonical_name] = aliased_record.get(legacy_name)
+                used_legacy_aliases.append(legacy_name)
+
+        if used_legacy_aliases:
+            context.logger.warning(
+                "Legacy publication aliases used on read path; aliases are deprecated",
+                legacy_aliases=sorted(set(used_legacy_aliases)),
+                deprecation_cutoff_date=LEGACY_PUBLICATION_ALIASES_CUTOFF_DATE,
+            )
+
+        return await super()._transform_impl(context, aliased_record, index)
 
     def __init__(
         self,
@@ -136,6 +161,7 @@ class PublicationTransformer(BaseChemblTransformer):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
+        contract_policy: Any = None,
     ) -> None:
         """Initialize ChEMBL Publication transformer.
 
@@ -150,6 +176,7 @@ class PublicationTransformer(BaseChemblTransformer):
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
             data_normalizer: Optional data normalization service for text normalization.
+            contract_policy: Optional pipeline contract policy.
 
         """
         super().__init__(
@@ -162,6 +189,7 @@ class PublicationTransformer(BaseChemblTransformer):
             identity_service=identity_service,
             pii_hasher=pii_hasher,
             data_normalizer=data_normalizer,
+            contract_policy=contract_policy,
         )
 
     def _extract_business_data(
@@ -261,9 +289,9 @@ class PublicationTransformer(BaseChemblTransformer):
 
         return data
 
-    @staticmethod
-    # Any: accepts any dataclass ...
-    def entity_to_silver_record(entity: Any) -> dict[str, Any]:
+        # Any: accepts any dataclass ...
+
+    def entity_to_silver_record(self, entity: Any) -> dict[str, Any]:
         """Convert Domain Entity to SilverRecord.
 
         ChEMBL-specific fields are set to None in _extract_business_data() for
@@ -278,10 +306,8 @@ class PublicationTransformer(BaseChemblTransformer):
             fields are None).
 
         """
-        from bioetl.application.core.base_transformer import BaseTransformer
-
         # Get base silver record (includes all fields with None values)
-        silver_record = BaseTransformer.entity_to_silver_record(entity)
+        silver_record = super().entity_to_silver_record(entity)
 
         # Remove fields not in unified publication schema (ChEMBL-specific exclusions)
         silver_record.pop("issn", None)

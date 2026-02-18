@@ -62,6 +62,7 @@ class SilverDQAnalyzer:
         input_record_count: int | None,
         quarantined_count: int,
         previous_schema: dict[str, str] | None,
+        key_nullability_rules: list[dict[str, Any]] | None,
     ) -> tuple[dict[str, Any], int, int, int]:
         """Execute all enabled DQ checks and collect results.
 
@@ -141,6 +142,19 @@ class SilverDQAnalyzer:
                 hash_result.status, passed, failed, warnings
             )
 
+        if SilverDQCheckType.KEY_NULLABILITY in enabled_checks:
+            key_nullability_result = self._check_key_nullability(
+                df,
+                key_nullability_rules or [],
+            )
+            checks["key_nullability"] = key_nullability_result
+            passed, failed, warnings = update_counts(
+                DQCheckStatus(key_nullability_result["status"]),
+                passed,
+                failed,
+                warnings,
+            )
+
         return checks, passed, failed, warnings
 
     def _calculate_thresholds(
@@ -196,6 +210,7 @@ class SilverDQAnalyzer:
         input_record_count: int | None = None,
         quarantined_count: int = 0,
         previous_schema: dict[str, str] | None = None,
+        key_nullability_rules: list[dict[str, Any]] | None = None,
     ) -> SilverDQReport:
         """Analyze Silver data and generate DQ report.
 
@@ -233,6 +248,7 @@ class SilverDQAnalyzer:
             input_record_count=input_record_count,
             quarantined_count=quarantined_count,
             previous_schema=previous_schema,
+            key_nullability_rules=key_nullability_rules,
         )
 
         # Calculate thresholds
@@ -263,6 +279,38 @@ class SilverDQAnalyzer:
             thresholds=thresholds,
             summary=summary,
         )
+
+    def _check_key_nullability(
+        self,
+        df: pl.DataFrame,
+        key_nullability_rules: list[dict[str, Any]],
+    ) -> dict[str, Any]:
+        """Check nullability for configured merge/partition keys."""
+        violations: list[dict[str, Any]] = []
+
+        for rule in key_nullability_rules:
+            if rule.get("nullable", False):
+                continue
+            field = str(rule.get("field", ""))
+            key_type = str(rule.get("key_type", "merge"))
+            if field not in df.columns:
+                continue
+            null_count = int(df[field].null_count())
+            if null_count > 0:
+                violations.append(
+                    {
+                        "field": field,
+                        "key_type": key_type,
+                        "null_count": null_count,
+                    }
+                )
+
+        status = DQCheckStatus.FAIL if violations else DQCheckStatus.PASS
+        return {
+            "status": status.value,
+            "violations": violations,
+            "rules_checked": len(key_nullability_rules),
+        }
 
     def _check_record_count(
         self,

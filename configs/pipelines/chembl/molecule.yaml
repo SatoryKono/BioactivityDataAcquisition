@@ -6,10 +6,12 @@
 pipeline_name: chembl_molecule
 provider: chembl
 entity_type: molecule
+schema_file: ../../schemas/chembl/molecule.yaml
 version: "1.2.0"
 description: "Extract molecules/compounds from ChEMBL API"
 
-primary_keys: ["molecule_id"]
+business_primary_keys: ["molecule_id"]
+technical_primary_key: "entity_id"
 silver_table: "chembl_molecule"
 gold_table: "chembl_molecule"
 

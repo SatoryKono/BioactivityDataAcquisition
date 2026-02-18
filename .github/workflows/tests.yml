@@ -45,6 +45,9 @@ jobs:
       - name: Install dependencies
         run: uv sync --extra dev --extra tracing --extra performance
 
+      - name: Validate pipeline configs + schema links (blocking)
+        run: uv run python scripts/validate_pipeline_configs.py
+
       - name: Smoke check (dependencies + core imports)
         run: uv run pytest tests/smoke/ -v --tb=short
 

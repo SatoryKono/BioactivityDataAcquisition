@@ -277,6 +277,10 @@ class DQConfigLoader:
                 result.pop("conditional_validations")
             )
 
+        if "key_nullability_rules" in result:
+            result.setdefault("key_nullability", [])
+            result["key_nullability"].extend(result.pop("key_nullability_rules"))
+
         return result
 
 

@@ -33,11 +33,11 @@ from bioetl.application.services.dq._checks_statistical import (
     check_anomaly_detection,
     check_statistical_profile,
 )
-from bioetl.application.services.dq.gold_analyzer import GoldDQAnalyzer
 from bioetl.application.services.dq.dq_report_builders import (
     convert_value,
     update_counts,
 )
+from bioetl.application.services.dq.gold_analyzer import GoldDQAnalyzer
 from bioetl.domain.value_objects.dq_report import (
     DQCheckStatus,
     DQReportStatus,
@@ -341,6 +341,37 @@ class TestBusinessRulesCheck:
         result = check_business_rules(df, rules)
 
         assert result.rules_failed == 1
+
+    def test_business_rules_include_provenance_fields(self) -> None:
+        """Business rules should preserve provenance and decision fields."""
+        df = pl.DataFrame({"value": [-1.0, 2.0]})
+        rules = [
+            {
+                "rule_id": "R_TRACE_01",
+                "name": "non_negative",
+                "column": "value",
+                "condition": "range",
+                "min": 0,
+                "config_path": "configs/quality/entities/chembl/activity.yaml",
+                "layer": "gold",
+                "field": "value",
+                "severity": "error",
+                "decision": "quarantine",
+            }
+        ]
+
+        result = check_business_rules(df, rules)
+
+        assert result.rules_failed == 1
+        rule_result = result.rules[0]
+        assert rule_result.rule_id == "R_TRACE_01"
+        assert (
+            rule_result.config_path == "configs/quality/entities/chembl/activity.yaml"
+        )
+        assert rule_result.layer == "gold"
+        assert rule_result.field == "value"
+        assert rule_result.severity == "error"
+        assert rule_result.decision == "quarantine"
 
     def test_business_rules_empty(self) -> None:
         """Business rules check passes when no rules specified."""

@@ -95,6 +95,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
+        contract_policy: Any = None,
     ):
         """Initialize PubMed publication transformer.
 
@@ -108,6 +109,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
             data_normalizer: Optional data normalization service for DOI normalization.
+            contract_policy: Optional pipeline contract policy.
 
         """
         super().__init__(
@@ -120,6 +122,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             identity_service=identity_service,
             pii_hasher=pii_hasher,
             data_normalizer=data_normalizer,
+            contract_policy=contract_policy,
         )
         self._cached_xml_root = None
 
@@ -700,9 +703,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "date_revised": date_revised,
         }
 
-    @staticmethod
-    # Any: accepts any dataclass ...
-    def entity_to_silver_record(entity: Any) -> dict[str, Any]:
+        # Any: accepts any dataclass ...
+
+    def entity_to_silver_record(self, entity: Any) -> dict[str, Any]:
         """Convert Domain Entity to SilverRecord, excluding certain fields.
 
         Overrides base implementation to remove fields not needed for PubMed.
@@ -714,10 +717,8 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             SilverRecord dictionary without excluded fields.
 
         """
-        from bioetl.application.core.base_transformer import BaseTransformer
-
         # Get base silver record
-        silver_record = BaseTransformer.entity_to_silver_record(entity)
+        silver_record = super().entity_to_silver_record(entity)
 
         # Remove excluded fields (API deprecated or not available)
         silver_record.pop("vernacular_title", None)

@@ -596,6 +596,19 @@ class TransformConfig(BaseModel):
         return v
 
 
+class ContentHashConfig(BaseModel):
+    """Configures include/exclude field policy for content hash generation."""
+
+    include: list[str] = Field(
+        default_factory=list,
+        description="Optional allowlist of fields included in content hash.",
+    )
+    exclude: list[str] = Field(
+        default_factory=list,
+        description="Optional denylist of fields excluded from content hash.",
+    )
+
+
 class PipelineYamlConfig(BaseModel):
     """Strict schema for pipeline YAML configuration.
 
@@ -671,12 +684,27 @@ class PipelineYamlConfig(BaseModel):
         default=None,
         description="Path to column group config file relative to pipeline config.",
     )
+    schema_file: str = Field(
+        ...,
+        min_length=1,
+        description="Required path to schema config file relative to pipeline config. "
+        "Example: ../../schemas/chembl/activity.yaml",
+    )
     data_schema_file: str | None = Field(
         default=None,
-        description="Path to data schema file with layer-specific columns (silver/gold).",
+        description="Deprecated alias for schema_file. Kept for backward compatibility.",
     )
 
-    primary_keys: list[str] = Field(min_length=1)
+    business_primary_keys: list[str] | None = Field(default=None, min_length=1)
+    technical_primary_key: str = Field(
+        default="entity_id",
+        min_length=1,
+        description="Technical immutable record key in Silver (defaults to entity_id).",
+    )
+    primary_keys: list[str] | None = Field(
+        default=None,
+        description="Deprecated alias for business_primary_keys (kept for migration).",
+    )
     silver_table: str = Field(min_length=1)
     gold_table: str | None = Field(default=None, min_length=1)
     silver_filters: GoldFiltersConfig = Field(default_factory=GoldFiltersConfig)
@@ -691,6 +719,12 @@ class PipelineYamlConfig(BaseModel):
         default_factory=list,
         description="Optional column ordering groups for Silver/Gold output",
     )
+
+    content_hash: ContentHashConfig = Field(
+        default_factory=ContentHashConfig,
+        description="Content-hash include/exclude rules loaded from schema config.",
+    )
+
     extraction_params: dict[str, str | int | bool] = Field(
         default_factory=dict,
         description="Server-side API query parameters for Bronze extraction (ADR-028 §3). "
@@ -720,6 +754,44 @@ class PipelineYamlConfig(BaseModel):
         if not v.islower():
             raise ValueError("provider must be lowercase")
         return v
+
+    @model_validator(mode="after")
+    def validate_primary_key_split(self) -> PipelineYamlConfig:
+        """Validate explicit separation between business and technical PKs.
+
+        Migration rules:
+        - business_primary_keys is canonical.
+        - primary_keys is accepted as legacy alias.
+        - If both are provided, values MUST match exactly.
+        """
+        if self.business_primary_keys is None and self.primary_keys is None:
+            raise ValueError(
+                "business_primary_keys is required (or legacy primary_keys during migration)"
+            )
+
+        if self.business_primary_keys is None:
+            self.business_primary_keys = self.primary_keys
+
+        if (
+            self.primary_keys is not None
+            and self.business_primary_keys is not None
+            and tuple(self.primary_keys) != tuple(self.business_primary_keys)
+        ):
+            raise ValueError(
+                "primary_keys and business_primary_keys mismatch; "
+                "use business_primary_keys as canonical naming"
+            )
+
+        if (
+            self.business_primary_keys is not None
+            and self.technical_primary_key in self.business_primary_keys
+            and len(self.business_primary_keys) > 1
+        ):
+            raise ValueError(
+                "technical_primary_key MUST NOT be part of composite business_primary_keys"
+            )
+
+        return self
 
     @model_validator(mode="after")
     def validate_entity_type_canonical(self) -> PipelineYamlConfig:

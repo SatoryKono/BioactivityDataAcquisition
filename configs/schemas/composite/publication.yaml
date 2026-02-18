@@ -1,3 +1,7 @@
+content_hash:
+  include: []
+  exclude: []
+
 # Layer-specific column configuration (ADR-029: Data Schema Externalization)
 # This file demonstrates Variant 2 approach: filtering shared column_groups by layer
 
