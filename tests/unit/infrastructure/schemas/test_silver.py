@@ -271,28 +271,22 @@ class TestChemblTargetSchema:
         """Verify primary key field exists."""
         assert "target_id" in CHEMBL_TARGET_SCHEMA.names
 
-    def test_has_list_fields(self):
-        """Verify list fields have correct types."""
-        # Note: protein_classifications not available in /target endpoint
-        # It's only in /target_component endpoint (CHEMBL_TARGET_COMPONENT_SCHEMA)
-        list_fields = [
+    def test_has_canonical_json_string_fields(self):
+        """Verify canonical JSON string fields have correct types (ADR-035)."""
+        # These fields were migrated from list types to canonical JSON strings
+        json_string_fields = [
             "component_accessions",
             "component_types",
             "component_relationships",
             "component_descriptions",
+            "component_ids",
         ]
-        for field_name in list_fields:
+        for field_name in json_string_fields:
             assert field_name in CHEMBL_TARGET_SCHEMA.names
             field = CHEMBL_TARGET_SCHEMA.field(field_name)
-            assert isinstance(field.type, pa.ListType), (
-                f"{field_name} should be list, got {field.type}"
+            assert field.type == pa.string(), (
+                f"{field_name} should be string (canonical JSON), got {field.type}"
             )
-
-    def test_component_ids_is_list_of_int64(self):
-        """Verify component_ids is list of int64."""
-        field = CHEMBL_TARGET_SCHEMA.field("component_ids")
-        assert isinstance(field.type, pa.ListType)
-        assert field.type.value_type == pa.int64()
 
 
 class TestChemblDocumentSchema:
