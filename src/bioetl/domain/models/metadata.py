@@ -372,6 +372,10 @@ class BaseOutputMetadata(BaseModel):
         default=None,
         description="UTC timestamp when write operation completed",
     )
+    composite_run_id: str | None = Field(
+        default=None,
+        description="Composite run identifier mapped from _composite_run_id",
+    )
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -450,6 +454,57 @@ class GoldOutputExt(BaseModel):
     format: Literal["delta", "parquet"] = Field(
         default="delta",
         description="Output format",
+    )
+
+
+class CompositeSchemaValidationMetadata(BaseModel):
+    """Schema validation metadata for composite Gold outputs.
+
+    Captures whether strict schema validation was applied before writing
+    composite merged data and records the outcome in sidecar metadata.
+    """
+
+    enabled: bool = Field(
+        default=False,
+        description="Whether schema validation was enabled",
+    )
+    strict: bool | None = Field(
+        default=None,
+        description="Whether strict schema validation was required",
+    )
+    status: Literal["passed", "not_run"] = Field(
+        default="not_run",
+        description="Schema validation outcome for this write",
+    )
+
+
+class CompositeOutputExt(GoldOutputExt):
+    """Composite-specific extension for Gold output metadata.
+
+    Formalizes lineage fields that are also emitted in composite records
+    (`_composite_*`, `_source_providers`, `_enrichment_*`, `_lineage_*`) and
+    adds schema validation sidecar metadata for merged outputs.
+    """
+
+    composite_run_id: str | None = Field(
+        default=None,
+        description="Composite run identifier from _composite_run_id",
+    )
+    source_providers: list[str] = Field(
+        default_factory=list,
+        description="Source providers from _source_providers",
+    )
+    enrichment_status: dict[str, str] = Field(
+        default_factory=dict,
+        description="Per-enricher status map from _enrichment_status",
+    )
+    lineage_created_at: datetime | None = Field(
+        default=None,
+        description="Lineage timestamp from _lineage_created_at",
+    )
+    schema_validation: CompositeSchemaValidationMetadata = Field(
+        default_factory=CompositeSchemaValidationMetadata,
+        description="Schema validation details for composite merged write",
     )
 
 
@@ -753,8 +808,9 @@ class GoldMetadata(BaseModel):
     output: BaseOutputMetadata = Field(
         default_factory=BaseOutputMetadata, description="Base output metrics"
     )
-    output_ext: GoldOutputExt = Field(
-        default_factory=GoldOutputExt, description="Gold-specific output metrics"
+    output_ext: GoldOutputExt | CompositeOutputExt = Field(
+        default_factory=GoldOutputExt,
+        description="Gold-specific or composite-specific output metrics",
     )
     scd: SCDMetadata | None = Field(default=None, description="SCD Type 2 metadata")
     environment: EnvironmentMetadata = Field(description="Environment information")

@@ -131,6 +131,8 @@ class GoldMetadataInput:
         governance: Optional governance metadata from pipeline config.
         total_bytes: Total size in bytes (ADR-029).
         partition_count: Number of partitions (ADR-029).
+        schema_validation_enabled: Whether schema validation ran before write.
+        schema_validation_strict: Whether validation used strict mode.
     """
 
     table_path: str
@@ -147,6 +149,8 @@ class GoldMetadataInput:
     governance: GovernanceMetadata | None = None
     total_bytes: int = 0  # ADR-029: Total size in bytes
     partition_count: int = 0  # ADR-029: Number of partitions
+    schema_validation_enabled: bool = False
+    schema_validation_strict: bool | None = None
 
 
 @runtime_checkable

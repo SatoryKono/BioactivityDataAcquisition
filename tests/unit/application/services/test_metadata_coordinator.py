@@ -16,11 +16,10 @@ from bioetl.composition.services.metadata_coordinator import (
     MetadataCoordinator,
     SilverMetadataInput,
 )
-from bioetl.domain.ports.metadata_coordinator import SilverRef
-from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
-from bioetl.domain.medallion import Layer
+from bioetl.domain.medallion import GoldWriteMode, Layer, SilverWriteMode
 from bioetl.domain.models.metadata import (
     BronzeMetadata,
+    CompositeOutputExt,
     GoldMetadata,
     GovernanceLineageConfig,
     GovernanceMetadata,
@@ -29,6 +28,7 @@ from bioetl.domain.models.metadata import (
     SilverMetadata,
     SourceMetadata,
 )
+from bioetl.domain.ports.metadata_coordinator import SilverRef
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.run_context import RunContext
 
@@ -577,6 +577,40 @@ class TestGoldMetadata:
         metadata = coordinator.create_gold_metadata(input_data)
 
         assert metadata.output.record_count == 25
+
+    def test_gold_composite_output_extension(
+        self, coordinator: MetadataCoordinator
+    ) -> None:
+        """Test composite records are mapped to CompositeOutputExt metadata."""
+        records = [
+            {
+                "id": 1,
+                "_composite_run_id": "comp-run-123",
+                "_source_providers": "['seed', 'openalex']",
+                "_enrichment_status": "{'openalex': 'ok'}",
+                "_lineage_created_at": "2026-01-01T10:00:00+00:00",
+            }
+        ]
+
+        input_data = GoldMetadataInput(
+            table_path="/data/gold/composite/publication",
+            table_name="composite.publication",
+            records=records,
+            mode=GoldWriteMode.OVERWRITE,
+            schema_validation_enabled=True,
+            schema_validation_strict=True,
+        )
+
+        metadata = coordinator.create_gold_metadata(input_data)
+
+        assert metadata.output.composite_run_id == "comp-run-123"
+        assert isinstance(metadata.output_ext, CompositeOutputExt)
+        assert metadata.output_ext.composite_run_id == "comp-run-123"
+        assert metadata.output_ext.source_providers == ["seed", "openalex"]
+        assert metadata.output_ext.enrichment_status == {"openalex": "ok"}
+        assert metadata.output_ext.schema_validation.enabled is True
+        assert metadata.output_ext.schema_validation.strict is True
+        assert metadata.output_ext.schema_validation.status == "passed"
 
     def test_gold_lineage_with_silver_refs(
         self, coordinator: MetadataCoordinator
