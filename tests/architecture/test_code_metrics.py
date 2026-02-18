@@ -82,7 +82,7 @@ class TestFileSizeLimits:
         # Domain registry exemptions
         "publication_type_classification.py": 1650,  # 1644 LOC - Publication type classification taxonomy (Level 1/2/3 mapping tables + classify_publication_type)
         "publication.py": 340,  # 331 LOC - Publication entity mapping registry with composite key support
-        "publication_field_groups.py": 430,  # 424 LOC - Field-to-group mapping for composite publication pipeline (ADR-026)
+        "publication_field_groups.py": 440,  # 435 LOC - Field-to-group mapping for composite publication pipeline (ADR-026, +SYSTEM_METADATA group)
         "field_groups.py": 400,  # 392 LOC - FieldGroupRegistry domain models with FieldMapping/FieldGroupDefinition (ADR-026)
         # Application layer exemptions
         "batch_writer.py": 565,  # 560 LOC - BatchWriter with Safety Guard + column_order + layer config filtering
