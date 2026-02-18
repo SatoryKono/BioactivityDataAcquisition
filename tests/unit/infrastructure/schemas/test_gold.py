@@ -388,7 +388,7 @@ class TestGoldSchemaValidation:
             "date_revised": "2024-03-20",
             "publication_status": "ppublish",
             "publication_type_list": '["Journal Article"]',
-            "publication_type": "PUBLICATION",
+            "publication_type": "journal-article",
             "publication_types": '["Journal Article"]',
             "subject_keywords": '["test"]',
             "subject_mesh": '["Testing"]',
@@ -437,7 +437,7 @@ class TestGoldSchemaValidation:
             "title": "Test Publication",
             "authors": '["Author One"]',
             "abstract": "Test abstract",
-            "publication_type": "PUBLICATION",
+            "publication_type": "journal-article",
             "journal": "Test Journal",
             "publication_year": 2024,
             # publication_date excluded: not available from ChEMBL API

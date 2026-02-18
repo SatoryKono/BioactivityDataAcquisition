@@ -54,9 +54,11 @@ extraction_params:
 # Defence-in-depth: mirrors extraction_params to catch API inconsistencies.
 silver_filters:
     # Column value filters — strict inclusion lists
+    # NOTE: Use Silver-layer field names (after transformation).
+    # doc_type is mapped to publication_type and normalized to kebab-case
+    # by PublicationTransformer (e.g., "PUBLICATION" → "journal-article").
     columns:
-        # Publications only (mirrors extraction_params doc_type)
-        doc_type: [PUBLICATION]
+        publication_type: [journal-article]
 
     # Numeric range filters
     ranges:
@@ -66,9 +68,10 @@ silver_filters:
             max: 2050
 
     # Required fields — must be non-null for silver
+    # NOTE: Use Silver-layer field names (after transformation).
     required_fields:
         - publication_id
-        - doc_type
+        - publication_type
         - title
 
 # -----------------------------------------------------------------------------
@@ -77,9 +80,10 @@ silver_filters:
 # Criteria for valid publications
 gold_filters:
   # Column value filters
+  # NOTE: Use Silver-layer field names (after transformation).
   columns:
     # Publications only (exclude patents, books, etc.)
-    doc_type: [PUBLICATION]
+    publication_type: [journal-article]
 
   # Numeric range filters
   ranges:
@@ -89,7 +93,8 @@ gold_filters:
       max: 2050
 
   # Required fields (pubmed_id and doi are optional - not all publications have them)
+  # NOTE: Use Silver-layer field names (after transformation).
   required_fields:
     - publication_id
-    - doc_type
+    - publication_type
     - title
