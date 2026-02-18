@@ -9,6 +9,8 @@ on:
       - 'src/bioetl/infrastructure/schemas/**'
       - 'src/tools/scripts/generate_contracts.py'
       - 'src/tools/verify_schema_parity.py'
+      - 'src/tools/generate_json_field_typing_inventory.py'
+      - 'docs/03-data-model/json-field-typing-inventory.md'
       - '.github/workflows/schema-governance.yml'
   pull_request:
     paths:
@@ -17,6 +19,8 @@ on:
       - 'src/bioetl/infrastructure/schemas/**'
       - 'src/tools/scripts/generate_contracts.py'
       - 'src/tools/verify_schema_parity.py'
+      - 'src/tools/generate_json_field_typing_inventory.py'
+      - 'docs/03-data-model/json-field-typing-inventory.md'
       - '.github/workflows/schema-governance.yml'
 
 permissions:
@@ -64,10 +68,9 @@ jobs:
           "
 
   schema-parity:
-    name: Schema Parity + PK Coverage (non-blocking)
+    name: Schema Parity + PK Coverage (blocking)
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    continue-on-error: true
 
     steps:
       - name: Checkout code
@@ -85,7 +88,13 @@ jobs:
         run: uv sync --extra dev
 
       - name: Verify schema parity (Domain → Silver → Gold)
-        run: uv run python src/tools/verify_schema_parity.py
+        run: uv run python src/tools/verify_schema_parity.py --mode blocking
+
+      - name: Rebuild JSON field typing inventory
+        run: uv run python src/tools/generate_json_field_typing_inventory.py
+
+      - name: Ensure JSON field typing inventory is up-to-date
+        run: git diff --exit-code docs/03-data-model/json-field-typing-inventory.md
 
   schema-governance-status:
     name: Schema Governance Status

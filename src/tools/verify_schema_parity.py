@@ -256,6 +256,13 @@ def check_schema_pair(pair: SchemaPair) -> tuple[list[str], list[str]]:
                 f"{pair.name}: PK '{primary_key}' is nullable in Gold schema"
             )
 
+        if silver_fields[primary_key].nullable != gold_columns[primary_key].nullable:
+            blocking.append(
+                f"{pair.name}: PK '{primary_key}' nullable mismatch "
+                f"(Silver={silver_fields[primary_key].nullable}, "
+                f"Gold={gold_columns[primary_key].nullable})"
+            )
+
     return blocking, warnings
 
 
