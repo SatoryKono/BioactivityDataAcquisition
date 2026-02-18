@@ -38,7 +38,7 @@ def mock_runner():
     """Create a mock runner that implements RunnablePort."""
     runner = MagicMock()
     runner.run = AsyncMock()
-    runner.shutdown_signal = None
+    runner._shutdown_signal = None
     return runner
 
 

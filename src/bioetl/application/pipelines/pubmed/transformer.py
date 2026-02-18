@@ -122,6 +122,8 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             data_normalizer=data_normalizer,
         )
         self._cached_xml_root = None
+        self._author_extractor = AuthorExtractor()
+        self._date_extractor = DateExtractor()
 
     def _pre_extract_validation(
         self,
@@ -345,7 +347,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         medline = root.find(".//MedlineCitation")
         pubmed_data = root.find(".//PubmedData")
 
-        raw_author_data = AuthorExtractor().extract(article) or []
+        raw_author_data = self._author_extractor.extract(article) or []
 
         return {
             **identifiers,
@@ -608,7 +610,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             return None, None
 
         # Use DateExtractor logic to support MedlineDate parsing
-        raw_date = DateExtractor().extract(pub_date_node)
+        raw_date = self._date_extractor.extract(pub_date_node)
         if not raw_date:
             return None, None
 

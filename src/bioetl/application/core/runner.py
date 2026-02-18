@@ -90,9 +90,9 @@ class PipelineRunner:
         self._context = context
         self._executor = executor
         self._checkpoint_manager = checkpoint_manager
-        self.shutdown_signal = shutdown_signal
+        self._shutdown_signal = shutdown_signal
         self._logger = logger
-        self.pipeline = pipeline
+        self._pipeline = pipeline
         self._tracer = tracer
 
         # Services injected directly via DI (created in composition layer)
