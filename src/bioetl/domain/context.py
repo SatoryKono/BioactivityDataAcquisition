@@ -15,7 +15,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from bioetl.domain.ports import LoggerPort
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import ExecutionContext, RunID, RunType
 
 
 def _now_utc() -> datetime:
@@ -361,6 +361,7 @@ class PipelineRunContext:
 
     # Composite mode: skip Gold layer writing (sub-pipelines produce merged Gold separately)
     skip_gold: bool = False
+    execution_context: ExecutionContext = ExecutionContext.ISOLATED
 
     @property
     def has_input_filter(self) -> bool:

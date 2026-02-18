@@ -58,6 +58,10 @@ class FieldValidationConfig(BaseModel):
     severity: Literal["error", "warn"] = Field(
         default="error", description="Severity level (error or warn)"
     )
+    severity_enricher: Literal["error", "warn"] | None = Field(
+        default=None,
+        description="Override severity when running as enricher in composite pipeline",
+    )
     # Range validation
     min: float | None = Field(default=None, description="Minimum value (range)")
     max: float | None = Field(default=None, description="Maximum value (range)")
@@ -199,6 +203,7 @@ class DQConfig(BaseModel):
                 validation_type=fv.type,
                 nullable=fv.nullable,
                 severity=fv.severity,
+                severity_enricher=fv.severity_enricher,
                 min_value=fv.min,
                 max_value=fv.max,
                 pattern=fv.pattern,
@@ -241,6 +246,8 @@ class DQConfig(BaseModel):
                         field=tv.field,
                         validation_type=tv.type,
                         nullable=tv.nullable,
+                        severity=tv.severity,
+                        severity_enricher=tv.severity_enricher,
                         min_value=tv.min,
                         max_value=tv.max,
                         pattern=tv.pattern,
