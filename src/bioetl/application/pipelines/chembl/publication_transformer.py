@@ -22,6 +22,11 @@ from bioetl.application.core.field_specs import (
     map_field_groups,
     simple_fields,
 )
+from bioetl.application.core.publication_aliases import (
+    LEGACY_PUBLICATION_ALIASES_CUTOFF_DATE,
+    PUBLICATION_SCHEMA_FIELD_ALIASES,
+    build_publication_legacy_to_canonical_map,
+)
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
@@ -95,6 +100,14 @@ _PUBLICATION_GROUPS: tuple[FieldGroup, ...] = (
     _SOURCE_INFO,
 )
 
+# Legacy -> canonical table assembled from FieldSpec(target=...) + field_aliases.
+PUBLICATION_LEGACY_TO_CANONICAL: dict[str, str] = (
+    build_publication_legacy_to_canonical_map(
+        _PUBLICATION_GROUPS,
+        field_aliases=PUBLICATION_SCHEMA_FIELD_ALIASES,
+    )
+)
+
 
 class PublicationTransformer(BaseChemblTransformer):
     """Transforms ChEMBL bronze publication records to silver.
@@ -116,13 +129,25 @@ class PublicationTransformer(BaseChemblTransformer):
         index: int,
     ) -> SilverRecord | None:
         """Support both unified and legacy publication identifier field names."""
-        if (
-            "publication_id" not in record
-            and record.get("document_chembl_id") is not None
-        ):
-            record = dict(record)
-            record["publication_id"] = record.get("document_chembl_id")
-        return await super()._transform_impl(context, record, index)
+        aliased_record = dict(record)
+        used_legacy_aliases: list[str] = []
+
+        for legacy_name, canonical_name in PUBLICATION_LEGACY_TO_CANONICAL.items():
+            if (
+                canonical_name not in aliased_record
+                and aliased_record.get(legacy_name) is not None
+            ):
+                aliased_record[canonical_name] = aliased_record.get(legacy_name)
+                used_legacy_aliases.append(legacy_name)
+
+        if used_legacy_aliases:
+            context.logger.warning(
+                "Legacy publication aliases used on read path; aliases are deprecated",
+                legacy_aliases=sorted(set(used_legacy_aliases)),
+                deprecation_cutoff_date=LEGACY_PUBLICATION_ALIASES_CUTOFF_DATE,
+            )
+
+        return await super()._transform_impl(context, aliased_record, index)
 
     def __init__(
         self,

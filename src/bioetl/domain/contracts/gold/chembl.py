@@ -315,8 +315,6 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     content_hash: Series[str] = pa.Field(nullable=False)
     publication_id: Series[str] = pa.Field(nullable=False)
     # Cross-reference IDs for linking publications across providers
-    pmid: Series[str] = pa.Field(nullable=True)
-    doi: Series[str] = pa.Field(nullable=True)
     publication_doi: Series[str] = pa.Field(nullable=True)
     publication_pmid: Series[str] = pa.Field(nullable=True)
     publication_pmc_id: Series[str] = pa.Field(nullable=True)
