@@ -166,6 +166,7 @@ class CrossFieldValidation:
         name: Unique name for the validation rule.
         fields: Fields involved in the validation.
         condition: Validation condition type.
+        severity: Severity level (error or warn). Default: error.
         error_message: Custom error message template.
     """
 
@@ -178,6 +179,7 @@ class CrossFieldValidation:
         "conditional_required",  # If field A present, field B required
         "custom",  # Custom validation function
     ]
+    severity: Literal["error", "warn"] = "error"
     # For conditional_required: (trigger_field, required_field)
     trigger_field: str | None = None
     required_field: str | None = None
