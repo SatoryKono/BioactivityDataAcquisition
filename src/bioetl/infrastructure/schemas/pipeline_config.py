@@ -85,6 +85,9 @@ class CrossFieldValidationConfig(BaseModel):
         "conditional_required",
         "custom",
     ] = Field(description="Validation condition type")
+    severity: Literal["error", "warn"] = Field(
+        default="error", description="Severity level (error or warn)"
+    )
     trigger_field: str | None = Field(
         default=None, description="Field that triggers conditional requirement"
     )
@@ -213,6 +216,7 @@ class DQConfig(BaseModel):
                 name=cfv.name,
                 fields=tuple(cfv.fields),
                 condition=cfv.condition,
+                severity=cfv.severity,
                 trigger_field=cfv.trigger_field,
                 required_field=cfv.required_field,
                 validator=cfv.validator,

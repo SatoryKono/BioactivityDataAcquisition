@@ -265,6 +265,8 @@ class ConfigLoader:
             "fields": list(cfv.fields),
             "condition": cfv.condition,
         }
+        if cfv.severity != "error":
+            result["severity"] = cfv.severity
         if cfv.trigger_field:
             result["trigger_field"] = cfv.trigger_field
         if cfv.required_field:
