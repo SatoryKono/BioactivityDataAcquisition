@@ -485,7 +485,7 @@ class TestFunctionLength:
         "_parse_composite_config": 95,  # 93 lines - Composite config parsing with validation
         "bootstrap_composite_runner": 175,  # 170 lines - Composite pipeline bootstrapping with factory functions
         "run_composite": 70,  # 68 lines - Composite CLI entrypoint with dependency support
-        "build_pipeline_context": 60,  # 55 lines - Context building for composite
+        "build_pipeline_context": 80,  # 75 lines - Context building for composite + execution_context
         "write_gold_merged": 90,  # 88 lines - Gold write with merged enrichers + flat_structure + CSV export
         "_write_gold_merged_metadata": 130,  # 128 lines - Gold merged metadata with full lineage
         "write_silver_merged": 94,  # 92 lines - Silver merged write with flat_structure + CSV export
