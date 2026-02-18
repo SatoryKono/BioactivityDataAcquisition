@@ -53,7 +53,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/target?format=json
+    uri: https://www.ebi.ac.uk/chembl/api/data/target?format=json&target_type=SINGLE+PROTEIN&organism__isnull=false&tax_id__isnull=false
   response:
     body:
       string: '{"page_meta": {"limit": 20, "next": "/chembl/api/data/target.json?limit=20&offset=20",
@@ -6718,7 +6718,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/molecule?format=json&limit=2&offset=0
+    uri: https://www.ebi.ac.uk/chembl/api/data/molecule?format=json&molecule_type=Small+molecule&structure_type=MOL&inorganic_flag=0&limit=2&offset=0
   response:
     body:
       string: '{"molecules": [{"atc_classifications": [], "availability_type": -1,
@@ -6874,7 +6874,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&limit=2&offset=0
+    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&doc_type=PUBLICATION&year__gte=1950&year__lte=2050&limit=2&offset=0
   response:
     body:
       string: '{"documents": [{"abstract": "", "authors": null, "chembl_release":

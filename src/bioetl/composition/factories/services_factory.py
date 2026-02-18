@@ -442,6 +442,7 @@ class ServicesBuilder:
         strict_gold_validation: bool = True,
         lock_validator: Callable[[], Awaitable[bool]] | None = None,
         column_groups: tuple[ColumnGroupConfig, ...] = (),
+        scd_config: dict[str, str] | None = None,
     ) -> RecordProcessor:
         """Create configured RecordProcessor.
 
@@ -492,6 +493,7 @@ class ServicesBuilder:
             dq_config=dq_config,
             table_config=table_config,
             column_groups=column_groups,
+            scd_config=scd_config,
         )
 
         # Create Gold validator from schema (DI pattern)
@@ -562,6 +564,7 @@ class ServicesBuilder:
             strict_gold_validation=strict_gold_validation,
             lock_validator=lock_validator,
             column_groups=tuple(pipeline.config.column_groups),
+            scd_config=pipeline.config.scd_config,
         )
 
     @staticmethod
@@ -624,6 +627,7 @@ class ServicesBuilder:
             gold_output_path=gold_output_path,
             flat_structure=flat_structure,
             column_groups=pipeline.config.column_groups,
+            scd_config=pipeline.config.scd_config,
         )
 
         # Create Gold validator

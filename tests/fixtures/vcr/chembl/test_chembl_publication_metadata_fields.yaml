@@ -53,7 +53,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&document_chembl_id__in=CHEMBL1121421%2CCHEMBL1121493%2CCHEMBL1121680%2CCHEMBL1121695%2CCHEMBL1121721%2CCHEMBL1121751%2CCHEMBL1121774%2CCHEMBL1121806%2CCHEMBL1121940%2CCHEMBL1121981
+    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&doc_type=PUBLICATION&year__gte=1950&year__lte=2050&document_chembl_id__in=CHEMBL1121421%2CCHEMBL1121493%2CCHEMBL1121680%2CCHEMBL1121695%2CCHEMBL1121721%2CCHEMBL1121751%2CCHEMBL1121774%2CCHEMBL1121806%2CCHEMBL1121940%2CCHEMBL1121981
   response:
     body:
       string: "{\"documents\": [{\"abstract\": \"A new route to 5-(p-hydroxybenzyl)pyrimidines
@@ -277,7 +277,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&document_chembl_id__in=CHEMBL1121982%2CCHEMBL1122012%2CCHEMBL1122013%2CCHEMBL1122103%2CCHEMBL1122157%2CCHEMBL1122264%2CCHEMBL1122282%2CCHEMBL1122397%2CCHEMBL1122439%2CCHEMBL1122470
+    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&doc_type=PUBLICATION&year__gte=1950&year__lte=2050&document_chembl_id__in=CHEMBL1121982%2CCHEMBL1122012%2CCHEMBL1122013%2CCHEMBL1122103%2CCHEMBL1122157%2CCHEMBL1122264%2CCHEMBL1122282%2CCHEMBL1122397%2CCHEMBL1122439%2CCHEMBL1122470
   response:
     body:
       string: '{"documents": [{"abstract": "Using a combination of solid-phase and
@@ -522,7 +522,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&document_chembl_id__in=CHEMBL1122477%2CCHEMBL1122542%2CCHEMBL1122576%2CCHEMBL1122648%2CCHEMBL1122707%2CCHEMBL1122740%2CCHEMBL1122801%2CCHEMBL1122806%2CCHEMBL1122824%2CCHEMBL1122863
+    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&doc_type=PUBLICATION&year__gte=1950&year__lte=2050&document_chembl_id__in=CHEMBL1122477%2CCHEMBL1122542%2CCHEMBL1122576%2CCHEMBL1122648%2CCHEMBL1122707%2CCHEMBL1122740%2CCHEMBL1122801%2CCHEMBL1122806%2CCHEMBL1122824%2CCHEMBL1122863
   response:
     body:
       string: "{\"documents\": [{\"abstract\": \"A series of 1-piperazino-3-phenylindans
@@ -750,7 +750,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&document_chembl_id__in=CHEMBL1122902%2CCHEMBL1122908%2CCHEMBL1122916%2CCHEMBL1122930%2CCHEMBL1122934%2CCHEMBL1122939%2CCHEMBL1123048%2CCHEMBL1123066%2CCHEMBL1123072%2CCHEMBL1123078
+    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&doc_type=PUBLICATION&year__gte=1950&year__lte=2050&document_chembl_id__in=CHEMBL1122902%2CCHEMBL1122908%2CCHEMBL1122916%2CCHEMBL1122930%2CCHEMBL1122934%2CCHEMBL1122939%2CCHEMBL1123048%2CCHEMBL1123066%2CCHEMBL1123072%2CCHEMBL1123078
   response:
     body:
       string: '{"documents": [{"abstract": "A variety of N-substituted (mercaptoalkanoyl)-
@@ -984,7 +984,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&document_chembl_id__in=CHEMBL1123100%2CCHEMBL1123108%2CCHEMBL1123138%2CCHEMBL1123156%2CCHEMBL1123181%2CCHEMBL1123225%2CCHEMBL1123252%2CCHEMBL1123303%2CCHEMBL1123307%2CCHEMBL1123313
+    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&doc_type=PUBLICATION&year__gte=1950&year__lte=2050&document_chembl_id__in=CHEMBL1123100%2CCHEMBL1123108%2CCHEMBL1123138%2CCHEMBL1123156%2CCHEMBL1123181%2CCHEMBL1123225%2CCHEMBL1123252%2CCHEMBL1123303%2CCHEMBL1123307%2CCHEMBL1123313
   response:
     body:
       string: '{"documents": [{"abstract": "The synthesis of chiral 1,5-benzothiazepines
@@ -1238,7 +1238,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&document_chembl_id__in=CHEMBL1123329%2CCHEMBL1123364%2CCHEMBL1123426%2CCHEMBL1123445%2CCHEMBL1123459%2CCHEMBL1123545%2CCHEMBL1123605%2CCHEMBL1123635%2CCHEMBL1123636%2CCHEMBL1123638
+    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&doc_type=PUBLICATION&year__gte=1950&year__lte=2050&document_chembl_id__in=CHEMBL1123329%2CCHEMBL1123364%2CCHEMBL1123426%2CCHEMBL1123445%2CCHEMBL1123459%2CCHEMBL1123545%2CCHEMBL1123605%2CCHEMBL1123635%2CCHEMBL1123636%2CCHEMBL1123638
   response:
     body:
       string: '{"documents": [{"abstract": "A series of 2-aryldopamine analogues were
@@ -1503,7 +1503,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&document_chembl_id__in=CHEMBL1123646%2CCHEMBL1123675%2CCHEMBL1123767%2CCHEMBL1123825%2CCHEMBL1123885%2CCHEMBL1123890%2CCHEMBL1123948%2CCHEMBL1123952%2CCHEMBL1123976%2CCHEMBL1123992
+    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&doc_type=PUBLICATION&year__gte=1950&year__lte=2050&document_chembl_id__in=CHEMBL1123646%2CCHEMBL1123675%2CCHEMBL1123767%2CCHEMBL1123825%2CCHEMBL1123885%2CCHEMBL1123890%2CCHEMBL1123948%2CCHEMBL1123952%2CCHEMBL1123976%2CCHEMBL1123992
   response:
     body:
       string: '{"documents": [{"abstract": "Some 4-phenyl-4-piperidinols, corresponding
@@ -1786,7 +1786,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&document_chembl_id__in=CHEMBL1123998%2CCHEMBL1124008%2CCHEMBL1124019%2CCHEMBL1124039%2CCHEMBL1124076%2CCHEMBL1124077%2CCHEMBL1124094%2CCHEMBL1124116%2CCHEMBL1124132%2CCHEMBL1124147
+    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&doc_type=PUBLICATION&year__gte=1950&year__lte=2050&document_chembl_id__in=CHEMBL1123998%2CCHEMBL1124008%2CCHEMBL1124019%2CCHEMBL1124039%2CCHEMBL1124076%2CCHEMBL1124077%2CCHEMBL1124094%2CCHEMBL1124116%2CCHEMBL1124132%2CCHEMBL1124147
   response:
     body:
       string: "{\"documents\": [{\"abstract\": \"Two isomeric iodinated analogues
@@ -2077,7 +2077,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&document_chembl_id__in=CHEMBL1124162%2CCHEMBL1124177%2CCHEMBL1124208%2CCHEMBL1124210%2CCHEMBL1124219%2CCHEMBL1124221%2CCHEMBL1124229%2CCHEMBL1124245%2CCHEMBL1124274%2CCHEMBL1124276
+    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&doc_type=PUBLICATION&year__gte=1950&year__lte=2050&document_chembl_id__in=CHEMBL1124162%2CCHEMBL1124177%2CCHEMBL1124208%2CCHEMBL1124210%2CCHEMBL1124219%2CCHEMBL1124221%2CCHEMBL1124229%2CCHEMBL1124245%2CCHEMBL1124274%2CCHEMBL1124276
   response:
     body:
       string: "{\"documents\": [{\"abstract\": \"The interaction of dihydrofolate
@@ -2376,7 +2376,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&document_chembl_id__in=CHEMBL1124288%2CCHEMBL1124308%2CCHEMBL1124311%2CCHEMBL1124313%2CCHEMBL1124325%2CCHEMBL1124342%2CCHEMBL1124374%2CCHEMBL1124424%2CCHEMBL1124469%2CCHEMBL1124484
+    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&doc_type=PUBLICATION&year__gte=1950&year__lte=2050&document_chembl_id__in=CHEMBL1124288%2CCHEMBL1124308%2CCHEMBL1124311%2CCHEMBL1124313%2CCHEMBL1124325%2CCHEMBL1124342%2CCHEMBL1124374%2CCHEMBL1124424%2CCHEMBL1124469%2CCHEMBL1124484
   response:
     body:
       string: '{"documents": [{"abstract": "A series of renin inhibitors have been

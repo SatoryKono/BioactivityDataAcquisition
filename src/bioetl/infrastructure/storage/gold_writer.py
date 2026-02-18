@@ -1,19 +1,4 @@
-"""Gold layer writer (business-ready data with strict validation).
-
-Implements RULES.md §2.1.1 - Gold Layer specifications.
-
-Requirements:
-- REQ-DATA-009: Strict validation (strict=True)
-- REQ-DATA-010: SCD Type 2 or date partitioning
-- REQ-CONTRACT-001: Published schemas in docs/contracts/
-
-Architecture:
-- Uses Pandera for strict schema validation
-- Local filesystem storage with Delta Lake format
-- Implements SCD Type 2 (Slowly Changing Dimensions) for history tracking
-- Enforces data contracts
-- CSV export delegated to CsvExporter (composition)
-"""
+"""Gold layer writer — RULES.md §2.1.1, REQ-DATA-009/010, REQ-CONTRACT-001."""
 
 from __future__ import annotations
 
@@ -56,16 +41,35 @@ if TYPE_CHECKING:
 # Consumers importing from gold_writer will still work
 __all__ = ["GoldWriteMode", "GoldWriter"]
 
+# YAML key mapping for SCD2 config normalization
+_SCD_KEY_MAP = {
+    "valid_from": "valid_from_col",
+    "valid_to": "valid_to_col",
+    "is_current": "current_flag_col",
+    "version": "version_col",
+}
+
+
+def _normalize_scd_config(
+    scd_config: dict[str, Any],
+    primary_keys: list[str] | None,
+) -> dict[str, Any]:
+    """Normalize YAML scd_config keys to gold_writer expected format."""
+    out = dict(scd_config)
+    if "business_key" not in out and primary_keys:
+        out["business_key"] = (
+            primary_keys[0] if len(primary_keys) == 1 else primary_keys
+        )
+    for src, dst in _SCD_KEY_MAP.items():
+        if src in out and dst not in out:
+            out[dst] = out[src]
+    return out
+
 
 class GoldWriter(BaseDeltaWriter):
-    """Writer for Gold layer (validated business data).
+    """Gold layer writer: strict Pandera validation, Delta Lake, SCD Type 2.
 
-    Inherits from BaseDeltaWriter for common Delta Lake operations
-    (get_table_path, clear).
-
-    Enforces strict validation before writing. All records must pass
-    schema validation or the entire batch fails.
-    CSV export is delegated to an optional CsvExporter (composition pattern).
+    Inherits BaseDeltaWriter for common Delta ops. CSV export via CsvExporter.
     """
 
     def __init__(
@@ -461,10 +465,11 @@ class GoldWriter(BaseDeltaWriter):
         if mode == GoldWriteMode.SCD2:
             assert ingestion_ts is not None  # Validated in _validate_scd2_requirements
             assert scd_config is not None
+            normalized = _normalize_scd_config(scd_config, primary_keys)
             await self._write_scd2(
                 table_path,
                 records,
-                scd_config,
+                normalized,
                 partition_cols,
                 ingestion_ts,
                 column_order,
