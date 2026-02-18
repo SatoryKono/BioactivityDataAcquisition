@@ -126,6 +126,7 @@ class StoragePort(Protocol):
         primary_keys: list[str] | None = None,
         mode: Literal["overwrite", "append", "scd2"] = "overwrite",
         *,
+        scd_config: dict[str, Any] | None = None,
         column_order: list[str] | None = None,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,

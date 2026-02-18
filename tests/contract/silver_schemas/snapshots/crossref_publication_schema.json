@@ -121,8 +121,8 @@
   "alternative_id": {
     "checks": [],
     "coerce": false,
-    "description": "Alternative IDs (publisher-specific, e.g., PII)",
-    "dtype": "object",
+    "description": "Canonical JSON array of alternative IDs (publisher-specific, e.g., PII).",
+    "dtype": "str",
     "nullable": true,
     "required": true,
     "unique": false
@@ -203,8 +203,8 @@
   "content_domain_domains": {
     "checks": [],
     "coerce": false,
-    "description": "Content domain domains (list of strings)",
-    "dtype": "object",
+    "description": "Canonical JSON array of content domain domains.",
+    "dtype": "str",
     "nullable": true,
     "required": true,
     "unique": false

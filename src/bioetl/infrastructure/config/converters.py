@@ -90,6 +90,9 @@ def yaml_config_to_domain(
         on_schema_mismatch=on_schema_mismatch,
     )
 
+    gold_config = yaml_config.sink.get("gold")
+    scd_config = gold_config.scd_config if gold_config else None
+
     return PipelineConfig(
         pipeline_name=yaml_config.pipeline_name,
         provider=yaml_config.provider,
@@ -105,4 +108,5 @@ def yaml_config_to_domain(
         transform_version=transform_version,
         transform_steps=transform_steps,
         loading_strategy=yaml_config.loading_strategy,
+        scd_config=scd_config,
     )
