@@ -357,7 +357,7 @@ class TestPipelineRunnerInit:
 
         assert runner._config == pipeline_config
         assert runner._runtime == runtime_config
-        assert runner.shutdown_signal == shutdown_signal
+        assert runner._shutdown_signal == shutdown_signal
         # Verify services are stored directly
         assert runner._lock_manager == mock_lock_manager
         assert runner._preflight_service == mock_preflight_service
