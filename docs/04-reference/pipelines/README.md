@@ -36,13 +36,13 @@ ______________________________________________________________________
 
 ### Composite Pipelines (5)
 
-| #   | Pipeline ID             | Provider  | Entity      | Spec                                         |
-| --- | ----------------------- | --------- | ----------- | -------------------------------------------- |
-| 22  | `composite_publication` | Composite | publication | [Spec](composite/01-publication-spec.md)     |
-| 23  | `composite_molecule`    | Composite | molecule    | [Spec](composite/02-molecule-spec.md)        |
-| 24  | `composite_target`      | Composite | target      | [Spec](composite/03-target-spec.md)          |
-| 25  | `composite_activity`    | Composite | activity    | *Spec pending*                               |
-| 26  | `composite_assay`       | Composite | assay       | *Spec pending*                               |
+| #   | Pipeline ID             | Provider  | Entity      | Spec                                     |
+| --- | ----------------------- | --------- | ----------- | ---------------------------------------- |
+| 22  | `composite_publication` | Composite | publication | [Spec](composite/01-publication-spec.md) |
+| 23  | `composite_molecule`    | Composite | molecule    | [Spec](composite/02-molecule-spec.md)    |
+| 24  | `composite_target`      | Composite | target      | [Spec](composite/03-target-spec.md)      |
+| 25  | `composite_activity`    | Composite | activity    | *Spec pending*                           |
+| 26  | `composite_assay`       | Composite | assay       | *Spec pending*                           |
 
 ______________________________________________________________________
 
@@ -91,7 +91,33 @@ ______________________________________________________________________
 
 ## Schema Files
 
-Provider schemas live in `src/bioetl/domain/schemas/` and Gold contracts in `src/bioetl/domain/contracts/gold/`.
+Each provider pipeline references an explicit schema config via `schema_file` in `configs/pipelines/*/*.yaml`.
+
+| Pipeline config                                        | Schema config                                        |
+| ------------------------------------------------------ | ---------------------------------------------------- |
+| `configs/pipelines/chembl/activity.yaml`               | `configs/schemas/chembl/activity.yaml`               |
+| `configs/pipelines/chembl/assay.yaml`                  | `configs/schemas/chembl/assay.yaml`                  |
+| `configs/pipelines/chembl/assay_parameters.yaml`       | `configs/schemas/chembl/assay_parameters.yaml`       |
+| `configs/pipelines/chembl/cell_line.yaml`              | `configs/schemas/chembl/cell_line.yaml`              |
+| `configs/pipelines/chembl/compound_record.yaml`        | `configs/schemas/chembl/compound_record.yaml`        |
+| `configs/pipelines/chembl/molecule.yaml`               | `configs/schemas/chembl/molecule.yaml`               |
+| `configs/pipelines/chembl/protein_class.yaml`          | `configs/schemas/chembl/protein_class.yaml`          |
+| `configs/pipelines/chembl/publication.yaml`            | `configs/schemas/chembl/publication.yaml`            |
+| `configs/pipelines/chembl/publication_similarity.yaml` | `configs/schemas/chembl/publication_similarity.yaml` |
+| `configs/pipelines/chembl/publication_term.yaml`       | `configs/schemas/chembl/publication_term.yaml`       |
+| `configs/pipelines/chembl/subcellular_fraction.yaml`   | `configs/schemas/chembl/subcellular_fraction.yaml`   |
+| `configs/pipelines/chembl/target.yaml`                 | `configs/schemas/chembl/target.yaml`                 |
+| `configs/pipelines/chembl/target_component.yaml`       | `configs/schemas/chembl/target_component.yaml`       |
+| `configs/pipelines/chembl/tissue.yaml`                 | `configs/schemas/chembl/tissue.yaml`                 |
+| `configs/pipelines/crossref/publication.yaml`          | `configs/schemas/crossref/publication.yaml`          |
+| `configs/pipelines/openalex/publication.yaml`          | `configs/schemas/openalex/publication.yaml`          |
+| `configs/pipelines/pubchem/compound.yaml`              | `configs/schemas/pubchem/compound.yaml`              |
+| `configs/pipelines/pubmed/publication.yaml`            | `configs/schemas/pubmed/publication.yaml`            |
+| `configs/pipelines/semanticscholar/publication.yaml`   | `configs/schemas/semanticscholar/publication.yaml`   |
+| `configs/pipelines/uniprot/idmapping.yaml`             | `configs/schemas/uniprot/idmapping.yaml`             |
+| `configs/pipelines/uniprot/protein.yaml`               | `configs/schemas/uniprot/protein.yaml`               |
+
+Domain schema contracts remain in `src/bioetl/domain/schemas/` and Gold contracts in `src/bioetl/domain/contracts/gold/`.
 JSON contract exports are in `docs/contracts/gold/`.
 
 ______________________________________________________________________

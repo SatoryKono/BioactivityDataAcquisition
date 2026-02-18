@@ -1,4 +1,4 @@
-"""Unit tests for data_schema_file path resolution in config_loader.
+"""Unit tests for schema_file path resolution in config_loader.
 
 Tests:
 - Convention-based default path: ../../schemas/{provider}/{entity_type}.yaml
@@ -20,24 +20,24 @@ from bioetl.infrastructure.config_loader import (
 
 
 @pytest.mark.unit
-class TestDataSchemaFileDefault:
-    """Verify convention-based default for data_schema_file."""
+class TestSchemaFileDefault:
+    """Verify convention-based default for schema_file."""
 
     def test_default_path_uses_two_parent_levels(self) -> None:
-        """Default data_schema_file must be ../../schemas/{provider}/{entity}.yaml."""
+        """Default schema_file must be ../../schemas/{provider}/{entity}.yaml."""
         config: dict[str, Any] = {}
         _apply_file_reference_defaults(config, "chembl", "molecule")
 
-        assert config["data_schema_file"] == "../../schemas/chembl/molecule.yaml"
+        assert config["schema_file"] == "../../schemas/chembl/molecule.yaml"
 
     def test_explicit_override_not_overwritten(self) -> None:
-        """Explicit data_schema_file in config must not be overwritten by default."""
+        """Explicit schema_file in config must not be overwritten by default."""
         config: dict[str, Any] = {
-            "data_schema_file": "custom/path/schema.yaml",
+            "schema_file": "custom/path/schema.yaml",
         }
         _apply_file_reference_defaults(config, "chembl", "molecule")
 
-        assert config["data_schema_file"] == "custom/path/schema.yaml"
+        assert config["schema_file"] == "custom/path/schema.yaml"
 
 
 @pytest.mark.unit
@@ -45,7 +45,7 @@ class TestLoadDataSchemaConfig:
     """Tests for _load_data_schema_config file resolution and loading."""
 
     def test_missing_file_raises_file_not_found_error(self, tmp_path: Path) -> None:
-        """Missing data_schema_file must raise FileNotFoundError."""
+        """Missing schema_file must raise FileNotFoundError."""
         config_path = tmp_path / "pipelines" / "chembl" / "molecule.yaml"
         config_path.parent.mkdir(parents=True)
         config_path.touch()
@@ -54,7 +54,7 @@ class TestLoadDataSchemaConfig:
             _load_data_schema_config(config_path, "../../schemas/chembl/molecule.yaml")
 
     def test_existing_file_loads_column_groups(self, tmp_path: Path) -> None:
-        """Existing data_schema_file with column_groups must load correctly."""
+        """Existing schema_file with column_groups must load correctly."""
         # Create pipeline config path
         config_path = tmp_path / "pipelines" / "chembl" / "molecule.yaml"
         config_path.parent.mkdir(parents=True)

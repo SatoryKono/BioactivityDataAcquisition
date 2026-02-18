@@ -6,6 +6,7 @@
 pipeline_name: chembl_target_component
 provider: chembl
 entity_type: target_component
+schema_file: ../../schemas/chembl/target_component.yaml
 version: "1.2.0"
 description: "ChEMBL Target Components (protein sequences, etc.)"
 

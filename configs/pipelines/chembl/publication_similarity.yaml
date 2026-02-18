@@ -7,6 +7,7 @@
 pipeline_name: chembl_publication_similarity
 provider: chembl
 entity_type: publication_similarity
+schema_file: ../../schemas/chembl/publication_similarity.yaml
 version: "2.1.0"
 description: "Extract publication similarity data (Tanimoto coefficients) from ChEMBL API"
 

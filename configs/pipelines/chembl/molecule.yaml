@@ -6,6 +6,7 @@
 pipeline_name: chembl_molecule
 provider: chembl
 entity_type: molecule
+schema_file: ../../schemas/chembl/molecule.yaml
 version: "1.2.0"
 description: "Extract molecules/compounds from ChEMBL API"
 

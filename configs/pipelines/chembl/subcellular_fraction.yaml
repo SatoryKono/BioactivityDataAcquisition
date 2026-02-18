@@ -9,6 +9,7 @@
 pipeline_name: chembl_subcellular_fraction
 provider: chembl
 entity_type: subcellular_fraction
+schema_file: ../../schemas/chembl/subcellular_fraction.yaml
 version: "1.0.0"
 description: "Extract unique subcellular fractions from ChEMBL Assay records"
 

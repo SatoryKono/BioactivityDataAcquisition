@@ -9,6 +9,7 @@
 pipeline_name: chembl_compound_record
 provider: chembl
 entity_type: compound_record
+schema_file: ../../schemas/chembl/compound_record.yaml
 version: "1.2.0"
 description: "Extract compound records from ChEMBL API"
 

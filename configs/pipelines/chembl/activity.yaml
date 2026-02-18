@@ -16,6 +16,7 @@
 pipeline_name: chembl_activity
 provider: chembl
 entity_type: activity
+schema_file: ../../schemas/chembl/activity.yaml
 version: "1.2.0"
 description: "Extract biological activity records from ChEMBL API"
 

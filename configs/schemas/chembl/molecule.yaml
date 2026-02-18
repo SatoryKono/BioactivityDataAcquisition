@@ -1,1 +1,27 @@
-column_groups: []
+column_groups:
+- name: system
+  fields:
+  - entity_id
+  - content_hash
+  - _run_id
+  - _run_type
+  - _source
+  - _ingestion_ts
+- name: identifiers
+  fields:
+  - molecule_id
+- name: business
+  pattern: ^(?!_|.*_id$).+
+silver:
+  include_groups:
+  - system
+  - identifiers
+  - business
+gold:
+  include_groups:
+  - system
+  - identifiers
+  - business
+  exclude_fields:
+  - '*_raw'
+  - _dq_*

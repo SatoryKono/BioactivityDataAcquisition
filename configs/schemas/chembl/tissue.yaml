@@ -4,26 +4,34 @@
 version: "1.0.0"
 entity: tissue
 
-# Column groups must be a list of {name, fields} objects
 column_groups:
+  - name: system
+    fields:
+      - entity_id
+      - content_hash
+      - _run_id
+      - _run_type
+      - _source
+      - _ingestion_ts
   - name: identifiers
     fields:
       - tissue_id
-  - name: core_metadata
+  - name: business
     fields:
       - pref_name
-  - name: ontology_references
-    fields:
       - bto_id
       - caloha_id
       - efo_id
       - uberon_id
 
-# All business fields for Gold layer
-gold_columns:
-  - tissue_id
-  - pref_name
-  - bto_id
-  - caloha_id
-  - efo_id
-  - uberon_id
+silver:
+  include_groups:
+    - system
+    - identifiers
+    - business
+
+gold:
+  include_groups:
+    - system
+    - identifiers
+    - business

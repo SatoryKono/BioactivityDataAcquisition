@@ -9,6 +9,7 @@
 pipeline_name: semanticscholar_publication
 provider: semanticscholar
 entity_type: publication
+schema_file: ../../schemas/semanticscholar/publication.yaml
 version: "1.2.0"
 description: "Batch DOI resolution via Semantic Scholar with title fallback"
 

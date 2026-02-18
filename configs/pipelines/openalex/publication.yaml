@@ -9,6 +9,7 @@
 pipeline_name: openalex_publication
 provider: openalex
 entity_type: publication
+schema_file: ../../schemas/openalex/publication.yaml
 version: "1.2.0"
 description: "Batch DOI resolution via OpenAlex with title fallback"
 

@@ -8,6 +8,7 @@
 pipeline_name: pubmed_publication
 provider: pubmed
 entity_type: publication
+schema_file: ../../schemas/pubmed/publication.yaml
 version: "1.2.0"
 description: "Extract publication metadata from PubMed via Entrez API"
 

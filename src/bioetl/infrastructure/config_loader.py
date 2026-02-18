@@ -10,7 +10,7 @@ Convention-based path resolution (ADR-029):
         - source_file: ../../sources/{provider}.yaml
         - dq_config_file: ../../quality/entities/{provider}/{entity_type}.yaml
         - filter_config_file: ../../filters/entities/{provider}/{entity_type}.yaml
-        - data_schema_file: ../../schemas/{provider}/{entity_type}.yaml
+        - schema_file: ../../schemas/{provider}/{entity_type}.yaml
 
     Sink Paths:
         - sink.bronze.path: data/output/bronze/{provider}/{entity_type}
@@ -79,7 +79,7 @@ def _apply_file_reference_defaults(
         f"../../filters/entities/{provider}/{entity_type}.yaml",
     )
     config.setdefault(
-        "data_schema_file",
+        "schema_file",
         f"../../schemas/{provider}/{entity_type}.yaml",
     )
     config.setdefault(
@@ -111,7 +111,7 @@ def _load_column_groups_config(
 
 
 def _load_data_schema_config(
-    config_path: Path, data_schema_file: str
+    config_path: Path, schema_file: str
 ) -> dict[str, Any] | None:
     """Load data schema configuration with layer-specific column definitions.
 
@@ -121,7 +121,7 @@ def _load_data_schema_config(
 
     Args:
         config_path: Path to pipeline config file.
-        data_schema_file: Relative path to data schema YAML.
+        schema_file: Relative path to data schema YAML.
 
     Returns:
         Dictionary with column_groups, silver, and gold keys, or None if empty.
@@ -129,11 +129,11 @@ def _load_data_schema_config(
     Raises:
         FileNotFoundError: If the resolved schema path does not exist.
     """
-    schema_path = (config_path.parent / data_schema_file).resolve()
+    schema_path = (config_path.parent / schema_file).resolve()
     if not schema_path.exists():
         raise FileNotFoundError(
             f"Data schema file not found: {schema_path} "
-            f"(resolved from '{data_schema_file}' relative to {config_path.parent})"
+            f"(resolved from '{schema_file}' relative to {config_path.parent})"
         )
 
     with open(schema_path, encoding="utf-8") as f:
@@ -521,6 +521,49 @@ def _merge_data_schema_into_config(
         config.setdefault("data_schema", {})["gold"] = data_schema["gold"]
 
 
+def _validate_schema_config(data_schema: dict[str, Any], schema_file: str) -> None:
+    """Validate schema configuration has required minimum structure.
+
+    Required:
+      - non-empty column_groups
+      - system/identifiers/business groups
+      - layer filters for silver and gold (non-empty include_groups)
+    """
+    groups = data_schema.get("column_groups") or []
+    if not isinstance(groups, list) or not groups:
+        raise ValueError(
+            f"schema_file '{schema_file}' must define non-empty column_groups"
+        )
+
+    group_names = {g.get("name") for g in groups if isinstance(g, dict)}
+    has_system = "system" in group_names
+    has_identifiers = any(
+        isinstance(name, str) and name.startswith("identifiers") for name in group_names
+    )
+    has_business = "business" in group_names or any(
+        isinstance(name, str)
+        and name != "system"
+        and not name.startswith("identifiers")
+        for name in group_names
+    )
+    if not (has_system and has_identifiers and has_business):
+        raise ValueError(
+            f"schema_file '{schema_file}' must contain system, identifiers*, and business groups"
+        )
+
+    for layer in ("silver", "gold"):
+        layer_cfg = data_schema.get(layer)
+        if not isinstance(layer_cfg, dict):
+            raise ValueError(
+                f"schema_file '{schema_file}' missing '{layer}' layer filter config"
+            )
+        include_groups = layer_cfg.get("include_groups")
+        if not isinstance(include_groups, list) or not include_groups:
+            raise ValueError(
+                f"schema_file '{schema_file}' must define non-empty {layer}.include_groups"
+            )
+
+
 def _load_column_groups_section(
     config: dict[str, Any],
     entity_config: dict[str, Any],
@@ -528,20 +571,30 @@ def _load_column_groups_section(
 ) -> None:
     """Load column groups from external file unless explicitly set inline.
 
-    Priority: explicit inline > data_schema_file > column_groups_file (legacy).
+    Priority: explicit inline > schema_file > data_schema_file > column_groups_file (legacy).
     """
     if "column_groups" in entity_config:
         return
 
-    if data_schema_file := config.get("data_schema_file"):
-        try:
-            data_schema = _load_data_schema_config(config_path, data_schema_file)
-        except FileNotFoundError:
-            pass  # Fall back to column_groups_file below
-        else:
-            if data_schema:
-                _merge_data_schema_into_config(config, data_schema)
-                return
+    schema_file = config.get("schema_file")
+    if isinstance(schema_file, str) and schema_file.strip():
+        data_schema = _load_data_schema_config(config_path, schema_file)
+        if data_schema:
+            _validate_schema_config(data_schema, schema_file)
+            _merge_data_schema_into_config(config, data_schema)
+            return
+
+    # Backward compatibility for deprecated data_schema_file field
+    deprecated_data_schema_file = config.get("data_schema_file")
+    if (
+        isinstance(deprecated_data_schema_file, str)
+        and deprecated_data_schema_file.strip()
+    ):
+        data_schema = _load_data_schema_config(config_path, deprecated_data_schema_file)
+        if data_schema:
+            _validate_schema_config(data_schema, deprecated_data_schema_file)
+            _merge_data_schema_into_config(config, data_schema)
+            return
 
     if column_groups_file := config.get("column_groups_file"):
         column_groups = _load_column_groups_config(config_path, column_groups_file)

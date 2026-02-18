@@ -7,6 +7,7 @@
 pipeline_name: crossref_publication
 provider: crossref
 entity_type: publication
+schema_file: ../../schemas/crossref/publication.yaml
 version: "1.2.0"
 description: "Enrich publication records with CrossRef metadata via DOI resolution"
 

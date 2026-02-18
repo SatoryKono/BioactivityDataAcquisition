@@ -10,6 +10,7 @@
 pipeline_name: chembl_assay
 provider: chembl
 entity_type: assay
+schema_file: ../../schemas/chembl/assay.yaml
 version: "1.2.0"
 description: "Extract bioassay definitions from ChEMBL API"
 

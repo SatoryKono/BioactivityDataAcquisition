@@ -660,9 +660,15 @@ class PipelineYamlConfig(BaseModel):
         default=None,
         description="Path to column group config file relative to pipeline config.",
     )
+    schema_file: str = Field(
+        ...,
+        min_length=1,
+        description="Required path to schema config file relative to pipeline config. "
+        "Example: ../../schemas/chembl/activity.yaml",
+    )
     data_schema_file: str | None = Field(
         default=None,
-        description="Path to data schema file with layer-specific columns (silver/gold).",
+        description="Deprecated alias for schema_file. Kept for backward compatibility.",
     )
 
     primary_keys: list[str] = Field(min_length=1)

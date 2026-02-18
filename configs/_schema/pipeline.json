@@ -1791,12 +1791,19 @@
       "default": null,
       "description": "Explicit loading strategy for the pipeline. 'full_scan_only': Each run performs full scan, checkpoint resume disabled. See ADR-031.",
       "title": "Loading Strategy"
+    },
+    "schema_file": {
+      "description": "Required path to schema config file relative to pipeline config. Example: ../../schemas/chembl/activity.yaml",
+      "minLength": 1,
+      "title": "Schema File",
+      "type": "string"
     }
   },
   "required": [
     "pipeline_name",
     "provider",
     "entity_type",
+    "schema_file",
     "primary_keys",
     "silver_table"
   ],
