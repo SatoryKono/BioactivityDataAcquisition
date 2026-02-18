@@ -110,7 +110,7 @@ class TestSemanticScholarPublicationTransformer:
         assert result["is_oa"] is True
         assert result["open_access_url"] == "https://example.com/paper.pdf"
         assert result["oa_status"] == "green"  # Normalized to lowercase
-        assert result["publication_type"] == "JournalArticle"
+        assert result["publication_type"] == "journal-article"  # Normalized
         assert result["_source"] == "semanticscholar"
         assert result["_lookup_method"] == "doi"
 
@@ -189,7 +189,7 @@ class TestSemanticScholarPublicationTransformer:
         sample_record: dict[str, Any],
         publication_types: list[str] | None,
     ) -> None:
-        """Test that publication_type defaults to PUBLICATION when publicationTypes is empty/null."""
+        """Test that publication_type defaults to 'publication' when publicationTypes is empty/null."""
         if publication_types is None:
             sample_record.pop("publicationTypes", None)
         else:
@@ -198,7 +198,10 @@ class TestSemanticScholarPublicationTransformer:
         result = await transformer.transform(mock_context, sample_record, 0)
 
         assert result is not None
-        assert result["publication_type"] == "PUBLICATION"
+        # "PUBLICATION" is the raw fallback from _resolve_publication_type(),
+        # which is then mapped to "journal-article" via PUBLICATION_TYPE_MAPPING
+        # (matches the ChEMBL "PUBLICATION" → "journal-article" entry)
+        assert result["publication_type"] == "journal-article"
 
     @pytest.mark.asyncio
     async def test_transform_publication_type_joined(
@@ -207,13 +210,13 @@ class TestSemanticScholarPublicationTransformer:
         mock_context: PipelineContext,
         sample_record: dict[str, Any],
     ) -> None:
-        """Test that publication_type joins list values with '|'."""
+        """Test that publication_type joins list values and normalizes each to canonical."""
         sample_record["publicationTypes"] = ["JournalArticle", "Review"]
 
         result = await transformer.transform(mock_context, sample_record, 0)
 
         assert result is not None
-        assert result["publication_type"] == "JournalArticle|Review"
+        assert result["publication_type"] == "journal-article|review"
 
     @pytest.mark.asyncio
     async def test_transform_missing_paper_id_skips_record(

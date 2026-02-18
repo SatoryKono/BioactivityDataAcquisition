@@ -170,6 +170,7 @@ class BasePublicationTransformer(BaseTransformer):
         Uses ``PUBLICATION_TYPE_MAPPING`` for provider-agnostic normalization.
         Handles pipe-separated multi-value strings (PubMed, Semantic Scholar).
 
+        Only operates when ``publication_type`` key is present in business_data.
         The operation is idempotent — safe for providers that already use
         canonical values (e.g., CrossRef).
 
@@ -180,8 +181,10 @@ class BasePublicationTransformer(BaseTransformer):
             The same dictionary with ``publication_type`` normalized.
 
         """
-        raw = business_data.get("publication_type")
-        business_data["publication_type"] = normalize_publication_type(raw)
+        if "publication_type" in business_data:
+            business_data["publication_type"] = normalize_publication_type(
+                business_data["publication_type"]
+            )
         return business_data
 
     async def _transform_impl(
