@@ -47,8 +47,8 @@ class TestFileSizeLimits:
         "normalization_service.py": 420,  # 411 LOC - Normalization service with validation
         "value_validator.py": 360,  # 351 LOC - Value objects validation
         "activity.py": 330,  # 327 LOC - Activity domain types with rich validation
-        "types.py": 400,  # 396 LOC
-        "context.py": 385,  # 380 LOC - PipelineContext with rich metadata and validation + InputFilterContext.from_multi_ids
+        "types.py": 420,  # 414 LOC - domain types + PublicationType + ExecutionContext enums
+        "context.py": 390,  # 385 LOC - PipelineContext with rich metadata and validation + InputFilterContext.from_multi_ids + execution_context
         "state.py": 380,  # 371 LOC - CompositePipelineState FSM with transition rules
         "chembl_structures.py": 510,  # 506 LOC - ChEMBL structural entities + deprecated alias __getattr__ (v2.0)
         "exceptions.py": 550,  # 513 LOC
@@ -96,7 +96,7 @@ class TestFileSizeLimits:
         # Composition layer exemptions
         "metadata_coordinator.py": 510,  # 506 LOC - MetadataCoordinator with centralized metadata management + extended lineage
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
-        "composite.py": 650,  # 641 LOC - Composite pipeline bootstrap with runner factories + field group registry loading + DQ report service + cross-validation + quarantine wiring
+        "composite.py": 655,  # 651 LOC - Composite pipeline bootstrap with runner factories + execution_context + field group registry loading + DQ report service + cross-validation + quarantine wiring
         "entrypoints.py": 110,  # 102 LOC - Re-export facade (split to _pipeline_execution, _resource_management, _services)
         "registration.py": 655,  # 651 LOC - provider registration (config helpers extracted to _config_helpers.py) + extraction_params overlap validation (ADR-028 §3)
         "storage_adapter.py": 660,  # 655 LOC - storage adapter with Bronze/Silver/Gold writers + BronzeWriteResult + SilverWriteResult + SourceMetadata param + Silver lineage
@@ -485,7 +485,7 @@ class TestFunctionLength:
         "_parse_composite_config": 95,  # 93 lines - Composite config parsing with validation
         "bootstrap_composite_runner": 175,  # 170 lines - Composite pipeline bootstrapping with factory functions
         "run_composite": 70,  # 68 lines - Composite CLI entrypoint with dependency support
-        "build_pipeline_context": 60,  # 55 lines - Context building for composite
+        "build_pipeline_context": 80,  # 75 lines - Context building for composite + execution_context
         "write_gold_merged": 90,  # 88 lines - Gold write with merged enrichers + flat_structure + CSV export
         "_write_gold_merged_metadata": 130,  # 128 lines - Gold merged metadata with full lineage
         "write_silver_merged": 94,  # 92 lines - Silver merged write with flat_structure + CSV export

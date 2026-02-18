@@ -363,6 +363,7 @@ def bootstrap_composite_runner(
             filter_ids=filter_ids,
             filter_field=filter_field,
             fallback_mapping=fallback_mapping,
+            execution_context="enricher",
             **_enricher_bronze_opts,  # type: ignore[arg-type]
         )
         ctx = build_pipeline_context(pipeline_name, options)
@@ -449,6 +450,7 @@ def bootstrap_composite_runner(
             multi_filter_ids=multi_filter_ids,
             ignore_yaml_filter=True,
             skip_gold=True,
+            execution_context="dependency",
             **_dependency_bronze_opts,  # type: ignore[arg-type]
         )
         ctx = build_pipeline_context(pipeline_name, options)

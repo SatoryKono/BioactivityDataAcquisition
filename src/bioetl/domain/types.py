@@ -74,6 +74,22 @@ class PublicationType(StrEnum):
     OTHER = "other"
 
 
+class ExecutionContext(StrEnum):
+    """Execution context: how a pipeline is launched.
+
+    Controls DQ severity resolution via ``FieldValidation.severity_enricher``.
+    """
+
+    ISOLATED = "isolated"
+    ENRICHER = "enricher"
+    DEPENDENCY = "dependency"
+
+    @property
+    def is_enricher(self) -> bool:
+        """True when severity_enricher overrides should apply."""
+        return self == ExecutionContext.ENRICHER
+
+
 class RunType(StrEnum):
     """Type of pipeline run (RULES.md §2.4).
 
