@@ -12,8 +12,8 @@
 
 | Metric | Command / Method | Value | Δ vs 2026-02-16 |
 |--------|-----------------|-------|------------------|
-| Test coverage | `pytest --cov=src/bioetl --cov-report=term` | **90.63%** ¹ | — |
-| mypy errors | `mypy src/bioetl --strict` | **0** (540 files checked) ² | ↓ from 1 |
+| Test coverage | `pytest --cov=src/bioetl --cov-report=term` | **90.21%** (12,186 passed, 241 skipped) | ↓ from 90.63% |
+| mypy errors | `mypy src/bioetl --strict` | **0** (540 files checked) ¹ | ↓ from 1 |
 | Circular imports | `python -c "from bioetl.domain.ports import ..."` | **PASS** | — |
 | Class count | `grep -r "^class " src/ --include="*.py" \| wc -l` | **932** | ↑ from 911 |
 | Python file count | `find src/ -name "*.py" \| wc -l` | **566** | ↑ from 559 |
@@ -39,9 +39,7 @@
 | Quarantine classes | classes matching `*Quarantine*` | **11** | — |
 | Content hash / dedup | occurrences across codebase | **297** across 75 files | — |
 
-¹ Coverage value from previous audit run (2026-02-16). Current test suite executing at time of audit (11,693+ tests).
-
-² With full dev dependencies (`pip install -e ".[dev]"`). Without third-party type stubs (pydantic, pandera), mypy reports 11 stub-related errors in 9 files — all `[misc]` (cannot subclass "Any"), `[no-any-return]`, `[untyped-decorator]`, or `[unused-ignore]`. These are not code defects but missing stub issues. CI environments MUST install full dev dependencies before running mypy.
+¹ With full dev dependencies (`pip install -e ".[dev]"`). Without third-party type stubs (pydantic, pandera), mypy reports 11 stub-related errors in 9 files — all `[misc]` (cannot subclass "Any"), `[no-any-return]`, `[untyped-decorator]`, or `[unused-ignore]`. These are not code defects but missing stub issues. CI environments MUST install full dev dependencies before running mypy.
 
 ---
 
@@ -305,7 +303,7 @@ All import boundary checks passed with **zero violations**:
 
 **Score: 10/10** (↑ from 9/10)
 
-**Coverage:** 90.63% (exceeds 85% threshold)
+**Coverage:** 90.21% (exceeds 85% threshold) — 12,186 passed, 241 skipped, 0 failures in 746s
 
 **Test structure:**
 
@@ -404,7 +402,7 @@ All import boundary checks passed with **zero violations**:
 | 5 | Locking & Concurrency | 10% | 9 | 0.90 | Full lifecycle (heartbeat + fencing), MemoryLock only (ADR-010) |
 | 6 | Validation & DQ | 10% | 10 | 1.00 | 31 Pandera schemas, unified quarantine, 297 content hash occurrences |
 | 7 | Logging & Observability | 8% | 10 | 0.80 | UnifiedLogger, Prometheus, OpenTelemetry, 335 run_id occurrences |
-| 8 | Testing | 8% | 10 | 0.80 | 90.63% coverage, 571 test files, ruff + mypy clean |
+| 8 | Testing | 8% | 10 | 0.80 | 90.21% coverage (12,186 tests), 571 test files, ruff + mypy clean |
 | 9 | Security & Secrets | 8% | 10 | 0.80 | SecretStr, PII hashing with salt rotation, bandit + detect-secrets |
 | 10 | Documentation | 7% | 10 | 0.70 | 38 ADRs, active CHANGELOG, Gold contracts, RULES.md v5.20 |
 | **Total** | | **100%** | | **9.90** | |
