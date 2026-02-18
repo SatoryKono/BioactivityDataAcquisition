@@ -57,16 +57,12 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
     # Instance variable to cache parsed XML root between validation and extraction
     _cached_xml_root: ET.Element | None
 
-    # Date validation patterns for ISO date formats (YYYY, YYYY-MM, YYYY-MM-DD).
+    # Date validation pattern for ISO date formats (YYYY, YYYY-MM, YYYY-MM-DD).
     # Used to filter out invalid dates like "2024-13-99" or "n/a" before
     # they propagate to _compute_publication_date.
-    _VALID_DATE_PATTERNS: tuple[re.Pattern[str], ...] = (
-        # Full date: YYYY-MM-DD (with valid month 01-12 and day 01-31)
-        re.compile(r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$"),
-        # Partial month: YYYY-MM (with valid month 01-12)
-        re.compile(r"^\d{4}-(0[1-9]|1[0-2])$"),
-        # Partial year: YYYY
-        re.compile(r"^\d{4}$"),
+    # Combined regex matches: YYYY, YYYY-MM, or YYYY-MM-DD
+    _VALID_DATE_PATTERN: ClassVar[re.Pattern[str]] = re.compile(
+        r"^\d{4}(?:-(?:0[1-9]|1[0-2])(?:-(?:0[1-9]|[12]\d|3[01]))?)?$"
     )
 
     _MONTH_MAP: ClassVar[dict[str, int]] = {
@@ -158,7 +154,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         """Validate that date string matches YYYY, YYYY-MM, or YYYY-MM-DD format."""
         if not date_str:
             return False
-        return any(pattern.match(date_str) for pattern in self._VALID_DATE_PATTERNS)
+        return bool(self._VALID_DATE_PATTERN.match(date_str))
 
     def _extract_medline_metadata(
         self,
