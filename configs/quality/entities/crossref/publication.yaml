@@ -44,7 +44,7 @@ field_validations:
     nullable: true
     error_message: "Publication year out of valid range"
 
-  - field: type
+  - field: publication_type
     type: enum
     allowed:
       - journal-article
@@ -93,7 +93,7 @@ cross_field_validations:
 # =============================================================================
 conditional_validations:
   - name: article_requires_title
-    condition_field: type
+    condition_field: publication_type
     condition_value:
       - journal-article
       - proceedings-article

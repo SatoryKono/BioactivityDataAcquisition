@@ -51,18 +51,18 @@ field_validations:
     nullable: true
     error_message: "Publication year out of valid range"
 
-  - field: pub_type
+  - field: publication_type
     type: enum
     allowed:
-      - Journal Article
-      - Review
-      - Letter
-      - Editorial
-      - Clinical Trial
-      - Meta-Analysis
-      - Case Reports
-      - Comparative Study
-      - Evaluation Study
+      - journal-article
+      - review
+      - letter
+      - editorial
+      - clinical-trial
+      - meta-analysis
+      - case-reports
+      - comparative-study
+      - evaluation-study
     nullable: true
 
   - field: pmc_id
