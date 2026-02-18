@@ -100,7 +100,7 @@ cross_field_validations:
 conditional_validations:
   - name: journal_article_requires_title
     condition_field: publication_type
-    condition_value: JournalArticle
+    condition_value: journal-article
     condition_operator: eq
     then_validations:
       - field: title

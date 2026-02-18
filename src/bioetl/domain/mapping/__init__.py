@@ -13,15 +13,21 @@ from bioetl.domain.mapping.publication_type_classification import (
     PublicationTypeEntry,
     classify_publication_type,
 )
+from bioetl.domain.mapping.publication_type_mapping import (
+    PUBLICATION_TYPE_MAPPING,
+    normalize_publication_type,
+)
 
 __all__ = [
     "ACTIVITY_FIELD_MAPPING",
     "MOLECULE_FIELD_MAPPING",
     "PUBLICATION_FIELD_MAPPING",
+    "PUBLICATION_TYPE_MAPPING",
     "UNIFIED_TO_PROVIDER",
     "PublicationTypeEntry",
     "apply_field_mapping",
     "classify_publication_type",
     "get_provider_name",
     "get_unified_name",
+    "normalize_publication_type",
 ]
