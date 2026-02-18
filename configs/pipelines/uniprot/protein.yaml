@@ -10,10 +10,12 @@
 pipeline_name: uniprot_protein
 provider: uniprot
 entity_type: protein
+schema_file: ../../schemas/uniprot/protein.yaml
 version: "1.2.0"
 description: "Pipeline for ingesting UniProt proteins"
 
-primary_keys: ["accession"]
+business_primary_keys: ["accession"]
+technical_primary_key: "entity_id"
 silver_table: "uniprot_protein"
 gold_table: "uniprot_protein"
 

@@ -1,0 +1,113 @@
+# configs/schemas/composite/target.yaml
+# =============================================================================
+# Data Schema for Composite Target Pipeline
+# =============================================================================
+
+version: "1.0.0"
+entity: target
+
+field_renames:
+  "chembl.target_component.description": "component_description"
+
+column_groups:
+  - name: system
+    fields:
+      - entity_id
+      - content_hash
+      - _run_id
+      - _run_type
+      - _source_batch_id
+      - _source
+      - _ingestion_ts
+      - _index
+      - _lookup_method
+      - _original_id
+
+  - name: lineage
+    pattern: "^_composite_|^_source_providers|^_enrichment_|^_lineage_|^_dq_"
+
+  - name: identifiers
+    fields:
+      - target_id
+      - primary_component_id
+      - uniprot_accession
+      - mapping_status
+    provider_order: [chembl, uniprot]
+
+  - name: classification
+    fields:
+      - target_type
+      - organism
+      - taxonomy_id
+      - species_group_flag
+    provider_order: [chembl]
+
+  - name: descriptors
+    fields:
+      - pref_name
+      - description
+      - component_description
+      - downgraded
+    provider_order: [chembl, uniprot]
+
+  - name: protein_classification
+    fields:
+      - protein_classification_id
+      - protein_class_desc
+      - level1
+      - level2
+      - level3
+      - level4
+      - level5
+      - level6
+      - level7
+      - level8
+    provider_order: [chembl]
+
+  - name: uniprot
+    fields:
+      - protein_name
+      - gene_name
+      - protein_function
+      - sequence
+      - length
+      - reviewed
+    provider_order: [uniprot]
+
+silver:
+  include_all_groups: true
+  exclude_groups: []
+
+gold:
+  exclude_groups: []
+  exclude_fields: []
+
+gold_columns:
+  - target_id
+  - primary_component_id
+  - uniprot_accession
+  - mapping_status
+  - target_type
+  - organism
+  - taxonomy_id
+  - species_group_flag
+  - pref_name
+  - description
+  - component_description
+  - downgraded
+  - protein_classification_id
+  - protein_class_desc
+  - level1
+  - level2
+  - level3
+  - level4
+  - level5
+  - level6
+  - level7
+  - level8
+  - protein_name
+  - gene_name
+  - protein_function
+  - sequence
+  - length
+  - reviewed

@@ -144,31 +144,31 @@ pipeline_name: chembl_activity
 provider: chembl
 entity_type: activity
 version: "1.2.0"
-primary_keys: ["activity_id"]
+business_primary_keys: ["activity_id"]
 silver_table: "chembl_activity"
 gold_table: "chembl_activity"
 ```
 
 ### Полная структура конфига
 
-| Секция                | Описание                           | Обязательно          |
-| --------------------- | ---------------------------------- | -------------------- |
-| `pipeline_name`       | Уникальный идентификатор пайплайна | Да                   |
-| `provider`            | Имя провайдера (lowercase)         | Да                   |
-| `entity_type`         | Тип сущности                       | Да                   |
-| `version`             | Semver версия конфига              | Да                   |
-| `primary_keys`        | Первичные ключи                    | Да                   |
-| `silver_table`        | Имя Silver таблицы                 | Да                   |
-| `gold_table`          | Имя Gold таблицы                   | Нет                  |
-| `batch_size`          | Размер батча (1-5000)              | Нет (default: 100)   |
-| `checkpoint_interval` | Интервал checkpoint                | Нет (default: 10)    |
-| `source`              | Конфиг источника                   | Нет (auto-resolved)  |
-| `dq_overrides`            | Inline DQ переопределения          | Нет                  |
-| `sink`                | Конфиги слоёв (Bronze/Silver/Gold) | Нет (auto-resolved)  |
-| `circuit_breaker`     | Настройки Circuit Breaker          | Нет (from base)      |
-| `maintenance`         | VACUUM настройки                   | Нет (from base)      |
-| `loading_strategy`    | Стратегия загрузки                 | Нет (default: full)  |
-| `force_full_scan`     | Отключить checkpoint resume        | Нет (default: false) |
+| Секция                  | Описание                           | Обязательно          |
+| ----------------------- | ---------------------------------- | -------------------- |
+| `pipeline_name`         | Уникальный идентификатор пайплайна | Да                   |
+| `provider`              | Имя провайдера (lowercase)         | Да                   |
+| `entity_type`           | Тип сущности                       | Да                   |
+| `version`               | Semver версия конфига              | Да                   |
+| `business_primary_keys` | Первичные ключи                    | Да                   |
+| `silver_table`          | Имя Silver таблицы                 | Да                   |
+| `gold_table`            | Имя Gold таблицы                   | Нет                  |
+| `batch_size`            | Размер батча (1-5000)              | Нет (default: 100)   |
+| `checkpoint_interval`   | Интервал checkpoint                | Нет (default: 10)    |
+| `source`                | Конфиг источника                   | Нет (auto-resolved)  |
+| `dq_overrides`          | Inline DQ переопределения          | Нет                  |
+| `sink`                  | Конфиги слоёв (Bronze/Silver/Gold) | Нет (auto-resolved)  |
+| `circuit_breaker`       | Настройки Circuit Breaker          | Нет (from base)      |
+| `maintenance`           | VACUUM настройки                   | Нет (from base)      |
+| `loading_strategy`      | Стратегия загрузки                 | Нет (default: full)  |
+| `force_full_scan`       | Отключить checkpoint resume        | Нет (default: false) |
 
 ### Пример с переопределениями
 
@@ -178,7 +178,7 @@ pipeline_name: chembl_activity
 provider: chembl
 entity_type: activity
 version: "1.2.0"
-primary_keys: ["activity_id"]
+business_primary_keys: ["activity_id"]
 silver_table: "chembl_activity"
 gold_table: "chembl_activity"
 
@@ -253,14 +253,14 @@ composite:
 
 ### Отличия от Regular Pipelines
 
-| Аспект          | Regular Pipeline                           | Composite Pipeline                                      |
-| --------------- | ------------------------------------------ | ------------------------------------------------------- |
-| Корневой ключ   | `pipeline_name`, `provider`, `entity_type` | `composite:`                                            |
-| Source          | Один провайдер                             | Несколько провайдеров через `enrichers`                  |
-| Schema          | `_schema.json`                             | Отдельная схема (ADR-026)                               |
-| Пути            | Auto-computed                              | Определяются в `merge.output`                           |
-| Orchestration   | `PipelineRunner` + `{Entity}Transformer`   | `CompositePipelineRunner` (без отдельных трансформеров) |
-| Реализация      | `application/pipelines/{provider}/`        | `application/composite/` (15 модулей)                   |
+| Аспект        | Regular Pipeline                           | Composite Pipeline                                      |
+| ------------- | ------------------------------------------ | ------------------------------------------------------- |
+| Корневой ключ | `pipeline_name`, `provider`, `entity_type` | `composite:`                                            |
+| Source        | Один провайдер                             | Несколько провайдеров через `enrichers`                 |
+| Schema        | `_schema.json`                             | Отдельная схема (ADR-026)                               |
+| Пути          | Auto-computed                              | Определяются в `merge.output`                           |
+| Orchestration | `PipelineRunner` + `{Entity}Transformer`   | `CompositePipelineRunner` (без отдельных трансформеров) |
+| Реализация    | `application/pipelines/{provider}/`        | `application/composite/` (15 модулей)                   |
 
 > **Архитектурная заметка:** Composite pipelines **не используют** классы трансформеров
 > (`*Transformer`). Вместо этого оркестрация выполняется через `CompositePipelineRunner`,
@@ -276,31 +276,34 @@ ______________________________________________________________________
 Pipeline YAML файлы **не должны** явно указывать эти поля — они вычисляются
 конвенционно. Если указаны явно, значение используется как override-path.
 
-| Поле                 | Auto-computed значение                                    | Примечание                                 |
-| -------------------- | --------------------------------------------------------- | ------------------------------------------ |
-| `source_file`        | `../../sources/{provider}.yaml`                           | Provider API settings                      |
-| `dq_config_file`     | `../../quality/entities/{provider}/{entity_type}.yaml`    | Informational; loader uses full hierarchy  |
-| `filter_config_file` | `../../filters/entities/{provider}/{entity_type}.yaml`    | Informational; loader uses full hierarchy  |
-| `sink.bronze.path`   | `data/output/bronze/{provider}/{entity_type}`         |
-| `sink.silver.path`   | `data/output/silver/{provider}/{entity_type}`         |
-| `sink.gold.path`     | `data/output/gold/{provider}/{entity_type}`           |
+| Поле                 | Auto-computed значение                                 | Примечание                                |
+| -------------------- | ------------------------------------------------------ | ----------------------------------------- |
+| `source_file`        | `../../sources/{provider}.yaml`                        | Provider API settings                     |
+| `dq_config_file`     | `../../quality/entities/{provider}/{entity_type}.yaml` | Informational; loader uses full hierarchy |
+| `filter_config_file` | `../../filters/entities/{provider}/{entity_type}.yaml` | Informational; loader uses full hierarchy |
+| `sink.bronze.path`   | `data/output/bronze/{provider}/{entity_type}`          |                                           |
+| `sink.silver.path`   | `data/output/silver/{provider}/{entity_type}`          |                                           |
+| `sink.gold.path`     | `data/output/gold/{provider}/{entity_type}`            |                                           |
 
 ### Авто-пропагация sort_by (ADR-014 compliance)
 
-Параметры `sink.silver.sort_by.columns` и `sink.gold.sort_by.columns` **автоматически вычисляются** из `primary_keys`:
+Параметры `sink.silver.sort_by.columns` и `sink.gold.sort_by.columns` **автоматически вычисляются** из `business_primary_keys`:
 
 ```python
 # config_loader.py:155-176
 if "sort_by" not in sink_silver:
-    sink_silver["sort_by"] = {"columns": config["primary_keys"], "ascending": True}
+    sink_silver["sort_by"] = {
+        "columns": config["business_primary_keys"],
+        "ascending": True,
+    }
 ```
 
-Это означает, что entity configs **не должны** явно указывать `sort_by` — он пропагируется из `primary_keys`:
+Это означает, что entity configs **не должны** явно указывать `sort_by` — он пропагируется из `business_primary_keys`:
 
 ```yaml
 # НЕ нужно указывать sort_by — он auto-computed!
 pipeline_name: chembl_activity
-primary_keys: ["activity_id"]  # → sort_by.columns = ["activity_id"]
+business_primary_keys: ["activity_id"]  # → sort_by.columns = ["activity_id"]
 ```
 
 > **Преимущество:** Снижает дублирование на ~30%. Разработчик указывает только переопределения. Все 21 entity configs соответствуют ADR-014 через авто-пропагацию.
@@ -653,7 +656,7 @@ pipeline_name: chembl_activity
 provider: chembl
 entity_type: activity
 version: "1.2.0"
-primary_keys: ["activity_id"]
+business_primary_keys: ["activity_id"]
 silver_table: "chembl_activity"
 gold_table: "chembl_activity"
 ```
@@ -665,7 +668,7 @@ pipeline_name: chembl_activity
 provider: chembl
 entity_type: activity
 version: "1.2.0"
-primary_keys: ["activity_id"]
+business_primary_keys: ["activity_id"]
 silver_table: "chembl_activity"
 gold_table: "chembl_activity"
 
@@ -689,7 +692,7 @@ pipeline_name: chembl_activity
 provider: chembl
 entity_type: activity
 version: "1.2.0"
-primary_keys: ["activity_id"]
+business_primary_keys: ["activity_id"]
 silver_table: "chembl_activity"
 gold_table: "chembl_activity"
 

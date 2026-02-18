@@ -112,7 +112,7 @@ class ProviderConfigYaml(BaseModel):
     api_version: str | None = None
     default_email: str | None = None
 
-    @model_validator(mode="before")  # type: ignore[untyped-decorator]
+    @model_validator(mode="before")
     @classmethod
     def _promote_legacy_pagination(cls, data: dict[str, Any]) -> dict[str, Any]:
         """Promote legacy batch_size/page_size/max_url_length into pagination.

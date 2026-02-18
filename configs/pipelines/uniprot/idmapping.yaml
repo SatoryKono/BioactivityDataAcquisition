@@ -10,10 +10,12 @@
 pipeline_name: uniprot_idmapping
 provider: uniprot
 entity_type: idmapping
+schema_file: ../../schemas/uniprot/idmapping.yaml
 version: "1.1.0"
 description: "Maps ChEMBL target IDs to UniProt accessions via UniProt ID Mapping API"
 
-primary_keys: ["target_id"]
+business_primary_keys: ["target_id"]
+technical_primary_key: "entity_id"
 silver_table: "uniprot_idmapping"
 gold_table: "uniprot_idmapping"
 

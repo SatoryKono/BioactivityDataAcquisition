@@ -98,6 +98,11 @@ entity_cross_field_validations:
       - field_a
       - field_b
     condition: all_present
+
+key_nullability:
+  - field: entity_id
+    key_type: merge
+    nullable: false
 """
     )
 
@@ -142,6 +147,8 @@ class TestDQConfigLoaderBasics:
         assert len(config.field_validations) == 4
         # Cross-field from entity
         assert len(config.cross_field_validations) == 1
+        assert len(config.key_nullability_rules) == 1
+        assert config.key_nullability_rules[0].field == "entity_id"
 
 
 class TestDQConfigLoaderMerge:
@@ -229,6 +236,29 @@ class TestDQConfigLoaderInlineOverrides:
 
         field_names = [fv.field for fv in config.field_validations]
         assert "inline_field" in field_names
+
+    def test_inline_override_key_nullability_rules(
+        self, loader: DQConfigLoader
+    ) -> None:
+        """Inline key nullability rules should be normalized and merged."""
+        config = loader.load(
+            "test_provider",
+            "test_entity",
+            inline_overrides={
+                "key_nullability_rules": [
+                    {
+                        "field": "partition_col",
+                        "key_type": "partition",
+                        "nullable": True,
+                    }
+                ]
+            },
+        )
+
+        rules = {
+            (r.field, r.key_type, r.nullable) for r in config.key_nullability_rules
+        }
+        assert ("partition_col", "partition", True) in rules
 
 
 class TestDQConfigLoaderCaching:

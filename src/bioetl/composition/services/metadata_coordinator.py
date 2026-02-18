@@ -18,6 +18,7 @@ Architecture:
 
 from __future__ import annotations
 
+import ast
 import inspect
 import platform
 import socket
@@ -30,6 +31,8 @@ from bioetl.domain.models.metadata import (
     BaseOutputMetadata,
     BronzeMetadata,
     BronzeOutputExt,
+    CompositeOutputExt,
+    CompositeSchemaValidationMetadata,
     DeltaMetrics,
     DQSummary,
     EnvironmentMetadata,
@@ -55,6 +58,76 @@ from bioetl.domain.ports import (
 from bioetl.domain.types import RunType
 from bioetl.domain.value_objects.run_context import RunContext
 from bioetl.domain.version import get_version as _get_bioetl_version
+
+
+def _parse_composite_list(value: Any) -> list[str]:
+    """Parse composite list metadata stored as list or stringified list."""
+    if isinstance(value, list):
+        return [str(item) for item in value]
+    if isinstance(value, str):
+        try:
+            parsed = ast.literal_eval(value)
+        except (ValueError, SyntaxError):
+            return []
+        if isinstance(parsed, list):
+            return [str(item) for item in parsed]
+    return []
+
+
+def _parse_composite_status(value: Any) -> dict[str, str]:
+    """Parse enrichment status stored as dict or stringified dict."""
+    if isinstance(value, dict):
+        return {str(k): str(v) for k, v in value.items()}
+    if isinstance(value, str):
+        try:
+            parsed = ast.literal_eval(value)
+        except (ValueError, SyntaxError):
+            return {}
+        if isinstance(parsed, dict):
+            return {str(k): str(v) for k, v in parsed.items()}
+    return {}
+
+
+def _extract_composite_output_ext(
+    records: list[dict[str, Any]],
+    partition_count: int,
+    *,
+    schema_validation_enabled: bool = False,
+    schema_validation_strict: bool | None = None,
+) -> CompositeOutputExt | None:
+    """Extract composite output metadata from merged Gold records."""
+    if not records:
+        return None
+
+    sample = records[0]
+    composite_run_id = sample.get("_composite_run_id")
+    lineage_raw = sample.get("_lineage_created_at")
+    lineage_created_at: datetime | None = None
+    if isinstance(lineage_raw, str):
+        try:
+            lineage_created_at = datetime.fromisoformat(lineage_raw)
+        except ValueError:
+            lineage_created_at = None
+
+    has_composite_fields = any(key.startswith("_composite_") for key in sample)
+    has_lineage_fields = "_source_providers" in sample or "_enrichment_status" in sample
+    if not has_composite_fields and not has_lineage_fields:
+        return None
+
+    return CompositeOutputExt(
+        partition_count=partition_count,
+        composite_run_id=str(composite_run_id)
+        if composite_run_id is not None
+        else None,
+        source_providers=_parse_composite_list(sample.get("_source_providers")),
+        enrichment_status=_parse_composite_status(sample.get("_enrichment_status")),
+        lineage_created_at=lineage_created_at,
+        schema_validation=CompositeSchemaValidationMetadata(
+            enabled=schema_validation_enabled,
+            strict=schema_validation_strict,
+            status="passed" if schema_validation_enabled else "not_run",
+        ),
+    )
 
 
 class MetadataCoordinator:
@@ -277,6 +350,10 @@ class MetadataCoordinator:
             if input_data.dq_metrics
             else DQSummary(total_records=rec_count, valid_records=rec_count)
         )
+        if input_data.dq_rule_provenance:
+            dq_summary = dq_summary.model_copy(
+                update={"rule_provenance": input_data.dq_rule_provenance}
+            )
 
         # Calculate duration if both timestamps provided
         duration_seconds = (
@@ -443,17 +520,28 @@ class MetadataCoordinator:
         )
 
         # Build unified output metadata (ADR-029)
+        composite_ext = _extract_composite_output_ext(
+            input_data.records,
+            partition_count=getattr(input_data, "partition_count", 0),
+            schema_validation_enabled=getattr(
+                input_data, "schema_validation_enabled", False
+            ),
+            schema_validation_strict=getattr(
+                input_data, "schema_validation_strict", None
+            ),
+        )
+
         output = BaseOutputMetadata(
             record_count=rec_count,
             total_bytes=getattr(input_data, "total_bytes", 0),
             write_started_at=getattr(input_data, "started_at", None),
             write_completed_at=input_data.completed_at,
+            composite_run_id=composite_ext.composite_run_id if composite_ext else None,
         )
 
-        # Build Gold-specific output extension
-        output_ext = GoldOutputExt(
-            partition_count=getattr(input_data, "partition_count", 0),
-        )
+        # Build Gold-specific/composite-specific output extension
+        partition_count = getattr(input_data, "partition_count", 0)
+        output_ext = composite_ext or GoldOutputExt(partition_count=partition_count)
 
         # Build SCD metadata if applicable
         scd = None

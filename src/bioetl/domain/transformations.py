@@ -83,22 +83,46 @@ _NORMALIZE_DISPATCH = (
 
 
 # Any: record field type varies
-def _should_include_field(key: str, value: Any, exclude_none: bool) -> bool:
+def _is_excluded_key(
+    key: str,
+    exclude_fields: set[str] | None,
+) -> bool:
+    """Check if key is excluded by explicit set, prefix, or META_FIELDS."""
+    if exclude_fields and key in exclude_fields:
+        return True
+    return key.startswith("_") or key in META_FIELDS
+
+
+def _should_include_field(
+    key: str,
+    value: Any,
+    exclude_none: bool,
+    include_fields: set[str] | None = None,
+    exclude_fields: set[str] | None = None,
+) -> bool:
     """Check if field should be included in hash calculation."""
-    if key in META_FIELDS:
+    if exclude_none and value is None:
         return False
-    return not (exclude_none and value is None)
+    if _is_excluded_key(key, exclude_fields):
+        return False
+    if include_fields is not None:
+        return key in include_fields
+    return True
 
 
 def normalize_for_hash(
     record: dict[str, Any],
     exclude_none: bool = False,  # Any: record vals vary
+    include_fields: set[str] | None = None,
+    exclude_fields: set[str] | None = None,
 ) -> dict[str, Any]:  # Any: heterogeneous record values
     """Normalize record before hashing to ensure consistency."""
     return {
         key: _normalize_value(value)
         for key, value in record.items()
-        if _should_include_field(key, value, exclude_none)
+        if _should_include_field(
+            key, value, exclude_none, include_fields, exclude_fields
+        )
     }
 
 
@@ -116,9 +140,16 @@ def generate_content_hash(
     record: dict[str, Any],
     provider: str,
     exclude_none: bool = False,
+    include_fields: set[str] | None = None,
+    exclude_fields: set[str] | None = None,
 ) -> ContentHash:
     """Generate SHA256 content hash for record versioning."""
-    normalized = normalize_for_hash(record, exclude_none=exclude_none)
+    normalized = normalize_for_hash(
+        record,
+        exclude_none=exclude_none,
+        include_fields=include_fields,
+        exclude_fields=exclude_fields,
+    )
     canonical = canonical_json_dumps(normalized)
     data = f"{provider}{canonical}"
     hash_digest = hashlib.sha256(data.encode("utf-8")).hexdigest()

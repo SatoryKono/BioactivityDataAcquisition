@@ -2,7 +2,7 @@
 
 *Синхронизировано с RULES.md v5.20 | Последнее обновление: 2026-01-14*
 
----
+______________________________________________________________________
 
 ## Обзор
 
@@ -10,7 +10,7 @@
 включая иерархию конфигураций и структуру выходных данных. Правила именования
 классов и переменных вынесены в [02-naming-policy.md](02-naming-policy.md).
 
----
+______________________________________________________________________
 
 ## 1. Структура Конфигураций Pipeline
 
@@ -44,16 +44,16 @@ _base.yaml (базовые значения) → <provider>/<entity>.yaml (пе�
 
 Каждый entity config (`<provider>/<entity>.yaml`) **MUST** содержать:
 
-| Поле | Описание | Пример |
-|------|----------|--------|
-| `pipeline_name` | Уникальный идентификатор `{provider}_{entity}` | `chembl_activity` |
-| `provider` | Имя провайдера | `chembl` |
-| `entity_type` | Тип сущности | `activity` |
-| `version` | Семантическая версия | `"1.1.0"` |
-| `primary_keys` | Первичный ключ | `["activity_id"]` |
-| `silver_table` | Имя Silver-таблицы | `chembl_activity` |
-| `gold_table` | Имя Gold-таблицы | `chembl_activity` |
-| `sink` | Пути к слоям с `sort_by` | См. ниже |
+| Поле                    | Описание                                       | Пример            |
+| ----------------------- | ---------------------------------------------- | ----------------- |
+| `pipeline_name`         | Уникальный идентификатор `{provider}_{entity}` | `chembl_activity` |
+| `provider`              | Имя провайдера                                 | `chembl`          |
+| `entity_type`           | Тип сущности                                   | `activity`        |
+| `version`               | Семантическая версия                           | `"1.1.0"`         |
+| `business_primary_keys` | Первичный ключ                                 | `["activity_id"]` |
+| `silver_table`          | Имя Silver-таблицы                             | `chembl_activity` |
+| `gold_table`            | Имя Gold-таблицы                               | `chembl_activity` |
+| `sink`                  | Пути к слоям с `sort_by`                       | См. ниже          |
 
 ### 1.4. Валидация конфигураций
 
@@ -68,7 +68,7 @@ python -c "import json, yaml, jsonschema; \
   jsonschema.validate(config, schema)"
 ```
 
----
+______________________________________________________________________
 
 ## 2. Иерархия путей для данных
 
@@ -80,13 +80,13 @@ python -c "import json, yaml, jsonschema; \
 data/output/{layer}/{provider}/{entity}/
 ```
 
-| Слой | Паттерн пути | Пример |
-|------|--------------|--------|
-| **Bronze** | `data/output/bronze/{provider}/{entity}/` | `data/output/bronze/chembl/activity/` |
-| **Silver** | `data/output/silver/{provider}/{entity}/` | `data/output/silver/chembl/activity/` |
-| **Gold** | `data/output/gold/{provider}/{entity}/` | `data/output/gold/chembl/activity/` |
+| Слой             | Паттерн пути                                  | Пример                                    |
+| ---------------- | --------------------------------------------- | ----------------------------------------- |
+| **Bronze**       | `data/output/bronze/{provider}/{entity}/`     | `data/output/bronze/chembl/activity/`     |
+| **Silver**       | `data/output/silver/{provider}/{entity}/`     | `data/output/silver/chembl/activity/`     |
+| **Gold**         | `data/output/gold/{provider}/{entity}/`       | `data/output/gold/chembl/activity/`       |
 | **CSV (Silver)** | `data/output/csv/silver/{provider}/{entity}/` | `data/output/csv/silver/chembl/activity/` |
-| **CSV (Gold)** | `data/output/csv/gold/{provider}/{entity}/` | `data/output/csv/gold/chembl/activity/` |
+| **CSV (Gold)**   | `data/output/csv/gold/{provider}/{entity}/`   | `data/output/csv/gold/chembl/activity/`   |
 
 ### 2.2. Пример конфигурации sink
 
@@ -117,22 +117,23 @@ sink:
 **MUST**: Все entity configs должны содержать `sort_by` для Silver и Gold слоёв.
 
 Это требование обеспечивает:
+
 - Детерминизм выходных данных
 - Воспроизводимость при повторных запусках
 - Стабильность diff-сравнений
 
 См. [ADR-014: Deterministic Writes](../02-architecture/decisions/ADR-014-deterministic-writes.md).
 
----
+______________________________________________________________________
 
 ## 3. Соглашения об именовании
 
 ### 3.1. Pipeline идентификаторы
 
-| Паттерн | Описание | Пример |
-|---------|----------|--------|
-| `{provider}_{entity}` | Стандартный формат | `chembl_activity` |
-| `{provider}_{entity}_{variant}` | С вариантом | `chembl_publication_term` |
+| Паттерн                         | Описание           | Пример                    |
+| ------------------------------- | ------------------ | ------------------------- |
+| `{provider}_{entity}`           | Стандартный формат | `chembl_activity`         |
+| `{provider}_{entity}_{variant}` | С вариантом        | `chembl_publication_term` |
 
 **НЕ используется**: `{entity}_{provider}` (например, `activity_chembl`)
 
@@ -145,7 +146,7 @@ silver_table: "chembl_activity"
 gold_table: "chembl_activity"
 ```
 
----
+______________________________________________________________________
 
 ## 4. Файлы источников (sources)
 
@@ -156,6 +157,7 @@ configs/sources/<provider>.yaml
 ```
 
 Содержит настройки API провайдера:
+
 - `base_url` — базовый URL API
 - `rate_limit` — лимиты запросов
 - `timeout` — таймауты
@@ -168,30 +170,30 @@ configs/sources/<provider>.yaml
 source_file: ../../sources/chembl.yaml
 ```
 
----
+______________________________________________________________________
 
 ## 5. Политика очистки
 
-| Слой | Retention | Примечание |
-|------|-----------|------------|
-| Bronze | 90 дней | Автоматическая архивация |
+| Слой   | Retention | Примечание                 |
+| ------ | --------- | -------------------------- |
+| Bronze | 90 дней   | Автоматическая архивация   |
 | Silver | Постоянно | Delta Lake VACUUM (7 дней) |
-| Gold | Постоянно | Delta Lake VACUUM (7 дней) |
+| Gold   | Постоянно | Delta Lake VACUUM (7 дней) |
 
 См. [RULES.md §2.1.1](../RULES.md) для деталей политики retention.
 
----
+______________________________________________________________________
 
 ## 6. Миграция и обратная совместимость
 
 ### 6.1. История изменений
 
-| Версия | Дата | Изменение |
-|--------|------|-----------|
-| 2.0.0 | 2026-01-14 | Унификация `_defaults.yaml`, удаление `_base.yaml` |
-| 2.0.0 | 2026-01-14 | Иерархические пути `{layer}/{provider}/{entity}` |
-| 2.0.0 | 2026-01-14 | Обязательный `sort_by` во всех entity configs |
-| 2.0.0 | 2026-01-14 | JSON Schema валидация через `_schema.json` |
+| Версия | Дата       | Изменение                                          |
+| ------ | ---------- | -------------------------------------------------- |
+| 2.0.0  | 2026-01-14 | Унификация `_defaults.yaml`, удаление `_base.yaml` |
+| 2.0.0  | 2026-01-14 | Иерархические пути `{layer}/{provider}/{entity}`   |
+| 2.0.0  | 2026-01-14 | Обязательный `sort_by` во всех entity configs      |
+| 2.0.0  | 2026-01-14 | JSON Schema валидация через `_schema.json`         |
 
 ### 6.2. Проверка соответствия
 
@@ -203,7 +205,7 @@ make validate-configs
 pre-commit run validate-pipeline-configs --all-files
 ```
 
----
+______________________________________________________________________
 
 ## Связанные документы
 
@@ -212,6 +214,6 @@ pre-commit run validate-pipeline-configs --all-files
 - [ADR-025: Pipeline Config Unification](../02-architecture/decisions/ADR-025-pipeline-config-unification.md)
 - [04-extending-bioetl.md](04-extending-bioetl.md) — Добавление новых pipeline
 
----
+______________________________________________________________________
 
 *Последнее обновление: 2026-01-14*

@@ -358,6 +358,11 @@ docs-serve: ## Serve documentation locally
 docs-build: ## Build documentation
 	$(RUN) mkdocs build
 
+schema-artifacts: ## Generate canonical schema artifacts (registry + contracts)
+	@echo "$(BLUE)Generating schema artifacts...$(NC)"
+	$(RUN) python scripts/generate_schema_artifacts.py
+	@echo "$(GREEN)Schema artifacts generated!$(NC)"
+
 contracts-check: ## Generate and check data contracts
 	@echo "$(BLUE)Generating data contracts...$(NC)"
 ifdef UV_EXISTS
@@ -392,3 +397,9 @@ check-mermaid: ## Check that vendored mermaid files exist (fails if missing)
 	done; \
 	if [ $$missing -eq 1 ]; then echo "Mermaid vendored assets missing; run 'make vendor-mermaid' locally or add the files to the PR"; exit 1; fi; \
 	echo "Mermaid vendored assets present."
+
+
+schema-artifacts-check: ## Verify generated schema artifacts are up-to-date
+	@echo "$(BLUE)Checking schema artifacts...$(NC)"
+	$(RUN) python scripts/generate_schema_artifacts.py --check
+	@echo "$(GREEN)Schema artifacts are up-to-date!$(NC)"

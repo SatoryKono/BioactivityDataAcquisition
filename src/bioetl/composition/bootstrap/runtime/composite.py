@@ -28,6 +28,13 @@ from bioetl.domain.composite.config import (
     DependencyConfig,
     EnricherConfig,
 )
+from bioetl.domain.contracts import (
+    CompositeActivityGoldSchema,
+    CompositeAssayGoldSchema,
+    CompositeMoleculeGoldSchema,
+    CompositePublicationGoldSchema,
+    CompositeTargetGoldSchema,
+)
 from bioetl.domain.ports import LoggerPort
 from bioetl.infrastructure.config import get_settings
 from bioetl.infrastructure.config.field_group_loader import (
@@ -60,6 +67,21 @@ __all__ = [
 # Default composite config path
 COMPOSITE_CONFIG_DIR = Path("configs/pipelines/composite")
 FIELD_GROUP_CONFIG_DIR = Path("configs/composite/field_groups")
+
+
+COMPOSITE_GOLD_SCHEMA_REGISTRY: dict[str, type] = {
+    "activity": CompositeActivityGoldSchema,
+    "assay": CompositeAssayGoldSchema,
+    "molecule": CompositeMoleculeGoldSchema,
+    "publication": CompositePublicationGoldSchema,
+    "target": CompositeTargetGoldSchema,
+}
+
+
+def _resolve_composite_gold_schema(composite_name: str) -> type | None:
+    """Resolve composite Gold contract by composite pipeline name."""
+    key = composite_name.removeprefix("composite_")
+    return COMPOSITE_GOLD_SCHEMA_REGISTRY.get(key)
 
 
 def _to_id_str(val: Any) -> str:  # Any: accepts int, float, st...
@@ -500,6 +522,7 @@ def bootstrap_composite_runner(
         delta_reader=delta_reader,
         field_group_registry=field_group_registry,
         cross_validator=cross_validator,
+        gold_schema=_resolve_composite_gold_schema(config.name),
     )
 
     checkpoint_dir = Path(settings.data_dir) / "checkpoints" / "composite"

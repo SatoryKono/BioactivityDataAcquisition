@@ -172,6 +172,7 @@ class TestYamlConfigToDomain:
                 hard_fail_threshold=0.20,
             ),
             sink={},
+            schema_file="../../schemas/test/entity.yaml",
         )
 
         result = yaml_config_to_domain(yaml_config)
@@ -217,6 +218,7 @@ class TestYamlConfigToDomain:
                 hard_fail_threshold=0.20,
             ),
             sink={},
+            schema_file="../../schemas/test/test.yaml",
         )
 
         result = yaml_config_to_domain(yaml_config)
@@ -248,6 +250,7 @@ class TestYamlConfigToDomain:
                 hard_fail_threshold=0.30,
             ),
             sink={},
+            schema_file="../../schemas/test/test.yaml",
         )
 
         result = yaml_config_to_domain(yaml_config)
@@ -278,6 +281,7 @@ class TestYamlConfigToDomain:
             source=SourceConfig(),
             dq_overrides=DQConfig(),
             sink={},
+            schema_file="../../schemas/test/test.yaml",
         )
 
         result = yaml_config_to_domain(yaml_config)

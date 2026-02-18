@@ -129,3 +129,12 @@ conditional_validations:
         type: not_null
         nullable: false
         error_message: "Publications of type PUBLICATION must have a title"
+
+# =============================================================================
+# Key Nullability Policy for Silver writes
+# =============================================================================
+# Documented per pipeline: merge(primary) and partition key nullability.
+key_nullability:
+  - field: publication_id
+    key_type: merge
+    nullable: false

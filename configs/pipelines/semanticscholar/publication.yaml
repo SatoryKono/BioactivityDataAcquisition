@@ -9,6 +9,7 @@
 pipeline_name: semanticscholar_publication
 provider: semanticscholar
 entity_type: publication
+schema_file: ../../schemas/semanticscholar/publication.yaml
 version: "1.2.0"
 description: "Batch DOI resolution via Semantic Scholar with title fallback"
 
@@ -17,7 +18,8 @@ description: "Batch DOI resolution via Semantic Scholar with title fallback"
 # Deduplication is handled on Silver layer via content_hash.
 loading_strategy: full_scan_only
 
-primary_keys: ["paper_id"]
+business_primary_keys: ["paper_id"]
+technical_primary_key: "entity_id"
 silver_table: "semanticscholar_publication"
 gold_table: "semanticscholar_publication"
 

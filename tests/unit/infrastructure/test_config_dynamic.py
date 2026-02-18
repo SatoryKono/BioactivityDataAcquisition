@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 import yaml
 
@@ -14,6 +16,34 @@ from bioetl.infrastructure.config_loader import (
     load_source_config,
 )
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
+
+def _create_minimal_schema_for_pipeline(pipeline_yaml_path: Path) -> None:
+    """Create a minimal valid schema file at the convention-resolved path.
+
+    The config loader resolves schema_file (default '../../schemas/{provider}/{entity}.yaml')
+    relative to the pipeline config file's parent directory.  This helper reads provider
+    and entity_type from the pipeline YAML and writes a minimal schema file at the
+    location where the loader will look for it.
+    """
+    with open(pipeline_yaml_path, encoding="utf-8") as f:
+        cfg = yaml.safe_load(f) or {}
+
+    provider = cfg["provider"]
+    entity_type = cfg["entity_type"]
+    schema_rel = cfg.get("schema_file", f"../../schemas/{provider}/{entity_type}.yaml")
+
+    schema_path = (pipeline_yaml_path.parent / schema_rel).resolve()
+    schema_path.parent.mkdir(parents=True, exist_ok=True)
+    schema_data = {
+        "column_groups": [
+            {"name": "system", "fields": ["_etl_timestamp"]},
+            {"name": "business", "fields": ["id"]},
+        ],
+        "silver": {"include_groups": ["system", "business"]},
+        "gold": {"include_groups": ["business"]},
+    }
+    schema_path.write_text(yaml.dump(schema_data))
 
 
 @pytest.fixture
@@ -46,7 +76,9 @@ def setup_configs(tmp_path, monkeypatch):
     # Create dummy/test.yaml (for dummy_test)
     dummy_dir = pipelines_dir / "dummy"
     dummy_dir.mkdir()
-    (dummy_dir / "test.yaml").write_text(yaml.dump(base_config))
+    dummy_yaml = dummy_dir / "test.yaml"
+    dummy_yaml.write_text(yaml.dump(base_config))
+    _create_minimal_schema_for_pipeline(dummy_yaml)
 
     # Create chembl/activity.yaml (mocking a real one)
     chembl_dir = pipelines_dir / "chembl"
@@ -60,7 +92,9 @@ def setup_configs(tmp_path, monkeypatch):
             "silver_table": "chembl.activity_silver",
         }
     )
-    (chembl_dir / "activity.yaml").write_text(yaml.dump(chembl_config))
+    chembl_yaml = chembl_dir / "activity.yaml"
+    chembl_yaml.write_text(yaml.dump(chembl_config))
+    _create_minimal_schema_for_pipeline(chembl_yaml)
 
     # Change CWD to tmp_path so "configs/pipelines/..." resolves to our temp files
     monkeypatch.chdir(tmp_path)
@@ -119,7 +153,9 @@ def test_load_fallback_no_underscore(setup_configs):
         "checkpoint_interval": 1000,
     }
 
-    (pipelines_dir / "simple.yaml").write_text(yaml.dump(simple_config))
+    simple_yaml = pipelines_dir / "simple.yaml"
+    simple_yaml.write_text(yaml.dump(simple_config))
+    _create_minimal_schema_for_pipeline(simple_yaml)
 
     config = load_pipeline_config("simple")
     assert isinstance(config, PipelineYamlConfig)
@@ -365,7 +401,9 @@ def test_dq_thresholds_are_validated_once(setup_configs):
         "dq_overrides": {"soft_fail_threshold": 0.3, "hard_fail_threshold": 0.2},
     }
 
-    (pipelines_dir / "dummy" / "invalid.yaml").write_text(yaml.dump(invalid_config))
+    invalid_yaml = pipelines_dir / "dummy" / "invalid.yaml"
+    invalid_yaml.write_text(yaml.dump(invalid_config))
+    _create_minimal_schema_for_pipeline(invalid_yaml)
 
     with pytest.raises(ValueError, match="soft_fail_threshold must be strictly less"):
         load_pipeline_config("dummy_invalid")
@@ -388,7 +426,9 @@ def test_gold_filters_loading(setup_configs):
         },
     }
 
-    (pipelines_dir / "chembl" / "filters.yaml").write_text(yaml.dump(config_data))
+    filters_yaml = pipelines_dir / "chembl" / "filters.yaml"
+    filters_yaml.write_text(yaml.dump(config_data))
+    _create_minimal_schema_for_pipeline(filters_yaml)
 
     config = load_pipeline_config("chembl_filters")
     # Note: load_pipeline_config returns PipelineYamlConfig (infrastructure layer)
@@ -418,7 +458,9 @@ def test_convention_based_source_file(setup_configs, tmp_path):
 
     test_dir = pipelines_dir / "testprovider"
     test_dir.mkdir()
-    (test_dir / "entity.yaml").write_text(yaml.dump(config_data))
+    test_yaml = test_dir / "entity.yaml"
+    test_yaml.write_text(yaml.dump(config_data))
+    _create_minimal_schema_for_pipeline(test_yaml)
 
     config = load_pipeline_config("testprovider_entity")
 
@@ -427,7 +469,7 @@ def test_convention_based_source_file(setup_configs, tmp_path):
     assert (
         config.filter_config_file == "../../filters/entities/testprovider/entity.yaml"
     )
-    assert config.data_schema_file == "../../schemas/testprovider/entity.yaml"
+    assert config.schema_file == "../../schemas/testprovider/entity.yaml"
 
 
 def test_convention_based_sink_paths(setup_configs, tmp_path):
@@ -445,7 +487,9 @@ def test_convention_based_sink_paths(setup_configs, tmp_path):
 
     auto_dir = pipelines_dir / "autoprov"
     auto_dir.mkdir()
-    (auto_dir / "autoent.yaml").write_text(yaml.dump(config_data))
+    auto_yaml = auto_dir / "autoent.yaml"
+    auto_yaml.write_text(yaml.dump(config_data))
+    _create_minimal_schema_for_pipeline(auto_yaml)
 
     config = load_pipeline_config("autoprov_autoent")
 
@@ -474,7 +518,9 @@ def test_explicit_paths_override_convention(setup_configs, tmp_path):
 
     explicit_dir = pipelines_dir / "explicit"
     explicit_dir.mkdir()
-    (explicit_dir / "entity.yaml").write_text(yaml.dump(config_data))
+    explicit_yaml = explicit_dir / "entity.yaml"
+    explicit_yaml.write_text(yaml.dump(config_data))
+    _create_minimal_schema_for_pipeline(explicit_yaml)
 
     config = load_pipeline_config("explicit_entity")
 
@@ -520,7 +566,9 @@ def test_filter_config_merging(setup_configs, tmp_path):
 
     filter_pipeline_dir = pipelines_dir / "filtertest"
     filter_pipeline_dir.mkdir()
-    (filter_pipeline_dir / "entity.yaml").write_text(yaml.dump(config_data))
+    filter_yaml = filter_pipeline_dir / "entity.yaml"
+    filter_yaml.write_text(yaml.dump(config_data))
+    _create_minimal_schema_for_pipeline(filter_yaml)
 
     config = load_pipeline_config("filtertest_entity")
 
@@ -574,7 +622,9 @@ def test_filter_config_explicit_override(setup_configs, tmp_path):
 
     override_dir = pipelines_dir / "override"
     override_dir.mkdir()
-    (override_dir / "entity.yaml").write_text(yaml.dump(config_data))
+    override_yaml = override_dir / "entity.yaml"
+    override_yaml.write_text(yaml.dump(config_data))
+    _create_minimal_schema_for_pipeline(override_yaml)
 
     config = load_pipeline_config("override_entity")
 

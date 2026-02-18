@@ -48,6 +48,7 @@ class IDMappingTransformer(BaseTransformer):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
+        contract_policy: Any = None,
     ):
         """Initialize ID Mapping transformer.
 
@@ -61,6 +62,7 @@ class IDMappingTransformer(BaseTransformer):
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing sensitive data.
             data_normalizer: Data normalization service for text normalization.
+            contract_policy: Optional pipeline contract policy.
         """
         super().__init__(
             provider,
@@ -72,6 +74,7 @@ class IDMappingTransformer(BaseTransformer):
             identity_service=identity_service,
             pii_hasher=pii_hasher,
             data_normalizer=data_normalizer,
+            contract_policy=contract_policy,
         )
 
     async def _transform_impl(
