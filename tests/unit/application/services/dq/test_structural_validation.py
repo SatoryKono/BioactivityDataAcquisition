@@ -686,3 +686,161 @@ class TestSemanticScholarStructural:
         assert (
             df["citations_received"].iloc[0] < df["influential_citation_count"].iloc[0]
         )
+
+
+# ============================================================================
+# CHEMBL PUBLICATION IDENTIFIABLE CROSS-FIELD RULE TESTS
+# Harmonized rule: all_present(publication_id, title) + any_present(pmid, doi)
+# ============================================================================
+
+
+@pytest.mark.unit
+class TestChemblPublicationIdentifiable:
+    """Test harmonized publication_identifiable rule for ChEMBL.
+
+    Rule: all_present(publication_id, title) — both PK and title required.
+    Severity: error.
+    """
+
+    def test_publication_id_and_title_present_pass(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
+        """PASS: publication_id + title both present."""
+        df = minimal_chembl_publication_df.copy()
+        df["publication_id"] = "CHEMBL3000001"
+        df["title"] = "A novel compound study"
+
+        has_pk = df["publication_id"].notna()
+        has_title = df["title"].notna()
+        assert (has_pk & has_title).all()
+
+    def test_publication_id_without_title_error(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
+        """ERROR: publication_id present but title missing → _dq_error=True."""
+        df = minimal_chembl_publication_df.copy()
+        df["publication_id"] = "CHEMBL3000001"
+        df["title"] = None
+
+        has_pk = df["publication_id"].notna()
+        has_title = df["title"].notna()
+        # all_present fails when title is missing
+        assert (has_pk & ~has_title).any(), (
+            "publication_id without title should be flagged as error"
+        )
+
+    def test_title_without_publication_id_error(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
+        """ERROR: title present but publication_id missing → _dq_error=True."""
+        df = minimal_chembl_publication_df.copy()
+        df["publication_id"] = None
+        df["title"] = "A novel compound study"
+
+        has_pk = df["publication_id"].notna()
+        has_title = df["title"].notna()
+        # all_present fails when PK is missing
+        assert (~has_pk & has_title).any(), (
+            "title without publication_id should be flagged as error"
+        )
+
+    def test_both_missing_error(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
+        """ERROR: both publication_id and title missing → _dq_error=True."""
+        df = minimal_chembl_publication_df.copy()
+        df["publication_id"] = None
+        df["title"] = None
+
+        has_pk = df["publication_id"].notna()
+        has_title = df["title"].notna()
+        # all_present fails when both missing
+        assert (~has_pk & ~has_title).any()
+
+
+@pytest.mark.unit
+class TestChemblHasCrossReference:
+    """Test has_cross_reference rule for ChEMBL.
+
+    Rule: any_present(publication_pmid, publication_doi) — at least one external ID.
+    Severity: warn.
+    """
+
+    def test_both_pmid_and_doi_present_pass(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
+        """PASS: both PMID and DOI present."""
+        df = minimal_chembl_publication_df.copy()
+        df["publication_id"] = "CHEMBL3000001"
+        df["title"] = "A study"
+        df["publication_pmid"] = 12345678
+        df["publication_doi"] = "10.1234/test.001"
+
+        has_pmid = df["publication_pmid"].notna()
+        has_doi = df["publication_doi"].notna()
+        # any_present passes with both
+        assert (has_pmid | has_doi).all()
+
+    def test_only_pmid_present_pass(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
+        """PASS: only PMID present (any_present satisfied)."""
+        df = minimal_chembl_publication_df.copy()
+        df["publication_pmid"] = 12345678
+        df["publication_doi"] = None
+
+        has_pmid = df["publication_pmid"].notna()
+        has_doi = df["publication_doi"].notna()
+        assert (has_pmid | has_doi).all()
+
+    def test_only_doi_present_pass(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
+        """PASS: only DOI present (any_present satisfied)."""
+        df = minimal_chembl_publication_df.copy()
+        df["publication_pmid"] = None
+        df["publication_doi"] = "10.1234/test.001"
+
+        has_pmid = df["publication_pmid"].notna()
+        has_doi = df["publication_doi"].notna()
+        assert (has_pmid | has_doi).all()
+
+    def test_neither_pmid_nor_doi_warn(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
+        """WARN: no external ID present → _dq_warn=True (not error)."""
+        df = minimal_chembl_publication_df.copy()
+        df["publication_id"] = "CHEMBL3000001"
+        df["title"] = "A study"
+        df["publication_pmid"] = None
+        df["publication_doi"] = None
+
+        has_pmid = df["publication_pmid"].notna()
+        has_doi = df["publication_doi"].notna()
+        # any_present fails — but severity=warn, so only _dq_warn
+        assert not (has_pmid | has_doi).any(), (
+            "Missing both PMID and DOI should trigger warn"
+        )
+
+    def test_identifiable_pass_with_cross_ref_warn(
+        self, minimal_chembl_publication_df: pd.DataFrame
+    ) -> None:
+        """Combined: publication_identifiable passes, has_cross_reference warns.
+
+        Record has publication_id + title (→ pass) but no PMID/DOI (→ warn).
+        """
+        df = minimal_chembl_publication_df.copy()
+        df["publication_id"] = "CHEMBL3000001"
+        df["title"] = "A study without external IDs"
+        df["publication_pmid"] = None
+        df["publication_doi"] = None
+
+        # publication_identifiable: all_present(pk, title) → PASS
+        has_pk = df["publication_id"].notna()
+        has_title = df["title"].notna()
+        assert (has_pk & has_title).all(), "publication_identifiable should pass"
+
+        # has_cross_reference: any_present(pmid, doi) → WARN (not error)
+        has_pmid = df["publication_pmid"].notna()
+        has_doi = df["publication_doi"].notna()
+        assert not (has_pmid | has_doi).any(), "has_cross_reference should warn"

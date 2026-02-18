@@ -90,13 +90,17 @@ field_validations:
 # Cross-Field Validations
 # =============================================================================
 cross_field_validations:
+  # Harmonized rule: all_present(pk, title) — same pattern as all providers.
+  # ChEMBL PK = document_chembl_id → silver name publication_id.
   - name: publication_identifiable
     fields:
       - publication_id
       - title
     condition: all_present
+    severity: error
     error_message: "Publication must have publication_id and title"
 
+  # External cross-reference check: at least one of PMID or DOI should exist.
   - name: has_cross_reference
     fields:
       - publication_pmid
