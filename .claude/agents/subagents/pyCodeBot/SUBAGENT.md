@@ -265,7 +265,7 @@ class {Entity}SilverSchema(pa.DataFrameModel):
 
     See Also:
         ADR-002: Medallion Architecture
-        configs/dq/entities/{provider}/{entity}.yaml
+        configs/quality/entities/{provider}/{entity}.yaml
     """
 
     {primary_key}: Series[str] = pa.Field(nullable=False)

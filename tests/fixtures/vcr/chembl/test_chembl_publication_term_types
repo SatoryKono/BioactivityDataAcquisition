@@ -53,7 +53,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&limit=500&offset=0
+    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&doc_type=PUBLICATION&year__gte=1950&year__lte=2050&limit=500&offset=0
   response:
     body:
       string: "{\"documents\": [{\"abstract\": \"\", \"authors\": null, \"chembl_release\":
@@ -4902,7 +4902,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&limit=500&offset=0
+    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&doc_type=PUBLICATION&year__gte=1950&year__lte=2050&limit=500&offset=0
   response:
     body:
       string: "{\"documents\": [{\"abstract\": \"\", \"authors\": null, \"chembl_release\":

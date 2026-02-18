@@ -96,7 +96,7 @@ class CircuitBreakerDataSourceDecorator:
         self,
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
-        exc_tb: Any,
+        exc_tb: Any,  # Any: traceback type from __aexit__ protocol
     ) -> None:
         """Exit async context by delegating to wrapped data source."""
         await self.data_source.__aexit__(exc_type, exc_val, exc_tb)

@@ -335,6 +335,7 @@ class _MedallionConfigValidator:
         errors.extend(
             self._validate_medallion_policy_consistency(runtime.run_type, policy)
         )
+        errors.extend(self._validate_key_nullability_policies())
 
         self._log_medallion_validation_result(errors, runtime)
         return errors
@@ -525,6 +526,27 @@ class _MedallionConfigValidator:
 
         return errors
 
+    def _validate_key_nullability_policies(self) -> list[ConfigValidationError]:
+        """Validate key nullability policy consistency for Silver write keys."""
+        errors: list[ConfigValidationError] = []
+
+        valid_keys = set(self._config.table.primary_keys) | set(
+            self._config.table.partition_cols
+        )
+
+        for rule in self._config.dq.key_nullability_rules:
+            if rule.field not in valid_keys:
+                errors.append(
+                    ConfigValidationError(
+                        field="dq.key_nullability",
+                        expected="rule field must be present in primary_keys or partition_cols",
+                        actual=rule.field,
+                        rule="DQ key policy: key_nullability rules apply only to merge/partition keys",
+                    )
+                )
+
+        return errors
+
     def _log_medallion_validation_result(
         self, errors: list[ConfigValidationError], runtime: RuntimeConfig
     ) -> None:
@@ -638,7 +660,7 @@ class PreflightService:
 
     def _record_health_check_metrics(
         self,
-        report: Any,
+        report: Any,  # Any: HealthReport accessed ...
         duration: float,
     ) -> None:
         """Record health-check metrics per Unified Observability Contract."""

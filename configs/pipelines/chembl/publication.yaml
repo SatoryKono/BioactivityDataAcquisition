@@ -7,11 +7,13 @@
 pipeline_name: chembl_publication
 provider: chembl
 entity_type: publication
+schema_file: ../../schemas/chembl/publication.yaml
 version: "2.1.0"
 description: "Extract scientific publications from ChEMBL API"
 
-source:
-  batch_size: 16
+# Pagination override: smaller page for publication entities (full_scan_only).
+# Source pagination strategy defined in configs/sources/chembl.yaml.
+page_size_override: 16
 
 # Loading strategy (ADR-030, ADR-031)
 # Publication entities require full scan on each run due to API offset instability.
@@ -20,7 +22,8 @@ source:
 # - watermark_based: Placeholder for future incremental loading (not implemented)
 loading_strategy: full_scan_only
 
-primary_keys: ["publication_id"]
+business_primary_keys: ["publication_id"]
+technical_primary_key: "entity_id"
 silver_table: "chembl_publication"
 gold_table: "chembl_publication"
 
@@ -54,7 +57,12 @@ sink:
   bronze:
     flat_structure: true  # Files written directly under path/{date}/, without provider/entity subdirs
   silver:
-    partition_by: ["doc_type"]
     flat_structure: true  # Delta directly in path, files named {table}_*.ext
   gold:
+    mode: scd2
+    scd_config:
+      valid_from: _valid_from
+      valid_to: _valid_to
+      is_current: _is_current
+      version: _version
     flat_structure: true  # Delta directly in path, files named {table}_*.ext

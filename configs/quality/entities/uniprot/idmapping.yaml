@@ -59,3 +59,12 @@ conditional_validations:
         pattern: '^[A-Z0-9]{6,10}$'
         nullable: false
         error_message: "Found mappings must have UniProt accession"
+
+# =============================================================================
+# Key Nullability Policy for Silver writes
+# =============================================================================
+# Documented per pipeline: merge(primary) and partition key nullability.
+key_nullability:
+  - field: target_id
+    key_type: merge
+    nullable: false

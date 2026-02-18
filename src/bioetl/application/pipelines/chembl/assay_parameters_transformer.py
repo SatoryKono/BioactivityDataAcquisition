@@ -96,6 +96,7 @@ class AssayParametersTransformer(BaseChemblTransformer):
     entity_class = AssayParameters
     primary_id_field = "assay_param_id"
 
+    # Any: ChEMBL API returns unt...
     def _normalize_type(self, param_type: Any) -> str | None:
         """Normalize parameter type to uppercase.
 

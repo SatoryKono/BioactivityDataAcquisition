@@ -14,8 +14,8 @@ class TestPublicationFieldGroup:
     """Tests for PublicationFieldGroup enum."""
 
     def test_all_groups_defined(self) -> None:
-        """All 8 semantic groups are defined."""
-        assert len(PublicationFieldGroup) == 8
+        """All 9 semantic groups are defined."""
+        assert len(PublicationFieldGroup) == 9
 
         expected_groups = {
             "id_and_status",
@@ -25,6 +25,7 @@ class TestPublicationFieldGroup:
             "citations_and_reference",
             "date_and_places",
             "publication_types",
+            "system_metadata",
             "trash",
         }
         actual_groups = {g.value for g in PublicationFieldGroup}
@@ -50,24 +51,28 @@ class TestPublicationFieldGroup:
         assert (
             PublicationFieldGroup.PUBLICATION_TYPES.display_name == "Publication Types"
         )
+        assert PublicationFieldGroup.SYSTEM_METADATA.display_name == "System Metadata"
         assert PublicationFieldGroup.TRASH.display_name == "Trash (Excluded)"
 
     def test_include_in_gold(self) -> None:
-        """Only trash group is excluded from Gold layer."""
-        # All groups except TRASH should be included in Gold
+        """TRASH and SYSTEM_METADATA groups are excluded from Gold layer."""
+        excluded = {
+            PublicationFieldGroup.TRASH,
+            PublicationFieldGroup.SYSTEM_METADATA,
+        }
         for group in PublicationFieldGroup:
-            if group == PublicationFieldGroup.TRASH:
+            if group in excluded:
                 assert not group.include_in_gold
             else:
                 assert group.include_in_gold
 
     def test_gold_groups(self) -> None:
-        """gold_groups() returns all groups except TRASH."""
+        """gold_groups() returns all groups except TRASH and SYSTEM_METADATA."""
         gold_groups = PublicationFieldGroup.gold_groups()
         assert len(gold_groups) == 7
         assert PublicationFieldGroup.TRASH not in gold_groups
+        assert PublicationFieldGroup.SYSTEM_METADATA not in gold_groups
 
-        # All other groups should be present
         expected = {
             PublicationFieldGroup.ID_AND_STATUS,
             PublicationFieldGroup.BIBLIOGRAPHY,
@@ -80,10 +85,11 @@ class TestPublicationFieldGroup:
         assert set(gold_groups) == expected
 
     def test_excluded_groups(self) -> None:
-        """excluded_groups() returns only TRASH."""
+        """excluded_groups() returns SYSTEM_METADATA and TRASH."""
         excluded = PublicationFieldGroup.excluded_groups()
-        assert len(excluded) == 1
-        assert excluded[0] == PublicationFieldGroup.TRASH
+        assert len(excluded) == 2
+        assert PublicationFieldGroup.SYSTEM_METADATA in excluded
+        assert PublicationFieldGroup.TRASH in excluded
 
     def test_from_string_valid(self) -> None:
         """from_string() parses valid group names."""
@@ -96,6 +102,10 @@ class TestPublicationFieldGroup:
             == PublicationFieldGroup.BIBLIOGRAPHY
         )
         assert PublicationFieldGroup.from_string("TRASH") == PublicationFieldGroup.TRASH
+        assert (
+            PublicationFieldGroup.from_string("system_metadata")
+            == PublicationFieldGroup.SYSTEM_METADATA
+        )
         # Case-insensitive
         assert (
             PublicationFieldGroup.from_string("ID_AND_STATUS")
@@ -257,7 +267,6 @@ class TestFieldToGroupMapping:
     def test_trash_fields(self) -> None:
         """Trash group contains expected excluded fields."""
         expected_fields = {
-            "content_hash",
             "language",
             "src_id",
         }
@@ -267,6 +276,15 @@ class TestFieldToGroupMapping:
             if g == PublicationFieldGroup.TRASH
         }
         assert expected_fields.issubset(actual_fields)
+
+    def test_system_metadata_fields(self) -> None:
+        """System metadata group contains content_hash."""
+        actual_fields = {
+            f
+            for f, g in FIELD_TO_GROUP_MAPPING.items()
+            if g == PublicationFieldGroup.SYSTEM_METADATA
+        }
+        assert "content_hash" in actual_fields
 
 
 class TestFieldGroupConfig:
@@ -332,8 +350,10 @@ class TestFieldGroupConfig:
         assert config.is_gold_field("chembl.publication.title") is True
 
         # Trash fields
-        assert config.is_gold_field("content_hash") is False
         assert config.is_gold_field("language") is False
+
+        # System metadata fields (also excluded from Gold)
+        assert config.is_gold_field("content_hash") is False
         assert config.is_gold_field("chembl.publication.content_hash") is False
 
     def test_get_gold_columns(self) -> None:
@@ -409,7 +429,7 @@ class TestFieldGroupConfig:
         assert "title" in grouped[PublicationFieldGroup.BIBLIOGRAPHY]
         assert "doi" in grouped[PublicationFieldGroup.ID_AND_STATUS]
         assert "authors" in grouped[PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS]
-        assert "content_hash" in grouped[PublicationFieldGroup.TRASH]
+        assert "content_hash" in grouped[PublicationFieldGroup.SYSTEM_METADATA]
         assert "publication_year" in grouped[PublicationFieldGroup.DATE_AND_PLACES]
 
         # Empty groups should exist
@@ -467,9 +487,9 @@ class TestFieldGroupConfig:
         crossref_title_idx = sorted_cols.index("crossref.publication.title")
         assert chembl_title_idx < crossref_title_idx
 
-        # Trash comes last
+        # System metadata and trash come after business groups
         hash_idx = sorted_cols.index("content_hash")
-        assert hash_idx == len(sorted_cols) - 1
+        assert hash_idx > crossref_title_idx
 
     def test_sort_columns_unqualified_first(self) -> None:
         """sort_columns() puts unqualified (seed) columns before qualified."""

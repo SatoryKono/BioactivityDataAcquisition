@@ -49,6 +49,7 @@ class PubChemCompoundTransformer(BaseTransformer):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
+        contract_policy: Any = None,
     ):
         """Initialize PubChem compound transformer.
 
@@ -63,6 +64,7 @@ class PubChemCompoundTransformer(BaseTransformer):
             pii_hasher: Optional PII hasher. Not typically used for molecules
                 (no PII in chemical data), but included for API consistency.
             data_normalizer: Data normalization service for text normalization.
+            contract_policy: Optional pipeline contract policy.
 
         """
         super().__init__(
@@ -75,6 +77,7 @@ class PubChemCompoundTransformer(BaseTransformer):
             identity_service=identity_service,
             pii_hasher=pii_hasher,
             data_normalizer=data_normalizer,
+            contract_policy=contract_policy,
         )
 
     def _extract_computed_descriptors(

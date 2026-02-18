@@ -102,6 +102,7 @@ class SilverDQReportConfig(BaseModel):
             SilverDQCheckType.VALUE_DISTRIBUTION.value,
             SilverDQCheckType.SCHEMA_DRIFT.value,
             SilverDQCheckType.DEDUPLICATION_STATS.value,
+            SilverDQCheckType.KEY_NULLABILITY.value,
         ],
         description="List of DQ checks to perform",
     )

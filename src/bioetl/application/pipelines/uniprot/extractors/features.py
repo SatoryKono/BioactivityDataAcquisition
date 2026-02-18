@@ -7,7 +7,7 @@ from typing import Any, ClassVar
 from bioetl.domain.serialization import serialize_to_json
 
 
-def _extract_feature_location(
+def _extract_feature_location(  # Any: JSON values
     location: dict[str, Any], feature_data: dict[str, Any]
 ) -> None:
     """Extract start/end positions from feature location.
@@ -24,7 +24,7 @@ def _extract_feature_location(
         feature_data["end"] = end.get("value")
 
 
-def _build_feature_dict(feature: dict[str, Any]) -> dict[str, Any]:
+def _build_feature_dict(feature: dict[str, Any]) -> dict[str, Any]:  # Any: JSON values
     """Build a feature data dictionary.
 
     Args:
@@ -33,7 +33,7 @@ def _build_feature_dict(feature: dict[str, Any]) -> dict[str, Any]:
     Returns:
         Extracted feature data dict.
     """
-    feature_data: dict[str, Any] = {}
+    feature_data: dict[str, Any] = {}  # Any: JSON values
     if feature.get("type"):
         feature_data["type"] = feature.get("type")
     if feature.get("description"):
@@ -48,7 +48,7 @@ def _build_feature_dict(feature: dict[str, Any]) -> dict[str, Any]:
     return feature_data
 
 
-def _build_keyword_dict(kw: dict[str, Any]) -> dict[str, Any]:
+def _build_keyword_dict(kw: dict[str, Any]) -> dict[str, Any]:  # Any: JSON values
     """Build a keyword data dictionary.
 
     Args:
@@ -57,7 +57,7 @@ def _build_keyword_dict(kw: dict[str, Any]) -> dict[str, Any]:
     Returns:
         Extracted keyword data dict.
     """
-    kw_data: dict[str, Any] = {}
+    kw_data: dict[str, Any] = {}  # Any: JSON values
     if kw.get("id"):
         kw_data["id"] = kw.get("id")
     if kw.get("name"):
@@ -91,7 +91,7 @@ class FeatureExtractor:
     }
 
     @staticmethod
-    def extract_features(features: Any) -> str | None:
+    def extract_features(features: Any) -> str | None:  # Any: untyped API JSON
         """Extract sequence features.
 
         Args:
@@ -103,7 +103,7 @@ class FeatureExtractor:
         if not features or not isinstance(features, list):
             return None
 
-        extracted: list[dict[str, Any]] = []
+        extracted: list[dict[str, Any]] = []  # Any: JSON values
         for feature in features:
             if not isinstance(feature, dict):
                 continue
@@ -114,7 +114,7 @@ class FeatureExtractor:
         return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
 
     @staticmethod
-    def extract_keywords(keywords: Any) -> str | None:
+    def extract_keywords(keywords: Any) -> str | None:  # Any: untyped API JSON
         """Extract UniProt keywords.
 
         Args:
@@ -126,7 +126,7 @@ class FeatureExtractor:
         if not keywords or not isinstance(keywords, list):
             return None
 
-        extracted: list[dict[str, Any]] = []
+        extracted: list[dict[str, Any]] = []  # Any: JSON values
         for kw in keywords:
             if not isinstance(kw, dict):
                 continue
@@ -137,7 +137,9 @@ class FeatureExtractor:
         return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
 
     @classmethod
-    def extract_features_by_type(cls, features: Any, feature_type: str) -> str | None:
+    def extract_features_by_type(
+        cls, features: Any, feature_type: str
+    ) -> str | None:  # Any: untyped UniProt JSON
         """Extract sequence features by type.
 
         Args:
@@ -150,7 +152,7 @@ class FeatureExtractor:
         if not features or not isinstance(features, list):
             return None
 
-        extracted: list[dict[str, Any]] = []
+        extracted: list[dict[str, Any]] = []  # Any: JSON values
         for feature in features:
             if not isinstance(feature, dict):
                 continue
@@ -162,7 +164,7 @@ class FeatureExtractor:
         return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
 
     @classmethod
-    def extract_domains(cls, features: Any) -> str | None:
+    def extract_domains(cls, features: Any) -> str | None:  # Any: untyped API JSON
         """Extract protein domain features.
 
         Args:
@@ -174,7 +176,7 @@ class FeatureExtractor:
         return cls.extract_features_by_type(features, "Domain")
 
     @classmethod
-    def extract_binding_sites(cls, features: Any) -> str | None:
+    def extract_binding_sites(cls, features: Any) -> str | None:  # Any: untyped JSON
         """Extract binding site features.
 
         Args:
@@ -186,7 +188,7 @@ class FeatureExtractor:
         return cls.extract_features_by_type(features, "Binding site")
 
     @classmethod
-    def extract_active_sites(cls, features: Any) -> str | None:
+    def extract_active_sites(cls, features: Any) -> str | None:  # Any: untyped API JSON
         """Extract active site features.
 
         Args:
@@ -198,7 +200,7 @@ class FeatureExtractor:
         return cls.extract_features_by_type(features, "Active site")
 
     @classmethod
-    def extract_topology(cls, features: Any) -> str | None:
+    def extract_topology(cls, features: Any) -> str | None:  # Any: untyped API JSON
         """Extract topological domain features.
 
         Args:
@@ -210,7 +212,7 @@ class FeatureExtractor:
         return cls.extract_features_by_type(features, cls.FEATURE_TYPES["topology"])
 
     @classmethod
-    def extract_transmembrane(cls, features: Any) -> str | None:
+    def extract_transmembrane(cls, features: Any) -> str | None:  # Any: untyped JSON
         """Extract transmembrane region features.
 
         Args:
@@ -224,7 +226,7 @@ class FeatureExtractor:
         )
 
     @classmethod
-    def extract_intramembrane(cls, features: Any) -> str | None:
+    def extract_intramembrane(cls, features: Any) -> str | None:  # Any: untyped JSON
         """Extract intramembrane region features.
 
         Args:
@@ -238,7 +240,7 @@ class FeatureExtractor:
         )
 
     @classmethod
-    def extract_glycosylation(cls, features: Any) -> str | None:
+    def extract_glycosylation(cls, features: Any) -> str | None:  # Any: untyped JSON
         """Extract glycosylation site features.
 
         Args:
@@ -252,7 +254,7 @@ class FeatureExtractor:
         )
 
     @classmethod
-    def extract_lipidation(cls, features: Any) -> str | None:
+    def extract_lipidation(cls, features: Any) -> str | None:  # Any: untyped API JSON
         """Extract lipidation site features.
 
         Args:
@@ -264,7 +266,7 @@ class FeatureExtractor:
         return cls.extract_features_by_type(features, cls.FEATURE_TYPES["lipidation"])
 
     @classmethod
-    def extract_disulfide_bonds(cls, features: Any) -> str | None:
+    def extract_disulfide_bonds(cls, features: Any) -> str | None:  # Any: untyped JSON
         """Extract disulfide bond features.
 
         Args:
@@ -278,7 +280,9 @@ class FeatureExtractor:
         )
 
     @classmethod
-    def extract_modified_residues(cls, features: Any) -> str | None:
+    def extract_modified_residues(
+        cls, features: Any
+    ) -> str | None:  # Any: untyped UniProt JSON
         """Extract modified residue features.
 
         Args:
@@ -292,7 +296,7 @@ class FeatureExtractor:
         )
 
     @classmethod
-    def extract_signal_peptide(cls, features: Any) -> str | None:
+    def extract_signal_peptide(cls, features: Any) -> str | None:  # Any: untyped JSON
         """Extract signal peptide features.
 
         Args:
@@ -306,7 +310,7 @@ class FeatureExtractor:
         )
 
     @classmethod
-    def extract_propeptide(cls, features: Any) -> str | None:
+    def extract_propeptide(cls, features: Any) -> str | None:  # Any: untyped API JSON
         """Extract propeptide features.
 
         Args:
@@ -318,7 +322,7 @@ class FeatureExtractor:
         return cls.extract_features_by_type(features, cls.FEATURE_TYPES["propeptide"])
 
     @classmethod
-    def extract_ptm_by_pattern(
+    def extract_ptm_by_pattern(  # Any: untyped JSON
         cls, features: Any, patterns: tuple[str, ...]
     ) -> str | None:
         """Extract modified residue features matching PTM patterns.
@@ -340,7 +344,7 @@ class FeatureExtractor:
             return None
 
         mod_res_type = cls.FEATURE_TYPES["modified_residue"]
-        extracted: list[dict[str, Any]] = []
+        extracted: list[dict[str, Any]] = []  # Any: JSON values
 
         for feature in features:
             if not isinstance(feature, dict):
@@ -361,7 +365,7 @@ class FeatureExtractor:
         return serialize_to_json(extracted, ensure_ascii=False) if extracted else None
 
     @classmethod
-    def extract_phosphorylation(cls, features: Any) -> str | None:
+    def extract_phosphorylation(cls, features: Any) -> str | None:  # Any: untyped JSON
         """Extract phosphorylation site features.
 
         Args:
@@ -373,7 +377,7 @@ class FeatureExtractor:
         return cls.extract_ptm_by_pattern(features, cls.PTM_PATTERNS["phosphorylation"])
 
     @classmethod
-    def extract_acetylation(cls, features: Any) -> str | None:
+    def extract_acetylation(cls, features: Any) -> str | None:  # Any: untyped API JSON
         """Extract acetylation site features.
 
         Args:
@@ -385,7 +389,7 @@ class FeatureExtractor:
         return cls.extract_ptm_by_pattern(features, cls.PTM_PATTERNS["acetylation"])
 
     @classmethod
-    def extract_ubiquitination(cls, features: Any) -> str | None:
+    def extract_ubiquitination(cls, features: Any) -> str | None:  # Any: untyped JSON
         """Extract ubiquitination site features.
 
         Args:

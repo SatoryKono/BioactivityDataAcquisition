@@ -2,7 +2,7 @@
 # PubChem Compound-specific DQ rules
 # Inherits from: _defaults.yaml → providers/pubchem.yaml
 
-version: "1.0.0"
+version: "1.1.0"
 provider: pubchem
 entity: compound
 
@@ -17,19 +17,87 @@ field_validations:
     nullable: false
     error_message: "CID is required"
 
-  # Molecular weight validation
+  # Molecular formula must start with uppercase letter
+  - field: molecular_formula
+    type: pattern
+    pattern: "^[A-Z][A-Za-z0-9]*$"
+    nullable: true
+    error_message: "Molecular formula must start with uppercase letter"
+
+  # Molecular weight in physically meaningful range
   - field: molecular_weight
     type: range
-    min: 0
+    min: 10
+    max: 10000
     nullable: true
-    error_message: "Molecular weight must be non-negative"
+    error_message: "Molecular weight must be between 10 and 10000 Da"
+
+  # SMILES notation validation
+  - field: canonical_smiles
+    type: custom
+    validator: smiles_validator
+    nullable: true
+
+  # Isomeric SMILES validation
+  - field: isomeric_smiles
+    type: custom
+    validator: smiles_validator
+    nullable: true
+
+  # XLogP partition coefficient
+  - field: xlogp
+    type: range
+    min: -20
+    max: 30
+    nullable: true
+
+  # Topological polar surface area
+  - field: tpsa
+    type: range
+    min: 0
+    max: 1000
+    nullable: true
+
+  # Hydrogen bond donor count
+  - field: h_bond_donor_count
+    type: range
+    min: 0
+    max: 50
+    nullable: true
+
+  # Hydrogen bond acceptor count
+  - field: h_bond_acceptor_count
+    type: range
+    min: 0
+    max: 50
+    nullable: true
 
 # =============================================================================
 # Cross-Field Validations
 # =============================================================================
-cross_field_validations: []
+cross_field_validations:
+  # At least one structure identifier must be present
+  - name: structure_present
+    fields:
+      - canonical_smiles
+      - inchi
+      - inchi_key
+    condition: any_present
+    error_message: "At least one structure identifier required"
 
 # =============================================================================
 # Conditional Validations
 # =============================================================================
 conditional_validations: []
+
+# =============================================================================
+# Key Nullability Policy for Silver writes
+# =============================================================================
+# Documented per pipeline: merge(primary) and partition key nullability.
+key_nullability:
+  - field: molecule_id
+    key_type: merge
+    nullable: false
+  - field: batch_date
+    key_type: partition
+    nullable: false

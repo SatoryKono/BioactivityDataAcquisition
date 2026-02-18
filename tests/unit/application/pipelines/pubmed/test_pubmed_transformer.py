@@ -680,10 +680,8 @@ class TestPubMedTransformerClassificationExtraction:
         result = await transformer.transform(mock_context, record, index=0)
 
         assert result is not None
-        assert len(result["subject_keywords"]) == 3
-        assert "keyword1" in result["subject_keywords"]
-        assert "keyword2" in result["subject_keywords"]
-        assert "keyword3" in result["subject_keywords"]
+        # subject_keywords is serialized as canonical JSON string
+        assert result["subject_keywords"] == '["keyword1","keyword2","keyword3"]'
 
 
 @pytest.mark.unit

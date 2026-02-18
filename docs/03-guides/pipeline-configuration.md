@@ -62,7 +62,7 @@ configs/
 │       ├── molecule.yaml        # chembl_molecule + enrichers
 │       ├── publication.yaml     # chembl_publication + enrichers
 │       └── target.yaml          # chembl_target + enrichers
-├── dq/                           # Data Quality правила (31 файл)
+├── quality/                      # Data Quality правила (ADR-027, 31 файл)
 │   ├── _defaults.yaml           # Глобальные DQ defaults (soft_fail=0.05, hard_fail=0.20)
 │   ├── providers/               # 7 provider-specific DQ
 │   │   ├── chembl.yaml
@@ -72,7 +72,7 @@ configs/
 │   │   ├── pubmed.yaml
 │   │   ├── semanticscholar.yaml
 │   │   └── uniprot.yaml
-│   └── entities/                # 22 entity-specific DQ
+│   └── entities/                # 23 entity-specific DQ
 │       ├── chembl/
 │       │   ├── activity.yaml
 │       │   ├── assay.yaml
@@ -91,16 +91,24 @@ configs/
 │           ├── idmapping.yaml
 │           ├── protein.yaml
 │           └── target.yaml
-├── filter/                       # Фильтры данных (8 файлов)
+├── filters/                      # Фильтры данных (ADR-028, 35 файлов)
 │   ├── _defaults.yaml           # batch_size: 100
-│   └── providers/               # Provider-specific batch_sizes
-│       ├── chembl.yaml
-│       ├── crossref.yaml
-│       ├── openalex.yaml
-│       ├── pubchem.yaml
-│       ├── pubmed.yaml
-│       ├── semanticscholar.yaml
-│       └── uniprot.yaml
+│   ├── providers/               # Provider-specific batch_sizes
+│   │   ├── chembl.yaml
+│   │   ├── crossref.yaml
+│   │   ├── openalex.yaml
+│   │   ├── pubchem.yaml
+│   │   ├── pubmed.yaml
+│   │   ├── semanticscholar.yaml
+│   │   └── uniprot.yaml
+│   └── entities/                # 27 entity-specific filter configs
+│       ├── chembl/
+│       │   ├── activity.yaml
+│       │   └── ...              # 14 entity filter configs
+│       ├── composite/
+│       │   ├── activity.yaml
+│       │   └── ...              # 5 composite filter configs
+│       └── ...                  # Other providers
 └── sources/                      # Конфигурации источников (7 файлов)
     ├── chembl.yaml
     ├── crossref.yaml
@@ -117,8 +125,8 @@ configs/
 | ------------------------- | ---------- | -------------------------------------- |
 | Pipeline configs (entity) | 21         | Regular ETL pipelines                  |
 | Composite configs         | 5          | Multi-provider pipelines (ADR-026)     |
-| DQ configs                | 31         | 1 defaults + 7 providers + 22 entities + 1 schema |
-| Filter configs            | 8          | 1 defaults + 7 providers               |
+| DQ configs (quality/)     | 31         | 1 defaults + 7 providers + 23 entities |
+| Filter configs (filters/) | 35         | 1 defaults + 7 providers + 27 entities |
 | Source configs            | 7          | Один на провайдера                     |
 | **Итого**                 | **71**     | Все конфиги валидированы               |
 
@@ -136,31 +144,31 @@ pipeline_name: chembl_activity
 provider: chembl
 entity_type: activity
 version: "1.2.0"
-primary_keys: ["activity_id"]
+business_primary_keys: ["activity_id"]
 silver_table: "chembl_activity"
 gold_table: "chembl_activity"
 ```
 
 ### Полная структура конфига
 
-| Секция                | Описание                           | Обязательно          |
-| --------------------- | ---------------------------------- | -------------------- |
-| `pipeline_name`       | Уникальный идентификатор пайплайна | Да                   |
-| `provider`            | Имя провайдера (lowercase)         | Да                   |
-| `entity_type`         | Тип сущности                       | Да                   |
-| `version`             | Semver версия конфига              | Да                   |
-| `primary_keys`        | Первичные ключи                    | Да                   |
-| `silver_table`        | Имя Silver таблицы                 | Да                   |
-| `gold_table`          | Имя Gold таблицы                   | Нет                  |
-| `batch_size`          | Размер батча (1-5000)              | Нет (default: 100)   |
-| `checkpoint_interval` | Интервал checkpoint                | Нет (default: 10)    |
-| `source`              | Конфиг источника                   | Нет (auto-resolved)  |
-| `dq_overrides`            | Inline DQ переопределения          | Нет                  |
-| `sink`                | Конфиги слоёв (Bronze/Silver/Gold) | Нет (auto-resolved)  |
-| `circuit_breaker`     | Настройки Circuit Breaker          | Нет (from base)      |
-| `maintenance`         | VACUUM настройки                   | Нет (from base)      |
-| `loading_strategy`    | Стратегия загрузки                 | Нет (default: full)  |
-| `force_full_scan`     | Отключить checkpoint resume        | Нет (default: false) |
+| Секция                  | Описание                           | Обязательно          |
+| ----------------------- | ---------------------------------- | -------------------- |
+| `pipeline_name`         | Уникальный идентификатор пайплайна | Да                   |
+| `provider`              | Имя провайдера (lowercase)         | Да                   |
+| `entity_type`           | Тип сущности                       | Да                   |
+| `version`               | Semver версия конфига              | Да                   |
+| `business_primary_keys` | Первичные ключи                    | Да                   |
+| `silver_table`          | Имя Silver таблицы                 | Да                   |
+| `gold_table`            | Имя Gold таблицы                   | Нет                  |
+| `batch_size`            | Размер батча (1-5000)              | Нет (default: 100)   |
+| `checkpoint_interval`   | Интервал checkpoint                | Нет (default: 10)    |
+| `source`                | Конфиг источника                   | Нет (auto-resolved)  |
+| `dq_overrides`          | Inline DQ переопределения          | Нет                  |
+| `sink`                  | Конфиги слоёв (Bronze/Silver/Gold) | Нет (auto-resolved)  |
+| `circuit_breaker`       | Настройки Circuit Breaker          | Нет (from base)      |
+| `maintenance`           | VACUUM настройки                   | Нет (from base)      |
+| `loading_strategy`      | Стратегия загрузки                 | Нет (default: full)  |
+| `force_full_scan`       | Отключить checkpoint resume        | Нет (default: false) |
 
 ### Пример с переопределениями
 
@@ -170,7 +178,7 @@ pipeline_name: chembl_activity
 provider: chembl
 entity_type: activity
 version: "1.2.0"
-primary_keys: ["activity_id"]
+business_primary_keys: ["activity_id"]
 silver_table: "chembl_activity"
 gold_table: "chembl_activity"
 
@@ -245,44 +253,57 @@ composite:
 
 ### Отличия от Regular Pipelines
 
-| Аспект        | Regular Pipeline                           | Composite Pipeline                      |
-| ------------- | ------------------------------------------ | --------------------------------------- |
-| Корневой ключ | `pipeline_name`, `provider`, `entity_type` | `composite:`                            |
-| Source        | Один провайдер                             | Несколько провайдеров через `enrichers` |
-| Schema        | `_schema.json`                             | Отдельная схема (ADR-026)               |
-| Пути          | Auto-computed                              | Определяются в `merge.output`           |
+| Аспект        | Regular Pipeline                           | Composite Pipeline                                      |
+| ------------- | ------------------------------------------ | ------------------------------------------------------- |
+| Корневой ключ | `pipeline_name`, `provider`, `entity_type` | `composite:`                                            |
+| Source        | Один провайдер                             | Несколько провайдеров через `enrichers`                 |
+| Schema        | `_schema.json`                             | Отдельная схема (ADR-026)                               |
+| Пути          | Auto-computed                              | Определяются в `merge.output`                           |
+| Orchestration | `PipelineRunner` + `{Entity}Transformer`   | `CompositePipelineRunner` (без отдельных трансформеров) |
+| Реализация    | `application/pipelines/{provider}/`        | `application/composite/` (15 модулей)                   |
+
+> **Архитектурная заметка:** Composite pipelines **не используют** классы трансформеров
+> (`*Transformer`). Вместо этого оркестрация выполняется через `CompositePipelineRunner`,
+> `EnrichmentCoordinator`, `MergeService` и другие сервисы в `application/composite/`.
+> Seed и enricher pipelines запускаются как обычные single-source pipelines,
+> а composite layer выполняет агрегацию на уровне Silver-данных.
 
 ______________________________________________________________________
 
 ## Convention-based Path Resolution (ADR-029)
 
-Пути и ссылки вычисляются автоматически из `provider` и `entity_type`:
+Пути и ссылки вычисляются автоматически из `provider` и `entity_type`.
+Pipeline YAML файлы **не должны** явно указывать эти поля — они вычисляются
+конвенционно. Если указаны явно, значение используется как override-path.
 
-| Поле                 | Auto-computed значение                                |
-| -------------------- | ----------------------------------------------------- |
-| `source_file`        | `../../sources/{provider}.yaml`                       |
-| `dq_config_file`     | `../../dq/entities/{provider}/{entity_type}.yaml`     |
-| `filter_config_file` | `../../filter/entities/{provider}/{entity_type}.yaml` |
-| `sink.bronze.path`   | `data/output/bronze/{provider}/{entity_type}`         |
-| `sink.silver.path`   | `data/output/silver/{provider}/{entity_type}`         |
-| `sink.gold.path`     | `data/output/gold/{provider}/{entity_type}`           |
+| Поле                 | Auto-computed значение                                 | Примечание                                |
+| -------------------- | ------------------------------------------------------ | ----------------------------------------- |
+| `source_file`        | `../../sources/{provider}.yaml`                        | Provider API settings                     |
+| `dq_config_file`     | `../../quality/entities/{provider}/{entity_type}.yaml` | Informational; loader uses full hierarchy |
+| `filter_config_file` | `../../filters/entities/{provider}/{entity_type}.yaml` | Informational; loader uses full hierarchy |
+| `sink.bronze.path`   | `data/output/bronze/{provider}/{entity_type}`          |                                           |
+| `sink.silver.path`   | `data/output/silver/{provider}/{entity_type}`          |                                           |
+| `sink.gold.path`     | `data/output/gold/{provider}/{entity_type}`            |                                           |
 
 ### Авто-пропагация sort_by (ADR-014 compliance)
 
-Параметры `sink.silver.sort_by.columns` и `sink.gold.sort_by.columns` **автоматически вычисляются** из `primary_keys`:
+Параметры `sink.silver.sort_by.columns` и `sink.gold.sort_by.columns` **автоматически вычисляются** из `business_primary_keys`:
 
 ```python
 # config_loader.py:155-176
 if "sort_by" not in sink_silver:
-    sink_silver["sort_by"] = {"columns": config["primary_keys"], "ascending": True}
+    sink_silver["sort_by"] = {
+        "columns": config["business_primary_keys"],
+        "ascending": True,
+    }
 ```
 
-Это означает, что entity configs **не должны** явно указывать `sort_by` — он пропагируется из `primary_keys`:
+Это означает, что entity configs **не должны** явно указывать `sort_by` — он пропагируется из `business_primary_keys`:
 
 ```yaml
 # НЕ нужно указывать sort_by — он auto-computed!
 pipeline_name: chembl_activity
-primary_keys: ["activity_id"]  # → sort_by.columns = ["activity_id"]
+business_primary_keys: ["activity_id"]  # → sort_by.columns = ["activity_id"]
 ```
 
 > **Преимущество:** Снижает дублирование на ~30%. Разработчик указывает только переопределения. Все 21 entity configs соответствуют ADR-014 через авто-пропагацию.
@@ -299,6 +320,11 @@ DQ правила загружаются в порядке приоритета 
 1. `configs/quality/providers/{provider}.yaml` — provider-specific
 1. `configs/quality/entities/{provider}/{entity}.yaml` — entity-specific
 1. Inline `dq_overrides` в pipeline конфиге — финальные переопределения
+
+> **Примечание:** Поле `dq_config_file` в pipeline YAML вычисляется конвенционно
+> (ADR-029) и **не требует** явного указания. `DQConfigLoader` всегда загружает
+> полную 3-уровневую иерархию по `provider`/`entity_type`. Если `dq_config_file`
+> указан явно — он используется как override-path для entity-level файла.
 
 ### Специальная merge логика
 
@@ -630,7 +656,7 @@ pipeline_name: chembl_activity
 provider: chembl
 entity_type: activity
 version: "1.2.0"
-primary_keys: ["activity_id"]
+business_primary_keys: ["activity_id"]
 silver_table: "chembl_activity"
 gold_table: "chembl_activity"
 ```
@@ -642,7 +668,7 @@ pipeline_name: chembl_activity
 provider: chembl
 entity_type: activity
 version: "1.2.0"
-primary_keys: ["activity_id"]
+business_primary_keys: ["activity_id"]
 silver_table: "chembl_activity"
 gold_table: "chembl_activity"
 
@@ -666,7 +692,7 @@ pipeline_name: chembl_activity
 provider: chembl
 entity_type: activity
 version: "1.2.0"
-primary_keys: ["activity_id"]
+business_primary_keys: ["activity_id"]
 silver_table: "chembl_activity"
 gold_table: "chembl_activity"
 

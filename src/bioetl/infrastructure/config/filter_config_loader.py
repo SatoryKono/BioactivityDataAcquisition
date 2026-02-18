@@ -60,7 +60,7 @@ class FilterConfigLoader(
         """Load merged filter config for provider/entity.
 
         Merge order (later wins for scalars, special handling for collections):
-        1. _defaults.yaml
+        1. _defaults.yaml (MUST exist)
         2. providers/{provider}.yaml
         3. entities/{provider}/{entity}.yaml
         4. inline_overrides (from pipeline config filter_rules)
@@ -83,13 +83,79 @@ class FilterConfigLoader(
         if inline_overrides is None and cache_key in self._cache:
             return self._cache[cache_key]
 
-        # 1. Load defaults (MUST exist)
+        # _defaults.yaml MUST exist for validated domain conversion
         defaults_path = self._filter_root / "_defaults.yaml"
         if not defaults_path.exists():
             raise FileNotFoundError(
                 "Required filter defaults file not found in configs/filters/. "
                 "Create _defaults.yaml with global filter settings."
             )
+
+        merged = self._merge_hierarchy(provider, entity, inline_overrides)
+
+        # Validate via Pydantic
+        validated = FilterConfigFile.model_validate(merged)
+        domain_configs: tuple[
+            InputFilterConfig, SilverFilterConfig, GoldFilterConfig, ExtractionParams
+        ] = validated.to_domain()
+
+        # Cache result if no inline overrides
+        if inline_overrides is None:
+            self._cache[cache_key] = domain_configs
+
+        return domain_configs
+
+    def load_as_dict(
+        self,
+        provider: str,
+        entity: str,
+        inline_overrides: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Load merged filter config hierarchy as raw dict.
+
+        Same 4-level merge order as :meth:`load` but returns the merged
+        dict **without** Pydantic validation or domain conversion.
+        Returns empty dict when no filter config files exist at all.
+
+        Merge order (later wins for scalars, concat for collection keys):
+        1. _defaults.yaml (optional — empty dict if absent)
+        2. providers/{provider}.yaml (optional)
+        3. entities/{provider}/{entity}.yaml (optional)
+        4. inline_overrides from pipeline config (highest priority)
+
+        Used by pipeline config loading to integrate the filter hierarchy
+        into the pipeline config dict before PipelineYamlConfig validation.
+
+        Args:
+            provider: Provider name (e.g., "chembl").
+            entity: Entity name (e.g., "activity").
+            inline_overrides: Optional inline overrides from pipeline config.
+
+        Returns:
+            Merged configuration dict (may be empty).
+        """
+        return self._merge_hierarchy(provider, entity, inline_overrides)
+
+    def _merge_hierarchy(
+        self,
+        provider: str,
+        entity: str,
+        inline_overrides: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Merge the 4-level filter config hierarchy into a single dict.
+
+        Shared logic for both :meth:`load` and :meth:`load_as_dict`.
+
+        Args:
+            provider: Provider name.
+            entity: Entity name.
+            inline_overrides: Optional inline overrides.
+
+        Returns:
+            Merged configuration dict.
+        """
+        # 1. Load defaults (returns {} if absent)
+        defaults_path = self._filter_root / "_defaults.yaml"
         merged = self._load_yaml(defaults_path)
 
         # 2. Load provider config (optional)
@@ -110,17 +176,7 @@ class FilterConfigLoader(
         if inline_overrides:
             merged = self._deep_merge(merged, inline_overrides)
 
-        # Validate via Pydantic
-        validated = FilterConfigFile.model_validate(merged)
-        domain_configs: tuple[
-            InputFilterConfig, SilverFilterConfig, GoldFilterConfig, ExtractionParams
-        ] = validated.to_domain()
-
-        # Cache result if no inline overrides
-        if inline_overrides is None:
-            self._cache[cache_key] = domain_configs
-
-        return domain_configs
+        return merged
 
     def _deep_merge(
         self,

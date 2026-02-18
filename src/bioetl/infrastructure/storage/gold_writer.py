@@ -1,25 +1,10 @@
-"""Gold layer writer (business-ready data with strict validation).
-
-Implements RULES.md §2.1.1 - Gold Layer specifications.
-
-Requirements:
-- REQ-DATA-009: Strict validation (strict=True)
-- REQ-DATA-010: SCD Type 2 or date partitioning
-- REQ-CONTRACT-001: Published schemas in docs/contracts/
-
-Architecture:
-- Uses Pandera for strict schema validation
-- Local filesystem storage with Delta Lake format
-- Implements SCD Type 2 (Slowly Changing Dimensions) for history tracking
-- Enforces data contracts
-- CSV export delegated to CsvExporter (composition)
-"""
+"""Gold layer writer — RULES.md §2.1.1, REQ-DATA-009/010, REQ-CONTRACT-001."""
 
 from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, TypeVar
 
 import pandera as pandera_pa
@@ -56,16 +41,35 @@ if TYPE_CHECKING:
 # Consumers importing from gold_writer will still work
 __all__ = ["GoldWriteMode", "GoldWriter"]
 
+# YAML key mapping for SCD2 config normalization
+_SCD_KEY_MAP = {
+    "valid_from": "valid_from_col",
+    "valid_to": "valid_to_col",
+    "is_current": "current_flag_col",
+    "version": "version_col",
+}
+
+
+def _normalize_scd_config(
+    scd_config: dict[str, Any],
+    primary_keys: list[str] | None,
+) -> dict[str, Any]:
+    """Normalize YAML scd_config keys to gold_writer expected format."""
+    out = dict(scd_config)
+    if "business_key" not in out and primary_keys:
+        out["business_key"] = (
+            primary_keys[0] if len(primary_keys) == 1 else primary_keys
+        )
+    for src, dst in _SCD_KEY_MAP.items():
+        if src in out and dst not in out:
+            out[dst] = out[src]
+    return out
+
 
 class GoldWriter(BaseDeltaWriter):
-    """Writer for Gold layer (validated business data).
+    """Gold layer writer: strict Pandera validation, Delta Lake, SCD Type 2.
 
-    Inherits from BaseDeltaWriter for common Delta Lake operations
-    (get_table_path, clear).
-
-    Enforces strict validation before writing. All records must pass
-    schema validation or the entire batch fails.
-    CSV export is delegated to an optional CsvExporter (composition pattern).
+    Inherits BaseDeltaWriter for common Delta ops. CSV export via CsvExporter.
     """
 
     def __init__(
@@ -370,6 +374,7 @@ class GoldWriter(BaseDeltaWriter):
             primary_keys=primary_keys or [],
             run_id=run_id,
             sources_used=sources_used,
+            schema=schema,
         )
 
     async def _write_gold_merged_metadata(
@@ -380,6 +385,7 @@ class GoldWriter(BaseDeltaWriter):
         primary_keys: list[str],
         run_id: str | None = None,
         sources_used: list[str] | None = None,
+        schema: DataFrameSchema | None = None,
     ) -> None:
         """Write Gold layer metadata sidecar for merged composite data.
 
@@ -390,14 +396,12 @@ class GoldWriter(BaseDeltaWriter):
             primary_keys: Primary key columns used.
             run_id: Composite run ID for tracking.
             sources_used: List of source pipelines (e.g., ['seed', 'crossref', 'openalex']).
+            schema: Optional strict schema used for pre-write validation.
         """
         if not records:
             return
 
-        from bioetl.infrastructure.storage.metadata_builder import (
-            GoldMetadataBuilder,
-            _parse_table_name,
-        )
+        from bioetl.infrastructure.storage.metadata_builder import _parse_table_name
 
         provider_name, entity_name = _parse_table_name(table_name)
 
@@ -409,18 +413,22 @@ class GoldWriter(BaseDeltaWriter):
             )
             return
 
-        # Build metadata using the extracted builder
-        builder = GoldMetadataBuilder(
-            transform_version=self._transform_version,
-            transform_steps=self._transform_steps,
-        )
-        metadata = builder.build_merged_metadata(
-            table_path=table_path,
-            table_name=table_name,
-            records=records,
-            primary_keys=primary_keys,
-            run_id=run_id,
-            sources_used=sources_used,
+        from bioetl.domain.ports import GoldMetadataInput
+
+        metadata = self._metadata_coordinator.create_gold_metadata(
+            GoldMetadataInput(
+                table_path=table_path,
+                table_name=table_name,
+                records=records,
+                mode=GoldWriteMode.OVERWRITE,
+                completed_at=datetime.now(UTC),
+                transform_version=self._transform_version,
+                transform_steps=self._transform_steps,
+                total_bytes=0,
+                partition_count=0,
+                schema_validation_enabled=schema is not None,
+                schema_validation_strict=True if schema is not None else None,
+            )
         )
 
         await self._metadata_writer.write_gold_metadata(
@@ -461,10 +469,11 @@ class GoldWriter(BaseDeltaWriter):
         if mode == GoldWriteMode.SCD2:
             assert ingestion_ts is not None  # Validated in _validate_scd2_requirements
             assert scd_config is not None
+            normalized = _normalize_scd_config(scd_config, primary_keys)
             await self._write_scd2(
                 table_path,
                 records,
-                scd_config,
+                normalized,
                 partition_cols,
                 ingestion_ts,
                 column_order,
@@ -580,7 +589,7 @@ class GoldWriter(BaseDeltaWriter):
         ingestion_ts: datetime | None,
         run_id: RunID | None,
         silver_refs: list[Any] | None = None,
-        gold_schema: Any | None = None,
+        gold_schema: Any | None = None,  # Any: Pandera DataFrameModel class or None
     ) -> None:
         """Write Gold layer metadata sidecar file.
 
@@ -668,6 +677,7 @@ class GoldWriter(BaseDeltaWriter):
             entity=entity_name,
         )
 
+    # Any: executor forwards arbi...
     async def _run_in_executor(self, func: Callable[..., T], *args: Any) -> T:
         """Run a function in the executor."""
         loop = asyncio.get_running_loop()

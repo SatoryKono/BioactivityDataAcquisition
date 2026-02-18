@@ -9,6 +9,7 @@
 pipeline_name: openalex_publication
 provider: openalex
 entity_type: publication
+schema_file: ../../schemas/openalex/publication.yaml
 version: "1.2.0"
 description: "Batch DOI resolution via OpenAlex with title fallback"
 
@@ -17,7 +18,8 @@ description: "Batch DOI resolution via OpenAlex with title fallback"
 # Deduplication is handled on Silver layer via content_hash.
 loading_strategy: full_scan_only
 
-primary_keys: ["openalex_id"]
+business_primary_keys: ["openalex_id"]
+technical_primary_key: "entity_id"
 silver_table: "openalex_publication"
 gold_table: "openalex_publication"
 
@@ -25,7 +27,8 @@ gold_table: "openalex_publication"
 # Pipeline-specific source configuration
 source:
   email: "${BIOETL_OPENALEX_EMAIL}"  # Required for polite pool
-  batch_size: 50  # Polite pool API - conservative batch size
+# Pagination: source config is the authority (configs/sources/openalex.yaml).
+# page_size_override: 50 not needed — matches source pagination.page_size
 
 # -----------------------------------------------------------------------------
 # Data Quality Configuration (ADR-027)
@@ -56,7 +59,12 @@ sink:
   bronze:
     flat_structure: true  # Path already includes provider/entity
   silver:
-    partition_by: ["year"]
     flat_structure: true
   gold:
+    mode: scd2
+    scd_config:
+      valid_from: _valid_from
+      valid_to: _valid_to
+      is_current: _is_current
+      version: _version
     flat_structure: true

@@ -90,6 +90,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
+        contract_policy: Any = None,
     ) -> None:
         """Initialize OpenAlex transformer.
 
@@ -103,6 +104,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names (RULES.md S5.4).
             data_normalizer: Optional data normalization service for DOI normalization.
+            contract_policy: Optional pipeline contract policy.
 
         """
         super().__init__(
@@ -115,6 +117,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             identity_service=identity_service,
             pii_hasher=pii_hasher,
             data_normalizer=data_normalizer,
+            contract_policy=contract_policy,
         )
 
     # ========================================================================
@@ -227,8 +230,10 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "authors": authors_json,
             "author_keys": author_keys,
             "affiliation_list": affiliations_json,
-            "institution_ids": institution_ids,
-            "institution_country_codes": institution_country_codes,
+            "institution_ids": self.serialize_json_list(institution_ids),
+            "institution_country_codes": self.serialize_json_list(
+                institution_country_codes
+            ),
             # ROR IDs (may be empty if not returned by Works API)
             "ror_ids": self.serialize_json_list(ror_ids) if ror_ids else None,
             "author_orcids": (
@@ -263,8 +268,8 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             else None,
             # Grants/funding information (serialized to JSON string)
             "grants": self.serialize_json_list(grants) if grants else None,
-            "subject_mesh": subject_mesh,
-            "subject_keywords": subject_keywords,
+            "subject_mesh": self.serialize_json_list(subject_mesh),
+            "subject_keywords": self.serialize_json_list(subject_keywords),
             "language": rec.get("language"),
             # Bibliographic info (from biblio object)
             "volume": biblio_info.get("volume"),
@@ -302,8 +307,9 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         """
         return OpenAlexPublicationEntity
 
-    @staticmethod
-    def entity_to_silver_record(entity: Any) -> dict[str, Any]:
+        # Any: accepts any dataclass ...
+
+    def entity_to_silver_record(self, entity: Any) -> dict[str, Any]:
         """Convert Domain Entity to SilverRecord.
 
         OpenAlex doesn't provide pmc_id, so it will be None in the entity.
@@ -316,10 +322,8 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             SilverRecord dictionary with all PublicationBaseSchema fields.
 
         """
-        from bioetl.application.core.base_transformer import BaseTransformer
-
         # Get base silver record (includes all fields with None values)
-        silver_record = BaseTransformer.entity_to_silver_record(entity)
+        silver_record = super().entity_to_silver_record(entity)
 
         # Note: pmc_id is kept (with None value) to satisfy PublicationBaseSchema
 

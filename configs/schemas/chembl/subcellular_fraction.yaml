@@ -1,0 +1,44 @@
+content_hash:
+  include: []
+  exclude: []
+
+
+column_groups:
+  - name: system
+    fields:
+      - entity_id
+      - content_hash
+      - _run_id
+      - _run_type
+      - _source_batch_id
+      - _ingestion_ts
+      - _index
+
+  - name: business
+    fields:
+      - assay_subcellular_fraction
+      - assay_id
+      - target_id
+      - assay_type
+      - assay_organism
+
+  - name: dq
+    pattern: "^_dq_"
+
+silver:
+  include_groups:
+    - system
+    - business
+    - dq
+  exclude_fields: []
+  alias_policy: preserve
+
+gold:
+  include_groups:
+    - system
+    - business
+  exclude_fields:
+    - _dq_*
+    - _source_batch_id
+    - _index
+  alias_policy: canonical

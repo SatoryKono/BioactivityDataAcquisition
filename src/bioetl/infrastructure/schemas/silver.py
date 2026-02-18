@@ -463,11 +463,11 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         pa.field("_ingestion_ts", pa.string()),
         pa.field("_index", pa.int64()),
         # === Business fields (alphabetical order) ===
-        pa.field("component_accessions", pa.list_(pa.string())),
-        pa.field("component_descriptions", pa.list_(pa.string())),
-        pa.field("component_ids", pa.list_(pa.int64())),
-        pa.field("component_relationships", pa.list_(pa.string())),
-        pa.field("component_types", pa.list_(pa.string())),
+        pa.field("component_accessions", pa.string()),
+        pa.field("component_descriptions", pa.string()),
+        pa.field("component_ids", pa.string()),
+        pa.field("component_relationships", pa.string()),
+        pa.field("component_types", pa.string()),
         pa.field("cross_references", pa.string()),
         pa.field("description", pa.string()),
         pa.field("downgraded", pa.bool_()),
@@ -508,7 +508,7 @@ CHEMBL_TARGET_COMPONENT_SCHEMA = pa.schema(
         pa.field("description", pa.string()),
         pa.field("organism", pa.string()),
         pa.field("protein_classification_id", pa.int64()),
-        pa.field("protein_classification_ids", pa.list_(pa.int64())),
+        pa.field("protein_classification_ids", pa.string()),
         pa.field("protein_classifications", pa.string()),  # Forensic JSON
         pa.field("target_component_synonyms", pa.string()),
         pa.field("target_component_xrefs", pa.string()),
@@ -837,7 +837,9 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
         pa.field(
             "affiliation_list", pa.string()
         ),  # Not available from CrossRef (None values)
-        pa.field("alternative_id", pa.list_(pa.string())),  # Publisher-specific IDs
+        pa.field(
+            "alternative_id", pa.string()
+        ),  # Publisher-specific IDs (canonical JSON)
         pa.field("author_details", pa.string()),  # JSON array of author objects
         pa.field("author_keys", pa.string()),  # Pipe-delimited Surname_F keys
         pa.field("author_orcids", pa.string()),
@@ -847,7 +849,7 @@ CROSSREF_PUBLICATION_SCHEMA = pa.schema(
             "citations_received", pa.int64()
         ),  # Unified: from is-referenced-by-count
         pa.field("content_domain_crossmark_restriction", pa.bool_()),
-        pa.field("content_domain_domains", pa.list_(pa.string())),
+        pa.field("content_domain_domains", pa.string()),
         # Note: doc_type excluded; CrossRef uses raw 'type' field instead
         # doi: Digital Object Identifier (lowercase, without "https://doi.org/") - Primary key
         pa.field("doi", pa.string()),

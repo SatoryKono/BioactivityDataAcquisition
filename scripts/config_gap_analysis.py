@@ -20,7 +20,7 @@ from pathlib import Path
 import yaml
 
 CONFIGS_DIR = Path("configs/pipelines")
-DQ_DIR = Path("configs/dq")
+DQ_DIR = Path("configs/quality")
 
 
 @dataclass

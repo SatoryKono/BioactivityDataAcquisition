@@ -1,333 +1,473 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$version": "1.0.0",
-  "title": "ChEMBL Activity Gold Contract",
-  "description": "Gold layer data contract for ChEMBL Activity Gold Contract. Auto-generated from Pandera schema ChEMBLActivityGoldSchema.",
+  "title": "ChEMBLActivityGoldSchema Contract",
+  "description": "Gold layer data contract for chembl_activity. Auto-generated from Pandera schema ChEMBLActivityGoldSchema.",
   "type": "object",
   "properties": {
     "entity_id": {
-      "type": "string"
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "content_hash": {
-      "type": "string"
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "activity_id": {
-      "type": "string"
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
-    "molecule_chembl_id": {
-      "type": "string"
+    "molecule_id": {
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
-    "target_chembl_id": {
+    "target_id": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
-    "assay_chembl_id": {
+    "assay_id": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
-    "document_chembl_id": {
+    "publication_id": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "record_id": {
       "type": [
         "number",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "src_id": {
       "type": [
         "number",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "canonical_smiles": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "molecule_pref_name": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
-    "parent_molecule_chembl_id": {
+    "parent_molecule_id": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "target_pref_name": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "target_organism": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "target_taxonomy_id": {
       "type": [
-        "string",
+        "number",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "assay_type": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "assay_description": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "assay_variant_accession": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "assay_variant_mutation": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "bao_endpoint": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "bao_format": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "bao_label": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "type": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "value": {
       "type": [
         "number",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "units": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "relation": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "upper_value": {
       "type": [
         "number",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "text_value": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "standard_type": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "standard_value": {
       "type": [
         "number",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "standard_units": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "standard_relation": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "standard_upper_value": {
       "type": [
         "number",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "standard_text_value": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "standard_flag": {
       "type": [
         "number",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "pchembl_value": {
       "type": [
         "number",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "ligand_efficiency_bei": {
       "type": [
         "number",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "ligand_efficiency_le": {
       "type": [
         "number",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "ligand_efficiency_lle": {
       "type": [
         "number",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "ligand_efficiency_sei": {
       "type": [
         "number",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "qudt_units": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "uo_units": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
-    "document_journal": {
+    "journal": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
-    "document_year": {
+    "publication_year": {
       "type": [
         "number",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "publication_doi": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "publication_pmid": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "publication_pmc_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
     },
     "activity_comment": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "data_validity_comment": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "data_validity_description": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "potential_duplicate": {
       "type": [
         "number",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
-    "action_type_action_type": {
+    "action_type": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "action_type_description": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "action_type_parent_type": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "activity_properties": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "toid": {
       "type": [
         "number",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "_run_id": {
-      "type": "string"
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "_run_type": {
-      "type": "string"
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "_source_batch_id": {
       "type": [
         "string",
         "null"
-      ]
+      ],
+      "nullable": true,
+      "description": ""
     },
     "_ingestion_ts": {
-      "type": "string"
+      "type": "string",
+      "nullable": false,
+      "description": ""
     },
     "_index": {
-      "type": "integer"
+      "type": "integer",
+      "nullable": false,
+      "description": ""
     }
   },
   "required": [
@@ -338,6 +478,6 @@
     "activity_id",
     "content_hash",
     "entity_id",
-    "molecule_chembl_id"
+    "molecule_id"
   ]
 }

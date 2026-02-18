@@ -187,10 +187,28 @@ TARGET_COMPONENT_RELATIONSHIPS: frozenset[str] = frozenset(
 
 PUBLICATION_TYPES: frozenset[str] = frozenset(
     [
-        "PUBLICATION",
-        "PATENT",
-        "DATASET",
-        "BOOK",
+        # Canonical kebab-case values after normalization by
+        # normalize_publication_type() (see domain.mapping.publication_type_mapping).
+        "journal-article",
+        "patent",
+        "dataset",
+        "book",
+        "review",
+        "letter",
+        "editorial",
+        "clinical-trial",
+        "meta-analysis",
+        "case-reports",
+        "comparative-study",
+        "evaluation-study",
+        "preprint",
+        "book-chapter",
+        "proceedings-article",
+        "posted-content",
+        "report",
+        "standard",
+        "dissertation",
+        "other",
     ]
 )
 

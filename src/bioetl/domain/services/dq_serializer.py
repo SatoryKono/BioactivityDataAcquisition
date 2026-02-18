@@ -21,7 +21,7 @@ from bioetl.domain.value_objects.dq_report import (
 )
 
 
-def to_dict(obj: Any) -> dict[str, Any]:
+def to_dict(obj: Any) -> dict[str, Any]:  # Any: serializable
     """Convert an object to a dictionary suitable for serialization.
 
     Handles dataclasses, enums, datetimes, and collection types.
@@ -33,13 +33,13 @@ def to_dict(obj: Any) -> dict[str, Any]:
         Dictionary representation of the object.
     """
     if is_dataclass(obj) and not isinstance(obj, type):
-        return cast(dict[str, Any], _serialize_value(obj))
+        return cast(dict[str, Any], _serialize_value(obj))  # Any: varied
     if isinstance(obj, dict):
-        return cast(dict[str, Any], _serialize_value(obj))
+        return cast(dict[str, Any], _serialize_value(obj))  # Any: varied
     return {"value": _serialize_value(obj)}
 
 
-def _serialize_dataclass(value: Any) -> dict[str, Any]:
+def _serialize_dataclass(value: Any) -> dict[str, Any]:  # Any: serializable
     """Serialize a dataclass instance to dict."""
     return {
         field.name: _serialize_value(getattr(value, field.name))
@@ -47,19 +47,21 @@ def _serialize_dataclass(value: Any) -> dict[str, Any]:
     }
 
 
-def _serialize_collection(value: dict[str, Any] | list[Any] | tuple[Any, ...]) -> Any:
+def _serialize_collection(
+    value: dict[str, Any] | list[Any] | tuple[Any, ...],  # Any: varied
+) -> Any:  # Any: mirrors input
     """Serialize dict/list/tuple recursively."""
     if isinstance(value, dict):
         return {key: _serialize_value(item) for key, item in value.items()}
     return [_serialize_value(item) for item in value]
 
 
-def _is_dataclass_instance(value: Any) -> bool:
+def _is_dataclass_instance(value: Any) -> bool:  # Any: any obj
     """Check if value is a dataclass instance (not a class)."""
     return is_dataclass(value) and not isinstance(value, type)
 
 
-def _serialize_value(value: Any) -> Any:
+def _serialize_value(value: Any) -> Any:  # Any: serializable
     """Serialize a value with dataclass/enum/datetime/collection support."""
     if _is_dataclass_instance(value):
         return _serialize_dataclass(value)
@@ -103,7 +105,7 @@ class DQReportSerializer:
 
     def to_dict(
         self, report: BronzeDQReport | SilverDQReport | GoldDQReport
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any]:  # Any: serialized values are heterogeneous
         """Convert report to dictionary."""
         return to_dict(report)
 
@@ -124,7 +126,7 @@ class DQReportSerializer:
         """Serialize to HTML report with styling."""
         return self._generate_html(to_dict(report), report)
 
-    def _dict_to_yaml(self, data: dict[str, Any], indent: int = 0) -> str:
+    def _dict_to_yaml(self, data: dict[str, Any], indent: int = 0) -> str:  # Any: mixed
         """Simple YAML serialization without external dependencies."""
         lines = []
         prefix = "  " * indent
@@ -134,7 +136,9 @@ class DQReportSerializer:
 
         return "\n".join(lines)
 
-    def _yaml_entry(self, key: str, value: Any, prefix: str, indent: int) -> list[str]:
+    def _yaml_entry(  # Any: value is serializable
+        self, key: str, value: Any, prefix: str, indent: int
+    ) -> list[str]:
         """Convert a single key-value pair to YAML lines."""
         if isinstance(value, dict):
             return [f"{prefix}{key}:", self._dict_to_yaml(value, indent + 1)]
@@ -142,7 +146,9 @@ class DQReportSerializer:
             return [f"{prefix}{key}:", *self._yaml_list(value, prefix, indent)]
         return [f"{prefix}{key}: {self._yaml_value(value)}"]
 
-    def _yaml_list(self, items: list[Any], prefix: str, indent: int) -> list[str]:
+    def _yaml_list(  # Any: items have mixed values
+        self, items: list[Any], prefix: str, indent: int
+    ) -> list[str]:
         """Convert a list to YAML lines."""
         lines = []
         for item in items:
@@ -153,7 +159,7 @@ class DQReportSerializer:
                 lines.append(f"{prefix}  - {self._yaml_value(item)}")
         return lines
 
-    def _yaml_value(self, value: Any) -> str:
+    def _yaml_value(self, value: Any) -> str:  # Any: any obj
         """Format a single value for YAML."""
         if value is None:
             return "null"
@@ -171,7 +177,7 @@ class DQReportSerializer:
 
     def _generate_html(
         self,
-        data: dict[str, Any],
+        data: dict[str, Any],  # Any: serialized values are heterogeneous
         report: BronzeDQReport | SilverDQReport | GoldDQReport,  # noqa: ARG002
     ) -> str:
         """Generate HTML report."""
@@ -359,7 +365,7 @@ class DQReportSerializer:
         else:
             return "fail"
 
-    def _render_checks_html(self, checks: dict[str, Any]) -> str:
+    def _render_checks_html(self, checks: dict[str, Any]) -> str:  # Any: mixed
         """Render checks as HTML."""
         if not checks:
             return "<p>No checks performed.</p>"
@@ -391,7 +397,7 @@ class DQReportSerializer:
 
         return "\n".join(html_parts)
 
-    def _render_check_details(self, data: dict[str, Any]) -> str:
+    def _render_check_details(self, data: dict[str, Any]) -> str:  # Any: mixed
         """Render check details as HTML table."""
         rows = []
         for key, value in data.items():
@@ -407,7 +413,7 @@ class DQReportSerializer:
 
         return f"<table>{''.join(rows)}</table>"
 
-    def _format_detail_value(self, value: Any) -> str:
+    def _format_detail_value(self, value: Any) -> str:  # Any: any obj
         """Format a detail value for HTML display."""
         if isinstance(value, dict):
             return (
@@ -417,7 +423,7 @@ class DQReportSerializer:
             return ", ".join(str(v) for v in value) if value else "[]"
         return str(value)
 
-    def _render_thresholds_html(self, thresholds: dict[str, Any]) -> str:
+    def _render_thresholds_html(self, thresholds: dict[str, Any]) -> str:  # Any: mixed
         """Render thresholds card as HTML."""
         if not thresholds:
             return ""

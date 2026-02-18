@@ -32,12 +32,7 @@ BatchID = NewType("BatchID", UUID)
 """Unique identifier for a data batch."""
 
 ArrowSchema: TypeAlias = "pyarrow.Schema"
-"""PyArrow schema type alias.
-
-Uses TYPE_CHECKING for type hints without runtime dependency on pyarrow
-in the domain layer. At runtime, this is a pyarrow.Schema object.
-"""
-
+"""PyArrow schema type alias (runtime: pyarrow.Schema, import-time: string)."""
 
 BronzeRecord: TypeAlias = dict[str, Any]
 """Untyped dictionary representing a raw record from the source."""
@@ -52,6 +47,47 @@ class SilverRecord(TypedDict, total=False):
     entity_id: str
     content_hash: str
     # Other fields are dynamic based on entity type
+
+
+class PublicationType(StrEnum):
+    """Canonical publication type (kebab-case). See PUBLICATION_TYPE_MAPPING."""
+
+    JOURNAL_ARTICLE = "journal-article"
+    BOOK = "book"
+    DATASET = "dataset"
+    PATENT = "patent"
+    REVIEW = "review"
+    LETTER = "letter"
+    EDITORIAL = "editorial"
+    CLINICAL_TRIAL = "clinical-trial"
+    META_ANALYSIS = "meta-analysis"
+    CASE_REPORTS = "case-reports"
+    COMPARATIVE_STUDY = "comparative-study"
+    EVALUATION_STUDY = "evaluation-study"
+    BOOK_CHAPTER = "book-chapter"
+    PROCEEDINGS_ARTICLE = "proceedings-article"
+    POSTED_CONTENT = "posted-content"
+    REPORT = "report"
+    STANDARD = "standard"
+    DISSERTATION = "dissertation"
+    PREPRINT = "preprint"
+    OTHER = "other"
+
+
+class ExecutionContext(StrEnum):
+    """Execution context: how a pipeline is launched.
+
+    Controls DQ severity resolution via ``FieldValidation.severity_enricher``.
+    """
+
+    ISOLATED = "isolated"
+    ENRICHER = "enricher"
+    DEPENDENCY = "dependency"
+
+    @property
+    def is_enricher(self) -> bool:
+        """True when severity_enricher overrides should apply."""
+        return self == ExecutionContext.ENRICHER
 
 
 class RunType(StrEnum):

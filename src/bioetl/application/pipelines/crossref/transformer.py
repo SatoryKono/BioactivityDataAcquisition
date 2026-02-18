@@ -75,6 +75,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
+        contract_policy: Any = None,
     ) -> None:
         """Initialize CrossRef transformer.
 
@@ -88,6 +89,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
             data_normalizer: Optional data normalization service for text normalization.
+            contract_policy: Optional pipeline contract policy.
 
         """
         super().__init__(
@@ -100,6 +102,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             identity_service=identity_service,
             pii_hasher=pii_hasher,
             data_normalizer=data_normalizer,
+            contract_policy=contract_policy,
         )
 
     def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:
@@ -202,7 +205,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             "citations_made": rec.get("references-count"),
             "language": rec.get("language"),
             "license_url": extract_license_url(rec),
-            "subject_keywords": rec.get("subject", []),
+            "subject_keywords": self.serialize_json_list(rec.get("subject", []) or []),
             "_source": "crossref",
             # is_oa: CrossRef doesn't provide Open Access info
             "is_oa": None,
@@ -210,12 +213,19 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             "_lookup_method": rec.get("_lookup_method", "doi"),
             "_original_id": rec.get("_original_id"),
             # Additional CrossRef fields
-            "alternative_id": rec.get("alternative-id", []) or [],
+            "alternative_id": self.serialize_json_list(
+                rec.get("alternative-id", []) or []
+            ),
             "journal_name_short": extract_first_string(
                 rec.get("short-container-title")
             ),
             "published": published_date,
-            **content_domain,
+            "content_domain_domains": self.serialize_json_list(
+                content_domain.get("content_domain_domains", [])
+            ),
+            "content_domain_crossmark_restriction": content_domain.get(
+                "content_domain_crossmark_restriction"
+            ),
             **issn_by_type,
             # Author and reference data
             "author_orcids": serialized_orcids,
@@ -353,8 +363,9 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         """
         return True
 
-    @staticmethod
-    def entity_to_silver_record(entity: Any) -> dict[str, Any]:
+        # Any: accepts any dataclass ...
+
+    def entity_to_silver_record(self, entity: Any) -> dict[str, Any]:
         """Convert Domain Entity to SilverRecord, preserving base schema fields.
 
         Overrides base implementation to handle ISSN list conversion.
@@ -368,10 +379,8 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             SilverRecord dictionary with all base schema fields.
 
         """
-        from bioetl.application.core.base_transformer import BaseTransformer
-
         # Get base silver record
-        silver_record = BaseTransformer.entity_to_silver_record(entity)
+        silver_record = super().entity_to_silver_record(entity)
 
         # Note: Do NOT remove pmid, pmc_id, abstract, affiliation_list
         # These fields inherit from PublicationBaseSchema and must exist in DataFrame
@@ -382,7 +391,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         if isinstance(issn_raw, list):
             silver_record["issn"] = issn_raw[0] if issn_raw else None
             silver_record["issn_list"] = (
-                BaseTransformer.serialize_json_list(issn_raw) if issn_raw else None
+                self.serialize_json_list(issn_raw) if issn_raw else None
             )
         else:
             silver_record.setdefault("issn_list", None)
