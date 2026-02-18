@@ -228,6 +228,7 @@ class DQConfigFile(BaseModel):
                 name=cfv.name,
                 fields=tuple(cfv.fields),
                 condition=cfv.condition,
+                severity=cfv.severity,
                 trigger_field=cfv.trigger_field,
                 required_field=cfv.required_field,
                 validator=cfv.validator,
