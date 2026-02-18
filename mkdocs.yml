@@ -91,6 +91,7 @@ nav:
             -   "Add Pipeline (Existing Source)": 03-guides/add-pipeline-existing-source.md
             -   "Cleanup Policy": 03-guides/cleanup-policy.md
             -   "Registry Pattern": 03-guides/registry-pattern.md
+            -   "Schema Artifact Migration": 03-guides/migration-schema-artifacts.md
             -   "File Path Audit Report": 03-guides/file-path-audit-report.md
     -   Providers:
             -   "Overview": providers/README.md

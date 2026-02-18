@@ -319,9 +319,15 @@ class BatchWriter:
                 primary_keys=list(self._table_config.primary_keys),
                 schema=self._silver_schema,
                 mode=self._silver_mode,
+                partition_cols=list(self._table_config.partition_cols),
                 on_schema_mismatch=self._table_config.on_schema_mismatch,
                 column_order=column_order,
                 bronze_refs=bronze_refs,
+                key_nullability_rules=(
+                    list(self._config.dq_config.key_nullability_rules)
+                    if self._config.dq_config is not None
+                    else None
+                ),
             )
             self._end_span(span)
             return silver_result

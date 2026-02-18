@@ -128,6 +128,7 @@ class DQReportContext:
     silver_quarantined_count: int = 0
     silver_previous_schema: dict[str, str] | None = None
     silver_output_path: str | None = None
+    silver_key_nullability_rules: list[dict[str, Any]] | None = None
 
     # Gold context
     gold_data: Any | None = None  # Any: pl.DataFrame (avoids polars import)
@@ -422,6 +423,7 @@ class DQReportService:
                 input_record_count=context.silver_input_count,
                 quarantined_count=context.silver_quarantined_count,
                 previous_schema=context.silver_previous_schema,
+                key_nullability_rules=context.silver_key_nullability_rules,
             )
 
             # Write report - use context output_path if provided, else config

@@ -17,6 +17,7 @@ import os
 from pathlib import Path
 
 import pytest
+import yaml
 
 from tests.contract.silver_schemas.conftest import (
     SILVER_SCHEMAS,
@@ -129,31 +130,28 @@ class TestSchemaStability:
 
     @pytest.mark.parametrize("schema_name", sorted(SILVER_SCHEMAS.keys()))
     def test_primary_key_field_exists(self, schema_name: str) -> None:
-        """Each Silver schema MUST have entity_id as the base primary key.
-
-        All schemas inherit from ETLRecordSchema which defines entity_id as
-        the primary business key. This test verifies:
-        1. entity_id field exists
-        2. entity_id is non-nullable (required=True, nullable=False)
-
-        NOTE: Other fields ending in _id or _chembl_id are typically foreign keys
-        or alternate identifiers, not primary keys. The actual PK is entity_id.
-        """
+        """Silver schema MUST expose both technical and business PK fields."""
         schema_class = SILVER_SCHEMAS[schema_name]
         fields = extract_field_metadata(schema_class)
 
-        # Check entity_id exists (base PK from ETLRecordSchema)
-        assert "entity_id" in fields, (
-            f"{schema_name}: Missing entity_id field.\n"
-            "All schemas MUST inherit from ETLRecordSchema which defines entity_id."
+        provider, entity = schema_name.split("_", 1)
+        config_path = Path("configs/pipelines") / provider / f"{entity}.yaml"
+        data = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+
+        technical_pk = data["technical_primary_key"]
+        business_pks = data["business_primary_keys"]
+
+        assert technical_pk in fields, (
+            f"{schema_name}: Missing technical_primary_key '{technical_pk}' in Silver schema"
+        )
+        assert not fields[technical_pk]["nullable"], (
+            f"{schema_name}.{technical_pk}: technical_primary_key MUST NOT be nullable"
         )
 
-        # entity_id MUST NOT be nullable
-        if fields["entity_id"]["nullable"]:
-            pytest.fail(
-                f"{schema_name}.entity_id: Primary key MUST NOT be nullable.\n"
-                "ETLRecordSchema defines entity_id with nullable=False."
-            )
+        missing_business = [pk for pk in business_pks if pk not in fields]
+        assert not missing_business, (
+            f"{schema_name}: Missing business_primary_keys in Silver schema: {missing_business}"
+        )
 
     @pytest.mark.parametrize("schema_name", sorted(SILVER_SCHEMAS.keys()))
     def test_etl_metadata_fields_present(self, schema_name: str) -> None:

@@ -35,8 +35,13 @@ from bioetl.composition.services.versioning import (
 )
 from bioetl.domain.locking import LockContextHolder
 from bioetl.domain.medallion import LoadingStrategy
+from bioetl.domain.services import IdentityService
 from bioetl.domain.value_objects.run_context import RunContext
-from bioetl.infrastructure.config import load_pipeline_config, yaml_config_to_domain
+from bioetl.infrastructure.config import (
+    load_pipeline_config,
+    load_pipeline_contract_policy,
+    yaml_config_to_domain,
+)
 from bioetl.infrastructure.config.pipeline_config_loader import ConfigLoader
 
 if TYPE_CHECKING:
@@ -61,7 +66,6 @@ if TYPE_CHECKING:
         PiiHasherPort,
         TracingPort,
     )
-    from bioetl.domain.services import IdentityService
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.config import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -569,6 +573,16 @@ def create_pipeline_with_services(
     # Create transformer via DI if configured (with observability)
     transformer = None
     if transformer_class is not None:
+        identity_service = IdentityService(
+            content_hash_include_fields=set(yaml_config.content_hash.include) or None,
+            content_hash_exclude_fields=set(yaml_config.content_hash.exclude),
+        )
+        try:
+            contract_policy = load_pipeline_contract_policy(
+                provider, _extract_entity_type(pipeline_name)
+            )
+        except ValueError:
+            contract_policy = None
         transformer = transformer_class(
             provider=provider,
             entity_type=_extract_entity_type(pipeline_name),
@@ -576,7 +590,8 @@ def create_pipeline_with_services(
             metrics=metrics,
             silver_filters=domain_config.silver_filters,
             gold_filters=domain_config.gold_filters,
-            # identity_service and pii_hasher use defaults in transformer
+            identity_service=identity_service,
+            contract_policy=contract_policy,
         )
 
     return pipeline_class.create(

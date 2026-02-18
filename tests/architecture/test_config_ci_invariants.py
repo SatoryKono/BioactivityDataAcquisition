@@ -68,7 +68,8 @@ PIPELINE_ALLOWED_KEYS: set[str] = {
     "batch_size",
     "filter_batch_size",
     "checkpoint_interval",
-    "primary_keys",
+    "business_primary_keys",
+    "technical_primary_key",
     "silver_table",
     "gold_table",
     "loading_strategy",
@@ -89,6 +90,7 @@ PIPELINE_ALLOWED_KEYS: set[str] = {
     "transform",
     "extraction_params",
     "page_size_override",
+    "schema_file",
 }
 
 COMPOSITE_ALLOWED_KEYS: set[str] = {
@@ -118,6 +120,7 @@ QUALITY_ALLOWED_KEYS: set[str] = {
     "conditional_validations",
     "report",
     "required_fields",
+    "key_nullability",
 }
 
 FILTER_ALLOWED_KEYS: set[str] = {

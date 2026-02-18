@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from bioetl.application.composite.aggregator import EnricherAggregator
 from bioetl.application.composite.column_orderer import ColumnOrderer
@@ -82,6 +82,7 @@ class MergeService:
         delta_reader: DeltaReaderPort | None = None,
         field_group_registry: FieldGroupRegistry | None = None,
         cross_validator: EnrichmentCrossValidator | None = None,
+        gold_schema: Any | None = None,
     ) -> None:
         self._config = merge_config
         self._storage = storage
@@ -93,6 +94,7 @@ class MergeService:
         self._aggregator = EnricherAggregator(logger)
         self._renamer = ColumnRenamer(logger)
         # Pass column_groups from config if available for YAML-based ordering
+        self._gold_schema = gold_schema
         self._orderer = ColumnOrderer(
             logger,
             column_groups=merge_config.column_groups
@@ -459,6 +461,7 @@ class MergeService:
             run_id=run_id,
             sources_used=sources_used,
             preserve_column_order=True,
+            schema=self._gold_schema,
         )
 
     def _infer_silver_table(self, pipeline_name: str) -> str:

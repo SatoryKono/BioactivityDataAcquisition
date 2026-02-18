@@ -1701,13 +1701,36 @@
       "description": "Path to data schema file with layer-specific columns (silver/gold).",
       "title": "Data Schema File"
     },
-    "primary_keys": {
+    "business_primary_keys": {
       "items": {
         "type": "string"
       },
       "minItems": 1,
-      "title": "Primary Keys",
+      "title": "Business Primary Keys",
       "type": "array"
+    },
+    "technical_primary_key": {
+      "default": "entity_id",
+      "minLength": 1,
+      "title": "Technical Primary Key",
+      "type": "string"
+    },
+    "primary_keys": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Deprecated alias for business_primary_keys.",
+      "title": "Primary Keys"
     },
     "silver_table": {
       "minLength": 1,
@@ -1791,13 +1814,20 @@
       "default": null,
       "description": "Explicit loading strategy for the pipeline. 'full_scan_only': Each run performs full scan, checkpoint resume disabled. See ADR-031.",
       "title": "Loading Strategy"
+    },
+    "schema_file": {
+      "description": "Required path to schema config file relative to pipeline config. Example: ../../schemas/chembl/activity.yaml",
+      "minLength": 1,
+      "title": "Schema File",
+      "type": "string"
     }
   },
   "required": [
     "pipeline_name",
     "provider",
     "entity_type",
-    "primary_keys",
+    "business_primary_keys",
+    "schema_file",
     "silver_table"
   ],
   "title": "PipelineYamlConfig",

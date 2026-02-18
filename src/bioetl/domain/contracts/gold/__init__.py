@@ -42,8 +42,11 @@ from bioetl.domain.contracts.gold.chembl import (
     ChEMBLTissueGoldSchema,
 )
 from bioetl.domain.contracts.gold.composite import (
+    CompositeActivityGoldSchema,
+    CompositeAssayGoldSchema,
     CompositeMoleculeGoldSchema,
     CompositePublicationGoldSchema,
+    CompositeTargetGoldSchema,
 )
 from bioetl.domain.contracts.gold.pubchem import PubChemCompoundGoldSchema
 from bioetl.domain.contracts.gold.publications import (
@@ -72,8 +75,11 @@ __all__ = [
     "ChEMBLTargetComponentGoldSchema",
     "ChEMBLTargetGoldSchema",
     "ChEMBLTissueGoldSchema",
+    "CompositeActivityGoldSchema",
+    "CompositeAssayGoldSchema",
     "CompositeMoleculeGoldSchema",
     "CompositePublicationGoldSchema",
+    "CompositeTargetGoldSchema",
     "CrossRefPublicationGoldSchema",
     "OpenAlexPublicationGoldSchema",
     "PubChemCompoundGoldSchema",

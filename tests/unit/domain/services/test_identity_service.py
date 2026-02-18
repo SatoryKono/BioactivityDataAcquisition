@@ -13,6 +13,8 @@ from __future__ import annotations
 from datetime import date, datetime
 
 import pytest
+from hypothesis import given
+from hypothesis import strategies as st
 
 from bioetl.domain.services.identity_service import META_FIELDS, IdentityService
 
@@ -118,6 +120,9 @@ class TestMetaFieldExclusion:
             "_dq_error",
             "_source_batch_id",
             "_index",
+            "_lookup_method",
+            "_original_id",
+            "_source",
         ],
     )
     def test_meta_field_excluded_from_hash(self, meta_field: str) -> None:
@@ -142,8 +147,59 @@ class TestMetaFieldExclusion:
             "_dq_error",
             "_source_batch_id",
             "_index",
+            "_lookup_method",
+            "_original_id",
+            "_source",
         }
         assert META_FIELDS == expected
+
+    @pytest.mark.hypothesis
+    @given(
+        business_record=st.dictionaries(
+            keys=st.text(
+                min_size=1,
+                max_size=20,
+                alphabet=st.characters(
+                    blacklist_characters="_",
+                    blacklist_categories=("Cs",),
+                ),
+            ),
+            values=st.one_of(
+                st.none(),
+                st.booleans(),
+                st.integers(min_value=-(2**63), max_value=2**63 - 1),
+                st.floats(allow_nan=False, allow_infinity=False),
+                st.text(),
+            ),
+            max_size=10,
+        ),
+        meta_value=st.one_of(
+            st.none(),
+            st.booleans(),
+            st.integers(),
+            st.floats(allow_nan=False, allow_infinity=False),
+            st.text(),
+        ),
+    )
+    def test_hash_is_stable_when_only_metadata_changes(
+        self,
+        business_record: dict[str, object],
+        meta_value: object,
+    ) -> None:
+        """Metadata-only mutations MUST NOT alter content hash."""
+        service = IdentityService()
+        base_hash = service.compute_content_hash("test", business_record)
+
+        augmented = {
+            **business_record,
+            "_lookup_method": "doi",
+            "_original_id": "pmid:123",
+            "_source": "pubmed",
+            "_future_meta_field": meta_value,
+        }
+        augmented_hash = service.compute_content_hash("test", augmented)
+
+        assert base_hash == augmented_hash
 
 
 class TestCanonicalJSON:

@@ -42,6 +42,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-034](ADR-034-schema-domain-pairs.md)               | Schema↔Domain Configuration Pairs        | Accepted           | Architecture    | 2026-02-15 |
 | [ADR-035](ADR-035-json-field-typing-policy.md)          | JSON Field Typing Policy (Silver↔Gold)   | Accepted           | Data Modeling   | 2026-02-17 |
 | [ADR-036](ADR-036-gold-contract-versioning-policy.md)   | Gold Contract Versioning Policy          | Accepted           | Data Quality    | 2026-02-18 |
+| [ADR-037](ADR-036-canonical-schema-generation.md)       | Canonical Schema Source and Generation   | Accepted           | Data Contracts  | 2026-02-18 |
 
 ## ADRs by Category
 
@@ -92,6 +93,7 @@ This directory contains Architecture Decision Records documenting significant ar
 - [ADR-021](ADR-021-ddd-aggregates-adoption.md): DDD Aggregates Adoption
 - [ADR-029](ADR-029-output-metadata-unification.md): Output Metadata Unification — Unified output metadata contracts
 - [ADR-035](ADR-035-json-field-typing-policy.md): JSON Field Typing Policy (Silver↔Gold)
+- [ADR-036](ADR-036-canonical-schema-generation.md): Canonical schema source + generated artifact gates
 
 ### Data Fetching
 

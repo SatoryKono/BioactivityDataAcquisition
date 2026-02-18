@@ -335,6 +335,7 @@ class _MedallionConfigValidator:
         errors.extend(
             self._validate_medallion_policy_consistency(runtime.run_type, policy)
         )
+        errors.extend(self._validate_key_nullability_policies())
 
         self._log_medallion_validation_result(errors, runtime)
         return errors
@@ -520,6 +521,27 @@ class _MedallionConfigValidator:
                         expected="False",
                         actual="True",
                         rule="RULES §2.1: INCREMENTAL MUST NOT clear Gold layer",
+                    )
+                )
+
+        return errors
+
+    def _validate_key_nullability_policies(self) -> list[ConfigValidationError]:
+        """Validate key nullability policy consistency for Silver write keys."""
+        errors: list[ConfigValidationError] = []
+
+        valid_keys = set(self._config.table.primary_keys) | set(
+            self._config.table.partition_cols
+        )
+
+        for rule in self._config.dq.key_nullability_rules:
+            if rule.field not in valid_keys:
+                errors.append(
+                    ConfigValidationError(
+                        field="dq.key_nullability",
+                        expected="rule field must be present in primary_keys or partition_cols",
+                        actual=rule.field,
+                        rule="DQ key policy: key_nullability rules apply only to merge/partition keys",
                     )
                 )
 
