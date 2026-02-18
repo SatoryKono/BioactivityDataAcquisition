@@ -57,6 +57,15 @@ field_validations:
     nullable: true
     error_message: "Publication year out of valid range"
 
+  - field: publication_type
+    type: pattern
+    # After normalization: pipe-delimited canonical kebab-case values
+    # e.g. "journal-article", "journal-article|review", "book-chapter|other"
+    pattern: '^[a-z][a-z0-9-]+(\|[a-z][a-z0-9-]+)*$'
+    nullable: true
+    severity: warn
+    error_message: "Unexpected publication_type format after normalization"
+
   - field: citations_received
     type: range
     min: 0
