@@ -85,7 +85,7 @@ _NORMALIZE_DISPATCH = (
 # Any: record field type varies
 def _should_include_field(key: str, value: Any, exclude_none: bool) -> bool:
     """Check if field should be included in hash calculation."""
-    if key in META_FIELDS:
+    if key in META_FIELDS or key.startswith("_dq_"):
         return False
     return not (exclude_none and value is None)
 
@@ -93,12 +93,19 @@ def _should_include_field(key: str, value: Any, exclude_none: bool) -> bool:
 def normalize_for_hash(
     record: dict[str, Any],
     exclude_none: bool = False,  # Any: record vals vary
+    include_fields: set[str] | None = None,
+    exclude_fields: set[str] | None = None,
 ) -> dict[str, Any]:  # Any: heterogeneous record values
     """Normalize record before hashing to ensure consistency."""
+    include = include_fields or None
+    exclude = exclude_fields or set()
+
     return {
         key: _normalize_value(value)
         for key, value in record.items()
-        if _should_include_field(key, value, exclude_none)
+        if (include is None or key in include)
+        and key not in exclude
+        and _should_include_field(key, value, exclude_none)
     }
 
 
@@ -116,9 +123,16 @@ def generate_content_hash(
     record: dict[str, Any],
     provider: str,
     exclude_none: bool = False,
+    include_fields: set[str] | None = None,
+    exclude_fields: set[str] | None = None,
 ) -> ContentHash:
     """Generate SHA256 content hash for record versioning."""
-    normalized = normalize_for_hash(record, exclude_none=exclude_none)
+    normalized = normalize_for_hash(
+        record,
+        exclude_none=exclude_none,
+        include_fields=include_fields,
+        exclude_fields=exclude_fields,
+    )
     canonical = canonical_json_dumps(normalized)
     data = f"{provider}{canonical}"
     hash_digest = hashlib.sha256(data.encode("utf-8")).hexdigest()

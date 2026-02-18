@@ -585,6 +585,19 @@ class TransformConfig(BaseModel):
         return v
 
 
+class ContentHashConfig(BaseModel):
+    """Configures include/exclude field policy for content hash generation."""
+
+    include: list[str] = Field(
+        default_factory=list,
+        description="Optional allowlist of fields included in content hash.",
+    )
+    exclude: list[str] = Field(
+        default_factory=list,
+        description="Optional denylist of fields excluded from content hash.",
+    )
+
+
 class PipelineYamlConfig(BaseModel):
     """Strict schema for pipeline YAML configuration.
 
@@ -680,6 +693,12 @@ class PipelineYamlConfig(BaseModel):
         default_factory=list,
         description="Optional column ordering groups for Silver/Gold output",
     )
+
+    content_hash: ContentHashConfig = Field(
+        default_factory=ContentHashConfig,
+        description="Content-hash include/exclude rules loaded from schema config.",
+    )
+
     extraction_params: dict[str, str | int | bool] = Field(
         default_factory=dict,
         description="Server-side API query parameters for Bronze extraction (ADR-028 §3). "

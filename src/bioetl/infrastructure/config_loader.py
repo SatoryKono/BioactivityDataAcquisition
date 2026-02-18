@@ -124,7 +124,7 @@ def _load_data_schema_config(
         data_schema_file: Relative path to data schema YAML.
 
     Returns:
-        Dictionary with column_groups, silver, and gold keys, or None if empty.
+        Dictionary with column_groups, content_hash, silver, and gold keys, or None if empty.
 
     Raises:
         FileNotFoundError: If the resolved schema path does not exist.
@@ -145,6 +145,9 @@ def _load_data_schema_config(
     # Always include column_groups if present (for backward compatibility)
     if "column_groups" in data:
         result["column_groups"] = data["column_groups"]
+
+    if "content_hash" in data:
+        result["content_hash"] = data["content_hash"]
 
     # Add layer-specific configs if present
     if "silver" in data:
@@ -515,6 +518,8 @@ def _merge_data_schema_into_config(
     """Merge loaded data schema (column_groups, silver, gold) into pipeline config."""
     if "column_groups" in data_schema:
         config["column_groups"] = data_schema["column_groups"]
+    if "content_hash" in data_schema:
+        config["content_hash"] = data_schema["content_hash"]
     if "silver" in data_schema:
         config.setdefault("data_schema", {})["silver"] = data_schema["silver"]
     if "gold" in data_schema:

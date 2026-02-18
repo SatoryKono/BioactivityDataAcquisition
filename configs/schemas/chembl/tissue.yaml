@@ -1,3 +1,7 @@
+content_hash:
+  include: []
+  exclude: []
+
 # configs/schemas/chembl/tissue.yaml
 # Column group definitions for ChEMBL Tissue entity
 

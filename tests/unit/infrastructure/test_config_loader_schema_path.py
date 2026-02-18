@@ -106,6 +106,28 @@ class TestLoadDataSchemaConfig:
         assert "gold" in result
         assert result["gold"]["exclude_groups"] == ["complex_fields"]
 
+    def test_existing_file_loads_content_hash_rules(self, tmp_path: Path) -> None:
+        """Schema file with content_hash section must load include/exclude rules."""
+        config_path = tmp_path / "pipelines" / "chembl" / "activity.yaml"
+        config_path.parent.mkdir(parents=True)
+        config_path.touch()
+
+        schema_path = tmp_path / "schemas" / "chembl" / "activity.yaml"
+        schema_path.parent.mkdir(parents=True)
+        schema_path.write_text(
+            "content_hash:\n"
+            "  include: [activity_id, standard_value]\n"
+            "  exclude: [standard_relation]\n"
+        )
+
+        result = _load_data_schema_config(
+            config_path, "../../schemas/chembl/activity.yaml"
+        )
+
+        assert result is not None
+        assert result["content_hash"]["include"] == ["activity_id", "standard_value"]
+        assert result["content_hash"]["exclude"] == ["standard_relation"]
+
     def test_empty_schema_file_returns_none(self, tmp_path: Path) -> None:
         """Schema file with no recognized keys must return None."""
         config_path = tmp_path / "pipelines" / "test" / "entity.yaml"

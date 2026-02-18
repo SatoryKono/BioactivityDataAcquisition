@@ -1,0 +1,34 @@
+[
+  {
+    "provider": "chembl",
+    "entity": "activity",
+    "record_id": "a-001",
+    "record": {
+      "activity_id": "A1",
+      "standard_value": 12.345678901234,
+      "comment": "  IC50  ",
+      "_dq_custom_check": "warn"
+    }
+  },
+  {
+    "provider": "chembl",
+    "entity": "activity",
+    "record_id": "a-002",
+    "record": {
+      "activity_id": "A2",
+      "standard_value": null,
+      "_run_id": "run-2",
+      "_dq_score": 0.91
+    }
+  },
+  {
+    "provider": "pubchem",
+    "entity": "compound",
+    "record_id": "c-001",
+    "record": {
+      "compound_id": "C1",
+      "mass": 99.123456789012,
+      "synonym": "  aspirin"
+    }
+  }
+]
