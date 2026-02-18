@@ -19,7 +19,7 @@ interactions:
       string: '{"molecules": [{"atc_classifications": [], "availability_type": -1,
         "biotherapeutic": null, "black_box_warning": 0, "chemical_probe": 0, "chirality":
         -1, "cross_references": [], "dosed_ingredient": false, "first_approval": null,
-        "first_in_class": -1, "helm_notation": null, "inorganic_flag": -1, "max_phase":
+        "first_in_class": -1, "helm_notation": null, "inorganic_flag": 0, "max_phase":
         null, "molecule_chembl_id": "CHEMBL10", "molecule_hierarchy": {"active_chembl_id":
         "CHEMBL10", "molecule_chembl_id": "CHEMBL10", "parent_chembl_id": "CHEMBL10"},
         "molecule_properties": {"alogp": "4.68", "aromatic_rings": 4, "full_molformula":
@@ -57,7 +57,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL10332",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL10332",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL10332", "molecule_chembl_id":
         "CHEMBL10332", "parent_chembl_id": "CHEMBL10332"}, "molecule_properties":
         {"alogp": "0.80", "aromatic_rings": 1, "full_molformula": "C12H14N2O3", "full_mwt":
@@ -87,7 +87,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL10333",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL10333",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL10333", "molecule_chembl_id":
         "CHEMBL10333", "parent_chembl_id": "CHEMBL10333"}, "molecule_properties":
         {"alogp": "7.73", "aromatic_rings": 4, "full_molformula": "C30H32N2O", "full_mwt":
@@ -237,7 +237,7 @@ interactions:
         0, "withdrawn_flag": false}, {"atc_classifications": [], "availability_type":
         -1, "biotherapeutic": null, "black_box_warning": 0, "chemical_probe": 0, "chirality":
         -1, "cross_references": [], "dosed_ingredient": false, "first_approval": null,
-        "first_in_class": -1, "helm_notation": null, "inorganic_flag": -1, "max_phase":
+        "first_in_class": -1, "helm_notation": null, "inorganic_flag": 0, "max_phase":
         null, "molecule_chembl_id": "CHEMBL10231", "molecule_hierarchy": {"active_chembl_id":
         "CHEMBL10231", "molecule_chembl_id": "CHEMBL10231", "parent_chembl_id": "CHEMBL10231"},
         "molecule_properties": {"alogp": "6.62", "aromatic_rings": 5, "full_molformula":
@@ -278,7 +278,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL10160",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL10160",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL10160", "molecule_chembl_id":
         "CHEMBL10160", "parent_chembl_id": "CHEMBL10160"}, "molecule_properties":
         {"alogp": "5.78", "aromatic_rings": 4, "full_molformula": "C25H22N2O", "full_mwt":
@@ -316,7 +316,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL10309",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL10309",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL10309", "molecule_chembl_id":
         "CHEMBL10309", "parent_chembl_id": "CHEMBL10309"}, "molecule_properties":
         {"alogp": "4.04", "aromatic_rings": 2, "full_molformula": "C23H25BrN2O2",
@@ -355,7 +355,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL10134",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL10134",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL10134", "molecule_chembl_id":
         "CHEMBL10134", "parent_chembl_id": "CHEMBL10134"}, "molecule_properties":
         {"alogp": "6.35", "aromatic_rings": 4, "full_molformula": "C27H26N2O", "full_mwt":
@@ -394,7 +394,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL10284",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL10284",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL10284", "molecule_chembl_id":
         "CHEMBL10284", "parent_chembl_id": "CHEMBL10284"}, "molecule_properties":
         {"alogp": "6.09", "aromatic_rings": 4, "full_molformula": "C26H24N2O", "full_mwt":
@@ -1183,7 +1183,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100082",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100082",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL39092", "molecule_chembl_id":
         "CHEMBL100082", "parent_chembl_id": "CHEMBL39092"}, "molecule_properties":
         {"alogp": "3.22", "aromatic_rings": 3, "full_molformula": "C18H12NNaO5", "full_mwt":
@@ -1220,7 +1220,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100219",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100219",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100219", "molecule_chembl_id":
         "CHEMBL100219", "parent_chembl_id": "CHEMBL100219"}, "molecule_properties":
         {"alogp": "7.52", "aromatic_rings": 3, "full_molformula": "C27H26BrNO2", "full_mwt":
@@ -1259,7 +1259,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100421",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100421",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100421", "molecule_chembl_id":
         "CHEMBL100421", "parent_chembl_id": "CHEMBL100421"}, "molecule_properties":
         {"alogp": "3.48", "aromatic_rings": 4, "full_molformula": "C23H22N4O3", "full_mwt":
@@ -1298,7 +1298,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101054",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101054",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101054", "molecule_chembl_id":
         "CHEMBL101054", "parent_chembl_id": "CHEMBL101054"}, "molecule_properties":
         {"alogp": "2.44", "aromatic_rings": 1, "full_molformula": "C12H19N3OS", "full_mwt":
@@ -1327,7 +1327,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100239",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100239",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100239", "molecule_chembl_id":
         "CHEMBL100239", "parent_chembl_id": "CHEMBL100239"}, "molecule_properties":
         {"alogp": "2.95", "aromatic_rings": 3, "full_molformula": "C14H12N4S", "full_mwt":
@@ -1358,7 +1358,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100714",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100714",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100714", "molecule_chembl_id":
         "CHEMBL100714", "parent_chembl_id": "CHEMBL100714"}, "molecule_properties":
         {"alogp": "3.41", "aromatic_rings": 3, "full_molformula": "C18H19N3O4", "full_mwt":
@@ -1393,7 +1393,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100749",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100749",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100749", "molecule_chembl_id":
         "CHEMBL100749", "parent_chembl_id": "CHEMBL100749"}, "molecule_properties":
         {"alogp": "2.85", "aromatic_rings": 4, "full_molformula": "C16H13ClN6", "full_mwt":
@@ -1475,7 +1475,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100763",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100763",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100763", "molecule_chembl_id":
         "CHEMBL100763", "parent_chembl_id": "CHEMBL100763"}, "molecule_properties":
         {"alogp": "5.85", "aromatic_rings": 3, "full_molformula": "C28H31ClN2O2",
@@ -1518,7 +1518,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101083",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101083",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101083", "molecule_chembl_id":
         "CHEMBL101083", "parent_chembl_id": "CHEMBL101083"}, "molecule_properties":
         {"alogp": "5.72", "aromatic_rings": 3, "full_molformula": "C29H33FN2O2", "full_mwt":
@@ -1560,7 +1560,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101997",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101997",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101997", "molecule_chembl_id":
         "CHEMBL101997", "parent_chembl_id": "CHEMBL101997"}, "molecule_properties":
         {"alogp": "5.33", "aromatic_rings": 3, "full_molformula": "C28H31FN2O2", "full_mwt":
@@ -1602,7 +1602,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101771",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101771",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101771", "molecule_chembl_id":
         "CHEMBL101771", "parent_chembl_id": "CHEMBL101771"}, "molecule_properties":
         {"alogp": "0.95", "aromatic_rings": 0, "full_molformula": "C5H13NS2", "full_mwt":
@@ -1625,7 +1625,7 @@ interactions:
         false}, {"atc_classifications": [], "availability_type": -1, "biotherapeutic":
         null, "black_box_warning": 0, "chemical_probe": 0, "chirality": -1, "cross_references":
         [], "dosed_ingredient": false, "first_approval": null, "first_in_class": -1,
-        "helm_notation": null, "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id":
+        "helm_notation": null, "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id":
         "CHEMBL101807", "molecule_hierarchy": {"active_chembl_id": "CHEMBL101807",
         "molecule_chembl_id": "CHEMBL101807", "parent_chembl_id": "CHEMBL101807"},
         "molecule_properties": {"alogp": "5.58", "aromatic_rings": 3, "full_molformula":
@@ -1667,7 +1667,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101382",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101382",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101382", "molecule_chembl_id":
         "CHEMBL101382", "parent_chembl_id": "CHEMBL101382"}, "molecule_properties":
         {"alogp": "5.41", "aromatic_rings": 3, "full_molformula": "C28H32N2O2", "full_mwt":
@@ -1708,7 +1708,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100617",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100617",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100617", "molecule_chembl_id":
         "CHEMBL100617", "parent_chembl_id": "CHEMBL100617"}, "molecule_properties":
         {"alogp": "5.29", "aromatic_rings": 3, "full_molformula": "C29H34N2O3", "full_mwt":
@@ -1750,7 +1750,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL103294",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL103294",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL103294", "molecule_chembl_id":
         "CHEMBL103294", "parent_chembl_id": "CHEMBL103294"}, "molecule_properties":
         {"alogp": "6.24", "aromatic_rings": 3, "full_molformula": "C29H33ClN2O2",
@@ -1793,7 +1793,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100231",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100231",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100231", "molecule_chembl_id":
         "CHEMBL100231", "parent_chembl_id": "CHEMBL100231"}, "molecule_properties":
         {"alogp": "6.71", "aromatic_rings": 3, "full_molformula": "C32H40N2O2", "full_mwt":
@@ -1836,7 +1836,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100595",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100595",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100595", "molecule_chembl_id":
         "CHEMBL100595", "parent_chembl_id": "CHEMBL100595"}, "molecule_properties":
         {"alogp": "6.71", "aromatic_rings": 3, "full_molformula": "C32H40N2O2", "full_mwt":
@@ -1880,7 +1880,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL103305",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL103305",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL103305", "molecule_chembl_id":
         "CHEMBL103305", "parent_chembl_id": "CHEMBL103305"}, "molecule_properties":
         {"alogp": "6.24", "aromatic_rings": 3, "full_molformula": "C29H33ClN2O2",
@@ -1923,7 +1923,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100951",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100951",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100951", "molecule_chembl_id":
         "CHEMBL100951", "parent_chembl_id": "CHEMBL100951"}, "molecule_properties":
         {"alogp": "4.94", "aromatic_rings": 4, "full_molformula": "C23H20ClN5O2",
@@ -1963,7 +1963,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100629",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100629",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100629", "molecule_chembl_id":
         "CHEMBL100629", "parent_chembl_id": "CHEMBL100629"}, "molecule_properties":
         {"alogp": "4.40", "aromatic_rings": 3, "full_molformula": "C22H20N4O", "full_mwt":
@@ -1999,7 +1999,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101412",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101412",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101412", "molecule_chembl_id":
         "CHEMBL101412", "parent_chembl_id": "CHEMBL101412"}, "molecule_properties":
         {"alogp": "4.01", "aromatic_rings": 3, "full_molformula": "C22H22N4O", "full_mwt":
@@ -2035,7 +2035,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101454",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101454",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101454", "molecule_chembl_id":
         "CHEMBL101454", "parent_chembl_id": "CHEMBL101454"}, "molecule_properties":
         {"alogp": "4.15", "aromatic_rings": 1, "full_molformula": "C21H30N2O", "full_mwt":
@@ -2070,7 +2070,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101501",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101501",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101501", "molecule_chembl_id":
         "CHEMBL101501", "parent_chembl_id": "CHEMBL101501"}, "molecule_properties":
         {"alogp": "2.33", "aromatic_rings": 2, "full_molformula": "C18H20N4O3", "full_mwt":
@@ -2105,7 +2105,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100563",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100563",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100563", "molecule_chembl_id":
         "CHEMBL100563", "parent_chembl_id": "CHEMBL100563"}, "molecule_properties":
         {"alogp": "3.56", "aromatic_rings": 2, "full_molformula": "C32H42N4O7", "full_mwt":
@@ -2153,7 +2153,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL102006",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL102006",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL102006", "molecule_chembl_id":
         "CHEMBL102006", "parent_chembl_id": "CHEMBL102006"}, "molecule_properties":
         {"alogp": "0.50", "aromatic_rings": 0, "full_molformula": "C6H13NO2S", "full_mwt":
@@ -2179,7 +2179,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101147",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101147",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101147", "molecule_chembl_id":
         "CHEMBL101147", "parent_chembl_id": "CHEMBL101147"}, "molecule_properties":
         {"alogp": "0.50", "aromatic_rings": 0, "full_molformula": "C6H13NO2S", "full_mwt":
@@ -2205,7 +2205,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL102113",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL102113",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL102113", "molecule_chembl_id":
         "CHEMBL102113", "parent_chembl_id": "CHEMBL102113"}, "molecule_properties":
         {"alogp": "3.64", "aromatic_rings": 3, "full_molformula": "C21H21ClN6O", "full_mwt":
@@ -2243,7 +2243,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101845",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101845",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101845", "molecule_chembl_id":
         "CHEMBL101845", "parent_chembl_id": "CHEMBL101845"}, "molecule_properties":
         {"alogp": "5.30", "aromatic_rings": 4, "full_molformula": "C26H23FN4O", "full_mwt":
@@ -2283,7 +2283,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100056",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100056",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100056", "molecule_chembl_id":
         "CHEMBL100056", "parent_chembl_id": "CHEMBL100056"}, "molecule_properties":
         {"alogp": "4.25", "aromatic_rings": 3, "full_molformula": "C22H22ClN5O", "full_mwt":
@@ -2321,7 +2321,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL102192",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL102192",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL102192", "molecule_chembl_id":
         "CHEMBL102192", "parent_chembl_id": "CHEMBL102192"}, "molecule_properties":
         {"alogp": "4.66", "aromatic_rings": 3, "full_molformula": "C22H21ClN4O", "full_mwt":
@@ -2359,7 +2359,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101834",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101834",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101834", "molecule_chembl_id":
         "CHEMBL101834", "parent_chembl_id": "CHEMBL101834"}, "molecule_properties":
         {"alogp": "4.03", "aromatic_rings": 3, "full_molformula": "C23H24ClN5O3S",
@@ -2401,7 +2401,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101938",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101938",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101938", "molecule_chembl_id":
         "CHEMBL101938", "parent_chembl_id": "CHEMBL101938"}, "molecule_properties":
         {"alogp": "3.84", "aromatic_rings": 3, "full_molformula": "C23H22ClN5O3",
@@ -2442,7 +2442,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100729",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100729",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100729", "molecule_chembl_id":
         "CHEMBL100729", "parent_chembl_id": "CHEMBL100729"}, "molecule_properties":
         {"alogp": "3.89", "aromatic_rings": 2, "full_molformula": "C25H35N3O2", "full_mwt":
@@ -2482,7 +2482,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100136",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100136",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100136", "molecule_chembl_id":
         "CHEMBL100136", "parent_chembl_id": "CHEMBL100136"}, "molecule_properties":
         {"alogp": "4.37", "aromatic_rings": 3, "full_molformula": "C22H22ClN5O", "full_mwt":
@@ -2520,7 +2520,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100833",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100833",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100833", "molecule_chembl_id":
         "CHEMBL100833", "parent_chembl_id": "CHEMBL100833"}, "molecule_properties":
         {"alogp": "3.54", "aromatic_rings": 3, "full_molformula": "C21H20FN5O", "full_mwt":
@@ -2558,7 +2558,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101998",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101998",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101998", "molecule_chembl_id":
         "CHEMBL101998", "parent_chembl_id": "CHEMBL101998"}, "molecule_properties":
         {"alogp": "3.28", "aromatic_rings": 3, "full_molformula": "C22H20N6O", "full_mwt":
@@ -2646,7 +2646,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL102960",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL102960",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL102960", "molecule_chembl_id":
         "CHEMBL102960", "parent_chembl_id": "CHEMBL102960"}, "molecule_properties":
         {"alogp": "4.15", "aromatic_rings": 3, "full_molformula": "C22H21FN4O", "full_mwt":
@@ -2684,7 +2684,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL102163",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL102163",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL102163", "molecule_chembl_id":
         "CHEMBL102163", "parent_chembl_id": "CHEMBL102163"}, "molecule_properties":
         {"alogp": "4.97", "aromatic_rings": 3, "full_molformula": "C23H23ClN4O", "full_mwt":
@@ -2722,7 +2722,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL102166",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL102166",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL102166", "molecule_chembl_id":
         "CHEMBL102166", "parent_chembl_id": "CHEMBL102166"}, "molecule_properties":
         {"alogp": "3.20", "aromatic_rings": 3, "full_molformula": "C20H19N5O2", "full_mwt":
@@ -2758,7 +2758,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101670",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101670",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101670", "molecule_chembl_id":
         "CHEMBL101670", "parent_chembl_id": "CHEMBL101670"}, "molecule_properties":
         {"alogp": "4.97", "aromatic_rings": 3, "full_molformula": "C23H23ClN4O", "full_mwt":
@@ -2796,7 +2796,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100934",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100934",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100934", "molecule_chembl_id":
         "CHEMBL100934", "parent_chembl_id": "CHEMBL100934"}, "molecule_properties":
         {"alogp": "4.15", "aromatic_rings": 3, "full_molformula": "C23H23ClN6O2",
@@ -2837,7 +2837,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100570",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100570",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100570", "molecule_chembl_id":
         "CHEMBL100570", "parent_chembl_id": "CHEMBL100570"}, "molecule_properties":
         {"alogp": "1.77", "aromatic_rings": 2, "full_molformula": "C18H20N2O5S", "full_mwt":
@@ -2874,7 +2874,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100352",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100352",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100352", "molecule_chembl_id":
         "CHEMBL100352", "parent_chembl_id": "CHEMBL100352"}, "molecule_properties":
         {"alogp": "1.72", "aromatic_rings": 2, "full_molformula": "C15H16N4O2", "full_mwt":
@@ -2906,7 +2906,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100844",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100844",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100844", "molecule_chembl_id":
         "CHEMBL100844", "parent_chembl_id": "CHEMBL100844"}, "molecule_properties":
         {"alogp": "2.15", "aromatic_rings": 2, "full_molformula": "C17H20N4O2", "full_mwt":
@@ -2940,7 +2940,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101917",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101917",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101917", "molecule_chembl_id":
         "CHEMBL101917", "parent_chembl_id": "CHEMBL101917"}, "molecule_properties":
         {"alogp": "5.17", "aromatic_rings": 3, "full_molformula": "C18H13Cl2N3O2",
@@ -2976,7 +2976,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100941",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100941",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100941", "molecule_chembl_id":
         "CHEMBL100941", "parent_chembl_id": "CHEMBL100941"}, "molecule_properties":
         {"alogp": "4.69", "aromatic_rings": 1, "full_molformula": "C16H18Cl2O2", "full_mwt":
@@ -3008,7 +3008,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101946",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101946",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101946", "molecule_chembl_id":
         "CHEMBL101946", "parent_chembl_id": "CHEMBL101946"}, "molecule_properties":
         {"alogp": "3.59", "aromatic_rings": 3, "full_molformula": "C22H23N5O", "full_mwt":
@@ -3046,7 +3046,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL102034",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL102034",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL102034", "molecule_chembl_id":
         "CHEMBL102034", "parent_chembl_id": "CHEMBL102034"}, "molecule_properties":
         {"alogp": "3.34", "aromatic_rings": 3, "full_molformula": "C20H18FN5O2", "full_mwt":
@@ -3133,7 +3133,7 @@ interactions:
         false}, {"atc_classifications": [], "availability_type": -1, "biotherapeutic":
         null, "black_box_warning": 0, "chemical_probe": 0, "chirality": -1, "cross_references":
         [], "dosed_ingredient": false, "first_approval": null, "first_in_class": -1,
-        "helm_notation": null, "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id":
+        "helm_notation": null, "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id":
         "CHEMBL100445", "molecule_hierarchy": {"active_chembl_id": "CHEMBL100445",
         "molecule_chembl_id": "CHEMBL100445", "parent_chembl_id": "CHEMBL100445"},
         "molecule_properties": {"alogp": "4.16", "aromatic_rings": 3, "full_molformula":
@@ -3172,7 +3172,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101944",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101944",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101944", "molecule_chembl_id":
         "CHEMBL101944", "parent_chembl_id": "CHEMBL101944"}, "molecule_properties":
         {"alogp": "3.40", "aromatic_rings": 3, "full_molformula": "C21H21N5O", "full_mwt":
@@ -3208,7 +3208,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101091",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101091",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101091", "molecule_chembl_id":
         "CHEMBL101091", "parent_chembl_id": "CHEMBL101091"}, "molecule_properties":
         {"alogp": "4.04", "aromatic_rings": 3, "full_molformula": "C21H20ClN5O2",
@@ -3247,7 +3247,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101979",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101979",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101979", "molecule_chembl_id":
         "CHEMBL101979", "parent_chembl_id": "CHEMBL101979"}, "molecule_properties":
         {"alogp": "3.56", "aromatic_rings": 3, "full_molformula": "C22H20ClN5O3",
@@ -3287,7 +3287,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101607",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101607",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101607", "molecule_chembl_id":
         "CHEMBL101607", "parent_chembl_id": "CHEMBL101607"}, "molecule_properties":
         {"alogp": "4.41", "aromatic_rings": 2, "full_molformula": "C21H25N", "full_mwt":
@@ -3321,7 +3321,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100071",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100071",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100071", "molecule_chembl_id":
         "CHEMBL100071", "parent_chembl_id": "CHEMBL100071"}, "molecule_properties":
         {"alogp": "3.88", "aromatic_rings": 1, "full_molformula": "C19H23NO4", "full_mwt":
@@ -3356,7 +3356,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL103437",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL103437",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL103437", "molecule_chembl_id":
         "CHEMBL103437", "parent_chembl_id": "CHEMBL103437"}, "molecule_properties":
         {"alogp": "2.44", "aromatic_rings": 3, "full_molformula": "C20H19N5O3", "full_mwt":
@@ -3394,7 +3394,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL103386",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL103386",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL103386", "molecule_chembl_id":
         "CHEMBL103386", "parent_chembl_id": "CHEMBL103386"}, "molecule_properties":
         {"alogp": "5.17", "aromatic_rings": 3, "full_molformula": "C21H19ClN4OS",
@@ -3432,7 +3432,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100980",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100980",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100980", "molecule_chembl_id":
         "CHEMBL100980", "parent_chembl_id": "CHEMBL100980"}, "molecule_properties":
         {"alogp": "4.57", "aromatic_rings": 3, "full_molformula": "C20H18ClN5OS",
@@ -3470,7 +3470,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100981",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100981",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100981", "molecule_chembl_id":
         "CHEMBL100981", "parent_chembl_id": "CHEMBL100981"}, "molecule_properties":
         {"alogp": "3.96", "aromatic_rings": 3, "full_molformula": "C19H17ClN6OS",
@@ -3508,7 +3508,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101300",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101300",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101300", "molecule_chembl_id":
         "CHEMBL101300", "parent_chembl_id": "CHEMBL101300"}, "molecule_properties":
         {"alogp": "4.55", "aromatic_rings": 2, "full_molformula": "C21H24FN", "full_mwt":
@@ -3542,7 +3542,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100336",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100336",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100336", "molecule_chembl_id":
         "CHEMBL100336", "parent_chembl_id": "CHEMBL100336"}, "molecule_properties":
         {"alogp": "5.76", "aromatic_rings": 2, "full_molformula": "C34H48N2O3", "full_mwt":
@@ -3588,7 +3588,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL102860",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL102860",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL102860", "molecule_chembl_id":
         "CHEMBL102860", "parent_chembl_id": "CHEMBL102860"}, "molecule_properties":
         {"alogp": "4.65", "aromatic_rings": 1, "full_molformula": "C19H26BrNO", "full_mwt":
@@ -3622,7 +3622,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL103399",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL103399",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL103399", "molecule_chembl_id":
         "CHEMBL103399", "parent_chembl_id": "CHEMBL103399"}, "molecule_properties":
         {"alogp": "4.60", "aromatic_rings": 3, "full_molformula": "C21H18ClFN4O2",
@@ -3661,7 +3661,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100903",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100903",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100903", "molecule_chembl_id":
         "CHEMBL100903", "parent_chembl_id": "CHEMBL100903"}, "molecule_properties":
         {"alogp": "4.16", "aromatic_rings": 3, "full_molformula": "C21H19ClN4O3",
@@ -3700,7 +3700,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL103157",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL103157",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL103157", "molecule_chembl_id":
         "CHEMBL103157", "parent_chembl_id": "CHEMBL103157"}, "molecule_properties":
         {"alogp": "4.32", "aromatic_rings": 1, "full_molformula": "C19H26FN", "full_mwt":
@@ -3733,7 +3733,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100702",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100702",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100702", "molecule_chembl_id":
         "CHEMBL100702", "parent_chembl_id": "CHEMBL100702"}, "molecule_properties":
         {"alogp": "3.05", "aromatic_rings": 3, "full_molformula": "C30H31N3O5", "full_mwt":
@@ -3778,7 +3778,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL103238",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL103238",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL103238", "molecule_chembl_id":
         "CHEMBL103238", "parent_chembl_id": "CHEMBL103238"}, "molecule_properties":
         {"alogp": "6.19", "aromatic_rings": 4, "full_molformula": "C36H38N2O4S", "full_mwt":
@@ -3826,7 +3826,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100849",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100849",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100849", "molecule_chembl_id":
         "CHEMBL100849", "parent_chembl_id": "CHEMBL100849"}, "molecule_properties":
         {"alogp": "5.80", "aromatic_rings": 4, "full_molformula": "C35H36N2O4S", "full_mwt":
@@ -3874,7 +3874,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL103268",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL103268",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL103268", "molecule_chembl_id":
         "CHEMBL103268", "parent_chembl_id": "CHEMBL103268"}, "molecule_properties":
         {"alogp": "5.83", "aromatic_rings": 2, "full_molformula": "C33H46N2O3", "full_mwt":
@@ -3919,7 +3919,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL102714",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL102714",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL102714", "molecule_chembl_id":
         "CHEMBL102714", "parent_chembl_id": "CHEMBL102714"}, "molecule_properties":
         {"alogp": "4.05", "aromatic_rings": 3, "full_molformula": "C19H12Cl2N2O2",
@@ -3956,7 +3956,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101800",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101800",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101800", "molecule_chembl_id":
         "CHEMBL101800", "parent_chembl_id": "CHEMBL101800"}, "molecule_properties":
         {"alogp": "3.49", "aromatic_rings": 2, "full_molformula": "C21H32N4O2", "full_mwt":
@@ -3992,7 +3992,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101690",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101690",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101690", "molecule_chembl_id":
         "CHEMBL101690", "parent_chembl_id": "CHEMBL101690"}, "molecule_properties":
         {"alogp": "4.37", "aromatic_rings": 3, "full_molformula": "C21H22FN3O", "full_mwt":
@@ -4029,7 +4029,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL102371",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL102371",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL102371", "molecule_chembl_id":
         "CHEMBL102371", "parent_chembl_id": "CHEMBL102371"}, "molecule_properties":
         {"alogp": "3.10", "aromatic_rings": 2, "full_molformula": "C20H30N4O2", "full_mwt":
@@ -4065,7 +4065,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL102372",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL102372",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL102372", "molecule_chembl_id":
         "CHEMBL102372", "parent_chembl_id": "CHEMBL102372"}, "molecule_properties":
         {"alogp": "2.62", "aromatic_rings": 2, "full_molformula": "C19H28N4O2", "full_mwt":
@@ -4100,7 +4100,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL102664",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL102664",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL102664", "molecule_chembl_id":
         "CHEMBL102664", "parent_chembl_id": "CHEMBL102664"}, "molecule_properties":
         {"alogp": "2.93", "aromatic_rings": 4, "full_molformula": "C48H58N8O6S2",
@@ -4165,7 +4165,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL103005",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL103005",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL103005", "molecule_chembl_id":
         "CHEMBL103005", "parent_chembl_id": "CHEMBL103005"}, "molecule_properties":
         {"alogp": "5.39", "aromatic_rings": 4, "full_molformula": "C32H39N7O3", "full_mwt":
@@ -4257,7 +4257,7 @@ interactions:
       string: '{"molecules": [{"atc_classifications": [], "availability_type": -1,
         "biotherapeutic": null, "black_box_warning": 0, "chemical_probe": 0, "chirality":
         -1, "cross_references": [], "dosed_ingredient": false, "first_approval": null,
-        "first_in_class": -1, "helm_notation": null, "inorganic_flag": -1, "max_phase":
+        "first_in_class": -1, "helm_notation": null, "inorganic_flag": 0, "max_phase":
         null, "molecule_chembl_id": "CHEMBL10", "molecule_hierarchy": {"active_chembl_id":
         "CHEMBL10", "molecule_chembl_id": "CHEMBL10", "parent_chembl_id": "CHEMBL10"},
         "molecule_properties": {"alogp": "4.68", "aromatic_rings": 4, "full_molformula":
@@ -4295,7 +4295,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL10347",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL10347",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL10347", "molecule_chembl_id":
         "CHEMBL10347", "parent_chembl_id": "CHEMBL10347"}, "molecule_properties":
         {"alogp": "2.65", "aromatic_rings": 2, "full_molformula": "C21H26N2O3", "full_mwt":
@@ -4334,7 +4334,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL10332",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL10332",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL10332", "molecule_chembl_id":
         "CHEMBL10332", "parent_chembl_id": "CHEMBL10332"}, "molecule_properties":
         {"alogp": "0.80", "aromatic_rings": 1, "full_molformula": "C12H14N2O3", "full_mwt":
@@ -4364,7 +4364,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL10333",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL10333",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL10333", "molecule_chembl_id":
         "CHEMBL10333", "parent_chembl_id": "CHEMBL10333"}, "molecule_properties":
         {"alogp": "7.73", "aromatic_rings": 4, "full_molformula": "C30H32N2O", "full_mwt":
@@ -4514,7 +4514,7 @@ interactions:
         0, "withdrawn_flag": false}, {"atc_classifications": [], "availability_type":
         -1, "biotherapeutic": null, "black_box_warning": 0, "chemical_probe": 0, "chirality":
         -1, "cross_references": [], "dosed_ingredient": false, "first_approval": null,
-        "first_in_class": -1, "helm_notation": null, "inorganic_flag": -1, "max_phase":
+        "first_in_class": -1, "helm_notation": null, "inorganic_flag": 0, "max_phase":
         null, "molecule_chembl_id": "CHEMBL10231", "molecule_hierarchy": {"active_chembl_id":
         "CHEMBL10231", "molecule_chembl_id": "CHEMBL10231", "parent_chembl_id": "CHEMBL10231"},
         "molecule_properties": {"alogp": "6.62", "aromatic_rings": 5, "full_molformula":
@@ -4555,7 +4555,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL10160",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL10160",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL10160", "molecule_chembl_id":
         "CHEMBL10160", "parent_chembl_id": "CHEMBL10160"}, "molecule_properties":
         {"alogp": "5.78", "aromatic_rings": 4, "full_molformula": "C25H22N2O", "full_mwt":
@@ -4593,7 +4593,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL10309",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL10309",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL10309", "molecule_chembl_id":
         "CHEMBL10309", "parent_chembl_id": "CHEMBL10309"}, "molecule_properties":
         {"alogp": "4.04", "aromatic_rings": 2, "full_molformula": "C23H25BrN2O2",
@@ -4632,7 +4632,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL10134",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL10134",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL10134", "molecule_chembl_id":
         "CHEMBL10134", "parent_chembl_id": "CHEMBL10134"}, "molecule_properties":
         {"alogp": "6.35", "aromatic_rings": 4, "full_molformula": "C27H26N2O", "full_mwt":
@@ -4671,7 +4671,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL10284",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL10284",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL10284", "molecule_chembl_id":
         "CHEMBL10284", "parent_chembl_id": "CHEMBL10284"}, "molecule_properties":
         {"alogp": "6.09", "aromatic_rings": 4, "full_molformula": "C26H24N2O", "full_mwt":
@@ -5288,7 +5288,7 @@ interactions:
         0, "withdrawn_flag": false}, {"atc_classifications": [], "availability_type":
         -1, "biotherapeutic": null, "black_box_warning": 0, "chemical_probe": 0, "chirality":
         -1, "cross_references": [], "dosed_ingredient": false, "first_approval": null,
-        "first_in_class": -1, "helm_notation": null, "inorganic_flag": -1, "max_phase":
+        "first_in_class": -1, "helm_notation": null, "inorganic_flag": 0, "max_phase":
         null, "molecule_chembl_id": "CHEMBL100219", "molecule_hierarchy": {"active_chembl_id":
         "CHEMBL100219", "molecule_chembl_id": "CHEMBL100219", "parent_chembl_id":
         "CHEMBL100219"}, "molecule_properties": {"alogp": "7.52", "aromatic_rings":
@@ -5328,7 +5328,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100421",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100421",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100421", "molecule_chembl_id":
         "CHEMBL100421", "parent_chembl_id": "CHEMBL100421"}, "molecule_properties":
         {"alogp": "3.48", "aromatic_rings": 4, "full_molformula": "C23H22N4O3", "full_mwt":
@@ -5367,7 +5367,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101054",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101054",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101054", "molecule_chembl_id":
         "CHEMBL101054", "parent_chembl_id": "CHEMBL101054"}, "molecule_properties":
         {"alogp": "2.44", "aromatic_rings": 1, "full_molformula": "C12H19N3OS", "full_mwt":
@@ -5396,7 +5396,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100239",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100239",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100239", "molecule_chembl_id":
         "CHEMBL100239", "parent_chembl_id": "CHEMBL100239"}, "molecule_properties":
         {"alogp": "2.95", "aromatic_rings": 3, "full_molformula": "C14H12N4S", "full_mwt":
@@ -5427,7 +5427,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100714",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100714",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100714", "molecule_chembl_id":
         "CHEMBL100714", "parent_chembl_id": "CHEMBL100714"}, "molecule_properties":
         {"alogp": "3.41", "aromatic_rings": 3, "full_molformula": "C18H19N3O4", "full_mwt":
@@ -5462,7 +5462,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100749",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100749",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100749", "molecule_chembl_id":
         "CHEMBL100749", "parent_chembl_id": "CHEMBL100749"}, "molecule_properties":
         {"alogp": "2.85", "aromatic_rings": 4, "full_molformula": "C16H13ClN6", "full_mwt":
@@ -5544,7 +5544,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100763",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100763",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100763", "molecule_chembl_id":
         "CHEMBL100763", "parent_chembl_id": "CHEMBL100763"}, "molecule_properties":
         {"alogp": "5.85", "aromatic_rings": 3, "full_molformula": "C28H31ClN2O2",
@@ -5587,7 +5587,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101083",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101083",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101083", "molecule_chembl_id":
         "CHEMBL101083", "parent_chembl_id": "CHEMBL101083"}, "molecule_properties":
         {"alogp": "5.72", "aromatic_rings": 3, "full_molformula": "C29H33FN2O2", "full_mwt":
@@ -5629,7 +5629,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101997",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101997",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101997", "molecule_chembl_id":
         "CHEMBL101997", "parent_chembl_id": "CHEMBL101997"}, "molecule_properties":
         {"alogp": "5.33", "aromatic_rings": 3, "full_molformula": "C28H31FN2O2", "full_mwt":
@@ -5671,7 +5671,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101771",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101771",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101771", "molecule_chembl_id":
         "CHEMBL101771", "parent_chembl_id": "CHEMBL101771"}, "molecule_properties":
         {"alogp": "0.95", "aromatic_rings": 0, "full_molformula": "C5H13NS2", "full_mwt":
@@ -5694,7 +5694,7 @@ interactions:
         false}, {"atc_classifications": [], "availability_type": -1, "biotherapeutic":
         null, "black_box_warning": 0, "chemical_probe": 0, "chirality": -1, "cross_references":
         [], "dosed_ingredient": false, "first_approval": null, "first_in_class": -1,
-        "helm_notation": null, "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id":
+        "helm_notation": null, "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id":
         "CHEMBL101807", "molecule_hierarchy": {"active_chembl_id": "CHEMBL101807",
         "molecule_chembl_id": "CHEMBL101807", "parent_chembl_id": "CHEMBL101807"},
         "molecule_properties": {"alogp": "5.58", "aromatic_rings": 3, "full_molformula":
@@ -5736,7 +5736,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101382",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101382",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101382", "molecule_chembl_id":
         "CHEMBL101382", "parent_chembl_id": "CHEMBL101382"}, "molecule_properties":
         {"alogp": "5.41", "aromatic_rings": 3, "full_molformula": "C28H32N2O2", "full_mwt":
@@ -5777,7 +5777,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100617",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100617",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100617", "molecule_chembl_id":
         "CHEMBL100617", "parent_chembl_id": "CHEMBL100617"}, "molecule_properties":
         {"alogp": "5.29", "aromatic_rings": 3, "full_molformula": "C29H34N2O3", "full_mwt":
@@ -5819,7 +5819,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL103294",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL103294",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL103294", "molecule_chembl_id":
         "CHEMBL103294", "parent_chembl_id": "CHEMBL103294"}, "molecule_properties":
         {"alogp": "6.24", "aromatic_rings": 3, "full_molformula": "C29H33ClN2O2",
@@ -5862,7 +5862,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100231",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100231",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100231", "molecule_chembl_id":
         "CHEMBL100231", "parent_chembl_id": "CHEMBL100231"}, "molecule_properties":
         {"alogp": "6.71", "aromatic_rings": 3, "full_molformula": "C32H40N2O2", "full_mwt":
@@ -5905,7 +5905,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100595",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100595",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100595", "molecule_chembl_id":
         "CHEMBL100595", "parent_chembl_id": "CHEMBL100595"}, "molecule_properties":
         {"alogp": "6.71", "aromatic_rings": 3, "full_molformula": "C32H40N2O2", "full_mwt":
@@ -5949,7 +5949,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL103305",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL103305",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL103305", "molecule_chembl_id":
         "CHEMBL103305", "parent_chembl_id": "CHEMBL103305"}, "molecule_properties":
         {"alogp": "6.24", "aromatic_rings": 3, "full_molformula": "C29H33ClN2O2",
@@ -5992,7 +5992,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100951",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100951",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100951", "molecule_chembl_id":
         "CHEMBL100951", "parent_chembl_id": "CHEMBL100951"}, "molecule_properties":
         {"alogp": "4.94", "aromatic_rings": 4, "full_molformula": "C23H20ClN5O2",
@@ -6032,7 +6032,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100629",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100629",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100629", "molecule_chembl_id":
         "CHEMBL100629", "parent_chembl_id": "CHEMBL100629"}, "molecule_properties":
         {"alogp": "4.40", "aromatic_rings": 3, "full_molformula": "C22H20N4O", "full_mwt":
@@ -6068,7 +6068,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101412",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101412",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101412", "molecule_chembl_id":
         "CHEMBL101412", "parent_chembl_id": "CHEMBL101412"}, "molecule_properties":
         {"alogp": "4.01", "aromatic_rings": 3, "full_molformula": "C22H22N4O", "full_mwt":
@@ -6104,7 +6104,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101454",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101454",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101454", "molecule_chembl_id":
         "CHEMBL101454", "parent_chembl_id": "CHEMBL101454"}, "molecule_properties":
         {"alogp": "4.15", "aromatic_rings": 1, "full_molformula": "C21H30N2O", "full_mwt":
@@ -6139,7 +6139,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101501",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101501",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101501", "molecule_chembl_id":
         "CHEMBL101501", "parent_chembl_id": "CHEMBL101501"}, "molecule_properties":
         {"alogp": "2.33", "aromatic_rings": 2, "full_molformula": "C18H20N4O3", "full_mwt":
@@ -6174,7 +6174,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100563",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100563",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100563", "molecule_chembl_id":
         "CHEMBL100563", "parent_chembl_id": "CHEMBL100563"}, "molecule_properties":
         {"alogp": "3.56", "aromatic_rings": 2, "full_molformula": "C32H42N4O7", "full_mwt":
@@ -6222,7 +6222,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL102006",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL102006",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL102006", "molecule_chembl_id":
         "CHEMBL102006", "parent_chembl_id": "CHEMBL102006"}, "molecule_properties":
         {"alogp": "0.50", "aromatic_rings": 0, "full_molformula": "C6H13NO2S", "full_mwt":
@@ -6248,7 +6248,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101147",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101147",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101147", "molecule_chembl_id":
         "CHEMBL101147", "parent_chembl_id": "CHEMBL101147"}, "molecule_properties":
         {"alogp": "0.50", "aromatic_rings": 0, "full_molformula": "C6H13NO2S", "full_mwt":
@@ -6274,7 +6274,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL102113",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL102113",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL102113", "molecule_chembl_id":
         "CHEMBL102113", "parent_chembl_id": "CHEMBL102113"}, "molecule_properties":
         {"alogp": "3.64", "aromatic_rings": 3, "full_molformula": "C21H21ClN6O", "full_mwt":
@@ -6312,7 +6312,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101845",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101845",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101845", "molecule_chembl_id":
         "CHEMBL101845", "parent_chembl_id": "CHEMBL101845"}, "molecule_properties":
         {"alogp": "5.30", "aromatic_rings": 4, "full_molformula": "C26H23FN4O", "full_mwt":
@@ -6352,7 +6352,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100056",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100056",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100056", "molecule_chembl_id":
         "CHEMBL100056", "parent_chembl_id": "CHEMBL100056"}, "molecule_properties":
         {"alogp": "4.25", "aromatic_rings": 3, "full_molformula": "C22H22ClN5O", "full_mwt":
@@ -6390,7 +6390,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL102192",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL102192",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL102192", "molecule_chembl_id":
         "CHEMBL102192", "parent_chembl_id": "CHEMBL102192"}, "molecule_properties":
         {"alogp": "4.66", "aromatic_rings": 3, "full_molformula": "C22H21ClN4O", "full_mwt":
@@ -6428,7 +6428,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101834",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101834",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101834", "molecule_chembl_id":
         "CHEMBL101834", "parent_chembl_id": "CHEMBL101834"}, "molecule_properties":
         {"alogp": "4.03", "aromatic_rings": 3, "full_molformula": "C23H24ClN5O3S",
@@ -6470,7 +6470,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101938",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101938",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101938", "molecule_chembl_id":
         "CHEMBL101938", "parent_chembl_id": "CHEMBL101938"}, "molecule_properties":
         {"alogp": "3.84", "aromatic_rings": 3, "full_molformula": "C23H22ClN5O3",
@@ -6511,7 +6511,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100729",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100729",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100729", "molecule_chembl_id":
         "CHEMBL100729", "parent_chembl_id": "CHEMBL100729"}, "molecule_properties":
         {"alogp": "3.89", "aromatic_rings": 2, "full_molformula": "C25H35N3O2", "full_mwt":
@@ -6551,7 +6551,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100136",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100136",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100136", "molecule_chembl_id":
         "CHEMBL100136", "parent_chembl_id": "CHEMBL100136"}, "molecule_properties":
         {"alogp": "4.37", "aromatic_rings": 3, "full_molformula": "C22H22ClN5O", "full_mwt":
@@ -6589,7 +6589,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100833",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100833",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100833", "molecule_chembl_id":
         "CHEMBL100833", "parent_chembl_id": "CHEMBL100833"}, "molecule_properties":
         {"alogp": "3.54", "aromatic_rings": 3, "full_molformula": "C21H20FN5O", "full_mwt":
@@ -6627,7 +6627,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101998",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101998",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101998", "molecule_chembl_id":
         "CHEMBL101998", "parent_chembl_id": "CHEMBL101998"}, "molecule_properties":
         {"alogp": "3.28", "aromatic_rings": 3, "full_molformula": "C22H20N6O", "full_mwt":
@@ -6715,7 +6715,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL102960",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL102960",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL102960", "molecule_chembl_id":
         "CHEMBL102960", "parent_chembl_id": "CHEMBL102960"}, "molecule_properties":
         {"alogp": "4.15", "aromatic_rings": 3, "full_molformula": "C22H21FN4O", "full_mwt":
@@ -6753,7 +6753,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL103593",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL103593",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL103593", "molecule_chembl_id":
         "CHEMBL103593", "parent_chembl_id": "CHEMBL103593"}, "molecule_properties":
         {"alogp": "3.59", "aromatic_rings": 3, "full_molformula": "C22H23N5O", "full_mwt":
@@ -6791,7 +6791,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL102163",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL102163",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL102163", "molecule_chembl_id":
         "CHEMBL102163", "parent_chembl_id": "CHEMBL102163"}, "molecule_properties":
         {"alogp": "4.97", "aromatic_rings": 3, "full_molformula": "C23H23ClN4O", "full_mwt":
@@ -6829,7 +6829,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL102166",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL102166",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL102166", "molecule_chembl_id":
         "CHEMBL102166", "parent_chembl_id": "CHEMBL102166"}, "molecule_properties":
         {"alogp": "3.20", "aromatic_rings": 3, "full_molformula": "C20H19N5O2", "full_mwt":
@@ -6865,7 +6865,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101670",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101670",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101670", "molecule_chembl_id":
         "CHEMBL101670", "parent_chembl_id": "CHEMBL101670"}, "molecule_properties":
         {"alogp": "4.97", "aromatic_rings": 3, "full_molformula": "C23H23ClN4O", "full_mwt":
@@ -6903,7 +6903,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100934",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100934",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100934", "molecule_chembl_id":
         "CHEMBL100934", "parent_chembl_id": "CHEMBL100934"}, "molecule_properties":
         {"alogp": "4.15", "aromatic_rings": 3, "full_molformula": "C23H23ClN6O2",
@@ -6944,7 +6944,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100570",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100570",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100570", "molecule_chembl_id":
         "CHEMBL100570", "parent_chembl_id": "CHEMBL100570"}, "molecule_properties":
         {"alogp": "1.77", "aromatic_rings": 2, "full_molformula": "C18H20N2O5S", "full_mwt":
@@ -6981,7 +6981,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100352",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100352",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100352", "molecule_chembl_id":
         "CHEMBL100352", "parent_chembl_id": "CHEMBL100352"}, "molecule_properties":
         {"alogp": "1.72", "aromatic_rings": 2, "full_molformula": "C15H16N4O2", "full_mwt":
@@ -7013,7 +7013,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100844",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100844",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100844", "molecule_chembl_id":
         "CHEMBL100844", "parent_chembl_id": "CHEMBL100844"}, "molecule_properties":
         {"alogp": "2.15", "aromatic_rings": 2, "full_molformula": "C17H20N4O2", "full_mwt":
@@ -7047,7 +7047,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101917",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101917",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101917", "molecule_chembl_id":
         "CHEMBL101917", "parent_chembl_id": "CHEMBL101917"}, "molecule_properties":
         {"alogp": "5.17", "aromatic_rings": 3, "full_molformula": "C18H13Cl2N3O2",
@@ -7083,7 +7083,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100941",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100941",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100941", "molecule_chembl_id":
         "CHEMBL100941", "parent_chembl_id": "CHEMBL100941"}, "molecule_properties":
         {"alogp": "4.69", "aromatic_rings": 1, "full_molformula": "C16H18Cl2O2", "full_mwt":
@@ -7115,7 +7115,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101946",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101946",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101946", "molecule_chembl_id":
         "CHEMBL101946", "parent_chembl_id": "CHEMBL101946"}, "molecule_properties":
         {"alogp": "3.59", "aromatic_rings": 3, "full_molformula": "C22H23N5O", "full_mwt":
@@ -7153,7 +7153,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL102034",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL102034",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL102034", "molecule_chembl_id":
         "CHEMBL102034", "parent_chembl_id": "CHEMBL102034"}, "molecule_properties":
         {"alogp": "3.34", "aromatic_rings": 3, "full_molformula": "C20H18FN5O2", "full_mwt":
@@ -7240,7 +7240,7 @@ interactions:
         false}, {"atc_classifications": [], "availability_type": -1, "biotherapeutic":
         null, "black_box_warning": 0, "chemical_probe": 0, "chirality": -1, "cross_references":
         [], "dosed_ingredient": false, "first_approval": null, "first_in_class": -1,
-        "helm_notation": null, "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id":
+        "helm_notation": null, "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id":
         "CHEMBL100445", "molecule_hierarchy": {"active_chembl_id": "CHEMBL100445",
         "molecule_chembl_id": "CHEMBL100445", "parent_chembl_id": "CHEMBL100445"},
         "molecule_properties": {"alogp": "4.16", "aromatic_rings": 3, "full_molformula":
@@ -7279,7 +7279,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101944",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101944",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101944", "molecule_chembl_id":
         "CHEMBL101944", "parent_chembl_id": "CHEMBL101944"}, "molecule_properties":
         {"alogp": "3.40", "aromatic_rings": 3, "full_molformula": "C21H21N5O", "full_mwt":
@@ -7315,7 +7315,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101091",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101091",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101091", "molecule_chembl_id":
         "CHEMBL101091", "parent_chembl_id": "CHEMBL101091"}, "molecule_properties":
         {"alogp": "4.04", "aromatic_rings": 3, "full_molformula": "C21H20ClN5O2",
@@ -7354,7 +7354,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101979",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101979",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101979", "molecule_chembl_id":
         "CHEMBL101979", "parent_chembl_id": "CHEMBL101979"}, "molecule_properties":
         {"alogp": "3.56", "aromatic_rings": 3, "full_molformula": "C22H20ClN5O3",
@@ -7394,7 +7394,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101607",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101607",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101607", "molecule_chembl_id":
         "CHEMBL101607", "parent_chembl_id": "CHEMBL101607"}, "molecule_properties":
         {"alogp": "4.41", "aromatic_rings": 2, "full_molformula": "C21H25N", "full_mwt":
@@ -7428,7 +7428,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100071",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100071",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100071", "molecule_chembl_id":
         "CHEMBL100071", "parent_chembl_id": "CHEMBL100071"}, "molecule_properties":
         {"alogp": "3.88", "aromatic_rings": 1, "full_molformula": "C19H23NO4", "full_mwt":
@@ -7463,7 +7463,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL103437",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL103437",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL103437", "molecule_chembl_id":
         "CHEMBL103437", "parent_chembl_id": "CHEMBL103437"}, "molecule_properties":
         {"alogp": "2.44", "aromatic_rings": 3, "full_molformula": "C20H19N5O3", "full_mwt":
@@ -7501,7 +7501,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL103386",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL103386",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL103386", "molecule_chembl_id":
         "CHEMBL103386", "parent_chembl_id": "CHEMBL103386"}, "molecule_properties":
         {"alogp": "5.17", "aromatic_rings": 3, "full_molformula": "C21H19ClN4OS",
@@ -7539,7 +7539,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100980",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100980",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100980", "molecule_chembl_id":
         "CHEMBL100980", "parent_chembl_id": "CHEMBL100980"}, "molecule_properties":
         {"alogp": "4.57", "aromatic_rings": 3, "full_molformula": "C20H18ClN5OS",
@@ -7577,7 +7577,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100981",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100981",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100981", "molecule_chembl_id":
         "CHEMBL100981", "parent_chembl_id": "CHEMBL100981"}, "molecule_properties":
         {"alogp": "3.96", "aromatic_rings": 3, "full_molformula": "C19H17ClN6OS",
@@ -7615,7 +7615,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101300",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101300",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101300", "molecule_chembl_id":
         "CHEMBL101300", "parent_chembl_id": "CHEMBL101300"}, "molecule_properties":
         {"alogp": "4.55", "aromatic_rings": 2, "full_molformula": "C21H24FN", "full_mwt":
@@ -7649,7 +7649,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100336",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100336",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100336", "molecule_chembl_id":
         "CHEMBL100336", "parent_chembl_id": "CHEMBL100336"}, "molecule_properties":
         {"alogp": "5.76", "aromatic_rings": 2, "full_molformula": "C34H48N2O3", "full_mwt":
@@ -7695,7 +7695,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL102860",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL102860",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL102860", "molecule_chembl_id":
         "CHEMBL102860", "parent_chembl_id": "CHEMBL102860"}, "molecule_properties":
         {"alogp": "4.65", "aromatic_rings": 1, "full_molformula": "C19H26BrNO", "full_mwt":
@@ -7729,7 +7729,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL103399",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL103399",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL103399", "molecule_chembl_id":
         "CHEMBL103399", "parent_chembl_id": "CHEMBL103399"}, "molecule_properties":
         {"alogp": "4.60", "aromatic_rings": 3, "full_molformula": "C21H18ClFN4O2",
@@ -7768,7 +7768,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100903",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100903",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100903", "molecule_chembl_id":
         "CHEMBL100903", "parent_chembl_id": "CHEMBL100903"}, "molecule_properties":
         {"alogp": "4.16", "aromatic_rings": 3, "full_molformula": "C21H19ClN4O3",
@@ -7807,7 +7807,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL103157",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL103157",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL103157", "molecule_chembl_id":
         "CHEMBL103157", "parent_chembl_id": "CHEMBL103157"}, "molecule_properties":
         {"alogp": "4.32", "aromatic_rings": 1, "full_molformula": "C19H26FN", "full_mwt":
@@ -7840,7 +7840,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100702",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100702",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100702", "molecule_chembl_id":
         "CHEMBL100702", "parent_chembl_id": "CHEMBL100702"}, "molecule_properties":
         {"alogp": "3.05", "aromatic_rings": 3, "full_molformula": "C30H31N3O5", "full_mwt":
@@ -7885,7 +7885,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL103238",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL103238",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL103238", "molecule_chembl_id":
         "CHEMBL103238", "parent_chembl_id": "CHEMBL103238"}, "molecule_properties":
         {"alogp": "6.19", "aromatic_rings": 4, "full_molformula": "C36H38N2O4S", "full_mwt":
@@ -7933,7 +7933,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100849",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100849",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100849", "molecule_chembl_id":
         "CHEMBL100849", "parent_chembl_id": "CHEMBL100849"}, "molecule_properties":
         {"alogp": "5.80", "aromatic_rings": 4, "full_molformula": "C35H36N2O4S", "full_mwt":
@@ -7981,7 +7981,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL103268",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL103268",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL103268", "molecule_chembl_id":
         "CHEMBL103268", "parent_chembl_id": "CHEMBL103268"}, "molecule_properties":
         {"alogp": "5.83", "aromatic_rings": 2, "full_molformula": "C33H46N2O3", "full_mwt":
@@ -8026,7 +8026,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL102714",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL102714",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL102714", "molecule_chembl_id":
         "CHEMBL102714", "parent_chembl_id": "CHEMBL102714"}, "molecule_properties":
         {"alogp": "4.05", "aromatic_rings": 3, "full_molformula": "C19H12Cl2N2O2",
@@ -8063,7 +8063,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101800",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101800",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101800", "molecule_chembl_id":
         "CHEMBL101800", "parent_chembl_id": "CHEMBL101800"}, "molecule_properties":
         {"alogp": "3.49", "aromatic_rings": 2, "full_molformula": "C21H32N4O2", "full_mwt":
@@ -8099,7 +8099,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL101690",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL101690",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL101690", "molecule_chembl_id":
         "CHEMBL101690", "parent_chembl_id": "CHEMBL101690"}, "molecule_properties":
         {"alogp": "4.37", "aromatic_rings": 3, "full_molformula": "C21H22FN3O", "full_mwt":
@@ -8136,7 +8136,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL102371",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL102371",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL102371", "molecule_chembl_id":
         "CHEMBL102371", "parent_chembl_id": "CHEMBL102371"}, "molecule_properties":
         {"alogp": "3.10", "aromatic_rings": 2, "full_molformula": "C20H30N4O2", "full_mwt":
@@ -8172,7 +8172,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL102372",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL102372",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL102372", "molecule_chembl_id":
         "CHEMBL102372", "parent_chembl_id": "CHEMBL102372"}, "molecule_properties":
         {"alogp": "2.62", "aromatic_rings": 2, "full_molformula": "C19H28N4O2", "full_mwt":
@@ -8207,7 +8207,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL102664",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL102664",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL102664", "molecule_chembl_id":
         "CHEMBL102664", "parent_chembl_id": "CHEMBL102664"}, "molecule_properties":
         {"alogp": "2.93", "aromatic_rings": 4, "full_molformula": "C48H58N8O6S2",
@@ -8272,7 +8272,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL103005",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL103005",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL103005", "molecule_chembl_id":
         "CHEMBL103005", "parent_chembl_id": "CHEMBL103005"}, "molecule_properties":
         {"alogp": "5.39", "aromatic_rings": 4, "full_molformula": "C32H39N7O3", "full_mwt":
@@ -8404,7 +8404,7 @@ interactions:
       string: '{"molecules": [{"atc_classifications": [], "availability_type": -1,
         "biotherapeutic": null, "black_box_warning": 0, "chemical_probe": 0, "chirality":
         -1, "cross_references": [], "dosed_ingredient": false, "first_approval": null,
-        "first_in_class": -1, "helm_notation": null, "inorganic_flag": -1, "max_phase":
+        "first_in_class": -1, "helm_notation": null, "inorganic_flag": 0, "max_phase":
         null, "molecule_chembl_id": "CHEMBL10", "molecule_hierarchy": {"active_chembl_id":
         "CHEMBL10", "molecule_chembl_id": "CHEMBL10", "parent_chembl_id": "CHEMBL10"},
         "molecule_properties": {"alogp": "4.68", "aromatic_rings": 4, "full_molformula":
@@ -8523,7 +8523,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100219",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100219",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100219", "molecule_chembl_id":
         "CHEMBL100219", "parent_chembl_id": "CHEMBL100219"}, "molecule_properties":
         {"alogp": "7.52", "aromatic_rings": 3, "full_molformula": "C27H26BrNO2", "full_mwt":
@@ -8562,7 +8562,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100421",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100421",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100421", "molecule_chembl_id":
         "CHEMBL100421", "parent_chembl_id": "CHEMBL100421"}, "molecule_properties":
         {"alogp": "3.48", "aromatic_rings": 4, "full_molformula": "C23H22N4O3", "full_mwt":
@@ -8601,7 +8601,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100239",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100239",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100239", "molecule_chembl_id":
         "CHEMBL100239", "parent_chembl_id": "CHEMBL100239"}, "molecule_properties":
         {"alogp": "2.95", "aromatic_rings": 3, "full_molformula": "C14H12N4S", "full_mwt":
@@ -8632,7 +8632,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100617",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100617",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100617", "molecule_chembl_id":
         "CHEMBL100617", "parent_chembl_id": "CHEMBL100617"}, "molecule_properties":
         {"alogp": "5.29", "aromatic_rings": 3, "full_molformula": "C29H34N2O3", "full_mwt":
@@ -8674,7 +8674,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100231",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100231",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100231", "molecule_chembl_id":
         "CHEMBL100231", "parent_chembl_id": "CHEMBL100231"}, "molecule_properties":
         {"alogp": "6.71", "aromatic_rings": 3, "full_molformula": "C32H40N2O2", "full_mwt":
@@ -8717,7 +8717,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100595",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100595",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100595", "molecule_chembl_id":
         "CHEMBL100595", "parent_chembl_id": "CHEMBL100595"}, "molecule_properties":
         {"alogp": "6.71", "aromatic_rings": 3, "full_molformula": "C32H40N2O2", "full_mwt":
@@ -8761,7 +8761,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100629",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100629",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100629", "molecule_chembl_id":
         "CHEMBL100629", "parent_chembl_id": "CHEMBL100629"}, "molecule_properties":
         {"alogp": "4.40", "aromatic_rings": 3, "full_molformula": "C22H20N4O", "full_mwt":
@@ -8797,7 +8797,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100563",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100563",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100563", "molecule_chembl_id":
         "CHEMBL100563", "parent_chembl_id": "CHEMBL100563"}, "molecule_properties":
         {"alogp": "3.56", "aromatic_rings": 2, "full_molformula": "C32H42N4O7", "full_mwt":
@@ -8845,7 +8845,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100056",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100056",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100056", "molecule_chembl_id":
         "CHEMBL100056", "parent_chembl_id": "CHEMBL100056"}, "molecule_properties":
         {"alogp": "4.25", "aromatic_rings": 3, "full_molformula": "C22H22ClN5O", "full_mwt":
@@ -8883,7 +8883,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100136",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100136",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100136", "molecule_chembl_id":
         "CHEMBL100136", "parent_chembl_id": "CHEMBL100136"}, "molecule_properties":
         {"alogp": "4.37", "aromatic_rings": 3, "full_molformula": "C22H22ClN5O", "full_mwt":
@@ -8921,7 +8921,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100570",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100570",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100570", "molecule_chembl_id":
         "CHEMBL100570", "parent_chembl_id": "CHEMBL100570"}, "molecule_properties":
         {"alogp": "1.77", "aromatic_rings": 2, "full_molformula": "C18H20N2O5S", "full_mwt":
@@ -8958,7 +8958,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100352",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100352",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100352", "molecule_chembl_id":
         "CHEMBL100352", "parent_chembl_id": "CHEMBL100352"}, "molecule_properties":
         {"alogp": "1.72", "aromatic_rings": 2, "full_molformula": "C15H16N4O2", "full_mwt":
@@ -9039,7 +9039,7 @@ interactions:
         false}, {"atc_classifications": [], "availability_type": -1, "biotherapeutic":
         null, "black_box_warning": 0, "chemical_probe": 0, "chirality": -1, "cross_references":
         [], "dosed_ingredient": false, "first_approval": null, "first_in_class": -1,
-        "helm_notation": null, "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id":
+        "helm_notation": null, "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id":
         "CHEMBL100445", "molecule_hierarchy": {"active_chembl_id": "CHEMBL100445",
         "molecule_chembl_id": "CHEMBL100445", "parent_chembl_id": "CHEMBL100445"},
         "molecule_properties": {"alogp": "4.16", "aromatic_rings": 3, "full_molformula":
@@ -9078,7 +9078,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100071",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100071",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100071", "molecule_chembl_id":
         "CHEMBL100071", "parent_chembl_id": "CHEMBL100071"}, "molecule_properties":
         {"alogp": "3.88", "aromatic_rings": 1, "full_molformula": "C19H23NO4", "full_mwt":
@@ -9113,7 +9113,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100336",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100336",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100336", "molecule_chembl_id":
         "CHEMBL100336", "parent_chembl_id": "CHEMBL100336"}, "molecule_properties":
         {"alogp": "5.76", "aromatic_rings": 2, "full_molformula": "C34H48N2O3", "full_mwt":
@@ -9159,7 +9159,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL100702",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL100702",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL100702", "molecule_chembl_id":
         "CHEMBL100702", "parent_chembl_id": "CHEMBL100702"}, "molecule_properties":
         {"alogp": "3.05", "aromatic_rings": 3, "full_molformula": "C30H31N3O5", "full_mwt":
@@ -9246,7 +9246,7 @@ interactions:
       string: '{"molecules": [{"atc_classifications": [], "availability_type": -1,
         "biotherapeutic": null, "black_box_warning": 0, "chemical_probe": 0, "chirality":
         -1, "cross_references": [], "dosed_ingredient": false, "first_approval": null,
-        "first_in_class": -1, "helm_notation": null, "inorganic_flag": -1, "max_phase":
+        "first_in_class": -1, "helm_notation": null, "inorganic_flag": 0, "max_phase":
         null, "molecule_chembl_id": "CHEMBL6329", "molecule_hierarchy": {"active_chembl_id":
         "CHEMBL6329", "molecule_chembl_id": "CHEMBL6329", "parent_chembl_id": "CHEMBL6329"},
         "molecule_properties": {"alogp": "2.11", "aromatic_rings": 3, "full_molformula":
@@ -9281,7 +9281,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL6328",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL6328",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL6328", "molecule_chembl_id":
         "CHEMBL6328", "parent_chembl_id": "CHEMBL6328"}, "molecule_properties": {"alogp":
         "1.33", "aromatic_rings": 3, "full_molformula": "C18H12N4O3", "full_mwt":
@@ -9317,7 +9317,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL265667",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL265667",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL265667", "molecule_chembl_id":
         "CHEMBL265667", "parent_chembl_id": "CHEMBL265667"}, "molecule_properties":
         {"alogp": "2.27", "aromatic_rings": 3, "full_molformula": "C18H16ClN3O3",
@@ -9354,7 +9354,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL6362",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL6362",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL6362", "molecule_chembl_id":
         "CHEMBL6362", "parent_chembl_id": "CHEMBL6362"}, "molecule_properties": {"alogp":
         "1.46", "aromatic_rings": 3, "full_molformula": "C17H13N3O3", "full_mwt":
@@ -9388,7 +9388,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL267864",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL267864",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL267864", "molecule_chembl_id":
         "CHEMBL267864", "parent_chembl_id": "CHEMBL267864"}, "molecule_properties":
         {"alogp": "2.11", "aromatic_rings": 3, "full_molformula": "C17H12ClN3O3",
@@ -9420,8 +9420,8 @@ interactions:
         -1, "structure_type": "MOL", "therapeutic_flag": false, "topical": false,
         "usan_stem": null, "usan_stem_definition": null, "usan_substem": null, "usan_year":
         null, "veterinary": -1, "withdrawn_flag": false}], "page_meta": {"limit":
-        5, "next": "/chembl/api/data/molecule?limit=5&offset=5", "offset": 0,
-        "previous": null, "total_count": 2878135}}'
+        5, "next": "/chembl/api/data/molecule?limit=5&offset=5", "offset": 0, "previous":
+        null, "total_count": 2878135}}'
     headers:
       Cache-Control:
       - max-age=30000000, s-maxage=30000000

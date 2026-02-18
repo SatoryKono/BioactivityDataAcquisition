@@ -6724,7 +6724,7 @@ interactions:
       string: '{"molecules": [{"atc_classifications": [], "availability_type": -1,
         "biotherapeutic": null, "black_box_warning": 0, "chemical_probe": 0, "chirality":
         -1, "cross_references": [], "dosed_ingredient": false, "first_approval": null,
-        "first_in_class": -1, "helm_notation": null, "inorganic_flag": -1, "max_phase":
+        "first_in_class": -1, "helm_notation": null, "inorganic_flag": 0, "max_phase":
         null, "molecule_chembl_id": "CHEMBL6329", "molecule_hierarchy": {"active_chembl_id":
         "CHEMBL6329", "molecule_chembl_id": "CHEMBL6329", "parent_chembl_id": "CHEMBL6329"},
         "molecule_properties": {"alogp": "2.11", "aromatic_rings": 3, "full_molformula":
@@ -6759,7 +6759,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL6328",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL6328",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL6328", "molecule_chembl_id":
         "CHEMBL6328", "parent_chembl_id": "CHEMBL6328"}, "molecule_properties": {"alogp":
         "1.33", "aromatic_rings": 3, "full_molformula": "C18H12N4O3", "full_mwt":
@@ -7122,8 +7122,8 @@ interactions:
         null, "confidence_description": "Homologous single protein target assigned",
         "confidence_score": 8, "description": "The compound was tested for the in
         vitro inhibition of platelet 12-lipoxygenase at a concentration of 30 uM",
-        "document_chembl_id": "CHEMBL1125582", "relationship_description": "Homologous
-        protein target assigned", "relationship_type": "H", "src_assay_id": null,
+        "document_chembl_id": "CHEMBL1125582", "relationship_description": "Direct
+        protein target assigned", "relationship_type": "D", "src_assay_id": null,
         "src_id": 1, "target_chembl_id": "CHEMBL2741", "tissue_chembl_id": null, "variant_sequence":
         null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
         "CHEMBL615118", "assay_classifications": [], "assay_group": null, "assay_organism":
@@ -7131,12 +7131,12 @@ interactions:
         null, "assay_tax_id": null, "assay_test_type": null, "assay_tissue": null,
         "assay_type": "F", "assay_type_description": "Functional", "bao_format": "BAO_0000219",
         "bao_label": "cell-based format", "cell_chembl_id": null, "confidence_description":
-        "Default value - Target unknown or has yet to be assigned", "confidence_score":
-        0, "description": "Compound was evaluated for its ability to mobilize calcium
-        in 1321NI cells", "document_chembl_id": "CHEMBL1127008", "relationship_description":
-        "Default value - Target has yet to be curated", "relationship_type": "U",
-        "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL612545", "tissue_chembl_id":
-        null, "variant_sequence": null}], "page_meta": {"limit": 2, "next": "/chembl/api/data/assay.json?limit=2&offset=2",
+        "Direct single protein target assigned", "confidence_score": 8, "description":
+        "Compound was evaluated for its ability to mobilize calcium in 1321NI cells",
+        "document_chembl_id": "CHEMBL1127008", "relationship_description": "Direct
+        protein target assigned", "relationship_type": "D", "src_assay_id": null,
+        "src_id": 1, "target_chembl_id": "CHEMBL612545", "tissue_chembl_id": null,
+        "variant_sequence": null}], "page_meta": {"limit": 2, "next": "/chembl/api/data/assay.json?limit=2&offset=2",
         "offset": 0, "previous": null, "total_count": 1890749}}'
     headers:
       Cache-Control:
