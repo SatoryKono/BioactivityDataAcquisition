@@ -265,3 +265,76 @@ class TestCrossProviderDoiNormalization:
         assert pubmed_result["doi"] is None
         assert s2_result["doi"] is None
         assert openalex_result["doi"] is None
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "url_prefixed_doi,expected_normalized",
+        [
+            ("https://doi.org/10.1234/test", "10.1234/test"),
+            ("https://doi.org/10.1038/NATURE12373", "10.1038/nature12373"),
+            ("http://doi.org/10.1000/ABC.DEF", "10.1000/abc.def"),
+            ("doi:10.5555/Mixed.Case", "10.5555/mixed.case"),
+        ],
+    )
+    async def test_url_prefixed_doi_stripped_across_providers(
+        self,
+        mock_context: PipelineContext,
+        url_prefixed_doi: str,
+        expected_normalized: str,
+    ) -> None:
+        """Test that URL-prefixed DOIs are stripped and normalized across providers.
+
+        Each provider receives a DOI with URL prefix (e.g., https://doi.org/...)
+        and the Silver output must contain the bare, lowercase DOI.
+        """
+        # Build records with the URL-prefixed DOI placed directly in each
+        # provider's DOI field (bypassing helpers that may add their own prefix)
+        pubmed_record: dict[str, Any] = {
+            "_raw_xml": f"""<?xml version="1.0"?>
+            <PubmedArticle>
+              <MedlineCitation>
+                <PMID>99999999</PMID>
+                <Article>
+                  <ArticleTitle>URL Prefix DOI Test</ArticleTitle>
+                  <ELocationID EIdType="doi">{url_prefixed_doi}</ELocationID>
+                </Article>
+              </MedlineCitation>
+            </PubmedArticle>
+            """
+        }
+        s2_record: dict[str, Any] = {
+            "paperId": "a" * 40,
+            "externalIds": {"DOI": url_prefixed_doi},
+            "title": "URL Prefix DOI Test",
+            "_lookup_method": "doi",
+        }
+        openalex_record: dict[str, Any] = {
+            "id": "https://openalex.org/W9999999999",
+            "doi": url_prefixed_doi,
+            "title": "URL Prefix DOI Test",
+            "_lookup_method": "doi",
+        }
+
+        pubmed_result = await PubMedPublicationTransformer().transform(
+            mock_context, pubmed_record, 0
+        )
+        s2_result = await SemanticScholarPublicationTransformer().transform(
+            mock_context, s2_record, 0
+        )
+        openalex_result = await OpenAlexPublicationTransformer().transform(
+            mock_context, openalex_record, 0
+        )
+
+        assert pubmed_result is not None, "PubMed URL-prefix transform failed"
+        assert s2_result is not None, "Semantic Scholar URL-prefix transform failed"
+        assert openalex_result is not None, "OpenAlex URL-prefix transform failed"
+
+        assert pubmed_result["doi"] == expected_normalized, (
+            f"PubMed did not strip URL prefix: {pubmed_result['doi']}"
+        )
+        assert s2_result["doi"] == expected_normalized, (
+            f"Semantic Scholar did not strip URL prefix: {s2_result['doi']}"
+        )
+        assert openalex_result["doi"] == expected_normalized, (
+            f"OpenAlex did not strip URL prefix: {openalex_result['doi']}"
+        )
