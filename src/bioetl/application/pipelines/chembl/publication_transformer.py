@@ -192,7 +192,9 @@ class PublicationTransformer(BaseChemblTransformer):
         data["abstract"] = normalizer.normalize_abstract(data.get("abstract"))
 
         # Validate DOI using Value Object (returns None for invalid/empty)
-        data["publication_pmid"] = data.get("publication_pmid") or record.get("pmid")
+        data["publication_pmid"] = data.get("publication_pmid") or PMID(
+            record.get("pmid")
+        )
         doi = DOI.from_raw(data.get("publication_doi"))
         data["publication_doi"] = str(doi) if doi else None
         data["doi"] = data["publication_doi"]
