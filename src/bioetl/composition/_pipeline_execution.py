@@ -25,7 +25,7 @@ from bioetl.domain.context import (
     PipelineRunContext,
     VacuumConfig,
 )
-from bioetl.domain.types import RunID, RunType
+from bioetl.domain.types import ExecutionContext, RunID, RunType
 from bioetl.infrastructure.config import get_settings
 
 if TYPE_CHECKING:
@@ -158,6 +158,7 @@ def build_pipeline_context(name: str, options: RunOptions) -> PipelineRunContext
         ignore_yaml_filter=options.ignore_yaml_filter,
         skip_gold=options.skip_gold,
         cached_bronze=cached_bronze,
+        execution_context=ExecutionContext(options.execution_context),
     )
 
 

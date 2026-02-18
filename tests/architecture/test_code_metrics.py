@@ -47,8 +47,8 @@ class TestFileSizeLimits:
         "normalization_service.py": 420,  # 411 LOC - Normalization service with validation
         "value_validator.py": 360,  # 351 LOC - Value objects validation
         "activity.py": 330,  # 327 LOC - Activity domain types with rich validation
-        "types.py": 400,  # 396 LOC
-        "context.py": 385,  # 380 LOC - PipelineContext with rich metadata and validation + InputFilterContext.from_multi_ids
+        "types.py": 420,  # 414 LOC - domain types + PublicationType + ExecutionContext enums
+        "context.py": 390,  # 385 LOC - PipelineContext with rich metadata and validation + InputFilterContext.from_multi_ids + execution_context
         "state.py": 380,  # 371 LOC - CompositePipelineState FSM with transition rules
         "chembl_structures.py": 510,  # 506 LOC - ChEMBL structural entities + deprecated alias __getattr__ (v2.0)
         "exceptions.py": 550,  # 513 LOC
@@ -96,7 +96,7 @@ class TestFileSizeLimits:
         # Composition layer exemptions
         "metadata_coordinator.py": 510,  # 506 LOC - MetadataCoordinator with centralized metadata management + extended lineage
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
-        "composite.py": 650,  # 641 LOC - Composite pipeline bootstrap with runner factories + field group registry loading + DQ report service + cross-validation + quarantine wiring
+        "composite.py": 655,  # 651 LOC - Composite pipeline bootstrap with runner factories + execution_context + field group registry loading + DQ report service + cross-validation + quarantine wiring
         "entrypoints.py": 110,  # 102 LOC - Re-export facade (split to _pipeline_execution, _resource_management, _services)
         "registration.py": 655,  # 651 LOC - provider registration (config helpers extracted to _config_helpers.py) + extraction_params overlap validation (ADR-028 §3)
         "storage_adapter.py": 660,  # 655 LOC - storage adapter with Bronze/Silver/Gold writers + BronzeWriteResult + SilverWriteResult + SourceMetadata param + Silver lineage
