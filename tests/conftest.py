@@ -291,7 +291,7 @@ def _create_minimal_df(columns, provider, entity_id, pk_field, pk_value):
 
     # Use PUBLICATION for ChEMBL, journal-article for others to satisfy enums
     if provider == "chembl":
-        data["publication_type"] = "PUBLICATION"
+        data["publication_type"] = "journal-article"
     else:
         data["publication_type"] = "journal-article"
 
@@ -317,7 +317,7 @@ def minimal_chembl_publication_df():
     df = _create_minimal_df(
         CHEMBL_SPECIFIC, "chembl", "CHEMBL123", "publication_id", "CHEMBL123"
     )
-    df["publication_type"] = "PUBLICATION"
+    df["publication_type"] = "journal-article"
     return df
 
 
