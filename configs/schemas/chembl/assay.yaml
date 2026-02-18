@@ -1,1 +1,71 @@
-column_groups: []
+column_groups:
+  - name: system
+    fields:
+      - entity_id
+      - content_hash
+      - _run_id
+      - _run_type
+      - _source_batch_id
+      - _ingestion_ts
+      - _index
+
+  - name: business
+    fields:
+      - assay_id
+      - description
+      - assay_type
+      - assay_type_description
+      - assay_test_type
+      - assay_category
+      - assay_group
+      - assay_organism
+      - assay_taxonomy_id
+      - assay_strain
+      - assay_tissue
+      - assay_cell_type
+      - assay_subcellular_fraction
+      - target_id
+      - relationship_type
+      - relationship_description
+      - confidence_score
+      - confidence_description
+      - src_id
+      - src_assay_id
+      - publication_id
+      - assay_pref_name
+      - score
+      - cell_id
+      - tissue_id
+      - bao_format
+      - bao_label
+      - aidx
+      - variant_accession
+      - variant_isoform
+      - variant_mutation
+      - variant_organism
+      - variant_sequence
+      - variant_taxonomy_id
+      - variant_sequence_json
+      - assay_classifications
+      - assay_parameters
+
+  - name: dq
+    pattern: "^_dq_"
+
+silver:
+  include_groups:
+    - system
+    - business
+    - dq
+  exclude_fields: []
+  alias_policy: preserve
+
+gold:
+  include_groups:
+    - system
+    - business
+  exclude_fields:
+    - _dq_*
+    - _source_batch_id
+    - _index
+  alias_policy: canonical
