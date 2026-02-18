@@ -83,6 +83,7 @@
     "loading_strategy": null,
     "pipeline_name": "chembl_activity",
     "provider": "chembl",
+    "scd_config": null,
     "silver_filters": {
       "column_filters": [
         {
@@ -324,6 +325,12 @@
     "loading_strategy": null,
     "pipeline_name": "pubchem_compound",
     "provider": "pubchem",
+    "scd_config": {
+      "is_current": "_is_current",
+      "valid_from": "_valid_from",
+      "valid_to": "_valid_to",
+      "version": "_version"
+    },
     "silver_filters": {
       "column_filters": [],
       "exclude_if_present": [],
@@ -683,6 +690,12 @@
     "loading_strategy": "full_scan_only",
     "pipeline_name": "pubmed_publication",
     "provider": "pubmed",
+    "scd_config": {
+      "is_current": "_is_current",
+      "valid_from": "_valid_from",
+      "valid_to": "_valid_to",
+      "version": "_version"
+    },
     "silver_filters": {
       "column_filters": [],
       "exclude_if_present": [],
@@ -750,6 +763,12 @@
     "loading_strategy": null,
     "pipeline_name": "uniprot_protein",
     "provider": "uniprot",
+    "scd_config": {
+      "is_current": "_is_current",
+      "valid_from": "_valid_from",
+      "valid_to": "_valid_to",
+      "version": "_version"
+    },
     "silver_filters": {
       "column_filters": [],
       "exclude_if_present": [],

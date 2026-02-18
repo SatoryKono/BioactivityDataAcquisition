@@ -149,6 +149,7 @@ class TestStorageAdapter:
             schema=mock_schema,
             primary_keys=None,
             mode="overwrite",
+            scd_config=None,
             column_order=None,
             ingestion_ts=None,
             run_id=None,

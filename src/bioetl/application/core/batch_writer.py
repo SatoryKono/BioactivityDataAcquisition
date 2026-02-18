@@ -396,6 +396,7 @@ class BatchWriter:
                 schema=self._gold_schema,
                 primary_keys=list(self._table_config.primary_keys),
                 mode=self._gold_mode,
+                scd_config=self._config.scd_config,
                 column_order=column_order,
                 ingestion_ts=self._context.started_at,
                 run_id=self._context.run_id,
