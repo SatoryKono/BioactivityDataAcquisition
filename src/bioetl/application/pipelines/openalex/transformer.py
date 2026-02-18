@@ -304,9 +304,9 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
         """
         return OpenAlexPublicationEntity
 
-    @staticmethod
-    # Any: accepts any dataclass ...
-    def entity_to_silver_record(entity: Any) -> dict[str, Any]:
+        # Any: accepts any dataclass ...
+
+    def entity_to_silver_record(self, entity: Any) -> dict[str, Any]:
         """Convert Domain Entity to SilverRecord.
 
         OpenAlex doesn't provide pmc_id, so it will be None in the entity.
@@ -319,10 +319,8 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             SilverRecord dictionary with all PublicationBaseSchema fields.
 
         """
-        from bioetl.application.core.base_transformer import BaseTransformer
-
         # Get base silver record (includes all fields with None values)
-        silver_record = BaseTransformer.entity_to_silver_record(entity)
+        silver_record = super().entity_to_silver_record(entity)
 
         # Note: pmc_id is kept (with None value) to satisfy PublicationBaseSchema
 

@@ -141,6 +141,7 @@ from bioetl.domain.schemas.semanticscholar.publication import (
 )
 from bioetl.domain.schemas.uniprot.idmapping import IDMappingSchema
 from bioetl.domain.schemas.uniprot.protein import UniprotTargetSchema
+from bioetl.infrastructure.config import load_pipeline_contract_policy
 
 # Silver schemas (optional PyArrow schemas)
 from bioetl.infrastructure.schemas.silver import (
@@ -203,6 +204,7 @@ class PipelineFactoryConfig(NamedTuple):
 
     pipeline_name: str
     provider: str
+    entity_type: str
     transformer_class: type[BaseTransformer]
     silver_schema: pa.Schema | None
     gold_schema: Any  # Any: Pandera DataFrameModel (no common base type)
@@ -216,6 +218,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     PipelineFactoryConfig(
         pipeline_name="chembl_activity",
         provider="chembl",
+        entity_type="activity",
         transformer_class=ActivityTransformer,
         silver_schema=CHEMBL_ACTIVITY_SCHEMA,
         gold_schema=ChEMBLActivityGoldSchema,
@@ -224,6 +227,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     PipelineFactoryConfig(
         pipeline_name="chembl_assay",
         provider="chembl",
+        entity_type="assay",
         transformer_class=AssayTransformer,
         silver_schema=CHEMBL_ASSAY_SCHEMA,
         gold_schema=ChEMBLAssayGoldSchema,
@@ -232,6 +236,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     PipelineFactoryConfig(
         pipeline_name="chembl_assay_parameters",
         provider="chembl",
+        entity_type="assay_parameters",
         transformer_class=AssayParametersTransformer,
         silver_schema=CHEMBL_ASSAY_PARAMETERS_SCHEMA,
         gold_schema=ChEMBLAssayParametersGoldSchema,
@@ -240,6 +245,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     PipelineFactoryConfig(
         pipeline_name="chembl_cell_line",
         provider="chembl",
+        entity_type="cell_line",
         transformer_class=CellLineTransformer,
         silver_schema=CHEMBL_CELL_LINE_SCHEMA,
         gold_schema=ChEMBLCellLineGoldSchema,
@@ -248,6 +254,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     PipelineFactoryConfig(
         pipeline_name="chembl_compound_record",
         provider="chembl",
+        entity_type="compound_record",
         transformer_class=CompoundRecordTransformer,
         silver_schema=CHEMBL_COMPOUND_RECORD_SCHEMA,
         gold_schema=ChEMBLCompoundRecordGoldSchema,
@@ -256,6 +263,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     PipelineFactoryConfig(
         pipeline_name="chembl_publication",
         provider="chembl",
+        entity_type="publication",
         transformer_class=PublicationTransformer,
         silver_schema=CHEMBL_PUBLICATION_SCHEMA,
         gold_schema=ChEMBLDocumentGoldSchema,
@@ -264,6 +272,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     PipelineFactoryConfig(
         pipeline_name="chembl_publication_similarity",
         provider="chembl",
+        entity_type="publication_similarity",
         transformer_class=PublicationSimilarityTransformer,
         silver_schema=CHEMBL_DOCUMENT_SIMILARITY_SCHEMA,
         gold_schema=ChEMBLDocumentSimilarityGoldSchema,
@@ -272,6 +281,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     PipelineFactoryConfig(
         pipeline_name="chembl_publication_term",
         provider="chembl",
+        entity_type="publication_term",
         transformer_class=PublicationTermTransformer,
         silver_schema=CHEMBL_DOCUMENT_TERM_SCHEMA,
         gold_schema=ChEMBLDocumentTermGoldSchema,
@@ -280,6 +290,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     PipelineFactoryConfig(
         pipeline_name="chembl_molecule",
         provider="chembl",
+        entity_type="molecule",
         transformer_class=MoleculeTransformer,
         silver_schema=CHEMBL_MOLECULE_SCHEMA,
         gold_schema=ChEMBLMoleculeGoldSchema,
@@ -288,6 +299,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     PipelineFactoryConfig(
         pipeline_name="chembl_target",
         provider="chembl",
+        entity_type="target",
         transformer_class=TargetTransformer,
         silver_schema=CHEMBL_TARGET_SCHEMA,
         gold_schema=ChEMBLTargetGoldSchema,
@@ -296,6 +308,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     PipelineFactoryConfig(
         pipeline_name="chembl_target_component",
         provider="chembl",
+        entity_type="target_component",
         transformer_class=TargetComponentTransformer,
         silver_schema=CHEMBL_TARGET_COMPONENT_SCHEMA,
         gold_schema=ChEMBLTargetComponentGoldSchema,
@@ -304,6 +317,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     PipelineFactoryConfig(
         pipeline_name="chembl_protein_class",
         provider="chembl",
+        entity_type="protein_class",
         transformer_class=ProteinClassTransformer,
         silver_schema=CHEMBL_PROTEIN_CLASS_SCHEMA,
         gold_schema=ChEMBLProteinClassGoldSchema,
@@ -312,6 +326,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     PipelineFactoryConfig(
         pipeline_name="chembl_tissue",
         provider="chembl",
+        entity_type="tissue",
         transformer_class=TissueTransformer,
         silver_schema=CHEMBL_TISSUE_SCHEMA,
         gold_schema=ChEMBLTissueGoldSchema,
@@ -319,6 +334,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     PipelineFactoryConfig(
         pipeline_name="chembl_subcellular_fraction",
         provider="chembl",
+        entity_type="subcellular_fraction",
         transformer_class=SubcellularFractionTransformer,
         silver_schema=CHEMBL_SUBCELLULAR_FRACTION_SCHEMA,
         gold_schema=ChEMBLSubcellularFractionGoldSchema,
@@ -327,6 +343,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     PipelineFactoryConfig(
         pipeline_name="pubchem_compound",
         provider="pubchem",
+        entity_type="compound",
         transformer_class=PubChemCompoundTransformer,
         silver_schema=PUBCHEM_COMPOUND_SCHEMA,
         gold_schema=PubChemCompoundGoldSchema,
@@ -336,6 +353,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     PipelineFactoryConfig(
         pipeline_name="uniprot_protein",
         provider="uniprot",
+        entity_type="protein",
         transformer_class=UniProtProteinTransformer,
         silver_schema=UNIPROT_PROTEIN_SCHEMA,
         gold_schema=UniProtProteinGoldSchema,
@@ -344,6 +362,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     PipelineFactoryConfig(
         pipeline_name="uniprot_idmapping",
         provider="uniprot",
+        entity_type="idmapping",
         transformer_class=IDMappingTransformer,
         silver_schema=UNIPROT_ID_MAPPING_SCHEMA,
         gold_schema=UniProtIDMappingGoldSchema,
@@ -354,6 +373,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     PipelineFactoryConfig(
         pipeline_name="pubmed_publication",
         provider="pubmed",
+        entity_type="publication",
         transformer_class=PubMedPublicationTransformer,
         silver_schema=PUBMED_PUBLICATION_SCHEMA,
         gold_schema=PubMedPublicationGoldSchema,
@@ -363,6 +383,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     PipelineFactoryConfig(
         pipeline_name="crossref_publication",
         provider="crossref",
+        entity_type="publication",
         transformer_class=CrossRefPublicationTransformer,
         silver_schema=CROSSREF_PUBLICATION_SCHEMA,
         gold_schema=CrossRefPublicationGoldSchema,
@@ -372,6 +393,7 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     PipelineFactoryConfig(
         pipeline_name="openalex_publication",
         provider="openalex",
+        entity_type="publication",
         transformer_class=OpenAlexPublicationTransformer,
         silver_schema=OPENALEX_PUBLICATION_SCHEMA,
         gold_schema=OpenAlexPublicationGoldSchema,
@@ -381,12 +403,54 @@ PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
     PipelineFactoryConfig(
         pipeline_name="semanticscholar_publication",
         provider="semanticscholar",
+        entity_type="publication",
         transformer_class=SemanticScholarPublicationTransformer,
         silver_schema=SEMANTICSCHOLAR_PUBLICATION_SCHEMA,
         gold_schema=SemanticScholarPublicationGoldSchema,
         pandera_silver_schema=SemanticScholarPublicationSchema,
     ),
 )
+
+
+def _schema_columns(schema_class: Any) -> set[str]:
+    """Extract column names from a Pandera DataFrameModel class."""
+    try:
+        schema = schema_class.to_schema()
+    except Exception as exc:  # pragma: no cover - defensive
+        raise ValueError(f"Failed to materialize schema {schema_class}: {exc}") from exc
+    return set(schema.columns.keys())
+
+
+def _validate_contract_policy(config: PipelineFactoryConfig) -> None:
+    """Preflight check that policy keys exist in Silver and Gold contracts."""
+    policy = load_pipeline_contract_policy(config.provider, config.entity_type)
+
+    if config.pandera_silver_schema is not None:
+        silver_columns = _schema_columns(config.pandera_silver_schema)
+    elif config.silver_schema is not None:
+        silver_columns = set(config.silver_schema.names)
+    else:
+        raise ValueError(
+            f"No Silver schema available for {config.provider}/{config.entity_type}"
+        )
+    gold_columns = _schema_columns(config.gold_schema)
+
+    required_keys = set(policy.primary_key) | set(policy.merge_keys)
+    missing_in_silver = sorted(
+        key for key in required_keys if key not in silver_columns
+    )
+    missing_in_gold = sorted(key for key in required_keys if key not in gold_columns)
+
+    if missing_in_silver or missing_in_gold:
+        details: list[str] = []
+        if missing_in_silver:
+            details.append(f"silver missing {missing_in_silver}")
+        if missing_in_gold:
+            details.append(f"gold missing {missing_in_gold}")
+        raise ValueError(
+            f"Invalid contract policy for {config.provider}/{config.entity_type}: "
+            + ", ".join(details)
+        )
 
 
 def _create_factory(
@@ -400,6 +464,8 @@ def _create_factory(
     Returns:
         Configured GenericPipelineFactory instance
     """
+    _validate_contract_policy(config)
+
     # Resolve data source creator: use data_source_provider override if set
     data_source_creator: DataSourceCreator | None = None
     if config.data_source_provider:

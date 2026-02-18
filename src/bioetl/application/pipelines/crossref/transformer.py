@@ -360,9 +360,9 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         """
         return True
 
-    @staticmethod
-    # Any: accepts any dataclass ...
-    def entity_to_silver_record(entity: Any) -> dict[str, Any]:
+        # Any: accepts any dataclass ...
+
+    def entity_to_silver_record(self, entity: Any) -> dict[str, Any]:
         """Convert Domain Entity to SilverRecord, preserving base schema fields.
 
         Overrides base implementation to handle ISSN list conversion.
@@ -376,10 +376,8 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             SilverRecord dictionary with all base schema fields.
 
         """
-        from bioetl.application.core.base_transformer import BaseTransformer
-
         # Get base silver record
-        silver_record = BaseTransformer.entity_to_silver_record(entity)
+        silver_record = super().entity_to_silver_record(entity)
 
         # Note: Do NOT remove pmid, pmc_id, abstract, affiliation_list
         # These fields inherit from PublicationBaseSchema and must exist in DataFrame
@@ -390,7 +388,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
         if isinstance(issn_raw, list):
             silver_record["issn"] = issn_raw[0] if issn_raw else None
             silver_record["issn_list"] = (
-                BaseTransformer.serialize_json_list(issn_raw) if issn_raw else None
+                self.serialize_json_list(issn_raw) if issn_raw else None
             )
         else:
             silver_record.setdefault("issn_list", None)

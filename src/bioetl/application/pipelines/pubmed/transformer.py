@@ -700,9 +700,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "date_revised": date_revised,
         }
 
-    @staticmethod
-    # Any: accepts any dataclass ...
-    def entity_to_silver_record(entity: Any) -> dict[str, Any]:
+        # Any: accepts any dataclass ...
+
+    def entity_to_silver_record(self, entity: Any) -> dict[str, Any]:
         """Convert Domain Entity to SilverRecord, excluding certain fields.
 
         Overrides base implementation to remove fields not needed for PubMed.
@@ -714,10 +714,8 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             SilverRecord dictionary without excluded fields.
 
         """
-        from bioetl.application.core.base_transformer import BaseTransformer
-
         # Get base silver record
-        silver_record = BaseTransformer.entity_to_silver_record(entity)
+        silver_record = super().entity_to_silver_record(entity)
 
         # Remove excluded fields (API deprecated or not available)
         silver_record.pop("vernacular_title", None)

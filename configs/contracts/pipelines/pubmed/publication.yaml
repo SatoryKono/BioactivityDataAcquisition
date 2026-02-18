@@ -1,0 +1,17 @@
+primary_key:
+- pmid
+merge_keys:
+- pmid
+rename_map:
+  run_id: _run_id
+  run_type: _run_type
+  source_batch_id: _source_batch_id
+  ingestion_ts: _ingestion_ts
+  source: _source
+hash_include: []
+hash_exclude:
+- _ingestion_ts
+- _run_id
+- _run_type
+- _dq_errors
+- _dq_status

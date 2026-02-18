@@ -253,9 +253,9 @@ class PublicationTransformer(BaseChemblTransformer):
 
         return data
 
-    @staticmethod
-    # Any: accepts any dataclass ...
-    def entity_to_silver_record(entity: Any) -> dict[str, Any]:
+        # Any: accepts any dataclass ...
+
+    def entity_to_silver_record(self, entity: Any) -> dict[str, Any]:
         """Convert Domain Entity to SilverRecord.
 
         ChEMBL-specific fields are set to None in _extract_business_data() for
@@ -270,10 +270,8 @@ class PublicationTransformer(BaseChemblTransformer):
             fields are None).
 
         """
-        from bioetl.application.core.base_transformer import BaseTransformer
-
         # Get base silver record (includes all fields with None values)
-        silver_record = BaseTransformer.entity_to_silver_record(entity)
+        silver_record = super().entity_to_silver_record(entity)
 
         # Remove fields not in unified publication schema (ChEMBL-specific exclusions)
         silver_record.pop("issn", None)

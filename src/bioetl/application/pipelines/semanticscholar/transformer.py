@@ -281,8 +281,9 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         """
         return SemanticScholarPublicationEntity
 
-    @staticmethod
-    def entity_to_silver_record(entity: Any) -> dict[str, Any]:  # Any: record vals vary
+    def entity_to_silver_record(
+        self, entity: Any
+    ) -> dict[str, Any]:  # Any: record vals vary
         """Convert Domain Entity to SilverRecord, preserving base schema fields.
 
         Note: pmc_id is kept with None value to satisfy PublicationBaseSchema
@@ -295,9 +296,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             SilverRecord dictionary with all base schema fields.
 
         """
-        from bioetl.application.core.base_transformer import BaseTransformer
-
-        silver_record = BaseTransformer.entity_to_silver_record(entity)
+        silver_record = super().entity_to_silver_record(entity)
 
         # Note: Do NOT remove pmc_id - it inherits from PublicationBaseSchema
         # and must exist in DataFrame even if set to None (Pandera requires

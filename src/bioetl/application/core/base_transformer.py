@@ -14,6 +14,7 @@ Implements DRY principle by extracting shared logic from entity transformers.
 from __future__ import annotations
 
 import dataclasses
+import datetime
 import time
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
@@ -32,6 +33,10 @@ from bioetl.domain.ports import (
 )
 from bioetl.domain.services import DataNormalizationService, IdentityService
 from bioetl.domain.types import ContentHash, EntityID
+from bioetl.infrastructure.config import load_pipeline_contract_policy
+from bioetl.infrastructure.schemas.pipeline_contract_policy import (
+    PipelineContractPolicy,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -157,6 +162,25 @@ class BaseTransformer(ABC):
             if data_normalizer is not None
             else DataNormalizationService()
         )
+        try:
+            self._contract_policy = load_pipeline_contract_policy(
+                self.provider,
+                self.entity_type,
+            )
+        except ValueError:
+            self._contract_policy = PipelineContractPolicy(
+                primary_key=["entity_id"],
+                merge_keys=["entity_id"],
+                rename_map={
+                    "run_id": "_run_id",
+                    "run_type": "_run_type",
+                    "source_batch_id": "_source_batch_id",
+                    "ingestion_ts": "_ingestion_ts",
+                    "source": "_source",
+                },
+                hash_include=[],
+                hash_exclude=["_ingestion_ts", "_run_id", "_run_type"],
+            )
 
     # ========================================================================
     # PII Hashing Methods (RULES.md §5.4)
@@ -495,9 +519,10 @@ class BaseTransformer(ABC):
             ContentHash: SHA256 hash of normalized record.
 
         """
+        hash_input = self._apply_hash_policy(business_data)
         return self._identity.compute_content_hash(
             self.provider,
-            business_data,
+            hash_input,
             exclude_none=exclude_none,
         )
 
@@ -624,52 +649,51 @@ class BaseTransformer(ABC):
         """
         return {name: cls.serialize_json(record.get(name)) for name in field_names}
 
-    @staticmethod
-    def entity_to_silver_record(entity: Any) -> dict[str, Any]:  # Any: generic entity
-        """Convert Domain Entity to SilverRecord format.
-
-        Handles lineage fields renaming and formatting:
-        - run_id → _run_id (str)
-        - run_type → _run_type (str value)
-        - source_batch_id → _source_batch_id (str)
-        - ingestion_ts → _ingestion_ts (ISO string)
-
-        Args:
-            entity: Domain entity (dataclass).
-
-        Returns:
-            SilverRecord dictionary with renamed lineage fields.
-
-        """
-        # Use dataclasses.asdict to ensure fields from slots (BaseEntity) are included
+    def entity_to_silver_record(
+        self, entity: Any
+    ) -> dict[str, Any]:  # Any: generic entity
+        """Convert Domain Entity to SilverRecord format using policy rename map."""
         silver_record = dataclasses.asdict(entity)
 
-        # Handle lineage fields renaming and formatting
-        if "run_id" in silver_record:
-            silver_record["_run_id"] = str(silver_record.pop("run_id"))
-
-        if "run_type" in silver_record:
-            silver_record["_run_type"] = str(silver_record.pop("run_type").value)
-
-        # Handle source_batch_id which might be None
-        if "source_batch_id" in silver_record:
-            source_batch_id = silver_record.pop("source_batch_id")
-            silver_record["_source_batch_id"] = (
-                str(source_batch_id) if source_batch_id else None
-            )
-
-        if "ingestion_ts" in silver_record:
-            silver_record["_ingestion_ts"] = silver_record.pop(
-                "ingestion_ts"
-            ).isoformat()
-
-        # Handle source field renaming: source → _source
-        # Some entities use 'source' (PublicationEntityBase), others use '_source' (ChemblPublication)
-        # Silver schema expects '_source' as the system metadata field
-        if "source" in silver_record and "_source" not in silver_record:
-            silver_record["_source"] = silver_record.pop("source")
+        rename_map = self._contract_policy.rename_map
+        for source_key, target_key in rename_map.items():
+            if source_key in silver_record and target_key not in silver_record:
+                value = silver_record.pop(source_key)
+                silver_record[target_key] = self._normalize_lineage_value(
+                    source_key, value
+                )
 
         return silver_record
+
+    def _apply_hash_policy(self, business_data: dict[str, Any]) -> dict[str, Any]:
+        """Apply include/exclude hash policy from contract config."""
+        include_fields = self._contract_policy.hash_include
+        exclude_fields = set(self._contract_policy.hash_exclude)
+
+        if include_fields:
+            scoped = {
+                k: business_data.get(k) for k in include_fields if k in business_data
+            }
+        else:
+            scoped = dict(business_data)
+
+        for field in exclude_fields:
+            scoped.pop(field, None)
+
+        return scoped
+
+    @staticmethod
+    def _normalize_lineage_value(field_name: str, value: Any) -> Any:
+        """Normalize lineage/meta field values after rename."""
+        if field_name == "run_id" and value is not None:
+            return str(value)
+        if field_name == "run_type" and value is not None:
+            return str(value.value)
+        if field_name == "source_batch_id":
+            return str(value) if value else None
+        if field_name == "ingestion_ts" and isinstance(value, datetime.datetime):
+            return value.isoformat()
+        return value
 
     # ==================== Helper Methods ====================
 
