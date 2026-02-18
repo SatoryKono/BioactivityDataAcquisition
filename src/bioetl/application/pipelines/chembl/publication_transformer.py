@@ -26,6 +26,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import ChemblPublication
+from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
 from bioetl.domain.services import IdentityService
 from bioetl.domain.value_objects import DOI, PublicationYear
 
@@ -183,6 +184,11 @@ class PublicationTransformer(BaseChemblTransformer):
             "publication_id": str(primary_id),
             **map_field_groups(record, _PUBLICATION_GROUPS),
         }
+
+        # Normalize publication_type to canonical kebab-case
+        data["publication_type"] = normalize_publication_type(
+            data.get("publication_type")
+        )
 
         # Normalize text fields using DataNormalizationService
         # Уровень A: Bronze → Silver базовая нормализация
