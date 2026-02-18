@@ -198,9 +198,18 @@ class DQConfigLoader:
         """
 
         def get_key(item: dict[str, Any]) -> str:
-            """Get unique key for validation item."""
-            # Use 'name' for cross-field/conditional, 'field' for field validations
-            return str(item.get("name") or item.get("field", ""))
+            """Get unique key for validation item.
+
+            Cross-field/conditional validations use 'name' as key.
+            Field validations use composite key (field, type, severity)
+            to allow multiple rules per field (e.g. error + warn ranges).
+            """
+            if "name" in item:
+                return str(item["name"])
+            field = item.get("field", "")
+            vtype = item.get("type", "")
+            severity = item.get("severity", "error")
+            return f"{field}:{vtype}:{severity}"
 
         # Build result map, override entries replace base entries with same key
         result_map: dict[str, dict[str, Any]] = {}
