@@ -18,7 +18,7 @@ from bioetl.domain.value_objects.dq_report import (
 )
 
 
-def convert_value(value: Any) -> Any:
+def convert_value(value: Any) -> Any:  # Any: recursive serializer h...
     """Convert a value for serialization.
 
     Handles dataclasses, enums, datetimes, and collection types.

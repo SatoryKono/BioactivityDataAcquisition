@@ -306,7 +306,7 @@ Publication pipeline использует unified naming из `PublicationBaseSc
 
 > **Impact:** Меняет тип данных в Silver/Gold таблицах → требует REBUILD.
 >
-> **Schema Drift Policy (RULES.md v5.18):** Тип change = **Critical** drift.
+> **Schema Drift Policy (RULES.md v5.20):** Тип change = **Critical** drift.
 > Политика упрощена: только Info (новые поля) и Critical (пропавшее поле / смена типа).
 > Уровень Warn (>3 новых полей) удалён.
 

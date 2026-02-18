@@ -23,15 +23,18 @@ from typing import Any
 from bioetl.domain.config import DQConfig
 from bioetl.infrastructure.config.converters import dq_overrides_to_domain
 from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
+from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
 from bioetl.infrastructure.config_loader import load_pipeline_config as load_yaml_config
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
 class ConfigLoader:
-    """Pipeline configuration loader with DQ config integration.
+    """Pipeline configuration loader with DQ and filter config integration.
 
     Loads pipeline configurations from YAML files and resolves DQ config
-    through the hierarchical DQConfigLoader system.
+    through the hierarchical DQConfigLoader system. Filter configs are
+    resolved via FilterConfigLoader during pipeline config loading
+    (see :func:`load_pipeline_config` in ``config_loader.py``).
 
     Resolution order for DQ config:
     1. If dq_config_file present: load from DQ hierarchy
@@ -42,12 +45,14 @@ class ConfigLoader:
     Attributes:
         _configs_root: Root path to configs/ directory.
         _dq_loader: DQ configuration loader instance.
+        _filter_loader: Filter configuration loader instance.
     """
 
     def __init__(
         self,
         configs_root: Path,
         dq_loader: DQConfigLoader | None = None,
+        filter_loader: FilterConfigLoader | None = None,
         relaxed_dq: bool = False,
     ) -> None:
         """Initialize loader with configs root directory.
@@ -55,12 +60,14 @@ class ConfigLoader:
         Args:
             configs_root: Path to configs/ directory.
             dq_loader: Optional DQ config loader. Created automatically if None.
+            filter_loader: Optional filter config loader. Created automatically if None.
             relaxed_dq: Whether to relax DQ thresholds (default: False).
         """
         self._configs_root = configs_root
         self._dq_loader = dq_loader or DQConfigLoader(
             configs_root, relaxed_dq=relaxed_dq
         )
+        self._filter_loader = filter_loader or FilterConfigLoader(configs_root)
 
     def load_pipeline_config(self, pipeline_name: str) -> PipelineYamlConfig:
         """Load pipeline configuration from YAML file.
@@ -159,8 +166,8 @@ class ConfigLoader:
 
     def _normalize_inline_dq_overrides(
         self,
-        dq_overrides: Any,
-    ) -> dict[str, Any]:
+        dq_overrides: Any,  # Any: Pydantic model instance
+    ) -> dict[str, Any]:  # Any: dynamic YAML config values
         """Normalize inline dq_overrides to DQConfigFile format.
 
         Converts the Pydantic DQConfig model to a dict compatible with
@@ -172,7 +179,7 @@ class ConfigLoader:
         Returns:
             Dict in DQConfigFile format for merge.
         """
-        result: dict[str, Any] = {}
+        result: dict[str, Any] = {}  # Any: dynamic YAML config values
 
         # Thresholds normalization
         result["thresholds"] = {
@@ -214,6 +221,7 @@ class ConfigLoader:
 
         return result
 
+    # Any: Pydantic model instance
     def _field_validation_to_dict(self, fv: Any) -> dict[str, Any]:
         """Convert FieldValidationConfig to dict.
 
@@ -223,7 +231,7 @@ class ConfigLoader:
         Returns:
             Dict representation for YAML merge.
         """
-        result: dict[str, Any] = {
+        result: dict[str, Any] = {  # Any: dynamic YAML config values
             "field": fv.field,
             "type": fv.type,
             "nullable": fv.nullable,
@@ -242,6 +250,7 @@ class ConfigLoader:
             result["error_message"] = fv.error_message
         return result
 
+    # Any: Pydantic model instance
     def _cross_field_validation_to_dict(self, cfv: Any) -> dict[str, Any]:
         """Convert CrossFieldValidationConfig to dict.
 
@@ -251,11 +260,13 @@ class ConfigLoader:
         Returns:
             Dict representation for YAML merge.
         """
-        result: dict[str, Any] = {
+        result: dict[str, Any] = {  # Any: dynamic YAML config values
             "name": cfv.name,
             "fields": list(cfv.fields),
             "condition": cfv.condition,
         }
+        if cfv.severity != "error":
+            result["severity"] = cfv.severity
         if cfv.trigger_field:
             result["trigger_field"] = cfv.trigger_field
         if cfv.required_field:
@@ -266,6 +277,7 @@ class ConfigLoader:
             result["error_message"] = cfv.error_message
         return result
 
+    # Any: Pydantic model instance
     def _conditional_validation_to_dict(self, cv: Any) -> dict[str, Any]:
         """Convert ConditionalValidationConfig to dict.
 
@@ -275,7 +287,7 @@ class ConfigLoader:
         Returns:
             Dict representation for YAML merge.
         """
-        result: dict[str, Any] = {
+        result: dict[str, Any] = {  # Any: dynamic YAML config values
             "name": cv.name,
             "condition_field": cv.condition_field,
             "condition_value": (
@@ -292,11 +304,12 @@ class ConfigLoader:
         return result
 
     def clear_cache(self) -> None:
-        """Clear all caches (DQ loader cache).
+        """Clear all caches (DQ and filter loader caches).
 
         Call after modifying config files during development/testing.
         """
         self._dq_loader.clear_cache()
+        self._filter_loader.clear_cache()
 
 
 __all__ = ["ConfigLoader"]

@@ -53,7 +53,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/target?format=json
+    uri: https://www.ebi.ac.uk/chembl/api/data/target?format=json&target_type=SINGLE+PROTEIN&organism__isnull=false&tax_id__isnull=false
   response:
     body:
       string: '{"page_meta": {"limit": 20, "next": "/chembl/api/data/target.json?limit=20&offset=20",

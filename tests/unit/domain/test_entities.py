@@ -498,7 +498,7 @@ class TestCrossRefPublicationEntity:
             publication_year=2023,
             published_print="2023-07-25",
             published_online="2023-07-20",
-            publication_type="PUBLICATION",
+            publication_type="journal-article",
             citations_received=2847,
             citations_made=50,
             language="en",

@@ -6,6 +6,7 @@ Tests the unified data normalization service for text and publication metadata.
 from __future__ import annotations
 
 import json
+import unicodedata
 
 import pytest
 
@@ -14,6 +15,7 @@ from bioetl.domain.services import (
     DataNormalizationService,
     DefaultDataNormalizationService,
 )
+from bioetl.domain.services._author_helpers import hash_author_name
 
 
 class TestDefaultDataNormalizationServiceInit:
@@ -129,32 +131,28 @@ class TestNormalizeAuthors:
     """Tests for normalize_authors method."""
 
     def test_normalize_authors_list(self) -> None:
-        """Test hashing list of authors."""
+        """Test normalizing list of authors."""
         service = DefaultDataNormalizationService()
-        result = service.normalize_authors(["John Doe", "Jane Smith"], salt="test_salt")
+        result = service.normalize_authors(["John Doe", "Jane Smith"])
 
         assert result is not None
         parsed = json.loads(result)
         assert len(parsed) == 2
-        # Hashes should be consistent
-        expected_hash_john = service._hash_pii("John Doe", "test_salt")
-        assert parsed[0] == expected_hash_john
+        assert parsed == ["John Doe", "Jane Smith"]
 
     def test_normalize_authors_string(self) -> None:
-        """Test hashing semicolon-separated authors."""
+        """Test normalizing semicolon-separated authors."""
         service = DefaultDataNormalizationService()
-        result = service.normalize_authors("John Doe; Jane Smith", salt="test_salt")
+        result = service.normalize_authors("John Doe; Jane Smith")
 
         assert result is not None
         parsed = json.loads(result)
         assert len(parsed) == 2
 
     def test_normalize_authors_json_string(self) -> None:
-        """Test hashing JSON-serialized authors."""
+        """Test normalizing JSON-serialized authors."""
         service = DefaultDataNormalizationService()
-        result = service.normalize_authors(
-            '["John Doe", "Jane Smith"]', salt="test_salt"
-        )
+        result = service.normalize_authors('["John Doe", "Jane Smith"]')
 
         assert result is not None
         parsed = json.loads(result)
@@ -163,9 +161,9 @@ class TestNormalizeAuthors:
     def test_normalize_authors_empty(self) -> None:
         """Test empty authors returns None."""
         service = DefaultDataNormalizationService()
-        assert service.normalize_authors(None, salt="test_salt") is None
-        assert service.normalize_authors([], salt="test_salt") is None
-        assert service.normalize_authors("", salt="test_salt") is None
+        assert service.normalize_authors(None) is None
+        assert service.normalize_authors([]) is None
+        assert service.normalize_authors("") is None
 
 
 class TestStripHtmlTags:
@@ -420,46 +418,40 @@ class TestHashPii:
 
     def test_hash_consistency(self) -> None:
         """Test that same input produces same hash."""
-        service = DefaultDataNormalizationService()
-        hash1 = service._hash_pii("John Doe", "salt123")
-        hash2 = service._hash_pii("John Doe", "salt123")
+        hash1 = hash_author_name("John Doe", "salt123")
+        hash2 = hash_author_name("John Doe", "salt123")
         assert hash1 == hash2
 
     def test_different_salt_different_hash(self) -> None:
         """Test that different salt produces different hash."""
-        service = DefaultDataNormalizationService()
-        hash1 = service._hash_pii("John Doe", "salt1")
-        hash2 = service._hash_pii("John Doe", "salt2")
+        hash1 = hash_author_name("John Doe", "salt1")
+        hash2 = hash_author_name("John Doe", "salt2")
         assert hash1 != hash2
 
     def test_different_value_different_hash(self) -> None:
         """Test that different value produces different hash."""
-        service = DefaultDataNormalizationService()
-        hash1 = service._hash_pii("John Doe", "salt")
-        hash2 = service._hash_pii("Jane Smith", "salt")
+        hash1 = hash_author_name("John Doe", "salt")
+        hash2 = hash_author_name("Jane Smith", "salt")
         assert hash1 != hash2
 
     def test_case_normalization(self) -> None:
         """Test that hashing is case-insensitive per RULES.md §5.4."""
-        service = DefaultDataNormalizationService()
-        hash_lower = service._hash_pii("john doe", "salt")
-        hash_upper = service._hash_pii("JOHN DOE", "salt")
-        hash_mixed = service._hash_pii("John Doe", "salt")
+        hash_lower = hash_author_name("john doe", "salt")
+        hash_upper = hash_author_name("JOHN DOE", "salt")
+        hash_mixed = hash_author_name("John Doe", "salt")
         assert hash_lower == hash_upper == hash_mixed
 
     def test_whitespace_normalization(self) -> None:
         """Test that leading/trailing whitespace is stripped before hashing."""
-        service = DefaultDataNormalizationService()
-        hash_clean = service._hash_pii("john doe", "salt")
-        hash_padded = service._hash_pii("  john doe  ", "salt")
-        hash_tabs = service._hash_pii("\tjohn doe\t", "salt")
+        hash_clean = hash_author_name("john doe", "salt")
+        hash_padded = hash_author_name("  john doe  ", "salt")
+        hash_tabs = hash_author_name("\tjohn doe\t", "salt")
         assert hash_clean == hash_padded == hash_tabs
 
     def test_hash_formula_matches_rules_md(self) -> None:
         """Test hash formula matches RULES.md §5.4: sha256(lowercase(value) + SALT)."""
         import hashlib
 
-        service = DefaultDataNormalizationService()
         value = "  John Doe  "
         salt = "test_salt"
 
@@ -467,12 +459,155 @@ class TestHashPii:
         normalized = value.strip().lower()
         expected_hash = hashlib.sha256(f"{normalized}{salt}".encode()).hexdigest()
 
-        actual_hash = service._hash_pii(value, salt)
+        actual_hash = hash_author_name(value, salt)
         assert actual_hash == expected_hash
 
     def test_empty_salt_allowed(self) -> None:
         """Test that empty salt works (edge case)."""
-        service = DefaultDataNormalizationService()
-        # Should not raise
-        result = service._hash_pii("test", "")
+        result = hash_author_name("test", "")
         assert len(result) == 64  # SHA-256 hex digest length
+
+
+class TestNormalizeTitle:
+    """Tests for normalize_title method."""
+
+    @pytest.mark.parametrize(
+        "title,expected",
+        [
+            # Basic normalization
+            ("Simple Title", "Simple Title"),
+            ("  Title with spaces  ", "Title with spaces"),
+            # HTML cleanup
+            ("<b>Bold Title</b>", "Bold Title"),
+            ("<p>Paragraph <i>italic</i></p>", "Paragraph italic"),
+            ("Title with &lt;HTML&gt; entities", "Title with <HTML> entities"),
+            ("Title with &amp; &quot;quotes&quot;", 'Title with & "quotes"'),
+            # Whitespace normalization
+            ("Title  with   multiple    spaces", "Title with multiple spaces"),
+            ("Title\twith\ttabs", "Title with tabs"),
+            ("Title\nwith\nnewlines", "Title with newlines"),
+            ("Title\r\nwith\r\nCRLF", "Title with CRLF"),
+            ("  Title  \n  with  \t  mixed  ", "Title with mixed"),
+            # Control characters
+            ("Title\x00with\x01control", "Titlewithcontrol"),
+            ("Title\x7fwith\x9fmore", "Titlewithmore"),
+            # Empty/None cases
+            (None, None),
+            ("", None),
+            ("   ", None),
+            ("\t\n", None),
+            # Unicode normalization (NFC)
+            ("Café", "Café"),  # Already NFC
+            ("Café", "Café"),  # NFD é (e + combining acute) -> NFC é
+            ("naïve", "naïve"),  # NFD ï -> NFC ï
+            # Complex cases
+            (
+                "<b>Title</b>  with   &lt;tags&gt;\nand\twhitespace",
+                "Title with <tags> and whitespace",
+            ),
+            ("  <p>  Study of α-particles  </p>  ", "Study of α-particles"),
+        ],
+    )
+    def test_normalize_title(self, title: str | None, expected: str | None) -> None:
+        """Test title normalization with various inputs."""
+        service = DefaultDataNormalizationService()
+        result = service.normalize_title(title)
+        assert result == expected
+
+    def test_unicode_nfc_normalization(self) -> None:
+        """Test that unicode is normalized to NFC form."""
+        service = DefaultDataNormalizationService()
+
+        # Create NFD string (decomposed form: e + combining acute accent)
+        nfd_title = unicodedata.normalize("NFD", "Café")
+        # Verify it's actually NFD
+        assert unicodedata.is_normalized("NFD", nfd_title)
+        assert not unicodedata.is_normalized("NFC", nfd_title)
+
+        # Normalize should convert to NFC
+        result = service.normalize_title(nfd_title)
+        assert unicodedata.is_normalized("NFC", result)
+        assert result == "Café"
+
+    def test_idempotency(self) -> None:
+        """Test that normalization is idempotent."""
+        service = DefaultDataNormalizationService()
+        title = "<b>Test</b>  with   spaces"
+
+        normalized_once = service.normalize_title(title)
+        normalized_twice = service.normalize_title(normalized_once)
+
+        assert normalized_once == normalized_twice
+
+
+class TestNormalizeAbstract:
+    """Tests for normalize_abstract method."""
+
+    @pytest.mark.parametrize(
+        "abstract,expected",
+        [
+            # Basic cases
+            ("Simple abstract.", "Simple abstract."),
+            ("  Abstract with spaces  ", "Abstract with spaces"),
+            # HTML cleanup (common in PubMed abstracts)
+            ("<p>Background: Study of proteins.</p>", "Background: Study of proteins."),
+            (
+                "<b>Results:</b> We found <i>p</i> &lt; 0.05",
+                "Results: We found p < 0.05",
+            ),
+            ("Abstract with &alpha;-helix", "Abstract with α-helix"),
+            # Whitespace normalization
+            ("Line 1\nLine 2\nLine 3", "Line 1 Line 2 Line 3"),
+            ("Abstract  with   extra    spaces", "Abstract with extra spaces"),
+            # Control characters (can appear in raw data)
+            ("Abstract\x00with\x01control", "Abstractwithcontrol"),
+            # Empty cases
+            (None, None),
+            ("", None),
+            ("   ", None),
+            # Unicode characters (scientific symbols)
+            (
+                "Study of α-particles and β-radiation",
+                "Study of α-particles and β-radiation",
+            ),
+            ("Temperature ±2°C", "Temperature ±2°C"),
+            # Complex real-world case
+            (
+                "<p><b>Background:</b> Study of &alpha;-helix.\n\n"
+                "<b>Methods:</b>  We analyzed  proteins.</p>",
+                "Background: Study of α-helix. Methods: We analyzed proteins.",
+            ),
+        ],
+    )
+    def test_normalize_abstract(
+        self, abstract: str | None, expected: str | None
+    ) -> None:
+        """Test abstract normalization with various inputs."""
+        service = DefaultDataNormalizationService()
+        result = service.normalize_abstract(abstract)
+        assert result == expected
+
+    def test_preserves_special_characters(self) -> None:
+        """Test that scientific special characters are preserved."""
+        service = DefaultDataNormalizationService()
+
+        abstract = "Study found p<0.05, R²=0.98, ±2σ, α=0.01"
+        result = service.normalize_abstract(abstract)
+
+        # Special characters should be preserved
+        assert "p<0.05" in result
+        assert "R²=0.98" in result
+        assert "±2σ" in result
+        assert "α=0.01" in result
+
+    def test_long_abstract_performance(self) -> None:
+        """Test normalization of long abstracts (performance check)."""
+        service = DefaultDataNormalizationService()
+
+        # Create a long abstract (typical length ~3000 chars)
+        long_abstract = "<p>" + ("Study of proteins. " * 150) + "</p>"
+
+        # Should complete without issues
+        result = service.normalize_abstract(long_abstract)
+        assert result is not None
+        assert len(result) > 2000

@@ -99,7 +99,7 @@ class StageResult:
     status: StageStatus
     started_at: datetime
     completed_at: datetime | None = None
-    result: Any = None
+    result: Any = None  # Any: dynamic event data
     error: str | None = None
     error_type: str | None = None
     records_processed: int = 0
@@ -124,7 +124,7 @@ class StageResult:
     def with_success(
         self,
         completed_at: datetime,
-        result: Any = None,
+        result: Any = None,  # Any: dynamic event data
         records_processed: int = 0,
     ) -> StageResult:
         """Create a new StageResult marking this stage as successful.
@@ -213,7 +213,7 @@ class PipelineRun:
         run_id: RunID,
         run_type: RunType,
         pipeline_name: str = "",
-        metadata: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,  # Any: heterogeneous pipeline metrics
     ) -> None:
         """Initialize a new pipeline run.
 
@@ -269,7 +269,7 @@ class PipelineRun:
         return self._ended_at
 
     @property
-    def metadata(self) -> dict[str, Any]:
+    def metadata(self) -> dict[str, Any]:  # Any: heterogeneous pipeline metrics
         """Copy of run metadata."""
         return self._metadata.copy()
 
@@ -340,7 +340,7 @@ class PipelineRun:
     def record_stage_success(
         self,
         stage: str,
-        result: Any = None,
+        result: Any = None,  # Any: dynamic event data
         records_processed: int = 0,
         started_at: datetime | None = None,
         completed_at: datetime | None = None,

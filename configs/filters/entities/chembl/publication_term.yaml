@@ -20,6 +20,27 @@ input_filter:
   filter_field: "publication_id"
   batch_size: 20
 
+# ---------------------------------------------------------------------------
+# Extraction-Level Filtering (ADR-028 §3)
+# ---------------------------------------------------------------------------
+# Server-side query parameters appended to underlying ChEMBL Document API
+# requests. Publication terms are a derived entity: PublicationTermDataSource
+# fetches from /document endpoint via the wrapped ChemblAdapter, which
+# applies these params to every API request.
+#
+# Mirrors publication.yaml extraction_params for consistency.
+# Does NOT affect content_hash (ADR-014).
+# Logged in SourceMetadata.query_string for audit/reproducibility.
+extraction_params:
+    # Publications only (exclude patents, books, etc.)
+    doc_type: "PUBLICATION"
+
+    # Year range lower bound (inclusive)
+    year__gte: 1950
+
+    # Year range upper bound (inclusive)
+    year__lte: 2050
+
 # -----------------------------------------------------------------------------
 # Gold Filters
 # -----------------------------------------------------------------------------

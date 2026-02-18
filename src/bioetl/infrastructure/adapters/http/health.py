@@ -16,6 +16,7 @@ from typing import Any
 from bioetl.domain.types import HealthStatus
 
 
+# Any: structural typing for ...
 def assess_health_from_circuit_breaker(circuit_breaker: Any) -> HealthStatus:
     """Determine adapter health status from circuit breaker state.
 

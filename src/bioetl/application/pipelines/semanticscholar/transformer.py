@@ -15,6 +15,7 @@ from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_author_h_indices,
     extract_author_orcids,
     extract_author_s2_ids,
+    extract_authors,
     extract_citation_contexts,
     extract_external_ids,
     extract_fields_of_study,
@@ -89,6 +90,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
+        contract_policy: Any = None,
     ) -> None:
         """Initialize transformer.
 
@@ -102,6 +104,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names.
             data_normalizer: Optional data normalization service for DOI normalization.
+            contract_policy: Optional pipeline contract policy.
 
         """
         super().__init__(
@@ -114,8 +117,10 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             identity_service=identity_service,
             pii_hasher=pii_hasher,
             data_normalizer=data_normalizer,
+            contract_policy=contract_policy,
         )
 
+    # Any: raw API JSON
     def _resolve_publication_type(self, publication_types: Any) -> str:
         """Resolve raw publication types list to a unified scalar string."""
         if not isinstance(publication_types, list):
@@ -127,6 +132,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         ]
         return "|".join(cleaned) if cleaned else "PUBLICATION"
 
+    # Any: raw API JSON
     def _extract_validated_ids(self, rec: dict[str, Any]) -> dict[str, Any]:
         """Extract and validate external identifiers using Value Objects."""
         external_ids = extract_external_ids(rec.get("externalIds"))
@@ -140,13 +146,33 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "corpus_id": external_ids.get("corpus_id"),
         }
 
+    # Any: raw API JSON
     def _extract_author_metadata(self, authors_list: Any) -> dict[str, Any]:
-        """Extract author identifiers, h-indices, and affiliations."""
+        """Extract author identifiers, h-indices, and affiliations.
+
+        Uses unified normalization service for authors and affiliations.
+        """
+        normalizer = self._data_normalizer
+
+        # Extract and normalize author names using unified service
+        raw_authors = extract_authors(authors_list)
+        authors_json = normalizer.normalize_author_list(raw_authors)
+        author_keys = normalizer.normalize_author_keys(raw_authors)
+
+        # Extract author metadata (not PII)
         author_s2_ids = extract_author_s2_ids(authors_list)
         author_orcids = extract_author_orcids(authors_list)
         author_h_indices = extract_author_h_indices(authors_list)
+
+        # Extract and normalize affiliations using unified service
         affiliations = extract_affiliations(authors_list)
+        affiliations_json = (
+            normalizer.normalize_affiliations(affiliations) if affiliations else None
+        )
+
         return {
+            "authors": authors_json,
+            "author_keys": author_keys,
             "author_s2_ids": self.serialize_json_list(author_s2_ids)
             if author_s2_ids
             else None,
@@ -156,11 +182,10 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "author_h_indices": self.serialize_json_list(author_h_indices)
             if any(h is not None for h in author_h_indices)
             else None,
-            "affiliation_list": self.serialize_json_list(affiliations)
-            if affiliations
-            else None,
+            "affiliation_list": affiliations_json,
         }
 
+    # Any: record vals vary
     def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:
         """Extract and normalize fields from Semantic Scholar record.
 
@@ -259,8 +284,9 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         """
         return SemanticScholarPublicationEntity
 
-    @staticmethod
-    def entity_to_silver_record(entity: Any) -> dict[str, Any]:
+    def entity_to_silver_record(
+        self, entity: Any
+    ) -> dict[str, Any]:  # Any: record vals vary
         """Convert Domain Entity to SilverRecord, preserving base schema fields.
 
         Note: pmc_id is kept with None value to satisfy PublicationBaseSchema
@@ -273,9 +299,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             SilverRecord dictionary with all base schema fields.
 
         """
-        from bioetl.application.core.base_transformer import BaseTransformer
-
-        silver_record = BaseTransformer.entity_to_silver_record(entity)
+        silver_record = super().entity_to_silver_record(entity)
 
         # Note: Do NOT remove pmc_id - it inherits from PublicationBaseSchema
         # and must exist in DataFrame even if set to None (Pandera requires

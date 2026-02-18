@@ -195,6 +195,9 @@ class TestBootstrapPipeline:
 
         # Setup pipeline registry mock
         mock_config = MagicMock()
+        mock_config.business_primary_keys = ["activity_id"]
+        mock_config.primary_keys = None
+        mock_config.technical_primary_key = "entity_id"
         mock_config.maintenance.auto_vacuum = False
         mock_config.maintenance.vacuum_retention_days = 7
         mock_config.input_filter = MagicMock()
@@ -248,6 +251,9 @@ class TestBootstrapPipeline:
 
         # Mock YAML config with maintenance settings
         mock_yaml_config = MagicMock()
+        mock_yaml_config.business_primary_keys = ["activity_id"]
+        mock_yaml_config.primary_keys = None
+        mock_yaml_config.technical_primary_key = "entity_id"
         mock_yaml_config.maintenance.auto_vacuum = False
         mock_yaml_config.maintenance.vacuum_retention_days = 7
         # Input filter with disabled state (source_path empty means disabled)
@@ -665,6 +671,9 @@ class TestBootstrapVacuumConfig:
 
         # Setup YAML config with auto_vacuum enabled
         yaml_config = MagicMock()
+        yaml_config.business_primary_keys = ["activity_id"]
+        yaml_config.primary_keys = None
+        yaml_config.technical_primary_key = "entity_id"
         yaml_config.maintenance.auto_vacuum = True
         yaml_config.maintenance.vacuum_retention_days = 14
         yaml_config.input_filter = MagicMock()
@@ -732,6 +741,9 @@ class TestBootstrapVacuumConfig:
 
         # Setup YAML config with auto_vacuum enabled
         yaml_config = MagicMock()
+        yaml_config.business_primary_keys = ["activity_id"]
+        yaml_config.primary_keys = None
+        yaml_config.technical_primary_key = "entity_id"
         yaml_config.maintenance.auto_vacuum = True
         yaml_config.maintenance.vacuum_retention_days = 14
         yaml_config.input_filter = MagicMock()

@@ -10,9 +10,10 @@ Usage:
 
 from __future__ import annotations
 
+import warnings
 from typing import Any, Literal, Self
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, ValidationError, field_validator, model_validator
 
 from bioetl.domain.composite.aggregation import (
     AggregationConfig,
@@ -541,6 +542,14 @@ class LineageSchema(BaseModel):
     track_status: bool = Field(
         default=True, description="Include per-record enrichment status"
     )
+    provider_lookup_fields: dict[str, dict[str, str]] = Field(
+        default_factory=dict,
+        description="Per-provider mapping of lookup metadata field names",
+    )
+    track_source_for_fields: list[str] = Field(
+        default_factory=list,
+        description="Field names requiring source tracking for overlapping data",
+    )
 
     def to_domain(self) -> LineageConfig:
         """Convert to immutable domain LineageConfig."""
@@ -548,6 +557,8 @@ class LineageSchema(BaseModel):
             track_field_sources=self.track_field_sources,
             track_timestamps=self.track_timestamps,
             track_status=self.track_status,
+            provider_lookup_fields=self.provider_lookup_fields,
+            track_source_for_fields=tuple(self.track_source_for_fields),
         )
 
 
@@ -642,7 +653,7 @@ class CompositeConfigSchema(BaseModel):
 
     name: str = Field(..., min_length=1, description="Composite pipeline name")
     version: str = Field(
-        default="1.0.0", min_length=1, description="Configuration version (semver)"
+        ..., min_length=1, description="Configuration version (semver)"
     )
     seed: SeedSchema = Field(..., description="Seed pipeline configuration")
     dependencies: list[DependencySchema] = Field(
@@ -773,7 +784,57 @@ class CompositeConfigFileSchema(BaseModel):
         return self.composite.to_domain()
 
 
+class LegacyCompositeConfigSchema(CompositeConfigSchema):
+    """Legacy schema for pre-v6 composite configs.
+
+    Keeps `version` optional to support a deprecation window for historical
+    YAML files that omitted `composite.version`.
+    """
+
+    version: str = Field(
+        default="1.0.0", min_length=1, description="Configuration version (semver)"
+    )
+
+
+class LegacyCompositeConfigFileSchema(CompositeConfigFileSchema):
+    """Legacy file schema where `composite.version` may be omitted."""
+
+    composite: LegacyCompositeConfigSchema = Field(
+        ..., description="The composite pipeline configuration"
+    )
+
+
+COMPOSITE_VERSION_DEPRECATION_TARGET = "6.2.0"
+
+
+def validate_composite_config_payload(
+    payload: dict[str, Any],
+) -> CompositeConfigFileSchema:
+    """Validate composite YAML payload with explicit legacy fallback.
+
+    Runtime and generated JSON Schema both use :class:`CompositeConfigFileSchema`
+    as the canonical contract. Legacy files (missing `composite.version`) are
+    accepted only via an explicit compatibility path and emit a deprecation
+    warning until BioETL v6.2.0.
+    """
+
+    try:
+        return CompositeConfigFileSchema.model_validate(payload)
+    except ValidationError:
+        legacy_schema = LegacyCompositeConfigFileSchema.model_validate(payload)
+        warnings.warn(
+            "Composite config without 'composite.version' is deprecated and will "
+            f"be removed in BioETL {COMPOSITE_VERSION_DEPRECATION_TARGET}. "
+            "Add 'composite.version' explicitly.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        normalized = legacy_schema.model_dump(mode="python")
+        return CompositeConfigFileSchema.model_validate(normalized)
+
+
 __all__ = [
+    "COMPOSITE_VERSION_DEPRECATION_TARGET",
     "AggregationFieldSchema",
     "AggregationSchema",
     "ColumnGroupSchema",
@@ -792,4 +853,5 @@ __all__ = [
     "MergeSchema",
     "RetrySchema",
     "SeedSchema",
+    "validate_composite_config_payload",
 ]

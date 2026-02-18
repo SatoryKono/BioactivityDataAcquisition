@@ -66,6 +66,7 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
 
     # Authors and affiliations
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
+    author_keys: Series[str] = pa.Field(nullable=True)  # Pipe-delimited Surname_F keys
     affiliation_list: Series[str] = pa.Field(
         nullable=True
     )  # JSON array of unique affiliations
@@ -104,15 +105,15 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     publication_type_list: Series[str] = pa.Field(
         nullable=True
     )  # JSON array of pub types
-    publication_type: Series[object] = pa.Field(nullable=True)  # list[str]
-    publication_types: Series[object] = pa.Field(nullable=True)  # list[str]
+    publication_type: Series[str] = pa.Field(nullable=True)  # list[str]
+    publication_types: Series[str] = pa.Field(nullable=True)  # list[str]
 
     # Classification
-    subject_keywords: Series[object] = pa.Field(nullable=True)  # list[str]
-    subject_mesh: Series[object] = pa.Field(nullable=True)  # list[str]
-    chemicals: Series[object] = pa.Field(nullable=True)  # list[str]
-    databanks: Series[object] = pa.Field(nullable=True)  # list[str]
-    gene_symbols: Series[object] = pa.Field(nullable=True)  # list[str]
+    subject_keywords: Series[str] = pa.Field(nullable=True)  # list[str]
+    subject_mesh: Series[str] = pa.Field(nullable=True)  # list[str]
+    chemicals: Series[str] = pa.Field(nullable=True)  # list[str]
+    databanks: Series[str] = pa.Field(nullable=True)  # list[str]
+    gene_symbols: Series[str] = pa.Field(nullable=True)  # list[str]
     citation_subset: Series[str] = pa.Field(
         nullable=True
     )  # Citation subset codes (e.g., 'AIM')
@@ -198,16 +199,16 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     citations_made: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     language: Series[str] = pa.Field(nullable=True)
     license_url: Series[str] = pa.Field(nullable=True)
-    subject_keywords: Series[object] = pa.Field(nullable=True)  # list[str]
+    subject_keywords: Series[str] = pa.Field(nullable=True)  # list[str]
 
     # Content domain (Crossmark/license restrictions)
-    content_domain_domains: Series[object] = pa.Field(nullable=True)  # list[str]
+    content_domain_domains: Series[str] = pa.Field(nullable=True)  # list[str]
     content_domain_crossmark_restriction: Series[bool] = pa.Field(
         nullable=True, coerce=True
     )
 
     # Alternative identifiers (publisher-specific IDs, e.g., PII)
-    alternative_id: Series[object] = pa.Field(nullable=True)  # list[str]
+    alternative_id: Series[str] = pa.Field(nullable=True)  # list[str]
 
     # Canonical publication date
     published: Series[str] = pa.Field(nullable=True)
@@ -220,6 +221,7 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     issn_electronic: Series[str] = pa.Field(nullable=True)
 
     # Author identifiers
+    author_keys: Series[str] = pa.Field(nullable=True)  # Pipe-delimited Surname_F keys
     author_orcids: Series[str] = pa.Field(nullable=True)  # JSON array of ORCID IDs
     author_details: Series[str] = pa.Field(
         nullable=True
@@ -279,8 +281,8 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
     affiliation_list: Series[str] = pa.Field(nullable=True)  # JSON array
     # NOTE: concepts field removed - OpenAlex deprecated concepts in 2024, use topics instead
-    subject_mesh: Series[object] = pa.Field(nullable=True)  # list[str] - MeSH terms
-    subject_keywords: Series[object] = pa.Field(nullable=True)  # list[str]
+    subject_mesh: Series[str] = pa.Field(nullable=True)  # list[str] - MeSH terms
+    subject_keywords: Series[str] = pa.Field(nullable=True)  # list[str]
     mag_id: Series[str] = pa.Field(nullable=True)  # Microsoft Academic Graph ID
 
     # Journal info
@@ -331,11 +333,12 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     grants: Series[str] = pa.Field(nullable=True)  # JSON array
 
     # Institution identifiers
-    institution_ids: Series[object] = pa.Field(nullable=True)  # list[str]
-    institution_country_codes: Series[object] = pa.Field(nullable=True)  # list[str]
+    institution_ids: Series[str] = pa.Field(nullable=True)  # list[str]
+    institution_country_codes: Series[str] = pa.Field(nullable=True)  # list[str]
     ror_ids: Series[str] = pa.Field(nullable=True)  # JSON array of ROR URLs
 
     # Author identifiers
+    author_keys: Series[str] = pa.Field(nullable=True)  # Pipe-delimited Surname_F keys
     author_openalex_ids: Series[str] = pa.Field(nullable=True)  # OpenAlex author IDs
     author_orcids: Series[str] = pa.Field(nullable=True)  # ORCID IDs
 
@@ -426,6 +429,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     affiliation_list: Series[str] = pa.Field(nullable=True)  # JSON array
 
     # Author identifiers
+    author_keys: Series[str] = pa.Field(nullable=True)  # Pipe-delimited Surname_F keys
     author_s2_ids: Series[str] = pa.Field(nullable=True)  # JSON array (40-char hex)
     author_orcids: Series[str] = pa.Field(nullable=True)  # JSON array of ORCIDs
     author_h_indices: Series[str] = pa.Field(

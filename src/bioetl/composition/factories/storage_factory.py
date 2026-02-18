@@ -59,7 +59,7 @@ class StorageFactory:
 
     @staticmethod
     def _create_csv_exporter_from_config(
-        csv_cfg: Any,
+        csv_cfg: Any,  # Any: dynamic Pydantic CsvExportConfig from YAML
         logger: LoggerPort,
         override_path: Path | None = None,
     ) -> CsvExporter | None:
@@ -85,7 +85,10 @@ class StorageFactory:
 
     @staticmethod
     def _resolve_layer_path(
-        layer_config: Any, default_path: Path, use_yaml_paths: bool
+        # Any: dynamic Pydantic sink ...
+        layer_config: Any,
+        default_path: Path,
+        use_yaml_paths: bool,
     ) -> Path:
         """Resolve storage path from config or fall back to default."""
         if use_yaml_paths and layer_config and layer_config.path:
@@ -97,9 +100,9 @@ class StorageFactory:
         bronze_path: Path,
         silver_path: Path,
         gold_path: Path,
-        bronze_config: Any,
-        silver_config: Any,
-        gold_config: Any,
+        bronze_config: Any,  # Any: dynamic Pydantic sink layer config
+        silver_config: Any,  # Any: dynamic Pydantic sink layer config
+        gold_config: Any,  # Any: dynamic Pydantic sink layer config
         silver_csv_exporter: CsvExporter | None,
         gold_csv_exporter: CsvExporter | None,
         logger: LoggerPort,
@@ -111,7 +114,7 @@ class StorageFactory:
         bronze_flat_structure: bool = False,
         silver_flat_structure: bool = False,
         gold_flat_structure: bool = False,
-        silver_validator: Any = None,
+        silver_validator: Any = None,  # Any: SilverValidatorPort (optional lazy import)
     ) -> StorageAdapter:
         """Create StorageAdapter with all writers configured.
 
@@ -187,7 +190,7 @@ class StorageFactory:
         metrics: MetricsPort,
         tracing: TracingPort | None = None,
         metadata_coordinator: MetadataCoordinator | None = None,
-        silver_validator: Any = None,
+        silver_validator: Any = None,  # Any: SilverValidatorPort (optional lazy import)
     ) -> StorageContext:
         """Create a StorageAdapter for local deployment.
 

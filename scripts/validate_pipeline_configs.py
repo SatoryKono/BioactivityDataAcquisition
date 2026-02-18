@@ -74,6 +74,54 @@ def validate_paths_hierarchy(config: dict[str, Any]) -> list[str]:
     return warnings
 
 
+def validate_schema_link(config: dict[str, Any], config_path: Path) -> list[str]:
+    """Validate required schema_file reference and non-empty schema config."""
+    errors: list[str] = []
+
+    schema_file = config.get("schema_file")
+    if not isinstance(schema_file, str) or not schema_file.strip():
+        errors.append("schema_file is required and must be a non-empty string")
+        return errors
+
+    schema_path = (config_path.parent / schema_file).resolve()
+    if not schema_path.exists():
+        errors.append(
+            f"schema_file does not exist: {schema_file} (resolved: {schema_path})"
+        )
+        return errors
+
+    schema = yaml.safe_load(schema_path.read_text()) or {}
+    groups = schema.get("column_groups")
+    if not isinstance(groups, list) or len(groups) == 0:
+        errors.append(f"schema_file has empty column_groups: {schema_file}")
+        return errors
+
+    names = {g.get("name") for g in groups if isinstance(g, dict)}
+    has_system = "system" in names
+    has_business = "business" in names or any(
+        isinstance(name, str)
+        and name != "system"
+        and not name.startswith("dq")
+        for name in names
+    )
+    if not (has_system and has_business):
+        errors.append(
+            f"schema_file must contain system and business groups: {schema_file}"
+        )
+
+    for layer in ("silver", "gold"):
+        layer_cfg = schema.get(layer)
+        include_groups = (
+            layer_cfg.get("include_groups") if isinstance(layer_cfg, dict) else None
+        )
+        if not isinstance(include_groups, list) or not include_groups:
+            errors.append(
+                f"schema_file missing non-empty {layer}.include_groups: {schema_file}"
+            )
+
+    return errors
+
+
 def validate_sort_by_present(config: dict[str, Any]) -> list[str]:
     """Check that sort_by is defined for determinism (ADR-014)."""
     warnings = []
@@ -97,8 +145,9 @@ def main() -> int:
     args = parser.parse_args()
 
     configs_dir = Path("configs/pipelines")
-    schema_path = configs_dir / "_schema.json"
-    composite_schema_path = configs_dir / "_composite_schema.json"
+    schema_dir = Path("configs/_schema")
+    schema_path = schema_dir / "pipeline.json"
+    composite_schema_path = schema_dir / "composite.json"
 
     schema = load_schema(schema_path)
     composite_schema = load_schema(composite_schema_path)
@@ -126,6 +175,11 @@ def main() -> int:
         # Hierarchy and sort checks apply only to standard pipeline configs.
         if is_composite_config:
             continue
+
+        # schema_file linkage and non-empty schema config (blocking)
+        schema_errors = validate_schema_link(config, config_path)
+        for e in schema_errors:
+            errors.append(f"{config_path}: {e}")
 
         # Path hierarchy check
         path_warnings = validate_paths_hierarchy(config)

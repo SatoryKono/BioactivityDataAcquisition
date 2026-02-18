@@ -26,8 +26,10 @@ class TestContractsPackageExports:
             ChEMBLDocumentTermGoldSchema,
             ChEMBLMoleculeGoldSchema,
             ChEMBLProteinClassGoldSchema,
+            ChEMBLSubcellularFractionGoldSchema,
             ChEMBLTargetComponentGoldSchema,
             ChEMBLTargetGoldSchema,
+            ChEMBLTissueGoldSchema,
         )
 
         # Verify they are Pandera DataFrameModel classes
@@ -41,8 +43,10 @@ class TestContractsPackageExports:
         assert hasattr(ChEMBLDocumentTermGoldSchema, "validate")
         assert hasattr(ChEMBLMoleculeGoldSchema, "validate")
         assert hasattr(ChEMBLProteinClassGoldSchema, "validate")
+        assert hasattr(ChEMBLSubcellularFractionGoldSchema, "validate")
         assert hasattr(ChEMBLTargetComponentGoldSchema, "validate")
         assert hasattr(ChEMBLTargetGoldSchema, "validate")
+        assert hasattr(ChEMBLTissueGoldSchema, "validate")
 
     def test_all_publication_schemas_exported(self):
         """All publication Gold schemas should be importable from domain.contracts."""
@@ -57,6 +61,22 @@ class TestContractsPackageExports:
         assert hasattr(OpenAlexPublicationGoldSchema, "validate")
         assert hasattr(PubMedPublicationGoldSchema, "validate")
         assert hasattr(SemanticScholarPublicationGoldSchema, "validate")
+
+    def test_composite_schemas_exported(self):
+        """Composite Gold schemas should be importable from domain.contracts."""
+        from bioetl.domain.contracts import (
+            CompositeActivityGoldSchema,
+            CompositeAssayGoldSchema,
+            CompositeMoleculeGoldSchema,
+            CompositePublicationGoldSchema,
+            CompositeTargetGoldSchema,
+        )
+
+        assert hasattr(CompositeActivityGoldSchema, "validate")
+        assert hasattr(CompositeAssayGoldSchema, "validate")
+        assert hasattr(CompositeMoleculeGoldSchema, "validate")
+        assert hasattr(CompositePublicationGoldSchema, "validate")
+        assert hasattr(CompositeTargetGoldSchema, "validate")
 
     def test_pubchem_schema_exported(self):
         """PubChem Gold schema should be importable from domain.contracts."""

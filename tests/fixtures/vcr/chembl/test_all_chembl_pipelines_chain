@@ -29,7 +29,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:07:53 GMT
+      - Mon, 16 Feb 2026 12:16:27 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -53,7 +53,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/target?format=json
+    uri: https://www.ebi.ac.uk/chembl/api/data/target?format=json&target_type=SINGLE+PROTEIN&organism__isnull=false&tax_id__isnull=false
   response:
     body:
       string: '{"page_meta": {"limit": 20, "next": "/chembl/api/data/target.json?limit=20&offset=20",
@@ -6650,7 +6650,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:07:56 GMT
+      - Mon, 16 Feb 2026 12:16:31 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -6660,7 +6660,7 @@ interactions:
       X-ChEMBL-in-cache:
       - 'True'
       X-ChEMBL-retrieval-time:
-      - '1.757967233657837'
+      - '2.6598455905914307'
     status:
       code: 200
       message: OK
@@ -6694,7 +6694,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:08:06 GMT
+      - Mon, 16 Feb 2026 12:16:35 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -6718,13 +6718,13 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/molecule?format=json&limit=2&offset=0
+    uri: https://www.ebi.ac.uk/chembl/api/data/molecule?format=json&molecule_type=Small+molecule&structure_type=MOL&inorganic_flag=0&limit=2&offset=0
   response:
     body:
       string: '{"molecules": [{"atc_classifications": [], "availability_type": -1,
         "biotherapeutic": null, "black_box_warning": 0, "chemical_probe": 0, "chirality":
         -1, "cross_references": [], "dosed_ingredient": false, "first_approval": null,
-        "first_in_class": -1, "helm_notation": null, "inorganic_flag": -1, "max_phase":
+        "first_in_class": -1, "helm_notation": null, "inorganic_flag": 0, "max_phase":
         null, "molecule_chembl_id": "CHEMBL6329", "molecule_hierarchy": {"active_chembl_id":
         "CHEMBL6329", "molecule_chembl_id": "CHEMBL6329", "parent_chembl_id": "CHEMBL6329"},
         "molecule_properties": {"alogp": "2.11", "aromatic_rings": 3, "full_molformula":
@@ -6759,7 +6759,7 @@ interactions:
         [], "availability_type": -1, "biotherapeutic": null, "black_box_warning":
         0, "chemical_probe": 0, "chirality": -1, "cross_references": [], "dosed_ingredient":
         false, "first_approval": null, "first_in_class": -1, "helm_notation": null,
-        "inorganic_flag": -1, "max_phase": null, "molecule_chembl_id": "CHEMBL6328",
+        "inorganic_flag": 0, "max_phase": null, "molecule_chembl_id": "CHEMBL6328",
         "molecule_hierarchy": {"active_chembl_id": "CHEMBL6328", "molecule_chembl_id":
         "CHEMBL6328", "parent_chembl_id": "CHEMBL6328"}, "molecule_properties": {"alogp":
         "1.33", "aromatic_rings": 3, "full_molformula": "C18H12N4O3", "full_mwt":
@@ -6806,7 +6806,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:08:08 GMT
+      - Mon, 16 Feb 2026 12:16:37 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -6816,7 +6816,7 @@ interactions:
       X-ChEMBL-in-cache:
       - 'True'
       X-ChEMBL-retrieval-time:
-      - '0.6005535125732422'
+      - '0.9021103382110596'
     status:
       code: 200
       message: OK
@@ -6850,7 +6850,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:08:15 GMT
+      - Mon, 16 Feb 2026 12:16:40 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -6874,7 +6874,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&limit=2&offset=0
+    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&doc_type=PUBLICATION&year__gte=1950&year__lte=2050&limit=2&offset=0
   response:
     body:
       string: '{"documents": [{"abstract": "", "authors": null, "chembl_release":
@@ -6904,7 +6904,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:08:16 GMT
+      - Mon, 16 Feb 2026 12:16:41 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -6914,7 +6914,7 @@ interactions:
       X-ChEMBL-in-cache:
       - 'True'
       X-ChEMBL-retrieval-time:
-      - '0.013529300689697266'
+      - '0.2833278179168701'
     status:
       code: 200
       message: OK
@@ -6948,7 +6948,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:08:22 GMT
+      - Mon, 16 Feb 2026 12:16:43 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -6972,7 +6972,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/activity?format=json&limit=3&offset=0&standard_type__in=IC50%2CKi&standard_units=nM&standard_relation=%3D&assay_type__in=B%2CF&potential_duplicate=0&data_validity_comment__isnull=true&pchembl_value__isnull=false&standard_flag=1
+    uri: https://www.ebi.ac.uk/chembl/api/data/activity?format=json&limit=3&offset=0&standard_type__in=IC50%2CKi&standard_units=nM&standard_relation=%3D&assay_type__in=B%2CF&potential_duplicate=0&data_validity_comment__isnull=true&pchembl_value__isnull=false&standard_flag=1&target_tax_id__isnull=false
   response:
     body:
       string: '{"activities": [{"action_type": null, "activity_comment": null, "activity_id":
@@ -7028,8 +7028,8 @@ interactions:
         "CHEMBL4632", "target_organism": "Rattus norvegicus", "target_pref_name":
         "Peroxisomal acyl-coenzyme A oxidase 1", "target_tax_id": "10116", "text_value":
         null, "toid": null, "type": "IC50", "units": "uM", "uo_units": "UO_0000065",
-        "upper_value": null, "value": "4.0"}], "page_meta": {"limit": 3, "next": "/chembl/api/data/activity.json?limit=3&offset=3&standard_type__in=IC50%2CKi&standard_units=nM&standard_relation=%3D&assay_type__in=B%2CF&potential_duplicate=0&data_validity_comment__isnull=true&pchembl_value__isnull=false&standard_flag=1",
-        "offset": 0, "previous": null, "total_count": 2712214}}'
+        "upper_value": null, "value": "4.0"}], "page_meta": {"limit": 3, "next": "/chembl/api/data/activity.json?limit=3&offset=3&standard_type__in=IC50%2CKi&standard_units=nM&standard_relation=%3D&assay_type__in=B%2CF&potential_duplicate=0&data_validity_comment__isnull=true&pchembl_value__isnull=false&standard_flag=1&target_tax_id__isnull=false",
+        "offset": 0, "previous": null, "total_count": 2428355}}'
     headers:
       Cache-Control:
       - max-age=30000000, s-maxage=30000000
@@ -7038,11 +7038,11 @@ interactions:
       Content-Disposition:
       - inline
       Content-Length:
-      - '4767'
+      - '4795'
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:08:24 GMT
+      - Mon, 16 Feb 2026 12:16:44 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -7052,7 +7052,7 @@ interactions:
       X-ChEMBL-in-cache:
       - 'True'
       X-ChEMBL-retrieval-time:
-      - '0.7119524478912354'
+      - '0.19233345985412598'
     status:
       code: 200
       message: OK
@@ -7086,7 +7086,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:08:33 GMT
+      - Mon, 16 Feb 2026 12:16:49 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -7110,7 +7110,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/assay?format=json&limit=2&offset=0
+    uri: https://www.ebi.ac.uk/chembl/api/data/assay?format=json&limit=2&offset=0&assay_type__in=B%2CF&confidence_score__gte=8&relationship_type=D&target_chembl_id__isnull=false
   response:
     body:
       string: '{"assays": [{"aidx": "CLD0", "assay_category": null, "assay_cell_type":
@@ -7122,8 +7122,8 @@ interactions:
         null, "confidence_description": "Homologous single protein target assigned",
         "confidence_score": 8, "description": "The compound was tested for the in
         vitro inhibition of platelet 12-lipoxygenase at a concentration of 30 uM",
-        "document_chembl_id": "CHEMBL1125582", "relationship_description": "Homologous
-        protein target assigned", "relationship_type": "H", "src_assay_id": null,
+        "document_chembl_id": "CHEMBL1125582", "relationship_description": "Direct
+        protein target assigned", "relationship_type": "D", "src_assay_id": null,
         "src_id": 1, "target_chembl_id": "CHEMBL2741", "tissue_chembl_id": null, "variant_sequence":
         null}, {"aidx": "CLD0", "assay_category": null, "assay_cell_type": null, "assay_chembl_id":
         "CHEMBL615118", "assay_classifications": [], "assay_group": null, "assay_organism":
@@ -7131,12 +7131,12 @@ interactions:
         null, "assay_tax_id": null, "assay_test_type": null, "assay_tissue": null,
         "assay_type": "F", "assay_type_description": "Functional", "bao_format": "BAO_0000219",
         "bao_label": "cell-based format", "cell_chembl_id": null, "confidence_description":
-        "Default value - Target unknown or has yet to be assigned", "confidence_score":
-        0, "description": "Compound was evaluated for its ability to mobilize calcium
-        in 1321NI cells", "document_chembl_id": "CHEMBL1127008", "relationship_description":
-        "Default value - Target has yet to be curated", "relationship_type": "U",
-        "src_assay_id": null, "src_id": 1, "target_chembl_id": "CHEMBL612545", "tissue_chembl_id":
-        null, "variant_sequence": null}], "page_meta": {"limit": 2, "next": "/chembl/api/data/assay.json?limit=2&offset=2",
+        "Direct single protein target assigned", "confidence_score": 8, "description":
+        "Compound was evaluated for its ability to mobilize calcium in 1321NI cells",
+        "document_chembl_id": "CHEMBL1127008", "relationship_description": "Direct
+        protein target assigned", "relationship_type": "D", "src_assay_id": null,
+        "src_id": 1, "target_chembl_id": "CHEMBL612545", "tissue_chembl_id": null,
+        "variant_sequence": null}], "page_meta": {"limit": 2, "next": "/chembl/api/data/assay.json?limit=2&offset=2",
         "offset": 0, "previous": null, "total_count": 1890749}}'
     headers:
       Cache-Control:
@@ -7150,7 +7150,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Thu, 12 Feb 2026 17:08:35 GMT
+      - Mon, 16 Feb 2026 12:16:51 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -7160,7 +7160,7 @@ interactions:
       X-ChEMBL-in-cache:
       - 'True'
       X-ChEMBL-retrieval-time:
-      - '0.18316268920898438'
+      - '0.30101895332336426'
     status:
       code: 200
       message: OK

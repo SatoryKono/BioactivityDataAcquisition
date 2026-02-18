@@ -49,4 +49,4 @@ All metrics MUST follow these naming conventions:
 *   Prefix: `bioetl_`
 *   Labels: `pipeline`, `run_type`, `stage`
 
-See `docs/contracts/observability.md` for the full catalog.
+See `docs/04-reference/contracts/observability.md` for the full catalog.

@@ -1,3 +1,7 @@
+content_hash:
+  include: []
+  exclude: []
+
 column_groups:
   - name: system
     fields:
@@ -31,6 +35,8 @@ column_groups:
 
   - name: authors
     fields:
+      - authors
+      - author_keys
       - author_s2_ids
       - author_orcids
       - author_h_indices

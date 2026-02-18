@@ -122,7 +122,7 @@ def _create_pubchem_adapter(
     http_client: UnifiedHTTPClient | None = None,
     logger: LoggerPort | None = None,
     settings: Settings | None = None,
-    **kwargs: Any,
+    **kwargs: Any,  # Any: forwarded adapter kwar...
 ) -> DataSourcePort:
     """Create PubChem adapter with all dependencies injected from Composition Root."""
     if logger is None:
@@ -425,11 +425,9 @@ def _create_uniprot_idmapping_data_source(
 
     # Get input path from pipeline config
     input_path_str = (
-        pipeline_config.source.input_path
-        if hasattr(pipeline_config.source, "input_path")
-        else "data/input/target.csv"
+        getattr(pipeline_config.source, "input_path", None) or "data/input/target.csv"
     )
-    input_path = Path(input_path_str)
+    input_path = Path(input_path_str or "data/input/target.csv")
 
     # Get database names from API config
     from_db = "ChEMBL"

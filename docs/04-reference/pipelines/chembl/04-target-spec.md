@@ -1,6 +1,6 @@
 # ChEMBL Target Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.18*
+*Version 1.2.0 | Aligned with RULES.md v5.20*
 
 ______________________________________________________________________
 
@@ -42,9 +42,9 @@ Targets represent **biological entities** that drugs interact with:
 ```
 target
     │
-    ├──◄──FK──activity.target_chembl_id (1:M)
+    ├──◄──FK──activity.target_id (1:M)
     │
-    ├──◄──FK──assay.target_chembl_id (1:M)
+    ├──◄──FK──assay.target_id (1:M)
     │
     └── target_components (nested array)
         ├── component_id
@@ -69,7 +69,7 @@ ______________________________________________________________________
 
 | #   | API Field            | JSON Type | Nullable | Nested | Description         |
 | --- | -------------------- | --------- | -------- | ------ | ------------------- |
-| 1   | `target_chembl_id`   | string    | No       | -      | Primary key         |
+| 1   | `target_id`          | string    | No       | -      | Primary key         |
 | 2   | `target_type`        | string    | Yes      | -      | Type classification |
 | 3   | `pref_name`          | string    | Yes      | -      | Preferred name      |
 | 4   | `organism`           | string    | Yes      | -      | Organism name       |
@@ -97,7 +97,7 @@ ______________________________________________________________________
 
 | Parameter           | Value                    |
 | ------------------- | ------------------------ |
-| **Entity ID Field** | `target_chembl_id`       |
+| **Entity ID Field** | `target_id`              |
 | **ID Source**       | `from_api`               |
 | **Format**          | ChEMBL ID (CHEMBL[0-9]+) |
 
@@ -117,12 +117,14 @@ ______________________________________________________________________
 
 ### 5.1. Pandera Schema
 
+> Migration note: public Pandera contract uses canonical PK names; legacy aliases are accepted only during transition via ingestion/transform alias mapping and will be removed in the next major release.
+
 ```python
 class TargetSchema(ETLRecordSchema):
     """Target validation schema for Silver layer."""
 
     # === Identifiers ===
-    target_chembl_id: Series[str] = pa.Field(
+    target_id: Series[str] = pa.Field(
         nullable=False,
         str_matches=r"^CHEMBL\d+$",
     )
@@ -177,12 +179,12 @@ class TargetSchema(ETLRecordSchema):
 
 ### 5.2. Field Validation Matrix
 
-| Field              | Type | Nullable | Constraints         | DQ Level |
-| ------------------ | ---- | -------- | ------------------- | -------- |
-| `target_chembl_id` | str  | No       | regex `^CHEMBL\d+$` | CRITICAL |
-| `target_type`      | str  | Yes      | isin [...]          | WARNING  |
-| `tax_id`           | int  | Yes      | >= 1                | WARNING  |
-| `organism`         | str  | Yes      | -                   | INFO     |
+| Field         | Type | Nullable | Constraints         | DQ Level |
+| ------------- | ---- | -------- | ------------------- | -------- |
+| `target_id`   | str  | No       | regex `^CHEMBL\d+$` | CRITICAL |
+| `target_type` | str  | Yes      | isin [...]          | WARNING  |
+| `tax_id`      | int  | Yes      | >= 1                | WARNING  |
+| `organism`    | str  | Yes      | -                   | INFO     |
 
 ______________________________________________________________________
 
@@ -193,7 +195,7 @@ ______________________________________________________________________
 | This Entity Field         | Maps To            | Provider | Field       |
 | ------------------------- | ------------------ | -------- | ----------- |
 | `component_accessions[*]` | UniProt            | UniProt  | `accession` |
-| `target_chembl_id`        | UniProt ID Mapping | UniProt  | `from_id`   |
+| `target_id`               | UniProt ID Mapping | UniProt  | `from_id`   |
 
 ______________________________________________________________________
 
@@ -205,7 +207,7 @@ provider: chembl
 entity_type: target
 version: "1.2.0"
 
-primary_keys: ["target_chembl_id"]
+primary_keys: ["target_id"]
 silver_table: "chembl_target"
 gold_table: "chembl_target"
 
@@ -218,7 +220,7 @@ gold_filters:
 input_filter:
   enabled: true
   source_path: "data/input/target.csv"
-  column_name: "target_chembl_id"
-  filter_field: "target_chembl_id"
+  column_name: "target_id"
+  filter_field: "target_id"
   batch_size: 20
 ```

@@ -8,6 +8,7 @@ Implements RULES.md §2.3 and ADR-026 for metadata creation.
 
 from __future__ import annotations
 
+import ast
 import inspect
 from datetime import UTC, datetime
 from platform import node as hostname
@@ -22,6 +23,75 @@ if TYPE_CHECKING:
         GoldMetadata,
         SchemaMetadata,
         SilverMetadata,
+    )
+
+
+def _parse_composite_list(value: Any) -> list[str]:
+    """Parse composite list metadata stored as list or stringified list."""
+    if isinstance(value, list):
+        return [str(item) for item in value]
+    if isinstance(value, str):
+        try:
+            parsed = ast.literal_eval(value)
+        except (ValueError, SyntaxError):
+            return []
+        if isinstance(parsed, list):
+            return [str(item) for item in parsed]
+    return []
+
+
+def _parse_composite_status(value: Any) -> dict[str, str]:
+    """Parse enrichment status stored as dict or stringified dict."""
+    if isinstance(value, dict):
+        return {str(k): str(v) for k, v in value.items()}
+    if isinstance(value, str):
+        try:
+            parsed = ast.literal_eval(value)
+        except (ValueError, SyntaxError):
+            return {}
+        if isinstance(parsed, dict):
+            return {str(k): str(v) for k, v in parsed.items()}
+    return {}
+
+
+def _build_composite_output_ext(records: list[dict[str, Any]]) -> Any | None:
+    """Build CompositeOutputExt when composite lineage columns are present."""
+    from bioetl.domain.models.metadata import (
+        CompositeOutputExt,
+        CompositeSchemaValidationMetadata,
+    )
+
+    if not records:
+        return None
+
+    sample = records[0]
+    has_composite_fields = any(key.startswith("_composite_") for key in sample)
+    has_lineage_fields = "_source_providers" in sample or "_enrichment_status" in sample
+    if not has_composite_fields and not has_lineage_fields:
+        return None
+
+    lineage_raw = sample.get("_lineage_created_at")
+    lineage_created_at: datetime | None = None
+    if isinstance(lineage_raw, str):
+        try:
+            lineage_created_at = datetime.fromisoformat(lineage_raw)
+        except ValueError:
+            lineage_created_at = None
+
+    return CompositeOutputExt(
+        composite_run_id=(
+            str(sample.get("_composite_run_id"))
+            if sample.get("_composite_run_id") is not None
+            else None
+        ),
+        source_providers=_parse_composite_list(sample.get("_source_providers")),
+        enrichment_status=_parse_composite_status(sample.get("_enrichment_status")),
+        lineage_created_at=lineage_created_at,
+        schema_validation=CompositeSchemaValidationMetadata(
+            enabled=False,
+            strict=None,
+            status="not_run",
+        ),
     )
 
 
@@ -79,6 +149,7 @@ def _parse_table_name(table_name: str) -> tuple[str, str]:
     return "unknown", table_name if table_name else "unknown"
 
 
+# Any: dynamic Pandera schema...
 def _extract_schema_metadata(gold_schema: Any | None) -> SchemaMetadata:
     """Extract schema metadata from a Pandera DataFrameModel.
 
@@ -193,7 +264,7 @@ class SilverMetadataBuilder(_MetadataBuilderBase):
         self,
         table_path: str,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[dict[str, Any]],  # Any: heterogeneous metadata values
         primary_keys: list[str],
         run_id: str | None = None,
         sources_used: list[str] | None = None,
@@ -314,12 +385,12 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
     def build_fallback_metadata(
         self,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[dict[str, Any]],  # Any: heterogeneous metadata values
         mode: GoldWriteMode,
-        scd_config: dict[str, Any] | None = None,
+        scd_config: dict[str, Any] | None = None,  # Any: dynamic layer config
         ingestion_ts: datetime | None = None,
-        run_id: Any | None = None,
-        gold_schema: Any | None = None,
+        run_id: Any | None = None,  # Any: heterogeneous run ID (str, int, UUID)
+        gold_schema: Any | None = None,  # Any: dynamic Pandera schema class
     ) -> GoldMetadata:
         """Build Gold metadata using fallback logic (no coordinator).
 
@@ -374,14 +445,17 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
             valid_records=len(records),
         )
 
+        composite_ext = _build_composite_output_ext(records)
+
         # Use unified output structure (ADR-029)
         output = BaseOutputMetadata(
             record_count=len(records),
             write_started_at=now,
             write_completed_at=now,
+            composite_run_id=composite_ext.composite_run_id if composite_ext else None,
         )
 
-        output_ext = GoldOutputExt()
+        output_ext = composite_ext or GoldOutputExt()
 
         scd = None
         if mode == GoldWriteMode.SCD2 and scd_config:
@@ -419,11 +493,11 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
         self,
         table_path: str,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[dict[str, Any]],  # Any: heterogeneous metadata values
         primary_keys: list[str],
         run_id: str | None = None,
         sources_used: list[str] | None = None,
-        gold_schema: Any | None = None,
+        gold_schema: Any | None = None,  # Any: dynamic Pandera schema class
     ) -> GoldMetadata:
         """Build Gold metadata for merged composite data.
 
@@ -485,14 +559,17 @@ class GoldMetadataBuilder(_MetadataBuilderBase):
             error_rate=0.0,
         )
 
+        composite_ext = _build_composite_output_ext(records)
+
         # Use unified output structure (ADR-029)
         output = BaseOutputMetadata(
             record_count=len(records),
             write_started_at=now,
             write_completed_at=now,
+            composite_run_id=composite_ext.composite_run_id if composite_ext else None,
         )
 
-        output_ext = GoldOutputExt()
+        output_ext = composite_ext or GoldOutputExt()
 
         environment = EnvironmentMetadata(
             hostname=hostname(),

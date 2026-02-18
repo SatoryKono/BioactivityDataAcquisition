@@ -44,6 +44,7 @@ class PublicationFieldGroup(StrEnum):
         CITATIONS_AND_REFERENCE: Citation counts, references
         DATE_AND_PLACES: Publication dates, countries, locations
         PUBLICATION_TYPES: Document types, publication types
+        SYSTEM_METADATA: System/lineage fields excluded from Gold (content_hash, etc.)
         TRASH: Excluded from Gold layer (internal, redundant, low-value)
     """
 
@@ -54,6 +55,7 @@ class PublicationFieldGroup(StrEnum):
     CITATIONS_AND_REFERENCE = "citations_and_reference"
     DATE_AND_PLACES = "date_and_places"
     PUBLICATION_TYPES = "publication_types"
+    SYSTEM_METADATA = "system_metadata"
     TRASH = "trash"
 
     @property
@@ -64,7 +66,10 @@ class PublicationFieldGroup(StrEnum):
     @property
     def include_in_gold(self) -> bool:
         """Check if fields in this group should be included in Gold layer."""
-        return self != PublicationFieldGroup.TRASH
+        return self not in (
+            PublicationFieldGroup.TRASH,
+            PublicationFieldGroup.SYSTEM_METADATA,
+        )
 
     @classmethod
     def from_string(cls, value: str) -> PublicationFieldGroup:
@@ -108,6 +113,7 @@ _GROUP_DISPLAY_NAMES: Final[dict[PublicationFieldGroup, str]] = {
     PublicationFieldGroup.CITATIONS_AND_REFERENCE: "Citations & Reference",
     PublicationFieldGroup.DATE_AND_PLACES: "Date & Places",
     PublicationFieldGroup.PUBLICATION_TYPES: "Publication Types",
+    PublicationFieldGroup.SYSTEM_METADATA: "System Metadata",
     PublicationFieldGroup.TRASH: "Trash (Excluded)",
 }
 
@@ -124,7 +130,7 @@ FIELD_TO_GROUP_MAPPING: Final[dict[str, PublicationFieldGroup]] = {
     # ===== canonical: id (1-24) =====
     "alternative_id": PublicationFieldGroup.ID_AND_STATUS,
     "chembl_release": PublicationFieldGroup.ID_AND_STATUS,
-    "content_hash": PublicationFieldGroup.TRASH,
+    "content_hash": PublicationFieldGroup.SYSTEM_METADATA,
     "corpus_id": PublicationFieldGroup.ID_AND_STATUS,
     "dblp_id": PublicationFieldGroup.ID_AND_STATUS,
     "document_chembl_id": PublicationFieldGroup.ID_AND_STATUS,
@@ -168,9 +174,9 @@ FIELD_TO_GROUP_MAPPING: Final[dict[str, PublicationFieldGroup]] = {
     "author_count": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "author_details": PublicationFieldGroup.TRASH,
     "author_h_indices": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
+    "author_keys": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "author_openalex_ids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "author_orcids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
-    "author_ormolecule_ids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "author_s2_ids": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "authors": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
     "authors_with_affiliations": PublicationFieldGroup.AUTHOR_AND_AFFILIATIONS,
@@ -187,6 +193,7 @@ FIELD_TO_GROUP_MAPPING: Final[dict[str, PublicationFieldGroup]] = {
     "pub_month": PublicationFieldGroup.DATE_AND_PLACES,
     "publication_date": PublicationFieldGroup.DATE_AND_PLACES,
     # ===== canonical: topics_and_keywords (115-130) =====
+    "fields_of_study": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
     "chemical_count": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
     "chemicals": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
     "citation_subset": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
@@ -218,7 +225,7 @@ FIELD_TO_GROUP_MAPPING: Final[dict[str, PublicationFieldGroup]] = {
     "oa_status": PublicationFieldGroup.ID_AND_STATUS,
     "open_access_url": PublicationFieldGroup.ID_AND_STATUS,
     "publication_status": PublicationFieldGroup.ID_AND_STATUS,
-    "publication_type": PublicationFieldGroup.ID_AND_STATUS,
+    "publication_type": PublicationFieldGroup.PUBLICATION_TYPES,
     "publication_type_list": PublicationFieldGroup.PUBLICATION_TYPES,
     "publication_types": PublicationFieldGroup.PUBLICATION_TYPES,
     "references": PublicationFieldGroup.CITATIONS_AND_REFERENCE,

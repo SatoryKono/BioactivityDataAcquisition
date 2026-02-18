@@ -1,7 +1,21 @@
 """Observability ports for tracing, metrics, and logging.
 
-This module contains ports for distributed tracing (OpenTelemetry),
-metrics collection, and structured logging.
+This module contains ports for distributed tracing, metrics collection,
+and structured logging.
+
+Design Decision — TracingPort as OpenTelemetry facade:
+    TracingPort is intentionally modeled after the OpenTelemetry Tracing API.
+    ``get_tracer()`` returns an object whose interface mirrors
+    ``opentelemetry.trace.Tracer`` (``start_as_current_span``, span context
+    manager, ``set_attribute``, ``record_exception``).  This is a deliberate
+    architectural choice (see ADR-017, ADR-022):
+
+    * The OTel API is a vendor-neutral industry standard for distributed tracing.
+    * Adopting its surface as our port contract avoids inventing a bespoke
+      tracing abstraction and keeps the migration path to real OTel trivial.
+    * NoOp implementations (``_NoOpOtelTracer``, ``_NoOpSpan``) mirror the same
+      API surface so that application code uses a single calling convention
+      regardless of whether tracing is enabled.
 """
 
 from __future__ import annotations
@@ -11,13 +25,43 @@ from typing import Any, Protocol, Self, runtime_checkable
 
 @runtime_checkable
 class TracingPort(Protocol):
-    """Port for distributed tracing (OpenTelemetry).
+    """Port for distributed tracing — an OpenTelemetry Tracing API facade.
 
-    Abstracts the tracer implementation to allow no-op or specific backends.
+    This port is **deliberately** shaped after the OpenTelemetry API so that:
+
+    1. Application code calls ``tracer.get_tracer(name).start_as_current_span(...)``
+       — the standard OTel calling convention — regardless of the backend.
+    2. Switching from ``NoOpTracing`` to ``OpenTelemetryTracer`` requires zero
+       changes in application/domain code; only composition wiring changes.
+    3. Any OTel-compatible tracer (Jaeger, Zipkin, OTLP) can be plugged in
+       without altering the port contract.
+
+    The ``Any`` return type of ``get_tracer`` is intentional: it represents an
+    ``opentelemetry.trace.Tracer``-compatible object.  Using ``Any`` avoids a
+    hard dependency on the ``opentelemetry`` package in the domain layer while
+    preserving the OTel calling convention in all implementations (including
+    ``NoOpTracing``).
+
+    See Also:
+        - ADR-017: Observability Architecture — establishes port-based tracing.
+        - ADR-022: NoOp Tracing — documents the OTel facade rationale and
+          NoOp default for local-only deployment.
     """
 
-    def get_tracer(self, name: str) -> Any:
-        """Get a tracer instance for instrumentation."""
+    def get_tracer(self, name: str) -> Any:  # Any: OTel Tracer (avoids op...
+        """Return an OpenTelemetry-compatible tracer instance.
+
+        The returned object exposes ``start_as_current_span(name, attributes=...)``
+        — the standard OTel ``Tracer`` interface.  For ``NoOpTracing`` this is a
+        lightweight no-op; for ``OpenTelemetryTracer`` it delegates to the real
+        OTel SDK.
+
+        Args:
+            name: Instrumentation scope name (e.g. ``"bioetl.pipeline"``).
+
+        Returns:
+            An OTel-compatible tracer (concrete type depends on the implementation).
+        """
         ...
 
     def close(self) -> None:
@@ -110,29 +154,33 @@ class LoggerPort(Protocol):
     should be fast and non-blocking by design.
     """
 
-    def bind(self, **kwargs: Any) -> Self:
+    def bind(self, **kwargs: Any) -> Self:  # Any: structlog-compatible a...
         """Bind additional context to the logger.
 
         Returns a new logger instance with the bound context.
         """
         ...
 
-    def info(self, _event: str, **kwargs: Any) -> Any:
+    def info(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible a...
         """Log an informational message."""
         ...
 
+    # Any: structlog-compatible a...
     def warning(self, _event: str, **kwargs: Any) -> Any:
         """Log a warning message."""
         ...
 
+    # Any: structlog-compatible a...
     def error(self, _event: str, **kwargs: Any) -> Any:
         """Log an error message."""
         ...
 
+    # Any: structlog-compatible a...
     def debug(self, _event: str, **kwargs: Any) -> Any:
         """Log a debug message."""
         ...
 
+    # Any: structlog-compatible a...
     def exception(self, _event: str, **kwargs: Any) -> Any:
         """Log an exception with traceback."""
         ...
@@ -196,7 +244,7 @@ class DQMonitorPort(Protocol):
     def add_metric(
         self,
         metric_name: str,
-        baseline: Any,  # Sequence[float]
+        baseline: Any,  # Any: Sequence[float] (avoid...
         min_threshold: float | None = None,
         max_threshold: float | None = None,
     ) -> None:
@@ -236,7 +284,7 @@ class DQMonitorPort(Protocol):
     def check_quality(
         self,
         metrics: dict[str, float],
-    ) -> list[Any]:
+    ) -> list[Any]:  # Any: list[Anomaly] (avoids importing Anomaly in domain port)
         """Check current metrics against baseline for anomalies.
 
         Args:

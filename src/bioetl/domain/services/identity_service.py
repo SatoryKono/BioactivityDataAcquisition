@@ -56,6 +56,16 @@ class IdentityService:
 
     """
 
+    def __init__(
+        self,
+        *,
+        content_hash_include_fields: set[str] | None = None,
+        content_hash_exclude_fields: set[str] | None = None,
+    ) -> None:
+        """Initialize service with optional default content-hash field policy."""
+        self._content_hash_include_fields = content_hash_include_fields
+        self._content_hash_exclude_fields = content_hash_exclude_fields or set()
+
     def compute_entity_id(
         self,
         provider: str,
@@ -99,6 +109,8 @@ class IdentityService:
         record: dict[str, Any],
         *,
         exclude_none: bool = False,
+        include_fields: set[str] | None = None,
+        exclude_fields: set[str] | None = None,
     ) -> ContentHash:
         """Compute SHA256 content hash for record versioning.
 
@@ -121,13 +133,29 @@ class IdentityService:
             ContentHash("abc123...")
 
         """
-        return generate_content_hash(record, provider, exclude_none=exclude_none)
+        resolved_include_fields = (
+            include_fields
+            if include_fields is not None
+            else self._content_hash_include_fields
+        )
+        resolved_exclude_fields = self._content_hash_exclude_fields | (
+            exclude_fields or set()
+        )
+        return generate_content_hash(
+            record,
+            provider,
+            exclude_none=exclude_none,
+            include_fields=resolved_include_fields,
+            exclude_fields=resolved_exclude_fields,
+        )
 
     def _normalize_for_hash(
         self,
         record: dict[str, Any],
         *,
         exclude_none: bool = False,
+        include_fields: set[str] | None = None,
+        exclude_fields: set[str] | None = None,
     ) -> dict[str, Any]:
         """Normalize record before hashing for consistency.
 
@@ -148,4 +176,17 @@ class IdentityService:
             Normalized dictionary suitable for hashing.
 
         """
-        return normalize_for_hash(record, exclude_none=exclude_none)
+        resolved_include_fields = (
+            include_fields
+            if include_fields is not None
+            else self._content_hash_include_fields
+        )
+        resolved_exclude_fields = self._content_hash_exclude_fields | (
+            exclude_fields or set()
+        )
+        return normalize_for_hash(
+            record,
+            exclude_none=exclude_none,
+            include_fields=resolved_include_fields,
+            exclude_fields=resolved_exclude_fields,
+        )

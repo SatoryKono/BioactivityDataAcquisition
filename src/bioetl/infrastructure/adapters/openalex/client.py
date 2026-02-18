@@ -395,6 +395,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
         query: str | None = None,
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
+        offset: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch OpenAlex works.
 
@@ -727,7 +728,7 @@ def _create_openalex_adapter(
     http_client: UnifiedHTTPClient | None,
     logger: LoggerPort | None,
     settings: Settings | None,
-    **kwargs: Any,
+    **kwargs: Any,  # Any: forward arbitrary adap...
 ) -> OpenAlexAdapter:
     """Custom creator for OpenAlex adapter.
 

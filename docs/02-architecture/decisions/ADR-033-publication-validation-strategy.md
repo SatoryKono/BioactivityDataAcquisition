@@ -2,7 +2,7 @@
 
 | Параметр | Значение |
 |----------|----------|
-| **Статус** | Proposed |
+| **Статус** | Proposed (per-provider schemas implemented; unified 5-level validation pipeline not yet realized) |
 | **Дата** | 2026-02-06 |
 | **Автор** | BioETL Team |
 | **Ревьюер** | — |

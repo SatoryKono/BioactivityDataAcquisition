@@ -229,10 +229,10 @@ composite:
   # ---------------------------------------------------------------------------
   # Data Quality Configuration
   # ---------------------------------------------------------------------------
+  # Thresholds, required_fields, and field_validations externalized to:
+  #   configs/quality/entities/composite/assay.yaml
+  # Only pipeline-specific enricher_overrides remain inline.
   dq_overrides:
-    soft_fail_threshold: 0.10   # 10% errors = warning
-    hard_fail_threshold: 0.30   # 30% errors = failure
-
     # Per-enricher threshold overrides (lenient - many nulls expected)
     enricher_overrides:
       chembl_cell_line:
@@ -241,68 +241,6 @@ composite:
       chembl_tissue:
         soft_fail_threshold: 0.70   # ~70% assays lack tissue
         hard_fail_threshold: 0.95
-
-    # Required fields in final Gold output
-    required_fields:
-      - assay_id
-      - assay_type
-
-    # Field-level validation rules
-    field_validations:
-      assay_id:
-        type: string
-        nullable: false
-        pattern: "^CHEMBL\\d+$"
-        description: "ChEMBL assay ID (primary key)"
-
-      cell_id:
-        type: string
-        nullable: true
-        pattern: "^CHEMBL\\d+$"
-        description: "FK to cell_line (nullable)"
-
-      tissue_id:
-        type: string
-        nullable: true
-        pattern: "^CHEMBL\\d+$"
-        description: "FK to tissue (nullable)"
-
-      target_id:
-        type: string
-        nullable: true
-        pattern: "^CHEMBL\\d+$"
-        description: "FK to target"
-
-      assay_type:
-        type: string
-        nullable: false
-        allowed: ["B", "F", "A", "T", "P", "U"]
-        description: "Assay type classification"
-
-      confidence_score:
-        type: integer
-        nullable: true
-        min_value: 0
-        max_value: 9
-        description: "Target confidence score (0-9)"
-
-      assay_taxonomy_id:
-        type: integer
-        nullable: true
-        min_value: 1
-        description: "NCBI Taxonomy ID"
-
-      cell_source_taxonomy_id:
-        type: integer
-        nullable: true
-        min_value: 1
-        description: "Cell line source organism taxonomy ID"
-
-      bao_format:
-        type: string
-        nullable: true
-        pattern: "^BAO:\\d+$"
-        description: "BioAssay Ontology format ID"
 
   # ---------------------------------------------------------------------------
   # Execution Options
@@ -334,14 +272,8 @@ composite:
       - tissue_chembl_id   # FK from seed vs enricher match
 
 # -----------------------------------------------------------------------------
-# Gold Filters (applied to merged output)
-# -----------------------------------------------------------------------------
-gold_filters:
-  required_fields:
-    - assay_id
-    - assay_type
-
-# -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
-filter_config_file: ../../filter/entities/composite/assay.yaml
+# Gold filters and filter rules loaded from hierarchical config files.
+# No inline gold_filters needed — filter entity config is authoritative.
+filter_config_file: ../../filters/entities/composite/assay.yaml

@@ -518,9 +518,11 @@ class TestFieldGroupId:
     def test_include_in_gold(self) -> None:
         assert FieldGroupId.BIBLIOGRAPHY.include_in_gold is True
         assert FieldGroupId.TRASH.include_in_gold is False
+        assert FieldGroupId.SYSTEM_METADATA.include_in_gold is False
 
     def test_gold_groups(self) -> None:
         gold = FieldGroupId.gold_groups()
         assert FieldGroupId.TRASH not in gold
+        assert FieldGroupId.SYSTEM_METADATA not in gold
         assert FieldGroupId.BIBLIOGRAPHY in gold
-        assert len(gold) == 7  # All groups except TRASH
+        assert len(gold) == 7  # All groups except TRASH and SYSTEM_METADATA

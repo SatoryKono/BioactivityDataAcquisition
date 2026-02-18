@@ -44,7 +44,14 @@ field_validations:
     nullable: true
     error_message: "Publication year out of valid range"
 
-  - field: type
+  - field: publication_year
+    type: range
+    min: 1950
+    nullable: true
+    severity: warn
+    error_message: "Publication year before 1950 — will be filtered at Gold stage"
+
+  - field: publication_type
     type: enum
     allowed:
       - journal-article
@@ -93,7 +100,7 @@ cross_field_validations:
 # =============================================================================
 conditional_validations:
   - name: article_requires_title
-    condition_field: type
+    condition_field: publication_type
     condition_value:
       - journal-article
       - proceedings-article
@@ -103,3 +110,12 @@ conditional_validations:
         type: not_null
         nullable: false
         error_message: "Journal and proceedings articles must have a title"
+
+# =============================================================================
+# Key Nullability Policy for Silver writes
+# =============================================================================
+# Documented per pipeline: merge(primary) and partition key nullability.
+key_nullability:
+  - field: doi
+    key_type: merge
+    nullable: false

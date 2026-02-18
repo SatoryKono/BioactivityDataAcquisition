@@ -115,6 +115,10 @@ class FieldValidation:
         validation_type: Type of validation.
         nullable: Whether field can be null/None. Default: True.
         severity: Severity level (error or warn). Default: error.
+        severity_enricher: Override severity for enricher context. None means
+            use the base ``severity``. Allows DQ rules to downgrade from
+            error to warn when a pipeline runs as an enricher in a
+            composite pipeline.
         min_value: Minimum value for range validation.
         max_value: Maximum value for range validation.
         pattern: Regex pattern for pattern validation.
@@ -137,6 +141,7 @@ class FieldValidation:
     ]
     nullable: bool = True
     severity: Literal["error", "warn"] = "error"
+    severity_enricher: Literal["error", "warn"] | None = None
     # Range validation
     min_value: float | None = None
     max_value: float | None = None
@@ -155,6 +160,26 @@ class FieldValidation:
         """Convert lists to tuples for immutability."""
         freeze_sequences(self, ("allowed",))
 
+    def effective_severity(
+        self, *, is_enricher: bool = False
+    ) -> Literal["error", "warn"]:
+        """Return the applicable severity given execution context.
+
+        When running as an enricher inside a composite pipeline and
+        ``severity_enricher`` is set, that override takes precedence.
+        Otherwise the base ``severity`` is returned.
+
+        Args:
+            is_enricher: True when the pipeline runs as an enricher
+                within a composite pipeline.
+
+        Returns:
+            ``"error"`` or ``"warn"``.
+        """
+        if is_enricher and self.severity_enricher is not None:
+            return self.severity_enricher
+        return self.severity
+
 
 @dataclass(frozen=True, slots=True)
 class CrossFieldValidation:
@@ -166,6 +191,7 @@ class CrossFieldValidation:
         name: Unique name for the validation rule.
         fields: Fields involved in the validation.
         condition: Validation condition type.
+        severity: Severity level (error or warn). Default: error.
         error_message: Custom error message template.
     """
 
@@ -178,6 +204,7 @@ class CrossFieldValidation:
         "conditional_required",  # If field A present, field B required
         "custom",  # Custom validation function
     ]
+    severity: Literal["error", "warn"] = "error"
     # For conditional_required: (trigger_field, required_field)
     trigger_field: str | None = None
     required_field: str | None = None

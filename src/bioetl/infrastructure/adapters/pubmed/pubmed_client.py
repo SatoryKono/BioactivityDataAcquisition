@@ -173,6 +173,7 @@ class PubMedAdapter(
         query: str | None = None,
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
+        offset: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch PubMed records."""
         if filter_ids:
@@ -237,7 +238,7 @@ def _create_pubmed_adapter(
     http_client: UnifiedHTTPClient | None,
     logger: LoggerPort | None,
     settings: Settings | None,
-    **kwargs: Any,
+    **kwargs: Any,  # Any: forward arbitrary adap...
 ) -> PubMedAdapter:
     email = kwargs.get("email")
     if not email and settings:

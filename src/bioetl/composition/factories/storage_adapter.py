@@ -15,8 +15,12 @@ from __future__ import annotations
 import asyncio
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
+from bioetl.domain.contracts.gold.composite import (
+    CompositeMoleculeGoldSchema,
+    CompositePublicationGoldSchema,
+)
 from bioetl.domain.types import HealthStatus
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
@@ -27,6 +31,9 @@ from bioetl.infrastructure.storage.silver_writer import SilverWriter
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
+    from pandera.api.dataframe.container import DataFrameSchema
+
+    from bioetl.domain.config import KeyNullabilityRule
     from bioetl.domain.models.metadata import SourceMetadata
     from bioetl.domain.types import ArrowSchema, BatchID, RunID, RunType
 
@@ -40,6 +47,13 @@ class StorageAdapter:
     Implements StoragePort protocol from domain/ports.py.
     Delegates to specialized writers for each layer.
     """
+
+    _COMPOSITE_GOLD_SCHEMAS: ClassVar[dict[str, Any]] = {
+        "composite/publication": CompositePublicationGoldSchema,
+        "composite_publication": CompositePublicationGoldSchema,
+        "composite/molecule": CompositeMoleculeGoldSchema,
+        "composite_molecule": CompositeMoleculeGoldSchema,
+    }
 
     # Protocol compliance marker
     REQUIRES_SILVER_SCHEMA: bool = True
@@ -113,6 +127,7 @@ class StorageAdapter:
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
         column_order: list[str] | None = None,
         bronze_refs: list[BronzeWriteResult] | None = None,
+        key_nullability_rules: list[KeyNullabilityRule] | None = None,
     ) -> SilverWriteResult | None:
         """Write transformed records to Silver layer.
 
@@ -147,16 +162,18 @@ class StorageAdapter:
             on_schema_mismatch=on_schema_mismatch,
             column_order=column_order,
             bronze_refs=bronze_refs,
+            key_nullability_rules=key_nullability_rules,
         )
 
     async def write_gold(
         self,
         table_name: str,
         records: list[dict[str, Any]],
-        schema: Any,
+        schema: Any,  # Any: Pandera DataFrameModel class varies per entity Gold schema
         primary_keys: list[str] | None = None,
         mode: Literal["overwrite", "append", "scd2"] = "overwrite",
         *,
+        scd_config: dict[str, Any] | None = None,
         column_order: list[str] | None = None,
         ingestion_ts: datetime | None = None,
         run_id: RunID | None = None,
@@ -187,6 +204,7 @@ class StorageAdapter:
             schema=schema,
             primary_keys=primary_keys,
             mode=mode,
+            scd_config=scd_config,
             column_order=column_order,
             ingestion_ts=ingestion_ts,
             run_id=run_id,
@@ -233,6 +251,7 @@ class StorageAdapter:
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.
             preserve_column_order: If True, skip canonical reordering.
+            schema: Optional Pandera schema for strict contract validation.
         """
         await self.silver.write_silver_merged(
             table_name,
@@ -252,6 +271,7 @@ class StorageAdapter:
         run_id: str | None = None,
         sources_used: list[str] | None = None,
         preserve_column_order: bool = False,
+        schema: DataFrameSchema | None = None,  # type: ignore[type-arg]
     ) -> None:
         """Write merged records to Gold layer without Pandera schema.
 
@@ -264,11 +284,15 @@ class StorageAdapter:
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.
             preserve_column_order: If True, skip canonical reordering.
+            schema: Optional Pandera schema for strict contract validation.
         """
+        schema = self._COMPOSITE_GOLD_SCHEMAS.get(table_name)
+
         await self.gold.write_gold_merged(
             table_name,
             records,
             primary_keys,
+            schema=schema,
             run_id=run_id,
             sources_used=sources_used,
             preserve_column_order=preserve_column_order,

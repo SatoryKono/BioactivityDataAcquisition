@@ -110,7 +110,7 @@ class TestSemanticScholarPublicationTransformer:
         assert result["is_oa"] is True
         assert result["open_access_url"] == "https://example.com/paper.pdf"
         assert result["oa_status"] == "green"  # Normalized to lowercase
-        assert result["publication_type"] == "JournalArticle"
+        assert result["publication_type"] == "journal-article"  # Normalized
         assert result["_source"] == "semanticscholar"
         assert result["_lookup_method"] == "doi"
 
@@ -189,7 +189,7 @@ class TestSemanticScholarPublicationTransformer:
         sample_record: dict[str, Any],
         publication_types: list[str] | None,
     ) -> None:
-        """Test that publication_type defaults to PUBLICATION when publicationTypes is empty/null."""
+        """Test that publication_type defaults to 'publication' when publicationTypes is empty/null."""
         if publication_types is None:
             sample_record.pop("publicationTypes", None)
         else:
@@ -198,7 +198,10 @@ class TestSemanticScholarPublicationTransformer:
         result = await transformer.transform(mock_context, sample_record, 0)
 
         assert result is not None
-        assert result["publication_type"] == "PUBLICATION"
+        # "PUBLICATION" is the raw fallback from _resolve_publication_type(),
+        # which is then mapped to "journal-article" via PUBLICATION_TYPE_MAPPING
+        # (matches the ChEMBL "PUBLICATION" → "journal-article" entry)
+        assert result["publication_type"] == "journal-article"
 
     @pytest.mark.asyncio
     async def test_transform_publication_type_joined(
@@ -207,13 +210,13 @@ class TestSemanticScholarPublicationTransformer:
         mock_context: PipelineContext,
         sample_record: dict[str, Any],
     ) -> None:
-        """Test that publication_type joins list values with '|'."""
+        """Test that publication_type joins list values and normalizes each to canonical."""
         sample_record["publicationTypes"] = ["JournalArticle", "Review"]
 
         result = await transformer.transform(mock_context, sample_record, 0)
 
         assert result is not None
-        assert result["publication_type"] == "JournalArticle|Review"
+        assert result["publication_type"] == "journal-article|review"
 
     @pytest.mark.asyncio
     async def test_transform_missing_paper_id_skips_record(
@@ -471,6 +474,85 @@ class TestSemanticScholarDoiNormalization:
         assert result_lower is not None
         # After normalization, content hashes should be identical
         assert result_upper["content_hash"] == result_lower["content_hash"]
+
+
+class TestSemanticScholarPmidNormalization:
+    """Tests for PMID normalization in Semantic Scholar transformer.
+
+    PubMedId.from_raw() strips leading zeros, converts int→str, and
+    validates upper bound (< 10^10).
+    """
+
+    @pytest.fixture
+    def transformer(self) -> SemanticScholarPublicationTransformer:
+        """Create a transformer instance."""
+        return SemanticScholarPublicationTransformer()
+
+    @staticmethod
+    def _make_record_with_pmid(pmid: str | None) -> dict[str, Any]:
+        """Create a Semantic Scholar record with a specific PMID."""
+        external_ids: dict[str, Any] = {"CorpusId": 123456}
+        if pmid is not None:
+            external_ids["PubMed"] = pmid
+        return {
+            "paperId": "649def34f8be52c8b66281af98ae884c09aef38b",
+            "externalIds": external_ids,
+            "title": "PMID Normalization Test",
+            "_lookup_method": "doi",
+        }
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "raw_pmid,expected",
+        [
+            ("12345", "12345"),
+            ("0012345", "12345"),
+            ("00001", "1"),
+            ("9999999999", "9999999999"),
+        ],
+    )
+    async def test_pmid_normalization(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+        raw_pmid: str,
+        expected: str,
+    ) -> None:
+        """Test that PMIDs are normalized (leading zeros stripped)."""
+        record = self._make_record_with_pmid(raw_pmid)
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        assert result["pmid"] == expected
+
+    @pytest.mark.asyncio
+    async def test_pmid_none_handling(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test that None PMID remains None."""
+        record = self._make_record_with_pmid(None)
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        assert result["pmid"] is None
+
+    @pytest.mark.asyncio
+    async def test_pmid_exceeds_upper_bound(
+        self,
+        transformer: SemanticScholarPublicationTransformer,
+        mock_context: PipelineContext,
+    ) -> None:
+        """Test that PMID >= 10^10 is normalized to None."""
+        record = self._make_record_with_pmid("10000000000")
+
+        result = await transformer.transform(mock_context, record, 0)
+
+        assert result is not None
+        assert result["pmid"] is None
 
 
 class TestSemanticScholarDateNormalization:

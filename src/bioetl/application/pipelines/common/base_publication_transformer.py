@@ -20,6 +20,7 @@ from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.domain.mapping.publication_type_classification import (
     classify_publication_type,
 )
+from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
@@ -48,6 +49,9 @@ class BasePublicationTransformer(BaseTransformer):
     Subclasses MAY override:
     - _pre_extract_validation(): Add validation before extraction
     - _should_log_fallback_lookup(): Disable fallback logging (default: True)
+    - _normalize_content_fields(): Customize content field normalization
+
+    RF-NORM-04: Uniform content normalization (strip_html_tags on title/abstract).
     """
 
     @abstractmethod
@@ -125,6 +129,64 @@ class BasePublicationTransformer(BaseTransformer):
         """
         return True
 
+    _CONTENT_FIELDS: tuple[str, ...] = ("abstract",)
+    """Fields to apply ``strip_html_tags`` on after extraction (RF-NORM-04).
+
+    Only ``abstract`` by default — titles may contain angle brackets
+    (e.g. ``5' & 3' ends in DNA <structure>``) that are valid content,
+    not HTML markup.  Subclasses MAY extend to ``("title", "abstract")``.
+    """
+
+    def _normalize_content_fields(
+        self, business_data: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Apply uniform content normalization to text fields.
+
+        Strips residual HTML/XML tags from abstract (and other fields
+        listed in ``_CONTENT_FIELDS``).
+        The operation is idempotent — safe for providers that already
+        clean these fields in ``_extract_business_data``.
+
+        Subclasses MAY override to customize or extend normalization.
+
+        Args:
+            business_data: Extracted business data dictionary (mutated in-place).
+
+        Returns:
+            The same dictionary with content fields normalized.
+
+        """
+        for field in self._CONTENT_FIELDS:
+            raw = business_data.get(field)
+            if raw is not None:
+                business_data[field] = self._data_normalizer.strip_html_tags(raw)
+        return business_data
+
+    def _normalize_publication_type_field(
+        self, business_data: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Normalize the ``publication_type`` field to canonical kebab-case.
+
+        Uses ``PUBLICATION_TYPE_MAPPING`` for provider-agnostic normalization.
+        Handles pipe-separated multi-value strings (PubMed, Semantic Scholar).
+
+        Only operates when ``publication_type`` key is present in business_data.
+        The operation is idempotent — safe for providers that already use
+        canonical values (e.g., CrossRef).
+
+        Args:
+            business_data: Extracted business data dictionary (mutated in-place).
+
+        Returns:
+            The same dictionary with ``publication_type`` normalized.
+
+        """
+        if "publication_type" in business_data:
+            business_data["publication_type"] = normalize_publication_type(
+                business_data["publication_type"]
+            )
+        return business_data
+
     async def _transform_impl(
         self,
         context: PipelineContext,
@@ -136,6 +198,8 @@ class BasePublicationTransformer(BaseTransformer):
         Orchestrates the transformation process:
         1. Pre-extraction validation (optional hook)
         2. Extract business data
+        2a. Normalize content fields (strip HTML — RF-NORM-04)
+        2b. Normalize publication_type to canonical kebab-case
         3. Validate primary ID exists
         4. Log fallback usage if applicable
         5. Generate entity ID
@@ -157,6 +221,12 @@ class BasePublicationTransformer(BaseTransformer):
 
         # 2. Extract business data
         business_data = self._extract_business_data(record)
+
+        # 2a. Uniform content normalization (RF-NORM-04)
+        self._normalize_content_fields(business_data)
+
+        # 2b. Normalize publication_type to canonical kebab-case
+        self._normalize_publication_type_field(business_data)
 
         # 3. Validate primary ID
         primary_id_field = self._get_primary_id_field()

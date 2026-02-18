@@ -31,7 +31,7 @@ class DataSourceFactoryPort(Protocol):
         ...
 
     @staticmethod
-    def create(provider_name: str) -> Any:
+    def create(provider: str) -> Any:  # Any: polymorphic adapter
         """Create a data source adapter for the given provider."""
         ...
 
@@ -71,9 +71,9 @@ class HealthResult:
         """Return True if status is unhealthy or unknown."""
         return self.status in ("unhealthy", "unknown")
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:  # Any: heterogeneous health metric values
         """Convert to dictionary for serialization."""
-        result: dict[str, Any] = {
+        result: dict[str, Any] = {  # Any: heterogeneous health metric values
             "status": self.status,
         }
         if self.latency_ms is not None:
@@ -109,7 +109,7 @@ class HealthCheckSummary:
         """Number of unhealthy providers."""
         return sum(1 for r in self.results.values() if r.is_unhealthy)
 
-    def to_dict(self) -> dict[str, dict[str, Any]]:
+    def to_dict(self) -> dict[str, dict[str, Any]]:  # Any: heterogeneous health m...
         """Convert to dictionary for serialization."""
         return {name: result.to_dict() for name, result in self.results.items()}
 
@@ -134,7 +134,7 @@ class HealthService:
     """
 
     logger: LoggerPort
-    _factory: Any  # DataSourceFactoryPort
+    _factory: DataSourceFactoryPort
 
     async def check_providers(
         self,

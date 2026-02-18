@@ -96,7 +96,7 @@ class CircuitBreakerDataSourceDecorator:
         self,
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
-        exc_tb: Any,
+        exc_tb: Any,  # Any: traceback type from __aexit__ protocol
     ) -> None:
         """Exit async context by delegating to wrapped data source."""
         await self.data_source.__aexit__(exc_type, exc_val, exc_tb)
@@ -151,6 +151,7 @@ class CircuitBreakerDataSourceDecorator:
         query: str | None = None,
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
+        offset: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch records with circuit breaker protection.
 
@@ -163,6 +164,7 @@ class CircuitBreakerDataSourceDecorator:
             query: Optional search query.
             filter_ids: Optional IDs to filter by.
             filter_field: Optional field to filter on.
+            offset: Optional starting offset for checkpoint resume.
 
         Yields:
             Dictionary records from the data source.
@@ -182,6 +184,7 @@ class CircuitBreakerDataSourceDecorator:
                 query=query,
                 filter_ids=filter_ids,
                 filter_field=filter_field,
+                offset=offset,
             ):
                 yield record
 
@@ -199,6 +202,7 @@ class CircuitBreakerDataSourceDecorator:
         query: str | None,
         filter_ids: list[str] | None,
         filter_field: str | None,
+        offset: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Internal fetch implementation with circuit breaker protection.
 
@@ -211,6 +215,7 @@ class CircuitBreakerDataSourceDecorator:
             query=query,
             filter_ids=filter_ids,
             filter_field=filter_field,
+            offset=offset,
         ):
             yield record
 

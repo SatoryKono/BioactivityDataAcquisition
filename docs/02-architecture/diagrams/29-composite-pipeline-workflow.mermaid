@@ -1,0 +1,92 @@
+%% Title: Composite Pipeline Full Workflow — Seed to Gold (ADR-026)
+%% Covers: RULES.md §2.10 (Composite Pipelines), ADR-026
+%% Rank: 4 (Score 8.88) — Most complex architectural feature
+%% Updated: 2026-02-17
+
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+flowchart TB
+    subgraph Init["Phase 1: Initialization"]
+        CFG["Load CompositeConfig\nfrom YAML"]
+        PFV["CompositePreflightValidator\n• validate seed\n• validate enrichers\n• check silver tables"]
+        BOOT["bootstrap_composite_runner()\n→ CompositePipelineRunner"]
+    end
+
+    subgraph Seed["Phase 2: Seed Pipeline"]
+        SP["Run Seed Pipeline\n(e.g., chembl_publication)"]
+        SB[("Seed Silver Table\nsilver/chembl/publication/")]
+    end
+
+    subgraph Deps["Phase 3: Dependencies"]
+        DC["DependencyCoordinator\n• run_dependencies()"]
+        DEP1["Dependency 1\n(e.g., uniprot_protein)"]
+        DEP2["Dependency 2\n(optional)"]
+        DS1[("Dep 1 Silver Table")]
+        DS2[("Dep 2 Silver Table")]
+    end
+
+    subgraph Keys["Phase 3.5: Key Extraction"]
+        KE["KeyExtractorService\n• extract_keys(seed_silver,\n  join_keys=[doi, pmid])"]
+        KEYS["Filter Keys\n(DOIs, PMIDs)"]
+    end
+
+    subgraph Enrich["Phase 4: Fan-Out Enrichment"]
+        EC["EnrichmentCoordinator\n• asyncio.gather(*enrichers,\n  return_exceptions=True)"]
+        E1["CrossRef Enricher\nfilter_ids=DOIs"]
+        E2["PubMed Enricher\nfilter_ids=PMIDs"]
+        E3["OpenAlex Enricher\nfilter_ids=DOIs"]
+        E4["SemanticScholar Enricher\nfilter_ids=DOIs"]
+        ES1[("crossref/publication/")]
+        ES2[("pubmed/publication/")]
+        ES3[("openalex/publication/")]
+        ES4[("semanticscholar/publication/")]
+    end
+
+    subgraph Merge["Phase 5: Merge"]
+        DD["EnricherDeduplicator\n• deduplicate across sources"]
+        MS["MergeService\n• LEFT OUTER JOIN\n• conflict_resolution\n• column_ordering"]
+        CO["ColumnOrderer\n• FieldGroup priority\n• exclude TRASH group"]
+        CR["ColumnRenamer\n• qualified names\n• e.g., crossref.publication.title"]
+    end
+
+    subgraph Gold["Phase 6: Gold Write"]
+        XV["EnrichmentCrossValidator\n• check join coverage\n• detect orphans"]
+        GW["GoldWriter.write_gold()\nCompositePublicationGoldSchema\n(Pandera strict validation)"]
+        GT[("Gold Table\ngold/composite/publication/")]
+    end
+
+    subgraph CKP["Checkpointing (each phase)"]
+        CCM["CompositeCheckpointManager\n• save after each phase\n• resume from any phase"]
+    end
+
+    %% Flow
+    CFG --> PFV --> BOOT
+    BOOT --> SP --> SB
+
+    SB --> DC
+    DC --> DEP1 --> DS1
+    DC --> DEP2 --> DS2
+
+    SB --> KE
+    KE --> KEYS
+
+    KEYS --> EC
+    EC --> E1 & E2 & E3 & E4
+    E1 --> ES1
+    E2 --> ES2
+    E3 --> ES3
+    E4 --> ES4
+
+    ES1 & ES2 & ES3 & ES4 --> DD
+    DD --> MS
+    SB -->|"seed data"| MS
+    MS --> CO --> CR
+
+    CR --> XV --> GW --> GT
+
+    CCM -.->|"checkpoint"| Seed & Deps & Enrich & Merge & Gold
+
+    %% Styling
+    style Seed fill:#FFA500,stroke:#cc8400
+    style Enrich fill:#C0C0C0,stroke:#808080
+    style Gold fill:#FFD700,stroke:#ccac00
+    style Merge fill:#e3f2fd,stroke:#1565c0

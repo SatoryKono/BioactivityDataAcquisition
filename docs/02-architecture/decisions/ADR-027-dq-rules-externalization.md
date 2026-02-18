@@ -49,8 +49,20 @@ configs/quality/
 Pipeline configs reference DQ config via `dq_config_file`:
 ```yaml
 pipeline_name: chembl_activity
-dq_config_file: ../../dq/entities/chembl/activity.yaml
+dq_config_file: ../../quality/entities/chembl/activity.yaml
 ```
+
+> **`dq_config_file` semantics (convention-based):**
+> This field is **auto-computed** by the pipeline config loader from `provider` and
+> `entity_type` as `../../quality/entities/{provider}/{entity_type}.yaml`. Pipeline
+> YAML files **SHOULD NOT** explicitly set this field — it is resolved automatically
+> via convention (ADR-029). If explicitly set, the value acts as an **override path**
+> that replaces the convention-based resolution. The `DQConfigLoader` always loads
+> the full 3-level hierarchy (`_defaults → provider → entity`) regardless of whether
+> `dq_config_file` is explicit or computed.
+>
+> Inline `dq_overrides` in pipeline YAML are applied as Level 4 on top of the
+> resolved hierarchy. They are the recommended way to add entity-specific exceptions.
 
 ### Implementation Components
 

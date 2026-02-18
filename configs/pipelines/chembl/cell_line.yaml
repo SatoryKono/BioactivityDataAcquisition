@@ -6,10 +6,12 @@
 pipeline_name: chembl_cell_line
 provider: chembl
 entity_type: cell_line
+schema_file: ../../schemas/chembl/cell_line.yaml
 version: "1.2.0"
 description: "Extract cell lines from ChEMBL API"
 
-primary_keys: ["cell_id"]
+business_primary_keys: ["cell_id"]
+technical_primary_key: "entity_id"
 silver_table: "chembl_cell_line"
 gold_table: "chembl_cell_line"
 
@@ -35,4 +37,10 @@ gold_table: "chembl_cell_line"
 sink:
   bronze: {}
   silver: {}
-  gold: {}
+  gold:
+    mode: scd2
+    scd_config:
+      valid_from: _valid_from
+      valid_to: _valid_to
+      is_current: _is_current
+      version: _version

@@ -31,7 +31,6 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
     ror_ids: list[str] = field(default_factory=list)  # ROR IDs (may be empty)
 
     # Author identifiers (JSON-serialized lists preserving author order)
-    author_ormolecule_ids: str | None = None  # ORCID IDs (empty string for missing)
     author_openalex_ids: str | None = (
         None  # OpenAlex author IDs (empty string for missing)
     )

@@ -316,7 +316,7 @@ def _calculate_null_rate(values: list[Any], total: int) -> float:
     return round(null_count / total, 4)
 
 
-def _make_hashable(value: Any) -> Any:
+def _make_hashable(value: Any) -> Any:  # Any: record vals vary
     """Convert a value to a hashable representation.
 
     Args:
@@ -374,7 +374,7 @@ def _compute_numeric_stats(
     )
 
 
-def _is_valid_numeric(v: Any) -> bool:
+def _is_valid_numeric(v: Any) -> bool:  # Any: heterogeneous record values
     """Check if value is a valid numeric (not bool, NaN, or Inf).
 
     Args:

@@ -85,16 +85,16 @@ data_source = ProviderRegistry.create_data_source("chembl", settings, config, lo
 
 **Зарегистрированные провайдеры (8 шт, включая uniprot_idmapping):**
 
-| Provider          | Data Sources           | Pipelines                                                                                                                                                                                | Rate Limit   |
-| ----------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| Provider          | Data Sources           | Pipelines                                                                                                                                                                                                  | Rate Limit   |
+| ----------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
 | chembl            | ChemblAdapter          | activity, assay, assay_parameters, cell_line, compound_record, molecule, target, target_component, protein_class, publication, publication_similarity, publication_term, tissue, subcellular_fraction (14) | None         |
-| pubchem           | PubChemAdapter         | compound                                                                                                                                                                                 | 5 req/sec    |
-| uniprot           | UniProtAdapter         | protein                                                                                                                                                                                  | 100 req/sec  |
-| uniprot_idmapping | IDMappingDataSource    | id_mapping                                                                                                                                                                               | —            |
-| pubmed            | PubMedAdapter          | publications                                                                                                                                                                             | 3 req/sec    |
-| crossref          | CrossRefAdapter        | publication                                                                                                                                                                              | Polite pool  |
-| openalex          | OpenAlexAdapter        | publication                                                                                                                                                                              | 10 req/sec   |
-| semanticscholar   | SemanticScholarAdapter | publication                                                                                                                                                                              | 100 req/5min |
+| pubchem           | PubChemAdapter         | compound                                                                                                                                                                                                   | 5 req/sec    |
+| uniprot           | UniProtAdapter         | protein                                                                                                                                                                                                    | 100 req/sec  |
+| uniprot_idmapping | IDMappingDataSource    | id_mapping                                                                                                                                                                                                 | —            |
+| pubmed            | PubMedAdapter          | publications                                                                                                                                                                                               | 3 req/sec    |
+| crossref          | CrossRefAdapter        | publication                                                                                                                                                                                                | Polite pool  |
+| openalex          | OpenAlexAdapter        | publication                                                                                                                                                                                                | 10 req/sec   |
+| semanticscholar   | SemanticScholarAdapter | publication                                                                                                                                                                                                | 100 req/5min |
 
 ### 2.3. `registry.py` — Реестр пайплайнов
 
@@ -141,7 +141,7 @@ ______________________________________________________________________
 | Composition Root        | [diagrams/mermaid/11_composition_root.mmd](diagrams/mermaid/11_composition_root.mmd)               | DI container, factories, bootstrap |
 | Factory Pattern         | [diagrams/mermaid/20_factory_pattern_usage.mmd](diagrams/mermaid/20_factory_pattern_usage.mmd)     | Использование Factory паттерна     |
 | Five Layer Architecture | [diagrams/mermaid/01_five_layer_architecture.mmd](diagrams/mermaid/01_five_layer_architecture.mmd) | Composition слой в архитектуре     |
-| Layers Interaction      | [05-layers-interaction.mermaid](diagrams/05-layers-interaction.mermaid)                            | Bootstrap → Factories → Runner     |
+| Layers Interaction      | [05-layers-interaction.mermaid](diagrams/mermaid/05-layers-interaction.mermaid)                    | Bootstrap → Factories → Runner     |
 
 ### Связанные ADR
 

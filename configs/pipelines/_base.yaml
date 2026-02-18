@@ -1,10 +1,7 @@
 # Base pipeline config format (defaults only).
 # Full documentation: docs/03-guides/CONFIG-GUIDE.md
-schema_version: "2.0.0"
 
-source:
-  type: api
-  load_strategy: full
+source: {}
 
 transform:
   steps: []
@@ -31,77 +28,38 @@ sink:
   bronze:
     format: jsonl
     save_json: true
-    deterministic: true
     save_metadata: true
     dq_report:
       enabled: true
-    metadata:
-      lineage:
-        source_system: "<provider>"
-        source_version: "<version>"
-        extraction_method: "api"
-      owner: "data-team"
-      steward: "<pipeline>-owner"
-      description: "Raw <provider> <entity> data"
-      tags: ["<provider>", "<entity>", "raw"]
-      retention_days: 90
-      sla_freshness_hours: 24
     flat_structure: true
 
   silver:
     format: delta
     mode: merge
     on_schema_mismatch: evolve
-    classification: public
-    forensic_retention: false
-    deterministic: true
     save_metadata: true
     dq_report:
       enabled: true
-    metadata:
-      lineage:
-        source_layer: "bronze"
-        transformations: ["deduplication", "normalization", "dq_validation"]
-      quality_expectations:
-        completeness: 0.95
-        accuracy: 0.99
-      description: "Cleansed <provider> <entity> data"
-      tags: ["<provider>", "<entity>", "silver", "validated"]
     csv_export:
       enabled: true
       delimiter: ","
       header: true
       encoding: "utf-8"
-    partition_by: []
-    sort_by:
-      ascending: true
     flat_structure: true
 
   gold:
     enabled: true
-    validation:
-      strict: true
     format: delta
-    mode: overwrite
+    mode: append
     deterministic: true
     save_metadata: true
     dq_report:
       enabled: true
-    metadata:
-      lineage:
-        source_layer: "silver"
-        filters_applied: true
-      business_domain: "drug-discovery"
-      use_cases: ["ml-training", "reporting", "analytics"]
-      description: "Business-ready <provider> <entity> data"
-      tags: ["<provider>", "<entity>", "gold", "ml-ready"]
     csv_export:
       enabled: true
       delimiter: ","
       header: true
       encoding: "utf-8"
-    sort_by:
-      ascending: true
     flat_structure: true
 
 maintenance:

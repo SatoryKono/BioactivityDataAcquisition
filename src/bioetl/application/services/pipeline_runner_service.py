@@ -157,6 +157,8 @@ class RunOptions:
     log_level: str = "INFO"
     ignore_yaml_filter: bool = False
     skip_gold: bool = False  # Skip Gold layer writing (composite sub-pipelines)
+    # Execution context for severity resolution in DQ rules
+    execution_context: str = "isolated"  # isolated | enricher | dependency
     # Cached Bronze mode options
     use_cached_bronze: bool = False
     cached_bronze_path: str | None = None
@@ -248,10 +250,14 @@ class PipelineRunnerService:
         # Generate run_id if not provided
         effective_run_id: RunID = cast(RunID, run_id or uuid4())
 
-        self.logger.info(
-            "Starting pipeline run",
-            pipeline=pipeline_name,
+        # Bind run_id and pipeline to logger for automatic propagation
+        run_logger = self.logger.bind(
             run_id=str(effective_run_id),
+            pipeline=pipeline_name,
+        )
+
+        run_logger.info(
+            "Starting pipeline run",
             run_type=effective_options.run_type,
             dry_run=effective_options.dry_run,
             limit=effective_options.limit,
@@ -259,11 +265,7 @@ class PipelineRunnerService:
 
         # Handle dry-run mode
         if effective_options.dry_run:
-            self.logger.info(
-                "Dry-run mode: no execution performed",
-                pipeline=pipeline_name,
-                run_id=str(effective_run_id),
-            )
+            run_logger.info("Dry-run mode: no execution performed")
             return RunResult(
                 status=PipelineRunResult.DRY_RUN,
                 pipeline_name=pipeline_name,
@@ -282,6 +284,7 @@ class PipelineRunnerService:
         # Execute pipeline
         return await self._execute_pipeline(
             runner=runner,
+            run_logger=run_logger,
             pipeline_name=pipeline_name,
             run_id=effective_run_id,
             run_type=effective_options.run_type,
@@ -391,6 +394,7 @@ class PipelineRunnerService:
     async def _execute_pipeline(
         self,
         runner: RunnablePort,
+        run_logger: LoggerPort,
         pipeline_name: str,
         run_id: RunID,
         run_type: str,
@@ -400,6 +404,7 @@ class PipelineRunnerService:
 
         Args:
             runner: Pipeline runner to execute.
+            run_logger: Logger with run_id and pipeline already bound.
             pipeline_name: Name of the pipeline.
             run_id: Run identifier.
             run_type: Type of run.
@@ -419,26 +424,16 @@ class PipelineRunnerService:
 
         try:
             await runner.run()
-            self.logger.info(
-                "Pipeline completed successfully",
-                pipeline=pipeline_name,
-                run_id=str(run_id),
-            )
+            run_logger.info("Pipeline completed successfully")
         except PipelineShutdownError:
             status = PipelineRunResult.SHUTDOWN
-            self.logger.warning(
-                "Pipeline was gracefully shut down",
-                pipeline=pipeline_name,
-                run_id=str(run_id),
-            )
+            run_logger.warning("Pipeline was gracefully shut down")
         except Exception as e:
             status = PipelineRunResult.FAILED
             error_message = str(e)
             error_type = type(e).__name__
-            self.logger.exception(
+            run_logger.exception(
                 "Pipeline failed with exception",
-                pipeline=pipeline_name,
-                run_id=str(run_id),
                 error_type=error_type,
             )
 

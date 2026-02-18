@@ -271,6 +271,7 @@ class CrossRefAdapter(BaseHttpAdapter):
         query: str | None = None,
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
+        offset: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Fetch CrossRef publications.
 
@@ -414,7 +415,7 @@ def _create_crossref_adapter(
     http_client: UnifiedHTTPClient | None,
     logger: LoggerPort | None,
     settings: Settings | None,
-    **kwargs: Any,
+    **kwargs: Any,  # Any: forward arbitrary adap...
 ) -> CrossRefAdapter:
     """Custom creator for CrossRef adapter.
 

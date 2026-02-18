@@ -21,7 +21,7 @@ from __future__ import annotations
 # Subpackage registrations (make them importable as bioetl.domain.<name>)
 from bioetl.domain import mapping  # noqa: F401
 from bioetl.domain import registry  # noqa: F401
-from bioetl.domain import composite, constants, contracts, version
+from bioetl.domain import composite, constants, contracts, version  # noqa: F401
 
 # Events
 from bioetl.domain.events import PipelineEvent
@@ -30,7 +30,6 @@ from bioetl.domain.version import get_version
 __all__ = [
     "PipelineEvent",
     "composite",
-    "version",
     "get_version",
     # Data contracts (subpackage)
     "contracts",

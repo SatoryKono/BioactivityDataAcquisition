@@ -53,14 +53,10 @@ class TestDevDependencies:
         "module_name",
         [
             "detect_secrets",
-            "mypy",
             "pytest",
             "hypothesis",
             "vcr",
-            "importlinter",
             "psutil",
-            "radon",
-            "xenon",
         ],
     )
     def test_dependency_importable(self, module_name: str) -> None:
@@ -68,6 +64,19 @@ class TestDevDependencies:
         import importlib
 
         importlib.import_module(module_name)
+
+    @pytest.mark.parametrize(
+        "module_name",
+        [
+            "mypy",
+            "importlinter",
+            "radon",
+            "xenon",
+        ],
+    )
+    def test_dev_only_dependency_importable(self, module_name: str) -> None:
+        """Dev-only dependencies (from [dev] extra) must be importable when installed."""
+        pytest.importorskip(module_name, reason=f"{module_name} requires [dev] extra")
 
 
 @pytest.mark.smoke

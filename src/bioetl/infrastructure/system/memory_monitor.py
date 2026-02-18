@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 
 # Module-level cache for psutil availability (checked once per process)
 _PSUTIL_AVAILABLE: bool | None = None
-_PSUTIL_MODULE: Any = None  # Cached psutil module reference
+_PSUTIL_MODULE: Any = None  # Any: lazy-loaded psutil module reference
 
 
 def _check_psutil_available() -> bool:
@@ -79,6 +79,7 @@ class MemoryMonitor:
     _psutil_available: bool = field(default=False, init=False)
     _last_batch_size: int = field(default=100, init=False)
     _consecutive_pressure_count: int = field(default=0, init=False)
+    # Any: optional psutil.Proces...
     _cached_process: Any = field(default=None, init=False)
 
     def __post_init__(self) -> None:
@@ -143,7 +144,7 @@ class MemoryMonitor:
         import resource
 
         # Get process memory usage (Unix-only attributes)
-        rusage = resource.getrusage(resource.RUSAGE_SELF)  # type: ignore[attr-defined]
+        rusage = resource.getrusage(resource.RUSAGE_SELF)
         process_mb = rusage.ru_maxrss / 1024  # Convert KB to MB on Linux
 
         # Try to read system memory from /proc/meminfo

@@ -57,9 +57,8 @@ class DataNormalizationPort(Protocol):
     def normalize_authors(
         self,
         authors: list[str] | str | None,
-        salt: str,
     ) -> str | None:
-        """Hash author names for PII protection. Accepts list, JSON, or delimited string."""
+        """Normalize author names. Accepts list, JSON, or delimited string."""
         ...
 
     def strip_html_tags(self, text: str | None) -> str | None:
@@ -74,6 +73,7 @@ class DataNormalizationPort(Protocol):
         """Normalize string by stripping whitespace. Returns None if empty."""
         ...
 
+    # Any: accepts any type for s...
     def normalize_to_string(self, value: Any) -> str | None:
         """Convert value to string, strip whitespace, return None if empty."""
         ...
@@ -99,5 +99,82 @@ class DataNormalizationPort(Protocol):
         """Format CrossRef date-parts to full YYYY-MM-DD (end of period strategy).
 
         Partial dates: [year,month]->YYYY-MM-30, [year]->YYYY-12-31.
+        """
+        ...
+
+    def normalize_title(self, title: str | None) -> str | None:
+        """Normalize publication title: HTML cleanup, whitespace, unicode NFC, trim.
+
+        Args:
+            title: Raw title string (may contain HTML tags, extra whitespace).
+
+        Returns:
+            Normalized title or None if input is None/empty.
+        """
+        ...
+
+    def normalize_abstract(self, abstract: str | None) -> str | None:
+        """Normalize publication abstract: HTML cleanup, whitespace, unicode NFC, trim.
+
+        Args:
+            abstract: Raw abstract string (may contain HTML tags, extra whitespace).
+
+        Returns:
+            Normalized abstract or None if input is None/empty.
+        """
+        ...
+
+    def normalize_author_keys(
+        self,
+        authors: list[str] | list[dict[str, Any]] | str | None,
+    ) -> str | None:
+        """Normalize author names to short ``Surname_F`` keys.
+
+        Args:
+            authors: Author data in any supported format.
+
+        Returns:
+            Pipe-delimited string of short keys or None if empty.
+        """
+        ...
+
+    def normalize_author_list(
+        self,
+        authors: list[str] | list[dict[str, Any]] | str | None,
+    ) -> str | None:
+        """Parse and normalize author names to JSON string.
+
+        Accepts multiple input formats:
+        - list[str]: ["John Doe", "Jane Smith"]
+        - list[dict]: [{"name": "John Doe", "orcid": "..."}]
+        - str: "John Doe; Jane Smith" or JSON array
+        - None
+
+        Returns JSON string of normalized author names or None if empty.
+        """
+        ...
+
+    def normalize_affiliations(
+        self,
+        affiliations: list[str] | list[dict[str, Any]] | None,
+    ) -> str | None:
+        """Extract, normalize, and deduplicate affiliations to JSON string.
+
+        Normalizes, deduplicates (case-insensitive), and sorts alphabetically.
+        Returns JSON string or None if empty.
+        """
+        ...
+
+    def extract_affiliations_from_authors(
+        self,
+        authors: list[dict[str, Any]],
+    ) -> list[str]:
+        """Extract unique affiliations from author objects.
+
+        Args:
+            authors: List of author dicts with 'affiliations' key.
+
+        Returns:
+            List of unique normalized affiliation strings (sorted).
         """
         ...

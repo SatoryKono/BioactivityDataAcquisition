@@ -21,10 +21,10 @@ field_validations:
   - field: publication_type
     type: enum
     allowed:
-      - PUBLICATION
-      - BOOK
-      - DATASET
-      - PATENT
+      - journal-article
+      - book
+      - dataset
+      - patent
     nullable: true
 
   - field: publication_year
@@ -33,6 +33,13 @@ field_validations:
     max: 2100
     nullable: true
     error_message: "Publication year must be between 1500 and 2100"
+
+  - field: publication_year
+    type: range
+    min: 1950
+    nullable: true
+    severity: warn
+    error_message: "Publication year before 1950 — will be filtered at Gold stage"
 
   - field: publication_pmid
     type: range
@@ -90,13 +97,17 @@ field_validations:
 # Cross-Field Validations
 # =============================================================================
 cross_field_validations:
+  # Harmonized rule: all_present(pk, title) — same pattern as all providers.
+  # ChEMBL PK = document_chembl_id → silver name publication_id.
   - name: publication_identifiable
     fields:
       - publication_id
       - title
     condition: all_present
+    severity: error
     error_message: "Publication must have publication_id and title"
 
+  # External cross-reference check: at least one of PMID or DOI should exist.
   - name: has_cross_reference
     fields:
       - publication_pmid
@@ -111,10 +122,19 @@ cross_field_validations:
 conditional_validations:
   - name: publication_requires_title
     condition_field: publication_type
-    condition_value: PUBLICATION
+    condition_value: journal-article
     condition_operator: eq
     then_validations:
       - field: title
         type: not_null
         nullable: false
         error_message: "Publications of type PUBLICATION must have a title"
+
+# =============================================================================
+# Key Nullability Policy for Silver writes
+# =============================================================================
+# Documented per pipeline: merge(primary) and partition key nullability.
+key_nullability:
+  - field: publication_id
+    key_type: merge
+    nullable: false

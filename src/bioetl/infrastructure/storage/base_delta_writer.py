@@ -31,6 +31,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
+# Any: arbitrary Python value...
 def _serialize_value(value: Any, is_string_field: bool) -> Any:
     """Serialize a value for Arrow storage.
 

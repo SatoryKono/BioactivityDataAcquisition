@@ -95,6 +95,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
+        contract_policy: Any = None,
     ):
         """Initialize PubMed publication transformer.
 
@@ -108,6 +109,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             identity_service: Service for computing entity IDs and content hashes.
             pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
             data_normalizer: Optional data normalization service for DOI normalization.
+            contract_policy: Optional pipeline contract policy.
 
         """
         super().__init__(
@@ -120,8 +122,11 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             identity_service=identity_service,
             pii_hasher=pii_hasher,
             data_normalizer=data_normalizer,
+            contract_policy=contract_policy,
         )
         self._cached_xml_root = None
+        self._author_extractor = AuthorExtractor()
+        self._date_extractor = DateExtractor()
 
     def _pre_extract_validation(
         self,
@@ -129,20 +134,10 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         record: BronzeRecord,
         index: int,
     ) -> None:
-        """Validate raw XML and parse it before extraction.
-
-        Parses the XML upfront and caches the root element. This allows
-        ET.ParseError to be caught and converted to ValueError, which
-        BaseTransformer.transform() handles gracefully.
-
-        Args:
-            context: Pipeline context with run_id, run_type, logger.
-            record: Raw Bronze record containing _raw_xml field.
-            index: Sequential index of the record (unused).
+        """Validate raw XML and parse it, caching the root element.
 
         Raises:
             ValueError: If _raw_xml is missing, empty, or malformed XML.
-
         """
         raw_xml = record.get("_raw_xml")
         if not raw_xml or not isinstance(raw_xml, str):
@@ -160,23 +155,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             raise ValueError(f"XML parse error: {e}") from e
 
     def _is_valid_date_format(self, date_str: str | None) -> bool:
-        """Validate that date string matches expected ISO format.
-
-        Accepts:
-        - YYYY-MM-DD (full date with valid month 01-12 and day 01-31)
-        - YYYY-MM (partial with valid month 01-12)
-        - YYYY (year only)
-
-        This validation ensures that invalid dates like "2024-13-99", "n/a",
-        or malformed strings don't propagate to _compute_publication_date,
-        which would produce inconsistent results.
-
-        Args:
-            date_str: Date string to validate.
-
-        Returns:
-            True if date format is valid, False otherwise.
-        """
+        """Validate that date string matches YYYY, YYYY-MM, or YYYY-MM-DD format."""
         if not date_str:
             return False
         return any(pattern.match(date_str) for pattern in self._VALID_DATE_PATTERNS)
@@ -250,57 +229,77 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         chemicals = ClassificationExtractor.parse_chemicals(medline)
 
         return {
-            "publication_types": publication_types,
+            "publication_types": self.serialize_json_list(publication_types),
             "publication_type_list": self.serialize_json_list(publication_types),
-            "subject_keywords": subject_keywords,
+            "subject_keywords": self.serialize_json_list(subject_keywords),
             "keyword_count": len(subject_keywords) if subject_keywords else 0,
-            "subject_mesh": subject_mesh,
+            "subject_mesh": self.serialize_json_list(subject_mesh),
             "mesh_heading_count": len(subject_mesh) if subject_mesh else 0,
-            "chemicals": chemicals,
+            "chemicals": self.serialize_json_list(chemicals),
             "chemical_count": len(chemicals) if chemicals else 0,
-            "gene_symbols": ClassificationExtractor.parse_gene_symbols(medline),
-            "databanks": ClassificationExtractor.parse_databanks(medline),
+            "gene_symbols": self.serialize_json_list(
+                ClassificationExtractor.parse_gene_symbols(medline)
+            ),
+            "databanks": self.serialize_json_list(
+                ClassificationExtractor.parse_databanks(medline)
+            ),
         }
 
     def _extract_author_block(
         self, article: ET.Element, raw_author_data: list[RawAuthor]
     ) -> dict[str, Any]:
-        """Extract and process author-related fields from article XML."""
-        normalized_authors = (
+        """Extract and process author-related fields from article XML.
+
+        Uses unified normalization service for authors and affiliations.
+        """
+        # Normalize author names using unified service
+        normalizer = self._data_normalizer
+
+        # Extract author names
+        author_names: list[str] = (
             AuthorExtractor().normalize(raw_author_data) if raw_author_data else []
         )
-        hashed_authors = self.hash_pii_list(normalized_authors) or []
+
+        # Use unified normalization (parse + serialize in one call)
+        authors_json = normalizer.normalize_author_list(author_names)
+        author_keys = normalizer.normalize_author_keys(author_names)
 
         authors_with_affiliations = self._build_authors_with_affiliations(
             raw_author_data
         )
 
-        # Unique affiliations across all authors
-        affiliation_values: list[str] = []
-        for author in raw_author_data:
-            affiliation_values.extend(
-                aff for aff in (author.get("affiliations") or []) if aff
-            )
-        unique_affiliations = sorted(set(affiliation_values))
+        # Extract affiliations using unified service
+        affiliation_strings = normalizer.extract_affiliations_from_authors(
+            cast("list[dict[str, Any]]", raw_author_data)
+        )
 
-        # Structured affiliations with identifiers
+        # Normalize affiliations using unified service (already deduplicated & sorted)
+        affiliation_list_json = (
+            normalizer.normalize_affiliations(affiliation_strings)
+            if affiliation_strings
+            else None
+        )
+
+        # Structured affiliations with identifiers (PubMed-specific)
         structured_affs = AuthorExtractor.parse_structured_affiliations(article)
         processed = self._process_structured_affiliations(structured_affs)
 
+        # Count from parsed JSON
+        import json
+
+        author_count = len(json.loads(authors_json)) if authors_json else 0
+
         return {
-            "authors": self.serialize_json_list(hashed_authors),
+            "authors": authors_json,
+            "author_keys": author_keys,
             "authors_with_affiliations": (
                 self.serialize_json_list(authors_with_affiliations)
                 if authors_with_affiliations
                 else None
             ),
-            "affiliation_list": (
-                self.serialize_json_list(unique_affiliations)
-                if unique_affiliations
-                else None
-            ),
+            "affiliation_list": affiliation_list_json,
             "affiliation_structured": self.serialize_json_list(processed),
-            "author_count": len(hashed_authors),
+            "author_count": author_count,
         }
 
     def _extract_identifiers(self, root: ET.Element) -> dict[str, Any]:
@@ -351,7 +350,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         medline = root.find(".//MedlineCitation")
         pubmed_data = root.find(".//PubmedData")
 
-        raw_author_data = AuthorExtractor().extract(article) or []
+        raw_author_data = self._author_extractor.extract(article) or []
 
         return {
             **identifiers,
@@ -614,7 +613,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             return None, None
 
         # Use DateExtractor logic to support MedlineDate parsing
-        raw_date = DateExtractor().extract(pub_date_node)
+        raw_date = self._date_extractor.extract(pub_date_node)
         if not raw_date:
             return None, None
 
@@ -706,8 +705,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "date_revised": date_revised,
         }
 
-    @staticmethod
-    def entity_to_silver_record(entity: Any) -> dict[str, Any]:
+        # Any: accepts any dataclass ...
+
+    def entity_to_silver_record(self, entity: Any) -> dict[str, Any]:
         """Convert Domain Entity to SilverRecord, excluding certain fields.
 
         Overrides base implementation to remove fields not needed for PubMed.
@@ -719,10 +719,8 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             SilverRecord dictionary without excluded fields.
 
         """
-        from bioetl.application.core.base_transformer import BaseTransformer
-
         # Get base silver record
-        silver_record = BaseTransformer.entity_to_silver_record(entity)
+        silver_record = super().entity_to_silver_record(entity)
 
         # Remove excluded fields (API deprecated or not available)
         silver_record.pop("vernacular_title", None)

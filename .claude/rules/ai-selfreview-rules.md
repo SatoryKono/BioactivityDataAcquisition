@@ -1,6 +1,6 @@
 # AI Self-Review Rules
 
-*Версия: 1.1.0 | Синхронизировано с RULES.md v5.18 (2026-02-03)*
+*Версия: 1.2.0 | Синхронизировано с RULES.md v5.20 (2026-02-17)*
 
 Правила для автоматической самопроверки кода в проекте BioETL.
 Использует RFC 2119 keywords: **MUST**, **SHOULD**, **MAY**.
@@ -398,6 +398,17 @@ runner = PipelineFactory.create()
 | Error/Exception | `*Error` | `ValidationError` |
 | Schema | `*Schema` | `CompoundGoldSchema` |
 | Config | `*Config` | `RuntimeConfig` |
+| Extractor | `*Extractor` | `AuthorExtractor` |
+| Parser | `*Parser` | `MedlineDateParser` |
+| Aggregator | `*Aggregator` | `EnricherAggregator` |
+| Recorder | `*Recorder` | `BatchMetricsRecorder` |
+| Result | `*Result` | `ValidationResult` |
+| Info | `*Info` | `PipelineInfo` |
+| State | `*State` | `FSMState` |
+| Signal | `*Signal` | `ShutdownSignal` |
+| Context | `*Context` | `PipelineContext` |
+| Spec | `*Spec` | `FieldSpec` |
+| Mixin | `*Mixin` | `HealthCheckMixin` |
 
 **Детекция:**
 ```bash

@@ -1,0 +1,67 @@
+%% Title: Cross-Provider Data Enrichment Flow — Publication
+%% Covers: ADR-026 (Composite), publication composite pipeline config
+%% Rank: 19 (Score 8.00) — 5 providers merging into unified Gold
+%% Updated: 2026-02-17
+
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+flowchart LR
+    subgraph ChEMBL["ChEMBL (Seed)"]
+        CA["ChemblAdapter\n/document endpoint"]
+        CT["PublicationTransformer"]
+        CS[("Silver\nchembl/publication")]
+    end
+
+    subgraph CrossRef["CrossRef (Enricher)"]
+        CRA["CrossRefAdapter\n/works?filter=doi:..."]
+        CRT["CrossRefPublicationTransformer"]
+        CRS[("Silver\ncrossref/publication")]
+    end
+
+    subgraph PubMed["PubMed (Enricher)"]
+        PMA["PubMedAdapter\nefetch(PMIDs)"]
+        PMT["PubMedPublicationTransformer"]
+        PMS[("Silver\npubmed/publication")]
+    end
+
+    subgraph OpenAlex["OpenAlex (Enricher)"]
+        OAA["OpenAlexAdapter\n/works?filter=doi:..."]
+        OAT["OpenAlexPublicationTransformer"]
+        OAS[("Silver\nopenalex/publication")]
+    end
+
+    subgraph S2["Semantic Scholar (Enricher)"]
+        SSA["SemanticScholarAdapter\n/paper/batch"]
+        SST["SemanticScholarPublicationTransformer"]
+        S2S[("Silver\nsemanticscholar/publication")]
+    end
+
+    subgraph Merge["Merge Phase"]
+        MS["MergeService\nLEFT OUTER JOIN\nconflict: coalesce"]
+        FIELDS["Field Groups:\n• ID_AND_STATUS\n• BIBLIOGRAPHY\n• AUTHOR\n• TERMS\n• CITATIONS\n• DATES\n• PUB_TYPES"]
+    end
+
+    subgraph Gold["Gold Output"]
+        GS["CompositePublicationGoldSchema\n(Pandera strict validation)"]
+        GT[("Gold\ncomposite/publication")]
+    end
+
+    %% Flows
+    CA --> CT --> CS
+    CRA --> CRT --> CRS
+    PMA --> PMT --> PMS
+    OAA --> OAT --> OAS
+    SSA --> SST --> S2S
+
+    CS -->|"seed (doi, pmid,\ntitle, authors)"| MS
+    CRS -->|"enriches (citations,\nfunders, references)"| MS
+    PMS -->|"enriches (abstract,\nmesh_terms, pub_type)"| MS
+    OAS -->|"enriches (concepts,\ninstitutions, cited_by)"| MS
+    S2S -->|"enriches (tldr,\nembedding, fields_of_study)"| MS
+
+    MS --> FIELDS
+    FIELDS --> GS --> GT
+
+    %% Styling
+    style ChEMBL fill:#FFA500,stroke:#cc8400,color:#000
+    style Merge fill:#C0C0C0,stroke:#808080,color:#000
+    style Gold fill:#FFD700,stroke:#ccac00,color:#000

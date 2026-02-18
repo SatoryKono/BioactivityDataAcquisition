@@ -41,7 +41,7 @@ if TYPE_CHECKING:
 
 
 @runtime_checkable
-class ExecutorMetricsProtocol(Protocol):
+class ExecutorMetricsPort(Protocol):
     """Protocol for executors providing batch metrics.
 
     Both PipelineExecutor and BatchExecutor implement this protocol.
@@ -133,7 +133,7 @@ class PostrunService:
 
     async def run(
         self,
-        executor: ExecutorMetricsProtocol,
+        executor: ExecutorMetricsPort,
         dq_context: DQReportContext | None = None,
     ) -> PostrunResult:
         """Run all post-execution operations.
@@ -155,7 +155,7 @@ class PostrunService:
         vacuum_result = await self.run_vacuum_if_enabled()
         return PostrunResult(dq=dq_result, dq_reports=dq_reports, vacuum=vacuum_result)
 
-    async def run_dq_checks(self, executor: ExecutorMetricsProtocol) -> DQResult:
+    async def run_dq_checks(self, executor: ExecutorMetricsPort) -> DQResult:
         """Check data quality metrics and report anomalies.
 
         Delegates to DataQualityService for threshold checks and anomaly detection.
@@ -264,9 +264,7 @@ class PostrunService:
             )
             return None
 
-    def _collect_batch_metrics(
-        self, executor: ExecutorMetricsProtocol
-    ) -> dict[str, float]:
+    def _collect_batch_metrics(self, executor: ExecutorMetricsPort) -> dict[str, float]:
         """Collect batch metrics from executor.
 
         Args:
@@ -291,7 +289,7 @@ class PostrunService:
 __all__ = [
     "DQEvaluationStatus",
     "DQResult",
-    "ExecutorMetricsProtocol",
+    "ExecutorMetricsPort",
     "PostrunResult",
     "PostrunService",
     "VacuumResult",
