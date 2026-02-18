@@ -72,6 +72,7 @@ class SilverDQCheckType(StrEnum):
     SCHEMA_DRIFT = "schema_drift"
     DEDUPLICATION_STATS = "deduplication_stats"
     CONTENT_HASH_INTEGRITY = "content_hash_integrity"
+    KEY_NULLABILITY = "key_nullability"
 
 
 # =============================================================================

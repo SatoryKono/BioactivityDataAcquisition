@@ -26,6 +26,7 @@ from bioetl.domain.config import CrossFieldValidation as DomainCrossFieldValidat
 from bioetl.domain.config import DQConfig as DomainDQConfig
 from bioetl.domain.config import DQReportConfig as DomainDQReportConfig
 from bioetl.domain.config import FieldValidation as DomainFieldValidation
+from bioetl.domain.config import KeyNullabilityRule as DomainKeyNullabilityRule
 from bioetl.infrastructure.schemas.pipeline_config import (
     ConditionalValidationConfig,
     CrossFieldValidationConfig,
@@ -79,6 +80,19 @@ class ThresholdsConfig(BaseModel):
                 f"soft_fail ({self.soft_fail}) must be < hard_fail ({self.hard_fail})"
             )
         return self
+
+
+class KeyNullabilityRuleConfig(BaseModel):
+    """Nullability policy for Silver merge/partition keys."""
+
+    field: str = Field(description="Field name")
+    key_type: Literal["merge", "partition"] = Field(
+        description="Key role in Silver write strategy"
+    )
+    nullable: bool = Field(
+        default=False,
+        description="Whether null values are allowed for this key field",
+    )
 
 
 class DQConfigFile(BaseModel):
@@ -177,6 +191,11 @@ class DQConfigFile(BaseModel):
     entity_cross_field_validations: list[CrossFieldValidationConfig] = Field(
         default_factory=list,
         description="Cross-field validations from entity config",
+    )
+
+    key_nullability: list[KeyNullabilityRuleConfig] = Field(
+        default_factory=list,
+        description="Nullability rules for merge/partition key fields",
     )
 
     # Conditional validations
@@ -283,6 +302,14 @@ class DQConfigFile(BaseModel):
             conditional_validations=conditional_validations,
             invalid_record_policy=self.invalid_record_policy,
             report=report_config,
+            key_nullability_rules=tuple(
+                DomainKeyNullabilityRule(
+                    field=rule.field,
+                    key_type=rule.key_type,
+                    nullable=rule.nullable,
+                )
+                for rule in self.key_nullability
+            ),
         )
 
 

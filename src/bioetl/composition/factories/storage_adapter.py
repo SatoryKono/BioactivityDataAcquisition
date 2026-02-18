@@ -27,6 +27,7 @@ from bioetl.infrastructure.storage.silver_writer import SilverWriter
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
+    from bioetl.domain.config import KeyNullabilityRule
     from bioetl.domain.models.metadata import SourceMetadata
     from bioetl.domain.types import ArrowSchema, BatchID, RunID, RunType
 
@@ -113,6 +114,7 @@ class StorageAdapter:
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
         column_order: list[str] | None = None,
         bronze_refs: list[BronzeWriteResult] | None = None,
+        key_nullability_rules: list[KeyNullabilityRule] | None = None,
     ) -> SilverWriteResult | None:
         """Write transformed records to Silver layer.
 
@@ -147,6 +149,7 @@ class StorageAdapter:
             on_schema_mismatch=on_schema_mismatch,
             column_order=column_order,
             bronze_refs=bronze_refs,
+            key_nullability_rules=key_nullability_rules,
         )
 
     async def write_gold(

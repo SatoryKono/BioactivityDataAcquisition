@@ -25,6 +25,7 @@ from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 if TYPE_CHECKING:
+    from bioetl.domain.config import KeyNullabilityRule
     from bioetl.domain.models.metadata import SourceMetadata
 
 
@@ -86,6 +87,7 @@ class StoragePort(Protocol):
         on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
         column_order: list[str] | None = None,
         bronze_refs: list[BronzeWriteResult] | None = None,
+        key_nullability_rules: list[KeyNullabilityRule] | None = None,
     ) -> SilverWriteResult | None:
         """Write transformed records to the Silver layer.
 

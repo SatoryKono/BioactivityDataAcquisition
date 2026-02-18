@@ -117,3 +117,12 @@ conditional_validations:
         min: 0.001
         max: 100000
         nullable: false
+
+# =============================================================================
+# Key Nullability Policy for Silver writes
+# =============================================================================
+# Documented per pipeline: merge(primary) and partition key nullability.
+key_nullability:
+  - field: activity_id
+    key_type: merge
+    nullable: false
