@@ -41,6 +41,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-033](ADR-033-publication-validation-strategy.md)   | Publication Metadata Validation Strategy | Proposed           | Data Quality    | 2026-02-06 |
 | [ADR-034](ADR-034-schema-domain-pairs.md)               | Schema↔Domain Configuration Pairs        | Accepted           | Architecture    | 2026-02-15 |
 | [ADR-035](ADR-035-json-field-typing-policy.md)          | JSON Field Typing Policy (Silver↔Gold)   | Accepted           | Data Modeling   | 2026-02-17 |
+| [ADR-036](ADR-036-gold-contract-versioning-policy.md)   | Gold Contract Versioning Policy          | Accepted           | Data Quality    | 2026-02-18 |
 
 ## ADRs by Category
 
@@ -83,6 +84,7 @@ This directory contains Architecture Decision Records documenting significant ar
 - [ADR-018](ADR-018-gold-strict-validation.md): Gold Strict Validation
 - [ADR-027](ADR-027-dq-rules-externalization.md): DQ Rules Externalization — Hierarchical DQ config
 - [ADR-033](ADR-033-publication-validation-strategy.md): Publication Metadata Validation Strategy — 5-level validation for publication data
+- [ADR-036](ADR-036-gold-contract-versioning-policy.md): Gold Contract Versioning Policy — Semver for Gold contracts with breaking window policy
 
 ### Domain Model
 

@@ -206,8 +206,8 @@ class TestLoadRealConfig:
         if not real_config_path.exists():
             pytest.skip("Real config not available")
         registry = load_field_groups(real_config_path)
-        # Should have all 8 groups
-        assert len(registry.groups) == 8
+        # Should have all 9 groups (7 business + system_metadata + trash)
+        assert len(registry.groups) == 9
 
     def test_real_config_field_count(self, real_config_path: Path) -> None:
         if not real_config_path.exists():
