@@ -13,7 +13,7 @@
 | Metric | Command / Method | Value | Δ vs 2026-02-16 |
 |--------|-----------------|-------|------------------|
 | Test coverage | `pytest --cov=src/bioetl --cov-report=term` | **90.63%** ¹ | — |
-| mypy errors | `mypy src/bioetl --strict` | **0** (540 files checked) | ↓ from 1 |
+| mypy errors | `mypy src/bioetl --strict` | **0** (540 files checked) ² | ↓ from 1 |
 | Circular imports | `python -c "from bioetl.domain.ports import ..."` | **PASS** | — |
 | Class count | `grep -r "^class " src/ --include="*.py" \| wc -l` | **932** | ↑ from 911 |
 | Python file count | `find src/ -name "*.py" \| wc -l` | **566** | ↑ from 559 |
@@ -40,6 +40,8 @@
 | Content hash / dedup | occurrences across codebase | **297** across 75 files | — |
 
 ¹ Coverage value from previous audit run (2026-02-16). Current test suite executing at time of audit (11,693+ tests).
+
+² With full dev dependencies (`pip install -e ".[dev]"`). Without third-party type stubs (pydantic, pandera), mypy reports 11 stub-related errors in 9 files — all `[misc]` (cannot subclass "Any"), `[no-any-return]`, `[untyped-decorator]`, or `[unused-ignore]`. These are not code defects but missing stub issues. CI environments MUST install full dev dependencies before running mypy.
 
 ---
 
