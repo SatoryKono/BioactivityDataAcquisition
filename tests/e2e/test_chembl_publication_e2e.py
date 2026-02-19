@@ -11,7 +11,6 @@ Cassettes location: tests/fixtures/vcr/chembl/
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 from typing import Any
 
@@ -48,7 +47,7 @@ def vcr_config() -> dict[str, Any]:
     """Configure VCR for ChEMBL Publication E2E tests."""
     return {
         "cassette_library_dir": str(CASSETTE_DIR),
-        "record_mode": os.environ.get("VCR_RECORD_MODE", "all"),
+        "record_mode": "all",
         "match_on": ["method", "scheme", "host", "port", "path", "query"],
         "decode_compressed_response": True,
     }
