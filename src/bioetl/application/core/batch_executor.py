@@ -140,6 +140,11 @@ class BatchExecutor:
         self.records_gold = 0
         self.records_quarantined = 0
 
+        # Progress reporting
+        self._total_records: int | None = None
+        self._progress_interval: int | None = None
+        self._next_progress_threshold: int = 0
+
         # DQ Report data accumulation (only if DQ report service is available)
         # Collecting data adds memory overhead, so only enabled when needed
         self._bronze_records_for_dq: list[bytes] = []
@@ -216,6 +221,24 @@ class BatchExecutor:
         self._resume_offset = offset or 0
         self._query_string = query
 
+        # Estimate total records for progress reporting
+        self._total_records = limit
+        if not self._total_records:
+            # Try to get total from data source if available (e.g. CachedBronzeDataSource)
+            get_total = getattr(self._services.data_source, "get_total_records", None)
+            if get_total and callable(get_total):
+                self._total_records = await get_total()
+
+        if self._total_records:
+            # Report progress every 10%
+            self._progress_interval = max(1, self._total_records // 10)
+            self._next_progress_threshold = self._progress_interval
+            self._logger.info(
+                "Starting pipeline with total records estimate",
+                total_records=self._total_records,
+                progress_interval=self._progress_interval,
+            )
+
         root_span = self._tracing.start_execution_span()
 
         try:
@@ -259,6 +282,22 @@ class BatchExecutor:
             batch.append(raw_record)
             self.records_fetched += 1
 
+            # Report progress every 10%
+            if (
+                self._progress_interval
+                and self._total_records
+                and self.records_fetched >= self._next_progress_threshold
+            ):
+                pct = min(100, (self.records_fetched / self._total_records) * 100)
+                self._logger.info(
+                    "Pipeline progress",
+                    progress=f"{pct:.0f}%",
+                    bronze=self.records_bronze,
+                    silver=self.records_silver,
+                    fetched=self.records_fetched,
+                )
+                self._next_progress_threshold += self._progress_interval
+
             current_batch_size = self._check_memory_pressure(
                 current_batch_size, check_interval
             )
@@ -268,6 +307,22 @@ class BatchExecutor:
                 await self._process_batch(batch, start_index)
                 batch = []
                 current_batch_size = self._maybe_recover_batch_size(current_batch_size)
+
+            # Report progress every 10%
+            if (
+                self._progress_interval
+                and self._total_records
+                and self.records_fetched >= self._next_progress_threshold
+            ):
+                pct = min(100, (self.records_fetched / self._total_records) * 100)
+                self._logger.info(
+                    "Pipeline progress",
+                    progress=f"{pct:.0f}%",
+                    bronze=self.records_bronze,
+                    silver=self.records_silver,
+                    fetched=self.records_fetched,
+                )
+                self._next_progress_threshold += self._progress_interval
 
             if self.records_fetched % self.checkpoint_interval == 0:
                 total = self._resume_offset + self.records_fetched
