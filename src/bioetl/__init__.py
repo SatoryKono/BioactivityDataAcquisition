@@ -9,6 +9,7 @@ __version__ = "6.0.0"
 # This prevents pandas-specific checks from being registered correctly.
 try:
     import typing
+
     import typing_inspect
 
     # Fix typing_inspect.get_origin BEFORE importing pandera backends
