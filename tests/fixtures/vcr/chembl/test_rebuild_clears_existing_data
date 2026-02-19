@@ -29,7 +29,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Mon, 16 Feb 2026 17:07:29 GMT
+      - Mon, 16 Feb 2026 17:06:42 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -53,7 +53,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/activity?assay_type__in=B%2CF&data_validity_comment__isnull=true&format=json&limit=5&offset=0&pchembl_value__isnull=false&potential_duplicate=0&standard_flag=1&standard_relation=%3D&standard_type__in=IC50%2CKi&standard_units=nM&target_tax_id__isnull=false
+    uri: https://www.ebi.ac.uk/chembl/api/data/activity?assay_type__in=B%2CF&data_validity_comment__isnull=true&format=json&limit=3&offset=0&pchembl_value__isnull=false&potential_duplicate=0&standard_flag=1&standard_relation=%3D&standard_type__in=IC50%2CKi&standard_units=nM&target_tax_id__isnull=false
   response:
     body:
       string: '{"activities": [{"action_type": null, "activity_comment": null, "activity_id":
@@ -109,46 +109,7 @@ interactions:
         "CHEMBL4632", "target_organism": "Rattus norvegicus", "target_pref_name":
         "Peroxisomal acyl-coenzyme A oxidase 1", "target_tax_id": "10116", "text_value":
         null, "toid": null, "type": "IC50", "units": "uM", "uo_units": "UO_0000065",
-        "upper_value": null, "value": "4.0"}, {"action_type": null, "activity_comment":
-        null, "activity_id": 31870, "activity_properties": [], "assay_chembl_id":
-        "CHEMBL760688", "assay_description": "Inhibitory activity against Palmitoyl-CoA
-        oxidase to inhibit rat heart mitochondrial Palmitoyl-CoA oxidation.", "assay_type":
-        "B", "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
-        "BAO_0000190", "bao_format": "BAO_0000357", "bao_label": "single protein format",
-        "canonical_smiles": "Cc1nc2cc(OC[C@H](O)CN3CCN(CC(=O)NCCc4ccccc4)CC3)ccc2s1",
-        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
-        "CHEMBL1148425", "document_journal": "Bioorg Med Chem Lett", "document_year":
-        2004, "ligand_efficiency": {"bei": "10.18", "le": "0.20", "lle": "2.45", "sei":
-        "6.12"}, "molecule_chembl_id": "CHEMBL357119", "molecule_pref_name": null,
-        "parent_molecule_chembl_id": "CHEMBL357119", "pchembl_value": "4.77", "potential_duplicate":
-        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
-        297563, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
-        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
-        "nM", "standard_upper_value": null, "standard_value": "17000.0", "target_chembl_id":
-        "CHEMBL4632", "target_organism": "Rattus norvegicus", "target_pref_name":
-        "Peroxisomal acyl-coenzyme A oxidase 1", "target_tax_id": "10116", "text_value":
-        null, "toid": null, "type": "IC50", "units": "uM", "uo_units": "UO_0000065",
-        "upper_value": null, "value": "17.0"}, {"action_type": null, "activity_comment":
-        null, "activity_id": 31872, "activity_properties": [], "assay_chembl_id":
-        "CHEMBL760688", "assay_description": "Inhibitory activity against Palmitoyl-CoA
-        oxidase to inhibit rat heart mitochondrial Palmitoyl-CoA oxidation.", "assay_type":
-        "B", "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
-        "BAO_0000190", "bao_format": "BAO_0000357", "bao_label": "single protein format",
-        "canonical_smiles": "Cc1nc2cc(OC[C@H](O)CN3CCN(CC(=O)Nc4cccc(-c5ccccc5)c4)CC3)ccc2s1",
-        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
-        "CHEMBL1148425", "document_journal": "Bioorg Med Chem Lett", "document_year":
-        2004, "ligand_efficiency": {"bei": "13.05", "le": "0.25", "lle": "2.47", "sei":
-        "8.65"}, "molecule_chembl_id": "CHEMBL152968", "molecule_pref_name": null,
-        "parent_molecule_chembl_id": "CHEMBL152968", "pchembl_value": "6.75", "potential_duplicate":
-        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
-        297580, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
-        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
-        "nM", "standard_upper_value": null, "standard_value": "180.0", "target_chembl_id":
-        "CHEMBL4632", "target_organism": "Rattus norvegicus", "target_pref_name":
-        "Peroxisomal acyl-coenzyme A oxidase 1", "target_tax_id": "10116", "text_value":
-        null, "toid": null, "type": "IC50", "units": "nM", "uo_units": "UO_0000065",
-        "upper_value": null, "value": "180.0"}], "page_meta": {"limit": 5, "next":
-        "/chembl/api/data/activity.json?limit=5&offset=5&standard_type__in=IC50%2CKi&standard_units=nM&standard_relation=%3D&assay_type__in=B%2CF&potential_duplicate=0&data_validity_comment__isnull=true&pchembl_value__isnull=false&standard_flag=1&target_tax_id__isnull=false",
+        "upper_value": null, "value": "4.0"}], "page_meta": {"limit": 3, "next": "/chembl/api/data/activity.json?limit=3&offset=3&standard_type__in=IC50%2CKi&standard_units=nM&standard_relation=%3D&assay_type__in=B%2CF&potential_duplicate=0&data_validity_comment__isnull=true&pchembl_value__isnull=false&standard_flag=1&target_tax_id__isnull=false",
         "offset": 0, "previous": null, "total_count": 2428355}}'
     headers:
       Cache-Control:
@@ -158,11 +119,11 @@ interactions:
       Content-Disposition:
       - inline
       Content-Length:
-      - '7857'
+      - '4795'
       Content-Type:
       - application/json
       Date:
-      - Mon, 16 Feb 2026 17:07:29 GMT
+      - Mon, 16 Feb 2026 17:06:43 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -172,7 +133,7 @@ interactions:
       X-ChEMBL-in-cache:
       - 'True'
       X-ChEMBL-retrieval-time:
-      - '0.16805768013000488'
+      - '0.17231011390686035'
     status:
       code: 200
       message: OK
@@ -206,7 +167,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Mon, 16 Feb 2026 17:07:33 GMT
+      - Mon, 16 Feb 2026 17:06:46 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -230,7 +191,7 @@ interactions:
       User-Agent:
       - BioETL/5.0.0
     method: GET
-    uri: https://www.ebi.ac.uk/chembl/api/data/activity?assay_type__in=B%2CF&data_validity_comment__isnull=true&format=json&limit=5&offset=0&pchembl_value__isnull=false&potential_duplicate=0&standard_flag=1&standard_relation=%3D&standard_type__in=IC50%2CKi&standard_units=nM&target_tax_id__isnull=false
+    uri: https://www.ebi.ac.uk/chembl/api/data/activity?assay_type__in=B%2CF&data_validity_comment__isnull=true&format=json&limit=2&offset=0&pchembl_value__isnull=false&potential_duplicate=0&standard_flag=1&standard_relation=%3D&standard_type__in=IC50%2CKi&standard_units=nM&target_tax_id__isnull=false
   response:
     body:
       string: '{"activities": [{"action_type": null, "activity_comment": null, "activity_id":
@@ -267,65 +228,8 @@ interactions:
         "nM", "standard_upper_value": null, "standard_value": "9000.0", "target_chembl_id":
         "CHEMBL3921", "target_organism": "Homo sapiens", "target_pref_name": "Heparanase",
         "target_tax_id": "9606", "text_value": null, "toid": null, "type": "IC50",
-        "units": "uM", "uo_units": "UO_0000065", "upper_value": null, "value": "9.0"},
-        {"action_type": null, "activity_comment": null, "activity_id": 31868, "activity_properties":
-        [], "assay_chembl_id": "CHEMBL760688", "assay_description": "Inhibitory activity
-        against Palmitoyl-CoA oxidase to inhibit rat heart mitochondrial Palmitoyl-CoA
-        oxidation.", "assay_type": "B", "assay_variant_accession": null, "assay_variant_mutation":
-        null, "bao_endpoint": "BAO_0000190", "bao_format": "BAO_0000357", "bao_label":
-        "single protein format", "canonical_smiles": "Cc1nc2cc(OC[C@H](O)CN3CCN(CC(=O)Nc4ccc(Cl)c(C(F)(F)F)c4)CC3)ccc2s1",
-        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
-        "CHEMBL1148425", "document_journal": "Bioorg Med Chem Lett", "document_year":
-        2004, "ligand_efficiency": {"bei": "9.94", "le": "0.20", "lle": "1.13", "sei":
-        "6.93"}, "molecule_chembl_id": "CHEMBL357278", "molecule_pref_name": null,
-        "parent_molecule_chembl_id": "CHEMBL357278", "pchembl_value": "5.40", "potential_duplicate":
-        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
-        297547, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
-        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
-        "nM", "standard_upper_value": null, "standard_value": "4000.0", "target_chembl_id":
-        "CHEMBL4632", "target_organism": "Rattus norvegicus", "target_pref_name":
-        "Peroxisomal acyl-coenzyme A oxidase 1", "target_tax_id": "10116", "text_value":
-        null, "toid": null, "type": "IC50", "units": "uM", "uo_units": "UO_0000065",
-        "upper_value": null, "value": "4.0"}, {"action_type": null, "activity_comment":
-        null, "activity_id": 31870, "activity_properties": [], "assay_chembl_id":
-        "CHEMBL760688", "assay_description": "Inhibitory activity against Palmitoyl-CoA
-        oxidase to inhibit rat heart mitochondrial Palmitoyl-CoA oxidation.", "assay_type":
-        "B", "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
-        "BAO_0000190", "bao_format": "BAO_0000357", "bao_label": "single protein format",
-        "canonical_smiles": "Cc1nc2cc(OC[C@H](O)CN3CCN(CC(=O)NCCc4ccccc4)CC3)ccc2s1",
-        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
-        "CHEMBL1148425", "document_journal": "Bioorg Med Chem Lett", "document_year":
-        2004, "ligand_efficiency": {"bei": "10.18", "le": "0.20", "lle": "2.45", "sei":
-        "6.12"}, "molecule_chembl_id": "CHEMBL357119", "molecule_pref_name": null,
-        "parent_molecule_chembl_id": "CHEMBL357119", "pchembl_value": "4.77", "potential_duplicate":
-        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
-        297563, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
-        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
-        "nM", "standard_upper_value": null, "standard_value": "17000.0", "target_chembl_id":
-        "CHEMBL4632", "target_organism": "Rattus norvegicus", "target_pref_name":
-        "Peroxisomal acyl-coenzyme A oxidase 1", "target_tax_id": "10116", "text_value":
-        null, "toid": null, "type": "IC50", "units": "uM", "uo_units": "UO_0000065",
-        "upper_value": null, "value": "17.0"}, {"action_type": null, "activity_comment":
-        null, "activity_id": 31872, "activity_properties": [], "assay_chembl_id":
-        "CHEMBL760688", "assay_description": "Inhibitory activity against Palmitoyl-CoA
-        oxidase to inhibit rat heart mitochondrial Palmitoyl-CoA oxidation.", "assay_type":
-        "B", "assay_variant_accession": null, "assay_variant_mutation": null, "bao_endpoint":
-        "BAO_0000190", "bao_format": "BAO_0000357", "bao_label": "single protein format",
-        "canonical_smiles": "Cc1nc2cc(OC[C@H](O)CN3CCN(CC(=O)Nc4cccc(-c5ccccc5)c4)CC3)ccc2s1",
-        "data_validity_comment": null, "data_validity_description": null, "document_chembl_id":
-        "CHEMBL1148425", "document_journal": "Bioorg Med Chem Lett", "document_year":
-        2004, "ligand_efficiency": {"bei": "13.05", "le": "0.25", "lle": "2.47", "sei":
-        "8.65"}, "molecule_chembl_id": "CHEMBL152968", "molecule_pref_name": null,
-        "parent_molecule_chembl_id": "CHEMBL152968", "pchembl_value": "6.75", "potential_duplicate":
-        0, "qudt_units": "http://www.openphacts.org/units/Nanomolar", "record_id":
-        297580, "relation": "=", "src_id": 1, "standard_flag": 1, "standard_relation":
-        "=", "standard_text_value": null, "standard_type": "IC50", "standard_units":
-        "nM", "standard_upper_value": null, "standard_value": "180.0", "target_chembl_id":
-        "CHEMBL4632", "target_organism": "Rattus norvegicus", "target_pref_name":
-        "Peroxisomal acyl-coenzyme A oxidase 1", "target_tax_id": "10116", "text_value":
-        null, "toid": null, "type": "IC50", "units": "nM", "uo_units": "UO_0000065",
-        "upper_value": null, "value": "180.0"}], "page_meta": {"limit": 5, "next":
-        "/chembl/api/data/activity.json?limit=5&offset=5&standard_type__in=IC50%2CKi&standard_units=nM&standard_relation=%3D&assay_type__in=B%2CF&potential_duplicate=0&data_validity_comment__isnull=true&pchembl_value__isnull=false&standard_flag=1&target_tax_id__isnull=false",
+        "units": "uM", "uo_units": "UO_0000065", "upper_value": null, "value": "9.0"}],
+        "page_meta": {"limit": 2, "next": "/chembl/api/data/activity.json?limit=2&offset=2&standard_type__in=IC50%2CKi&standard_units=nM&standard_relation=%3D&assay_type__in=B%2CF&potential_duplicate=0&data_validity_comment__isnull=true&pchembl_value__isnull=false&standard_flag=1&target_tax_id__isnull=false",
         "offset": 0, "previous": null, "total_count": 2428355}}'
     headers:
       Cache-Control:
@@ -335,11 +239,11 @@ interactions:
       Content-Disposition:
       - inline
       Content-Length:
-      - '7857'
+      - '3259'
       Content-Type:
       - application/json
       Date:
-      - Mon, 16 Feb 2026 17:07:33 GMT
+      - Mon, 16 Feb 2026 17:06:47 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -349,7 +253,7 @@ interactions:
       X-ChEMBL-in-cache:
       - 'True'
       X-ChEMBL-retrieval-time:
-      - '0.1651763916015625'
+      - '0.2508881092071533'
     status:
       code: 200
       message: OK
