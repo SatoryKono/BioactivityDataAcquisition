@@ -256,3 +256,22 @@ class CachedBronzeDataSource:
             records_yielded=count,
             batches_processed=len(batches),
         )
+
+    async def get_total_records(self) -> int:
+        """Get total number of records across all cached batches.
+
+        This is used for progress reporting. It performs a quick pass over
+        the files to count records without full JSON parsing where possible.
+        """
+        batches = await self._list_batches_sorted()
+        total = 0
+
+        self._logger.info("Estimating total records in Bronze cache...", batch_count=len(batches))
+
+        for batch_path in batches:
+            # We use a simpler counting method if available, or just use the reader
+            async for _ in self._reader.read_bronze(batch_path):
+                total += 1
+
+        self._logger.info("Total records estimated", total=total)
+        return total
