@@ -170,8 +170,8 @@ class TestStoragePortProtocol:
                 *,
                 scd_config: dict[str, Any] | None = None,
                 column_order: list[str] | None = None,
-                ingestion_ts: Any = None,
-                run_id: Any = None,
+                ingestion_ts: datetime | None = None,
+                run_id: RunID | None = None,
                 silver_refs: list[Any] | None = None,
             ) -> None:
                 pass

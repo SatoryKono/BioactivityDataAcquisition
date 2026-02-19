@@ -127,7 +127,7 @@ class TestExecutorTracingIntegration:
         executor_path = Path("src/bioetl/application/core/executor.py")
 
         if executor_path.exists():
-            source = executor_path.read_text()
+            source = executor_path.read_text(encoding="utf-8")
 
             # Check for tracing in imports or type hints
             has_tracing_reference = any(
@@ -153,7 +153,7 @@ class TestExecutorTracingIntegration:
         found = False
         for path in services_paths:
             if path.exists():
-                source = path.read_text()
+                source = path.read_text(encoding="utf-8")
                 if "tracing" in source.lower() or "TracingPort" in source:
                     found = True
                     break
@@ -162,7 +162,7 @@ class TestExecutorTracingIntegration:
         if not found:
             runner_path = Path("src/bioetl/application/core/runner.py")
             if runner_path.exists():
-                source = runner_path.read_text()
+                source = runner_path.read_text(encoding="utf-8")
                 found = "tracing" in source.lower() or "observer" in source.lower()
 
         assert found, "Pipeline services should include tracing"
@@ -185,7 +185,7 @@ class TestStorageTracingIntegration:
         if not path.exists():
             pytest.skip(f"File not found: {file_path}")
 
-        source = path.read_text()
+        source = path.read_text(encoding="utf-8")
 
         # Storage writers should have some form of observability
         has_observability = any(
@@ -210,7 +210,7 @@ class TestStorageTracingIntegration:
         if not path.exists():
             pytest.skip("BronzeWriter not found")
 
-        source = path.read_text()
+        source = path.read_text(encoding="utf-8")
 
         # BronzeWriter should have metrics
         has_metrics = "metrics" in source.lower() or "MetricsPort" in source
@@ -224,7 +224,7 @@ class TestStorageTracingIntegration:
         if not path.exists():
             pytest.skip("SilverWriter not found")
 
-        source = path.read_text()
+        source = path.read_text(encoding="utf-8")
 
         # SilverWriter should have logging
         has_logging = "logger" in source.lower()
@@ -242,7 +242,7 @@ class TestPipelineRunnerTracing:
         if not runner_path.exists():
             pytest.skip("Runner not found")
 
-        source = runner_path.read_text()
+        source = runner_path.read_text(encoding="utf-8")
 
         # Runner should have observer for stage tracking
         has_observer = any(
@@ -259,7 +259,7 @@ class TestPipelineRunnerTracing:
         if not runner_path.exists():
             pytest.skip("Runner not found")
 
-        source = runner_path.read_text()
+        source = runner_path.read_text(encoding="utf-8")
 
         # Should have stage-related code
         has_stages = any(
@@ -280,7 +280,7 @@ class TestObservabilityBootstrap:
         if not bootstrap_path.exists():
             pytest.skip("Bootstrap not found")
 
-        source = bootstrap_path.read_text()
+        source = bootstrap_path.read_text(encoding="utf-8")
 
         # Bootstrap should set up observability
         has_observability_setup = any(
@@ -310,7 +310,7 @@ class TestObservabilityBootstrap:
         if not exists:
             bootstrap_path = Path("src/bioetl/composition/bootstrap/__init__.py")
             if bootstrap_path.exists():
-                source = bootstrap_path.read_text()
+                source = bootstrap_path.read_text(encoding="utf-8")
                 exists = "bootstrap_observability_bundle" in source
 
         assert exists, "Observability factory or bootstrap function should exist"
@@ -335,7 +335,7 @@ class TestTracingConfiguration:
         if not settings_path.exists():
             pytest.skip("Settings not found")
 
-        source = settings_path.read_text()
+        source = settings_path.read_text(encoding="utf-8")
 
         # Should have tracing-related settings or at least mention it
         # May be optional (via OTEL env vars)
@@ -375,7 +375,7 @@ class TestMandatorySpans:
             for layer in ["application", "infrastructure"]:
                 for path in Path(f"src/bioetl/{layer}").rglob(filename):
                     if path.exists():
-                        source = path.read_text()
+                        source = path.read_text(encoding="utf-8")
                         for method in methods:
                             if (
                                 f"def {method}" in source

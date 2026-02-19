@@ -821,6 +821,11 @@ class GoldMetadata(BaseModel):
     )
     scd: SCDMetadata | None = Field(default=None, description="SCD Type 2 metadata")
     environment: EnvironmentMetadata = Field(description="Environment information")
+    # Cross-reference to DQ report
+    dq_report_path: str | None = Field(
+        default=None,
+        description="Path to corresponding DQ report file (if generated)",
+    )
     governance: GovernanceMetadata | None = Field(
         default=None, description="Governance metadata for data stewardship"
     )
