@@ -1,6 +1,6 @@
 # Schema Evolution Guide
 
-*Reference: [RULES.md §2.2](../../RULES.md#22-политика-дрейфа-схемы-schema-drift) and [Appendix E](../../RULES.md#приложение-e-примеры-schema-evolution)*
+*Reference: [RULES.md §2.2](../../00-project/RULES.md#22-политика-дрейфа-схемы-schema-drift) and [Appendix E](../../00-project/RULES.md#приложение-e-примеры-schema-evolution)*
 
 This runbook describes how to handle schema changes in Bronze, Silver, and Gold layers.
 
@@ -29,7 +29,7 @@ This runbook describes how to handle schema changes in Bronze, Silver, and Gold 
 
 1. **Create Migration Plan**:
    - **Option A**: Full Rebuild (Simplest). Delete table and reload.
-   - **Option B**: Dual Write (Zero Downtime). See [RULES.md Appendix E.3](../../RULES.md#e3-field-deprecation-workflow).
+   - **Option B**: Dual Write (Zero Downtime). See [RULES.md Appendix E.3](../../00-project/RULES.md#e3-field-deprecation-workflow).
 
 2. **Implement Dual Write (If needed)**:
    - Add `new-field`.

@@ -1,6 +1,6 @@
 # Quarantine Management
 
-*Reference: [RULES.md §2.6](../../RULES.md#26-политика-null-и-пропущенных-значений)*
+*Reference: [RULES.md §2.6](../../00-project/RULES.md#26-политика-null-и-пропущенных-значений)*
 
 This runbook describes how to manage the Quarantine (Dead Letter Queue).
 

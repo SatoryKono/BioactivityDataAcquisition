@@ -58,9 +58,11 @@ class SilverMetadataInput:
 
     Attributes:
         table_path: Full path to the Delta table.
-        records: List of records written.
         primary_keys: Primary key columns.
         mode: Write mode (merge, append, delete).
+        records: List of records written (current batch).
+        total_records: Optional total records for the entire run (aggregates).
+        source_batch_ids: Optional list of all source batch IDs for the run.
         bronze_refs: Optional list of BronzeWriteResult for lineage.
         dq_metrics: Optional BatchDQMetrics for DQ summary.
         version_before: Delta table version before write (ADR-029).
@@ -77,9 +79,11 @@ class SilverMetadataInput:
     """
 
     table_path: str
-    records: list[dict[str, Any]]  # Any: heterogeneous record values
     primary_keys: list[str]
     mode: Any  # Any: SilverWriteMode - avoid circular import
+    records: list[dict[str, Any]] | None = None  # Any: heterogeneous record values
+    total_records: int | None = None
+    source_batch_ids: list[str] | None = None
     bronze_refs: Any | None = None  # Any: list[BronzeWriteResult...
     dq_metrics: Any | None = None  # Any: BatchDQMetrics - avoid circular import
     version_before: int | None = None  # ADR-029: Delta version before write
@@ -120,9 +124,10 @@ class GoldMetadataInput:
     Attributes:
         table_path: Full path to the Delta table.
         table_name: Table name.
-        records: List of records written.
         mode: Write mode (overwrite, append, scd2).
-        scd_config: SCD2 configuration if applicable.
+        records: List of records written (current batch).
+        total_records: Optional total records for the entire run (aggregates).
+        scd_config: Required config for SCD2 mode.
         started_at: UTC timestamp when write started (ADR-029).
         completed_at: UTC timestamp when write completed.
         silver_refs: List of Silver source references for lineage tracking.
@@ -139,8 +144,9 @@ class GoldMetadataInput:
 
     table_path: str
     table_name: str
-    records: list[dict[str, Any]]  # Any: heterogeneous record values
     mode: Any  # Any: GoldWriteMode - avoid circular import
+    records: list[dict[str, Any]] | None = None  # Any: heterogeneous record values
+    total_records: int | None = None
     scd_config: dict[str, Any] | None = None  # Any: SCD2 config values
     started_at: datetime | None = None  # ADR-029: Write start timestamp
     completed_at: datetime | None = None

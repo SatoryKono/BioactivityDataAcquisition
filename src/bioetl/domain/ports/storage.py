@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from datetime import datetime
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, Protocol, runtime_checkable
 
 from bioetl.domain.types import (
@@ -158,6 +159,17 @@ class StoragePort(Protocol):
         Note:
             Lock validation is performed at Application layer (BatchWriter)
             per RULES.md §4.6 Safety Guard.
+        """
+        ...
+
+    def get_table_path(self, table_name: str) -> Path:
+        """Resolve the full path to a Delta table.
+
+        Args:
+            table_name: Table name (e.g., 'chembl.activity').
+
+        Returns:
+            Path object pointing to the table directory.
         """
         ...
 

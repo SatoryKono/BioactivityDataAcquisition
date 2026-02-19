@@ -1,6 +1,6 @@
 # Pipeline: ChEMBL Activity
 
-> **Full Documentation (RU):** [docs/providers/chembl/activity.md](../../providers/chembl/activity.md)
+> **Full Documentation (RU):** [docs/04-reference/providers/chembl/activity.md](../providers/chembl/activity.md)
 
 ## Overview
 
@@ -99,4 +99,4 @@ bioetl run --pipeline chembl-activity --run-type rebuild
 
 ----------------------------------------------------------------------
 
-*See [full documentation in Russian](../../providers/chembl/activity.md) for complete schema details, normalization rules, and data flow diagrams.*
+*See [full documentation in Russian](../providers/chembl/activity.md) for complete schema details, normalization rules, and data flow diagrams.*

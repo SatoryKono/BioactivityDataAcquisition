@@ -104,10 +104,10 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 
 | Diagram                 | Description                                    | File                                                                                                          |
 | ----------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| Five Layer Architecture | Complete system architecture with all 5 layers | [01-five-layer-architecture.mermaid](diagrams/01-five-layer-architecture.mermaid)                             |
+| Five Layer Architecture | Complete system architecture with all 5 layers | [01-high-level.mermaid](diagrams/01-high-level.mermaid)                                                       |
 | Layers Interaction      | How layers communicate                         | [05-layers-interaction.mermaid](diagrams/05-layers-interaction.mermaid)                                |
-| Composite Pipeline      | ADR-026 workflow: seed → enrich → merge        | [26-composite-pipeline-workflow.mermaid](diagrams/26-composite-pipeline-workflow.mermaid)                      |
-| Provider Adapters       | 7 providers with rate limits                   | [23-provider-adapters-overview.mermaid](diagrams/23-provider-adapters-overview.mermaid)                        |
+| Composite Pipeline      | ADR-026 workflow: seed → enrich → merge        | [29-composite-pipeline-workflow.mermaid](diagrams/29-composite-pipeline-workflow.mermaid)                      |
+| Provider Adapters       | 7 providers with rate limits                   | [30-port-adapter-mapping.mermaid](diagrams/30-port-adapter-mapping.mermaid)                                    |
 | Pipeline Hierarchy      | Pipeline/Transformer inheritance               | [17-pipeline-hierarchy.mermaid](diagrams/17-pipeline-hierarchy.mermaid)                                |
 | Local Deployment        | ADR-010 local-only runtime architecture        | [12-local-deployment-architecture.mermaid](diagrams/12-local-deployment-architecture.mermaid)          |
 
@@ -116,5 +116,5 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 ## Related Documents
 
 - [RULES.md](../00-project/RULES.md) — Project rules (source of truth)
-- [00-map.md](../00-map.md) — Full project navigator
+- [00-map.md](../00-project/00-map.md) — Full project navigator
 - [glossary.md](../00-project/glossary.md) — Ubiquitous language terminology

@@ -180,7 +180,7 @@ source-file: ../../sources/chembl.yaml
 | Silver | Постоянно | Delta Lake VACUUM (7 дней) |
 | Gold   | Постоянно | Delta Lake VACUUM (7 дней) |
 
-См. [RULES.md §2.1.1](../00-project/RULES.md) для деталей политики retention.
+См. [RULES.md §2.1.1](../RULES.md) для деталей политики retention.
 
 ----------------------------------------------------------------------
 
@@ -209,7 +209,7 @@ pre-commit run validate-pipeline-configs --all-files
 
 ## Связанные документы
 
-- [RULES.md](../00-project/RULES.md) — Конституция проекта
+- [RULES.md](../RULES.md) — Конституция проекта
 - [ADR-014: Deterministic Writes](../../02-architecture/decisions/ADR-014-deterministic-writes.md)
 - [ADR-025: Pipeline Config Unification](../../02-architecture/decisions/ADR-025-pipeline-config-unification.md)
 - [04-extending-bioetl.md](04-extending-bioetl.md) — Добавление новых pipeline

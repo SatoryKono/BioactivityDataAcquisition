@@ -30,6 +30,7 @@ if TYPE_CHECKING:
         MedallionLifecycleService,
     )
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
+    from bioetl.domain.context import PipelineContext
     from bioetl.domain.ports import (
         BronzeDQConfigPort,
         GoldDQConfigPort,
@@ -81,24 +82,32 @@ class PostrunService:
     Attributes:
         _config: Pipeline configuration.
         _runtime: Runtime configuration.
+        _context: Pipeline execution context.
         _dq_service: Data quality service for DQ checks.
         _lifecycle_service: Medallion lifecycle service for VACUUM.
+        _storage: Storage port for path resolution.
         _metrics: Optional metrics port.
         _logger: Structured logger.
         _dq_report_service: Optional DQ report service for report generation.
         _bronze_dq_config: Optional Bronze DQ report configuration.
         _silver_dq_config: Optional Silver DQ report configuration.
         _gold_dq_config: Optional Gold DQ report configuration.
+        _metadata_coordinator: Centralized metadata coordinator.
+        _metadata_writer: Metadata sidecar file writer.
     """
 
     def __init__(
         self,
         config: PipelineConfig,
         runtime: RuntimeConfig,
+        context: PipelineContext,
         dq_service: DataQualityService,
         lifecycle_service: MedallionLifecycleService,
+        storage: StoragePort,
         metrics: MetricsPort | None,
         logger: LoggerPort,
+        metadata_coordinator: MetadataCoordinatorPort | None = None,
+        metadata_writer: MetadataWriterPort | None = None,
         # DQ Report parameters (optional)
         dq_report_service: DQReportService | None = None,
         bronze_dq_config: BronzeDQConfigPort | None = None,
@@ -110,10 +119,14 @@ class PostrunService:
         Args:
             config: Pipeline configuration.
             runtime: Runtime configuration.
+            context: Pipeline execution context.
             dq_service: Data quality service for DQ checks.
             lifecycle_service: Medallion lifecycle service for VACUUM.
+            storage: Storage port for path resolution.
             metrics: Optional metrics port.
             logger: Structured logger.
+            metadata_coordinator: Centralized metadata coordinator.
+            metadata_writer: Metadata sidecar file writer.
             dq_report_service: Optional DQ report service for report generation.
             bronze_dq_config: Optional Bronze DQ report configuration.
             silver_dq_config: Optional Silver DQ report configuration.
@@ -121,10 +134,14 @@ class PostrunService:
         """
         self._config = config
         self._runtime = runtime
+        self._context = context
         self._dq_service = dq_service
         self._lifecycle_service = lifecycle_service
+        self._storage = storage
         self._metrics = metrics
         self._logger = logger
+        self._metadata_coordinator = metadata_coordinator
+        self._metadata_writer = metadata_writer
         # DQ Report services
         self._dq_report_service = dq_report_service
         self._bronze_dq_config = bronze_dq_config
@@ -153,6 +170,11 @@ class PostrunService:
         dq_result = await self.run_dq_checks(executor)
         dq_reports = await self._generate_dq_reports(dq_context)
         vacuum_result = await self.run_vacuum_if_enabled()
+
+        # Write final run-level metadata (aggregates all batches)
+        if self._metadata_coordinator and self._metadata_writer:
+            await self._write_final_metadata(executor, dq_reports)
+
         return PostrunResult(dq=dq_result, dq_reports=dq_reports, vacuum=vacuum_result)
 
     async def run_dq_checks(self, executor: ExecutorMetricsPort) -> DQResult:
@@ -263,6 +285,73 @@ class PostrunService:
                 error=str(e),
             )
             return None
+
+    async def _write_final_metadata(
+        self,
+        executor: ExecutorMetricsPort,
+        dq_reports: DQReportResult | None,
+    ) -> None:
+        """Write final aggregated metadata for Silver and Gold layers.
+
+        Aggregates statistics from all batches processed by the executor
+        and writes a final run-level metadata sidecar file.
+
+        Args:
+            executor: Pipeline executor with accumulated metrics.
+            dq_reports: Results from DQ report generation (for cross-links).
+        """
+        from datetime import UTC, datetime
+
+        from bioetl.domain.ports import GoldMetadataInput, SilverMetadataInput
+
+        # Get run-level statistics from executor
+        stats = {}
+        if hasattr(executor, "get_run_statistics"):
+            stats = executor.get_run_statistics()
+
+        # 1. Write final Silver metadata
+        silver_table = self._config.table.silver_table
+        if silver_table:
+            silver_path = self._storage.get_table_path(silver_table)
+            silver_input = SilverMetadataInput(
+                table_path=str(silver_path),
+                primary_keys=list(self._config.table.primary_keys),
+                mode=self._config.table.silver_write_mode,
+                total_records=stats.get("records_silver"),
+                source_batch_ids=stats.get("source_batch_ids"),
+                dq_report_path=dq_reports.silver_path if dq_reports else None,
+                started_at=self._context.started_at,
+                completed_at=datetime.now(UTC),
+            )
+            silver_metadata = self._metadata_coordinator.create_silver_metadata(
+                silver_input
+            )
+            await self._metadata_writer.write_silver_metadata(
+                str(silver_path),
+                silver_metadata,
+                provider=self._config.provider,
+                entity=self._config.entity_type,
+            )
+
+        # 2. Write final Gold metadata
+        gold_table = self._config.table.gold_table
+        if gold_table:
+            gold_path = self._storage.get_table_path(gold_table)
+            gold_input = GoldMetadataInput(
+                table_path=str(gold_path),
+                table_name=gold_table,
+                mode=self._config.table.gold_write_mode,
+                total_records=stats.get("records_gold"),
+                completed_at=datetime.now(UTC),
+                gold_schema=self._config.gold_schema,
+            )
+            gold_metadata = self._metadata_coordinator.create_gold_metadata(gold_input)
+            await self._metadata_writer.write_gold_metadata(
+                str(gold_path),
+                gold_metadata,
+                provider=self._config.provider,
+                entity=self._config.entity_type,
+            )
 
     def _collect_batch_metrics(self, executor: ExecutorMetricsPort) -> dict[str, float]:
         """Collect batch metrics from executor.

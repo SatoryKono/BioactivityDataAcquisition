@@ -264,4 +264,4 @@ Worker -> MemoryLock: release lock
 ## Related Documents
 
 - [RULES.md](../../00-project/RULES.md) - Project rules
-- [00-map.md](../../00-map.md) - Project navigator
+- [00-map.md](../../00-project/00-map.md) - Project navigator

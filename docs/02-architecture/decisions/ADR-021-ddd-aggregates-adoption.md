@@ -265,7 +265,7 @@ async def run(self) -> None:
 - [ADR-020: Декомпозиция BasePipeline](ADR-020-basepipeline-decomposition.md) — рефакторинг application layer
 - [ADR-015: Pipeline Services Lifecycle](ADR-015-pipeline-services-lifecycle.md) — lifecycle management
 - [RULES.md §1.1](../../00-project/RULES.md) — Ports & Adapters Architecture
-- [docs/glossary.md](../glossary.md) — Ubiquitous Language
+- [docs/glossary.md](../../00-project/glossary.md) — Ubiquitous Language
 
 ## Альтернативы рассмотренные
 

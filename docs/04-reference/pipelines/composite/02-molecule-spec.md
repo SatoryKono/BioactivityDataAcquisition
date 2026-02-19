@@ -35,5 +35,5 @@ Merges ChEMBL molecules with PubChem compound data to produce a composite molecu
 
 ## Related ADRs
 
-- [ADR-026](../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)
-- [ADR-028](../../02-architecture/decisions/ADR-028-filter-rules-externalization.md)
+- [ADR-026](../../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)
+- [ADR-028](../../../02-architecture/decisions/ADR-028-filter-rules-externalization.md)

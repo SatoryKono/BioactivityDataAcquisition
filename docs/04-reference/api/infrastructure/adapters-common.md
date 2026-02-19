@@ -88,7 +88,7 @@ class MyAdapter:
                 )
 ```
 
-**Related ADR:** [ADR-029: Output Metadata Unification](../../02-architecture/decisions/ADR-029-output-metadata-unification.md)
+**Related ADR:** [ADR-029: Output Metadata Unification](../../../../02-architecture/decisions/ADR-029-output-metadata-unification.md)
 
 ---
 
@@ -181,7 +181,7 @@ class CrossRefTitleFallback(BaseTitleFallbackHandler):
         return response.json()["message"]["items"][0]
 ```
 
-**Related ADR:** [ADR-030: Publication Pagination Strategy](../../02-architecture/decisions/ADR-030-publication-pagination-strategy.md)
+**Related ADR:** [ADR-030: Publication Pagination Strategy](../../../../02-architecture/decisions/ADR-030-publication-pagination-strategy.md)
 
 ---
 
@@ -249,8 +249,8 @@ infrastructure/adapters/
 - Adapters **MUST NOT** import from other adapter modules (only from `common/`)
 
 **Related:**
-- [ADR-005: Composition Layer Separation](../../02-architecture/decisions/ADR-005-composition-layer-separation.md)
-- [ARCH-001: Import Matrix](../../../00-project/RULES.md#arch-001-import-matrix)
+- [ADR-005: Composition Layer Separation](../../../../02-architecture/decisions/ADR-005-composition-layer-separation.md)
+- [ARCH-001: Import Matrix](../../../../00-project/RULES.md#arch-001-import-matrix)
 
 ---
 
@@ -275,7 +275,7 @@ pytest tests/unit/infrastructure/adapters/common/test-base-title-fallback.py
 
 ## See Also
 
-- [Infrastructure Layer Overview](infrastructure.md)
-- [ADR-029: Output Metadata Unification](../../02-architecture/decisions/ADR-029-output-metadata-unification.md)
-- [ADR-030: Publication Pagination Strategy](../../02-architecture/decisions/ADR-030-publication-pagination-strategy.md)
-- [ADR-032: Unified HTTP Client Pattern](../../02-architecture/decisions/ADR-032-unified-http-client.md)
+- [Infrastructure Layer Overview](../infrastructure.md)
+- [ADR-029: Output Metadata Unification](../../../../02-architecture/decisions/ADR-029-output-metadata-unification.md)
+- [ADR-030: Publication Pagination Strategy](../../../../02-architecture/decisions/ADR-030-publication-pagination-strategy.md)
+- [ADR-032: Unified HTTP Client Pattern](../../../../02-architecture/decisions/ADR-032-unified-http-client.md)

@@ -43,6 +43,6 @@ Merges publication data from multiple providers into a unified composite publica
 
 ## Related ADRs
 
-- [ADR-026](../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)
-- [ADR-028](../../02-architecture/decisions/ADR-028-filter-rules-externalization.md)
-- [ADR-029](../../02-architecture/decisions/ADR-029-output-metadata-unification.md)
+- [ADR-026](../../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)
+- [ADR-028](../../../02-architecture/decisions/ADR-028-filter-rules-externalization.md)
+- [ADR-029](../../../02-architecture/decisions/ADR-029-output-metadata-unification.md)

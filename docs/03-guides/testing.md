@@ -50,7 +50,7 @@
     - Область: `src/bioetl/infrastructure/**/*.py` (с исключениями)
   - `test-all-ports-have-implementations`: Проверка наличия реализаций для всех протоколов (портов).
 
-**Документация:** См. [ADR-014](../../02-architecture/decisions/ADR-014-deterministic-writes.md) для обоснования детерминизма.
+**Документация:** См. [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md) для обоснования детерминизма.
 
 ### 2.5. Security Tests (`tests/security/`)
 

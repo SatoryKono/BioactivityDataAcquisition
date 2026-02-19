@@ -447,6 +447,9 @@ class BatchExecutor:
             self.records_gold += len(result.gold_records)
             self.records_quarantined += result.quarantined_count
 
+            # Track batch ID for lineage (always enabled)
+            self._source_batch_ids.append(str(batch_id))
+
             # Collect data for DQ reports (if enabled)
             if self._should_collect_dq_data():
                 self._collect_dq_data(
@@ -682,9 +685,6 @@ class BatchExecutor:
                 # Skip records that can't be serialized
                 pass
 
-        # Track batch ID
-        self._source_batch_ids.append(str(batch_id))
-
         # Track Bronze file path if available
         if bronze_result is not None and hasattr(bronze_result, "path"):
             self._last_bronze_path = str(bronze_result.path)
@@ -810,3 +810,19 @@ class BatchExecutor:
             # Flat structure flag for DQ reports
             flat_structure=self._config.flat_structure,
         )
+
+    def get_run_statistics(self) -> dict[str, Any]:
+        """Get aggregated statistics for the entire pipeline run.
+
+        Returns:
+            Dictionary with total counts and lists of IDs accumulated
+            across all processed batches.
+        """
+        return {
+            "records_fetched": self.records_fetched,
+            "records_bronze": self.records_bronze,
+            "records_silver": self.records_silver,
+            "records_gold": self.records_gold,
+            "records_quarantined": self.records_quarantined,
+            "source_batch_ids": list(set(self._source_batch_ids)),
+        }

@@ -100,9 +100,9 @@ Graceful shutdown обрабатывается непосредственно в
 
 | Диаграмма               | Файл                                                                                               | Описание                              |
 | ----------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| Five Layer Architecture | [diagrams/01-five-layer-architecture.mermaid](diagrams/01-five-layer-architecture.mermaid) | Полная архитектура с Interfaces слоем |
+| Five Layer Architecture | [01-high-level.mermaid](diagrams/01-high-level.mermaid)                                   | Полная архитектура с Interfaces слоем |
 | Layers Interaction      | [05-layers-interaction.mermaid](diagrams/05-layers-interaction.mermaid)                    | Взаимодействие слоёв                  |
-| Graceful Shutdown       | [diagrams/24-graceful-shutdown.mermaid](diagrams/24-graceful-shutdown.mermaid)             | Sequence diagram graceful shutdown    |
+| Graceful Shutdown       | [05-pipeline-lifecycle-states.mermaid](diagrams/05-pipeline-lifecycle-states.mermaid)      | Sequence diagram graceful shutdown    |
 
 ### Связанные ADR
 

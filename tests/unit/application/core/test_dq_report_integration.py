@@ -129,6 +129,23 @@ def mock_executor() -> MagicMock:
     return executor
 
 
+@pytest.fixture
+def mock_storage() -> MagicMock:
+    """Create a mock storage port."""
+    storage = MagicMock()
+    storage.get_table_path = MagicMock(return_value=Path("/tmp/table"))
+    return storage
+
+
+@pytest.fixture
+def mock_context() -> MagicMock:
+    """Create a mock pipeline context."""
+    from datetime import UTC, datetime
+    context = MagicMock()
+    context.started_at = datetime.now(UTC)
+    return context
+
+
 @pytest.mark.unit
 class TestPostrunServiceDQReports:
     """Tests for DQ report generation in PostrunService."""
@@ -137,8 +154,10 @@ class TestPostrunServiceDQReports:
         self,
         mock_pipeline_config: MagicMock,
         mock_runtime_config: MagicMock,
+        mock_context: MagicMock,
         mock_dq_service: MagicMock,
         mock_lifecycle_service: MagicMock,
+        mock_storage: MagicMock,
         mock_logger: LoggerPort,
         mock_dq_report_service: MagicMock,
         mock_executor: MagicMock,
@@ -148,8 +167,10 @@ class TestPostrunServiceDQReports:
         service = PostrunService(
             config=mock_pipeline_config,
             runtime=mock_runtime_config,
+            context=mock_context,
             dq_service=mock_dq_service,
             lifecycle_service=mock_lifecycle_service,
+            storage=mock_storage,
             metrics=None,
             logger=mock_logger,
             dq_report_service=mock_dq_report_service,
@@ -180,8 +201,10 @@ class TestPostrunServiceDQReports:
         service = PostrunService(
             config=mock_pipeline_config,
             runtime=mock_runtime_config,
+            context=mock_context,
             dq_service=mock_dq_service,
             lifecycle_service=mock_lifecycle_service,
+            storage=mock_storage,
             metrics=None,
             logger=mock_logger,
             dq_report_service=mock_dq_report_service,
@@ -209,8 +232,10 @@ class TestPostrunServiceDQReports:
         service = PostrunService(
             config=mock_pipeline_config,
             runtime=mock_runtime_config,
+            context=mock_context,
             dq_service=mock_dq_service,
             lifecycle_service=mock_lifecycle_service,
+            storage=mock_storage,
             metrics=None,
             logger=mock_logger,
             dq_report_service=None,  # No service
@@ -242,8 +267,10 @@ class TestPostrunServiceDQReports:
         service = PostrunService(
             config=mock_pipeline_config,
             runtime=mock_runtime_config,
+            context=mock_context,
             dq_service=mock_dq_service,
             lifecycle_service=mock_lifecycle_service,
+            storage=mock_storage,
             metrics=None,
             logger=mock_logger,
             dq_report_service=mock_dq_report_service,
@@ -280,8 +307,10 @@ class TestPostrunServiceDQReports:
         service = PostrunService(
             config=mock_pipeline_config,
             runtime=mock_runtime_config,
+            context=mock_context,
             dq_service=mock_dq_service,
             lifecycle_service=mock_lifecycle_service,
+            storage=mock_storage,
             metrics=None,
             logger=mock_logger,
             dq_report_service=mock_dq_report_service,

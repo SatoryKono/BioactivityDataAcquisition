@@ -688,10 +688,14 @@ def assemble_runner(
     postrun_service = PostrunService(
         config=pipeline.config,
         runtime=pipeline.runtime,
+        context=pipeline.context,
         dq_service=dq_service,
         lifecycle_service=lifecycle_service,
+        storage=pipeline.services.storage,
         metrics=pipeline.services.metrics,
         logger=logger_port,
+        metadata_coordinator=pipeline.services.metadata_coordinator,
+        metadata_writer=pipeline.services.metadata_writer,
         # DQ Report parameters
         dq_report_service=pipeline.services.dq_report_service,
         bronze_dq_config=dq_configs.bronze,

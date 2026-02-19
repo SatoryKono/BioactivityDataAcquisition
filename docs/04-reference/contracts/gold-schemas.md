@@ -4,7 +4,7 @@
 
 > **Версия**: 1.1.0
 > **Последнее обновление**: 2026-02-04
-> **Связанные ADR**: [ADR-018](../02-architecture/decisions/ADR-018-gold-strict-validation.md), [ADR-014](../../02-architecture/decisions/ADR-014-deterministic-writes.md)
+> **Связанные ADR**: [ADR-018](../../02-architecture/decisions/ADR-018-gold-strict-validation.md), [ADR-014](../../02-architecture/decisions/ADR-014-deterministic-writes.md)
 
 ---
 
@@ -655,10 +655,10 @@ JSON exports для Gold-схем хранятся в `docs/04-reference/contrac
 
 ## Связанные документы
 
-- [ADR-018: Gold Strict Validation](../02-architecture/decisions/ADR-018-gold-strict-validation.md)
+- [ADR-018: Gold Strict Validation](../../02-architecture/decisions/ADR-018-gold-strict-validation.md)
 - [ADR-014: Deterministic Writes](../../02-architecture/decisions/ADR-014-deterministic-writes.md)
-- [ADR-002: Medallion Architecture](../02-architecture/decisions/ADR-002-medallion-architecture.md)
-- [Data Layers](../02-architecture/data-layers.md)
+- [ADR-002: Medallion Architecture](../../02-architecture/decisions/ADR-002-medallion-architecture.md)
+- [Data Layers](../../02-architecture/data-layers.md)
 - [JSON Contract Exports](gold/)
 
 ---

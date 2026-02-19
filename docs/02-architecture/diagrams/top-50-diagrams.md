@@ -15,7 +15,7 @@
 
 ## Структура файлов диаграмм
 
-- Mermaid-исходники: [`mermaid/`](mermaid/)
+- Mermaid-исходники: [`./`](./)
 - PNG-рендеры: [`png/`](png/)
 - Полный индекс: [`diagrams-index.md`](diagrams-index.md)
 
