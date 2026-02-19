@@ -82,6 +82,8 @@ def _build_registry(entries: list[CanonicalSchemaEntry]) -> str:
     lines.append("")
     lines.append("@dataclass(frozen=True)")
     lines.append("class CanonicalSchemaRegistryEntry:")
+    lines.append('    """Entry in the canonical schema registry."""')
+    lines.append("")
     lines.append("    provider: str")
     lines.append("    entity: str")
     lines.append("    yaml_path: str")
