@@ -22,7 +22,7 @@ description: "Extract biological activity records from ChEMBL API"
 
 business_primary_keys: [ "activity_id" ]
 technical_primary_key: "entity_id"
-loading_strategy: full_scan_only
+loading_strategy: incremental
 silver_table: "chembl_activity"
 gold_table: "chembl_activity"
 batch_size: 1000
