@@ -5,11 +5,23 @@ from __future__ import annotations
 __version__ = "6.0.0"
 
 # Project-wide monkeypatch for Pandera compatibility with Python 3.14.
-# Pandera Dispatcher currently does exact-type lookup and can register checks
-# only under typing.Any, which raises KeyError for pandas.Series inputs.
+# Pandera uses typing_inspect.get_origin which returns None for A | B unions on Python 3.10+.
+# This prevents pandas-specific checks from being registered correctly.
 try:
+    import typing
     import typing_inspect
-    from typing import Any
+
+    # Fix typing_inspect.get_origin BEFORE importing pandera backends
+    _orig_get_origin = typing_inspect.get_origin
+
+    def _get_origin_with_union_fix(tp: typing.Any) -> typing.Any:
+        origin = _orig_get_origin(tp)
+        if origin is None:
+            # Fallback to typing.get_origin for Python 3.10+ unions (A | B)
+            return typing.get_origin(tp)
+        return origin
+
+    typing_inspect.get_origin = _get_origin_with_union_fix
 
     # Ensure pandas-specific check implementations are registered.
     import pandera.backends.pandas.builtin_checks  # noqa: F401
@@ -25,7 +37,7 @@ try:
         # (e.g., pandas.Series | pandas.DataFrame) in Pandera's registry.
         if fn is None:
             for registered_type, registered_fn in self._function_registry.items():
-                if registered_type is Any:
+                if registered_type is typing.Any:
                     continue
                 if isinstance(registered_type, type) and issubclass(
                     input_data_type, registered_type
@@ -40,8 +52,8 @@ try:
                     fn = registered_fn
                     break
 
-        if fn is None and Any in self._function_registry:
-            fn = self._function_registry[Any]
+        if fn is None and typing.Any in self._function_registry:
+            fn = self._function_registry[typing.Any]
         if fn is None:
             return _orig_dispatcher_call(self, *args, **kwargs)
         return fn(*args, **kwargs)
