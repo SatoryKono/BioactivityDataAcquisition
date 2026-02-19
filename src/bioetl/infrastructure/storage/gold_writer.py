@@ -725,7 +725,11 @@ class GoldWriter(BaseDeltaWriter):
         for attempt in range(3):
             try:
                 await self._run_in_executor(
-                    lambda table_or_uri=table_path, data=arrow_data, mode=mode, partition_by=partition_cols, schema_mode=schema_mode: (
+                    lambda table_or_uri=table_path,
+                    data=arrow_data,
+                    mode=mode,
+                    partition_by=partition_cols,
+                    schema_mode=schema_mode: (
                         write_deltalake(
                             table_or_uri=table_or_uri,
                             data=pa.RecordBatchReader.from_batches(
@@ -815,7 +819,10 @@ class GoldWriter(BaseDeltaWriter):
                         records, column_order=column_order
                     )
                     await self._run_in_executor(
-                        lambda table_or_uri=table_path, data=arrow_data, mode="append", partition_by=partition_cols: (
+                        lambda table_or_uri=table_path,
+                        data=arrow_data,
+                        mode="append",
+                        partition_by=partition_cols: (
                             write_deltalake(
                                 table_or_uri=table_or_uri,
                                 data=pa.RecordBatchReader.from_batches(
