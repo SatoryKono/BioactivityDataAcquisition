@@ -4,32 +4,51 @@ from __future__ import annotations
 
 __version__ = "6.0.0"
 
-# Project-wide monkeypatch for Pandera compatibility with Pandas 3.0.0 on Python 3.14
-# Registers pd.Series in Pandera's function dispatch registry to avoid KeyError.
+# Project-wide monkeypatch for Pandera compatibility with Python 3.14.
+# Pandera Dispatcher currently does exact-type lookup and can register checks
+# only under typing.Any, which raises KeyError for pandas.Series inputs.
 try:
+    import typing_inspect
     from typing import Any
 
-    import pandas as pd
-    import pandera as pa
+    # Ensure pandas-specific check implementations are registered.
+    import pandera.backends.pandas.builtin_checks  # noqa: F401
+    from pandera.api.function_dispatch import Dispatcher
 
-    # Force registration of pandas backend
-    import pandera.backends.pandas
+    _orig_dispatcher_call = Dispatcher.__call__
 
-    # Create a dummy check to access the dispatch registry
-    _check = pa.Check(lambda _s: True)
-    from pandera.backends.pandas.checks import PandasCheckBackend
 
-    _backend = PandasCheckBackend(_check)
+    def _dispatcher_call_with_any_fallback(self, *args, **kwargs):
+        input_data_type = type(args[0])
+        fn = self._function_registry.get(input_data_type)
 
-    _func = (
-        _backend.check_fn.func
-        if hasattr(_backend.check_fn, "func")
-        else _backend.check_fn
-    )
-    if hasattr(_func, "_function_registry"):
-        _registry = _func._function_registry
-        if pd.Series not in _registry and Any in _registry:
-            _registry[pd.Series] = _registry[Any]
+        # Python 3.14 can leave Union-annotated registrations as single keys
+        # (e.g., pandas.Series | pandas.DataFrame) in Pandera's registry.
+        if fn is None:
+            for registered_type, registered_fn in self._function_registry.items():
+                if registered_type is Any:
+                    continue
+                if isinstance(registered_type, type) and issubclass(
+                    input_data_type, registered_type
+                ):
+                    fn = registered_fn
+                    break
+                union_args = typing_inspect.get_args(registered_type)
+                if union_args and any(
+                    isinstance(arg, type) and issubclass(input_data_type, arg)
+                    for arg in union_args
+                ):
+                    fn = registered_fn
+                    break
+
+        if fn is None and Any in self._function_registry:
+            fn = self._function_registry[Any]
+        if fn is None:
+            return _orig_dispatcher_call(self, *args, **kwargs)
+        return fn(*args, **kwargs)
+
+
+    Dispatcher.__call__ = _dispatcher_call_with_any_fallback
 except Exception:
     # Fail silently to avoid breaking the entire project if Pandera/Pandas are not present
     pass
