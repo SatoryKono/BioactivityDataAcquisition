@@ -154,7 +154,9 @@ class TestStoragePortProtocol:
                 mode: Literal["merge", "append", "delete"] = "merge",
                 partition_cols: list[str] | None = None,
                 on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
+                column_order: list[str] | None = None,
                 bronze_refs: list[BronzeWriteResult] | None = None,
+                key_nullability_rules: list[Any] | None = None,
             ) -> SilverWriteResult | None:
                 return None
 
@@ -166,11 +168,18 @@ class TestStoragePortProtocol:
                 primary_keys: list[str] | None = None,
                 mode: Literal["overwrite", "append", "scd2"] = "overwrite",
                 *,
+                scd_config: dict[str, Any] | None = None,
+                column_order: list[str] | None = None,
                 ingestion_ts: Any = None,
                 run_id: Any = None,
                 silver_refs: list[Any] | None = None,
             ) -> None:
                 pass
+
+            def get_table_path(self, table_name: str) -> Any:
+                from pathlib import Path
+
+                return Path("/tmp") / table_name
 
             async def read_silver(
                 self,
