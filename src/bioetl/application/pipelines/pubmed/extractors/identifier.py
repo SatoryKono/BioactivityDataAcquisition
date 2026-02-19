@@ -135,6 +135,75 @@ class IdentifierExtractor(BaseFieldExtractor):
         return text.strip() if text else None
 
     @classmethod
+    def extract_all_identifiers(cls, root: Element) -> dict[str, str | None]:
+        """Extract all supported identifiers from PubMed XML in a single pass.
+
+        Combines ELocationID and ArticleIdList extraction strategies.
+        Priority: ELocationID > ArticleIdList for DOI and PII.
+
+        Args:
+            root: Root PubmedArticle element.
+
+        Returns:
+            Dictionary with keys: doi, pii, mid, publisher_id, pmc_id.
+            Values are normalized strings or None.
+        """
+        extractor = cls()
+        result: dict[str, str | None] = {
+            "doi": None,
+            "pii": None,
+            "mid": None,
+            "publisher_id": None,
+            "pmc_id": None,
+        }
+
+        # 1. Scan ELocationID (higher priority for DOI/PII)
+        # Note: ELocationID is typically under Article, but we search from root
+        # consistent with extract_elocation_ids logic
+        article = root.find(".//Article")
+        if article is not None:
+            for eloc in article.findall("ELocationID"):
+                eid_type = eloc.get("EIdType")
+                if not eid_type or not eloc.text:
+                    continue
+
+                normalized = extractor._normalize_text(eloc.text)
+                if not normalized:
+                    continue
+
+                if eid_type == "doi":
+                    result["doi"] = normalized
+                elif eid_type == "pii":
+                    result["pii"] = normalized
+
+        # 2. Scan ArticleIdList (fallback for DOI/PII, primary for others)
+        article_id_list = root.find(".//ArticleIdList")
+        if article_id_list is not None:
+            for aid in article_id_list.findall("ArticleId"):
+                id_type = aid.get("IdType")
+                if not id_type or not aid.text:
+                    continue
+
+                normalized = extractor._normalize_text(aid.text)
+                if not normalized:
+                    continue
+
+                if id_type == "doi":
+                    if result["doi"] is None:
+                        result["doi"] = normalized
+                elif id_type == "pii":
+                    if result["pii"] is None:
+                        result["pii"] = normalized
+                elif id_type == "pmc":
+                    result["pmc_id"] = normalized
+                elif id_type == "mid":
+                    result["mid"] = normalized
+                elif id_type == "publisher-id":
+                    result["publisher_id"] = normalized
+
+        return result
+
+    @classmethod
     def extract_doi(cls, root: Element) -> str | None:
         """Extract DOI from ArticleIdList or ELocationID.
 
