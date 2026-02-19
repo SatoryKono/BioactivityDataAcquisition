@@ -376,8 +376,8 @@ class MetadataCoordinator:
 
         # Build unified output metadata (ADR-029)
         output = BaseOutputMetadata(
-            record_count=rec_count,
-            total_bytes=getattr(input_data, "total_bytes", 0),
+            record_count=rec_count or 0,
+            total_bytes=getattr(input_data, "total_bytes", 0) or 0,
             write_started_at=input_data.started_at,
             write_completed_at=input_data.completed_at,
         )
@@ -392,7 +392,7 @@ class MetadataCoordinator:
             runtime=self._build_runtime_metadata(
                 started_at=input_data.started_at,
                 completed_at=input_data.completed_at,
-                duration_seconds=duration_seconds,
+                duration_seconds=duration_seconds or 0.0,
             ),
             pipeline=self._build_pipeline_metadata(),
             lineage=lineage,
@@ -549,8 +549,8 @@ class MetadataCoordinator:
         )
 
         output = BaseOutputMetadata(
-            record_count=rec_count,
-            total_bytes=getattr(input_data, "total_bytes", 0),
+            record_count=rec_count or 0,
+            total_bytes=getattr(input_data, "total_bytes", 0) or 0,
             write_started_at=getattr(input_data, "started_at", None),
             write_completed_at=input_data.completed_at,
             composite_run_id=composite_ext.composite_run_id if composite_ext else None,
@@ -591,6 +591,7 @@ class MetadataCoordinator:
             output_ext=output_ext,
             scd=scd,
             environment=self._get_environment_metadata(),
+            dq_report_path=input_data.dq_report_path,
             governance=input_data.governance,
         )
 

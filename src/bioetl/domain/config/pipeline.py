@@ -67,6 +67,9 @@ class PipelineConfig:
     # SCD Type 2 configuration (Gold layer)
     scd_config: dict[str, str] | None = None
 
+    # Gold schema for validation
+    gold_schema: Any | None = None
+
     def __post_init__(self) -> None:
         """Convert lists to tuples and validate configuration on creation."""
         freeze_sequences(

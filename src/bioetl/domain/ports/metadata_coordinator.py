@@ -153,6 +153,7 @@ class GoldMetadataInput:
     silver_refs: list[SilverRef] | None = None
     transform_version: str | None = None
     transform_steps: tuple[str, ...] | None = None
+    dq_report_path: str | None = None
     gold_schema: Any | None = None  # Any: Pandera DataFrameModel...
     governance: GovernanceMetadata | None = None
     total_bytes: int = 0  # ADR-029: Total size in bytes
