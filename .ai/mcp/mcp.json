@@ -1,0 +1,49 @@
+{
+  "mcpServers": {
+    "google-search": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-google-search"
+      ],
+      "env": {
+        "GOOGLE_API_KEY": "",
+        "GOOGLE_SEARCH_ENGINE_ID": ""
+      }
+    },
+    "fetch": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-fetch"
+      ]
+    },
+    "memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ]
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2"
+      ]
+    }
+  }
+}
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2"
+      ]
+    }
+  }
+}
