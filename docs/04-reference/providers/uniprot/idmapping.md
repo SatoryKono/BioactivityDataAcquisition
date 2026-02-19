@@ -225,4 +225,4 @@ CHEMBL9999999
 - [UniProt Protein](./protein.md) — Пайплайн для белковых записей
 - [ChEMBL Target](../chembl/target.md) — Источник Target IDs
 - [Running Pipelines](../../03-guides/running-pipelines.md) — Запуск пайплайнов
-- [Project Rules](../../RULES.md) — Правила обработки данных
+- [Project Rules](../../00-project/RULES.md) — Правила обработки данных

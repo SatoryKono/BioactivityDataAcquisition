@@ -263,5 +263,5 @@ ______________________________________________________________________
 
 ## Related Documents
 
-- [RULES.md](../../RULES.md) - Project rules
+- [RULES.md](../../00-project/RULES.md) - Project rules
 - [00-map.md](../../00-map.md) - Project navigator

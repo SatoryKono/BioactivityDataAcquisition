@@ -259,7 +259,7 @@ pipeline_name: chembl_activity
 
 ## References
 
-- [RULES.md v5.20, Appendix D](../../RULES.md) - Reference schema
+- [RULES.md v5.20, Appendix D](../../00-project/RULES.md) - Reference schema
 - [ADR-014: Deterministic Writes](ADR-014-deterministic-writes.md) - sort_by requirement
 - [ADR-027: DQ Rules Externalization](ADR-027-dq-rules-externalization.md) - Hierarchical DQ config
 - [03-file-policy.md](../../00-project-rules/03-file-policy.md) - File structure documentation

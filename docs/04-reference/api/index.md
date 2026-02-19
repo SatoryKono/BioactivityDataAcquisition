@@ -115,4 +115,4 @@ await runner.run()
 
 - [CLI Reference](../cli.md) - Command-line interface documentation
 - [Architecture Decisions](../../02-architecture/decisions/) - ADRs explaining design choices
-- [RULES.md](../../RULES.md) - Project governance and requirements
+- [RULES.md](../../00-project/RULES.md) - Project governance and requirements

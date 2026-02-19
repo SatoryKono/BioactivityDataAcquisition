@@ -115,4 +115,4 @@ ______________________________________________________________________
 
 - [Composition Layer](05-composition-layer.md) — bootstrap_pipeline, фабрики
 - [CLI Reference](../04-reference/cli.md) — полная документация CLI команд
-- [RULES.md §1 "Архитектура и Слои"](../RULES.md) — матрица импортов (interfaces может импортировать всё)
+- [RULES.md §1 "Архитектура и Слои"](../00-project/RULES.md) — матрица импортов (interfaces может импортировать всё)

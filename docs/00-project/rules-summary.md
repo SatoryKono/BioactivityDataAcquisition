@@ -129,4 +129,4 @@
 
 ---
 
-*Полная версия: [docs/RULES.md](../RULES.md)*
+*Полная версия: [docs/RULES.md](../00-project/RULES.md)*

@@ -57,6 +57,13 @@ ALLOWED_ROOT_DIRS: set[str] = {
     ".claude",
     ".codex",
     ".jules",
+    ".ai",
+    ".aiassistant",
+    ".gemini",
+    ".idea",
+    ".import_linter_cache",
+    ".junie",
+    ".vscode",
     # Infrastructure monitoring
     "grafana",  # Grafana dashboards for observability
     # Documentation assets

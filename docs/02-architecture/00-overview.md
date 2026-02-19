@@ -115,6 +115,6 @@ ______________________________________________________________________
 
 ## Related Documents
 
-- [RULES.md](../RULES.md) — Project rules (source of truth)
+- [RULES.md](../00-project/RULES.md) — Project rules (source of truth)
 - [00-map.md](../00-map.md) — Full project navigator
 - [glossary.md](../glossary.md) — Ubiquitous language terminology

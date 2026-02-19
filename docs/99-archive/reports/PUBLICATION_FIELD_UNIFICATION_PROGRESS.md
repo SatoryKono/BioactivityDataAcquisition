@@ -248,7 +248,7 @@ make test
 ## Связанные Документы
 
 - [ADR-029: Data Schema Externalization](docs/02-architecture/decisions/ADR-029-data-schema-externalization.md)
-- [RULES.md §2.6: Int→Float Coercion](docs/RULES.md)
+- [RULES.md §2.6: Int→Float Coercion](docs/00-project/RULES.md)
 - [Composite Publication Schema](configs/schemas/composite/publication.yaml)
 
 ---
