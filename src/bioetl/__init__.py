@@ -17,7 +17,6 @@ try:
 
     _orig_dispatcher_call = Dispatcher.__call__
 
-
     def _dispatcher_call_with_any_fallback(self, *args, **kwargs):
         input_data_type = type(args[0])
         fn = self._function_registry.get(input_data_type)
@@ -46,7 +45,6 @@ try:
         if fn is None:
             return _orig_dispatcher_call(self, *args, **kwargs)
         return fn(*args, **kwargs)
-
 
     Dispatcher.__call__ = _dispatcher_call_with_any_fallback
 except Exception:
