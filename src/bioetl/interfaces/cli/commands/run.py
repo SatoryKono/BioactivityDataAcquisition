@@ -14,6 +14,7 @@ from bioetl.application.services import (
     PipelineNotFoundError,
     PipelineRunResult,
     RunOptions,
+    RunResult,
 )
 from bioetl.composition.entrypoints import get_pipeline_runner_service
 from bioetl.interfaces.cli.commands.health_server_integration import (
@@ -76,7 +77,7 @@ async def _run_pipeline_async(
     options: RunOptions,
     health_server_enabled: bool = True,
     health_port: int = DEFAULT_HEALTH_SERVER_PORT,
-) -> tuple[PipelineRunResult, str | None, str | None, str]:
+) -> RunResult:
     """Run pipeline asynchronously via service.
 
     Args:
@@ -86,7 +87,7 @@ async def _run_pipeline_async(
         health_port: Port for health server.
 
     Returns:
-        Tuple of (status, error_message, error_type, run_id).
+        RunResult object with status and metrics.
     """
     # Start metrics server if enabled (side-effect in entrypoint, not bootstrap)
     ensure_metrics_server_started()
@@ -96,41 +97,45 @@ async def _run_pipeline_async(
         port=health_port,
     ):
         service = get_pipeline_runner_service()
-        result = await service.run(pipeline, options=options)
-        return result.status, result.error_message, result.error_type, result.run_id
+        return await service.run(pipeline, options=options)
 
 
-def _echo_run_result(
-    status: PipelineRunResult, error_message: str | None, run_id: str
-) -> None:
-    """Output run result message based on status.
+def _echo_run_result(result: RunResult) -> None:
+    """Output run result message based on status and display metrics.
 
     Args:
-        status: Run status from service.
-        error_message: Error message if failed.
-        run_id: Unique identifier for the pipeline run.
+        result: RunResult object with execution outcome and metrics.
     """
     # Truncate run_id to first 8 chars for readability (like git short hash)
-    short_run_id = run_id[:8] if len(run_id) > 8 else run_id
+    short_run_id = result.run_id[:8] if len(result.run_id) > 8 else result.run_id
 
-    status_handlers = {
-        PipelineRunResult.SUCCESS: lambda: echo_info(
-            f"Pipeline completed successfully (run_id: {short_run_id})"
-        ),
-        PipelineRunResult.DRY_RUN: lambda: echo_info(
-            f"Dry-run completed (no changes made) (run_id: {short_run_id})"
-        ),
-        PipelineRunResult.SHUTDOWN: lambda: echo_warning(
-            f"Pipeline was gracefully shut down (run_id: {short_run_id})"
-        ),
-        PipelineRunResult.FAILED: lambda: echo_error(
+    if result.status == PipelineRunResult.SUCCESS:
+        echo_info(f"Pipeline completed successfully (run_id: {short_run_id})")
+        # Display statistics for SUCCESS
+        echo_info(f"  - Bronze records:      {result.records_fetched}")
+        echo_info(f"  - Silver records:      {result.records_silver}")
+        if result.records_gold > 0:
+            echo_info(f"  - Gold records:        {result.records_gold}")
+        if result.records_quarantined > 0:
+            echo_warning(f"  - Quarantined (DQ):    {result.records_quarantined}")
+        else:
+            echo_info("  - Quarantined (DQ):    0")
+
+    elif result.status == PipelineRunResult.DRY_RUN:
+        echo_info(f"Dry-run completed (no changes made) (run_id: {short_run_id})")
+
+    elif result.status == PipelineRunResult.SHUTDOWN:
+        echo_warning(f"Pipeline was gracefully shut down (run_id: {short_run_id})")
+        # Display partial statistics
+        echo_info(f"  - Processed so far:    {result.records_fetched}")
+
+    elif result.status == PipelineRunResult.FAILED:
+        echo_error(
             f"Pipeline failed (run_id: {short_run_id})",
-            error_message or "Unknown error",
-        ),
-    }
-    handler = status_handlers.get(status)
-    if handler:
-        handler()
+            result.error_message or "Unknown error",
+        )
+        # Display statistics before failure
+        echo_info(f"  - Processed before failure: {result.records_fetched}")
 
 
 @click.command()
@@ -276,7 +281,7 @@ def run(
         health_port=health_port,
     )
     try:
-        status, error_message, error_type, run_id = asyncio.run(coro)
+        result = asyncio.run(coro)
     except PipelineNotFoundError as e:
         echo_error("Pipeline not found", str(e))
         sys.exit(ExitCode.CONFIG_ERROR)
@@ -291,8 +296,8 @@ def run(
             coro.close()
 
     # Map status to exit code and output result
-    exit_code = _map_status_to_exit_code(status, error_type)
-    _echo_run_result(status, error_message, run_id)
+    exit_code = _map_status_to_exit_code(result.status, result.error_type)
+    _echo_run_result(result)
     sys.exit(exit_code)
 
 

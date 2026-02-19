@@ -9,6 +9,7 @@ from click.testing import CliRunner
 
 from bioetl.application.core.cleanup_service import CleanupPreview, LayerInfo
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+from bioetl.application.services import PipelineRunResult, RunResult
 from bioetl.interfaces.cli import cli, main
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
@@ -91,14 +92,14 @@ class TestRunCommand:
         runner,
     ):
         """Test that run command works with valid arguments."""
-        from bioetl.application.services import PipelineRunResult
-
-        # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
-        mock_asyncio_run.return_value = (
-            PipelineRunResult.SUCCESS,
-            None,
-            None,
-            "test-run-id",
+        # _run_pipeline_async returns RunResult object
+        mock_asyncio_run.return_value = RunResult(
+            status=PipelineRunResult.SUCCESS,
+            pipeline_name="chembl_activity",
+            run_id="test-run-id",
+            run_type="incremental",
+            records_fetched=100,
+            records_silver=100,
         )
 
         result = runner.invoke(
@@ -116,14 +117,15 @@ class TestRunCommand:
         runner,
     ):
         """Test run command with all options."""
-        from bioetl.application.services import PipelineRunResult
-
-        # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
-        mock_asyncio_run.return_value = (
-            PipelineRunResult.SUCCESS,
-            None,
-            None,
-            "test-run-id",
+        # _run_pipeline_async returns RunResult object
+        mock_asyncio_run.return_value = RunResult(
+            status=PipelineRunResult.SUCCESS,
+            pipeline_name="chembl_activity",
+            run_id="test-run-id",
+            run_type="backfill",
+            records_fetched=1000,
+            records_silver=950,
+            records_quarantined=50,
         )
 
         result = runner.invoke(
@@ -152,14 +154,13 @@ class TestRunCommand:
         runner,
     ):
         """Test run command handles shutdown error."""
-        from bioetl.application.services import PipelineRunResult
-
-        # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
-        mock_asyncio_run.return_value = (
-            PipelineRunResult.SHUTDOWN,
-            None,
-            None,
-            "test-run-id",
+        # _run_pipeline_async returns RunResult object
+        mock_asyncio_run.return_value = RunResult(
+            status=PipelineRunResult.SHUTDOWN,
+            pipeline_name="chembl_activity",
+            run_id="test-run-id",
+            run_type="incremental",
+            records_fetched=50,
         )
 
         result = runner.invoke(
@@ -269,14 +270,14 @@ class TestRunCommandAdvanced:
     @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
     def test_run_command_bootstrap_file_not_found(self, mock_asyncio_run, runner):
         """Test run command handles FileNotFoundError during service call."""
-        from bioetl.application.services import PipelineRunResult
-
-        # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
-        mock_asyncio_run.return_value = (
-            PipelineRunResult.FAILED,
-            "Config not found",
-            "FileNotFoundError",
-            "test-run-id",
+        # _run_pipeline_async returns RunResult object
+        mock_asyncio_run.return_value = RunResult(
+            status=PipelineRunResult.FAILED,
+            pipeline_name="chembl_activity",
+            run_id="test-run-id",
+            run_type="incremental",
+            error_message="Config not found",
+            error_type="FileNotFoundError",
         )
 
         result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
@@ -290,7 +291,7 @@ class TestRunCommandAdvanced:
         self, mock_asyncio_run, mock_get_service, runner
     ):
         """Test run command handles generic Exception during execution."""
-        mock_get_service.side_effect = RuntimeError("Unexpected error")
+        mock_asyncio_run.side_effect = RuntimeError("Unexpected error")
 
         result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
 
@@ -311,12 +312,14 @@ class TestRunCommandAdvanced:
         csv_file = tmp_path / "filter.csv"
         csv_file.write_text("id\nCHEMBL123\nCHEMBL456")
 
-        # Mock the async function to return success tuple
-        mock_run_async.return_value = (
-            PipelineRunResult.SUCCESS,
-            None,
-            None,
-            "test-run-id",
+        # Mock the async function to return success result
+        mock_run_async.return_value = RunResult(
+            status=PipelineRunResult.SUCCESS,
+            pipeline_name="chembl_activity",
+            run_id="test-run-id",
+            run_type="incremental",
+            records_fetched=10,
+            records_silver=10,
         )
 
         result = runner.invoke(
@@ -349,14 +352,14 @@ class TestRunCommandAdvanced:
     @patch("bioetl.interfaces.cli.commands.run.asyncio.run")
     def test_run_command_missing_logger(self, mock_asyncio_run, runner):
         """Test run command handles service errors gracefully."""
-        from bioetl.application.services import PipelineRunResult
-
-        # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
-        mock_asyncio_run.return_value = (
-            PipelineRunResult.FAILED,
-            "Internal error",
-            "RuntimeError",
-            "test-run-id",
+        # _run_pipeline_async returns RunResult object
+        mock_asyncio_run.return_value = RunResult(
+            status=PipelineRunResult.FAILED,
+            pipeline_name="chembl_activity",
+            run_id="test-run-id",
+            run_type="incremental",
+            error_message="Internal error",
+            error_type="RuntimeError",
         )
 
         result = runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
@@ -501,14 +504,14 @@ class TestDryRunMode:
         runner,
     ):
         """Test that rebuild with -y skips confirmation."""
-        from bioetl.application.services import PipelineRunResult
-
-        # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
-        mock_asyncio_run.return_value = (
-            PipelineRunResult.SUCCESS,
-            None,
-            None,
-            "test-run-id",
+        # _run_pipeline_async returns RunResult object
+        mock_asyncio_run.return_value = RunResult(
+            status=PipelineRunResult.SUCCESS,
+            pipeline_name="chembl_activity",
+            run_id="test-run-id",
+            run_type="rebuild",
+            records_fetched=100,
+            records_silver=100,
         )
 
         result = runner.invoke(
