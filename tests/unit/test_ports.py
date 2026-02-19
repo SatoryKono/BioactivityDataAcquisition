@@ -168,11 +168,16 @@ class TestStoragePortProtocol:
                 primary_keys: list[str] | None = None,
                 mode: Literal["overwrite", "append", "scd2"] = "overwrite",
                 *,
+                scd_config: dict[str, Any] | None = None,
+                column_order: list[str] | None = None,
                 ingestion_ts: Any = None,
                 run_id: Any = None,
                 silver_refs: list[Any] | None = None,
             ) -> None:
                 pass
+
+            def get_table_path(self, table_name: str) -> Path:
+                return Path(f"data/silver/{table_name}")
 
             async def read_silver(
                 self,
@@ -202,6 +207,7 @@ class TestStoragePortProtocol:
                 run_id: str | None = None,
                 sources_used: list[str] | None = None,
                 preserve_column_order: bool = False,
+                schema: Any | None = None,
             ) -> None:
                 pass
 

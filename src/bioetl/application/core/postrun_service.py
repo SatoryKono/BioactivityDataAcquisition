@@ -322,7 +322,11 @@ class PostrunService:
                 mode=self._config.table.silver_write_mode,
                 total_records=stats.get("records_silver"),
                 source_batch_ids=stats.get("source_batch_ids"),
-                dq_report_path=(dq_reports.silver_report_path if dq_reports else None),
+                dq_report_path=(
+                    str(dq_reports.silver_report_path)
+                    if dq_reports and dq_reports.silver_report_path
+                    else None
+                ),
                 started_at=self._context.started_at,
                 completed_at=datetime.now(UTC),
             )
