@@ -1,58 +1,51 @@
 {
   "mcpServers": {
-    "git": {
-      "command": "npx",
+    "bioetl-filesystem": {
+      "command": "docker",
       "args": [
-        "-y",
-        "@modelcontextprotocol/server-git",
-        "--repository",
-        "/path/to/bioetl"
+        "run",
+        "-i",
+        "--rm",
+        "-v",
+        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2:/project",
+        "mcp/filesystem",
+        "/project"
       ]
     },
-    "obsidian": {
-      "command": "uvx",
+    "bioetl-git": {
+      "command": "docker",
       "args": [
-        "obsidian-mcp"
-      ],
-      "env": {
-        "OBSIDIAN_VAULT_PATH": "/path/to/vault"
-      }
-    },
-    "neo4j-memory": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@jovanhsu/mcp-neo4j-memory-server"
-      ],
-      "env": {
-        "NEO4J_URI": "bolt://localhost:7687",
-        "NEO4J_USER": "neo4j",
-        "NEO4J_PASSWORD": "password"
-      }
-    },
-    "filesystem": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "/path/to/bioetl"
-      ]
-    },
-    "memory": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-memory"
+        "run",
+        "-i",
+        "--rm",
+        "-v",
+        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2:/repo",
+        "mcp/git",
+        "/repo"
       ]
     },
     "fetch": {
-      "command": "npx",
+      "command": "docker",
       "args": [
-        "-y",
-        "@modelcontextprotocol/server-fetch"
+        "run",
+        "-i",
+        "--rm",
+        "mcp/fetch"
       ]
     },
-    "MCP_DOCKER": {
+    "memory": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-v",
+        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2/.ai/mcp/memory:/data",
+        "mcp/memory",
+        "/data"
+      ]
+    },
+    "docker-mcp-gateway": {
       "command": "docker",
       "args": [
         "mcp",
