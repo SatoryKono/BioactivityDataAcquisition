@@ -81,17 +81,17 @@ class TestCliGracefulShutdownExitCode:
         temp_env: dict[str, str],
     ):
         """Test that SHUTDOWN status results in exit code 130."""
-        from bioetl.application.services import PipelineRunResult
+        from bioetl.application.services import PipelineRunResult, RunResult
 
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"
         ) as mock_asyncio_run:
-            # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
-            mock_asyncio_run.return_value = (
-                PipelineRunResult.SHUTDOWN,
-                None,
-                None,
-                "test-run-id",
+            # _run_pipeline_async returns RunResult
+            mock_asyncio_run.return_value = RunResult(
+                status=PipelineRunResult.SHUTDOWN,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
             )
 
             result = cli_runner.invoke(
@@ -107,17 +107,17 @@ class TestCliGracefulShutdownExitCode:
         temp_env: dict[str, str],
     ):
         """Test that normal completion returns exit code 0."""
-        from bioetl.application.services import PipelineRunResult
+        from bioetl.application.services import PipelineRunResult, RunResult
 
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"
         ) as mock_asyncio_run:
-            # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
-            mock_asyncio_run.return_value = (
-                PipelineRunResult.SUCCESS,
-                None,
-                None,
-                "test-run-id",
+            # _run_pipeline_async returns RunResult
+            mock_asyncio_run.return_value = RunResult(
+                status=PipelineRunResult.SUCCESS,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
             )
 
             result = cli_runner.invoke(
@@ -204,17 +204,17 @@ class TestRunnerShutdownIntegration:
         temp_env: dict[str, str],
     ):
         """Test that SHUTDOWN status results in shutdown warning."""
-        from bioetl.application.services import PipelineRunResult
+        from bioetl.application.services import PipelineRunResult, RunResult
 
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"
         ) as mock_asyncio_run:
-            # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
-            mock_asyncio_run.return_value = (
-                PipelineRunResult.SHUTDOWN,
-                None,
-                None,
-                "test-run-id",
+            # _run_pipeline_async returns RunResult
+            mock_asyncio_run.return_value = RunResult(
+                status=PipelineRunResult.SHUTDOWN,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
             )
 
             result = cli_runner.invoke(
@@ -234,17 +234,17 @@ class TestRunnerShutdownIntegration:
         temp_env: dict[str, str],
     ):
         """Test that service-based architecture handles shutdown correctly."""
-        from bioetl.application.services import PipelineRunResult
+        from bioetl.application.services import PipelineRunResult, RunResult
 
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"
         ) as mock_asyncio_run:
-            # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
-            mock_asyncio_run.return_value = (
-                PipelineRunResult.SUCCESS,
-                None,
-                None,
-                "test-run-id",
+            # _run_pipeline_async returns RunResult
+            mock_asyncio_run.return_value = RunResult(
+                status=PipelineRunResult.SUCCESS,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
             )
 
             result = cli_runner.invoke(
@@ -271,17 +271,17 @@ class TestLockReleaseOnShutdown:
         temp_env: dict[str, str],
     ):
         """Test that lock is released even after shutdown error."""
-        from bioetl.application.services import PipelineRunResult
+        from bioetl.application.services import PipelineRunResult, RunResult
 
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"
         ) as mock_asyncio_run:
-            # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
-            mock_asyncio_run.return_value = (
-                PipelineRunResult.SHUTDOWN,
-                None,
-                None,
-                "test-run-id",
+            # _run_pipeline_async returns RunResult
+            mock_asyncio_run.return_value = RunResult(
+                status=PipelineRunResult.SHUTDOWN,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
             )
 
             result = cli_runner.invoke(

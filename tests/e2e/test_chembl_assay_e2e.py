@@ -31,7 +31,7 @@ def vcr_config() -> dict[str, Any]:
     """Configure VCR for ChEMBL Assay E2E tests."""
     return {
         "cassette_library_dir": str(CASSETTE_DIR),
-        "record_mode": os.environ.get("VCR_RECORD_MODE", "once"),
+        "record_mode": os.environ.get("VCR_RECORD_MODE", "all"),
         "match_on": ["method", "scheme", "host", "port", "path", "query"],
         "decode_compressed_response": True,
     }

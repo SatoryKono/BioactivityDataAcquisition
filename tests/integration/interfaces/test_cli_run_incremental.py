@@ -74,17 +74,18 @@ class TestCliRunIncremental:
 
         Uses mocked service to verify CLI bootstrapping and execution flow.
         """
-        from bioetl.application.services import PipelineRunResult
+        from bioetl.application.services import PipelineRunResult, RunResult
 
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"
         ) as mock_asyncio_run:
-            # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
-            mock_asyncio_run.return_value = (
-                PipelineRunResult.SUCCESS,
-                None,
-                None,
-                "test-run-id",
+            # mock asyncio.run(coro) where coro is _run_pipeline_async
+            # _run_pipeline_async returns RunResult
+            mock_asyncio_run.return_value = RunResult(
+                status=PipelineRunResult.SUCCESS,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
             )
 
             result = cli_runner.invoke(
@@ -101,17 +102,16 @@ class TestCliRunIncremental:
         temp_env: dict[str, str],
     ):
         """Test incremental run with --resume flag."""
-        from bioetl.application.services import PipelineRunResult
+        from bioetl.application.services import PipelineRunResult, RunResult
 
         with patch(
             "bioetl.interfaces.cli.commands.run.asyncio.run"
         ) as mock_asyncio_run:
-            # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
-            mock_asyncio_run.return_value = (
-                PipelineRunResult.SUCCESS,
-                None,
-                None,
-                "test-run-id",
+            mock_asyncio_run.return_value = RunResult(
+                status=PipelineRunResult.SUCCESS,
+                pipeline_name="chembl_activity",
+                run_id="test-run-id",
+                run_type="incremental",
             )
 
             result = cli_runner.invoke(
