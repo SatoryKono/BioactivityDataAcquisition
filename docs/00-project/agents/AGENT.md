@@ -187,6 +187,12 @@ find tests -name "*test_*" | xargs grep -l "ClassName"
 - **Silver**: Delta Lake, merge/upsert по `content_hash`
 - **Gold**: Delta/Parquet, overwrite/append
 
+### 4.1. Операционные Политики (CRITICAL)
+
+- **Стратегия загрузки (ADR-031)**: `full_scan_only` разрешён ТОЛЬКО для публикаций. Все остальные сущности (activity, molecule, target) MUST использовать `null` (по умолчанию incremental) для поддержки чекпоинтов.
+- **Маппинг в трансформерах**: Используй декларативные `FieldGroup`/`FieldSpec`. Нормализуй пустые коллекции в `None`. Компактная JSON-сериализация для сложных полей.
+- **VCR Кассеты**: Хранить строго в `tests/fixtures/vcr/{provider}/`. ЗАПРЕЩЕНО оставлять кассеты в корне проекта. Режим `once` локально, `none` в CI.
+
 ### Обработка Ошибок
 - **Critical**: Падение пайплайна (auth, schema mismatch)
 - **Recoverable**: Retry с backoff (429, 5xx)

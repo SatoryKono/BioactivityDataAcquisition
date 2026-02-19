@@ -25,6 +25,12 @@ etl-architecture
 
 - Idempotent runs with deterministic sorting and hashing; re-runs do not duplicate data.
 
+# LOADING STRATEGY (ADR-031)
+
+- `full_scan_only`: Reserved ONLY for publication entities (e.g., `pubmed_publication`).
+- `null`: Default strategy for high-volume entities (activity, molecule, target) to allow checkpointing and incremental resume.
+- NEVER set `full_scan_only` for non-publication entities.
+
 # REFERENCE
 
 See [docs/styleguide/08-etl-architecture.md](../../docs/styleguide/08-etl-architecture.md) for detailed documentation.
