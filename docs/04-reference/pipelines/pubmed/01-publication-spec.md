@@ -8,14 +8,14 @@
 
 | Parameter | Value |
 |-----------|-------|
-| **Pipeline ID** | `pubmed_publication` |
+| **Pipeline ID** | `pubmed-publication` |
 | **Provider** | PubMed (NCBI) |
 | **Entity** | publication |
 | **API Endpoint** | `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/` |
 | **Library** | `httpx` (E-utilities API) |
 | **Rate Limit** | 3 req/sec (10 with API key) |
 | **Health Check** | `/einfo.fcgi` |
-| **Auth Type** | API Key (NCBI_API_KEY) |
+| **Auth Type** | API Key (NCBI-API-KEY) |
 
 ---
 
@@ -27,7 +27,7 @@ PubMed publications are **biomedical literature** with MeSH indexing:
 
 - **MEDLINE citations**: Curated biomedical literature
 - **MeSH terms**: Medical Subject Headings for categorization
-- **Author affiliations**: Institution data (available in source, `structured_affiliations` field only)
+- **Author affiliations**: Institution data (available in source, `structured-affiliations` field only)
 - **Grant information**: Funding sources
 - **Cross-database links**: DOI, PMC, ChEMBL
 
@@ -48,22 +48,22 @@ PubMed publications are **biomedical literature** with MeSH indexing:
 import httpx
 
 # Step 1: Search for PMIDs (esearch)
-search_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
+search-url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
 params = {
     "db": "pubmed",
     "term": f"{pmid}[uid]",
     "retmode": "json",
-    "api_key": api_key
+    "api-key": api-key
 }
 
 # Step 2: Fetch full records (efetch)
-fetch_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
+fetch-url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
 params = {
     "db": "pubmed",
     "id": ",".join(pmids),
     "rettype": "xml",
     "retmode": "xml",
-    "api_key": api_key
+    "api-key": api-key
 }
 ```
 
@@ -100,7 +100,7 @@ params = {
 | Parameter | Value |
 |-----------|-------|
 | **Entity ID Field** | `pmid` |
-| **ID Source** | `from_api` |
+| **ID Source** | `from-api` |
 | **Format** | Integer (positive) |
 
 ### 4.2. XML Parsing Notes
@@ -110,10 +110,10 @@ PubMed returns XML. Key transformations:
 | XML Element | Silver Field | Transformation |
 |-------------|--------------|----------------|
 | `PMID` | `pmid` | Parse as int |
-| `Abstract/AbstractText[@Label]` | `abstract_structured` | Check for structured |
+| `Abstract/AbstractText[@Label]` | `abstract-structured` | Check for structured |
 | `AuthorList/Author/ForeName + LastName` | `authors` | Concatenate |
-| `MeshHeadingList/MeshHeading` | `mesh_headings` | JSON array |
-| `PubDate/Year + Month + Day` | `publication_date` | Parse to date |
+| `MeshHeadingList/MeshHeading` | `mesh-headings` | JSON array |
+| `PubDate/Year + Month + Day` | `publication-date` | Parse to date |
 
 ---
 
@@ -131,55 +131,55 @@ class ArticleSchema(ETLRecordSchema):
     # === External Identifiers ===
     doi: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=DOI_REGEX_PATTERN,
+        str-matches=DOI-REGEX-PATTERN,
     )
-    pmc_id: Series[str] | None = pa.Field(
+    pmc-id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^PMC\d+$",
+        str-matches=r"^PMC\d+$",
     )
 
     # === Article Content ===
-    title: Series[str] = pa.Field(nullable=False, str_length={"min_value": 1})
+    title: Series[str] = pa.Field(nullable=False, str-length={"min-value": 1})
     abstract: Series[str] | None = pa.Field(nullable=True)
-    abstract_structured: Series[bool] | None = pa.Field(nullable=True)
-    vernacular_title: Series[str] | None = pa.Field(nullable=True)
+    abstract-structured: Series[bool] | None = pa.Field(nullable=True)
+    vernacular-title: Series[str] | None = pa.Field(nullable=True)
     language: Series[str] | None = pa.Field(nullable=True)
 
     # === Journal Information ===
-    journal_title: Series[str] | None = pa.Field(nullable=True)
-    journal_iso_abbrev: Series[str] | None = pa.Field(nullable=True)
-    journal_issn: Series[str] | None = pa.Field(
+    journal-title: Series[str] | None = pa.Field(nullable=True)
+    journal-iso-abbrev: Series[str] | None = pa.Field(nullable=True)
+    journal-issn: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^\d{4}-\d{3}[\dX]$",
+        str-matches=r"^\d{4}-\d{3}[\dX]$",
     )
     country: Series[str] | None = pa.Field(nullable=True)
 
     # === Publication Details ===
     volume: Series[str] | None = pa.Field(nullable=True)
     issue: Series[str] | None = pa.Field(nullable=True)
-    medline_pgn: Series[str] | None = pa.Field(nullable=True)
+    medline-pgn: Series[str] | None = pa.Field(nullable=True)
     year: Series[int] | None = pa.Field(
         nullable=True,
-        ge=MIN_PUBLICATION_YEAR,
-        le=MAX_PUBLICATION_YEAR,
+        ge=MIN-PUBLICATION-YEAR,
+        le=MAX-PUBLICATION-YEAR,
     )
-    pub_month: Series[int] | None = pa.Field(nullable=True, ge=1, le=12)
-    pub_day: Series[int] | None = pa.Field(nullable=True, ge=1, le=31)
-    publication_status: Series[str] | None = pa.Field(
+    pub-month: Series[int] | None = pa.Field(nullable=True, ge=1, le=12)
+    pub-day: Series[int] | None = pa.Field(nullable=True, ge=1, le=31)
+    publication-status: Series[str] | None = pa.Field(
         nullable=True,
         isin=["ppublish", "epublish", "aheadofprint"],
     )
 
     # === Dates ===
-    date_completed: Series[date] | None = pa.Field(nullable=True)
-    date_revised: Series[date] | None = pa.Field(nullable=True)
+    date-completed: Series[date] | None = pa.Field(nullable=True)
+    date-revised: Series[date] | None = pa.Field(nullable=True)
 
     # === Counts ===
-    author_count: Series[int] | None = pa.Field(nullable=True, ge=0)
-    mesh_heading_count: Series[int] | None = pa.Field(nullable=True, ge=0)
-    keyword_count: Series[int] | None = pa.Field(nullable=True, ge=0)
-    grant_count: Series[int] | None = pa.Field(nullable=True, ge=0)
-    reference_count: Series[int] | None = pa.Field(nullable=True, ge=0)
+    author-count: Series[int] | None = pa.Field(nullable=True, ge=0)
+    mesh-heading-count: Series[int] | None = pa.Field(nullable=True, ge=0)
+    keyword-count: Series[int] | None = pa.Field(nullable=True, ge=0)
+    grant-count: Series[int] | None = pa.Field(nullable=True, ge=0)
+    reference-count: Series[int] | None = pa.Field(nullable=True, ge=0)
 
     class Config:
         strict = True
@@ -193,53 +193,53 @@ class ArticleSchema(ETLRecordSchema):
 
 | This Entity Field | Maps To | Provider | Field |
 |-------------------|---------|----------|-------|
-| `pmid` | ChEMBL | ChEMBL | `document.pubmed_id` |
+| `pmid` | ChEMBL | ChEMBL | `document.pubmed-id` |
 | `doi` | CrossRef | CrossRef | `DOI` |
 | `doi` | OpenAlex | OpenAlex | `doi` |
-| `pmc_id` | PMC | PMC | PMCID |
+| `pmc-id` | PMC | PMC | PMCID |
 
 ---
 
 ## 7. Pipeline Configuration
 
 ```yaml
-pipeline_name: pubmed_publication
+pipeline-name: pubmed-publication
 provider: pubmed
-entity_type: publications
+entity-type: publications
 version: "1.2.0"
 
-primary_keys: ["pmid"]
-silver_table: "pubmed_publication"
-gold_table: "pubmed_publication"
+primary-keys: ["pmid"]
+silver-table: "pubmed-publication"
+gold-table: "pubmed-publication"
 
 source:
   type: api
-  batch_size: 200  # E-utilities limit
+  batch-size: 200  # E-utilities limit
 
-dq_overrides:
-  soft_fail_threshold: 0.05
-  hard_fail_threshold: 0.20
+dq-overrides:
+  soft-fail-threshold: 0.05
+  hard-fail-threshold: 0.20
 
 sink:
   bronze:
     path: "data/output/bronze"
   silver:
     path: "data/output/silver"
-    primary_key: ["pmid"]
-    partition_by: []
+    primary-key: ["pmid"]
+    partition-by: []
   gold:
     path: "data/output/gold"
 
-gold_filters:
-  required_fields:
+gold-filters:
+  required-fields:
     - title
 
-input_filter:
+input-filter:
   enabled: true
-  source_path: "data/input/pubmed.csv"
-  column_name: "pmid"
-  filter_field: "pmid"
-  batch_size: 200
+  source-path: "data/input/pubmed.csv"
+  column-name: "pmid"
+  filter-field: "pmid"
+  batch-size: 200
 ```
 
 ---
@@ -250,7 +250,7 @@ input_filter:
 
 ```bash
 # Environment variable
-export NCBI_API_KEY=your_api_key
+export NCBI-API-KEY=your-api-key
 
 # Increases rate limit from 3 to 10 req/sec
 ```

@@ -10,9 +10,9 @@
 
 Audit of `configs/schemas/composite/` reveals **3 critical issues**, **5 high-severity issues**, and **8 medium-severity issues**. The primary problems are:
 
-1. **Alias chaos** — legacy and canonical field names coexist as separate base_names in `field_groups/publication.yaml`, creating ghost columns after alias resolution
-2. **TRASH group** contains fields that arguably belong elsewhere (language, license_url) while missing fields that should be trash
-3. **Two parallel publication schemas** (`publication.yaml` column_groups vs `field_groups/publication.yaml`) with semantic drift between them
+1. **Alias chaos** — legacy and canonical field names coexist as separate base-names in `field-groups/publication.yaml`, creating ghost columns after alias resolution
+2. **TRASH group** contains fields that arguably belong elsewhere (language, license-url) while missing fields that should be trash
+3. **Two parallel publication schemas** (`publication.yaml` column-groups vs `field-groups/publication.yaml`) with semantic drift between them
 
 The `assay.yaml` and `molecule.yaml` composite schemas are clean and well-structured.
 
@@ -25,11 +25,11 @@ The `assay.yaml` and `molecule.yaml` composite schemas are clean and well-struct
 | `configs/schemas/composite/assay.yaml` | 252 | PASS |
 | `configs/schemas/composite/molecule.yaml` | 260 | PASS |
 | `configs/schemas/composite/publication.yaml` | 355 | WARN |
-| `configs/schemas/composite/field_groups/publication.yaml` | 572 | WARN |
+| `configs/schemas/composite/field-groups/publication.yaml` | 572 | WARN |
 
 Supporting files cross-referenced:
-- `src/bioetl/domain/value_objects/publication_field_groups.py` (Python enum + mapping)
-- `src/bioetl/domain/composite/field_groups.py` (FieldGroupRegistry)
+- `src/bioetl/domain/value-objects/publication-field-groups.py` (Python enum + mapping)
+- `src/bioetl/domain/composite/field-groups.py` (FieldGroupRegistry)
 - `src/bioetl/application/composite/merger.py` (MergeService consumption)
 - All 5 provider schemas (`chembl/`, `crossref/`, `openalex/`, `pubmed/`, `semanticscholar/`)
 
@@ -39,107 +39,107 @@ Supporting files cross-referenced:
 
 ### 2.1 TRASH Group — Audit
 
-**Location:** `field_groups/publication.yaml` lines 535–572
+**Location:** `field-groups/publication.yaml` lines 535–572
 
 Current TRASH fields:
 
-| base_name | Provider(s) | Issue |
+| base-name | Provider(s) | Issue |
 |-----------|-------------|-------|
-| `content_domain_crossmark_restriction` | crossref | OK — CrossRef internal metadata |
-| `content_domain_domains` | crossref | OK — CrossRef internal metadata |
-| `content_hash` | all 5 | **PROBLEM** — system field, not business data; should be in `system` group |
+| `content-domain-crossmark-restriction` | crossref | OK — CrossRef internal metadata |
+| `content-domain-domains` | crossref | OK — CrossRef internal metadata |
+| `content-hash` | all 5 | **PROBLEM** — system field, not business data; should be in `system` group |
 | `language` | crossref, openalex, pubmed | **QUESTIONABLE** — has analytical value for multilingual corpora |
-| `license_url` | crossref | **QUESTIONABLE** — relevant for OA/licensing analytics |
-| `medline_pgn` | pubmed | OK — redundant with page_first/page_last |
-| `src_id` | chembl | OK — ChEMBL-internal source identifier |
+| `license-url` | crossref | **QUESTIONABLE** — relevant for OA/licensing analytics |
+| `medline-pgn` | pubmed | OK — redundant with page-first/page-last |
+| `src-id` | chembl | OK — ChEMBL-internal source identifier |
 
 **Fields missing from TRASH that should be there:**
 
-| base_name | Current Group | Issue |
+| base-name | Current Group | Issue |
 |-----------|--------------|-------|
-| `author_details` | Python: TRASH, YAML: **missing entirely** | 3-way inconsistency |
+| `author-details` | Python: TRASH, YAML: **missing entirely** | 3-way inconsistency |
 | `venue` | bibliography | SemanticScholar legacy field, superseded by `journal` |
-| `journal_full_title` | bibliography | ChEMBL-only legacy, overlaps `journal` |
-| `journal_title` | bibliography (YAML only) | PubMed-only legacy, overlaps `journal_name` |
-| `journal_abbrev` | bibliography (YAML only) | PubMed-only legacy, overlaps `journal_name_short` |
-| `issn_list` | bibliography | Redundant JSON blob, `issn`/`issn_print`/`issn_electronic` are canonical |
-| `document_chembl_id` | id_and_status | Legacy alias for `publication_id`, should not coexist |
-| `pub_date` | date_and_places | Legacy PubMed field, `publication_date` is canonical |
+| `journal-full-title` | bibliography | ChEMBL-only legacy, overlaps `journal` |
+| `journal-title` | bibliography (YAML only) | PubMed-only legacy, overlaps `journal-name` |
+| `journal-abbrev` | bibliography (YAML only) | PubMed-only legacy, overlaps `journal-name-short` |
+| `issn-list` | bibliography | Redundant JSON blob, `issn`/`issn-print`/`issn-electronic` are canonical |
+| `document-chembl-id` | id-and-status | Legacy alias for `publication-id`, should not coexist |
+| `pub-date` | date-and-places | Legacy PubMed field, `publication-date` is canonical |
 
-### 2.2 `id_and_status` Group — Overloaded
+### 2.2 `id-and-status` Group — Overloaded
 
 This group has become a catch-all (30+ fields in YAML). Fields that belong elsewhere:
 
-| base_name | Should Be | Reason |
+| base-name | Should Be | Reason |
 |-----------|-----------|--------|
-| `fields_of_study` | terms_and_keywords_and_topics | Subject classification, not identifier |
-| `is_oa` | open_access (new group) or bibliography | OA status flag |
-| `oa_status` | open_access (new group) or bibliography | OA status detail |
-| `open_access_url` | open_access (new group) or bibliography | OA access link |
-| `publication_type` | publication_types | Type classification, not identifier |
-| `publication_status` | date_and_places or bibliography | Workflow status, not identifier |
+| `fields-of-study` | terms-and-keywords-and-topics | Subject classification, not identifier |
+| `is-oa` | open-access (new group) or bibliography | OA status flag |
+| `oa-status` | open-access (new group) or bibliography | OA status detail |
+| `open-access-url` | open-access (new group) or bibliography | OA access link |
+| `publication-type` | publication-types | Type classification, not identifier |
+| `publication-status` | date-and-places or bibliography | Workflow status, not identifier |
 
 ---
 
-## 3. Alias Chaos — Duplicate base_names
+## 3. Alias Chaos — Duplicate base-names
 
 ### 3.1 Pre-alias / Post-alias Duplication
 
-The `field_groups/publication.yaml` contains BOTH legacy and canonical names as separate `base_name` entries. After provider-level alias resolution (e.g., `doi → publication_doi`), the legacy columns no longer exist in the data, making these entries **ghost columns**.
+The `field-groups/publication.yaml` contains BOTH legacy and canonical names as separate `base-name` entries. After provider-level alias resolution (e.g., `doi → publication-doi`), the legacy columns no longer exist in the data, making these entries **ghost columns**.
 
-| Legacy base_name | Canonical base_name | Providers with both | Risk |
+| Legacy base-name | Canonical base-name | Providers with both | Risk |
 |-----------------|---------------------|---------------------|------|
-| `doi` | `publication_doi` | all 5 | **CRITICAL** — double-counting |
-| `pmid` | `publication_pmid` | chembl, openalex, pubmed, s2 | **CRITICAL** — double-counting |
-| `pmc_id` | `publication_pmc_id` | pubmed | HIGH — ghost column |
-| `year` | `publication_year` | all 5 | **CRITICAL** — double-counting |
-| `keywords` | `subject_keywords` | openalex, pubmed, s2 | HIGH — semantic overlap |
-| `mesh_terms` | `subject_mesh` | openalex, pubmed | HIGH — semantic overlap |
-| `topics` | `subject_topics` | openalex | MEDIUM — single provider |
-| `pages` | `page_range` | crossref, pubmed, s2 | MEDIUM — both may exist |
-| `journal_title` | `journal_name` | pubmed | MEDIUM — single provider |
-| `mesh` | `subject_mesh` | openalex | MEDIUM — 3-way overlap |
-| `type` | `publication_type` | crossref, openalex | HIGH — generic name |
-| `pub_date` | `publication_date` | pubmed | MEDIUM — legacy |
+| `doi` | `publication-doi` | all 5 | **CRITICAL** — double-counting |
+| `pmid` | `publication-pmid` | chembl, openalex, pubmed, s2 | **CRITICAL** — double-counting |
+| `pmc-id` | `publication-pmc-id` | pubmed | HIGH — ghost column |
+| `year` | `publication-year` | all 5 | **CRITICAL** — double-counting |
+| `keywords` | `subject-keywords` | openalex, pubmed, s2 | HIGH — semantic overlap |
+| `mesh-terms` | `subject-mesh` | openalex, pubmed | HIGH — semantic overlap |
+| `topics` | `subject-topics` | openalex | MEDIUM — single provider |
+| `pages` | `page-range` | crossref, pubmed, s2 | MEDIUM — both may exist |
+| `journal-title` | `journal-name` | pubmed | MEDIUM — single provider |
+| `mesh` | `subject-mesh` | openalex | MEDIUM — 3-way overlap |
+| `type` | `publication-type` | crossref, openalex | HIGH — generic name |
+| `pub-date` | `publication-date` | pubmed | MEDIUM — legacy |
 
 ### 3.2 Three-way Field Overlap Examples
 
 **MeSH data:**
-- `mesh` (openalex raw) → terms_and_keywords
-- `mesh_terms` (openalex, pubmed) → terms_and_keywords
-- `subject_mesh` (openalex, pubmed) → terms_and_keywords
+- `mesh` (openalex raw) → terms-and-keywords
+- `mesh-terms` (openalex, pubmed) → terms-and-keywords
+- `subject-mesh` (openalex, pubmed) → terms-and-keywords
 
 All three track the same MeSH vocabulary data from the same providers.
 
 **Journal naming:**
 - `journal` — canonical (all providers)
-- `journal_name` — pubmed, openalex, semanticscholar
-- `journal_full_title` — chembl only
-- `journal_title` — pubmed only
-- `journal_name_short` — crossref, pubmed
-- `journal_iso_abbrev` — pubmed
-- `journal_abbrev` — pubmed
+- `journal-name` — pubmed, openalex, semanticscholar
+- `journal-full-title` — chembl only
+- `journal-title` — pubmed only
+- `journal-name-short` — crossref, pubmed
+- `journal-iso-abbrev` — pubmed
+- `journal-abbrev` — pubmed
 
-Seven base_names for journal nomenclature across 5 providers.
+Seven base-names for journal nomenclature across 5 providers.
 
 ### 3.3 Python ↔ YAML Inconsistencies
 
-| Field | Python (`FIELD_TO_GROUP_MAPPING`) | YAML (`field_groups/publication.yaml`) | YAML (`publication.yaml`) |
+| Field | Python (`FIELD-TO-GROUP-MAPPING`) | YAML (`field-groups/publication.yaml`) | YAML (`publication.yaml`) |
 |-------|-----------------------------------|---------------------------------------|--------------------------|
-| `author_details` | TRASH | **MISSING** | author_identifiers group |
-| `publication_doi` | **MISSING** | id_and_status | identifiers_doi group |
-| `publication_pmid` | **MISSING** | id_and_status | identifiers_pmid group |
-| `publication_pmc_id` | **MISSING** | id_and_status | pmc_identifiers group |
-| `journal_name` | **MISSING** | bibliography | journal group |
-| `journal_title` | **MISSING** | bibliography | **MISSING** |
-| `journal_abbrev` | **MISSING** | bibliography | **MISSING** |
-| `mesh` | terms_and_keywords | terms_and_keywords | **MISSING** |
-| `keywords` | **MISSING** | terms_and_keywords | **MISSING** |
-| `topics` | **MISSING** | terms_and_keywords | **MISSING** |
-| `type` | **MISSING** | publication_types | **MISSING** |
+| `author-details` | TRASH | **MISSING** | author-identifiers group |
+| `publication-doi` | **MISSING** | id-and-status | identifiers-doi group |
+| `publication-pmid` | **MISSING** | id-and-status | identifiers-pmid group |
+| `publication-pmc-id` | **MISSING** | id-and-status | pmc-identifiers group |
+| `journal-name` | **MISSING** | bibliography | journal group |
+| `journal-title` | **MISSING** | bibliography | **MISSING** |
+| `journal-abbrev` | **MISSING** | bibliography | **MISSING** |
+| `mesh` | terms-and-keywords | terms-and-keywords | **MISSING** |
+| `keywords` | **MISSING** | terms-and-keywords | **MISSING** |
+| `topics` | **MISSING** | terms-and-keywords | **MISSING** |
+| `type` | **MISSING** | publication-types | **MISSING** |
 | `pages` | **MISSING** | bibliography | **MISSING** |
 | `venue` | bibliography | bibliography | **MISSING** |
-| `issn_list` | bibliography (YAML) | bibliography | **MISSING** |
+| `issn-list` | bibliography (YAML) | bibliography | **MISSING** |
 
 ---
 
@@ -147,19 +147,19 @@ Seven base_names for journal nomenclature across 5 providers.
 
 ### 4.1 Silver Layer Impact
 
-- **Storage waste**: Duplicate columns (`doi` + `publication_doi`) inflate parquet files
+- **Storage waste**: Duplicate columns (`doi` + `publication-doi`) inflate parquet files
 - **Schema confusion**: Consumers don't know which column to use
 - **No data corruption**: Silver is append-only with all fields included
 - **Risk**: LOW (Silver is forensic/debugging layer)
 
 ### 4.2 Gold Layer Impact
 
-- **`include_in_gold: true` on `id_and_status`** propagates ALL misplaced fields to Gold
-- `fields_of_study` appears in Gold as an "identifier" — misleading for analytics
-- `publication_type` appears in Gold via `id_and_status` AND `publication_types` — potential duplication
-- **`content_hash`** is marked TRASH, correctly excluded — but it's a system field, not business trash
+- **`include-in-gold: true` on `id-and-status`** propagates ALL misplaced fields to Gold
+- `fields-of-study` appears in Gold as an "identifier" — misleading for analytics
+- `publication-type` appears in Gold via `id-and-status` AND `publication-types` — potential duplication
+- **`content-hash`** is marked TRASH, correctly excluded — but it's a system field, not business trash
 - **`language`** excluded from Gold — may be wanted for multilingual analysis
-- **`license_url`** excluded from Gold — may be wanted for OA analysis
+- **`license-url`** excluded from Gold — may be wanted for OA analysis
 - **Risk**: MEDIUM (Gold schema drift affects downstream analytics)
 
 ### 4.3 MergeService Behavior
@@ -167,12 +167,12 @@ Seven base_names for journal nomenclature across 5 providers.
 From `application/composite/merger.py`:
 ```python
 # Trash filtering happens AFTER merge, BEFORE Gold write
-if self._field_group_registry is not None:
-    trash_cols = self._field_group_registry.get_trash_columns(df.columns)
-    df = df.drop(trash_cols)
+if self.-field-group-registry is not None:
+    trash-cols = self.-field-group-registry.get-trash-columns(df.columns)
+    df = df.drop(trash-cols)
 ```
 
-System columns (`_*`) are **never** considered trash — `content_hash` (no underscore prefix) is correctly excluded. But the default_group=TRASH means **any unmapped field falls to trash and is silently dropped from Gold**.
+System columns (`-*`) are **never** considered trash — `content-hash` (no underscore prefix) is correctly excluded. But the default-group=TRASH means **any unmapped field falls to trash and is silently dropped from Gold**.
 
 ---
 
@@ -180,21 +180,21 @@ System columns (`_*`) are **never** considered trash — `content_hash` (no unde
 
 ### 5.1 Normalize Alias Pairs (CRITICAL — eliminate ghost columns)
 
-Remove legacy `base_name` entries from `field_groups/publication.yaml`. Keep only canonical names.
+Remove legacy `base-name` entries from `field-groups/publication.yaml`. Keep only canonical names.
 
 ```yaml
-# REMOVE these base_names (ghost columns after alias resolution):
-- doi          → keep only publication_doi
-- pmid         → keep only publication_pmid  (add if missing)
-- pmc_id       → keep only publication_pmc_id (add if missing)
-- year         → keep only publication_year
-- document_chembl_id → keep only publication_id
+# REMOVE these base-names (ghost columns after alias resolution):
+- doi          → keep only publication-doi
+- pmid         → keep only publication-pmid  (add if missing)
+- pmc-id       → keep only publication-pmc-id (add if missing)
+- year         → keep only publication-year
+- document-chembl-id → keep only publication-id
 ```
 
-**Diff — `field_groups/publication.yaml`:**
+**Diff — `field-groups/publication.yaml`:**
 ```diff
   # Remove doi (lines 61-67)
--     - base_name: doi
+-     - base-name: doi
 -       columns:
 -         - chembl.publication.doi
 -         - crossref.publication.doi
@@ -202,13 +202,13 @@ Remove legacy `base_name` entries from `field_groups/publication.yaml`. Keep onl
 -         - pubmed.publication.doi
 -         - semanticscholar.publication.doi
 
-  # Remove document_chembl_id (lines 49-51)
--     - base_name: document_chembl_id
+  # Remove document-chembl-id (lines 49-51)
+-     - base-name: document-chembl-id
 -       columns:
--         - chembl.publication.document_chembl_id
+-         - chembl.publication.document-chembl-id
 
   # Remove year (lines 508-514)
--     - base_name: year
+-     - base-name: year
 -       columns:
 -         - chembl.publication.year
 -         - crossref.publication.year
@@ -216,149 +216,149 @@ Remove legacy `base_name` entries from `field_groups/publication.yaml`. Keep onl
 -         - pubmed.publication.year
 -         - semanticscholar.publication.year
 
-  # Add publication_year to date_and_places (currently missing)
-+     - base_name: publication_year
+  # Add publication-year to date-and-places (currently missing)
++     - base-name: publication-year
 +       columns:
-+         - chembl.publication.publication_year
-+         - crossref.publication.publication_year
-+         - openalex.publication.publication_year
-+         - pubmed.publication.publication_year
-+         - semanticscholar.publication.publication_year
++         - chembl.publication.publication-year
++         - crossref.publication.publication-year
++         - openalex.publication.publication-year
++         - pubmed.publication.publication-year
++         - semanticscholar.publication.publication-year
 ```
 
 ### 5.2 Consolidate MeSH/Keywords/Topics Triplicates (HIGH)
 
 ```diff
-  # REMOVE mesh (openalex raw, superseded by subject_mesh):
--     - base_name: mesh
+  # REMOVE mesh (openalex raw, superseded by subject-mesh):
+-     - base-name: mesh
 -       columns:
 -         - openalex.publication.mesh
 
-  # REMOVE mesh_terms (superseded by subject_mesh after alias resolution):
--     - base_name: mesh_terms
+  # REMOVE mesh-terms (superseded by subject-mesh after alias resolution):
+-     - base-name: mesh-terms
 -       columns:
--         - openalex.publication.mesh_terms
--         - pubmed.publication.mesh_terms
+-         - openalex.publication.mesh-terms
+-         - pubmed.publication.mesh-terms
 
-  # KEEP subject_mesh as canonical
+  # KEEP subject-mesh as canonical
 
-  # REMOVE keywords (superseded by subject_keywords after alias resolution):
--     - base_name: keywords
+  # REMOVE keywords (superseded by subject-keywords after alias resolution):
+-     - base-name: keywords
 -       columns:
 -         - openalex.publication.keywords
 -         - pubmed.publication.keywords
 -         - semanticscholar.publication.keywords
 
-  # KEEP subject_keywords as canonical
+  # KEEP subject-keywords as canonical
 
-  # REMOVE topics (superseded by subject_topics after alias resolution):
--     - base_name: topics
+  # REMOVE topics (superseded by subject-topics after alias resolution):
+-     - base-name: topics
 -       columns:
 -         - openalex.publication.topics
 
-  # KEEP subject_topics as canonical
+  # KEEP subject-topics as canonical
 ```
 
 ### 5.3 Consolidate Journal Naming (HIGH)
 
 ```diff
   # KEEP: journal (canonical, all providers)
-  # KEEP: journal_name (PubMed/OpenAlex/S2 display name)
-  # KEEP: journal_name_short (CrossRef/PubMed abbreviation)
-  # KEEP: journal_iso_abbrev (PubMed ISO)
+  # KEEP: journal-name (PubMed/OpenAlex/S2 display name)
+  # KEEP: journal-name-short (CrossRef/PubMed abbreviation)
+  # KEEP: journal-iso-abbrev (PubMed ISO)
 
   # MOVE to TRASH (redundant legacy):
--     - base_name: journal_full_title    # → journal covers this
+-     - base-name: journal-full-title    # → journal covers this
 -       columns:
--         - chembl.publication.journal_full_title
+-         - chembl.publication.journal-full-title
 
--     - base_name: journal_title         # → journal_name covers this
+-     - base-name: journal-title         # → journal-name covers this
 -       columns:
--         - pubmed.publication.journal_title
+-         - pubmed.publication.journal-title
 
--     - base_name: journal_abbrev        # → journal_name_short covers this
+-     - base-name: journal-abbrev        # → journal-name-short covers this
 -       columns:
--         - pubmed.publication.journal_abbrev
+-         - pubmed.publication.journal-abbrev
 ```
 
-### 5.4 Fix `id_and_status` Overloading (MEDIUM)
+### 5.4 Fix `id-and-status` Overloading (MEDIUM)
 
 ```diff
-  # Move fields_of_study to terms_and_keywords_and_topics:
-  # In id_and_status group:
--     - base_name: fields_of_study
+  # Move fields-of-study to terms-and-keywords-and-topics:
+  # In id-and-status group:
+-     - base-name: fields-of-study
 -       columns:
--         - semanticscholar.publication.fields_of_study
+-         - semanticscholar.publication.fields-of-study
 
-  # In terms_and_keywords_and_topics group:
-+     - base_name: fields_of_study
+  # In terms-and-keywords-and-topics group:
++     - base-name: fields-of-study
 +       columns:
-+         - semanticscholar.publication.fields_of_study
++         - semanticscholar.publication.fields-of-study
 
-  # Move publication_type to publication_types:
-  # In id_and_status group:
--     - base_name: publication_type
+  # Move publication-type to publication-types:
+  # In id-and-status group:
+-     - base-name: publication-type
 -       columns:
--         - chembl.publication.publication_type
--         - pubmed.publication.publication_type
+-         - chembl.publication.publication-type
+-         - pubmed.publication.publication-type
 
-  # In publication_types group:
-+     - base_name: publication_type
+  # In publication-types group:
++     - base-name: publication-type
 +       columns:
-+         - chembl.publication.publication_type
-+         - pubmed.publication.publication_type
++         - chembl.publication.publication-type
++         - pubmed.publication.publication-type
 ```
 
 ### 5.5 Reclassify TRASH Group (MEDIUM)
 
 ```diff
-  # Move content_hash to system (not business data, not trash):
+  # Move content-hash to system (not business data, not trash):
   # In trash group:
--     - base_name: content_hash
+-     - base-name: content-hash
 -       ...
 
-  # In a new 'system' group or remove from field_groups entirely
+  # In a new 'system' group or remove from field-groups entirely
   # (system fields are handled separately by MergeService)
 
   # Consider promoting language to a proper group:
   # If multilingual analytics are needed:
--     - base_name: language        # from trash
+-     - base-name: language        # from trash
 +     # Move to bibliography or a new 'metadata' group
 
-  # Consider promoting license_url:
--     - base_name: license_url     # from trash
-+     # Move to a new 'open_access' group alongside is_oa, oa_status
+  # Consider promoting license-url:
+-     - base-name: license-url     # from trash
++     # Move to a new 'open-access' group alongside is-oa, oa-status
 ```
 
-### 5.6 Add Missing `author_details` to YAML (MEDIUM)
+### 5.6 Add Missing `author-details` to YAML (MEDIUM)
 
 ```diff
   # In trash group (consistent with Python mapping):
-+     - base_name: author_details
++     - base-name: author-details
 +       columns:
-+         - crossref.publication.author_details
++         - crossref.publication.author-details
 ```
 
-### 5.7 Sync Python FIELD_TO_GROUP_MAPPING (MEDIUM)
+### 5.7 Sync Python FIELD-TO-GROUP-MAPPING (MEDIUM)
 
-Add missing canonical field names to `publication_field_groups.py`:
+Add missing canonical field names to `publication-field-groups.py`:
 
 ```diff
-  FIELD_TO_GROUP_MAPPING = {
+  FIELD-TO-GROUP-MAPPING = {
       ...
-+     "publication_doi": PublicationFieldGroup.ID_AND_STATUS,
-+     "publication_pmid": PublicationFieldGroup.ID_AND_STATUS,
-+     "publication_pmc_id": PublicationFieldGroup.ID_AND_STATUS,
-+     "journal_name": PublicationFieldGroup.BIBLIOGRAPHY,
-+     "journal_title": PublicationFieldGroup.TRASH,       # legacy
-+     "journal_abbrev": PublicationFieldGroup.TRASH,       # legacy
-+     "keywords": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
-+     "topics": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
-+     "mesh": PublicationFieldGroup.TERMS_AND_KEYWORDS_AND_TOPICS,
++     "publication-doi": PublicationFieldGroup.ID-AND-STATUS,
++     "publication-pmid": PublicationFieldGroup.ID-AND-STATUS,
++     "publication-pmc-id": PublicationFieldGroup.ID-AND-STATUS,
++     "journal-name": PublicationFieldGroup.BIBLIOGRAPHY,
++     "journal-title": PublicationFieldGroup.TRASH,       # legacy
++     "journal-abbrev": PublicationFieldGroup.TRASH,       # legacy
++     "keywords": PublicationFieldGroup.TERMS-AND-KEYWORDS-AND-TOPICS,
++     "topics": PublicationFieldGroup.TERMS-AND-KEYWORDS-AND-TOPICS,
++     "mesh": PublicationFieldGroup.TERMS-AND-KEYWORDS-AND-TOPICS,
 +     "pages": PublicationFieldGroup.BIBLIOGRAPHY,
-+     "type": PublicationFieldGroup.PUBLICATION_TYPES,
-+     "issn_list": PublicationFieldGroup.BIBLIOGRAPHY,
-+     "pub_date": PublicationFieldGroup.DATE_AND_PLACES,   # (already present)
++     "type": PublicationFieldGroup.PUBLICATION-TYPES,
++     "issn-list": PublicationFieldGroup.BIBLIOGRAPHY,
++     "pub-date": PublicationFieldGroup.DATE-AND-PLACES,   # (already present)
       ...
   }
 ```
@@ -369,16 +369,16 @@ Add missing canonical field names to `publication_field_groups.py`:
 
 | Change | Breaking Risk | Mitigation |
 |--------|--------------|------------|
-| Remove `doi` base_name from field_groups YAML | **LOW** — ghost column, doesn't exist post-alias | Verify with test: `pytest tests/unit/infrastructure/config/test_field_group_loader.py` |
-| Remove `year` base_name from field_groups YAML | **LOW** — ghost column, doesn't exist post-alias | Same |
-| Remove `mesh`/`mesh_terms`/`keywords`/`topics` | **MEDIUM** — if any consumer queries by legacy name | Add to `field_aliases` in `publication.yaml` for backward compat |
-| Move `fields_of_study` to different group | **LOW** — only affects column ordering | Gold output columns unchanged |
-| Move `publication_type` to `publication_types` group | **LOW** — field still in Gold, just reordered | No downstream schema change |
-| Move `content_hash` out of TRASH | **MEDIUM** — changes Gold inclusion if moved to non-trash group | Keep in TRASH or create dedicated `system` group with `include_in_gold: false` |
-| Add entries to Python `FIELD_TO_GROUP_MAPPING` | **NONE** — additive change | Run `mypy --strict` to verify |
-| Remove `journal_full_title`/`journal_title`/`journal_abbrev` | **MEDIUM** — if downstream reports use these | Deprecate first, add to `field_aliases` |
+| Remove `doi` base-name from field-groups YAML | **LOW** — ghost column, doesn't exist post-alias | Verify with test: `pytest tests/unit/infrastructure/config/test-field-group-loader.py` |
+| Remove `year` base-name from field-groups YAML | **LOW** — ghost column, doesn't exist post-alias | Same |
+| Remove `mesh`/`mesh-terms`/`keywords`/`topics` | **MEDIUM** — if any consumer queries by legacy name | Add to `field-aliases` in `publication.yaml` for backward compat |
+| Move `fields-of-study` to different group | **LOW** — only affects column ordering | Gold output columns unchanged |
+| Move `publication-type` to `publication-types` group | **LOW** — field still in Gold, just reordered | No downstream schema change |
+| Move `content-hash` out of TRASH | **MEDIUM** — changes Gold inclusion if moved to non-trash group | Keep in TRASH or create dedicated `system` group with `include-in-gold: false` |
+| Add entries to Python `FIELD-TO-GROUP-MAPPING` | **NONE** — additive change | Run `mypy --strict` to verify |
+| Remove `journal-full-title`/`journal-title`/`journal-abbrev` | **MEDIUM** — if downstream reports use these | Deprecate first, add to `field-aliases` |
 | Promote `language` from TRASH | **HIGH** — adds column to Gold output | Requires Gold schema version bump |
-| Promote `license_url` from TRASH | **HIGH** — adds column to Gold output | Requires Gold schema version bump |
+| Promote `license-url` from TRASH | **HIGH** — adds column to Gold output | Requires Gold schema version bump |
 
 ### Overall Breaking Risk: **MEDIUM**
 
@@ -390,22 +390,22 @@ Most changes are additive (Python mapping) or remove ghost columns (YAML cleanup
 
 | Priority | Action | Effort |
 |----------|--------|--------|
-| P0 | Remove ghost alias pairs (doi/year/pmid/pmc_id) from field_groups YAML | Small |
-| P0 | Add `author_details` to YAML TRASH group | Small |
-| P0 | Sync Python FIELD_TO_GROUP_MAPPING with canonical names | Small |
+| P0 | Remove ghost alias pairs (doi/year/pmid/pmc-id) from field-groups YAML | Small |
+| P0 | Add `author-details` to YAML TRASH group | Small |
+| P0 | Sync Python FIELD-TO-GROUP-MAPPING with canonical names | Small |
 | P1 | Consolidate MeSH/keywords/topics triplicates | Medium |
-| P1 | Fix `id_and_status` overloading | Medium |
+| P1 | Fix `id-and-status` overloading | Medium |
 | P1 | Consolidate journal naming (7 → 4 fields) | Medium |
-| P2 | Reclassify `content_hash` as system, not trash | Small |
-| P2 | Evaluate `language`/`license_url` for Gold promotion | Decision needed |
-| P3 | Unify the two publication YAML schemas (column_groups vs field_groups) | Large |
+| P2 | Reclassify `content-hash` as system, not trash | Small |
+| P2 | Evaluate `language`/`license-url` for Gold promotion | Decision needed |
+| P3 | Unify the two publication YAML schemas (column-groups vs field-groups) | Large |
 
 ---
 
 ## 8. Assay / Molecule Schemas — No Issues
 
 Both `assay.yaml` and `molecule.yaml` are well-structured:
-- No TRASH group (molecule uses `complex_fields` excluded from Gold)
+- No TRASH group (molecule uses `complex-fields` excluded from Gold)
 - No alias duplication
 - Clear conflict resolution tables
 - Proper join key documentation

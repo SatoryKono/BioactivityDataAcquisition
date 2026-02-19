@@ -1,6 +1,6 @@
 # Пайплайн: UniProt Protein
 
-**Имя пайплайна:** `uniprot_protein`
+**Имя пайплайна:** `uniprot-protein`
 **Провайдер:** `uniprot`
 **Сущность:** `protein`
 
@@ -14,10 +14,10 @@
 
 | Параметр | Значение | Описание |
 |---|---|---|
-| `pipeline_name` | `uniprot_protein` | Уникальное имя пайплайна. |
+| `pipeline-name` | `uniprot-protein` | Уникальное имя пайплайна. |
 | `provider` | `uniprot` | Имя провайдера данных. |
-| `entity_type` | `protein` | Тип извлекаемой сущности. |
-| `primary_keys` | `["accession"]` | Ключи для слияния в Silver-слое. |
+| `entity-type` | `protein` | Тип извлекаемой сущности. |
+| `primary-keys` | `["accession"]` | Ключи для слияния в Silver-слое. |
 
 ## 3. Процесс (ETL)
 
@@ -37,8 +37,8 @@
 | Слой | Формат | Стратегия | Таблица/Путь |
 |---|---|---|---|
 | **Bronze** | `jsonl` (сжатый `zstd`) | Append-only | `bronze/uniprot/protein/...` |
-| **Silver** | `delta` | Merge (по `accession`) | `uniprot_protein` |
-| **Gold** | `delta` | - | `dim_target` |
+| **Silver** | `delta` | Merge (по `accession`) | `uniprot-protein` |
+| **Gold** | `delta` | - | `dim-target` |
 
 ## 4. Качество Данных (DQ)
 

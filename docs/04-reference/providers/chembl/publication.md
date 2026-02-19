@@ -1,6 +1,6 @@
 # Пайплайн: ChEMBL Publication
 
-**Имя пайплайна:** `chembl_publication`
+**Имя пайплайна:** `chembl-publication`
 **Провайдер:** `chembl`
 **Сущность:** `publication`
 **Версия схемы:** 1.2.0
@@ -19,10 +19,10 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `document_chembl_id` | `str` | Уникальный ChEMBL ID публикации |
-| `pubmed_id` | `int` | PubMed ID (если есть) |
+| `document-chembl-id` | `str` | Уникальный ChEMBL ID публикации |
+| `pubmed-id` | `int` | PubMed ID (если есть) |
 | `doi` | `str` | Digital Object Identifier |
-| `patent_id` | `str` | ID патента (если применимо) |
+| `patent-id` | `str` | ID патента (если применимо) |
 
 ### Метаданные публикации
 
@@ -34,26 +34,26 @@
 | `year` | `int` | Год публикации |
 | `volume` | `str` | Том |
 | `issue` | `str` | Выпуск |
-| `first_page` | `str` | Первая страница |
-| `last_page` | `str` | Последняя страница |
+| `first-page` | `str` | Первая страница |
+| `last-page` | `str` | Последняя страница |
 
 ### Классификация
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `doc_type` | `str` | Тип публикации (PUBLICATION, PATENT) |
-| `src_id` | `int` | ID источника данных |
+| `doc-type` | `str` | Тип публикации (PUBLICATION, PATENT) |
+| `src-id` | `int` | ID источника данных |
 
 ---
 
 ## 3. Трансформация
 
-**Файл:** `src/bioetl/application/pipelines/chembl/publication_transformer.py`
+**Файл:** `src/bioetl/application/pipelines/chembl/publication-transformer.py`
 
 ### Entity ID
 
 ```python
-entity_id = f"chembl:{document_chembl_id}"
+entity-id = f"chembl:{document-chembl-id}"
 ```
 
 ---
@@ -62,8 +62,8 @@ entity_id = f"chembl:{document_chembl_id}"
 
 ### DQ-правила
 
-1. **`document_chembl_id`** — обязательное
-2. **`doc_type`** — должен быть PUBLICATION или PATENT
+1. **`document-chembl-id`** — обязательное
+2. **`doc-type`** — должен быть PUBLICATION или PATENT
 
 ---
 
@@ -71,10 +71,10 @@ entity_id = f"chembl:{document_chembl_id}"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_publication
+bioetl run chembl-publication
 
 # С ограничением
-bioetl run chembl_publication --limit 1000
+bioetl run chembl-publication --limit 1000
 ```
 
 ---
@@ -84,7 +84,7 @@ bioetl run chembl_publication --limit 1000
 | Компонент | Путь |
 |-----------|------|
 | Конфигурация | `configs/pipelines/chembl/publication.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/publication_transformer.py` |
+| Трансформер | `src/bioetl/application/pipelines/chembl/publication-transformer.py` |
 | Пайплайн | `src/bioetl/application/pipelines/chembl/publication.py` |
 
 ---

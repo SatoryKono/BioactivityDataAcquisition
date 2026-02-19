@@ -25,26 +25,26 @@
 
 Единственное нарушение — файл `src/bioetl/interfaces/observability.py:14`:
 ```python
-from bioetl.infrastructure.observability import start_metrics_server
+from bioetl.infrastructure.observability import start-metrics-server
 ```
-Это задокументировано в ADR-005 как осознанное допущение и покрыто архитектурным тестом `test_observability_allowed_infrastructure()`.
+Это задокументировано в ADR-005 как осознанное допущение и покрыто архитектурным тестом `test-observability-allowed-infrastructure()`.
 
 ### План исправления
 
 **Цель:** Устранить прямой импорт interfaces → infrastructure, маршрутизировав через composition.
 
-#### Шаг 1: Экспортировать `start_metrics_server` через composition
+#### Шаг 1: Экспортировать `start-metrics-server` через composition
 
 **Файл:** `src/bioetl/composition/entrypoints.py`
 
 Добавить фабричную функцию или re-export:
 ```python
 # В composition/entrypoints.py (или отдельный composition/observability.py)
-from bioetl.infrastructure.observability import start_metrics_server
+from bioetl.infrastructure.observability import start-metrics-server
 
-def create_metrics_server() -> ...:
+def create-metrics-server() -> ...:
     """Factory for metrics server — routes infrastructure through composition."""
-    return start_metrics_server
+    return start-metrics-server
 ```
 
 #### Шаг 2: Обновить interfaces/observability.py
@@ -53,19 +53,19 @@ def create_metrics_server() -> ...:
 
 ```python
 # БЫЛО:
-from bioetl.infrastructure.observability import start_metrics_server
+from bioetl.infrastructure.observability import start-metrics-server
 
 # СТАЛО:
-from bioetl.composition.entrypoints import start_metrics_server
+from bioetl.composition.entrypoints import start-metrics-server
 # или:
-from bioetl.composition.observability import create_metrics_server
+from bioetl.composition.observability import create-metrics-server
 ```
 
 #### Шаг 3: Обновить архитектурные тесты
 
-**Файл:** `tests/architecture/test_interfaces_no_infrastructure.py`
+**Файл:** `tests/architecture/test-interfaces-no-infrastructure.py`
 
-- Удалить тест `test_observability_allowed_infrastructure()` (исключение больше не нужно)
+- Удалить тест `test-observability-allowed-infrastructure()` (исключение больше не нужно)
 - Добавить/обновить тест, что interfaces не импортирует infrastructure напрямую
 
 #### Шаг 4: Ужесточить import-linter
@@ -77,9 +77,9 @@ from bioetl.composition.observability import create_metrics_server
 [importlinter:contract:interfaces-no-direct-infrastructure]
 name = Interfaces must not import infrastructure directly
 type = forbidden
-source_modules =
+source-modules =
     bioetl.interfaces
-forbidden_modules =
+forbidden-modules =
     bioetl.infrastructure
 ```
 
@@ -106,23 +106,23 @@ forbidden_modules =
 
 ### 2.1 Env var format (CRITICAL)
 
-**Проблема:** Документация использует плоский формат `BIOETL_TRACING_ENABLED`, а pydantic-settings с `env_nested_delimiter="__"` требует `BIOETL_OBSERVABILITY__TRACING_ENABLED`.
+**Проблема:** Документация использует плоский формат `BIOETL-TRACING-ENABLED`, а pydantic-settings с `env-nested-delimiter="--"` требует `BIOETL-OBSERVABILITY--TRACING-ENABLED`.
 
 **Затронутые файлы:**
 
 | Файл | Строки | Что исправить |
 |------|--------|---------------|
-| `docs/03-guides/metrics-monitoring.md` | ~42, 54, 210, 399, 427 | Все env vars `BIOETL_*_ENABLED/PORT` → `BIOETL_OBSERVABILITY__*` |
-| `docs/04-reference/cli.md` | ~469 | `BIOETL_TRACING_ENABLED` → `BIOETL_OBSERVABILITY__TRACING_ENABLED` |
+| `docs/03-guides/metrics-monitoring.md` | ~42, 54, 210, 399, 427 | Все env vars `BIOETL-*-ENABLED/PORT` → `BIOETL-OBSERVABILITY--*` |
+| `docs/04-reference/cli.md` | ~469 | `BIOETL-TRACING-ENABLED` → `BIOETL-OBSERVABILITY--TRACING-ENABLED` |
 | `docs/04-reference/api/infrastructure/observability.md` | ~211 | Аналогичная замена |
 | `docs/05-operations/runbooks/observability-checklist.md` | Проверить все env vars | Аналогичная замена |
 
 **Действие:** Глобальная замена по документации. Добавить примечание о вложенной структуре настроек:
 
 ```markdown
-> **Примечание:** BioETL использует pydantic-settings с `env_nested_delimiter="__"`.
+> **Примечание:** BioETL использует pydantic-settings с `env-nested-delimiter="--"`.
 > Observability-настройки вложены в секцию `observability`, поэтому env var формат:
-> `BIOETL_OBSERVABILITY__<FIELD_NAME>`.
+> `BIOETL-OBSERVABILITY--<FIELD-NAME>`.
 ```
 
 ### 2.2 ADR-022: Некорректные пути файлов (HIGH)
@@ -131,7 +131,7 @@ forbidden_modules =
 
 | ADR-022 утверждает | Фактический путь | Исправление |
 |--------------------|-----------------|-------------|
-| `infrastructure/observability/noop_tracing.py` | `domain/ports/noop.py` | Обновить путь |
+| `infrastructure/observability/noop-tracing.py` | `domain/ports/noop.py` | Обновить путь |
 | `composition/factories/observability.py` | `composition/bootstrap/runtime/observability.py` | Обновить путь |
 
 **Файл:** `docs/02-architecture/decisions/ADR-022-tracing-noop.md`
@@ -149,7 +149,7 @@ forbidden_modules =
 
 | Источник | closed | half-open | open |
 |----------|--------|-----------|------|
-| **Код** (`circuit_breaker.py:36-39`) | **0** | **1** | **2** |
+| **Код** (`circuit-breaker.py:36-39`) | **0** | **1** | **2** |
 | `metrics-monitoring.md:102` | 0 | 1 | 2 |
 | `contracts/observability.md:121` | 0 | **0.5** | **1** |
 
@@ -167,23 +167,23 @@ forbidden_modules =
 
 ### 2.6 Deprecated bootstrap функции не документированы (MEDIUM)
 
-**Проблема:** В `composition/bootstrap/runtime/observability.py` deprecated-функции (`bootstrap_logger`, `bootstrap_tracer`, `bootstrap_metrics`, `bootstrap_dq_monitor`, `bootstrap_observability`) не упомянуты в документации.
+**Проблема:** В `composition/bootstrap/runtime/observability.py` deprecated-функции (`bootstrap-logger`, `bootstrap-tracer`, `bootstrap-metrics`, `bootstrap-dq-monitor`, `bootstrap-observability`) не упомянуты в документации.
 
-**Действие:** Добавить секцию "Deprecated API" в ADR-017 или в отдельный migration guide, указав канонические имена с суффиксом `_port()`:
-- `bootstrap_logger_port()`
-- `bootstrap_tracer_port()`
-- `bootstrap_metrics_port()`
-- `bootstrap_dq_monitor_port()`
-- `bootstrap_observability_bundle()`
+**Действие:** Добавить секцию "Deprecated API" в ADR-017 или в отдельный migration guide, указав канонические имена с суффиксом `-port()`:
+- `bootstrap-logger-port()`
+- `bootstrap-tracer-port()`
+- `bootstrap-metrics-port()`
+- `bootstrap-dq-monitor-port()`
+- `bootstrap-observability-bundle()`
 
 ### 2.7 Неполный перечень настроек в документации (MEDIUM)
 
-**Проблема:** Документация не перечисляет все observability-настройки из `_base.py`.
+**Проблема:** Документация не перечисляет все observability-настройки из `-base.py`.
 
 **Недокументированные поля:**
-- `metrics_server_enabled`, `metrics_fail_fast`, `metrics_retry_count`, `metrics_retry_delay`
-- `dq_baseline_window`, `dq_z_score_threshold`, `dq_min_baseline_samples`
-- `dq_cold_start_runs`, `dq_error_rate_max`, `dq_quality_score_min`
+- `metrics-server-enabled`, `metrics-fail-fast`, `metrics-retry-count`, `metrics-retry-delay`
+- `dq-baseline-window`, `dq-z-score-threshold`, `dq-min-baseline-samples`
+- `dq-cold-start-runs`, `dq-error-rate-max`, `dq-quality-score-min`
 
 **Файлы:** `docs/04-reference/cli.md`, `docs/03-guides/metrics-monitoring.md`
 **Действие:** Добавить полную таблицу env vars с описаниями и значениями по умолчанию.
@@ -194,9 +194,9 @@ forbidden_modules =
 
 ### Текущее состояние
 
-`TracingPort` определяет `get_tracer(name) -> Any`, но:
-- Все потребители (batch_tracing.py, base_transformer.py) вызывают OTel-специфичные методы: `start_as_current_span()`, `set_attribute()`, `record_exception()`
-- `NoOpTracing` реализует `_NoOpOtelTracer` с теми же OTel-методами
+`TracingPort` определяет `get-tracer(name) -> Any`, но:
+- Все потребители (batch-tracing.py, base-transformer.py) вызывают OTel-специфичные методы: `start-as-current-span()`, `set-attribute()`, `record-exception()`
+- `NoOpTracing` реализует `-NoOpOtelTracer` с теми же OTel-методами
 - Замена backend (e.g. Jaeger-native) потребует адаптеров ко всему OTel API
 
 ### Варианты решения
@@ -207,19 +207,19 @@ forbidden_modules =
 
 ```python
 # domain/ports/observability.py
-@runtime_checkable
+@runtime-checkable
 class SpanPort(Protocol):
     """Backend-agnostic span abstraction."""
-    def set_attribute(self, key: str, value: Any) -> None: ...
-    def set_status(self, status: Any) -> None: ...
-    def record_error(self, exception: Exception) -> None: ...
-    def __enter__(self) -> Self: ...
-    def __exit__(self, *args: Any) -> None: ...
+    def set-attribute(self, key: str, value: Any) -> None: ...
+    def set-status(self, status: Any) -> None: ...
+    def record-error(self, exception: Exception) -> None: ...
+    def --enter--(self) -> Self: ...
+    def --exit--(self, *args: Any) -> None: ...
 
-@runtime_checkable
+@runtime-checkable
 class TracingPort(Protocol):
     """Backend-agnostic tracing port."""
-    def start_span(self, name: str, attributes: dict[str, Any] | None = None) -> SpanPort: ...
+    def start-span(self, name: str, attributes: dict[str, Any] | None = None) -> SpanPort: ...
     def close(self) -> None: ...
 ```
 
@@ -227,9 +227,9 @@ class TracingPort(Protocol):
 - `domain/ports/observability.py` — новый SpanPort, обновлённый TracingPort
 - `domain/ports/noop.py` — обновить NoOp реализации
 - `infrastructure/observability/tracing.py` — адаптировать OTel tracer
-- `application/core/batch_tracing.py` — заменить `get_tracer().start_as_current_span()` → `start_span()`
-- `application/core/base_transformer.py` — аналогично
-- `application/observability/span_helpers.py` — аналогично
+- `application/core/batch-tracing.py` — заменить `get-tracer().start-as-current-span()` → `start-span()`
+- `application/core/base-transformer.py` — аналогично
+- `application/observability/span-helpers.py` — аналогично
 - ADR-017 — обновить контракт
 
 #### Вариант B: Зафиксировать TracingPort = OTel facade (минимальный)
@@ -238,7 +238,7 @@ class TracingPort(Protocol):
 
 **Объём изменений:**
 - ADR-017 — добавить секцию "TracingPort Design Decision: OTel as canonical API"
-- Типизировать `get_tracer() -> Any` как `get_tracer() -> OtelTracerLike` с TYPE_CHECKING
+- Типизировать `get-tracer() -> Any` как `get-tracer() -> OtelTracerLike` с TYPE-CHECKING
 - Добавить комментарии к NoOp реализации
 
 **Рекомендация:** Вариант B как первый шаг (документация + типизация), Вариант A — в бэклог для следующего рефакторинга.
@@ -298,7 +298,7 @@ class TracingPort(Protocol):
 
 ## Checklist перед мержем
 
-- [ ] Все env vars в документации используют формат `BIOETL_OBSERVABILITY__*`
+- [ ] Все env vars в документации используют формат `BIOETL-OBSERVABILITY--*`
 - [ ] ADR-022 ссылается на корректные пути файлов
 - [ ] `contracts/observability.md` — circuit breaker values = 0/1/2
 - [ ] `interfaces/observability.py` не импортирует из infrastructure

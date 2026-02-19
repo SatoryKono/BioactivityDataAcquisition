@@ -15,9 +15,9 @@
 
 | Правило | Пример |
 |---------|--------|
-| Префикс | `bioetl_` |
-| snake_case | `pipeline_duration_seconds` |
-| Единицы в суффиксе | `_seconds`, `_total`, `_bytes` |
+| Префикс | `bioetl-` |
+| snake-case | `pipeline-duration-seconds` |
+| Единицы в суффиксе | `-seconds`, `-total`, `-bytes` |
 
 ---
 
@@ -25,43 +25,43 @@
 
 Эти метрики MUST экспортироваться для каждого запуска пайплайна.
 
-### bioetl_pipeline_duration_seconds
+### bioetl-pipeline-duration-seconds
 
 | Свойство | Значение |
 |----------|----------|
 | Тип | Histogram |
 | Описание | Длительность выполнения этапов пайплайна |
-| Labels | `pipeline`, `stage`, `status`, `run_type` |
+| Labels | `pipeline`, `stage`, `status`, `run-type` |
 
 **Labels:**
-- `pipeline`: Имя пайплайна (e.g., `chembl_activity`)
-- `stage`: Этап (`fetch`, `transform`, `write_bronze`, `write_silver`, `write_gold`)
+- `pipeline`: Имя пайплайна (e.g., `chembl-activity`)
+- `stage`: Этап (`fetch`, `transform`, `write-bronze`, `write-silver`, `write-gold`)
 - `status`: Результат (`success`, `failure`, `timeout`)
-- `run_type`: Тип запуска (`incremental`, `backfill`, `rebuild`)
+- `run-type`: Тип запуска (`incremental`, `backfill`, `rebuild`)
 
-### bioetl_records_processed_total
+### bioetl-records-processed-total
 
 | Свойство | Значение |
 |----------|----------|
 | Тип | Counter |
 | Описание | Общее количество обработанных записей |
-| Labels | `pipeline`, `stage`, `run_type` |
+| Labels | `pipeline`, `stage`, `run-type` |
 
 **Labels:**
 - `stage`: Слой данных (`bronze`, `silver`, `gold`, `quarantined`)
 
-### bioetl_errors_total
+### bioetl-errors-total
 
 | Свойство | Значение |
 |----------|----------|
 | Тип | Counter |
 | Описание | Общее количество ошибок |
-| Labels | `pipeline`, `stage`, `error_code` |
+| Labels | `pipeline`, `stage`, `error-code` |
 
 **Labels:**
-- `error_code`: Код ошибки (e.g., `RATE_LIMIT`, `SCHEMA_VIOLATION`, `API_ERROR`)
+- `error-code`: Код ошибки (e.g., `RATE-LIMIT`, `SCHEMA-VIOLATION`, `API-ERROR`)
 
-### bioetl_batch_size_records
+### bioetl-batch-size-records
 
 | Свойство | Значение |
 |----------|----------|
@@ -74,36 +74,36 @@
 
 ## Data Quality Metrics (MUST)
 
-### bioetl_dq_records_quarantined_total
+### bioetl-dq-records-quarantined-total
 
 | Свойство | Значение |
 |----------|----------|
 | Тип | Counter |
 | Описание | Записи, отправленные в карантин |
-| Labels | `pipeline`, `error_type`, `run_type` |
+| Labels | `pipeline`, `error-type`, `run-type` |
 
 **Labels:**
-- `error_type`: Тип ошибки качества (`invalid_smiles`, `missing_field`, `schema_violation`)
+- `error-type`: Тип ошибки качества (`invalid-smiles`, `missing-field`, `schema-violation`)
 
 ---
 
 ## Input Filter Metrics (SHOULD)
 
-### bioetl_filter_ids_loaded_total
+### bioetl-filter-ids-loaded-total
 
 | Свойство | Значение |
 |----------|----------|
 | Тип | Counter |
 | Описание | Уникальные ID загруженные из фильтра |
-| Labels | `pipeline`, `source_file` |
+| Labels | `pipeline`, `source-file` |
 
-### bioetl_filter_ids_duplicates_total
+### bioetl-filter-ids-duplicates-total
 
 | Свойство | Значение |
 |----------|----------|
 | Тип | Counter |
 | Описание | Дубликаты ID в источнике фильтра |
-| Labels | `pipeline`, `source_file` |
+| Labels | `pipeline`, `source-file` |
 
 ---
 
@@ -111,7 +111,7 @@
 
 Метрики для мониторинга состояния Circuit Breaker (см. ADR-007).
 
-### bioetl_circuit_breaker_state
+### bioetl-circuit-breaker-state
 
 | Свойство | Значение |
 |----------|----------|
@@ -120,7 +120,7 @@
 | Labels | `adapter` |
 | Значения | `0` = closed, `0.5` = half-open, `1` = open |
 
-### bioetl_circuit_breaker_trips_total
+### bioetl-circuit-breaker-trips-total
 
 | Свойство | Значение |
 |----------|----------|
@@ -128,7 +128,7 @@
 | Описание | Количество срабатываний (transitions to open) |
 | Labels | `adapter` |
 
-### bioetl_circuit_breaker_success_total
+### bioetl-circuit-breaker-success-total
 
 | Свойство | Значение |
 |----------|----------|
@@ -136,7 +136,7 @@
 | Описание | Успешные вызовы через Circuit Breaker |
 | Labels | `adapter` |
 
-### bioetl_circuit_breaker_failure_total
+### bioetl-circuit-breaker-failure-total
 
 | Свойство | Значение |
 |----------|----------|
@@ -148,7 +148,7 @@
 
 ## Storage Metrics (SHOULD)
 
-### bioetl_storage_write_duration_seconds
+### bioetl-storage-write-duration-seconds
 
 | Свойство | Значение |
 |----------|----------|
@@ -159,7 +159,7 @@
 **Labels:**
 - `layer`: `bronze`, `silver`, `gold`
 
-### bioetl_storage_bytes_written_total
+### bioetl-storage-bytes-written-total
 
 | Свойство | Значение |
 |----------|----------|
@@ -171,7 +171,7 @@
 
 ## Health Check Metrics (MAY)
 
-### bioetl_health_check_duration_seconds
+### bioetl-health-check-duration-seconds
 
 | Свойство | Значение |
 |----------|----------|
@@ -179,7 +179,7 @@
 | Описание | Длительность health check адаптеров |
 | Labels | `adapter` |
 
-### bioetl_health_check_status
+### bioetl-health-check-status
 
 | Свойство | Значение |
 |----------|----------|
@@ -196,10 +196,10 @@
 
 | Метрика | Условие | Severity |
 |---------|---------|----------|
-| `bioetl_circuit_breaker_state == 1` | > 5 min | Critical |
-| `bioetl_errors_total` rate | > 10/min | Warning |
-| `bioetl_dq_records_quarantined_total` rate | > 5% of processed | Warning |
-| `bioetl_pipeline_duration_seconds` | > 95th percentile + 50% | Warning |
+| `bioetl-circuit-breaker-state == 1` | > 5 min | Critical |
+| `bioetl-errors-total` rate | > 10/min | Warning |
+| `bioetl-dq-records-quarantined-total` rate | > 5% of processed | Warning |
+| `bioetl-pipeline-duration-seconds` | > 95th percentile + 50% | Warning |
 
 ---
 

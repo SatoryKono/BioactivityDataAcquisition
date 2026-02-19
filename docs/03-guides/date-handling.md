@@ -33,61 +33,61 @@ End-of-period normalization ensures that:
 
 ## Core Functions
 
-### `format_date_parts()` (CrossRef)
+### `format-date-parts()` (CrossRef)
 
 Location: `src/bioetl/domain/normalization.py:56-73`
 
 Converts CrossRef API date-parts format to ISO string:
 
 ```python
-from bioetl.domain.normalization import format_date_parts
+from bioetl.domain.normalization import format-date-parts
 
 # Full date
-format_date_parts([[2024, 3, 15]])  # → "2024-03-15"
+format-date-parts([[2024, 3, 15]])  # → "2024-03-15"
 
 # Partial month (uses calendar.monthrange for exact last day)
-format_date_parts([[2024, 3]])      # → "2024-03-31"
+format-date-parts([[2024, 3]])      # → "2024-03-31"
 
 # Year only
-format_date_parts([[2024]])         # → "2024-12-31"
+format-date-parts([[2024]])         # → "2024-12-31"
 
 # Empty/invalid
-format_date_parts(None)             # → None
-format_date_parts([])               # → None
+format-date-parts(None)             # → None
+format-date-parts([])               # → None
 ```
 
-### `parse_date_field()`
+### `parse-date-field()`
 
 Location: `src/bioetl/domain/normalization.py:88-97`
 
 Parses date string to Python `date` object:
 
 ```python
-from bioetl.domain.normalization import parse_date_field
+from bioetl.domain.normalization import parse-date-field
 
-parse_date_field("2024-03-15")           # → date(2024, 3, 15)
-parse_date_field("2024-03-15", "%Y-%m-%d")  # → date(2024, 3, 15)
-parse_date_field("invalid")              # → None
-parse_date_field(None)                   # → None
+parse-date-field("2024-03-15")           # → date(2024, 3, 15)
+parse-date-field("2024-03-15", "%Y-%m-%d")  # → date(2024, 3, 15)
+parse-date-field("invalid")              # → None
+parse-date-field(None)                   # → None
 ```
 
-### `DefaultDataNormalizationService.normalize_partial_date()`
+### `DefaultDataNormalizationService.normalize-partial-date()`
 
-Location: `src/bioetl/domain/services/data_normalization_service.py:186-240`
+Location: `src/bioetl/domain/services/data-normalization-service.py:186-240`
 
 Service-based partial date normalization:
 
 ```python
-from bioetl.domain.services.data_normalization_service import (
+from bioetl.domain.services.data-normalization-service import (
     DefaultDataNormalizationService,
 )
 
 service = DefaultDataNormalizationService()
 
-service.normalize_partial_date("2024-03-15")  # → "2024-03-15"
-service.normalize_partial_date("2024-03")     # → "2024-03-30"
-service.normalize_partial_date("2024")        # → "2024-12-31"
-service.normalize_partial_date(None)          # → None
+service.normalize-partial-date("2024-03-15")  # → "2024-03-15"
+service.normalize-partial-date("2024-03")     # → "2024-03-30"
+service.normalize-partial-date("2024")        # → "2024-12-31"
+service.normalize-partial-date(None)          # → None
 ```
 
 ---
@@ -99,42 +99,42 @@ service.normalize_partial_date(None)          # → None
 **Date Extractor**: `src/bioetl/application/pipelines/pubmed/extractors/date.py`
 
 Extracts dates from PubMed XML:
-- `publication_date` (unified, normalized)
-- `pub_date`, `epub_date` (original dates)
-- `accepted_date`, `received_date`, `revised_date` (history dates)
+- `publication-date` (unified, normalized)
+- `pub-date`, `epub-date` (original dates)
+- `accepted-date`, `received-date`, `revised-date` (history dates)
 
-**Date Priority** (`_compute_publication_date`):
-1. `epub_date` (electronic publication)
-2. `pub_date` (print publication)
+**Date Priority** (`-compute-publication-date`):
+1. `epub-date` (electronic publication)
+2. `pub-date` (print publication)
 3. Year from article metadata
 
 ```python
-# Priority chain for publication_date
-publication_date = epub_date or pub_date or f"{year}-12-31"
+# Priority chain for publication-date
+publication-date = epub-date or pub-date or f"{year}-12-31"
 ```
 
 ### CrossRef
 
 **Extractors**: `src/bioetl/application/pipelines/crossref/extractors.py`
 
-Uses `format_date_parts()` for date normalization:
-- `published_print`, `published_online` (from API date-parts)
-- `publication_date` (unified: prefers print over online)
+Uses `format-date-parts()` for date normalization:
+- `published-print`, `published-online` (from API date-parts)
+- `publication-date` (unified: prefers print over online)
 
 ```python
 # Date normalization in extractor
-published_print = format_date_parts(record.get("published-print", {}).get("date-parts"))
-published_online = format_date_parts(record.get("published-online", {}).get("date-parts"))
+published-print = format-date-parts(record.get("published-print", {}).get("date-parts"))
+published-online = format-date-parts(record.get("published-online", {}).get("date-parts"))
 ```
 
 ### OpenAlex
 
 **Transformer**: `src/bioetl/application/pipelines/openalex/transformer.py:229-266`
 
-Implements `_normalize_partial_date()` inline:
+Implements `-normalize-partial-date()` inline:
 
 ```python
-def _normalize_partial_date(self, date_str: str | None) -> str | None:
+def -normalize-partial-date(self, date-str: str | None) -> str | None:
     # Full date (YYYY-MM-DD) - unchanged
     # YYYY-MM → YYYY-MM-30
     # YYYY → YYYY-12-31
@@ -144,21 +144,21 @@ def _normalize_partial_date(self, date_str: str | None) -> str | None:
 
 **Transformer**: `src/bioetl/application/pipelines/semanticscholar/transformer.py`
 
-Uses identical `_normalize_partial_date()` implementation:
+Uses identical `-normalize-partial-date()` implementation:
 
 ```python
-publication_date = self._normalize_partial_date(raw.get("publicationDate"))
+publication-date = self.-normalize-partial-date(raw.get("publicationDate"))
 ```
 
 ### ChEMBL
 
-**Transformer**: `src/bioetl/application/pipelines/chembl/publication_transformer.py`
+**Transformer**: `src/bioetl/application/pipelines/chembl/publication-transformer.py`
 
 ChEMBL only provides year information. Uses start-of-year convention:
 
 ```python
 # Year only → YYYY-01-01 (differs from other pipelines)
-publication_date = f"{year}-01-01"
+publication-date = f"{year}-01-01"
 ```
 
 **Note**: This differs from the end-of-period strategy used by other pipelines.
@@ -173,49 +173,49 @@ When creating a new publication pipeline:
 ### 1. Use Centralized Functions When Possible
 
 ```python
-from bioetl.domain.normalization import format_date_parts, parse_date_field
+from bioetl.domain.normalization import format-date-parts, parse-date-field
 ```
 
-### 2. Implement `_normalize_partial_date()` Method
+### 2. Implement `-normalize-partial-date()` Method
 
 If the API returns string dates in various formats:
 
 ```python
-def _normalize_partial_date(self, date_str: str | None) -> str | None:
+def -normalize-partial-date(self, date-str: str | None) -> str | None:
     """Normalize partial date to YYYY-MM-DD format (end of period)."""
-    if not date_str:
+    if not date-str:
         return None
 
-    date_str = str(date_str).strip()
+    date-str = str(date-str).strip()
 
     # Full ISO format (YYYY-MM-DD) - return as-is
-    if len(date_str) == 10 and date_str[4] == "-" and date_str[7] == "-":
-        return date_str
+    if len(date-str) == 10 and date-str[4] == "-" and date-str[7] == "-":
+        return date-str
 
     # Partial date: YYYY-MM → YYYY-MM-30
-    if len(date_str) == 7 and date_str[4] == "-":
-        return f"{date_str}-30"
+    if len(date-str) == 7 and date-str[4] == "-":
+        return f"{date-str}-30"
 
     # Partial date: YYYY → YYYY-12-31
-    if len(date_str) == 4 and date_str.isdigit():
-        return f"{date_str}-12-31"
+    if len(date-str) == 4 and date-str.isdigit():
+        return f"{date-str}-12-31"
 
     return None
 ```
 
-### 3. Implement `_compute_publication_date()` Method
+### 3. Implement `-compute-publication-date()` Method
 
 For unified publication date with priority chain:
 
 ```python
-def _compute_publication_date(
+def -compute-publication-date(
     self,
-    primary_date: str | None,
-    fallback_date: str | None,
+    primary-date: str | None,
+    fallback-date: str | None,
 ) -> str | None:
-    """Build unified publication_date, preferring primary source."""
-    return self._normalize_partial_date(primary_date) or \
-           self._normalize_partial_date(fallback_date)
+    """Build unified publication-date, preferring primary source."""
+    return self.-normalize-partial-date(primary-date) or \
+           self.-normalize-partial-date(fallback-date)
 ```
 
 ### 4. Add Tests
@@ -226,17 +226,17 @@ Create unit tests in `tests/unit/application/pipelines/`:
 import pytest
 
 class TestNewProviderDateHandling:
-    def test_full_date_unchanged(self, transformer):
-        assert transformer._normalize_partial_date("2024-03-15") == "2024-03-15"
+    def test-full-date-unchanged(self, transformer):
+        assert transformer.-normalize-partial-date("2024-03-15") == "2024-03-15"
 
-    def test_partial_month_normalized(self, transformer):
-        assert transformer._normalize_partial_date("2024-03") == "2024-03-30"
+    def test-partial-month-normalized(self, transformer):
+        assert transformer.-normalize-partial-date("2024-03") == "2024-03-30"
 
-    def test_year_only_normalized(self, transformer):
-        assert transformer._normalize_partial_date("2024") == "2024-12-31"
+    def test-year-only-normalized(self, transformer):
+        assert transformer.-normalize-partial-date("2024") == "2024-12-31"
 
-    def test_none_returns_none(self, transformer):
-        assert transformer._normalize_partial_date(None) is None
+    def test-none-returns-none(self, transformer):
+        assert transformer.-normalize-partial-date(None) is None
 ```
 
 ---
@@ -250,7 +250,7 @@ When computing content hash for deduplication, dates are normalized to ISO forma
 # Dates normalized to YYYY-MM-DD before hashing
 ```
 
-**Excluded from hash**: `_ingestion_ts`, `_run_id`, `_run_type`, `_dq_*` (technical metadata)
+**Excluded from hash**: `-ingestion-ts`, `-run-id`, `-run-type`, `-dq-*` (technical metadata)
 
 ---
 
@@ -260,14 +260,14 @@ Run date-related tests:
 
 ```bash
 # Unit tests
-pytest tests/unit/application/pipelines/test_date_parsing.py -v
+pytest tests/unit/application/pipelines/test-date-parsing.py -v
 
 # PubMed date extractor tests
-pytest tests/unit/pipelines/pubmed/extractors/test_date_extractor.py -v
+pytest tests/unit/pipelines/pubmed/extractors/test-date-extractor.py -v
 
 # Integration tests
-pytest tests/integration/pipelines/test_pubmed_date_normalization.py -v
-pytest tests/integration/pipelines/test_crossref_date_normalization.py -v
+pytest tests/integration/pipelines/test-pubmed-date-normalization.py -v
+pytest tests/integration/pipelines/test-crossref-date-normalization.py -v
 ```
 
 ---
@@ -276,5 +276,5 @@ pytest tests/integration/pipelines/test_crossref_date_normalization.py -v
 
 - **Audit Report**: `docs/audits/date-handling-audit-2026-01-19.md`
 - **Normalization Functions**: `src/bioetl/domain/normalization.py`
-- **Data Normalization Service**: `src/bioetl/domain/services/data_normalization_service.py`
+- **Data Normalization Service**: `src/bioetl/domain/services/data-normalization-service.py`
 - **RULES.md**: §2.4 Content Hash normalization

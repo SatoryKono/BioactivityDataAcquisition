@@ -10,18 +10,18 @@
 
 | Утверждение в аудите | Статус | Верификация |
 |---------------------|--------|-------------|
-| "CircuitBreaker отсутствует полностью" | ❌ **ЛОЖНО** | `infrastructure/adapters/http/circuit_breaker.py` — 230 строк |
-| "Есть только конфигурация CircuitBreaker без реализации состояния/метрик" | ❌ **ЛОЖНО** | Строки 44-213: state machine, метрики `circuit_breaker_state`, `circuit_breaker_trips_total` |
-| "CB не реализован по требованиям §3.1.4" | ❌ **ЛОЖНО** | failure_threshold=5, recovery_timeout=300 (5 мин) — точно по RULES |
+| "CircuitBreaker отсутствует полностью" | ❌ **ЛОЖНО** | `infrastructure/adapters/http/circuit-breaker.py` — 230 строк |
+| "Есть только конфигурация CircuitBreaker без реализации состояния/метрик" | ❌ **ЛОЖНО** | Строки 44-213: state machine, метрики `circuit-breaker-state`, `circuit-breaker-trips-total` |
+| "CB не реализован по требованиям §3.1.4" | ❌ **ЛОЖНО** | failure-threshold=5, recovery-timeout=300 (5 мин) — точно по RULES |
 
 **Доказательство:**
 ```python
-# circuit_breaker.py:44-68
+# circuit-breaker.py:44-68
 @dataclass
 class CircuitBreaker:
     provider: str
-    failure_threshold: int = 5
-    recovery_timeout: int = 300  # 5 minutes
+    failure-threshold: int = 5
+    recovery-timeout: int = 300  # 5 minutes
     metrics: MetricsPort | None = None
     # ... state machine implementation
 ```
@@ -30,25 +30,25 @@ class CircuitBreaker:
 
 | Утверждение в аудите | Статус | Верификация |
 |---------------------|--------|-------------|
-| "TTL/heartbeat необязательны, нет fencing tokens" | ❌ **ЛОЖНО** | `memory_lock.py:176-238` |
+| "TTL/heartbeat необязательны, нет fencing tokens" | ❌ **ЛОЖНО** | `memory-lock.py:176-238` |
 | "Требуется Redis для распределённых блокировок" | ❌ **ЛОЖНО** | Проект by design локальный |
 | "Нет Redis SETNX/TTL/heartbeat 20s и fencing tokens" | ❌ **ЛОЖНО** | Реализовано in-memory, Redis не нужен |
-| "MemoryLock без обязательного TTL=60s" | ❌ **ЛОЖНО** | TTL параметризован, `_ttl_checker_loop()` |
+| "MemoryLock без обязательного TTL=60s" | ❌ **ЛОЖНО** | TTL параметризован, `-ttl-checker-loop()` |
 
 **Доказательство:**
 ```python
-# memory_lock.py:43-64 — TTL checker
-async def _ttl_checker_loop(self) -> None:
-    while not self._closed:
-        await asyncio.sleep(self._ttl_check_interval)
-        await self._release_expired_locks()
+# memory-lock.py:43-64 — TTL checker
+async def -ttl-checker-loop(self) -> None:
+    while not self.-closed:
+        await asyncio.sleep(self.-ttl-check-interval)
+        await self.-release-expired-locks()
 
-# memory_lock.py:176-204 — Heartbeat
-async def heartbeat(self, key: str, owner_id: RunID, exclusive: bool = False) -> bool:
+# memory-lock.py:176-204 — Heartbeat
+async def heartbeat(self, key: str, owner-id: RunID, exclusive: bool = False) -> bool:
     # Extends TTL using original TTL value
 
-# memory_lock.py:206-238 — Safety guard (validate_owner)
-async def validate_owner(self, key: str, owner_id: RunID) -> bool:
+# memory-lock.py:206-238 — Safety guard (validate-owner)
+async def validate-owner(self, key: str, owner-id: RunID) -> bool:
     """Safety Guard: before writing to storage, writer MUST validate lock."""
 ```
 
@@ -56,33 +56,33 @@ async def validate_owner(self, key: str, owner_id: RunID) -> bool:
 
 | Утверждение в аудите | Статус | Верификация |
 |---------------------|--------|-------------|
-| "TokenBucket.try_acquire допускает перерасход capacity" | ❌ **ЛОЖНО** | Это ПРАВИЛЬНОЕ поведение token bucket |
+| "TokenBucket.try-acquire допускает перерасход capacity" | ❌ **ЛОЖНО** | Это ПРАВИЛЬНОЕ поведение token bucket |
 | "Нарушает контракт capacity — tokens пополняются" | ❌ **НЕКОРРЕКТНО** | Token bucket ДОЛЖЕН пополняться по времени |
 | "RateLimiter нарушает контракт" | ❌ **ЛОЖНО** | Алгоритм работает по спецификации |
 
-**Пояснение:** Token bucket алгоритм по определению пополняет токены со временем. Вызов `_refill()` в `try_acquire()` — **корректное поведение**, не баг. Токены восстанавливаются с rate `rate` токенов/секунду.
+**Пояснение:** Token bucket алгоритм по определению пополняет токены со временем. Вызов `-refill()` в `try-acquire()` — **корректное поведение**, не баг. Токены восстанавливаются с rate `rate` токенов/секунду.
 
 ### 4. DQ thresholds "не реализованы"
 
 | Утверждение в аудите | Статус | Верификация |
 |---------------------|--------|-------------|
-| "Нет DQ пороговой логики 5%/20%" | ❌ **ЛОЖНО** | `domain/config.py:37-38`, `data_quality_service.py:112-131` |
+| "Нет DQ пороговой логики 5%/20%" | ❌ **ЛОЖНО** | `domain/config.py:37-38`, `data-quality-service.py:112-131` |
 | "DQ ошибки не отправляются в quarantine" | ❌ **ЛОЖНО** | `DataQualityThresholdError` останавливает pipeline |
-| "Пороги DQ не проверяются автоматически" | ❌ **ЛОЖНО** | `_check_hard_threshold()` проверяет автоматически |
+| "Пороги DQ не проверяются автоматически" | ❌ **ЛОЖНО** | `-check-hard-threshold()` проверяет автоматически |
 
 **Доказательство:**
 ```python
 # domain/config.py:37-38
-soft_fail_threshold: float = 0.05
-hard_fail_threshold: float = 0.20
+soft-fail-threshold: float = 0.05
+hard-fail-threshold: float = 0.20
 
-# data_quality_service.py:112-131
-def _check_hard_threshold(self, error_rate: float) -> None:
-    if error_rate >= self._config.hard_fail_threshold:
+# data-quality-service.py:112-131
+def -check-hard-threshold(self, error-rate: float) -> None:
+    if error-rate >= self.-config.hard-fail-threshold:
         raise DataQualityThresholdError(...)
 
-# data_quality_service.py:158-163 — Prometheus метрики
-self._metrics.increment_counter("dq_soft_threshold_exceeded", ...)
+# data-quality-service.py:158-163 — Prometheus метрики
+self.-metrics.increment-counter("dq-soft-threshold-exceeded", ...)
 ```
 
 ### 5. Pandera "strict=False — баг"
@@ -98,14 +98,14 @@ self._metrics.increment_counter("dq_soft_threshold_exceeded", ...)
 
 | Утверждение в аудите | Статус | Верификация |
 |---------------------|--------|-------------|
-| "VACUUM/retention не интегрирован в пайплайн" | ❌ **ЛОЖНО** | `postrun_service.py:137-153` |
+| "VACUUM/retention не интегрирован в пайплайн" | ❌ **ЛОЖНО** | `postrun-service.py:137-153` |
 | "Требуется планировщик" | ❌ **ЛОЖНО** | Вызывается автоматически после run |
 
 **Доказательство:**
 ```python
-# postrun_service.py:137-153
-async def run_vacuum_if_enabled(self) -> VacuumResult:
-    return await self._lifecycle_service.finalize_run(...)
+# postrun-service.py:137-153
+async def run-vacuum-if-enabled(self) -> VacuumResult:
+    return await self.-lifecycle-service.finalize-run(...)
 ```
 
 ---
@@ -118,7 +118,7 @@ async def run_vacuum_if_enabled(self) -> VacuumResult:
 |---------|------|-------|--------|
 | Размер файла | 643 LOC | 540 LOC | ✅ < 550 лимита |
 
-**Решение:** Tracing извлечён в `BatchTracingManager` (`batch_tracing.py`, 245 LOC).
+**Решение:** Tracing извлечён в `BatchTracingManager` (`batch-tracing.py`, 245 LOC).
 
 ### 2. print() в коде ✅ ЛОЖНОЕ УТВЕРЖДЕНИЕ
 
@@ -157,8 +157,8 @@ grep -rn "print(" src/bioetl | grep -v ">>> \|\.\.\.     print" | wc -l
 
 ```bash
 # 1. Размер файлов
-wc -l src/bioetl/application/core/batch_executor.py
-wc -l src/bioetl/infrastructure/locking/memory_lock.py
+wc -l src/bioetl/application/core/batch-executor.py
+wc -l src/bioetl/infrastructure/locking/memory-lock.py
 
 # 2. print() usage
 grep -r "print(" src/bioetl --include="*.py" | wc -l
@@ -167,10 +167,10 @@ grep -r "print(" src/bioetl --include="*.py" | wc -l
 grep -n "class CircuitBreaker" src/bioetl/
 
 # 4. DQConfig
-grep -n "soft_fail_threshold\|hard_fail_threshold" src/bioetl/domain/config.py
+grep -n "soft-fail-threshold\|hard-fail-threshold" src/bioetl/domain/config.py
 
 # 5. MemoryLock TTL/heartbeat
-grep -n "heartbeat\|_ttl_checker" src/bioetl/infrastructure/locking/memory_lock.py
+grep -n "heartbeat\|-ttl-checker" src/bioetl/infrastructure/locking/memory-lock.py
 ```
 
 ---

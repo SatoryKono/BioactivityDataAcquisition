@@ -17,12 +17,12 @@
 1. **Отсутствие инвариантной защиты**: Batch-записи могли модифицироваться на любом этапе
 2. **Размытые границы консистентности**: Непонятно, какие объекты должны изменяться транзакционно
 3. **Отсутствие Event Sourcing**: Нет механизма отслеживания изменений состояния
-4. **Слабая типизация идентификаторов**: `run_id` и `batch_id` были обычными строками
+4. **Слабая типизация идентификаторов**: `run-id` и `batch-id` были обычными строками
 
 ### Затронутые области
 
 - `src/bioetl/domain/aggregates/` — новый пакет
-- `src/bioetl/domain/value_objects/` — новый пакет
+- `src/bioetl/domain/value-objects/` — новый пакет
 - `src/bioetl/domain/types.py` — расширен новыми типами
 - `src/bioetl/domain/exceptions/` — добавлены DDD-исключения
 
@@ -39,20 +39,20 @@ class Batch:
     """Aggregate Root для коллекции записей.
 
     Инварианты:
-        1. Все записи имеют один batch_id
+        1. Все записи имеют один batch-id
         2. Записи нельзя добавить после seal()
-        3. batch_id неизменяем
+        3. batch-id неизменяем
         4. Индексы записей последовательны
         5. Карантинные записи отслеживаются отдельно
     """
 
-    def add_record(self, data: dict) -> BatchRecord: ...
-    def quarantine_record(self, record: BatchRecord, error: str) -> BatchRecord: ...
+    def add-record(self, data: dict) -> BatchRecord: ...
+    def quarantine-record(self, record: BatchRecord, error: str) -> BatchRecord: ...
     def seal(self) -> None: ...
-    def mark_writing(self) -> None: ...
-    def mark_committed(self, layer: str) -> None: ...
-    def mark_failed(self, layer: str, error: str) -> None: ...
-    def collect_events(self) -> list[DomainEvent]: ...
+    def mark-writing(self) -> None: ...
+    def mark-committed(self, layer: str) -> None: ...
+    def mark-failed(self, layer: str, error: str) -> None: ...
+    def collect-events(self) -> list[DomainEvent]: ...
 ```
 
 **State Machine:**
@@ -61,7 +61,7 @@ OPEN → SEALED → WRITING → COMMITTED
                       ↘→ FAILED
 ```
 
-#### PipelineRun Aggregate (`domain/aggregates/pipeline_run.py`)
+#### PipelineRun Aggregate (`domain/aggregates/pipeline-run.py`)
 
 ```python
 class PipelineRun:
@@ -70,15 +70,15 @@ class PipelineRun:
     Инварианты:
         1. status == COMPLETED только если все стадии SUCCESS
         2. status == FAILED если хотя бы одна стадия FAILED
-        3. end_time != None только для терминальных статусов
+        3. end-time != None только для терминальных статусов
         4. stages нельзя модифицировать после терминального статуса
-        5. run_id неизменяем после создания
+        5. run-id неизменяем после создания
     """
 
     def start(self) -> None: ...
-    def record_stage_start(self, stage: str) -> None: ...
-    def record_stage_success(self, stage: str, records: int) -> None: ...
-    def record_stage_failure(self, stage: str, error: str) -> None: ...
+    def record-stage-start(self, stage: str) -> None: ...
+    def record-stage-success(self, stage: str, records: int) -> None: ...
+    def record-stage-failure(self, stage: str, error: str) -> None: ...
     def complete(self) -> None: ...
     def fail(self, error: str) -> None: ...
     def shutdown(self) -> None: ...
@@ -91,26 +91,26 @@ PENDING → RUNNING → COMPLETED
                ↘→ SHUTDOWN
 ```
 
-#### QuarantineEntry Aggregate (`domain/aggregates/quarantine_entry.py`)
+#### QuarantineEntry Aggregate (`domain/aggregates/quarantine-entry.py`)
 
 ```python
 class QuarantineEntry:
     """Aggregate для записи в карантине.
 
     Инварианты:
-        1. entry_id неизменяем
+        1. entry-id неизменяем
         2. Статус переходит только в указанном порядке
         3. Повторные попытки (retries) инкрементируются атомарно
     """
 
-    def mark_retrying(self) -> None: ...
-    def mark_recovered(self) -> None: ...
-    def mark_dead_letter(self, reason: str) -> None: ...
+    def mark-retrying(self) -> None: ...
+    def mark-recovered(self) -> None: ...
+    def mark-dead-letter(self, reason: str) -> None: ...
 ```
 
 ### 2. Добавлены Value Objects
 
-Строго типизированные идентификаторы в `domain/value_objects/`:
+Строго типизированные идентификаторы в `domain/value-objects/`:
 
 ```python
 # Типизированные идентификаторы
@@ -134,12 +134,12 @@ class Measurement:
 |-------|-----------|-------|
 | `BatchCreated` | Batch | После `Batch.create()` |
 | `BatchSealed` | Batch | После `batch.seal()` |
-| `BatchWritten` | Batch | После `batch.mark_committed()` |
-| `BatchFailed` | Batch | После `batch.mark_failed()` |
-| `RecordQuarantined` | Batch | После `batch.quarantine_record()` |
+| `BatchWritten` | Batch | После `batch.mark-committed()` |
+| `BatchFailed` | Batch | После `batch.mark-failed()` |
+| `RecordQuarantined` | Batch | После `batch.quarantine-record()` |
 | `RunStarted` | PipelineRun | После `run.start()` |
-| `StageCompleted` | PipelineRun | После `run.record_stage_success()` |
-| `StageFailed` | PipelineRun | После `run.record_stage_failure()` |
+| `StageCompleted` | PipelineRun | После `run.record-stage-success()` |
+| `StageFailed` | PipelineRun | После `run.record-stage-failure()` |
 | `RunCompleted` | PipelineRun | После `run.complete()` |
 | `RunFailed` | PipelineRun | После `run.fail()` |
 
@@ -148,13 +148,13 @@ class Measurement:
 ```
 src/bioetl/domain/
 ├── aggregates/           # DDD Aggregates
-│   ├── __init__.py
+│   ├── --init--.py
 │   ├── batch.py          # Batch Aggregate (536 LOC)
-│   ├── pipeline_run.py   # PipelineRun Aggregate (574 LOC)
-│   ├── quarantine_entry.py # QuarantineEntry Aggregate (517 LOC)
+│   ├── pipeline-run.py   # PipelineRun Aggregate (574 LOC)
+│   ├── quarantine-entry.py # QuarantineEntry Aggregate (517 LOC)
 │   └── events.py         # Domain Events (197 LOC)
-├── value_objects/        # Value Objects
-│   ├── __init__.py
+├── value-objects/        # Value Objects
+│   ├── --init--.py
 │   ├── identifiers.py    # RunID, BatchID, EntityID, ContentHash
 │   └── measurements.py   # Measurement, IC50, etc.
 ├── entities/             # Domain Entities (per provider)
@@ -172,7 +172,7 @@ src/bioetl/domain/
 
 1. **Защита инвариантов**: State machine в агрегатах предотвращает некорректные переходы
 2. **Чёткие границы консистентности**: Каждый агрегат — единица транзакционной консистентности
-3. **Event Sourcing Ready**: `collect_events()` позволяет публиковать события
+3. **Event Sourcing Ready**: `collect-events()` позволяет публиковать события
 4. **Типобезопасность**: Value Objects исключают смешение идентификаторов
 5. **Тестируемость**: Агрегаты можно тестировать изолированно без I/O
 6. **Документирование бизнес-правил**: Инварианты явно описаны в docstrings
@@ -196,33 +196,33 @@ src/bioetl/domain/
 ### Batch Aggregate в RecordProcessor
 
 ```python
-# application/core/record_processor.py
-async def process_batch(self, records: list[dict]) -> None:
-    batch = Batch.create(run_id=self._run_id)
+# application/core/record-processor.py
+async def process-batch(self, records: list[dict]) -> None:
+    batch = Batch.create(run-id=self.-run-id)
 
     for record in records:
-        batch.add_record(record)
+        batch.add-record(record)
 
     # Валидация
-    for record in batch.all_records:
-        if not self._validate(record.data):
-            batch.quarantine_record(record, "Validation failed")
+    for record in batch.all-records:
+        if not self.-validate(record.data):
+            batch.quarantine-record(record, "Validation failed")
 
     batch.seal()
 
     # Запись
-    batch.mark_writing()
+    batch.mark-writing()
     try:
-        await self._writer.write(batch.records)
-        batch.mark_committed("silver")
+        await self.-writer.write(batch.records)
+        batch.mark-committed("silver")
     except Exception as e:
-        batch.mark_failed("silver", str(e))
+        batch.mark-failed("silver", str(e))
         raise
 
     # Публикация событий
-    events = batch.collect_events()
+    events = batch.collect-events()
     for event in events:
-        await self._event_bus.publish(event)
+        await self.-event-bus.publish(event)
 ```
 
 ### PipelineRun Aggregate в PipelineRunner
@@ -231,32 +231,32 @@ async def process_batch(self, records: list[dict]) -> None:
 # application/core/runner.py
 async def run(self) -> None:
     run = PipelineRun.create(
-        run_id=self._run_id,
-        pipeline_name=self._config.pipeline_name,
-        run_type=self._runtime.run_type,
+        run-id=self.-run-id,
+        pipeline-name=self.-config.pipeline-name,
+        run-type=self.-runtime.run-type,
     )
 
     run.start()
 
     try:
-        run.record_stage_start("preflight")
-        await self._preflight()
-        run.record_stage_success("preflight", records_processed=0)
+        run.record-stage-start("preflight")
+        await self.-preflight()
+        run.record-stage-success("preflight", records-processed=0)
 
-        run.record_stage_start("execution")
-        processed = await self._execute()
-        run.record_stage_success("execution", records_processed=processed)
+        run.record-stage-start("execution")
+        processed = await self.-execute()
+        run.record-stage-success("execution", records-processed=processed)
 
-        run.record_stage_start("postrun")
-        await self._postrun()
-        run.record_stage_success("postrun", records_processed=0)
+        run.record-stage-start("postrun")
+        await self.-postrun()
+        run.record-stage-success("postrun", records-processed=0)
 
         run.complete()
     except Exception as e:
         run.fail(str(e))
         raise
     finally:
-        events = run.collect_events()
+        events = run.collect-events()
         # Publish events...
 ```
 
@@ -265,7 +265,7 @@ async def run(self) -> None:
 - [ADR-020: Декомпозиция BasePipeline](ADR-020-basepipeline-decomposition.md) — рефакторинг application layer
 - [ADR-015: Pipeline Services Lifecycle](ADR-015-pipeline-services-lifecycle.md) — lifecycle management
 - [RULES.md §1.1](../../00-project/RULES.md) — Ports & Adapters Architecture
-- [docs/glossary.md](../../glossary.md) — Ubiquitous Language
+- [docs/glossary.md](../glossary.md) — Ubiquitous Language
 
 ## Альтернативы рассмотренные
 
@@ -279,7 +279,7 @@ async def run(self) -> None:
 
 - **Плюсы**: Полная история изменений
 - **Минусы**: Значительная сложность, требует event store
-- **Решение**: Отклонено, но `collect_events()` готов к эволюции
+- **Решение**: Отклонено, но `collect-events()` готов к эволюции
 
 ### 3. CQRS
 

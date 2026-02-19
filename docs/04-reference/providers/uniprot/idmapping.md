@@ -1,6 +1,6 @@
 # Пайплайн: UniProt ID Mapping
 
-**Имя пайплайна:** `uniprot_idmapping`
+**Имя пайплайна:** `uniprot-idmapping`
 **Провайдер:** `uniprot`
 **Сущность:** `idmapping`
 **Версия схемы:** 1.0.0
@@ -21,7 +21,7 @@
 
 - **Job-based API:** Асинхронный трёхэтапный процесс (submit → poll → fetch)
 - **Batch Processing:** До 500 IDs за один API job
-- **DQ Warning:** Записи без маппинга (`not_found`) сохраняются с `_dq_warn=True`
+- **DQ Warning:** Записи без маппинга (`not-found`) сохраняются с `-dq-warn=True`
 - **Bronze Disabled:** Данные идут напрямую из API, минуя Bronze-слой
 
 ---
@@ -32,26 +32,26 @@
 
 | Поле | Тип | Nullable | Описание |
 |------|-----|----------|----------|
-| `entity_id` | `str` | ❌ | Формат: `chembl:uniprot:{target_chembl_id}` |
-| `target_chembl_id` | `str` | ❌ | ChEMBL Target ID (e.g., CHEMBL204) — первичный ключ |
-| `uniprot_accession` | `str` | ✅ | UniProt Accession (e.g., P00742), null если не найден |
+| `entity-id` | `str` | ❌ | Формат: `chembl:uniprot:{target-chembl-id}` |
+| `target-chembl-id` | `str` | ❌ | ChEMBL Target ID (e.g., CHEMBL204) — первичный ключ |
+| `uniprot-accession` | `str` | ✅ | UniProt Accession (e.g., P00742), null если не найден |
 
 ### Статус маппинга
 
 | Поле | Тип | Значения | Описание |
 |------|-----|----------|----------|
-| `mapping_status` | `str` | `found`, `not_found`, `error` | Результат маппинга |
-| `_dq_warn` | `bool` | `True`, `False` | DQ предупреждение (`True` для `not_found`) |
+| `mapping-status` | `str` | `found`, `not-found`, `error` | Результат маппинга |
+| `-dq-warn` | `bool` | `True`, `False` | DQ предупреждение (`True` для `not-found`) |
 
 ### Lineage Metadata
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `content_hash` | `str` | SHA256 от business data |
-| `_run_id` | `str` | UUID запуска пайплайна |
-| `_run_type` | `str` | `incremental`, `backfill`, `rebuild` |
-| `_ingestion_ts` | `str` | Timestamp ingestion (ISO 8601) |
-| `_index` | `int` | Порядковый номер записи |
+| `content-hash` | `str` | SHA256 от business data |
+| `-run-id` | `str` | UUID запуска пайплайна |
+| `-run-type` | `str` | `incremental`, `backfill`, `rebuild` |
+| `-ingestion-ts` | `str` | Timestamp ingestion (ISO 8601) |
+| `-index` | `int` | Порядковый номер записи |
 
 ---
 
@@ -60,36 +60,36 @@
 **Источник:** `configs/pipelines/uniprot/idmapping.yaml`
 
 ```yaml
-pipeline_name: uniprot_idmapping
+pipeline-name: uniprot-idmapping
 provider: uniprot
-entity_type: idmapping
+entity-type: idmapping
 version: "1.0.0"
 
-primary_keys: ["target_chembl_id"]
-silver_table: "uniprot_idmapping"
-gold_table: "uniprot_idmapping"
+primary-keys: ["target-chembl-id"]
+silver-table: "uniprot-idmapping"
+gold-table: "uniprot-idmapping"
 
 source:
   type: file
-  input_path: data/input/target.csv
+  input-path: data/input/target.csv
   api:
-    base_url: https://rest.uniprot.org
-    from_db: ChEMBL
-    to_db: UniProtKB
+    base-url: https://rest.uniprot.org
+    from-db: ChEMBL
+    to-db: UniProtKB
 
 # Elevated thresholds for ID mapping
-dq_overrides:
-  soft_fail_threshold: 0.30  # 30% not_found acceptable
-  hard_fail_threshold: 0.80  # 80% not_found → hard failure
+dq-overrides:
+  soft-fail-threshold: 0.30  # 30% not-found acceptable
+  hard-fail-threshold: 0.80  # 80% not-found → hard failure
 
-rate_limit:
-  requests_per_second: 10.0
+rate-limit:
+  requests-per-second: 10.0
   burst: 20
 
-gold_filters:
-  required_fields:
-    - target_chembl_id
-    - mapping_status
+gold-filters:
+  required-fields:
+    - target-chembl-id
+    - mapping-status
 ```
 
 ---
@@ -99,7 +99,7 @@ gold_filters:
 ### 4.1. Extract
 
 - **Источник:** UniProt ID Mapping REST API (`https://rest.uniprot.org/idmapping`)
-- **Input:** CSV файл с колонкой `target_chembl_id`
+- **Input:** CSV файл с колонкой `target-chembl-id`
 - **Batch Size:** 500 IDs per job
 - **API Flow:**
   1. `POST /idmapping/run` — submit job, получить `jobId`
@@ -108,20 +108,20 @@ gold_filters:
 
 ### 4.2. Transform
 
-**Transformer:** `src/bioetl/application/pipelines/uniprot/idmapping_transformer.py`
+**Transformer:** `src/bioetl/application/pipelines/uniprot/idmapping-transformer.py`
 
-1. Извлечение `target_chembl_id` и `uniprot_accession` из API response
-2. Определение `mapping_status`: `found` | `not_found`
-3. Генерация `entity_id`: `chembl:uniprot:{target_chembl_id}`
-4. Вычисление `content_hash` (SHA256)
-5. Установка `_dq_warn=True` для `not_found`
+1. Извлечение `target-chembl-id` и `uniprot-accession` из API response
+2. Определение `mapping-status`: `found` | `not-found`
+3. Генерация `entity-id`: `chembl:uniprot:{target-chembl-id}`
+4. Вычисление `content-hash` (SHA256)
+5. Установка `-dq-warn=True` для `not-found`
 
 ### 4.3. Load
 
 | Слой | Формат | Стратегия | Путь |
 |------|--------|-----------|------|
 | **Bronze** | — | Disabled | — |
-| **Silver** | `delta` | Merge по `target_chembl_id` | `data/output/silver/uniprot/idmapping` |
+| **Silver** | `delta` | Merge по `target-chembl-id` | `data/output/silver/uniprot/idmapping` |
 | **Gold** | `delta` | Overwrite | `data/output/gold/uniprot/idmapping` |
 
 ---
@@ -132,8 +132,8 @@ gold_filters:
 
 | Порог | Значение | Действие |
 |-------|----------|----------|
-| **Soft** | 30% `not_found` | Warning в логах |
-| **Hard** | 80% `not_found` | Fail batch |
+| **Soft** | 30% `not-found` | Warning в логах |
+| **Hard** | 80% `not-found` | Fail batch |
 
 ### Обоснование elevated thresholds
 
@@ -148,7 +148,7 @@ gold_filters:
 
 ### UniProt ID Mapping API
 
-**Документация:** https://www.uniprot.org/help/id_mapping
+**Документация:** https://www.uniprot.org/help/id-mapping
 
 **Поддерживаемые базы данных:**
 - `ChEMBL` → `UniProtKB` (основной сценарий)
@@ -163,7 +163,7 @@ gold_filters:
 
 ```python
 # Endpoint: GET /configure/idmapping/fields
-await client.health_check()  # Returns HealthStatus.HEALTHY
+await client.health-check()  # Returns HealthStatus.HEALTHY
 ```
 
 ---
@@ -173,7 +173,7 @@ await client.health_check()  # Returns HealthStatus.HEALTHY
 ### Входные данные (CSV)
 
 ```csv
-target_chembl_id
+target-chembl-id
 CHEMBL204
 CHEMBL2034
 CHEMBL9999999
@@ -184,22 +184,22 @@ CHEMBL9999999
 ```json
 [
   {
-    "entity_id": "chembl:uniprot:CHEMBL204",
-    "target_chembl_id": "CHEMBL204",
-    "uniprot_accession": "P00742",
-    "mapping_status": "found",
-    "_dq_warn": false,
-    "_run_id": "...",
-    "_ingestion_ts": "2026-01-06T..."
+    "entity-id": "chembl:uniprot:CHEMBL204",
+    "target-chembl-id": "CHEMBL204",
+    "uniprot-accession": "P00742",
+    "mapping-status": "found",
+    "-dq-warn": false,
+    "-run-id": "...",
+    "-ingestion-ts": "2026-01-06T..."
   },
   {
-    "entity_id": "chembl:uniprot:CHEMBL9999999",
-    "target_chembl_id": "CHEMBL9999999",
-    "uniprot_accession": null,
-    "mapping_status": "not_found",
-    "_dq_warn": true,
-    "_run_id": "...",
-    "_ingestion_ts": "2026-01-06T..."
+    "entity-id": "chembl:uniprot:CHEMBL9999999",
+    "target-chembl-id": "CHEMBL9999999",
+    "uniprot-accession": null,
+    "mapping-status": "not-found",
+    "-dq-warn": true,
+    "-run-id": "...",
+    "-ingestion-ts": "2026-01-06T..."
   }
 ]
 ```
@@ -211,12 +211,12 @@ CHEMBL9999999
 | Компонент | Путь |
 |-----------|------|
 | **Config** | `configs/pipelines/uniprot/idmapping.yaml` |
-| **Transformer** | `src/bioetl/application/pipelines/uniprot/idmapping_transformer.py` |
-| **Client** | `src/bioetl/infrastructure/adapters/uniprot/idmapping_client.py` |
+| **Transformer** | `src/bioetl/application/pipelines/uniprot/idmapping-transformer.py` |
+| **Client** | `src/bioetl/infrastructure/adapters/uniprot/idmapping-client.py` |
 | **Silver Schema** | `src/bioetl/infrastructure/schemas/silver.py:134-154` |
 | **Gold Schema** | `src/bioetl/infrastructure/schemas/gold.py:166-198` |
-| **Unit Tests** | `tests/unit/application/pipelines/test_idmapping_transformer.py` |
-| **Integration Tests** | `tests/integration/adapters/test_uniprot_idmapping.py` |
+| **Unit Tests** | `tests/unit/application/pipelines/test-idmapping-transformer.py` |
+| **Integration Tests** | `tests/integration/adapters/test-uniprot-idmapping.py` |
 
 ---
 

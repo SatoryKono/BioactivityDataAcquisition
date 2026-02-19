@@ -19,28 +19,28 @@ Systematic verification of field mapping across all publication pipeline layers 
 
 | # | Pipeline | Provider | Entity | Status |
 |---|----------|----------|--------|--------|
-| 1 | `chembl_publication` | ChEMBL | publication | ⚠️ Missing Gold fields |
-| 2 | `chembl_publication_similarity` | ChEMBL | publication_similarity | ✅ Correct |
-| 3 | `chembl_publication_term` | ChEMBL | publication_term | ✅ Correct |
-| 4 | `pubmed_publication` | PubMed | publication | ⚠️ Missing Gold fields (Type mismatch ✅ FIXED) |
-| 5 | `crossref_publication` | CrossRef | work | ⚠️ Missing Gold fields (Type mismatch ✅ FIXED) |
-| 6 | `openalex_publication` | OpenAlex | publication | ✅ Correct (Type mismatch ✅ FIXED) |
-| 7 | `semanticscholar_publication` | SemanticScholar | publication | ✅ Correct |
+| 1 | `chembl-publication` | ChEMBL | publication | ⚠️ Missing Gold fields |
+| 2 | `chembl-publication-similarity` | ChEMBL | publication-similarity | ✅ Correct |
+| 3 | `chembl-publication-term` | ChEMBL | publication-term | ✅ Correct |
+| 4 | `pubmed-publication` | PubMed | publication | ⚠️ Missing Gold fields (Type mismatch ✅ FIXED) |
+| 5 | `crossref-publication` | CrossRef | work | ⚠️ Missing Gold fields (Type mismatch ✅ FIXED) |
+| 6 | `openalex-publication` | OpenAlex | publication | ✅ Correct (Type mismatch ✅ FIXED) |
+| 7 | `semanticscholar-publication` | SemanticScholar | publication | ✅ Correct |
 
-Примечание: API-ресурсы остаются `document*`, но canonical `entity_type` — `publication*` (см. ADR-024).
+Примечание: API-ресурсы остаются `document*`, но canonical `entity-type` — `publication*` (см. ADR-024).
 
 ---
 
-## Finding 1: TYPE_MISMATCH - `authors` Field Type Inconsistency
+## Finding 1: TYPE-MISMATCH - `authors` Field Type Inconsistency
 
 **Severity**: HIGH → ✅ **RESOLVED** (2026-01-26)
-**Affected Pipelines**: `pubmed_publication`, `crossref_publication`, `openalex_publication`
+**Affected Pipelines**: `pubmed-publication`, `crossref-publication`, `openalex-publication`
 
 ### Issue
 
 ~~The `authors` field has inconsistent types between Silver (JSON string) and Gold (Python list) schemas for 3 providers, while 2 providers are correctly aligned.~~
 
-**Resolution**: All Gold schemas now use `Series[str]` for the `authors` field, matching the Silver layer where transformers serialize authors to JSON strings via `serialize_json_list()`.
+**Resolution**: All Gold schemas now use `Series[str]` for the `authors` field, matching the Silver layer where transformers serialize authors to JSON strings via `serialize-json-list()`.
 
 ### Current State (Verified 2026-01-26)
 
@@ -60,20 +60,20 @@ Systematic verification of field mapping across all publication pipeline layers 
 - Line 252: OpenAlex `authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list` ✅
 - Line 353: SemanticScholar `authors: Series[str] = pa.Field(nullable=True)` ✅
 
-**Silver Schema (`src/bioetl/domain/schemas/common/publication_base.py`)**:
+**Silver Schema (`src/bioetl/domain/schemas/common/publication-base.py`)**:
 - Line 64-67: `authors: Series[str] = pa.Field(nullable=True, description="JSON array of author names")` ✅
 
 **Transformer Evidence (all serialize to JSON string)**:
-- `pubmed/transformer.py`: `"authors": self.serialize_json_list(hashed_authors)`
-- `crossref/transformer.py`: `"authors": self.serialize_json_list(hashed_authors)`
-- `openalex/transformer.py`: `"authors": self.serialize_json_list(hashed_authors)`
+- `pubmed/transformer.py`: `"authors": self.serialize-json-list(hashed-authors)`
+- `crossref/transformer.py`: `"authors": self.serialize-json-list(hashed-authors)`
+- `openalex/transformer.py`: `"authors": self.serialize-json-list(hashed-authors)`
 
 ---
 
-## Finding 2: MISSING_FIELD - CrossRef Gold Schema
+## Finding 2: MISSING-FIELD - CrossRef Gold Schema
 
 **Severity**: MEDIUM
-**Pipeline**: `crossref_publication`
+**Pipeline**: `crossref-publication`
 **Location**: `gold.py:748-810`
 
 ### Missing Fields
@@ -81,13 +81,13 @@ Systematic verification of field mapping across all publication pipeline layers 
 | Field | Silver Schema Line | Purpose |
 |-------|-------------------|---------|
 | `pmid` | 669 | Cross-provider linking |
-| `pmc_id` | 667 | Cross-provider linking |
-| `_lookup_method` | 648 | Resolution tracking |
-| `_original_id` | 649 | Resolution tracking |
+| `pmc-id` | 667 | Cross-provider linking |
+| `-lookup-method` | 648 | Resolution tracking |
+| `-original-id` | 649 | Resolution tracking |
 
 ### Context
 
-The transformer explicitly sets `pmid: None, pmc_id: None` (`transformer.py:157-158`) to prepare for future cross-enrichment. These fields exist in Silver but are absent from Gold.
+The transformer explicitly sets `pmid: None, pmc-id: None` (`transformer.py:157-158`) to prepare for future cross-enrichment. These fields exist in Silver but are absent from Gold.
 
 ### Recommended Fix
 
@@ -96,27 +96,27 @@ Add fields to `CrossRefPublicationGoldSchema`:
 ```python
 # After doi field (line 761)
 pmid: Series[str] = pa.Field(nullable=True)
-pmc_id: Series[str] = pa.Field(nullable=True)
+pmc-id: Series[str] = pa.Field(nullable=True)
 
 # After source field (line 794)
-lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
-original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
+lookup-method: Series[str] = pa.Field(nullable=True, alias="-lookup-method")
+original-id: Series[str] = pa.Field(nullable=True, alias="-original-id")
 ```
 
 ---
 
-## Finding 3: MISSING_FIELD - PubMed Gold Schema
+## Finding 3: MISSING-FIELD - PubMed Gold Schema
 
 **Severity**: MEDIUM
-**Pipeline**: `pubmed_publication`
+**Pipeline**: `pubmed-publication`
 **Location**: `gold.py:211-262`
 
 ### Missing Fields
 
 | Field | Silver Schema Line | Purpose |
 |-------|-------------------|---------|
-| `_lookup_method` | 173 | Resolution tracking |
-| `_original_id` | 174 | Resolution tracking |
+| `-lookup-method` | 173 | Resolution tracking |
+| `-original-id` | 174 | Resolution tracking |
 | `source` | 207 | Provider identification |
 
 ### Recommended Fix
@@ -128,33 +128,33 @@ Add fields to `PubMedPublicationGoldSchema`:
 source: Series[str] = pa.Field(nullable=True)
 
 # Before DQ fields (line 248)
-lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
-original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
+lookup-method: Series[str] = pa.Field(nullable=True, alias="-lookup-method")
+original-id: Series[str] = pa.Field(nullable=True, alias="-original-id")
 ```
 
 ---
 
-## Finding 4: MISSING_FIELD - ChEMBL Document Gold Schema
+## Finding 4: MISSING-FIELD - ChEMBL Document Gold Schema
 
 **Severity**: MEDIUM
-**Pipeline**: `chembl_publication`
+**Pipeline**: `chembl-publication`
 **Location**: `gold.py:400-444`
 
 ### Missing Fields
 
 | Field | Silver Schema Line | Purpose |
 |-------|-------------------|---------|
-| `_lookup_method` | 390 | Resolution tracking |
-| `_original_id` | 391 | Resolution tracking |
+| `-lookup-method` | 390 | Resolution tracking |
+| `-original-id` | 391 | Resolution tracking |
 
 ### Recommended Fix
 
 Add fields to `ChEMBLDocumentGoldSchema`:
 
 ```python
-# After src_id field (line 428)
-lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
-original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
+# After src-id field (line 428)
+lookup-method: Series[str] = pa.Field(nullable=True, alias="-lookup-method")
+original-id: Series[str] = pa.Field(nullable=True, alias="-original-id")
 ```
 
 ---
@@ -163,67 +163,67 @@ original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
 
 ### DOI Normalization ✅
 
-All providers use `DOI.from_raw()` value object for consistent normalization:
+All providers use `DOI.from-raw()` value object for consistent normalization:
 
 | Provider | Location | Method |
 |----------|----------|--------|
-| ChEMBL | `publication_transformer.py:162-163` | `DOI.from_raw(data.get("doi"))` |
-| PubMed | `transformer.py:168-170` | `DOI.from_raw(raw_doi)` |
-| CrossRef | `transformer.py:115-116` | `DOI.from_raw(rec.get("DOI"))` |
-| OpenAlex | `transformer.py:130-131` | `DOI.from_raw(rec.get("doi"))` |
-| SemanticScholar | `transformer.py:127-128` | `DOI.from_raw(raw_doi)` |
+| ChEMBL | `publication-transformer.py:162-163` | `DOI.from-raw(data.get("doi"))` |
+| PubMed | `transformer.py:168-170` | `DOI.from-raw(raw-doi)` |
+| CrossRef | `transformer.py:115-116` | `DOI.from-raw(rec.get("DOI"))` |
+| OpenAlex | `transformer.py:130-131` | `DOI.from-raw(rec.get("doi"))` |
+| SemanticScholar | `transformer.py:127-128` | `DOI.from-raw(raw-doi)` |
 
 ### PMID Normalization ✅
 
-All providers use `PubMedId.from_raw()` or `normalize_pmid()`:
+All providers use `PubMedId.from-raw()` or `normalize-pmid()`:
 
 | Provider | Location | Method |
 |----------|----------|--------|
-| ChEMBL | `publication_transformer.py:48` | `PMID` converter (via `normalize_pmid`) |
-| PubMed | `transformer.py:149-150` | `PubMedId.from_raw(raw_pmid)` |
-| OpenAlex | `extractors.py` | Via `extract_external_ids` |
-| SemanticScholar | `transformer.py:131-133` | `PubMedId.from_raw(raw_pmid)` |
+| ChEMBL | `publication-transformer.py:48` | `PMID` converter (via `normalize-pmid`) |
+| PubMed | `transformer.py:149-150` | `PubMedId.from-raw(raw-pmid)` |
+| OpenAlex | `extractors.py` | Via `extract-external-ids` |
+| SemanticScholar | `transformer.py:131-133` | `PubMedId.from-raw(raw-pmid)` |
 | CrossRef | N/A | Does not provide PMID |
 
 ### PMC ID Normalization ✅
 
-All providers use `normalize_pmc_id()`:
+All providers use `normalize-pmc-id()`:
 
 | Provider | Location | Method |
 |----------|----------|--------|
-| ChEMBL | `publication_transformer.py:189` | Set to `None` (API doesn't provide) |
-| PubMed | `transformer.py:196` | `normalize_pmc_id(IdentifierExtractor.extract_pmc_id(root))` |
-| OpenAlex | `transformer.py:178` | Via `extract_external_ids` |
-| SemanticScholar | `transformer.py:172-174` | `normalize_pmc_id(external_ids.get("pmcid"))` |
+| ChEMBL | `publication-transformer.py:189` | Set to `None` (API doesn't provide) |
+| PubMed | `transformer.py:196` | `normalize-pmc-id(IdentifierExtractor.extract-pmc-id(root))` |
+| OpenAlex | `transformer.py:178` | Via `extract-external-ids` |
+| SemanticScholar | `transformer.py:172-174` | `normalize-pmc-id(external-ids.get("pmcid"))` |
 | CrossRef | N/A | Does not provide PMC ID |
 
 ---
 
 ## Pipelines Verified as Correct
 
-### 1. chembl_publication_similarity ✅
+### 1. chembl-publication-similarity ✅
 
-- **Transformer**: `publication_similarity_transformer.py`
+- **Transformer**: `publication-similarity-transformer.py`
 - **Entity**: `DocumentSimilarity`
-- **Silver**: `CHEMBL_DOCUMENT_SIMILARITY_SCHEMA`
+- **Silver**: `CHEMBL-DOCUMENT-SIMILARITY-SCHEMA`
 - **Gold**: `ChEMBLDocumentSimilarityGoldSchema`
 - **Status**: All fields correctly mapped, types consistent
 
-### 2. chembl_publication_term ✅
+### 2. chembl-publication-term ✅
 
-- **Transformer**: `publication_term_transformer.py`
+- **Transformer**: `publication-term-transformer.py`
 - **Entity**: `DocumentTerm`
-- **Silver**: `CHEMBL_DOCUMENT_TERM_SCHEMA`
+- **Silver**: `CHEMBL-DOCUMENT-TERM-SCHEMA`
 - **Gold**: `ChEMBLDocumentTermGoldSchema`
 - **Status**: All fields correctly mapped, types consistent
 
-### 3. semanticscholar_publication ✅
+### 3. semanticscholar-publication ✅
 
 - **Transformer**: `semanticscholar/transformer.py`
 - **Entity**: `SemanticScholarPublicationEntity`
-- **Silver**: `SEMANTICSCHOLAR_PUBLICATION_SCHEMA`
+- **Silver**: `SEMANTICSCHOLAR-PUBLICATION-SCHEMA`
 - **Gold**: `SemanticScholarPublicationGoldSchema`
-- **Status**: All fields correctly mapped, includes `_lookup_method` and `_original_id`
+- **Status**: All fields correctly mapped, includes `-lookup-method` and `-original-id`
 
 ---
 
@@ -231,10 +231,10 @@ All providers use `normalize_pmc_id()`:
 
 | Finding | Category | Severity | Pipelines Affected | Status |
 |---------|----------|----------|-------------------|--------|
-| 1 | TYPE_MISMATCH | HIGH | pubmed, crossref, openalex | ✅ RESOLVED |
-| 2 | MISSING_FIELD | MEDIUM | crossref | Open |
-| 3 | MISSING_FIELD | MEDIUM | pubmed | Open |
-| 4 | MISSING_FIELD | MEDIUM | chembl_publication | Open |
+| 1 | TYPE-MISMATCH | HIGH | pubmed, crossref, openalex | ✅ RESOLVED |
+| 2 | MISSING-FIELD | MEDIUM | crossref | Open |
+| 3 | MISSING-FIELD | MEDIUM | pubmed | Open |
+| 4 | MISSING-FIELD | MEDIUM | chembl-publication | Open |
 
 ---
 
@@ -243,8 +243,8 @@ All providers use `normalize_pmc_id()`:
 | Criteria | Status |
 |----------|--------|
 | Mapping Matrix Complete | ✅ Verified for all 7 pipelines |
-| No TYPE_MISMATCH | ✅ All type mismatches resolved (authors field fixed 2026-01-26) |
-| No NULLABLE_MISMATCH | ✅ No nullable mismatches found |
+| No TYPE-MISMATCH | ✅ All type mismatches resolved (authors field fixed 2026-01-26) |
+| No NULLABLE-MISMATCH | ✅ No nullable mismatches found |
 | Cross-Provider Linking | ✅ DOI/PMID/PMC ID mapping verified |
 | Documentation Updated | ✅ This report |
 

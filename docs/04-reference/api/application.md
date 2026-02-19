@@ -98,7 +98,7 @@ sequenceDiagram
     CLI->>Runner: run()
     Runner->>Preflight: execute()
     Preflight-->>Runner: health OK
-    Runner->>Runner: acquire_lock()
+    Runner->>Runner: acquire-lock()
     Runner->>Executor: execute()
     loop Each Batch
         Executor->>Executor: fetch → transform → write
@@ -106,7 +106,7 @@ sequenceDiagram
     Executor-->>Runner: done
     Runner->>Postrun: execute()
     Postrun-->>Runner: DQ + VACUUM done
-    Runner->>Runner: release_lock()
+    Runner->>Runner: release-lock()
     Runner-->>CLI: result
 ```
 

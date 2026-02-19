@@ -28,13 +28,13 @@ VACUUM выполняется **автоматически** после кажд
 
 ```
 PipelineRunner.run()
-    └── PostrunService.run_vacuum_if_enabled()
-            └── RetentionManager.vacuum(retention_hours=168)
+    └── PostrunService.run-vacuum-if-enabled()
+            └── RetentionManager.vacuum(retention-hours=168)
 ```
 
 **Реализация:**
-- `PostrunService` (`application/services/postrun_service.py:137-153`)
-- `RetentionManager` (`infrastructure/storage/retention_manager.py:57-91`)
+- `PostrunService` (`application/services/postrun-service.py:137-153`)
+- `RetentionManager` (`infrastructure/storage/retention-manager.py:57-91`)
 
 ### Конфигурация
 
@@ -44,16 +44,16 @@ PipelineRunner.run()
 from bioetl.domain.config import RuntimeConfig
 
 config = RuntimeConfig(
-    vacuum_enabled=True,      # Включить автоматический VACUUM
-    vacuum_retention_days=7,  # Файлы старше 7 дней удаляются
+    vacuum-enabled=True,      # Включить автоматический VACUUM
+    vacuum-retention-days=7,  # Файлы старше 7 дней удаляются
 )
 ```
 
 Или через переменные окружения:
 
 ```bash
-export BIOETL_VACUUM_ENABLED=true
-export BIOETL_VACUUM_RETENTION_DAYS=7
+export BIOETL-VACUUM-ENABLED=true
+export BIOETL-VACUUM-RETENTION-DAYS=7
 ```
 
 ---
@@ -127,19 +127,19 @@ bioetl maintenance vacuum-all --dry-run
 
 set -euo pipefail
 
-RETENTION_DAYS="${VACUUM_RETENTION_DAYS:-7}"
-LOG_FILE="${VACUUM_LOG_FILE:-/var/log/bioetl/vacuum.log}"
+RETENTION-DAYS="${VACUUM-RETENTION-DAYS:-7}"
+LOG-FILE="${VACUUM-LOG-FILE:-/var/log/bioetl/vacuum.log}"
 
-echo "[$(date -Iseconds)] Starting scheduled vacuum" >> "$LOG_FILE"
+echo "[$(date -Iseconds)] Starting scheduled vacuum" >> "$LOG-FILE"
 
 cd "$(dirname "$0")/.."
 
 if bioetl maintenance vacuum-all \
-    --retention-days "$RETENTION_DAYS" \
-    >> "$LOG_FILE" 2>&1; then
-    echo "[$(date -Iseconds)] Vacuum completed successfully" >> "$LOG_FILE"
+    --retention-days "$RETENTION-DAYS" \
+    >> "$LOG-FILE" 2>&1; then
+    echo "[$(date -Iseconds)] Vacuum completed successfully" >> "$LOG-FILE"
 else
-    echo "[$(date -Iseconds)] Vacuum failed with exit code $?" >> "$LOG_FILE"
+    echo "[$(date -Iseconds)] Vacuum failed with exit code $?" >> "$LOG-FILE"
     exit 1
 fi
 ```
@@ -164,11 +164,11 @@ fi
 ```yaml
 # configs/runtime.yaml
 vacuum:
-  default_retention_days: 7
-  forensic_tables:
-    - chembl_activity
-    - pubchem_compound
-  forensic_retention_days: 30
+  default-retention-days: 7
+  forensic-tables:
+    - chembl-activity
+    - pubchem-compound
+  forensic-retention-days: 30
 ```
 
 ---
@@ -181,11 +181,11 @@ VACUUM операции логируются с structlog pattern:
 
 ```json
 {
-  "event": "vacuum_completed",
+  "event": "vacuum-completed",
   "layer": "silver",
-  "table": "chembl_activity",
-  "files_removed": 42,
-  "run_id": "abc123-..."
+  "table": "chembl-activity",
+  "files-removed": 42,
+  "run-id": "abc123-..."
 }
 ```
 
@@ -193,9 +193,9 @@ VACUUM операции логируются с structlog pattern:
 
 | Метрика | Тип | Описание |
 |---------|-----|----------|
-| `vacuum_files_removed` | Counter | Количество удалённых файлов |
-| `vacuum_duration_seconds` | Histogram | Время выполнения VACUUM |
-| `vacuum_errors_total` | Counter | Ошибки VACUUM |
+| `vacuum-files-removed` | Counter | Количество удалённых файлов |
+| `vacuum-duration-seconds` | Histogram | Время выполнения VACUUM |
+| `vacuum-errors-total` | Counter | Ошибки VACUUM |
 
 ---
 
@@ -228,5 +228,5 @@ VACUUM операции логируются с structlog pattern:
 - [ADR-001: Delta Lake vs Parquet](../02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md)
 - [ADR-002: Medallion Architecture](../02-architecture/decisions/ADR-002-medallion-architecture.md)
 - [RULES.md §3.1: Medallion Architecture](../00-project/RULES.md)
-- [VacuumService](../../src/bioetl/application/services/vacuum_service.py)
-- [RetentionManager](../../src/bioetl/infrastructure/storage/retention_manager.py)
+- [VacuumService](../../src/bioetl/application/services/vacuum-service.py)
+- [RetentionManager](../../src/bioetl/infrastructure/storage/retention-manager.py)

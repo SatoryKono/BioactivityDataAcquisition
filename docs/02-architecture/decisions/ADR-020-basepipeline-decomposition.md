@@ -12,13 +12,13 @@
 
 ```python
 # СТАРЫЙ API (deprecated)
-def __init__(
+def --init--(
     self,
-    pipeline_name: str,
+    pipeline-name: str,
     provider: str,
-    entity_type: str,
-    run_type: RunType,
-    data_source: DataSourcePort,
+    entity-type: str,
+    run-type: RunType,
+    data-source: DataSourcePort,
     storage: StoragePort,
     lock: LockPort,
     checkpoint: CheckpointPort,
@@ -47,16 +47,16 @@ def __init__(
 
 - `src/bioetl/application/core/base.py` - основной класс
 - `src/bioetl/domain/config.py` - **NEW**
-- `src/bioetl/application/core/pipeline_services.py` - **NEW**
+- `src/bioetl/application/core/pipeline-services.py` - **NEW**
 - `src/bioetl/application/pipelines/chembl/activity.py` - наследник
 - `src/bioetl/application/core/runner.py` - зависит от BasePipeline
-- `src/bioetl/application/core/batch_executor.py` - зависит от BasePipeline
-- `src/bioetl/application/core/lock_manager.py` - зависит от BasePipeline
-- `src/bioetl/application/core/quarantine_manager.py` - зависит от BasePipeline
-- `tests/unit/application/test_base_pipeline.py` - тесты
-- `tests/unit/application/core/test_batch_executor.py` - тесты
-- `tests/unit/application/test_pipeline_config.py` - тесты
-- `tests/unit/application/pipelines/test_chembl_activity_unit.py` - тесты
+- `src/bioetl/application/core/batch-executor.py` - зависит от BasePipeline
+- `src/bioetl/application/core/lock-manager.py` - зависит от BasePipeline
+- `src/bioetl/application/core/quarantine-manager.py` - зависит от BasePipeline
+- `tests/unit/application/test-base-pipeline.py` - тесты
+- `tests/unit/application/core/test-batch-executor.py` - тесты
+- `tests/unit/application/test-pipeline-config.py` - тесты
+- `tests/unit/application/pipelines/test-chembl-activity-unit.py` - тесты
 
 ## Решение
 
@@ -68,14 +68,14 @@ def __init__(
 @dataclass(frozen=True)
 class PipelineConfig:
     """Static pipeline configuration."""
-    pipeline_name: str
+    pipeline-name: str
     provider: str
-    entity_type: str
-    primary_keys: list[str]
-    silver_table: str
-    gold_table: str | None = None
-    batch_size: int = 100
-    checkpoint_interval: int = 1000
+    entity-type: str
+    primary-keys: list[str]
+    silver-table: str
+    gold-table: str | None = None
+    batch-size: int = 100
+    checkpoint-interval: int = 1000
 ```
 
 #### RuntimeConfig (immutable dataclass)
@@ -84,10 +84,10 @@ class PipelineConfig:
 @dataclass(frozen=True)
 class RuntimeConfig:
     """Runtime execution parameters."""
-    run_type: RunType
+    run-type: RunType
     resume: bool = False
     limit: int | None = None
-    skip_gold: bool = False  # Skip Gold writes (composite sub-pipelines)
+    skip-gold: bool = False  # Skip Gold writes (composite sub-pipelines)
 ```
 
 #### PipelineServices (immutable dataclass with lifecycle)
@@ -96,7 +96,7 @@ class RuntimeConfig:
 @dataclass(frozen=True)
 class PipelineServices:
     """I/O port dependencies with lifecycle management."""
-    data_source: DataSourcePort
+    data-source: DataSourcePort
     storage: StoragePort
     lock: LockPort
     checkpoint: CheckpointPort
@@ -108,12 +108,12 @@ class PipelineServices:
     async def aclose(self) -> None:
         """Gracefully close all I/O resources."""
         results = await asyncio.gather(
-            self.data_source.aclose(),
+            self.data-source.aclose(),
             self.storage.aclose(),
             self.lock.aclose(),
             self.checkpoint.aclose(),
             self.quarantine.aclose(),
-            return_exceptions=True,
+            return-exceptions=True,
         )
         for result in results:
             if isinstance(result, Exception):
@@ -126,19 +126,19 @@ class PipelineServices:
 class BasePipeline(ABC):
     """Refactored pipeline with decomposed dependencies."""
 
-    def __init__(
+    def --init--(
         self,
         config: PipelineConfig,
         runtime: RuntimeConfig,
         services: PipelineServices,
-        run_id: RunID,
+        run-id: RunID,
         transformer: BaseTransformer | None = None,
     ) -> None:
-        self._config = config
-        self._runtime = runtime
-        self._services = services
-        self._run_id = run_id
-        self._transformer = transformer
+        self.-config = config
+        self.-runtime = runtime
+        self.-services = services
+        self.-run-id = run-id
+        self.-transformer = transformer
         # ... lazy-initialized components
 ```
 
@@ -153,7 +153,7 @@ self.runner = PipelineRunner(self)  # circular ref!
 
 # Стало:
 pipeline = ChEMBLActivityPipeline.create(
-    run_id=run_id,
+    run-id=run-id,
     runtime=runtime,
     services=services,
     config=config,
@@ -164,14 +164,14 @@ runner = PipelineRunner(
     runtime=pipeline.runtime,
     services=pipeline.services,
     context=pipeline.context,
-    executor=batch_executor,
-    checkpoint_manager=checkpoint_manager,
-    shutdown_signal=pipeline.shutdown_signal,
+    executor=batch-executor,
+    checkpoint-manager=checkpoint-manager,
+    shutdown-signal=pipeline.shutdown-signal,
     logger=logger,
-    lock_manager=lock_manager,
+    lock-manager=lock-manager,
     preflight=preflight,
     postrun=postrun,
-    lifecycle_service=lifecycle_service,
+    lifecycle-service=lifecycle-service,
     observer=observer,
     pipeline=pipeline,
     tracer=tracer,
@@ -185,11 +185,11 @@ Graceful shutdown реализован в `PipelineRunner.run()` через ко
 
 ```python
 try:
-    with self._observer:
-        async with self._services, self._lock_manager:
+    with self.-observer:
+        async with self.-services, self.-lock-manager:
             ...
 finally:
-    await self._postrun_service.cleanup(self._tracer)
+    await self.-postrun-service.cleanup(self.-tracer)
 ```
 
 ## Последствия
@@ -232,8 +232,8 @@ finally:
 
 ### Фаза 3: Рефакторинг BasePipeline
 
-- [x] Новый конструктор `__init__(config, runtime, services)`
-- [x] Обновление менеджеров (`from_components()`)
+- [x] Новый конструктор `--init--(config, runtime, services)`
+- [x] Обновление менеджеров (`from-components()`)
 - [x] Lazy initialization компонентов
 - [x] `ShutdownSignal` для graceful shutdown
 
@@ -244,13 +244,13 @@ finally:
 
 ### Фаза 5: Обновление тестов
 
-- [x] `test_base_pipeline.py`
-- [x] `test_batch_executor.py`
-- [x] `test_chembl_activity_unit.py`
+- [x] `test-base-pipeline.py`
+- [x] `test-batch-executor.py`
+- [x] `test-chembl-activity-unit.py`
 
 ### Фаза 6: Удаление shim
 
-- [x] Удалить `from_params()`
+- [x] Удалить `from-params()`
 - [x] Финальное обновление документации
 
 ## Альтернативы рассмотренные
@@ -282,12 +282,12 @@ finally:
 │  │ PipelineConfig │  │ PipelineRuntime  │  │  PipelineServices  │  │
 │  │   (frozen)     │  │    Config        │  │    (frozen)        │  │
 │  │                │  │   (frozen)       │  │                    │  │
-│  │ - pipeline_name│  │ - run_type       │  │ - data_source      │  │
+│  │ - pipeline-name│  │ - run-type       │  │ - data-source      │  │
 │  │ - provider     │  │ - resume         │  │ - storage          │  │
-│  │ - entity_type  │  │ - limit          │  │ - lock             │  │
-│  │ - primary_keys │  │                  │  │ - checkpoint       │  │
-│  │ - silver_table │  │                  │  │ - quarantine       │  │
-│  │ - batch_size   │  │                  │  │ - metrics          │  │
+│  │ - entity-type  │  │ - limit          │  │ - lock             │  │
+│  │ - primary-keys │  │                  │  │ - checkpoint       │  │
+│  │ - silver-table │  │                  │  │ - quarantine       │  │
+│  │ - batch-size   │  │                  │  │ - metrics          │  │
 │  │                │  │                  │  │ - logger           │  │
 │  │                │  │                  │  │                    │  │
 │  │                │  │                  │  │ + aclose()         │  │
@@ -296,13 +296,13 @@ finally:
 │  Lazy-initialized (no circular refs):                               │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────────┐  │
 │  │ Orchestrator │  │   Executor   │  │   CheckpointManager      │  │
-│  │.from_components│ │.from_components│ │                          │  │
+│  │.from-components│ │.from-components│ │                          │  │
 │  └──────────────┘  └──────────────┘  └──────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────────┘
                                 │
                                 ▼
                     ChEMBLActivityPipeline
-                    (uses CHEMBL_ACTIVITY_CONFIG)
+                    (uses CHEMBL-ACTIVITY-CONFIG)
 ```
 
 ## Related ADRs

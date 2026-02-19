@@ -7,10 +7,10 @@ Checkpoints track pipeline progress to enable resumable execution. This runbook 
 ## Checkpoint Location
 
 ```
-data/checkpoints/{provider}_{entity}.json
+data/checkpoints/{provider}-{entity}.json
 ```
 
-Example: `data/checkpoints/chembl_activity.json`
+Example: `data/checkpoints/chembl-activity.json`
 
 ## Checkpoint Structure
 
@@ -18,12 +18,12 @@ Example: `data/checkpoints/chembl_activity.json`
 {
   "provider": "chembl",
   "entity": "activity",
-  "last_offset": 1500000,
-  "last_run_id": "run-20260102-143022-abc123",
-  "last_run_timestamp": "2026-01-02T14:30:22.123456Z",
-  "last_run_type": "incremental",
-  "total_records_processed": 1500000,
-  "schema_version": "1.0.0"
+  "last-offset": 1500000,
+  "last-run-id": "run-20260102-143022-abc123",
+  "last-run-timestamp": "2026-01-02T14:30:22.123456Z",
+  "last-run-type": "incremental",
+  "total-records-processed": 1500000,
+  "schema-version": "1.0.0"
 }
 ```
 
@@ -36,11 +36,11 @@ Example: `data/checkpoints/chembl_activity.json`
 **Diagnosis**:
 ```bash
 # Check checkpoint offset
-cat data/checkpoints/chembl_activity.json | jq '.last_offset'
+cat data/checkpoints/chembl-activity.json | jq '.last-offset'
 
 # Compare with source record count
 # (provider-specific, example for ChEMBL)
-curl "https://www.ebi.ac.uk/chembl/api/data/activity?limit=1" | jq '.page_meta.total_count'
+curl "https://www.ebi.ac.uk/chembl/api/data/activity?limit=1" | jq '.page-meta.total-count'
 ```
 
 **Resolution**:
@@ -58,19 +58,19 @@ import polars as pl
 from deltalake import DeltaTable
 
 dt = DeltaTable("data/output/silver/chembl/activity")
-df = pl.scan_delta(str(dt)).collect()
+df = pl.scan-delta(str(dt)).collect()
 
 # Check for duplicates
-duplicates = df.group_by("activity_id").count().filter(pl.col("count") > 1)
+duplicates = df.group-by("activity-id").count().filter(pl.col("count") > 1)
 print(f"Duplicate records: {len(duplicates)}")
 ```
 
 **Resolution**:
 1. Check if checkpoint was manually modified
-2. Verify content_hash is being calculated correctly
+2. Verify content-hash is being calculated correctly
 3. Run deduplication:
    ```bash
-   bioetl dedupe --table chembl_activity
+   bioetl dedupe --table chembl-activity
    ```
 
 ### Issue 3: Checkpoint Corruption
@@ -80,7 +80,7 @@ print(f"Duplicate records: {len(duplicates)}")
 **Diagnosis**:
 ```bash
 # Validate JSON
-python -m json.tool data/checkpoints/chembl_activity.json
+python -m json.tool data/checkpoints/chembl-activity.json
 
 # Check file permissions
 ls -la data/checkpoints/
@@ -92,10 +92,10 @@ ls -la data/checkpoints/
 
 ```bash
 # Backup corrupted checkpoint
-mv data/checkpoints/chembl_activity.json data/checkpoints/chembl_activity.json.corrupted
+mv data/checkpoints/chembl-activity.json data/checkpoints/chembl-activity.json.corrupted
 
 # Create fresh checkpoint (optional, will be created on first run)
-echo '{}' > data/checkpoints/chembl_activity.json
+echo '{}' > data/checkpoints/chembl-activity.json
 ```
 
 ### Issue 4: Checkpoint Not Updating
@@ -105,7 +105,7 @@ echo '{}' > data/checkpoints/chembl_activity.json
 **Diagnosis**:
 ```bash
 # Check file modification time
-stat data/checkpoints/chembl_activity.json
+stat data/checkpoints/chembl-activity.json
 
 # Verify write permissions
 touch data/checkpoints/test && rm data/checkpoints/test
@@ -121,14 +121,14 @@ touch data/checkpoints/test && rm data/checkpoints/test
 **Symptom**: Pipeline processes old records after schema evolution.
 
 **Diagnosis**:
-1. Check checkpoint schema_version
+1. Check checkpoint schema-version
 2. Compare with current schema version in code
 
 **Resolution**:
 If schema version mismatch is intentional:
 ```bash
 # Full refresh with new schema
-bioetl run --pipeline chembl_activity --run-type rebuild
+bioetl run --pipeline chembl-activity --run-type rebuild
 ```
 
 ## Manual Checkpoint Operations
@@ -136,17 +136,17 @@ bioetl run --pipeline chembl_activity --run-type rebuild
 ### View Checkpoint
 
 ```bash
-cat data/checkpoints/chembl_activity.json | python -m json.tool
+cat data/checkpoints/chembl-activity.json | python -m json.tool
 ```
 
 ### Reset Checkpoint
 
 ```bash
 # Backup first
-cp data/checkpoints/chembl_activity.json data/checkpoints/chembl_activity.json.bak
+cp data/checkpoints/chembl-activity.json data/checkpoints/chembl-activity.json.bak
 
 # Reset to beginning
-echo '{"provider": "chembl", "entity": "activity", "last_offset": 0}' > data/checkpoints/chembl_activity.json
+echo '{"provider": "chembl", "entity": "activity", "last-offset": 0}' > data/checkpoints/chembl-activity.json
 ```
 
 ### Set Specific Offset
@@ -154,16 +154,16 @@ echo '{"provider": "chembl", "entity": "activity", "last_offset": 0}' > data/che
 ```python
 import json
 
-checkpoint_path = "data/checkpoints/chembl_activity.json"
+checkpoint-path = "data/checkpoints/chembl-activity.json"
 
-with open(checkpoint_path) as f:
+with open(checkpoint-path) as f:
     checkpoint = json.load(f)
 
 # Set to specific offset
-checkpoint["last_offset"] = 1000000
-checkpoint["last_run_type"] = "manual_reset"
+checkpoint["last-offset"] = 1000000
+checkpoint["last-run-type"] = "manual-reset"
 
-with open(checkpoint_path, "w") as f:
+with open(checkpoint-path, "w") as f:
     json.dump(checkpoint, f, indent=2)
 ```
 
@@ -187,25 +187,25 @@ import json
 from pathlib import Path
 from deltalake import DeltaTable
 
-def validate_checkpoint(provider: str, entity: str):
+def validate-checkpoint(provider: str, entity: str):
     """Validate checkpoint against Silver table state."""
 
-    checkpoint_path = Path(f"data/output/checkpoints/{provider}_{entity}.json")
-    table_path = Path(f"data/output/silver/{provider}/{entity}")
+    checkpoint-path = Path(f"data/output/checkpoints/{provider}-{entity}.json")
+    table-path = Path(f"data/output/silver/{provider}/{entity}")
 
     # Load checkpoint
-    with open(checkpoint_path) as f:
+    with open(checkpoint-path) as f:
         checkpoint = json.load(f)
 
     # Load table
-    dt = DeltaTable(str(table_path))
-    row_count = dt.to_pyarrow_table().num_rows
+    dt = DeltaTable(str(table-path))
+    row-count = dt.to-pyarrow-table().num-rows
 
-    print(f"Checkpoint offset: {checkpoint.get('last_offset', 0)}")
-    print(f"Table row count: {row_count}")
+    print(f"Checkpoint offset: {checkpoint.get('last-offset', 0)}")
+    print(f"Table row count: {row-count}")
 
     # Check consistency
-    if checkpoint.get("total_records_processed", 0) != row_count:
+    if checkpoint.get("total-records-processed", 0) != row-count:
         print("WARNING: Checkpoint and table row count mismatch!")
         return False
 
@@ -213,7 +213,7 @@ def validate_checkpoint(provider: str, entity: str):
     return True
 
 # Validate
-validate_checkpoint("chembl", "activity")
+validate-checkpoint("chembl", "activity")
 ```
 
 ## Backup and Recovery
@@ -222,15 +222,15 @@ validate_checkpoint("chembl", "activity")
 
 Checkpoints are backed up before each run:
 ```
-data/checkpoints/chembl_activity.json.bak
+data/checkpoints/chembl-activity.json.bak
 ```
 
 ### Manual Backup
 
 ```bash
 # Timestamp-based backup
-cp data/checkpoints/chembl_activity.json \
-   data/checkpoints/chembl_activity.$(date +%Y%m%d_%H%M%S).json
+cp data/checkpoints/chembl-activity.json \
+   data/checkpoints/chembl-activity.$(date +%Y%m%d-%H%M%S).json
 ```
 
 ### Recovery from Backup
@@ -240,7 +240,7 @@ cp data/checkpoints/chembl_activity.json \
 ls -la data/checkpoints/*.bak data/checkpoints/*.json.*
 
 # Restore from backup
-cp data/checkpoints/chembl_activity.json.bak data/checkpoints/chembl_activity.json
+cp data/checkpoints/chembl-activity.json.bak data/checkpoints/chembl-activity.json
 ```
 
 ## Monitoring

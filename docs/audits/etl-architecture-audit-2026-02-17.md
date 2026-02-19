@@ -53,7 +53,7 @@ All 38 Protocol classes in `domain/ports/` use `*Port` suffix correctly.
 
 ### ARCH-004: Adapter Health Check — PASS
 
-Health check implementations found via `HealthCheckMixin` and individual adapters. All HTTP adapters implement `health_check()`.
+Health check implementations found via `HealthCheckMixin` and individual adapters. All HTTP adapters implement `health-check()`.
 
 ### ARCH-005: Composition Root Isolation — PASS
 
@@ -61,11 +61,11 @@ No `Factory()` calls found in `application/` or `domain/` layers. All factory lo
 
 ### ARCH-006: Silver Layer ACID — PASS
 
-No `to_parquet` or `write_parquet` calls in storage layer. Silver layer uses Delta Lake exclusively.
+No `to-parquet` or `write-parquet` calls in storage layer. Silver layer uses Delta Lake exclusively.
 
 ### ARCH-007: Medallion Clear Policy — PASS (via architecture tests)
 
-`test_medallion_policy.py` and `test_medallion_invariants.py` pass (14 tests + 3 tests).
+`test-medallion-policy.py` and `test-medallion-invariants.py` pass (14 tests + 3 tests).
 
 ### ARCH-008: Single Source of Imports — PASS
 
@@ -84,7 +84,7 @@ Application-layer constructor instantiations are internal helper decomposition (
 - Application layer: 0 structlog imports
 - Interfaces layer: 0 structlog imports
 - Domain layer: 0 structlog imports
-- Architecture test `test_no_structlog_in_application_interfaces.py` passes
+- Architecture test `test-no-structlog-in-application-interfaces.py` passes
 
 ### AP-003: Import Boundary Violation — PASS
 
@@ -154,15 +154,15 @@ All factory calls are in `composition/` layer.
 
 **Severity:** MEDIUM (-0.5 each, capped at -1.0 total per category)
 
-**Note:** Architecture test `test_naming_conventions.py` passes — the project has its own set of accepted naming patterns that may differ slightly from the strict rules.
+**Note:** Architecture test `test-naming-conventions.py` passes — the project has its own set of accepted naming patterns that may differ slightly from the strict rules.
 
 ### NAME-003: Module Naming — PASS
 
-All modules use descriptive snake_case names. No `utils.py`, `helpers.py`, `misc.py` found.
+All modules use descriptive snake-case names. No `utils.py`, `helpers.py`, `misc.py` found.
 
 ### NAME-006: Enum Values — PASS
 
-All ~45 Enum classes use UPPER_SNAKE_CASE correctly.
+All ~45 Enum classes use UPPER-SNAKE-CASE correctly.
 
 ---
 
@@ -189,7 +189,7 @@ All ~45 Enum classes use UPPER_SNAKE_CASE correctly.
 **Top hotspots:**
 - `application/pipelines/uniprot/extractors/` — XML parsing returns untyped data
 - `infrastructure/adapters/*/client.py` — external API response handling
-- `application/core/base_transformer.py` — generic transform pipeline
+- `application/core/base-transformer.py` — generic transform pipeline
 
 ### TYPE-003: mypy Strict — PASS (assumed via CI enforcement)
 
@@ -197,7 +197,7 @@ The project is configured for `mypy --strict` in `pyproject.toml` and CI enforce
 
 ### TYPE-004: Protocol Runtime Checkable — PASS
 
-All 38 Port Protocol classes have `@runtime_checkable` decorator.
+All 38 Port Protocol classes have `@runtime-checkable` decorator.
 
 ---
 
@@ -216,7 +216,7 @@ tests/unit/{application,domain,infrastructure,composition,interfaces}/
 
 ### TEST-003: VCR Cassettes for HTTP — PASS
 
-136 VCR cassettes across 8 providers in `tests/fixtures/vcr/`. Secrets are filtered in `before_record` callback.
+136 VCR cassettes across 8 providers in `tests/fixtures/vcr/`. Secrets are filtered in `before-record` callback.
 
 ### TEST-004: Architecture Tests — PASS
 
@@ -224,7 +224,7 @@ tests/unit/{application,domain,infrastructure,composition,interfaces}/
 
 ### TEST-005: No Test Logic in Production — PASS
 
-No `pytest`/`unittest` imports in production code. The `test_mode` flag is a legitimate runtime configuration parameter (EXC-002).
+No `pytest`/`unittest` imports in production code. The `test-mode` flag is a legitimate runtime configuration parameter (EXC-002).
 
 ---
 
@@ -248,7 +248,7 @@ Analyzed 514 files, 1696 dependencies.
 ### Priority 1: TYPE-002 — Add `# Any:` justification comments (MEDIUM)
 
 The 625 `Any` usages should have justifying comments. Prioritize:
-1. `application/core/base_transformer.py` — core template pattern
+1. `application/core/base-transformer.py` — core template pattern
 2. `infrastructure/adapters/*/client.py` — document API response types
 3. `domain/filtering/` — filter predicate types
 

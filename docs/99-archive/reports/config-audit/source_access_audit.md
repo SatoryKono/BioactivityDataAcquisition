@@ -20,9 +20,9 @@
 
 | ID | Файл | Изменение |
 |----|------|-----------|
-| ENV-001 | `.env.example:43` | `BIOETL_SEMANTIC_SCHOLAR_API_KEY` → `BIOETL_SEMANTICSCHOLAR_API_KEY` |
-| CONFIG-001 | `configs/sources/pubmed.yaml:16-17` | `BIOETL_NCBI_*` → `BIOETL_PUBMED_*` |
-| CONFIG-002 | `configs/pipelines/pubmed/publication.yaml:29-30` | `BIOETL_NCBI_*` → `BIOETL_PUBMED_*` |
+| ENV-001 | `.env.example:43` | `BIOETL-SEMANTIC-SCHOLAR-API-KEY` → `BIOETL-SEMANTICSCHOLAR-API-KEY` |
+| CONFIG-001 | `configs/sources/pubmed.yaml:16-17` | `BIOETL-NCBI-*` → `BIOETL-PUBMED-*` |
+| CONFIG-002 | `configs/pipelines/pubmed/publication.yaml:29-30` | `BIOETL-NCBI-*` → `BIOETL-PUBMED-*` |
 
 ---
 
@@ -34,21 +34,21 @@
 |----------|----------|-----------|----------------------|-----------------|---------------|
 | ChEMBL | `https://www.ebi.ac.uk/chembl/api/data` | public | 3 | 5/300 | — |
 | PubChem | `https://pubchem.ncbi.nlm.nih.gov/rest/pug` | public | 5 | 5/300 | — |
-| UniProt | `https://rest.uniprot.org` | api_key | 10 (100 w/key) | 5/300 | `BIOETL_UNIPROT_API_KEY` |
-| OpenAlex | `https://api.openalex.org` | email | 10 | 5/300 | `BIOETL_OPENALEX_EMAIL` |
-| CrossRef | `https://api.crossref.org` | email | 50 | 5/300 | `BIOETL_CROSSREF_EMAIL` |
-| PubMed | `https://eutils.ncbi.nlm.nih.gov/entrez/eutils` | api_key | 3 (10 w/key) | 5/300 | `BIOETL_NCBI_API_KEY`, `BIOETL_NCBI_EMAIL` |
-| SemanticScholar | `https://api.semanticscholar.org/graph/v1` | api_key | 0.1 (1 w/key) | **10/600** | `BIOETL_SEMANTICSCHOLAR_API_KEY` |
+| UniProt | `https://rest.uniprot.org` | api-key | 10 (100 w/key) | 5/300 | `BIOETL-UNIPROT-API-KEY` |
+| OpenAlex | `https://api.openalex.org` | email | 10 | 5/300 | `BIOETL-OPENALEX-EMAIL` |
+| CrossRef | `https://api.crossref.org` | email | 50 | 5/300 | `BIOETL-CROSSREF-EMAIL` |
+| PubMed | `https://eutils.ncbi.nlm.nih.gov/entrez/eutils` | api-key | 3 (10 w/key) | 5/300 | `BIOETL-NCBI-API-KEY`, `BIOETL-NCBI-EMAIL` |
+| SemanticScholar | `https://api.semanticscholar.org/graph/v1` | api-key | 0.1 (1 w/key) | **10/600** | `BIOETL-SEMANTICSCHOLAR-API-KEY` |
 
 ### B. Детализация по провайдерам
 
 #### ChEMBL (`configs/sources/chembl.yaml`)
 ```yaml
 # Lines 14-15, 30-32
-base_url: https://www.ebi.ac.uk/chembl/api/data
-auth_type: public
-rate_limit:
-  requests_per_second: 3
+base-url: https://www.ebi.ac.uk/chembl/api/data
+auth-type: public
+rate-limit:
+  requests-per-second: 3
   burst: 10
 ```
 **Статус:** OK — консервативный лимит для публичного API
@@ -56,10 +56,10 @@ rate_limit:
 #### PubChem (`configs/sources/pubchem.yaml`)
 ```yaml
 # Lines 14-15, 27-29
-base_url: https://pubchem.ncbi.nlm.nih.gov/rest/pug
-auth_type: public
-rate_limit:
-  requests_per_second: 5.0
+base-url: https://pubchem.ncbi.nlm.nih.gov/rest/pug
+auth-type: public
+rate-limit:
+  requests-per-second: 5.0
   burst: 10
 ```
 **Статус:** OK — соответствует документации (5 req/sec)
@@ -67,14 +67,14 @@ rate_limit:
 #### UniProt (`configs/sources/uniprot.yaml`)
 ```yaml
 # Lines 14-16, 27-32
-base_url: https://rest.uniprot.org
-auth_type: api_key
-api_key_env: BIOETL_UNIPROT_API_KEY
-rate_limit:
-  requests_per_second: 10.0
+base-url: https://rest.uniprot.org
+auth-type: api-key
+api-key-env: BIOETL-UNIPROT-API-KEY
+rate-limit:
+  requests-per-second: 10.0
   burst: 20
-  with_api_key:
-    requests_per_second: 100
+  with-api-key:
+    requests-per-second: 100
     burst: 200
 ```
 **Статус:** OK — 10/100 req/sec соответствует документации
@@ -82,41 +82,41 @@ rate_limit:
 #### OpenAlex (`configs/sources/openalex.yaml`)
 ```yaml
 # Lines 15-17, 31-34
-base_url: https://api.openalex.org
-auth_type: email
-mailto: ${BIOETL_OPENALEX_EMAIL}
-rate_limit:
-  requests_per_second: 10
+base-url: https://api.openalex.org
+auth-type: email
+mailto: ${BIOETL-OPENALEX-EMAIL}
+rate-limit:
+  requests-per-second: 10
   burst: 20
-  polite_pool: true
+  polite-pool: true
 ```
 **Статус:** OK — 10 req/sec для polite pool
 
 #### CrossRef (`configs/sources/crossref.yaml`)
 ```yaml
 # Lines 15-17, 31-34
-base_url: https://api.crossref.org
-auth_type: email
-mailto: ${BIOETL_CROSSREF_EMAIL}
-rate_limit:
-  requests_per_second: 50
+base-url: https://api.crossref.org
+auth-type: email
+mailto: ${BIOETL-CROSSREF-EMAIL}
+rate-limit:
+  requests-per-second: 50
   burst: 100
-  polite_pool: true
+  polite-pool: true
 ```
 **Статус:** OK — 50 req/sec для polite pool
 
 #### PubMed (`configs/sources/pubmed.yaml`)
 ```yaml
 # Lines 14-17, 31-36
-base_url: https://eutils.ncbi.nlm.nih.gov/entrez/eutils
-auth_type: api_key
-api_key_env: BIOETL_NCBI_API_KEY
-email_env: BIOETL_NCBI_EMAIL
-rate_limit:
-  requests_per_second: 3.0
+base-url: https://eutils.ncbi.nlm.nih.gov/entrez/eutils
+auth-type: api-key
+api-key-env: BIOETL-NCBI-API-KEY
+email-env: BIOETL-NCBI-EMAIL
+rate-limit:
+  requests-per-second: 3.0
   burst: 5
-  with_api_key:
-    requests_per_second: 10
+  with-api-key:
+    requests-per-second: 10
     burst: 20
 ```
 **Статус:** OK — 3/10 req/sec соответствует документации
@@ -124,17 +124,17 @@ rate_limit:
 #### SemanticScholar (`configs/sources/semanticscholar.yaml`)
 ```yaml
 # Lines 21-23, 39-45
-base_url: https://api.semanticscholar.org/graph/v1
-auth_type: api_key
-api_key: ${BIOETL_SEMANTICSCHOLAR_API_KEY}
-circuit_breaker:
-  failure_threshold: 10      # DEVIATION: 10 vs standard 5
-  recovery_timeout: 600      # DEVIATION: 600 vs standard 300
-rate_limit:
-  requests_per_second: 0.1   # Very conservative
+base-url: https://api.semanticscholar.org/graph/v1
+auth-type: api-key
+api-key: ${BIOETL-SEMANTICSCHOLAR-API-KEY}
+circuit-breaker:
+  failure-threshold: 10      # DEVIATION: 10 vs standard 5
+  recovery-timeout: 600      # DEVIATION: 600 vs standard 300
+rate-limit:
+  requests-per-second: 0.1   # Very conservative
   burst: 1
-  with_api_key:
-    requests_per_second: 1.0
+  with-api-key:
+    requests-per-second: 1.0
     burst: 5
 ```
 **Статус:** OK — отклонения circuit breaker обоснованы (S2 API нестабилен)
@@ -148,30 +148,30 @@ rate_limit:
 #### Issue #1: Semantic Scholar API Key
 | Location | Variable Name | Status |
 |----------|---------------|--------|
-| `configs/sources/semanticscholar.yaml:23` | `BIOETL_SEMANTICSCHOLAR_API_KEY` | Config |
-| `.env.example:42` | `BIOETL_SEMANTIC_SCHOLAR_API_KEY` | **MISMATCH** |
-| `src/bioetl/composition/providers/registration.py:438` | `BIOETL_SEMANTICSCHOLAR_API_KEY` | Code |
+| `configs/sources/semanticscholar.yaml:23` | `BIOETL-SEMANTICSCHOLAR-API-KEY` | Config |
+| `.env.example:42` | `BIOETL-SEMANTIC-SCHOLAR-API-KEY` | **MISMATCH** |
+| `src/bioetl/composition/providers/registration.py:438` | `BIOETL-SEMANTICSCHOLAR-API-KEY` | Code |
 
-**Проблема:** `.env.example` использует `BIOETL_SEMANTIC_SCHOLAR_API_KEY` (с underscore), но config и код — `BIOETL_SEMANTICSCHOLAR_API_KEY` (без underscore).
+**Проблема:** `.env.example` использует `BIOETL-SEMANTIC-SCHOLAR-API-KEY` (с underscore), но config и код — `BIOETL-SEMANTICSCHOLAR-API-KEY` (без underscore).
 
 #### Issue #2: PubMed/NCBI Variables
 | Location | Variable Name | Status |
 |----------|---------------|--------|
-| `configs/sources/pubmed.yaml:16-17` | `BIOETL_NCBI_API_KEY`, `BIOETL_NCBI_EMAIL` | Config |
-| `configs/pipelines/pubmed/publication.yaml:29-30` | `BIOETL_NCBI_EMAIL`, `BIOETL_NCBI_API_KEY` | Pipeline |
-| `.env.example:35-36` | `BIOETL_PUBMED_API_KEY`, `BIOETL_PUBMED_EMAIL` | **MISMATCH** |
-| `.github/workflows/contract-tests.yml:77` | `BIOETL_PUBMED_API_KEY` | CI |
-| `tests/contract/conftest.py:52` | `BIOETL_PUBMED_API_KEY` | Tests |
+| `configs/sources/pubmed.yaml:16-17` | `BIOETL-NCBI-API-KEY`, `BIOETL-NCBI-EMAIL` | Config |
+| `configs/pipelines/pubmed/publication.yaml:29-30` | `BIOETL-NCBI-EMAIL`, `BIOETL-NCBI-API-KEY` | Pipeline |
+| `.env.example:35-36` | `BIOETL-PUBMED-API-KEY`, `BIOETL-PUBMED-EMAIL` | **MISMATCH** |
+| `.github/workflows/contract-tests.yml:77` | `BIOETL-PUBMED-API-KEY` | CI |
+| `tests/contract/conftest.py:52` | `BIOETL-PUBMED-API-KEY` | Tests |
 
-**Проблема:** Config использует `BIOETL_NCBI_*`, но `.env.example`, CI и тесты — `BIOETL_PUBMED_*`.
+**Проблема:** Config использует `BIOETL-NCBI-*`, но `.env.example`, CI и тесты — `BIOETL-PUBMED-*`.
 
 ### OK: Корректные переменные
 
 | Variable | Config | .env.example | Status |
 |----------|--------|--------------|--------|
-| `BIOETL_UNIPROT_API_KEY` | `uniprot.yaml:16` | `.env.example:43` | OK |
-| `BIOETL_OPENALEX_EMAIL` | `openalex.yaml:17` | `.env.example:30` | OK |
-| `BIOETL_CROSSREF_EMAIL` | `crossref.yaml:17` | `.env.example:10` | OK |
+| `BIOETL-UNIPROT-API-KEY` | `uniprot.yaml:16` | `.env.example:43` | OK |
+| `BIOETL-OPENALEX-EMAIL` | `openalex.yaml:17` | `.env.example:30` | OK |
+| `BIOETL-CROSSREF-EMAIL` | `crossref.yaml:17` | `.env.example:10` | OK |
 
 ---
 
@@ -191,7 +191,7 @@ rate_limit:
 
 ## 4. Circuit Breaker Compliance
 
-| Provider | failure_threshold | recovery_timeout | RULES.md (5/300) | Status |
+| Provider | failure-threshold | recovery-timeout | RULES.md (5/300) | Status |
 |----------|-------------------|------------------|------------------|--------|
 | ChEMBL | 5 | 300 | | OK |
 | PubChem | 5 | 300 | | OK |
@@ -215,50 +215,50 @@ corrections:
     severity: CRITICAL
     file: .env.example
     line: 42
-    old_value: "BIOETL_SEMANTIC_SCHOLAR_API_KEY=your_semantic_scholar_api_key_here"
-    new_value: "BIOETL_SEMANTICSCHOLAR_API_KEY=your_semantic_scholar_api_key_here"
+    old-value: "BIOETL-SEMANTIC-SCHOLAR-API-KEY=your-semantic-scholar-api-key-here"
+    new-value: "BIOETL-SEMANTICSCHOLAR-API-KEY=your-semantic-scholar-api-key-here"
     reason: "Несоответствие имени переменной с configs/sources/semanticscholar.yaml:23"
 
   - id: ENV-002
     severity: CRITICAL
     file: .env.example
     lines: 35-36
-    old_value: |
-      BIOETL_PUBMED_API_KEY=your_ncbi_api_key_here
-      BIOETL_PUBMED_EMAIL=your_email@example.com
-    new_value: |
-      BIOETL_NCBI_API_KEY=your_ncbi_api_key_here
-      BIOETL_NCBI_EMAIL=your_email@example.com
+    old-value: |
+      BIOETL-PUBMED-API-KEY=your-ncbi-api-key-here
+      BIOETL-PUBMED-EMAIL=your-email@example.com
+    new-value: |
+      BIOETL-NCBI-API-KEY=your-ncbi-api-key-here
+      BIOETL-NCBI-EMAIL=your-email@example.com
     reason: "Несоответствие с configs/sources/pubmed.yaml:16-17"
     note: "Также обновить CI workflow и тесты для консистентности"
 ```
 
 ### B. Альтернатива: Обновить configs вместо .env.example
 
-Если тесты и CI уже используют `BIOETL_PUBMED_*`, можно обновить configs:
+Если тесты и CI уже используют `BIOETL-PUBMED-*`, можно обновить configs:
 
 ```yaml
-alternative_corrections:
+alternative-corrections:
   - id: CONFIG-001
     file: configs/sources/pubmed.yaml
     lines: 16-17
-    old_value: |
-      api_key_env: BIOETL_NCBI_API_KEY
-      email_env: BIOETL_NCBI_EMAIL
-    new_value: |
-      api_key_env: BIOETL_PUBMED_API_KEY
-      email_env: BIOETL_PUBMED_EMAIL
+    old-value: |
+      api-key-env: BIOETL-NCBI-API-KEY
+      email-env: BIOETL-NCBI-EMAIL
+    new-value: |
+      api-key-env: BIOETL-PUBMED-API-KEY
+      email-env: BIOETL-PUBMED-EMAIL
     reason: "Согласование с CI и тестами"
 
   - id: CONFIG-002
     file: configs/pipelines/pubmed/publication.yaml
     lines: 29-30
-    old_value: |
-      email: "${BIOETL_NCBI_EMAIL}"
-      api_key: "${BIOETL_NCBI_API_KEY}"
-    new_value: |
-      email: "${BIOETL_PUBMED_EMAIL}"
-      api_key: "${BIOETL_PUBMED_API_KEY}"
+    old-value: |
+      email: "${BIOETL-NCBI-EMAIL}"
+      api-key: "${BIOETL-NCBI-API-KEY}"
+    new-value: |
+      email: "${BIOETL-PUBMED-EMAIL}"
+      api-key: "${BIOETL-PUBMED-API-KEY}"
 ```
 
 ---
@@ -266,8 +266,8 @@ alternative_corrections:
 ## 6. Рекомендации
 
 ### Приоритет P1 (Critical)
-1. Исправить несоответствие `BIOETL_SEMANTICSCHOLAR_API_KEY` в `.env.example`
-2. Унифицировать `BIOETL_PUBMED_*` vs `BIOETL_NCBI_*` — выбрать один вариант
+1. Исправить несоответствие `BIOETL-SEMANTICSCHOLAR-API-KEY` в `.env.example`
+2. Унифицировать `BIOETL-PUBMED-*` vs `BIOETL-NCBI-*` — выбрать один вариант
 
 ### Приоритет P2 (Medium)
 1. Добавить валидацию env variables при старте pipeline
@@ -282,20 +282,20 @@ alternative_corrections:
 
 | Файл | Описание |
 |------|----------|
-| `source_access_audit.md` | Этот документ |
-| `source_access_status.csv` | CSV таблица статусов (ниже) |
+| `source-access-audit.md` | Этот документ |
+| `source-access-status.csv` | CSV таблица статусов (ниже) |
 
 ---
 
 ## Приложение: CSV Export
 
 ```csv
-provider,base_url,auth_type,rate_limit_rps,rate_limit_with_key,circuit_breaker,env_vars,issues
+provider,base-url,auth-type,rate-limit-rps,rate-limit-with-key,circuit-breaker,env-vars,issues
 chembl,https://www.ebi.ac.uk/chembl/api/data,public,3,—,5/300,—,—
 pubchem,https://pubchem.ncbi.nlm.nih.gov/rest/pug,public,5,—,5/300,—,—
-uniprot,https://rest.uniprot.org,api_key,10,100,5/300,BIOETL_UNIPROT_API_KEY,—
-openalex,https://api.openalex.org,email,10,—,5/300,BIOETL_OPENALEX_EMAIL,—
-crossref,https://api.crossref.org,email,50,—,5/300,BIOETL_CROSSREF_EMAIL,—
-pubmed,https://eutils.ncbi.nlm.nih.gov/entrez/eutils,api_key,3,10,5/300,"BIOETL_NCBI_API_KEY,BIOETL_NCBI_EMAIL",ENV-002: mismatch with .env.example
-semanticscholar,https://api.semanticscholar.org/graph/v1,api_key,0.1,1,10/600,BIOETL_SEMANTICSCHOLAR_API_KEY,ENV-001: mismatch with .env.example
+uniprot,https://rest.uniprot.org,api-key,10,100,5/300,BIOETL-UNIPROT-API-KEY,—
+openalex,https://api.openalex.org,email,10,—,5/300,BIOETL-OPENALEX-EMAIL,—
+crossref,https://api.crossref.org,email,50,—,5/300,BIOETL-CROSSREF-EMAIL,—
+pubmed,https://eutils.ncbi.nlm.nih.gov/entrez/eutils,api-key,3,10,5/300,"BIOETL-NCBI-API-KEY,BIOETL-NCBI-EMAIL",ENV-002: mismatch with .env.example
+semanticscholar,https://api.semanticscholar.org/graph/v1,api-key,0.1,1,10/600,BIOETL-SEMANTICSCHOLAR-API-KEY,ENV-001: mismatch with .env.example
 ```

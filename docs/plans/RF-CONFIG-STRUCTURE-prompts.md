@@ -15,7 +15,7 @@
 | 1 | BaseFilterConfig extraction | 1.2 | Не начато |
 | 2 | Write mode type narrowing | 1.3 | Частично (опц.) |
 | 3 | Source config dual format | 2.3 | Не начато (опц.) |
-| 4 | effective_*_table properties | 3.1 | Не начато |
+| 4 | effective-*-table properties | 3.1 | Не начато |
 | 5 | Миграция вызовов | 3.2 | Не начато |
 | 6 | Удаление convenience-свойств | 3.3 | Не начато |
 | 7 | Исправление entity names | 4.1 | Не начато |
@@ -33,32 +33,32 @@
 вместо наследования SilverFilterConfig от GoldFilterConfig.
 
 КОНТЕКСТ (верифицировано на main, коммит 2c360d5):
-- `SilverFilterConfig(GoldFilterConfig)` в `src/bioetl/domain/filtering/silver_config.py:17`
-- `isinstance(silver_cfg, GoldFilterConfig)` возвращает True — нарушение номинальной типизации
+- `SilverFilterConfig(GoldFilterConfig)` в `src/bioetl/domain/filtering/silver-config.py:17`
+- `isinstance(silver-cfg, GoldFilterConfig)` возвращает True — нарушение номинальной типизации
 - Infrastructure УЖЕ подготовлена:
-  - `filter_config.py` — `SilverFiltersFileConfig.to_domain()` возвращает `SilverFilterConfig`
-  - `_base.py` — `_build_silver_filters()` вызывает `SilverFilterConfig.from_gold_filter_config()`
-  - `filter_config_loader.py` — возвращает `SilverFilterConfig` в кортеже
-- Новые тесты: `tests/unit/domain/filtering/test_silver_config.py` уже существует (87 строк)
+  - `filter-config.py` — `SilverFiltersFileConfig.to-domain()` возвращает `SilverFilterConfig`
+  - `-base.py` — `-build-silver-filters()` вызывает `SilverFilterConfig.from-gold-filter-config()`
+  - `filter-config-loader.py` — возвращает `SilverFilterConfig` в кортеже
+- Новые тесты: `tests/unit/domain/filtering/test-silver-config.py` уже существует (87 строк)
 
 ДИЗАЙН:
-1. Создать `src/bioetl/domain/filtering/_base_filter_config.py`:
-   - Перенести ВСЮ логику из GoldFilterConfig: `should_include()`, `_check_*`, `_OPERATOR_CHECKERS`, `is_empty()`
+1. Создать `src/bioetl/domain/filtering/-base-filter-config.py`:
+   - Перенести ВСЮ логику из GoldFilterConfig: `should-include()`, `-check-*`, `-OPERATOR-CHECKERS`, `is-empty()`
    - Класс: `BaseFilterConfig` — frozen dataclass с теми же полями
-   - Добавить `from_base(cls, other: BaseFilterConfig) -> Self`
+   - Добавить `from-base(cls, other: BaseFilterConfig) -> Self`
 
-2. `src/bioetl/domain/filtering/gold_config.py`:
+2. `src/bioetl/domain/filtering/gold-config.py`:
    - `GoldFilterConfig(BaseFilterConfig)` — только docstring
 
-3. `src/bioetl/domain/filtering/silver_config.py`:
+3. `src/bioetl/domain/filtering/silver-config.py`:
    - `SilverFilterConfig(BaseFilterConfig)` (НЕ GoldFilterConfig)
-   - `from_gold_filter_config` → `from_base(other: BaseFilterConfig)`
+   - `from-gold-filter-config` → `from-base(other: BaseFilterConfig)`
 
-4. `src/bioetl/domain/filtering/__init__.py` — реэкспорт BaseFilterConfig
+4. `src/bioetl/domain/filtering/--init--.py` — реэкспорт BaseFilterConfig
 
 5. Infrastructure:
-   - `infrastructure/schemas/filter_config.py` — `SilverFilterConfig.from_base()` вместо `.from_gold_filter_config()`
-   - `infrastructure/config/_base.py` — аналогично
+   - `infrastructure/schemas/filter-config.py` — `SilverFilterConfig.from-base()` вместо `.from-gold-filter-config()`
+   - `infrastructure/config/-base.py` — аналогично
 
 ВЕРИФИКАЦИЯ:
 - mypy --strict src/bioetl/
@@ -72,24 +72,24 @@
 
 ---
 
-## Промпт 2: Сужение write_mode типов (Шаг 1.3, опционально)
+## Промпт 2: Сужение write-mode типов (Шаг 1.3, опционально)
 
 ```
 ЗАДАЧА: Убрать `| str` из объявлений write mode в TableConfig.
 
 КОНТЕКСТ (main, 2c360d5):
 - `table.py:31-32`:
-    silver_write_mode: SilverWriteMode | str = SilverWriteMode.MERGE
-    gold_write_mode: GoldWriteMode | str = GoldWriteMode.APPEND
-- `__post_init__` конвертирует через `convert_write_mode()`
-- `_base.py` УЖЕ конвертирует на границе: `SilverWriteMode.from_string()`
+    silver-write-mode: SilverWriteMode | str = SilverWriteMode.MERGE
+    gold-write-mode: GoldWriteMode | str = GoldWriteMode.APPEND
+- `--post-init--` конвертирует через `convert-write-mode()`
+- `-base.py` УЖЕ конвертирует на границе: `SilverWriteMode.from-string()`
 
 ШАГИ:
-1. grep -rn "silver_write_mode\|gold_write_mode" src/bioetl/ --include="*.py"
-   — убедиться что все вызовы проходят через __post_init__ или передают enum.
+1. grep -rn "silver-write-mode\|gold-write-mode" src/bioetl/ --include="*.py"
+   — убедиться что все вызовы проходят через --post-init-- или передают enum.
 2. Изменить в table.py:
-   silver_write_mode: SilverWriteMode = SilverWriteMode.MERGE
-   gold_write_mode: GoldWriteMode = GoldWriteMode.APPEND
+   silver-write-mode: SilverWriteMode = SilverWriteMode.MERGE
+   gold-write-mode: GoldWriteMode = GoldWriteMode.APPEND
 3. mypy --strict src/bioetl/
 4. pytest tests/ -x --timeout=120
 ```
@@ -102,54 +102,54 @@
 ЗАДАЧА: Добавить поддержку нового плоского формата source-конфигов.
 
 КОНТЕКСТ:
-- Файл: src/bioetl/composition/providers/_config_helpers.py
-- Старый: source.provider_config.base_url
-- Новый: api.base_url, client.timeout_sec, batch.api_batch_size
+- Файл: src/bioetl/composition/providers/-config-helpers.py
+- Старый: source.provider-config.base-url
+- Новый: api.base-url, client.timeout-sec, batch.api-batch-size
 
 РЕАЛИЗАЦИЯ:
-def _normalize_source_config(raw: dict) -> dict:
+def -normalize-source-config(raw: dict) -> dict:
     if "api" in raw and "source" not in raw:
         raw["source"] = {
-            "provider_config": {
-                "base_url": raw["api"]["base_url"],
-                "auth_type": raw["api"].get("auth_type", "public"),
+            "provider-config": {
+                "base-url": raw["api"]["base-url"],
+                "auth-type": raw["api"].get("auth-type", "public"),
                 "client": raw.get("client", {}),
                 ...
             },
-            "batch_size": raw.get("batch", {}).get("api_batch_size", 100),
+            "batch-size": raw.get("batch", {}).get("api-batch-size", 100),
         }
-        # Перенести rate_limit, circuit_breaker, health_check, retry, entities
-        for key in ("rate_limit", "circuit_breaker", "health_check", "retry", "entities"):
+        # Перенести rate-limit, circuit-breaker, health-check, retry, entities
+        for key in ("rate-limit", "circuit-breaker", "health-check", "retry", "entities"):
             if key in raw:
                 raw[key] = raw[key]
     return raw
 
 ВЕРИФИКАЦИЯ:
 - Существующие конфиги загружаются (старый формат)
-- pytest tests/ -k "source_config or adapter" -v
+- pytest tests/ -k "source-config or adapter" -v
 
 ПРИМЕЧАНИЕ: Этот шаг ОПЦИОНАЛЕН. Можно вместо него мигрировать YAML + загрузчик атомарно.
 ```
 
 ---
 
-## Промпт 4: Добавление effective_*_table (Шаг 3.1)
+## Промпт 4: Добавление effective-*-table (Шаг 3.1)
 
 ```
-ЗАДАЧА: Добавить effective_silver_table и effective_gold_table в PipelineConfig.
+ЗАДАЧА: Добавить effective-silver-table и effective-gold-table в PipelineConfig.
 
 ФАЙЛ: src/bioetl/domain/config/pipeline.py (после строки 145)
 
 ДОБАВИТЬ:
 @property
-def effective_silver_table(self) -> str:
+def effective-silver-table(self) -> str:
     """Имя Silver-таблицы с fallback на provider.entity."""
-    return self.table.silver_table or f"{self.provider}.{self.entity_type}"
+    return self.table.silver-table or f"{self.provider}.{self.entity-type}"
 
 @property
-def effective_gold_table(self) -> str:
+def effective-gold-table(self) -> str:
     """Имя Gold-таблицы с fallback на provider.entity."""
-    return self.table.gold_table or f"{self.provider}.{self.entity_type}"
+    return self.table.gold-table or f"{self.provider}.{self.entity-type}"
 
 ВЕРИФИКАЦИЯ:
 - mypy --strict src/bioetl/
@@ -162,30 +162,30 @@ def effective_gold_table(self) -> str:
 
 ```
 ЗАДАЧА: Заменить все использования convenience-свойств PipelineConfig
-на config.table.* или config.effective_*.
+на config.table.* или config.effective-*.
 
 ПРЕДУСЛОВИЕ: Промпт 4 выполнен.
 
 ШАГИ:
 1. Исчерпывающий поиск:
-   grep -rn 'config\.primary_keys\b' src/bioetl/ --include="*.py" | grep -v 'table\.primary_keys' | grep -v '_test\.'
-   grep -rn 'config\.silver_table\b' src/bioetl/ --include="*.py" | grep -v 'table\.silver_table' | grep -v 'effective_silver'
-   grep -rn 'config\.gold_table\b' src/bioetl/ --include="*.py" | grep -v 'table\.gold_table' | grep -v 'effective_gold'
-   grep -rn 'config\.write_mode\b' src/bioetl/ --include="*.py" | grep -v 'table\.'
-   grep -rn 'config\.gold_write_mode\b' src/bioetl/ --include="*.py" | grep -v 'table\.'
-   grep -rn 'config\.partition_cols\b' src/bioetl/ --include="*.py" | grep -v 'table\.'
-   grep -rn 'config\.on_schema_mismatch\b' src/bioetl/ --include="*.py" | grep -v 'table\.'
+   grep -rn 'config\.primary-keys\b' src/bioetl/ --include="*.py" | grep -v 'table\.primary-keys' | grep -v '-test\.'
+   grep -rn 'config\.silver-table\b' src/bioetl/ --include="*.py" | grep -v 'table\.silver-table' | grep -v 'effective-silver'
+   grep -rn 'config\.gold-table\b' src/bioetl/ --include="*.py" | grep -v 'table\.gold-table' | grep -v 'effective-gold'
+   grep -rn 'config\.write-mode\b' src/bioetl/ --include="*.py" | grep -v 'table\.'
+   grep -rn 'config\.gold-write-mode\b' src/bioetl/ --include="*.py" | grep -v 'table\.'
+   grep -rn 'config\.partition-cols\b' src/bioetl/ --include="*.py" | grep -v 'table\.'
+   grep -rn 'config\.on-schema-mismatch\b' src/bioetl/ --include="*.py" | grep -v 'table\.'
 
-2. Также: source_config.silver_table, source_config.primary_keys в composite-коде.
+2. Также: source-config.silver-table, source-config.primary-keys в composite-коде.
 
 3. Маппинг:
-   config.primary_keys → config.table.primary_keys
-   config.silver_table → config.effective_silver_table (с fallback) или config.table.silver_table
-   config.gold_table → config.effective_gold_table (с fallback) или config.table.gold_table
-   config.write_mode → config.table.silver_write_mode
-   config.gold_write_mode → config.table.gold_write_mode
-   config.partition_cols → config.table.partition_cols
-   config.on_schema_mismatch → config.table.on_schema_mismatch
+   config.primary-keys → config.table.primary-keys
+   config.silver-table → config.effective-silver-table (с fallback) или config.table.silver-table
+   config.gold-table → config.effective-gold-table (с fallback) или config.table.gold-table
+   config.write-mode → config.table.silver-write-mode
+   config.gold-write-mode → config.table.gold-write-mode
+   config.partition-cols → config.table.partition-cols
+   config.on-schema-mismatch → config.table.on-schema-mismatch
 
 4. Обновить тесты.
 
@@ -206,10 +206,10 @@ def effective_gold_table(self) -> str:
 
 ФАЙЛ: src/bioetl/domain/config/pipeline.py (строки ~112-145)
 
-УДАЛИТЬ: primary_keys, silver_table, gold_table, write_mode, gold_write_mode,
-partition_cols, on_schema_mismatch
+УДАЛИТЬ: primary-keys, silver-table, gold-table, write-mode, gold-write-mode,
+partition-cols, on-schema-mismatch
 
-ОСТАВИТЬ: lock_key, effective_silver_table, effective_gold_table
+ОСТАВИТЬ: lock-key, effective-silver-table, effective-gold-table
 
 ШАГИ:
 1. Финальный grep — убедиться что вызовов не осталось
@@ -233,8 +233,8 @@ partition_cols, on_schema_mismatch
 1. grep -rn "document" configs/sources/
 2. Заменить:
    - document → publication
-   - document_similarity → publication_similarity
-   - document_term → publication_term
+   - document-similarity → publication-similarity
+   - document-term → publication-term
 3. НЕ менять комментарии, обсуждающие переименование.
 
 ВЕРИФИКАЦИЯ:
@@ -248,22 +248,22 @@ partition_cols, on_schema_mismatch
 ```
 ЗАДАЧА: Удалить дублированные поля из pipeline YAML, convention-based minimal стиль.
 
-КОНТЕКСТ: config_loader.py (2c360d5) УЖЕ авто-вычисляет:
-- source_file, dq_config_file, filter_config_file, column_groups_file
-- sink.*.path (из provider + entity_type)
-- sink.silver.primary_key (из primary_keys)
-- sink.*.sort_by.columns (из primary_keys)
+КОНТЕКСТ: config-loader.py (2c360d5) УЖЕ авто-вычисляет:
+- source-file, dq-config-file, filter-config-file, column-groups-file
+- sink.*.path (из provider + entity-type)
+- sink.silver.primary-key (из primary-keys)
+- sink.*.sort-by.columns (из primary-keys)
 
 ДЛЯ КАЖДОГО configs/pipelines/{provider}/{entity}.yaml:
 
-УДАЛИТЬ: source_file, dq_config_file, data_schema_file, filter_config_file,
-sink.*.path, sink.silver.primary_key, sink.*.sort_by, sink.*.csv_export.path
+УДАЛИТЬ: source-file, dq-config-file, data-schema-file, filter-config-file,
+sink.*.path, sink.silver.primary-key, sink.*.sort-by, sink.*.csv-export.path
 
-ПЕРЕИМЕНОВАТЬ: dq_overrides → dq_overrides
+ПЕРЕИМЕНОВАТЬ: dq-overrides → dq-overrides
 
-ОСТАВИТЬ: pipeline_name, provider, entity_type, version, description,
-primary_keys, silver_table, gold_table, sink.silver.partition_by,
-write_mode (если не default), dq_overrides (содержимое)
+ОСТАВИТЬ: pipeline-name, provider, entity-type, version, description,
+primary-keys, silver-table, gold-table, sink.silver.partition-by,
+write-mode (если не default), dq-overrides (содержимое)
 
 ПОРЯДОК: chembl/molecule.yaml (117 строк) → все остальные. Пропустить composite/.
 
@@ -281,15 +281,15 @@ write_mode (если не default), dq_overrides (содержимое)
 КОНТЕКСТ: Загрузчик (2c360d5) уже поддерживает оба формата через нормализацию.
 
 ПЕРЕИМЕНОВАНИЯ:
-- configs/quality/_defaults.yaml: common_field_validations → field_validations
-- configs/quality/providers/*.yaml: provider_field_validations → field_validations
-- configs/quality/entities/*/*.yaml: entity_field_validations → field_validations
-Аналогично для cross_field_validations и conditional_validations.
+- configs/quality/-defaults.yaml: common-field-validations → field-validations
+- configs/quality/providers/*.yaml: provider-field-validations → field-validations
+- configs/quality/entities/*/*.yaml: entity-field-validations → field-validations
+Аналогично для cross-field-validations и conditional-validations.
 
 ШАГИ:
 1. find configs/quality/ -name "*.yaml" | wc -l
 2. Применить переименования
-3. grep -rn "common_field_validations\|provider_field_validations\|entity_field_validations" configs/quality/ → 0
+3. grep -rn "common-field-validations\|provider-field-validations\|entity-field-validations" configs/quality/ → 0
 
 ВЕРИФИКАЦИЯ:
 - pytest tests/ -k "dq" -v
@@ -309,12 +309,12 @@ write_mode (если не default), dq_overrides (содержимое)
 1. configs/quality/ → configs/quality/
 2. configs/filters/ → configs/filters/
 3. configs/schemas/ → configs/schemas/
-4. configs/composite/field_groups/ → configs/schemas/composite/field_groups/
-5. configs/pipelines/_schema.json → configs/_schema/pipeline.json
-6. configs/pipelines/_composite_schema.json → configs/_schema/composite.json
+4. configs/composite/field-groups/ → configs/schemas/composite/field-groups/
+5. configs/pipelines/-schema.json → configs/-schema/pipeline.json
+6. configs/pipelines/-composite-schema.json → configs/-schema/composite.json
 
 ШАГИ:
-1. mkdir -p configs/quality configs/filters configs/schemas configs/_schema
+1. mkdir -p configs/quality configs/filters configs/schemas configs/-schema
 2. cp -r (скопировать содержимое)
 3. pytest tests/ -x --timeout=120
 4. Если ОК — rm -rf старых каталогов
@@ -334,27 +334,27 @@ write_mode (если не default), dq_overrides (содержимое)
 ПРЕДУСЛОВИЯ: Все промпты 1-10 выполнены.
 
 НОВЫЕ ТЕСТЫ:
-1. tests/architecture/test_filter_separation.py:
+1. tests/architecture/test-filter-separation.py:
    - SilverFilterConfig НЕ подкласс GoldFilterConfig
    - Оба подклассы BaseFilterConfig
    - isinstance(Silver(...), Gold) → False
 
-2. tests/unit/domain/config/test_effective_tables.py:
-   - effective_silver_table с silver_table и без
-   - effective_gold_table с gold_table и без
+2. tests/unit/domain/config/test-effective-tables.py:
+   - effective-silver-table с silver-table и без
+   - effective-gold-table с gold-table и без
 
-3. tests/unit/domain/filtering/test_base_filter_config.py:
-   - Параметризованный: Gold и Silver проходят одинаковые should_include() тесты
+3. tests/unit/domain/filtering/test-base-filter-config.py:
+   - Параметризованный: Gold и Silver проходят одинаковые should-include() тесты
 
 ОЧИСТКА:
-- Удалить fallback-код из dq_config_loader.py, filter_config_loader.py
-- Удалить алиас dq_overrides из pipeline_config.py (оставить только dq_overrides)
-- grep -rn "common_field_validations\|provider_field_validations" configs/ → 0
+- Удалить fallback-код из dq-config-loader.py, filter-config-loader.py
+- Удалить алиас dq-overrides из pipeline-config.py (оставить только dq-overrides)
+- grep -rn "common-field-validations\|provider-field-validations" configs/ → 0
 - grep -rn "configs/quality/" docs/ → 0
 
 ДОКУМЕНТАЦИЯ:
 - Обновить ADR-027, ADR-028, ADR-029 с новыми путями
-- Создать docs/03-guides/CONFIG-GUIDE.md (из _base.yaml)
+- Создать docs/03-guides/CONFIG-GUIDE.md (из -base.yaml)
 
 ВЕРИФИКАЦИЯ:
 - mypy --strict src/bioetl/

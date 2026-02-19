@@ -8,7 +8,7 @@
 
 | Parameter | Value |
 |-----------|-------|
-| **Pipeline ID** | `semanticscholar_publication` |
+| **Pipeline ID** | `semanticscholar-publication` |
 | **Provider** | Semantic Scholar |
 | **Entity** | publication (paper) |
 | **API Endpoint** | `https://api.semanticscholar.org/graph/v1/paper/` |
@@ -48,7 +48,7 @@ Semantic Scholar provides **AI-enhanced academic data**:
 import httpx
 
 # By Paper ID
-url = f"https://api.semanticscholar.org/graph/v1/paper/{paper_id}"
+url = f"https://api.semanticscholar.org/graph/v1/paper/{paper-id}"
 
 # By DOI
 url = f"https://api.semanticscholar.org/graph/v1/paper/DOI:{doi}"
@@ -63,7 +63,7 @@ params = {
               "isOpenAccess,openAccessPdf,fieldsOfStudy,s2FieldsOfStudy,"
               "publicationTypes,publicationDate,journal,authors"
 }
-headers = {"x-api-key": api_key}  # Optional but recommended
+headers = {"x-api-key": api-key}  # Optional but recommended
 ```
 
 ### 3.2. Complete API Fields
@@ -123,26 +123,26 @@ headers = {"x-api-key": api_key}  # Optional but recommended
 
 | Parameter | Value |
 |-----------|-------|
-| **Entity ID Field** | `paper_id` |
-| **ID Source** | `from_api` |
+| **Entity ID Field** | `paper-id` |
+| **ID Source** | `from-api` |
 | **Format** | 40-character hex string |
 
 ### 4.2. Flattening Strategy
 
 | Nested Path | Flattened Name | Strategy |
 |-------------|----------------|----------|
-| `paperId` | `paper_id` | Direct |
+| `paperId` | `paper-id` | Direct |
 | `externalIds.DOI` | `doi` | Extract |
 | `externalIds.PubMed` | `pmid` | Extract |
 | `externalIds.PMCID` | `pmcid` | Extract |
-| `externalIds.ArXiv` | `arxiv_id` | Extract |
+| `externalIds.ArXiv` | `arxiv-id` | Extract |
 | `tldr.text` | `tldr` | Extract |
 | `journal.name` | `journal` | Extract |
 | `journal.volume` | `volume` | Extract |
 | `journal.pages` | `pages` | Extract |
-| `openAccessPdf.url` | `open_access_url` | Extract |
-| `fieldsOfStudy` | `fields_of_study` | JSON array |
-| `publicationTypes` | `publication_types` | JSON array |
+| `openAccessPdf.url` | `open-access-url` | Extract |
+| `fieldsOfStudy` | `fields-of-study` | JSON array |
+| `publicationTypes` | `publication-types` | JSON array |
 | `authors[*]` | `authors` | JSON array |
 
 ---
@@ -156,26 +156,26 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
     """Semantic Scholar Publication validation schema."""
 
     # === Primary Key ===
-    paper_id: Series[str] = pa.Field(
+    paper-id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^[a-f0-9]{40}$",
+        str-matches=r"^[a-f0-9]{40}$",
     )
 
     # === External Identifiers ===
     doi: Series[str] = pa.Field(
         nullable=True,
-        str_matches=DOI_REGEX_PATTERN,
+        str-matches=DOI-REGEX-PATTERN,
     )
     pmid: Series[str] = pa.Field(
         nullable=True,
-        str_matches=r"^\d+$",
+        str-matches=r"^\d+$",
     )
     pmcid: Series[str] = pa.Field(
         nullable=True,
-        str_matches=r"^PMC\d+$",
+        str-matches=r"^PMC\d+$",
     )
-    arxiv_id: Series[str] = pa.Field(nullable=True)
-    corpus_id: Series[int] = pa.Field(nullable=True, ge=0)
+    arxiv-id: Series[str] = pa.Field(nullable=True)
+    corpus-id: Series[int] = pa.Field(nullable=True, ge=0)
 
     # === Core Fields ===
     title: Series[str] = pa.Field(nullable=True)
@@ -183,12 +183,12 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
     tldr: Series[str] = pa.Field(nullable=True)
     year: Series[int] = pa.Field(
         nullable=True,
-        ge=MIN_PUBLICATION_YEAR,
-        le=MAX_PUBLICATION_YEAR,
+        ge=MIN-PUBLICATION-YEAR,
+        le=MAX-PUBLICATION-YEAR,
     )
-    publication_date: Series[str] = pa.Field(
+    publication-date: Series[str] = pa.Field(
         nullable=True,
-        str_matches=r"^\d{4}-\d{2}-\d{2}$",
+        str-matches=r"^\d{4}-\d{2}-\d{2}$",
     )
 
     # === Journal/Venue ===
@@ -198,20 +198,20 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
     venue: Series[str] = pa.Field(nullable=True)
 
     # === Metrics ===
-    citation_count: Series[int] = pa.Field(nullable=True, ge=0)
-    reference_count: Series[int] = pa.Field(nullable=True, ge=0)
+    citation-count: Series[int] = pa.Field(nullable=True, ge=0)
+    reference-count: Series[int] = pa.Field(nullable=True, ge=0)
 
     # === Open Access ===
-    is_oa: Series[bool] = pa.Field(nullable=True)
-    open_access_url: Series[str] = pa.Field(nullable=True)
-    oa_status: Series[str] = pa.Field(
+    is-oa: Series[bool] = pa.Field(nullable=True)
+    open-access-url: Series[str] = pa.Field(nullable=True)
+    oa-status: Series[str] = pa.Field(
         nullable=True,
         isin=["gold", "green", "hybrid", "bronze", "closed"],
     )
 
     # === Classification ===
-    fields_of_study: Series[str] = pa.Field(nullable=True)  # JSON
-    publication_types: Series[str] = pa.Field(nullable=True)  # JSON
+    fields-of-study: Series[str] = pa.Field(nullable=True)  # JSON
+    publication-types: Series[str] = pa.Field(nullable=True)  # JSON
 
     # === Authors ===
     authors: Series[str] = pa.Field(nullable=True)  # JSON
@@ -223,13 +223,13 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
     )
 
     # === Lookup Metadata ===
-    lookup_method: Series[str] = pa.Field(
-        alias="_lookup_method",
+    lookup-method: Series[str] = pa.Field(
+        alias="-lookup-method",
         nullable=False,
-        isin=["doi", "title_fallback", "title_only", "unknown"],
+        isin=["doi", "title-fallback", "title-only", "unknown"],
     )
-    original_doi: Series[str] = pa.Field(
-        alias="_original_doi",
+    original-doi: Series[str] = pa.Field(
+        alias="-original-doi",
         nullable=True,
     )
 
@@ -248,46 +248,46 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
 | `doi` | CrossRef | CrossRef | `DOI` |
 | `doi` | OpenAlex | OpenAlex | `doi` |
 | `pmid` | PubMed | PubMed | `pmid` |
-| `arxiv_id` | arXiv | arXiv | ID |
+| `arxiv-id` | arXiv | arXiv | ID |
 
 ---
 
 ## 7. Pipeline Configuration
 
 ```yaml
-pipeline_name: semanticscholar_publication
+pipeline-name: semanticscholar-publication
 provider: semanticscholar
-entity_type: publication
+entity-type: publication
 version: "1.2.0"
 
-primary_keys: ["paper_id"]
-silver_table: "semanticscholar_publication"
-gold_table: "semanticscholar_publication"
+primary-keys: ["paper-id"]
+silver-table: "semanticscholar-publication"
+gold-table: "semanticscholar-publication"
 
 source:
   type: api
-  batch_size: 100
+  batch-size: 100
 
 sink:
   bronze:
     path: "data/output/bronze"
   silver:
     path: "data/output/silver"
-    primary_key: ["paper_id"]
-    partition_by: []
+    primary-key: ["paper-id"]
+    partition-by: []
   gold:
     path: "data/output/gold"
 
-gold_filters:
-  required_fields:
+gold-filters:
+  required-fields:
     - title
 
-input_filter:
+input-filter:
   enabled: true
-  source_path: "data/input/doi.csv"
-  column_name: "doi"
-  filter_field: "doi"
-  batch_size: 100
+  source-path: "data/input/doi.csv"
+  column-name: "doi"
+  filter-field: "doi"
+  batch-size: 100
 ```
 
 ---
@@ -305,7 +305,7 @@ input_filter:
 ```python
 # Batch lookup (up to 500 papers)
 url = "https://api.semanticscholar.org/graph/v1/paper/batch"
-body = {"ids": paper_ids}
+body = {"ids": paper-ids}
 params = {"fields": "paperId,title,abstract,..."}
 ```
 

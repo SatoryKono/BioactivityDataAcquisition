@@ -53,7 +53,7 @@
 
 ### Required leaf-модули (Wave 0)
 
-1. `src/bioetl/domain/value_objects/**`
+1. `src/bioetl/domain/value-objects/**`
 2. `src/bioetl/domain/exceptions/**`
 3. `src/bioetl/domain/contracts/gold/**`
 4. `src/bioetl/domain/schemas/common/**`
@@ -76,7 +76,7 @@
 3. **Тег после этапа:** `post-consolidation-stage-{N}`
 4. **Документ rollback-команд:**
    - `git checkout pre-consolidation-stage-{N}`
-   - `git revert <stage_commit_range>`
+   - `git revert <stage-commit-range>`
    - `git checkout -b rollback/stage-{N}`
 
 ### Stage template
@@ -93,17 +93,17 @@
 
 План MUST фиксировать baseline и target по метрикам:
 
-1. **Число слоёв** (`layer_count`)
-2. **Число интерфейсов** (`protocol_abc_count`, суммарно `typing.Protocol` + `ABC`)
-3. **Coupling между слоями** (`cross_layer_imports_count`)
+1. **Число слоёв** (`layer-count`)
+2. **Число интерфейсов** (`protocol-abc-count`, суммарно `typing.Protocol` + `ABC`)
+3. **Coupling между слоями** (`cross-layer-imports-count`)
 
 ### Метрики и пороги
 
 | Metric | Baseline | Target | Rule |
 |---|---:|---:|---|
-| `layer_count` | current | option-specific | не увеличивать вне выбранного варианта |
-| `protocol_abc_count` | current | >= baseline | нельзя терять контракты без ADR |
-| `cross_layer_imports_count` | current | -20% minimum | снижение связанности между слоями |
+| `layer-count` | current | option-specific | не увеличивать вне выбранного варианта |
+| `protocol-abc-count` | current | >= baseline | нельзя терять контракты без ADR |
+| `cross-layer-imports-count` | current | -20% minimum | снижение связанности между слоями |
 
 ### Минимальные команды сбора
 

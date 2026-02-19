@@ -13,7 +13,7 @@ flowchart TB
     end
 
     subgraph Composition["Composition Layer"]
-        Bootstrap[bootstrap_pipeline]
+        Bootstrap[bootstrap-pipeline]
         Factories[Pipeline Factories]
     end
 
@@ -76,38 +76,38 @@ External system adapters and I/O:
 
 Dependency injection and bootstrapping:
 
-- **[Bootstrap](composition/bootstrap.md)** - `bootstrap_pipeline()` entry point
+- **[Bootstrap](composition/bootstrap.md)** - `bootstrap-pipeline()` entry point
 - **[Factories](composition/factories.md)** - Pipeline and service factories
 
 ## Quick Links
 
 | Component | Module | Description |
 |-----------|--------|-------------|
-| `bootstrap_pipeline` | `bioetl.composition.bootstrap` | Main entry point for pipeline creation |
+| `bootstrap-pipeline` | `bioetl.composition.bootstrap` | Main entry point for pipeline creation |
 | `PipelineRunner` | `bioetl.application.core.runner` | Pipeline lifecycle orchestrator |
-| `BaseTransformer` | `bioetl.application.core.base_transformer` | Template Method for data transformation |
+| `BaseTransformer` | `bioetl.application.core.base-transformer` | Template Method for data transformation |
 | `StoragePort` | `bioetl.domain.ports` | Storage interface contract |
 | `DataSourcePort` | `bioetl.domain.ports` | Data fetching interface contract |
-| `SilverWriter` | `bioetl.infrastructure.storage.silver_writer` | Silver layer Delta Lake writer |
-| `BronzeWriter` | `bioetl.infrastructure.storage.bronze_writer` | Bronze layer JSONL writer |
+| `SilverWriter` | `bioetl.infrastructure.storage.silver-writer` | Silver layer Delta Lake writer |
+| `BronzeWriter` | `bioetl.infrastructure.storage.bronze-writer` | Bronze layer JSONL writer |
 
 ## Usage Example
 
 ```python
-from bioetl.composition.bootstrap import bootstrap_pipeline
+from bioetl.composition.bootstrap import bootstrap-pipeline
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 from uuid import uuid4
 
 # Create pipeline context
 ctx = PipelineContext(
-    pipeline_name="chembl_activity",
-    run_id=uuid4(),
-    run_type=RunType.INCREMENTAL,
+    pipeline-name="chembl-activity",
+    run-id=uuid4(),
+    run-type=RunType.INCREMENTAL,
 )
 
 # Bootstrap and run
-runner = bootstrap_pipeline(ctx)
+runner = bootstrap-pipeline(ctx)
 await runner.run()
 ```
 

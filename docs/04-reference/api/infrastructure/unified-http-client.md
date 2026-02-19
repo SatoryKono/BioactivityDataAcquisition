@@ -4,7 +4,7 @@
 **Version:** 5.14.0
 **Last updated:** 2026-02-10
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Overview
 
@@ -19,7 +19,7 @@ All API adapters **MUST** use `UnifiedHTTPClient` instead of direct `httpx` call
 
 **Related ADR:** [ADR-032: Unified HTTP Client Pattern](../../../02-architecture/decisions/ADR-032-unified-http-client.md)
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Architecture
 
@@ -54,7 +54,7 @@ flowchart TB
 1. **Observability Built-in:** Tracing and metrics integrated via ports
 1. **Async-first:** Uses `httpx.AsyncClient` for async HTTP
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Basic Usage
 
@@ -62,17 +62,17 @@ ______________________________________________________________________
 
 ```python
 from bioetl.infrastructure.adapters.http import UnifiedHTTPClient
-from bioetl.domain.models.retry_config import RetryConfig
+from bioetl.domain.models.retry-config import RetryConfig
 
 # Create client
 client = UnifiedHTTPClient(
-    base_url="https://www.ebi.ac.uk/chembl/api/data",
-    rate_limiter=rate_limiter,
-    circuit_breaker=circuit_breaker,
-    retry_config=RetryConfig(
-        max_attempts=3,
-        base_delay=1.0,
-        max_delay=60.0,
+    base-url="https://www.ebi.ac.uk/chembl/api/data",
+    rate-limiter=rate-limiter,
+    circuit-breaker=circuit-breaker,
+    retry-config=RetryConfig(
+        max-attempts=3,
+        base-delay=1.0,
+        max-delay=60.0,
     ),
     logger=logger,
     metrics=metrics,
@@ -94,7 +94,7 @@ response = await client.post(
 )
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Rate Limiting
 
@@ -115,10 +115,10 @@ Each provider has different rate limit policies:
 ### Token Bucket Example
 
 ```python
-from bioetl.infrastructure.adapters.rate_limiting import TokenBucketLimiter
+from bioetl.infrastructure.adapters.rate-limiting import TokenBucketLimiter
 
 # PubChem: 5 requests per second
-rate_limiter = TokenBucketLimiter(
+rate-limiter = TokenBucketLimiter(
     rate=5.0,  # tokens per second
     burst=10,  # max burst size
     logger=logger,
@@ -126,13 +126,13 @@ rate_limiter = TokenBucketLimiter(
 )
 
 client = UnifiedHTTPClient(
-    base_url="https://pubchem.ncbi.nlm.nih.gov/rest/pug",
-    rate_limiter=rate_limiter,
+    base-url="https://pubchem.ncbi.nlm.nih.gov/rest/pug",
+    rate-limiter=rate-limiter,
     # ... other config
 )
 
 # Requests are automatically throttled
-for cid in compound_ids:
+for cid in compound-ids:
     response = await client.get(f"/compound/cid/{cid}/JSON")
     # Rate limiter ensures ≤ 5 req/sec
 ```
@@ -140,19 +140,19 @@ for cid in compound_ids:
 ### Sliding Window Example
 
 ```python
-from bioetl.infrastructure.adapters.rate_limiting import SlidingWindowLimiter
+from bioetl.infrastructure.adapters.rate-limiting import SlidingWindowLimiter
 
 # Semantic Scholar: 100 requests per 5 minutes
-rate_limiter = SlidingWindowLimiter(
-    max_requests=100,
-    window_seconds=300,  # 5 minutes
+rate-limiter = SlidingWindowLimiter(
+    max-requests=100,
+    window-seconds=300,  # 5 minutes
     logger=logger,
     metrics=metrics,
 )
 
 client = UnifiedHTTPClient(
-    base_url="https://api.semanticscholar.org/graph/v1",
-    rate_limiter=rate_limiter,
+    base-url="https://api.semanticscholar.org/graph/v1",
+    rate-limiter=rate-limiter,
     # ... other config
 )
 ```
@@ -172,7 +172,7 @@ The client automatically respects standard rate limit headers:
 # 3. Wait until reset time if limit exceeded
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Circuit Breaker
 
@@ -183,17 +183,17 @@ ______________________________________________________________________
 ```python
 from bioetl.infrastructure.adapters.http import CircuitBreaker
 
-circuit_breaker = CircuitBreaker(
-    failure_threshold=5,  # Open after 5 consecutive failures
-    success_threshold=2,  # Close after 2 consecutive successes in half-open
-    timeout_seconds=60,  # Try again after 60 seconds
+circuit-breaker = CircuitBreaker(
+    failure-threshold=5,  # Open after 5 consecutive failures
+    success-threshold=2,  # Close after 2 consecutive successes in half-open
+    timeout-seconds=60,  # Try again after 60 seconds
     logger=logger,
     metrics=metrics,
 )
 
 client = UnifiedHTTPClient(
-    base_url="https://api.example.com",
-    circuit_breaker=circuit_breaker,
+    base-url="https://api.example.com",
+    circuit-breaker=circuit-breaker,
     # ... other config
 )
 ```
@@ -229,25 +229,25 @@ except CircuitBreakerOpenError:
     # Fail gracefully or use fallback
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Retry Logic
 
 ### Exponential Backoff
 
 ```python
-from bioetl.domain.models.retry_config import RetryConfig
+from bioetl.domain.models.retry-config import RetryConfig
 
-retry_config = RetryConfig(
-    max_attempts=5,  # Maximum 5 attempts total
-    base_delay=1.0,  # Start with 1 second delay
-    max_delay=60.0,  # Cap delay at 60 seconds
-    backoff_factor=2.0,  # Double delay each retry
+retry-config = RetryConfig(
+    max-attempts=5,  # Maximum 5 attempts total
+    base-delay=1.0,  # Start with 1 second delay
+    max-delay=60.0,  # Cap delay at 60 seconds
+    backoff-factor=2.0,  # Double delay each retry
 )
 
 client = UnifiedHTTPClient(
-    base_url="https://api.example.com",
-    retry_config=retry_config,
+    base-url="https://api.example.com",
+    retry-config=retry-config,
     # ... other config
 )
 
@@ -274,15 +274,15 @@ client = UnifiedHTTPClient(
 try:
     response = await client.get("/endpoint")
 except httpx.HTTPStatusError as e:
-    if e.response.status_code == 404:
+    if e.response.status-code == 404:
         # Non-retryable, entity not found
         logger.warning(f"Entity not found: {e.request.url}")
-    elif e.response.status_code >= 500:
+    elif e.response.status-code >= 500:
         # Retryable, already attempted with exponential backoff
-        logger.error("API server error after retries", exc_info=e)
+        logger.error("API server error after retries", exc-info=e)
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Observability Integration
 
@@ -292,16 +292,16 @@ The client automatically emits metrics:
 
 ```python
 # Counter: HTTP requests by method and status
-http_requests_total{method="GET", status="200", provider="chembl"}
+http-requests-total{method="GET", status="200", provider="chembl"}
 
 # Histogram: Request duration
-http_request_duration_seconds{method="GET", provider="chembl"}
+http-request-duration-seconds{method="GET", provider="chembl"}
 
 # Counter: Rate limiter wait events
-rate_limiter_wait_total{provider="pubchem"}
+rate-limiter-wait-total{provider="pubchem"}
 
 # Counter: Circuit breaker state changes
-circuit_breaker_state_change_total{provider="uniprot", state="open"}
+circuit-breaker-state-change-total{provider="uniprot", state="open"}
 ```
 
 ### Tracing
@@ -313,16 +313,16 @@ from bioetl.infrastructure.observability import OpenTelemetryTracer
 tracing = OpenTelemetryTracer()
 
 client = UnifiedHTTPClient(
-    base_url="https://api.example.com",
+    base-url="https://api.example.com",
     tracing=tracing,
     # ... other config
 )
 
 # Each HTTP request creates a span
-with tracing.start_span("fetch_compounds") as span:
-    span.set_attribute("provider", "pubchem")
+with tracing.start-span("fetch-compounds") as span:
+    span.set-attribute("provider", "pubchem")
     response = await client.get("/compound/cid/2244/JSON")
-    span.set_attribute("http.status_code", response.status_code)
+    span.set-attribute("http.status-code", response.status-code)
 ```
 
 **Note:** For Local-Only deployment, use `NoOpTracing` (default, ADR-022).
@@ -333,17 +333,17 @@ All HTTP operations are logged with structured context:
 
 ```json
 {
-  "event": "http_request",
+  "event": "http-request",
   "method": "GET",
   "url": "https://www.ebi.ac.uk/chembl/api/data/activity?limit=100",
-  "status_code": 200,
-  "duration_ms": 523.45,
+  "status-code": 200,
+  "duration-ms": 523.45,
   "provider": "chembl",
-  "run_id": "run-20260210-143022-abc123"
+  "run-id": "run-20260210-143022-abc123"
 }
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Error Handling
 
@@ -370,7 +370,7 @@ from bioetl.domain.exceptions import (
 import httpx
 
 
-async def fetch_with_error_handling(client: UnifiedHTTPClient, url: str):
+async def fetch-with-error-handling(client: UnifiedHTTPClient, url: str):
     try:
         response = await client.get(url)
         return response.json()
@@ -382,17 +382,17 @@ async def fetch_with_error_handling(client: UnifiedHTTPClient, url: str):
 
     except RateLimitExceededError as e:
         # Rate limit exceeded despite throttling
-        wait_seconds = e.retry_after or 60
-        logger.warning(f"Rate limit exceeded, retry after {wait_seconds}s")
-        await asyncio.sleep(wait_seconds)
-        return await fetch_with_error_handling(client, url)
+        wait-seconds = e.retry-after or 60
+        logger.warning(f"Rate limit exceeded, retry after {wait-seconds}s")
+        await asyncio.sleep(wait-seconds)
+        return await fetch-with-error-handling(client, url)
 
     except httpx.HTTPStatusError as e:
-        if e.response.status_code == 404:
+        if e.response.status-code == 404:
             logger.info(f"Entity not found: {url}")
             return None
-        elif e.response.status_code >= 500:
-            logger.error(f"Server error: {e.response.status_code}")
+        elif e.response.status-code >= 500:
+            logger.error(f"Server error: {e.response.status-code}")
             raise
 
     except httpx.NetworkError as e:
@@ -404,7 +404,7 @@ async def fetch_with_error_handling(client: UnifiedHTTPClient, url: str):
         raise
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Testing
 
@@ -417,12 +417,12 @@ import respx
 
 
 @respx.mock
-async def test_unified_http_client_retry():
+async def test-unified-http-client-retry():
     """Test retry logic with mocked responses."""
     # First two attempts fail, third succeeds
     route = respx.get("https://api.example.com/data")
     route.mock(
-        side_effect=[
+        side-effect=[
             httpx.Response(503),
             httpx.Response(503),
             httpx.Response(200, json={"result": "success"}),
@@ -430,18 +430,18 @@ async def test_unified_http_client_retry():
     )
 
     client = UnifiedHTTPClient(
-        base_url="https://api.example.com",
-        retry_config=RetryConfig(max_attempts=3),
-        rate_limiter=NoOpRateLimiter(),
-        circuit_breaker=NoOpCircuitBreaker(),
+        base-url="https://api.example.com",
+        retry-config=RetryConfig(max-attempts=3),
+        rate-limiter=NoOpRateLimiter(),
+        circuit-breaker=NoOpCircuitBreaker(),
         logger=logger,
         metrics=NoOpMetrics(),
         tracing=NoOpTracing(),
     )
 
     response = await client.get("/data")
-    assert response.status_code == 200
-    assert route.call_count == 3
+    assert response.status-code == 200
+    assert route.call-count == 3
 ```
 
 ### Integration Tests with VCR
@@ -451,21 +451,21 @@ import pytest
 import vcr
 
 
-@pytest.mark.vcr(cassette_library_dir="tests/fixtures/vcr/chembl")
-async def test_chembl_activity_fetch_real():
+@pytest.mark.vcr(cassette-library-dir="tests/fixtures/vcr/chembl")
+async def test-chembl-activity-fetch-real():
     """Test with recorded HTTP interactions."""
     client = UnifiedHTTPClient(
-        base_url="https://www.ebi.ac.uk/chembl/api/data",
+        base-url="https://www.ebi.ac.uk/chembl/api/data",
         # ... config
     )
 
     response = await client.get("/activity", params={"limit": 10})
-    assert response.status_code == 200
+    assert response.status-code == 200
     data = response.json()
     assert "activities" in data
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Configuration via YAML
 
@@ -475,24 +475,24 @@ Source configs support HTTP client settings:
 # configs/sources/pubchem.yaml
 name: pubchem
 version: "1.0"
-http_config:
-  timeout_sec: 30.0
-  max_retries: 3
-  retry_base_delay: 1.0
-  retry_max_delay: 60.0
-  rate_limit:
-    type: token_bucket
+http-config:
+  timeout-sec: 30.0
+  max-retries: 3
+  retry-base-delay: 1.0
+  retry-max-delay: 60.0
+  rate-limit:
+    type: token-bucket
     rate: 5.0  # 5 requests per second
     burst: 10
-  circuit_breaker:
-    failure_threshold: 5
-    success_threshold: 2
-    timeout_seconds: 60
+  circuit-breaker:
+    failure-threshold: 5
+    success-threshold: 2
+    timeout-seconds: 60
 ```
 
 **Note:** See [ADR-032 Configuration](../../../02-architecture/decisions/ADR-032-unified-http-client.md#configuration) for full schema.
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Migration from Direct httpx
 
@@ -502,7 +502,7 @@ ______________________________________________________________________
 import httpx
 
 
-async def fetch_data():
+async def fetch-data():
     async with httpx.AsyncClient() as client:
         response = await client.get("https://api.example.com/data")
         return response.json()
@@ -515,11 +515,11 @@ from bioetl.infrastructure.adapters.http import UnifiedHTTPClient
 
 
 class MyAdapter:
-    def __init__(self, http_client: UnifiedHTTPClient):
-        self._http = http_client
+    def --init--(self, http-client: UnifiedHTTPClient):
+        self.-http = http-client
 
-    async def fetch_data(self):
-        response = await self._http.get("/data")
+    async def fetch-data(self):
+        response = await self.-http.get("/data")
         return response.json()
 ```
 
@@ -531,7 +531,7 @@ class MyAdapter:
 - ✅ Built-in observability
 - ✅ Testability with NoOp implementations
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## See Also
 

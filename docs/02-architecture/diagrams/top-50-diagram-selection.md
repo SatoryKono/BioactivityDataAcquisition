@@ -86,7 +86,7 @@ Priority = (Arch×2 + Doc×1.5 + Freq×1.5 + Complex×2 + Coverage×1) / 8
 | 17 | 171 | PipelineRunner Internal Component Diagram | classDiagram | Component | 8 | 9 | 8 | 8 | 7 | **8.06** |
 | 18 | 155 | Fan-Out/Fan-In Pattern — Composite Pipeline Enrichment | flowchart | Pattern | 9 | 8 | 6 | 9 | 7 | **8.00** |
 | 19 | 91 | Cross-Provider Data Enrichment Flow — Publication | flowchart | DataFlow | 8 | 8 | 6 | 9 | 9 | **8.00** |
-| 20 | 121 | Template Method Pattern — BaseTransformer._transform_impl() | classDiagram | Pattern | 8 | 9 | 8 | 8 | 6 | **7.94** |
+| 20 | 121 | Template Method Pattern — BaseTransformer.-transform-impl() | classDiagram | Pattern | 8 | 9 | 8 | 8 | 6 | **7.94** |
 | 21 | 16 | YAML Configuration Resolution Chain | flowchart | Architecture | 8 | 9 | 8 | 8 | 6 | **7.94** |
 | 22 | 104 | Publication Composite — Merge All Sources | flowchart | DataFlow | 8 | 8 | 6 | 9 | 8 | **7.88** |
 | 23 | 278 | Composite Pipeline Phase Lifecycle | stateDiagram | Lifecycle | 8 | 8 | 6 | 9 | 8 | **7.88** |
@@ -198,7 +198,7 @@ Priority = (Arch×2 + Doc×1.5 + Freq×1.5 + Complex×2 + Coverage×1) / 8
 ### Rank 8: #221 — CLI Run → PipelineRunner Full Interaction (8.50)
 
 - **Arch=7**: Shows the entry point and full call chain
-- **Doc=10**: "What happens when I run `bioetl run chembl_activity`?"
+- **Doc=10**: "What happens when I run `bioetl run chembl-activity`?"
 - **Freq=10**: The most common operation in the system
 - **Complex=8**: CLI→bootstrap→factories→runner→executor→finalize
 - **Coverage=8**: Spans interfaces, composition, application layers

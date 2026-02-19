@@ -55,13 +55,13 @@ All 10 directional import boundary checks returned **0 violations**:
 | 9 | infrastructure → composition | CLEAN |
 | 10 | infrastructure → interfaces | CLEAN |
 
-TYPE_CHECKING guard audit: no hidden cross-boundary imports in guarded blocks.
+TYPE-CHECKING guard audit: no hidden cross-boundary imports in guarded blocks.
 
 #### ARCH-002: Domain Purity — CLEAN
 
 - Zero I/O operations in domain layer
 - No imports of `requests`, `httpx`, `aiohttp`, or `structlog`
-- No `open()` file I/O calls (5 matches for `_assert_open()` method calls are batch state checks, not file I/O)
+- No `open()` file I/O calls (5 matches for `-assert-open()` method calls are batch state checks, not file I/O)
 - No database client imports
 
 #### ARCH-003: Port Protocol Naming — CLEAN
@@ -70,9 +70,9 @@ All 37 Protocol classes in `domain/ports/` have the `*Port` suffix. Non-Protocol
 
 #### ARCH-004: Adapter Health Check — CLEAN
 
-All 7 HTTP/External adapters implement `health_check()` through `HealthCheckProviderMixin` inheritance:
+All 7 HTTP/External adapters implement `health-check()` through `HealthCheckProviderMixin` inheritance:
 
-| Adapter | Base Class | health_check() |
+| Adapter | Base Class | health-check() |
 |---------|-----------|-----------------|
 | ChemblAdapter | ChemblHealthMixin + BaseHttpAdapter | ✅ |
 | CrossRefAdapter | BaseHttpAdapter | ✅ |
@@ -88,20 +88,20 @@ Zero `Factory()` calls found in domain or application layers. All factory invoca
 
 #### ARCH-006: Silver Layer ACID — CLEAN
 
-Silver layer uses `deltalake.write_deltalake()` exclusively. Zero `to_parquet` or `write_parquet` calls found anywhere in `src/bioetl/`.
+Silver layer uses `deltalake.write-deltalake()` exclusively. Zero `to-parquet` or `write-parquet` calls found anywhere in `src/bioetl/`.
 
 #### ARCH-007: Medallion Clear Policy — CLEAN
 
 Clear policy correctly maps:
-- REBUILD → `ClearPolicy.SILVER_AND_GOLD` (clear both)
-- BACKFILL → `ClearPolicy.SILVER_AND_GOLD` (clear both)
+- REBUILD → `ClearPolicy.SILVER-AND-GOLD` (clear both)
+- BACKFILL → `ClearPolicy.SILVER-AND-GOLD` (clear both)
 - INCREMENTAL → `ClearPolicy.NEVER` (clear neither)
 
-Enforcement verified in `medallion_lifecycle.py:84-90` and `preflight_service.py:488-519`.
+Enforcement verified in `medallion-lifecycle.py:84-90` and `preflight-service.py:488-519`.
 
 #### ARCH-008: Single Source of Imports — CLEAN
 
-All external consumers import ports from the facade `bioetl.domain.ports`, not from internal modules like `bioetl.domain.ports.data_source_port`. The facade `__init__.py` exports 48 symbols in `__all__`.
+All external consumers import ports from the facade `bioetl.domain.ports`, not from internal modules like `bioetl.domain.ports.data-source-port`. The facade `--init--.py` exports 48 symbols in `--all--`.
 
 ---
 
@@ -112,11 +112,11 @@ All external consumers import ports from the facade `bioetl.domain.ports`, not f
 | AP-001 | Hard-coded Constructor | **PASS** | 0 (all matches are EXC-005 delegation) |
 | AP-002 | Direct structlog Import | **PASS** | 0 |
 | AP-003 | Import Boundary Violation | **PASS** | 0 |
-| AP-004 | Sentinel Values | **PASS** | 0 (4 matches: 3 comments/docstrings, 1 zstd `COMPRESSION_THREADS = -1` per EXC-015) |
+| AP-004 | Sentinel Values | **PASS** | 0 (4 matches: 3 comments/docstrings, 1 zstd `COMPRESSION-THREADS = -1` per EXC-015) |
 | AP-005 | Hardcoded Secrets | **PASS** | 0 |
 | AP-006 | Print Statements | **PASS** | 0 |
 | AP-007 | Raw Parquet in Silver | **PASS** | 0 |
-| AP-008 | Blocking I/O in Async | **PASS** | 0 (all async file I/O uses `run_in_executor` with sync helpers) |
+| AP-008 | Blocking I/O in Async | **PASS** | 0 (all async file I/O uses `run-in-executor` with sync helpers) |
 
 ---
 
@@ -137,7 +137,7 @@ All external consumers import ports from the facade `bioetl.domain.ports`, not f
 | AUD-DI-001 | `application/composite/merger.py:92-100` | MergeService creates 4 concrete helpers (`EnricherDeduplicator`, `EnricherAggregator`, `ColumnRenamer`, `ColumnOrderer`) without injection | MEDIUM |
 | AUD-DI-002 | `application/composite/runner.py:193-199` | `FSMStateHelper` hard-coded with inline import in CompositePipelineRunner | MEDIUM |
 | AUD-DI-003 | `application/pipelines/pubmed/transformer.py:348,611` | `AuthorExtractor()` and `DateExtractor()` instantiated inside methods per-call | MEDIUM |
-| AUD-DI-004 | `application/core/preflight_service.py:350` | `WriteModePolicy()` instantiated inside method | LOW |
+| AUD-DI-004 | `application/core/preflight-service.py:350` | `WriteModePolicy()` instantiated inside method | LOW |
 | AUD-DI-005 | `application/pipelines/pubmed/extractors/date.py:195` | `MedlineDateParser()` hard-coded in DateExtractor constructor | LOW |
 
 **Mitigating factors:** All violations involve same-layer internal helpers with no external dependencies. No CRITICAL violations. The codebase demonstrates mature DI practices overall with zero Service Locator usage and zero import-time side effects.
@@ -152,15 +152,15 @@ All external consumers import ports from the facade `bioetl.domain.ports`, not f
 | NAME-002 | Function Prefixes | **PASS** | Consistent convention usage |
 | NAME-003 | Module Naming | **PASS** | No `utils.py`, `helpers.py`, `misc.py` |
 | NAME-004 | Private Attributes | **WARN** | 5 public DI attributes |
-| NAME-005 | Constants | **PASS** | All UPPER_SNAKE_CASE |
-| NAME-006 | Enum Values | **PASS** | All UPPER_SNAKE_CASE |
+| NAME-005 | Constants | **PASS** | All UPPER-SNAKE-CASE |
+| NAME-006 | Enum Values | **PASS** | All UPPER-SNAKE-CASE |
 
 #### NAME Findings:
 
 | ID | Location | Description | Severity |
 |----|----------|-------------|----------|
 | AUD-NAME-001 | Multiple (~5 classes) | Classes like `Settings`, `Anomaly` lack suffixes from NAME-001 table | MEDIUM |
-| AUD-NAME-002 | `application/core/runner.py:93,95` `application/observability/observer.py:65-67` | Injected deps stored as `self.xxx` instead of `self._xxx` (`shutdown_signal`, `pipeline`, `metrics`, `logger`, `tracer`) | MEDIUM |
+| AUD-NAME-002 | `application/core/runner.py:93,95` `application/observability/observer.py:65-67` | Injected deps stored as `self.xxx` instead of `self.-xxx` (`shutdown-signal`, `pipeline`, `metrics`, `logger`, `tracer`) | MEDIUM |
 
 **Recommendation:** Extend NAME-001 suffix table to include Processor, Analyzer, Orderer, Renamer, Decorator, Tracker, Detector, Converter, Paginator, Hasher. Rename `Settings` → `AppConfig` and `Anomaly` → `AnomalyResult`.
 
@@ -173,7 +173,7 @@ All external consumers import ports from the facade `bioetl.domain.ports`, not f
 | TYPE-001 | Public Function Annotations | **PASS** — all public functions annotated |
 | TYPE-002 | Any Usage | **PASS** — 77% of `Any` uses have inline justification comments |
 | TYPE-003 | mypy Strict | **PASS** — `strict = true` in pyproject.toml |
-| TYPE-004 | Runtime Checkable | **PASS** — 38 `@runtime_checkable` decorators covering all 37 Ports |
+| TYPE-004 | Runtime Checkable | **PASS** — 38 `@runtime-checkable` decorators covering all 37 Ports |
 
 ---
 
@@ -272,8 +272,8 @@ All external consumers import ports from the facade `bioetl.domain.ports`, not f
 6. **AUD-DOC-006**: Update pipeline README to link to existing tissue spec
 7. **AUD-DI-001**: Consider injecting MergeService helpers or defining lightweight Protocols
 8. **AUD-DI-002**: Consider injecting FSMStateHelper via constructor
-9. **AUD-DI-003**: Move extractor instantiation from per-method-call to `__init__`
-10. **AUD-NAME-002**: Rename public DI attributes to `self._xxx` in PipelineRunner and PipelineObserver
+9. **AUD-DI-003**: Move extractor instantiation from per-method-call to `--init--`
+10. **AUD-NAME-002**: Rename public DI attributes to `self.-xxx` in PipelineRunner and PipelineObserver
 
 #### Priority 3 — LOW (cleanup)
 

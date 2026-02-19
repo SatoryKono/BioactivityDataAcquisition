@@ -1,15 +1,15 @@
 # Пайплайн: ChEMBL Publication Similarity
 
-**Имя пайплайна:** `chembl_publication_similarity`
+**Имя пайплайна:** `chembl-publication-similarity`
 **Провайдер:** `chembl`
-**Сущность:** `publication_similarity`
+**Сущность:** `publication-similarity`
 **Версия схемы:** 1.2.0
 
 ---
 
 ## 1. Описание
 
-Пайплайн извлекает данные о сходстве публикаций (коэффициенты Танимото) из API ChEMBL. Используется для анализа связей между научными публикациями на основе молекулярного и таргетного сходства. Endpoint API остаётся `/document_similarity`.
+Пайплайн извлекает данные о сходстве публикаций (коэффициенты Танимото) из API ChEMBL. Используется для анализа связей между научными публикациями на основе молекулярного и таргетного сходства. Endpoint API остаётся `/document-similarity`.
 
 ---
 
@@ -19,38 +19,38 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `sim_id` | `int` | Уникальный идентификатор записи сходства |
-| `doc_1` | `int` | ID первой публикации |
-| `doc_2` | `int` | ID второй публикации |
-| `pubmed_id1` | `int` | PubMed ID первой публикации |
-| `pubmed_id2` | `int` | PubMed ID второй публикации |
+| `sim-id` | `int` | Уникальный идентификатор записи сходства |
+| `doc-1` | `int` | ID первой публикации |
+| `doc-2` | `int` | ID второй публикации |
+| `pubmed-id1` | `int` | PubMed ID первой публикации |
+| `pubmed-id2` | `int` | PubMed ID второй публикации |
 
 ### Коэффициенты Танимото
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `tid_tani` | `float` | Коэффициент Танимото по таргетам |
-| `mol_tani` | `float` | Коэффициент Танимото по молекулам |
-| `avg_tani` | `float` | Среднее значение (вычисляемое) |
-| `max_tani` | `float` | Максимальное значение (вычисляемое) |
+| `tid-tani` | `float` | Коэффициент Танимото по таргетам |
+| `mol-tani` | `float` | Коэффициент Танимото по молекулам |
+| `avg-tani` | `float` | Среднее значение (вычисляемое) |
+| `max-tani` | `float` | Максимальное значение (вычисляемое) |
 
 ---
 
 ## 3. Трансформация
 
-**Файл:** `src/bioetl/application/pipelines/chembl/publication_similarity_transformer.py`
+**Файл:** `src/bioetl/application/pipelines/chembl/publication-similarity-transformer.py`
 
 ### Entity ID
 
 ```python
-entity_id = f"chembl:{sim_id}"
+entity-id = f"chembl:{sim-id}"
 ```
 
 ### Вычисляемые метрики
 
 ```python
-avg_tani = round((tid_tani + mol_tani) / 2, 6)
-max_tani = round(max(tid_tani, mol_tani), 6)
+avg-tani = round((tid-tani + mol-tani) / 2, 6)
+max-tani = round(max(tid-tani, mol-tani), 6)
 ```
 
 Если один из коэффициентов отсутствует, используется доступное значение.
@@ -61,13 +61,13 @@ max_tani = round(max(tid_tani, mol_tani), 6)
 
 ### DQ-правила
 
-1. **`sim_id`** — обязательное
-2. **`doc_1`**, **`doc_2`** — обязательные (foreign keys)
+1. **`sim-id`** — обязательное
+2. **`doc-1`**, **`doc-2`** — обязательные (foreign keys)
 
 ### Gold-фильтры
 
-- `max_tani >= 0.5` — только значимые связи попадают в Gold
-- Обязательные поля: `sim_id`, `doc_1`, `doc_2`
+- `max-tani >= 0.5` — только значимые связи попадают в Gold
+- Обязательные поля: `sim-id`, `doc-1`, `doc-2`
 
 ---
 
@@ -75,10 +75,10 @@ max_tani = round(max(tid_tani, mol_tani), 6)
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_publication_similarity
+bioetl run chembl-publication-similarity
 
 # С ограничением
-bioetl run chembl_publication_similarity --limit 1000
+bioetl run chembl-publication-similarity --limit 1000
 ```
 
 ---
@@ -87,9 +87,9 @@ bioetl run chembl_publication_similarity --limit 1000
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/publication_similarity.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/publication_similarity_transformer.py` |
-| Пайплайн | `src/bioetl/application/pipelines/chembl/publication_similarity.py` |
+| Конфигурация | `configs/pipelines/chembl/publication-similarity.yaml` |
+| Трансформер | `src/bioetl/application/pipelines/chembl/publication-similarity-transformer.py` |
+| Пайплайн | `src/bioetl/application/pipelines/chembl/publication-similarity.py` |
 
 ---
 

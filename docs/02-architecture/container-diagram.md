@@ -6,25 +6,25 @@
 flowchart TB
     engineer["Инженер-программист<br/>CLI (bioetl run)"]
     analyst["Аналитик данных"]
-    external_apis["Внешние научные API<br/>ChEMBL, PubChem, UniProt и др."]
+    external-apis["Внешние научные API<br/>ChEMBL, PubChem, UniProt и др."]
 
-    subgraph bioetl_system["Система BioETL (локальный процесс)"]
-        pipeline_runner["PipelineRunner<br/>Application Layer"]
-        storage_port["StoragePort<br/>(Domain Port)"]
-        lock_port["LockPort<br/>(Domain Port)"]
+    subgraph bioetl-system["Система BioETL (локальный процесс)"]
+        pipeline-runner["PipelineRunner<br/>Application Layer"]
+        storage-port["StoragePort<br/>(Domain Port)"]
+        lock-port["LockPort<br/>(Domain Port)"]
         writers["BronzeWriter / SilverWriter / GoldWriter<br/>(StoragePort impl)"]
-        memory_lock["MemoryLock<br/>(LockPort impl)"]
-        local_fs["Локальная файловая система<br/>data/ (bronze/silver/gold, checkpoints)"]
+        memory-lock["MemoryLock<br/>(LockPort impl)"]
+        local-fs["Локальная файловая система<br/>data/ (bronze/silver/gold, checkpoints)"]
     end
 
-    engineer -->|"Запускает пайплайны"| pipeline_runner
-    pipeline_runner -->|"Запрашивает данные"| external_apis
-    pipeline_runner -->|"Пишет через порт"| storage_port
-    storage_port --> writers
-    writers -->|"Чтение/запись"| local_fs
-    pipeline_runner -->|"Блокировки"| lock_port
-    lock_port --> memory_lock
-    analyst -->|"Читает локальные данные"| local_fs
+    engineer -->|"Запускает пайплайны"| pipeline-runner
+    pipeline-runner -->|"Запрашивает данные"| external-apis
+    pipeline-runner -->|"Пишет через порт"| storage-port
+    storage-port --> writers
+    writers -->|"Чтение/запись"| local-fs
+    pipeline-runner -->|"Блокировки"| lock-port
+    lock-port --> memory-lock
+    analyst -->|"Читает локальные данные"| local-fs
 ```
 
 ## Компоненты

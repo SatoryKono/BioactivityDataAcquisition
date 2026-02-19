@@ -6,7 +6,7 @@
 
 This document defines standards for creating, maintaining, and versioning architecture diagrams in the BioETL project.
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 1. General Principles
 
@@ -28,7 +28,7 @@ ______________________________________________________________________
 - Follow naming conventions from RULES.md §2
 - Reference RULES.md sections where applicable
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 2. File Organization
 
@@ -66,7 +66,7 @@ docs/02-architecture/diagrams/
 - есть запись в `diagrams-index.md`;
 - есть контекстный абзац со ссылкой в `docs/02-architecture/*.md`.
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 3. Format Standards
 
@@ -99,7 +99,7 @@ Use for:
 actor User
 participant CLI
 participant Pipeline
-User -> CLI: run --pipeline chembl_activity
+User -> CLI: run --pipeline chembl-activity
 CLI -> Pipeline: execute()
 @enduml
 ```
@@ -118,7 +118,7 @@ Use for:
 └─────────┘     └─────────┘     └─────────┘
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 4. Content Guidelines
 
@@ -149,7 +149,7 @@ Recommended color scheme:
 | Success          | Green  | #4CAF50 |
 | External         | Blue   | #2196F3 |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 5. Maintenance
 
@@ -175,7 +175,7 @@ Update diagrams when:
 - Mark outdated diagrams with `<!-- NEEDS UPDATE -->`
 - Track in `../../00-map.md`
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 6. Tools
 
@@ -195,7 +195,7 @@ ______________________________________________________________________
   run: npx @mermaid-js/mermaid-cli -i docs/**/*.mermaid
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 7. Diagram Catalog
 
@@ -209,7 +209,7 @@ ______________________________________________________________________
 | 06  | Class Diagram           | Mermaid  | Domain Objects    |
 | 07  | Deployment              | Mermaid  | §5.6 Environments |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 8. Examples
 
@@ -243,7 +243,7 @@ participant Worker
 participant MemoryLock
 participant DeltaLake
 
-Worker -> MemoryLock: acquire lock:chembl_activity (TTL 90s)
+Worker -> MemoryLock: acquire lock:chembl-activity (TTL 90s)
 MemoryLock --> Worker: OK
 
 loop Every 30s (heartbeat)
@@ -251,7 +251,7 @@ loop Every 30s (heartbeat)
 end
 
 Worker -> MemoryLock: get lock (validate owner)
-MemoryLock --> Worker: owner_id matches
+MemoryLock --> Worker: owner-id matches
 
 Worker -> DeltaLake: write()
 
@@ -259,7 +259,7 @@ Worker -> MemoryLock: release lock
 @enduml
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Related Documents
 

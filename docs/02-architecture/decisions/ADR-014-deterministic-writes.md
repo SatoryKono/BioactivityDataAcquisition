@@ -19,8 +19,8 @@
 | Файл | Паттерн | Контекст |
 |------|---------|----------|
 | `infrastructure/adapters/http/client.py` | `random.uniform()` | Retry jitter |
-| `infrastructure/storage/gold_writer.py` | `random.uniform()` | Write backoff |
-| `infrastructure/storage/bronze_writer.py` | `datetime.now()` | Ingestion timestamp |
+| `infrastructure/storage/gold-writer.py` | `random.uniform()` | Write backoff |
+| `infrastructure/storage/bronze-writer.py` | `datetime.now()` | Ingestion timestamp |
 | `infrastructure/quarantine/unified.py` | `datetime.now()` | Error timestamp |
 
 ## The Decision
@@ -32,20 +32,20 @@
 ```python
 @dataclass
 class RetryConfig:
-    max_attempts: int = 3
-    base_delay: float = 1.0
+    max-attempts: int = 3
+    base-delay: float = 1.0
     jitter: float = 0.1
     deterministic: bool = False  # NEW
-    jitter_seed: int | None = None  # NEW
+    jitter-seed: int | None = None  # NEW
 
-    def calculate_delay(self, attempt: int, url: str = "") -> float:
-        delay = self.base_delay * (self.multiplier ** attempt)
+    def calculate-delay(self, attempt: int, url: str = "") -> float:
+        delay = self.base-delay * (self.multiplier ** attempt)
 
         if self.deterministic:
             # Hash-based deterministic jitter
-            hash_input = f"{attempt}:{url}:{self.jitter_seed or 0}"
-            jitter_factor = (hash(hash_input) % 1000) / 1000.0
-            delay += delay * self.jitter * (jitter_factor * 2 - 1)
+            hash-input = f"{attempt}:{url}:{self.jitter-seed or 0}"
+            jitter-factor = (hash(hash-input) % 1000) / 1000.0
+            delay += delay * self.jitter * (jitter-factor * 2 - 1)
         else:
             delay += random.uniform(-delay * self.jitter, delay * self.jitter)
 
@@ -54,45 +54,45 @@ class RetryConfig:
 
 ### 2. Запрет random в Storage Writers
 
-- Удалён `import random` из `gold_writer.py`
+- Удалён `import random` из `gold-writer.py`
 - `random.uniform(0, 0.1)` заменён на фиксированный `0.05`
-- Архитектурный тест `test_no_random_in_writers` блокирует регрессии
+- Архитектурный тест `test-no-random-in-writers` блокирует регрессии
 
 ### 3. Единый Источник Времени
 
-`PipelineContext.started_at` — единственный источник timestamps для batch:
+`PipelineContext.started-at` — единственный источник timestamps для batch:
 
 ```python
 @dataclass(frozen=True)
 class PipelineContext:
-    run_id: RunID
-    run_type: RunType
+    run-id: RunID
+    run-type: RunType
     logger: LoggerPort
-    started_at: datetime = field(default_factory=_now_utc)
+    started-at: datetime = field(default-factory=-now-utc)
 
     @classmethod
-    def create(cls, run_id, run_type, logger, started_at=None):
-        return cls(..., started_at=started_at or datetime.now(UTC))
+    def create(cls, run-id, run-type, logger, started-at=None):
+        return cls(..., started-at=started-at or datetime.now(UTC))
 ```
 
 Infrastructure компоненты получают timestamp как параметр:
 
 ```python
 # Application layer
-ingestion_ts = self._context.started_at
+ingestion-ts = self.-context.started-at
 
 # Infrastructure layer - receives timestamp
-await bronze_writer.write_bronze(..., ingestion_ts=ingestion_ts)
-await quarantine.write(..., ingestion_ts=ingestion_ts)
+await bronze-writer.write-bronze(..., ingestion-ts=ingestion-ts)
+await quarantine.write(..., ingestion-ts=ingestion-ts)
 ```
 
 ### 4. Архитектурные Тесты
 
 | Тест | Цель |
 |------|------|
-| `test_no_random_in_writers` | Блокирует `import random` в `infrastructure/storage/` |
-| `test_no_datetime_now_in_infrastructure` | Блокирует `datetime.now()` в `infrastructure/` |
-| `test_no_structlog_in_application_interfaces` | Блокирует прямой импорт `structlog` в `application/` и `interfaces/` |
+| `test-no-random-in-writers` | Блокирует `import random` в `infrastructure/storage/` |
+| `test-no-datetime-now-in-infrastructure` | Блокирует `datetime.now()` в `infrastructure/` |
+| `test-no-structlog-in-application-interfaces` | Блокирует прямой импорт `structlog` в `application/` и `interfaces/` |
 
 ### 5. Изоляция логирования
 
@@ -108,11 +108,11 @@ Application и interfaces слои **MUST NOT** импортировать `stru
 1. **Воспроизводимость**: Одинаковые входные данные → одинаковое поведение
 2. **Тестируемость**: Детерминистичные тесты без flakiness
 3. **Отладка**: Можно воспроизвести точную последовательность событий
-4. **Консистентность**: Все записи в batch имеют одинаковый `_ingestion_ts`
+4. **Консистентность**: Все записи в batch имеют одинаковый `-ingestion-ts`
 
 ### Компромиссы
 
-1. **API усложнение**: Дополнительные параметры (`ingestion_ts`, `deterministic`)
+1. **API усложнение**: Дополнительные параметры (`ingestion-ts`, `deterministic`)
 2. **Миграция**: Требуется обновление всех вызовов infrastructure компонентов
 3. **Backward compatibility**: Fallback на `datetime.now()` при отсутствии параметра
 
@@ -122,31 +122,31 @@ Application и interfaces слои **MUST NOT** импортировать `stru
 
 | Файл | Изменение |
 |------|-----------|
-| `domain/context.py` | Добавлен `started_at` field |
-| `application/core/record_processor.py` | Использует `context.started_at` |
+| `domain/context.py` | Добавлен `started-at` field |
+| `application/core/record-processor.py` | Использует `context.started-at` |
 | `application/core/base.py` | Использует `PipelineContext.create()` |
 | `infrastructure/adapters/http/client.py` | Добавлен `deterministic` mode |
-| `infrastructure/storage/gold_writer.py` | Удалён `random`, фиксированный backoff |
-| `infrastructure/storage/bronze_writer.py` | Принимает `ingestion_ts` параметр |
-| `infrastructure/quarantine/unified.py` | Принимает `ingestion_ts` параметр |
+| `infrastructure/storage/gold-writer.py` | Удалён `random`, фиксированный backoff |
+| `infrastructure/storage/bronze-writer.py` | Принимает `ingestion-ts` параметр |
+| `infrastructure/quarantine/unified.py` | Принимает `ingestion-ts` параметр |
 | `domain/ports/quarantine.py` | Обновлён `QuarantinePort.write()` |
 
 ### Архитектурные тесты
 
-- `tests/architecture/test_no_random_in_writers.py`
-- `tests/architecture/test_no_datetime_now_in_infrastructure.py`
-- `tests/architecture/test_no_structlog_in_application_interfaces.py`
+- `tests/architecture/test-no-random-in-writers.py`
+- `tests/architecture/test-no-datetime-now-in-infrastructure.py`
+- `tests/architecture/test-no-structlog-in-application-interfaces.py`
 
-### Исключения для datetime.now() (ALLOWED_FILES)
+### Исключения для datetime.now() (ALLOWED-FILES)
 
 Следующие файлы имеют **обоснованные исключения** для использования `datetime.now()`.
-Исключения определены в `tests/architecture/test_no_datetime_now_in_infrastructure.py`:
+Исключения определены в `tests/architecture/test-no-datetime-now-in-infrastructure.py`:
 
 | Файл | Модуль | Обоснование | Использование |
 |------|--------|-------------|---------------|
-| `operations.py` | `infrastructure/quarantine/` | Вычисление retention cutoff для cleanup | `datetime.now(UTC) - timedelta(days=max_age_days)` для определения записей на удаление |
-| `gold_writer.py` | `infrastructure/storage/` | SCD2 `valid_from`/`valid_to` timestamps | Установка временных меток при merge-операциях для Slowly Changing Dimensions Type 2 |
-| `lineage.py` | `infrastructure/observability/` | Provenance tracking | Real-time timestamps для `record_run_start()`, `record_run_end()`, и фильтрации по дате |
+| `operations.py` | `infrastructure/quarantine/` | Вычисление retention cutoff для cleanup | `datetime.now(UTC) - timedelta(days=max-age-days)` для определения записей на удаление |
+| `gold-writer.py` | `infrastructure/storage/` | SCD2 `valid-from`/`valid-to` timestamps | Установка временных меток при merge-операциях для Slowly Changing Dimensions Type 2 |
+| `lineage.py` | `infrastructure/observability/` | Provenance tracking | Real-time timestamps для `record-run-start()`, `record-run-end()`, и фильтрации по дате |
 | `detector.py` | `infrastructure/observability/anomaly/` | Anomaly detection monitoring | Timestamp в `AnomalyResult` при обнаружении критических аномалий |
 | `iqr.py` | `infrastructure/observability/anomaly/detectors/` | IQR-based anomaly detection | Timestamp в результате детекции при обнаружении аномалии |
 | `mad.py` | `infrastructure/observability/anomaly/detectors/` | MAD-based anomaly detection | Timestamp в результате детекции при обнаружении аномалии |
@@ -163,7 +163,7 @@ Application и interfaces слои **MUST NOT** импортировать `stru
 ### 1. Глобальная фиксация времени через context manager
 
 ```python
-with frozen_time(timestamp):
+with frozen-time(timestamp):
     await pipeline.run()
 ```
 
@@ -198,7 +198,7 @@ with frozen_time(timestamp):
 ## Related
 
 - RULES.md §4.3 Детерминизм и Воспроизводимость
-- `tests/architecture/test_no_random_in_writers.py`
-- `tests/architecture/test_no_datetime_now_in_infrastructure.py`
-- `tests/architecture/test_no_structlog_in_application_interfaces.py`
+- `tests/architecture/test-no-random-in-writers.py`
+- `tests/architecture/test-no-datetime-now-in-infrastructure.py`
+- `tests/architecture/test-no-structlog-in-application-interfaces.py`
 - ADR-006 Logger and Metrics Ports

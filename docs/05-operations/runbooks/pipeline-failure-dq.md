@@ -7,8 +7,8 @@ This runbook describes how to handle pipeline failures due to high Data Quality 
 ## Symptoms
 - Pipeline fails with `DataQualityError`.
 - Logs show "Batch failed DQ check".
-- `dq_validation_score` drops below threshold.
-- `errors_total{type="data_quality"}` metric spikes.
+- `dq-validation-score` drops below threshold.
+- `errors-total{type="data-quality"}` metric spikes.
 
 ## Thresholds
 - **Soft Fail**: > 5% errors (Warning).
@@ -20,9 +20,9 @@ This runbook describes how to handle pipeline failures due to high Data Quality 
    make quarantine-inspect PIPELINE=...
    ```
 2. **Analyze Error Types**:
-   - `SCHEMA_VIOLATION`: Source data doesn't match expected schema.
-   - `MISSING_REQUIRED_FIELD`: Mandatory field is null/missing.
-   - `INVALID_FORMAT`: Date/Number format is incorrect.
+   - `SCHEMA-VIOLATION`: Source data doesn't match expected schema.
+   - `MISSING-REQUIRED-FIELD`: Mandatory field is null/missing.
+   - `INVALID-FORMAT`: Date/Number format is incorrect.
 
 ## Recovery Actions
 1. **If Source Data is Bad**:
@@ -35,8 +35,8 @@ This runbook describes how to handle pipeline failures due to high Data Quality 
 3. **If Threshold is Too Strict**:
    - Temporarily increase threshold in `configs/pipelines/{pipeline}.yaml`:
      ```yaml
-     dq_overrides:
-       hard_fail_threshold: 0.30  # Increase to 30%
+     dq-overrides:
+       hard-fail-threshold: 0.30  # Increase to 30%
      ```
    - **Warning**: This degrades data quality in Silver/Gold.
 

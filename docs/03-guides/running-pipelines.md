@@ -5,7 +5,7 @@
 **Версия:** 5.14.0
 **Дата обновления:** 2026-02-10
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Prerequisites
 
@@ -30,7 +30,7 @@ ______________________________________________________________________
 > **Note:** BioETL использует **Local-Only** архитектуру (ADR-010).
 > Docker и внешние сервисы (Redis, MinIO) **не требуются**.
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Быстрый старт
 
@@ -39,13 +39,13 @@ ______________________________________________________________________
 bioetl config list-pipelines
 
 # Запуск пайплайна с ограничением (для тестирования)
-bioetl run --pipeline chembl_activity --limit 100
+bioetl run --pipeline chembl-activity --limit 100
 
 # Запуск полного пайплайна
-bioetl run --pipeline chembl_activity
+bioetl run --pipeline chembl-activity
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Типы запуска (Run Types)
 
@@ -60,7 +60,7 @@ ______________________________________________________________________
 Обрабатывает только новые записи с момента последнего успешного запуска:
 
 ```bash
-bioetl run --pipeline chembl_activity
+bioetl run --pipeline chembl-activity
 ```
 
 ### Backfill Run
@@ -69,13 +69,13 @@ bioetl run --pipeline chembl_activity
 
 ```bash
 # С подтверждением
-bioetl run --pipeline chembl_activity --run-type backfill
+bioetl run --pipeline chembl-activity --run-type backfill
 
 # Без подтверждения
-bioetl run --pipeline chembl_activity --run-type backfill --yes
+bioetl run --pipeline chembl-activity --run-type backfill --yes
 
 # Предпросмотр очистки
-bioetl run --pipeline chembl_activity --run-type backfill --dry-run
+bioetl run --pipeline chembl-activity --run-type backfill --dry-run
 ```
 
 ### Full Rebuild
@@ -84,16 +84,16 @@ bioetl run --pipeline chembl_activity --run-type backfill --dry-run
 
 ```bash
 # С подтверждением
-bioetl run --pipeline chembl_activity --run-type rebuild
+bioetl run --pipeline chembl-activity --run-type rebuild
 
 # Без подтверждения
-bioetl run --pipeline chembl_activity --run-type rebuild --yes
+bioetl run --pipeline chembl-activity --run-type rebuild --yes
 
 # Предпросмотр очистки
-bioetl run --pipeline chembl_activity --run-type rebuild --dry-run
+bioetl run --pipeline chembl-activity --run-type rebuild --dry-run
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Тестирование и разработка
 
@@ -102,7 +102,7 @@ ______________________________________________________________________
 Для тестирования ограничьте количество обрабатываемых записей:
 
 ```bash
-bioetl run --pipeline chembl_activity --limit 100
+bioetl run --pipeline chembl-activity --limit 100
 ```
 
 ### Resume (продолжение прерванного запуска)
@@ -110,16 +110,16 @@ bioetl run --pipeline chembl_activity --limit 100
 Если пайплайн был прерван, продолжите с checkpoint:
 
 ```bash
-bioetl run --pipeline chembl_activity --resume
+bioetl run --pipeline chembl-activity --resume
 ```
 
 ### Debug логирование
 
 ```bash
-bioetl run --pipeline chembl_activity --debug
+bioetl run --pipeline chembl-activity --debug
 ```
 
-### Bronze Cache (use_cached_bronze)
+### Bronze Cache (use-cached-bronze)
 
 BioETL поддерживает запуск пайплайнов на основе локального кеша Bronze-слоя вместо выполнения HTTP-запросов к API. Это полезно для быстрой отладки трансформаций и тестирования DQ-правил на ранее загруженных данных.
 
@@ -128,16 +128,16 @@ BioETL поддерживает запуск пайплайнов на осно�
 
 ```bash
 # Использовать кеш (по умолчанию)
-bioetl run --pipeline chembl_activity
+bioetl run --pipeline chembl-activity
 
 # Принудительно запросить свежие данные из API
-bioetl run --pipeline chembl_activity --no-cached-bronze
+bioetl run --pipeline chembl-activity --no-cached-bronze
 
 # Фильтрация кеша по дате
-bioetl run --pipeline chembl_activity --cached-bronze-date 2026-01-20
+bioetl run --pipeline chembl-activity --cached-bronze-date 2026-01-20
 
 # Указание кастомного пути к кешу
-bioetl run --pipeline chembl_activity --cached-bronze-path ./my_cache
+bioetl run --pipeline chembl-activity --cached-bronze-path ./my-cache
 ```
 
 ### Фильтрация по CSV
@@ -145,13 +145,13 @@ bioetl run --pipeline chembl_activity --cached-bronze-path ./my_cache
 Обрабатывать только записи с указанными ID:
 
 ```bash
-bioetl run --pipeline chembl_activity \
-    --input-csv data/filter_ids.csv \
-    --filter-column molecule_id \
-    --filter-field molecule_chembl_id
+bioetl run --pipeline chembl-activity \
+    --input-csv data/filter-ids.csv \
+    --filter-column molecule-id \
+    --filter-field molecule-chembl-id
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Конфигурация пайплайнов
 
@@ -160,7 +160,7 @@ ______________________________________________________________________
 ```
 configs/
 ├── pipelines/
-│   ├── _base.yaml           # Базовая конфигурация (наследуется)
+│   ├── -base.yaml           # Базовая конфигурация (наследуется)
 │   ├── chembl/
 │   │   ├── activity.yaml
 │   │   ├── molecule.yaml
@@ -176,32 +176,32 @@ configs/
 
 ```bash
 # Показать конфигурацию пайплайна
-bioetl config show chembl_activity
+bioetl config show chembl-activity
 
 # В формате JSON
-bioetl config show chembl_activity --format json
+bioetl config show chembl-activity --format json
 
 # Валидация конфигурации
-bioetl config validate chembl_activity
+bioetl config validate chembl-activity
 ```
 
 ### Структура YAML-конфига
 
-Минимальный конфиг (наследует из `_base.yaml`):
+Минимальный конфиг (наследует из `-base.yaml`):
 
 ```yaml
-pipeline_name: chembl_activity
+pipeline-name: chembl-activity
 provider: chembl
-entity_type: activity
+entity-type: activity
 version: "1.2.0"
-business_primary_keys: ["activity_id"]
-silver_table: "chembl_activity"
-gold_table: "chembl_activity"
+business-primary-keys: ["activity-id"]
+silver-table: "chembl-activity"
+gold-table: "chembl-activity"
 
 # Переопределения DQ правил (опционально)
-dq_overrides:
-  field_validations:
-    - field: standard_value
+dq-overrides:
+  field-validations:
+    - field: standard-value
       type: range
       min: 0
       nullable: true
@@ -209,7 +209,7 @@ dq_overrides:
 
 > **Подробнее:** [Pipeline Configuration Guide](pipeline-configuration.md)
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Блокировки (Locking)
 
@@ -221,7 +221,7 @@ BioETL использует **in-memory блокировки** для предо
 ### Проверка статуса блокировки
 
 ```bash
-bioetl lock check --pipeline chembl_activity --run-id <UUID>
+bioetl lock check --pipeline chembl-activity --run-id <UUID>
 ```
 
 ### Освобождение зависшей блокировки
@@ -229,7 +229,7 @@ bioetl lock check --pipeline chembl_activity --run-id <UUID>
 Если пайплайн завершился аварийно и не освободил блокировку:
 
 ```bash
-bioetl lock release --pipeline chembl_activity --run-id <UUID>
+bioetl lock release --pipeline chembl-activity --run-id <UUID>
 ```
 
 > **Внимание:** Используйте только если уверены, что пайплайн не выполняется.
@@ -240,7 +240,7 @@ bioetl lock release --pipeline chembl_activity --run-id <UUID>
 - **Heartbeat interval:** 30 секунд (автоматически продлевает блокировку)
 - При аварийном завершении блокировка автоматически освобождается по истечении TTL
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Мониторинг и метрики
 
@@ -248,11 +248,11 @@ ______________________________________________________________________
 
 ```bash
 # Via флаг
-bioetl run --pipeline chembl_activity --debug
+bioetl run --pipeline chembl-activity --debug
 
 # Via переменную окружения
-export BIOETL_LOG_LEVEL=DEBUG
-bioetl run --pipeline chembl_activity
+export BIOETL-LOG-LEVEL=DEBUG
+bioetl run --pipeline chembl-activity
 ```
 
 | Уровень   | Использование               |
@@ -268,28 +268,28 @@ BioETL автоматически собирает метрики выполне
 
 ```bash
 # Метрики доступны на порту 8000
-curl http://localhost:8000/metrics | grep bioetl_
+curl http://localhost:8000/metrics | grep bioetl-
 ```
 
 **Ключевые метрики:**
 
 | Метрика                               | Тип       | Описание                          |
 | ------------------------------------- | --------- | --------------------------------- |
-| `bioetl_pipeline_duration_seconds`    | Histogram | Длительность выполнения пайплайна |
-| `bioetl_records_processed_total`      | Counter   | Количество обработанных записей   |
-| `bioetl_errors_total`                 | Counter   | Количество ошибок                 |
-| `bioetl_batch_size_records`           | Histogram | Размер батчей                     |
-| `bioetl_dq_records_quarantined_total` | Counter   | Карантинные записи                |
-| `bioetl_circuit_breaker_state`        | Gauge     | Состояние Circuit Breaker         |
+| `bioetl-pipeline-duration-seconds`    | Histogram | Длительность выполнения пайплайна |
+| `bioetl-records-processed-total`      | Counter   | Количество обработанных записей   |
+| `bioetl-errors-total`                 | Counter   | Количество ошибок                 |
+| `bioetl-batch-size-records`           | Histogram | Размер батчей                     |
+| `bioetl-dq-records-quarantined-total` | Counter   | Карантинные записи                |
+| `bioetl-circuit-breaker-state`        | Gauge     | Состояние Circuit Breaker         |
 
 **Включение/отключение метрик:**
 
 ```bash
 # Включить (по умолчанию)
-export BIOETL_METRICS_ENABLED=true
+export BIOETL-METRICS-ENABLED=true
 
 # Отключить
-export BIOETL_METRICS_ENABLED=false
+export BIOETL-METRICS-ENABLED=false
 ```
 
 > **Подробнее:** [Metrics & Monitoring Guide](metrics-monitoring.md)
@@ -300,10 +300,10 @@ export BIOETL_METRICS_ENABLED=false
 
 ```bash
 # Включён по умолчанию на порту 8080
-bioetl run --pipeline chembl_activity --health-port 8080
+bioetl run --pipeline chembl-activity --health-port 8080
 
 # Отключить
-bioetl run --pipeline chembl_activity --no-health-server
+bioetl run --pipeline chembl-activity --no-health-server
 ```
 
 **Endpoints:**
@@ -318,7 +318,7 @@ bioetl run --pipeline chembl_activity --no-health-server
 bioetl health server --port 8080
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Выходные данные (Pipeline Output)
 
@@ -337,15 +337,15 @@ data/
 ├── output/
 │   ├── bronze/
 │   │   └── chembl/activity/2026-01-26/
-│   │       └── batch_001.jsonl.zst
+│   │       └── batch-001.jsonl.zst
 │   ├── silver/
 │   │   └── chembl/activity/
-│   │       └── _delta_log/
+│   │       └── -delta-log/
 │   └── gold/
 │       └── chembl/activity/
-│           └── _delta_log/
+│           └── -delta-log/
 ├── checkpoints/
-│   └── chembl_activity.json
+│   └── chembl-activity.json
 └── quarantine/
     └── chembl/activity/
 ```
@@ -366,7 +366,7 @@ bioetl export chembl.activity --format xlsx
 bioetl export chembl.activity --layer gold
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Maintenance операции
 
@@ -395,7 +395,7 @@ bioetl maintenance bronze-cleanup
 bioetl maintenance bronze-cleanup --retention-days 60 --dry-run
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Карантин (Quarantine)
 
@@ -405,29 +405,29 @@ ______________________________________________________________________
 
 ```bash
 # Статистика
-bioetl quarantine stats --pipeline chembl_activity
+bioetl quarantine stats --pipeline chembl-activity
 
 # Просмотр записей
-bioetl quarantine inspect --pipeline chembl_activity --limit 50
+bioetl quarantine inspect --pipeline chembl-activity --limit 50
 
 # Фильтрация по коду ошибки
-bioetl quarantine inspect --pipeline chembl_activity --error-code DQ_MISSING_FIELD
+bioetl quarantine inspect --pipeline chembl-activity --error-code DQ-MISSING-FIELD
 ```
 
 ### Повторная обработка
 
 ```bash
-bioetl quarantine replay --pipeline chembl_activity --dry-run
-bioetl quarantine replay --pipeline chembl_activity --max-age-days 7
+bioetl quarantine replay --pipeline chembl-activity --dry-run
+bioetl quarantine replay --pipeline chembl-activity --max-age-days 7
 ```
 
 ### Очистка карантина
 
 ```bash
-bioetl quarantine purge --pipeline chembl_activity --older-than-days 30 --dry-run
+bioetl quarantine purge --pipeline chembl-activity --older-than-days 30 --dry-run
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Распространённые проблемы
 
@@ -440,7 +440,7 @@ ______________________________________________________________________
 | DQ threshold exceeded   | Проверьте `quarantine stats`, исправьте источник           |
 | Circuit breaker open    | Подождите recovery (5 мин) или проверьте health провайдера |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Запуск нескольких пайплайнов
 
@@ -466,7 +466,7 @@ bioetl run-composite --composite publication
 bioetl run-composite --composite publication --seed-limit 100
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## См. также
 

@@ -2,19 +2,19 @@
 
 *Version 1.0.0 | Aligned with RULES.md v5.20*
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 1. Identification
 
 | Parameter         | Value                                         |
 | ----------------- | --------------------------------------------- |
-| **Pipeline ID**   | `chembl_subcellular_fraction`                 |
+| **Pipeline ID**   | `chembl-subcellular-fraction`                 |
 | **Provider**      | ChEMBL (EBI)                                  |
-| **Entity**        | subcellular_fraction                          |
+| **Entity**        | subcellular-fraction                          |
 | **Source Entity** | assay                                         |
 | **Strategy**      | Derived Entity (Extracted from Assay records) |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 2. Business Context
 
@@ -30,21 +30,21 @@ Subcellular Fractions represent specific **cellular compartments** (like mitocho
 1. **Compartmental Analysis**: Study drug effects specifically on mitochondrial or microsomal enzymes.
 1. **Assay Enrichment**: Group assays by the subcellular fraction used in the experiment.
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 3. Extraction & Transformation
 
-This is a **derived entity** created by extracting unique values from the `assay_subcellular_fraction` field in the `chembl_assay` pipeline.
+This is a **derived entity** created by extracting unique values from the `assay-subcellular-fraction` field in the `chembl-assay` pipeline.
 
 ### 3.1. Fields
 
 | #   | Field                  | Type    | Nullable | Description                          |
 | --- | ---------------------- | ------- | -------- | ------------------------------------ |
-| 1   | `subcellular_fraction` | string  | No       | Primary key (normalized name)        |
-| 2   | `assay_count`          | integer | Yes      | Number of assays using this fraction |
-| 3   | `example_assay_id`     | string  | Yes      | Reference to an example assay        |
+| 1   | `subcellular-fraction` | string  | No       | Primary key (normalized name)        |
+| 2   | `assay-count`          | integer | Yes      | Number of assays using this fraction |
+| 3   | `example-assay-id`     | string  | Yes      | Reference to an example assay        |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 4. Validation
 
@@ -55,19 +55,19 @@ class ChEMBLSubcellularFractionGoldSchema(pa.DataFrameModel):
     """Gold schema for ChEMBL Subcellular Fraction entity."""
 
     # Primary key
-    subcellular_fraction: Series[str] = pa.Field(
+    subcellular-fraction: Series[str] = pa.Field(
         nullable=False,
-        str_length={"min_value": 1, "max_value": 200},
+        str-length={"min-value": 1, "max-value": 200},
     )
 
     # Statistics
-    assay_count: Series[float] | None = pa.Field(
+    assay-count: Series[float] | None = pa.Field(
         nullable=True,
         coerce=True,
     )
 
     # Example reference
-    example_assay_id: Series[str] | None = pa.Field(
+    example-assay-id: Series[str] | None = pa.Field(
         nullable=True,
     )
 
@@ -75,17 +75,17 @@ class ChEMBLSubcellularFractionGoldSchema(pa.DataFrameModel):
         strict = True
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 5. Pipeline Configuration
 
 ```yaml
-pipeline_name: chembl_subcellular_fraction
+pipeline-name: chembl-subcellular-fraction
 provider: chembl
-entity_type: subcellular_fraction
+entity-type: subcellular-fraction
 version: "1.0.0"
 
-primary_keys: ["subcellular_fraction"]
-silver_table: "chembl_subcellular_fraction"
-gold_table: "chembl_subcellular_fraction"
+primary-keys: ["subcellular-fraction"]
+silver-table: "chembl-subcellular-fraction"
+gold-table: "chembl-subcellular-fraction"
 ```

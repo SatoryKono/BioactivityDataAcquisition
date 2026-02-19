@@ -73,7 +73,7 @@ This directory contains Architecture Decision Records documenting significant ar
 - [ADR-017](ADR-017-observability-architecture.md): Observability Architecture
 - [ADR-019](ADR-019-observability-port-enforcement.md): Observability Port Enforcement
 - [ADR-022](ADR-022-tracing-noop.md): NoOp Tracing for Local-Only
-- [ADR-023](ADR-023-entity-type-patterns.md): Entity Type Patterns (transformer entity_type)
+- [ADR-023](ADR-023-entity-type-patterns.md): Entity Type Patterns (transformer entity-type)
 
 ### Lifecycle Management
 

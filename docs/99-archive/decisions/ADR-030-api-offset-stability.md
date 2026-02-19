@@ -17,7 +17,7 @@ This affected publication pipelines across providers (ChEMBL, PubMed, CrossRef, 
 ## Decision (Summary)
 
 Adopt a **full-scan strategy** for publication pipelines and explicitly block
-checkpoint-based resume. Deduplication is handled in Silver using `content_hash`.
+checkpoint-based resume. Deduplication is handled in Silver using `content-hash`.
 
 The canonical, detailed decision record is:
 - [ADR-030: Publication Pagination Strategy](ADR-030-publication-pagination-strategy.md)

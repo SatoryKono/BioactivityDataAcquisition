@@ -24,9 +24,9 @@
 - **Secrets** только через `pydantic-settings`/`os.environ`, без хардкода.
 
 ## Разработка и запуск
-- Быстрый старт: `./dev_setup.sh` (или `--quick`).
+- Быстрый старт: `./dev-setup.sh` (или `--quick`).
 - Проверки: `make lint && make test`.
-- Пример запуска: `bioetl run --pipeline chembl_activity --run-type incremental`.
+- Пример запуска: `bioetl run --pipeline chembl-activity --run-type incremental`.
 
 ## Гигиена репозитория
 - Артефакты → `reports/` или `logs/`, временные дампы → `tmp/`.

@@ -21,7 +21,7 @@ This checklist documents the pre-release verification completed for BioETL v5.9.
 
 | Test           | Status  | Result                           |
 | -------------- | ------- | -------------------------------- |
-| Version import | ✅ Pass | `bioetl.__version__ = "5.9.0"`   |
+| Version import | ✅ Pass | `bioetl.--version-- = "5.9.0"`   |
 | CLI help       | ✅ Pass | All commands displayed correctly |
 
 ## Documentation Checklist
@@ -59,10 +59,10 @@ This checklist documents the pre-release verification completed for BioETL v5.9.
 | Item                   | Status     | Value                    |
 | ---------------------- | ---------- | ------------------------ |
 | pyproject.toml version | ✅         | 5.9.0                    |
-| `__version__`          | ✅         | 5.9.0                    |
+| `--version--`          | ✅         | 5.9.0                    |
 | README badge version   | ✅         | 5.9.0                    |
 | Git tag                | ⏳ Pending | v5.9.0 (to be created)   |
-| RELEASE_NOTES          | ⏳ Pending | In CHANGELOG.md          |
+| RELEASE-NOTES          | ⏳ Pending | In CHANGELOG.md          |
 | Wheel и sdist          | ⏳ Pending | CI will build on release |
 
 ## CI/CD
@@ -99,7 +99,7 @@ Tests now run correctly with `pytest-xdist` using `--dist loadscope`.
 1. ⏳ Push tag: `git push origin v5.9.0`
 1. ⏳ Create GitHub Release with release notes
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 *Verified: 2026-01-13*
 *Version: 5.9.0*

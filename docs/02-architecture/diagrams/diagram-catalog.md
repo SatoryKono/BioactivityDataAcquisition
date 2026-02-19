@@ -45,7 +45,7 @@
 30. **Use Cases Overview** - Use Case - Основные use cases системы
 
 ### 1.4 Composition Layer (10)
-31. **Composition Root** - Component - bootstrap_pipeline() orchestration
+31. **Composition Root** - Component - bootstrap-pipeline() orchestration
 32. **Factory Pattern Usage** - Class - 8 фабрик и их ответственности
 33. **Bootstrap Functions** - Flowchart - 10 bootstrap функций
 34. **Dependency Injection Flow** - Sequence - Как собираются зависимости
@@ -116,13 +116,13 @@
 
 ### 2.4 Storage Operations (12)
 87. **Bronze Write Operation** - Sequence - JSONL append with metadata
-88. **Silver Merge Operation** - Sequence - Delta merge by content_hash
+88. **Silver Merge Operation** - Sequence - Delta merge by content-hash
 89. **Gold SCD2 Write** - Sequence - Slowly Changing Dimension Type 2
 90. **Delta VACUUM** - Activity - Retention и cleanup
 91. **Checkpoint Save** - Sequence - State persistence
 92. **Checkpoint Load** - Sequence - Resume from checkpoint
 93. **Quarantine Write** - Sequence - Failed record isolation
-94. **Metadata Write** - Sequence - _metadata.yaml creation
+94. **Metadata Write** - Sequence - -metadata.yaml creation
 95. **Bronze Archive** - Activity - 90d → Archive flow
 96. **Silver Upsert** - Sequence - Insert or Update logic
 97. **Gold Overwrite** - Sequence - Full table replacement
@@ -130,10 +130,10 @@
 
 ### 2.5 Batch Processing (12)
 99. **Batch Creation** - State - Batch lifecycle states
-100. **Record Addition** - Activity - add_record() flow
+100. **Record Addition** - Activity - add-record() flow
 101. **Batch Sealing** - Activity - seal() operation
 102. **Batch Writing** - Sequence - Mark writing → Commit
-103. **Batch Failure** - Activity - mark_failed() и rollback
+103. **Batch Failure** - Activity - mark-failed() и rollback
 104. **Batch Metrics Recording** - Activity - BatchMetricsRecorder
 105. **Adaptive Batch Sizing** - Activity - Memory-based sizing
 106. **Batch Transformation** - Sequence - BatchTransformer процесс
@@ -189,7 +189,7 @@
 146. **Health Checks** - Sequence - Component health probes
 147. **Pipeline Observer Pattern** - Sequence - Cross-cutting concerns
 148. **Metrics Emission** - Activity - Metric recording flow
-149. **Log Correlation** - Flowchart - run_id correlation
+149. **Log Correlation** - Flowchart - run-id correlation
 150. **Trace Context Propagation** - Sequence - Distributed tracing
 151. **Alerting Flow** - Flowchart - Metrics → Alerts
 152. **Dashboard Data Flow** - Flowchart - Metrics → Dashboards
@@ -285,9 +285,9 @@
 230. **PipelineObserver** - Class - Observability wrapper
 
 ### 4.3 Composition Components (15)
-231. **bootstrap_pipeline()** - Sequence - Composition root
-232. **bootstrap_observability()** - Sequence - Observability setup
-233. **bootstrap_storage()** - Sequence - Storage setup
+231. **bootstrap-pipeline()** - Sequence - Composition root
+232. **bootstrap-observability()** - Sequence - Observability setup
+233. **bootstrap-storage()** - Sequence - Storage setup
 234. **PipelineFactory** - Class - Pipeline creation
 235. **RunnerFactory** - Class - Runner creation
 236. **ServicesFactory** - Class - Services creation
@@ -453,10 +453,10 @@
 372. **PipelineRun Transitions** - State - All state transitions
 373. **Batch States** - State - OPEN → SEALED → WRITING → COMMITTED
 374. **Batch Lifecycle** - Sequence - Creation → Sealing → Commit
-375. **QuarantineEntry States** - State - NEW → UNDER_REVIEW → RESOLVED
+375. **QuarantineEntry States** - State - NEW → UNDER-REVIEW → RESOLVED
 376. **QuarantineEntry Lifecycle** - Sequence - Creation → Resolution
 377. **StageResult States** - State - SUCCESS/FAILED/SKIPPED
-378. **Event Collection** - Sequence - collect_events() flow
+378. **Event Collection** - Sequence - collect-events() flow
 379. **Aggregate Immutability** - Activity - State protection
 380. **Aggregate Persistence** - Sequence - Event sourcing
 
@@ -524,7 +524,7 @@
 431. **PubChem Compound Schema** - Class - Pandera schema
 432. **UniProt Protein Schema** - Class - Pandera schema
 433. **CrossRef Publication Schema** - Class - Pandera schema
-434. **Metadata Schema** - Class - _metadata.yaml structure
+434. **Metadata Schema** - Class - -metadata.yaml structure
 435. **Checkpoint Schema** - Class - Checkpoint JSON structure
 436. **Quarantine Schema** - Class - Quarantine entry schema
 437. **DQ Report Schema** - Class - DQ report structure

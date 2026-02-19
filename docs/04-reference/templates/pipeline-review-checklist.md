@@ -17,17 +17,17 @@ Use this checklist when reviewing new or modified pipelines.
 ## 2. Configuration (RULES.md App D)
 
 - [ ] Pipeline config exists at `configs/pipelines/{provider}/{entity}.yaml`
-- [ ] Config includes required sections: `pipeline`, `source`, `sink`, `dq_overrides`
-- [ ] `circuit_breaker` and `rate_limit` parameters defined
-- [ ] `load_strategy` specified (`incremental` | `full`)
-- [ ] `forensic_retention` flag set for Critical tables if needed
+- [ ] Config includes required sections: `pipeline`, `source`, `sink`, `dq-overrides`
+- [ ] `circuit-breaker` and `rate-limit` parameters defined
+- [ ] `load-strategy` specified (`incremental` | `full`)
+- [ ] `forensic-retention` flag set for Critical tables if needed
 
 ## 3. Data Flow - Medallion Architecture (RULES.md §2.1)
 
 ### Bronze Layer
 
 - [ ] Format: JSONL + zstd
-- [ ] Path pattern: `bronze/{format_version}/{provider}/{entity}/{date}/`
+- [ ] Path pattern: `bronze/{format-version}/{provider}/{entity}/{date}/`
 - [ ] Append-only mode
 - [ ] No in-place format migrations
 
@@ -35,8 +35,8 @@ Use this checklist when reviewing new or modified pipelines.
 
 - [ ] Format: Delta Lake (NOT raw Parquet)
 - [ ] Mode: Merge/Upsert
-- [ ] `primary_key` defined for deduplication
-- [ ] `partition_by` specified
+- [ ] `primary-key` defined for deduplication
+- [ ] `partition-by` specified
 
 ### Gold Layer
 
@@ -53,22 +53,22 @@ Use this checklist when reviewing new or modified pipelines.
 
 ## 5. Metadata & Lineage (RULES.md §2.3, §2.4)
 
-- [ ] Records include `_run_id` (UUID)
-- [ ] Records include `_run_type` (`incremental` | `backfill` | `rebuild`)
-- [ ] Records include `_source_batch_id` (FK to lineage_log)
-- [ ] Lineage recorded in `sys.lineage_log`
+- [ ] Records include `-run-id` (UUID)
+- [ ] Records include `-run-type` (`incremental` | `backfill` | `rebuild`)
+- [ ] Records include `-source-batch-id` (FK to lineage-log)
+- [ ] Lineage recorded in `sys.lineage-log`
 - [ ] Full Bronze paths NOT stored in each record
 
 ## 6. Content Hash / Entity ID (RULES.md §2.8)
 
 - [ ] Entity ID strategy documented (source ID or content hash)
-- [ ] Content Hash uses `sha256(provider + canonical_json(data))`
+- [ ] Content Hash uses `sha256(provider + canonical-json(data))`
 - [ ] Normalization applied before hashing:
   - [ ] NaN/Inf → null
   - [ ] Floats → round(10)
   - [ ] Dates → YYYY-MM-DD
   - [ ] Strings → strip()
-- [ ] Meta-fields excluded from hash (`_ingestion_ts`, `_run_id`, etc.)
+- [ ] Meta-fields excluded from hash (`-ingestion-ts`, `-run-id`, etc.)
 
 ## 7. Error Handling (RULES.md §3.1)
 
@@ -86,12 +86,12 @@ Use this checklist when reviewing new or modified pipelines.
 
 - [ ] DQ failures routed to `common.quarantine`
 - [ ] Quarantine record includes:
-  - [ ] `ingestion_ts`
+  - [ ] `ingestion-ts`
   - [ ] `pipeline`
-  - [ ] `error_code`
+  - [ ] `error-code`
   - [ ] `payload` (truncated to 64KB)
-  - [ ] `bronze_batch_id`
-  - [ ] `dq_status`
+  - [ ] `bronze-batch-id`
+  - [ ] `dq-status`
 - [ ] Quarantine operations testable via `make quarantine-*`
 
 ## 9. Locking & Concurrency (RULES.md §3.3)
@@ -99,8 +99,8 @@ Use this checklist when reviewing new or modified pipelines.
 > **Note**: Local-Only Deployment (ADR-010). MemoryLock используется для локального развёртывания.
 
 - [ ] Lock implemented (`MemoryLock` for Local-Only)
-- [ ] Lock key format: `lock:{provider}_{entity}`
-- [ ] Backfill uses exclusive lock: `lock:{provider}_{entity}:exclusive`
+- [ ] Lock key format: `lock:{provider}-{entity}`
+- [ ] Backfill uses exclusive lock: `lock:{provider}-{entity}:exclusive`
 - [ ] Max Duration: 4 hours
 - [ ] Safety Guard: lock validated before Delta write
 
@@ -110,25 +110,25 @@ Use this checklist when reviewing new or modified pipelines.
 - [ ] Log schema compliance:
   - [ ] `ts` (MUST)
   - [ ] `level` (MUST)
-  - [ ] `run_id` (MUST)
+  - [ ] `run-id` (MUST)
   - [ ] `pipeline` (MUST)
   - [ ] `stage` (MUST)
   - [ ] `dataset` (SHOULD)
-  - [ ] `record_count` (SHOULD)
+  - [ ] `record-count` (SHOULD)
 - [ ] DQ metrics exported (Prometheus format):
-  - [ ] `dq_validation_score`
-  - [ ] `data_freshness_seconds`
+  - [ ] `dq-validation-score`
+  - [ ] `data-freshness-seconds`
 - [ ] Provider health monitoring configured
 
 ## 11. Delta Maintenance (RULES.md §2.1.1)
 
-- [ ] Weekly `VACUUM` scheduled with `retention_period=7 days`
-- [ ] Forensic retention policy set appropriately (7d default; 30d for Critical tables via `forensic_retention: true`)
+- [ ] Weekly `VACUUM` scheduled with `retention-period=7 days`
+- [ ] Forensic retention policy set appropriately (7d default; 30d for Critical tables via `forensic-retention: true`)
 
 ## 12. Security (RULES.md §5.2, §5.4)
 
 - [ ] No hardcoded secrets
-- [ ] Secrets via environment variables (`BIOETL_{PROVIDER}_{KEY}`)
+- [ ] Secrets via environment variables (`BIOETL-{PROVIDER}-{KEY}`)
 - [ ] PII fields salted in Silver: `sha256(lowercase(value) + SALT)`
 - [ ] PII excluded or aggregated in Gold
 - [ ] No secrets in logs
@@ -163,7 +163,7 @@ Use this checklist when reviewing new or modified pipelines.
 - [ ] Health check endpoint configured
 - [ ] Provider health states implemented:
   - [ ] Healthy: 0 errors in 5 min
-  - [ ] Degraded: 1-2 errors → timeout×2, batch_size÷2
+  - [ ] Degraded: 1-2 errors → timeout×2, batch-size÷2
   - [ ] Unhealthy: ≥3 errors → pause, Alert P2
 
 ---
@@ -180,4 +180,4 @@ Use this checklist when reviewing new or modified pipelines.
 
 ## Notes
 
-_Add any additional notes or exceptions here._
+-Add any additional notes or exceptions here.-

@@ -2,22 +2,22 @@
 
 *Version 1.2.0 | Aligned with RULES.md v5.20*
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 1. Identification
 
 | Parameter        | Value                                                    |
 | ---------------- | -------------------------------------------------------- |
-| **Pipeline ID**  | `chembl_target_component`                                |
+| **Pipeline ID**  | `chembl-target-component`                                |
 | **Provider**     | ChEMBL (EBI)                                             |
-| **Entity**       | target_component                                         |
-| **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/target_component` |
-| **Library**      | `chembl_webresource_client`                              |
+| **Entity**       | target-component                                         |
+| **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/target-component` |
+| **Library**      | `chembl-webresource-client`                              |
 | **Rate Limit**   | None                                                     |
 | **Health Check** | `/chembl/api/data/status.json`                           |
 | **Auth Type**    | None (public API)                                        |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 2. Business Context
 
@@ -40,16 +40,16 @@ Target Components represent **subunits of biological targets**:
 ### 2.3. Entity Relationships
 
 ```
-target_component
+target-component
     │
     ├──FK──► target.tid (M:1)
     │
-    ├──FK──► component_sequences.component_id (M:1)
+    ├──FK──► component-sequences.component-id (M:1)
     │
     └──► uniprot.accession (via accession field)
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 3. Extraction (Bronze Layer)
 
@@ -57,14 +57,14 @@ ______________________________________________________________________
 
 | #   | API Field       | Type   | Nullable | Description               |
 | --- | --------------- | ------ | -------- | ------------------------- |
-| 1   | `targcomp_id`   | int    | No       | Primary key               |
+| 1   | `targcomp-id`   | int    | No       | Primary key               |
 | 2   | `tid`           | int    | No       | FK to target              |
-| 3   | `component_id`  | int    | No       | FK to component_sequences |
+| 3   | `component-id`  | int    | No       | FK to component-sequences |
 | 4   | `relationship`  | string | Yes      | Relationship type         |
 | 5   | `stoichiometry` | int    | Yes      | Stoichiometry             |
 | 6   | `homologue`     | int    | Yes      | Homologue flag            |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 4. Validation
 
@@ -77,7 +77,7 @@ class TargetComponentSchema(ETLRecordSchema):
     """Target Component validation schema for Silver layer."""
 
     # === Primary Key ===
-    targcomp_id: Series[int] = pa.Field(
+    targcomp-id: Series[int] = pa.Field(
         nullable=False,
     )
 
@@ -85,7 +85,7 @@ class TargetComponentSchema(ETLRecordSchema):
     tid: Series[int] = pa.Field(
         nullable=False,
     )
-    component_id: Series[int] = pa.Field(
+    component-id: Series[int] = pa.Field(
         nullable=False,
     )
 
@@ -114,7 +114,7 @@ class TargetComponentSchema(ETLRecordSchema):
         coerce = True
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 5. Cross-Provider Mapping
 
@@ -122,29 +122,29 @@ ______________________________________________________________________
 | ---------------------------- | ------- | -------- | ----------- |
 | UniProt accession (via join) | UniProt | UniProt  | `accession` |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 6. Pipeline Configuration
 
 ```yaml
-pipeline_name: chembl_target_component
+pipeline-name: chembl-target-component
 provider: chembl
-entity_type: target_component
+entity-type: target-component
 version: "1.2.0"
 
-primary_keys: ["targcomp_id"]
-silver_table: "chembl_target_component"
-gold_table: "chembl_target_component"
+primary-keys: ["targcomp-id"]
+silver-table: "chembl-target-component"
+gold-table: "chembl-target-component"
 
-gold_filters:
-  required_fields:
+gold-filters:
+  required-fields:
     - tid
-    - component_id
+    - component-id
 
-input_filter:
+input-filter:
   enabled: true
-  source_path: "data/input/target.csv"
-  column_name: "target_id"
-  filter_field: "target_id"
-  batch_size: 20
+  source-path: "data/input/target.csv"
+  column-name: "target-id"
+  filter-field: "target-id"
+  batch-size: 20
 ```

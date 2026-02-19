@@ -18,15 +18,15 @@ BioETL provides three observability pillars:
 
 Prometheus-compatible metrics exporter.
 
-::: bioetl.infrastructure.observability.prometheus_metrics.PrometheusMetrics
+::: bioetl.infrastructure.observability.prometheus-metrics.PrometheusMetrics
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
         members:
-            - __init__
-            - observe_histogram
-            - increment_counter
-            - set_gauge
+            - --init--
+            - observe-histogram
+            - increment-counter
+            - set-gauge
             - close
 
 ### NoOpMetrics
@@ -36,21 +36,21 @@ Located in `domain/ports/noop.py` (no I/O dependencies).
 
 ::: bioetl.domain.ports.noop.NoOpMetrics
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### Key Metrics
 
-All metrics use `bioetl_` prefix. See [Metrics Contract](../../contracts/observability.md) for the full catalog.
+All metrics use `bioetl-` prefix. See [Metrics Contract](../../contracts/observability.md) for the full catalog.
 
 | Metric | Type | Description |
 |--------|------|-------------|
-| `bioetl_pipeline_duration_seconds` | Histogram | Stage execution duration |
-| `bioetl_records_processed_total` | Counter | Processed record count |
-| `bioetl_errors_total` | Counter | Error count by type |
-| `bioetl_batch_size_records` | Histogram | Batch size distribution |
-| `bioetl_circuit_breaker_state` | Gauge | Circuit breaker status |
-| `bioetl_dq_records_quarantined_total` | Counter | Quarantined records |
+| `bioetl-pipeline-duration-seconds` | Histogram | Stage execution duration |
+| `bioetl-records-processed-total` | Counter | Processed record count |
+| `bioetl-errors-total` | Counter | Error count by type |
+| `bioetl-batch-size-records` | Histogram | Batch size distribution |
+| `bioetl-circuit-breaker-state` | Gauge | Circuit breaker status |
+| `bioetl-dq-records-quarantined-total` | Counter | Quarantined records |
 
 ## Tracing
 
@@ -60,11 +60,11 @@ OpenTelemetry tracing exporter.
 
 ::: bioetl.infrastructure.observability.tracing.OpenTelemetryTracer
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
         members:
-            - __init__
-            - get_tracer
+            - --init--
+            - get-tracer
             - close
 
 ### NoOpTracing
@@ -75,47 +75,47 @@ Located in `domain/ports/noop.py` (no I/O dependencies); re-exported via
 
 ::: bioetl.domain.ports.noop.NoOpTracing
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### Span Hierarchy
 
 ```
-pipeline_run
+pipeline-run
 ├── preflight
-│   ├── health_check_storage
-│   ├── health_check_datasource
-│   └── acquire_lock
+│   ├── health-check-storage
+│   ├── health-check-datasource
+│   └── acquire-lock
 ├── execute
-│   ├── batch_{batch_id}
+│   ├── batch-{batch-id}
 │   │   ├── fetch
 │   │   ├── transform
 │   │   └── write
 │   └── checkpoint
 └── postrun
-    ├── dq_check
+    ├── dq-check
     └── vacuum
 ```
 
 ## Logging
 
-### create_logger
+### create-logger
 
 Factory function for creating structured loggers.
 
-::: bioetl.infrastructure.observability.logging.create_logger
+::: bioetl.infrastructure.observability.logging.create-logger
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### NoOpLogger
 
 No-op implementation for testing.
 
-::: bioetl.infrastructure.observability.noop_logger.NoOpLogger
+::: bioetl.infrastructure.observability.noop-logger.NoOpLogger
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### Log Context
 
@@ -123,13 +123,13 @@ All logs include structured context per Log Schema (RULES.md §3.2.1):
 
 ```python
 logger = logger.bind(
-    run_id=str(run_id),
-    pipeline="chembl_activity",
+    run-id=str(run-id),
+    pipeline="chembl-activity",
     stage="extract",
 )
 
 # Output:
-# {"event": "batch_complete", "run_id": "abc-123", "pipeline": "chembl_activity", "stage": "extract", ...}
+# {"event": "batch-complete", "run-id": "abc-123", "pipeline": "chembl-activity", "stage": "extract", ...}
 ```
 
 ## Anomaly Detection
@@ -140,8 +140,8 @@ Monitors metrics for anomalies in batch processing.
 
 ::: bioetl.infrastructure.observability.anomaly.monitor.DataQualityMonitor
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### Detection Algorithms
 
@@ -153,18 +153,18 @@ Monitors metrics for anomalies in batch processing.
 
 ## Metrics Server
 
-### start_metrics_server
+### start-metrics-server
 
 HTTP server for Prometheus scraping.
 
-::: bioetl.infrastructure.observability.server.start_metrics_server
+::: bioetl.infrastructure.observability.server.start-metrics-server
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ```python
 # Start metrics server (default port: 8000)
-start_metrics_server(port=8000)
+start-metrics-server(port=8000)
 
 # Prometheus can scrape at http://localhost:8000/metrics
 ```
@@ -176,23 +176,23 @@ functions in `composition/bootstrap/runtime/observability.py`:
 
 ```python
 from bioetl.composition.bootstrap.runtime.observability import (
-    bootstrap_observability_bundle,
+    bootstrap-observability-bundle,
 )
 
 # Initialize complete observability stack
-bundle = bootstrap_observability_bundle(
-    pipeline="chembl_activity",
-    run_id=run_id,
+bundle = bootstrap-observability-bundle(
+    pipeline="chembl-activity",
+    run-id=run-id,
     settings=settings,
 )
 
 # Use logger, metrics, tracer from the bundle
-bundle.logger.info("batch_started", stage="extract", batch_id=str(batch_id))
+bundle.logger.info("batch-started", stage="extract", batch-id=str(batch-id))
 
-bundle.metrics.increment_counter(
-    "records_processed_total",
-    records_count,
-    {"pipeline": "chembl_activity", "stage": "extract", "run_type": "incremental"},
+bundle.metrics.increment-counter(
+    "records-processed-total",
+    records-count,
+    {"pipeline": "chembl-activity", "stage": "extract", "run-type": "incremental"},
 )
 ```
 
@@ -200,44 +200,44 @@ For manual initialization (e.g., tests):
 
 ```python
 from bioetl.infrastructure.observability import PrometheusMetrics, OpenTelemetryTracer
-from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
+from bioetl.infrastructure.observability.unified-logger import UnifiedLogger
 
 metrics = PrometheusMetrics()
-tracer = OpenTelemetryTracer(service_name="bioetl")
-logger = UnifiedLogger(pipeline="chembl_activity", run_id=run_id)
+tracer = OpenTelemetryTracer(service-name="bioetl")
+logger = UnifiedLogger(pipeline="chembl-activity", run-id=run-id)
 ```
 
 ## Configuration
 
-Settings uses pydantic-settings with `env_prefix="BIOETL_"` and
-`env_nested_delimiter="__"`. Nested observability settings map to
-`BIOETL_OBSERVABILITY__<FIELD>` env vars.
+Settings uses pydantic-settings with `env-prefix="BIOETL-"` and
+`env-nested-delimiter="--"`. Nested observability settings map to
+`BIOETL-OBSERVABILITY--<FIELD>` env vars.
 
 ### Top-level Variables
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `BIOETL_METRICS_PORT` | Prometheus HTTP server port | `8000` |
-| `BIOETL_LOG_LEVEL` | Log level | `INFO` |
-| `BIOETL_LOG_FORMAT` | Log format (`json` / `text`) | `json` |
+| `BIOETL-METRICS-PORT` | Prometheus HTTP server port | `8000` |
+| `BIOETL-LOG-LEVEL` | Log level | `INFO` |
+| `BIOETL-LOG-FORMAT` | Log format (`json` / `text`) | `json` |
 
-### Nested Observability Variables (`BIOETL_OBSERVABILITY__*`)
+### Nested Observability Variables (`BIOETL-OBSERVABILITY--*`)
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `BIOETL_OBSERVABILITY__METRICS_ENABLED` | Enable metrics collection | `true` |
-| `BIOETL_OBSERVABILITY__METRICS_SERVER_ENABLED` | Enable Prometheus HTTP server | `true` |
-| `BIOETL_OBSERVABILITY__METRICS_FAIL_FAST` | Exit on server start failure | `false` |
-| `BIOETL_OBSERVABILITY__METRICS_RETRY_COUNT` | Server start retry count (1–10) | `3` |
-| `BIOETL_OBSERVABILITY__METRICS_RETRY_DELAY` | Retry delay in seconds (0.1–10) | `1.0` |
-| `BIOETL_OBSERVABILITY__TRACING_ENABLED` | Enable OpenTelemetry tracing | `false` |
-| `BIOETL_OBSERVABILITY__DQ_MONITOR_ENABLED` | Enable data quality monitor | `false` |
-| `BIOETL_OBSERVABILITY__DQ_BASELINE_WINDOW` | Runs for baseline (1–30) | `7` |
-| `BIOETL_OBSERVABILITY__DQ_Z_SCORE_THRESHOLD` | Anomaly z-score (1.5–5.0) | `2.5` |
-| `BIOETL_OBSERVABILITY__DQ_MIN_BASELINE_SAMPLES` | Min samples before detection (1–10) | `3` |
-| `BIOETL_OBSERVABILITY__DQ_COLD_START_RUNS` | Skip first N runs (0–20) | `5` |
-| `BIOETL_OBSERVABILITY__DQ_ERROR_RATE_MAX` | Max error rate (0.0–1.0) | `0.10` |
-| `BIOETL_OBSERVABILITY__DQ_QUALITY_SCORE_MIN` | Min quality score (0.0–1.0) | `0.80` |
+| `BIOETL-OBSERVABILITY--METRICS-ENABLED` | Enable metrics collection | `true` |
+| `BIOETL-OBSERVABILITY--METRICS-SERVER-ENABLED` | Enable Prometheus HTTP server | `true` |
+| `BIOETL-OBSERVABILITY--METRICS-FAIL-FAST` | Exit on server start failure | `false` |
+| `BIOETL-OBSERVABILITY--METRICS-RETRY-COUNT` | Server start retry count (1–10) | `3` |
+| `BIOETL-OBSERVABILITY--METRICS-RETRY-DELAY` | Retry delay in seconds (0.1–10) | `1.0` |
+| `BIOETL-OBSERVABILITY--TRACING-ENABLED` | Enable OpenTelemetry tracing | `false` |
+| `BIOETL-OBSERVABILITY--DQ-MONITOR-ENABLED` | Enable data quality monitor | `false` |
+| `BIOETL-OBSERVABILITY--DQ-BASELINE-WINDOW` | Runs for baseline (1–30) | `7` |
+| `BIOETL-OBSERVABILITY--DQ-Z-SCORE-THRESHOLD` | Anomaly z-score (1.5–5.0) | `2.5` |
+| `BIOETL-OBSERVABILITY--DQ-MIN-BASELINE-SAMPLES` | Min samples before detection (1–10) | `3` |
+| `BIOETL-OBSERVABILITY--DQ-COLD-START-RUNS` | Skip first N runs (0–20) | `5` |
+| `BIOETL-OBSERVABILITY--DQ-ERROR-RATE-MAX` | Max error rate (0.0–1.0) | `0.10` |
+| `BIOETL-OBSERVABILITY--DQ-QUALITY-SCORE-MIN` | Min quality score (0.0–1.0) | `0.80` |
 
 ## See Also
 

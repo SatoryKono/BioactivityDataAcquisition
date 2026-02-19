@@ -31,7 +31,7 @@
 
 **Key Metrics:**
 - **DQ Pass Rate** — процент записей без ошибок/предупреждений
-- **WARN Rate** — процент записей с `_dq_warn=True`
+- **WARN Rate** — процент записей с `-dq-warn=True`
 - **FAIL Rate** — процент отклонённых записей
 - **Validation Latency** — время выполнения валидации (per level)
 
@@ -45,7 +45,7 @@
 
 **Триггер:**
 ```promql
-(bioetl_validation_failed_total / bioetl_validation_total) > 0.10
+(bioetl-validation-failed-total / bioetl-validation-total) > 0.10
 ```
 
 **Описание:** Более 10% записей отклонены валидацией
@@ -54,18 +54,18 @@
 1. Проверить логи последних запусков:
    ```bash
    # Посмотреть ошибки за последний час
-   journalctl -u bioetl-pipeline --since "1 hour ago" | grep "validation_failed"
+   journalctl -u bioetl-pipeline --since "1 hour ago" | grep "validation-failed"
 
    # Или из structlog JSON
    cat /var/log/bioetl/pipeline.log | \
-     jq 'select(.event == "validation_failed") | select(.timestamp > now - 3600)'
+     jq 'select(.event == "validation-failed") | select(.timestamp > now - 3600)'
    ```
 
 2. Определить провайдера и уровень с наибольшим fail rate:
    ```bash
    # Топ провайдеров по fail rate
    cat /var/log/bioetl/pipeline.log | \
-     jq -r 'select(.event == "validation_failed") | "\(.provider) \(.validation_level)"' | \
+     jq -r 'select(.event == "validation-failed") | "\(.provider) \(.validation-level)"' | \
      sort | uniq -c | sort -rn | head -10
    ```
 
@@ -78,7 +78,7 @@
 
 **Триггер:**
 ```promql
-histogram_quantile(0.95, bioetl_validation_duration_seconds) > 300
+histogram-quantile(0.95, bioetl-validation-duration-seconds) > 300
 ```
 
 **Описание:** P95 validation latency > 5 минут
@@ -88,25 +88,25 @@ histogram_quantile(0.95, bioetl_validation_duration_seconds) > 300
    ```bash
    # Latency по уровням
    cat /var/log/bioetl/pipeline.log | \
-     jq 'select(.event == "validation_step_complete") |
-         {level: .validator, duration: .duration_seconds}' | \
-     jq -s 'group_by(.level) |
-            map({level: .[0].level, avg_duration: (map(.duration) | add / length)})'
+     jq 'select(.event == "validation-step-complete") |
+         {level: .validator, duration: .duration-seconds}' | \
+     jq -s 'group-by(.level) |
+            map({level: .[0].level, avg-duration: (map(.duration) | add / length)})'
    ```
 
 2. Если медленный **External Verification**:
    - Проверить rate limiting:
      ```bash
      # Количество 429 ответов от API
-     grep "rate_limit_exceeded" /var/log/bioetl/pipeline.log | wc -l
+     grep "rate-limit-exceeded" /var/log/bioetl/pipeline.log | wc -l
      ```
-   - Снизить `batch_size` или увеличить `retry_delay`
+   - Снизить `batch-size` или увеличить `retry-delay`
 
 3. Если медленный **Semantic Validation**:
    - Отключить временно:
      ```bash
      bioetl run \
-       --pipeline pubmed_publication \
+       --pipeline pubmed-publication \
        --skip-semantic
      ```
 
@@ -118,27 +118,27 @@ histogram_quantile(0.95, bioetl_validation_duration_seconds) > 300
 
 **Триггер:**
 ```promql
-(bioetl_validation_warned_total / bioetl_validation_total) > 0.20
+(bioetl-validation-warned-total / bioetl-validation-total) > 0.20
 ```
 
-**Описание:** Более 20% записей в карантине (`_dq_warn=True`)
+**Описание:** Более 20% записей в карантине (`-dq-warn=True`)
 
 **Действия:**
 1. Проверить топ правил, вызывающих WARN:
    ```bash
    cat /var/log/bioetl/pipeline.log | \
-     jq -r 'select(.event == "validation_warning") | .rule' | \
+     jq -r 'select(.event == "validation-warning") | .rule' | \
      sort | uniq -c | sort -rn | head -10
    ```
 
-2. Если топ правило — `doi_not_found`:
+2. Если топ правило — `doi-not-found`:
    - CrossRef API может быть временно недоступен
    - Проверить вручную:
      ```bash
      curl -I https://api.crossref.org/works/10.1038/nature12373
      ```
 
-3. Если топ правило — `low_title_abstract_similarity`:
+3. Если топ правило — `low-title-abstract-similarity`:
    - Semantic validation слишком строгая
    - Увеличить threshold в конфиге
 
@@ -157,18 +157,18 @@ histogram_quantile(0.95, bioetl_validation_duration_seconds) > 300
 ```bash
 # 1. Посмотреть последние SchemaError
 cat /var/log/bioetl/pipeline.log | \
-  jq 'select(.event == "base_validation_failed") | .error' | tail -20
+  jq 'select(.event == "base-validation-failed") | .error' | tail -20
 
 # 2. Проверить, какие колонки fail чаще всего
 cat /var/log/bioetl/pipeline.log | \
-  jq -r 'select(.event == "base_validation_failed") |
+  jq -r 'select(.event == "base-validation-failed") |
          .error | match("Column \'([^\']+)\'") | .captures[0].string' | \
   sort | uniq -c | sort -rn
 
 # 3. Посмотреть примеры некорректных значений
 cat /var/log/bioetl/pipeline.log | \
-  jq 'select(.event == "base_validation_failed") |
-      {column: .column, value: .invalid_value, record_id: .record_id}' | \
+  jq 'select(.event == "base-validation-failed") |
+      {column: .column, value: .invalid-value, record-id: .record-id}' | \
   head -10
 ```
 
@@ -184,7 +184,7 @@ cat /var/log/bioetl/pipeline.log | \
 # Проверить реальные DOI в Bronze
 python -c "
 import pandas as pd
-df = pd.read_parquet('data/bronze/crossref/publication.parquet')
+df = pd.read-parquet('data/bronze/crossref/publication.parquet')
 print('Sample DOIs:')
 print(df['doi'].dropna().head(10))
 print('\nDOIs not matching regex:')
@@ -195,9 +195,9 @@ print(df[~df['doi'].str.match(r'^10\.\d{4,9}/.+$', na=False)]['doi'].head(10))
 **Решение:**
 - Обновить трансформер для удаления префикса `doi:`:
   ```python
-  # src/bioetl/application/transformers/crossref_transformer.py
-  def transform_doi(raw_doi: str) -> str:
-      doi = raw_doi.strip().lower()
+  # src/bioetl/application/transformers/crossref-transformer.py
+  def transform-doi(raw-doi: str) -> str:
+      doi = raw-doi.strip().lower()
       if doi.startswith("doi:"):
           doi = doi[4:]  # Remove "doi:" prefix
       return doi
@@ -211,12 +211,12 @@ print(df[~df['doi'].str.match(r'^10\.\d{4,9}/.+$', na=False)]['doi'].head(10))
 # Проверить NULL в Primary Key
 python -c "
 import pandas as pd
-df = pd.read_parquet('data/bronze/pubmed/publication.parquet')
-null_pk = df[df['pmid'].isna()]
-print(f'Records with NULL pmid: {len(null_pk)}')
-if len(null_pk) > 0:
+df = pd.read-parquet('data/bronze/pubmed/publication.parquet')
+null-pk = df[df['pmid'].isna()]
+print(f'Records with NULL pmid: {len(null-pk)}')
+if len(null-pk) > 0:
     print('Sample records:')
-    print(null_pk[['pmid', 'doi', 'title']].head())
+    print(null-pk[['pmid', 'doi', 'title']].head())
 "
 ```
 
@@ -224,10 +224,10 @@ if len(null_pk) > 0:
 - Фильтровать NULL PK в адаптере перед записью в Bronze:
   ```python
   # src/bioetl/infrastructure/adapters/pubmed/client.py
-  def fetch_publications(self, query: Query) -> Iterator[RawRecord]:
-      for record in self._fetch_raw(query):
+  def fetch-publications(self, query: Query) -> Iterator[RawRecord]:
+      for record in self.-fetch-raw(query):
           if record.get("pmid") is None:
-              self._logger.warning("record_missing_pk", record=record)
+              self.-logger.warning("record-missing-pk", record=record)
               continue  # Skip record
           yield record
   ```
@@ -240,24 +240,24 @@ if len(null_pk) > 0:
 # Проверить типы данных
 python -c "
 import pandas as pd
-df = pd.read_parquet('data/bronze/chembl/publication.parquet')
+df = pd.read-parquet('data/bronze/chembl/publication.parquet')
 print('Data types:')
 print(df.dtypes)
 print('\nPublicationYear non-integer values:')
-print(df[~df['publication_year'].apply(lambda x: isinstance(x, (int, float, type(None))))]['publication_year'])
+print(df[~df['publication-year'].apply(lambda x: isinstance(x, (int, float, type(None))))]['publication-year'])
 "
 ```
 
 **Решение:**
 - Добавить coercion в трансформере:
   ```python
-  def transform_publication_year(raw_year: Any) -> int | None:
-      if raw_year is None:
+  def transform-publication-year(raw-year: Any) -> int | None:
+      if raw-year is None:
           return None
       try:
-          return int(raw_year)
+          return int(raw-year)
       except (ValueError, TypeError):
-          self._logger.warning("invalid_year", raw_year=raw_year)
+          self.-logger.warning("invalid-year", raw-year=raw-year)
           return None
   ```
 
@@ -265,66 +265,66 @@ print(df[~df['publication_year'].apply(lambda x: isinstance(x, (int, float, type
 
 ### Level 2: Structural Validation Warnings
 
-**Симптом:** `_dq_warn=True` из-за нарушения межполевых правил
+**Симптом:** `-dq-warn=True` из-за нарушения межполевых правил
 
 #### Диагностика
 
 ```bash
 # 1. Топ структурных правил с WARN
 cat /var/log/bioetl/pipeline.log | \
-  jq -r 'select(.event == "structural_validation_warning") | .rule' | \
+  jq -r 'select(.event == "structural-validation-warning") | .rule' | \
   sort | uniq -c | sort -rn
 
-# 2. Примеры записей с нарушением page_ordering
+# 2. Примеры записей с нарушением page-ordering
 python -c "
 import pandas as pd
-df = pd.read_parquet('data/silver/pubmed/publication.parquet')
-invalid_pages = df[
-    df['page_first'].notna() &
-    df['page_last'].notna() &
-    (df['page_first'].astype(str).str.isnumeric()) &
-    (df['page_last'].astype(str).str.isnumeric()) &
-    (df['page_first'].astype(int) > df['page_last'].astype(int))
+df = pd.read-parquet('data/silver/pubmed/publication.parquet')
+invalid-pages = df[
+    df['page-first'].notna() &
+    df['page-last'].notna() &
+    (df['page-first'].astype(str).str.isnumeric()) &
+    (df['page-last'].astype(str).str.isnumeric()) &
+    (df['page-first'].astype(int) > df['page-last'].astype(int))
 ]
-print(f'Records with page_first > page_last: {len(invalid_pages)}')
-print(invalid_pages[['pmid', 'page_first', 'page_last', '_dq_warn']].head(10))
+print(f'Records with page-first > page-last: {len(invalid-pages)}')
+print(invalid-pages[['pmid', 'page-first', 'page-last', '-dq-warn']].head(10))
 "
 ```
 
 #### Типичные проблемы
 
-**Проблема: Year mismatch между `publication_year` и `publication_date`**
+**Проблема: Year mismatch между `publication-year` и `publication-date`**
 
 ```bash
 # Найти несоответствия
 python -c "
 import pandas as pd
-df = pd.read_parquet('data/silver/crossref/publication.parquet')
-df['publication_date_year'] = pd.to_datetime(df['publication_date'], errors='coerce').dt.year
+df = pd.read-parquet('data/silver/crossref/publication.parquet')
+df['publication-date-year'] = pd.to-datetime(df['publication-date'], errors='coerce').dt.year
 mismatches = df[
-    df['publication_year'].notna() &
-    df['publication_date'].notna() &
-    (df['publication_year'] != df['publication_date_year'])
+    df['publication-year'].notna() &
+    df['publication-date'].notna() &
+    (df['publication-year'] != df['publication-date-year'])
 ]
 print(f'Year mismatches: {len(mismatches)}')
-print(mismatches[['doi', 'publication_year', 'publication_date']].head(10))
+print(mismatches[['doi', 'publication-year', 'publication-date']].head(10))
 "
 ```
 
 **Решение:**
-- Использовать `publication_date` как source of truth:
+- Использовать `publication-date` как source of truth:
   ```python
   def transform(self, raw: RawRecord) -> TransformedRecord:
-      pub_date = raw.get("publication_date")
-      pub_year = raw.get("publication_year")
+      pub-date = raw.get("publication-date")
+      pub-year = raw.get("publication-year")
 
       # If date exists, extract year from it
-      if pub_date:
-          pub_year = datetime.strptime(pub_date, "%Y-%m-%d").year
+      if pub-date:
+          pub-year = datetime.strptime(pub-date, "%Y-%m-%d").year
 
       return TransformedRecord(
-          publication_date=pub_date,
-          publication_year=pub_year,
+          publication-date=pub-date,
+          publication-year=pub-year,
       )
   ```
 
@@ -332,26 +332,26 @@ print(mismatches[['doi', 'publication_year', 'publication_date']].head(10))
 
 ### Level 3: External Verification Failures
 
-**Симптом:** HTTP 404/timeout от upstream API, `_dq_warn=True`
+**Симптом:** HTTP 404/timeout от upstream API, `-dq-warn=True`
 
 #### Диагностика
 
 ```bash
 # 1. Проверить доступность API endpoints
-curl -I -w "\n%{http_code}\n" https://api.crossref.org/works/10.1038/nature12373
-curl -I -w "\n%{http_code}\n" https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=12345678
-curl -I -w "\n%{http_code}\n" https://api.openalex.org/works/W2124179640
-curl -I -w "\n%{http_code}\n" https://api.semanticscholar.org/graph/v1/paper/649def34f8be52c8b66281af98ae884c09aef38b
+curl -I -w "\n%{http-code}\n" https://api.crossref.org/works/10.1038/nature12373
+curl -I -w "\n%{http-code}\n" https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=12345678
+curl -I -w "\n%{http-code}\n" https://api.openalex.org/works/W2124179640
+curl -I -w "\n%{http-code}\n" https://api.semanticscholar.org/graph/v1/paper/649def34f8be52c8b66281af98ae884c09aef38b
 
 # 2. Проверить rate limiting
 cat /var/log/bioetl/pipeline.log | \
-  jq 'select(.event == "external_api_rate_limited") |
+  jq 'select(.event == "external-api-rate-limited") |
       {provider: .provider, timestamp: .timestamp}' | \
   tail -20
 
 # 3. Количество 404 по провайдерам
 cat /var/log/bioetl/pipeline.log | \
-  jq -r 'select(.event == "external_id_not_found") | .provider' | \
+  jq -r 'select(.event == "external-id-not-found") | .provider' | \
   sort | uniq -c
 ```
 
@@ -361,32 +361,32 @@ cat /var/log/bioetl/pipeline.log | \
 
 ```bash
 # Проверить rate limit конфигурацию
-cat config/crossref_validation.yaml | grep -A5 "external_verification"
+cat config/crossref-validation.yaml | grep -A5 "external-verification"
 
 # Текущая конфигурация:
-# rate_limit: 50  # requests per second
+# rate-limit: 50  # requests per second
 ```
 
 **Решение:**
 - Снизить rate limit:
   ```yaml
-  # config/crossref_validation.yaml
-  external_verification:
+  # config/crossref-validation.yaml
+  external-verification:
     providers:
       crossref:
-        rate_limit: 20  # Reduce from 50 to 20
-        batch_size: 50
+        rate-limit: 20  # Reduce from 50 to 20
+        batch-size: 50
   ```
 
 - Или добавить exponential backoff:
   ```python
-  async def verify_with_retry(self, doi: str) -> VerificationResult:
-      for attempt in range(self._max_retries):
+  async def verify-with-retry(self, doi: str) -> VerificationResult:
+      for attempt in range(self.-max-retries):
           try:
-              response = await self._client.get(f"/works/{doi}")
+              response = await self.-client.get(f"/works/{doi}")
               return VerificationResult(status="PASS", found=True)
           except httpx.HTTPStatusError as e:
-              if e.response.status_code == 429:
+              if e.response.status-code == 429:
                   delay = 2 ** attempt  # Exponential backoff
                   await asyncio.sleep(delay)
               else:
@@ -400,7 +400,7 @@ cat config/crossref_validation.yaml | grep -A5 "external_verification"
 
 ```bash
 # Проверить timeout конфигурацию
-cat config/pubmed_validation.yaml | grep -A2 "timeout"
+cat config/pubmed-validation.yaml | grep -A2 "timeout"
 
 # Текущая конфигурация:
 # timeout: 10.0  # seconds
@@ -409,11 +409,11 @@ cat config/pubmed_validation.yaml | grep -A2 "timeout"
 **Решение:**
 - Увеличить timeout для PubMed (NCBI часто медленный):
   ```yaml
-  external_verification:
+  external-verification:
     providers:
       pubmed:
         timeout: 30.0  # Increase from 10 to 30
-        rate_limit: 2  # Lower than default 3 to reduce load
+        rate-limit: 2  # Lower than default 3 to reduce load
   ```
 
 ---
@@ -436,14 +436,14 @@ curl -v --connect-timeout 5 https://api.crossref.org/
 - Временно отключить External Verification:
   ```bash
   bioetl run \
-    --pipeline crossref_publication \
+    --pipeline crossref-publication \
     --skip-external
   ```
 
 - Или отключить только проблемный провайдер:
   ```yaml
-  # config/crossref_validation.yaml
-  external_verification:
+  # config/crossref-validation.yaml
+  external-verification:
     enabled: true
     providers:
       crossref:
@@ -454,45 +454,45 @@ curl -v --connect-timeout 5 https://api.crossref.org/
 
 ### Level 4: Logical Validation Warnings
 
-**Симптом:** `_dq_warn=True` из-за нарушения бизнес-правил
+**Симптом:** `-dq-warn=True` из-за нарушения бизнес-правил
 
 #### Диагностика
 
 ```bash
 # 1. Топ логических правил с WARN
 cat /var/log/bioetl/pipeline.log | \
-  jq -r 'select(.event == "logical_validation_warning") | .rule' | \
+  jq -r 'select(.event == "logical-validation-warning") | .rule' | \
   sort | uniq -c | sort -rn
 
-# 2. Примеры записей с year_out_of_range
+# 2. Примеры записей с year-out-of-range
 python -c "
 import pandas as pd
 from datetime import date
-df = pd.read_parquet('data/silver/pubmed/publication.parquet')
-current_year = date.today().year
-invalid_years = df[
-    df['publication_year'].notna() &
-    ((df['publication_year'] < 1800) | (df['publication_year'] > current_year + 1))
+df = pd.read-parquet('data/silver/pubmed/publication.parquet')
+current-year = date.today().year
+invalid-years = df[
+    df['publication-year'].notna() &
+    ((df['publication-year'] < 1800) | (df['publication-year'] > current-year + 1))
 ]
-print(f'Records with invalid publication_year: {len(invalid_years)}')
-print(invalid_years[['pmid', 'publication_year', '_dq_warn']].head(10))
+print(f'Records with invalid publication-year: {len(invalid-years)}')
+print(invalid-years[['pmid', 'publication-year', '-dq-warn']].head(10))
 "
 ```
 
 #### Типичные проблемы
 
-**Проблема: Publication year в будущем (> CURRENT_YEAR + 1)**
+**Проблема: Publication year в будущем (> CURRENT-YEAR + 1)**
 
 ```bash
 # Найти записи с future year
 python -c "
 import pandas as pd
 from datetime import date
-df = pd.read_parquet('data/silver/openalex/publication.parquet')
-current_year = date.today().year
-future_years = df[df['publication_year'] > current_year + 1]
-print(f'Records with future year: {len(future_years)}')
-print(future_years[['openalex_id', 'publication_year', 'title']].head())
+df = pd.read-parquet('data/silver/openalex/publication.parquet')
+current-year = date.today().year
+future-years = df[df['publication-year'] > current-year + 1]
+print(f'Records with future year: {len(future-years)}')
+print(future-years[['openalex-id', 'publication-year', 'title']].head())
 "
 ```
 
@@ -502,9 +502,9 @@ print(future_years[['openalex_id', 'publication_year', 'title']].head())
 - Если точно ошибка — обновить в Bronze:
   ```sql
   -- Исправить известные ошибки (например, 2099 → 2019)
-  UPDATE bronze.openalex_publication
-  SET publication_year = 2019
-  WHERE publication_year = 2099;
+  UPDATE bronze.openalex-publication
+  SET publication-year = 2019
+  WHERE publication-year = 2099;
   ```
 
 ---
@@ -515,13 +515,13 @@ print(future_years[['openalex_id', 'publication_year', 'title']].head())
 # Найти записи с отрицательными citations
 python -c "
 import pandas as pd
-df = pd.read_parquet('data/silver/semanticscholar/publication.parquet')
-negative_cit = df[
-    df['citations_received'].notna() &
-    (df['citations_received'] < 0)
+df = pd.read-parquet('data/silver/semanticscholar/publication.parquet')
+negative-cit = df[
+    df['citations-received'].notna() &
+    (df['citations-received'] < 0)
 ]
-print(f'Records with negative citations: {len(negative_cit)}')
-print(negative_cit[['paper_id', 'citations_received', 'title']].head())
+print(f'Records with negative citations: {len(negative-cit)}')
+print(negative-cit[['paper-id', 'citations-received', 'title']].head())
 "
 ```
 
@@ -529,39 +529,39 @@ print(negative_cit[['paper_id', 'citations_received', 'title']].head())
 - **Data quality issue у источника**
 - Обнулить некорректные значения в трансформере:
   ```python
-  def transform_citations_received(raw_citations: int | None) -> int | None:
-      if raw_citations is None:
+  def transform-citations-received(raw-citations: int | None) -> int | None:
+      if raw-citations is None:
           return None
-      if raw_citations < 0:
-          self._logger.warning("negative_citations", value=raw_citations)
+      if raw-citations < 0:
+          self.-logger.warning("negative-citations", value=raw-citations)
           return 0  # Coerce to 0
-      return raw_citations
+      return raw-citations
   ```
 
 ---
 
 ### Level 5: Semantic Validation Warnings
 
-**Симптом:** `_dq_warn=True` из-за низкой semantic similarity или language mismatch
+**Симптом:** `-dq-warn=True` из-за низкой semantic similarity или language mismatch
 
 #### Диагностика
 
 ```bash
 # 1. Топ semantic правил с WARN
 cat /var/log/bioetl/pipeline.log | \
-  jq -r 'select(.event == "semantic_validation_warning") | .rule' | \
+  jq -r 'select(.event == "semantic-validation-warning") | .rule' | \
   sort | uniq -c | sort -rn
 
-# 2. Примеры записей с low_title_abstract_similarity
+# 2. Примеры записей с low-title-abstract-similarity
 python -c "
 import pandas as pd
-df = pd.read_parquet('data/silver/pubmed/publication.parquet')
-low_sim = df[
-    df['_dq_warn'] == True &
-    df['_dq_warn_reasons'].str.contains('low_title_abstract_similarity', na=False)
+df = pd.read-parquet('data/silver/pubmed/publication.parquet')
+low-sim = df[
+    df['-dq-warn'] == True &
+    df['-dq-warn-reasons'].str.contains('low-title-abstract-similarity', na=False)
 ]
-print(f'Records with low title-abstract similarity: {len(low_sim)}')
-print(low_sim[['pmid', 'title', 'abstract']].head(3))
+print(f'Records with low title-abstract similarity: {len(low-sim)}')
+print(low-sim[['pmid', 'title', 'abstract']].head(3))
 "
 ```
 
@@ -571,25 +571,25 @@ print(low_sim[['pmid', 'title', 'abstract']].head(3))
 
 ```bash
 # Проверить threshold
-cat config/pubmed_validation.yaml | grep -A3 "semantic_validation"
+cat config/pubmed-validation.yaml | grep -A3 "semantic-validation"
 
 # Текущая конфигурация:
-# similarity_threshold: 0.3
+# similarity-threshold: 0.3
 ```
 
 **Решение:**
 - Semantic validation **НЕ блокирует** записи (только WARN)
 - Если слишком много false positives — увеличить threshold:
   ```yaml
-  semantic_validation:
+  semantic-validation:
     enabled: true
-    similarity_threshold: 0.2  # Lower threshold (less strict)
+    similarity-threshold: 0.2  # Lower threshold (less strict)
   ```
 
 - Или отключить для конкретного провайдера:
   ```yaml
-  # config/chembl_validation.yaml
-  semantic_validation:
+  # config/chembl-validation.yaml
+  semantic-validation:
     enabled: false  # Disable for ChEMBL (low quality abstracts)
   ```
 
@@ -601,13 +601,13 @@ cat config/pubmed_validation.yaml | grep -A3 "semantic_validation"
 # Примеры language mismatch
 python -c "
 import pandas as pd
-df = pd.read_parquet('data/silver/pubmed/publication.parquet')
-lang_mismatch = df[
-    df['_dq_warn'] == True &
-    df['_dq_warn_reasons'].str.contains('language_mismatch', na=False)
+df = pd.read-parquet('data/silver/pubmed/publication.parquet')
+lang-mismatch = df[
+    df['-dq-warn'] == True &
+    df['-dq-warn-reasons'].str.contains('language-mismatch', na=False)
 ]
-print(f'Records with language mismatch: {len(lang_mismatch)}')
-print(lang_mismatch[['pmid', 'language', 'title', 'abstract']].head())
+print(f'Records with language mismatch: {len(lang-mismatch)}')
+print(lang-mismatch[['pmid', 'language', 'title', 'abstract']].head())
 "
 ```
 
@@ -645,7 +645,7 @@ pkill -f "bioetl.interfaces.cli.main run-pipeline"
 
 # Перезапустить без External Verification
 bioetl run \
-  --pipeline pubmed_publication \
+  --pipeline pubmed-publication \
   --skip-external \
   --skip-semantic
 ```
@@ -655,7 +655,7 @@ bioetl run \
 ### 2. Карантинная таблица переполнена
 
 **Симптомы:**
-- > 50% записей в карантине (`_dq_warn=True`)
+- > 50% записей в карантине (`-dq-warn=True`)
 - Silver storage растёт быстрее обычного
 
 **Диагностика:**
@@ -663,21 +663,21 @@ bioetl run \
 # Количество записей в карантине
 python -c "
 import pandas as pd
-df = pd.read_parquet('data/silver/crossref/publication.parquet')
+df = pd.read-parquet('data/silver/crossref/publication.parquet')
 total = len(df)
-quarantine = len(df[df['_dq_warn'] == True])
+quarantine = len(df[df['-dq-warn'] == True])
 print(f'Total: {total}, Quarantine: {quarantine}, Percentage: {100 * quarantine / total:.2f}%')
 "
 
 # Топ причин попадания в карантин
 python -c "
 import pandas as pd
-df = pd.read_parquet('data/silver/crossref/publication.parquet')
-quarantine = df[df['_dq_warn'] == True]
-# Assuming _dq_warn_reasons is a JSON string
+df = pd.read-parquet('data/silver/crossref/publication.parquet')
+quarantine = df[df['-dq-warn'] == True]
+# Assuming -dq-warn-reasons is a JSON string
 import json
-reasons = quarantine['_dq_warn_reasons'].apply(json.loads).explode()
-print(reasons.value_counts().head(10))
+reasons = quarantine['-dq-warn-reasons'].apply(json.loads).explode()
+print(reasons.value-counts().head(10))
 "
 ```
 
@@ -692,13 +692,13 @@ print(reasons.value_counts().head(10))
 3. **Промоция валидных записей из карантина:**
    ```python
    # Автоматически промотировать записи с только одной WARN причиной
-   df = pd.read_parquet("data/silver/pubmed/publication.parquet")
-   single_warn = df[
-       (df["_dq_warn"] == True) &
-       (df["_dq_warn_reasons"].str.count(",") == 0)  # Single reason
+   df = pd.read-parquet("data/silver/pubmed/publication.parquet")
+   single-warn = df[
+       (df["-dq-warn"] == True) &
+       (df["-dq-warn-reasons"].str.count(",") == 0)  # Single reason
    ]
-   single_warn["_dq_warn"] = False
-   single_warn.to_parquet("data/silver/pubmed/publication.parquet", mode="append")
+   single-warn["-dq-warn"] = False
+   single-warn.to-parquet("data/silver/pubmed/publication.parquet", mode="append")
    ```
 
 ---
@@ -707,7 +707,7 @@ print(reasons.value_counts().head(10))
 
 **Симптомы:**
 - Grafana dashboard пустой
-- Prometheus `/metrics` endpoint не показывает `bioetl_validation_*` метрики
+- Prometheus `/metrics` endpoint не показывает `bioetl-validation-*` метрики
 
 **Диагностика:**
 ```bash
@@ -715,21 +715,21 @@ print(reasons.value_counts().head(10))
 curl http://localhost:9090/api/v1/targets | jq '.data.activeTargets[] | select(.labels.job == "bioetl")'
 
 # Проверить метрики напрямую
-curl http://localhost:8000/metrics | grep bioetl_validation
+curl http://localhost:8000/metrics | grep bioetl-validation
 ```
 
 **Решение:**
 ```bash
 # Перезапустить pipeline с Prometheus exporter
 bioetl run \
-  --pipeline pubmed_publication \
+  --pipeline pubmed-publication \
   --enable-metrics \
   --metrics-port 8000
 
 # Добавить в prometheus.yml:
-scrape_configs:
-  - job_name: 'bioetl'
-    static_configs:
+scrape-configs:
+  - job-name: 'bioetl'
+    static-configs:
       - targets: ['localhost:8000']
 ```
 
@@ -794,7 +794,7 @@ scrape_configs:
 - **ADR-033:** Стратегия валидации (`docs/02-architecture/decisions/ADR-033-publication-validation-strategy.md`)
 - **Validation Guide:** `docs/03-guides/publication-validation-guide.md`
 - **Field Reference:** `docs/04-reference/publication-fields-reference.md`
-- **Test Suite:** `tests_generated/` (471 тест)
+- **Test Suite:** `tests-generated/` (471 тест)
 
 ---
 

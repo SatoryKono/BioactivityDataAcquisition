@@ -9,9 +9,9 @@
 
 Schema audits (2026-02-17) выявили множественные потенциальные breaking changes в Gold контрактах:
 
-- Переименование PK (`tissue_chembl_id` → `tissue_id`)
-- Удаление legacy полей (journal aliases, ghost base_names)
-- Продвижение полей из TRASH в Gold (language, license_url)
+- Переименование PK (`tissue-chembl-id` → `tissue-id`)
+- Удаление legacy полей (journal aliases, ghost base-names)
+- Продвижение полей из TRASH в Gold (language, license-url)
 - Унификация типов (taxonomy IDs, list/JSON fields per ADR-035)
 
 Без формальной политики версионирования breaking changes могут сломать downstream consumers без предупреждения. Необходимы чёткие правила для классификации изменений и управления миграцией.
@@ -26,7 +26,7 @@ Schema audits (2026-02-17) выявили множественные потен�
 |---------------|-------------|---------|
 | Добавление nullable колонки | minor | Новое аналитическое поле |
 | Добавление metadata/docs | patch (no bump) | Комментарии, описания |
-| Переименование колонки | **major** | `tissue_chembl_id` → `tissue_id` |
+| Переименование колонки | **major** | `tissue-chembl-id` → `tissue-id` |
 | Удаление колонки | **major** | Удаление legacy journal fields |
 | Изменение типа колонки | **major** | `string` → `float` для taxonomy |
 | Изменение семантики колонки | **major** | `doi` означает разное |
@@ -75,10 +75,10 @@ Breaking change откатывается если:
 
 ## Observability
 
-- `contract_version_adoption`: доля consumers на каждой версии
-- `contract_breaking_errors`: ошибки совместимости при чтении
-- `dual_service_query_share`: распределение запросов между vN и vN+1
-- `rollback_trigger_events`: срабатывания критериев отката
+- `contract-version-adoption`: доля consumers на каждой версии
+- `contract-breaking-errors`: ошибки совместимости при чтении
+- `dual-service-query-share`: распределение запросов между vN и vN+1
+- `rollback-trigger-events`: срабатывания критериев отката
 
 ## Related ADRs
 

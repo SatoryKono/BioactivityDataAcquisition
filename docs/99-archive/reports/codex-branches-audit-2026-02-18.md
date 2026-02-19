@@ -10,19 +10,19 @@
 
 | # | Ветка | +/- LOC | Тип | Краткое описание |
 |---|-------|---------|-----|------------------|
-| 1 | `codex/add-content_hash-configuration-section` | +421/−8 | Config + Code | `content_hash.include/exclude` секции во все schema YAML |
-| 2 | `codex/revise-meta_fields-and-add-technical-fields` | +175/−3 | Code + Policy | Расширение мета-полей (`_lookup_method`, `_original_id`, `_source`), identity policy |
-| 3 | `codex/refactor-primary-keys-separation-in-configs` | +415/−220 | Config + Schema | Разделение `primary_keys` → `business_primary_keys` + `technical_primary_key` |
+| 1 | `codex/add-content-hash-configuration-section` | +421/−8 | Config + Code | `content-hash.include/exclude` секции во все schema YAML |
+| 2 | `codex/revise-meta-fields-and-add-technical-fields` | +175/−3 | Code + Policy | Расширение мета-полей (`-lookup-method`, `-original-id`, `-source`), identity policy |
+| 3 | `codex/refactor-primary-keys-separation-in-configs` | +415/−220 | Config + Schema | Разделение `primary-keys` → `business-primary-keys` + `technical-primary-key` |
 | 4 | `codex/define-canonical-schema-source-and-generate-artifacts` | +563/−1 | Code + CI | Генератор schema artifacts (Pandera registry), ADR-036, CI gate |
 | 5 | `codex/create-dataframemodel-classes-and-tests` | +215/−28 | Code + Tests | DataFrameModel для composite Gold, `strict="filter"` |
-| 6 | `codex/expand-dq-report-schema` | +148/−5 | Code | DQ report provenance: `config_path`, `layer`, `severity`, `decision` |
-| 7 | `codex/update-yaml-config-files-with-field-groups` | +946/−15 | Config | `column_groups` (system/business/dq) + silver/gold include_groups |
-| 8 | `codex/document-nullability-rules-for-pipelines` | +553/−9 | Config + Code | `key_nullability` policy → quality configs + silver writer validation |
-| 9 | `codex/update-schema-configs-and-ci-rules` | +664/−62 | Config + CI | `schema_file` поле в pipeline configs + validation script |
+| 6 | `codex/expand-dq-report-schema` | +148/−5 | Code | DQ report provenance: `config-path`, `layer`, `severity`, `decision` |
+| 7 | `codex/update-yaml-config-files-with-field-groups` | +946/−15 | Config | `column-groups` (system/business/dq) + silver/gold include-groups |
+| 8 | `codex/document-nullability-rules-for-pipelines` | +553/−9 | Config + Code | `key-nullability` policy → quality configs + silver writer validation |
+| 9 | `codex/update-schema-configs-and-ci-rules` | +664/−62 | Config + CI | `schema-file` поле в pipeline configs + validation script |
 | 10 | `codex/generate-nullable/type-matrix` | +760/−61 | Tools + Docs | Инвентарь JSON field typing, CI gate |
 | 11 | `codex/create-legacy-to-canonical-mapping-table` | +195/−50 | Code + ADR | Publication alias mapping (legacy→canonical), ADR-024 update |
-| 12 | `codex/create-yaml-configuration-for-pipelines` | +570/−70 | Config + Code | Pipeline contract policy YAML (rename_map, hash_include, merge_keys) |
-| 13 | `codex/map-_composite_-fields-to-baseoutputmetadata` | +307/−32 | Code | Composite metadata → `CompositeOutputExt`, `CompositeSchemaValidationMetadata` |
+| 12 | `codex/create-yaml-configuration-for-pipelines` | +570/−70 | Config + Code | Pipeline contract policy YAML (rename-map, hash-include, merge-keys) |
+| 13 | `codex/map--composite--fields-to-baseoutputmetadata` | +307/−32 | Code | Composite metadata → `CompositeOutputExt`, `CompositeSchemaValidationMetadata` |
 | 14 | `codex/add-composite-schemas-and-contracts` | +431/−4 | Config + Code | Composite activity/target schemas, 3 новых Pandera класса |
 | 15 | `codex/add-hash-policy-document-and-machine-readable-file` | +254/−0 | Config + Policy | Machine-readable hash policy (YAML), snapshot stability tests |
 | 16 | `codex/conduct-data-schema-audit-…-pbn8h6` | +2262/−0 | Docs only | Аудит-отчёт (analysis/) |
@@ -35,16 +35,16 @@
 
 ### A. Content Hash & Identity Policy (ветки 1, 2, 15)
 
-**Цель:** Формализовать политику вычисления `content_hash`.
+**Цель:** Формализовать политику вычисления `content-hash`.
 
 | Ветка | Что делает | Файлы |
 |-------|-----------|-------|
-| #1 | Добавляет `content_hash.include/exclude` во все schema YAML | 24 schema YAML, `identity_service.py`, `transformations.py`, `config_loader.py` |
-| #2 | Расширяет мета-поля, policy doc, `_`-prefix exclusion | `constants.py`, `transformations.py`, RULES.md |
-| #15 | Machine-readable hash policy YAML + snapshot tests | `configs/hash_policy/`, тесты |
+| #1 | Добавляет `content-hash.include/exclude` во все schema YAML | 24 schema YAML, `identity-service.py`, `transformations.py`, `config-loader.py` |
+| #2 | Расширяет мета-поля, policy doc, `-`-prefix exclusion | `constants.py`, `transformations.py`, RULES.md |
+| #15 | Machine-readable hash policy YAML + snapshot tests | `configs/hash-policy/`, тесты |
 
-**Конфликт:** #1 и #2 оба правят `transformations.py` (дополняемый — `content_hash` секция vs `_`-prefix exclusion).
-**Перекрытие:** #1 и #15 оба описывают hash include/exclude, но в разных форматах (#1 — секция в schema YAML, #15 — отдельный `hash_policy/` YAML).
+**Конфликт:** #1 и #2 оба правят `transformations.py` (дополняемый — `content-hash` секция vs `-`-prefix exclusion).
+**Перекрытие:** #1 и #15 оба описывают hash include/exclude, но в разных форматах (#1 — секция в schema YAML, #15 — отдельный `hash-policy/` YAML).
 **Решение:** Объединить в один, выбрать единый source of truth для hash policy.
 
 ---
@@ -55,16 +55,16 @@
 
 | Ветка | Добавляет секцию | Конфликт |
 |-------|-----------------|----------|
-| #1 | `content_hash:` | Вставка перед `column_groups` |
-| #7 | `column_groups:` (развёрнутые) | Заменяет `column_groups: []` |
-| #9 | `column_groups:` (другая структура) + silver/gold | Заменяет `column_groups: []` |
+| #1 | `content-hash:` | Вставка перед `column-groups` |
+| #7 | `column-groups:` (развёрнутые) | Заменяет `column-groups: []` |
+| #9 | `column-groups:` (другая структура) + silver/gold | Заменяет `column-groups: []` |
 
-**КОНФЛИКТ (CRITICAL):** Ветки #7 и #9 обе заменяют `column_groups: []` на **разные** структуры:
-- #7: `system`, `business`, `dq` группы с explicit field lists + `silver.include_groups`
-- #9: `system`, `identifiers`, `business` + pattern matching (`^(?!_|.*_id$).+`)
+**КОНФЛИКТ (CRITICAL):** Ветки #7 и #9 обе заменяют `column-groups: []` на **разные** структуры:
+- #7: `system`, `business`, `dq` группы с explicit field lists + `silver.include-groups`
+- #9: `system`, `identifiers`, `business` + pattern matching (`^(?!-|.*-id$).+`)
 
 **Файлов в конфликте:** 15 schema YAML (все provider/entity).
-**Решение:** Выбрать ОДНУ структуру column_groups, смёржить #1 как дополнительную секцию.
+**Решение:** Выбрать ОДНУ структуру column-groups, смёржить #1 как дополнительную секцию.
 
 ---
 
@@ -74,11 +74,11 @@
 
 | Ветка | Что добавляет | Файлы |
 |-------|--------------|-------|
-| #3 | `business_primary_keys`, `technical_primary_key` | 23 pipeline YAML + `pipeline.json` schema |
-| #9 | `schema_file` поле (ссылка на schema YAML) | 23 pipeline YAML + `pipeline.json` schema |
-| #12 | Новые `configs/contracts/pipelines/` YAML (rename_map, hash) | 21 новых YAML + `base_transformer.py` |
+| #3 | `business-primary-keys`, `technical-primary-key` | 23 pipeline YAML + `pipeline.json` schema |
+| #9 | `schema-file` поле (ссылка на schema YAML) | 23 pipeline YAML + `pipeline.json` schema |
+| #12 | Новые `configs/contracts/pipelines/` YAML (rename-map, hash) | 21 новых YAML + `base-transformer.py` |
 
-**Конфликт:** #3 и #9 оба правят `configs/_schema/pipeline.json` и все 23 pipeline YAML.
+**Конфликт:** #3 и #9 оба правят `configs/-schema/pipeline.json` и все 23 pipeline YAML.
 **Перекрытие:** #12 дублирует hash include/exclude (пересекается с группой A).
 **Решение:** Последовательно мёржить #3 → #9, разрешая конфликты в pipeline configs. #12 интегрировать после группы A.
 
@@ -90,15 +90,15 @@
 
 | Ветка | Что делает | Ключевые файлы |
 |-------|-----------|----------------|
-| #5 | `strict="filter"` + descriptions в существующих composite schemas | `composite.py`, `storage_adapter.py` |
-| #13 | Composite metadata fields → `CompositeOutputExt` | `metadata_coordinator.py`, `metadata.py`, `gold_writer.py` |
-| #14 | 3 новых composite schemas (Activity, Assay, Target) + YAML configs | `composite.py`, `storage_adapter.py` |
+| #5 | `strict="filter"` + descriptions в существующих composite schemas | `composite.py`, `storage-adapter.py` |
+| #13 | Composite metadata fields → `CompositeOutputExt` | `metadata-coordinator.py`, `metadata.py`, `gold-writer.py` |
+| #14 | 3 новых composite schemas (Activity, Assay, Target) + YAML configs | `composite.py`, `storage-adapter.py` |
 
 **КОНФЛИКТ:** #5 и #14 оба правят `composite.py`:
 - #5 меняет существующие классы (`strict="filter"`, добавляет descriptions)
 - #14 добавляет новые классы (`CompositeActivityGoldSchema`, `CompositeAssayGoldSchema`, `CompositeTargetGoldSchema`) но оставляет `strict=False`
 
-**КОНФЛИКТ:** #5 и #14 оба правят `storage_adapter.py`.
+**КОНФЛИКТ:** #5 и #14 оба правят `storage-adapter.py`.
 **Решение:** Мёржить #14 → #5 (новые классы + strict="filter" для всех).
 
 ---
@@ -109,12 +109,12 @@
 
 | Ветка | Что делает | Ключевые файлы |
 |-------|-----------|----------------|
-| #6 | Rule provenance в DQ report | `dq_report.py`, `metadata.py`, `metadata_coordinator.py` |
-| #8 | Key nullability policy в quality configs | `silver_writer.py`, `dq_config.py`, 21 quality config |
-| #13 | Composite output metadata | `metadata.py`, `metadata_coordinator.py` |
+| #6 | Rule provenance в DQ report | `dq-report.py`, `metadata.py`, `metadata-coordinator.py` |
+| #8 | Key nullability policy в quality configs | `silver-writer.py`, `dq-config.py`, 21 quality config |
+| #13 | Composite output metadata | `metadata.py`, `metadata-coordinator.py` |
 
-**Конфликт:** #6 и #13 оба правят `metadata.py`, `metadata_coordinator.py`, тесты metadata.
-**Перекрытие:** #6 и #8 оба правят `dq_report.py`.
+**Конфликт:** #6 и #13 оба правят `metadata.py`, `metadata-coordinator.py`, тесты metadata.
+**Перекрытие:** #6 и #8 оба правят `dq-report.py`.
 **Решение:** #8 независим, мёржить первым. #6 и #13 мёржить последовательно.
 
 ---
@@ -125,8 +125,8 @@
 
 | Ветка | Что делает | CI файлы |
 |-------|-----------|----------|
-| #4 | `generate_schema_artifacts.py` → Pandera registry, ADR-036 | `schema-governance.yml` |
-| #10 | `generate_json_field_typing_inventory.py` → type matrix | `schema-governance.yml` |
+| #4 | `generate-schema-artifacts.py` → Pandera registry, ADR-036 | `schema-governance.yml` |
+| #10 | `generate-json-field-typing-inventory.py` → type matrix | `schema-governance.yml` |
 
 **Конфликт:** оба правят `.github/workflows/schema-governance.yml`.
 **Решение:** Мёржить последовательно, добавляя оба job в один workflow.
@@ -135,8 +135,8 @@
 
 ### G. Publication Aliases (ветка 11) — изолированная
 
-Добавляет `publication_aliases.py` service, обновляет ADR-024, правит `publication_transformer.py`.
-Пересечение с #12 только в `publication_transformer.py`.
+Добавляет `publication-aliases.py` service, обновляет ADR-024, правит `publication-transformer.py`.
+Пересечение с #12 только в `publication-transformer.py`.
 
 ---
 
@@ -157,26 +157,26 @@
 Файл                                          Ветки             Severity
 ─────────────────────────────────────────────────────────────────────────
 configs/schemas/*/**.yaml (×15)               #1, #7, #9        CRITICAL
-  → column_groups: три РАЗНЫЕ структуры
+  → column-groups: три РАЗНЫЕ структуры
 composite.py                                  #5, #14           HIGH
   → strict="filter" vs новые классы + strict=False
-storage_adapter.py                            #5, #8, #14       HIGH
+storage-adapter.py                            #5, #8, #14       HIGH
   → три разных расширения
-metadata.py + metadata_coordinator.py         #6, #13           HIGH
+metadata.py + metadata-coordinator.py         #6, #13           HIGH
   → rule provenance vs composite metadata
-configs/_schema/pipeline.json                 #3, #9            MEDIUM
+configs/-schema/pipeline.json                 #3, #9            MEDIUM
   → разные новые required fields
 configs/pipelines/*/**.yaml (×23)             #3, #9            MEDIUM
-  → разные новые поля (PKs vs schema_file)
+  → разные новые поля (PKs vs schema-file)
 transformations.py                            #1, #2            MEDIUM
-  → content_hash config vs _-prefix exclusion
-dq_report.py                                  #6, #8            MEDIUM
+  → content-hash config vs --prefix exclusion
+dq-report.py                                  #6, #8            MEDIUM
   → provenance fields vs nullability
 .github/workflows/schema-governance.yml       #4, #10           LOW
   → два разных CI job
 RULES.md                                      #2, #3            LOW
   → разные секции (meta fields vs PK docs)
-publication_transformer.py                    #11, #12          LOW
+publication-transformer.py                    #11, #12          LOW
   → alias compat vs contract policy
 ```
 
@@ -193,14 +193,14 @@ publication_transformer.py                    #11, #12          LOW
 **Порядок merge (sequential):**
 
 ```
-1.  #7  update-yaml-config-files-with-field-groups   ← BASE: column_groups структура
-    ↓   DISCARD #9 column_groups (конфликтует, менее детальная)
-    ↓   Из #9 взять ТОЛЬКО: schema_file поле в pipeline configs + validation script
+1.  #7  update-yaml-config-files-with-field-groups   ← BASE: column-groups структура
+    ↓   DISCARD #9 column-groups (конфликтует, менее детальная)
+    ↓   Из #9 взять ТОЛЬКО: schema-file поле в pipeline configs + validation script
 
-2.  #1  add-content_hash-configuration-section        ← content_hash секция поверх #7
+2.  #1  add-content-hash-configuration-section        ← content-hash секция поверх #7
     ↓   Конфликт в schema YAML: тривиальный (разные секции файла)
 
-3.  #2  revise-meta_fields-and-add-technical-fields   ← мета-поля + identity policy
+3.  #2  revise-meta-fields-and-add-technical-fields   ← мета-поля + identity policy
     ↓   Конфликт transformations.py: merge обоих изменений
 
 4.  #15 add-hash-policy-document-and-machine-readable ← hash policy YAML (дополняет #1)
@@ -215,11 +215,11 @@ publication_transformer.py                    #11, #12          LOW
 ```
 5.  #3  refactor-primary-keys-separation-in-configs   ← business/technical PK split
     ↓
-6.  #9  update-schema-configs-and-ci-rules            ← CHERRY-PICK: schema_file + CI
-    ↓   НЕ брать column_groups (уже из #7)
+6.  #9  update-schema-configs-and-ci-rules            ← CHERRY-PICK: schema-file + CI
+    ↓   НЕ брать column-groups (уже из #7)
 
 7.  #12 create-yaml-configuration-for-pipelines       ← contract policy YAML
-    ↓   Проверить: hash_include/exclude не дублирует #1/#15
+    ↓   Проверить: hash-include/exclude не дублирует #1/#15
 ```
 
 **Результат:** Pipeline configs с PK separation + schema links + contract policies.
@@ -234,7 +234,7 @@ publication_transformer.py                    #11, #12          LOW
 9.  #5  create-dataframemodel-classes-and-tests        ← strict="filter" + descriptions
     ↓   ПРИМЕНИТЬ strict="filter" ко ВСЕМ классам (#14 оставил strict=False)
 
-10. #13 map-_composite_-fields-to-baseoutputmetadata  ← composite metadata
+10. #13 map--composite--fields-to-baseoutputmetadata  ← composite metadata
     ↓
 11. #6  expand-dq-report-schema                       ← DQ provenance
     ↓   Конфликт metadata.py: merge composite + provenance fields
@@ -285,7 +285,7 @@ publication_transformer.py                    #11, #12          LOW
 1. **НЕ мёржить все 18 веток по отдельности** — гарантированы конфликты и несогласованность
 2. **Создать 4-5 консолидированных feature branches** по фазам выше
 3. **Ветки #16, #17 — полностью DROP**, #18 оставить как единственный аудит-отчёт
-4. **Ветки #7 и #9** — выбрать #7 column_groups (более детальная), из #9 cherry-pick только CI + schema_file
+4. **Ветки #7 и #9** — выбрать #7 column-groups (более детальная), из #9 cherry-pick только CI + schema-file
 5. **В composite.py** — применить `strict="filter"` из #5 ко ВСЕМ schema классам (включая новые из #14)
 6. **Запускать тесты после каждой фазы**: `pytest tests/architecture/ -v && pytest tests/contract/ -v`
 7. **Ожидаемое время:** ~2-3 часа на ручную консолидацию всех фаз

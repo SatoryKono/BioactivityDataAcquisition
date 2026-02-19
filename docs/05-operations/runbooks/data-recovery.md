@@ -15,16 +15,16 @@ This runbook provides procedures for recovering data in case of corruption, acci
   1. **Use Time Travel (Delta Lake)**: If the issue was recent (within 7 days), use Delta Lake's time travel to revert the table to a previous version or timestamp.
      ```sql
      -- Example: Revert a table to a specific version
-     RESTORE TABLE schema.table_name TO VERSION AS OF <version_number>;
+     RESTORE TABLE schema.table-name TO VERSION AS OF <version-number>;
 
      -- Example: Revert to a timestamp
-     RESTORE TABLE schema.table_name TO TIMESTAMP AS OF 'YYYY-MM-DD HH:MI:SS';
+     RESTORE TABLE schema.table-name TO TIMESTAMP AS OF 'YYYY-MM-DD HH:MI:SS';
      ```
   1. **Full Rebuild from Bronze**: If time travel is not an option, the most reliable method is to rebuild from the Bronze layer.
      - Delete the corrupted data from the Silver/Gold tables.
      - Run the pipeline with the `--run-type rebuild` flag. This will re-process all data from Bronze.
      ```bash
-     bioetl run --pipeline <pipeline_name> --run-type rebuild
+     bioetl run --pipeline <pipeline-name> --run-type rebuild
      ```
 
 ## Scenario 2: Bronze Data Loss or Corruption
@@ -46,11 +46,11 @@ This runbook provides procedures for recovering data in case of corruption, acci
   1. **Option A (Safest)**: Delete the checkpoint and re-process from the beginning.
      ```bash
      # Delete the checkpoint file for the affected pipeline
-     rm data/output/checkpoints/{pipeline_name}.json
+     rm data/output/checkpoints/{pipeline-name}.json
 
      # Re-run the pipeline (will start from scratch)
-     bioetl run --pipeline <pipeline_name> --run-type rebuild
+     bioetl run --pipeline <pipeline-name> --run-type rebuild
      ```
-     - **Note**: For checkpoint reset, delete the file at `data/output/checkpoints/{pipeline_name}.json`.
+     - **Note**: For checkpoint reset, delete the file at `data/output/checkpoints/{pipeline-name}.json`.
      - **Impact**: This may create duplicate records in the Bronze layer, but the merge/upsert logic in the Silver layer will handle deduplication, ensuring correctness.
   1. **Option B (Advanced)**: Manually determine the last successfully processed record ID or timestamp from the Silver table and create a new checkpoint file. This is faster but more error-prone.

@@ -11,10 +11,10 @@ External API calls (ChEMBL, PubChem, UniProt) can experience temporary failures,
 
 ## The Decision
 
-We have implemented a **state machine-based Circuit Breaker** in `infrastructure/adapters/http/circuit_breaker.py` with the following characteristics:
+We have implemented a **state machine-based Circuit Breaker** in `infrastructure/adapters/http/circuit-breaker.py` with the following characteristics:
 
-1. **Three-state machine**: CLOSED → OPEN → HALF_OPEN → CLOSED
-2. **Configurable thresholds**: `failure_threshold=5`, `recovery_timeout=300s`
+1. **Three-state machine**: CLOSED → OPEN → HALF-OPEN → CLOSED
+2. **Configurable thresholds**: `failure-threshold=5`, `recovery-timeout=300s`
 3. **Selective triggering**: Only infrastructure errors (5xx, 429, timeouts) trip the breaker
 4. **Thread-safe**: Uses `asyncio.Lock` for concurrent access
 
@@ -26,15 +26,15 @@ This decision implements RULES.md Section 3.1.4.
          ┌─────────────────────────────────────────┐
          │                                         │
          ▼                                         │
-     ┌───────┐  failure_threshold  ┌──────┐      success
+     ┌───────┐  failure-threshold  ┌──────┐      success
      │CLOSED │ ─────────────────▶ │ OPEN │ ──────────┐
      └───────┘                     └──────┘          │
          ▲                            │              │
-         │                    recovery_timeout       │
+         │                    recovery-timeout       │
          │                            │              │
          │                            ▼              │
          │                      ┌───────────┐        │
-         └────── success ────── │ HALF_OPEN │ ───────┘
+         └────── success ────── │ HALF-OPEN │ ───────┘
                                 └───────────┘
                                       │
                                    failure
@@ -59,8 +59,8 @@ The circuit breaker allows immediate failure with `CircuitBreakerOpenError`, let
 
 ### 2. Self-Healing
 
-The HALF_OPEN state enables automatic recovery probing:
-- After `recovery_timeout` (5 minutes), one probe request is allowed
+The HALF-OPEN state enables automatic recovery probing:
+- After `recovery-timeout` (5 minutes), one probe request is allowed
 - If successful, circuit closes and normal operation resumes
 - If failed, circuit reopens for another timeout period
 
@@ -77,26 +77,26 @@ Not all errors should trip the circuit:
 | Validation Error | No | Data issue, not infrastructure |
 
 ```python
-def is_circuit_breaker_error(exc: Exception) -> bool:
+def is-circuit-breaker-error(exc: Exception) -> bool:
     if isinstance(exc, (ConnectError, ConnectTimeout, ReadTimeout)):
         return True
     if isinstance(exc, HTTPStatusError):
-        return exc.response.status_code >= 500 or exc.response.status_code == 429
+        return exc.response.status-code >= 500 or exc.response.status-code == 429
     return False
 ```
 
 ### 4. Metrics Integration
 
 The circuit breaker exposes metrics for observability:
-- `circuit_breaker_state{provider}`: Current state (0=Closed, 1=Half-Open, 2=Open)
-- `circuit_breaker_trips_total{provider}`: Total OPEN transitions
+- `circuit-breaker-state{provider}`: Current state (0=Closed, 1=Half-Open, 2=Open)
+- `circuit-breaker-trips-total{provider}`: Total OPEN transitions
 
 ## Configuration
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `failure_threshold` | 5 | Consecutive failures before opening |
-| `recovery_timeout` | 300s | Time in OPEN before probing |
+| `failure-threshold` | 5 | Consecutive failures before opening |
+| `recovery-timeout` | 300s | Time in OPEN before probing |
 
 These defaults balance between:
 - **Too sensitive** (threshold=1): Normal transient failures trip circuit
@@ -142,12 +142,12 @@ Considered but deferred:
 ## Usage Example
 
 ```python
-from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
+from bioetl.infrastructure.adapters.http.circuit-breaker import CircuitBreaker
 
-cb = CircuitBreaker(provider="chembl", failure_threshold=5)
+cb = CircuitBreaker(provider="chembl", failure-threshold=5)
 
-async def fetch_activity(activity_id: int) -> dict:
-    return await cb.call(http_client.get, f"/activity/{activity_id}")
+async def fetch-activity(activity-id: int) -> dict:
+    return await cb.call(http-client.get, f"/activity/{activity-id}")
 ```
 
 ## Related ADRs

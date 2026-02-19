@@ -42,13 +42,13 @@ All 10 directional import boundary checks returned **0 violations**:
 | 9 | infrastructure -> composition | CLEAN |
 | 10 | infrastructure -> interfaces | CLEAN |
 
-TYPE_CHECKING guard audit: no hidden cross-boundary imports in guarded blocks.
+TYPE-CHECKING guard audit: no hidden cross-boundary imports in guarded blocks.
 
 ### ARCH-002: Domain Purity -- CLEAN
 
 - Zero I/O operations in domain layer
 - No imports of `requests`, `httpx`, `aiohttp`, or `structlog`
-- All `write_`/`open(` matches are attribute names or docstrings
+- All `write-`/`open(` matches are attribute names or docstrings
 
 ### ARCH-003: Port Protocol Naming -- CLEAN
 
@@ -56,7 +56,7 @@ All 37 Protocol classes in `domain/ports/` correctly use `*Port` suffix.
 
 ### ARCH-004: Adapter Health Check -- CLEAN
 
-All HTTP adapters inherit `health_check()` from `HealthCheckProviderMixin`:
+All HTTP adapters inherit `health-check()` from `HealthCheckProviderMixin`:
 - ChemblAdapter, CrossRefAdapter, OpenAlexAdapter, SemanticScholarAdapter
 - UniProtAdapter, UniProtIDMappingClient, PubMedAdapter, PubChemAdapter
 
@@ -66,7 +66,7 @@ Zero `Factory()` calls in domain/ or application/. All factory usage in composit
 
 ### ARCH-006: Silver Layer ACID -- CLEAN
 
-Zero `to_parquet`/`write_parquet` calls in storage layer. Delta Lake used exclusively.
+Zero `to-parquet`/`write-parquet` calls in storage layer. Delta Lake used exclusively.
 
 ### ARCH-008: Single Source of Imports -- CLEAN
 
@@ -81,10 +81,10 @@ Internal cross-references within `domain/ports/` package are acceptable.
 |------|-------|--------|
 | AP-001 | Hard-coded constructors in app/domain | **CLEAN** -- all instantiations are same-layer helpers or value objects |
 | AP-002 | Direct structlog import in app/interfaces | **CLEAN** -- 0 matches |
-| AP-004 | Sentinel values | **CLEAN** -- `COMPRESSION_THREADS = -1` is zstd convention (documented) |
+| AP-004 | Sentinel values | **CLEAN** -- `COMPRESSION-THREADS = -1` is zstd convention (documented) |
 | AP-005 | Hardcoded secrets | **CLEAN** -- 0 matches |
 | AP-006 | Print statements | **CLEAN** -- 0 matches in production code |
-| AP-008 | Blocking I/O in async | **CLEAN** -- all blocking I/O offloaded via `run_in_executor` |
+| AP-008 | Blocking I/O in async | **CLEAN** -- all blocking I/O offloaded via `run-in-executor` |
 
 ---
 
@@ -107,8 +107,8 @@ Internal cross-references within `domain/ports/` package are acceptable.
 | Check | Result |
 |-------|--------|
 | NAME-003: No bad module names (utils.py, helpers.py, misc.py) | **PASS** |
-| NAME-005: Constants UPPER_SNAKE_CASE | **PASS** |
-| NAME-006: Enum values UPPER_SNAKE_CASE (50+ classes verified) | **PASS** |
+| NAME-005: Constants UPPER-SNAKE-CASE | **PASS** |
+| NAME-006: Enum values UPPER-SNAKE-CASE (50+ classes verified) | **PASS** |
 
 ### Findings
 
@@ -130,18 +130,18 @@ or rename to `*CallbackPort`.
 
 #### NM-002: ConfigLoader lacks descriptive prefix (MEDIUM)
 
-**Location:** `src/bioetl/infrastructure/config/pipeline_config_loader.py:30`
+**Location:** `src/bioetl/infrastructure/config/pipeline-config-loader.py:30`
 
 ```python
-class ConfigLoader:  # module is pipeline_config_loader.py
+class ConfigLoader:  # module is pipeline-config-loader.py
 ```
 
 **Recommendation:** Rename to `PipelineConfigLoader` to match module name.
 
 #### NM-003: Application-level Ports outside domain/ports/ (MEDIUM)
 
-**Location:** `src/bioetl/application/services/config_service.py:22-127` (8 Ports),
-`postrun_service.py:44`, `metrics_service.py:35`, `health_service.py:22`
+**Location:** `src/bioetl/application/services/config-service.py:22-127` (8 Ports),
+`postrun-service.py:44`, `metrics-service.py:35`, `health-service.py:22`
 
 11 Protocol classes with `Port` suffix are defined in `application/` instead of
 `domain/ports/`. Naming is correct, but ARCH-003 expects ports in `domain/ports/`.
@@ -166,7 +166,7 @@ for cross-provider disambiguation.
 | Check | Result |
 |-------|--------|
 | TYPE-001: Public function return annotations | **PASS** -- all hits are docstring examples |
-| TYPE-004: `@runtime_checkable` on Ports | **PASS** -- 38/38 Protocol classes decorated |
+| TYPE-004: `@runtime-checkable` on Ports | **PASS** -- 38/38 Protocol classes decorated |
 
 ### Findings
 
@@ -177,20 +177,20 @@ for cross-provider disambiguation.
 
 **Top offenders:**
 - `application/pipelines/uniprot/extractors/features.py`: 18 bare Any
-- `composition/factories/pipeline_factory.py`: 12 bare Any
+- `composition/factories/pipeline-factory.py`: 12 bare Any
 - `application/pipelines/uniprot/extractors/comments.py`: 11 bare Any
-- `application/core/base_transformer.py`: 11 bare Any
-- `domain/filtering/_base_filter_config.py`: 9 bare Any
+- `application/core/base-transformer.py`: 11 bare Any
+- `domain/filtering/-base-filter-config.py`: 9 bare Any
 
 **Recommendation:** Add justification comments (e.g., `# Any: raw API JSON`),
 or replace with specific types where feasible.
 
 #### TY-002: Known type used as Any (MEDIUM)
 
-**Location:** `src/bioetl/application/services/health_service.py:137`
+**Location:** `src/bioetl/application/services/health-service.py:137`
 
 ```python
-_factory: Any  # DataSourceFactoryPort
+-factory: Any  # DataSourceFactoryPort
 ```
 
 The comment reveals the intended type, but `Any` is used.
@@ -202,8 +202,8 @@ The comment reveals the intended type, but `Any` is used.
 **Location:** `src/bioetl/application/core/config.py:22-23`
 
 ```python
-silver_schema: Any
-gold_schema: Any
+silver-schema: Any
+gold-schema: Any
 ```
 
 **Recommendation:** Define a `SchemaLike` type alias for schema types.
@@ -216,7 +216,7 @@ gold_schema: Any
 
 | Check | Result |
 |-------|--------|
-| TEST-005: No test logic in production | **PASS** -- all `test_mode` refs are legitimate config |
+| TEST-005: No test logic in production | **PASS** -- all `test-mode` refs are legitimate config |
 | Architecture test suite | **130/130 runnable tests pass** |
 | DI compliance tests | **18/18 pass** |
 | Layer boundary tests | **All pass** |
@@ -233,15 +233,15 @@ gold_schema: Any
 ## 7. Architecture Test Suite Results
 
 ```
-tests/architecture/test_layer_dependencies.py       18 PASSED
-tests/architecture/test_forbidden_imports.py          7 PASSED
-tests/architecture/test_domain_purity.py              5 PASSED
-tests/architecture/test_no_structlog.py               5 PASSED
-tests/architecture/test_interfaces_no_infra.py       17 PASSED
-tests/architecture/test_di_compliance.py              9 PASSED
-tests/architecture/test_di_constructors.py            8 PASSED
-tests/architecture/test_di_discipline.py              1 PASSED
-tests/architecture/test_antipatterns.py               4 PASSED
+tests/architecture/test-layer-dependencies.py       18 PASSED
+tests/architecture/test-forbidden-imports.py          7 PASSED
+tests/architecture/test-domain-purity.py              5 PASSED
+tests/architecture/test-no-structlog.py               5 PASSED
+tests/architecture/test-interfaces-no-infra.py       17 PASSED
+tests/architecture/test-di-compliance.py              9 PASSED
+tests/architecture/test-di-constructors.py            8 PASSED
+tests/architecture/test-di-discipline.py              1 PASSED
+tests/architecture/test-antipatterns.py               4 PASSED
 ─────────────────────────────────────────────────────────────
 Total:                                               74 PASSED, 0 FAILED
 ```
@@ -265,18 +265,18 @@ Total:                                               74 PASSED, 0 FAILED
 
 ### High Priority (Type Safety)
 
-1. **TY-002:** Replace `_factory: Any` with `DataSourceFactoryPort` in
-   `health_service.py:137`
+1. **TY-002:** Replace `-factory: Any` with `DataSourceFactoryPort` in
+   `health-service.py:137`
 
 2. **TY-001:** Add justification comments to top bare-Any files:
    - `features.py` (18 instances)
-   - `pipeline_factory.py` (12 instances)
+   - `pipeline-factory.py` (12 instances)
    - `comments.py` (11 instances)
 
 ### Medium Priority (Naming)
 
 3. **NM-002:** Rename `ConfigLoader` to `PipelineConfigLoader` in
-   `infrastructure/config/pipeline_config_loader.py:30`
+   `infrastructure/config/pipeline-config-loader.py:30`
 
 4. **NM-003:** Document application-level Ports as accepted convention or
    migrate to `domain/ports/`

@@ -21,7 +21,7 @@
 | Review a pipeline       | [pipeline-review-checklist.md](../04-reference/templates/pipeline-review-checklist.md) |
 | Handle a prod error     | [runbooks/index.md](../05-operations/runbooks/index.md)                           |
 | Understand architecture | [00-overview.md](../02-architecture/00-overview.md)                  |
-| Check data contracts    | [chembl_activity_v1.0.json](../04-reference/contracts/gold/chembl_activity_v1.0.json)          |
+| Check data contracts    | [chembl-activity-v1.0.json](../04-reference/contracts/gold/chembl_activity_v1.0.json)          |
 
 ---
 
@@ -116,9 +116,9 @@ docs/
 | [ADR-009: Paginated Fetcher](../02-architecture/decisions/ADR-009-paginated-fetcher-mixin.md)   | Pagination abstraction                   | App D    |
 | [ADR-010: Local-Only Deploy](../02-architecture/decisions/ADR-010-local-only-deployment.md)     | File-based deployment (no Docker)        | §5.6     |
 | [ADR-011: Watermark Removal](../02-architecture/decisions/ADR-011-remove-watermark-mechanism.md) | Simplified checkpoint model             | §2.4     |
-| [ADR-012: Storage Clear Contract](../02-architecture/decisions/ADR-012-storage-clear-contract-and-run-id.md) | Storage clear API, run_id injection | §2.1     |
+| [ADR-012: Storage Clear Contract](../02-architecture/decisions/ADR-012-storage-clear-contract-and-run-id.md) | Storage clear API, run-id injection | §2.1     |
 | [ADR-013: Async Storage Cleanup](../02-architecture/decisions/ADR-013-async-storage-cleanup.md) | MedallionLifecycleService pattern        | §2.1     |
-| [ADR-014: Deterministic Writes](../02-architecture/decisions/ADR-014-deterministic-writes.md)   | SCD2 ingestion_ts, reproducible writes   | §2.1     |
+| [ADR-014: Deterministic Writes](../02-architecture/decisions/ADR-014-deterministic-writes.md)   | SCD2 ingestion-ts, reproducible writes   | §2.1     |
 | [ADR-015: Pipeline Services Lifecycle](../02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md) | Port lifecycle contracts       | §1.1     |
 | [ADR-016: Error Handling Strategy](../02-architecture/decisions/ADR-016-error-handling-strategy.md) | Unified error classification          | §3.1     |
 | [ADR-017: Observability Architecture](../02-architecture/decisions/ADR-017-observability-architecture.md) | Metrics, tracing, logging ports    | §5.1     |
@@ -190,8 +190,8 @@ docs/
 src/bioetl/
 ├── domain/                      # Pure logic, no I/O (§1.1)
 │   ├── ports/                   # Protocol interfaces (Ports & Adapters)
-│   │   ├── __init__.py          # Facade — single import point
-│   │   ├── data_source.py       # DataSourcePort, FilterableDataSourcePort
+│   │   ├── --init--.py          # Facade — single import point
+│   │   ├── data-source.py       # DataSourcePort, FilterableDataSourcePort
 │   │   ├── storage.py           # StoragePort
 │   │   ├── locking.py           # LockPort
 │   │   ├── checkpoint.py        # CheckpointPort
@@ -207,9 +207,9 @@ src/bioetl/
 ├── application/                 # Pipeline orchestration (§1.1)
 │   ├── core/                    # Core pipeline infrastructure
 │   │   ├── base.py              # Base pipeline primitives
-│   │   ├── base_transformer.py  # Base transformer contracts
-│   │   ├── batch_executor.py    # Batch executor
-│   │   ├── pipeline_services.py # Service container
+│   │   ├── base-transformer.py  # Base transformer contracts
+│   │   ├── batch-executor.py    # Batch executor
+│   │   ├── pipeline-services.py # Service container
 │   │   ├── runner.py            # PipelineRunner (Driving Adapter logic)
 │   │   └── shutdown.py          # Graceful shutdown handling
 │   ├── composite/               # Composite pipeline orchestration
@@ -237,8 +237,8 @@ src/bioetl/
 │
 ├── composition/                 # Composition Root (DI container)
 │   ├── bootstrap/               # Bootstrap helpers
-│   ├── bootstrap_contexts.py    # Bootstrap contexts
-│   ├── bootstrap_logger.py      # Bootstrap logging setup
+│   ├── bootstrap-contexts.py    # Bootstrap contexts
+│   ├── bootstrap-logger.py      # Bootstrap logging setup
 │   ├── builders.py              # Composition builders
 │   ├── entrypoints.py           # CLI/runner entrypoints
 │   ├── observability.py         # Observability wiring
@@ -246,9 +246,9 @@ src/bioetl/
 │   ├── providers/               # Provider registration
 │   ├── services/                # Composition services
 │   └── factories/               # Consolidated factories
-│       ├── pipeline_factory.py  # Pipeline factory
-│       ├── runner_factory.py    # Runner factory
-│       └── storage_factory.py   # Multi-layer storage factory
+│       ├── pipeline-factory.py  # Pipeline factory
+│       ├── runner-factory.py    # Runner factory
+│       └── storage-factory.py   # Multi-layer storage factory
 │
 ├── infrastructure/              # I/O adapters (§1.1)
 │   ├── adapters/                # External API clients
@@ -261,12 +261,12 @@ src/bioetl/
 │   │   ├── semanticscholar/     # Semantic Scholar API adapter
 │   │   └── uniprot/             # UniProt API adapter
 │   ├── storage/                 # Data persistence
-│   │   ├── bronze_writer.py     # JSONL + zstd writer
-│   │   ├── base_delta_writer.py  # Delta Lake merge/upsert
-│   │   ├── silver_writer.py     # Silver layer writer
-│   │   └── gold_writer.py       # SCD Type 2 writer
+│   │   ├── bronze-writer.py     # JSONL + zstd writer
+│   │   ├── base-delta-writer.py  # Delta Lake merge/upsert
+│   │   ├── silver-writer.py     # Silver layer writer
+│   │   └── gold-writer.py       # SCD Type 2 writer
 │   ├── locking/                 # Distributed locking
-│   │   └── memory_lock.py       # In-memory (local-only)
+│   │   └── memory-lock.py       # In-memory (local-only)
 │   ├── checkpoint/              # Checkpoint persistence
 │   ├── quarantine/              # DQ failure handling
 │   ├── observability/           # Metrics, logging
@@ -276,14 +276,14 @@ src/bioetl/
 │
 └── interfaces/                  # External interfaces
     ├── cli/                     # CLI package (bioetl run/quarantine/checkpoint)
-    │   ├── __init__.py          # CLI package entry
-    │   ├── __main__.py          # CLI module entrypoint
-    │   ├── exit_codes.py        # CLI exit codes
+    │   ├── --init--.py          # CLI package entry
+    │   ├── --main--.py          # CLI module entrypoint
+    │   ├── exit-codes.py        # CLI exit codes
     │   ├── formatters.py        # CLI output formatting
     │   ├── main.py              # Click command group
     │   └── commands/            # CLI subcommands
     ├── http/                    # HTTP interfaces (health server)
-    │   ├── health_server.py     # Health server
+    │   ├── health-server.py     # Health server
     │   └── types.py             # HTTP types
     ├── orchestration/           # Orchestration helpers
     └── observability.py         # Interface observability wiring
@@ -297,9 +297,9 @@ tests/
 │   └── adapters/                # HTTP adapter tests
 ├── e2e/                         # E2E tests (Local-Only arch)
 │   ├── conftest.py              # E2E helpers & fixtures
-│   └── test_pipeline_e2e.py     # Full pipeline cycle tests
+│   └── test-pipeline-e2e.py     # Full pipeline cycle tests
 ├── architecture/                # Architecture validation tests
-│   └── test_layer_imports.py    # Import matrix enforcement
+│   └── test-layer-imports.py    # Import matrix enforcement
 └── fixtures/                    # Test fixtures
     └── vcr/                     # VCR cassettes for HTTP
 ```
@@ -332,7 +332,7 @@ graph TD
 | `CHANGELOG.md`                                     | Version history           |
 | `configs/pipelines/{provider}/{entity}.yaml`       | Pipeline configuration    |
 | `src/bioetl/domain/ports/`                         | Protocol interfaces (package) |
-| `src/bioetl/composition/bootstrap_contexts.py`     | Composition root          |
+| `src/bioetl/composition/bootstrap-contexts.py`     | Composition root          |
 | `src/bioetl/infrastructure/config.py`              | Application settings      |
 | `docs/02-architecture/system-context.md`           | High-level system diagram |
 | `docs/04-reference/contracts/gold/{entity}.json`   | Gold data contracts       |

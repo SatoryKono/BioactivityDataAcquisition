@@ -2,7 +2,7 @@
 
 **Версия:** 1.0.0
 **Дата:** 2026-02-06
-**Источник:** `publication_validation_schema_v3.xlsx`
+**Источник:** `publication-validation-schema-v3.xlsx`
 **Охват:** 191 поле × 5 провайдеров
 
 ---
@@ -44,11 +44,11 @@
 
 | Провайдер | Кол-во полей | Primary Key | Non-nullable | Nullable |
 |-----------|--------------|-------------|--------------|----------|
-| **ChEMBL** | 28 | `document_chembl_id` | 1 | 27 |
+| **ChEMBL** | 28 | `document-chembl-id` | 1 | 27 |
 | **PubMed** | 52 | `pmid` | 1 | 51 |
 | **CrossRef** | 37 | `doi` | 1 | 36 |
-| **OpenAlex** | 39 | `openalex_id` | 1 | 38 |
-| **Semantic Scholar** | 35 | `paper_id` | 1 | 34 |
+| **OpenAlex** | 39 | `openalex-id` | 1 | 38 |
+| **Semantic Scholar** | 35 | `paper-id` | 1 | 34 |
 | **ИТОГО** | **191** | — | **5** | **186** |
 
 **Важно:**
@@ -68,25 +68,25 @@
 | `abstract` | string/integer/boolean | nullable | Аннотация (краткое содержание) |
 | `authors` | string/integer/boolean | nullable | Список авторов (JSON/CSV) |
 | `journal` | string/integer/boolean | nullable | Название журнала |
-| `publication_year` | string/integer/boolean | nullable | Год публикации |
-| `publication_date` | string/integer/boolean | nullable | Дата публикации (YYYY-MM-DD) |
-| `_source` | string/integer/boolean | nullable | Провайдер-источник (chembl, pubmed, crossref, openalex, semanticscholar) |
-| `lookup_method` | string/integer/boolean | nullable | Метод извлечения записи (api, direct, cached) |
-| `original_id` | string/integer/boolean | nullable | Исходный идентификатор записи у провайдера |
-| `_dq_warn` | string/integer/boolean | nullable | DQ флаг: запись прошла с предупреждениями |
-| `_dq_error` | string/integer/boolean | nullable | DQ флаг: запись заблокирована из-за критической ошибки |
-| `content_hash` | string/integer/boolean | nullable | SHA-256 хеш контента для дедупликации |
+| `publication-year` | string/integer/boolean | nullable | Год публикации |
+| `publication-date` | string/integer/boolean | nullable | Дата публикации (YYYY-MM-DD) |
+| `-source` | string/integer/boolean | nullable | Провайдер-источник (chembl, pubmed, crossref, openalex, semanticscholar) |
+| `lookup-method` | string/integer/boolean | nullable | Метод извлечения записи (api, direct, cached) |
+| `original-id` | string/integer/boolean | nullable | Исходный идентификатор записи у провайдера |
+| `-dq-warn` | string/integer/boolean | nullable | DQ флаг: запись прошла с предупреждениями |
+| `-dq-error` | string/integer/boolean | nullable | DQ флаг: запись заблокирована из-за критической ошибки |
+| `content-hash` | string/integer/boolean | nullable | SHA-256 хеш контента для дедупликации |
 
 **Примечания:**
-- `_source` — фиксированное значение, соответствует провайдеру (`chembl`, `pubmed`, `crossref`, `openalex`, `semanticscholar`)
-- `content_hash` — SHA-256 хеш полей `[title, abstract, authors, publication_year, journal, doi]` для детерминированной дедупликации
-- `_dq_warn`, `_dq_error` — устанавливаются автоматически валидационным пайплайном (ADR-027)
+- `-source` — фиксированное значение, соответствует провайдеру (`chembl`, `pubmed`, `crossref`, `openalex`, `semanticscholar`)
+- `content-hash` — SHA-256 хеш полей `[title, abstract, authors, publication-year, journal, doi]` для детерминированной дедупликации
+- `-dq-warn`, `-dq-error` — устанавливаются автоматически валидационным пайплайном (ADR-027)
 
 ---
 
 ## ChEMBL
 
-**Кол-во полей:** 28 | **Primary Key:** `document_chembl_id`
+**Кол-во полей:** 28 | **Primary Key:** `document-chembl-id`
 
 ### Идентификаторы и статусы
 
@@ -94,11 +94,11 @@
 |------|-----|----------|----------|-------|-------|
 | `pmid` | string | ✅ | — | `^[1-9]\d*$ (positive integer)` |  |
 | `doi` | string | ✅ | — | `^10\.\d{4,9}/.+$` |  |
-| `pmc_id` | string | ✅ | — | `^PMC\d+$` |  |
-| `publication_type` | string | ✅ | — | — |  |
-| `is_oa` | boolean | ✅ | — | — |  |
-| `document_chembl_id` | string | ❌ | Primary key for chembl; | `^CHEMBL\d+$` | ⭐ |
-| `chembl_release` | string | ✅ | — | — |  |
+| `pmc-id` | string | ✅ | — | `^PMC\d+$` |  |
+| `publication-type` | string | ✅ | — | — |  |
+| `is-oa` | boolean | ✅ | — | — |  |
+| `document-chembl-id` | string | ❌ | Primary key for chembl; | `^CHEMBL\d+$` | ⭐ |
+| `chembl-release` | string | ✅ | — | — |  |
 
 ### Библиографическая информация
 
@@ -107,8 +107,8 @@
 | `title` | string | ✅ | — | — |  |
 | `abstract` | string | ✅ | — | — |  |
 | `journal` | string | ✅ | — | — |  |
-| `page_first` | string | ✅ | — | — |  |
-| `page_last` | string | ✅ | — | — |  |
+| `page-first` | string | ✅ | — | — |  |
+| `page-last` | string | ✅ | — | — |  |
 | `volume` | string | ✅ | — | — |  |
 | `issue` | string | ✅ | — | — |  |
 
@@ -117,34 +117,34 @@
 | Поле | Тип | Nullable | Описание | Regex | PK |
 |------|-----|----------|----------|-------|-------|
 | `authors` | string | ✅ | — | — |  |
-| `affiliation_list` | string | ✅ | — | — |  |
+| `affiliation-list` | string | ✅ | — | — |  |
 
 ### Даты и места публикации
 
 | Поле | Тип | Nullable | Описание | Regex | PK |
 |------|-----|----------|----------|-------|-------|
-| `publication_year` | integer | ✅ | — | — |  |
-| `publication_date` | string | ✅ | — | `^\d{4}-\d{2}-\d{2}$` |  |
-| `creation_date` | string | ✅ | — | `^\d{4}-\d{2}-\d{2}$` |  |
+| `publication-year` | integer | ✅ | — | — |  |
+| `publication-date` | string | ✅ | — | `^\d{4}-\d{2}-\d{2}$` |  |
+| `creation-date` | string | ✅ | — | `^\d{4}-\d{2}-\d{2}$` |  |
 
 ### Цитирования и ссылки
 
 | Поле | Тип | Nullable | Описание | Regex | PK |
 |------|-----|----------|----------|-------|-------|
-| `citations_received` | integer | ✅ | — | — |  |
-| `citations_made` | integer | ✅ | — | — |  |
+| `citations-received` | integer | ✅ | — | — |  |
+| `citations-made` | integer | ✅ | — | — |  |
 
 ### Технические/устаревшие поля
 
 | Поле | Тип | Nullable | Описание | Regex | PK |
 |------|-----|----------|----------|-------|-------|
 | `language` | string | ✅ | — | — |  |
-| `lookup_method` | string | ✅ | Tracking field for record resolution strategy | — |  |
-| `original_id` | string | ✅ | — | — |  |
-| `_source` | string | ✅ | Fixed value: 'chembl' | — |  |
-| `src_id` | integer | ✅ | — | — |  |
-| `_dq_warn` | boolean | ✅ | DQ flag field; auto-set by validation pipeline | — |  |
-| `_dq_error` | boolean | ✅ | DQ flag field; auto-set by validation pipeline | — |  |
+| `lookup-method` | string | ✅ | Tracking field for record resolution strategy | — |  |
+| `original-id` | string | ✅ | — | — |  |
+| `-source` | string | ✅ | Fixed value: 'chembl' | — |  |
+| `src-id` | integer | ✅ | — | — |  |
+| `-dq-warn` | boolean | ✅ | DQ flag field; auto-set by validation pipeline | — |  |
+| `-dq-error` | boolean | ✅ | DQ flag field; auto-set by validation pipeline | — |  |
 
 ---
 
@@ -158,11 +158,11 @@
 |------|-----|----------|----------|-------|-------|
 | `pmid` | string | ❌ | Primary key for pubmed; | `^[1-9]\d*$ (positive integer)` | ⭐ |
 | `doi` | string | ✅ | — | `^10\.\d{4,9}/.+$` |  |
-| `pmc_id` | string | ✅ | — | `^PMC\d+$` |  |
-| `publication_type` | string | ✅ | — | — |  |
-| `is_oa` | boolean | ✅ | — | — |  |
-| `nlm_unique_id` | string | ✅ | — | — |  |
-| `publication_status` | string | ✅ | — | — |  |
+| `pmc-id` | string | ✅ | — | `^PMC\d+$` |  |
+| `publication-type` | string | ✅ | — | — |  |
+| `is-oa` | boolean | ✅ | — | — |  |
+| `nlm-unique-id` | string | ✅ | — | — |  |
+| `publication-status` | string | ✅ | — | — |  |
 
 ### Библиографическая информация
 
@@ -171,57 +171,57 @@
 | `title` | string | ✅ | — | — |  |
 | `abstract` | string | ✅ | — | — |  |
 | `journal` | string | ✅ | — | — |  |
-| `page_first` | string | ✅ | — | — |  |
-| `page_last` | string | ✅ | — | — |  |
-| `abstract_structured` | boolean | ✅ | — | — |  |
-| `journal_name_short` | string | ✅ | — | — |  |
-| `journal_iso_abbrev` | string | ✅ | — | — |  |
+| `page-first` | string | ✅ | — | — |  |
+| `page-last` | string | ✅ | — | — |  |
+| `abstract-structured` | boolean | ✅ | — | — |  |
+| `journal-name-short` | string | ✅ | — | — |  |
+| `journal-iso-abbrev` | string | ✅ | — | — |  |
 | `issn` | string | ✅ | — | `^\d{4}-\d{3}[\dX]$` |  |
-| `journal_issn_type` | string | ✅ | — | `^\d{4}-\d{3}[\dX]$` |  |
-| `page_range` | string | ✅ | — | — |  |
+| `journal-issn-type` | string | ✅ | — | `^\d{4}-\d{3}[\dX]$` |  |
+| `page-range` | string | ✅ | — | — |  |
 
 ### Авторы и аффилиации
 
 | Поле | Тип | Nullable | Описание | Regex | PK |
 |------|-----|----------|----------|-------|-------|
 | `authors` | string | ✅ | — | — |  |
-| `affiliation_list` | string | ✅ | — | — |  |
-| `affiliation_structured` | string | ✅ | — | — |  |
-| `author_count` | integer | ✅ | — | — |  |
-| `authors_with_affiliations` | string | ✅ | — | — |  |
+| `affiliation-list` | string | ✅ | — | — |  |
+| `affiliation-structured` | string | ✅ | — | — |  |
+| `author-count` | integer | ✅ | — | — |  |
+| `authors-with-affiliations` | string | ✅ | — | — |  |
 
 ### Даты и места публикации
 
 | Поле | Тип | Nullable | Описание | Regex | PK |
 |------|-----|----------|----------|-------|-------|
-| `publication_year` | integer | ✅ | — | — |  |
-| `publication_date` | string | ✅ | — | `^\d{4}-\d{2}-\d{2}$` |  |
+| `publication-year` | integer | ✅ | — | — |  |
+| `publication-date` | string | ✅ | — | `^\d{4}-\d{2}-\d{2}$` |  |
 | `country` | string | ✅ | — | — |  |
-| `pub_month` | integer | ✅ | — | — |  |
-| `pub_day` | integer | ✅ | — | — |  |
-| `date_completed` | date | ✅ | — | — |  |
-| `date_revised` | date | ✅ | — | — |  |
+| `pub-month` | integer | ✅ | — | — |  |
+| `pub-day` | integer | ✅ | — | — |  |
+| `date-completed` | date | ✅ | — | — |  |
+| `date-revised` | date | ✅ | — | — |  |
 
 ### Цитирования и ссылки
 
 | Поле | Тип | Nullable | Описание | Regex | PK |
 |------|-----|----------|----------|-------|-------|
-| `citations_received` | integer | ✅ | — | — |  |
-| `citations_made` | integer | ✅ | — | — |  |
-| `grant_count` | integer | ✅ | — | — |  |
+| `citations-received` | integer | ✅ | — | — |  |
+| `citations-made` | integer | ✅ | — | — |  |
+| `grant-count` | integer | ✅ | — | — |  |
 
 ### Технические/устаревшие поля
 
 | Поле | Тип | Nullable | Описание | Regex | PK |
 |------|-----|----------|----------|-------|-------|
 | `language` | string | ✅ | — | — |  |
-| `lookup_method` | string | ✅ | Tracking field for record resolution strategy | — |  |
-| `original_id` | string | ✅ | — | — |  |
-| `_source` | string | ✅ | Fixed value: 'pubmed' | — |  |
+| `lookup-method` | string | ✅ | Tracking field for record resolution strategy | — |  |
+| `original-id` | string | ✅ | — | — |  |
+| `-source` | string | ✅ | Fixed value: 'pubmed' | — |  |
 | `pii` | string | ✅ | — | — |  |
 | `mid` | string | ✅ | — | — |  |
-| `publisher_id` | string | ✅ | — | — |  |
-| `medline_pgn` | string | ✅ | — | — |  |
+| `publisher-id` | string | ✅ | — | — |  |
+| `medline-pgn` | string | ✅ | — | — |  |
 
 ---
 
@@ -235,10 +235,10 @@
 |------|-----|----------|----------|-------|-------|
 | `pmid` | string | ✅ | — | `^[1-9]\d*$ (positive integer)` |  |
 | `doi` | string | ❌ | Primary key for crossref; | `^10\.\d{4,9}/.+$` | ⭐ |
-| `pmc_id` | string | ✅ | — | `^PMC\d+$` |  |
-| `publication_type` | string | ✅ | — | — |  |
-| `is_oa` | boolean | ✅ | — | — |  |
-| `alternative_id` | JSON object | ✅ | — | — |  |
+| `pmc-id` | string | ✅ | — | `^PMC\d+$` |  |
+| `publication-type` | string | ✅ | — | — |  |
+| `is-oa` | boolean | ✅ | — | — |  |
+| `alternative-id` | JSON object | ✅ | — | — |  |
 
 ### Библиографическая информация
 
@@ -247,39 +247,39 @@
 | `title` | string | ✅ | — | — |  |
 | `abstract` | string | ✅ | — | — |  |
 | `journal` | string | ✅ | — | — |  |
-| `page_first` | string | ✅ | — | — |  |
-| `page_last` | string | ✅ | — | — |  |
+| `page-first` | string | ✅ | — | — |  |
+| `page-last` | string | ✅ | — | — |  |
 | `issn` | string | ✅ | — | `^\d{4}-\d{3}[\dX]$` |  |
-| `issn_list` | string | ✅ | — | `^\d{4}-\d{3}[\dX]$` |  |
+| `issn-list` | string | ✅ | — | `^\d{4}-\d{3}[\dX]$` |  |
 | `publisher` | string | ✅ | — | — |  |
-| `journal_name_short` | string | ✅ | — | — |  |
-| `issn_print` | string | ✅ | — | `^\d{4}-\d{3}[\dX]$` |  |
-| `issn_electronic` | string | ✅ | — | `^\d{4}-\d{3}[\dX]$` |  |
+| `journal-name-short` | string | ✅ | — | — |  |
+| `issn-print` | string | ✅ | — | `^\d{4}-\d{3}[\dX]$` |  |
+| `issn-electronic` | string | ✅ | — | `^\d{4}-\d{3}[\dX]$` |  |
 
 ### Авторы и аффилиации
 
 | Поле | Тип | Nullable | Описание | Regex | PK |
 |------|-----|----------|----------|-------|-------|
 | `authors` | string | ✅ | — | — |  |
-| `affiliation_list` | string | ✅ | — | — |  |
-| `author_orcid_list` | string | ✅ | — | `^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$` |  |
+| `affiliation-list` | string | ✅ | — | — |  |
+| `author-orcid-list` | string | ✅ | — | `^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$` |  |
 
 ### Даты и места публикации
 
 | Поле | Тип | Nullable | Описание | Regex | PK |
 |------|-----|----------|----------|-------|-------|
-| `publication_year` | integer | ✅ | — | — |  |
-| `publication_date` | string | ✅ | — | `^\d{4}-\d{2}-\d{2}$` |  |
-| `published_print` | string | ✅ | — | — |  |
-| `published_online` | string | ✅ | — | — |  |
+| `publication-year` | integer | ✅ | — | — |  |
+| `publication-date` | string | ✅ | — | `^\d{4}-\d{2}-\d{2}$` |  |
+| `published-print` | string | ✅ | — | — |  |
+| `published-online` | string | ✅ | — | — |  |
 | `published` | string | ✅ | — | — |  |
 
 ### Цитирования и ссылки
 
 | Поле | Тип | Nullable | Описание | Regex | PK |
 |------|-----|----------|----------|-------|-------|
-| `citations_received` | integer | ✅ | — | — |  |
-| `citations_made` | integer | ✅ | — | — |  |
+| `citations-received` | integer | ✅ | — | — |  |
+| `citations-made` | integer | ✅ | — | — |  |
 | `references` | string | ✅ | — | — |  |
 
 ### Технические/устаревшие поля
@@ -287,19 +287,19 @@
 | Поле | Тип | Nullable | Описание | Regex | PK |
 |------|-----|----------|----------|-------|-------|
 | `language` | string | ✅ | — | — |  |
-| `lookup_method` | string | ✅ | Tracking field for record resolution strategy | — |  |
-| `original_id` | string | ✅ | — | — |  |
-| `_source` | string | ✅ | Fixed value: 'crossref' | — |  |
-| `license_url` | string | ✅ | — | — |  |
-| `content_domain_domains` | JSON object | ✅ | — | — |  |
-| `content_domain_crossmark_restriction` | boolean | ✅ | — | — |  |
-| `author_details` | string | ✅ | — | — |  |
+| `lookup-method` | string | ✅ | Tracking field for record resolution strategy | — |  |
+| `original-id` | string | ✅ | — | — |  |
+| `-source` | string | ✅ | Fixed value: 'crossref' | — |  |
+| `license-url` | string | ✅ | — | — |  |
+| `content-domain-domains` | JSON object | ✅ | — | — |  |
+| `content-domain-crossmark-restriction` | boolean | ✅ | — | — |  |
+| `author-details` | string | ✅ | — | — |  |
 
 ---
 
 ## OpenAlex
 
-**Кол-во полей:** 39 | **Primary Key:** `openalex_id`
+**Кол-во полей:** 39 | **Primary Key:** `openalex-id`
 
 ### Идентификаторы и статусы
 
@@ -307,13 +307,13 @@
 |------|-----|----------|----------|-------|-------|
 | `pmid` | string | ✅ | — | `^[1-9]\d*$ (positive integer)` |  |
 | `doi` | string | ✅ | — | `^10\.\d{4,9}/.+$` |  |
-| `pmc_id` | string | ✅ | — | `^PMC\d+$` |  |
-| `publication_type` | string | ✅ | — | — |  |
-| `is_oa` | boolean | ✅ | — | — |  |
-| `openalex_id` | string | ❌ | Primary key for openalex; | `^W\d+$` | ⭐ |
-| `oa_status` | string | ✅ | — | — |  |
-| `is_retracted` | boolean | ✅ | — | — |  |
-| `mag_id` | string | ✅ | — | — |  |
+| `pmc-id` | string | ✅ | — | `^PMC\d+$` |  |
+| `publication-type` | string | ✅ | — | — |  |
+| `is-oa` | boolean | ✅ | — | — |  |
+| `openalex-id` | string | ❌ | Primary key for openalex; | `^W\d+$` | ⭐ |
+| `oa-status` | string | ✅ | — | — |  |
+| `is-retracted` | boolean | ✅ | — | — |  |
+| `mag-id` | string | ✅ | — | — |  |
 
 ### Библиографическая информация
 
@@ -322,8 +322,8 @@
 | `title` | string | ✅ | — | — |  |
 | `abstract` | string | ✅ | — | — |  |
 | `journal` | string | ✅ | — | — |  |
-| `page_first` | string | ✅ | — | — |  |
-| `page_last` | string | ✅ | — | — |  |
+| `page-first` | string | ✅ | — | — |  |
+| `page-last` | string | ✅ | — | — |  |
 | `issn` | string | ✅ | — | `^\d{4}-\d{3}[\dX]$` |  |
 | `publisher` | string | ✅ | — | — |  |
 | `volume` | string | ✅ | — | — |  |
@@ -334,26 +334,26 @@
 | Поле | Тип | Nullable | Описание | Regex | PK |
 |------|-----|----------|----------|-------|-------|
 | `authors` | string | ✅ | — | — |  |
-| `affiliation_list` | string | ✅ | — | — |  |
-| `author_orcids` | string | ✅ | — | `^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$` |  |
-| `author_openalex_ids` | string | ✅ | — | — |  |
-| `institution_ids` | string | ✅ | — | — |  |
-| `ror_ids` | string | ✅ | — | — |  |
+| `affiliation-list` | string | ✅ | — | — |  |
+| `author-orcids` | string | ✅ | — | `^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$` |  |
+| `author-openalex-ids` | string | ✅ | — | — |  |
+| `institution-ids` | string | ✅ | — | — |  |
+| `ror-ids` | string | ✅ | — | — |  |
 
 ### Даты и места публикации
 
 | Поле | Тип | Nullable | Описание | Regex | PK |
 |------|-----|----------|----------|-------|-------|
-| `publication_year` | integer | ✅ | — | — |  |
-| `publication_date` | string | ✅ | — | `^\d{4}-\d{2}-\d{2}$` |  |
-| `institution_country_codes` | string | ✅ | — | — |  |
+| `publication-year` | integer | ✅ | — | — |  |
+| `publication-date` | string | ✅ | — | `^\d{4}-\d{2}-\d{2}$` |  |
+| `institution-country-codes` | string | ✅ | — | — |  |
 
 ### Цитирования и ссылки
 
 | Поле | Тип | Nullable | Описание | Regex | PK |
 |------|-----|----------|----------|-------|-------|
-| `citations_received` | integer | ✅ | — | — |  |
-| `citations_made` | integer | ✅ | — | — |  |
+| `citations-received` | integer | ✅ | — | — |  |
+| `citations-made` | integer | ✅ | — | — |  |
 | `fwci` | float | ✅ | — | — |  |
 | `grants` | string | ✅ | — | — |  |
 
@@ -362,15 +362,15 @@
 | Поле | Тип | Nullable | Описание | Regex | PK |
 |------|-----|----------|----------|-------|-------|
 | `language` | string | ✅ | — | — |  |
-| `lookup_method` | string | ✅ | Tracking field for record resolution strategy | — |  |
-| `original_id` | string | ✅ | — | — |  |
-| `_source` | string | ✅ | Fixed value: 'openalex' | — |  |
+| `lookup-method` | string | ✅ | Tracking field for record resolution strategy | — |  |
+| `original-id` | string | ✅ | — | — |  |
+| `-source` | string | ✅ | Fixed value: 'openalex' | — |  |
 
 ---
 
 ## Semantic Scholar
 
-**Кол-во полей:** 35 | **Primary Key:** `paper_id`
+**Кол-во полей:** 35 | **Primary Key:** `paper-id`
 
 ### Идентификаторы и статусы
 
@@ -378,14 +378,14 @@
 |------|-----|----------|----------|-------|-------|
 | `pmid` | string | ✅ | — | `^[1-9]\d*$ (positive integer)` |  |
 | `doi` | string | ✅ | — | `^10\.\d{4,9}/.+$` |  |
-| `pmc_id` | string | ✅ | — | `^PMC\d+$` |  |
-| `publication_type` | string | ✅ | — | — |  |
-| `is_oa` | boolean | ✅ | — | — |  |
-| `paper_id` | string | ❌ | Primary key for semanticscholar; | `^[a-f0-9]{40}$` | ⭐ |
-| `dblp_id` | string | ✅ | — | — |  |
-| `corpus_id` | integer | ✅ | — | — |  |
-| `open_access_url` | string | ✅ | — | — |  |
-| `oa_status` | string | ✅ | — | — |  |
+| `pmc-id` | string | ✅ | — | `^PMC\d+$` |  |
+| `publication-type` | string | ✅ | — | — |  |
+| `is-oa` | boolean | ✅ | — | — |  |
+| `paper-id` | string | ❌ | Primary key for semanticscholar; | `^[a-f0-9]{40}$` | ⭐ |
+| `dblp-id` | string | ✅ | — | — |  |
+| `corpus-id` | integer | ✅ | — | — |  |
+| `open-access-url` | string | ✅ | — | — |  |
+| `oa-status` | string | ✅ | — | — |  |
 
 ### Библиографическая информация
 
@@ -394,45 +394,45 @@
 | `title` | string | ✅ | — | — |  |
 | `abstract` | string | ✅ | — | — |  |
 | `journal` | string | ✅ | — | — |  |
-| `page_first` | string | ✅ | — | — |  |
-| `page_last` | string | ✅ | — | — |  |
+| `page-first` | string | ✅ | — | — |  |
+| `page-last` | string | ✅ | — | — |  |
 | `volume` | string | ✅ | — | — |  |
-| `page_range` | string | ✅ | — | — |  |
+| `page-range` | string | ✅ | — | — |  |
 
 ### Авторы и аффилиации
 
 | Поле | Тип | Nullable | Описание | Regex | PK |
 |------|-----|----------|----------|-------|-------|
 | `authors` | string | ✅ | — | — |  |
-| `affiliation_list` | string | ✅ | — | — |  |
-| `author_s2_ids` | string | ✅ | — | — |  |
-| `author_orcids` | string | ✅ | — | `^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$` |  |
-| `author_h_indices` | string | ✅ | — | — |  |
+| `affiliation-list` | string | ✅ | — | — |  |
+| `author-s2-ids` | string | ✅ | — | — |  |
+| `author-orcids` | string | ✅ | — | `^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$` |  |
+| `author-h-indices` | string | ✅ | — | — |  |
 
 ### Даты и места публикации
 
 | Поле | Тип | Nullable | Описание | Regex | PK |
 |------|-----|----------|----------|-------|-------|
-| `publication_year` | integer | ✅ | — | — |  |
-| `publication_date` | string | ✅ | — | `^\d{4}-\d{2}-\d{2}$` |  |
+| `publication-year` | integer | ✅ | — | — |  |
+| `publication-date` | string | ✅ | — | `^\d{4}-\d{2}-\d{2}$` |  |
 
 ### Цитирования и ссылки
 
 | Поле | Тип | Nullable | Описание | Regex | PK |
 |------|-----|----------|----------|-------|-------|
-| `citations_received` | integer | ✅ | — | — |  |
-| `citations_made` | integer | ✅ | — | — |  |
-| `influential_citation_count` | integer | ✅ | — | — |  |
-| `citation_contexts` | string | ✅ | — | — |  |
+| `citations-received` | integer | ✅ | — | — |  |
+| `citations-made` | integer | ✅ | — | — |  |
+| `influential-citation-count` | integer | ✅ | — | — |  |
+| `citation-contexts` | string | ✅ | — | — |  |
 
 ### Технические/устаревшие поля
 
 | Поле | Тип | Nullable | Описание | Regex | PK |
 |------|-----|----------|----------|-------|-------|
 | `language` | string | ✅ | — | — |  |
-| `lookup_method` | string | ✅ | Tracking field for record resolution strategy | — |  |
-| `original_id` | string | ✅ | — | — |  |
-| `_source` | string | ✅ | Fixed value: 'semanticscholar' | — |  |
+| `lookup-method` | string | ✅ | Tracking field for record resolution strategy | — |  |
+| `original-id` | string | ✅ | — | — |  |
+| `-source` | string | ✅ | Fixed value: 'semanticscholar' | — |  |
 
 ---
 
@@ -468,10 +468,10 @@
 
 ## Связанная документация
 
-- **Validation Schema:** `docs/04-reference/schemas/publication_validation_schema_v3.xlsx`
+- **Validation Schema:** `docs/04-reference/schemas/publication-validation-schema-v3.xlsx`
 - **ADR-033:** Стратегия валидации публикаций (`docs/02-architecture/decisions/ADR-033-publication-validation-strategy.md`)
 - **Validation Guide:** `docs/03-guides/publication-validation-guide.md`
-- **Тесты:** `tests_generated/` (471 тест, 64% покрытие)
+- **Тесты:** `tests-generated/` (471 тест, 64% покрытие)
 
 ---
 

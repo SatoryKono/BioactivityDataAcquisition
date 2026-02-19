@@ -28,8 +28,8 @@
 
 **Связанные ADR:**
 - [ADR-002](../02-architecture/decisions/ADR-002-medallion-architecture.md) — Hexagonal Architecture (validation services в application layer)
-- [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md) — Medallion Architecture (Bronze → Silver → Gold)
-- [ADR-027](../02-architecture/decisions/ADR-027-dq-rules-externalization.md) — Silver Layer DQ Framework (`_dq_warn`, `_dq_error`)
+- [ADR-014](../../02-architecture/decisions/ADR-014-deterministic-writes.md) — Medallion Architecture (Bronze → Silver → Gold)
+- [ADR-027](../02-architecture/decisions/ADR-027-dq-rules-externalization.md) — Silver Layer DQ Framework (`-dq-warn`, `-dq-error`)
 
 ---
 
@@ -38,7 +38,7 @@
 | Документ | Описание | Охват |
 |----------|----------|-------|
 | **[Publication Fields Reference](publication-fields-reference.md)** | Полный справочник всех 191 полей с типами, regex, PK, категориями | 191 поле |
-| **[Validation Schema v3](schemas/publication_validation_schema_v3.xlsx)** | Структурированная таблица правил валидации (XLSX + CSV) | 191 правило × 5 уровней |
+| **[Validation Schema v3](schemas/publication-validation-schema-v3.xlsx)** | Структурированная таблица правил валидации (XLSX + CSV) | 191 правило × 5 уровней |
 | **[Glossary v2.5](../00-project/glossary.md)** | Ubiquitous Language: термины валидации, DQ-флаги, режимы | 12 новых терминов |
 
 ---
@@ -56,19 +56,19 @@
 
 | Документ | Описание | Покрытие |
 |----------|----------|----------|
-| **[Test Suite README](../../tests_generated/README.md)** | Описание сгенерированного test suite, матрица покрытия, инструкции по запуску | 471 тест (64%) |
-| **[Coverage Matrix CSV](../../tests_generated/test_coverage_matrix.csv)** | Детальная таблица покрытия по уровням валидации | 6 категорий тестов |
+| **[Test Suite README](../../tests-generated/README.md)** | Описание сгенерированного test suite, матрица покрытия, инструкции по запуску | 471 тест (64%) |
+| **[Coverage Matrix CSV](../../tests-generated/test-coverage-matrix.csv)** | Детальная таблица покрытия по уровням валидации | 6 категорий тестов |
 
 **Test Organization:**
 ```
-tests_generated/
+tests-generated/
 ├── conftest.py                     # 5 provider fixtures
 ├── unit/
 │   ├── domain/schemas/             # 404 base validation tests
 │   └── application/services/dq/    # 41 structural/logical/semantic tests
 ├── integration/validation/         # 16 external verification tests (mocked)
 ├── contracts/                      # 10 contract tests
-└── test_coverage_matrix.csv        # Coverage report
+└── test-coverage-matrix.csv        # Coverage report
 ```
 
 ---
@@ -100,17 +100,17 @@ open docs/03-guides/publication-validation-guide.md
 open docs/04-reference/publication-fields-reference.md
 
 # Или поискать в валидационной схеме
-grep "pmid" docs/04-reference/schemas/publication_validation_schema_v3.csv
+grep "pmid" docs/04-reference/schemas/publication-validation-schema-v3.csv
 ```
 
 **Пример записи:**
 ```
-field_name: pubmed.publication.pmid
-data_type: string
-is_nullable: non-nullable
-base_validation: regex: ^[1-9]\d*$ (positive integer)
-base_result: FAIL
-external_verification: PubMed/NCBI API
+field-name: pubmed.publication.pmid
+data-type: string
+is-nullable: non-nullable
+base-validation: regex: ^[1-9]\d*$ (positive integer)
+base-result: FAIL
+external-verification: PubMed/NCBI API
 ```
 
 ---
@@ -142,18 +142,18 @@ python -m bioetl.interfaces.cli.main run-pipeline \
 
 ```bash
 # Все тесты
-pytest tests_generated/ -v
+pytest tests-generated/ -v
 
 # По маркерам
-pytest tests_generated/ -m unit           # Unit tests only
-pytest tests_generated/ -m integration    # Integration tests only
-pytest tests_generated/ -m contracts      # Contract tests only
+pytest tests-generated/ -m unit           # Unit tests only
+pytest tests-generated/ -m integration    # Integration tests only
+pytest tests-generated/ -m contracts      # Contract tests only
 
 # По провайдеру
-pytest tests_generated/unit/domain/schemas/pubmed/ -v
+pytest tests-generated/unit/domain/schemas/pubmed/ -v
 
 # С coverage
-pytest tests_generated/ --cov=src/bioetl --cov-report=html
+pytest tests-generated/ --cov=src/bioetl --cov-report=html
 ```
 
 ---
@@ -165,11 +165,11 @@ pytest tests_generated/ --cov=src/bioetl --cov-report=html
 open docs/05-operations/runbooks/publication-validation-runbook.md
 
 # Проверить последние ошибки валидации
-journalctl -u bioetl-pipeline --since "1 hour ago" | grep "validation_failed"
+journalctl -u bioetl-pipeline --since "1 hour ago" | grep "validation-failed"
 
 # Топ провайдеров по fail rate
 cat /var/log/bioetl/pipeline.log | \
-  jq -r 'select(.event == "validation_failed") | "\(.provider) \(.validation_level)"' | \
+  jq -r 'select(.event == "validation-failed") | "\(.provider) \(.validation-level)"' | \
   sort | uniq -c | sort -rn | head -10
 ```
 
@@ -189,19 +189,19 @@ cat /var/log/bioetl/pipeline.log | \
    - Интегрировать в трансформер
 
 3. **Тестировать:**
-   - Запустить `pytest tests_generated/` — проверить существующие тесты
+   - Запустить `pytest tests-generated/` — проверить существующие тесты
    - Добавить provider-specific tests по примерам
 
 4. **Документировать:**
    - Обновить [Field Reference](publication-fields-reference.md) при добавлении полей
-   - Добавить правила в [Validation Schema](schemas/publication_validation_schema_v3.xlsx)
+   - Добавить правила в [Validation Schema](schemas/publication-validation-schema-v3.xlsx)
 
 ---
 
 ### DevOps / Support (Эксплуатация)
 
 1. **Настроить мониторинг:**
-   - Prometheus metrics: `bioetl_validation_passed_total`, `bioetl_validation_warned_total`, `bioetl_validation_failed_total`
+   - Prometheus metrics: `bioetl-validation-passed-total`, `bioetl-validation-warned-total`, `bioetl-validation-failed-total`
    - Grafana dashboard: DQ Pass Rate, Top Failing Rules, Validation Latency
 
 2. **При алерте:**
@@ -220,8 +220,8 @@ cat /var/log/bioetl/pipeline.log | \
 ### QA / Test Engineer (Тестирование)
 
 1. **Изучить тесты:**
-   - [Test Suite README](../../tests_generated/README.md)
-   - [Coverage Matrix](../../tests_generated/test_coverage_matrix.csv)
+   - [Test Suite README](../../tests-generated/README.md)
+   - [Coverage Matrix](../../tests-generated/test-coverage-matrix.csv)
 
 2. **Расширить покрытие:**
    - Base Validation: добавить edge cases для string fields (empty, whitespace, very long)
@@ -242,8 +242,8 @@ cat /var/log/bioetl/pipeline.log | \
 ### Добавление нового провайдера
 
 1. Определить поля в Pandera schema (`src/bioetl/domain/schemas/{provider}/publication.py`)
-2. Добавить правила в `publication_validation_schema_v3.xlsx`
-3. Сгенерировать тесты из XLSX (скрипт: `scratchpad/generate_tests.py`)
+2. Добавить правила в `publication-validation-schema-v3.xlsx`
+3. Сгенерировать тесты из XLSX (скрипт: `scratchpad/generate-tests.py`)
 4. Обновить [Field Reference](publication-fields-reference.md)
 5. Добавить провайдера в конфигурацию External Verification
 

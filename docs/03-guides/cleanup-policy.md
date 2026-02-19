@@ -14,10 +14,10 @@ This document defines deterministic cleanup rules and automation for removing ca
 
 ### 1.1. Python Artifacts
 
-- `**/__pycache__/`
-- `.pytest_cache/`
-- `.mypy_cache/`
-- `.ruff_cache/`
+- `**/--pycache--/`
+- `.pytest-cache/`
+- `.mypy-cache/`
+- `.ruff-cache/`
 - `**/*.pyc`, `**/*.pyo`, `**/*.pyd`
 
 ### 1.2. Coverage
@@ -37,20 +37,20 @@ This document defines deterministic cleanup rules and automation for removing ca
 - `**/*.log`
 - `**/*.tmp`
 - `**/*report*.txt`
-- `full_log.txt`
-- `final_report*.txt`
-- `project_rules_failures.txt`
+- `full-log.txt`
+- `final-report*.txt`
+- `project-rules-failures.txt`
 
 ### 1.5. IDE/OS
 
 - `.idea/workspace.xml`
-- `.DS_Store`
+- `.DS-Store`
 - `Thumbs.db`
-- `.ipynb_checkpoints/`
+- `.ipynb-checkpoints/`
 
 ### 1.6. JavaScript (if applicable)
 
-- `node_modules/`
+- `node-modules/`
 - `.next/`
 - `web/dist/`
 
@@ -83,7 +83,7 @@ This document defines deterministic cleanup rules and automation for removing ca
 | --------- | ----------------------------------------------------- |
 | Retention | 90 дней hot → Archive (local archive policy)          |
 | Format    | JSONL + zstd                                          |
-| Path      | `bronze/{format_version}/{provider}/{entity}/{date}/` |
+| Path      | `bronze/{format-version}/{provider}/{entity}/{date}/` |
 
 ### 3.2. Silver Layer
 
@@ -91,7 +91,7 @@ This document defines deterministic cleanup rules and automation for removing ca
 | --------- | ----------------------------------------------- |
 | Retention | Постоянно                                       |
 | Format    | Delta Lake                                      |
-| VACUUM    | **MUST** еженедельно, `retention_period=7 days` |
+| VACUUM    | **MUST** еженедельно, `retention-period=7 days` |
 | Forensic  | 7 дней (default), 30 дней для Critical tables   |
 
 ### 3.3. Gold Layer
@@ -124,7 +124,7 @@ All whitelist patterns **MUST** be in `.gitignore`.
 
 ### 4.2. Cleanup Script
 
-Location: `src/tools/cleanup_project.py`
+Location: `src/tools/cleanup-project.py`
 
 | Flag             | Behavior                                     |
 | ---------------- | -------------------------------------------- |
@@ -139,7 +139,7 @@ Logging: Structured JSON via `UnifiedLogger`.
 
 ```bash
 # Weekly VACUUM for Silver tables
-make vacuum-silver RETENTION_DAYS=7
+make vacuum-silver RETENTION-DAYS=7
 ```
 
 **VACUUM MUST** запускаться еженедельно для:
@@ -151,13 +151,13 @@ make vacuum-silver RETENTION_DAYS=7
 
 ```bash
 # Inspect quarantine errors
-make quarantine-inspect PIPELINE=chembl_activity
+make quarantine-inspect PIPELINE=chembl-activity
 
 # Replay corrected records
-make quarantine-replay PIPELINE=chembl_activity
+make quarantine-replay PIPELINE=chembl-activity
 
 # Purge old quarantine data
-make quarantine-purge PIPELINE=chembl_activity
+make quarantine-purge PIPELINE=chembl-activity
 ```
 
 ## 5. Verification (MUST)
@@ -168,7 +168,7 @@ make quarantine-purge PIPELINE=chembl_activity
 | ------------------------- | ----------------------------------------------------------- |
 | Tests pass                | `pytest -q` (without network)                               |
 | Golden tests green        | `pytest tests/golden/ -v`                                   |
-| Class inventory unchanged | Compare `tests/project_rules/class_inventory_baseline.json` |
+| Class inventory unchanged | Compare `tests/project-rules/class-inventory-baseline.json` |
 | Smoke run                 | One pipeline, identical artifacts                           |
 
 ### 5.2. Checksum Verification
@@ -185,13 +185,13 @@ make verify-checksums
 
 ```bash
 # Dry-run (default)
-python src/tools/cleanup_project.py
+python src/tools/cleanup-project.py
 
 # Apply with log archive
-python src/tools/cleanup_project.py --apply --archive-logs
+python src/tools/cleanup-project.py --apply --archive-logs
 
 # Full purge
-python src/tools/cleanup_project.py --apply --purge-logs
+python src/tools/cleanup-project.py --apply --purge-logs
 ```
 
 ### 6.2. Delta Lake Maintenance
@@ -211,10 +211,10 @@ make vacuum-table TABLE=silver/chembl/activity
 make quarantine-triage
 
 # Inspect specific pipeline
-make quarantine-inspect PIPELINE=chembl_activity
+make quarantine-inspect PIPELINE=chembl-activity
 
 # Replay after fix
-make quarantine-replay PIPELINE=chembl_activity BATCH_ID=...
+make quarantine-replay PIPELINE=chembl-activity BATCH-ID=...
 
 # Purge old records
 make quarantine-purge DAYS=30
@@ -227,7 +227,7 @@ make quarantine-purge DAYS=30
 `.pre-commit-config.yaml` **MUST** forbid:
 
 - `*.pyc`
-- `__pycache__`
+- `--pycache--`
 - `.env` files with secrets
 
 ### 7.2. CI Workflow
@@ -241,11 +241,11 @@ Root-level audit artifacts **MUST NOT** be committed.
 | Artifact           | Generator                                                      | Frequency              | Storage Policy                                                                               |
 | ------------------ | -------------------------------------------------------------- | ---------------------- | -------------------------------------------------------------------------------------------- |
 | `coverage.json`    | Local `pytest --cov ... --cov-report=json` or CI coverage jobs | On demand / per CI run | Keep local only; attach to CI artifacts if needed; never commit to repository root           |
-| `all_fixtures.txt` | Fixture inventory/debug scripts run by maintainers             | On demand              | Keep local only; if needed for review, attach to PR/CI artifacts, not git-tracked root files |
+| `all-fixtures.txt` | Fixture inventory/debug scripts run by maintainers             | On demand              | Keep local only; if needed for review, attach to PR/CI artifacts, not git-tracked root files |
 
 Enforcement:
 
-- `.gitignore` **MUST** include `/coverage.json` and `/all_fixtures.txt`.
+- `.gitignore` **MUST** include `/coverage.json` and `/all-fixtures.txt`.
 - CI **MUST** run a root-level allowlist check from `.github/root-allowlist.txt`.
 - Any intentional new root-level tracked file **MUST** be added to `.github/root-allowlist.txt` in the same PR with justification.
 
@@ -272,7 +272,7 @@ make cleanup-checkpoints
 make quarantine-reset
 
 # 4. Rebuild Silver (if needed)
-make full-rebuild PIPELINE=chembl_activity
+make full-rebuild PIPELINE=chembl-activity
 ```
 
 ### 8.2. Checkpoint Cleanup
@@ -281,10 +281,10 @@ Stale checkpoints **SHOULD** be cleaned after successful pipeline completion:
 
 ```python
 # After successful run
-async def cleanup_checkpoint(run_id: UUID) -> None:
-    checkpoint_path = f"data/output/checkpoints/{run_id}.json"
-    await s3.delete(checkpoint_path)
-    logger.info("Checkpoint deleted", run_id=str(run_id))
+async def cleanup-checkpoint(run-id: UUID) -> None:
+    checkpoint-path = f"data/output/checkpoints/{run-id}.json"
+    await s3.delete(checkpoint-path)
+    logger.info("Checkpoint deleted", run-id=str(run-id))
 ```
 
 ## 9. Environment-Specific Cleanup
@@ -295,7 +295,7 @@ async def cleanup_checkpoint(run_id: UUID) -> None:
 # Full cleanup for dev
 make clean-dev
 # Equivalent to:
-# python src/tools/cleanup_project.py --apply --purge-logs
+# python src/tools/cleanup-project.py --apply --purge-logs
 # docker-compose down -v
 ```
 

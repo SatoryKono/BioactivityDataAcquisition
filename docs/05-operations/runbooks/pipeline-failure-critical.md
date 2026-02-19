@@ -9,7 +9,7 @@ This runbook describes how to handle critical pipeline failures (P1 incidents).
 - Pipeline crashes with exit code != 0.
 - Logs contain `CRITICAL` level messages.
 - Alert "Pipeline Failed" fires.
-- `errors_total{type="critical"}` metric increments.
+- `errors-total{type="critical"}` metric increments.
 
 ## Common Causes
 

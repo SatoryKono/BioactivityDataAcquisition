@@ -21,9 +21,9 @@
 | Average module size | 117,926 / 539 | **~219 lines** | ~same |
 | TODO/FIXME/HACK | `grep -rE "(TODO\|FIXME\|XXX\|HACK)" src/` | **0** | — |
 | print() in production code | `grep -r "print(" src/bioetl --include="*.py"` | **0** | — |
-| Hardcoded secrets | `grep -rE "(api_key\|password\|secret)\s*=" src/` | **0** real violations (14 parameter names) | — |
+| Hardcoded secrets | `grep -rE "(api-key\|password\|secret)\s*=" src/` | **0** real violations (14 parameter names) | — |
 | Port/Protocol count | Protocols in `domain/ports/` | **38** | — |
-| `@runtime_checkable` count | decorators in `domain/ports/` | **38** (100%) | — |
+| `@runtime-checkable` count | decorators in `domain/ports/` | **38** (100%) | — |
 | ADR documents | `ls docs/02-architecture/decisions/` | **38** | ↑ from 34 |
 | VCR cassettes | `find tests/fixtures/vcr -type f` | **136** | — |
 | Unit test files | `find tests -name "*.py" -path "*/unit/*"` | **415** | ↑ from 408 |
@@ -34,8 +34,8 @@
 | Security test files | `find tests -name "*.py" -path "*/security/*"` | **4** | — |
 | Ruff formatting | `ruff format --check src/` | **566 files formatted** | Fixed |
 | Ruff linting | `ruff check src/` | **All checks passed** | — |
-| `run_id` occurrences | `grep -r "run_id" src/bioetl` | **335** across 50 files | ↑ from ~35 |
-| Health check adapters | files containing `health_check` in adapters | **17** | — |
+| `run-id` occurrences | `grep -r "run-id" src/bioetl` | **335** across 50 files | ↑ from ~35 |
+| Health check adapters | files containing `health-check` in adapters | **17** | — |
 | Quarantine classes | classes matching `*Quarantine*` | **11** | — |
 | Content hash / dedup | occurrences across codebase | **297** across 75 files | — |
 
@@ -65,7 +65,7 @@ All import boundary checks passed with **zero violations**:
 | Infrastructure → Interfaces | 0 violations |
 
 **Additional checks:**
-- `structlog` usage: Only in `infrastructure/observability/` (3 files) and `composition/bootstrap_logger.py` (1 file) — all allowed locations per RULES.md §4.3
+- `structlog` usage: Only in `infrastructure/observability/` (3 files) and `composition/bootstrap-logger.py` (1 file) — all allowed locations per RULES.md §4.3
 - No I/O in domain layer
 - No `Factory()` calls in application or domain layers
 - No `print()` statements anywhere in production code
@@ -85,10 +85,10 @@ All import boundary checks passed with **zero violations**:
 
 **38 Protocol-based ports** defined in `src/bioetl/domain/ports/` across 23 files:
 
-| Port | File | @runtime_checkable |
+| Port | File | @runtime-checkable |
 |------|------|-------------------|
-| `DataSourcePort` | `data_source.py` | Yes |
-| `FilterableDataSourcePort` | `data_source.py` | Yes |
+| `DataSourcePort` | `data-source.py` | Yes |
+| `FilterableDataSourcePort` | `data-source.py` | Yes |
 | `StoragePort` | `storage.py` | Yes |
 | `LockPort` | `locking.py` | Yes |
 | `LoggerPort` | `observability.py` | Yes |
@@ -100,37 +100,37 @@ All import boundary checks passed with **zero violations**:
 | `QuarantinePort` | `quarantine.py` | Yes |
 | `CheckpointPort` | `checkpoint.py` | Yes |
 | `PiiHasherPort` | `pii.py` | Yes |
-| `HealthCheckPort` | `health_check.py` | Yes |
-| `HealthStatePort` | `health_check.py` | Yes |
-| `HealthMonitorPort` | `health_check.py` | Yes |
+| `HealthCheckPort` | `health-check.py` | Yes |
+| `HealthStatePort` | `health-check.py` | Yes |
+| `HealthMonitorPort` | `health-check.py` | Yes |
 | `AuditPort` | `audit.py` | Yes |
 | `SilverValidatorPort` | `validation.py` | Yes |
 | `GoldValidatorPort` | `validation.py` | Yes |
 | `MetadataWriterPort` | `metadata.py` | Yes |
-| `MetadataCoordinatorPort` | `metadata_coordinator.py` | Yes |
+| `MetadataCoordinatorPort` | `metadata-coordinator.py` | Yes |
 | `MemoryMonitorPort` | `memory.py` | Yes |
 | `ShutdownPort` | `shutdown.py` | Yes |
-| `DeltaReaderPort` | `delta_reader.py` | Yes |
+| `DeltaReaderPort` | `delta-reader.py` | Yes |
 | `RunnablePort` | `runner.py` | Yes |
 | `RunnerFactoryPort` | `runner.py` | Yes |
 | `MetricsExtractorPort` | `runner.py` | Yes |
 | `IDMappingPort` | `idmapping.py` | Yes |
 | `JsonEncoderPort` | `serialization.py` | Yes |
 | `InputFilterPort` | `filtering.py` | Yes |
-| `DataNormalizationPort` | `data_normalization.py` | Yes |
-| `BronzeDQAnalyzerPort` | `dq_report.py` | Yes |
-| `SilverDQAnalyzerPort` | `dq_report.py` | Yes |
-| `GoldDQAnalyzerPort` | `dq_report.py` | Yes |
-| `DQReportWriterPort` | `dq_report.py` | Yes |
-| `BronzeDQConfigPort` | `dq_config.py` | Yes |
-| `SilverDQConfigPort` | `dq_config.py` | Yes |
-| `GoldDQConfigPort` | `dq_config.py` | Yes |
+| `DataNormalizationPort` | `data-normalization.py` | Yes |
+| `BronzeDQAnalyzerPort` | `dq-report.py` | Yes |
+| `SilverDQAnalyzerPort` | `dq-report.py` | Yes |
+| `GoldDQAnalyzerPort` | `dq-report.py` | Yes |
+| `DQReportWriterPort` | `dq-report.py` | Yes |
+| `BronzeDQConfigPort` | `dq-config.py` | Yes |
+| `SilverDQConfigPort` | `dq-config.py` | Yes |
+| `GoldDQConfigPort` | `dq-config.py` | Yes |
 
 **Key findings:**
-- 100% of ports use `@runtime_checkable` decorator (38/38)
+- 100% of ports use `@runtime-checkable` decorator (38/38)
 - All external dependencies abstracted through Protocol ports
 - Health check methods present across 17 adapter files
-- `HealthCheckMixin` in `infrastructure/adapters/health_check_mixin.py` ensures consistency
+- `HealthCheckMixin` in `infrastructure/adapters/health-check-mixin.py` ensures consistency
 - Ports imported via facade `bioetl.domain.ports` (verified by architecture tests)
 
 ---
@@ -140,25 +140,25 @@ All import boundary checks passed with **zero violations**:
 **Score: 10/10**
 
 **Bronze layer:**
-- JSONL+zstd format implemented in `infrastructure/storage/bronze_writer.py` (802 LOC)
+- JSONL+zstd format implemented in `infrastructure/storage/bronze-writer.py` (802 LOC)
 - Append-only, immutable design
 - Path convention: `bronze/{provider}/{entity}/{date}/`
 
 **Silver layer:**
 - Delta Lake fully implemented via `deltalake` library
-- 5 storage files reference `DeltaTable`/`write_deltalake`: `silver_writer.py`, `gold_writer.py`, `base_delta_writer.py`, `delta_reader.py`, `retention_manager.py`
-- **Zero** `to_parquet`/`write_parquet` calls in storage (ARCH-006 compliant)
+- 5 storage files reference `DeltaTable`/`write-deltalake`: `silver-writer.py`, `gold-writer.py`, `base-delta-writer.py`, `delta-reader.py`, `retention-manager.py`
+- **Zero** `to-parquet`/`write-parquet` calls in storage (ARCH-006 compliant)
 - `SilverWriteMode` enum: MERGE, APPEND, DELETE
 - Merge operations for upsert by primary keys
 
 **Gold layer:**
-- Delta Lake used in `infrastructure/storage/gold_writer.py` (956 LOC)
+- Delta Lake used in `infrastructure/storage/gold-writer.py` (956 LOC)
 - Gold contracts defined in `domain/contracts/gold/`: chembl.py (14 schemas), publications.py (4), composite.py (5), uniprot.py (2), pubchem.py (1)
 - Strict validation via Pandera `DataFrameModel` schemas (31 schema definitions across 10 files)
 - `GoldWriteMode` enum: APPEND, SCD2, OVERWRITE
 
 **Retention and VACUUM:**
-- `infrastructure/storage/retention_manager.py` implements Delta Lake retention with VACUUM
+- `infrastructure/storage/retention-manager.py` implements Delta Lake retention with VACUUM
 - Time-travel support via `DeltaTable` version/timestamp loading
 
 **Medallion policy** (`domain/medallion.py`):
@@ -179,22 +179,22 @@ All import boundary checks passed with **zero violations**:
 | **Recoverable** | `RecoverableError` | `NetworkError`, `TimeoutError`, `RateLimitError`, `CircuitBreakerOpenError`, `RetryExhaustedError`, `ApiError`, `ExternalServiceError`, `ServiceUnavailableError`, `RateLimitExceededError`, `ServiceAuthenticationError`, `DataValidationError`, `StorageError` (and subtypes) |
 | **Data Quality** | `DataQualityError` | `ValidationError`, `SchemaViolationError`, `MissingRequiredFieldError`, `InvalidDataFormatError`, `DataQualityThresholdError` |
 
-**Error classifier**: `domain/error_classifier.py` classifies errors for appropriate handling.
+**Error classifier**: `domain/error-classifier.py` classifies errors for appropriate handling.
 
 **Circuit breaker:**
 - `CircuitBreakerPort` protocol in `domain/ports/resilience.py:68`
-- Implementation in `infrastructure/adapters/http/circuit_breaker.py:44`
-- Decorator in `infrastructure/adapters/decorators/circuit_breaker.py:47`
+- Implementation in `infrastructure/adapters/http/circuit-breaker.py:44`
+- Decorator in `infrastructure/adapters/decorators/circuit-breaker.py:47`
 - Config: `CircuitBreakerConfig` in both domain and infrastructure schemas
-- State enum: `CircuitBreakerState` (CLOSED, HALF_OPEN, OPEN) in `domain/types.py:160`
+- State enum: `CircuitBreakerState` (CLOSED, HALF-OPEN, OPEN) in `domain/types.py:160`
 
 **Retry pattern:**
 - Decorator in `infrastructure/adapters/decorators/retry.py`
-- Error handling mixin in `infrastructure/adapters/error_handling.py`
+- Error handling mixin in `infrastructure/adapters/error-handling.py`
 - Deterministic jitter support (ADR-014)
 
 **Metrics integration:**
-- Prometheus metrics in `infrastructure/observability/prometheus_metrics.py`
+- Prometheus metrics in `infrastructure/observability/prometheus-metrics.py`
 - Observable circuit breaker state changes
 
 ---
@@ -204,20 +204,20 @@ All import boundary checks passed with **zero violations**:
 **Score: 9/10**
 
 **Lock implementation:**
-- `LockPort` protocol in `domain/ports/locking.py:16` with full contract: `acquire()`, `release()`, `heartbeat()`, `validate_fencing_token()`
-- `MemoryLock` in `infrastructure/locking/memory_lock.py:20` (sufficient per ADR-010: local-only deployment)
-- `LockManager` in `application/core/lock_manager.py:18` orchestrates full lifecycle
-- `LockService` in `application/services/lock_service.py:35`
+- `LockPort` protocol in `domain/ports/locking.py:16` with full contract: `acquire()`, `release()`, `heartbeat()`, `validate-fencing-token()`
+- `MemoryLock` in `infrastructure/locking/memory-lock.py:20` (sufficient per ADR-010: local-only deployment)
+- `LockManager` in `application/core/lock-manager.py:18` orchestrates full lifecycle
+- `LockService` in `application/services/lock-service.py:35`
 
 **Heartbeat:**
 - Background async heartbeat support
 - Configurable interval (default 30s, range 5-60s per RULES.md §3.3)
-- Lock TTL: `heartbeat_interval * 3` = 90s default
+- Lock TTL: `heartbeat-interval * 3` = 90s default
 
 **Fencing token:**
-- `LockContext` dataclass in `domain/locking.py:68` with fencing_token field
+- `LockContext` dataclass in `domain/locking.py:68` with fencing-token field
 - `LockContextHolder` in `domain/locking.py:153` for thread-safe token management
-- `validate_fencing_token()` on both port and implementation
+- `validate-fencing-token()` on both port and implementation
 
 **Configuration:**
 - `LockConfig` in `application/core/config.py:41`
@@ -234,7 +234,7 @@ All import boundary checks passed with **zero violations**:
 
 **Pandera schemas:**
 - 31 `DataFrameModel` schema definitions across 10 files
-- Silver schemas in `domain/schemas/` for all entity types: ChEMBL (activity, assay, cell_line, compound_record, molecule, publication, target, etc.), PubChem, PubMed, UniProt (annotations, features, xrefs), Crossref, OpenAlex, Semantic Scholar
+- Silver schemas in `domain/schemas/` for all entity types: ChEMBL (activity, assay, cell-line, compound-record, molecule, publication, target, etc.), PubChem, PubMed, UniProt (annotations, features, xrefs), Crossref, OpenAlex, Semantic Scholar
 - Gold contracts in `domain/contracts/gold/`: chembl (14 schemas), publications (4), composite (5), uniprot (2), pubchem (1)
 - Base schema with common validation in `domain/schemas/base.py`
 - Validators in `domain/schemas/validators.py`
@@ -242,26 +242,26 @@ All import boundary checks passed with **zero violations**:
 
 **Quarantine mechanism (11 classes):**
 - `QuarantinePort` protocol in `domain/ports/quarantine.py:17`
-- `QuarantineEntry` aggregate in `domain/aggregates/quarantine_entry.py:109`
-- `QuarantineStatus` enum: NEW, UNDER_REVIEW, IGNORED, REPROCESSED, EXPIRED
-- `QuarantineManager` in `application/core/quarantine_manager.py:15`
-- `QuarantineService` in `application/services/quarantine_service.py:43`
+- `QuarantineEntry` aggregate in `domain/aggregates/quarantine-entry.py:109`
+- `QuarantineStatus` enum: NEW, UNDER-REVIEW, IGNORED, REPROCESSED, EXPIRED
+- `QuarantineManager` in `application/core/quarantine-manager.py:15`
+- `QuarantineService` in `application/services/quarantine-service.py:43`
 - `UnifiedQuarantine` storage in `infrastructure/quarantine/unified.py:39` using Delta Lake
 - Domain events: `RecordQuarantined`, `QuarantineEntryCreated`, `QuarantineEntryResolved`
 
 **DQ monitoring:**
 - `DQMonitorPort` protocol for metrics
-- DQ report service in `application/services/dq_report_service.py`
-- DQ metrics calculator in `domain/services/dq_metrics_calculator.py`
+- DQ report service in `application/services/dq-report-service.py`
+- DQ metrics calculator in `domain/services/dq-metrics-calculator.py`
 - Silver/Gold DQ analyzers: `BronzeDQAnalyzerPort`, `SilverDQAnalyzerPort`, `GoldDQAnalyzerPort`
 - `DataQualityThresholdError` for threshold enforcement (5%/20%)
 
 **Content hash / deduplication:**
 - 297 occurrences across 75 files
-- Identity service in `domain/services/identity_service.py` (16 content_hash references)
+- Identity service in `domain/services/identity-service.py` (16 content-hash references)
 - Deduplication logic in `application/composite/deduplication.py` (10 references)
 - Content hash in entities via `domain/entities/base.py`
-- Canonical JSON serialization with `sort_keys=True`
+- Canonical JSON serialization with `sort-keys=True`
 
 ---
 
@@ -271,14 +271,14 @@ All import boundary checks passed with **zero violations**:
 
 **Structured logging:**
 - `LoggerPort` protocol in `domain/ports/observability.py:146`
-- `UnifiedLogger` implementation in `infrastructure/observability/unified_logger.py:51`
+- `UnifiedLogger` implementation in `infrastructure/observability/unified-logger.py:51`
 - `structlog` imported **only** in allowed locations:
-  - `infrastructure/observability/unified_logger.py`
-  - `infrastructure/observability/logging_config.py`
+  - `infrastructure/observability/unified-logger.py`
+  - `infrastructure/observability/logging-config.py`
   - `infrastructure/observability/logging.py`
-  - `composition/bootstrap_logger.py`
+  - `composition/bootstrap-logger.py`
 - Zero `print()` statements in production code
-- `run_id` tracked across **335 occurrences in 50 files** (improvement from ~35/5 in previous audit)
+- `run-id` tracked across **335 occurrences in 50 files** (improvement from ~35/5 in previous audit)
 
 **Observability ports:**
 - `TracingPort` for distributed tracing (`domain/ports/observability.py:27`)
@@ -287,7 +287,7 @@ All import boundary checks passed with **zero violations**:
 - All ports have NoOp implementations for graceful degradation
 
 **Prometheus metrics:**
-- Implementation in `infrastructure/observability/prometheus_metrics.py`
+- Implementation in `infrastructure/observability/prometheus-metrics.py`
 - Metrics server in `infrastructure/observability/server.py`
 - Metrics definitions in `infrastructure/observability/metrics.py`
 - Pipeline metrics, DQ metrics, circuit breaker metrics
@@ -326,7 +326,7 @@ All import boundary checks passed with **zero violations**:
 
 **Improvement from previous audit:**
 - Ruff formatting drift fixed (was causing 1 test failure)
-- Unused `type: ignore` in `memory_monitor.py` resolved
+- Unused `type: ignore` in `memory-monitor.py` resolved
 - 20 additional test files across architecture, contract, integration, and unit suites
 
 ---
@@ -336,18 +336,18 @@ All import boundary checks passed with **zero violations**:
 **Score: 10/10**
 
 **Secrets management:**
-- All secrets use `pydantic.SecretStr` (5 occurrences in `infrastructure/config/_base.py`)
-- `.env` files in `.gitignore` (`*.env`, `!.env.example`, `API_KEY.env`)
-- `get_secret_value()` for runtime access
+- All secrets use `pydantic.SecretStr` (5 occurrences in `infrastructure/config/-base.py`)
+- `.env` files in `.gitignore` (`*.env`, `!.env.example`, `API-KEY.env`)
+- `get-secret-value()` for runtime access
 - `detect-secrets` in dev dependencies for pre-commit scanning
 - No hardcoded credential values in codebase
 
 **PII hashing:**
 - `PiiHasherPort` protocol in `domain/ports/pii.py:16`
-- `Sha256PiiHasher` implementation in `infrastructure/security/pii_hasher.py:104`
-- Salt rotation support: `current_salt` + `next_salt` + `rotation_active`
+- `Sha256PiiHasher` implementation in `infrastructure/security/pii-hasher.py:104`
+- Salt rotation support: `current-salt` + `next-salt` + `rotation-active`
 - Salt minimum length enforcement: 32 characters
-- `SaltConfig.from_settings()` and `SaltConfig.from_env()` factory methods
+- `SaltConfig.from-settings()` and `SaltConfig.from-env()` factory methods
 - Unicode normalization before hashing
 - `NoOpPiiHasher` for graceful degradation
 
@@ -385,7 +385,7 @@ All import boundary checks passed with **zero violations**:
 
 **Gold contracts:** Data contracts defined in `domain/contracts/gold/` for all entity types (26 Pandera schema definitions).
 
-**`run_id` binding:** Now pervasive — 335 occurrences across 50 files (major improvement from 35/5 in previous audit, resolving the -1 gap from that audit).
+**`run-id` binding:** Now pervasive — 335 occurrences across 50 files (major improvement from 35/5 in previous audit, resolving the -1 gap from that audit).
 
 ---
 
@@ -396,12 +396,12 @@ All import boundary checks passed with **zero violations**:
 | # | Category | Weight | Score | Weighted | Key Findings |
 |---|----------|--------|-------|----------|--------------|
 | 1 | Layered Architecture | 15% | 10 | 1.50 | Zero import violations, enforced by 57 architecture tests + import-linter |
-| 2 | Contracts and Ports | 12% | 10 | 1.20 | 38 protocols, 100% @runtime_checkable, 17 adapters with health_check |
+| 2 | Contracts and Ports | 12% | 10 | 1.20 | 38 protocols, 100% @runtime-checkable, 17 adapters with health-check |
 | 3 | Medallion Architecture | 12% | 10 | 1.20 | Full Bronze/Silver/Gold with Delta Lake, zero raw Parquet |
 | 4 | Error Handling & CB | 10% | 10 | 1.00 | Three-tier classification (43+ exception classes), CB + retry + metrics |
 | 5 | Locking & Concurrency | 10% | 9 | 0.90 | Full lifecycle (heartbeat + fencing), MemoryLock only (ADR-010) |
 | 6 | Validation & DQ | 10% | 10 | 1.00 | 31 Pandera schemas, unified quarantine, 297 content hash occurrences |
-| 7 | Logging & Observability | 8% | 10 | 0.80 | UnifiedLogger, Prometheus, OpenTelemetry, 335 run_id occurrences |
+| 7 | Logging & Observability | 8% | 10 | 0.80 | UnifiedLogger, Prometheus, OpenTelemetry, 335 run-id occurrences |
 | 8 | Testing | 8% | 10 | 0.80 | 90.21% coverage (12,186 tests), 571 test files, ruff + mypy clean |
 | 9 | Security & Secrets | 8% | 10 | 0.80 | SecretStr, PII hashing with salt rotation, bandit + detect-secrets |
 | 10 | Documentation | 7% | 10 | 0.70 | 38 ADRs, active CHANGELOG, Gold contracts, RULES.md v5.20 |
@@ -417,7 +417,7 @@ The BioETL v6.0.0 codebase demonstrates exceptional architectural discipline wit
 - **ruff format/check**: All 566 files pass (was failing)
 - **ADRs**: 38 documents (up from 34)
 - **Test files**: 571 (up from 551)
-- **run_id**: 335 occurrences across 50 files (up from ~35 across 5 files)
+- **run-id**: 335 occurrences across 50 files (up from ~35 across 5 files)
 - **Classes**: 932 (up from 911, controlled growth)
 
 The only remaining gap is the single-implementation lock mechanism (MemoryLock), which is architecturally sound per ADR-010's explicit rejection of distributed deployment.
@@ -434,7 +434,7 @@ The only remaining gap is the single-implementation lock mechanism (MemoryLock),
 
 **Problem**: Only `MemoryLock` exists. While explicitly sufficient per ADR-010 (local-only deployment, REJECTED status for Redis), a distributed implementation would be needed if deployment requirements change.
 **Solution**: Implement a `RedisLock` or `FileLock` class implementing `LockPort` protocol.
-**Files**: New `infrastructure/locking/redis_lock.py` or `file_lock.py`
+**Files**: New `infrastructure/locking/redis-lock.py` or `file-lock.py`
 **Risks**: Additional dependency, network failure handling
 **Criterion**: New lock implementation passes same test suite as `MemoryLock`
 **Effort**: M (days)
@@ -450,7 +450,7 @@ The only remaining gap is the single-implementation lock mechanism (MemoryLock),
 All P1 and P2 items from the v5.14.0 audit have been resolved:
 - ✅ Ruff formatting drift fixed
 - ✅ Unused `type: ignore` comment removed (mypy now 0 errors)
-- ✅ `run_id` binding dramatically expanded (335 occurrences vs ~35)
+- ✅ `run-id` binding dramatically expanded (335 occurrences vs ~35)
 - ✅ 4 new ADRs added (ADR-029 through ADR-032)
 - ✅ 20 additional test files
 
@@ -534,6 +534,6 @@ No other refactoring is recommended at this time. The codebase is production-rea
 | Classes | 911 | 932 | +21 |
 | Python files | 559 | 566 | +7 |
 | LOC | 116,062 | 117,926 | +1,864 |
-| `run_id` occurrences | ~35 / 5 files | 335 / 50 files | ~10× |
+| `run-id` occurrences | ~35 / 5 files | 335 / 50 files | ~10× |
 | Testing score | 9/10 | 10/10 | +1 |
 | Documentation score | 9/10 | 10/10 | +1 |

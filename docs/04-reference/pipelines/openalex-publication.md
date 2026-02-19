@@ -8,7 +8,7 @@ OpenAlex Works pipeline for scholarly publication metadata with DOI resolution a
 
 ## Overview
 
-The `openalex_publication` pipeline ingests scholarly work records from the [OpenAlex Works API](https://docs.openalex.org/api-entities/works), transforming them through Bronze (raw JSON), Silver (normalized), and Gold (analytics-ready) layers.
+The `openalex-publication` pipeline ingests scholarly work records from the [OpenAlex Works API](https://docs.openalex.org/api-entities/works), transforming them through Bronze (raw JSON), Silver (normalized), and Gold (analytics-ready) layers.
 
 **Key Features:**
 - Batch DOI resolution with automatic title-based fallback
@@ -30,12 +30,12 @@ The `openalex_publication` pipeline ingests scholarly work records from the [Ope
 
 | Property | Value |
 |----------|-------|
-| **Pipeline Name** | `openalex_publication` |
+| **Pipeline Name** | `openalex-publication` |
 | **Version** | 1.2.0 |
 | **Provider** | `openalex` |
 | **Entity Type** | `publication` |
-| **Primary Key** | `openalex_id` |
-| **Loading Strategy** | `full_scan_only` (ADR-030, ADR-031) |
+| **Primary Key** | `openalex-id` |
+| **Loading Strategy** | `full-scan-only` (ADR-030, ADR-031) |
 | **Batch Size** | 50 records |
 
 ### Storage Paths
@@ -66,11 +66,11 @@ The pipeline supports multiple identifier resolution strategies:
 
 | Method | Endpoint Pattern | Priority |
 |--------|------------------|----------|
-| **Direct** | `/works/{openalex_id}` | 1 (highest) |
+| **Direct** | `/works/{openalex-id}` | 1 (highest) |
 | **DOI** | `/works/doi:{doi}` | 2 |
 | **Title Fallback** | `/works?filter=title.search:{title}` | 3 (lowest) |
 
-When DOI resolution fails, the pipeline automatically falls back to title-based search. The resolution method is tracked in `_lookup_method` for data quality auditing.
+When DOI resolution fails, the pipeline automatically falls back to title-based search. The resolution method is tracked in `-lookup-method` for data quality auditing.
 
 ### API Response Structure
 
@@ -79,11 +79,11 @@ When DOI resolution fails, the pipeline automatically falls back to title-based 
   "id": "https://openalex.org/W2148763428",
   "doi": "https://doi.org/10.1038/nature12373",
   "title": "Example Publication Title",
-  "abstract_inverted_index": {"the": [0, 5], "protein": [1], ...},
+  "abstract-inverted-index": {"the": [0, 5], "protein": [1], ...},
   "authorships": [...],
-  "primary_location": {"source": {...}},
-  "open_access": {"is_oa": true, "oa_status": "gold"},
-  "cited_by_count": 150,
+  "primary-location": {"source": {...}},
+  "open-access": {"is-oa": true, "oa-status": "gold"},
+  "cited-by-count": 150,
   ...
 }
 ```
@@ -98,27 +98,27 @@ When DOI resolution fails, the pipeline automatically falls back to title-based 
 
 | Silver Field | Type | Source | Description |
 |--------------|------|--------|-------------|
-| `entity_id` | string | Computed | UUID hash of business data |
-| `content_hash` | string | Computed | SHA-256 of normalized content |
-| `_run_id` | string | Context | Pipeline execution ID |
-| `_run_type` | string | Context | "incremental" or "full_scan" |
-| `_source_batch_id` | string | Adapter | Batch identifier |
-| `_source` | string | Fixed | Always "openalex" |
-| `_ingestion_ts` | string | Context | ISO 8601 timestamp |
-| `_index` | int64 | Processor | Record index within batch |
+| `entity-id` | string | Computed | UUID hash of business data |
+| `content-hash` | string | Computed | SHA-256 of normalized content |
+| `-run-id` | string | Context | Pipeline execution ID |
+| `-run-type` | string | Context | "incremental" or "full-scan" |
+| `-source-batch-id` | string | Adapter | Batch identifier |
+| `-source` | string | Fixed | Always "openalex" |
+| `-ingestion-ts` | string | Context | ISO 8601 timestamp |
+| `-index` | int64 | Processor | Record index within batch |
 
 #### Lookup Metadata
 
 | Silver Field | Type | Source | Values |
 |--------------|------|--------|--------|
-| `_lookup_method` | string | Adapter | "direct" \| "doi" \| "title_fallback" \| "unknown" |
-| `_original_id` | string | Adapter | Original identifier if fallback used |
+| `-lookup-method` | string | Adapter | "direct" \| "doi" \| "title-fallback" \| "unknown" |
+| `-original-id` | string | Adapter | Original identifier if fallback used |
 
 #### Primary Identifier
 
 | API Field | Silver Field | Type | Extraction |
 |-----------|--------------|------|------------|
-| `id` | `openalex_id` | string | URL to ID extraction |
+| `id` | `openalex-id` | string | URL to ID extraction |
 
 **Extraction Logic:**
 ```
@@ -131,8 +131,8 @@ When DOI resolution fails, the pipeline automatically falls back to title-based 
 |-----------|--------------|------|------------|
 | `doi` | `doi` | string | URL normalization via `DOI` Value Object |
 | `ids.pmid` | `pmid` | string | URL extraction (last path segment) |
-| `ids.pmcid` | `pmc_id` | string | URL extraction |
-| `ids.mag` | `mag_id` | string | Integer/string to string coercion |
+| `ids.pmcid` | `pmc-id` | string | URL extraction |
+| `ids.mag` | `mag-id` | string | Integer/string to string coercion |
 
 **External ID URL Patterns:**
 - PMID: `https://pubmed.ncbi.nlm.nih.gov/12345678` → `"12345678"`
@@ -143,28 +143,28 @@ When DOI resolution fails, the pipeline automatically falls back to title-based 
 | API Field | Silver Field | Type | Notes |
 |-----------|--------------|------|-------|
 | `title` | `title` | string | Publication title |
-| `abstract_inverted_index` | `abstract` | string | Reconstructed + HTML stripped |
+| `abstract-inverted-index` | `abstract` | string | Reconstructed + HTML stripped |
 | `type` | `type` | string | Raw OpenAlex type |
-| `type` | `doc_type` | string | Mapped to unified type |
+| `type` | `doc-type` | string | Mapped to unified type |
 | `language` | `language` | string | ISO 639 code |
-| `is_retracted` | `is_retracted` | bool | Default: False |
+| `is-retracted` | `is-retracted` | bool | Default: False |
 
 #### Authors & Affiliations
 
 | API Field | Silver Field | Type | Notes |
 |-----------|--------------|------|-------|
-| `authorships[].author.display_name` | `authors` | string (JSON) | **PII hashed** |
-| `authorships[].institutions[].display_name` | `affiliations` | string (JSON) | Sorted, deduplicated |
-| `authorships[].institutions[].id` | `institution_ids` | list[string] | OpenAlex institution IDs |
-| `authorships[].institutions[].country_code` | `institution_country_codes` | list[string] | ISO 2-letter codes |
+| `authorships[].author.display-name` | `authors` | string (JSON) | **PII hashed** |
+| `authorships[].institutions[].display-name` | `affiliations` | string (JSON) | Sorted, deduplicated |
+| `authorships[].institutions[].id` | `institution-ids` | list[string] | OpenAlex institution IDs |
+| `authorships[].institutions[].country-code` | `institution-country-codes` | list[string] | ISO 2-letter codes |
 
 #### Journal & Venue
 
 | API Field | Silver Field | Type |
 |-----------|--------------|------|
-| `primary_location.source.display_name` | `journal` | string |
-| `primary_location.source.issn_l` | `issn` | string |
-| `primary_location.source.host_organization_name` | `publisher` | string |
+| `primary-location.source.display-name` | `journal` | string |
+| `primary-location.source.issn-l` | `issn` | string |
+| `primary-location.source.host-organization-name` | `publisher` | string |
 
 #### Bibliographic Information
 
@@ -172,48 +172,48 @@ When DOI resolution fails, the pipeline automatically falls back to title-based 
 |-----------|--------------|------|
 | `biblio.volume` | `volume` | string |
 | `biblio.issue` | `issue` | string |
-| `biblio.first_page` | `first_page` | string |
-| `biblio.last_page` | `last_page` | string |
+| `biblio.first-page` | `first-page` | string |
+| `biblio.last-page` | `last-page` | string |
 
 #### Dates
 
 | API Field | Silver Field | Type | Validation |
 |-----------|--------------|------|------------|
-| `publication_year` | `year` | int64 | 1500-2100 range |
-| `publication_date` | `publication_date` | string | ISO 8601 normalized |
+| `publication-year` | `year` | int64 | 1500-2100 range |
+| `publication-date` | `publication-date` | string | ISO 8601 normalized |
 
 #### Open Access
 
 | API Field | Silver Field | Type | Values |
 |-----------|--------------|------|--------|
-| `open_access.is_oa` | `is_oa` | bool | true/false/null |
-| `open_access.oa_status` | `oa_status` | string | gold/green/hybrid/bronze/closed |
+| `open-access.is-oa` | `is-oa` | bool | true/false/null |
+| `open-access.oa-status` | `oa-status` | string | gold/green/hybrid/bronze/closed |
 
 #### Classification
 
 | API Field | Silver Field | Type | Notes |
 |-----------|--------------|------|-------|
 | `topics[0..9]` | `topics` | list[dict] | Hierarchical (new format) |
-| `primary_topic` | `primary_topic` | dict | Most relevant topic |
+| `primary-topic` | `primary-topic` | dict | Most relevant topic |
 | `concepts[0..9]` | `concepts` | list[string] | **DEPRECATED** |
-| `mesh[].descriptor_name` | `mesh_terms` | list[string] | MeSH terms |
-| `keywords[].display_name` | `keywords` | list[string] | Author keywords |
+| `mesh[].descriptor-name` | `mesh-terms` | list[string] | MeSH terms |
+| `keywords[].display-name` | `keywords` | list[string] | Author keywords |
 | `grants[]` | `grants` | list[dict] | Funding information |
 
 #### Metrics
 
 | API Field | Silver Field | Type | Notes |
 |-----------|--------------|------|-------|
-| `cited_by_count` | `citation_count` | int64 | Unified field name |
-| `referenced_works_count` | `referenced_works_count` | int64 | Reference count |
+| `cited-by-count` | `citation-count` | int64 | Unified field name |
+| `referenced-works-count` | `referenced-works-count` | int64 | Reference count |
 | `fwci` | `fwci` | float64 | Field-Weighted Citation Impact |
 
 #### DQ Flags (Suffix)
 
 | Silver Field | Type | Default | Description |
 |--------------|------|---------|-------------|
-| `_dq_warn` | bool | False | Soft threshold exceeded |
-| `_dq_error` | bool | False | Hard threshold exceeded |
+| `-dq-warn` | bool | False | Soft threshold exceeded |
+| `-dq-error` | bool | False | Hard threshold exceeded |
 
 ---
 
@@ -283,7 +283,7 @@ Each topic includes 4-level classification hierarchy:
 ```json
 {
   "id": "T1234",
-  "display_name": "Machine Learning",
+  "display-name": "Machine Learning",
   "score": 0.95,
   "subfield": "Artificial Intelligence",
   "field": "Computer Science",
@@ -301,9 +301,9 @@ Each topic includes 4-level classification hierarchy:
 
 | Field | Type | Nullable | Constraints |
 |-------|------|----------|-------------|
-| `entity_id` | string | **No** | - |
-| `content_hash` | string | **No** | - |
-| `openalex_id` | string | **No** | Primary key |
+| `entity-id` | string | **No** | - |
+| `content-hash` | string | **No** | - |
+| `openalex-id` | string | **No** | Primary key |
 | `doi` | string | Yes | - |
 | `pmid` | string | Yes | - |
 | `title` | string | Yes | - |
@@ -311,40 +311,40 @@ Each topic includes 4-level classification hierarchy:
 | `authors` | string | Yes | JSON list |
 | `affiliations` | list[str] | Yes | - |
 | `concepts` | list[str] | Yes | - |
-| `mesh_terms` | list[str] | Yes | - |
+| `mesh-terms` | list[str] | Yes | - |
 | `keywords` | list[str] | Yes | - |
-| `mag_id` | string | Yes | - |
+| `mag-id` | string | Yes | - |
 | `journal` | string | Yes | - |
 | `issn` | string | Yes | - |
 | `publisher` | string | Yes | - |
-| `first_page` | string | Yes | - |
-| `last_page` | string | Yes | - |
+| `first-page` | string | Yes | - |
+| `last-page` | string | Yes | - |
 | `year` | float | Yes | ge=1500, le=2100, coerce=True |
-| `publication_date` | string | Yes | - |
+| `publication-date` | string | Yes | - |
 | `type` | string | Yes | Raw OpenAlex type |
-| `is_oa` | bool | Yes | coerce=True |
-| `oa_status` | string | Yes | - |
-| `citation_count` | float | Yes | ge=0, coerce=True |
+| `is-oa` | bool | Yes | coerce=True |
+| `oa-status` | string | Yes | - |
+| `citation-count` | float | Yes | ge=0, coerce=True |
 | `language` | string | Yes | - |
-| `_source` | string | **No** | Always "openalex" |
-| `_lookup_method` | string | **No** | Resolution method |
-| `_original_id` | string | Yes | - |
-| `_dq_warn` | bool | **No** | default=False |
-| `_dq_error` | bool | **No** | default=False |
-| `_run_id` | string | **No** | - |
-| `_run_type` | string | **No** | - |
-| `_source_batch_id` | string | Yes | - |
-| `_ingestion_ts` | string | **No** | - |
-| `_index` | int | **No** | - |
+| `-source` | string | **No** | Always "openalex" |
+| `-lookup-method` | string | **No** | Resolution method |
+| `-original-id` | string | Yes | - |
+| `-dq-warn` | bool | **No** | default=False |
+| `-dq-error` | bool | **No** | default=False |
+| `-run-id` | string | **No** | - |
+| `-run-type` | string | **No** | - |
+| `-source-batch-id` | string | Yes | - |
+| `-ingestion-ts` | string | **No** | - |
+| `-index` | int | **No** | - |
 
 ### Required Fields
 
 The following fields are required (nullable=False):
-- `entity_id`, `content_hash` (system)
-- `openalex_id` (primary key)
-- `_source`, `_lookup_method` (tracking)
-- `_dq_warn`, `_dq_error` (quality flags)
-- `_run_id`, `_run_type`, `_ingestion_ts`, `_index` (lineage)
+- `entity-id`, `content-hash` (system)
+- `openalex-id` (primary key)
+- `-source`, `-lookup-method` (tracking)
+- `-dq-warn`, `-dq-error` (quality flags)
+- `-run-id`, `-run-type`, `-ingestion-ts`, `-index` (lineage)
 
 ### Year Constraints
 
@@ -368,20 +368,20 @@ The following Silver fields are **excluded** from Gold output:
 | Field | Reason |
 |-------|--------|
 | `topics` | Complex nested structure |
-| `primary_topic` | Complex nested structure |
+| `primary-topic` | Complex nested structure |
 | `grants` | Complex nested structure |
-| `pmc_id` | Not collected for OpenAlex |
-| `doc_type` | Gold uses raw `type` instead |
-| `institution_ids` | Denormalized institution data |
-| `institution_country_codes` | Denormalized institution data |
-| `referenced_works_count` | Reference metric |
+| `pmc-id` | Not collected for OpenAlex |
+| `doc-type` | Gold uses raw `type` instead |
+| `institution-ids` | Denormalized institution data |
+| `institution-country-codes` | Denormalized institution data |
+| `referenced-works-count` | Reference metric |
 | `fwci` | Citation impact metric |
-| `is_retracted` | Retraction flag |
+| `is-retracted` | Retraction flag |
 
 ### Filter Configuration Hierarchy
 
 Filters are loaded from (ADR-028, ADR-029):
-1. `configs/filters/_defaults.yaml` (global)
+1. `configs/filters/-defaults.yaml` (global)
 2. `configs/filters/providers/openalex.yaml` (provider)
 3. `configs/filters/entities/openalex/publication.yaml` (entity)
 
@@ -401,7 +401,7 @@ Filters are loaded from (ADR-028, ADR-029):
 
 | Check | Severity | Notes |
 |-------|----------|-------|
-| Missing `openalex_id` | Error | Primary key required |
+| Missing `openalex-id` | Error | Primary key required |
 | Missing `doi` | Warning | Expected for most records |
 | Missing `pmid` | Info | Not all works have PMID |
 
@@ -417,9 +417,9 @@ Filters are loaded from (ADR-028, ADR-029):
 
 | Check | Severity | Notes |
 |-------|----------|-------|
-| `is_oa=true` but `oa_status=closed` | Warning | Inconsistent OA data |
-| `is_oa=null` | Info | Unknown OA status |
-| Invalid `oa_status` value | Error | Must be known status |
+| `is-oa=true` but `oa-status=closed` | Warning | Inconsistent OA data |
+| `is-oa=null` | Info | Unknown OA status |
+| Invalid `oa-status` value | Error | Must be known status |
 
 ### Author/Affiliation Extraction
 
@@ -441,7 +441,7 @@ sequenceDiagram
     participant Bronze as Bronze Layer
     participant Silver as Silver Layer
     participant Gold as Gold Layer
-    participant Composite as composite_publication
+    participant Composite as composite-publication
 
     API->>Bronze: Raw JSON (ZSTD)
     Bronze->>Silver: Transform + Validate
@@ -463,20 +463,20 @@ sequenceDiagram
 
 | Consumer | Usage |
 |----------|-------|
-| `composite_publication` | Silver merge input |
+| `composite-publication` | Silver merge input |
 | Analytics dashboards | Gold layer queries |
 | DOI enrichment services | Publication metadata lookup |
 
 ### Composite Pipeline Integration
 
-The `composite_publication` pipeline uses OpenAlex Silver data as an enricher:
+The `composite-publication` pipeline uses OpenAlex Silver data as an enricher:
 
 ```yaml
-# composite_publication config excerpt
+# composite-publication config excerpt
 enrichers:
-  - name: openalex_publication
+  - name: openalex-publication
     source: silver/openalex/publication
-    join_keys: [doi, pmid]
+    join-keys: [doi, pmid]
     priority: 2
 ```
 
@@ -491,7 +491,7 @@ enrichers:
   "id": "https://openalex.org/W2148763428",
   "doi": "https://doi.org/10.1038/nature12373",
   "title": "Crystal structure of a bacterial homologue",
-  "abstract_inverted_index": {
+  "abstract-inverted-index": {
     "The": [0],
     "crystal": [1],
     "structure": [2],
@@ -501,31 +501,31 @@ enrichers:
     {
       "author": {
         "id": "https://openalex.org/A1234567890",
-        "display_name": "John Smith"
+        "display-name": "John Smith"
       },
       "institutions": [
         {
           "id": "https://openalex.org/I1234567890",
-          "display_name": "University of Oxford",
-          "country_code": "GB"
+          "display-name": "University of Oxford",
+          "country-code": "GB"
         }
       ]
     }
   ],
-  "primary_location": {
+  "primary-location": {
     "source": {
-      "display_name": "Nature",
-      "issn_l": "0028-0836",
-      "host_organization_name": "Springer Nature"
+      "display-name": "Nature",
+      "issn-l": "0028-0836",
+      "host-organization-name": "Springer Nature"
     }
   },
-  "open_access": {
-    "is_oa": true,
-    "oa_status": "hybrid"
+  "open-access": {
+    "is-oa": true,
+    "oa-status": "hybrid"
   },
-  "cited_by_count": 150,
-  "publication_year": 2013,
-  "publication_date": "2013-08-15"
+  "cited-by-count": 150,
+  "publication-year": 2013,
+  "publication-date": "2013-08-15"
 }
 ```
 
@@ -533,30 +533,30 @@ enrichers:
 
 ```json
 {
-  "entity_id": "uuid-abc123...",
-  "content_hash": "sha256:def456...",
-  "openalex_id": "W2148763428",
+  "entity-id": "uuid-abc123...",
+  "content-hash": "sha256:def456...",
+  "openalex-id": "W2148763428",
   "doi": "10.1038/nature12373",
   "pmid": null,
   "title": "Crystal structure of a bacterial homologue",
   "abstract": "The crystal structure reveals",
   "authors": "[\"sha256:author1...\"]",
   "affiliations": "[\"University of Oxford\"]",
-  "institution_ids": ["I1234567890"],
-  "institution_country_codes": ["GB"],
+  "institution-ids": ["I1234567890"],
+  "institution-country-codes": ["GB"],
   "journal": "Nature",
   "issn": "0028-0836",
   "publisher": "Springer Nature",
-  "is_oa": true,
-  "oa_status": "hybrid",
-  "citation_count": 150,
+  "is-oa": true,
+  "oa-status": "hybrid",
+  "citation-count": 150,
   "year": 2013,
-  "publication_date": "2013-08-15",
-  "_source": "openalex",
-  "_lookup_method": "doi",
-  "_run_id": "run-123",
-  "_dq_warn": false,
-  "_dq_error": false
+  "publication-date": "2013-08-15",
+  "-source": "openalex",
+  "-lookup-method": "doi",
+  "-run-id": "run-123",
+  "-dq-warn": false,
+  "-dq-error": false
 }
 ```
 
@@ -567,47 +567,47 @@ enrichers:
 ```mermaid
 erDiagram
     WORK ||--o{ AUTHORSHIP : has
-    WORK ||--o| PRIMARY_LOCATION : has
-    WORK ||--o{ TOPIC : classified_by
-    WORK ||--o{ CONCEPT : tagged_with
-    WORK ||--o{ GRANT : funded_by
-    WORK ||--o{ MESH_TERM : indexed_by
+    WORK ||--o| PRIMARY-LOCATION : has
+    WORK ||--o{ TOPIC : classified-by
+    WORK ||--o{ CONCEPT : tagged-with
+    WORK ||--o{ GRANT : funded-by
+    WORK ||--o{ MESH-TERM : indexed-by
 
-    AUTHORSHIP ||--o{ INSTITUTION : affiliated_with
+    AUTHORSHIP ||--o{ INSTITUTION : affiliated-with
 
     WORK {
-        string openalex_id PK
+        string openalex-id PK
         string doi
         string pmid
         string title
         string abstract
-        int citation_count
+        int citation-count
         int year
-        string publication_date
-        bool is_oa
-        string oa_status
+        string publication-date
+        bool is-oa
+        string oa-status
     }
 
     AUTHORSHIP {
-        string author_id
-        string display_name "PII - hashed"
+        string author-id
+        string display-name "PII - hashed"
     }
 
     INSTITUTION {
-        string institution_id
-        string display_name
-        string country_code
+        string institution-id
+        string display-name
+        string country-code
     }
 
-    PRIMARY_LOCATION {
-        string journal_name
+    PRIMARY-LOCATION {
+        string journal-name
         string issn
         string publisher
     }
 
     TOPIC {
-        string topic_id
-        string display_name
+        string topic-id
+        string display-name
         float score
         string subfield
         string field
@@ -615,17 +615,17 @@ erDiagram
     }
 
     CONCEPT {
-        string display_name "DEPRECATED"
+        string display-name "DEPRECATED"
     }
 
     GRANT {
-        string funder_id
-        string funder_name
-        string award_id
+        string funder-id
+        string funder-name
+        string award-id
     }
 
-    MESH_TERM {
-        string descriptor_name
+    MESH-TERM {
+        string descriptor-name
     }
 ```
 
@@ -643,7 +643,7 @@ erDiagram
 
 3. **Concepts Deprecated**: The `concepts` field is deprecated by OpenAlex (2024). Use `topics` for new development.
 
-4. **Title Fallback Accuracy**: Title-based search may return incorrect matches for common titles. The `_lookup_method` field allows filtering these records.
+4. **Title Fallback Accuracy**: Title-based search may return incorrect matches for common titles. The `-lookup-method` field allows filtering these records.
 
 5. **Abstract Coverage**: Not all OpenAlex works have abstracts. The inverted index may be empty or null.
 
@@ -654,8 +654,8 @@ erDiagram
 - [ ] Add `topics` and `grants` to Gold schema with flattened structure
 - [ ] Implement incremental loading when OpenAlex stabilizes cursor pagination
 - [ ] Add author ORCID extraction from `authorships[].author.orcid`
-- [ ] Add related works extraction (`related_works[]`)
-- [ ] Add citation context extraction from `referenced_works[]`
+- [ ] Add related works extraction (`related-works[]`)
+- [ ] Add citation context extraction from `referenced-works[]`
 
 ---
 
@@ -663,8 +663,8 @@ erDiagram
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 1.2.0 | 2026-01 | Added topics/primary_topic extraction (new OpenAlex format) |
-| 1.1.0 | 2025-12 | Added institution_ids and country_codes extraction |
+| 1.2.0 | 2026-01 | Added topics/primary-topic extraction (new OpenAlex format) |
+| 1.1.0 | 2025-12 | Added institution-ids and country-codes extraction |
 | 1.0.0 | 2025-10 | Initial release with DOI resolution and title fallback |
 
 ---

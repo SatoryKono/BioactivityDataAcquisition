@@ -20,7 +20,7 @@
 ### REQ-ARCH-001
 - **Уровень**: MUST
 - **Описание**: Интерфейсы (Ports) определяются в пакете `domain/ports/` через `typing.Protocol`. Импорт **MUST** быть из фасада (`from bioetl.domain.ports import ...`).
-- **Проверка**: Статический анализ — проверить наличие пакета и использование Protocol. Архитектурный тест `test_ports_imported_only_from_facade`.
+- **Проверка**: Статический анализ — проверить наличие пакета и использование Protocol. Архитектурный тест `test-ports-imported-only-from-facade`.
 
 ### REQ-ARCH-002
 - **Уровень**: MUST
@@ -34,22 +34,22 @@
 
 ### REQ-ARCH-004
 - **Уровень**: SHOULD
-- **Описание**: Критичные адаптеры используют `@runtime_checkable` декоратор
+- **Описание**: Критичные адаптеры используют `@runtime-checkable` декоратор
 - **Проверка**: Проверить наличие декоратора на Protocol классах для критичных адаптеров
 
 ### REQ-ARCH-005
 - **Уровень**: MUST
-- **Описание**: Все адаптеры реализуют асинхронный метод `health_check()` возвращающий `HealthStatus` enum
-- **Проверка**: Проверить наличие `async def health_check(self) -> HealthStatus` в каждом адаптере
+- **Описание**: Все адаптеры реализуют асинхронный метод `health-check()` возвращающий `HealthStatus` enum
+- **Проверка**: Проверить наличие `async def health-check(self) -> HealthStatus` в каждом адаптере
 
 ### REQ-ARCH-006
 - **Уровень**: MUST
-- **Описание**: `health_check()` использует lightweight probe (не тяжёлые запросы)
+- **Описание**: `health-check()` использует lightweight probe (не тяжёлые запросы)
 - **Проверка**: Проверить что health check не загружает большие данные
 
 ### REQ-ARCH-007
 - **Уровень**: MUST NOT
-- **Описание**: `health_check()` не должен выбрасывать исключения — ловить и возвращать `UNHEALTHY`
+- **Описание**: `health-check()` не должен выбрасывать исключения — ловить и возвращать `UNHEALTHY`
 - **Проверка**: Тест — исключение в health check возвращает UNHEALTHY
 
 ---
@@ -65,7 +65,7 @@
 
 #### REQ-DATA-002
 - **Уровень**: MUST
-- **Описание**: Bronze путь соответствует формату `bronze/{format_version}/{provider}/{entity}/{date}/`
+- **Описание**: Bronze путь соответствует формату `bronze/{format-version}/{provider}/{entity}/{date}/`
 - **Проверка**: Regex валидация путей Bronze файлов
 
 #### REQ-DATA-003
@@ -88,7 +88,7 @@
 #### REQ-DATA-006
 - **Уровень**: MUST
 - **Описание**: Silver данные хранятся в формате Delta Lake или Iceberg (ACID обязателен)
-- **Проверка**: Проверить наличие `_delta_log/` директории или Iceberg metadata
+- **Проверка**: Проверить наличие `-delta-log/` директории или Iceberg metadata
 
 #### REQ-DATA-007
 - **Уровень**: MUST NOT
@@ -121,13 +121,13 @@
 
 #### REQ-DELTA-002
 - **Уровень**: MUST
-- **Описание**: VACUUM запускается еженедельно с `retention_period=7 days`
+- **Описание**: VACUUM запускается еженедельно с `retention-period=7 days`
 - **Проверка**: Проверить наличие scheduled job для VACUUM
 
 #### REQ-DELTA-003
 - **Уровень**: MUST
 - **Описание**: Forensic retention по умолчанию 7 дней, до 30 дней для critical таблиц через конфиг
-- **Проверка**: Проверить значение forensic_retention в конфигах пайплайнов
+- **Проверка**: Проверить значение forensic-retention в конфигах пайплайнов
 
 ### 2.5 Schema Drift
 
@@ -155,13 +155,13 @@
 
 #### REQ-LINEAGE-001
 - **Уровень**: MUST
-- **Описание**: Silver записи содержат `_source_batch_id` (FK)
-- **Проверка**: Проверить наличие поля `_source_batch_id` в Silver схеме
+- **Описание**: Silver записи содержат `-source-batch-id` (FK)
+- **Проверка**: Проверить наличие поля `-source-batch-id` в Silver схеме
 
 #### REQ-LINEAGE-002
 - **Уровень**: MUST
-- **Описание**: Таблица `sys.lineage_log` хранит маппинг batch_id -> Bronze файлы
-- **Проверка**: Проверить существование и схему таблицы lineage_log
+- **Описание**: Таблица `sys.lineage-log` хранит маппинг batch-id -> Bronze файлы
+- **Проверка**: Проверить существование и схему таблицы lineage-log
 
 #### REQ-LINEAGE-003
 - **Уровень**: MUST NOT
@@ -172,7 +172,7 @@
 
 #### REQ-BACKFILL-001
 - **Уровень**: MUST
-- **Описание**: Все записи содержат `_run_id` (UUID) и `_run_type` (`incremental` | `backfill` | `rebuild`)
+- **Описание**: Все записи содержат `-run-id` (UUID) и `-run-type` (`incremental` | `backfill` | `rebuild`)
 - **Проверка**: Проверить наличие обязательных мета-полей в схеме
 
 #### REQ-BACKFILL-002
@@ -187,7 +187,7 @@
 
 #### REQ-BACKFILL-004
 - **Уровень**: MUST
-- **Описание**: Lock key для exclusive операций: `lock:{provider}_{entity}:exclusive`
+- **Описание**: Lock key для exclusive операций: `lock:{provider}-{entity}:exclusive`
 - **Проверка**: Проверить формат lock key в MemoryLock при backfill/rebuild
 
 #### REQ-BACKFILL-005
@@ -199,29 +199,29 @@
 
 #### REQ-CLEAR-001
 - **Уровень**: MUST
-- **Описание**: REBUILD и BACKFILL run types вызывают `clear_silver()` перед execute
-- **Проверка**: Integration тест `test_rebuild_lifecycle_order` — clear вызывается
+- **Описание**: REBUILD и BACKFILL run types вызывают `clear-silver()` перед execute
+- **Проверка**: Integration тест `test-rebuild-lifecycle-order` — clear вызывается
 
 #### REQ-CLEAR-002
 - **Уровень**: MUST
-- **Описание**: REBUILD и BACKFILL run types вызывают `clear_gold()` перед execute (если gold_table настроен)
+- **Описание**: REBUILD и BACKFILL run types вызывают `clear-gold()` перед execute (если gold-table настроен)
 - **Проверка**: Integration тест — gold очищается при rebuild
 
 #### REQ-CLEAR-003
 - **Уровень**: MUST NOT
-- **Описание**: INCREMENTAL run type НЕ вызывает `clear_silver()` или `clear_gold()`
-- **Проверка**: Integration тест `test_incremental_skips_clear` — clear НЕ вызывается
+- **Описание**: INCREMENTAL run type НЕ вызывает `clear-silver()` или `clear-gold()`
+- **Проверка**: Integration тест `test-incremental-skips-clear` — clear НЕ вызывается
 
 #### REQ-CLEAR-004
 - **Уровень**: MUST
-- **Описание**: Очистка storage выполняется асинхронно через `async def _clear_exports()`
+- **Описание**: Очистка storage выполняется асинхронно через `async def -clear-exports()`
 - **Проверка**: Проверить сигнатуру метода — `async def`
 
 ### 2.8 Партиционирование
 
 #### REQ-PARTITION-001
 - **Уровень**: MUST
-- **Описание**: Bronze партиционируется по `ingestion_date` (YYYY-MM-DD)
+- **Описание**: Bronze партиционируется по `ingestion-date` (YYYY-MM-DD)
 - **Проверка**: Проверить структуру директорий Bronze
 
 #### REQ-PARTITION-002
@@ -237,7 +237,7 @@
 #### REQ-PARTITION-004
 - **Уровень**: MUST NOT
 - **Описание**: Запрещены ключи партиционирования: UUID, Hash, Free-text
-- **Проверка**: Статический анализ конфигов — partition_by не содержит запрещенных типов
+- **Проверка**: Статический анализ конфигов — partition-by не содержит запрещенных типов
 
 ### 2.9 NULL и Пропущенные Значения
 
@@ -280,14 +280,14 @@
 
 #### REQ-QUARANTINE-004
 - **Уровень**: MUST
-- **Описание**: Quarantine записи содержат ссылку на Bronze файл (bronze_file_uri или batch_id)
+- **Описание**: Quarantine записи содержат ссылку на Bronze файл (bronze-file-uri или batch-id)
 - **Проверка**: Проверить наличие обязательного поля в схеме quarantine
 
 ### 2.11 Load Strategy
 
 #### REQ-LOAD-001
 - **Уровень**: MUST
-- **Описание**: Для инкрементальной загрузки хранить `last_successful_watermark`
+- **Описание**: Для инкрементальной загрузки хранить `last-successful-watermark`
 - **Проверка**: Проверить сохранение watermark после успешного запуска
 
 #### REQ-LOAD-002
@@ -299,12 +299,12 @@
 
 #### REQ-ID-001
 - **Уровень**: MUST
-- **Описание**: Алгоритм Content Hash: `sha256(provider + canonical_json_dumps(record))`
+- **Описание**: Алгоритм Content Hash: `sha256(provider + canonical-json-dumps(record))`
 - **Проверка**: Unit-тест генерации ID — результат соответствует алгоритму
 
 #### REQ-ID-002
 - **Уровень**: MUST
-- **Описание**: Canonical JSON: `json.dumps(obj, sort_keys=True, separators=(',', ':'), ensure_ascii=True)`
+- **Описание**: Canonical JSON: `json.dumps(obj, sort-keys=True, separators=(',', ':'), ensure-ascii=True)`
 - **Проверка**: Unit-тест — JSON формат соответствует спецификации
 
 #### REQ-ID-003
@@ -329,12 +329,12 @@
 
 #### REQ-ID-007
 - **Уровень**: MUST
-- **Описание**: Мета-поля (`_ingestion_ts`, `_run_id`, `_run_type`, `_dq_*`) исключаются из хэша
+- **Описание**: Мета-поля (`-ingestion-ts`, `-run-id`, `-run-type`, `-dq-*`) исключаются из хэша
 - **Проверка**: Unit-тест — мета-поля не влияют на хэш
 
 #### REQ-ID-008
 - **Уровень**: MUST
-- **Описание**: При коллизии хэшей (разные `_source_record_id`) — логировать обе записи
+- **Описание**: При коллизии хэшей (разные `-source-record-id`) — логировать обе записи
 - **Проверка**: Тест детекции коллизий
 
 ---
@@ -402,11 +402,11 @@
 #### REQ-CB-003
 - **Уровень**: MUST
 - **Описание**: Recovery: Half-Open → 1 пробный запрос
-- **Проверка**: Тест — после recovery_timeout делается пробный запрос
+- **Проверка**: Тест — после recovery-timeout делается пробный запрос
 
 #### REQ-CB-004
 - **Уровень**: MUST
-- **Описание**: Метрика `circuit_breaker_state` (0=Closed, 1=Half-Open, 2=Open)
+- **Описание**: Метрика `circuit-breaker-state` (0=Closed, 1=Half-Open, 2=Open)
 - **Проверка**: Проверить экспорт метрики в правильном формате
 
 #### REQ-CB-005
@@ -418,8 +418,8 @@
 
 #### REQ-OBS-001
 - **Уровень**: MUST
-- **Описание**: `run_id` обязателен во всех логах, метриках и блокировках
-- **Проверка**: Статический анализ — все log вызовы содержат run_id
+- **Описание**: `run-id` обязателен во всех логах, метриках и блокировках
+- **Проверка**: Статический анализ — все log вызовы содержат run-id
 
 #### REQ-OBS-002
 - **Уровень**: MUST
@@ -438,12 +438,12 @@
 
 #### REQ-OBS-005
 - **Уровень**: MUST
-- **Описание**: Log Schema содержит обязательные поля: ts, level, run_id, pipeline, stage
+- **Описание**: Log Schema содержит обязательные поля: ts, level, run-id, pipeline, stage
 - **Проверка**: Валидация схемы логов
 
 #### REQ-OBS-006
 - **Уровень**: SHOULD
-- **Описание**: Log Schema содержит рекомендуемые поля: dataset, record_count
+- **Описание**: Log Schema содержит рекомендуемые поля: dataset, record-count
 - **Проверка**: Проверить наличие дополнительных полей в логах
 
 ### 3.6 Concurrency и Блокировки
@@ -455,7 +455,7 @@
 
 #### REQ-LOCK-002
 - **Уровень**: MUST
-- **Описание**: Lock TTL: `heartbeat_interval * 3` = 90 секунд по умолчанию
+- **Описание**: Lock TTL: `heartbeat-interval * 3` = 90 секунд по умолчанию
 - **Проверка**: Проверить значение TTL при создании блокировки
 
 #### REQ-LOCK-003
@@ -470,8 +470,8 @@
 
 #### REQ-LOCK-005
 - **Уровень**: MUST
-- **Описание**: Fencing Token: в тело блокировки записывается `owner_id` (run_id)
-- **Проверка**: Проверить наличие owner_id в данных блокировки
+- **Описание**: Fencing Token: в тело блокировки записывается `owner-id` (run-id)
+- **Проверка**: Проверить наличие owner-id в данных блокировки
 
 #### REQ-LOCK-006
 - **Уровень**: MUST
@@ -486,7 +486,7 @@
 #### REQ-LOCK-008
 - **Уровень**: MUST
 - **Описание**: Safety Guard: валидация блокировки перед записью в local storage/Delta
-- **Проверка**: Тест — проверка owner_id перед commit
+- **Проверка**: Тест — проверка owner-id перед commit
 
 ### 3.7 DQ Metrics
 
@@ -497,12 +497,12 @@
 
 #### REQ-DQ-002
 - **Уровень**: MUST
-- **Описание**: Метрика `dq_validation_score` с лейблами check, column
+- **Описание**: Метрика `dq-validation-score` с лейблами check, column
 - **Проверка**: Проверить наличие метрики с правильными лейблами
 
 #### REQ-DQ-003
 - **Уровень**: MUST
-- **Описание**: Метрика `data_freshness_seconds`
+- **Описание**: Метрика `data-freshness-seconds`
 - **Проверка**: Проверить наличие метрики freshness
 
 ### 3.8 DQ Anomaly Detection
@@ -514,22 +514,22 @@
 
 #### REQ-ANOMALY-002
 - **Уровень**: MUST
-- **Описание**: Warning при росте null_rate >2x baseline
+- **Описание**: Warning при росте null-rate >2x baseline
 - **Проверка**: Тест — 2.5x baseline генерирует warning
 
 #### REQ-ANOMALY-003
 - **Уровень**: MUST
-- **Описание**: Critical при росте null_rate >5x baseline
+- **Описание**: Critical при росте null-rate >5x baseline
 - **Проверка**: Тест — 6x baseline генерирует critical
 
 #### REQ-ANOMALY-004
 - **Уровень**: MUST
-- **Описание**: Warning при падении record_count <70% baseline
+- **Описание**: Warning при падении record-count <70% baseline
 - **Проверка**: Тест — 60% baseline генерирует warning
 
 #### REQ-ANOMALY-005
 - **Уровень**: MUST
-- **Описание**: Critical при падении record_count <50% baseline
+- **Описание**: Critical при падении record-count <50% baseline
 - **Проверка**: Тест — 40% baseline генерирует critical
 
 #### REQ-ANOMALY-006
@@ -541,7 +541,7 @@
 
 #### REQ-HEALTH-001
 - **Уровень**: MUST
-- **Описание**: Status Degraded при 1-2 consecutive errors (Timeout ×2, batch_size ÷2)
+- **Описание**: Status Degraded при 1-2 consecutive errors (Timeout ×2, batch-size ÷2)
 - **Проверка**: Тест — параметры корректируются при degraded
 
 #### REQ-HEALTH-002
@@ -551,7 +551,7 @@
 
 #### REQ-HEALTH-003
 - **Уровень**: MUST
-- **Описание**: Метрика `provider_health_status` (0=Unhealthy, 1=Degraded, 2=Healthy)
+- **Описание**: Метрика `provider-health-status` (0=Unhealthy, 1=Degraded, 2=Healthy)
 - **Проверка**: Проверить экспорт метрики
 
 ---
@@ -567,7 +567,7 @@
 
 #### REQ-STACK-002
 - **Уровень**: MUST
-- **Описание**: Legacy библиотеки без async — через `run_in_executor`
+- **Описание**: Legacy библиотеки без async — через `run-in-executor`
 - **Проверка**: Проверить обёртки для pubchempy, biopython
 
 #### REQ-STACK-003
@@ -584,7 +584,7 @@
 
 #### REQ-PYTHON-001
 - **Уровень**: MUST
-- **Описание**: Все Python-файлы начинаются с `from __future__ import annotations`
+- **Описание**: Все Python-файлы начинаются с `from --future-- import annotations`
 - **Проверка**: `ruff check --select FA` проходит без ошибок
 
 #### REQ-PYTHON-002
@@ -617,7 +617,7 @@
 #### REQ-TEST-004
 - **Уровень**: MUST
 - **Описание**: VCR санитизация: удаление Authorization, X-API-Key, PII
-- **Проверка**: Проверить хук `before_record` в конфиге VCR
+- **Проверка**: Проверить хук `before-record` в конфиге VCR
 
 #### REQ-TEST-005
 - **Уровень**: MUST
@@ -654,7 +654,7 @@
 
 #### REQ-SECRET-002
 - **Уровень**: MUST
-- **Описание**: Формат: `BIOETL_{PROVIDER}_{KEY}`
+- **Описание**: Формат: `BIOETL-{PROVIDER}-{KEY}`
 - **Проверка**: Проверить имена переменных окружения
 
 #### REQ-SECRET-003
@@ -698,7 +698,7 @@
 
 #### REQ-CHECKPOINT-002
 - **Уровень**: MUST
-- **Описание**: С флагом `--resume` — продолжение с `last_processed_id + 1`
+- **Описание**: С флагом `--resume` — продолжение с `last-processed-id + 1`
 - **Проверка**: Тест — resume начинает с правильной позиции
 
 #### REQ-CHECKPOINT-003
@@ -730,7 +730,7 @@
 
 #### REQ-CLEANUP-004
 - **Уровень**: MUST
-- **Описание**: PipelineServices реализует async context manager (`__aenter__`/`__aexit__`)
+- **Описание**: PipelineServices реализует async context manager (`--aenter--`/`--aexit--`)
 - **Проверка**: Проверить использование `async with services:` в runner
 
 ### 5.5 Security
@@ -816,7 +816,7 @@
 
 #### REQ-CONTRACT-002
 - **Уровень**: MUST
-- **Описание**: Версионирование: `{entity}_v{major}.{minor}`
+- **Описание**: Версионирование: `{entity}-v{major}.{minor}`
 - **Проверка**: Проверить формат версий в схемах
 
 #### REQ-CONTRACT-003

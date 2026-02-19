@@ -8,21 +8,21 @@
 
 Два архитектурных вопроса требовали решения:
 
-### Проблема 1: Дублирование run_id
+### Проблема 1: Дублирование run-id
 
-`BasePipeline` генерировал новый `run_id` в конструкторе (`base.py:60`), игнорируя `run_id`, переданный из CLI через `PipelineRunContext`. Это приводило к рассинхронизации:
+`BasePipeline` генерировал новый `run-id` в конструкторе (`base.py:60`), игнорируя `run-id`, переданный из CLI через `PipelineRunContext`. Это приводило к рассинхронизации:
 
-- CLI логировал один `run_id`
-- Записи в Silver содержали другой `run_id` в метаполе `_run_id`
+- CLI логировал один `run-id`
+- Записи в Silver содержали другой `run-id` в метаполе `-run-id`
 - Чекпоинты и блокировки использовали третий идентификатор
 
 ### Проблема 2: Reflection для очистки хранилища
 
-`PipelineRunner._clear_exports()` использовал `hasattr()` для проверки наличия методов `clear_csv()` и `clear_delta()`:
+`PipelineRunner.-clear-exports()` использовал `hasattr()` для проверки наличия методов `clear-csv()` и `clear-delta()`:
 
 ```python
-if hasattr(storage, "clear_csv"):
-    storage.clear_csv(table_name)
+if hasattr(storage, "clear-csv"):
+    storage.clear-csv(table-name)
 ```
 
 Это нарушало принцип явных контрактов и затрудняло статический анализ.
@@ -33,22 +33,22 @@ if hasattr(storage, "clear_csv"):
 
 ## Decision
 
-### 1. Единый run_id от CLI до метаполей
+### 1. Единый run-id от CLI до метаполей
 
-- `BasePipeline.__init__()` принимает `run_id` как обязательный параметр
-- `run_id` генерируется **только** в CLI (`cli.py:86`)
-- Все компоненты (logger, context, checkpoints, locks) используют один `run_id`
+- `BasePipeline.--init--()` принимает `run-id` как обязательный параметр
+- `run-id` генерируется **только** в CLI (`cli.py:86`)
+- Все компоненты (logger, context, checkpoints, locks) используют один `run-id`
 
 **Изменённая сигнатура:**
 
 ```python
 class BasePipeline(ABC):
-    def __init__(
+    def --init--(
         self,
         config: PipelineConfig,
         runtime: RuntimeConfig,
         services: PipelineServices,
-        run_id: RunID,  # NEW: обязательный параметр
+        run-id: RunID,  # NEW: обязательный параметр
     ) -> None:
 ```
 
@@ -57,28 +57,28 @@ class BasePipeline(ABC):
 Добавлены методы в `StoragePort` (`domain/ports/storage.py`, импорт из фасада `domain/ports/`):
 
 ```python
-def clear_silver(self, table_name: str) -> int:
+def clear-silver(self, table-name: str) -> int:
     """Clear Silver layer data for a specific table."""
     ...
 
-def clear_gold(self, table_name: str) -> int:
+def clear-gold(self, table-name: str) -> int:
     """Clear Gold layer data for a specific table."""
     ...
 ```
 
 Удалён `hasattr()` из `runner.py` — теперь используются явные вызовы методов порта.
 
-### 3. Medallion-инварианты по run_type
+### 3. Medallion-инварианты по run-type
 
 Очистка выполняется **только** для destructive run types:
 
 ```python
-should_clear = self._runtime.run_type in (RunType.REBUILD, RunType.BACKFILL)
+should-clear = self.-runtime.run-type in (RunType.REBUILD, RunType.BACKFILL)
 ```
 
 | Run Type | Очистка | Обоснование |
 |----------|---------|-------------|
-| `incremental` | НЕТ | Merge/upsert по content_hash |
+| `incremental` | НЕТ | Merge/upsert по content-hash |
 | `backfill` | ДА | Заполнение исторических данных |
 | `rebuild` | ДА | Полная перестройка таблицы |
 
@@ -86,22 +86,22 @@ should_clear = self._runtime.run_type in (RunType.REBUILD, RunType.BACKFILL)
 
 ### Positive
 
-- **Трассируемость**: Один `run_id` во всех слоях и компонентах
+- **Трассируемость**: Один `run-id` во всех слоях и компонентах
 - **Типобезопасность**: Явные методы в `StoragePort` вместо reflection
 - **Data Integrity**: Incremental runs не удаляют существующие данные
 - **Тестируемость**: Можно проверить контракт через type checking
 
 ### Negative
 
-- **Breaking Change**: Сигнатура `BasePipeline.__init__()` изменилась (4 параметра вместо 3)
+- **Breaking Change**: Сигнатура `BasePipeline.--init--()` изменилась (4 параметра вместо 3)
 - **Миграция тестов**: Все тесты, создающие pipeline напрямую, требуют обновления
 
 ### Risks
 
 | Риск | Вероятность | Митигация |
 |------|-------------|-----------|
-| Чекпоинты со старым форматом | Низкая | `load()` игнорирует `run_id` в файле |
-| Дубликаты при incremental | Средняя | Merge по `content_hash` предотвращает дубли |
+| Чекпоинты со старым форматом | Низкая | `load()` игнорирует `run-id` в файле |
+| Дубликаты при incremental | Средняя | Merge по `content-hash` предотвращает дубли |
 
 ## Related ADRs
 

@@ -7,9 +7,9 @@
 ## Context
 
 BioETL uses Hexagonal Architecture + Medallion (Bronze→Silver→Gold) for ETL biоактивных данных. Current pipelines operate independently:
-- `chembl_activity`
-- `chembl_publication`
-- `pubchem_compound`
+- `chembl-activity`
+- `chembl-publication`
+- `pubchem-compound`
 
 A common use case requires combining data from multiple sources:
 1. **Seed Pipeline** extracts primary entities (e.g., publications from ChEMBL)
@@ -30,7 +30,7 @@ A common use case requires combining data from multiple sources:
 | Local-Only Deployment | ADR-010 | No distributed orchestration (Airflow, Prefect) |
 | MemoryLock | ADR-003 | Single-process execution only |
 | Medallion Architecture | ADR-002 | Must preserve Bronze/Silver/Gold semantics |
-| Content Hash Deduplication | RULES.md §3.1 | Silver merge must use content_hash |
+| Content Hash Deduplication | RULES.md §3.1 | Silver merge must use content-hash |
 | DQ Thresholds | RULES.md §4.1 | Soft >5%, Hard >20% apply per-enricher |
 
 ## Decision
@@ -42,7 +42,7 @@ Implement **Composite Pipeline Pattern** with the following architecture:
 ```
                     ┌─────────────────┐
                     │   Seed Pipeline │
-                    │  (chembl_pub)   │
+                    │  (chembl-pub)   │
                     └────────┬────────┘
                              │
                     ┌────────▼────────┐
@@ -89,7 +89,7 @@ Implement **Composite Pipeline Pattern** with the following architecture:
 1. Seed writes → Silver/chembl/publication/
 2. Extract keys → In-memory DataFrame (small)
 3. Enrichers write → Silver/{enricher}/publication/
-4. Merger reads all → Gold/composite_publication/
+4. Merger reads all → Gold/composite-publication/
 ```
 
 ### 3. Join Strategy: Configurable per Enricher
@@ -133,32 +133,32 @@ pipelines to populate Silver tables.
 
 | Use Case | Example |
 |----------|---------|
-| Reference tables | `protein_class` hierarchy (~1.5K records) |
-| Derived entities | `publication_term` (MeSH terms from /document API) |
-| Chained data | `protein_class` using IDs from `target_component` |
+| Reference tables | `protein-class` hierarchy (~1.5K records) |
+| Derived entities | `publication-term` (MeSH terms from /document API) |
+| Chained data | `protein-class` using IDs from `target-component` |
 
-#### Chained Dependencies (key_source)
+#### Chained Dependencies (key-source)
 
 **Problem:** Some dependencies need keys from *another dependency's* output, not from seed.
 
-**Example:** `chembl_protein_class` needs `protein_classification_id` values, but these
-come from `chembl_target_component` Silver table, not from seed.
+**Example:** `chembl-protein-class` needs `protein-classification-id` values, but these
+come from `chembl-target-component` Silver table, not from seed.
 
-**Solution:** `key_source` field specifies where to read join keys from.
+**Solution:** `key-source` field specifies where to read join keys from.
 
 ```yaml
 dependencies:
   # Standard dependency: uses keys from seed
-  - pipeline: chembl_target_component
-    join_keys: [component_id]      # Column in seed
-    silver_table: silver/chembl/target_component
+  - pipeline: chembl-target-component
+    join-keys: [component-id]      # Column in seed
+    silver-table: silver/chembl/target-component
 
   # Chained dependency: uses keys from another dependency
-  - pipeline: chembl_protein_class
-    join_keys: [protein_classification_id]  # Column in key_source table
-    filter_field: protein_class_id          # API filter field name
-    key_source: chembl_target_component     # Read keys from this Silver table
-    silver_table: silver/chembl/protein_class
+  - pipeline: chembl-protein-class
+    join-keys: [protein-classification-id]  # Column in key-source table
+    filter-field: protein-class-id          # API filter field name
+    key-source: chembl-target-component     # Read keys from this Silver table
+    silver-table: silver/chembl/protein-class
 ```
 
 #### Configuration Fields
@@ -166,43 +166,43 @@ dependencies:
 | Field | Type | Description |
 |-------|------|-------------|
 | `pipeline` | string | Dependency pipeline name |
-| `join_keys` | list[string] | Column names to extract from key source |
-| `key_source` | string? | Source of keys: `null`/`"seed"` = seed, or pipeline name |
-| `filter_field` | string? | API filter field (if differs from join_key) |
+| `join-keys` | list[string] | Column names to extract from key source |
+| `key-source` | string? | Source of keys: `null`/`"seed"` = seed, or pipeline name |
+| `filter-field` | string? | API filter field (if differs from join-key) |
 | `required` | bool | If true, failure stops composite |
-| `timeout_seconds` | int | Per-dependency timeout |
-| `silver_table` | string? | Path to Silver table |
+| `timeout-seconds` | int | Per-dependency timeout |
+| `silver-table` | string? | Path to Silver table |
 
 #### Implementation
 
 - **DependencyCoordinator**: Reads keys from correct source (seed or chained)
-- **`DependencyConfig.uses_seed_keys`**: Property to check key source
+- **`DependencyConfig.uses-seed-keys`**: Property to check key source
 - **Sequential execution**: Dependencies run in order (chaining requires this)
 
 #### Example: Target Composite Pipeline
 
 ```
-Seed: chembl_target
-  └─ Provides: target_chembl_id, component_id
+Seed: chembl-target
+  └─ Provides: target-chembl-id, component-id
 
 Dependencies:
-  1. chembl_target_component (component_id from seed)
-     └─ Populates: Silver with protein_classification_id
-  2. chembl_protein_class (protein_classification_id from #1)
+  1. chembl-target-component (component-id from seed)
+     └─ Populates: Silver with protein-classification-id
+  2. chembl-protein-class (protein-classification-id from #1)
      └─ Populates: Silver with protein class hierarchy
 
 Enrichers:
-  - uniprot_idmapping (target_chembl_id from seed)
+  - uniprot-idmapping (target-chembl-id from seed)
 ```
 
 ### 5. Locking Strategy: Hierarchical Locks
 
 ```
-lock:composite_publication              # Parent lock (exclusive)
-├── lock:chembl_publication             # Seed lock (shared under parent)
-├── lock:crossref_publication           # Enricher lock (shared)
-├── lock:openalex_publication           # Enricher lock (shared)
-└── lock:pubmed_publication             # Enricher lock (shared)
+lock:composite-publication              # Parent lock (exclusive)
+├── lock:chembl-publication             # Seed lock (shared under parent)
+├── lock:crossref-publication           # Enricher lock (shared)
+├── lock:openalex-publication           # Enricher lock (shared)
+└── lock:pubmed-publication             # Enricher lock (shared)
 ```
 
 **Rationale:**
@@ -215,23 +215,23 @@ lock:composite_publication              # Parent lock (exclusive)
 Every Gold record includes:
 ```python
 {
-    "_composite_run_id": "uuid-of-composite-run",
-    "_source_providers": ["chembl", "crossref", "openalex", "pubmed"],
-    "_enrichment_status": {
+    "-composite-run-id": "uuid-of-composite-run",
+    "-source-providers": ["chembl", "crossref", "openalex", "pubmed"],
+    "-enrichment-status": {
         "crossref": "success",
         "openalex": "success",
-        "pubmed": "not_found",
+        "pubmed": "not-found",
         "semanticscholar": "skipped"  # filter condition not met
     },
-    "_enrichment_timestamps": {
+    "-enrichment-timestamps": {
         "chembl": "2026-01-15T10:00:00Z",
         "crossref": "2026-01-15T10:05:00Z",
         ...
     },
-    "_field_sources": {
+    "-field-sources": {
         "title": "chembl",
-        "citations_count": "crossref",
-        "mesh_terms": "pubmed",
+        "citations-count": "crossref",
+        "mesh-terms": "pubmed",
         ...
     }
 }
@@ -245,7 +245,7 @@ Every Gold record includes:
 src/bioetl/
 ├── domain/
 │   ├── composite/
-│   │   ├── __init__.py
+│   │   ├── --init--.py
 │   │   ├── config.py           # CompositeConfig, EnricherConfig
 │   │   ├── result.py           # EnrichmentResult, MergeResult
 │   │   ├── state.py            # CompositePipelineState FSM enum
@@ -256,25 +256,25 @@ src/bioetl/
 │
 ├── application/
 │   ├── composite/
-│   │   ├── __init__.py
+│   │   ├── --init--.py
 │   │   ├── runner.py           # CompositePipelineRunner
 │   │   ├── coordinator.py      # EnrichmentCoordinator (fan-out logic)
 │   │   ├── merger.py           # MergeService (join + conflict resolution)
-│   │   ├── key_extractor.py    # KeyExtractorService
+│   │   ├── key-extractor.py    # KeyExtractorService
 │   │   └── checkpoint.py       # CompositeCheckpointManager
 │   └── core/
 │       └── runner.py           # Existing PipelineRunner (unchanged)
 │
 ├── composition/
 │   ├── composite/
-│   │   ├── __init__.py
-│   │   ├── bootstrap.py        # bootstrap_composite_pipeline()
+│   │   ├── --init--.py
+│   │   ├── bootstrap.py        # bootstrap-composite-pipeline()
 │   │   └── factory.py          # CompositePipelineFactory
 │   └── factories/              # Existing factories (unchanged)
 │
 ├── infrastructure/
 │   └── storage/
-│       └── silver_reader.py    # SilverReader adapter for key extraction
+│       └── silver-reader.py    # SilverReader adapter for key extraction
 │
 └── interfaces/
     └── cli.py                  # Extended with composite commands
@@ -298,17 +298,17 @@ This ensures predictable execution flow and prevents invalid operations.
 
 ```
 ┌─────────────────┐
-│   NOT_STARTED   │
+│   NOT-STARTED   │
 └────────┬────────┘
          │
          ▼
 ┌─────────────────┐
-│  SEED_RUNNING   │──────────┐
+│  SEED-RUNNING   │──────────┐
 └────────┬────────┘          │
          │                   │
          ▼                   │
 ┌─────────────────┐          │
-│ SEED_COMPLETED  │          │
+│ SEED-COMPLETED  │          │
 └────────┬────────┘          │
          │                   │
          ▼                   │
@@ -318,7 +318,7 @@ This ensures predictable execution flow and prevents invalid operations.
          │                   │
          ▼                   │
 ┌─────────────────┐          │
-│ENRICHMENT_COMPL.│          │
+│ENRICHMENT-COMPL.│          │
 └────────┬────────┘          │
          │                   │
          ▼                   │
@@ -338,7 +338,7 @@ This ensures predictable execution flow and prevents invalid operations.
 | Component | Layer | Responsibility |
 |-----------|-------|----------------|
 | `CompositePipelineState` (Enum) | **domain** | Defines states, transition rules, validation |
-| `can_transition()`, `validate_transition()` | **domain** | Pure functions for transition logic |
+| `can-transition()`, `validate-transition()` | **domain** | Pure functions for transition logic |
 | `CompositeCheckpointState.state` field | **application** | Persists FSM state for resume |
 | `CompositePipelineRunner` | **application** | Executes transitions, manages lifecycle |
 | `EnrichmentCoordinator` | **application** | No FSM knowledge (delegated service) |
@@ -350,26 +350,26 @@ executes *when transitions happen*. This separation allows:
 1. **Testability**: FSM rules can be unit-tested in isolation
 2. **Predictability**: Invalid transitions raise `InvalidStateError` immediately
 3. **Observability**: Every transition is logged with from/to states
-4. **Resumability**: `is_resumable` property enables checkpoint-based recovery
+4. **Resumability**: `is-resumable` property enables checkpoint-based recovery
 
 #### FSM in Domain Layer (`domain/composite/state.py`)
 
 ```python
 class CompositePipelineState(str, Enum):
-    NOT_STARTED = "not_started"
-    SEED_RUNNING = "seed_running"
-    SEED_COMPLETED = "seed_completed"
+    NOT-STARTED = "not-started"
+    SEED-RUNNING = "seed-running"
+    SEED-COMPLETED = "seed-completed"
     ENRICHING = "enriching"
-    ENRICHMENT_COMPLETED = "enrichment_completed"
+    ENRICHMENT-COMPLETED = "enrichment-completed"
     MERGING = "merging"
     COMPLETED = "completed"  # Terminal
     FAILED = "failed"        # Terminal
 
-    def can_transition_to(self, target: CompositePipelineState) -> bool:
+    def can-transition-to(self, target: CompositePipelineState) -> bool:
         """Domain logic: check if transition is valid."""
-        return target in self.allowed_transitions
+        return target in self.allowed-transitions
 
-    def validate_transition(self, target: CompositePipelineState) -> None:
+    def validate-transition(self, target: CompositePipelineState) -> None:
         """Raises InvalidStateError if transition is invalid."""
         ...
 ```
@@ -380,12 +380,12 @@ class CompositePipelineState(str, Enum):
 class CompositePipelineRunner:
     async def run(self) -> CompositeResult:
         # Application decides WHEN to transition
-        state = state.with_state(CompositePipelineState.SEED_RUNNING)
-        self._log_fsm_transition(from_state, to_state, stage="seed_start")
+        state = state.with-state(CompositePipelineState.SEED-RUNNING)
+        self.-log-fsm-transition(from-state, to-state, stage="seed-start")
 
         # ... execute seed ...
 
-        state = state.with_state(CompositePipelineState.SEED_COMPLETED)
+        state = state.with-state(CompositePipelineState.SEED-COMPLETED)
         # ... etc.
 ```
 
@@ -399,55 +399,55 @@ class DependencyConfig:
     """Configuration for a dependency pipeline.
 
     Dependencies run after seed but before enrichers to populate Silver tables.
-    Supports chained dependencies via key_source field.
+    Supports chained dependencies via key-source field.
     """
-    pipeline: str                    # Pipeline name (e.g., "chembl_protein_class")
-    join_keys: tuple[str, ...]       # Keys to extract for filtering
+    pipeline: str                    # Pipeline name (e.g., "chembl-protein-class")
+    join-keys: tuple[str, ...]       # Keys to extract for filtering
     required: bool = False           # If True, failure = composite failure
-    timeout_seconds: int = 600       # Per-dependency timeout
-    silver_table: str | None = None  # Path to Silver table
-    key_source: str | None = None    # None/"seed" = seed keys, or pipeline name
-    filter_field: str | None = None  # API filter field (if differs from join_key)
+    timeout-seconds: int = 600       # Per-dependency timeout
+    silver-table: str | None = None  # Path to Silver table
+    key-source: str | None = None    # None/"seed" = seed keys, or pipeline name
+    filter-field: str | None = None  # API filter field (if differs from join-key)
 
     @property
-    def uses_seed_keys(self) -> bool:
+    def uses-seed-keys(self) -> bool:
         """Check if dependency uses keys from seed."""
-        return self.key_source is None or self.key_source == "seed"
+        return self.key-source is None or self.key-source == "seed"
 
 
 @dataclass(frozen=True, slots=True)
 class EnricherConfig:
     """Configuration for a single enrichment pipeline."""
-    pipeline: str                    # Pipeline name (e.g., "crossref_publication")
-    join_keys: tuple[str, ...]       # Keys to join on (e.g., ("doi", "pmid"))
+    pipeline: str                    # Pipeline name (e.g., "crossref-publication")
+    join-keys: tuple[str, ...]       # Keys to join on (e.g., ("doi", "pmid"))
     required: bool = False           # If True, failure = composite failure
-    filter_condition: str | None = None  # SQL-like filter (e.g., "pmid IS NOT NULL")
-    timeout_seconds: int = 600       # Per-enricher timeout
-    fallback_strategy: Literal["skip", "use_cached", "fail"] = "skip"
+    filter-condition: str | None = None  # SQL-like filter (e.g., "pmid IS NOT NULL")
+    timeout-seconds: int = 600       # Per-enricher timeout
+    fallback-strategy: Literal["skip", "use-cached", "fail"] = "skip"
 
 
 @dataclass(frozen=True, slots=True)
 class MergeConfig:
     """Configuration for merge step."""
-    strategy: MergeStrategy          # left_outer, inner, union
-    conflict_resolution: ConflictResolution  # seed_priority, latest, explicit
-    output_silver_path: str
-    output_gold_path: str
-    field_mappings: dict[str, str] | None = None  # Rename fields during merge
+    strategy: MergeStrategy          # left-outer, inner, union
+    conflict-resolution: ConflictResolution  # seed-priority, latest, explicit
+    output-silver-path: str
+    output-gold-path: str
+    field-mappings: dict[str, str] | None = None  # Rename fields during merge
 
 
 @dataclass(frozen=True, slots=True)
 class CompositeConfig:
     """Complete composite pipeline configuration."""
-    name: str                        # e.g., "composite_publication"
+    name: str                        # e.g., "composite-publication"
     seed: SeedConfig                 # Seed pipeline config
     enrichers: tuple[EnricherConfig, ...]
     merge: MergeConfig
     dq: DQConfig                     # Composite-level DQ thresholds
 
-    def __post_init__(self) -> None:
-        self._validate_join_keys()
-        self._validate_required_enrichers()
+    def --post-init--(self) -> None:
+        self.-validate-join-keys()
+        self.-validate-required-enrichers()
 ```
 
 ### EnrichmentResult
@@ -456,17 +456,17 @@ class CompositeConfig:
 @dataclass(frozen=True, slots=True)
 class EnrichmentResult:
     """Result of a single enrichment pipeline execution."""
-    enricher_name: str
+    enricher-name: str
     status: EnrichmentStatus  # success, partial, failed, skipped
-    records_enriched: int
-    records_not_found: int
-    records_errored: int
-    dq_error_rate: float
-    duration_seconds: float
-    error_message: str | None = None
+    records-enriched: int
+    records-not-found: int
+    records-errored: int
+    dq-error-rate: float
+    duration-seconds: float
+    error-message: str | None = None
 
     @property
-    def is_success(self) -> bool:
+    def is-success(self) -> bool:
         return self.status in (EnrichmentStatus.SUCCESS, EnrichmentStatus.PARTIAL)
 
 
@@ -475,7 +475,7 @@ class EnrichmentStatus(str, Enum):
     PARTIAL = "partial"       # Some records enriched (below hard threshold)
     FAILED = "failed"         # Above hard threshold or critical error
     SKIPPED = "skipped"       # Filter condition excluded all records
-    NOT_RUN = "not_run"       # Pipeline not executed (e.g., resume scenario)
+    NOT-RUN = "not-run"       # Pipeline not executed (e.g., resume scenario)
 ```
 
 ### MergeStrategy
@@ -483,17 +483,17 @@ class EnrichmentStatus(str, Enum):
 ```python
 class MergeStrategy(str, Enum):
     """Strategy for merging enriched data."""
-    LEFT_OUTER = "left_outer"  # All seed records, nullable enrichments
+    LEFT-OUTER = "left-outer"  # All seed records, nullable enrichments
     INNER = "inner"            # Only records found in ALL required enrichers
     UNION = "union"            # All records from any source (with dedup)
 
 
 class ConflictResolution(str, Enum):
     """Strategy for resolving field conflicts between sources."""
-    SEED_PRIORITY = "seed_priority"    # Seed value wins
-    ENRICHER_PRIORITY = "enricher"     # Enricher value wins
-    LATEST_TIMESTAMP = "latest"        # Most recent value wins
-    EXPLICIT_RULES = "explicit"        # Use field_priorities mapping
+    SEED-PRIORITY = "seed-priority"    # Seed value wins
+    ENRICHER-PRIORITY = "enricher"     # Enricher value wins
+    LATEST-TIMESTAMP = "latest"        # Most recent value wins
+    EXPLICIT-RULES = "explicit"        # Use field-priorities mapping
     COALESCE = "coalesce"              # First non-null value
 ```
 
@@ -521,14 +521,14 @@ class ConflictResolution(str, Enum):
 **Примеры**:
 | Source | Original | Qualified |
 |--------|----------|-----------|
-| chembl_publication (seed) | title | chembl.publication.title |
-| crossref_publication (enricher) | title | crossref.publication.title |
-| crossref_publication (enricher) | citation_count | crossref.publication.citation_count |
+| chembl-publication (seed) | title | chembl.publication.title |
+| crossref-publication (enricher) | title | crossref.publication.title |
+| crossref-publication (enricher) | citation-count | crossref.publication.citation-count |
 
 **Исключения** (НЕ переименовываются):
-1. **Join keys**: `doi`, `pmid`, `pmc_id` — для совместимости с join операциями
-2. **System columns**: колонки с prefix `_` (`_run_id`, `_ingestion_ts`, etc.)
-3. **Entity ID columns**: `entity_id`, `content_hash` — системные идентификаторы
+1. **Join keys**: `doi`, `pmid`, `pmc-id` — для совместимости с join операциями
+2. **System columns**: колонки с prefix `-` (`-run-id`, `-ingestion-ts`, etc.)
+3. **Entity ID columns**: `entity-id`, `content-hash` — системные идентификаторы
 
 ### Column Ordering
 
@@ -536,16 +536,16 @@ class ConflictResolution(str, Enum):
 
 | Order | Group | Examples |
 |-------|-------|----------|
-| 1 | System | entity_id, content_hash, _run_id, _ingestion_ts |
-| 2 | Identifiers | doi, pmid, pmc_id, document_chembl_id |
+| 1 | System | entity-id, content-hash, -run-id, -ingestion-ts |
+| 2 | Identifiers | doi, pmid, pmc-id, document-chembl-id |
 | 3 | Title | title, chembl.publication.title, crossref.publication.title |
 | 4 | Abstract | abstract, chembl.publication.abstract |
-| 5 | Authors | authors, first_author, affiliations |
+| 5 | Authors | authors, first-author, affiliations |
 | 6 | Journal | journal, publisher, volume, issue |
-| 7 | Dates | publication_date, year, created_at |
-| 8 | Metrics | citation_count, reference_count |
-| 9 | Classification | mesh_terms, keywords, subjects |
-| 10 | URLs | url, pdf_url, landing_page |
+| 7 | Dates | publication-date, year, created-at |
+| 8 | Metrics | citation-count, reference-count |
+| 9 | Classification | mesh-terms, keywords, subjects |
+| 10 | URLs | url, pdf-url, landing-page |
 | 11 | Other | All remaining fields |
 
 Внутри каждой группы колонки упорядочены по:
@@ -575,10 +575,10 @@ class ConflictResolution(str, Enum):
 
 ### References
 
-- ColumnRenamer: `src/bioetl/application/composite/column_renamer.py`
-- ColumnOrderer: `src/bioetl/application/composite/column_orderer.py`
-- ColumnQualifier: `src/bioetl/domain/value_objects/column_qualifier.py`
-- ColumnOrderConfig: `src/bioetl/domain/value_objects/column_order.py`
+- ColumnRenamer: `src/bioetl/application/composite/column-renamer.py`
+- ColumnOrderer: `src/bioetl/application/composite/column-orderer.py`
+- ColumnQualifier: `src/bioetl/domain/value-objects/column-qualifier.py`
+- ColumnOrderConfig: `src/bioetl/domain/value-objects/column-order.py`
 
 ## Preserve All Sources Feature
 
@@ -592,7 +592,7 @@ However, some use cases require access to **all** provider values for comparison
 
 ### Decision
 
-Add `preserve_all_sources: bool = False` to `MergeConfig`. When enabled:
+Add `preserve-all-sources: bool = False` to `MergeConfig`. When enabled:
 
 1. **Skip coalescing** - MergeService does not apply conflict resolution
 2. **Keep all qualified columns** - All `{provider}.{entity}.{field}` columns are retained
@@ -603,33 +603,33 @@ Add `preserve_all_sources: bool = False` to `MergeConfig`. When enabled:
 ```yaml
 # configs/pipelines/composite/publication.yaml
 merge:
-  strategy: left_outer
-  conflict_resolution: seed_priority  # Used when preserve_all_sources=false
-  preserve_all_sources: true          # NEW: Keep all provider columns
+  strategy: left-outer
+  conflict-resolution: seed-priority  # Used when preserve-all-sources=false
+  preserve-all-sources: true          # NEW: Keep all provider columns
 ```
 
 ### Behavior Comparison
 
 | Mode | Output Columns | Use Case |
 |------|----------------|----------|
-| `preserve_all_sources: false` (default) | `title` (single coalesced column) | Production views with "best" value |
-| `preserve_all_sources: true` | `chembl.publication.title`, `crossref.publication.title`, etc. | Data quality analysis, ML features |
+| `preserve-all-sources: false` (default) | `title` (single coalesced column) | Production views with "best" value |
+| `preserve-all-sources: true` | `chembl.publication.title`, `crossref.publication.title`, etc. | Data quality analysis, ML features |
 
 ### Implementation
 
-- **Domain**: `MergeConfig.preserve_all_sources: bool = False` in `domain/composite/config.py`
-- **Application**: `MergeService._resolve_conflicts()` skips coalescing when flag is True
-- **Schema**: Pydantic schema updated with `preserve_all_sources` field
+- **Domain**: `MergeConfig.preserve-all-sources: bool = False` in `domain/composite/config.py`
+- **Application**: `MergeService.-resolve-conflicts()` skips coalescing when flag is True
+- **Schema**: Pydantic schema updated with `preserve-all-sources` field
 
 ### Example Output
 
 ```python
-# preserve_all_sources: false (default)
-df.columns = ['entity_id', 'title', 'abstract', 'citation_count', ...]
+# preserve-all-sources: false (default)
+df.columns = ['entity-id', 'title', 'abstract', 'citation-count', ...]
 
-# preserve_all_sources: true
+# preserve-all-sources: true
 df.columns = [
-    'entity_id',
+    'entity-id',
     'chembl.publication.title',
     'crossref.publication.title',
     'openalex.publication.title',
@@ -653,58 +653,58 @@ df.columns = [
 
 ## Field Group Registry
 
-When `preserve_all_sources: true` is enabled, the number of columns grows significantly (94 base fields × up to 5 providers). The **Field Group Registry** (`FieldGroupRegistry`) provides semantic grouping for these columns.
+When `preserve-all-sources: true` is enabled, the number of columns grows significantly (94 base fields × up to 5 providers). The **Field Group Registry** (`FieldGroupRegistry`) provides semantic grouping for these columns.
 
 ### Purpose
 
-1. **Gold Filtering**: Automatically exclude TRASH-group fields (e.g., `content_hash`, `language`) from Gold output
-2. **Column Ordering**: Sort output columns by semantic group (ID_AND_STATUS first, TRASH last) and provider priority
+1. **Gold Filtering**: Automatically exclude TRASH-group fields (e.g., `content-hash`, `language`) from Gold output
+2. **Column Ordering**: Sort output columns by semantic group (ID-AND-STATUS first, TRASH last) and provider priority
 3. **Validation**: Identify unmapped columns for data quality checks
 
 ### Domain Models
 
 ```
 FieldGroupId (enum)          — 8 semantic groups (alias for PublicationFieldGroup)
-FieldMapping (frozen)        — base_name → provider_columns + group
-FieldGroupDefinition (frozen)— group_id, display_name, include_in_gold, fields
+FieldMapping (frozen)        — base-name → provider-columns + group
+FieldGroupDefinition (frozen)— group-id, display-name, include-in-gold, fields
 FieldGroupRegistry           — central registry with lookup indices
 ```
 
 ### YAML Configuration
 
-Field groups are defined in `configs/composite/field_groups/publication.yaml`:
+Field groups are defined in `configs/composite/field-groups/publication.yaml`:
 
 ```yaml
 version: "1.0"
 entity: publication
-provider_order: [chembl, crossref, openalex, pubmed, semanticscholar]
+provider-order: [chembl, crossref, openalex, pubmed, semanticscholar]
 groups:
-  - id: id_and_status
-    display_name: "ID & Status"
-    include_in_gold: true
+  - id: id-and-status
+    display-name: "ID & Status"
+    include-in-gold: true
     fields:
-      - base_name: doi
+      - base-name: doi
         columns:
           - chembl.publication.doi
           - crossref.publication.doi
           - openalex.publication.doi
   - id: trash
-    display_name: "Trash"
-    include_in_gold: false
+    display-name: "Trash"
+    include-in-gold: false
     fields:
-      - base_name: content_hash
-        columns: [chembl.publication.content_hash, ...]
+      - base-name: content-hash
+        columns: [chembl.publication.content-hash, ...]
 ```
 
 ### Integration with MergeService
 
-During `_write_merged_gold()`, `MergeService` uses the registry to filter out TRASH columns:
+During `-write-merged-gold()`, `MergeService` uses the registry to filter out TRASH columns:
 
 ```python
-if self._field_group_registry is not None:
-    trash_cols = self._field_group_registry.get_trash_columns(df.columns)
-    if trash_cols:
-        df = df.drop(trash_cols)
+if self.-field-group-registry is not None:
+    trash-cols = self.-field-group-registry.get-trash-columns(df.columns)
+    if trash-cols:
+        df = df.drop(trash-cols)
 ```
 
 ### Graceful Degradation
@@ -715,9 +715,9 @@ If no YAML config exists for a composite pipeline, bootstrap continues without t
 
 | Layer | File | Description |
 |-------|------|-------------|
-| Domain | `domain/composite/field_groups.py` | Models: FieldMapping, FieldGroupDefinition, FieldGroupRegistry |
-| Infrastructure | `infrastructure/config/field_group_loader.py` | YAML → domain object loader |
-| Config | `configs/composite/field_groups/publication.yaml` | 8 groups, 94 fields |
+| Domain | `domain/composite/field-groups.py` | Models: FieldMapping, FieldGroupDefinition, FieldGroupRegistry |
+| Infrastructure | `infrastructure/config/field-group-loader.py` | YAML → domain object loader |
+| Config | `configs/composite/field-groups/publication.yaml` | 8 groups, 94 fields |
 | Composition | `composition/bootstrap/runtime/composite.py` | Bootstrap integration |
 | Application | `application/composite/merger.py` | Gold filtering integration |
 
@@ -733,59 +733,59 @@ class CompositePipelineRunner:
     Delegates to existing PipelineRunner for individual pipelines.
     """
 
-    def __init__(
+    def --init--(
         self,
         config: CompositeConfig,
         runtime: CompositeRuntimeConfig,
-        seed_runner_factory: Callable[[], PipelineRunner],  # skip_gold=True
-        enricher_runner_factory: Callable[[str], PipelineRunner],  # skip_gold=True
-        key_extractor: KeyExtractorService,
+        seed-runner-factory: Callable[[], PipelineRunner],  # skip-gold=True
+        enricher-runner-factory: Callable[[str], PipelineRunner],  # skip-gold=True
+        key-extractor: KeyExtractorService,
         coordinator: EnrichmentCoordinator,
         merger: MergeService,
-        checkpoint_manager: CompositeCheckpointManager,
+        checkpoint-manager: CompositeCheckpointManager,
         logger: LoggerPort,
-        lock_manager: CompositeLockManager,
+        lock-manager: CompositeLockManager,
     ) -> None:
         ...
 
     async def run(self) -> CompositeResult:
         """Execute full composite pipeline."""
-        async with self._lock_manager:
+        async with self.-lock-manager:
             # 1. Load checkpoint (for resume)
-            state = await self._checkpoint_manager.load()
+            state = await self.-checkpoint-manager.load()
 
             # 2. Run seed (if not completed)
-            if not state.seed_completed:
-                await self._run_seed()
-                state = state.with_seed_completed()
-                await self._checkpoint_manager.save(state)
+            if not state.seed-completed:
+                await self.-run-seed()
+                state = state.with-seed-completed()
+                await self.-checkpoint-manager.save(state)
 
             # 3. Extract keys from seed Silver
-            keys_df = await self._key_extractor.extract(
-                self._config.seed.output_keys
+            keys-df = await self.-key-extractor.extract(
+                self.-config.seed.output-keys
             )
 
             # 4. Run enrichers (fan-out)
-            results = await self._coordinator.run_enrichers(
-                keys=keys_df,
-                enrichers=self._config.enrichers,
-                completed=state.completed_enrichers,
+            results = await self.-coordinator.run-enrichers(
+                keys=keys-df,
+                enrichers=self.-config.enrichers,
+                completed=state.completed-enrichers,
             )
 
             # 5. Merge results
-            merge_result = await self._merger.merge(
-                seed_table=self._config.seed.silver_table,
-                enricher_tables=[e.pipeline for e in self._config.enrichers],
+            merge-result = await self.-merger.merge(
+                seed-table=self.-config.seed.silver-table,
+                enricher-tables=[e.pipeline for e in self.-config.enrichers],
                 results=results,
             )
 
             # 6. Cleanup
-            await self._checkpoint_manager.delete()
+            await self.-checkpoint-manager.delete()
 
             return CompositeResult(
-                seed_result=state.seed_result,
-                enrichment_results=results,
-                merge_result=merge_result,
+                seed-result=state.seed-result,
+                enrichment-results=results,
+                merge-result=merge-result,
             )
 ```
 
@@ -799,7 +799,7 @@ class EnrichmentCoordinator:
     Handles timeouts, failures, and partial completion.
     """
 
-    async def run_enrichers(
+    async def run-enrichers(
         self,
         keys: pl.DataFrame,
         enrichers: Sequence[EnricherConfig],
@@ -821,41 +821,41 @@ class EnrichmentCoordinator:
                 continue  # Skip completed (resume scenario)
 
             # Filter keys based on enricher condition
-            filtered_keys = self._apply_filter(keys, enricher.filter_condition)
-            if filtered_keys.is_empty():
-                tasks.append(self._create_skipped_result(enricher))
+            filtered-keys = self.-apply-filter(keys, enricher.filter-condition)
+            if filtered-keys.is-empty():
+                tasks.append(self.-create-skipped-result(enricher))
                 continue
 
             tasks.append(
-                self._run_single_enricher(enricher, filtered_keys)
+                self.-run-single-enricher(enricher, filtered-keys)
             )
 
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        return self._process_results(enrichers, results)
+        results = await asyncio.gather(*tasks, return-exceptions=True)
+        return self.-process-results(enrichers, results)
 
-    async def _run_single_enricher(
+    async def -run-single-enricher(
         self,
         enricher: EnricherConfig,
         keys: pl.DataFrame,
     ) -> EnrichmentResult:
         """Run a single enricher with timeout and error handling."""
         try:
-            async with asyncio.timeout(enricher.timeout_seconds):
-                runner = self._runner_factory(enricher.pipeline)
+            async with asyncio.timeout(enricher.timeout-seconds):
+                runner = self.-runner-factory(enricher.pipeline)
                 # Pass keys via input filter mechanism
                 await runner.run()
-                return self._build_success_result(enricher)
+                return self.-build-success-result(enricher)
         except asyncio.TimeoutError:
             return EnrichmentResult(
-                enricher_name=enricher.pipeline,
+                enricher-name=enricher.pipeline,
                 status=EnrichmentStatus.FAILED,
-                error_message=f"Timeout after {enricher.timeout_seconds}s",
+                error-message=f"Timeout after {enricher.timeout-seconds}s",
                 ...
             )
         except Exception as e:
             if enricher.required:
                 raise  # Propagate for required enrichers
-            return self._build_error_result(enricher, e)
+            return self.-build-error-result(enricher, e)
 ```
 
 ### MergeService
@@ -870,66 +870,66 @@ class MergeService:
 
     async def merge(
         self,
-        seed_table: str,
-        enricher_tables: Sequence[str],
+        seed-table: str,
+        enricher-tables: Sequence[str],
         results: dict[str, EnrichmentResult],
     ) -> MergeResult:
         """Merge seed and enricher data into unified Gold table.
 
         Args:
-            seed_table: Path to seed Silver table.
-            enricher_tables: Paths to enricher Silver tables.
+            seed-table: Path to seed Silver table.
+            enricher-tables: Paths to enricher Silver tables.
             results: Enrichment results for filtering.
 
         Returns:
             MergeResult with statistics and lineage.
         """
         # 1. Load seed data
-        seed_df = await self._storage.read_silver(seed_table)
+        seed-df = await self.-storage.read-silver(seed-table)
 
         # 2. Apply joins based on strategy
-        merged_df = seed_df
-        for enricher in enricher_tables:
+        merged-df = seed-df
+        for enricher in enricher-tables:
             result = results.get(enricher)
-            if not result or not result.is_success:
+            if not result or not result.is-success:
                 continue
 
-            enricher_df = await self._storage.read_silver(enricher)
-            merged_df = self._apply_join(
-                merged_df,
-                enricher_df,
-                join_keys=self._get_join_keys(enricher),
+            enricher-df = await self.-storage.read-silver(enricher)
+            merged-df = self.-apply-join(
+                merged-df,
+                enricher-df,
+                join-keys=self.-get-join-keys(enricher),
             )
 
         # 3. Resolve conflicts
-        merged_df = self._resolve_conflicts(merged_df)
+        merged-df = self.-resolve-conflicts(merged-df)
 
         # 4. Add lineage metadata
-        merged_df = self._add_lineage(merged_df, results)
+        merged-df = self.-add-lineage(merged-df, results)
 
         # 5. Write to Gold
-        await self._storage.write_gold(
-            df=merged_df,
-            path=self._config.merge.output_gold_path,
+        await self.-storage.write-gold(
+            df=merged-df,
+            path=self.-config.merge.output-gold-path,
         )
 
         return MergeResult(
-            records_merged=len(merged_df),
-            sources_used=[...],
-            lineage_summary={...},
+            records-merged=len(merged-df),
+            sources-used=[...],
+            lineage-summary={...},
         )
 
-    def _resolve_conflicts(self, df: pl.DataFrame) -> pl.DataFrame:
+    def -resolve-conflicts(self, df: pl.DataFrame) -> pl.DataFrame:
         """Apply conflict resolution strategy."""
-        match self._config.merge.conflict_resolution:
-            case ConflictResolution.SEED_PRIORITY:
-                return self._coalesce_prefer_first(df)
-            case ConflictResolution.LATEST_TIMESTAMP:
-                return self._pick_latest(df)
+        match self.-config.merge.conflict-resolution:
+            case ConflictResolution.SEED-PRIORITY:
+                return self.-coalesce-prefer-first(df)
+            case ConflictResolution.LATEST-TIMESTAMP:
+                return self.-pick-latest(df)
             case ConflictResolution.COALESCE:
-                return self._coalesce_non_null(df)
-            case ConflictResolution.EXPLICIT_RULES:
-                return self._apply_explicit_rules(df)
+                return self.-coalesce-non-null(df)
+            case ConflictResolution.EXPLICIT-RULES:
+                return self.-apply-explicit-rules(df)
 ```
 
 ## Configuration Schema
@@ -938,97 +938,97 @@ class MergeService:
 
 ```yaml
 # configs/pipelines/composite/publication.yaml
-schema_version: "2.0.0"
+schema-version: "2.0.0"
 
 composite:
-  name: composite_publication
+  name: composite-publication
   version: "1.0.0"
 
   # ---------------------------------------------------------------------------
   # Seed Pipeline Configuration
   # ---------------------------------------------------------------------------
   seed:
-    pipeline: chembl_publication
-    output_keys:
-      - document_id      # ChEMBL document ID
+    pipeline: chembl-publication
+    output-keys:
+      - document-id      # ChEMBL document ID
       - doi              # Digital Object Identifier
       - pmid             # PubMed ID
-    silver_table: silver/chembl/publication
+    silver-table: silver/chembl/publication
 
   # ---------------------------------------------------------------------------
   # Enricher Pipelines
   # ---------------------------------------------------------------------------
   enrichers:
     # CrossRef: Required enricher for citation data
-    - pipeline: crossref_publication
-      join_keys:
+    - pipeline: crossref-publication
+      join-keys:
         - doi            # Primary join key
       required: true     # Failure = composite failure
-      timeout_seconds: 900
+      timeout-seconds: 900
 
     # OpenAlex: Optional enricher for academic metadata
-    - pipeline: openalex_publication
-      join_keys:
+    - pipeline: openalex-publication
+      join-keys:
         - doi            # Primary
         - pmid           # Fallback
       required: false
-      filter_condition: "doi IS NOT NULL OR pmid IS NOT NULL"
-      timeout_seconds: 600
+      filter-condition: "doi IS NOT NULL OR pmid IS NOT NULL"
+      timeout-seconds: 600
 
     # PubMed: Optional enricher for medical metadata
-    - pipeline: pubmed_publication
-      join_keys:
+    - pipeline: pubmed-publication
+      join-keys:
         - pmid
       required: false
-      filter_condition: "pmid IS NOT NULL"
-      timeout_seconds: 600
+      filter-condition: "pmid IS NOT NULL"
+      timeout-seconds: 600
 
     # Semantic Scholar: Optional enricher for AI/ML features
-    - pipeline: semanticscholar_publication
-      join_keys:
+    - pipeline: semanticscholar-publication
+      join-keys:
         - doi
         - pmid
       required: false
-      filter_condition: "doi IS NOT NULL OR pmid IS NOT NULL"
-      timeout_seconds: 1200
-      fallback_strategy: skip  # High rate limits, ok to skip
+      filter-condition: "doi IS NOT NULL OR pmid IS NOT NULL"
+      timeout-seconds: 1200
+      fallback-strategy: skip  # High rate limits, ok to skip
 
   # ---------------------------------------------------------------------------
   # Merge Configuration
   # ---------------------------------------------------------------------------
   merge:
-    strategy: left_outer         # All seed records preserved
-    conflict_resolution: seed_priority
+    strategy: left-outer         # All seed records preserved
+    conflict-resolution: seed-priority
 
-    # Field-level priority overrides (for explicit_rules strategy)
-    field_priorities:
+    # Field-level priority overrides (for explicit-rules strategy)
+    field-priorities:
       title: [chembl, crossref, openalex]
       abstract: [pubmed, openalex, chembl]
-      citations_count: [crossref, openalex]
-      mesh_terms: [pubmed]
+      citations-count: [crossref, openalex]
+      mesh-terms: [pubmed]
       concepts: [openalex]
 
     output:
       silver: silver/composite/publication
-      gold: gold/publication_enriched
+      gold: gold/publication-enriched
 
   # ---------------------------------------------------------------------------
   # Data Quality Configuration
   # ---------------------------------------------------------------------------
-  dq_overrides:
+  dq-overrides:
     # Composite-level thresholds (applied to merge result)
-    soft_fail_threshold: 0.10
-    hard_fail_threshold: 0.30
+    soft-fail-threshold: 0.10
+    hard-fail-threshold: 0.30
 
     # Per-enricher overrides
-    enricher_overrides:
-      semanticscholar_publication:
-        soft_fail_threshold: 0.20  # Higher tolerance for S2
-        hard_fail_threshold: 0.50
+    enricher-overrides:
+      semanticscholar-publication:
+        soft-fail-threshold: 0.20  # Higher tolerance for S2
+        hard-fail-threshold: 0.50
 
     # Required fields in final Gold output
-    required_fields:
-      - document_id
+    required-fields:
+      - document-id
       - title
 
   # ---------------------------------------------------------------------------
@@ -1036,28 +1036,28 @@ composite:
   # ---------------------------------------------------------------------------
   execution:
     # Maximum concurrent enrichers
-    max_concurrency: 4
+    max-concurrency: 4
 
     # Enable checkpointing for resume
-    checkpoint_enabled: true
+    checkpoint-enabled: true
 
     # Retry configuration for enrichers
     retry:
-      max_attempts: 3
-      backoff_multiplier: 2.0
+      max-attempts: 3
+      backoff-multiplier: 2.0
 
   # ---------------------------------------------------------------------------
   # Lineage Configuration
   # ---------------------------------------------------------------------------
   lineage:
     # Track field-level provenance
-    track_field_sources: true
+    track-field-sources: true
 
     # Include enrichment timestamps
-    track_timestamps: true
+    track-timestamps: true
 
     # Include enrichment status per record
-    track_status: true
+    track-status: true
 ```
 
 ## Test Strategy
@@ -1065,68 +1065,68 @@ composite:
 ### Unit Tests
 
 ```python
-# tests/unit/application/composite/test_merger.py
+# tests/unit/application/composite/test-merger.py
 
 class TestMergeService:
     """Test cases for MergeService."""
 
-    def test_left_outer_join_preserves_all_seed_records(self):
+    def test-left-outer-join-preserves-all-seed-records(self):
         """LEFT OUTER join should keep all seed records."""
         seed = pl.DataFrame({"doi": ["10.1/a", "10.1/b", "10.1/c"]})
         enricher = pl.DataFrame({"doi": ["10.1/a"], "citations": [100]})
 
-        merged = merge_service.merge(seed, enricher, strategy=LEFT_OUTER)
+        merged = merge-service.merge(seed, enricher, strategy=LEFT-OUTER)
 
         assert len(merged) == 3
         assert merged.filter(pl.col("doi") == "10.1/a")["citations"][0] == 100
         assert merged.filter(pl.col("doi") == "10.1/b")["citations"][0] is None
 
-    def test_inner_join_filters_unmatched_records(self):
+    def test-inner-join-filters-unmatched-records(self):
         """INNER join should only keep matched records."""
         ...
 
-    def test_conflict_resolution_seed_priority(self):
-        """Seed values should take precedence with seed_priority."""
+    def test-conflict-resolution-seed-priority(self):
+        """Seed values should take precedence with seed-priority."""
         seed = pl.DataFrame({"doi": ["10.1/a"], "title": "Seed Title"})
         enricher = pl.DataFrame({"doi": ["10.1/a"], "title": "Enricher Title"})
 
-        merged = merge_service.merge(
+        merged = merge-service.merge(
             seed, enricher,
-            conflict_resolution=ConflictResolution.SEED_PRIORITY
+            conflict-resolution=ConflictResolution.SEED-PRIORITY
         )
 
         assert merged["title"][0] == "Seed Title"
 
-    def test_lineage_metadata_added_correctly(self):
+    def test-lineage-metadata-added-correctly(self):
         """Lineage metadata should track all sources."""
         ...
 
 
-# tests/unit/application/composite/test_coordinator.py
+# tests/unit/application/composite/test-coordinator.py
 
 class TestEnrichmentCoordinator:
     """Test cases for EnrichmentCoordinator."""
 
-    async def test_parallel_execution_respects_timeout(self):
+    async def test-parallel-execution-respects-timeout(self):
         """Enrichers should timeout independently."""
         ...
 
-    async def test_required_enricher_failure_propagates(self):
+    async def test-required-enricher-failure-propagates(self):
         """Required enricher failure should raise exception."""
         coordinator = EnrichmentCoordinator(...)
         enricher = EnricherConfig(pipeline="crossref", required=True)
 
         with pytest.raises(CriticalError):
-            await coordinator.run_enrichers(
-                keys=test_keys,
+            await coordinator.run-enrichers(
+                keys=test-keys,
                 enrichers=[enricher],
             )
 
-    async def test_optional_enricher_failure_continues(self):
+    async def test-optional-enricher-failure-continues(self):
         """Optional enricher failure should return error result."""
         ...
 
-    async def test_filter_condition_applied_correctly(self):
+    async def test-filter-condition-applied-correctly(self):
         """Filter condition should exclude records before enrichment."""
         ...
 ```
@@ -1134,61 +1134,61 @@ class TestEnrichmentCoordinator:
 ### Integration Tests
 
 ```python
-# tests/integration/composite/test_composite_publication.py
+# tests/integration/composite/test-composite-publication.py
 
 @pytest.mark.integration
 class TestCompositePublicationPipeline:
-    """Integration tests for composite_publication pipeline."""
+    """Integration tests for composite-publication pipeline."""
 
     @pytest.mark.vcr
-    async def test_full_composite_run(self, vcr_cassette):
+    async def test-full-composite-run(self, vcr-cassette):
         """Full composite run with all enrichers."""
-        runner = await bootstrap_composite_pipeline(
-            "composite_publication",
+        runner = await bootstrap-composite-pipeline(
+            "composite-publication",
             limit=10,
         )
 
         result = await runner.run()
 
-        assert result.seed_result.records_processed > 0
-        assert "crossref" in result.enrichment_results
-        assert result.merge_result.records_merged > 0
+        assert result.seed-result.records-processed > 0
+        assert "crossref" in result.enrichment-results
+        assert result.merge-result.records-merged > 0
 
     @pytest.mark.vcr
-    async def test_resume_after_enricher_failure(self, vcr_cassette):
+    async def test-resume-after-enricher-failure(self, vcr-cassette):
         """Resume should skip completed enrichers."""
         # First run with simulated failure
-        runner = await bootstrap_composite_pipeline(
-            "composite_publication",
+        runner = await bootstrap-composite-pipeline(
+            "composite-publication",
             limit=10,
         )
         # Simulate failure after seed
         ...
 
         # Resume run
-        runner = await bootstrap_composite_pipeline(
-            "composite_publication",
+        runner = await bootstrap-composite-pipeline(
+            "composite-publication",
             resume=True,
         )
         result = await runner.run()
 
         # Seed should be skipped
-        assert result.seed_result.status == "resumed"
+        assert result.seed-result.status == "resumed"
 
 
-# tests/integration/composite/test_enricher_failures.py
+# tests/integration/composite/test-enricher-failures.py
 
 @pytest.mark.integration
 class TestEnricherFailureScenarios:
     """Test various enricher failure scenarios."""
 
     @pytest.mark.vcr
-    async def test_optional_enricher_timeout(self):
+    async def test-optional-enricher-timeout(self):
         """Optional enricher timeout should not fail composite."""
         ...
 
     @pytest.mark.vcr
-    async def test_required_enricher_dq_failure(self):
+    async def test-required-enricher-dq-failure(self):
         """Required enricher >20% DQ errors should fail composite."""
         ...
 ```
@@ -1196,9 +1196,9 @@ class TestEnricherFailureScenarios:
 ### Architecture Tests
 
 ```python
-# tests/architecture/test_composite_imports.py
+# tests/architecture/test-composite-imports.py
 
-def test_composite_domain_has_no_infrastructure_imports():
+def test-composite-domain-has-no-infrastructure-imports():
     """domain/composite should not import from infrastructure."""
     for file in glob.glob("src/bioetl/domain/composite/**/*.py"):
         with open(file) as f:
@@ -1207,12 +1207,12 @@ def test_composite_domain_has_no_infrastructure_imports():
         assert "import bioetl.infrastructure" not in content
 
 
-def test_composite_application_has_no_infrastructure_imports():
+def test-composite-application-has-no-infrastructure-imports():
     """application/composite should not import from infrastructure."""
     ...
 
 
-def test_composite_port_contracts():
+def test-composite-port-contracts():
     """Composite ports should follow standard conventions."""
     ...
 ```
@@ -1223,31 +1223,31 @@ def test_composite_port_contracts():
 
 ```bash
 # Full composite run
-bioetl run --pipeline composite_publication
+bioetl run --pipeline composite-publication
 
 # With options
-bioetl run --pipeline composite_publication \
+bioetl run --pipeline composite-publication \
     --limit 1000 \
     --dry-run
 
 # Re-enrich specific source only
-bioetl run --pipeline composite_publication \
+bioetl run --pipeline composite-publication \
     --enrich-only pubmed,openalex
 
 # Skip optional enrichers (fast mode)
-bioetl run --pipeline composite_publication \
+bioetl run --pipeline composite-publication \
     --required-only
 
 # Resume after failure
-bioetl run --pipeline composite_publication \
+bioetl run --pipeline composite-publication \
     --resume
 
 # Force re-run of specific enricher
-bioetl run --pipeline composite_publication \
+bioetl run --pipeline composite-publication \
     --force-enricher crossref
 
 # List composite pipeline status
-bioetl status composite_publication
+bioetl status composite-publication
 ```
 
 ### CLI Implementation
@@ -1257,14 +1257,14 @@ bioetl status composite_publication
 
 @cli.command()
 @click.option("--enrich-only", help="Run only specified enrichers (comma-separated)")
-@click.option("--required-only", is_flag=True, help="Skip optional enrichers")
+@click.option("--required-only", is-flag=True, help="Skip optional enrichers")
 @click.option("--force-enricher", help="Force re-run of specified enricher")
-def run(pipeline: str, enrich_only: str | None, required_only: bool, ...):
+def run(pipeline: str, enrich-only: str | None, required-only: bool, ...):
     """Run a pipeline (regular or composite)."""
-    if pipeline.startswith("composite_"):
-        return run_composite(pipeline, enrich_only, required_only, ...)
+    if pipeline.startswith("composite-"):
+        return run-composite(pipeline, enrich-only, required-only, ...)
     else:
-        return run_regular(pipeline, ...)
+        return run-regular(pipeline, ...)
 ```
 
 ## Consequences
@@ -1276,7 +1276,7 @@ def run(pipeline: str, enrich_only: str | None, required_only: bool, ...):
 3. **Full lineage** - Every field traceable to source
 4. **Resume capability** - Checkpoint-based recovery from failures
 5. **Configurable flexibility** - YAML-based orchestration without code changes
-6. **No redundant Gold writes** - Sub-pipelines run with `skip_gold=True`,
+6. **No redundant Gold writes** - Sub-pipelines run with `skip-gold=True`,
    writing only Bronze+Silver; the composite merge phase produces the unified Gold output
 
 ### Negative
@@ -1290,7 +1290,7 @@ def run(pipeline: str, enrich_only: str | None, required_only: bool, ...):
 
 | Risk | Mitigation |
 |------|------------|
-| Memory pressure from parallel enrichers | `max_concurrency` limit, adaptive sizing |
+| Memory pressure from parallel enrichers | `max-concurrency` limit, adaptive sizing |
 | Lock contention with many enrichers | Hierarchical lock strategy |
 | Inconsistent data on partial failures | Checkpoint + resume mechanism |
 | Configuration errors | Schema validation via Pydantic |

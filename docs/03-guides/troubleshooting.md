@@ -33,7 +33,7 @@
     1.  Проверьте наличие других процессов того же пайплайна.
     2.  Если уверены, что процессов нет, блокировка может быть устаревшей. Освободите её вручную:
         ```bash
-        make release-lock PIPELINE=your_pipeline_name
+        make release-lock PIPELINE=your-pipeline-name
         ```
 
 ### Ошибка: `pydantic.ValidationError`
@@ -52,9 +52,9 @@
 *   **Решение**:
     1.  Просмотрите карантинные записи:
         ```bash
-        make quarantine-inspect PIPELINE=your_pipeline_name
+        make quarantine-inspect PIPELINE=your-pipeline-name
         ```
-    2.  Проанализируйте `error_code` и `payload`, чтобы определить первопричину (например, неожиданные `null` или неверные SMILES).
+    2.  Проанализируйте `error-code` и `payload`, чтобы определить первопричину (например, неожиданные `null` или неверные SMILES).
     3.  Скорректируйте правила качества данных или логику трансформации в соответствующем адаптере.
 
 ## См. также

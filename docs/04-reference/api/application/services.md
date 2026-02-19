@@ -8,28 +8,28 @@ Specialized services that encapsulate business logic and orchestration rules. Th
 
 Orchestrates the lifecycle of Medallion layers, including clearing data before runs and managing retention.
 
-::: bioetl.application.services.medallion_lifecycle.MedallionLifecycleService
+::: bioetl.application.services.medallion-lifecycle.MedallionLifecycleService
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### VacuumService
 
 Manages Delta Lake VACUUM operations to remove old files.
 
-::: bioetl.application.services.vacuum_service.VacuumService
+::: bioetl.application.services.vacuum-service.VacuumService
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### BronzeCleanupService
 
 Manages cleanup of Bronze layer files (JSONL) based on retention policies.
 
-::: bioetl.application.services.bronze_cleanup_service.BronzeCleanupService
+::: bioetl.application.services.bronze-cleanup-service.BronzeCleanupService
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ## Data Quality & Reporting
 
@@ -37,28 +37,28 @@ Manages cleanup of Bronze layer files (JSONL) based on retention policies.
 
 Orchestrates data quality checks and validation.
 
-::: bioetl.application.services.data_quality_service.DataQualityService
+::: bioetl.application.services.data-quality-service.DataQualityService
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### DQReportService
 
 Generates and persists data quality reports.
 
-::: bioetl.application.services.dq_report_service.DQReportService
+::: bioetl.application.services.dq-report-service.DQReportService
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### DQMetricsCalculator
 
 Calculates aggregated DQ metrics from raw validation results.
 
-::: bioetl.application.services.dq_metrics_calculator.DQMetricsCalculator
+::: bioetl.application.services.dq-metrics-calculator.DQMetricsCalculator
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ## Infrastructure Management
 
@@ -66,46 +66,46 @@ Calculates aggregated DQ metrics from raw validation results.
 
 Manages distributed locks for pipeline coordination.
 
-::: bioetl.application.services.lock_service.LockService
+::: bioetl.application.services.lock-service.LockService
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### CheckpointService
 
 Manages pipeline state persistence and recovery.
 
-::: bioetl.application.services.checkpoint_service.CheckpointService
+::: bioetl.application.services.checkpoint-service.CheckpointService
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### QuarantineService
 
 Manages failed records and quarantine operations.
 
-::: bioetl.application.services.quarantine_service.QuarantineService
+::: bioetl.application.services.quarantine-service.QuarantineService
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### ShutdownService
 
 Coordinates graceful shutdown of pipeline components.
 
-::: bioetl.application.services.shutdown_service.ShutdownService
+::: bioetl.application.services.shutdown-service.ShutdownService
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### ConfigService
 
 Manages configuration loading and validation.
 
-::: bioetl.application.services.config_service.ConfigService
+::: bioetl.application.services.config-service.ConfigService
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ## Observability & Health
 
@@ -113,19 +113,19 @@ Manages configuration loading and validation.
 
 Aggregates health status from multiple components.
 
-::: bioetl.application.services.health_service.HealthService
+::: bioetl.application.services.health-service.HealthService
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### MetricsService
 
 Manages application-level metrics collection.
 
-::: bioetl.application.services.metrics_service.MetricsService
+::: bioetl.application.services.metrics-service.MetricsService
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ## Data Export
 
@@ -133,10 +133,10 @@ Manages application-level metrics collection.
 
 Manages data export operations (e.g., to CSV/Parquet).
 
-::: bioetl.application.services.export_service.ExportService
+::: bioetl.application.services.export-service.ExportService
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ## Orchestration
 
@@ -144,7 +144,7 @@ Manages data export operations (e.g., to CSV/Parquet).
 
 Higher-level service for managing multiple pipeline runners.
 
-::: bioetl.application.services.pipeline_runner_service.PipelineRunnerService
+::: bioetl.application.services.pipeline-runner-service.PipelineRunnerService
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false

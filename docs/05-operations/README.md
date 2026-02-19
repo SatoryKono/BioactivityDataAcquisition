@@ -13,7 +13,7 @@ This section contains operational documentation for managing BioETL in productio
 | [Runbooks](runbooks/index.md) | Operational playbooks for incident response |
 | [Performance Baselines](performance-baselines.md) | Expected performance metrics |
 | [VACUUM Retention](vacuum-retention.md) | Delta Lake vacuum retention policies |
-| [Release Checklist](RELEASE_CHECKLIST.md) | Pre-release verification checklist |
+| [Release Checklist](RELEASE-CHECKLIST.md) | Pre-release verification checklist |
 
 ## Quick Links
 

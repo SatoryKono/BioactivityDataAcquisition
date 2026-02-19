@@ -44,7 +44,7 @@ and `src/bioetl/infrastructure/adapters/{provider}/` source code.
 
 ### Health Check
 
-- [ ] `curl -s -o /dev/null -w "%{http_code}" "https://www.ebi.ac.uk/chembl/api/data/status"` returns 200
+- [ ] `curl -s -o /dev/null -w "%{http-code}" "https://www.ebi.ac.uk/chembl/api/data/status"` returns 200
 - [ ] Response JSON contains `{"status": "UP"}` (adapter returns HEALTHY)
 - [ ] Response time < 5 sec (otherwise DEGRADED)
 
@@ -57,29 +57,29 @@ curl -s "https://www.ebi.ac.uk/chembl/api/data/status?format=json" | python3 -m 
 
 | Type | Next Indicator | Last Page Signal |
 |------|---------------|-----------------|
-| Offset-based (`limit` + `offset` params) | `page_meta.next` is not `null` | `page_meta.next` is `null` |
+| Offset-based (`limit` + `offset` params) | `page-meta.next` is not `null` | `page-meta.next` is `null` |
 
 **Response envelope:**
 ```
 {
-  "page_meta": {
+  "page-meta": {
     "limit": 1000,
     "offset": 0,
-    "total_count": 20000000,
+    "total-count": 20000000,
     "next": "/chembl/api/data/activity?limit=1000&offset=1000",
     "previous": null
   },
-  "<entity_plural_key>": [ ... records ... ]
+  "<entity-plural-key>": [ ... records ... ]
 }
 ```
 
-**Non-paginated entities:** `target`, `target_component`, `protein_class` (all records returned in single response).
+**Non-paginated entities:** `target`, `target-component`, `protein-class` (all records returned in single response).
 
 ### Retry & Circuit Breaker
 
 | Parameter | Value |
 |-----------|-------|
-| `use_retry_after` | `false` (ChEMBL does not return Retry-After headers) |
+| `use-retry-after` | `false` (ChEMBL does not return Retry-After headers) |
 | Circuit Breaker Failure Threshold | 5 |
 | Circuit Breaker Recovery Timeout | 300 sec |
 
@@ -93,18 +93,18 @@ curl -s "https://www.ebi.ac.uk/chembl/api/data/status?format=json"
 curl -s "https://www.ebi.ac.uk/chembl/api/data/activity?format=json&limit=5&offset=0" | python3 -c "
 import json, sys; d=json.load(sys.stdin)
 print('Records:', len(d.get('activities',[])))
-print('Total:', d.get('page_meta',{}).get('total_count'))
-print('Has next:', d.get('page_meta',{}).get('next') is not None)
+print('Total:', d.get('page-meta',{}).get('total-count'))
+print('Has next:', d.get('page-meta',{}).get('next') is not None)
 "
 
 # 3. Entity count check
 curl -s "https://www.ebi.ac.uk/chembl/api/data/molecule?format=json&limit=1" | python3 -c "
 import json, sys; d=json.load(sys.stdin)
-print('molecule total_count:', d.get('page_meta',{}).get('total_count'))
+print('molecule total-count:', d.get('page-meta',{}).get('total-count'))
 "
 
 # 4. Filtered query (by ChEMBL ID)
-curl -s "https://www.ebi.ac.uk/chembl/api/data/molecule?format=json&molecule_chembl_id__in=CHEMBL25,CHEMBL59" | python3 -c "
+curl -s "https://www.ebi.ac.uk/chembl/api/data/molecule?format=json&molecule-chembl-id--in=CHEMBL25,CHEMBL59" | python3 -c "
 import json, sys; d=json.load(sys.stdin)
 print('Records:', len(d.get('molecules',[])))
 "
@@ -113,11 +113,11 @@ print('Records:', len(d.get('molecules',[])))
 ### Checklist
 
 - [ ] Health endpoint returns 200 with `status: UP`
-- [ ] Paginated fetch returns `page_meta` with `total_count`
-- [ ] `page_meta.next` is populated when more pages exist
+- [ ] Paginated fetch returns `page-meta` with `total-count`
+- [ ] `page-meta.next` is populated when more pages exist
 - [ ] `format=json` parameter is respected
-- [ ] Filter `__in` operator works for batch ID lookups
-- [ ] Non-paginated entities (target, protein_class) return all records without limit/offset
+- [ ] Filter `--in` operator works for batch ID lookups
+- [ ] Non-paginated entities (target, protein-class) return all records without limit/offset
 
 ---
 
@@ -134,7 +134,7 @@ print('Records:', len(d.get('molecules',[])))
 | Base URL | `https://api.crossref.org` |
 | Auth Type | `email` (polite pool via `mailto` parameter) |
 | Rate Limit | 50 req/sec (polite pool), burst 100 |
-| Polite Pool | `true` (requires `BIOETL_CROSSREF_EMAIL` env var) |
+| Polite Pool | `true` (requires `BIOETL-CROSSREF-EMAIL` env var) |
 | Batch Size | 50 DOIs per batch |
 | Cursor Pagination | `true` |
 | Timeout | 30.0 sec |
@@ -143,7 +143,7 @@ print('Records:', len(d.get('molecules',[])))
 
 ### Health Check
 
-- [ ] `curl -s -o /dev/null -w "%{http_code}" "https://api.crossref.org/works?rows=1"` returns 200
+- [ ] `curl -s -o /dev/null -w "%{http-code}" "https://api.crossref.org/works?rows=1"` returns 200
 - [ ] Response time < 5 sec (>5 sec triggers DEGRADED in adapter)
 
 ```bash
@@ -180,7 +180,7 @@ print('Total results:', d.get('message',{}).get('total-results'))
 
 | Parameter | Value |
 |-----------|-------|
-| `use_retry_after` | `true` (CrossRef returns Retry-After on 429) |
+| `use-retry-after` | `true` (CrossRef returns Retry-After on 429) |
 | Circuit Breaker Failure Threshold | 5 |
 | Circuit Breaker Recovery Timeout | 300 sec |
 
@@ -234,7 +234,7 @@ print('Next cursor:', msg.get('next-cursor', 'N/A')[:20], '...')
 | Base URL | `https://api.openalex.org` |
 | Auth Type | `email` (polite pool via `mailto` parameter) |
 | Rate Limit | 10 req/sec (polite pool), burst 20 |
-| Polite Pool | `true` (requires `BIOETL_OPENALEX_EMAIL` env var) |
+| Polite Pool | `true` (requires `BIOETL-OPENALEX-EMAIL` env var) |
 | Batch Size | 50 DOIs per batch |
 | Cursor Pagination | `true` |
 | Timeout | 30.0 sec |
@@ -243,7 +243,7 @@ print('Next cursor:', msg.get('next-cursor', 'N/A')[:20], '...')
 
 ### Health Check
 
-- [ ] `curl -s -o /dev/null -w "%{http_code}" "https://api.openalex.org/works?per-page=1"` returns 200
+- [ ] `curl -s -o /dev/null -w "%{http-code}" "https://api.openalex.org/works?per-page=1"` returns 200
 - [ ] Response time < 5 sec (>5 sec triggers DEGRADED)
 
 ```bash
@@ -259,17 +259,17 @@ print('Results:', len(d.get('results', [])))
 
 | Type | Next Indicator | Last Page Signal |
 |------|---------------|-----------------|
-| Cursor-based (`cursor` param, initial `*`) | `meta.next_cursor` is not `null` | `meta.next_cursor` is `null` |
+| Cursor-based (`cursor` param, initial `*`) | `meta.next-cursor` is not `null` | `meta.next-cursor` is `null` |
 
 **Response envelope:**
 ```
 {
   "meta": {
     "count": 250000000,
-    "db_response_time_ms": 50,
+    "db-response-time-ms": 50,
     "page": 1,
-    "per_page": 50,
-    "next_cursor": "IlsxNjk..."
+    "per-page": 50,
+    "next-cursor": "IlsxNjk..."
   },
   "results": [ ... records ... ]
 }
@@ -281,7 +281,7 @@ print('Results:', len(d.get('results', [])))
 
 | Parameter | Value |
 |-----------|-------|
-| `use_retry_after` | `true` |
+| `use-retry-after` | `true` |
 | Circuit Breaker Failure Threshold | 5 |
 | Circuit Breaker Recovery Timeout | 300 sec |
 
@@ -306,7 +306,7 @@ curl -s "https://api.openalex.org/works?search=pharmacogenomics&cursor=*&per-pag
 import json, sys; d=json.load(sys.stdin)
 meta = d.get('meta', {})
 print('Results:', len(d.get('results', [])))
-print('Next cursor:', meta.get('next_cursor', 'N/A')[:20], '...')
+print('Next cursor:', meta.get('next-cursor', 'N/A')[:20], '...')
 "
 
 # 4. Title search
@@ -321,7 +321,7 @@ for r in d.get('results', []):
 
 - [ ] Health endpoint `/works?per-page=1` returns 200 with `meta` block
 - [ ] Batch DOI filter `filter=doi:id1|id2` returns matched results
-- [ ] Cursor pagination returns `meta.next_cursor` for continuation
+- [ ] Cursor pagination returns `meta.next-cursor` for continuation
 - [ ] Title search via `filter=title.search:...` returns results
 - [ ] Polite pool is activated via `mailto` query parameter
 - [ ] Retry-After header is respected on 429 responses
@@ -375,7 +375,7 @@ Fetch strategies include SMILES-based search, CID-based lookup, and InChIKey loo
 
 | Parameter | Value |
 |-----------|-------|
-| `use_retry_after` | `true` (PubChem returns Retry-After on 429) |
+| `use-retry-after` | `true` (PubChem returns Retry-After on 429) |
 | Circuit Breaker Failure Threshold | 5 |
 | Circuit Breaker Recovery Timeout | 300 sec |
 
@@ -401,7 +401,7 @@ curl -s "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/CC(%3DO)OC1%3
 
 # 5. Rate limit test (should return 429 if exceeded)
 for i in $(seq 1 10); do
-  curl -s -o /dev/null -w "%{http_code}\n" "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/962/property/MolecularFormula/JSON"
+  curl -s -o /dev/null -w "%{http-code}\n" "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/962/property/MolecularFormula/JSON"
 done
 ```
 
@@ -419,7 +419,7 @@ done
 ## 5. PubMed
 
 **Source config:** `configs/sources/pubmed.yaml`
-**Adapter code:** `src/bioetl/infrastructure/adapters/pubmed/pubmed_client.py`
+**Adapter code:** `src/bioetl/infrastructure/adapters/pubmed/pubmed-client.py`
 **API Docs:** https://www.ncbi.nlm.nih.gov/books/NBK25500/
 
 ### Base Configuration
@@ -427,8 +427,8 @@ done
 | Parameter | Value |
 |-----------|-------|
 | Base URL | `https://eutils.ncbi.nlm.nih.gov/entrez/eutils` |
-| Auth Type | `api_key` (optional, via `BIOETL_PUBMED_API_KEY` env var) |
-| Email | Required (`BIOETL_PUBMED_EMAIL` env var, default: `bioetl-bot@example.com`) |
+| Auth Type | `api-key` (optional, via `BIOETL-PUBMED-API-KEY` env var) |
+| Email | Required (`BIOETL-PUBMED-EMAIL` env var, default: `bioetl-bot@example.com`) |
 | Rate Limit (no key) | 3.0 req/sec, burst 5 |
 | Rate Limit (with key) | 10 req/sec, burst 20 |
 | Batch Size | 200 PMIDs per efetch request |
@@ -438,7 +438,7 @@ done
 
 ### Health Check
 
-- [ ] `curl -s -o /dev/null -w "%{http_code}" "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/einfo.fcgi?db=pubmed&retmode=json&email=test@example.com"` returns 200
+- [ ] `curl -s -o /dev/null -w "%{http-code}" "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/einfo.fcgi?db=pubmed&retmode=json&email=test@example.com"` returns 200
 - [ ] Health check timeout: 10 sec (from YAML)
 - [ ] Response time < 5 sec (>5 sec triggers DEGRADED)
 
@@ -477,7 +477,7 @@ Records are fetched in batches of 200 PMIDs per efetch request.
 
 | Parameter | Value |
 |-----------|-------|
-| `use_retry_after` | `true` |
+| `use-retry-after` | `true` |
 | Circuit Breaker Failure Threshold | 5 |
 | Circuit Breaker Recovery Timeout | 300 sec |
 
@@ -499,8 +499,8 @@ print('IDs:', result.get('idlist', []))
 curl -s "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=33826699&retmode=xml&rettype=abstract&email=test@example.com" | head -20
 
 # 4. Rate limit validation (with API key)
-curl -s -o /dev/null -w "%{http_code}" \
-  "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=test&retmax=1&retmode=json&email=test@example.com&api_key=YOUR_KEY"
+curl -s -o /dev/null -w "%{http-code}" \
+  "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=test&retmax=1&retmode=json&email=test@example.com&api-key=YOUR-KEY"
 ```
 
 ### Checklist
@@ -525,7 +525,7 @@ curl -s -o /dev/null -w "%{http_code}" \
 | Parameter | Value |
 |-----------|-------|
 | Base URL | `https://api.semanticscholar.org/graph/v1` |
-| Auth Type | `api_key` (via `BIOETL_SEMANTICSCHOLAR_API_KEY` env var) |
+| Auth Type | `api-key` (via `BIOETL-SEMANTICSCHOLAR-API-KEY` env var) |
 | Rate Limit (no key) | 0.1 req/sec (1 per 10 sec), burst 1 |
 | Rate Limit (with key) | 1.0 req/sec, burst 5 |
 | Sliding Window | 300 sec (5-minute window) |
@@ -539,19 +539,19 @@ curl -s -o /dev/null -w "%{http_code}" \
 
 ### Health Check
 
-- [ ] `curl -s -o /dev/null -w "%{http_code}" "https://api.semanticscholar.org/graph/v1/paper/search?query=test&limit=1&fields=paperId"` returns 200
+- [ ] `curl -s -o /dev/null -w "%{http-code}" "https://api.semanticscholar.org/graph/v1/paper/search?query=test&limit=1&fields=paperId"` returns 200
 - [ ] Health check timeout: 30 sec
 - [ ] Response 429 returns DEGRADED (not UNHEALTHY) -- rate limiting is expected without API key
-- [ ] `skip_on_429: true` in YAML config
+- [ ] `skip-on-429: true` in YAML config
 
 ```bash
 # Health check (may return 429 without API key)
-curl -s -w "\nHTTP Code: %{http_code}\n" \
+curl -s -w "\nHTTP Code: %{http-code}\n" \
   "https://api.semanticscholar.org/graph/v1/paper/search?query=test&limit=1&fields=paperId"
 
 # Health check with API key
-curl -s -w "\nHTTP Code: %{http_code}\n" \
-  -H "x-api-key: YOUR_API_KEY" \
+curl -s -w "\nHTTP Code: %{http-code}\n" \
+  -H "x-api-key: YOUR-API-KEY" \
   "https://api.semanticscholar.org/graph/v1/paper/search?query=test&limit=1&fields=paperId"
 ```
 
@@ -584,7 +584,7 @@ The batch response preserves order and returns `null` for unresolved DOIs.
 
 | Parameter | Value |
 |-----------|-------|
-| `use_retry_after` | `true` |
+| `use-retry-after` | `true` |
 | Circuit Breaker Failure Threshold | 10 (more tolerant) |
 | Circuit Breaker Recovery Timeout | 600 sec (10 min) |
 
@@ -618,7 +618,7 @@ for r in d.get('data', []):
 "
 
 # 4. Rate limit test (expect 429 without API key)
-curl -s -o /dev/null -w "%{http_code}\n" "https://api.semanticscholar.org/graph/v1/paper/search?query=test&limit=1&fields=paperId"
+curl -s -o /dev/null -w "%{http-code}\n" "https://api.semanticscholar.org/graph/v1/paper/search?query=test&limit=1&fields=paperId"
 ```
 
 ### Checklist
@@ -643,10 +643,10 @@ curl -s -o /dev/null -w "%{http_code}\n" "https://api.semanticscholar.org/graph/
 | Parameter | Value |
 |-----------|-------|
 | Base URL | `https://rest.uniprot.org` |
-| Auth Type | `api_key` (optional, via `BIOETL_UNIPROT_API_KEY` env var) |
+| Auth Type | `api-key` (optional, via `BIOETL-UNIPROT-API-KEY` env var) |
 | Rate Limit (no key) | 10.0 req/sec, burst 20 |
 | Rate Limit (with key) | 100 req/sec, burst 200 |
-| Batch Size | 200 (source YAML), 100 IDs per OR-query (adapter constant `UNIPROT_BATCH_SIZE`) |
+| Batch Size | 200 (source YAML), 100 IDs per OR-query (adapter constant `UNIPROT-BATCH-SIZE`) |
 | Protein Fetch Page Size | 500 (hardcoded in adapter) |
 | Timeout | 30.0 sec |
 | Max Retries | 3 |
@@ -693,7 +693,7 @@ if results:
 
 | Parameter | Value |
 |-----------|-------|
-| `use_retry_after` | `true` |
+| `use-retry-after` | `true` |
 | Circuit Breaker Failure Threshold | 5 |
 | Circuit Breaker Recovery Timeout | 300 sec |
 
@@ -707,7 +707,7 @@ print('Results:', len(d.get('results', [])))
 "
 
 # 2. Protein search with fields
-curl -s "https://rest.uniprot.org/uniprotkb/search?query=accession:P62988&size=1&format=json&fields=accession,protein_name,organism_name,sequence,length" | python3 -c "
+curl -s "https://rest.uniprot.org/uniprotkb/search?query=accession:P62988&size=1&format=json&fields=accession,protein-name,organism-name,sequence,length" | python3 -c "
 import json, sys; d=json.load(sys.stdin)
 for r in d.get('results', []):
     print(f\"Accession: {r.get('primaryAccession')}\")
@@ -722,7 +722,7 @@ for r in d.get('results', []):
 "
 
 # 4. Cursor pagination
-curl -s "https://rest.uniprot.org/uniprotkb/search?query=organism_id:9606+AND+reviewed:true&size=5&format=json" | python3 -c "
+curl -s "https://rest.uniprot.org/uniprotkb/search?query=organism-id:9606+AND+reviewed:true&size=5&format=json" | python3 -c "
 import json, sys; d=json.load(sys.stdin)
 print('Results:', len(d.get('results', [])))
 print('Next cursor:', d.get('nextCursor', 'N/A')[:20] if d.get('nextCursor') else 'None')
@@ -761,12 +761,12 @@ curl -s "https://rest.uniprot.org/uniprotkb/stream?query=accession:P62988&format
 | Provider | Auth Type | Env Variable | Polite Pool |
 |----------|-----------|-------------|-------------|
 | ChEMBL | Public | N/A | N/A |
-| CrossRef | Email | `BIOETL_CROSSREF_EMAIL` | Yes (50 req/sec) |
-| OpenAlex | Email | `BIOETL_OPENALEX_EMAIL` | Yes (10 req/sec) |
+| CrossRef | Email | `BIOETL-CROSSREF-EMAIL` | Yes (50 req/sec) |
+| OpenAlex | Email | `BIOETL-OPENALEX-EMAIL` | Yes (10 req/sec) |
 | PubChem | Public | N/A | N/A |
-| PubMed | API Key (optional) | `BIOETL_PUBMED_API_KEY`, `BIOETL_PUBMED_EMAIL` | N/A |
-| Semantic Scholar | API Key (recommended) | `BIOETL_SEMANTICSCHOLAR_API_KEY` | N/A |
-| UniProt | API Key (optional) | `BIOETL_UNIPROT_API_KEY` | N/A |
+| PubMed | API Key (optional) | `BIOETL-PUBMED-API-KEY`, `BIOETL-PUBMED-EMAIL` | N/A |
+| Semantic Scholar | API Key (recommended) | `BIOETL-SEMANTICSCHOLAR-API-KEY` | N/A |
+| UniProt | API Key (optional) | `BIOETL-UNIPROT-API-KEY` | N/A |
 
 ### Rate Limit Comparison
 
@@ -784,9 +784,9 @@ curl -s "https://rest.uniprot.org/uniprotkb/stream?query=accession:P62988&format
 
 | Provider | Pagination Type | Key Response Fields |
 |----------|----------------|---------------------|
-| ChEMBL | Offset (`limit`/`offset`) | `page_meta.next`, `page_meta.total_count` |
+| ChEMBL | Offset (`limit`/`offset`) | `page-meta.next`, `page-meta.total-count` |
 | CrossRef | Cursor (`cursor`) | `message.next-cursor` |
-| OpenAlex | Cursor (`cursor`, initial `*`) | `meta.next_cursor` |
+| OpenAlex | Cursor (`cursor`, initial `*`) | `meta.next-cursor` |
 | PubChem | None (via pubchempy library) | N/A |
 | PubMed | Two-phase (esearch + efetch) | `esearchresult.idlist` |
 | Semantic Scholar | Offset (search) / Batch POST (DOIs) | `next` (offset integer) |

@@ -5,8 +5,8 @@
 
 | Attribute | Value |
 |-----------|-------|
-| **Entity ID** | `target_chembl_id` (Business Key) |
-| **Content Hash** | `content_hash` (SHA256 for SCD Type 2) |
+| **Entity ID** | `target-chembl-id` (Business Key) |
+| **Content Hash** | `content-hash` (SHA256 for SCD Type 2) |
 | **Source** | ChEMBL API (`/chembl/api/data/target.json`) |
 | **Update Frequency** | Quarterly (ChEMBL release cycle) |
 | **Schema Version** | 1.0.0 (ChEMBL 34 aligned) |
@@ -16,13 +16,13 @@ Target records represent biological targets including single proteins, protein c
 
 ### Key Relationships
 ```
-Target ◄─── Activity (target_chembl_id)
+Target ◄─── Activity (target-chembl-id)
     │
-    ├───► Target Component (component_id)
+    ├───► Target Component (component-id)
     │       │
     │       └───► UniProt (accession)
     │
-    └───► Assay (target_chembl_id)
+    └───► Assay (target-chembl-id)
 ```
 
 ---
@@ -31,8 +31,8 @@ Target ◄─── Activity (target_chembl_id)
 
 | Layer | Format | Validation | Partition Key | Retention |
 |-------|--------|------------|---------------|-----------|
-| Bronze | JSONL+zstd | None | `ingestion_date` | 90 days |
-| Silver | Delta Lake | Pandera (soft) | `target_type` | Permanent |
+| Bronze | JSONL+zstd | None | `ingestion-date` | 90 days |
+| Silver | Delta Lake | Pandera (soft) | `target-type` | Permanent |
 | Gold | Delta Lake | Pandera (strict) | None | Permanent |
 
 ### Gold Layer Filtering
@@ -40,12 +40,12 @@ Gold layer applies filters for single proteins with UniProt mappings:
 
 | Filter | Values | Purpose |
 |--------|--------|---------|
-| `target_type` | `["SINGLE PROTEIN"]` | Focus on single proteins |
-| `component_accessions` | length = 1 | Single component |
-| `component_ids` | length >= 1 | Has component ID |
-| `component_types` | contains `["PROTEIN"]` | Protein components |
+| `target-type` | `["SINGLE PROTEIN"]` | Focus on single proteins |
+| `component-accessions` | length = 1 | Single component |
+| `component-ids` | length >= 1 | Has component ID |
+| `component-types` | contains `["PROTEIN"]` | Protein components |
 
-**Required Fields for Gold**: `pref_name`, `organism`
+**Required Fields for Gold**: `pref-name`, `organism`
 
 ---
 
@@ -55,24 +55,24 @@ Gold layer applies filters for single proteins with UniProt mappings:
 
 | Field | Type | Nullable | Constraints | Description | Source |
 |-------|------|----------|-------------|-------------|--------|
-| `target_chembl_id` | `str` | No | `^CHEMBL\d+$` | ChEMBL target identifier | `targets[].target_chembl_id` |
+| `target-chembl-id` | `str` | No | `^CHEMBL\d+$` | ChEMBL target identifier | `targets[].target-chembl-id` |
 
 ### Core Metadata
 
 | Field | Type | Nullable | Constraints | Description | Source |
 |-------|------|----------|-------------|-------------|--------|
-| `pref_name` | `str` | Yes | — | Preferred target name | `targets[].pref_name` |
+| `pref-name` | `str` | Yes | — | Preferred target name | `targets[].pref-name` |
 | `organism` | `str` | Yes | — | Organism (e.g., "Homo sapiens") | `targets[].organism` |
-| `tax_id` | `int` | Yes | — | NCBI Taxonomy ID | `targets[].tax_id` |
-| `species_group_flag` | `bool` | Yes | — | Species group indicator | `targets[].species_group_flag` |
+| `tax-id` | `int` | Yes | — | NCBI Taxonomy ID | `targets[].tax-id` |
+| `species-group-flag` | `bool` | Yes | — | Species group indicator | `targets[].species-group-flag` |
 
 ### Classification
 
 | Field | Type | Nullable | Constraints | Description | Source |
 |-------|------|----------|-------------|-------------|--------|
-| `target_type` | `str` | Yes | `isin=[...]` | Target type classification | `targets[].target_type` |
+| `target-type` | `str` | Yes | `isin=[...]` | Target type classification | `targets[].target-type` |
 
-**Valid `target_type` values:**
+**Valid `target-type` values:**
 - `SINGLE PROTEIN` - Single protein target
 - `PROTEIN FAMILY` - Group of related proteins
 - `PROTEIN COMPLEX` - Multi-subunit protein
@@ -92,20 +92,20 @@ Gold layer applies filters for single proteins with UniProt mappings:
 
 | Field | Type | Nullable | Description | Source |
 |-------|------|----------|-------------|--------|
-| `target_components` | `str` | Yes | Component proteins/sequences (JSON) | `targets[].target_components` |
-| `cross_references` | `str` | Yes | External database links (JSON) | `targets[].cross_references` |
+| `target-components` | `str` | Yes | Component proteins/sequences (JSON) | `targets[].target-components` |
+| `cross-references` | `str` | Yes | External database links (JSON) | `targets[].cross-references` |
 
 ### Flattened Component Fields
 
-These fields are extracted from the `target_components` array for easier querying:
+These fields are extracted from the `target-components` array for easier querying:
 
 | Field | Type | Nullable | Description | Source |
 |-------|------|----------|-------------|--------|
-| `component_accessions` | `list[str]` | Yes | UniProt accessions | `target_components[].accession` |
-| `component_ids` | `list[int]` | Yes | Component IDs | `target_components[].component_id` |
-| `component_types` | `list[str]` | Yes | Component types (PROTEIN, etc.) | `target_components[].component_type` |
-| `component_relationships` | `list[str]` | Yes | Relationship types | `target_components[].relationship` |
-| `component_descriptions` | `list[str]` | Yes | Component descriptions | `target_components[].component_description` |
+| `component-accessions` | `list[str]` | Yes | UniProt accessions | `target-components[].accession` |
+| `component-ids` | `list[int]` | Yes | Component IDs | `target-components[].component-id` |
+| `component-types` | `list[str]` | Yes | Component types (PROTEIN, etc.) | `target-components[].component-type` |
+| `component-relationships` | `list[str]` | Yes | Relationship types | `target-components[].relationship` |
+| `component-descriptions` | `list[str]` | Yes | Component descriptions | `target-components[].component-description` |
 
 ---
 
@@ -113,14 +113,14 @@ These fields are extracted from the `target_components` array for easier queryin
 
 | Field | Type | Nullable | Purpose | Included in Content Hash |
 |-------|------|----------|---------|-------------------------|
-| `entity_id` | `str` | No | Business key (= target_chembl_id) | Yes |
-| `content_hash` | `str` | No | SHA256 for SCD Type 2 | — |
-| `_run_id` | `UUID` | No | Pipeline run correlation ID | No |
-| `_run_type` | `Enum` | No | incremental/backfill/rebuild | No |
-| `_source_batch_id` | `UUID` | Yes | FK to lineage_log | No |
-| `_ingestion_ts` | `Timestamp` | No | Ingestion time (UTC) | No |
-| `_dq_warn` | `bool` | No | DQ warning flag | No |
-| `_index` | `int` | No | Record index in batch | No |
+| `entity-id` | `str` | No | Business key (= target-chembl-id) | Yes |
+| `content-hash` | `str` | No | SHA256 for SCD Type 2 | — |
+| `-run-id` | `UUID` | No | Pipeline run correlation ID | No |
+| `-run-type` | `Enum` | No | incremental/backfill/rebuild | No |
+| `-source-batch-id` | `UUID` | Yes | FK to lineage-log | No |
+| `-ingestion-ts` | `Timestamp` | No | Ingestion time (UTC) | No |
+| `-dq-warn` | `bool` | No | DQ warning flag | No |
+| `-index` | `int` | No | Record index in batch | No |
 
 ---
 
@@ -130,13 +130,13 @@ These fields are extracted from the `target_components` array for easier queryin
 
 | Source Field | Target Field | Transformation |
 |--------------|--------------|----------------|
-| `target_chembl_id` | `target_chembl_id` | Direct |
-| `tax_id` | `tax_id` | `safe_int()` |
-| `target_components` | `target_components` | `json.dumps()` |
-| `target_components[*].accession` | `component_accessions` | Extract to list |
-| `target_components[*].component_id` | `component_ids` | Extract to list |
-| `target_components[*].component_type` | `component_types` | Extract to list |
-| `cross_references` | `cross_references` | `json.dumps()` |
+| `target-chembl-id` | `target-chembl-id` | Direct |
+| `tax-id` | `tax-id` | `safe-int()` |
+| `target-components` | `target-components` | `json.dumps()` |
+| `target-components[*].accession` | `component-accessions` | Extract to list |
+| `target-components[*].component-id` | `component-ids` | Extract to list |
+| `target-components[*].component-type` | `component-types` | Extract to list |
+| `cross-references` | `cross-references` | `json.dumps()` |
 
 ---
 
@@ -148,20 +148,20 @@ These fields are extracted from the `target_components` array for easier queryin
 class TargetSchema(ETLRecordSchema):
     """Target validation schema for Silver layer."""
 
-    target_chembl_id: Series[str] = pa.Field(
-        nullable=False, str_matches=r"^CHEMBL\d+$"
+    target-chembl-id: Series[str] = pa.Field(
+        nullable=False, str-matches=r"^CHEMBL\d+$"
     )
-    target_type: Optional[Series[str]] = pa.Field(
+    target-type: Optional[Series[str]] = pa.Field(
         nullable=True, isin=[
             "SINGLE PROTEIN", "PROTEIN FAMILY", "PROTEIN COMPLEX",
             "CELL-LINE", "TISSUE", "ORGANISM", ...
         ]
     )
-    tax_id: Optional[Series[int]] = pa.Field(nullable=True)
+    tax-id: Optional[Series[int]] = pa.Field(nullable=True)
 
     # List fields
-    component_accessions: Optional[Series[object]] = pa.Field(nullable=True)
-    component_ids: Optional[Series[object]] = pa.Field(nullable=True)
+    component-accessions: Optional[Series[object]] = pa.Field(nullable=True)
+    component-ids: Optional[Series[object]] = pa.Field(nullable=True)
 
     class Config:
         strict = True
@@ -172,8 +172,8 @@ class TargetSchema(ETLRecordSchema):
 ### Entity Invariants
 
 ```python
-def _validate_invariants(self) -> None:
-    if not self.target_chembl_id:
+def -validate-invariants(self) -> None:
+    if not self.target-chembl-id:
         raise ValueError("Target ChEMBL ID is required")
 ```
 
@@ -183,10 +183,10 @@ def _validate_invariants(self) -> None:
 
 | Source | ID Field | Mapping Strategy |
 |--------|----------|------------------|
-| ChEMBL | `target_chembl_id` | Primary source |
-| UniProt | `component_accessions[]` | Via flattened components |
-| NCBI Taxonomy | `tax_id` | Direct mapping |
-| Gene Ontology | `cross_references[src="GO"]` | Via cross_references |
+| ChEMBL | `target-chembl-id` | Primary source |
+| UniProt | `component-accessions[]` | Via flattened components |
+| NCBI Taxonomy | `tax-id` | Direct mapping |
+| Gene Ontology | `cross-references[src="GO"]` | Via cross-references |
 
 ---
 
@@ -196,24 +196,24 @@ def _validate_invariants(self) -> None:
 
 ```json
 {
-  "target_chembl_id": "CHEMBL3921",
-  "pref_name": "Heparanase",
-  "target_type": "SINGLE PROTEIN",
+  "target-chembl-id": "CHEMBL3921",
+  "pref-name": "Heparanase",
+  "target-type": "SINGLE PROTEIN",
   "organism": "Homo sapiens",
-  "tax_id": 9606,
-  "species_group_flag": false,
-  "target_components": [
+  "tax-id": 9606,
+  "species-group-flag": false,
+  "target-components": [
     {
       "accession": "Q9Y251",
-      "component_id": 4553,
-      "component_type": "PROTEIN",
-      "component_description": "Heparanase",
+      "component-id": 4553,
+      "component-type": "PROTEIN",
+      "component-description": "Heparanase",
       "relationship": "SINGLE PROTEIN"
     }
   ],
-  "cross_references": [
-    {"xref_id": "Q9Y251", "xref_name": "UniProt", "xref_src": "UniProt"},
-    {"xref_id": "GO:0005576", "xref_name": "extracellular region", "xref_src": "GO"}
+  "cross-references": [
+    {"xref-id": "Q9Y251", "xref-name": "UniProt", "xref-src": "UniProt"},
+    {"xref-id": "GO:0005576", "xref-name": "extracellular region", "xref-src": "GO"}
   ]
 }
 ```
@@ -222,29 +222,29 @@ def _validate_invariants(self) -> None:
 
 ```json
 {
-  "entity_id": "CHEMBL3921",
-  "target_chembl_id": "CHEMBL3921",
-  "content_hash": "sha256:def456...",
-  "_run_id": "550e8400-e29b-41d4-a716-446655440001",
-  "_run_type": "incremental",
-  "_ingestion_ts": "2024-01-15T10:30:00Z",
-  "_dq_warn": false,
-  "_index": 0,
+  "entity-id": "CHEMBL3921",
+  "target-chembl-id": "CHEMBL3921",
+  "content-hash": "sha256:def456...",
+  "-run-id": "550e8400-e29b-41d4-a716-446655440001",
+  "-run-type": "incremental",
+  "-ingestion-ts": "2024-01-15T10:30:00Z",
+  "-dq-warn": false,
+  "-index": 0,
 
-  "pref_name": "Heparanase",
-  "target_type": "SINGLE PROTEIN",
+  "pref-name": "Heparanase",
+  "target-type": "SINGLE PROTEIN",
   "organism": "Homo sapiens",
-  "tax_id": 9606,
-  "species_group_flag": false,
+  "tax-id": 9606,
+  "species-group-flag": false,
 
-  "target_components": "[{\"accession\": \"Q9Y251\", ...}]",
-  "cross_references": "[{\"xref_id\": \"Q9Y251\", ...}]",
+  "target-components": "[{\"accession\": \"Q9Y251\", ...}]",
+  "cross-references": "[{\"xref-id\": \"Q9Y251\", ...}]",
 
-  "component_accessions": ["Q9Y251"],
-  "component_ids": [4553],
-  "component_types": ["PROTEIN"],
-  "component_relationships": ["SINGLE PROTEIN"],
-  "component_descriptions": ["Heparanase"]
+  "component-accessions": ["Q9Y251"],
+  "component-ids": [4553],
+  "component-types": ["PROTEIN"],
+  "component-relationships": ["SINGLE PROTEIN"],
+  "component-descriptions": ["Heparanase"]
 }
 ```
 
@@ -255,9 +255,9 @@ def _validate_invariants(self) -> None:
 | Artifact | Path |
 |----------|------|
 | Pandera Schema | `src/bioetl/domain/schemas/chembl/target.py` |
-| Domain Entity | `src/bioetl/domain/entities/chembl_structures.py` |
+| Domain Entity | `src/bioetl/domain/entities/chembl-structures.py` |
 | Pipeline Config | `configs/pipelines/chembl/target.yaml` |
-| Target Component Schema | `src/bioetl/domain/schemas/chembl/target_component.py` |
+| Target Component Schema | `src/bioetl/domain/schemas/chembl/target-component.py` |
 
 ---
 

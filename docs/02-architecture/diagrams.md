@@ -82,7 +82,7 @@ flowchart LR
     Bronze -->|Transform + Validate| Silver
     Silver -->|Aggregate| Gold
     Silver -.->|DQ errors| Q
-    Bronze -.->|batch_id FK| L
+    Bronze -.->|batch-id FK| L
 ```
 
 ## Class Diagram
@@ -129,7 +129,7 @@ flowchart TB
     end
 
     subgraph Composition["Composition Layer"]
-        Bootstrap[bootstrap_pipeline]
+        Bootstrap[bootstrap-pipeline]
         Factories[Factories]
     end
 
@@ -176,22 +176,22 @@ sequenceDiagram
 
     CLI->>Runner: run()
     Runner->>Preflight: execute()
-    Preflight->>Storage: health_check()
-    Preflight->>DataSource: health_check()
+    Preflight->>Storage: health-check()
+    Preflight->>DataSource: health-check()
     Preflight-->>Runner: success
 
-    Runner->>Runner: acquire_lock()
+    Runner->>Runner: acquire-lock()
     Runner->>Executor: execute()
 
     loop Each Batch
         Executor->>DataSource: fetch(batch)
         Executor->>Transformer: transform(records)
-        Executor->>Storage: write_bronze()
-        Executor->>Storage: write_silver()
-        Executor->>Storage: write_gold()
+        Executor->>Storage: write-bronze()
+        Executor->>Storage: write-silver()
+        Executor->>Storage: write-gold()
     end
 
-    Runner->>Runner: release_lock()
+    Runner->>Runner: release-lock()
     Runner-->>CLI: result
 ```
 
@@ -241,15 +241,15 @@ flowchart TB
         subgraph aggregates["DDD Aggregates"]
             Batch["Batch
             ─────────
-            add_record()
-            quarantine_record()
+            add-record()
+            quarantine-record()
             seal()
-            mark_committed()"]
+            mark-committed()"]
 
             PipelineRun["PipelineRun
             ─────────
             start()
-            record_stage_success()
+            record-stage-success()
             complete()
             fail()"]
         end
@@ -262,7 +262,7 @@ flowchart TB
             RunCompleted
         end
 
-        subgraph value_objects["Value Objects"]
+        subgraph value-objects["Value Objects"]
             RunID["RunID"]
             BatchID["BatchID"]
             EntityID["EntityID"]
@@ -295,9 +295,9 @@ See [ADR-021: DDD Aggregates Adoption](decisions/ADR-021-ddd-aggregates-adoption
 stateDiagram-v2
     [*] --> OPEN: create()
     OPEN --> SEALED: seal()
-    SEALED --> WRITING: mark_writing()
-    WRITING --> COMMITTED: mark_committed()
-    WRITING --> FAILED: mark_failed()
+    SEALED --> WRITING: mark-writing()
+    WRITING --> COMMITTED: mark-committed()
+    WRITING --> FAILED: mark-failed()
     COMMITTED --> [*]
     FAILED --> [*]
 

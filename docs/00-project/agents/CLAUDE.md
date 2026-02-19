@@ -10,14 +10,14 @@
 
 ```bash
 # Автоматическая настройка окружения (рекомендуется)
-./dev_setup.sh          # Полная настройка с тестами
-./dev_setup.sh --quick  # Быстрая установка без тестов
+./dev-setup.sh          # Полная настройка с тестами
+./dev-setup.sh --quick  # Быстрая установка без тестов
 
 # Проверка перед работой
 make lint && make test
 
 # Основные команды
-make install          # Создание venv, установка зависимостей (альтернатива dev_setup.sh)
+make install          # Создание venv, установка зависимостей (альтернатива dev-setup.sh)
 make test             # Все тесты (unit + integration)
 make lint             # ruff + mypy
 make run-local        # Запуск на фикстурах
@@ -28,7 +28,7 @@ make lint && make test
 
 **Главные ресурсы:**
 1. `docs/00-project/RULES.md` — Конституция проекта (RFC 2119 keywords)
-2. `.claude/PROJECT_CONTEXT.md` — Компактный контекст
+2. `.claude/PROJECT-CONTEXT.md` — Компактный контекст
 3. `AGENT.md` — Детальные инструкции для агента
 4. `docs/archived/refactoring-plan.md` — Архив плана рефакторинга (исторический справочник)
 
@@ -76,10 +76,10 @@ grep -n "def " src/bioetl/application/core/runner.py  # Проверить ме�
 ### 0.3. Формат Верифицированного Утверждения
 
 **❌ НЕ делай так:**
-> "bootstrap_pipeline смешивает ответственности и требует декомпозиции"
+> "bootstrap-pipeline смешивает ответственности и требует декомпозиции"
 
 **✅ Делай так:**
-> "bootstrap_pipeline рефакторирован в `composition/bootstrap/` (directory),
+> "bootstrap-pipeline рефакторирован в `composition/bootstrap/` (directory),
 > делегирует через sub-modules: `assembly/`, `cli/`, `runtime/`.
 >
 > **Вывод**: Уже декомпозирован, задача не требуется."
@@ -100,14 +100,14 @@ wc -l src/bioetl/application/core/runner.py
 grep -c "def \|async def " src/bioetl/application/core/runner.py
 
 # Проверка делегирования
-grep -n "self\._.*\." src/bioetl/application/core/runner.py | head -20
+grep -n "self\.-.*\." src/bioetl/application/core/runner.py | head -20
 
 # Проверка импортов (зависимости)
 grep "^from\|^import" src/bioetl/application/core/runner.py
 
 # Существующие тесты
-ls tests/unit/application/core/test_runner*.py
-ls tests/architecture/test_*.py
+ls tests/unit/application/core/test-runner*.py
+ls tests/architecture/test-*.py
 ```
 
 ---
@@ -128,7 +128,7 @@ ls tests/architecture/test_*.py
 |---------|----------|
 | **Python-файлов** | ~1,114 (534 src + 580 tests) |
 | **Строк кода** | ~115,656 (src/bioetl/) |
-| **Тестов** | ~11,985 (функций test_) |
+| **Тестов** | ~11,985 (функций test-) |
 | **ADR** | 36 |
 | **Провайдеров** | 7 |
 | **Pipeline-конфигураций** | 27 |
@@ -161,25 +161,25 @@ src/bioetl/
 
 | Компонент | ❌ Ложное утверждение | ✅ Реальность |
 |-----------|----------------------|---------------|
-| **Email в config/adapters** | "PII поля (email) требуют хэширования HashService" | **НЕ PII**: `default_email` — технический идентификатор для NCBI API, не персональные данные. NCBI требует email для идентификации инструмента. См. `config.py:364-371`, `pubmed_client.py:38-42` |
+| **Email в config/adapters** | "PII поля (email) требуют хэширования HashService" | **НЕ PII**: `default-email` — технический идентификатор для NCBI API, не персональные данные. NCBI требует email для идентификации инструмента. См. `config.py:364-371`, `pubmed-client.py:38-42` |
 | **PipelineRunner** | "God object, слишком много ответственностей" | **189 строк**, делегирует через `PipelineServices` bundle (`runner.py:54,89`) |
-| **bootstrap_pipeline** | "Смешивает сборку и бизнес-логику" | Тонкий фасад, делегирует фабрикам: `factory.create_runner()` |
+| **bootstrap-pipeline** | "Смешивает сборку и бизнес-логику" | Тонкий фасад, делегирует фабрикам: `factory.create-runner()` |
 | **ChEMBL Adapter** | "Монолит 517 строк, объединяет всё" | **1124 строки**, делегирует через `EntityMapper`, `ErrorClassifier`, `AdapterMetrics`, `BaseHttpAdapter` (`client.py`) |
-| **GoldWriter** | "Монолит 593 строки, требует декомпозиции" | **938 строк**, делегирует CSV в `CsvExporter`, audit в `AuditPort`. Режимы OVERWRITE/APPEND/SCD2 — когезивны (`gold_writer.py`) |
+| **GoldWriter** | "Монолит 593 строки, требует декомпозиции" | **938 строк**, делегирует CSV в `CsvExporter`, audit в `AuditPort`. Режимы OVERWRITE/APPEND/SCD2 — когезивны (`gold-writer.py`) |
 | **CLI** | "Содержит бизнес-логику подтверждений" | Подтверждения — **законная** ответственность interfaces слоя |
 | **WriteModePolicy default** | "DeltaWriter нарушает DI" | Опциональный параметр с default — валидный паттерн для value objects |
 | **BaseTransformer** | "Нет DQ-валидации" | By design: Template Method. DQ — ответственность конкретных трансформеров |
-| **MedallionLifecycle** | "Не использует политики" | Использует `MedallionPolicy.should_clear_silver/gold` |
-| **BronzeWriter** | "Нет observability" | Имеет структурированное логирование (`bronze_writer.py:197-205`) |
+| **MedallionLifecycle** | "Не использует политики" | Использует `MedallionPolicy.should-clear-silver/gold` |
+| **BronzeWriter** | "Нет observability" | Имеет структурированное логирование (`bronze-writer.py:197-205`) |
 | **DQ/Medallion политики** | "Нет автоматизации" | Реализовано: `MedallionPolicy`, `DQConfig`, `SilverWriteMode`, `GoldWriteMode` enums |
-| **bootstrap_pipeline** | "140+ строк, усложняет тестирование" | Рефакторинг в `composition/bootstrap/` (directory с `assembly/`, `cli/`, `runtime/`), делегирует через фабрики и helper-функции |
-| **RecordProcessor** | "Совмещает метрики/карантин/запись" | **Делегирует** в `BatchMetricsRecorder`, `BatchTransformer`, `BatchWriter`, `QuarantineManager` (`record_processor.py:59-85`) |
+| **bootstrap-pipeline** | "140+ строк, усложняет тестирование" | Рефакторинг в `composition/bootstrap/` (directory с `assembly/`, `cli/`, `runtime/`), делегирует через фабрики и helper-функции |
+| **RecordProcessor** | "Совмещает метрики/карантин/запись" | **Делегирует** в `BatchMetricsRecorder`, `BatchTransformer`, `BatchWriter`, `QuarantineManager` (`record-processor.py:59-85`) |
 | **PipelineRunner** | "Не выпускает метрики по стадиям" | Использует `PipelineObserver` через `PipelineServices` (`runner.py:89`) |
-| **Write mode validation** | "Нет валидации через Enum" | **Реализовано**: `SilverWriteMode`, `GoldWriteMode` enums (`delta_writer.py:53-64`, `gold_writer.py:42-54`) |
+| **Write mode validation** | "Нет валидации через Enum" | **Реализовано**: `SilverWriteMode`, `GoldWriteMode` enums (`delta-writer.py:53-64`, `gold-writer.py:42-54`) |
 | **Архитектурные тесты** | "Не связаны с метриками" | 360 тестов в `tests/architecture/`, `make arch-test` в CI |
 | **MemoryLock** | "Требуется Redis для распределённых блокировок" | **MemoryLock достаточен** для локального запуска. Проект **by design** использует локальные пайплайны. См. §5 Блокировки. |
-| **MemoryMonitor** | "Возвращает захардкоженные нули, баг" | **Graceful degradation** — возвращает консервативные оценки (50% использования), не нули. Это **валидный паттерн** при недоступности psutil. См. `memory_monitor.py:170-180` |
-| **DQ метрики** | "Не экспортируются в Prometheus" | **УЖЕ РЕАЛИЗОВАНО**: `postrun_service.py:158-163` эмитит `dq_soft_threshold_exceeded` (counter), `dq_check_duration_ms` (histogram). `DQConfig` имеет `soft_fail_threshold=0.05`, `hard_fail_threshold=0.20` |
+| **MemoryMonitor** | "Возвращает захардкоженные нули, баг" | **Graceful degradation** — возвращает консервативные оценки (50% использования), не нули. Это **валидный паттерн** при недоступности psutil. См. `memory-monitor.py:170-180` |
+| **DQ метрики** | "Не экспортируются в Prometheus" | **УЖЕ РЕАЛИЗОВАНО**: `postrun-service.py:158-163` эмитит `dq-soft-threshold-exceeded` (counter), `dq-check-duration-ms` (histogram). `DQConfig` имеет `soft-fail-threshold=0.05`, `hard-fail-threshold=0.20` |
 | **protocols.py** | "Пустой файл с нулевым покрытием" | Содержит 4 Protocol: `TransformCallback`, `GoldFilterCallback`, `GoldTransformCallback`, `TransformerPort`. См. `application/core/protocols.py` |
 | **Coverage gate** | "Нет coverage gate в CI, нужно добавить --cov-fail-under" | **УЖЕ РЕАЛИЗОВАНО**: `Makefile:63` (`--cov-fail-under=85`), `.github/workflows/tests.yml:158`. Верификация: 2026-01-06 |
 | **OTLPSpanExporter** | "Ошибка Optional-аннотации, mypy --strict падает" | **ОШИБОК НЕТ**: `uv run mypy src/bioetl --strict` → "Success: no issues found in 326 source files". Код в `tracing.py:36-44` корректен. Верификация: 2025-12-31 |
@@ -199,24 +199,24 @@ src/bioetl/
    - Ответственность interfaces слоя
    - Другие интерфейсы имеют свои механизмы
 
-4. **Backward-compatibility shims** (`from module import X; __all__ = ["X"]`):
+4. **Backward-compatibility shims** (`from module import X; --all-- = ["X"]`):
    - Re-export для совместимости — НЕ дублирование
-   - Пример: `application/core/medallion_policy.py` (19 строк)
+   - Пример: `application/core/medallion-policy.py` (19 строк)
 
 5. **Большой файл с делегированием** (500+ LOC):
    - Размер ≠ god object, если есть делегирование
-   - Проверять через `grep "self._" file.py | sort -u`
+   - Проверять через `grep "self.-" file.py | sort -u`
 
 6. **Graceful degradation в MemoryMonitor**:
    - При недоступности psutil возвращает **консервативные оценки** (50% памяти), не нули
    - Это **безопасный fallback** — лучше переоценить нагрузку, чем недооценить
-   - Реализация: `memory_monitor.py:170-180` (`_get_stats_estimate`)
+   - Реализация: `memory-monitor.py:170-180` (`-get-stats-estimate`)
    - **НЕ баг**, а продуманное поведение для кросс-платформенности
 
 7. **DQ метрики уже реализованы**:
-   - `DQConfig` в `domain/config.py:28-40` с `soft_fail_threshold=0.05`, `hard_fail_threshold=0.20`
-   - `postrun_service.py:122-163` проверяет пороги и эмитит метрики
-   - Счётчик `dq_soft_threshold_exceeded` и гистограмма `dq_check_duration_ms`
+   - `DQConfig` в `domain/config.py:28-40` с `soft-fail-threshold=0.05`, `hard-fail-threshold=0.20`
+   - `postrun-service.py:122-163` проверяет пороги и эмитит метрики
+   - Счётчик `dq-soft-threshold-exceeded` и гистограмма `dq-check-duration-ms`
    - **НЕ требуется** дополнительная реализация
 
 8. **Click для CLI (а не Typer)**:
@@ -229,7 +229,7 @@ src/bioetl/
    - Gold-схемы используют `Series[float]` с `coerce=True` для полей, которые в Silver — `pa.int64()`
    - **Осознанное решение**: Pandas/Polars исторически не поддерживали nullable integers без `Int64` (capital I)
    - Float — единственный способ представить `int + NULL` без потери данных; `NaN` = отсутствующее значение
-   - Затронуто ~34 поля: `record_id`, `src_id`, `taxonomy_id`, `year`, `first_approval` и др.
+   - Затронуто ~34 поля: `record-id`, `src-id`, `taxonomy-id`, `year`, `first-approval` и др.
    - См. `docs/00-project/RULES.md` §2.6 "Int→Float Coercion для Nullable Integers"
    - **НЕ баг**, а паттерн для nullable integer handling
 
@@ -254,7 +254,7 @@ src/bioetl/
 wc -l src/bioetl/path/to/file.py  # Должно быть > 500 для "монолита"
 
 # 2. Найти делегирование (если много — НЕ монолит!)
-grep -o "self\._[a-z_]*" src/bioetl/path/to/file.py | sort -u
+grep -o "self\.-[a-z-]*" src/bioetl/path/to/file.py | sort -u
 
 # 3. Проверить импорты внешних компонентов
 grep "^from\|^import" src/bioetl/path/to/file.py | grep -v "typing\|dataclass"
@@ -265,7 +265,7 @@ grep -c "^    def \|^    async def " src/bioetl/path/to/file.py
 
 **Критерии "монолита" (ВСЕ должны выполняться):**
 - [ ] 500+ строк
-- [ ] Мало делегирования (< 3 вызовов `self._component.method()`)
+- [ ] Мало делегирования (< 3 вызовов `self.-component.method()`)
 - [ ] Много публичных методов с разной ответственностью
 - [ ] Низкая когезия (методы не связаны друг с другом)
 
@@ -278,7 +278,7 @@ grep -c "^    def \|^    async def " src/bioetl/path/to/file.py
 ```bash
 # 1. Проверить существование класса/метода
 grep -r "class ClassName" src/bioetl/
-grep -r "def method_name" src/bioetl/
+grep -r "def method-name" src/bioetl/
 
 # 2. Проверить реализованность фичи
 grep -r "SilverWriteMode\|GoldWriteMode" src/bioetl/
@@ -296,7 +296,7 @@ cat docs/archived/refactoring-plan.md | head -60
 |-------------|-------------|
 | "Класс X существует" | `grep -r "class X" src/` |
 | "Метод Y не реализован" | `grep -r "def Y" src/` + прочитать код |
-| "Нет теста для Z" | `grep -r "test_Z\|Z" tests/` |
+| "Нет теста для Z" | `grep -r "test-Z\|Z" tests/` |
 | "Нет валидации W" | Прочитать файл и найти validation logic |
 
 **При обнаружении расхождения:**
@@ -309,9 +309,9 @@ cat docs/archived/refactoring-plan.md | head -60
 
 | Агрегат | Файл | Назначение |
 |---------|------|------------|
-| `PipelineRun` | `domain/aggregates/pipeline_run.py` | Запуск пайплайна, события жизненного цикла |
+| `PipelineRun` | `domain/aggregates/pipeline-run.py` | Запуск пайплайна, события жизненного цикла |
 | `Batch` | `domain/aggregates/batch.py` | Батч записей, состояние обработки |
-| `QuarantineEntry` | `domain/aggregates/quarantine_entry.py` | Карантинные записи |
+| `QuarantineEntry` | `domain/aggregates/quarantine-entry.py` | Карантинные записи |
 
 **Паттерны:**
 - Event Sourcing для аудита изменений
@@ -326,7 +326,7 @@ cat docs/archived/refactoring-plan.md | head -60
 
 **Medallion** (Bronze → Silver → Gold):
 - **Bronze**: JSONL + zstd, append-only, 90d retention
-- **Silver**: Delta Lake, merge/upsert по `content_hash`, ACID обязателен
+- **Silver**: Delta Lake, merge/upsert по `content-hash`, ACID обязателен
 - **Gold**: Delta/Parquet, SCD Type 2 или партиции по дате
 
 **Обработка ошибок**:
@@ -358,19 +358,19 @@ cat docs/archived/refactoring-plan.md | head -60
 1. Пайплайны запускаются **локально** на одной машине
 2. Нет распределённых workers — нет split-brain
 3. `MemoryLock` полностью реализует `LockPort`:
-   - TTL-based автоматическое освобождение (`_ttl_checker_loop`)
+   - TTL-based автоматическое освобождение (`-ttl-checker-loop`)
    - Heartbeat для продления блокировки (`heartbeat()`)
-   - Валидация владельца (`validate_owner()`)
+   - Валидация владельца (`validate-owner()`)
    - Safety guard перед записью (`LockNotHeldError`)
 
-**Реализация:** `src/bioetl/infrastructure/locking/memory_lock.py` (256 строк)
+**Реализация:** `src/bioetl/infrastructure/locking/memory-lock.py` (256 строк)
 
 ```python
 # Полный функционал MemoryLock:
-async def acquire(key, owner_id, ttl, wait, wait_timeout, exclusive) -> bool
-async def release(key, owner_id, exclusive) -> bool
-async def heartbeat(key, owner_id, exclusive) -> bool  # Продление TTL
-async def validate_owner(key, owner_id) -> bool        # Safety guard
+async def acquire(key, owner-id, ttl, wait, wait-timeout, exclusive) -> bool
+async def release(key, owner-id, exclusive) -> bool
+async def heartbeat(key, owner-id, exclusive) -> bool  # Продление TTL
+async def validate-owner(key, owner-id) -> bool        # Safety guard
 async def aclose() -> None                             # Graceful shutdown
 ```
 
@@ -380,8 +380,8 @@ async def aclose() -> None                             # Graceful shutdown
 
 ### 5.2. Lock Keys
 
-- Incremental: `lock:{provider}_{entity}`
-- Backfill/Rebuild: `lock:{provider}_{entity}:exclusive`
+- Incremental: `lock:{provider}-{entity}`
+- Backfill/Rebuild: `lock:{provider}-{entity}:exclusive`
 
 ---
 
@@ -395,7 +395,7 @@ async def aclose() -> None                             # Graceful shutdown
 | **Integration** | `tests/integration/` | ~375 | VCR.py для HTTP |
 | **Architecture** | `tests/architecture/` | ~1,173 | Проверка слоёв, контракты портов |
 
-**Всего:** ~11,985 тестов (функций `test_`) | **Цель покрытия:** ≥85% (`--cov-fail-under=85`)
+**Всего:** ~11,985 тестов (функций `test-`) | **Цель покрытия:** ≥85% (`--cov-fail-under=85`)
 
 ### Основные команды
 
@@ -409,7 +409,7 @@ pytest tests/e2e/ -v -m e2e  # E2E тесты
 ### VCR.py (MUST для HTTP)
 
 - Кассеты: `tests/fixtures/vcr/`
-- Санитизация секретов в `before_record`
+- Санитизация секретов в `before-record`
 - CI: `pytest --vcr-record=none`
 
 ---
@@ -421,7 +421,7 @@ pytest tests/e2e/ -v -m e2e  # E2E тесты
 **Ключевые инструменты:** httpx (`UnifiedHTTPClient`), Polars, Delta Lake, Pandera, Ruff + mypy, Click
 
 **HTTP-адаптеры**: Все используют `BaseHttpAdapter` с Rate Limiter, Circuit Breaker, Retry Logic
-**Legacy Wrappers**: `BaseSyncAdapter` с `run_in_executor` для библиотек без async (pubchempy)
+**Legacy Wrappers**: `BaseSyncAdapter` с `run-in-executor` для библиотек без async (pubchempy)
 
 **Провайдеры:** ChEMBL, PubChem (5 req/sec), UniProt (100 req/sec), CrossRef, OpenAlex, PubMed (3 req/sec), SemanticScholar
 
@@ -453,7 +453,7 @@ pytest tests/e2e/ -v -m e2e  # E2E тесты
 - ❌ Создание зависимостей внутри классов (нарушение DI)
 - ❌ Прямой импорт `structlog` в `application`/`interfaces` → `LoggerPort`
 - ❌ Sentinel values (`-1`, `"N/A"`) → `None`
-- ❌ Блокирующий I/O в async → `run_in_executor`
+- ❌ Блокирующий I/O в async → `run-in-executor`
 - ❌ HTTP без VCR-кассет
 
 **Перед коммитом:** `make lint && make test`
@@ -467,7 +467,7 @@ pytest tests/e2e/ -v -m e2e  # E2E тесты
 **Conventional Commits:** `<type>(<scope>): <description>`
 - Типы: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`
 
-**Новый адаптер:** `domain/ports/` Protocol → `infrastructure/adapters/{provider}/` → `health_check()` + DI
+**Новый адаптер:** `domain/ports/` Protocol → `infrastructure/adapters/{provider}/` → `health-check()` + DI
 
 **Новый пайплайн:** Config YAML → `BaseTransformer` → Pipeline → Factory → `@register` → Tests
 
@@ -478,7 +478,7 @@ pytest tests/e2e/ -v -m e2e  # E2E тесты
 | Ошибка | Решение |
 |--------|---------|
 | `ImportError: cannot import from domain` | Проверь матрицу импортов (`RULES.md` §1.1) |
-| `RuntimeError: Event loop is closed` | `run_in_executor` для блокирующего I/O |
+| `RuntimeError: Event loop is closed` | `run-in-executor` для блокирующего I/O |
 | Тесты падают в CI | Запиши VCR-кассету |
 | Неясности в задаче | **СПРОСИ ПОЛЬЗОВАТЕЛЯ** |
 
@@ -490,7 +490,7 @@ pytest tests/e2e/ -v -m e2e  # E2E тесты
 |----------|----------|
 | `docs/00-project/RULES.md` | **Конституция проекта** — единственный источник истины для архитектурных правил |
 | `docs/00-project/agents/AGENT.md` | Инструкции для агента (персона, workflow, специфика работы) |
-| `.claude/PROJECT_CONTEXT.md` | Компактный контекст для быстрой справки |
+| `.claude/PROJECT-CONTEXT.md` | Компактный контекст для быстрой справки |
 | `docs/02-architecture/decisions/` | ADR (001-036) — архитектурные решения |
 | `docs/REQUIREMENTS.md` | 127 тестируемых требований |
 

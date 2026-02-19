@@ -29,8 +29,8 @@ Versions 5.10-5.14 introduce significant enhancements to publication validation,
 
 | Old Field Name | New Field Name | Reason |
 |----------------|----------------|--------|
-| `citation_count` | `citations_received` | Semantic clarity (incoming vs outgoing) |
-| `author_orcid_list` | `author_orcids` | Naming consistency |
+| `citation-count` | `citations-received` | Semantic clarity (incoming vs outgoing) |
+| `author-orcid-list` | `author-orcids` | Naming consistency |
 
 **Impact:**
 - ❌ Silver layer queries using old field names will fail
@@ -44,16 +44,16 @@ Versions 5.10-5.14 introduce significant enhancements to publication validation,
 ```sql
 -- BEFORE (5.9)
 SELECT
-    document_chembl_id,
-    citation_count,
-    author_orcid_list
+    document-chembl-id,
+    citation-count,
+    author-orcid-list
 FROM chembl.publication;
 
 -- AFTER (5.14)
 SELECT
-    document_chembl_id,
-    citations_received,
-    author_orcids
+    document-chembl-id,
+    citations-received,
+    author-orcids
 FROM chembl.publication;
 ```
 
@@ -65,12 +65,12 @@ If you have custom DQ rules referencing these fields:
 # configs/quality/entities/chembl/publication.yaml
 
 # BEFORE (5.9)
-- field: citation_count
+- field: citation-count
   validation: range
   min: 0
 
 # AFTER (5.14)
-- field: citations_received
+- field: citations-received
   validation: range
   min: 0
 ```
@@ -79,18 +79,18 @@ If you have custom DQ rules referencing these fields:
 
 ```bash
 # Rebuild all publication pipelines
-bioetl run --pipeline chembl_publication --run-type rebuild --yes
-bioetl run --pipeline pubmed_publication --run-type rebuild --yes
-bioetl run --pipeline crossref_publication --run-type rebuild --yes
-bioetl run --pipeline openalex_publication --run-type rebuild --yes
-bioetl run --pipeline semanticscholar_publication --run-type rebuild --yes
+bioetl run --pipeline chembl-publication --run-type rebuild --yes
+bioetl run --pipeline pubmed-publication --run-type rebuild --yes
+bioetl run --pipeline crossref-publication --run-type rebuild --yes
+bioetl run --pipeline openalex-publication --run-type rebuild --yes
+bioetl run --pipeline semanticscholar-publication --run-type rebuild --yes
 ```
 
 **Automation:**
 ```bash
 # Rebuild all publication providers
 for provider in chembl pubmed crossref openalex semanticscholar; do
-    bioetl run --pipeline ${provider}_publication --run-type rebuild --yes
+    bioetl run --pipeline ${provider}-publication --run-type rebuild --yes
 done
 ```
 
@@ -118,18 +118,18 @@ done
 
 ```bash
 # Balanced mode (default) - Base + Structural + Logical
-bioetl run --pipeline pubmed_publication
+bioetl run --pipeline pubmed-publication
 
 # Strict mode - All 5 levels
-bioetl run --pipeline pubmed_publication --validation-mode strict
+bioetl run --pipeline pubmed-publication --validation-mode strict
 
 # Fast mode - Base only
-bioetl run --pipeline pubmed_publication --validation-mode fast
+bioetl run --pipeline pubmed-publication --validation-mode fast
 ```
 
 **DQ flags in Silver:**
-- `_dq_error`: FAIL (blocking) — record rejected
-- `_dq_warn`: WARN (quarantine) — record flagged for manual review
+- `-dq-error`: FAIL (blocking) — record rejected
+- `-dq-warn`: WARN (quarantine) — record flagged for manual review
 
 **Documentation:**
 - [ADR-033: Publication Validation Strategy](../02-architecture/decisions/ADR-033-publication-validation-strategy.md)
@@ -143,9 +143,9 @@ bioetl run --pipeline pubmed_publication --validation-mode fast
 **Purpose:** Combine ChEMBL activity data with compound record metadata in a single Gold table.
 
 **Structure:**
-- **Seed:** `chembl_activity` (bioactivity measurements)
-- **Dependency:** `chembl_compound_record` (compound metadata, optional)
-- **Join:** LEFT OUTER join on `molecule_chembl_id`
+- **Seed:** `chembl-activity` (bioactivity measurements)
+- **Dependency:** `chembl-compound-record` (compound metadata, optional)
+- **Join:** LEFT OUTER join on `molecule-chembl-id`
 
 **Usage:**
 
@@ -157,7 +157,7 @@ bioetl run-composite --composite activity
 bioetl run-composite --composite activity --seed-limit 1000
 ```
 
-**Output:** `data/gold/composite_activity/`
+**Output:** `data/gold/composite-activity/`
 
 **Configuration:** `configs/pipelines/composite/activity.yaml`
 
@@ -173,26 +173,26 @@ bioetl run-composite --composite activity --seed-limit 1000
 - `superkingdom`, `phylum`, `genus`
 
 **Gene Ontology:**
-- `molecular_function`, `cellular_component`
+- `molecular-function`, `cellular-component`
 
 **Structural Features:**
-- `topology`, `transmembrane`, `intramembrane`, `signal_peptide`, `propeptide`
+- `topology`, `transmembrane`, `intramembrane`, `signal-peptide`, `propeptide`
 
 **PTM Features:**
-- `glycosylation`, `lipidation`, `disulfide_bond`, `modified_residue`
+- `glycosylation`, `lipidation`, `disulfide-bond`, `modified-residue`
 - `phosphorylation`, `acetylation`, `ubiquitination`
 
 **Isoforms:**
-- `isoform_names`, `isoform_ids`, `isoform_synonyms`
+- `isoform-names`, `isoform-ids`, `isoform-synonyms`
 
 **Reactions:**
-- `reactions`, `reaction_ec_numbers`
+- `reactions`, `reaction-ec-numbers`
 
 **Usage:**
 
 ```bash
 # Rebuild UniProt to get new fields
-bioetl run --pipeline uniprot_protein --run-type rebuild --yes
+bioetl run --pipeline uniprot-protein --run-type rebuild --yes
 ```
 
 **Data availability:** Fields populated only for entries with relevant data (nullable).
@@ -203,7 +203,7 @@ bioetl run --pipeline uniprot_protein --run-type rebuild --yes
 
 ### 1. Deprecated Parameter Migration (5.12.0)
 
-**Change:** `column_groups_file` → `data_schema_file`
+**Change:** `column-groups-file` → `data-schema-file`
 
 **Affected configs:** 21 pipeline configs across all providers
 
@@ -211,12 +211,12 @@ bioetl run --pipeline uniprot_protein --run-type rebuild --yes
 
 ```yaml
 # BEFORE (5.9)
-silver_config:
-  column_groups_file: configs/schemas/chembl/activity.yaml
+silver-config:
+  column-groups-file: configs/schemas/chembl/activity.yaml
 
 # AFTER (5.14)
-silver_config:
-  data_schema_file: configs/schemas/chembl/activity.yaml
+silver-config:
+  data-schema-file: configs/schemas/chembl/activity.yaml
 ```
 
 **Note:** Old parameter still works (deprecated warning), will be removed in 6.0.
@@ -231,14 +231,14 @@ silver_config:
 ```yaml
 # configs/pipelines/composite/activity.yaml
 output:
-  gold_path: data/gold/composite_activity
+  gold-path: data/gold/composite-activity
 ```
 
 **After (5.14):**
 ```yaml
 # configs/pipelines/composite/activity.yaml
-# output.gold_path removed — auto-computed as:
-# data/gold/composite_{pipeline_name}/
+# output.gold-path removed — auto-computed as:
+# data/gold/composite-{pipeline-name}/
 ```
 
 **Impact:** No action required — convention-based paths work automatically.
@@ -257,11 +257,11 @@ output:
 # Invalid: 0000000123456789
 ```
 
-**Impact:** Records with malformed ORCIDs will be flagged in `_dq_warn`.
+**Impact:** Records with malformed ORCIDs will be flagged in `-dq-warn`.
 
 ---
 
-### 2. MIN_PUBLICATION_YEAR Change (5.14.0)
+### 2. MIN-PUBLICATION-YEAR Change (5.14.0)
 
 **Change:** Lowered from 1800 → 1500
 
@@ -273,10 +273,10 @@ output:
 
 ### 3. ISSN Regex Constant (5.14.0)
 
-**Added:** `ISSN_PATTERN` in `domain/schemas/constants.py`
+**Added:** `ISSN-PATTERN` in `domain/schemas/constants.py`
 
 ```python
-ISSN_PATTERN = r"^\d{4}-\d{3}[\dX]$"
+ISSN-PATTERN = r"^\d{4}-\d{3}[\dX]$"
 # Valid:   1234-567X
 # Invalid: 12345678
 ```
@@ -289,16 +289,16 @@ ISSN_PATTERN = r"^\d{4}-\d{3}[\dX]$"
 
 **Old (5.9):**
 ```bash
-python -m bioetl.main run --pipeline chembl_activity
+python -m bioetl.main run --pipeline chembl-activity
 ```
 
 **New (5.14):**
 ```bash
 # Preferred (via setuptools entry point)
-bioetl run --pipeline chembl_activity
+bioetl run --pipeline chembl-activity
 
 # Or development mode
-python -m bioetl.interfaces.cli run --pipeline chembl_activity
+python -m bioetl.interfaces.cli run --pipeline chembl-activity
 ```
 
 **Note:** Old entry point still works but is considered legacy.
@@ -311,7 +311,7 @@ python -m bioetl.interfaces.cli run --pipeline chembl_activity
 
 ```bash
 # Enable all 5 validation levels
-bioetl run --pipeline pubmed_publication --validation-mode strict
+bioetl run --pipeline pubmed-publication --validation-mode strict
 ```
 
 ---
@@ -322,12 +322,12 @@ bioetl run --pipeline pubmed_publication --validation-mode strict
 
 **Added:** 471 auto-generated tests for publication validation
 
-**Location:** `tests_generated/`
+**Location:** `tests-generated/`
 
 **Run:**
 ```bash
-pytest tests_generated/test_validation_base_*.py
-pytest tests_generated/test_validation_structural_*.py
+pytest tests-generated/test-validation-base-*.py
+pytest tests-generated/test-validation-structural-*.py
 ```
 
 ---
@@ -368,7 +368,7 @@ cp -r backup/data/silver/chembl.publication data/silver/
 
 ```bash
 # Disable validation levels
-export BIOETL_VALIDATION_MODE=fast  # Base only
+export BIOETL-VALIDATION-MODE=fast  # Base only
 
 # Skip composite pipelines
 # (use individual pipelines instead)
@@ -380,7 +380,7 @@ export BIOETL_VALIDATION_MODE=fast  # Base only
 
 - [ ] **Backup data** (especially Silver layer)
   ```bash
-  tar -czf bioetl_backup_$(date +%Y%m%d).tar.gz data/silver/ data/gold/
+  tar -czf bioetl-backup-$(date +%Y%m%d).tar.gz data/silver/ data/gold/
   ```
 
 - [ ] **Upgrade package**
@@ -388,20 +388,20 @@ export BIOETL_VALIDATION_MODE=fast  # Base only
   pip install --upgrade bioetl==5.14.0
   ```
 
-- [ ] **Update SQL queries** (replace `citation_count`, `author_orcid_list`)
+- [ ] **Update SQL queries** (replace `citation-count`, `author-orcid-list`)
 
 - [ ] **Update custom DQ configs** (if using old field names)
 
 - [ ] **Rebuild publication Gold layers**
   ```bash
   for provider in chembl pubmed crossref openalex semanticscholar; do
-      bioetl run --pipeline ${provider}_publication --run-type rebuild --yes
+      bioetl run --pipeline ${provider}-publication --run-type rebuild --yes
   done
   ```
 
 - [ ] **Test queries** (verify new field names work)
   ```sql
-  SELECT citations_received, author_orcids FROM chembl.publication LIMIT 10;
+  SELECT citations-received, author-orcids FROM chembl.publication LIMIT 10;
   ```
 
 - [ ] **Update documentation** (if you have custom docs referencing old fields)

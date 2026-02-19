@@ -1,6 +1,6 @@
 # Пайплайн: PubMed Publication
 
-**Имя пайплайна:** `pubmed_publication`
+**Имя пайплайна:** `pubmed-publication`
 **Провайдер:** `pubmed`
 **Сущность:** `publication`
 **Версия схемы:** 1.0.0
@@ -21,7 +21,7 @@
 |------|-----|----------|
 | `pmid` | `str` | PubMed ID (уникальный) |
 | `doi` | `str` | Digital Object Identifier |
-| `pmc_id` | `str` | PubMed Central ID |
+| `pmc-id` | `str` | PubMed Central ID |
 
 ### Метаданные статьи
 
@@ -30,8 +30,8 @@
 | `title` | `str` | Название статьи |
 | `abstract` | `str` | Аннотация |
 | `authors` | `list[str]` | Список авторов |
-| `journal_title` | `str` | Название журнала |
-| `publication_date` | `str` | Дата публикации |
+| `journal-title` | `str` | Название журнала |
+| `publication-date` | `str` | Дата публикации |
 | `volume` | `str` | Том журнала |
 | `issue` | `str` | Выпуск |
 | `pages` | `str` | Страницы |
@@ -40,21 +40,21 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `author_keys` | `str \| None` | Нормализованные ключи авторов в формате `Surname_F`, разделённые `\|` |
-| `affiliation_list` | `str \| None` | JSON-массив уникальных аффилиаций |
-| `authors_with_affiliations` | `str \| None` | JSON-массив: автор → аффилиации |
-| `affiliation_structured` | `str \| None` | JSON-массив с ROR/GRID идентификаторами |
+| `author-keys` | `str \| None` | Нормализованные ключи авторов в формате `Surname-F`, разделённые `\|` |
+| `affiliation-list` | `str \| None` | JSON-массив уникальных аффилиаций |
+| `authors-with-affiliations` | `str \| None` | JSON-массив: автор → аффилиации |
+| `affiliation-structured` | `str \| None` | JSON-массив с ROR/GRID идентификаторами |
 
 ### Классификация
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `publication_class` | `str` | Класс публикации: EXP, REV, PEER |
-| `publication_subclass` | `str \| None` | Подкласс (L2): ~16 групп |
-| `publication_type_unified` | `str \| None` | Унифицированный тип (L3): 214 значений |
-| `mesh_terms` | `list[str]` | MeSH термины |
+| `publication-class` | `str` | Класс публикации: EXP, REV, PEER |
+| `publication-subclass` | `str \| None` | Подкласс (L2): ~16 групп |
+| `publication-type-unified` | `str \| None` | Унифицированный тип (L3): 214 значений |
+| `mesh-terms` | `list[str]` | MeSH термины |
 | `keywords` | `list[str]` | Ключевые слова |
-| `publication_types` | `list[str]` | Типы публикации |
+| `publication-types` | `list[str]` | Типы публикации |
 
 ---
 
@@ -64,12 +64,12 @@
 
 ### Парсинг XML
 
-PubMed API возвращает данные в XML формате. Трансформер использует `xml_utils.py` для парсинга.
+PubMed API возвращает данные в XML формате. Трансформер использует `xml-utils.py` для парсинга.
 
 ### Entity ID
 
 ```python
-entity_id = f"pubmed:{pmid}"
+entity-id = f"pubmed:{pmid}"
 ```
 
 ---
@@ -94,13 +94,13 @@ PubMed API имеет строгие лимиты:
 
 ```bash
 # Инкрементальная загрузка
-bioetl run pubmed_publication
+bioetl run pubmed-publication
 
 # С ограничением
-bioetl run pubmed_publication --limit 100
+bioetl run pubmed-publication --limit 100
 
 # Полная перезагрузка
-bioetl run pubmed_publication --run-type rebuild
+bioetl run pubmed-publication --run-type rebuild
 ```
 
 ---
@@ -111,7 +111,7 @@ bioetl run pubmed_publication --run-type rebuild
 |-----------|------|
 | Конфигурация | `configs/pipelines/pubmed/publication.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/pubmed/transformer.py` |
-| XML Utils | `src/bioetl/application/pipelines/pubmed/xml_utils.py` |
+| XML Utils | `src/bioetl/application/pipelines/pubmed/xml-utils.py` |
 
 ---
 

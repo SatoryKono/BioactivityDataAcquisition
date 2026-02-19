@@ -120,7 +120,7 @@ docs/02-architecture/decisions/ADR-034-schema-domain-pairs.md
 25-circuit-breaker-observer-class.mermaid (118 LOC) — CircuitBreaker class
 ```
 
-Также есть **22 placeholder .mmd файла** (по 3 строки-заглушки) в `diagrams/mermaid/`.
+Также есть **22 placeholder .mermaid файла** (по 3 строки-заглушки) в `diagrams/`.
 Их нужно заполнить реальным содержимым, если они попадут в TOP-25.
 
 ### 0.4 Исходный код (ключевые модули для чтения)
@@ -130,21 +130,21 @@ docs/02-architecture/decisions/ADR-034-schema-domain-pairs.md
 
 ```
 # Domain Layer — Aggregates
-src/bioetl/domain/aggregates/pipeline_run.py
+src/bioetl/domain/aggregates/pipeline-run.py
 src/bioetl/domain/aggregates/batch.py
-src/bioetl/domain/aggregates/quarantine_entry.py
+src/bioetl/domain/aggregates/quarantine-entry.py
 src/bioetl/domain/aggregates/events.py
 
 # Domain Layer — Ports (все 24 порта)
-src/bioetl/domain/ports/__init__.py
-src/bioetl/domain/ports/data_source.py
+src/bioetl/domain/ports/--init--.py
+src/bioetl/domain/ports/data-source.py
 src/bioetl/domain/ports/storage.py
 src/bioetl/domain/ports/locking.py
 src/bioetl/domain/ports/checkpoint.py
 src/bioetl/domain/ports/quarantine.py
 src/bioetl/domain/ports/observability.py
 src/bioetl/domain/ports/resilience.py
-src/bioetl/domain/ports/health_check.py
+src/bioetl/domain/ports/health-check.py
 src/bioetl/domain/ports/validation.py
 src/bioetl/domain/ports/audit.py
 src/bioetl/domain/ports/metadata.py
@@ -159,35 +159,35 @@ src/bioetl/domain/config/dq.py
 src/bioetl/domain/config/validation.py
 
 # Domain Layer — Value Objects
-src/bioetl/domain/value_objects/activity.py
-src/bioetl/domain/value_objects/dq_metrics.py
-src/bioetl/domain/value_objects/run_context.py
-src/bioetl/domain/value_objects/compound_ids.py
-src/bioetl/domain/value_objects/taxonomy_id.py
+src/bioetl/domain/value-objects/activity.py
+src/bioetl/domain/value-objects/dq-metrics.py
+src/bioetl/domain/value-objects/run-context.py
+src/bioetl/domain/value-objects/compound-ids.py
+src/bioetl/domain/value-objects/taxonomy-id.py
 
 # Domain Layer — Entities
 src/bioetl/domain/entities/base.py
-src/bioetl/domain/entities/chembl_activity.py
+src/bioetl/domain/entities/chembl-activity.py
 src/bioetl/domain/entities/pubchem.py
 src/bioetl/domain/entities/uniprot.py
 src/bioetl/domain/entities/crossref.py
 src/bioetl/domain/entities/pubmed.py
 
 # Domain Layer — Services
-src/bioetl/domain/services/data_normalization_service.py
-src/bioetl/domain/services/identity_service.py
-src/bioetl/domain/services/unit_converter.py
-src/bioetl/domain/services/activity_aggregator.py
-src/bioetl/domain/services/value_validator.py
-src/bioetl/domain/services/dq_serializer.py
+src/bioetl/domain/services/data-normalization-service.py
+src/bioetl/domain/services/identity-service.py
+src/bioetl/domain/services/unit-converter.py
+src/bioetl/domain/services/activity-aggregator.py
+src/bioetl/domain/services/value-validator.py
+src/bioetl/domain/services/dq-serializer.py
 
 # Domain Layer — Exceptions & Types
-src/bioetl/domain/exceptions/__init__.py
+src/bioetl/domain/exceptions/--init--.py
 src/bioetl/domain/exceptions/base.py
 src/bioetl/domain/exceptions/network.py
-src/bioetl/domain/exceptions/data_quality.py
+src/bioetl/domain/exceptions/data-quality.py
 src/bioetl/domain/types.py
-src/bioetl/domain/error_classifier.py
+src/bioetl/domain/error-classifier.py
 src/bioetl/domain/medallion.py
 src/bioetl/domain/resilience.py
 
@@ -199,9 +199,9 @@ src/bioetl/domain/schemas/pubchem/compound.py
 src/bioetl/domain/schemas/uniprot/protein.py
 
 # Domain Layer — Filtering
-src/bioetl/domain/filtering/gold_config.py
-src/bioetl/domain/filtering/silver_config.py
-src/bioetl/domain/filtering/column_filter.py
+src/bioetl/domain/filtering/gold-config.py
+src/bioetl/domain/filtering/silver-config.py
+src/bioetl/domain/filtering/column-filter.py
 
 # Domain Layer — Composite
 src/bioetl/domain/composite/config.py
@@ -210,41 +210,41 @@ src/bioetl/domain/composite/strategy.py
 src/bioetl/domain/composite/lineage.py
 
 # Domain Layer — Gold Contracts
-src/bioetl/domain/contracts/gold/_base.py
+src/bioetl/domain/contracts/gold/-base.py
 src/bioetl/domain/contracts/gold/chembl.py
 
 # Application Layer — Core
 src/bioetl/application/core/runner.py
-src/bioetl/application/core/batch_executor.py
-src/bioetl/application/core/record_processor.py
-src/bioetl/application/core/batch_transformer.py
-src/bioetl/application/core/batch_writer.py
-src/bioetl/application/core/batch_metrics.py
-src/bioetl/application/core/base_transformer.py
-src/bioetl/application/core/pipeline_services.py
-src/bioetl/application/core/lock_manager.py
-src/bioetl/application/core/checkpoint_manager.py
-src/bioetl/application/core/preflight_service.py
-src/bioetl/application/core/postrun_service.py
+src/bioetl/application/core/batch-executor.py
+src/bioetl/application/core/record-processor.py
+src/bioetl/application/core/batch-transformer.py
+src/bioetl/application/core/batch-writer.py
+src/bioetl/application/core/batch-metrics.py
+src/bioetl/application/core/base-transformer.py
+src/bioetl/application/core/pipeline-services.py
+src/bioetl/application/core/lock-manager.py
+src/bioetl/application/core/checkpoint-manager.py
+src/bioetl/application/core/preflight-service.py
+src/bioetl/application/core/postrun-service.py
 src/bioetl/application/core/heartbeat.py
 src/bioetl/application/core/shutdown.py
-src/bioetl/application/core/quarantine_manager.py
-src/bioetl/application/core/cleanup_service.py
-src/bioetl/application/core/filtered_data_source.py
+src/bioetl/application/core/quarantine-manager.py
+src/bioetl/application/core/cleanup-service.py
+src/bioetl/application/core/filtered-data-source.py
 
 # Application Layer — Composite Pipeline
 src/bioetl/application/composite/coordinator.py
 src/bioetl/application/composite/runner.py
 src/bioetl/application/composite/merger.py
 src/bioetl/application/composite/aggregator.py
-src/bioetl/application/composite/dependency_coordinator.py
-src/bioetl/application/composite/cross_validator.py
+src/bioetl/application/composite/dependency-coordinator.py
+src/bioetl/application/composite/cross-validator.py
 src/bioetl/application/composite/deduplication.py
 
 # Application Layer — Pipeline Transformers (примеры)
-src/bioetl/application/pipelines/chembl/activity_transformer.py
-src/bioetl/application/pipelines/chembl/molecule_transformer.py
-src/bioetl/application/pipelines/chembl/base_chembl_transformer.py
+src/bioetl/application/pipelines/chembl/activity-transformer.py
+src/bioetl/application/pipelines/chembl/molecule-transformer.py
+src/bioetl/application/pipelines/chembl/base-chembl-transformer.py
 src/bioetl/application/pipelines/pubmed/transformer.py
 src/bioetl/application/pipelines/crossref/transformer.py
 
@@ -252,19 +252,19 @@ src/bioetl/application/pipelines/crossref/transformer.py
 src/bioetl/application/observability/observer.py
 
 # Infrastructure Layer — Storage
-src/bioetl/infrastructure/storage/bronze_writer.py
-src/bioetl/infrastructure/storage/silver_writer.py
-src/bioetl/infrastructure/storage/gold_writer.py
-src/bioetl/infrastructure/storage/base_delta_writer.py
-src/bioetl/infrastructure/storage/delta_reader.py
-src/bioetl/infrastructure/storage/metadata_writer.py
-src/bioetl/infrastructure/storage/retention_manager.py
+src/bioetl/infrastructure/storage/bronze-writer.py
+src/bioetl/infrastructure/storage/silver-writer.py
+src/bioetl/infrastructure/storage/gold-writer.py
+src/bioetl/infrastructure/storage/base-delta-writer.py
+src/bioetl/infrastructure/storage/delta-reader.py
+src/bioetl/infrastructure/storage/metadata-writer.py
+src/bioetl/infrastructure/storage/retention-manager.py
 
 # Infrastructure Layer — HTTP
 src/bioetl/infrastructure/adapters/http/client.py
-src/bioetl/infrastructure/adapters/http/circuit_breaker.py
-src/bioetl/infrastructure/adapters/http/rate_limiter.py
-src/bioetl/infrastructure/adapters/http/health_monitor.py
+src/bioetl/infrastructure/adapters/http/circuit-breaker.py
+src/bioetl/infrastructure/adapters/http/rate-limiter.py
+src/bioetl/infrastructure/adapters/http/health-monitor.py
 src/bioetl/infrastructure/adapters/http/pagination.py
 
 # Infrastructure Layer — Provider Adapters
@@ -273,23 +273,23 @@ src/bioetl/infrastructure/adapters/chembl/client.py
 src/bioetl/infrastructure/adapters/pubchem/client.py
 src/bioetl/infrastructure/adapters/uniprot/client.py
 src/bioetl/infrastructure/adapters/crossref/client.py
-src/bioetl/infrastructure/adapters/pubmed/pubmed_client.py
+src/bioetl/infrastructure/adapters/pubmed/pubmed-client.py
 src/bioetl/infrastructure/adapters/openalex/client.py
 src/bioetl/infrastructure/adapters/semanticscholar/adapter.py
 
 # Infrastructure Layer — Other
-src/bioetl/infrastructure/locking/memory_lock.py
-src/bioetl/infrastructure/checkpoint/local_checkpoint.py
+src/bioetl/infrastructure/locking/memory-lock.py
+src/bioetl/infrastructure/checkpoint/local-checkpoint.py
 src/bioetl/infrastructure/quarantine/unified.py
 src/bioetl/infrastructure/observability/logging.py
 src/bioetl/infrastructure/observability/metrics.py
 src/bioetl/infrastructure/observability/tracing.py
 src/bioetl/infrastructure/observability/anomaly/detector.py
-src/bioetl/infrastructure/validation/pandera_validator.py
-src/bioetl/infrastructure/security/pii_hasher.py
-src/bioetl/infrastructure/config/pipeline_config_loader.py
-src/bioetl/infrastructure/config/dq_config_loader.py
-src/bioetl/infrastructure/config/filter_config_loader.py
+src/bioetl/infrastructure/validation/pandera-validator.py
+src/bioetl/infrastructure/security/pii-hasher.py
+src/bioetl/infrastructure/config/pipeline-config-loader.py
+src/bioetl/infrastructure/config/dq-config-loader.py
+src/bioetl/infrastructure/config/filter-config-loader.py
 
 # Composition Layer
 src/bioetl/composition/entrypoints.py
@@ -298,28 +298,28 @@ src/bioetl/composition/bootstrap/runtime/pipeline.py
 src/bioetl/composition/bootstrap/runtime/runner.py
 src/bioetl/composition/bootstrap/runtime/composite.py
 src/bioetl/composition/bootstrap/runtime/observability.py
-src/bioetl/composition/factories/pipeline_factory.py
-src/bioetl/composition/factories/runner_factory.py
-src/bioetl/composition/factories/services_factory.py
-src/bioetl/composition/factories/storage_factory.py
-src/bioetl/composition/factories/http_client_factory.py
-src/bioetl/composition/factories/data_source_factory.py
-src/bioetl/composition/factories/transformer_factory.py
-src/bioetl/composition/factories/dq_factory.py
-src/bioetl/composition/providers/provider_registry.py
+src/bioetl/composition/factories/pipeline-factory.py
+src/bioetl/composition/factories/runner-factory.py
+src/bioetl/composition/factories/services-factory.py
+src/bioetl/composition/factories/storage-factory.py
+src/bioetl/composition/factories/http-client-factory.py
+src/bioetl/composition/factories/data-source-factory.py
+src/bioetl/composition/factories/transformer-factory.py
+src/bioetl/composition/factories/dq-factory.py
+src/bioetl/composition/providers/provider-registry.py
 src/bioetl/composition/providers/registration.py
 src/bioetl/composition/registry.py
 
 # Interfaces Layer
 src/bioetl/interfaces/cli/main.py
 src/bioetl/interfaces/cli/commands/run.py
-src/bioetl/interfaces/cli/commands/run_all.py
-src/bioetl/interfaces/cli/commands/run_composite.py
+src/bioetl/interfaces/cli/commands/run-all.py
+src/bioetl/interfaces/cli/commands/run-composite.py
 src/bioetl/interfaces/cli/commands/health.py
 src/bioetl/interfaces/cli/commands/export.py
 src/bioetl/interfaces/cli/commands/quarantine.py
 src/bioetl/interfaces/cli/commands/maintenance.py
-src/bioetl/interfaces/http/health_server.py
+src/bioetl/interfaces/http/health-server.py
 ```
 
 ### 0.5 Diagramming Policy (стандарты)
@@ -559,7 +559,7 @@ Infrastructure → Adapters (7 providers), Storage (Bronze/Silver/Gold), HTTP, L
 
 | Provider | Entity Types | Adapter |
 |----------|-------------|---------|
-| ChEMBL | activity, molecule, target, assay, compound_record, cell_line, protein_class, tissue, publication, publication_term, publication_similarity, subcellular_fraction, assay_parameters, target_component | `ChemblClient` |
+| ChEMBL | activity, molecule, target, assay, compound-record, cell-line, protein-class, tissue, publication, publication-term, publication-similarity, subcellular-fraction, assay-parameters, target-component | `ChemblClient` |
 | PubChem | compound | `PubChemClient` |
 | UniProt | protein, idmapping | `UniProtClient` |
 | CrossRef | publication | `CrossRefClient` |
@@ -582,9 +582,9 @@ ShutdownPort, SerializationPort, DQConfigLoaderPort, FilterConfigLoaderPort
 
 | Aggregate | States | Key Methods |
 |-----------|--------|-------------|
-| PipelineRun | PENDING → RUNNING → COMPLETED/FAILED/CANCELLED | start(), complete_stage(), fail(), cancel() |
-| Batch | OPEN → SEALED → WRITING → COMMITTED/FAILED | add_record(), seal(), mark_writing(), commit(), mark_failed() |
-| QuarantineEntry | NEW → UNDER_REVIEW → RESOLVED/DISCARDED | start_review(), resolve(), discard() |
+| PipelineRun | PENDING → RUNNING → COMPLETED/FAILED/CANCELLED | start(), complete-stage(), fail(), cancel() |
+| Batch | OPEN → SEALED → WRITING → COMMITTED/FAILED | add-record(), seal(), mark-writing(), commit(), mark-failed() |
+| QuarantineEntry | NEW → UNDER-REVIEW → RESOLVED/DISCARDED | start-review(), resolve(), discard() |
 
 ### Ключевые параметры
 

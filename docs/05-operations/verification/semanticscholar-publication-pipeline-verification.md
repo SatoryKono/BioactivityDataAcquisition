@@ -16,11 +16,11 @@
 | **TLDR извлечение** | ✅ Реализовано | Корректно обрабатывает nested structure |
 | **Authors извлечение** | ✅ Реализовано | Whitespace-only имена фильтруются, names stripped |
 | **Journal/Venue приоритет** | ✅ Реализовано | journal.name → venue fallback |
-| **Open Access info** | ✅ Реализовано | oa_status нормализуется к lowercase |
+| **Open Access info** | ✅ Реализовано | oa-status нормализуется к lowercase |
 | **Fields of Study** | ✅ Реализовано | null/empty элементы фильтруются |
 | **Citation counts** | ✅ Реализовано | citationCount + influentialCitationCount |
-| **Year валидация** | ✅ Реализовано | min_year=1500 для исторических публикаций |
-| **Lookup metadata** | ✅ Реализовано | _lookup_method, _original_id |
+| **Year валидация** | ✅ Реализовано | min-year=1500 для исторических публикаций |
+| **Lookup metadata** | ✅ Реализовано | -lookup-method, -original-id |
 
 **Общий статус:** 149/149 тестов проходят. Все найденные проблемы исправлены.
 
@@ -34,10 +34,10 @@
 - `extractors.py:120` — не валидирует формат
 - `transformer.py:169` — только проверяет наличие
 - `publication.py:43-47` — Pandera схема с regex `^[a-f0-9]{40}$`
-- `academic_ids.py:82-126` — SemanticScholarId Value Object
+- `academic-ids.py:82-126` — SemanticScholarId Value Object
 
 **Поведение:**
-- Отсутствующий paper_id → record skipped (✅)
+- Отсутствующий paper-id → record skipped (✅)
 - Невалидный формат (не 40-char hex) → проходит transformer, отклоняется схемой (✅)
 
 ---
@@ -53,12 +53,12 @@
 | PMCID | ✅ | `pmcid` |
 | PubMedCentral | ✅ (fallback) | `pmcid` |
 | ArXiv | ✅ | `arxiv` |
-| CorpusId | ✅ | `corpus_id` |
+| CorpusId | ✅ | `corpus-id` |
 | MAG | ✅ | `mag` |
 | **DBLP** | ✅ | `dblp` |
 | ACL | ✅ | `acl` |
 
-**Исправление:** Добавлено `"dblp": external_ids.get("DBLP")`.
+**Исправление:** Добавлено `"dblp": external-ids.get("DBLP")`.
 
 ---
 
@@ -137,16 +137,16 @@ if name and name.strip():
 **Исправление:**
 ```python
 # Было:
-return fields_of_study[:max_count]
+return fields-of-study[:max-count]
 
 # Стало:
-return [f for f in fields_of_study if f and isinstance(f, str)][:max_count]
+return [f for f in fields-of-study if f and isinstance(f, str)][:max-count]
 ```
 
 **Поведение:**
 - None элементы → фильтруются ✅
 - Пустые строки → фильтруются ✅
-- Фильтрация применяется перед max_count ✅
+- Фильтрация применяется перед max-count ✅
 
 ---
 
@@ -156,7 +156,7 @@ return [f for f in fields_of_study if f and isinstance(f, str)][:max_count]
 - `transformer.py:195-197` — извлекает `citationCount`, `referenceCount`, `influentialCitationCount`
 - `publication.py:102-117` — валидация `ge=0` с `pd.Int64Dtype` для nullable integers
 
-**Добавленное поле:** `influential_citation_count`
+**Добавленное поле:** `influential-citation-count`
 - Entity: `semanticscholar.py:78`
 - Schema: `publication.py:113-117`
 - Transformer: `transformer.py:197`
@@ -167,7 +167,7 @@ return [f for f in fields_of_study if f and isinstance(f, str)][:max_count]
 
 **Файл:** `extractors.py:240-256`
 
-**Конфигурация:** `ValidationConfig(min_publication_year=1500)`
+**Конфигурация:** `ValidationConfig(min-publication-year=1500)`
 
 **Статус:** Полностью реализовано.
 
@@ -176,8 +176,8 @@ return [f for f in fields_of_study if f and isinstance(f, str)][:max_count]
 ### 2.10. Lookup Metadata
 
 **Файлы:**
-- `adapter.py:239,274` — устанавливает `_lookup_method: "doi"`
-- `fallback.py:219-220` — устанавливает `_lookup_method: "title_fallback"`, `_original_id`
+- `adapter.py:239,274` — устанавливает `-lookup-method: "doi"`
+- `fallback.py:219-220` — устанавливает `-lookup-method: "title-fallback"`, `-original-id`
 - `transformer.py:168-169` — передаёт metadata без модификации
 
 **Статус:** Полностью реализовано.
@@ -188,9 +188,9 @@ return [f for f in fields_of_study if f and isinstance(f, str)][:max_count]
 
 | Тестовый файл | Тестов | Статус |
 |---------------|--------|--------|
-| `test_extractors.py` | 53 | ✅ Pass |
-| `test_transformer.py` | 47 | ✅ Pass |
-| `test_publication_schema.py` | 49 | ✅ Pass |
+| `test-extractors.py` | 53 | ✅ Pass |
+| `test-transformer.py` | 47 | ✅ Pass |
+| `test-publication-schema.py` | 49 | ✅ Pass |
 | **Итого** | **149** | **✅ Pass** |
 
 ---
@@ -205,12 +205,12 @@ return [f for f in fields_of_study if f and isinstance(f, str)][:max_count]
 
 2. ✅ **Fields of Study filtering** (`extractors.py:234`):
    - None и пустые строки фильтруются
-   - Фильтрация применяется перед max_count
+   - Фильтрация применяется перед max-count
 
 ### 4.2. Желательные (исправлено)
 
 3. ✅ **DBLP extraction** (`extractors.py:44`):
-   - Добавлено `"dblp": external_ids.get("DBLP")`
+   - Добавлено `"dblp": external-ids.get("DBLP")`
 
 4. ✅ **influentialCitationCount** (`transformer.py:197`, `publication.py:113-117`):
    - Добавлено извлечение в transformer
@@ -223,7 +223,7 @@ return [f for f in fields_of_study if f and isinstance(f, str)][:max_count]
 | Требование | Соответствие |
 |------------|--------------|
 | Ports & Adapters | ✅ adapter в infrastructure, transformer в application |
-| DI | ✅ pii_hasher, data_normalizer инжектируются |
+| DI | ✅ pii-hasher, data-normalizer инжектируются |
 | Value Objects | ✅ DOI, PubMedId, PublicationYear |
 | Template Method | ✅ BasePublicationTransformer |
 | Pandera Schema | ✅ SemanticScholarPublicationSchema |

@@ -1,6 +1,6 @@
 # Пайплайн: ChEMBL Target
 
-**Имя пайплайна:** `chembl_target`
+**Имя пайплайна:** `chembl-target`
 **Провайдер:** `chembl`
 **Сущность:** `target`
 **Версия схемы:** 1.2.0
@@ -19,50 +19,50 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `target_chembl_id` | `str` | Уникальный ChEMBL ID мишени |
-| `pref_name` | `str` | Предпочтительное название |
-| `target_type` | `str` | Тип мишени (SINGLE PROTEIN, PROTEIN COMPLEX, etc.) |
+| `target-chembl-id` | `str` | Уникальный ChEMBL ID мишени |
+| `pref-name` | `str` | Предпочтительное название |
+| `target-type` | `str` | Тип мишени (SINGLE PROTEIN, PROTEIN COMPLEX, etc.) |
 
 ### Таксономия
 
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `organism` | `str` | Название организма |
-| `tax_id` | `int` | NCBI Taxonomy ID |
-| `species_group_flag` | `bool` | Флаг группы видов |
+| `tax-id` | `int` | NCBI Taxonomy ID |
+| `species-group-flag` | `bool` | Флаг группы видов |
 
 ### Компоненты мишени
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `component_accessions` | `list[str]` | UniProt accessions |
-| `component_ids` | `list[int]` | ID компонентов |
-| `component_types` | `list[str]` | Типы компонентов |
-| `component_organisms` | `list[str]` | Организмы компонентов |
+| `component-accessions` | `list[str]` | UniProt accessions |
+| `component-ids` | `list[int]` | ID компонентов |
+| `component-types` | `list[str]` | Типы компонентов |
+| `component-organisms` | `list[str]` | Организмы компонентов |
 
 ### Связи
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `cross_references` | `list[str]` | Кросс-ссылки на внешние БД |
-| `target_synonyms` | `list[str]` | Синонимы названия |
+| `cross-references` | `list[str]` | Кросс-ссылки на внешние БД |
+| `target-synonyms` | `list[str]` | Синонимы названия |
 
 ---
 
 ## 3. Трансформация
 
-**Файл:** `src/bioetl/application/pipelines/chembl/target_transformer.py`
+**Файл:** `src/bioetl/application/pipelines/chembl/target-transformer.py`
 
 ### Агрегация компонентов
 
-Компоненты мишени (`target_components`) агрегируются в списки:
-- `component_accessions`, `component_ids`, `component_types`
-- `component_organisms`
+Компоненты мишени (`target-components`) агрегируются в списки:
+- `component-accessions`, `component-ids`, `component-types`
+- `component-organisms`
 
 ### Entity ID
 
 ```python
-entity_id = f"chembl:{target_chembl_id}"
+entity-id = f"chembl:{target-chembl-id}"
 ```
 
 ---
@@ -71,8 +71,8 @@ entity_id = f"chembl:{target_chembl_id}"
 
 ### DQ-правила
 
-1. **`target_chembl_id`** — обязательное
-2. **`target_type`** — должен быть валидным типом
+1. **`target-chembl-id`** — обязательное
+2. **`target-type`** — должен быть валидным типом
 
 ### Пороги ошибок
 
@@ -87,13 +87,13 @@ entity_id = f"chembl:{target_chembl_id}"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_target
+bioetl run chembl-target
 
 # С ограничением
-bioetl run chembl_target --limit 500
+bioetl run chembl-target --limit 500
 
 # Полная перезагрузка
-bioetl run chembl_target --run-type rebuild
+bioetl run chembl-target --run-type rebuild
 ```
 
 ---
@@ -103,7 +103,7 @@ bioetl run chembl_target --run-type rebuild
 | Компонент | Путь |
 |-----------|------|
 | Конфигурация | `configs/pipelines/chembl/target.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/target_transformer.py` |
+| Трансформер | `src/bioetl/application/pipelines/chembl/target-transformer.py` |
 | Сущность | `src/bioetl/domain/entities.py` |
 
 ---

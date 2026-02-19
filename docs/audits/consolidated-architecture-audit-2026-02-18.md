@@ -57,12 +57,12 @@ This finding contradicts the project's own exception rule **EXC-012** in
 `ai-selfreview-rules.md`:
 
 > Infrastructure может импортировать любые domain-модули (ports, types,
-> exceptions, entities, config, models, value_objects, serialization и т.д.).
+> exceptions, entities, config, models, value-objects, serialization и т.д.).
 > Domain содержит чистую бизнес-логику без I/O — это value objects и контракты,
 > от которых infrastructure зависит by design.
 
-The architecture test suite (`tests/architecture/test_layer_dependencies.py`,
-`test_forbidden_imports.py`) **passes** with these imports present, confirming they
+The architecture test suite (`tests/architecture/test-layer-dependencies.py`,
+`test-forbidden-imports.py`) **passes** with these imports present, confirming they
 are permitted by the enforced boundary rules.
 
 **Conclusion:** No action required. The audit detection rule was overly strict
@@ -77,21 +77,21 @@ adapters depend on domain contracts, value objects, and exceptions).
 
 - **Reported by:** Audit 3 (MODERATE)
 - **Verified locations:**
-  - `src/bioetl/application/composite/checkpoint.py:411` — `json.loads(checkpoint_path.read_text())`
-  - `src/bioetl/application/composite/checkpoint.py:453` — `json.loads(checkpoint_path.read_text())`
-  - `src/bioetl/application/composite/checkpoint.py:504` — `temp_path.write_text(...)`
+  - `src/bioetl/application/composite/checkpoint.py:411` — `json.loads(checkpoint-path.read-text())`
+  - `src/bioetl/application/composite/checkpoint.py:453` — `json.loads(checkpoint-path.read-text())`
+  - `src/bioetl/application/composite/checkpoint.py:504` — `temp-path.write-text(...)`
 - **Rule:** AP-008 (SHOULD NOT use blocking I/O in async functions)
 
 ### Disposition: CONFIRMED (MODERATE)
 
 The `load()` (line 430) and `save()` (line 490) methods are `async def` but perform
-synchronous `Path.read_text()` / `Path.write_text()` calls. This blocks the event
+synchronous `Path.read-text()` / `Path.write-text()` calls. This blocks the event
 loop during checkpoint I/O.
 
 **Recommendation:**
 ```python
-raw = await asyncio.to_thread(checkpoint_path.read_text)
-await asyncio.to_thread(temp_path.write_text, json.dumps(state.to_dict(), indent=2))
+raw = await asyncio.to-thread(checkpoint-path.read-text)
+await asyncio.to-thread(temp-path.write-text, json.dumps(state.to-dict(), indent=2))
 ```
 
 **Priority:** Low-medium. Checkpoint files are small; real latency impact is minimal
@@ -102,10 +102,10 @@ in single-worker local-only deployment (ADR-010). Fix opportunistically.
 ## Finding F-003: Broken documentation links
 
 - **Reported by:** Audit 3 (CRITICAL)
-- **Verified count:** 159 broken links (re-verified via `scripts/check_doc_links.py`)
+- **Verified count:** 159 broken links (re-verified via `scripts/check-doc-links.py`)
 - **Primary pattern:** Relative path errors (e.g., `../../RULES.md` instead of
   `../../00-project/RULES.md`) and references to non-existent generated files
-  (`tests_generated/`)
+  (`tests-generated/`)
 
 ### Disposition: CONFIRMED (MODERATE)
 
@@ -147,7 +147,7 @@ in runbooks can mislead new contributors.
 ## Finding F-005: pytest-asyncio config mismatch blocks test collection
 
 - **Reported by:** Audits 1, 3 (both MODERATE)
-- **Evidence:** `PytestConfigWarning: Unknown config option: asyncio_default_fixture_loop_scope`
+- **Evidence:** `PytestConfigWarning: Unknown config option: asyncio-default-fixture-loop-scope`
 
 ### Disposition: ENVIRONMENT-SPECIFIC (MODERATE)
 
@@ -162,10 +162,10 @@ config option with a plugin availability check.
 
 ---
 
-## Finding F-006: Source formatting drift in `gold_writer.py`
+## Finding F-006: Source formatting drift in `gold-writer.py`
 
 - **Reported by:** Audits 2, 4 (both MODERATE)
-- **Rule:** Architecture test gate `test_ruff_formatting_src`
+- **Rule:** Architecture test gate `test-ruff-formatting-src`
 
 ### Disposition: RESOLVED
 
@@ -185,14 +185,14 @@ All four audits independently confirmed the following healthy patterns:
 | Domain layer purity (no HTTP/file I/O) | PASS | No `httpx`/`requests`/`aiohttp`/`open()` in `domain/` |
 | No `print()` in production code | PASS | Zero matches in `src/bioetl/` |
 | No hardcoded secrets | PASS | No credential literals detected |
-| Silver uses Delta Lake (not raw Parquet) | PASS | No `to_parquet`/`write_parquet` in Silver writer |
+| Silver uses Delta Lake (not raw Parquet) | PASS | No `to-parquet`/`write-parquet` in Silver writer |
 | Structured logging discipline | PASS | LoggerPort pattern followed |
 | ADR-010 MemoryLock implementation | PASS | In-memory lock with correct TTL/heartbeat |
-| ADR-007 circuit breaker defaults | PASS | `failure_threshold=5`, `recovery_timeout=300` |
+| ADR-007 circuit breaker defaults | PASS | `failure-threshold=5`, `recovery-timeout=300` |
 | Public API type annotations | PASS | No missing return types on public functions |
-| Architecture tests (layer boundaries) | PASS | `test_layer_dependencies`, `test_forbidden_imports` green |
-| Domain purity tests | PASS | `test_domain_purity` green |
-| Medallion policy tests | PASS | `test_medallion_policy` green |
+| Architecture tests (layer boundaries) | PASS | `test-layer-dependencies`, `test-forbidden-imports` green |
+| Domain purity tests | PASS | `test-domain-purity` green |
+| Medallion policy tests | PASS | `test-medallion-policy` green |
 
 ---
 
@@ -201,11 +201,11 @@ All four audits independently confirmed the following healthy patterns:
 | # | Finding | Severity | Action | Priority |
 |---|---------|----------|--------|----------|
 | F-001 | infra→domain imports | FALSE POSITIVE | None (EXC-012 applies) | — |
-| F-002 | Blocking I/O in async checkpoint | MODERATE | Wrap in `asyncio.to_thread()` | Low-Medium |
+| F-002 | Blocking I/O in async checkpoint | MODERATE | Wrap in `asyncio.to-thread()` | Low-Medium |
 | F-003 | 159 broken doc links | MODERATE | Batch link normalization | Medium |
 | F-004 | Legacy Redis refs in docs | MODERATE | Archive legacy section, clean runbooks | Low-Medium |
 | F-005 | pytest-asyncio config | ENV-SPECIFIC | Add to dev deps or guard config | Low |
-| F-006 | gold_writer.py formatting | RESOLVED | None | — |
+| F-006 | gold-writer.py formatting | RESOLVED | None | — |
 
 **Net actionable items: 4** (2 documentation, 1 code, 1 config)
 
@@ -239,20 +239,20 @@ All four audits independently confirmed the following healthy patterns:
 python3 -c "
 import pathlib, re
 count = sum(1 for p in pathlib.Path('src/bioetl/infrastructure').rglob('*.py')
-            for l in p.read_text().splitlines()
+            for l in p.read-text().splitlines()
             if re.match(r'\s*from\s+bioetl\.domain\.(?!ports\b)', l))
 print(count)
 "
 
 # Reproduce F-002
-grep -n 'read_text\|write_text' src/bioetl/application/composite/checkpoint.py
+grep -n 'read-text\|write-text' src/bioetl/application/composite/checkpoint.py
 
 # Reproduce F-003
-python3 scripts/check_doc_links.py 2>&1 | tail -3
+python3 scripts/check-doc-links.py 2>&1 | tail -3
 
 # Reproduce F-004
 rg -n "Redis|redis" README.md docs/05-operations/runbooks/*.md
 
 # Reproduce F-006 (should show "already formatted")
-ruff format --check src/bioetl/infrastructure/storage/gold_writer.py
+ruff format --check src/bioetl/infrastructure/storage/gold-writer.py
 ```

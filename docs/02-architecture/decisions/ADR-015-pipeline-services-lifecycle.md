@@ -24,7 +24,7 @@ Introduce a centralized lifecycle management pattern through `PipelineServices`:
 ```python
 @dataclass(frozen=True)
 class PipelineServices:
-    data_source: DataSourcePort
+    data-source: DataSourcePort
     storage: StoragePort
     lock: LockPort
     checkpoint: CheckpointPort
@@ -33,12 +33,12 @@ class PipelineServices:
     tracing: TracingPort
     logger: LoggerPort
 
-    async def __aenter__(self) -> Self:
+    async def --aenter--(self) -> Self:
         """Initialize async resources."""
-        await self.data_source.__aenter__()
+        await self.data-source.--aenter--()
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+    async def --aexit--(self, exc-type, exc-val, exc-tb) -> None:
         """Cleanup all resources."""
         await self.aclose()
 
@@ -46,22 +46,22 @@ class PipelineServices:
         """Gracefully close all I/O resources and observability."""
         # Close async I/O services in parallel
         await asyncio.gather(
-            self.data_source.aclose(),
+            self.data-source.aclose(),
             self.storage.aclose(),
             self.lock.aclose(),
             self.checkpoint.aclose(),
             self.quarantine.aclose(),
-            return_exceptions=True,
+            return-exceptions=True,
         )
         # Close observability (sync, best-effort)
-        self._close_observability()
+        self.-close-observability()
 ```
 
 ### 2. Port Lifecycle Contracts
 
 | Port Type | Lifecycle Method | Sync/Async | Notes |
 |-----------|------------------|------------|-------|
-| DataSourcePort | `aclose()` | async | Also supports `__aenter__`/`__aexit__` |
+| DataSourcePort | `aclose()` | async | Also supports `--aenter--`/`--aexit--` |
 | StoragePort | `aclose()` | async | MUST release Delta table locks |
 | LockPort | `aclose()` | async | MUST release held locks |
 | CheckpointPort | `aclose()` | async | MUST flush pending writes |
@@ -85,7 +85,7 @@ When SIGTERM/SIGINT is received (see ADR-008):
 Cleanup errors are logged but don't prevent other resources from being cleaned:
 
 ```python
-results = await asyncio.gather(..., return_exceptions=True)
+results = await asyncio.gather(..., return-exceptions=True)
 for result in results:
     if isinstance(result, Exception):
         self.logger.error("Error during service shutdown", error=result)
@@ -111,28 +111,28 @@ for result in results:
 Lifecycle contracts are enforced by architecture tests:
 
 ```python
-# tests/architecture/test_port_contracts.py
+# tests/architecture/test-port-contracts.py
 
 class TestAsyncPortLifecycle:
-    ASYNC_IO_PORTS = [
+    ASYNC-IO-PORTS = [
         "DataSourcePort", "StoragePort", "LockPort",
         "CheckpointPort", "QuarantinePort"
     ]
 
-    @pytest.mark.parametrize("port_name", ASYNC_IO_PORTS)
-    def test_async_ports_have_aclose_method(self, port_name):
+    @pytest.mark.parametrize("port-name", ASYNC-IO-PORTS)
+    def test-async-ports-have-aclose-method(self, port-name):
         """All async I/O ports MUST have aclose() method."""
-        port_class = getattr(ports, port_name)
-        assert hasattr(port_class, "aclose")
+        port-class = getattr(ports, port-name)
+        assert hasattr(port-class, "aclose")
 
 class TestObservabilityPortLifecycle:
-    OBSERVABILITY_PORTS = ["MetricsPort", "TracingPort"]
+    OBSERVABILITY-PORTS = ["MetricsPort", "TracingPort"]
 
-    @pytest.mark.parametrize("port_name", OBSERVABILITY_PORTS)
-    def test_observability_ports_have_close_method(self, port_name):
+    @pytest.mark.parametrize("port-name", OBSERVABILITY-PORTS)
+    def test-observability-ports-have-close-method(self, port-name):
         """Observability ports MUST have close() method."""
-        port_class = getattr(ports, port_name)
-        assert hasattr(port_class, "close")
+        port-class = getattr(ports, port-name)
+        assert hasattr(port-class, "close")
 ```
 
 ## Related ADRs

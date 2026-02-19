@@ -20,7 +20,7 @@ Runbooks for common operational scenarios in the BioETL pipeline system.
 | 0                       | Success                     | None required                                                             |
 | 1                       | General error               | Check logs, see [Pipeline Failure Recovery](pipeline-failure-recovery.md) |
 | 2                       | Invalid arguments           | Check CLI arguments                                                       |
-| 83 (DATA_QUALITY_ERROR) | Data quality hard threshold | See [DQ Failure Investigation](dq-failure-investigation.md)               |
+| 83 (DATA-QUALITY-ERROR) | Data quality hard threshold | See [DQ Failure Investigation](dq-failure-investigation.md)               |
 | 130                     | SIGINT (Ctrl+C)             | Graceful shutdown, check checkpoint                                       |
 | 143                     | SIGTERM                     | Graceful shutdown, check checkpoint                                       |
 
@@ -32,7 +32,7 @@ data/
     ├── bronze/{provider}/{entity}/{date}/   # Raw JSONL files
     ├── silver/{provider}/{entity}/           # Delta Lake tables
     ├── gold/{provider}/{entity}/             # Delta Lake tables
-    ├── checkpoints/{pipeline_name}.json      # Pipeline state
+    ├── checkpoints/{pipeline-name}.json      # Pipeline state
     └── quarantine/{provider}/{entity}/       # Failed records
 ```
 
@@ -43,13 +43,13 @@ data/
 bioetl health check
 
 # Resume from checkpoint
-bioetl run --pipeline chembl_activity --resume
+bioetl run --pipeline chembl-activity --resume
 
 # Force full refresh (rebuild)
-bioetl run --pipeline chembl_activity --run-type rebuild
+bioetl run --pipeline chembl-activity --run-type rebuild
 
 # Dry run (no writes)
-bioetl run --pipeline chembl_activity --dry-run
+bioetl run --pipeline chembl-activity --dry-run
 ```
 
 ## Prerequisites

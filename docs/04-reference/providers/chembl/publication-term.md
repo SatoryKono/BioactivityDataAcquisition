@@ -1,8 +1,8 @@
 # Пайплайн: ChEMBL Publication Term
 
-**Имя пайплайна:** `chembl_publication_term`
+**Имя пайплайна:** `chembl-publication-term`
 **Провайдер:** `chembl`
-**Сущность:** `publication_term`
+**Сущность:** `publication-term`
 **Версия схемы:** 1.2.0
 
 ---
@@ -12,8 +12,8 @@
 Пайплайн извлекает термины (MeSH-дескрипторы, ключевые слова) из записей публикаций ChEMBL API. Это производная сущность — извлекает вложенные данные терминов из ответов API `/document` и преобразует связь 1:M (одна публикация → множество терминов) в плоскую структуру.
 
 **Типы терминов:**
-- `MESH_HEADING` — MeSH-дескрипторы
-- `MESH_QUALIFIER` — MeSH-квалификаторы/подзаголовки
+- `MESH-HEADING` — MeSH-дескрипторы
+- `MESH-QUALIFIER` — MeSH-квалификаторы/подзаголовки
 - `KEYWORD` — Ключевые слова, заданные авторами
 
 ---
@@ -24,30 +24,30 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `document_chembl_id` | `str` | FK → ChEMBL ID родительской публикации |
+| `document-chembl-id` | `str` | FK → ChEMBL ID родительской публикации |
 | `term` | `str` | Текст термина (напр., "Aspirin", "kinase inhibitor") |
-| `term_type` | `str` | Тип термина: MESH_HEADING, MESH_QUALIFIER, KEYWORD |
+| `term-type` | `str` | Тип термина: MESH-HEADING, MESH-QUALIFIER, KEYWORD |
 
 ### MeSH-специфичные поля
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `mesh_id` | `str \| None` | MeSH идентификатор (напр., "D001241") |
+| `mesh-id` | `str \| None` | MeSH идентификатор (напр., "D001241") |
 | `qualifier` | `str \| None` | MeSH квалификатор (напр., "pharmacology") |
 
 ---
 
 ## 3. Трансформация
 
-**Файл:** `src/bioetl/application/pipelines/chembl/publication_term_transformer.py`
+**Файл:** `src/bioetl/application/pipelines/chembl/publication-term-transformer.py`
 
 ### Entity ID
 
 Entity ID вычисляется как SHA256-хэш композитного ключа:
 
 ```python
-composite = f"{document_chembl_id}:{term_type}:{normalized_term}"
-entity_id = hashlib.sha256(composite.encode()).hexdigest()[:16]
+composite = f"{document-chembl-id}:{term-type}:{normalized-term}"
+entity-id = hashlib.sha256(composite.encode()).hexdigest()[:16]
 ```
 
 **Нормализация термина:** `term.lower().strip()`
@@ -55,7 +55,7 @@ entity_id = hashlib.sha256(composite.encode()).hexdigest()[:16]
 ### Извлечение терминов
 
 Трансформер извлекает термины из двух полей публикации:
-1. `mesh_terms` — массив MeSH-терминов (heading + qualifier)
+1. `mesh-terms` — массив MeSH-терминов (heading + qualifier)
 2. `keywords` — массив ключевых слов авторов
 
 ---
@@ -64,20 +64,20 @@ entity_id = hashlib.sha256(composite.encode()).hexdigest()[:16]
 
 ### DQ-правила
 
-1. **`document_chembl_id`** — обязательное, формат `CHEMBL\d+`
+1. **`document-chembl-id`** — обязательное, формат `CHEMBL\d+`
 2. **`term`** — обязательное, минимум 1 символ
-3. **`term_type`** — обязательное, одно из: MESH_HEADING, MESH_QUALIFIER, KEYWORD, CONCEPT
+3. **`term-type`** — обязательное, одно из: MESH-HEADING, MESH-QUALIFIER, KEYWORD, CONCEPT
 
 ### Gold-фильтры
 
 ```yaml
-gold_filters:
+gold-filters:
   columns:
-    term_type: [MESH_HEADING, KEYWORD]  # Основные типы терминов
-  required_fields:
-    - document_chembl_id
+    term-type: [MESH-HEADING, KEYWORD]  # Основные типы терминов
+  required-fields:
+    - document-chembl-id
     - term
-    - term_type
+    - term-type
 ```
 
 ---
@@ -86,25 +86,25 @@ gold_filters:
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_publication_term
+bioetl run chembl-publication-term
 
 # С ограничением
-bioetl run chembl_publication_term --limit 1000
+bioetl run chembl-publication-term --limit 1000
 
 # С фильтрацией по публикациям
-bioetl run chembl_publication_term --input-filter data/input/publications.csv
+bioetl run chembl-publication-term --input-filter data/input/publications.csv
 ```
 
 ---
 
 ## 6. Партиционирование
 
-Silver-таблица партиционирована по `term_type` для эффективных запросов по типу термина.
+Silver-таблица партиционирована по `term-type` для эффективных запросов по типу термина.
 
 ```yaml
 sink:
   silver:
-    partition_by: ["term_type"]
+    partition-by: ["term-type"]
 ```
 
 ---
@@ -113,21 +113,21 @@ sink:
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/publication_term.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/publication_term_transformer.py` |
-| Пайплайн | `src/bioetl/application/pipelines/chembl/publication_term.py` |
-| Сущность | `src/bioetl/domain/entities/chembl_structures.py` (PublicationTerm) |
-| Схема | `src/bioetl/domain/schemas/chembl/publication_term.py` |
+| Конфигурация | `configs/pipelines/chembl/publication-term.yaml` |
+| Трансформер | `src/bioetl/application/pipelines/chembl/publication-term-transformer.py` |
+| Пайплайн | `src/bioetl/application/pipelines/chembl/publication-term.py` |
+| Сущность | `src/bioetl/domain/entities/chembl-structures.py` (PublicationTerm) |
+| Схема | `src/bioetl/domain/schemas/chembl/publication-term.py` |
 
 ---
 
 ## 8. Связь с родительской сущностью
 
-`chembl_publication_term` — производная от `chembl_publication`. Для полного покрытия рекомендуется сначала загрузить публикации:
+`chembl-publication-term` — производная от `chembl-publication`. Для полного покрытия рекомендуется сначала загрузить публикации:
 
 ```bash
-bioetl run chembl_publication --limit 100
-bioetl run chembl_publication_term --limit 1000
+bioetl run chembl-publication --limit 100
+bioetl run chembl-publication-term --limit 1000
 ```
 
 ---

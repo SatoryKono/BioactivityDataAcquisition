@@ -11,5 +11,5 @@
 
 ```bash
 cd docs/02-architecture/diagrams
-./render_diagrams.sh
+./render-diagrams.sh
 ```

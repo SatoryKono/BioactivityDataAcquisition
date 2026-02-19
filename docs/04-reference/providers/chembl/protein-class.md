@@ -1,8 +1,8 @@
 # Пайплайн: ChEMBL Protein Class
 
-**Имя пайплайна:** `chembl_protein_class`
+**Имя пайплайна:** `chembl-protein-class`
 **Провайдер:** `chembl`
-**Сущность:** `protein_class`
+**Сущность:** `protein-class`
 **Версия схемы:** 1.2.0
 
 ---
@@ -19,23 +19,23 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `protein_class_id` | `int` | Уникальный идентификатор класса |
-| `parent_id` | `int` | ID родительского класса (иерархия) |
+| `protein-class-id` | `int` | Уникальный идентификатор класса |
+| `parent-id` | `int` | ID родительского класса (иерархия) |
 
 ### Иерархия
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `class_level` | `int` | Уровень в иерархии (1 = корень) |
-| `sort_order` | `int` | Порядок сортировки внутри уровня |
+| `class-level` | `int` | Уровень в иерархии (1 = корень) |
+| `sort-order` | `int` | Порядок сортировки внутри уровня |
 
 ### Классификация
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `pref_name` | `str` | Предпочтительное название |
-| `short_name` | `str` | Короткое название |
-| `protein_class_desc` | `str` | Описание класса |
+| `pref-name` | `str` | Предпочтительное название |
+| `short-name` | `str` | Короткое название |
+| `protein-class-desc` | `str` | Описание класса |
 | `definition` | `str` | Определение класса |
 
 ### Метаданные
@@ -43,27 +43,27 @@
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `downgraded` | `int` | Флаг устаревшей записи (0/1) |
-| `replaced_by` | `int` | ID заменяющего класса |
+| `replaced-by` | `int` | ID заменяющего класса |
 
 ---
 
 ## 3. Трансформация
 
-**Файл:** `src/bioetl/application/pipelines/chembl/protein_class_transformer.py`
+**Файл:** `src/bioetl/application/pipelines/chembl/protein-class-transformer.py`
 
 ### Entity ID
 
 ```python
-entity_id = f"chembl:{protein_class_id}"
+entity-id = f"chembl:{protein-class-id}"
 ```
 
 ### Иерархическая структура
 
 ```
-parent_id → protein_class_id
+parent-id → protein-class-id
 ```
 
-Корневые классы имеют `parent_id = None`.
+Корневые классы имеют `parent-id = None`.
 
 ---
 
@@ -71,12 +71,12 @@ parent_id → protein_class_id
 
 ### DQ-правила
 
-1. **`protein_class_id`** — обязательное (primary key)
-2. **`pref_name`** — обязательное (название класса)
+1. **`protein-class-id`** — обязательное (primary key)
+2. **`pref-name`** — обязательное (название класса)
 
 ### Gold-фильтры
 
-- Обязательные поля: `pref_name`
+- Обязательные поля: `pref-name`
 - Фильтр `downgraded = 0` — исключение устаревших записей
 
 ---
@@ -85,25 +85,25 @@ parent_id → protein_class_id
 
 ```bash
 # Полная загрузка (справочная таблица)
-bioetl run chembl_protein_class
+bioetl run chembl-protein-class
 
 # С ограничением
-bioetl run chembl_protein_class --limit 500
+bioetl run chembl-protein-class --limit 500
 ```
 
 ---
 
 ## 6. Стратегия загрузки
 
-**Full load** — справочная таблица загружается полностью при каждом запуске. Входной фильтр отключён (`input_filter.enabled: false`).
+**Full load** — справочная таблица загружается полностью при каждом запуске. Входной фильтр отключён (`input-filter.enabled: false`).
 
 ---
 
 ## 7. Партиционирование
 
-Silver-таблица партиционируется по полю `class_level` для оптимизации иерархических запросов.
+Silver-таблица партиционируется по полю `class-level` для оптимизации иерархических запросов.
 
-Gold-таблица сортируется по `class_level`, `sort_order`, `protein_class_id`.
+Gold-таблица сортируется по `class-level`, `sort-order`, `protein-class-id`.
 
 ---
 
@@ -111,9 +111,9 @@ Gold-таблица сортируется по `class_level`, `sort_order`, `pr
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/protein_class.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/protein_class_transformer.py` |
-| Пайплайн | `src/bioetl/application/pipelines/chembl/protein_class.py` |
+| Конфигурация | `configs/pipelines/chembl/protein-class.yaml` |
+| Трансформер | `src/bioetl/application/pipelines/chembl/protein-class-transformer.py` |
+| Пайплайн | `src/bioetl/application/pipelines/chembl/protein-class.py` |
 
 ---
 

@@ -27,18 +27,18 @@
 
 | № | Утверждение в документе | Ссылка на код | Фрагмент кода | Соответствует | План устранения | Тест | Предлагаемый тест |
 |---|-------------------------|---------------|----------------|---------------|-----------------|------|-------------------|
-| D-01 | «Пакет содержит 24 файла» (§2.1) | `src/bioetl/domain/ports/` | 25 файлов (.py), 24 без `__init__.py`, из них `noop.py` — не protocol | ✅ Исправлено 2026-02-11 | — | ❌ | `test_ports_file_count`: `assert len(glob('domain/ports/*.py')) - 1 == 24` |
-| D-02 | Перечислены 21 порт: DataSourcePort, FilterableDataSourcePort, StoragePort, LockPort, CheckpointPort, QuarantinePort, MetricsPort, TracingPort, LoggerPort, DQMonitorPort, **PipelineObserverPort**, BronzeDQAnalyzerPort, SilverDQAnalyzerPort, GoldDQAnalyzerPort, DQReportWriterPort, GoldValidatorPort, **InputFilterPort**, **ExportPort**, HealthCheckPort, AuditPort, **RetentionPort** (§2.1) | `src/bioetl/domain/ports/__init__.py` | 3 порта НЕ существуют: `PipelineObserverPort`, `ExportPort`, `RetentionPort`. Фактически 43+ protocol-класса, 22+ не документированы | ❌ | Удалить 3 несуществующих порта, добавить недокументированные (SilverValidatorPort, DeltaReaderPort, IDMappingPort, PiiHasherPort, MemoryMonitorPort, ShutdownPort и др.) | ⚠️ `test_port_contracts.py::TestPortExportsComplete` проверяет `__all__`, но не сверяет с документацией | `test_docs_ports_list_matches_code`: сравнить список портов в docs с `__all__` в `domain/ports/__init__.py` |
-| D-03 | QuarantineEntry: состояния `PENDING → RETRYING → RECOVERED/DEAD_LETTER` (§2.2) | `src/bioetl/domain/aggregates/quarantine_entry.py:31-55` | `class QuarantineStatus(StrEnum): NEW, UNDER_REVIEW, IGNORED, REPROCESSED, EXPIRED` | ❌ Фактические состояния: NEW → UNDER_REVIEW → IGNORED/REPROCESSED/EXPIRED | Заменить на: «NEW → UNDER_REVIEW → IGNORED / REPROCESSED / EXPIRED» | ✅ `test_aggregate_boundaries.py` тестирует агрегаты, но не сверяет с документацией | `test_quarantine_states_match_docs`: сравнить enum-значения с текстом документа |
-| D-04 | «exceptions/ (6 файлов)» (§2.7) | `src/bioetl/domain/exceptions/` | 7 файлов: `__init__.py`, `base.py`, `data_quality.py`, `infrastructure.py`, `internal.py`, `network.py`, `validation.py` | ✅ Исправлено 2026-02-11 | — | ❌ | `test_exceptions_file_count`: `assert len(glob('domain/exceptions/*.py')) - 1 == 6` |
-| D-05 | «schemas/ (25 файлов)» (§2.7) | `src/bioetl/domain/schemas/` | 25 .py файлов (без __init__.py) | ✅ Исправлено 2026-02-11 | — | ❌ | `test_schemas_file_count`: `assert 20 <= len(glob('domain/schemas/**/*.py', excl='__init__')) <= 30` |
-| D-06 | «value_objects/ (18 файлов)» (§2.3) | `src/bioetl/domain/value_objects/` | 18 .py файлов (без __init__.py) | ✅ Исправлено 2026-02-11 | — | ❌ | `test_value_objects_file_count` |
-| D-07 | Batch: OPEN → SEALED → WRITING → COMMITTED/FAILED (§2.2) | `src/bioetl/domain/aggregates/batch.py:31-51` | `class BatchStatus(StrEnum): OPEN, SEALED, WRITING, COMMITTED, FAILED` | ✅ | — | ✅ `test_aggregate_boundaries.py` | — |
-| D-08 | PipelineRun: PENDING → RUNNING → COMPLETED/FAILED/SHUTDOWN (§2.2) | `src/bioetl/domain/aggregates/pipeline_run.py:27-38` | `class RunStatus(StrEnum): PENDING, RUNNING, COMPLETED, FAILED, SHUTDOWN` | ✅ | — | ✅ `test_aggregate_boundaries.py` | — |
-| D-09 | config.py: PipelineConfig, RuntimeConfig, DQConfig, TableConfig (§2.5) | `src/bioetl/domain/config.py:249,354,394,537` | Все 4 класса найдены + 6 дополнительных | ✅ | — | ❌ | `test_config_classes_exist` |
-| D-10 | types.py: RunID, BatchID, EntityID, ContentHash (§2.4) | `src/bioetl/domain/types.py:22-31` | `RunID = NewType("RunID", UUID)` и др. | ✅ | — | ✅ `test_domain_public_api.py` | — |
-| D-11 | Domain не импортирует application/infrastructure/interfaces (§1) | `src/bioetl/domain/**/*.py` | 0 нарушений | ✅ | — | ✅ `test_layer_dependencies.py` (7 тестов) + import-linter | — |
-| D-12 | Тест `test_ports_imported_only_from_facade` (§2.1) | `tests/architecture/test_forbidden_imports.py:171` | `class TestPortImportFacade` | ✅ | — | ✅ | — |
+| D-01 | «Пакет содержит 24 файла» (§2.1) | `src/bioetl/domain/ports/` | 25 файлов (.py), 24 без `--init--.py`, из них `noop.py` — не protocol | ✅ Исправлено 2026-02-11 | — | ❌ | `test-ports-file-count`: `assert len(glob('domain/ports/*.py')) - 1 == 24` |
+| D-02 | Перечислены 21 порт: DataSourcePort, FilterableDataSourcePort, StoragePort, LockPort, CheckpointPort, QuarantinePort, MetricsPort, TracingPort, LoggerPort, DQMonitorPort, **PipelineObserverPort**, BronzeDQAnalyzerPort, SilverDQAnalyzerPort, GoldDQAnalyzerPort, DQReportWriterPort, GoldValidatorPort, **InputFilterPort**, **ExportPort**, HealthCheckPort, AuditPort, **RetentionPort** (§2.1) | `src/bioetl/domain/ports/--init--.py` | 3 порта НЕ существуют: `PipelineObserverPort`, `ExportPort`, `RetentionPort`. Фактически 43+ protocol-класса, 22+ не документированы | ❌ | Удалить 3 несуществующих порта, добавить недокументированные (SilverValidatorPort, DeltaReaderPort, IDMappingPort, PiiHasherPort, MemoryMonitorPort, ShutdownPort и др.) | ⚠️ `test-port-contracts.py::TestPortExportsComplete` проверяет `--all--`, но не сверяет с документацией | `test-docs-ports-list-matches-code`: сравнить список портов в docs с `--all--` в `domain/ports/--init--.py` |
+| D-03 | QuarantineEntry: состояния `PENDING → RETRYING → RECOVERED/DEAD-LETTER` (§2.2) | `src/bioetl/domain/aggregates/quarantine-entry.py:31-55` | `class QuarantineStatus(StrEnum): NEW, UNDER-REVIEW, IGNORED, REPROCESSED, EXPIRED` | ❌ Фактические состояния: NEW → UNDER-REVIEW → IGNORED/REPROCESSED/EXPIRED | Заменить на: «NEW → UNDER-REVIEW → IGNORED / REPROCESSED / EXPIRED» | ✅ `test-aggregate-boundaries.py` тестирует агрегаты, но не сверяет с документацией | `test-quarantine-states-match-docs`: сравнить enum-значения с текстом документа |
+| D-04 | «exceptions/ (6 файлов)» (§2.7) | `src/bioetl/domain/exceptions/` | 7 файлов: `--init--.py`, `base.py`, `data-quality.py`, `infrastructure.py`, `internal.py`, `network.py`, `validation.py` | ✅ Исправлено 2026-02-11 | — | ❌ | `test-exceptions-file-count`: `assert len(glob('domain/exceptions/*.py')) - 1 == 6` |
+| D-05 | «schemas/ (25 файлов)» (§2.7) | `src/bioetl/domain/schemas/` | 25 .py файлов (без --init--.py) | ✅ Исправлено 2026-02-11 | — | ❌ | `test-schemas-file-count`: `assert 20 <= len(glob('domain/schemas/**/*.py', excl='--init--')) <= 30` |
+| D-06 | «value-objects/ (18 файлов)» (§2.3) | `src/bioetl/domain/value-objects/` | 18 .py файлов (без --init--.py) | ✅ Исправлено 2026-02-11 | — | ❌ | `test-value-objects-file-count` |
+| D-07 | Batch: OPEN → SEALED → WRITING → COMMITTED/FAILED (§2.2) | `src/bioetl/domain/aggregates/batch.py:31-51` | `class BatchStatus(StrEnum): OPEN, SEALED, WRITING, COMMITTED, FAILED` | ✅ | — | ✅ `test-aggregate-boundaries.py` | — |
+| D-08 | PipelineRun: PENDING → RUNNING → COMPLETED/FAILED/SHUTDOWN (§2.2) | `src/bioetl/domain/aggregates/pipeline-run.py:27-38` | `class RunStatus(StrEnum): PENDING, RUNNING, COMPLETED, FAILED, SHUTDOWN` | ✅ | — | ✅ `test-aggregate-boundaries.py` | — |
+| D-09 | config.py: PipelineConfig, RuntimeConfig, DQConfig, TableConfig (§2.5) | `src/bioetl/domain/config.py:249,354,394,537` | Все 4 класса найдены + 6 дополнительных | ✅ | — | ❌ | `test-config-classes-exist` |
+| D-10 | types.py: RunID, BatchID, EntityID, ContentHash (§2.4) | `src/bioetl/domain/types.py:22-31` | `RunID = NewType("RunID", UUID)` и др. | ✅ | — | ✅ `test-domain-public-api.py` | — |
+| D-11 | Domain не импортирует application/infrastructure/interfaces (§1) | `src/bioetl/domain/**/*.py` | 0 нарушений | ✅ | — | ✅ `test-layer-dependencies.py` (7 тестов) + import-linter | — |
+| D-12 | Тест `test-ports-imported-only-from-facade` (§2.1) | `tests/architecture/test-forbidden-imports.py:171` | `class TestPortImportFacade` | ✅ | — | ✅ | — |
 
 ---
 
@@ -46,14 +46,14 @@
 
 | № | Утверждение | Ссылка на код | Фрагмент | Соответствует | План устранения | Тест | Предлагаемый тест |
 |---|-------------|---------------|----------|---------------|-----------------|------|-------------------|
-| A-01 | «core/ (27 файлов)» (§2.2) | `src/bioetl/application/core/` | 27 .py файлов (без __init__.py) | ✅ Исправлено 2026-02-11 | — | ❌ | `test_core_file_count` |
-| A-02 | BasePipeline в base.py (§2.2) | `src/bioetl/application/core/base.py:27` | `class BasePipeline(ABC):` | ✅ | — | ✅ `test_base_pipeline_purity.py` | — |
-| A-03 | BaseTransformer в base_transformer.py (§2.2) | `src/bioetl/application/core/base_transformer.py:84` | `class BaseTransformer(ABC):` | ✅ | — | ✅ `test_transformer_signatures.py` | — |
-| A-04 | BatchExecutor 783 LOC (§2.2) | `src/bioetl/application/core/batch_executor.py` | 783 строк, `class BatchExecutor:` на строке 62 | ✅ | — | ❌ | — |
-| A-05 | PipelineServices frozen dataclass с 14 полями (§2.4) | `src/bioetl/application/core/pipeline_services.py:39-93` | `@dataclass(frozen=True) class PipelineServices:` — все 14 полей совпадают | ✅ | — | ❌ | `test_pipeline_services_fields` |
-| A-06 | 11 трансформеров по документированным путям (§2.3) | См. таблицу | Все 11 найдены по точным путям | ✅ | — | ✅ `test_transformer_signatures.py` | — |
-| A-07 | Composite: CompositePipelineRunner, EnrichmentCoordinator, MergeService, KeyExtractorService, CompositeCheckpointManager (§2.5) | `src/bioetl/application/composite/` | Все 5 классов найдены | ✅ | — | ✅ `test_composite_layer_boundaries.py` | — |
-| A-08 | Application не импортирует infrastructure (§1) | `src/bioetl/application/**/*.py` | 0 нарушений | ✅ | — | ✅ `test_layer_dependencies.py` + import-linter | — |
+| A-01 | «core/ (27 файлов)» (§2.2) | `src/bioetl/application/core/` | 27 .py файлов (без --init--.py) | ✅ Исправлено 2026-02-11 | — | ❌ | `test-core-file-count` |
+| A-02 | BasePipeline в base.py (§2.2) | `src/bioetl/application/core/base.py:27` | `class BasePipeline(ABC):` | ✅ | — | ✅ `test-base-pipeline-purity.py` | — |
+| A-03 | BaseTransformer в base-transformer.py (§2.2) | `src/bioetl/application/core/base-transformer.py:84` | `class BaseTransformer(ABC):` | ✅ | — | ✅ `test-transformer-signatures.py` | — |
+| A-04 | BatchExecutor 783 LOC (§2.2) | `src/bioetl/application/core/batch-executor.py` | 783 строк, `class BatchExecutor:` на строке 62 | ✅ | — | ❌ | — |
+| A-05 | PipelineServices frozen dataclass с 14 полями (§2.4) | `src/bioetl/application/core/pipeline-services.py:39-93` | `@dataclass(frozen=True) class PipelineServices:` — все 14 полей совпадают | ✅ | — | ❌ | `test-pipeline-services-fields` |
+| A-06 | 11 трансформеров по документированным путям (§2.3) | См. таблицу | Все 11 найдены по точным путям | ✅ | — | ✅ `test-transformer-signatures.py` | — |
+| A-07 | Composite: CompositePipelineRunner, EnrichmentCoordinator, MergeService, KeyExtractorService, CompositeCheckpointManager (§2.5) | `src/bioetl/application/composite/` | Все 5 классов найдены | ✅ | — | ✅ `test-composite-layer-boundaries.py` | — |
+| A-08 | Application не импортирует infrastructure (§1) | `src/bioetl/application/**/*.py` | 0 нарушений | ✅ | — | ✅ `test-layer-dependencies.py` + import-linter | — |
 
 ---
 
@@ -61,16 +61,16 @@
 
 | № | Утверждение | Ссылка на код | Фрагмент | Соответствует | План устранения | Тест | Предлагаемый тест |
 |---|-------------|---------------|----------|---------------|-----------------|------|-------------------|
-| I-01 | ChemblAdapter наследует BaseHttpAdapter (§2.1.1) | `src/bioetl/infrastructure/adapters/chembl/client.py:88-89` | `@dataclass class ChemblAdapter(BaseHttpAdapter)` | ✅ | — | ✅ `test_adapter_contracts.py` | — |
-| I-02 | PubMedAdapter: базовый класс `@dataclass` (§2.1.1) | `src/bioetl/infrastructure/adapters/pubmed/pubmed_client.py:49-50` | `@dataclass class PubMedAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter)` | ⚠️ Doc говорит базовый класс `@dataclass`, но фактически BaseHttpAdapter | Исправить таблицу: «BaseHttpAdapter» в колонке «Базовый класс» | ❌ | `test_adapter_base_classes`: проверить базовые классы всех адаптеров |
-| I-03 | PubChemAdapter наследует BaseSyncAdapter (§2.1.1) | `src/bioetl/infrastructure/adapters/pubchem/client.py:62` | `class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter)` | ✅ | — | ✅ `test_adapter_contracts.py` | — |
-| I-04 | UnifiedHTTPClient: Rate Limiter, Circuit Breaker, Retry, Metrics (§2.1.1) | `src/bioetl/infrastructure/adapters/http/client.py:83-93` | `rate_limiter: RateLimiterPort`, `circuit_breaker: CircuitBreakerPort`, `retry_config: RetryConfig`, `metrics: MetricsPort` | ✅ | — | ✅ `test_port_contracts.py` | — |
-| I-05 | BronzeWriter: JSONL+zstd, atomic temp+rename (§2.2) | `src/bioetl/infrastructure/storage/bronze_writer.py:30,341-407,463` | `import zstandard as zstd`, `.jsonl.zst`, `mkstemp()` + `replace()` | ✅ | — | ✅ `test_medallion_invariants.py`, `test_adapter_contracts.py` | — |
-| I-06 | SilverWriter: Delta Lake, merge/upsert (§2.2) | `src/bioetl/infrastructure/storage/silver_writer.py:36,80,859-894` | `from deltalake import DeltaTable`, `dt.merge()` | ✅ | — | ✅ `test_medallion_invariants.py` | — |
-| I-07 | GoldWriter наследует BaseDeltaWriter + Pandera (§2.2) | `src/bioetl/infrastructure/storage/gold_writer.py:25,60` | `class GoldWriter(BaseDeltaWriter)`, `import pandera` | ✅ | — | ✅ `test_gold_schema_contracts.py` | — |
-| I-08 | MemoryLock: in-memory, LockPort (§2.3) | `src/bioetl/infrastructure/locking/memory_lock.py:19` | `class MemoryLock(LockPort)` с asyncio.Lock | ✅ | — | ✅ `test_lock_safety_guard.py` | — |
-| I-09 | LocalCheckpoint (§2.4) | `src/bioetl/infrastructure/checkpoint/local_checkpoint.py:31` | `class LocalCheckpoint` — filesystem-based | ✅ | — | ❌ | `test_local_checkpoint_implements_port` |
-| I-10 | Infrastructure не импортирует application/interfaces (§3) | `src/bioetl/infrastructure/**/*.py` | 0 нарушений | ✅ | — | ✅ `test_layer_dependencies.py` | — |
+| I-01 | ChemblAdapter наследует BaseHttpAdapter (§2.1.1) | `src/bioetl/infrastructure/adapters/chembl/client.py:88-89` | `@dataclass class ChemblAdapter(BaseHttpAdapter)` | ✅ | — | ✅ `test-adapter-contracts.py` | — |
+| I-02 | PubMedAdapter: базовый класс `@dataclass` (§2.1.1) | `src/bioetl/infrastructure/adapters/pubmed/pubmed-client.py:49-50` | `@dataclass class PubMedAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter)` | ⚠️ Doc говорит базовый класс `@dataclass`, но фактически BaseHttpAdapter | Исправить таблицу: «BaseHttpAdapter» в колонке «Базовый класс» | ❌ | `test-adapter-base-classes`: проверить базовые классы всех адаптеров |
+| I-03 | PubChemAdapter наследует BaseSyncAdapter (§2.1.1) | `src/bioetl/infrastructure/adapters/pubchem/client.py:62` | `class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter)` | ✅ | — | ✅ `test-adapter-contracts.py` | — |
+| I-04 | UnifiedHTTPClient: Rate Limiter, Circuit Breaker, Retry, Metrics (§2.1.1) | `src/bioetl/infrastructure/adapters/http/client.py:83-93` | `rate-limiter: RateLimiterPort`, `circuit-breaker: CircuitBreakerPort`, `retry-config: RetryConfig`, `metrics: MetricsPort` | ✅ | — | ✅ `test-port-contracts.py` | — |
+| I-05 | BronzeWriter: JSONL+zstd, atomic temp+rename (§2.2) | `src/bioetl/infrastructure/storage/bronze-writer.py:30,341-407,463` | `import zstandard as zstd`, `.jsonl.zst`, `mkstemp()` + `replace()` | ✅ | — | ✅ `test-medallion-invariants.py`, `test-adapter-contracts.py` | — |
+| I-06 | SilverWriter: Delta Lake, merge/upsert (§2.2) | `src/bioetl/infrastructure/storage/silver-writer.py:36,80,859-894` | `from deltalake import DeltaTable`, `dt.merge()` | ✅ | — | ✅ `test-medallion-invariants.py` | — |
+| I-07 | GoldWriter наследует BaseDeltaWriter + Pandera (§2.2) | `src/bioetl/infrastructure/storage/gold-writer.py:25,60` | `class GoldWriter(BaseDeltaWriter)`, `import pandera` | ✅ | — | ✅ `test-gold-schema-contracts.py` | — |
+| I-08 | MemoryLock: in-memory, LockPort (§2.3) | `src/bioetl/infrastructure/locking/memory-lock.py:19` | `class MemoryLock(LockPort)` с asyncio.Lock | ✅ | — | ✅ `test-lock-safety-guard.py` | — |
+| I-09 | LocalCheckpoint (§2.4) | `src/bioetl/infrastructure/checkpoint/local-checkpoint.py:31` | `class LocalCheckpoint` — filesystem-based | ✅ | — | ❌ | `test-local-checkpoint-implements-port` |
+| I-10 | Infrastructure не импортирует application/interfaces (§3) | `src/bioetl/infrastructure/**/*.py` | 0 нарушений | ✅ | — | ✅ `test-layer-dependencies.py` | — |
 
 ---
 
@@ -78,11 +78,11 @@
 
 | № | Утверждение | Ссылка на код | Фрагмент | Соответствует | План устранения | Тест | Предлагаемый тест |
 |---|-------------|---------------|----------|---------------|-----------------|------|-------------------|
-| IF-01 | «17 модулей в commands/» (§2.1) | `src/bioetl/interfaces/cli/commands/` | 16 файлов (15 без __init__) | ❌ Фактически 15 command-модулей | Исправить: «15 модулей» (или 16 с __init__) | ❌ | `test_cli_commands_count` |
-| IF-02 | 13 перечисленных команд (run, run_all, ... archive) (§2.1) | `src/bioetl/interfaces/cli/commands/` | Все 13 найдены + 3 не упомянуты: `health_server_integration.py`, `metrics_server_integration.py`, `run_helpers.py` | ⚠️ Перечисленные существуют, но 3 модуля не документированы | Добавить в таблицу: health_server_integration, metrics_server_integration, run_helpers | ❌ | `test_all_commands_documented` |
+| IF-01 | «17 модулей в commands/» (§2.1) | `src/bioetl/interfaces/cli/commands/` | 16 файлов (15 без --init--) | ❌ Фактически 15 command-модулей | Исправить: «15 модулей» (или 16 с --init--) | ❌ | `test-cli-commands-count` |
+| IF-02 | 13 перечисленных команд (run, run-all, ... archive) (§2.1) | `src/bioetl/interfaces/cli/commands/` | Все 13 найдены + 3 не упомянуты: `health-server-integration.py`, `metrics-server-integration.py`, `run-helpers.py` | ⚠️ Перечисленные существуют, но 3 модуля не документированы | Добавить в таблицу: health-server-integration, metrics-server-integration, run-helpers | ❌ | `test-all-commands-documented` |
 | IF-03 | CLI использует Click (§2.1) | `src/bioetl/interfaces/cli/main.py:9` | `import click` — Click везде, Typer не используется | ✅ | — | ❌ | — |
-| IF-04 | HTTP: /health, /health/live, /health/ready (§2.2) | `src/bioetl/interfaces/http/health_server.py:143-151` | Все 3 endpoints + 2 дополнительных: `/healthz`, `/health/providers` | ✅ | Документировать `/healthz` и `/health/providers` | ❌ | `test_health_endpoints_documented` |
-| IF-05 | orchestration/ содержит graceful shutdown (§2.3) | `src/bioetl/interfaces/orchestration/__init__.py:10-12` | «Signal handlers were removed in 2025-12-31» — модуль пуст | ❌ Graceful shutdown удалён, обрабатывается в CLI напрямую | Обновить: «Graceful shutdown обрабатывается в CLI (run.py, run_all.py, run_composite.py)» | ❌ | `test_orchestration_not_empty_or_docs_updated` |
+| IF-04 | HTTP: /health, /health/live, /health/ready (§2.2) | `src/bioetl/interfaces/http/health-server.py:143-151` | Все 3 endpoints + 2 дополнительных: `/healthz`, `/health/providers` | ✅ | Документировать `/healthz` и `/health/providers` | ❌ | `test-health-endpoints-documented` |
+| IF-05 | orchestration/ содержит graceful shutdown (§2.3) | `src/bioetl/interfaces/orchestration/--init--.py:10-12` | «Signal handlers were removed in 2025-12-31» — модуль пуст | ❌ Graceful shutdown удалён, обрабатывается в CLI напрямую | Обновить: «Graceful shutdown обрабатывается в CLI (run.py, run-all.py, run-composite.py)» | ❌ | `test-orchestration-not-empty-or-docs-updated` |
 
 ---
 
@@ -90,15 +90,15 @@
 
 | № | Утверждение | Ссылка на код | Фрагмент | Соответствует | План устранения | Тест | Предлагаемый тест |
 |---|-------------|---------------|----------|---------------|-----------------|------|-------------------|
-| C-01 | bootstrap/cli/ содержит: health, lock, config, metrics, noop (§2.1) | `src/bioetl/composition/bootstrap/cli/` | 7 модулей (без __init__): checkpoint, config, health, lock, metrics, noop, storage | ⚠️ 2 модуля не документированы: `checkpoint.py`, `storage.py` | Добавить checkpoint и storage в список | ❌ | `test_bootstrap_cli_modules_documented` |
-| C-02 | «factories/ (11 файлов)» (§2.2) | `src/bioetl/composition/factories/` | 11 .py файлов (без __init__) | ✅ | — | ❌ | `test_factories_file_count` |
-| C-03 | StorageAdapterFactory (§2.2) | `src/bioetl/composition/factories/storage_adapter.py:38` | Класс называется `StorageAdapter`, не `StorageAdapterFactory` | ❌ | Исправить: «StorageAdapter» (без Factory) | ❌ | — |
-| C-04 | ServicesFactory (§2.2) | `src/bioetl/composition/factories/services_factory.py:129,372` | Классы: `BaseServicesFactory` и `ServicesBuilder`, не `ServicesFactory` | ❌ | Исправить: «BaseServicesFactory / ServicesBuilder» | ❌ | — |
-| C-05 | TransformerFactory — класс (§2.2) | `src/bioetl/composition/factories/transformer_factory.py:31,47` | Нет класса TransformerFactory — только функции `register_transformer()`, `create_transformer()` | ❌ | Исправить: «transformer_factory.py — модуль с функциями create_transformer(), register_transformer()» | ❌ | — |
-| C-06 | DQFactory (§2.2) | `src/bioetl/composition/factories/dq_factory.py:35` | Класс называется `DQServicesFactory`, не `DQFactory` | ❌ | Исправить: «DQServicesFactory» | ❌ | — |
-| C-07 | DataSourceRegistry в providers/ (§2.3) | `src/bioetl/composition/factories/data_source_factory.py:100` | DataSourceRegistry находится в factories/, не в providers/ | ❌ | Исправить расположение в документации | ❌ | — |
-| C-08 | «7 зарегистрированных провайдеров» (§2.3) | `src/bioetl/composition/providers/registration.py:506-637` | 8 провайдеров: +`uniprot_idmapping` | ❌ | Добавить uniprot_idmapping в таблицу (8 провайдеров) | ❌ | `test_registered_providers_count_matches_docs` |
-| C-09 | bootstrap_composite_pipeline — async, принимает (name, limit) (§3.1) | `src/bioetl/composition/bootstrap/runtime/composite.py:528` | Функция sync (не async), принимает `(config: CompositeConfig, runtime: CompositeRuntimeConfig)` | ❌ | Исправить пример в документации на актуальную сигнатуру | ❌ | `test_bootstrap_composite_signature` |
+| C-01 | bootstrap/cli/ содержит: health, lock, config, metrics, noop (§2.1) | `src/bioetl/composition/bootstrap/cli/` | 7 модулей (без --init--): checkpoint, config, health, lock, metrics, noop, storage | ⚠️ 2 модуля не документированы: `checkpoint.py`, `storage.py` | Добавить checkpoint и storage в список | ❌ | `test-bootstrap-cli-modules-documented` |
+| C-02 | «factories/ (11 файлов)» (§2.2) | `src/bioetl/composition/factories/` | 11 .py файлов (без --init--) | ✅ | — | ❌ | `test-factories-file-count` |
+| C-03 | StorageAdapterFactory (§2.2) | `src/bioetl/composition/factories/storage-adapter.py:38` | Класс называется `StorageAdapter`, не `StorageAdapterFactory` | ❌ | Исправить: «StorageAdapter» (без Factory) | ❌ | — |
+| C-04 | ServicesFactory (§2.2) | `src/bioetl/composition/factories/services-factory.py:129,372` | Классы: `BaseServicesFactory` и `ServicesBuilder`, не `ServicesFactory` | ❌ | Исправить: «BaseServicesFactory / ServicesBuilder» | ❌ | — |
+| C-05 | TransformerFactory — класс (§2.2) | `src/bioetl/composition/factories/transformer-factory.py:31,47` | Нет класса TransformerFactory — только функции `register-transformer()`, `create-transformer()` | ❌ | Исправить: «transformer-factory.py — модуль с функциями create-transformer(), register-transformer()» | ❌ | — |
+| C-06 | DQFactory (§2.2) | `src/bioetl/composition/factories/dq-factory.py:35` | Класс называется `DQServicesFactory`, не `DQFactory` | ❌ | Исправить: «DQServicesFactory» | ❌ | — |
+| C-07 | DataSourceRegistry в providers/ (§2.3) | `src/bioetl/composition/factories/data-source-factory.py:100` | DataSourceRegistry находится в factories/, не в providers/ | ❌ | Исправить расположение в документации | ❌ | — |
+| C-08 | «7 зарегистрированных провайдеров» (§2.3) | `src/bioetl/composition/providers/registration.py:506-637` | 8 провайдеров: +`uniprot-idmapping` | ❌ | Добавить uniprot-idmapping в таблицу (8 провайдеров) | ❌ | `test-registered-providers-count-matches-docs` |
+| C-09 | bootstrap-composite-pipeline — async, принимает (name, limit) (§3.1) | `src/bioetl/composition/bootstrap/runtime/composite.py:528` | Функция sync (не async), принимает `(config: CompositeConfig, runtime: CompositeRuntimeConfig)` | ❌ | Исправить пример в документации на актуальную сигнатуру | ❌ | `test-bootstrap-composite-signature` |
 
 ---
 
@@ -106,10 +106,10 @@
 
 | № | Утверждение | Ссылка на код | Фрагмент | Соответствует | План устранения | Тест | Предлагаемый тест |
 |---|-------------|---------------|----------|---------------|-----------------|------|-------------------|
-| O-01 | «33 ADR» (строка 40) | `docs/02-architecture/decisions/ADR-*.md` | 33 файла ADR-001..ADR-033 | ✅ | — | ❌ | `test_adr_count` |
-| O-02 | «35 Mermaid diagram files» (строка 31) | `docs/02-architecture/diagrams/` | 35 `.mermaid` + 22 `.mmd` = 57 файлов | ⚠️ 35 .mermaid верно, но 22 .mmd не упомянуты | Уточнить: «35 .mermaid + 22 .mmd файлов» | ❌ | `test_diagram_files_count` |
-| O-03 | «Additional 26 diagrams» в mermaid/ (строка 34) | `docs/02-architecture/diagrams/mermaid/` | 22 .mmd файла, не 26 | ❌ | Исправить: 22 | ❌ | `test_mermaid_subdir_count` |
-| O-04 | Import Matrix (строки 84-90) | `.importlinter`, `tests/architecture/test_layer_dependencies.py` | Семантически идентична ARCH-001 (порядок колонок отличается) | ✅ | — | ✅ `test_layer_dependencies.py` + import-linter | — |
+| O-01 | «33 ADR» (строка 40) | `docs/02-architecture/decisions/ADR-*.md` | 33 файла ADR-001..ADR-033 | ✅ | — | ❌ | `test-adr-count` |
+| O-02 | «35 Mermaid diagram files» (строка 31) | `docs/02-architecture/diagrams/` | 35 `.mermaid` + 22 `.mermaid` = 57 файлов | ⚠️ 35 .mermaid верно, но 22 .mermaid не упомянуты | Уточнить: «35 .mermaid + 22 .mermaid файлов» | ❌ | `test-diagram-files-count` |
+| O-03 | «Additional 26 diagrams» в mermaid/ (строка 34) | `docs/02-architecture/diagrams/` | 22 .mermaid файла, не 26 | ❌ | Исправить: 22 | ❌ | `test-mermaid-subdir-count` |
+| O-04 | Import Matrix (строки 84-90) | `.importlinter`, `tests/architecture/test-layer-dependencies.py` | Семантически идентична ARCH-001 (порядок колонок отличается) | ✅ | — | ✅ `test-layer-dependencies.py` + import-linter | — |
 | O-05 | «Enforced by import-linter and tests/architecture/» (строка 92) | `.importlinter` (71 строка, 5 контрактов) + `tests/architecture/` (45 тестовых файлов) | Оба механизма существуют | ✅ | — | ✅ (самореференция) | — |
 
 ---
@@ -118,14 +118,14 @@
 
 | № | ADR | Утверждение | Ссылка на код | Соответствует | План устранения | Тест | Предлагаемый тест |
 |---|-----|-------------|---------------|---------------|-----------------|------|-------------------|
-| ADR-01 | ADR-001 | Delta Lake для Silver/Gold | `silver_writer.py:36`, `gold_writer.py:27` | ✅ | — | ✅ `test_medallion_invariants.py` | — |
-| ADR-02 | ADR-003 | MemoryLock, нет Redis | `memory_lock.py:19`, pyproject.toml | ✅ Нет Redis-зависимостей | — | ✅ `test_lock_safety_guard.py` | — |
-| ADR-03 | ADR-005 | Composition как отдельный слой | `src/bioetl/composition/` | ✅ | — | ✅ `test_bootstrap_layer_boundaries.py` | — |
-| ADR-04 | ADR-010 | Local-only, нет cloud deps | pyproject.toml | ✅ Нет boto3/redis/prefect | — | ✅ `test_forbidden_imports.py::test_no_cloud_or_distributed_libs` | — |
-| ADR-05 | ADR-021 | 3 DDD агрегата + события | `domain/aggregates/` | ✅ Batch, PipelineRun, QuarantineEntry + 12 event-классов | — | ✅ `test_aggregate_boundaries.py` | — |
-| ADR-06 | ADR-026 | Composite Pipeline | `application/composite/`, `domain/composite/` | ✅ Runner, Coordinator, Merger, FSM | — | ✅ `test_composite_layer_boundaries.py` | — |
-| ADR-07 | ADR-032 | Unified HTTP Client | `infrastructure/adapters/http/client.py:48` | ✅ Rate limiter + CB + retry + metrics | — | ✅ `test_port_contracts.py` | — |
-| ADR-08 | — | User-Agent версия «BioETL/5.0.0» | `infrastructure/adapters/http/client.py:88` | ❌ pyproject.toml = 5.14.0, UA = 5.0.0 | Обновить `user_agent` до `"BioETL/5.14.0"` или динамически из `importlib.metadata` | ❌ | `test_user_agent_version_matches_package` |
+| ADR-01 | ADR-001 | Delta Lake для Silver/Gold | `silver-writer.py:36`, `gold-writer.py:27` | ✅ | — | ✅ `test-medallion-invariants.py` | — |
+| ADR-02 | ADR-003 | MemoryLock, нет Redis | `memory-lock.py:19`, pyproject.toml | ✅ Нет Redis-зависимостей | — | ✅ `test-lock-safety-guard.py` | — |
+| ADR-03 | ADR-005 | Composition как отдельный слой | `src/bioetl/composition/` | ✅ | — | ✅ `test-bootstrap-layer-boundaries.py` | — |
+| ADR-04 | ADR-010 | Local-only, нет cloud deps | pyproject.toml | ✅ Нет boto3/redis/prefect | — | ✅ `test-forbidden-imports.py::test-no-cloud-or-distributed-libs` | — |
+| ADR-05 | ADR-021 | 3 DDD агрегата + события | `domain/aggregates/` | ✅ Batch, PipelineRun, QuarantineEntry + 12 event-классов | — | ✅ `test-aggregate-boundaries.py` | — |
+| ADR-06 | ADR-026 | Composite Pipeline | `application/composite/`, `domain/composite/` | ✅ Runner, Coordinator, Merger, FSM | — | ✅ `test-composite-layer-boundaries.py` | — |
+| ADR-07 | ADR-032 | Unified HTTP Client | `infrastructure/adapters/http/client.py:48` | ✅ Rate limiter + CB + retry + metrics | — | ✅ `test-port-contracts.py` | — |
+| ADR-08 | — | User-Agent версия «BioETL/5.0.0» | `infrastructure/adapters/http/client.py:88` | ❌ pyproject.toml = 5.14.0, UA = 5.0.0 | Обновить `user-agent` до `"BioETL/5.14.0"` или динамически из `importlib.metadata` | ❌ | `test-user-agent-version-matches-package` |
 
 ---
 
@@ -133,31 +133,31 @@
 
 | № | Правило | Описание | Тест есть? | Файл теста | Предлагаемый тест |
 |---|---------|----------|------------|------------|-------------------|
-| SR-01 | ARCH-001 | Import Matrix | ✅ | `test_layer_dependencies.py` (7+ тестов), `.importlinter` | — |
-| SR-02 | ARCH-002 | Domain Purity (no I/O) | ✅ | `test_domain_purity.py` | — |
-| SR-03 | ARCH-003 | Port Protocol Naming (*Port suffix) | ⚠️ | `test_domain_purity.py` (Protocol usage), но нет проверки суффикса *Port | `test_all_ports_have_port_suffix` |
-| SR-04 | ARCH-004 | Adapter Health Check | ✅ | `test_adapter_contracts.py` | — |
-| SR-05 | ARCH-005 | Composition Root Isolation | ✅ | `test_di_compliance.py::test_factories_only_in_composition` | — |
-| SR-06 | ARCH-006 | Silver Layer ACID (Delta Lake) | ✅ | `test_medallion_invariants.py` | — |
-| SR-07 | ARCH-007 | Medallion Clear Policy (REBUILD/BACKFILL/INCREMENTAL) | ❌ | — | `test_clear_policy_by_run_type`: проверить что REBUILD очищает Silver+Gold, INCREMENTAL — нет |
-| SR-08 | ARCH-008 | Ports from facade only | ✅ | `test_forbidden_imports.py::test_ports_imported_only_from_facade` | — |
-| SR-09 | AP-001 | DI Hard-coded Constructor | ✅ | `test_di_compliance.py`, `test_di_constructors.py` | — |
-| SR-10 | AP-002 | No structlog in app/interfaces | ✅ | `test_no_structlog_in_application_interfaces.py` | — |
-| SR-11 | AP-004 | Sentinel Values | ❌ | — | `test_no_sentinel_values`: grep для `-1`, `"N/A"`, `9999` в `src/bioetl/` |
-| SR-12 | AP-005 | Hardcoded Secrets | ❌ | — | `test_no_hardcoded_secrets`: grep для `password=`, `api_key=`, `secret=` |
-| SR-13 | AP-006 | Print Statements | ⚠️ | `test_no_print_in_docstrings.py` (только docstrings) | `test_no_print_in_production`: grep `print(` в `src/bioetl/` кроме `interfaces/cli/` |
-| SR-14 | AP-008 | Blocking I/O in Async | ❌ | — | `test_no_blocking_io_in_async`: проверить `open(`, `requests.` внутри `async def` |
-| SR-15 | DI-003 | Service Locator | ❌ | — | `test_no_service_locator`: grep `ServiceLocator`, `Container.resolve` |
-| SR-16 | DI-004 | Import-time Side Effects | ⚠️ | `test_no_side_effects_in_composition.py` (только composition) | `test_no_module_level_instantiation`: AST-анализ `domain/`, `application/` |
-| SR-17 | NAME-001 | Class Suffixes | ❌ | — | `test_class_naming_conventions`: проверить суффиксы Factory, Client, Port, Service, Transformer |
-| SR-18 | NAME-002 | Function Prefixes | ❌ | — | `test_function_naming_prefixes` |
-| SR-19 | NAME-003..006 | Module/Constant/Enum Naming | ❌ | — | `test_naming_conventions_suite` |
-| SR-20 | TYPE-001 | Public Function Annotations | ❌ | — | `test_public_functions_have_annotations` |
-| SR-21 | TYPE-002 | Any Usage | ❌ | — | `test_any_usage_justified` |
-| SR-22 | TYPE-003 | mypy --strict | ❌ (в CI, не в arch-тестах) | — | `test_mypy_strict` (или оставить в CI) |
-| SR-23 | TYPE-004 | Protocol @runtime_checkable | ✅ | `test_port_contracts.py::TestPortRuntimeCheckable` | — |
-| SR-24 | TEST-003 | VCR Cassettes for HTTP | ❌ | — | `test_http_tests_use_vcr` |
-| SR-25 | TEST-005 | No Test Logic in Production | ❌ | — | `test_no_test_logic_in_production`: grep `pytest`, `unittest` в `src/bioetl/` |
+| SR-01 | ARCH-001 | Import Matrix | ✅ | `test-layer-dependencies.py` (7+ тестов), `.importlinter` | — |
+| SR-02 | ARCH-002 | Domain Purity (no I/O) | ✅ | `test-domain-purity.py` | — |
+| SR-03 | ARCH-003 | Port Protocol Naming (*Port suffix) | ⚠️ | `test-domain-purity.py` (Protocol usage), но нет проверки суффикса *Port | `test-all-ports-have-port-suffix` |
+| SR-04 | ARCH-004 | Adapter Health Check | ✅ | `test-adapter-contracts.py` | — |
+| SR-05 | ARCH-005 | Composition Root Isolation | ✅ | `test-di-compliance.py::test-factories-only-in-composition` | — |
+| SR-06 | ARCH-006 | Silver Layer ACID (Delta Lake) | ✅ | `test-medallion-invariants.py` | — |
+| SR-07 | ARCH-007 | Medallion Clear Policy (REBUILD/BACKFILL/INCREMENTAL) | ❌ | — | `test-clear-policy-by-run-type`: проверить что REBUILD очищает Silver+Gold, INCREMENTAL — нет |
+| SR-08 | ARCH-008 | Ports from facade only | ✅ | `test-forbidden-imports.py::test-ports-imported-only-from-facade` | — |
+| SR-09 | AP-001 | DI Hard-coded Constructor | ✅ | `test-di-compliance.py`, `test-di-constructors.py` | — |
+| SR-10 | AP-002 | No structlog in app/interfaces | ✅ | `test-no-structlog-in-application-interfaces.py` | — |
+| SR-11 | AP-004 | Sentinel Values | ❌ | — | `test-no-sentinel-values`: grep для `-1`, `"N/A"`, `9999` в `src/bioetl/` |
+| SR-12 | AP-005 | Hardcoded Secrets | ❌ | — | `test-no-hardcoded-secrets`: grep для `password=`, `api-key=`, `secret=` |
+| SR-13 | AP-006 | Print Statements | ⚠️ | `test-no-print-in-docstrings.py` (только docstrings) | `test-no-print-in-production`: grep `print(` в `src/bioetl/` кроме `interfaces/cli/` |
+| SR-14 | AP-008 | Blocking I/O in Async | ❌ | — | `test-no-blocking-io-in-async`: проверить `open(`, `requests.` внутри `async def` |
+| SR-15 | DI-003 | Service Locator | ❌ | — | `test-no-service-locator`: grep `ServiceLocator`, `Container.resolve` |
+| SR-16 | DI-004 | Import-time Side Effects | ⚠️ | `test-no-side-effects-in-composition.py` (только composition) | `test-no-module-level-instantiation`: AST-анализ `domain/`, `application/` |
+| SR-17 | NAME-001 | Class Suffixes | ❌ | — | `test-class-naming-conventions`: проверить суффиксы Factory, Client, Port, Service, Transformer |
+| SR-18 | NAME-002 | Function Prefixes | ❌ | — | `test-function-naming-prefixes` |
+| SR-19 | NAME-003..006 | Module/Constant/Enum Naming | ❌ | — | `test-naming-conventions-suite` |
+| SR-20 | TYPE-001 | Public Function Annotations | ❌ | — | `test-public-functions-have-annotations` |
+| SR-21 | TYPE-002 | Any Usage | ❌ | — | `test-any-usage-justified` |
+| SR-22 | TYPE-003 | mypy --strict | ❌ (в CI, не в arch-тестах) | — | `test-mypy-strict` (или оставить в CI) |
+| SR-23 | TYPE-004 | Protocol @runtime-checkable | ✅ | `test-port-contracts.py::TestPortRuntimeCheckable` | — |
+| SR-24 | TEST-003 | VCR Cassettes for HTTP | ❌ | — | `test-http-tests-use-vcr` |
+| SR-25 | TEST-005 | No Test Logic in Production | ❌ | — | `test-no-test-logic-in-production`: grep `pytest`, `unittest` в `src/bioetl/` |
 
 ---
 
@@ -194,8 +194,8 @@
 
 | Приоритет | ID | Документ | Проблема | Влияние |
 |-----------|----|----------|----------|---------|
-| 🔴 P1 | D-03 | domain-layer | QuarantineEntry states полностью неверны (PENDING/RETRYING vs NEW/UNDER_REVIEW) | Разработчики будут реализовывать несуществующие состояния |
-| 🔴 P1 | C-09 | composition-layer | bootstrap_composite_pipeline — неверная сигнатура (async vs sync, string vs config) | Пример кода не компилируется |
+| 🔴 P1 | D-03 | domain-layer | QuarantineEntry states полностью неверны (PENDING/RETRYING vs NEW/UNDER-REVIEW) | Разработчики будут реализовывать несуществующие состояния |
+| 🔴 P1 | C-09 | composition-layer | bootstrap-composite-pipeline — неверная сигнатура (async vs sync, string vs config) | Пример кода не компилируется |
 | 🔴 P1 | IF-05 | interfaces-layer | Документирован graceful shutdown в orchestration/, но модуль пуст | Архитектурная документация описывает несуществующий функционал |
 | 🟡 P2 | D-02 | domain-layer | 3 несуществующих порта, 22+ недокументированных | Неполная карта портов |
 | 🟡 P2 | C-03..C-06 | composition-layer | 4 фабрики с неверными именами классов | Разработчики не найдут классы по документации |
@@ -211,8 +211,8 @@
 
 ### Фаза 1: Критические (P1) — срочно
 
-1. **D-03**: Обновить `01-domain-layer.md §2.2` — заменить `PENDING → RETRYING → RECOVERED/DEAD_LETTER` на `NEW → UNDER_REVIEW → IGNORED/REPROCESSED/EXPIRED`
-2. **C-09**: Обновить `05-composition-layer.md §3.1` — исправить пример `bootstrap_composite_pipeline` на актуальную сигнатуру
+1. **D-03**: Обновить `01-domain-layer.md §2.2` — заменить `PENDING → RETRYING → RECOVERED/DEAD-LETTER` на `NEW → UNDER-REVIEW → IGNORED/REPROCESSED/EXPIRED`
+2. **C-09**: Обновить `05-composition-layer.md §3.1` — исправить пример `bootstrap-composite-pipeline` на актуальную сигнатуру
 3. **IF-05**: Обновить `04-interfaces-layer.md §2.3` — указать что signal handlers удалены, graceful shutdown в CLI
 
 ### Фаза 2: Важные (P2) — в текущем спринте
@@ -220,7 +220,7 @@
 4. **D-02**: Обновить список портов в `01-domain-layer.md §2.1` — удалить 3 несуществующих, добавить актуальные
 5. **C-03..C-06**: Исправить имена фабрик в `05-composition-layer.md §2.2`
 6. **C-07**: Исправить расположение DataSourceRegistry
-7. **ADR-08**: Исправить user_agent в `http/client.py` или сделать динамическим
+7. **ADR-08**: Исправить user-agent в `http/client.py` или сделать динамическим
 
 ### Фаза 3: Косметические (P3) — при следующем обновлении
 
@@ -243,19 +243,19 @@
 
 | № | Утверждение | Ссылка на код | Соответствует | План устранения |
 |---|-------------|---------------|---------------|-----------------|
-| R-01 | Silver формат: «Delta Lake / Iceberg» (§1.3) | `silver_writer.py:36`: `from deltalake import DeltaTable` | ❌ Iceberg НЕ реализован, только Delta Lake | Убрать «/ Iceberg» из RULES.md |
-| R-02 | Gold формат: «Delta/Iceberg/Parquet» (§1.3) | `gold_writer.py:27`: `from deltalake` | ❌ Только Delta Lake, нет Iceberg/Parquet | Исправить: «Delta Lake» |
-| R-03 | `PipelineRunner._clear_exports()` очищает Silver/Gold (§1.4) | `application/core/runner.py` | ❌ Метод не существует. Логика в `MedallionLifecycleService.clear()` | Исправить ссылку на `MedallionLifecycleService.clear()` |
-| R-04 | QuarantineStatus: 3 значения (NEW\|IGNORED\|REPROCESSED) (§2.3) | `domain/aggregates/quarantine_entry.py:31-55` | ❌ Фактически 5: +UNDER_REVIEW, EXPIRED | Добавить 2 недокументированных статуса |
-| R-05 | `compute_content_hash` (§2.2) | `domain/transformations.py:101` | ❌ Фактическое имя: `generate_content_hash` | Исправить имя функции |
+| R-01 | Silver формат: «Delta Lake / Iceberg» (§1.3) | `silver-writer.py:36`: `from deltalake import DeltaTable` | ❌ Iceberg НЕ реализован, только Delta Lake | Убрать «/ Iceberg» из RULES.md |
+| R-02 | Gold формат: «Delta/Iceberg/Parquet» (§1.3) | `gold-writer.py:27`: `from deltalake` | ❌ Только Delta Lake, нет Iceberg/Parquet | Исправить: «Delta Lake» |
+| R-03 | `PipelineRunner.-clear-exports()` очищает Silver/Gold (§1.4) | `application/core/runner.py` | ❌ Метод не существует. Логика в `MedallionLifecycleService.clear()` | Исправить ссылку на `MedallionLifecycleService.clear()` |
+| R-04 | QuarantineStatus: 3 значения (NEW\|IGNORED\|REPROCESSED) (§2.3) | `domain/aggregates/quarantine-entry.py:31-55` | ❌ Фактически 5: +UNDER-REVIEW, EXPIRED | Добавить 2 недокументированных статуса |
+| R-05 | `compute-content-hash` (§2.2) | `domain/transformations.py:101` | ❌ Фактическое имя: `generate-content-hash` | Исправить имя функции |
 | R-06 | Лог-поле `ts` (§3.1) | structlog TimeStamper | ❌ Фактическое поле: `timestamp` | Исправить: `timestamp` |
-| R-07 | Bronze: JSONL + zstd (§1.3) | `bronze_writer.py:30,463` | ✅ | — |
+| R-07 | Bronze: JSONL + zstd (§1.3) | `bronze-writer.py:30,463` | ✅ | — |
 | R-08 | Lock TTL: 90 секунд (§5.2) | `domain/config.py:554` | ✅ | — |
 | R-09 | Heartbeat interval: 30 секунд (§5.2) | `domain/config.py:551` | ✅ | — |
-| R-10 | `from __future__ import annotations` во всех файлах (§4.1) | 100+ файлов проверено | ✅ | — |
+| R-10 | `from --future-- import annotations` во всех файлах (§4.1) | 100+ файлов проверено | ✅ | — |
 | R-11 | Coverage threshold: 85% (§4.3) | `pyproject.toml:219`, `Makefile:66` | ✅ | — |
 | R-12 | VCR cassettes в `tests/fixtures/vcr/` (§4.3) | 8 провайдер-директорий | ✅ | — |
-| R-13 | ChEMBL API base URL: `ebi.ac.uk/chembl/api/data` (§5.1) | `infrastructure/adapters/chembl/entity_mapper.py:35` | ✅ | — |
+| R-13 | ChEMBL API base URL: `ebi.ac.uk/chembl/api/data` (§5.1) | `infrastructure/adapters/chembl/entity-mapper.py:35` | ✅ | — |
 | R-14 | PII hashing: sha256(lowercase + SALT) (§5.4) | Domain filtering modules | ✅ | — |
 | R-15 | 33 ADR (§6.1) | `docs/02-architecture/decisions/ADR-*.md` | ✅ | — |
 
@@ -277,7 +277,7 @@
 | R-23 | `async def aclose()` contract в адаптерах (§5.3) | 5+ адаптеров проверено | ✅ | — |
 | R-24 | aclose() is idempotent (§5.3) | Base adapter definition | ✅ | — |
 | R-25 | DR targets: RPO 24h, RTO 4h (§5.5) | RULES.md §5.5 | ✅ | — |
-| R-26 | Content hash excludes: `_ingestion_ts`, `_run_id`, `_run_type`, `_source_batch_id` (§4.2) | Config-driven | ✅ | — |
+| R-26 | Content hash excludes: `-ingestion-ts`, `-run-id`, `-run-type`, `-source-batch-id` (§4.2) | Config-driven | ✅ | — |
 | R-27 | MD5-based jitter (not random module) (§4.2) | Domain resilience config | ✅ | — |
 | R-28 | `docs/archived/refactoring-plan.md` exists (§7.1) | File confirmed | ✅ | — |
 
@@ -292,12 +292,12 @@
 | № | Утверждение | Ссылка на код | Соответствует | План устранения |
 |---|-------------|---------------|---------------|-----------------|
 | API-01 | LockPort: метод `refresh()` (§Ports) | `domain/ports/locking.py:64` | ❌ Фактический метод: `heartbeat()` | Исправить: `heartbeat()` |
-| API-02 | MetricsPort: `increment()` (§Ports) | `domain/ports/observability.py:46` | ❌ Фактический: `increment_counter()` | Исправить имя метода |
-| API-03 | MetricsPort: `gauge()` (§Ports) | `domain/ports/observability.py:61` | ❌ Фактический: `set_gauge()` | Исправить имя метода |
-| API-04 | MetricsPort: `histogram()` (§Ports) | `domain/ports/observability.py:76` | ❌ Фактический: `observe_histogram()` | Исправить имя метода |
+| API-02 | MetricsPort: `increment()` (§Ports) | `domain/ports/observability.py:46` | ❌ Фактический: `increment-counter()` | Исправить имя метода |
+| API-03 | MetricsPort: `gauge()` (§Ports) | `domain/ports/observability.py:61` | ❌ Фактический: `set-gauge()` | Исправить имя метода |
+| API-04 | MetricsPort: `histogram()` (§Ports) | `domain/ports/observability.py:76` | ❌ Фактический: `observe-histogram()` | Исправить имя метода |
 | API-05 | Entity `Activity` (§Entities) | `domain/entities/` | ❌ Фактически: `ActivityRecord` / `Bioactivity` | Исправить имя |
 | API-06 | Entity `Document` (§Entities) | `domain/entities/` | ❌ Класс не существует | Удалить или уточнить |
-| API-07 | `compute_content_hash` (§Transformations) | `domain/transformations.py:101` | ❌ Фактически: `generate_content_hash` | Исправить имя |
+| API-07 | `compute-content-hash` (§Transformations) | `domain/transformations.py:101` | ❌ Фактически: `generate-content-hash` | Исправить имя |
 
 ### 14.2. Infrastructure API (`docs/04-reference/api/infrastructure.md`)
 
@@ -305,22 +305,22 @@
 |---|-------------|---------------|---------------|-----------------|
 | API-08 | `MetricsExporter` class (§Observability) | Весь код | ❌ Не существует. Фактически: `PrometheusMetrics` | Исправить имя класса |
 | API-09 | `LineageTracker` class (§Observability) | Весь код | ❌ Класс не существует нигде | Удалить из документации |
-| API-10 | UnifiedHTTPClient constructor: `base_url`, `rate_limit`, `max_retries` (§HTTP) | `http/client.py:83-93` | ❌ Фактически: `rate_limiter: RateLimiterPort`, `circuit_breaker: CircuitBreakerPort`, `retry_config: RetryConfig` | Полностью переписать пример конструктора |
+| API-10 | UnifiedHTTPClient constructor: `base-url`, `rate-limit`, `max-retries` (§HTTP) | `http/client.py:83-93` | ❌ Фактически: `rate-limiter: RateLimiterPort`, `circuit-breaker: CircuitBreakerPort`, `retry-config: RetryConfig` | Полностью переписать пример конструктора |
 | API-11 | `DeltaWriter` class (§Storage) | Весь код | ❌ Класс полностью удалён | Удалить из документации |
 
 ### 14.3. Composition API (`docs/04-reference/api/composition.md`)
 
 | № | Утверждение | Ссылка на код | Соответствует | План устранения |
 |---|-------------|---------------|---------------|-----------------|
-| API-12 | `ServicesFactory` class (§Factories) | `composition/factories/services_factory.py` | ❌ Фактически: `BaseServicesFactory` / `ServicesBuilder` | Исправить имя |
-| API-13 | `@register("chembl_activity")` decorator (§Registry) | Весь код | ❌ Декоратор не существует. Фактически: `registry.register_factory()` | Исправить пример |
-| API-14 | `bootstrap_pipeline(ctx)` extra `registry` param (§Bootstrap) | `composition/bootstrap/` | ⚠️ Сигнатура в целом верна, но `registry` не документирован | Добавить optional param |
+| API-12 | `ServicesFactory` class (§Factories) | `composition/factories/services-factory.py` | ❌ Фактически: `BaseServicesFactory` / `ServicesBuilder` | Исправить имя |
+| API-13 | `@register("chembl-activity")` decorator (§Registry) | Весь код | ❌ Декоратор не существует. Фактически: `registry.register-factory()` | Исправить пример |
+| API-14 | `bootstrap-pipeline(ctx)` extra `registry` param (§Bootstrap) | `composition/bootstrap/` | ⚠️ Сигнатура в целом верна, но `registry` не документирован | Добавить optional param |
 
 ### 14.4. CLI Reference (`docs/04-reference/cli.md`)
 
 | № | Утверждение | Ссылка на код | Соответствует | План устранения |
 |---|-------------|---------------|---------------|-----------------|
-| API-15 | Exit codes 82-87 (§Exit Codes) | `interfaces/cli/exit_codes.py:52-57` | ✅ | — |
+| API-15 | Exit codes 82-87 (§Exit Codes) | `interfaces/cli/exit-codes.py:52-57` | ✅ | — |
 | API-16 | `--health-server/--no-health-server` flag (§run) | `interfaces/cli/commands/run.py:191` | ✅ | — |
 | API-17 | `quarantine resolve --payload-hash` (§quarantine) | `interfaces/cli/commands/quarantine.py:220` | ✅ | — |
 
@@ -332,10 +332,10 @@
 
 | № | Утверждение | Ссылка на код | Соответствует | План устранения |
 |---|-------------|---------------|---------------|-----------------|
-| GS-01 | Bronze path: `data/bronze/v1/chembl/activity/` | `config_loader.py:163` | ❌ Фактически: `data/output/bronze/chembl/activity/{date}/` (нет `v1/`, нужен `output/`) | Исправить паттерн пути |
-| GS-02 | Silver path: `data/silver/chembl.activity/` | `config_loader.py:163` | ❌ Фактически: `data/output/silver/chembl/activity/` (слеш не точка, нужен `output/`) | Исправить разделитель и путь |
-| GS-03 | Gold path: `data/gold/chembl.activity_gold/` | `config_loader.py:163` | ❌ Фактически: `data/output/gold/chembl/activity/` (нет `_gold` суффикса) | Исправить паттерн пути |
-| GS-04 | Convention: `data/output/{layer}/{provider}/{entity}/` | `config_loader.py:163` | ✅ Это фактический паттерн | — |
+| GS-01 | Bronze path: `data/bronze/v1/chembl/activity/` | `config-loader.py:163` | ❌ Фактически: `data/output/bronze/chembl/activity/{date}/` (нет `v1/`, нужен `output/`) | Исправить паттерн пути |
+| GS-02 | Silver path: `data/silver/chembl.activity/` | `config-loader.py:163` | ❌ Фактически: `data/output/silver/chembl/activity/` (слеш не точка, нужен `output/`) | Исправить разделитель и путь |
+| GS-03 | Gold path: `data/gold/chembl.activity-gold/` | `config-loader.py:163` | ❌ Фактически: `data/output/gold/chembl/activity/` (нет `-gold` суффикса) | Исправить паттерн пути |
+| GS-04 | Convention: `data/output/{layer}/{provider}/{entity}/` | `config-loader.py:163` | ✅ Это фактический паттерн | — |
 
 **Итого Getting Started:** 1/4 ✅, 3/4 ❌ — все пути неверны
 
@@ -346,7 +346,7 @@
 | № | Утверждение | Ссылка на код | Соответствует | План устранения |
 |---|-------------|---------------|---------------|-----------------|
 | PL-01 | «19 standard + 3 composite = 22 pipelines» | `configs/pipelines/` | ❌ Фактически: 21 standard + 5 composite = 26 | Обновить подсчёт |
-| PL-02 | Недокументированные: ChEMBL `subcellular_fraction.yaml`, `tissue.yaml` | `configs/pipelines/chembl/` | ❌ Файлы существуют, но не в списке | Добавить в список |
+| PL-02 | Недокументированные: ChEMBL `subcellular-fraction.yaml`, `tissue.yaml` | `configs/pipelines/chembl/` | ❌ Файлы существуют, но не в списке | Добавить в список |
 | PL-03 | Недокументированные composite: `activity.yaml`, `assay.yaml` | `configs/composite/` | ❌ Файлы существуют, но не в списке | Добавить в список |
 
 ---
@@ -378,20 +378,20 @@
 
 | № | Документ | Утверждение | Соответствует | План устранения |
 |---|----------|-------------|---------------|-----------------|
-| OPS-01 | observability-checklist.md | `health_check() -> bool` | ❌ Фактически: `-> HealthStatus` (enum) | Исправить тип возврата |
+| OPS-01 | observability-checklist.md | `health-check() -> bool` | ❌ Фактически: `-> HealthStatus` (enum) | Исправить тип возврата |
 | OPS-02 | observability-checklist.md | ChEMBL health endpoint: `/chembl/api/data/status.json` | ⚠️ Фактически: `/chembl/api/data/status` (без .json) | Исправить путь |
-| OPS-03 | runbooks/README.md | DQ hard threshold exit code: 10 | ❌ Фактически: 83 (DATA_QUALITY_ERROR) | Исправить: exit code 83 |
+| OPS-03 | runbooks/README.md | DQ hard threshold exit code: 10 | ❌ Фактически: 83 (DATA-QUALITY-ERROR) | Исправить: exit code 83 |
 | OPS-04 | runbooks/pipeline-failure-recovery.md | DQ hard threshold exit code: 10 | ❌ Фактически: 83 | Исправить: exit code 83 |
 | OPS-05 | runbooks/pipeline-failure-recovery.md | CLI flag `--full-refresh` | ❌ Не реализован. Использовать `--run-type rebuild` | Заменить на `--run-type rebuild` |
 | OPS-06 | runbooks/data-recovery.md | CLI flag `--full-rebuild` | ❌ Не реализован. Использовать `--run-type rebuild` | Заменить на `--run-type rebuild` |
 | OPS-07 | runbooks/data-recovery.md | CLI flag `--ignore-checkpoint` | ❌ Не реализован | Удалить или реализовать |
-| OPS-08 | runbooks/pipeline-failure-recovery.md | `bioetl verify --table chembl_activity` | ❌ Команда `verify` не существует | Удалить или реализовать |
+| OPS-08 | runbooks/pipeline-failure-recovery.md | `bioetl verify --table chembl-activity` | ❌ Команда `verify` не существует | Удалить или реализовать |
 | OPS-09 | runbooks/dq-failure-investigation.md | `bioetl quarantine-purge --older-than 30d` | ❌ Фактически: `bioetl quarantine purge --pipeline <name> --older-than-days 30` | Исправить формат команды |
 | OPS-10 | runbooks/backfill-rebuild.md | `make run-pipeline PIPELINE={name} ARGS="--full-rebuild"` | ❌ Makefile target не существует. Использовать `bioetl run --pipeline <name> --run-type rebuild` | Заменить на актуальную CLI команду |
 | OPS-11 | runbooks/backfill-rebuild.md | `make run-pipeline ... ARGS="--backfill ..."` | ❌ Использовать `bioetl run --pipeline <name> --run-type backfill` | Исправить формат |
-| OPS-12 | runbooks/vacuum-procedures.md | `retention_hours: 168` config field | ✅ | — |
-| OPS-13 | incident-response.md | `make release-lock PIPELINE=chembl_activity` | ✅ Makefile target делегирует в CLI | — |
-| OPS-14 | runbooks/dq-failure-investigation.md | `bioetl quarantine stats --pipeline chembl_activity` | ✅ Команда и флаги существуют | — |
+| OPS-12 | runbooks/vacuum-procedures.md | `retention-hours: 168` config field | ✅ | — |
+| OPS-13 | incident-response.md | `make release-lock PIPELINE=chembl-activity` | ✅ Makefile target делегирует в CLI | — |
+| OPS-14 | runbooks/dq-failure-investigation.md | `bioetl quarantine stats --pipeline chembl-activity` | ✅ Команда и флаги существуют | — |
 
 **Итого Operations:** 3/14 ✅ (21%), 1/14 ⚠️ (7%), 10/14 ❌ (71%)
 
@@ -401,20 +401,20 @@
 
 | № | Документ | Утверждение | Соответствует | План устранения |
 |---|----------|-------------|---------------|-----------------|
-| GOV-01 | `.claude/PROJECT_CONTEXT.md` | 5 architecture layers: domain/, application/, composition/, infrastructure/, interfaces/ | ✅ | — |
-| GOV-02 | `governance/02-naming-policy.md` | Pipeline IDs: `{provider}_{entity}` (snake_case) | ✅ `chembl_activity` и др. | — |
-| GOV-03 | `governance/02-naming-policy.md` | Transformer placement: `application/pipelines/{provider}/{entity}_transformer.py` | ✅ | — |
+| GOV-01 | `.claude/PROJECT-CONTEXT.md` | 5 architecture layers: domain/, application/, composition/, infrastructure/, interfaces/ | ✅ | — |
+| GOV-02 | `governance/02-naming-policy.md` | Pipeline IDs: `{provider}-{entity}` (snake-case) | ✅ `chembl-activity` и др. | — |
+| GOV-03 | `governance/02-naming-policy.md` | Transformer placement: `application/pipelines/{provider}/{entity}-transformer.py` | ✅ | — |
 | GOV-04 | `governance/03-file-policy.md` | Config path: `configs/pipelines/{provider}/{entity}.yaml` | ✅ | — |
-| GOV-05 | `governance/03-file-policy.md` | 7 required config fields: pipeline_name, provider, entity_type, version, primary_keys, silver_table, gold_table | ✅ | — |
-| GOV-06 | `governance/03-file-policy.md` | Schema validation: `configs/pipelines/_schema.json` | ✅ Файл существует (8747 bytes) | — |
-| GOV-07 | `.aiassistant/rules/09-etl-architecture.md` | Pipeline naming: `{entity}_{source}` | ❌ Фактически обратный порядок: `{source}_{entity}` (chembl_activity) | Исправить: `{source}_{entity}` |
-| GOV-08 | `.claude/agents/py-code-bot.md` | Entity location: `domain/entities/{provider}/{entity}.py` с поддиректориями | ❌ Фактически: flat структура `domain/entities/chembl_activity.py` | Исправить: убрать поддиректории |
-| GOV-09 | `.claude/agents/py-code-bot.md` | Client file: `adapters/{provider}/{entity}_client.py` | ⚠️ Фактически: `adapters/{provider}/client.py` (generic, не per-entity) | Исправить паттерн |
-| GOV-10 | `.aiassistant/rules/12-entity-naming-policy.md` | Test path: `tests/bioetl/pipelines/<provider>/<entity>/test_<stage>.py` | ❌ Фактически: `tests/unit/` и `tests/integration/`, нет `tests/bioetl/` | Исправить базовый путь |
-| GOV-11 | `.claude/agents/py-code-bot.md` | BaseTransformer в `application/core/base_transformer.py` | ✅ `class BaseTransformer(ABC)` line 84 | — |
-| GOV-12 | `.claude/agents/py-code-bot.md` | Provider-specific base: `BaseChemblTransformer` | ✅ `base_chembl_transformer.py:34` | — |
-| GOV-13 | `.claude/PROJECT_CONTEXT.md` | Domain Ports: `domain/ports/` с 27 port файлами | ✅ | — |
-| GOV-14 | `.claude/PROJECT_CONTEXT.md` | Facade import: `from bioetl.domain.ports import DataSourcePort` | ✅ `__init__.py` re-exports via `__all__` | — |
+| GOV-05 | `governance/03-file-policy.md` | 7 required config fields: pipeline-name, provider, entity-type, version, primary-keys, silver-table, gold-table | ✅ | — |
+| GOV-06 | `governance/03-file-policy.md` | Schema validation: `configs/pipelines/-schema.json` | ✅ Файл существует (8747 bytes) | — |
+| GOV-07 | `.aiassistant/rules/09-etl-architecture.md` | Pipeline naming: `{entity}-{source}` | ❌ Фактически обратный порядок: `{source}-{entity}` (chembl-activity) | Исправить: `{source}-{entity}` |
+| GOV-08 | `.claude/agents/py-code-bot.md` | Entity location: `domain/entities/{provider}/{entity}.py` с поддиректориями | ❌ Фактически: flat структура `domain/entities/chembl-activity.py` | Исправить: убрать поддиректории |
+| GOV-09 | `.claude/agents/py-code-bot.md` | Client file: `adapters/{provider}/{entity}-client.py` | ⚠️ Фактически: `adapters/{provider}/client.py` (generic, не per-entity) | Исправить паттерн |
+| GOV-10 | `.aiassistant/rules/12-entity-naming-policy.md` | Test path: `tests/bioetl/pipelines/<provider>/<entity>/test-<stage>.py` | ❌ Фактически: `tests/unit/` и `tests/integration/`, нет `tests/bioetl/` | Исправить базовый путь |
+| GOV-11 | `.claude/agents/py-code-bot.md` | BaseTransformer в `application/core/base-transformer.py` | ✅ `class BaseTransformer(ABC)` line 84 | — |
+| GOV-12 | `.claude/agents/py-code-bot.md` | Provider-specific base: `BaseChemblTransformer` | ✅ `base-chembl-transformer.py:34` | — |
+| GOV-13 | `.claude/PROJECT-CONTEXT.md` | Domain Ports: `domain/ports/` с 27 port файлами | ✅ | — |
+| GOV-14 | `.claude/PROJECT-CONTEXT.md` | Facade import: `from bioetl.domain.ports import DataSourcePort` | ✅ `--init--.py` re-exports via `--all--` | — |
 | GOV-15 | `governance/02-naming-policy.md` | Entity naming: `{Provider}{CanonicalTerm}` PascalCase | ⚠️ Смешанный: есть provider-prefixed (ChemblMolecule) и generic (Bioactivity, Assay) | Стандартизировать |
 
 **Итого Governance:** 10/15 ✅ (67%), 2/15 ⚠️ (13%), 3/15 ❌ (20%)
@@ -428,13 +428,13 @@
 | № | Документ | Утверждение | Соответствует | План устранения |
 |---|----------|-------------|---------------|-----------------|
 | PROV-01 | chembl/molecule.md | Schema version: 1.0.0 | ❌ Config: 1.2.0 | Обновить версию |
-| PROV-02 | chembl/molecule.md | Primary ID: `molecule_chembl_id` | ✅ | — |
-| PROV-03 | chembl/molecule.md | SMILES validation через Value Object | ✅ `SMILES.from_raw()` в transformer:177 | — |
-| PROV-04 | chembl/molecule.md | InChI Key validation через Value Object | ✅ `InChIKey.validate_value_object()` | — |
+| PROV-02 | chembl/molecule.md | Primary ID: `molecule-chembl-id` | ✅ | — |
+| PROV-03 | chembl/molecule.md | SMILES validation через Value Object | ✅ `SMILES.from-raw()` в transformer:177 | — |
+| PROV-04 | chembl/molecule.md | InChI Key validation через Value Object | ✅ `InChIKey.validate-value-object()` | — |
 | PROV-05 | chembl/activity.md | Schema version: 1.0.0 | ❌ Config: 1.2.0 | Обновить версию |
-| PROV-06 | chembl/activity.md | «55 полей» в Activity entity | ❌ Фактически: 57 полей (includes _state, activity_properties, toid) | Исправить: 57 |
+| PROV-06 | chembl/activity.md | «55 полей» в Activity entity | ❌ Фактически: 57 полей (includes -state, activity-properties, toid) | Исправить: 57 |
 | PROV-07 | chembl/activity.md | Gold filter: IC50, Ki | ❌ Фактически 9 типов: IC50, Ki, Kd, EC50, AC50, GI50, ED50, MIC, CC50 | Добавить все 9 типов |
-| PROV-08 | chembl/activity.md | Primary key: `["activity_id"]` | ✅ | — |
+| PROV-08 | chembl/activity.md | Primary key: `["activity-id"]` | ✅ | — |
 | PROV-09 | chembl/activity.md | Ligand efficiency: bei, le, lle, sei | ✅ Все 4 метрики в `bioactivity.py:132-135` | — |
 
 ### 20.2. PubChem, PubMed, UniProt
@@ -442,7 +442,7 @@
 | № | Документ | Утверждение | Соответствует | План устранения |
 |---|----------|-------------|---------------|-----------------|
 | PROV-10 | pubchem/compound.md | Primary key: `["cid"]` | ✅ | — |
-| PROV-11 | pubchem/compound.md | Rate Limit: 5 req/sec | ✅ `pubchem.yaml:27`: `requests_per_second: 5.0` | — |
+| PROV-11 | pubchem/compound.md | Rate Limit: 5 req/sec | ✅ `pubchem.yaml:27`: `requests-per-second: 5.0` | — |
 | PROV-12 | pubmed/publication.md | Rate limit (no key): 3 req/sec | ✅ `pubmed.yaml:32` | — |
 | PROV-13 | pubmed/publication.md | Rate limit (with key): 10 req/sec | ✅ `pubmed.yaml:34-36` | — |
 | PROV-14 | pubmed/publication.md | Entity ID: `pubmed:{pmid}` | ✅ `transformer.py:297` | — |
@@ -455,11 +455,11 @@
 | № | Документ | Утверждение | Соответствует | План устранения |
 |---|----------|-------------|---------------|-----------------|
 | PROV-18 | crossref/publication.md | Rate limit без email: ~5 req/sec | ❌ Фактически: 50 req/sec (polite pool) | Исправить |
-| PROV-19 | crossref/publication.md | Batch DOI: до 100 DOIs | ❌ Config: `batch_size: 50` | Исправить: 50 |
+| PROV-19 | crossref/publication.md | Batch DOI: до 100 DOIs | ❌ Config: `batch-size: 50` | Исправить: 50 |
 | PROV-20 | openalex/publication.md | Rate limit без email: ~5 req/sec | ❌ Фактически: 10 req/sec (polite pool) | Исправить |
-| PROV-21 | openalex/publication.md | Batch DOI: до 50 DOIs | ✅ `batch_size: 50` | — |
-| PROV-22 | semanticscholar/publication.md | Rate limit: 1000 req/sec (shared) | ❌ Config не содержит rate_limit секции | Добавить rate_limit в config |
-| PROV-23 | semanticscholar/publication.md | Rate limit (API key): 1 req/sec | ❌ Config не содержит rate_limit секции | Добавить rate_limit в config |
+| PROV-21 | openalex/publication.md | Batch DOI: до 50 DOIs | ✅ `batch-size: 50` | — |
+| PROV-22 | semanticscholar/publication.md | Rate limit: 1000 req/sec (shared) | ❌ Config не содержит rate-limit секции | Добавить rate-limit в config |
+| PROV-23 | semanticscholar/publication.md | Rate limit (API key): 1 req/sec | ❌ Config не содержит rate-limit секции | Добавить rate-limit в config |
 
 **Итого Provider Specs:** 14/23 ✅ (61%), 0 ⚠️, 9/23 ❌ (39%)
 
@@ -499,17 +499,17 @@
 | # | ID | Документ | Проблема | Серьёзность |
 |---|-----|----------|----------|-------------|
 | 1 | API-10 | api/infrastructure.md | UnifiedHTTPClient constructor — полностью неверная сигнатура | P0 CRITICAL |
-| 2 | GS-01..03 | getting-started.md | ВСЕ data path паттерны неверны (`v1/`, точка вместо слеша, `_gold` суффикс) | P0 CRITICAL |
+| 2 | GS-01..03 | getting-started.md | ВСЕ data path паттерны неверны (`v1/`, точка вместо слеша, `-gold` суффикс) | P0 CRITICAL |
 | 3 | OPS-05..07 | runbooks/ | 3 несуществующих CLI flags: `--full-refresh`, `--full-rebuild`, `--ignore-checkpoint` | P0 CRITICAL |
 | 4 | OPS-08 | pipeline-failure-recovery.md | Команда `bioetl verify` не существует | P0 CRITICAL |
 | 5 | D-03 | domain-layer.md | QuarantineEntry states полностью неверны | P1 HIGH |
-| 6 | C-09 | composition-layer.md | bootstrap_composite_pipeline — неверная сигнатура | P1 HIGH |
+| 6 | C-09 | composition-layer.md | bootstrap-composite-pipeline — неверная сигнатура | P1 HIGH |
 | 7 | IF-05 | interfaces-layer.md | Graceful shutdown в orchestration/ — модуль пуст | P1 HIGH |
 | 8 | API-01..04 | api/domain.md | 4 неверных имени методов MetricsPort/LockPort | P1 HIGH |
 | 9 | API-08..09 | api/infrastructure.md | 2 несуществующих класса: MetricsExporter, LineageTracker | P1 HIGH |
 | 10 | API-11 | api/infrastructure.md | DeltaWriter — класс полностью удалён | P1 HIGH |
 | 11 | R-01..R-02 | RULES.md | «Iceberg» упоминается но не реализован | P2 MEDIUM |
-| 12 | R-03 | RULES.md | `PipelineRunner._clear_exports()` не существует | P2 MEDIUM |
+| 12 | R-03 | RULES.md | `PipelineRunner.-clear-exports()` не существует | P2 MEDIUM |
 | 13 | OPS-03..04 | runbooks/ | DQ exit code 10 vs фактический 83 | P1 HIGH |
 | 14 | OPS-10..11 | backfill-rebuild.md | Makefile targets не существуют | P1 HIGH |
 | 15 | PROV-01,05 | chembl/ docs | Schema version 1.0.0 vs фактическая 1.2.0 | P2 MEDIUM |
@@ -533,17 +533,17 @@
 ### Фаза 1: Критические (P1) — в течение 1-2 дней
 
 5. **D-03**: Исправить QuarantineEntry states
-6. **C-09**: Исправить bootstrap_composite_pipeline сигнатуру
+6. **C-09**: Исправить bootstrap-composite-pipeline сигнатуру
 7. **IF-05**: Обновить orchestration/ описание
 8. **API-01..07**: Исправить все имена методов/классов в API domain reference
 9. **API-08..11**: Удалить несуществующие классы из API infrastructure reference
 10. **OPS-03..04**: Исправить exit code 10→83
-11. **PROV-22..23**: Добавить rate_limit конфигурацию для Semantic Scholar
+11. **PROV-22..23**: Добавить rate-limit конфигурацию для Semantic Scholar
 
 ### Фаза 2: Важные (P2) — в текущем спринте
 
 12. **R-01..R-02**: Убрать упоминания Iceberg из RULES.md
-13. **R-03**: Исправить `_clear_exports()` → `MedallionLifecycleService.clear()`
+13. **R-03**: Исправить `-clear-exports()` → `MedallionLifecycleService.clear()`
 14. **C-03..C-07**: Исправить имена фабрик в composition docs
 15. **PROV-01,05**: Обновить schema versions 1.0.0→1.2.0
 16. **GOV-07,08,10**: Исправить пути и naming patterns в agent/governance docs
@@ -576,33 +576,33 @@
 
 | № | Документ | Утверждение | Ссылка на код | Соответствует | План устранения |
 |---|----------|-------------|---------------|---------------|-----------------|
-| GUIDE-02 | add-new-source.md | `ProviderRegistry.register()` в `registration.py` | `composition/providers/provider_registry.py` | ⚠️ Файл называется `provider_registry.py`, не `registration.py` | Исправить имя модуля |
-| GUIDE-04 | add-new-source.md | `GenericPipelineFactory` class | `composition/factories/pipeline_factories.py` | ⚠️ Необходимо верифицировать имя класса | Проверить и обновить |
+| GUIDE-02 | add-new-source.md | `ProviderRegistry.register()` в `registration.py` | `composition/providers/provider-registry.py` | ⚠️ Файл называется `provider-registry.py`, не `registration.py` | Исправить имя модуля |
+| GUIDE-04 | add-new-source.md | `GenericPipelineFactory` class | `composition/factories/pipeline-factories.py` | ⚠️ Необходимо верифицировать имя класса | Проверить и обновить |
 | GUIDE-33 | pipeline-configuration.md | «19 entity + 2 composite = 21 total» | `configs/pipelines/`, `configs/composite/` | ❌ Фактически: 21 standard + 5 composite = 26 | Обновить подсчёт |
-| GUIDE-40 | quick-start.md | Data paths: `data/bronze/`, `data/silver/`, `data/gold/` | `config_loader.py:163` | ❌ Фактически: `data/output/bronze/`, etc. | Исправить все пути (как GS-01..03) |
+| GUIDE-40 | quick-start.md | Data paths: `data/bronze/`, `data/silver/`, `data/gold/` | `config-loader.py:163` | ❌ Фактически: `data/output/bronze/`, etc. | Исправить все пути (как GS-01..03) |
 
 ### 24.2. Подтверждённые утверждения (выборка)
 
 | № | Документ | Утверждение | Соответствует |
 |---|----------|-------------|---------------|
 | GUIDE-01 | add-new-source.md | `UnifiedHTTPClient` для HTTP | ✅ `http/client.py:48` |
-| GUIDE-03 | add-new-source.md | `BaseTransformer(ABC)` наследование | ✅ `base_transformer.py:84` |
+| GUIDE-03 | add-new-source.md | `BaseTransformer(ABC)` наследование | ✅ `base-transformer.py:84` |
 | GUIDE-05 | add-new-source.md | Config path `configs/pipelines/{provider}/{entity}.yaml` | ✅ |
-| GUIDE-13 | date-handling.md | `format_date_parts()` в `domain/normalization.py:56` | ✅ |
-| GUIDE-14 | date-handling.md | `parse_date_field()` в `domain/normalization.py:88` | ✅ |
-| GUIDE-20 | dq-configuration.md | DQ defaults `_defaults.yaml` (soft=0.05, hard=0.20) | ✅ |
+| GUIDE-13 | date-handling.md | `format-date-parts()` в `domain/normalization.py:56` | ✅ |
+| GUIDE-14 | date-handling.md | `parse-date-field()` в `domain/normalization.py:88` | ✅ |
+| GUIDE-20 | dq-configuration.md | DQ defaults `-defaults.yaml` (soft=0.05, hard=0.20) | ✅ |
 | GUIDE-23 | local-storage-layout.md | Bronze path `data/output/bronze/{provider}/{entity}/{date}/` | ✅ |
 | GUIDE-24 | local-storage-layout.md | Silver = Delta Lake | ✅ |
-| GUIDE-25 | local-storage-layout.md | Checkpoint: `data/output/checkpoints/{pipeline_name}.json` | ✅ |
-| GUIDE-32 | pipeline-configuration.md | `_base.yaml` (474 lines) | ✅ |
+| GUIDE-25 | local-storage-layout.md | Checkpoint: `data/output/checkpoints/{pipeline-name}.json` | ✅ |
+| GUIDE-32 | pipeline-configuration.md | `-base.yaml` (474 lines) | ✅ |
 | GUIDE-34 | pipeline-configuration.md | 7 source configs (chembl, pubchem, uniprot, crossref, openalex, pubmed, semanticscholar) | ✅ |
 | GUIDE-37 | pipeline-lifecycle.md | REBUILD/BACKFILL clear Silver+Gold | ✅ |
 | GUIDE-38 | pipeline-lifecycle.md | INCREMENTAL does NOT clear (merge/upsert) | ✅ |
-| GUIDE-39 | running-pipelines.md | `bioetl run --pipeline chembl_activity` | ✅ |
+| GUIDE-39 | running-pipelines.md | `bioetl run --pipeline chembl-activity` | ✅ |
 | GUIDE-44 | running-pipelines.md | `--no-cached-bronze` flag | ✅ |
 | GUIDE-45 | running-pipelines.md | Run types: INCREMENTAL, BACKFILL, REBUILD | ✅ |
 | GUIDE-55 | publication-validation.md | 5-level validation: Base, Structural, External, Logical, Semantic | ✅ |
-| GUIDE-56 | publication-validation.md | `format_date_parts()` converts `[[2024,3]]` → `"2024-03-30"` | ✅ |
+| GUIDE-56 | publication-validation.md | `format-date-parts()` converts `[[2024,3]]` → `"2024-03-30"` | ✅ |
 
 **Итого Developer Guides:** 41/57 ✅ (72%), 5/57 ⚠️ (9%), 11/57 требуют верификации
 
@@ -618,9 +618,9 @@
 | domain/types.md | 5 claims | ✅ PASS — RunID, RunType, HealthStatus, BronzeRecord, SilverRecord |
 | domain/exceptions.md | 8 claims | ✅ PASS — BioETLError, CriticalError, RecoverableError, DataQualityError |
 | infrastructure/adapters.md | 13 claims | ✅ PASS — все адаптеры, storage writers, MemoryLock, LocalCheckpoint |
-| infrastructure/observability.md | 5 claims | ✅ PASS — PrometheusMetrics, OpenTelemetryTracer, create_logger() |
+| infrastructure/observability.md | 5 claims | ✅ PASS — PrometheusMetrics, OpenTelemetryTracer, create-logger() |
 | infrastructure/storage.md | 6 claims | ✅ PASS — BronzeWriter, SilverWriter, GoldWriter, DeltaReader, RetentionManager |
-| composition/bootstrap.md | 9 claims | ✅ PASS — bootstrap_pipeline_runner, все deprecated aliases |
+| composition/bootstrap.md | 9 claims | ✅ PASS — bootstrap-pipeline-runner, все deprecated aliases |
 | contracts/gold-schemas.md | 5 claims | ✅ PASS — Pandera schema, coercion int→float |
 
 ### 25.2. Документы с расхождениями
@@ -628,7 +628,7 @@
 | № | Документ | Утверждение | Соответствует | Проблема |
 |---|----------|-------------|---------------|----------|
 | APIREF-05 | application/core.md | `StreamingBatchProcessor` отдельный класс | ❌ Интегрирован как режим в `BatchTransformer` | Удалить из docs или уточнить |
-| APIREF-08 | application/core.md | `normalize_string`, `safe_extract` в `core/transform_utils` | ⚠️ Функции могут быть в domain services | Проверить фактический путь |
+| APIREF-08 | application/core.md | `normalize-string`, `safe-extract` в `core/transform-utils` | ⚠️ Функции могут быть в domain services | Проверить фактический путь |
 | APIREF-10 | application/core.md | `LockManager` в `core/` | ⚠️ Может быть в infrastructure | Проверить фактический путь |
 | APIREF-40 | domain/entities.md | Entity `Activity` | ❌ Фактически: `Bioactivity` | Исправить имя |
 | APIREF-45 | domain/entities.md | Entity `Document` | ❌ Фактически: `ChemblPublication` | Исправить имя |
@@ -647,8 +647,8 @@
 
 | Pipeline | Spec version | Config version | Статус |
 |----------|-------------|----------------|--------|
-| protein_class | 1.1.0 | 1.2.0 | ❌ |
-| cell_line | 1.1.0 | 1.2.0 | ❌ |
+| protein-class | 1.1.0 | 1.2.0 | ❌ |
+| cell-line | 1.1.0 | 1.2.0 | ❌ |
 | molecule | 1.1.0 | 1.2.0 | ❌ |
 | target | 1.1.0 | 1.2.0 | ❌ |
 | activity | 1.1.0 | 1.2.0 | ❌ |
@@ -660,27 +660,27 @@
 
 | № | Document | Утверждение | Config/Code | Соответствует | Проблема |
 |---|----------|-------------|-------------|---------------|----------|
-| SPEC-08 | cell-line-spec | Field `cell_source_tax_id` | `cell_line.py:55` | ❌ Фактически: `cell_source_taxonomy_id` | Имя поля стандартизировано в коде |
+| SPEC-08 | cell-line-spec | Field `cell-source-tax-id` | `cell-line.py:55` | ❌ Фактически: `cell-source-taxonomy-id` | Имя поля стандартизировано в коде |
 | SPEC-14 | molecule-spec | «23 поля» schema | `molecule.py` | ❌ Фактически: 59 полей (flattened structures) | Значительное занижение |
-| SPEC-15 | molecule-spec | `partition_by: []` (нет) | `molecule.yaml:104` | ❌ Фактически: `["molecule_type"]` | Partition добавлен в config |
+| SPEC-15 | molecule-spec | `partition-by: []` (нет) | `molecule.yaml:104` | ❌ Фактически: `["molecule-type"]` | Partition добавлен в config |
 | SPEC-21 | target-spec | 14 target types | `target.yaml:46` | ❌ Фактически: 17 типов | Config расширен |
-| SPEC-28 | activity-spec | 5 standard_units (nM, uM, mM, pM, M) | `activity.yaml:63` | ❌ Фактически: 7 (+ ug.mL-1, mg.kg-1) | Config расширен |
+| SPEC-28 | activity-spec | 5 standard-units (nM, uM, mM, pM, M) | `activity.yaml:63` | ❌ Фактически: 7 (+ ug.mL-1, mg.kg-1) | Config расширен |
 
 ### 26.3. Подтверждённые утверждения (выборка)
 
 | № | Document | Утверждение | Соответствует |
 |---|----------|-------------|---------------|
-| SPEC-02 | protein-class | batch_size: 500 | ✅ |
-| SPEC-03 | protein-class | silver_table: chembl_protein_class | ✅ |
-| SPEC-04 | protein-class | partition_by: class_level | ✅ |
+| SPEC-02 | protein-class | batch-size: 500 | ✅ |
+| SPEC-03 | protein-class | silver-table: chembl-protein-class | ✅ |
+| SPEC-04 | protein-class | partition-by: class-level | ✅ |
 | SPEC-05 | protein-class | 10 schema fields | ✅ |
-| SPEC-17 | molecule | max_phase values: [-1, 0, 0.5, 1, 2, 3, 4] | ✅ |
+| SPEC-17 | molecule | max-phase values: [-1, 0, 0.5, 1, 2, 3, 4] | ✅ |
 | SPEC-18 | molecule | DQ: MW range 10-10000 Da | ✅ |
-| SPEC-25 | activity | primary_key: activity_id | ✅ |
-| SPEC-26 | activity | 9 standard_type values | ✅ |
-| SPEC-30 | assay | primary_key: assay_chembl_id | ✅ |
-| SPEC-31 | assay | partition_by: assay_type | ✅ |
-| SPEC-32 | assay | assay_type: [B, F, A, T, P, U] | ✅ |
+| SPEC-25 | activity | primary-key: activity-id | ✅ |
+| SPEC-26 | activity | 9 standard-type values | ✅ |
+| SPEC-30 | assay | primary-key: assay-chembl-id | ✅ |
+| SPEC-31 | assay | partition-by: assay-type | ✅ |
+| SPEC-32 | assay | assay-type: [B, F, A, T, P, U] | ✅ |
 | SPEC-34..39 | composite-pub | seed, enrichers, merge strategy, field priority | ✅ Все 6 claims |
 
 **Итого Pipeline Specs:** 32/50 ✅ (64%), 5/50 ⚠️ (10%), 13/50 ❌ (26%)
@@ -691,19 +691,19 @@
 
 | № | ADR | Утверждение (ключевое) | Соответствует | Проблема |
 |---|-----|------------------------|---------------|----------|
-| ADR-23 | ADR-011 | Watermark mechanism полностью удалён | ✅ Нет Watermark class, extract_watermark() или watermark param | — |
-| ADR-24 | ADR-013 | `_clear_exports()` async, только для BACKFILL/REBUILD | ✅ | — |
+| ADR-23 | ADR-011 | Watermark mechanism полностью удалён | ✅ Нет Watermark class, extract-watermark() или watermark param | — |
+| ADR-24 | ADR-013 | `-clear-exports()` async, только для BACKFILL/REBUILD | ✅ | — |
 | ADR-25 | ADR-015 | PipelineServices.aclose() для lifecycle cleanup | ✅ | — |
 | ADR-26 | ADR-016 | Three-tier exceptions: Critical/Recoverable/DataQuality | ✅ | — |
 | ADR-27 | ADR-016 | CircuitBreaker: 5 failures → OPEN, 5-min timeout | ✅ | — |
-| ADR-28 | ADR-017 | LoggerPort, MetricsPort, TracingPort — 3 Protocol ports | ✅ @runtime_checkable | — |
+| ADR-28 | ADR-017 | LoggerPort, MetricsPort, TracingPort — 3 Protocol ports | ✅ @runtime-checkable | — |
 | ADR-29 | ADR-019 | No structlog in application/interfaces | ✅ 0 occurrences | — |
 | ADR-30 | ADR-020 | BasePipeline decomposition → PipelineConfig + RuntimeConfig + PipelineServices | ✅ | — |
-| ADR-31 | ADR-023 | Entity type auto-derived from entity_class.lower() | ✅ | — |
+| ADR-31 | ADR-023 | Entity type auto-derived from entity-class.lower() | ✅ | — |
 | ADR-32 | ADR-024 | Document → ChemblPublication rename | ✅ | ArticleSchema alias не реализован (заявлен deprecated alias, но не создан) |
-| ADR-33 | ADR-029 | BaseOutputMetadata с write_started_at, write_completed_at, content_hash | ✅ | — |
-| ADR-34 | ADR-030 | force_full_scan для publication pipelines | ✅ | — |
-| ADR-35 | ADR-031 | LoadingStrategy enum: FULL_SCAN_ONLY, WATERMARK_BASED | ✅ | — |
+| ADR-33 | ADR-029 | BaseOutputMetadata с write-started-at, write-completed-at, content-hash | ✅ | — |
+| ADR-34 | ADR-030 | force-full-scan для publication pipelines | ✅ | — |
+| ADR-35 | ADR-031 | LoadingStrategy enum: FULL-SCAN-ONLY, WATERMARK-BASED | ✅ | — |
 
 **Итого ADR (Phase 3):** 13/13 ✅ (100%), 1 minor note (ArticleSchema alias)
 
@@ -715,7 +715,7 @@
 |---|----------|--------|---------------|------------|
 | META-01 | data-flow.md | 5 claims | ✅ 5/5 | JSONL+zstd, Delta merge, metadata fields |
 | META-02 | data-layers.md | 5 claims | ✅ 5/5 | Append-only Bronze, Merge/Upsert Silver, Pandera Gold |
-| META-03 | observability-layers.md | 3 claims | ✅ 3/3 | PipelineObserver, PrometheusMetrics, bioetl_ prefix |
+| META-03 | observability-layers.md | 3 claims | ✅ 3/3 | PipelineObserver, PrometheusMetrics, bioetl- prefix |
 | META-04 | system-context.md | 4 claims | ✅ 3/4, ⚠️ 1 | S3/Redis deferred — port structure prepared |
 | META-05 | container-diagram.md | 2 claims | ✅ 2/2 | PipelineRunner orchestrates via ports |
 
@@ -727,12 +727,12 @@
 
 | № | Документ | Claims | Соответствует | Примечание |
 |---|----------|--------|---------------|------------|
-| META-06 | TOOLS.md | 4 claims | ✅ 4/4 | src/tools/, scripts/, vacuum_delta.py, audit_structure.py |
+| META-06 | TOOLS.md | 4 claims | ✅ 4/4 | src/tools/, scripts/, vacuum-delta.py, audit-structure.py |
 | META-07 | glossary.md | 3 claims | ✅ 3/3 | Ubiquitous Language: Activity, Molecule, Target, Publication |
 | META-08 | rules-summary.md | 3 claims | ✅ 3/3 | RFC 2119, Medallion layers, DQ thresholds |
 | META-09 | REQUIREMENTS.md | 3 claims | ✅ 3/3 | Ports as Protocol, mypy --strict, Bronze JSONL+zstd |
-| META-10 | RELEASE_CHECKLIST.md | 3 claims | ✅ 3/3 | 5277 tests, 88.43% coverage, mypy 0 errors |
-| META-11 | performance-baselines.md | 2 claims | ✅ 2/2 | content_hash <50µs, batch 100 records <10ms |
+| META-10 | RELEASE-CHECKLIST.md | 3 claims | ✅ 3/3 | 5277 tests, 88.43% coverage, mypy 0 errors |
+| META-11 | performance-baselines.md | 2 claims | ✅ 2/2 | content-hash <50µs, batch 100 records <10ms |
 
 **Итого Project Meta:** 18/18 ✅ (100%)
 
@@ -786,10 +786,10 @@
 | # | ID | Документ | Проблема | Серьёзность |
 |---|-----|----------|----------|-------------|
 | 21 | SPEC-14 | molecule-spec | Заявлено 23 поля — фактически 59 (flattened structures) | P2 MEDIUM |
-| 22 | SPEC-15 | molecule-spec | partition_by: [] — фактически ["molecule_type"] | P2 MEDIUM |
-| 23 | SPEC-08 | cell-line-spec | `cell_source_tax_id` → фактически `cell_source_taxonomy_id` | P2 MEDIUM |
+| 22 | SPEC-15 | molecule-spec | partition-by: [] — фактически ["molecule-type"] | P2 MEDIUM |
+| 23 | SPEC-08 | cell-line-spec | `cell-source-tax-id` → фактически `cell-source-taxonomy-id` | P2 MEDIUM |
 | 24 | SPEC-21 | target-spec | 14 target types → фактически 17 | P2 MEDIUM |
-| 25 | SPEC-28 | activity-spec | 5 standard_units → фактически 7 | P2 MEDIUM |
+| 25 | SPEC-28 | activity-spec | 5 standard-units → фактически 7 | P2 MEDIUM |
 | 26 | SPEC-* | 8 pipeline specs | Все version: 1.1.0 → configs 1.2.0 | P2 MEDIUM (bulk) |
 | 27 | APIREF-05 | core.md | `StreamingBatchProcessor` — не отдельный класс | P1 HIGH |
 | 28 | APIREF-40,45 | entities.md | Activity→Bioactivity, Document→ChemblPublication | P1 HIGH |
@@ -808,7 +808,7 @@
 
 ### Фаза 1: Критические (P1) — 22 issues — 1-2 дня
 5. Исправить QuarantineEntry states (domain-layer.md)
-6. Исправить bootstrap_composite_pipeline сигнатуру
+6. Исправить bootstrap-composite-pipeline сигнатуру
 7. Обновить orchestration/ описание
 8. Исправить MetricsPort/LockPort method names (api/domain.md)
 9. Удалить несуществующие классы (MetricsExporter, LineageTracker, DeltaWriter)
@@ -820,7 +820,7 @@
 ### Фаза 2: Важные (P2) — 38 issues — текущий спринт
 14. Обновить version 1.1.0→1.2.0 в 8 pipeline specs
 15. Убрать Iceberg из RULES.md
-16. Исправить molecule field count (23→59), partition, cell_line field name
+16. Исправить molecule field count (23→59), partition, cell-line field name
 17. Обновить target types (14→17), activity units (5→7)
 18. Исправить factory names в composition docs
 19. Обновить pipeline count (21/22→26)
@@ -857,16 +857,16 @@
   - docs/03-guides/getting-started.md
   - docs/03-guides/quick-start.md
 
-Эталон (фактический паттерн из config_loader.py:163):
-  data/output/{layer_name}/{provider}/{entity_type}/
+Эталон (фактический паттерн из config-loader.py:163):
+  data/output/{layer-name}/{provider}/{entity-type}/
 
 Замены (выполни find-and-replace):
   1. «data/bronze/v1/chembl/activity/» → «data/output/bronze/chembl/activity/{date}/»
   2. «data/silver/chembl.activity/» → «data/output/silver/chembl/activity/»
-  3. «data/gold/chembl.activity_gold/» → «data/output/gold/chembl/activity/»
+  3. «data/gold/chembl.activity-gold/» → «data/output/gold/chembl/activity/»
   4. Любые другие вхождения «data/bronze/», «data/silver/», «data/gold/» без «output/» → добавить «output/» после «data/»
   5. Заменить точку-разделитель «chembl.activity» → «chembl/activity» (слеш, не точка)
-  6. Убрать суффикс «_gold» из gold-путей
+  6. Убрать суффикс «-gold» из gold-путей
 
 Проверь: в обоих файлах не должно остаться паттернов «data/bronze/», «data/silver/», «data/gold/» без «output/».
 
@@ -885,13 +885,13 @@ Audit IDs: GS-01, GS-02, GS-03, GUIDE-40
   src/bioetl/infrastructure/adapters/http/client.py:83-93
 
 Найди в документе секцию с конструктором UnifiedHTTPClient, содержащую
-устаревшие параметры «base_url», «rate_limit», «max_retries».
+устаревшие параметры «base-url», «rate-limit», «max-retries».
 
 Замени на актуальную сигнатуру (из кода):
   UnifiedHTTPClient(
-      rate_limiter: RateLimiterPort,
-      circuit_breaker: CircuitBreakerPort,
-      retry_config: RetryConfig,
+      rate-limiter: RateLimiterPort,
+      circuit-breaker: CircuitBreakerPort,
+      retry-config: RetryConfig,
       metrics: MetricsPort,
       logger: LoggerPort,
       tracing: TracingPort,
@@ -916,13 +916,13 @@ Audit ID: API-10
 
 1) В pipeline-failure-recovery.md:
    - «--full-refresh» → «--run-type rebuild»
-   - «bioetl verify --table chembl_activity» → удалить строку целиком или
-     заменить на: «Для проверки данных используйте: bioetl run --pipeline chembl_activity --run-type rebuild --limit 10»
+   - «bioetl verify --table chembl-activity» → удалить строку целиком или
+     заменить на: «Для проверки данных используйте: bioetl run --pipeline chembl-activity --run-type rebuild --limit 10»
 
 2) В data-recovery.md:
    - «--full-rebuild» → «--run-type rebuild»
    - «--ignore-checkpoint» → удалить флаг. Добавить примечание:
-     «Для сброса checkpoint удалите файл: data/output/checkpoints/{pipeline_name}.json»
+     «Для сброса checkpoint удалите файл: data/output/checkpoints/{pipeline-name}.json»
 
 3) В backfill-rebuild.md:
    - «make run-pipeline PIPELINE={name} ARGS="--full-rebuild"» →
@@ -946,10 +946,10 @@ Audit IDs: OPS-05, OPS-06, OPS-07, OPS-08, OPS-10, OPS-11
   2. docs/05-operations/runbooks/pipeline-failure-recovery.md
 
 Эталон:
-  src/bioetl/interfaces/cli/exit_codes.py:52-57
-  DATA_QUALITY_ERROR = 83
+  src/bioetl/interfaces/cli/exit-codes.py:52-57
+  DATA-QUALITY-ERROR = 83
 
-Замена: Все вхождения «exit code 10» (в контексте DQ hard threshold) → «exit code 83 (DATA_QUALITY_ERROR)»
+Замена: Все вхождения «exit code 10» (в контексте DQ hard threshold) → «exit code 83 (DATA-QUALITY-ERROR)»
 
 Audit IDs: OPS-03, OPS-04
 ```
@@ -966,31 +966,31 @@ Audit IDs: OPS-03, OPS-04
 Файл: docs/02-architecture/01-domain-layer.md
 
 Найди секцию §2.2 с описанием QuarantineEntry и состояниями:
-  «PENDING → RETRYING → RECOVERED/DEAD_LETTER»
+  «PENDING → RETRYING → RECOVERED/DEAD-LETTER»
 
-Замени на актуальные состояния из src/bioetl/domain/aggregates/quarantine_entry.py:31-55:
-  «NEW → UNDER_REVIEW → IGNORED / REPROCESSED / EXPIRED»
+Замени на актуальные состояния из src/bioetl/domain/aggregates/quarantine-entry.py:31-55:
+  «NEW → UNDER-REVIEW → IGNORED / REPROCESSED / EXPIRED»
 
 Enum: QuarantineStatus(StrEnum) с 5 значениями:
-  NEW, UNDER_REVIEW, IGNORED, REPROCESSED, EXPIRED
+  NEW, UNDER-REVIEW, IGNORED, REPROCESSED, EXPIRED
 
 Обнови Mermaid-диаграмму, если она есть в секции.
 
 Audit ID: D-03
 ```
 
-### PROMPT-P1-02: Исправить bootstrap_composite_pipeline в composition-layer.md
+### PROMPT-P1-02: Исправить bootstrap-composite-pipeline в composition-layer.md
 
 ```
-Задача: Исправить сигнатуру и описание bootstrap_composite_pipeline.
+Задача: Исправить сигнатуру и описание bootstrap-composite-pipeline.
 
 Файл: docs/02-architecture/05-composition-layer.md
 
-Найди секцию §3.1 с описанием bootstrap_composite_pipeline.
+Найди секцию §3.1 с описанием bootstrap-composite-pipeline.
 
 Текущее (неверное): async функция с параметрами (name: str, limit: int)
 Актуальное из src/bioetl/composition/bootstrap/runtime/composite.py:528:
-  def bootstrap_composite_pipeline(
+  def bootstrap-composite-pipeline(
       config: CompositeConfig,
       runtime: CompositeRuntimeConfig,
   ) -> CompositePipelineRunner
@@ -1013,15 +1013,15 @@ Audit ID: C-09
 Найди секцию §2.3 про orchestration/ и graceful shutdown.
 
 Текущее (неверное): описывает signal handlers и graceful shutdown в orchestration/
-Фактически: src/bioetl/interfaces/orchestration/__init__.py содержит только
+Фактически: src/bioetl/interfaces/orchestration/--init--.py содержит только
 комментарий «Signal handlers were removed in 2025-12-31»
 
 Замени текст секции на:
   «orchestration/ — модуль пуст. Signal handlers были удалены 2025-12-31.
   Graceful shutdown обрабатывается непосредственно в CLI командах:
   - interfaces/cli/commands/run.py
-  - interfaces/cli/commands/run_all.py
-  - interfaces/cli/commands/run_composite.py
+  - interfaces/cli/commands/run-all.py
+  - interfaces/cli/commands/run-composite.py
   Shutdown логика вынесена в application/core/shutdown.py»
 
 Audit ID: IF-05
@@ -1040,16 +1040,16 @@ Audit ID: IF-05
    «refresh()» → «heartbeat()»
 
 2) MetricsPort (src/bioetl/domain/ports/observability.py):
-   «increment()» → «increment_counter()» (строка 46)
-   «gauge()» → «set_gauge()» (строка 61)
-   «histogram()» → «observe_histogram()» (строка 76)
+   «increment()» → «increment-counter()» (строка 46)
+   «gauge()» → «set-gauge()» (строка 61)
+   «histogram()» → «observe-histogram()» (строка 76)
 
-3) Entities (src/bioetl/domain/entities/__init__.py):
+3) Entities (src/bioetl/domain/entities/--init--.py):
    «Activity» → «Bioactivity» (или «ActivityRecord»)
    «Document» → «ChemblPublication» (или удалить — класс Document не существует)
 
 4) Transformations (src/bioetl/domain/transformations.py:101):
-   «compute_content_hash» → «generate_content_hash»
+   «compute-content-hash» → «generate-content-hash»
 
 Audit IDs: API-01, API-02, API-03, API-04, API-05, API-06, API-07
 ```
@@ -1062,7 +1062,7 @@ Audit IDs: API-01, API-02, API-03, API-04, API-05, API-06, API-07
 Файл: docs/04-reference/api/infrastructure.md
 
 1) «MetricsExporter» → заменить на «PrometheusMetrics»
-   Источник: src/bioetl/infrastructure/observability/prometheus_metrics.py
+   Источник: src/bioetl/infrastructure/observability/prometheus-metrics.py
 
 2) «LineageTracker» → полностью удалить секцию (класс не существует нигде в коде)
 
@@ -1085,16 +1085,16 @@ Audit IDs: API-08, API-09, API-11
 Замены:
 
 В entities.md:
-  «Activity» → «Bioactivity» (src/bioetl/domain/entities/__init__.py)
+  «Activity» → «Bioactivity» (src/bioetl/domain/entities/--init--.py)
   «Document» → «ChemblPublication»
 
 В composition.md:
   «ServicesFactory» → «BaseServicesFactory / ServicesBuilder»
-  «@register("chembl_activity")» → «registry.register_factory("chembl_activity", factory_fn)»
+  «@register("chembl-activity")» → «registry.register-factory("chembl-activity", factory-fn)»
 
 В core.md:
   Удалить «StreamingBatchProcessor» как отдельный класс.
-  Добавить: «Streaming-режим интегрирован в BatchTransformer как streaming_processing mode»
+  Добавить: «Streaming-режим интегрирован в BatchTransformer как streaming-processing mode»
 
 Audit IDs: APIREF-05, APIREF-40, APIREF-45, API-12, API-13
 ```
@@ -1102,11 +1102,11 @@ Audit IDs: APIREF-05, APIREF-40, APIREF-45, API-12, API-13
 ### PROMPT-P1-07: Исправить observability-checklist.md
 
 ```
-Задача: Исправить тип возврата health_check и endpoint path.
+Задача: Исправить тип возврата health-check и endpoint path.
 
 Файл: docs/05-operations/runbooks/observability-checklist.md
 
-1) Найди описание health_check(): «-> bool»
+1) Найди описание health-check(): «-> bool»
    Замени на: «-> HealthStatus» (HealthStatus — это enum из domain/types.py)
 
 2) Найди ChEMBL health endpoint: «/chembl/api/data/status.json»
@@ -1123,12 +1123,12 @@ Audit IDs: OPS-01, OPS-02
 Файл: docs/05-operations/runbooks/dq-failure-investigation.md
 
 Найди: «bioetl quarantine-purge --older-than 30d»
-Замени на: «bioetl quarantine purge --pipeline <pipeline_name> --older-than-days 30»
+Замени на: «bioetl quarantine purge --pipeline <pipeline-name> --older-than-days 30»
 
 Обрати внимание:
   - «quarantine-purge» → «quarantine purge» (подкоманда, не дефис)
   - «--older-than 30d» → «--older-than-days 30» (int тип, без суффикса d)
-  - Добавлен обязательный «--pipeline <pipeline_name>»
+  - Добавлен обязательный «--pipeline <pipeline-name>»
 
 Эталон: src/bioetl/interfaces/cli/commands/quarantine.py
 
@@ -1165,14 +1165,14 @@ Audit IDs: R-01, R-02
 
 Файл: docs/00-project/RULES.md
 
-1) §1.4 — «PipelineRunner._clear_exports()» → «MedallionLifecycleService.clear()»
-   (src/bioetl/application/services/medallion_lifecycle.py)
+1) §1.4 — «PipelineRunner.-clear-exports()» → «MedallionLifecycleService.clear()»
+   (src/bioetl/application/services/medallion-lifecycle.py)
 
 2) §2.3 — QuarantineStatus: «3 значения (NEW|IGNORED|REPROCESSED)» →
-   «5 значений: NEW, UNDER_REVIEW, IGNORED, REPROCESSED, EXPIRED»
-   (src/bioetl/domain/aggregates/quarantine_entry.py:31-55)
+   «5 значений: NEW, UNDER-REVIEW, IGNORED, REPROCESSED, EXPIRED»
+   (src/bioetl/domain/aggregates/quarantine-entry.py:31-55)
 
-3) §2.2 — «compute_content_hash» → «generate_content_hash»
+3) §2.2 — «compute-content-hash» → «generate-content-hash»
    (src/bioetl/domain/transformations.py:101)
 
 4) §3.1 — Лог-поле «ts» → «timestamp»
@@ -1189,15 +1189,15 @@ Audit IDs: R-03, R-04, R-05, R-06
 Файл: docs/02-architecture/05-composition-layer.md
 
 Замени в секции §2.2:
-  1. «StorageAdapterFactory» → «StorageAdapter» (composition/factories/storage_adapter.py:38)
-  2. «ServicesFactory» → «BaseServicesFactory / ServicesBuilder» (services_factory.py:129,372)
-  3. «TransformerFactory» (класс) → «transformer_factory.py — модуль с функциями
-     register_transformer() и create_transformer()» (transformer_factory.py:31,47)
-  4. «DQFactory» → «DQServicesFactory» (dq_factory.py:35)
+  1. «StorageAdapterFactory» → «StorageAdapter» (composition/factories/storage-adapter.py:38)
+  2. «ServicesFactory» → «BaseServicesFactory / ServicesBuilder» (services-factory.py:129,372)
+  3. «TransformerFactory» (класс) → «transformer-factory.py — модуль с функциями
+     register-transformer() и create-transformer()» (transformer-factory.py:31,47)
+  4. «DQFactory» → «DQServicesFactory» (dq-factory.py:35)
 
 В §2.3:
-  5. «DataSourceRegistry в providers/» → «DataSourceRegistry в factories/data_source_factory.py:100»
-  6. «7 зарегистрированных провайдеров» → «8 провайдеров (+uniprot_idmapping)»
+  5. «DataSourceRegistry в providers/» → «DataSourceRegistry в factories/data-source-factory.py:100»
+  6. «7 зарегистрированных провайдеров» → «8 провайдеров (+uniprot-idmapping)»
 
 Audit IDs: C-03, C-04, C-05, C-06, C-07, C-08
 ```
@@ -1233,11 +1233,11 @@ Audit ID: SPEC-01, SPEC-07, SPEC-13, SPEC-19, SPEC-24, SPEC-29, SPEC-40
 Файл: docs/04-reference/pipelines/chembl/03-molecule-spec.md
 
 1) Schema field count: «23 поля» → «59 полей»
-   Причина: Spec считает только API-level поля, но schema flattens molecule_hierarchy,
-   molecule_properties, molecule_structures, molecule_synonyms.
+   Причина: Spec считает только API-level поля, но schema flattens molecule-hierarchy,
+   molecule-properties, molecule-structures, molecule-synonyms.
    Эталон: src/bioetl/domain/schemas/chembl/molecule.py — подсчитай Series fields.
 
-2) partition_by: «[]» (нет) → «["molecule_type"]»
+2) partition-by: «[]» (нет) → «["molecule-type"]»
    Эталон: configs/pipelines/chembl/molecule.yaml:104
 
 3) Если в spec упоминается «23 поля в API» — оставить, но добавить:
@@ -1252,15 +1252,15 @@ Audit IDs: SPEC-14, SPEC-15
 Задача: Исправить точечные расхождения в pipeline specs.
 
 1) docs/04-reference/pipelines/chembl/02-cell-line-spec.md:
-   Поле «cell_source_tax_id» → «cell_source_taxonomy_id»
-   Эталон: src/bioetl/domain/schemas/chembl/cell_line.py:55
+   Поле «cell-source-tax-id» → «cell-source-taxonomy-id»
+   Эталон: src/bioetl/domain/schemas/chembl/cell-line.py:55
 
 2) docs/04-reference/pipelines/chembl/04-target-spec.md:
    «14 target types» → «17 target types»
    Прочитай полный список из configs/pipelines/chembl/target.yaml:46 и обнови таблицу.
 
 3) docs/04-reference/pipelines/chembl/05-activity-spec.md:
-   standard_units: «5 (nM, uM, mM, pM, M)» → «7 (+ ug.mL-1, mg.kg-1)»
+   standard-units: «5 (nM, uM, mM, pM, M)» → «7 (+ ug.mL-1, mg.kg-1)»
    Эталон: configs/pipelines/chembl/activity.yaml:63
 
 Audit IDs: SPEC-08, SPEC-21, SPEC-28
@@ -1278,12 +1278,12 @@ Audit IDs: SPEC-08, SPEC-21, SPEC-28
 
 Текущее: «19 standard + 3 composite = 22 pipelines» или «19 entity + 2 composite = 21»
 Актуальное: подсчитай файлы:
-  - configs/pipelines/ (все .yaml кроме _base.yaml и _schema.json) = 21 standard
+  - configs/pipelines/ (все .yaml кроме -base.yaml и -schema.json) = 21 standard
   - configs/composite/ (все .yaml) = 5 composite
   - Итого: 21 standard + 5 composite = 26
 
 Обнови таблицу pipelines, добавив недокументированные:
-  - ChEMBL: subcellular_fraction, tissue
+  - ChEMBL: subcellular-fraction, tissue
   - Composite: activity, assay
 
 Audit IDs: PL-01, PL-02, PL-03, GUIDE-33
@@ -1301,7 +1301,7 @@ Audit IDs: PL-01, PL-02, PL-03, GUIDE-33
 
 Добавить в начало:
   «> **Superseded:** Signal handlers удалены 2025-12-31.
-  > Graceful shutdown обрабатывается в CLI (run.py, run_all.py) и application/core/shutdown.py.
+  > Graceful shutdown обрабатывается в CLI (run.py, run-all.py) и application/core/shutdown.py.
   > orchestration/ модуль пуст.»
 
 Audit ID: ADR-13
@@ -1313,18 +1313,18 @@ Audit ID: ADR-13
 Задача: Исправить пути и naming patterns в governance и agent документах.
 
 1) .aiassistant/rules/09-etl-architecture.md:
-   Pipeline naming: «{entity}_{source}» → «{source}_{entity}»
-   Пример: «activity_chembl» → «chembl_activity»
+   Pipeline naming: «{entity}-{source}» → «{source}-{entity}»
+   Пример: «activity-chembl» → «chembl-activity»
 
 2) .claude/agents/py-code-bot.md:
    Entity location: «domain/entities/{provider}/{entity}.py» →
-   «domain/entities/{provider}_{entity}.py» (flat structure)
-   Client file: «adapters/{provider}/{entity}_client.py» →
+   «domain/entities/{provider}-{entity}.py» (flat structure)
+   Client file: «adapters/{provider}/{entity}-client.py» →
    «adapters/{provider}/client.py» (generic client per provider)
 
 3) .aiassistant/rules/12-entity-naming-policy.md:
-   Test path: «tests/bioetl/pipelines/<provider>/<entity>/test_<stage>.py» →
-   «tests/unit/application/pipelines/<provider>/test_<entity>_transformer.py»
+   Test path: «tests/bioetl/pipelines/<provider>/<entity>/test-<stage>.py» →
+   «tests/unit/application/pipelines/<provider>/test-<entity>-transformer.py»
 
 Audit IDs: GOV-07, GOV-08, GOV-09, GOV-10
 ```
@@ -1347,7 +1347,7 @@ Audit IDs: GOV-07, GOV-08, GOV-09, GOV-10
 
 4) docs/04-reference/providers/openalex/publication.md:
    Rate limit: «~5 req/sec» → проверить configs/sources/openalex.yaml и обновить
-   Batch DOI: «до 100 DOIs» → «до 50 DOIs» (config: batch_size: 50)
+   Batch DOI: «до 100 DOIs» → «до 50 DOIs» (config: batch-size: 50)
 
 Audit IDs: PROV-01, PROV-05, PROV-06, PROV-07, PROV-18, PROV-19, PROV-20
 ```
@@ -1370,7 +1370,7 @@ Audit IDs: PROV-01, PROV-05, PROV-06, PROV-07, PROV-18, PROV-19, PROV-20
    §2.1 — «17 модулей в commands/» → подсчитай: ls src/bioetl/interfaces/cli/commands/*.py | wc -l
 
 3) docs/02-architecture/00-overview.md:
-   «Additional 26 diagrams» → подсчитай: ls docs/02-architecture/diagrams/mermaid/*.mmd | wc -l
+   «Additional 26 diagrams» → подсчитай: ls docs/02-architecture/diagrams/*.mermaid | wc -l
 
 Каждое число замени на фактическое из подсчёта + добавь дату актуальности.
 
@@ -1384,18 +1384,18 @@ Audit IDs: D-01, D-04, D-05, IF-01, O-03
 
 1) docs/02-architecture/01-domain-layer.md §2.1:
    Удалить 3 несуществующих порта: PipelineObserverPort, ExportPort, RetentionPort
-   Добавить в список актуальные порты из src/bioetl/domain/ports/__init__.py:
-   Прочитай __all__ из __init__.py и сравни с документированным списком.
+   Добавить в список актуальные порты из src/bioetl/domain/ports/--init--.py:
+   Прочитай --all-- из --init--.py и сравни с документированным списком.
 
 2) docs/02-architecture/04-interfaces-layer.md §2.1:
-   Добавить 3 недокументированных модуля: health_server_integration,
-   metrics_server_integration, run_helpers
+   Добавить 3 недокументированных модуля: health-server-integration,
+   metrics-server-integration, run-helpers
 
 3) docs/02-architecture/05-composition-layer.md §2.1:
    Добавить 2 недокументированных модуля bootstrap/cli/: checkpoint.py, storage.py
 
 4) docs/02-architecture/05-composition-layer.md §2.3:
-   Добавить 8-й провайдер: uniprot_idmapping
+   Добавить 8-й провайдер: uniprot-idmapping
 
 Audit IDs: D-02, IF-02, C-01, C-08
 ```
@@ -1411,8 +1411,8 @@ Audit IDs: D-02, IF-02, C-01, C-08
    Обнови путь в документе.
 
 2) docs/04-reference/api/application/core.md:
-   Проверь расположение утилит normalize_string, safe_extract, parse_date_field:
-   grep -rn "def normalize_string\|def safe_extract\|def parse_date_field" src/bioetl/
+   Проверь расположение утилит normalize-string, safe-extract, parse-date-field:
+   grep -rn "def normalize-string\|def safe-extract\|def parse-date-field" src/bioetl/
    Обнови пути import в документе.
 
 3) docs/04-reference/api/infrastructure/unified-http-client.md:
@@ -1431,12 +1431,12 @@ Audit IDs: APIREF-08, APIREF-10, APIREF-107
 ```
 Задача: Создать тест для ARCH-007 (Medallion Clear Policy).
 
-Файл: tests/architecture/test_medallion_invariants.py (добавить в существующий)
+Файл: tests/architecture/test-medallion-invariants.py (добавить в существующий)
 
 Тест должен проверить:
-  - REBUILD run_type → clear_silver() и clear_gold() вызываются
-  - BACKFILL run_type → clear_silver() и clear_gold() вызываются
-  - INCREMENTAL run_type → clear_silver() и clear_gold() НЕ вызываются
+  - REBUILD run-type → clear-silver() и clear-gold() вызываются
+  - BACKFILL run-type → clear-silver() и clear-gold() вызываются
+  - INCREMENTAL run-type → clear-silver() и clear-gold() НЕ вызываются
 
 Прочитай MedallionLifecycleService.clear() для понимания логики.
 Используй mock для storage writer.
@@ -1449,22 +1449,22 @@ Audit ID: SR-07 (ai-selfreview-rules.md ARCH-007)
 ```
 Задача: Создать тесты для правил AP-004, AP-005, AP-006, AP-008.
 
-Файл: tests/architecture/test_antipatterns.py (новый файл)
+Файл: tests/architecture/test-antipatterns.py (новый файл)
 
 Тесты:
-1) test_no_sentinel_values:
+1) test-no-sentinel-values:
    Поиск в src/bioetl/**/*.py паттернов: = -1, "N/A", "n/a", = 9999
    Исключения: тестовые фикстуры, комментарии
 
-2) test_no_hardcoded_secrets:
-   Поиск: password\s*=\s*["'], api_key\s*=\s*["'], secret\s*=\s*["']
+2) test-no-hardcoded-secrets:
+   Поиск: password\s*=\s*["'], api-key\s*=\s*["'], secret\s*=\s*["']
    Исключения: тесты, Port/Protocol definitions
 
-3) test_no_print_in_production:
+3) test-no-print-in-production:
    Поиск: ^\s*print( в src/bioetl/**/*.py
    Исключения: interfaces/cli/
 
-4) test_no_blocking_io_in_async:
+4) test-no-blocking-io-in-async:
    AST-анализ: найти async def функции содержащие open(, requests., urllib
    в src/bioetl/**/*.py
 
@@ -1476,19 +1476,19 @@ Audit IDs: SR-11, SR-12, SR-13, SR-14
 ```
 Задача: Создать тесты для правил NAME-001..006.
 
-Файл: tests/architecture/test_naming_conventions.py (новый файл)
+Файл: tests/architecture/test-naming-conventions.py (новый файл)
 
 Тесты:
-1) test_class_naming_suffixes:
+1) test-class-naming-suffixes:
    Проверить что классы в application/ имеют суффиксы: Factory, Service,
    Transformer, Error, Config, Protocol, Port (NAME-001)
 
-2) test_module_naming_snake_case:
-   Все .py файлы в src/bioetl/ используют snake_case (NAME-003)
+2) test-module-naming-snake-case:
+   Все .py файлы в src/bioetl/ используют snake-case (NAME-003)
    Нет сокращений: dw.py, utils.py, helpers.py, misc.py
 
-3) test_constants_upper_snake_case:
-   Проверить что module-level constants используют UPPER_SNAKE_CASE (NAME-005)
+3) test-constants-upper-snake-case:
+   Проверить что module-level constants используют UPPER-SNAKE-CASE (NAME-005)
 
 Audit IDs: SR-17, SR-18, SR-19
 ```
@@ -1498,23 +1498,23 @@ Audit IDs: SR-17, SR-18, SR-19
 ```
 Задача: Создать тест синхронизации документации с кодом.
 
-Файл: tests/architecture/test_documentation_sync.py (новый файл)
+Файл: tests/architecture/test-documentation-sync.py (новый файл)
 
 Тесты:
-1) test_ports_count_matches_docs:
+1) test-ports-count-matches-docs:
    Подсчитай protocol файлы в domain/ports/ и сравни с числом в
    docs/02-architecture/01-domain-layer.md
 
-2) test_pipeline_count_matches_docs:
+2) test-pipeline-count-matches-docs:
    Подсчитай .yaml в configs/pipelines/ и configs/composite/ и сравни с числом
    в docs/04-reference/pipelines/README.md
 
-3) test_quarantine_states_match_docs:
-   Прочитай enum QuarantineStatus из domain/aggregates/quarantine_entry.py
+3) test-quarantine-states-match-docs:
+   Прочитай enum QuarantineStatus из domain/aggregates/quarantine-entry.py
    и проверь что все значения упомянуты в docs/02-architecture/01-domain-layer.md
 
-4) test_exit_codes_match_docs:
-   Прочитай exit codes из interfaces/cli/exit_codes.py и проверь что
+4) test-exit-codes-match-docs:
+   Прочитай exit codes из interfaces/cli/exit-codes.py и проверь что
    все упомянуты в docs/04-reference/cli.md
 
 Эти тесты предотвратят drift документации от кода в будущем.
@@ -1537,19 +1537,19 @@ Audit IDs: SR-17, SR-18, SR-19
 
 | # | Утверждение (документ) | Ссылка на код (file:line) | Фрагмент кода | Соответствует | Plan |
 |---|------------------------|---------------------------|---------------|---------------|------|
-| B-D01 | «24 protocol-файла» (01-domain-layer.md:23) | `src/bioetl/domain/ports/` | 23 protocol .py + `__init__.py` = 24 total | ⚠️ | Уточнить формулировку: «23 protocol-модуля + фасадный __init__.py» |
-| B-D02 | `BronzeDQAnalyzerPort`, `SilverDQAnalyzerPort`, `GoldDQAnalyzerPort` (01-domain-layer.md:45) | `domain/ports/dq_report.py:47,83,131` | `class BronzeDQAnalyzerPort(Protocol)` | ✅ | — |
-| B-D03 | `DQReportWriterPort` (01-domain-layer.md:47) | `domain/ports/dq_report.py:177` | `class DQReportWriterPort(Protocol)` | ✅ | — |
+| B-D01 | «24 protocol-файла» (01-domain-layer.md:23) | `src/bioetl/domain/ports/` | 23 protocol .py + `--init--.py` = 24 total | ⚠️ | Уточнить формулировку: «23 protocol-модуля + фасадный --init--.py» |
+| B-D02 | `BronzeDQAnalyzerPort`, `SilverDQAnalyzerPort`, `GoldDQAnalyzerPort` (01-domain-layer.md:45) | `domain/ports/dq-report.py:47,83,131` | `class BronzeDQAnalyzerPort(Protocol)` | ✅ | — |
+| B-D03 | `DQReportWriterPort` (01-domain-layer.md:47) | `domain/ports/dq-report.py:177` | `class DQReportWriterPort(Protocol)` | ✅ | — |
 | B-D04 | `GoldValidatorPort` (01-domain-layer.md:47) | `domain/ports/validation.py:41` | `class GoldValidatorPort(Protocol)` | ✅ | — |
 | B-D05 | Batch: 536 LOC (01-domain-layer.md:84) | `domain/aggregates/batch.py` | Exactly 536 lines | ✅ | — |
-| B-D06 | PipelineRun: 574 LOC (01-domain-layer.md:85) | `domain/aggregates/pipeline_run.py` | Exactly 574 lines | ✅ | — |
-| B-D07 | QuarantineEntry: 517 LOC (01-domain-layer.md:86) | `domain/aggregates/quarantine_entry.py` | Exactly 517 lines | ✅ | — |
+| B-D06 | PipelineRun: 574 LOC (01-domain-layer.md:85) | `domain/aggregates/pipeline-run.py` | Exactly 574 lines | ✅ | — |
+| B-D07 | QuarantineEntry: 517 LOC (01-domain-layer.md:86) | `domain/aggregates/quarantine-entry.py` | Exactly 517 lines | ✅ | — |
 | B-D08 | events.py: 197 LOC (01-domain-layer.md:87) | `domain/aggregates/events.py` | Exactly 197 lines | ✅ | — |
-| B-D09 | `QuarantineStatus` enum: NEW, UNDER_REVIEW, IGNORED, REPROCESSED, EXPIRED (01-domain-layer.md:98) | `domain/aggregates/quarantine_entry.py:31-46` | All 5 values confirmed | ✅ | — |
-| B-D10 | `value_objects/` — 18 файлов (01-domain-layer.md:119) | `domain/value_objects/` | 18 non-init files | ✅ | — |
-| B-D11 | `schemas/` — 25 файлов (01-domain-layer.md:185) | `domain/schemas/` | 25 non-init + 5 `__init__` = 30 total | ⚠️ | Уточнить: «25 schema-модулей (30 файлов с __init__.py)» |
-| B-D12 | `exceptions/` — 6 файлов (01-domain-layer.md:180) | `domain/exceptions/` | 6 non-init + `__init__` = 7 total | ⚠️ | Уточнить: «7 файлов (6 модулей + __init__.py)» |
-| B-D13 | `test_ports_imported_only_from_facade` существует (01-domain-layer.md:70) | `tests/architecture/test_forbidden_imports.py:171` | `def test_ports_imported_only_from_facade` | ✅ | — |
+| B-D09 | `QuarantineStatus` enum: NEW, UNDER-REVIEW, IGNORED, REPROCESSED, EXPIRED (01-domain-layer.md:98) | `domain/aggregates/quarantine-entry.py:31-46` | All 5 values confirmed | ✅ | — |
+| B-D10 | `value-objects/` — 18 файлов (01-domain-layer.md:119) | `domain/value-objects/` | 18 non-init files | ✅ | — |
+| B-D11 | `schemas/` — 25 файлов (01-domain-layer.md:185) | `domain/schemas/` | 25 non-init + 5 `--init--` = 30 total | ⚠️ | Уточнить: «25 schema-модулей (30 файлов с --init--.py)» |
+| B-D12 | `exceptions/` — 6 файлов (01-domain-layer.md:180) | `domain/exceptions/` | 6 non-init + `--init--` = 7 total | ⚠️ | Уточнить: «7 файлов (6 модулей + --init--.py)» |
+| B-D13 | `test-ports-imported-only-from-facade` существует (01-domain-layer.md:70) | `tests/architecture/test-forbidden-imports.py:171` | `def test-ports-imported-only-from-facade` | ✅ | — |
 | B-D14 | `RunID`, `BatchID`, `EntityID`, `ContentHash` в types.py (01-domain-layer.md:147) | `domain/types.py:22,25,28,31` | `RunID = NewType("RunID", UUID)` etc. | ✅ | — |
 | B-D15 | `PipelineConfig`, `RuntimeConfig`, `DQConfig`, `TableConfig` в config.py (01-domain-layer.md:153-158) | `domain/config.py:249,354,394,538` | All 4 dataclasses confirmed | ✅ | — |
 | B-D16 | «8 дополнительных поддиректорий» (01-domain-layer.md:172) | `src/bioetl/domain/` | composite, configs, contracts/gold, entities, exceptions, filtering, mapping, models, registry, schemas, services = **11** | ❌ | Исправить: 11 поддиректорий, не 8. Обновить таблицу. |
@@ -1560,20 +1560,20 @@ Audit IDs: SR-17, SR-18, SR-19
 
 | # | Утверждение (документ) | Ссылка на код (file:line) | Фрагмент кода | Соответствует | Plan |
 |---|------------------------|---------------------------|---------------|---------------|------|
-| B-A01 | `core/` — 27 файлов (02-application-layer.md:40) | `application/core/` | 27 non-init + `__init__` = 28 total | ✅ | — |
-| B-A02 | `BatchExecutor` — 786 LOC (02-application-layer.md:48) | `application/core/batch_executor.py` | Exactly 786 lines | ✅ | — |
-| B-A03 | `MedallionLifecycleService` в таблице core/ (02-application-layer.md:135) | `application/services/medallion_lifecycle.py:32` | `class MedallionLifecycleService` | ⚠️ | Сервис в `application/services/`, не `application/core/services/`. Переместить в правильную секцию документа. |
-| B-A04 | `PipelineServices` frozen dataclass с 14 полями (02-application-layer.md:146-163) | `application/core/pipeline_services.py:39-93` | `@dataclass(frozen=True)` — all 14 fields match exactly | ✅ | — |
+| B-A01 | `core/` — 27 файлов (02-application-layer.md:40) | `application/core/` | 27 non-init + `--init--` = 28 total | ✅ | — |
+| B-A02 | `BatchExecutor` — 786 LOC (02-application-layer.md:48) | `application/core/batch-executor.py` | Exactly 786 lines | ✅ | — |
+| B-A03 | `MedallionLifecycleService` в таблице core/ (02-application-layer.md:135) | `application/services/medallion-lifecycle.py:32` | `class MedallionLifecycleService` | ⚠️ | Сервис в `application/services/`, не `application/core/services/`. Переместить в правильную секцию документа. |
+| B-A04 | `PipelineServices` frozen dataclass с 14 полями (02-application-layer.md:146-163) | `application/core/pipeline-services.py:39-93` | `@dataclass(frozen=True)` — all 14 fields match exactly | ✅ | — |
 | B-A05 | 23 класса трансформеров (02-application-layer.md:96) | `application/pipelines/` | Exactly 23 `*Transformer` classes confirmed | ✅ | — |
-| B-A06 | Подклассы реализуют `_extract_business_data()` (02-application-layer.md:93) | `application/core/base_transformer.py:385-414` | Abstract method is `_transform_impl()`, NOT `_extract_business_data()` | ❌ | **CRITICAL**: Исправить на `_transform_impl()`. `_extract_business_data()` — метод промежуточных классов `BaseChemblTransformer` и `BasePublicationTransformer`. |
+| B-A06 | Подклассы реализуют `-extract-business-data()` (02-application-layer.md:93) | `application/core/base-transformer.py:385-414` | Abstract method is `-transform-impl()`, NOT `-extract-business-data()` | ❌ | **CRITICAL**: Исправить на `-transform-impl()`. `-extract-business-data()` — метод промежуточных классов `BaseChemblTransformer` и `BasePublicationTransformer`. |
 | B-A07 | `Heartbeat` в `heartbeat.py` (02-application-layer.md:65) | `application/core/heartbeat.py:21` | Class is `HeartbeatTask`, not `Heartbeat` | ⚠️ | Исправить: `HeartbeatTask` |
 | B-A08 | `CompositePipelineRunner` в `composite/runner.py` (02-application-layer.md:175) | `application/composite/runner.py:94` | `class CompositePipelineRunner` | ✅ | — |
 | B-A09 | `EnrichmentCoordinator` в `composite/coordinator.py` (02-application-layer.md:176) | `application/composite/coordinator.py:26` | `class EnrichmentCoordinator` | ✅ | — |
 | B-A10 | `MergeService` в `composite/merger.py` (02-application-layer.md:177) | `application/composite/merger.py:62` | `class MergeService` | ✅ | — |
-| B-A11 | `KeyExtractorService` в `composite/key_extractor.py` (02-application-layer.md:178) | `application/composite/key_extractor.py:20` | `class KeyExtractorService` | ✅ | — |
+| B-A11 | `KeyExtractorService` в `composite/key-extractor.py` (02-application-layer.md:178) | `application/composite/key-extractor.py:20` | `class KeyExtractorService` | ✅ | — |
 | B-A12 | `CompositeCheckpointManager` в `composite/checkpoint.py` (02-application-layer.md:179) | `application/composite/checkpoint.py:337` | `class CompositeCheckpointManager` | ✅ | — |
-| B-A13 | `FilteredDataSource` в `core/filtered_data_source.py` (02-application-layer.md:68) | `application/core/filtered_data_source.py:21` | `class FilteredDataSource` | ✅ | — |
-| B-A14 | `IDMappingDataSource` в `core/idmapping_data_source.py` (02-application-layer.md:69) | `application/core/idmapping_data_source.py:22` | `class IDMappingDataSource` | ✅ | — |
+| B-A13 | `FilteredDataSource` в `core/filtered-data-source.py` (02-application-layer.md:68) | `application/core/filtered-data-source.py:21` | `class FilteredDataSource` | ✅ | — |
+| B-A14 | `IDMappingDataSource` в `core/idmapping-data-source.py` (02-application-layer.md:69) | `application/core/idmapping-data-source.py:22` | `class IDMappingDataSource` | ✅ | — |
 
 ---
 
@@ -1583,7 +1583,7 @@ Audit IDs: SR-17, SR-18, SR-19
 |---|------------------------|---------------------------|---------------|---------------|------|
 | B-I01 | ChemblAdapter наследует BaseHttpAdapter (03-infrastructure-layer.md:38) | `infrastructure/adapters/chembl/client.py:88-89` | `@dataclass class ChemblAdapter(BaseHttpAdapter)` | ✅ | — |
 | B-I02 | ChemblAdapter Mixins: `PaginatedFetcherMixin`, `FilterableStubMixin` (03-infrastructure-layer.md:38) | `infrastructure/adapters/chembl/client.py:88-89` | Only `BaseHttpAdapter` — NO mixins | ❌ | **CRITICAL**: Удалить mixins из описания. `PaginatedFetcherMixin` используется в `UniProtAdapter`, не в ChemblAdapter. ChemblAdapter реализует пагинацию и фильтрацию нативно. |
-| B-I03 | PubMedAdapter: `@dataclass + BaseHttpAdapter` (03-infrastructure-layer.md:40) | `infrastructure/adapters/pubmed/pubmed_client.py:49-50` | `@dataclass class PubMedAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter)` | ⚠️ | Добавить `NotSupportedMultiFilterMixin` в описание |
+| B-I03 | PubMedAdapter: `@dataclass + BaseHttpAdapter` (03-infrastructure-layer.md:40) | `infrastructure/adapters/pubmed/pubmed-client.py:49-50` | `@dataclass class PubMedAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter)` | ⚠️ | Добавить `NotSupportedMultiFilterMixin` в описание |
 | B-I04 | PubChemAdapter: `BaseSyncAdapter` + pubchempy (03-infrastructure-layer.md:41) | `infrastructure/adapters/pubchem/client.py:28,62` | `class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter)` + `import pubchempy as pcp` | ✅ | — |
 | B-I05 | PubChemAdapter mixin: `NotSupportedMultiFilterMixin` (03-infrastructure-layer.md:41) | `infrastructure/adapters/pubchem/client.py:62` | Direct mixin: `FilterableStubMixin` (includes `NotSupportedMultiFilterMixin` transitively) | ⚠️ | Уточнить: `FilterableStubMixin` (транзитивно включает `NotSupportedMultiFilterMixin`) |
 | B-I06 | CrossRefAdapter: `BaseHttpAdapter` (03-infrastructure-layer.md:42) | `infrastructure/adapters/crossref/client.py:49-50` | `@dataclass class CrossRefAdapter(BaseHttpAdapter)` | ✅ | — |
@@ -1591,15 +1591,15 @@ Audit IDs: SR-17, SR-18, SR-19
 | B-I08 | SemanticScholarAdapter: `BaseHttpAdapter` (03-infrastructure-layer.md:44) | `infrastructure/adapters/semanticscholar/adapter.py:60-61` | `@dataclass class SemanticScholarAdapter(BaseHttpAdapter)` | ✅ | — |
 | B-I09 | UniProtAdapter: `BaseHttpAdapter` (03-infrastructure-layer.md:39) | `infrastructure/adapters/uniprot/client.py:100` | `class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin)` | ⚠️ | Добавить `PaginatedFetcherMixin` |
 | B-I10 | `UnifiedHTTPClient` в http/client.py (03-infrastructure-layer.md:67) | `infrastructure/adapters/http/client.py:48` | `@dataclass class UnifiedHTTPClient` | ✅ | — |
-| B-I11 | BronzeWriter: JSONL + zstd (03-infrastructure-layer.md:85) | `infrastructure/storage/bronze_writer.py:29,364,463` | `import zstandard as zstd`, `.jsonl.zst` extension | ✅ | — |
-| B-I12 | SilverWriter: Delta Lake, merge/upsert (03-infrastructure-layer.md:86) | `infrastructure/storage/silver_writer.py:36,80` | `from deltalake import DeltaTable, write_deltalake`, inherits `BaseDeltaWriter` | ✅ | — |
-| B-I13 | GoldWriter наследует BaseDeltaWriter (03-infrastructure-layer.md:87) | `infrastructure/storage/gold_writer.py:60` | `class GoldWriter(BaseDeltaWriter)` | ✅ | — |
-| B-I14 | MemoryLock реализует LockPort (03-infrastructure-layer.md:103) | `infrastructure/locking/memory_lock.py:12,19` | `class MemoryLock(LockPort)` — explicit inheritance | ✅ | — |
-| B-I15 | LocalCheckpoint реализует CheckpointPort (03-infrastructure-layer.md:115) | `infrastructure/checkpoint/local_checkpoint.py:31` | `class LocalCheckpoint:` — structural typing (Protocol) | ⚠️ | Уточнить: structural subtyping (Protocol), не explicit inheritance |
+| B-I11 | BronzeWriter: JSONL + zstd (03-infrastructure-layer.md:85) | `infrastructure/storage/bronze-writer.py:29,364,463` | `import zstandard as zstd`, `.jsonl.zst` extension | ✅ | — |
+| B-I12 | SilverWriter: Delta Lake, merge/upsert (03-infrastructure-layer.md:86) | `infrastructure/storage/silver-writer.py:36,80` | `from deltalake import DeltaTable, write-deltalake`, inherits `BaseDeltaWriter` | ✅ | — |
+| B-I13 | GoldWriter наследует BaseDeltaWriter (03-infrastructure-layer.md:87) | `infrastructure/storage/gold-writer.py:60` | `class GoldWriter(BaseDeltaWriter)` | ✅ | — |
+| B-I14 | MemoryLock реализует LockPort (03-infrastructure-layer.md:103) | `infrastructure/locking/memory-lock.py:12,19` | `class MemoryLock(LockPort)` — explicit inheritance | ✅ | — |
+| B-I15 | LocalCheckpoint реализует CheckpointPort (03-infrastructure-layer.md:115) | `infrastructure/checkpoint/local-checkpoint.py:31` | `class LocalCheckpoint:` — structural typing (Protocol) | ⚠️ | Уточнить: structural subtyping (Protocol), не explicit inheritance |
 | B-I16 | StructlogLogger реализует LoggerPort (03-infrastructure-layer.md:122) | `infrastructure/observability/logging.py:30` | `class StructlogLogger:` — structural typing (Protocol) | ⚠️ | Уточнить: structural subtyping |
-| B-I17 | PrometheusMetrics реализует MetricsPort (03-infrastructure-layer.md:122) | `infrastructure/observability/prometheus_metrics.py:9,68` | `class PrometheusMetrics(MetricsPort)` — explicit inheritance | ✅ | — |
-| B-I18 | BaseSyncAdapter существует (03-infrastructure-layer.md:57) | `infrastructure/adapters/sync_base.py:38` | `class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort)` | ✅ | — |
-| B-I19 | RetentionManager в storage/retention_manager.py (03-infrastructure-layer.md:94) | `infrastructure/storage/retention_manager.py:31` | `class RetentionManager` | ✅ | — |
+| B-I17 | PrometheusMetrics реализует MetricsPort (03-infrastructure-layer.md:122) | `infrastructure/observability/prometheus-metrics.py:9,68` | `class PrometheusMetrics(MetricsPort)` — explicit inheritance | ✅ | — |
+| B-I18 | BaseSyncAdapter существует (03-infrastructure-layer.md:57) | `infrastructure/adapters/sync-base.py:38` | `class BaseSyncAdapter(HealthCheckProviderMixin, DataSourcePort)` | ✅ | — |
+| B-I19 | RetentionManager в storage/retention-manager.py (03-infrastructure-layer.md:94) | `infrastructure/storage/retention-manager.py:31` | `class RetentionManager` | ✅ | — |
 
 ---
 
@@ -1608,12 +1608,12 @@ Audit IDs: SR-17, SR-18, SR-19
 | # | Утверждение (документ) | Ссылка на код (file:line) | Фрагмент кода | Соответствует | Plan |
 |---|------------------------|---------------------------|---------------|---------------|------|
 | B-IF01 | CLI использует Click (04-interfaces-layer.md:23) | `interfaces/cli/commands/run.py:11` | `import click`, `@click.command()` line 136 | ✅ | — |
-| B-IF02 | «17 модулей в commands/» (04-interfaces-layer.md:25) | `interfaces/cli/commands/` | 17 .py files total (incl. `__init__.py`), 16 non-init | ✅ | — |
-| B-IF03 | orchestration/ пуст (04-interfaces-layer.md:71) | `interfaces/orchestration/__init__.py` | Only `__init__.py` with empty `__all__ = []` | ✅ | — |
-| B-IF04 | HTTP endpoints: /health, /health/live, /health/ready (04-interfaces-layer.md:65) | `interfaces/http/health_server.py:146-152` | All 3 + `/healthz` + `/health/providers` | ⚠️ | Добавить `/healthz` и `/health/providers` |
+| B-IF02 | «17 модулей в commands/» (04-interfaces-layer.md:25) | `interfaces/cli/commands/` | 17 .py files total (incl. `--init--.py`), 16 non-init | ✅ | — |
+| B-IF03 | orchestration/ пуст (04-interfaces-layer.md:71) | `interfaces/orchestration/--init--.py` | Only `--init--.py` with empty `--all-- = []` | ✅ | — |
+| B-IF04 | HTTP endpoints: /health, /health/live, /health/ready (04-interfaces-layer.md:65) | `interfaces/http/health-server.py:146-152` | All 3 + `/healthz` + `/health/providers` | ⚠️ | Добавить `/healthz` и `/health/providers` |
 | B-IF05 | `run` в run.py (04-interfaces-layer.md:29) | `interfaces/cli/commands/run.py:136` | `@click.command()` | ✅ | — |
-| B-IF06 | `run-composite` в run_composite.py (04-interfaces-layer.md:31) | `interfaces/cli/commands/run_composite.py:104` | `@click.command(name="run-composite")` | ✅ | — |
-| B-IF07 | CLI пример: `python -m bioetl run --pipeline composite_publication` (04-interfaces-layer.md:52) | `interfaces/cli/commands/run_composite.py:104` | Composite uses `run-composite` command, NOT `run` | ❌ | Исправить: `python -m bioetl run-composite --pipeline composite_publication` |
+| B-IF06 | `run-composite` в run-composite.py (04-interfaces-layer.md:31) | `interfaces/cli/commands/run-composite.py:104` | `@click.command(name="run-composite")` | ✅ | — |
+| B-IF07 | CLI пример: `python -m bioetl run --pipeline composite-publication` (04-interfaces-layer.md:52) | `interfaces/cli/commands/run-composite.py:104` | Composite uses `run-composite` command, NOT `run` | ❌ | Исправить: `python -m bioetl run-composite --pipeline composite-publication` |
 
 ---
 
@@ -1621,21 +1621,21 @@ Audit IDs: SR-17, SR-18, SR-19
 
 | # | Утверждение (документ) | Ссылка на код (file:line) | Фрагмент кода | Соответствует | Plan |
 |---|------------------------|---------------------------|---------------|---------------|------|
-| B-C01 | `factories/` — 11 файлов (05-composition-layer.md:44) | `composition/factories/` | 11 non-init + `__init__` = 12 total | ⚠️ | Уточнить: 12 файлов |
-| B-C02 | `GenericPipelineFactory` в pipeline_factory.py (05-composition-layer.md:48) | `composition/factories/pipeline_factory.py:94` | `class GenericPipelineFactory(Generic[TPipeline])` | ✅ | — |
-| B-C03 | `DataSourceFactory` в data_source_factory.py (05-composition-layer.md:50) | `composition/factories/data_source_factory.py:38` | `class DataSourceFactory` | ✅ | — |
-| B-C04 | `HttpClientFactory` в http_client_factory.py (05-composition-layer.md:51) | `composition/factories/http_client_factory.py:34` | `class HttpClientFactory` | ✅ | — |
-| B-C05 | `StorageFactory` в storage_factory.py (05-composition-layer.md:52) | `composition/factories/storage_factory.py:48` | `class StorageFactory` | ✅ | — |
-| B-C06 | `RunnerFactory` в runner_factory.py (05-composition-layer.md:57) | `composition/factories/runner_factory.py:25` | `class RunnerFactory` | ✅ | — |
-| B-C07 | `ServicesBuilder` / `BaseServicesFactory` в services_factory.py (05-composition-layer.md:58) | `composition/factories/services_factory.py:129,376` | Both classes confirmed | ✅ | — |
-| B-C08 | `DQServicesFactory` в dq_factory.py (05-composition-layer.md:60) | `composition/factories/dq_factory.py:35` | `class DQServicesFactory` | ✅ | — |
-| B-C09 | `register_transformer()` и `create_transformer()` (05-composition-layer.md:59) | `composition/factories/transformer_factory.py:31,47` | Both functions confirmed | ✅ | — |
-| B-C10 | `DataSourceRegistry` на строке ~100 (05-composition-layer.md:68) | `composition/factories/data_source_factory.py:100` | Exactly line 100 | ✅ | — |
-| B-C11 | `ProviderRegistry` в providers/provider_registry.py (05-composition-layer.md:72) | `composition/providers/provider_registry.py:103` | `class ProviderRegistry` | ✅ | — |
-| B-C12 | `bootstrap_composite_pipeline` в runtime/composite.py (05-composition-layer.md:112-114) | `composition/bootstrap/runtime/composite.py:529` | Deprecated alias → `bootstrap_composite_runner` (line 267) | ⚠️ | Обновить на `bootstrap_composite_runner` |
+| B-C01 | `factories/` — 11 файлов (05-composition-layer.md:44) | `composition/factories/` | 11 non-init + `--init--` = 12 total | ⚠️ | Уточнить: 12 файлов |
+| B-C02 | `GenericPipelineFactory` в pipeline-factory.py (05-composition-layer.md:48) | `composition/factories/pipeline-factory.py:94` | `class GenericPipelineFactory(Generic[TPipeline])` | ✅ | — |
+| B-C03 | `DataSourceFactory` в data-source-factory.py (05-composition-layer.md:50) | `composition/factories/data-source-factory.py:38` | `class DataSourceFactory` | ✅ | — |
+| B-C04 | `HttpClientFactory` в http-client-factory.py (05-composition-layer.md:51) | `composition/factories/http-client-factory.py:34` | `class HttpClientFactory` | ✅ | — |
+| B-C05 | `StorageFactory` в storage-factory.py (05-composition-layer.md:52) | `composition/factories/storage-factory.py:48` | `class StorageFactory` | ✅ | — |
+| B-C06 | `RunnerFactory` в runner-factory.py (05-composition-layer.md:57) | `composition/factories/runner-factory.py:25` | `class RunnerFactory` | ✅ | — |
+| B-C07 | `ServicesBuilder` / `BaseServicesFactory` в services-factory.py (05-composition-layer.md:58) | `composition/factories/services-factory.py:129,376` | Both classes confirmed | ✅ | — |
+| B-C08 | `DQServicesFactory` в dq-factory.py (05-composition-layer.md:60) | `composition/factories/dq-factory.py:35` | `class DQServicesFactory` | ✅ | — |
+| B-C09 | `register-transformer()` и `create-transformer()` (05-composition-layer.md:59) | `composition/factories/transformer-factory.py:31,47` | Both functions confirmed | ✅ | — |
+| B-C10 | `DataSourceRegistry` на строке ~100 (05-composition-layer.md:68) | `composition/factories/data-source-factory.py:100` | Exactly line 100 | ✅ | — |
+| B-C11 | `ProviderRegistry` в providers/provider-registry.py (05-composition-layer.md:72) | `composition/providers/provider-registry.py:103` | `class ProviderRegistry` | ✅ | — |
+| B-C12 | `bootstrap-composite-pipeline` в runtime/composite.py (05-composition-layer.md:112-114) | `composition/bootstrap/runtime/composite.py:529` | Deprecated alias → `bootstrap-composite-runner` (line 267) | ⚠️ | Обновить на `bootstrap-composite-runner` |
 | B-C13 | 8 провайдеров (05-composition-layer.md:86-97) | `composition/providers/registration.py:476-649` | Exactly 8 providers registered | ✅ | — |
-| B-C14 | ChEMBL — 14 пайплайнов (05-composition-layer.md:90) | `composition/factories/pipeline_factories.py:214-325` | Exactly 14 ChEMBL pipelines | ✅ | — |
-| B-C15 | Пример bootstrap с `CompositeConfig` + `CompositeRuntimeConfig` (05-composition-layer.md:115-116) | `composition/bootstrap/runtime/composite.py` | Actual signature: `bootstrap_composite_runner(name: str, ...)` — not `CompositeConfig` objects | ❌ | Исправить пример кода |
+| B-C14 | ChEMBL — 14 пайплайнов (05-composition-layer.md:90) | `composition/factories/pipeline-factories.py:214-325` | Exactly 14 ChEMBL pipelines | ✅ | — |
+| B-C15 | Пример bootstrap с `CompositeConfig` + `CompositeRuntimeConfig` (05-composition-layer.md:115-116) | `composition/bootstrap/runtime/composite.py` | Actual signature: `bootstrap-composite-runner(name: str, ...)` — not `CompositeConfig` objects | ❌ | Исправить пример кода |
 
 ---
 
@@ -1643,18 +1643,18 @@ Audit IDs: SR-17, SR-18, SR-19
 
 | # | Утверждение (документ) | Ссылка на код (file:line) | Фрагмент кода | Соответствует | Plan |
 |---|------------------------|---------------------------|---------------|---------------|------|
-| B-DL01 | Bronze формат: JSONL + zstd (data-layers.md:12) | `infrastructure/storage/bronze_writer.py:29,463` | `import zstandard as zstd`, `.jsonl.zst` | ✅ | — |
-| B-DL02 | Bronze metadata: `_ingestion_ts`, `_run_id`, `_batch_id` per-record (data-layers.md:22-25) | `infrastructure/storage/bronze_writer.py` | Metadata in `.meta.json` sidecar: `ingestion_ts`, `run_id`, `batch_id` (NO underscore) | ❌ | Исправить: (1) нет underscore prefix, (2) file-level sidecar, не per-record |
-| B-DL03 | Silver формат: Delta Lake (data-layers.md:45) | `infrastructure/storage/silver_writer.py:36` | `from deltalake import DeltaTable, write_deltalake` | ✅ | — |
-| B-DL04 | Silver protocol: Writer V2, Reader V1 (data-layers.md:48) | `infrastructure/storage/silver_writer.py` | Not explicitly set in code | ⚠️ | Уточнить или убрать версии |
-| B-DL05 | Silver validation pandera (data-layers.md:51) | `infrastructure/validation/pandera_validator.py` | Pandera used for validation | ✅ | — |
+| B-DL01 | Bronze формат: JSONL + zstd (data-layers.md:12) | `infrastructure/storage/bronze-writer.py:29,463` | `import zstandard as zstd`, `.jsonl.zst` | ✅ | — |
+| B-DL02 | Bronze metadata: `-ingestion-ts`, `-run-id`, `-batch-id` per-record (data-layers.md:22-25) | `infrastructure/storage/bronze-writer.py` | Metadata in `.meta.json` sidecar: `ingestion-ts`, `run-id`, `batch-id` (NO underscore) | ❌ | Исправить: (1) нет underscore prefix, (2) file-level sidecar, не per-record |
+| B-DL03 | Silver формат: Delta Lake (data-layers.md:45) | `infrastructure/storage/silver-writer.py:36` | `from deltalake import DeltaTable, write-deltalake` | ✅ | — |
+| B-DL04 | Silver protocol: Writer V2, Reader V1 (data-layers.md:48) | `infrastructure/storage/silver-writer.py` | Not explicitly set in code | ⚠️ | Уточнить или убрать версии |
+| B-DL05 | Silver validation pandera (data-layers.md:51) | `infrastructure/validation/pandera-validator.py` | Pandera used for validation | ✅ | — |
 | B-DL06 | Gold Z-ORDER: «обязательно» (data-layers.md:126) | `src/bioetl/` — full search | NO Z-ORDER implementation found | ❌ | Z-ORDER не реализован. Исправить на «рекомендуется» |
 | B-DL07 | Gold contracts: «JSON Schema файлы в contracts/gold/» (data-layers.md:131) | `docs/04-reference/contracts/` | Only `gold-schemas.md` (markdown), no JSON Schema files | ❌ | Создать JSON Schema или исправить описание |
-| B-DL08 | `BaseTransformer.transform_for_gold()` + `GOLD_EXCLUDE_FIELDS` (data-layers.md:107) | `application/core/base_transformer.py` | Method `transform_for_gold()` NOT found; constant `GOLD_EXCLUDE_FIELDS` NOT found | ❌ | Исправить: найти актуальный метод Gold-трансформации |
-| B-DL09 | Silver merge с приоритетом `_run_type` (data-layers.md:80-82) | `infrastructure/storage/silver_writer.py` | Delta merge with run_type priority implemented | ✅ | — |
-| B-DL10 | Gold SCD Type 2 (data-layers.md:143) | `infrastructure/storage/gold_writer.py` | SCD2 support in GoldWriter | ✅ | — |
-| B-DL11 | Silver partition from `configs/pipelines/` with `partition_by` (data-layers.md:90) | `configs/pipelines/` | YAML configs have `partition_by` field | ✅ | — |
-| B-DL12 | PII hashing: sha256(lowercase(value) + SALT) (data-layers.md:86) | `infrastructure/security/pii_hasher.py:68,151` | `Sha256PiiHasher` uses `hashlib.sha256()` | ✅ | — |
+| B-DL08 | `BaseTransformer.transform-for-gold()` + `GOLD-EXCLUDE-FIELDS` (data-layers.md:107) | `application/core/base-transformer.py` | Method `transform-for-gold()` NOT found; constant `GOLD-EXCLUDE-FIELDS` NOT found | ❌ | Исправить: найти актуальный метод Gold-трансформации |
+| B-DL09 | Silver merge с приоритетом `-run-type` (data-layers.md:80-82) | `infrastructure/storage/silver-writer.py` | Delta merge with run-type priority implemented | ✅ | — |
+| B-DL10 | Gold SCD Type 2 (data-layers.md:143) | `infrastructure/storage/gold-writer.py` | SCD2 support in GoldWriter | ✅ | — |
+| B-DL11 | Silver partition from `configs/pipelines/` with `partition-by` (data-layers.md:90) | `configs/pipelines/` | YAML configs have `partition-by` field | ✅ | — |
+| B-DL12 | PII hashing: sha256(lowercase(value) + SALT) (data-layers.md:86) | `infrastructure/security/pii-hasher.py:68,151` | `Sha256PiiHasher` uses `hashlib.sha256()` | ✅ | — |
 
 ---
 
@@ -1676,12 +1676,12 @@ Audit IDs: SR-17, SR-18, SR-19
 
 | # | ID | Document | Проблема | Серьёзность |
 |---|----|----------|----------|-------------|
-| 1 | B-A06 | application-layer.md | `BaseTransformer` abstract method: `_extract_business_data()` → фактически `_transform_impl()` | P1 HIGH |
+| 1 | B-A06 | application-layer.md | `BaseTransformer` abstract method: `-extract-business-data()` → фактически `-transform-impl()` | P1 HIGH |
 | 2 | B-I02 | infrastructure-layer.md | ChemblAdapter mixins PaginatedFetcherMixin + FilterableStubMixin — не существуют | P1 HIGH |
 | 3 | B-DL02 | data-layers.md | Bronze metadata fields без underscore, в sidecar (не per-record) | P1 HIGH |
 | 4 | B-DL06 | data-layers.md | Gold Z-ORDER «обязательно» — не реализован в коде | P1 HIGH |
 | 5 | B-DL07 | data-layers.md | Gold «JSON Schema файлы» — нет, только markdown | P2 MEDIUM |
-| 6 | B-DL08 | data-layers.md | `transform_for_gold()` и `GOLD_EXCLUDE_FIELDS` — не существуют | P1 HIGH |
+| 6 | B-DL08 | data-layers.md | `transform-for-gold()` и `GOLD-EXCLUDE-FIELDS` — не существуют | P1 HIGH |
 | 7 | B-IF07 | interfaces-layer.md | CLI пример `run` вместо `run-composite` для composite | P2 MEDIUM |
 | 8 | B-C15 | composition-layer.md | Bootstrap пример с неверной сигнатурой | P1 HIGH |
 | 9 | B-D16 | domain-layer.md | «8 поддиректорий» → реально 11 | P3 LOW |
@@ -1698,17 +1698,17 @@ Audit IDs: SR-17, SR-18, SR-19
 
 Файл: docs/02-architecture/02-application-layer.md
 
-Строка 93: Заменить «подклассы реализуют _extract_business_data()» на
-«подклассы реализуют _transform_impl()».
+Строка 93: Заменить «подклассы реализуют -extract-business-data()» на
+«подклассы реализуют -transform-impl()».
 
-Добавить примечание: «_extract_business_data() — метод промежуточных
-базовых классов BaseChemblTransformer (base_chembl_transformer.py:160)
-и BasePublicationTransformer (base_publication_transformer.py:54),
+Добавить примечание: «-extract-business-data() — метод промежуточных
+базовых классов BaseChemblTransformer (base-chembl-transformer.py:160)
+и BasePublicationTransformer (base-publication-transformer.py:54),
 не BaseTransformer.»
 
-Эталон: src/bioetl/application/core/base_transformer.py:385-414
+Эталон: src/bioetl/application/core/base-transformer.py:385-414
   @abstractmethod
-  def _transform_impl(self, record: dict[str, Any]) -> dict[str, Any]: ...
+  def -transform-impl(self, record: dict[str, Any]) -> dict[str, Any]: ...
 ```
 
 ### PROMPT-B-02: Исправить ChemblAdapter mixins
@@ -1738,21 +1738,21 @@ Audit IDs: SR-17, SR-18, SR-19
 
 Строки 22-25 (таблица Bronze metadata):
   БЫЛО:
-    _ingestion_ts | Timestamp (UTC) | Время получения записи
-    _run_id       | UUID           | Идентификатор запуска
-    _batch_id     | UUID           | Идентификатор пакета
+    -ingestion-ts | Timestamp (UTC) | Время получения записи
+    -run-id       | UUID           | Идентификатор запуска
+    -batch-id     | UUID           | Идентификатор пакета
 
   СТАЛО:
-    ingestion_ts  | Timestamp (UTC) | Время получения записи (в sidecar .meta.json)
-    run_id        | UUID           | Идентификатор запуска (в sidecar .meta.json)
-    batch_id      | UUID           | Идентификатор пакета (в sidecar .meta.json)
+    ingestion-ts  | Timestamp (UTC) | Время получения записи (в sidecar .meta.json)
+    run-id        | UUID           | Идентификатор запуска (в sidecar .meta.json)
+    batch-id      | UUID           | Идентификатор пакета (в sidecar .meta.json)
 
 Добавить примечание после таблицы:
   «Metadata хранится в отдельном sidecar-файле .meta.json на уровне файла,
-  а не как per-record поля. Underscore-prefixed версии (_ingestion_ts, _run_id,
-  _source_batch_id) появляются в Silver layer после трансформации.»
+  а не как per-record поля. Underscore-prefixed версии (-ingestion-ts, -run-id,
+  -source-batch-id) появляются в Silver layer после трансформации.»
 
-Эталон: src/bioetl/infrastructure/storage/bronze_writer.py
+Эталон: src/bioetl/infrastructure/storage/bronze-writer.py
 ```
 
 ### PROMPT-B-04: Исправить Gold Z-ORDER и Gold contracts
@@ -1772,7 +1772,7 @@ Audit IDs: SR-17, SR-18, SR-19
   и документация в docs/04-reference/contracts/gold-schemas.md»
 ```
 
-### PROMPT-B-05: Исправить transform_for_gold и GOLD_EXCLUDE_FIELDS
+### PROMPT-B-05: Исправить transform-for-gold и GOLD-EXCLUDE-FIELDS
 
 ```
 Задача: Исправить ссылки на несуществующие API в data-layers.md.
@@ -1780,12 +1780,12 @@ Audit IDs: SR-17, SR-18, SR-19
 Файл: docs/02-architecture/data-layers.md
 
 Строка 107:
-  БЫЛО: «BaseTransformer.transform_for_gold() метод с константой GOLD_EXCLUDE_FIELDS
-  в src/bioetl/application/core/base_transformer.py»
+  БЫЛО: «BaseTransformer.transform-for-gold() метод с константой GOLD-EXCLUDE-FIELDS
+  в src/bioetl/application/core/base-transformer.py»
 
   Найти фактический механизм Gold-трансформации:
-  1. Прочитать base_transformer.py — найти метод, связанный с Gold
-  2. Проверить gold_writer.py — как данные фильтруются для Gold
+  1. Прочитать base-transformer.py — найти метод, связанный с Gold
+  2. Проверить gold-writer.py — как данные фильтруются для Gold
   3. Обновить ссылку на актуальный метод и механизм
 
   Если механизм Gold-исключения полей реализован иначе (например,
@@ -1798,8 +1798,8 @@ Audit IDs: SR-17, SR-18, SR-19
 Задача: Два косметических исправления.
 
 1) docs/02-architecture/04-interfaces-layer.md строка 52:
-  БЫЛО: «python -m bioetl run --pipeline composite_publication»
-  СТАЛО: «python -m bioetl run-composite --pipeline composite_publication»
+  БЫЛО: «python -m bioetl run --pipeline composite-publication»
+  СТАЛО: «python -m bioetl run-composite --pipeline composite-publication»
 
 2) docs/02-architecture/02-application-layer.md строка 65:
   БЫЛО: «Heartbeat» (heartbeat.py)
@@ -1829,14 +1829,14 @@ Audit IDs: SR-17, SR-18, SR-19
 
 | ID | Document | Было (ошибка) | Стало (исправлено) | Commit |
 |----|----------|--------------|-------------------|--------|
-| B-A06, A-06 | 02-application-layer.md:93 | `_extract_business_data()` | `_transform_impl()` + примечание о промежуточных классах | `0ef246a` |
+| B-A06, A-06 | 02-application-layer.md:93 | `-extract-business-data()` | `-transform-impl()` + примечание о промежуточных классах | `0ef246a` |
 | B-A07, A-14 | 02-application-layer.md:65 | `Heartbeat` | `HeartbeatTask` (heartbeat.py:21) | `0ef246a` |
 | B-I02, I-04 | 03-infrastructure-layer.md:38 | ChemblAdapter: Mixins PaginatedFetcherMixin, FilterableStubMixin | Native pagination and filtering (without mixins) | `0ef246a` |
-| B-IF07, IF-07 | 04-interfaces-layer.md:52 | `python -m bioetl run --pipeline composite_publication` | `python -m bioetl run-composite --pipeline composite_publication` | `0ef246a` |
-| B-DL02, DL-03 | data-layers.md:22-27 | `_ingestion_ts`, `_run_id`, `_batch_id` (underscore prefix) | `ingestion_ts`, `run_id`, `batch_id` + sidecar note | `0ef246a` |
+| B-IF07, IF-07 | 04-interfaces-layer.md:52 | `python -m bioetl run --pipeline composite-publication` | `python -m bioetl run-composite --pipeline composite-publication` | `0ef246a` |
+| B-DL02, DL-03 | data-layers.md:22-27 | `-ingestion-ts`, `-run-id`, `-batch-id` (underscore prefix) | `ingestion-ts`, `run-id`, `batch-id` + sidecar note | `0ef246a` |
 | ADR-13 | ADR-008:7 | Status: Accepted | Status: Superseded | `0ef246a` |
 | DL-12 | data-layers.md:131 | «JSON Schema файлы» без реальных файлов | Файлы `*.json` созданы в `docs/04-reference/contracts/gold/` (20 шт.) | `0ef246a` |
-| API-01..04 | api/domain.md:30-34 | `increment()`, `gauge()`, `histogram()` | `increment_counter()`, `set_gauge()`, `observe_histogram()` | `0ef246a` |
+| API-01..04 | api/domain.md:30-34 | `increment()`, `gauge()`, `histogram()` | `increment-counter()`, `set-gauge()`, `observe-histogram()` | `0ef246a` |
 | OPS-05..08 | runbooks/pipeline-failure-recovery.md | `--full-refresh`, `bioetl verify`, exit code 10 | `--run-type rebuild`, примеры через `bioetl run`, exit code 83 | `0ef246a` |
 | SPEC-14 | 03-molecule-spec.md | 23 поля | 52 поля (полная схема с hierarchy, properties, structures) | `0ef246a` |
 
@@ -1848,21 +1848,21 @@ Audit IDs: SR-17, SR-18, SR-19
 
 | # | ID | Document | Проблема | Текущий текст в main | Фактический код | Severity |
 |---|-----|----------|----------|---------------------|-----------------|----------|
-| 1 | **NEW** | 04-interfaces-layer.md:52 | CLI option name `--pipeline` вместо `--composite` | `run-composite --pipeline composite_publication` | `@click.option("--composite", ...)` в run_composite.py:105. Также значение: `publication`, не `composite_publication` | P1 HIGH |
-| 2 | C-15, B-C15 | 05-composition-layer.md:113-122 | Deprecated function + wrong import paths | `from bioetl.infrastructure.config.composite import CompositeConfig, CompositeRuntimeConfig` | `CompositeConfig` в `domain/composite/config.py:780`; `CompositeRuntimeConfig` в `application/composite/runner.py:57`; функция deprecated → `bootstrap_composite_runner` | P1 HIGH |
-| 3 | B-DL08 | data-layers.md:107-109 | `GOLD_EXCLUDE_FIELDS` now empty (behaviour changed) | «JSON-строки исключаются из Gold через `GOLD_EXCLUDE_FIELDS`» | `GOLD_EXCLUDE_FIELDS: ClassVar[frozenset[str]] = frozenset()` — пустое множество, ничего не исключается | P2 MEDIUM |
-| 4 | B-DL06, DL-11 | data-layers.md:126-128 | Z-ORDER «обязательно» — не реализован | «Z-ORDER Clustering: Обязательно применяется» | 0 вхождений z_order/z-order/Z-ORDER в `src/bioetl/` | P2 MEDIUM |
+| 1 | **NEW** | 04-interfaces-layer.md:52 | CLI option name `--pipeline` вместо `--composite` | `run-composite --pipeline composite-publication` | `@click.option("--composite", ...)` в run-composite.py:105. Также значение: `publication`, не `composite-publication` | P1 HIGH |
+| 2 | C-15, B-C15 | 05-composition-layer.md:113-122 | Deprecated function + wrong import paths | `from bioetl.infrastructure.config.composite import CompositeConfig, CompositeRuntimeConfig` | `CompositeConfig` в `domain/composite/config.py:780`; `CompositeRuntimeConfig` в `application/composite/runner.py:57`; функция deprecated → `bootstrap-composite-runner` | P1 HIGH |
+| 3 | B-DL08 | data-layers.md:107-109 | `GOLD-EXCLUDE-FIELDS` now empty (behaviour changed) | «JSON-строки исключаются из Gold через `GOLD-EXCLUDE-FIELDS`» | `GOLD-EXCLUDE-FIELDS: ClassVar[frozenset[str]] = frozenset()` — пустое множество, ничего не исключается | P2 MEDIUM |
+| 4 | B-DL06, DL-11 | data-layers.md:126-128 | Z-ORDER «обязательно» — не реализован | «Z-ORDER Clustering: Обязательно применяется» | 0 вхождений z-order/z-order/Z-ORDER в `src/bioetl/` | P2 MEDIUM |
 | 5 | DL-06 | data-layers.md:48-50 | Delta Lake protocol versions не подтверждены | «Writer Version 2, Reader Version 1» | Не задаётся явно в коде; зависит от defaults библиотеки | P3 LOW |
 
 ### MEDIUM / LOW (уточнения)
 
 | # | ID | Document | Проблема | Severity |
 |---|-----|----------|----------|----------|
-| 6 | B-D16, D-20 | 01-domain-layer.md:172 | «8 дополнительных поддиректорий» — таблица содержит 11, фактически 14 (не хватает: `aggregates/`, `ports/`, `value_objects/`) | P3 LOW |
+| 6 | B-D16, D-20 | 01-domain-layer.md:172 | «8 дополнительных поддиректорий» — таблица содержит 11, фактически 14 (не хватает: `aggregates/`, `ports/`, `value-objects/`) | P3 LOW |
 | 7 | R-01, R-02 | RULES.md §1.3 | «Delta Lake / Iceberg» и «Delta/Iceberg/Parquet» — Iceberg не реализован | P2 MEDIUM |
-| 8 | R-03 | RULES.md §1.4 | `PipelineRunner._clear_exports()` не существует → `MedallionLifecycleService.clear()` | P2 MEDIUM |
+| 8 | R-03 | RULES.md §1.4 | `PipelineRunner.-clear-exports()` не существует → `MedallionLifecycleService.clear()` | P2 MEDIUM |
 | 9 | R-04 | RULES.md §2.3 | QuarantineStatus: «3 значения» → фактически 5 | P2 MEDIUM |
-| 10 | R-05 | RULES.md §2.2 | `compute_content_hash` → фактически `generate_content_hash` | P2 MEDIUM |
+| 10 | R-05 | RULES.md §2.2 | `compute-content-hash` → фактически `generate-content-hash` | P2 MEDIUM |
 | 11 | R-06 | RULES.md §3.1 | Лог-поле `ts` → фактически `timestamp` | P2 MEDIUM |
 
 ---
@@ -1913,31 +1913,31 @@ Audit IDs: SR-17, SR-18, SR-19
 Файл: docs/02-architecture/04-interfaces-layer.md
 
 Строка 52:
-  БЫЛО: python -m bioetl run-composite --pipeline composite_publication
+  БЫЛО: python -m bioetl run-composite --pipeline composite-publication
   СТАЛО: python -m bioetl run-composite --composite publication
 
 Причина:
   - CLI option называется --composite (НЕ --pipeline)
-    src/bioetl/interfaces/cli/commands/run_composite.py:105
-  - Значение: просто имя композита "publication" (НЕ "composite_publication")
-    src/bioetl/interfaces/cli/commands/run_composite.py:215 (docstring)
+    src/bioetl/interfaces/cli/commands/run-composite.py:105
+  - Значение: просто имя композита "publication" (НЕ "composite-publication")
+    src/bioetl/interfaces/cli/commands/run-composite.py:215 (docstring)
 ```
 
 ### PROMPT-R3-02: Исправить bootstrap example в composition-layer.md
 
 ```
-Задача: Исправить пример bootstrap_composite_pipeline.
+Задача: Исправить пример bootstrap-composite-pipeline.
 
 Файл: docs/02-architecture/05-composition-layer.md
 
 Строки 113-122: Заменить код целиком на:
 
 ```python
-from bioetl.composition.bootstrap.runtime.composite import bootstrap_composite_runner
+from bioetl.composition.bootstrap.runtime.composite import bootstrap-composite-runner
 from bioetl.domain.composite.config import CompositeConfig
 from bioetl.application.composite.runner import CompositeRuntimeConfig
 
-runner = bootstrap_composite_runner(
+runner = bootstrap-composite-runner(
     config=CompositeConfig(...),
     runtime=CompositeRuntimeConfig(...),
 )
@@ -1945,12 +1945,12 @@ runner = bootstrap_composite_runner(
 ```
 
 Изменения:
-  1. bootstrap_composite_pipeline → bootstrap_composite_runner (deprecated alias)
+  1. bootstrap-composite-pipeline → bootstrap-composite-runner (deprecated alias)
   2. bioetl.infrastructure.config.composite → bioetl.domain.composite.config (CompositeConfig)
   3. bioetl.infrastructure.config.composite → bioetl.application.composite.runner (CompositeRuntimeConfig)
 ```
 
-### PROMPT-R3-03: Исправить GOLD_EXCLUDE_FIELDS описание
+### PROMPT-R3-03: Исправить GOLD-EXCLUDE-FIELDS описание
 
 ```
 Задача: Обновить описание Gold-трансформации в data-layers.md.
@@ -1958,10 +1958,10 @@ runner = bootstrap_composite_runner(
 Файл: docs/02-architecture/data-layers.md
 
 Строки 107-109:
-  БЫЛО: «Вложенные JSON-строки исключаются из Gold через GOLD_EXCLUDE_FIELDS»
-  СТАЛО: «Метод BaseTransformer.transform_for_gold() (base_transformer.py:456)
-  использует GOLD_EXCLUDE_FIELDS для фильтрации полей. В текущей версии
-  GOLD_EXCLUDE_FIELDS = frozenset() (пустое множество) — все Silver-поля
+  БЫЛО: «Вложенные JSON-строки исключаются из Gold через GOLD-EXCLUDE-FIELDS»
+  СТАЛО: «Метод BaseTransformer.transform-for-gold() (base-transformer.py:456)
+  использует GOLD-EXCLUDE-FIELDS для фильтрации полей. В текущей версии
+  GOLD-EXCLUDE-FIELDS = frozenset() (пустое множество) — все Silver-поля
   проходят в Gold без исключения.»
 ```
 
@@ -1994,7 +1994,7 @@ runner = bootstrap_composite_runner(
 
 Таблица (строки 174-186): Добавить отсутствующие записи:
   - aggregates/ (описаны в §2.2, но не в таблице «дополнительных»)
-  - Проверить, нужно ли добавить ports/ и value_objects/
+  - Проверить, нужно ли добавить ports/ и value-objects/
     (они описаны в §2.1 и §2.3 отдельно; если считать «дополнительными»
     только те, что не имеют отдельной секции — оставить 11)
 ```
@@ -2008,10 +2008,10 @@ runner = bootstrap_composite_runner(
 
 1) §1.3 Silver: «Delta Lake / Iceberg» → «Delta Lake»
 2) §1.3 Gold: «Delta/Iceberg/Parquet» → «Delta Lake»
-3) §1.4: «PipelineRunner._clear_exports()» → «MedallionLifecycleService.clear()»
+3) §1.4: «PipelineRunner.-clear-exports()» → «MedallionLifecycleService.clear()»
 4) §2.3: QuarantineStatus «3 значения (NEW|IGNORED|REPROCESSED)» →
-   «5 значений: NEW, UNDER_REVIEW, IGNORED, REPROCESSED, EXPIRED»
-5) §2.2: «compute_content_hash» → «generate_content_hash»
+   «5 значений: NEW, UNDER-REVIEW, IGNORED, REPROCESSED, EXPIRED»
+5) §2.2: «compute-content-hash» → «generate-content-hash»
 6) §3.1: Лог-поле «ts» → «timestamp»
 ```
 

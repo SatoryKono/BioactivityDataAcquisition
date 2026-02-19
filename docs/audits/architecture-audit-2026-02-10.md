@@ -20,9 +20,9 @@
 | Средний размер модуля | 116 554 / 522 | **223 строки** |
 | TODO/FIXME в коде | `grep -rE "(TODO\|FIXME\|XXX\|HACK)" src/ \| wc -l` | **24 шт.** |
 | Использование print() | `grep -r "print(" src/bioetl --include="*.py" \| wc -l` | **0 шт.** |
-| Hardcoded secrets | `grep -rE "(api_key\|password\|secret)\s*=" src/ \| wc -l` | **0 шт.** |
+| Hardcoded secrets | `grep -rE "(api-key\|password\|secret)\s*=" src/ \| wc -l` | **0 шт.** |
 | Тесты всего | `pytest` | **11 548 passed, 18 failed, 215 skipped** |
-| Тест-файлы | `find tests/ -name "test_*.py" \| wc -l` | **457 шт.** |
+| Тест-файлы | `find tests/ -name "test-*.py" \| wc -l` | **457 шт.** |
 | Отношение test/prod код | 179 051 LOC tests / 116 554 LOC src | **1.54:1** |
 
 ---
@@ -47,10 +47,10 @@
 
 **Ключевые находки:**
 - Границы слоёв строго соблюдены во всех 522 модулях
-- Фасад `bioetl.domain.ports.__init__.py` экспортирует 61 символ; 176 файлов импортируют через фасад
+- Фасад `bioetl.domain.ports.--init--.py` экспортирует 61 символ; 176 файлов импортируют через фасад
 - 0 нарушений ARCH-008 (Single Source of Imports)
 - Composition layer корректно выполняет роль assembly root
-- Все TYPE_CHECKING guards используются правильно (EXC-001)
+- Все TYPE-CHECKING guards используются правильно (EXC-001)
 
 **Обоснование:** 0 нарушений границ слоёв → 9-10 по критериям → **10**
 
@@ -62,11 +62,11 @@
 
 **Ключевые находки:**
 - **40+ Protocol** классов определены в `domain/ports/` (24 файла)
-- **100%** протоколов используют `typing.Protocol` + `@runtime_checkable`
+- **100%** протоколов используют `typing.Protocol` + `@runtime-checkable`
 - **100%** соблюдают именование `*Port` (ARCH-003)
 - **6 адаптеров** (ChEMBL, CrossRef, OpenAlex, UniProt, SemanticScholar, PubChem) — все реализуют `DataSourcePort`
 - **6 NoOp-реализаций** (NoOpTracing, NoOpMetrics, NoOpAudit, NoOpPiiHasher, NoOpMemoryMonitor, NoOpMetadataWriter) — Null Object Pattern (EXC-003)
-- Все HTTP-адаптеры реализуют `health_check()` через `HealthCheckProviderMixin` (ARCH-004)
+- Все HTTP-адаптеры реализуют `health-check()` через `HealthCheckProviderMixin` (ARCH-004)
 - 0 прямых импортов `httpx`/`requests`/`structlog` в application/interfaces слоях
 
 **Обоснование:** Все внешние зависимости абстрагированы через Protocol → **10**
@@ -78,28 +78,28 @@
 **Оценка: 10/10**
 
 **Bronze Layer:**
-- Формат: JSONL + zstd (`compression="zstd"`, `compression_level=3`) — `bronze_writer.py:364-368`
-- Атомарные записи: temp file + rename — `bronze_writer.py:341-407`
-- Метаданные: `run_id`, `run_type`, `batch_id`, `ingestion_ts` — `bronze_writer.py:223-240`
-- Контрольные суммы: BLAKE2b — `bronze_writer.py:643-654`
+- Формат: JSONL + zstd (`compression="zstd"`, `compression-level=3`) — `bronze-writer.py:364-368`
+- Атомарные записи: temp file + rename — `bronze-writer.py:341-407`
+- Метаданные: `run-id`, `run-type`, `batch-id`, `ingestion-ts` — `bronze-writer.py:223-240`
+- Контрольные суммы: BLAKE2b — `bronze-writer.py:643-654`
 
 **Silver Layer:**
-- **Delta Lake ONLY** — `write_deltalake()` в строках 234, 250, 1063
-- **0 использований** `to_parquet()` / `write_parquet()` (ARCH-006 PASS)
-- Merge/Upsert: primary key predicate + приоритет по run_type — `silver_writer.py:859-894`
-- Schema drift detection: severity (critical/warn/info) — `silver_writer.py:421-466`
-- Pandera validation — `silver_writer.py:374-399`
+- **Delta Lake ONLY** — `write-deltalake()` в строках 234, 250, 1063
+- **0 использований** `to-parquet()` / `write-parquet()` (ARCH-006 PASS)
+- Merge/Upsert: primary key predicate + приоритет по run-type — `silver-writer.py:859-894`
+- Schema drift detection: severity (critical/warn/info) — `silver-writer.py:421-466`
+- Pandera validation — `silver-writer.py:374-399`
 
 **Gold Layer:**
-- Strict Pandera validation (`strict=True`) — `gold_writer.py:263-269`
-- SCD Type 2: version tracking, valid_from/valid_to — `gold_writer.py:765-768`
-- Delta Lake writes — `gold_writer.py`
+- Strict Pandera validation (`strict=True`) — `gold-writer.py:263-269`
+- SCD Type 2: version tracking, valid-from/valid-to — `gold-writer.py:765-768`
+- Delta Lake writes — `gold-writer.py`
 
 **Medallion Policy (ARCH-007):**
 - REBUILD → Clear Silver + Gold ✅ (`medallion.py:304`)
 - BACKFILL → Clear Silver + Gold ✅ (`medallion.py:304`)
 - INCREMENTAL → Never clear ✅ (`medallion.py:306`)
-- Тесты: `test_medallion.py:61-83`
+- Тесты: `test-medallion.py:61-83`
 
 **Обоснование:** Полное соответствие: форматы, пути, merge, ACID, retention → **10**
 
@@ -117,20 +117,20 @@
 - Internal (10): state, locks, auth → `CriticalError`
 
 **Circuit Breaker:**
-- State machine: CLOSED → OPEN → HALF_OPEN → CLOSED — `circuit_breaker.py:111-154`
-- Метрики: `circuit_breaker_state` (gauge), `circuit_breaker_trips_total` (counter)
+- State machine: CLOSED → OPEN → HALF-OPEN → CLOSED — `circuit-breaker.py:111-154`
+- Метрики: `circuit-breaker-state` (gauge), `circuit-breaker-trips-total` (counter)
 - Selective triggering: только 5xx, 429, timeouts (не 4xx)
-- Thread safety: `asyncio.Lock` — `circuit_breaker.py:75`
+- Thread safety: `asyncio.Lock` — `circuit-breaker.py:75`
 - Decorator pattern: `CircuitBreakerDataSourceDecorator` обёртывает любой `DataSourcePort`
 
 **Retry Logic:**
 - Exponential backoff с детерминистическим jitter (MD5-hash based) — `resilience.py:78-109`
-- `max_attempts=3`, `base_delay=1.0s`, `max_delay=60.0s`
+- `max-attempts=3`, `base-delay=1.0s`, `max-delay=60.0s`
 - Retryable statuses: `{429, 500, 502, 503, 504}`
-- `RetryExhaustedError` с контекстом (url, attempts, last_error)
+- `RetryExhaustedError` с контекстом (url, attempts, last-error)
 
 **Замечания:**
-- 13 из 23 `except Exception:` блоков не имеют документирующих комментариев — `batch_executor.py:530,693`, `batch_writer.py:424`, `dq/_checks_*.py`, `metadata_coordinator.py:359,401`, `chembl/client.py:465`
+- 13 из 23 `except Exception:` блоков не имеют документирующих комментариев — `batch-executor.py:530,693`, `batch-writer.py:424`, `dq/-checks-*.py`, `metadata-coordinator.py:359,401`, `chembl/client.py:465`
 - CB state — in-memory only (достаточно для local deployment per ADR-010)
 
 **Обоснование:** Все 3 типа ошибок обрабатываются, CB реализован с метриками; -1 за undocumented broad exceptions → **9**
@@ -142,9 +142,9 @@
 **Оценка: 9.5/10**
 
 **Lock Implementation:**
-- `LockPort` protocol: acquire, release, heartbeat, validate_owner, aclose — `domain/ports/locking.py:14-104`
-- `MemoryLock`: asyncio.Lock + global lock + TTL checker — `memory_lock.py:31-266`
-- Thread-safe: все мутации `_locks` dict под `_global_lock`
+- `LockPort` protocol: acquire, release, heartbeat, validate-owner, aclose — `domain/ports/locking.py:14-104`
+- `MemoryLock`: asyncio.Lock + global lock + TTL checker — `memory-lock.py:31-266`
+- Thread-safe: все мутации `-locks` dict под `-global-lock`
 
 **Heartbeat:**
 - `HeartbeatTask`: фоновый loop каждые 30s (default) — `heartbeat.py:108-123`
@@ -152,14 +152,14 @@
 - Shutdown signal: `PipelineShutdownError` при потере lock
 
 **Fencing Token:**
-- `RunID` (UUID) как owner_id — `locking.py:43-124`
-- 4-point validation: exists + held + not expired + owner match — `memory_lock.py:233-248`
+- `RunID` (UUID) как owner-id — `locking.py:43-124`
+- 4-point validation: exists + held + not expired + owner match — `memory-lock.py:233-248`
 - Immutable `LockContext` (frozen dataclass)
 
 **Safety Guard:**
-- `BatchWriter._validate_lock()` перед каждой записью — `batch_writer.py:127-148`
+- `BatchWriter.-validate-lock()` перед каждой записью — `batch-writer.py:127-148`
 - Raises `LockNotHeldError` если lock потерян
-- 6 architecture tests — `test_lock_safety_guard.py`
+- 6 architecture tests — `test-lock-safety-guard.py`
 
 **Configuration:** TTL=90s, Heartbeat=30s, Wait timeout=300s
 
@@ -176,28 +176,28 @@
 
 **Pandera Schemas:**
 - **30+ DataFrameModel** schemas по провайдерам (ChEMBL: 14, UniProt: 3, PubChem: 1, Publications: 5)
-- **Custom validators**: `is_non_negative`, `is_valid_json`, `max_str_length`, `in_closed_range` и др. — `validators.py`
+- **Custom validators**: `is-non-negative`, `is-valid-json`, `max-str-length`, `in-closed-range` и др. — `validators.py`
 - Gold contracts: 5 DataFrameModel с `strict=True`
 
 **Quarantine System:**
-- `QuarantineManager`: write, inspect, get_stats — `quarantine_manager.py`
-- `QuarantineService`: replay, purge (30 days), mark_as_reprocessed — `quarantine_service.py`
+- `QuarantineManager`: write, inspect, get-stats — `quarantine-manager.py`
+- `QuarantineService`: replay, purge (30 days), mark-as-reprocessed — `quarantine-service.py`
 - Policy: quarantine | skip | fail (configurable)
 
 **DQ Thresholds:**
-- soft_fail: 5%, hard_fail: 20% — `configs/quality/_defaults.yaml:16-18`
-- Pydantic validation: `soft_fail < hard_fail` enforced
+- soft-fail: 5%, hard-fail: 20% — `configs/quality/-defaults.yaml:16-18`
+- Pydantic validation: `soft-fail < hard-fail` enforced
 - 3-level hierarchy: defaults → provider → entity → inline
 
 **Content Hash:**
-- SHA256(provider + canonical_json(normalized)) — `transformations.py:101-109`
+- SHA256(provider + canonical-json(normalized)) — `transformations.py:101-109`
 - NaN/Inf → None, float rounding to 10 decimals, NFKC unicode normalization
 - Deterministic canonical JSON (sorted keys)
 
 **DQ Metrics:** 20 check types across Bronze (5), Silver (8), Gold (7)
 
 **Externalized DQ Rules:**
-- 30+ YAML configs в `configs/quality/` — entities/, providers/, _defaults.yaml
+- 30+ YAML configs в `configs/quality/` — entities/, providers/, -defaults.yaml
 - Cross-field validations, conditional validations
 
 **Замечания:**
@@ -213,14 +213,14 @@
 
 **LoggerPort:**
 - 4 реализации: UnifiedLogger, StructlogLogger, BootstrapLogger, NoOpLogger
-- `UnifiedLogger`: обязательный bind `run_id` + `pipeline` при инициализации — `unified_logger.py:76-102`
+- `UnifiedLogger`: обязательный bind `run-id` + `pipeline` при инициализации — `unified-logger.py:76-102`
 - 0 direct structlog imports в application/interfaces (AP-002 PASS)
 - 0 print() statements в production коде (AP-006 PASS)
 
 **Structured JSON Logging:**
-- Processor chain: contextvars → log level → ISO timestamps → **secret filter** → JSON renderer — `logging_config.py:156-171`
-- Secret masking: API keys, Bearer tokens, passwords, AWS keys → `[REDACTED_*]`
-- Thread-safe configuration: `_config_lock` mutex
+- Processor chain: contextvars → log level → ISO timestamps → **secret filter** → JSON renderer — `logging-config.py:156-171`
+- Secret masking: API keys, Bearer tokens, passwords, AWS keys → `[REDACTED-*]`
+- Thread-safe configuration: `-config-lock` mutex
 
 **Prometheus Metrics:** 28 метрик:
 - Pipeline execution: 5 (duration, batch size, records, errors, health)
@@ -232,9 +232,9 @@
 
 **OpenTelemetry:** Optional, реализован полностью (OTel SDK + OTLP gRPC exporter), NoOp по умолчанию (ADR-010)
 
-**Health Checks:** `HealthCheckProviderMixin` — template method с `_probe_health()`, метрики + logging + CB fallback
+**Health Checks:** `HealthCheckProviderMixin` — template method с `-probe-health()`, метрики + logging + CB fallback
 
-**Обоснование:** UnifiedLogger везде, run_id в логах, 28 Prometheus metrics, secret filtering → **9.5**
+**Обоснование:** UnifiedLogger везде, run-id в логах, 28 Prometheus metrics, secret filtering → **9.5**
 
 ---
 
@@ -266,13 +266,13 @@
 
 | Тест | Причина |
 |------|---------|
-| `test_ruff_formatting_src` | Ruff formatting drift |
-| `test_infrastructure_files_under_limit` | File size limit exceeded |
-| `test_business_fields_sorted` ×4 | Schema column order (CROSSREF, OPENALEX, PUBMED, SEMANTICSCHOLAR) |
-| `test_schema_matches_canonical_order` ×4 | Canonical column order mismatch |
-| `test_transform_snapshot` | Transformer snapshot mismatch |
-| `test_transform_minimal_snapshot` / `test_transform_full_snapshot` | PubMed transformer snapshots |
-| `test_schema_field_names_and_types` ×5 | Pipeline schema field contracts (publication schemas) |
+| `test-ruff-formatting-src` | Ruff formatting drift |
+| `test-infrastructure-files-under-limit` | File size limit exceeded |
+| `test-business-fields-sorted` ×4 | Schema column order (CROSSREF, OPENALEX, PUBMED, SEMANTICSCHOLAR) |
+| `test-schema-matches-canonical-order` ×4 | Canonical column order mismatch |
+| `test-transform-snapshot` | Transformer snapshot mismatch |
+| `test-transform-minimal-snapshot` / `test-transform-full-snapshot` | PubMed transformer snapshots |
+| `test-schema-field-names-and-types` ×5 | Pipeline schema field contracts (publication schemas) |
 
 **Замечания:**
 - 18 failures преимущественно в publication schema contracts и column ordering — последствия недавнего рефакторинга v5.14.0 (Publication field standardization)
@@ -287,17 +287,17 @@
 **Оценка: 9.5/10**
 
 **Secrets Management:**
-- `SecretStr` (Pydantic) для API keys — `config/_base.py:337-344`
-- Env vars: `BIOETL_{PROVIDER}_API_KEY` через pydantic-settings
+- `SecretStr` (Pydantic) для API keys — `config/-base.py:337-344`
+- Env vars: `BIOETL-{PROVIDER}-API-KEY` через pydantic-settings
 - `.env` в `.gitignore` (`*.env`, `!.env.example`) — `.gitignore:64-69`
 - `.env.example` содержит только placeholder values
 
 **PII Hashing:**
-- SHA256 + salt — `pii_hasher.py:45-64`
+- SHA256 + salt — `pii-hasher.py:45-64`
 - NFKC normalization → lowercase → strip → SHA256(value + salt)
 - Min salt length: 32 chars
-- Salt rotation: `BIOETL_PII_SALT_CURRENT` / `BIOETL_PII_SALT_NEXT`
-- Rotation tool: `scripts/salt_rotate.py` (501 lines, cryptographically secure via `secrets`)
+- Salt rotation: `BIOETL-PII-SALT-CURRENT` / `BIOETL-PII-SALT-NEXT`
+- Rotation tool: `scripts/salt-rotate.py` (501 lines, cryptographically secure via `secrets`)
 
 **SAST Pipeline:**
 - Bandit: configured in `pyproject.toml`, blocks CI on HIGH severity
@@ -310,7 +310,7 @@
 **Замечания:**
 - 0 hardcoded credentials
 - 0 SQL injection vectors (no SQL in codebase)
-- Security test suite: 611 lines (`test_security.py`)
+- Security test suite: 611 lines (`test-security.py`)
 
 **Обоснование:** Секреты через env, PII salted, .env не в git, SAST в CI → **9.5**
 
@@ -337,7 +337,7 @@
 
 **Замечания:**
 - Interfaces layer: 89% function docstrings (Click decorators)
-- `__init__.py` version (5.9.0) расходится с CHANGELOG (5.14.0)
+- `--init--.py` version (5.9.0) расходится с CHANGELOG (5.14.0)
 
 **Обоснование:** Gold contracts, 33 ADR, 100% class docstrings, CHANGELOG актуален; -0.5 за version mismatch → **9.5**
 
@@ -348,7 +348,7 @@
 | # | Категория | Вес | Оценка | Взвеш. балл | Ключевые находки |
 |---|-----------|-----|--------|-------------|------------------|
 | 1 | Слоистая архитектура | 15% | 10.0 | 1.500 | 0 нарушений ARCH-001, фасад Ports 100% |
-| 2 | Контракты и Ports | 12% | 10.0 | 1.200 | 40+ Protocols, все @runtime_checkable |
+| 2 | Контракты и Ports | 12% | 10.0 | 1.200 | 40+ Protocols, все @runtime-checkable |
 | 3 | Medallion Architecture | 12% | 10.0 | 1.200 | Delta Lake only, 0 raw Parquet, ACID |
 | 4 | Обработка ошибок и CB | 10% | 9.0 | 0.900 | 43 exceptions, CB с метриками; 13 broad catches |
 | 5 | Блокировки и конкурентность | 10% | 9.5 | 0.950 | Lock+heartbeat+fencing+safety guard |
@@ -376,11 +376,11 @@
 **Влияние на общий балл:** +0.12
 
 **Проблема:** 18 тестов упали после рефакторинга v5.14.0 (Publication field standardization):
-- 8 тестов column order (`test_column_order.py`) — CROSSREF, OPENALEX, PUBMED, SEMANTICSCHOLAR
-- 5 тестов pipeline schema contracts (`test_silver_pipeline_contracts.py`)
-- 3 теста transformer snapshots (`test_transformer_snapshots.py`)
-- 1 тест ruff formatting (`test_code_formatting.py`)
-- 1 тест file size limits (`test_code_metrics.py`)
+- 8 тестов column order (`test-column-order.py`) — CROSSREF, OPENALEX, PUBMED, SEMANTICSCHOLAR
+- 5 тестов pipeline schema contracts (`test-silver-pipeline-contracts.py`)
+- 3 теста transformer snapshots (`test-transformer-snapshots.py`)
+- 1 тест ruff formatting (`test-code-formatting.py`)
+- 1 тест file size limits (`test-code-metrics.py`)
 
 **Решение:**
 1. Обновить canonical column order CSV для publication schemas
@@ -390,11 +390,11 @@
 5. Рефакторить oversized infrastructure файл или обновить limit
 
 **Файлы:**
-- `docs/schemas/publication_field_order.csv`
-- `tests/unit/application/pipelines/__snapshots__/`
-- `tests/unit/infrastructure/schemas/test_silver_pipeline_contracts.py`
-- `tests/architecture/test_code_formatting.py`
-- `tests/architecture/test_code_metrics.py`
+- `docs/schemas/publication-field-order.csv`
+- `tests/unit/application/pipelines/--snapshots--/`
+- `tests/unit/infrastructure/schemas/test-silver-pipeline-contracts.py`
+- `tests/architecture/test-code-formatting.py`
+- `tests/architecture/test-code-metrics.py`
 
 **Риски:** Минимальные — snapshot и contract updates отражают текущее состояние
 **Критерий готовности:** `pytest` — 0 failures
@@ -411,10 +411,10 @@
 **Проблема:** 16 `# type: ignore` комментариев стали невалидными (библиотеки обновили type stubs):
 - `domain/serialization.py:146`
 - `application/pipelines/uniprot/extractors/utils.py:35`
-- `domain/services/dq_serializer.py:113`
-- `infrastructure/storage/bronze_writer.py:698`
-- `infrastructure/config/dq_config_loader.py:111`
-- `infrastructure/adapters/common/api_request_collector.py:110`
+- `domain/services/dq-serializer.py:113`
+- `infrastructure/storage/bronze-writer.py:698`
+- `infrastructure/config/dq-config-loader.py:111`
+- `infrastructure/adapters/common/api-request-collector.py:110`
 - `domain/schemas/validators.py:124,143,162,182,195,208`
 - `application/composite/deduplication.py:66,156`
 - `application/composite/coordinator.py:218`
@@ -434,11 +434,11 @@
 **Влияние на общий балл:** +0.05
 
 **Проблема:** 13 `except Exception:` блоков без комментариев или specific exception types:
-- `batch_executor.py:530,693` — batch processing failures
-- `batch_writer.py:424` — metadata enrichment
-- `dq/_checks_*.py:104,102,155` — DQ check execution
-- `dq/silver_analyzer.py:427,449` — analysis failures
-- `metadata_coordinator.py:359,401` — coordination
+- `batch-executor.py:530,693` — batch processing failures
+- `batch-writer.py:424` — metadata enrichment
+- `dq/-checks-*.py:104,102,155` — DQ check execution
+- `dq/silver-analyzer.py:427,449` — analysis failures
+- `metadata-coordinator.py:359,401` — coordination
 - `chembl/client.py:465` — API response parsing
 
 **Решение:** Для каждого handler:
@@ -460,8 +460,8 @@
 
 **Проблема:** 24 TODO/FIXME маркеров в production коде:
 - `domain/validation.py` — 5 items
-- `domain/value_objects/academic_ids.py` — 4 items
-- `domain/value_objects/publications.py` — 3 items
+- `domain/value-objects/academic-ids.py` — 4 items
+- `domain/value-objects/publications.py` — 3 items
 - 4 других файла — 1-2 items каждый
 
 **Решение:** Для каждого TODO:
@@ -475,14 +475,14 @@
 
 ---
 
-### [P2] Синхронизация версии в `__init__.py`
+### [P2] Синхронизация версии в `--init--.py`
 
 **Категория:** Документация
 **Влияние:** Косметическое
 
-**Проблема:** `src/bioetl/__init__.py` содержит `__version__ = "5.9.0"`, а CHANGELOG — v5.14.0
+**Проблема:** `src/bioetl/--init--.py` содержит `--version-- = "5.9.0"`, а CHANGELOG — v5.14.0
 
-**Решение:** Обновить `__version__` или настроить dynamic versioning через `setuptools-scm`
+**Решение:** Обновить `--version--` или настроить dynamic versioning через `setuptools-scm`
 **Трудозатраты:** S (часы)
 
 ---
@@ -495,7 +495,7 @@
 **Проблема:** `MemoryLock` работает только для single-process deployment (ADR-010)
 
 **Решение:** Реализовать `RedisLockPort` с SETNX + TTL + Lua scripts
-**Файлы:** `infrastructure/locking/redis_lock.py` (новый), `composition/` (factory update)
+**Файлы:** `infrastructure/locking/redis-lock.py` (новый), `composition/` (factory update)
 **Риски:** Средние — требует Redis dependency и integration testing
 **Критерий готовности:** Architecture tests pass с Redis backend
 **Трудозатраты:** L (неделя)
@@ -511,7 +511,7 @@
 
 **Решение:** Документировать и активировать для production:
 1. Настроить OTLP collector endpoint
-2. Добавить OTel baggage для run_id propagation
+2. Добавить OTel baggage для run-id propagation
 3. Grafana dashboards для Prometheus metrics
 
 **Трудозатраты:** M (дни)

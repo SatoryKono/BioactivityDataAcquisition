@@ -31,11 +31,11 @@ pytest tests/architecture/ -v
 | Architecture | 1150 | 1145 | 0 | 5 | 0 | 28.80s |
 
 ### Skipped Tests (Expected)
-1. `test_bootstrap_layer_boundaries.py::test_no_legacy_bootstrap_imports` - Legacy _bootstrap package not found (expected)
-2. `test_column_order.py::test_chembl_publication_column_order_crossref` - CHEMBL_PUBLICATION_SCHEMA uses custom column order
-3. `test_column_order.py::test_chembl_publication_column_order_metadata` - CHEMBL_PUBLICATION_SCHEMA uses custom column order
-4. `test_env_var_centralization.py::test_no_env_vars_in_composition` - No allowed files in composition layer (expected)
-5. `test_tracing_enforcement.py::test_bootstrap_tracing` - Bootstrap not found (expected)
+1. `test-bootstrap-layer-boundaries.py::test-no-legacy-bootstrap-imports` - Legacy -bootstrap package not found (expected)
+2. `test-column-order.py::test-chembl-publication-column-order-crossref` - CHEMBL-PUBLICATION-SCHEMA uses custom column order
+3. `test-column-order.py::test-chembl-publication-column-order-metadata` - CHEMBL-PUBLICATION-SCHEMA uses custom column order
+4. `test-env-var-centralization.py::test-no-env-vars-in-composition` - No allowed files in composition layer (expected)
+5. `test-tracing-enforcement.py::test-bootstrap-tracing` - Bootstrap not found (expected)
 
 ### Analysis
 - All architectural invariants are satisfied
@@ -59,8 +59,8 @@ pytest tests/unit/ -v --tb=line --timeout=60
 | Unit | 9032 | 9030 | 0 | 2 | 0 | 126.78s (2:06) |
 
 ### Skipped Tests (Expected)
-1. `test_transformer_snapshots.py::test_snapshots` - syrupy package required for snapshot tests (optional dependency)
-2. `test_registry_consistency.py::test_snapshot` - syrupy required for snapshot tests (optional dependency)
+1. `test-transformer-snapshots.py::test-snapshots` - syrupy package required for snapshot tests (optional dependency)
+2. `test-registry-consistency.py::test-snapshot` - syrupy required for snapshot tests (optional dependency)
 
 ### Coverage by Layer
 | Metric | Value |
@@ -140,7 +140,7 @@ mypy --strict src/bioetl/
 
 **3. Type variable issues (2 errors)**
 - `application/composite/merger.py:1798` - EnrichmentResult vs DependencyResult assignment
-- `infrastructure/storage/gold_writer.py:443` - PolarsFrame type variable
+- `infrastructure/storage/gold-writer.py:443` - PolarsFrame type variable
 - **Impact**: Minor - likely false positives
 - **Action**: Review recommended but not blocking
 

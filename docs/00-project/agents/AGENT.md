@@ -10,14 +10,14 @@
 
 ```bash
 # Автоматическая настройка окружения (рекомендуется для новых разработчиков)
-./dev_setup.sh          # Полная настройка с тестами
-./dev_setup.sh --quick  # Быстрая установка без тестов
+./dev-setup.sh          # Полная настройка с тестами
+./dev-setup.sh --quick  # Быстрая установка без тестов
 
 # Проверка статуса перед работой
 make lint && make test
 
 # Основные команды
-make install      # установка зависимостей (альтернатива dev_setup.sh)
+make install      # установка зависимостей (альтернатива dev-setup.sh)
 make test         # все тесты (unit + integration)
 make lint         # ruff + mypy
 make run-local    # запуск на фикстурах
@@ -47,26 +47,26 @@ make lint && make test && git add . && git commit
 **Перед любой задачей:**
 1. Прочти `docs/RULES.md` — это Конституция проекта.
 2. Проверь `CLAUDE.md` — справочник для Claude Code.
-3. Изучи `.claude/PROJECT_CONTEXT.md` для быстрой справки.
+3. Изучи `.claude/PROJECT-CONTEXT.md` для быстрой справки.
 4. Ознакомься с `memory.md` — краткая выжимка по проекту.
 5. Изучи существующий код в затрагиваемых модулях.
 
 ### 2.1. Настройка Окружения Разработки
 
-Используй скрипт `dev_setup.sh` для автоматической настройки окружения:
+Используй скрипт `dev-setup.sh` для автоматической настройки окружения:
 
 ```bash
 # Полная настройка (рекомендуется для первого запуска)
-./dev_setup.sh
+./dev-setup.sh
 
 # Быстрая установка без тестов
-./dev_setup.sh --quick
+./dev-setup.sh --quick
 
 # Пересоздать окружение с нуля
-./dev_setup.sh --force
+./dev-setup.sh --force
 
 # Справка по опциям
-./dev_setup.sh --help
+./dev-setup.sh --help
 ```
 
 **Что делает скрипт:**
@@ -121,7 +121,7 @@ src/bioetl/
 | Компонент | ❌ НЕ говори | ✅ Реальность |
 |-----------|-------------|---------------|
 | **PipelineRunner** | "God object" | 173 строки, делегирует через `RunnerServices` |
-| **bootstrap_pipeline** | "Смешивает ответственности" | Делегирует фабрикам |
+| **bootstrap-pipeline** | "Смешивает ответственности" | Делегирует фабрикам |
 | **ChEMBL Adapter** | "Размытые границы" | Когезивная ответственность (~350 строк) |
 | **CLI подтверждения** | "Бизнес-логика в interfaces" | Законная ответственность UI |
 | **WriteModePolicy default** | "Нарушение DI" | Валидный паттерн для value objects |
@@ -168,13 +168,13 @@ wc -l src/bioetl/path/to/file.py
 grep -c "def \|async def " src/bioetl/path/to/file.py
 
 # Проверка делегирования (ищем вызовы сервисов)
-grep -n "self\._.*\." src/bioetl/path/to/file.py
+grep -n "self\.-.*\." src/bioetl/path/to/file.py
 
 # Проверка импортов
 head -30 src/bioetl/path/to/file.py
 
 # Поиск существующих тестов
-find tests -name "*test_*" | xargs grep -l "ClassName"
+find tests -name "*test-*" | xargs grep -l "ClassName"
 ```
 
 ---
@@ -185,12 +185,12 @@ find tests -name "*test_*" | xargs grep -l "ClassName"
 
 ### Medallion Architecture
 - **Bronze**: JSONL, append-only
-- **Silver**: Delta Lake, merge/upsert по `content_hash`
+- **Silver**: Delta Lake, merge/upsert по `content-hash`
 - **Gold**: Delta/Parquet, overwrite/append
 
 ### 4.1. Операционные Политики (CRITICAL)
 
-- **Стратегия загрузки (ADR-031)**: `full_scan_only` разрешён ТОЛЬКО для публикаций. Все остальные сущности (activity, molecule, target) MUST использовать `null` (по умолчанию incremental) для поддержки чекпоинтов.
+- **Стратегия загрузки (ADR-031)**: `full-scan-only` разрешён ТОЛЬКО для публикаций. Все остальные сущности (activity, molecule, target) MUST использовать `null` (по умолчанию incremental) для поддержки чекпоинтов.
 - **Маппинг в трансформерах**: Используй декларативные `FieldGroup`/`FieldSpec`. Нормализуй пустые коллекции в `None`. Компактная JSON-сериализация для сложных полей.
 - **VCR Кассеты**: Хранить строго в `tests/fixtures/vcr/{provider}/`. ЗАПРЕЩЕНО оставлять кассеты в корне проекта. Режим `once` локально, `none` в CI.
 
@@ -201,7 +201,7 @@ find tests -name "*test_*" | xargs grep -l "ClassName"
 
 ### Блокировки (Local-Only)
 - **Механизм**: `MemoryLock` (in-process)
-- **Ключ**: `lock:{provider}_{entity}`
+- **Ключ**: `lock:{provider}-{entity}`
 - **Invariant**: Потеря блокировки = аварийное завершение ДО записи
 
 ### Тестирование
@@ -247,7 +247,7 @@ flowchart TD
 - ❌ Импорт `infrastructure` в `domain`/`application`
 - ❌ Создание зависимостей внутри классов
 - ❌ Sentinel values (`-1`, `"N/A"`) → `None`
-- ❌ Блокирующий I/O в async → `run_in_executor`
+- ❌ Блокирующий I/O в async → `run-in-executor`
 - ❌ HTTP без VCR-кассет
 
 ---
@@ -259,13 +259,13 @@ flowchart TD
 2.  **Адаптер:** Создай класс в `src/bioetl/infrastructure/adapters/{provider}/`
 3.  **Реализация:**
     - Класс **MUST** реализовывать порт.
-    - Зависимости (`httpx.AsyncClient`, `config`) **MUST** приниматься в `__init__`.
-    - **MUST** реализовывать `health_check()`.
+    - Зависимости (`httpx.AsyncClient`, `config`) **MUST** приниматься в `--init--`.
+    - **MUST** реализовывать `health-check()`.
     - **MUST** соблюдать rate limits провайдера.
 
 ### 7.2. Создание Нового Пайплайна
-1.  **Конфиг:** Создай `configs/pipelines/{provider}/{entity}.yaml`. Определи `load_strategy` (`incremental` или `full`).
-2.  **Трансформер:** Наследуй от `BaseTransformer` (`src/bioetl/application/core/base_transformer.py`).
+1.  **Конфиг:** Создай `configs/pipelines/{provider}/{entity}.yaml`. Определи `load-strategy` (`incremental` или `full`).
+2.  **Трансформер:** Наследуй от `BaseTransformer` (`src/bioetl/application/core/base-transformer.py`).
 3.  **Пайплайн:** Создай класс в `src/bioetl/application/pipelines/`.
 4.  **Фабрика:** Создай фабрику в `src/bioetl/composition/factories/`.
 5.  **Регистрация:** Зарегистрируй в `PipelineRegistry` (через декоратор `@register`).
@@ -274,10 +274,10 @@ flowchart TD
 ### 7.3. Использование BaseTransformer
 
 ```python
-from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.application.core.base-transformer import BaseTransformer
 
 class MyTransformer(BaseTransformer):
-    def _transform_record(self, record: dict) -> dict:
+    def -transform-record(self, record: dict) -> dict:
         # Реализуй логику трансформации
         return {...}
 ```
@@ -316,9 +316,9 @@ git commit -m "..."
 > **Полный реестр**: См. `docs/RULES.md` Приложение F (31 ADR)
 
 **Ключевые ADR:**
-- [ADR-007](docs/02-architecture/decisions/ADR-007-circuit-breaker-implementation.md) — Circuit Breaker
-- [ADR-008](docs/02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md) — Graceful Shutdown
-- [ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md) — Local-Only Deployment
+- [ADR-007](../../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md) — Circuit Breaker
+- [ADR-008](../../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md) — Graceful Shutdown
+- [ADR-010](../../02-architecture/decisions/ADR-010-local-only-deployment.md) — Local-Only Deployment
 
 ---
 
@@ -327,7 +327,7 @@ git commit -m "..."
 | Ошибка | Решение |
 |--------|---------|
 | `ImportError: cannot import from domain` | Проверь матрицу импортов (`RULES.md` §1.1) |
-| `RuntimeError: Event loop is closed` | `run_in_executor` для блокирующего I/O |
+| `RuntimeError: Event loop is closed` | `run-in-executor` для блокирующего I/O |
 | Тесты падают в CI | Запиши VCR-кассету |
 | Неясности в задаче | **СПРОСИ ПОЛЬЗОВАТЕЛЯ** |
 

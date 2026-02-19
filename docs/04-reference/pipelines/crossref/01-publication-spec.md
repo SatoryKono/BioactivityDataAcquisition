@@ -8,7 +8,7 @@
 
 | Parameter | Value |
 |-----------|-------|
-| **Pipeline ID** | `crossref_publication` |
+| **Pipeline ID** | `crossref-publication` |
 | **Provider** | CrossRef |
 | **Entity** | publication |
 | **API Endpoint** | `https://api.crossref.org/works/` |
@@ -87,7 +87,7 @@ response = await client.get(url, headers=headers)
 | Parameter | Value |
 |-----------|-------|
 | **Entity ID Field** | `doi` |
-| **ID Source** | `from_api` |
+| **ID Source** | `from-api` |
 | **Format** | DOI (10.xxx/yyy) |
 
 ### 4.2. Field Normalization
@@ -109,12 +109,12 @@ response = await client.get(url, headers=headers)
 | `title[0]` | `title` | Extract first |
 | `container-title[0]` | `journal` | Extract first |
 | `author[*]` | `authors` | JSON array |
-| `published-print.date-parts[0]` | `year`, `published_print` | Parse |
-| `published-online.date-parts[0]` | `published_online` | Parse |
+| `published-print.date-parts[0]` | `year`, `published-print` | Parse |
+| `published-online.date-parts[0]` | `published-online` | Parse |
 | `ISSN` | `issn` | JSON array |
 | `subject` | `subjects` | JSON array |
 | `funder[*]` | `funders` | JSON array (separate table option) |
-| `license[0].URL` | `license_url` | Extract first |
+| `license[0].URL` | `license-url` | Extract first |
 
 ---
 
@@ -129,11 +129,11 @@ class PublicationEnrichedSchema(ETLRecordSchema):
     # === Primary Key ===
     doi: Series[str] = pa.Field(
         nullable=False,
-        str_matches=DOI_REGEX_PATTERN,
+        str-matches=DOI-REGEX-PATTERN,
     )
 
     # === Core Metadata ===
-    title: Series[str] | None = pa.Field(nullable=True, str_length={"min_value": 1})
+    title: Series[str] | None = pa.Field(nullable=True, str-length={"min-value": 1})
     abstract: Series[str] | None = pa.Field(nullable=True)
 
     # === Authors ===
@@ -147,31 +147,31 @@ class PublicationEnrichedSchema(ETLRecordSchema):
     # === Publication Details ===
     volume: Series[str] | None = pa.Field(nullable=True)
     issue: Series[str] | None = pa.Field(nullable=True)
-    first_page: Series[str] | None = pa.Field(nullable=True)
-    last_page: Series[str] | None = pa.Field(nullable=True)
+    first-page: Series[str] | None = pa.Field(nullable=True)
+    last-page: Series[str] | None = pa.Field(nullable=True)
 
     # === Dates ===
     year: Series[int] | None = pa.Field(
         nullable=True,
-        ge=MIN_PUBLICATION_YEAR,
-        le=MAX_PUBLICATION_YEAR,
+        ge=MIN-PUBLICATION-YEAR,
+        le=MAX-PUBLICATION-YEAR,
     )
-    published_print: Series[str] | None = pa.Field(nullable=True)
-    published_online: Series[str] | None = pa.Field(nullable=True)
+    published-print: Series[str] | None = pa.Field(nullable=True)
+    published-online: Series[str] | None = pa.Field(nullable=True)
 
     # === Document Type ===
-    doc_type: Series[str] = pa.Field(
+    doc-type: Series[str] = pa.Field(
         nullable=False,
         isin=["PUBLICATION", "PREPRINT"],
     )
 
     # === Citation Metrics ===
-    citation_count: Series[int] | None = pa.Field(nullable=True, ge=0)
-    reference_count: Series[int] | None = pa.Field(nullable=True, ge=0)
+    citation-count: Series[int] | None = pa.Field(nullable=True, ge=0)
+    reference-count: Series[int] | None = pa.Field(nullable=True, ge=0)
 
     # === Additional Metadata ===
     language: Series[str] | None = pa.Field(nullable=True)
-    license_url: Series[str] | None = pa.Field(nullable=True)
+    license-url: Series[str] | None = pa.Field(nullable=True)
     subjects: Series[str] | None = pa.Field(nullable=True)  # JSON array
 
     # === Source Tracking ===
@@ -199,41 +199,41 @@ class PublicationEnrichedSchema(ETLRecordSchema):
 ## 7. Pipeline Configuration
 
 ```yaml
-pipeline_name: crossref_publication
+pipeline-name: crossref-publication
 provider: crossref
-entity_type: publication
+entity-type: publication
 version: "1.2.0"
 
-primary_keys: ["doi"]
-silver_table: "crossref_publication"
-gold_table: "crossref_publication"
+primary-keys: ["doi"]
+silver-table: "crossref-publication"
+gold-table: "crossref-publication"
 
 source:
   type: api
-  batch_size: 50
+  batch-size: 50
 
 sink:
   bronze:
     path: "data/output/bronze"
   silver:
     path: "data/output/silver"
-    primary_key: ["doi"]
-    partition_by: []
+    primary-key: ["doi"]
+    partition-by: []
   gold:
     path: "data/output/gold"
 
-gold_filters:
-  required_fields:
+gold-filters:
+  required-fields:
     - title
   columns:
-    doc_type: [PUBLICATION]
+    doc-type: [PUBLICATION]
 
-input_filter:
+input-filter:
   enabled: true
-  source_path: "data/input/doi.csv"
-  column_name: "doi"
-  filter_field: "doi"
-  batch_size: 50
+  source-path: "data/input/doi.csv"
+  column-name: "doi"
+  filter-field: "doi"
+  batch-size: 50
 ```
 
 ---

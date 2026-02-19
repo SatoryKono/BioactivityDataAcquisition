@@ -2,13 +2,13 @@
 
 *Version 1.2.0 | Aligned with RULES.md v5.20*
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 1. Identification
 
 | Parameter        | Value                                               |
 | ---------------- | --------------------------------------------------- |
-| **Pipeline ID**  | `pubchem_compound`                                  |
+| **Pipeline ID**  | `pubchem-compound`                                  |
 | **Provider**     | PubChem (NCBI)                                      |
 | **Entity**       | compound                                            |
 | **API Endpoint** | `https://pubchem.ncbi.nlm.nih.gov/rest/pug/`        |
@@ -17,7 +17,7 @@ ______________________________________________________________________
 | **Health Check** | `/compound/cid/2244/property/MolecularFormula/JSON` |
 | **Auth Type**    | None (public API)                                   |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 2. Business Context
 
@@ -41,12 +41,12 @@ PubChem compounds are **chemical structures** with computed descriptors:
 ### 2.3. Entity Relationships
 
 ```
-pubchem_compound
+pubchem-compound
     │
-    └──► chembl_molecule (via inchi_key)
+    └──► chembl-molecule (via inchi-key)
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 3. Extraction (Bronze Layer)
 
@@ -56,9 +56,9 @@ ______________________________________________________________________
 import pubchempy as pcp
 
 # Sync library - wrapped in executor
-compound = pcp.Compound.from_cid(cid)
+compound = pcp.Compound.from-cid(cid)
 # Or batch:
-compounds = pcp.get_compounds(cid_list, namespace="cid")
+compounds = pcp.get-compounds(cid-list, namespace="cid")
 ```
 
 ### 3.2. Complete API Fields
@@ -94,7 +94,7 @@ compounds = pcp.get_compounds(cid_list, namespace="cid")
 | 27  | `Volume3D`                 | float | Yes      | 3D volume                   |
 | 28  | `ConformerCount3D`         | int   | Yes      | 3D conformers               |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 4. Transformation
 
@@ -102,8 +102,8 @@ ______________________________________________________________________
 
 | Parameter           | Value                              |
 | ------------------- | ---------------------------------- |
-| **Entity ID Field** | `molecule_id` (derived from `CID`) |
-| **ID Source**       | `from_api`                         |
+| **Entity ID Field** | `molecule-id` (derived from `CID`) |
+| **ID Source**       | `from-api`                         |
 | **Format**          | String (stringified CID)           |
 
 ### 4.2. Field Normalization
@@ -111,12 +111,12 @@ ______________________________________________________________________
 | Field              | Normalization   | Before              | After             |
 | ------------------ | --------------- | ------------------- | ----------------- |
 | `cid`              | Cast to int     | `2244`              | `2244`            |
-| `molecular_weight` | round(10)       | `180.157123456789`  | `180.1571234568`  |
+| `molecular-weight` | round(10)       | `180.157123456789`  | `180.1571234568`  |
 | `xlogp`            | round(2)        | `1.31456`           | `1.31`            |
-| `canonical_smiles` | RDKit canonical | -                   | Normalized SMILES |
-| `inchi_key`        | Validate format | `BSYNRYMUTXBXSQ...` | Validated         |
+| `canonical-smiles` | RDKit canonical | -                   | Normalized SMILES |
+| `inchi-key`        | Validate format | `BSYNRYMUTXBXSQ...` | Validated         |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 5. Validation
 
@@ -127,33 +127,33 @@ class PubchemMoleculeSchema(ETLRecordSchema):
     """PubChem Molecule validation schema for Silver layer."""
 
     # === Primary Key ===
-    molecule_id: Series[str] = pa.Field(nullable=False)
+    molecule-id: Series[str] = pa.Field(nullable=False)
 
     # === Structural Identifiers ===
-    canonical_smiles: Series[str] | None = pa.Field(nullable=True)
-    isomeric_smiles: Series[str] | None = pa.Field(nullable=True)
+    canonical-smiles: Series[str] | None = pa.Field(nullable=True)
+    isomeric-smiles: Series[str] | None = pa.Field(nullable=True)
     inchi: Series[str] | None = pa.Field(nullable=True)
 
-    @pa.check("inchi", name="inchi_format")
-    def _check_inchi(cls, series):
+    @pa.check("inchi", name="inchi-format")
+    def -check-inchi(cls, series):
         return series.isna() | series.str.startswith("InChI=")
 
-    inchi_key: Series[str] | None = pa.Field(
+    inchi-key: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=INCHI_KEY_REGEX_PATTERN,
+        str-matches=INCHI-KEY-REGEX-PATTERN,
     )
 
     # === Nomenclature ===
-    molecular_formula: Series[str] | None = pa.Field(nullable=True)
-    iupac_name: Series[str] | None = pa.Field(nullable=True)
+    molecular-formula: Series[str] | None = pa.Field(nullable=True)
+    iupac-name: Series[str] | None = pa.Field(nullable=True)
 
     # === Physical Properties ===
-    molecular_weight: Series[float] | None = pa.Field(
+    molecular-weight: Series[float] | None = pa.Field(
         nullable=True,
         ge=0.0,
         le=100000.0,
     )
-    exact_mass: Series[float] | None = pa.Field(nullable=True, ge=0)
+    exact-mass: Series[float] | None = pa.Field(nullable=True, ge=0)
 
     # === Computed Descriptors ===
     xlogp: Series[float] | None = pa.Field(nullable=True, ge=-20, le=20)
@@ -162,21 +162,21 @@ class PubchemMoleculeSchema(ETLRecordSchema):
     charge: Series[int] | None = pa.Field(nullable=True, ge=-10, le=10)
 
     # === Atom/Bond Counts ===
-    heavy_atom_count: Series[int] | None = pa.Field(nullable=True, ge=1, le=500)
-    h_bond_donor_count: Series[int] | None = pa.Field(nullable=True, ge=0, le=50)
-    h_bond_acceptor_count: Series[int] | None = pa.Field(nullable=True, ge=0, le=50)
-    rotatable_bond_count: Series[int] | None = pa.Field(nullable=True, ge=0, le=100)
+    heavy-atom-count: Series[int] | None = pa.Field(nullable=True, ge=1, le=500)
+    h-bond-donor-count: Series[int] | None = pa.Field(nullable=True, ge=0, le=50)
+    h-bond-acceptor-count: Series[int] | None = pa.Field(nullable=True, ge=0, le=50)
+    rotatable-bond-count: Series[int] | None = pa.Field(nullable=True, ge=0, le=100)
 
     # === Stereochemistry ===
-    atom_stereo_count: Series[int] | None = pa.Field(nullable=True, ge=0)
-    defined_atom_stereo_count: Series[int] | None = pa.Field(nullable=True, ge=0)
-    undefined_atom_stereo_count: Series[int] | None = pa.Field(nullable=True, ge=0)
-    bond_stereo_count: Series[int] | None = pa.Field(nullable=True, ge=0)
-    covalent_unit_count: Series[int] | None = pa.Field(nullable=True, ge=1)
+    atom-stereo-count: Series[int] | None = pa.Field(nullable=True, ge=0)
+    defined-atom-stereo-count: Series[int] | None = pa.Field(nullable=True, ge=0)
+    undefined-atom-stereo-count: Series[int] | None = pa.Field(nullable=True, ge=0)
+    bond-stereo-count: Series[int] | None = pa.Field(nullable=True, ge=0)
+    covalent-unit-count: Series[int] | None = pa.Field(nullable=True, ge=1)
 
     # === 3D Properties ===
-    volume_3d: Series[float] | None = pa.Field(nullable=True, ge=0)
-    conformer_count_3d: Series[int] | None = pa.Field(nullable=True, ge=0)
+    volume-3d: Series[float] | None = pa.Field(nullable=True, ge=0)
+    conformer-count-3d: Series[int] | None = pa.Field(nullable=True, ge=0)
 
     class Config:
         strict = True
@@ -184,52 +184,52 @@ class PubchemMoleculeSchema(ETLRecordSchema):
         coerce = True
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 6. Cross-Provider Mapping
 
 | This Entity Field | Maps To          | Provider | Field                          |
 | ----------------- | ---------------- | -------- | ------------------------------ |
-| `inchi_key`       | ChEMBL           | ChEMBL   | `structure_standard_inchi_key` |
-| `molecule_id`     | PubChem BioAssay | PubChem  | CID                            |
+| `inchi-key`       | ChEMBL           | ChEMBL   | `structure-standard-inchi-key` |
+| `molecule-id`     | PubChem BioAssay | PubChem  | CID                            |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 7. Pipeline Configuration
 
 ```yaml
-pipeline_name: pubchem_compound
+pipeline-name: pubchem-compound
 provider: pubchem
-entity_type: compound
+entity-type: compound
 version: "1.2.0"
 
-primary_keys: ["molecule_id"]
-silver_table: "pubchem_compound"
-gold_table: "pubchem_compound"
+primary-keys: ["molecule-id"]
+silver-table: "pubchem-compound"
+gold-table: "pubchem-compound"
 
 source:
   type: api
-  batch_size: 100  # PubChem allows batch requests
+  batch-size: 100  # PubChem allows batch requests
 
 sink:
   bronze:
     path: "data/output/bronze"
   silver:
     path: "data/output/silver"
-    primary_key: ["molecule_id"]
-    partition_by: []
+    primary-key: ["molecule-id"]
+    partition-by: []
   gold:
     path: "data/output/gold"
 
-input_filter:
+input-filter:
   enabled: true
-  source_path: "data/input/compound.csv"
-  column_name: "cid"
-  filter_field: "cid"
-  batch_size: 100
+  source-path: "data/input/compound.csv"
+  column-name: "cid"
+  filter-field: "cid"
+  batch-size: 100
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 8. Special Considerations
 
@@ -241,7 +241,7 @@ PubChemPy is synchronous. BioETL wraps it using `BaseSyncAdapter`:
 class PubChemAdapter(BaseSyncAdapter):
     async def fetch(self, cids: list[int]) -> list[dict]:
         # Wrapped in executor
-        return await self._run_in_executor(pcp.get_compounds, cids, namespace="cid")
+        return await self.-run-in-executor(pcp.get-compounds, cids, namespace="cid")
 ```
 
 ### 8.2. Rate Limiting

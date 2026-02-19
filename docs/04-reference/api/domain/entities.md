@@ -7,17 +7,17 @@ Rich domain objects representing bioactivity data with invariants and business l
 BioETL entities follow these design principles:
 
 - **Immutable**: Frozen dataclasses with `slots=True` for memory efficiency
-- **Validated**: Invariants checked on construction via `__post_init__`
+- **Validated**: Invariants checked on construction via `--post-init--`
 - **Pure Python**: No external dependencies in domain layer
 
 ### Field Classification
 
 | Category         | Description                                    | Example                          |
 | ---------------- | ---------------------------------------------- | -------------------------------- |
-| **REQUIRED**     | Must be non-None, validated in `__post_init__` | `entity_id`, `content_hash`      |
-| **LINEAGE**      | System metadata for tracking                   | `run_id`, `ingestion_ts`         |
-| **API-OPTIONAL** | May be None (API-dependent)                    | `pchembl_value`, `target_name`   |
-| **COMPUTED**     | Derived from other fields                      | `pchembl_value` (log conversion) |
+| **REQUIRED**     | Must be non-None, validated in `--post-init--` | `entity-id`, `content-hash`      |
+| **LINEAGE**      | System metadata for tracking                   | `run-id`, `ingestion-ts`         |
+| **API-OPTIONAL** | May be None (API-dependent)                    | `pchembl-value`, `target-name`   |
+| **COMPUTED**     | Derived from other fields                      | `pchembl-value` (log conversion) |
 
 ## Base Entity
 
@@ -27,15 +27,15 @@ Base class containing system fields for lineage and versioning.
 
 ::: bioetl.domain.entities.BaseEntity
 options:
-show_root_heading: true
-show_source: true
+show-root-heading: true
+show-source: true
 members:
-\- entity_id
-\- content_hash
-\- run_id
-\- run_type
-\- ingestion_ts
-\- source_batch_id
+\- entity-id
+\- content-hash
+\- run-id
+\- run-type
+\- ingestion-ts
+\- source-batch-id
 
 ### RequiredEntityFields
 
@@ -43,8 +43,8 @@ Protocol defining minimum required fields for all entities.
 
 ::: bioetl.domain.entities.RequiredEntityFields
 options:
-show_root_heading: true
-show_source: false
+show-root-heading: true
+show-source: false
 
 ## ChEMBL Entities
 
@@ -54,8 +54,8 @@ Bioactivity measurement from ChEMBL database.
 
 ::: bioetl.domain.entities.Bioactivity
 options:
-show_root_heading: true
-show_source: false
+show-root-heading: true
+show-source: false
 
 ### Assay
 
@@ -63,8 +63,8 @@ Experimental assay information.
 
 ::: bioetl.domain.entities.Assay
 options:
-show_root_heading: true
-show_source: false
+show-root-heading: true
+show-source: false
 
 ### Molecule
 
@@ -72,8 +72,8 @@ Chemical compound structure.
 
 ::: bioetl.domain.entities.Molecule
 options:
-show_root_heading: true
-show_source: false
+show-root-heading: true
+show-source: false
 
 ### Target
 
@@ -81,8 +81,8 @@ Biological target (protein, gene, etc.).
 
 ::: bioetl.domain.entities.Target
 options:
-show_root_heading: true
-show_source: false
+show-root-heading: true
+show-source: false
 
 ### TargetComponent
 
@@ -90,8 +90,8 @@ Component of a complex biological target.
 
 ::: bioetl.domain.entities.TargetComponent
 options:
-show_root_heading: true
-show_source: false
+show-root-heading: true
+show-source: false
 
 ### ChemblPublication
 
@@ -99,8 +99,8 @@ Publication or patent reference.
 
 ::: bioetl.domain.entities.ChemblPublication
 options:
-show_root_heading: true
-show_source: false
+show-root-heading: true
+show-source: false
 
 ## PubChem Entities
 
@@ -110,8 +110,8 @@ PubChem compound with chemical properties.
 
 ::: bioetl.domain.entities.Compound
 options:
-show_root_heading: true
-show_source: false
+show-root-heading: true
+show-source: false
 
 ## PubMed Entities
 
@@ -121,8 +121,8 @@ Scientific publication metadata.
 
 ::: bioetl.domain.entities.Publication
 options:
-show_root_heading: true
-show_source: false
+show-root-heading: true
+show-source: false
 
 ## UniProt Entities
 
@@ -132,8 +132,8 @@ UniProt protein entry.
 
 ::: bioetl.domain.entities.Protein
 options:
-show_root_heading: true
-show_source: false
+show-root-heading: true
+show-source: false
 
 ## Usage Example
 
@@ -145,17 +145,17 @@ from uuid import uuid4
 
 # Create an activity entity
 activity = Bioactivity(
-    entity_id="CHEMBL12345",
-    content_hash=ContentHash("sha256:abc123..."),
-    run_id=RunID(uuid4()),
-    run_type=RunType.INCREMENTAL,
-    ingestion_ts=datetime.now(),
+    entity-id="CHEMBL12345",
+    content-hash=ContentHash("sha256:abc123..."),
+    run-id=RunID(uuid4()),
+    run-type=RunType.INCREMENTAL,
+    ingestion-ts=datetime.now(),
     # ChEMBL-specific fields
-    activity_id="12345",
-    molecule_chembl_id="CHEMBL789",
-    standard_type="IC50",
-    standard_value=50.0,
-    standard_units="nM",
+    activity-id="12345",
+    molecule-chembl-id="CHEMBL789",
+    standard-type="IC50",
+    standard-value=50.0,
+    standard-units="nM",
 )
 
 # Check required fields protocol

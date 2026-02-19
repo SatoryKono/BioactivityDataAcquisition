@@ -48,17 +48,17 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 > Migration complete — deprecated `Compound` alias removed.
 
 **Note**: ChEMBL uses `Molecule` and PubChem uses `PubchemMolecule` as canonical domain entity names:
-- ChEMBL API returns `molecule_chembl_id`
+- ChEMBL API returns `molecule-chembl-id`
 - PubChem API returns `cid` (Compound ID)
 
 ### Bioactivity Data
 
 | Canonical Term | Definition | Provider-Specific Names | Avoid |
 |----------------|------------|------------------------|-------|
-| **Activity** | A quantitative measurement of biological activity (e.g., IC50, EC50, Ki) | ChEMBL: `Activity` | `measurement`, `data_point`, `result` |
+| **Activity** | A quantitative measurement of biological activity (e.g., IC50, EC50, Ki) | ChEMBL: `Activity` | `measurement`, `data-point`, `result` |
 | **Assay** | An experimental protocol used to measure activity | ChEMBL: `Assay` | `experiment`, `test`, `study` |
-| **Standard Value** | The normalized activity value in standard units | ChEMBL: `standard_value` | `value`, `result` |
-| **pChEMBL Value** | Potency metric: -log10 of molar activity value | ChEMBL: `pchembl_value` | `potency`, `logIC50` |
+| **Standard Value** | The normalized activity value in standard units | ChEMBL: `standard-value` | `value`, `result` |
+| **pChEMBL Value** | Potency metric: -log10 of molar activity value | ChEMBL: `pchembl-value` | `potency`, `logIC50` |
 
 ### Biological Targets
 
@@ -91,9 +91,9 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 |----------------|------------|-------|
 | **Pipeline** | A complete data processing sequence from extraction to loading | `workflow`, `job`, `flow` |
 | **Stage** | A discrete phase of pipeline execution (extract, transform, validate, load) | `step`, `phase` (as generic terms) |
-| **Run** | A single execution instance of a pipeline, identified by `run_id` | `execution`, `instance` |
+| **Run** | A single execution instance of a pipeline, identified by `run-id` | `execution`, `instance` |
 | **Run Type** | The mode of pipeline execution: `INCREMENTAL`, `BACKFILL`, `REBUILD` | `mode` |
-| **Loading Strategy** | Enum defining pipeline loading behavior: `FULL_SCAN_ONLY`, `WATERMARK_BASED` (ADR-031) | `force_full_scan` (deprecated boolean) |
+| **Loading Strategy** | Enum defining pipeline loading behavior: `FULL-SCAN-ONLY`, `WATERMARK-BASED` (ADR-031) | `force-full-scan` (deprecated boolean) |
 
 ### Batch Processing
 
@@ -101,7 +101,7 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 |----------------|------------|-------|
 | **Batch** | A collection of records processed together as a unit | `chunk`, `partition` |
 | **Record** | A single data item within a batch | `entry` (for batch items), `row` |
-| **Batch ID** | Unique identifier for a batch within a run | `chunk_id` |
+| **Batch ID** | Unique identifier for a batch within a run | `chunk-id` |
 
 ### Data Layers (Medallion Architecture)
 
@@ -120,11 +120,11 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | **Seed Pipeline** | Primary pipeline providing base entities for enrichment | `source pipeline`, `base pipeline` |
 | **Enricher** | Pipeline that adds supplemental data from external source | `enhancer`, `augmenter` |
 | **MergeService** | Application service that joins seed and enricher data | `Joiner`, `Combiner` |
-| **Preserve All Sources** | MergeConfig flag to keep all provider-qualified columns | `keep_all_columns` |
+| **Preserve All Sources** | MergeConfig flag to keep all provider-qualified columns | `keep-all-columns` |
 | **Qualified Column** | Column name in `{provider}.{entity}.{field}` format | `prefixed column`, `namespaced column` |
 | **Column Group** | Semantic grouping of columns for output ordering | `field group` |
 | **Field Group Registry** | Central registry (`FieldGroupRegistry`) for semantic field grouping, Gold filtering, and column ordering | `column registry` |
-| **Field Group Id** | Enum identifying a semantic group (e.g., `ID_AND_STATUS`, `BIBLIOGRAPHY`, `TRASH`). Alias for `PublicationFieldGroup` | `group type` |
+| **Field Group Id** | Enum identifying a semantic group (e.g., `ID-AND-STATUS`, `BIBLIOGRAPHY`, `TRASH`). Alias for `PublicationFieldGroup` | `group type` |
 | **Field Mapping** | Frozen dataclass mapping a base field name to its provider-qualified columns and group | `column mapping` |
 | **Field Group Definition** | Frozen dataclass defining a semantic group with display name, Gold inclusion flag, and field mappings | `group config` |
 | **Conflict Resolution** | Strategy for handling field value conflicts during merge | `conflict handling` |
@@ -137,22 +137,22 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | Canonical Term | Definition | Avoid |
 |----------------|------------|-------|
 | **Validation** | Checking data against schema rules | `check`, `verification` (as nouns) |
-| **Quarantine** | Isolation of records that failed validation | `reject`, `dead_letter`, `error_log` |
-| **Quarantine Entry** | A single quarantined record with error metadata | `quarantine_record` (class name) |
+| **Quarantine** | Isolation of records that failed validation | `reject`, `dead-letter`, `error-log` |
+| **Quarantine Entry** | A single quarantined record with error metadata | `quarantine-record` (class name) |
 | **Schema** | Structure definition for data validation | `model` (when referring to schema) |
-| **Schema Drift** | Detection of changes in source data structure | `schema_change`, `schema_evolution` |
+| **Schema Drift** | Detection of changes in source data structure | `schema-change`, `schema-evolution` |
 | **Base Validation** | Level 1: Pandera schema validation (types, regex, nullable) | `schema validation`, `type checking` |
 | **Structural Validation** | Level 2: Cross-field consistency rules (page ordering, year matching) | `cross-field validation`, `field dependencies` |
 | **External Verification** | Level 3: HTTP-based ID verification with upstream providers | `API validation`, `ID lookup` |
 | **Logical Validation** | Level 4: Range constraints and business invariants | `business rules`, `constraint checking` |
 | **Semantic Validation** | Level 5: NLP-based text consistency checks (similarity, language) | `text validation`, `NLP checks` |
-| **DQ Flag** | Data Quality flag: `_dq_error` (FAIL — blocking), `_dq_warn` (WARN — accepted) | `quality flag`, `error flag` |
+| **DQ Flag** | Data Quality flag: `-dq-error` (FAIL — blocking), `-dq-warn` (WARN — accepted) | `quality flag`, `error flag` |
 | **Validation Mode** | Pipeline execution profile: STRICT, BALANCED, FAST | `validation profile`, `quality mode` |
-| **Clean Record** | Record with `_dq_warn=False` and `_dq_error=False` | `valid record`, `passed record` |
-| **Quarantine Record** | Record with `_dq_warn=True` (non-critical warnings) | `warned record`, `flagged record` |
-| **Rejected Record** | Record with `_dq_error=True` (critical errors, not written to Silver) | `failed record`, `blocked record` |
+| **Clean Record** | Record with `-dq-warn=False` and `-dq-error=False` | `valid record`, `passed record` |
+| **Quarantine Record** | Record with `-dq-warn=True` (non-critical warnings) | `warned record`, `flagged record` |
+| **Rejected Record** | Record with `-dq-error=True` (critical errors, not written to Silver) | `failed record`, `blocked record` |
 | **Validation Level** | One of five sequential validation stages (Base → Structural → External → Logical → Semantic) | `validation stage`, `check level` |
-| **Validation Result** | Outcome of validation check: PASS, FAIL, WARN, SKIP, NOT_APPLICABLE | `check result`, `validation status` |
+| **Validation Result** | Outcome of validation check: PASS, FAIL, WARN, SKIP, NOT-APPLICABLE | `check result`, `validation status` |
 
 ---
 
@@ -160,10 +160,10 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 
 | Canonical Term | Definition | Format | Avoid |
 |----------------|------------|--------|-------|
-| **Entity ID** | Business identifier from the source system | Provider-specific (e.g., `CHEMBL25`) | `business_key`, `natural_key` |
-| **Content Hash** | SHA256 hash for record deduplication | `sha256(provider + canonical_json)` | `checksum`, `version_id` |
-| **Run ID** | UUID identifying a pipeline run | `UUID` | `execution_id`, `job_id` |
-| **Batch ID** | UUID identifying a batch within a run | `UUID` | `chunk_id` |
+| **Entity ID** | Business identifier from the source system | Provider-specific (e.g., `CHEMBL25`) | `business-key`, `natural-key` |
+| **Content Hash** | SHA256 hash for record deduplication | `sha256(provider + canonical-json)` | `checksum`, `version-id` |
+| **Run ID** | UUID identifying a pipeline run | `UUID` | `execution-id`, `job-id` |
+| **Batch ID** | UUID identifying a batch within a run | `UUID` | `chunk-id` |
 
 ---
 
@@ -199,11 +199,11 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 
 ### CLI Conventions
 
-**Pipeline Names**: CLI uses `{provider}_{entity}` format for pipeline identifiers:
-- `chembl_molecule`, `chembl_activity`, `chembl_assay`
-- `pubchem_compound`
-- `uniprot_protein`
-- `pubmed_publication`
+**Pipeline Names**: CLI uses `{provider}-{entity}` format for pipeline identifiers:
+- `chembl-molecule`, `chembl-activity`, `chembl-assay`
+- `pubchem-compound`
+- `uniprot-protein`
+- `pubmed-publication`
 
 **Language Policy**: All CLI help texts, error messages, and user-facing output use **English** for consistency and international accessibility. Internal documentation (CLAUDE.md, RULES.md) may use Russian per project convention.
 
@@ -225,9 +225,9 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | `Assay` | `/assay` | Experimental protocol |
 | `Target` | `/target` | Biological target |
 | `Document` | `/document` | Publication reference |
-| `CellLine` | `/cell_line` | Cell line for assays |
-| `TargetComponent` | `/target_component` | Target subunit |
-| `CompoundRecord` | `/compound_record` | Molecule-document link |
+| `CellLine` | `/cell-line` | Cell line for assays |
+| `TargetComponent` | `/target-component` | Target subunit |
+| `CompoundRecord` | `/compound-record` | Molecule-document link |
 
 ### PubChem
 
@@ -276,7 +276,7 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | **Z-Score** | Number of standard deviations from mean | `sigma`, `deviation` |
 | **Threshold** | Configurable limit for anomaly detection | `limit`, `bound` |
 | **Anomaly Severity** | One of: `LOW`, `MEDIUM`, `HIGH`, `CRITICAL` | Custom severity names |
-| **Anomaly Type** | One of: `SPIKE`, `DROP`, `THRESHOLD_EXCEEDED`, `TREND_CHANGE` | Generic descriptions |
+| **Anomaly Type** | One of: `SPIKE`, `DROP`, `THRESHOLD-EXCEEDED`, `TREND-CHANGE` | Generic descriptions |
 
 ### Alerting
 
@@ -310,10 +310,10 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | Canonical Term | Definition | Avoid |
 |----------------|------------|-------|
 | **Circuit Breaker** | Pattern to prevent cascading failures | `failsafe`, `breaker` |
-| **Circuit State** | One of: `CLOSED`, `OPEN`, `HALF_OPEN` | Custom state names |
+| **Circuit State** | One of: `CLOSED`, `OPEN`, `HALF-OPEN` | Custom state names |
 | **Trip** | Circuit breaker opening due to failures | `break`, `trigger` |
 | **Recovery** | Circuit breaker closing after successful probes | `reset`, `heal` |
-| **Failure Threshold** | Consecutive errors before circuit opens | `trip_count` |
+| **Failure Threshold** | Consecutive errors before circuit opens | `trip-count` |
 
 ### Error Recovery
 
@@ -333,7 +333,7 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | **Lock Port** | Interface for lock acquisition/release | `LockClient` |
 | **TTL** | Time-to-live for automatic lock expiration | `timeout`, `expiry` |
 | **Heartbeat** | Periodic lock renewal signal | `keepalive`, `refresh` |
-| **Owner ID** | Identifier of lock holder | `holder`, `client_id` |
+| **Owner ID** | Identifier of lock holder | `holder`, `client-id` |
 
 ---
 
@@ -359,7 +359,7 @@ These terms should NOT be used in new code:
 | `job` | `run` | Clarity |
 | `chunk` | `batch` | Domain alignment |
 | `measurement` | `activity` | ChEMBL terminology |
-| `data_point` | `record` | Generic term |
+| `data-point` | `record` | Generic term |
 | `Loader` | `Adapter` (for input), `Writer` (for output) | Vague technical term |
 | `Handler` | Specific name (e.g., `Manager`, `Service`) | Vague technical term |
 | `Work` | `Publication` | CrossRef API term → Ubiquitous Language |
@@ -388,7 +388,7 @@ These terms should NOT be used in new code:
 | **Pipeline** | **пайплайн** | НЕ "конвейер", НЕ "workflow" |
 | **Entity** | **сущность** | Тип данных (Activity, Molecule, Target) |
 | **Record** | **запись** | Единица данных в батче |
-| **Run** | **запуск** | Экземпляр выполнения пайплайна (run_id) |
+| **Run** | **запуск** | Экземпляр выполнения пайплайна (run-id) |
 | **Batch** | **батч** | Группа записей для обработки |
 | **Adapter** | **адаптер** | Реализация Port для провайдера |
 | **Port** | **порт** | Protocol-интерфейс для DI |
@@ -421,7 +421,7 @@ These terms should NOT be used in new code:
 
 | ❌ Избегать | ✅ Использовать | Причина |
 |-------------|-----------------|---------|
-| источник данных | провайдер | Термин "источник" зарезервирован для `src_id` в ChEMBL |
+| источник данных | провайдер | Термин "источник" зарезервирован для `src-id` в ChEMBL |
 | конвейер | пайплайн | Согласованность с кодовой базой |
 | задача | запуск (run) | Избегать путаницы с job/task |
 | поток | пайплайн | Избегать путаницы с data flow |
@@ -432,11 +432,11 @@ These terms should NOT be used in new code:
 
 ### Lint Script
 
-A terminology linter is available at `scripts/lint_terminology.py`:
+A terminology linter is available at `scripts/lint-terminology.py`:
 
 ```bash
 # Check for deprecated terms
-python scripts/lint_terminology.py src/bioetl/
+python scripts/lint-terminology.py src/bioetl/
 
 # Pre-commit hook (see .pre-commit-config.yaml)
 ```

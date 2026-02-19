@@ -14,7 +14,7 @@
 | Total objects (classes/functions/constants) | 1711 |
 | Classes | 911 |
 | Module-level functions | 619 |
-| Constants (UPPER_SNAKE_CASE) | 181 |
+| Constants (UPPER-SNAKE-CASE) | 181 |
 | **MUST violations** | **2** |
 | SHOULD violations | 9 |
 | MAY / informational | 6 |
@@ -45,34 +45,34 @@
 | Class | LOC | Location |
 |-------|-----|----------|
 | MergeService | 1749 | application/composite/merger.py |
-| SilverWriter | 1075 | infrastructure/storage/silver_writer.py |
+| SilverWriter | 1075 | infrastructure/storage/silver-writer.py |
 | CompositePipelineRunner | 1039 | application/composite/runner.py |
 | ChemblAdapter | 933 | infrastructure/adapters/chembl/client.py |
-| GoldWriter | 894 | infrastructure/storage/gold_writer.py |
-| BronzeWriter | 755 | infrastructure/storage/bronze_writer.py |
-| BaseTransformer | 738 | application/core/base_transformer.py |
-| BatchExecutor | 725 | application/core/batch_executor.py |
+| GoldWriter | 894 | infrastructure/storage/gold-writer.py |
+| BronzeWriter | 755 | infrastructure/storage/bronze-writer.py |
+| BaseTransformer | 738 | application/core/base-transformer.py |
+| BatchExecutor | 725 | application/core/batch-executor.py |
 | PubMedPublicationTransformer | 685 | application/pipelines/pubmed/transformer.py |
 | OpenAlexAdapter | 677 | infrastructure/adapters/openalex/client.py |
 
 > **Note (EXC-005):** Large classes (500+ LOC) are NOT flagged as god objects if they
-> demonstrate proper delegation via `self._component.method()`. These classes
+> demonstrate proper delegation via `self.-component.method()`. These classes
 > are predominantly orchestrators/adapters with high delegation counts.
 
 ### Top 10 Largest Functions
 
 | Function | LOC | Location |
 |----------|-----|----------|
-| bootstrap_composite_runner | 279 | composition/bootstrap/runtime/composite.py |
-| register_all_providers | 174 | composition/providers/registration.py |
-| assemble_runner | 144 | composition/factories/pipeline_factory.py |
-| create_pipeline_with_services | 112 | composition/factories/pipeline_factory.py |
-| register_all_transformers | 103 | composition/factories/transformer_factory.py |
-| register_provider | 100 | composition/providers/decorators.py |
-| build_pipeline_runner | 97 | composition/runtime_builders/runner_builder.py |
-| export_command | 93 | interfaces/cli/commands/export.py |
-| check_anomaly_detection | 82 | application/services/dq/_checks_statistical.py |
-| bootstrap_storage_adapter | 82 | composition/bootstrap/assembly/storage.py |
+| bootstrap-composite-runner | 279 | composition/bootstrap/runtime/composite.py |
+| register-all-providers | 174 | composition/providers/registration.py |
+| assemble-runner | 144 | composition/factories/pipeline-factory.py |
+| create-pipeline-with-services | 112 | composition/factories/pipeline-factory.py |
+| register-all-transformers | 103 | composition/factories/transformer-factory.py |
+| register-provider | 100 | composition/providers/decorators.py |
+| build-pipeline-runner | 97 | composition/runtime-builders/runner-builder.py |
+| export-command | 93 | interfaces/cli/commands/export.py |
+| check-anomaly-detection | 82 | application/services/dq/-checks-statistical.py |
+| bootstrap-storage-adapter | 82 | composition/bootstrap/assembly/storage.py |
 
 > Large functions are concentrated in `composition/` (assembly/factory) which is
 > architecturally expected — this is the wiring layer.
@@ -102,7 +102,7 @@ All 10 forbidden import directions checked: **0 violations**.
 
 - No `import requests/httpx/aiohttp` in domain
 - No `import structlog` in domain
-- No file I/O (`open()`) in domain (false positives from `_assert_open()` method correctly excluded)
+- No file I/O (`open()`) in domain (false positives from `-assert-open()` method correctly excluded)
 
 ### ARCH-003: Port Protocol Naming — PASS
 
@@ -110,7 +110,7 @@ All ports defined as `typing.Protocol` with `*Port` suffix in `domain/ports/`.
 
 ### ARCH-006: Silver Layer ACID — PASS
 
-No `to_parquet` or `write_parquet` found in `infrastructure/storage/`. Delta Lake is used.
+No `to-parquet` or `write-parquet` found in `infrastructure/storage/`. Delta Lake is used.
 
 ### ARCH-008: Single Source of Imports — PASS
 
@@ -126,9 +126,9 @@ All use the facade `bioetl.domain.ports`.
 ### AP-001: Hard-coded Constructors — SHOULD (informational)
 
 The `application/core/` layer creates internal helper objects:
-- `BatchMetricsRecorder(...)` in `record_processor.py` and `batch_executor.py`
-- `BatchTransformer(...)` in `record_processor.py` and `batch_executor.py`
-- `BatchWriter(...)` in `batch_executor.py`
+- `BatchMetricsRecorder(...)` in `record-processor.py` and `batch-executor.py`
+- `BatchTransformer(...)` in `record-processor.py` and `batch-executor.py`
+- `BatchWriter(...)` in `batch-executor.py`
 - `MedlineDateParser()` in `pubmed/extractors/date.py`
 
 **Assessment:** These are internal application-layer components (not cross-layer dependencies),
@@ -150,8 +150,8 @@ Zero `print()` calls outside `interfaces/cli/`.
 
 ### AP-008: Blocking I/O in Async — PASS
 
-The one hit (`bronze_writer.py:681`) uses `open()` inside a sync `_read_and_decompress()`
-helper that is called via `run_in_executor()` — this is the correct async pattern.
+The one hit (`bronze-writer.py:681`) uses `open()` inside a sync `-read-and-decompress()`
+helper that is called via `run-in-executor()` — this is the correct async pattern.
 
 **Anti-Patterns Score: 10.0 / 10.0**
 
@@ -195,7 +195,7 @@ No `Factory()` calls in `application/` or `domain/`.
 `PublicationMapping`, `FieldAlias`
 
 **Candidates for review:**
-- `ErrorClassifier` (domain/error_classifier.py) — could use `*Service` suffix
+- `ErrorClassifier` (domain/error-classifier.py) — could use `*Service` suffix
 - `UnitConverter` (domain/services/) — could use `*Service` suffix
 
 **Assessment:** 28 of 30 are Enums or value objects (not subject to NAME-001).
@@ -213,38 +213,38 @@ No `Factory()` calls in `application/` or `domain/`.
 
 #### Critical: Missing Port Method (5 files affected)
 
-`DataNormalizationPort` is missing `normalize_author_keys()` method declaration.
+`DataNormalizationPort` is missing `normalize-author-keys()` method declaration.
 The method exists in `DataNormalizationService` (concrete) but was never added to the port protocol.
 
 **Affected transformers:**
-1. `application/pipelines/chembl/publication_transformer.py:212`
+1. `application/pipelines/chembl/publication-transformer.py:212`
 2. `application/pipelines/semanticscholar/transformer.py:154`
 3. `application/pipelines/pubmed/transformer.py:259`
 4. `application/pipelines/openalex/transformer.py:157`
 5. `application/pipelines/crossref/transformer.py:141`
 
-**Fix:** Add `normalize_author_keys()` to `DataNormalizationPort` protocol in
-`domain/ports/data_normalization.py`.
+**Fix:** Add `normalize-author-keys()` to `DataNormalizationPort` protocol in
+`domain/ports/data-normalization.py`.
 
 #### High: Type Mismatches in PubMed Transformer (2 errors)
 
 - `pubmed/transformer.py:255`: `list[str]` assigned to `list[list[str]]`
-- `pubmed/transformer.py:258`: Wrong arg type to `normalize_author_list()`
+- `pubmed/transformer.py:258`: Wrong arg type to `normalize-author-list()`
 
 **Fix:** Review author data flow in PubMed transformer, align types.
 
 #### Medium: Pandera DataFrameModel Stubs (3 errors)
 
-- `domain/schemas/uniprot/_xrefs.py:12`
-- `domain/schemas/uniprot/_features.py:15`
-- `domain/schemas/uniprot/_annotations.py:12`
+- `domain/schemas/uniprot/-xrefs.py:12`
+- `domain/schemas/uniprot/-features.py:15`
+- `domain/schemas/uniprot/-annotations.py:12`
 
 **Assessment:** These are `[misc]` errors from pandera's missing type stubs — third-party issue,
 not a code defect. Can be suppressed with `# type: ignore[misc]`.
 
 #### Medium: DataNormalizationService Arg Type (1 error)
 
-- `domain/services/data_normalization_service.py:161`: incompatible arg type to `_parse_author_names`
+- `domain/services/data-normalization-service.py:161`: incompatible arg type to `-parse-author-names`
 
 #### Low: Path Constructor Arg (1 error)
 
@@ -272,8 +272,8 @@ Zero violations across all enabled rules (F401, etc.).
 
 ### Ruff Formatting — 1 issue
 
-`infrastructure/storage/gold_writer.py` has 2 multi-line lambda parameter lists
-that need collapsing. Cosmetic. Fix: `ruff format src/bioetl/infrastructure/storage/gold_writer.py`.
+`infrastructure/storage/gold-writer.py` has 2 multi-line lambda parameter lists
+that need collapsing. Cosmetic. Fix: `ruff format src/bioetl/infrastructure/storage/gold-writer.py`.
 
 ### Import-Linter Contracts — ALL PASS
 
@@ -286,16 +286,16 @@ All 5 import contracts kept (514 files, 1696 dependencies):
 
 ### Architecture Tests (pytest) — 1151 passed, 1 failed, 21 skipped
 
-The single failure is `test_ruff_formatting_src` (caused by the `gold_writer.py` formatting
+The single failure is `test-ruff-formatting-src` (caused by the `gold-writer.py` formatting
 issue). All structural architecture tests pass.
 
 ### Cyclomatic Complexity (xenon) — 38 violations
 
 Blocks exceeding CC threshold (rank C or worse). Most notable:
-- `src/tools/scripts/config_matrix_generator.py:48 main` — rank **F**
+- `src/tools/scripts/config-matrix-generator.py:48 main` — rank **F**
 - `application/composite/merger.py` — 4 complex methods
 - `infrastructure/adapters/chembl/client.py` — 4 complex methods
-- `infrastructure/storage/gold_writer.py:271 write_gold_merged`
+- `infrastructure/storage/gold-writer.py:271 write-gold-merged`
 
 ### Security (pip-audit) — 3 vulnerabilities
 
@@ -348,19 +348,19 @@ Blocks exceeding CC threshold (rank C or worse). Most notable:
 
 | ID | Severity | Description | Files |
 |----|----------|-------------|-------|
-| AUD-001 | CRITICAL | Add `normalize_author_keys()` to `DataNormalizationPort` | `domain/ports/data_normalization.py` + 5 transformers |
+| AUD-001 | CRITICAL | Add `normalize-author-keys()` to `DataNormalizationPort` | `domain/ports/data-normalization.py` + 5 transformers |
 | AUD-002 | HIGH | Fix type mismatches in PubMed transformer author handling | `application/pipelines/pubmed/transformer.py` |
 
 ### SHOULD Fix (Priority 2)
 
 | ID | Severity | Description | Files |
 |----|----------|-------------|-------|
-| AUD-003 | MEDIUM | Fix `_parse_author_names` arg type in DataNormalizationService | `domain/services/data_normalization_service.py` |
+| AUD-003 | MEDIUM | Fix `-parse-author-names` arg type in DataNormalizationService | `domain/services/data-normalization-service.py` |
 | AUD-004 | MEDIUM | Add `str | None` guard for `Path()` in registration | `composition/providers/registration.py:432` |
-| AUD-005 | MEDIUM | Suppress pandera `DataFrameModel` mypy stubs (3 files) | `domain/schemas/uniprot/_*.py` |
+| AUD-005 | MEDIUM | Suppress pandera `DataFrameModel` mypy stubs (3 files) | `domain/schemas/uniprot/-*.py` |
 | AUD-006 | MEDIUM | Fix `BaseException | None` → `BaseException` in observer | `application/observability/observer.py:157` |
-| AUD-007 | MEDIUM | Run `ruff format` on gold_writer.py (fixes 1 test failure) | `infrastructure/storage/gold_writer.py` |
-| AUD-008 | LOW | Consider `*Service` suffix for `ErrorClassifier`, `UnitConverter` | `domain/error_classifier.py`, `domain/services/unit_converter.py` |
+| AUD-007 | MEDIUM | Run `ruff format` on gold-writer.py (fixes 1 test failure) | `infrastructure/storage/gold-writer.py` |
+| AUD-008 | LOW | Consider `*Service` suffix for `ErrorClassifier`, `UnitConverter` | `domain/error-classifier.py`, `domain/services/unit-converter.py` |
 
 ### SHOULD Fix (Priority 3 — Security)
 
@@ -381,7 +381,7 @@ Blocks exceeding CC threshold (rank C or worse). Most notable:
 | Domain purity | CLEAN | CLEAN | — |
 
 > The 2 new MUST findings (AUD-001, AUD-002) are type-system regressions likely introduced
-> by recent author normalization refactoring. The `normalize_author_keys` method was added to
+> by recent author normalization refactoring. The `normalize-author-keys` method was added to
 > the service implementation but not propagated to the port protocol.
 
 ---

@@ -53,12 +53,12 @@ interfaces             ✅        ✅             ✅             ✅           
 > **Note (2026-01-05):** The import matrix allows `interfaces → infrastructure`. This is intentional
 > and consistent with CLAUDE.md §2.1. The `interfaces` layer (CLI, API handlers) may occasionally
 > need direct infrastructure access for:
-> - Health monitoring endpoints (`health.py` → `health_monitor`, `prometheus_metrics`)
+> - Health monitoring endpoints (`health.py` → `health-monitor`, `prometheus-metrics`)
 > - Observability setup (`observability.py` → infrastructure adapters)
 >
 > However, **best practice** is to route through Application layer services when possible
 > for better testability and consistency. See architecture tests in
-> `tests/architecture/test_interfaces_no_infrastructure.py` for tracked legacy violations.
+> `tests/architecture/test-interfaces-no-infrastructure.py` for tracked legacy violations.
 
 Key observation: `composition/` remains the primary DI layer. While `interfaces/` *can* import from `infrastructure/`, it *should prefer* using `composition/` to get fully assembled objects. If we merge composition into interfaces, we:
 - Lose the explicit separation of wiring concern
@@ -70,12 +70,12 @@ The `bootstrap` module is used by multiple entry points:
 
 ```python
 # CLI (interfaces/cli.py)
-from bioetl.composition.bootstrap import bootstrap_pipeline
-runner = bootstrap_pipeline(...)
+from bioetl.composition.bootstrap import bootstrap-pipeline
+runner = bootstrap-pipeline(...)
 
 # Integration Tests
-from bioetl.composition.bootstrap import bootstrap_pipeline
-runner = bootstrap_pipeline(...)
+from bioetl.composition.bootstrap import bootstrap-pipeline
+runner = bootstrap-pipeline(...)
 
 # Future: HTTP API, Lambda handlers, etc.
 ```
@@ -117,7 +117,7 @@ interfaces/
 ├── cli.py
 ├── orchestration/
 └── bootstrap/        # Moved here
-    ├── __init__.py
+    ├── --init--.py
     └── factories/
 ```
 

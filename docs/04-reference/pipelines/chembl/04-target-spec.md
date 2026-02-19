@@ -2,22 +2,22 @@
 
 *Version 1.2.0 | Aligned with RULES.md v5.20*
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 1. Identification
 
 | Parameter        | Value                                          |
 | ---------------- | ---------------------------------------------- |
-| **Pipeline ID**  | `chembl_target`                                |
+| **Pipeline ID**  | `chembl-target`                                |
 | **Provider**     | ChEMBL (EBI)                                   |
 | **Entity**       | target                                         |
 | **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/target` |
-| **Library**      | `chembl_webresource_client`                    |
+| **Library**      | `chembl-webresource-client`                    |
 | **Rate Limit**   | None (polite usage recommended)                |
 | **Health Check** | `/chembl/api/data/status`                      |
 | **Auth Type**    | None (public API)                              |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 2. Business Context
 
@@ -42,14 +42,14 @@ Targets represent **biological entities** that drugs interact with:
 ```
 target
     │
-    ├──◄──FK──activity.target_id (1:M)
+    ├──◄──FK──activity.target-id (1:M)
     │
-    ├──◄──FK──assay.target_id (1:M)
+    ├──◄──FK──assay.target-id (1:M)
     │
-    └── target_components (nested array)
-        ├── component_id
+    └── target-components (nested array)
+        ├── component-id
         ├── accession (UniProt)
-        └── component_type
+        └── component-type
 ```
 
 ### 2.4. Load Strategy
@@ -61,7 +61,7 @@ target
 | **Estimated Volume** | ~15,000 records total           |
 | **Batch Size**       | 20 (filter batch)               |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 3. Extraction (Bronze Layer)
 
@@ -69,27 +69,27 @@ ______________________________________________________________________
 
 | #   | API Field            | JSON Type | Nullable | Nested | Description         |
 | --- | -------------------- | --------- | -------- | ------ | ------------------- |
-| 1   | `target_id`          | string    | No       | -      | Primary key         |
-| 2   | `target_type`        | string    | Yes      | -      | Type classification |
-| 3   | `pref_name`          | string    | Yes      | -      | Preferred name      |
+| 1   | `target-id`          | string    | No       | -      | Primary key         |
+| 2   | `target-type`        | string    | Yes      | -      | Type classification |
+| 3   | `pref-name`          | string    | Yes      | -      | Preferred name      |
 | 4   | `organism`           | string    | Yes      | -      | Organism name       |
-| 5   | `tax_id`             | integer   | Yes      | -      | NCBI Taxonomy ID    |
-| 6   | `species_group_flag` | boolean   | Yes      | -      | Species group flag  |
+| 5   | `tax-id`             | integer   | Yes      | -      | NCBI Taxonomy ID    |
+| 6   | `species-group-flag` | boolean   | Yes      | -      | Species group flag  |
 | 7   | `downgraded`         | boolean   | Yes      | -      | Deprecated flag     |
-| 8   | `target_components`  | array     | Yes      | Yes    | Component list      |
-| 9   | `cross_references`   | array     | Yes      | Yes    | External refs       |
+| 8   | `target-components`  | array     | Yes      | Yes    | Component list      |
+| 9   | `cross-references`   | array     | Yes      | Yes    | External refs       |
 
-### 3.2. Nested Structure: target_components
+### 3.2. Nested Structure: target-components
 
 | Field                   | Type    | Description       |
 | ----------------------- | ------- | ----------------- |
-| `component_id`          | integer | Component ID      |
-| `component_type`        | string  | PROTEIN/DNA/RNA   |
+| `component-id`          | integer | Component ID      |
+| `component-type`        | string  | PROTEIN/DNA/RNA   |
 | `accession`             | string  | UniProt accession |
-| `component_description` | string  | Description       |
+| `component-description` | string  | Description       |
 | `relationship`          | string  | Relationship type |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 4. Transformation
 
@@ -97,21 +97,21 @@ ______________________________________________________________________
 
 | Parameter           | Value                    |
 | ------------------- | ------------------------ |
-| **Entity ID Field** | `target_id`              |
-| **ID Source**       | `from_api`               |
+| **Entity ID Field** | `target-id`              |
+| **ID Source**       | `from-api`               |
 | **Format**          | ChEMBL ID (CHEMBL[0-9]+) |
 
 ### 4.2. Flattening Strategy
 
 | Nested Path                           | Flattened Name         | Strategy     |
 | ------------------------------------- | ---------------------- | ------------ |
-| `target_components[*].accession`      | `component_accessions` | Extract list |
-| `target_components[*].component_id`   | `component_ids`        | Extract list |
-| `target_components[*].component_type` | `component_types`      | Extract list |
-| `target_components`                   | `target_components`    | JSON string  |
-| `cross_references`                    | `cross_references`     | JSON string  |
+| `target-components[*].accession`      | `component-accessions` | Extract list |
+| `target-components[*].component-id`   | `component-ids`        | Extract list |
+| `target-components[*].component-type` | `component-types`      | Extract list |
+| `target-components`                   | `target-components`    | JSON string  |
+| `cross-references`                    | `cross-references`     | JSON string  |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 5. Validation
 
@@ -124,13 +124,13 @@ class TargetSchema(ETLRecordSchema):
     """Target validation schema for Silver layer."""
 
     # === Identifiers ===
-    target_id: Series[str] = pa.Field(
+    target-id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str-matches=r"^CHEMBL\d+$",
     )
 
     # === Classification ===
-    target_type: Series[str] | None = pa.Field(
+    target-type: Series[str] | None = pa.Field(
         nullable=True,
         isin=[
             "SINGLE PROTEIN",
@@ -154,22 +154,22 @@ class TargetSchema(ETLRecordSchema):
     )
 
     # === Metadata ===
-    pref_name: Series[str] | None = pa.Field(nullable=True)
-    tax_id: Series[int] | None = pa.Field(nullable=True)
+    pref-name: Series[str] | None = pa.Field(nullable=True)
+    tax-id: Series[int] | None = pa.Field(nullable=True)
     organism: Series[str] | None = pa.Field(nullable=True)
-    species_group_flag: Series[bool] | None = pa.Field(nullable=True)
+    species-group-flag: Series[bool] | None = pa.Field(nullable=True)
     downgraded: Series[bool] | None = pa.Field(nullable=True)
 
     # === Complex Fields ===
-    target_components: Series[str] | None = pa.Field(nullable=True)
-    cross_references: Series[str] | None = pa.Field(nullable=True)
+    target-components: Series[str] | None = pa.Field(nullable=True)
+    cross-references: Series[str] | None = pa.Field(nullable=True)
 
     # === Flattened Lists ===
-    component_accessions: Series[object] | None = pa.Field(nullable=True)
-    component_ids: Series[object] | None = pa.Field(nullable=True)
-    component_types: Series[object] | None = pa.Field(nullable=True)
-    component_relationships: Series[object] | None = pa.Field(nullable=True)
-    component_descriptions: Series[object] | None = pa.Field(nullable=True)
+    component-accessions: Series[object] | None = pa.Field(nullable=True)
+    component-ids: Series[object] | None = pa.Field(nullable=True)
+    component-types: Series[object] | None = pa.Field(nullable=True)
+    component-relationships: Series[object] | None = pa.Field(nullable=True)
+    component-descriptions: Series[object] | None = pa.Field(nullable=True)
 
     class Config:
         strict = True
@@ -181,12 +181,12 @@ class TargetSchema(ETLRecordSchema):
 
 | Field         | Type | Nullable | Constraints         | DQ Level |
 | ------------- | ---- | -------- | ------------------- | -------- |
-| `target_id`   | str  | No       | regex `^CHEMBL\d+$` | CRITICAL |
-| `target_type` | str  | Yes      | isin [...]          | WARNING  |
-| `tax_id`      | int  | Yes      | >= 1                | WARNING  |
+| `target-id`   | str  | No       | regex `^CHEMBL\d+$` | CRITICAL |
+| `target-type` | str  | Yes      | isin [...]          | WARNING  |
+| `tax-id`      | int  | Yes      | >= 1                | WARNING  |
 | `organism`    | str  | Yes      | -                   | INFO     |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 6. Dependencies
 
@@ -194,33 +194,33 @@ ______________________________________________________________________
 
 | This Entity Field         | Maps To            | Provider | Field       |
 | ------------------------- | ------------------ | -------- | ----------- |
-| `component_accessions[*]` | UniProt            | UniProt  | `accession` |
-| `target_id`               | UniProt ID Mapping | UniProt  | `from_id`   |
+| `component-accessions[*]` | UniProt            | UniProt  | `accession` |
+| `target-id`               | UniProt ID Mapping | UniProt  | `from-id`   |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 7. Pipeline Configuration
 
 ```yaml
-pipeline_name: chembl_target
+pipeline-name: chembl-target
 provider: chembl
-entity_type: target
+entity-type: target
 version: "1.2.0"
 
-primary_keys: ["target_id"]
-silver_table: "chembl_target"
-gold_table: "chembl_target"
+primary-keys: ["target-id"]
+silver-table: "chembl-target"
+gold-table: "chembl-target"
 
-gold_filters:
-  required_fields:
-    - pref_name
+gold-filters:
+  required-fields:
+    - pref-name
   columns:
     downgraded: [false]
 
-input_filter:
+input-filter:
   enabled: true
-  source_path: "data/input/target.csv"
-  column_name: "target_id"
-  filter_field: "target_id"
-  batch_size: 20
+  source-path: "data/input/target.csv"
+  column-name: "target-id"
+  filter-field: "target-id"
+  batch-size: 20
 ```

@@ -55,17 +55,17 @@ Open `.env` and verify the settings. For local development, the defaults are usu
 
 **Key Variables:**
 
-- `BIOETL_ENV`: Set to `dev`.
-- `BIOETL_DATA_DIR`: Directory for data storage (default: `./data`).
-- `BIOETL_LOG_LEVEL`: Logging level (default: `INFO`).
+- `BIOETL-ENV`: Set to `dev`.
+- `BIOETL-DATA-DIR`: Directory for data storage (default: `./data`).
+- `BIOETL-LOG-LEVEL`: Logging level (default: `INFO`).
 
 ### Secrets
 
 If you plan to access APIs requiring authentication (e.g., UniProt, OpenAlex), add your keys to `.env`:
 
 ```ini
-BIOETL_UNIPROT_API_KEY=your_key_here
-BIOETL_OPENALEX_API_KEY=your_email@example.com
+BIOETL-UNIPROT-API-KEY=your-key-here
+BIOETL-OPENALEX-API-KEY=your-email@example.com
 ```
 
 ## 4. Verify Installation
@@ -94,7 +94,7 @@ source .venv/bin/activate  # Linux/macOS
 # .venv\Scripts\activate   # Windows
 
 # Run the pipeline
-bioetl run --pipeline chembl_activity --limit 100
+bioetl run --pipeline chembl-activity --limit 100
 ```
 
 This command will:
@@ -113,15 +113,15 @@ data/
 └── output/
     ├── bronze/
     │   └── chembl/activity/
-    │       └── batch_001.jsonl.zst
+    │       └── batch-001.jsonl.zst
     ├── silver/
     │   └── chembl/activity/
-    │       └── _delta_log/
+    │       └── -delta-log/
     ├── gold/
     │   └── chembl/activity/
-    │       └── _delta_log/
+    │       └── -delta-log/
     ├── checkpoints/
-    │   └── chembl_activity.json
+    │   └── chembl-activity.json
     └── quarantine/
         └── chembl/activity/
 ```

@@ -18,11 +18,11 @@
 **Location**: `configs/pipelines/chembl/activity.yaml`, `assay.yaml`, `pubmed/publication.yaml`, `uniprot/protein.yaml`.
 **Rule Violated**: ADR-014 (Deterministic Writes), ADR-025 (Pipeline Config Unification).
 **Evidence**:
-- Missing `sink.silver.sort_by` field.
-- Missing `sink.silver.primary_key` field.
-- Missing `sink.gold.sort_by` field (where gold is enabled).
+- Missing `sink.silver.sort-by` field.
+- Missing `sink.silver.primary-key` field.
+- Missing `sink.gold.sort-by` field (where gold is enabled).
 **Impact**: Недетерминированные записи в Delta Lake, нарушение контракта конфигурации.
-**Recommendation**: Добавить поля `sort_by` и `primary_key` во все silver/gold sink конфигурации.
+**Recommendation**: Добавить поля `sort-by` и `primary-key` во все silver/gold sink конфигурации.
 
 ### AUD-002 [MUST] Project Structure
 **Location**: `[ROOT]/run/`
@@ -34,7 +34,7 @@
 ### AUD-003 [SHOULD] Missing Documentation
 **Location**: `docs/04-reference/pipelines/chembl/`
 **Rule Violated**: Documentation Coverage.
-**Evidence**: Отсутствует документация для `chembl_publication_similarity`, `chembl_publication_term`, `chembl_protein_class`, `chembl_target_component`.
+**Evidence**: Отсутствует документация для `chembl-publication-similarity`, `chembl-publication-term`, `chembl-protein-class`, `chembl-target-component`.
 **Impact**: Неполная справка по пайплайнам.
 **Recommendation**: Создать спецификации (RFC-DOC-*).
 
@@ -53,6 +53,6 @@
 
 ## Рекомендации для pyPlanBot
 
-1. **RF-CFG-001 (Critical)**: Исправить конфигурации `chembl`, `pubmed`, `uniprot` (добавить `sort_by`, `primary_key`).
+1. **RF-CFG-001 (Critical)**: Исправить конфигурации `chembl`, `pubmed`, `uniprot` (добавить `sort-by`, `primary-key`).
 2. **RF-STR-001 (Critical)**: Удалить/переместить папку `run/`.
 3. **RF-DOC-001 (Medium)**: Добавить недостающие спецификации пайплайнов.
