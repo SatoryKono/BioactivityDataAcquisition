@@ -282,7 +282,7 @@
         "target_id"
       ]
     },
-    "loading_strategy": "full_scan_only",
+    "loading_strategy": null,
     "pipeline_name": "chembl_activity",
     "provider": "chembl",
     "scd_config": null,
