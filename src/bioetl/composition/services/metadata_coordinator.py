@@ -531,6 +531,7 @@ class MetadataCoordinator:
             if input_data.total_records is not None
             else len(input_data.records or [])
         )
+        rec_count = rec_count or 0
         dq_summary = DQSummary(
             total_records=rec_count,
             valid_records=rec_count,
@@ -582,6 +583,7 @@ class MetadataCoordinator:
         return GoldMetadata(  # type: ignore[call-arg]
             runtime=self._build_runtime_metadata(
                 completed_at=input_data.completed_at,
+                duration_seconds=0.0,  # Gold duration currently not tracked per batch
             ),
             pipeline=self._build_pipeline_metadata(),
             lineage=lineage,

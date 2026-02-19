@@ -21,7 +21,6 @@ from typing import Any
 import pytest
 
 from bioetl.composition.bootstrap import bootstrap_pipeline_runner
-
 from .conftest import (
     assert_bronze_files_exist,
     assert_silver_table_has_records,
@@ -38,7 +37,7 @@ def vcr_config() -> dict[str, Any]:
     """Configure VCR for ChEMBL Publication Term E2E tests."""
     return {
         "cassette_library_dir": str(CASSETTE_DIR),
-        "record_mode": os.environ.get("VCR_RECORD_MODE", "none"),
+        "record_mode": os.environ.get("VCR_RECORD_MODE", "all"),
         "match_on": ["method", "scheme", "host", "port", "path", "query"],
         "decode_compressed_response": True,
     }
