@@ -530,13 +530,29 @@ class BatchExecutor:
     # -------------------------------------------------------------------------
 
     def _get_memory_check_interval(self) -> int:
-        """Get interval for memory pressure checks."""
+        """Get interval for memory pressure checks.
+
+        Returns:
+            Number of records between memory monitor checks (defaults to 100).
+        """
         if self._memory_config:
             return self._memory_config.check_interval_records
         return 100  # Default check every 100 records
 
     def _check_memory_pressure(self, current_size: int, check_interval: int) -> int:
-        """Check memory pressure and adjust batch size if needed."""
+        """Check memory pressure and adjust batch size if needed.
+
+        Args:
+            current_size: Current number of records in batch.
+            check_interval: Number of records between memory checks.
+
+        Returns:
+            Newly recommended batch size (may be smaller than current_size).
+
+        Note:
+            Only performs check if adaptive sizing is enabled and the
+            record count matches the check interval.
+        """
         if not self._adaptive_batch_size_enabled:
             return current_size
         if self.records_fetched % check_interval != 0:
@@ -544,7 +560,18 @@ class BatchExecutor:
         return self._adjust_batch_size(current_size)
 
     def _maybe_recover_batch_size(self, current_size: int) -> int:
-        """Try to recover batch size after processing if adaptive sizing enabled."""
+        """Try to recover batch size after processing if adaptive sizing enabled.
+
+        Args:
+            current_size: Current number of records in batch.
+
+        Returns:
+            Newly recommended batch size (may be larger than current_size).
+
+        Note:
+            Executed after a batch has been written to clear memory and
+            potentially scale back up to the initial batch size.
+        """
         if not self._adaptive_batch_size_enabled:
             return current_size
         return self._try_recover_batch_size(current_size)
