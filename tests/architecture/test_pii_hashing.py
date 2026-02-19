@@ -155,7 +155,7 @@ class TestPiiFieldsInTransformers:
         transformer_path = Path(
             "src/bioetl/application/pipelines/crossref/transformer.py"
         )
-        content = transformer_path.read_text()
+        content = transformer_path.read_text(encoding="utf-8")
 
         # Unified normalization: normalize_author_list() handles parse+hash+serialize
         assert "normalize_author_list" in content, (
@@ -168,7 +168,7 @@ class TestPiiFieldsInTransformers:
         transformer_path = Path(
             "src/bioetl/application/pipelines/pubmed/transformer.py"
         )
-        content = transformer_path.read_text()
+        content = transformer_path.read_text(encoding="utf-8")
 
         assert "normalize_author_list" in content, (
             "PubMedPublicationTransformer MUST use normalize_author_list() "
@@ -180,7 +180,7 @@ class TestPiiFieldsInTransformers:
         transformer_path = Path(
             "src/bioetl/application/pipelines/chembl/publication_transformer.py"
         )
-        content = transformer_path.read_text()
+        content = transformer_path.read_text(encoding="utf-8")
 
         # ChEMBL parses concatenated string to list and uses normalize_author_list
         # (unified authors format across all providers)
