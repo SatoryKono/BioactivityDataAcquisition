@@ -45,6 +45,55 @@
         "/data"
       ]
     },
+    "arxiv-research": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "ARXIV_STORAGE_PATH=/papers",
+        "-v",
+        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2/.ai/mcp/arxiv_papers:/papers",
+        "mcp/arxiv-mcp-server"
+      ]
+    },
+    "bioetl-db": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "DATABASE_URL=sqlite+aiosqlite:///data/mcp_db.sqlite",
+        "-v",
+        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2/data:/data",
+        "souhardyak/mcp-db-server"
+      ]
+    },
+    "github-official": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "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"
+      }
+    },
+    "duckduckgo": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "mcp/duckduckgo"
+      ]
+    },
     "docker-mcp-gateway": {
       "command": "docker",
       "args": [
