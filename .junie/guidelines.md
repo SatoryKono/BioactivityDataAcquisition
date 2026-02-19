@@ -25,12 +25,13 @@
 
 3. **Архитектура и Слои**:
    Соблюдение границ слоев (Hexagonal Architecture) критично:
-  - **Domain** (`src/bioetl/domain`): Чистая логика, порты (Protocols), агрегаты. **Запрещен I/O и импорт инфраструктуры
-    **.
-  - **Application** (`src/bioetl/application`): Оркестрация, пайплайны.
-  - **Infrastructure** (`src/bioetl/infrastructure`): Адаптеры (HTTP, Delta Lake), реализация портов.
-  - **Composition** (`src/bioetl/composition`): Единственное место для сборки зависимостей (DI Root).
-  - **Interfaces** (`src/bioetl/interfaces`): CLI и входные точки.
+
+- **Domain** (`src/bioetl/domain`): Чистая логика, порты (Protocols), агрегаты. **Запрещен I/O и импорт инфраструктуры
+  **.
+- **Application** (`src/bioetl/application`): Оркестрация, пайплайны.
+- **Infrastructure** (`src/bioetl/infrastructure`): Адаптеры (HTTP, Delta Lake), реализация портов.
+- **Composition** (`src/bioetl/composition`): Единственное место для сборки зависимостей (DI Root).
+- **Interfaces** (`src/bioetl/interfaces`): CLI и входные точки.
 
 ## 2. Тестирование (Testing)
 
@@ -85,6 +86,18 @@ def test_data_structure() -> None:
 ### Работа на Windows:
 
 Если `make` недоступен, используйте `uv run pytest`, `uv run ruff check`, `uv run mypy`.
+
+## 4. Ресурсы для AI Агентов
+
+Для эффективной работы с AI агентами (Claude, Gemini, JetBrains AI Assistant) используйте следующие ресурсы:
+
+- **[AI_RULES.md](../AI_RULES.md)**: Единый источник правды по инвариантам проекта. Рекомендуется "скармливать" агенту в
+  начале каждой сессии.
+- **[.junie/prompts/](prompts/)**: Библиотека готовых промтов для типичных задач:
+  - [Рефакторинг под Hexagonal Architecture](prompts/refactor_to_hexagonal.md)
+  - [Генерация тестов по стандартам проекта](prompts/test_generation.md)
+  - [Проектирование схем данных](prompts/schema_design.md)
+  - [Аудит кода (Self-review)](prompts/self_review.md)
 
 ---
 *Синхронизировано с внутренними правилами проекта BioETL.*
