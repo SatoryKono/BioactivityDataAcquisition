@@ -9,6 +9,7 @@
 .jscpd.json
 .pre-commit-config.yaml
 .secrets.baseline
+AI_RULES.md
 CHANGELOG.md
 LICENSE
 Makefile

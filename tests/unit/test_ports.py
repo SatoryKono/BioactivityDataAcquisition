@@ -154,7 +154,9 @@ class TestStoragePortProtocol:
                 mode: Literal["merge", "append", "delete"] = "merge",
                 partition_cols: list[str] | None = None,
                 on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
+                column_order: list[str] | None = None,
                 bronze_refs: list[BronzeWriteResult] | None = None,
+                key_nullability_rules: list[Any] | None = None,
             ) -> SilverWriteResult | None:
                 return None
 
@@ -260,6 +262,9 @@ class TestStoragePortProtocol:
                 dry_run: bool = False,
             ) -> dict[str, int]:
                 return {"files_removed": 0, "bytes_freed": 0, "directories_removed": 0}
+
+        def get_table_path(self, table_name: str) -> Path:
+            return Path(f"data/silver/{table_name}")
 
         assert isinstance(ValidStorage(), StoragePort)
 

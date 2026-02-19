@@ -30,31 +30,43 @@ try:
 
     _orig_dispatcher_call = Dispatcher.__call__
 
-    def _dispatcher_call_with_any_fallback(self, *args, **kwargs):
-        input_data_type = type(args[0])
+    def _find_matching_function(self, input_data_type: type) -> typing.Any | None:
+        """Find matching function in registry supporting Union types."""
+        # Check explicit match first (O(1))
         fn = self._function_registry.get(input_data_type)
+        if fn is not None:
+            return fn
 
+        # Scan registry for compatible types (O(N))
         # Python 3.14 can leave Union-annotated registrations as single keys
         # (e.g., pandas.Series | pandas.DataFrame) in Pandera's registry.
-        if fn is None:
-            for registered_type, registered_fn in self._function_registry.items():
-                if registered_type is typing.Any:
-                    continue
-                if isinstance(registered_type, type) and issubclass(
-                    input_data_type, registered_type
-                ):
-                    fn = registered_fn
-                    break
-                union_args = typing_inspect.get_args(registered_type)
-                if union_args and any(
-                    isinstance(arg, type) and issubclass(input_data_type, arg)
-                    for arg in union_args
-                ):
-                    fn = registered_fn
-                    break
+        for registered_type, registered_fn in self._function_registry.items():
+            if registered_type is typing.Any:
+                continue
+
+            # Check direct subclass relationship
+            if isinstance(registered_type, type) and issubclass(
+                input_data_type, registered_type
+            ):
+                return registered_fn
+
+            # Check Union arguments (e.g. Series | DataFrame)
+            union_args = typing_inspect.get_args(registered_type)
+            if union_args and any(
+                isinstance(arg, type) and issubclass(input_data_type, arg)
+                for arg in union_args
+            ):
+                return registered_fn
+
+        return None
+
+    def _dispatcher_call_with_any_fallback(self, *args, **kwargs) -> typing.Any:
+        input_data_type = type(args[0])
+        fn = _find_matching_function(self, input_data_type)
 
         if fn is None and typing.Any in self._function_registry:
             fn = self._function_registry[typing.Any]
+
         if fn is None:
             return _orig_dispatcher_call(self, *args, **kwargs)
         return fn(*args, **kwargs)

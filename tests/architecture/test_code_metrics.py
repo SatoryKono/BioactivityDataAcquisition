@@ -659,7 +659,7 @@ class TestClassSize:
         # Derived entity data source wrappers (comprehensive docstrings)
         "PublicationTermDataSource": 585,  # 579 lines - Wrapper with FilterableDataSourcePort delegation + get_source_metadata
         # Composition services
-        "MetadataCoordinator": 455,  # 451 lines - Metadata coordination for Medallion layers + DQ provenance + composite metadata
+        "MetadataCoordinator": 470,  # 460 LOC - Metadata coordination for Medallion layers + DQ provenance + composite metadata
         # Composite pipeline services (ADR-026)
         "MergeService": 1835,  # 1826 lines - Composite merge service with dependency join support + conflict resolution + column priority ordering + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation + composite key dependency join
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
@@ -682,6 +682,7 @@ class TestClassSize:
         "CommentExtractor": 355,  # 352 lines - UniProt comment extraction helper
         "CrossRefExtractor": 370,  # 366 lines - UniProt cross-reference extraction helper
         "FeatureExtractor": 335,  # 332 lines - UniProt feature extraction helper
+        "IdentifierExtractor": 350,  # 338 lines - PubMed identifier extraction with single-pass logic + delegation to extractors
         # Derived entity data source wrappers
         "SubcellularFractionDataSource": 490,  # 479 lines - Wrapper with FilterableDataSourcePort delegation (like PublicationTermDataSource)
     }
@@ -826,6 +827,7 @@ class TestGodObjectDetection:
         "PipelineRunner": "Thin orchestrator - delegates to preflight, postrun, lifecycle services",
         # Extracted validators (REFACTOR-003)
         "MedallionConfigValidator": "Cohesive validator - all methods relate to medallion validation",
+        "IdentifierExtractor": "Cohesive extractor - all methods relate to identifier extraction logic",
         # Error handling utility (not an adapter, unified error classification)
         "ErrorService": "Cohesive utility - all methods relate to error classification and logging",
         # Domain services (cohesive services with single responsibility)

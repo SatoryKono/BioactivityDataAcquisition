@@ -35,8 +35,11 @@ if TYPE_CHECKING:
         BronzeDQConfigPort,
         GoldDQConfigPort,
         LoggerPort,
+        MetadataCoordinatorPort,
+        MetadataWriterPort,
         MetricsPort,
         SilverDQConfigPort,
+        StoragePort,
         TracingPort,
     )
 
@@ -319,23 +322,28 @@ class PostrunService:
                 mode=self._config.table.silver_write_mode,
                 total_records=stats.get("records_silver"),
                 source_batch_ids=stats.get("source_batch_ids"),
-                dq_report_path=dq_reports.silver_path if dq_reports else None,
+                dq_report_path=(dq_reports.silver_report_path if dq_reports else None),
                 started_at=self._context.started_at,
                 completed_at=datetime.now(UTC),
             )
-            silver_metadata = self._metadata_coordinator.create_silver_metadata(
-                silver_input
-            )
-            await self._metadata_writer.write_silver_metadata(
-                str(silver_path),
-                silver_metadata,
-                provider=self._config.provider,
-                entity=self._config.entity_type,
-            )
+            if self._metadata_coordinator:
+                silver_metadata = self._metadata_coordinator.create_silver_metadata(
+                    silver_input
+                )
+                if self._metadata_writer:
+                    await self._metadata_writer.write_silver_metadata(
+                        str(silver_path),
+                        silver_metadata,
+                        provider=self._config.provider,
+                        entity=self._config.entity_type,
+                    )
 
         # 2. Write final Gold metadata
         gold_table = self._config.table.gold_table
-        if gold_table:
+        # Check if gold schema exists, assuming it's available in config
+        gold_schema = getattr(self._config, "gold_schema", None)
+
+        if gold_table and gold_schema:
             gold_path = self._storage.get_table_path(gold_table)
             gold_input = GoldMetadataInput(
                 table_path=str(gold_path),
@@ -343,15 +351,19 @@ class PostrunService:
                 mode=self._config.table.gold_write_mode,
                 total_records=stats.get("records_gold"),
                 completed_at=datetime.now(UTC),
-                gold_schema=self._config.gold_schema,
+                gold_schema=gold_schema,
             )
-            gold_metadata = self._metadata_coordinator.create_gold_metadata(gold_input)
-            await self._metadata_writer.write_gold_metadata(
-                str(gold_path),
-                gold_metadata,
-                provider=self._config.provider,
-                entity=self._config.entity_type,
-            )
+            if self._metadata_coordinator:
+                gold_metadata = self._metadata_coordinator.create_gold_metadata(
+                    gold_input
+                )
+                if self._metadata_writer:
+                    await self._metadata_writer.write_gold_metadata(
+                        str(gold_path),
+                        gold_metadata,
+                        provider=self._config.provider,
+                        entity=self._config.entity_type,
+                    )
 
     def _collect_batch_metrics(self, executor: ExecutorMetricsPort) -> dict[str, float]:
         """Collect batch metrics from executor.

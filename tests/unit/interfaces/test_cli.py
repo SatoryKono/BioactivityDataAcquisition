@@ -283,17 +283,33 @@ class TestCliCommands:
         self, mock_asyncio_run, mock_register, cli_runner, mock_registry
     ):
         """Test that valid pipeline is executed."""
-        from bioetl.application.services import PipelineRunResult
+        from bioetl.application.services import PipelineRunResult, RunResult
 
-        # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
-        mock_asyncio_run.return_value = (
-            PipelineRunResult.SUCCESS,
-            None,
-            None,
-            "test-run-id",
+        # _run_pipeline_async returns RunResult object
+        mock_asyncio_run.return_value = RunResult(
+            status=PipelineRunResult.SUCCESS,
+            pipeline_name="chembl_activity",
+            error_message=None,
+            error_type=None,
+            run_id="test-run-id",
+            run_type="incremental",
+            records_fetched=100,
+            records_bronze=100,
+            records_silver=90,
+            records_gold=80,
+            records_quarantined=10,
         )
 
-        result = cli_runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
+        # Pass --no-health-server to avoid "Health server" output in failure message
+        result = cli_runner.invoke(
+            cli, ["run", "--pipeline", "chembl_activity", "--no-health-server"]
+        )
+
+        # Print output if command failed
+        if result.exit_code != 0:
+            print(f"Command output: {result.output}")
+            if result.exception:
+                print(f"Command exception: {result.exception}")
 
         # Should have called asyncio.run
         assert result.exit_code == 0, f"Command failed: {result.output}"

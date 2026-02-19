@@ -6,59 +6,16 @@ Supports complete ArticleIdList and ELocationID extraction for cross-referencing
 
 from __future__ import annotations
 
-from typing import TypedDict
 from xml.etree.ElementTree import Element
 
 from bioetl.application.pipelines.pubmed.extractors.base import BaseFieldExtractor
-
-
-class ArticleIdentifiers(TypedDict):
-    """Identifier data container (raw or normalized)."""
-
-    doi: str | None
-    pmc_id: str | None
-
-
-# Aliases for clarity in extractor API
-RawIdentifiers = ArticleIdentifiers
-NormalizedIdentifiers = ArticleIdentifiers
-
-
-class AllArticleIds(TypedDict, total=False):
-    """Complete set of article identifiers from PubMed.
-
-    ArticleIdList can contain various ID types:
-    - pubmed: PubMed ID
-    - doi: Digital Object Identifier
-    - pmc: PubMed Central ID
-    - pii: Publisher Item Identifier
-    - mid: Manuscript ID (PMC submission)
-    - publisher-id: Publisher-specific identifier
-    - pmcid: Alternative PMC ID format
-    - medline: MEDLINE unique ID
-    """
-
-    pubmed: str | None
-    doi: str | None
-    pmc: str | None
-    pii: str | None
-    mid: str | None
-    publisher_id: str | None
-    pmcid: str | None
-    medline: str | None
-    other_ids: dict[str, str]  # Any other ID types encountered
-
-
-class ELocationIds(TypedDict, total=False):
-    """Electronic location identifiers from ELocationID elements.
-
-    ELocationID provides additional identifiers like:
-    - doi: Digital Object Identifier
-    - pii: Publisher Item Identifier
-    """
-
-    doi: str | None
-    pii: str | None
+from bioetl.application.pipelines.pubmed.extractors.identifier_types import (
+    AllArticleIds,
+    ArticleIdentifiers,
+    ELocationIds,
+    NormalizedIdentifiers,
+    RawIdentifiers,
+)
 
 
 class IdentifierExtractor(BaseFieldExtractor):
@@ -134,6 +91,50 @@ class IdentifierExtractor(BaseFieldExtractor):
         """Normalize text by stripping whitespace."""
         return text.strip() if text else None
 
+    def _extract_from_elocation(
+        self, article: Element, result: dict[str, str | None]
+    ) -> None:
+        """Extract identifiers from ELocationID elements."""
+        for eloc in article.findall("ELocationID"):
+            eid_type = eloc.get("EIdType")
+            if not eid_type or not eloc.text:
+                continue
+
+            normalized = self._normalize_text(eloc.text)
+            if not normalized:
+                continue
+
+            if eid_type == "doi":
+                result["doi"] = normalized
+            elif eid_type == "pii":
+                result["pii"] = normalized
+
+    def _extract_from_article_id_list(
+        self, article_id_list: Element, result: dict[str, str | None]
+    ) -> None:
+        """Extract identifiers from ArticleIdList elements."""
+        for aid in article_id_list.findall("ArticleId"):
+            id_type = aid.get("IdType")
+            if not id_type or not aid.text:
+                continue
+
+            normalized = self._normalize_text(aid.text)
+            if not normalized:
+                continue
+
+            if id_type == "doi":
+                if result["doi"] is None:
+                    result["doi"] = normalized
+            elif id_type == "pii":
+                if result["pii"] is None:
+                    result["pii"] = normalized
+            elif id_type == "pmc":
+                result["pmc_id"] = normalized
+            elif id_type == "mid":
+                result["mid"] = normalized
+            elif id_type == "publisher-id":
+                result["publisher_id"] = normalized
+
     @classmethod
     def extract_all_identifiers(cls, root: Element) -> dict[str, str | None]:
         """Extract all supported identifiers from PubMed XML in a single pass.
@@ -158,48 +159,14 @@ class IdentifierExtractor(BaseFieldExtractor):
         }
 
         # 1. Scan ELocationID (higher priority for DOI/PII)
-        # Note: ELocationID is typically under Article, but we search from root
-        # consistent with extract_elocation_ids logic
         article = root.find(".//Article")
         if article is not None:
-            for eloc in article.findall("ELocationID"):
-                eid_type = eloc.get("EIdType")
-                if not eid_type or not eloc.text:
-                    continue
-
-                normalized = extractor._normalize_text(eloc.text)
-                if not normalized:
-                    continue
-
-                if eid_type == "doi":
-                    result["doi"] = normalized
-                elif eid_type == "pii":
-                    result["pii"] = normalized
+            extractor._extract_from_elocation(article, result)
 
         # 2. Scan ArticleIdList (fallback for DOI/PII, primary for others)
         article_id_list = root.find(".//ArticleIdList")
         if article_id_list is not None:
-            for aid in article_id_list.findall("ArticleId"):
-                id_type = aid.get("IdType")
-                if not id_type or not aid.text:
-                    continue
-
-                normalized = extractor._normalize_text(aid.text)
-                if not normalized:
-                    continue
-
-                if id_type == "doi":
-                    if result["doi"] is None:
-                        result["doi"] = normalized
-                elif id_type == "pii":
-                    if result["pii"] is None:
-                        result["pii"] = normalized
-                elif id_type == "pmc":
-                    result["pmc_id"] = normalized
-                elif id_type == "mid":
-                    result["mid"] = normalized
-                elif id_type == "publisher-id":
-                    result["publisher_id"] = normalized
+            extractor._extract_from_article_id_list(article_id_list, result)
 
         return result
 
