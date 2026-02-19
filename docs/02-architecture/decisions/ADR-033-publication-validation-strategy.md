@@ -6,7 +6,7 @@
 | **Дата** | 2026-02-06 |
 | **Автор** | BioETL Team |
 | **Ревьюер** | — |
-| **Связанные ADR** | [ADR-002](ADR-002-medallion-architecture.md) (Medallion Architecture), [ADR-014](ADR-014-deterministic-writes.md) (Deterministic Writes), [ADR-027](ADR-027-dq-externalization.md) (DQ Externalization) |
+| **Связанные ADR** | [ADR-002](ADR-002-medallion-architecture.md) (Medallion Architecture), [ADR-014](ADR-014-deterministic-writes.md) (Deterministic Writes), [ADR-027](ADR-027-dq-rules-externalization.md) (DQ Externalization) |
 | **Заменяет** | — |
 | **Заменён** | — |
 

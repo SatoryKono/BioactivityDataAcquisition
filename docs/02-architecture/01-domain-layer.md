@@ -230,8 +230,8 @@ Domain содержит 11 дополнительных поддиректори
 | Domain Layer Classes | [04-domain-layer-class-diagram.mermaid](diagrams/04-domain-layer-class-diagram.mermaid) | Классы портов, сущностей, конфигурации            |
 | Domain DDD           | [08-domain-ddd.mermaid](diagrams/08-domain-ddd.mermaid)                                 | DDD-структура домена                              |
 | Domain Models        | [13-domain-models-relationship.mermaid](diagrams/13-domain-models-relationship.mermaid) | Связи доменных моделей                            |
-| DDD Aggregates       | [diagrams/09-ddd-aggregates.mermaid](diagrams/09-ddd-aggregates.mermaid)                | DDD агрегаты: Batch, PipelineRun, QuarantineEntry |
-| Ports Architecture   | [diagrams/07-ports-architecture.mermaid](diagrams/07-ports-architecture.mermaid)        | Архитектура 25 портов                             |
+| DDD Aggregates       | [08-domain-ddd.mermaid](diagrams/08-domain-ddd.mermaid)                                 | DDD агрегаты: Batch, PipelineRun, QuarantineEntry |
+| Ports Architecture   | [30-port-adapter-mapping.mermaid](diagrams/30-port-adapter-mapping.mermaid)             | Архитектура 25 портов                             |
 
 ### Связанные ADR
 

@@ -211,6 +211,13 @@ class StorageAdapter:
             silver_refs=silver_refs,
         )
 
+    def get_table_path(self, table_name: str) -> Path:
+        """Resolve the full path to a Delta table.
+
+        Delegates to the underlying writer implementation.
+        """
+        return self.silver.get_table_path(table_name)
+
     async def read_silver(
         self,
         table_name: str,

@@ -222,9 +222,9 @@ Seed Pipeline → Extract Keys → [CrossRef, OpenAlex, PubMed, SemanticScholar]
 | Pipeline Execution        | [06-pipeline-execution.mermaid](diagrams/06-pipeline-execution.mermaid)                                      | Поток выполнения пайплайна               |
 | Pipeline Hierarchy        | [17-pipeline-hierarchy.mermaid](diagrams/17-pipeline-hierarchy.mermaid)                                      | Иерархия Pipeline/Transformer            |
 | Layers Interaction        | [05-layers-interaction.mermaid](diagrams/05-layers-interaction.mermaid)                                      | Взаимодействие слоёв (включая Composite) |
-| Composite Pipeline        | [diagrams/26-composite-pipeline-workflow.mermaid](diagrams/26-composite-pipeline-workflow.mermaid)           | Workflow Composite Pipeline              |
-| Pipeline Core             | [diagrams/10-pipeline-core-components.mermaid](diagrams/10-pipeline-core-components.mermaid)                 | Ядро пайплайнов                          |
-| BaseTransformer           | [diagrams/19-base-transformer-template-method.mermaid](diagrams/19-base-transformer-template-method.mermaid) | Template Method паттерн                  |
+| Composite Pipeline        | [29-composite-pipeline-workflow.mermaid](diagrams/29-composite-pipeline-workflow.mermaid)                     | Workflow Composite Pipeline              |
+| Pipeline Core             | [40-application-core-collaboration.mermaid](diagrams/40-application-core-collaboration.mermaid)              | Ядро пайплайнов                          |
+| BaseTransformer           | [45-template-method-transformer.mermaid](diagrams/45-template-method-transformer.mermaid)                    | Template Method паттерн                  |
 
 ### Связанные ADR
 

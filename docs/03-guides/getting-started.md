@@ -148,5 +148,5 @@ Another pipeline instance may be running. Check for zombie Python processes or w
 
 - [Running Pipelines](running-pipelines.md) - Comprehensive guide to pipeline execution
 - [Add New Source](add-new-source.md) - Integrate a new data provider
-- [Project Navigator](../00-map.md) - Full documentation index
+- [Project Navigator](../00-project/00-map.md) - Full documentation index
 - [ADR-010: Local-Only Deployment](../02-architecture/decisions/ADR-010-local-only-deployment.md) - Architecture decision details

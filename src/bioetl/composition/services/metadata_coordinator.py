@@ -290,17 +290,19 @@ class MetadataCoordinator:
         Returns:
             Complete SilverMetadata for sidecar file.
         """
-        if not input_data.records:
-            raise ValueError("Cannot create Silver metadata without records")
-
         # Build lineage from records and bronze_refs
-        source_batch_ids = list(
-            {
-                r.get("_source_batch_id", "")
-                for r in input_data.records
-                if r.get("_source_batch_id")
-            }
-        )
+        if input_data.source_batch_ids is not None:
+            source_batch_ids = input_data.source_batch_ids
+        elif input_data.records:
+            source_batch_ids = list(
+                {
+                    r.get("_source_batch_id", "")
+                    for r in input_data.records
+                    if r.get("_source_batch_id")
+                }
+            )
+        else:
+            source_batch_ids = []
 
         bronze_paths: list[str] = []
         if input_data.bronze_refs:
@@ -340,11 +342,17 @@ class MetadataCoordinator:
             primary_key=input_data.primary_keys,
             partition_by=input_data.partition_by or [],
             version_after=input_data.version_after,
-            rows_inserted=len(input_data.records),
+            rows_inserted=input_data.total_records
+            if input_data.total_records is not None
+            else len(input_data.records or []),
         )
 
         # Build DQ summary from computed metrics or use basic fallback
-        rec_count = len(input_data.records)
+        rec_count = (
+            input_data.total_records
+            if input_data.total_records is not None
+            else len(input_data.records or [])
+        )
         dq_summary = (
             input_data.dq_metrics.to_dq_summary()
             if input_data.dq_metrics
@@ -484,9 +492,6 @@ class MetadataCoordinator:
         Returns:
             Complete GoldMetadata for sidecar file.
         """
-        if not input_data.records:
-            raise ValueError("Cannot create Gold metadata without records")
-
         # Build lineage from Silver refs (REQ-LINEAGE-002: Silver → Gold tracking)
         source_tables: dict[str, int] = {}
         if input_data.silver_refs:
@@ -513,7 +518,11 @@ class MetadataCoordinator:
         )
 
         # Build DQ summary (basic metrics)
-        rec_count = len(input_data.records)
+        rec_count = (
+            input_data.total_records
+            if input_data.total_records is not None
+            else len(input_data.records or [])
+        )
         dq_summary = DQSummary(
             total_records=rec_count,
             valid_records=rec_count,
@@ -521,7 +530,7 @@ class MetadataCoordinator:
 
         # Build unified output metadata (ADR-029)
         composite_ext = _extract_composite_output_ext(
-            input_data.records,
+            input_data.records or [],
             partition_count=getattr(input_data, "partition_count", 0),
             schema_validation_enabled=getattr(
                 input_data, "schema_validation_enabled", False

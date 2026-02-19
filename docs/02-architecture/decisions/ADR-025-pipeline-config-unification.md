@@ -262,10 +262,10 @@ pipeline-name: chembl-activity
 - [RULES.md v5.20, Appendix D](../../00-project/RULES.md) - Reference schema
 - [ADR-014: Deterministic Writes](ADR-014-deterministic-writes.md) - sort-by requirement
 - [ADR-027: DQ Rules Externalization](ADR-027-dq-rules-externalization.md) - Hierarchical DQ config
-- [03-file-policy.md](../../00-project-rules/03-file-policy.md) - File structure documentation
-- [04-extending-bioetl.md](../../00-project-rules/04-extending-bioetl.md) - Entity config template
-- [configs/pipelines/-base.yaml](../../../configs/pipelines/-base.yaml) - Unified Base Schema v2.0.0
-- [Pipeline Pydantic Schema](../../../src/bioetl/infrastructure/schemas/pipeline-config.py) - Pydantic validation schema
+- [03-file-policy.md](../../00-project/governance/03-file-policy.md) - File structure documentation
+- [04-extending-bioetl.md](../../00-project/governance/04-extending-bioetl.md) - Entity config template
+- [configs/pipelines/_base.yaml](../../../configs/pipelines/_base.yaml) - Unified Base Schema v2.0.0
+- [Pipeline Pydantic Schema](../../../src/bioetl/infrastructure/schemas/pipeline_config.py) - Pydantic validation schema
 
 ## Changelog
 

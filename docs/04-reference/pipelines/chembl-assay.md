@@ -1,6 +1,6 @@
 # Pipeline: ChEMBL Assay
 
-> **Full Documentation (RU):** [docs/providers/chembl/assay.md](../../providers/chembl/assay.md)
+> **Full Documentation (RU):** [docs/04-reference/providers/chembl/assay.md](../providers/chembl/assay.md)
 
 ## Overview
 

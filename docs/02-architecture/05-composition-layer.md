@@ -138,9 +138,9 @@ runner = bootstrap-composite-runner(
 
 | Диаграмма               | Файл                                                                                               | Описание                           |
 | ----------------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| Composition Root        | [diagrams/11-composition-root.mermaid](diagrams/11-composition-root.mermaid)               | DI container, factories, bootstrap |
-| Factory Pattern         | [diagrams/20-factory-pattern-usage.mermaid](diagrams/20-factory-pattern-usage.mermaid)     | Использование Factory паттерна     |
-| Five Layer Architecture | [diagrams/01-five-layer-architecture.mermaid](diagrams/01-five-layer-architecture.mermaid) | Composition слой в архитектуре     |
+| Composition Root        | [28-composition-root-di-graph.mermaid](diagrams/28-composition-root-di-graph.mermaid)     | DI container, factories, bootstrap |
+| Factory Pattern         | [35-bootstrap-sequence.mermaid](diagrams/35-bootstrap-sequence.mermaid)                   | Использование Factory паттерна     |
+| Five Layer Architecture | [01-high-level.mermaid](diagrams/01-high-level.mermaid)                                   | Composition слой в архитектуре     |
 | Layers Interaction      | [05-layers-interaction.mermaid](diagrams/05-layers-interaction.mermaid)                    | Bootstrap → Factories → Runner     |
 
 ### Связанные ADR

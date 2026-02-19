@@ -198,6 +198,11 @@ class BaseServicesFactory:
             logger=logger,
         )
 
+        # Create MetadataWriter
+        from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
+
+        metadata_writer = MetadataWriter(logger=logger)
+
         return PipelineServices(
             data_source=data_source,
             storage=storage_ctx.adapter,
@@ -208,6 +213,8 @@ class BaseServicesFactory:
             tracing=tracer,
             logger=logger,
             dq_monitor=dq_monitor,
+            metadata_coordinator=metadata_coordinator,
+            metadata_writer=metadata_writer,
             bronze_dq_analyzer=dq_services.get("bronze_analyzer"),
             silver_dq_analyzer=dq_services.get("silver_analyzer"),
             gold_dq_analyzer=dq_services.get("gold_analyzer"),

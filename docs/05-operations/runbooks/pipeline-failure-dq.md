@@ -1,6 +1,6 @@
 # Pipeline Failure: High DQ Rate (P2)
 
-*Reference: [RULES.md §3.1.2](../../RULES.md#312-пороги-ошибок-батча-thresholds)*
+*Reference: [RULES.md §3.1.2](../../00-project/RULES.md#312-пороги-ошибок-батча-thresholds)*
 
 This runbook describes how to handle pipeline failures due to high Data Quality (DQ) error rates.
 

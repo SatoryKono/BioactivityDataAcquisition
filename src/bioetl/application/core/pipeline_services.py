@@ -32,6 +32,8 @@ if TYPE_CHECKING:
         BronzeDQAnalyzerPort,
         DQReportWriterPort,
         GoldDQAnalyzerPort,
+        MetadataCoordinatorPort,
+        MetadataWriterPort,
         SilverDQAnalyzerPort,
     )
 
@@ -56,6 +58,8 @@ class PipelineServices:
         tracing: Port for distributed tracing.
         logger: Structured logger for pipeline events.
         dq_monitor: Optional data quality monitor for anomaly detection.
+        metadata_coordinator: Optional coordinator for creating consistent metadata.
+        metadata_writer: Optional writer for metadata sidecar files.
         bronze_dq_analyzer: Optional Bronze layer DQ analyzer for report generation.
         silver_dq_analyzer: Optional Silver layer DQ analyzer for report generation.
         gold_dq_analyzer: Optional Gold layer DQ analyzer for report generation.
@@ -84,6 +88,10 @@ class PipelineServices:
     tracing: TracingPort
     logger: LoggerPort
     dq_monitor: DQMonitorPort | None = None
+
+    # Metadata services
+    metadata_coordinator: MetadataCoordinatorPort | None = None
+    metadata_writer: MetadataWriterPort | None = None
 
     # DQ Report services (optional, created only if any layer has dq_report enabled)
     bronze_dq_analyzer: BronzeDQAnalyzerPort | None = None
@@ -116,14 +124,17 @@ class PipelineServices:
         self.logger.info("Closing pipeline services...", stage="cleanup")
 
         # Close async I/O services
-        results = await asyncio.gather(
+        io_tasks = [
             self.data_source.aclose(),
             self.storage.aclose(),
             self.lock.aclose(),
             self.checkpoint.aclose(),
             self.quarantine.aclose(),
-            return_exceptions=True,
-        )
+        ]
+        if self.metadata_writer:
+            io_tasks.append(self.metadata_writer.aclose())
+
+        results = await asyncio.gather(*io_tasks, return_exceptions=True)
 
         for result in results:
             if isinstance(result, Exception):

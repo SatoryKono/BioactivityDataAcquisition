@@ -34,6 +34,6 @@ Derived pipeline that extracts and flattens publication terms (MeSH, keywords) f
 
 ## Related ADRs
 
-- [ADR-024](../../02-architecture/decisions/ADR-024-entity-naming-unification.md)
-- [ADR-030](../../02-architecture/decisions/ADR-030-publication-pagination-strategy.md)
-- [ADR-031](../../02-architecture/decisions/ADR-031-loading-strategy-formalization.md)
+- [ADR-024](../../../02-architecture/decisions/ADR-024-entity-naming-unification.md)
+- [ADR-030](../../../02-architecture/decisions/ADR-030-publication-pagination-strategy.md)
+- [ADR-031](../../../02-architecture/decisions/ADR-031-loading-strategy-formalization.md)

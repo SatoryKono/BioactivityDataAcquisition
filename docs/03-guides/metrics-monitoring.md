@@ -437,7 +437,7 @@ groups:
 
 ## См. также
 
-- [Observability Metrics Contract](../contracts/observability.md) — полный каталог метрик
+- [Observability Metrics Contract](../04-reference/contracts/observability.md) — полный каталог метрик
 - [Observability Architecture](../02-architecture/observability-layers.md) — архитектура observability
 - [Observability Checklist](../05-operations/runbooks/observability-checklist.md) — чек-лист для адаптеров
 - [ADR-017: Observability Architecture](../02-architecture/decisions/ADR-017-observability-architecture.md)

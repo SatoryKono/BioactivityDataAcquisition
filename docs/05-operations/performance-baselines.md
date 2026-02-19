@@ -77,5 +77,5 @@ When performance improvements are made:
 ## References
 
 - [pytest-benchmark documentation](https://pytest-benchmark.readthedocs.io/)
-- [ADR-014: Deterministic Writes](../../02-architecture/decisions/ADR-014-deterministic-writes.md)
+- [ADR-014: Deterministic Writes](../02-architecture/decisions/ADR-014-deterministic-writes.md)
 - Architecture Review Report (R5)

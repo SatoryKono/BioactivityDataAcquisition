@@ -28,7 +28,7 @@
 
 **Связанные ADR:**
 - [ADR-002](../02-architecture/decisions/ADR-002-medallion-architecture.md) — Hexagonal Architecture (validation services в application layer)
-- [ADR-014](../../02-architecture/decisions/ADR-014-deterministic-writes.md) — Medallion Architecture (Bronze → Silver → Gold)
+- [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md) — Medallion Architecture (Bronze → Silver → Gold)
 - [ADR-027](../02-architecture/decisions/ADR-027-dq-rules-externalization.md) — Silver Layer DQ Framework (`-dq-warn`, `-dq-error`)
 
 ---
@@ -38,7 +38,7 @@
 | Документ | Описание | Охват |
 |----------|----------|-------|
 | **[Publication Fields Reference](publication-fields-reference.md)** | Полный справочник всех 191 полей с типами, regex, PK, категориями | 191 поле |
-| **[Validation Schema v3](schemas/publication-validation-schema-v3.xlsx)** | Структурированная таблица правил валидации (XLSX + CSV) | 191 правило × 5 уровней |
+| **[Validation Schema v3](schemas/publication_validation_schema_v3.xlsx)** | Структурированная таблица правил валидации (XLSX + CSV) | 191 правило × 5 уровней |
 | **[Glossary v2.5](../00-project/glossary.md)** | Ubiquitous Language: термины валидации, DQ-флаги, режимы | 12 новых терминов |
 
 ---
@@ -56,8 +56,8 @@
 
 | Документ | Описание | Покрытие |
 |----------|----------|----------|
-| **[Test Suite README](../../tests-generated/README.md)** | Описание сгенерированного test suite, матрица покрытия, инструкции по запуску | 471 тест (64%) |
-| **[Coverage Matrix CSV](../../tests-generated/test-coverage-matrix.csv)** | Детальная таблица покрытия по уровням валидации | 6 категорий тестов |
+| **[Contract Tests README](../../tests/contract/silver_schemas/README.md)** | Описание контрактных тестов и snapshot-процесса | Contract tests |
+| **[Publication Schema Contracts](../../tests/contract/test_publication_schema_contracts.py)** | Тесты валидации схем публикаций | Contract tests |
 
 **Test Organization:**
 ```
@@ -99,8 +99,8 @@ open docs/03-guides/publication-validation-guide.md
 # Открыть Field Reference
 open docs/04-reference/publication-fields-reference.md
 
-# Или поискать в валидационной схеме
-grep "pmid" docs/04-reference/schemas/publication-validation-schema-v3.csv
+    # Или поискать в валидационной схеме
+    grep "pmid" docs/04-reference/schemas/publication_validation_schema_v3.csv
 ```
 
 **Пример записи:**
@@ -142,18 +142,18 @@ python -m bioetl.interfaces.cli.main run-pipeline \
 
 ```bash
 # Все тесты
-pytest tests-generated/ -v
+pytest tests/contract/ -v
 
 # По маркерам
-pytest tests-generated/ -m unit           # Unit tests only
-pytest tests-generated/ -m integration    # Integration tests only
-pytest tests-generated/ -m contracts      # Contract tests only
+pytest tests/contract/ -m unit           # Unit tests only
+pytest tests/contract/ -m integration    # Integration tests only
+pytest tests/contract/ -m contracts      # Contract tests only
 
 # По провайдеру
-pytest tests-generated/unit/domain/schemas/pubmed/ -v
+pytest tests/contract/ -k pubmed -v
 
 # С coverage
-pytest tests-generated/ --cov=src/bioetl --cov-report=html
+pytest tests/contract/ --cov=src/bioetl --cov-report=html
 ```
 
 ---
@@ -189,12 +189,12 @@ cat /var/log/bioetl/pipeline.log | \
    - Интегрировать в трансформер
 
 3. **Тестировать:**
-   - Запустить `pytest tests-generated/` — проверить существующие тесты
+    - Запустить `pytest tests/contract/` — проверить существующие тесты
    - Добавить provider-specific tests по примерам
 
 4. **Документировать:**
    - Обновить [Field Reference](publication-fields-reference.md) при добавлении полей
-   - Добавить правила в [Validation Schema](schemas/publication-validation-schema-v3.xlsx)
+    - Добавить правила в [Validation Schema](schemas/publication_validation_schema_v3.xlsx)
 
 ---
 
@@ -220,8 +220,8 @@ cat /var/log/bioetl/pipeline.log | \
 ### QA / Test Engineer (Тестирование)
 
 1. **Изучить тесты:**
-   - [Test Suite README](../../tests-generated/README.md)
-   - [Coverage Matrix](../../tests-generated/test-coverage-matrix.csv)
+    - [Contract Tests README](../../tests/contract/silver_schemas/README.md)
+    - [Publication Schema Contracts](../../tests/contract/test_publication_schema_contracts.py)
 
 2. **Расширить покрытие:**
    - Base Validation: добавить edge cases для string fields (empty, whitespace, very long)
@@ -242,7 +242,7 @@ cat /var/log/bioetl/pipeline.log | \
 ### Добавление нового провайдера
 
 1. Определить поля в Pandera schema (`src/bioetl/domain/schemas/{provider}/publication.py`)
-2. Добавить правила в `publication-validation-schema-v3.xlsx`
+2. Добавить правила в `publication_validation_schema_v3.xlsx`
 3. Сгенерировать тесты из XLSX (скрипт: `scratchpad/generate-tests.py`)
 4. Обновить [Field Reference](publication-fields-reference.md)
 5. Добавить провайдера в конфигурацию External Verification

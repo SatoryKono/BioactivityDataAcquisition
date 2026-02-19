@@ -107,22 +107,62 @@ def mock_dq_service():
 
 
 @pytest.fixture
+def mock_storage():
+    """Create a mock storage port."""
+    storage = MagicMock()
+    storage.get_table_path = MagicMock(return_value="/path/to/table")
+    return storage
+
+
+@pytest.fixture
+def mock_metadata_coordinator():
+    """Create a mock metadata coordinator."""
+    return MagicMock()
+
+
+@pytest.fixture
+def mock_metadata_writer():
+    """Create a mock metadata writer."""
+    writer = MagicMock()
+    writer.write_silver_metadata = AsyncMock(return_value="/path/to/silver_metadata.yaml")
+    writer.write_gold_metadata = AsyncMock(return_value="/path/to/gold_metadata.yaml")
+    return writer
+
+
+@pytest.fixture
+def mock_context():
+    """Create a mock pipeline context."""
+    from datetime import UTC, datetime
+    context = MagicMock()
+    context.started_at = datetime.now(UTC)
+    return context
+
+
+@pytest.fixture
 def postrun_service(
     pipeline_config,
     runtime_config,
+    mock_context,
     mock_dq_service,
     mock_lifecycle_service,
+    mock_storage,
     mock_metrics,
     mock_logger,
+    mock_metadata_coordinator,
+    mock_metadata_writer,
 ):
     """Create a PostrunService instance."""
     return PostrunService(
         config=pipeline_config,
         runtime=runtime_config,
+        context=mock_context,
         dq_service=mock_dq_service,
         lifecycle_service=mock_lifecycle_service,
+        storage=mock_storage,
         metrics=mock_metrics,
         logger=mock_logger,
+        metadata_coordinator=mock_metadata_coordinator,
+        metadata_writer=mock_metadata_writer,
     )
 
 
@@ -134,27 +174,39 @@ class TestPostrunServiceInit:
         self,
         pipeline_config,
         runtime_config,
+        mock_context,
         mock_dq_service,
         mock_lifecycle_service,
+        mock_storage,
         mock_metrics,
         mock_logger,
+        mock_metadata_coordinator,
+        mock_metadata_writer,
     ):
         """Test postrun service initializes correctly."""
         service = PostrunService(
             config=pipeline_config,
             runtime=runtime_config,
+            context=mock_context,
             dq_service=mock_dq_service,
             lifecycle_service=mock_lifecycle_service,
+            storage=mock_storage,
             metrics=mock_metrics,
             logger=mock_logger,
+            metadata_coordinator=mock_metadata_coordinator,
+            metadata_writer=mock_metadata_writer,
         )
 
         assert service._config == pipeline_config
         assert service._runtime == runtime_config
+        assert service._context == mock_context
         assert service._dq_service == mock_dq_service
         assert service._lifecycle_service == mock_lifecycle_service
+        assert service._storage == mock_storage
         assert service._metrics == mock_metrics
         assert service._logger == mock_logger
+        assert service._metadata_coordinator == mock_metadata_coordinator
+        assert service._metadata_writer == mock_metadata_writer
 
 
 @pytest.mark.unit
@@ -263,8 +315,10 @@ class TestPostrunServiceVacuum:
         service = PostrunService(
             config=pipeline_config,
             runtime=runtime,
+            context=mock_context,
             dq_service=mock_dq_service,
             lifecycle_service=mock_lifecycle_service,
+            storage=mock_storage,
             metrics=mock_metrics,
             logger=mock_logger,
         )
@@ -305,8 +359,10 @@ class TestPostrunServiceVacuum:
         service = PostrunService(
             config=pipeline_config,
             runtime=runtime,
+            context=mock_context,
             dq_service=mock_dq_service,
             lifecycle_service=mock_lifecycle_service,
+            storage=mock_storage,
             metrics=mock_metrics,
             logger=mock_logger,
         )
@@ -451,8 +507,10 @@ class TestPostrunServiceIntegrationWithDataQualityService:
         service = PostrunService(
             config=pipeline_config,
             runtime=runtime_config,
+            context=mock_context,
             dq_service=dq_service,
             lifecycle_service=mock_lifecycle_service,
+            storage=mock_storage,
             metrics=mock_metrics,
             logger=mock_logger,
         )
@@ -495,8 +553,10 @@ class TestPostrunServiceIntegrationWithDataQualityService:
         service = PostrunService(
             config=pipeline_config,
             runtime=runtime_config,
+            context=mock_context,
             dq_service=dq_service,
             lifecycle_service=mock_lifecycle_service,
+            storage=mock_storage,
             metrics=mock_metrics,
             logger=mock_logger,
         )

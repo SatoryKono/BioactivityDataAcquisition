@@ -148,10 +148,10 @@ Redis-адаптер без изменения domain/application слоёв.
 | Диаграмма              | Файл                                                                                                            | Описание                                         |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
 | Infrastructure Classes | [10-infrastructure-layer-class-diagram.mermaid](diagrams/10-infrastructure-layer-class-diagram.mermaid) | Классы слоя Infrastructure                       |
-| Provider Adapters      | [diagrams/23-provider-adapters-overview.mermaid](diagrams/23-provider-adapters-overview.mermaid)        | Обзор 7 провайдеров и их rate limits             |
-| HTTP Infrastructure    | [diagrams/14-http-infrastructure.mermaid](diagrams/14-http-infrastructure.mermaid)                      | UnifiedHTTPClient, Rate Limiter, Circuit Breaker |
+| Provider Adapters      | [30-port-adapter-mapping.mermaid](diagrams/30-port-adapter-mapping.mermaid)                              | Обзор 7 провайдеров и их rate limits             |
+| HTTP Infrastructure    | [10-infrastructure-layer-class-diagram.mermaid](diagrams/10-infrastructure-layer-class-diagram.mermaid) | UnifiedHTTPClient, Rate Limiter, Circuit Breaker |
 | Circuit Breaker        | [07-circuit-breaker-states.mermaid](diagrams/07-circuit-breaker-states.mermaid)                         | Состояния Circuit Breaker                        |
-| Storage Architecture   | [diagrams/13-storage-architecture.mermaid](diagrams/13-storage-architecture.mermaid)                    | Bronze, Silver, Gold writers                     |
+| Storage Architecture   | [19-delta-lake-write-sequence.mermaid](diagrams/19-delta-lake-write-sequence.mermaid)                    | Bronze, Silver, Gold writers                     |
 | MemoryLock             | [16-memory-lock-class.mermaid](diagrams/16-memory-lock-class.mermaid)                                   | Класс MemoryLock                                 |
 
 ### Связанные ADR
