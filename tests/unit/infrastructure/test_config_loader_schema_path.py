@@ -8,6 +8,7 @@ Tests:
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Any
 
@@ -148,5 +149,5 @@ class TestLoadDataSchemaConfig:
         config_path.parent.mkdir(parents=True)
         config_path.touch()
 
-        with pytest.raises(FileNotFoundError, match=str(tmp_path)):
+        with pytest.raises(FileNotFoundError, match=re.escape(str(tmp_path))):
             _load_data_schema_config(config_path, "../../schemas/chembl/molecule.yaml")
