@@ -12,7 +12,7 @@ This document outlines the migration plan to unify BioETL pipeline configuration
 The analysis revealed that the **current configuration structure is well-designed**
 and requires only minor enhancements rather than major restructuring.
 
-**Key Finding**: The existing inheritance mechanism (`_defaults.yaml` + source configs)
+**Key Finding**: The existing inheritance mechanism (`-defaults.yaml` + source configs)
 already implements the DRY principle effectively. No critical violations were found.
 
 ---
@@ -26,16 +26,16 @@ already implements the DRY principle effectively. No critical violations were fo
 **Deliverables**:
 - [x] Compliance matrix (`reports/pipeline-config-matrix.csv`)
 - [x] Discrepancy report (`reports/pipeline-config-issues.md`)
-- [x] Unified base schema (`configs/pipelines/_base.yaml`)
+- [x] Unified base schema (`configs/pipelines/-base.yaml`)
 - [x] Provider-specific documentation (consolidated into `configs/sources/`)
 - [x] ADR-025: Pipeline Configuration Unification
 
 **Status**: COMPLETED
 
-**Note (2026-01-16)**: Provider documentation from `configs/pipelines/_providers/` was
-consolidated into `configs/sources/*.yaml` to eliminate duplication. The `_providers/`
-directory was removed. Each source config now contains: `entities`, `entity_notes`,
-`documentation` (url, license), and `rate_limit.with_api_key` where applicable.
+**Note (2026-01-16)**: Provider documentation from `configs/pipelines/-providers/` was
+consolidated into `configs/sources/*.yaml` to eliminate duplication. The `-providers/`
+directory was removed. Each source config now contains: `entities`, `entity-notes`,
+`documentation` (url, license), and `rate-limit.with-api-key` where applicable.
 
 ---
 
@@ -74,7 +74,7 @@ directory was removed. Each source config now contains: `entities`, `entity_note
 
 - [ ] **2.3** Add schema validation test
   ```
-  tests/unit/configs/test_pipeline_config_schema.py
+  tests/unit/configs/test-pipeline-config-schema.py
   ```
 
 - [ ] **2.4** Add CI check for config validation
@@ -91,17 +91,17 @@ directory was removed. Each source config now contains: `entities`, `entity_note
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "BioETL Pipeline Configuration",
   "type": "object",
-  "required": ["pipeline_name", "provider", "entity_type", "version", "primary_keys"],
+  "required": ["pipeline-name", "provider", "entity-type", "version", "primary-keys"],
   "properties": {
-    "pipeline_name": {
+    "pipeline-name": {
       "type": "string",
-      "pattern": "^[a-z]+_[a-z_]+$"
+      "pattern": "^[a-z]+-[a-z-]+$"
     },
     "provider": {
       "type": "string",
       "enum": ["chembl", "pubchem", "uniprot", "crossref", "openalex", "pubmed", "semanticscholar"]
     },
-    "entity_type": {
+    "entity-type": {
       "type": "string"
     },
     "version": {
@@ -113,7 +113,7 @@ directory was removed. Each source config now contains: `entities`, `entity_note
       "properties": {
         "silver": {
           "type": "object",
-          "required": ["primary_key"],
+          "required": ["primary-key"],
           "properties": {
             "format": {
               "type": "string",
@@ -146,25 +146,25 @@ For pipelines with complex transformations, add documentation of steps:
 ```yaml
 transform:
   steps:
-    - normalize_units      # Convert to standard units (nM)
-    - validate_smiles      # Check SMILES syntax
-    - deduplicate          # Remove duplicates by content_hash
+    - normalize-units      # Convert to standard units (nM)
+    - validate-smiles      # Check SMILES syntax
+    - deduplicate          # Remove duplicates by content-hash
 ```
 
-#### 3.2 Document Empty `partition_by`
+#### 3.2 Document Empty `partition-by`
 
-Add comments explaining empty partition_by where not already documented:
+Add comments explaining empty partition-by where not already documented:
 
 - [ ] `chembl/activity.yaml` - add comment
-- [ ] `chembl/cell_line.yaml` - add comment
-- [ ] `chembl/compound_record.yaml` - add comment
+- [ ] `chembl/cell-line.yaml` - add comment
+- [ ] `chembl/compound-record.yaml` - add comment
 
 **Example**:
 ```yaml
 sink:
   silver:
-    # partition_by: []  # No natural partition key for this entity
-    partition_by: []
+    # partition-by: []  # No natural partition key for this entity
+    partition-by: []
 ```
 
 ---
@@ -178,7 +178,7 @@ sink:
 Consider using YAML anchors for cleaner inheritance:
 
 ```yaml
-# _base.yaml
+# -base.yaml
 defaults: &defaults
   sink:
     silver:
@@ -187,7 +187,7 @@ defaults: &defaults
 
 # chembl/activity.yaml
 <<: *defaults
-pipeline_name: chembl_activity
+pipeline-name: chembl-activity
 ```
 
 **Note**: This requires config loader changes. Current approach is functional.
@@ -233,7 +233,7 @@ If migration causes issues:
 
 ### Phase 3 (Documentation)
 - [ ] `transform.steps` documented where applicable
-- [ ] Empty `partition_by` commented
+- [ ] Empty `partition-by` commented
 - [ ] All deviations from defaults documented
 
 ---
@@ -256,7 +256,7 @@ If migration causes issues:
 
 | File | Purpose |
 |------|---------|
-| `configs/pipelines/_base.yaml` | Unified base schema documentation |
+| `configs/pipelines/-base.yaml` | Unified base schema documentation |
 | `reports/pipeline-config-matrix.csv` | Compliance matrix |
 | `reports/pipeline-config-issues.md` | Discrepancy report |
 | `reports/pipeline-config-migration-plan.md` | This document |
@@ -268,19 +268,19 @@ Provider documentation was consolidated into source configs:
 
 | File | Changes |
 |------|---------|
-| `configs/sources/chembl.yaml` | Added: entities, entity_notes, documentation, health_check, retry |
-| `configs/sources/pubchem.yaml` | Added: entities, entity_notes, documentation, health_check, retry |
-| `configs/sources/uniprot.yaml` | Added: entities, entity_notes, documentation, rate_limit.with_api_key, health_check, retry |
-| `configs/sources/crossref.yaml` | Added: entities, entity_notes, documentation, rate_limit.polite_pool, retry |
-| `configs/sources/openalex.yaml` | Added: entities, entity_notes, documentation, rate_limit.polite_pool, retry |
-| `configs/sources/pubmed.yaml` | Added: entities, entity_notes, documentation, rate_limit.with_api_key, health_check, retry |
-| `configs/sources/semanticscholar.yaml` | Added: entities, entity_notes, rate_limit.with_api_key, retry |
+| `configs/sources/chembl.yaml` | Added: entities, entity-notes, documentation, health-check, retry |
+| `configs/sources/pubchem.yaml` | Added: entities, entity-notes, documentation, health-check, retry |
+| `configs/sources/uniprot.yaml` | Added: entities, entity-notes, documentation, rate-limit.with-api-key, health-check, retry |
+| `configs/sources/crossref.yaml` | Added: entities, entity-notes, documentation, rate-limit.polite-pool, retry |
+| `configs/sources/openalex.yaml` | Added: entities, entity-notes, documentation, rate-limit.polite-pool, retry |
+| `configs/sources/pubmed.yaml` | Added: entities, entity-notes, documentation, rate-limit.with-api-key, health-check, retry |
+| `configs/sources/semanticscholar.yaml` | Added: entities, entity-notes, rate-limit.with-api-key, retry |
 
 ### Files Removed (2026-01-16)
 
 | File | Reason |
 |------|--------|
-| `configs/pipelines/_providers/*.yaml` (7 files) | Content consolidated into `configs/sources/` |
+| `configs/pipelines/-providers/*.yaml` (7 files) | Content consolidated into `configs/sources/` |
 
 ### Existing Files - No Changes Required
 

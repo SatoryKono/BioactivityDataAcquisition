@@ -7,20 +7,20 @@
 ## Scope
 
 This document is the single canonical policy for determining which fields affect
-`content_hash` and identity in BioETL.
+`content-hash` and identity in BioETL.
 
 Cross-reference:
 
 - RULES.md §2.8.1, §6.1
 - ADR-014 (determinism context)
-- `src/bioetl/domain/constants.py` (`META_FIELDS`)
-- `src/bioetl/domain/transformations.py` (`_should_include_field`)
+- `src/bioetl/domain/constants.py` (`META-FIELDS`)
+- `src/bioetl/domain/transformations.py` (`-should-include-field`)
 
 ## Canonical Rule
 
-`content_hash` is computed as:
+`content-hash` is computed as:
 
-`sha256(provider + canonical_json_dumps(normalized_record))`
+`sha256(provider + canonical-json-dumps(normalized-record))`
 
 Before hashing:
 
@@ -29,20 +29,20 @@ Before hashing:
 
 ### Metadata exclusion policy (MUST)
 
-A field **MUST NOT** affect identity/hash if its name starts with `_`.
+A field **MUST NOT** affect identity/hash if its name starts with `-`.
 
 This includes (non-exhaustive):
 
-- `_ingestion_ts`
-- `_run_id`
-- `_run_type`
-- `_dq_warn`, `_dq_error`, `_dq_*`
-- `_source_batch_id`
-- `_index`
-- `_lookup_method`
-- `_original_id`
-- `_source`
-- Future technical fields like `_new_field`
+- `-ingestion-ts`
+- `-run-id`
+- `-run-type`
+- `-dq-warn`, `-dq-error`, `-dq-*`
+- `-source-batch-id`
+- `-index`
+- `-lookup-method`
+- `-original-id`
+- `-source`
+- Future technical fields like `-new-field`
 
 ## Rationale
 
@@ -54,4 +54,4 @@ This includes (non-exhaustive):
 ## Contract tests
 
 - Property-based determinism: metadata-only changes keep hash stable.
-- Schema drift contract: adding new `_` fields keeps hash stable.
+- Schema drift contract: adding new `-` fields keeps hash stable.

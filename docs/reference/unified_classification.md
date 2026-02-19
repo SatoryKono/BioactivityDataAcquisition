@@ -4,7 +4,7 @@
 
 Canonical source for machine consumption is **CSV**:
 
-- `data/input/reference/unified_classification.csv`
+- `data/input/reference/unified-classification.csv`
 
 Rationale:
 
@@ -15,7 +15,7 @@ Rationale:
 
 Optional Excel copy for manual review:
 
-- `docs/reference/unified_classification.xlsx`
+- `docs/reference/unified-classification.xlsx`
 
 This file is non-canonical and must be kept synchronized from CSV when updated.
 

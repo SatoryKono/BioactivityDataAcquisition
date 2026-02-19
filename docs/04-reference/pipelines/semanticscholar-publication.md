@@ -8,7 +8,7 @@ Semantic Scholar Academic Graph API pipeline for publication metadata enrichment
 
 ## Overview
 
-The `semanticscholar_publication` pipeline ingests scholarly publication records from the [Semantic Scholar Academic Graph API](https://api.semanticscholar.org/api-docs/graph), transforming them through Bronze (raw JSON), Silver (normalized), and Gold (analytics-ready) layers.
+The `semanticscholar-publication` pipeline ingests scholarly publication records from the [Semantic Scholar Academic Graph API](https://api.semanticscholar.org/api-docs/graph), transforming them through Bronze (raw JSON), Silver (normalized), and Gold (analytics-ready) layers.
 
 **Key Features:**
 - Batch DOI resolution with automatic title-based fallback
@@ -32,17 +32,17 @@ The `semanticscholar_publication` pipeline ingests scholarly publication records
 
 | Property | Value |
 |----------|-------|
-| **Pipeline Name** | `semanticscholar_publication` |
+| **Pipeline Name** | `semanticscholar-publication` |
 | **Version** | 1.2.0 |
 | **Provider** | `semanticscholar` |
 | **Entity Type** | `publication` |
-| **Primary Key** | `paper_id` (40-char hex S2 ID) |
-| **Loading Strategy** | `full_scan_only` (ADR-030, ADR-031) |
+| **Primary Key** | `paper-id` (40-char hex S2 ID) |
+| **Loading Strategy** | `full-scan-only` (ADR-030, ADR-031) |
 | **Batch Size** | 50 records |
 
 ### Primary Key Format
 
-The `paper_id` is a 40-character hexadecimal string unique to Semantic Scholar:
+The `paper-id` is a 40-character hexadecimal string unique to Semantic Scholar:
 
 ```
 Pattern: ^[a-f0-9]{40}$
@@ -78,11 +78,11 @@ The pipeline supports multiple identifier resolution strategies:
 
 | Method | Query Pattern | Priority |
 |--------|---------------|----------|
-| **Direct** | `/paper/{paper_id}` | 1 (highest) |
+| **Direct** | `/paper/{paper-id}` | 1 (highest) |
 | **DOI** | `/paper/batch` with `ids=[DOI:...]` | 2 |
 | **Title Fallback** | `/paper/search?query={title}` | 3 (lowest) |
 
-When DOI resolution fails, the pipeline automatically falls back to title-based search. The resolution method is tracked in `_lookup_method` for data quality auditing.
+When DOI resolution fails, the pipeline automatically falls back to title-based search. The resolution method is tracked in `-lookup-method` for data quality auditing.
 
 ### Requested Fields
 
@@ -138,27 +138,27 @@ openAccessPdf, tldr, fieldsOfStudy, publicationTypes, journal
 
 | Silver Field | Type | Source | Description |
 |--------------|------|--------|-------------|
-| `entity_id` | string | Computed | UUID hash of business data |
-| `content_hash` | string | Computed | SHA-256 of normalized content |
-| `_run_id` | string | Context | Pipeline execution ID |
-| `_run_type` | string | Context | "incremental" or "full_scan" |
-| `_source_batch_id` | string | Adapter | Batch identifier |
-| `_source` | string | Fixed | Always "semanticscholar" |
-| `_ingestion_ts` | string | Context | ISO 8601 timestamp |
-| `_index` | int64 | Processor | Record index within batch |
+| `entity-id` | string | Computed | UUID hash of business data |
+| `content-hash` | string | Computed | SHA-256 of normalized content |
+| `-run-id` | string | Context | Pipeline execution ID |
+| `-run-type` | string | Context | "incremental" or "full-scan" |
+| `-source-batch-id` | string | Adapter | Batch identifier |
+| `-source` | string | Fixed | Always "semanticscholar" |
+| `-ingestion-ts` | string | Context | ISO 8601 timestamp |
+| `-index` | int64 | Processor | Record index within batch |
 
 #### Lookup Metadata
 
 | Silver Field | Type | Source | Values |
 |--------------|------|--------|--------|
-| `_lookup_method` | string | Adapter | "direct" \| "doi" \| "pmid" \| "title_fallback" \| "unknown" |
-| `_original_id` | string | Adapter | Original identifier if fallback used |
+| `-lookup-method` | string | Adapter | "direct" \| "doi" \| "pmid" \| "title-fallback" \| "unknown" |
+| `-original-id` | string | Adapter | Original identifier if fallback used |
 
 #### Primary Identifier
 
 | API Field | Silver Field | Type | Required |
 |-----------|--------------|------|----------|
-| `paperId` | `paper_id` | string | **YES** |
+| `paperId` | `paper-id` | string | **YES** |
 
 #### External Identifiers
 
@@ -166,14 +166,14 @@ openAccessPdf, tldr, fieldsOfStudy, publicationTypes, journal
 |-----------|--------------|------|------------|-------|
 | `externalIds.DOI` | `doi` | string | DOI Value Object | Normalized format |
 | `externalIds.PubMed` | `pmid` | string | PubMedId Value Object | Numeric string |
-| `externalIds.PubMedCentral` | `pmc_id` | string | - | **Excluded from Gold** |
-| `externalIds.ArXiv` | `arxiv_id` | string | - | **Excluded from Gold** |
-| `externalIds.DBLP` | `dblp_id` | string | - | **Excluded from Gold** |
-| `externalIds.CorpusId` | `corpus_id` | int64 | - | S2 internal ID |
+| `externalIds.PubMedCentral` | `pmc-id` | string | - | **Excluded from Gold** |
+| `externalIds.ArXiv` | `arxiv-id` | string | - | **Excluded from Gold** |
+| `externalIds.DBLP` | `dblp-id` | string | - | **Excluded from Gold** |
+| `externalIds.CorpusId` | `corpus-id` | int64 | - | S2 internal ID |
 
 **Value Object Validation:**
-- DOI: `DOI.from_raw()` validates format (10.xxxx/...), returns None if invalid
-- PMID: `PubMedId.from_raw()` validates numeric format, returns None if invalid
+- DOI: `DOI.from-raw()` validates format (10.xxxx/...), returns None if invalid
+- PMID: `PubMedId.from-raw()` validates numeric format, returns None if invalid
 
 #### Core Metadata
 
@@ -182,7 +182,7 @@ openAccessPdf, tldr, fieldsOfStudy, publicationTypes, journal
 | `title` | `title` | string | Publication title |
 | `tldr.text` | `tldr` | string | AI-generated summary |
 | `year` | `year` | int64 | Validated: 1500-2100 |
-| `publicationDate` | `publication_date` | string | ISO format (partial OK) |
+| `publicationDate` | `publication-date` | string | ISO format (partial OK) |
 | `venue` | - | string | Used as fallback for `journal` (not stored separately) |
 
 #### Journal Information
@@ -193,8 +193,8 @@ openAccessPdf, tldr, fieldsOfStudy, publicationTypes, journal
 | `journal.volume` | `volume` | string | Parsed from combined format |
 | - | `issue` | string | Parsed from combined format |
 | `journal.pages` | `pages` | string | Original value (cleaned) |
-| - | `first_page` | string | Parsed with abbreviation expansion |
-| - | `last_page` | string | Parsed with abbreviation expansion |
+| - | `first-page` | string | Parsed with abbreviation expansion |
+| - | `last-page` | string | Parsed with abbreviation expansion |
 
 **Volume/Issue Parsing:**
 Combined formats like `"32 4"` are parsed into separate fields:
@@ -203,59 +203,59 @@ Combined formats like `"32 4"` are parsed into separate fields:
 - `"Vol. 32, No. 4"` → volume="32", issue="4"
 
 **Page Abbreviation Expansion:**
-- `"737-9"` → first_page="737", last_page="739"
-- `"737-39"` → first_page="737", last_page="739"
-- `"199-3"` → first_page="199", last_page="203" (rollover case)
+- `"737-9"` → first-page="737", last-page="739"
+- `"737-39"` → first-page="737", last-page="739"
+- `"199-3"` → first-page="199", last-page="203" (rollover case)
 
 #### Open Access Fields
 
 | API Field | Silver Field | Type | Values |
 |-----------|--------------|------|--------|
-| `isOpenAccess` | `is_oa` | bool | true/false/null |
-| `openAccessPdf.url` | `open_access_url` | string | PDF URL |
-| `openAccessPdf.status` | `oa_status` | string | gold/green/hybrid/bronze/closed |
+| `isOpenAccess` | `is-oa` | bool | true/false/null |
+| `openAccessPdf.url` | `open-access-url` | string | PDF URL |
+| `openAccessPdf.status` | `oa-status` | string | gold/green/hybrid/bronze/closed |
 
 **OA Status Normalization:**
 - Input values normalized to lowercase
-- "closed" set only when `is_oa=False` explicitly
+- "closed" set only when `is-oa=False` explicitly
 - `null` preserved when status unknown (not defaulted to "closed")
 
 #### Metrics
 
 | API Field | Silver Field | Type | Constraint |
 |-----------|--------------|------|------------|
-| `citationCount` | `citation_count` | int64 | >= 0 |
-| `referenceCount` | `reference_count` | int64 | >= 0 |
-| `influentialCitationCount` | `influential_citation_count` | int64 | >= 0 |
+| `citationCount` | `citation-count` | int64 | >= 0 |
+| `referenceCount` | `reference-count` | int64 | >= 0 |
+| `influentialCitationCount` | `influential-citation-count` | int64 | >= 0 |
 
 #### Classification (JSON Serialized)
 
 | API Field | Silver Field | Type | Notes |
 |-----------|--------------|------|-------|
-| `fieldsOfStudy[]` | `fields_of_study` | string | JSON array (max 10) |
-| `publicationTypes[]` | `publication_types` | string | JSON array |
+| `fieldsOfStudy[]` | `fields-of-study` | string | JSON array (max 10) |
+| `publicationTypes[]` | `publication-types` | string | JSON array |
 
 #### Author Fields (JSON Serialized)
 
 | Extraction | Silver Field | Type | Notes |
 |------------|--------------|------|-------|
-| `authors[].authorId` | `author_ids` | string | JSON array of IDs |
-| `authors[].authorId` (40-char) | `author_s2_ids` | string | JSON array of S2 IDs |
-| `authors[].externalIds.ORCID` | `author_orcids` | string | JSON array (empty string for missing) |
-| `authors[].hIndex` | `author_h_indices` | string | JSON array (null for missing) |
+| `authors[].authorId` | `author-ids` | string | JSON array of IDs |
+| `authors[].authorId` (40-char) | `author-s2-ids` | string | JSON array of S2 IDs |
+| `authors[].externalIds.ORCID` | `author-orcids` | string | JSON array (empty string for missing) |
+| `authors[].hIndex` | `author-h-indices` | string | JSON array (null for missing) |
 
 #### Citation Contexts
 
 | API Field | Silver Field | Type | Notes |
 |-----------|--------------|------|-------|
-| `citations[].contexts[]` | `citation_contexts` | string | JSON array (max 100) |
+| `citations[].contexts[]` | `citation-contexts` | string | JSON array (max 100) |
 
 #### DQ Flags (Suffix)
 
 | Silver Field | Type | Default | Description |
 |--------------|------|---------|-------------|
-| `_dq_warn` | bool | False | Soft threshold exceeded |
-| `_dq_error` | bool | False | Hard threshold exceeded |
+| `-dq-warn` | bool | False | Soft threshold exceeded |
+| `-dq-error` | bool | False | Hard threshold exceeded |
 
 ---
 
@@ -269,10 +269,10 @@ The API returns external IDs with case-sensitive keys that are normalized:
 {
     "DOI": "10.1038/..." → doi
     "PubMed": "12345678" → pmid
-    "PubMedCentral": "PMC..." → pmc_id
-    "ArXiv": "1234.5678" → arxiv_id
-    "DBLP": "conf/..." → dblp_id
-    "CorpusId": 123456789 → corpus_id
+    "PubMedCentral": "PMC..." → pmc-id
+    "ArXiv": "1234.5678" → arxiv-id
+    "DBLP": "conf/..." → dblp-id
+    "CorpusId": 123456789 → corpus-id
 }
 ```
 
@@ -296,7 +296,7 @@ Only the `text` field is extracted and stored.
 The `journal` field is extracted from `journal.name` with `venue` as fallback:
 
 ```python
-journal_name = journal.get("name") or venue  # Stored in 'journal' field
+journal-name = journal.get("name") or venue  # Stored in 'journal' field
 ```
 
 **Note**: After transformation, only the unified `journal` field is stored (no separate `venue` field).
@@ -338,12 +338,12 @@ Academic publishers commonly abbreviate page ranges. The transformer expands the
 
 OA status is normalized to lowercase with special handling for unknown status:
 
-| is_oa | status | Result | Meaning |
+| is-oa | status | Result | Meaning |
 |-------|--------|--------|---------|
-| true | "GREEN" | `{is_oa: true, oa_status: "green"}` | Confirmed OA |
-| false | null | `{is_oa: false, oa_status: "closed"}` | Confirmed closed |
-| null | "GOLD" | `{is_oa: null, oa_status: "gold"}` | Unknown, but gold access |
-| null | null | `{is_oa: null, oa_status: null}` | Completely unknown |
+| true | "GREEN" | `{is-oa: true, oa-status: "green"}` | Confirmed OA |
+| false | null | `{is-oa: false, oa-status: "closed"}` | Confirmed closed |
+| null | "GOLD" | `{is-oa: null, oa-status: "gold"}` | Unknown, but gold access |
+| null | null | `{is-oa: null, oa-status: null}` | Completely unknown |
 
 **Key Design:** `null` is preserved (not defaulted to "closed") to distinguish between "closed" (explicit) and "unknown" (data gap).
 
@@ -353,10 +353,10 @@ Complex fields are serialized as JSON strings for storage:
 
 | Method | Input | Output |
 |--------|-------|--------|
-| `serialize_json()` | `["A", "B"]` | `'["A", "B"]'` |
-| `serialize_json_list()` | `[1, None, 3]` | `'[1, null, 3]'` |
+| `serialize-json()` | `["A", "B"]` | `'["A", "B"]'` |
+| `serialize-json-list()` | `[1, None, 3]` | `'[1, null, 3]'` |
 
-Applied to: `fields_of_study`, `publication_types`, `author_ids`, `author_s2_ids`, `author_orcids`, `author_h_indices`, `citation_contexts`
+Applied to: `fields-of-study`, `publication-types`, `author-ids`, `author-s2-ids`, `author-orcids`, `author-h-indices`, `citation-contexts`
 
 ### Year Validation
 
@@ -376,46 +376,46 @@ Publication year is validated against range 1500-2100:
 
 | Field | Type | Nullable | Constraints |
 |-------|------|----------|-------------|
-| `entity_id` | string | **No** | - |
-| `content_hash` | string | **No** | - |
-| `paper_id` | string | **No** | Primary key |
+| `entity-id` | string | **No** | - |
+| `content-hash` | string | **No** | - |
+| `paper-id` | string | **No** | Primary key |
 | `doi` | string | Yes | - |
 | `pmid` | string | Yes | - |
-| `corpus_id` | float | Yes | coerce=True |
+| `corpus-id` | float | Yes | coerce=True |
 | `title` | string | Yes | - |
 | `tldr` | string | Yes | - |
 | `year` | float | Yes | coerce=True |
-| `publication_date` | string | Yes | - |
+| `publication-date` | string | Yes | - |
 | `journal` | string | Yes | - |
 | `volume` | string | Yes | - |
 | `issue` | string | Yes | - |
 | `pages` | string | Yes | - |
-| `first_page` | string | Yes | - |
-| `last_page` | string | Yes | - |
-| `citation_count` | float | Yes | ge=0, coerce=True |
-| `reference_count` | float | Yes | ge=0, coerce=True |
-| `is_oa` | bool | Yes | coerce=True |
-| `open_access_url` | string | Yes | - |
-| `oa_status` | string | Yes | - |
-| `fields_of_study` | string | Yes | JSON array |
-| `publication_types` | string | Yes | JSON array |
-| `_source` | string | Yes | - |
-| `_lookup_method` | string | Yes | - |
-| `_original_id` | string | Yes | - |
-| `_dq_warn` | bool | **No** | default=False |
-| `_dq_error` | bool | **No** | default=False |
-| `_run_id` | string | **No** | - |
-| `_run_type` | string | **No** | - |
-| `_source_batch_id` | string | Yes | - |
-| `_ingestion_ts` | string | **No** | - |
-| `_index` | int | **No** | - |
+| `first-page` | string | Yes | - |
+| `last-page` | string | Yes | - |
+| `citation-count` | float | Yes | ge=0, coerce=True |
+| `reference-count` | float | Yes | ge=0, coerce=True |
+| `is-oa` | bool | Yes | coerce=True |
+| `open-access-url` | string | Yes | - |
+| `oa-status` | string | Yes | - |
+| `fields-of-study` | string | Yes | JSON array |
+| `publication-types` | string | Yes | JSON array |
+| `-source` | string | Yes | - |
+| `-lookup-method` | string | Yes | - |
+| `-original-id` | string | Yes | - |
+| `-dq-warn` | bool | **No** | default=False |
+| `-dq-error` | bool | **No** | default=False |
+| `-run-id` | string | **No** | - |
+| `-run-type` | string | **No** | - |
+| `-source-batch-id` | string | Yes | - |
+| `-ingestion-ts` | string | **No** | - |
+| `-index` | int | **No** | - |
 
 ### Required Fields
 
-- `paper_id` (primary key)
+- `paper-id` (primary key)
 - `title` (required for identification)
-- System fields: `entity_id`, `content_hash`, `_run_id`, `_run_type`, `_ingestion_ts`, `_index`
-- DQ flags: `_dq_warn`, `_dq_error`
+- System fields: `entity-id`, `content-hash`, `-run-id`, `-run-type`, `-ingestion-ts`, `-index`
+- DQ flags: `-dq-warn`, `-dq-error`
 
 ### Year Filter Range
 
@@ -425,13 +425,13 @@ Gold layer applies year constraints:
 
 ### Citation/Reference Constraints
 
-- `citation_count` >= 0
-- `reference_count` >= 0
+- `citation-count` >= 0
+- `reference-count` >= 0
 
 ### Int-to-Float Coercion
 
 Fields stored as `float` in Gold (despite `int64` in Silver) for nullable integer support:
-- `year`, `citation_count`, `reference_count`, `corpus_id`
+- `year`, `citation-count`, `reference-count`, `corpus-id`
 
 ---
 
@@ -446,15 +446,15 @@ The following Silver fields are **excluded** from Gold output:
 | `abstract` | User request |
 | `authors` | User request |
 | `affiliations` | User request |
-| `pmc_id` | User request |
-| `arxiv_id` | User request |
-| `dblp_id` | Not in Gold schema |
-| `author_ids` | Not in Gold schema |
-| `author_s2_ids` | Not in Gold schema |
-| `author_orcids` | Not in Gold schema |
-| `author_h_indices` | Not in Gold schema |
-| `citation_contexts` | Not in Gold schema |
-| `influential_citation_count` | Not in Gold schema |
+| `pmc-id` | User request |
+| `arxiv-id` | User request |
+| `dblp-id` | Not in Gold schema |
+| `author-ids` | Not in Gold schema |
+| `author-s2-ids` | Not in Gold schema |
+| `author-orcids` | Not in Gold schema |
+| `author-h-indices` | Not in Gold schema |
+| `citation-contexts` | Not in Gold schema |
+| `influential-citation-count` | Not in Gold schema |
 
 ### Gold Filter Configuration
 
@@ -462,7 +462,7 @@ The following Silver fields are **excluded** from Gold output:
 |-------------|-------|-----------|-------|
 | **range** | year | min | 1900 |
 | **range** | year | max | 2100 |
-| **required** | paper_id | present | yes |
+| **required** | paper-id | present | yes |
 | **required** | title | present | yes |
 
 ---
@@ -473,7 +473,7 @@ The following Silver fields are **excluded** from Gold output:
 
 | Check | Severity | Threshold |
 |-------|----------|-----------|
-| Missing `paper_id` | Error | 0% |
+| Missing `paper-id` | Error | 0% |
 | Missing `doi` | Warning | 30% |
 | Missing `pmid` | Info | 70% |
 | Invalid DOI format | Warning | 5% |
@@ -483,9 +483,9 @@ The following Silver fields are **excluded** from Gold output:
 
 | Check | Severity | Notes |
 |-------|----------|-------|
-| `is_oa=true` but no `open_access_url` | Warning | PDF URL expected |
-| `is_oa=true` but `oa_status=closed` | Error | Inconsistent data |
-| `is_oa=null` (unknown) | Info | Data gap, not error |
+| `is-oa=true` but no `open-access-url` | Warning | PDF URL expected |
+| `is-oa=true` but `oa-status=closed` | Error | Inconsistent data |
+| `is-oa=null` (unknown) | Info | Data gap, not error |
 
 ### Year Validity
 
@@ -499,9 +499,9 @@ The following Silver fields are **excluded** from Gold output:
 
 | Check | Severity | Notes |
 |-------|----------|-------|
-| `citation_count` < 0 | Error | Must be non-negative |
-| `reference_count` < 0 | Error | Must be non-negative |
-| `influential_citation_count` < 0 | Error | Must be non-negative |
+| `citation-count` < 0 | Error | Must be non-negative |
+| `reference-count` < 0 | Error | Must be non-negative |
+| `influential-citation-count` < 0 | Error | Must be non-negative |
 
 ### DQ Thresholds
 
@@ -521,7 +521,7 @@ sequenceDiagram
     participant Bronze as Bronze Layer
     participant Silver as Silver Layer
     participant Gold as Gold Layer
-    participant Composite as composite_publication
+    participant Composite as composite-publication
 
     Input->>API: DOIs/Titles
     API->>Bronze: Raw JSON (ZSTD)
@@ -529,7 +529,7 @@ sequenceDiagram
     Bronze->>Silver: Transform + Validate
     Note over Silver: External ID normalization<br/>Volume/Issue parsing<br/>Page abbreviation expansion<br/>OA status normalization<br/>JSON serialization
     Silver->>Gold: Filter + Refine
-    Note over Gold: Year filter [1900,2100]<br/>Exclude: abstract, authors,<br/>pmc_id, arxiv_id
+    Note over Gold: Year filter [1900,2100]<br/>Exclude: abstract, authors,<br/>pmc-id, arxiv-id
     Gold-->>Composite: Feed merger
 ```
 
@@ -545,19 +545,19 @@ sequenceDiagram
 
 | Consumer | Usage |
 |----------|-------|
-| `composite_publication` | Silver merge input |
+| `composite-publication` | Silver merge input |
 | Analytics dashboards | Gold layer queries |
 | DOI enrichment services | Publication metadata lookup |
 
 ### Composite Pipeline Integration
 
-The `composite_publication` pipeline uses Semantic Scholar Silver data as an enricher:
+The `composite-publication` pipeline uses Semantic Scholar Silver data as an enricher:
 
 ```yaml
 enrichers:
-  - name: semanticscholar_publication
+  - name: semanticscholar-publication
     source: silver/semanticscholar/publication
-    join_keys: [doi, pmid]
+    join-keys: [doi, pmid]
     priority: 3
 ```
 
@@ -605,8 +605,8 @@ enrichers:
       "hIndex": 52
     }
   ],
-  "_lookup_method": "doi",
-  "_original_id": "10.1038/nature12373"
+  "-lookup-method": "doi",
+  "-original-id": "10.1038/nature12373"
 }
 ```
 
@@ -614,40 +614,40 @@ enrichers:
 
 ```json
 {
-  "entity_id": "uuid-abc123...",
-  "content_hash": "sha256:def456...",
-  "paper_id": "1234567890abcdef1234567890abcdef12345678",
+  "entity-id": "uuid-abc123...",
+  "content-hash": "sha256:def456...",
+  "paper-id": "1234567890abcdef1234567890abcdef12345678",
   "doi": "10.1038/nature12373",
   "pmid": "23831764",
-  "corpus_id": 4393218,
+  "corpus-id": 4393218,
   "title": "Crystal structure of a bacterial homologue",
   "tldr": "This paper presents the crystal structure of a membrane protein.",
   "journal": "Nature",
   "volume": "500",
   "issue": "7462",
   "pages": "102-6",
-  "first_page": "102",
-  "last_page": "106",
+  "first-page": "102",
+  "last-page": "106",
   "year": 2013,
-  "publication_date": "2013-08-01",
-  "is_oa": true,
-  "open_access_url": "https://europepmc.org/articles/pmc3737505?pdf=render",
-  "oa_status": "green",
-  "citation_count": 856,
-  "reference_count": 45,
-  "influential_citation_count": 89,
-  "fields_of_study": "[\"Biology\", \"Chemistry\"]",
-  "publication_types": "[\"Journal Article\"]",
-  "author_ids": "[\"3456789\"]",
-  "author_s2_ids": "[\"3456789\"]",
-  "author_orcids": "[\"0000-0001-2345-6789\"]",
-  "author_h_indices": "[52]",
-  "_source": "semanticscholar",
-  "_lookup_method": "doi",
-  "_original_id": "10.1038/nature12373",
-  "_run_id": "run-123",
-  "_dq_warn": false,
-  "_dq_error": false
+  "publication-date": "2013-08-01",
+  "is-oa": true,
+  "open-access-url": "https://europepmc.org/articles/pmc3737505?pdf=render",
+  "oa-status": "green",
+  "citation-count": 856,
+  "reference-count": 45,
+  "influential-citation-count": 89,
+  "fields-of-study": "[\"Biology\", \"Chemistry\"]",
+  "publication-types": "[\"Journal Article\"]",
+  "author-ids": "[\"3456789\"]",
+  "author-s2-ids": "[\"3456789\"]",
+  "author-orcids": "[\"0000-0001-2345-6789\"]",
+  "author-h-indices": "[52]",
+  "-source": "semanticscholar",
+  "-lookup-method": "doi",
+  "-original-id": "10.1038/nature12373",
+  "-run-id": "run-123",
+  "-dq-warn": false,
+  "-dq-error": false
 }
 ```
 
@@ -655,31 +655,31 @@ enrichers:
 
 ```json
 {
-  "entity_id": "uuid-abc123...",
-  "content_hash": "sha256:def456...",
-  "paper_id": "1234567890abcdef1234567890abcdef12345678",
+  "entity-id": "uuid-abc123...",
+  "content-hash": "sha256:def456...",
+  "paper-id": "1234567890abcdef1234567890abcdef12345678",
   "doi": "10.1038/nature12373",
   "pmid": "23831764",
-  "corpus_id": 4393218,
+  "corpus-id": 4393218,
   "title": "Crystal structure of a bacterial homologue",
   "tldr": "This paper presents the crystal structure of a membrane protein.",
   "journal": "Nature",
   "volume": "500",
   "issue": "7462",
   "pages": "102-6",
-  "first_page": "102",
-  "last_page": "106",
+  "first-page": "102",
+  "last-page": "106",
   "year": 2013,
-  "publication_date": "2013-08-01",
-  "is_oa": true,
-  "open_access_url": "https://europepmc.org/articles/pmc3737505?pdf=render",
-  "oa_status": "green",
-  "citation_count": 856,
-  "reference_count": 45,
-  "fields_of_study": "[\"Biology\", \"Chemistry\"]",
-  "publication_types": "[\"Journal Article\"]",
-  "_source": "semanticscholar",
-  "_lookup_method": "doi"
+  "publication-date": "2013-08-01",
+  "is-oa": true,
+  "open-access-url": "https://europepmc.org/articles/pmc3737505?pdf=render",
+  "oa-status": "green",
+  "citation-count": 856,
+  "reference-count": 45,
+  "fields-of-study": "[\"Biology\", \"Chemistry\"]",
+  "publication-types": "[\"Journal Article\"]",
+  "-source": "semanticscholar",
+  "-lookup-method": "doi"
 }
 ```
 
@@ -689,61 +689,61 @@ enrichers:
 
 ```mermaid
 erDiagram
-    PAPER ||--o{ EXTERNAL_ID : has
-    PAPER ||--o{ AUTHOR : written_by
-    PAPER ||--o| JOURNAL_INFO : published_in
-    PAPER ||--o| OPEN_ACCESS : has_access
-    PAPER ||--o{ FIELD_OF_STUDY : classified_as
-    PAPER ||--o{ PUBLICATION_TYPE : typed_as
+    PAPER ||--o{ EXTERNAL-ID : has
+    PAPER ||--o{ AUTHOR : written-by
+    PAPER ||--o| JOURNAL-INFO : published-in
+    PAPER ||--o| OPEN-ACCESS : has-access
+    PAPER ||--o{ FIELD-OF-STUDY : classified-as
+    PAPER ||--o{ PUBLICATION-TYPE : typed-as
 
     PAPER {
-        string paper_id PK "40-char hex S2 ID"
+        string paper-id PK "40-char hex S2 ID"
         string title
         string tldr "AI-generated summary"
         int year
-        string publication_date
-        int citation_count
-        int reference_count
-        int influential_citation_count
+        string publication-date
+        int citation-count
+        int reference-count
+        int influential-citation-count
     }
 
-    EXTERNAL_ID {
+    EXTERNAL-ID {
         string doi "Digital Object Identifier"
         string pmid "PubMed ID"
-        string pmc_id "PubMed Central ID"
-        string arxiv_id "ArXiv ID"
-        string dblp_id "DBLP key"
-        int corpus_id "S2 Corpus ID"
+        string pmc-id "PubMed Central ID"
+        string arxiv-id "ArXiv ID"
+        string dblp-id "DBLP key"
+        int corpus-id "S2 Corpus ID"
     }
 
     AUTHOR {
-        string author_id
-        string s2_id "40-char hex"
+        string author-id
+        string s2-id "40-char hex"
         string orcid
-        int h_index
+        int h-index
     }
 
-    JOURNAL_INFO {
-        string journal_name
+    JOURNAL-INFO {
+        string journal-name
         string volume
         string issue
         string pages
-        string first_page
-        string last_page
+        string first-page
+        string last-page
     }
 
-    OPEN_ACCESS {
-        bool is_oa
-        string oa_status "gold/green/hybrid/bronze/closed"
-        string pdf_url
+    OPEN-ACCESS {
+        bool is-oa
+        string oa-status "gold/green/hybrid/bronze/closed"
+        string pdf-url
     }
 
-    FIELD_OF_STUDY {
+    FIELD-OF-STUDY {
         string name
     }
 
-    PUBLICATION_TYPE {
-        string type_name
+    PUBLICATION-TYPE {
+        string type-name
     }
 ```
 
@@ -761,7 +761,7 @@ erDiagram
 
 3. **Citation Contexts Not in Gold**: Context sentences for citation analysis only in Silver.
 
-4. **Title Fallback Accuracy**: Title-based search may return incorrect matches. Use `_lookup_method` to filter.
+4. **Title Fallback Accuracy**: Title-based search may return incorrect matches. Use `-lookup-method` to filter.
 
 5. **TLDR Coverage**: Not all papers have AI-generated summaries (newer papers more likely).
 
@@ -770,13 +770,13 @@ erDiagram
 ### Schema Gaps
 
 The following fields are created by the transformer but not defined in Silver schema:
-- `author_s2_ids`, `author_orcids`, `author_h_indices`
-- `citation_contexts`, `dblp_id`, `influential_citation_count`, `issue`
+- `author-s2-ids`, `author-orcids`, `author-h-indices`
+- `citation-contexts`, `dblp-id`, `influential-citation-count`, `issue`
 
 ### Future Enhancements
 
 - [ ] Add author fields to Gold schema with flattened structure
-- [ ] Add `influential_citation_count` to Gold schema
+- [ ] Add `influential-citation-count` to Gold schema
 - [ ] Implement incremental loading when S2 stabilizes cursor pagination
 - [ ] Add citation/reference extraction for network analysis
 - [ ] Add abstract (currently excluded per user request)
@@ -797,7 +797,7 @@ The following fields are created by the transformer but not defined in Silver sc
 ## References
 
 - [Semantic Scholar API Documentation](https://api.semanticscholar.org/api-docs/graph)
-- [S2 Paper Object Schema](https://api.semanticscholar.org/api-docs/graph#tag/Paper-Data/operation/get_graph_get_paper)
+- [S2 Paper Object Schema](https://api.semanticscholar.org/api-docs/graph#tag/Paper-Data/operation/get-graph-get-paper)
 - [ADR-030: Publication Pagination Strategy](../../02-architecture/decisions/ADR-030-publication-pagination-strategy.md)
 - [ADR-031: Loading Strategy Formalization](../../02-architecture/decisions/ADR-031-loading-strategy-formalization.md)
 - [RULES.md: Medallion Architecture](../RULES.md#2-medallion-architecture)

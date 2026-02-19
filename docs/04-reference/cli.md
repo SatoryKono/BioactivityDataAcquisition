@@ -66,28 +66,28 @@ bioetl run --pipeline <NAME> [OPTIONS]
 
 ```bash
 # Инкрементальный запуск (по умолчанию)
-bioetl run --pipeline chembl_activity
+bioetl run --pipeline chembl-activity
 
 # С ограничением записей (для тестирования)
-bioetl run --pipeline chembl_activity --limit 100
+bioetl run --pipeline chembl-activity --limit 100
 
 # Полная перезагрузка данных
-bioetl run --pipeline chembl_activity --run-type rebuild --yes
+bioetl run --pipeline chembl-activity --run-type rebuild --yes
 
 # Предпросмотр очистки без выполнения
-bioetl run --pipeline chembl_activity --run-type rebuild --dry-run
+bioetl run --pipeline chembl-activity --run-type rebuild --dry-run
 
 # Продолжить прерванный запуск
-bioetl run --pipeline chembl_activity --resume
+bioetl run --pipeline chembl-activity --resume
 
 # С фильтрацией по CSV
-bioetl run --pipeline chembl_activity \
-    --input-csv data/filter_ids.csv \
-    --filter-column molecule_id \
-    --filter-field molecule_chembl_id
+bioetl run --pipeline chembl-activity \
+    --input-csv data/filter-ids.csv \
+    --filter-column molecule-id \
+    --filter-field molecule-chembl-id
 
 # С DEBUG логированием
-bioetl run --pipeline chembl_activity --debug
+bioetl run --pipeline chembl-activity --debug
 ```
 
 **Типы запуска:**
@@ -239,7 +239,7 @@ bioetl export chembl.activity --limit 10000 --columns id,name,value
 bioetl export chembl.activity --layer gold
 
 # В указанную директорию
-bioetl export chembl.activity -o ./my_exports
+bioetl export chembl.activity -o ./my-exports
 ```
 
 ---
@@ -256,8 +256,8 @@ bioetl config show <PIPELINE> [--format yaml|json]
 
 **Примеры:**
 ```bash
-bioetl config show chembl_activity
-bioetl config show chembl_activity --format json
+bioetl config show chembl-activity
+bioetl config show chembl-activity --format json
 ```
 
 #### `config validate` — Валидация конфигурации
@@ -274,7 +274,7 @@ bioetl config validate <PIPELINE>
 bioetl config show-settings [--format yaml|json]
 ```
 
-Показывает все `BIOETL_*` переменные окружения (API-ключи маскируются).
+Показывает все `BIOETL-*` переменные окружения (API-ключи маскируются).
 
 #### `config list-pipelines` — Список пайплайнов
 
@@ -302,8 +302,8 @@ bioetl quarantine inspect --pipeline <NAME> [OPTIONS]
 
 **Примеры:**
 ```bash
-bioetl quarantine inspect --pipeline chembl_activity
-bioetl quarantine inspect --pipeline chembl_activity --error-code DQ_MISSING_FIELD
+bioetl quarantine inspect --pipeline chembl-activity
+bioetl quarantine inspect --pipeline chembl-activity --error-code DQ-MISSING-FIELD
 ```
 
 #### `quarantine stats` — Статистика
@@ -441,7 +441,7 @@ bioetl maintenance vacuum-all [OPTIONS]
 #### `maintenance archive` — Архивирование таблицы
 
 ```bash
-bioetl maintenance archive <TABLE> <TARGET_PATH> [--remove-source]
+bioetl maintenance archive <TABLE> <TARGET-PATH> [--remove-source]
 ```
 
 #### `maintenance bronze-cleanup` — Очистка Bronze
@@ -461,17 +461,17 @@ bioetl maintenance bronze-cleanup [OPTIONS]
 
 | Переменная | Описание | По умолчанию |
 |------------|----------|--------------|
-| `BIOETL_ENV` | Окружение (`dev`, `prod`) | `dev` |
-| `BIOETL_DATA_DIR` | Директория данных | `./data` |
-| `BIOETL_LOG_LEVEL` | Уровень логирования | `INFO` |
-| `BIOETL_METRICS_ENABLED` | Включить Prometheus метрики | `true` |
-| `BIOETL_METRICS_PORT` | Порт для Prometheus | `8000` |
-| `BIOETL_TRACING_ENABLED` | Включить OpenTelemetry tracing | `false` |
+| `BIOETL-ENV` | Окружение (`dev`, `prod`) | `dev` |
+| `BIOETL-DATA-DIR` | Директория данных | `./data` |
+| `BIOETL-LOG-LEVEL` | Уровень логирования | `INFO` |
+| `BIOETL-METRICS-ENABLED` | Включить Prometheus метрики | `true` |
+| `BIOETL-METRICS-PORT` | Порт для Prometheus | `8000` |
+| `BIOETL-TRACING-ENABLED` | Включить OpenTelemetry tracing | `false` |
 
 **API-ключи провайдеров:**
-- `BIOETL_UNIPROT_API_KEY`
-- `BIOETL_OPENALEX_API_KEY`
-- `BIOETL_SEMANTIC_SCHOLAR_API_KEY`
+- `BIOETL-UNIPROT-API-KEY`
+- `BIOETL-OPENALEX-API-KEY`
+- `BIOETL-SEMANTIC-SCHOLAR-API-KEY`
 
 ---
 
@@ -483,16 +483,16 @@ bioetl maintenance bronze-cleanup [OPTIONS]
 |-----|-----------|----------|
 | 0 | OK | Успешное выполнение |
 | 1 | FAIL | Неспецифицированная ошибка |
-| 64 | EX_USAGE | Ошибка использования командной строки |
-| 78 | EX_CONFIG | Ошибка конфигурации |
-| 80 | CONFIG_ERROR | Ошибка конфигурации пайплайна |
-| 81 | INIT_ERROR | Ошибка инициализации |
-| 82 | PIPELINE_ERROR | Ошибка выполнения пайплайна |
-| 83 | DATA_QUALITY_ERROR | Превышен DQ порог |
-| 84 | LOCK_ERROR | Ошибка блокировки |
-| 85 | STORAGE_ERROR | Ошибка хранилища |
-| 86 | NETWORK_ERROR | Сетевая ошибка |
-| 87 | CHECKPOINT_ERROR | Ошибка checkpoint |
+| 64 | EX-USAGE | Ошибка использования командной строки |
+| 78 | EX-CONFIG | Ошибка конфигурации |
+| 80 | CONFIG-ERROR | Ошибка конфигурации пайплайна |
+| 81 | INIT-ERROR | Ошибка инициализации |
+| 82 | PIPELINE-ERROR | Ошибка выполнения пайплайна |
+| 83 | DATA-QUALITY-ERROR | Превышен DQ порог |
+| 84 | LOCK-ERROR | Ошибка блокировки |
+| 85 | STORAGE-ERROR | Ошибка хранилища |
+| 86 | NETWORK-ERROR | Сетевая ошибка |
+| 87 | CHECKPOINT-ERROR | Ошибка checkpoint |
 | 130 | SIGINT | Прервано Ctrl+C |
 | 143 | SIGTERM | Завершено SIGTERM |
 

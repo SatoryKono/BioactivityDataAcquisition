@@ -11,21 +11,21 @@
 
 Publication pipelines currently have implicit loading behavior:
 1. They **look like** incremental pipelines (same config structure)
-2. They **behave as** full-scan pipelines (via `force_full_scan: true`)
+2. They **behave as** full-scan pipelines (via `force-full-scan: true`)
 3. There is **no explicit policy** documenting this distinction
 
 This creates confusion:
 - New team members assume checkpoint resume works for publications
-- The boolean `force_full_scan` flag doesn't clearly communicate intent
+- The boolean `force-full-scan` flag doesn't clearly communicate intent
 - No formalized extension point for future watermark-based loading
 
 ### Current State (ADR-030)
 
-ADR-030 introduced `force_full_scan: bool` to disable checkpoint resume:
+ADR-030 introduced `force-full-scan: bool` to disable checkpoint resume:
 
 ```yaml
 # Publication pipeline
-force_full_scan: true  # But why? What's the strategy?
+force-full-scan: true  # But why? What's the strategy?
 ```
 
 This works but has limitations:
@@ -43,11 +43,11 @@ Introduce explicit `LoadingStrategy` enum and formalize loading behavior:
 class LoadingStrategy(StrEnum):
     """Loading strategy for pipeline data extraction."""
 
-    FULL_SCAN_ONLY = "full_scan_only"
+    FULL-SCAN-ONLY = "full-scan-only"
     """Each run performs full scan. Checkpoint resume disabled."""
 ```
 
-> **Note:** `WATERMARK_BASED` strategy is planned but not yet implemented.
+> **Note:** `WATERMARK-BASED` strategy is planned but not yet implemented.
 > See [Future Work](#future-work) for prerequisites and implementation plan.
 
 ### 2. PipelineConfig Field
@@ -58,29 +58,29 @@ class PipelineConfig:
     # ... existing fields ...
 
     # Pagination strategy (ADR-030)
-    force_full_scan: bool = False
+    force-full-scan: bool = False
 
     # Loading strategy (ADR-031) - explicit formalization
-    loading_strategy: LoadingStrategy | str | None = None
+    loading-strategy: LoadingStrategy | str | None = None
 ```
 
 ### 3. YAML Configuration
 
 ```yaml
 # configs/pipelines/chembl/publication.yaml
-pipeline_name: chembl_publication
+pipeline-name: chembl-publication
 provider: chembl
-entity_type: publication
+entity-type: publication
 
 # Loading strategy (ADR-030, ADR-031)
 # Explicit strategy declaration
-force_full_scan: true
-loading_strategy: full_scan_only
+force-full-scan: true
+loading-strategy: full-scan-only
 ```
 
 ### 4. WatermarkStrategyPort (Future Work)
 
-> **NOT YET IMPLEMENTED.** The `WatermarkStrategyPort` and `WATERMARK_BASED` enum value
+> **NOT YET IMPLEMENTED.** The `WatermarkStrategyPort` and `WATERMARK-BASED` enum value
 > will be added when watermark-based incremental loading is needed.
 > See [Future Work](#future-work) for the planned interface and prerequisites.
 
@@ -88,14 +88,14 @@ loading_strategy: full_scan_only
 
 | Strategy | Checkpoint Resume | Watermark | Deduplication |
 |----------|------------------|-----------|---------------|
-| `full_scan_only` | BLOCKED | N/A | content_hash on Silver |
-| `watermark_based` | ALLOWED | REQUIRED | watermark field filtering |
+| `full-scan-only` | BLOCKED | N/A | content-hash on Silver |
+| `watermark-based` | ALLOWED | REQUIRED | watermark field filtering |
 
 ### 6. Backward Compatibility
 
-- `force_full_scan: true` continues to work
-- When `loading_strategy` is not set, it's derived from `force_full_scan`
-- Explicit `loading_strategy` takes precedence over `force_full_scan`
+- `force-full-scan: true` continues to work
+- When `loading-strategy` is not set, it's derived from `force-full-scan`
+- Explicit `loading-strategy` takes precedence over `force-full-scan`
 
 ## Consequences
 
@@ -109,13 +109,13 @@ loading_strategy: full_scan_only
 
 ### Negative
 
-1. **Migration effort**: Existing configs need `loading_strategy` field
-2. **Two fields**: Both `force_full_scan` and `loading_strategy` exist (temporary)
+1. **Migration effort**: Existing configs need `loading-strategy` field
+2. **Two fields**: Both `force-full-scan` and `loading-strategy` exist (temporary)
 
 ### Mitigations
 
-- **Migration**: All publication configs updated with `loading_strategy: full_scan_only`
-- **Two fields**: `loading_strategy` takes precedence; `force_full_scan` maintained for compatibility
+- **Migration**: All publication configs updated with `loading-strategy: full-scan-only`
+- **Two fields**: `loading-strategy` takes precedence; `force-full-scan` maintained for compatibility
 
 ## Why Publication !== Activity
 
@@ -124,73 +124,73 @@ loading_strategy: full_scan_only
 | **API behavior** | Stable offset pagination | Offset shifts on updates |
 | **Update frequency** | Rare (assay data static) | Frequent (citations, metadata) |
 | **Checkpoint safety** | Safe to resume from offset | Unsafe (data loss/duplicates) |
-| **Recommended strategy** | `watermark_based` (future) | `full_scan_only` |
+| **Recommended strategy** | `watermark-based` (future) | `full-scan-only` |
 
 ## Implementation
 
 ### Files Modified
 
 **Domain:**
-- `src/bioetl/domain/medallion.py` — Add `LoadingStrategy` enum (currently: `FULL_SCAN_ONLY` only)
-- `src/bioetl/domain/config/pipeline.py` — Add `loading_strategy` field to `PipelineConfig`
+- `src/bioetl/domain/medallion.py` — Add `LoadingStrategy` enum (currently: `FULL-SCAN-ONLY` only)
+- `src/bioetl/domain/config/pipeline.py` — Add `loading-strategy` field to `PipelineConfig`
 
 **Application:**
-- `src/bioetl/application/core/checkpoint_manager.py` — Use `LoadingStrategy` for validation
+- `src/bioetl/application/core/checkpoint-manager.py` — Use `LoadingStrategy` for validation
 
 **Infrastructure:**
-- `src/bioetl/infrastructure/schemas/pipeline_config.py` — Add `loading_strategy` to YAML schema
-- `src/bioetl/infrastructure/config/converters.py` — Pass `loading_strategy` in conversion
+- `src/bioetl/infrastructure/schemas/pipeline-config.py` — Add `loading-strategy` to YAML schema
+- `src/bioetl/infrastructure/config/converters.py` — Pass `loading-strategy` in conversion
 
 **Composition:**
-- `src/bioetl/composition/factories/services_factory.py` — Pass `loading_strategy` to CheckpointManager
-- `src/bioetl/composition/factories/pipeline_factory.py` — Use `config.loading_strategy`
+- `src/bioetl/composition/factories/services-factory.py` — Pass `loading-strategy` to CheckpointManager
+- `src/bioetl/composition/factories/pipeline-factory.py` — Use `config.loading-strategy`
 
 **Configs:**
-- `configs/pipelines/chembl/publication.yaml` — Add `loading_strategy: full_scan_only`
-- `configs/pipelines/chembl/publication_term.yaml` — Add `loading_strategy: full_scan_only`
-- `configs/pipelines/chembl/publication_similarity.yaml` — Add `loading_strategy: full_scan_only`
-- `configs/pipelines/pubmed/publication.yaml` — Add `loading_strategy: full_scan_only`
-- `configs/pipelines/crossref/publication.yaml` — Add `loading_strategy: full_scan_only`
-- `configs/pipelines/openalex/publication.yaml` — Add `loading_strategy: full_scan_only`
-- `configs/pipelines/semanticscholar/publication.yaml` — Add `loading_strategy: full_scan_only`
+- `configs/pipelines/chembl/publication.yaml` — Add `loading-strategy: full-scan-only`
+- `configs/pipelines/chembl/publication-term.yaml` — Add `loading-strategy: full-scan-only`
+- `configs/pipelines/chembl/publication-similarity.yaml` — Add `loading-strategy: full-scan-only`
+- `configs/pipelines/pubmed/publication.yaml` — Add `loading-strategy: full-scan-only`
+- `configs/pipelines/crossref/publication.yaml` — Add `loading-strategy: full-scan-only`
+- `configs/pipelines/openalex/publication.yaml` — Add `loading-strategy: full-scan-only`
+- `configs/pipelines/semanticscholar/publication.yaml` — Add `loading-strategy: full-scan-only`
 
 ### Tests
 
-- `tests/unit/domain/test_medallion.py` — Test `LoadingStrategy` enum
-- `tests/unit/application/core/test_checkpoint_manager.py` — Test loading_strategy validation
-- `tests/architecture/test_force_full_scan_publication.py` — Verify publication configs
+- `tests/unit/domain/test-medallion.py` — Test `LoadingStrategy` enum
+- `tests/unit/application/core/test-checkpoint-manager.py` — Test loading-strategy validation
+- `tests/architecture/test-force-full-scan-publication.py` — Verify publication configs
 
 ## Future Work
 
 ### Watermark Implementation (When Ready)
 
 Prerequisites:
-1. Confirm API provides reliable `updated_at` or version field
+1. Confirm API provides reliable `updated-at` or version field
 2. Verify field is monotonically increasing
 3. Ensure API supports filtering by watermark
 
 Steps:
-1. Add `WATERMARK_BASED = "watermark_based"` to `LoadingStrategy` enum
+1. Add `WATERMARK-BASED = "watermark-based"` to `LoadingStrategy` enum
 2. Create `src/bioetl/domain/ports/watermark.py` with `WatermarkStrategyPort`:
    ```python
-   @runtime_checkable
+   @runtime-checkable
    class WatermarkStrategyPort(Protocol):
-       async def get_watermark(self, pipeline_name: str) -> datetime | int | str | None: ...
-       async def update_watermark(self, pipeline_name: str, watermark: ...) -> None: ...
-       async def clear_watermark(self, pipeline_name: str) -> None: ...
+       async def get-watermark(self, pipeline-name: str) -> datetime | int | str | None: ...
+       async def update-watermark(self, pipeline-name: str, watermark: ...) -> None: ...
+       async def clear-watermark(self, pipeline-name: str) -> None: ...
    ```
-3. Export `WatermarkStrategyPort` from `src/bioetl/domain/ports/__init__.py`
+3. Export `WatermarkStrategyPort` from `src/bioetl/domain/ports/--init--.py`
 4. Implement `LocalWatermarkStorage` adapter
-5. Add `watermark_field` to pipeline config
+5. Add `watermark-field` to pipeline config
 6. Update fetchers to use watermark filtering
 7. Add integration tests with VCR
 
 ### Strategy Migration
 
 Once watermark is implemented:
-1. Activity pipelines: Switch to `watermark_based`
-2. Publication pipelines: Keep `full_scan_only`
-3. Deprecate `force_full_scan` field
+1. Activity pipelines: Switch to `watermark-based`
+2. Publication pipelines: Keep `full-scan-only`
+3. Deprecate `force-full-scan` field
 
 ## References
 

@@ -8,7 +8,7 @@
 
 | Parameter | Value |
 |-----------|-------|
-| **Pipeline ID** | `uniprot_idmapping` |
+| **Pipeline ID** | `uniprot-idmapping` |
 | **Provider** | UniProt (EBI/SIB/PIR) |
 | **Entity** | idmapping |
 | **API Endpoint** | `https://rest.uniprot.org/idmapping/` |
@@ -42,9 +42,9 @@ ID Mapping enables **cross-database identifier translation**:
 | From Database | To Database | Use Case |
 |---------------|-------------|----------|
 | ChEMBL | UniProtKB | Target enrichment |
-| UniProtKB_AC-ID | PDB | Structure data |
-| UniProtKB_AC-ID | RefSeq_Protein | Sequence data |
-| Gene_Name | UniProtKB | Gene-based search |
+| UniProtKB-AC-ID | PDB | Structure data |
+| UniProtKB-AC-ID | RefSeq-Protein | Sequence data |
+| Gene-Name | UniProtKB | Gene-based search |
 | EMBL | UniProtKB | Sequence→Protein |
 
 ---
@@ -57,25 +57,25 @@ ID Mapping enables **cross-database identifier translation**:
 import httpx
 
 # Step 1: Submit mapping job
-submit_url = "https://rest.uniprot.org/idmapping/run"
-job_response = await client.post(submit_url, data={
+submit-url = "https://rest.uniprot.org/idmapping/run"
+job-response = await client.post(submit-url, data={
     "from": "ChEMBL",
     "to": "UniProtKB",
-    "ids": ",".join(chembl_target_ids)  # Max 100,000 IDs
+    "ids": ",".join(chembl-target-ids)  # Max 100,000 IDs
 })
-job_id = job_response.json()["jobId"]
+job-id = job-response.json()["jobId"]
 
 # Step 2: Poll for results
-status_url = f"https://rest.uniprot.org/idmapping/status/{job_id}"
+status-url = f"https://rest.uniprot.org/idmapping/status/{job-id}"
 while True:
-    status = await client.get(status_url)
+    status = await client.get(status-url)
     if status.json().get("results"):
         break
     await asyncio.sleep(1)
 
 # Step 3: Fetch results with pagination
-results_url = f"https://rest.uniprot.org/idmapping/results/{job_id}"
-results = await client.get(results_url)
+results-url = f"https://rest.uniprot.org/idmapping/results/{job-id}"
+results = await client.get(results-url)
 ```
 
 ### 3.2. Response Fields
@@ -93,7 +93,7 @@ results = await client.get(results_url)
 | Case | Response | Handling |
 |------|----------|----------|
 | ID found | Full UniProt entry | Extract accession |
-| ID not found | Empty results | Set `mapping_status = "not_found"` |
+| ID not found | Empty results | Set `mapping-status = "not-found"` |
 | Multiple matches | Array of entries | Store as JSON array |
 | Obsolete ID | May have redirect | Follow redirect |
 
@@ -105,41 +105,41 @@ results = await client.get(results_url)
 
 | Parameter | Value |
 |-----------|-------|
-| **Entity ID Field** | `target_id` (input ChEMBL target ID) |
-| **ID Source** | `from_input` |
+| **Entity ID Field** | `target-id` (input ChEMBL target ID) |
+| **ID Source** | `from-input` |
 | **Format** | ChEMBL ID (CHEMBL[0-9]+) |
 
 ### 4.2. Output Fields
 
 | Field | Type | Source | Description |
 |-------|------|--------|-------------|
-| `target_id` | str | Input | Source ChEMBL target ID |
-| `uniprot_accession` | str | API | Mapped UniProt accession |
-| `uniprot_entry_name` | str | API | Entry name |
-| `mapping_status` | str | Derived | found/not_found/multiple/error |
-| `organism_scientific` | str | API | Scientific organism name |
-| `organism_common` | str | API | Common organism name |
-| `taxonomy_id` | int | API | NCBI Taxonomy ID |
-| `protein_name` | str | API | Recommended protein name |
-| `gene_primary` | str | API | Primary gene name |
-| `sequence_length` | int | API | Protein sequence length |
-| `sequence_mass` | int | API | Molecular weight in Daltons |
+| `target-id` | str | Input | Source ChEMBL target ID |
+| `uniprot-accession` | str | API | Mapped UniProt accession |
+| `uniprot-entry-name` | str | API | Entry name |
+| `mapping-status` | str | Derived | found/not-found/multiple/error |
+| `organism-scientific` | str | API | Scientific organism name |
+| `organism-common` | str | API | Common organism name |
+| `taxonomy-id` | int | API | NCBI Taxonomy ID |
+| `protein-name` | str | API | Recommended protein name |
+| `gene-primary` | str | API | Primary gene name |
+| `sequence-length` | int | API | Protein sequence length |
+| `sequence-mass` | int | API | Molecular weight in Daltons |
 | `reviewed` | bool | API | True if Swiss-Prot (reviewed) |
-| `annotation_score` | int | API | Quality score 1-5 |
-| `all_mappings` | str | API | JSON array if multiple |
+| `annotation-score` | int | API | Quality score 1-5 |
+| `all-mappings` | str | API | JSON array if multiple |
 
 ### 4.3. Content Hash Specification
 
 ```python
 # Fields included in hash
-hash_fields = [
-    "target_id",
-    "uniprot_accession",
-    "mapping_status",
+hash-fields = [
+    "target-id",
+    "uniprot-accession",
+    "mapping-status",
 ]
 
 # Algorithm
-content_hash = sha256(f"uniprot{canonical_json(filtered_record)}")
+content-hash = sha256(f"uniprot{canonical-json(filtered-record)}")
 ```
 
 ---
@@ -153,60 +153,60 @@ class UniprotIdMappingSchema(ETLRecordSchema):
     """UniProt ID Mapping validation schema for Silver layer."""
 
     # === Primary Key (Input ID) ===
-    target_id: Series[str] = pa.Field(
+    target-id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str-matches=r"^CHEMBL\d+$",
         description="Source ChEMBL target ID",
     )
 
     # === Mapping Result ===
-    uniprot_accession: Series[str] | None = pa.Field(
+    uniprot-accession: Series[str] | None = pa.Field(
         nullable=True,
-        description="Mapped UniProt accession (null if not_found)",
+        description="Mapped UniProt accession (null if not-found)",
     )
-    uniprot_entry_name: Series[str] | None = pa.Field(
+    uniprot-entry-name: Series[str] | None = pa.Field(
         nullable=True,
         description="UniProt entry name",
     )
-    mapping_status: Series[str] = pa.Field(
+    mapping-status: Series[str] = pa.Field(
         nullable=False,
-        isin=["found", "not_found", "multiple", "error"],
+        isin=["found", "not-found", "multiple", "error"],
         description="Mapping result status",
     )
 
     # === Organism & Taxonomy ===
-    organism_scientific: Series[str] | None = pa.Field(
+    organism-scientific: Series[str] | None = pa.Field(
         nullable=True,
         description="Scientific organism name",
     )
-    organism_common: Series[str] | None = pa.Field(
+    organism-common: Series[str] | None = pa.Field(
         nullable=True,
         description="Common organism name",
     )
-    taxonomy_id: Series[int] | None = pa.Field(nullable=True, ge=1)
+    taxonomy-id: Series[int] | None = pa.Field(nullable=True, ge=1)
 
     # === Protein Metadata ===
-    protein_name: Series[str] | None = pa.Field(
+    protein-name: Series[str] | None = pa.Field(
         nullable=True,
         description="Recommended protein name",
     )
-    gene_primary: Series[str] | None = pa.Field(
+    gene-primary: Series[str] | None = pa.Field(
         nullable=True,
         description="Primary gene name",
     )
-    sequence_length: Series[int] | None = pa.Field(nullable=True, ge=1)
-    sequence_mass: Series[int] | None = pa.Field(nullable=True, ge=1)
+    sequence-length: Series[int] | None = pa.Field(nullable=True, ge=1)
+    sequence-mass: Series[int] | None = pa.Field(nullable=True, ge=1)
     reviewed: Series[bool] | None = pa.Field(
         nullable=True,
         description="True if Swiss-Prot (reviewed)",
     )
-    annotation_score: Series[int] | None = pa.Field(
+    annotation-score: Series[int] | None = pa.Field(
         nullable=True, ge=1, le=5,
         description="Quality score 1-5",
     )
 
     # === Multiple Mappings ===
-    all_mappings: Series[str] | None = pa.Field(
+    all-mappings: Series[str] | None = pa.Field(
         nullable=True,
         description="JSON array for multiple mappings",
     )
@@ -221,8 +221,8 @@ class UniprotIdMappingSchema(ETLRecordSchema):
 
 | Threshold | Value | Action |
 |-----------|-------|--------|
-| Soft | 30% not_found | Warning, continue |
-| Hard | 80% not_found | Fail batch |
+| Soft | 30% not-found | Warning, continue |
+| Hard | 80% not-found | Fail batch |
 
 **Note:** Higher thresholds because many ChEMBL targets may not have UniProt mappings (organism targets, cell lines, etc.)
 
@@ -239,7 +239,7 @@ class UniprotIdMappingSchema(ETLRecordSchema):
 ```
 Path: silver/uniprot/idmapping/
 Format: Delta Lake (delta-rs)
-Mode: Merge on [target_id]
+Mode: Merge on [target-id]
 Partition: None
 Retention: Permanent
 ```
@@ -252,7 +252,7 @@ Format: Delta Lake
 Mode: Overwrite
 ```
 
-**Gold Filter:** All records pass (including not_found for tracking)
+**Gold Filter:** All records pass (including not-found for tracking)
 
 ---
 
@@ -261,45 +261,45 @@ Mode: Overwrite
 ```yaml
 # configs/pipelines/uniprot/idmapping.yaml
 
-pipeline_name: uniprot_idmapping
+pipeline-name: uniprot-idmapping
 provider: uniprot
-entity_type: idmapping
+entity-type: idmapping
 version: "1.1.0"
 description: "Maps ChEMBL target IDs to UniProt accessions via UniProt ID Mapping API"
 
-primary_keys: ["target_id"]
-silver_table: "uniprot_idmapping"
-gold_table: "uniprot_idmapping"
+primary-keys: ["target-id"]
+silver-table: "uniprot-idmapping"
+gold-table: "uniprot-idmapping"
 
 source:
   type: file
-  load_strategy: full
-  input_path: data/input/target.csv
+  load-strategy: full
+  input-path: data/input/target.csv
   api:
-    base_url: https://rest.uniprot.org
-    from_db: ChEMBL
-    to_db: UniProtKB
+    base-url: https://rest.uniprot.org
+    from-db: ChEMBL
+    to-db: UniProtKB
 
-dq_overrides:
-  soft_fail_threshold: 0.30  # 30% not_found acceptable
-  hard_fail_threshold: 0.80  # 80% not_found triggers failure
+dq-overrides:
+  soft-fail-threshold: 0.30  # 30% not-found acceptable
+  hard-fail-threshold: 0.80  # 80% not-found triggers failure
 
 sink:
   bronze:
     enabled: false  # No Bronze for ID mapping
   silver:
     path: "data/output/silver"
-    primary_key: ["target_id"]
-    partition_by: []
+    primary-key: ["target-id"]
+    partition-by: []
   gold:
     path: "data/output/gold"
 
-gold_filters:
-  required_fields:
-    - target_id
-    - mapping_status
+gold-filters:
+  required-fields:
+    - target-id
+    - mapping-status
 
-input_filter:
+input-filter:
   enabled: false  # Input CSV IS the source
 ```
 
@@ -318,7 +318,7 @@ input_filter:
 
 | Consumer | Impact |
 |----------|--------|
-| `uniprot_protein` | Provides accessions for protein fetch |
+| `uniprot-protein` | Provides accessions for protein fetch |
 | Target enrichment | Enables ChEMBL→UniProt linking |
 | Cross-provider analytics | ID harmonization |
 
@@ -337,9 +337,9 @@ input_filter:
 
 ### 9.2. Mapping Failures
 
-| Scenario | `mapping_status` | Notes |
+| Scenario | `mapping-status` | Notes |
 |----------|------------------|-------|
 | ID found | `found` | Normal case |
-| ID not in DB | `not_found` | Expected for non-protein targets |
-| Multiple matches | `multiple` | Store all in `all_mappings` |
+| ID not in DB | `not-found` | Expected for non-protein targets |
+| Multiple matches | `multiple` | Store all in `all-mappings` |
 | API error | `error` | Retry or quarantine |

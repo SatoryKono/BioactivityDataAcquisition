@@ -42,15 +42,15 @@
 
 - **Layer Separation**: Проверка отсутствия импортов `infrastructure` в `domain/application` через `import-linter`.
 - **Rules Enforcement**:
-  - `test_no_random_in_writers` (REQ-ARCH-030): Запрет на использование `random` в слое хранилища для детерминизма.
+  - `test-no-random-in-writers` (REQ-ARCH-030): Запрет на использование `random` в слое хранилища для детерминизма.
     - Проверяет: `import random`, `from random import`, `random.uniform()`, `random.choice()`
     - Область: `src/bioetl/infrastructure/storage/*.py`
-  - `test_no_datetime_now_in_infrastructure`: Запрет на создание временных меток в инфраструктурном слое.
+  - `test-no-datetime-now-in-infrastructure`: Запрет на создание временных меток в инфраструктурном слое.
     - Проверяет: `datetime.now()`, `datetime.datetime.now()`
     - Область: `src/bioetl/infrastructure/**/*.py` (с исключениями)
-  - `test_all_ports_have_implementations`: Проверка наличия реализаций для всех протоколов (портов).
+  - `test-all-ports-have-implementations`: Проверка наличия реализаций для всех протоколов (портов).
 
-**Документация:** См. [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md) для обоснования детерминизма.
+**Документация:** См. [ADR-014](../../02-architecture/decisions/ADR-014-deterministic-writes.md) для обоснования детерминизма.
 
 ### 2.5. Security Tests (`tests/security/`)
 
@@ -97,10 +97,10 @@ pytest --cov=src/bioetl tests/
 
 ## 5. План по устранению избыточности (ChEMBL Target Component)
 
-В ходе аудита пайплайна `chembl_target_component` был выявлен риск многократного извлечения одних и тех же данных. План исправления:
+В ходе аудита пайплайна `chembl-target-component` был выявлен риск многократного извлечения одних и тех же данных. План исправления:
 
-1. **Дедупликация на стороне клиента**: Внедрение `seen_ids` в `ChemblAdapter.fetch_filtered` для обработки дублей, возвращаемых API при использовании сложных фильтров.
-1. **Исправление пагинации**: Переход от фиксированного `offset += batch_size` к `offset += len(records)` для предотвращения пропусков данных в Degraded режиме.
+1. **Дедупликация на стороне клиента**: Внедрение `seen-ids` в `ChemblAdapter.fetch-filtered` для обработки дублей, возвращаемых API при использовании сложных фильтров.
+1. **Исправление пагинации**: Переход от фиксированного `offset += batch-size` к `offset += len(records)` для предотвращения пропусков данных в Degraded режиме.
 1. **Оптимизация параметров**: Передача `limit` напрямую в API запросы для исключения выкачивания лишних записей из ChEMBL.
 
 ## 6. Оптимизация Тестов
@@ -129,7 +129,7 @@ make test-serial
 
 Hypothesis настроен с профилями для разных сценариев (см. `tests/conftest.py`):
 
-| Профиль    | max_examples | Использование                  |
+| Профиль    | max-examples | Использование                  |
 | ---------- | ------------ | ------------------------------ |
 | `ci`       | 10           | Автоматически в CI (CI=true)   |
 | `fast`     | 5            | Быстрый smoke test             |
@@ -138,11 +138,11 @@ Hypothesis настроен с профилями для разных сцена
 
 ```bash
 # Использование профилей
-HYPOTHESIS_PROFILE=fast pytest tests/unit/
-HYPOTHESIS_PROFILE=thorough pytest tests/  # Перед релизом
+HYPOTHESIS-PROFILE=fast pytest tests/unit/
+HYPOTHESIS-PROFILE=thorough pytest tests/  # Перед релизом
 ```
 
-**Важно**: Тесты НЕ должны переопределять `max_examples` в декораторе `@settings()`, чтобы профили работали корректно.
+**Важно**: Тесты НЕ должны переопределять `max-examples` в декораторе `@settings()`, чтобы профили работали корректно.
 
 ### 6.3. Test Markers
 
@@ -193,7 +193,7 @@ Stage 4: E2E (на PR merge)
 └── pytest tests/e2e/ -m e2e
 
 Stage 5: Contract (ежемесячно)
-└── BIOETL_LIVE_API_TESTS=true pytest tests/contracts/
+└── BIOETL-LIVE-API-TESTS=true pytest tests/contracts/
 ```
 
 ## 7. Воспроизводимость и Проверка Зависимостей
@@ -208,7 +208,7 @@ Stage 5: Contract (ежемесячно)
 make setup-dev
 
 # Универсальный скрипт (создаст venv и установит зависимости)
-./dev_setup.sh
+./dev-setup.sh
 ```
 
 Команда `make setup-dev` выполняет полную синхронизацию зависимостей и запускает расширенный набор проверок `test-deps-dev`.

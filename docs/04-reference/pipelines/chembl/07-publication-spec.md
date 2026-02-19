@@ -2,22 +2,22 @@
 
 *Version 1.2.0 | Aligned with RULES.md v5.20*
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 1. Identification
 
 | Parameter        | Value                                            |
 | ---------------- | ------------------------------------------------ |
-| **Pipeline ID**  | `chembl_publication`                             |
+| **Pipeline ID**  | `chembl-publication`                             |
 | **Provider**     | ChEMBL (EBI)                                     |
 | **Entity**       | document                                         |
 | **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/document` |
-| **Library**      | `chembl_webresource_client`                      |
+| **Library**      | `chembl-webresource-client`                      |
 | **Rate Limit**   | None                                             |
 | **Health Check** | `/chembl/api/data/status.json`                   |
 | **Auth Type**    | None (public API)                                |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 2. Business Context
 
@@ -42,14 +42,14 @@ Documents represent **scientific publications** that are sources of ChEMBL data:
 ```
 document
     │
-    ├──◄──FK──activity.publication_id (1:M)
+    ├──◄──FK──activity.publication-id (1:M)
     │
-    ├──◄──FK──assay.publication_id (1:M)
+    ├──◄──FK──assay.publication-id (1:M)
     │
-    └──◄──FK──compound_record.publication_id (1:M)
+    └──◄──FK──compound-record.publication-id (1:M)
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 3. Extraction (Bronze Layer)
 
@@ -57,12 +57,12 @@ ______________________________________________________________________
 
 | #   | API Field        | JSON Type | Nullable | Description                     |
 | --- | ---------------- | --------- | -------- | ------------------------------- |
-| 1   | `publication_id` | string    | No       | Primary key                     |
-| 2   | `doc_type`       | string    | Yes      | PUBLICATION/PATENT/DATASET/BOOK |
-| 3   | `src_id`         | integer   | Yes      | Source ID                       |
-| 4   | `pubmed_id`      | integer   | Yes      | PubMed ID                       |
+| 1   | `publication-id` | string    | No       | Primary key                     |
+| 2   | `doc-type`       | string    | Yes      | PUBLICATION/PATENT/DATASET/BOOK |
+| 3   | `src-id`         | integer   | Yes      | Source ID                       |
+| 4   | `pubmed-id`      | integer   | Yes      | PubMed ID                       |
 | 5   | `doi`            | string    | Yes      | DOI                             |
-| 6   | `patent_id`      | string    | Yes      | Patent ID                       |
+| 6   | `patent-id`      | string    | Yes      | Patent ID                       |
 | 7   | `title`          | string    | Yes      | Title                           |
 | 8   | `authors`        | string    | Yes      | Authors string                  |
 | 9   | `abstract`       | string    | Yes      | Abstract                        |
@@ -70,10 +70,10 @@ ______________________________________________________________________
 | 11  | `year`           | integer   | Yes      | Publication year                |
 | 13  | `volume`         | string    | Yes      | Volume                          |
 | 14  | `issue`          | string    | Yes      | Issue                           |
-| 15  | `first_page`     | string    | Yes      | First page                      |
-| 16  | `last_page`      | string    | Yes      | Last page                       |
+| 15  | `first-page`     | string    | Yes      | First page                      |
+| 16  | `last-page`      | string    | Yes      | Last page                       |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 4. Validation
 
@@ -86,26 +86,26 @@ class ChemblPublicationSchema(ETLRecordSchema):
     """ChEMBL Publication validation schema for Silver layer."""
 
     # === Primary Key ===
-    publication_id: Series[str] = pa.Field(
+    publication-id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str-matches=r"^CHEMBL\d+$",
     )
 
     # === External Identifiers ===
-    pubmed_id: Series[str] | None = pa.Field(
+    pubmed-id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^\d+$",
+        str-matches=r"^\d+$",
     )
     doi: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=DOI_REGEX_PATTERN,
+        str-matches=DOI-REGEX-PATTERN,
     )
-    patent_id: Series[str] | None = pa.Field(nullable=True)
-    src_id: Series[int] | None = pa.Field(nullable=True)
+    patent-id: Series[str] | None = pa.Field(nullable=True)
+    src-id: Series[int] | None = pa.Field(nullable=True)
 
     # === Metadata ===
     title: Series[str] | None = pa.Field(nullable=True)
-    doc_type: Series[str] | None = pa.Field(
+    doc-type: Series[str] | None = pa.Field(
         nullable=True,
         isin=["PUBLICATION", "PATENT", "DATASET", "BOOK"],
     )
@@ -114,13 +114,13 @@ class ChemblPublicationSchema(ETLRecordSchema):
     journal: Series[str] | None = pa.Field(nullable=True)
     year: Series[int] | None = pa.Field(
         nullable=True,
-        ge=MIN_PUBLICATION_YEAR,  # 1800
-        le=MAX_PUBLICATION_YEAR,  # 2100
+        ge=MIN-PUBLICATION-YEAR,  # 1800
+        le=MAX-PUBLICATION-YEAR,  # 2100
     )
     volume: Series[str] | None = pa.Field(nullable=True)
     issue: Series[str] | None = pa.Field(nullable=True)
-    first_page: Series[str] | None = pa.Field(nullable=True)
-    last_page: Series[str] | None = pa.Field(nullable=True)
+    first-page: Series[str] | None = pa.Field(nullable=True)
+    last-page: Series[str] | None = pa.Field(nullable=True)
 
     class Config:
         strict = True
@@ -128,41 +128,41 @@ class ChemblPublicationSchema(ETLRecordSchema):
         coerce = True
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 5. Cross-Provider Mapping
 
 | This Entity Field | Maps To          | Provider | Field  |
 | ----------------- | ---------------- | -------- | ------ |
-| `pubmed_id`       | PubMed           | PubMed   | `pmid` |
+| `pubmed-id`       | PubMed           | PubMed   | `pmid` |
 | `doi`             | CrossRef         | CrossRef | `DOI`  |
 | `doi`             | OpenAlex         | OpenAlex | `doi`  |
 | `doi`             | Semantic Scholar | S2       | `doi`  |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 6. Pipeline Configuration
 
 ```yaml
-pipeline_name: chembl_publication
+pipeline-name: chembl-publication
 provider: chembl
-entity_type: document
+entity-type: document
 version: "1.2.0"
 
-primary_keys: ["publication_id"]
-silver_table: "chembl_publication"
-gold_table: "chembl_publication"
+primary-keys: ["publication-id"]
+silver-table: "chembl-publication"
+gold-table: "chembl-publication"
 
-gold_filters:
-  required_fields:
+gold-filters:
+  required-fields:
     - title
   columns:
-    doc_type: [PUBLICATION]
+    doc-type: [PUBLICATION]
 
-input_filter:
+input-filter:
   enabled: true
-  source_path: "data/input/document.csv"
-  column_name: "publication_id"
-  filter_field: "publication_id"
-  batch_size: 20
+  source-path: "data/input/document.csv"
+  column-name: "publication-id"
+  filter-field: "publication-id"
+  batch-size: 20
 ```

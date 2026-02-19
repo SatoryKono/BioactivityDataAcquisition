@@ -8,9 +8,9 @@
 
 Механизм Watermark был реализован для поддержки инкрементальной загрузки данных:
 - `Watermark` value object в domain слое для хранения позиции (timestamp, offset, ID)
-- `extract_watermark()` метод в каждом пайплайне
+- `extract-watermark()` метод в каждом пайплайне
 - Отдельные классы `*WatermarkExtractor` для каждого типа сущности
-- Поле `watermark_field` в конфигурации пайплайнов
+- Поле `watermark-field` в конфигурации пайплайнов
 - Параметр `watermark` в `DataSourcePort.fetch()` и `CheckpointPort`
 
 ### Проблемы текущего подхода
@@ -24,7 +24,7 @@
 
 1. **Cursor-based pagination**: API провайдеров (ChEMBL, UniProt) используют встроенную пагинацию
 2. **Full reload**: Для небольших датасетов (< 1M записей) полная перезагрузка эффективнее
-3. **Content-based deduplication**: Delta Lake merge по `content_hash` автоматически обрабатывает дубликаты
+3. **Content-based deduplication**: Delta Lake merge по `content-hash` автоматически обрабатывает дубликаты
 
 ## The Decision
 
@@ -32,9 +32,9 @@
 
 1. Удаление `Watermark` value object из domain/types.py
 2. Удаление параметра `watermark` из `DataSourcePort.fetch()`
-3. Удаление метода `extract_watermark()` из `BasePipeline`
+3. Удаление метода `extract-watermark()` из `BasePipeline`
 4. Удаление всех `*WatermarkExtractor` классов
-5. Удаление поля `watermark_field` из конфигурации
+5. Удаление поля `watermark-field` из конфигурации
 6. Упрощение `CheckpointPort` - хранение только метаданных запуска
 
 ## Justification
@@ -43,9 +43,9 @@
 
 | До | После |
 |---|---|
-| BasePipeline + extract_watermark() | BasePipeline (без watermark) |
+| BasePipeline + extract-watermark() | BasePipeline (без watermark) |
 | *WatermarkExtractor классы | Удалены |
-| watermark_field в config | Удалено |
+| watermark-field в config | Удалено |
 | Watermark value object | Удалён |
 
 ### 2. Уменьшение кода
@@ -64,8 +64,8 @@
 ### 4. Упрощение добавления новых пайплайнов
 
 Новый пайплайн требует только:
-- `transform_bronze_to_silver()` — основная логика
-- `should_write_gold()` — опциональная фильтрация
+- `transform-bronze-to-silver()` — основная логика
+- `should-write-gold()` — опциональная фильтрация
 
 ## Implementation
 
@@ -75,7 +75,7 @@
 # Было
 def fetch(
     self,
-    entity_type: str,
+    entity-type: str,
     watermark: Watermark | None = None,
     limit: int | None = None,
 ) -> AsyncIterator[dict[str, Any]]:
@@ -84,7 +84,7 @@ def fetch(
 # Стало
 def fetch(
     self,
-    entity_type: str,
+    entity-type: str,
     limit: int | None = None,
     query: str | None = None,
 ) -> AsyncIterator[dict[str, Any]]:
@@ -99,7 +99,7 @@ async def save(
     self,
     pipeline: str,
     watermark: Watermark,
-    run_id: RunID,
+    run-id: RunID,
     metadata: dict[str, Any],
 ) -> None:
     ...
@@ -108,7 +108,7 @@ async def save(
 async def save(
     self,
     pipeline: str,
-    run_id: RunID,
+    run-id: RunID,
     metadata: dict[str, Any],
 ) -> None:
     ...
@@ -120,14 +120,14 @@ async def save(
 # Было
 class BasePipeline(ABC):
     @abstractmethod
-    def extract_watermark(
+    def extract-watermark(
         self, context: PipelineContext, record: dict[str, Any]
     ) -> Watermark:
         ...
 
 # Стало
 class BasePipeline(ABC):
-    # Метод extract_watermark удалён
+    # Метод extract-watermark удалён
     pass
 ```
 
@@ -147,7 +147,7 @@ class BasePipeline(ABC):
 
 ### Mitigation
 
-1. **Content-based deduplication**: Delta Lake merge по `content_hash` предотвращает дубликаты
+1. **Content-based deduplication**: Delta Lake merge по `content-hash` предотвращает дубликаты
 2. **Limit параметр**: Ограничение количества записей для тестирования
 3. **Фильтрация на стороне API**: Использование query параметра для ограничения данных
 
@@ -163,6 +163,6 @@ class BasePipeline(ABC):
 ## Migration Notes
 
 При обновлении:
-1. Удалить поле `watermark_field` из конфигов пайплайнов
-2. Удалить метод `extract_watermark()` из кастомных пайплайнов
+1. Удалить поле `watermark-field` из конфигов пайплайнов
+2. Удалить метод `extract-watermark()` из кастомных пайплайнов
 3. Обновить тесты, использующие Watermark

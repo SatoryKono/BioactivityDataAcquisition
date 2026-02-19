@@ -2,21 +2,21 @@
 
 **Дата:** 2026-02-10
 **Версия:** 1.0.0
-**Scope:** Нормализация полей publication_type в composite publication pipeline
+**Scope:** Нормализация полей publication-type в composite publication pipeline
 
 ---
 
 ## Executive Summary
 
-Нормализация полей `publication_type` в BioETL происходит в **два этапа**:
+Нормализация полей `publication-type` в BioETL происходит в **два этапа**:
 
 1. **Silver Layer Transformation** — провайдер-специфичные raw типы классифицируются с помощью унифицированной 3-уровневой иерархии (214 типов, 4 провайдера)
-2. **Composite Pipeline Merging** — все provider-qualified поля сохраняются (preserve_all_sources=true), coalescing НЕ происходит
+2. **Composite Pipeline Merging** — все provider-qualified поля сохраняются (preserve-all-sources=true), coalescing НЕ происходит
 
 **Ключевые файлы:**
-- `domain/mapping/publication_type_classification.py` — 214 mappings (OpenAlex, CrossRef, PubMed, SemanticScholar)
-- `application/pipelines/common/base_publication_transformer.py` — метод `_classify_publication_type()`
-- `configs/composite/field_groups/publication.yaml` — field grouping для composite
+- `domain/mapping/publication-type-classification.py` — 214 mappings (OpenAlex, CrossRef, PubMed, SemanticScholar)
+- `application/pipelines/common/base-publication-transformer.py` — метод `-classify-publication-type()`
+- `configs/composite/field-groups/publication.yaml` — field grouping для composite
 - Provider transformers — вызывают классификацию для каждой записи
 
 ---
@@ -50,7 +50,7 @@
 - `"editorial"`
 - `"preprint"`
 
-**Mapping table:** 191 уникальных mappings (column 4 в _CLASSIFICATION_TABLE)
+**Mapping table:** 191 уникальных mappings (column 4 в -CLASSIFICATION-TABLE)
 
 ---
 
@@ -68,7 +68,7 @@
 ["Meta-Analysis"]
 ```
 
-**Mapping table:** 191 уникальных mappings (column 6 в _CLASSIFICATION_TABLE)
+**Mapping table:** 191 уникальных mappings (column 6 в -CLASSIFICATION-TABLE)
 
 **Особенность:** Multi-value provider — классификатор выбирает **наиболее специфичный тип** (highest specificity row number)
 
@@ -87,7 +87,7 @@
 ["MetaAnalysis"]
 ```
 
-**Mapping table:** 191 уникальных mappings (column 7 в _CLASSIFICATION_TABLE)
+**Mapping table:** 191 уникальных mappings (column 7 в -CLASSIFICATION-TABLE)
 
 **Особенность:** Multi-value provider — классификатор выбирает **наиболее специфичный тип**
 
@@ -95,7 +95,7 @@
 
 ### 1.5 ChEMBL
 
-**Поле:** `doc_type` (строка)
+**Поле:** `doc-type` (строка)
 
 **Примеры значений:**
 - `"PUBLICATION"`
@@ -103,10 +103,10 @@
 - `"DATASET"`
 - `"BOOK"`
 
-**Mapping:** Использует константу `PUBLICATION_TYPES` из `domain/schemas/constants.py` (line 187-194):
+**Mapping:** Использует константу `PUBLICATION-TYPES` из `domain/schemas/constants.py` (line 187-194):
 
 ```python
-PUBLICATION_TYPES: frozenset[str] = frozenset([
+PUBLICATION-TYPES: frozenset[str] = frozenset([
     "PUBLICATION",
     "PATENT",
     "DATASET",
@@ -122,16 +122,16 @@ PUBLICATION_TYPES: frozenset[str] = frozenset([
 
 ### 2.1 Архитектура Классификации
 
-**Файл:** `src/bioetl/domain/mapping/publication_type_classification.py`
+**Файл:** `src/bioetl/domain/mapping/publication-type-classification.py`
 
 **Структура:**
 
 ```python
 @dataclass(frozen=True, slots=True)
 class PublicationTypeEntry:
-    unified_type: str       # Level 3: 214 типов (e.g., "Journal Article")
+    unified-type: str       # Level 3: 214 типов (e.g., "Journal Article")
     subclass: str           # Level 2: ~25 groupings (e.g., "Original Experimental Data")
-    class_code: str         # Level 1: 3 codes (EXP | REV | PEER)
+    class-code: str         # Level 1: 3 codes (EXP | REV | PEER)
     specificity: int        # Row number (higher = more specific)
 ```
 
@@ -190,27 +190,27 @@ class PublicationTypeEntry:
 
 ### 2.3 Функция Классификации
 
-**Файл:** `src/bioetl/domain/mapping/publication_type_classification.py:1585`
+**Файл:** `src/bioetl/domain/mapping/publication-type-classification.py:1585`
 
 ```python
-def classify_publication_type(
+def classify-publication-type(
     provider: str,
-    raw_type: str | None = None,
-    raw_types_list: list[str] | None = None,
+    raw-type: str | None = None,
+    raw-types-list: list[str] | None = None,
 ) -> PublicationTypeEntry | None:
     """Classify a publication type using the unified 3-level hierarchy.
 
-    For single-value providers (OpenAlex, CrossRef): uses raw_type for
+    For single-value providers (OpenAlex, CrossRef): uses raw-type for
     a direct lookup.
 
     For multi-value providers (PubMed, Semantic Scholar): iterates
-    raw_types_list, collects all matches, and returns the entry with
+    raw-types-list, collects all matches, and returns the entry with
     the highest specificity (largest row number = most specific type).
 
     Args:
         provider: Provider name ("openalex", "crossref", "pubmed", "semanticscholar").
-        raw_type: Single raw type string (for OpenAlex / CrossRef).
-        raw_types_list: List of raw type strings (for PubMed / S2).
+        raw-type: Single raw type string (for OpenAlex / CrossRef).
+        raw-types-list: List of raw type strings (for PubMed / S2).
 
     Returns:
         The matching PublicationTypeEntry, or None if no match.
@@ -218,10 +218,10 @@ def classify_publication_type(
 ```
 
 **Lookup Tables (built at import time):**
-- `_OPENALEX_LOOKUP: dict[str, PublicationTypeEntry]`
-- `_CROSSREF_LOOKUP: dict[str, PublicationTypeEntry]`
-- `_PUBMED_LOOKUP: dict[str, PublicationTypeEntry]`
-- `_S2_LOOKUP: dict[str, PublicationTypeEntry]`
+- `-OPENALEX-LOOKUP: dict[str, PublicationTypeEntry]`
+- `-CROSSREF-LOOKUP: dict[str, PublicationTypeEntry]`
+- `-PUBMED-LOOKUP: dict[str, PublicationTypeEntry]`
+- `-S2-LOOKUP: dict[str, PublicationTypeEntry]`
 
 **Normalization:** Keys normalized to lowercase (`"JournalArticle"` → `"journalarticle"`)
 
@@ -230,7 +230,7 @@ def classify_publication_type(
 # PubMed example: ["Journal Article", "Clinical Trial", "Randomized Controlled Trial"]
 # Returns: "Randomized Controlled Trial" (row 287, most specific)
 best: PublicationTypeEntry | None = None
-for raw in raw_types_list:
+for raw in raw-types-list:
     entry = lookup.get(raw.strip().lower())
     if entry is not None and (best is None or entry.specificity > best.specificity):
         best = entry
@@ -243,45 +243,45 @@ return best
 
 ### 3.1 BasePublicationTransformer
 
-**Файл:** `src/bioetl/application/pipelines/common/base_publication_transformer.py:206`
+**Файл:** `src/bioetl/application/pipelines/common/base-publication-transformer.py:206`
 
 **Метод:**
 
 ```python
-def _classify_publication_type(
+def -classify-publication-type(
     self,
     provider: str,
-    raw_type: str | None = None,
-    raw_types_list: list[str] | None = None,
+    raw-type: str | None = None,
+    raw-types-list: list[str] | None = None,
 ) -> dict[str, str | None]:
     """Classify publication type using the unified 3-level hierarchy.
 
     Delegates to domain classification module.
 
     Returns:
-        Dict with keys publication_type_unified, publication_subclass,
-        publication_class (all str | None).
+        Dict with keys publication-type-unified, publication-subclass,
+        publication-class (all str | None).
     """
-    entry = classify_publication_type(
-        provider, raw_type=raw_type, raw_types_list=raw_types_list
+    entry = classify-publication-type(
+        provider, raw-type=raw-type, raw-types-list=raw-types-list
     )
     if entry is None:
         return {
-            "publication_type_unified": None,
-            "publication_subclass": None,
-            "publication_class": None,
+            "publication-type-unified": None,
+            "publication-subclass": None,
+            "publication-class": None,
         }
     return {
-        "publication_type_unified": entry.unified_type,
-        "publication_subclass": entry.subclass,
-        "publication_class": entry.class_code,
+        "publication-type-unified": entry.unified-type,
+        "publication-subclass": entry.subclass,
+        "publication-class": entry.class-code,
     }
 ```
 
 **Возвращает 3 поля:**
-- `publication_type_unified` — Level 3 (e.g., "Journal Article")
-- `publication_subclass` — Level 2 (e.g., "Original Experimental Data")
-- `publication_class` — Level 1 (e.g., "EXP")
+- `publication-type-unified` — Level 3 (e.g., "Journal Article")
+- `publication-subclass` — Level 2 (e.g., "Original Experimental Data")
+- `publication-class` — Level 1 (e.g., "EXP")
 
 ---
 
@@ -292,8 +292,8 @@ def _classify_publication_type(
 ```python
 return {
     # ... other fields ...
-    "publication_type": rec.get("type"),  # Raw CrossRef type
-    **self._classify_publication_type("crossref", raw_type=rec.get("type")),
+    "publication-type": rec.get("type"),  # Raw CrossRef type
+    **self.-classify-publication-type("crossref", raw-type=rec.get("type")),
     # ... other fields ...
 }
 ```
@@ -313,10 +313,10 @@ Silver record:
 ```python
 {
     "doi": "10.1038/nature12345",
-    "publication_type": "journal-article",  # Raw
-    "publication_type_unified": "Journal Article",  # Level 3
-    "publication_subclass": "Original Experimental Data",  # Level 2
-    "publication_class": "EXP",  # Level 1
+    "publication-type": "journal-article",  # Raw
+    "publication-type-unified": "Journal Article",  # Level 3
+    "publication-subclass": "Original Experimental Data",  # Level 2
+    "publication-class": "EXP",  # Level 1
     # ...
 }
 ```
@@ -330,8 +330,8 @@ Silver record:
 ```python
 return {
     # ... other fields ...
-    "publication_type": rec.get("type"),  # Raw OpenAlex type
-    **self._classify_publication_type("openalex", raw_type=rec.get("type")),
+    "publication-type": rec.get("type"),  # Raw OpenAlex type
+    **self.-classify-publication-type("openalex", raw-type=rec.get("type")),
     # ... other fields ...
 }
 ```
@@ -350,11 +350,11 @@ Bronze record:
 Silver record:
 ```python
 {
-    "openalex_id": "W2741809807",
-    "publication_type": "article",  # Raw
-    "publication_type_unified": "Journal Article",  # Level 3
-    "publication_subclass": "Original Experimental Data",  # Level 2
-    "publication_class": "EXP",  # Level 1
+    "openalex-id": "W2741809807",
+    "publication-type": "article",  # Raw
+    "publication-type-unified": "Journal Article",  # Level 3
+    "publication-subclass": "Original Experimental Data",  # Level 2
+    "publication-class": "EXP",  # Level 1
     # ...
 }
 ```
@@ -368,50 +368,50 @@ Silver record:
 **Метод:**
 
 ```python
-def _build_pubmed_classification(
-    self, pub_types: list[str]
+def -build-pubmed-classification(
+    self, pub-types: list[str]
 ) -> dict[str, str | None]:
-    """Build publication_type and classification fields for PubMed.
+    """Build publication-type and classification fields for PubMed.
 
-    Joins raw types with | for the raw publication_type field,
+    Joins raw types with | for the raw publication-type field,
     then uses the unified classifier to pick the most specific match.
 
     Args:
-        pub_types: List of raw publication type strings from XML.
+        pub-types: List of raw publication type strings from XML.
 
     Returns:
-        Dict with publication_type and the 3 classification fields.
+        Dict with publication-type and the 3 classification fields.
     """
-    raw_type = "|".join(pub_types) if pub_types else None
-    classification = self._classify_publication_type(
+    raw-type = "|".join(pub-types) if pub-types else None
+    classification = self.-classify-publication-type(
         "pubmed",
-        raw_types_list=pub_types,
+        raw-types-list=pub-types,
     )
-    return {"publication_type": raw_type, **classification}
+    return {"publication-type": raw-type, **classification}
 ```
 
 **Пример:**
 
 Bronze record (parsed XML):
 ```python
-pub_types = ["Journal Article", "Clinical Trial", "Randomized Controlled Trial"]
+pub-types = ["Journal Article", "Clinical Trial", "Randomized Controlled Trial"]
 ```
 
 Silver record:
 ```python
 {
     "pmid": "12345678",
-    "publication_type": "Journal Article|Clinical Trial|Randomized Controlled Trial",  # Raw (joined)
-    "publication_type_unified": "Randomized Controlled Trial",  # Level 3 (most specific)
-    "publication_subclass": "Original Experimental Data",  # Level 2
-    "publication_class": "EXP",  # Level 1
+    "publication-type": "Journal Article|Clinical Trial|Randomized Controlled Trial",  # Raw (joined)
+    "publication-type-unified": "Randomized Controlled Trial",  # Level 3 (most specific)
+    "publication-subclass": "Original Experimental Data",  # Level 2
+    "publication-class": "EXP",  # Level 1
     # ...
 }
 ```
 
 **Алгоритм выбора:**
-1. Iterate pub_types: ["Journal Article", "Clinical Trial", "Randomized Controlled Trial"]
-2. Lookup each in `_PUBMED_LOOKUP`
+1. Iterate pub-types: ["Journal Article", "Clinical Trial", "Randomized Controlled Trial"]
+2. Lookup each in `-PUBMED-LOOKUP`
 3. Compare `specificity` (row number)
 4. Return entry with highest specificity
 
@@ -427,22 +427,22 @@ Row numbers in classification table:
 **Файл:** `src/bioetl/application/pipelines/semanticscholar/transformer.py:219-230`
 
 ```python
-publication_types = extract_publication_types(rec)
+publication-types = extract-publication-types(rec)
 
 return {
     # ... other fields ...
-    "publication_type": self._resolve_publication_type(publication_types),
-    **self._classify_publication_type(
+    "publication-type": self.-resolve-publication-type(publication-types),
+    **self.-classify-publication-type(
         "semanticscholar",
-        raw_types_list=[
+        raw-types-list=[
             str(t).strip()
-            for t in publication_types
+            for t in publication-types
             if t is not None and str(t).strip()
         ]
-        if isinstance(publication_types, list)
+        if isinstance(publication-types, list)
         else None,
     ),
-    "publication_types": self.serialize_json(publication_types),
+    "publication-types": self.serialize-json(publication-types),
     # ... other fields ...
 }
 ```
@@ -460,20 +460,20 @@ Bronze record:
 Silver record:
 ```python
 {
-    "paper_id": "1234567890abcdef",
-    "publication_type": "JournalArticle",  # First item (from _resolve_publication_type)
-    "publication_type_unified": "Review",  # Level 3 (most specific)
-    "publication_subclass": "Reviews & Syntheses",  # Level 2
-    "publication_class": "REV",  # Level 1
-    "publication_types": '["JournalArticle", "Review"]',  # JSON string
+    "paper-id": "1234567890abcdef",
+    "publication-type": "JournalArticle",  # First item (from -resolve-publication-type)
+    "publication-type-unified": "Review",  # Level 3 (most specific)
+    "publication-subclass": "Reviews & Syntheses",  # Level 2
+    "publication-class": "REV",  # Level 1
+    "publication-types": '["JournalArticle", "Review"]',  # JSON string
     # ...
 }
 ```
 
 **Алгоритм:**
-1. `publication_type` = первый элемент списка (fallback логика)
-2. `publication_type_unified` = most specific match from ["JournalArticle", "Review"]
-3. `publication_types` = JSON-сериализованный исходный список
+1. `publication-type` = первый элемент списка (fallback логика)
+2. `publication-type-unified` = most specific match from ["JournalArticle", "Review"]
+3. `publication-types` = JSON-сериализованный исходный список
 
 Row numbers:
 - "JournalArticle" → row 2 (specificity=2)
@@ -489,31 +489,31 @@ Row numbers:
 
 | Field Name | Type | Description |
 |------------|------|-------------|
-| `publication_type` | `Series[str] \| None` | Raw provider-specific type (для backward compatibility) |
-| `publication_type_unified` | `Series[str] \| None` | Level 3: унифицированный тип из 214 значений |
-| `publication_subclass` | `Series[str] \| None` | Level 2: подкласс (~25 значений) |
-| `publication_class` | `Series[str] \| None` | Level 1: class code (EXP/REV/PEER) |
+| `publication-type` | `Series[str] \| None` | Raw provider-specific type (для backward compatibility) |
+| `publication-type-unified` | `Series[str] \| None` | Level 3: унифицированный тип из 214 значений |
+| `publication-subclass` | `Series[str] \| None` | Level 2: подкласс (~25 значений) |
+| `publication-class` | `Series[str] \| None` | Level 1: class code (EXP/REV/PEER) |
 
 **PubMed дополнительно:**
-- `publication_type_list` — не используется (deprecated/placeholder)
-- `publication_types` — не используется (deprecated/placeholder)
+- `publication-type-list` — не используется (deprecated/placeholder)
+- `publication-types` — не используется (deprecated/placeholder)
 
 **SemanticScholar дополнительно:**
-- `publication_types` — JSON string с исходным списком типов
+- `publication-types` — JSON string с исходным списком типов
 
 ---
 
-### 4.2 Field Name Mapping (publication_fields.py)
+### 4.2 Field Name Mapping (publication-fields.py)
 
-**Файл:** `src/bioetl/domain/mapping/publication_fields.py:34-41`
+**Файл:** `src/bioetl/domain/mapping/publication-fields.py:34-41`
 
 **Цель:** Унификация field names между провайдерами для будущей интеграции.
 
 **ChEMBL Mapping:**
 ```python
-_CHEMBL_MAPPING: Final[dict[str, str]] = {
-    "doc_type": "publication_type",  # ChEMBL doc_type → unified publication_type
-    "year": "publication_year",
+-CHEMBL-MAPPING: Final[dict[str, str]] = {
+    "doc-type": "publication-type",  # ChEMBL doc-type → unified publication-type
+    "year": "publication-year",
 }
 ```
 
@@ -525,33 +525,33 @@ _CHEMBL_MAPPING: Final[dict[str, str]] = {
 
 ### 5.1 Field Groups Configuration
 
-**Файл:** `configs/composite/field_groups/publication.yaml:40-44, 496-514`
+**Файл:** `configs/composite/field-groups/publication.yaml:40-44, 496-514`
 
 **Doc Type Group (line 40-44):**
 ```yaml
-- base_name: publication_type
+- base-name: publication-type
   columns:
-    - chembl.publication.publication_type
-    - pubmed.publication.publication_type
+    - chembl.publication.publication-type
+    - pubmed.publication.publication-type
 ```
 
 **Publication Types Group (line 496-514):**
 ```yaml
-# ===== PUBLICATION_TYPES =====
-- id: publication_types
-  display_name: "Publication Types"
-  include_in_gold: true
+# ===== PUBLICATION-TYPES =====
+- id: publication-types
+  display-name: "Publication Types"
+  include-in-gold: true
   fields:
-    - base_name: publication_type_list
+    - base-name: publication-type-list
       columns:
-        - pubmed.publication.publication_type_list
+        - pubmed.publication.publication-type-list
 
-    - base_name: publication_types
+    - base-name: publication-types
       columns:
-        - pubmed.publication.publication_types
-        - semanticscholar.publication.publication_types
+        - pubmed.publication.publication-types
+        - semanticscholar.publication.publication-types
 
-    - base_name: type
+    - base-name: type
       columns:
         - crossref.publication.type
         - openalex.publication.type
@@ -559,54 +559,54 @@ _CHEMBL_MAPPING: Final[dict[str, str]] = {
 
 **Интерпретация:**
 
-1. `publication_type` — базовое поле (ChEMBL, PubMed)
-2. `publication_type_list` — PubMed-specific (deprecated)
-3. `publication_types` — PubMed + SemanticScholar (JSON списки)
+1. `publication-type` — базовое поле (ChEMBL, PubMed)
+2. `publication-type-list` — PubMed-specific (deprecated)
+3. `publication-types` — PubMed + SemanticScholar (JSON списки)
 4. `type` — CrossRef + OpenAlex (raw типы)
 
-**Отсутствуют в field_groups:**
-- `publication_type_unified` (Level 3)
-- `publication_subclass` (Level 2)
-- `publication_class` (Level 1)
+**Отсутствуют в field-groups:**
+- `publication-type-unified` (Level 3)
+- `publication-subclass` (Level 2)
+- `publication-class` (Level 1)
 
-Эти поля **сохраняются** с provider qualification (e.g., `crossref.publication.publication_type_unified`).
+Эти поля **сохраняются** с provider qualification (e.g., `crossref.publication.publication-type-unified`).
 
 ---
 
-### 5.2 Merge Strategy (preserve_all_sources)
+### 5.2 Merge Strategy (preserve-all-sources)
 
 **Файл:** `configs/pipelines/composite/publication.yaml:132`
 
 ```yaml
 merge:
-  preserve_all_sources: true
-  conflict_resolution: seed_priority
+  preserve-all-sources: true
+  conflict-resolution: seed-priority
 ```
 
 **Файл:** `src/bioetl/application/composite/merger.py:1334-1346`
 
 ```python
-def _resolve_conflicts(
+def -resolve-conflicts(
     self,
     df: pl.DataFrame,
-    enricher_dfs: dict[str, pl.DataFrame],
+    enricher-dfs: dict[str, pl.DataFrame],
     enrichers: Sequence[EnricherConfig],
-    seed_pipeline: str | None = None,
+    seed-pipeline: str | None = None,
 ) -> pl.DataFrame:
     """Apply conflict resolution based on configured strategy."""
-    # Skip coalescing if preserve_all_sources is enabled
-    if self._config.preserve_all_sources:
-        qualified_cols = [
-            c for c in df.columns if "." in c and not c.startswith("_")
+    # Skip coalescing if preserve-all-sources is enabled
+    if self.-config.preserve-all-sources:
+        qualified-cols = [
+            c for c in df.columns if "." in c and not c.startswith("-")
         ]
-        self._logger.info(
-            "Skipping conflict resolution - preserve_all_sources=True",
-            qualified_columns=len(qualified_cols),
+        self.-logger.info(
+            "Skipping conflict resolution - preserve-all-sources=True",
+            qualified-columns=len(qualified-cols),
         )
         return df
 ```
 
-**Вывод:** С `preserve_all_sources: true`, **coalescing НЕ происходит**. Все поля сохраняются с квалификацией провайдера.
+**Вывод:** С `preserve-all-sources: true`, **coalescing НЕ происходит**. Все поля сохраняются с квалификацией провайдера.
 
 ---
 
@@ -616,38 +616,38 @@ def _resolve_conflicts(
 
 | Column Name | Type | Example Value | Source |
 |-------------|------|---------------|--------|
-| `entity_id` | str | "pub-HASH123" | Unified PK |
+| `entity-id` | str | "pub-HASH123" | Unified PK |
 | `doi` | str | "10.1038/nature12345" | Coalesced DOI |
 | `pmid` | str | "12345678" | PubMed ID |
 | **ChEMBL** |||
-| `chembl.publication.publication_type` | str | "PUBLICATION" | Raw ChEMBL enum |
+| `chembl.publication.publication-type` | str | "PUBLICATION" | Raw ChEMBL enum |
 | **CrossRef** |||
 | `crossref.publication.type` | str | "journal-article" | Raw CrossRef type |
-| `crossref.publication.publication_type` | str | "journal-article" | Raw (duplicated) |
-| `crossref.publication.publication_type_unified` | str | "Journal Article" | Level 3 |
-| `crossref.publication.publication_subclass` | str | "Original Experimental Data" | Level 2 |
-| `crossref.publication.publication_class` | str | "EXP" | Level 1 |
+| `crossref.publication.publication-type` | str | "journal-article" | Raw (duplicated) |
+| `crossref.publication.publication-type-unified` | str | "Journal Article" | Level 3 |
+| `crossref.publication.publication-subclass` | str | "Original Experimental Data" | Level 2 |
+| `crossref.publication.publication-class` | str | "EXP" | Level 1 |
 | **OpenAlex** |||
 | `openalex.publication.type` | str | "article" | Raw OpenAlex type |
-| `openalex.publication.publication_type` | str | "article" | Raw (duplicated) |
-| `openalex.publication.publication_type_unified` | str | "Journal Article" | Level 3 |
-| `openalex.publication.publication_subclass` | str | "Original Experimental Data" | Level 2 |
-| `openalex.publication.publication_class` | str | "EXP" | Level 1 |
+| `openalex.publication.publication-type` | str | "article" | Raw (duplicated) |
+| `openalex.publication.publication-type-unified` | str | "Journal Article" | Level 3 |
+| `openalex.publication.publication-subclass` | str | "Original Experimental Data" | Level 2 |
+| `openalex.publication.publication-class` | str | "EXP" | Level 1 |
 | **PubMed** |||
-| `pubmed.publication.publication_type` | str | "Journal Article\|Clinical Trial" | Raw (pipe-joined) |
-| `pubmed.publication.publication_type_unified` | str | "Clinical Trial" | Level 3 (most specific) |
-| `pubmed.publication.publication_subclass` | str | "Original Experimental Data" | Level 2 |
-| `pubmed.publication.publication_class` | str | "EXP" | Level 1 |
-| `pubmed.publication.publication_type_list` | str? | NULL | Deprecated field |
-| `pubmed.publication.publication_types` | str? | NULL | Deprecated field |
+| `pubmed.publication.publication-type` | str | "Journal Article\|Clinical Trial" | Raw (pipe-joined) |
+| `pubmed.publication.publication-type-unified` | str | "Clinical Trial" | Level 3 (most specific) |
+| `pubmed.publication.publication-subclass` | str | "Original Experimental Data" | Level 2 |
+| `pubmed.publication.publication-class` | str | "EXP" | Level 1 |
+| `pubmed.publication.publication-type-list` | str? | NULL | Deprecated field |
+| `pubmed.publication.publication-types` | str? | NULL | Deprecated field |
 | **SemanticScholar** |||
-| `semanticscholar.publication.publication_type` | str | "JournalArticle" | Raw (first item) |
-| `semanticscholar.publication.publication_type_unified` | str | "Journal Article" | Level 3 |
-| `semanticscholar.publication.publication_subclass` | str | "Original Experimental Data" | Level 2 |
-| `semanticscholar.publication.publication_class` | str | "EXP" | Level 1 |
-| `semanticscholar.publication.publication_types` | str | '["JournalArticle"]' | JSON list |
+| `semanticscholar.publication.publication-type` | str | "JournalArticle" | Raw (first item) |
+| `semanticscholar.publication.publication-type-unified` | str | "Journal Article" | Level 3 |
+| `semanticscholar.publication.publication-subclass` | str | "Original Experimental Data" | Level 2 |
+| `semanticscholar.publication.publication-class` | str | "EXP" | Level 1 |
+| `semanticscholar.publication.publication-types` | str | '["JournalArticle"]' | JSON list |
 
-**Итого:** ~20 publication_type-related колонок (с provider qualification)
+**Итого:** ~20 publication-type-related колонок (с provider qualification)
 
 ---
 
@@ -656,31 +656,31 @@ def _resolve_conflicts(
 **Файл:** `configs/pipelines/composite/publication.yaml:406-409`
 
 ```yaml
-- name: doc_type
+- name: doc-type
   fields:
-    - publication_status
-    - publication_type
-    - publication_type_list
-    - publication_types
+    - publication-status
+    - publication-type
+    - publication-type-list
+    - publication-types
 ```
 
 **Интерпретация:**
 
-Колонки группируются по `base_name` из field_groups, но фактически в DataFrame будут provider-qualified:
-- `chembl.publication.publication_type`
-- `pubmed.publication.publication_type`
+Колонки группируются по `base-name` из field-groups, но фактически в DataFrame будут provider-qualified:
+- `chembl.publication.publication-type`
+- `pubmed.publication.publication-type`
 - `crossref.publication.type`
 - `openalex.publication.type`
-- `pubmed.publication.publication_type_list`
-- `pubmed.publication.publication_types`
-- `semanticscholar.publication.publication_types`
+- `pubmed.publication.publication-type-list`
+- `pubmed.publication.publication-types`
+- `semanticscholar.publication.publication-types`
 
 **Дополнительно:**
-- `*.publication.publication_type_unified`
-- `*.publication.publication_subclass`
-- `*.publication.publication_class`
+- `*.publication.publication-type-unified`
+- `*.publication.publication-subclass`
+- `*.publication.publication-class`
 
-Эти колонки НЕ перечислены в column_groups, но сохраняются в DataFrame.
+Эти колонки НЕ перечислены в column-groups, но сохраняются в DataFrame.
 
 ---
 
@@ -696,19 +696,19 @@ def _resolve_conflicts(
 │ OpenAlex:         type: "article"                                     │
 │ PubMed:           PublicationType: ["Journal Article", "Clinical..."] │
 │ SemanticScholar:  publicationTypes: ["JournalArticle", "Review"]     │
-│ ChEMBL:           doc_type: "PUBLICATION"                             │
+│ ChEMBL:           doc-type: "PUBLICATION"                             │
 └──────────────────────────────────────────────────────────────────────┘
                                ↓
 ┌──────────────────────────────────────────────────────────────────────┐
 │                    TRANSFORMATION (Silver Transformer)                 │
 ├──────────────────────────────────────────────────────────────────────┤
 │ 1. Extract raw type(s) from Bronze record                             │
-│ 2. Call _classify_publication_type(provider, raw_type/raw_types_list) │
+│ 2. Call -classify-publication-type(provider, raw-type/raw-types-list) │
 │ 3. Lookup in provider-specific table (case-insensitive)              │
 │ 4. Return PublicationTypeEntry:                                      │
-│    - unified_type (Level 3)                                           │
+│    - unified-type (Level 3)                                           │
 │    - subclass (Level 2)                                               │
-│    - class_code (Level 1)                                             │
+│    - class-code (Level 1)                                             │
 │ 5. Multi-value providers: select most specific (highest row number)  │
 └──────────────────────────────────────────────────────────────────────┘
                                ↓
@@ -716,29 +716,29 @@ def _resolve_conflicts(
 │                       SILVER LAYER (Per-Provider)                      │
 ├──────────────────────────────────────────────────────────────────────┤
 │ CrossRef Silver:                                                      │
-│   - publication_type: "journal-article" (raw)                         │
-│   - publication_type_unified: "Journal Article"                       │
-│   - publication_subclass: "Original Experimental Data"                │
-│   - publication_class: "EXP"                                          │
+│   - publication-type: "journal-article" (raw)                         │
+│   - publication-type-unified: "Journal Article"                       │
+│   - publication-subclass: "Original Experimental Data"                │
+│   - publication-class: "EXP"                                          │
 │                                                                       │
 │ OpenAlex Silver:                                                      │
-│   - publication_type: "article" (raw)                                 │
-│   - publication_type_unified: "Journal Article"                       │
-│   - publication_subclass: "Original Experimental Data"                │
-│   - publication_class: "EXP"                                          │
+│   - publication-type: "article" (raw)                                 │
+│   - publication-type-unified: "Journal Article"                       │
+│   - publication-subclass: "Original Experimental Data"                │
+│   - publication-class: "EXP"                                          │
 │                                                                       │
 │ PubMed Silver:                                                        │
-│   - publication_type: "Journal Article|Clinical Trial" (joined)       │
-│   - publication_type_unified: "Clinical Trial" (most specific)        │
-│   - publication_subclass: "Original Experimental Data"                │
-│   - publication_class: "EXP"                                          │
+│   - publication-type: "Journal Article|Clinical Trial" (joined)       │
+│   - publication-type-unified: "Clinical Trial" (most specific)        │
+│   - publication-subclass: "Original Experimental Data"                │
+│   - publication-class: "EXP"                                          │
 │                                                                       │
 │ SemanticScholar Silver:                                               │
-│   - publication_type: "JournalArticle" (first item)                   │
-│   - publication_type_unified: "Review" (most specific)                │
-│   - publication_subclass: "Reviews & Syntheses"                       │
-│   - publication_class: "REV"                                          │
-│   - publication_types: '["JournalArticle", "Review"]' (JSON)          │
+│   - publication-type: "JournalArticle" (first item)                   │
+│   - publication-type-unified: "Review" (most specific)                │
+│   - publication-subclass: "Reviews & Syntheses"                       │
+│   - publication-class: "REV"                                          │
+│   - publication-types: '["JournalArticle", "Review"]' (JSON)          │
 └──────────────────────────────────────────────────────────────────────┘
                                ↓
 ┌──────────────────────────────────────────────────────────────────────┐
@@ -746,59 +746,59 @@ def _resolve_conflicts(
 ├──────────────────────────────────────────────────────────────────────┤
 │ 1. Load seed (e.g., ChEMBL) and enrichers (CrossRef, OpenAlex, etc.)  │
 │ 2. Apply qualified column renaming:                                  │
-│    - crossref.publication.publication_type                            │
-│    - openalex.publication.publication_type                            │
-│    - pubmed.publication.publication_type                              │
-│    - semanticscholar.publication.publication_type                     │
-│    - crossref.publication.publication_type_unified                    │
-│    - openalex.publication.publication_type_unified                    │
-│    - pubmed.publication.publication_type_unified                      │
-│    - semanticscholar.publication.publication_type_unified             │
-│    - (same for publication_subclass, publication_class)               │
+│    - crossref.publication.publication-type                            │
+│    - openalex.publication.publication-type                            │
+│    - pubmed.publication.publication-type                              │
+│    - semanticscholar.publication.publication-type                     │
+│    - crossref.publication.publication-type-unified                    │
+│    - openalex.publication.publication-type-unified                    │
+│    - pubmed.publication.publication-type-unified                      │
+│    - semanticscholar.publication.publication-type-unified             │
+│    - (same for publication-subclass, publication-class)               │
 │ 3. Join on doi/pmid                                                   │
-│ 4. preserve_all_sources=true → NO coalescing                          │
-│ 5. Apply field_groups ordering (semantic grouping)                   │
+│ 4. preserve-all-sources=true → NO coalescing                          │
+│ 5. Apply field-groups ordering (semantic grouping)                   │
 └──────────────────────────────────────────────────────────────────────┘
                                ↓
 ┌──────────────────────────────────────────────────────────────────────┐
 │                    COMPOSITE PUBLICATION (Gold Layer)                  │
 ├──────────────────────────────────────────────────────────────────────┤
 │ Result DataFrame:                                                     │
-│   - entity_id: "pub-HASH123"                                          │
+│   - entity-id: "pub-HASH123"                                          │
 │   - doi: "10.1038/nature12345"                                        │
 │   - pmid: "12345678"                                                  │
 │                                                                       │
 │   # ChEMBL (seed)                                                     │
-│   - chembl.publication.publication_type: "PUBLICATION"                │
+│   - chembl.publication.publication-type: "PUBLICATION"                │
 │                                                                       │
 │   # CrossRef (enricher)                                               │
 │   - crossref.publication.type: "journal-article"                      │
-│   - crossref.publication.publication_type: "journal-article"          │
-│   - crossref.publication.publication_type_unified: "Journal Article"  │
-│   - crossref.publication.publication_subclass: "Original..."          │
-│   - crossref.publication.publication_class: "EXP"                     │
+│   - crossref.publication.publication-type: "journal-article"          │
+│   - crossref.publication.publication-type-unified: "Journal Article"  │
+│   - crossref.publication.publication-subclass: "Original..."          │
+│   - crossref.publication.publication-class: "EXP"                     │
 │                                                                       │
 │   # OpenAlex (enricher)                                               │
 │   - openalex.publication.type: "article"                              │
-│   - openalex.publication.publication_type: "article"                  │
-│   - openalex.publication.publication_type_unified: "Journal Article"  │
-│   - openalex.publication.publication_subclass: "Original..."          │
-│   - openalex.publication.publication_class: "EXP"                     │
+│   - openalex.publication.publication-type: "article"                  │
+│   - openalex.publication.publication-type-unified: "Journal Article"  │
+│   - openalex.publication.publication-subclass: "Original..."          │
+│   - openalex.publication.publication-class: "EXP"                     │
 │                                                                       │
 │   # PubMed (enricher)                                                 │
-│   - pubmed.publication.publication_type: "Journal Article|Clinical..."│
-│   - pubmed.publication.publication_type_unified: "Clinical Trial"     │
-│   - pubmed.publication.publication_subclass: "Original..."            │
-│   - pubmed.publication.publication_class: "EXP"                       │
+│   - pubmed.publication.publication-type: "Journal Article|Clinical..."│
+│   - pubmed.publication.publication-type-unified: "Clinical Trial"     │
+│   - pubmed.publication.publication-subclass: "Original..."            │
+│   - pubmed.publication.publication-class: "EXP"                       │
 │                                                                       │
 │   # SemanticScholar (enricher)                                        │
-│   - semanticscholar.publication.publication_type: "JournalArticle"    │
-│   - semanticscholar.publication.publication_type_unified: "Review"    │
-│   - semanticscholar.publication.publication_subclass: "Reviews..."    │
-│   - semanticscholar.publication.publication_class: "REV"              │
-│   - semanticscholar.publication.publication_types: '["Journal..."]'   │
+│   - semanticscholar.publication.publication-type: "JournalArticle"    │
+│   - semanticscholar.publication.publication-type-unified: "Review"    │
+│   - semanticscholar.publication.publication-subclass: "Reviews..."    │
+│   - semanticscholar.publication.publication-class: "REV"              │
+│   - semanticscholar.publication.publication-types: '["Journal..."]'   │
 │                                                                       │
-│   # ~20 publication_type-related columns total                        │
+│   # ~20 publication-type-related columns total                        │
 └──────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -809,15 +809,15 @@ def _resolve_conflicts(
 ### 7.1 Нормализация Происходит в 2 Этапа
 
 1. **Silver Layer** — провайдер-специфичные raw типы классифицируются через unified 3-level hierarchy (214 типов)
-2. **Composite Layer** — все provider-qualified поля сохраняются (preserve_all_sources=true)
+2. **Composite Layer** — все provider-qualified поля сохраняются (preserve-all-sources=true)
 
 ---
 
 ### 7.2 Unified Classification (214 Types)
 
-- **Источник:** `domain/mapping/publication_type_classification.py`
+- **Источник:** `domain/mapping/publication-type-classification.py`
 - **Провайдеры:** OpenAlex, CrossRef, PubMed, SemanticScholar (ChEMBL НЕ участвует)
-- **Структура:** 3 уровня (class_code → subclass → unified_type)
+- **Структура:** 3 уровня (class-code → subclass → unified-type)
 - **Алгоритм:** Multi-value провайдеры (PubMed, S2) выбирают most specific type (highest row number)
 
 ---
@@ -825,19 +825,19 @@ def _resolve_conflicts(
 ### 7.3 Silver Layer Output (4 поля)
 
 Каждый трансформер создает:
-1. `publication_type` — raw provider-specific type (backward compatibility)
-2. `publication_type_unified` — Level 3 unified type
-3. `publication_subclass` — Level 2 subclass
-4. `publication_class` — Level 1 class code (EXP/REV/PEER)
+1. `publication-type` — raw provider-specific type (backward compatibility)
+2. `publication-type-unified` — Level 3 unified type
+3. `publication-subclass` — Level 2 subclass
+4. `publication-class` — Level 1 class code (EXP/REV/PEER)
 
 ---
 
 ### 7.4 Composite Layer Preservation
 
-С `preserve_all_sources: true`:
+С `preserve-all-sources: true`:
 - **НЕТ автоматического coalescing** полей
 - **ВСЕ поля сохраняются** с provider qualification
-- Результат: ~20 publication_type-related колонок для записи с 5 провайдерами
+- Результат: ~20 publication-type-related колонок для записи с 5 провайдерами
 
 ---
 
@@ -846,23 +846,23 @@ def _resolve_conflicts(
 ChEMBL:
 - Использует ограниченный enum (4 значения): `PUBLICATION`, `PATENT`, `DATASET`, `BOOK`
 - **НЕ участвует** в unified classification с 214 типами
-- `doc_type` → `publication_type` mapping существует в `publication_fields.py`, но это field name mapping, не value classification
+- `doc-type` → `publication-type` mapping существует в `publication-fields.py`, но это field name mapping, не value classification
 
 ---
 
 ### 7.6 Field Naming Inconsistencies
 
 **Внутри провайдеров (Bronze → Silver):**
-- CrossRef: `type` (Bronze) → `type` + `publication_type` (Silver, duplicated)
-- OpenAlex: `type` (Bronze) → `type` + `publication_type` (Silver, duplicated)
-- PubMed: `PublicationType` (Bronze XML) → `publication_type` (Silver, joined with `|`)
-- SemanticScholar: `publicationTypes` (Bronze) → `publication_type` + `publication_types` (Silver, resolved + JSON)
+- CrossRef: `type` (Bronze) → `type` + `publication-type` (Silver, duplicated)
+- OpenAlex: `type` (Bronze) → `type` + `publication-type` (Silver, duplicated)
+- PubMed: `PublicationType` (Bronze XML) → `publication-type` (Silver, joined with `|`)
+- SemanticScholar: `publicationTypes` (Bronze) → `publication-type` + `publication-types` (Silver, resolved + JSON)
 
 **В Composite:**
-- `crossref.publication.type` vs `crossref.publication.publication_type` (оба содержат одинаковое значение)
-- `openalex.publication.type` vs `openalex.publication.publication_type` (оба содержат одинаковое значение)
+- `crossref.publication.type` vs `crossref.publication.publication-type` (оба содержат одинаковое значение)
+- `openalex.publication.type` vs `openalex.publication.publication-type` (оба содержат одинаковое значение)
 
-**Причина:** field_groups configuration сохраняет оба имени для backward compatibility.
+**Причина:** field-groups configuration сохраняет оба имени для backward compatibility.
 
 ---
 
@@ -882,21 +882,21 @@ ChEMBL:
 **Silver (OpenAlex):**
 ```python
 {
-    "openalex_id": "W2741809807",
-    "publication_type": "article",
-    "publication_type_unified": "Journal Article",
-    "publication_subclass": "Original Experimental Data",
-    "publication_class": "EXP",
+    "openalex-id": "W2741809807",
+    "publication-type": "article",
+    "publication-type-unified": "Journal Article",
+    "publication-subclass": "Original Experimental Data",
+    "publication-class": "EXP",
 }
 ```
 
 **Composite:**
 ```
 openalex.publication.type: "article"
-openalex.publication.publication_type: "article"
-openalex.publication.publication_type_unified: "Journal Article"
-openalex.publication.publication_subclass: "Original Experimental Data"
-openalex.publication.publication_class: "EXP"
+openalex.publication.publication-type: "article"
+openalex.publication.publication-type-unified: "Journal Article"
+openalex.publication.publication-subclass: "Original Experimental Data"
+openalex.publication.publication-class: "EXP"
 ```
 
 ---
@@ -916,10 +916,10 @@ openalex.publication.publication_class: "EXP"
 ```python
 {
     "pmid": "12345678",
-    "publication_type": "Journal Article|Meta-Analysis|Review",  # Joined
-    "publication_type_unified": "Meta-Analysis",  # Most specific (row 41)
-    "publication_subclass": "Reviews & Syntheses",
-    "publication_class": "REV",
+    "publication-type": "Journal Article|Meta-Analysis|Review",  # Joined
+    "publication-type-unified": "Meta-Analysis",  # Most specific (row 41)
+    "publication-subclass": "Reviews & Syntheses",
+    "publication-class": "REV",
 }
 ```
 
@@ -930,10 +930,10 @@ openalex.publication.publication_class: "EXP"
 
 **Composite:**
 ```
-pubmed.publication.publication_type: "Journal Article|Meta-Analysis|Review"
-pubmed.publication.publication_type_unified: "Meta-Analysis"
-pubmed.publication.publication_subclass: "Reviews & Syntheses"
-pubmed.publication.publication_class: "REV"
+pubmed.publication.publication-type: "Journal Article|Meta-Analysis|Review"
+pubmed.publication.publication-type-unified: "Meta-Analysis"
+pubmed.publication.publication-subclass: "Reviews & Syntheses"
+pubmed.publication.publication-class: "REV"
 ```
 
 ---
@@ -948,21 +948,21 @@ pubmed.publication.publication_class: "REV"
 ```python
 {
     "doi": "10.1109/CVPR.2020.00123",
-    "publication_type": "proceedings-article",
-    "publication_type_unified": "Conference Paper",
-    "publication_subclass": "Original Experimental Data",
-    "publication_class": "EXP",
+    "publication-type": "proceedings-article",
+    "publication-type-unified": "Conference Paper",
+    "publication-subclass": "Original Experimental Data",
+    "publication-class": "EXP",
 }
 ```
 
 **Silver (OpenAlex):**
 ```python
 {
-    "openalex_id": "W3012345678",
-    "publication_type": "article",
-    "publication_type_unified": "Conference Paper",  # Secondary mapping
-    "publication_subclass": "Original Experimental Data",
-    "publication_class": "EXP",
+    "openalex-id": "W3012345678",
+    "publication-type": "article",
+    "publication-type-unified": "Conference Paper",  # Secondary mapping
+    "publication-subclass": "Original Experimental Data",
+    "publication-class": "EXP",
 }
 ```
 
@@ -974,7 +974,7 @@ pubmed.publication.publication_class: "REV"
 
 ### 9.1 Domain Layer Purity
 
-**Файл:** `domain/mapping/publication_type_classification.py`
+**Файл:** `domain/mapping/publication-type-classification.py`
 
 ✅ **Соответствует RULES.md:**
 - Pure Python (no I/O)
@@ -986,12 +986,12 @@ pubmed.publication.publication_class: "REV"
 
 ### 9.2 Template Method Pattern
 
-**Файл:** `application/pipelines/common/base_publication_transformer.py`
+**Файл:** `application/pipelines/common/base-publication-transformer.py`
 
 ✅ **Соответствует Pattern:**
-- `_transform_impl()` — Template Method (base class)
-- `_extract_business_data()` — Abstract (provider-specific)
-- `_classify_publication_type()` — Reusable helper (base class)
+- `-transform-impl()` — Template Method (base class)
+- `-extract-business-data()` — Abstract (provider-specific)
+- `-classify-publication-type()` — Reusable helper (base class)
 
 ---
 
@@ -1012,22 +1012,22 @@ pubmed.publication.publication_class: "REV"
 
 ## Часть 10: Потенциальные Улучшения
 
-### 10.1 Deduplicate `type` and `publication_type`
+### 10.1 Deduplicate `type` and `publication-type`
 
 **Проблема:** CrossRef и OpenAlex имеют оба поля с одинаковым значением.
 
 **Текущее состояние:**
 ```python
 {
-    "publication_type": rec.get("type"),  # Raw
+    "publication-type": rec.get("type"),  # Raw
     # ...
-    "type": rec.get("type"),  # Duplicate via field_groups
+    "type": rec.get("type"),  # Duplicate via field-groups
 }
 ```
 
-**Решение:** Удалить дублирование, оставить только `publication_type` в Silver schemas.
+**Решение:** Удалить дублирование, оставить только `publication-type` в Silver schemas.
 
-**Impact:** Requires field_groups update and schema validation tests.
+**Impact:** Requires field-groups update and schema validation tests.
 
 ---
 
@@ -1036,10 +1036,10 @@ pubmed.publication.publication_class: "REV"
 **Проблема:** ChEMBL использует 4-value enum, не участвует в unified 214-type classification.
 
 **Текущее состояние:**
-- ChEMBL: `doc_type` ∈ {PUBLICATION, PATENT, DATASET, BOOK}
-- No `publication_type_unified`, `publication_subclass`, `publication_class`
+- ChEMBL: `doc-type` ∈ {PUBLICATION, PATENT, DATASET, BOOK}
+- No `publication-type-unified`, `publication-subclass`, `publication-class`
 
-**Решение:** Add ChEMBL column to `_CLASSIFICATION_TABLE` for 4 types:
+**Решение:** Add ChEMBL column to `-CLASSIFICATION-TABLE` for 4 types:
 
 ```python
 # Row example
@@ -1056,118 +1056,118 @@ pubmed.publication.publication_class: "REV"
 
 ### 10.3 Explicit Column Ordering для classification fields
 
-**Проблема:** `publication_type_unified`, `publication_subclass`, `publication_class` не перечислены в `column_groups`.
+**Проблема:** `publication-type-unified`, `publication-subclass`, `publication-class` не перечислены в `column-groups`.
 
 **Текущее состояние:**
 ```yaml
 # configs/pipelines/composite/publication.yaml:406-409
-- name: doc_type
+- name: doc-type
   fields:
-    - publication_status
-    - publication_type
-    - publication_type_list
-    - publication_types
-    # Missing: publication_type_unified, publication_subclass, publication_class
+    - publication-status
+    - publication-type
+    - publication-type-list
+    - publication-types
+    # Missing: publication-type-unified, publication-subclass, publication-class
 ```
 
-**Решение:** Add to column_groups for explicit ordering:
+**Решение:** Add to column-groups for explicit ordering:
 
 ```yaml
-- name: doc_type
+- name: doc-type
   fields:
-    - publication_status
-    - publication_type
-    - publication_type_unified  # Add
-    - publication_subclass      # Add
-    - publication_class         # Add
-    - publication_type_list
-    - publication_types
+    - publication-status
+    - publication-type
+    - publication-type-unified  # Add
+    - publication-subclass      # Add
+    - publication-class         # Add
+    - publication-type-list
+    - publication-types
 ```
 
 **Benefit:** Explicit control over column ordering in composite output.
 
 ---
 
-### 10.4 Deprecate `publication_type_list` and `publication_types` (PubMed)
+### 10.4 Deprecate `publication-type-list` and `publication-types` (PubMed)
 
 **Проблема:** PubMed Silver schema имеет deprecated placeholders:
-- `publication_type_list` — always NULL
-- `publication_types` — always NULL (not to be confused with SemanticScholar's field)
+- `publication-type-list` — always NULL
+- `publication-types` — always NULL (not to be confused with SemanticScholar's field)
 
 **Текущее состояние:**
 ```python
 # pubmed/publication.py schema
-publication_type_list: Series[str] | None = pa.Field(nullable=True, ...)
-publication_types: Series[str] | None = pa.Field(nullable=True, ...)
+publication-type-list: Series[str] | None = pa.Field(nullable=True, ...)
+publication-types: Series[str] | None = pa.Field(nullable=True, ...)
 ```
 
-**Решение:** Remove from schema, update field_groups, update skipped tests analysis.
+**Решение:** Remove from schema, update field-groups, update skipped tests analysis.
 
-**Benefit:** Reduce schema complexity, eliminate confusion with SemanticScholar's `publication_types`.
+**Benefit:** Reduce schema complexity, eliminate confusion with SemanticScholar's `publication-types`.
 
 ---
 
 ### 10.5 PyArrow Schema Missing Fields (RESOLVED - 2026-02-10)
 
-**Проблема (ROOT CAUSE):** Classification fields (`publication_type_unified`, `publication_subclass`, `publication_class`) отсутствовали в PyArrow schemas для публикаций.
+**Проблема (ROOT CAUSE):** Classification fields (`publication-type-unified`, `publication-subclass`, `publication-class`) отсутствовали в PyArrow schemas для публикаций.
 
 **Файл:** `src/bioetl/infrastructure/schemas/silver.py`
 
 **Пострадавшие schemas:**
-- `CHEMBL_PUBLICATION_SCHEMA`
-- `PUBMED_PUBLICATION_SCHEMA`
-- `SEMANTICSCHOLAR_PUBLICATION_SCHEMA`
-- `CROSSREF_PUBLICATION_SCHEMA`
-- `OPENALEX_PUBLICATION_SCHEMA`
+- `CHEMBL-PUBLICATION-SCHEMA`
+- `PUBMED-PUBLICATION-SCHEMA`
+- `SEMANTICSCHOLAR-PUBLICATION-SCHEMA`
+- `CROSSREF-PUBLICATION-SCHEMA`
+- `OPENALEX-PUBLICATION-SCHEMA`
 
 **Симптомы:**
 
-1. **Transformers создавали поля:** Все publication transformers вызывали `_classify_publication_type()` и добавляли classification fields в records
-2. **Writer фильтровал поля:** `SilverWriter._prepare_arrow_data()` (line 194) фильтровал records, оставляя только поля из PyArrow schema:
+1. **Transformers создавали поля:** Все publication transformers вызывали `-classify-publication-type()` и добавляли classification fields в records
+2. **Writer фильтровал поля:** `SilverWriter.-prepare-arrow-data()` (line 194) фильтровал records, оставляя только поля из PyArrow schema:
    ```python
-   schema_fields = set(schema.names)
-   filtered_records = [
-       {k: v for k, v in record.items() if k in schema_fields}
+   schema-fields = set(schema.names)
+   filtered-records = [
+       {k: v for k, v in record.items() if k in schema-fields}
        for record in records
    ]
    ```
 3. **Result:** Classification fields НЕ попадали в Silver Delta tables и отсутствовали в Composite output
 
 **Доказательства:**
-- Pandera schemas (`domain/schemas/common/publication_base.py`) содержали поля (validation OK)
-- Entity dataclasses (`domain/entities/publication_base.py`) содержали поля (types OK)
+- Pandera schemas (`domain/schemas/common/publication-base.py`) содержали поля (validation OK)
+- Entity dataclasses (`domain/entities/publication-base.py`) содержали поля (types OK)
 - PyArrow schemas НЕ содержали поля (write filtering!)
 
 **Решение (2026-02-10):**
 
-Добавлены 3 classification fields во все 5 PyArrow schemas после `publication_type` field:
+Добавлены 3 classification fields во все 5 PyArrow schemas после `publication-type` field:
 
 ```python
-pa.field("publication_type", pa.string()),  # Raw provider type
-pa.field("publication_type_unified", pa.string()),  # Level 3: "Journal Article", etc.
-pa.field("publication_subclass", pa.string()),  # Level 2: "Original Experimental Data", etc.
-pa.field("publication_class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
+pa.field("publication-type", pa.string()),  # Raw provider type
+pa.field("publication-type-unified", pa.string()),  # Level 3: "Journal Article", etc.
+pa.field("publication-subclass", pa.string()),  # Level 2: "Original Experimental Data", etc.
+pa.field("publication-class", pa.string()),  # Level 1: "EXP" | "REV" | "PEER"
 ```
 
 **Affected Lines:**
-- CHEMBL_PUBLICATION_SCHEMA: lines 52-56
-- PUBMED_PUBLICATION_SCHEMA: lines 347-351
-- SEMANTICSCHOLAR_PUBLICATION_SCHEMA: lines 777-781
-- CROSSREF_PUBLICATION_SCHEMA: lines 839-843
-- OPENALEX_PUBLICATION_SCHEMA: lines 926-930
+- CHEMBL-PUBLICATION-SCHEMA: lines 52-56
+- PUBMED-PUBLICATION-SCHEMA: lines 347-351
+- SEMANTICSCHOLAR-PUBLICATION-SCHEMA: lines 777-781
+- CROSSREF-PUBLICATION-SCHEMA: lines 839-843
+- OPENALEX-PUBLICATION-SCHEMA: lines 926-930
 
 **Impact:**
 
 ✅ **Provider pipelines:** Classification fields теперь записываются в Silver Delta tables
-✅ **Composite pipeline:** `write_silver_merged()` динамически выводит schema из records → classification fields автоматически включаются
-✅ **Tests:** Добавлен `TestPublicationSchemaClassificationFields` в `tests/unit/infrastructure/schemas/test_silver.py`
+✅ **Composite pipeline:** `write-silver-merged()` динамически выводит schema из records → classification fields автоматически включаются
+✅ **Tests:** Добавлен `TestPublicationSchemaClassificationFields` в `tests/unit/infrastructure/schemas/test-silver.py`
 
 **Verification:**
 
 После перезапуска pipelines:
 ```bash
 # Check Silver output
-python -m pytest tests/unit/infrastructure/schemas/test_silver.py::TestPublicationSchemaClassificationFields -v
+python -m pytest tests/unit/infrastructure/schemas/test-silver.py::TestPublicationSchemaClassificationFields -v
 
 # Verify Delta tables contain new fields
 # data/output/silver/{provider}/publication/*.parquet
@@ -1179,15 +1179,15 @@ python -m pytest tests/unit/infrastructure/schemas/test_silver.py::TestPublicati
 
 ## Заключение
 
-**Нормализация publication_type полей в BioETL:**
+**Нормализация publication-type полей в BioETL:**
 
 1. ✅ **Unified 3-level classification** (214 types) применяется в Silver Layer для OpenAlex, CrossRef, PubMed, SemanticScholar
 2. ✅ **Multi-value strategy** (PubMed, S2): выбор most specific type (highest row number)
 3. ✅ **Preserve all sources** в Composite Layer: все provider-qualified колонки сохраняются
 4. ✅ **PyArrow schemas updated** (2026-02-10): classification fields теперь присутствуют в Silver output
 5. ⚠️ **ChEMBL не участвует** в unified classification (4-value enum)
-6. ⚠️ **Дублирование полей** (`type` vs `publication_type` для CrossRef/OpenAlex)
-7. ⚠️ **Classification fields не перечислены** в column_groups (неявный порядок)
+6. ⚠️ **Дублирование полей** (`type` vs `publication-type` для CrossRef/OpenAlex)
+7. ⚠️ **Classification fields не перечислены** в column-groups (неявный порядок)
 
 **Метрики:**
 - **214 unified types** (Level 3)
@@ -1195,7 +1195,7 @@ python -m pytest tests/unit/infrastructure/schemas/test_silver.py::TestPublicati
 - **3 class codes** (Level 1: EXP/REV/PEER)
 - **4 провайдера** в unified classification (OpenAlex, CrossRef, PubMed, SemanticScholar)
 - **5 провайдеров total** (+ ChEMBL с отдельным enum)
-- **~20 publication_type columns** в composite output (для записи с 5 провайдерами)
+- **~20 publication-type columns** в composite output (для записи с 5 провайдерами)
 
 ---
 

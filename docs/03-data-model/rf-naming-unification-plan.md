@@ -15,71 +15,71 @@
 
 **Промт: единое имя поля**
 ```
-Задача: переименовать поле {old_name} в {new_name} в пайплайне {pipeline} без сохранения старого имени.
+Задача: переименовать поле {old-name} в {new-name} в пайплайне {pipeline} без сохранения старого имени.
 Контекст:
-- Привести трансформер и Pandera схемы (silver/gold) к {new_name};
+- Привести трансформер и Pandera схемы (silver/gold) к {new-name};
 - Перед записью Silver/Gold — валидировать против Pandera-схемы; при ошибке запись не выполнять;
-- Обновить data_schema, DQ, composite field_groups под {new_name};
-- Обновить join/field_groups/configs в composite; выполнить REBUILD затронутых таблиц;
-- Обновить mapping/field_groups, если используют {old_name}.
+- Обновить data-schema, DQ, composite field-groups под {new-name};
+- Обновить join/field-groups/configs в composite; выполнить REBUILD затронутых таблиц;
+- Обновить mapping/field-groups, если используют {old-name}.
 Требования:
 - Тип и nullability сохранить;
 - Порядок колонок по RULES.md §2.9.4 (Column order) + стабильная сортировка строк по бизнес-ключам;
 - Тесты: обновить/добавить golden/unit на новый набор колонок; убедиться, что повторный прогон даёт бит-в-бит идентичный результат;
-- Удалить упоминания {old_name} в коде и документации.
+- Удалить упоминания {old-name} в коде и документации.
 
 Полный список переименований (без обратной совместимости):
-- publication ids: `doi`→`publication_doi`, `pmid`→`publication_pmid`, `pmc_id`→`publication_pmc_id`, `document_chembl_id`/`paper_id`/`openalex_id`→`publication_id`.
-- publication контекст: `document_year`→`publication_year`, `document_journal`→`journal`.
-- taxonomy: `target_taxonomy_id`/`assay_taxonomy_id`/`variant_taxonomy_id`/`cell_source_taxonomy_id`/`organism_id`→`taxonomy_id` (float, nullable int pattern).
-- activity action: `action_type_action_type`→`action_type`.
-- molecule ids: `molecule_chembl_id`/`cid`→`molecule_id`.
-- molecule структуры: `structure_standard_inchi_key`→`inchi_key`.
-- molecule компоненты: `component_id`→`primary_component_id`.
+- publication ids: `doi`→`publication-doi`, `pmid`→`publication-pmid`, `pmc-id`→`publication-pmc-id`, `document-chembl-id`/`paper-id`/`openalex-id`→`publication-id`.
+- publication контекст: `document-year`→`publication-year`, `document-journal`→`journal`.
+- taxonomy: `target-taxonomy-id`/`assay-taxonomy-id`/`variant-taxonomy-id`/`cell-source-taxonomy-id`/`organism-id`→`taxonomy-id` (float, nullable int pattern).
+- activity action: `action-type-action-type`→`action-type`.
+- molecule ids: `molecule-chembl-id`/`cid`→`molecule-id`.
+- molecule структуры: `structure-standard-inchi-key`→`inchi-key`.
+- molecule компоненты: `component-id`→`primary-component-id`.
 - молекулярные свойства:
-  - `property_full_mwt`→`molecular_weight`;
-  - `property_alogp`/`xlogp`→`logp` (+`logp_method`);
-  - `property_psa`/`tpsa`→`polar_surface_area`;
-  - `property_rtb`→`rotatable_bond_count`;
-  - `property_heavy_atoms`→`heavy_atom_count`;
-  - `property_aromatic_rings`→`aromatic_ring_count`;
-  - `property_hba`→`hba_count`; `property_hbd`→`hbd_count`.
+  - `property-full-mwt`→`molecular-weight`;
+  - `property-alogp`/`xlogp`→`logp` (+`logp-method`);
+  - `property-psa`/`tpsa`→`polar-surface-area`;
+  - `property-rtb`→`rotatable-bond-count`;
+  - `property-heavy-atoms`→`heavy-atom-count`;
+  - `property-aromatic-rings`→`aromatic-ring-count`;
+  - `property-hba`→`hba-count`; `property-hbd`→`hbd-count`.
 ```
 
 **Промт: нормализация таксономии**
 ```
-Цель: унифицировать taxonomy поля в {pipelines} к `taxonomy_id:int64`.
+Цель: унифицировать taxonomy поля в {pipelines} к `taxonomy-id:int64`.
 Шаги:
-- В трансформерах конвертировать все варианты ({variants}) → taxonomy_id:int64;
-- В схемах заменить поля на taxonomy_id:int64;
-- Обновить все join/lookup на taxonomy_id;
-- Удалить legacy поля {legacy_fields};
-- Обновить DQ (валидировать положительное int) и data_schema.
+- В трансформерах конвертировать все варианты ({variants}) → taxonomy-id:int64;
+- В схемах заменить поля на taxonomy-id:int64;
+- Обновить все join/lookup на taxonomy-id;
+- Удалить legacy поля {legacy-fields};
+- Обновить DQ (валидировать положительное int) и data-schema.
 ```
 
 **Промт: молекулярные свойства**
 ```
 Цель: унифицировать свойства к канону:
-- molecular_weight (float64) — alias property_full_mwt/molecular_weight;
-- logp (float64) + logp_method (string: alogp|xlogp);
-- polar_surface_area (float64) — alias property_psa/tpsa.
+- molecular-weight (float64) — alias property-full-mwt/molecular-weight;
+- logp (float64) + logp-method (string: alogp|xlogp);
+- polar-surface-area (float64) — alias property-psa/tpsa.
 Действия:
-- В трансформерах: rename + derive logp_method;
+- В трансформерах: rename + derive logp-method;
 - В схемах: оставить только канон, удалить legacy;
-- В документации/field_groups обновить имена;
+- В документации/field-groups обновить имена;
 - Тесты: golden по колонкам и типам.
 ```
 
 **Промт: публикационные идентификаторы**
 ```
 Цель: привести ключи публикаций к канону:
-- publication_id (provider PK);
-- publication_doi, publication_pmid, publication_pmc_id.
+- publication-id (provider PK);
+- publication-doi, publication-pmid, publication-pmc-id.
 Шаги:
-- В трансформерах: map provider PK → publication_id, убрать document_* и paper_id/openalex_id;
+- В трансформерах: map provider PK → publication-id, убрать document-* и paper-id/openalex-id;
 - В схемах: оставить только canonical поля;
 - В composite/pipelines: обновить join-ключи;
-- Тесты: golden + валидация на уникальность publication_id.
+- Тесты: golden + валидация на уникальность publication-id.
 ```
 
 ---
@@ -90,26 +90,26 @@
 ChEMBL, CrossRef, OpenAlex, PubMed, Semantic Scholar), в которой cross-provider
 field naming **уже решён** через:
 
-1. **`PublicationBaseSchema`** (`domain/schemas/common/publication_base.py`) —
+1. **`PublicationBaseSchema`** (`domain/schemas/common/publication-base.py`) —
    общая base-схема с unified field names
-2. **`PUBLICATION_FIELD_MAPPING`** (`domain/mapping/publication_fields.py`) —
+2. **`PUBLICATION-FIELD-MAPPING`** (`domain/mapping/publication-fields.py`) —
    bidirectional маппинг provider → unified names
-3. **`apply_field_mapping()`** — runtime rename при трансформации
+3. **`apply-field-mapping()`** — runtime rename при трансформации
 4. **ADR-030** (archived) — Publication Field Naming Unification decision record
 
 Ключевые унифицированные имена publication:
 
 | Provider name | Unified name | Провайдеры |
 |---------------|--------------|------------|
-| `year` | `publication_year` | All 5 |
-| `citation_count` | `citations_received` | CrossRef, OpenAlex, S2 |
-| `reference_count` | `citations_made` | CrossRef, OpenAlex, S2 |
-| `first_page` / `last_page` | `page_first` / `page_last` | CrossRef, OpenAlex, PubMed |
-| `doc_type` / `source_type` | `publication_type` | ChEMBL, CrossRef, OpenAlex |
-| `is_open_access` | `is_oa` | All |
-| `affiliations` | `affiliation_list` | OpenAlex, PubMed |
+| `year` | `publication-year` | All 5 |
+| `citation-count` | `citations-received` | CrossRef, OpenAlex, S2 |
+| `reference-count` | `citations-made` | CrossRef, OpenAlex, S2 |
+| `first-page` / `last-page` | `page-first` / `page-last` | CrossRef, OpenAlex, PubMed |
+| `doc-type` / `source-type` | `publication-type` | ChEMBL, CrossRef, OpenAlex |
+| `is-open-access` | `is-oa` | All |
+| `affiliations` | `affiliation-list` | OpenAlex, PubMed |
 
-**Вывод для core pipelines:** Паттерн `BaseSchema` + `FIELD_MAPPING` dict + `apply_field_mapping()`
+**Вывод для core pipelines:** Паттерн `BaseSchema` + `FIELD-MAPPING` dict + `apply-field-mapping()`
 является проверенным подходом и должен быть переиспользован для унификации
 Molecule cross-provider naming (N-06).
 
@@ -124,88 +124,88 @@ Molecule cross-provider naming (N-06).
 
 | # | Severity | Категория | Пример |
 |---|----------|-----------|--------|
-| N-01 | CRITICAL | Type mismatch: `taxonomy_id` | Activity: `str`, все остальные: `float` |
-| N-02 | CRITICAL | Type mismatch: `cell_source_taxonomy_id` | Silver: `int`, Gold: `float` |
-| N-03 | HIGH | Redundant prefix: `action_type_action_type` | Двойной префикс при flatten |
-| N-04 | HIGH | Inconsistent context naming: `pref_name` | Target: `pref_name`, Activity: `target_pref_name`, Assay Composite: `tissue_pref_name` |
-| N-05 | HIGH | Inconsistent context naming: `description` | Assay: `description`, Activity: `assay_description` |
-| N-06 | MEDIUM | Cross-provider naming: physicochemical properties | ChEMBL: `property_alogp`, PubChem: `xlogp` |
-| N-07 | MEDIUM | Inconsistent flatten prefixes | `property_*`, `hierarchy_*`, `ligand_efficiency_*`, но `canonical_smiles` без prefix |
-| N-08 | LOW | Singular/plural ambiguity | `component_id` (scalar) vs `component_ids` (list) |
-| N-09 | LOW | InChI Key dual naming | `structure_standard_inchi_key` (top-level alias) vs `inchi_key` (flattened) |
-| N-10 | HIGH | Publication ↔ Activity context naming gap | Activity: `document_year`, Publication unified: `publication_year`; Activity: `document_journal`, Publication: `journal` |
+| N-01 | CRITICAL | Type mismatch: `taxonomy-id` | Activity: `str`, все остальные: `float` |
+| N-02 | CRITICAL | Type mismatch: `cell-source-taxonomy-id` | Silver: `int`, Gold: `float` |
+| N-03 | HIGH | Redundant prefix: `action-type-action-type` | Двойной префикс при flatten |
+| N-04 | HIGH | Inconsistent context naming: `pref-name` | Target: `pref-name`, Activity: `target-pref-name`, Assay Composite: `tissue-pref-name` |
+| N-05 | HIGH | Inconsistent context naming: `description` | Assay: `description`, Activity: `assay-description` |
+| N-06 | MEDIUM | Cross-provider naming: physicochemical properties | ChEMBL: `property-alogp`, PubChem: `xlogp` |
+| N-07 | MEDIUM | Inconsistent flatten prefixes | `property-*`, `hierarchy-*`, `ligand-efficiency-*`, но `canonical-smiles` без prefix |
+| N-08 | LOW | Singular/plural ambiguity | `component-id` (scalar) vs `component-ids` (list) |
+| N-09 | LOW | InChI Key dual naming | `structure-standard-inchi-key` (top-level alias) vs `inchi-key` (flattened) |
+| N-10 | HIGH | Publication ↔ Activity context naming gap | Activity: `document-year`, Publication unified: `publication-year`; Activity: `document-journal`, Publication: `journal` |
 
 ---
 
 ## 2. Детальный анализ каждой проблемы
 
-### N-01: `taxonomy_id` — type mismatch (CRITICAL)
+### N-01: `taxonomy-id` — type mismatch (CRITICAL)
 
 **Проблема:** Одни и те же данные (NCBI Taxonomy ID) имеют разные типы.
 
 | Пайплайн | Поле | Silver тип | Gold тип | Converter |
 |----------|------|------------|----------|-----------|
-| Activity | `target_taxonomy_id` | `str` | `str` | `validate_taxonomy_id_str` |
-| Assay | `assay_taxonomy_id` | `float` | `float` | `validate_taxonomy_id` |
-| Assay | `variant_taxonomy_id` | `float` | `float` | `validate_taxonomy_id` |
-| Target | `taxonomy_id` | `float` | `float` | `TaxonomyId.from_raw()` |
-| CellLine | `cell_source_taxonomy_id` | `int` | `float` | `TaxonomyId.from_raw()` |
+| Activity | `target-taxonomy-id` | `str` | `str` | `validate-taxonomy-id-str` |
+| Assay | `assay-taxonomy-id` | `float` | `float` | `validate-taxonomy-id` |
+| Assay | `variant-taxonomy-id` | `float` | `float` | `validate-taxonomy-id` |
+| Target | `taxonomy-id` | `float` | `float` | `TaxonomyId.from-raw()` |
+| CellLine | `cell-source-taxonomy-id` | `int` | `float` | `TaxonomyId.from-raw()` |
 
-**Root cause:** `activity_transformer.py:70` использует `validate_taxonomy_id_str` (возвращает `str`), в то время как все остальные используют `validate_taxonomy_id` (возвращает `int`) или `TaxonomyId.from_raw()` (возвращает `int`).
+**Root cause:** `activity-transformer.py:70` использует `validate-taxonomy-id-str` (возвращает `str`), в то время как все остальные используют `validate-taxonomy-id` (возвращает `int`) или `TaxonomyId.from-raw()` (возвращает `int`).
 
 **Затронутые файлы:**
 - `src/bioetl/domain/schemas/chembl/activity.py:192` — `Series[str]`
 - `src/bioetl/domain/contracts/gold/chembl.py:55` — `Series[str]`
-- `src/bioetl/application/pipelines/chembl/activity_transformer.py:70` — `validate_taxonomy_id_str`
-- `src/bioetl/domain/value_objects/taxonomy_id.py:163` — `validate_taxonomy_id_str()`
+- `src/bioetl/application/pipelines/chembl/activity-transformer.py:70` — `validate-taxonomy-id-str`
+- `src/bioetl/domain/value-objects/taxonomy-id.py:163` — `validate-taxonomy-id-str()`
 
 ---
 
-### N-02: `cell_source_taxonomy_id` — Silver/Gold type mismatch (CRITICAL)
+### N-02: `cell-source-taxonomy-id` — Silver/Gold type mismatch (CRITICAL)
 
 **Проблема:** Silver схема определяет как `int`, Gold как `float` (coerce).
 
 | Слой | Тип | Файл |
 |------|-----|------|
-| Silver | `Series[int]` | `domain/schemas/chembl/cell_line.py:55` |
+| Silver | `Series[int]` | `domain/schemas/chembl/cell-line.py:55` |
 | Gold | `Series[float]` (coerce) | `domain/contracts/gold/chembl.py:256` |
 
 **Root cause:** Silver не учитывает nullable int → float coercion convention.
 
 ---
 
-### N-03: `action_type_action_type` — redundant prefix (HIGH)
+### N-03: `action-type-action-type` — redundant prefix (HIGH)
 
-**Проблема:** При flatten nested `action_type` dict с prefix `action_type_`, поле `action_type` внутри даёт `action_type_action_type`.
+**Проблема:** При flatten nested `action-type` dict с prefix `action-type-`, поле `action-type` внутри даёт `action-type-action-type`.
 
 ```python
-# activity_transformer.py
-_ACTION_TYPE_FIELDS = {
-    "action_type": None,      # → action_type_action_type  (REDUNDANT!)
-    "description": None,      # → action_type_description  (OK)
-    "parent_type": None,      # → action_type_parent_type  (OK)
+# activity-transformer.py
+-ACTION-TYPE-FIELDS = {
+    "action-type": None,      # → action-type-action-type  (REDUNDANT!)
+    "description": None,      # → action-type-description  (OK)
+    "parent-type": None,      # → action-type-parent-type  (OK)
 }
 ```
 
 **Затронутые файлы:**
-- `src/bioetl/application/pipelines/chembl/activity_transformer.py:41`
+- `src/bioetl/application/pipelines/chembl/activity-transformer.py:41`
 - `src/bioetl/domain/schemas/chembl/activity.py:162`
 - `src/bioetl/domain/contracts/gold/chembl.py:109`
 - `configs/pipelines/composite/activity.yaml:237`
 
 ---
 
-### N-04: Inconsistent context naming — `pref_name` (HIGH)
+### N-04: Inconsistent context naming — `pref-name` (HIGH)
 
 **Проблема:** Одно и то же поле (preferred name) именуется по-разному в зависимости от контекста.
 
 | Контекст | Поле в "домашнем" entity | Поле при денормализации в другой entity |
 |----------|--------------------------|----------------------------------------|
-| Target | `pref_name` | Activity: `target_pref_name` |
-| Molecule | `pref_name` | Activity: `molecule_pref_name` |
-| Tissue | `pref_name` | Assay Composite: `tissue_pref_name` |
+| Target | `pref-name` | Activity: `target-pref-name` |
+| Molecule | `pref-name` | Activity: `molecule-pref-name` |
+| Tissue | `pref-name` | Assay Composite: `tissue-pref-name` |
 
-**Это НЕ баг** — для пайплайна Activity контекстные поля *должны* иметь prefix (`target_*`, `molecule_*`), потому что без него неясно какой `pref_name` имеется в виду. Однако следует зафиксировать единую конвенцию.
+**Это НЕ баг** — для пайплайна Activity контекстные поля *должны* иметь prefix (`target-*`, `molecule-*`), потому что без него неясно какой `pref-name` имеется в виду. Однако следует зафиксировать единую конвенцию.
 
 ---
 
@@ -213,9 +213,9 @@ _ACTION_TYPE_FIELDS = {
 
 | Entity | Поле | При денормализации в Activity |
 |--------|------|-------------------------------|
-| Assay | `description` | `assay_description` |
+| Assay | `description` | `assay-description` |
 
-**Проблема:** В Assay schema поле `description` без prefix, но в Activity при денормализации добавляется `assay_`. Для одного entity (Assay) `assay_type` имеет prefix, а `description` — нет. Это создаёт неконсистентность внутри Assay.
+**Проблема:** В Assay schema поле `description` без prefix, но в Activity при денормализации добавляется `assay-`. Для одного entity (Assay) `assay-type` имеет prefix, а `description` — нет. Это создаёт неконсистентность внутри Assay.
 
 ---
 
@@ -225,16 +225,16 @@ Composite Molecule pipeline объединяет ChEMBL и PubChem данные 
 
 | Свойство | ChEMBL (Silver) | PubChem (Silver) | Composite merge |
 |----------|-----------------|-------------------|-----------------|
-| Lipophilicity | `property_alogp` | `xlogp` | Оба сохранены |
-| Polar Surface Area | `property_psa` | `tpsa` | Оба сохранены |
-| H-Bond Acceptors | `property_hba` | `hba` | Оба сохранены |
-| H-Bond Donors | `property_hbd` | `hbd` | Оба сохранены |
-| Rotatable Bonds | `property_rtb` | `rotatable_bond_count` | Каноническое имя: `rotatable_bond_count`; в PubChem поле отсутствует |
-| Heavy Atoms | `property_heavy_atoms` | `heavy_atom_count` | Оба сохранены |
-| Aromatic Rings | `property_aromatic_rings` | `aromatic_ring_count` | Каноническое имя: `aromatic_ring_count` |
-| Molecular Weight | `property_full_mwt` | `molecular_weight` | Оба сохранены |
+| Lipophilicity | `property-alogp` | `xlogp` | Оба сохранены |
+| Polar Surface Area | `property-psa` | `tpsa` | Оба сохранены |
+| H-Bond Acceptors | `property-hba` | `hba` | Оба сохранены |
+| H-Bond Donors | `property-hbd` | `hbd` | Оба сохранены |
+| Rotatable Bonds | `property-rtb` | `rotatable-bond-count` | Каноническое имя: `rotatable-bond-count`; в PubChem поле отсутствует |
+| Heavy Atoms | `property-heavy-atoms` | `heavy-atom-count` | Оба сохранены |
+| Aromatic Rings | `property-aromatic-rings` | `aromatic-ring-count` | Каноническое имя: `aromatic-ring-count` |
+| Molecular Weight | `property-full-mwt` | `molecular-weight` | Оба сохранены |
 
-**Текущий подход:** `preserve_all_sources: true` — сохраняются обе колонки. Это осознанное решение (данные отличаются: ALogP ≠ XLogP3, разные методы расчёта). Но naming convention всё равно нуждается в стандартизации.
+**Текущий подход:** `preserve-all-sources: true` — сохраняются обе колонки. Это осознанное решение (данные отличаются: ALogP ≠ XLogP3, разные методы расчёта). Но naming convention всё равно нуждается в стандартизации.
 
 ---
 
@@ -242,14 +242,14 @@ Composite Molecule pipeline объединяет ChEMBL и PubChem данные 
 
 | Nested object | Prefix | Примеры |
 |--------------|--------|---------|
-| `molecule_properties` | `property_` | `property_alogp`, `property_hba` |
-| `molecule_hierarchy` | `hierarchy_` | `hierarchy_parent_chembl_id` |
-| `molecule_structures` | `""` (пусто) | `canonical_smiles`, `inchi_key` |
-| `ligand_efficiency` | `ligand_efficiency_` | `ligand_efficiency_bei` |
-| `action_type` | `action_type_` | `action_type_description` |
-| `variant_sequence` | `variant_` | `variant_accession` |
+| `molecule-properties` | `property-` | `property-alogp`, `property-hba` |
+| `molecule-hierarchy` | `hierarchy-` | `hierarchy-parent-chembl-id` |
+| `molecule-structures` | `""` (пусто) | `canonical-smiles`, `inchi-key` |
+| `ligand-efficiency` | `ligand-efficiency-` | `ligand-efficiency-bei` |
+| `action-type` | `action-type-` | `action-type-description` |
+| `variant-sequence` | `variant-` | `variant-accession` |
 
-**Проблема:** `molecule_structures` раскрывается без prefix, все остальные — с prefix. Причина: `canonical_smiles` шарится между ChEMBL и PubChem и prefix `structure_` был бы длинным. Но это исключение из общего правила.
+**Проблема:** `molecule-structures` раскрывается без prefix, все остальные — с prefix. Причина: `canonical-smiles` шарится между ChEMBL и PubChem и prefix `structure-` был бы длинным. Но это исключение из общего правила.
 
 ---
 
@@ -257,10 +257,10 @@ Composite Molecule pipeline объединяет ChEMBL и PubChem данные 
 
 | Поле | Тип | Назначение |
 |------|-----|------------|
-| `component_id` | `float` (scalar) | Primary component ID (first from list, для FK join) |
-| `component_ids` | `object` (list) | Все component IDs |
+| `component-id` | `float` (scalar) | Primary component ID (first from list, для FK join) |
+| `component-ids` | `object` (list) | Все component IDs |
 
-Работает корректно, но `component_id` vs `component_ids` не самоочевидно. Лучше: `primary_component_id`.
+Работает корректно, но `component-id` vs `component-ids` не самоочевидно. Лучше: `primary-component-id`.
 
 ---
 
@@ -268,35 +268,35 @@ Composite Molecule pipeline объединяет ChEMBL и PubChem данные 
 
 | Поле | Источник | Слой |
 |------|----------|------|
-| `structure_standard_inchi_key` | Top-level alias от ChEMBL API | Silver (Molecule schema, line 41) |
-| `inchi_key` | Flattened из `molecule_structures` | Silver + Gold (Molecule schema, line 229) |
+| `structure-standard-inchi-key` | Top-level alias от ChEMBL API | Silver (Molecule schema, line 41) |
+| `inchi-key` | Flattened из `molecule-structures` | Silver + Gold (Molecule schema, line 229) |
 
-Два поля содержат одни и те же данные. `structure_standard_inchi_key` — это top-level alias, `inchi_key` — результат flatten.
+Два поля содержат одни и те же данные. `structure-standard-inchi-key` — это top-level alias, `inchi-key` — результат flatten.
 
 ---
 
 ### N-10: Publication ↔ Activity context naming gap (HIGH)
 
-**Проблема:** Activity денормализует publication-поля с prefix `document_`, но
+**Проблема:** Activity денормализует publication-поля с prefix `document-`, но
 Publication pipeline использует unified naming из `PublicationBaseSchema`.
 
 | Данные | В Activity | В Publication (unified) | В ChEMBL Document (legacy) |
 |--------|-----------|-------------------------|---------------------------|
-| Год публикации | `document_year` (int) | `publication_year` (Int64) | `year` → `publication_year` |
-| Журнал | `document_journal` (str) | `journal` (str) | `journal` (str) |
-| Количество цитирований | — | `citations_received` (Int64) | — |
+| Год публикации | `document-year` (int) | `publication-year` (Int64) | `year` → `publication-year` |
+| Журнал | `document-journal` (str) | `journal` (str) | `journal` (str) |
+| Количество цитирований | — | `citations-received` (Int64) | — |
 
 **Последствия:**
-- При будущем composite activity + publication join, поле `document_year` (Activity) и `publication_year` (Publication) содержат одни и те же данные, но именуются по-разному
-- Конвенция context prefix `document_*` в Activity конфликтует с unified naming convention `publication_*`
+- При будущем composite activity + publication join, поле `document-year` (Activity) и `publication-year` (Publication) содержат одни и те же данные, но именуются по-разному
+- Конвенция context prefix `document-*` в Activity конфликтует с unified naming convention `publication-*`
 
-**Root cause:** Activity transformer создавался до Publication unification. Контекстные поля `document_journal` и `document_year` следуют старой конвенции "prefix = source entity name", но Publication pipeline выбрал semantic naming (`publication_year` вместо `document_year`).
+**Root cause:** Activity transformer создавался до Publication unification. Контекстные поля `document-journal` и `document-year` следуют старой конвенции "prefix = source entity name", но Publication pipeline выбрал semantic naming (`publication-year` вместо `document-year`).
 
 **Затронутые файлы:**
-- `src/bioetl/application/pipelines/chembl/activity_transformer.py` — field groups `_QUALITY_ANNOTATIONS`
-- `src/bioetl/domain/schemas/chembl/activity.py` — `document_year`, `document_journal`
+- `src/bioetl/application/pipelines/chembl/activity-transformer.py` — field groups `-QUALITY-ANNOTATIONS`
+- `src/bioetl/domain/schemas/chembl/activity.py` — `document-year`, `document-journal`
 - `src/bioetl/domain/contracts/gold/chembl.py` — Activity Gold schema
-- `configs/pipelines/composite/activity.yaml` — column_groups `document_context`
+- `configs/pipelines/composite/activity.yaml` — column-groups `document-context`
 
 ---
 
@@ -310,23 +310,23 @@ Publication pipeline использует unified naming из `PublicationBaseSc
 > Политика упрощена: только Info (новые поля) и Critical (пропавшее поле / смена типа).
 > Уровень Warn (>3 новых полей) удалён.
 
-#### RF-NAMING-01: Унифицировать `target_taxonomy_id` → `float`
+#### RF-NAMING-01: Унифицировать `target-taxonomy-id` → `float`
 
 | Шаг | Файл | Изменение |
 |-----|------|-----------|
-| 1 | `activity_transformer.py:70` | `validate_taxonomy_id_str` → `validate_taxonomy_id` |
+| 1 | `activity-transformer.py:70` | `validate-taxonomy-id-str` → `validate-taxonomy-id` |
 | 2 | `domain/schemas/chembl/activity.py:192` | `Series[str]` → `Series[float]` |
 | 3 | `domain/contracts/gold/chembl.py:55` | `Series[str]` → `Series[float]` (coerce=True) |
 | 4 | Тесты | Обновить unit tests для ActivityTransformer |
-| 5 | Composite configs | `composite/activity.yaml` — обновить `field_validations.target_taxonomy_id.type: integer` |
+| 5 | Composite configs | `composite/activity.yaml` — обновить `field-validations.target-taxonomy-id.type: integer` |
 
 **Миграция данных:** REBUILD для Activity Silver + Gold.
 
-#### RF-NAMING-02: Унифицировать `cell_source_taxonomy_id` → `float` в Silver
+#### RF-NAMING-02: Унифицировать `cell-source-taxonomy-id` → `float` в Silver
 
 | Шаг | Файл | Изменение |
 |-----|------|-----------|
-| 1 | `domain/schemas/chembl/cell_line.py:55` | `Series[int]` → `Series[float]` |
+| 1 | `domain/schemas/chembl/cell-line.py:55` | `Series[int]` → `Series[float]` |
 | 2 | Тесты | Обновить unit tests |
 
 **Миграция данных:** REBUILD для CellLine Silver.
@@ -337,44 +337,44 @@ Publication pipeline использует unified naming из `PublicationBaseSc
 
 > **Impact:** Меняет имена колонок в Silver/Gold → требует REBUILD.
 
-#### RF-NAMING-03: Rename `action_type_action_type` → `action_type`
+#### RF-NAMING-03: Rename `action-type-action-type` → `action-type`
 
-**Стратегия:** Добавить rename mapping в `_ACTION_TYPE_FIELDS`:
+**Стратегия:** Добавить rename mapping в `-ACTION-TYPE-FIELDS`:
 
 ```python
-_ACTION_TYPE_FIELDS = {
-    "action_type": None,    # flatten → action_type_action_type
-    "description": None,    # flatten → action_type_description
-    "parent_type": None,    # flatten → action_type_parent_type
+-ACTION-TYPE-FIELDS = {
+    "action-type": None,    # flatten → action-type-action-type
+    "description": None,    # flatten → action-type-description
+    "parent-type": None,    # flatten → action-type-parent-type
 }
-_ACTION_TYPE_RENAMES = {
-    "action_type_action_type": "action_type",  # Remove redundant prefix
+-ACTION-TYPE-RENAMES = {
+    "action-type-action-type": "action-type",  # Remove redundant prefix
 }
 ```
 
 | Шаг | Файл | Изменение |
 |-----|------|-----------|
-| 1 | `activity_transformer.py:40-44` | Добавить `_ACTION_TYPE_RENAMES`, передать в `flatten_nested_dict` |
-| 2 | `domain/schemas/chembl/activity.py:162` | `action_type_action_type` → `action_type` |
-| 3 | `domain/contracts/gold/chembl.py:109` | `action_type_action_type` → `action_type` |
-| 4 | `configs/pipelines/composite/activity.yaml:237` | Обновить column_groups |
+| 1 | `activity-transformer.py:40-44` | Добавить `-ACTION-TYPE-RENAMES`, передать в `flatten-nested-dict` |
+| 2 | `domain/schemas/chembl/activity.py:162` | `action-type-action-type` → `action-type` |
+| 3 | `domain/contracts/gold/chembl.py:109` | `action-type-action-type` → `action-type` |
+| 4 | `configs/pipelines/composite/activity.yaml:237` | Обновить column-groups |
 | 5 | Тесты | Обновить |
 
-**Риск:** Конфликт имён — `action_type` совпадает с контекстным полем `assay_type`, но это разные данные (action type of molecule-target interaction vs assay type). Нужно проверить, нет ли коллизии в Activity schema.
+**Риск:** Конфликт имён — `action-type` совпадает с контекстным полем `assay-type`, но это разные данные (action type of molecule-target interaction vs assay type). Нужно проверить, нет ли коллизии в Activity schema.
 
-**Решение:** Нет коллизии — `assay_type` и `action_type` это разные поля. `action_type` = тип действия молекулы на таргет (inhibitor, agonist, etc.).
+**Решение:** Нет коллизии — `assay-type` и `action-type` это разные поля. `action-type` = тип действия молекулы на таргет (inhibitor, agonist, etc.).
 
 #### RF-NAMING-04: Зафиксировать конвенцию context-prefix naming
 
-**Правило:** Когда поле из entity A денормализуется в entity B, оно получает prefix `{source_entity}_`:
+**Правило:** Когда поле из entity A денормализуется в entity B, оно получает prefix `{source-entity}-`:
 
 ```
 Правильно:
-  Target.pref_name        → Activity.target_pref_name
-  Target.organism         → Activity.target_organism
-  Assay.description       → Activity.assay_description
-  Assay.assay_type        → Activity.assay_type  (уже имеет prefix!)
-  Tissue.pref_name        → Assay Composite.tissue_pref_name
+  Target.pref-name        → Activity.target-pref-name
+  Target.organism         → Activity.target-organism
+  Assay.description       → Activity.assay-description
+  Assay.assay-type        → Activity.assay-type  (уже имеет prefix!)
+  Tissue.pref-name        → Assay Composite.tissue-pref-name
 ```
 
 Это ТЕКУЩЕЕ поведение, и оно корректно. Нужно:
@@ -384,7 +384,7 @@ _ACTION_TYPE_RENAMES = {
 | 1 | Задокументировать правило в RULES.md §2.x "Field Naming Conventions" |
 | 2 | Задокументировать правило в ADR (новый ADR-0XX) |
 
-**Не менять:** `Assay.description` (без prefix `assay_`) — это breaking change с малой пользой. Assay `description` — единственное поле без prefix в "домашнем" entity, это legacy. Для новых entity всегда добавлять prefix.
+**Не менять:** `Assay.description` (без prefix `assay-`) — это breaking change с малой пользой. Assay `description` — единственное поле без prefix в "домашнем" entity, это legacy. Для новых entity всегда добавлять prefix.
 
 ---
 
@@ -396,67 +396,67 @@ _ACTION_TYPE_RENAMES = {
 
 **Подход:** Переиспользовать паттерн из Publication unification (§0):
 
-1. Создать `MoleculeBaseSchema` в `domain/schemas/common/molecule_base.py` с unified field names
-2. Создать `MOLECULE_FIELD_MAPPING` в `domain/mapping/molecule_fields.py` по аналогии с `PUBLICATION_FIELD_MAPPING`
-3. Использовать `apply_field_mapping()` в трансформерах
+1. Создать `MoleculeBaseSchema` в `domain/schemas/common/molecule-base.py` с unified field names
+2. Создать `MOLECULE-FIELD-MAPPING` в `domain/mapping/molecule-fields.py` по аналогии с `PUBLICATION-FIELD-MAPPING`
+3. Использовать `apply-field-mapping()` в трансформерах
 
 ```python
-# domain/mapping/molecule_fields.py (по аналогии с publication_fields.py)
-_CHEMBL_MOLECULE_MAPPING: Final[dict[str, str]] = {
-    "property_alogp": "logp",           # ALogP → unified logp
-    "property_psa": "polar_surface_area",
-    "property_hba": "hba_count",
-    "property_hbd": "hbd_count",
-    "property_rtb": "rotatable_bond_count",
-    "property_heavy_atoms": "heavy_atom_count",
-    "property_aromatic_rings": "aromatic_ring_count",
-    "property_full_mwt": "molecular_weight",
+# domain/mapping/molecule-fields.py (по аналогии с publication-fields.py)
+-CHEMBL-MOLECULE-MAPPING: Final[dict[str, str]] = {
+    "property-alogp": "logp",           # ALogP → unified logp
+    "property-psa": "polar-surface-area",
+    "property-hba": "hba-count",
+    "property-hbd": "hbd-count",
+    "property-rtb": "rotatable-bond-count",
+    "property-heavy-atoms": "heavy-atom-count",
+    "property-aromatic-rings": "aromatic-ring-count",
+    "property-full-mwt": "molecular-weight",
 }
 
-_PUBCHEM_MOLECULE_MAPPING: Final[dict[str, str]] = {
+-PUBCHEM-MOLECULE-MAPPING: Final[dict[str, str]] = {
     "xlogp": "logp",
-    "tpsa": "polar_surface_area",
-    "hba": "hba_count",
-    "hbd": "hbd_count",
-    "rotatable_bonds": "rotatable_bond_count",
-    "heavy_atom_count": "heavy_atom_count",  # Already canonical
-    "aromatic_rings": "aromatic_ring_count",
-    "molecular_weight": "molecular_weight",  # Already canonical
+    "tpsa": "polar-surface-area",
+    "hba": "hba-count",
+    "hbd": "hbd-count",
+    "rotatable-bonds": "rotatable-bond-count",
+    "heavy-atom-count": "heavy-atom-count",  # Already canonical
+    "aromatic-rings": "aromatic-ring-count",
+    "molecular-weight": "molecular-weight",  # Already canonical
 }
 ```
 
 **Важно:** ALogP ≠ XLogP3 — это разные методы расчёта. Unified `logp` в Gold composite
-будет содержать coalesced значение с `field_priority: [pubchem, chembl]` и source tracking.
-Оригинальные `property_alogp` / `xlogp` сохраняются в Silver каждого провайдера.
+будет содержать coalesced значение с `field-priority: [pubchem, chembl]` и source tracking.
+Оригинальные `property-alogp` / `xlogp` сохраняются в Silver каждого провайдера.
 
 | Шаг | Действие |
 |-----|----------|
-| 1 | Создать `domain/mapping/molecule_fields.py` по шаблону `publication_fields.py` |
-| 2 | Создать `domain/schemas/common/molecule_base.py` (unified field names) |
+| 1 | Создать `domain/mapping/molecule-fields.py` по шаблону `publication-fields.py` |
+| 2 | Создать `domain/schemas/common/molecule-base.py` (unified field names) |
 | 3 | Обновить Composite Molecule config с unified naming |
 | 4 | Добавить ADR-0XX с обоснованием подхода |
 
 #### RF-NAMING-06: Стандартизировать flatten prefix policy
 
-**Правило:** ВСЕ flattened nested objects используют prefix `{parent_field}_`, кроме `molecule_structures` (legacy exception).
+**Правило:** ВСЕ flattened nested objects используют prefix `{parent-field}-`, кроме `molecule-structures` (legacy exception).
 
 | Шаг | Действие |
 |-----|----------|
 | 1 | Документировать правило + exception в RULES.md |
-| 2 | Добавить комментарий в `molecule_transformer.py:163` объясняющий отсутствие prefix |
+| 2 | Добавить комментарий в `molecule-transformer.py:163` объясняющий отсутствие prefix |
 
 #### RF-NAMING-10: Согласовать Activity document context с Publication unified naming
 
-**Проблема:** Activity использует `document_year` / `document_journal`, а Publication ecosystem — `publication_year` / `journal`.
+**Проблема:** Activity использует `document-year` / `document-journal`, а Publication ecosystem — `publication-year` / `journal`.
 
-**Стратегия (breaking-now):** Переименовать Activity поля сразу в unified naming (`publication_year`, `journal`, `publication_id`, `publication_doi`/`publication_pmid`/`publication_pmc_id`) без сохранения `document_*`.
+**Стратегия (breaking-now):** Переименовать Activity поля сразу в unified naming (`publication-year`, `journal`, `publication-id`, `publication-doi`/`publication-pmid`/`publication-pmc-id`) без сохранения `document-*`.
 
 | Шаг | Действие |
 |-----|----------|
-| 1 | В `activity_transformer.py` генерировать publication_* поля и `publication_id`; удалить `document_*` |
+| 1 | В `activity-transformer.py` генерировать publication-* поля и `publication-id`; удалить `document-*` |
 | 2 | В Activity Silver/Gold схемах оставить только unified имена |
-| 3 | В `composite/activity.yaml` обновить join/field_groups/validations на publication_* |
-| 4 | Обновить DQ/data_schema/field_groups на publication_* |
+| 3 | В `composite/activity.yaml` обновить join/field-groups/validations на publication-* |
+| 4 | Обновить DQ/data-schema/field-groups на publication-* |
 | 5 | Обновить тесты и REBUILD Activity Silver/Gold |
 
 **Обоснование:** Принята стратегия breaking rename без legacy. Unified naming выравнивает Activity с Publication pipelines и убирает дубли контекстных полей.
@@ -465,41 +465,41 @@ _PUBCHEM_MOLECULE_MAPPING: Final[dict[str, str]] = {
 
 ### Фаза 4: LOW fixes (clarity) — Non-breaking
 
-#### RF-NAMING-07: Rename `component_id` → `primary_component_id`
+#### RF-NAMING-07: Rename `component-id` → `primary-component-id`
 
 | Шаг | Файл | Изменение |
 |-----|------|-----------|
-| 1 | `target_transformer.py` | `component_id` → `primary_component_id` |
+| 1 | `target-transformer.py` | `component-id` → `primary-component-id` |
 | 2 | Silver/Gold schemas | Rename field |
-| 3 | `composite/target.yaml` | Обновить `output_keys`, `join_keys`, `field_priorities` |
+| 3 | `composite/target.yaml` | Обновить `output-keys`, `join-keys`, `field-priorities` |
 
 **Миграция данных:** REBUILD для Target.
 
-#### RF-NAMING-08: Удалить `structure_standard_inchi_key` alias
+#### RF-NAMING-08: Удалить `structure-standard-inchi-key` alias
 
-Поле `structure_standard_inchi_key` в Molecule Silver schema дублирует `inchi_key`. Одно из них нужно удалить.
+Поле `structure-standard-inchi-key` в Molecule Silver schema дублирует `inchi-key`. Одно из них нужно удалить.
 
 | Шаг | Действие |
 |-----|----------|
-| 1 | Проверить, используется ли `structure_standard_inchi_key` downstream |
-| 2 | Если нет — удалить из Silver schema, оставить `inchi_key` |
+| 1 | Проверить, используется ли `structure-standard-inchi-key` downstream |
+| 2 | Если нет — удалить из Silver schema, оставить `inchi-key` |
 | 3 | Если да — deprecate с forward alias в Gold |
 
 ---
 
-## 4. Deprecation strategy для удаляемого `validate_taxonomy_id_str`
+## 4. Deprecation strategy для удаляемого `validate-taxonomy-id-str`
 
 ```python
 # BEFORE (текущий):
-def validate_taxonomy_id_str(value):
-    vo = TaxonomyId.from_raw(value)
+def validate-taxonomy-id-str(value):
+    vo = TaxonomyId.from-raw(value)
     return str(vo.value) if vo else None
 
 # AFTER (Phase 1):
-# Удалить функцию. Все callers переключить на validate_taxonomy_id.
+# Удалить функцию. Все callers переключить на validate-taxonomy-id.
 ```
 
-**Единственный caller:** `activity_transformer.py:70` (FieldSpec converter).
+**Единственный caller:** `activity-transformer.py:70` (FieldSpec converter).
 
 ---
 
@@ -507,17 +507,17 @@ def validate_taxonomy_id_str(value):
 
 ```
 RF-NAMING-01 (taxonomy type) ←── CRITICAL, блокирует downstream joins
-RF-NAMING-02 (cell_line type) ←── CRITICAL, может вызвать runtime coercion errors
+RF-NAMING-02 (cell-line type) ←── CRITICAL, может вызвать runtime coercion errors
      │
-     ├── RF-NAMING-03 (action_type rename)
+     ├── RF-NAMING-03 (action-type rename)
      ├── RF-NAMING-04 (document convention)
      ├── RF-NAMING-10 (Activity ↔ Publication naming)
      │
      ├── RF-NAMING-05 (cross-provider molecule) ← зависит от Publication pattern (§0)
      ├── RF-NAMING-06 (flatten prefix doc)
      │
-     ├── RF-NAMING-07 (component_id rename)
-     └── RF-NAMING-08 (inchi_key dedup)
+     ├── RF-NAMING-07 (component-id rename)
+     └── RF-NAMING-08 (inchi-key dedup)
 ```
 
 ---
@@ -541,10 +541,10 @@ RF-NAMING-02 (cell_line type) ←── CRITICAL, может вызвать runt
 ## 7. Рекомендуемый порядок реализации
 
 ### Batch 1 (Critical — type safety)
-1. **RF-NAMING-01** + **RF-NAMING-02** — одним коммитом, т.к. оба про taxonomy_id type unification
+1. **RF-NAMING-01** + **RF-NAMING-02** — одним коммитом, т.к. оба про taxonomy-id type unification
 
 ### Batch 2 (High — naming cleanup)
-2. **RF-NAMING-03** — action_type rename (isolated change)
+2. **RF-NAMING-03** — action-type rename (isolated change)
 3. **RF-NAMING-04** — documentation only
 4. **RF-NAMING-10** — Activity ↔ Publication context mapping (config only, non-breaking)
 
@@ -553,7 +553,7 @@ RF-NAMING-02 (cell_line type) ←── CRITICAL, может вызвать runt
 6. **RF-NAMING-06** — flatten prefix documentation
 
 ### Batch 4 (Low — polish)
-7. **RF-NAMING-07** + **RF-NAMING-08** — component_id + inchi_key cleanup
+7. **RF-NAMING-07** + **RF-NAMING-08** — component-id + inchi-key cleanup
 
 ### Post-migration
 8. Один REBUILD для Activity + CellLine + Target + Molecule (можно объединить)
@@ -564,23 +564,23 @@ RF-NAMING-02 (cell_line type) ←── CRITICAL, может вызвать runt
 
 ### 8.1 Taxonomy ID Convention
 - Тип: всегда `float` (nullable int pattern)
-- Имя: `{context_prefix}taxonomy_id` (не `tax_id`)
-- Converter: `validate_taxonomy_id()` (возвращает `int`, Pandas хранит как `float`)
+- Имя: `{context-prefix}taxonomy-id` (не `tax-id`)
+- Converter: `validate-taxonomy-id()` (возвращает `int`, Pandas хранит как `float`)
 
 ### 8.2 Context Denormalization Prefix
-- При денормализации поля из entity A в entity B: `{source_entity}_{field_name}`
-- Пример: `Target.pref_name` → `Activity.target_pref_name`
-- Исключение: если поле уже содержит entity prefix (e.g. `assay_type`), дополнительный prefix НЕ добавляется
+- При денормализации поля из entity A в entity B: `{source-entity}-{field-name}`
+- Пример: `Target.pref-name` → `Activity.target-pref-name`
+- Исключение: если поле уже содержит entity prefix (e.g. `assay-type`), дополнительный prefix НЕ добавляется
 
 ### 8.3 Nested Object Flatten Prefix
-- Default: `{parent_json_field}_{child_key}` (e.g. `ligand_efficiency_bei`)
+- Default: `{parent-json-field}-{child-key}` (e.g. `ligand-efficiency-bei`)
 - Renames разрешены для: удаления redundancy, стандартизации names
-- Exception: `molecule_structures` → flatten без prefix (shared naming with PubChem)
+- Exception: `molecule-structures` → flatten без prefix (shared naming with PubChem)
 
 ### 8.4 Singular vs Plural for List Fields
-- Scalar FK: `{entity}_id` (e.g. `component_id`, `protein_classification_id`)
-- List field: `{entity}_ids` (e.g. `component_ids`, `protein_classification_ids`)
-- Рекомендация: для clarity scalar FK переименовать в `primary_{entity}_id`
+- Scalar FK: `{entity}-id` (e.g. `component-id`, `protein-classification-id`)
+- List field: `{entity}-ids` (e.g. `component-ids`, `protein-classification-ids`)
+- Рекомендация: для clarity scalar FK переименовать в `primary-{entity}-id`
 
 ---
 
@@ -589,15 +589,15 @@ RF-NAMING-02 (cell_line type) ←── CRITICAL, может вызвать runt
 ### Core Pipeline Files
 - **Activity Silver Schema:** `src/bioetl/domain/schemas/chembl/activity.py`
 - **Activity Gold Schema:** `src/bioetl/domain/contracts/gold/chembl.py:29-128`
-- **Activity Transformer:** `src/bioetl/application/pipelines/chembl/activity_transformer.py`
-- **TaxonomyId VO:** `src/bioetl/domain/value_objects/taxonomy_id.py`
+- **Activity Transformer:** `src/bioetl/application/pipelines/chembl/activity-transformer.py`
+- **TaxonomyId VO:** `src/bioetl/domain/value-objects/taxonomy-id.py`
 - **Composite Configs:** `configs/pipelines/composite/{entity}.yaml`
 - **Validation Matrix:** `docs/03-data-model/pipeline-validation-matrix.md`
 
 ### Publication Unification Precedent (main)
-- **Publication Base Schema:** `src/bioetl/domain/schemas/common/publication_base.py`
-- **Publication Field Mapping:** `src/bioetl/domain/mapping/publication_fields.py`
+- **Publication Base Schema:** `src/bioetl/domain/schemas/common/publication-base.py`
+- **Publication Field Mapping:** `src/bioetl/domain/mapping/publication-fields.py`
 - **ADR-030 (archived):** `docs/99-archive/decisions/ADR-030-publication-field-unification.md`
 - **Composite Publication Config:** `configs/pipelines/composite/publication.yaml`
 - **S2 Publication Schema:** `src/bioetl/domain/schemas/semanticscholar/publication.py`
-- **ChEMBL Publication Transformer:** `src/bioetl/application/pipelines/chembl/publication_transformer.py`
+- **ChEMBL Publication Transformer:** `src/bioetl/application/pipelines/chembl/publication-transformer.py`

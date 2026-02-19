@@ -22,7 +22,7 @@
 | Восстановление при аварии           | §5.5            | DR Runbook                  |
 | Откат релиза                        | §7.2            | Rollback Strategy           |
 | Безопасность                        | §5.4            | Security Policy             |
-| Forensic retention для таблицы      | §2.1.1, App D   | Config `forensic_retention` |
+| Forensic retention для таблицы      | §2.1.1, App D   | Config `forensic-retention` |
 | Backfill с эксклюзивной блокировкой | §2.4            | Lock Mechanism              |
 | Deprecation поля                    | §7.1, App E     | Schema Evolution            |
 
@@ -36,13 +36,13 @@
 
 | Уровень    | Формат        | Валидация               | Retention             | Идемпотентность                                                          |
 |------------|---------------|-------------------------|-----------------------|--------------------------------------------------------------------------|
-| **Bronze** | JSONL + zstd  | Мин./Нет                | 90 дней hot → Archive | Append-only. Path: `bronze/{format_version}/{provider}/{entity}/{date}/` |
+| **Bronze** | JSONL + zstd  | Мин./Нет                | 90 дней hot → Archive | Append-only. Path: `bronze/{format-version}/{provider}/{entity}/{date}/` |
 | **Silver** | Delta Lake    | Мягкая (дрейф схемы)    | Постоянно             | **Merge/Upsert**. Raw Parquet **MUST NOT**.                              |
 | **Gold**   | Delta/Parquet | Строгая (`strict=True`) | Постоянно             | SCD Type 2 или партиции по дате                                          |
 
 ### Delta Maintenance
 
-- **VACUUM**: Еженедельно, `retention_period=7 days` (MUST)
+- **VACUUM**: Еженедельно, `retention-period=7 days` (MUST)
 - **Forensic Retention**: 7 дней (default), 30 дней для Critical tables
 
 ## 3. Обработка Ошибок
@@ -65,14 +65,14 @@
 | Trigger       | 5 consecutive errors                           |
 | Open Duration | 5 минут                                        |
 | Recovery      | Half-Open → 1 пробный запрос                   |
-| Metrics       | `circuit_breaker_state` (0/1/2), `trips_total` |
+| Metrics       | `circuit-breaker-state` (0/1/2), `trips-total` |
 
 ## 4. Блокировки (Local-Only)
 
 | Параметр      | Значение                                 |
 |---------------|------------------------------------------|
 | Механизм      | `MemoryLock` (in-process)                |
-| TTL           | `heartbeat_interval * 3` = 90s           |
+| TTL           | `heartbeat-interval * 3` = 90s           |
 | Heartbeat     | 30s                                      |
 | Max Duration  | 4 часа                                   |
 
@@ -83,7 +83,7 @@
 ### Secrets
 
 - Источник: `os.environ`
-- Формат: `BIOETL_{PROVIDER}_{KEY}`
+- Формат: `BIOETL-{PROVIDER}-{KEY}`
 - **Хардкод MUST NOT. Файлы .env в git MUST NOT.**
 
 ### Disaster Recovery

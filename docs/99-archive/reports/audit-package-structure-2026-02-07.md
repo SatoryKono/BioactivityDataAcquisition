@@ -11,21 +11,21 @@
 | Метрика | Значение |
 |---------|----------|
 | Всего Python-файлов | 510 |
-| Из них `__init__.py` | 79 |
-| Содержательных модулей (без `__init__`) | 431 |
+| Из них `--init--.py` | 79 |
+| Содержательных модулей (без `--init--`) | 431 |
 | Всего каталогов | 83 |
 | Общий LOC | 113 840 |
 
 ### LOC и файлы по слоям
 
-| Слой | Файлов (без `__init__`) | LOC | % от LOC |
+| Слой | Файлов (без `--init--`) | LOC | % от LOC |
 |------|------------------------|-----|----------|
 | domain | 149 | 36 156 | 31.8% |
 | application | 121 | 32 625 | 28.7% |
 | infrastructure | 99 | 31 401 | 27.6% |
 | composition | 38 | 10 474 | 9.2% |
 | interfaces | 23 | 3 171 | 2.8% |
-| root (\_\_init\_\_, \_\_main\_\_) | 1 | 13 | <0.1% |
+| root (\-\-init\-\-, \-\-main\-\-) | 1 | 13 | <0.1% |
 
 ---
 
@@ -35,17 +35,17 @@
 
 | Модуль-источник | Модуль-дубликат | Совпадение | Рекомендация |
 |-----------------|-----------------|------------|--------------|
-| `domain/ports/noop.py:379` — `NoOpMetadataWriter` | `infrastructure/storage/metadata_writer.py:241` — `NoOpMetadataWriter` | ~95% | **Удалить** копию в infrastructure; импортировать из `domain.ports.noop` или вынести в composition |
+| `domain/ports/noop.py:379` — `NoOpMetadataWriter` | `infrastructure/storage/metadata-writer.py:241` — `NoOpMetadataWriter` | ~95% | **Удалить** копию в infrastructure; импортировать из `domain.ports.noop` или вынести в composition |
 
 Обе реализации `NoOpMetadataWriter` почти идентичны: те же методы, те же no-op возвраты. Разница — в docstring (infrastructure-версия не содержит комментарий "All operations are silently ignored").
 
-**Действие:** Удалить класс из `infrastructure/storage/metadata_writer.py`, обновить импорты на `from bioetl.domain.ports.noop import NoOpMetadataWriter`.
+**Действие:** Удалить класс из `infrastructure/storage/metadata-writer.py`, обновить импорты на `from bioetl.domain.ports.noop import NoOpMetadataWriter`.
 
 ### 1.2 Re-export модули (backward compatibility)
 
 | Файл | LOC | Что реэкспортирует | Рекомендация |
 |------|-----|--------------------|--------------|
-| `application/services/dq_metrics_calculator.py` | 16 | `DQMetricsCalculator` из `domain/services/` | DEPRECATE — добавить warning, удалить через 2 релиза |
+| `application/services/dq-metrics-calculator.py` | 16 | `DQMetricsCalculator` из `domain/services/` | DEPRECATE — добавить warning, удалить через 2 релиза |
 | `composition/factories/storage.py` | 35 | Функции из split-модулей | KEEP — документированный backward-compat |
 | `application/core/shutdown.py` | ~30 | `ShutdownService` из `application/services/` | DEPRECATE — обновить импорты |
 
@@ -54,7 +54,7 @@
 Три группы NoOp-классов существуют на разных слоях для разных целей:
 
 - `domain/ports/noop.py` (470 LOC) — Null Object implementations на уровне домена
-- `infrastructure/observability/noop_*.py` (3 файла, ~200 LOC) — конкретные NoOp с предупреждениями
+- `infrastructure/observability/noop-*.py` (3 файла, ~200 LOC) — конкретные NoOp с предупреждениями
 - `composition/bootstrap/cli/noop.py` (109 LOC) — фабрики NoOp для CLI bootstrap
 
 **Вердикт:** Архитектурно обоснованное разделение. **Исключение EXC-003** (Null Object Pattern).
@@ -84,27 +84,27 @@
 | Файл | LOC | Вердикт | Делегирование |
 |------|-----|---------|---------------|
 | `application/composite/merger.py` | 1698 | PROPER DELEGATION | 4+ компонента |
-| `infrastructure/storage/silver_writer.py` | 1151 | PROPER DELEGATION | 5+ компонентов |
+| `infrastructure/storage/silver-writer.py` | 1151 | PROPER DELEGATION | 5+ компонентов |
 | `infrastructure/adapters/chembl/client.py` | 1098 | PROPER DELEGATION | 4+ компонента |
-| `infrastructure/schemas/pipeline_config.py` | 1093 | PROPER DELEGATION | Единственная ответственность: валидация конфигов |
+| `infrastructure/schemas/pipeline-config.py` | 1093 | PROPER DELEGATION | Единственная ответственность: валидация конфигов |
 | `application/composite/runner.py` | 1074 | PROPER DELEGATION | 7+ компонентов |
 | `infrastructure/schemas/silver.py` | 1003 | PROPER DELEGATION | Единственная ответственность: схемы |
 | `domain/composite/config.py` | 978 | PROPER DELEGATION | Единственная ответственность: dataclasses |
-| `infrastructure/storage/gold_writer.py` | 934 | PROPER DELEGATION | 4+ компонента |
-| `application/core/preflight_service.py` | 816 | PROPER DELEGATION | Вспомогательные внутренние классы |
-| `application/core/base_transformer.py` | 786 | PROPER DELEGATION | 5+ компонентов |
-| `application/core/batch_executor.py` | 783 | PROPER DELEGATION | 4+ компонента |
+| `infrastructure/storage/gold-writer.py` | 934 | PROPER DELEGATION | 4+ компонента |
+| `application/core/preflight-service.py` | 816 | PROPER DELEGATION | Вспомогательные внутренние классы |
+| `application/core/base-transformer.py` | 786 | PROPER DELEGATION | 5+ компонентов |
+| `application/core/batch-executor.py` | 783 | PROPER DELEGATION | 4+ компонента |
 | `domain/models/metadata.py` | 777 | PROPER DELEGATION | Единственная ответственность: модели |
 | `composition/entrypoints.py` | 771 | **NEEDS SPLITTING** | 4 категории энтрипоинтов |
 | `infrastructure/adapters/openalex/client.py` | 770 | PROPER DELEGATION | 4+ компонента |
-| **`application/services/dq/gold_analyzer.py`** | **761** | **GOD MODULE** | **8 разных типов DQ-проверок, минимальное делегирование** |
+| **`application/services/dq/gold-analyzer.py`** | **761** | **GOD MODULE** | **8 разных типов DQ-проверок, минимальное делегирование** |
 | `domain/contracts/gold/chembl.py` | 758 | PROPER DELEGATION | Единственная ответственность: схемы |
 | `composition/providers/registration.py` | 715 | **NEEDS SPLITTING** | 7 провайдеров в одном файле |
 | `application/pipelines/semanticscholar/extractors.py` | 709 | **NEEDS SPLITTING** | 20+ функций извлечения |
 
-### 2.2 God Module: `gold_analyzer.py`
+### 2.2 God Module: `gold-analyzer.py`
 
-**Файл:** `src/bioetl/application/services/dq/gold_analyzer.py` (761 LOC)
+**Файл:** `src/bioetl/application/services/dq/gold-analyzer.py` (761 LOC)
 
 **8 разных ответственностей в одном классе `GoldDQAnalyzer`:**
 
@@ -118,33 +118,33 @@
 8. Свежесть данных (data freshness)
 
 **Рекомендация:** Разделить на 5 модулей:
-- `gold_analyzer_core.py` — базовый анализатор и оркестрация
-- `gold_checks_basic.py` — record count, completeness
-- `gold_checks_business.py` — business rules
-- `gold_checks_integrity.py` — referential integrity, SCD
-- `gold_checks_statistical.py` — statistical profiling, anomaly detection
+- `gold-analyzer-core.py` — базовый анализатор и оркестрация
+- `gold-checks-basic.py` — record count, completeness
+- `gold-checks-business.py` — business rules
+- `gold-checks-integrity.py` — referential integrity, SCD
+- `gold-checks-statistical.py` — statistical profiling, anomaly detection
 
 ### 2.3 Файлы, требующие разделения
 
 #### `composition/entrypoints.py` (771 LOC)
 **Проблема:** 4 категории энтрипоинтов (пайплайны, обслуживание, ресурсы, сервисы) в одном файле.
 **Рекомендация:**
-- `pipeline_entrypoints.py` — run_pipeline, create_pipeline_runner
-- `maintenance_entrypoints.py` — vacuum, archive, cleanup
-- `service_entrypoints.py` — get_* сервис-функции
+- `pipeline-entrypoints.py` — run-pipeline, create-pipeline-runner
+- `maintenance-entrypoints.py` — vacuum, archive, cleanup
+- `service-entrypoints.py` — get-* сервис-функции
 
 #### `composition/providers/registration.py` (715 LOC)
 **Проблема:** Создатели для 7 провайдеров в одном файле.
 **Рекомендация:**
-- `core_providers.py` — ChEMBL, PubChem, UniProt
-- `publication_providers.py` — PubMed, CrossRef, OpenAlex, SemanticScholar
+- `core-providers.py` — ChEMBL, PubChem, UniProt
+- `publication-providers.py` — PubMed, CrossRef, OpenAlex, SemanticScholar
 
 #### `application/pipelines/semanticscholar/extractors.py` (709 LOC)
 **Проблема:** 20+ функций извлечения без чёткой группировки.
 **Рекомендация:**
-- `basic_extractors.py` — DOI, external IDs, year validation
-- `author_extractors.py` — Authors, affiliations, ORCIDs, h-indices
-- `journal_extractors.py` — Volume/issue parsing, page ranges
+- `basic-extractors.py` — DOI, external IDs, year validation
+- `author-extractors.py` — Authors, affiliations, ORCIDs, h-indices
+- `journal-extractors.py` — Volume/issue parsing, page ranges
 
 ---
 
@@ -152,7 +152,7 @@
 
 ### 3.1 Общая статистика
 
-Найдено **47 файлов** менее 60 строк (без `__init__.py`).
+Найдено **47 файлов** менее 60 строк (без `--init--.py`).
 
 | Категория | Кол-во | Действие |
 |-----------|--------|----------|
@@ -169,17 +169,17 @@
 |------|-----|---------------------|
 | `pipelines/chembl/activity.py` | 24 | ChEMBL Activity |
 | `pipelines/chembl/assay.py` | 24 | ChEMBL Assay |
-| `pipelines/chembl/assay_parameters.py` | 29 | ChEMBL AssayParameters |
-| `pipelines/chembl/cell_line.py` | 27 | ChEMBL CellLine |
-| `pipelines/chembl/compound_record.py` | 27 | ChEMBL CompoundRecord |
+| `pipelines/chembl/assay-parameters.py` | 29 | ChEMBL AssayParameters |
+| `pipelines/chembl/cell-line.py` | 27 | ChEMBL CellLine |
+| `pipelines/chembl/compound-record.py` | 27 | ChEMBL CompoundRecord |
 | `pipelines/chembl/molecule.py` | 24 | ChEMBL Molecule |
-| `pipelines/chembl/protein_class.py` | 28 | ChEMBL ProteinClass |
+| `pipelines/chembl/protein-class.py` | 28 | ChEMBL ProteinClass |
 | `pipelines/chembl/publication.py` | 30 | ChEMBL Publication |
-| `pipelines/chembl/publication_similarity.py` | 35 | ChEMBL PublicationSimilarity |
-| `pipelines/chembl/publication_term.py` | 40 | ChEMBL PublicationTerm |
-| `pipelines/chembl/subcellular_fraction.py` | 43 | ChEMBL SubcellularFraction |
+| `pipelines/chembl/publication-similarity.py` | 35 | ChEMBL PublicationSimilarity |
+| `pipelines/chembl/publication-term.py` | 40 | ChEMBL PublicationTerm |
+| `pipelines/chembl/subcellular-fraction.py` | 43 | ChEMBL SubcellularFraction |
 | `pipelines/chembl/target.py` | 24 | ChEMBL Target |
-| `pipelines/chembl/target_component.py` | 24 | ChEMBL TargetComponent |
+| `pipelines/chembl/target-component.py` | 24 | ChEMBL TargetComponent |
 | `pipelines/chembl/tissue.py` | 27 | ChEMBL Tissue |
 | `pipelines/pubchem/compound.py` | 17 | PubChem Compound |
 | `pipelines/uniprot/protein.py` | 17 | UniProt Protein |
@@ -202,12 +202,12 @@ class ChemblActivityPipeline(BasePipeline):
 
 ### 3.3 Обоснованно маленькие файлы (KEEP)
 
-- **Entry points** (2): `__main__.py` — обязательные точки входа
-- **Constants** (2): `domain/constants.py`, `domain/contracts/gold/_base.py`
-- **Schemas** (7): Pandera-схемы для простых сущностей (molecule_form, target_relation и т.д.)
+- **Entry points** (2): `--main--.py` — обязательные точки входа
+- **Constants** (2): `domain/constants.py`, `domain/contracts/gold/-base.py`
+- **Schemas** (7): Pandera-схемы для простых сущностей (molecule-form, target-relation и т.д.)
 - **Filters** (2): Domain filter dataclasses
-- **Entities** (1): `chembl_tissue.py` — простая сущность
-- **Exceptions** (1): `data_quality.py`
+- **Entities** (1): `chembl-tissue.py` — простая сущность
+- **Exceptions** (1): `data-quality.py`
 - **CLI commands** (6): Отдельные команды — нормальная CLI-архитектура
 - **Bootstrap functions** (4): DI-wiring функции в composition
 
@@ -230,7 +230,7 @@ class ChemblActivityPipeline(BasePipeline):
 | infrastructure → composition | **0** |
 | infrastructure → interfaces | **0** |
 
-**Вердикт: Архитектурные границы соблюдаются полностью.** Ни одного нарушения матрицы импортов ARCH-001. Единственное совпадение (`application/pipelines/__init__.py:13`) — это комментарий в docstring, не реальный импорт.
+**Вердикт: Архитектурные границы соблюдаются полностью.** Ни одного нарушения матрицы импортов ARCH-001. Единственное совпадение (`application/pipelines/--init--.py:13`) — это комментарий в docstring, не реальный импорт.
 
 ### 4.2 Распределение по слоям
 
@@ -272,19 +272,19 @@ src/bioetl/
 ├── application/
 │   ├── pipelines/
 │   │   ├── chembl/
-│   │   │   ├── __init__.py          # Убрать 14 пустых pipeline-классов
+│   │   │   ├── --init--.py          # Убрать 14 пустых pipeline-классов
 │   │   │   ├── registry.py          # НОВЫЙ: фабричная регистрация пайплайнов
 │   │   │   ├── compound.py          # Оставить — содержит логику
-│   │   │   ├── compound_transformer.py
+│   │   │   ├── compound-transformer.py
 │   │   │   └── ...
 │   │   └── ...
 │   └── services/
 │       └── dq/
-│           ├── gold_analyzer_core.py      # SPLIT из gold_analyzer.py
-│           ├── gold_checks_basic.py       # SPLIT
-│           ├── gold_checks_business.py    # SPLIT
-│           ├── gold_checks_integrity.py   # SPLIT
-│           └── gold_checks_statistical.py # SPLIT
+│           ├── gold-analyzer-core.py      # SPLIT из gold-analyzer.py
+│           ├── gold-checks-basic.py       # SPLIT
+│           ├── gold-checks-business.py    # SPLIT
+│           ├── gold-checks-integrity.py   # SPLIT
+│           └── gold-checks-statistical.py # SPLIT
 ├── infrastructure/                  # БЕЗ СУЩЕСТВЕННЫХ ИЗМЕНЕНИЙ
 ├── composition/
 │   ├── entrypoints/                 # SPLIT из entrypoints.py
@@ -292,8 +292,8 @@ src/bioetl/
 │   │   ├── maintenance.py
 │   │   └── services.py
 │   └── providers/
-│       ├── core_providers.py        # SPLIT из registration.py
-│       └── publication_providers.py # SPLIT
+│       ├── core-providers.py        # SPLIT из registration.py
+│       └── publication-providers.py # SPLIT
 └── interfaces/                      # БЕЗ ИЗМЕНЕНИЙ
 ```
 
@@ -306,14 +306,14 @@ src/bioetl/
 | # | Действие | Файлов | LOC | Трудоёмкость |
 |---|----------|--------|-----|--------------|
 | 1 | Удалить дубликат `NoOpMetadataWriter` из infrastructure | 1 | -60 | 1ч |
-| 2 | Deprecate re-export `application/services/dq_metrics_calculator.py` | 1 | -16 | 0.5ч |
+| 2 | Deprecate re-export `application/services/dq-metrics-calculator.py` | 1 | -16 | 0.5ч |
 | 3 | Консолидировать 17 пустых pipeline-классов в реестр | -16 | -400 | 4ч |
 
 ### Средний приоритет (требуют аккуратного рефакторинга)
 
 | # | Действие | Файлов | LOC | Трудоёмкость |
 |---|----------|--------|-----|--------------|
-| 4 | Разделить `gold_analyzer.py` (God Module) | +4 | ±0 | 3ч |
+| 4 | Разделить `gold-analyzer.py` (God Module) | +4 | ±0 | 3ч |
 | 5 | Разделить `entrypoints.py` на 3 модуля | +2 | ±0 | 2ч |
 | 6 | Разделить `registration.py` на 2 модуля | +1 | ±0 | 2ч |
 | 7 | Разделить `semanticscholar/extractors.py` | +2 | ±0 | 2ч |
@@ -344,7 +344,7 @@ src/bioetl/
 ```
 1. [Quick Win]  Удалить NoOpMetadataWriter дубликат          → 1ч
 2. [Quick Win]  Консолидировать 17 пустых pipeline-классов   → 4ч
-3. [Medium]     Разделить gold_analyzer.py                   → 3ч
+3. [Medium]     Разделить gold-analyzer.py                   → 3ч
 4. [Medium]     Разделить entrypoints.py                     → 2ч
 5. [Medium]     Разделить registration.py                    → 2ч
 6. [Medium]     Разделить semanticscholar/extractors.py      → 2ч
@@ -361,13 +361,13 @@ src/bioetl/
 Кодовая база BioETL в целом **хорошо структурирована**:
 
 - **Архитектурные границы соблюдаются на 100%** — ни одного нарушения ARCH-001
-- **Из 18 крупнейших файлов только 1 — God Module** (gold_analyzer.py)
+- **Из 18 крупнейших файлов только 1 — God Module** (gold-analyzer.py)
 - **Дублирование минимально** — 1 подтверждённый дубликат (NoOpMetadataWriter)
 - **Баланс LOC между слоями адекватный** (~30%/30%/28%/9%/3%)
 
 Основные точки улучшения:
 1. **17 пустых pipeline-классов** — главный source навигационного шума
-2. **God Module gold_analyzer.py** — единственный серьёзный SRP-violation
+2. **God Module gold-analyzer.py** — единственный серьёзный SRP-violation
 3. **3 файла 700+ LOC** требуют разделения для лучшей навигации
 
 Рекомендуемый подход: начать с quick wins (пп. 1-2), затем поэтапно реализовать средний приоритет с полным покрытием тестами перед каждым merge.

@@ -43,7 +43,7 @@
 | `schemas/` | 20+ | - | Silver layer Pandera schemas (20 silver schemas) |
 | `services/` | 8 | 20+ | IdentityService, NormalizationService |
 | `types/` | 20+ | - | Type aliases, enums |
-| `value_objects/` | 20+ | - | ChemblId, DOI, PubMedId... |
+| `value-objects/` | 20+ | - | ChemblId, DOI, PubMedId... |
 
 **Классов в слое:** 420
 
@@ -122,37 +122,37 @@
 
 | # | Pipeline Name | Provider | Transformer | Silver Schema | Gold Schema |
 |---|--------------|----------|-------------|---------------|-------------|
-| 1 | chembl_activity | chembl | ActivityTransformer | ActivitySchema | ChEMBLActivityGoldSchema |
-| 2 | chembl_assay | chembl | AssayTransformer | AssaySchema | ChEMBLAssayGoldSchema |
-| 3 | chembl_assay_parameters | chembl | AssayParametersTransformer | AssayParametersSchema | ChEMBLAssayParametersGoldSchema |
-| 4 | chembl_cell_line | chembl | CellLineTransformer | CellLineSchema | ChEMBLCellLineGoldSchema |
-| 5 | chembl_compound_record | chembl | CompoundRecordTransformer | CompoundRecordSchema | ChEMBLCompoundRecordGoldSchema |
-| 6 | chembl_publication | chembl | PublicationTransformer | ChemblPublicationSchema | ChEMBLDocumentGoldSchema |
-| 7 | chembl_publication_similarity | chembl | PublicationSimilarityTransformer | PublicationSimilaritySchema | ChEMBLDocumentSimilarityGoldSchema |
-| 8 | chembl_publication_term | chembl | PublicationTermTransformer | PublicationTermSchema | ChEMBLDocumentTermGoldSchema |
-| 9 | chembl_molecule | chembl | MoleculeTransformer | MoleculeSchema | ChEMBLMoleculeGoldSchema |
-| 10 | chembl_target | chembl | TargetTransformer | TargetSchema | ChEMBLTargetGoldSchema |
-| 11 | chembl_target_component | chembl | TargetComponentTransformer | TargetComponentSchema | ChEMBLTargetComponentGoldSchema |
-| 12 | chembl_protein_class | chembl | ProteinClassTransformer | ProteinClassificationSchema | ChEMBLProteinClassGoldSchema |
-| 13 | chembl_tissue | chembl | TissueTransformer | - | ChEMBLTissueGoldSchema |
-| 14 | chembl_subcellular_fraction | chembl | SubcellularFractionTransformer | - | ChEMBLSubcellularFractionGoldSchema |
-| 15 | pubchem_compound | pubchem | PubChemCompoundTransformer | PubchemMoleculeSchema | PubChemCompoundGoldSchema |
-| 16 | uniprot_protein | uniprot | UniProtProteinTransformer | UniprotTargetSchema | UniProtProteinGoldSchema |
-| 17 | uniprot_idmapping | uniprot | IDMappingTransformer | IDMappingSchema | UniProtIDMappingGoldSchema |
-| 18 | pubmed_publication | pubmed | PubMedPublicationTransformer | PubMedPublicationSchema | PubMedPublicationGoldSchema |
-| 19 | crossref_publication | crossref | CrossRefPublicationTransformer | PublicationEnrichedSchema | CrossRefPublicationGoldSchema |
-| 20 | openalex_publication | openalex | OpenAlexPublicationTransformer | OpenAlexPublicationSchema | OpenAlexPublicationGoldSchema |
-| 21 | semanticscholar_publication | semanticscholar | SemanticScholarPublicationTransformer | SemanticScholarPublicationSchema | SemanticScholarPublicationGoldSchema |
+| 1 | chembl-activity | chembl | ActivityTransformer | ActivitySchema | ChEMBLActivityGoldSchema |
+| 2 | chembl-assay | chembl | AssayTransformer | AssaySchema | ChEMBLAssayGoldSchema |
+| 3 | chembl-assay-parameters | chembl | AssayParametersTransformer | AssayParametersSchema | ChEMBLAssayParametersGoldSchema |
+| 4 | chembl-cell-line | chembl | CellLineTransformer | CellLineSchema | ChEMBLCellLineGoldSchema |
+| 5 | chembl-compound-record | chembl | CompoundRecordTransformer | CompoundRecordSchema | ChEMBLCompoundRecordGoldSchema |
+| 6 | chembl-publication | chembl | PublicationTransformer | ChemblPublicationSchema | ChEMBLDocumentGoldSchema |
+| 7 | chembl-publication-similarity | chembl | PublicationSimilarityTransformer | PublicationSimilaritySchema | ChEMBLDocumentSimilarityGoldSchema |
+| 8 | chembl-publication-term | chembl | PublicationTermTransformer | PublicationTermSchema | ChEMBLDocumentTermGoldSchema |
+| 9 | chembl-molecule | chembl | MoleculeTransformer | MoleculeSchema | ChEMBLMoleculeGoldSchema |
+| 10 | chembl-target | chembl | TargetTransformer | TargetSchema | ChEMBLTargetGoldSchema |
+| 11 | chembl-target-component | chembl | TargetComponentTransformer | TargetComponentSchema | ChEMBLTargetComponentGoldSchema |
+| 12 | chembl-protein-class | chembl | ProteinClassTransformer | ProteinClassificationSchema | ChEMBLProteinClassGoldSchema |
+| 13 | chembl-tissue | chembl | TissueTransformer | - | ChEMBLTissueGoldSchema |
+| 14 | chembl-subcellular-fraction | chembl | SubcellularFractionTransformer | - | ChEMBLSubcellularFractionGoldSchema |
+| 15 | pubchem-compound | pubchem | PubChemCompoundTransformer | PubchemMoleculeSchema | PubChemCompoundGoldSchema |
+| 16 | uniprot-protein | uniprot | UniProtProteinTransformer | UniprotTargetSchema | UniProtProteinGoldSchema |
+| 17 | uniprot-idmapping | uniprot | IDMappingTransformer | IDMappingSchema | UniProtIDMappingGoldSchema |
+| 18 | pubmed-publication | pubmed | PubMedPublicationTransformer | PubMedPublicationSchema | PubMedPublicationGoldSchema |
+| 19 | crossref-publication | crossref | CrossRefPublicationTransformer | PublicationEnrichedSchema | CrossRefPublicationGoldSchema |
+| 20 | openalex-publication | openalex | OpenAlexPublicationTransformer | OpenAlexPublicationSchema | OpenAlexPublicationGoldSchema |
+| 21 | semanticscholar-publication | semanticscholar | SemanticScholarPublicationTransformer | SemanticScholarPublicationSchema | SemanticScholarPublicationGoldSchema |
 
 ### Composite Pipelines (configs/pipelines/composite/)
 
 | Pipeline | Seed | Enrichers |
 |----------|------|-----------|
-| composite/activity | chembl_activity | - |
-| composite/assay | chembl_assay | - |
-| composite/molecule | chembl_molecule | pubchem_compound |
-| composite/publication | chembl_publication | pubmed, crossref, openalex, semanticscholar |
-| composite/target | chembl_target | uniprot_protein |
+| composite/activity | chembl-activity | - |
+| composite/assay | chembl-assay | - |
+| composite/molecule | chembl-molecule | pubchem-compound |
+| composite/publication | chembl-publication | pubmed, crossref, openalex, semanticscholar |
+| composite/target | chembl-target | uniprot-protein |
 
 ### Gold Schemas: 23
 
@@ -170,7 +170,7 @@
 
 | Port | Файл | Строки | Используется в |
 |------|------|--------|----------------|
-| DataSourcePort | domain/ports/data_source.py | 25-60 | Все adapters в infrastructure |
+| DataSourcePort | domain/ports/data-source.py | 25-60 | Все adapters в infrastructure |
 | StoragePort | domain/ports/storage.py | 20-80 | BronzeWriter, SilverWriter, GoldWriter |
 | CheckpointPort | domain/ports/checkpoint.py | 15-50 | LocalCheckpoint |
 | LockPort | domain/ports/locking.py | 10-30 | MemoryLock |
@@ -178,7 +178,7 @@
 | MetricsPort | domain/ports/observability.py | 65-100 | PrometheusMetrics |
 | TracingPort | domain/ports/observability.py | 105-140 | TracingService |
 | QuarantinePort | domain/ports/quarantine.py | 15-50 | UnifiedQuarantine |
-| HealthCheckPort | domain/ports/health_check.py | 10-40 | All adapters |
+| HealthCheckPort | domain/ports/health-check.py | 10-40 | All adapters |
 | RateLimiterPort | domain/ports/resilience.py | 15-35 | TokenBucketRateLimiter |
 | CircuitBreakerPort | domain/ports/resilience.py | 40-70 | CircuitBreaker |
 
@@ -188,39 +188,39 @@
 
 | Service | Файл | Строки | Используется в CLI |
 |---------|------|--------|-------------------|
-| PipelineRunnerService | application/services/pipeline_runner_service.py | 30-150 | run command |
-| HealthService | application/services/health_service.py | 25-100 | health command |
-| ExportService | application/services/export_service.py | 20-200 | export command |
-| CheckpointService | application/services/checkpoint_service.py | 15-80 | checkpoint command |
-| QuarantineService | application/services/quarantine_service.py | 20-90 | quarantine command |
-| VacuumService | application/services/vacuum_service.py | 15-70 | vacuum command |
-| LockService | application/services/lock_service.py | 15-60 | lock command |
-| ConfigService | application/services/config_service.py | 25-150 | config command |
-| DataQualityService | application/services/data_quality_service.py | 30-120 | DQ validation |
+| PipelineRunnerService | application/services/pipeline-runner-service.py | 30-150 | run command |
+| HealthService | application/services/health-service.py | 25-100 | health command |
+| ExportService | application/services/export-service.py | 20-200 | export command |
+| CheckpointService | application/services/checkpoint-service.py | 15-80 | checkpoint command |
+| QuarantineService | application/services/quarantine-service.py | 20-90 | quarantine command |
+| VacuumService | application/services/vacuum-service.py | 15-70 | vacuum command |
+| LockService | application/services/lock-service.py | 15-60 | lock command |
+| ConfigService | application/services/config-service.py | 25-150 | config command |
+| DataQualityService | application/services/data-quality-service.py | 30-120 | DQ validation |
 
 ### Infrastructure Adapters
 
 | Adapter | Файл | Строки | Implements |
 |---------|------|--------|------------|
 | ChemblAdapter | infrastructure/adapters/chembl/client.py | 57-300 | DataSourcePort |
-| PubMedAdapter | infrastructure/adapters/pubmed/pubmed_client.py | 50-250 | DataSourcePort |
+| PubMedAdapter | infrastructure/adapters/pubmed/pubmed-client.py | 50-250 | DataSourcePort |
 | CrossRefAdapter | infrastructure/adapters/crossref/client.py | 50-200 | DataSourcePort |
 | OpenAlexAdapter | infrastructure/adapters/openalex/client.py | 47-180 | DataSourcePort |
 | SemanticScholarAdapter | infrastructure/adapters/semanticscholar/adapter.py | 62-200 | DataSourcePort |
 | PubChemAdapter | infrastructure/adapters/pubchem/client.py | 57-180 | DataSourcePort |
 | UniProtAdapter | infrastructure/adapters/uniprot/client.py | 100-280 | DataSourcePort |
-| UniProtIDMappingClient | infrastructure/adapters/uniprot/idmapping_client.py | 66-200 | DataSourcePort |
+| UniProtIDMappingClient | infrastructure/adapters/uniprot/idmapping-client.py | 66-200 | DataSourcePort |
 
 ### Transformers
 
 | Transformer | Файл | Строки | Pipeline |
 |-------------|------|--------|----------|
-| BaseTransformer | application/core/base_transformer.py | 84-200 | Abstract base |
-| BaseChemblTransformer | application/pipelines/chembl/base_chembl_transformer.py | 34-100 | ChEMBL base |
-| BasePublicationTransformer | application/pipelines/common/base_publication_transformer.py | 30-100 | Publication base |
-| ActivityTransformer | application/pipelines/chembl/activity_transformer.py | 146-350 | chembl_activity |
-| MoleculeTransformer | application/pipelines/chembl/molecule_transformer.py | 141-300 | chembl_molecule |
-| PubMedPublicationTransformer | application/pipelines/pubmed/transformer.py | 44-200 | pubmed_publication |
+| BaseTransformer | application/core/base-transformer.py | 84-200 | Abstract base |
+| BaseChemblTransformer | application/pipelines/chembl/base-chembl-transformer.py | 34-100 | ChEMBL base |
+| BasePublicationTransformer | application/pipelines/common/base-publication-transformer.py | 30-100 | Publication base |
+| ActivityTransformer | application/pipelines/chembl/activity-transformer.py | 146-350 | chembl-activity |
+| MoleculeTransformer | application/pipelines/chembl/molecule-transformer.py | 141-300 | chembl-molecule |
+| PubMedPublicationTransformer | application/pipelines/pubmed/transformer.py | 44-200 | pubmed-publication |
 
 ---
 
@@ -249,7 +249,7 @@
 | Сущность | Файл | Статус |
 |----------|------|--------|
 | ~~Aggregator~~ | ~~application/composite/aggregator.py~~ | **DONE** (17 тестов) |
-| ~~dict_transformers~~ | ~~application/core/dict_transformers.py~~ | **DONE** (49 тестов) |
+| ~~dict-transformers~~ | ~~application/core/dict-transformers.py~~ | **DONE** (49 тестов) |
 | orchestration/* | interfaces/orchestration/ | Пустой модуль, нечего тестировать |
 | CLI commands (health, config, run) | interfaces/cli/commands/ | Covered, но не 100% |
 
@@ -332,15 +332,15 @@
 | Функция | Файл | Слой |
 |---------|------|------|
 | merger.py (4 функции) | application/composite/ | application |
-| silver_analyzer.py (3 функции) | application/services/dq/ | application |
-| _checks_integrity.py (2 функции) | application/services/dq/ | application |
-| _checks_statistical.py (2 функции) | application/services/dq/ | application |
+| silver-analyzer.py (3 функции) | application/services/dq/ | application |
+| -checks-integrity.py (2 функции) | application/services/dq/ | application |
+| -checks-statistical.py (2 функции) | application/services/dq/ | application |
 | chembl/client.py (4 функции) | infrastructure/adapters/chembl/ | infrastructure |
-| uniprot/idmapping_client.py (2 функции) | infrastructure/adapters/uniprot/ | infrastructure |
+| uniprot/idmapping-client.py (2 функции) | infrastructure/adapters/uniprot/ | infrastructure |
 | semanticscholar/adapter.py (2 функции) | infrastructure/adapters/ | infrastructure |
-| storage_factory.py (1 функция) | composition/factories/ | composition |
-| metadata_coordinator.py (2 функции) | composition/services/ | composition |
-| gold_writer.py (1 функция) | infrastructure/storage/ | infrastructure |
+| storage-factory.py (1 функция) | composition/factories/ | composition |
+| metadata-coordinator.py (2 функции) | composition/services/ | composition |
+| gold-writer.py (1 функция) | infrastructure/storage/ | infrastructure |
 
 ### 6.4 Maintainability Index
 
@@ -363,7 +363,7 @@
 
 | Элемент | Файл | Severity | Статус |
 |---------|------|----------|--------|
-| `@register_provider` decorator | composition/providers/decorators.py | LOW | 0 usages в production (только docstring examples) |
+| `@register-provider` decorator | composition/providers/decorators.py | LOW | 0 usages в production (только docstring examples) |
 | `composition/types.py` re-export модуль | composition/types.py | LOW | 0 потребителей в production, 14 в тесте самого модуля |
 
 ### Deprecated Aliases — Миграция завершена
@@ -435,14 +435,14 @@
 
 ### Высокий приоритет (P1)
 1. ~~Добавить unit тесты для `application/composite/aggregator.py`~~ — **DONE** (17 тестов)
-2. ~~Добавить unit тесты для `application/core/dict_transformers.py`~~ — **DONE** (49 тестов)
+2. ~~Добавить unit тесты для `application/core/dict-transformers.py`~~ — **DONE** (49 тестов)
 3. **NEW:** Рефакторинг `MergeService.merge` (grade D, CC 21-30) — единственная функция grade D в кодовой базе. Файл `merger.py` также имеет MI = 5.91 (grade C), единственный файл ниже порога.
 
 ### Средний приоритет (P2)
-1. Удалить или задокументировать `register_provider` decorator (0 usages в production)
+1. Удалить или задокументировать `register-provider` decorator (0 usages в production)
 2. ~~Добавить `@deprecated` warning для legacy bootstrap functions~~ — **DONE** (11 функций в 6 модулях)
 3. ~~Миграция callsites deprecated functions~~ — **DONE** (0 callsites за пределами bootstrap)
-4. **NEW:** Снизить CC функций grade C в application/services/dq/ (5 функций: silver_analyzer, _checks_integrity, _checks_statistical)
+4. **NEW:** Снизить CC функций grade C в application/services/dq/ (5 функций: silver-analyzer, -checks-integrity, -checks-statistical)
 
 ### Низкий приоритет (P3)
 1. Обновить статистику в RULES.md (520 файлов, 895 классов, 23 gold schemas, 20 silver schemas)
@@ -457,31 +457,31 @@
 
 | Сущность | Тип | Файл:Строки | Тесты | Документация |
 |----------|-----|-------------|-------|--------------|
-| PipelineConfig | dataclass | domain/config/__init__.py:45-100 | tests/unit/domain/test_config.py | docs/03-pipelines/ |
-| RuntimeConfig | dataclass | domain/config/__init__.py:103-150 | tests/unit/domain/test_config.py | docs/03-pipelines/ |
-| DQConfig | dataclass | domain/config/dq.py:20-80 | tests/unit/domain/test_dq_config.py | docs/04-data-quality/ |
-| Molecule | entity | domain/entities/__init__.py | tests/unit/domain/entities/ | docs/05-entities/ |
-| Activity | entity | domain/entities/__init__.py | tests/unit/domain/entities/ | docs/05-entities/ |
-| Target | entity | domain/entities/__init__.py | tests/unit/domain/entities/ | docs/05-entities/ |
-| DataSourcePort | Protocol | domain/ports/data_source.py:25-60 | tests/unit/domain/ports/ | docs/02-architecture/ |
+| PipelineConfig | dataclass | domain/config/--init--.py:45-100 | tests/unit/domain/test-config.py | docs/03-pipelines/ |
+| RuntimeConfig | dataclass | domain/config/--init--.py:103-150 | tests/unit/domain/test-config.py | docs/03-pipelines/ |
+| DQConfig | dataclass | domain/config/dq.py:20-80 | tests/unit/domain/test-dq-config.py | docs/04-data-quality/ |
+| Molecule | entity | domain/entities/--init--.py | tests/unit/domain/entities/ | docs/05-entities/ |
+| Activity | entity | domain/entities/--init--.py | tests/unit/domain/entities/ | docs/05-entities/ |
+| Target | entity | domain/entities/--init--.py | tests/unit/domain/entities/ | docs/05-entities/ |
+| DataSourcePort | Protocol | domain/ports/data-source.py:25-60 | tests/unit/domain/ports/ | docs/02-architecture/ |
 | StoragePort | Protocol | domain/ports/storage.py:20-80 | tests/unit/domain/ports/ | docs/02-architecture/ |
 | CheckpointPort | Protocol | domain/ports/checkpoint.py:15-50 | tests/unit/domain/ports/ | docs/02-architecture/ |
-| HealthStatus | Enum | domain/types.py | tests/unit/domain/test_types.py | docs/02-architecture/ |
-| RunType | Enum | domain/types.py | tests/unit/domain/test_types.py | docs/03-pipelines/ |
-| ChemblId | ValueObject | domain/value_objects/identifiers.py | tests/unit/domain/value_objects/ | docs/05-entities/ |
-| DOI | ValueObject | domain/value_objects/identifiers.py | tests/unit/domain/value_objects/ | docs/05-entities/ |
-| PubMedId | ValueObject | domain/value_objects/identifiers.py | tests/unit/domain/value_objects/ | docs/05-entities/ |
+| HealthStatus | Enum | domain/types.py | tests/unit/domain/test-types.py | docs/02-architecture/ |
+| RunType | Enum | domain/types.py | tests/unit/domain/test-types.py | docs/03-pipelines/ |
+| ChemblId | ValueObject | domain/value-objects/identifiers.py | tests/unit/domain/value-objects/ | docs/05-entities/ |
+| DOI | ValueObject | domain/value-objects/identifiers.py | tests/unit/domain/value-objects/ | docs/05-entities/ |
+| PubMedId | ValueObject | domain/value-objects/identifiers.py | tests/unit/domain/value-objects/ | docs/05-entities/ |
 
 ### Application Layer Services
 
 | Сущность | Тип | Файл:Строки | Тесты | Пайплайны |
 |----------|-----|-------------|-------|-----------|
 | Runner | class | application/core/runner.py:30-200 | tests/unit/application/core/ | Все |
-| BatchTransformer | class | application/core/batch_transformer.py:61-200 | tests/unit/application/core/ | Все |
-| CheckpointManager | class | application/core/checkpoint_manager.py:25-150 | tests/unit/application/core/ | Все |
-| PipelineRunnerService | class | application/services/pipeline_runner_service.py:30-150 | tests/unit/application/services/ | CLI |
-| HealthService | class | application/services/health_service.py:25-100 | tests/unit/application/services/ | CLI |
-| DataQualityService | class | application/services/data_quality_service.py:30-120 | tests/unit/application/services/ | Все |
+| BatchTransformer | class | application/core/batch-transformer.py:61-200 | tests/unit/application/core/ | Все |
+| CheckpointManager | class | application/core/checkpoint-manager.py:25-150 | tests/unit/application/core/ | Все |
+| PipelineRunnerService | class | application/services/pipeline-runner-service.py:30-150 | tests/unit/application/services/ | CLI |
+| HealthService | class | application/services/health-service.py:25-100 | tests/unit/application/services/ | CLI |
+| DataQualityService | class | application/services/data-quality-service.py:30-120 | tests/unit/application/services/ | Все |
 | CompositeRunner | class | application/composite/runner.py:40-300 | tests/unit/application/composite/ | Composite |
 | Merger | class | application/composite/merger.py:30-200 | tests/unit/application/composite/ | Composite |
 
@@ -489,24 +489,24 @@
 
 | Сущность | Тип | Файл:Строки | Тесты | Пайплайны |
 |----------|-----|-------------|-------|-----------|
-| ChemblAdapter | class | infrastructure/adapters/chembl/client.py:57-300 | tests/unit/infrastructure/adapters/chembl/ | chembl_* |
-| PubMedAdapter | class | infrastructure/adapters/pubmed/pubmed_client.py:50-250 | tests/unit/infrastructure/adapters/pubmed/ | pubmed_publication |
-| CrossRefAdapter | class | infrastructure/adapters/crossref/client.py:50-200 | tests/unit/infrastructure/adapters/crossref/ | crossref_publication |
-| BronzeWriter | class | infrastructure/storage/bronze_writer.py:30-200 | tests/unit/infrastructure/storage/ | Все |
-| SilverWriter | class | infrastructure/storage/silver_writer.py:30-300 | tests/unit/infrastructure/storage/ | Все |
-| GoldWriter | class | infrastructure/storage/gold_writer.py:30-250 | tests/unit/infrastructure/storage/ | Все |
-| UnifiedLogger | class | infrastructure/observability/unified_logger.py:40-200 | tests/unit/infrastructure/observability/ | Все |
-| PrometheusMetrics | class | infrastructure/observability/prometheus_metrics.py:30-300 | tests/unit/infrastructure/observability/ | CLI |
+| ChemblAdapter | class | infrastructure/adapters/chembl/client.py:57-300 | tests/unit/infrastructure/adapters/chembl/ | chembl-* |
+| PubMedAdapter | class | infrastructure/adapters/pubmed/pubmed-client.py:50-250 | tests/unit/infrastructure/adapters/pubmed/ | pubmed-publication |
+| CrossRefAdapter | class | infrastructure/adapters/crossref/client.py:50-200 | tests/unit/infrastructure/adapters/crossref/ | crossref-publication |
+| BronzeWriter | class | infrastructure/storage/bronze-writer.py:30-200 | tests/unit/infrastructure/storage/ | Все |
+| SilverWriter | class | infrastructure/storage/silver-writer.py:30-300 | tests/unit/infrastructure/storage/ | Все |
+| GoldWriter | class | infrastructure/storage/gold-writer.py:30-250 | tests/unit/infrastructure/storage/ | Все |
+| UnifiedLogger | class | infrastructure/observability/unified-logger.py:40-200 | tests/unit/infrastructure/observability/ | Все |
+| PrometheusMetrics | class | infrastructure/observability/prometheus-metrics.py:30-300 | tests/unit/infrastructure/observability/ | CLI |
 
 ### Composition Factories
 
 | Сущность | Тип | Файл:Строки | Тесты | Используется в |
 |----------|-----|-------------|-------|----------------|
-| GenericPipelineFactory | class | composition/factories/pipeline_factory.py:100-295 | tests/unit/composition/factories/ | Все пайплайны |
-| StorageFactory | class | composition/factories/storage_factory.py:48-341 | tests/unit/composition/factories/ | Bootstrap |
-| DataSourceRegistry | class | composition/factories/data_source_factory.py:100-233 | tests/unit/composition/factories/ | Bootstrap |
+| GenericPipelineFactory | class | composition/factories/pipeline-factory.py:100-295 | tests/unit/composition/factories/ | Все пайплайны |
+| StorageFactory | class | composition/factories/storage-factory.py:48-341 | tests/unit/composition/factories/ | Bootstrap |
+| DataSourceRegistry | class | composition/factories/data-source-factory.py:100-233 | tests/unit/composition/factories/ | Bootstrap |
 | PipelineRegistry | class | composition/registry.py:87-254 | tests/unit/composition/ | CLI |
-| MetadataCoordinator | class | composition/services/metadata_coordinator.py:73-507 | tests/unit/application/services/ | Storage |
+| MetadataCoordinator | class | composition/services/metadata-coordinator.py:73-507 | tests/unit/application/services/ | Storage |
 
 ---
 
@@ -517,12 +517,12 @@
 
 ---
 
-### ~~PROMPT-1 (P2-1): Документировать `register_provider` decorator~~ — актуально
+### ~~PROMPT-1 (P2-1): Документировать `register-provider` decorator~~ — актуально
 
 **Контекст:**
 - Файл: `src/bioetl/composition/providers/decorators.py`
-- `@register_provider` экспортируется из `composition.providers`, документирован
-  с примерами, протестирован в `tests/unit/composition/providers/test_provider_registry.py`
+- `@register-provider` экспортируется из `composition.providers`, документирован
+  с примерами, протестирован в `tests/unit/composition/providers/test-provider-registry.py`
 - **Ни один адаптер** в production-коде не использует его как decorator.
   Все 7 провайдеров регистрируются императивно в `composition/providers/registration.py`.
 - **Подтверждено аудитом 2026-02-15:** 0 actual usages, 3 references — все docstring examples.
@@ -577,10 +577,10 @@
 
 Подход:
 1. Извлечь логические блоки в private methods:
-   - Validation logic → _validate_merge_inputs()
-   - Column alignment → _align_columns()
-   - Conflict resolution → _resolve_conflicts()
-   - Final assembly → _assemble_result()
+   - Validation logic → -validate-merge-inputs()
+   - Column alignment → -align-columns()
+   - Conflict resolution → -resolve-conflicts()
+   - Final assembly → -assemble-result()
 
 2. Каждый новый метод должен:
    - Иметь CC ≤ 10 (grade B)

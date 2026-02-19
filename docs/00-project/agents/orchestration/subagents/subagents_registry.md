@@ -17,7 +17,7 @@
 
 ## pyConfigBot
 - **Роль**: Управление конфигурациями.
-- **Действие**: Редактирует YAML в `configs/`. Запускает `scripts/validate_pipeline_configs.py`.
+- **Действие**: Редактирует YAML в `configs/`. Запускает `scripts/validate-pipeline-configs.py`.
 - **Артефакт**: `04a-config-log.md`.
 
 ## pyDebugBot

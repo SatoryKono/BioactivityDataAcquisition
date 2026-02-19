@@ -6,7 +6,7 @@
 
 ## Context
 
-Метод `_clear_exports()` в `PipelineRunner` вызывает асинхронные методы `StoragePort.clear_silver()` и `StoragePort.clear_gold()`. Изначально метод был определён как синхронный (`def`), что приводило к синтаксической ошибке при использовании `await`.
+Метод `-clear-exports()` в `PipelineRunner` вызывает асинхронные методы `StoragePort.clear-silver()` и `StoragePort.clear-gold()`. Изначально метод был определён как синхронный (`def`), что приводило к синтаксической ошибке при использовании `await`.
 
 Также требовалось формализовать политику очистки данных в зависимости от типа запуска (RunType).
 
@@ -14,10 +14,10 @@
 
 ### 1. Асинхронная сигнатура
 
-`_clear_exports()` объявляется как `async def`:
+`-clear-exports()` объявляется как `async def`:
 
 ```python
-async def _clear_exports(self) -> None:
+async def -clear-exports(self) -> None:
     """Clear export files and Delta tables at the start of a pipeline run."""
     ...
 ```
@@ -25,7 +25,7 @@ async def _clear_exports(self) -> None:
 Вызов из `run()` использует `await`:
 
 ```python
-await self._clear_exports()
+await self.-clear-exports()
 ```
 
 ### 2. Политика очистки по RunType
@@ -43,32 +43,32 @@ await self._clear_exports()
 ```python
 from bioetl.domain.types import RunType
 
-should_clear = self._runtime.run_type in (RunType.REBUILD, RunType.BACKFILL)
-if not should_clear:
-    self._logger.debug("Skipping clear for incremental run")
+should-clear = self.-runtime.run-type in (RunType.REBUILD, RunType.BACKFILL)
+if not should-clear:
+    self.-logger.debug("Skipping clear for incremental run")
     return
 ```
 
 ### 3. Порядок операций в run()
 
 ```
-1. services.__aenter__()           # Инициализация сервисов
-2. lock_manager.__aenter__()       # Захват блокировки
-3. await _clear_exports()          # Очистка (только REBUILD/BACKFILL)
-4. await checkpoint_manager.load() # Загрузка чекпоинта
+1. services.--aenter--()           # Инициализация сервисов
+2. lock-manager.--aenter--()       # Захват блокировки
+3. await -clear-exports()          # Очистка (только REBUILD/BACKFILL)
+4. await checkpoint-manager.load() # Загрузка чекпоинта
 5. await executor.execute()        # Выполнение пайплайна
-6. await checkpoint_manager.delete()# Удаление чекпоинта
-7. lock_manager.__aexit__()        # Освобождение блокировки
-8. services.__aexit__()            # Закрытие сервисов
+6. await checkpoint-manager.delete()# Удаление чекпоинта
+7. lock-manager.--aexit--()        # Освобождение блокировки
+8. services.--aexit--()            # Закрытие сервисов
 ```
 
 ### 4. Dry-run поддержка
 
-Параметр `dry_run` передаётся в методы очистки:
+Параметр `dry-run` передаётся в методы очистки:
 
 ```python
-silver_cleared = await storage.clear_silver(silver_table, dry_run=self._runtime.dry_run)
-gold_cleared = await storage.clear_gold(gold_table, dry_run=self._runtime.dry_run)
+silver-cleared = await storage.clear-silver(silver-table, dry-run=self.-runtime.dry-run)
+gold-cleared = await storage.clear-gold(gold-table, dry-run=self.-runtime.dry-run)
 ```
 
 ## Consequences
@@ -82,8 +82,8 @@ gold_cleared = await storage.clear_gold(gold_table, dry_run=self._runtime.dry_ru
 
 ### Negative
 
-- **Breaking change** для тестов, вызывающих `_clear_exports()` напрямую
-- Требуется `AsyncMock` для `storage.clear_silver/clear_gold` в тестах
+- **Breaking change** для тестов, вызывающих `-clear-exports()` напрямую
+- Требуется `AsyncMock` для `storage.clear-silver/clear-gold` в тестах
 
 ### Migration
 
@@ -91,15 +91,15 @@ gold_cleared = await storage.clear_gold(gold_table, dry_run=self._runtime.dry_ru
 
 ```python
 # До:
-def test_clear_exports(...):
-    runner._clear_exports()
-    services.storage.clear_silver = MagicMock(return_value=0)
+def test-clear-exports(...):
+    runner.-clear-exports()
+    services.storage.clear-silver = MagicMock(return-value=0)
 
 # После:
 @pytest.mark.asyncio
-async def test_clear_exports(...):
-    await runner._clear_exports()
-    services.storage.clear_silver = AsyncMock(return_value=0)
+async def test-clear-exports(...):
+    await runner.-clear-exports()
+    services.storage.clear-silver = AsyncMock(return-value=0)
 ```
 
 ## Related ADRs
@@ -110,4 +110,4 @@ async def test_clear_exports(...):
 ## References
 
 - CLAUDE.md §3: Medallion Architecture
-- tests/integration/test_runner_lifecycle.py — Тесты инвариантов
+- tests/integration/test-runner-lifecycle.py — Тесты инвариантов

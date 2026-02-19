@@ -22,28 +22,28 @@
 
 | # | Проблема | Статус | PR / Коммит |
 |---|----------|--------|-------------|
-| 1 | DTO `*_json` суффикс ≠ Entity/Gold | ✅ DONE | Уже в main (до аудита) |
-| 2 | `action_type_parent` ≠ `action_type_parent_type` | ✅ DONE | Уже в main (до аудита) |
-| 3 | `taxonomy_id` перегружен (Activity/Assay) | ✅ DONE | Уже в main (до аудита) |
+| 1 | DTO `*-json` суффикс ≠ Entity/Gold | ✅ DONE | Уже в main (до аудита) |
+| 2 | `action-type-parent` ≠ `action-type-parent-type` | ✅ DONE | Уже в main (до аудита) |
+| 3 | `taxonomy-id` перегружен (Activity/Assay) | ✅ DONE | Уже в main (до аудита) |
 | 4 | Taxonomy тип `string` ≠ `float64` | ✅ DONE | Уже в main (до аудита) |
 | 5 | DTO taxonomy поля с API-именами | ✅ DONE | Уже в main (до аудита) |
 | 6 | Filtering config рефакторинг | ✅ DONE | PR #2122 |
 | 7 | DQ-конфиг molecule: entity + pipeline inline | ✅ DONE | PR #2135 (`5c83044`) |
-| 8 | Assay filter `column_name` | ✅ DONE | Уже в main (`360e357`) |
+| 8 | Assay filter `column-name` | ✅ DONE | Уже в main (`360e357`) |
 | 9 | Molecule property alias дублирование | ✅ DONE | PR #2138 (`0c2b69b`) |
 | 10 | DTO-only поля Target | ✅ DONE | PR #2136 (`1ff8a2e`) |
-| 11 | `_normalize_source_config` complexity | ✅ DONE | PR #2137 (`14eea38`) |
+| 11 | `-normalize-source-config` complexity | ✅ DONE | PR #2137 (`14eea38`) |
 | 12 | Deprecated bootstrap alias миграция | ✅ DONE | PR #2134 (`401ccbe`) |
 
 ### 1.2 Что НЕ менялось (by design)
 
 | Тема | Обоснование |
 |------|-------------|
-| `assay_pref_name` → `pref_name` | Entity/Gold уже синхронны, не критично |
+| `assay-pref-name` → `pref-name` | Entity/Gold уже синхронны, не критично |
 | `organism` bare vs prefixed | Корректно: bare в своём пайплайне, prefix при денормализации |
-| `parent_molecule_id` vs `hierarchy_parent_chembl_id` | Разные уровни абстракции (FK vs hierarchy) |
-| Target/TargetComponent `taxonomy_id` (bare) | Нет семантической перегрузки — в Target контексте однозначно |
-| `variant_sequence_json` / `features_json` | Forensic-поля, намеренно хранят исходный JSON |
+| `parent-molecule-id` vs `hierarchy-parent-chembl-id` | Разные уровни абстракции (FK vs hierarchy) |
+| Target/TargetComponent `taxonomy-id` (bare) | Нет семантической перегрузки — в Target контексте однозначно |
+| `variant-sequence-json` / `features-json` | Forensic-поля, намеренно хранят исходный JSON |
 
 ---
 
@@ -53,17 +53,17 @@
 
 | ID (v1) | Задача | Коммит |
 |---------|--------|--------|
-| RF-01..04 | Убрать `_json` суффикс в DTO Activity/Assay/Target/Molecule | Уже в main |
+| RF-01..04 | Убрать `-json` суффикс в DTO Activity/Assay/Target/Molecule | Уже в main |
 | RF-05 | DQ entity-level конфиг molecule → Silver-имена | Уже в main |
-| RF-06 | Assay filter `column_name` → unified name | `360e357` |
-| RF-07 | Silver Target: `component_id` → `primary_component_id` | Уже в main |
+| RF-06 | Assay filter `column-name` → unified name | `360e357` |
+| RF-07 | Silver Target: `component-id` → `primary-component-id` | Уже в main |
 
 ### Фаза 2: Taxonomy семантическая унификация (v1.0)
 
 | ID (v1) | Задача | Коммит |
 |---------|--------|--------|
-| RF-08 | Activity: `taxonomy_id` → `target_taxonomy_id` + float64 | Уже в main |
-| RF-09 | Assay: `taxonomy_id` → `assay_taxonomy_id` | Уже в main |
+| RF-08 | Activity: `taxonomy-id` → `target-taxonomy-id` + float64 | Уже в main |
+| RF-09 | Assay: `taxonomy-id` → `assay-taxonomy-id` | Уже в main |
 | RF-10 | Документация taxonomy переименований | Уже в main |
 
 ### Фаза 1 (v2.0): Config-уровень
@@ -71,25 +71,25 @@
 | ID (v2) | Задача | PR | Коммит |
 |---------|--------|-----|--------|
 | RF-01 | Pipeline inline DQ molecule → Silver-имена | #2135 | `5c83044` |
-| RF-02 | Assay filter `column_name` | — | `360e357` |
+| RF-02 | Assay filter `column-name` | — | `360e357` |
 
 ### Фаза 2 (v2.0): Molecule property alias
 
 | ID (v2) | Задача | PR | Коммит |
 |---------|--------|-----|--------|
-| RF-03 | Molecule Gold: `property_*` → canonical alias (Вариант A) | #2138 | `0c2b69b` |
+| RF-03 | Molecule Gold: `property-*` → canonical alias (Вариант A) | #2138 | `0c2b69b` |
 
 ### Фаза 3 (v2.0): DTO-only поля Target
 
 | ID (v2) | Задача | PR | Коммит |
 |---------|--------|-----|--------|
-| RF-04 | Удалены `dap_id`, `target_constraints`, `component_tax_ids` из config/docs | #2136 | `1ff8a2e` |
+| RF-04 | Удалены `dap-id`, `target-constraints`, `component-tax-ids` из config/docs | #2136 | `1ff8a2e` |
 
 ### Фаза 4 (v2.0): Техдолг
 
 | ID (v2) | Задача | PR | Коммит |
 |---------|--------|-----|--------|
-| RF-05 | Декомпозиция `_normalize_source_config` → 4 функции (40 LOC) | #2137 | `14eea38` |
+| RF-05 | Декомпозиция `-normalize-source-config` → 4 функции (40 LOC) | #2137 | `14eea38` |
 
 ### Дополнительно
 
@@ -97,7 +97,7 @@
 |--------|-----|--------|
 | SilverFilterConfig nominal type separation | #2122 | — |
 | BaseConfigLoader abstraction | #2122 | — |
-| `dq_overrides` → `dq_overrides` rename | #2122 | — |
+| `dq-overrides` → `dq-overrides` rename | #2122 | — |
 | Directory fallback (filters/filter, quality/dq) | #2122 | — |
 | Deprecated bootstrap alias → canonical names | #2134 | `401ccbe` |
 | Monitor deprecated aliases (runtime warnings) | #2134 | — |
@@ -129,23 +129,23 @@ pytest --cov=src/bioetl --cov-fail-under=85
 ### Остаточные grep-проверки (все должны давать 0 совпадений)
 
 ```bash
-# _json в DTO (кроме forensic-полей)
-grep -rn "_json" src/bioetl/domain/entities/chembl.py | \
-  grep -v "variant_sequence_json\|features_json\|#\|serialize_to_json"
+# -json в DTO (кроме forensic-полей)
+grep -rn "-json" src/bioetl/domain/entities/chembl.py | \
+  grep -v "variant-sequence-json\|features-json\|#\|serialize-to-json"
 
-# bare taxonomy_id в Activity/Assay
-grep -rn '"taxonomy_id"' src/bioetl/domain/entities/bioactivity.py \
+# bare taxonomy-id в Activity/Assay
+grep -rn '"taxonomy-id"' src/bioetl/domain/entities/bioactivity.py \
   src/bioetl/domain/contracts/gold/chembl.py
 
-# action_type_parent без _type
-grep -rn "action_type_parent[^_]" src/ --include="*.py"
+# action-type-parent без -type
+grep -rn "action-type-parent[^-]" src/ --include="*.py"
 
-# property_* в Molecule Gold (должно быть 0 — только canonical aliases)
-grep "property_" src/bioetl/domain/contracts/gold/chembl.py | grep -i molecule
+# property-* в Molecule Gold (должно быть 0 — только canonical aliases)
+grep "property-" src/bioetl/domain/contracts/gold/chembl.py | grep -i molecule
 
 # Deprecated bootstrap aliases (должны быть только в compatibility shim)
-grep -rn "from bioetl.*_bootstrap\|from bioetl.*bootstrap" src/bioetl/ --include="*.py" | \
-  grep -v "composition/bootstrap\|__init__"
+grep -rn "from bioetl.*-bootstrap\|from bioetl.*bootstrap" src/bioetl/ --include="*.py" | \
+  grep -v "composition/bootstrap\|--init--"
 ```
 
 ---
@@ -154,8 +154,8 @@ grep -rn "from bioetl.*_bootstrap\|from bioetl.*bootstrap" src/bioetl/ --include
 
 | Решение | Выбор | Обоснование |
 |---------|-------|-------------|
-| Molecule Gold alias strategy | **Вариант A**: только canonical | Чистый API для downstream, property_* остаются в Silver |
-| Target DTO-only fields | Удалены из config/docs | `dap_id`, `target_constraints`, `component_tax_ids` не используются downstream |
-| `_normalize_source_config` | Декомпозиция на 4 функции | 147 LOC → 40 LOC, CC>15 → CC<10 |
+| Molecule Gold alias strategy | **Вариант A**: только canonical | Чистый API для downstream, property-* остаются в Silver |
+| Target DTO-only fields | Удалены из config/docs | `dap-id`, `target-constraints`, `component-tax-ids` не используются downstream |
+| `-normalize-source-config` | Декомпозиция на 4 функции | 147 LOC → 40 LOC, CC>15 → CC<10 |
 | Filter config types | SilverFilterConfig nominal type | Structurally identical to Gold but type-distinct |
-| DQ config naming | `dq_overrides` (backward-compat alias `dq_overrides`) | AliasChoices обеспечивает обратную совместимость |
+| DQ config naming | `dq-overrides` (backward-compat alias `dq-overrides`) | AliasChoices обеспечивает обратную совместимость |

@@ -76,7 +76,7 @@ from bioetl.domain.ports import StoragePort, LockPort
 from bioetl.domain.ports.storage import StoragePort  # Запрещено!
 ```
 
-Это правило проверяется архитектурным тестом `test_ports_imported_only_from_facade`.
+Это правило проверяется архитектурным тестом `test-ports-imported-only-from-facade`.
 
 ### 2.2. `aggregates/` — DDD Aggregates
 
@@ -89,10 +89,10 @@ from bioetl.domain.ports.storage import StoragePort  # Запрещено!
 
 ```text
 src/bioetl/domain/aggregates/
-├── __init__.py
+├── --init--.py
 ├── batch.py             # Batch Aggregate (536 LOC)
-├── pipeline_run.py      # PipelineRun Aggregate (574 LOC)
-├── quarantine_entry.py  # QuarantineEntry Aggregate (517 LOC)
+├── pipeline-run.py      # PipelineRun Aggregate (574 LOC)
+├── quarantine-entry.py  # QuarantineEntry Aggregate (517 LOC)
 └── events.py            # Domain Events (197 LOC)
 ```
 
@@ -102,22 +102,22 @@ src/bioetl/domain/aggregates/
 | ----------------- | ----------------------------------------------- | ---------------------------------------------------- |
 | `Batch`           | Records sealed before write; sequential indices | OPEN → SEALED → WRITING → COMMITTED/FAILED           |
 | `PipelineRun`     | COMPLETED only if all stages SUCCESS            | NEW → RUNNING → COMPLETED/FAILED/SHUTDOWN            |
-| `QuarantineEntry` | Controlled resolution lifecycle                 | NEW → UNDER_REVIEW → IGNORED / REPROCESSED / EXPIRED |
+| `QuarantineEntry` | Controlled resolution lifecycle                 | NEW → UNDER-REVIEW → IGNORED / REPROCESSED / EXPIRED |
 
-`QuarantineStatus(StrEnum)` (актуально по `quarantine_entry.py`):
+`QuarantineStatus(StrEnum)` (актуально по `quarantine-entry.py`):
 
 - `NEW`
-- `UNDER_REVIEW`
+- `UNDER-REVIEW`
 - `IGNORED`
 - `REPROCESSED`
 - `EXPIRED`
 
 Допустимые переходы:
 
-- `NEW` → `UNDER_REVIEW`
-- `NEW` или `UNDER_REVIEW` → `IGNORED`
-- `NEW` или `UNDER_REVIEW` → `REPROCESSED`
-- `NEW` или `UNDER_REVIEW` → `EXPIRED`
+- `NEW` → `UNDER-REVIEW`
+- `NEW` или `UNDER-REVIEW` → `IGNORED`
+- `NEW` или `UNDER-REVIEW` → `REPROCESSED`
+- `NEW` или `UNDER-REVIEW` → `EXPIRED`
 
 **Пример использования:**
 
@@ -125,18 +125,18 @@ src/bioetl/domain/aggregates/
 from bioetl.domain.aggregates import Batch
 from bioetl.domain.types import RunID
 
-batch = Batch.create(run_id=RunID(uuid4()))
-batch.add_record({"id": "1", "value": 100})
+batch = Batch.create(run-id=RunID(uuid4()))
+batch.add-record({"id": "1", "value": 100})
 batch.seal()
-batch.mark_writing()
-batch.mark_committed("silver")
+batch.mark-writing()
+batch.mark-committed("silver")
 
-events = batch.collect_events()  # [BatchCreated, BatchSealed, BatchWritten]
+events = batch.collect-events()  # [BatchCreated, BatchSealed, BatchWritten]
 ```
 
-### 2.3. `value_objects/` — Value Objects
+### 2.3. `value-objects/` — Value Objects
 
-**Расположение:** `src/bioetl/domain/value_objects/`
+**Расположение:** `src/bioetl/domain/value-objects/`
 
 Неизменяемые доменные примитивы с типобезопасностью (18 файлов).
 
@@ -179,9 +179,9 @@ events = batch.collect_events()  # [BatchCreated, BatchSealed, BatchWritten]
 - `DQConfig` — пороги Data Quality
 - `TableConfig` — настройки таблиц
 
-### 2.6. `error_classifier.py` — Классификатор Ошибок
+### 2.6. `error-classifier.py` — Классификатор Ошибок
 
-**Источник:** `src/bioetl/domain/error_classifier.py`
+**Источник:** `src/bioetl/domain/error-classifier.py`
 
 Реализует логику классификации ошибок в соответствии с правилами из `RULES.md` (раздел 3.1.1):
 
@@ -213,7 +213,7 @@ Domain содержит 11 дополнительных поддиректори
 - **Валидация данных:** Логика валидации бизнес-сущностей (например, проверка SMILES-строк) может находиться здесь, если она не требует внешних зависимостей.
 - **Иммутабельность:** Предпочтение отдаётся иммутабельным структурам данных (например, `NamedTuple`, `dataclasses(frozen=True)`).
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 4. Связанные Материалы
 
@@ -227,11 +227,11 @@ ______________________________________________________________________
 
 | Диаграмма            | Файл                                                                                            | Описание                                          |
 | -------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| Domain Layer Classes | [04-domain-layer-class-diagram.mermaid](diagrams/mermaid/04-domain-layer-class-diagram.mermaid) | Классы портов, сущностей, конфигурации            |
-| Domain DDD           | [08-domain-ddd.mermaid](diagrams/mermaid/08-domain-ddd.mermaid)                                 | DDD-структура домена                              |
-| Domain Models        | [13-domain-models-relationship.mermaid](diagrams/mermaid/13-domain-models-relationship.mermaid) | Связи доменных моделей                            |
-| DDD Aggregates       | [diagrams/mermaid/09_ddd_aggregates.mmd](diagrams/mermaid/09_ddd_aggregates.mmd)                | DDD агрегаты: Batch, PipelineRun, QuarantineEntry |
-| Ports Architecture   | [diagrams/mermaid/07_ports_architecture.mmd](diagrams/mermaid/07_ports_architecture.mmd)        | Архитектура 25 портов                             |
+| Domain Layer Classes | [04-domain-layer-class-diagram.mermaid](diagrams/04-domain-layer-class-diagram.mermaid) | Классы портов, сущностей, конфигурации            |
+| Domain DDD           | [08-domain-ddd.mermaid](diagrams/08-domain-ddd.mermaid)                                 | DDD-структура домена                              |
+| Domain Models        | [13-domain-models-relationship.mermaid](diagrams/13-domain-models-relationship.mermaid) | Связи доменных моделей                            |
+| DDD Aggregates       | [diagrams/09-ddd-aggregates.mermaid](diagrams/09-ddd-aggregates.mermaid)                | DDD агрегаты: Batch, PipelineRun, QuarantineEntry |
+| Ports Architecture   | [diagrams/07-ports-architecture.mermaid](diagrams/07-ports-architecture.mermaid)        | Архитектура 25 портов                             |
 
 ### Связанные ADR
 
@@ -244,4 +244,4 @@ ______________________________________________________________________
 
 - [RULES.md §1 "Архитектура и Слои"](../00-project/RULES.md) — матрица импортов, правила слоёв
 - [API Reference: Domain](../04-reference/api/domain.md) — API документация слоя
-- [Glossary](../glossary.md) — терминология Ubiquitous Language
+- [Glossary](../00-project/glossary.md) — терминология Ubiquitous Language

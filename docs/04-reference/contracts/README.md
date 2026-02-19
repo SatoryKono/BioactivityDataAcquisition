@@ -10,5 +10,5 @@ JSON-экспорты в `docs/04-reference/contracts/gold/*.json` — **source 
 Обновление выполняется скриптом:
 
 ```bash
-python src/tools/scripts/generate_contracts.py
+python src/tools/scripts/generate-contracts.py
 ```

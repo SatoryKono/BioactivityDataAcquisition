@@ -21,15 +21,15 @@ This guide covers the **Silver Schema Contract Tests** that protect against acci
 ## Test Suite Location
 
 ```
-tests/contract/silver_schemas/
+tests/contract/silver-schemas/
 ├── conftest.py                    # Schema registry and introspection
-├── test_schema_stability.py       # Snapshot tests (~60 tests)
-├── test_field_types.py            # Type safety tests (~50 tests)
-├── test_validations.py            # Validation rules tests (~40 tests)
-├── test_naming_conventions.py     # Naming consistency tests (~35 tests)
+├── test-schema-stability.py       # Snapshot tests (~60 tests)
+├── test-field-types.py            # Type safety tests (~50 tests)
+├── test-validations.py            # Validation rules tests (~40 tests)
+├── test-naming-conventions.py     # Naming consistency tests (~35 tests)
 ├── snapshots/                     # JSON snapshots (auto-generated)
-│   ├── chembl_activity_schema.json
-│   ├── chembl_molecule_schema.json
+│   ├── chembl-activity-schema.json
+│   ├── chembl-molecule-schema.json
 │   └── ...
 └── README.md                      # Detailed test documentation
 ```
@@ -44,29 +44,29 @@ tests/contract/silver_schemas/
 
 ```bash
 # Run all Silver schema contract tests
-pytest tests/contract/silver_schemas/ -v
+pytest tests/contract/silver-schemas/ -v
 
 # Run with coverage
-pytest tests/contract/silver_schemas/ --cov=src/bioetl/domain/schemas
+pytest tests/contract/silver-schemas/ --cov=src/bioetl/domain/schemas
 
 # Run for specific schema
-pytest tests/contract/silver_schemas/ -k chembl_activity
+pytest tests/contract/silver-schemas/ -k chembl-activity
 ```
 
 ### By Test Category
 
 ```bash
 # Schema stability (snapshot tests)
-pytest tests/contract/silver_schemas/test_schema_stability.py -v
+pytest tests/contract/silver-schemas/test-schema-stability.py -v
 
 # Type safety
-pytest tests/contract/silver_schemas/test_field_types.py -v
+pytest tests/contract/silver-schemas/test-field-types.py -v
 
 # Validation rules
-pytest tests/contract/silver_schemas/test_validations.py -v
+pytest tests/contract/silver-schemas/test-validations.py -v
 
 # Naming conventions
-pytest tests/contract/silver_schemas/test_naming_conventions.py -v
+pytest tests/contract/silver-schemas/test-naming-conventions.py -v
 ```
 
 ### Continuous Integration
@@ -91,7 +91,7 @@ Snapshot tests capture the **current state** of a schema and detect ANY deviatio
 
 ### How They Work
 
-1. **First run:** Creates `snapshots/{schema_name}_schema.json`
+1. **First run:** Creates `snapshots/{schema-name}-schema.json`
 2. **Subsequent runs:** Compares current schema against snapshot
 3. **On mismatch:** Test fails with detailed diff
 
@@ -99,7 +99,7 @@ Snapshot tests capture the **current state** of a schema and detect ANY deviatio
 
 ```json
 {
-  "activity_id": {
+  "activity-id": {
     "dtype": "str",
     "nullable": false,
     "unique": false,
@@ -108,7 +108,7 @@ Snapshot tests capture the **current state** of a schema and detect ANY deviatio
     "description": "Primary key.",
     "checks": []
   },
-  "standard_value": {
+  "standard-value": {
     "dtype": "float64",
     "nullable": true,
     "unique": false,
@@ -117,7 +117,7 @@ Snapshot tests capture the **current state** of a schema and detect ANY deviatio
     "description": "Standardized value.",
     "checks": [
       {
-        "name": "greater_than_or_equal_to",
+        "name": "greater-than-or-equal-to",
         "type": "ge"
       }
     ]
@@ -145,7 +145,7 @@ class EntitySchema(ETLRecordSchema):
     """
 
     # Primary key
-    entity_id: Series[str] = pa.Field(
+    entity-id: Series[str] = pa.Field(
         nullable=False,
         description="Primary key."
     )
@@ -156,12 +156,12 @@ class EntitySchema(ETLRecordSchema):
 ### Step 2: Register Schema
 
 ```python
-# tests/contract/silver_schemas/conftest.py
+# tests/contract/silver-schemas/conftest.py
 from bioetl.domain.schemas.provider.entity import EntitySchema
 
-SILVER_SCHEMAS = {
+SILVER-SCHEMAS = {
     # ... existing schemas ...
-    "provider_entity": EntitySchema,  # Add new schema
+    "provider-entity": EntitySchema,  # Add new schema
 }
 ```
 
@@ -169,18 +169,18 @@ SILVER_SCHEMAS = {
 
 ```bash
 # Run tests to create initial snapshot
-pytest tests/contract/silver_schemas/test_schema_stability.py -k provider_entity
+pytest tests/contract/silver-schemas/test-schema-stability.py -k provider-entity
 
 # Verify snapshot created
-ls tests/contract/silver_schemas/snapshots/provider_entity_schema.json
+ls tests/contract/silver-schemas/snapshots/provider-entity-schema.json
 ```
 
 ### Step 4: Commit Together
 
 ```bash
 git add src/bioetl/domain/schemas/provider/entity.py
-git add tests/contract/silver_schemas/conftest.py
-git add tests/contract/silver_schemas/snapshots/provider_entity_schema.json
+git add tests/contract/silver-schemas/conftest.py
+git add tests/contract/silver-schemas/snapshots/provider-entity-schema.json
 git commit -m "feat(schemas): add EntitySchema for Provider"
 ```
 
@@ -204,7 +204,7 @@ class ActivitySchema(ETLRecordSchema):
     # ... existing fields ...
 
     # NEW: Additional metadata
-    data_source_version: Series[str] | None = pa.Field(
+    data-source-version: Series[str] | None = pa.Field(
         nullable=True,
         description="Provider API version."
     )
@@ -213,11 +213,11 @@ class ActivitySchema(ETLRecordSchema):
 ### Step 3: Run Tests (They WILL Fail)
 
 ```bash
-pytest tests/contract/silver_schemas/test_schema_stability.py -k chembl_activity
+pytest tests/contract/silver-schemas/test-schema-stability.py -k chembl-activity
 
 # Example failure:
-# FAILED: chembl_activity: New fields detected: ['data_source_version']
-# If intentional, run: UPDATE_SNAPSHOTS=1 pytest ...
+# FAILED: chembl-activity: New fields detected: ['data-source-version']
+# If intentional, run: UPDATE-SNAPSHOTS=1 pytest ...
 ```
 
 ### Step 4: Review Diff Carefully
@@ -240,18 +240,18 @@ If breaking change:
 
 ```bash
 # After confirming change is intentional
-UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py -k chembl_activity
+UPDATE-SNAPSHOTS=1 pytest tests/contract/silver-schemas/test-schema-stability.py -k chembl-activity
 
 # Verify snapshot updated
-git diff tests/contract/silver_schemas/snapshots/chembl_activity_schema.json
+git diff tests/contract/silver-schemas/snapshots/chembl-activity-schema.json
 ```
 
 ### Step 7: Commit with Context
 
 ```bash
 git add src/bioetl/domain/schemas/chembl/activity.py
-git add tests/contract/silver_schemas/snapshots/chembl_activity_schema.json
-git commit -m "feat(schemas): add data_source_version to ActivitySchema
+git add tests/contract/silver-schemas/snapshots/chembl-activity-schema.json
+git commit -m "feat(schemas): add data-source-version to ActivitySchema
 
 - Added optional field for API version tracking
 - Non-breaking change (nullable)
@@ -271,35 +271,35 @@ Related: #1234"
 ```python
 class PublicationSchema(ETLRecordSchema):
     # NEW field with correct name
-    citations_received: Series[int] | None = pa.Field(
+    citations-received: Series[int] | None = pa.Field(
         nullable=True,
         description="Number of citations received (incoming)."
     )
 
     # OLD field marked deprecated
-    citation_count: Series[int] | None = pa.Field(
+    citation-count: Series[int] | None = pa.Field(
         nullable=True,
-        description="DEPRECATED: Use citations_received instead. Will be removed in v6.0."
+        description="DEPRECATED: Use citations-received instead. Will be removed in v6.0."
     )
 ```
 
 ### Phase 2: Update Transformers (Release N)
 
 ```python
-def transform_publication(raw: dict) -> dict:
+def transform-publication(raw: dict) -> dict:
     # Populate BOTH fields during deprecation period
-    citation_count = raw.get("citation_count", 0)
+    citation-count = raw.get("citation-count", 0)
 
     return {
-        "citations_received": citation_count,  # NEW
-        "citation_count": citation_count,      # OLD (deprecated)
+        "citations-received": citation-count,  # NEW
+        "citation-count": citation-count,      # OLD (deprecated)
         # ... other fields
     }
 ```
 
 ### Phase 3: Update Documentation (Release N)
 
-- Add to CHANGELOG.md: "DEPRECATED: citation_count field"
+- Add to CHANGELOG.md: "DEPRECATED: citation-count field"
 - Create migration guide showing field rename
 - Update Gold contracts to use new field name
 
@@ -314,7 +314,7 @@ def transform_publication(raw: dict) -> dict:
 ```python
 class PublicationSchema(ETLRecordSchema):
     # NEW field (kept)
-    citations_received: Series[int] | None = pa.Field(
+    citations-received: Series[int] | None = pa.Field(
         nullable=True,
         description="Number of citations received (incoming)."
     )
@@ -324,79 +324,79 @@ class PublicationSchema(ETLRecordSchema):
 
 Update snapshot:
 ```bash
-UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py -k publication
+UPDATE-SNAPSHOTS=1 pytest tests/contract/silver-schemas/test-schema-stability.py -k publication
 ```
 
 ---
 
 ## Test Categories Explained
 
-### 1. Schema Stability Tests (`test_schema_stability.py`)
+### 1. Schema Stability Tests (`test-schema-stability.py`)
 
 **Purpose:** Prevent accidental schema modifications
 
 **Tests:**
-- ✅ `test_schema_fields_unchanged` — Snapshot comparison
-- ✅ `test_primary_key_field_exists` — PK presence
-- ✅ `test_etl_metadata_fields_present` — ETL metadata
-- ✅ `test_schema_has_docstring` — Documentation
-- ✅ `test_fields_have_descriptions` — Field descriptions
+- ✅ `test-schema-fields-unchanged` — Snapshot comparison
+- ✅ `test-primary-key-field-exists` — PK presence
+- ✅ `test-etl-metadata-fields-present` — ETL metadata
+- ✅ `test-schema-has-docstring` — Documentation
+- ✅ `test-fields-have-descriptions` — Field descriptions
 
 **Coverage:** All 18 schemas
 
 ---
 
-### 2. Field Type Tests (`test_field_types.py`)
+### 2. Field Type Tests (`test-field-types.py`)
 
 **Purpose:** Ensure type safety and consistency
 
 **Tests:**
-- ✅ `test_no_object_dtype_without_reason` — Avoid generic `object`
-- ✅ `test_id_fields_are_strings` — IDs are `str`, not `int`
-- ✅ `test_numeric_fields_not_nullable_without_union` — `Series[float] | None`
-- ✅ `test_boolean_fields_use_bool_type` — Booleans use `bool`
-- ✅ `test_timestamp_fields_use_datetime` — Timestamps use `datetime64[ns]`
-- ✅ `test_year_fields_are_int` — Years are `int`
-- ✅ `test_coerce_used_appropriately` — Coercion justified
+- ✅ `test-no-object-dtype-without-reason` — Avoid generic `object`
+- ✅ `test-id-fields-are-strings` — IDs are `str`, not `int`
+- ✅ `test-numeric-fields-not-nullable-without-union` — `Series[float] | None`
+- ✅ `test-boolean-fields-use-bool-type` — Booleans use `bool`
+- ✅ `test-timestamp-fields-use-datetime` — Timestamps use `datetime64[ns]`
+- ✅ `test-year-fields-are-int` — Years are `int`
+- ✅ `test-coerce-used-appropriately` — Coercion justified
 
 **Coverage:** All 18 schemas
 
 ---
 
-### 3. Validation Tests (`test_validations.py`)
+### 3. Validation Tests (`test-validations.py`)
 
 **Purpose:** Ensure validation consistency
 
 **Tests:**
-- ✅ `test_chembl_id_pattern_consistent` — ChEMBL ID regex
-- ✅ `test_pmid_pattern_if_present` — PMID format
-- ✅ `test_year_fields_have_range_check` — Year bounds
-- ✅ `test_percentage_fields_bounded` — Percentages 0-100
-- ✅ `test_pchembl_value_range` — pChEMBL 0-14
-- ✅ `test_enum_fields_have_isin_check` — Enum validation
-- ✅ `test_primary_keys_not_nullable` — PKs non-nullable
-- ✅ `test_publication_doi_validation_consistent` — Cross-provider DOI
-- ✅ `test_publication_year_range_consistent` — Cross-provider year
+- ✅ `test-chembl-id-pattern-consistent` — ChEMBL ID regex
+- ✅ `test-pmid-pattern-if-present` — PMID format
+- ✅ `test-year-fields-have-range-check` — Year bounds
+- ✅ `test-percentage-fields-bounded` — Percentages 0-100
+- ✅ `test-pchembl-value-range` — pChEMBL 0-14
+- ✅ `test-enum-fields-have-isin-check` — Enum validation
+- ✅ `test-primary-keys-not-nullable` — PKs non-nullable
+- ✅ `test-publication-doi-validation-consistent` — Cross-provider DOI
+- ✅ `test-publication-year-range-consistent` — Cross-provider year
 
 **Coverage:** All 18 schemas
 
 ---
 
-### 4. Naming Convention Tests (`test_naming_conventions.py`)
+### 4. Naming Convention Tests (`test-naming-conventions.py`)
 
 **Purpose:** Enforce naming consistency
 
 **Tests:**
-- ✅ `test_field_names_are_snake_case` — snake_case only
-- ✅ `test_no_camelcase_fields` — No camelCase
-- ✅ `test_no_abbreviations_without_glossary` — Documented abbreviations
-- ✅ `test_boolean_fields_start_with_is_has_can` — Boolean prefixes
-- ✅ `test_metadata_fields_start_with_underscore` — Metadata `_` prefix
-- ✅ `test_foreign_keys_have_id_suffix` — FKs end with `_id`
-- ✅ `test_chembl_fk_naming_consistency` — ChEMBL FK patterns
-- ✅ `test_common_fields_same_name_across_publications` — Publication consistency
-- ✅ `test_id_field_naming_by_provider` — Provider conventions
-- ✅ `test_no_legacy_dq_field_names` — No legacy DQ names
+- ✅ `test-field-names-are-snake-case` — snake-case only
+- ✅ `test-no-camelcase-fields` — No camelCase
+- ✅ `test-no-abbreviations-without-glossary` — Documented abbreviations
+- ✅ `test-boolean-fields-start-with-is-has-can` — Boolean prefixes
+- ✅ `test-metadata-fields-start-with-underscore` — Metadata `-` prefix
+- ✅ `test-foreign-keys-have-id-suffix` — FKs end with `-id`
+- ✅ `test-chembl-fk-naming-consistency` — ChEMBL FK patterns
+- ✅ `test-common-fields-same-name-across-publications` — Publication consistency
+- ✅ `test-id-field-naming-by-provider` — Provider conventions
+- ✅ `test-no-legacy-dq-field-names` — No legacy DQ names
 
 **Coverage:** All 18 schemas
 
@@ -411,7 +411,7 @@ UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py
 **Solution:**
 ```bash
 # If addition is intentional
-UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py -k schema_name
+UPDATE-SNAPSHOTS=1 pytest tests/contract/silver-schemas/test-schema-stability.py -k schema-name
 ```
 
 ---
@@ -452,7 +452,7 @@ UPDATE_SNAPSHOTS=1 pytest tests/contract/silver_schemas/test_schema_stability.py
 
 ---
 
-### Test Fails: "Field not snake_case"
+### Test Fails: "Field not snake-case"
 
 **Cause:** Field name violates naming conventions
 
@@ -463,7 +463,7 @@ publicationYear: Series[int]
 PublicationYear: Series[int]
 
 # GOOD
-publication_year: Series[int]
+publication-year: Series[int]
 ```
 
 ---
@@ -473,7 +473,7 @@ publication_year: Series[int]
 ### DO ✅
 
 - ✅ Run contract tests before committing schema changes
-- ✅ Update snapshots explicitly with `UPDATE_SNAPSHOTS=1`
+- ✅ Update snapshots explicitly with `UPDATE-SNAPSHOTS=1`
 - ✅ Add field descriptions for all new fields
 - ✅ Follow deprecation workflow for field removal
 - ✅ Keep commits atomic (schema + snapshot together)
@@ -503,7 +503,7 @@ Contract tests run automatically in CI:
 
 **On failure:** Pipeline blocks, preventing broken schemas from merging.
 
-**Manual override:** Requires `UPDATE_SNAPSHOTS=1` flag (not available in CI by design).
+**Manual override:** Requires `UPDATE-SNAPSHOTS=1` flag (not available in CI by design).
 
 ---
 
@@ -519,7 +519,7 @@ Contract tests run automatically in CI:
 
 **Optimization:** Tests run in parallel with `pytest-xdist`:
 ```bash
-pytest tests/contract/silver_schemas/ -n auto
+pytest tests/contract/silver-schemas/ -n auto
 ```
 
 ---
@@ -543,7 +543,7 @@ pytest tests/contract/silver_schemas/ -n auto
 - **ADR-024**: Entity Naming Unification
 - **ADR-027**: DQ Rules Externalization
 - **docs/glossary.md**: Ubiquitous Language
-- **tests/contract/silver_schemas/README.md**: Detailed test documentation
+- **tests/contract/silver-schemas/README.md**: Detailed test documentation
 
 ---
 

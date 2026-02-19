@@ -51,5 +51,5 @@ configs/pipelines/
 ## Related Documentation
 
 - [RULES.md](../00-project/RULES.md) Appendix A - Provider rate limits and libraries
-- [03-guides/add-new-source.md](../03-guides/add-new-source.md) - Adding new providers
+- [03-guides/add-new-source.md](../../03-guides/add-new-source.md) - Adding new providers
 - [02-architecture/03-infrastructure-layer.md](../02-architecture/03-infrastructure-layer.md) - Adapter architecture

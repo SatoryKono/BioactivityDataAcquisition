@@ -13,16 +13,16 @@
 
 | Старое имя | Новое имя | Провайдеры | Обоснование |
 |------------|-----------|------------|-------------|
-| `doc_type`/`source_type` | `publication_type` | ChEMBL, CR, OA | Семантически точнее |
-| `year` | `publication_year` | Все | Явная семантика |
-| `first_page`/`last_page` | `page_first`/`page_last` | Все | Префикс `page_` для когезии |
-| `citation_count` | `citations_received` | CR, OA, S2 | Явная направленность (TO) |
-| `reference_count` | `citations_made` | CR, OA, PM, S2 | Явная направленность (FROM) |
+| `doc-type`/`source-type` | `publication-type` | ChEMBL, CR, OA | Семантически точнее |
+| `year` | `publication-year` | Все | Явная семантика |
+| `first-page`/`last-page` | `page-first`/`page-last` | Все | Префикс `page-` для когезии |
+| `citation-count` | `citations-received` | CR, OA, S2 | Явная направленность (TO) |
+| `reference-count` | `citations-made` | CR, OA, PM, S2 | Явная направленность (FROM) |
 | `tldr` | `abstract` | S2 | Унификация аннотаций |
-| `affiliations` | `affiliation_list` | OA, PM, S2 | Явная типизация |
-| `journal_title`/`journal_abbrev` | `journal_name`/`journal_name_short` | PM | Разделение полного/краткого |
-| `short_container_title` | `journal_name_short` | CR | Унификация с PubMed |
-| `subjects`/`topics`/`fields_of_study` | `subject_keywords`/`subject_topics`/`subject_fields` | Все | Префикс `subject_` + классификатор |
+| `affiliations` | `affiliation-list` | OA, PM, S2 | Явная типизация |
+| `journal-title`/`journal-abbrev` | `journal-name`/`journal-name-short` | PM | Разделение полного/краткого |
+| `short-container-title` | `journal-name-short` | CR | Унификация с PubMed |
+| `subjects`/`topics`/`fields-of-study` | `subject-keywords`/`subject-topics`/`subject-fields` | Все | Префикс `subject-` + классификатор |
 
 ---
 
@@ -30,18 +30,18 @@
 
 ### 1.1. Mapping Layer
 **Файлы созданы:**
-- `src/bioetl/domain/mapping/publication_fields.py` (275 строк)
-- `src/bioetl/domain/mapping/__init__.py`
+- `src/bioetl/domain/mapping/publication-fields.py` (275 строк)
+- `src/bioetl/domain/mapping/--init--.py`
 
 **Функционал:**
 ```python
-from bioetl.domain.mapping import apply_field_mapping, get_unified_name
+from bioetl.domain.mapping import apply-field-mapping, get-unified-name
 
 # Provider → Unified
-mapping = PUBLICATION_FIELD_MAPPING["chembl"]  # {"doc_type": "publication_type", ...}
+mapping = PUBLICATION-FIELD-MAPPING["chembl"]  # {"doc-type": "publication-type", ...}
 
 # Apply mapping to record
-unified_record = apply_field_mapping(provider_record, "chembl")
+unified-record = apply-field-mapping(provider-record, "chembl")
 ```
 
 ### 1.2. YAML Data Schemas
@@ -53,43 +53,43 @@ unified_record = apply_field_mapping(provider_record, "chembl")
 - ✅ `configs/schemas/semanticscholar/publication.yaml`
 
 **Изменения:**
-- Переименованы поля в `column_groups`
-- Добавлены `field_aliases` для backward compatibility
+- Переименованы поля в `column-groups`
+- Добавлены `field-aliases` для backward compatibility
 
 ---
 
 ## ✅ Фаза 2: Domain Entities (ЗАВЕРШЕНО)
 
 ### 2.1. PublicationEntityBase (ЗАВЕРШЕНО)
-**Файл:** `src/bioetl/domain/entities/publication_base.py` (128 строк)
+**Файл:** `src/bioetl/domain/entities/publication-base.py` (128 строк)
 
 **Унифицированные поля:**
 ```python
-@dataclass(frozen=True, kw_only=True)
+@dataclass(frozen=True, kw-only=True)
 class PublicationEntityBase(BaseEntity):
     # Pagination
-    page_first: str | None = None
-    page_last: str | None = None
+    page-first: str | None = None
+    page-last: str | None = None
 
     # Temporal
-    publication_year: int | None = None
+    publication-year: int | None = None
 
     # Metrics
-    citations_received: int | None = None
-    citations_made: int | None = None
+    citations-received: int | None = None
+    citations-made: int | None = None
 
     # Classification
-    publication_type: str = "PUBLICATION"
+    publication-type: str = "PUBLICATION"
 
     # Affiliations
-    affiliation_list: str | None = None
+    affiliation-list: str | None = None
 ```
 
 ### 2.2. Provider Entities (ВСЕ ЗАВЕРШЕНЫ)
 
 | Provider | Entity | Файл | Статус |
 |----------|--------|------|--------|
-| ChEMBL | `ChemblPublication` | `domain/entities/chembl_structures.py` | ✅ Наследует от base |
+| ChEMBL | `ChemblPublication` | `domain/entities/chembl-structures.py` | ✅ Наследует от base |
 | CrossRef | `CrossRefPublicationEntity` | `domain/entities/crossref.py` | ✅ Наследует от base |
 | OpenAlex | `OpenAlexPublicationEntity` | `domain/entities/openalex.py` | ✅ Наследует от base |
 | PubMed | `PubMedPublicationEntity` | `domain/entities/pubmed.py` | ✅ Наследует от base |
@@ -103,10 +103,10 @@ class PublicationEntityBase(BaseEntity):
 
 | Provider | Transformer | Тесты |
 |----------|------------|-------|
-| ChEMBL | `publication_transformer.py` | ✅ 3/3 passed |
+| ChEMBL | `publication-transformer.py` | ✅ 3/3 passed |
 | CrossRef | `transformer.py` | ✅ 148/148 passed |
 | OpenAlex | `transformer.py` | ✅ 147/147 passed |
-| PubMed | `pubmed_transformer.py` | ✅ 77/77 passed |
+| PubMed | `pubmed-transformer.py` | ✅ 77/77 passed |
 | SemanticScholar | `transformer.py` | ✅ 177/177 passed |
 
 ---
@@ -114,16 +114,16 @@ class PublicationEntityBase(BaseEntity):
 ## ✅ Фаза 4: Pandera Schemas (ЗАВЕРШЕНО)
 
 ### 4.1. Base Schema (ЗАВЕРШЕНО)
-**Файл:** `src/bioetl/domain/schemas/common/publication_base.py` (157 строк)
+**Файл:** `src/bioetl/domain/schemas/common/publication-base.py` (157 строк)
 
 Содержит все унифицированные поля:
-- `publication_year: Series[pd.Int64Dtype]`
-- `page_first: Series[str]`
-- `page_last: Series[str]`
-- `citations_received: Series[pd.Int64Dtype]`
-- `citations_made: Series[pd.Int64Dtype]`
-- `publication_type: Series[str]`
-- `affiliation_list: Series[str]`
+- `publication-year: Series[pd.Int64Dtype]`
+- `page-first: Series[str]`
+- `page-last: Series[str]`
+- `citations-received: Series[pd.Int64Dtype]`
+- `citations-made: Series[pd.Int64Dtype]`
+- `publication-type: Series[str]`
+- `affiliation-list: Series[str]`
 
 ### 4.2. Provider Schemas (ВСЕ НАСЛЕДУЮТ ОТ BASE)
 
@@ -142,15 +142,15 @@ class PublicationEntityBase(BaseEntity):
 **Файл:** `configs/schemas/composite/publication.yaml` (10,735 bytes)
 
 **Содержит:**
-- Unified field names в `column_groups`
-- `field_aliases` для backward compatibility:
+- Unified field names в `column-groups`
+- `field-aliases` для backward compatibility:
   ```yaml
-  field_aliases:
-    year: publication_year
-    first_page: page_first
-    last_page: page_last
-    citation_count: citations_received
-    reference_count: citations_made
+  field-aliases:
+    year: publication-year
+    first-page: page-first
+    last-page: page-last
+    citation-count: citations-received
+    reference-count: citations-made
   ```
 
 ---
@@ -183,7 +183,7 @@ class PublicationEntityBase(BaseEntity):
 **Обоснование:**
 - Проект ещё не имеет production Delta Lake таблиц с legacy field names
 - Все новые данные будут записываться с unified field names
-- При необходимости миграции в будущем — создать `scripts/migrate_publication_columns.py`
+- При необходимости миграции в будущем — создать `scripts/migrate-publication-columns.py`
 
 ---
 
@@ -192,12 +192,12 @@ class PublicationEntityBase(BaseEntity):
 ### Наследование Entity → Schema
 
 ```
-PublicationEntityBase (domain/entities/publication_base.py)
+PublicationEntityBase (domain/entities/publication-base.py)
     ↓ наследуют
 ChemblPublication, CrossRefPublicationEntity, OpenAlexPublicationEntity,
 PubMedPublicationEntity, SemanticScholarPublicationEntity
 
-PublicationBaseSchema (domain/schemas/common/publication_base.py)
+PublicationBaseSchema (domain/schemas/common/publication-base.py)
     ↓ наследуют
 ChemblPublicationSchema, PublicationEnrichedSchema, OpenAlexPublicationSchema,
 PubMedPublicationSchema, SemanticScholarPublicationSchema
@@ -205,13 +205,13 @@ PubMedPublicationSchema, SemanticScholarPublicationSchema
 
 ### Field Aliases для Backward Compatibility
 
-YAML data schemas и composite schema содержат `field_aliases` для поддержки legacy field names:
-- `year` → `publication_year`
-- `first_page` → `page_first`
-- `last_page` → `page_last`
-- `citation_count` → `citations_received`
-- `reference_count` → `citations_made`
-- `doc_type` → `publication_type`
+YAML data schemas и composite schema содержат `field-aliases` для поддержки legacy field names:
+- `year` → `publication-year`
+- `first-page` → `page-first`
+- `last-page` → `page-last`
+- `citation-count` → `citations-received`
+- `reference-count` → `citations-made`
+- `doc-type` → `publication-type`
 
 ---
 
@@ -234,7 +234,7 @@ YAML data schemas и composite schema содержат `field_aliases` для п
 make lint
 
 # Запустить все unit tests по трансформерам
-pytest tests/unit/application/pipelines/*/test_*transformer*.py -v
+pytest tests/unit/application/pipelines/*/test-*transformer*.py -v
 
 # Запустить architecture tests
 make arch-test
@@ -247,8 +247,8 @@ make test
 
 ## Связанные Документы
 
-- [ADR-029: Data Schema Externalization](docs/02-architecture/decisions/ADR-029-data-schema-externalization.md)
-- [RULES.md §2.6: Int→Float Coercion](docs/00-project/RULES.md)
+- [ADR-029: Data Schema Externalization](../../../02-architecture/decisions/ADR-029-data-schema-externalization.md)
+- [RULES.md §2.6: Int→Float Coercion](../../../00-project/RULES.md)
 - [Composite Publication Schema](configs/schemas/composite/publication.yaml)
 
 ---

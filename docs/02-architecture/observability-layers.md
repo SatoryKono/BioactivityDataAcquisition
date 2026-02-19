@@ -32,21 +32,21 @@ sequenceDiagram
     participant Infra as PrometheusMetrics (Impl)
 
     App->>Obs: enter()
-    Obs->>Port: increment_counter(started)
-    Port->>Infra: INC bioetl_pipeline_runs_total
+    Obs->>Port: increment-counter(started)
+    Port->>Infra: INC bioetl-pipeline-runs-total
 
-    App->>App: process_batch()
+    App->>App: process-batch()
 
     App->>Obs: exit(success)
-    Obs->>Port: observe_histogram(duration)
-    Port->>Infra: OBS bioetl_pipeline_duration_seconds
+    Obs->>Port: observe-histogram(duration)
+    Port->>Infra: OBS bioetl-pipeline-duration-seconds
 ```
 
 ## Metrics Standards
 
 All metrics MUST follow these naming conventions:
 
-*   Prefix: `bioetl_`
-*   Labels: `pipeline`, `run_type`, `stage`
+*   Prefix: `bioetl-`
+*   Labels: `pipeline`, `run-type`, `stage`
 
 See `docs/04-reference/contracts/observability.md` for the full catalog.

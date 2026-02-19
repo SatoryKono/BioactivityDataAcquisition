@@ -74,7 +74,7 @@ Original plan (not implemented):
 | `ArticleSchema`  | `PubMedPublicationSchema` |
 
 **Note:** PubMed's `ArticleSchema` was renamed to `PubMedPublicationSchema` (2026-01-25)
-to align with `entity_type: publication` in pipeline config and maintain consistency
+to align with `entity-type: publication` in pipeline config and maintain consistency
 with other publication schemas (`ChemblPublicationSchema`, `OpenAlexPublicationSchema`,
 `SemanticScholarPublicationSchema`). A backward-compatibility alias `ArticleSchema`
 is provided but deprecated.
@@ -104,10 +104,10 @@ is provided but deprecated.
 
 **Domain Entities:**
 
-- `src/bioetl/domain/entities/chembl_structures.py` — `Document` → `ChemblPublication`
+- `src/bioetl/domain/entities/chembl-structures.py` — `Document` → `ChemblPublication`
 - `src/bioetl/domain/entities/pubchem.py` — `Compound` → `PubchemMolecule`
 - `src/bioetl/domain/entities/uniprot.py` — `Protein` → `UniprotTarget`
-- `src/bioetl/domain/entities/__init__.py` — exports обновлены
+- `src/bioetl/domain/entities/--init--.py` — exports обновлены
 
 **Pandera Schemas:**
 
@@ -120,54 +120,54 @@ is provided but deprecated.
 **Pipeline Configs (renamed files):**
 
 - `configs/pipelines/chembl/document.yaml` → `publication.yaml`
-- `configs/pipelines/chembl/document_similarity.yaml` → `publication_similarity.yaml`
-- `configs/pipelines/chembl/document_term.yaml` → `publication_term.yaml`
-- Pipeline names changed: `chembl_document` → `chembl_publication`, etc.
+- `configs/pipelines/chembl/document-similarity.yaml` → `publication-similarity.yaml`
+- `configs/pipelines/chembl/document-term.yaml` → `publication-term.yaml`
+- Pipeline names changed: `chembl-document` → `chembl-publication`, etc.
 
 **Pipeline Classes (renamed files):**
 
 - `document.py` → `publication.py` — `ChEMBLDocumentPipeline` → `ChEMBLPublicationPipeline`
-- `document_similarity.py` → `publication_similarity.py` — `ChEMBLDocumentSimilarityPipeline` → `ChEMBLPublicationSimilarityPipeline`
-- `document_term.py` → `publication_term.py` — `ChEMBLDocumentTermPipeline` → `ChEMBLPublicationTermPipeline`
+- `document-similarity.py` → `publication-similarity.py` — `ChEMBLDocumentSimilarityPipeline` → `ChEMBLPublicationSimilarityPipeline`
+- `document-term.py` → `publication-term.py` — `ChEMBLDocumentTermPipeline` → `ChEMBLPublicationTermPipeline`
 
 **Transformer Classes (renamed files):**
 
-- `document_transformer.py` → `publication_transformer.py` — `DocumentTransformer` → `PublicationTransformer`
-- `document_similarity_transformer.py` → `publication_similarity_transformer.py` — `DocumentSimilarityTransformer` → `PublicationSimilarityTransformer`
-- `document_term_transformer.py` → `publication_term_transformer.py` — `DocumentTermTransformer` → `PublicationTermTransformer`
+- `document-transformer.py` → `publication-transformer.py` — `DocumentTransformer` → `PublicationTransformer`
+- `document-similarity-transformer.py` → `publication-similarity-transformer.py` — `DocumentSimilarityTransformer` → `PublicationSimilarityTransformer`
+- `document-term-transformer.py` → `publication-term-transformer.py` — `DocumentTermTransformer` → `PublicationTermTransformer`
 
 **Data Source (renamed file):**
 
-- `document_term_data_source.py` → `publication_term_data_source.py` — `DocumentTermDataSource` → `PublicationTermDataSource`
+- `document-term-data-source.py` → `publication-term-data-source.py` — `DocumentTermDataSource` → `PublicationTermDataSource`
 
 **Schema Files (renamed):**
 
 - `src/bioetl/domain/schemas/chembl/document.py` → `publication.py`
-- `src/bioetl/domain/schemas/chembl/document_similarity.py` → `publication_similarity.py`
-- `src/bioetl/domain/schemas/chembl/document_term.py` → `publication_term.py`
+- `src/bioetl/domain/schemas/chembl/document-similarity.py` → `publication-similarity.py`
+- `src/bioetl/domain/schemas/chembl/document-term.py` → `publication-term.py`
 - `src/bioetl/domain/schemas/pubmed/article.py` → `publication.py` — `ArticleSchema` → `PubMedPublicationSchema` (2026-01-25)
 
 **Factory Updates:**
 
-- `transformer_factory.py` — imports and registrations updated
-- `pipeline_factories.py` — imports, configs, and exports updated
+- `transformer-factory.py` — imports and registrations updated
+- `pipeline-factories.py` — imports, configs, and exports updated
 - `registration.py` — import updated
 
 **Test Files (renamed):**
 
-- `test_document_term_data_source.py` → `test_publication_term_data_source.py`
-- `test_document_similarity_transformer.py` → `test_publication_similarity_transformer.py`
-- `test_chembl_document_e2e.py` → `test_chembl_publication_e2e.py`
-- `test_chembl_document_term_e2e.py` → `test_chembl_publication_term_e2e.py`
+- `test-document-term-data-source.py` → `test-publication-term-data-source.py`
+- `test-document-similarity-transformer.py` → `test-publication-similarity-transformer.py`
+- `test-chembl-document-e2e.py` → `test-chembl-publication-e2e.py`
+- `test-chembl-document-term-e2e.py` → `test-chembl-publication-term-e2e.py`
 
 **Documentation:**
 
 - `docs/glossary.md` — Migration notes добавлены
-- `configs/naming_exceptions.yaml` — Canonical + deprecated names
+- `configs/naming-exceptions.yaml` — Canonical + deprecated names
 
 **Tests:**
 
-- `tests/unit/domain/test_entities.py` — Error messages обновлены
+- `tests/unit/domain/test-entities.py` — Error messages обновлены
 - All test files updated to use new class names
 
 ### Migration Guide
@@ -192,10 +192,10 @@ from bioetl.domain.entities import ChemblPublication, PubchemMolecule, UniprotTa
 
 ```python
 # Old files/classes no longer exist
-# from bioetl.application.pipelines.chembl.document_transformer import DocumentTransformer  # ERROR!
+# from bioetl.application.pipelines.chembl.document-transformer import DocumentTransformer  # ERROR!
 
 # Canonical names (ONLY option)
-from bioetl.application.pipelines.chembl.publication_transformer import (
+from bioetl.application.pipelines.chembl.publication-transformer import (
     PublicationTransformer,
 )
 from bioetl.application.pipelines.chembl.publication import ChEMBLPublicationPipeline
@@ -205,10 +205,10 @@ from bioetl.application.pipelines.chembl.publication import ChEMBLPublicationPip
 
 ```bash
 # Old names no longer work
-# bioetl run chembl_document  # ERROR: Unknown pipeline
+# bioetl run chembl-document  # ERROR: Unknown pipeline
 
 # Canonical names (ONLY option)
-bioetl run chembl_publication
+bioetl run chembl-publication
 ```
 
 ### Publication field alias compatibility window (update: 2026-02-18)
@@ -221,15 +221,15 @@ Legacy aliases accepted until **2026-06-30**:
 
 | Legacy field         | Canonical field      | Source                                    |
 | -------------------- | -------------------- | ----------------------------------------- |
-| `pubmed_id`          | `publication_pmid`   | `FieldSpec(target=...)`                   |
-| `doi`                | `publication_doi`    | `FieldSpec(target=...)` + `field_aliases` |
-| `doc_type`           | `publication_type`   | `FieldSpec(target=...)` + `field_aliases` |
-| `first_page`         | `page_first`         | `FieldSpec(target=...)` + `field_aliases` |
-| `last_page`          | `page_last`          | `FieldSpec(target=...)` + `field_aliases` |
-| `year`               | `publication_year`   | `FieldSpec(target=...)` + `field_aliases` |
-| `document_chembl_id` | `publication_id`     | `field_aliases`                           |
-| `pmid`               | `publication_pmid`   | `field_aliases`                           |
-| `pmc_id`             | `publication_pmc_id` | `field_aliases`                           |
+| `pubmed-id`          | `publication-pmid`   | `FieldSpec(target=...)`                   |
+| `doi`                | `publication-doi`    | `FieldSpec(target=...)` + `field-aliases` |
+| `doc-type`           | `publication-type`   | `FieldSpec(target=...)` + `field-aliases` |
+| `first-page`         | `page-first`         | `FieldSpec(target=...)` + `field-aliases` |
+| `last-page`          | `page-last`          | `FieldSpec(target=...)` + `field-aliases` |
+| `year`               | `publication-year`   | `FieldSpec(target=...)` + `field-aliases` |
+| `document-chembl-id` | `publication-id`     | `field-aliases`                           |
+| `pmid`               | `publication-pmid`   | `field-aliases`                           |
+| `pmc-id`             | `publication-pmc-id` | `field-aliases`                           |
 
 After 2026-06-30, legacy aliases must be removed from read-path shims and
 consumers should use canonical fields only.
@@ -249,7 +249,7 @@ consumers should use canonical fields only.
 
 Publication entity mappings (`publication*` → `document*` for ChEMBL API) were scattered across:
 
-1. YAML pipeline configs (`entity_type: publication`)
+1. YAML pipeline configs (`entity-type: publication`)
 1. `ChemblEntityMapper` hardcoded dictionaries
 1. Implicit comments and ADR documentation
 
@@ -261,7 +261,7 @@ Introduced a centralized **Publication Mapping Registry** in domain layer:
 
 **New Files:**
 
-- `src/bioetl/domain/registry/__init__.py` — Registry exports
+- `src/bioetl/domain/registry/--init--.py` — Registry exports
 - `src/bioetl/domain/registry/publication.py` — Single source of truth for publication mappings
 
 **Registry Structure:**
@@ -269,19 +269,19 @@ Introduced a centralized **Publication Mapping Registry** in domain layer:
 ```python
 @dataclass(frozen=True, slots=True)
 class PublicationMapping:
-    canonical_name: str  # Domain entity type (publication*)
-    api_resource: str  # ChEMBL API resource (document*)
-    plural_key: str  # Response array key (documents)
-    primary_key_field: str  # PK for deduplication
-    is_legacy_alias: bool  # True for backward-compat aliases
+    canonical-name: str  # Domain entity type (publication*)
+    api-resource: str  # ChEMBL API resource (document*)
+    plural-key: str  # Response array key (documents)
+    primary-key-field: str  # PK for deduplication
+    is-legacy-alias: bool  # True for backward-compat aliases
 ```
 
 **Key Functions:**
 
-- `get_publication_mapping(entity_type)` — Get mapping for entity type
-- `is_publication_entity(entity_type)` — Check if publication-related
-- `is_legacy_publication_alias(entity_type)` — Check if legacy alias
-- `validate_publication_entity_type(entity_type, provider)` — Config validation
+- `get-publication-mapping(entity-type)` — Get mapping for entity type
+- `is-publication-entity(entity-type)` — Check if publication-related
+- `is-legacy-publication-alias(entity-type)` — Check if legacy alias
+- `validate-publication-entity-type(entity-type, provider)` — Config validation
 
 ### Updated Components
 
@@ -289,22 +289,22 @@ class PublicationMapping:
 
 ```python
 from bioetl.domain.registry.publication import (
-    get_publication_mapping,
-    is_publication_entity,
+    get-publication-mapping,
+    is-publication-entity,
 )
 
 
 class ChemblEntityMapper:
     @staticmethod
-    def get_resource_url(entity_type: str) -> str:
+    def get-resource-url(entity-type: str) -> str:
         # Check publication registry first (ADR-024)
-        pub_mapping = get_publication_mapping(entity_type)
-        if pub_mapping is not None:
-            return f"{CHEMBL_API_BASE}/{pub_mapping.api_resource}"
+        pub-mapping = get-publication-mapping(entity-type)
+        if pub-mapping is not None:
+            return f"{CHEMBL-API-BASE}/{pub-mapping.api-resource}"
         # ... non-publication entities
 ```
 
-**`PipelineYamlConfig`** now validates entity_type:
+**`PipelineYamlConfig`** now validates entity-type:
 
 - Raises `ValueError` if `document*` used in ChEMBL YAML configs
 - Enforces canonical names (`publication*`) at config load time
@@ -318,6 +318,6 @@ class ChemblEntityMapper:
 
 ## References
 
-- [glossary.md](../../glossary.md) — Ubiquitous Language definitions
+- [glossary.md](../glossary.md) — Ubiquitous Language definitions
 - [RULES.md §8.2](../../00-project/RULES.md) — Domain Layer guidelines
 - [ADR-021](ADR-021-ddd-aggregates-adoption.md) — DDD Aggregates

@@ -15,22 +15,22 @@ sequenceDiagram
     participant Executor
 
     CLI->>Runner: run()
-    Runner->>Services: __aenter__()
-    Runner->>Lock: __aenter__() (acquire)
+    Runner->>Services: --aenter--()
+    Runner->>Lock: --aenter--() (acquire)
     alt RunType == REBUILD or BACKFILL
-        Runner->>Storage: clear_silver()
-        Runner->>Storage: clear_gold()
+        Runner->>Storage: clear-silver()
+        Runner->>Storage: clear-gold()
     end
-    Runner->>Checkpoint: load_checkpoint()
+    Runner->>Checkpoint: load-checkpoint()
     Runner->>Executor: execute()
-    Runner->>Checkpoint: delete_checkpoint()
-    Runner->>Lock: __aexit__() (release)
-    Runner->>Services: __aexit__()
+    Runner->>Checkpoint: delete-checkpoint()
+    Runner->>Lock: --aexit--() (release)
+    Runner->>Services: --aexit--()
 ```
 
 ## Очистка слоёв по типу запуска
 
-| RunType | clear_silver | clear_gold | Обоснование |
+| RunType | clear-silver | clear-gold | Обоснование |
 |---------|--------------|------------|-------------|
 | `INCREMENTAL` | ❌ | ❌ | Merge/upsert сохраняет существующие данные |
 | `BACKFILL` | ✅ | ✅ | Заполнение исторических данных |
@@ -40,7 +40,7 @@ sequenceDiagram
 
 Medallion архитектура требует идемпотентности для инкрементальных обновлений:
 
-1. **Silver слой**: Использует merge/upsert по `content_hash`
+1. **Silver слой**: Использует merge/upsert по `content-hash`
 2. **Gold слой**: Применяет SCD Type 2 или партиционирование
 
 Удаление данных при incremental run привело бы к потере исторических записей.
@@ -54,17 +54,17 @@ Medallion архитектура требует идемпотентности �
 3. **Graceful release**: Освобождение в `finally` даже при ошибках
 
 ```python
-async with self._lock_manager:
+async with self.-lock-manager:
     # Блокировка захвачена
-    await self._clear_exports()
-    await self._checkpoint_manager.load_checkpoint()
-    await self._executor.execute()
+    await self.-clear-exports()
+    await self.-checkpoint-manager.load-checkpoint()
+    await self.-executor.execute()
     # Блокировка освобождается автоматически
 ```
 
-## Политика метрик (fail_fast)
+## Политика метрик (fail-fast)
 
-Параметр `BIOETL_FAIL_FAST_METRICS` управляет поведением при ошибках запуска Prometheus сервера:
+Параметр `BIOETL-FAIL-FAST-METRICS` управляет поведением при ошибках запуска Prometheus сервера:
 
 | Значение | Поведение |
 |----------|-----------|
@@ -80,12 +80,12 @@ async with self._lock_manager:
 
 ```bash
 # Строгий режим для production
-export BIOETL_FAIL_FAST_METRICS=true
+export BIOETL-FAIL-FAST-METRICS=true
 
 # Или в конфиге
 metrics:
   port: 8000
-  fail_fast: true
+  fail-fast: true
 ```
 
 ## Graceful Shutdown
@@ -115,7 +115,7 @@ sequenceDiagram
     participant Merge as MergeService
     participant Gold as GoldWriter
 
-    CLI->>Composite: run_composite()
+    CLI->>Composite: run-composite()
     Composite->>Seed: run (standard pipeline)
     Composite->>Deps: run dependencies (chained)
     Composite->>Enrichers: fan-out enrichers (parallel)
@@ -128,7 +128,7 @@ sequenceDiagram
 
 1. **Без трансформеров**: Composite не использует `*Transformer` классы
 2. **Оркестрация**: `application/composite/` содержит 15 модулей сервисов
-3. **Merge**: `MergeService` выполняет JOIN по `join_key` из конфига
+3. **Merge**: `MergeService` выполняет JOIN по `join-key` из конфига
 4. **Fan-out**: Enrichers могут выполняться параллельно (если `optional: true`)
 
 См. [ADR-026: Composite Pipeline Pattern](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)

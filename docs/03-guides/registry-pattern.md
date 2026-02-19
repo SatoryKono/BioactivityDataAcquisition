@@ -8,7 +8,7 @@ All registries in BioETL follow the unified `RegistryProtocol` for consistent AP
 |--------|-------------|
 | `register(key, value)` | Register an item |
 | `get(key)` | Get item (raises `KeyError` if missing) |
-| `list_keys()` | List all registered keys |
+| `list-keys()` | List all registered keys |
 | `contains(key)` | Check if key is registered |
 | `clear()` | Clear all registrations (testing only) |
 
@@ -22,11 +22,11 @@ Registry for pipeline factories. Located in `src/bioetl/composition/registry.py`
 from bioetl.composition.registry import PipelineRegistry
 
 # List all registered pipelines
-pipelines = PipelineRegistry.list_keys()
+pipelines = PipelineRegistry.list-keys()
 
 # Check if pipeline exists
-if PipelineRegistry.contains("chembl_activity"):
-    definition = PipelineRegistry.get("chembl_activity")
+if PipelineRegistry.contains("chembl-activity"):
+    definition = PipelineRegistry.get("chembl-activity")
 ```
 
 ### ProviderRegistry (Primary)
@@ -37,35 +37,35 @@ Central registry for all providers. Located in `src/bioetl/composition/providers
 from bioetl.composition.providers import ProviderRegistry
 
 # List all registered providers
-providers = ProviderRegistry.list_providers()
+providers = ProviderRegistry.list-providers()
 
 # Create data source directly (preferred)
-data_source = ProviderRegistry.create_data_source(
-    "chembl", settings, pipeline_config, logger
+data-source = ProviderRegistry.create-data-source(
+    "chembl", settings, pipeline-config, logger
 )
 
 # Check if provider exists
-if ProviderRegistry.is_registered("chembl"):
+if ProviderRegistry.is-registered("chembl"):
     config = ProviderRegistry.get("chembl")
 ```
 
 ### DataSourceRegistry (Facade)
 
-Thin facade over ProviderRegistry for backward compatibility. Located in `src/bioetl/composition/factories/data_source_registry.py`.
+Thin facade over ProviderRegistry for backward compatibility. Located in `src/bioetl/composition/factories/data-source-registry.py`.
 
 ```python
-from bioetl.composition.factories.data_source_registry import DataSourceRegistry
+from bioetl.composition.factories.data-source-registry import DataSourceRegistry
 
 # Old way (still works, delegates to ProviderRegistry)
 creator = DataSourceRegistry.get("chembl")
-data_source = creator(settings, pipeline_config, logger)
+data-source = creator(settings, pipeline-config, logger)
 
 # Check if provider exists
 if DataSourceRegistry.contains("chembl"):
     creator = DataSourceRegistry.get("chembl")
 ```
 
-**Note:** For new code, prefer using `ProviderRegistry.create_data_source()` directly.
+**Note:** For new code, prefer using `ProviderRegistry.create-data-source()` directly.
 
 ## Legacy Aliases
 
@@ -73,10 +73,10 @@ For backward compatibility, the following legacy methods are available:
 
 | Registry | Legacy Method | Unified Method |
 |----------|---------------|----------------|
-| `PipelineRegistry` | `register_factory(factory)` | `register(key, factory)` |
-| `PipelineRegistry` | `list_pipelines()` | `list_keys()` |
-| `DataSourceRegistry` | `list_providers()` | `list_keys()` |
-| `DataSourceRegistry` | `get(provider)` | `ProviderRegistry.create_data_source()` |
+| `PipelineRegistry` | `register-factory(factory)` | `register(key, factory)` |
+| `PipelineRegistry` | `list-pipelines()` | `list-keys()` |
+| `DataSourceRegistry` | `list-providers()` | `list-keys()` |
+| `DataSourceRegistry` | `get(provider)` | `ProviderRegistry.create-data-source()` |
 
 ### Deprecated Methods
 
@@ -84,19 +84,19 @@ For backward compatibility, the following legacy methods are available:
 |----------|--------|-------------|
 | `DataSourceRegistry` | `register(provider, creator)` | `ProviderRegistry.register()` with `ProviderConfig` |
 
-**Note:** `DataSourceRegistry.register()` is deprecated. New providers should be registered through `ProviderRegistry` with a `ProviderConfig` that includes `data_source_creator`.
+**Note:** `DataSourceRegistry.register()` is deprecated. New providers should be registered through `ProviderRegistry` with a `ProviderConfig` that includes `data-source-creator`.
 
 ## Protocol Definition
 
-The base protocol is defined in `src/bioetl/composition/base_registry.py`:
+The base protocol is defined in `src/bioetl/composition/base-registry.py`:
 
 ```python
-from typing import Protocol, TypeVar, runtime_checkable
+from typing import Protocol, TypeVar, runtime-checkable
 
 K = TypeVar("K")  # Key type
 V = TypeVar("V")  # Value type
 
-@runtime_checkable
+@runtime-checkable
 class RegistryProtocol(Protocol[K, V]):
     @classmethod
     def register(cls, key: K, value: V) -> None: ...
@@ -105,7 +105,7 @@ class RegistryProtocol(Protocol[K, V]):
     def get(cls, key: K) -> V: ...
 
     @classmethod
-    def list_keys(cls) -> list[K]: ...
+    def list-keys(cls) -> list[K]: ...
 
     @classmethod
     def contains(cls, key: K) -> bool: ...
@@ -120,7 +120,7 @@ All registries raise `KeyError` when accessing non-existent keys:
 
 ```python
 try:
-    creator = DataSourceRegistry.get("unknown_provider")
+    creator = DataSourceRegistry.get("unknown-provider")
 except KeyError as e:
     print(f"Provider not found: {e}")
 ```
@@ -133,9 +133,9 @@ When writing tests that modify registries, use the `clear()` method in teardown:
 
 ```python
 @pytest.fixture(autouse=True)
-def reset_registries():
-    backup = PipelineRegistry._registry.copy()
+def reset-registries():
+    backup = PipelineRegistry.-registry.copy()
     yield
-    PipelineRegistry._registry.clear()
-    PipelineRegistry._registry.update(backup)
+    PipelineRegistry.-registry.clear()
+    PipelineRegistry.-registry.update(backup)
 ```

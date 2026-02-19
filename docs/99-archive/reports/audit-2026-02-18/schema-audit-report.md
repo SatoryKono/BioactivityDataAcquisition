@@ -2,23 +2,23 @@
 
 ## I. Карта схем пайплайна
 
-### chembl_activity
+### chembl-activity
 
 #### 1. Общая информация
 
 - Provider: chembl
 - Entity: activity
-- Pipeline name / pipeline_id: chembl_activity
-- Primary keys: ['activity_id']
+- Pipeline name / pipeline-id: chembl-activity
+- Primary keys: ['activity-id']
 - Loading strategy: Silver `merge(default)`, Gold `append`
 - Write mode (Silver/Gold): `merge(default)` / `append`
 
 #### 2. Bronze Layer
 
 - Формат хранения: jsonl (по базовой конфигурации), фактический sample raw JSONL в репозитории: GAP.
-- Структура записи: `METADATA_ONLY`.
-  - Ключевые JSON paths (из schema_snapshot metadata): action_type, activity_comment, activity_id, activity_properties, assay_chembl_id, assay_description, assay_type, assay_variant_accession, assay_variant_mutation, bao_endpoint, bao_format, bao_label ...
-- Поля метаданных: \_run_id/\_run_type/\_source_batch_id/\_ingestion_ts/\_index/content_hash/entity_id (по общесистемным конвенциям).
+- Структура записи: `METADATA-ONLY`.
+  - Ключевые JSON paths (из schema-snapshot metadata): action-type, activity-comment, activity-id, activity-properties, assay-chembl-id, assay-description, assay-type, assay-variant-accession, assay-variant-mutation, bao-endpoint, bao-format, bao-label ...
+- Поля метаданных: \-run-id/\-run-type/\-source-batch-id/\-ingestion-ts/\-index/content-hash/entity-id (по общесистемным конвенциям).
 - Потенциальный schema drift: MEDIUM (для pipelines без фактического Bronze sample).
 - Проблемы: nested JSON и multi-type поля не подтверждены репрезентативной выборкой N>=200 (GAP).
 
@@ -26,22 +26,22 @@
 
 | Поле         | Тип    | Nullable | Source field         | Notes                       |
 | ------------ | ------ | -------: | -------------------- | --------------------------- |
-| entity_id    | string |  UNKNOWN | primary/business key | System prefix field         |
-| content_hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
-| \_run_id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
-| \_dq_warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
-| \_dq_error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| entity-id    | string |  UNKNOWN | primary/business key | System prefix field         |
+| content-hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
+| \-run-id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
+| \-dq-warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| \-dq-error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
 
 Анализ:
 
 - Типы (int→float coercion?): UNKNOWN per pipeline (нет извлечённой полной матрицы Pandera↔PyArrow в этом проходе).
 - Nullable consistency: частично UNKNOWN; требуется автоматический diff Pandera DataFrameModel vs silver.py schemas.
 - DQ flags / checks: externalized config `configs/quality/entities/chembl/activity.yaml`.
-- Hash exclusions: meta-fields из domain.constants.META_FIELDS.
+- Hash exclusions: meta-fields из domain.constants.META-FIELDS.
 - Ordering policy: system prefix + business + DQ suffix (фиксировано в schema conventions).
-- Schema drift tolerance: Silver on_schema_mismatch=evolve (base config).
+- Schema drift tolerance: Silver on-schema-mismatch=evolve (base config).
 - Partition keys: silver=MISSING, gold=MISSING.
-- Merge key correctness: uses primary_keys from pipeline config; collision risk requires entity-level validation.
+- Merge key correctness: uses primary-keys from pipeline config; collision risk requires entity-level validation.
 
 #### 4. Gold Schema (Контракт)
 
@@ -53,47 +53,47 @@
 
 | Поле           | Тип                | Nullable | Semantic role  | Breaking risk |
 | -------------- | ------------------ | -------: | -------------- | ------------- |
-| entity_id      | string             |      Нет | contract field | Высокий       |
-| content_hash   | string             |      Нет | contract field | Высокий       |
-| activity_id    | string             |      Нет | contract field | Высокий       |
-| molecule_id    | string             |      Нет | contract field | Высокий       |
-| target_id      | ['string', 'null'] |       Да | contract field | Средний       |
-| assay_id       | ['string', 'null'] |       Да | contract field | Средний       |
-| publication_id | ['string', 'null'] |       Да | contract field | Средний       |
-| record_id      | ['number', 'null'] |       Да | contract field | Средний       |
+| entity-id      | string             |      Нет | contract field | Высокий       |
+| content-hash   | string             |      Нет | contract field | Высокий       |
+| activity-id    | string             |      Нет | contract field | Высокий       |
+| molecule-id    | string             |      Нет | contract field | Высокий       |
+| target-id      | ['string', 'null'] |       Да | contract field | Средний       |
+| assay-id       | ['string', 'null'] |       Да | contract field | Средний       |
+| publication-id | ['string', 'null'] |       Да | contract field | Средний       |
+| record-id      | ['number', 'null'] |       Да | contract field | Средний       |
 
 #### 5. Domain ↔ Schema соответствие
 
 - 1:1 mapping?: UNKNOWN/PARTIAL (нужен автоматизированный field-level diff Domain entity ↔ Pandera ↔ Gold contract).
 - Поля отсутствуют в доменной модели?: не подтверждено, требуется diff.
 - Поля есть в домене, но не в таблице?: не подтверждено, требуется diff.
-- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column_groups: []`).
+- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column-groups: []`).
 
 Evidence:
 
 - `configs/pipelines/chembl/activity.yaml`
 - `configs/schemas/chembl/activity.yaml`
 - `configs/quality/entities/chembl/activity.yaml`
-- `docs/04-reference/contracts/gold/chembl_activity_v1.0.json`
+- `docs/04-reference/contracts/gold/chembl-activity-v1.0.json`
 - `data/output/bronze/chembl/activity`
 
-### chembl_assay
+### chembl-assay
 
 #### 1. Общая информация
 
 - Provider: chembl
 - Entity: assay
-- Pipeline name / pipeline_id: chembl_assay
-- Primary keys: ['assay_id']
+- Pipeline name / pipeline-id: chembl-assay
+- Primary keys: ['assay-id']
 - Loading strategy: Silver `merge(default)`, Gold `scd2`
 - Write mode (Silver/Gold): `merge(default)` / `scd2`
 
 #### 2. Bronze Layer
 
 - Формат хранения: jsonl (по базовой конфигурации), фактический sample raw JSONL в репозитории: GAP.
-- Структура записи: `METADATA_ONLY`.
-  - Ключевые JSON paths (из schema_snapshot metadata): aidx, assay_category, assay_cell_type, assay_chembl_id, assay_classifications, assay_group, assay_organism, assay_parameters, assay_strain, assay_subcellular_fraction, assay_tax_id, assay_test_type ...
-- Поля метаданных: \_run_id/\_run_type/\_source_batch_id/\_ingestion_ts/\_index/content_hash/entity_id (по общесистемным конвенциям).
+- Структура записи: `METADATA-ONLY`.
+  - Ключевые JSON paths (из schema-snapshot metadata): aidx, assay-category, assay-cell-type, assay-chembl-id, assay-classifications, assay-group, assay-organism, assay-parameters, assay-strain, assay-subcellular-fraction, assay-tax-id, assay-test-type ...
+- Поля метаданных: \-run-id/\-run-type/\-source-batch-id/\-ingestion-ts/\-index/content-hash/entity-id (по общесистемным конвенциям).
 - Потенциальный schema drift: MEDIUM (для pipelines без фактического Bronze sample).
 - Проблемы: nested JSON и multi-type поля не подтверждены репрезентативной выборкой N>=200 (GAP).
 
@@ -101,22 +101,22 @@ Evidence:
 
 | Поле         | Тип    | Nullable | Source field         | Notes                       |
 | ------------ | ------ | -------: | -------------------- | --------------------------- |
-| entity_id    | string |  UNKNOWN | primary/business key | System prefix field         |
-| content_hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
-| \_run_id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
-| \_dq_warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
-| \_dq_error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| entity-id    | string |  UNKNOWN | primary/business key | System prefix field         |
+| content-hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
+| \-run-id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
+| \-dq-warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| \-dq-error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
 
 Анализ:
 
 - Типы (int→float coercion?): UNKNOWN per pipeline (нет извлечённой полной матрицы Pandera↔PyArrow в этом проходе).
 - Nullable consistency: частично UNKNOWN; требуется автоматический diff Pandera DataFrameModel vs silver.py schemas.
 - DQ flags / checks: externalized config `configs/quality/entities/chembl/assay.yaml`.
-- Hash exclusions: meta-fields из domain.constants.META_FIELDS.
+- Hash exclusions: meta-fields из domain.constants.META-FIELDS.
 - Ordering policy: system prefix + business + DQ suffix (фиксировано в schema conventions).
-- Schema drift tolerance: Silver on_schema_mismatch=evolve (base config).
-- Partition keys: silver=['assay_type'], gold=MISSING.
-- Merge key correctness: uses primary_keys from pipeline config; collision risk requires entity-level validation.
+- Schema drift tolerance: Silver on-schema-mismatch=evolve (base config).
+- Partition keys: silver=['assay-type'], gold=MISSING.
+- Merge key correctness: uses primary-keys from pipeline config; collision risk requires entity-level validation.
 
 #### 4. Gold Schema (Контракт)
 
@@ -128,38 +128,38 @@ Evidence:
 
 | Поле           | Тип                | Nullable | Semantic role  | Breaking risk |
 | -------------- | ------------------ | -------: | -------------- | ------------- |
-| entity_id      | string             |      Нет | contract field | Высокий       |
-| content_hash   | string             |      Нет | contract field | Высокий       |
-| assay_id       | string             |      Нет | contract field | Высокий       |
-| target_id      | ['string', 'null'] |       Да | contract field | Средний       |
-| publication_id | ['string', 'null'] |       Да | contract field | Средний       |
-| cell_id        | ['string', 'null'] |       Да | contract field | Средний       |
-| tissue_id      | ['string', 'null'] |       Да | contract field | Средний       |
-| src_id         | ['number', 'null'] |       Да | contract field | Средний       |
+| entity-id      | string             |      Нет | contract field | Высокий       |
+| content-hash   | string             |      Нет | contract field | Высокий       |
+| assay-id       | string             |      Нет | contract field | Высокий       |
+| target-id      | ['string', 'null'] |       Да | contract field | Средний       |
+| publication-id | ['string', 'null'] |       Да | contract field | Средний       |
+| cell-id        | ['string', 'null'] |       Да | contract field | Средний       |
+| tissue-id      | ['string', 'null'] |       Да | contract field | Средний       |
+| src-id         | ['number', 'null'] |       Да | contract field | Средний       |
 
 #### 5. Domain ↔ Schema соответствие
 
 - 1:1 mapping?: UNKNOWN/PARTIAL (нужен автоматизированный field-level diff Domain entity ↔ Pandera ↔ Gold contract).
 - Поля отсутствуют в доменной модели?: не подтверждено, требуется diff.
 - Поля есть в домене, но не в таблице?: не подтверждено, требуется diff.
-- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column_groups: []`).
+- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column-groups: []`).
 
 Evidence:
 
 - `configs/pipelines/chembl/assay.yaml`
 - `configs/schemas/chembl/assay.yaml`
 - `configs/quality/entities/chembl/assay.yaml`
-- `docs/04-reference/contracts/gold/chembl_assay_v1.0.json`
+- `docs/04-reference/contracts/gold/chembl-assay-v1.0.json`
 - `data/output/bronze/chembl/assay`
 
-### chembl_assay_parameters
+### chembl-assay-parameters
 
 #### 1. Общая информация
 
 - Provider: chembl
-- Entity: assay_parameters
-- Pipeline name / pipeline_id: chembl_assay_parameters
-- Primary keys: ['assay_param_id']
+- Entity: assay-parameters
+- Pipeline name / pipeline-id: chembl-assay-parameters
+- Primary keys: ['assay-param-id']
 - Loading strategy: Silver `merge(default)`, Gold `scd2`
 - Write mode (Silver/Gold): `merge(default)` / `scd2`
 
@@ -168,7 +168,7 @@ Evidence:
 - Формат хранения: jsonl (по базовой конфигурации), фактический sample raw JSONL в репозитории: GAP.
 - Структура записи: `INFERRED`.
   - Ключевые JSON paths: UNKNOWN (нет JSONL sample, inference required).
-- Поля метаданных: \_run_id/\_run_type/\_source_batch_id/\_ingestion_ts/\_index/content_hash/entity_id (по общесистемным конвенциям).
+- Поля метаданных: \-run-id/\-run-type/\-source-batch-id/\-ingestion-ts/\-index/content-hash/entity-id (по общесистемным конвенциям).
 - Потенциальный schema drift: MEDIUM (для pipelines без фактического Bronze sample).
 - Проблемы: nested JSON и multi-type поля не подтверждены репрезентативной выборкой N>=200 (GAP).
 
@@ -176,22 +176,22 @@ Evidence:
 
 | Поле         | Тип    | Nullable | Source field         | Notes                       |
 | ------------ | ------ | -------: | -------------------- | --------------------------- |
-| entity_id    | string |  UNKNOWN | primary/business key | System prefix field         |
-| content_hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
-| \_run_id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
-| \_dq_warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
-| \_dq_error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| entity-id    | string |  UNKNOWN | primary/business key | System prefix field         |
+| content-hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
+| \-run-id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
+| \-dq-warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| \-dq-error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
 
 Анализ:
 
 - Типы (int→float coercion?): UNKNOWN per pipeline (нет извлечённой полной матрицы Pandera↔PyArrow в этом проходе).
 - Nullable consistency: частично UNKNOWN; требуется автоматический diff Pandera DataFrameModel vs silver.py schemas.
-- DQ flags / checks: externalized config `configs/quality/entities/chembl/assay_parameters.yaml`.
-- Hash exclusions: meta-fields из domain.constants.META_FIELDS.
+- DQ flags / checks: externalized config `configs/quality/entities/chembl/assay-parameters.yaml`.
+- Hash exclusions: meta-fields из domain.constants.META-FIELDS.
 - Ordering policy: system prefix + business + DQ suffix (фиксировано в schema conventions).
-- Schema drift tolerance: Silver on_schema_mismatch=evolve (base config).
+- Schema drift tolerance: Silver on-schema-mismatch=evolve (base config).
 - Partition keys: silver=['type'], gold=MISSING.
-- Merge key correctness: uses primary_keys from pipeline config; collision risk requires entity-level validation.
+- Merge key correctness: uses primary-keys from pipeline config; collision risk requires entity-level validation.
 
 #### 4. Gold Schema (Контракт)
 
@@ -203,10 +203,10 @@ Evidence:
 
 | Поле           | Тип                | Nullable | Semantic role  | Breaking risk |
 | -------------- | ------------------ | -------: | -------------- | ------------- |
-| entity_id      | string             |      Нет | contract field | Высокий       |
-| content_hash   | string             |      Нет | contract field | Высокий       |
-| assay_param_id | number             |      Нет | contract field | Высокий       |
-| assay_id       | string             |      Нет | contract field | Высокий       |
+| entity-id      | string             |      Нет | contract field | Высокий       |
+| content-hash   | string             |      Нет | contract field | Высокий       |
+| assay-param-id | number             |      Нет | contract field | Высокий       |
+| assay-id       | string             |      Нет | contract field | Высокий       |
 | type           | string             |      Нет | contract field | Высокий       |
 | relation       | ['string', 'null'] |       Да | contract field | Средний       |
 | value          | ['number', 'null'] |       Да | contract field | Средний       |
@@ -217,33 +217,33 @@ Evidence:
 - 1:1 mapping?: UNKNOWN/PARTIAL (нужен автоматизированный field-level diff Domain entity ↔ Pandera ↔ Gold contract).
 - Поля отсутствуют в доменной модели?: не подтверждено, требуется diff.
 - Поля есть в домене, но не в таблице?: не подтверждено, требуется diff.
-- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column_groups: []`).
+- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column-groups: []`).
 
 Evidence:
 
-- `configs/pipelines/chembl/assay_parameters.yaml`
-- `configs/schemas/chembl/assay_parameters.yaml`
-- `configs/quality/entities/chembl/assay_parameters.yaml`
-- `docs/04-reference/contracts/gold/chembl_assay_parameters_v1.0.json`
-- `data/output/bronze/chembl/assay_parameters`
+- `configs/pipelines/chembl/assay-parameters.yaml`
+- `configs/schemas/chembl/assay-parameters.yaml`
+- `configs/quality/entities/chembl/assay-parameters.yaml`
+- `docs/04-reference/contracts/gold/chembl-assay-parameters-v1.0.json`
+- `data/output/bronze/chembl/assay-parameters`
 
-### chembl_cell_line
+### chembl-cell-line
 
 #### 1. Общая информация
 
 - Provider: chembl
-- Entity: cell_line
-- Pipeline name / pipeline_id: chembl_cell_line
-- Primary keys: ['cell_id']
+- Entity: cell-line
+- Pipeline name / pipeline-id: chembl-cell-line
+- Primary keys: ['cell-id']
 - Loading strategy: Silver `merge(default)`, Gold `scd2`
 - Write mode (Silver/Gold): `merge(default)` / `scd2`
 
 #### 2. Bronze Layer
 
 - Формат хранения: jsonl (по базовой конфигурации), фактический sample raw JSONL в репозитории: GAP.
-- Структура записи: `METADATA_ONLY`.
-  - Ключевые JSON paths (из schema_snapshot metadata): cell_chembl_id, cell_description, cell_id, cell_name, cell_source_organism, cell_source_tax_id, cell_source_tissue, cellosaurus_id, cl_lincs_id, clo_id, efo_id
-- Поля метаданных: \_run_id/\_run_type/\_source_batch_id/\_ingestion_ts/\_index/content_hash/entity_id (по общесистемным конвенциям).
+- Структура записи: `METADATA-ONLY`.
+  - Ключевые JSON paths (из schema-snapshot metadata): cell-chembl-id, cell-description, cell-id, cell-name, cell-source-organism, cell-source-tax-id, cell-source-tissue, cellosaurus-id, cl-lincs-id, clo-id, efo-id
+- Поля метаданных: \-run-id/\-run-type/\-source-batch-id/\-ingestion-ts/\-index/content-hash/entity-id (по общесистемным конвенциям).
 - Потенциальный schema drift: MEDIUM (для pipelines без фактического Bronze sample).
 - Проблемы: nested JSON и multi-type поля не подтверждены репрезентативной выборкой N>=200 (GAP).
 
@@ -251,22 +251,22 @@ Evidence:
 
 | Поле         | Тип    | Nullable | Source field         | Notes                       |
 | ------------ | ------ | -------: | -------------------- | --------------------------- |
-| entity_id    | string |  UNKNOWN | primary/business key | System prefix field         |
-| content_hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
-| \_run_id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
-| \_dq_warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
-| \_dq_error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| entity-id    | string |  UNKNOWN | primary/business key | System prefix field         |
+| content-hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
+| \-run-id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
+| \-dq-warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| \-dq-error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
 
 Анализ:
 
 - Типы (int→float coercion?): UNKNOWN per pipeline (нет извлечённой полной матрицы Pandera↔PyArrow в этом проходе).
 - Nullable consistency: частично UNKNOWN; требуется автоматический diff Pandera DataFrameModel vs silver.py schemas.
-- DQ flags / checks: externalized config `configs/quality/entities/chembl/cell_line.yaml`.
-- Hash exclusions: meta-fields из domain.constants.META_FIELDS.
+- DQ flags / checks: externalized config `configs/quality/entities/chembl/cell-line.yaml`.
+- Hash exclusions: meta-fields из domain.constants.META-FIELDS.
 - Ordering policy: system prefix + business + DQ suffix (фиксировано в schema conventions).
-- Schema drift tolerance: Silver on_schema_mismatch=evolve (base config).
+- Schema drift tolerance: Silver on-schema-mismatch=evolve (base config).
 - Partition keys: silver=MISSING, gold=MISSING.
-- Merge key correctness: uses primary_keys from pipeline config; collision risk requires entity-level validation.
+- Merge key correctness: uses primary-keys from pipeline config; collision risk requires entity-level validation.
 
 #### 4. Gold Schema (Контракт)
 
@@ -278,47 +278,47 @@ Evidence:
 
 | Поле                    | Тип                | Nullable | Semantic role  | Breaking risk |
 | ----------------------- | ------------------ | -------: | -------------- | ------------- |
-| entity_id               | string             |      Нет | contract field | Высокий       |
-| content_hash            | string             |      Нет | contract field | Высокий       |
-| cell_id                 | string             |      Нет | contract field | Высокий       |
-| cell_name               | string             |      Нет | contract field | Высокий       |
-| cell_description        | ['string', 'null'] |       Да | contract field | Средний       |
-| cell_source_tissue      | ['string', 'null'] |       Да | contract field | Средний       |
-| cell_source_organism    | ['string', 'null'] |       Да | contract field | Средний       |
-| cell_source_taxonomy_id | ['number', 'null'] |       Да | contract field | Средний       |
+| entity-id               | string             |      Нет | contract field | Высокий       |
+| content-hash            | string             |      Нет | contract field | Высокий       |
+| cell-id                 | string             |      Нет | contract field | Высокий       |
+| cell-name               | string             |      Нет | contract field | Высокий       |
+| cell-description        | ['string', 'null'] |       Да | contract field | Средний       |
+| cell-source-tissue      | ['string', 'null'] |       Да | contract field | Средний       |
+| cell-source-organism    | ['string', 'null'] |       Да | contract field | Средний       |
+| cell-source-taxonomy-id | ['number', 'null'] |       Да | contract field | Средний       |
 
 #### 5. Domain ↔ Schema соответствие
 
 - 1:1 mapping?: UNKNOWN/PARTIAL (нужен автоматизированный field-level diff Domain entity ↔ Pandera ↔ Gold contract).
 - Поля отсутствуют в доменной модели?: не подтверждено, требуется diff.
 - Поля есть в домене, но не в таблице?: не подтверждено, требуется diff.
-- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column_groups: []`).
+- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column-groups: []`).
 
 Evidence:
 
-- `configs/pipelines/chembl/cell_line.yaml`
-- `configs/schemas/chembl/cell_line.yaml`
-- `configs/quality/entities/chembl/cell_line.yaml`
-- `docs/04-reference/contracts/gold/chembl_cell_line_v1.0.json`
-- `data/output/bronze/chembl/cell_line`
+- `configs/pipelines/chembl/cell-line.yaml`
+- `configs/schemas/chembl/cell-line.yaml`
+- `configs/quality/entities/chembl/cell-line.yaml`
+- `docs/04-reference/contracts/gold/chembl-cell-line-v1.0.json`
+- `data/output/bronze/chembl/cell-line`
 
-### chembl_compound_record
+### chembl-compound-record
 
 #### 1. Общая информация
 
 - Provider: chembl
-- Entity: compound_record
-- Pipeline name / pipeline_id: chembl_compound_record
-- Primary keys: ['record_id']
+- Entity: compound-record
+- Pipeline name / pipeline-id: chembl-compound-record
+- Primary keys: ['record-id']
 - Loading strategy: Silver `merge(default)`, Gold `scd2`
 - Write mode (Silver/Gold): `merge(default)` / `scd2`
 
 #### 2. Bronze Layer
 
 - Формат хранения: jsonl (по базовой конфигурации), фактический sample raw JSONL в репозитории: GAP.
-- Структура записи: `METADATA_ONLY`.
-  - Ключевые JSON paths (из schema_snapshot metadata): compound_key, compound_name, document_chembl_id, molecule_chembl_id, record_id, src_id
-- Поля метаданных: \_run_id/\_run_type/\_source_batch_id/\_ingestion_ts/\_index/content_hash/entity_id (по общесистемным конвенциям).
+- Структура записи: `METADATA-ONLY`.
+  - Ключевые JSON paths (из schema-snapshot metadata): compound-key, compound-name, document-chembl-id, molecule-chembl-id, record-id, src-id
+- Поля метаданных: \-run-id/\-run-type/\-source-batch-id/\-ingestion-ts/\-index/content-hash/entity-id (по общесистемным конвенциям).
 - Потенциальный schema drift: MEDIUM (для pipelines без фактического Bronze sample).
 - Проблемы: nested JSON и multi-type поля не подтверждены репрезентативной выборкой N>=200 (GAP).
 
@@ -326,22 +326,22 @@ Evidence:
 
 | Поле         | Тип    | Nullable | Source field         | Notes                       |
 | ------------ | ------ | -------: | -------------------- | --------------------------- |
-| entity_id    | string |  UNKNOWN | primary/business key | System prefix field         |
-| content_hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
-| \_run_id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
-| \_dq_warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
-| \_dq_error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| entity-id    | string |  UNKNOWN | primary/business key | System prefix field         |
+| content-hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
+| \-run-id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
+| \-dq-warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| \-dq-error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
 
 Анализ:
 
 - Типы (int→float coercion?): UNKNOWN per pipeline (нет извлечённой полной матрицы Pandera↔PyArrow в этом проходе).
 - Nullable consistency: частично UNKNOWN; требуется автоматический diff Pandera DataFrameModel vs silver.py schemas.
-- DQ flags / checks: externalized config `configs/quality/entities/chembl/compound_record.yaml`.
-- Hash exclusions: meta-fields из domain.constants.META_FIELDS.
+- DQ flags / checks: externalized config `configs/quality/entities/chembl/compound-record.yaml`.
+- Hash exclusions: meta-fields из domain.constants.META-FIELDS.
 - Ordering policy: system prefix + business + DQ suffix (фиксировано в schema conventions).
-- Schema drift tolerance: Silver on_schema_mismatch=evolve (base config).
+- Schema drift tolerance: Silver on-schema-mismatch=evolve (base config).
 - Partition keys: silver=MISSING, gold=MISSING.
-- Merge key correctness: uses primary_keys from pipeline config; collision risk requires entity-level validation.
+- Merge key correctness: uses primary-keys from pipeline config; collision risk requires entity-level validation.
 
 #### 4. Gold Schema (Контракт)
 
@@ -353,38 +353,38 @@ Evidence:
 
 | Поле           | Тип                | Nullable | Semantic role  | Breaking risk |
 | -------------- | ------------------ | -------: | -------------- | ------------- |
-| entity_id      | string             |      Нет | contract field | Высокий       |
-| content_hash   | string             |      Нет | contract field | Высокий       |
-| record_id      | number             |      Нет | contract field | Высокий       |
-| molecule_id    | string             |      Нет | contract field | Высокий       |
-| publication_id | string             |      Нет | contract field | Высокий       |
-| compound_key   | ['string', 'null'] |       Да | contract field | Средний       |
-| compound_name  | ['string', 'null'] |       Да | contract field | Средний       |
-| src_id         | number             |      Нет | contract field | Высокий       |
+| entity-id      | string             |      Нет | contract field | Высокий       |
+| content-hash   | string             |      Нет | contract field | Высокий       |
+| record-id      | number             |      Нет | contract field | Высокий       |
+| molecule-id    | string             |      Нет | contract field | Высокий       |
+| publication-id | string             |      Нет | contract field | Высокий       |
+| compound-key   | ['string', 'null'] |       Да | contract field | Средний       |
+| compound-name  | ['string', 'null'] |       Да | contract field | Средний       |
+| src-id         | number             |      Нет | contract field | Высокий       |
 
 #### 5. Domain ↔ Schema соответствие
 
 - 1:1 mapping?: UNKNOWN/PARTIAL (нужен автоматизированный field-level diff Domain entity ↔ Pandera ↔ Gold contract).
 - Поля отсутствуют в доменной модели?: не подтверждено, требуется diff.
 - Поля есть в домене, но не в таблице?: не подтверждено, требуется diff.
-- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column_groups: []`).
+- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column-groups: []`).
 
 Evidence:
 
-- `configs/pipelines/chembl/compound_record.yaml`
-- `configs/schemas/chembl/compound_record.yaml`
-- `configs/quality/entities/chembl/compound_record.yaml`
-- `docs/04-reference/contracts/gold/chembl_compound_record_v1.0.json`
-- `data/output/bronze/chembl/compound_record`
+- `configs/pipelines/chembl/compound-record.yaml`
+- `configs/schemas/chembl/compound-record.yaml`
+- `configs/quality/entities/chembl/compound-record.yaml`
+- `docs/04-reference/contracts/gold/chembl-compound-record-v1.0.json`
+- `data/output/bronze/chembl/compound-record`
 
-### chembl_molecule
+### chembl-molecule
 
 #### 1. Общая информация
 
 - Provider: chembl
 - Entity: molecule
-- Pipeline name / pipeline_id: chembl_molecule
-- Primary keys: ['molecule_id']
+- Pipeline name / pipeline-id: chembl-molecule
+- Primary keys: ['molecule-id']
 - Loading strategy: Silver `merge(default)`, Gold `scd2`
 - Write mode (Silver/Gold): `merge(default)` / `scd2`
 
@@ -393,7 +393,7 @@ Evidence:
 - Формат хранения: jsonl (по базовой конфигурации), фактический sample raw JSONL в репозитории: GAP.
 - Структура записи: `INFERRED`.
   - Ключевые JSON paths: UNKNOWN (нет JSONL sample, inference required).
-- Поля метаданных: \_run_id/\_run_type/\_source_batch_id/\_ingestion_ts/\_index/content_hash/entity_id (по общесистемным конвенциям).
+- Поля метаданных: \-run-id/\-run-type/\-source-batch-id/\-ingestion-ts/\-index/content-hash/entity-id (по общесистемным конвенциям).
 - Потенциальный schema drift: MEDIUM (для pipelines без фактического Bronze sample).
 - Проблемы: nested JSON и multi-type поля не подтверждены репрезентативной выборкой N>=200 (GAP).
 
@@ -401,22 +401,22 @@ Evidence:
 
 | Поле         | Тип    | Nullable | Source field         | Notes                       |
 | ------------ | ------ | -------: | -------------------- | --------------------------- |
-| entity_id    | string |  UNKNOWN | primary/business key | System prefix field         |
-| content_hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
-| \_run_id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
-| \_dq_warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
-| \_dq_error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| entity-id    | string |  UNKNOWN | primary/business key | System prefix field         |
+| content-hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
+| \-run-id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
+| \-dq-warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| \-dq-error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
 
 Анализ:
 
 - Типы (int→float coercion?): UNKNOWN per pipeline (нет извлечённой полной матрицы Pandera↔PyArrow в этом проходе).
 - Nullable consistency: частично UNKNOWN; требуется автоматический diff Pandera DataFrameModel vs silver.py schemas.
 - DQ flags / checks: externalized config `configs/quality/entities/chembl/molecule.yaml`.
-- Hash exclusions: meta-fields из domain.constants.META_FIELDS.
+- Hash exclusions: meta-fields из domain.constants.META-FIELDS.
 - Ordering policy: system prefix + business + DQ suffix (фиксировано в schema conventions).
-- Schema drift tolerance: Silver on_schema_mismatch=evolve (base config).
-- Partition keys: silver=['molecule_type'], gold=MISSING.
-- Merge key correctness: uses primary_keys from pipeline config; collision risk requires entity-level validation.
+- Schema drift tolerance: Silver on-schema-mismatch=evolve (base config).
+- Partition keys: silver=['molecule-type'], gold=MISSING.
+- Merge key correctness: uses primary-keys from pipeline config; collision risk requires entity-level validation.
 
 #### 4. Gold Schema (Контракт)
 
@@ -428,38 +428,38 @@ Evidence:
 
 | Поле           | Тип                | Nullable | Semantic role  | Breaking risk |
 | -------------- | ------------------ | -------: | -------------- | ------------- |
-| entity_id      | string             |      Нет | contract field | Высокий       |
-| content_hash   | string             |      Нет | contract field | Высокий       |
-| molecule_id    | string             |      Нет | contract field | Высокий       |
-| pref_name      | ['string', 'null'] |       Да | contract field | Средний       |
-| molecule_type  | ['string', 'null'] |       Да | contract field | Средний       |
-| structure_type | ['string', 'null'] |       Да | contract field | Средний       |
-| max_phase      | ['number', 'null'] |       Да | contract field | Средний       |
-| first_approval | ['number', 'null'] |       Да | contract field | Средний       |
+| entity-id      | string             |      Нет | contract field | Высокий       |
+| content-hash   | string             |      Нет | contract field | Высокий       |
+| molecule-id    | string             |      Нет | contract field | Высокий       |
+| pref-name      | ['string', 'null'] |       Да | contract field | Средний       |
+| molecule-type  | ['string', 'null'] |       Да | contract field | Средний       |
+| structure-type | ['string', 'null'] |       Да | contract field | Средний       |
+| max-phase      | ['number', 'null'] |       Да | contract field | Средний       |
+| first-approval | ['number', 'null'] |       Да | contract field | Средний       |
 
 #### 5. Domain ↔ Schema соответствие
 
 - 1:1 mapping?: UNKNOWN/PARTIAL (нужен автоматизированный field-level diff Domain entity ↔ Pandera ↔ Gold contract).
 - Поля отсутствуют в доменной модели?: не подтверждено, требуется diff.
 - Поля есть в домене, но не в таблице?: не подтверждено, требуется diff.
-- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column_groups: []`).
+- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column-groups: []`).
 
 Evidence:
 
 - `configs/pipelines/chembl/molecule.yaml`
 - `configs/schemas/chembl/molecule.yaml`
 - `configs/quality/entities/chembl/molecule.yaml`
-- `docs/04-reference/contracts/gold/chembl_molecule_v1.0.json`
+- `docs/04-reference/contracts/gold/chembl-molecule-v1.0.json`
 - `data/output/bronze/chembl/molecule`
 
-### chembl_protein_class
+### chembl-protein-class
 
 #### 1. Общая информация
 
 - Provider: chembl
-- Entity: protein_class
-- Pipeline name / pipeline_id: chembl_protein_class
-- Primary keys: ['protein_class_id']
+- Entity: protein-class
+- Pipeline name / pipeline-id: chembl-protein-class
+- Primary keys: ['protein-class-id']
 - Loading strategy: Silver `merge(default)`, Gold `scd2`
 - Write mode (Silver/Gold): `merge(default)` / `scd2`
 
@@ -468,7 +468,7 @@ Evidence:
 - Формат хранения: jsonl (по базовой конфигурации), фактический sample raw JSONL в репозитории: GAP.
 - Структура записи: `INFERRED`.
   - Ключевые JSON paths: UNKNOWN (нет JSONL sample, inference required).
-- Поля метаданных: \_run_id/\_run_type/\_source_batch_id/\_ingestion_ts/\_index/content_hash/entity_id (по общесистемным конвенциям).
+- Поля метаданных: \-run-id/\-run-type/\-source-batch-id/\-ingestion-ts/\-index/content-hash/entity-id (по общесистемным конвенциям).
 - Потенциальный schema drift: MEDIUM (для pipelines без фактического Bronze sample).
 - Проблемы: nested JSON и multi-type поля не подтверждены репрезентативной выборкой N>=200 (GAP).
 
@@ -476,22 +476,22 @@ Evidence:
 
 | Поле         | Тип    | Nullable | Source field         | Notes                       |
 | ------------ | ------ | -------: | -------------------- | --------------------------- |
-| entity_id    | string |  UNKNOWN | primary/business key | System prefix field         |
-| content_hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
-| \_run_id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
-| \_dq_warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
-| \_dq_error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| entity-id    | string |  UNKNOWN | primary/business key | System prefix field         |
+| content-hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
+| \-run-id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
+| \-dq-warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| \-dq-error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
 
 Анализ:
 
 - Типы (int→float coercion?): UNKNOWN per pipeline (нет извлечённой полной матрицы Pandera↔PyArrow в этом проходе).
 - Nullable consistency: частично UNKNOWN; требуется автоматический diff Pandera DataFrameModel vs silver.py schemas.
-- DQ flags / checks: externalized config `configs/quality/entities/chembl/protein_class.yaml`.
-- Hash exclusions: meta-fields из domain.constants.META_FIELDS.
+- DQ flags / checks: externalized config `configs/quality/entities/chembl/protein-class.yaml`.
+- Hash exclusions: meta-fields из domain.constants.META-FIELDS.
 - Ordering policy: system prefix + business + DQ suffix (фиксировано в schema conventions).
-- Schema drift tolerance: Silver on_schema_mismatch=evolve (base config).
-- Partition keys: silver=['class_level'], gold=MISSING.
-- Merge key correctness: uses primary_keys from pipeline config; collision risk requires entity-level validation.
+- Schema drift tolerance: Silver on-schema-mismatch=evolve (base config).
+- Partition keys: silver=['class-level'], gold=MISSING.
+- Merge key correctness: uses primary-keys from pipeline config; collision risk requires entity-level validation.
 
 #### 4. Gold Schema (Контракт)
 
@@ -503,38 +503,38 @@ Evidence:
 
 | Поле               | Тип                | Nullable | Semantic role  | Breaking risk |
 | ------------------ | ------------------ | -------: | -------------- | ------------- |
-| entity_id          | string             |      Нет | contract field | Высокий       |
-| content_hash       | string             |      Нет | contract field | Высокий       |
-| protein_class_id   | number             |      Нет | contract field | Высокий       |
-| parent_id          | ['number', 'null'] |       Да | contract field | Средний       |
-| class_level        | ['number', 'null'] |       Да | contract field | Средний       |
-| pref_name          | ['string', 'null'] |       Да | contract field | Средний       |
-| short_name         | ['string', 'null'] |       Да | contract field | Средний       |
-| protein_class_desc | ['string', 'null'] |       Да | contract field | Средний       |
+| entity-id          | string             |      Нет | contract field | Высокий       |
+| content-hash       | string             |      Нет | contract field | Высокий       |
+| protein-class-id   | number             |      Нет | contract field | Высокий       |
+| parent-id          | ['number', 'null'] |       Да | contract field | Средний       |
+| class-level        | ['number', 'null'] |       Да | contract field | Средний       |
+| pref-name          | ['string', 'null'] |       Да | contract field | Средний       |
+| short-name         | ['string', 'null'] |       Да | contract field | Средний       |
+| protein-class-desc | ['string', 'null'] |       Да | contract field | Средний       |
 
 #### 5. Domain ↔ Schema соответствие
 
 - 1:1 mapping?: UNKNOWN/PARTIAL (нужен автоматизированный field-level diff Domain entity ↔ Pandera ↔ Gold contract).
 - Поля отсутствуют в доменной модели?: не подтверждено, требуется diff.
 - Поля есть в домене, но не в таблице?: не подтверждено, требуется diff.
-- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column_groups: []`).
+- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column-groups: []`).
 
 Evidence:
 
-- `configs/pipelines/chembl/protein_class.yaml`
-- `configs/schemas/chembl/protein_class.yaml`
-- `configs/quality/entities/chembl/protein_class.yaml`
-- `docs/04-reference/contracts/gold/chembl_protein_class_v1.0.json`
-- `data/output/bronze/chembl/protein_class`
+- `configs/pipelines/chembl/protein-class.yaml`
+- `configs/schemas/chembl/protein-class.yaml`
+- `configs/quality/entities/chembl/protein-class.yaml`
+- `docs/04-reference/contracts/gold/chembl-protein-class-v1.0.json`
+- `data/output/bronze/chembl/protein-class`
 
-### chembl_publication
+### chembl-publication
 
 #### 1. Общая информация
 
 - Provider: chembl
 - Entity: publication
-- Pipeline name / pipeline_id: chembl_publication
-- Primary keys: ['publication_id']
+- Pipeline name / pipeline-id: chembl-publication
+- Primary keys: ['publication-id']
 - Loading strategy: Silver `merge(default)`, Gold `scd2`
 - Write mode (Silver/Gold): `merge(default)` / `scd2`
 
@@ -543,7 +543,7 @@ Evidence:
 - Формат хранения: jsonl (по базовой конфигурации), фактический sample raw JSONL в репозитории: GAP.
 - Структура записи: `INFERRED`.
   - Ключевые JSON paths: UNKNOWN (нет JSONL sample, inference required).
-- Поля метаданных: \_run_id/\_run_type/\_source_batch_id/\_ingestion_ts/\_index/content_hash/entity_id (по общесистемным конвенциям).
+- Поля метаданных: \-run-id/\-run-type/\-source-batch-id/\-ingestion-ts/\-index/content-hash/entity-id (по общесистемным конвенциям).
 - Потенциальный schema drift: MEDIUM (для pipelines без фактического Bronze sample).
 - Проблемы: nested JSON и multi-type поля не подтверждены репрезентативной выборкой N>=200 (GAP).
 
@@ -551,22 +551,22 @@ Evidence:
 
 | Поле         | Тип    | Nullable | Source field         | Notes                       |
 | ------------ | ------ | -------: | -------------------- | --------------------------- |
-| entity_id    | string |  UNKNOWN | primary/business key | System prefix field         |
-| content_hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
-| \_run_id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
-| \_dq_warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
-| \_dq_error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| entity-id    | string |  UNKNOWN | primary/business key | System prefix field         |
+| content-hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
+| \-run-id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
+| \-dq-warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| \-dq-error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
 
 Анализ:
 
 - Типы (int→float coercion?): UNKNOWN per pipeline (нет извлечённой полной матрицы Pandera↔PyArrow в этом проходе).
 - Nullable consistency: частично UNKNOWN; требуется автоматический diff Pandera DataFrameModel vs silver.py schemas.
 - DQ flags / checks: externalized config `configs/quality/entities/chembl/publication.yaml`.
-- Hash exclusions: meta-fields из domain.constants.META_FIELDS.
+- Hash exclusions: meta-fields из domain.constants.META-FIELDS.
 - Ordering policy: system prefix + business + DQ suffix (фиксировано в schema conventions).
-- Schema drift tolerance: Silver on_schema_mismatch=evolve (base config).
+- Schema drift tolerance: Silver on-schema-mismatch=evolve (base config).
 - Partition keys: silver=MISSING, gold=MISSING.
-- Merge key correctness: uses primary_keys from pipeline config; collision risk requires entity-level validation.
+- Merge key correctness: uses primary-keys from pipeline config; collision risk requires entity-level validation.
 
 #### 4. Gold Schema (Контракт)
 
@@ -585,7 +585,7 @@ Evidence:
 - 1:1 mapping?: UNKNOWN/PARTIAL (нужен автоматизированный field-level diff Domain entity ↔ Pandera ↔ Gold contract).
 - Поля отсутствуют в доменной модели?: не подтверждено, требуется diff.
 - Поля есть в домене, но не в таблице?: не подтверждено, требуется diff.
-- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column_groups: []`).
+- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column-groups: []`).
 
 Evidence:
 
@@ -595,14 +595,14 @@ Evidence:
 - `MISSING`
 - `data/output/bronze/chembl/publication`
 
-### chembl_publication_similarity
+### chembl-publication-similarity
 
 #### 1. Общая информация
 
 - Provider: chembl
-- Entity: publication_similarity
-- Pipeline name / pipeline_id: chembl_publication_similarity
-- Primary keys: ['sim_id']
+- Entity: publication-similarity
+- Pipeline name / pipeline-id: chembl-publication-similarity
+- Primary keys: ['sim-id']
 - Loading strategy: Silver `merge(default)`, Gold `overwrite`
 - Write mode (Silver/Gold): `merge(default)` / `overwrite`
 
@@ -611,7 +611,7 @@ Evidence:
 - Формат хранения: jsonl (по базовой конфигурации), фактический sample raw JSONL в репозитории: GAP.
 - Структура записи: `INFERRED`.
   - Ключевые JSON paths: UNKNOWN (нет JSONL sample, inference required).
-- Поля метаданных: \_run_id/\_run_type/\_source_batch_id/\_ingestion_ts/\_index/content_hash/entity_id (по общесистемным конвенциям).
+- Поля метаданных: \-run-id/\-run-type/\-source-batch-id/\-ingestion-ts/\-index/content-hash/entity-id (по общесистемным конвенциям).
 - Потенциальный schema drift: MEDIUM (для pipelines без фактического Bronze sample).
 - Проблемы: nested JSON и multi-type поля не подтверждены репрезентативной выборкой N>=200 (GAP).
 
@@ -619,22 +619,22 @@ Evidence:
 
 | Поле         | Тип    | Nullable | Source field         | Notes                       |
 | ------------ | ------ | -------: | -------------------- | --------------------------- |
-| entity_id    | string |  UNKNOWN | primary/business key | System prefix field         |
-| content_hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
-| \_run_id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
-| \_dq_warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
-| \_dq_error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| entity-id    | string |  UNKNOWN | primary/business key | System prefix field         |
+| content-hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
+| \-run-id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
+| \-dq-warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| \-dq-error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
 
 Анализ:
 
 - Типы (int→float coercion?): UNKNOWN per pipeline (нет извлечённой полной матрицы Pandera↔PyArrow в этом проходе).
 - Nullable consistency: частично UNKNOWN; требуется автоматический diff Pandera DataFrameModel vs silver.py schemas.
-- DQ flags / checks: externalized config `configs/quality/entities/chembl/publication_similarity.yaml`.
-- Hash exclusions: meta-fields из domain.constants.META_FIELDS.
+- DQ flags / checks: externalized config `configs/quality/entities/chembl/publication-similarity.yaml`.
+- Hash exclusions: meta-fields из domain.constants.META-FIELDS.
 - Ordering policy: system prefix + business + DQ suffix (фиксировано в schema conventions).
-- Schema drift tolerance: Silver on_schema_mismatch=evolve (base config).
+- Schema drift tolerance: Silver on-schema-mismatch=evolve (base config).
 - Partition keys: silver=[], gold=MISSING.
-- Merge key correctness: uses primary_keys from pipeline config; collision risk requires entity-level validation.
+- Merge key correctness: uses primary-keys from pipeline config; collision risk requires entity-level validation.
 
 #### 4. Gold Schema (Контракт)
 
@@ -653,24 +653,24 @@ Evidence:
 - 1:1 mapping?: UNKNOWN/PARTIAL (нужен автоматизированный field-level diff Domain entity ↔ Pandera ↔ Gold contract).
 - Поля отсутствуют в доменной модели?: не подтверждено, требуется diff.
 - Поля есть в домене, но не в таблице?: не подтверждено, требуется diff.
-- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column_groups: []`).
+- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column-groups: []`).
 
 Evidence:
 
-- `configs/pipelines/chembl/publication_similarity.yaml`
-- `configs/schemas/chembl/publication_similarity.yaml`
-- `configs/quality/entities/chembl/publication_similarity.yaml`
+- `configs/pipelines/chembl/publication-similarity.yaml`
+- `configs/schemas/chembl/publication-similarity.yaml`
+- `configs/quality/entities/chembl/publication-similarity.yaml`
 - `MISSING`
-- `data/output/bronze/chembl/publication_similarity`
+- `data/output/bronze/chembl/publication-similarity`
 
-### chembl_publication_term
+### chembl-publication-term
 
 #### 1. Общая информация
 
 - Provider: chembl
-- Entity: publication_term
-- Pipeline name / pipeline_id: chembl_publication_term
-- Primary keys: ['entity_id']
+- Entity: publication-term
+- Pipeline name / pipeline-id: chembl-publication-term
+- Primary keys: ['entity-id']
 - Loading strategy: Silver `merge(default)`, Gold `overwrite`
 - Write mode (Silver/Gold): `merge(default)` / `overwrite`
 
@@ -679,7 +679,7 @@ Evidence:
 - Формат хранения: jsonl (по базовой конфигурации), фактический sample raw JSONL в репозитории: GAP.
 - Структура записи: `INFERRED`.
   - Ключевые JSON paths: UNKNOWN (нет JSONL sample, inference required).
-- Поля метаданных: \_run_id/\_run_type/\_source_batch_id/\_ingestion_ts/\_index/content_hash/entity_id (по общесистемным конвенциям).
+- Поля метаданных: \-run-id/\-run-type/\-source-batch-id/\-ingestion-ts/\-index/content-hash/entity-id (по общесистемным конвенциям).
 - Потенциальный schema drift: MEDIUM (для pipelines без фактического Bronze sample).
 - Проблемы: nested JSON и multi-type поля не подтверждены репрезентативной выборкой N>=200 (GAP).
 
@@ -687,22 +687,22 @@ Evidence:
 
 | Поле         | Тип    | Nullable | Source field         | Notes                       |
 | ------------ | ------ | -------: | -------------------- | --------------------------- |
-| entity_id    | string |  UNKNOWN | primary/business key | System prefix field         |
-| content_hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
-| \_run_id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
-| \_dq_warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
-| \_dq_error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| entity-id    | string |  UNKNOWN | primary/business key | System prefix field         |
+| content-hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
+| \-run-id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
+| \-dq-warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| \-dq-error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
 
 Анализ:
 
 - Типы (int→float coercion?): UNKNOWN per pipeline (нет извлечённой полной матрицы Pandera↔PyArrow в этом проходе).
 - Nullable consistency: частично UNKNOWN; требуется автоматический diff Pandera DataFrameModel vs silver.py schemas.
-- DQ flags / checks: externalized config `configs/quality/entities/chembl/publication_term.yaml`.
-- Hash exclusions: meta-fields из domain.constants.META_FIELDS.
+- DQ flags / checks: externalized config `configs/quality/entities/chembl/publication-term.yaml`.
+- Hash exclusions: meta-fields из domain.constants.META-FIELDS.
 - Ordering policy: system prefix + business + DQ suffix (фиксировано в schema conventions).
-- Schema drift tolerance: Silver on_schema_mismatch=evolve (base config).
-- Partition keys: silver=['term_type'], gold=MISSING.
-- Merge key correctness: uses primary_keys from pipeline config; collision risk requires entity-level validation.
+- Schema drift tolerance: Silver on-schema-mismatch=evolve (base config).
+- Partition keys: silver=['term-type'], gold=MISSING.
+- Merge key correctness: uses primary-keys from pipeline config; collision risk requires entity-level validation.
 
 #### 4. Gold Schema (Контракт)
 
@@ -721,24 +721,24 @@ Evidence:
 - 1:1 mapping?: UNKNOWN/PARTIAL (нужен автоматизированный field-level diff Domain entity ↔ Pandera ↔ Gold contract).
 - Поля отсутствуют в доменной модели?: не подтверждено, требуется diff.
 - Поля есть в домене, но не в таблице?: не подтверждено, требуется diff.
-- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column_groups: []`).
+- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column-groups: []`).
 
 Evidence:
 
-- `configs/pipelines/chembl/publication_term.yaml`
-- `configs/schemas/chembl/publication_term.yaml`
-- `configs/quality/entities/chembl/publication_term.yaml`
+- `configs/pipelines/chembl/publication-term.yaml`
+- `configs/schemas/chembl/publication-term.yaml`
+- `configs/quality/entities/chembl/publication-term.yaml`
 - `MISSING`
-- `data/output/bronze/chembl/publication_term`
+- `data/output/bronze/chembl/publication-term`
 
-### chembl_subcellular_fraction
+### chembl-subcellular-fraction
 
 #### 1. Общая информация
 
 - Provider: chembl
-- Entity: subcellular_fraction
-- Pipeline name / pipeline_id: chembl_subcellular_fraction
-- Primary keys: ['entity_id']
+- Entity: subcellular-fraction
+- Pipeline name / pipeline-id: chembl-subcellular-fraction
+- Primary keys: ['entity-id']
 - Loading strategy: Silver `merge(default)`, Gold `scd2`
 - Write mode (Silver/Gold): `merge(default)` / `scd2`
 
@@ -747,7 +747,7 @@ Evidence:
 - Формат хранения: jsonl (по базовой конфигурации), фактический sample raw JSONL в репозитории: GAP.
 - Структура записи: `INFERRED`.
   - Ключевые JSON paths: UNKNOWN (нет JSONL sample, inference required).
-- Поля метаданных: \_run_id/\_run_type/\_source_batch_id/\_ingestion_ts/\_index/content_hash/entity_id (по общесистемным конвенциям).
+- Поля метаданных: \-run-id/\-run-type/\-source-batch-id/\-ingestion-ts/\-index/content-hash/entity-id (по общесистемным конвенциям).
 - Потенциальный schema drift: MEDIUM (для pipelines без фактического Bronze sample).
 - Проблемы: nested JSON и multi-type поля не подтверждены репрезентативной выборкой N>=200 (GAP).
 
@@ -755,22 +755,22 @@ Evidence:
 
 | Поле         | Тип    | Nullable | Source field         | Notes                       |
 | ------------ | ------ | -------: | -------------------- | --------------------------- |
-| entity_id    | string |  UNKNOWN | primary/business key | System prefix field         |
-| content_hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
-| \_run_id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
-| \_dq_warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
-| \_dq_error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| entity-id    | string |  UNKNOWN | primary/business key | System prefix field         |
+| content-hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
+| \-run-id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
+| \-dq-warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| \-dq-error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
 
 Анализ:
 
 - Типы (int→float coercion?): UNKNOWN per pipeline (нет извлечённой полной матрицы Pandera↔PyArrow в этом проходе).
 - Nullable consistency: частично UNKNOWN; требуется автоматический diff Pandera DataFrameModel vs silver.py schemas.
-- DQ flags / checks: externalized config `configs/quality/entities/chembl/subcellular_fraction.yaml`.
-- Hash exclusions: meta-fields из domain.constants.META_FIELDS.
+- DQ flags / checks: externalized config `configs/quality/entities/chembl/subcellular-fraction.yaml`.
+- Hash exclusions: meta-fields из domain.constants.META-FIELDS.
 - Ordering policy: system prefix + business + DQ suffix (фиксировано в schema conventions).
-- Schema drift tolerance: Silver on_schema_mismatch=evolve (base config).
+- Schema drift tolerance: Silver on-schema-mismatch=evolve (base config).
 - Partition keys: silver=MISSING, gold=MISSING.
-- Merge key correctness: uses primary_keys from pipeline config; collision risk requires entity-level validation.
+- Merge key correctness: uses primary-keys from pipeline config; collision risk requires entity-level validation.
 
 #### 4. Gold Schema (Контракт)
 
@@ -782,38 +782,38 @@ Evidence:
 
 | Поле                 | Тип                | Nullable | Semantic role  | Breaking risk |
 | -------------------- | ------------------ | -------: | -------------- | ------------- |
-| entity_id            | string             |      Нет | contract field | Высокий       |
-| content_hash         | string             |      Нет | contract field | Высокий       |
-| subcellular_fraction | string             |      Нет | contract field | Высокий       |
-| assay_count          | ['number', 'null'] |       Да | contract field | Средний       |
-| example_assay_id     | ['string', 'null'] |       Да | contract field | Средний       |
-| \_run_id             | string             |      Нет | contract field | Высокий       |
-| \_run_type           | string             |      Нет | contract field | Высокий       |
-| \_source_batch_id    | ['string', 'null'] |       Да | contract field | Средний       |
+| entity-id            | string             |      Нет | contract field | Высокий       |
+| content-hash         | string             |      Нет | contract field | Высокий       |
+| subcellular-fraction | string             |      Нет | contract field | Высокий       |
+| assay-count          | ['number', 'null'] |       Да | contract field | Средний       |
+| example-assay-id     | ['string', 'null'] |       Да | contract field | Средний       |
+| \-run-id             | string             |      Нет | contract field | Высокий       |
+| \-run-type           | string             |      Нет | contract field | Высокий       |
+| \-source-batch-id    | ['string', 'null'] |       Да | contract field | Средний       |
 
 #### 5. Domain ↔ Schema соответствие
 
 - 1:1 mapping?: UNKNOWN/PARTIAL (нужен автоматизированный field-level diff Domain entity ↔ Pandera ↔ Gold contract).
 - Поля отсутствуют в доменной модели?: не подтверждено, требуется diff.
 - Поля есть в домене, но не в таблице?: не подтверждено, требуется diff.
-- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column_groups: []`).
+- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column-groups: []`).
 
 Evidence:
 
-- `configs/pipelines/chembl/subcellular_fraction.yaml`
-- `configs/schemas/chembl/subcellular_fraction.yaml`
-- `configs/quality/entities/chembl/subcellular_fraction.yaml`
-- `docs/04-reference/contracts/gold/chembl_subcellular_fraction_v1.0.json`
-- `data/output/bronze/chembl/subcellular_fraction`
+- `configs/pipelines/chembl/subcellular-fraction.yaml`
+- `configs/schemas/chembl/subcellular-fraction.yaml`
+- `configs/quality/entities/chembl/subcellular-fraction.yaml`
+- `docs/04-reference/contracts/gold/chembl-subcellular-fraction-v1.0.json`
+- `data/output/bronze/chembl/subcellular-fraction`
 
-### chembl_target
+### chembl-target
 
 #### 1. Общая информация
 
 - Provider: chembl
 - Entity: target
-- Pipeline name / pipeline_id: chembl_target
-- Primary keys: ['target_id']
+- Pipeline name / pipeline-id: chembl-target
+- Primary keys: ['target-id']
 - Loading strategy: Silver `merge(default)`, Gold `scd2`
 - Write mode (Silver/Gold): `merge(default)` / `scd2`
 
@@ -822,7 +822,7 @@ Evidence:
 - Формат хранения: jsonl (по базовой конфигурации), фактический sample raw JSONL в репозитории: GAP.
 - Структура записи: `INFERRED`.
   - Ключевые JSON paths: UNKNOWN (нет JSONL sample, inference required).
-- Поля метаданных: \_run_id/\_run_type/\_source_batch_id/\_ingestion_ts/\_index/content_hash/entity_id (по общесистемным конвенциям).
+- Поля метаданных: \-run-id/\-run-type/\-source-batch-id/\-ingestion-ts/\-index/content-hash/entity-id (по общесистемным конвенциям).
 - Потенциальный schema drift: MEDIUM (для pipelines без фактического Bronze sample).
 - Проблемы: nested JSON и multi-type поля не подтверждены репрезентативной выборкой N>=200 (GAP).
 
@@ -830,22 +830,22 @@ Evidence:
 
 | Поле         | Тип    | Nullable | Source field         | Notes                       |
 | ------------ | ------ | -------: | -------------------- | --------------------------- |
-| entity_id    | string |  UNKNOWN | primary/business key | System prefix field         |
-| content_hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
-| \_run_id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
-| \_dq_warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
-| \_dq_error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| entity-id    | string |  UNKNOWN | primary/business key | System prefix field         |
+| content-hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
+| \-run-id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
+| \-dq-warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| \-dq-error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
 
 Анализ:
 
 - Типы (int→float coercion?): UNKNOWN per pipeline (нет извлечённой полной матрицы Pandera↔PyArrow в этом проходе).
 - Nullable consistency: частично UNKNOWN; требуется автоматический diff Pandera DataFrameModel vs silver.py schemas.
 - DQ flags / checks: externalized config `configs/quality/entities/chembl/target.yaml`.
-- Hash exclusions: meta-fields из domain.constants.META_FIELDS.
+- Hash exclusions: meta-fields из domain.constants.META-FIELDS.
 - Ordering policy: system prefix + business + DQ suffix (фиксировано в schema conventions).
-- Schema drift tolerance: Silver on_schema_mismatch=evolve (base config).
-- Partition keys: silver=['target_type'], gold=MISSING.
-- Merge key correctness: uses primary_keys from pipeline config; collision risk requires entity-level validation.
+- Schema drift tolerance: Silver on-schema-mismatch=evolve (base config).
+- Partition keys: silver=['target-type'], gold=MISSING.
+- Merge key correctness: uses primary-keys from pipeline config; collision risk requires entity-level validation.
 
 #### 4. Gold Schema (Контракт)
 
@@ -857,47 +857,47 @@ Evidence:
 
 | Поле               | Тип                 | Nullable | Semantic role  | Breaking risk |
 | ------------------ | ------------------- | -------: | -------------- | ------------- |
-| entity_id          | string              |      Нет | contract field | Высокий       |
-| content_hash       | string              |      Нет | contract field | Высокий       |
-| target_id          | string              |      Нет | contract field | Высокий       |
-| pref_name          | ['string', 'null']  |       Да | contract field | Средний       |
-| target_type        | ['string', 'null']  |       Да | contract field | Средний       |
+| entity-id          | string              |      Нет | contract field | Высокий       |
+| content-hash       | string              |      Нет | contract field | Высокий       |
+| target-id          | string              |      Нет | contract field | Высокий       |
+| pref-name          | ['string', 'null']  |       Да | contract field | Средний       |
+| target-type        | ['string', 'null']  |       Да | contract field | Средний       |
 | organism           | ['string', 'null']  |       Да | contract field | Средний       |
-| taxonomy_id        | ['number', 'null']  |       Да | contract field | Средний       |
-| species_group_flag | ['boolean', 'null'] |       Да | contract field | Средний       |
+| taxonomy-id        | ['number', 'null']  |       Да | contract field | Средний       |
+| species-group-flag | ['boolean', 'null'] |       Да | contract field | Средний       |
 
 #### 5. Domain ↔ Schema соответствие
 
 - 1:1 mapping?: UNKNOWN/PARTIAL (нужен автоматизированный field-level diff Domain entity ↔ Pandera ↔ Gold contract).
 - Поля отсутствуют в доменной модели?: не подтверждено, требуется diff.
 - Поля есть в домене, но не в таблице?: не подтверждено, требуется diff.
-- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column_groups: []`).
+- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column-groups: []`).
 
 Evidence:
 
 - `configs/pipelines/chembl/target.yaml`
 - `configs/schemas/chembl/target.yaml`
 - `configs/quality/entities/chembl/target.yaml`
-- `docs/04-reference/contracts/gold/chembl_target_v1.0.json`
+- `docs/04-reference/contracts/gold/chembl-target-v1.0.json`
 - `data/output/bronze/chembl/target`
 
-### chembl_target_component
+### chembl-target-component
 
 #### 1. Общая информация
 
 - Provider: chembl
-- Entity: target_component
-- Pipeline name / pipeline_id: chembl_target_component
-- Primary keys: ['component_id']
+- Entity: target-component
+- Pipeline name / pipeline-id: chembl-target-component
+- Primary keys: ['component-id']
 - Loading strategy: Silver `merge(default)`, Gold `scd2`
 - Write mode (Silver/Gold): `merge(default)` / `scd2`
 
 #### 2. Bronze Layer
 
 - Формат хранения: jsonl (по базовой конфигурации), фактический sample raw JSONL в репозитории: GAP.
-- Структура записи: `METADATA_ONLY`.
-  - Ключевые JSON paths (из schema_snapshot metadata): accession, component_id, component_type, description, go_slims, organism, protein_classifications, sequence, target_component_synonyms, target_component_xrefs, targets, tax_id
-- Поля метаданных: \_run_id/\_run_type/\_source_batch_id/\_ingestion_ts/\_index/content_hash/entity_id (по общесистемным конвенциям).
+- Структура записи: `METADATA-ONLY`.
+  - Ключевые JSON paths (из schema-snapshot metadata): accession, component-id, component-type, description, go-slims, organism, protein-classifications, sequence, target-component-synonyms, target-component-xrefs, targets, tax-id
+- Поля метаданных: \-run-id/\-run-type/\-source-batch-id/\-ingestion-ts/\-index/content-hash/entity-id (по общесистемным конвенциям).
 - Потенциальный schema drift: MEDIUM (для pipelines без фактического Bronze sample).
 - Проблемы: nested JSON и multi-type поля не подтверждены репрезентативной выборкой N>=200 (GAP).
 
@@ -905,22 +905,22 @@ Evidence:
 
 | Поле         | Тип    | Nullable | Source field         | Notes                       |
 | ------------ | ------ | -------: | -------------------- | --------------------------- |
-| entity_id    | string |  UNKNOWN | primary/business key | System prefix field         |
-| content_hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
-| \_run_id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
-| \_dq_warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
-| \_dq_error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| entity-id    | string |  UNKNOWN | primary/business key | System prefix field         |
+| content-hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
+| \-run-id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
+| \-dq-warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| \-dq-error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
 
 Анализ:
 
 - Типы (int→float coercion?): UNKNOWN per pipeline (нет извлечённой полной матрицы Pandera↔PyArrow в этом проходе).
 - Nullable consistency: частично UNKNOWN; требуется автоматический diff Pandera DataFrameModel vs silver.py schemas.
-- DQ flags / checks: externalized config `configs/quality/entities/chembl/target_component.yaml`.
-- Hash exclusions: meta-fields из domain.constants.META_FIELDS.
+- DQ flags / checks: externalized config `configs/quality/entities/chembl/target-component.yaml`.
+- Hash exclusions: meta-fields из domain.constants.META-FIELDS.
 - Ordering policy: system prefix + business + DQ suffix (фиксировано в schema conventions).
-- Schema drift tolerance: Silver on_schema_mismatch=evolve (base config).
+- Schema drift tolerance: Silver on-schema-mismatch=evolve (base config).
 - Partition keys: silver=['organism'], gold=MISSING.
-- Merge key correctness: uses primary_keys from pipeline config; collision risk requires entity-level validation.
+- Merge key correctness: uses primary-keys from pipeline config; collision risk requires entity-level validation.
 
 #### 4. Gold Schema (Контракт)
 
@@ -932,38 +932,38 @@ Evidence:
 
 | Поле           | Тип                | Nullable | Semantic role  | Breaking risk |
 | -------------- | ------------------ | -------: | -------------- | ------------- |
-| entity_id      | string             |      Нет | contract field | Высокий       |
-| content_hash   | string             |      Нет | contract field | Высокий       |
-| component_id   | number             |      Нет | contract field | Высокий       |
+| entity-id      | string             |      Нет | contract field | Высокий       |
+| content-hash   | string             |      Нет | contract field | Высокий       |
+| component-id   | number             |      Нет | contract field | Высокий       |
 | accession      | ['string', 'null'] |       Да | contract field | Средний       |
-| component_type | ['string', 'null'] |       Да | contract field | Средний       |
+| component-type | ['string', 'null'] |       Да | contract field | Средний       |
 | description    | ['string', 'null'] |       Да | contract field | Средний       |
 | organism       | ['string', 'null'] |       Да | contract field | Средний       |
-| taxonomy_id    | ['number', 'null'] |       Да | contract field | Средний       |
+| taxonomy-id    | ['number', 'null'] |       Да | contract field | Средний       |
 
 #### 5. Domain ↔ Schema соответствие
 
 - 1:1 mapping?: UNKNOWN/PARTIAL (нужен автоматизированный field-level diff Domain entity ↔ Pandera ↔ Gold contract).
 - Поля отсутствуют в доменной модели?: не подтверждено, требуется diff.
 - Поля есть в домене, но не в таблице?: не подтверждено, требуется diff.
-- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column_groups: []`).
+- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column-groups: []`).
 
 Evidence:
 
-- `configs/pipelines/chembl/target_component.yaml`
-- `configs/schemas/chembl/target_component.yaml`
-- `configs/quality/entities/chembl/target_component.yaml`
-- `docs/04-reference/contracts/gold/chembl_target_component_v1.0.json`
-- `data/output/bronze/chembl/target_component`
+- `configs/pipelines/chembl/target-component.yaml`
+- `configs/schemas/chembl/target-component.yaml`
+- `configs/quality/entities/chembl/target-component.yaml`
+- `docs/04-reference/contracts/gold/chembl-target-component-v1.0.json`
+- `data/output/bronze/chembl/target-component`
 
-### chembl_tissue
+### chembl-tissue
 
 #### 1. Общая информация
 
 - Provider: chembl
 - Entity: tissue
-- Pipeline name / pipeline_id: chembl_tissue
-- Primary keys: ['tissue_id']
+- Pipeline name / pipeline-id: chembl-tissue
+- Primary keys: ['tissue-id']
 - Loading strategy: Silver `merge(default)`, Gold `scd2`
 - Write mode (Silver/Gold): `merge(default)` / `scd2`
 
@@ -972,7 +972,7 @@ Evidence:
 - Формат хранения: jsonl (по базовой конфигурации), фактический sample raw JSONL в репозитории: GAP.
 - Структура записи: `INFERRED`.
   - Ключевые JSON paths: UNKNOWN (нет JSONL sample, inference required).
-- Поля метаданных: \_run_id/\_run_type/\_source_batch_id/\_ingestion_ts/\_index/content_hash/entity_id (по общесистемным конвенциям).
+- Поля метаданных: \-run-id/\-run-type/\-source-batch-id/\-ingestion-ts/\-index/content-hash/entity-id (по общесистемным конвенциям).
 - Потенциальный schema drift: MEDIUM (для pipelines без фактического Bronze sample).
 - Проблемы: nested JSON и multi-type поля не подтверждены репрезентативной выборкой N>=200 (GAP).
 
@@ -980,22 +980,22 @@ Evidence:
 
 | Поле         | Тип    | Nullable | Source field         | Notes                       |
 | ------------ | ------ | -------: | -------------------- | --------------------------- |
-| entity_id    | string |  UNKNOWN | primary/business key | System prefix field         |
-| content_hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
-| \_run_id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
-| \_dq_warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
-| \_dq_error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| entity-id    | string |  UNKNOWN | primary/business key | System prefix field         |
+| content-hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
+| \-run-id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
+| \-dq-warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| \-dq-error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
 
 Анализ:
 
 - Типы (int→float coercion?): UNKNOWN per pipeline (нет извлечённой полной матрицы Pandera↔PyArrow в этом проходе).
 - Nullable consistency: частично UNKNOWN; требуется автоматический diff Pandera DataFrameModel vs silver.py schemas.
 - DQ flags / checks: externalized config `configs/quality/entities/chembl/tissue.yaml`.
-- Hash exclusions: meta-fields из domain.constants.META_FIELDS.
+- Hash exclusions: meta-fields из domain.constants.META-FIELDS.
 - Ordering policy: system prefix + business + DQ suffix (фиксировано в schema conventions).
-- Schema drift tolerance: Silver on_schema_mismatch=evolve (base config).
+- Schema drift tolerance: Silver on-schema-mismatch=evolve (base config).
 - Partition keys: silver=MISSING, gold=MISSING.
-- Merge key correctness: uses primary_keys from pipeline config; collision risk requires entity-level validation.
+- Merge key correctness: uses primary-keys from pipeline config; collision risk requires entity-level validation.
 
 #### 4. Gold Schema (Контракт)
 
@@ -1007,37 +1007,37 @@ Evidence:
 
 | Поле       | Тип                | Nullable | Semantic role  | Breaking risk |
 | ---------- | ------------------ | -------: | -------------- | ------------- |
-| tissue_id  | string             |      Нет | contract field | Высокий       |
-| pref_name  | string             |      Нет | contract field | Высокий       |
-| bto_id     | ['string', 'null'] |       Да | contract field | Средний       |
-| caloha_id  | ['string', 'null'] |       Да | contract field | Средний       |
-| efo_id     | ['string', 'null'] |       Да | contract field | Средний       |
-| uberon_id  | ['string', 'null'] |       Да | contract field | Средний       |
-| \_run_id   | string             |      Нет | contract field | Высокий       |
-| \_run_type | string             |      Нет | contract field | Высокий       |
+| tissue-id  | string             |      Нет | contract field | Высокий       |
+| pref-name  | string             |      Нет | contract field | Высокий       |
+| bto-id     | ['string', 'null'] |       Да | contract field | Средний       |
+| caloha-id  | ['string', 'null'] |       Да | contract field | Средний       |
+| efo-id     | ['string', 'null'] |       Да | contract field | Средний       |
+| uberon-id  | ['string', 'null'] |       Да | contract field | Средний       |
+| \-run-id   | string             |      Нет | contract field | Высокий       |
+| \-run-type | string             |      Нет | contract field | Высокий       |
 
 #### 5. Domain ↔ Schema соответствие
 
 - 1:1 mapping?: UNKNOWN/PARTIAL (нужен автоматизированный field-level diff Domain entity ↔ Pandera ↔ Gold contract).
 - Поля отсутствуют в доменной модели?: не подтверждено, требуется diff.
 - Поля есть в домене, но не в таблице?: не подтверждено, требуется diff.
-- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column_groups: []`).
+- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column-groups: []`).
 
 Evidence:
 
 - `configs/pipelines/chembl/tissue.yaml`
 - `configs/schemas/chembl/tissue.yaml`
 - `configs/quality/entities/chembl/tissue.yaml`
-- `docs/04-reference/contracts/gold/chembl_tissue_v1.0.json`
+- `docs/04-reference/contracts/gold/chembl-tissue-v1.0.json`
 - `data/output/bronze/chembl/tissue`
 
-### crossref_publication
+### crossref-publication
 
 #### 1. Общая информация
 
 - Provider: crossref
 - Entity: publication
-- Pipeline name / pipeline_id: crossref_publication
+- Pipeline name / pipeline-id: crossref-publication
 - Primary keys: ['doi']
 - Loading strategy: Silver `merge(default)`, Gold `scd2`
 - Write mode (Silver/Gold): `merge(default)` / `scd2`
@@ -1047,7 +1047,7 @@ Evidence:
 - Формат хранения: jsonl (по базовой конфигурации), фактический sample raw JSONL в репозитории: GAP.
 - Структура записи: `INFERRED`.
   - Ключевые JSON paths: UNKNOWN (нет JSONL sample, inference required).
-- Поля метаданных: \_run_id/\_run_type/\_source_batch_id/\_ingestion_ts/\_index/content_hash/entity_id (по общесистемным конвенциям).
+- Поля метаданных: \-run-id/\-run-type/\-source-batch-id/\-ingestion-ts/\-index/content-hash/entity-id (по общесистемным конвенциям).
 - Потенциальный schema drift: MEDIUM (для pipelines без фактического Bronze sample).
 - Проблемы: nested JSON и multi-type поля не подтверждены репрезентативной выборкой N>=200 (GAP).
 
@@ -1055,22 +1055,22 @@ Evidence:
 
 | Поле         | Тип    | Nullable | Source field         | Notes                       |
 | ------------ | ------ | -------: | -------------------- | --------------------------- |
-| entity_id    | string |  UNKNOWN | primary/business key | System prefix field         |
-| content_hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
-| \_run_id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
-| \_dq_warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
-| \_dq_error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| entity-id    | string |  UNKNOWN | primary/business key | System prefix field         |
+| content-hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
+| \-run-id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
+| \-dq-warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| \-dq-error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
 
 Анализ:
 
 - Типы (int→float coercion?): UNKNOWN per pipeline (нет извлечённой полной матрицы Pandera↔PyArrow в этом проходе).
 - Nullable consistency: частично UNKNOWN; требуется автоматический diff Pandera DataFrameModel vs silver.py schemas.
 - DQ flags / checks: externalized config `configs/quality/entities/crossref/publication.yaml`.
-- Hash exclusions: meta-fields из domain.constants.META_FIELDS.
+- Hash exclusions: meta-fields из domain.constants.META-FIELDS.
 - Ordering policy: system prefix + business + DQ suffix (фиксировано в schema conventions).
-- Schema drift tolerance: Silver on_schema_mismatch=evolve (base config).
+- Schema drift tolerance: Silver on-schema-mismatch=evolve (base config).
 - Partition keys: silver=MISSING, gold=MISSING.
-- Merge key correctness: uses primary_keys from pipeline config; collision risk requires entity-level validation.
+- Merge key correctness: uses primary-keys from pipeline config; collision risk requires entity-level validation.
 
 #### 4. Gold Schema (Контракт)
 
@@ -1082,38 +1082,38 @@ Evidence:
 
 | Поле         | Тип                | Nullable | Semantic role  | Breaking risk |
 | ------------ | ------------------ | -------: | -------------- | ------------- |
-| entity_id    | string             |      Нет | contract field | Высокий       |
-| content_hash | string             |      Нет | contract field | Высокий       |
+| entity-id    | string             |      Нет | contract field | Высокий       |
+| content-hash | string             |      Нет | contract field | Высокий       |
 | doi          | string             |      Нет | contract field | Высокий       |
 | title        | ['string', 'null'] |       Да | contract field | Средний       |
 | authors      | ['string', 'null'] |       Да | contract field | Средний       |
 | journal      | ['string', 'null'] |       Да | contract field | Средний       |
 | issn         | ['string', 'null'] |       Да | contract field | Средний       |
-| issn_list    | ['string', 'null'] |       Да | contract field | Средний       |
+| issn-list    | ['string', 'null'] |       Да | contract field | Средний       |
 
 #### 5. Domain ↔ Schema соответствие
 
 - 1:1 mapping?: UNKNOWN/PARTIAL (нужен автоматизированный field-level diff Domain entity ↔ Pandera ↔ Gold contract).
 - Поля отсутствуют в доменной модели?: не подтверждено, требуется diff.
 - Поля есть в домене, но не в таблице?: не подтверждено, требуется diff.
-- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column_groups: []`).
+- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column-groups: []`).
 
 Evidence:
 
 - `configs/pipelines/crossref/publication.yaml`
 - `configs/schemas/crossref/publication.yaml`
 - `configs/quality/entities/crossref/publication.yaml`
-- `docs/04-reference/contracts/gold/crossref_publication_v1.0.json`
+- `docs/04-reference/contracts/gold/crossref-publication-v1.0.json`
 - `data/output/bronze/crossref/publication`
 
-### openalex_publication
+### openalex-publication
 
 #### 1. Общая информация
 
 - Provider: openalex
 - Entity: publication
-- Pipeline name / pipeline_id: openalex_publication
-- Primary keys: ['openalex_id']
+- Pipeline name / pipeline-id: openalex-publication
+- Primary keys: ['openalex-id']
 - Loading strategy: Silver `merge(default)`, Gold `scd2`
 - Write mode (Silver/Gold): `merge(default)` / `scd2`
 
@@ -1122,7 +1122,7 @@ Evidence:
 - Формат хранения: jsonl (по базовой конфигурации), фактический sample raw JSONL в репозитории: GAP.
 - Структура записи: `INFERRED`.
   - Ключевые JSON paths: UNKNOWN (нет JSONL sample, inference required).
-- Поля метаданных: \_run_id/\_run_type/\_source_batch_id/\_ingestion_ts/\_index/content_hash/entity_id (по общесистемным конвенциям).
+- Поля метаданных: \-run-id/\-run-type/\-source-batch-id/\-ingestion-ts/\-index/content-hash/entity-id (по общесистемным конвенциям).
 - Потенциальный schema drift: MEDIUM (для pipelines без фактического Bronze sample).
 - Проблемы: nested JSON и multi-type поля не подтверждены репрезентативной выборкой N>=200 (GAP).
 
@@ -1130,22 +1130,22 @@ Evidence:
 
 | Поле         | Тип    | Nullable | Source field         | Notes                       |
 | ------------ | ------ | -------: | -------------------- | --------------------------- |
-| entity_id    | string |  UNKNOWN | primary/business key | System prefix field         |
-| content_hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
-| \_run_id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
-| \_dq_warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
-| \_dq_error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| entity-id    | string |  UNKNOWN | primary/business key | System prefix field         |
+| content-hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
+| \-run-id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
+| \-dq-warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| \-dq-error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
 
 Анализ:
 
 - Типы (int→float coercion?): UNKNOWN per pipeline (нет извлечённой полной матрицы Pandera↔PyArrow в этом проходе).
 - Nullable consistency: частично UNKNOWN; требуется автоматический diff Pandera DataFrameModel vs silver.py schemas.
 - DQ flags / checks: externalized config `configs/quality/entities/openalex/publication.yaml`.
-- Hash exclusions: meta-fields из domain.constants.META_FIELDS.
+- Hash exclusions: meta-fields из domain.constants.META-FIELDS.
 - Ordering policy: system prefix + business + DQ suffix (фиксировано в schema conventions).
-- Schema drift tolerance: Silver on_schema_mismatch=evolve (base config).
+- Schema drift tolerance: Silver on-schema-mismatch=evolve (base config).
 - Partition keys: silver=MISSING, gold=MISSING.
-- Merge key correctness: uses primary_keys from pipeline config; collision risk requires entity-level validation.
+- Merge key correctness: uses primary-keys from pipeline config; collision risk requires entity-level validation.
 
 #### 4. Gold Schema (Контракт)
 
@@ -1157,9 +1157,9 @@ Evidence:
 
 | Поле         | Тип                | Nullable | Semantic role  | Breaking risk |
 | ------------ | ------------------ | -------: | -------------- | ------------- |
-| entity_id    | string             |      Нет | contract field | Высокий       |
-| content_hash | string             |      Нет | contract field | Высокий       |
-| openalex_id  | string             |      Нет | contract field | Высокий       |
+| entity-id    | string             |      Нет | contract field | Высокий       |
+| content-hash | string             |      Нет | contract field | Высокий       |
+| openalex-id  | string             |      Нет | contract field | Высокий       |
 | doi          | ['string', 'null'] |       Да | contract field | Средний       |
 | pmid         | ['string', 'null'] |       Да | contract field | Средний       |
 | title        | ['string', 'null'] |       Да | contract field | Средний       |
@@ -1171,24 +1171,24 @@ Evidence:
 - 1:1 mapping?: UNKNOWN/PARTIAL (нужен автоматизированный field-level diff Domain entity ↔ Pandera ↔ Gold contract).
 - Поля отсутствуют в доменной модели?: не подтверждено, требуется diff.
 - Поля есть в домене, но не в таблице?: не подтверждено, требуется diff.
-- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column_groups: []`).
+- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column-groups: []`).
 
 Evidence:
 
 - `configs/pipelines/openalex/publication.yaml`
 - `configs/schemas/openalex/publication.yaml`
 - `configs/quality/entities/openalex/publication.yaml`
-- `docs/04-reference/contracts/gold/openalex_publication_v1.0.json`
+- `docs/04-reference/contracts/gold/openalex-publication-v1.0.json`
 - `data/output/bronze/openalex/publication`
 
-### pubchem_compound
+### pubchem-compound
 
 #### 1. Общая информация
 
 - Provider: pubchem
 - Entity: compound
-- Pipeline name / pipeline_id: pubchem_compound
-- Primary keys: ['molecule_id']
+- Pipeline name / pipeline-id: pubchem-compound
+- Primary keys: ['molecule-id']
 - Loading strategy: Silver `merge(default)`, Gold `scd2`
 - Write mode (Silver/Gold): `merge(default)` / `scd2`
 
@@ -1197,7 +1197,7 @@ Evidence:
 - Формат хранения: jsonl (по базовой конфигурации), фактический sample raw JSONL в репозитории: GAP.
 - Структура записи: `INFERRED`.
   - Ключевые JSON paths: UNKNOWN (нет JSONL sample, inference required).
-- Поля метаданных: \_run_id/\_run_type/\_source_batch_id/\_ingestion_ts/\_index/content_hash/entity_id (по общесистемным конвенциям).
+- Поля метаданных: \-run-id/\-run-type/\-source-batch-id/\-ingestion-ts/\-index/content-hash/entity-id (по общесистемным конвенциям).
 - Потенциальный schema drift: MEDIUM (для pipelines без фактического Bronze sample).
 - Проблемы: nested JSON и multi-type поля не подтверждены репрезентативной выборкой N>=200 (GAP).
 
@@ -1205,22 +1205,22 @@ Evidence:
 
 | Поле         | Тип    | Nullable | Source field         | Notes                       |
 | ------------ | ------ | -------: | -------------------- | --------------------------- |
-| entity_id    | string |  UNKNOWN | primary/business key | System prefix field         |
-| content_hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
-| \_run_id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
-| \_dq_warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
-| \_dq_error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| entity-id    | string |  UNKNOWN | primary/business key | System prefix field         |
+| content-hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
+| \-run-id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
+| \-dq-warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| \-dq-error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
 
 Анализ:
 
 - Типы (int→float coercion?): UNKNOWN per pipeline (нет извлечённой полной матрицы Pandera↔PyArrow в этом проходе).
 - Nullable consistency: частично UNKNOWN; требуется автоматический diff Pandera DataFrameModel vs silver.py schemas.
 - DQ flags / checks: externalized config `configs/quality/entities/pubchem/compound.yaml`.
-- Hash exclusions: meta-fields из domain.constants.META_FIELDS.
+- Hash exclusions: meta-fields из domain.constants.META-FIELDS.
 - Ordering policy: system prefix + business + DQ suffix (фиксировано в schema conventions).
-- Schema drift tolerance: Silver on_schema_mismatch=evolve (base config).
-- Partition keys: silver=['batch_date'], gold=MISSING.
-- Merge key correctness: uses primary_keys from pipeline config; collision risk requires entity-level validation.
+- Schema drift tolerance: Silver on-schema-mismatch=evolve (base config).
+- Partition keys: silver=['batch-date'], gold=MISSING.
+- Merge key correctness: uses primary-keys from pipeline config; collision risk requires entity-level validation.
 
 #### 4. Gold Schema (Контракт)
 
@@ -1232,37 +1232,37 @@ Evidence:
 
 | Поле              | Тип                | Nullable | Semantic role  | Breaking risk |
 | ----------------- | ------------------ | -------: | -------------- | ------------- |
-| entity_id         | string             |      Нет | contract field | Высокий       |
-| molecule_id       | string             |      Нет | contract field | Высокий       |
-| molecular_formula | ['string', 'null'] |       Да | contract field | Средний       |
-| molecular_weight  | ['number', 'null'] |       Да | contract field | Средний       |
-| canonical_smiles  | ['string', 'null'] |       Да | contract field | Средний       |
-| isomeric_smiles   | ['string', 'null'] |       Да | contract field | Средний       |
+| entity-id         | string             |      Нет | contract field | Высокий       |
+| molecule-id       | string             |      Нет | contract field | Высокий       |
+| molecular-formula | ['string', 'null'] |       Да | contract field | Средний       |
+| molecular-weight  | ['number', 'null'] |       Да | contract field | Средний       |
+| canonical-smiles  | ['string', 'null'] |       Да | contract field | Средний       |
+| isomeric-smiles   | ['string', 'null'] |       Да | contract field | Средний       |
 | inchi             | ['string', 'null'] |       Да | contract field | Средний       |
-| inchi_key         | ['string', 'null'] |       Да | contract field | Средний       |
+| inchi-key         | ['string', 'null'] |       Да | contract field | Средний       |
 
 #### 5. Domain ↔ Schema соответствие
 
 - 1:1 mapping?: UNKNOWN/PARTIAL (нужен автоматизированный field-level diff Domain entity ↔ Pandera ↔ Gold contract).
 - Поля отсутствуют в доменной модели?: не подтверждено, требуется diff.
 - Поля есть в домене, но не в таблице?: не подтверждено, требуется diff.
-- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column_groups: []`).
+- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column-groups: []`).
 
 Evidence:
 
 - `configs/pipelines/pubchem/compound.yaml`
 - `configs/schemas/pubchem/compound.yaml`
 - `configs/quality/entities/pubchem/compound.yaml`
-- `docs/04-reference/contracts/gold/pubchem_compound_v1.0.json`
+- `docs/04-reference/contracts/gold/pubchem-compound-v1.0.json`
 - `data/output/bronze/pubchem/compound`
 
-### pubmed_publication
+### pubmed-publication
 
 #### 1. Общая информация
 
 - Provider: pubmed
 - Entity: publication
-- Pipeline name / pipeline_id: pubmed_publication
+- Pipeline name / pipeline-id: pubmed-publication
 - Primary keys: ['pmid']
 - Loading strategy: Silver `merge(default)`, Gold `scd2`
 - Write mode (Silver/Gold): `merge(default)` / `scd2`
@@ -1272,7 +1272,7 @@ Evidence:
 - Формат хранения: jsonl (по базовой конфигурации), фактический sample raw JSONL в репозитории: GAP.
 - Структура записи: `INFERRED`.
   - Ключевые JSON paths: UNKNOWN (нет JSONL sample, inference required).
-- Поля метаданных: \_run_id/\_run_type/\_source_batch_id/\_ingestion_ts/\_index/content_hash/entity_id (по общесистемным конвенциям).
+- Поля метаданных: \-run-id/\-run-type/\-source-batch-id/\-ingestion-ts/\-index/content-hash/entity-id (по общесистемным конвенциям).
 - Потенциальный schema drift: MEDIUM (для pipelines без фактического Bronze sample).
 - Проблемы: nested JSON и multi-type поля не подтверждены репрезентативной выборкой N>=200 (GAP).
 
@@ -1280,22 +1280,22 @@ Evidence:
 
 | Поле         | Тип    | Nullable | Source field         | Notes                       |
 | ------------ | ------ | -------: | -------------------- | --------------------------- |
-| entity_id    | string |  UNKNOWN | primary/business key | System prefix field         |
-| content_hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
-| \_run_id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
-| \_dq_warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
-| \_dq_error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| entity-id    | string |  UNKNOWN | primary/business key | System prefix field         |
+| content-hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
+| \-run-id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
+| \-dq-warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| \-dq-error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
 
 Анализ:
 
 - Типы (int→float coercion?): UNKNOWN per pipeline (нет извлечённой полной матрицы Pandera↔PyArrow в этом проходе).
 - Nullable consistency: частично UNKNOWN; требуется автоматический diff Pandera DataFrameModel vs silver.py schemas.
 - DQ flags / checks: externalized config `configs/quality/entities/pubmed/publication.yaml`.
-- Hash exclusions: meta-fields из domain.constants.META_FIELDS.
+- Hash exclusions: meta-fields из domain.constants.META-FIELDS.
 - Ordering policy: system prefix + business + DQ suffix (фиксировано в schema conventions).
-- Schema drift tolerance: Silver on_schema_mismatch=evolve (base config).
+- Schema drift tolerance: Silver on-schema-mismatch=evolve (base config).
 - Partition keys: silver=MISSING, gold=MISSING.
-- Merge key correctness: uses primary_keys from pipeline config; collision risk requires entity-level validation.
+- Merge key correctness: uses primary-keys from pipeline config; collision risk requires entity-level validation.
 
 #### 4. Gold Schema (Контракт)
 
@@ -1307,38 +1307,38 @@ Evidence:
 
 | Поле                | Тип                 | Nullable | Semantic role  | Breaking risk |
 | ------------------- | ------------------- | -------: | -------------- | ------------- |
-| entity_id           | string              |      Нет | contract field | Высокий       |
-| content_hash        | string              |      Нет | contract field | Высокий       |
+| entity-id           | string              |      Нет | contract field | Высокий       |
+| content-hash        | string              |      Нет | contract field | Высокий       |
 | pmid                | string              |      Нет | contract field | Высокий       |
 | doi                 | ['string', 'null']  |       Да | contract field | Средний       |
-| pmc_id              | ['string', 'null']  |       Да | contract field | Средний       |
+| pmc-id              | ['string', 'null']  |       Да | contract field | Средний       |
 | title               | string              |      Нет | contract field | Высокий       |
 | abstract            | ['string', 'null']  |       Да | contract field | Средний       |
-| abstract_structured | ['boolean', 'null'] |       Да | contract field | Средний       |
+| abstract-structured | ['boolean', 'null'] |       Да | contract field | Средний       |
 
 #### 5. Domain ↔ Schema соответствие
 
 - 1:1 mapping?: UNKNOWN/PARTIAL (нужен автоматизированный field-level diff Domain entity ↔ Pandera ↔ Gold contract).
 - Поля отсутствуют в доменной модели?: не подтверждено, требуется diff.
 - Поля есть в домене, но не в таблице?: не подтверждено, требуется diff.
-- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column_groups: []`).
+- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column-groups: []`).
 
 Evidence:
 
 - `configs/pipelines/pubmed/publication.yaml`
 - `configs/schemas/pubmed/publication.yaml`
 - `configs/quality/entities/pubmed/publication.yaml`
-- `docs/04-reference/contracts/gold/pubmed_publication_v1.0.json`
+- `docs/04-reference/contracts/gold/pubmed-publication-v1.0.json`
 - `data/output/bronze/pubmed/publication`
 
-### semanticscholar_publication
+### semanticscholar-publication
 
 #### 1. Общая информация
 
 - Provider: semanticscholar
 - Entity: publication
-- Pipeline name / pipeline_id: semanticscholar_publication
-- Primary keys: ['paper_id']
+- Pipeline name / pipeline-id: semanticscholar-publication
+- Primary keys: ['paper-id']
 - Loading strategy: Silver `merge(default)`, Gold `scd2`
 - Write mode (Silver/Gold): `merge(default)` / `scd2`
 
@@ -1347,7 +1347,7 @@ Evidence:
 - Формат хранения: jsonl (по базовой конфигурации), фактический sample raw JSONL в репозитории: GAP.
 - Структура записи: `INFERRED`.
   - Ключевые JSON paths: UNKNOWN (нет JSONL sample, inference required).
-- Поля метаданных: \_run_id/\_run_type/\_source_batch_id/\_ingestion_ts/\_index/content_hash/entity_id (по общесистемным конвенциям).
+- Поля метаданных: \-run-id/\-run-type/\-source-batch-id/\-ingestion-ts/\-index/content-hash/entity-id (по общесистемным конвенциям).
 - Потенциальный schema drift: MEDIUM (для pipelines без фактического Bronze sample).
 - Проблемы: nested JSON и multi-type поля не подтверждены репрезентативной выборкой N>=200 (GAP).
 
@@ -1355,22 +1355,22 @@ Evidence:
 
 | Поле         | Тип    | Nullable | Source field         | Notes                       |
 | ------------ | ------ | -------: | -------------------- | --------------------------- |
-| entity_id    | string |  UNKNOWN | primary/business key | System prefix field         |
-| content_hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
-| \_run_id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
-| \_dq_warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
-| \_dq_error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| entity-id    | string |  UNKNOWN | primary/business key | System prefix field         |
+| content-hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
+| \-run-id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
+| \-dq-warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| \-dq-error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
 
 Анализ:
 
 - Типы (int→float coercion?): UNKNOWN per pipeline (нет извлечённой полной матрицы Pandera↔PyArrow в этом проходе).
 - Nullable consistency: частично UNKNOWN; требуется автоматический diff Pandera DataFrameModel vs silver.py schemas.
 - DQ flags / checks: externalized config `configs/quality/entities/semanticscholar/publication.yaml`.
-- Hash exclusions: meta-fields из domain.constants.META_FIELDS.
+- Hash exclusions: meta-fields из domain.constants.META-FIELDS.
 - Ordering policy: system prefix + business + DQ suffix (фиксировано в schema conventions).
-- Schema drift tolerance: Silver on_schema_mismatch=evolve (base config).
+- Schema drift tolerance: Silver on-schema-mismatch=evolve (base config).
 - Partition keys: silver=MISSING, gold=MISSING.
-- Merge key correctness: uses primary_keys from pipeline config; collision risk requires entity-level validation.
+- Merge key correctness: uses primary-keys from pipeline config; collision risk requires entity-level validation.
 
 #### 4. Gold Schema (Контракт)
 
@@ -1382,12 +1382,12 @@ Evidence:
 
 | Поле         | Тип                | Nullable | Semantic role  | Breaking risk |
 | ------------ | ------------------ | -------: | -------------- | ------------- |
-| entity_id    | string             |      Нет | contract field | Высокий       |
-| content_hash | string             |      Нет | contract field | Высокий       |
-| paper_id     | string             |      Нет | contract field | Высокий       |
+| entity-id    | string             |      Нет | contract field | Высокий       |
+| content-hash | string             |      Нет | contract field | Высокий       |
+| paper-id     | string             |      Нет | contract field | Высокий       |
 | doi          | ['string', 'null'] |       Да | contract field | Средний       |
 | pmid         | ['string', 'null'] |       Да | contract field | Средний       |
-| corpus_id    | ['number', 'null'] |       Да | contract field | Средний       |
+| corpus-id    | ['number', 'null'] |       Да | contract field | Средний       |
 | title        | ['string', 'null'] |       Да | contract field | Средний       |
 | abstract     | ['string', 'null'] |       Да | contract field | Средний       |
 
@@ -1396,24 +1396,24 @@ Evidence:
 - 1:1 mapping?: UNKNOWN/PARTIAL (нужен автоматизированный field-level diff Domain entity ↔ Pandera ↔ Gold contract).
 - Поля отсутствуют в доменной модели?: не подтверждено, требуется diff.
 - Поля есть в домене, но не в таблице?: не подтверждено, требуется diff.
-- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column_groups: []`).
+- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column-groups: []`).
 
 Evidence:
 
 - `configs/pipelines/semanticscholar/publication.yaml`
 - `configs/schemas/semanticscholar/publication.yaml`
 - `configs/quality/entities/semanticscholar/publication.yaml`
-- `docs/04-reference/contracts/gold/semanticscholar_publication_v1.0.json`
+- `docs/04-reference/contracts/gold/semanticscholar-publication-v1.0.json`
 - `data/output/bronze/semanticscholar/publication`
 
-### uniprot_idmapping
+### uniprot-idmapping
 
 #### 1. Общая информация
 
 - Provider: uniprot
 - Entity: idmapping
-- Pipeline name / pipeline_id: uniprot_idmapping
-- Primary keys: ['target_id']
+- Pipeline name / pipeline-id: uniprot-idmapping
+- Primary keys: ['target-id']
 - Loading strategy: Silver `merge(default)`, Gold `scd2`
 - Write mode (Silver/Gold): `merge(default)` / `scd2`
 
@@ -1422,7 +1422,7 @@ Evidence:
 - Формат хранения: jsonl (по базовой конфигурации), фактический sample raw JSONL в репозитории: GAP.
 - Структура записи: `INFERRED`.
   - Ключевые JSON paths: UNKNOWN (нет JSONL sample, inference required).
-- Поля метаданных: \_run_id/\_run_type/\_source_batch_id/\_ingestion_ts/\_index/content_hash/entity_id (по общесистемным конвенциям).
+- Поля метаданных: \-run-id/\-run-type/\-source-batch-id/\-ingestion-ts/\-index/content-hash/entity-id (по общесистемным конвенциям).
 - Потенциальный schema drift: MEDIUM (для pipelines без фактического Bronze sample).
 - Проблемы: nested JSON и multi-type поля не подтверждены репрезентативной выборкой N>=200 (GAP).
 
@@ -1430,22 +1430,22 @@ Evidence:
 
 | Поле         | Тип    | Nullable | Source field         | Notes                       |
 | ------------ | ------ | -------: | -------------------- | --------------------------- |
-| entity_id    | string |  UNKNOWN | primary/business key | System prefix field         |
-| content_hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
-| \_run_id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
-| \_dq_warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
-| \_dq_error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| entity-id    | string |  UNKNOWN | primary/business key | System prefix field         |
+| content-hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
+| \-run-id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
+| \-dq-warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| \-dq-error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
 
 Анализ:
 
 - Типы (int→float coercion?): UNKNOWN per pipeline (нет извлечённой полной матрицы Pandera↔PyArrow в этом проходе).
 - Nullable consistency: частично UNKNOWN; требуется автоматический diff Pandera DataFrameModel vs silver.py schemas.
 - DQ flags / checks: externalized config `configs/quality/entities/uniprot/idmapping.yaml`.
-- Hash exclusions: meta-fields из domain.constants.META_FIELDS.
+- Hash exclusions: meta-fields из domain.constants.META-FIELDS.
 - Ordering policy: system prefix + business + DQ suffix (фиксировано в schema conventions).
-- Schema drift tolerance: Silver on_schema_mismatch=evolve (base config).
+- Schema drift tolerance: Silver on-schema-mismatch=evolve (base config).
 - Partition keys: silver=[], gold=MISSING.
-- Merge key correctness: uses primary_keys from pipeline config; collision risk requires entity-level validation.
+- Merge key correctness: uses primary-keys from pipeline config; collision risk requires entity-level validation.
 
 #### 4. Gold Schema (Контракт)
 
@@ -1457,37 +1457,37 @@ Evidence:
 
 | Поле                | Тип                | Nullable | Semantic role  | Breaking risk |
 | ------------------- | ------------------ | -------: | -------------- | ------------- |
-| entity_id           | string             |      Нет | contract field | Высокий       |
-| content_hash        | string             |      Нет | contract field | Высокий       |
-| target_id           | string             |      Нет | contract field | Высокий       |
-| uniprot_accession   | ['string', 'null'] |       Да | contract field | Средний       |
-| mapping_status      | string             |      Нет | contract field | Высокий       |
-| uniprot_entry_name  | ['string', 'null'] |       Да | contract field | Средний       |
-| organism_scientific | ['string', 'null'] |       Да | contract field | Средний       |
-| organism_common     | ['string', 'null'] |       Да | contract field | Средний       |
+| entity-id           | string             |      Нет | contract field | Высокий       |
+| content-hash        | string             |      Нет | contract field | Высокий       |
+| target-id           | string             |      Нет | contract field | Высокий       |
+| uniprot-accession   | ['string', 'null'] |       Да | contract field | Средний       |
+| mapping-status      | string             |      Нет | contract field | Высокий       |
+| uniprot-entry-name  | ['string', 'null'] |       Да | contract field | Средний       |
+| organism-scientific | ['string', 'null'] |       Да | contract field | Средний       |
+| organism-common     | ['string', 'null'] |       Да | contract field | Средний       |
 
 #### 5. Domain ↔ Schema соответствие
 
 - 1:1 mapping?: UNKNOWN/PARTIAL (нужен автоматизированный field-level diff Domain entity ↔ Pandera ↔ Gold contract).
 - Поля отсутствуют в доменной модели?: не подтверждено, требуется diff.
 - Поля есть в домене, но не в таблице?: не подтверждено, требуется diff.
-- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column_groups: []`).
+- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column-groups: []`).
 
 Evidence:
 
 - `configs/pipelines/uniprot/idmapping.yaml`
 - `configs/schemas/uniprot/idmapping.yaml`
 - `configs/quality/entities/uniprot/idmapping.yaml`
-- `docs/04-reference/contracts/gold/uniprot_idmapping_v1.0.json`
+- `docs/04-reference/contracts/gold/uniprot-idmapping-v1.0.json`
 - `data/output/bronze/uniprot/idmapping`
 
-### uniprot_protein
+### uniprot-protein
 
 #### 1. Общая информация
 
 - Provider: uniprot
 - Entity: protein
-- Pipeline name / pipeline_id: uniprot_protein
+- Pipeline name / pipeline-id: uniprot-protein
 - Primary keys: ['accession']
 - Loading strategy: Silver `merge(default)`, Gold `scd2`
 - Write mode (Silver/Gold): `merge(default)` / `scd2`
@@ -1495,9 +1495,9 @@ Evidence:
 #### 2. Bronze Layer
 
 - Формат хранения: jsonl (по базовой конфигурации), фактический sample raw JSONL в репозитории: GAP.
-- Структура записи: `METADATA_ONLY`.
-  - Ключевые JSON paths (из schema_snapshot metadata): annotationScore, comments, entryAudit, entryType, extraAttributes, features, genes, keywords, lineages, organism, primaryAccession, proteinDescription ...
-- Поля метаданных: \_run_id/\_run_type/\_source_batch_id/\_ingestion_ts/\_index/content_hash/entity_id (по общесистемным конвенциям).
+- Структура записи: `METADATA-ONLY`.
+  - Ключевые JSON paths (из schema-snapshot metadata): annotationScore, comments, entryAudit, entryType, extraAttributes, features, genes, keywords, lineages, organism, primaryAccession, proteinDescription ...
+- Поля метаданных: \-run-id/\-run-type/\-source-batch-id/\-ingestion-ts/\-index/content-hash/entity-id (по общесистемным конвенциям).
 - Потенциальный schema drift: MEDIUM (для pipelines без фактического Bronze sample).
 - Проблемы: nested JSON и multi-type поля не подтверждены репрезентативной выборкой N>=200 (GAP).
 
@@ -1505,22 +1505,22 @@ Evidence:
 
 | Поле         | Тип    | Nullable | Source field         | Notes                       |
 | ------------ | ------ | -------: | -------------------- | --------------------------- |
-| entity_id    | string |  UNKNOWN | primary/business key | System prefix field         |
-| content_hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
-| \_run_id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
-| \_dq_warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
-| \_dq_error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| entity-id    | string |  UNKNOWN | primary/business key | System prefix field         |
+| content-hash | string |  UNKNOWN | hash service         | Deterministic hash expected |
+| \-run-id     | string |  UNKNOWN | runtime metadata     | ADR-029 metadata            |
+| \-dq-warn    | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
+| \-dq-error   | bool   |  UNKNOWN | DQ processor         | DQ flag suffix              |
 
 Анализ:
 
 - Типы (int→float coercion?): UNKNOWN per pipeline (нет извлечённой полной матрицы Pandera↔PyArrow в этом проходе).
 - Nullable consistency: частично UNKNOWN; требуется автоматический diff Pandera DataFrameModel vs silver.py schemas.
 - DQ flags / checks: externalized config `configs/quality/entities/uniprot/protein.yaml`.
-- Hash exclusions: meta-fields из domain.constants.META_FIELDS.
+- Hash exclusions: meta-fields из domain.constants.META-FIELDS.
 - Ordering policy: system prefix + business + DQ suffix (фиксировано в schema conventions).
-- Schema drift tolerance: Silver on_schema_mismatch=evolve (base config).
+- Schema drift tolerance: Silver on-schema-mismatch=evolve (base config).
 - Partition keys: silver=['organism'], gold=MISSING.
-- Merge key correctness: uses primary_keys from pipeline config; collision risk requires entity-level validation.
+- Merge key correctness: uses primary-keys from pipeline config; collision risk requires entity-level validation.
 
 #### 4. Gold Schema (Контракт)
 
@@ -1532,28 +1532,28 @@ Evidence:
 
 | Поле          | Тип                | Nullable | Semantic role  | Breaking risk |
 | ------------- | ------------------ | -------: | -------------- | ------------- |
-| entity_id     | string             |      Нет | contract field | Высокий       |
-| content_hash  | string             |      Нет | contract field | Высокий       |
+| entity-id     | string             |      Нет | contract field | Высокий       |
+| content-hash  | string             |      Нет | contract field | Высокий       |
 | accession     | string             |      Нет | contract field | Высокий       |
-| entry_name    | ['string', 'null'] |       Да | contract field | Средний       |
-| active_sites  | ['string', 'null'] |       Да | contract field | Средний       |
-| binding_sites | ['string', 'null'] |       Да | contract field | Средний       |
+| entry-name    | ['string', 'null'] |       Да | contract field | Средний       |
+| active-sites  | ['string', 'null'] |       Да | contract field | Средний       |
+| binding-sites | ['string', 'null'] |       Да | contract field | Средний       |
 | domains       | ['string', 'null'] |       Да | contract field | Средний       |
-| features_json | ['string', 'null'] |       Да | contract field | Средний       |
+| features-json | ['string', 'null'] |       Да | contract field | Средний       |
 
 #### 5. Domain ↔ Schema соответствие
 
 - 1:1 mapping?: UNKNOWN/PARTIAL (нужен автоматизированный field-level diff Domain entity ↔ Pandera ↔ Gold contract).
 - Поля отсутствуют в доменной модели?: не подтверждено, требуется diff.
 - Поля есть в домене, но не в таблице?: не подтверждено, требуется diff.
-- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column_groups: []`).
+- Нарушение Single Source of Truth?: вероятно PARTIAL (schema config files у части pipeline минимальные `column-groups: []`).
 
 Evidence:
 
 - `configs/pipelines/uniprot/protein.yaml`
 - `configs/schemas/uniprot/protein.yaml`
 - `configs/quality/entities/uniprot/protein.yaml`
-- `docs/04-reference/contracts/gold/uniprot_protein_v1.0.json`
+- `docs/04-reference/contracts/gold/uniprot-protein-v1.0.json`
 - `data/output/bronze/uniprot/protein`
 
 ## II. Архитектурные проблемы
@@ -1562,13 +1562,13 @@ Evidence:
 | ---- | -------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------ | ------ | --------- |
 | A-01 | all      | Schema duplication       | Schema defined in multiple places (Pandera, PyArrow, JSON contract, YAML schema config) without generated SSOT.          | High   | P1        |
 | A-02 | all      | Content hash instability | Hash excludes fixed meta-fields but no per-pipeline explicit exclusion spec; drift may alter hashes unexpectedly.        | Medium | P2        |
-| A-03 | many     | Domain drift             | Multiple `configs/schemas/*` are empty (`column_groups: []`), violating explicit schema↔domain pairing intent (ADR-034). | High   | P1        |
+| A-03 | many     | Domain drift             | Multiple `configs/schemas/*` are empty (`column-groups: []`), violating explicit schema↔domain pairing intent (ADR-034). | High   | P1        |
 | A-04 | selected | Nullable ambiguity       | Nullable policy not centrally enforced across Bronze→Silver→Gold contracts.                                              | Medium | P2        |
 | A-05 | selected | Inconsistent naming      | publication/document aliases and provider-specific IDs create hidden coupling.                                           | Medium | P2        |
 
 ## III. Общесистемные проблемы
 
-- Повторяющиеся поля в схемах: `entity_id`, `content_hash`, `_run_id`, `_dq_warn`, `_dq_error` повторяются во всех слоях без machine-verifiable centralized generator.
+- Повторяющиеся поля в схемах: `entity-id`, `content-hash`, `-run-id`, `-dq-warn`, `-dq-error` повторяются во всех слоях без machine-verifiable centralized generator.
 - Несогласованные типы между пайплайнами: publication identifiers (`doi`, `pmid`, provider-specific IDs) имеют разный naming и optionality.
 - Унифицированные metadata поля ADR-029 partially present, но фактическая проверка полноты по всем pipeline outputs не автоматизирована.
 - Нарушения OutputMetadata унификации: в `data/output/bronze/*` доступны только metadata snapshots, не raw JSONL outputs для подтверждения full parity.
@@ -1580,8 +1580,8 @@ Evidence:
 
 ### 1. Немедленные улучшения (Low Risk)
 
-- Add automated `schema_diff` CI job: Pandera vs PyArrow vs Gold JSON contract. Impact: высокая трассируемость; Breaking: Non-breaking; ADR: No; Migration: add report-only stage.
-- Enforce explicit hash input specification per pipeline in config (`hash.include_fields`/`hash.exclude_fields`). Impact: детерминизм; Breaking: Non-breaking initially (warn mode); ADR: Maybe (if mandatory). Migration: phase warn→enforce.
+- Add automated `schema-diff` CI job: Pandera vs PyArrow vs Gold JSON contract. Impact: высокая трассируемость; Breaking: Non-breaking; ADR: No; Migration: add report-only stage.
+- Enforce explicit hash input specification per pipeline in config (`hash.include-fields`/`hash.exclude-fields`). Impact: детерминизм; Breaking: Non-breaking initially (warn mode); ADR: Maybe (if mandatory). Migration: phase warn→enforce.
 - Populate missing `configs/schemas/*` with at least column groups + aliases. Impact: ADR-034 compliance; Breaking: Non-breaking; ADR: No; Migration: per-pipeline PRs.
 
 ### 2. Среднесрочные улучшения (Refactoring Phase)

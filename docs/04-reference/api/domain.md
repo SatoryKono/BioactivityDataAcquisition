@@ -8,16 +8,16 @@ The Domain layer contains pure business logic with no I/O dependencies. It defin
 classDiagram
     class StoragePort {
         <<interface>>
-        +write_bronze()
-        +write_silver()
-        +write_gold()
-        +health_check()
+        +write-bronze()
+        +write-silver()
+        +write-gold()
+        +health-check()
     }
 
     class DataSourcePort {
         <<interface>>
         +fetch()
-        +health_check()
+        +health-check()
     }
 
     class LockPort {
@@ -29,9 +29,9 @@ classDiagram
 
     class MetricsPort {
         <<interface>>
-        +increment_counter()
-        +set_gauge()
-        +observe_histogram()
+        +increment-counter()
+        +set-gauge()
+        +observe-histogram()
     }
 
     StoragePort <|.. SilverWriter
@@ -96,14 +96,14 @@ from bioetl.domain.ports import StoragePort, DataSourcePort
 
 # Ports are Protocol classes (structural typing)
 class StoragePort(Protocol):
-    async def write_bronze(self, records: list[dict], ...) -> int: ...
-    async def write_silver(self, records: list[dict], ...) -> int: ...
+    async def write-bronze(self, records: list[dict], ...) -> int: ...
+    async def write-silver(self, records: list[dict], ...) -> int: ...
 ```
 
 Infrastructure provides **Adapters** that implement these ports:
 
 ```python
-from bioetl.infrastructure.storage.silver_writer import SilverWriter
+from bioetl.infrastructure.storage.silver-writer import SilverWriter
 
 # SilverWriter implements StoragePort
 writer: StoragePort = SilverWriter(...)
@@ -114,10 +114,10 @@ writer: StoragePort = SilverWriter(...)
 Unique record identification using deterministic hashing:
 
 ```python
-from bioetl.domain.transformations import generate_content_hash
+from bioetl.domain.transformations import generate-content-hash
 
-# sha256(provider + canonical_json(record))
-hash = generate_content_hash("chembl", record)
+# sha256(provider + canonical-json(record))
+hash = generate-content-hash("chembl", record)
 ```
 
 Normalization rules:
@@ -125,7 +125,7 @@ Normalization rules:
 - NaN/Inf → `null`
 - Floats → rounded to 10 decimals
 - Dates → ISO format `YYYY-MM-DD`
-- Excludes metadata fields (`_ingestion_ts`, `_run_id`, etc.)
+- Excludes metadata fields (`-ingestion-ts`, `-run-id`, etc.)
 
 ## Import Structure
 

@@ -5,7 +5,7 @@
 BioETL 6.0.0 restores strict composite config contract validation:
 
 - `composite.version` is required by the canonical Pydantic model.
-- `configs/_schema/composite.json` is generated from the same model and now marks `version` as required.
+- `configs/-schema/composite.json` is generated from the same model and now marks `version` as required.
 
 ### What changed
 
@@ -19,7 +19,7 @@ Update every composite YAML:
 
 ```yaml
 composite:
-  name: composite_publication
+  name: composite-publication
   version: "1.1.0"  # required in v6+
 ```
 

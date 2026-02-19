@@ -35,8 +35,8 @@
 ### 2.2. Пайплайны (Pipelines)
 
 #### 2.2.1. Идентификаторы пайплайнов (Pipeline IDs)
-**Формат:** `{provider}_{entity}` (snake_case)
-**Используется в:** YAML конфигах (`pipeline_name`), CLI (`--pipeline`).
+**Формат:** `{provider}-{entity}` (snake-case)
+**Используется в:** YAML конфигах (`pipeline-name`), CLI (`--pipeline`).
 
 #### 2.2.2. Классы пайплайнов
 **Формат:** `{Provider}{CanonicalTerm}Pipeline` (PascalCase)
@@ -56,7 +56,7 @@
 **Место:** `src/bioetl/domain/contracts/gold/`
 
 #### 2.4.2. PyArrow Schemas (Silver)
-**Формат:** `CHEMBL_{CANONICAL_TERM}_SCHEMA` (UPPER_SNAKE_CASE)
+**Формат:** `CHEMBL-{CANONICAL-TERM}-SCHEMA` (UPPER-SNAKE-CASE)
 **Место:** `src/bioetl/infrastructure/schemas/silver.py`
 
 ---
@@ -65,9 +65,9 @@
 
 ### 3.1. Имена таблиц (Silver/Gold)
 
-**Формат:** `{provider}_{entity}` (snake_case)
+**Формат:** `{provider}-{entity}` (snake-case)
 - Должны совпадать с идентификатором пайплайна.
-- **Пример**: `chembl_publication`.
+- **Пример**: `chembl-publication`.
 
 ### 3.2. Файлы конфигурации
 
@@ -80,7 +80,7 @@
 ## 4. Исключения (Naming Exceptions)
 
 Полный список разрешенных отклонений от правил (напр., `README.md`, `LICENSE`) зафиксирован в файле:
-`configs/naming_exceptions.yaml`
+`configs/naming-exceptions.yaml`
 
 Добавление нового исключения требует обоснования в PR и обновления этого файла.
 
@@ -90,4 +90,4 @@
 
 - [ADR-024: Entity Naming Unification](../../02-architecture/decisions/ADR-024-entity-naming-unification.md)
 - [03-file-policy.md](03-file-policy.md) — Политика файлов и директорий
-- [glossary.md](../../glossary.md) — Ubiquitous Language
+- [glossary.md](../glossary.md) — Ubiquitous Language

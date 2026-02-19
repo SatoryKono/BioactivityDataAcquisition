@@ -15,10 +15,10 @@ for a local ETL process.
 
 | Use Case | Local Solution |
 |----------|---------------|
-| Request correlation | `run_id` in structured logs |
-| Performance debugging | Prometheus histograms (`pipeline_duration_seconds`) |
-| Error tracking | Structured error logs with `run_id`, `stage`, `error_type` |
-| Batch traceability | `run_id` + `batch_id` in logs and metrics |
+| Request correlation | `run-id` in structured logs |
+| Performance debugging | Prometheus histograms (`pipeline-duration-seconds`) |
+| Error tracking | Structured error logs with `run-id`, `stage`, `error-type` |
+| Batch traceability | `run-id` + `batch-id` in logs and metrics |
 
 ### Distributed Tracing Overhead
 
@@ -35,8 +35,8 @@ This overhead provides no benefit for single-process local execution.
 ### TracingPort = OpenTelemetry Facade (deliberate choice)
 
 `TracingPort` is intentionally modeled after the **OpenTelemetry Tracing API**.
-`get_tracer()` returns an object whose interface mirrors `opentelemetry.trace.Tracer`
-(`start_as_current_span`, span context manager, `set_attribute`, `record_exception`).
+`get-tracer()` returns an object whose interface mirrors `opentelemetry.trace.Tracer`
+(`start-as-current-span`, span context manager, `set-attribute`, `record-exception`).
 
 **Why OTel as the port surface?**
 
@@ -46,14 +46,14 @@ This overhead provides no benefit for single-process local execution.
    requires only a composition wiring change; application code stays the same.
 3. **Ecosystem compatibility** — any OTel-compatible backend (Jaeger, Zipkin, Tempo,
    OTLP Collector) can be plugged in without modifying the port contract.
-4. **`Any` return type** — `get_tracer()` returns `Any` to avoid a hard dependency
+4. **`Any` return type** — `get-tracer()` returns `Any` to avoid a hard dependency
    on the `opentelemetry` package in the domain layer while preserving the OTel
    calling convention in all implementations.
 
 ### Default: NoOpTracing (Null Object Pattern)
 
 Use **Null Object Pattern** (`NoOpTracing`) as the default tracing implementation.
-Request correlation is provided via `run_id` in structured logs.
+Request correlation is provided via `run-id` in structured logs.
 
 ### Implementation
 
@@ -64,33 +64,33 @@ tracing = NoOpTracing()
 
 # Extension point: real OTel adapter (when distributed deployment needed)
 from bioetl.infrastructure.observability.tracing import OpenTelemetryTracer
-tracing = OpenTelemetryTracer(service_name="bioetl")
+tracing = OpenTelemetryTracer(service-name="bioetl")
 
 # Both implementations expose the same OTel calling convention:
-otel_tracer = tracing.get_tracer("bioetl.pipeline")
-with otel_tracer.start_as_current_span("my_operation", attributes={...}):
+otel-tracer = tracing.get-tracer("bioetl.pipeline")
+with otel-tracer.start-as-current-span("my-operation", attributes={...}):
     ...  # works identically with NoOp or real OTel
 ```
 
-### Correlation via run_id (RULES.md §4.5)
+### Correlation via run-id (RULES.md §4.5)
 
-All structured logs include `run_id`:
+All structured logs include `run-id`:
 
 ```json
 {
   "ts": "2025-12-30T10:00:00Z",
   "level": "INFO",
-  "run_id": "550e8400-e29b-41d4-a716-446655440000",
-  "pipeline": "chembl_activity",
+  "run-id": "550e8400-e29b-41d4-a716-446655440000",
+  "pipeline": "chembl-activity",
   "stage": "transform",
-  "record_count": 1000
+  "record-count": 1000
 }
 ```
 
 This enables:
-- Log aggregation: `grep run_id=<uuid> logs/*.jsonl`
-- Metrics correlation: labels include `run_id` where appropriate
-- Batch tracing: `run_id` + `batch_id` for granular tracking
+- Log aggregation: `grep run-id=<uuid> logs/*.jsonl`
+- Metrics correlation: labels include `run-id` where appropriate
+- Batch tracing: `run-id` + `batch-id` for granular tracking
 
 ## Justification
 
@@ -100,11 +100,11 @@ This enables:
 
 ```python
 class NoOpTracing:
-    def get_tracer(self, name: str) -> NoOpTracer:
+    def get-tracer(self, name: str) -> NoOpTracer:
         return NoOpTracer()  # Stateless, no allocations per span
 
     def close(self) -> None:
-        self._closed = True  # Idempotent
+        self.-closed = True  # Idempotent
 ```
 
 ### 2. TracingPort Preserved
@@ -112,9 +112,9 @@ class NoOpTracing:
 The port interface remains unchanged, preserving the extension point:
 
 ```python
-@runtime_checkable
+@runtime-checkable
 class TracingPort(Protocol):
-    def get_tracer(self, name: str) -> Any: ...
+    def get-tracer(self, name: str) -> Any: ...
     def close(self) -> None: ...
 ```
 
@@ -137,9 +137,9 @@ Local-Only Deployment principle:
 | File | Purpose |
 |------|---------|
 | `domain/ports/observability.py` | TracingPort protocol (OTel facade contract) |
-| `domain/ports/noop.py` | NoOpTracing, _NoOpOtelTracer, _NoOpSpan (default) |
+| `domain/ports/noop.py` | NoOpTracing, -NoOpOtelTracer, -NoOpSpan (default) |
 | `infrastructure/observability/tracing.py` | OpenTelemetryTracer (real OTel adapter) + NoOpTracing re-export |
-| `composition/bootstrap/runtime/observability.py` | DI wiring (`bootstrap_tracer_port`) |
+| `composition/bootstrap/runtime/observability.py` | DI wiring (`bootstrap-tracer-port`) |
 
 ## Consequences
 
@@ -147,7 +147,7 @@ Local-Only Deployment principle:
 
 - **(+) Zero overhead**: No memory/CPU cost from span collection
 - **(+) No dependencies**: OpenTelemetry packages not required for default usage
-- **(+) Simple debugging**: `run_id` in logs sufficient for local development
+- **(+) Simple debugging**: `run-id` in logs sufficient for local development
 - **(+) Extension point preserved**: TracingPort + OpenTelemetryTracer ready for future
 - **(+) Consistent with ADR-010**: No external infrastructure needed
 
@@ -167,7 +167,7 @@ If distributed deployment becomes necessary:
 
 2. Enable tracing via environment variable:
    ```bash
-   export BIOETL_OBSERVABILITY__TRACING_ENABLED=true
+   export BIOETL-OBSERVABILITY--TRACING-ENABLED=true
    ```
    The bootstrap in `composition/bootstrap/runtime/observability.py` will
    automatically return `OpenTelemetryTracer` instead of `NoOpTracing`.

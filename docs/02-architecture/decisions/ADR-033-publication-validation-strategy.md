@@ -20,11 +20,11 @@
 
 | Провайдер | Полей | Primary Key | API Особенности |
 |-----------|-------|-------------|----------------|
-| **ChEMBL** | 28 | `document_chembl_id` | REST, стабильная схема |
+| **ChEMBL** | 28 | `document-chembl-id` | REST, стабильная схема |
 | **PubMed** | 52 | `pmid` | MEDLINE XML, богатые метаданные |
 | **CrossRef** | 37 | `doi` | REST, неполные данные |
-| **OpenAlex** | 39 | `openalex_id` | REST, академическая граф-база |
-| **Semantic Scholar** | 35 | `paper_id` | REST, AI-генерированные TLDR |
+| **OpenAlex** | 39 | `openalex-id` | REST, академическая граф-база |
+| **Semantic Scholar** | 35 | `paper-id` | REST, AI-генерированные TLDR |
 
 **Всего: 191 поле** (с учетом всех полей включая унаследованные от `PublicationBaseSchema`).
 
@@ -32,17 +32,17 @@
 
 1. **Гетерогенность форматов:**
    - DOI regex различается (CrossRef: non-nullable PK vs PubMed: nullable enrichment field)
-   - Типы данных: строки vs числа (page_first может быть "e1234" или "100")
+   - Типы данных: строки vs числа (page-first может быть "e1234" или "100")
    - Дублирование полей: 5 провайдеров × ~20 общих полей = ~100 вариаций
 
 2. **Качество данных:**
    - Неполные записи: ~15% CrossRef-записей без title
-   - Противоречия: publication_year ≠ YEAR(publication_date) в ~2% PubMed
+   - Противоречия: publication-year ≠ YEAR(publication-date) в ~2% PubMed
    - Семантическая несогласованность: title-abstract similarity < 0.1 в ~5% OpenAlex
 
 3. **Отсутствие унифицированной стратегии:**
    - Pandera валидирует только схему Silver (форматные проверки)
-   - Нет кросс-полевой валидации (page_first ≤ page_last)
+   - Нет кросс-полевой валидации (page-first ≤ page-last)
    - Нет верификации по внешним источникам (DOI существует в CrossRef API?)
    - Нет семантических проверок (язык аннотации совпадает с полем language?)
 
@@ -55,8 +55,8 @@
 
 **Функциональные:**
 - **REQ-VAL-001 (MUST):** Многоуровневая валидация: base → structural → external → logical → semantic.
-- **REQ-VAL-002 (MUST):** DQ-флаги: `_dq_error` (блокирующие ошибки), `_dq_warn` (предупреждения).
-- **REQ-VAL-003 (MUST):** Карантин: записи с `_dq_error=True` → Dead Letter Queue, не попадают в Gold.
+- **REQ-VAL-002 (MUST):** DQ-флаги: `-dq-error` (блокирующие ошибки), `-dq-warn` (предупреждения).
+- **REQ-VAL-003 (MUST):** Карантин: записи с `-dq-error=True` → Dead Letter Queue, не попадают в Gold.
 - **REQ-VAL-004 (MUST):** Внешняя верификация: DOI/PMID/ORCID проверяются через авторитетные API.
 - **REQ-VAL-005 (SHOULD):** Graceful degradation: таймауты API не блокируют пайплайн (SKIP).
 
@@ -68,7 +68,7 @@
 ### Связь с архитектурой
 
 - **ADR-002 (Medallion):** Валидация на Silver-слое (Pandera), Gold (PyArrow strict).
-- **ADR-014 (Deterministic Writes):** content_hash проверяется structural validation.
+- **ADR-014 (Deterministic Writes):** content-hash проверяется structural validation.
 - **ADR-027 (DQ Externalization):** DQ-правила в `configs/validation/{provider}.yaml`.
 
 ---
@@ -90,17 +90,17 @@
          │  - Type coercion          │
          └──┬──────────────┬─────────┘
             │ PASS         │ FAIL
-            │              └──────────► _dq_error=True → Quarantine
+            │              └──────────► -dq-error=True → Quarantine
             │
          ┌──▼──────────────────────────┐
          │  2. STRUCTURAL VALIDATION   │
          │  (Cross-field rules)        │
-         │  - page_first ≤ page_last   │
-         │  - content_hash consistency │
+         │  - page-first ≤ page-last   │
+         │  - content-hash consistency │
          │  - Field dependencies       │
          └──┬──────────────┬───────────┘
-            │ PASS         │ FAIL → _dq_error=True
-            │              │ WARN → _dq_warn=True
+            │ PASS         │ FAIL → -dq-error=True
+            │              │ WARN → -dq-warn=True
             │
          ┌──▼──────────────────────────┐
          │  3. EXTERNAL VERIFICATION   │
@@ -109,8 +109,8 @@
          │  - PMID in PubMed?          │
          │  - ORCID valid?             │
          └──┬──────────────┬───────────┘
-            │ PASS/SKIP    │ FAIL (PK) → _dq_error=True
-            │              │ WARN (non-PK) → _dq_warn=True
+            │ PASS/SKIP    │ FAIL (PK) → -dq-error=True
+            │              │ WARN (non-PK) → -dq-warn=True
             │
          ┌──▼──────────────────────────┐
          │  4. LOGICAL VALIDATION      │
@@ -119,7 +119,7 @@
          │  - citations ≥ 0            │
          │  - dates ordering           │
          └──┬──────────────┬───────────┘
-            │ PASS         │ WARN → _dq_warn=True
+            │ PASS         │ WARN → -dq-warn=True
             │
          ┌──▼──────────────────────────┐
          │  5. SEMANTIC VALIDATION     │
@@ -128,11 +128,11 @@
          │  - Language detection       │
          │  - Keyword relevance        │
          └──┬──────────────┬───────────┘
-            │ PASS         │ WARN → _dq_warn=True
+            │ PASS         │ WARN → -dq-warn=True
             │
          ┌──▼──────────────────────────┐
          │     Write to Silver         │
-         │  (_dq_error=False records)  │
+         │  (-dq-error=False records)  │
          └─────────────────────────────┘
 ```
 
@@ -149,14 +149,14 @@
 
 **Результат:**
 - `PASS` → переход к structural
-- `FAIL` → `_dq_error=True`, запись отклонена
+- `FAIL` → `-dq-error=True`, запись отклонена
 
 **Пример (Pandera):**
 ```python
 class ChemblPublicationSchema(PublicationBaseSchema):
-    document_chembl_id: Series[str] = pa.Field(
+    document-chembl-id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str-matches=r"^CHEMBL\d+$",
         description="ChEMBL Document ID (PK)",
     )
 ```
@@ -166,15 +166,15 @@ class ChemblPublicationSchema(PublicationBaseSchema):
 **Назначение:** Проверка согласованности между полями одной записи.
 
 **Правила:**
-- `page_first ≤ page_last` (если оба числовые)
-- `content_hash == recomputed_hash(excl. _ingestion_ts, _run_id, _dq_*)`
-- `IF corpus_id NOT NULL THEN paper_id MUST NOT be NULL` (S2)
-- `publication_year == YEAR(publication_date)` (если оба заполнены)
+- `page-first ≤ page-last` (если оба числовые)
+- `content-hash == recomputed-hash(excl. -ingestion-ts, -run-id, -dq-*)`
+- `IF corpus-id NOT NULL THEN paper-id MUST NOT be NULL` (S2)
+- `publication-year == YEAR(publication-date)` (если оба заполнены)
 
 **Результат:**
 - `PASS` → external verification
-- `FAIL` → `_dq_error=True` (критические: content_hash)
-- `WARN` → `_dq_warn=True` (некритические: page ordering)
+- `FAIL` → `-dq-error=True` (критические: content-hash)
+- `WARN` → `-dq-warn=True` (некритические: page ordering)
 
 #### 3. External Verification (Integration)
 
@@ -183,11 +183,11 @@ class ChemblPublicationSchema(PublicationBaseSchema):
 **Поддерживаемые API:**
 - CrossRef: `/works/{doi}` → HTTP 200
 - PubMed: `/efetch.fcgi?db=pubmed&id={pmid}`
-- OpenAlex: `/works/{openalex_id}`
-- Semantic Scholar: `/graph/v1/paper/{paper_id}`
-- ChEMBL: `/api/data/document/{chembl_id}`
+- OpenAlex: `/works/{openalex-id}`
+- Semantic Scholar: `/graph/v1/paper/{paper-id}`
+- ChEMBL: `/api/data/document/{chembl-id}`
 - ORCID: `/v3.0/{orcid}`
-- ROR: `/organizations/{ror_id}`
+- ROR: `/organizations/{ror-id}`
 
 **Стратегия отказов:**
 - Timeout (> 5s) → `SKIP` (graceful degradation)
@@ -196,23 +196,23 @@ class ChemblPublicationSchema(PublicationBaseSchema):
 
 **Результат:**
 - `PASS` / `SKIP` → logical validation
-- `FAIL` (PK not found) → `_dq_error=True`
-- `WARN` (non-PK not found) → `_dq_warn=True`
+- `FAIL` (PK not found) → `-dq-error=True`
+- `WARN` (non-PK not found) → `-dq-warn=True`
 
 #### 4. Logical Validation (Service)
 
 **Назначение:** Проверка числовых диапазонов и временных инвариантов.
 
 **Правила:**
-- `1800 ≤ publication_year ≤ CURRENT_YEAR + 1`
-- `citations_received ≥ 0`, `citations_made ≥ 0`
+- `1800 ≤ publication-year ≤ CURRENT-YEAR + 1`
+- `citations-received ≥ 0`, `citations-made ≥ 0`
 - `fwci ≥ 0.0` (OpenAlex)
-- `citations_received ≥ influential_citation_count` (S2)
-- `date_completed ≤ date_revised` (PubMed)
+- `citations-received ≥ influential-citation-count` (S2)
+- `date-completed ≤ date-revised` (PubMed)
 
 **Результат:**
 - `PASS` → semantic validation
-- `WARN` → `_dq_warn=True` (логически некорректно, но не блокирует)
+- `WARN` → `-dq-warn=True` (логически некорректно, но не блокирует)
 
 #### 5. Semantic Validation (Service, NLP)
 
@@ -221,37 +221,37 @@ class ChemblPublicationSchema(PublicationBaseSchema):
 **Правила (примеры):**
 - `SemanticSimilarity(title, abstract) > 0.3` (Sentence-BERT)
 - `Language(abstract) == language` (langdetect)
-- `Keywords(abstract) ∩ subject_keywords ≠ ∅`
+- `Keywords(abstract) ∩ subject-keywords ≠ ∅`
 - `MeSH` terms relevance (NLP topic modeling)
 
 **Результат:**
-- `PASS` / `WARN` → `_dq_warn=True`
+- `PASS` / `WARN` → `-dq-warn=True`
 - **NEVER FAIL** (семантика не блокирует)
 
 ### DQ-флаги и карантин
 
 | Флаг | Устанавливается при | Действие |
 |------|---------------------|----------|
-| `_dq_error` | FAIL на уровнях 1-3 | Запись → Quarantine (Dead Letter), не попадает в Silver |
-| `_dq_warn` | WARN на уровнях 2-5 | Запись → Silver с флагом, может быть отфильтрована в Gold |
+| `-dq-error` | FAIL на уровнях 1-3 | Запись → Quarantine (Dead Letter), не попадает в Silver |
+| `-dq-warn` | WARN на уровнях 2-5 | Запись → Silver с флагом, может быть отфильтрована в Gold |
 
 **Карантин:**
 - Путь: `data/output/quarantine/{provider}/publication/{date}/`
 - Формат: Delta Lake (для SCD Type 2)
 - Retention: 90 дней
-- Ручная проверка: `scripts/dq_review_quarantine.py`
+- Ручная проверка: `scripts/dq-review-quarantine.py`
 
 ### Конфигурация DQ
 
 **Иерархия:**
 ```
 configs/validation/
-├── _defaults.yaml                    # Глобальные пороги
+├── -defaults.yaml                    # Глобальные пороги
 ├── chembl.yaml                       # Провайдер-специфичные
 ├── pubmed/
 │   └── publication.yaml              # Entity-специфичные
 └── overrides/
-    └── emergency_disable_external.yaml  # Runtime overrides
+    └── emergency-disable-external.yaml  # Runtime overrides
 ```
 
 **Пример конфигурации:**
@@ -260,33 +260,33 @@ configs/validation/
 validation:
   base:
     enabled: true
-    fail_fast: false  # Collect all errors
+    fail-fast: false  # Collect all errors
 
   structural:
     enabled: true
     rules:
-      - name: year_date_consistency
+      - name: year-date-consistency
         severity: WARN
         enabled: true
 
   external:
     enabled: true
-    timeout_ms: 5000
-    circuit_breaker:
-      failure_threshold: 5
-      recovery_timeout_s: 60
+    timeout-ms: 5000
+    circuit-breaker:
+      failure-threshold: 5
+      recovery-timeout-s: 60
 
   logical:
     enabled: true
-    year_range: [1800, 2027]
+    year-range: [1800, 2027]
 
   semantic:
     enabled: false  # Expensive, optional
-    similarity_threshold: 0.3
+    similarity-threshold: 0.3
 
-dq_thresholds:
-  soft_fail_threshold: 0.05  # 5% errors → warning
-  hard_fail_threshold: 0.20  # 20% errors → pipeline fail
+dq-thresholds:
+  soft-fail-threshold: 0.05  # 5% errors → warning
+  hard-fail-threshold: 0.20  # 20% errors → pipeline fail
 ```
 
 ---
@@ -355,7 +355,7 @@ dq_thresholds:
 
 2. **Наблюдаемость:**
    - DQ-метрики на уровне провайдера/поля/уровня валидации
-   - `_dq_report.json` для каждого run: error rate, warn rate, quarantine count
+   - `-dq-report.json` для каждого run: error rate, warn rate, quarantine count
 
 3. **Гибкость:**
    - Можно отключить дорогие проверки (semantic, external) в production
@@ -363,7 +363,7 @@ dq_thresholds:
 
 4. **Compliance:**
    - Аудитируемость: карантин хранит невалидные записи с причинами
-   - Reproducibility: детерминистическая валидация (content_hash)
+   - Reproducibility: детерминистическая валидация (content-hash)
 
 ### Негативные
 
@@ -381,7 +381,7 @@ dq_thresholds:
    - **Mitigation:** Circuit breaker, graceful degradation (SKIP)
 
 4. **Maintenance:**
-   - Regex-паттерны и диапазоны нужно обновлять (e.g., MAX_YEAR)
+   - Regex-паттерны и диапазоны нужно обновлять (e.g., MAX-YEAR)
    - API endpoints могут измениться
    - **Mitigation:** Версионирование конфигов, архитектурные тесты
 
@@ -400,7 +400,7 @@ dq_thresholds:
 ## Связанные решения
 
 - **ADR-002 (Medallion Architecture):** Валидация на Silver-слое, strict mode на Gold.
-- **ADR-014 (Deterministic Writes):** `content_hash` проверяется structural validation.
+- **ADR-014 (Deterministic Writes):** `content-hash` проверяется structural validation.
 - **ADR-027 (DQ Externalization):** DQ-правила в YAML, не в коде.
 - **ADR-024 (Entity Naming Unification):** `publication` entity для всех провайдеров.
 - **ADR-026 (Composite Publication Pipeline):** Валидация в seed + enricher pipelines.
@@ -432,7 +432,7 @@ dq_thresholds:
 - Tests: `tests/unit/domain/schemas/`, `tests/integration/validation/`
 
 **Конфигурация:**
-- `docs/04-reference/schemas/publication_validation_schema_v3.xlsx` — источник правил
+- `docs/04-reference/schemas/publication-validation-schema-v3.xlsx` — источник правил
 - `configs/validation/{provider}.yaml` — runtime конфигурация
 
 ---

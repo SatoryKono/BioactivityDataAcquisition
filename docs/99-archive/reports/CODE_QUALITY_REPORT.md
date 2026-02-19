@@ -41,7 +41,7 @@ ruff format: 922 files left unchanged
 |------------|------------|---------|
 | `[misc]` - Class cannot subclass "BaseModel" | 42 | Pydantic без mypy plugin |
 | `[unused-ignore]` - Unused type: ignore | 12 | Устаревшие ignore-комментарии |
-| `[untyped-decorator]` - Untyped decorator | 10 | Pydantic @field_validator |
+| `[untyped-decorator]` - Untyped decorator | 10 | Pydantic @field-validator |
 | `[no-any-return]` - Returning Any | 9 | Недостаточная типизация возвратов |
 | **Итого** | **76** | |
 
@@ -50,12 +50,12 @@ ruff format: 922 files left unchanged
 | Файл | Ошибок | Основная проблема |
 |------|--------|-------------------|
 | `domain/models/metadata.py` | 21 | Pydantic BaseModel |
-| `infrastructure/schemas/composite_config.py` | 18 | Pydantic + validators |
-| `infrastructure/schemas/dq_report_config.py` | 6 | Pydantic BaseModel |
-| `application/services/dq/silver_analyzer.py` | 6 | Unused type: ignore |
-| `infrastructure/config/_base.py` | 4 | Pydantic BaseSettings |
-| `infrastructure/schemas/filter_config.py` | 4 | Pydantic BaseModel |
-| `infrastructure/schemas/dq_config.py` | 3 | Pydantic BaseModel |
+| `infrastructure/schemas/composite-config.py` | 18 | Pydantic + validators |
+| `infrastructure/schemas/dq-report-config.py` | 6 | Pydantic BaseModel |
+| `application/services/dq/silver-analyzer.py` | 6 | Unused type: ignore |
+| `infrastructure/config/-base.py` | 4 | Pydantic BaseSettings |
+| `infrastructure/schemas/filter-config.py` | 4 | Pydantic BaseModel |
+| `infrastructure/schemas/dq-config.py` | 3 | Pydantic BaseModel |
 | Остальные 11 файлов | 14 | Смешанные |
 
 ### Рекомендация по исправлению
@@ -69,9 +69,9 @@ ruff format: 922 files left unchanged
 plugins = ["pydantic.mypy"]
 
 [tool.pydantic-mypy]
-init_forbid_extra = true
-init_typed = true
-warn_required_dynamic_aliases = true
+init-forbid-extra = true
+init-typed = true
+warn-required-dynamic-aliases = true
 ```
 
 После включения плагина:
@@ -147,15 +147,15 @@ from bioetl.infrastructure import * # OK
 
 | Функция | Файл | CC |
 |---------|------|-----|
-| `MergeService._apply_explicit_rules` | composite/merger.py:542 | 20 |
-| `SilverDQAnalyzer.analyze` | services/dq/silver_analyzer.py:54 | 20 |
-| `CrossRefAdapter.fetch_filtered_with_fallback` | adapters/crossref/client.py:191 | 17 |
-| `PubMedAdapter.fetch_filtered_with_fallback` | adapters/pubmed/pubmed_client.py:298 | 17 |
-| `SilverDQAnalyzer._check_value_distribution` | services/dq/silver_analyzer.py:360 | 17 |
-| `OpenAlexAdapter.fetch_filtered_with_fallback` | adapters/openalex/client.py:209 | 16 |
-| `GoldWriter._write_gold_metadata` | storage/gold_writer.py:602 | 15 |
-| `GoldDQAnalyzer._check_statistical_profile` | services/dq/gold_analyzer.py:490 | 15 |
-| `GoldDQAnalyzer._check_scd_integrity` | services/dq/gold_analyzer.py:654 | 15 |
+| `MergeService.-apply-explicit-rules` | composite/merger.py:542 | 20 |
+| `SilverDQAnalyzer.analyze` | services/dq/silver-analyzer.py:54 | 20 |
+| `CrossRefAdapter.fetch-filtered-with-fallback` | adapters/crossref/client.py:191 | 17 |
+| `PubMedAdapter.fetch-filtered-with-fallback` | adapters/pubmed/pubmed-client.py:298 | 17 |
+| `SilverDQAnalyzer.-check-value-distribution` | services/dq/silver-analyzer.py:360 | 17 |
+| `OpenAlexAdapter.fetch-filtered-with-fallback` | adapters/openalex/client.py:209 | 16 |
+| `GoldWriter.-write-gold-metadata` | storage/gold-writer.py:602 | 15 |
+| `GoldDQAnalyzer.-check-statistical-profile` | services/dq/gold-analyzer.py:490 | 15 |
+| `GoldDQAnalyzer.-check-scd-integrity` | services/dq/gold-analyzer.py:654 | 15 |
 
 ### Maintainability Index
 
@@ -182,11 +182,11 @@ from bioetl.infrastructure import * # OK
 
 ```
 src/bioetl/domain/serialization.py:38
-src/bioetl/domain/value_objects/dq_metrics.py:83
-src/bioetl/infrastructure/adapters/common/api_request_collector.py:111
-src/bioetl/infrastructure/adapters/common/api_request_collector.py:198
-src/bioetl/application/services/dq/silver_analyzer.py:93,379-383
-src/bioetl/application/services/dq/gold_analyzer.py:135,446
+src/bioetl/domain/value-objects/dq-metrics.py:83
+src/bioetl/infrastructure/adapters/common/api-request-collector.py:111
+src/bioetl/infrastructure/adapters/common/api-request-collector.py:198
+src/bioetl/application/services/dq/silver-analyzer.py:93,379-383
+src/bioetl/application/services/dq/gold-analyzer.py:135,446
 ```
 
 ---
@@ -198,12 +198,12 @@ src/bioetl/application/services/dq/gold_analyzer.py:135,446
 1. **Включить pydantic.mypy плагин** — устранит 52 из 76 ошибок типизации
 
 2. **Рефакторинг сложных функций** (CC ≥ 17):
-   - `_apply_explicit_rules` (CC=20) — разбить на подфункции
+   - `-apply-explicit-rules` (CC=20) — разбить на подфункции
    - `analyze` в DQ analyzers (CC=20) — извлечь проверки в отдельные методы
 
 ### Средний приоритет
 
-3. **Унифицировать `fetch_filtered_with_fallback`** — 4 адаптера имеют одинаковую сложную логику, кандидат на mixin
+3. **Унифицировать `fetch-filtered-with-fallback`** — 4 адаптера имеют одинаковую сложную логику, кандидат на mixin
 
 4. **Удалить устаревшие type: ignore** — 12 комментариев больше не нужны
 
@@ -213,15 +213,15 @@ src/bioetl/application/services/dq/gold_analyzer.py:135,446
 
 ```yaml
 # Рекомендуемые проверки для CI
-quality_gates:
-  ruff_check: PASS       # ✅ Готово
-  ruff_format: PASS      # ✅ Готово
-  mypy_strict: FAIL      # ⚠️ Требует pydantic.mypy
-  arch_tests: PASS       # ✅ 990/990
+quality-gates:
+  ruff-check: PASS       # ✅ Готово
+  ruff-format: PASS      # ✅ Готово
+  mypy-strict: FAIL      # ⚠️ Требует pydantic.mypy
+  arch-tests: PASS       # ✅ 990/990
   coverage: 85%+         # ✅ (проверяется отдельно)
 
 # После исправления mypy:
-# mypy_strict: PASS      # Ожидается после включения плагина
+# mypy-strict: PASS      # Ожидается после включения плагина
 ```
 
 ---

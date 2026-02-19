@@ -11,7 +11,7 @@ This runbook describes how to perform Backfill (historical load) and Rebuild (fu
 
 ## Prerequisites
 
-- **Exclusive Lock**: These operations require an exclusive lock (`lock:{provider}_{entity}:exclusive`).
+- **Exclusive Lock**: These operations require an exclusive lock (`lock:{provider}-{entity}:exclusive`).
 - **Downtime**: Incremental pipelines must be stopped or will be blocked.
 
 ## Procedure: Full Rebuild

@@ -15,8 +15,8 @@ incremental strategies should be represented.
 ## Decision (Summary)
 
 Formalize loading behavior via an explicit `LoadingStrategy` enum and keep
-`full_scan_only` for publication pipelines. The boolean `force_full_scan` remains for
-backward compatibility, but `loading_strategy` is the explicit source of truth.
+`full-scan-only` for publication pipelines. The boolean `force-full-scan` remains for
+backward compatibility, but `loading-strategy` is the explicit source of truth.
 
 See the canonical ADR for full details:
 - [ADR-031: Loading Strategy Formalization](ADR-031-loading-strategy-formalization.md)
@@ -29,7 +29,7 @@ See the canonical ADR for full details:
 
 ### Negative
 - Migration effort for existing configs
-- Temporary dual-field configuration (`force_full_scan` + `loading_strategy`)
+- Temporary dual-field configuration (`force-full-scan` + `loading-strategy`)
 
 ## Notes
 

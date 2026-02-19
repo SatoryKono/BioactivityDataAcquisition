@@ -27,8 +27,8 @@
 | Команда         | Модуль             | Описание                                |
 | --------------- | ------------------ | --------------------------------------- |
 | `run`           | `run.py`           | Запуск одного пайплайна                 |
-| `run-all`       | `run_all.py`       | Запуск всех пайплайнов провайдера       |
-| `run-composite` | `run_composite.py` | Запуск композитного пайплайна (ADR-026) |
+| `run-all`       | `run-all.py`       | Запуск всех пайплайнов провайдера       |
+| `run-composite` | `run-composite.py` | Запуск композитного пайплайна (ADR-026) |
 | `export`        | `export.py`        | Экспорт данных из Gold                  |
 | `quarantine`    | `quarantine.py`    | Управление карантинными записями        |
 | `health`        | `health.py`        | Проверка здоровья провайдеров           |
@@ -38,7 +38,7 @@
 | `vacuum`        | `vacuum.py`        | VACUUM операции для Delta Lake          |
 | `cleanup`       | `cleanup.py`       | Очистка Bronze данных                   |
 
-Дополнительно в слое `interfaces/cli/` используются модули: `health_server_integration.py`, `metrics_server_integration.py`, `run_helpers.py`.
+Дополнительно в слое `interfaces/cli/` используются модули: `health-server-integration.py`, `metrics-server-integration.py`, `run-helpers.py`.
 | `maintenance` | `maintenance.py` | Maintenance операции |
 | `archive` | `archive.py` | Архивирование данных |
 
@@ -46,7 +46,7 @@
 
 ```bash
 # Запуск пайплайна с лимитом
-python -m bioetl run --pipeline chembl_activity --limit 100
+python -m bioetl run --pipeline chembl-activity --limit 100
 
 # Запуск композитного пайплайна (ADR-026)
 python -m bioetl run-composite --composite publication
@@ -61,7 +61,7 @@ python -m bioetl health --provider chembl
 
 **Расположение:** `src/bioetl/interfaces/http/`
 
-Содержит HTTP health endpoint (`health_server.py`) с интеграцией Prometheus metrics.
+Содержит HTTP health endpoint (`health-server.py`) с интеграцией Prometheus metrics.
 Endpoints: `/health`, `/health/live`, `/health/ready`.
 
 ### 2.3. `orchestration/` — Оркестрация (Driving Adapters)
@@ -72,11 +72,11 @@ Endpoints: `/health`, `/health/live`, `/health/ready`.
 Graceful shutdown обрабатывается непосредственно в CLI командах:
 
 - `interfaces/cli/commands/run.py`
-- `interfaces/cli/commands/run_all.py`
-- `interfaces/cli/commands/run_composite.py`
+- `interfaces/cli/commands/run-all.py`
+- `interfaces/cli/commands/run-composite.py`
   Shutdown логика вынесена в `application/core/shutdown.py`.
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 Для подробной информации о том, как собираются компоненты системы, см. [Слой Composition](05-composition-layer.md).
 
@@ -86,7 +86,7 @@ ______________________________________________________________________
 - **Единственная ответственность:** Единственная ответственность этого слоя — запуск приложения и управление его жизненным циклом на самом верхнем уровне.
 - **Импорт из всех слоёв:** Это единственный слой, которому разрешено импортировать модули из `domain`, `application` и `infrastructure` для того, чтобы "собрать" приложение воедино.
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 4. Связанные Материалы
 
@@ -100,9 +100,9 @@ ______________________________________________________________________
 
 | Диаграмма               | Файл                                                                                               | Описание                              |
 | ----------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| Five Layer Architecture | [diagrams/mermaid/01_five_layer_architecture.mmd](diagrams/mermaid/01_five_layer_architecture.mmd) | Полная архитектура с Interfaces слоем |
-| Layers Interaction      | [05-layers-interaction.mermaid](diagrams/mermaid/05-layers-interaction.mermaid)                    | Взаимодействие слоёв                  |
-| Graceful Shutdown       | [diagrams/mermaid/24_graceful_shutdown.mmd](diagrams/mermaid/24_graceful_shutdown.mmd)             | Sequence diagram graceful shutdown    |
+| Five Layer Architecture | [diagrams/01-five-layer-architecture.mermaid](diagrams/01-five-layer-architecture.mermaid) | Полная архитектура с Interfaces слоем |
+| Layers Interaction      | [05-layers-interaction.mermaid](diagrams/05-layers-interaction.mermaid)                    | Взаимодействие слоёв                  |
+| Graceful Shutdown       | [diagrams/24-graceful-shutdown.mermaid](diagrams/24-graceful-shutdown.mermaid)             | Sequence diagram graceful shutdown    |
 
 ### Связанные ADR
 
@@ -113,6 +113,6 @@ ______________________________________________________________________
 
 ### Смежные Разделы Документации
 
-- [Composition Layer](05-composition-layer.md) — bootstrap_pipeline, фабрики
+- [Composition Layer](05-composition-layer.md) — bootstrap-pipeline, фабрики
 - [CLI Reference](../04-reference/cli.md) — полная документация CLI команд
 - [RULES.md §1 "Архитектура и Слои"](../00-project/RULES.md) — матрица импортов (interfaces может импортировать всё)

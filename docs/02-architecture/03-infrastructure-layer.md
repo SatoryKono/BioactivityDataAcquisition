@@ -29,7 +29,7 @@
 - Управление HTTP-соединениями через `UnifiedHTTPClient`.
 - Обработка специфичных для API ошибок (например, `429 Rate Limit`).
 - Преобразование ответа API в стандартизированный формат (словари Python).
-- Реализация `health_check()` для проверки доступности API.
+- Реализация `health-check()` для проверки доступности API.
 
 #### 2.1.1. Унифицированный HTTP-клиент
 
@@ -76,7 +76,7 @@ PubMedAdapter                         (pubchempy)
 
 - `ThreadPoolExecutor` для изоляции блокирующего I/O
 - Собственные `TokenBucket` и `CircuitBreaker`
-- Async-обёртка через `run_in_executor()`
+- Async-обёртка через `run-in-executor()`
 
 ### 2.2. `storage/` — Адаптеры Хранилищ
 
@@ -86,17 +86,17 @@ PubMedAdapter                         (pubchempy)
 
 Реализация разделена на три отдельных writer-а:
 
-- **`BronzeWriter`** (`bronze_writer.py`): Запись сырых данных в формате JSONL + zstd. Atomic writes через temp file + rename, генерация checksums.
-- **`SilverWriter`** (`silver_writer.py`): Запись в Delta Lake таблицы с наследованием от `BaseDeltaWriter`, ACID-транзакциями, логикой merge/upsert для идемпотентности, поддержкой Time Travel и 7-дневным VACUUM retention.
-- **`GoldWriter`** (`gold_writer.py`): Запись бизнес-готовых данных с наследованием от `BaseDeltaWriter`, строгой валидацией через Pandera, поддержкой SCD Type 2 и контрактов данных.
+- **`BronzeWriter`** (`bronze-writer.py`): Запись сырых данных в формате JSONL + zstd. Atomic writes через temp file + rename, генерация checksums.
+- **`SilverWriter`** (`silver-writer.py`): Запись в Delta Lake таблицы с наследованием от `BaseDeltaWriter`, ACID-транзакциями, логикой merge/upsert для идемпотентности, поддержкой Time Travel и 7-дневным VACUUM retention.
+- **`GoldWriter`** (`gold-writer.py`): Запись бизнес-готовых данных с наследованием от `BaseDeltaWriter`, строгой валидацией через Pandera, поддержкой SCD Type 2 и контрактов данных.
 
 Вспомогательные модули:
 
-- **`BaseDeltaWriter`** (`base_delta_writer.py`): Базовый класс для Delta Lake writers (Silver, Gold).
-- **`DeltaReader`** (`delta_reader.py`): Чтение Delta Lake таблиц.
-- **`ArrowDataConverter`** (`arrow_converter.py`): Утилиты конвертации PyArrow.
+- **`BaseDeltaWriter`** (`base-delta-writer.py`): Базовый класс для Delta Lake writers (Silver, Gold).
+- **`DeltaReader`** (`delta-reader.py`): Чтение Delta Lake таблиц.
+- **`ArrowDataConverter`** (`arrow-converter.py`): Утилиты конвертации PyArrow.
 - **`MetadataBuilder`** / **`MetadataWriter`**: Генерация и запись метаданных.
-- **`RetentionManager`** (`retention_manager.py`): Управление политиками хранения данных.
+- **`RetentionManager`** (`retention-manager.py`): Управление политиками хранения данных.
 
 ### 2.3. `locking/` — Реализация Блокировок
 
@@ -133,7 +133,7 @@ Redis-адаптер без изменения domain/application слоёв.
 - **Инверсия зависимостей:** Классы из `Infrastructure` зависят от абстракций (`Protocol`) из `Domain`, а не наоборот. Это позволяет подменять реализации без изменения ядра системы.
 - **Конфигурация:** Все необходимые параметры (API-ключи, пути, адреса серверов) адаптеры получают через DI из конфигурационных объектов.
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 4. Связанные Материалы
 
@@ -147,12 +147,12 @@ ______________________________________________________________________
 
 | Диаграмма              | Файл                                                                                                            | Описание                                         |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| Infrastructure Classes | [10-infrastructure-layer-class-diagram.mermaid](diagrams/mermaid/10-infrastructure-layer-class-diagram.mermaid) | Классы слоя Infrastructure                       |
-| Provider Adapters      | [diagrams/mermaid/23_provider_adapters_overview.mmd](diagrams/mermaid/23_provider_adapters_overview.mmd)        | Обзор 7 провайдеров и их rate limits             |
-| HTTP Infrastructure    | [diagrams/mermaid/14_http_infrastructure.mmd](diagrams/mermaid/14_http_infrastructure.mmd)                      | UnifiedHTTPClient, Rate Limiter, Circuit Breaker |
-| Circuit Breaker        | [07-circuit-breaker-states.mermaid](diagrams/mermaid/07-circuit-breaker-states.mermaid)                         | Состояния Circuit Breaker                        |
-| Storage Architecture   | [diagrams/mermaid/13_storage_architecture.mmd](diagrams/mermaid/13_storage_architecture.mmd)                    | Bronze, Silver, Gold writers                     |
-| MemoryLock             | [16-memory-lock-class.mermaid](diagrams/mermaid/16-memory-lock-class.mermaid)                                   | Класс MemoryLock                                 |
+| Infrastructure Classes | [10-infrastructure-layer-class-diagram.mermaid](diagrams/10-infrastructure-layer-class-diagram.mermaid) | Классы слоя Infrastructure                       |
+| Provider Adapters      | [diagrams/23-provider-adapters-overview.mermaid](diagrams/23-provider-adapters-overview.mermaid)        | Обзор 7 провайдеров и их rate limits             |
+| HTTP Infrastructure    | [diagrams/14-http-infrastructure.mermaid](diagrams/14-http-infrastructure.mermaid)                      | UnifiedHTTPClient, Rate Limiter, Circuit Breaker |
+| Circuit Breaker        | [07-circuit-breaker-states.mermaid](diagrams/07-circuit-breaker-states.mermaid)                         | Состояния Circuit Breaker                        |
+| Storage Architecture   | [diagrams/13-storage-architecture.mermaid](diagrams/13-storage-architecture.mermaid)                    | Bronze, Silver, Gold writers                     |
+| MemoryLock             | [16-memory-lock-class.mermaid](diagrams/16-memory-lock-class.mermaid)                                   | Класс MemoryLock                                 |
 
 ### Связанные ADR
 

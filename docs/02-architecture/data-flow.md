@@ -6,7 +6,7 @@
 
 Medallion Architecture — трёхслойная модель хранения данных: Bronze → Silver → Gold.
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Medallion Architecture Diagram
 
@@ -29,7 +29,7 @@ flowchart LR
     direction TB
     S1["Delta Lake"]
     S2["Merge/Upsert"]
-    S_perm["Permanent"]
+    S-perm["Permanent"]
   end
 
   subgraph Gold["Gold Layer"]
@@ -48,10 +48,10 @@ flowchart LR
   Bronze -->|Transform + Validate| Silver
   Silver -->|Transform + Filter| Gold
   Silver -.->|DQ errors| Q
-  Bronze -.->|batch_id FK| L
+  Bronze -.->|batch-id FK| L
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Layer Specifications (§2.1)
 
@@ -61,7 +61,7 @@ ______________________________________________________________________
 | **Silver** | Delta Lake      | Pandera (soft)   | Permanent         | Merge/Upsert           |
 | **Gold**   | Delta / Parquet | Pandera (strict) | Permanent         | SCD Type 2 / Overwrite |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Storage Paths
 
@@ -72,31 +72,31 @@ ______________________________________________________________________
 data/output/                       # Local-Only (current)
 ├── bronze/
 │   └── {provider}/{entity}/{date}/
-│       ├── batch_001.jsonl.zst
-│       └── _manifest.json
+│       ├── batch-001.jsonl.zst
+│       └── -manifest.json
 │
 ├── silver/
 │   └── {provider}/{entity}/
-│       └── [{partition_cols}/]  # Optional, configured via `partition_by` in YAML
-│           └── _delta_log/
+│       └── [{partition-cols}/]  # Optional, configured via `partition-by` in YAML
+│           └── -delta-log/
 │
 ├── gold/
 │   └── {provider}/{entity}/
-│       └── _delta_log/
+│       └── -delta-log/
 │
 ├── quarantine/
 │   └── {provider}/{entity}/
 │       └── {date}/
 │
 └── checkpoints/
-    └── {pipeline_name}.json
+    └── {pipeline-name}.json
 ```
 
-**Note**: Silver partitioning is **configurable** via `partition_by` field in pipeline YAML configs.
-Examples: `["year", "month"]`, `["assay_type"]`, `["organism"]`, or `[]` (no partitioning).
+**Note**: Silver partitioning is **configurable** via `partition-by` field in pipeline YAML configs.
+Examples: `["year", "month"]`, `["assay-type"]`, `["organism"]`, or `[]` (no partitioning).
 See `configs/pipelines/{provider}/{entity}.yaml` for specific configurations.
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Pipeline Execution Flow
 
@@ -116,7 +116,7 @@ flowchart TB
 
   subgraph Transform
     C1["Normalize Values"]
-    C2["Add Metadata<br/>(_run_id, _run_type)"]
+    C2["Add Metadata<br/>(-run-id, -run-type)"]
     C3["Compute Content Hash"]
   end
 
@@ -130,7 +130,7 @@ flowchart TB
     E1["Safety Guard<br/>(validate lock)"]
     E2["Delta Lake Write<br/>(Silver)"]
     E3["Gold Transform<br/>(exclude JSON fields)"]
-    E4["Delta Lake Write<br/>(Gold)<br/><i>skipped if skip_gold=True</i>"]
+    E4["Delta Lake Write<br/>(Gold)<br/><i>skipped if skip-gold=True</i>"]
   end
 
   subgraph Finalize
@@ -147,34 +147,34 @@ flowchart TB
   F1 --> F2 --> F3
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Required Metadata Fields (§2.4)
 
 | Field              | Type      | Description                            |
 | ------------------ | --------- | -------------------------------------- |
-| `_run_id`          | UUID      | Pipeline execution ID                  |
-| `_run_type`        | Enum      | `incremental` / `backfill` / `rebuild` |
-| `_source_batch_id` | UUID      | FK to lineage_log                      |
-| `_ingestion_ts`    | Timestamp | UTC ingestion time                     |
-| `_content_hash`    | String    | SHA256 for deduplication               |
-| `_dq_warn`         | Boolean   | Data quality warning flag              |
+| `-run-id`          | UUID      | Pipeline execution ID                  |
+| `-run-type`        | Enum      | `incremental` / `backfill` / `rebuild` |
+| `-source-batch-id` | UUID      | FK to lineage-log                      |
+| `-ingestion-ts`    | Timestamp | UTC ingestion time                     |
+| `-content-hash`    | String    | SHA256 for deduplication               |
+| `-dq-warn`         | Boolean   | Data quality warning flag              |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Silver → Gold Transformation
 
 При записи в Gold слой выполняется трансформация:
 
-1. **Фильтрация записей**: `should_write_gold()` определяет, какие записи попадают в Gold
-1. **Исключение JSON полей**: `transform_for_gold()` удаляет поля из `GOLD_EXCLUDE_FIELDS`:
-   - `molecule_hierarchy`, `molecule_properties`, `molecule_structures`
-   - `molecule_synonyms`, `cross_references`, `atc_classifications`
+1. **Фильтрация записей**: `should-write-gold()` определяет, какие записи попадают в Gold
+1. **Исключение JSON полей**: `transform-for-gold()` удаляет поля из `GOLD-EXCLUDE-FIELDS`:
+   - `molecule-hierarchy`, `molecule-properties`, `molecule-structures`
+   - `molecule-synonyms`, `cross-references`, `atc-classifications`
 1. **Валидация**: Pandera схема (strict mode) проверяет плоские поля
 
-**Code Reference**: `src/bioetl/application/core/base_transformer.py` → `BaseTransformer.transform_for_gold()`
+**Code Reference**: `src/bioetl/application/core/base-transformer.py` → `BaseTransformer.transform-for-gold()`
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Data Quality Flow (§2.6)
 
@@ -182,7 +182,7 @@ ______________________________________________________________________
 flowchart TD
   INPUT["Input Record"] --> VALIDATE["Pandera Validate"]
   VALIDATE -->|Pass| SILVER["Silver Table"]
-  VALIDATE -->|Warning < 5%| SILVER_WARN["Silver + _dq_warn=true"]
+  VALIDATE -->|Warning < 5%| SILVER-WARN["Silver + -dq-warn=true"]
   VALIDATE -->|Error > 20%| FAIL["Batch FAIL"]
   VALIDATE -->|Per - record error| QUARANTINE["Quarantine Table"]
   QUARANTINE --> REPLAY["Manual Replay<br/>(after fix)"]
@@ -190,11 +190,11 @@ flowchart TD
 
 **Thresholds**:
 
-- `< 5%` errors → Write with `_dq_warn=true`
+- `< 5%` errors → Write with `-dq-warn=true`
 - `5-20%` errors → Warning in logs
 - `> 20%` errors → Batch fails entirely
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Error Handling Summary
 
@@ -205,9 +205,9 @@ ______________________________________________________________________
 | **Data Quality**                    | Route to Quarantine            | §2.6      |
 | **Lock Lost**                       | Abort to prevent split-brain   | §3.3      |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Related Documents
 
 - **System Context**: [system-context.md](system-context.md)
-- **Architecture Diagrams**: [diagrams/00-diagramming-policy.md](diagrams/mermaid/00-diagramming-policy.md)
+- **Architecture Diagrams**: [diagrams/00-diagramming-policy.md](diagrams/00-diagramming-policy.md)

@@ -56,8 +56,8 @@ We have implemented **`UnifiedHTTPClient`** in `infrastructure/adapters/http/cli
 | Circuit Breaker | 5 consecutive errors → Open 5 min (ADR-007) |
 | Retry | Exponential backoff with jitter (RetryConfig) |
 | Tracing | OpenTelemetry spans per request |
-| Metrics | http_request_duration_seconds, http_request_errors_total |
-| Correlation | X-Correlation-ID header from run_id |
+| Metrics | http-request-duration-seconds, http-request-errors-total |
+| Correlation | X-Correlation-ID header from run-id |
 
 ## Justification
 
@@ -66,19 +66,19 @@ We have implemented **`UnifiedHTTPClient`** in `infrastructure/adapters/http/cli
 ```python
 # Before: Each adapter configured independently
 class ChEMBLAdapter:
-    def __init__(self):
-        self._rate_limit = 10  # Hardcoded
-        self._timeout = 30     # Duplicated
+    def --init--(self):
+        self.-rate-limit = 10  # Hardcoded
+        self.-timeout = 30     # Duplicated
 
 class PubChemAdapter:
-    def __init__(self):
-        self._rate_limit = 5   # Different value
-        self._timeout = 30     # Duplicated
+    def --init--(self):
+        self.-rate-limit = 5   # Different value
+        self.-timeout = 30     # Duplicated
 ```
 
 ```python
 # After: Factory creates configured client
-client = HttpClientFactory.create_for_provider("chembl", settings)
+client = HttpClientFactory.create-for-provider("chembl", settings)
 # Rate limit, timeout, retry config from YAML
 ```
 
@@ -94,9 +94,9 @@ All HTTP requests automatically get:
 
 ```python
 # Easy to mock for testing
-mock_client = Mock(spec=UnifiedHTTPClient)
-mock_client.get.return_value = {"data": [...]}
-adapter = ChEMBLAdapter(http_client=mock_client)
+mock-client = Mock(spec=UnifiedHTTPClient)
+mock-client.get.return-value = {"data": [...]}
+adapter = ChEMBLAdapter(http-client=mock-client)
 ```
 
 ## Implementation
@@ -106,13 +106,13 @@ adapter = ChEMBLAdapter(http_client=mock_client)
 ```python
 @dataclass
 class UnifiedHTTPClient:
-    rate_limiter: RateLimiterPort
-    circuit_breaker: CircuitBreakerPort
-    retry_config: RetryConfig = field(default_factory=RetryConfig)
+    rate-limiter: RateLimiterPort
+    circuit-breaker: CircuitBreakerPort
+    retry-config: RetryConfig = field(default-factory=RetryConfig)
     timeout: float = 30.0
-    run_id: RunID | None = None
-    user_agent: str = "BioETL/5.0.0"
-    contact_email: str | None = None
+    run-id: RunID | None = None
+    user-agent: str = "BioETL/5.0.0"
+    contact-email: str | None = None
     provider: str = "unknown"
     tracer: TracingPort | None = None
     metrics: MetricsPort | None = None
@@ -124,18 +124,18 @@ class UnifiedHTTPClient:
 ```python
 class HttpClientFactory:
     @classmethod
-    def create_for_provider(
+    def create-for-provider(
         cls, provider: str, settings: Settings
     ) -> UnifiedHTTPClient:
-        config = load_source_config(provider)
+        config = load-source-config(provider)
         return UnifiedHTTPClient(
-            rate_limiter=TokenBucket(
-                rate=config.rate_limit.rate,
-                capacity=config.rate_limit.capacity,
+            rate-limiter=TokenBucket(
+                rate=config.rate-limit.rate,
+                capacity=config.rate-limit.capacity,
             ),
-            circuit_breaker=CircuitBreaker(provider=provider),
+            circuit-breaker=CircuitBreaker(provider=provider),
             timeout=config.timeout,
-            contact_email=settings.default_email,
+            contact-email=settings.default-email,
         )
 ```
 
@@ -143,10 +143,10 @@ class HttpClientFactory:
 
 ```python
 class ChEMBLAdapter(BaseHttpAdapter):
-    async def fetch(self, entity_type: str, limit: int | None = None):
-        async with self._http_client:
-            response = await self._http_client.get(
-                f"{self.base_url}/{entity_type}",
+    async def fetch(self, entity-type: str, limit: int | None = None):
+        async with self.-http-client:
+            response = await self.-http-client.get(
+                f"{self.base-url}/{entity-type}",
                 params={"limit": limit},
             )
             yield from response.json()["data"]

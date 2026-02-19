@@ -1,8 +1,8 @@
 # Пайплайн: ChEMBL Assay Parameters
 
-**Имя пайплайна:** `chembl_assay_parameters`
+**Имя пайплайна:** `chembl-assay-parameters`
 **Провайдер:** `chembl`
-**Сущность:** `assay_parameters`
+**Сущность:** `assay-parameters`
 **Версия схемы:** 1.2.0
 
 ---
@@ -19,8 +19,8 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `assay_param_id` | `int` | Уникальный идентификатор параметра |
-| `assay_chembl_id` | `str` | ChEMBL ID связанного анализа |
+| `assay-param-id` | `int` | Уникальный идентификатор параметра |
+| `assay-chembl-id` | `str` | ChEMBL ID связанного анализа |
 
 ### Тип параметра
 
@@ -33,7 +33,7 @@
 - `PH` — кислотность
 - `TEMP` — температура
 - `TIME` — время
-- `CELL_COUNT` — количество клеток
+- `CELL-COUNT` — количество клеток
 - `SERUM` — сыворотка
 - `DOSE` — доза
 - `VOLUME` — объём
@@ -42,7 +42,7 @@
 - `PRESSURE` — давление
 - `HUMIDITY` — влажность
 - `PASSAGE` — пассаж
-- `CELL_DENSITY` — плотность клеток
+- `CELL-DENSITY` — плотность клеток
 - `INCUBATION` — инкубация
 
 ### Сырые значения
@@ -50,7 +50,7 @@
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `value` | `float` | Числовое значение |
-| `text_value` | `str` | Текстовое значение |
+| `text-value` | `str` | Текстовое значение |
 | `relation` | `str` | Отношение (=, <, >, etc.) |
 | `units` | `str` | Единицы измерения |
 | `comments` | `str` | Комментарии |
@@ -59,28 +59,28 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `standard_value` | `float` | Стандартизированное числовое значение |
-| `standard_text_value` | `str` | Стандартизированное текстовое значение |
-| `standard_type` | `str` | Стандартизированный тип |
-| `standard_relation` | `str` | Стандартизированное отношение |
-| `standard_units` | `str` | Стандартизированные единицы |
+| `standard-value` | `float` | Стандартизированное числовое значение |
+| `standard-text-value` | `str` | Стандартизированное текстовое значение |
+| `standard-type` | `str` | Стандартизированный тип |
+| `standard-relation` | `str` | Стандартизированное отношение |
+| `standard-units` | `str` | Стандартизированные единицы |
 
 ---
 
 ## 3. Трансформация
 
-**Файл:** `src/bioetl/application/pipelines/chembl/assay_parameters_transformer.py`
+**Файл:** `src/bioetl/application/pipelines/chembl/assay-parameters-transformer.py`
 
 ### Entity ID
 
 ```python
-entity_id = f"chembl:{assay_param_id}"
+entity-id = f"chembl:{assay-param-id}"
 ```
 
 ### Нормализация типа
 
 ```python
-type = param_type.upper() if param_type else "UNKNOWN"
+type = param-type.upper() if param-type else "UNKNOWN"
 ```
 
 ---
@@ -89,13 +89,13 @@ type = param_type.upper() if param_type else "UNKNOWN"
 
 ### DQ-правила
 
-1. **`assay_param_id`** — обязательное (primary key)
-2. **`assay_chembl_id`** — обязательное (foreign key)
+1. **`assay-param-id`** — обязательное (primary key)
+2. **`assay-chembl-id`** — обязательное (foreign key)
 3. **`type`** — обязательное
 
 ### Gold-фильтры
 
-- Обязательные поля: `assay_chembl_id`, `type`
+- Обязательные поля: `assay-chembl-id`, `type`
 
 ---
 
@@ -103,13 +103,13 @@ type = param_type.upper() if param_type else "UNKNOWN"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_assay_parameters
+bioetl run chembl-assay-parameters
 
 # С ограничением
-bioetl run chembl_assay_parameters --limit 1000
+bioetl run chembl-assay-parameters --limit 1000
 
 # С входным фильтром
-bioetl run chembl_assay_parameters --input-filter data/input/assay_parameters.csv
+bioetl run chembl-assay-parameters --input-filter data/input/assay-parameters.csv
 ```
 
 ---
@@ -124,9 +124,9 @@ Silver-таблица партиционируется по полю `type` дл
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/assay_parameters.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/assay_parameters_transformer.py` |
-| Пайплайн | `src/bioetl/application/pipelines/chembl/assay_parameters.py` |
+| Конфигурация | `configs/pipelines/chembl/assay-parameters.yaml` |
+| Трансформер | `src/bioetl/application/pipelines/chembl/assay-parameters-transformer.py` |
+| Пайплайн | `src/bioetl/application/pipelines/chembl/assay-parameters.py` |
 
 ---
 

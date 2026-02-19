@@ -1,8 +1,8 @@
 # Пайплайн: ChEMBL Target Component
 
-**Имя пайплайна:** `chembl_target_component`
+**Имя пайплайна:** `chembl-target-component`
 **Провайдер:** `chembl`
-**Сущность:** `target_component`
+**Сущность:** `target-component`
 **Версия схемы:** 1.2.0
 
 ---
@@ -19,15 +19,15 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `component_id` | `int` | Уникальный ID компонента |
+| `component-id` | `int` | Уникальный ID компонента |
 | `accession` | `str` | UniProt accession |
-| `component_type` | `str` | Тип компонента (PROTEIN, etc.) |
+| `component-type` | `str` | Тип компонента (PROTEIN, etc.) |
 
 ### Описание
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `component_description` | `str` | Описание компонента |
+| `component-description` | `str` | Описание компонента |
 | `sequence` | `str` | Аминокислотная последовательность |
 
 ### Таксономия
@@ -35,24 +35,24 @@
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `organism` | `str` | Организм |
-| `tax_id` | `int` | NCBI Taxonomy ID |
+| `tax-id` | `int` | NCBI Taxonomy ID |
 
 ### Классификация белков
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `protein_classifications` | `list[dict]` | Классификация по ChEMBL |
+| `protein-classifications` | `list[dict]` | Классификация по ChEMBL |
 
 ---
 
 ## 3. Трансформация
 
-**Файл:** `src/bioetl/application/pipelines/chembl/target_component_transformer.py`
+**Файл:** `src/bioetl/application/pipelines/chembl/target-component-transformer.py`
 
 ### Entity ID
 
 ```python
-entity_id = f"chembl:component_{component_id}"
+entity-id = f"chembl:component-{component-id}"
 ```
 
 ---
@@ -61,10 +61,10 @@ entity_id = f"chembl:component_{component_id}"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_target_component
+bioetl run chembl-target-component
 
 # С ограничением
-bioetl run chembl_target_component --limit 500
+bioetl run chembl-target-component --limit 500
 ```
 
 ---
@@ -73,8 +73,8 @@ bioetl run chembl_target_component --limit 500
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/target_component.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/target_component_transformer.py` |
+| Конфигурация | `configs/pipelines/chembl/target-component.yaml` |
+| Трансформер | `src/bioetl/application/pipelines/chembl/target-component-transformer.py` |
 
 ---
 

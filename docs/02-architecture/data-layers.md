@@ -20,22 +20,22 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `ingestion_ts` | Timestamp (UTC) | Время получения записи (в sidecar `.meta.json`). |
-| `run_id` | UUID | Идентификатор запуска пайплайна (в sidecar `.meta.json`). |
-| `batch_id` | UUID | Идентификатор пакета данных (в sidecar `.meta.json`). |
+| `ingestion-ts` | Timestamp (UTC) | Время получения записи (в sidecar `.meta.json`). |
+| `run-id` | UUID | Идентификатор запуска пайплайна (в sidecar `.meta.json`). |
+| `batch-id` | UUID | Идентификатор пакета данных (в sidecar `.meta.json`). |
 
-**Примечание**: Metadata хранится в отдельном sidecar-файле `.meta.json` на уровне файла, а не как per-record поля. Underscore-prefixed версии (`_ingestion_ts`, `_run_id`, `_source_batch_id`) появляются в Silver layer после трансформации.
+**Примечание**: Metadata хранится в отдельном sidecar-файле `.meta.json` на уровне файла, а не как per-record поля. Underscore-prefixed версии (`-ingestion-ts`, `-run-id`, `-source-batch-id`) появляются в Silver layer после трансформации.
 
 **Примечание**: Если источник возвращает массив JSON, он разбивается на отдельные строки (records).
 
 ### 1.3. Реализация (Code Reference)
-*   **Writer**: `src/bioetl/infrastructure/storage/bronze_writer.py`
+*   **Writer**: `src/bioetl/infrastructure/storage/bronze-writer.py`
 *   **Логика**:
     1.  Получение батча данных от адаптера.
     2.  Добавление метаданных.
     3.  Сериализация в JSONL.
     4.  Сжатие `zstd`.
-    5.  Загрузка в локальное хранилище с уникальным именем файла (обычно содержащим `run_id` и порядковый номер части).
+    5.  Загрузка в локальное хранилище с уникальным именем файла (обычно содержащим `run-id` и порядковый номер части).
 
 ---
 
@@ -46,7 +46,7 @@
 ### 2.1. Формат и Технологии
 *   **Формат**: Delta Lake (Parquet + Transaction Log).
 *   **Engine**: `delta-rs` (через библиотеку `deltalake` Python binding).
-*   **Путь**: `data/output/silver/{provider}/{entity}/[{partition_cols}/]` — партиционирование опционально, настраивается через `partition_by` в YAML конфиге пайплайна.
+*   **Путь**: `data/output/silver/{provider}/{entity}/[{partition-cols}/]` — партиционирование опционально, настраивается через `partition-by` в YAML конфиге пайплайна.
 *   **Протокол**: Версия протокола определяется defaults библиотеки deltalake.
 
 ### 2.2. Схема и Валидация
@@ -56,7 +56,7 @@
 *   **Обработка ошибок валидации**:
     *   **Info/Warning** (например, новые поля или отсутствие необязательных): Данные пропускаются, но метаданные дрейфа схемы логируются.
     *   **Data Quality Error** (нарушение типов, провал check-ов):
-        *   Soft Fail (<5%): Замена на `NULL` (если поле `nullable`) или пометка флагом `_dq_error`.
+        *   Soft Fail (<5%): Замена на `NULL` (если поле `nullable`) или пометка флагом `-dq-error`.
         *   Hard Fail (>20%): Батч отклоняется, запись в Quarantine.
     *   **Critical Schema Violation**: Исключение, остановка пайплайна.
 
@@ -74,14 +74,14 @@
 ### 2.4. Дедупликация и Merge Strategy
 Silver слой использует стратегию **Merge/Upsert** для обеспечения идемпотентности.
 
-*   **Первичный ключ (Primary Key)**: Определяется для каждой сущности (например, `chembl_id`). Если естественного ключа нет, используется синтетический `content_hash`.
+*   **Первичный ключ (Primary Key)**: Определяется для каждой сущности (например, `chembl-id`). Если естественного ключа нет, используется синтетический `content-hash`.
 *   **Логика Merge**:
     *   Если запись с PK существует: Обновление (UPDATE).
     *   Если запись не существует: Вставка (INSERT).
 *   **Приоритет обновлений (Conflict Resolution)**:
-    При конкурентных запусках (например, Backfill vs Incremental) используется поле `_run_type`.
+    При конкурентных запусках (например, Backfill vs Incremental) используется поле `-run-type`.
     Приоритет: `rebuild` > `backfill` > `incremental`.
-    *В коде*: Условный update в Delta Merge (см. `src/bioetl/infrastructure/storage/silver_writer.py`).
+    *В коде*: Условный update в Delta Merge (см. `src/bioetl/infrastructure/storage/silver-writer.py`).
 
 ### 2.5. PII и Безопасность
 *   Поля, помеченные как чувствительные (PII), **ОБЯЗАНЫ** быть хэшированы перед записью в Silver.
@@ -89,8 +89,8 @@ Silver слой использует стратегию **Merge/Upsert** для 
 *   Соль управляется через Secrets Manager и ротируется (см. `RULES.md` §5.4.1).
 
 ### 2.6. Партиционирование
-*   **Конфигурация**: Определяется через `partition_by` в `configs/pipelines/{provider}/{entity}.yaml`.
-*   **Примеры**: `["year", "month"]` (по дате), `["assay_type"]` (по типу сущности), `[]` (без партиционирования).
+*   **Конфигурация**: Определяется через `partition-by` в `configs/pipelines/{provider}/{entity}.yaml`.
+*   **Примеры**: `["year", "month"]` (по дате), `["assay-type"]` (по типу сущности), `[]` (без партиционирования).
 *   **Стандарт**: По дате источника или по типу данных, если кардинальность низкая.
 *   **Z-ORDER**: Не применяется в Silver (обычно сортировка по ingestion time), так как основная цель — write throughput.
 
@@ -104,20 +104,20 @@ Silver слой использует стратегию **Merge/Upsert** для 
 
 При переходе из Silver в Gold выполняется трансформация данных:
 
-*   **Фильтрация полей**: Метод `BaseTransformer.transform_for_gold()` (`base_transformer.py:456`) использует `GOLD_EXCLUDE_FIELDS` для фильтрации полей. В текущей версии `GOLD_EXCLUDE_FIELDS = frozenset()` (пустое множество) — все Silver-поля проходят в Gold без исключения.
+*   **Фильтрация полей**: Метод `BaseTransformer.transform-for-gold()` (`base-transformer.py:456`) использует `GOLD-EXCLUDE-FIELDS` для фильтрации полей. В текущей версии `GOLD-EXCLUDE-FIELDS = frozenset()` (пустое множество) — все Silver-поля проходят в Gold без исключения.
 *   **Плоская структура**: Gold содержит только плоские (scalar) поля для оптимизации аналитических запросов.
-*   **Реализация**: `BaseTransformer.transform_for_gold()` метод с константой `GOLD_EXCLUDE_FIELDS` в `src/bioetl/application/core/base_transformer.py`.
+*   **Реализация**: `BaseTransformer.transform-for-gold()` метод с константой `GOLD-EXCLUDE-FIELDS` в `src/bioetl/application/core/base-transformer.py`.
 
 #### Пример: ChEMBL Molecule
 
 | Silver (JSON) | Gold (Flat) |
 |---------------|-------------|
-| `molecule_hierarchy` (JSON string) | `hierarchy_parent_chembl_id`, `hierarchy_active_chembl_id` |
-| `molecule_properties` (JSON string) | `property_mw_freebase`, `property_alogp`, `property_hba`, `property_hbd`, `property_psa`, `property_rtb`, `property_ro5_violations`, `property_qed_weighted`, `property_full_molformula` |
-| `molecule_structures` (JSON string) | `structure_canonical_smiles`, `structure_standard_inchi`, `structure_standard_inchi_key` |
-| `molecule_synonyms` (JSON string) | *Excluded* |
-| `cross_references` (JSON string) | *Excluded* |
-| `atc_classifications` (JSON string) | *Excluded* |
+| `molecule-hierarchy` (JSON string) | `hierarchy-parent-chembl-id`, `hierarchy-active-chembl-id` |
+| `molecule-properties` (JSON string) | `property-mw-freebase`, `property-alogp`, `property-hba`, `property-hbd`, `property-psa`, `property-rtb`, `property-ro5-violations`, `property-qed-weighted`, `property-full-molformula` |
+| `molecule-structures` (JSON string) | `structure-canonical-smiles`, `structure-standard-inchi`, `structure-standard-inchi-key` |
+| `molecule-synonyms` (JSON string) | *Excluded* |
+| `cross-references` (JSON string) | *Excluded* |
+| `atc-classifications` (JSON string) | *Excluded* |
 
 **Примечание**: Silver сохраняет полные JSON-данные для возможности восстановления и расследования (forensic retention).
 
@@ -125,7 +125,7 @@ Silver слой использует стратегию **Merge/Upsert** для 
 *   **Формат**: Delta Lake.
 *   **Путь**: `data/output/gold/{provider}/{entity}/` (например, `data/output/gold/chembl/activity`).
 *   **Оптимизация чтения**:
-    *   **Z-ORDER Clustering**: Рекомендуется (не реализовано в текущей версии) по часто используемым предикатам фильтрации (например, `target_id`, `assay_type`).
+    *   **Z-ORDER Clustering**: Рекомендуется (не реализовано в текущей версии) по часто используемым предикатам фильтрации (например, `target-id`, `assay-type`).
     *   **Compaction**: Регулярная (еженедельная) компрессия мелких файлов через `OPTIMIZE`.
 
 ### 3.3. Контракты Данных (Data Contracts)

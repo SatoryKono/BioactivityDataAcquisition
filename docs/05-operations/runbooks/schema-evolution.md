@@ -11,7 +11,7 @@ This runbook describes how to handle schema changes in Bronze, Silver, and Gold 
    ```python
    class MyEntity(BaseEntity):
        ...
-       new_field: str | None = None  # Must be optional initially
+       new-field: str | None = None  # Must be optional initially
    ```
 
 2. **Update Pandera Schema**:
@@ -19,7 +19,7 @@ This runbook describes how to handle schema changes in Bronze, Silver, and Gold 
    ```python
    class MySchema(pa.DataFrameModel):
        ...
-       new_field: Series[str] = pa.Field(nullable=True)
+       new-field: Series[str] = pa.Field(nullable=True)
    ```
 
 3. **Deploy**:
@@ -32,16 +32,16 @@ This runbook describes how to handle schema changes in Bronze, Silver, and Gold 
    - **Option B**: Dual Write (Zero Downtime). See [RULES.md Appendix E.3](../../RULES.md#e3-field-deprecation-workflow).
 
 2. **Implement Dual Write (If needed)**:
-   - Add `new_field`.
-   - Populate `new_field` from `old_field` or source.
-   - Keep `old_field` for compatibility.
+   - Add `new-field`.
+   - Populate `new-field` from `old-field` or source.
+   - Keep `old-field` for compatibility.
 
 3. **Deprecate Old Field**:
-   - Mark `old_field` as deprecated in documentation/schema.
+   - Mark `old-field` as deprecated in documentation/schema.
    - Notify consumers.
 
 4. **Remove Old Field**:
-   - After deprecation period, remove `old_field`.
+   - After deprecation period, remove `old-field`.
    - Run `VACUUM` to clean up old versions.
 
 ## Handling Schema Drift Alerts

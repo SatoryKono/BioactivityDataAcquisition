@@ -10,7 +10,7 @@
 ## 2. Список изменений (RF-*)
 
 ### RF-CFG-001 [MUST] — Конфигурации Sink
-**Описание**: Добавить явные параметры `sort_by` и `primary_key` в конфигурации пайплайнов для соответствия ADR-014 и ADR-025.
+**Описание**: Добавить явные параметры `sort-by` и `primary-key` в конфигурации пайплайнов для соответствия ADR-014 и ADR-025.
 **Файлы**:
 - `configs/pipelines/chembl/activity.yaml`
 - `configs/pipelines/chembl/assay.yaml`
@@ -35,9 +35,9 @@
 1. **Implementation (Config)**: Выполнить RF-CFG-001.
 2. **Implementation (Structure)**: Выполнить RF-STR-001.
 3. **Implementation (Doc)**: Выполнить RF-DOC-001.
-4. **Verification**: Запустить `scripts/config_gap_analysis.py` и `scripts/audit_structure.py`.
+4. **Verification**: Запустить `scripts/config-gap-analysis.py` и `scripts/audit-structure.py`.
 
 ## 4. Критерии успеха
-- `config_gap_analysis.py` показывает 0 critical issues.
-- `audit_structure.py` показывает 0 MUST violations.
+- `config-gap-analysis.py` показывает 0 critical issues.
+- `audit-structure.py` показывает 0 MUST violations.
 - Документация по 4 новым пайплайнам доступна.

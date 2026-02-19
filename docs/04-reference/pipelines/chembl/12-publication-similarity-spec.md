@@ -4,33 +4,33 @@
 
 ## Overview
 
-Extracts publication similarity data (Tanimoto coefficients) from the ChEMBL `/document_similarity` endpoint.
+Extracts publication similarity data (Tanimoto coefficients) from the ChEMBL `/document-similarity` endpoint.
 
 ## Identity
 
 | Field | Value |
 |-------|-------|
-| Pipeline ID | `chembl_publication_similarity` |
+| Pipeline ID | `chembl-publication-similarity` |
 | Provider | `chembl` |
-| Entity | `publication_similarity` |
+| Entity | `publication-similarity` |
 | Version | `2.1.0` |
-| Loading Strategy | `full_scan_only` (force full scan) |
-| Primary Keys | `sim_id` |
-| Config | `configs/pipelines/chembl/publication_similarity.yaml` |
+| Loading Strategy | `full-scan-only` (force full scan) |
+| Primary Keys | `sim-id` |
+| Config | `configs/pipelines/chembl/publication-similarity.yaml` |
 
 ## Outputs
 
 | Layer | Path |
 |-------|------|
-| Bronze | `data/output/bronze/chembl/publication_similarity` |
-| Silver | `data/output/silver/chembl/publication_similarity` |
-| Gold | `data/output/gold/chembl/publication_similarity` |
+| Bronze | `data/output/bronze/chembl/publication-similarity` |
+| Silver | `data/output/silver/chembl/publication-similarity` |
+| Gold | `data/output/gold/chembl/publication-similarity` |
 
 ## Related Configs
 
-- DQ: `configs/quality/entities/chembl/publication_similarity.yaml`
-- Filters: `configs/filters/entities/chembl/publication_similarity.yaml`
-- Column groups: `configs/schemas/chembl/publication_similarity.yaml`
+- DQ: `configs/quality/entities/chembl/publication-similarity.yaml`
+- Filters: `configs/filters/entities/chembl/publication-similarity.yaml`
+- Column groups: `configs/schemas/chembl/publication-similarity.yaml`
 
 ## Related ADRs
 

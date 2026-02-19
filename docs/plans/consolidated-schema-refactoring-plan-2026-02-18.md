@@ -26,27 +26,27 @@
 
 | Утверждение планов | Реальность на main | Verdict |
 |---|---|---|
-| `gene_names` отсутствует в Silver schema UniProt | **Присутствует** (`silver.py:236`, `pa.list_(pa.string())`) | FALSE |
+| `gene-names` отсутствует в Silver schema UniProt | **Присутствует** (`silver.py:236`, `pa.list-(pa.string())`) | FALSE |
 | `issue` отсутствует в Silver schema SemanticScholar | **Присутствует** (`silver.py:783`, `pa.string()`) | FALSE |
-| Python↔YAML drift в `FIELD_TO_GROUP_MAPPING` | **Синхронизированы** (167 entries совпадают) | FALSE |
-| CrossRef: отсутствуют трансформеры для `content_domain_*`, `issn_print/electronic`, `published_print/online` | **Все трансформеры реализованы** в `crossref/extractors.py` и `crossref/transformer.py` | FALSE |
-| `pharmaceutical_use`, `publication_count` — dead fields | **Активны**: присутствуют в entity, имеют валидацию в schemas | UNVERIFIED — нужно проверить, заполняются ли реально трансформером |
-| Ghost base_names (doi, pmid, year, etc.) рядом с canonical | **Подтверждено**: `field_groups/publication.yaml` содержит оба варианта | TRUE |
-| `content_hash` в группе TRASH | **Подтверждено**: `publication.yaml:548`, группа `trash` | TRUE |
-| Tissue PK mismatch: Gold `tissue_chembl_id` vs entity/Silver `tissue_id` | **Подтверждено**: Gold `chembl.py:645` vs Silver `silver.py:569` | TRUE |
-| `action_type_action_type` в Activity | **Подтверждено**: rename mapping в `activity_transformer.py:185` | TRUE |
-| `document_year`/`document_journal` legacy naming | **Подтверждено**: FieldSpec renames в `activity_transformer.py:119,125` | TRUE |
-| Пустые `column_groups: []` в 15+ YAML schema файлах | **Подтверждено**: 15 файлов в `configs/schemas/` | TRUE |
-| `subject_topics` inconsistency (string vs list) | **Подтверждено**: OpenAlex `pa.string()` vs другие `pa.list_` | TRUE |
+| Python↔YAML drift в `FIELD-TO-GROUP-MAPPING` | **Синхронизированы** (167 entries совпадают) | FALSE |
+| CrossRef: отсутствуют трансформеры для `content-domain-*`, `issn-print/electronic`, `published-print/online` | **Все трансформеры реализованы** в `crossref/extractors.py` и `crossref/transformer.py` | FALSE |
+| `pharmaceutical-use`, `publication-count` — dead fields | **Активны**: присутствуют в entity, имеют валидацию в schemas | UNVERIFIED — нужно проверить, заполняются ли реально трансформером |
+| Ghost base-names (doi, pmid, year, etc.) рядом с canonical | **Подтверждено**: `field-groups/publication.yaml` содержит оба варианта | TRUE |
+| `content-hash` в группе TRASH | **Подтверждено**: `publication.yaml:548`, группа `trash` | TRUE |
+| Tissue PK mismatch: Gold `tissue-chembl-id` vs entity/Silver `tissue-id` | **Подтверждено**: Gold `chembl.py:645` vs Silver `silver.py:569` | TRUE |
+| `action-type-action-type` в Activity | **Подтверждено**: rename mapping в `activity-transformer.py:185` | TRUE |
+| `document-year`/`document-journal` legacy naming | **Подтверждено**: FieldSpec renames в `activity-transformer.py:119,125` | TRUE |
+| Пустые `column-groups: []` в 15+ YAML schema файлах | **Подтверждено**: 15 файлов в `configs/schemas/` | TRUE |
+| `subject-topics` inconsistency (string vs list) | **Подтверждено**: OpenAlex `pa.string()` vs другие `pa.list-` | TRUE |
 
 ### 0.3 Уникальные находки по веткам
 
 | Ветка | Уникальные items | Ценность |
 |-------|-----------------|----------|
 | Branch 1 (base) | — (базовый publication-focused набор) | Baseline |
-| Branch 2 (f7msdt) | Tissue PK (BLG-010), CrossRef transformer gaps (BLG-011), Empty column_groups governance (BLG-012) | BLG-010 подтверждён, BLG-011 ложный, BLG-012 подтверждён |
+| Branch 2 (f7msdt) | Tissue PK (BLG-010), CrossRef transformer gaps (BLG-011), Empty column-groups governance (BLG-012) | BLG-010 подтверждён, BLG-011 ложный, BLG-012 подтверждён |
 | Branch 3 (8x3vzl) | Single source of truth schema (SC-008), Contract versioning strategy (SC-009) | Оба архитектурно ценные |
-| Branch 4 (6v6zla) | Taxonomy types Activity/CellLine (CB-01/02), action_type rename (CB-03), document naming (CB-04), PubChem fingerprint (CB-09) | CB-01/02 новая тема, CB-03/04 подтверждены, CB-09 minor |
+| Branch 4 (6v6zla) | Taxonomy types Activity/CellLine (CB-01/02), action-type rename (CB-03), document naming (CB-04), PubChem fingerprint (CB-09) | CB-01/02 новая тема, CB-03/04 подтверждены, CB-09 minor |
 
 ---
 
@@ -58,25 +58,25 @@
 
 | ID | Pipeline/Global | Изменение | Уровень | Источник веток | Подтверждено кодом |
 |---|---|---|---|---|---|
-| RF-SCH-001 | composite/publication | Удалить ghost base_names (`doi`, `pmid`, `pmc_id`, `year`, `document_chembl_id`) из `field_groups/publication.yaml`, оставить canonical `publication_*` | Refactor | ALL (SCH-001, BLG-001, SC-001, CB-*) | ✅ `publication.yaml` содержит обе формы |
-| RF-SCH-002 | composite/publication | Консолидация MeSH/keywords/topics: оставить `subject_mesh`, `subject_keywords`, `subject_topics` как canonical | Refactor | ALL (SCH-002, BLG-002, SC-003) | ✅ Дублирование подтверждено |
-| RF-SCH-003 | composite/publication | Разгрузить `id_and_status`: перенести `fields_of_study` → terms/topics, `publication_type` → publication_types | Refactor | ALL (SCH-003, BLG-003, SC-004) | ✅ Перегрузка группы подтверждена |
-| RF-SCH-004 | composite/publication | Переклассифицировать `content_hash`: TRASH → system-metadata (`include_in_gold=false`) | Refactor | ALL (SCH-005, BLG-004, SC-005) | ✅ `content_hash` в TRASH группе |
-| RF-SCH-005 | composite/publication | Journal naming cleanup: deprecate legacy `journal_full_title`, `journal_title`, `journal_abbrev` | Breaking | Branches 1,3 (SCH-004, SC-006) | ⚠️ Требует отдельного аудита journal полей |
-| RF-SCH-006 | composite/publication | Решение по `language`, `license_url`, `is_oa`, `oa_status`, `open_access_url`: promote в Gold или оставить вне | Breaking | ALL (SCH-006, BLG-005, SC-007) | ✅ Сейчас в TRASH, решение необходимо |
-| RF-SCH-007 | chembl/tissue | PK mismatch: Gold `tissue_chembl_id` → align с entity/Silver `tissue_id` | Breaking | Branch 2 (BLG-010) | ✅ Gold `chembl.py:645` vs Silver `silver.py:569` |
-| RF-SCH-008 | chembl/activity | Унификация taxonomy type `target_taxonomy_id` (string→float/nullable int) в Silver/Gold | Breaking | Branch 4 (CB-01) | ⚠️ Требует отдельной верификации типов |
-| RF-SCH-009 | chembl/cell_line | Выровнять Silver тип `cell_source_taxonomy_id` с Gold (`int`→`float`) | Breaking | Branch 4 (CB-02) | ⚠️ Требует отдельной верификации типов |
-| RF-SCH-010 | chembl/activity | Формализовать rename `action_type_action_type` → `action_type` в schemas/configs (сейчас только в transformer) | Refactor | Branch 4 (CB-03) | ✅ Rename в `activity_transformer.py:185` |
-| RF-SCH-011 | chembl/activity | Нормализовать `document_year`→`publication_year`, `document_journal`→`journal` в schemas/Gold contracts | Refactor | Branch 4 (CB-04) | ✅ FieldSpec renames в transformer |
-| RF-SCH-012 | global/publication | Унифицировать list/JSON типы (`subject_topics` string vs list) между Silver schemas разных провайдеров | Refactor | ALL (SCH-011, BLG-*, SC-*, CB-08) | ✅ `subject_topics` как `pa.string()` в OpenAlex |
+| RF-SCH-001 | composite/publication | Удалить ghost base-names (`doi`, `pmid`, `pmc-id`, `year`, `document-chembl-id`) из `field-groups/publication.yaml`, оставить canonical `publication-*` | Refactor | ALL (SCH-001, BLG-001, SC-001, CB-*) | ✅ `publication.yaml` содержит обе формы |
+| RF-SCH-002 | composite/publication | Консолидация MeSH/keywords/topics: оставить `subject-mesh`, `subject-keywords`, `subject-topics` как canonical | Refactor | ALL (SCH-002, BLG-002, SC-003) | ✅ Дублирование подтверждено |
+| RF-SCH-003 | composite/publication | Разгрузить `id-and-status`: перенести `fields-of-study` → terms/topics, `publication-type` → publication-types | Refactor | ALL (SCH-003, BLG-003, SC-004) | ✅ Перегрузка группы подтверждена |
+| RF-SCH-004 | composite/publication | Переклассифицировать `content-hash`: TRASH → system-metadata (`include-in-gold=false`) | Refactor | ALL (SCH-005, BLG-004, SC-005) | ✅ `content-hash` в TRASH группе |
+| RF-SCH-005 | composite/publication | Journal naming cleanup: deprecate legacy `journal-full-title`, `journal-title`, `journal-abbrev` | Breaking | Branches 1,3 (SCH-004, SC-006) | ⚠️ Требует отдельного аудита journal полей |
+| RF-SCH-006 | composite/publication | Решение по `language`, `license-url`, `is-oa`, `oa-status`, `open-access-url`: promote в Gold или оставить вне | Breaking | ALL (SCH-006, BLG-005, SC-007) | ✅ Сейчас в TRASH, решение необходимо |
+| RF-SCH-007 | chembl/tissue | PK mismatch: Gold `tissue-chembl-id` → align с entity/Silver `tissue-id` | Breaking | Branch 2 (BLG-010) | ✅ Gold `chembl.py:645` vs Silver `silver.py:569` |
+| RF-SCH-008 | chembl/activity | Унификация taxonomy type `target-taxonomy-id` (string→float/nullable int) в Silver/Gold | Breaking | Branch 4 (CB-01) | ⚠️ Требует отдельной верификации типов |
+| RF-SCH-009 | chembl/cell-line | Выровнять Silver тип `cell-source-taxonomy-id` с Gold (`int`→`float`) | Breaking | Branch 4 (CB-02) | ⚠️ Требует отдельной верификации типов |
+| RF-SCH-010 | chembl/activity | Формализовать rename `action-type-action-type` → `action-type` в schemas/configs (сейчас только в transformer) | Refactor | Branch 4 (CB-03) | ✅ Rename в `activity-transformer.py:185` |
+| RF-SCH-011 | chembl/activity | Нормализовать `document-year`→`publication-year`, `document-journal`→`journal` в schemas/Gold contracts | Refactor | Branch 4 (CB-04) | ✅ FieldSpec renames в transformer |
+| RF-SCH-012 | global/publication | Унифицировать list/JSON типы (`subject-topics` string vs list) между Silver schemas разных провайдеров | Refactor | ALL (SCH-011, BLG-*, SC-*, CB-08) | ✅ `subject-topics` как `pa.string()` в OpenAlex |
 
 ### Tier 2: Подтверждённые, но не критичные
 
 | ID | Pipeline/Global | Изменение | Уровень | Источник веток | Подтверждено кодом |
 |---|---|---|---|---|---|
-| RF-SCH-013 | global/config | Решение по пустым `column_groups: []` в 15 YAML schema файлах: deprecate или populate | Refactor | Branch 2 (BLG-012) | ✅ 15 файлов с пустыми column_groups |
-| RF-SCH-014 | global/publication | Единый source of truth: гармонизировать `publication.yaml` и `field_groups/publication.yaml` | Refactor | Branch 3 (SC-008) | ✅ Два параллельных определения |
+| RF-SCH-013 | global/config | Решение по пустым `column-groups: []` в 15 YAML schema файлах: deprecate или populate | Refactor | Branch 2 (BLG-012) | ✅ 15 файлов с пустыми column-groups |
+| RF-SCH-014 | global/publication | Единый source of truth: гармонизировать `publication.yaml` и `field-groups/publication.yaml` | Refactor | Branch 3 (SC-008) | ✅ Два параллельных определения |
 | RF-SCH-015 | pubchem/compound | Документировать или удалить DTO-only поле `fingerprint` | Low | Branch 4 (CB-09) | ⚠️ Требует верификации |
 | RF-SCH-016 | global/dq | Externalize DQ rules для schema drift detection и group policy enforcement | Refactor | ALL (SCH-012, BLG-*, SC-011, CB-12) | ✅ Архитектурно обоснованно |
 
@@ -84,11 +84,11 @@
 
 | ID | Pipeline/Global | Утверждение планов | Проблема | Действие |
 |---|---|---|---|---|
-| ~~RF-SCH-X1~~ | uniprot/protein | `gene_names` отсутствует в Silver schema | **Уже присутствует** на main (`silver.py:236`) | ОТКЛОНЕНО |
+| ~~RF-SCH-X1~~ | uniprot/protein | `gene-names` отсутствует в Silver schema | **Уже присутствует** на main (`silver.py:236`) | ОТКЛОНЕНО |
 | ~~RF-SCH-X2~~ | semanticscholar/publication | `issue` отсутствует в Silver schema | **Уже присутствует** на main (`silver.py:783`) | ОТКЛОНЕНО |
-| ~~RF-SCH-X3~~ | crossref/publication | MISSING_TRANSFORMER для 6 полей | **Все трансформеры реализованы** | ОТКЛОНЕНО |
+| ~~RF-SCH-X3~~ | crossref/publication | MISSING-TRANSFORMER для 6 полей | **Все трансформеры реализованы** | ОТКЛОНЕНО |
 | ~~RF-SCH-X4~~ | global/publication | Python↔YAML drift | **Синхронизированы** (167 entries) | ОТКЛОНЕНО |
-| RF-SCH-017 | uniprot/protein | Dead fields `pharmaceutical_use`, `publication_count` | Поля есть в entity и schemas, но неизвестно, заполняются ли трансформером | НУЖНА ВЕРИФИКАЦИЯ: проверить `uniprot/protein_transformer.py` |
+| RF-SCH-017 | uniprot/protein | Dead fields `pharmaceutical-use`, `publication-count` | Поля есть в entity и schemas, но неизвестно, заполняются ли трансформером | НУЖНА ВЕРИФИКАЦИЯ: проверить `uniprot/protein-transformer.py` |
 
 ---
 
@@ -100,17 +100,17 @@
 
 **Покрывает:** ADR-CAND-01 (B1), ADR-C1 (B2), ADR-1 (B3), часть CB-04 (B4)
 
-- **Context:** Ghost base_names (doi/publication_doi, year/publication_year и др.) в field groups создают двойственность и ghost columns.
-- **Decision:** Canonical-only naming в field_groups и Gold contracts; legacy names — только compatibility alias на ограниченный период.
+- **Context:** Ghost base-names (doi/publication-doi, year/publication-year и др.) в field groups создают двойственность и ghost columns.
+- **Decision:** Canonical-only naming в field-groups и Gold contracts; legacy names — только compatibility alias на ограниченный период.
 - **Migration:** Contract v2 → dual-read alias (2 релиза) → hard removal.
-- **Observability:** `legacy_alias_hit_rate`, `unknown_field_in_query`.
+- **Observability:** `legacy-alias-hit-rate`, `unknown-field-in-query`.
 
 ### ADR-SCH-02: Field Group Taxonomy Governance (System/TRASH/Topics/OA)
 
 **Покрывает:** ADR-CAND-02 (B1), ADR-C2 (B2), ADR-2 (B3), ADR-5 (B3)
 
-- **Context:** `content_hash` в TRASH; `id_and_status` перегружен; нет system-metadata группы; спорный статус `language`/`license_url`.
-- **Decision:** Формализовать группы: `system` (exclude from Gold by policy), `open_access`, `identifiers`, `topics`. Запрет mixed semantics.
+- **Context:** `content-hash` в TRASH; `id-and-status` перегружен; нет system-metadata группы; спорный статус `language`/`license-url`.
+- **Decision:** Формализовать группы: `system` (exclude from Gold by policy), `open-access`, `identifiers`, `topics`. Запрет mixed semantics.
 - **Migration:** Перегруппировка YAML + policy enforcement + metadata spec v1.
 
 ### ADR-SCH-03: Gold Contract Versioning and Breaking Window Policy
@@ -125,9 +125,9 @@
 
 **Покрывает:** ADR-CAND-04 (B1), часть BLG-007 (B2), ADR-C04 (B4)
 
-- **Context:** Поля `pharmaceutical_use`, `publication_count` (UniProt) и `fingerprint` (PubChem DTO) — потенциально мёртвые.
+- **Context:** Поля `pharmaceutical-use`, `publication-count` (UniProt) и `fingerprint` (PubChem DTO) — потенциально мёртвые.
 - **Decision:** Explicit policy: поле в contract → MUST быть populated трансформером ИЛИ documented exception. Dead → remove с major bump.
-- **Pre-requisite:** Верификация population rate через `uniprot/protein_transformer.py`.
+- **Pre-requisite:** Верификация population rate через `uniprot/protein-transformer.py`.
 
 ### ADR-SCH-05: DQ Rules Externalization
 
@@ -142,13 +142,13 @@
 
 - **Context:** Некоторые поля проходят в Silver/Gold без валидации.
 - **Decision:** Каждая колонка Silver schema MUST иметь явную типизацию и constraint или documented exception.
-- **Note:** Частично устарел — `gene_names` и `issue` уже в Silver schema. Актуален для будущих полей.
+- **Note:** Частично устарел — `gene-names` и `issue` уже в Silver schema. Актуален для будущих полей.
 
 ### ADR-SCH-07: Taxonomy Type Canonicalization (ChEMBL Activity/CellLine)
 
 **Покрывает:** ADR-C01 (B4) — уникален для Branch 4
 
-- **Context:** Type mismatch `target_taxonomy_id` (string vs float) и `cell_source_taxonomy_id` (int vs float) между Silver/Gold.
+- **Context:** Type mismatch `target-taxonomy-id` (string vs float) и `cell-source-taxonomy-id` (int vs float) между Silver/Gold.
 - **Decision:** Зафиксировать единый nullable-int pattern (`float` в Pandas) с explicit converter policy.
 - **Pre-requisite:** Верификация текущих типов на main.
 
@@ -159,8 +159,8 @@
 ### Phase 1: Подготовка и верификация
 
 1. **Верифицировать оставшиеся спорные утверждения:**
-   - Population rate `pharmaceutical_use`/`publication_count` в UniProt
-   - Текущие типы `target_taxonomy_id`/`cell_source_taxonomy_id` в Silver/Gold
+   - Population rate `pharmaceutical-use`/`publication-count` в UniProt
+   - Текущие типы `target-taxonomy-id`/`cell-source-taxonomy-id` в Silver/Gold
    - Полнота journal field audit для RF-SCH-005
 2. **Создать schema registry baseline** для затронутых contracts.
 3. **Определить version bump стратегию** по каждому breaking item.
@@ -170,19 +170,19 @@
 
 **Порядок:** RF-SCH-003 → RF-SCH-004 → RF-SCH-010 → RF-SCH-011 → RF-SCH-012 → RF-SCH-014
 
-1. Разгрузить `id_and_status` (RF-SCH-003) — перенос полей между группами, без изменения колонок.
-2. Переклассифицировать `content_hash` (RF-SCH-004) — ввести system group.
-3. Формализовать `action_type_action_type` rename в schemas/configs (RF-SCH-010).
-4. Нормализовать `document_year`/`document_journal` в Gold contracts (RF-SCH-011).
-5. Унифицировать `subject_topics` тип (RF-SCH-012).
+1. Разгрузить `id-and-status` (RF-SCH-003) — перенос полей между группами, без изменения колонок.
+2. Переклассифицировать `content-hash` (RF-SCH-004) — ввести system group.
+3. Формализовать `action-type-action-type` rename в schemas/configs (RF-SCH-010).
+4. Нормализовать `document-year`/`document-journal` в Gold contracts (RF-SCH-011).
+5. Унифицировать `subject-topics` тип (RF-SCH-012).
 6. Гармонизировать dual publication schema definitions (RF-SCH-014).
 
 ### Phase 3: Breaking changes (contract v2)
 
 **Порядок:** RF-SCH-001 → RF-SCH-002 → RF-SCH-007 → RF-SCH-005 → RF-SCH-006
 
-1. **Ghost base_names cleanup (RF-SCH-001):** contract v2, dual-read aliases на 2 релиза.
-2. **MeSH/keywords consolidation (RF-SCH-002):** canonical `subject_*` only.
+1. **Ghost base-names cleanup (RF-SCH-001):** contract v2, dual-read aliases на 2 релиза.
+2. **MeSH/keywords consolidation (RF-SCH-002):** canonical `subject-*` only.
 3. **Tissue PK alignment (RF-SCH-007):** Gold major bump, dual-write PK alias.
 4. **Journal naming (RF-SCH-005):** после отдельного аудита — contract v2 с deprecation window.
 5. **OA fields decision (RF-SCH-006):** ADR → promote или exclude.
@@ -195,7 +195,7 @@
 
 ### Phase 5: Governance cleanup
 
-1. **Empty column_groups (RF-SCH-013):** ADR decision — activate или deprecate.
+1. **Empty column-groups (RF-SCH-013):** ADR decision — activate или deprecate.
 2. **PubChem fingerprint (RF-SCH-015):** document или remove.
 
 ### Cutover + Rollback
@@ -222,34 +222,34 @@
 
 ### 1) Unified OutputMetadata (обязательный минимум)
 
-- `run_id: str`
-- `run_type: str`
+- `run-id: str`
+- `run-type: str`
 - `provider: str`
 - `entity: str`
-- `schema_version: str`
-- `ingestion_ts: timestamp`
-- `content_hash: str | None` (system metadata, не business field)
-- `dq_status: str`
-- `dq_error_count: int`
-- `record_count: int`
+- `schema-version: str`
+- `ingestion-ts: timestamp`
+- `content-hash: str | None` (system metadata, не business field)
+- `dq-status: str`
+- `dq-error-count: int`
+- `record-count: int`
 
 ### 2) Unified Key Strategy
 
-- Silver merge key: `[provider, entity, canonical_business_id]`
+- Silver merge key: `[provider, entity, canonical-business-id]`
 - Gold PK: provider-scoped canonical key
 - Для rename PK — только через breaking versioned migration
 - Запрет implicit coalesce нескольких IDs как surrogate key
 
 ### 3) Content Hash Standard
 
-- Алгоритм: `sha256(provider + canonical_json(record))`
+- Алгоритм: `sha256(provider + canonical-json(record))`
 - Canonicalization: NaN/Inf→null, float→round(10), date→YYYY-MM-DD, string→strip(), deterministic key ordering
-- Exclude: `_ingestion_ts`, `_run_id`, `_run_type`, `_dq_*`
+- Exclude: `-ingestion-ts`, `-run-id`, `-run-type`, `-dq-*`
 - Null handling: None → explicit `null`
 
 ### 4) Naming Standards
 
-- Canonical-first: `publication_doi`, не `doi`
+- Canonical-first: `publication-doi`, не `doi`
 - Provider-qualified: только когда поле source-specific
 - Legacy names: только в compatibility alias maps, ограниченный срок
 
@@ -295,7 +295,7 @@
 
 1. **Начать с Phase 2** (non-breaking refactoring) — низкий риск, высокая ценность.
 2. **RF-SCH-007 (tissue PK)** — изолированный breaking change, можно сделать раньше.
-3. **RF-SCH-001 (ghost base_names)** — ключевой cleanup, но требует coordination с downstream.
+3. **RF-SCH-001 (ghost base-names)** — ключевой cleanup, но требует coordination с downstream.
 4. **ADR-SCH-03 (contract versioning)** — принять ДО начала breaking changes.
 5. **Верификация UniProt dead fields** — до принятия решений по RF-SCH-017.
 

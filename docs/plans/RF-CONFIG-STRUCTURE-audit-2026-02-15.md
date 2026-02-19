@@ -14,16 +14,16 @@
 
 - `SilverFilterConfig` наследуется от `GoldFilterConfig`.
 - Вся логика фильтрации сейчас находится в `GoldFilterConfig`.
-- Инфраструктура использует временный мост `from_gold_filter_config()`.
+- Инфраструктура использует временный мост `from-gold-filter-config()`.
 
 **Корректировка:**
 
 - Делать как обязательный шаг 1.
 - Ввести `BaseFilterConfig` как единственный носитель логики.
-- В `SilverFilterConfig` оставить фабрику `from_base()`.
-- На 1 итерацию оставить совместимость: alias `from_gold_filter_config = from_base` (с deprecation-комментарием), затем удалить на фазе cleanup.
+- В `SilverFilterConfig` оставить фабрику `from-base()`.
+- На 1 итерацию оставить совместимость: alias `from-gold-filter-config = from-base` (с deprecation-комментарием), затем удалить на фазе cleanup.
 
-### Prompt 2 — Сужение типов write_mode (Шаг 1.3)
+### Prompt 2 — Сужение типов write-mode (Шаг 1.3)
 
 **Статус: Частично актуально, но не готово к «быстрому» применению.**
 
@@ -44,20 +44,20 @@
 
 Подтверждено:
 
-- Нормализация source-конфига уже реализована в `infrastructure/config_loader.py::_normalize_source_config`.
-- Предложенный файл `composition/providers/_config_helpers.py` не является центром нормализации формата.
+- Нормализация source-конфига уже реализована в `infrastructure/config-loader.py::-normalize-source-config`.
+- Предложенный файл `composition/providers/-config-helpers.py` не является центром нормализации формата.
 
 **Корректировка:**
 
-- Реализовывать расширение именно в `_normalize_source_config` (infrastructure), добавив поддержку top-level flat формата (`api/client/batch` без `source`).
+- Реализовывать расширение именно в `-normalize-source-config` (infrastructure), добавив поддержку top-level flat формата (`api/client/batch` без `source`).
 
-### Prompt 4 — effective\_\*\_table (Шаг 3.1)
+### Prompt 4 — effective\-\*\-table (Шаг 3.1)
 
 **Статус: Актуально, средний приоритет.**
 
 Подтверждено:
 
-- В `PipelineConfig` есть only convenience-свойства, но нет `effective_silver_table/effective_gold_table`.
+- В `PipelineConfig` есть only convenience-свойства, но нет `effective-silver-table/effective-gold-table`.
 
 **Корректировка:**
 
@@ -69,7 +69,7 @@
 
 Подтверждено:
 
-- Есть реальные использования `config.primary_keys`, `config.silver_table`, `config.gold_table`, `config.write_mode`, `config.gold_write_mode`, `config.on_schema_mismatch` в `application/` и `composition/`.
+- Есть реальные использования `config.primary-keys`, `config.silver-table`, `config.gold-table`, `config.write-mode`, `config.gold-write-mode`, `config.on-schema-mismatch` в `application/` и `composition/`.
 
 **Корректировка:**
 
@@ -101,7 +101,7 @@
 
 Подтверждено:
 
-- В config_loader действительно есть авто-вычисление ряда полей.
+- В config-loader действительно есть авто-вычисление ряда полей.
 
 **Корректировка:**
 
@@ -136,7 +136,7 @@
 
 Подтверждено:
 
-- Тесты/схемы пока еще явно поддерживают `dq_overrides` alias.
+- Тесты/схемы пока еще явно поддерживают `dq-overrides` alias.
 
 **Корректировка:**
 
@@ -144,21 +144,21 @@
   1. Добавление новых тестов на рефакторинг (можно раньше).
   1. Удаление fallback/alias только после полной YAML-миграции.
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Скорректированный порядок реализации (рекомендуемый)
 
 ### Wave A (типобезопасность и домен)
 
 1. **A1:** Prompt 1 (BaseFilterConfig) + архитектурные тесты разделения типов.
-1. **A2:** Prompt 4 (effective\_\*\_table).
+1. **A2:** Prompt 4 (effective\-\*\-table).
 1. **A3:** Prompt 5 (миграция call-sites, 2 PR).
 1. **A4:** Prompt 6 (удаление convenience-свойств).
 1. **A5 (опц.):** Prompt 2 (enum-only write modes) после A3/A4.
 
 ### Wave B (форматы конфигов)
 
-6. **B1 (опц.):** Prompt 3 — flat source format в `config_loader`.
+6. **B1 (опц.):** Prompt 3 — flat source format в `config-loader`.
 1. **B2:** Prompt 7 — document→publication.
 1. **B3:** Prompt 8 — минимизация pipeline YAML.
 1. **B4:** Prompt 9 — унификация DQ-ключей.
@@ -168,7 +168,7 @@ ______________________________________________________________________
 10. **C1:** Prompt 10 — rename каталогов (`git mv`, без дублирования деревьев).
 01. **C2:** Prompt 11 — cleanup fallback + документация + coverage gate.
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Готовый набор задач к реализации
 
@@ -176,33 +176,33 @@ ______________________________________________________________________
 
 - [ ] Создать `BaseFilterConfig` и перенести в него всю логику фильтрации.
 - [ ] Перевести `GoldFilterConfig`/`SilverFilterConfig` на наследование от `BaseFilterConfig`.
-- [ ] Заменить bridge-вызовы `from_gold_filter_config()` на `from_base()` в infrastructure.
+- [ ] Заменить bridge-вызовы `from-gold-filter-config()` на `from-base()` в infrastructure.
 - [ ] Добавить/обновить тесты: архитектурный + параметризованные unit-тесты общих фильтров.
 - [ ] Прогон: `mypy --strict src/bioetl/`, `pytest tests/unit/domain/filtering/ -v`, `pytest tests/architecture/ -v`.
 
 ### Epic 2 — PipelineConfig API Cleanup
 
-- [ ] Добавить `effective_silver_table`/`effective_gold_table`.
-- [ ] Мигрировать все вызовы legacy convenience-свойств на `config.table.*` и `config.effective_*`.
+- [ ] Добавить `effective-silver-table`/`effective-gold-table`.
+- [ ] Мигрировать все вызовы legacy convenience-свойств на `config.table.*` и `config.effective-*`.
 - [ ] Удалить convenience-свойства из `PipelineConfig` после zero-usage gate.
 - [ ] Прогон: `mypy --strict src/bioetl/`, `pytest tests/ -x --timeout=120`.
 
 ### Epic 3 — Source Config Compatibility (Optional)
 
-- [ ] Добавить поддержку top-level flat source-формата в `_normalize_source_config`.
+- [ ] Добавить поддержку top-level flat source-формата в `-normalize-source-config`.
 - [ ] Добавить тесты на старый+новый формат.
-- [ ] Прогон: `pytest tests/ -k "source_config or adapter" -v`.
+- [ ] Прогон: `pytest tests/ -k "source-config or adapter" -v`.
 
 ### Epic 4 — YAML Migration
 
 - [ ] Переименовать entity names `document* -> publication*` в source/pipeline refs.
 - [ ] Упростить pipeline YAML до convention-based минимального стиля (провайдерными пакетами).
-- [ ] Унифицировать DQ ключи (`*_field_validations -> field_validations`, и т.д.).
+- [ ] Унифицировать DQ ключи (`*-field-validations -> field-validations`, и т.д.).
 - [ ] Прогон: `pytest tests/ -k "config or dq" -v`.
 
 ### Epic 5 — Config Paths Finalization
 
-- [ ] Перенести каталоги на `quality/filters/schemas/_schema` через `git mv`.
+- [ ] Перенести каталоги на `quality/filters/schemas/-schema` через `git mv`.
 - [ ] Обновить docs/ADR ссылки на новые пути.
-- [ ] Удалить fallback-код и legacy alias (`dq_overrides`) только после подтвержденной миграции.
+- [ ] Удалить fallback-код и legacy alias (`dq-overrides`) только после подтвержденной миграции.
 - [ ] Финальный прогон: `mypy --strict src/bioetl/`, `pytest tests/ -x --timeout=120`, `pytest --cov=src/bioetl --cov-fail-under=85`.

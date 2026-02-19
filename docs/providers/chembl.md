@@ -7,7 +7,7 @@ chemical database of bioactive molecules with drug-like properties.
 
 - **Base URL:** `https://www.ebi.ac.uk/chembl/api/data`
 - **Format:** JSON (REST API with Django-style query lookups)
-- **Pagination:** `limit`/`offset` (except target, target_component, protein_class)
+- **Pagination:** `limit`/`offset` (except target, target-component, protein-class)
 - **Reference:** [ChEMBL Web Services Documentation](https://chembl.gitbook.io/chembl-interface-documentation/web-services/chembl-data-web-services)
 
 ## Supported Entities
@@ -18,10 +18,10 @@ chemical database of bioactive molecules with drug-like properties.
 | assay | `/assay.json` | Yes |
 | molecule (compound) | `/molecule.json` | Yes |
 | target | `/target.json` | No |
-| target_component | `/target_component.json` | No |
+| target-component | `/target-component.json` | No |
 | document | `/document.json` | Yes |
-| cell_line | `/cell_line.json` | Yes |
-| protein_class | `/protein_class.json` | No |
+| cell-line | `/cell-line.json` | Yes |
+| protein-class | `/protein-class.json` | No |
 
 ## Extraction-Level Filtering
 
@@ -37,59 +37,59 @@ reducing data volume by approximately 75–90%.
 ### Configuration
 
 Defined in `configs/filters/entities/chembl/activity.yaml` under the
-`extraction_params` key:
+`extraction-params` key:
 
 ```yaml
-extraction_params:
+extraction-params:
   # Measurement types: IC50 and Ki only
-  standard_type__in: "IC50,Ki"
+  standard-type--in: "IC50,Ki"
 
   # Standardized units: nanomolar
-  standard_units: "nM"
+  standard-units: "nM"
 
   # Exact measurements only (exclude censored: >, <, ~)
-  standard_relation: "="
+  standard-relation: "="
 
   # Binding (B) and Functional (F) assays
-  assay_type__in: "B,F"
+  assay-type--in: "B,F"
 
   # Exclude potential duplicate records
-  potential_duplicate: 0
+  potential-duplicate: 0
 
   # Exclude records with data validity issues
-  data_validity_comment__isnull: true
+  data-validity-comment--isnull: true
 
   # Only records with standardized pChEMBL value
-  pchembl_value__isnull: false
+  pchembl-value--isnull: false
 
   # Only ChEMBL-standardized values
-  standard_flag: 1
+  standard-flag: 1
 ```
 
 ### How It Works
 
 1. Parameters are loaded from YAML config as `ExtractionParams` (frozen dataclass)
-2. `ChemblAdapter._build_params()` merges extraction params into every API request
+2. `ChemblAdapter.-build-params()` merges extraction params into every API request
 3. The resulting API URL includes all parameters:
    ```
    /chembl/api/data/activity?format=json&limit=1000&offset=0
-     &standard_type__in=IC50,Ki&standard_units=nM&standard_relation==
-     &assay_type__in=B,F&potential_duplicate=0
-     &data_validity_comment__isnull=true&pchembl_value__isnull=false
-     &standard_flag=1
+     &standard-type--in=IC50,Ki&standard-units=nM&standard-relation==
+     &assay-type--in=B,F&potential-duplicate=0
+     &data-validity-comment--isnull=true&pchembl-value--isnull=false
+     &standard-flag=1
    ```
-4. Parameters are recorded in `SourceMetadata.query_string` for audit and reproducibility
+4. Parameters are recorded in `SourceMetadata.query-string` for audit and reproducibility
 
 ### Audit Trail
 
-Extraction params are logged in Bronze `SourceMetadata.query_string`, enabling:
+Extraction params are logged in Bronze `SourceMetadata.query-string`, enabling:
 - **Reproducibility**: exact API query can be reconstructed from metadata
 - **Audit**: which filters were active during a given pipeline run
 - **Debugging**: verify that server-side filtering was applied correctly
 
 ### Constraints
 
-- Does **not** affect `content_hash` (ADR-014)
+- Does **not** affect `content-hash` (ADR-014)
 - No CLI override — deterministic per config (ADR-014)
-- Provider-specific: uses ChEMBL Django-style lookups (`__in`, `__isnull`, etc.)
+- Provider-specific: uses ChEMBL Django-style lookups (`--in`, `--isnull`, etc.)
 - Only affects Bronze extraction — Gold filters are applied separately at Silver→Gold

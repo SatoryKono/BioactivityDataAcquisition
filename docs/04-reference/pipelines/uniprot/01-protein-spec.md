@@ -2,13 +2,13 @@
 
 *Version 1.2.0 | Aligned with RULES.md v5.20*
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 1. Identification
 
 | Parameter        | Value                                 |
 | ---------------- | ------------------------------------- |
-| **Pipeline ID**  | `uniprot_protein`                     |
+| **Pipeline ID**  | `uniprot-protein`                     |
 | **Provider**     | UniProt (EBI/SIB/PIR)                 |
 | **Entity**       | protein                               |
 | **API Endpoint** | `https://rest.uniprot.org/uniprotkb/` |
@@ -17,7 +17,7 @@ ______________________________________________________________________
 | **Health Check** | `/rest/beta/health`                   |
 | **Auth Type**    | API Key (optional)                    |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 2. Business Context
 
@@ -42,16 +42,16 @@ UniProt proteins are **curated protein entries** with comprehensive annotations:
 ### 2.3. Entity Relationships
 
 ```
-uniprot_protein
+uniprot-protein
     │
-    ├──► chembl_target (via chembl_ids cross-ref)
+    ├──► chembl-target (via chembl-ids cross-ref)
     │
-    ├──► drugbank (via drugbank_ids cross-ref)
+    ├──► drugbank (via drugbank-ids cross-ref)
     │
-    └──► GO terms (via go_terms)
+    └──► GO terms (via go-terms)
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 3. Extraction (Bronze Layer)
 
@@ -67,16 +67,16 @@ results = await client.search(
     fields=[
         "accession",
         "id",
-        "protein_name",
-        "gene_names",
-        "organism_name",
-        "organism_id",
+        "protein-name",
+        "gene-names",
+        "organism-name",
+        "organism-id",
         "sequence",
         "length",
-        "cc_function",
-        "cc_pathway",
-        "xref_chembl",
-        "xref_drugbank",
+        "cc-function",
+        "cc-pathway",
+        "xref-chembl",
+        "xref-drugbank",
     ],
 )
 ```
@@ -124,7 +124,7 @@ results = await client.search(
 | `molWeight` | integer | Molecular weight    |
 | `crc64`     | string  | CRC64 checksum      |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 4. Transformation
 
@@ -133,27 +133,27 @@ ______________________________________________________________________
 | Parameter           | Value                          |
 | ------------------- | ------------------------------ |
 | **Entity ID Field** | `accession` (primaryAccession) |
-| **ID Source**       | `from_api`                     |
+| **ID Source**       | `from-api`                     |
 | **Format**          | UniProt accession pattern      |
 
 ### 4.2. Flattening Strategy
 
 | Nested Path                                         | Flattened Name        | Strategy         |
 | --------------------------------------------------- | --------------------- | ---------------- |
-| `proteinDescription.recommendedName.fullName.value` | `protein_name`        | Extract scalar   |
-| `proteinDescription.ecNumbers[*].value`             | `protein_ec_numbers`  | JSON array       |
-| `genes[0].geneName.value`                           | `gene_primary`        | Extract first    |
-| `genes[*].synonyms[*].value`                        | `gene_synonyms`       | JSON array       |
-| `organism.scientificName`                           | `organism_scientific` | Extract scalar   |
-| `organism.commonName`                               | `organism_common`     | Extract scalar   |
-| `organism.taxonId`                                  | `taxonomy_id`         | Extract scalar   |
+| `proteinDescription.recommendedName.fullName.value` | `protein-name`        | Extract scalar   |
+| `proteinDescription.ecNumbers[*].value`             | `protein-ec-numbers`  | JSON array       |
+| `genes[0].geneName.value`                           | `gene-primary`        | Extract first    |
+| `genes[*].synonyms[*].value`                        | `gene-synonyms`       | JSON array       |
+| `organism.scientificName`                           | `organism-scientific` | Extract scalar   |
+| `organism.commonName`                               | `organism-common`     | Extract scalar   |
+| `organism.taxonId`                                  | `taxonomy-id`         | Extract scalar   |
 | `sequence.value`                                    | `sequence`            | Extract scalar   |
-| `sequence.length`                                   | `sequence_length`     | Extract scalar   |
-| `sequence.molWeight`                                | `sequence_mass`       | Extract scalar   |
-| `dbreferences[type=ChEMBL]`                         | `chembl_ids`          | Filter & extract |
-| `dbreferences[type=DrugBank]`                       | `drugbank_ids`        | Filter & extract |
+| `sequence.length`                                   | `sequence-length`     | Extract scalar   |
+| `sequence.molWeight`                                | `sequence-mass`       | Extract scalar   |
+| `dbreferences[type=ChEMBL]`                         | `chembl-ids`          | Filter & extract |
+| `dbreferences[type=DrugBank]`                       | `drugbank-ids`        | Filter & extract |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 5. Validation
 
@@ -171,48 +171,48 @@ class UniprotTargetSchema(ETLRecordSchema):
         description="UniProt primary accession (PK)",
     )
 
-    @pa.check("accession", name="accession_format")
-    def _check_accession(cls, series):
+    @pa.check("accession", name="accession-format")
+    def -check-accession(cls, series):
         pattern = (
             r"^[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}$"
         )
         return series.str.match(pattern)
 
-    entry_name: Series[str] = pa.Field(nullable=False)
-    entry_type: Series[str] | None = pa.Field(
+    entry-name: Series[str] = pa.Field(nullable=False)
+    entry-type: Series[str] | None = pa.Field(
         nullable=True,
-        isin=ENTRY_TYPES,  # Swiss-Prot/TrEMBL
+        isin=ENTRY-TYPES,  # Swiss-Prot/TrEMBL
     )
 
     # === Protein Names ===
-    protein_name: Series[str] | None = pa.Field(nullable=True)
-    protein_ec_numbers: Series[str] | None = pa.Field(nullable=True)  # JSON
+    protein-name: Series[str] | None = pa.Field(nullable=True)
+    protein-ec-numbers: Series[str] | None = pa.Field(nullable=True)  # JSON
 
     # === Gene Names ===
-    gene_primary: Series[str] | None = pa.Field(nullable=True)
-    gene_synonyms: Series[str] | None = pa.Field(nullable=True)  # JSON
+    gene-primary: Series[str] | None = pa.Field(nullable=True)
+    gene-synonyms: Series[str] | None = pa.Field(nullable=True)  # JSON
 
     # === Organism ===
-    organism_scientific: Series[str] | None = pa.Field(nullable=True)
-    organism_common: Series[str] | None = pa.Field(nullable=True)
-    taxonomy_id: Series[int] | None = pa.Field(nullable=True, ge=1)
+    organism-scientific: Series[str] | None = pa.Field(nullable=True)
+    organism-common: Series[str] | None = pa.Field(nullable=True)
+    taxonomy-id: Series[int] | None = pa.Field(nullable=True, ge=1)
 
     # === Sequence ===
     sequence: Series[str] = pa.Field(nullable=False)
 
-    @pa.check("sequence", name="sequence_format")
-    def _check_sequence(cls, series):
+    @pa.check("sequence", name="sequence-format")
+    def -check-sequence(cls, series):
         return series.str.match(r"^[ACDEFGHIKLMNPQRSTVWY]+$")
 
-    sequence_length: Series[int] = pa.Field(nullable=False, ge=1)
-    sequence_mass: Series[int] | None = pa.Field(nullable=True, ge=1)
+    sequence-length: Series[int] = pa.Field(nullable=False, ge=1)
+    sequence-mass: Series[int] | None = pa.Field(nullable=True, ge=1)
 
     # === Evidence ===
-    protein_existence: Series[str] | None = pa.Field(
+    protein-existence: Series[str] | None = pa.Field(
         nullable=True,
-        isin=PROTEIN_EXISTENCE_LEVELS,
+        isin=PROTEIN-EXISTENCE-LEVELS,
     )
-    annotation_score: Series[int] | None = pa.Field(
+    annotation-score: Series[int] | None = pa.Field(
         nullable=True,
         ge=1,
         le=5,
@@ -220,16 +220,16 @@ class UniprotTargetSchema(ETLRecordSchema):
     reviewed: Series[bool] = pa.Field(nullable=False)
 
     # === Functional Annotation ===
-    function_comment: Series[str] | None = pa.Field(nullable=True)  # JSON
-    catalytic_activity: Series[str] | None = pa.Field(nullable=True)  # JSON
+    function-comment: Series[str] | None = pa.Field(nullable=True)  # JSON
+    catalytic-activity: Series[str] | None = pa.Field(nullable=True)  # JSON
     pathway: Series[str] | None = pa.Field(nullable=True)  # JSON
-    subcellular_location: Series[str] | None = pa.Field(nullable=True)  # JSON
-    disease_involvement: Series[str] | None = pa.Field(nullable=True)  # JSON
+    subcellular-location: Series[str] | None = pa.Field(nullable=True)  # JSON
+    disease-involvement: Series[str] | None = pa.Field(nullable=True)  # JSON
 
     # === Cross-References ===
-    go_terms: Series[str] | None = pa.Field(nullable=True)  # JSON
-    chembl_ids: Series[str] | None = pa.Field(nullable=True)  # JSON
-    drugbank_ids: Series[str] | None = pa.Field(nullable=True)  # JSON
+    go-terms: Series[str] | None = pa.Field(nullable=True)  # JSON
+    chembl-ids: Series[str] | None = pa.Field(nullable=True)  # JSON
+    drugbank-ids: Series[str] | None = pa.Field(nullable=True)  # JSON
 
     # === Features & Keywords ===
     features: Series[str] | None = pa.Field(nullable=True)  # JSON
@@ -246,42 +246,42 @@ class UniprotTargetSchema(ETLRecordSchema):
 | Field             | Type | Nullable | Constraints           | DQ Level |
 | ----------------- | ---- | -------- | --------------------- | -------- |
 | `accession`       | str  | No       | UniProt format        | CRITICAL |
-| `entry_name`      | str  | No       | format `XXX_SPECIES`  | CRITICAL |
+| `entry-name`      | str  | No       | format `XXX-SPECIES`  | CRITICAL |
 | `sequence`        | str  | No       | amino acid chars only | CRITICAL |
-| `sequence_length` | int  | No       | >= 1                  | CRITICAL |
-| `taxonomy_id`     | int  | Yes      | >= 1                  | WARNING  |
+| `sequence-length` | int  | No       | >= 1                  | CRITICAL |
+| `taxonomy-id`     | int  | Yes      | >= 1                  | WARNING  |
 | `reviewed`        | bool | No       | -                     | INFO     |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 6. Cross-Provider Mapping
 
 | This Entity Field | Maps To       | Provider | Field                        |
 | ----------------- | ------------- | -------- | ---------------------------- |
-| `accession`       | ChEMBL        | ChEMBL   | `target_component.accession` |
-| `chembl_ids[*]`   | ChEMBL        | ChEMBL   | `target_id`                  |
-| `drugbank_ids[*]` | DrugBank      | DrugBank | `drugbank_id`                |
-| `taxonomy_id`     | NCBI Taxonomy | NCBI     | `tax_id`                     |
+| `accession`       | ChEMBL        | ChEMBL   | `target-component.accession` |
+| `chembl-ids[*]`   | ChEMBL        | ChEMBL   | `target-id`                  |
+| `drugbank-ids[*]` | DrugBank      | DrugBank | `drugbank-id`                |
+| `taxonomy-id`     | NCBI Taxonomy | NCBI     | `tax-id`                     |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 7. Pipeline Configuration
 
 ```yaml
-pipeline_name: uniprot_protein
+pipeline-name: uniprot-protein
 provider: uniprot
-entity_type: protein
+entity-type: protein
 version: "1.2.0"
 
-primary_keys: ["accession"]
-silver_table: "uniprot_protein"
-gold_table: "uniprot_protein"
+primary-keys: ["accession"]
+silver-table: "uniprot-protein"
+gold-table: "uniprot-protein"
 
-source_file: ../../sources/uniprot.yaml
+source-file: ../../sources/uniprot.yaml
 
-gold_filters:
-  required_fields:
-    - protein_name
+gold-filters:
+  required-fields:
+    - protein-name
     - sequence
   columns:
     reviewed: [true]  # Swiss-Prot only
@@ -291,20 +291,20 @@ sink:
     path: "data/output/bronze"
   silver:
     path: "data/output/silver"
-    primary_key: ["accession"]
-    partition_by: []
+    primary-key: ["accession"]
+    partition-by: []
   gold:
     path: "data/output/gold"
 
-input_filter:
+input-filter:
   enabled: true
-  source_path: "data/input/protein.csv"
-  column_name: "accession"
-  filter_field: "accession"
-  batch_size: 100  # Higher for UniProt
+  source-path: "data/input/protein.csv"
+  column-name: "accession"
+  filter-field: "accession"
+  batch-size: 100  # Higher for UniProt
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 8. Dependencies
 
@@ -313,7 +313,7 @@ ______________________________________________________________________
 | Dependency          | Type     | Required                      |
 | ------------------- | -------- | ----------------------------- |
 | UniProt REST API    | API      | Yes                           |
-| `uniprot_idmapping` | Pipeline | Optional (for ChEMBL→UniProt) |
+| `uniprot-idmapping` | Pipeline | Optional (for ChEMBL→UniProt) |
 
 ### 8.2. Downstream
 

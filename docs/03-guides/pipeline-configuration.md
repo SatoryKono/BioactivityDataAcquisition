@@ -5,7 +5,7 @@
 **Версия:** 6.0.0
 **Дата обновления:** 2026-02-03
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Обзор
 
@@ -14,34 +14,34 @@ BioETL использует **YAML-файлы** для конфигурации 
 ### Ключевые особенности
 
 - **Convention over Configuration (ADR-029):** Пути и ссылки вычисляются автоматически
-- **Иерархическое наследование:** Конфиги наследуют из `_base.yaml`
+- **Иерархическое наследование:** Конфиги наследуют из `-base.yaml`
 - **Иерархические DQ/Filter правила (ADR-027/028):** 3-уровневая иерархия с merge
 - **Pydantic валидация:** Схемы проверяются при загрузке
 - **Immutable Domain Objects:** Конфиги преобразуются в frozen dataclasses
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Структура директорий
 
 ```
 configs/
 ├── pipelines/                    # Конфигурации пайплайнов (26 = 21 entity + 5 composite)
-│   ├── _base.yaml               # Базовая конфигурация v2.1.0 (491 строка)
-│   ├── _schema.json             # JSON Schema для валидации
+│   ├── -base.yaml               # Базовая конфигурация v2.1.0 (491 строка)
+│   ├── -schema.json             # JSON Schema для валидации
 │   ├── chembl/                  # 14 entity configs
 │   │   ├── activity.yaml
 │   │   ├── assay.yaml
-│   │   ├── assay_parameters.yaml
-│   │   ├── cell_line.yaml
-│   │   ├── compound_record.yaml
+│   │   ├── assay-parameters.yaml
+│   │   ├── cell-line.yaml
+│   │   ├── compound-record.yaml
 │   │   ├── molecule.yaml
-│   │   ├── protein_class.yaml
+│   │   ├── protein-class.yaml
 │   │   ├── publication.yaml
-│   │   ├── publication_similarity.yaml
-│   │   ├── publication_term.yaml
-│   │   ├── subcellular_fraction.yaml
+│   │   ├── publication-similarity.yaml
+│   │   ├── publication-term.yaml
+│   │   ├── subcellular-fraction.yaml
 │   │   ├── target.yaml
-│   │   ├── target_component.yaml
+│   │   ├── target-component.yaml
 │   │   └── tissue.yaml
 │   ├── pubchem/                 # 1 entity config
 │   │   └── compound.yaml
@@ -57,13 +57,13 @@ configs/
 │   ├── semanticscholar/         # 1 entity config
 │   │   └── publication.yaml
 │   └── composite/               # 5 composite configs (ADR-026)
-│       ├── activity.yaml        # chembl_activity + enrichers
-│       ├── assay.yaml           # chembl_assay + enrichers
-│       ├── molecule.yaml        # chembl_molecule + enrichers
-│       ├── publication.yaml     # chembl_publication + enrichers
-│       └── target.yaml          # chembl_target + enrichers
+│       ├── activity.yaml        # chembl-activity + enrichers
+│       ├── assay.yaml           # chembl-assay + enrichers
+│       ├── molecule.yaml        # chembl-molecule + enrichers
+│       ├── publication.yaml     # chembl-publication + enrichers
+│       └── target.yaml          # chembl-target + enrichers
 ├── quality/                      # Data Quality правила (ADR-027, 31 файл)
-│   ├── _defaults.yaml           # Глобальные DQ defaults (soft_fail=0.05, hard_fail=0.20)
+│   ├── -defaults.yaml           # Глобальные DQ defaults (soft-fail=0.05, hard-fail=0.20)
 │   ├── providers/               # 7 provider-specific DQ
 │   │   ├── chembl.yaml
 │   │   ├── crossref.yaml
@@ -92,8 +92,8 @@ configs/
 │           ├── protein.yaml
 │           └── target.yaml
 ├── filters/                      # Фильтры данных (ADR-028, 35 файлов)
-│   ├── _defaults.yaml           # batch_size: 100
-│   ├── providers/               # Provider-specific batch_sizes
+│   ├── -defaults.yaml           # batch-size: 100
+│   ├── providers/               # Provider-specific batch-sizes
 │   │   ├── chembl.yaml
 │   │   ├── crossref.yaml
 │   │   ├── openalex.yaml
@@ -130,82 +130,82 @@ configs/
 | Source configs            | 7          | Один на провайдера                     |
 | **Итого**                 | **71**     | Все конфиги валидированы               |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Pipeline YAML конфиг
 
 ### Минимальный конфиг
 
-Благодаря наследованию из `_base.yaml`, минимальный конфиг содержит только переопределения:
+Благодаря наследованию из `-base.yaml`, минимальный конфиг содержит только переопределения:
 
 ```yaml
 # configs/pipelines/chembl/activity.yaml
-pipeline_name: chembl_activity
+pipeline-name: chembl-activity
 provider: chembl
-entity_type: activity
+entity-type: activity
 version: "1.2.0"
-business_primary_keys: ["activity_id"]
-silver_table: "chembl_activity"
-gold_table: "chembl_activity"
+business-primary-keys: ["activity-id"]
+silver-table: "chembl-activity"
+gold-table: "chembl-activity"
 ```
 
 ### Полная структура конфига
 
 | Секция                  | Описание                           | Обязательно          |
 | ----------------------- | ---------------------------------- | -------------------- |
-| `pipeline_name`         | Уникальный идентификатор пайплайна | Да                   |
+| `pipeline-name`         | Уникальный идентификатор пайплайна | Да                   |
 | `provider`              | Имя провайдера (lowercase)         | Да                   |
-| `entity_type`           | Тип сущности                       | Да                   |
+| `entity-type`           | Тип сущности                       | Да                   |
 | `version`               | Semver версия конфига              | Да                   |
-| `business_primary_keys` | Первичные ключи                    | Да                   |
-| `silver_table`          | Имя Silver таблицы                 | Да                   |
-| `gold_table`            | Имя Gold таблицы                   | Нет                  |
-| `batch_size`            | Размер батча (1-5000)              | Нет (default: 100)   |
-| `checkpoint_interval`   | Интервал checkpoint                | Нет (default: 10)    |
+| `business-primary-keys` | Первичные ключи                    | Да                   |
+| `silver-table`          | Имя Silver таблицы                 | Да                   |
+| `gold-table`            | Имя Gold таблицы                   | Нет                  |
+| `batch-size`            | Размер батча (1-5000)              | Нет (default: 100)   |
+| `checkpoint-interval`   | Интервал checkpoint                | Нет (default: 10)    |
 | `source`                | Конфиг источника                   | Нет (auto-resolved)  |
-| `dq_overrides`          | Inline DQ переопределения          | Нет                  |
+| `dq-overrides`          | Inline DQ переопределения          | Нет                  |
 | `sink`                  | Конфиги слоёв (Bronze/Silver/Gold) | Нет (auto-resolved)  |
-| `circuit_breaker`       | Настройки Circuit Breaker          | Нет (from base)      |
+| `circuit-breaker`       | Настройки Circuit Breaker          | Нет (from base)      |
 | `maintenance`           | VACUUM настройки                   | Нет (from base)      |
-| `loading_strategy`      | Стратегия загрузки                 | Нет (default: full)  |
-| `force_full_scan`       | Отключить checkpoint resume        | Нет (default: false) |
+| `loading-strategy`      | Стратегия загрузки                 | Нет (default: full)  |
+| `force-full-scan`       | Отключить checkpoint resume        | Нет (default: false) |
 
 ### Пример с переопределениями
 
 ```yaml
 # configs/pipelines/chembl/activity.yaml
-pipeline_name: chembl_activity
+pipeline-name: chembl-activity
 provider: chembl
-entity_type: activity
+entity-type: activity
 version: "1.2.0"
-business_primary_keys: ["activity_id"]
-silver_table: "chembl_activity"
-gold_table: "chembl_activity"
+business-primary-keys: ["activity-id"]
+silver-table: "chembl-activity"
+gold-table: "chembl-activity"
 
-# Переопределение batch_size
-batch_size: 500
+# Переопределение batch-size
+batch-size: 500
 
 # Inline DQ переопределения
-dq_overrides:
-  field_validations:
-    - field: standard_value
+dq-overrides:
+  field-validations:
+    - field: standard-value
       type: range
       min: 0
       nullable: true
-    - field: standard_type
+    - field: standard-type
       type: enum
       allowed: [IC50, Ki, Kd, EC50, AC50, GI50, ED50, MIC, CC50, Kd, EC50, AC50]
 
 # Переопределение sink (опционально)
 sink:
   gold:
-    partition_by: ["standard_type"]
-    csv_export:
+    partition-by: ["standard-type"]
+    csv-export:
       enabled: true
-      include_columns: ["activity_id", "standard_type", "standard_value"]
+      include-columns: ["activity-id", "standard-type", "standard-value"]
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Composite Pipelines (ADR-026)
 
@@ -216,48 +216,48 @@ Composite pipelines объединяют данные из нескольких 
 ```yaml
 # configs/pipelines/composite/publication.yaml
 composite:
-  name: composite_publication
+  name: composite-publication
   version: "1.1.0"
 
   seed:
-    pipeline: chembl_publication     # Базовый пайплайн (источник ID)
+    pipeline: chembl-publication     # Базовый пайплайн (источник ID)
 
   enrichers:                          # Обогащение из других провайдеров
-    - pipeline: crossref_publication
-      join_key: doi
+    - pipeline: crossref-publication
+      join-key: doi
       optional: true
-    - pipeline: openalex_publication
-      join_key: doi
+    - pipeline: openalex-publication
+      join-key: doi
       optional: true
-    - pipeline: pubmed_publication
-      join_key: pmid
+    - pipeline: pubmed-publication
+      join-key: pmid
       optional: true
-    - pipeline: semanticscholar_publication
-      join_key: doi
+    - pipeline: semanticscholar-publication
+      join-key: doi
       optional: true
 
   merge:
-    strategy: left_outer              # Сохраняем все seed записи
-    conflict_resolution: prefer_seed  # При конфликте — seed выигрывает
+    strategy: left-outer              # Сохраняем все seed записи
+    conflict-resolution: prefer-seed  # При конфликте — seed выигрывает
 ```
 
 ### Доступные Composite Pipelines
 
 | Composite               | Seed                 | Enrichers                                                           | Описание                      |
 | ----------------------- | -------------------- | ------------------------------------------------------------------- | ----------------------------- |
-| `composite_activity`    | `chembl_activity`    | enrichers                                                           | Обогащённые данные активности |
-| `composite_assay`       | `chembl_assay`       | enrichers                                                           | Обогащённые данные анализов   |
-| `composite_molecule`    | `chembl_molecule`    | pubchem_compound, enrichers                                         | Обогащённые молекулы          |
-| `composite_publication` | `chembl_publication` | crossref, openalex, pubmed, semanticscholar                         | Обогащённые публикации        |
-| `composite_target`      | `chembl_target`      | target_component, protein_class, uniprot_idmapping, uniprot_protein | Обогащённые targets           |
+| `composite-activity`    | `chembl-activity`    | enrichers                                                           | Обогащённые данные активности |
+| `composite-assay`       | `chembl-assay`       | enrichers                                                           | Обогащённые данные анализов   |
+| `composite-molecule`    | `chembl-molecule`    | pubchem-compound, enrichers                                         | Обогащённые молекулы          |
+| `composite-publication` | `chembl-publication` | crossref, openalex, pubmed, semanticscholar                         | Обогащённые публикации        |
+| `composite-target`      | `chembl-target`      | target-component, protein-class, uniprot-idmapping, uniprot-protein | Обогащённые targets           |
 
 ### Отличия от Regular Pipelines
 
 | Аспект        | Regular Pipeline                           | Composite Pipeline                                      |
 | ------------- | ------------------------------------------ | ------------------------------------------------------- |
-| Корневой ключ | `pipeline_name`, `provider`, `entity_type` | `composite:`                                            |
+| Корневой ключ | `pipeline-name`, `provider`, `entity-type` | `composite:`                                            |
 | Source        | Один провайдер                             | Несколько провайдеров через `enrichers`                 |
-| Schema        | `_schema.json`                             | Отдельная схема (ADR-026)                               |
+| Schema        | `-schema.json`                             | Отдельная схема (ADR-026)                               |
 | Пути          | Auto-computed                              | Определяются в `merge.output`                           |
 | Orchestration | `PipelineRunner` + `{Entity}Transformer`   | `CompositePipelineRunner` (без отдельных трансформеров) |
 | Реализация    | `application/pipelines/{provider}/`        | `application/composite/` (15 модулей)                   |
@@ -268,47 +268,47 @@ composite:
 > Seed и enricher pipelines запускаются как обычные single-source pipelines,
 > а composite layer выполняет агрегацию на уровне Silver-данных.
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Convention-based Path Resolution (ADR-029)
 
-Пути и ссылки вычисляются автоматически из `provider` и `entity_type`.
+Пути и ссылки вычисляются автоматически из `provider` и `entity-type`.
 Pipeline YAML файлы **не должны** явно указывать эти поля — они вычисляются
 конвенционно. Если указаны явно, значение используется как override-path.
 
 | Поле                 | Auto-computed значение                                 | Примечание                                |
 | -------------------- | ------------------------------------------------------ | ----------------------------------------- |
-| `source_file`        | `../../sources/{provider}.yaml`                        | Provider API settings                     |
-| `dq_config_file`     | `../../quality/entities/{provider}/{entity_type}.yaml` | Informational; loader uses full hierarchy |
-| `filter_config_file` | `../../filters/entities/{provider}/{entity_type}.yaml` | Informational; loader uses full hierarchy |
-| `sink.bronze.path`   | `data/output/bronze/{provider}/{entity_type}`          |                                           |
-| `sink.silver.path`   | `data/output/silver/{provider}/{entity_type}`          |                                           |
-| `sink.gold.path`     | `data/output/gold/{provider}/{entity_type}`            |                                           |
+| `source-file`        | `../../sources/{provider}.yaml`                        | Provider API settings                     |
+| `dq-config-file`     | `../../quality/entities/{provider}/{entity-type}.yaml` | Informational; loader uses full hierarchy |
+| `filter-config-file` | `../../filters/entities/{provider}/{entity-type}.yaml` | Informational; loader uses full hierarchy |
+| `sink.bronze.path`   | `data/output/bronze/{provider}/{entity-type}`          |                                           |
+| `sink.silver.path`   | `data/output/silver/{provider}/{entity-type}`          |                                           |
+| `sink.gold.path`     | `data/output/gold/{provider}/{entity-type}`            |                                           |
 
-### Авто-пропагация sort_by (ADR-014 compliance)
+### Авто-пропагация sort-by (ADR-014 compliance)
 
-Параметры `sink.silver.sort_by.columns` и `sink.gold.sort_by.columns` **автоматически вычисляются** из `business_primary_keys`:
+Параметры `sink.silver.sort-by.columns` и `sink.gold.sort-by.columns` **автоматически вычисляются** из `business-primary-keys`:
 
 ```python
-# config_loader.py:155-176
-if "sort_by" not in sink_silver:
-    sink_silver["sort_by"] = {
-        "columns": config["business_primary_keys"],
+# config-loader.py:155-176
+if "sort-by" not in sink-silver:
+    sink-silver["sort-by"] = {
+        "columns": config["business-primary-keys"],
         "ascending": True,
     }
 ```
 
-Это означает, что entity configs **не должны** явно указывать `sort_by` — он пропагируется из `business_primary_keys`:
+Это означает, что entity configs **не должны** явно указывать `sort-by` — он пропагируется из `business-primary-keys`:
 
 ```yaml
-# НЕ нужно указывать sort_by — он auto-computed!
-pipeline_name: chembl_activity
-business_primary_keys: ["activity_id"]  # → sort_by.columns = ["activity_id"]
+# НЕ нужно указывать sort-by — он auto-computed!
+pipeline-name: chembl-activity
+business-primary-keys: ["activity-id"]  # → sort-by.columns = ["activity-id"]
 ```
 
 > **Преимущество:** Снижает дублирование на ~30%. Разработчик указывает только переопределения. Все 21 entity configs соответствуют ADR-014 через авто-пропагацию.
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Data Quality (DQ) конфигурация
 
@@ -316,14 +316,14 @@ ______________________________________________________________________
 
 DQ правила загружаются в порядке приоритета (позже выигрывают):
 
-1. `configs/quality/_defaults.yaml` — глобальные defaults
+1. `configs/quality/-defaults.yaml` — глобальные defaults
 1. `configs/quality/providers/{provider}.yaml` — provider-specific
 1. `configs/quality/entities/{provider}/{entity}.yaml` — entity-specific
-1. Inline `dq_overrides` в pipeline конфиге — финальные переопределения
+1. Inline `dq-overrides` в pipeline конфиге — финальные переопределения
 
-> **Примечание:** Поле `dq_config_file` в pipeline YAML вычисляется конвенционно
+> **Примечание:** Поле `dq-config-file` в pipeline YAML вычисляется конвенционно
 > (ADR-029) и **не требует** явного указания. `DQConfigLoader` всегда загружает
-> полную 3-уровневую иерархию по `provider`/`entity_type`. Если `dq_config_file`
+> полную 3-уровневую иерархию по `provider`/`entity-type`. Если `dq-config-file`
 > указан явно — он используется как override-path для entity-level файла.
 
 ### Специальная merge логика
@@ -335,25 +335,25 @@ DQ правила загружаются в порядке приоритета 
 ### Структура DQ конфига
 
 ```yaml
-# configs/quality/_defaults.yaml
+# configs/quality/-defaults.yaml
 thresholds:
-  soft_fail: 0.05      # >5% errors → Warning
-  hard_fail: 0.20      # >20% errors → Fail Batch
+  soft-fail: 0.05      # >5% errors → Warning
+  hard-fail: 0.20      # >20% errors → Fail Batch
 
-strict_validation: false
-invalid_record_policy: quarantine  # quarantine | skip | fail
+strict-validation: false
+invalid-record-policy: quarantine  # quarantine | skip | fail
 
 report:
   enabled: true
   format: json
-  include_sample_failures: true
-  sample_size: 10
+  include-sample-failures: true
+  sample-size: 10
 
-common_field_validations:
-  - field: _content_hash
+common-field-validations:
+  - field: -content-hash
     type: required
     nullable: false
-  - field: _ingestion_ts
+  - field: -ingestion-ts
     type: pattern
     pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}'
 ```
@@ -362,32 +362,32 @@ common_field_validations:
 
 ```yaml
 # configs/quality/entities/chembl/activity.yaml
-entity_field_validations:
-  - field: activity_id
+entity-field-validations:
+  - field: activity-id
     type: required
     nullable: false
-  - field: standard_value
+  - field: standard-value
     type: range
     min: 0
     nullable: true
-  - field: standard_type
+  - field: standard-type
     type: enum
     allowed: [IC50, Ki, Kd, EC50, AC50, GI50, ED50, MIC, CC50, Kd, EC50, AC50, Potency]
 
-entity_cross_field_validations:
-  - name: value_requires_units
-    fields: [standard_value, standard_units]
-    condition: conditional_required
-    trigger_field: standard_value
-    required_field: standard_units
+entity-cross-field-validations:
+  - name: value-requires-units
+    fields: [standard-value, standard-units]
+    condition: conditional-required
+    trigger-field: standard-value
+    required-field: standard-units
 
-entity_conditional_validations:
-  - name: binding_requires_target
-    condition_field: assay_type
-    condition_value: B
-    condition_operator: eq
-    then_validations:
-      - field: target_chembl_id
+entity-conditional-validations:
+  - name: binding-requires-target
+    condition-field: assay-type
+    condition-value: B
+    condition-operator: eq
+    then-validations:
+      - field: target-chembl-id
         type: required
 ```
 
@@ -402,7 +402,7 @@ entity_conditional_validations:
 | `length`   | Длина строки        | `min`, `max`             |
 | `unique`   | Уникальность        | —                        |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Filter конфигурация
 
@@ -410,22 +410,22 @@ ______________________________________________________________________
 
 Аналогично DQ, фильтры загружаются иерархически:
 
-1. `configs/filters/_defaults.yaml`
+1. `configs/filters/-defaults.yaml`
 1. `configs/filters/providers/{provider}.yaml`
 1. `configs/filters/entities/{provider}/{entity}.yaml`
-1. Inline `filter_rules` в pipeline конфиге
+1. Inline `filter-rules` в pipeline конфиге
 
 ### Input Filter
 
 Фильтрация входных данных (CSV с ID):
 
 ```yaml
-input_filter:
+input-filter:
   enabled: true
-  batch_size: 100
-  source_file: "data/filter_ids.csv"
-  column: "molecule_id"
-  api_field: "molecule_chembl_id"
+  batch-size: 100
+  source-file: "data/filter-ids.csv"
+  column: "molecule-id"
+  api-field: "molecule-chembl-id"
 ```
 
 ### Gold Filters
@@ -433,27 +433,27 @@ input_filter:
 Фильтрация данных на Gold слое:
 
 ```yaml
-gold_filters:
-  required_fields:
-    - activity_id
-    - standard_value
+gold-filters:
+  required-fields:
+    - activity-id
+    - standard-value
 
   columns:
-    standard_type:
+    standard-type:
       operator: in
       values: [IC50, Ki, Kd, EC50, AC50, GI50, ED50, MIC, CC50]
-    pchembl_value:
-      operator: is_not_null
+    pchembl-value:
+      operator: is-not-null
 
   ranges:
-    pchembl_value:
+    pchembl-value:
       min: 5.0
       max: 15.0
-      include_min: true
-      include_max: true
+      include-min: true
+      include-max: true
 
-  exclude_if_present:
-    - deprecated_field
+  exclude-if-present:
+    - deprecated-field
 ```
 
 ### Операторы фильтрации
@@ -461,13 +461,13 @@ gold_filters:
 | Оператор       | Описание                    |
 | -------------- | --------------------------- |
 | `in`           | Значение в списке           |
-| `not_in`       | Значение не в списке        |
-| `is_null`      | NULL                        |
-| `is_not_null`  | NOT NULL                    |
-| `is_empty`     | Пустая строка или список    |
-| `is_not_empty` | Не пустая строка или список |
+| `not-in`       | Значение не в списке        |
+| `is-null`      | NULL                        |
+| `is-not-null`  | NOT NULL                    |
+| `is-empty`     | Пустая строка или список    |
+| `is-not-empty` | Не пустая строка или список |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Source конфигурация
 
@@ -477,28 +477,28 @@ ______________________________________________________________________
 # configs/sources/chembl.yaml
 source:
   type: api
-  load_strategy: full
-  batch_size: 20
+  load-strategy: full
+  batch-size: 20
 
-  provider_config:
+  provider-config:
     provider: chembl
-    base_url: https://www.ebi.ac.uk/chembl/api/data
+    base-url: https://www.ebi.ac.uk/chembl/api/data
     client:
-      timeout_sec: 60.0
-      max_retries: 3
-    max_url_length: 2000
-    batch_size: 20
-    page_size: 1000
+      timeout-sec: 60.0
+      max-retries: 3
+    max-url-length: 2000
+    batch-size: 20
+    page-size: 1000
 
-  circuit_breaker:
-    failure_threshold: 5
-    recovery_timeout: 300
+  circuit-breaker:
+    failure-threshold: 5
+    recovery-timeout: 300
 
-  rate_limit:
-    requests_per_second: 5
+  rate-limit:
+    requests-per-second: 5
     burst: 10
 
-  health_check:
+  health-check:
     endpoint: /chembl/api/data/status
     timeout: 5
 
@@ -522,7 +522,7 @@ entities:
 | PubMed          | `sources/pubmed.yaml`          | 3 req/sec    | 5     | 10         |
 | SemanticScholar | `sources/semanticscholar.yaml` | 100 req/5min | —     | 100        |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Sink конфигурация
 
@@ -540,28 +540,28 @@ sink:
     format: delta
     path: data/output/silver/chembl/activity
     mode: merge                    # merge | overwrite
-    primary_key: ["activity_id"]
+    primary-key: ["activity-id"]
     deterministic: true
-    sort_by:
-      columns: ["activity_id"]
+    sort-by:
+      columns: ["activity-id"]
       ascending: true
-    on_schema_mismatch: evolve     # error | evolve | ignore
+    on-schema-mismatch: evolve     # error | evolve | ignore
 
   gold:
     enabled: true
     format: delta                  # delta | parquet
     path: data/output/gold/chembl/activity
     mode: overwrite
-    partition_by: ["standard_type"]
-    flat_structure: true
-    csv_export:
+    partition-by: ["standard-type"]
+    flat-structure: true
+    csv-export:
       enabled: true
-      include_columns: ["activity_id", "standard_type", "standard_value"]
+      include-columns: ["activity-id", "standard-type", "standard-value"]
     metadata:
       owner: "data-team"
       description: "ChEMBL activity measurements"
       tags: ["bioactivity", "chembl"]
-      retention_days: 365
+      retention-days: 365
 ```
 
 ### Write Modes
@@ -580,15 +580,15 @@ sink:
 | `evolve` | Автоматическое добавление новых колонок |
 | `ignore` | Игнорировать несовпадения               |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Circuit Breaker конфигурация
 
 ```yaml
-circuit_breaker:
-  failure_threshold: 5      # Количество ошибок для открытия
-  recovery_timeout: 300     # Время recovery в секундах
-  half_open_requests: 1     # Пробные запросы в half-open состоянии
+circuit-breaker:
+  failure-threshold: 5      # Количество ошибок для открытия
+  recovery-timeout: 300     # Время recovery в секундах
+  half-open-requests: 1     # Пробные запросы в half-open состоянии
 ```
 
 **Состояния:**
@@ -597,7 +597,7 @@ circuit_breaker:
 - **Open:** Все запросы блокируются
 - **Half-Open:** Пробные запросы для recovery
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Maintenance конфигурация
 
@@ -605,15 +605,15 @@ ______________________________________________________________________
 maintenance:
   vacuum:
     enabled: true
-    retention_days: 7           # Минимальный возраст файлов для удаления
-    run_after_pipeline: false   # Автоматический VACUUM после пайплайна
+    retention-days: 7           # Минимальный возраст файлов для удаления
+    run-after-pipeline: false   # Автоматический VACUUM после пайплайна
 
-  bronze_cleanup:
+  bronze-cleanup:
     enabled: true
-    retention_days: 90          # Retention для Bronze файлов
+    retention-days: 90          # Retention для Bronze файлов
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Валидация конфигурации
 
@@ -621,10 +621,10 @@ ______________________________________________________________________
 
 ```bash
 # Показать конфигурацию
-bioetl config show chembl_activity
+bioetl config show chembl-activity
 
 # Валидация
-bioetl config validate chembl_activity
+bioetl config validate chembl-activity
 
 # Показать глобальные настройки
 bioetl config show-settings
@@ -639,46 +639,46 @@ bioetl config list-pipelines
 
 | Проверка                         | Описание                                       |
 | -------------------------------- | ---------------------------------------------- |
-| `validate_batch_size`            | batch_size ≤ 5000                              |
-| `validate_provider`              | Provider в lowercase                           |
-| `validate_entity_type_canonical` | publication\* вместо document\*                |
-| `validate_medallion_formats`     | Bronze→JSONL, Silver→Delta, Gold→Delta/Parquet |
-| `validate_thresholds`            | soft_fail < hard_fail                          |
+| `validate-batch-size`            | batch-size ≤ 5000                              |
+| `validate-provider`              | Provider в lowercase                           |
+| `validate-entity-type-canonical` | publication\* вместо document\*                |
+| `validate-medallion-formats`     | Bronze→JSONL, Silver→Delta, Gold→Delta/Parquet |
+| `validate-thresholds`            | soft-fail < hard-fail                          |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Примеры конфигураций
 
 ### Минимальный конфиг
 
 ```yaml
-pipeline_name: chembl_activity
+pipeline-name: chembl-activity
 provider: chembl
-entity_type: activity
+entity-type: activity
 version: "1.2.0"
-business_primary_keys: ["activity_id"]
-silver_table: "chembl_activity"
-gold_table: "chembl_activity"
+business-primary-keys: ["activity-id"]
+silver-table: "chembl-activity"
+gold-table: "chembl-activity"
 ```
 
 ### С DQ переопределениями
 
 ```yaml
-pipeline_name: chembl_activity
+pipeline-name: chembl-activity
 provider: chembl
-entity_type: activity
+entity-type: activity
 version: "1.2.0"
-business_primary_keys: ["activity_id"]
-silver_table: "chembl_activity"
-gold_table: "chembl_activity"
+business-primary-keys: ["activity-id"]
+silver-table: "chembl-activity"
+gold-table: "chembl-activity"
 
-dq_overrides:
+dq-overrides:
   thresholds:
-    soft_fail: 0.10
-    hard_fail: 0.30
+    soft-fail: 0.10
+    hard-fail: 0.30
 
-  field_validations:
-    - field: pchembl_value
+  field-validations:
+    - field: pchembl-value
       type: range
       min: 0
       max: 20
@@ -688,27 +688,27 @@ dq_overrides:
 ### С кастомными sink путями
 
 ```yaml
-pipeline_name: chembl_activity
+pipeline-name: chembl-activity
 provider: chembl
-entity_type: activity
+entity-type: activity
 version: "1.2.0"
-business_primary_keys: ["activity_id"]
-silver_table: "chembl_activity"
-gold_table: "chembl_activity"
+business-primary-keys: ["activity-id"]
+silver-table: "chembl-activity"
+gold-table: "chembl-activity"
 
 sink:
   bronze:
     path: /custom/path/bronze/chembl/activity
   silver:
     path: /custom/path/silver/chembl/activity
-    partition_by: ["standard_type"]
+    partition-by: ["standard-type"]
   gold:
     path: /custom/path/gold/chembl/activity
-    csv_export:
+    csv-export:
       enabled: true
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Миграция с JSON на YAML
 
@@ -719,41 +719,41 @@ ______________________________________________________________________
 
 ```json
 {
-  "pipeline_name": "chembl_activity",
+  "pipeline-name": "chembl-activity",
   "provider": "chembl",
-  "entity_type": "activity",
-  "batch_size": 100
+  "entity-type": "activity",
+  "batch-size": 100
 }
 ```
 
 **Стало (YAML):**
 
 ```yaml
-pipeline_name: chembl_activity
+pipeline-name: chembl-activity
 provider: chembl
-entity_type: activity
-batch_size: 100
+entity-type: activity
+batch-size: 100
 
 # Комментарии теперь поддерживаются!
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Troubleshooting
 
 ### Ошибка валидации конфига
 
 ```bash
-bioetl config validate chembl_activity
+bioetl config validate chembl-activity
 ```
 
 **Распространённые ошибки:**
 
 | Ошибка                   | Причина                     | Решение                |
 | ------------------------ | --------------------------- | ---------------------- |
-| `batch_size > 5000`      | Слишком большой batch       | Уменьшить до ≤5000     |
+| `batch-size > 5000`      | Слишком большой batch       | Уменьшить до ≤5000     |
 | `provider not lowercase` | Provider в верхнем регистре | Использовать lowercase |
-| `soft_fail >= hard_fail` | Неверные пороги             | soft_fail < hard_fail  |
+| `soft-fail >= hard-fail` | Неверные пороги             | soft-fail < hard-fail  |
 | `unknown field`          | Опечатка в имени поля       | Проверить spelling     |
 
 ### DQ правила не применяются
@@ -769,18 +769,18 @@ bioetl config validate chembl_activity
 1. Использовать CLI для просмотра resolved конфига:
 
    ```bash
-   bioetl config show chembl_activity --format json
+   bioetl config show chembl-activity --format json
    ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## См. также
 
 - [Running Pipelines](running-pipelines.md) — запуск пайплайнов
 - [CLI Reference](../04-reference/cli.md) — команды CLI
 - [DQ Configuration](dq-configuration.md) — детальная настройка DQ
-- [ADR-014: Deterministic Writes](../02-architecture/decisions/ADR-014-deterministic-writes.md) — sort_by requirement
-- [ADR-025: Pipeline Config Unification](../02-architecture/decisions/ADR-025-pipeline-config-unification.md) — иерархия конфигов
+- [ADR-014: Deterministic Writes](../../02-architecture/decisions/ADR-014-deterministic-writes.md) — sort-by requirement
+- [ADR-025: Pipeline Config Unification](../../02-architecture/decisions/ADR-025-pipeline-config-unification.md) — иерархия конфигов
 - [ADR-026: Composite Pipeline Pattern](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) — multi-provider pipelines
 - [ADR-027: DQ Rules Externalization](../02-architecture/decisions/ADR-027-dq-rules-externalization.md) — иерархическая DQ загрузка
 - [ADR-028: Filter Rules Externalization](../02-architecture/decisions/ADR-028-filter-rules-externalization.md) — иерархическая Filter загрузка

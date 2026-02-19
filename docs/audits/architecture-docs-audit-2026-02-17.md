@@ -43,10 +43,10 @@ The Medallion pattern is correctly and consistently described across:
 
 | Aspect | RULES.md | ADR | Code | Verdict |
 |---|---|---|---|---|
-| Bronze: JSONL+zstd | §2.1 | ADR-002 | `bronze_writer.py` | CONSISTENT |
-| Silver: Delta Lake | §2.1 | ADR-001 | `silver_writer.py` | CONSISTENT |
-| Gold: Strict validation | §2.7 | ADR-018 | `gold_writer.py` | CONSISTENT |
-| Clear policy | §2.4.2 | ADR-012 | `medallion_lifecycle.py` | CONSISTENT |
+| Bronze: JSONL+zstd | §2.1 | ADR-002 | `bronze-writer.py` | CONSISTENT |
+| Silver: Delta Lake | §2.1 | ADR-001 | `silver-writer.py` | CONSISTENT |
+| Gold: Strict validation | §2.7 | ADR-018 | `gold-writer.py` | CONSISTENT |
+| Clear policy | §2.4.2 | ADR-012 | `medallion-lifecycle.py` | CONSISTENT |
 | Partitioning | §2.4.3 | - | configs | CONSISTENT |
 
 **Issue MEDAL-001 (MEDIUM):** Medallion Architecture is explained in **53 separate files** across
@@ -72,14 +72,14 @@ in RULES.md, ai-selfreview-rules.md, and architecture tests.
 
 **Issue ARCH-001 (HIGH):** `02-application-layer.md` line 144 incorrectly places
 `MedallionLifecycleService` under `application/core/` — actual location is
-`application/services/medallion_lifecycle.py`.
+`application/services/medallion-lifecycle.py`.
 
 ### 1.3 Local-Only Deployment (ADR-010)
 
 **Status: CONSISTENT**
 
 ADR-010 is correctly enforced:
-- MemoryLock (not Redis) in `infrastructure/locking/memory_lock.py`
+- MemoryLock (not Redis) in `infrastructure/locking/memory-lock.py`
 - Filesystem storage, no external services
 - CLI execution model, no orchestrator dependency
 - Confirmed in RULES.md, REQUIREMENTS.md, glossary.md
@@ -90,7 +90,7 @@ No contradictions found.
 
 **Status: CONSISTENT**
 
-`sort_by` requirement in configs, hash-based deterministic jitter, single timestamp source —
+`sort-by` requirement in configs, hash-based deterministic jitter, single timestamp source —
 all documented in ADR-014 and enforced via `03-file-policy.md` mandatory config fields.
 
 ### 1.5 Circuit Breaker & Retry
@@ -116,7 +116,7 @@ require updating 7 files.
 
 **Status: CONSISTENT**
 
-ADR-003 is the canonical source (TTL=90s, heartbeat=30s, max_duration=4h).
+ADR-003 is the canonical source (TTL=90s, heartbeat=30s, max-duration=4h).
 42 files reference MemoryLock but references are complementary (operational vs. architectural).
 
 ### 1.8 Composite Pipeline Pattern (ADR-026)
@@ -135,9 +135,9 @@ Missing: `composite/activity-spec.md` and `composite/assay-spec.md`.
 
 Naming policy correctly implements ADR-024 (Entity Naming Unification):
 - `{Provider}{CanonicalTerm}` class naming
-- `{provider}_{entity}` pipeline IDs
+- `{provider}-{entity}` pipeline IDs
 - `{Provider}{CanonicalTerm}GoldSchema` for Pandera schemas
-- Exception registry in `configs/naming_exceptions.yaml`
+- Exception registry in `configs/naming-exceptions.yaml`
 
 ---
 
@@ -237,7 +237,7 @@ No active references to watermark-based loading found.
 ### 3.2 Provider/Entity Naming
 
 All 7 providers follow naming policy:
-- chembl: 14 entity configs (snake_case)
+- chembl: 14 entity configs (snake-case)
 - pubchem: 1 (compound)
 - uniprot: 2 (protein, idmapping)
 - pubmed: 1 (publication)
@@ -266,7 +266,7 @@ Filter configs follow `configs/filters/entities/{provider}/{entity}.yaml` conven
 ### 3.5 MUST-Rule Violations
 
 **Issue NAME-001 (HIGH): Missing tissue pipeline documentation**
-`chembl_tissue` has a config at `configs/pipelines/chembl/tissue.yaml` but:
+`chembl-tissue` has a config at `configs/pipelines/chembl/tissue.yaml` but:
 - No spec in `docs/04-reference/pipelines/chembl/`
 - No provider doc in `docs/04-reference/providers/chembl/tissue.md`
 Per 04-extending-bioetl.md, all pipelines MUST have documentation.
@@ -290,36 +290,36 @@ This creates navigation confusion. One set should be canonical, the other remove
 
 | Pipeline | Config | Spec Doc | Provider Doc | Transformer | Schema | Status |
 |---|---|---|---|---|---|---|
-| chembl_activity | YES | YES | YES | YES | YES | COMPLETE |
-| chembl_assay | YES | YES | YES | YES | YES | COMPLETE |
-| chembl_molecule | YES | YES | YES | YES | YES | COMPLETE |
-| chembl_target | YES | YES | YES | YES | YES | COMPLETE |
-| chembl_cell_line | YES | YES | YES | YES | YES | COMPLETE |
-| chembl_protein_class | YES | YES | YES | YES | YES | COMPLETE |
-| chembl_publication | YES | YES | YES | YES | YES | COMPLETE |
-| chembl_assay_parameters | YES | YES | YES | YES | YES | COMPLETE |
-| chembl_compound_record | YES | YES | YES | YES | YES | COMPLETE |
-| chembl_target_component | YES | YES | YES | YES | YES | COMPLETE |
-| chembl_publication_term | YES | YES | YES | YES | YES | COMPLETE |
-| chembl_publication_similarity | YES | YES | YES | YES | YES | COMPLETE |
-| chembl_subcellular_fraction | YES | YES | YES | YES | YES | COMPLETE |
-| **chembl_tissue** | YES | **NO** | **NO** | YES | YES | **INCOMPLETE** |
-| pubchem_compound | YES | YES | YES | YES | YES | COMPLETE |
-| uniprot_protein | YES | YES | YES | YES | YES | COMPLETE |
-| uniprot_idmapping | YES | YES | YES | YES | YES | COMPLETE |
-| pubmed_publication | YES | YES | YES | YES | YES | COMPLETE |
-| crossref_publication | YES | YES | YES | YES | YES | COMPLETE |
-| openalex_publication | YES | YES | YES | YES | YES | COMPLETE |
-| semanticscholar_publication | YES | YES | YES | YES | YES | COMPLETE |
-| **composite_publication** | YES | YES | - | YES | YES | COMPLETE |
-| **composite_molecule** | YES | YES | - | YES | YES | COMPLETE |
-| **composite_target** | YES | YES | - | YES | YES | COMPLETE |
-| **composite_activity** | YES | **NO** | - | YES | YES | **INCOMPLETE** |
-| **composite_assay** | YES | **NO** | - | YES | YES | **INCOMPLETE** |
+| chembl-activity | YES | YES | YES | YES | YES | COMPLETE |
+| chembl-assay | YES | YES | YES | YES | YES | COMPLETE |
+| chembl-molecule | YES | YES | YES | YES | YES | COMPLETE |
+| chembl-target | YES | YES | YES | YES | YES | COMPLETE |
+| chembl-cell-line | YES | YES | YES | YES | YES | COMPLETE |
+| chembl-protein-class | YES | YES | YES | YES | YES | COMPLETE |
+| chembl-publication | YES | YES | YES | YES | YES | COMPLETE |
+| chembl-assay-parameters | YES | YES | YES | YES | YES | COMPLETE |
+| chembl-compound-record | YES | YES | YES | YES | YES | COMPLETE |
+| chembl-target-component | YES | YES | YES | YES | YES | COMPLETE |
+| chembl-publication-term | YES | YES | YES | YES | YES | COMPLETE |
+| chembl-publication-similarity | YES | YES | YES | YES | YES | COMPLETE |
+| chembl-subcellular-fraction | YES | YES | YES | YES | YES | COMPLETE |
+| **chembl-tissue** | YES | **NO** | **NO** | YES | YES | **INCOMPLETE** |
+| pubchem-compound | YES | YES | YES | YES | YES | COMPLETE |
+| uniprot-protein | YES | YES | YES | YES | YES | COMPLETE |
+| uniprot-idmapping | YES | YES | YES | YES | YES | COMPLETE |
+| pubmed-publication | YES | YES | YES | YES | YES | COMPLETE |
+| crossref-publication | YES | YES | YES | YES | YES | COMPLETE |
+| openalex-publication | YES | YES | YES | YES | YES | COMPLETE |
+| semanticscholar-publication | YES | YES | YES | YES | YES | COMPLETE |
+| **composite-publication** | YES | YES | - | YES | YES | COMPLETE |
+| **composite-molecule** | YES | YES | - | YES | YES | COMPLETE |
+| **composite-target** | YES | YES | - | YES | YES | COMPLETE |
+| **composite-activity** | YES | **NO** | - | YES | YES | **INCOMPLETE** |
+| **composite-assay** | YES | **NO** | - | YES | YES | **INCOMPLETE** |
 
 ### 4.2 Documentation Section Coverage
 
-Based on the pipeline spec template (chembl_activity as reference), each spec SHOULD contain:
+Based on the pipeline spec template (chembl-activity as reference), each spec SHOULD contain:
 
 | Section | Required | Coverage across documented pipelines |
 |---|---|---|
@@ -343,9 +343,9 @@ understanding.
 
 ### 4.3 Undocumented Pipelines
 
-1. `chembl_tissue` — config exists, no spec doc, no provider doc
-2. `composite_activity` — config exists, no spec doc
-3. `composite_assay` — config exists, no spec doc
+1. `chembl-tissue` — config exists, no spec doc, no provider doc
+2. `composite-activity` — config exists, no spec doc
+3. `composite-assay` — config exists, no spec doc
 
 ### 4.4 Partially Documented Pipelines
 
@@ -388,10 +388,10 @@ Most lack: Idempotency, Retry/CB, Edge Cases sections.
 
 **Issue FRAG-003 (HIGH): Archive bloat**
 `docs/99-archive/` contains 29 files including:
-- 6 merged source code dumps (total ~184K lines): `documentation_merged.md` (73K lines),
-  `domain_merged.md` (34K lines), `infrastructure_merged.md` (31K lines),
-  `application_merged.md` (30K lines), `composition_merged.md` (10K lines),
-  `configs_merged.md` (6K lines)
+- 6 merged source code dumps (total ~184K lines): `documentation-merged.md` (73K lines),
+  `domain-merged.md` (34K lines), `infrastructure-merged.md` (31K lines),
+  `application-merged.md` (30K lines), `composition-merged.md` (10K lines),
+  `configs-merged.md` (6K lines)
 - These are NOT documentation — they are full source code dumps in markdown
 - 5 superseded ADR versions without clear canonical indicators
 
@@ -451,12 +451,12 @@ test files (586), or assertions. The metric is unverifiable without clarificatio
 
 **Issue METRIC-005 (MEDIUM): BatchExecutor LOC drift**
 - `02-application-layer.md` line 143: "786 LOC"
-- Actual `batch_executor.py`: 774 lines
+- Actual `batch-executor.py`: 774 lines
 - Minor drift from refactoring
 
 **Issue METRIC-006 (LOW): Diagram count stale**
 - 00-map.md Document Status table: "34 diagrams Mermaid"
-- Actual in `docs/02-architecture/diagrams/mermaid/`: 50+ files
+- Actual in `docs/02-architecture/diagrams/`: 50+ files
 - Significant undercount
 
 ---
@@ -547,8 +547,8 @@ CRITICAL (6 issues)
 ├── FRAG-001: Dual audit directories (docs/audit/ + docs/audits/)
 ├── FRAG-003: Archive contains 184K lines of source code dumps
 ├── ADR-001 (§2.2): ADR-033 "Proposed" status anomaly
-├── NAME-001: chembl_tissue pipeline undocumented
-└── COMP-001: composite_activity + composite_assay specs missing
+├── NAME-001: chembl-tissue pipeline undocumented
+└── COMP-001: composite-activity + composite-assay specs missing
 
 HIGH (11 issues)
 ├── ARCH-001: MedallionLifecycleService path error in 02-application-layer.md
@@ -597,9 +597,9 @@ MEDIUM (14 issues)
 
 | # | Issue | Action | Effort |
 |---|---|---|---|
-| 7 | chembl_tissue docs | Create spec + provider doc from template | 2 hrs |
-| 8 | composite_activity spec | Create spec from existing config | 1 hr |
-| 9 | composite_assay spec | Create spec from existing config | 1 hr |
+| 7 | chembl-tissue docs | Create spec + provider doc from template | 2 hrs |
+| 8 | composite-activity spec | Create spec from existing config | 1 hr |
+| 9 | composite-assay spec | Create spec from existing config | 1 hr |
 | 10 | Audit dir consolidation | Move docs/audit/* → docs/audits/; delete docs/audit/ | 30 min |
 | 11 | Archive cleanup | Remove 6 merged*.md files (184K lines); mark archived ADRs | 30 min |
 | 12 | Duplicate chembl specs | Remove duplicate 15-18 numbering; keep 01-14 | 30 min |
@@ -625,8 +625,8 @@ MEDIUM (14 issues)
 2. fix(docs): update RULES.md version references in 00-map.md and TOOLS.md
 3. fix(docs): correct MedallionLifecycleService path in application layer docs
 4. fix(docs): resolve ADR-033 status (Proposed → Accepted or add implementation note)
-5. docs(pipeline): add chembl_tissue pipeline spec and provider doc
-6. docs(composite): add composite_activity and composite_assay specs
+5. docs(pipeline): add chembl-tissue pipeline spec and provider doc
+6. docs(composite): add composite-activity and composite-assay specs
 7. refactor(docs): consolidate audit directories (audit/ → audits/)
 8. refactor(docs): remove merged source dumps from 99-archive/
 9. refactor(docs): remove duplicate chembl pipeline spec numbering
@@ -651,7 +651,7 @@ docs/
 ├── reference/      → MERGE into 04-reference/
 ├── testing/        → MOVE to 03-guides/testing/
 └── 99-archive/
-    ├── *_merged.md → DELETE (source code dumps, not documentation)
+    ├── *-merged.md → DELETE (source code dumps, not documentation)
     └── decisions/  → ADD SUPERSEDED markers to all files
 ```
 
@@ -669,7 +669,7 @@ additions, and consolidation. The documentation foundation is solid.
 3. **Path verification**: All module paths in layer docs checked against actual src/ structure
 4. **Metric validation**: LOC counted via `find -name "*.py" -exec cat {} + | wc -l`
 5. **Naming compliance**: Config files checked against 02-naming-policy.md conventions
-6. **Template coverage**: Pipeline specs checked against chembl_activity template structure
+6. **Template coverage**: Pipeline specs checked against chembl-activity template structure
 7. **Duplication analysis**: Key concepts grep-searched across all 273 markdown files
 
 ## Appendix B: Files Analyzed

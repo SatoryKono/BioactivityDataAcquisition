@@ -1,6 +1,6 @@
 # Пайплайн: ChEMBL Molecule
 
-**Имя пайплайна:** `chembl_molecule`
+**Имя пайплайна:** `chembl-molecule`
 **Провайдер:** `chembl`
 **Сущность:** `molecule`
 **Версия схемы:** 1.2.0
@@ -19,59 +19,59 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `molecule_chembl_id` | `str` | Уникальный ChEMBL ID (например, `CHEMBL25`) |
-| `pref_name` | `str` | Предпочтительное название |
-| `max_phase` | `int` | Максимальная фаза клинических испытаний (0-4) |
-| `molecule_type` | `str` | Тип молекулы (Small molecule, Protein, etc.) |
+| `molecule-chembl-id` | `str` | Уникальный ChEMBL ID (например, `CHEMBL25`) |
+| `pref-name` | `str` | Предпочтительное название |
+| `max-phase` | `int` | Максимальная фаза клинических испытаний (0-4) |
+| `molecule-type` | `str` | Тип молекулы (Small molecule, Protein, etc.) |
 
 ### Структурные данные
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `structure_canonical_smiles` | `str` | Каноническая SMILES-формула |
-| `structure_standard_inchi` | `str` | Стандартный InChI |
-| `structure_standard_inchi_key` | `str` | Ключ InChI |
+| `structure-canonical-smiles` | `str` | Каноническая SMILES-формула |
+| `structure-standard-inchi` | `str` | Стандартный InChI |
+| `structure-standard-inchi-key` | `str` | Ключ InChI |
 
 ### Физико-химические свойства
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `property_alogp` | `float` | Расчётный LogP |
-| `property_mw_freebase` | `float` | Молекулярная масса свободного основания |
-| `property_full_mwt` | `float` | Полная молекулярная масса |
-| `property_hba` | `int` | Акцепторы водородных связей |
-| `property_hbd` | `int` | Доноры водородных связей |
-| `property_psa` | `float` | Полярная площадь поверхности |
-| `property_rtb` | `int` | Вращающиеся связи |
-| `property_ro5_violations` | `int` | Нарушения правила Липински |
-| `property_heavy_atoms` | `int` | Тяжёлые атомы |
-| `property_aromatic_rings` | `int` | Ароматические кольца |
-| `property_qed_weighted` | `float` | QED (drug-likeness) |
+| `property-alogp` | `float` | Расчётный LogP |
+| `property-mw-freebase` | `float` | Молекулярная масса свободного основания |
+| `property-full-mwt` | `float` | Полная молекулярная масса |
+| `property-hba` | `int` | Акцепторы водородных связей |
+| `property-hbd` | `int` | Доноры водородных связей |
+| `property-psa` | `float` | Полярная площадь поверхности |
+| `property-rtb` | `int` | Вращающиеся связи |
+| `property-ro5-violations` | `int` | Нарушения правила Липински |
+| `property-heavy-atoms` | `int` | Тяжёлые атомы |
+| `property-aromatic-rings` | `int` | Ароматические кольца |
+| `property-qed-weighted` | `float` | QED (drug-likeness) |
 
 ### Иерархия
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `hierarchy_parent_chembl_id` | `str` | ID родительской молекулы |
-| `hierarchy_active_chembl_id` | `str` | ID активной формы |
-| `hierarchy_child_chembl_id` | `str` | ID дочерней молекулы |
+| `hierarchy-parent-chembl-id` | `str` | ID родительской молекулы |
+| `hierarchy-active-chembl-id` | `str` | ID активной формы |
+| `hierarchy-child-chembl-id` | `str` | ID дочерней молекулы |
 
 ---
 
 ## 3. Трансформация
 
-**Файл:** `src/bioetl/application/pipelines/chembl/molecule_transformer.py`
+**Файл:** `src/bioetl/application/pipelines/chembl/molecule-transformer.py`
 
 ### Развёртывание вложенных структур
 
-- `molecule_hierarchy` → `hierarchy_*` поля
-- `molecule_properties` → `property_*` поля
-- `molecule_structures` → `structure_*` поля
+- `molecule-hierarchy` → `hierarchy-*` поля
+- `molecule-properties` → `property-*` поля
+- `molecule-structures` → `structure-*` поля
 
 ### Entity ID
 
 ```python
-entity_id = f"chembl:{molecule_chembl_id}"
+entity-id = f"chembl:{molecule-chembl-id}"
 ```
 
 ---
@@ -80,8 +80,8 @@ entity_id = f"chembl:{molecule_chembl_id}"
 
 ### DQ-правила
 
-1. **`molecule_chembl_id`** — обязательное, regex `^CHEMBL\d+$`
-2. **`structure_canonical_smiles`** — рекомендуется для анализа
+1. **`molecule-chembl-id`** — обязательное, regex `^CHEMBL\d+$`
+2. **`structure-canonical-smiles`** — рекомендуется для анализа
 
 ### Пороги ошибок
 
@@ -96,13 +96,13 @@ entity_id = f"chembl:{molecule_chembl_id}"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_molecule
+bioetl run chembl-molecule
 
 # С ограничением
-bioetl run chembl_molecule --limit 1000
+bioetl run chembl-molecule --limit 1000
 
 # Полная перезагрузка
-bioetl run chembl_molecule --run-type rebuild
+bioetl run chembl-molecule --run-type rebuild
 ```
 
 ---
@@ -112,7 +112,7 @@ bioetl run chembl_molecule --run-type rebuild
 | Компонент | Путь |
 |-----------|------|
 | Конфигурация | `configs/pipelines/chembl/molecule.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/molecule_transformer.py` |
+| Трансформер | `src/bioetl/application/pipelines/chembl/molecule-transformer.py` |
 | Сущность | `src/bioetl/domain/entities.py` |
 
 ---

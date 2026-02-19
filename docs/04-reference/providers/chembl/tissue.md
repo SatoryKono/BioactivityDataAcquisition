@@ -1,6 +1,6 @@
 # Пайплайн: ChEMBL Tissue
 
-**Имя пайплайна:** `chembl_tissue`
+**Имя пайплайна:** `chembl-tissue`
 **Провайдер:** `chembl`
 **Сущность:** `tissue`
 **Версия схемы:** 1.0.0
@@ -9,7 +9,7 @@
 
 ## 1. Описание
 
-Пайплайн извлекает данные о тканях и анатомических локациях из API ChEMBL. Ткани используются как контекст для описания условий экспериментов (assays). Сущность Tissue имеет связь 1:N с Assay (через FK `assay.tissue_id`).
+Пайплайн извлекает данные о тканях и анатомических локациях из API ChEMBL. Ткани используются как контекст для описания условий экспериментов (assays). Сущность Tissue имеет связь 1:N с Assay (через FK `assay.tissue-id`).
 
 **Источник данных:** ChEMBL REST API, эндпоинт `/tissue`
 
@@ -21,34 +21,34 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `tissue_id` | `str` | Уникальный ChEMBL ID ткани (PK, формат `CHEMBL\d+`) |
-| `pref_name` | `str` | Предпочтительное название ткани |
+| `tissue-id` | `str` | Уникальный ChEMBL ID ткани (PK, формат `CHEMBL\d+`) |
+| `pref-name` | `str` | Предпочтительное название ткани |
 
 ### Онтологические ссылки
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `bto_id` | `str` | Brenda Tissue Ontology ID (формат: `BTO:0000000`) |
-| `caloha_id` | `str` | CALIPHO tissue ID (формат: `TS-0000`) |
-| `efo_id` | `str` | EFO ontology ID (формат: `EFO:0000000`) |
-| `uberon_id` | `str` | UBERON anatomy ontology ID (формат: `UBERON:0000000`) |
+| `bto-id` | `str` | Brenda Tissue Ontology ID (формат: `BTO:0000000`) |
+| `caloha-id` | `str` | CALIPHO tissue ID (формат: `TS-0000`) |
+| `efo-id` | `str` | EFO ontology ID (формат: `EFO:0000000`) |
+| `uberon-id` | `str` | UBERON anatomy ontology ID (формат: `UBERON:0000000`) |
 
 ---
 
 ## 3. Трансформация
 
-**Файл:** `src/bioetl/application/pipelines/chembl/tissue_transformer.py`
+**Файл:** `src/bioetl/application/pipelines/chembl/tissue-transformer.py`
 
 ### Нормализация данных
 
-- **pref_name:** Строка нормализуется через `normalize_to_string()` (strip whitespace)
+- **pref-name:** Строка нормализуется через `normalize-to-string()` (strip whitespace)
 - **Онтологические ID:** Пустые строки и whitespace преобразуются в `NULL`
-- **tissue_id:** Валидируется через regex `^CHEMBL\d+$`
+- **tissue-id:** Валидируется через regex `^CHEMBL\d+$`
 
 ### Entity ID
 
 ```python
-entity_id = f"chembl:{tissue_id}"
+entity-id = f"chembl:{tissue-id}"
 ```
 
 ---
@@ -57,12 +57,12 @@ entity_id = f"chembl:{tissue_id}"
 
 ### DQ-правила
 
-1. **`tissue_id`** — обязательное, формат `^CHEMBL\d+$`
-2. **`pref_name`** — обязательное, длина 1-200 символов
-3. **`bto_id`** — если указан, формат `^BTO:\d{7}$`
-4. **`caloha_id`** — если указан, формат `^TS-\d{4}$`
-5. **`efo_id`** — если указан, формат `^EFO:\d{7}$`
-6. **`uberon_id`** — если указан, формат `^UBERON:\d{7}$`
+1. **`tissue-id`** — обязательное, формат `^CHEMBL\d+$`
+2. **`pref-name`** — обязательное, длина 1-200 символов
+3. **`bto-id`** — если указан, формат `^BTO:\d{7}$`
+4. **`caloha-id`** — если указан, формат `^TS-\d{4}$`
+5. **`efo-id`** — если указан, формат `^EFO:\d{7}$`
+6. **`uberon-id`** — если указан, формат `^UBERON:\d{7}$`
 
 ### Пороги ошибок
 
@@ -77,13 +77,13 @@ entity_id = f"chembl:{tissue_id}"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_tissue
+bioetl run chembl-tissue
 
 # С ограничением количества записей
-bioetl run chembl_tissue --limit 500
+bioetl run chembl-tissue --limit 500
 
 # Полная перезагрузка
-bioetl run chembl_tissue --run-type rebuild
+bioetl run chembl-tissue --run-type rebuild
 ```
 
 ---
@@ -95,15 +95,15 @@ bioetl run chembl_tissue --run-type rebuild
 | Конфигурация | `configs/pipelines/chembl/tissue.yaml` |
 | DQ Rules | `configs/quality/entities/chembl/tissue.yaml` |
 | Схема | `configs/schemas/chembl/tissue.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/tissue_transformer.py` |
+| Трансформер | `src/bioetl/application/pipelines/chembl/tissue-transformer.py` |
 
 ---
 
 ## 7. Связи с другими сущностями
 
 ```
-Tissue (tissue_id)
-    └── Assay (tissue_id FK) [1:N]
+Tissue (tissue-id)
+    └── Assay (tissue-id FK) [1:N]
         └── Activity [1:N]
 ```
 
@@ -115,18 +115,18 @@ Tissue (tissue_id)
 
 ```json
 {
-  "tissue_chembl_id": "CHEMBL3638186",
-  "pref_name": "Liver",
-  "bto_id": "BTO:0000759",
-  "caloha_id": "TS-0564",
-  "efo_id": "EFO:0000887",
-  "uberon_id": "UBERON:0002107"
+  "tissue-chembl-id": "CHEMBL3638186",
+  "pref-name": "Liver",
+  "bto-id": "BTO:0000759",
+  "caloha-id": "TS-0564",
+  "efo-id": "EFO:0000887",
+  "uberon-id": "UBERON:0002107"
 }
 ```
 
 ### Silver (нормализованный)
 
-| tissue_id | pref_name | bto_id | uberon_id |
+| tissue-id | pref-name | bto-id | uberon-id |
 |-----------|-----------|--------|-----------|
 | CHEMBL3638186 | Liver | BTO:0000759 | UBERON:0002107 |
 

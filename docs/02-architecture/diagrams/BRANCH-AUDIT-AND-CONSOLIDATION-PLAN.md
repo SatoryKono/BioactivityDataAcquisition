@@ -13,7 +13,7 @@
 | # | Ветка | Файлов | +/- | Суть изменений |
 |---|-------|--------|-----|----------------|
 | 1 | `codex/update-python-script-instructions-in-documentation` | 2 | +137/-68 | Shell-рендерер: CLI-флаги, env bash, уменьшенные размеры |
-| 2 | `codex/update-render_diagrams.sh-script` | 1 | +70/-59 | Shell-рендерер: поддержка .mermaid+.mmd, png/ выход, mapfile |
+| 2 | `codex/update-render-diagrams.sh-script` | 1 | +70/-59 | Shell-рендерер: поддержка .mermaid+.mermaid, png/ выход, mapfile |
 | 3 | `codex/update-diagram-overview-table` | 1 | +76/-52 | diagrams-index: добавление #12 (AWS, historical), скрипт валидации |
 | 4 | `codex/update-architecture-documentation-components` | 1 | +53/-52 | diagrams-index: косметическое форматирование, пути к исходникам в Key Params |
 | 5 | `codex/establish-diagram-structure-and-update-documentation` | 48 | +562/-510 | **Структурная**: перенос 25 .mermaid → mermaid/, создание png/, обновление 11 docs |
@@ -61,15 +61,15 @@
 
 **Вердикт**: Три конкурирующих подхода к оценке. Нужен выбор одного.
 
-### 2.3. `render_diagrams.sh` — 3 ветки (СРЕДНИЙ)
+### 2.3. `render-diagrams.sh` — 3 ветки (СРЕДНИЙ)
 
-| Ветка | MERMAID_DIR | OUTPUT_DIR | Расширения | CLI-флаги |
+| Ветка | MERMAID-DIR | OUTPUT-DIR | Расширения | CLI-флаги |
 |-------|-------------|------------|------------|-----------|
-| #1 update-python-script | `$SCRIPT_DIR` | images/ | .mermaid | Да (полные) |
-| #2 update-render_diagrams | `$SCRIPT_DIR` | png/ | .mermaid + .mmd | Нет |
-| #5 establish-diagram | `$SCRIPT_DIR/mermaid` | png/ | .mermaid | Нет |
+| #1 update-python-script | `$SCRIPT-DIR` | images/ | .mermaid | Да (полные) |
+| #2 update-render-diagrams | `$SCRIPT-DIR` | png/ | .mermaid + .mermaid | Нет |
+| #5 establish-diagram | `$SCRIPT-DIR/mermaid` | png/ | .mermaid | Нет |
 
-**Вердикт**: Ветка #5 определяет каноническую структуру (mermaid/ → png/), #1 добавляет CLI-гибкость, #2 — совместимость с .mmd.
+**Вердикт**: Ветка #5 определяет каноническую структуру (mermaid/ → png/), #1 добавляет CLI-гибкость, #2 — совместимость с .mermaid.
 
 ### 2.4. Каталог 500 диаграмм — 4 ветки (НОВЫЙ ФАЙЛ × 2 имени)
 
@@ -120,7 +120,7 @@
 ### Взаимоисключающие ветки
 - **#8 vs #10 vs #11**: три конкурирующих методологии оценки top-50
 - **#6 vs #9 vs #11 vs #12**: четыре конкурирующих каталога 500 диаграмм
-- **#1 vs #2**: два конкурирующих подхода к render_diagrams.sh
+- **#1 vs #2**: два конкурирующих подхода к render-diagrams.sh
 
 ---
 
@@ -134,11 +134,11 @@ mermaid/ + png/ и обновляет все 11 документов с крос
 Все остальные ветки должны адаптироваться к этой структуре.
 
 ### 4.2. Скрипт рендеринга
-**Winner: Комбинация #5 (структура) + #1 (CLI-флаги) + #2 (.mmd совместимость)**
+**Winner: Комбинация #5 (структура) + #1 (CLI-флаги) + #2 (.mermaid совместимость)**
 
 - Базовая структура: `mermaid/` → `png/` из #5
 - CLI-интерфейс: `--width`, `--height`, `--scale` и т.д. из #1
-- Расширения: поддержка `.mermaid` + `.mmd` из #2
+- Расширения: поддержка `.mermaid` + `.mermaid` из #2
 - Shebang: `#!/usr/bin/env bash` из #1
 - Shell safety: `set -euo pipefail` из #1
 
@@ -191,7 +191,7 @@ AWS-название — legacy, должно быть deprecated.
 Шаг 1.1: Merge ветки #5 (establish-diagram-structure) в main
          → Устанавливает mermaid/ + png/ структуру
          → Обновляет все 11 документов
-         → Конфликт: diagrams-index.md, top-50, render_diagrams.sh, 00-overview
+         → Конфликт: diagrams-index.md, top-50, render-diagrams.sh, 00-overview
 
 Шаг 1.2: Merge ветки #7 (rename-deployment) в main
          → Переименование #12: AWS → local-deployment
@@ -219,10 +219,10 @@ AWS-название — legacy, должно быть deprecated.
 ### Фаза 3: Скрипт рендеринга (после Фазы 1)
 
 ```
-Шаг 3.1: Ручное объединение #1 + #2 в render_diagrams.sh
+Шаг 3.1: Ручное объединение #1 + #2 в render-diagrams.sh
          → Базовые пути: mermaid/ → png/ (из #5, уже в main)
          → CLI-флаги из #1
-         → Поддержка .mermaid + .mmd из #2
+         → Поддержка .mermaid + .mermaid из #2
          → Shebang и safety из #1
 ```
 
@@ -248,8 +248,8 @@ AWS-название — legacy, должно быть deprecated.
 | **#12 document-bioetl-architecture** | **MERGE** (каталог 500 диаграмм) | **2.2** |
 | #6 update-catalog-500 | **PARTIAL PICK** (src/-ссылки → дополнить #12) | 2.2+ |
 | #3 update-diagram-overview | **PARTIAL PICK** (только скрипт валидации) | 2.3 |
-| #1 update-python-script-instructions | **PARTIAL PICK** (CLI-флаги для render_diagrams.sh) | 3.1 |
-| #2 update-render_diagrams.sh | **PARTIAL PICK** (.mmd совместимость) | 3.1 |
+| #1 update-python-script-instructions | **PARTIAL PICK** (CLI-флаги для render-diagrams.sh) | 3.1 |
+| #2 update-render-diagrams.sh | **PARTIAL PICK** (.mermaid совместимость) | 3.1 |
 | #4 update-architecture-documentation | **CLOSE** (поглощена #5) | — |
 | #9 create-diagram-catalog-doc | **CLOSE** (дубль, уступает #12) | — |
 | #10 update-eval-criteria | **CLOSE** (конкурент #8, проигрывает) | — |
@@ -262,7 +262,7 @@ AWS-название — legacy, должно быть deprecated.
 ### При merge #5:
 - `diagrams-index.md`: принять версию #5 целиком (перестройка)
 - `top-50-diagrams.md`: принять форматирование #5
-- `render_diagrams.sh`: принять пути #5
+- `render-diagrams.sh`: принять пути #5
 - `00-overview.md`: принять пути #5
 
 ### При merge #7 (после #5):
@@ -287,5 +287,5 @@ AWS-название — legacy, должно быть deprecated.
 | Расхождение top-50 оценок с каталогом-500 | Средняя | Провести cross-check ID |
 | Два файла-каталога (500-diagram-proposals.md + diagram-catalog-500.md) | Низкая | Принять только #12; src/-ссылки из #6 перенести в #12 |
 | TOP-25 в #12 vs top-50-diagrams.md (#8) — дублирование приоритетов | Средняя | Чётко разграничить: top-50 = рейтинг существующих, catalog = roadmap новых |
-| render_diagrams.sh не работает с новыми путями | Средняя | Тестировать на реальных .mermaid файлах |
+| render-diagrams.sh не работает с новыми путями | Средняя | Тестировать на реальных .mermaid файлах |
 | Потеря полезного контента из #5 (удалённые секции) | Низкая | Секции Options 1-4 и Style — устаревшие инструкции |

@@ -10,7 +10,7 @@
 В Silver/Gold схемах исторически смешивались 2 подхода для JSON-like полей:
 
 - `Series[str]` с JSON-serialized payload (`pa.string()`)
-- `Series[object]` с нативными `list/dict` (`pa.list_(...)`)
+- `Series[object]` с нативными `list/dict` (`pa.list-(...)`)
 
 Это приводило к drift по типам между провайдерами, нестабильному контракту для downstream и неоднозначности в трансформерах. Повышается риск ошибок strict validation.
 
@@ -21,9 +21,9 @@
 ### Canonical format
 
 - Тип в Pandera: `Series[str]`.
-- **Serialization (MUST)**: `json.dumps(obj, sort_keys=True, separators=(',', ':'), ensure_ascii=True)`.
+- **Serialization (MUST)**: `json.dumps(obj, sort-keys=True, separators=(',', ':'), ensure-ascii=True)`.
 - **Null semantics (MUST)**: отсутствие данных хранится как `NULL` (`None`).
-- **MUST NOT**: новые JSON-like поля задавать как `pa.list_(...)` или `Series[object]`.
+- **MUST NOT**: новые JSON-like поля задавать как `pa.list-(...)` или `Series[object]`.
 - **MAY (временно)**: legacy поля native list/object остаются до controlled migration.
 
 ### Non-goals
@@ -38,22 +38,22 @@
 
 ### A.1 Ключевые расхождения типов (MISMATCH)
 
-- `chemicals`: Silver `canonical_string`, Gold `native_object`
-- `databanks`: Silver `canonical_string`, Gold `native_object`
-- `gene_symbols`: Silver `canonical_string`, Gold `native_object`
-- `publication_types`: mixed on both layers (`canonical_string` + `native`)
+- `chemicals`: Silver `canonical-string`, Gold `native-object`
+- `databanks`: Silver `canonical-string`, Gold `native-object`
+- `gene-symbols`: Silver `canonical-string`, Gold `native-object`
+- `publication-types`: mixed on both layers (`canonical-string` + `native`)
 
 ### A.2 Legacy, но согласованные native-типы (требуют миграции)
 
-- `component_accessions`, `component_ids`, `component_types`, `component_relationships`
-- `protein_classification_ids`, `alternative_id`, `content_domain_domains`
-- `institution_ids`, `institution_country_codes`, `subject_keywords`, `subject_mesh`, `gene_names`
+- `component-accessions`, `component-ids`, `component-types`, `component-relationships`
+- `protein-classification-ids`, `alternative-id`, `content-domain-domains`
+- `institution-ids`, `institution-country-codes`, `subject-keywords`, `subject-mesh`, `gene-names`
 
 ### A.3 Уже согласованные canonical string поля
 
-Примеры: `authors`, `affiliation_list`, `variant_sequence_json`, `features_json`,
-`all_mappings`, `citation_contexts`, `subject_topics`, `primary_topic`,
-`references`, `issn_list`, `ror_ids`, `chembl_ids`, `drugbank_ids`, `go_terms`.
+Примеры: `authors`, `affiliation-list`, `variant-sequence-json`, `features-json`,
+`all-mappings`, `citation-contexts`, `subject-topics`, `primary-topic`,
+`references`, `issn-list`, `ror-ids`, `chembl-ids`, `drugbank-ids`, `go-terms`.
 
 ### Reproducible inventory command
 
@@ -63,14 +63,14 @@ import re
 from pathlib import Path
 for root in (Path('src/bioetl/domain/schemas'), Path('src/bioetl/domain/contracts/gold')):
     for p in sorted(root.rglob('*.py')):
-        lines=p.read_text().splitlines()
+        lines=p.read-text().splitlines()
         for i,l in enumerate(lines,1):
-            m=re.match(r'\s*([a-zA-Z_][a-zA-Z0-9_]*):\s*Series\[([^\]]+)\]', l)
+            m=re.match(r'\s*([a-zA-Z-][a-zA-Z0-9-]*):\s*Series\[([^\]]+)\]', l)
             if not m:
                 continue
             field, typ = m.groups()
             block='\n'.join(lines[max(0,i-2):min(len(lines),i+4)])
-            if 'JSON' in block or field.endswith('_list'):
+            if 'JSON' in block or field.endswith('-list'):
                 print(f"{p}:{field}:Series[{typ}]")
 PY
 ```
@@ -83,7 +83,7 @@ PY
 - CrossRef Publication
 - OpenAlex Publication
 - PubMed Publication
-- UniProt Protein (`gene_names`)
+- UniProt Protein (`gene-names`)
 
 ## Breaking Impact
 
@@ -112,7 +112,7 @@ PY
    - Gold transformers читают оба представления (list/object и string) с нормализацией в canonical string.
 1. **Phase 2 (backfill)**
    - Перезаписать Silver/Gold таблицы по сущностям с legacy native types.
-   - Для backfill использовать `run_type=backfill` с exclusive lock.
+   - Для backfill использовать `run-type=backfill` с exclusive lock.
 1. **Phase 3 (strict enforcement)**
    - Удалить `Series[object]` из Gold контрактов для JSON-like полей.
    - Включить fail-fast в schema checks при обнаружении native list/object.
@@ -122,9 +122,9 @@ PY
 1. Добавить migration notebook/script:
    - read Delta table;
    - для JSON-like legacy columns выполнить каноническую сериализацию;
-   - write to shadow table `*_v2` (Delta).
+   - write to shadow table `*-v2` (Delta).
 1. Сверить row-count, null-rate и content hash стабильность для non-JSON полей.
-1. Переключить readers на `*_v2`.
+1. Переключить readers на `*-v2`.
 1. Выполнить smoke validation через Gold Pandera contracts.
 1. Архивировать старую таблицу, обновить catalog pointers.
 

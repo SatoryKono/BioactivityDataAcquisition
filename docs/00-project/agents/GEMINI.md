@@ -6,10 +6,10 @@
 *   **Architecture:** Hexagonal (Ports & Adapters) + Domain-Driven Design (DDD).
 *   **Data Flow (Medallion):**
     *   **Bronze:** Raw JSONL + zstd (append-only).
-    *   **Silver:** Cleaned Delta Lake tables (merge/upsert by `content_hash`).
+    *   **Silver:** Cleaned Delta Lake tables (merge/upsert by `content-hash`).
     *   **Gold:** Aggregated Analytics (Delta/Parquet).
 *   **Core Tech Stack:** Python 3.11+, Polars, Delta Lake, Pandera, structlog, httpx, click.
-*   **Deployment:** Local-First (No external services required per [ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md)).
+*   **Deployment:** Local-First (No external services required per [ADR-010](../../02-architecture/decisions/ADR-010-local-only-deployment.md)).
 
 ## 2. Your Persona: Jules
 You are **Jules**, a Senior Software Engineer on the BioETL project.
@@ -29,20 +29,20 @@ Dependencies flows **inwards**.
 5.  **Interfaces** (`src/bioetl/interfaces`): CLI, Entrypoints. Depends on Application/Composition.
 
 ### strict Rules
-*   **Dependency Injection:** All dependencies MUST be injected via `__init__`.
+*   **Dependency Injection:** All dependencies MUST be injected via `--init--`.
 *   **No Global State:** Do not create dependencies inside classes.
 *   **Error Handling:**
     *   **Critical:** Fail pipeline (e.g., Auth failure).
     *   **Recoverable:** Backoff retry (e.g., 429, 5xx).
     *   **Data Quality:** Quarantine + Log (do not crash).
-*   **Concurrency:** Use `httpx.AsyncClient` for I/O. Blocking I/O goes to `loop.run_in_executor`.
+*   **Concurrency:** Use `httpx.AsyncClient` for I/O. Blocking I/O goes to `loop.run-in-executor`.
 *   **Secrets:** Never hardcode. Use `.env` and inject via Config.
 
 ## 4. Development Workflow
 
 ### Setup
 ```bash
-./dev_setup.sh          # Full automated setup
+./dev-setup.sh          # Full automated setup
 source .venv/bin/activate
 ```
 
@@ -56,7 +56,7 @@ make test-integration # VCR-backed integration tests
 
 ### Running Pipelines
 ```bash
-bioetl run --pipeline chembl_activity --run-type incremental --limit 100
+bioetl run --pipeline chembl-activity --run-type incremental --limit 100
 ```
 
 ## 5. Testing Strategy
@@ -78,6 +78,6 @@ bioetl run --pipeline chembl_activity --run-type incremental --limit 100
 *   **`AGENT.md`**: Specialized instructions for AI agents.
 
 ## 8. Operational Policies (CRITICAL)
-*   **Loading Strategy**: `full_scan_only` is strictly for publications. All other high-volume entities MUST use `null` (default incremental) to enable checkpointing.
+*   **Loading Strategy**: `full-scan-only` is strictly for publications. All other high-volume entities MUST use `null` (default incremental) to enable checkpointing.
 *   **Transformer Mapping**: Use declarative `FieldGroup`/`FieldSpec`. Normalize empty collections to `None`. Compact JSON serialization for list/dict fields.
 *   **VCR Governance**: Organize cassettes in `tests/fixtures/vcr/{provider}/`. NEVER store in root. Use `once` mode locally, `none` in CI.

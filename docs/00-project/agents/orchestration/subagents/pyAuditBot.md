@@ -7,7 +7,7 @@
 - **Архитектура**: Проверка границ слоев (Domain → Application → Infrastructure).
 - **Данные**: Проверка соответствия Medallion (Bronze/Silver/Gold) и использование Delta Lake в Silver.
 - **Качество**: Поиск `print()`, отсутствие Type Hints, использование Sentinel values.
-- **Конфиги**: Проверка внешней валидации (DQ, Filter) через `scripts/config_gap_analysis.py`.
+- **Конфиги**: Проверка внешней валидации (DQ, Filter) через `scripts/config-gap-analysis.py`.
 
 ## Чек-листы (BioETL)
 
@@ -19,13 +19,13 @@ grep -rn "from bioetl.application" src/bioetl/domain/
 
 # Infrastructure импортирует только ports/entities/exceptions из Domain
 # (Проверка через pytest-archon в тестах архитектуры)
-uv run pytest tests/architecture/test_import_boundaries.py
+uv run pytest tests/architecture/test-import-boundaries.py
 ```
 
 ### B. Medallion & Storage
 ```bash
 # Silver должен использовать Delta Lake
-grep -rn "to_parquet" src/bioetl/ | grep -i "silver" # Должно быть пусто или обосновано
+grep -rn "to-parquet" src/bioetl/ | grep -i "silver" # Должно быть пусто или обосновано
 ```
 
 ### C. Код и Типизация

@@ -36,28 +36,28 @@ without a canonical source, (3) missing per-pipeline documentation.
 | Medallion Architecture (Bronze/Silver/Gold) | RULES.md §2.1, data-layers.md, ADR-002 | storage/ writers | **ALIGNED** |
 | Ports & Adapters (5 layers) | RULES.md §1.1, diagrams.md | src/bioetl/{domain,application,infrastructure,composition,interfaces} | **ALIGNED** |
 | Local-Only Deployment | RULES.md §3.3, ADR-010 | MemoryLock only, no Redis | **ALIGNED** |
-| Deterministic Writes | RULES.md §4.3/§6.1, ADR-014 | sort_by in all configs, hash-based jitter | **ALIGNED** |
-| Circuit Breaker | RULES.md §3.1.4, ADR-007 | infrastructure/adapters/http/circuit_breaker.py | **ALIGNED** |
-| DQ Thresholds (5%/20%) | RULES.md §3.1.2, pipeline-configuration.md | configs/quality/_defaults.yaml | **ALIGNED** |
+| Deterministic Writes | RULES.md §4.3/§6.1, ADR-014 | sort-by in all configs, hash-based jitter | **ALIGNED** |
+| Circuit Breaker | RULES.md §3.1.4, ADR-007 | infrastructure/adapters/http/circuit-breaker.py | **ALIGNED** |
+| DQ Thresholds (5%/20%) | RULES.md §3.1.2, pipeline-configuration.md | configs/quality/-defaults.yaml | **ALIGNED** |
 | MemoryLock TTL/Heartbeat (90s/30s) | RULES.md §3.3 | domain/config.py | **ALIGNED** |
-| Content Hash (SHA256) | RULES.md §2.8 | domain/services/identity_service.py | **ALIGNED** |
+| Content Hash (SHA256) | RULES.md §2.8 | domain/services/identity-service.py | **ALIGNED** |
 | Gold Strict Validation | RULES.md §2.1, ADR-018 | domain/contracts/gold/ | **ALIGNED** |
 | Composite Pipeline Pattern | RULES.md §2.9, ADR-026 | application/composite/ (15 modules) | **ALIGNED** |
 
 ### 1.2 Inconsistencies Found
 
-#### ISSUE-ARCH-001: `@runtime_checkable` Scope Mismatch (LOW)
+#### ISSUE-ARCH-001: `@runtime-checkable` Scope Mismatch (LOW)
 
-**RULES.md §1.1.1** states only 4 ports **SHOULD** be `@runtime_checkable`:
+**RULES.md §1.1.1** states only 4 ports **SHOULD** be `@runtime-checkable`:
 `DataSourcePort`, `FilterableDataSourcePort`, `HealthCheckPort`, `StoragePort`.
-Other ports "MAY not have `@runtime_checkable`."
+Other ports "MAY not have `@runtime-checkable`."
 
-**Actual code:** All 38 ports are decorated with `@runtime_checkable`.
+**Actual code:** All 38 ports are decorated with `@runtime-checkable`.
 
 **Impact:** Over-compliance, not a violation. But documentation is misleading —
 a reader would conclude most ports lack runtime checking.
 
-**Fix:** Update §1.1.1 to reflect that all ports are currently `@runtime_checkable`,
+**Fix:** Update §1.1.1 to reflect that all ports are currently `@runtime-checkable`,
 while the SHOULD requirement applies to the 4 critical ones.
 
 #### ISSUE-ARCH-002: GtoP Provider in Documentation But Not in Code (MEDIUM)
@@ -104,9 +104,9 @@ by §4.1.1. The third-party library names in Appendix A appear to be legacy refe
 **Numbering gaps:** None — all 34 sequential numbers present.
 **Status:** 33 Accepted, 1 Proposed (ADR-033)
 
-#### ISSUE-ADR-001: ADR Count Mismatch in ARCHITECTURE_AUDIT_2026-02-16.md (HIGH)
+#### ISSUE-ADR-001: ADR Count Mismatch in ARCHITECTURE-AUDIT-2026-02-16.md (HIGH)
 
-**ARCHITECTURE_AUDIT_2026-02-16.md** (docs/00-project/) states: "ADR documents: **30**"
+**ARCHITECTURE-AUDIT-2026-02-16.md** (docs/00-project/) states: "ADR documents: **30**"
 
 **RULES.md Appendix F** lists all 34 ADRs. ADR-031 through ADR-034 exist and are
 accepted (dates 2026-01-26 through 2026-02-15).
@@ -114,7 +114,7 @@ accepted (dates 2026-01-26 through 2026-02-15).
 **Impact:** The audit report — positioned as the authoritative metrics document —
 understates ADR coverage by 4 (11.8% error).
 
-**Fix:** Update ARCHITECTURE_AUDIT_2026-02-16.md or produce a fresh audit with
+**Fix:** Update ARCHITECTURE-AUDIT-2026-02-16.md or produce a fresh audit with
 correct count: 34 ADRs.
 
 #### ISSUE-ADR-002: ADR-033 Status Discrepancy (LOW)
@@ -173,10 +173,10 @@ The following documented features lack dedicated ADRs:
 | Rule | Category | Compliance | Notes |
 |------|----------|:---:|-------|
 | Domain entities: `{Provider}{CanonicalTerm}` | MUST | ✅ | Verified across all providers |
-| Pipeline IDs: `{provider}_{entity}` | MUST | ✅ | All 26 configs follow convention |
+| Pipeline IDs: `{provider}-{entity}` | MUST | ✅ | All 26 configs follow convention |
 | Transformers: `{Provider}{CanonicalTerm}Transformer` | MUST | ✅ | 21 concrete transformers verified |
 | Schemas: `{Provider}{CanonicalTerm}GoldSchema` | MUST | ✅ | domain/contracts/gold/ |
-| Table names: `{provider}_{entity}` | MUST | ✅ | silver_table/gold_table in configs |
+| Table names: `{provider}-{entity}` | MUST | ✅ | silver-table/gold-table in configs |
 | Config file names: `{entity}.yaml` | MUST | ✅ | All follow pattern |
 
 #### ISSUE-NAME-001: Documentation Prefix Inconsistency (LOW)
@@ -299,7 +299,7 @@ as "composite pipelines use orchestration, not transformers."
 | Import matrix | RULES.md §1.1, ai-selfreview-rules.md ARCH-001 | RULES.md §1.1 |
 | Health Check contract | RULES.md §1.1.2, architecture tests | RULES.md §1.1.2 |
 | Content Hash algorithm | RULES.md §2.8, §2.8.1, §6.1 | RULES.md §2.8 |
-| sort_by requirement | RULES.md §6.1, ADR-014, 03-file-policy.md, pipeline-configuration.md | ADR-014 |
+| sort-by requirement | RULES.md §6.1, ADR-014, 03-file-policy.md, pipeline-configuration.md | ADR-014 |
 
 ### 5.2 Fragmentation Issues
 
@@ -338,7 +338,7 @@ The values are consistent but the duplication increases maintenance burden.
 
 ### 6.1 Metric Comparison Table
 
-| Metric | 00-map.md | ARCH_AUDIT 2026-02-16 | RULES.md | Actual (2026-02-17) | Drift |
+| Metric | 00-map.md | ARCH-AUDIT 2026-02-16 | RULES.md | Actual (2026-02-17) | Drift |
 |--------|-----------|----------------------|----------|---------------------|-------|
 | Python files (src/bioetl/) | — | — | 534 (§4.4.1) | **534** | ✅ |
 | Python files (src/) | ~1,114 | 552 | — | **534** (src/bioetl/) | ⚠️ Different scopes |
@@ -347,33 +347,33 @@ The values are consistent but the duplication increases maintenance burden.
 | ADR count | 34 | **30** | 34 (App F) | **34** | ❌ Audit stale |
 | Classes | — | 906 | — | **911** | ⚠️ +5 since audit |
 | Ports | — | 38 | — | **38** | ✅ |
-| Pipeline configs | 27 | — | — | **26** (excl. _base) | ⚠️ Off by 1 |
+| Pipeline configs | 27 | — | — | **26** (excl. -base) | ⚠️ Off by 1 |
 | VCR cassettes | — | 95 | — | **68** | ❌ Cassettes reduced |
 | Gold contracts | — | 5 modules | — | **8** files | ⚠️ Different granularity |
 | Future annotations | — | — | 497/534 (93.1%) | — | Not verified |
 
 ### 6.2 Critical Metric Issues
 
-#### ISSUE-METRIC-001: ADR Count in ARCHITECTURE_AUDIT (HIGH)
+#### ISSUE-METRIC-001: ADR Count in ARCHITECTURE-AUDIT (HIGH)
 
-`ARCHITECTURE_AUDIT_2026-02-16.md` reports 30 ADRs. Actual: 34.
+`ARCHITECTURE-AUDIT-2026-02-16.md` reports 30 ADRs. Actual: 34.
 ADR-031 through ADR-034 were added between 2026-01-26 and 2026-02-15.
 The audit was produced on 2026-02-16 — one day after ADR-034.
 
-**Fix:** Regenerate or update ARCHITECTURE_AUDIT with correct count.
+**Fix:** Regenerate or update ARCHITECTURE-AUDIT with correct count.
 
 #### ISSUE-METRIC-002: Pipeline Config Count in 00-map.md (LOW)
 
 `00-map.md` claims "27 configurations". Actual pipeline YAML files: 26
 (14 ChEMBL + 5 composite + 7 other providers). Possible explanations:
-- Counted `_base.yaml` as a pipeline config
+- Counted `-base.yaml` as a pipeline config
 - Previous count before a config was removed
 
 **Fix:** Update to 26 or clarify what "27" includes.
 
 #### ISSUE-METRIC-003: VCR Cassette Count Drift (MEDIUM)
 
-`ARCHITECTURE_AUDIT_2026-02-16.md` reports 95 VCR cassettes. Actual: 68.
+`ARCHITECTURE-AUDIT-2026-02-16.md` reports 95 VCR cassettes. Actual: 68.
 Either cassettes were cleaned up or the counting method differs.
 
 **Fix:** Reconcile VCR cassette counts and update audit metrics.
@@ -381,7 +381,7 @@ Either cassettes were cleaned up or the counting method differs.
 #### ISSUE-METRIC-004: LOC Drift (LOW)
 
 `00-map.md` (updated 2026-02-16): ~115,656 LOC
-`ARCHITECTURE_AUDIT_2026-02-16.md`: 114,547 LOC
+`ARCHITECTURE-AUDIT-2026-02-16.md`: 114,547 LOC
 Actual (2026-02-17): 116,062 LOC
 
 All three numbers differ, spanning a range of ~1,500 lines.
@@ -459,7 +459,7 @@ Weaknesses:
 
 ```
 CRITICAL (P0) — Blocks correctness/auditability
-├── ISSUE-ADR-001: ADR count mismatch (30 vs 34) in ARCHITECTURE_AUDIT
+├── ISSUE-ADR-001: ADR count mismatch (30 vs 34) in ARCHITECTURE-AUDIT
 ├── ISSUE-METRIC-001: Same as above — stale audit metrics
 └── ISSUE-METRIC-003: VCR cassette count drift (95 vs 68)
 
@@ -480,7 +480,7 @@ MEDIUM (P2) — Improvement opportunities
 └── ISSUE-NAME-001: Alias file confusion in 00-project/
 
 LOW (P3) — Polish
-├── ISSUE-ARCH-001: @runtime_checkable scope description
+├── ISSUE-ARCH-001: @runtime-checkable scope description
 └── ISSUE-ARCH-003: Docker mention without ADR-010 qualifier
 ```
 
@@ -492,7 +492,7 @@ LOW (P3) — Polish
 
 | File | Change |
 |------|--------|
-| `ARCHITECTURE_AUDIT_2026-02-16.md` | Update ADR count: 30→34, VCR cassettes: 95→68, classes: 906→911, LOC: 114,547→116,062 |
+| `ARCHITECTURE-AUDIT-2026-02-16.md` | Update ADR count: 30→34, VCR cassettes: 95→68, classes: 906→911, LOC: 114,547→116,062 |
 | `00-map.md` | Update pipeline configs: 27→26 |
 
 **Effort:** S (30 minutes)
@@ -554,11 +554,11 @@ with field lists from Gold schemas.
 
 #### Phase 4: P3 — Polish (2 commits)
 
-**Commit 8: `fix(docs): update @runtime_checkable documentation in RULES.md`**
+**Commit 8: `fix(docs): update @runtime-checkable documentation in RULES.md`**
 
 | File | Change |
 |------|--------|
-| `RULES.md` §1.1.1 | Note that all 38 ports are currently @runtime_checkable |
+| `RULES.md` §1.1.1 | Note that all 38 ports are currently @runtime-checkable |
 
 **Commit 9: `fix(docs): qualify Docker references with ADR-010 deprecation`**
 
@@ -582,7 +582,7 @@ Minor improvements:
 | Section | Reason | Priority |
 |---------|--------|----------|
 | RULES.md Appendix A (Provider Libraries) | Library names outdated after ADR-032 unification | P1 |
-| ARCHITECTURE_AUDIT_2026-02-16.md metrics | Stale numbers across 4+ categories | P0 |
+| ARCHITECTURE-AUDIT-2026-02-16.md metrics | Stale numbers across 4+ categories | P0 |
 
 **No other sections require full rewrites.** The documentation is structurally
 sound — the issues are synchronization debt, not fundamental gaps.
@@ -599,7 +599,7 @@ find src/bioetl -name "*.py" | wc -l                    # 534
 find src/bioetl -name "*.py" -exec cat {} \; | wc -l    # 116,062
 
 # Test file count
-find tests -name "test_*.py" -o -name "*_test.py" | wc -l  # 477
+find tests -name "test-*.py" -o -name "*-test.py" | wc -l  # 477
 
 # ADR count
 ls docs/02-architecture/decisions/ADR-*.md | wc -l      # 34
@@ -608,7 +608,7 @@ ls docs/02-architecture/decisions/ADR-*.md | wc -l      # 34
 grep -r "^class " src/bioetl/ --include="*.py" | wc -l  # 911
 
 # Port count
-grep -r "@runtime_checkable" src/bioetl/domain/ports/ --include="*.py" | wc -l  # 38
+grep -r "@runtime-checkable" src/bioetl/domain/ports/ --include="*.py" | wc -l  # 38
 
 # VCR cassette count
 find tests/fixtures/vcr -name "*.yaml" -o -name "*.json" | wc -l  # 68

@@ -8,7 +8,7 @@
 
 ## Context
 
-Система требует механизм блокировок для предотвращения одновременного запуска одного пайплайна (например, `chembl_activity`). Это защищает от race conditions, повреждения данных и избыточных API-вызовов.
+Система требует механизм блокировок для предотвращения одновременного запуска одного пайплайна (например, `chembl-activity`). Это защищает от race conditions, повреждения данных и избыточных API-вызовов.
 
 ### Исходное решение (Superseded)
 
@@ -45,11 +45,11 @@ MemoryLock полностью реализует `LockPort` и покрывае�
 
 | Функционал | Реализация | Файл:строки |
 |------------|------------|-------------|
-| **Атомарный захват** | `acquire()` с asyncio.Lock | `memory_lock.py:66-130` |
-| **TTL-based expiration** | `_ttl_checker_loop()` — фоновая задача | `memory_lock.py:43-64` |
-| **Heartbeat** | `heartbeat()` — продлевает TTL | `memory_lock.py:176-204` |
-| **Safety Guard** | `validate_owner()` — проверка перед записью | `memory_lock.py:206-238` |
-| **Graceful Shutdown** | `aclose()` — освобождение всех блокировок | `memory_lock.py:240-256` |
+| **Атомарный захват** | `acquire()` с asyncio.Lock | `memory-lock.py:66-130` |
+| **TTL-based expiration** | `-ttl-checker-loop()` — фоновая задача | `memory-lock.py:43-64` |
+| **Heartbeat** | `heartbeat()` — продлевает TTL | `memory-lock.py:176-204` |
+| **Safety Guard** | `validate-owner()` — проверка перед записью | `memory-lock.py:206-238` |
+| **Graceful Shutdown** | `aclose()` — освобождение всех блокировок | `memory-lock.py:240-256` |
 
 ### 2. Упрощение стека
 
@@ -64,8 +64,8 @@ MemoryLock полностью реализует `LockPort` и покрывае�
 ### 3. Конфигурация по умолчанию
 
 Из `PipelineSettings` (`config.py`):
-- `heartbeat_interval = 30s`
-- `effective_lock_ttl = heartbeat_interval * 3 = 90s`
+- `heartbeat-interval = 30s`
+- `effective-lock-ttl = heartbeat-interval * 3 = 90s`
 - TTL check interval = 1s
 
 ## Implementation
@@ -76,21 +76,21 @@ lock = MemoryLock()
 
 # Захват блокировки
 await lock.acquire(
-    key="pipeline:chembl_activity",
-    owner_id=run_id,
+    key="pipeline:chembl-activity",
+    owner-id=run-id,
     ttl=90,
     exclusive=True
 )
 
 # Heartbeat в пайплайне (каждые 30s)
-await lock.heartbeat(key="pipeline:chembl_activity", owner_id=run_id)
+await lock.heartbeat(key="pipeline:chembl-activity", owner-id=run-id)
 
 # Safety Guard перед записью
-if not await lock.validate_owner(key="pipeline:chembl_activity", owner_id=run_id):
+if not await lock.validate-owner(key="pipeline:chembl-activity", owner-id=run-id):
     raise LockNotHeldError("Lock lost during processing")
 
 # Освобождение
-await lock.release(key="pipeline:chembl_activity", owner_id=run_id)
+await lock.release(key="pipeline:chembl-activity", owner-id=run-id)
 
 # Graceful Shutdown
 await lock.aclose()
@@ -100,8 +100,8 @@ await lock.aclose()
 
 | Тип запуска | Key формат |
 |-------------|------------|
-| Incremental | `lock:{provider}_{entity}` |
-| Backfill/Rebuild | `lock:{provider}_{entity}:exclusive` |
+| Incremental | `lock:{provider}-{entity}` |
+| Backfill/Rebuild | `lock:{provider}-{entity}:exclusive` |
 
 ## Consequences
 
@@ -160,6 +160,6 @@ await lock.aclose()
 
 При обновлении с версий, использовавших Redis:
 1. Удалить `docker-compose.yml` (секция redis)
-2. Удалить переменные окружения `REDIS_*`
+2. Удалить переменные окружения `REDIS-*`
 3. Удалить зависимости: `pip uninstall redis aioredis fakeredis`
 4. Обновить код: заменить `RedisLock` на `MemoryLock`

@@ -8,7 +8,7 @@ C4 System Context diagram показывает BioETL как центральн�
 
 > **Note**: Текущая реализация — **Local-Only** (ADR-010). Redis и S3 отложены для будущего распределённого развёртывания.
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## System Context Diagram (Local-Only)
 
@@ -57,7 +57,7 @@ flowchart TB
     FS -->|Delta Lake| API
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## System Boundaries
 
@@ -82,7 +82,7 @@ ______________________________________________________________________
 | **S3/MinIO** | Object storage           | S3 API          | Future (Distributed) |
 | **Redis**    | Distributed locking      | Redis protocol  | Future (Distributed) |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Data Flow Summary (Local-Only)
 
@@ -99,7 +99,7 @@ ______________________________________________________________________
                        └─────────────────┘
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Architecture Style
 
@@ -117,10 +117,10 @@ BioETL использует **Ports & Adapters** (Hexagonal Architecture):
 - Расширяемость для новых провайдеров
 - Лёгкий переход между Local-Only и Distributed deployment
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Related Documents
 
 - **Data Flow**: [data-flow.md](data-flow.md)
-- **Architecture Diagrams**: [diagrams/00-diagramming-policy.md](diagrams/mermaid/00-diagramming-policy.md)
+- **Architecture Diagrams**: [diagrams/00-diagramming-policy.md](diagrams/00-diagramming-policy.md)
 - **Local-Only ADR**: [ADR-010](decisions/ADR-010-local-only-deployment.md)

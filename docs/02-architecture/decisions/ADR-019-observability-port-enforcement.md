@@ -57,11 +57,11 @@ Signal handlers can now be tested without mocking `structlog`:
 ```python
 # Before: hard to test, requires structlog mock
 import structlog
-log = structlog.get_logger()
+log = structlog.get-logger()
 
 # After: easy to test with any LoggerPort implementation
-def setup_shutdown_handlers(
-    shutdown_signal: ShutdownSignal,
+def setup-shutdown-handlers(
+    shutdown-signal: ShutdownSignal,
     logger: LoggerPort | None = None,  # Injectable
 ) -> None:
     ...
@@ -85,17 +85,17 @@ ADR-006 established that all logging should go through `LoggerPort`. This ADR ex
 
 ```python
 # Before
-if TYPE_CHECKING:
+if TYPE-CHECKING:
     import structlog  # ← VIOLATION
 
-def _get_runner_logger(runner: PipelineRunner) -> structlog.BoundLogger | None:
+def -get-runner-logger(runner: PipelineRunner) -> structlog.BoundLogger | None:
     ...
 
 # After
-if TYPE_CHECKING:
+if TYPE-CHECKING:
     from bioetl.domain.ports import LoggerPort  # ← CORRECT
 
-def _get_runner_logger(runner: PipelineRunner) -> LoggerPort | None:
+def -get-runner-logger(runner: PipelineRunner) -> LoggerPort | None:
     ...
 ```
 
@@ -105,15 +105,15 @@ def _get_runner_logger(runner: PipelineRunner) -> LoggerPort | None:
 # Before
 import structlog
 
-def setup_shutdown_handlers(shutdown_signal: ShutdownSignal) -> None:
-    log = structlog.get_logger()
+def setup-shutdown-handlers(shutdown-signal: ShutdownSignal) -> None:
+    log = structlog.get-logger()
     log.warning("Received signal...")
 
 # After
 from bioetl.domain.ports import LoggerPort
 
-def setup_shutdown_handlers(
-    shutdown_signal: ShutdownSignal,
+def setup-shutdown-handlers(
+    shutdown-signal: ShutdownSignal,
     logger: LoggerPort | None = None,  # Optional for backward compat
 ) -> None:
     if logger is not None:
@@ -123,12 +123,12 @@ def setup_shutdown_handlers(
 ### 3. Architecture Test Enforcement
 
 ```python
-# tests/architecture/test_no_structlog_in_application_interfaces.py
+# tests/architecture/test-no-structlog-in-application-interfaces.py
 
 # All exemptions removed
-EXEMPTED_FILES: set[str] = set()  # Empty - zero tolerance
+EXEMPTED-FILES: set[str] = set()  # Empty - zero tolerance
 
-def test_no_structlog_import_in_application_interfaces(...):
+def test-no-structlog-import-in-application-interfaces(...):
     """Verify no direct structlog imports in application/interfaces layers."""
     ...
 ```
@@ -141,15 +141,15 @@ def test_no_structlog_import_in_application_interfaces(...):
 # In interfaces layer
 from bioetl.domain.ports import LoggerPort
 
-def my_function(logger: LoggerPort) -> None:
+def my-function(logger: LoggerPort) -> None:
     logger.info("Message")
 
 # In infrastructure layer (adapters only)
 import structlog
 
 class StructlogAdapter:
-    def __init__(self):
-        self._logger = structlog.get_logger()
+    def --init--(self):
+        self.-logger = structlog.get-logger()
 ```
 
 ### ❌ Forbidden
@@ -181,12 +181,12 @@ from structlog import BoundLogger  # FORBIDDEN
 Run architecture tests to verify compliance:
 
 ```bash
-pytest tests/architecture/test_no_structlog_in_application_interfaces.py -v
+pytest tests/architecture/test-no-structlog-in-application-interfaces.py -v
 ```
 
 Expected output:
 ```
-test_no_structlog_import_in_application_interfaces PASSED
+test-no-structlog-import-in-application-interfaces PASSED
 ```
 
 ## References

@@ -2,22 +2,22 @@
 
 *Version 1.2.0 | Aligned with RULES.md v5.20*
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 1. Identification
 
 | Parameter        | Value                                             |
 | ---------------- | ------------------------------------------------- |
-| **Pipeline ID**  | `chembl_cell_line`                                |
+| **Pipeline ID**  | `chembl-cell-line`                                |
 | **Provider**     | ChEMBL (EBI)                                      |
-| **Entity**       | cell_line                                         |
-| **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/cell_line` |
-| **Library**      | `chembl_webresource_client`                       |
+| **Entity**       | cell-line                                         |
+| **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/cell-line` |
+| **Library**      | `chembl-webresource-client`                       |
 | **Rate Limit**   | None (polite usage recommended)                   |
 | **Health Check** | `/chembl/api/data/status`                         |
 | **Auth Type**    | None (public API)                                 |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 2. Business Context
 
@@ -40,9 +40,9 @@ Cell Lines represent **biological cell cultures** used in experimental assays. T
 ### 2.3. Entity Relationships
 
 ```
-cell_line
+cell-line
     │
-    └──◄──FK──assay.cell_id (1:M)
+    └──◄──FK──assay.cell-id (1:M)
               │
               └──◄──activity (via assay)
 ```
@@ -57,35 +57,35 @@ cell_line
 | **Estimated Volume**    | ~2,500 records total            |
 | **Batch Size**          | 20 (filter batch)               |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 3. Extraction (Bronze Layer)
 
 ### 3.1. API Request
 
 ```python
-from chembl_webresource_client.new_client import new_client
+from chembl-webresource-client.new-client import new-client
 
-cell_line = new_client.cell_line
-# Filter by input CSV cell_ids
-results = cell_line.filter(cell_id__in=chembl_ids)
+cell-line = new-client.cell-line
+# Filter by input CSV cell-ids
+results = cell-line.filter(cell-id--in=chembl-ids)
 ```
 
 ### 3.2. Complete API Fields
 
 | #   | API Field                 | JSON Type | Nullable | Description              | Example Value               |
 | --- | ------------------------- | --------- | -------- | ------------------------ | --------------------------- |
-| 1   | `cell_id`                 | string    | No       | Primary key (ChEMBL ID)  | `"CHEMBL3307641"`           |
-| 2   | `cell_name`               | string    | No       | Cell line name           | `"HeLa"`                    |
-| 3   | `cell_description`        | string    | Yes      | Description              | `"Cervical adenocarcinoma"` |
-| 4   | `cell_source_tissue`      | string    | Yes      | Source tissue            | `"Cervix"`                  |
-| 5   | `cell_source_organism`    | string    | Yes      | Source organism          | `"Homo sapiens"`            |
-| 6   | `cell_source_taxonomy_id` | integer   | Yes      | NCBI Taxonomy ID         | `9606`                      |
-| 7   | `cell_type`               | string    | Yes      | Cell type classification | `"Cancer cell line"`        |
-| 8   | `cellosaurus_id`          | string    | Yes      | Cellosaurus ID           | `"CVCL_0030"`               |
-| 9   | `clo_id`                  | string    | Yes      | Cell Line Ontology ID    | `"CLO_0002063"`             |
-| 10  | `cl_lincs_id`             | string    | Yes      | LINCS ID                 | `"LCL-1024"`                |
-| 11  | `efo_id`                  | string    | Yes      | EFO ontology ID          | `"EFO_0002067"`             |
+| 1   | `cell-id`                 | string    | No       | Primary key (ChEMBL ID)  | `"CHEMBL3307641"`           |
+| 2   | `cell-name`               | string    | No       | Cell line name           | `"HeLa"`                    |
+| 3   | `cell-description`        | string    | Yes      | Description              | `"Cervical adenocarcinoma"` |
+| 4   | `cell-source-tissue`      | string    | Yes      | Source tissue            | `"Cervix"`                  |
+| 5   | `cell-source-organism`    | string    | Yes      | Source organism          | `"Homo sapiens"`            |
+| 6   | `cell-source-taxonomy-id` | integer   | Yes      | NCBI Taxonomy ID         | `9606`                      |
+| 7   | `cell-type`               | string    | Yes      | Cell type classification | `"Cancer cell line"`        |
+| 8   | `cellosaurus-id`          | string    | Yes      | Cellosaurus ID           | `"CVCL-0030"`               |
+| 9   | `clo-id`                  | string    | Yes      | Cell Line Ontology ID    | `"CLO-0002063"`             |
+| 10  | `cl-lincs-id`             | string    | Yes      | LINCS ID                 | `"LCL-1024"`                |
+| 11  | `efo-id`                  | string    | Yes      | EFO ontology ID          | `"EFO-0002067"`             |
 
 ### 3.3. Excluded Fields
 
@@ -93,7 +93,7 @@ results = cell_line.filter(cell_id__in=chembl_ids)
 | ----- | ----------------------- |
 | N/A   | All fields are included |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 4. Transformation
 
@@ -101,52 +101,52 @@ ______________________________________________________________________
 
 | Parameter           | Value                    |
 | ------------------- | ------------------------ |
-| **Entity ID Field** | `cell_id`                |
-| **ID Source**       | `from_api`               |
+| **Entity ID Field** | `cell-id`                |
+| **ID Source**       | `from-api`               |
 | **Format**          | ChEMBL ID (CHEMBL[0-9]+) |
 
 ### 4.2. Field Normalization
 
 | Field                     | Normalization  | Before            | After             |
 | ------------------------- | -------------- | ----------------- | ----------------- |
-| `cell_id`                 | Validate regex | `"CHEMBL3307641"` | `"CHEMBL3307641"` |
-| `cell_name`               | strip()        | `" HeLa "`        | `"HeLa"`          |
-| `cell_description`        | strip()        | -                 | -                 |
-| `cell_source_tissue`      | strip()        | -                 | -                 |
-| `cell_source_organism`    | strip()        | -                 | -                 |
-| `cell_source_taxonomy_id` | Cast to int    | `"9606"`          | `9606`            |
-| `cell_type`               | strip()        | -                 | -                 |
-| `cellosaurus_id`          | Validate regex | `"CVCL_0030"`     | `"CVCL_0030"`     |
-| `clo_id`                  | Validate regex | `"CLO_0002063"`   | `"CLO_0002063"`   |
-| `cl_lincs_id`             | strip()        | -                 | -                 |
-| `efo_id`                  | Validate regex | `"EFO_0002067"`   | `"EFO_0002067"`   |
+| `cell-id`                 | Validate regex | `"CHEMBL3307641"` | `"CHEMBL3307641"` |
+| `cell-name`               | strip()        | `" HeLa "`        | `"HeLa"`          |
+| `cell-description`        | strip()        | -                 | -                 |
+| `cell-source-tissue`      | strip()        | -                 | -                 |
+| `cell-source-organism`    | strip()        | -                 | -                 |
+| `cell-source-taxonomy-id` | Cast to int    | `"9606"`          | `9606`            |
+| `cell-type`               | strip()        | -                 | -                 |
+| `cellosaurus-id`          | Validate regex | `"CVCL-0030"`     | `"CVCL-0030"`     |
+| `clo-id`                  | Validate regex | `"CLO-0002063"`   | `"CLO-0002063"`   |
+| `cl-lincs-id`             | strip()        | -                 | -                 |
+| `efo-id`                  | Validate regex | `"EFO-0002067"`   | `"EFO-0002067"`   |
 
 ### 4.3. Content Hash Specification
 
 ```python
 # Fields included in hash (alphabetical order)
-hash_fields = [
-    "cell_id",
-    "cell_description",
-    "cell_name",
-    "cell_source_organism",
-    "cell_source_taxonomy_id",
-    "cell_source_tissue",
-    "cell_type",
-    "cellosaurus_id",
-    "cl_lincs_id",
-    "clo_id",
-    "efo_id",
+hash-fields = [
+    "cell-id",
+    "cell-description",
+    "cell-name",
+    "cell-source-organism",
+    "cell-source-taxonomy-id",
+    "cell-source-tissue",
+    "cell-type",
+    "cellosaurus-id",
+    "cl-lincs-id",
+    "clo-id",
+    "efo-id",
 ]
 
 # Fields EXCLUDED from hash (RULES.md §2.8.1)
-excluded = ["_ingestion_ts", "_run_id", "_run_type", "_dq_*"]
+excluded = ["-ingestion-ts", "-run-id", "-run-type", "-dq-*"]
 
 # Algorithm
-content_hash = sha256(f"chembl{canonical_json(filtered_record)}")
+content-hash = sha256(f"chembl{canonical-json(filtered-record)}")
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 5. Validation
 
@@ -155,7 +155,7 @@ ______________________________________________________________________
 > Migration note: public Pandera contract uses canonical PK names; legacy aliases are accepted only during transition via ingestion/transform alias mapping and will be removed in the next major release.
 
 ```python
-# src/bioetl/domain/schemas/chembl/cell_line.py
+# src/bioetl/domain/schemas/chembl/cell-line.py
 
 import pandera.pandas as pa
 from pandera.typing import Series
@@ -166,62 +166,62 @@ class CellLineSchema(ETLRecordSchema):
     """Cell Line validation schema for Silver layer."""
 
     # === Primary Key ===
-    cell_id: Series[str] = pa.Field(
+    cell-id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str-matches=r"^CHEMBL\d+$",
         unique=True,
         description="ChEMBL ID for cell line (PK).",
     )
 
     # === Core Metadata ===
-    cell_name: Series[str] = pa.Field(
+    cell-name: Series[str] = pa.Field(
         nullable=False,
         description="Cell line name (e.g., HeLa, MCF7).",
     )
-    cell_description: Series[str] | None = pa.Field(
+    cell-description: Series[str] | None = pa.Field(
         nullable=True,
         description="Cell line description.",
     )
 
     # === Source Information ===
-    cell_source_tissue: Series[str] | None = pa.Field(
+    cell-source-tissue: Series[str] | None = pa.Field(
         nullable=True,
         description="Source tissue (e.g., Cervix, Breast).",
     )
-    cell_source_organism: Series[str] | None = pa.Field(
+    cell-source-organism: Series[str] | None = pa.Field(
         nullable=True,
         description="Source organism (e.g., Homo sapiens).",
     )
-    cell_source_taxonomy_id: Series[int] | None = pa.Field(
+    cell-source-taxonomy-id: Series[int] | None = pa.Field(
         nullable=True,
         ge=1,
         description="NCBI Taxonomy ID for source organism.",
     )
 
     # === Cell Type Classification ===
-    cell_type: Series[str] | None = pa.Field(
+    cell-type: Series[str] | None = pa.Field(
         nullable=True,
         description="Cell type classification.",
     )
 
     # === External Identifiers ===
-    cellosaurus_id: Series[str] | None = pa.Field(
+    cellosaurus-id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^CVCL_[A-Z0-9]+$",
+        str-matches=r"^CVCL-[A-Z0-9]+$",
         description="Cellosaurus ID.",
     )
-    clo_id: Series[str] | None = pa.Field(
+    clo-id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^CLO_\d+$",
+        str-matches=r"^CLO-\d+$",
         description="Cell Line Ontology ID.",
     )
-    cl_lincs_id: Series[str] | None = pa.Field(
+    cl-lincs-id: Series[str] | None = pa.Field(
         nullable=True,
         description="LINCS ID.",
     )
-    efo_id: Series[str] | None = pa.Field(
+    efo-id: Series[str] | None = pa.Field(
         nullable=True,
-        str_matches=r"^EFO_\d+$",
+        str-matches=r"^EFO-\d+$",
         description="EFO ontology ID.",
     )
 
@@ -235,23 +235,23 @@ class CellLineSchema(ETLRecordSchema):
 
 | Field                     | Type | Nullable | Constraints                 | DQ Level | Failure Action |
 | ------------------------- | ---- | -------- | --------------------------- | -------- | -------------- |
-| `cell_id`                 | str  | No       | regex `^CHEMBL\d+$`, unique | CRITICAL | Quarantine     |
-| `cell_name`               | str  | No       | -                           | CRITICAL | Quarantine     |
-| `cell_description`        | str  | Yes      | -                           | INFO     | Log            |
-| `cell_source_tissue`      | str  | Yes      | -                           | INFO     | Log            |
-| `cell_source_organism`    | str  | Yes      | -                           | INFO     | Log            |
-| `cell_source_taxonomy_id` | int  | Yes      | >= 1                        | WARNING  | Log            |
-| `cell_type`               | str  | Yes      | -                           | INFO     | Log            |
-| `cellosaurus_id`          | str  | Yes      | regex `^CVCL_[A-Z0-9]+$`    | WARNING  | Log            |
-| `clo_id`                  | str  | Yes      | regex `^CLO_\d+$`           | WARNING  | Log            |
-| `cl_lincs_id`             | str  | Yes      | -                           | INFO     | Log            |
-| `efo_id`                  | str  | Yes      | regex `^EFO_\d+$`           | WARNING  | Log            |
+| `cell-id`                 | str  | No       | regex `^CHEMBL\d+$`, unique | CRITICAL | Quarantine     |
+| `cell-name`               | str  | No       | -                           | CRITICAL | Quarantine     |
+| `cell-description`        | str  | Yes      | -                           | INFO     | Log            |
+| `cell-source-tissue`      | str  | Yes      | -                           | INFO     | Log            |
+| `cell-source-organism`    | str  | Yes      | -                           | INFO     | Log            |
+| `cell-source-taxonomy-id` | int  | Yes      | >= 1                        | WARNING  | Log            |
+| `cell-type`               | str  | Yes      | -                           | INFO     | Log            |
+| `cellosaurus-id`          | str  | Yes      | regex `^CVCL-[A-Z0-9]+$`    | WARNING  | Log            |
+| `clo-id`                  | str  | Yes      | regex `^CLO-\d+$`           | WARNING  | Log            |
+| `cl-lincs-id`             | str  | Yes      | -                           | INFO     | Log            |
+| `efo-id`                  | str  | Yes      | regex `^EFO-\d+$`           | WARNING  | Log            |
 
 ### 5.3. Cross-Field Validation Rules
 
 | Rule Name                     | Fields                                            | Condition                                         | Failure Action |
 | ----------------------------- | ------------------------------------------------- | ------------------------------------------------- | -------------- |
-| `tax_id_organism_consistency` | `cell_source_taxonomy_id`, `cell_source_organism` | If tax_id=9606, organism should contain "sapiens" | Warning        |
+| `tax-id-organism-consistency` | `cell-source-taxonomy-id`, `cell-source-organism` | If tax-id=9606, organism should contain "sapiens" | Warning        |
 
 ### 5.4. DQ Thresholds
 
@@ -259,9 +259,9 @@ class CellLineSchema(ETLRecordSchema):
 | ------------------- | ---------------------------- | ----------------- |
 | Soft                | 5%                           | Warning, continue |
 | Hard                | 20%                          | Fail batch        |
-| Critical field null | cell_id or cell_name is null | Fail immediately  |
+| Critical field null | cell-id or cell-name is null | Fail immediately  |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 6. Metadata Fields (RULES.md §2.4)
 
@@ -269,24 +269,24 @@ All records contain:
 
 | Field              | Type     | Source          | In Hash |
 | ------------------ | -------- | --------------- | ------- |
-| `entity_id`        | str      | cell_id         | N/A     |
-| `content_hash`     | str      | Computed        | N/A     |
-| `_run_id`          | UUID     | Generated       | No      |
-| `_run_type`        | Enum     | Config          | No      |
-| `_source_batch_id` | UUID     | Generated       | No      |
-| `_ingestion_ts`    | datetime | Generated (UTC) | No      |
-| `_dq_warn`         | bool     | Validation      | No      |
-| `_dq_error`        | bool     | Validation      | No      |
-| `_index`           | int      | Generated       | No      |
+| `entity-id`        | str      | cell-id         | N/A     |
+| `content-hash`     | str      | Computed        | N/A     |
+| `-run-id`          | UUID     | Generated       | No      |
+| `-run-type`        | Enum     | Config          | No      |
+| `-source-batch-id` | UUID     | Generated       | No      |
+| `-ingestion-ts`    | datetime | Generated (UTC) | No      |
+| `-dq-warn`         | bool     | Validation      | No      |
+| `-dq-error`        | bool     | Validation      | No      |
+| `-index`           | int      | Generated       | No      |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 7. Output Schemas
 
 ### 7.1. Bronze
 
 ```
-Path: bronze/v1/chembl/cell_line/{YYYY-MM-DD}/
+Path: bronze/v1/chembl/cell-line/{YYYY-MM-DD}/
 Format: JSONL + zstd
 Mode: Append-only
 Retention: 90 days → Archive
@@ -295,9 +295,9 @@ Retention: 90 days → Archive
 ### 7.2. Silver
 
 ```
-Path: silver/chembl/cell_line/
+Path: silver/chembl/cell-line/
 Format: Delta Lake (delta-rs)
-Mode: Merge on [cell_id]
+Mode: Merge on [cell-id]
 Partition: None
 Retention: Permanent
 VACUUM: Weekly, 7 days retention
@@ -307,32 +307,32 @@ VACUUM: Weekly, 7 days retention
 
 | #     | Column                    | Type    | Nullable | Description      |
 | ----- | ------------------------- | ------- | -------- | ---------------- |
-| 1     | `entity_id`               | string  | No       | = cell_id        |
-| 2     | `content_hash`            | string  | No       | SHA256 hash      |
-| 3     | `cell_id`                 | string  | No       | PK               |
-| 4     | `cell_name`               | string  | No       | Cell line name   |
-| 5     | `cell_description`        | string  | Yes      | Description      |
-| 6     | `cell_source_tissue`      | string  | Yes      | Source tissue    |
-| 7     | `cell_source_organism`    | string  | Yes      | Source organism  |
-| 8     | `cell_source_taxonomy_id` | int     | Yes      | NCBI Taxonomy ID |
-| 9     | `cell_type`               | string  | Yes      | Cell type        |
-| 10    | `cellosaurus_id`          | string  | Yes      | Cellosaurus ID   |
-| 11    | `clo_id`                  | string  | Yes      | CLO ID           |
-| 12    | `cl_lincs_id`             | string  | Yes      | LINCS ID         |
-| 13    | `efo_id`                  | string  | Yes      | EFO ID           |
+| 1     | `entity-id`               | string  | No       | = cell-id        |
+| 2     | `content-hash`            | string  | No       | SHA256 hash      |
+| 3     | `cell-id`                 | string  | No       | PK               |
+| 4     | `cell-name`               | string  | No       | Cell line name   |
+| 5     | `cell-description`        | string  | Yes      | Description      |
+| 6     | `cell-source-tissue`      | string  | Yes      | Source tissue    |
+| 7     | `cell-source-organism`    | string  | Yes      | Source organism  |
+| 8     | `cell-source-taxonomy-id` | int     | Yes      | NCBI Taxonomy ID |
+| 9     | `cell-type`               | string  | Yes      | Cell type        |
+| 10    | `cellosaurus-id`          | string  | Yes      | Cellosaurus ID   |
+| 11    | `clo-id`                  | string  | Yes      | CLO ID           |
+| 12    | `cl-lincs-id`             | string  | Yes      | LINCS ID         |
+| 13    | `efo-id`                  | string  | Yes      | EFO ID           |
 | 14-22 | System fields             | various | various  | See §6           |
 
 ### 7.3. Gold
 
 ```
-Path: gold/chembl/cell_line/
+Path: gold/chembl/cell-line/
 Format: Delta Lake
 Mode: Overwrite
 ```
 
-**Gold Filter:** `cell_name IS NOT NULL`
+**Gold Filter:** `cell-name IS NOT NULL`
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 8. Quarantine Handling
 
@@ -340,19 +340,19 @@ ______________________________________________________________________
 
 | Code                           | Description                   | Typical Cause      |
 | ------------------------------ | ----------------------------- | ------------------ |
-| `NULL_REQUIRED_CELL_CHEMBL_ID` | PK is null                    | Source data issue  |
-| `NULL_REQUIRED_CELL_NAME`      | Name is null                  | Incomplete record  |
-| `INVALID_CHEMBL_ID_FORMAT`     | ID doesn't match regex        | API change         |
-| `INVALID_CELLOSAURUS_ID`       | Cellosaurus ID format invalid | Data quality issue |
+| `NULL-REQUIRED-CELL-CHEMBL-ID` | PK is null                    | Source data issue  |
+| `NULL-REQUIRED-CELL-NAME`      | Name is null                  | Incomplete record  |
+| `INVALID-CHEMBL-ID-FORMAT`     | ID doesn't match regex        | API change         |
+| `INVALID-CELLOSAURUS-ID`       | Cellosaurus ID format invalid | Data quality issue |
 
 ### 8.2. Recovery Procedures
 
 | Error Code        | Recovery                        |
 | ----------------- | ------------------------------- |
-| `NULL_REQUIRED_*` | Investigate source, skip record |
-| `INVALID_*`       | Log warning, set field to null  |
+| `NULL-REQUIRED-*` | Investigate source, skip record |
+| `INVALID-*`       | Log warning, set field to null  |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 9. Dependencies
 
@@ -367,90 +367,90 @@ ______________________________________________________________________
 
 | Consumer                       | Impact                   |
 | ------------------------------ | ------------------------ |
-| `chembl_assay`                 | FK reference (cell_id)   |
+| `chembl-assay`                 | FK reference (cell-id)   |
 | Cell line enrichment analytics | Tissue/organism analysis |
 
 ### 9.3. Cross-Provider Mapping
 
 | This Entity Field | Maps To     | Provider    | Field     |
 | ----------------- | ----------- | ----------- | --------- |
-| `cellosaurus_id`  | Cellosaurus | ExPASy      | Accession |
-| `clo_id`          | CLO         | OBO Foundry | ID        |
-| `efo_id`          | EFO         | EMBL-EBI    | ID        |
+| `cellosaurus-id`  | Cellosaurus | ExPASy      | Accession |
+| `clo-id`          | CLO         | OBO Foundry | ID        |
+| `efo-id`          | EFO         | EMBL-EBI    | ID        |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 10. Pipeline Configuration
 
 ```yaml
-# configs/pipelines/chembl/cell_line.yaml
+# configs/pipelines/chembl/cell-line.yaml
 
-pipeline_name: chembl_cell_line
+pipeline-name: chembl-cell-line
 provider: chembl
-entity_type: cell_line
+entity-type: cell-line
 version: "1.2.0"
 description: "Extract cell lines from ChEMBL API"
 
-primary_keys: ["cell_id"]
-silver_table: "chembl_cell_line"
-gold_table: "chembl_cell_line"
+primary-keys: ["cell-id"]
+silver-table: "chembl-cell-line"
+gold-table: "chembl-cell-line"
 
-source_file: ../../sources/chembl.yaml
+source-file: ../../sources/chembl.yaml
 
-gold_filters:
-  required_fields:
-    - cell_name
+gold-filters:
+  required-fields:
+    - cell-name
 
 sink:
   bronze:
     path: "data/output/bronze"
   silver:
     path: "data/output/silver"
-    primary_key: ["cell_id"]
-    partition_by: []
-    sort_by:
-      columns: ["cell_id"]
+    primary-key: ["cell-id"]
+    partition-by: []
+    sort-by:
+      columns: ["cell-id"]
       ascending: true
-    csv_export:
+    csv-export:
       path: "data/output/csv/silver"
   gold:
     path: "data/output/gold"
-    sort_by:
-      columns: ["cell_id", "cell_name"]
+    sort-by:
+      columns: ["cell-id", "cell-name"]
       ascending: true
-    csv_export:
+    csv-export:
       path: "data/output/csv/gold"
 
-input_filter:
+input-filter:
   enabled: true
-  source_path: "data/input/cell.csv"
-  column_name: "cell_id"
-  filter_field: "cell_id"
-  batch_size: 20
+  source-path: "data/input/cell.csv"
+  column-name: "cell-id"
+  filter-field: "cell-id"
+  batch-size: 20
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 11. Testing Requirements
 
 ### 11.1. Unit Tests
 
-- [x] `test_cell_line_normalization.py`
-- [x] `test_cell_line_content_hash.py`
-- [x] `test_cell_line_validation.py`
+- [x] `test-cell-line-normalization.py`
+- [x] `test-cell-line-content-hash.py`
+- [x] `test-cell-line-validation.py`
 
 ### 11.2. Integration Tests (VCR)
 
-- [x] `test_cell_line_api_fetch.py`
-- [x] `test_cell_line_filter_batch.py`
-- [x] `test_cell_line_error_handling.py`
+- [x] `test-cell-line-api-fetch.py`
+- [x] `test-cell-line-filter-batch.py`
+- [x] `test-cell-line-error-handling.py`
 
 ### 11.3. Architecture Tests
 
 - [x] Schema strict mode validation
 - [x] Layer import compliance
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 12. Field Mapping CSV
 

@@ -1,5 +1,5 @@
 > **Superseded:** Signal handlers удалены 2025-12-31.
-> Graceful shutdown обрабатывается в CLI (run.py, run_all.py) и application/core/shutdown.py.
+> Graceful shutdown обрабатывается в CLI (run.py, run-all.py) и application/core/shutdown.py.
 > orchestration/ модуль пуст.
 
 # ADR-008: Graceful Shutdown Strategy
@@ -38,9 +38,9 @@ Key characteristics:
                           ▼
 ┌─────────────────────────────────────────────────────────────┐
 │              Signal Handlers (interfaces layer)              │
-│         setup_shutdown_handlers(shutdown_signal)             │
+│         setup-shutdown-handlers(shutdown-signal)             │
 └─────────────────────────┬───────────────────────────────────┘
-                          │ shutdown_signal.request()
+                          │ shutdown-signal.request()
                           ▼
 ┌─────────────────────────────────────────────────────────────┐
 │               ShutdownSignal (application layer)             │
@@ -84,13 +84,13 @@ This ensures resumability—next run can continue from saved checkpoint.
 
 ```python
 # In executor
-if shutdown_signal.is_requested:
-    await checkpoint_manager.save()
+if shutdown-signal.is-requested:
+    await checkpoint-manager.save()
     return  # Exit before next write
 
 # Lock loss also triggers shutdown
-if not await lock.is_held():
-    shutdown_signal.request()
+if not await lock.is-held():
+    shutdown-signal.request()
 ```
 
 This prevents split-brain scenarios where multiple workers might write conflicting data.
@@ -101,9 +101,9 @@ Multiple shutdown requests (e.g., SIGTERM followed by SIGINT) are handled gracef
 
 ```python
 def request(self) -> None:
-    if not self._requested:  # Only act once
-        self._requested = True
-        self._event.set()
+    if not self.-requested:  # Only act once
+        self.-requested = True
+        self.-event.set()
 ```
 
 ## Implementation Details
@@ -113,32 +113,32 @@ def request(self) -> None:
 ```python
 @dataclass
 class ShutdownSignal:
-    _requested: bool = field(default=False, init=False)
-    _event: asyncio.Event = field(default_factory=asyncio.Event, init=False)
+    -requested: bool = field(default=False, init=False)
+    -event: asyncio.Event = field(default-factory=asyncio.Event, init=False)
 
     @property
-    def is_requested(self) -> bool:
-        return self._requested
+    def is-requested(self) -> bool:
+        return self.-requested
 
     def request(self) -> None:
-        if not self._requested:
-            self._requested = True
-            self._event.set()
+        if not self.-requested:
+            self.-requested = True
+            self.-event.set()
 
     async def wait(self) -> None:
-        await self._event.wait()
+        await self.-event.wait()
 ```
 
 ### Signal Handler Setup
 
 ```python
-def setup_shutdown_handlers(shutdown_signal: ShutdownSignal) -> None:
-    def signal_handler(signum: int, _: Any) -> None:
+def setup-shutdown-handlers(shutdown-signal: ShutdownSignal) -> None:
+    def signal-handler(signum: int, -: Any) -> None:
         logger.warning(f"Received {signal.strsignal(signum)}, initiating shutdown")
-        shutdown_signal.request()
+        shutdown-signal.request()
 
-    signal.signal(signal.SIGTERM, signal_handler)
-    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal-handler)
+    signal.signal(signal.SIGINT, signal-handler)
 ```
 
 ### Integration Points
@@ -146,15 +146,15 @@ def setup_shutdown_handlers(shutdown_signal: ShutdownSignal) -> None:
 ```python
 # Executor checks before each batch
 async def execute(self, watermark, limit):
-    for batch in self.fetch_batches():
-        if self.shutdown_signal.is_requested:
-            await self.save_checkpoint()
+    for batch in self.fetch-batches():
+        if self.shutdown-signal.is-requested:
+            await self.save-checkpoint()
             break
-        await self.process_batch(batch)
+        await self.process-batch(batch)
 
 
 # Runner passes signal to all components
-runner = PipelineRunner(shutdown_signal=shutdown_signal, executor=executor, ...)
+runner = PipelineRunner(shutdown-signal=shutdown-signal, executor=executor, ...)
 ```
 
 ## Alternatives Considered

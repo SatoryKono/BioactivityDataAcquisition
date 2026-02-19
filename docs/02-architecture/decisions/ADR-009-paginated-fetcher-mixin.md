@@ -21,11 +21,11 @@ We have implemented **`PaginatedFetcherMixin`** in `infrastructure/adapters/http
 
 ```python
 class PaginatedFetcherMixin:
-    async def paginated_fetch(
+    async def paginated-fetch(
         self,
-        fetch_func: Callable[[cursor, fetched], Awaitable[tuple[list[T], cursor]]],
+        fetch-func: Callable[[cursor, fetched], Awaitable[tuple[list[T], cursor]]],
         limit: int | None = None,
-        initial_cursor: Any | None = None,
+        initial-cursor: Any | None = None,
     ) -> AsyncIterator[T]:
         ...
 ```
@@ -33,14 +33,14 @@ class PaginatedFetcherMixin:
 ### Fetch Function Contract
 
 ```python
-async def fetch_page(cursor: Any | None, fetched: int) -> tuple[list[T], Any | None]:
+async def fetch-page(cursor: Any | None, fetched: int) -> tuple[list[T], Any | None]:
     """
     Args:
         cursor: Current position (offset, page token, etc.)
         fetched: Items already yielded (for adaptive page sizing)
 
     Returns:
-        (items, next_cursor) - next_cursor is None when no more pages
+        (items, next-cursor) - next-cursor is None when no more pages
     """
 ```
 
@@ -54,7 +54,7 @@ Before (duplicated in each adapter):
 async def fetch(self, watermark, limit):
     offset = 0
     while True:
-        items = await self._fetch_page(offset)
+        items = await self.-fetch-page(offset)
         if not items:
             break
         for item in items:
@@ -67,7 +67,7 @@ async def fetch(self, watermark, limit):
 async def fetch(self, watermark, limit):
     cursor = None
     while True:
-        items, cursor = await self._fetch_page(cursor)
+        items, cursor = await self.-fetch-page(cursor)
         # ... same loop logic
 ```
 
@@ -75,7 +75,7 @@ After (shared loop logic):
 ```python
 class ChEMBLAdapter(PaginatedFetcherMixin):
     async def fetch(self, watermark, limit):
-        async for item in self.paginated_fetch(self._fetch_page, limit):
+        async for item in self.paginated-fetch(self.-fetch-page, limit):
             yield item
 ```
 
@@ -84,7 +84,7 @@ class ChEMBLAdapter(PaginatedFetcherMixin):
 The mixin guarantees exact limit enforcement across page boundaries:
 
 ```python
-# If limit=100 and page_size=30:
+# If limit=100 and page-size=30:
 # Page 1: items 1-30 (30 yielded)
 # Page 2: items 31-60 (60 yielded)
 # Page 3: items 61-90 (90 yielded)
@@ -98,10 +98,10 @@ Without the mixin, adapters might fetch full pages past the limit, wasting API c
 The `fetched` parameter enables adapters to adjust page size:
 
 ```python
-async def _fetch_page(self, cursor, fetched):
-    remaining = self.total_limit - fetched if self.total_limit else None
-    page_size = min(self.default_page_size, remaining or self.default_page_size)
-    return await self._api_call(page_size=page_size, cursor=cursor)
+async def -fetch-page(self, cursor, fetched):
+    remaining = self.total-limit - fetched if self.total-limit else None
+    page-size = min(self.default-page-size, remaining or self.default-page-size)
+    return await self.-api-call(page-size=page-size, cursor=cursor)
 ```
 
 ### 4. Generator-Based Memory Efficiency
@@ -115,9 +115,9 @@ Using `AsyncIterator` instead of collecting all items:
 
 ```python
 class PageFetcher(Protocol[T]):
-    """Protocol for fetch functions compatible with paginated_fetch."""
+    """Protocol for fetch functions compatible with paginated-fetch."""
 
-    async def __call__(
+    async def --call--(
         self, cursor: Any | None, fetched: int
     ) -> tuple[list[T], Any | None]:
         ...
@@ -143,7 +143,7 @@ The mixin is agnostic to cursor type—it just passes through.
 ```python
 class PaginatedAdapter(ABC):
     @abstractmethod
-    async def fetch_page(self, cursor) -> tuple[list, Any]: ...
+    async def fetch-page(self, cursor) -> tuple[list, Any]: ...
 ```
 
 Rejected because:
@@ -154,9 +154,9 @@ Rejected because:
 ### 2. Decorator Pattern
 
 ```python
-@paginated(limit_param="limit")
+@paginated(limit-param="limit")
 async def fetch(self, watermark, limit):
-    return await self._fetch_page(...)
+    return await self.-fetch-page(...)
 ```
 
 Rejected because:
@@ -167,12 +167,12 @@ Rejected because:
 ### 3. Utility Function (not mixin)
 
 ```python
-async def paginated_fetch(fetcher, fetch_func, limit):
+async def paginated-fetch(fetcher, fetch-func, limit):
     ...
 ```
 
 Considered but mixin preferred because:
-- Cleaner API for adapters (`self.paginated_fetch(...)`)
+- Cleaner API for adapters (`self.paginated-fetch(...)`)
 - Can access adapter state if needed
 - More idiomatic for class-based adapters
 
@@ -183,7 +183,7 @@ Considered but mixin preferred because:
 - Consistent limit enforcement
 - Type-safe via Protocol
 - Memory-efficient streaming
-- Easy to test (mock fetch_func)
+- Easy to test (mock fetch-func)
 
 ### Negative
 - **Mixin complexity**: Mixins can make class hierarchies harder to understand. Mitigated by simple, focused interface.
@@ -198,16 +198,16 @@ class ChEMBLActivityAdapter(PaginatedFetcherMixin):
     async def fetch(
         self, watermark: Watermark | None, limit: int | None
     ) -> AsyncIterator[dict]:
-        async def fetch_page(offset: int | None, fetched: int):
+        async def fetch-page(offset: int | None, fetched: int):
             page = await self.client.get(
                 "/activity",
-                params={"offset": offset or 0, "limit": self.page_size}
+                params={"offset": offset or 0, "limit": self.page-size}
             )
             items = page.json()["activities"]
-            next_offset = (offset or 0) + len(items) if items else None
-            return items, next_offset
+            next-offset = (offset or 0) + len(items) if items else None
+            return items, next-offset
 
-        async for item in self.paginated_fetch(fetch_page, limit=limit):
+        async for item in self.paginated-fetch(fetch-page, limit=limit):
             yield item
 ```
 

@@ -1,6 +1,6 @@
 # Project Structure
 
-Generated: E:\google_drive\05_AI\github\BioactivityDataAcquisition2
+Generated: E:\google-drive\05-AI\github\BioactivityDataAcquisition2
 
 ```
 BioactivityDataAcquisition2/
@@ -16,7 +16,7 @@ BioactivityDataAcquisition2/
     │   │   │   └── 04-naming-compliance-audit-prompt.md
     │   │   ├── 01-documentation-update-prompt.md
     │   │   └── 03-repository-cleanup-assistant.md
-    │   ├── PROJECT_CONTEXT.md
+    │   ├── PROJECT-CONTEXT.md
     │   └── settings.local.json
     ├── .codex/
     │   └── config.toml
@@ -3642,7 +3642,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp03e9ifkr
     │   │   ├── tmp0527utsn
     │   │   ├── tmp06s50iwd
-    │   │   ├── tmp0_hx3wfn
+    │   │   ├── tmp0-hx3wfn
     │   │   ├── tmp0clhlmh9
     │   │   ├── tmp0colykgp
     │   │   ├── tmp0d8lk3wj
@@ -3650,11 +3650,11 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp0dvmo9o1
     │   │   ├── tmp0fxekn95
     │   │   ├── tmp0fxizo9m
-    │   │   ├── tmp0g0mn15_
+    │   │   ├── tmp0g0mn15-
     │   │   ├── tmp0hm4l07h
-    │   │   ├── tmp0hzyfv2_
+    │   │   ├── tmp0hzyfv2-
     │   │   ├── tmp0i5qilw4
-    │   │   ├── tmp0j6b_e_2
+    │   │   ├── tmp0j6b-e-2
     │   │   ├── tmp0libf48r
     │   │   ├── tmp0lpe90kn
     │   │   ├── tmp0lyi7skh
@@ -3666,7 +3666,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp0sn192hz
     │   │   ├── tmp0u6mfusr
     │   │   ├── tmp0x1acg9a
-    │   │   ├── tmp0x_h_z2p
+    │   │   ├── tmp0x-h-z2p
     │   │   ├── tmp0xllsdoc
     │   │   ├── tmp0ygusfwh
     │   │   ├── tmp0z4q52eb
@@ -3683,14 +3683,14 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp1777lidl
     │   │   ├── tmp177eccym
     │   │   ├── tmp19oi4l0v
-    │   │   ├── tmp1_sigsj8
+    │   │   ├── tmp1-sigsj8
     │   │   ├── tmp1ag9wljf
     │   │   ├── tmp1awh5f63
     │   │   ├── tmp1beiknt3
     │   │   ├── tmp1de0ou4u
-    │   │   ├── tmp1dh_owpc
+    │   │   ├── tmp1dh-owpc
     │   │   ├── tmp1dz4p18r
-    │   │   ├── tmp1f_loax6
+    │   │   ├── tmp1f-loax6
     │   │   ├── tmp1fpq3x4e
     │   │   ├── tmp1hr4m9v2
     │   │   ├── tmp1iqpslsj
@@ -3699,11 +3699,11 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp1oco0a2q
     │   │   ├── tmp1od1ejrh
     │   │   ├── tmp1q3j038t
-    │   │   ├── tmp1q_uv1vw
+    │   │   ├── tmp1q-uv1vw
     │   │   ├── tmp1qbm6g6f
     │   │   ├── tmp1qcckfx9
     │   │   ├── tmp1r39cejl
-    │   │   ├── tmp1r6_zlkp
+    │   │   ├── tmp1r6-zlkp
     │   │   ├── tmp1umsvdgo
     │   │   ├── tmp1wdf16s0
     │   │   ├── tmp1wovz44p
@@ -3711,21 +3711,21 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp1y7dqda3
     │   │   ├── tmp1y9le42b
     │   │   ├── tmp1ydze5op
-    │   │   ├── tmp1zprt_5u
+    │   │   ├── tmp1zprt-5u
     │   │   ├── tmp246up24g
     │   │   ├── tmp25m540f3
     │   │   ├── tmp25qryi5z
     │   │   ├── tmp280nw9oa
     │   │   ├── tmp29l0gs7a
     │   │   ├── tmp29zig8de
-    │   │   ├── tmp2_o3aezf
-    │   │   ├── tmp2_yu_4r8
+    │   │   ├── tmp2-o3aezf
+    │   │   ├── tmp2-yu-4r8
     │   │   ├── tmp2amkjr17
     │   │   ├── tmp2atokv4k
     │   │   ├── tmp2brpff73
     │   │   ├── tmp2cpyomg8
     │   │   ├── tmp2daniblq
-    │   │   ├── tmp2duri_o5
+    │   │   ├── tmp2duri-o5
     │   │   ├── tmp2e1zqgqy
     │   │   ├── tmp2eadst8g
     │   │   ├── tmp2gd5ud7a
@@ -3738,7 +3738,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp2lsbj13o
     │   │   ├── tmp2mcqxlb1
     │   │   ├── tmp2nw0eqnl
-    │   │   ├── tmp2pm__frd
+    │   │   ├── tmp2pm--frd
     │   │   ├── tmp2pzg72mc
     │   │   ├── tmp2ssqoxoa
     │   │   ├── tmp2vy9oibv
@@ -3750,7 +3750,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp31aehrvf
     │   │   ├── tmp31cyc2ss
     │   │   ├── tmp328ins43
-    │   │   ├── tmp32_5ie5e
+    │   │   ├── tmp32-5ie5e
     │   │   ├── tmp32d0jjkf
     │   │   ├── tmp335driws
     │   │   ├── tmp337knhfs
@@ -3758,12 +3758,12 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp36ipoaht
     │   │   ├── tmp386p3k38
     │   │   ├── tmp39gm41gf
-    │   │   ├── tmp3_71utp7
-    │   │   ├── tmp3_ap8gin
+    │   │   ├── tmp3-71utp7
+    │   │   ├── tmp3-ap8gin
     │   │   ├── tmp3bfdf2j0
     │   │   ├── tmp3bkj7xgi
     │   │   ├── tmp3dga99fq
-    │   │   ├── tmp3einy4_x
+    │   │   ├── tmp3einy4-x
     │   │   ├── tmp3f8z5fy2
     │   │   ├── tmp3fieqe5m
     │   │   ├── tmp3ipo8hp3
@@ -3780,18 +3780,18 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp3pqc7cuo
     │   │   ├── tmp3qr10k8o
     │   │   ├── tmp3ri3alwa
-    │   │   ├── tmp3shq1s_t
+    │   │   ├── tmp3shq1s-t
     │   │   ├── tmp3srt8sjs
     │   │   ├── tmp3u3j70lt
     │   │   ├── tmp3uemko3g
     │   │   ├── tmp3uqn8066
     │   │   ├── tmp3usn7ghy
     │   │   ├── tmp3vt5zkdn
-    │   │   ├── tmp3y0m_ol9
+    │   │   ├── tmp3y0m-ol9
     │   │   ├── tmp3z23bngu
     │   │   ├── tmp3zujr8fz
     │   │   ├── tmp41onxfwy
-    │   │   ├── tmp41z06e_1
+    │   │   ├── tmp41z06e-1
     │   │   ├── tmp42i1n0i5
     │   │   ├── tmp437fu0yy
     │   │   ├── tmp44c2x1x4
@@ -3800,23 +3800,23 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp45b54297
     │   │   ├── tmp463ojyeh
     │   │   ├── tmp46azwl40
-    │   │   ├── tmp487d_m6t
+    │   │   ├── tmp487d-m6t
     │   │   ├── tmp49rasy69
-    │   │   ├── tmp4_s1ekxs
+    │   │   ├── tmp4-s1ekxs
     │   │   ├── tmp4a95fgjs
     │   │   ├── tmp4bcv8369
     │   │   ├── tmp4cb18m6p
     │   │   ├── tmp4cwpvyth
-    │   │   ├── tmp4f_pfs5p
+    │   │   ├── tmp4f-pfs5p
     │   │   ├── tmp4hp6zrih
     │   │   ├── tmp4iefdamt
     │   │   ├── tmp4igf8jf0
     │   │   ├── tmp4jl5m9oh
-    │   │   ├── tmp4l29qbq_
-    │   │   ├── tmp4lcs8x_x
+    │   │   ├── tmp4l29qbq-
+    │   │   ├── tmp4lcs8x-x
     │   │   ├── tmp4lgxn2x2
     │   │   ├── tmp4lur45c8
-    │   │   ├── tmp4px_lm5f
+    │   │   ├── tmp4px-lm5f
     │   │   ├── tmp4q5pt478
     │   │   ├── tmp4rdjhz0e
     │   │   ├── tmp4s6fbzyl
@@ -3833,7 +3833,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp4xtvmywk
     │   │   ├── tmp4ydyz01p
     │   │   ├── tmp4zx2sbdn
-    │   │   ├── tmp51hp_16i
+    │   │   ├── tmp51hp-16i
     │   │   ├── tmp51mhtnzr
     │   │   ├── tmp5214ki8g
     │   │   ├── tmp52j4qq5g
@@ -3844,20 +3844,20 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp58k8ov9s
     │   │   ├── tmp59c1tbl8
     │   │   ├── tmp59tosuzk
-    │   │   ├── tmp5_p08s0y
+    │   │   ├── tmp5-p08s0y
     │   │   ├── tmp5brersnj
     │   │   ├── tmp5cap6l6y
-    │   │   ├── tmp5d_u22rm
+    │   │   ├── tmp5d-u22rm
     │   │   ├── tmp5fm1s9o1
     │   │   ├── tmp5h7wza7q
     │   │   ├── tmp5hgcu6w0
     │   │   ├── tmp5ingwpya
     │   │   ├── tmp5l09q8pp
-    │   │   ├── tmp5l5o_svo
+    │   │   ├── tmp5l5o-svo
     │   │   ├── tmp5mkokoat
     │   │   ├── tmp5o1tidvb
-    │   │   ├── tmp5o_pmfny
-    │   │   ├── tmp5ofy_u5v
+    │   │   ├── tmp5o-pmfny
+    │   │   ├── tmp5ofy-u5v
     │   │   ├── tmp5oi8hvyg
     │   │   ├── tmp5ptl22as
     │   │   ├── tmp5s77u4r0
@@ -3872,29 +3872,29 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp5yrqvzsu
     │   │   ├── tmp60siqnna
     │   │   ├── tmp611hxvw9
-    │   │   ├── tmp617h6_lx
-    │   │   ├── tmp62ofx1l_
+    │   │   ├── tmp617h6-lx
+    │   │   ├── tmp62ofx1l-
     │   │   ├── tmp62vinw8s
-    │   │   ├── tmp63k6fl_g
+    │   │   ├── tmp63k6fl-g
     │   │   ├── tmp645lvopt
     │   │   ├── tmp652p13uv
     │   │   ├── tmp65yedaj0
     │   │   ├── tmp678erj7a
     │   │   ├── tmp68vvdtal
-    │   │   ├── tmp6_kgum18
-    │   │   ├── tmp6_x_ehsu
-    │   │   ├── tmp6apvupj_
-    │   │   ├── tmp6bt_v129
+    │   │   ├── tmp6-kgum18
+    │   │   ├── tmp6-x-ehsu
+    │   │   ├── tmp6apvupj-
+    │   │   ├── tmp6bt-v129
     │   │   ├── tmp6cmsd11a
-    │   │   ├── tmp6d89k2_t
+    │   │   ├── tmp6d89k2-t
     │   │   ├── tmp6daze8sl
     │   │   ├── tmp6fqvdd1r
     │   │   ├── tmp6ggs7tej
     │   │   ├── tmp6ghgojlr
     │   │   ├── tmp6hopsg4l
     │   │   ├── tmp6j2hxw34
-    │   │   ├── tmp6lnvmq_r
-    │   │   ├── tmp6mbuc_bk
+    │   │   ├── tmp6lnvmq-r
+    │   │   ├── tmp6mbuc-bk
     │   │   ├── tmp6n8jh4sr
     │   │   ├── tmp6pau3bsx
     │   │   ├── tmp6pg6nnxn
@@ -3909,12 +3909,12 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp6zrjgser
     │   │   ├── tmp71iqbnaf
     │   │   ├── tmp72gklrc4
-    │   │   ├── tmp736vlsz_
-    │   │   ├── tmp73a1_1qf
+    │   │   ├── tmp736vlsz-
+    │   │   ├── tmp73a1-1qf
     │   │   ├── tmp73fdpzul
     │   │   ├── tmp77ekbm2u
     │   │   ├── tmp79cbg51k
-    │   │   ├── tmp7a2x175_
+    │   │   ├── tmp7a2x175-
     │   │   ├── tmp7b96o6ge
     │   │   ├── tmp7cg0nu7e
     │   │   ├── tmp7ctbrvwa
@@ -3925,7 +3925,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp7pemwyao
     │   │   ├── tmp7r7a02o4
     │   │   ├── tmp7sq1804i
-    │   │   ├── tmp7va2_ajl
+    │   │   ├── tmp7va2-ajl
     │   │   ├── tmp7vpew1np
     │   │   ├── tmp7vrs3etz
     │   │   ├── tmp7w8e1tmr
@@ -3940,13 +3940,13 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp86tm8b9f
     │   │   ├── tmp872rmu4s
     │   │   ├── tmp89nq70f7
-    │   │   ├── tmp8_laowjq
-    │   │   ├── tmp8_t0dy65
+    │   │   ├── tmp8-laowjq
+    │   │   ├── tmp8-t0dy65
     │   │   ├── tmp8c6pk7qw
     │   │   ├── tmp8d8cp7ls
     │   │   ├── tmp8damlyx9
     │   │   ├── tmp8dgz5kdj
-    │   │   ├── tmp8elr_6y8
+    │   │   ├── tmp8elr-6y8
     │   │   ├── tmp8f18tbtk
     │   │   ├── tmp8idkub2f
     │   │   ├── tmp8k2v0lw3
@@ -3957,10 +3957,10 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp8sgn732v
     │   │   ├── tmp8sl9m38d
     │   │   ├── tmp8vvtwkp6
-    │   │   ├── tmp8xb_l51i
+    │   │   ├── tmp8xb-l51i
     │   │   ├── tmp8xsnd3o2
     │   │   ├── tmp8y47ramq
-    │   │   ├── tmp8yhx_qj7
+    │   │   ├── tmp8yhx-qj7
     │   │   ├── tmp8z9ett28
     │   │   ├── tmp907o7hqc
     │   │   ├── tmp90un5xip
@@ -3978,7 +3978,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp99k9fkd7
     │   │   ├── tmp9a2iokzd
     │   │   ├── tmp9ag8b4rn
-    │   │   ├── tmp9bvn_uql
+    │   │   ├── tmp9bvn-uql
     │   │   ├── tmp9cp8jxfo
     │   │   ├── tmp9cv63ywq
     │   │   ├── tmp9da3cxw9
@@ -3986,14 +3986,14 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp9fmc188n
     │   │   ├── tmp9glhvcct
     │   │   ├── tmp9goq0fl8
-    │   │   ├── tmp9h_6vm8o
+    │   │   ├── tmp9h-6vm8o
     │   │   ├── tmp9htnqqyy
     │   │   ├── tmp9i960l97
     │   │   ├── tmp9ibuq3pn
     │   │   ├── tmp9iehqcgr
     │   │   ├── tmp9iq2inn4
     │   │   ├── tmp9jlt7kgh
-    │   │   ├── tmp9k5639r_
+    │   │   ├── tmp9k5639r-
     │   │   ├── tmp9lig3zyl
     │   │   ├── tmp9ll7qtsa
     │   │   ├── tmp9pu5okqp
@@ -4002,70 +4002,70 @@ BioactivityDataAcquisition2/
     │   │   ├── tmp9utnkkt3
     │   │   ├── tmp9y6sjb68
     │   │   ├── tmp9yhlrvzq
-    │   │   ├── tmp_07xi8kb
-    │   │   ├── tmp_2g2dbuz
-    │   │   ├── tmp_3whq_bj
-    │   │   ├── tmp_4kz_98b
-    │   │   ├── tmp_58h789p
-    │   │   ├── tmp_6221lk9
-    │   │   ├── tmp_6cix7or
-    │   │   ├── tmp_73f43v6
-    │   │   ├── tmp_7fcp75s
-    │   │   ├── tmp_7nmz_zi
-    │   │   ├── tmp_9q9pyts
-    │   │   ├── tmp_9x6m149
-    │   │   ├── tmp__1xn6l3
-    │   │   ├── tmp_a1smyn1
-    │   │   ├── tmp_aoa56wa
-    │   │   ├── tmp_bjf2og0
-    │   │   ├── tmp_bjslasi
-    │   │   ├── tmp_cdmiqh6
-    │   │   ├── tmp_ckgibpf
-    │   │   ├── tmp_fpr7214
-    │   │   ├── tmp_fpt2kb8
-    │   │   ├── tmp_i0oayb3
-    │   │   ├── tmp_ipsvfg8
-    │   │   ├── tmp_kif_nbx
-    │   │   ├── tmp_l4n50mj
-    │   │   ├── tmp_n2c341x
-    │   │   ├── tmp_of6c5nf
-    │   │   ├── tmp_q7k19db
-    │   │   ├── tmp_qc8m8d9
-    │   │   ├── tmp_qca_u4t
-    │   │   ├── tmp_rbzljwo
-    │   │   ├── tmp_tsu5mhy
-    │   │   ├── tmp_u1j_eti
-    │   │   ├── tmp_u5k99fy
-    │   │   ├── tmp_urtd0nf
-    │   │   ├── tmp_uz0y7f1
-    │   │   ├── tmp_wc3d18x
-    │   │   ├── tmp_xldcdov
-    │   │   ├── tmp_ygobtd9
-    │   │   ├── tmp_zep9em3
+    │   │   ├── tmp-07xi8kb
+    │   │   ├── tmp-2g2dbuz
+    │   │   ├── tmp-3whq-bj
+    │   │   ├── tmp-4kz-98b
+    │   │   ├── tmp-58h789p
+    │   │   ├── tmp-6221lk9
+    │   │   ├── tmp-6cix7or
+    │   │   ├── tmp-73f43v6
+    │   │   ├── tmp-7fcp75s
+    │   │   ├── tmp-7nmz-zi
+    │   │   ├── tmp-9q9pyts
+    │   │   ├── tmp-9x6m149
+    │   │   ├── tmp--1xn6l3
+    │   │   ├── tmp-a1smyn1
+    │   │   ├── tmp-aoa56wa
+    │   │   ├── tmp-bjf2og0
+    │   │   ├── tmp-bjslasi
+    │   │   ├── tmp-cdmiqh6
+    │   │   ├── tmp-ckgibpf
+    │   │   ├── tmp-fpr7214
+    │   │   ├── tmp-fpt2kb8
+    │   │   ├── tmp-i0oayb3
+    │   │   ├── tmp-ipsvfg8
+    │   │   ├── tmp-kif-nbx
+    │   │   ├── tmp-l4n50mj
+    │   │   ├── tmp-n2c341x
+    │   │   ├── tmp-of6c5nf
+    │   │   ├── tmp-q7k19db
+    │   │   ├── tmp-qc8m8d9
+    │   │   ├── tmp-qca-u4t
+    │   │   ├── tmp-rbzljwo
+    │   │   ├── tmp-tsu5mhy
+    │   │   ├── tmp-u1j-eti
+    │   │   ├── tmp-u5k99fy
+    │   │   ├── tmp-urtd0nf
+    │   │   ├── tmp-uz0y7f1
+    │   │   ├── tmp-wc3d18x
+    │   │   ├── tmp-xldcdov
+    │   │   ├── tmp-ygobtd9
+    │   │   ├── tmp-zep9em3
     │   │   ├── tmpa52zum12
     │   │   ├── tmpa5wz7q2k
     │   │   ├── tmpa78ssg1u
     │   │   ├── tmpa7tg0pr6
-    │   │   ├── tmpa_lq4xeu
-    │   │   ├── tmpa_lw7lg_
-    │   │   ├── tmpaao3o8s_
+    │   │   ├── tmpa-lq4xeu
+    │   │   ├── tmpa-lw7lg-
+    │   │   ├── tmpaao3o8s-
     │   │   ├── tmpaar43f71
     │   │   ├── tmpab47d7rz
     │   │   ├── tmpabewjfjy
-    │   │   ├── tmpabg5c_uz
+    │   │   ├── tmpabg5c-uz
     │   │   ├── tmpad22p496
     │   │   ├── tmpadzj8ahu
     │   │   ├── tmpafpkywk2
-    │   │   ├── tmpag_fjcx_
+    │   │   ├── tmpag-fjcx-
     │   │   ├── tmpagma0o5e
     │   │   ├── tmpaikw2r9v
     │   │   ├── tmpaisbkhky
     │   │   ├── tmpajfi9lnh
     │   │   ├── tmpamg0w0ig
     │   │   ├── tmpaotbjqvw
-    │   │   ├── tmpap4_g8u_
-    │   │   ├── tmpapk_z54j
-    │   │   ├── tmpapm_7x5m
+    │   │   ├── tmpap4-g8u-
+    │   │   ├── tmpapk-z54j
+    │   │   ├── tmpapm-7x5m
     │   │   ├── tmpaqfmovfr
     │   │   ├── tmpaqr5ijqs
     │   │   ├── tmpasejtj5r
@@ -4076,15 +4076,15 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpaz0i84sb
     │   │   ├── tmpb03in371
     │   │   ├── tmpb1nh877e
-    │   │   ├── tmpb28f_0zj
+    │   │   ├── tmpb28f-0zj
     │   │   ├── tmpb2dg4mnq
     │   │   ├── tmpb40nbyrj
     │   │   ├── tmpb4pjrpcu
     │   │   ├── tmpb5bl3m8z
     │   │   ├── tmpb5ff2in2
-    │   │   ├── tmpb6v6cy5_
+    │   │   ├── tmpb6v6cy5-
     │   │   ├── tmpb7jc06ea
-    │   │   ├── tmpb7l17z_i
+    │   │   ├── tmpb7l17z-i
     │   │   ├── tmpb7latai7
     │   │   ├── tmpb8jncw0v
     │   │   ├── tmpbb3ouxox
@@ -4095,7 +4095,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpbgaa5klz
     │   │   ├── tmpbh3ndh0x
     │   │   ├── tmpbh5ys3fn
-    │   │   ├── tmpbj7dqhy_
+    │   │   ├── tmpbj7dqhy-
     │   │   ├── tmpbjd62ai8
     │   │   ├── tmpbjrufepk
     │   │   ├── tmpbk4v0a3q
@@ -4122,16 +4122,16 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpc34numsm
     │   │   ├── tmpc494egmi
     │   │   ├── tmpc5z39jo1
-    │   │   ├── tmpc7_q0q97
+    │   │   ├── tmpc7-q0q97
     │   │   ├── tmpc82piv0x
-    │   │   ├── tmpc83ezf3_
+    │   │   ├── tmpc83ezf3-
     │   │   ├── tmpc8mkepr6
-    │   │   ├── tmpc8ok60w_
-    │   │   ├── tmpc9a_tnkz
+    │   │   ├── tmpc8ok60w-
+    │   │   ├── tmpc9a-tnkz
     │   │   ├── tmpc9z4f5us
-    │   │   ├── tmpc_4c_up1
-    │   │   ├── tmpc_ao9s61
-    │   │   ├── tmpc_y9b4zv
+    │   │   ├── tmpc-4c-up1
+    │   │   ├── tmpc-ao9s61
+    │   │   ├── tmpc-y9b4zv
     │   │   ├── tmpcalm57so
     │   │   ├── tmpcbkcmiqk
     │   │   ├── tmpcbznp0fp
@@ -4150,19 +4150,19 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpcpqcb69c
     │   │   ├── tmpct3fls6m
     │   │   ├── tmpct3i3kvd
-    │   │   ├── tmpct9_t0si
+    │   │   ├── tmpct9-t0si
     │   │   ├── tmpcuir0spl
     │   │   ├── tmpcvx2ui8q
     │   │   ├── tmpcw9ziv3e
     │   │   ├── tmpcwkt03j4
     │   │   ├── tmpcxzsbecn
-    │   │   ├── tmpcycuxe_s
+    │   │   ├── tmpcycuxe-s
     │   │   ├── tmpcyrjjuj0
-    │   │   ├── tmpczv_mcvx
+    │   │   ├── tmpczv-mcvx
     │   │   ├── tmpd046jtom
     │   │   ├── tmpd0u5yvrm
     │   │   ├── tmpd1gfb1gc
-    │   │   ├── tmpd1r73u0_
+    │   │   ├── tmpd1r73u0-
     │   │   ├── tmpd24v2sc0
     │   │   ├── tmpd2itq2x9
     │   │   ├── tmpd3829xkl
@@ -4173,10 +4173,10 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpd80j6e8h
     │   │   ├── tmpd9mv7m09
     │   │   ├── tmpd9o5c18m
-    │   │   ├── tmpd__7qxp7
-    │   │   ├── tmpd_m0mxy1
+    │   │   ├── tmpd--7qxp7
+    │   │   ├── tmpd-m0mxy1
     │   │   ├── tmpda5ku9z1
-    │   │   ├── tmpdc9v_jtc
+    │   │   ├── tmpdc9v-jtc
     │   │   ├── tmpdcd612k9
     │   │   ├── tmpdcdkcytn
     │   │   ├── tmpdcl7jo44
@@ -4191,7 +4191,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpdk5i844t
     │   │   ├── tmpdkfs6081
     │   │   ├── tmpdklj74va
-    │   │   ├── tmpdl5_fwa8
+    │   │   ├── tmpdl5-fwa8
     │   │   ├── tmpdpkufhw5
     │   │   ├── tmpdpsqsbkv
     │   │   ├── tmpdpw77u6d
@@ -4209,23 +4209,23 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpe6sw85dw
     │   │   ├── tmpe7f0b2cc
     │   │   ├── tmpe9t7z6jr
-    │   │   ├── tmpe_6kyntd
+    │   │   ├── tmpe-6kyntd
     │   │   ├── tmpebupm55g
     │   │   ├── tmpec5i8pls
-    │   │   ├── tmpec_d88ys
+    │   │   ├── tmpec-d88ys
     │   │   ├── tmpechb2cwq
     │   │   ├── tmpecm0xl4t
     │   │   ├── tmpee9sxhbl
     │   │   ├── tmpej3tzpat
     │   │   ├── tmpejfd481m
     │   │   ├── tmpejpu3eoc
-    │   │   ├── tmpelzv_7qc
+    │   │   ├── tmpelzv-7qc
     │   │   ├── tmpemxf2bpv
-    │   │   ├── tmpen39lc_g
-    │   │   ├── tmpenl5_l5x
+    │   │   ├── tmpen39lc-g
+    │   │   ├── tmpenl5-l5x
     │   │   ├── tmpeod2rm6l
     │   │   ├── tmpeqc6bx5d
-    │   │   ├── tmpeqc_inmy
+    │   │   ├── tmpeqc-inmy
     │   │   ├── tmpeqkf2ywe
     │   │   ├── tmper61t4hd
     │   │   ├── tmpew5y7rmc
@@ -4236,16 +4236,16 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpf284hznt
     │   │   ├── tmpf29veaoz
     │   │   ├── tmpf2zpz9xu
-    │   │   ├── tmpf4b_koru
+    │   │   ├── tmpf4b-koru
     │   │   ├── tmpf5114ake
     │   │   ├── tmpf65soa4m
     │   │   ├── tmpf7xmn5gd
     │   │   ├── tmpf84pv52c
     │   │   ├── tmpf8dszjf7
     │   │   ├── tmpf9gcfxmg
-    │   │   ├── tmpf_2sl2pc
-    │   │   ├── tmpf_4qjs9b
-    │   │   ├── tmpfb71t38_
+    │   │   ├── tmpf-2sl2pc
+    │   │   ├── tmpf-4qjs9b
+    │   │   ├── tmpfb71t38-
     │   │   ├── tmpfb9vurdr
     │   │   ├── tmpfbbae1r7
     │   │   ├── tmpfchg75gq
@@ -4253,9 +4253,9 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpfen7ze3t
     │   │   ├── tmpffvmtman
     │   │   ├── tmpfg0baj7o
-    │   │   ├── tmpfg_k9bsu
-    │   │   ├── tmpfgs_jx_g
-    │   │   ├── tmpfi_3u0vq
+    │   │   ├── tmpfg-k9bsu
+    │   │   ├── tmpfgs-jx-g
+    │   │   ├── tmpfi-3u0vq
     │   │   ├── tmpfl1p3np3
     │   │   ├── tmpfmgwhi1v
     │   │   ├── tmpfnb78kwy
@@ -4266,7 +4266,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpfoq7jxxy
     │   │   ├── tmpfoum1io8
     │   │   ├── tmpfwps8u3e
-    │   │   ├── tmpfwwn_x8f
+    │   │   ├── tmpfwwn-x8f
     │   │   ├── tmpg07xqh9y
     │   │   ├── tmpg0tdcp3g
     │   │   ├── tmpg1n1q210
@@ -4279,40 +4279,40 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpg6aw9axe
     │   │   ├── tmpg6c5vfag
     │   │   ├── tmpg6jh2wmy
-    │   │   ├── tmpg6y_ak06
+    │   │   ├── tmpg6y-ak06
     │   │   ├── tmpg89r4byi
     │   │   ├── tmpga3rzohj
     │   │   ├── tmpgas1u5uf
-    │   │   ├── tmpgat_2m9m
-    │   │   ├── tmpgb6c_m8y
+    │   │   ├── tmpgat-2m9m
+    │   │   ├── tmpgb6c-m8y
     │   │   ├── tmpgbdr6b8x
     │   │   ├── tmpgc9oa8gk
     │   │   ├── tmpgcvynq3s
-    │   │   ├── tmpge5il9_a
+    │   │   ├── tmpge5il9-a
     │   │   ├── tmpgf8d903c
     │   │   ├── tmpgfrbfz8d
     │   │   ├── tmpgfzhrz0m
     │   │   ├── tmpgg3pzef0
     │   │   ├── tmpgg4l0lka
-    │   │   ├── tmpggric_2f
+    │   │   ├── tmpggric-2f
     │   │   ├── tmpghdlgiza
     │   │   ├── tmpghp9fva8
     │   │   ├── tmpgioay3vf
-    │   │   ├── tmpgivfuxa_
-    │   │   ├── tmpgj_gjpog
+    │   │   ├── tmpgivfuxa-
+    │   │   ├── tmpgj-gjpog
     │   │   ├── tmpgjykfu73
     │   │   ├── tmpgmv3jat8
     │   │   ├── tmpgo9melhj
     │   │   ├── tmpgp99pfsx
     │   │   ├── tmpgq4ynylw
     │   │   ├── tmpgqki1rxv
-    │   │   ├── tmpgr2vq__a
+    │   │   ├── tmpgr2vq--a
     │   │   ├── tmpgr55o1q7
     │   │   ├── tmpgrzx9wnk
     │   │   ├── tmpgui4ixs8
     │   │   ├── tmpguj351xn
     │   │   ├── tmpguz5z964
-    │   │   ├── tmpgz_a8fhi
+    │   │   ├── tmpgz-a8fhi
     │   │   ├── tmph230qflv
     │   │   ├── tmph31g70zm
     │   │   ├── tmph37z6qfb
@@ -4333,30 +4333,30 @@ BioactivityDataAcquisition2/
     │   │   ├── tmphiz5cb39
     │   │   ├── tmphjwz4eve
     │   │   ├── tmphkukfffp
-    │   │   ├── tmphkzrk6_f
-    │   │   ├── tmphld9xr1_
+    │   │   ├── tmphkzrk6-f
+    │   │   ├── tmphld9xr1-
     │   │   ├── tmphlmb28xm
-    │   │   ├── tmphlzg4ng_
+    │   │   ├── tmphlzg4ng-
     │   │   ├── tmphm04eu2v
     │   │   ├── tmphmaltr69
     │   │   ├── tmphn3na9bj
-    │   │   ├── tmpho1m_xzh
+    │   │   ├── tmpho1m-xzh
     │   │   ├── tmphpe946fz
     │   │   ├── tmphpkvgvpw
     │   │   ├── tmphrpgkb1l
     │   │   ├── tmphru19ymp
     │   │   ├── tmphtrt6ril
     │   │   ├── tmphtuv1e20
-    │   │   ├── tmphv2qg6_h
-    │   │   ├── tmphv3wg6_9
+    │   │   ├── tmphv2qg6-h
+    │   │   ├── tmphv3wg6-9
     │   │   ├── tmphvcwfd5u
     │   │   ├── tmphwjgab5b
     │   │   ├── tmphxal9ew7
     │   │   ├── tmpi021csqu
     │   │   ├── tmpi03ip3nw
-    │   │   ├── tmpi0hzwq_i
+    │   │   ├── tmpi0hzwq-i
     │   │   ├── tmpi0xf6ct8
-    │   │   ├── tmpi14j5jo_
+    │   │   ├── tmpi14j5jo-
     │   │   ├── tmpi230zu94
     │   │   ├── tmpi2uufzij
     │   │   ├── tmpi4thqoxa
@@ -4372,11 +4372,11 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpieg7gyvi
     │   │   ├── tmpieq38jhu
     │   │   ├── tmpif6ufwpp
-    │   │   ├── tmpifs1z_lk
+    │   │   ├── tmpifs1z-lk
     │   │   ├── tmpig39ehyf
     │   │   ├── tmpihac5x78
-    │   │   ├── tmpii_10so4
-    │   │   ├── tmpiik_5jml
+    │   │   ├── tmpii-10so4
+    │   │   ├── tmpiik-5jml
     │   │   ├── tmpiip6i9cr
     │   │   ├── tmpil0o9fcb
     │   │   ├── tmpineyoim5
@@ -4401,26 +4401,26 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpj32vfbgx
     │   │   ├── tmpj39mkjsx
     │   │   ├── tmpj4cbqnw4
-    │   │   ├── tmpj7wrxza_
+    │   │   ├── tmpj7wrxza-
     │   │   ├── tmpj83q2oa5
     │   │   ├── tmpj8a0j5cq
     │   │   ├── tmpj9dbgi3w
     │   │   ├── tmpj9lzovgm
     │   │   ├── tmpja28xagy
-    │   │   ├── tmpja_q9v_9
-    │   │   ├── tmpjbj_peqj
+    │   │   ├── tmpja-q9v-9
+    │   │   ├── tmpjbj-peqj
     │   │   ├── tmpjdaplq94
     │   │   ├── tmpjf1dhz80
     │   │   ├── tmpjf5pdaol
     │   │   ├── tmpjfjc7gxk
     │   │   ├── tmpjgif1urj
-    │   │   ├── tmpjgsf7br_
-    │   │   ├── tmpjhg_heft
+    │   │   ├── tmpjgsf7br-
+    │   │   ├── tmpjhg-heft
     │   │   ├── tmpjhopf3uh
     │   │   ├── tmpjhuc24o4
     │   │   ├── tmpjih018q6
     │   │   ├── tmpjjclsnct
-    │   │   ├── tmpjjzjc_ie
+    │   │   ├── tmpjjzjc-ie
     │   │   ├── tmpjk2pylnp
     │   │   ├── tmpjm6cm23k
     │   │   ├── tmpjnm8xyx5
@@ -4440,12 +4440,12 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpk1td0coz
     │   │   ├── tmpk31ngbqp
     │   │   ├── tmpk3qzwsmr
-    │   │   ├── tmpk4h_fmpw
+    │   │   ├── tmpk4h-fmpw
     │   │   ├── tmpk56w4xb1
     │   │   ├── tmpk5tu7rnx
     │   │   ├── tmpk7o40xva
-    │   │   ├── tmpk88_yiio
-    │   │   ├── tmpk_6p214b
+    │   │   ├── tmpk88-yiio
+    │   │   ├── tmpk-6p214b
     │   │   ├── tmpka936evu
     │   │   ├── tmpkbkdwxnz
     │   │   ├── tmpkc0qugge
@@ -4454,17 +4454,17 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpkeuaulyx
     │   │   ├── tmpkfeet1m1
     │   │   ├── tmpkfimaxs5
-    │   │   ├── tmpkflw_fxh
+    │   │   ├── tmpkflw-fxh
     │   │   ├── tmpkg97lf2q
     │   │   ├── tmpkgeag27i
     │   │   ├── tmpkgiucfsg
-    │   │   ├── tmpkh15w2s_
+    │   │   ├── tmpkh15w2s-
     │   │   ├── tmpki5pbc0k
     │   │   ├── tmpkj5v0jpm
     │   │   ├── tmpkjbeqt3b
     │   │   ├── tmpkkmosoe4
     │   │   ├── tmpkkuqbg7t
-    │   │   ├── tmpkm0rak_h
+    │   │   ├── tmpkm0rak-h
     │   │   ├── tmpknyy4waw
     │   │   ├── tmpkogumfq8
     │   │   ├── tmpkokn7rkb
@@ -4477,10 +4477,10 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpkrvmhq4q
     │   │   ├── tmpkshxh2x5
     │   │   ├── tmpku8jomqp
-    │   │   ├── tmpkzd_yk6z
+    │   │   ├── tmpkzd-yk6z
     │   │   ├── tmpl1ls8rpe
     │   │   ├── tmpl2acbak8
-    │   │   ├── tmpl326l_9r
+    │   │   ├── tmpl326l-9r
     │   │   ├── tmpl3pp4jak
     │   │   ├── tmpl4b8rh3j
     │   │   ├── tmpl5atx6sr
@@ -4491,17 +4491,17 @@ BioactivityDataAcquisition2/
     │   │   ├── tmplgadxtxs
     │   │   ├── tmplgulgna5
     │   │   ├── tmplhaux0hg
-    │   │   ├── tmplhy45d_0
+    │   │   ├── tmplhy45d-0
     │   │   ├── tmpli6wyya3
     │   │   ├── tmpll2exmj3
     │   │   ├── tmpllskthfx
-    │   │   ├── tmplnqf__ca
+    │   │   ├── tmplnqf--ca
     │   │   ├── tmplo0e0mil
     │   │   ├── tmplo1hoie9
     │   │   ├── tmplsbnbre4
     │   │   ├── tmplss3b43u
     │   │   ├── tmplvm2ncfu
-    │   │   ├── tmplw_c33v5
+    │   │   ├── tmplw-c33v5
     │   │   ├── tmplwadnm89
     │   │   ├── tmplwc2e7ui
     │   │   ├── tmplx7r5vp1
@@ -4510,38 +4510,38 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpm3ouq07l
     │   │   ├── tmpm6f7ygx1
     │   │   ├── tmpm6wlv9jv
-    │   │   ├── tmpm7f2_1f6
-    │   │   ├── tmpm7o8o4_l
+    │   │   ├── tmpm7f2-1f6
+    │   │   ├── tmpm7o8o4-l
     │   │   ├── tmpm7rh4hab
     │   │   ├── tmpm94i6z4o
     │   │   ├── tmpm9kdifrb
-    │   │   ├── tmpm_dwc1sw
-    │   │   ├── tmpm_iak5j4
+    │   │   ├── tmpm-dwc1sw
+    │   │   ├── tmpm-iak5j4
     │   │   ├── tmpmaflpmvx
     │   │   ├── tmpmb3gflxe
     │   │   ├── tmpmbw8zcm8
-    │   │   ├── tmpmcf_56v2
+    │   │   ├── tmpmcf-56v2
     │   │   ├── tmpmfczq6lt
     │   │   ├── tmpmffps35x
     │   │   ├── tmpmfto3m6h
     │   │   ├── tmpmi18qhka
-    │   │   ├── tmpmjpcw_zd
+    │   │   ├── tmpmjpcw-zd
     │   │   ├── tmpmk9c7kn6
     │   │   ├── tmpmmmvtrip
-    │   │   ├── tmpmmnw_9hl
-    │   │   ├── tmpmqv5j_w6
-    │   │   ├── tmpmrg_vdkp
+    │   │   ├── tmpmmnw-9hl
+    │   │   ├── tmpmqv5j-w6
+    │   │   ├── tmpmrg-vdkp
     │   │   ├── tmpms1kefv8
     │   │   ├── tmpms6r8hk7
     │   │   ├── tmpmv0r82yx
     │   │   ├── tmpmvsefrm1
     │   │   ├── tmpmw74b2rh
-    │   │   ├── tmpmwk7jon_
+    │   │   ├── tmpmwk7jon-
     │   │   ├── tmpmx6gnqox
     │   │   ├── tmpmxlh382d
     │   │   ├── tmpmynri943
     │   │   ├── tmpmyv3038b
-    │   │   ├── tmpmyz_y2rt
+    │   │   ├── tmpmyz-y2rt
     │   │   ├── tmpmz368aa4
     │   │   ├── tmpn0ovtvmu
     │   │   ├── tmpn0q0vhav
@@ -4553,9 +4553,9 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpn837l565
     │   │   ├── tmpn8x7yh9n
     │   │   ├── tmpn9jzl8b3
-    │   │   ├── tmpnao2_3ej
+    │   │   ├── tmpnao2-3ej
     │   │   ├── tmpne92qhtm
-    │   │   ├── tmpnfkyvg_3
+    │   │   ├── tmpnfkyvg-3
     │   │   ├── tmpng0tn3ve
     │   │   ├── tmpng59zdwp
     │   │   ├── tmpnhnbeetd
@@ -4563,16 +4563,16 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpnixhsz3h
     │   │   ├── tmpnjyi6koj
     │   │   ├── tmpno7fiwf3
-    │   │   ├── tmpnoezi_3f
+    │   │   ├── tmpnoezi-3f
     │   │   ├── tmpnorfnelg
-    │   │   ├── tmpnpa_iuhv
+    │   │   ├── tmpnpa-iuhv
     │   │   ├── tmpnqjsuj6u
     │   │   ├── tmpnqndi0yy
     │   │   ├── tmpnqzawvyf
-    │   │   ├── tmpnrs7_8kc
-    │   │   ├── tmpnru_loou
+    │   │   ├── tmpnrs7-8kc
+    │   │   ├── tmpnru-loou
     │   │   ├── tmpnt932k4t
-    │   │   ├── tmpntf5w0_z
+    │   │   ├── tmpntf5w0-z
     │   │   ├── tmpntz8jtbs
     │   │   ├── tmpnx4sl4gm
     │   │   ├── tmpnz1sgn13
@@ -4583,12 +4583,12 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpo4cxt2au
     │   │   ├── tmpo8lmtpj0
     │   │   ├── tmpo9nf2fea
-    │   │   ├── tmpo_k379a7
+    │   │   ├── tmpo-k379a7
     │   │   ├── tmpoa40mkf8
     │   │   ├── tmpoalmplnd
     │   │   ├── tmpobgtiaf5
     │   │   ├── tmpod3f5nlu
-    │   │   ├── tmpodpf74k_
+    │   │   ├── tmpodpf74k-
     │   │   ├── tmpoe3bwslf
     │   │   ├── tmpoe48nzb5
     │   │   ├── tmpoeav1zre
@@ -4599,7 +4599,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpoj8ib67o
     │   │   ├── tmpoky5841k
     │   │   ├── tmpolxtc20l
-    │   │   ├── tmpom3gc55_
+    │   │   ├── tmpom3gc55-
     │   │   ├── tmpomivbi8q
     │   │   ├── tmpooq82sor
     │   │   ├── tmpoq3s11g2
@@ -4614,15 +4614,15 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpp1bewbjb
     │   │   ├── tmpp3e4hxse
     │   │   ├── tmpp3qd7bax
-    │   │   ├── tmpp4__iyj_
+    │   │   ├── tmpp4--iyj-
     │   │   ├── tmpp4iymhll
     │   │   ├── tmpp4j75ngc
     │   │   ├── tmpp68biget
     │   │   ├── tmpp875pixh
-    │   │   ├── tmpp8n2w_yb
+    │   │   ├── tmpp8n2w-yb
     │   │   ├── tmpp9d9vayc
     │   │   ├── tmpp9o0hv1a
-    │   │   ├── tmpp_aln1d_
+    │   │   ├── tmpp-aln1d-
     │   │   ├── tmppb3s0h0i
     │   │   ├── tmppbnex6gt
     │   │   ├── tmppcbiyeld
@@ -4631,10 +4631,10 @@ BioactivityDataAcquisition2/
     │   │   ├── tmppfeqg7b3
     │   │   ├── tmppgq41w6f
     │   │   ├── tmppgyohm46
-    │   │   ├── tmppirrc_5n
+    │   │   ├── tmppirrc-5n
     │   │   ├── tmppjvi6ex2
     │   │   ├── tmppkj8bhll
-    │   │   ├── tmppnbe1w8_
+    │   │   ├── tmppnbe1w8-
     │   │   ├── tmppntqhybm
     │   │   ├── tmpppdmnamk
     │   │   ├── tmppradns67
@@ -4642,12 +4642,12 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpptn132y8
     │   │   ├── tmppwqu5l81
     │   │   ├── tmpq0m6p6s4
-    │   │   ├── tmpq0vm4y0_
+    │   │   ├── tmpq0vm4y0-
     │   │   ├── tmpq2ps56rb
     │   │   ├── tmpq3tss7eg
     │   │   ├── tmpq4oh4pmt
     │   │   ├── tmpq78hg6jy
-    │   │   ├── tmpq7ppv8s_
+    │   │   ├── tmpq7ppv8s-
     │   │   ├── tmpq9oj0efm
     │   │   ├── tmpqaaxm370
     │   │   ├── tmpqbzphd6d
@@ -4658,12 +4658,12 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpqgzqpqel
     │   │   ├── tmpqi1djukr
     │   │   ├── tmpqif6dti8
-    │   │   ├── tmpqjhu_43l
+    │   │   ├── tmpqjhu-43l
     │   │   ├── tmpql5uo82y
     │   │   ├── tmpqmo7l0pq
     │   │   ├── tmpqo8vddzi
     │   │   ├── tmpqpn0g3nx
-    │   │   ├── tmpqri9d_bs
+    │   │   ├── tmpqri9d-bs
     │   │   ├── tmpqru3naec
     │   │   ├── tmpqs9bp652
     │   │   ├── tmpqu0rr2jc
@@ -4682,8 +4682,8 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpr76y99v0
     │   │   ├── tmpr7d3jjk6
     │   │   ├── tmpr8opkoq7
-    │   │   ├── tmpr8pq_4eo
-    │   │   ├── tmpr_2r6jbz
+    │   │   ├── tmpr8pq-4eo
+    │   │   ├── tmpr-2r6jbz
     │   │   ├── tmpra0gmwlb
     │   │   ├── tmprarg6p9j
     │   │   ├── tmprcl5lyge
@@ -4691,14 +4691,14 @@ BioactivityDataAcquisition2/
     │   │   ├── tmprdz76mut
     │   │   ├── tmprfhge3j7
     │   │   ├── tmprfqi1npb
-    │   │   ├── tmprk010sk_
+    │   │   ├── tmprk010sk-
     │   │   ├── tmprk30oyut
     │   │   ├── tmprl5vz4bh
     │   │   ├── tmprmlw11ly
     │   │   ├── tmprphe6gna
     │   │   ├── tmprqnv64pv
-    │   │   ├── tmprrcln_0a
-    │   │   ├── tmprs__arvd
+    │   │   ├── tmprrcln-0a
+    │   │   ├── tmprs--arvd
     │   │   ├── tmprsemugf9
     │   │   ├── tmprskb48a1
     │   │   ├── tmprslvp2nc
@@ -4706,28 +4706,28 @@ BioactivityDataAcquisition2/
     │   │   ├── tmprtaoxuh1
     │   │   ├── tmpruwztiev
     │   │   ├── tmpruxse3vq
-    │   │   ├── tmprv_d6ayo
+    │   │   ├── tmprv-d6ayo
     │   │   ├── tmprvdo4yli
     │   │   ├── tmprw0xxz4k
     │   │   ├── tmprw9noztq
     │   │   ├── tmprycyinst
-    │   │   ├── tmpryv17d0_
+    │   │   ├── tmpryv17d0-
     │   │   ├── tmpryvkmnxp
     │   │   ├── tmprz5an9n7
-    │   │   ├── tmprzhss2_q
+    │   │   ├── tmprzhss2-q
     │   │   ├── tmps0jxq5dh
     │   │   ├── tmps1wb6oca
     │   │   ├── tmps392g8ly
     │   │   ├── tmps398vm0u
     │   │   ├── tmps6pisehi
-    │   │   ├── tmps7chd4_2
+    │   │   ├── tmps7chd4-2
     │   │   ├── tmps93wt27x
     │   │   ├── tmps9friswk
-    │   │   ├── tmps_72fei_
-    │   │   ├── tmps_gr9qc3
+    │   │   ├── tmps-72fei-
+    │   │   ├── tmps-gr9qc3
     │   │   ├── tmpsbltsszw
     │   │   ├── tmpsbqch9hs
-    │   │   ├── tmpsdu0e_dh
+    │   │   ├── tmpsdu0e-dh
     │   │   ├── tmpsiwpgfbo
     │   │   ├── tmpska4rv9e
     │   │   ├── tmpsl5fm23i
@@ -4739,9 +4739,9 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpsox2xf51
     │   │   ├── tmpsqvavnnp
     │   │   ├── tmpsraeaglk
-    │   │   ├── tmpssfkfy_s
+    │   │   ├── tmpssfkfy-s
     │   │   ├── tmpstakihau
-    │   │   ├── tmpsuvt_2zw
+    │   │   ├── tmpsuvt-2zw
     │   │   ├── tmpsv1csqs8
     │   │   ├── tmpsx0p8uso
     │   │   ├── tmpsyd8xoid
@@ -4753,8 +4753,8 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpt2wct5nx
     │   │   ├── tmpt7g8m2g9
     │   │   ├── tmpt7mj0b1u
-    │   │   ├── tmpt_06q7_c
-    │   │   ├── tmpt_g_300v
+    │   │   ├── tmpt-06q7-c
+    │   │   ├── tmpt-g-300v
     │   │   ├── tmptbp82g4t
     │   │   ├── tmptcwtukb7
     │   │   ├── tmptd54ze0z
@@ -4769,9 +4769,9 @@ BioactivityDataAcquisition2/
     │   │   ├── tmptqrbo9xk
     │   │   ├── tmptstdixmj
     │   │   ├── tmptsvdvtl4
-    │   │   ├── tmptuef_hmb
+    │   │   ├── tmptuef-hmb
     │   │   ├── tmptvvj5h6i
-    │   │   ├── tmptz6_xmmg
+    │   │   ├── tmptz6-xmmg
     │   │   ├── tmpu10b3ark
     │   │   ├── tmpu1ckb8xk
     │   │   ├── tmpu1yig6wf
@@ -4780,24 +4780,24 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpu3lf8rfk
     │   │   ├── tmpu3ov6shh
     │   │   ├── tmpu5o0t9dl
-    │   │   ├── tmpu8aeb_gs
+    │   │   ├── tmpu8aeb-gs
     │   │   ├── tmpu8hg5hms
-    │   │   ├── tmpu_hy8sre
-    │   │   ├── tmpu_kbzlp3
-    │   │   ├── tmpu_ng6c0g
-    │   │   ├── tmpua_e_dks
+    │   │   ├── tmpu-hy8sre
+    │   │   ├── tmpu-kbzlp3
+    │   │   ├── tmpu-ng6c0g
+    │   │   ├── tmpua-e-dks
     │   │   ├── tmpuc0x9eog
     │   │   ├── tmpue4ynfvd
     │   │   ├── tmpuexq3iin
-    │   │   ├── tmpufui2pt_
+    │   │   ├── tmpufui2pt-
     │   │   ├── tmpugaaubm2
     │   │   ├── tmpugfg572m
     │   │   ├── tmpuhds8scz
     │   │   ├── tmpulhli2um
-    │   │   ├── tmpulx5_14s
-    │   │   ├── tmpumf_epzo
-    │   │   ├── tmpuml7do_3
-    │   │   ├── tmpun_vmqs0
+    │   │   ├── tmpulx5-14s
+    │   │   ├── tmpumf-epzo
+    │   │   ├── tmpuml7do-3
+    │   │   ├── tmpun-vmqs0
     │   │   ├── tmpuncfww0l
     │   │   ├── tmpup5rouln
     │   │   ├── tmpup9d5q6h
@@ -4821,11 +4821,11 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpv5wglqu7
     │   │   ├── tmpv79vtzo9
     │   │   ├── tmpv7j0vrna
-    │   │   ├── tmpv_1r855w
+    │   │   ├── tmpv-1r855w
     │   │   ├── tmpva9ak3a4
     │   │   ├── tmpvbtps9e6
     │   │   ├── tmpvd8o4fxw
-    │   │   ├── tmpvd__a_ez
+    │   │   ├── tmpvd--a-ez
     │   │   ├── tmpve5nr2bq
     │   │   ├── tmpvh6mkkz6
     │   │   ├── tmpvhqlxaon
@@ -4854,12 +4854,12 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpw8lro44f
     │   │   ├── tmpw8stijt6
     │   │   ├── tmpw9rc8auc
-    │   │   ├── tmpw_9v32nu
-    │   │   ├── tmpw__a49nd
+    │   │   ├── tmpw-9v32nu
+    │   │   ├── tmpw--a49nd
     │   │   ├── tmpwaim1i95
-    │   │   ├── tmpwcujmh_0
+    │   │   ├── tmpwcujmh-0
     │   │   ├── tmpwcwizprr
-    │   │   ├── tmpwfcbqzu_
+    │   │   ├── tmpwfcbqzu-
     │   │   ├── tmpwful8yuk
     │   │   ├── tmpwghci3y4
     │   │   ├── tmpwgljiqjy
@@ -4871,14 +4871,14 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpwl3r00hk
     │   │   ├── tmpwl52q9oo
     │   │   ├── tmpwlkyovbf
-    │   │   ├── tmpwm6_eg5_
+    │   │   ├── tmpwm6-eg5-
     │   │   ├── tmpwnsuil38
     │   │   ├── tmpwperpxpg
     │   │   ├── tmpwpeyqe4s
     │   │   ├── tmpwtdqz22c
     │   │   ├── tmpwty6hpd5
-    │   │   ├── tmpwu6im_hl
-    │   │   ├── tmpwvid_c44
+    │   │   ├── tmpwu6im-hl
+    │   │   ├── tmpwvid-c44
     │   │   ├── tmpwws7vgkr
     │   │   ├── tmpwxpzg47m
     │   │   ├── tmpwxr6efca
@@ -4895,22 +4895,22 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpx9fv8llv
     │   │   ├── tmpxakmihb5
     │   │   ├── tmpxblrtbiu
-    │   │   ├── tmpxc52h_e2
+    │   │   ├── tmpxc52h-e2
     │   │   ├── tmpxeh29r7u
     │   │   ├── tmpxf29hra3
-    │   │   ├── tmpxfxjwr3_
-    │   │   ├── tmpxfyfc32_
+    │   │   ├── tmpxfxjwr3-
+    │   │   ├── tmpxfyfc32-
     │   │   ├── tmpxg8pg3vw
     │   │   ├── tmpxgouov5k
-    │   │   ├── tmpxi1ld_pj
-    │   │   ├── tmpxkd2kdf_
+    │   │   ├── tmpxi1ld-pj
+    │   │   ├── tmpxkd2kdf-
     │   │   ├── tmpxkqo8a0j
     │   │   ├── tmpxlflv3b6
     │   │   ├── tmpxnqqfva7
     │   │   ├── tmpxobrtba3
     │   │   ├── tmpxpdcvzap
     │   │   ├── tmpxpom71hm
-    │   │   ├── tmpxq14c24_
+    │   │   ├── tmpxq14c24-
     │   │   ├── tmpxr00aam4
     │   │   ├── tmpxrzdi0q0
     │   │   ├── tmpxs4rzivi
@@ -4918,7 +4918,7 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpxu1hp2kv
     │   │   ├── tmpxv7f7kuc
     │   │   ├── tmpxwjx273t
-    │   │   ├── tmpxx8b1z_j
+    │   │   ├── tmpxx8b1z-j
     │   │   ├── tmpxxx6cf4n
     │   │   ├── tmpxyy19nn5
     │   │   ├── tmpxz8zdqd0
@@ -4935,18 +4935,18 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpy7sfl79g
     │   │   ├── tmpy8gqogeq
     │   │   ├── tmpy9qbsl8k
-    │   │   ├── tmpy_cftsiw
-    │   │   ├── tmpy_wkyazc
+    │   │   ├── tmpy-cftsiw
+    │   │   ├── tmpy-wkyazc
     │   │   ├── tmpya0m2k0u
-    │   │   ├── tmpyaq7wz_4
+    │   │   ├── tmpyaq7wz-4
     │   │   ├── tmpyd44kh2i
-    │   │   ├── tmpyej9vi9_
+    │   │   ├── tmpyej9vi9-
     │   │   ├── tmpyf6w6n70
     │   │   ├── tmpyfjj6eo7
-    │   │   ├── tmpygf1_4d8
+    │   │   ├── tmpygf1-4d8
     │   │   ├── tmpygn7oopa
     │   │   ├── tmpyh7nnnna
-    │   │   ├── tmpyi3z5_m7
+    │   │   ├── tmpyi3z5-m7
     │   │   ├── tmpyj1xsrwu
     │   │   ├── tmpylg70hc6
     │   │   ├── tmpymbtgacx
@@ -4954,11 +4954,11 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpymtfdtmr
     │   │   ├── tmpynkw9oif
     │   │   ├── tmpyo5ueb7q
-    │   │   ├── tmpyoi_zpnl
+    │   │   ├── tmpyoi-zpnl
     │   │   ├── tmpyopy1xyh
     │   │   ├── tmpyp8faa0v
     │   │   ├── tmpyppw9xm6
-    │   │   ├── tmpyq5_27yj
+    │   │   ├── tmpyq5-27yj
     │   │   ├── tmpyqfw3b2e
     │   │   ├── tmpyucowmfu
     │   │   ├── tmpyukvdxp7
@@ -4969,22 +4969,22 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpz0b23u4r
     │   │   ├── tmpz26ghpv1
     │   │   ├── tmpz2nyy02x
-    │   │   ├── tmpz3_ugwx1
+    │   │   ├── tmpz3-ugwx1
     │   │   ├── tmpz4fmkmj6
     │   │   ├── tmpz4hb8ksy
     │   │   ├── tmpz5yozi0e
     │   │   ├── tmpz6qx9one
     │   │   ├── tmpz76bgyso
     │   │   ├── tmpz81ibl7d
-    │   │   ├── tmpz88a_l0c
+    │   │   ├── tmpz88a-l0c
     │   │   ├── tmpz9eqsthp
     │   │   ├── tmpz9zxyk9m
     │   │   ├── tmpzb7duoep
     │   │   ├── tmpzca5ekqd
     │   │   ├── tmpzchxikb8
-    │   │   ├── tmpzf_vxb3t
+    │   │   ├── tmpzf-vxb3t
     │   │   ├── tmpzjd0x8a9
-    │   │   ├── tmpzm5dw2_v
+    │   │   ├── tmpzm5dw2-v
     │   │   ├── tmpzm5xjgyi
     │   │   ├── tmpzn5ojkd5
     │   │   ├── tmpzpogmeen
@@ -4993,10 +4993,10 @@ BioactivityDataAcquisition2/
     │   │   ├── tmpzrw45t90
     │   │   ├── tmpzth1gn60
     │   │   ├── tmpztjhzz9b
-    │   │   ├── tmpzuis3_4w
-    │   │   ├── tmpzxg_uxnd
+    │   │   ├── tmpzuis3-4w
+    │   │   ├── tmpzxg-uxnd
     │   │   └── tmpzyn2i47v
-    │   └── unicode_data/
+    │   └── unicode-data/
     │       └── 15.1.0/
     │           ├── charmap.json.gz
     │           └── codec-utf-8.json.gz
@@ -5004,7 +5004,7 @@ BioactivityDataAcquisition2/
     │   ├── dictionaries/
     │   │   └── project.xml
     │   ├── inspectionProfiles/
-    │   │   └── profiles_settings.xml
+    │   │   └── profiles-settings.xml
     │   ├── .gitignore
     │   ├── BioactivityDataAcquisition2.iml
     │   ├── codex.xml
@@ -5017,7 +5017,7 @@ BioactivityDataAcquisition2/
     │   ├── modules.xml
     │   ├── vcs.xml
     │   └── workspace.xml
-    ├── .import_linter_cache/
+    ├── .import-linter-cache/
     │   ├── .gitignore
     │   ├── 020bf9a579f422a2334140ee2267ca0d0306daa1.data.json
     │   ├── CACHEDIR.TAG
@@ -5025,19 +5025,19 @@ BioactivityDataAcquisition2/
     │   └── ffd35c0055ccf94f516de1a6a1eb6149bab5d4ab.data.json
     ├── .jules/
     │   └── bolt.md
-    ├── .mypy_cache/
+    ├── .mypy-cache/
     │   ├── 3.11/
-    │   │   ├── _pytest/
-    │   │   │   ├── _code/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   ├── -pytest/
+    │   │   │   ├── -code/
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── code.data.json
     │   │   │   │   ├── code.meta.json
     │   │   │   │   ├── source.data.json
     │   │   │   │   └── source.meta.json
-    │   │   │   ├── _io/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   ├── -io/
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── pprint.data.json
     │   │   │   │   ├── pprint.meta.json
     │   │   │   │   ├── saferepr.data.json
@@ -5047,8 +5047,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── wcwidth.data.json
     │   │   │   │   └── wcwidth.meta.json
     │   │   │   ├── assertion/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── rewrite.data.json
     │   │   │   │   ├── rewrite.meta.json
     │   │   │   │   ├── truncate.data.json
@@ -5056,8 +5056,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── util.data.json
     │   │   │   │   └── util.meta.json
     │   │   │   ├── config/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── argparsing.data.json
     │   │   │   │   ├── argparsing.meta.json
     │   │   │   │   ├── compat.data.json
@@ -5067,18 +5067,18 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── findpaths.data.json
     │   │   │   │   └── findpaths.meta.json
     │   │   │   ├── mark/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── expression.data.json
     │   │   │   │   ├── expression.meta.json
     │   │   │   │   ├── structures.data.json
     │   │   │   │   └── structures.meta.json
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _argcomplete.data.json
-    │   │   │   ├── _argcomplete.meta.json
-    │   │   │   ├── _version.data.json
-    │   │   │   ├── _version.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -argcomplete.data.json
+    │   │   │   ├── -argcomplete.meta.json
+    │   │   │   ├── -version.data.json
+    │   │   │   ├── -version.meta.json
     │   │   │   ├── cacheprovider.data.json
     │   │   │   ├── cacheprovider.meta.json
     │   │   │   ├── capture.data.json
@@ -5093,8 +5093,8 @@ BioactivityDataAcquisition2/
     │   │   │   ├── doctest.meta.json
     │   │   │   ├── fixtures.data.json
     │   │   │   ├── fixtures.meta.json
-    │   │   │   ├── freeze_support.data.json
-    │   │   │   ├── freeze_support.meta.json
+    │   │   │   ├── freeze-support.data.json
+    │   │   │   ├── freeze-support.meta.json
     │   │   │   ├── helpconfig.data.json
     │   │   │   ├── helpconfig.meta.json
     │   │   │   ├── hookspec.data.json
@@ -5115,12 +5115,12 @@ BioactivityDataAcquisition2/
     │   │   │   ├── pathlib.meta.json
     │   │   │   ├── pytester.data.json
     │   │   │   ├── pytester.meta.json
-    │   │   │   ├── pytester_assertions.data.json
-    │   │   │   ├── pytester_assertions.meta.json
+    │   │   │   ├── pytester-assertions.data.json
+    │   │   │   ├── pytester-assertions.meta.json
     │   │   │   ├── python.data.json
     │   │   │   ├── python.meta.json
-    │   │   │   ├── python_api.data.json
-    │   │   │   ├── python_api.meta.json
+    │   │   │   ├── python-api.data.json
+    │   │   │   ├── python-api.meta.json
     │   │   │   ├── raises.data.json
     │   │   │   ├── raises.meta.json
     │   │   │   ├── recwarn.data.json
@@ -5145,123 +5145,123 @@ BioactivityDataAcquisition2/
     │   │   │   ├── tracemalloc.meta.json
     │   │   │   ├── unraisableexception.data.json
     │   │   │   ├── unraisableexception.meta.json
-    │   │   │   ├── warning_types.data.json
-    │   │   │   ├── warning_types.meta.json
+    │   │   │   ├── warning-types.data.json
+    │   │   │   ├── warning-types.meta.json
     │   │   │   ├── warnings.data.json
     │   │   │   └── warnings.meta.json
-    │   │   ├── _typeshed/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
+    │   │   ├── -typeshed/
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
     │   │   │   ├── importlib.data.json
     │   │   │   ├── importlib.meta.json
     │   │   │   ├── wsgi.data.json
     │   │   │   └── wsgi.meta.json
-    │   │   ├── annotated_types/
-    │   │   │   ├── __init__.data.json
-    │   │   │   └── __init__.meta.json
+    │   │   ├── annotated-types/
+    │   │   │   ├── --init--.data.json
+    │   │   │   └── --init--.meta.json
     │   │   ├── anyio/
-    │   │   │   ├── _core/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── _contextmanagers.data.json
-    │   │   │   │   ├── _contextmanagers.meta.json
-    │   │   │   │   ├── _eventloop.data.json
-    │   │   │   │   ├── _eventloop.meta.json
-    │   │   │   │   ├── _exceptions.data.json
-    │   │   │   │   ├── _exceptions.meta.json
-    │   │   │   │   ├── _fileio.data.json
-    │   │   │   │   ├── _fileio.meta.json
-    │   │   │   │   ├── _resources.data.json
-    │   │   │   │   ├── _resources.meta.json
-    │   │   │   │   ├── _signals.data.json
-    │   │   │   │   ├── _signals.meta.json
-    │   │   │   │   ├── _sockets.data.json
-    │   │   │   │   ├── _sockets.meta.json
-    │   │   │   │   ├── _streams.data.json
-    │   │   │   │   ├── _streams.meta.json
-    │   │   │   │   ├── _subprocesses.data.json
-    │   │   │   │   ├── _subprocesses.meta.json
-    │   │   │   │   ├── _synchronization.data.json
-    │   │   │   │   ├── _synchronization.meta.json
-    │   │   │   │   ├── _tasks.data.json
-    │   │   │   │   ├── _tasks.meta.json
-    │   │   │   │   ├── _tempfile.data.json
-    │   │   │   │   ├── _tempfile.meta.json
-    │   │   │   │   ├── _testing.data.json
-    │   │   │   │   ├── _testing.meta.json
-    │   │   │   │   ├── _typedattr.data.json
-    │   │   │   │   └── _typedattr.meta.json
+    │   │   │   ├── -core/
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── -contextmanagers.data.json
+    │   │   │   │   ├── -contextmanagers.meta.json
+    │   │   │   │   ├── -eventloop.data.json
+    │   │   │   │   ├── -eventloop.meta.json
+    │   │   │   │   ├── -exceptions.data.json
+    │   │   │   │   ├── -exceptions.meta.json
+    │   │   │   │   ├── -fileio.data.json
+    │   │   │   │   ├── -fileio.meta.json
+    │   │   │   │   ├── -resources.data.json
+    │   │   │   │   ├── -resources.meta.json
+    │   │   │   │   ├── -signals.data.json
+    │   │   │   │   ├── -signals.meta.json
+    │   │   │   │   ├── -sockets.data.json
+    │   │   │   │   ├── -sockets.meta.json
+    │   │   │   │   ├── -streams.data.json
+    │   │   │   │   ├── -streams.meta.json
+    │   │   │   │   ├── -subprocesses.data.json
+    │   │   │   │   ├── -subprocesses.meta.json
+    │   │   │   │   ├── -synchronization.data.json
+    │   │   │   │   ├── -synchronization.meta.json
+    │   │   │   │   ├── -tasks.data.json
+    │   │   │   │   ├── -tasks.meta.json
+    │   │   │   │   ├── -tempfile.data.json
+    │   │   │   │   ├── -tempfile.meta.json
+    │   │   │   │   ├── -testing.data.json
+    │   │   │   │   ├── -testing.meta.json
+    │   │   │   │   ├── -typedattr.data.json
+    │   │   │   │   └── -typedattr.meta.json
     │   │   │   ├── abc/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── _eventloop.data.json
-    │   │   │   │   ├── _eventloop.meta.json
-    │   │   │   │   ├── _resources.data.json
-    │   │   │   │   ├── _resources.meta.json
-    │   │   │   │   ├── _sockets.data.json
-    │   │   │   │   ├── _sockets.meta.json
-    │   │   │   │   ├── _streams.data.json
-    │   │   │   │   ├── _streams.meta.json
-    │   │   │   │   ├── _subprocesses.data.json
-    │   │   │   │   ├── _subprocesses.meta.json
-    │   │   │   │   ├── _tasks.data.json
-    │   │   │   │   ├── _tasks.meta.json
-    │   │   │   │   ├── _testing.data.json
-    │   │   │   │   └── _testing.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── -eventloop.data.json
+    │   │   │   │   ├── -eventloop.meta.json
+    │   │   │   │   ├── -resources.data.json
+    │   │   │   │   ├── -resources.meta.json
+    │   │   │   │   ├── -sockets.data.json
+    │   │   │   │   ├── -sockets.meta.json
+    │   │   │   │   ├── -streams.data.json
+    │   │   │   │   ├── -streams.meta.json
+    │   │   │   │   ├── -subprocesses.data.json
+    │   │   │   │   ├── -subprocesses.meta.json
+    │   │   │   │   ├── -tasks.data.json
+    │   │   │   │   ├── -tasks.meta.json
+    │   │   │   │   ├── -testing.data.json
+    │   │   │   │   └── -testing.meta.json
     │   │   │   ├── streams/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── memory.data.json
     │   │   │   │   ├── memory.meta.json
     │   │   │   │   ├── stapled.data.json
     │   │   │   │   ├── stapled.meta.json
     │   │   │   │   ├── tls.data.json
     │   │   │   │   └── tls.meta.json
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── from_thread.data.json
-    │   │   │   ├── from_thread.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── from-thread.data.json
+    │   │   │   ├── from-thread.meta.json
     │   │   │   ├── lowlevel.data.json
     │   │   │   ├── lowlevel.meta.json
-    │   │   │   ├── to_thread.data.json
-    │   │   │   └── to_thread.meta.json
+    │   │   │   ├── to-thread.data.json
+    │   │   │   └── to-thread.meta.json
     │   │   ├── arro3/
     │   │   │   └── core/
-    │   │   │       ├── __init__.data.json
-    │   │   │       ├── __init__.meta.json
-    │   │   │       ├── _array.data.json
-    │   │   │       ├── _array.meta.json
-    │   │   │       ├── _array_reader.data.json
-    │   │   │       ├── _array_reader.meta.json
-    │   │   │       ├── _buffer.data.json
-    │   │   │       ├── _buffer.meta.json
-    │   │   │       ├── _chunked_array.data.json
-    │   │   │       ├── _chunked_array.meta.json
-    │   │   │       ├── _core.data.json
-    │   │   │       ├── _core.meta.json
-    │   │   │       ├── _data_type.data.json
-    │   │   │       ├── _data_type.meta.json
-    │   │   │       ├── _field.data.json
-    │   │   │       ├── _field.meta.json
-    │   │   │       ├── _record_batch.data.json
-    │   │   │       ├── _record_batch.meta.json
-    │   │   │       ├── _record_batch_reader.data.json
-    │   │   │       ├── _record_batch_reader.meta.json
-    │   │   │       ├── _scalar.data.json
-    │   │   │       ├── _scalar.meta.json
-    │   │   │       ├── _schema.data.json
-    │   │   │       ├── _schema.meta.json
-    │   │   │       ├── _table.data.json
-    │   │   │       ├── _table.meta.json
+    │   │   │       ├── --init--.data.json
+    │   │   │       ├── --init--.meta.json
+    │   │   │       ├── -array.data.json
+    │   │   │       ├── -array.meta.json
+    │   │   │       ├── -array-reader.data.json
+    │   │   │       ├── -array-reader.meta.json
+    │   │   │       ├── -buffer.data.json
+    │   │   │       ├── -buffer.meta.json
+    │   │   │       ├── -chunked-array.data.json
+    │   │   │       ├── -chunked-array.meta.json
+    │   │   │       ├── -core.data.json
+    │   │   │       ├── -core.meta.json
+    │   │   │       ├── -data-type.data.json
+    │   │   │       ├── -data-type.meta.json
+    │   │   │       ├── -field.data.json
+    │   │   │       ├── -field.meta.json
+    │   │   │       ├── -record-batch.data.json
+    │   │   │       ├── -record-batch.meta.json
+    │   │   │       ├── -record-batch-reader.data.json
+    │   │   │       ├── -record-batch-reader.meta.json
+    │   │   │       ├── -scalar.data.json
+    │   │   │       ├── -scalar.meta.json
+    │   │   │       ├── -schema.data.json
+    │   │   │       ├── -schema.meta.json
+    │   │   │       ├── -table.data.json
+    │   │   │       ├── -table.meta.json
     │   │   │       ├── types.data.json
     │   │   │       └── types.meta.json
     │   │   ├── asyncio/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── base_events.data.json
-    │   │   │   ├── base_events.meta.json
-    │   │   │   ├── base_futures.data.json
-    │   │   │   ├── base_futures.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── base-events.data.json
+    │   │   │   ├── base-events.meta.json
+    │   │   │   ├── base-futures.data.json
+    │   │   │   ├── base-futures.meta.json
     │   │   │   ├── constants.data.json
     │   │   │   ├── constants.meta.json
     │   │   │   ├── coroutines.data.json
@@ -5276,16 +5276,16 @@ BioactivityDataAcquisition2/
     │   │   │   ├── locks.meta.json
     │   │   │   ├── mixins.data.json
     │   │   │   ├── mixins.meta.json
-    │   │   │   ├── proactor_events.data.json
-    │   │   │   ├── proactor_events.meta.json
+    │   │   │   ├── proactor-events.data.json
+    │   │   │   ├── proactor-events.meta.json
     │   │   │   ├── protocols.data.json
     │   │   │   ├── protocols.meta.json
     │   │   │   ├── queues.data.json
     │   │   │   ├── queues.meta.json
     │   │   │   ├── runners.data.json
     │   │   │   ├── runners.meta.json
-    │   │   │   ├── selector_events.data.json
-    │   │   │   ├── selector_events.meta.json
+    │   │   │   ├── selector-events.data.json
+    │   │   │   ├── selector-events.meta.json
     │   │   │   ├── streams.data.json
     │   │   │   ├── streams.meta.json
     │   │   │   ├── subprocess.data.json
@@ -5300,21 +5300,21 @@ BioactivityDataAcquisition2/
     │   │   │   ├── timeouts.meta.json
     │   │   │   ├── transports.data.json
     │   │   │   ├── transports.meta.json
-    │   │   │   ├── unix_events.data.json
-    │   │   │   ├── unix_events.meta.json
-    │   │   │   ├── windows_events.data.json
-    │   │   │   ├── windows_events.meta.json
-    │   │   │   ├── windows_utils.data.json
-    │   │   │   └── windows_utils.meta.json
+    │   │   │   ├── unix-events.data.json
+    │   │   │   ├── unix-events.meta.json
+    │   │   │   ├── windows-events.data.json
+    │   │   │   ├── windows-events.meta.json
+    │   │   │   ├── windows-utils.data.json
+    │   │   │   └── windows-utils.meta.json
     │   │   ├── attr/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _cmp.data.json
-    │   │   │   ├── _cmp.meta.json
-    │   │   │   ├── _typing_compat.data.json
-    │   │   │   ├── _typing_compat.meta.json
-    │   │   │   ├── _version_info.data.json
-    │   │   │   ├── _version_info.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -cmp.data.json
+    │   │   │   ├── -cmp.meta.json
+    │   │   │   ├── -typing-compat.data.json
+    │   │   │   ├── -typing-compat.meta.json
+    │   │   │   ├── -version-info.data.json
+    │   │   │   ├── -version-info.meta.json
     │   │   │   ├── converters.data.json
     │   │   │   ├── converters.meta.json
     │   │   │   ├── exceptions.data.json
@@ -5326,215 +5326,215 @@ BioactivityDataAcquisition2/
     │   │   │   ├── validators.data.json
     │   │   │   └── validators.meta.json
     │   │   ├── attrs/
-    │   │   │   ├── __init__.data.json
-    │   │   │   └── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   └── --init--.meta.json
     │   │   ├── bioetl/
     │   │   │   ├── application/
     │   │   │   │   ├── composite/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── aggregator.data.json
     │   │   │   │   │   ├── aggregator.meta.json
     │   │   │   │   │   ├── checkpoint.data.json
     │   │   │   │   │   ├── checkpoint.meta.json
-    │   │   │   │   │   ├── column_orderer.data.json
-    │   │   │   │   │   ├── column_orderer.meta.json
-    │   │   │   │   │   ├── column_renamer.data.json
-    │   │   │   │   │   ├── column_renamer.meta.json
+    │   │   │   │   │   ├── column-orderer.data.json
+    │   │   │   │   │   ├── column-orderer.meta.json
+    │   │   │   │   │   ├── column-renamer.data.json
+    │   │   │   │   │   ├── column-renamer.meta.json
     │   │   │   │   │   ├── coordinator.data.json
     │   │   │   │   │   ├── coordinator.meta.json
     │   │   │   │   │   ├── deduplication.data.json
     │   │   │   │   │   ├── deduplication.meta.json
-    │   │   │   │   │   ├── dependency_coordinator.data.json
-    │   │   │   │   │   ├── dependency_coordinator.meta.json
-    │   │   │   │   │   ├── fsm_helper.data.json
-    │   │   │   │   │   ├── fsm_helper.meta.json
-    │   │   │   │   │   ├── key_extractor.data.json
-    │   │   │   │   │   ├── key_extractor.meta.json
+    │   │   │   │   │   ├── dependency-coordinator.data.json
+    │   │   │   │   │   ├── dependency-coordinator.meta.json
+    │   │   │   │   │   ├── fsm-helper.data.json
+    │   │   │   │   │   ├── fsm-helper.meta.json
+    │   │   │   │   │   ├── key-extractor.data.json
+    │   │   │   │   │   ├── key-extractor.meta.json
     │   │   │   │   │   ├── merger.data.json
     │   │   │   │   │   ├── merger.meta.json
-    │   │   │   │   │   ├── preflight_validator.data.json
-    │   │   │   │   │   ├── preflight_validator.meta.json
+    │   │   │   │   │   ├── preflight-validator.data.json
+    │   │   │   │   │   ├── preflight-validator.meta.json
     │   │   │   │   │   ├── runner.data.json
     │   │   │   │   │   ├── runner.meta.json
-    │   │   │   │   │   ├── runner_helpers.data.json
-    │   │   │   │   │   └── runner_helpers.meta.json
+    │   │   │   │   │   ├── runner-helpers.data.json
+    │   │   │   │   │   └── runner-helpers.meta.json
     │   │   │   │   ├── core/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── base.data.json
     │   │   │   │   │   ├── base.meta.json
-    │   │   │   │   │   ├── base_transformer.data.json
-    │   │   │   │   │   ├── base_transformer.meta.json
-    │   │   │   │   │   ├── batch_executor.data.json
-    │   │   │   │   │   ├── batch_executor.meta.json
-    │   │   │   │   │   ├── batch_metrics.data.json
-    │   │   │   │   │   ├── batch_metrics.meta.json
-    │   │   │   │   │   ├── batch_tracing.data.json
-    │   │   │   │   │   ├── batch_tracing.meta.json
-    │   │   │   │   │   ├── batch_transformer.data.json
-    │   │   │   │   │   ├── batch_transformer.meta.json
-    │   │   │   │   │   ├── batch_writer.data.json
-    │   │   │   │   │   ├── batch_writer.meta.json
-    │   │   │   │   │   ├── checkpoint_manager.data.json
-    │   │   │   │   │   ├── checkpoint_manager.meta.json
-    │   │   │   │   │   ├── cleanup_service.data.json
-    │   │   │   │   │   ├── cleanup_service.meta.json
+    │   │   │   │   │   ├── base-transformer.data.json
+    │   │   │   │   │   ├── base-transformer.meta.json
+    │   │   │   │   │   ├── batch-executor.data.json
+    │   │   │   │   │   ├── batch-executor.meta.json
+    │   │   │   │   │   ├── batch-metrics.data.json
+    │   │   │   │   │   ├── batch-metrics.meta.json
+    │   │   │   │   │   ├── batch-tracing.data.json
+    │   │   │   │   │   ├── batch-tracing.meta.json
+    │   │   │   │   │   ├── batch-transformer.data.json
+    │   │   │   │   │   ├── batch-transformer.meta.json
+    │   │   │   │   │   ├── batch-writer.data.json
+    │   │   │   │   │   ├── batch-writer.meta.json
+    │   │   │   │   │   ├── checkpoint-manager.data.json
+    │   │   │   │   │   ├── checkpoint-manager.meta.json
+    │   │   │   │   │   ├── cleanup-service.data.json
+    │   │   │   │   │   ├── cleanup-service.meta.json
     │   │   │   │   │   ├── config.data.json
     │   │   │   │   │   ├── config.meta.json
-    │   │   │   │   │   ├── document_term_data_source.data.json
-    │   │   │   │   │   ├── document_term_data_source.meta.json
+    │   │   │   │   │   ├── document-term-data-source.data.json
+    │   │   │   │   │   ├── document-term-data-source.meta.json
     │   │   │   │   │   ├── executor.data.json
     │   │   │   │   │   ├── executor.meta.json
-    │   │   │   │   │   ├── field_specs.data.json
-    │   │   │   │   │   ├── field_specs.meta.json
-    │   │   │   │   │   ├── filtered_data_source.data.json
-    │   │   │   │   │   ├── filtered_data_source.meta.json
-    │   │   │   │   │   ├── health_aggregator.data.json
-    │   │   │   │   │   ├── health_aggregator.meta.json
+    │   │   │   │   │   ├── field-specs.data.json
+    │   │   │   │   │   ├── field-specs.meta.json
+    │   │   │   │   │   ├── filtered-data-source.data.json
+    │   │   │   │   │   ├── filtered-data-source.meta.json
+    │   │   │   │   │   ├── health-aggregator.data.json
+    │   │   │   │   │   ├── health-aggregator.meta.json
     │   │   │   │   │   ├── heartbeat.data.json
     │   │   │   │   │   ├── heartbeat.meta.json
-    │   │   │   │   │   ├── idmapping_data_source.data.json
-    │   │   │   │   │   ├── idmapping_data_source.meta.json
-    │   │   │   │   │   ├── lifecycle_orchestrator.data.json
-    │   │   │   │   │   ├── lifecycle_orchestrator.meta.json
-    │   │   │   │   │   ├── lock_manager.data.json
-    │   │   │   │   │   ├── lock_manager.meta.json
-    │   │   │   │   │   ├── medallion_policy.data.json
-    │   │   │   │   │   ├── medallion_policy.meta.json
-    │   │   │   │   │   ├── memory_monitor.data.json
-    │   │   │   │   │   ├── memory_monitor.meta.json
-    │   │   │   │   │   ├── pipeline_services.data.json
-    │   │   │   │   │   ├── pipeline_services.meta.json
-    │   │   │   │   │   ├── postrun_service.data.json
-    │   │   │   │   │   ├── postrun_service.meta.json
-    │   │   │   │   │   ├── preflight_service.data.json
-    │   │   │   │   │   ├── preflight_service.meta.json
+    │   │   │   │   │   ├── idmapping-data-source.data.json
+    │   │   │   │   │   ├── idmapping-data-source.meta.json
+    │   │   │   │   │   ├── lifecycle-orchestrator.data.json
+    │   │   │   │   │   ├── lifecycle-orchestrator.meta.json
+    │   │   │   │   │   ├── lock-manager.data.json
+    │   │   │   │   │   ├── lock-manager.meta.json
+    │   │   │   │   │   ├── medallion-policy.data.json
+    │   │   │   │   │   ├── medallion-policy.meta.json
+    │   │   │   │   │   ├── memory-monitor.data.json
+    │   │   │   │   │   ├── memory-monitor.meta.json
+    │   │   │   │   │   ├── pipeline-services.data.json
+    │   │   │   │   │   ├── pipeline-services.meta.json
+    │   │   │   │   │   ├── postrun-service.data.json
+    │   │   │   │   │   ├── postrun-service.meta.json
+    │   │   │   │   │   ├── preflight-service.data.json
+    │   │   │   │   │   ├── preflight-service.meta.json
     │   │   │   │   │   ├── protocols.data.json
     │   │   │   │   │   ├── protocols.meta.json
-    │   │   │   │   │   ├── publication_term_data_source.data.json
-    │   │   │   │   │   ├── publication_term_data_source.meta.json
-    │   │   │   │   │   ├── quarantine_manager.data.json
-    │   │   │   │   │   ├── quarantine_manager.meta.json
-    │   │   │   │   │   ├── record_processor.data.json
-    │   │   │   │   │   ├── record_processor.meta.json
+    │   │   │   │   │   ├── publication-term-data-source.data.json
+    │   │   │   │   │   ├── publication-term-data-source.meta.json
+    │   │   │   │   │   ├── quarantine-manager.data.json
+    │   │   │   │   │   ├── quarantine-manager.meta.json
+    │   │   │   │   │   ├── record-processor.data.json
+    │   │   │   │   │   ├── record-processor.meta.json
     │   │   │   │   │   ├── runner.data.json
     │   │   │   │   │   ├── runner.meta.json
-    │   │   │   │   │   ├── runner_services.data.json
-    │   │   │   │   │   ├── runner_services.meta.json
+    │   │   │   │   │   ├── runner-services.data.json
+    │   │   │   │   │   ├── runner-services.meta.json
     │   │   │   │   │   ├── shutdown.data.json
     │   │   │   │   │   ├── shutdown.meta.json
-    │   │   │   │   │   ├── transform_utils.data.json
-    │   │   │   │   │   └── transform_utils.meta.json
+    │   │   │   │   │   ├── transform-utils.data.json
+    │   │   │   │   │   └── transform-utils.meta.json
     │   │   │   │   ├── observability/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── observer.data.json
     │   │   │   │   │   ├── observer.meta.json
-    │   │   │   │   │   ├── span_helpers.data.json
-    │   │   │   │   │   └── span_helpers.meta.json
+    │   │   │   │   │   ├── span-helpers.data.json
+    │   │   │   │   │   └── span-helpers.meta.json
     │   │   │   │   ├── pipelines/
     │   │   │   │   │   ├── chembl/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   ├── activity.data.json
     │   │   │   │   │   │   ├── activity.meta.json
-    │   │   │   │   │   │   ├── activity_transformer.data.json
-    │   │   │   │   │   │   ├── activity_transformer.meta.json
+    │   │   │   │   │   │   ├── activity-transformer.data.json
+    │   │   │   │   │   │   ├── activity-transformer.meta.json
     │   │   │   │   │   │   ├── assay.data.json
     │   │   │   │   │   │   ├── assay.meta.json
-    │   │   │   │   │   │   ├── assay_parameters.data.json
-    │   │   │   │   │   │   ├── assay_parameters.meta.json
-    │   │   │   │   │   │   ├── assay_parameters_transformer.data.json
-    │   │   │   │   │   │   ├── assay_parameters_transformer.meta.json
-    │   │   │   │   │   │   ├── assay_transformer.data.json
-    │   │   │   │   │   │   ├── assay_transformer.meta.json
-    │   │   │   │   │   │   ├── base_chembl_transformer.data.json
-    │   │   │   │   │   │   ├── base_chembl_transformer.meta.json
-    │   │   │   │   │   │   ├── cell_line.data.json
-    │   │   │   │   │   │   ├── cell_line.meta.json
-    │   │   │   │   │   │   ├── cell_line_transformer.data.json
-    │   │   │   │   │   │   ├── cell_line_transformer.meta.json
-    │   │   │   │   │   │   ├── compound_record.data.json
-    │   │   │   │   │   │   ├── compound_record.meta.json
-    │   │   │   │   │   │   ├── compound_record_transformer.data.json
-    │   │   │   │   │   │   ├── compound_record_transformer.meta.json
+    │   │   │   │   │   │   ├── assay-parameters.data.json
+    │   │   │   │   │   │   ├── assay-parameters.meta.json
+    │   │   │   │   │   │   ├── assay-parameters-transformer.data.json
+    │   │   │   │   │   │   ├── assay-parameters-transformer.meta.json
+    │   │   │   │   │   │   ├── assay-transformer.data.json
+    │   │   │   │   │   │   ├── assay-transformer.meta.json
+    │   │   │   │   │   │   ├── base-chembl-transformer.data.json
+    │   │   │   │   │   │   ├── base-chembl-transformer.meta.json
+    │   │   │   │   │   │   ├── cell-line.data.json
+    │   │   │   │   │   │   ├── cell-line.meta.json
+    │   │   │   │   │   │   ├── cell-line-transformer.data.json
+    │   │   │   │   │   │   ├── cell-line-transformer.meta.json
+    │   │   │   │   │   │   ├── compound-record.data.json
+    │   │   │   │   │   │   ├── compound-record.meta.json
+    │   │   │   │   │   │   ├── compound-record-transformer.data.json
+    │   │   │   │   │   │   ├── compound-record-transformer.meta.json
     │   │   │   │   │   │   ├── document.data.json
     │   │   │   │   │   │   ├── document.meta.json
-    │   │   │   │   │   │   ├── document_similarity.data.json
-    │   │   │   │   │   │   ├── document_similarity.meta.json
-    │   │   │   │   │   │   ├── document_similarity_transformer.data.json
-    │   │   │   │   │   │   ├── document_similarity_transformer.meta.json
-    │   │   │   │   │   │   ├── document_term.data.json
-    │   │   │   │   │   │   ├── document_term.meta.json
-    │   │   │   │   │   │   ├── document_term_transformer.data.json
-    │   │   │   │   │   │   ├── document_term_transformer.meta.json
-    │   │   │   │   │   │   ├── document_transformer.data.json
-    │   │   │   │   │   │   ├── document_transformer.meta.json
+    │   │   │   │   │   │   ├── document-similarity.data.json
+    │   │   │   │   │   │   ├── document-similarity.meta.json
+    │   │   │   │   │   │   ├── document-similarity-transformer.data.json
+    │   │   │   │   │   │   ├── document-similarity-transformer.meta.json
+    │   │   │   │   │   │   ├── document-term.data.json
+    │   │   │   │   │   │   ├── document-term.meta.json
+    │   │   │   │   │   │   ├── document-term-transformer.data.json
+    │   │   │   │   │   │   ├── document-term-transformer.meta.json
+    │   │   │   │   │   │   ├── document-transformer.data.json
+    │   │   │   │   │   │   ├── document-transformer.meta.json
     │   │   │   │   │   │   ├── molecule.data.json
     │   │   │   │   │   │   ├── molecule.meta.json
-    │   │   │   │   │   │   ├── molecule_transformer.data.json
-    │   │   │   │   │   │   ├── molecule_transformer.meta.json
-    │   │   │   │   │   │   ├── protein_class.data.json
-    │   │   │   │   │   │   ├── protein_class.meta.json
-    │   │   │   │   │   │   ├── protein_class_transformer.data.json
-    │   │   │   │   │   │   ├── protein_class_transformer.meta.json
+    │   │   │   │   │   │   ├── molecule-transformer.data.json
+    │   │   │   │   │   │   ├── molecule-transformer.meta.json
+    │   │   │   │   │   │   ├── protein-class.data.json
+    │   │   │   │   │   │   ├── protein-class.meta.json
+    │   │   │   │   │   │   ├── protein-class-transformer.data.json
+    │   │   │   │   │   │   ├── protein-class-transformer.meta.json
     │   │   │   │   │   │   ├── publication.data.json
     │   │   │   │   │   │   ├── publication.meta.json
-    │   │   │   │   │   │   ├── publication_similarity.data.json
-    │   │   │   │   │   │   ├── publication_similarity.meta.json
-    │   │   │   │   │   │   ├── publication_similarity_transformer.data.json
-    │   │   │   │   │   │   ├── publication_similarity_transformer.meta.json
-    │   │   │   │   │   │   ├── publication_term.data.json
-    │   │   │   │   │   │   ├── publication_term.meta.json
-    │   │   │   │   │   │   ├── publication_term_transformer.data.json
-    │   │   │   │   │   │   ├── publication_term_transformer.meta.json
-    │   │   │   │   │   │   ├── publication_transformer.data.json
-    │   │   │   │   │   │   ├── publication_transformer.meta.json
+    │   │   │   │   │   │   ├── publication-similarity.data.json
+    │   │   │   │   │   │   ├── publication-similarity.meta.json
+    │   │   │   │   │   │   ├── publication-similarity-transformer.data.json
+    │   │   │   │   │   │   ├── publication-similarity-transformer.meta.json
+    │   │   │   │   │   │   ├── publication-term.data.json
+    │   │   │   │   │   │   ├── publication-term.meta.json
+    │   │   │   │   │   │   ├── publication-term-transformer.data.json
+    │   │   │   │   │   │   ├── publication-term-transformer.meta.json
+    │   │   │   │   │   │   ├── publication-transformer.data.json
+    │   │   │   │   │   │   ├── publication-transformer.meta.json
     │   │   │   │   │   │   ├── target.data.json
     │   │   │   │   │   │   ├── target.meta.json
-    │   │   │   │   │   │   ├── target_component.data.json
-    │   │   │   │   │   │   ├── target_component.meta.json
-    │   │   │   │   │   │   ├── target_component_transformer.data.json
-    │   │   │   │   │   │   ├── target_component_transformer.meta.json
-    │   │   │   │   │   │   ├── target_transformer.data.json
-    │   │   │   │   │   │   └── target_transformer.meta.json
+    │   │   │   │   │   │   ├── target-component.data.json
+    │   │   │   │   │   │   ├── target-component.meta.json
+    │   │   │   │   │   │   ├── target-component-transformer.data.json
+    │   │   │   │   │   │   ├── target-component-transformer.meta.json
+    │   │   │   │   │   │   ├── target-transformer.data.json
+    │   │   │   │   │   │   └── target-transformer.meta.json
     │   │   │   │   │   ├── common/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── base_publication_transformer.data.json
-    │   │   │   │   │   │   ├── base_publication_transformer.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   │   ├── base-publication-transformer.data.json
+    │   │   │   │   │   │   ├── base-publication-transformer.meta.json
     │   │   │   │   │   │   ├── extractors.data.json
     │   │   │   │   │   │   └── extractors.meta.json
     │   │   │   │   │   ├── crossref/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── author_extractors.data.json
-    │   │   │   │   │   │   ├── author_extractors.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   │   ├── author-extractors.data.json
+    │   │   │   │   │   │   ├── author-extractors.meta.json
     │   │   │   │   │   │   ├── extractors.data.json
     │   │   │   │   │   │   ├── extractors.meta.json
-    │   │   │   │   │   │   ├── reference_extractors.data.json
-    │   │   │   │   │   │   ├── reference_extractors.meta.json
+    │   │   │   │   │   │   ├── reference-extractors.data.json
+    │   │   │   │   │   │   ├── reference-extractors.meta.json
     │   │   │   │   │   │   ├── transformer.data.json
     │   │   │   │   │   │   └── transformer.meta.json
     │   │   │   │   │   ├── openalex/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   ├── extractors.data.json
     │   │   │   │   │   │   ├── extractors.meta.json
     │   │   │   │   │   │   ├── transformer.data.json
     │   │   │   │   │   │   └── transformer.meta.json
     │   │   │   │   │   ├── pubchem/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   ├── compound.data.json
     │   │   │   │   │   │   ├── compound.meta.json
     │   │   │   │   │   │   ├── transformer.data.json
     │   │   │   │   │   │   └── transformer.meta.json
     │   │   │   │   │   ├── pubmed/
     │   │   │   │   │   │   ├── extractors/
-    │   │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   │   ├── abstract.data.json
     │   │   │   │   │   │   │   ├── abstract.meta.json
     │   │   │   │   │   │   │   ├── author.data.json
@@ -5547,27 +5547,27 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   │   │   ├── date.meta.json
     │   │   │   │   │   │   │   ├── identifier.data.json
     │   │   │   │   │   │   │   └── identifier.meta.json
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   ├── publication.data.json
     │   │   │   │   │   │   ├── publication.meta.json
     │   │   │   │   │   │   ├── publications.data.json
     │   │   │   │   │   │   ├── publications.meta.json
     │   │   │   │   │   │   ├── transformer.data.json
     │   │   │   │   │   │   ├── transformer.meta.json
-    │   │   │   │   │   │   ├── xml_utils.data.json
-    │   │   │   │   │   │   └── xml_utils.meta.json
+    │   │   │   │   │   │   ├── xml-utils.data.json
+    │   │   │   │   │   │   └── xml-utils.meta.json
     │   │   │   │   │   ├── semanticscholar/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   ├── extractors.data.json
     │   │   │   │   │   │   ├── extractors.meta.json
     │   │   │   │   │   │   ├── transformer.data.json
     │   │   │   │   │   │   └── transformer.meta.json
     │   │   │   │   │   ├── uniprot/
     │   │   │   │   │   │   ├── extractors/
-    │   │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   │   ├── comments.data.json
     │   │   │   │   │   │   │   ├── comments.meta.json
     │   │   │   │   │   │   │   ├── crossrefs.data.json
@@ -5578,70 +5578,70 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   │   │   ├── genes.meta.json
     │   │   │   │   │   │   │   ├── utils.data.json
     │   │   │   │   │   │   │   └── utils.meta.json
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── idmapping_transformer.data.json
-    │   │   │   │   │   │   ├── idmapping_transformer.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   │   ├── idmapping-transformer.data.json
+    │   │   │   │   │   │   ├── idmapping-transformer.meta.json
     │   │   │   │   │   │   ├── protein.data.json
     │   │   │   │   │   │   ├── protein.meta.json
     │   │   │   │   │   │   ├── transformer.data.json
     │   │   │   │   │   │   └── transformer.meta.json
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── generic.data.json
     │   │   │   │   │   └── generic.meta.json
     │   │   │   │   ├── services/
     │   │   │   │   │   ├── dq/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── bronze_analyzer.data.json
-    │   │   │   │   │   │   ├── bronze_analyzer.meta.json
-    │   │   │   │   │   │   ├── gold_analyzer.data.json
-    │   │   │   │   │   │   ├── gold_analyzer.meta.json
-    │   │   │   │   │   │   ├── silver_analyzer.data.json
-    │   │   │   │   │   │   ├── silver_analyzer.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   │   ├── bronze-analyzer.data.json
+    │   │   │   │   │   │   ├── bronze-analyzer.meta.json
+    │   │   │   │   │   │   ├── gold-analyzer.data.json
+    │   │   │   │   │   │   ├── gold-analyzer.meta.json
+    │   │   │   │   │   │   ├── silver-analyzer.data.json
+    │   │   │   │   │   │   ├── silver-analyzer.meta.json
     │   │   │   │   │   │   ├── utils.data.json
     │   │   │   │   │   │   └── utils.meta.json
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── bronze_cleanup_service.data.json
-    │   │   │   │   │   ├── bronze_cleanup_service.meta.json
-    │   │   │   │   │   ├── checkpoint_service.data.json
-    │   │   │   │   │   ├── checkpoint_service.meta.json
-    │   │   │   │   │   ├── config_service.data.json
-    │   │   │   │   │   ├── config_service.meta.json
-    │   │   │   │   │   ├── data_quality_service.data.json
-    │   │   │   │   │   ├── data_quality_service.meta.json
-    │   │   │   │   │   ├── dq_metrics_calculator.data.json
-    │   │   │   │   │   ├── dq_metrics_calculator.meta.json
-    │   │   │   │   │   ├── dq_report_service.data.json
-    │   │   │   │   │   ├── dq_report_service.meta.json
-    │   │   │   │   │   ├── export_service.data.json
-    │   │   │   │   │   ├── export_service.meta.json
-    │   │   │   │   │   ├── health_service.data.json
-    │   │   │   │   │   ├── health_service.meta.json
-    │   │   │   │   │   ├── lock_service.data.json
-    │   │   │   │   │   ├── lock_service.meta.json
-    │   │   │   │   │   ├── medallion_lifecycle.data.json
-    │   │   │   │   │   ├── medallion_lifecycle.meta.json
-    │   │   │   │   │   ├── medallion_types.data.json
-    │   │   │   │   │   ├── medallion_types.meta.json
-    │   │   │   │   │   ├── metrics_service.data.json
-    │   │   │   │   │   ├── metrics_service.meta.json
-    │   │   │   │   │   ├── pipeline_runner_service.data.json
-    │   │   │   │   │   ├── pipeline_runner_service.meta.json
-    │   │   │   │   │   ├── quarantine_service.data.json
-    │   │   │   │   │   ├── quarantine_service.meta.json
-    │   │   │   │   │   ├── shutdown_service.data.json
-    │   │   │   │   │   ├── shutdown_service.meta.json
-    │   │   │   │   │   ├── vacuum_service.data.json
-    │   │   │   │   │   └── vacuum_service.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   └── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── bronze-cleanup-service.data.json
+    │   │   │   │   │   ├── bronze-cleanup-service.meta.json
+    │   │   │   │   │   ├── checkpoint-service.data.json
+    │   │   │   │   │   ├── checkpoint-service.meta.json
+    │   │   │   │   │   ├── config-service.data.json
+    │   │   │   │   │   ├── config-service.meta.json
+    │   │   │   │   │   ├── data-quality-service.data.json
+    │   │   │   │   │   ├── data-quality-service.meta.json
+    │   │   │   │   │   ├── dq-metrics-calculator.data.json
+    │   │   │   │   │   ├── dq-metrics-calculator.meta.json
+    │   │   │   │   │   ├── dq-report-service.data.json
+    │   │   │   │   │   ├── dq-report-service.meta.json
+    │   │   │   │   │   ├── export-service.data.json
+    │   │   │   │   │   ├── export-service.meta.json
+    │   │   │   │   │   ├── health-service.data.json
+    │   │   │   │   │   ├── health-service.meta.json
+    │   │   │   │   │   ├── lock-service.data.json
+    │   │   │   │   │   ├── lock-service.meta.json
+    │   │   │   │   │   ├── medallion-lifecycle.data.json
+    │   │   │   │   │   ├── medallion-lifecycle.meta.json
+    │   │   │   │   │   ├── medallion-types.data.json
+    │   │   │   │   │   ├── medallion-types.meta.json
+    │   │   │   │   │   ├── metrics-service.data.json
+    │   │   │   │   │   ├── metrics-service.meta.json
+    │   │   │   │   │   ├── pipeline-runner-service.data.json
+    │   │   │   │   │   ├── pipeline-runner-service.meta.json
+    │   │   │   │   │   ├── quarantine-service.data.json
+    │   │   │   │   │   ├── quarantine-service.meta.json
+    │   │   │   │   │   ├── shutdown-service.data.json
+    │   │   │   │   │   ├── shutdown-service.meta.json
+    │   │   │   │   │   ├── vacuum-service.data.json
+    │   │   │   │   │   └── vacuum-service.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   └── --init--.meta.json
     │   │   │   ├── composition/
-    │   │   │   │   ├── _bootstrap/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── -bootstrap/
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── checkpoint.data.json
     │   │   │   │   │   ├── checkpoint.meta.json
     │   │   │   │   │   ├── config.data.json
@@ -5658,15 +5658,15 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   └── storage.meta.json
     │   │   │   │   ├── bootstrap/
     │   │   │   │   │   ├── assembly/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   ├── checkpoint.data.json
     │   │   │   │   │   │   ├── checkpoint.meta.json
     │   │   │   │   │   │   ├── storage.data.json
     │   │   │   │   │   │   └── storage.meta.json
     │   │   │   │   │   ├── cli/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   ├── checkpoint.data.json
     │   │   │   │   │   │   ├── checkpoint.meta.json
     │   │   │   │   │   │   ├── config.data.json
@@ -5682,8 +5682,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   │   ├── storage.data.json
     │   │   │   │   │   │   └── storage.meta.json
     │   │   │   │   │   ├── runtime/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   ├── assembly.data.json
     │   │   │   │   │   │   ├── assembly.meta.json
     │   │   │   │   │   │   ├── composite.data.json
@@ -5694,63 +5694,63 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   │   ├── pipeline.meta.json
     │   │   │   │   │   │   ├── runner.data.json
     │   │   │   │   │   │   └── runner.meta.json
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   └── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   └── --init--.meta.json
     │   │   │   │   ├── factories/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── data_source_factory.data.json
-    │   │   │   │   │   ├── data_source_factory.meta.json
-    │   │   │   │   │   ├── dq_factory.data.json
-    │   │   │   │   │   ├── dq_factory.meta.json
-    │   │   │   │   │   ├── http_client_factory.data.json
-    │   │   │   │   │   ├── http_client_factory.meta.json
-    │   │   │   │   │   ├── pipeline_factories.data.json
-    │   │   │   │   │   ├── pipeline_factories.meta.json
-    │   │   │   │   │   ├── pipeline_factory.data.json
-    │   │   │   │   │   ├── pipeline_factory.meta.json
-    │   │   │   │   │   ├── runner_factory.data.json
-    │   │   │   │   │   ├── runner_factory.meta.json
-    │   │   │   │   │   ├── services_factory.data.json
-    │   │   │   │   │   ├── services_factory.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── data-source-factory.data.json
+    │   │   │   │   │   ├── data-source-factory.meta.json
+    │   │   │   │   │   ├── dq-factory.data.json
+    │   │   │   │   │   ├── dq-factory.meta.json
+    │   │   │   │   │   ├── http-client-factory.data.json
+    │   │   │   │   │   ├── http-client-factory.meta.json
+    │   │   │   │   │   ├── pipeline-factories.data.json
+    │   │   │   │   │   ├── pipeline-factories.meta.json
+    │   │   │   │   │   ├── pipeline-factory.data.json
+    │   │   │   │   │   ├── pipeline-factory.meta.json
+    │   │   │   │   │   ├── runner-factory.data.json
+    │   │   │   │   │   ├── runner-factory.meta.json
+    │   │   │   │   │   ├── services-factory.data.json
+    │   │   │   │   │   ├── services-factory.meta.json
     │   │   │   │   │   ├── storage.data.json
     │   │   │   │   │   ├── storage.meta.json
-    │   │   │   │   │   ├── storage_adapter.data.json
-    │   │   │   │   │   ├── storage_adapter.meta.json
-    │   │   │   │   │   ├── storage_factory.data.json
-    │   │   │   │   │   ├── storage_factory.meta.json
-    │   │   │   │   │   ├── transformer_factory.data.json
-    │   │   │   │   │   └── transformer_factory.meta.json
+    │   │   │   │   │   ├── storage-adapter.data.json
+    │   │   │   │   │   ├── storage-adapter.meta.json
+    │   │   │   │   │   ├── storage-factory.data.json
+    │   │   │   │   │   ├── storage-factory.meta.json
+    │   │   │   │   │   ├── transformer-factory.data.json
+    │   │   │   │   │   └── transformer-factory.meta.json
     │   │   │   │   ├── providers/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── decorators.data.json
     │   │   │   │   │   ├── decorators.meta.json
     │   │   │   │   │   ├── loader.data.json
     │   │   │   │   │   ├── loader.meta.json
-    │   │   │   │   │   ├── provider_registry.data.json
-    │   │   │   │   │   ├── provider_registry.meta.json
+    │   │   │   │   │   ├── provider-registry.data.json
+    │   │   │   │   │   ├── provider-registry.meta.json
     │   │   │   │   │   ├── registration.data.json
     │   │   │   │   │   └── registration.meta.json
     │   │   │   │   ├── services/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── metadata_coordinator.data.json
-    │   │   │   │   │   ├── metadata_coordinator.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── metadata-coordinator.data.json
+    │   │   │   │   │   ├── metadata-coordinator.meta.json
     │   │   │   │   │   ├── versioning.data.json
     │   │   │   │   │   └── versioning.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── base_registry.data.json
-    │   │   │   │   ├── base_registry.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── base-registry.data.json
+    │   │   │   │   ├── base-registry.meta.json
     │   │   │   │   ├── bootstrap.data.json
     │   │   │   │   ├── bootstrap.meta.json
-    │   │   │   │   ├── bootstrap_composite.data.json
-    │   │   │   │   ├── bootstrap_composite.meta.json
-    │   │   │   │   ├── bootstrap_contexts.data.json
-    │   │   │   │   ├── bootstrap_contexts.meta.json
-    │   │   │   │   ├── bootstrap_logger.data.json
-    │   │   │   │   ├── bootstrap_logger.meta.json
+    │   │   │   │   ├── bootstrap-composite.data.json
+    │   │   │   │   ├── bootstrap-composite.meta.json
+    │   │   │   │   ├── bootstrap-contexts.data.json
+    │   │   │   │   ├── bootstrap-contexts.meta.json
+    │   │   │   │   ├── bootstrap-logger.data.json
+    │   │   │   │   ├── bootstrap-logger.meta.json
     │   │   │   │   ├── builders.data.json
     │   │   │   │   ├── builders.meta.json
     │   │   │   │   ├── entrypoints.data.json
@@ -5763,19 +5763,19 @@ BioactivityDataAcquisition2/
     │   │   │   │   └── types.meta.json
     │   │   │   ├── domain/
     │   │   │   │   ├── aggregates/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── batch.data.json
     │   │   │   │   │   ├── batch.meta.json
     │   │   │   │   │   ├── events.data.json
     │   │   │   │   │   ├── events.meta.json
-    │   │   │   │   │   ├── pipeline_run.data.json
-    │   │   │   │   │   ├── pipeline_run.meta.json
-    │   │   │   │   │   ├── quarantine_entry.data.json
-    │   │   │   │   │   └── quarantine_entry.meta.json
+    │   │   │   │   │   ├── pipeline-run.data.json
+    │   │   │   │   │   ├── pipeline-run.meta.json
+    │   │   │   │   │   ├── quarantine-entry.data.json
+    │   │   │   │   │   └── quarantine-entry.meta.json
     │   │   │   │   ├── composite/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── aggregation.data.json
     │   │   │   │   │   ├── aggregation.meta.json
     │   │   │   │   │   ├── config.data.json
@@ -5789,16 +5789,16 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── strategy.data.json
     │   │   │   │   │   └── strategy.meta.json
     │   │   │   │   ├── configs/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── base.data.json
     │   │   │   │   │   └── base.meta.json
     │   │   │   │   ├── contracts/
     │   │   │   │   │   ├── gold/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── _base.data.json
-    │   │   │   │   │   │   ├── _base.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   │   ├── -base.data.json
+    │   │   │   │   │   │   ├── -base.meta.json
     │   │   │   │   │   │   ├── chembl.data.json
     │   │   │   │   │   │   ├── chembl.meta.json
     │   │   │   │   │   │   ├── pubchem.data.json
@@ -5807,33 +5807,33 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   │   ├── publications.meta.json
     │   │   │   │   │   │   ├── uniprot.data.json
     │   │   │   │   │   │   └── uniprot.meta.json
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   └── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   └── --init--.meta.json
     │   │   │   │   ├── entities/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── base.data.json
     │   │   │   │   │   ├── base.meta.json
     │   │   │   │   │   ├── bioactivity.data.json
     │   │   │   │   │   ├── bioactivity.meta.json
     │   │   │   │   │   ├── chembl.data.json
     │   │   │   │   │   ├── chembl.meta.json
-    │   │   │   │   │   ├── chembl_activity.data.json
-    │   │   │   │   │   ├── chembl_activity.meta.json
-    │   │   │   │   │   ├── chembl_assay_parameters.data.json
-    │   │   │   │   │   ├── chembl_assay_parameters.meta.json
-    │   │   │   │   │   ├── chembl_compound_record.data.json
-    │   │   │   │   │   ├── chembl_compound_record.meta.json
-    │   │   │   │   │   ├── chembl_structures.data.json
-    │   │   │   │   │   ├── chembl_structures.meta.json
+    │   │   │   │   │   ├── chembl-activity.data.json
+    │   │   │   │   │   ├── chembl-activity.meta.json
+    │   │   │   │   │   ├── chembl-assay-parameters.data.json
+    │   │   │   │   │   ├── chembl-assay-parameters.meta.json
+    │   │   │   │   │   ├── chembl-compound-record.data.json
+    │   │   │   │   │   ├── chembl-compound-record.meta.json
+    │   │   │   │   │   ├── chembl-structures.data.json
+    │   │   │   │   │   ├── chembl-structures.meta.json
     │   │   │   │   │   ├── crossref.data.json
     │   │   │   │   │   ├── crossref.meta.json
     │   │   │   │   │   ├── openalex.data.json
     │   │   │   │   │   ├── openalex.meta.json
     │   │   │   │   │   ├── pubchem.data.json
     │   │   │   │   │   ├── pubchem.meta.json
-    │   │   │   │   │   ├── publication_base.data.json
-    │   │   │   │   │   ├── publication_base.meta.json
+    │   │   │   │   │   ├── publication-base.data.json
+    │   │   │   │   │   ├── publication-base.meta.json
     │   │   │   │   │   ├── pubmed.data.json
     │   │   │   │   │   ├── pubmed.meta.json
     │   │   │   │   │   ├── semanticscholar.data.json
@@ -5841,16 +5841,16 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── uniprot.data.json
     │   │   │   │   │   └── uniprot.meta.json
     │   │   │   │   ├── exceptions/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── base.data.json
     │   │   │   │   │   ├── base.meta.json
     │   │   │   │   │   ├── critical.data.json
     │   │   │   │   │   ├── critical.meta.json
-    │   │   │   │   │   ├── data_quality.data.json
-    │   │   │   │   │   ├── data_quality.meta.json
-    │   │   │   │   │   ├── external_service.data.json
-    │   │   │   │   │   ├── external_service.meta.json
+    │   │   │   │   │   ├── data-quality.data.json
+    │   │   │   │   │   ├── data-quality.meta.json
+    │   │   │   │   │   ├── external-service.data.json
+    │   │   │   │   │   ├── external-service.meta.json
     │   │   │   │   │   ├── infrastructure.data.json
     │   │   │   │   │   ├── infrastructure.meta.json
     │   │   │   │   │   ├── internal.data.json
@@ -5864,46 +5864,46 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── validation.data.json
     │   │   │   │   │   └── validation.meta.json
     │   │   │   │   ├── filtering/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── column_filter.data.json
-    │   │   │   │   │   ├── column_filter.meta.json
-    │   │   │   │   │   ├── gold_config.data.json
-    │   │   │   │   │   ├── gold_config.meta.json
-    │   │   │   │   │   ├── input_config.data.json
-    │   │   │   │   │   ├── input_config.meta.json
-    │   │   │   │   │   ├── list_filters.data.json
-    │   │   │   │   │   ├── list_filters.meta.json
-    │   │   │   │   │   ├── load_result.data.json
-    │   │   │   │   │   ├── load_result.meta.json
-    │   │   │   │   │   ├── range_filter.data.json
-    │   │   │   │   │   └── range_filter.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── column-filter.data.json
+    │   │   │   │   │   ├── column-filter.meta.json
+    │   │   │   │   │   ├── gold-config.data.json
+    │   │   │   │   │   ├── gold-config.meta.json
+    │   │   │   │   │   ├── input-config.data.json
+    │   │   │   │   │   ├── input-config.meta.json
+    │   │   │   │   │   ├── list-filters.data.json
+    │   │   │   │   │   ├── list-filters.meta.json
+    │   │   │   │   │   ├── load-result.data.json
+    │   │   │   │   │   ├── load-result.meta.json
+    │   │   │   │   │   ├── range-filter.data.json
+    │   │   │   │   │   └── range-filter.meta.json
     │   │   │   │   ├── models/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── metadata.data.json
     │   │   │   │   │   └── metadata.meta.json
     │   │   │   │   ├── ports/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── audit.data.json
     │   │   │   │   │   ├── audit.meta.json
     │   │   │   │   │   ├── checkpoint.data.json
     │   │   │   │   │   ├── checkpoint.meta.json
-    │   │   │   │   │   ├── data_normalization.data.json
-    │   │   │   │   │   ├── data_normalization.meta.json
-    │   │   │   │   │   ├── data_source.data.json
-    │   │   │   │   │   ├── data_source.meta.json
-    │   │   │   │   │   ├── delta_reader.data.json
-    │   │   │   │   │   ├── delta_reader.meta.json
-    │   │   │   │   │   ├── dq_config.data.json
-    │   │   │   │   │   ├── dq_config.meta.json
-    │   │   │   │   │   ├── dq_report.data.json
-    │   │   │   │   │   ├── dq_report.meta.json
+    │   │   │   │   │   ├── data-normalization.data.json
+    │   │   │   │   │   ├── data-normalization.meta.json
+    │   │   │   │   │   ├── data-source.data.json
+    │   │   │   │   │   ├── data-source.meta.json
+    │   │   │   │   │   ├── delta-reader.data.json
+    │   │   │   │   │   ├── delta-reader.meta.json
+    │   │   │   │   │   ├── dq-config.data.json
+    │   │   │   │   │   ├── dq-config.meta.json
+    │   │   │   │   │   ├── dq-report.data.json
+    │   │   │   │   │   ├── dq-report.meta.json
     │   │   │   │   │   ├── filtering.data.json
     │   │   │   │   │   ├── filtering.meta.json
-    │   │   │   │   │   ├── health_check.data.json
-    │   │   │   │   │   ├── health_check.meta.json
+    │   │   │   │   │   ├── health-check.data.json
+    │   │   │   │   │   ├── health-check.meta.json
     │   │   │   │   │   ├── idmapping.data.json
     │   │   │   │   │   ├── idmapping.meta.json
     │   │   │   │   │   ├── locking.data.json
@@ -5912,8 +5912,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── memory.meta.json
     │   │   │   │   │   ├── metadata.data.json
     │   │   │   │   │   ├── metadata.meta.json
-    │   │   │   │   │   ├── metadata_coordinator.data.json
-    │   │   │   │   │   ├── metadata_coordinator.meta.json
+    │   │   │   │   │   ├── metadata-coordinator.data.json
+    │   │   │   │   │   ├── metadata-coordinator.meta.json
     │   │   │   │   │   ├── noop.data.json
     │   │   │   │   │   ├── noop.meta.json
     │   │   │   │   │   ├── normalization.data.json
@@ -5939,8 +5939,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── watermark.data.json
     │   │   │   │   │   └── watermark.meta.json
     │   │   │   │   ├── registry/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── publication.data.json
     │   │   │   │   │   └── publication.meta.json
     │   │   │   │   ├── schemas/
@@ -5949,44 +5949,44 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   │   ├── activity.meta.json
     │   │   │   │   │   │   ├── assay.data.json
     │   │   │   │   │   │   ├── assay.meta.json
-    │   │   │   │   │   │   ├── assay_parameters.data.json
-    │   │   │   │   │   │   ├── assay_parameters.meta.json
-    │   │   │   │   │   │   ├── cell_line.data.json
-    │   │   │   │   │   │   ├── cell_line.meta.json
-    │   │   │   │   │   │   ├── compound_record.data.json
-    │   │   │   │   │   │   ├── compound_record.meta.json
+    │   │   │   │   │   │   ├── assay-parameters.data.json
+    │   │   │   │   │   │   ├── assay-parameters.meta.json
+    │   │   │   │   │   │   ├── cell-line.data.json
+    │   │   │   │   │   │   ├── cell-line.meta.json
+    │   │   │   │   │   │   ├── compound-record.data.json
+    │   │   │   │   │   │   ├── compound-record.meta.json
     │   │   │   │   │   │   ├── document.data.json
     │   │   │   │   │   │   ├── document.meta.json
-    │   │   │   │   │   │   ├── document_similarity.data.json
-    │   │   │   │   │   │   ├── document_similarity.meta.json
-    │   │   │   │   │   │   ├── document_term.data.json
-    │   │   │   │   │   │   ├── document_term.meta.json
+    │   │   │   │   │   │   ├── document-similarity.data.json
+    │   │   │   │   │   │   ├── document-similarity.meta.json
+    │   │   │   │   │   │   ├── document-term.data.json
+    │   │   │   │   │   │   ├── document-term.meta.json
     │   │   │   │   │   │   ├── molecule.data.json
     │   │   │   │   │   │   ├── molecule.meta.json
-    │   │   │   │   │   │   ├── molecule_form.data.json
-    │   │   │   │   │   │   ├── molecule_form.meta.json
-    │   │   │   │   │   │   ├── protein_classification.data.json
-    │   │   │   │   │   │   ├── protein_classification.meta.json
+    │   │   │   │   │   │   ├── molecule-form.data.json
+    │   │   │   │   │   │   ├── molecule-form.meta.json
+    │   │   │   │   │   │   ├── protein-classification.data.json
+    │   │   │   │   │   │   ├── protein-classification.meta.json
     │   │   │   │   │   │   ├── publication.data.json
     │   │   │   │   │   │   ├── publication.meta.json
-    │   │   │   │   │   │   ├── publication_similarity.data.json
-    │   │   │   │   │   │   ├── publication_similarity.meta.json
-    │   │   │   │   │   │   ├── publication_term.data.json
-    │   │   │   │   │   │   ├── publication_term.meta.json
+    │   │   │   │   │   │   ├── publication-similarity.data.json
+    │   │   │   │   │   │   ├── publication-similarity.meta.json
+    │   │   │   │   │   │   ├── publication-term.data.json
+    │   │   │   │   │   │   ├── publication-term.meta.json
     │   │   │   │   │   │   ├── target.data.json
     │   │   │   │   │   │   ├── target.meta.json
-    │   │   │   │   │   │   ├── target_component.data.json
-    │   │   │   │   │   │   ├── target_component.meta.json
-    │   │   │   │   │   │   ├── target_relation.data.json
-    │   │   │   │   │   │   └── target_relation.meta.json
+    │   │   │   │   │   │   ├── target-component.data.json
+    │   │   │   │   │   │   ├── target-component.meta.json
+    │   │   │   │   │   │   ├── target-relation.data.json
+    │   │   │   │   │   │   └── target-relation.meta.json
     │   │   │   │   │   ├── common/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── publication_base.data.json
-    │   │   │   │   │   │   └── publication_base.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   │   ├── publication-base.data.json
+    │   │   │   │   │   │   └── publication-base.meta.json
     │   │   │   │   │   ├── crossref/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   ├── author.data.json
     │   │   │   │   │   │   ├── author.meta.json
     │   │   │   │   │   │   ├── funder.data.json
@@ -5998,8 +5998,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   │   ├── work.data.json
     │   │   │   │   │   │   └── work.meta.json
     │   │   │   │   │   ├── openalex/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   ├── publication.data.json
     │   │   │   │   │   │   └── publication.meta.json
     │   │   │   │   │   ├── pubchem/
@@ -6011,8 +6011,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   │   ├── publication.data.json
     │   │   │   │   │   │   └── publication.meta.json
     │   │   │   │   │   ├── semanticscholar/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   ├── publication.data.json
     │   │   │   │   │   │   └── publication.meta.json
     │   │   │   │   │   ├── uniprot/
@@ -6022,14 +6022,14 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   │   ├── isoform.meta.json
     │   │   │   │   │   │   ├── protein.data.json
     │   │   │   │   │   │   └── protein.meta.json
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── base.data.json
     │   │   │   │   │   ├── base.meta.json
     │   │   │   │   │   ├── chembl.data.json
     │   │   │   │   │   ├── chembl.meta.json
-    │   │   │   │   │   ├── column_order.data.json
-    │   │   │   │   │   ├── column_order.meta.json
+    │   │   │   │   │   ├── column-order.data.json
+    │   │   │   │   │   ├── column-order.meta.json
     │   │   │   │   │   ├── pubchem.data.json
     │   │   │   │   │   ├── pubchem.meta.json
     │   │   │   │   │   ├── pubmed.data.json
@@ -6037,81 +6037,81 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── uniprot.data.json
     │   │   │   │   │   └── uniprot.meta.json
     │   │   │   │   ├── services/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── activity_aggregator.data.json
-    │   │   │   │   │   ├── activity_aggregator.meta.json
-    │   │   │   │   │   ├── data_normalization_config.data.json
-    │   │   │   │   │   ├── data_normalization_config.meta.json
-    │   │   │   │   │   ├── data_normalization_service.data.json
-    │   │   │   │   │   ├── data_normalization_service.meta.json
-    │   │   │   │   │   ├── dq_metrics_calculator.data.json
-    │   │   │   │   │   ├── dq_metrics_calculator.meta.json
-    │   │   │   │   │   ├── dq_serializer.data.json
-    │   │   │   │   │   ├── dq_serializer.meta.json
-    │   │   │   │   │   ├── identity_service.data.json
-    │   │   │   │   │   ├── identity_service.meta.json
-    │   │   │   │   │   ├── normalization_config.data.json
-    │   │   │   │   │   ├── normalization_config.meta.json
-    │   │   │   │   │   ├── normalization_service.data.json
-    │   │   │   │   │   ├── normalization_service.meta.json
-    │   │   │   │   │   ├── unit_converter.data.json
-    │   │   │   │   │   ├── unit_converter.meta.json
-    │   │   │   │   │   ├── value_validator.data.json
-    │   │   │   │   │   └── value_validator.meta.json
-    │   │   │   │   ├── value_objects/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── academic_ids.data.json
-    │   │   │   │   │   ├── academic_ids.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── activity-aggregator.data.json
+    │   │   │   │   │   ├── activity-aggregator.meta.json
+    │   │   │   │   │   ├── data-normalization-config.data.json
+    │   │   │   │   │   ├── data-normalization-config.meta.json
+    │   │   │   │   │   ├── data-normalization-service.data.json
+    │   │   │   │   │   ├── data-normalization-service.meta.json
+    │   │   │   │   │   ├── dq-metrics-calculator.data.json
+    │   │   │   │   │   ├── dq-metrics-calculator.meta.json
+    │   │   │   │   │   ├── dq-serializer.data.json
+    │   │   │   │   │   ├── dq-serializer.meta.json
+    │   │   │   │   │   ├── identity-service.data.json
+    │   │   │   │   │   ├── identity-service.meta.json
+    │   │   │   │   │   ├── normalization-config.data.json
+    │   │   │   │   │   ├── normalization-config.meta.json
+    │   │   │   │   │   ├── normalization-service.data.json
+    │   │   │   │   │   ├── normalization-service.meta.json
+    │   │   │   │   │   ├── unit-converter.data.json
+    │   │   │   │   │   ├── unit-converter.meta.json
+    │   │   │   │   │   ├── value-validator.data.json
+    │   │   │   │   │   └── value-validator.meta.json
+    │   │   │   │   ├── value-objects/
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── academic-ids.data.json
+    │   │   │   │   │   ├── academic-ids.meta.json
     │   │   │   │   │   ├── activity.data.json
     │   │   │   │   │   ├── activity.meta.json
-    │   │   │   │   │   ├── activity_values.data.json
-    │   │   │   │   │   ├── activity_values.meta.json
+    │   │   │   │   │   ├── activity-values.data.json
+    │   │   │   │   │   ├── activity-values.meta.json
     │   │   │   │   │   ├── base.data.json
     │   │   │   │   │   ├── base.meta.json
-    │   │   │   │   │   ├── bronze_result.data.json
-    │   │   │   │   │   ├── bronze_result.meta.json
+    │   │   │   │   │   ├── bronze-result.data.json
+    │   │   │   │   │   ├── bronze-result.meta.json
     │   │   │   │   │   ├── chemical.data.json
     │   │   │   │   │   ├── chemical.meta.json
-    │   │   │   │   │   ├── column_order.data.json
-    │   │   │   │   │   ├── column_order.meta.json
-    │   │   │   │   │   ├── column_qualifier.data.json
-    │   │   │   │   │   ├── column_qualifier.meta.json
-    │   │   │   │   │   ├── compound_ids.data.json
-    │   │   │   │   │   ├── compound_ids.meta.json
-    │   │   │   │   │   ├── dq_metrics.data.json
-    │   │   │   │   │   ├── dq_metrics.meta.json
-    │   │   │   │   │   ├── dq_report.data.json
-    │   │   │   │   │   ├── dq_report.meta.json
-    │   │   │   │   │   ├── dq_result.data.json
-    │   │   │   │   │   ├── dq_result.meta.json
+    │   │   │   │   │   ├── column-order.data.json
+    │   │   │   │   │   ├── column-order.meta.json
+    │   │   │   │   │   ├── column-qualifier.data.json
+    │   │   │   │   │   ├── column-qualifier.meta.json
+    │   │   │   │   │   ├── compound-ids.data.json
+    │   │   │   │   │   ├── compound-ids.meta.json
+    │   │   │   │   │   ├── dq-metrics.data.json
+    │   │   │   │   │   ├── dq-metrics.meta.json
+    │   │   │   │   │   ├── dq-report.data.json
+    │   │   │   │   │   ├── dq-report.meta.json
+    │   │   │   │   │   ├── dq-result.data.json
+    │   │   │   │   │   ├── dq-result.meta.json
     │   │   │   │   │   ├── identifiers.data.json
     │   │   │   │   │   ├── identifiers.meta.json
     │   │   │   │   │   ├── publications.data.json
     │   │   │   │   │   ├── publications.meta.json
-    │   │   │   │   │   ├── run_context.data.json
-    │   │   │   │   │   ├── run_context.meta.json
-    │   │   │   │   │   ├── silver_result.data.json
-    │   │   │   │   │   ├── silver_result.meta.json
-    │   │   │   │   │   ├── taxonomy_id.data.json
-    │   │   │   │   │   └── taxonomy_id.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── run-context.data.json
+    │   │   │   │   │   ├── run-context.meta.json
+    │   │   │   │   │   ├── silver-result.data.json
+    │   │   │   │   │   ├── silver-result.meta.json
+    │   │   │   │   │   ├── taxonomy-id.data.json
+    │   │   │   │   │   └── taxonomy-id.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── config.data.json
     │   │   │   │   ├── config.meta.json
-    │   │   │   │   ├── config_types.data.json
-    │   │   │   │   ├── config_types.meta.json
+    │   │   │   │   ├── config-types.data.json
+    │   │   │   │   ├── config-types.meta.json
     │   │   │   │   ├── constants.data.json
     │   │   │   │   ├── constants.meta.json
     │   │   │   │   ├── context.data.json
     │   │   │   │   ├── context.meta.json
-    │   │   │   │   ├── error_classifier.data.json
-    │   │   │   │   ├── error_classifier.meta.json
+    │   │   │   │   ├── error-classifier.data.json
+    │   │   │   │   ├── error-classifier.meta.json
     │   │   │   │   ├── events.data.json
     │   │   │   │   ├── events.meta.json
-    │   │   │   │   ├── filter_config.data.json
-    │   │   │   │   ├── filter_config.meta.json
+    │   │   │   │   ├── filter-config.data.json
+    │   │   │   │   ├── filter-config.meta.json
     │   │   │   │   ├── locking.data.json
     │   │   │   │   ├── locking.meta.json
     │   │   │   │   ├── medallion.data.json
@@ -6133,28 +6133,28 @@ BioactivityDataAcquisition2/
     │   │   │   ├── infrastructure/
     │   │   │   │   ├── adapters/
     │   │   │   │   │   ├── chembl/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   ├── client.data.json
     │   │   │   │   │   │   ├── client.meta.json
-    │   │   │   │   │   │   ├── entity_mapper.data.json
-    │   │   │   │   │   │   ├── entity_mapper.meta.json
+    │   │   │   │   │   │   ├── entity-mapper.data.json
+    │   │   │   │   │   │   ├── entity-mapper.meta.json
     │   │   │   │   │   │   ├── exceptions.data.json
     │   │   │   │   │   │   ├── exceptions.meta.json
     │   │   │   │   │   │   ├── models.data.json
     │   │   │   │   │   │   └── models.meta.json
     │   │   │   │   │   ├── common/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── api_request_collector.data.json
-    │   │   │   │   │   │   ├── api_request_collector.meta.json
-    │   │   │   │   │   │   ├── base_title_fallback.data.json
-    │   │   │   │   │   │   ├── base_title_fallback.meta.json
-    │   │   │   │   │   │   ├── title_matching.data.json
-    │   │   │   │   │   │   └── title_matching.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   │   ├── api-request-collector.data.json
+    │   │   │   │   │   │   ├── api-request-collector.meta.json
+    │   │   │   │   │   │   ├── base-title-fallback.data.json
+    │   │   │   │   │   │   ├── base-title-fallback.meta.json
+    │   │   │   │   │   │   ├── title-matching.data.json
+    │   │   │   │   │   │   └── title-matching.meta.json
     │   │   │   │   │   ├── crossref/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   ├── batch.data.json
     │   │   │   │   │   │   ├── batch.meta.json
     │   │   │   │   │   │   ├── client.data.json
@@ -6166,136 +6166,136 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   │   ├── models.data.json
     │   │   │   │   │   │   └── models.meta.json
     │   │   │   │   │   ├── decorators/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── circuit_breaker.data.json
-    │   │   │   │   │   │   ├── circuit_breaker.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   │   ├── circuit-breaker.data.json
+    │   │   │   │   │   │   ├── circuit-breaker.meta.json
     │   │   │   │   │   │   ├── retry.data.json
     │   │   │   │   │   │   └── retry.meta.json
     │   │   │   │   │   ├── http/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── circuit_breaker.data.json
-    │   │   │   │   │   │   ├── circuit_breaker.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   │   ├── circuit-breaker.data.json
+    │   │   │   │   │   │   ├── circuit-breaker.meta.json
     │   │   │   │   │   │   ├── client.data.json
     │   │   │   │   │   │   ├── client.meta.json
     │   │   │   │   │   │   ├── health.data.json
     │   │   │   │   │   │   ├── health.meta.json
-    │   │   │   │   │   │   ├── health_monitor.data.json
-    │   │   │   │   │   │   ├── health_monitor.meta.json
+    │   │   │   │   │   │   ├── health-monitor.data.json
+    │   │   │   │   │   │   ├── health-monitor.meta.json
     │   │   │   │   │   │   ├── pagination.data.json
     │   │   │   │   │   │   ├── pagination.meta.json
-    │   │   │   │   │   │   ├── rate_limiter.data.json
-    │   │   │   │   │   │   └── rate_limiter.meta.json
+    │   │   │   │   │   │   ├── rate-limiter.data.json
+    │   │   │   │   │   │   └── rate-limiter.meta.json
     │   │   │   │   │   ├── input/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── csv_filter_reader.data.json
-    │   │   │   │   │   │   └── csv_filter_reader.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   │   ├── csv-filter-reader.data.json
+    │   │   │   │   │   │   └── csv-filter-reader.meta.json
     │   │   │   │   │   ├── openalex/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   ├── client.data.json
     │   │   │   │   │   │   ├── client.meta.json
     │   │   │   │   │   │   ├── fallback.data.json
     │   │   │   │   │   │   └── fallback.meta.json
     │   │   │   │   │   ├── pubchem/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   ├── client.data.json
     │   │   │   │   │   │   ├── client.meta.json
-    │   │   │   │   │   │   ├── entity_mapper.data.json
-    │   │   │   │   │   │   ├── entity_mapper.meta.json
-    │   │   │   │   │   │   ├── fetch_strategies.data.json
-    │   │   │   │   │   │   ├── fetch_strategies.meta.json
+    │   │   │   │   │   │   ├── entity-mapper.data.json
+    │   │   │   │   │   │   ├── entity-mapper.meta.json
+    │   │   │   │   │   │   ├── fetch-strategies.data.json
+    │   │   │   │   │   │   ├── fetch-strategies.meta.json
     │   │   │   │   │   │   ├── models.data.json
     │   │   │   │   │   │   └── models.meta.json
     │   │   │   │   │   ├── pubmed/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   ├── fallback.data.json
     │   │   │   │   │   │   ├── fallback.meta.json
     │   │   │   │   │   │   ├── models.data.json
     │   │   │   │   │   │   ├── models.meta.json
-    │   │   │   │   │   │   ├── pubmed_client.data.json
-    │   │   │   │   │   │   ├── pubmed_client.meta.json
-    │   │   │   │   │   │   ├── xml_processor.data.json
-    │   │   │   │   │   │   └── xml_processor.meta.json
+    │   │   │   │   │   │   ├── pubmed-client.data.json
+    │   │   │   │   │   │   ├── pubmed-client.meta.json
+    │   │   │   │   │   │   ├── xml-processor.data.json
+    │   │   │   │   │   │   └── xml-processor.meta.json
     │   │   │   │   │   ├── semanticscholar/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   ├── adapter.data.json
     │   │   │   │   │   │   ├── adapter.meta.json
     │   │   │   │   │   │   ├── fallback.data.json
     │   │   │   │   │   │   └── fallback.meta.json
     │   │   │   │   │   ├── uniprot/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   ├── client.data.json
     │   │   │   │   │   │   ├── client.meta.json
-    │   │   │   │   │   │   ├── fasta_parser.data.json
-    │   │   │   │   │   │   ├── fasta_parser.meta.json
-    │   │   │   │   │   │   ├── idmapping_client.data.json
-    │   │   │   │   │   │   ├── idmapping_client.meta.json
+    │   │   │   │   │   │   ├── fasta-parser.data.json
+    │   │   │   │   │   │   ├── fasta-parser.meta.json
+    │   │   │   │   │   │   ├── idmapping-client.data.json
+    │   │   │   │   │   │   ├── idmapping-client.meta.json
     │   │   │   │   │   │   ├── models.data.json
     │   │   │   │   │   │   └── models.meta.json
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── base.data.json
     │   │   │   │   │   ├── base.meta.json
-    │   │   │   │   │   ├── base_metrics.data.json
-    │   │   │   │   │   ├── base_metrics.meta.json
-    │   │   │   │   │   ├── error_handling.data.json
-    │   │   │   │   │   ├── error_handling.meta.json
-    │   │   │   │   │   ├── filterable_mixin.data.json
-    │   │   │   │   │   ├── filterable_mixin.meta.json
-    │   │   │   │   │   ├── health_check_mixin.data.json
-    │   │   │   │   │   ├── health_check_mixin.meta.json
-    │   │   │   │   │   ├── logging_utils.data.json
-    │   │   │   │   │   ├── logging_utils.meta.json
-    │   │   │   │   │   ├── sync_base.data.json
-    │   │   │   │   │   ├── sync_base.meta.json
+    │   │   │   │   │   ├── base-metrics.data.json
+    │   │   │   │   │   ├── base-metrics.meta.json
+    │   │   │   │   │   ├── error-handling.data.json
+    │   │   │   │   │   ├── error-handling.meta.json
+    │   │   │   │   │   ├── filterable-mixin.data.json
+    │   │   │   │   │   ├── filterable-mixin.meta.json
+    │   │   │   │   │   ├── health-check-mixin.data.json
+    │   │   │   │   │   ├── health-check-mixin.meta.json
+    │   │   │   │   │   ├── logging-utils.data.json
+    │   │   │   │   │   ├── logging-utils.meta.json
+    │   │   │   │   │   ├── sync-base.data.json
+    │   │   │   │   │   ├── sync-base.meta.json
     │   │   │   │   │   ├── validation.data.json
     │   │   │   │   │   └── validation.meta.json
     │   │   │   │   ├── audit/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── file_audit.data.json
-    │   │   │   │   │   └── file_audit.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── file-audit.data.json
+    │   │   │   │   │   └── file-audit.meta.json
     │   │   │   │   ├── checkpoint/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── local_checkpoint.data.json
-    │   │   │   │   │   └── local_checkpoint.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── local-checkpoint.data.json
+    │   │   │   │   │   └── local-checkpoint.meta.json
     │   │   │   │   ├── config/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── _base.data.json
-    │   │   │   │   │   ├── _base.meta.json
-    │   │   │   │   │   ├── base_config_loader.data.json
-    │   │   │   │   │   ├── base_config_loader.meta.json
-    │   │   │   │   │   ├── dq_config_loader.data.json
-    │   │   │   │   │   ├── dq_config_loader.meta.json
-    │   │   │   │   │   ├── filter_config_loader.data.json
-    │   │   │   │   │   ├── filter_config_loader.meta.json
-    │   │   │   │   │   ├── pipeline_config_loader.data.json
-    │   │   │   │   │   └── pipeline_config_loader.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── -base.data.json
+    │   │   │   │   │   ├── -base.meta.json
+    │   │   │   │   │   ├── base-config-loader.data.json
+    │   │   │   │   │   ├── base-config-loader.meta.json
+    │   │   │   │   │   ├── dq-config-loader.data.json
+    │   │   │   │   │   ├── dq-config-loader.meta.json
+    │   │   │   │   │   ├── filter-config-loader.data.json
+    │   │   │   │   │   ├── filter-config-loader.meta.json
+    │   │   │   │   │   ├── pipeline-config-loader.data.json
+    │   │   │   │   │   └── pipeline-config-loader.meta.json
     │   │   │   │   ├── export/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── csv_exporter.data.json
-    │   │   │   │   │   ├── csv_exporter.meta.json
-    │   │   │   │   │   ├── dq_report_writer.data.json
-    │   │   │   │   │   └── dq_report_writer.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── csv-exporter.data.json
+    │   │   │   │   │   ├── csv-exporter.meta.json
+    │   │   │   │   │   ├── dq-report-writer.data.json
+    │   │   │   │   │   └── dq-report-writer.meta.json
     │   │   │   │   ├── locking/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── memory_lock.data.json
-    │   │   │   │   │   └── memory_lock.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── memory-lock.data.json
+    │   │   │   │   │   └── memory-lock.meta.json
     │   │   │   │   ├── observability/
     │   │   │   │   │   ├── alerting/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   ├── channels.data.json
     │   │   │   │   │   │   ├── channels.meta.json
     │   │   │   │   │   │   ├── service.data.json
@@ -6304,8 +6304,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   │   └── types.meta.json
     │   │   │   │   │   ├── anomaly/
     │   │   │   │   │   │   ├── detectors/
-    │   │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   │   ├── base.data.json
     │   │   │   │   │   │   │   ├── base.meta.json
     │   │   │   │   │   │   │   ├── iqr.data.json
@@ -6314,132 +6314,132 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   │   │   ├── mad.meta.json
     │   │   │   │   │   │   │   ├── zscore.data.json
     │   │   │   │   │   │   │   └── zscore.meta.json
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   ├── detector.data.json
     │   │   │   │   │   │   ├── detector.meta.json
     │   │   │   │   │   │   ├── monitor.data.json
     │   │   │   │   │   │   ├── monitor.meta.json
     │   │   │   │   │   │   ├── types.data.json
     │   │   │   │   │   │   └── types.meta.json
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── lineage.data.json
     │   │   │   │   │   ├── lineage.meta.json
     │   │   │   │   │   ├── logging.data.json
     │   │   │   │   │   ├── logging.meta.json
-    │   │   │   │   │   ├── logging_config.data.json
-    │   │   │   │   │   ├── logging_config.meta.json
+    │   │   │   │   │   ├── logging-config.data.json
+    │   │   │   │   │   ├── logging-config.meta.json
     │   │   │   │   │   ├── metrics.data.json
     │   │   │   │   │   ├── metrics.meta.json
-    │   │   │   │   │   ├── metrics_server_adapter.data.json
-    │   │   │   │   │   ├── metrics_server_adapter.meta.json
-    │   │   │   │   │   ├── noop_logger.data.json
-    │   │   │   │   │   ├── noop_logger.meta.json
-    │   │   │   │   │   ├── noop_metrics.data.json
-    │   │   │   │   │   ├── noop_metrics.meta.json
-    │   │   │   │   │   ├── noop_tracing.data.json
-    │   │   │   │   │   ├── noop_tracing.meta.json
-    │   │   │   │   │   ├── prometheus_metrics.data.json
-    │   │   │   │   │   ├── prometheus_metrics.meta.json
+    │   │   │   │   │   ├── metrics-server-adapter.data.json
+    │   │   │   │   │   ├── metrics-server-adapter.meta.json
+    │   │   │   │   │   ├── noop-logger.data.json
+    │   │   │   │   │   ├── noop-logger.meta.json
+    │   │   │   │   │   ├── noop-metrics.data.json
+    │   │   │   │   │   ├── noop-metrics.meta.json
+    │   │   │   │   │   ├── noop-tracing.data.json
+    │   │   │   │   │   ├── noop-tracing.meta.json
+    │   │   │   │   │   ├── prometheus-metrics.data.json
+    │   │   │   │   │   ├── prometheus-metrics.meta.json
     │   │   │   │   │   ├── server.data.json
     │   │   │   │   │   ├── server.meta.json
     │   │   │   │   │   ├── tracing.data.json
     │   │   │   │   │   ├── tracing.meta.json
-    │   │   │   │   │   ├── unified_logger.data.json
-    │   │   │   │   │   └── unified_logger.meta.json
+    │   │   │   │   │   ├── unified-logger.data.json
+    │   │   │   │   │   └── unified-logger.meta.json
     │   │   │   │   ├── quarantine/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── helpers.data.json
     │   │   │   │   │   ├── helpers.meta.json
     │   │   │   │   │   ├── operations.data.json
     │   │   │   │   │   ├── operations.meta.json
     │   │   │   │   │   ├── unified.data.json
     │   │   │   │   │   ├── unified.meta.json
-    │   │   │   │   │   ├── unified_quarantine.data.json
-    │   │   │   │   │   └── unified_quarantine.meta.json
+    │   │   │   │   │   ├── unified-quarantine.data.json
+    │   │   │   │   │   └── unified-quarantine.meta.json
     │   │   │   │   ├── schemas/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── base_schemas.data.json
-    │   │   │   │   │   ├── base_schemas.meta.json
-    │   │   │   │   │   ├── common_config.data.json
-    │   │   │   │   │   ├── common_config.meta.json
-    │   │   │   │   │   ├── composite_config.data.json
-    │   │   │   │   │   ├── composite_config.meta.json
-    │   │   │   │   │   ├── dq_config.data.json
-    │   │   │   │   │   ├── dq_config.meta.json
-    │   │   │   │   │   ├── dq_report_config.data.json
-    │   │   │   │   │   ├── dq_report_config.meta.json
-    │   │   │   │   │   ├── filter_config.data.json
-    │   │   │   │   │   ├── filter_config.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── base-schemas.data.json
+    │   │   │   │   │   ├── base-schemas.meta.json
+    │   │   │   │   │   ├── common-config.data.json
+    │   │   │   │   │   ├── common-config.meta.json
+    │   │   │   │   │   ├── composite-config.data.json
+    │   │   │   │   │   ├── composite-config.meta.json
+    │   │   │   │   │   ├── dq-config.data.json
+    │   │   │   │   │   ├── dq-config.meta.json
+    │   │   │   │   │   ├── dq-report-config.data.json
+    │   │   │   │   │   ├── dq-report-config.meta.json
+    │   │   │   │   │   ├── filter-config.data.json
+    │   │   │   │   │   ├── filter-config.meta.json
     │   │   │   │   │   ├── gold.data.json
     │   │   │   │   │   ├── gold.meta.json
-    │   │   │   │   │   ├── pipeline_config.data.json
-    │   │   │   │   │   ├── pipeline_config.meta.json
+    │   │   │   │   │   ├── pipeline-config.data.json
+    │   │   │   │   │   ├── pipeline-config.meta.json
     │   │   │   │   │   ├── silver.data.json
     │   │   │   │   │   ├── silver.meta.json
-    │   │   │   │   │   ├── source_config.data.json
-    │   │   │   │   │   └── source_config.meta.json
+    │   │   │   │   │   ├── source-config.data.json
+    │   │   │   │   │   └── source-config.meta.json
     │   │   │   │   ├── security/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── pii_hasher.data.json
-    │   │   │   │   │   └── pii_hasher.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── pii-hasher.data.json
+    │   │   │   │   │   └── pii-hasher.meta.json
     │   │   │   │   ├── serialization/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── encoders.data.json
     │   │   │   │   │   └── encoders.meta.json
     │   │   │   │   ├── storage/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── _atomic.data.json
-    │   │   │   │   │   ├── _atomic.meta.json
-    │   │   │   │   │   ├── arrow_converter.data.json
-    │   │   │   │   │   ├── arrow_converter.meta.json
-    │   │   │   │   │   ├── base_delta_writer.data.json
-    │   │   │   │   │   ├── base_delta_writer.meta.json
-    │   │   │   │   │   ├── bronze_writer.data.json
-    │   │   │   │   │   ├── bronze_writer.meta.json
-    │   │   │   │   │   ├── delta_reader.data.json
-    │   │   │   │   │   ├── delta_reader.meta.json
-    │   │   │   │   │   ├── delta_writer.data.json
-    │   │   │   │   │   ├── delta_writer.meta.json
-    │   │   │   │   │   ├── gold_writer.data.json
-    │   │   │   │   │   ├── gold_writer.meta.json
-    │   │   │   │   │   ├── lock_validator.data.json
-    │   │   │   │   │   ├── lock_validator.meta.json
-    │   │   │   │   │   ├── metadata_builder.data.json
-    │   │   │   │   │   ├── metadata_builder.meta.json
-    │   │   │   │   │   ├── metadata_writer.data.json
-    │   │   │   │   │   ├── metadata_writer.meta.json
-    │   │   │   │   │   ├── retention_manager.data.json
-    │   │   │   │   │   ├── retention_manager.meta.json
-    │   │   │   │   │   ├── silver_writer.data.json
-    │   │   │   │   │   └── silver_writer.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── -atomic.data.json
+    │   │   │   │   │   ├── -atomic.meta.json
+    │   │   │   │   │   ├── arrow-converter.data.json
+    │   │   │   │   │   ├── arrow-converter.meta.json
+    │   │   │   │   │   ├── base-delta-writer.data.json
+    │   │   │   │   │   ├── base-delta-writer.meta.json
+    │   │   │   │   │   ├── bronze-writer.data.json
+    │   │   │   │   │   ├── bronze-writer.meta.json
+    │   │   │   │   │   ├── delta-reader.data.json
+    │   │   │   │   │   ├── delta-reader.meta.json
+    │   │   │   │   │   ├── delta-writer.data.json
+    │   │   │   │   │   ├── delta-writer.meta.json
+    │   │   │   │   │   ├── gold-writer.data.json
+    │   │   │   │   │   ├── gold-writer.meta.json
+    │   │   │   │   │   ├── lock-validator.data.json
+    │   │   │   │   │   ├── lock-validator.meta.json
+    │   │   │   │   │   ├── metadata-builder.data.json
+    │   │   │   │   │   ├── metadata-builder.meta.json
+    │   │   │   │   │   ├── metadata-writer.data.json
+    │   │   │   │   │   ├── metadata-writer.meta.json
+    │   │   │   │   │   ├── retention-manager.data.json
+    │   │   │   │   │   ├── retention-manager.meta.json
+    │   │   │   │   │   ├── silver-writer.data.json
+    │   │   │   │   │   └── silver-writer.meta.json
     │   │   │   │   ├── system/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── memory_monitor.data.json
-    │   │   │   │   │   └── memory_monitor.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── memory-monitor.data.json
+    │   │   │   │   │   └── memory-monitor.meta.json
     │   │   │   │   ├── validation/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── pandera_validator.data.json
-    │   │   │   │   │   └── pandera_validator.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── pandera-validator.data.json
+    │   │   │   │   │   └── pandera-validator.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── config.data.json
     │   │   │   │   ├── config.meta.json
-    │   │   │   │   ├── config_loader.data.json
-    │   │   │   │   └── config_loader.meta.json
+    │   │   │   │   ├── config-loader.data.json
+    │   │   │   │   └── config-loader.meta.json
     │   │   │   ├── interfaces/
     │   │   │   │   ├── cli/
     │   │   │   │   │   ├── commands/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   ├── archive.data.json
     │   │   │   │   │   │   ├── archive.meta.json
     │   │   │   │   │   │   ├── checkpoint.data.json
@@ -6452,63 +6452,63 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   │   ├── export.meta.json
     │   │   │   │   │   │   ├── health.data.json
     │   │   │   │   │   │   ├── health.meta.json
-    │   │   │   │   │   │   ├── health_server_integration.data.json
-    │   │   │   │   │   │   ├── health_server_integration.meta.json
+    │   │   │   │   │   │   ├── health-server-integration.data.json
+    │   │   │   │   │   │   ├── health-server-integration.meta.json
     │   │   │   │   │   │   ├── lock.data.json
     │   │   │   │   │   │   ├── lock.meta.json
     │   │   │   │   │   │   ├── maintenance.data.json
     │   │   │   │   │   │   ├── maintenance.meta.json
-    │   │   │   │   │   │   ├── metrics_server_integration.data.json
-    │   │   │   │   │   │   ├── metrics_server_integration.meta.json
+    │   │   │   │   │   │   ├── metrics-server-integration.data.json
+    │   │   │   │   │   │   ├── metrics-server-integration.meta.json
     │   │   │   │   │   │   ├── quarantine.data.json
     │   │   │   │   │   │   ├── quarantine.meta.json
     │   │   │   │   │   │   ├── run.data.json
     │   │   │   │   │   │   ├── run.meta.json
-    │   │   │   │   │   │   ├── run_all.data.json
-    │   │   │   │   │   │   ├── run_all.meta.json
-    │   │   │   │   │   │   ├── run_composite.data.json
-    │   │   │   │   │   │   ├── run_composite.meta.json
-    │   │   │   │   │   │   ├── run_helpers.data.json
-    │   │   │   │   │   │   ├── run_helpers.meta.json
+    │   │   │   │   │   │   ├── run-all.data.json
+    │   │   │   │   │   │   ├── run-all.meta.json
+    │   │   │   │   │   │   ├── run-composite.data.json
+    │   │   │   │   │   │   ├── run-composite.meta.json
+    │   │   │   │   │   │   ├── run-helpers.data.json
+    │   │   │   │   │   │   ├── run-helpers.meta.json
     │   │   │   │   │   │   ├── vacuum.data.json
     │   │   │   │   │   │   └── vacuum.meta.json
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── __main__.data.json
-    │   │   │   │   │   ├── __main__.meta.json
-    │   │   │   │   │   ├── exit_codes.data.json
-    │   │   │   │   │   ├── exit_codes.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── --main--.data.json
+    │   │   │   │   │   ├── --main--.meta.json
+    │   │   │   │   │   ├── exit-codes.data.json
+    │   │   │   │   │   ├── exit-codes.meta.json
     │   │   │   │   │   ├── formatters.data.json
     │   │   │   │   │   ├── formatters.meta.json
     │   │   │   │   │   ├── main.data.json
     │   │   │   │   │   └── main.meta.json
     │   │   │   │   ├── http/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── health_server.data.json
-    │   │   │   │   │   ├── health_server.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── health-server.data.json
+    │   │   │   │   │   ├── health-server.meta.json
     │   │   │   │   │   ├── types.data.json
     │   │   │   │   │   └── types.meta.json
     │   │   │   │   ├── orchestration/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── signals.data.json
     │   │   │   │   │   └── signals.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── cli.data.json
     │   │   │   │   ├── cli.meta.json
     │   │   │   │   ├── observability.data.json
     │   │   │   │   └── observability.meta.json
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── __main__.data.json
-    │   │   │   └── __main__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── --main--.data.json
+    │   │   │   └── --main--.meta.json
     │   │   ├── black/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _width_table.data.json
-    │   │   │   ├── _width_table.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -width-table.data.json
+    │   │   │   ├── -width-table.meta.json
     │   │   │   ├── brackets.data.json
     │   │   │   ├── brackets.meta.json
     │   │   │   ├── cache.data.json
@@ -6519,8 +6519,8 @@ BioactivityDataAcquisition2/
     │   │   │   ├── const.meta.json
     │   │   │   ├── files.data.json
     │   │   │   ├── files.meta.json
-    │   │   │   ├── handle_ipynb_magics.data.json
-    │   │   │   ├── handle_ipynb_magics.meta.json
+    │   │   │   ├── handle-ipynb-magics.data.json
+    │   │   │   ├── handle-ipynb-magics.meta.json
     │   │   │   ├── linegen.data.json
     │   │   │   ├── linegen.meta.json
     │   │   │   ├── lines.data.json
@@ -6547,16 +6547,16 @@ BioactivityDataAcquisition2/
     │   │   │   └── trans.meta.json
     │   │   ├── boto3/
     │   │   │   ├── resources/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── base.data.json
     │   │   │   │   ├── base.meta.json
     │   │   │   │   ├── factory.data.json
     │   │   │   │   ├── factory.meta.json
     │   │   │   │   ├── model.data.json
     │   │   │   │   └── model.meta.json
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
     │   │   │   ├── exceptions.data.json
     │   │   │   ├── exceptions.meta.json
     │   │   │   ├── session.data.json
@@ -6565,13 +6565,13 @@ BioactivityDataAcquisition2/
     │   │   │   └── utils.meta.json
     │   │   ├── botocore/
     │   │   │   ├── crt/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── auth.data.json
     │   │   │   │   └── auth.meta.json
     │   │   │   ├── retries/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── adaptive.data.json
     │   │   │   │   ├── adaptive.meta.json
     │   │   │   │   ├── base.data.json
@@ -6586,8 +6586,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── standard.meta.json
     │   │   │   │   ├── throttling.data.json
     │   │   │   │   └── throttling.meta.json
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
     │   │   │   ├── args.data.json
     │   │   │   ├── args.meta.json
     │   │   │   ├── auth.data.json
@@ -6608,8 +6608,8 @@ BioactivityDataAcquisition2/
     │   │   │   ├── discovery.meta.json
     │   │   │   ├── endpoint.data.json
     │   │   │   ├── endpoint.meta.json
-    │   │   │   ├── endpoint_provider.data.json
-    │   │   │   ├── endpoint_provider.meta.json
+    │   │   │   ├── endpoint-provider.data.json
+    │   │   │   ├── endpoint-provider.meta.json
     │   │   │   ├── errorfactory.data.json
     │   │   │   ├── errorfactory.meta.json
     │   │   │   ├── eventstream.data.json
@@ -6651,21 +6651,21 @@ BioactivityDataAcquisition2/
     │   │   │   ├── waiter.data.json
     │   │   │   └── waiter.meta.json
     │   │   ├── certifi/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
     │   │   │   ├── core.data.json
     │   │   │   └── core.meta.json
     │   │   ├── click/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _compat.data.json
-    │   │   │   ├── _compat.meta.json
-    │   │   │   ├── _termui_impl.data.json
-    │   │   │   ├── _termui_impl.meta.json
-    │   │   │   ├── _utils.data.json
-    │   │   │   ├── _utils.meta.json
-    │   │   │   ├── _winconsole.data.json
-    │   │   │   ├── _winconsole.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -compat.data.json
+    │   │   │   ├── -compat.meta.json
+    │   │   │   ├── -termui-impl.data.json
+    │   │   │   ├── -termui-impl.meta.json
+    │   │   │   ├── -utils.data.json
+    │   │   │   ├── -utils.meta.json
+    │   │   │   ├── -winconsole.data.json
+    │   │   │   ├── -winconsole.meta.json
     │   │   │   ├── core.data.json
     │   │   │   ├── core.meta.json
     │   │   │   ├── decorators.data.json
@@ -6678,8 +6678,8 @@ BioactivityDataAcquisition2/
     │   │   │   ├── globals.meta.json
     │   │   │   ├── parser.data.json
     │   │   │   ├── parser.meta.json
-    │   │   │   ├── shell_completion.data.json
-    │   │   │   ├── shell_completion.meta.json
+    │   │   │   ├── shell-completion.data.json
+    │   │   │   ├── shell-completion.meta.json
     │   │   │   ├── termui.data.json
     │   │   │   ├── termui.meta.json
     │   │   │   ├── types.data.json
@@ -6687,56 +6687,56 @@ BioactivityDataAcquisition2/
     │   │   │   ├── utils.data.json
     │   │   │   └── utils.meta.json
     │   │   ├── collections/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
     │   │   │   ├── abc.data.json
     │   │   │   └── abc.meta.json
     │   │   ├── concurrent/
     │   │   │   ├── futures/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── _base.data.json
-    │   │   │   │   ├── _base.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── -base.data.json
+    │   │   │   │   ├── -base.meta.json
     │   │   │   │   ├── process.data.json
     │   │   │   │   ├── process.meta.json
     │   │   │   │   ├── thread.data.json
     │   │   │   │   └── thread.meta.json
-    │   │   │   ├── __init__.data.json
-    │   │   │   └── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   └── --init--.meta.json
     │   │   ├── ctypes/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _endian.data.json
-    │   │   │   ├── _endian.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -endian.data.json
+    │   │   │   ├── -endian.meta.json
     │   │   │   ├── wintypes.data.json
     │   │   │   └── wintypes.meta.json
     │   │   ├── deltalake/
     │   │   │   ├── fs/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── _base_handler.data.json
-    │   │   │   │   ├── _base_handler.meta.json
-    │   │   │   │   ├── fs_handler.data.json
-    │   │   │   │   └── fs_handler.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── -base-handler.data.json
+    │   │   │   │   ├── -base-handler.meta.json
+    │   │   │   │   ├── fs-handler.data.json
+    │   │   │   │   └── fs-handler.meta.json
     │   │   │   ├── writer/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── _conversion.data.json
-    │   │   │   │   ├── _conversion.meta.json
-    │   │   │   │   ├── _utils.data.json
-    │   │   │   │   ├── _utils.meta.json
-    │   │   │   │   ├── convert_to.data.json
-    │   │   │   │   ├── convert_to.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── -conversion.data.json
+    │   │   │   │   ├── -conversion.meta.json
+    │   │   │   │   ├── -utils.data.json
+    │   │   │   │   ├── -utils.meta.json
+    │   │   │   │   ├── convert-to.data.json
+    │   │   │   │   ├── convert-to.meta.json
     │   │   │   │   ├── properties.data.json
     │   │   │   │   ├── properties.meta.json
     │   │   │   │   ├── writer.data.json
     │   │   │   │   └── writer.meta.json
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _internal.data.json
-    │   │   │   ├── _internal.meta.json
-    │   │   │   ├── _util.data.json
-    │   │   │   ├── _util.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -internal.data.json
+    │   │   │   ├── -internal.meta.json
+    │   │   │   ├── -util.data.json
+    │   │   │   ├── -util.meta.json
     │   │   │   ├── exceptions.data.json
     │   │   │   ├── exceptions.meta.json
     │   │   │   ├── query.data.json
@@ -6748,8 +6748,8 @@ BioactivityDataAcquisition2/
     │   │   │   ├── transaction.data.json
     │   │   │   └── transaction.meta.json
     │   │   ├── dotenv/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
     │   │   │   ├── main.data.json
     │   │   │   ├── main.meta.json
     │   │   │   ├── parser.data.json
@@ -6757,10 +6757,10 @@ BioactivityDataAcquisition2/
     │   │   │   ├── variables.data.json
     │   │   │   └── variables.meta.json
     │   │   ├── email/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _policybase.data.json
-    │   │   │   ├── _policybase.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -policybase.data.json
+    │   │   │   ├── -policybase.meta.json
     │   │   │   ├── charset.data.json
     │   │   │   ├── charset.meta.json
     │   │   │   ├── contentmanager.data.json
@@ -6776,40 +6776,40 @@ BioactivityDataAcquisition2/
     │   │   │   ├── utils.data.json
     │   │   │   └── utils.meta.json
     │   │   ├── exceptiongroup/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _catch.data.json
-    │   │   │   ├── _catch.meta.json
-    │   │   │   ├── _suppress.data.json
-    │   │   │   ├── _suppress.meta.json
-    │   │   │   ├── _version.data.json
-    │   │   │   └── _version.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -catch.data.json
+    │   │   │   ├── -catch.meta.json
+    │   │   │   ├── -suppress.data.json
+    │   │   │   ├── -suppress.meta.json
+    │   │   │   ├── -version.data.json
+    │   │   │   └── -version.meta.json
     │   │   ├── h11/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _abnf.data.json
-    │   │   │   ├── _abnf.meta.json
-    │   │   │   ├── _connection.data.json
-    │   │   │   ├── _connection.meta.json
-    │   │   │   ├── _events.data.json
-    │   │   │   ├── _events.meta.json
-    │   │   │   ├── _headers.data.json
-    │   │   │   ├── _headers.meta.json
-    │   │   │   ├── _readers.data.json
-    │   │   │   ├── _readers.meta.json
-    │   │   │   ├── _receivebuffer.data.json
-    │   │   │   ├── _receivebuffer.meta.json
-    │   │   │   ├── _state.data.json
-    │   │   │   ├── _state.meta.json
-    │   │   │   ├── _util.data.json
-    │   │   │   ├── _util.meta.json
-    │   │   │   ├── _version.data.json
-    │   │   │   ├── _version.meta.json
-    │   │   │   ├── _writers.data.json
-    │   │   │   └── _writers.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -abnf.data.json
+    │   │   │   ├── -abnf.meta.json
+    │   │   │   ├── -connection.data.json
+    │   │   │   ├── -connection.meta.json
+    │   │   │   ├── -events.data.json
+    │   │   │   ├── -events.meta.json
+    │   │   │   ├── -headers.data.json
+    │   │   │   ├── -headers.meta.json
+    │   │   │   ├── -readers.data.json
+    │   │   │   ├── -readers.meta.json
+    │   │   │   ├── -receivebuffer.data.json
+    │   │   │   ├── -receivebuffer.meta.json
+    │   │   │   ├── -state.data.json
+    │   │   │   ├── -state.meta.json
+    │   │   │   ├── -util.data.json
+    │   │   │   ├── -util.meta.json
+    │   │   │   ├── -version.data.json
+    │   │   │   ├── -version.meta.json
+    │   │   │   ├── -writers.data.json
+    │   │   │   └── -writers.meta.json
     │   │   ├── h2/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
     │   │   │   ├── config.data.json
     │   │   │   ├── config.meta.json
     │   │   │   ├── connection.data.json
@@ -6820,8 +6820,8 @@ BioactivityDataAcquisition2/
     │   │   │   ├── events.meta.json
     │   │   │   ├── exceptions.data.json
     │   │   │   ├── exceptions.meta.json
-    │   │   │   ├── frame_buffer.data.json
-    │   │   │   ├── frame_buffer.meta.json
+    │   │   │   ├── frame-buffer.data.json
+    │   │   │   ├── frame-buffer.meta.json
     │   │   │   ├── settings.data.json
     │   │   │   ├── settings.meta.json
     │   │   │   ├── stream.data.json
@@ -6831,30 +6831,30 @@ BioactivityDataAcquisition2/
     │   │   │   ├── windows.data.json
     │   │   │   └── windows.meta.json
     │   │   ├── hpack/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
     │   │   │   ├── exceptions.data.json
     │   │   │   ├── exceptions.meta.json
     │   │   │   ├── hpack.data.json
     │   │   │   ├── hpack.meta.json
     │   │   │   ├── huffman.data.json
     │   │   │   ├── huffman.meta.json
-    │   │   │   ├── huffman_constants.data.json
-    │   │   │   ├── huffman_constants.meta.json
-    │   │   │   ├── huffman_table.data.json
-    │   │   │   ├── huffman_table.meta.json
+    │   │   │   ├── huffman-constants.data.json
+    │   │   │   ├── huffman-constants.meta.json
+    │   │   │   ├── huffman-table.data.json
+    │   │   │   ├── huffman-table.meta.json
     │   │   │   ├── struct.data.json
     │   │   │   ├── struct.meta.json
     │   │   │   ├── table.data.json
     │   │   │   └── table.meta.json
     │   │   ├── html/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
     │   │   │   ├── entities.data.json
     │   │   │   └── entities.meta.json
     │   │   ├── http/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
     │   │   │   ├── client.data.json
     │   │   │   ├── client.meta.json
     │   │   │   ├── cookiejar.data.json
@@ -6862,26 +6862,26 @@ BioactivityDataAcquisition2/
     │   │   │   ├── server.data.json
     │   │   │   └── server.meta.json
     │   │   ├── httpcore/
-    │   │   │   ├── _async/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   ├── -async/
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── connection.data.json
     │   │   │   │   ├── connection.meta.json
-    │   │   │   │   ├── connection_pool.data.json
-    │   │   │   │   ├── connection_pool.meta.json
+    │   │   │   │   ├── connection-pool.data.json
+    │   │   │   │   ├── connection-pool.meta.json
     │   │   │   │   ├── http11.data.json
     │   │   │   │   ├── http11.meta.json
     │   │   │   │   ├── http2.data.json
     │   │   │   │   ├── http2.meta.json
-    │   │   │   │   ├── http_proxy.data.json
-    │   │   │   │   ├── http_proxy.meta.json
+    │   │   │   │   ├── http-proxy.data.json
+    │   │   │   │   ├── http-proxy.meta.json
     │   │   │   │   ├── interfaces.data.json
     │   │   │   │   ├── interfaces.meta.json
-    │   │   │   │   ├── socks_proxy.data.json
-    │   │   │   │   └── socks_proxy.meta.json
-    │   │   │   ├── _backends/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── socks-proxy.data.json
+    │   │   │   │   └── socks-proxy.meta.json
+    │   │   │   ├── -backends/
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── anyio.data.json
     │   │   │   │   ├── anyio.meta.json
     │   │   │   │   ├── auto.data.json
@@ -6894,43 +6894,43 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── sync.meta.json
     │   │   │   │   ├── trio.data.json
     │   │   │   │   └── trio.meta.json
-    │   │   │   ├── _sync/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   ├── -sync/
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── connection.data.json
     │   │   │   │   ├── connection.meta.json
-    │   │   │   │   ├── connection_pool.data.json
-    │   │   │   │   ├── connection_pool.meta.json
+    │   │   │   │   ├── connection-pool.data.json
+    │   │   │   │   ├── connection-pool.meta.json
     │   │   │   │   ├── http11.data.json
     │   │   │   │   ├── http11.meta.json
     │   │   │   │   ├── http2.data.json
     │   │   │   │   ├── http2.meta.json
-    │   │   │   │   ├── http_proxy.data.json
-    │   │   │   │   ├── http_proxy.meta.json
+    │   │   │   │   ├── http-proxy.data.json
+    │   │   │   │   ├── http-proxy.meta.json
     │   │   │   │   ├── interfaces.data.json
     │   │   │   │   ├── interfaces.meta.json
-    │   │   │   │   ├── socks_proxy.data.json
-    │   │   │   │   └── socks_proxy.meta.json
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _api.data.json
-    │   │   │   ├── _api.meta.json
-    │   │   │   ├── _exceptions.data.json
-    │   │   │   ├── _exceptions.meta.json
-    │   │   │   ├── _models.data.json
-    │   │   │   ├── _models.meta.json
-    │   │   │   ├── _ssl.data.json
-    │   │   │   ├── _ssl.meta.json
-    │   │   │   ├── _synchronization.data.json
-    │   │   │   ├── _synchronization.meta.json
-    │   │   │   ├── _trace.data.json
-    │   │   │   ├── _trace.meta.json
-    │   │   │   ├── _utils.data.json
-    │   │   │   └── _utils.meta.json
+    │   │   │   │   ├── socks-proxy.data.json
+    │   │   │   │   └── socks-proxy.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -api.data.json
+    │   │   │   ├── -api.meta.json
+    │   │   │   ├── -exceptions.data.json
+    │   │   │   ├── -exceptions.meta.json
+    │   │   │   ├── -models.data.json
+    │   │   │   ├── -models.meta.json
+    │   │   │   ├── -ssl.data.json
+    │   │   │   ├── -ssl.meta.json
+    │   │   │   ├── -synchronization.data.json
+    │   │   │   ├── -synchronization.meta.json
+    │   │   │   ├── -trace.data.json
+    │   │   │   ├── -trace.meta.json
+    │   │   │   ├── -utils.data.json
+    │   │   │   └── -utils.meta.json
     │   │   ├── httpx/
-    │   │   │   ├── _transports/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   ├── -transports/
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── asgi.data.json
     │   │   │   │   ├── asgi.meta.json
     │   │   │   │   ├── base.data.json
@@ -6941,43 +6941,43 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── mock.meta.json
     │   │   │   │   ├── wsgi.data.json
     │   │   │   │   └── wsgi.meta.json
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── __version__.data.json
-    │   │   │   ├── __version__.meta.json
-    │   │   │   ├── _api.data.json
-    │   │   │   ├── _api.meta.json
-    │   │   │   ├── _auth.data.json
-    │   │   │   ├── _auth.meta.json
-    │   │   │   ├── _client.data.json
-    │   │   │   ├── _client.meta.json
-    │   │   │   ├── _config.data.json
-    │   │   │   ├── _config.meta.json
-    │   │   │   ├── _content.data.json
-    │   │   │   ├── _content.meta.json
-    │   │   │   ├── _decoders.data.json
-    │   │   │   ├── _decoders.meta.json
-    │   │   │   ├── _exceptions.data.json
-    │   │   │   ├── _exceptions.meta.json
-    │   │   │   ├── _main.data.json
-    │   │   │   ├── _main.meta.json
-    │   │   │   ├── _models.data.json
-    │   │   │   ├── _models.meta.json
-    │   │   │   ├── _multipart.data.json
-    │   │   │   ├── _multipart.meta.json
-    │   │   │   ├── _status_codes.data.json
-    │   │   │   ├── _status_codes.meta.json
-    │   │   │   ├── _types.data.json
-    │   │   │   ├── _types.meta.json
-    │   │   │   ├── _urlparse.data.json
-    │   │   │   ├── _urlparse.meta.json
-    │   │   │   ├── _urls.data.json
-    │   │   │   ├── _urls.meta.json
-    │   │   │   ├── _utils.data.json
-    │   │   │   └── _utils.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── --version--.data.json
+    │   │   │   ├── --version--.meta.json
+    │   │   │   ├── -api.data.json
+    │   │   │   ├── -api.meta.json
+    │   │   │   ├── -auth.data.json
+    │   │   │   ├── -auth.meta.json
+    │   │   │   ├── -client.data.json
+    │   │   │   ├── -client.meta.json
+    │   │   │   ├── -config.data.json
+    │   │   │   ├── -config.meta.json
+    │   │   │   ├── -content.data.json
+    │   │   │   ├── -content.meta.json
+    │   │   │   ├── -decoders.data.json
+    │   │   │   ├── -decoders.meta.json
+    │   │   │   ├── -exceptions.data.json
+    │   │   │   ├── -exceptions.meta.json
+    │   │   │   ├── -main.data.json
+    │   │   │   ├── -main.meta.json
+    │   │   │   ├── -models.data.json
+    │   │   │   ├── -models.meta.json
+    │   │   │   ├── -multipart.data.json
+    │   │   │   ├── -multipart.meta.json
+    │   │   │   ├── -status-codes.data.json
+    │   │   │   ├── -status-codes.meta.json
+    │   │   │   ├── -types.data.json
+    │   │   │   ├── -types.meta.json
+    │   │   │   ├── -urlparse.data.json
+    │   │   │   ├── -urlparse.meta.json
+    │   │   │   ├── -urls.data.json
+    │   │   │   ├── -urls.meta.json
+    │   │   │   ├── -utils.data.json
+    │   │   │   └── -utils.meta.json
     │   │   ├── hyperframe/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
     │   │   │   ├── exceptions.data.json
     │   │   │   ├── exceptions.meta.json
     │   │   │   ├── flags.data.json
@@ -6987,21 +6987,21 @@ BioactivityDataAcquisition2/
     │   │   ├── hypothesis/
     │   │   │   ├── extra/
     │   │   │   │   ├── pandas/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── impl.data.json
     │   │   │   │   │   └── impl.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── _array_helpers.data.json
-    │   │   │   │   ├── _array_helpers.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── -array-helpers.data.json
+    │   │   │   │   ├── -array-helpers.meta.json
     │   │   │   │   ├── numpy.data.json
     │   │   │   │   └── numpy.meta.json
     │   │   │   ├── internal/
     │   │   │   │   ├── conjecture/
     │   │   │   │   │   ├── shrinking/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   ├── bytes.data.json
     │   │   │   │   │   │   ├── bytes.meta.json
     │   │   │   │   │   │   ├── choicetree.data.json
@@ -7018,8 +7018,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   │   ├── ordering.meta.json
     │   │   │   │   │   │   ├── string.data.json
     │   │   │   │   │   │   └── string.meta.json
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── choice.data.json
     │   │   │   │   │   ├── choice.meta.json
     │   │   │   │   │   ├── data.data.json
@@ -7042,8 +7042,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── shrinker.meta.json
     │   │   │   │   │   ├── utils.data.json
     │   │   │   │   │   └── utils.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── cache.data.json
     │   │   │   │   ├── cache.meta.json
     │   │   │   │   ├── cathetus.data.json
@@ -7052,8 +7052,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── charmap.meta.json
     │   │   │   │   ├── compat.data.json
     │   │   │   │   ├── compat.meta.json
-    │   │   │   │   ├── constants_ast.data.json
-    │   │   │   │   ├── constants_ast.meta.json
+    │   │   │   │   ├── constants-ast.data.json
+    │   │   │   │   ├── constants-ast.meta.json
     │   │   │   │   ├── coverage.data.json
     │   │   │   │   ├── coverage.meta.json
     │   │   │   │   ├── detection.data.json
@@ -7070,8 +7070,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── healthcheck.meta.json
     │   │   │   │   ├── intervalsets.data.json
     │   │   │   │   ├── intervalsets.meta.json
-    │   │   │   │   ├── lambda_sources.data.json
-    │   │   │   │   ├── lambda_sources.meta.json
+    │   │   │   │   ├── lambda-sources.data.json
+    │   │   │   │   ├── lambda-sources.meta.json
     │   │   │   │   ├── observability.data.json
     │   │   │   │   ├── observability.meta.json
     │   │   │   │   ├── reflection.data.json
@@ -7081,9 +7081,9 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── validation.data.json
     │   │   │   │   └── validation.meta.json
     │   │   │   ├── strategies/
-    │   │   │   │   ├── _internal/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── -internal/
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── collections.data.json
     │   │   │   │   │   ├── collections.meta.json
     │   │   │   │   │   ├── core.data.json
@@ -7120,11 +7120,11 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── types.meta.json
     │   │   │   │   │   ├── utils.data.json
     │   │   │   │   │   └── utils.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   └── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   └── --init--.meta.json
     │   │   │   ├── utils/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── conventions.data.json
     │   │   │   │   ├── conventions.meta.json
     │   │   │   │   ├── dynamicvariables.data.json
@@ -7132,14 +7132,14 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── threading.data.json
     │   │   │   │   └── threading.meta.json
     │   │   │   ├── vendor/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── pretty.data.json
     │   │   │   │   └── pretty.meta.json
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _settings.data.json
-    │   │   │   ├── _settings.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -settings.data.json
+    │   │   │   ├── -settings.meta.json
     │   │   │   ├── configuration.data.json
     │   │   │   ├── configuration.meta.json
     │   │   │   ├── control.data.json
@@ -7148,8 +7148,8 @@ BioactivityDataAcquisition2/
     │   │   │   ├── core.meta.json
     │   │   │   ├── database.data.json
     │   │   │   ├── database.meta.json
-    │   │   │   ├── entry_points.data.json
-    │   │   │   ├── entry_points.meta.json
+    │   │   │   ├── entry-points.data.json
+    │   │   │   ├── entry-points.meta.json
     │   │   │   ├── errors.data.json
     │   │   │   ├── errors.meta.json
     │   │   │   ├── reporting.data.json
@@ -7161,39 +7161,39 @@ BioactivityDataAcquisition2/
     │   │   │   ├── version.data.json
     │   │   │   └── version.meta.json
     │   │   ├── idna/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
     │   │   │   ├── core.data.json
     │   │   │   ├── core.meta.json
     │   │   │   ├── idnadata.data.json
     │   │   │   ├── idnadata.meta.json
     │   │   │   ├── intranges.data.json
     │   │   │   ├── intranges.meta.json
-    │   │   │   ├── package_data.data.json
-    │   │   │   └── package_data.meta.json
+    │   │   │   ├── package-data.data.json
+    │   │   │   └── package-data.meta.json
     │   │   ├── importlib/
     │   │   │   ├── metadata/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── _meta.data.json
-    │   │   │   │   └── _meta.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── -meta.data.json
+    │   │   │   │   └── -meta.meta.json
     │   │   │   ├── resources/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── _common.data.json
-    │   │   │   │   ├── _common.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── -common.data.json
+    │   │   │   │   ├── -common.meta.json
     │   │   │   │   ├── abc.data.json
     │   │   │   │   ├── abc.meta.json
     │   │   │   │   ├── readers.data.json
     │   │   │   │   └── readers.meta.json
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _abc.data.json
-    │   │   │   ├── _abc.meta.json
-    │   │   │   ├── _bootstrap.data.json
-    │   │   │   ├── _bootstrap.meta.json
-    │   │   │   ├── _bootstrap_external.data.json
-    │   │   │   ├── _bootstrap_external.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -abc.data.json
+    │   │   │   ├── -abc.meta.json
+    │   │   │   ├── -bootstrap.data.json
+    │   │   │   ├── -bootstrap.meta.json
+    │   │   │   ├── -bootstrap-external.data.json
+    │   │   │   ├── -bootstrap-external.meta.json
     │   │   │   ├── abc.data.json
     │   │   │   ├── abc.meta.json
     │   │   │   ├── machinery.data.json
@@ -7202,84 +7202,84 @@ BioactivityDataAcquisition2/
     │   │   │   ├── readers.meta.json
     │   │   │   ├── util.data.json
     │   │   │   └── util.meta.json
-    │   │   ├── importlib_metadata/
+    │   │   ├── importlib-metadata/
     │   │   │   ├── compat/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── py311.data.json
     │   │   │   │   ├── py311.meta.json
     │   │   │   │   ├── py39.data.json
     │   │   │   │   └── py39.meta.json
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _adapters.data.json
-    │   │   │   ├── _adapters.meta.json
-    │   │   │   ├── _collections.data.json
-    │   │   │   ├── _collections.meta.json
-    │   │   │   ├── _compat.data.json
-    │   │   │   ├── _compat.meta.json
-    │   │   │   ├── _functools.data.json
-    │   │   │   ├── _functools.meta.json
-    │   │   │   ├── _itertools.data.json
-    │   │   │   ├── _itertools.meta.json
-    │   │   │   ├── _meta.data.json
-    │   │   │   ├── _meta.meta.json
-    │   │   │   ├── _text.data.json
-    │   │   │   ├── _text.meta.json
-    │   │   │   ├── _typing.data.json
-    │   │   │   └── _typing.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -adapters.data.json
+    │   │   │   ├── -adapters.meta.json
+    │   │   │   ├── -collections.data.json
+    │   │   │   ├── -collections.meta.json
+    │   │   │   ├── -compat.data.json
+    │   │   │   ├── -compat.meta.json
+    │   │   │   ├── -functools.data.json
+    │   │   │   ├── -functools.meta.json
+    │   │   │   ├── -itertools.data.json
+    │   │   │   ├── -itertools.meta.json
+    │   │   │   ├── -meta.data.json
+    │   │   │   ├── -meta.meta.json
+    │   │   │   ├── -text.data.json
+    │   │   │   ├── -text.meta.json
+    │   │   │   ├── -typing.data.json
+    │   │   │   └── -typing.meta.json
     │   │   ├── iniconfig/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _parse.data.json
-    │   │   │   ├── _parse.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -parse.data.json
+    │   │   │   ├── -parse.meta.json
     │   │   │   ├── exceptions.data.json
     │   │   │   └── exceptions.meta.json
     │   │   ├── json/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
     │   │   │   ├── decoder.data.json
     │   │   │   ├── decoder.meta.json
     │   │   │   ├── encoder.data.json
     │   │   │   └── encoder.meta.json
     │   │   ├── logging/
-    │   │   │   ├── __init__.data.json
-    │   │   │   └── __init__.meta.json
-    │   │   ├── markdown_it/
+    │   │   │   ├── --init--.data.json
+    │   │   │   └── --init--.meta.json
+    │   │   ├── markdown-it/
     │   │   │   ├── common/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── entities.data.json
     │   │   │   │   ├── entities.meta.json
-    │   │   │   │   ├── html_blocks.data.json
-    │   │   │   │   ├── html_blocks.meta.json
-    │   │   │   │   ├── html_re.data.json
-    │   │   │   │   ├── html_re.meta.json
-    │   │   │   │   ├── normalize_url.data.json
-    │   │   │   │   ├── normalize_url.meta.json
+    │   │   │   │   ├── html-blocks.data.json
+    │   │   │   │   ├── html-blocks.meta.json
+    │   │   │   │   ├── html-re.data.json
+    │   │   │   │   ├── html-re.meta.json
+    │   │   │   │   ├── normalize-url.data.json
+    │   │   │   │   ├── normalize-url.meta.json
     │   │   │   │   ├── utils.data.json
     │   │   │   │   └── utils.meta.json
     │   │   │   ├── helpers/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── parse_link_destination.data.json
-    │   │   │   │   ├── parse_link_destination.meta.json
-    │   │   │   │   ├── parse_link_label.data.json
-    │   │   │   │   ├── parse_link_label.meta.json
-    │   │   │   │   ├── parse_link_title.data.json
-    │   │   │   │   └── parse_link_title.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── parse-link-destination.data.json
+    │   │   │   │   ├── parse-link-destination.meta.json
+    │   │   │   │   ├── parse-link-label.data.json
+    │   │   │   │   ├── parse-link-label.meta.json
+    │   │   │   │   ├── parse-link-title.data.json
+    │   │   │   │   └── parse-link-title.meta.json
     │   │   │   ├── presets/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── commonmark.data.json
     │   │   │   │   ├── commonmark.meta.json
     │   │   │   │   ├── default.data.json
     │   │   │   │   ├── default.meta.json
     │   │   │   │   ├── zero.data.json
     │   │   │   │   └── zero.meta.json
-    │   │   │   ├── rules_block/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   ├── rules-block/
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── blockquote.data.json
     │   │   │   │   ├── blockquote.meta.json
     │   │   │   │   ├── code.data.json
@@ -7290,8 +7290,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── heading.meta.json
     │   │   │   │   ├── hr.data.json
     │   │   │   │   ├── hr.meta.json
-    │   │   │   │   ├── html_block.data.json
-    │   │   │   │   ├── html_block.meta.json
+    │   │   │   │   ├── html-block.data.json
+    │   │   │   │   ├── html-block.meta.json
     │   │   │   │   ├── lheading.data.json
     │   │   │   │   ├── lheading.meta.json
     │   │   │   │   ├── list.data.json
@@ -7300,13 +7300,13 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── paragraph.meta.json
     │   │   │   │   ├── reference.data.json
     │   │   │   │   ├── reference.meta.json
-    │   │   │   │   ├── state_block.data.json
-    │   │   │   │   ├── state_block.meta.json
+    │   │   │   │   ├── state-block.data.json
+    │   │   │   │   ├── state-block.meta.json
     │   │   │   │   ├── table.data.json
     │   │   │   │   └── table.meta.json
-    │   │   │   ├── rules_core/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   ├── rules-core/
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── block.data.json
     │   │   │   │   ├── block.meta.json
     │   │   │   │   ├── inline.data.json
@@ -7319,29 +7319,29 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── replacements.meta.json
     │   │   │   │   ├── smartquotes.data.json
     │   │   │   │   ├── smartquotes.meta.json
-    │   │   │   │   ├── state_core.data.json
-    │   │   │   │   ├── state_core.meta.json
-    │   │   │   │   ├── text_join.data.json
-    │   │   │   │   └── text_join.meta.json
-    │   │   │   ├── rules_inline/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── state-core.data.json
+    │   │   │   │   ├── state-core.meta.json
+    │   │   │   │   ├── text-join.data.json
+    │   │   │   │   └── text-join.meta.json
+    │   │   │   ├── rules-inline/
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── autolink.data.json
     │   │   │   │   ├── autolink.meta.json
     │   │   │   │   ├── backticks.data.json
     │   │   │   │   ├── backticks.meta.json
-    │   │   │   │   ├── balance_pairs.data.json
-    │   │   │   │   ├── balance_pairs.meta.json
+    │   │   │   │   ├── balance-pairs.data.json
+    │   │   │   │   ├── balance-pairs.meta.json
     │   │   │   │   ├── emphasis.data.json
     │   │   │   │   ├── emphasis.meta.json
     │   │   │   │   ├── entity.data.json
     │   │   │   │   ├── entity.meta.json
     │   │   │   │   ├── escape.data.json
     │   │   │   │   ├── escape.meta.json
-    │   │   │   │   ├── fragments_join.data.json
-    │   │   │   │   ├── fragments_join.meta.json
-    │   │   │   │   ├── html_inline.data.json
-    │   │   │   │   ├── html_inline.meta.json
+    │   │   │   │   ├── fragments-join.data.json
+    │   │   │   │   ├── fragments-join.meta.json
+    │   │   │   │   ├── html-inline.data.json
+    │   │   │   │   ├── html-inline.meta.json
     │   │   │   │   ├── image.data.json
     │   │   │   │   ├── image.meta.json
     │   │   │   │   ├── link.data.json
@@ -7350,24 +7350,24 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── linkify.meta.json
     │   │   │   │   ├── newline.data.json
     │   │   │   │   ├── newline.meta.json
-    │   │   │   │   ├── state_inline.data.json
-    │   │   │   │   ├── state_inline.meta.json
+    │   │   │   │   ├── state-inline.data.json
+    │   │   │   │   ├── state-inline.meta.json
     │   │   │   │   ├── strikethrough.data.json
     │   │   │   │   ├── strikethrough.meta.json
     │   │   │   │   ├── text.data.json
     │   │   │   │   └── text.meta.json
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _punycode.data.json
-    │   │   │   ├── _punycode.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -punycode.data.json
+    │   │   │   ├── -punycode.meta.json
     │   │   │   ├── main.data.json
     │   │   │   ├── main.meta.json
-    │   │   │   ├── parser_block.data.json
-    │   │   │   ├── parser_block.meta.json
-    │   │   │   ├── parser_core.data.json
-    │   │   │   ├── parser_core.meta.json
-    │   │   │   ├── parser_inline.data.json
-    │   │   │   ├── parser_inline.meta.json
+    │   │   │   ├── parser-block.data.json
+    │   │   │   ├── parser-block.meta.json
+    │   │   │   ├── parser-core.data.json
+    │   │   │   ├── parser-core.meta.json
+    │   │   │   ├── parser-inline.data.json
+    │   │   │   ├── parser-inline.meta.json
     │   │   │   ├── renderer.data.json
     │   │   │   ├── renderer.meta.json
     │   │   │   ├── ruler.data.json
@@ -7377,21 +7377,21 @@ BioactivityDataAcquisition2/
     │   │   │   ├── utils.data.json
     │   │   │   └── utils.meta.json
     │   │   ├── mdurl/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _decode.data.json
-    │   │   │   ├── _decode.meta.json
-    │   │   │   ├── _encode.data.json
-    │   │   │   ├── _encode.meta.json
-    │   │   │   ├── _format.data.json
-    │   │   │   ├── _format.meta.json
-    │   │   │   ├── _parse.data.json
-    │   │   │   ├── _parse.meta.json
-    │   │   │   ├── _url.data.json
-    │   │   │   └── _url.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -decode.data.json
+    │   │   │   ├── -decode.meta.json
+    │   │   │   ├── -encode.data.json
+    │   │   │   ├── -encode.meta.json
+    │   │   │   ├── -format.data.json
+    │   │   │   ├── -format.meta.json
+    │   │   │   ├── -parse.data.json
+    │   │   │   ├── -parse.meta.json
+    │   │   │   ├── -url.data.json
+    │   │   │   └── -url.meta.json
     │   │   ├── multiprocessing/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
     │   │   │   ├── connection.data.json
     │   │   │   ├── connection.meta.json
     │   │   │   ├── context.data.json
@@ -7400,22 +7400,22 @@ BioactivityDataAcquisition2/
     │   │   │   ├── managers.meta.json
     │   │   │   ├── pool.data.json
     │   │   │   ├── pool.meta.json
-    │   │   │   ├── popen_fork.data.json
-    │   │   │   ├── popen_fork.meta.json
-    │   │   │   ├── popen_forkserver.data.json
-    │   │   │   ├── popen_forkserver.meta.json
-    │   │   │   ├── popen_spawn_posix.data.json
-    │   │   │   ├── popen_spawn_posix.meta.json
-    │   │   │   ├── popen_spawn_win32.data.json
-    │   │   │   ├── popen_spawn_win32.meta.json
+    │   │   │   ├── popen-fork.data.json
+    │   │   │   ├── popen-fork.meta.json
+    │   │   │   ├── popen-forkserver.data.json
+    │   │   │   ├── popen-forkserver.meta.json
+    │   │   │   ├── popen-spawn-posix.data.json
+    │   │   │   ├── popen-spawn-posix.meta.json
+    │   │   │   ├── popen-spawn-win32.data.json
+    │   │   │   ├── popen-spawn-win32.meta.json
     │   │   │   ├── process.data.json
     │   │   │   ├── process.meta.json
     │   │   │   ├── queues.data.json
     │   │   │   ├── queues.meta.json
     │   │   │   ├── reduction.data.json
     │   │   │   ├── reduction.meta.json
-    │   │   │   ├── shared_memory.data.json
-    │   │   │   ├── shared_memory.meta.json
+    │   │   │   ├── shared-memory.data.json
+    │   │   │   ├── shared-memory.meta.json
     │   │   │   ├── sharedctypes.data.json
     │   │   │   ├── sharedctypes.meta.json
     │   │   │   ├── spawn.data.json
@@ -7425,17 +7425,17 @@ BioactivityDataAcquisition2/
     │   │   │   ├── util.data.json
     │   │   │   └── util.meta.json
     │   │   ├── numpy/
-    │   │   │   ├── _core/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── _asarray.data.json
-    │   │   │   │   ├── _asarray.meta.json
-    │   │   │   │   ├── _internal.data.json
-    │   │   │   │   ├── _internal.meta.json
-    │   │   │   │   ├── _type_aliases.data.json
-    │   │   │   │   ├── _type_aliases.meta.json
-    │   │   │   │   ├── _ufunc_config.data.json
-    │   │   │   │   ├── _ufunc_config.meta.json
+    │   │   │   ├── -core/
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── -asarray.data.json
+    │   │   │   │   ├── -asarray.meta.json
+    │   │   │   │   ├── -internal.data.json
+    │   │   │   │   ├── -internal.meta.json
+    │   │   │   │   ├── -type-aliases.data.json
+    │   │   │   │   ├── -type-aliases.meta.json
+    │   │   │   │   ├── -ufunc-config.data.json
+    │   │   │   │   ├── -ufunc-config.meta.json
     │   │   │   │   ├── arrayprint.data.json
     │   │   │   │   ├── arrayprint.meta.json
     │   │   │   │   ├── defchararray.data.json
@@ -7444,8 +7444,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── einsumfunc.meta.json
     │   │   │   │   ├── fromnumeric.data.json
     │   │   │   │   ├── fromnumeric.meta.json
-    │   │   │   │   ├── function_base.data.json
-    │   │   │   │   ├── function_base.meta.json
+    │   │   │   │   ├── function-base.data.json
+    │   │   │   │   ├── function-base.meta.json
     │   │   │   │   ├── multiarray.data.json
     │   │   │   │   ├── multiarray.meta.json
     │   │   │   │   ├── numeric.data.json
@@ -7454,51 +7454,51 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── numerictypes.meta.json
     │   │   │   │   ├── records.data.json
     │   │   │   │   ├── records.meta.json
-    │   │   │   │   ├── shape_base.data.json
-    │   │   │   │   ├── shape_base.meta.json
+    │   │   │   │   ├── shape-base.data.json
+    │   │   │   │   ├── shape-base.meta.json
     │   │   │   │   ├── strings.data.json
     │   │   │   │   └── strings.meta.json
-    │   │   │   ├── _typing/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── _add_docstring.data.json
-    │   │   │   │   ├── _add_docstring.meta.json
-    │   │   │   │   ├── _array_like.data.json
-    │   │   │   │   ├── _array_like.meta.json
-    │   │   │   │   ├── _char_codes.data.json
-    │   │   │   │   ├── _char_codes.meta.json
-    │   │   │   │   ├── _dtype_like.data.json
-    │   │   │   │   ├── _dtype_like.meta.json
-    │   │   │   │   ├── _extended_precision.data.json
-    │   │   │   │   ├── _extended_precision.meta.json
-    │   │   │   │   ├── _nbit.data.json
-    │   │   │   │   ├── _nbit.meta.json
-    │   │   │   │   ├── _nbit_base.data.json
-    │   │   │   │   ├── _nbit_base.meta.json
-    │   │   │   │   ├── _nested_sequence.data.json
-    │   │   │   │   ├── _nested_sequence.meta.json
-    │   │   │   │   ├── _scalars.data.json
-    │   │   │   │   ├── _scalars.meta.json
-    │   │   │   │   ├── _shape.data.json
-    │   │   │   │   ├── _shape.meta.json
-    │   │   │   │   ├── _ufunc.data.json
-    │   │   │   │   └── _ufunc.meta.json
+    │   │   │   ├── -typing/
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── -add-docstring.data.json
+    │   │   │   │   ├── -add-docstring.meta.json
+    │   │   │   │   ├── -array-like.data.json
+    │   │   │   │   ├── -array-like.meta.json
+    │   │   │   │   ├── -char-codes.data.json
+    │   │   │   │   ├── -char-codes.meta.json
+    │   │   │   │   ├── -dtype-like.data.json
+    │   │   │   │   ├── -dtype-like.meta.json
+    │   │   │   │   ├── -extended-precision.data.json
+    │   │   │   │   ├── -extended-precision.meta.json
+    │   │   │   │   ├── -nbit.data.json
+    │   │   │   │   ├── -nbit.meta.json
+    │   │   │   │   ├── -nbit-base.data.json
+    │   │   │   │   ├── -nbit-base.meta.json
+    │   │   │   │   ├── -nested-sequence.data.json
+    │   │   │   │   ├── -nested-sequence.meta.json
+    │   │   │   │   ├── -scalars.data.json
+    │   │   │   │   ├── -scalars.meta.json
+    │   │   │   │   ├── -shape.data.json
+    │   │   │   │   ├── -shape.meta.json
+    │   │   │   │   ├── -ufunc.data.json
+    │   │   │   │   └── -ufunc.meta.json
     │   │   │   ├── char/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   └── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   └── --init--.meta.json
     │   │   │   ├── core/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   └── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   └── --init--.meta.json
     │   │   │   ├── ctypeslib/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── _ctypeslib.data.json
-    │   │   │   │   └── _ctypeslib.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── -ctypeslib.data.json
+    │   │   │   │   └── -ctypeslib.meta.json
     │   │   │   ├── f2py/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── __version__.data.json
-    │   │   │   │   ├── __version__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── --version--.data.json
+    │   │   │   │   ├── --version--.meta.json
     │   │   │   │   ├── auxfuncs.data.json
     │   │   │   │   ├── auxfuncs.meta.json
     │   │   │   │   ├── cfuncs.data.json
@@ -7506,59 +7506,59 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── f2py2e.data.json
     │   │   │   │   └── f2py2e.meta.json
     │   │   │   ├── fft/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── _helper.data.json
-    │   │   │   │   ├── _helper.meta.json
-    │   │   │   │   ├── _pocketfft.data.json
-    │   │   │   │   └── _pocketfft.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── -helper.data.json
+    │   │   │   │   ├── -helper.meta.json
+    │   │   │   │   ├── -pocketfft.data.json
+    │   │   │   │   └── -pocketfft.meta.json
     │   │   │   ├── lib/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── _array_utils_impl.data.json
-    │   │   │   │   ├── _array_utils_impl.meta.json
-    │   │   │   │   ├── _arraypad_impl.data.json
-    │   │   │   │   ├── _arraypad_impl.meta.json
-    │   │   │   │   ├── _arraysetops_impl.data.json
-    │   │   │   │   ├── _arraysetops_impl.meta.json
-    │   │   │   │   ├── _arrayterator_impl.data.json
-    │   │   │   │   ├── _arrayterator_impl.meta.json
-    │   │   │   │   ├── _datasource.data.json
-    │   │   │   │   ├── _datasource.meta.json
-    │   │   │   │   ├── _format_impl.data.json
-    │   │   │   │   ├── _format_impl.meta.json
-    │   │   │   │   ├── _function_base_impl.data.json
-    │   │   │   │   ├── _function_base_impl.meta.json
-    │   │   │   │   ├── _histograms_impl.data.json
-    │   │   │   │   ├── _histograms_impl.meta.json
-    │   │   │   │   ├── _index_tricks_impl.data.json
-    │   │   │   │   ├── _index_tricks_impl.meta.json
-    │   │   │   │   ├── _iotools.data.json
-    │   │   │   │   ├── _iotools.meta.json
-    │   │   │   │   ├── _nanfunctions_impl.data.json
-    │   │   │   │   ├── _nanfunctions_impl.meta.json
-    │   │   │   │   ├── _npyio_impl.data.json
-    │   │   │   │   ├── _npyio_impl.meta.json
-    │   │   │   │   ├── _polynomial_impl.data.json
-    │   │   │   │   ├── _polynomial_impl.meta.json
-    │   │   │   │   ├── _scimath_impl.data.json
-    │   │   │   │   ├── _scimath_impl.meta.json
-    │   │   │   │   ├── _shape_base_impl.data.json
-    │   │   │   │   ├── _shape_base_impl.meta.json
-    │   │   │   │   ├── _stride_tricks_impl.data.json
-    │   │   │   │   ├── _stride_tricks_impl.meta.json
-    │   │   │   │   ├── _twodim_base_impl.data.json
-    │   │   │   │   ├── _twodim_base_impl.meta.json
-    │   │   │   │   ├── _type_check_impl.data.json
-    │   │   │   │   ├── _type_check_impl.meta.json
-    │   │   │   │   ├── _ufunclike_impl.data.json
-    │   │   │   │   ├── _ufunclike_impl.meta.json
-    │   │   │   │   ├── _utils_impl.data.json
-    │   │   │   │   ├── _utils_impl.meta.json
-    │   │   │   │   ├── _version.data.json
-    │   │   │   │   ├── _version.meta.json
-    │   │   │   │   ├── array_utils.data.json
-    │   │   │   │   ├── array_utils.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── -array-utils-impl.data.json
+    │   │   │   │   ├── -array-utils-impl.meta.json
+    │   │   │   │   ├── -arraypad-impl.data.json
+    │   │   │   │   ├── -arraypad-impl.meta.json
+    │   │   │   │   ├── -arraysetops-impl.data.json
+    │   │   │   │   ├── -arraysetops-impl.meta.json
+    │   │   │   │   ├── -arrayterator-impl.data.json
+    │   │   │   │   ├── -arrayterator-impl.meta.json
+    │   │   │   │   ├── -datasource.data.json
+    │   │   │   │   ├── -datasource.meta.json
+    │   │   │   │   ├── -format-impl.data.json
+    │   │   │   │   ├── -format-impl.meta.json
+    │   │   │   │   ├── -function-base-impl.data.json
+    │   │   │   │   ├── -function-base-impl.meta.json
+    │   │   │   │   ├── -histograms-impl.data.json
+    │   │   │   │   ├── -histograms-impl.meta.json
+    │   │   │   │   ├── -index-tricks-impl.data.json
+    │   │   │   │   ├── -index-tricks-impl.meta.json
+    │   │   │   │   ├── -iotools.data.json
+    │   │   │   │   ├── -iotools.meta.json
+    │   │   │   │   ├── -nanfunctions-impl.data.json
+    │   │   │   │   ├── -nanfunctions-impl.meta.json
+    │   │   │   │   ├── -npyio-impl.data.json
+    │   │   │   │   ├── -npyio-impl.meta.json
+    │   │   │   │   ├── -polynomial-impl.data.json
+    │   │   │   │   ├── -polynomial-impl.meta.json
+    │   │   │   │   ├── -scimath-impl.data.json
+    │   │   │   │   ├── -scimath-impl.meta.json
+    │   │   │   │   ├── -shape-base-impl.data.json
+    │   │   │   │   ├── -shape-base-impl.meta.json
+    │   │   │   │   ├── -stride-tricks-impl.data.json
+    │   │   │   │   ├── -stride-tricks-impl.meta.json
+    │   │   │   │   ├── -twodim-base-impl.data.json
+    │   │   │   │   ├── -twodim-base-impl.meta.json
+    │   │   │   │   ├── -type-check-impl.data.json
+    │   │   │   │   ├── -type-check-impl.meta.json
+    │   │   │   │   ├── -ufunclike-impl.data.json
+    │   │   │   │   ├── -ufunclike-impl.meta.json
+    │   │   │   │   ├── -utils-impl.data.json
+    │   │   │   │   ├── -utils-impl.meta.json
+    │   │   │   │   ├── -version.data.json
+    │   │   │   │   ├── -version.meta.json
+    │   │   │   │   ├── array-utils.data.json
+    │   │   │   │   ├── array-utils.meta.json
     │   │   │   │   ├── format.data.json
     │   │   │   │   ├── format.meta.json
     │   │   │   │   ├── introspect.data.json
@@ -7569,20 +7569,20 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── npyio.meta.json
     │   │   │   │   ├── scimath.data.json
     │   │   │   │   ├── scimath.meta.json
-    │   │   │   │   ├── stride_tricks.data.json
-    │   │   │   │   └── stride_tricks.meta.json
+    │   │   │   │   ├── stride-tricks.data.json
+    │   │   │   │   └── stride-tricks.meta.json
     │   │   │   ├── linalg/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── _linalg.data.json
-    │   │   │   │   ├── _linalg.meta.json
-    │   │   │   │   ├── _umath_linalg.data.json
-    │   │   │   │   ├── _umath_linalg.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── -linalg.data.json
+    │   │   │   │   ├── -linalg.meta.json
+    │   │   │   │   ├── -umath-linalg.data.json
+    │   │   │   │   ├── -umath-linalg.meta.json
     │   │   │   │   ├── linalg.data.json
     │   │   │   │   └── linalg.meta.json
     │   │   │   ├── ma/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── core.data.json
     │   │   │   │   ├── core.meta.json
     │   │   │   │   ├── extras.data.json
@@ -7590,23 +7590,23 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── mrecords.data.json
     │   │   │   │   └── mrecords.meta.json
     │   │   │   ├── matrixlib/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── defmatrix.data.json
     │   │   │   │   └── defmatrix.meta.json
     │   │   │   ├── polynomial/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── _polybase.data.json
-    │   │   │   │   ├── _polybase.meta.json
-    │   │   │   │   ├── _polytypes.data.json
-    │   │   │   │   ├── _polytypes.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── -polybase.data.json
+    │   │   │   │   ├── -polybase.meta.json
+    │   │   │   │   ├── -polytypes.data.json
+    │   │   │   │   ├── -polytypes.meta.json
     │   │   │   │   ├── chebyshev.data.json
     │   │   │   │   ├── chebyshev.meta.json
     │   │   │   │   ├── hermite.data.json
     │   │   │   │   ├── hermite.meta.json
-    │   │   │   │   ├── hermite_e.data.json
-    │   │   │   │   ├── hermite_e.meta.json
+    │   │   │   │   ├── hermite-e.data.json
+    │   │   │   │   ├── hermite-e.meta.json
     │   │   │   │   ├── laguerre.data.json
     │   │   │   │   ├── laguerre.meta.json
     │   │   │   │   ├── legendre.data.json
@@ -7616,53 +7616,53 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── polyutils.data.json
     │   │   │   │   └── polyutils.meta.json
     │   │   │   ├── random/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── _generator.data.json
-    │   │   │   │   ├── _generator.meta.json
-    │   │   │   │   ├── _mt19937.data.json
-    │   │   │   │   ├── _mt19937.meta.json
-    │   │   │   │   ├── _pcg64.data.json
-    │   │   │   │   ├── _pcg64.meta.json
-    │   │   │   │   ├── _philox.data.json
-    │   │   │   │   ├── _philox.meta.json
-    │   │   │   │   ├── _sfc64.data.json
-    │   │   │   │   ├── _sfc64.meta.json
-    │   │   │   │   ├── bit_generator.data.json
-    │   │   │   │   ├── bit_generator.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── -generator.data.json
+    │   │   │   │   ├── -generator.meta.json
+    │   │   │   │   ├── -mt19937.data.json
+    │   │   │   │   ├── -mt19937.meta.json
+    │   │   │   │   ├── -pcg64.data.json
+    │   │   │   │   ├── -pcg64.meta.json
+    │   │   │   │   ├── -philox.data.json
+    │   │   │   │   ├── -philox.meta.json
+    │   │   │   │   ├── -sfc64.data.json
+    │   │   │   │   ├── -sfc64.meta.json
+    │   │   │   │   ├── bit-generator.data.json
+    │   │   │   │   ├── bit-generator.meta.json
     │   │   │   │   ├── mtrand.data.json
     │   │   │   │   └── mtrand.meta.json
     │   │   │   ├── rec/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   └── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   └── --init--.meta.json
     │   │   │   ├── strings/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   └── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   └── --init--.meta.json
     │   │   │   ├── testing/
-    │   │   │   │   ├── _private/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── -private/
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── utils.data.json
     │   │   │   │   │   └── utils.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── overrides.data.json
     │   │   │   │   └── overrides.meta.json
     │   │   │   ├── typing/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   └── __init__.meta.json
-    │   │   │   ├── __config__.data.json
-    │   │   │   ├── __config__.meta.json
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _array_api_info.data.json
-    │   │   │   ├── _array_api_info.meta.json
-    │   │   │   ├── _expired_attrs_2_0.data.json
-    │   │   │   ├── _expired_attrs_2_0.meta.json
-    │   │   │   ├── _globals.data.json
-    │   │   │   ├── _globals.meta.json
-    │   │   │   ├── _pytesttester.data.json
-    │   │   │   ├── _pytesttester.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   └── --init--.meta.json
+    │   │   │   ├── --config--.data.json
+    │   │   │   ├── --config--.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -array-api-info.data.json
+    │   │   │   ├── -array-api-info.meta.json
+    │   │   │   ├── -expired-attrs-2-0.data.json
+    │   │   │   ├── -expired-attrs-2-0.meta.json
+    │   │   │   ├── -globals.data.json
+    │   │   │   ├── -globals.meta.json
+    │   │   │   ├── -pytesttester.data.json
+    │   │   │   ├── -pytesttester.meta.json
     │   │   │   ├── dtypes.data.json
     │   │   │   ├── dtypes.meta.json
     │   │   │   ├── exceptions.data.json
@@ -7672,52 +7672,52 @@ BioactivityDataAcquisition2/
     │   │   │   ├── version.data.json
     │   │   │   └── version.meta.json
     │   │   ├── opentelemetry/
-    │   │   │   ├── _logs/
-    │   │   │   │   ├── _internal/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   └── __init__.meta.json
+    │   │   │   ├── -logs/
+    │   │   │   │   ├── -internal/
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   └── --init--.meta.json
     │   │   │   │   ├── severity/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   └── __init__.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   └── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   └── --init--.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   └── --init--.meta.json
     │   │   │   ├── attributes/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   └── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   └── --init--.meta.json
     │   │   │   ├── context/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── context.data.json
     │   │   │   │   └── context.meta.json
-    │   │   │   ├── environment_variables/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   └── __init__.meta.json
+    │   │   │   ├── environment-variables/
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   └── --init--.meta.json
     │   │   │   ├── exporter/
     │   │   │   │   ├── otlp/
     │   │   │   │   │   ├── proto/
     │   │   │   │   │   │   ├── common/
-    │   │   │   │   │   │   │   ├── _internal/
-    │   │   │   │   │   │   │   │   ├── trace_encoder/
-    │   │   │   │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   │   │   │   └── __init__.meta.json
-    │   │   │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   │   │   └── __init__.meta.json
+    │   │   │   │   │   │   │   ├── -internal/
+    │   │   │   │   │   │   │   │   ├── trace-encoder/
+    │   │   │   │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   │   │   │   └── --init--.meta.json
+    │   │   │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   │   │   └── --init--.meta.json
     │   │   │   │   │   │   │   ├── version/
-    │   │   │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   │   │   └── __init__.meta.json
-    │   │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   │   ├── trace_encoder.data.json
-    │   │   │   │   │   │   │   └── trace_encoder.meta.json
+    │   │   │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   │   │   └── --init--.meta.json
+    │   │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   │   │   ├── trace-encoder.data.json
+    │   │   │   │   │   │   │   └── trace-encoder.meta.json
     │   │   │   │   │   │   └── grpc/
-    │   │   │   │   │   │       ├── trace_exporter/
-    │   │   │   │   │   │       │   ├── __init__.data.json
-    │   │   │   │   │   │       │   └── __init__.meta.json
+    │   │   │   │   │   │       ├── trace-exporter/
+    │   │   │   │   │   │       │   ├── --init--.data.json
+    │   │   │   │   │   │       │   └── --init--.meta.json
     │   │   │   │   │   │       ├── version/
-    │   │   │   │   │   │       │   ├── __init__.data.json
-    │   │   │   │   │   │       │   └── __init__.meta.json
-    │   │   │   │   │   │       ├── __init__.data.json
-    │   │   │   │   │   │       ├── __init__.meta.json
+    │   │   │   │   │   │       │   ├── --init--.data.json
+    │   │   │   │   │   │       │   └── --init--.meta.json
+    │   │   │   │   │   │       ├── --init--.data.json
+    │   │   │   │   │   │       ├── --init--.meta.json
     │   │   │   │   │   │       ├── exporter.data.json
     │   │   │   │   │   │       └── exporter.meta.json
     │   │   │   │   │   ├── proto.data.json
@@ -7725,146 +7725,146 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── otlp.data.json
     │   │   │   │   └── otlp.meta.json
     │   │   │   ├── metrics/
-    │   │   │   │   ├── _internal/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── -internal/
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── instrument.data.json
     │   │   │   │   │   ├── instrument.meta.json
     │   │   │   │   │   ├── observation.data.json
     │   │   │   │   │   └── observation.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   └── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   └── --init--.meta.json
     │   │   │   ├── proto/
     │   │   │   │   ├── collector/
     │   │   │   │   │   ├── logs/
     │   │   │   │   │   │   ├── v1/
-    │   │   │   │   │   │   │   ├── logs_service_pb2.data.json
-    │   │   │   │   │   │   │   ├── logs_service_pb2.meta.json
-    │   │   │   │   │   │   │   ├── logs_service_pb2_grpc.data.json
-    │   │   │   │   │   │   │   └── logs_service_pb2_grpc.meta.json
+    │   │   │   │   │   │   │   ├── logs-service-pb2.data.json
+    │   │   │   │   │   │   │   ├── logs-service-pb2.meta.json
+    │   │   │   │   │   │   │   ├── logs-service-pb2-grpc.data.json
+    │   │   │   │   │   │   │   └── logs-service-pb2-grpc.meta.json
     │   │   │   │   │   │   ├── v1.data.json
     │   │   │   │   │   │   └── v1.meta.json
     │   │   │   │   │   ├── metrics/
     │   │   │   │   │   │   ├── v1/
-    │   │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   │   ├── metrics_service_pb2.data.json
-    │   │   │   │   │   │   │   ├── metrics_service_pb2.meta.json
-    │   │   │   │   │   │   │   ├── metrics_service_pb2_grpc.data.json
-    │   │   │   │   │   │   │   └── metrics_service_pb2_grpc.meta.json
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   └── __init__.meta.json
+    │   │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   │   │   ├── metrics-service-pb2.data.json
+    │   │   │   │   │   │   │   ├── metrics-service-pb2.meta.json
+    │   │   │   │   │   │   │   ├── metrics-service-pb2-grpc.data.json
+    │   │   │   │   │   │   │   └── metrics-service-pb2-grpc.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   └── --init--.meta.json
     │   │   │   │   │   ├── trace/
     │   │   │   │   │   │   ├── v1/
-    │   │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   │   ├── trace_service_pb2.data.json
-    │   │   │   │   │   │   │   ├── trace_service_pb2.meta.json
-    │   │   │   │   │   │   │   ├── trace_service_pb2_grpc.data.json
-    │   │   │   │   │   │   │   └── trace_service_pb2_grpc.meta.json
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   └── __init__.meta.json
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   │   │   ├── trace-service-pb2.data.json
+    │   │   │   │   │   │   │   ├── trace-service-pb2.meta.json
+    │   │   │   │   │   │   │   ├── trace-service-pb2-grpc.data.json
+    │   │   │   │   │   │   │   └── trace-service-pb2-grpc.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   └── --init--.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── logs.data.json
     │   │   │   │   │   └── logs.meta.json
     │   │   │   │   ├── common/
     │   │   │   │   │   ├── v1/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── common_pb2.data.json
-    │   │   │   │   │   │   └── common_pb2.meta.json
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   └── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   │   ├── common-pb2.data.json
+    │   │   │   │   │   │   └── common-pb2.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   └── --init--.meta.json
     │   │   │   │   ├── logs/
     │   │   │   │   │   ├── v1/
-    │   │   │   │   │   │   ├── logs_pb2.data.json
-    │   │   │   │   │   │   └── logs_pb2.meta.json
+    │   │   │   │   │   │   ├── logs-pb2.data.json
+    │   │   │   │   │   │   └── logs-pb2.meta.json
     │   │   │   │   │   ├── v1.data.json
     │   │   │   │   │   └── v1.meta.json
     │   │   │   │   ├── metrics/
     │   │   │   │   │   ├── v1/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── metrics_pb2.data.json
-    │   │   │   │   │   │   └── metrics_pb2.meta.json
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   └── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   │   ├── metrics-pb2.data.json
+    │   │   │   │   │   │   └── metrics-pb2.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   └── --init--.meta.json
     │   │   │   │   ├── resource/
     │   │   │   │   │   ├── v1/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── resource_pb2.data.json
-    │   │   │   │   │   │   └── resource_pb2.meta.json
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   └── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   │   ├── resource-pb2.data.json
+    │   │   │   │   │   │   └── resource-pb2.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   └── --init--.meta.json
     │   │   │   │   ├── trace/
     │   │   │   │   │   ├── v1/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── trace_pb2.data.json
-    │   │   │   │   │   │   └── trace_pb2.meta.json
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   └── __init__.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   │   ├── trace-pb2.data.json
+    │   │   │   │   │   │   └── trace-pb2.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   └── --init--.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── logs.data.json
     │   │   │   │   └── logs.meta.json
     │   │   │   ├── sdk/
-    │   │   │   │   ├── _logs/
-    │   │   │   │   │   ├── _internal/
+    │   │   │   │   ├── -logs/
+    │   │   │   │   │   ├── -internal/
     │   │   │   │   │   │   ├── export/
-    │   │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   │   ├── in_memory_log_exporter.data.json
-    │   │   │   │   │   │   │   └── in_memory_log_exporter.meta.json
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   └── __init__.meta.json
+    │   │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   │   │   ├── in-memory-log-exporter.data.json
+    │   │   │   │   │   │   │   └── in-memory-log-exporter.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   └── --init--.meta.json
     │   │   │   │   │   ├── export/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   └── __init__.meta.json
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   └── __init__.meta.json
-    │   │   │   │   ├── _shared_internal/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   └── __init__.meta.json
-    │   │   │   │   ├── environment_variables/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   └── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   └── --init--.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   └── --init--.meta.json
+    │   │   │   │   ├── -shared-internal/
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   └── --init--.meta.json
+    │   │   │   │   ├── environment-variables/
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   └── --init--.meta.json
     │   │   │   │   ├── metrics/
-    │   │   │   │   │   ├── _internal/
+    │   │   │   │   │   ├── -internal/
     │   │   │   │   │   │   ├── exemplar/
-    │   │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   │   ├── exemplar.data.json
     │   │   │   │   │   │   │   ├── exemplar.meta.json
-    │   │   │   │   │   │   │   ├── exemplar_filter.data.json
-    │   │   │   │   │   │   │   ├── exemplar_filter.meta.json
-    │   │   │   │   │   │   │   ├── exemplar_reservoir.data.json
-    │   │   │   │   │   │   │   └── exemplar_reservoir.meta.json
-    │   │   │   │   │   │   ├── exponential_histogram/
+    │   │   │   │   │   │   │   ├── exemplar-filter.data.json
+    │   │   │   │   │   │   │   ├── exemplar-filter.meta.json
+    │   │   │   │   │   │   │   ├── exemplar-reservoir.data.json
+    │   │   │   │   │   │   │   └── exemplar-reservoir.meta.json
+    │   │   │   │   │   │   ├── exponential-histogram/
     │   │   │   │   │   │   │   ├── mapping/
-    │   │   │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   │   │   ├── errors.data.json
     │   │   │   │   │   │   │   │   ├── errors.meta.json
-    │   │   │   │   │   │   │   │   ├── exponent_mapping.data.json
-    │   │   │   │   │   │   │   │   ├── exponent_mapping.meta.json
-    │   │   │   │   │   │   │   │   ├── ieee_754.data.json
-    │   │   │   │   │   │   │   │   ├── ieee_754.meta.json
-    │   │   │   │   │   │   │   │   ├── logarithm_mapping.data.json
-    │   │   │   │   │   │   │   │   └── logarithm_mapping.meta.json
-    │   │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   │   │   │   ├── exponent-mapping.data.json
+    │   │   │   │   │   │   │   │   ├── exponent-mapping.meta.json
+    │   │   │   │   │   │   │   │   ├── ieee-754.data.json
+    │   │   │   │   │   │   │   │   ├── ieee-754.meta.json
+    │   │   │   │   │   │   │   │   ├── logarithm-mapping.data.json
+    │   │   │   │   │   │   │   │   └── logarithm-mapping.meta.json
+    │   │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   │   │   ├── buckets.data.json
     │   │   │   │   │   │   │   └── buckets.meta.json
     │   │   │   │   │   │   ├── export/
-    │   │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   │   └── __init__.meta.json
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── _view_instrument_match.data.json
-    │   │   │   │   │   │   ├── _view_instrument_match.meta.json
+    │   │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   │   └── --init--.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   │   ├── -view-instrument-match.data.json
+    │   │   │   │   │   │   ├── -view-instrument-match.meta.json
     │   │   │   │   │   │   ├── aggregation.data.json
     │   │   │   │   │   │   ├── aggregation.meta.json
     │   │   │   │   │   │   ├── exceptions.data.json
@@ -7873,79 +7873,79 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   │   ├── instrument.meta.json
     │   │   │   │   │   │   ├── measurement.data.json
     │   │   │   │   │   │   ├── measurement.meta.json
-    │   │   │   │   │   │   ├── measurement_consumer.data.json
-    │   │   │   │   │   │   ├── measurement_consumer.meta.json
-    │   │   │   │   │   │   ├── metric_reader_storage.data.json
-    │   │   │   │   │   │   ├── metric_reader_storage.meta.json
+    │   │   │   │   │   │   ├── measurement-consumer.data.json
+    │   │   │   │   │   │   ├── measurement-consumer.meta.json
+    │   │   │   │   │   │   ├── metric-reader-storage.data.json
+    │   │   │   │   │   │   ├── metric-reader-storage.meta.json
     │   │   │   │   │   │   ├── point.data.json
     │   │   │   │   │   │   ├── point.meta.json
-    │   │   │   │   │   │   ├── sdk_configuration.data.json
-    │   │   │   │   │   │   ├── sdk_configuration.meta.json
+    │   │   │   │   │   │   ├── sdk-configuration.data.json
+    │   │   │   │   │   │   ├── sdk-configuration.meta.json
     │   │   │   │   │   │   ├── view.data.json
     │   │   │   │   │   │   └── view.meta.json
     │   │   │   │   │   ├── export/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   └── __init__.meta.json
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   └── __init__.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   └── --init--.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   └── --init--.meta.json
     │   │   │   │   ├── resources/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   └── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   └── --init--.meta.json
     │   │   │   │   ├── trace/
     │   │   │   │   │   ├── export/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   └── __init__.meta.json
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── id_generator.data.json
-    │   │   │   │   │   ├── id_generator.meta.json
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   └── --init--.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── id-generator.data.json
+    │   │   │   │   │   ├── id-generator.meta.json
     │   │   │   │   │   ├── sampling.data.json
     │   │   │   │   │   └── sampling.meta.json
     │   │   │   │   ├── util/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── instrumentation.data.json
     │   │   │   │   │   └── instrumentation.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   └── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   └── --init--.meta.json
     │   │   │   ├── semconv/
-    │   │   │   │   ├── _incubating/
+    │   │   │   │   ├── -incubating/
     │   │   │   │   │   ├── attributes/
-    │   │   │   │   │   │   ├── code_attributes.data.json
-    │   │   │   │   │   │   └── code_attributes.meta.json
+    │   │   │   │   │   │   ├── code-attributes.data.json
+    │   │   │   │   │   │   └── code-attributes.meta.json
     │   │   │   │   │   ├── attributes.data.json
     │   │   │   │   │   └── attributes.meta.json
     │   │   │   │   ├── attributes/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── exception_attributes.data.json
-    │   │   │   │   │   └── exception_attributes.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── exception-attributes.data.json
+    │   │   │   │   │   └── exception-attributes.meta.json
     │   │   │   │   ├── resource/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   └── __init__.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── _incubating.data.json
-    │   │   │   │   └── _incubating.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   └── --init--.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── -incubating.data.json
+    │   │   │   │   └── -incubating.meta.json
     │   │   │   ├── trace/
     │   │   │   │   ├── propagation/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   └── __init__.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   └── --init--.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── span.data.json
     │   │   │   │   ├── span.meta.json
     │   │   │   │   ├── status.data.json
     │   │   │   │   └── status.meta.json
     │   │   │   ├── util/
-    │   │   │   │   ├── _decorator.data.json
-    │   │   │   │   ├── _decorator.meta.json
-    │   │   │   │   ├── _importlib_metadata.data.json
-    │   │   │   │   ├── _importlib_metadata.meta.json
-    │   │   │   │   ├── _once.data.json
-    │   │   │   │   ├── _once.meta.json
-    │   │   │   │   ├── _providers.data.json
-    │   │   │   │   ├── _providers.meta.json
+    │   │   │   │   ├── -decorator.data.json
+    │   │   │   │   ├── -decorator.meta.json
+    │   │   │   │   ├── -importlib-metadata.data.json
+    │   │   │   │   ├── -importlib-metadata.meta.json
+    │   │   │   │   ├── -once.data.json
+    │   │   │   │   ├── -once.meta.json
+    │   │   │   │   ├── -providers.data.json
+    │   │   │   │   ├── -providers.meta.json
     │   │   │   │   ├── re.data.json
     │   │   │   │   ├── re.meta.json
     │   │   │   │   ├── types.data.json
@@ -7955,28 +7955,28 @@ BioactivityDataAcquisition2/
     │   │   │   ├── util.data.json
     │   │   │   └── util.meta.json
     │   │   ├── orjson/
-    │   │   │   ├── __init__.data.json
-    │   │   │   └── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   └── --init--.meta.json
     │   │   ├── os/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
     │   │   │   ├── path.data.json
     │   │   │   └── path.meta.json
     │   │   ├── packaging/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _elffile.data.json
-    │   │   │   ├── _elffile.meta.json
-    │   │   │   ├── _manylinux.data.json
-    │   │   │   ├── _manylinux.meta.json
-    │   │   │   ├── _musllinux.data.json
-    │   │   │   ├── _musllinux.meta.json
-    │   │   │   ├── _parser.data.json
-    │   │   │   ├── _parser.meta.json
-    │   │   │   ├── _structures.data.json
-    │   │   │   ├── _structures.meta.json
-    │   │   │   ├── _tokenizer.data.json
-    │   │   │   ├── _tokenizer.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -elffile.data.json
+    │   │   │   ├── -elffile.meta.json
+    │   │   │   ├── -manylinux.data.json
+    │   │   │   ├── -manylinux.meta.json
+    │   │   │   ├── -musllinux.data.json
+    │   │   │   ├── -musllinux.meta.json
+    │   │   │   ├── -parser.data.json
+    │   │   │   ├── -parser.meta.json
+    │   │   │   ├── -structures.data.json
+    │   │   │   ├── -structures.meta.json
+    │   │   │   ├── -tokenizer.data.json
+    │   │   │   ├── -tokenizer.meta.json
     │   │   │   ├── markers.data.json
     │   │   │   ├── markers.meta.json
     │   │   │   ├── requirements.data.json
@@ -7991,26 +7991,26 @@ BioactivityDataAcquisition2/
     │   │   │   └── version.meta.json
     │   │   ├── pandera/
     │   │   │   ├── accessors/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── dask_accessor.data.json
-    │   │   │   │   ├── dask_accessor.meta.json
-    │   │   │   │   ├── pandas_accessor.data.json
-    │   │   │   │   └── pandas_accessor.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── dask-accessor.data.json
+    │   │   │   │   ├── dask-accessor.meta.json
+    │   │   │   │   ├── pandas-accessor.data.json
+    │   │   │   │   └── pandas-accessor.meta.json
     │   │   │   ├── api/
     │   │   │   │   ├── base/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── checks.data.json
     │   │   │   │   │   ├── checks.meta.json
-    │   │   │   │   │   ├── error_handler.data.json
-    │   │   │   │   │   ├── error_handler.meta.json
+    │   │   │   │   │   ├── error-handler.data.json
+    │   │   │   │   │   ├── error-handler.meta.json
     │   │   │   │   │   ├── model.data.json
     │   │   │   │   │   ├── model.meta.json
-    │   │   │   │   │   ├── model_components.data.json
-    │   │   │   │   │   ├── model_components.meta.json
-    │   │   │   │   │   ├── model_config.data.json
-    │   │   │   │   │   ├── model_config.meta.json
+    │   │   │   │   │   ├── model-components.data.json
+    │   │   │   │   │   ├── model-components.meta.json
+    │   │   │   │   │   ├── model-config.data.json
+    │   │   │   │   │   ├── model-config.meta.json
     │   │   │   │   │   ├── parsers.data.json
     │   │   │   │   │   ├── parsers.meta.json
     │   │   │   │   │   ├── schema.data.json
@@ -8018,21 +8018,21 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── types.data.json
     │   │   │   │   │   └── types.meta.json
     │   │   │   │   ├── dataframe/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── components.data.json
     │   │   │   │   │   ├── components.meta.json
     │   │   │   │   │   ├── container.data.json
     │   │   │   │   │   ├── container.meta.json
     │   │   │   │   │   ├── model.data.json
     │   │   │   │   │   ├── model.meta.json
-    │   │   │   │   │   ├── model_components.data.json
-    │   │   │   │   │   ├── model_components.meta.json
-    │   │   │   │   │   ├── model_config.data.json
-    │   │   │   │   │   └── model_config.meta.json
+    │   │   │   │   │   ├── model-components.data.json
+    │   │   │   │   │   ├── model-components.meta.json
+    │   │   │   │   │   ├── model-config.data.json
+    │   │   │   │   │   └── model-config.meta.json
     │   │   │   │   ├── pandas/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── array.data.json
     │   │   │   │   │   ├── array.meta.json
     │   │   │   │   │   ├── components.data.json
@@ -8041,48 +8041,48 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── container.meta.json
     │   │   │   │   │   ├── model.data.json
     │   │   │   │   │   ├── model.meta.json
-    │   │   │   │   │   ├── model_config.data.json
-    │   │   │   │   │   ├── model_config.meta.json
+    │   │   │   │   │   ├── model-config.data.json
+    │   │   │   │   │   ├── model-config.meta.json
     │   │   │   │   │   ├── types.data.json
     │   │   │   │   │   └── types.meta.json
     │   │   │   │   ├── polars/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── components.data.json
     │   │   │   │   │   ├── components.meta.json
     │   │   │   │   │   ├── container.data.json
     │   │   │   │   │   ├── container.meta.json
     │   │   │   │   │   ├── model.data.json
     │   │   │   │   │   ├── model.meta.json
-    │   │   │   │   │   ├── model_config.data.json
-    │   │   │   │   │   ├── model_config.meta.json
+    │   │   │   │   │   ├── model-config.data.json
+    │   │   │   │   │   ├── model-config.meta.json
     │   │   │   │   │   ├── types.data.json
     │   │   │   │   │   ├── types.meta.json
     │   │   │   │   │   ├── utils.data.json
     │   │   │   │   │   └── utils.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── checks.data.json
     │   │   │   │   ├── checks.meta.json
     │   │   │   │   ├── extensions.data.json
     │   │   │   │   ├── extensions.meta.json
-    │   │   │   │   ├── function_dispatch.data.json
-    │   │   │   │   ├── function_dispatch.meta.json
+    │   │   │   │   ├── function-dispatch.data.json
+    │   │   │   │   ├── function-dispatch.meta.json
     │   │   │   │   ├── hypotheses.data.json
     │   │   │   │   ├── hypotheses.meta.json
     │   │   │   │   ├── parsers.data.json
     │   │   │   │   └── parsers.meta.json
     │   │   │   ├── backends/
     │   │   │   │   ├── base/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── builtin_checks.data.json
-    │   │   │   │   │   ├── builtin_checks.meta.json
-    │   │   │   │   │   ├── builtin_hypotheses.data.json
-    │   │   │   │   │   └── builtin_hypotheses.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── builtin-checks.data.json
+    │   │   │   │   │   ├── builtin-checks.meta.json
+    │   │   │   │   │   ├── builtin-hypotheses.data.json
+    │   │   │   │   │   └── builtin-hypotheses.meta.json
     │   │   │   │   ├── pandas/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── array.data.json
     │   │   │   │   │   ├── array.meta.json
     │   │   │   │   │   ├── base.data.json
@@ -8093,8 +8093,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── components.meta.json
     │   │   │   │   │   ├── container.data.json
     │   │   │   │   │   ├── container.meta.json
-    │   │   │   │   │   ├── error_formatters.data.json
-    │   │   │   │   │   ├── error_formatters.meta.json
+    │   │   │   │   │   ├── error-formatters.data.json
+    │   │   │   │   │   ├── error-formatters.meta.json
     │   │   │   │   │   ├── hypotheses.data.json
     │   │   │   │   │   ├── hypotheses.meta.json
     │   │   │   │   │   ├── parsers.data.json
@@ -8102,58 +8102,58 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── register.data.json
     │   │   │   │   │   └── register.meta.json
     │   │   │   │   ├── polars/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── register.data.json
     │   │   │   │   │   └── register.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── utils.data.json
     │   │   │   │   └── utils.meta.json
     │   │   │   ├── engines/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── engine.data.json
     │   │   │   │   ├── engine.meta.json
-    │   │   │   │   ├── geopandas_engine.data.json
-    │   │   │   │   ├── geopandas_engine.meta.json
-    │   │   │   │   ├── numpy_engine.data.json
-    │   │   │   │   ├── numpy_engine.meta.json
-    │   │   │   │   ├── pandas_engine.data.json
-    │   │   │   │   ├── pandas_engine.meta.json
-    │   │   │   │   ├── polars_engine.data.json
-    │   │   │   │   ├── polars_engine.meta.json
-    │   │   │   │   ├── pyarrow_engine.data.json
-    │   │   │   │   ├── pyarrow_engine.meta.json
-    │   │   │   │   ├── type_aliases.data.json
-    │   │   │   │   ├── type_aliases.meta.json
+    │   │   │   │   ├── geopandas-engine.data.json
+    │   │   │   │   ├── geopandas-engine.meta.json
+    │   │   │   │   ├── numpy-engine.data.json
+    │   │   │   │   ├── numpy-engine.meta.json
+    │   │   │   │   ├── pandas-engine.data.json
+    │   │   │   │   ├── pandas-engine.meta.json
+    │   │   │   │   ├── polars-engine.data.json
+    │   │   │   │   ├── polars-engine.meta.json
+    │   │   │   │   ├── pyarrow-engine.data.json
+    │   │   │   │   ├── pyarrow-engine.meta.json
+    │   │   │   │   ├── type-aliases.data.json
+    │   │   │   │   ├── type-aliases.meta.json
     │   │   │   │   ├── utils.data.json
     │   │   │   │   └── utils.meta.json
     │   │   │   ├── io/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── pandas_io.data.json
-    │   │   │   │   └── pandas_io.meta.json
-    │   │   │   ├── schema_inference/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── pandas-io.data.json
+    │   │   │   │   └── pandas-io.meta.json
+    │   │   │   ├── schema-inference/
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── pandas.data.json
     │   │   │   │   └── pandas.meta.json
-    │   │   │   ├── schema_statistics/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   ├── schema-statistics/
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── pandas.data.json
     │   │   │   │   └── pandas.meta.json
     │   │   │   ├── strategies/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── base_strategies.data.json
-    │   │   │   │   ├── base_strategies.meta.json
-    │   │   │   │   ├── pandas_strategies.data.json
-    │   │   │   │   └── pandas_strategies.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── base-strategies.data.json
+    │   │   │   │   ├── base-strategies.meta.json
+    │   │   │   │   ├── pandas-strategies.data.json
+    │   │   │   │   └── pandas-strategies.meta.json
     │   │   │   ├── typing/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── common.data.json
     │   │   │   │   ├── common.meta.json
     │   │   │   │   ├── formats.data.json
@@ -8162,14 +8162,14 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── pandas.meta.json
     │   │   │   │   ├── polars.data.json
     │   │   │   │   └── polars.meta.json
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _pandas_deprecated.data.json
-    │   │   │   ├── _pandas_deprecated.meta.json
-    │   │   │   ├── _patch_numpy2.data.json
-    │   │   │   ├── _patch_numpy2.meta.json
-    │   │   │   ├── _version.data.json
-    │   │   │   ├── _version.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -pandas-deprecated.data.json
+    │   │   │   ├── -pandas-deprecated.meta.json
+    │   │   │   ├── -patch-numpy2.data.json
+    │   │   │   ├── -patch-numpy2.meta.json
+    │   │   │   ├── -version.data.json
+    │   │   │   ├── -version.meta.json
     │   │   │   ├── config.data.json
     │   │   │   ├── config.meta.json
     │   │   │   ├── constants.data.json
@@ -8180,12 +8180,12 @@ BioactivityDataAcquisition2/
     │   │   │   ├── dtypes.meta.json
     │   │   │   ├── errors.data.json
     │   │   │   ├── errors.meta.json
-    │   │   │   ├── external_config.data.json
-    │   │   │   ├── external_config.meta.json
-    │   │   │   ├── import_utils.data.json
-    │   │   │   ├── import_utils.meta.json
-    │   │   │   ├── inspection_utils.data.json
-    │   │   │   ├── inspection_utils.meta.json
+    │   │   │   ├── external-config.data.json
+    │   │   │   ├── external-config.meta.json
+    │   │   │   ├── import-utils.data.json
+    │   │   │   ├── import-utils.meta.json
+    │   │   │   ├── inspection-utils.data.json
+    │   │   │   ├── inspection-utils.meta.json
     │   │   │   ├── pandas.data.json
     │   │   │   ├── pandas.meta.json
     │   │   │   ├── polars.data.json
@@ -8194,21 +8194,21 @@ BioactivityDataAcquisition2/
     │   │   │   ├── system.meta.json
     │   │   │   ├── utils.data.json
     │   │   │   ├── utils.meta.json
-    │   │   │   ├── validation_depth.data.json
-    │   │   │   └── validation_depth.meta.json
+    │   │   │   ├── validation-depth.data.json
+    │   │   │   └── validation-depth.meta.json
     │   │   ├── pathlib/
-    │   │   │   ├── __init__.data.json
-    │   │   │   └── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   └── --init--.meta.json
     │   │   ├── pathspec/
     │   │   │   ├── patterns/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── gitwildmatch.data.json
     │   │   │   │   └── gitwildmatch.meta.json
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _meta.data.json
-    │   │   │   ├── _meta.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -meta.data.json
+    │   │   │   ├── -meta.meta.json
     │   │   │   ├── gitignore.data.json
     │   │   │   ├── gitignore.meta.json
     │   │   │   ├── pathspec.data.json
@@ -8218,8 +8218,8 @@ BioactivityDataAcquisition2/
     │   │   │   ├── util.data.json
     │   │   │   └── util.meta.json
     │   │   ├── platformdirs/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
     │   │   │   ├── api.data.json
     │   │   │   ├── api.meta.json
     │   │   │   ├── version.data.json
@@ -8227,27 +8227,27 @@ BioactivityDataAcquisition2/
     │   │   │   ├── windows.data.json
     │   │   │   └── windows.meta.json
     │   │   ├── pluggy/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _callers.data.json
-    │   │   │   ├── _callers.meta.json
-    │   │   │   ├── _hooks.data.json
-    │   │   │   ├── _hooks.meta.json
-    │   │   │   ├── _manager.data.json
-    │   │   │   ├── _manager.meta.json
-    │   │   │   ├── _result.data.json
-    │   │   │   ├── _result.meta.json
-    │   │   │   ├── _tracing.data.json
-    │   │   │   ├── _tracing.meta.json
-    │   │   │   ├── _version.data.json
-    │   │   │   ├── _version.meta.json
-    │   │   │   ├── _warnings.data.json
-    │   │   │   └── _warnings.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -callers.data.json
+    │   │   │   ├── -callers.meta.json
+    │   │   │   ├── -hooks.data.json
+    │   │   │   ├── -hooks.meta.json
+    │   │   │   ├── -manager.data.json
+    │   │   │   ├── -manager.meta.json
+    │   │   │   ├── -result.data.json
+    │   │   │   ├── -result.meta.json
+    │   │   │   ├── -tracing.data.json
+    │   │   │   ├── -tracing.meta.json
+    │   │   │   ├── -version.data.json
+    │   │   │   ├── -version.meta.json
+    │   │   │   ├── -warnings.data.json
+    │   │   │   └── -warnings.meta.json
     │   │   ├── polars/
-    │   │   │   ├── _utils/
+    │   │   │   ├── -utils/
     │   │   │   │   ├── construction/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── dataframe.data.json
     │   │   │   │   │   ├── dataframe.meta.json
     │   │   │   │   │   ├── other.data.json
@@ -8257,14 +8257,14 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── utils.data.json
     │   │   │   │   │   └── utils.meta.json
     │   │   │   │   ├── parse/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── expr.data.json
     │   │   │   │   │   └── expr.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── async_.data.json
-    │   │   │   │   ├── async_.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── async-.data.json
+    │   │   │   │   ├── async-.meta.json
     │   │   │   │   ├── cache.data.json
     │   │   │   │   ├── cache.meta.json
     │   │   │   │   ├── constants.data.json
@@ -8279,8 +8279,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── logging.meta.json
     │   │   │   │   ├── parquet.data.json
     │   │   │   │   ├── parquet.meta.json
-    │   │   │   │   ├── polars_version.data.json
-    │   │   │   │   ├── polars_version.meta.json
+    │   │   │   │   ├── polars-version.data.json
+    │   │   │   │   ├── polars-version.meta.json
     │   │   │   │   ├── pycapsule.data.json
     │   │   │   │   ├── pycapsule.meta.json
     │   │   │   │   ├── scan.data.json
@@ -8299,50 +8299,50 @@ BioactivityDataAcquisition2/
     │   │   │   │   └── wrap.meta.json
     │   │   │   ├── catalog/
     │   │   │   │   ├── unity/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── client.data.json
     │   │   │   │   │   ├── client.meta.json
     │   │   │   │   │   ├── models.data.json
     │   │   │   │   │   └── models.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   └── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   └── --init--.meta.json
     │   │   │   ├── convert/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── general.data.json
     │   │   │   │   ├── general.meta.json
     │   │   │   │   ├── normalize.data.json
     │   │   │   │   └── normalize.meta.json
     │   │   │   ├── dataframe/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── _html.data.json
-    │   │   │   │   ├── _html.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── -html.data.json
+    │   │   │   │   ├── -html.meta.json
     │   │   │   │   ├── frame.data.json
     │   │   │   │   ├── frame.meta.json
-    │   │   │   │   ├── group_by.data.json
-    │   │   │   │   ├── group_by.meta.json
+    │   │   │   │   ├── group-by.data.json
+    │   │   │   │   ├── group-by.meta.json
     │   │   │   │   ├── plotting.data.json
     │   │   │   │   └── plotting.meta.json
-    │   │   │   ├── datatype_expr/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   ├── datatype-expr/
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── array.data.json
     │   │   │   │   ├── array.meta.json
-    │   │   │   │   ├── datatype_expr.data.json
-    │   │   │   │   ├── datatype_expr.meta.json
+    │   │   │   │   ├── datatype-expr.data.json
+    │   │   │   │   ├── datatype-expr.meta.json
     │   │   │   │   ├── list.data.json
     │   │   │   │   ├── list.meta.json
     │   │   │   │   ├── struct.data.json
     │   │   │   │   └── struct.meta.json
     │   │   │   ├── datatypes/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── _parse.data.json
-    │   │   │   │   ├── _parse.meta.json
-    │   │   │   │   ├── _utils.data.json
-    │   │   │   │   ├── _utils.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── -parse.data.json
+    │   │   │   │   ├── -parse.meta.json
+    │   │   │   │   ├── -utils.data.json
+    │   │   │   │   ├── -utils.meta.json
     │   │   │   │   ├── classes.data.json
     │   │   │   │   ├── classes.meta.json
     │   │   │   │   ├── constants.data.json
@@ -8356,8 +8356,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── group.data.json
     │   │   │   │   └── group.meta.json
     │   │   │   ├── expr/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── array.data.json
     │   │   │   │   ├── array.meta.json
     │   │   │   │   ├── binary.data.json
@@ -8384,31 +8384,31 @@ BioactivityDataAcquisition2/
     │   │   │   │   └── whenthen.meta.json
     │   │   │   ├── functions/
     │   │   │   │   ├── aggregation/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── horizontal.data.json
     │   │   │   │   │   ├── horizontal.meta.json
     │   │   │   │   │   ├── vertical.data.json
     │   │   │   │   │   └── vertical.meta.json
     │   │   │   │   ├── range/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── _utils.data.json
-    │   │   │   │   │   ├── _utils.meta.json
-    │   │   │   │   │   ├── date_range.data.json
-    │   │   │   │   │   ├── date_range.meta.json
-    │   │   │   │   │   ├── datetime_range.data.json
-    │   │   │   │   │   ├── datetime_range.meta.json
-    │   │   │   │   │   ├── int_range.data.json
-    │   │   │   │   │   ├── int_range.meta.json
-    │   │   │   │   │   ├── linear_space.data.json
-    │   │   │   │   │   ├── linear_space.meta.json
-    │   │   │   │   │   ├── time_range.data.json
-    │   │   │   │   │   └── time_range.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── as_datatype.data.json
-    │   │   │   │   ├── as_datatype.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── -utils.data.json
+    │   │   │   │   │   ├── -utils.meta.json
+    │   │   │   │   │   ├── date-range.data.json
+    │   │   │   │   │   ├── date-range.meta.json
+    │   │   │   │   │   ├── datetime-range.data.json
+    │   │   │   │   │   ├── datetime-range.meta.json
+    │   │   │   │   │   ├── int-range.data.json
+    │   │   │   │   │   ├── int-range.meta.json
+    │   │   │   │   │   ├── linear-space.data.json
+    │   │   │   │   │   ├── linear-space.meta.json
+    │   │   │   │   │   ├── time-range.data.json
+    │   │   │   │   │   └── time-range.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── as-datatype.data.json
+    │   │   │   │   ├── as-datatype.meta.json
     │   │   │   │   ├── business.data.json
     │   │   │   │   ├── business.meta.json
     │   │   │   │   ├── col.data.json
@@ -8417,8 +8417,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── datatype.meta.json
     │   │   │   │   ├── eager.data.json
     │   │   │   │   ├── eager.meta.json
-    │   │   │   │   ├── escape_regex.data.json
-    │   │   │   │   ├── escape_regex.meta.json
+    │   │   │   │   ├── escape-regex.data.json
+    │   │   │   │   ├── escape-regex.meta.json
     │   │   │   │   ├── lazy.data.json
     │   │   │   │   ├── lazy.meta.json
     │   │   │   │   ├── len.data.json
@@ -8432,8 +8432,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── whenthen.data.json
     │   │   │   │   └── whenthen.meta.json
     │   │   │   ├── interchange/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── buffer.data.json
     │   │   │   │   ├── buffer.meta.json
     │   │   │   │   ├── column.data.json
@@ -8446,92 +8446,92 @@ BioactivityDataAcquisition2/
     │   │   │   │   └── utils.meta.json
     │   │   │   ├── io/
     │   │   │   │   ├── cloud/
-    │   │   │   │   │   ├── credential_provider/
-    │   │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   │   ├── _builder.data.json
-    │   │   │   │   │   │   ├── _builder.meta.json
-    │   │   │   │   │   │   ├── _providers.data.json
-    │   │   │   │   │   │   └── _providers.meta.json
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── _utils.data.json
-    │   │   │   │   │   └── _utils.meta.json
+    │   │   │   │   │   ├── credential-provider/
+    │   │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   │   ├── -builder.data.json
+    │   │   │   │   │   │   ├── -builder.meta.json
+    │   │   │   │   │   │   ├── -providers.data.json
+    │   │   │   │   │   │   └── -providers.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── -utils.data.json
+    │   │   │   │   │   └── -utils.meta.json
     │   │   │   │   ├── csv/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── _utils.data.json
-    │   │   │   │   │   ├── _utils.meta.json
-    │   │   │   │   │   ├── batched_reader.data.json
-    │   │   │   │   │   ├── batched_reader.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── -utils.data.json
+    │   │   │   │   │   ├── -utils.meta.json
+    │   │   │   │   │   ├── batched-reader.data.json
+    │   │   │   │   │   ├── batched-reader.meta.json
     │   │   │   │   │   ├── functions.data.json
     │   │   │   │   │   └── functions.meta.json
     │   │   │   │   ├── database/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── _arrow_registry.data.json
-    │   │   │   │   │   ├── _arrow_registry.meta.json
-    │   │   │   │   │   ├── _cursor_proxies.data.json
-    │   │   │   │   │   ├── _cursor_proxies.meta.json
-    │   │   │   │   │   ├── _executor.data.json
-    │   │   │   │   │   ├── _executor.meta.json
-    │   │   │   │   │   ├── _inference.data.json
-    │   │   │   │   │   ├── _inference.meta.json
-    │   │   │   │   │   ├── _utils.data.json
-    │   │   │   │   │   ├── _utils.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── -arrow-registry.data.json
+    │   │   │   │   │   ├── -arrow-registry.meta.json
+    │   │   │   │   │   ├── -cursor-proxies.data.json
+    │   │   │   │   │   ├── -cursor-proxies.meta.json
+    │   │   │   │   │   ├── -executor.data.json
+    │   │   │   │   │   ├── -executor.meta.json
+    │   │   │   │   │   ├── -inference.data.json
+    │   │   │   │   │   ├── -inference.meta.json
+    │   │   │   │   │   ├── -utils.data.json
+    │   │   │   │   │   ├── -utils.meta.json
     │   │   │   │   │   ├── functions.data.json
     │   │   │   │   │   └── functions.meta.json
     │   │   │   │   ├── iceberg/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── _utils.data.json
-    │   │   │   │   │   ├── _utils.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── -utils.data.json
+    │   │   │   │   │   ├── -utils.meta.json
     │   │   │   │   │   ├── dataset.data.json
     │   │   │   │   │   ├── dataset.meta.json
     │   │   │   │   │   ├── functions.data.json
     │   │   │   │   │   └── functions.meta.json
     │   │   │   │   ├── ipc/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── functions.data.json
     │   │   │   │   │   └── functions.meta.json
     │   │   │   │   ├── json/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── read.data.json
     │   │   │   │   │   └── read.meta.json
     │   │   │   │   ├── parquet/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── field_overwrites.data.json
-    │   │   │   │   │   ├── field_overwrites.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── field-overwrites.data.json
+    │   │   │   │   │   ├── field-overwrites.meta.json
     │   │   │   │   │   ├── functions.data.json
     │   │   │   │   │   └── functions.meta.json
-    │   │   │   │   ├── pyarrow_dataset/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── anonymous_scan.data.json
-    │   │   │   │   │   ├── anonymous_scan.meta.json
+    │   │   │   │   ├── pyarrow-dataset/
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── anonymous-scan.data.json
+    │   │   │   │   │   ├── anonymous-scan.meta.json
     │   │   │   │   │   ├── functions.data.json
     │   │   │   │   │   └── functions.meta.json
-    │   │   │   │   ├── scan_options/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── _options.data.json
-    │   │   │   │   │   ├── _options.meta.json
-    │   │   │   │   │   ├── cast_options.data.json
-    │   │   │   │   │   └── cast_options.meta.json
+    │   │   │   │   ├── scan-options/
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── -options.data.json
+    │   │   │   │   │   ├── -options.meta.json
+    │   │   │   │   │   ├── cast-options.data.json
+    │   │   │   │   │   └── cast-options.meta.json
     │   │   │   │   ├── spreadsheet/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   │   ├── _write_utils.data.json
-    │   │   │   │   │   ├── _write_utils.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   │   ├── -write-utils.data.json
+    │   │   │   │   │   ├── -write-utils.meta.json
     │   │   │   │   │   ├── functions.data.json
     │   │   │   │   │   └── functions.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── _utils.data.json
-    │   │   │   │   ├── _utils.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── -utils.data.json
+    │   │   │   │   ├── -utils.meta.json
     │   │   │   │   ├── avro.data.json
     │   │   │   │   ├── avro.meta.json
     │   │   │   │   ├── clipboard.data.json
@@ -8545,39 +8545,39 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── plugins.data.json
     │   │   │   │   └── plugins.meta.json
     │   │   │   ├── lazyframe/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── engine_config.data.json
-    │   │   │   │   ├── engine_config.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── engine-config.data.json
+    │   │   │   │   ├── engine-config.meta.json
     │   │   │   │   ├── frame.data.json
     │   │   │   │   ├── frame.meta.json
-    │   │   │   │   ├── group_by.data.json
-    │   │   │   │   ├── group_by.meta.json
-    │   │   │   │   ├── in_process.data.json
-    │   │   │   │   ├── in_process.meta.json
-    │   │   │   │   ├── opt_flags.data.json
-    │   │   │   │   └── opt_flags.meta.json
+    │   │   │   │   ├── group-by.data.json
+    │   │   │   │   ├── group-by.meta.json
+    │   │   │   │   ├── in-process.data.json
+    │   │   │   │   ├── in-process.meta.json
+    │   │   │   │   ├── opt-flags.data.json
+    │   │   │   │   └── opt-flags.meta.json
     │   │   │   ├── meta/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── build.data.json
     │   │   │   │   ├── build.meta.json
-    │   │   │   │   ├── index_type.data.json
-    │   │   │   │   ├── index_type.meta.json
-    │   │   │   │   ├── thread_pool.data.json
-    │   │   │   │   ├── thread_pool.meta.json
+    │   │   │   │   ├── index-type.data.json
+    │   │   │   │   ├── index-type.meta.json
+    │   │   │   │   ├── thread-pool.data.json
+    │   │   │   │   ├── thread-pool.meta.json
     │   │   │   │   ├── versions.data.json
     │   │   │   │   └── versions.meta.json
     │   │   │   ├── ml/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── torch.data.json
     │   │   │   │   ├── torch.meta.json
     │   │   │   │   ├── utilities.data.json
     │   │   │   │   └── utilities.meta.json
     │   │   │   ├── series/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── array.data.json
     │   │   │   │   ├── array.meta.json
     │   │   │   │   ├── binary.data.json
@@ -8601,24 +8601,24 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── utils.data.json
     │   │   │   │   └── utils.meta.json
     │   │   │   ├── sql/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── context.data.json
     │   │   │   │   ├── context.meta.json
     │   │   │   │   ├── functions.data.json
     │   │   │   │   └── functions.meta.json
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _cpu_check.data.json
-    │   │   │   ├── _cpu_check.meta.json
-    │   │   │   ├── _dependencies.data.json
-    │   │   │   ├── _dependencies.meta.json
-    │   │   │   ├── _plr.data.json
-    │   │   │   ├── _plr.meta.json
-    │   │   │   ├── _reexport.data.json
-    │   │   │   ├── _reexport.meta.json
-    │   │   │   ├── _typing.data.json
-    │   │   │   ├── _typing.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -cpu-check.data.json
+    │   │   │   ├── -cpu-check.meta.json
+    │   │   │   ├── -dependencies.data.json
+    │   │   │   ├── -dependencies.meta.json
+    │   │   │   ├── -plr.data.json
+    │   │   │   ├── -plr.meta.json
+    │   │   │   ├── -reexport.data.json
+    │   │   │   ├── -reexport.meta.json
+    │   │   │   ├── -typing.data.json
+    │   │   │   ├── -typing.meta.json
     │   │   │   ├── api.data.json
     │   │   │   ├── api.meta.json
     │   │   │   ├── config.data.json
@@ -8631,36 +8631,36 @@ BioactivityDataAcquisition2/
     │   │   │   ├── schema.meta.json
     │   │   │   ├── selectors.data.json
     │   │   │   ├── selectors.meta.json
-    │   │   │   ├── string_cache.data.json
-    │   │   │   └── string_cache.meta.json
-    │   │   ├── prometheus_client/
+    │   │   │   ├── string-cache.data.json
+    │   │   │   └── string-cache.meta.json
+    │   │   ├── prometheus-client/
     │   │   │   ├── openmetrics/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── exposition.data.json
     │   │   │   │   └── exposition.meta.json
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
     │   │   │   ├── asgi.data.json
     │   │   │   ├── asgi.meta.json
-    │   │   │   ├── context_managers.data.json
-    │   │   │   ├── context_managers.meta.json
+    │   │   │   ├── context-managers.data.json
+    │   │   │   ├── context-managers.meta.json
     │   │   │   ├── decorator.data.json
     │   │   │   ├── decorator.meta.json
     │   │   │   ├── exposition.data.json
     │   │   │   ├── exposition.meta.json
-    │   │   │   ├── gc_collector.data.json
-    │   │   │   ├── gc_collector.meta.json
+    │   │   │   ├── gc-collector.data.json
+    │   │   │   ├── gc-collector.meta.json
     │   │   │   ├── metrics.data.json
     │   │   │   ├── metrics.meta.json
-    │   │   │   ├── metrics_core.data.json
-    │   │   │   ├── metrics_core.meta.json
-    │   │   │   ├── mmap_dict.data.json
-    │   │   │   ├── mmap_dict.meta.json
-    │   │   │   ├── platform_collector.data.json
-    │   │   │   ├── platform_collector.meta.json
-    │   │   │   ├── process_collector.data.json
-    │   │   │   ├── process_collector.meta.json
+    │   │   │   ├── metrics-core.data.json
+    │   │   │   ├── metrics-core.meta.json
+    │   │   │   ├── mmap-dict.data.json
+    │   │   │   ├── mmap-dict.meta.json
+    │   │   │   ├── platform-collector.data.json
+    │   │   │   ├── platform-collector.meta.json
+    │   │   │   ├── process-collector.data.json
+    │   │   │   ├── process-collector.meta.json
     │   │   │   ├── registry.data.json
     │   │   │   ├── registry.meta.json
     │   │   │   ├── samples.data.json
@@ -8672,72 +8672,72 @@ BioactivityDataAcquisition2/
     │   │   │   ├── values.data.json
     │   │   │   └── values.meta.json
     │   │   ├── pydantic/
-    │   │   │   ├── _internal/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── _config.data.json
-    │   │   │   │   ├── _config.meta.json
-    │   │   │   │   ├── _core_metadata.data.json
-    │   │   │   │   ├── _core_metadata.meta.json
-    │   │   │   │   ├── _core_utils.data.json
-    │   │   │   │   ├── _core_utils.meta.json
-    │   │   │   │   ├── _dataclasses.data.json
-    │   │   │   │   ├── _dataclasses.meta.json
-    │   │   │   │   ├── _decorators.data.json
-    │   │   │   │   ├── _decorators.meta.json
-    │   │   │   │   ├── _decorators_v1.data.json
-    │   │   │   │   ├── _decorators_v1.meta.json
-    │   │   │   │   ├── _discriminated_union.data.json
-    │   │   │   │   ├── _discriminated_union.meta.json
-    │   │   │   │   ├── _docs_extraction.data.json
-    │   │   │   │   ├── _docs_extraction.meta.json
-    │   │   │   │   ├── _fields.data.json
-    │   │   │   │   ├── _fields.meta.json
-    │   │   │   │   ├── _forward_ref.data.json
-    │   │   │   │   ├── _forward_ref.meta.json
-    │   │   │   │   ├── _generate_schema.data.json
-    │   │   │   │   ├── _generate_schema.meta.json
-    │   │   │   │   ├── _generics.data.json
-    │   │   │   │   ├── _generics.meta.json
-    │   │   │   │   ├── _import_utils.data.json
-    │   │   │   │   ├── _import_utils.meta.json
-    │   │   │   │   ├── _internal_dataclass.data.json
-    │   │   │   │   ├── _internal_dataclass.meta.json
-    │   │   │   │   ├── _known_annotated_metadata.data.json
-    │   │   │   │   ├── _known_annotated_metadata.meta.json
-    │   │   │   │   ├── _mock_val_ser.data.json
-    │   │   │   │   ├── _mock_val_ser.meta.json
-    │   │   │   │   ├── _model_construction.data.json
-    │   │   │   │   ├── _model_construction.meta.json
-    │   │   │   │   ├── _namespace_utils.data.json
-    │   │   │   │   ├── _namespace_utils.meta.json
-    │   │   │   │   ├── _repr.data.json
-    │   │   │   │   ├── _repr.meta.json
-    │   │   │   │   ├── _schema_gather.data.json
-    │   │   │   │   ├── _schema_gather.meta.json
-    │   │   │   │   ├── _schema_generation_shared.data.json
-    │   │   │   │   ├── _schema_generation_shared.meta.json
-    │   │   │   │   ├── _serializers.data.json
-    │   │   │   │   ├── _serializers.meta.json
-    │   │   │   │   ├── _signature.data.json
-    │   │   │   │   ├── _signature.meta.json
-    │   │   │   │   ├── _typing_extra.data.json
-    │   │   │   │   ├── _typing_extra.meta.json
-    │   │   │   │   ├── _utils.data.json
-    │   │   │   │   ├── _utils.meta.json
-    │   │   │   │   ├── _validate_call.data.json
-    │   │   │   │   ├── _validate_call.meta.json
-    │   │   │   │   ├── _validators.data.json
-    │   │   │   │   └── _validators.meta.json
+    │   │   │   ├── -internal/
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── -config.data.json
+    │   │   │   │   ├── -config.meta.json
+    │   │   │   │   ├── -core-metadata.data.json
+    │   │   │   │   ├── -core-metadata.meta.json
+    │   │   │   │   ├── -core-utils.data.json
+    │   │   │   │   ├── -core-utils.meta.json
+    │   │   │   │   ├── -dataclasses.data.json
+    │   │   │   │   ├── -dataclasses.meta.json
+    │   │   │   │   ├── -decorators.data.json
+    │   │   │   │   ├── -decorators.meta.json
+    │   │   │   │   ├── -decorators-v1.data.json
+    │   │   │   │   ├── -decorators-v1.meta.json
+    │   │   │   │   ├── -discriminated-union.data.json
+    │   │   │   │   ├── -discriminated-union.meta.json
+    │   │   │   │   ├── -docs-extraction.data.json
+    │   │   │   │   ├── -docs-extraction.meta.json
+    │   │   │   │   ├── -fields.data.json
+    │   │   │   │   ├── -fields.meta.json
+    │   │   │   │   ├── -forward-ref.data.json
+    │   │   │   │   ├── -forward-ref.meta.json
+    │   │   │   │   ├── -generate-schema.data.json
+    │   │   │   │   ├── -generate-schema.meta.json
+    │   │   │   │   ├── -generics.data.json
+    │   │   │   │   ├── -generics.meta.json
+    │   │   │   │   ├── -import-utils.data.json
+    │   │   │   │   ├── -import-utils.meta.json
+    │   │   │   │   ├── -internal-dataclass.data.json
+    │   │   │   │   ├── -internal-dataclass.meta.json
+    │   │   │   │   ├── -known-annotated-metadata.data.json
+    │   │   │   │   ├── -known-annotated-metadata.meta.json
+    │   │   │   │   ├── -mock-val-ser.data.json
+    │   │   │   │   ├── -mock-val-ser.meta.json
+    │   │   │   │   ├── -model-construction.data.json
+    │   │   │   │   ├── -model-construction.meta.json
+    │   │   │   │   ├── -namespace-utils.data.json
+    │   │   │   │   ├── -namespace-utils.meta.json
+    │   │   │   │   ├── -repr.data.json
+    │   │   │   │   ├── -repr.meta.json
+    │   │   │   │   ├── -schema-gather.data.json
+    │   │   │   │   ├── -schema-gather.meta.json
+    │   │   │   │   ├── -schema-generation-shared.data.json
+    │   │   │   │   ├── -schema-generation-shared.meta.json
+    │   │   │   │   ├── -serializers.data.json
+    │   │   │   │   ├── -serializers.meta.json
+    │   │   │   │   ├── -signature.data.json
+    │   │   │   │   ├── -signature.meta.json
+    │   │   │   │   ├── -typing-extra.data.json
+    │   │   │   │   ├── -typing-extra.meta.json
+    │   │   │   │   ├── -utils.data.json
+    │   │   │   │   ├── -utils.meta.json
+    │   │   │   │   ├── -validate-call.data.json
+    │   │   │   │   ├── -validate-call.meta.json
+    │   │   │   │   ├── -validators.data.json
+    │   │   │   │   └── -validators.meta.json
     │   │   │   ├── deprecated/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── class_validators.data.json
-    │   │   │   │   ├── class_validators.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── class-validators.data.json
+    │   │   │   │   ├── class-validators.meta.json
     │   │   │   │   ├── config.data.json
     │   │   │   │   ├── config.meta.json
-    │   │   │   │   ├── copy_internals.data.json
-    │   │   │   │   ├── copy_internals.meta.json
+    │   │   │   │   ├── copy-internals.data.json
+    │   │   │   │   ├── copy-internals.meta.json
     │   │   │   │   ├── json.data.json
     │   │   │   │   ├── json.meta.json
     │   │   │   │   ├── parse.data.json
@@ -8745,31 +8745,31 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── tools.data.json
     │   │   │   │   └── tools.meta.json
     │   │   │   ├── plugin/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── _schema_validator.data.json
-    │   │   │   │   └── _schema_validator.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── -schema-validator.data.json
+    │   │   │   │   └── -schema-validator.meta.json
     │   │   │   ├── v1/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── annotated_types.data.json
-    │   │   │   │   ├── annotated_types.meta.json
-    │   │   │   │   ├── class_validators.data.json
-    │   │   │   │   ├── class_validators.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── annotated-types.data.json
+    │   │   │   │   ├── annotated-types.meta.json
+    │   │   │   │   ├── class-validators.data.json
+    │   │   │   │   ├── class-validators.meta.json
     │   │   │   │   ├── color.data.json
     │   │   │   │   ├── color.meta.json
     │   │   │   │   ├── config.data.json
     │   │   │   │   ├── config.meta.json
     │   │   │   │   ├── dataclasses.data.json
     │   │   │   │   ├── dataclasses.meta.json
-    │   │   │   │   ├── datetime_parse.data.json
-    │   │   │   │   ├── datetime_parse.meta.json
+    │   │   │   │   ├── datetime-parse.data.json
+    │   │   │   │   ├── datetime-parse.meta.json
     │   │   │   │   ├── decorator.data.json
     │   │   │   │   ├── decorator.meta.json
-    │   │   │   │   ├── env_settings.data.json
-    │   │   │   │   ├── env_settings.meta.json
-    │   │   │   │   ├── error_wrappers.data.json
-    │   │   │   │   ├── error_wrappers.meta.json
+    │   │   │   │   ├── env-settings.data.json
+    │   │   │   │   ├── env-settings.meta.json
+    │   │   │   │   ├── error-wrappers.data.json
+    │   │   │   │   ├── error-wrappers.meta.json
     │   │   │   │   ├── errors.data.json
     │   │   │   │   ├── errors.meta.json
     │   │   │   │   ├── fields.data.json
@@ -8796,16 +8796,16 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── validators.meta.json
     │   │   │   │   ├── version.data.json
     │   │   │   │   └── version.meta.json
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _migration.data.json
-    │   │   │   ├── _migration.meta.json
-    │   │   │   ├── alias_generators.data.json
-    │   │   │   ├── alias_generators.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -migration.data.json
+    │   │   │   ├── -migration.meta.json
+    │   │   │   ├── alias-generators.data.json
+    │   │   │   ├── alias-generators.meta.json
     │   │   │   ├── aliases.data.json
     │   │   │   ├── aliases.meta.json
-    │   │   │   ├── annotated_handlers.data.json
-    │   │   │   ├── annotated_handlers.meta.json
+    │   │   │   ├── annotated-handlers.data.json
+    │   │   │   ├── annotated-handlers.meta.json
     │   │   │   ├── color.data.json
     │   │   │   ├── color.meta.json
     │   │   │   ├── config.data.json
@@ -8816,40 +8816,40 @@ BioactivityDataAcquisition2/
     │   │   │   ├── errors.meta.json
     │   │   │   ├── fields.data.json
     │   │   │   ├── fields.meta.json
-    │   │   │   ├── functional_serializers.data.json
-    │   │   │   ├── functional_serializers.meta.json
-    │   │   │   ├── functional_validators.data.json
-    │   │   │   ├── functional_validators.meta.json
-    │   │   │   ├── json_schema.data.json
-    │   │   │   ├── json_schema.meta.json
+    │   │   │   ├── functional-serializers.data.json
+    │   │   │   ├── functional-serializers.meta.json
+    │   │   │   ├── functional-validators.data.json
+    │   │   │   ├── functional-validators.meta.json
+    │   │   │   ├── json-schema.data.json
+    │   │   │   ├── json-schema.meta.json
     │   │   │   ├── main.data.json
     │   │   │   ├── main.meta.json
     │   │   │   ├── networks.data.json
     │   │   │   ├── networks.meta.json
-    │   │   │   ├── root_model.data.json
-    │   │   │   ├── root_model.meta.json
-    │   │   │   ├── type_adapter.data.json
-    │   │   │   ├── type_adapter.meta.json
+    │   │   │   ├── root-model.data.json
+    │   │   │   ├── root-model.meta.json
+    │   │   │   ├── type-adapter.data.json
+    │   │   │   ├── type-adapter.meta.json
     │   │   │   ├── types.data.json
     │   │   │   ├── types.meta.json
-    │   │   │   ├── validate_call_decorator.data.json
-    │   │   │   ├── validate_call_decorator.meta.json
+    │   │   │   ├── validate-call-decorator.data.json
+    │   │   │   ├── validate-call-decorator.meta.json
     │   │   │   ├── version.data.json
     │   │   │   ├── version.meta.json
     │   │   │   ├── warnings.data.json
     │   │   │   └── warnings.meta.json
-    │   │   ├── pydantic_core/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _pydantic_core.data.json
-    │   │   │   ├── _pydantic_core.meta.json
-    │   │   │   ├── core_schema.data.json
-    │   │   │   └── core_schema.meta.json
-    │   │   ├── pydantic_settings/
+    │   │   ├── pydantic-core/
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -pydantic-core.data.json
+    │   │   │   ├── -pydantic-core.meta.json
+    │   │   │   ├── core-schema.data.json
+    │   │   │   └── core-schema.meta.json
+    │   │   ├── pydantic-settings/
     │   │   │   ├── sources/
     │   │   │   │   ├── providers/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── aws.data.json
     │   │   │   │   │   ├── aws.meta.json
     │   │   │   │   │   ├── azure.data.json
@@ -8864,8 +8864,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── gcp.meta.json
     │   │   │   │   │   ├── json.data.json
     │   │   │   │   │   ├── json.meta.json
-    │   │   │   │   │   ├── nested_secrets.data.json
-    │   │   │   │   │   ├── nested_secrets.meta.json
+    │   │   │   │   │   ├── nested-secrets.data.json
+    │   │   │   │   │   ├── nested-secrets.meta.json
     │   │   │   │   │   ├── pyproject.data.json
     │   │   │   │   │   ├── pyproject.meta.json
     │   │   │   │   │   ├── secrets.data.json
@@ -8874,16 +8874,16 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── toml.meta.json
     │   │   │   │   │   ├── yaml.data.json
     │   │   │   │   │   └── yaml.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── base.data.json
     │   │   │   │   ├── base.meta.json
     │   │   │   │   ├── types.data.json
     │   │   │   │   ├── types.meta.json
     │   │   │   │   ├── utils.data.json
     │   │   │   │   └── utils.meta.json
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
     │   │   │   ├── exceptions.data.json
     │   │   │   ├── exceptions.meta.json
     │   │   │   ├── main.data.json
@@ -8893,58 +8893,58 @@ BioactivityDataAcquisition2/
     │   │   │   ├── version.data.json
     │   │   │   └── version.meta.json
     │   │   ├── pyexpat/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
     │   │   │   ├── errors.data.json
     │   │   │   ├── errors.meta.json
     │   │   │   ├── model.data.json
     │   │   │   └── model.meta.json
     │   │   ├── pytest/
-    │   │   │   ├── __init__.data.json
-    │   │   │   └── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   └── --init--.meta.json
     │   │   ├── rich/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── __main__.data.json
-    │   │   │   ├── __main__.meta.json
-    │   │   │   ├── _cell_widths.data.json
-    │   │   │   ├── _cell_widths.meta.json
-    │   │   │   ├── _emoji_codes.data.json
-    │   │   │   ├── _emoji_codes.meta.json
-    │   │   │   ├── _emoji_replace.data.json
-    │   │   │   ├── _emoji_replace.meta.json
-    │   │   │   ├── _export_format.data.json
-    │   │   │   ├── _export_format.meta.json
-    │   │   │   ├── _extension.data.json
-    │   │   │   ├── _extension.meta.json
-    │   │   │   ├── _fileno.data.json
-    │   │   │   ├── _fileno.meta.json
-    │   │   │   ├── _log_render.data.json
-    │   │   │   ├── _log_render.meta.json
-    │   │   │   ├── _loop.data.json
-    │   │   │   ├── _loop.meta.json
-    │   │   │   ├── _null_file.data.json
-    │   │   │   ├── _null_file.meta.json
-    │   │   │   ├── _palettes.data.json
-    │   │   │   ├── _palettes.meta.json
-    │   │   │   ├── _pick.data.json
-    │   │   │   ├── _pick.meta.json
-    │   │   │   ├── _ratio.data.json
-    │   │   │   ├── _ratio.meta.json
-    │   │   │   ├── _spinners.data.json
-    │   │   │   ├── _spinners.meta.json
-    │   │   │   ├── _stack.data.json
-    │   │   │   ├── _stack.meta.json
-    │   │   │   ├── _timer.data.json
-    │   │   │   ├── _timer.meta.json
-    │   │   │   ├── _win32_console.data.json
-    │   │   │   ├── _win32_console.meta.json
-    │   │   │   ├── _windows.data.json
-    │   │   │   ├── _windows.meta.json
-    │   │   │   ├── _windows_renderer.data.json
-    │   │   │   ├── _windows_renderer.meta.json
-    │   │   │   ├── _wrap.data.json
-    │   │   │   ├── _wrap.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── --main--.data.json
+    │   │   │   ├── --main--.meta.json
+    │   │   │   ├── -cell-widths.data.json
+    │   │   │   ├── -cell-widths.meta.json
+    │   │   │   ├── -emoji-codes.data.json
+    │   │   │   ├── -emoji-codes.meta.json
+    │   │   │   ├── -emoji-replace.data.json
+    │   │   │   ├── -emoji-replace.meta.json
+    │   │   │   ├── -export-format.data.json
+    │   │   │   ├── -export-format.meta.json
+    │   │   │   ├── -extension.data.json
+    │   │   │   ├── -extension.meta.json
+    │   │   │   ├── -fileno.data.json
+    │   │   │   ├── -fileno.meta.json
+    │   │   │   ├── -log-render.data.json
+    │   │   │   ├── -log-render.meta.json
+    │   │   │   ├── -loop.data.json
+    │   │   │   ├── -loop.meta.json
+    │   │   │   ├── -null-file.data.json
+    │   │   │   ├── -null-file.meta.json
+    │   │   │   ├── -palettes.data.json
+    │   │   │   ├── -palettes.meta.json
+    │   │   │   ├── -pick.data.json
+    │   │   │   ├── -pick.meta.json
+    │   │   │   ├── -ratio.data.json
+    │   │   │   ├── -ratio.meta.json
+    │   │   │   ├── -spinners.data.json
+    │   │   │   ├── -spinners.meta.json
+    │   │   │   ├── -stack.data.json
+    │   │   │   ├── -stack.meta.json
+    │   │   │   ├── -timer.data.json
+    │   │   │   ├── -timer.meta.json
+    │   │   │   ├── -win32-console.data.json
+    │   │   │   ├── -win32-console.meta.json
+    │   │   │   ├── -windows.data.json
+    │   │   │   ├── -windows.meta.json
+    │   │   │   ├── -windows-renderer.data.json
+    │   │   │   ├── -windows-renderer.meta.json
+    │   │   │   ├── -wrap.data.json
+    │   │   │   ├── -wrap.meta.json
     │   │   │   ├── abc.data.json
     │   │   │   ├── abc.meta.json
     │   │   │   ├── align.data.json
@@ -8957,8 +8957,8 @@ BioactivityDataAcquisition2/
     │   │   │   ├── cells.meta.json
     │   │   │   ├── color.data.json
     │   │   │   ├── color.meta.json
-    │   │   │   ├── color_triplet.data.json
-    │   │   │   ├── color_triplet.meta.json
+    │   │   │   ├── color-triplet.data.json
+    │   │   │   ├── color-triplet.meta.json
     │   │   │   ├── columns.data.json
     │   │   │   ├── columns.meta.json
     │   │   │   ├── console.data.json
@@ -8969,14 +8969,14 @@ BioactivityDataAcquisition2/
     │   │   │   ├── containers.meta.json
     │   │   │   ├── control.data.json
     │   │   │   ├── control.meta.json
-    │   │   │   ├── default_styles.data.json
-    │   │   │   ├── default_styles.meta.json
+    │   │   │   ├── default-styles.data.json
+    │   │   │   ├── default-styles.meta.json
     │   │   │   ├── emoji.data.json
     │   │   │   ├── emoji.meta.json
     │   │   │   ├── errors.data.json
     │   │   │   ├── errors.meta.json
-    │   │   │   ├── file_proxy.data.json
-    │   │   │   ├── file_proxy.meta.json
+    │   │   │   ├── file-proxy.data.json
+    │   │   │   ├── file-proxy.meta.json
     │   │   │   ├── filesize.data.json
     │   │   │   ├── filesize.meta.json
     │   │   │   ├── highlighter.data.json
@@ -8987,8 +8987,8 @@ BioactivityDataAcquisition2/
     │   │   │   ├── jupyter.meta.json
     │   │   │   ├── live.data.json
     │   │   │   ├── live.meta.json
-    │   │   │   ├── live_render.data.json
-    │   │   │   ├── live_render.meta.json
+    │   │   │   ├── live-render.data.json
+    │   │   │   ├── live-render.meta.json
     │   │   │   ├── markdown.data.json
     │   │   │   ├── markdown.meta.json
     │   │   │   ├── markup.data.json
@@ -9007,8 +9007,8 @@ BioactivityDataAcquisition2/
     │   │   │   ├── pretty.meta.json
     │   │   │   ├── progress.data.json
     │   │   │   ├── progress.meta.json
-    │   │   │   ├── progress_bar.data.json
-    │   │   │   ├── progress_bar.meta.json
+    │   │   │   ├── progress-bar.data.json
+    │   │   │   ├── progress-bar.meta.json
     │   │   │   ├── protocol.data.json
     │   │   │   ├── protocol.meta.json
     │   │   │   ├── region.data.json
@@ -9035,8 +9035,8 @@ BioactivityDataAcquisition2/
     │   │   │   ├── syntax.meta.json
     │   │   │   ├── table.data.json
     │   │   │   ├── table.meta.json
-    │   │   │   ├── terminal_theme.data.json
-    │   │   │   ├── terminal_theme.meta.json
+    │   │   │   ├── terminal-theme.data.json
+    │   │   │   ├── terminal-theme.meta.json
     │   │   │   ├── text.data.json
     │   │   │   ├── text.meta.json
     │   │   │   ├── theme.data.json
@@ -9046,30 +9046,30 @@ BioactivityDataAcquisition2/
     │   │   │   ├── traceback.data.json
     │   │   │   └── traceback.meta.json
     │   │   ├── sniffio/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _impl.data.json
-    │   │   │   ├── _impl.meta.json
-    │   │   │   ├── _version.data.json
-    │   │   │   └── _version.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -impl.data.json
+    │   │   │   ├── -impl.meta.json
+    │   │   │   ├── -version.data.json
+    │   │   │   └── -version.meta.json
     │   │   ├── sqlalchemy/
     │   │   │   ├── connectors/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── asyncio.data.json
     │   │   │   │   └── asyncio.meta.json
     │   │   │   ├── dialects/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   └── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   └── --init--.meta.json
     │   │   │   ├── engine/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── _py_processors.data.json
-    │   │   │   │   ├── _py_processors.meta.json
-    │   │   │   │   ├── _py_row.data.json
-    │   │   │   │   ├── _py_row.meta.json
-    │   │   │   │   ├── _py_util.data.json
-    │   │   │   │   ├── _py_util.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── -py-processors.data.json
+    │   │   │   │   ├── -py-processors.meta.json
+    │   │   │   │   ├── -py-row.data.json
+    │   │   │   │   ├── -py-row.meta.json
+    │   │   │   │   ├── -py-util.data.json
+    │   │   │   │   ├── -py-util.meta.json
     │   │   │   │   ├── base.data.json
     │   │   │   │   ├── base.meta.json
     │   │   │   │   ├── characteristics.data.json
@@ -9099,8 +9099,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── util.data.json
     │   │   │   │   └── util.meta.json
     │   │   │   ├── event/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── api.data.json
     │   │   │   │   ├── api.meta.json
     │   │   │   │   ├── attr.data.json
@@ -9113,8 +9113,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   └── registry.meta.json
     │   │   │   ├── ext/
     │   │   │   │   ├── asyncio/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   ├── --init--.meta.json
     │   │   │   │   │   ├── base.data.json
     │   │   │   │   │   ├── base.meta.json
     │   │   │   │   │   ├── engine.data.json
@@ -9127,40 +9127,40 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── scoping.meta.json
     │   │   │   │   │   ├── session.data.json
     │   │   │   │   │   └── session.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   └── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   └── --init--.meta.json
     │   │   │   ├── future/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── engine.data.json
     │   │   │   │   └── engine.meta.json
     │   │   │   ├── orm/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── _orm_constructors.data.json
-    │   │   │   │   ├── _orm_constructors.meta.json
-    │   │   │   │   ├── _typing.data.json
-    │   │   │   │   ├── _typing.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── -orm-constructors.data.json
+    │   │   │   │   ├── -orm-constructors.meta.json
+    │   │   │   │   ├── -typing.data.json
+    │   │   │   │   ├── -typing.meta.json
     │   │   │   │   ├── attributes.data.json
     │   │   │   │   ├── attributes.meta.json
     │   │   │   │   ├── base.data.json
     │   │   │   │   ├── base.meta.json
-    │   │   │   │   ├── bulk_persistence.data.json
-    │   │   │   │   ├── bulk_persistence.meta.json
+    │   │   │   │   ├── bulk-persistence.data.json
+    │   │   │   │   ├── bulk-persistence.meta.json
     │   │   │   │   ├── clsregistry.data.json
     │   │   │   │   ├── clsregistry.meta.json
     │   │   │   │   ├── collections.data.json
     │   │   │   │   ├── collections.meta.json
     │   │   │   │   ├── context.data.json
     │   │   │   │   ├── context.meta.json
-    │   │   │   │   ├── decl_api.data.json
-    │   │   │   │   ├── decl_api.meta.json
-    │   │   │   │   ├── decl_base.data.json
-    │   │   │   │   ├── decl_base.meta.json
+    │   │   │   │   ├── decl-api.data.json
+    │   │   │   │   ├── decl-api.meta.json
+    │   │   │   │   ├── decl-base.data.json
+    │   │   │   │   ├── decl-base.meta.json
     │   │   │   │   ├── dependency.data.json
     │   │   │   │   ├── dependency.meta.json
-    │   │   │   │   ├── descriptor_props.data.json
-    │   │   │   │   ├── descriptor_props.meta.json
+    │   │   │   │   ├── descriptor-props.data.json
+    │   │   │   │   ├── descriptor-props.meta.json
     │   │   │   │   ├── dynamic.data.json
     │   │   │   │   ├── dynamic.meta.json
     │   │   │   │   ├── evaluator.data.json
@@ -9177,12 +9177,12 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── interfaces.meta.json
     │   │   │   │   ├── loading.data.json
     │   │   │   │   ├── loading.meta.json
-    │   │   │   │   ├── mapped_collection.data.json
-    │   │   │   │   ├── mapped_collection.meta.json
+    │   │   │   │   ├── mapped-collection.data.json
+    │   │   │   │   ├── mapped-collection.meta.json
     │   │   │   │   ├── mapper.data.json
     │   │   │   │   ├── mapper.meta.json
-    │   │   │   │   ├── path_registry.data.json
-    │   │   │   │   ├── path_registry.meta.json
+    │   │   │   │   ├── path-registry.data.json
+    │   │   │   │   ├── path-registry.meta.json
     │   │   │   │   ├── persistence.data.json
     │   │   │   │   ├── persistence.meta.json
     │   │   │   │   ├── properties.data.json
@@ -9197,12 +9197,12 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── session.meta.json
     │   │   │   │   ├── state.data.json
     │   │   │   │   ├── state.meta.json
-    │   │   │   │   ├── state_changes.data.json
-    │   │   │   │   ├── state_changes.meta.json
+    │   │   │   │   ├── state-changes.data.json
+    │   │   │   │   ├── state-changes.meta.json
     │   │   │   │   ├── strategies.data.json
     │   │   │   │   ├── strategies.meta.json
-    │   │   │   │   ├── strategy_options.data.json
-    │   │   │   │   ├── strategy_options.meta.json
+    │   │   │   │   ├── strategy-options.data.json
+    │   │   │   │   ├── strategy-options.meta.json
     │   │   │   │   ├── sync.data.json
     │   │   │   │   ├── sync.meta.json
     │   │   │   │   ├── unitofwork.data.json
@@ -9212,8 +9212,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── writeonly.data.json
     │   │   │   │   └── writeonly.meta.json
     │   │   │   ├── pool/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── base.data.json
     │   │   │   │   ├── base.meta.json
     │   │   │   │   ├── events.data.json
@@ -9221,26 +9221,26 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── impl.data.json
     │   │   │   │   └── impl.meta.json
     │   │   │   ├── sql/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── _dml_constructors.data.json
-    │   │   │   │   ├── _dml_constructors.meta.json
-    │   │   │   │   ├── _elements_constructors.data.json
-    │   │   │   │   ├── _elements_constructors.meta.json
-    │   │   │   │   ├── _orm_types.data.json
-    │   │   │   │   ├── _orm_types.meta.json
-    │   │   │   │   ├── _py_util.data.json
-    │   │   │   │   ├── _py_util.meta.json
-    │   │   │   │   ├── _selectable_constructors.data.json
-    │   │   │   │   ├── _selectable_constructors.meta.json
-    │   │   │   │   ├── _typing.data.json
-    │   │   │   │   ├── _typing.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── -dml-constructors.data.json
+    │   │   │   │   ├── -dml-constructors.meta.json
+    │   │   │   │   ├── -elements-constructors.data.json
+    │   │   │   │   ├── -elements-constructors.meta.json
+    │   │   │   │   ├── -orm-types.data.json
+    │   │   │   │   ├── -orm-types.meta.json
+    │   │   │   │   ├── -py-util.data.json
+    │   │   │   │   ├── -py-util.meta.json
+    │   │   │   │   ├── -selectable-constructors.data.json
+    │   │   │   │   ├── -selectable-constructors.meta.json
+    │   │   │   │   ├── -typing.data.json
+    │   │   │   │   ├── -typing.meta.json
     │   │   │   │   ├── annotation.data.json
     │   │   │   │   ├── annotation.meta.json
     │   │   │   │   ├── base.data.json
     │   │   │   │   ├── base.meta.json
-    │   │   │   │   ├── cache_key.data.json
-    │   │   │   │   ├── cache_key.meta.json
+    │   │   │   │   ├── cache-key.data.json
+    │   │   │   │   ├── cache-key.meta.json
     │   │   │   │   ├── coercions.data.json
     │   │   │   │   ├── coercions.meta.json
     │   │   │   │   ├── compiler.data.json
@@ -9249,8 +9249,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── crud.meta.json
     │   │   │   │   ├── ddl.data.json
     │   │   │   │   ├── ddl.meta.json
-    │   │   │   │   ├── default_comparator.data.json
-    │   │   │   │   ├── default_comparator.meta.json
+    │   │   │   │   ├── default-comparator.data.json
+    │   │   │   │   ├── default-comparator.meta.json
     │   │   │   │   ├── dml.data.json
     │   │   │   │   ├── dml.meta.json
     │   │   │   │   ├── elements.data.json
@@ -9277,23 +9277,23 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── sqltypes.meta.json
     │   │   │   │   ├── traversals.data.json
     │   │   │   │   ├── traversals.meta.json
-    │   │   │   │   ├── type_api.data.json
-    │   │   │   │   ├── type_api.meta.json
+    │   │   │   │   ├── type-api.data.json
+    │   │   │   │   ├── type-api.meta.json
     │   │   │   │   ├── util.data.json
     │   │   │   │   ├── util.meta.json
     │   │   │   │   ├── visitors.data.json
     │   │   │   │   └── visitors.meta.json
     │   │   │   ├── util/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
-    │   │   │   │   ├── _collections.data.json
-    │   │   │   │   ├── _collections.meta.json
-    │   │   │   │   ├── _concurrency_py3k.data.json
-    │   │   │   │   ├── _concurrency_py3k.meta.json
-    │   │   │   │   ├── _has_cy.data.json
-    │   │   │   │   ├── _has_cy.meta.json
-    │   │   │   │   ├── _py_collections.data.json
-    │   │   │   │   ├── _py_collections.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
+    │   │   │   │   ├── -collections.data.json
+    │   │   │   │   ├── -collections.meta.json
+    │   │   │   │   ├── -concurrency-py3k.data.json
+    │   │   │   │   ├── -concurrency-py3k.meta.json
+    │   │   │   │   ├── -has-cy.data.json
+    │   │   │   │   ├── -has-cy.meta.json
+    │   │   │   │   ├── -py-collections.data.json
+    │   │   │   │   ├── -py-collections.meta.json
     │   │   │   │   ├── compat.data.json
     │   │   │   │   ├── compat.meta.json
     │   │   │   │   ├── concurrency.data.json
@@ -9310,8 +9310,8 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── topological.meta.json
     │   │   │   │   ├── typing.data.json
     │   │   │   │   └── typing.meta.json
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
     │   │   │   ├── exc.data.json
     │   │   │   ├── exc.meta.json
     │   │   │   ├── inspection.data.json
@@ -9323,27 +9323,27 @@ BioactivityDataAcquisition2/
     │   │   │   ├── types.data.json
     │   │   │   └── types.meta.json
     │   │   ├── string/
-    │   │   │   ├── __init__.data.json
-    │   │   │   └── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   └── --init--.meta.json
     │   │   ├── structlog/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _base.data.json
-    │   │   │   ├── _base.meta.json
-    │   │   │   ├── _config.data.json
-    │   │   │   ├── _config.meta.json
-    │   │   │   ├── _frames.data.json
-    │   │   │   ├── _frames.meta.json
-    │   │   │   ├── _generic.data.json
-    │   │   │   ├── _generic.meta.json
-    │   │   │   ├── _log_levels.data.json
-    │   │   │   ├── _log_levels.meta.json
-    │   │   │   ├── _native.data.json
-    │   │   │   ├── _native.meta.json
-    │   │   │   ├── _output.data.json
-    │   │   │   ├── _output.meta.json
-    │   │   │   ├── _utils.data.json
-    │   │   │   ├── _utils.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -base.data.json
+    │   │   │   ├── -base.meta.json
+    │   │   │   ├── -config.data.json
+    │   │   │   ├── -config.meta.json
+    │   │   │   ├── -frames.data.json
+    │   │   │   ├── -frames.meta.json
+    │   │   │   ├── -generic.data.json
+    │   │   │   ├── -generic.meta.json
+    │   │   │   ├── -log-levels.data.json
+    │   │   │   ├── -log-levels.meta.json
+    │   │   │   ├── -native.data.json
+    │   │   │   ├── -native.meta.json
+    │   │   │   ├── -output.data.json
+    │   │   │   ├── -output.meta.json
+    │   │   │   ├── -utils.data.json
+    │   │   │   ├── -utils.meta.json
     │   │   │   ├── contextvars.data.json
     │   │   │   ├── contextvars.meta.json
     │   │   │   ├── dev.data.json
@@ -9367,71 +9367,71 @@ BioactivityDataAcquisition2/
     │   │   │   ├── typing.data.json
     │   │   │   └── typing.meta.json
     │   │   ├── sys/
-    │   │   │   ├── __init__.data.json
-    │   │   │   └── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   └── --init--.meta.json
     │   │   ├── tests/
     │   │   │   ├── unit/
     │   │   │   │   ├── application/
     │   │   │   │   │   ├── pipelines/
     │   │   │   │   │   │   └── pubmed/
-    │   │   │   │   │   │       ├── __init__.data.json
-    │   │   │   │   │   │       ├── __init__.meta.json
-    │   │   │   │   │   │       ├── test_pubmed_transformer.data.json
-    │   │   │   │   │   │       └── test_pubmed_transformer.meta.json
+    │   │   │   │   │   │       ├── --init--.data.json
+    │   │   │   │   │   │       ├── --init--.meta.json
+    │   │   │   │   │   │       ├── test-pubmed-transformer.data.json
+    │   │   │   │   │   │       └── test-pubmed-transformer.meta.json
     │   │   │   │   │   ├── pipelines.data.json
     │   │   │   │   │   └── pipelines.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── application.data.json
     │   │   │   │   └── application.meta.json
-    │   │   │   ├── __init__.data.json
-    │   │   │   └── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   └── --init--.meta.json
     │   │   ├── tomli/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _parser.data.json
-    │   │   │   ├── _parser.meta.json
-    │   │   │   ├── _re.data.json
-    │   │   │   ├── _re.meta.json
-    │   │   │   ├── _types.data.json
-    │   │   │   └── _types.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -parser.data.json
+    │   │   │   ├── -parser.meta.json
+    │   │   │   ├── -re.data.json
+    │   │   │   ├── -re.meta.json
+    │   │   │   ├── -types.data.json
+    │   │   │   └── -types.meta.json
     │   │   ├── typeguard/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _checkers.data.json
-    │   │   │   ├── _checkers.meta.json
-    │   │   │   ├── _config.data.json
-    │   │   │   ├── _config.meta.json
-    │   │   │   ├── _decorators.data.json
-    │   │   │   ├── _decorators.meta.json
-    │   │   │   ├── _exceptions.data.json
-    │   │   │   ├── _exceptions.meta.json
-    │   │   │   ├── _functions.data.json
-    │   │   │   ├── _functions.meta.json
-    │   │   │   ├── _importhook.data.json
-    │   │   │   ├── _importhook.meta.json
-    │   │   │   ├── _memo.data.json
-    │   │   │   ├── _memo.meta.json
-    │   │   │   ├── _suppression.data.json
-    │   │   │   ├── _suppression.meta.json
-    │   │   │   ├── _transformer.data.json
-    │   │   │   ├── _transformer.meta.json
-    │   │   │   ├── _utils.data.json
-    │   │   │   └── _utils.meta.json
-    │   │   ├── typing_inspection/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -checkers.data.json
+    │   │   │   ├── -checkers.meta.json
+    │   │   │   ├── -config.data.json
+    │   │   │   ├── -config.meta.json
+    │   │   │   ├── -decorators.data.json
+    │   │   │   ├── -decorators.meta.json
+    │   │   │   ├── -exceptions.data.json
+    │   │   │   ├── -exceptions.meta.json
+    │   │   │   ├── -functions.data.json
+    │   │   │   ├── -functions.meta.json
+    │   │   │   ├── -importhook.data.json
+    │   │   │   ├── -importhook.meta.json
+    │   │   │   ├── -memo.data.json
+    │   │   │   ├── -memo.meta.json
+    │   │   │   ├── -suppression.data.json
+    │   │   │   ├── -suppression.meta.json
+    │   │   │   ├── -transformer.data.json
+    │   │   │   ├── -transformer.meta.json
+    │   │   │   ├── -utils.data.json
+    │   │   │   └── -utils.meta.json
+    │   │   ├── typing-inspection/
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
     │   │   │   ├── introspection.data.json
     │   │   │   ├── introspection.meta.json
-    │   │   │   ├── typing_objects.data.json
-    │   │   │   └── typing_objects.meta.json
+    │   │   │   ├── typing-objects.data.json
+    │   │   │   └── typing-objects.meta.json
     │   │   ├── unittest/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _log.data.json
-    │   │   │   ├── _log.meta.json
-    │   │   │   ├── async_case.data.json
-    │   │   │   ├── async_case.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -log.data.json
+    │   │   │   ├── -log.meta.json
+    │   │   │   ├── async-case.data.json
+    │   │   │   ├── async-case.meta.json
     │   │   │   ├── case.data.json
     │   │   │   ├── case.meta.json
     │   │   │   ├── loader.data.json
@@ -9449,8 +9449,8 @@ BioactivityDataAcquisition2/
     │   │   │   ├── suite.data.json
     │   │   │   └── suite.meta.json
     │   │   ├── urllib/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
     │   │   │   ├── error.data.json
     │   │   │   ├── error.meta.json
     │   │   │   ├── parse.data.json
@@ -9461,13 +9461,13 @@ BioactivityDataAcquisition2/
     │   │   │   └── response.meta.json
     │   │   ├── urllib3/
     │   │   │   ├── http2/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── probe.data.json
     │   │   │   │   └── probe.meta.json
     │   │   │   ├── util/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── connection.data.json
     │   │   │   │   ├── connection.meta.json
     │   │   │   │   ├── proxy.data.json
@@ -9478,10 +9478,10 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── response.meta.json
     │   │   │   │   ├── retry.data.json
     │   │   │   │   ├── retry.meta.json
-    │   │   │   │   ├── ssl_.data.json
-    │   │   │   │   ├── ssl_.meta.json
-    │   │   │   │   ├── ssl_match_hostname.data.json
-    │   │   │   │   ├── ssl_match_hostname.meta.json
+    │   │   │   │   ├── ssl-.data.json
+    │   │   │   │   ├── ssl-.meta.json
+    │   │   │   │   ├── ssl-match-hostname.data.json
+    │   │   │   │   ├── ssl-match-hostname.meta.json
     │   │   │   │   ├── ssltransport.data.json
     │   │   │   │   ├── ssltransport.meta.json
     │   │   │   │   ├── timeout.data.json
@@ -9492,16 +9492,16 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── util.meta.json
     │   │   │   │   ├── wait.data.json
     │   │   │   │   └── wait.meta.json
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _base_connection.data.json
-    │   │   │   ├── _base_connection.meta.json
-    │   │   │   ├── _collections.data.json
-    │   │   │   ├── _collections.meta.json
-    │   │   │   ├── _request_methods.data.json
-    │   │   │   ├── _request_methods.meta.json
-    │   │   │   ├── _version.data.json
-    │   │   │   ├── _version.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -base-connection.data.json
+    │   │   │   ├── -base-connection.meta.json
+    │   │   │   ├── -collections.data.json
+    │   │   │   ├── -collections.meta.json
+    │   │   │   ├── -request-methods.data.json
+    │   │   │   ├── -request-methods.meta.json
+    │   │   │   ├── -version.data.json
+    │   │   │   ├── -version.meta.json
     │   │   │   ├── connection.data.json
     │   │   │   ├── connection.meta.json
     │   │   │   ├── connectionpool.data.json
@@ -9518,41 +9518,41 @@ BioactivityDataAcquisition2/
     │   │   │   └── response.meta.json
     │   │   ├── watchdog/
     │   │   │   ├── observers/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── api.data.json
     │   │   │   │   └── api.meta.json
     │   │   │   ├── tricks/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   └── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   └── --init--.meta.json
     │   │   │   ├── utils/
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   ├── --init--.meta.json
     │   │   │   │   ├── bricks.data.json
     │   │   │   │   ├── bricks.meta.json
     │   │   │   │   ├── echo.data.json
     │   │   │   │   ├── echo.meta.json
-    │   │   │   │   ├── event_debouncer.data.json
-    │   │   │   │   ├── event_debouncer.meta.json
+    │   │   │   │   ├── event-debouncer.data.json
+    │   │   │   │   ├── event-debouncer.meta.json
     │   │   │   │   ├── patterns.data.json
     │   │   │   │   ├── patterns.meta.json
     │   │   │   │   ├── platform.data.json
     │   │   │   │   ├── platform.meta.json
-    │   │   │   │   ├── process_watcher.data.json
-    │   │   │   │   └── process_watcher.meta.json
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
+    │   │   │   │   ├── process-watcher.data.json
+    │   │   │   │   └── process-watcher.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
     │   │   │   ├── events.data.json
     │   │   │   └── events.meta.json
     │   │   ├── wsgiref/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
     │   │   │   ├── handlers.data.json
     │   │   │   ├── handlers.meta.json
     │   │   │   ├── headers.data.json
     │   │   │   ├── headers.meta.json
-    │   │   │   ├── simple_server.data.json
-    │   │   │   ├── simple_server.meta.json
+    │   │   │   ├── simple-server.data.json
+    │   │   │   ├── simple-server.meta.json
     │   │   │   ├── types.data.json
     │   │   │   ├── types.meta.json
     │   │   │   ├── util.data.json
@@ -9561,96 +9561,96 @@ BioactivityDataAcquisition2/
     │   │   │   ├── etree/
     │   │   │   │   ├── ElementTree.data.json
     │   │   │   │   ├── ElementTree.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   └── __init__.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   └── --init--.meta.json
     │   │   │   ├── parsers/
     │   │   │   │   ├── expat/
-    │   │   │   │   │   ├── __init__.data.json
-    │   │   │   │   │   └── __init__.meta.json
-    │   │   │   │   ├── __init__.data.json
-    │   │   │   │   └── __init__.meta.json
-    │   │   │   ├── __init__.data.json
-    │   │   │   └── __init__.meta.json
+    │   │   │   │   │   ├── --init--.data.json
+    │   │   │   │   │   └── --init--.meta.json
+    │   │   │   │   ├── --init--.data.json
+    │   │   │   │   └── --init--.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   └── --init--.meta.json
     │   │   ├── zipfile/
-    │   │   │   ├── __init__.data.json
-    │   │   │   └── __init__.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   └── --init--.meta.json
     │   │   ├── zoneinfo/
-    │   │   │   ├── __init__.data.json
-    │   │   │   ├── __init__.meta.json
-    │   │   │   ├── _common.data.json
-    │   │   │   ├── _common.meta.json
-    │   │   │   ├── _tzpath.data.json
-    │   │   │   └── _tzpath.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   ├── --init--.meta.json
+    │   │   │   ├── -common.data.json
+    │   │   │   ├── -common.meta.json
+    │   │   │   ├── -tzpath.data.json
+    │   │   │   └── -tzpath.meta.json
     │   │   ├── zstandard/
-    │   │   │   ├── __init__.data.json
-    │   │   │   └── __init__.meta.json
-    │   │   ├── @plugins_snapshot.json
-    │   │   ├── __future__.data.json
-    │   │   ├── __future__.meta.json
-    │   │   ├── _ast.data.json
-    │   │   ├── _ast.meta.json
-    │   │   ├── _asyncio.data.json
-    │   │   ├── _asyncio.meta.json
-    │   │   ├── _bisect.data.json
-    │   │   ├── _bisect.meta.json
-    │   │   ├── _blake2.data.json
-    │   │   ├── _blake2.meta.json
-    │   │   ├── _bz2.data.json
-    │   │   ├── _bz2.meta.json
-    │   │   ├── _codecs.data.json
-    │   │   ├── _codecs.meta.json
-    │   │   ├── _collections_abc.data.json
-    │   │   ├── _collections_abc.meta.json
-    │   │   ├── _compression.data.json
-    │   │   ├── _compression.meta.json
-    │   │   ├── _contextvars.data.json
-    │   │   ├── _contextvars.meta.json
-    │   │   ├── _csv.data.json
-    │   │   ├── _csv.meta.json
-    │   │   ├── _ctypes.data.json
-    │   │   ├── _ctypes.meta.json
-    │   │   ├── _decimal.data.json
-    │   │   ├── _decimal.meta.json
-    │   │   ├── _frozen_importlib.data.json
-    │   │   ├── _frozen_importlib.meta.json
-    │   │   ├── _frozen_importlib_external.data.json
-    │   │   ├── _frozen_importlib_external.meta.json
-    │   │   ├── _hashlib.data.json
-    │   │   ├── _hashlib.meta.json
-    │   │   ├── _heapq.data.json
-    │   │   ├── _heapq.meta.json
-    │   │   ├── _io.data.json
-    │   │   ├── _io.meta.json
-    │   │   ├── _locale.data.json
-    │   │   ├── _locale.meta.json
-    │   │   ├── _operator.data.json
-    │   │   ├── _operator.meta.json
-    │   │   ├── _pickle.data.json
-    │   │   ├── _pickle.meta.json
-    │   │   ├── _queue.data.json
-    │   │   ├── _queue.meta.json
-    │   │   ├── _random.data.json
-    │   │   ├── _random.meta.json
-    │   │   ├── _sitebuiltins.data.json
-    │   │   ├── _sitebuiltins.meta.json
-    │   │   ├── _socket.data.json
-    │   │   ├── _socket.meta.json
-    │   │   ├── _ssl.data.json
-    │   │   ├── _ssl.meta.json
-    │   │   ├── _stat.data.json
-    │   │   ├── _stat.meta.json
-    │   │   ├── _struct.data.json
-    │   │   ├── _struct.meta.json
-    │   │   ├── _thread.data.json
-    │   │   ├── _thread.meta.json
-    │   │   ├── _warnings.data.json
-    │   │   ├── _warnings.meta.json
-    │   │   ├── _weakref.data.json
-    │   │   ├── _weakref.meta.json
-    │   │   ├── _weakrefset.data.json
-    │   │   ├── _weakrefset.meta.json
-    │   │   ├── _winapi.data.json
-    │   │   ├── _winapi.meta.json
+    │   │   │   ├── --init--.data.json
+    │   │   │   └── --init--.meta.json
+    │   │   ├── @plugins-snapshot.json
+    │   │   ├── --future--.data.json
+    │   │   ├── --future--.meta.json
+    │   │   ├── -ast.data.json
+    │   │   ├── -ast.meta.json
+    │   │   ├── -asyncio.data.json
+    │   │   ├── -asyncio.meta.json
+    │   │   ├── -bisect.data.json
+    │   │   ├── -bisect.meta.json
+    │   │   ├── -blake2.data.json
+    │   │   ├── -blake2.meta.json
+    │   │   ├── -bz2.data.json
+    │   │   ├── -bz2.meta.json
+    │   │   ├── -codecs.data.json
+    │   │   ├── -codecs.meta.json
+    │   │   ├── -collections-abc.data.json
+    │   │   ├── -collections-abc.meta.json
+    │   │   ├── -compression.data.json
+    │   │   ├── -compression.meta.json
+    │   │   ├── -contextvars.data.json
+    │   │   ├── -contextvars.meta.json
+    │   │   ├── -csv.data.json
+    │   │   ├── -csv.meta.json
+    │   │   ├── -ctypes.data.json
+    │   │   ├── -ctypes.meta.json
+    │   │   ├── -decimal.data.json
+    │   │   ├── -decimal.meta.json
+    │   │   ├── -frozen-importlib.data.json
+    │   │   ├── -frozen-importlib.meta.json
+    │   │   ├── -frozen-importlib-external.data.json
+    │   │   ├── -frozen-importlib-external.meta.json
+    │   │   ├── -hashlib.data.json
+    │   │   ├── -hashlib.meta.json
+    │   │   ├── -heapq.data.json
+    │   │   ├── -heapq.meta.json
+    │   │   ├── -io.data.json
+    │   │   ├── -io.meta.json
+    │   │   ├── -locale.data.json
+    │   │   ├── -locale.meta.json
+    │   │   ├── -operator.data.json
+    │   │   ├── -operator.meta.json
+    │   │   ├── -pickle.data.json
+    │   │   ├── -pickle.meta.json
+    │   │   ├── -queue.data.json
+    │   │   ├── -queue.meta.json
+    │   │   ├── -random.data.json
+    │   │   ├── -random.meta.json
+    │   │   ├── -sitebuiltins.data.json
+    │   │   ├── -sitebuiltins.meta.json
+    │   │   ├── -socket.data.json
+    │   │   ├── -socket.meta.json
+    │   │   ├── -ssl.data.json
+    │   │   ├── -ssl.meta.json
+    │   │   ├── -stat.data.json
+    │   │   ├── -stat.meta.json
+    │   │   ├── -struct.data.json
+    │   │   ├── -struct.meta.json
+    │   │   ├── -thread.data.json
+    │   │   ├── -thread.meta.json
+    │   │   ├── -warnings.data.json
+    │   │   ├── -warnings.meta.json
+    │   │   ├── -weakref.data.json
+    │   │   ├── -weakref.meta.json
+    │   │   ├── -weakrefset.data.json
+    │   │   ├── -weakrefset.meta.json
+    │   │   ├── -winapi.data.json
+    │   │   ├── -winapi.meta.json
     │   │   ├── abc.data.json
     │   │   ├── abc.meta.json
     │   │   ├── argparse.data.json
@@ -9759,8 +9759,8 @@ BioactivityDataAcquisition2/
     │   │   ├── mmap.meta.json
     │   │   ├── msvcrt.data.json
     │   │   ├── msvcrt.meta.json
-    │   │   ├── mypy_extensions.data.json
-    │   │   ├── mypy_extensions.meta.json
+    │   │   ├── mypy-extensions.data.json
+    │   │   ├── mypy-extensions.meta.json
     │   │   ├── netrc.data.json
     │   │   ├── netrc.meta.json
     │   │   ├── ntpath.data.json
@@ -9815,12 +9815,12 @@ BioactivityDataAcquisition2/
     │   │   ├── socket.meta.json
     │   │   ├── socketserver.data.json
     │   │   ├── socketserver.meta.json
-    │   │   ├── sre_compile.data.json
-    │   │   ├── sre_compile.meta.json
-    │   │   ├── sre_constants.data.json
-    │   │   ├── sre_constants.meta.json
-    │   │   ├── sre_parse.data.json
-    │   │   ├── sre_parse.meta.json
+    │   │   ├── sre-compile.data.json
+    │   │   ├── sre-compile.meta.json
+    │   │   ├── sre-constants.data.json
+    │   │   ├── sre-constants.meta.json
+    │   │   ├── sre-parse.data.json
+    │   │   ├── sre-parse.meta.json
     │   │   ├── ssl.data.json
     │   │   ├── ssl.meta.json
     │   │   ├── stat.data.json
@@ -9857,8 +9857,8 @@ BioactivityDataAcquisition2/
     │   │   ├── types.meta.json
     │   │   ├── typing.data.json
     │   │   ├── typing.meta.json
-    │   │   ├── typing_extensions.data.json
-    │   │   ├── typing_extensions.meta.json
+    │   │   ├── typing-extensions.data.json
+    │   │   ├── typing-extensions.meta.json
     │   │   ├── unicodedata.data.json
     │   │   ├── unicodedata.meta.json
     │   │   ├── uuid.data.json
@@ -9873,8 +9873,8 @@ BioactivityDataAcquisition2/
     │   │   └── zlib.meta.json
     │   ├── .gitignore
     │   ├── CACHEDIR.TAG
-    │   └── missing_stubs
-    ├── .pytest_cache/
+    │   └── missing-stubs
+    ├── .pytest-cache/
     │   ├── v/
     │   │   └── cache/
     │   │       ├── lastfailed
@@ -9882,7 +9882,7 @@ BioactivityDataAcquisition2/
     │   ├── .gitignore
     │   ├── CACHEDIR.TAG
     │   └── README.md
-    ├── .ruff_cache/
+    ├── .ruff-cache/
     │   ├── 0.14.10/
     │   │   ├── 10052030055710839989
     │   │   ├── 10088401552678139102
@@ -10044,30 +10044,30 @@ BioactivityDataAcquisition2/
     │   └── CACHEDIR.TAG
     ├── assets/
     │   ├── javascripts/
-    │   │   ├── MERMAID_VERSION
-    │   │   ├── download_mermaid.ps1
+    │   │   ├── MERMAID-VERSION
+    │   │   ├── download-mermaid.ps1
     │   │   ├── mermaid-init.js
     │   │   └── mermaid-loader.js
     │   └── stylesheets/
     │       └── mermaid.css
     ├── configs/
     │   ├── composite/
-    │   │   └── publication_enrichment.yaml
+    │   │   └── publication-enrichment.yaml
     │   ├── dq/
     │   │   ├── entities/
     │   │   │   ├── chembl/
     │   │   │   │   ├── activity.yaml
     │   │   │   │   ├── assay.yaml
-    │   │   │   │   ├── assay_parameters.yaml
-    │   │   │   │   ├── cell_line.yaml
-    │   │   │   │   ├── compound_record.yaml
+    │   │   │   │   ├── assay-parameters.yaml
+    │   │   │   │   ├── cell-line.yaml
+    │   │   │   │   ├── compound-record.yaml
     │   │   │   │   ├── molecule.yaml
-    │   │   │   │   ├── protein_class.yaml
+    │   │   │   │   ├── protein-class.yaml
     │   │   │   │   ├── publication.yaml
-    │   │   │   │   ├── publication_similarity.yaml
-    │   │   │   │   ├── publication_term.yaml
+    │   │   │   │   ├── publication-similarity.yaml
+    │   │   │   │   ├── publication-term.yaml
     │   │   │   │   ├── target.yaml
-    │   │   │   │   └── target_component.yaml
+    │   │   │   │   └── target-component.yaml
     │   │   │   ├── crossref/
     │   │   │   │   └── publication.yaml
     │   │   │   ├── openalex/
@@ -10091,22 +10091,22 @@ BioactivityDataAcquisition2/
     │   │   │   ├── semanticscholar.yaml
     │   │   │   └── uniprot.yaml
     │   │   ├── README.md
-    │   │   └── _defaults.yaml
+    │   │   └── -defaults.yaml
     │   ├── filter/
     │   │   ├── entities/
     │   │   │   ├── chembl/
     │   │   │   │   ├── activity.yaml
     │   │   │   │   ├── assay.yaml
-    │   │   │   │   ├── assay_parameters.yaml
-    │   │   │   │   ├── cell_line.yaml
-    │   │   │   │   ├── compound_record.yaml
+    │   │   │   │   ├── assay-parameters.yaml
+    │   │   │   │   ├── cell-line.yaml
+    │   │   │   │   ├── compound-record.yaml
     │   │   │   │   ├── molecule.yaml
-    │   │   │   │   ├── protein_class.yaml
+    │   │   │   │   ├── protein-class.yaml
     │   │   │   │   ├── publication.yaml
-    │   │   │   │   ├── publication_similarity.yaml
-    │   │   │   │   ├── publication_term.yaml
+    │   │   │   │   ├── publication-similarity.yaml
+    │   │   │   │   ├── publication-term.yaml
     │   │   │   │   ├── target.yaml
-    │   │   │   │   └── target_component.yaml
+    │   │   │   │   └── target-component.yaml
     │   │   │   ├── composite/
     │   │   │   │   └── publication.yaml
     │   │   │   ├── crossref/
@@ -10131,21 +10131,21 @@ BioactivityDataAcquisition2/
     │   │   │   ├── semanticscholar.yaml
     │   │   │   └── uniprot.yaml
     │   │   ├── README.md
-    │   │   └── _defaults.yaml
+    │   │   └── -defaults.yaml
     │   ├── pipelines/
     │   │   ├── chembl/
     │   │   │   ├── activity.yaml
     │   │   │   ├── assay.yaml
-    │   │   │   ├── assay_parameters.yaml
-    │   │   │   ├── cell_line.yaml
-    │   │   │   ├── compound_record.yaml
+    │   │   │   ├── assay-parameters.yaml
+    │   │   │   ├── cell-line.yaml
+    │   │   │   ├── compound-record.yaml
     │   │   │   ├── molecule.yaml
-    │   │   │   ├── protein_class.yaml
+    │   │   │   ├── protein-class.yaml
     │   │   │   ├── publication.yaml
-    │   │   │   ├── publication_similarity.yaml
-    │   │   │   ├── publication_term.yaml
+    │   │   │   ├── publication-similarity.yaml
+    │   │   │   ├── publication-term.yaml
     │   │   │   ├── target.yaml
-    │   │   │   └── target_component.yaml
+    │   │   │   └── target-component.yaml
     │   │   ├── composite/
     │   │   │   └── publication.yaml
     │   │   ├── crossref/
@@ -10161,8 +10161,8 @@ BioactivityDataAcquisition2/
     │   │   ├── uniprot/
     │   │   │   ├── idmapping.yaml
     │   │   │   └── protein.yaml
-    │   │   ├── _base.yaml
-    │   │   └── _schema.json
+    │   │   ├── -base.yaml
+    │   │   └── -schema.json
     │   ├── sources/
     │   │   ├── chembl.yaml
     │   │   ├── crossref.yaml
@@ -10171,37 +10171,37 @@ BioactivityDataAcquisition2/
     │   │   ├── pubmed.yaml
     │   │   ├── semanticscholar.yaml
     │   │   └── uniprot.yaml
-    │   └── naming_exceptions.yaml
+    │   └── naming-exceptions.yaml
     ├── data/
     │   ├── checkpoints/
     │   │   └── composite/
-    │   │       ├── composite_composite_publication_0f58fcf2-bb8a-4df8-867d-6a47e106ef5a.json
-    │   │       ├── composite_composite_publication_1ea3267a-3111-4c9b-8f71-0ecde6d33eae.json
-    │   │       ├── composite_composite_publication_44f9285c-3600-49b7-af72-6bbfcba70927.json
-    │   │       ├── composite_composite_publication_6ad2bc7e-1cbf-4785-88ec-3a8457e88f05.json
-    │   │       ├── composite_composite_publication_959ee035-3b11-4b0b-a652-cde9bad42f19.json
-    │   │       ├── composite_composite_publication_9ff79b9b-7db2-451e-8467-bfafdeadf7c2.json
-    │   │       └── composite_composite_publication_ec532618-1da6-4af2-9665-bc636b001683.json
+    │   │       ├── composite-composite-publication-0f58fcf2-bb8a-4df8-867d-6a47e106ef5a.json
+    │   │       ├── composite-composite-publication-1ea3267a-3111-4c9b-8f71-0ecde6d33eae.json
+    │   │       ├── composite-composite-publication-44f9285c-3600-49b7-af72-6bbfcba70927.json
+    │   │       ├── composite-composite-publication-6ad2bc7e-1cbf-4785-88ec-3a8457e88f05.json
+    │   │       ├── composite-composite-publication-959ee035-3b11-4b0b-a652-cde9bad42f19.json
+    │   │       ├── composite-composite-publication-9ff79b9b-7db2-451e-8467-bfafdeadf7c2.json
+    │   │       └── composite-composite-publication-ec532618-1da6-4af2-9665-bc636b001683.json
     │   ├── input/
     │   │   ├── activity.csv
     │   │   ├── assay.csv
     │   │   ├── cell.csv
-    │   │   ├── compound_record.csv
+    │   │   ├── compound-record.csv
     │   │   ├── dois.csv
     │   │   ├── molecule.csv
     │   │   ├── protein.csv
-    │   │   ├── protein_classification.csv
+    │   │   ├── protein-classification.csv
     │   │   ├── publication.csv
     │   │   ├── pubmed.csv
-    │   │   ├── pubmed_publications.csv
+    │   │   ├── pubmed-publications.csv
     │   │   ├── target.csv
-    │   │   ├── target_component.csv
+    │   │   ├── target-component.csv
     │   │   └── tissue.csv
     │   ├── output/
     │   └── silver/
     │       ├── chembl/
     │       │   └── publication/
-    │       │       ├── _delta_log/
+    │       │       ├── -delta-log/
     │       │       │   ├── 00000000000000000000.json
     │       │       │   ├── 00000000000000000001.json
     │       │       │   ├── 00000000000000000002.json
@@ -10304,9 +10304,9 @@ BioactivityDataAcquisition2/
     │       │       │   ├── 00000000000000000099.checkpoint.parquet
     │       │       │   ├── 00000000000000000099.json
     │       │       │   ├── 00000000000000000100.json
-    │       │       │   └── _last_checkpoint
-    │       │       ├── chembl_publication.csv
-    │       │       ├── chembl_publication_metadata.yaml
+    │       │       │   └── -last-checkpoint
+    │       │       ├── chembl-publication.csv
+    │       │       ├── chembl-publication-metadata.yaml
     │       │       ├── part-00000-04bb4a58-76c2-44ae-a25d-305fadc39b06-c000.snappy.parquet
     │       │       ├── part-00000-052dba93-b90c-42ca-99d8-eab6456d1a92-c000.snappy.parquet
     │       │       ├── part-00000-05a2aba5-a2cf-4d1a-b2aa-d27622d229be-c000.snappy.parquet
@@ -10408,19 +10408,19 @@ BioactivityDataAcquisition2/
     │       │       ├── part-00000-fb4cbcf3-2f3c-4181-97dc-51b0b8aed085-c000.snappy.parquet
     │       │       ├── part-00000-fdf29651-a4df-495e-9127-39874aa11ed4-c000.snappy.parquet
     │       │       ├── part-00000-ffac6b8a-d16f-4e61-92f1-caffdbea3f22-c000.snappy.parquet
-    │       │       └── silver_chembl_publication_dq_report.json
+    │       │       └── silver-chembl-publication-dq-report.json
     │       ├── composite/
     │       │   ├── publication/
-    │       │   │   ├── _delta_log/
+    │       │   │   ├── -delta-log/
     │       │   │   │   ├── 00000000000000000000.json
     │       │   │   │   └── 00000000000000000001.json
-    │       │   │   ├── composite_publication_metadata.yaml
+    │       │   │   ├── composite-publication-metadata.yaml
     │       │   │   ├── part-00000-a5e04c60-f09e-4ba6-bd95-d1103aef2539-c000.snappy.parquet
     │       │   │   └── part-00000-ce70e9c5-440e-40cf-9e33-19cc6e5f70c5-c000.snappy.parquet
     │       │   └── publication.csv
     │       ├── crossref/
     │       │   └── publication/
-    │       │       ├── _delta_log/
+    │       │       ├── -delta-log/
     │       │       │   ├── 00000000000000000000.json
     │       │       │   ├── 00000000000000000001.json
     │       │       │   ├── 00000000000000000002.json
@@ -10523,9 +10523,9 @@ BioactivityDataAcquisition2/
     │       │       │   ├── 00000000000000000099.checkpoint.parquet
     │       │       │   ├── 00000000000000000099.json
     │       │       │   ├── 00000000000000000100.json
-    │       │       │   └── _last_checkpoint
-    │       │       ├── crossref_publication.csv
-    │       │       ├── crossref_publication_metadata.yaml
+    │       │       │   └── -last-checkpoint
+    │       │       ├── crossref-publication.csv
+    │       │       ├── crossref-publication-metadata.yaml
     │       │       ├── part-00000-00d9d09c-f4f9-4f8f-ba84-9f4a4b7a5349-c000.snappy.parquet
     │       │       ├── part-00000-04008a31-fd7b-459d-80cc-dbece4b014f2-c000.snappy.parquet
     │       │       ├── part-00000-053323d4-d14d-4f3d-86ef-028cd15786ba-c000.snappy.parquet
@@ -10627,10 +10627,10 @@ BioactivityDataAcquisition2/
     │       │       ├── part-00000-fa23b243-3633-499f-a164-5b26e6a1bab4-c000.snappy.parquet
     │       │       ├── part-00000-ff09e98d-462e-49a8-b56d-a2633878cfde-c000.snappy.parquet
     │       │       ├── part-00000-ff4ed719-4041-4b88-b5e9-e9a95a9f075d-c000.snappy.parquet
-    │       │       └── silver_crossref_publication_dq_report.json
+    │       │       └── silver-crossref-publication-dq-report.json
     │       ├── openalex/
     │       │   └── publication/
-    │       │       ├── _delta_log/
+    │       │       ├── -delta-log/
     │       │       │   ├── 00000000000000000000.json
     │       │       │   ├── 00000000000000000001.json
     │       │       │   ├── 00000000000000000002.json
@@ -10682,8 +10682,8 @@ BioactivityDataAcquisition2/
     │       │       │   ├── 00000000000000000048.json
     │       │       │   ├── 00000000000000000049.json
     │       │       │   └── 00000000000000000050.json
-    │       │       ├── openalex_publication.csv
-    │       │       ├── openalex_publication_metadata.yaml
+    │       │       ├── openalex-publication.csv
+    │       │       ├── openalex-publication-metadata.yaml
     │       │       ├── part-00000-00db1d95-db90-4a9a-aeb0-38854e5b93a7-c000.snappy.parquet
     │       │       ├── part-00000-0a1b8e99-8a8f-467e-a77c-52fbc7a723e4-c000.snappy.parquet
     │       │       ├── part-00000-1509b04a-da36-4bea-b5d3-d20e2a8bee60-c000.snappy.parquet
@@ -10735,10 +10735,10 @@ BioactivityDataAcquisition2/
     │       │       ├── part-00000-f425b1b6-d230-4809-9478-619d0f2cf0ec-c000.snappy.parquet
     │       │       ├── part-00000-f4cab255-7df2-4664-80cb-c6c3e7921b83-c000.snappy.parquet
     │       │       ├── part-00000-fe132fcb-2afc-4358-ad17-a6a8988f81ee-c000.snappy.parquet
-    │       │       └── silver_openalex_publication_dq_report.json
+    │       │       └── silver-openalex-publication-dq-report.json
     │       ├── pubmed/
     │       │   └── publication/
-    │       │       ├── _delta_log/
+    │       │       ├── -delta-log/
     │       │       │   ├── 00000000000000000000.json
     │       │       │   ├── 00000000000000000001.json
     │       │       │   ├── 00000000000000000002.json
@@ -10877,19 +10877,19 @@ BioactivityDataAcquisition2/
     │       │       ├── part-00000-f983dd52-b112-4875-ab4f-6fbcc91eef18-c000.snappy.parquet
     │       │       ├── part-00000-fca83ed5-3c2b-4381-b356-62e3ca41d765-c000.snappy.parquet
     │       │       ├── part-00000-fd264fac-3816-495e-b04b-d24a3c245283-c000.snappy.parquet
-    │       │       ├── pubmed_publication.csv
-    │       │       ├── pubmed_publication_metadata.yaml
-    │       │       └── silver_pubmed_publication_dq_report.json
+    │       │       ├── pubmed-publication.csv
+    │       │       ├── pubmed-publication-metadata.yaml
+    │       │       └── silver-pubmed-publication-dq-report.json
     │       └── semanticscholar/
     │           └── publication/
-    │               ├── _delta_log/
+    │               ├── -delta-log/
     │               │   ├── 00000000000000000000.json
     │               │   └── 00000000000000000001.json
     │               ├── part-00000-87e2a1e3-e8a9-4e37-9f83-d0ecebfa42bb-c000.snappy.parquet
     │               ├── part-00000-fba2b47e-268d-4a3e-8ce7-bbc4eea9da8d-c000.snappy.parquet
-    │               ├── semanticscholar_publication.csv
-    │               ├── semanticscholar_publication_metadata.yaml
-    │               └── silver_semanticscholar_publication_dq_report.json
+    │               ├── semanticscholar-publication.csv
+    │               ├── semanticscholar-publication-metadata.yaml
+    │               └── silver-semanticscholar-publication-dq-report.json
     ├── docs/
     │   ├── 00-project-rules/
     │   │   ├── 03-file-policy.md
@@ -10965,7 +10965,7 @@ BioactivityDataAcquisition2/
     │   │   │   ├── 24-hash-service-class.mermaid
     │   │   │   ├── 25-circuit-breaker-observer-class.mermaid
     │   │   │   ├── diagrams-index.md
-    │   │   │   └── render_diagrams.py
+    │   │   │   └── render-diagrams.py
     │   │   ├── 00-overview.md
     │   │   ├── 01-domain-layer.md
     │   │   ├── 02-application-layer.md
@@ -11048,7 +11048,7 @@ BioactivityDataAcquisition2/
     │   │   │   ├── stale-lock.md
     │   │   │   └── vacuum-procedures.md
     │   │   ├── README.md
-    │   │   ├── RELEASE_CHECKLIST.md
+    │   │   ├── RELEASE-CHECKLIST.md
     │   │   ├── performance-baselines.md
     │   │   └── vacuum-retention.md
     │   ├── analysis/
@@ -11079,8 +11079,8 @@ BioactivityDataAcquisition2/
     │   │   │   ├── audit-2026-01-02-comprehensive.yaml
     │   │   │   ├── audit-report-jan-2026.md
     │   │   │   ├── audit-scores-2025-12-31.yaml
-    │   │   │   ├── audit_scores-2026-01-02.yaml
-    │   │   │   ├── audit_scores.yaml
+    │   │   │   ├── audit-scores-2026-01-02.yaml
+    │   │   │   ├── audit-scores.yaml
     │   │   │   ├── bioetl-action-plan-2025-12-31.md
     │   │   │   ├── bioetl-audit-synthesis-2025-12-31.yaml
     │   │   │   ├── code-duplication-analysis-2026-01-06.md
@@ -11152,7 +11152,7 @@ BioactivityDataAcquisition2/
     │   │   ├── architecture-audit-report-2026-01-22.md
     │   │   ├── architecture-audit-report-2026-01-25.md
     │   │   ├── naming-compliance-report.md
-    │   │   └── schema_transformer_field_audit.md
+    │   │   └── schema-transformer-field-audit.md
     │   ├── audits/
     │   │   ├── architecture-audit-2026-01-22.md
     │   │   ├── architecture-audit-2026-01-26.md
@@ -11167,59 +11167,59 @@ BioactivityDataAcquisition2/
     │   │   ├── file-path-audit-2026-01-21.md
     │   │   ├── metadata-audit-2026-jan.md
     │   │   ├── metadata-audit-report-2026-01-19.md
-    │   │   └── metadata_inventory.csv
+    │   │   └── metadata-inventory.csv
     │   ├── contracts/
     │   │   ├── gold/
     │   │   │   ├── .gitkeep
-    │   │   │   ├── chembl_activity_v1.0.json
-    │   │   │   ├── chembl_assay_parameters_v1.0.json
-    │   │   │   ├── chembl_assay_v1.0.json
-    │   │   │   ├── chembl_cell_line_v1.0.json
-    │   │   │   ├── chembl_compound_record_v1.0.json
-    │   │   │   ├── chembl_document_similarity_v1.0.json
-    │   │   │   ├── chembl_document_term_v1.0.json
-    │   │   │   ├── chembl_document_v1.0.json
-    │   │   │   ├── chembl_molecule_v1.0.json
-    │   │   │   ├── chembl_protein_class_v1.0.json
-    │   │   │   ├── chembl_target_component_v1.0.json
-    │   │   │   ├── chembl_target_v1.0.json
-    │   │   │   ├── crossref_publication_v1.0.json
-    │   │   │   ├── openalex_publication_v1.0.json
-    │   │   │   ├── pubchem_compound_v1.0.json
-    │   │   │   ├── pubmed_publication_v1.0.json
-    │   │   │   ├── semanticscholar_publication_v1.0.json
-    │   │   │   ├── uniprot_idmapping_v1.0.json
-    │   │   │   └── uniprot_protein_v1.0.json
+    │   │   │   ├── chembl-activity-v1.0.json
+    │   │   │   ├── chembl-assay-parameters-v1.0.json
+    │   │   │   ├── chembl-assay-v1.0.json
+    │   │   │   ├── chembl-cell-line-v1.0.json
+    │   │   │   ├── chembl-compound-record-v1.0.json
+    │   │   │   ├── chembl-document-similarity-v1.0.json
+    │   │   │   ├── chembl-document-term-v1.0.json
+    │   │   │   ├── chembl-document-v1.0.json
+    │   │   │   ├── chembl-molecule-v1.0.json
+    │   │   │   ├── chembl-protein-class-v1.0.json
+    │   │   │   ├── chembl-target-component-v1.0.json
+    │   │   │   ├── chembl-target-v1.0.json
+    │   │   │   ├── crossref-publication-v1.0.json
+    │   │   │   ├── openalex-publication-v1.0.json
+    │   │   │   ├── pubchem-compound-v1.0.json
+    │   │   │   ├── pubmed-publication-v1.0.json
+    │   │   │   ├── semanticscholar-publication-v1.0.json
+    │   │   │   ├── uniprot-idmapping-v1.0.json
+    │   │   │   └── uniprot-protein-v1.0.json
     │   │   └── observability.md
     │   ├── diagrams/
     │   │   ├── images/
     │   │   ├── mermaid/
-    │   │   │   ├── 01_five_layer_architecture.mmd
-    │   │   │   ├── 02_complete_pipeline_flow.mmd
-    │   │   │   ├── 03_hexagonal_architecture.mmd
-    │   │   │   ├── 04_layer_dependency_matrix.mmd
-    │   │   │   ├── 05_medallion_architecture.mmd
-    │   │   │   ├── 06_domain_model_overview.mmd
-    │   │   │   ├── 07_ports_architecture.mmd
-    │   │   │   ├── 08_batch_processing_flow.mmd
-    │   │   │   ├── 09_ddd_aggregates.mmd
-    │   │   │   ├── 10_pipeline_core_components.mmd
-    │   │   │   ├── 11_composition_root.mmd
-    │   │   │   ├── 12_error_classification.mmd
-    │   │   │   ├── 13_storage_architecture.mmd
-    │   │   │   ├── 14_http_infrastructure.mmd
-    │   │   │   ├── 15_circuit_breaker_states.mmd
-    │   │   │   ├── 16_pipelinerun_aggregate.mmd
-    │   │   │   ├── 17_retry_mechanism.mmd
-    │   │   │   ├── 18_dq_check_flow.mmd
-    │   │   │   ├── 19_base_transformer_template_method.mmd
-    │   │   │   ├── 20_factory_pattern_usage.mmd
-    │   │   │   ├── 21_lock_acquisition_flow.mmd
-    │   │   │   ├── 22_silver_merge_operation.mmd
-    │   │   │   ├── 23_provider_adapters_overview.mmd
-    │   │   │   ├── 24_graceful_shutdown.mmd
-    │   │   │   ├── 25_pipeline_config_structure.mmd
-    │   │   │   └── 26_composite_pipeline_workflow.mmd
+    │   │   │   ├── 01-five-layer-architecture.mermaid
+    │   │   │   ├── 02-complete-pipeline-flow.mermaid
+    │   │   │   ├── 03-hexagonal-architecture.mermaid
+    │   │   │   ├── 04-layer-dependency-matrix.mermaid
+    │   │   │   ├── 05-medallion-architecture.mermaid
+    │   │   │   ├── 06-domain-model-overview.mermaid
+    │   │   │   ├── 07-ports-architecture.mermaid
+    │   │   │   ├── 08-batch-processing-flow.mermaid
+    │   │   │   ├── 09-ddd-aggregates.mermaid
+    │   │   │   ├── 10-pipeline-core-components.mermaid
+    │   │   │   ├── 11-composition-root.mermaid
+    │   │   │   ├── 12-error-classification.mermaid
+    │   │   │   ├── 13-storage-architecture.mermaid
+    │   │   │   ├── 14-http-infrastructure.mermaid
+    │   │   │   ├── 15-circuit-breaker-states.mermaid
+    │   │   │   ├── 16-pipelinerun-aggregate.mermaid
+    │   │   │   ├── 17-retry-mechanism.mermaid
+    │   │   │   ├── 18-dq-check-flow.mermaid
+    │   │   │   ├── 19-base-transformer-template-method.mermaid
+    │   │   │   ├── 20-factory-pattern-usage.mermaid
+    │   │   │   ├── 21-lock-acquisition-flow.mermaid
+    │   │   │   ├── 22-silver-merge-operation.mermaid
+    │   │   │   ├── 23-provider-adapters-overview.mermaid
+    │   │   │   ├── 24-graceful-shutdown.mermaid
+    │   │   │   ├── 25-pipeline-config-structure.mermaid
+    │   │   │   └── 26-composite-pipeline-workflow.mermaid
     │   │   ├── png/
     │   │   │   ├── 01-high-level-architecture.png
     │   │   │   ├── 02-medallion-architecture.png
@@ -11249,7 +11249,7 @@ BioactivityDataAcquisition2/
     │   │   │   └── 26-exceptions-hierarchy.png
     │   │   ├── README.md
     │   │   ├── diagram-catalog.md
-    │   │   ├── render_diagrams.sh
+    │   │   ├── render-diagrams.sh
     │   │   └── top-50-diagrams.md
     │   ├── domain/
     │   │   └── schemas/
@@ -11326,13 +11326,13 @@ BioactivityDataAcquisition2/
     │   │   ├── duplication-analysis-2026-01.md
     │   │   └── refactoring-plan-duplicate-logic.md
     │   ├── reports/
-    │   │   └── metadata_inventory.csv
+    │   │   └── metadata-inventory.csv
     │   ├── templates/
     │   │   ├── config.yaml.tpl
     │   │   ├── factory.py.tpl
     │   │   ├── pipeline-review-checklist.md
     │   │   ├── pipeline.py.tpl
-    │   │   └── source_adapter.py.tpl
+    │   │   └── source-adapter.py.tpl
     │   ├── verification/
     │   │   ├── publication-field-mapping-report.md
     │   │   ├── pubmed-extraction-verification-report.md
@@ -11343,7 +11343,7 @@ BioactivityDataAcquisition2/
     │   ├── REQUIREMENTS.md
     │   ├── RULES.md
     │   ├── TOOLS.md
-    │   ├── config_comparison_matrix.csv
+    │   ├── config-comparison-matrix.csv
     │   ├── glossary.md
     │   └── index.md
     ├── grafana/
@@ -11357,44 +11357,44 @@ BioactivityDataAcquisition2/
     │   └── README.md
     ├── reports/
     │   ├── application-merged.md
-    │   ├── application_merged.md
+    │   ├── application-merged.md
     │   ├── composition-merged.md
-    │   ├── composition_merged.md
-    │   ├── config_alignment_report.json
+    │   ├── composition-merged.md
+    │   ├── config-alignment-report.json
     │   ├── configs-merged.md
-    │   ├── configs_merged.md
+    │   ├── configs-merged.md
     │   ├── documentation-merged.md
-    │   ├── documentation_merged.md
+    │   ├── documentation-merged.md
     │   ├── domain-merged.md
-    │   ├── domain_merged.md
+    │   ├── domain-merged.md
     │   ├── infrastructure-merged.md
-    │   ├── infrastructure_merged.md
+    │   ├── infrastructure-merged.md
     │   ├── interfaces-merged.md
-    │   ├── interfaces_merged.md
+    │   ├── interfaces-merged.md
     │   ├── pipeline-config-issues.md
     │   ├── pipeline-config-matrix.csv
     │   ├── pipeline-config-migration-plan.md
     │   ├── project-structure.md
-    │   ├── project_structure.md
+    │   ├── project-structure.md
     │   └── Архитектурный обзор BioETL.docx
     ├── scripts/
-    │   ├── analyze_config_duplication.py
-    │   ├── audit_metadata.py
-    │   ├── audit_structure.py
-    │   ├── cleanup_project.py
-    │   ├── config_gap_analysis.py
-    │   ├── dq_baseline_update.py
-    │   ├── generate_gold_contracts.py
-    │   ├── lint_terminology.py
-    │   ├── naming_audit.py
-    │   ├── refactor_entity_configs.py
-    │   ├── render_diagrams.py
-    │   ├── salt_rotate.py
-    │   ├── vacuum_delta.py
-    │   ├── validate_pipeline_configs.py
-    │   └── verify_checksums.py
+    │   ├── analyze-config-duplication.py
+    │   ├── audit-metadata.py
+    │   ├── audit-structure.py
+    │   ├── cleanup-project.py
+    │   ├── config-gap-analysis.py
+    │   ├── dq-baseline-update.py
+    │   ├── generate-gold-contracts.py
+    │   ├── lint-terminology.py
+    │   ├── naming-audit.py
+    │   ├── refactor-entity-configs.py
+    │   ├── render-diagrams.py
+    │   ├── salt-rotate.py
+    │   ├── vacuum-delta.py
+    │   ├── validate-pipeline-configs.py
+    │   └── verify-checksums.py
     ├── site/
-    │   ├── 00-project_rules/
+    │   ├── 00-project-rules/
     │   │   ├── AUDIT-REPORT/
     │   │   │   └── index.html
     │   │   ├── 03-file-policy.md
@@ -11470,14 +11470,14 @@ BioactivityDataAcquisition2/
     │   │   │   ├── 24-hash-service-class.mermaid
     │   │   │   ├── 25-circuit-breaker-observer-class.mermaid
     │   │   │   ├── diagrams-index.md
-    │   │   │   └── render_diagrams.py
+    │   │   │   └── render-diagrams.py
     │   │   ├── 00-overview.md
     │   │   ├── 01-domain-layer.md
     │   │   ├── 02-application-layer.md
     │   │   ├── 03-infrastructure-layer.md
     │   │   ├── 04-interfaces-layer.md
     │   │   ├── 05-composition-layer.md
-    │   │   ├── ARCHITECTURE_DIAGRAMS.md
+    │   │   ├── ARCHITECTURE-DIAGRAMS.md
     │   │   ├── container-diagram.md
     │   │   ├── data-flow.md
     │   │   ├── data-layers.md
@@ -11561,7 +11561,7 @@ BioactivityDataAcquisition2/
     │   │   │   ├── stale-lock.md
     │   │   │   └── vacuum-procedures.md
     │   │   ├── README.md
-    │   │   ├── RELEASE_CHECKLIST.md
+    │   │   ├── RELEASE-CHECKLIST.md
     │   │   ├── performance-baselines.md
     │   │   └── vacuum-retention.md
     │   ├── analysis/
@@ -11570,10 +11570,10 @@ BioactivityDataAcquisition2/
     │   ├── archived/
     │   │   ├── audits/
     │   │   │   ├── 2026-01-04-architecture-audit.md
-    │   │   │   ├── AUDIT_REPORT_JAN_2026.md
-    │   │   │   ├── action_plan-2026-01-02-latest.md
-    │   │   │   ├── action_plan-2026-01-02.md
-    │   │   │   ├── action_plan.md
+    │   │   │   ├── AUDIT-REPORT-JAN-2026.md
+    │   │   │   ├── action-plan-2026-01-02-latest.md
+    │   │   │   ├── action-plan-2026-01-02.md
+    │   │   │   ├── action-plan.md
     │   │   │   ├── application-layer-audit-2026-01-05.md
     │   │   │   ├── application-layer-audit-2026-01-06.md
     │   │   │   ├── application-layer-audit.md
@@ -11589,15 +11589,15 @@ BioactivityDataAcquisition2/
     │   │   │   ├── audit-2025-12-31-comprehensive.md
     │   │   │   ├── audit-2026-01-02-comprehensive.yaml
     │   │   │   ├── audit-scores-2025-12-31.yaml
-    │   │   │   ├── audit_scores-2026-01-02.yaml
-    │   │   │   ├── audit_scores.yaml
+    │   │   │   ├── audit-scores-2026-01-02.yaml
+    │   │   │   ├── audit-scores.yaml
     │   │   │   ├── bioetl-action-plan-2025-12-31.md
     │   │   │   ├── bioetl-audit-synthesis-2025-12-31.yaml
     │   │   │   ├── code-duplication-analysis-2026-01-06.md
     │   │   │   ├── code-duplication-analysis-2026-01-15.md
     │   │   │   ├── code-duplication-report-2026-01-05.md
     │   │   │   ├── config-unification-plan.md
-    │   │   │   ├── config_discrepancies_report.md
+    │   │   │   ├── config-discrepancies-report.md
     │   │   │   ├── consolidated-action-plan-analysis-2025-12-31.md
     │   │   │   ├── consolidated-audit-validation-2025-12-31.md
     │   │   │   ├── consolidated-audit-verification-2025-12.md
@@ -11612,8 +11612,8 @@ BioactivityDataAcquisition2/
     │   │   │   ├── domain-layer-audit-2025-12-30.yaml
     │   │   │   ├── domain-layer-audit-2026-01-05.md
     │   │   │   ├── domain-layer-audit-2026-01-06.md
-    │   │   │   ├── entity_type_audit.md
-    │   │   │   ├── false_positives.md
+    │   │   │   ├── entity-type-audit.md
+    │   │   │   ├── false-positives.md
     │   │   │   ├── infrastructure-layer-audit-2026-01-05.md
     │   │   │   ├── infrastructure-layer-audit-2026-01-06.md
     │   │   │   ├── infrastructure-layer-audit.md
@@ -11631,12 +11631,12 @@ BioactivityDataAcquisition2/
     │   │   │   ├── sync-audit-2026-01-21.md
     │   │   │   ├── testing-report-2026-01-06.md
     │   │   │   ├── validation-matrix-2025-12-31.md
-    │   │   │   ├── validation_log-2026-01-02-latest.md
-    │   │   │   ├── validation_log-2026-01-02.md
-    │   │   │   └── validation_log.md
+    │   │   │   ├── validation-log-2026-01-02-latest.md
+    │   │   │   ├── validation-log-2026-01-02.md
+    │   │   │   └── validation-log.md
     │   │   ├── plans/
     │   │   │   └── observability-cli-vacuum-plan.md
-    │   │   ├── project_rules/
+    │   │   ├── project-rules/
     │   │   │   ├── 06-rules-mapping.md
     │   │   │   └── 07-consistency-check.md
     │   │   ├── prompts/
@@ -11660,72 +11660,72 @@ BioactivityDataAcquisition2/
     │   │   └── naming-compliance-report.md
     │   ├── audits/
     │   │   ├── architecture-audit-2026-01-22.md
-    │   │   ├── config_gaps.md
-    │   │   ├── config_gaps_2026-01-19.md
-    │   │   ├── config_gaps_final_2026-01-19.md
-    │   │   ├── config_inventory_2026-01-19.md
-    │   │   ├── config_unification_report_2026-01-19.md
+    │   │   ├── config-gaps.md
+    │   │   ├── config-gaps-2026-01-19.md
+    │   │   ├── config-gaps-final-2026-01-19.md
+    │   │   ├── config-inventory-2026-01-19.md
+    │   │   ├── config-unification-report-2026-01-19.md
     │   │   ├── date-handling-audit-2026-01-19.md
     │   │   ├── documentation-security-audit-2026-01-21.md
-    │   │   ├── dq_redundancy_audit_2026-01-20.md
+    │   │   ├── dq-redundancy-audit-2026-01-20.md
     │   │   ├── file-path-audit-2026-01-21.md
     │   │   ├── metadata-audit-report-2026-01-19.md
-    │   │   ├── metadata_audit_2026_jan.md
-    │   │   └── metadata_inventory.csv
+    │   │   ├── metadata-audit-2026-jan.md
+    │   │   └── metadata-inventory.csv
     │   ├── contracts/
     │   │   ├── gold/
     │   │   │   ├── .gitkeep
-    │   │   │   ├── chembl_activity_v1.0.json
-    │   │   │   ├── chembl_assay_parameters_v1.0.json
-    │   │   │   ├── chembl_assay_v1.0.json
-    │   │   │   ├── chembl_cell_line_v1.0.json
-    │   │   │   ├── chembl_compound_record_v1.0.json
-    │   │   │   ├── chembl_document_similarity_v1.0.json
-    │   │   │   ├── chembl_document_term_v1.0.json
-    │   │   │   ├── chembl_document_v1.0.json
-    │   │   │   ├── chembl_molecule_v1.0.json
-    │   │   │   ├── chembl_protein_class_v1.0.json
-    │   │   │   ├── chembl_target_component_v1.0.json
-    │   │   │   ├── chembl_target_v1.0.json
-    │   │   │   ├── crossref_publication_v1.0.json
-    │   │   │   ├── openalex_publication_v1.0.json
-    │   │   │   ├── pubchem_compound_v1.0.json
-    │   │   │   ├── pubmed_publication_v1.0.json
-    │   │   │   ├── semanticscholar_publication_v1.0.json
-    │   │   │   ├── uniprot_idmapping_v1.0.json
-    │   │   │   └── uniprot_protein_v1.0.json
+    │   │   │   ├── chembl-activity-v1.0.json
+    │   │   │   ├── chembl-assay-parameters-v1.0.json
+    │   │   │   ├── chembl-assay-v1.0.json
+    │   │   │   ├── chembl-cell-line-v1.0.json
+    │   │   │   ├── chembl-compound-record-v1.0.json
+    │   │   │   ├── chembl-document-similarity-v1.0.json
+    │   │   │   ├── chembl-document-term-v1.0.json
+    │   │   │   ├── chembl-document-v1.0.json
+    │   │   │   ├── chembl-molecule-v1.0.json
+    │   │   │   ├── chembl-protein-class-v1.0.json
+    │   │   │   ├── chembl-target-component-v1.0.json
+    │   │   │   ├── chembl-target-v1.0.json
+    │   │   │   ├── crossref-publication-v1.0.json
+    │   │   │   ├── openalex-publication-v1.0.json
+    │   │   │   ├── pubchem-compound-v1.0.json
+    │   │   │   ├── pubmed-publication-v1.0.json
+    │   │   │   ├── semanticscholar-publication-v1.0.json
+    │   │   │   ├── uniprot-idmapping-v1.0.json
+    │   │   │   └── uniprot-protein-v1.0.json
     │   │   └── observability.md
     │   ├── diagrams/
     │   │   ├── mermaid/
-    │   │   │   ├── 01_five_layer_architecture.mmd
-    │   │   │   ├── 02_complete_pipeline_flow.mmd
-    │   │   │   ├── 03_hexagonal_architecture.mmd
-    │   │   │   ├── 04_layer_dependency_matrix.mmd
-    │   │   │   ├── 05_medallion_architecture.mmd
-    │   │   │   ├── 06_domain_model_overview.mmd
-    │   │   │   ├── 07_ports_architecture.mmd
-    │   │   │   ├── 08_batch_processing_flow.mmd
-    │   │   │   ├── 09_ddd_aggregates.mmd
-    │   │   │   ├── 10_pipeline_core_components.mmd
-    │   │   │   ├── 11_composition_root.mmd
-    │   │   │   ├── 12_error_classification.mmd
-    │   │   │   ├── 13_storage_architecture.mmd
-    │   │   │   ├── 14_http_infrastructure.mmd
-    │   │   │   ├── 15_circuit_breaker_states.mmd
-    │   │   │   ├── 16_pipelinerun_aggregate.mmd
-    │   │   │   ├── 17_retry_mechanism.mmd
-    │   │   │   ├── 18_dq_check_flow.mmd
-    │   │   │   ├── 19_base_transformer_template_method.mmd
-    │   │   │   ├── 20_factory_pattern_usage.mmd
-    │   │   │   ├── 21_lock_acquisition_flow.mmd
-    │   │   │   ├── 22_silver_merge_operation.mmd
-    │   │   │   ├── 23_provider_adapters_overview.mmd
-    │   │   │   ├── 24_graceful_shutdown.mmd
-    │   │   │   └── 25_pipeline_config_structure.mmd
-    │   │   ├── DIAGRAM_CATALOG.md
+    │   │   │   ├── 01-five-layer-architecture.mermaid
+    │   │   │   ├── 02-complete-pipeline-flow.mermaid
+    │   │   │   ├── 03-hexagonal-architecture.mermaid
+    │   │   │   ├── 04-layer-dependency-matrix.mermaid
+    │   │   │   ├── 05-medallion-architecture.mermaid
+    │   │   │   ├── 06-domain-model-overview.mermaid
+    │   │   │   ├── 07-ports-architecture.mermaid
+    │   │   │   ├── 08-batch-processing-flow.mermaid
+    │   │   │   ├── 09-ddd-aggregates.mermaid
+    │   │   │   ├── 10-pipeline-core-components.mermaid
+    │   │   │   ├── 11-composition-root.mermaid
+    │   │   │   ├── 12-error-classification.mermaid
+    │   │   │   ├── 13-storage-architecture.mermaid
+    │   │   │   ├── 14-http-infrastructure.mermaid
+    │   │   │   ├── 15-circuit-breaker-states.mermaid
+    │   │   │   ├── 16-pipelinerun-aggregate.mermaid
+    │   │   │   ├── 17-retry-mechanism.mermaid
+    │   │   │   ├── 18-dq-check-flow.mermaid
+    │   │   │   ├── 19-base-transformer-template-method.mermaid
+    │   │   │   ├── 20-factory-pattern-usage.mermaid
+    │   │   │   ├── 21-lock-acquisition-flow.mermaid
+    │   │   │   ├── 22-silver-merge-operation.mermaid
+    │   │   │   ├── 23-provider-adapters-overview.mermaid
+    │   │   │   ├── 24-graceful-shutdown.mermaid
+    │   │   │   └── 25-pipeline-config-structure.mermaid
+    │   │   ├── DIAGRAM-CATALOG.md
     │   │   ├── README.md
-    │   │   ├── TOP_50_DIAGRAMS.md
-    │   │   └── render_diagrams.sh
+    │   │   ├── TOP-50-DIAGRAMS.md
+    │   │   └── render-diagrams.sh
     │   ├── domain/
     │   │   └── schemas/
     │   │       └── chembl/
@@ -11805,13 +11805,13 @@ BioactivityDataAcquisition2/
     │   ├── reports/
     │   │   ├── code-duplication-analysis.md
     │   │   ├── metadata-audit-report.md
-    │   │   └── metadata_inventory.csv
+    │   │   └── metadata-inventory.csv
     │   ├── templates/
     │   │   ├── config.yaml.tpl
     │   │   ├── factory.py.tpl
     │   │   ├── pipeline-review-checklist.md
     │   │   ├── pipeline.py.tpl
-    │   │   └── source_adapter.py.tpl
+    │   │   └── source-adapter.py.tpl
     │   ├── verification/
     │   │   └── publication-field-mapping-report.md
     │   ├── 00-map.md
@@ -11820,8 +11820,8 @@ BioactivityDataAcquisition2/
     │   ├── RULES.md
     │   ├── TOOLS.md
     │   ├── config-dedup-analysis.md
-    │   ├── config_comparison_matrix.csv
-    │   ├── config_discrepancies_report.md
+    │   ├── config-comparison-matrix.csv
+    │   ├── config-discrepancies-report.md
     │   ├── glossary.md
     │   ├── index.md
     │   └── schema-mapping-audit-report.md
@@ -11829,164 +11829,164 @@ BioactivityDataAcquisition2/
     │   ├── bioetl/
     │   │   ├── application/
     │   │   │   ├── composite/
-    │   │   │   │   ├── __init__.py
+    │   │   │   │   ├── --init--.py
     │   │   │   │   ├── aggregator.py
     │   │   │   │   ├── checkpoint.py
-    │   │   │   │   ├── column_orderer.py
-    │   │   │   │   ├── column_renamer.py
+    │   │   │   │   ├── column-orderer.py
+    │   │   │   │   ├── column-renamer.py
     │   │   │   │   ├── coordinator.py
     │   │   │   │   ├── deduplication.py
-    │   │   │   │   ├── dependency_coordinator.py
-    │   │   │   │   ├── fsm_helper.py
-    │   │   │   │   ├── key_extractor.py
+    │   │   │   │   ├── dependency-coordinator.py
+    │   │   │   │   ├── fsm-helper.py
+    │   │   │   │   ├── key-extractor.py
     │   │   │   │   ├── merger.py
-    │   │   │   │   ├── preflight_validator.py
+    │   │   │   │   ├── preflight-validator.py
     │   │   │   │   ├── runner.py
-    │   │   │   │   └── runner_helpers.py
+    │   │   │   │   └── runner-helpers.py
     │   │   │   ├── core/
     │   │   │   │   ├── .gitkeep
-    │   │   │   │   ├── __init__.py
+    │   │   │   │   ├── --init--.py
     │   │   │   │   ├── base.py
-    │   │   │   │   ├── base_transformer.py
-    │   │   │   │   ├── batch_executor.py
-    │   │   │   │   ├── batch_metrics.py
-    │   │   │   │   ├── batch_tracing.py
-    │   │   │   │   ├── batch_transformer.py
-    │   │   │   │   ├── batch_writer.py
-    │   │   │   │   ├── checkpoint_manager.py
-    │   │   │   │   ├── cleanup_service.py
+    │   │   │   │   ├── base-transformer.py
+    │   │   │   │   ├── batch-executor.py
+    │   │   │   │   ├── batch-metrics.py
+    │   │   │   │   ├── batch-tracing.py
+    │   │   │   │   ├── batch-transformer.py
+    │   │   │   │   ├── batch-writer.py
+    │   │   │   │   ├── checkpoint-manager.py
+    │   │   │   │   ├── cleanup-service.py
     │   │   │   │   ├── config.py
-    │   │   │   │   ├── field_specs.py
-    │   │   │   │   ├── filtered_data_source.py
+    │   │   │   │   ├── field-specs.py
+    │   │   │   │   ├── filtered-data-source.py
     │   │   │   │   ├── heartbeat.py
-    │   │   │   │   ├── idmapping_data_source.py
-    │   │   │   │   ├── lock_manager.py
-    │   │   │   │   ├── memory_monitor.py
-    │   │   │   │   ├── pipeline_services.py
-    │   │   │   │   ├── postrun_service.py
-    │   │   │   │   ├── preflight_service.py
+    │   │   │   │   ├── idmapping-data-source.py
+    │   │   │   │   ├── lock-manager.py
+    │   │   │   │   ├── memory-monitor.py
+    │   │   │   │   ├── pipeline-services.py
+    │   │   │   │   ├── postrun-service.py
+    │   │   │   │   ├── preflight-service.py
     │   │   │   │   ├── protocols.py
-    │   │   │   │   ├── publication_term_data_source.py
-    │   │   │   │   ├── quarantine_manager.py
-    │   │   │   │   ├── record_processor.py
+    │   │   │   │   ├── publication-term-data-source.py
+    │   │   │   │   ├── quarantine-manager.py
+    │   │   │   │   ├── record-processor.py
     │   │   │   │   ├── runner.py
     │   │   │   │   ├── shutdown.py
-    │   │   │   │   └── transform_utils.py
+    │   │   │   │   └── transform-utils.py
     │   │   │   ├── observability/
-    │   │   │   │   ├── __init__.py
+    │   │   │   │   ├── --init--.py
     │   │   │   │   ├── observer.py
-    │   │   │   │   └── span_helpers.py
+    │   │   │   │   └── span-helpers.py
     │   │   │   ├── pipelines/
     │   │   │   │   ├── chembl/
-    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── --init--.py
     │   │   │   │   │   ├── activity.py
-    │   │   │   │   │   ├── activity_transformer.py
+    │   │   │   │   │   ├── activity-transformer.py
     │   │   │   │   │   ├── assay.py
-    │   │   │   │   │   ├── assay_parameters.py
-    │   │   │   │   │   ├── assay_parameters_transformer.py
-    │   │   │   │   │   ├── assay_transformer.py
-    │   │   │   │   │   ├── base_chembl_transformer.py
-    │   │   │   │   │   ├── cell_line.py
-    │   │   │   │   │   ├── cell_line_transformer.py
-    │   │   │   │   │   ├── compound_record.py
-    │   │   │   │   │   ├── compound_record_transformer.py
+    │   │   │   │   │   ├── assay-parameters.py
+    │   │   │   │   │   ├── assay-parameters-transformer.py
+    │   │   │   │   │   ├── assay-transformer.py
+    │   │   │   │   │   ├── base-chembl-transformer.py
+    │   │   │   │   │   ├── cell-line.py
+    │   │   │   │   │   ├── cell-line-transformer.py
+    │   │   │   │   │   ├── compound-record.py
+    │   │   │   │   │   ├── compound-record-transformer.py
     │   │   │   │   │   ├── molecule.py
-    │   │   │   │   │   ├── molecule_transformer.py
-    │   │   │   │   │   ├── protein_class.py
-    │   │   │   │   │   ├── protein_class_transformer.py
+    │   │   │   │   │   ├── molecule-transformer.py
+    │   │   │   │   │   ├── protein-class.py
+    │   │   │   │   │   ├── protein-class-transformer.py
     │   │   │   │   │   ├── publication.py
-    │   │   │   │   │   ├── publication_similarity.py
-    │   │   │   │   │   ├── publication_similarity_transformer.py
-    │   │   │   │   │   ├── publication_term.py
-    │   │   │   │   │   ├── publication_term_transformer.py
-    │   │   │   │   │   ├── publication_transformer.py
+    │   │   │   │   │   ├── publication-similarity.py
+    │   │   │   │   │   ├── publication-similarity-transformer.py
+    │   │   │   │   │   ├── publication-term.py
+    │   │   │   │   │   ├── publication-term-transformer.py
+    │   │   │   │   │   ├── publication-transformer.py
     │   │   │   │   │   ├── target.py
-    │   │   │   │   │   ├── target_component.py
-    │   │   │   │   │   ├── target_component_transformer.py
-    │   │   │   │   │   └── target_transformer.py
+    │   │   │   │   │   ├── target-component.py
+    │   │   │   │   │   ├── target-component-transformer.py
+    │   │   │   │   │   └── target-transformer.py
     │   │   │   │   ├── common/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   ├── base_publication_transformer.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   ├── base-publication-transformer.py
     │   │   │   │   │   └── extractors.py
     │   │   │   │   ├── crossref/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   ├── author_extractors.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   ├── author-extractors.py
     │   │   │   │   │   ├── extractors.py
-    │   │   │   │   │   ├── reference_extractors.py
+    │   │   │   │   │   ├── reference-extractors.py
     │   │   │   │   │   └── transformer.py
     │   │   │   │   ├── openalex/
-    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── --init--.py
     │   │   │   │   │   ├── extractors.py
     │   │   │   │   │   └── transformer.py
     │   │   │   │   ├── pubchem/
-    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── --init--.py
     │   │   │   │   │   ├── compound.py
     │   │   │   │   │   └── transformer.py
     │   │   │   │   ├── pubmed/
     │   │   │   │   │   ├── extractors/
-    │   │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   │   ├── --init--.py
     │   │   │   │   │   │   ├── abstract.py
     │   │   │   │   │   │   ├── author.py
     │   │   │   │   │   │   ├── base.py
     │   │   │   │   │   │   ├── classification.py
     │   │   │   │   │   │   ├── date.py
     │   │   │   │   │   │   └── identifier.py
-    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── --init--.py
     │   │   │   │   │   ├── publication.py
     │   │   │   │   │   ├── transformer.py
-    │   │   │   │   │   └── xml_utils.py
+    │   │   │   │   │   └── xml-utils.py
     │   │   │   │   ├── semanticscholar/
-    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── --init--.py
     │   │   │   │   │   ├── extractors.py
     │   │   │   │   │   └── transformer.py
     │   │   │   │   ├── uniprot/
     │   │   │   │   │   ├── extractors/
-    │   │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   │   ├── --init--.py
     │   │   │   │   │   │   ├── comments.py
     │   │   │   │   │   │   ├── crossrefs.py
     │   │   │   │   │   │   ├── features.py
     │   │   │   │   │   │   ├── genes.py
     │   │   │   │   │   │   └── utils.py
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   ├── idmapping_transformer.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   ├── idmapping-transformer.py
     │   │   │   │   │   ├── protein.py
     │   │   │   │   │   └── transformer.py
-    │   │   │   │   ├── __init__.py
+    │   │   │   │   ├── --init--.py
     │   │   │   │   └── generic.py
     │   │   │   ├── services/
     │   │   │   │   ├── dq/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   ├── bronze_analyzer.py
-    │   │   │   │   │   ├── gold_analyzer.py
-    │   │   │   │   │   ├── silver_analyzer.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   ├── bronze-analyzer.py
+    │   │   │   │   │   ├── gold-analyzer.py
+    │   │   │   │   │   ├── silver-analyzer.py
     │   │   │   │   │   └── utils.py
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── bronze_cleanup_service.py
-    │   │   │   │   ├── checkpoint_service.py
-    │   │   │   │   ├── config_service.py
-    │   │   │   │   ├── data_quality_service.py
-    │   │   │   │   ├── dq_metrics_calculator.py
-    │   │   │   │   ├── dq_report_service.py
-    │   │   │   │   ├── export_service.py
-    │   │   │   │   ├── health_service.py
-    │   │   │   │   ├── lock_service.py
-    │   │   │   │   ├── medallion_lifecycle.py
-    │   │   │   │   ├── medallion_types.py
-    │   │   │   │   ├── metrics_service.py
-    │   │   │   │   ├── pipeline_runner_service.py
-    │   │   │   │   ├── quarantine_service.py
-    │   │   │   │   ├── shutdown_service.py
-    │   │   │   │   └── vacuum_service.py
-    │   │   │   └── __init__.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── bronze-cleanup-service.py
+    │   │   │   │   ├── checkpoint-service.py
+    │   │   │   │   ├── config-service.py
+    │   │   │   │   ├── data-quality-service.py
+    │   │   │   │   ├── dq-metrics-calculator.py
+    │   │   │   │   ├── dq-report-service.py
+    │   │   │   │   ├── export-service.py
+    │   │   │   │   ├── health-service.py
+    │   │   │   │   ├── lock-service.py
+    │   │   │   │   ├── medallion-lifecycle.py
+    │   │   │   │   ├── medallion-types.py
+    │   │   │   │   ├── metrics-service.py
+    │   │   │   │   ├── pipeline-runner-service.py
+    │   │   │   │   ├── quarantine-service.py
+    │   │   │   │   ├── shutdown-service.py
+    │   │   │   │   └── vacuum-service.py
+    │   │   │   └── --init--.py
     │   │   ├── composition/
-    │   │   │   ├── _bootstrap/
+    │   │   │   ├── -bootstrap/
     │   │   │   ├── bootstrap/
     │   │   │   │   ├── assembly/
-    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── --init--.py
     │   │   │   │   │   ├── checkpoint.py
     │   │   │   │   │   └── storage.py
     │   │   │   │   ├── cli/
-    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── --init--.py
     │   │   │   │   │   ├── checkpoint.py
     │   │   │   │   │   ├── config.py
     │   │   │   │   │   ├── health.py
@@ -11995,39 +11995,39 @@ BioactivityDataAcquisition2/
     │   │   │   │   │   ├── noop.py
     │   │   │   │   │   └── storage.py
     │   │   │   │   ├── runtime/
-    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── --init--.py
     │   │   │   │   │   ├── assembly.py
     │   │   │   │   │   ├── composite.py
     │   │   │   │   │   ├── observability.py
     │   │   │   │   │   ├── pipeline.py
     │   │   │   │   │   └── runner.py
-    │   │   │   │   └── __init__.py
+    │   │   │   │   └── --init--.py
     │   │   │   ├── factories/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── data_source_factory.py
-    │   │   │   │   ├── dq_factory.py
-    │   │   │   │   ├── http_client_factory.py
-    │   │   │   │   ├── pipeline_factories.py
-    │   │   │   │   ├── pipeline_factory.py
-    │   │   │   │   ├── runner_factory.py
-    │   │   │   │   ├── services_factory.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── data-source-factory.py
+    │   │   │   │   ├── dq-factory.py
+    │   │   │   │   ├── http-client-factory.py
+    │   │   │   │   ├── pipeline-factories.py
+    │   │   │   │   ├── pipeline-factory.py
+    │   │   │   │   ├── runner-factory.py
+    │   │   │   │   ├── services-factory.py
     │   │   │   │   ├── storage.py
-    │   │   │   │   ├── storage_adapter.py
-    │   │   │   │   ├── storage_factory.py
-    │   │   │   │   └── transformer_factory.py
+    │   │   │   │   ├── storage-adapter.py
+    │   │   │   │   ├── storage-factory.py
+    │   │   │   │   └── transformer-factory.py
     │   │   │   ├── providers/
-    │   │   │   │   ├── __init__.py
+    │   │   │   │   ├── --init--.py
     │   │   │   │   ├── decorators.py
     │   │   │   │   ├── loader.py
-    │   │   │   │   ├── provider_registry.py
+    │   │   │   │   ├── provider-registry.py
     │   │   │   │   └── registration.py
     │   │   │   ├── services/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── metadata_coordinator.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── metadata-coordinator.py
     │   │   │   │   └── versioning.py
-    │   │   │   ├── __init__.py
-    │   │   │   ├── bootstrap_contexts.py
-    │   │   │   ├── bootstrap_logger.py
+    │   │   │   ├── --init--.py
+    │   │   │   ├── bootstrap-contexts.py
+    │   │   │   ├── bootstrap-logger.py
     │   │   │   ├── builders.py
     │   │   │   ├── entrypoints.py
     │   │   │   ├── observability.py
@@ -12035,13 +12035,13 @@ BioactivityDataAcquisition2/
     │   │   │   └── types.py
     │   │   ├── domain/
     │   │   │   ├── aggregates/
-    │   │   │   │   ├── __init__.py
+    │   │   │   │   ├── --init--.py
     │   │   │   │   ├── batch.py
     │   │   │   │   ├── events.py
-    │   │   │   │   ├── pipeline_run.py
-    │   │   │   │   └── quarantine_entry.py
+    │   │   │   │   ├── pipeline-run.py
+    │   │   │   │   └── quarantine-entry.py
     │   │   │   ├── composite/
-    │   │   │   │   ├── __init__.py
+    │   │   │   │   ├── --init--.py
     │   │   │   │   ├── aggregation.py
     │   │   │   │   ├── config.py
     │   │   │   │   ├── lineage.py
@@ -12049,68 +12049,68 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── state.py
     │   │   │   │   └── strategy.py
     │   │   │   ├── configs/
-    │   │   │   │   ├── __init__.py
+    │   │   │   │   ├── --init--.py
     │   │   │   │   └── base.py
     │   │   │   ├── contracts/
     │   │   │   │   ├── gold/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   ├── _base.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   ├── -base.py
     │   │   │   │   │   ├── chembl.py
     │   │   │   │   │   ├── pubchem.py
     │   │   │   │   │   ├── publications.py
     │   │   │   │   │   └── uniprot.py
-    │   │   │   │   └── __init__.py
+    │   │   │   │   └── --init--.py
     │   │   │   ├── entities/
-    │   │   │   │   ├── __init__.py
+    │   │   │   │   ├── --init--.py
     │   │   │   │   ├── base.py
     │   │   │   │   ├── bioactivity.py
     │   │   │   │   ├── chembl.py
-    │   │   │   │   ├── chembl_activity.py
-    │   │   │   │   ├── chembl_assay_parameters.py
-    │   │   │   │   ├── chembl_compound_record.py
-    │   │   │   │   ├── chembl_structures.py
+    │   │   │   │   ├── chembl-activity.py
+    │   │   │   │   ├── chembl-assay-parameters.py
+    │   │   │   │   ├── chembl-compound-record.py
+    │   │   │   │   ├── chembl-structures.py
     │   │   │   │   ├── crossref.py
     │   │   │   │   ├── openalex.py
     │   │   │   │   ├── pubchem.py
-    │   │   │   │   ├── publication_base.py
+    │   │   │   │   ├── publication-base.py
     │   │   │   │   ├── pubmed.py
     │   │   │   │   ├── semanticscholar.py
     │   │   │   │   └── uniprot.py
     │   │   │   ├── exceptions/
-    │   │   │   │   ├── __init__.py
+    │   │   │   │   ├── --init--.py
     │   │   │   │   ├── base.py
-    │   │   │   │   ├── data_quality.py
+    │   │   │   │   ├── data-quality.py
     │   │   │   │   ├── infrastructure.py
     │   │   │   │   ├── internal.py
     │   │   │   │   ├── network.py
     │   │   │   │   └── validation.py
     │   │   │   ├── filtering/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── column_filter.py
-    │   │   │   │   ├── gold_config.py
-    │   │   │   │   ├── input_config.py
-    │   │   │   │   ├── list_filters.py
-    │   │   │   │   ├── load_result.py
-    │   │   │   │   └── range_filter.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── column-filter.py
+    │   │   │   │   ├── gold-config.py
+    │   │   │   │   ├── input-config.py
+    │   │   │   │   ├── list-filters.py
+    │   │   │   │   ├── load-result.py
+    │   │   │   │   └── range-filter.py
     │   │   │   ├── models/
-    │   │   │   │   ├── __init__.py
+    │   │   │   │   ├── --init--.py
     │   │   │   │   └── metadata.py
     │   │   │   ├── ports/
-    │   │   │   │   ├── __init__.py
+    │   │   │   │   ├── --init--.py
     │   │   │   │   ├── audit.py
     │   │   │   │   ├── checkpoint.py
-    │   │   │   │   ├── data_normalization.py
-    │   │   │   │   ├── data_source.py
-    │   │   │   │   ├── delta_reader.py
-    │   │   │   │   ├── dq_config.py
-    │   │   │   │   ├── dq_report.py
+    │   │   │   │   ├── data-normalization.py
+    │   │   │   │   ├── data-source.py
+    │   │   │   │   ├── delta-reader.py
+    │   │   │   │   ├── dq-config.py
+    │   │   │   │   ├── dq-report.py
     │   │   │   │   ├── filtering.py
-    │   │   │   │   ├── health_check.py
+    │   │   │   │   ├── health-check.py
     │   │   │   │   ├── idmapping.py
     │   │   │   │   ├── locking.py
     │   │   │   │   ├── memory.py
     │   │   │   │   ├── metadata.py
-    │   │   │   │   ├── metadata_coordinator.py
+    │   │   │   │   ├── metadata-coordinator.py
     │   │   │   │   ├── noop.py
     │   │   │   │   ├── normalization.py
     │   │   │   │   ├── observability.py
@@ -12124,88 +12124,88 @@ BioactivityDataAcquisition2/
     │   │   │   │   ├── validation.py
     │   │   │   │   └── watermark.py
     │   │   │   ├── registry/
-    │   │   │   │   ├── __init__.py
+    │   │   │   │   ├── --init--.py
     │   │   │   │   └── publication.py
     │   │   │   ├── schemas/
     │   │   │   │   ├── chembl/
     │   │   │   │   │   ├── activity.py
     │   │   │   │   │   ├── assay.py
-    │   │   │   │   │   ├── assay_parameters.py
-    │   │   │   │   │   ├── cell_line.py
-    │   │   │   │   │   ├── compound_record.py
+    │   │   │   │   │   ├── assay-parameters.py
+    │   │   │   │   │   ├── cell-line.py
+    │   │   │   │   │   ├── compound-record.py
     │   │   │   │   │   ├── molecule.py
-    │   │   │   │   │   ├── molecule_form.py
-    │   │   │   │   │   ├── protein_classification.py
+    │   │   │   │   │   ├── molecule-form.py
+    │   │   │   │   │   ├── protein-classification.py
     │   │   │   │   │   ├── publication.py
-    │   │   │   │   │   ├── publication_similarity.py
-    │   │   │   │   │   ├── publication_term.py
+    │   │   │   │   │   ├── publication-similarity.py
+    │   │   │   │   │   ├── publication-term.py
     │   │   │   │   │   ├── target.py
-    │   │   │   │   │   ├── target_component.py
-    │   │   │   │   │   └── target_relation.py
+    │   │   │   │   │   ├── target-component.py
+    │   │   │   │   │   └── target-relation.py
     │   │   │   │   ├── common/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   └── publication_base.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   └── publication-base.py
     │   │   │   │   ├── crossref/
-    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── --init--.py
     │   │   │   │   │   ├── author.py
     │   │   │   │   │   ├── funder.py
     │   │   │   │   │   ├── publication.py
     │   │   │   │   │   ├── reference.py
     │   │   │   │   │   └── work.py
     │   │   │   │   ├── openalex/
-    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── --init--.py
     │   │   │   │   │   └── publication.py
     │   │   │   │   ├── pubchem/
     │   │   │   │   │   └── compound.py
     │   │   │   │   ├── pubmed/
     │   │   │   │   │   └── publication.py
     │   │   │   │   ├── semanticscholar/
-    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── --init--.py
     │   │   │   │   │   └── publication.py
     │   │   │   │   ├── uniprot/
     │   │   │   │   │   ├── idmapping.py
     │   │   │   │   │   ├── isoform.py
     │   │   │   │   │   └── protein.py
-    │   │   │   │   ├── __init__.py
+    │   │   │   │   ├── --init--.py
     │   │   │   │   ├── base.py
-    │   │   │   │   └── column_order.py
+    │   │   │   │   └── column-order.py
     │   │   │   ├── services/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── activity_aggregator.py
-    │   │   │   │   ├── data_normalization_config.py
-    │   │   │   │   ├── data_normalization_service.py
-    │   │   │   │   ├── dq_metrics_calculator.py
-    │   │   │   │   ├── dq_serializer.py
-    │   │   │   │   ├── identity_service.py
-    │   │   │   │   ├── normalization_config.py
-    │   │   │   │   ├── normalization_service.py
-    │   │   │   │   ├── unit_converter.py
-    │   │   │   │   └── value_validator.py
-    │   │   │   ├── value_objects/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── academic_ids.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── activity-aggregator.py
+    │   │   │   │   ├── data-normalization-config.py
+    │   │   │   │   ├── data-normalization-service.py
+    │   │   │   │   ├── dq-metrics-calculator.py
+    │   │   │   │   ├── dq-serializer.py
+    │   │   │   │   ├── identity-service.py
+    │   │   │   │   ├── normalization-config.py
+    │   │   │   │   ├── normalization-service.py
+    │   │   │   │   ├── unit-converter.py
+    │   │   │   │   └── value-validator.py
+    │   │   │   ├── value-objects/
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── academic-ids.py
     │   │   │   │   ├── activity.py
-    │   │   │   │   ├── activity_values.py
+    │   │   │   │   ├── activity-values.py
     │   │   │   │   ├── base.py
-    │   │   │   │   ├── bronze_result.py
+    │   │   │   │   ├── bronze-result.py
     │   │   │   │   ├── chemical.py
-    │   │   │   │   ├── column_order.py
-    │   │   │   │   ├── column_qualifier.py
-    │   │   │   │   ├── compound_ids.py
-    │   │   │   │   ├── dq_metrics.py
-    │   │   │   │   ├── dq_report.py
-    │   │   │   │   ├── dq_result.py
+    │   │   │   │   ├── column-order.py
+    │   │   │   │   ├── column-qualifier.py
+    │   │   │   │   ├── compound-ids.py
+    │   │   │   │   ├── dq-metrics.py
+    │   │   │   │   ├── dq-report.py
+    │   │   │   │   ├── dq-result.py
     │   │   │   │   ├── identifiers.py
     │   │   │   │   ├── publications.py
-    │   │   │   │   ├── run_context.py
-    │   │   │   │   ├── silver_result.py
-    │   │   │   │   └── taxonomy_id.py
-    │   │   │   ├── __init__.py
+    │   │   │   │   ├── run-context.py
+    │   │   │   │   ├── silver-result.py
+    │   │   │   │   └── taxonomy-id.py
+    │   │   │   ├── --init--.py
     │   │   │   ├── config.py
-    │   │   │   ├── config_types.py
+    │   │   │   ├── config-types.py
     │   │   │   ├── constants.py
     │   │   │   ├── context.py
-    │   │   │   ├── error_classifier.py
+    │   │   │   ├── error-classifier.py
     │   │   │   ├── events.py
     │   │   │   ├── locking.py
     │   │   │   ├── medallion.py
@@ -12218,961 +12218,961 @@ BioactivityDataAcquisition2/
     │   │   ├── infrastructure/
     │   │   │   ├── adapters/
     │   │   │   │   ├── chembl/
-    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── --init--.py
     │   │   │   │   │   ├── client.py
-    │   │   │   │   │   ├── entity_mapper.py
+    │   │   │   │   │   ├── entity-mapper.py
     │   │   │   │   │   ├── exceptions.py
     │   │   │   │   │   └── models.py
     │   │   │   │   ├── common/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   ├── api_request_collector.py
-    │   │   │   │   │   ├── base_title_fallback.py
-    │   │   │   │   │   └── title_matching.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   ├── api-request-collector.py
+    │   │   │   │   │   ├── base-title-fallback.py
+    │   │   │   │   │   └── title-matching.py
     │   │   │   │   ├── crossref/
-    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── --init--.py
     │   │   │   │   │   ├── batch.py
     │   │   │   │   │   ├── client.py
     │   │   │   │   │   ├── exceptions.py
     │   │   │   │   │   ├── fallback.py
     │   │   │   │   │   └── models.py
     │   │   │   │   ├── decorators/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   ├── circuit_breaker.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   ├── circuit-breaker.py
     │   │   │   │   │   └── retry.py
     │   │   │   │   ├── http/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   ├── circuit_breaker.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   ├── circuit-breaker.py
     │   │   │   │   │   ├── client.py
     │   │   │   │   │   ├── health.py
-    │   │   │   │   │   ├── health_monitor.py
+    │   │   │   │   │   ├── health-monitor.py
     │   │   │   │   │   ├── pagination.py
-    │   │   │   │   │   └── rate_limiter.py
+    │   │   │   │   │   └── rate-limiter.py
     │   │   │   │   ├── input/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   └── csv_filter_reader.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   └── csv-filter-reader.py
     │   │   │   │   ├── openalex/
-    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── --init--.py
     │   │   │   │   │   ├── client.py
     │   │   │   │   │   └── fallback.py
     │   │   │   │   ├── pubchem/
-    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── --init--.py
     │   │   │   │   │   ├── client.py
-    │   │   │   │   │   ├── entity_mapper.py
-    │   │   │   │   │   ├── fetch_strategies.py
+    │   │   │   │   │   ├── entity-mapper.py
+    │   │   │   │   │   ├── fetch-strategies.py
     │   │   │   │   │   └── models.py
     │   │   │   │   ├── pubmed/
-    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── --init--.py
     │   │   │   │   │   ├── fallback.py
     │   │   │   │   │   ├── models.py
-    │   │   │   │   │   ├── pubmed_client.py
-    │   │   │   │   │   └── xml_processor.py
+    │   │   │   │   │   ├── pubmed-client.py
+    │   │   │   │   │   └── xml-processor.py
     │   │   │   │   ├── semanticscholar/
-    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── --init--.py
     │   │   │   │   │   ├── adapter.py
     │   │   │   │   │   └── fallback.py
     │   │   │   │   ├── uniprot/
-    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── --init--.py
     │   │   │   │   │   ├── client.py
-    │   │   │   │   │   ├── fasta_parser.py
-    │   │   │   │   │   ├── idmapping_client.py
+    │   │   │   │   │   ├── fasta-parser.py
+    │   │   │   │   │   ├── idmapping-client.py
     │   │   │   │   │   └── models.py
-    │   │   │   │   ├── __init__.py
+    │   │   │   │   ├── --init--.py
     │   │   │   │   ├── base.py
-    │   │   │   │   ├── base_metrics.py
-    │   │   │   │   ├── error_handling.py
-    │   │   │   │   ├── filterable_mixin.py
-    │   │   │   │   ├── health_check_mixin.py
-    │   │   │   │   ├── logging_utils.py
-    │   │   │   │   ├── sync_base.py
+    │   │   │   │   ├── base-metrics.py
+    │   │   │   │   ├── error-handling.py
+    │   │   │   │   ├── filterable-mixin.py
+    │   │   │   │   ├── health-check-mixin.py
+    │   │   │   │   ├── logging-utils.py
+    │   │   │   │   ├── sync-base.py
     │   │   │   │   └── validation.py
     │   │   │   ├── audit/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   └── file_audit.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   └── file-audit.py
     │   │   │   ├── checkpoint/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   └── local_checkpoint.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   └── local-checkpoint.py
     │   │   │   ├── config/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── _base.py
-    │   │   │   │   ├── base_config_loader.py
-    │   │   │   │   ├── dq_config_loader.py
-    │   │   │   │   ├── filter_config_loader.py
-    │   │   │   │   └── pipeline_config_loader.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── -base.py
+    │   │   │   │   ├── base-config-loader.py
+    │   │   │   │   ├── dq-config-loader.py
+    │   │   │   │   ├── filter-config-loader.py
+    │   │   │   │   └── pipeline-config-loader.py
     │   │   │   ├── export/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── csv_exporter.py
-    │   │   │   │   └── dq_report_writer.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── csv-exporter.py
+    │   │   │   │   └── dq-report-writer.py
     │   │   │   ├── locking/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   └── memory_lock.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   └── memory-lock.py
     │   │   │   ├── observability/
     │   │   │   │   ├── alerting/
     │   │   │   │   ├── anomaly/
     │   │   │   │   │   ├── detectors/
-    │   │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   │   ├── --init--.py
     │   │   │   │   │   │   ├── base.py
     │   │   │   │   │   │   └── zscore.py
-    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── --init--.py
     │   │   │   │   │   ├── detector.py
     │   │   │   │   │   ├── monitor.py
     │   │   │   │   │   └── types.py
-    │   │   │   │   ├── __init__.py
+    │   │   │   │   ├── --init--.py
     │   │   │   │   ├── logging.py
-    │   │   │   │   ├── logging_config.py
+    │   │   │   │   ├── logging-config.py
     │   │   │   │   ├── metrics.py
-    │   │   │   │   ├── metrics_server_adapter.py
-    │   │   │   │   ├── noop_logger.py
-    │   │   │   │   ├── noop_metrics.py
-    │   │   │   │   ├── noop_tracing.py
-    │   │   │   │   ├── prometheus_metrics.py
+    │   │   │   │   ├── metrics-server-adapter.py
+    │   │   │   │   ├── noop-logger.py
+    │   │   │   │   ├── noop-metrics.py
+    │   │   │   │   ├── noop-tracing.py
+    │   │   │   │   ├── prometheus-metrics.py
     │   │   │   │   ├── server.py
     │   │   │   │   ├── tracing.py
-    │   │   │   │   └── unified_logger.py
+    │   │   │   │   └── unified-logger.py
     │   │   │   ├── quarantine/
-    │   │   │   │   ├── __init__.py
+    │   │   │   │   ├── --init--.py
     │   │   │   │   ├── helpers.py
     │   │   │   │   ├── operations.py
     │   │   │   │   └── unified.py
     │   │   │   ├── schemas/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── base_schemas.py
-    │   │   │   │   ├── common_config.py
-    │   │   │   │   ├── composite_config.py
-    │   │   │   │   ├── dq_config.py
-    │   │   │   │   ├── dq_report_config.py
-    │   │   │   │   ├── filter_config.py
-    │   │   │   │   ├── pipeline_config.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── base-schemas.py
+    │   │   │   │   ├── common-config.py
+    │   │   │   │   ├── composite-config.py
+    │   │   │   │   ├── dq-config.py
+    │   │   │   │   ├── dq-report-config.py
+    │   │   │   │   ├── filter-config.py
+    │   │   │   │   ├── pipeline-config.py
     │   │   │   │   ├── silver.py
-    │   │   │   │   └── source_config.py
+    │   │   │   │   └── source-config.py
     │   │   │   ├── security/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   └── pii_hasher.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   └── pii-hasher.py
     │   │   │   ├── serialization/
-    │   │   │   │   ├── __init__.py
+    │   │   │   │   ├── --init--.py
     │   │   │   │   └── encoders.py
     │   │   │   ├── storage/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── _atomic.py
-    │   │   │   │   ├── arrow_converter.py
-    │   │   │   │   ├── base_delta_writer.py
-    │   │   │   │   ├── bronze_writer.py
-    │   │   │   │   ├── delta_reader.py
-    │   │   │   │   ├── gold_writer.py
-    │   │   │   │   ├── metadata_builder.py
-    │   │   │   │   ├── metadata_writer.py
-    │   │   │   │   ├── retention_manager.py
-    │   │   │   │   └── silver_writer.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── -atomic.py
+    │   │   │   │   ├── arrow-converter.py
+    │   │   │   │   ├── base-delta-writer.py
+    │   │   │   │   ├── bronze-writer.py
+    │   │   │   │   ├── delta-reader.py
+    │   │   │   │   ├── gold-writer.py
+    │   │   │   │   ├── metadata-builder.py
+    │   │   │   │   ├── metadata-writer.py
+    │   │   │   │   ├── retention-manager.py
+    │   │   │   │   └── silver-writer.py
     │   │   │   ├── system/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   └── memory_monitor.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   └── memory-monitor.py
     │   │   │   ├── validation/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   └── pandera_validator.py
-    │   │   │   ├── __init__.py
-    │   │   │   └── config_loader.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   └── pandera-validator.py
+    │   │   │   ├── --init--.py
+    │   │   │   └── config-loader.py
     │   │   ├── interfaces/
     │   │   │   ├── cli/
     │   │   │   │   ├── commands/
-    │   │   │   │   │   ├── __init__.py
+    │   │   │   │   │   ├── --init--.py
     │   │   │   │   │   ├── archive.py
     │   │   │   │   │   ├── checkpoint.py
     │   │   │   │   │   ├── cleanup.py
     │   │   │   │   │   ├── config.py
     │   │   │   │   │   ├── export.py
     │   │   │   │   │   ├── health.py
-    │   │   │   │   │   ├── health_server_integration.py
+    │   │   │   │   │   ├── health-server-integration.py
     │   │   │   │   │   ├── lock.py
     │   │   │   │   │   ├── maintenance.py
-    │   │   │   │   │   ├── metrics_server_integration.py
+    │   │   │   │   │   ├── metrics-server-integration.py
     │   │   │   │   │   ├── quarantine.py
     │   │   │   │   │   ├── run.py
-    │   │   │   │   │   ├── run_all.py
-    │   │   │   │   │   ├── run_composite.py
-    │   │   │   │   │   ├── run_helpers.py
+    │   │   │   │   │   ├── run-all.py
+    │   │   │   │   │   ├── run-composite.py
+    │   │   │   │   │   ├── run-helpers.py
     │   │   │   │   │   └── vacuum.py
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── __main__.py
-    │   │   │   │   ├── exit_codes.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── --main--.py
+    │   │   │   │   ├── exit-codes.py
     │   │   │   │   ├── formatters.py
     │   │   │   │   └── main.py
     │   │   │   ├── contracts/
     │   │   │   │   └── gold/
     │   │   │   ├── http/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── health_server.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── health-server.py
     │   │   │   │   └── types.py
     │   │   │   ├── orchestration/
     │   │   │   │   ├── prefect/
-    │   │   │   │   └── __init__.py
-    │   │   │   ├── __init__.py
+    │   │   │   │   └── --init--.py
+    │   │   │   ├── --init--.py
     │   │   │   └── observability.py
-    │   │   ├── __init__.py
-    │   │   ├── __main__.py
+    │   │   ├── --init--.py
+    │   │   ├── --main--.py
     │   │   └── py.typed
     │   ├── bioetl.egg-info/
     │   │   ├── PKG-INFO
     │   │   ├── SOURCES.txt
-    │   │   ├── dependency_links.txt
-    │   │   ├── entry_points.txt
+    │   │   ├── dependency-links.txt
+    │   │   ├── entry-points.txt
     │   │   ├── requires.txt
-    │   │   └── top_level.txt
+    │   │   └── top-level.txt
     │   └── tools/
     │       ├── benchmarks/
-    │       │   ├── __init__.py
+    │       │   ├── --init--.py
     │       │   ├── conftest.py
-    │       │   ├── test_bronze_write.py
-    │       │   ├── test_delta_write.py
-    │       │   └── test_json_serialization.py
+    │       │   ├── test-bronze-write.py
+    │       │   ├── test-delta-write.py
+    │       │   └── test-json-serialization.py
     │       ├── scripts/
     │       │   ├── migrations/
-    │       │   │   ├── __init__.py
-    │       │   │   ├── migrate_pmid_to_string.py
-    │       │   │   └── rename_structure_fields.py
-    │       │   ├── __init__.py
-    │       │   ├── check_application_deps.py
-    │       │   ├── check_architecture.py
-    │       │   ├── check_constructor_args.py
-    │       │   ├── cleanup_cache.py
-    │       │   ├── config_matrix_generator.py
-    │       │   ├── generate_contracts.py
-    │       │   ├── lint_terminology.py
-    │       │   ├── migrate_openalex_citation_count.py
+    │       │   │   ├── --init--.py
+    │       │   │   ├── migrate-pmid-to-string.py
+    │       │   │   └── rename-structure-fields.py
+    │       │   ├── --init--.py
+    │       │   ├── check-application-deps.py
+    │       │   ├── check-architecture.py
+    │       │   ├── check-constructor-args.py
+    │       │   ├── cleanup-cache.py
+    │       │   ├── config-matrix-generator.py
+    │       │   ├── generate-contracts.py
+    │       │   ├── lint-terminology.py
+    │       │   ├── migrate-openalex-citation-count.py
     │       │   ├── run-tests.sh
-    │       │   ├── run_pytest.sh
+    │       │   ├── run-pytest.sh
     │       │   ├── setup.sh
-    │       │   ├── test_changed.sh
-    │       │   └── validate_unified_configs.py
+    │       │   ├── test-changed.sh
+    │       │   └── validate-unified-configs.py
     │       ├── README.md
-    │       ├── __init__.py
-    │       ├── create_pipeline.py
-    │       ├── file_merger.py
-    │       ├── init_db.sql
-    │       └── verify_schema_parity.py
+    │       ├── --init--.py
+    │       ├── create-pipeline.py
+    │       ├── file-merger.py
+    │       ├── init-db.sql
+    │       └── verify-schema-parity.py
     ├── tests/
     │   ├── architecture/
-    │   │   ├── __init__.py
-    │   │   ├── test_adapter_contracts.py
-    │   │   ├── test_aggregate_boundaries.py
-    │   │   ├── test_base_pipeline_purity.py
-    │   │   ├── test_bootstrap_layer_boundaries.py
-    │   │   ├── test_code_formatting.py
-    │   │   ├── test_code_metrics.py
-    │   │   ├── test_column_order.py
-    │   │   ├── test_composite_layer_boundaries.py
-    │   │   ├── test_config_golden_master.py
-    │   │   ├── test_di_compliance.py
-    │   │   ├── test_di_constructors.py
-    │   │   ├── test_di_discipline.py
-    │   │   ├── test_docs_version_sync.py
-    │   │   ├── test_documentation.py
-    │   │   ├── test_domain_public_api.py
-    │   │   ├── test_domain_purity.py
-    │   │   ├── test_env_var_centralization.py
-    │   │   ├── test_forbidden_imports.py
-    │   │   ├── test_force_full_scan_publication.py
-    │   │   ├── test_gold_schema_contracts.py
-    │   │   ├── test_interfaces_no_infrastructure.py
-    │   │   ├── test_layer_dependencies.py
-    │   │   ├── test_lock_safety_guard.py
-    │   │   ├── test_medallion_invariants.py
-    │   │   ├── test_metadata_output_contract.py
-    │   │   ├── test_no_datetime_now_in_infrastructure.py
-    │   │   ├── test_no_fstring_in_logs.py
-    │   │   ├── test_no_logging_getlogger_in_infrastructure.py
-    │   │   ├── test_no_print_in_docstrings.py
-    │   │   ├── test_no_random_in_writers.py
-    │   │   ├── test_no_side_effects_in_composition.py
-    │   │   ├── test_no_structlog_in_application_interfaces.py
-    │   │   ├── test_no_transformer_fallback.py
-    │   │   ├── test_performance.py
-    │   │   ├── test_pii_hashing.py
-    │   │   ├── test_port_contracts.py
-    │   │   ├── test_port_contracts_hypothesis.py
-    │   │   ├── test_registry_contracts.py
-    │   │   ├── test_registry_threading.py
-    │   │   ├── test_source_config_usage.py
-    │   │   ├── test_tracing_enforcement.py
-    │   │   ├── test_transformer_signatures.py
-    │   │   └── test_write_mode_types.py
+    │   │   ├── --init--.py
+    │   │   ├── test-adapter-contracts.py
+    │   │   ├── test-aggregate-boundaries.py
+    │   │   ├── test-base-pipeline-purity.py
+    │   │   ├── test-bootstrap-layer-boundaries.py
+    │   │   ├── test-code-formatting.py
+    │   │   ├── test-code-metrics.py
+    │   │   ├── test-column-order.py
+    │   │   ├── test-composite-layer-boundaries.py
+    │   │   ├── test-config-golden-master.py
+    │   │   ├── test-di-compliance.py
+    │   │   ├── test-di-constructors.py
+    │   │   ├── test-di-discipline.py
+    │   │   ├── test-docs-version-sync.py
+    │   │   ├── test-documentation.py
+    │   │   ├── test-domain-public-api.py
+    │   │   ├── test-domain-purity.py
+    │   │   ├── test-env-var-centralization.py
+    │   │   ├── test-forbidden-imports.py
+    │   │   ├── test-force-full-scan-publication.py
+    │   │   ├── test-gold-schema-contracts.py
+    │   │   ├── test-interfaces-no-infrastructure.py
+    │   │   ├── test-layer-dependencies.py
+    │   │   ├── test-lock-safety-guard.py
+    │   │   ├── test-medallion-invariants.py
+    │   │   ├── test-metadata-output-contract.py
+    │   │   ├── test-no-datetime-now-in-infrastructure.py
+    │   │   ├── test-no-fstring-in-logs.py
+    │   │   ├── test-no-logging-getlogger-in-infrastructure.py
+    │   │   ├── test-no-print-in-docstrings.py
+    │   │   ├── test-no-random-in-writers.py
+    │   │   ├── test-no-side-effects-in-composition.py
+    │   │   ├── test-no-structlog-in-application-interfaces.py
+    │   │   ├── test-no-transformer-fallback.py
+    │   │   ├── test-performance.py
+    │   │   ├── test-pii-hashing.py
+    │   │   ├── test-port-contracts.py
+    │   │   ├── test-port-contracts-hypothesis.py
+    │   │   ├── test-registry-contracts.py
+    │   │   ├── test-registry-threading.py
+    │   │   ├── test-source-config-usage.py
+    │   │   ├── test-tracing-enforcement.py
+    │   │   ├── test-transformer-signatures.py
+    │   │   └── test-write-mode-types.py
     │   ├── benchmarks/
-    │   │   ├── __init__.py
-    │   │   ├── test_baseline_assertions.py
-    │   │   └── test_performance.py
+    │   │   ├── --init--.py
+    │   │   ├── test-baseline-assertions.py
+    │   │   └── test-performance.py
     │   ├── contract/
-    │   │   ├── __init__.py
+    │   │   ├── --init--.py
     │   │   ├── conftest.py
-    │   │   ├── test_chembl_contract.py
-    │   │   ├── test_pubchem_contract.py
-    │   │   ├── test_pubmed_contract.py
-    │   │   └── test_uniprot_contract.py
+    │   │   ├── test-chembl-contract.py
+    │   │   ├── test-pubchem-contract.py
+    │   │   ├── test-pubmed-contract.py
+    │   │   └── test-uniprot-contract.py
     │   ├── e2e/
-    │   │   ├── __init__.py
+    │   │   ├── --init--.py
     │   │   ├── conftest.py
-    │   │   ├── test_advanced_scenarios_e2e.py
-    │   │   ├── test_checkpoint_e2e.py
-    │   │   ├── test_chembl_activity_e2e.py
-    │   │   ├── test_chembl_assay_e2e.py
-    │   │   ├── test_chembl_molecule_e2e.py
-    │   │   ├── test_chembl_publication_e2e.py
-    │   │   ├── test_chembl_publication_term_e2e.py
-    │   │   ├── test_chembl_target_e2e.py
-    │   │   ├── test_cli_safety.py
-    │   │   ├── test_full_pipeline.py
-    │   │   ├── test_full_pipeline_chain_e2e.py
-    │   │   ├── test_gold_layer_e2e.py
-    │   │   ├── test_network_failure_e2e.py
-    │   │   ├── test_pipeline_circuit_breaker_e2e.py
-    │   │   ├── test_pipeline_graceful_shutdown_e2e.py
-    │   │   ├── test_pipeline_with_dq_errors_e2e.py
-    │   │   ├── test_pipeline_with_schema_drift_e2e.py
-    │   │   ├── test_pubchem_compound_e2e.py
-    │   │   ├── test_pubmed_publication_e2e.py
-    │   │   ├── test_resilience_scenarios_e2e.py
-    │   │   ├── test_run_types_e2e.py
-    │   │   └── test_uniprot_protein_e2e.py
+    │   │   ├── test-advanced-scenarios-e2e.py
+    │   │   ├── test-checkpoint-e2e.py
+    │   │   ├── test-chembl-activity-e2e.py
+    │   │   ├── test-chembl-assay-e2e.py
+    │   │   ├── test-chembl-molecule-e2e.py
+    │   │   ├── test-chembl-publication-e2e.py
+    │   │   ├── test-chembl-publication-term-e2e.py
+    │   │   ├── test-chembl-target-e2e.py
+    │   │   ├── test-cli-safety.py
+    │   │   ├── test-full-pipeline.py
+    │   │   ├── test-full-pipeline-chain-e2e.py
+    │   │   ├── test-gold-layer-e2e.py
+    │   │   ├── test-network-failure-e2e.py
+    │   │   ├── test-pipeline-circuit-breaker-e2e.py
+    │   │   ├── test-pipeline-graceful-shutdown-e2e.py
+    │   │   ├── test-pipeline-with-dq-errors-e2e.py
+    │   │   ├── test-pipeline-with-schema-drift-e2e.py
+    │   │   ├── test-pubchem-compound-e2e.py
+    │   │   ├── test-pubmed-publication-e2e.py
+    │   │   ├── test-resilience-scenarios-e2e.py
+    │   │   ├── test-run-types-e2e.py
+    │   │   └── test-uniprot-protein-e2e.py
     │   ├── fakes/
-    │   │   ├── __init__.py
-    │   │   ├── checkpoint_fake.py
-    │   │   ├── quarantine_fake.py
-    │   │   └── storage_fake.py
+    │   │   ├── --init--.py
+    │   │   ├── checkpoint-fake.py
+    │   │   ├── quarantine-fake.py
+    │   │   └── storage-fake.py
     │   ├── fixtures/
     │   │   ├── configs/
     │   │   │   └── dq/
     │   │   │       ├── entities/
-    │   │   │       │   └── test_provider/
-    │   │   │       │       └── test_entity.yaml
+    │   │   │       │   └── test-provider/
+    │   │   │       │       └── test-entity.yaml
     │   │   │       ├── providers/
-    │   │   │       │   └── test_provider.yaml
-    │   │   │       └── _defaults.yaml
+    │   │   │       │   └── test-provider.yaml
+    │   │   │       └── -defaults.yaml
     │   │   ├── input/
-    │   │   │   ├── openalex_dois_sample.csv
-    │   │   │   └── semanticscholar_dois_sample.csv
+    │   │   │   ├── openalex-dois-sample.csv
+    │   │   │   └── semanticscholar-dois-sample.csv
     │   │   ├── vcr/
     │   │   │   ├── chembl/
     │   │   │   │   ├── .gitkeep
-    │   │   │   │   ├── TestChEMBLIntegration.test_chembl_extract_transform_load.yaml
-    │   │   │   │   ├── TestChEMBLPipelineE2E.test_chembl_activity_full_run.yaml
-    │   │   │   │   ├── TestChemblActivityPipeline.test_chembl_activity_error_handling.yaml
-    │   │   │   │   ├── TestChemblActivityPipeline.test_chembl_activity_happy_path.yaml
-    │   │   │   │   ├── TestChemblAdapter.test_fetch_activities.yaml
-    │   │   │   │   ├── TestChemblAdapter.test_get_entity_count.yaml
-    │   │   │   │   ├── TestChemblAdapter.test_health_check.yaml
-    │   │   │   │   ├── TestChemblCellLinePipeline.test_chembl_cell_line_happy_path.yaml
-    │   │   │   │   ├── TestChemblCellLinePipeline.test_chembl_cell_line_source_fields.yaml
-    │   │   │   │   ├── TestChemblCompoundRecordPipeline.test_chembl_compound_record_error_handling.yaml
-    │   │   │   │   ├── TestChemblCompoundRecordPipeline.test_chembl_compound_record_happy_path.yaml
-    │   │   │   │   ├── TestChemblTargetComponentPipeline.test_chembl_target_component_happy_path.yaml
-    │   │   │   │   ├── test_all_chembl_pipelines_chain.yaml
-    │   │   │   │   ├── test_chembl_activity_full_cycle.yaml
-    │   │   │   │   ├── test_chembl_assay_confidence_score.yaml
-    │   │   │   │   ├── test_chembl_assay_full_cycle.yaml
-    │   │   │   │   ├── test_chembl_assay_metadata_fields.yaml
-    │   │   │   │   ├── test_chembl_molecule_full_cycle.yaml
-    │   │   │   │   ├── test_chembl_molecule_structural_fields.yaml
-    │   │   │   │   ├── test_chembl_molecule_then_activity_chain.yaml
-    │   │   │   │   ├── test_chembl_publication_full_cycle.yaml
-    │   │   │   │   ├── test_chembl_publication_metadata_fields.yaml
-    │   │   │   │   ├── test_chembl_publication_term_full_cycle.yaml
-    │   │   │   │   ├── test_chembl_publication_term_mesh_fields.yaml
-    │   │   │   │   ├── test_chembl_publication_term_types.yaml
-    │   │   │   │   ├── test_chembl_target_cross_references.yaml
-    │   │   │   │   ├── test_chembl_target_full_cycle.yaml
-    │   │   │   │   ├── test_chembl_target_then_activity_chain.yaml
-    │   │   │   │   ├── test_parallel_independent_pipelines.yaml
-    │   │   │   │   ├── test_pipeline_idempotency.yaml
-    │   │   │   │   ├── test_pipeline_isolation.yaml
-    │   │   │   │   ├── test_pipeline_resume_from_checkpoint.yaml
-    │   │   │   │   └── test_rerun_same_pipeline_twice.yaml
+    │   │   │   │   ├── TestChEMBLIntegration.test-chembl-extract-transform-load.yaml
+    │   │   │   │   ├── TestChEMBLPipelineE2E.test-chembl-activity-full-run.yaml
+    │   │   │   │   ├── TestChemblActivityPipeline.test-chembl-activity-error-handling.yaml
+    │   │   │   │   ├── TestChemblActivityPipeline.test-chembl-activity-happy-path.yaml
+    │   │   │   │   ├── TestChemblAdapter.test-fetch-activities.yaml
+    │   │   │   │   ├── TestChemblAdapter.test-get-entity-count.yaml
+    │   │   │   │   ├── TestChemblAdapter.test-health-check.yaml
+    │   │   │   │   ├── TestChemblCellLinePipeline.test-chembl-cell-line-happy-path.yaml
+    │   │   │   │   ├── TestChemblCellLinePipeline.test-chembl-cell-line-source-fields.yaml
+    │   │   │   │   ├── TestChemblCompoundRecordPipeline.test-chembl-compound-record-error-handling.yaml
+    │   │   │   │   ├── TestChemblCompoundRecordPipeline.test-chembl-compound-record-happy-path.yaml
+    │   │   │   │   ├── TestChemblTargetComponentPipeline.test-chembl-target-component-happy-path.yaml
+    │   │   │   │   ├── test-all-chembl-pipelines-chain.yaml
+    │   │   │   │   ├── test-chembl-activity-full-cycle.yaml
+    │   │   │   │   ├── test-chembl-assay-confidence-score.yaml
+    │   │   │   │   ├── test-chembl-assay-full-cycle.yaml
+    │   │   │   │   ├── test-chembl-assay-metadata-fields.yaml
+    │   │   │   │   ├── test-chembl-molecule-full-cycle.yaml
+    │   │   │   │   ├── test-chembl-molecule-structural-fields.yaml
+    │   │   │   │   ├── test-chembl-molecule-then-activity-chain.yaml
+    │   │   │   │   ├── test-chembl-publication-full-cycle.yaml
+    │   │   │   │   ├── test-chembl-publication-metadata-fields.yaml
+    │   │   │   │   ├── test-chembl-publication-term-full-cycle.yaml
+    │   │   │   │   ├── test-chembl-publication-term-mesh-fields.yaml
+    │   │   │   │   ├── test-chembl-publication-term-types.yaml
+    │   │   │   │   ├── test-chembl-target-cross-references.yaml
+    │   │   │   │   ├── test-chembl-target-full-cycle.yaml
+    │   │   │   │   ├── test-chembl-target-then-activity-chain.yaml
+    │   │   │   │   ├── test-parallel-independent-pipelines.yaml
+    │   │   │   │   ├── test-pipeline-idempotency.yaml
+    │   │   │   │   ├── test-pipeline-isolation.yaml
+    │   │   │   │   ├── test-pipeline-resume-from-checkpoint.yaml
+    │   │   │   │   └── test-rerun-same-pipeline-twice.yaml
     │   │   │   ├── crossref/
     │   │   │   │   ├── .gitkeep
-    │   │   │   │   ├── test_crossref_batch_fetch.yaml
-    │   │   │   │   ├── test_crossref_fetch_by_doi.yaml
-    │   │   │   │   ├── test_crossref_health_check.yaml
-    │   │   │   │   ├── test_crossref_search_by_title.yaml
-    │   │   │   │   └── works_batch.yaml
+    │   │   │   │   ├── test-crossref-batch-fetch.yaml
+    │   │   │   │   ├── test-crossref-fetch-by-doi.yaml
+    │   │   │   │   ├── test-crossref-health-check.yaml
+    │   │   │   │   ├── test-crossref-search-by-title.yaml
+    │   │   │   │   └── works-batch.yaml
     │   │   │   ├── e2e/
     │   │   │   ├── integration/
     │   │   │   │   ├── adapters/
     │   │   │   │   │   └── openalex/
     │   │   │   │   └── pipelines/
     │   │   │   ├── openalex/
-    │   │   │   │   ├── TestOpenAlexAdapterIntegration.test_fetch_filtered_batch_dois.yaml
-    │   │   │   │   ├── TestOpenAlexAdapterIntegration.test_fetch_filtered_by_doi.yaml
-    │   │   │   │   ├── TestOpenAlexAdapterIntegration.test_fetch_filtered_with_fallback.yaml
-    │   │   │   │   ├── TestOpenAlexAdapterIntegration.test_fetch_with_query.yaml
-    │   │   │   │   ├── TestOpenAlexAdapterIntegration.test_health_check.yaml
-    │   │   │   │   ├── TestOpenAlexAdapterIntegration.test_title_only_lookup.yaml
-    │   │   │   │   └── TestOpenAlexAdapterRateLimiting.test_rate_limiting_not_exceeded.yaml
+    │   │   │   │   ├── TestOpenAlexAdapterIntegration.test-fetch-filtered-batch-dois.yaml
+    │   │   │   │   ├── TestOpenAlexAdapterIntegration.test-fetch-filtered-by-doi.yaml
+    │   │   │   │   ├── TestOpenAlexAdapterIntegration.test-fetch-filtered-with-fallback.yaml
+    │   │   │   │   ├── TestOpenAlexAdapterIntegration.test-fetch-with-query.yaml
+    │   │   │   │   ├── TestOpenAlexAdapterIntegration.test-health-check.yaml
+    │   │   │   │   ├── TestOpenAlexAdapterIntegration.test-title-only-lookup.yaml
+    │   │   │   │   └── TestOpenAlexAdapterRateLimiting.test-rate-limiting-not-exceeded.yaml
     │   │   │   ├── pubchem/
     │   │   │   │   ├── .gitkeep
-    │   │   │   │   ├── test_pubchem_compound_full_cycle.yaml
-    │   │   │   │   ├── test_pubchem_compound_pipeline.yaml
-    │   │   │   │   ├── test_pubchem_compound_query_filter.yaml
-    │   │   │   │   └── test_pubchem_compound_structural_fields.yaml
+    │   │   │   │   ├── test-pubchem-compound-full-cycle.yaml
+    │   │   │   │   ├── test-pubchem-compound-pipeline.yaml
+    │   │   │   │   ├── test-pubchem-compound-query-filter.yaml
+    │   │   │   │   └── test-pubchem-compound-structural-fields.yaml
     │   │   │   ├── pubmed/
     │   │   │   │   ├── .gitkeep
-    │   │   │   │   ├── test_fetch_publications.yaml
-    │   │   │   │   ├── test_health_check.yaml
-    │   │   │   │   ├── test_pubmed_publication_classification_fields.yaml
-    │   │   │   │   ├── test_pubmed_publication_date_fields.yaml
-    │   │   │   │   ├── test_pubmed_publication_full_cycle.yaml
-    │   │   │   │   ├── test_pubmed_publication_identifier_fields.yaml
-    │   │   │   │   └── test_pubmed_publication_journal_fields.yaml
+    │   │   │   │   ├── test-fetch-publications.yaml
+    │   │   │   │   ├── test-health-check.yaml
+    │   │   │   │   ├── test-pubmed-publication-classification-fields.yaml
+    │   │   │   │   ├── test-pubmed-publication-date-fields.yaml
+    │   │   │   │   ├── test-pubmed-publication-full-cycle.yaml
+    │   │   │   │   ├── test-pubmed-publication-identifier-fields.yaml
+    │   │   │   │   └── test-pubmed-publication-journal-fields.yaml
     │   │   │   ├── semanticscholar/
     │   │   │   │   ├── .gitkeep
-    │   │   │   │   ├── TestSemanticScholarAdapterIntegration.test_fetch_batch_dois.yaml
-    │   │   │   │   ├── TestSemanticScholarAdapterIntegration.test_fetch_by_doi.yaml
-    │   │   │   │   ├── TestSemanticScholarAdapterIntegration.test_fetch_filtered_with_fallback.yaml
-    │   │   │   │   ├── TestSemanticScholarAdapterIntegration.test_fetch_with_query.yaml
-    │   │   │   │   ├── TestSemanticScholarAdapterIntegration.test_health_check.yaml
-    │   │   │   │   └── TestSemanticScholarAdapterIntegration.test_title_only_lookup.yaml
+    │   │   │   │   ├── TestSemanticScholarAdapterIntegration.test-fetch-batch-dois.yaml
+    │   │   │   │   ├── TestSemanticScholarAdapterIntegration.test-fetch-by-doi.yaml
+    │   │   │   │   ├── TestSemanticScholarAdapterIntegration.test-fetch-filtered-with-fallback.yaml
+    │   │   │   │   ├── TestSemanticScholarAdapterIntegration.test-fetch-with-query.yaml
+    │   │   │   │   ├── TestSemanticScholarAdapterIntegration.test-health-check.yaml
+    │   │   │   │   └── TestSemanticScholarAdapterIntegration.test-title-only-lookup.yaml
     │   │   │   ├── uniprot/
     │   │   │   │   ├── .gitkeep
-    │   │   │   │   ├── TestUniProtAdapterIntegration.test_fetch_proteins.yaml
-    │   │   │   │   ├── TestUniProtAdapterIntegration.test_health_check.yaml
-    │   │   │   │   ├── TestUniProtClientIntegration.test_fetch_proteins.yaml
-    │   │   │   │   ├── TestUniProtClientIntegration.test_health_check.yaml
-    │   │   │   │   ├── TestUniProtIDMappingIntegration.test_health_check.yaml
-    │   │   │   │   ├── TestUniProtIDMappingIntegration.test_map_mixed_results.yaml
-    │   │   │   │   ├── TestUniProtIDMappingIntegration.test_map_multiple_ids.yaml
-    │   │   │   │   ├── TestUniProtIDMappingIntegration.test_map_not_found_id.yaml
-    │   │   │   │   ├── TestUniProtIDMappingIntegration.test_map_single_id.yaml
-    │   │   │   │   ├── test_uniprot_protein_full_cycle.yaml
-    │   │   │   │   ├── test_uniprot_protein_metadata_fields.yaml
-    │   │   │   │   └── test_uniprot_protein_sequence_fields.yaml
-    │   │   │   ├── TestChEMBLPipelineE2E.test_chembl_activity_full_run.yaml
-    │   │   │   ├── test_backfill_clears_silver_only.yaml
-    │   │   │   ├── test_chembl_and_uniprot_sequential_run.yaml
-    │   │   │   ├── test_failed_run_preserves_partial_data.yaml
-    │   │   │   ├── test_health_check.yaml
-    │   │   │   ├── test_multiple_chembl_entities_parallel_safe.yaml
-    │   │   │   ├── test_pipeline_idempotency.yaml
-    │   │   │   ├── test_pipeline_resume_after_failure.yaml
-    │   │   │   ├── test_pubchem_compound_pipeline.yaml
-    │   │   │   ├── test_rebuild_clears_existing_data.yaml
-    │   │   │   ├── test_vacuum_respects_retention_days.yaml
-    │   │   │   └── test_vacuum_runs_after_successful_pipeline.yaml
-    │   │   └── vcr_cassettes/
+    │   │   │   │   ├── TestUniProtAdapterIntegration.test-fetch-proteins.yaml
+    │   │   │   │   ├── TestUniProtAdapterIntegration.test-health-check.yaml
+    │   │   │   │   ├── TestUniProtClientIntegration.test-fetch-proteins.yaml
+    │   │   │   │   ├── TestUniProtClientIntegration.test-health-check.yaml
+    │   │   │   │   ├── TestUniProtIDMappingIntegration.test-health-check.yaml
+    │   │   │   │   ├── TestUniProtIDMappingIntegration.test-map-mixed-results.yaml
+    │   │   │   │   ├── TestUniProtIDMappingIntegration.test-map-multiple-ids.yaml
+    │   │   │   │   ├── TestUniProtIDMappingIntegration.test-map-not-found-id.yaml
+    │   │   │   │   ├── TestUniProtIDMappingIntegration.test-map-single-id.yaml
+    │   │   │   │   ├── test-uniprot-protein-full-cycle.yaml
+    │   │   │   │   ├── test-uniprot-protein-metadata-fields.yaml
+    │   │   │   │   └── test-uniprot-protein-sequence-fields.yaml
+    │   │   │   ├── TestChEMBLPipelineE2E.test-chembl-activity-full-run.yaml
+    │   │   │   ├── test-backfill-clears-silver-only.yaml
+    │   │   │   ├── test-chembl-and-uniprot-sequential-run.yaml
+    │   │   │   ├── test-failed-run-preserves-partial-data.yaml
+    │   │   │   ├── test-health-check.yaml
+    │   │   │   ├── test-multiple-chembl-entities-parallel-safe.yaml
+    │   │   │   ├── test-pipeline-idempotency.yaml
+    │   │   │   ├── test-pipeline-resume-after-failure.yaml
+    │   │   │   ├── test-pubchem-compound-pipeline.yaml
+    │   │   │   ├── test-rebuild-clears-existing-data.yaml
+    │   │   │   ├── test-vacuum-respects-retention-days.yaml
+    │   │   │   └── test-vacuum-runs-after-successful-pipeline.yaml
+    │   │   └── vcr-cassettes/
     │   │       └── crossref/
-    │   │           └── works_batch.yaml
+    │   │           └── works-batch.yaml
     │   ├── infrastructure/
     │   │   ├── adapters/
     │   │   │   ├── http/
-    │   │   │   │   └── test_pagination.py
-    │   │   │   ├── test_pubchem.py
-    │   │   │   └── test_uniprot.py
+    │   │   │   │   └── test-pagination.py
+    │   │   │   ├── test-pubchem.py
+    │   │   │   └── test-uniprot.py
     │   │   ├── checkpoint/
-    │   │   │   └── __init__.py
+    │   │   │   └── --init--.py
     │   │   ├── factories/
-    │   │   │   └── test_data_sources.py
+    │   │   │   └── test-data-sources.py
     │   │   ├── observability/
-    │   │   │   └── test_metrics.py
+    │   │   │   └── test-metrics.py
     │   │   └── storage/
-    │   │       └── test_gold_writer_integration.py
+    │   │       └── test-gold-writer-integration.py
     │   ├── integration/
     │   │   ├── adapters/
     │   │   │   ├── openalex/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── test_adapter.py
-    │   │   │   │   └── test_pipeline.py
-    │   │   │   ├── __init__.py
-    │   │   │   ├── test_chembl.py
-    │   │   │   ├── test_crossref.py
-    │   │   │   ├── test_pubmed.py
-    │   │   │   ├── test_pubmed_edge_cases.py
-    │   │   │   ├── test_semanticscholar.py
-    │   │   │   ├── test_uniprot.py
-    │   │   │   └── test_uniprot_idmapping.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── test-adapter.py
+    │   │   │   │   └── test-pipeline.py
+    │   │   │   ├── --init--.py
+    │   │   │   ├── test-chembl.py
+    │   │   │   ├── test-crossref.py
+    │   │   │   ├── test-pubmed.py
+    │   │   │   ├── test-pubmed-edge-cases.py
+    │   │   │   ├── test-semanticscholar.py
+    │   │   │   ├── test-uniprot.py
+    │   │   │   └── test-uniprot-idmapping.py
     │   │   ├── composite/
-    │   │   │   ├── __init__.py
-    │   │   │   └── test_column_naming_integration.py
+    │   │   │   ├── --init--.py
+    │   │   │   └── test-column-naming-integration.py
     │   │   ├── config/
-    │   │   │   ├── __init__.py
-    │   │   │   └── test_dq_config_loading.py
+    │   │   │   ├── --init--.py
+    │   │   │   └── test-dq-config-loading.py
     │   │   ├── infrastructure/
     │   │   │   ├── checkpoint/
     │   │   │   ├── locking/
     │   │   │   ├── storage/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   └── test_silver_writer.py
-    │   │   │   └── __init__.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   └── test-silver-writer.py
+    │   │   │   └── --init--.py
     │   │   ├── interfaces/
-    │   │   │   ├── __init__.py
+    │   │   │   ├── --init--.py
     │   │   │   ├── conftest.py
-    │   │   │   ├── test_cli_checkpoint_list.py
-    │   │   │   ├── test_cli_maintenance_archive.py
-    │   │   │   ├── test_cli_maintenance_vacuum.py
-    │   │   │   ├── test_cli_quarantine_inspect.py
-    │   │   │   ├── test_cli_run_dry_run.py
-    │   │   │   ├── test_cli_run_incremental.py
-    │   │   │   └── test_cli_shutdown_integration.py
+    │   │   │   ├── test-cli-checkpoint-list.py
+    │   │   │   ├── test-cli-maintenance-archive.py
+    │   │   │   ├── test-cli-maintenance-vacuum.py
+    │   │   │   ├── test-cli-quarantine-inspect.py
+    │   │   │   ├── test-cli-run-dry-run.py
+    │   │   │   ├── test-cli-run-incremental.py
+    │   │   │   └── test-cli-shutdown-integration.py
     │   │   ├── pipelines/
     │   │   │   ├── base.py
-    │   │   │   ├── test_chembl_activity.py
-    │   │   │   ├── test_chembl_cell_line.py
-    │   │   │   ├── test_chembl_compound_record.py
-    │   │   │   ├── test_chembl_target_component.py
-    │   │   │   ├── test_crossref_date_normalization.py
-    │   │   │   └── test_pubmed_date_normalization.py
-    │   │   ├── __init__.py
-    │   │   ├── memory_storage.py
-    │   │   ├── test_cross_provider_doi_normalization.py
-    │   │   ├── test_dq_monitor_integration.py
-    │   │   ├── test_dq_report_integration.py
-    │   │   ├── test_pubchem_pipeline.py
-    │   │   ├── test_runner_lifecycle.py
-    │   │   └── test_uniprot_pipeline.py
+    │   │   │   ├── test-chembl-activity.py
+    │   │   │   ├── test-chembl-cell-line.py
+    │   │   │   ├── test-chembl-compound-record.py
+    │   │   │   ├── test-chembl-target-component.py
+    │   │   │   ├── test-crossref-date-normalization.py
+    │   │   │   └── test-pubmed-date-normalization.py
+    │   │   ├── --init--.py
+    │   │   ├── memory-storage.py
+    │   │   ├── test-cross-provider-doi-normalization.py
+    │   │   ├── test-dq-monitor-integration.py
+    │   │   ├── test-dq-report-integration.py
+    │   │   ├── test-pubchem-pipeline.py
+    │   │   ├── test-runner-lifecycle.py
+    │   │   └── test-uniprot-pipeline.py
     │   ├── performance/
-    │   │   ├── __init__.py
-    │   │   └── test_batching_performance.py
+    │   │   ├── --init--.py
+    │   │   └── test-batching-performance.py
     │   ├── security/
-    │   │   ├── __init__.py
-    │   │   └── test_security.py
+    │   │   ├── --init--.py
+    │   │   └── test-security.py
     │   ├── smoke/
-    │   │   ├── __init__.py
-    │   │   └── test_smoke.py
+    │   │   ├── --init--.py
+    │   │   └── test-smoke.py
     │   ├── snapshots/
-    │   │   └── pipeline_configs.json
+    │   │   └── pipeline-configs.json
     │   ├── unit/
     │   │   ├── application/
     │   │   │   ├── composite/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── test_checkpoint.py
-    │   │   │   │   ├── test_coalesce_qualified.py
-    │   │   │   │   ├── test_column_orderer.py
-    │   │   │   │   ├── test_column_renamer.py
-    │   │   │   │   ├── test_coordinator_logging.py
-    │   │   │   │   ├── test_fsm_helper.py
-    │   │   │   │   ├── test_fsm_pipeline_scenarios.py
-    │   │   │   │   ├── test_merger.py
-    │   │   │   │   ├── test_preflight_validator.py
-    │   │   │   │   ├── test_runner.py
-    │   │   │   │   ├── test_runner_checkpoint_resume.py
-    │   │   │   │   ├── test_runner_enrichment_fsm.py
-    │   │   │   │   ├── test_runner_fsm.py
-    │   │   │   │   ├── test_runner_fsm_logging.py
-    │   │   │   │   ├── test_runner_required_flag.py
-    │   │   │   │   └── test_runner_robustness.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── test-checkpoint.py
+    │   │   │   │   ├── test-coalesce-qualified.py
+    │   │   │   │   ├── test-column-orderer.py
+    │   │   │   │   ├── test-column-renamer.py
+    │   │   │   │   ├── test-coordinator-logging.py
+    │   │   │   │   ├── test-fsm-helper.py
+    │   │   │   │   ├── test-fsm-pipeline-scenarios.py
+    │   │   │   │   ├── test-merger.py
+    │   │   │   │   ├── test-preflight-validator.py
+    │   │   │   │   ├── test-runner.py
+    │   │   │   │   ├── test-runner-checkpoint-resume.py
+    │   │   │   │   ├── test-runner-enrichment-fsm.py
+    │   │   │   │   ├── test-runner-fsm.py
+    │   │   │   │   ├── test-runner-fsm-logging.py
+    │   │   │   │   ├── test-runner-required-flag.py
+    │   │   │   │   └── test-runner-robustness.py
     │   │   │   ├── core/
-    │   │   │   │   ├── test_base_transformer.py
-    │   │   │   │   ├── test_batch_executor.py
-    │   │   │   │   ├── test_batch_transformer.py
-    │   │   │   │   ├── test_batch_writer.py
-    │   │   │   │   ├── test_checkpoint_manager.py
-    │   │   │   │   ├── test_cleanup_service.py
-    │   │   │   │   ├── test_dq_metrics.py
-    │   │   │   │   ├── test_dq_report_integration.py
-    │   │   │   │   ├── test_field_specs.py
-    │   │   │   │   ├── test_filtered_data_source.py
-    │   │   │   │   ├── test_health_aggregator.py
-    │   │   │   │   ├── test_heartbeat.py
-    │   │   │   │   ├── test_idmapping_data_source.py
-    │   │   │   │   ├── test_lock_manager.py
-    │   │   │   │   ├── test_medallion_policy.py
-    │   │   │   │   ├── test_medallion_validator.py
-    │   │   │   │   ├── test_memory_monitor.py
-    │   │   │   │   ├── test_pipeline_services.py
-    │   │   │   │   ├── test_postrun_service.py
-    │   │   │   │   ├── test_preflight_service.py
-    │   │   │   │   ├── test_protocols.py
-    │   │   │   │   ├── test_publication_term_data_source.py
-    │   │   │   │   ├── test_record_processor.py
-    │   │   │   │   ├── test_record_processor_metrics.py
-    │   │   │   │   ├── test_run_id_propagation.py
-    │   │   │   │   ├── test_runner.py
-    │   │   │   │   ├── test_shutdown.py
-    │   │   │   │   └── test_streaming_batch.py
+    │   │   │   │   ├── test-base-transformer.py
+    │   │   │   │   ├── test-batch-executor.py
+    │   │   │   │   ├── test-batch-transformer.py
+    │   │   │   │   ├── test-batch-writer.py
+    │   │   │   │   ├── test-checkpoint-manager.py
+    │   │   │   │   ├── test-cleanup-service.py
+    │   │   │   │   ├── test-dq-metrics.py
+    │   │   │   │   ├── test-dq-report-integration.py
+    │   │   │   │   ├── test-field-specs.py
+    │   │   │   │   ├── test-filtered-data-source.py
+    │   │   │   │   ├── test-health-aggregator.py
+    │   │   │   │   ├── test-heartbeat.py
+    │   │   │   │   ├── test-idmapping-data-source.py
+    │   │   │   │   ├── test-lock-manager.py
+    │   │   │   │   ├── test-medallion-policy.py
+    │   │   │   │   ├── test-medallion-validator.py
+    │   │   │   │   ├── test-memory-monitor.py
+    │   │   │   │   ├── test-pipeline-services.py
+    │   │   │   │   ├── test-postrun-service.py
+    │   │   │   │   ├── test-preflight-service.py
+    │   │   │   │   ├── test-protocols.py
+    │   │   │   │   ├── test-publication-term-data-source.py
+    │   │   │   │   ├── test-record-processor.py
+    │   │   │   │   ├── test-record-processor-metrics.py
+    │   │   │   │   ├── test-run-id-propagation.py
+    │   │   │   │   ├── test-runner.py
+    │   │   │   │   ├── test-shutdown.py
+    │   │   │   │   └── test-streaming-batch.py
     │   │   │   ├── observability/
-    │   │   │   │   ├── test_observer.py
-    │   │   │   │   └── test_span_helpers.py
+    │   │   │   │   ├── test-observer.py
+    │   │   │   │   └── test-span-helpers.py
     │   │   │   ├── orchestration/
     │   │   │   ├── pipelines/
-    │   │   │   │   ├── __snapshots__/
-    │   │   │   │   │   └── test_transformer_snapshots.ambr
+    │   │   │   │   ├── --snapshots--/
+    │   │   │   │   │   └── test-transformer-snapshots.ambr
     │   │   │   │   ├── common/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   ├── test_base_publication_transformer.py
-    │   │   │   │   │   └── test_extractors.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   ├── test-base-publication-transformer.py
+    │   │   │   │   │   └── test-extractors.py
     │   │   │   │   ├── crossref/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   ├── test_crossref_transformer.py
-    │   │   │   │   │   └── test_extractors.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   ├── test-crossref-transformer.py
+    │   │   │   │   │   └── test-extractors.py
     │   │   │   │   ├── openalex/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   ├── test_extractors.py
-    │   │   │   │   │   └── test_transformer.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   ├── test-extractors.py
+    │   │   │   │   │   └── test-transformer.py
     │   │   │   │   ├── pubmed/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   ├── test_classification_extractor.py
-    │   │   │   │   │   └── test_pubmed_transformer.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   ├── test-classification-extractor.py
+    │   │   │   │   │   └── test-pubmed-transformer.py
     │   │   │   │   ├── semanticscholar/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   ├── test_extractors.py
-    │   │   │   │   │   └── test_transformer.py
-    │   │   │   │   ├── test_activity_transformer.py
-    │   │   │   │   ├── test_cell_line_transformer.py
-    │   │   │   │   ├── test_chembl_activity_unit.py
-    │   │   │   │   ├── test_chembl_assay_parameters.py
-    │   │   │   │   ├── test_chembl_pipelines.py
-    │   │   │   │   ├── test_chembl_transformers.py
-    │   │   │   │   ├── test_compound_record_transformer.py
-    │   │   │   │   ├── test_date_parsing.py
-    │   │   │   │   ├── test_idmapping_transformer.py
-    │   │   │   │   ├── test_page_parsing.py
-    │   │   │   │   ├── test_protein_class_transformer.py
-    │   │   │   │   ├── test_pubchem_transformer.py
-    │   │   │   │   ├── test_publication_similarity_transformer.py
-    │   │   │   │   ├── test_transformations.py
-    │   │   │   │   ├── test_transformer_snapshots.py
-    │   │   │   │   └── test_uniprot_transformer.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   ├── test-extractors.py
+    │   │   │   │   │   └── test-transformer.py
+    │   │   │   │   ├── test-activity-transformer.py
+    │   │   │   │   ├── test-cell-line-transformer.py
+    │   │   │   │   ├── test-chembl-activity-unit.py
+    │   │   │   │   ├── test-chembl-assay-parameters.py
+    │   │   │   │   ├── test-chembl-pipelines.py
+    │   │   │   │   ├── test-chembl-transformers.py
+    │   │   │   │   ├── test-compound-record-transformer.py
+    │   │   │   │   ├── test-date-parsing.py
+    │   │   │   │   ├── test-idmapping-transformer.py
+    │   │   │   │   ├── test-page-parsing.py
+    │   │   │   │   ├── test-protein-class-transformer.py
+    │   │   │   │   ├── test-pubchem-transformer.py
+    │   │   │   │   ├── test-publication-similarity-transformer.py
+    │   │   │   │   ├── test-transformations.py
+    │   │   │   │   ├── test-transformer-snapshots.py
+    │   │   │   │   └── test-uniprot-transformer.py
     │   │   │   ├── services/
     │   │   │   │   ├── dq/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   ├── test_bronze_analyzer.py
-    │   │   │   │   │   └── test_gold_analyzer.py
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── test_bronze_cleanup_service.py
-    │   │   │   │   ├── test_checkpoint_service.py
-    │   │   │   │   ├── test_data_quality_service.py
-    │   │   │   │   ├── test_dq_metrics_calculator.py
-    │   │   │   │   ├── test_dq_report_service.py
-    │   │   │   │   ├── test_health_service.py
-    │   │   │   │   ├── test_lock_service.py
-    │   │   │   │   ├── test_medallion_lifecycle.py
-    │   │   │   │   ├── test_metadata_coordinator.py
-    │   │   │   │   ├── test_metrics_service.py
-    │   │   │   │   ├── test_pipeline_runner_service.py
-    │   │   │   │   ├── test_quarantine_service.py
-    │   │   │   │   ├── test_shutdown_service.py
-    │   │   │   │   └── test_vacuum_service.py
-    │   │   │   ├── test_base_pipeline.py
-    │   │   │   ├── test_error_classifier.py
-    │   │   │   └── test_pipeline_config.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   ├── test-bronze-analyzer.py
+    │   │   │   │   │   └── test-gold-analyzer.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── test-bronze-cleanup-service.py
+    │   │   │   │   ├── test-checkpoint-service.py
+    │   │   │   │   ├── test-data-quality-service.py
+    │   │   │   │   ├── test-dq-metrics-calculator.py
+    │   │   │   │   ├── test-dq-report-service.py
+    │   │   │   │   ├── test-health-service.py
+    │   │   │   │   ├── test-lock-service.py
+    │   │   │   │   ├── test-medallion-lifecycle.py
+    │   │   │   │   ├── test-metadata-coordinator.py
+    │   │   │   │   ├── test-metrics-service.py
+    │   │   │   │   ├── test-pipeline-runner-service.py
+    │   │   │   │   ├── test-quarantine-service.py
+    │   │   │   │   ├── test-shutdown-service.py
+    │   │   │   │   └── test-vacuum-service.py
+    │   │   │   ├── test-base-pipeline.py
+    │   │   │   ├── test-error-classifier.py
+    │   │   │   └── test-pipeline-config.py
     │   │   ├── cli/
-    │   │   │   ├── __snapshots__/
-    │   │   │   │   └── test_registry_consistency.ambr
-    │   │   │   ├── __init__.py
-    │   │   │   └── test_registry_consistency.py
+    │   │   │   ├── --snapshots--/
+    │   │   │   │   └── test-registry-consistency.ambr
+    │   │   │   ├── --init--.py
+    │   │   │   └── test-registry-consistency.py
     │   │   ├── composition/
     │   │   │   ├── bootstrap/
     │   │   │   │   ├── runtime/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   └── test_assembly.py
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── test_checkpoint_bootstrap.py
-    │   │   │   │   ├── test_health_bootstrap.py
-    │   │   │   │   ├── test_lock_bootstrap.py
-    │   │   │   │   ├── test_runner_bootstrap.py
-    │   │   │   │   └── test_storage_bootstrap.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   └── test-assembly.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── test-checkpoint-bootstrap.py
+    │   │   │   │   ├── test-health-bootstrap.py
+    │   │   │   │   ├── test-lock-bootstrap.py
+    │   │   │   │   ├── test-runner-bootstrap.py
+    │   │   │   │   └── test-storage-bootstrap.py
     │   │   │   ├── factories/
-    │   │   │   │   ├── test_data_source_registry.py
-    │   │   │   │   ├── test_dq_factory.py
-    │   │   │   │   ├── test_runner_factory.py
-    │   │   │   │   └── test_transformer_factory.py
+    │   │   │   │   ├── test-data-source-registry.py
+    │   │   │   │   ├── test-dq-factory.py
+    │   │   │   │   ├── test-runner-factory.py
+    │   │   │   │   └── test-transformer-factory.py
     │   │   │   ├── providers/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   └── test_provider_registry.py
-    │   │   │   ├── __init__.py
-    │   │   │   ├── test_bootstrap_logger.py
-    │   │   │   ├── test_builders.py
-    │   │   │   ├── test_entrypoints.py
-    │   │   │   ├── test_generic_factory.py
-    │   │   │   ├── test_observability_contract.py
-    │   │   │   ├── test_registry_protocol.py
-    │   │   │   └── test_types.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   └── test-provider-registry.py
+    │   │   │   ├── --init--.py
+    │   │   │   ├── test-bootstrap-logger.py
+    │   │   │   ├── test-builders.py
+    │   │   │   ├── test-entrypoints.py
+    │   │   │   ├── test-generic-factory.py
+    │   │   │   ├── test-observability-contract.py
+    │   │   │   ├── test-registry-protocol.py
+    │   │   │   └── test-types.py
     │   │   ├── contracts/
-    │   │   │   ├── __init__.py
-    │   │   │   └── test_contracts_exports.py
+    │   │   │   ├── --init--.py
+    │   │   │   └── test-contracts-exports.py
     │   │   ├── domain/
     │   │   │   ├── aggregates/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── test_batch.py
-    │   │   │   │   ├── test_pipeline_run.py
-    │   │   │   │   └── test_quarantine_entry.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── test-batch.py
+    │   │   │   │   ├── test-pipeline-run.py
+    │   │   │   │   └── test-quarantine-entry.py
     │   │   │   ├── composite/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── test_composite_config.py
-    │   │   │   │   ├── test_composite_result.py
-    │   │   │   │   ├── test_lineage.py
-    │   │   │   │   └── test_state.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── test-composite-config.py
+    │   │   │   │   ├── test-composite-result.py
+    │   │   │   │   ├── test-lineage.py
+    │   │   │   │   └── test-state.py
     │   │   │   ├── configs/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   └── test_base_configs.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   └── test-base-configs.py
     │   │   │   ├── exceptions/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   └── test_storage.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   └── test-storage.py
     │   │   │   ├── filtering/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── test_column_filter.py
-    │   │   │   │   ├── test_gold_config.py
-    │   │   │   │   ├── test_list_filters.py
-    │   │   │   │   ├── test_load_result.py
-    │   │   │   │   └── test_range_filter.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── test-column-filter.py
+    │   │   │   │   ├── test-gold-config.py
+    │   │   │   │   ├── test-list-filters.py
+    │   │   │   │   ├── test-load-result.py
+    │   │   │   │   └── test-range-filter.py
     │   │   │   ├── models/
-    │   │   │   │   └── test_metadata_output.py
+    │   │   │   │   └── test-metadata-output.py
     │   │   │   ├── ports/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── test_noop.py
-    │   │   │   │   └── test_noop_audit.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── test-noop.py
+    │   │   │   │   └── test-noop-audit.py
     │   │   │   ├── registry/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   └── test_publication_registry.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   └── test-publication-registry.py
     │   │   │   ├── schemas/
     │   │   │   │   ├── common/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   └── test_publication_base.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   └── test-publication-base.py
     │   │   │   │   ├── crossref/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   ├── test_author_schema.py
-    │   │   │   │   │   ├── test_funder_schema.py
-    │   │   │   │   │   └── test_reference_schema.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   ├── test-author-schema.py
+    │   │   │   │   │   ├── test-funder-schema.py
+    │   │   │   │   │   └── test-reference-schema.py
     │   │   │   │   ├── openalex/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   └── test_publication_schema.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   └── test-publication-schema.py
     │   │   │   │   ├── semanticscholar/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   └── test_publication_schema.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   └── test-publication-schema.py
     │   │   │   │   ├── uniprot/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   └── test_idmapping_schema.py
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── test_doi_validation.py
-    │   │   │   │   ├── test_inchi_key_validation.py
-    │   │   │   │   └── test_year_validation.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   └── test-idmapping-schema.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── test-doi-validation.py
+    │   │   │   │   ├── test-inchi-key-validation.py
+    │   │   │   │   └── test-year-validation.py
     │   │   │   ├── services/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── test_activity_aggregator.py
-    │   │   │   │   ├── test_data_normalization_service.py
-    │   │   │   │   ├── test_identity_service.py
-    │   │   │   │   ├── test_normalization_config.py
-    │   │   │   │   ├── test_normalization_service.py
-    │   │   │   │   ├── test_unit_converter.py
-    │   │   │   │   └── test_value_validator.py
-    │   │   │   ├── value_objects/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── test_activity.py
-    │   │   │   │   ├── test_base.py
-    │   │   │   │   ├── test_column_order.py
-    │   │   │   │   ├── test_column_qualifier.py
-    │   │   │   │   ├── test_compound_ids.py
-    │   │   │   │   ├── test_dq_metrics.py
-    │   │   │   │   ├── test_identifiers.py
-    │   │   │   │   ├── test_measurements.py
-    │   │   │   │   ├── test_publications.py
-    │   │   │   │   └── test_silver_result.py
-    │   │   │   ├── __init__.py
-    │   │   │   ├── test_config.py
-    │   │   │   ├── test_config_types.py
-    │   │   │   ├── test_config_validation.py
-    │   │   │   ├── test_entities.py
-    │   │   │   ├── test_events.py
-    │   │   │   ├── test_exceptions.py
-    │   │   │   ├── test_filter_config.py
-    │   │   │   ├── test_locking.py
-    │   │   │   ├── test_medallion.py
-    │   │   │   ├── test_normalization.py
-    │   │   │   ├── test_pipeline_config.py
-    │   │   │   ├── test_runtime_config.py
-    │   │   │   ├── test_serialization.py
-    │   │   │   ├── test_transformations.py
-    │   │   │   ├── test_types.py
-    │   │   │   └── test_validation.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── test-activity-aggregator.py
+    │   │   │   │   ├── test-data-normalization-service.py
+    │   │   │   │   ├── test-identity-service.py
+    │   │   │   │   ├── test-normalization-config.py
+    │   │   │   │   ├── test-normalization-service.py
+    │   │   │   │   ├── test-unit-converter.py
+    │   │   │   │   └── test-value-validator.py
+    │   │   │   ├── value-objects/
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── test-activity.py
+    │   │   │   │   ├── test-base.py
+    │   │   │   │   ├── test-column-order.py
+    │   │   │   │   ├── test-column-qualifier.py
+    │   │   │   │   ├── test-compound-ids.py
+    │   │   │   │   ├── test-dq-metrics.py
+    │   │   │   │   ├── test-identifiers.py
+    │   │   │   │   ├── test-measurements.py
+    │   │   │   │   ├── test-publications.py
+    │   │   │   │   └── test-silver-result.py
+    │   │   │   ├── --init--.py
+    │   │   │   ├── test-config.py
+    │   │   │   ├── test-config-types.py
+    │   │   │   ├── test-config-validation.py
+    │   │   │   ├── test-entities.py
+    │   │   │   ├── test-events.py
+    │   │   │   ├── test-exceptions.py
+    │   │   │   ├── test-filter-config.py
+    │   │   │   ├── test-locking.py
+    │   │   │   ├── test-medallion.py
+    │   │   │   ├── test-normalization.py
+    │   │   │   ├── test-pipeline-config.py
+    │   │   │   ├── test-runtime-config.py
+    │   │   │   ├── test-serialization.py
+    │   │   │   ├── test-transformations.py
+    │   │   │   ├── test-types.py
+    │   │   │   └── test-validation.py
     │   │   ├── infrastructure/
     │   │   │   ├── adapters/
     │   │   │   │   ├── chembl/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   ├── test_chembl_client.py
-    │   │   │   │   │   └── test_chembl_exceptions.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   ├── test-chembl-client.py
+    │   │   │   │   │   └── test-chembl-exceptions.py
     │   │   │   │   ├── common/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   ├── test_api_request_collector.py
-    │   │   │   │   │   ├── test_base_title_fallback.py
-    │   │   │   │   │   └── test_title_matching.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   ├── test-api-request-collector.py
+    │   │   │   │   │   ├── test-base-title-fallback.py
+    │   │   │   │   │   └── test-title-matching.py
     │   │   │   │   ├── crossref/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   ├── test_batch.py
-    │   │   │   │   │   ├── test_crossref_client.py
-    │   │   │   │   │   └── test_fallback.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   ├── test-batch.py
+    │   │   │   │   │   ├── test-crossref-client.py
+    │   │   │   │   │   └── test-fallback.py
     │   │   │   │   ├── decorators/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   ├── test_circuit_breaker_decorator.py
-    │   │   │   │   │   ├── test_retry_decorator.py
-    │   │   │   │   │   └── test_wrap_with_resilience.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   ├── test-circuit-breaker-decorator.py
+    │   │   │   │   │   ├── test-retry-decorator.py
+    │   │   │   │   │   └── test-wrap-with-resilience.py
     │   │   │   │   ├── http/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   ├── test_health_monitor.py
-    │   │   │   │   │   └── test_http_client.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   ├── test-health-monitor.py
+    │   │   │   │   │   └── test-http-client.py
     │   │   │   │   ├── openalex/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   ├── test_adapter.py
-    │   │   │   │   │   └── test_fallback.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   ├── test-adapter.py
+    │   │   │   │   │   └── test-fallback.py
     │   │   │   │   ├── pubchem/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   └── test_fetch_strategies.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   └── test-fetch-strategies.py
     │   │   │   │   ├── pubmed/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   ├── test_adapter_fallback.py
-    │   │   │   │   │   ├── test_fallback.py
-    │   │   │   │   │   └── test_pubmed_client.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   ├── test-adapter-fallback.py
+    │   │   │   │   │   ├── test-fallback.py
+    │   │   │   │   │   └── test-pubmed-client.py
     │   │   │   │   ├── semanticscholar/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   ├── test_adapter.py
-    │   │   │   │   │   └── test_fallback.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   ├── test-adapter.py
+    │   │   │   │   │   └── test-fallback.py
     │   │   │   │   ├── uniprot/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   └── test_idmapping_client.py
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── test_base_metrics.py
-    │   │   │   │   ├── test_client_error_paths.py
-    │   │   │   │   ├── test_csv_filter_reader.py
-    │   │   │   │   ├── test_error_handling.py
-    │   │   │   │   ├── test_http_base.py
-    │   │   │   │   ├── test_logging_utils.py
-    │   │   │   │   ├── test_provider_names.py
-    │   │   │   │   ├── test_sync_base.py
-    │   │   │   │   └── test_validation.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   └── test-idmapping-client.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── test-base-metrics.py
+    │   │   │   │   ├── test-client-error-paths.py
+    │   │   │   │   ├── test-csv-filter-reader.py
+    │   │   │   │   ├── test-error-handling.py
+    │   │   │   │   ├── test-http-base.py
+    │   │   │   │   ├── test-logging-utils.py
+    │   │   │   │   ├── test-provider-names.py
+    │   │   │   │   ├── test-sync-base.py
+    │   │   │   │   └── test-validation.py
     │   │   │   ├── audit/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   └── test_file_audit.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   └── test-file-audit.py
     │   │   │   ├── checkpoint/
-    │   │   │   │   └── __init__.py
+    │   │   │   │   └── --init--.py
     │   │   │   ├── config/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── test_dq_config_loader.py
-    │   │   │   │   └── test_filter_config_loader.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── test-dq-config-loader.py
+    │   │   │   │   └── test-filter-config-loader.py
     │   │   │   ├── export/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   └── test_csv_exporter.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   └── test-csv-exporter.py
     │   │   │   ├── factories/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── test_factories.py
-    │   │   │   │   └── test_storage_adapter.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── test-factories.py
+    │   │   │   │   └── test-storage-adapter.py
     │   │   │   ├── locking/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   └── test_memory_lock.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   └── test-memory-lock.py
     │   │   │   ├── observability/
     │   │   │   │   ├── alerting/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── test_anomaly.py
-    │   │   │   │   ├── test_logging.py
-    │   │   │   │   ├── test_logging_config.py
-    │   │   │   │   ├── test_metrics_server_adapter.py
-    │   │   │   │   ├── test_prometheus_metrics.py
-    │   │   │   │   ├── test_server.py
-    │   │   │   │   ├── test_tracing.py
-    │   │   │   │   ├── test_unified_logger.py
-    │   │   │   │   └── test_zscore_detector.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── test-anomaly.py
+    │   │   │   │   ├── test-logging.py
+    │   │   │   │   ├── test-logging-config.py
+    │   │   │   │   ├── test-metrics-server-adapter.py
+    │   │   │   │   ├── test-prometheus-metrics.py
+    │   │   │   │   ├── test-server.py
+    │   │   │   │   ├── test-tracing.py
+    │   │   │   │   ├── test-unified-logger.py
+    │   │   │   │   └── test-zscore-detector.py
     │   │   │   ├── quarantine/
-    │   │   │   │   ├── test_unified_quarantine.py
-    │   │   │   │   └── test_unified_quarantine_security.py
+    │   │   │   │   ├── test-unified-quarantine.py
+    │   │   │   │   └── test-unified-quarantine-security.py
     │   │   │   ├── schemas/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── test_base_schemas.py
-    │   │   │   │   ├── test_common_config.py
-    │   │   │   │   ├── test_dq_config.py
-    │   │   │   │   ├── test_gold.py
-    │   │   │   │   ├── test_silver.py
-    │   │   │   │   └── test_sink_metadata_config.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── test-base-schemas.py
+    │   │   │   │   ├── test-common-config.py
+    │   │   │   │   ├── test-dq-config.py
+    │   │   │   │   ├── test-gold.py
+    │   │   │   │   ├── test-silver.py
+    │   │   │   │   └── test-sink-metadata-config.py
     │   │   │   ├── security/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   └── test_pii_hasher.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   └── test-pii-hasher.py
     │   │   │   ├── serialization/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   └── test_json_encoders.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   └── test-json-encoders.py
     │   │   │   ├── storage/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   ├── test_arrow_converter.py
-    │   │   │   │   ├── test_atomic.py
-    │   │   │   │   ├── test_base_delta_writer.py
-    │   │   │   │   ├── test_bronze_writer.py
-    │   │   │   │   ├── test_delta_reader.py
-    │   │   │   │   ├── test_deterministic_write.py
-    │   │   │   │   ├── test_gold_writer.py
-    │   │   │   │   ├── test_metadata_builder.py
-    │   │   │   │   ├── test_metadata_integration.py
-    │   │   │   │   ├── test_metadata_writer.py
-    │   │   │   │   ├── test_silver_writer.py
-    │   │   │   │   ├── test_silver_writer_validation.py
-    │   │   │   │   └── test_storage_exceptions.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   ├── test-arrow-converter.py
+    │   │   │   │   ├── test-atomic.py
+    │   │   │   │   ├── test-base-delta-writer.py
+    │   │   │   │   ├── test-bronze-writer.py
+    │   │   │   │   ├── test-delta-reader.py
+    │   │   │   │   ├── test-deterministic-write.py
+    │   │   │   │   ├── test-gold-writer.py
+    │   │   │   │   ├── test-metadata-builder.py
+    │   │   │   │   ├── test-metadata-integration.py
+    │   │   │   │   ├── test-metadata-writer.py
+    │   │   │   │   ├── test-silver-writer.py
+    │   │   │   │   ├── test-silver-writer-validation.py
+    │   │   │   │   └── test-storage-exceptions.py
     │   │   │   ├── validation/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   └── test_pandera_validator.py
-    │   │   │   ├── __init__.py
-    │   │   │   ├── test_adapters.py
-    │   │   │   ├── test_checkpoint.py
-    │   │   │   ├── test_circuit_breaker.py
-    │   │   │   ├── test_circuit_breaker_degradation.py
-    │   │   │   ├── test_config.py
-    │   │   │   ├── test_config_dynamic.py
-    │   │   │   ├── test_config_settings.py
-    │   │   │   ├── test_observability.py
-    │   │   │   ├── test_quarantine.py
-    │   │   │   ├── test_rate_limiter.py
-    │   │   │   ├── test_storage.py
-    │   │   │   └── test_storage_factory.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   └── test-pandera-validator.py
+    │   │   │   ├── --init--.py
+    │   │   │   ├── test-adapters.py
+    │   │   │   ├── test-checkpoint.py
+    │   │   │   ├── test-circuit-breaker.py
+    │   │   │   ├── test-circuit-breaker-degradation.py
+    │   │   │   ├── test-config.py
+    │   │   │   ├── test-config-dynamic.py
+    │   │   │   ├── test-config-settings.py
+    │   │   │   ├── test-observability.py
+    │   │   │   ├── test-quarantine.py
+    │   │   │   ├── test-rate-limiter.py
+    │   │   │   ├── test-storage.py
+    │   │   │   └── test-storage-factory.py
     │   │   ├── interfaces/
     │   │   │   ├── cli/
     │   │   │   │   ├── commands/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   ├── test_export.py
-    │   │   │   │   │   ├── test_health.py
-    │   │   │   │   │   ├── test_health_server_integration.py
-    │   │   │   │   │   ├── test_quarantine.py
-    │   │   │   │   │   └── test_run_composite.py
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   └── test_cli_main_module.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   ├── test-export.py
+    │   │   │   │   │   ├── test-health.py
+    │   │   │   │   │   ├── test-health-server-integration.py
+    │   │   │   │   │   ├── test-quarantine.py
+    │   │   │   │   │   └── test-run-composite.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   └── test-cli-main-module.py
     │   │   │   ├── factories/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   └── test_pipeline_factories.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   └── test-pipeline-factories.py
     │   │   │   ├── http/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   └── test_health_server.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   └── test-health-server.py
     │   │   │   ├── orchestration/
     │   │   │   │   ├── prefect/
-    │   │   │   │   ├── __init__.py
-    │   │   │   │   └── test_orchestration_init.py
-    │   │   │   ├── __init__.py
-    │   │   │   ├── test_cli.py
-    │   │   │   ├── test_cli_commands.py
-    │   │   │   ├── test_cli_run_all_vacuum_formatters.py
-    │   │   │   ├── test_exit_codes.py
-    │   │   │   ├── test_observability.py
-    │   │   │   ├── test_run_all_command.py
-    │   │   │   ├── test_run_all_service_mock.py
-    │   │   │   └── test_vacuum_commands.py
+    │   │   │   │   ├── --init--.py
+    │   │   │   │   └── test-orchestration-init.py
+    │   │   │   ├── --init--.py
+    │   │   │   ├── test-cli.py
+    │   │   │   ├── test-cli-commands.py
+    │   │   │   ├── test-cli-run-all-vacuum-formatters.py
+    │   │   │   ├── test-exit-codes.py
+    │   │   │   ├── test-observability.py
+    │   │   │   ├── test-run-all-command.py
+    │   │   │   ├── test-run-all-service-mock.py
+    │   │   │   └── test-vacuum-commands.py
     │   │   ├── pipelines/
     │   │   │   ├── chembl/
-    │   │   │   │   └── test_activity_schema_gap.py
+    │   │   │   │   └── test-activity-schema-gap.py
     │   │   │   ├── pubmed/
     │   │   │   │   ├── extractors/
-    │   │   │   │   │   ├── __init__.py
-    │   │   │   │   │   ├── test_abstract_extractor.py
-    │   │   │   │   │   ├── test_author_extractor.py
-    │   │   │   │   │   ├── test_base_field_extractor.py
-    │   │   │   │   │   ├── test_classification_extractor.py
-    │   │   │   │   │   ├── test_date_extractor.py
-    │   │   │   │   │   ├── test_extractor_edge_cases.py
-    │   │   │   │   │   ├── test_identifier_extractor.py
-    │   │   │   │   │   └── test_xml_utils.py
-    │   │   │   │   ├── test_pubmed_publication.py
-    │   │   │   │   └── test_pubmed_transformer.py
-    │   │   │   ├── __init__.py
-    │   │   │   └── test_chembl_ddd.py
-    │   │   ├── __init__.py
-    │   │   ├── test_bootstrap.py
-    │   │   ├── test_cli.py
-    │   │   ├── test_context.py
-    │   │   ├── test_error_classifier.py
-    │   │   ├── test_ports.py
-    │   │   ├── test_registry.py
-    │   │   ├── test_transformations.py
-    │   │   └── test_types.py
+    │   │   │   │   │   ├── --init--.py
+    │   │   │   │   │   ├── test-abstract-extractor.py
+    │   │   │   │   │   ├── test-author-extractor.py
+    │   │   │   │   │   ├── test-base-field-extractor.py
+    │   │   │   │   │   ├── test-classification-extractor.py
+    │   │   │   │   │   ├── test-date-extractor.py
+    │   │   │   │   │   ├── test-extractor-edge-cases.py
+    │   │   │   │   │   ├── test-identifier-extractor.py
+    │   │   │   │   │   └── test-xml-utils.py
+    │   │   │   │   ├── test-pubmed-publication.py
+    │   │   │   │   └── test-pubmed-transformer.py
+    │   │   │   ├── --init--.py
+    │   │   │   └── test-chembl-ddd.py
+    │   │   ├── --init--.py
+    │   │   ├── test-bootstrap.py
+    │   │   ├── test-cli.py
+    │   │   ├── test-context.py
+    │   │   ├── test-error-classifier.py
+    │   │   ├── test-ports.py
+    │   │   ├── test-registry.py
+    │   │   ├── test-transformations.py
+    │   │   └── test-types.py
     │   ├── verification/
-    │   ├── __init__.py
+    │   ├── --init--.py
     │   ├── conftest.py
     │   ├── strategies.py
-    │   ├── test_architecture.py
-    │   └── test_data_storage.py
+    │   ├── test-architecture.py
+    │   └── test-data-storage.py
     ├── .coverage
     ├── .editorconfig
     ├── .env
@@ -13187,8 +13187,8 @@ BioactivityDataAcquisition2/
     ├── AGENT.md
     ├── CHANGELOG.md
     ├── CLAUDE.md
-    ├── CODE_OF_CONDUCT.md
-    ├── CODE_QUALITY_REPORT.md
+    ├── CODE-OF-CONDUCT.md
+    ├── CODE-QUALITY-REPORT.md
     ├── CONTRIBUTING.md
     ├── GEMINI.md
     ├── LICENSE
@@ -13196,12 +13196,12 @@ BioactivityDataAcquisition2/
     ├── README.md
     ├── SECURITY.md
     ├── commitlint.config.js
-    ├── dev_setup.sh
+    ├── dev-setup.sh
     ├── mkdocs.yml
     ├── nul
     ├── pyproject.toml
     ├── requirements.txt
-    ├── test_output.txt
+    ├── test-output.txt
     └── uv.lock
 ```
 

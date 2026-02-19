@@ -28,7 +28,7 @@
 - **191 поле** из 5 провайдеров (ChEMBL, PubMed, CrossRef, OpenAlex, Semantic Scholar)
 - **5 уровней валидации** (base → structural → external → logical → semantic)
 - **3 режима обработки** (PASS, FAIL, WARN)
-- **2 DQ-флага** (`_dq_error`, `_dq_warn`)
+- **2 DQ-флага** (`-dq-error`, `-dq-warn`)
 
 **Ключевые принципы:**
 
@@ -61,7 +61,7 @@ graph TB
     subgraph "Storage & Observability"
         DeltaSilver[(Delta Lake<br/>Silver Layer)]
         DeltaGold[(Delta Lake<br/>Gold Layer)]
-        Quarantine[(Quarantine<br/>_dq_warn=True)]
+        Quarantine[(Quarantine<br/>-dq-warn=True)]
         Logger[Structured Logger<br/>DQ Events]
     end
 
@@ -74,9 +74,9 @@ graph TB
     ExtVal --> LogVal
     LogVal --> SemVal
 
-    SemVal -->|_dq_error=False<br/>_dq_warn=False| DeltaSilver
-    SemVal -->|_dq_warn=True| Quarantine
-    SemVal -->|_dq_error=True| Logger
+    SemVal -->|-dq-error=False<br/>-dq-warn=False| DeltaSilver
+    SemVal -->|-dq-warn=True| Quarantine
+    SemVal -->|-dq-error=True| Logger
 
     DeltaSilver --> DeltaGold
 
@@ -114,7 +114,7 @@ graph TB
 
 **Результат:**
 - `PASS` → следующий уровень
-- `FAIL` → запись отклонена (`_dq_error=True`), логируется
+- `FAIL` → запись отклонена (`-dq-error=True`), логируется
 
 **Пример:**
 ```python
@@ -148,35 +148,35 @@ class PublicationSilverSchema(DataFrameModel):
 **Когда:** После успешной Base Validation
 
 **Проверки:**
-- ✅ Page ordering: `page_first <= page_last`
-- ✅ Year consistency: `YEAR(publication_date) == publication_year`
+- ✅ Page ordering: `page-first <= page-last`
+- ✅ Year consistency: `YEAR(publication-date) == publication-year`
 - ✅ Field dependencies: `IF doi THEN title IS NOT NULL`
-- ✅ Content hash integrity: `SHA256(title + abstract + ...) == content_hash`
+- ✅ Content hash integrity: `SHA256(title + abstract + ...) == content-hash`
 
 **Результат:**
 - `PASS` → следующий уровень
-- `WARN` → `_dq_warn=True`, продолжить валидацию
+- `WARN` → `-dq-warn=True`, продолжить валидацию
 
 **Пример:**
 ```python
 class StructuralValidator:
-    def validate_page_ordering(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Check page_first <= page_last when both numeric."""
+    def validate-page-ordering(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Check page-first <= page-last when both numeric."""
         mask = (
-            df["page_first"].notna() &
-            df["page_last"].notna() &
-            df["page_first"].str.isnumeric() &
-            df["page_last"].str.isnumeric()
+            df["page-first"].notna() &
+            df["page-last"].notna() &
+            df["page-first"].str.isnumeric() &
+            df["page-last"].str.isnumeric()
         )
 
-        invalid = df[mask & (df["page_first"].astype(int) > df["page_last"].astype(int))]
+        invalid = df[mask & (df["page-first"].astype(int) > df["page-last"].astype(int))]
 
         if not invalid.empty:
-            df.loc[invalid.index, "_dq_warn"] = True
-            self._logger.warning(
-                "page_ordering_violation",
+            df.loc[invalid.index, "-dq-warn"] = True
+            self.-logger.warning(
+                "page-ordering-violation",
                 count=len(invalid),
-                record_ids=invalid.index.tolist()
+                record-ids=invalid.index.tolist()
             )
 
         return df
@@ -196,31 +196,31 @@ class StructuralValidator:
 |---------------|-----------|----------|-------------|
 | `doi` | CrossRef | `https://api.crossref.org/works/{doi}` | GET |
 | `pmid` | PubMed | `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={pmid}` | GET |
-| `pmc_id` | PMC | `https://www.ncbi.nlm.nih.gov/pmc/articles/{pmc_id}` | GET |
-| `openalex_id` | OpenAlex | `https://api.openalex.org/works/{id}` | GET |
-| `paper_id` | Semantic Scholar | `https://api.semanticscholar.org/graph/v1/paper/{id}` | GET |
-| `document_chembl_id` | ChEMBL | `https://www.ebi.ac.uk/chembl/api/data/document/{id}` | GET |
+| `pmc-id` | PMC | `https://www.ncbi.nlm.nih.gov/pmc/articles/{pmc-id}` | GET |
+| `openalex-id` | OpenAlex | `https://api.openalex.org/works/{id}` | GET |
+| `paper-id` | Semantic Scholar | `https://api.semanticscholar.org/graph/v1/paper/{id}` | GET |
+| `document-chembl-id` | ChEMBL | `https://www.ebi.ac.uk/chembl/api/data/document/{id}` | GET |
 
 **Результат:**
 - `HTTP 200` → PASS
-- `HTTP 404` → WARN (`_dq_warn=True`)
+- `HTTP 404` → WARN (`-dq-warn=True`)
 - `HTTP 429/500/timeout` → SKIP (не блокировать)
 
 **Конфигурация:**
 ```yaml
-external_verification:
+external-verification:
   enabled: true
-  batch_size: 100
+  batch-size: 100
   timeout: 10.0
-  max_retries: 3
-  retry_delay: 1.0
+  max-retries: 3
+  retry-delay: 1.0
   providers:
     crossref:
       enabled: true
-      rate_limit: 50  # requests per second
+      rate-limit: 50  # requests per second
     pubmed:
       enabled: true
-      rate_limit: 3
+      rate-limit: 3
 ```
 
 ---
@@ -232,34 +232,34 @@ external_verification:
 **Когда:** После External Verification
 
 **Проверки:**
-- ✅ Range constraints: `publication_year ∈ [1800, CURRENT_YEAR + 1]`
-- ✅ Non-negative rules: `citations_received >= 0`, `citations_made >= 0`
-- ✅ Date ordering: `date_completed <= date_revised`
-- ✅ Citation logic: `citations_received >= influential_citation_count`
+- ✅ Range constraints: `publication-year ∈ [1800, CURRENT-YEAR + 1]`
+- ✅ Non-negative rules: `citations-received >= 0`, `citations-made >= 0`
+- ✅ Date ordering: `date-completed <= date-revised`
+- ✅ Citation logic: `citations-received >= influential-citation-count`
 
 **Результат:**
 - `PASS` → следующий уровень
-- `WARN` → `_dq_warn=True`
+- `WARN` → `-dq-warn=True`
 
 **Пример:**
 ```python
 class LogicalValidator:
-    def validate_publication_year_range(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Year must be in [1800, CURRENT_YEAR + 1]."""
-        current_year = date.today().year
+    def validate-publication-year-range(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Year must be in [1800, CURRENT-YEAR + 1]."""
+        current-year = date.today().year
 
         invalid = df[
-            df["publication_year"].notna() &
-            ((df["publication_year"] < 1800) | (df["publication_year"] > current_year + 1))
+            df["publication-year"].notna() &
+            ((df["publication-year"] < 1800) | (df["publication-year"] > current-year + 1))
         ]
 
         if not invalid.empty:
-            df.loc[invalid.index, "_dq_warn"] = True
-            self._logger.warning(
-                "publication_year_out_of_range",
+            df.loc[invalid.index, "-dq-warn"] = True
+            self.-logger.warning(
+                "publication-year-out-of-range",
                 count=len(invalid),
-                min_year=invalid["publication_year"].min(),
-                max_year=invalid["publication_year"].max()
+                min-year=invalid["publication-year"].min(),
+                max-year=invalid["publication-year"].max()
             )
 
         return df
@@ -276,26 +276,26 @@ class LogicalValidator:
 **Проверки:**
 - ✅ Text similarity: `SemanticSimilarity(title, abstract) > 0.3`
 - ✅ Language detection: `Language(abstract) == language`
-- ✅ Keyword relevance: `Keywords(abstract) ∩ subject_keywords ≠ ∅`
+- ✅ Keyword relevance: `Keywords(abstract) ∩ subject-keywords ≠ ∅`
 - ✅ TLDR consistency: `SemanticSimilarity(abstract, tldr) > 0.5`
 
 **Результат:**
 - **ВСЕГДА WARN** (никогда не FAIL)
-- `_dq_warn=True` при низкой согласованности
+- `-dq-warn=True` при низкой согласованности
 
 **Важно:** Semantic validation **НЕ блокирует** записи, только помечает флагом.
 
 **Конфигурация:**
 ```yaml
-semantic_validation:
+semantic-validation:
   enabled: false  # Expensive, disabled by default
-  similarity_threshold: 0.3
-  language_detection:
+  similarity-threshold: 0.3
+  language-detection:
     enabled: true
     model: "fasttext"
-  keyword_extraction:
+  keyword-extraction:
     enabled: true
-    min_overlap: 1
+    min-overlap: 1
 ```
 
 ---
@@ -317,25 +317,25 @@ stateDiagram-v2
     ExternalVerification --> LogicalValidation: PASS/WARN
     LogicalValidation --> SemanticValidation: PASS/WARN
 
-    SemanticValidation --> Silver_Clean: _dq_warn=False<br/>_dq_error=False
-    SemanticValidation --> Silver_Quarantine: _dq_warn=True<br/>_dq_error=False
+    SemanticValidation --> Silver-Clean: -dq-warn=False<br/>-dq-error=False
+    SemanticValidation --> Silver-Quarantine: -dq-warn=True<br/>-dq-error=False
 
-    Silver_Clean --> Gold: Aggregation
-    Silver_Quarantine --> Gold: Manual review<br/>or auto-repair
+    Silver-Clean --> Gold: Aggregation
+    Silver-Quarantine --> Gold: Manual review<br/>or auto-repair
 
     Rejected --> ErrorLog: Record dropped
     ErrorLog --> [*]
 
     Gold --> [*]: Analytics ready
 
-    note right of Silver_Clean
+    note right of Silver-Clean
         Clean records:
         - All validations passed
         - No warnings
         - Ready for Gold
     end note
 
-    note right of Silver_Quarantine
+    note right of Silver-Quarantine
         Quarantine records:
         - Non-critical warnings
         - Require review
@@ -347,9 +347,9 @@ stateDiagram-v2
 
 | Флаг | Значение | Действие |
 |------|----------|----------|
-| `_dq_error=True` | Критическая ошибка (PK violation, type error) | Запись **отклонена**, не попадает в Silver |
-| `_dq_warn=True` | Некритичное предупреждение (external 404, low similarity) | Запись **помещается в карантин**, доступна для Gold с фильтрацией |
-| `_dq_warn=False`<br/>`_dq_error=False` | Все проверки пройдены | Запись **чистая**, автоматически идёт в Gold |
+| `-dq-error=True` | Критическая ошибка (PK violation, type error) | Запись **отклонена**, не попадает в Silver |
+| `-dq-warn=True` | Некритичное предупреждение (external 404, low similarity) | Запись **помещается в карантин**, доступна для Gold с фильтрацией |
+| `-dq-warn=False`<br/>`-dq-error=False` | Все проверки пройдены | Запись **чистая**, автоматически идёт в Gold |
 
 ---
 
@@ -361,8 +361,8 @@ stateDiagram-v2
 graph TB
     subgraph "Configuration Hierarchy"
         Default[Default Config<br/>application/config/validation.yaml<br/>Priority: 1]
-        Provider[Provider Config<br/>config/{provider}_validation.yaml<br/>Priority: 2]
-        Pipeline[Pipeline Config<br/>pipelines/{provider}_{entity}.yaml<br/>Priority: 3]
+        Provider[Provider Config<br/>config/{provider}-validation.yaml<br/>Priority: 2]
+        Pipeline[Pipeline Config<br/>pipelines/{provider}-{entity}.yaml<br/>Priority: 3]
         CLI[CLI Arguments<br/>--validation-mode strict<br/>Priority: 4]
     end
 
@@ -385,11 +385,11 @@ graph TB
    - Базовые правила для всех провайдеров
    - Дефолтные пороги и таймауты
 
-2. **Provider Config** (`config/chembl_validation.yaml`)
+2. **Provider Config** (`config/chembl-validation.yaml`)
    - Специфичные для провайдера настройки
    - Переопределяет Default
 
-3. **Pipeline Config** (`pipelines/chembl_compound.yaml`)
+3. **Pipeline Config** (`pipelines/chembl-compound.yaml`)
    - Настройки для конкретного pipeline (provider + entity)
    - Переопределяет Provider
 
@@ -403,26 +403,26 @@ graph TB
 validation:
   base:
     enabled: true
-    fail_on_error: true
+    fail-on-error: true
 
   structural:
     enabled: true
     rules:
-      - page_ordering
-      - year_consistency
-      - field_dependencies
+      - page-ordering
+      - year-consistency
+      - field-dependencies
 
   external:
     enabled: false  # Expensive, opt-in
     timeout: 10.0
-    max_retries: 3
+    max-retries: 3
 
   logical:
     enabled: true
     rules:
-      - year_range
-      - non_negative
-      - date_ordering
+      - year-range
+      - non-negative
+      - date-ordering
 
   semantic:
     enabled: false  # Very expensive
@@ -430,18 +430,18 @@ validation:
 
 **Пример Pipeline Override:**
 ```yaml
-# pipelines/pubmed_publication.yaml
+# pipelines/pubmed-publication.yaml
 validation:
   external:
     enabled: true  # Override: enable for PubMed
     providers:
       pubmed:
         enabled: true
-        rate_limit: 3
+        rate-limit: 3
 
   semantic:
     enabled: true  # Override: enable semantic for PubMed
-    similarity_threshold: 0.4  # Higher threshold
+    similarity-threshold: 0.4  # Higher threshold
 ```
 
 ---
@@ -468,18 +468,18 @@ sequenceDiagram
     alt Base Validation PASS
         Pandera->>StructVal: Records with types checked
     else Base Validation FAIL
-        Pandera->>Logger: Log error (_dq_error=True)
+        Pandera->>Logger: Log error (-dq-error=True)
         Logger-->>Adapter: Record rejected
     end
 
-    StructVal->>ExtVal: Records (_dq_warn may be set)
+    StructVal->>ExtVal: Records (-dq-warn may be set)
 
     alt External Check (if enabled)
         ExtVal->>ExtVal: Batch API requests
         alt ID found (HTTP 200)
             ExtVal->>LogVal: PASS
         else ID not found (HTTP 404)
-            ExtVal->>LogVal: WARN (_dq_warn=True)
+            ExtVal->>LogVal: WARN (-dq-warn=True)
         else Timeout/Rate Limit
             ExtVal->>LogVal: SKIP (no change)
         end
@@ -491,7 +491,7 @@ sequenceDiagram
 
     alt Semantic enabled
         SemVal->>SemVal: NLP similarity checks
-        SemVal->>Storage: Records (_dq_warn may be set)
+        SemVal->>Storage: Records (-dq-warn may be set)
     else Semantic disabled
         SemVal->>Storage: SKIP, pass through
     end
@@ -536,7 +536,7 @@ python -m bioetl.interfaces.cli.main run-pipeline \
 
 **Результат:**
 - Все 5 уровней активны
-- `_dq_warn=True` → запись **отклонена** (из-за `--fail-on-warn`)
+- `-dq-warn=True` → запись **отклонена** (из-за `--fail-on-warn`)
 - Максимальное качество, минимальная пропускная способность
 
 ---
@@ -552,7 +552,7 @@ python -m bioetl.interfaces.cli.main run-pipeline \
 
 **Результат:**
 - Base + Structural + Logical (без External и Semantic)
-- `_dq_warn=True` → запись **в карантине**
+- `-dq-warn=True` → запись **в карантине**
 - Хороший баланс качества и производительности
 
 ---
@@ -587,33 +587,33 @@ from bioetl.application.services.dq import (
 )
 
 # Configure validators
-config = ValidationConfig.load("config/pubmed_validation.yaml")
+config = ValidationConfig.load("config/pubmed-validation.yaml")
 
 validators = [
     BaseValidator(schema=PubMedPublicationSchema),
     StructuralValidator(config=config.structural),
-    ExternalVerifier(config=config.external, http_client=client),
+    ExternalVerifier(config=config.external, http-client=client),
     LogicalValidator(config=config.logical),
-    SemanticValidator(config=config.semantic, nlp_models=models),
+    SemanticValidator(config=config.semantic, nlp-models=models),
 ]
 
 # Run validation pipeline
-df = pd.read_parquet("silver/pubmed/publication.parquet")
+df = pd.read-parquet("silver/pubmed/publication.parquet")
 
 for validator in validators:
     df = validator.validate(df)
 
     # Log metrics
     logger.info(
-        "validation_step_complete",
-        validator=validator.__class__.__name__,
-        records_passed=len(df[df["_dq_warn"] == False]),
-        records_warned=len(df[df["_dq_warn"] == True]),
-        records_failed=len(df[df["_dq_error"] == True]),
+        "validation-step-complete",
+        validator=validator.--class--.--name--,
+        records-passed=len(df[df["-dq-warn"] == False]),
+        records-warned=len(df[df["-dq-warn"] == True]),
+        records-failed=len(df[df["-dq-error"] == True]),
     )
 
 # Write to Delta Lake
-df.to_parquet("silver/pubmed/publication_validated.parquet")
+df.to-parquet("silver/pubmed/publication-validated.parquet")
 ```
 
 ---
@@ -623,7 +623,7 @@ df.to_parquet("silver/pubmed/publication_validated.parquet")
 ### Проблема: Высокий процент WARN записей
 
 **Симптомы:**
-- > 20% записей имеют `_dq_warn=True`
+- > 20% записей имеют `-dq-warn=True`
 - Карантин переполнен
 
 **Причины:**
@@ -643,9 +643,9 @@ python -m bioetl.interfaces.cli.main run-pipeline \
     --skip-external
 
 # 3. Увеличить порог similarity
-# В config/crossref_validation.yaml:
+# В config/crossref-validation.yaml:
 semantic:
-  similarity_threshold: 0.2  # Было 0.3
+  similarity-threshold: 0.2  # Было 0.3
 ```
 
 ---
@@ -664,8 +664,8 @@ semantic:
 **Решение:**
 ```python
 # 1. Проверить реальные значения
-df = pd.read_parquet("bronze/crossref/publication.parquet")
-print(df["doi"].value_counts())
+df = pd.read-parquet("bronze/crossref/publication.parquet")
+print(df["doi"].value-counts())
 
 # 2. Ослабить regex (temporary)
 class PublicationSilverSchema(DataFrameModel):
@@ -675,9 +675,9 @@ class PublicationSilverSchema(DataFrameModel):
     )
 
 # 3. Проверить трансформер
-# src/bioetl/application/transformers/crossref_transformer.py
-def transform_doi(raw_doi: str) -> str:
-    return raw_doi.strip().lower()  # Ensure normalization
+# src/bioetl/application/transformers/crossref-transformer.py
+def transform-doi(raw-doi: str) -> str:
+    return raw-doi.strip().lower()  # Ensure normalization
 ```
 
 ---
@@ -686,7 +686,7 @@ def transform_doi(raw_doi: str) -> str:
 
 **Симптомы:**
 - Валидация зависает на External уровне
-- Логи: `external_verification_timeout`
+- Логи: `external-verification-timeout`
 
 **Причины:**
 1. Слишком низкий timeout
@@ -695,15 +695,15 @@ def transform_doi(raw_doi: str) -> str:
 
 **Решение:**
 ```yaml
-# config/pubmed_validation.yaml
-external_verification:
+# config/pubmed-validation.yaml
+external-verification:
   timeout: 30.0  # Увеличить с 10 до 30
-  batch_size: 50  # Уменьшить batch
-  max_retries: 5
-  retry_delay: 2.0
+  batch-size: 50  # Уменьшить batch
+  max-retries: 5
+  retry-delay: 2.0
   providers:
     pubmed:
-      rate_limit: 2  # Снизить с 3 до 2 RPS
+      rate-limit: 2  # Снизить с 3 до 2 RPS
 ```
 
 ---
@@ -726,44 +726,44 @@ external_verification:
 
 ```python
 # Экспортировать метрики в Prometheus
-from prometheus_client import Counter, Histogram
+from prometheus-client import Counter, Histogram
 
-validation_passed = Counter(
-    "bioetl_validation_passed_total",
+validation-passed = Counter(
+    "bioetl-validation-passed-total",
     "Records passed validation",
     ["provider", "level"]
 )
 
-validation_warned = Counter(
-    "bioetl_validation_warned_total",
+validation-warned = Counter(
+    "bioetl-validation-warned-total",
     "Records with warnings",
     ["provider", "level", "rule"]
 )
 
-validation_failed = Counter(
-    "bioetl_validation_failed_total",
+validation-failed = Counter(
+    "bioetl-validation-failed-total",
     "Records failed validation",
     ["provider", "level", "rule"]
 )
 
-validation_duration = Histogram(
-    "bioetl_validation_duration_seconds",
+validation-duration = Histogram(
+    "bioetl-validation-duration-seconds",
     "Validation duration",
     ["provider", "level"]
 )
 ```
 
 **Dashboard (Grafana):**
-- DQ Pass Rate: `validation_passed / (validation_passed + validation_warned + validation_failed)`
-- Top Failing Rules: `topk(10, validation_failed)`
-- Validation Latency: `validation_duration{quantile="0.95"}`
+- DQ Pass Rate: `validation-passed / (validation-passed + validation-warned + validation-failed)`
+- Top Failing Rules: `topk(10, validation-failed)`
+- Validation Latency: `validation-duration{quantile="0.95"}`
 
 ---
 
 ### 3. Batch External Verification
 
 ```python
-async def verify_dois_batch(dois: list[str]) -> dict[str, bool]:
+async def verify-dois-batch(dois: list[str]) -> dict[str, bool]:
     """Batch verify DOIs to reduce latency."""
     async with httpx.AsyncClient() as client:
         tasks = [
@@ -771,14 +771,14 @@ async def verify_dois_batch(dois: list[str]) -> dict[str, bool]:
             for doi in dois
         ]
 
-        responses = await asyncio.gather(*tasks, return_exceptions=True)
+        responses = await asyncio.gather(*tasks, return-exceptions=True)
 
         results = {}
         for doi, response in zip(dois, responses):
             if isinstance(response, Exception):
                 results[doi] = None  # SKIP on error
             else:
-                results[doi] = response.status_code == 200
+                results[doi] = response.status-code == 200
 
         return results
 ```
@@ -790,16 +790,16 @@ async def verify_dois_batch(dois: list[str]) -> dict[str, bool]:
 ```sql
 -- Запрос записей в карантине
 SELECT *
-FROM silver.pubmed_publication
-WHERE _dq_warn = TRUE
-ORDER BY _dq_warn_count DESC
+FROM silver.pubmed-publication
+WHERE -dq-warn = TRUE
+ORDER BY -dq-warn-count DESC
 LIMIT 100;
 
 -- Промоция в Gold после ручного review
-UPDATE silver.pubmed_publication
-SET _dq_warn = FALSE
+UPDATE silver.pubmed-publication
+SET -dq-warn = FALSE
 WHERE pmid IN ('12345678', '87654321')
-  AND manual_review_status = 'approved';
+  AND manual-review-status = 'approved';
 ```
 
 ---
@@ -811,11 +811,11 @@ import pytest
 import vcr
 
 @pytest.mark.integration
-@vcr.use_cassette("tests/fixtures/vcr/crossref_doi_valid.yaml")
-async def test_external_verification_doi():
+@vcr.use-cassette("tests/fixtures/vcr/crossref-doi-valid.yaml")
+async def test-external-verification-doi():
     """Test DOI verification with recorded HTTP response."""
     verifier = ExternalVerifier(config=config)
-    result = await verifier.verify_doi("10.1038/nature12373")
+    result = await verifier.verify-doi("10.1038/nature12373")
 
     assert result.status == "PASS"
     assert result.found is True
@@ -832,9 +832,9 @@ pytest tests/integration/validation/ --record-mode=once
 
 - **ADR-033:** Стратегия валидации публикаций
 - **Field Reference:** `docs/04-reference/publication-fields-reference.md`
-- **Validation Schema:** `docs/04-reference/schemas/publication_validation_schema_v3.xlsx`
+- **Validation Schema:** `docs/04-reference/schemas/publication-validation-schema-v3.xlsx`
 - **Operational Runbook:** `docs/05-operations/runbooks/publication-validation-runbook.md`
-- **Tests:** `tests_generated/` (471 тест)
+- **Tests:** `tests-generated/` (471 тест)
 
 ---
 

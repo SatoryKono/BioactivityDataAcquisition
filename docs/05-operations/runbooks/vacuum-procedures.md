@@ -24,8 +24,8 @@ Delta Lake tables accumulate old versions of data files for time travel and ACID
 VACUUM runs automatically after successful pipeline completion:
 
 ```python
-# From postrun_service.py
-await self.run_vacuum_if_enabled()
+# From postrun-service.py
+await self.run-vacuum-if-enabled()
 ```
 
 Configuration in pipeline YAML:
@@ -33,7 +33,7 @@ Configuration in pipeline YAML:
 storage:
   vacuum:
     enabled: true
-    retention_hours: 168  # 7 days default
+    retention-hours: 168  # 7 days default
 ```
 
 ## Manual VACUUM Procedures
@@ -49,13 +49,13 @@ dt = DeltaTable("data/output/silver/chembl/activity")
 
 # Get table info
 print(f"Version: {dt.version()}")
-print(f"Files: {len(dt.file_uris())}")
+print(f"Files: {len(dt.file-uris())}")
 print(f"Protocol: {dt.protocol()}")
 
 # Check file sizes
 import os
-total_size = sum(os.path.getsize(f) for f in dt.file_uris())
-print(f"Total size: {total_size / 1024 / 1024:.2f} MB")
+total-size = sum(os.path.getsize(f) for f in dt.file-uris())
+print(f"Total size: {total-size / 1024 / 1024:.2f} MB")
 ```
 
 ### Run VACUUM
@@ -68,13 +68,13 @@ from datetime import timedelta
 dt = DeltaTable("data/output/silver/chembl/activity")
 
 # Dry run first (shows files that would be deleted)
-dt.vacuum(retention_hours=168, dry_run=True, enforce_retention_duration=False)
+dt.vacuum(retention-hours=168, dry-run=True, enforce-retention-duration=False)
 
 # Execute VACUUM (7 day retention)
-dt.vacuum(retention_hours=168, dry_run=False, enforce_retention_duration=False)
+dt.vacuum(retention-hours=168, dry-run=False, enforce-retention-duration=False)
 ```
 
-**Warning**: `enforce_retention_duration=False` bypasses the 7-day safety check. Only use in controlled scenarios.
+**Warning**: `enforce-retention-duration=False` bypasses the 7-day safety check. Only use in controlled scenarios.
 
 ### VACUUM All Tables
 
@@ -82,26 +82,26 @@ dt.vacuum(retention_hours=168, dry_run=False, enforce_retention_duration=False)
 from pathlib import Path
 from deltalake import DeltaTable
 
-def vacuum_all_tables(base_path: str, retention_hours: int = 168):
+def vacuum-all-tables(base-path: str, retention-hours: int = 168):
     """VACUUM all Delta tables in directory."""
-    base = Path(base_path)
+    base = Path(base-path)
 
-    for table_dir in base.iterdir():
-        if not table_dir.is_dir():
+    for table-dir in base.iterdir():
+        if not table-dir.is-dir():
             continue
-        if not (table_dir / "_delta_log").exists():
+        if not (table-dir / "-delta-log").exists():
             continue
 
-        print(f"Vacuuming: {table_dir.name}")
-        dt = DeltaTable(str(table_dir))
-        dt.vacuum(retention_hours=retention_hours, dry_run=False)
-        print(f"  Version: {dt.version()}, Files: {len(dt.file_uris())}")
+        print(f"Vacuuming: {table-dir.name}")
+        dt = DeltaTable(str(table-dir))
+        dt.vacuum(retention-hours=retention-hours, dry-run=False)
+        print(f"  Version: {dt.version()}, Files: {len(dt.file-uris())}")
 
 # Run for Silver tables
-vacuum_all_tables("data/silver")
+vacuum-all-tables("data/silver")
 
 # Run for Gold tables
-vacuum_all_tables("data/gold")
+vacuum-all-tables("data/gold")
 ```
 
 ## OPTIMIZE Operations
@@ -117,7 +117,7 @@ dt = DeltaTable("data/output/silver/chembl/activity")
 dt.optimize.compact()
 
 # Z-order by frequently queried column
-dt.optimize.z_order(columns=["molecule_chembl_id"])
+dt.optimize.z-order(columns=["molecule-chembl-id"])
 ```
 
 ## Retention Guidelines
@@ -164,7 +164,7 @@ Track VACUUM metrics:
 
 Log example:
 ```
-INFO  | vacuum_completed | table=chembl_activity | files_removed=150 | bytes_freed=524288000 | duration_s=45.2
+INFO  | vacuum-completed | table=chembl-activity | files-removed=150 | bytes-freed=524288000 | duration-s=45.2
 ```
 
 ## Best Practices

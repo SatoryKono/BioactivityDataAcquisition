@@ -22,7 +22,7 @@ echo $?  # After pipeline run
 | ----------------------- | ----------------- | ---------------- |
 | 1                       | General error     | Check logs       |
 | 2                       | Invalid arguments | Review CLI args  |
-| 83 (DATA_QUALITY_ERROR) | DQ hard threshold | See DQ runbook   |
+| 83 (DATA-QUALITY-ERROR) | DQ hard threshold | See DQ runbook   |
 | 130                     | SIGINT            | Check checkpoint |
 | 143                     | SIGTERM           | Check checkpoint |
 
@@ -32,29 +32,29 @@ echo $?  # After pipeline run
 # Find recent log entries with errors
 grep -r "error\|ERROR\|exception" logs/ | tail -50
 
-# Check specific run by run_id
-grep "run_id.*<run-id>" logs/
+# Check specific run by run-id
+grep "run-id.*<run-id>" logs/
 ```
 
 Key log fields to examine:
 
-- `error_category`: CRITICAL, RECOVERABLE, or DATA_QUALITY
-- `status_code`: HTTP status if external API error
-- `retry_count`: Number of retry attempts
+- `error-category`: CRITICAL, RECOVERABLE, or DATA-QUALITY
+- `status-code`: HTTP status if external API error
+- `retry-count`: Number of retry attempts
 - `provider`: Which data source failed
 
 ### Step 3: Check Checkpoint State
 
 ```bash
-cat data/checkpoints/{provider}_{entity}.json
+cat data/checkpoints/{provider}-{entity}.json
 ```
 
 Checkpoint contains:
 
-- `last_offset`: Last successfully processed offset
-- `last_run_id`: Previous run identifier
-- `last_run_timestamp`: When last run completed
-- `total_records_processed`: Cumulative count
+- `last-offset`: Last successfully processed offset
+- `last-run-id`: Previous run identifier
+- `last-run-timestamp`: When last run completed
+- `total-records-processed`: Cumulative count
 
 ### Step 4: Identify Error Type
 
@@ -83,13 +83,13 @@ Checkpoint contains:
 For recoverable failures, simply resume:
 
 ```bash
-bioetl run --pipeline chembl_activity --resume
+bioetl run --pipeline chembl-activity --resume
 ```
 
 The pipeline will:
 
 1. Load checkpoint state
-1. Resume from `last_offset`
+1. Resume from `last-offset`
 1. Continue processing
 
 ### Force Full Refresh
@@ -98,7 +98,7 @@ If checkpoint is corrupted or data inconsistent:
 
 ```bash
 # Clear checkpoint and reprocess all data
-bioetl run --pipeline chembl_activity --run-type rebuild
+bioetl run --pipeline chembl-activity --run-type rebuild
 ```
 
 **Warning**: This will reprocess all records from the beginning.
@@ -112,13 +112,13 @@ For schema issues or data corruption:
 mv data/output/silver/chembl/activity data/output/silver/chembl/activity.bak
 
 # 2. Clear checkpoint
-rm data/checkpoints/chembl_activity.json
+rm data/checkpoints/chembl-activity.json
 
 # 3. Full refresh
-bioetl run --pipeline chembl_activity --run-type rebuild
+bioetl run --pipeline chembl-activity --run-type rebuild
 
 # 4. Verify data
-Для проверки данных используйте: `bioetl run --pipeline chembl_activity --run-type rebuild --limit 10`
+Для проверки данных используйте: `bioetl run --pipeline chembl-activity --run-type rebuild --limit 10`
 
 # 5. Remove backup if successful
 rm -rf data/output/silver/chembl/activity.bak
@@ -131,8 +131,8 @@ For 401/403 errors:
 1. Check API key validity
 1. Verify environment variables:
    ```bash
-   echo $BIOETL_CHEMBL_API_KEY
-   echo $BIOETL_UNIPROT_API_KEY
+   echo $BIOETL-CHEMBL-API-KEY
+   echo $BIOETL-UNIPROT-API-KEY
    ```
 1. Rotate API key if expired
 1. Resume pipeline
@@ -145,12 +145,12 @@ For persistent 429 errors:
 1. Reduce batch size if needed:
    ```yaml
    # configs/pipelines/chembl/activity.yaml
-   batch_size: 500  # Reduce from default
+   batch-size: 500  # Reduce from default
    ```
 1. Add delay between requests:
    ```yaml
-   rate_limit:
-     requests_per_second: 5  # Reduce if hitting limits
+   rate-limit:
+     requests-per-second: 5  # Reduce if hitting limits
    ```
 1. Resume pipeline
 

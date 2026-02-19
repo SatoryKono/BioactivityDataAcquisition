@@ -9,22 +9,22 @@ Data Quality (DQ) checks ensure data integrity throughout the pipeline. This run
 | Threshold | Default | Behavior                                              |
 | --------- | ------- | ----------------------------------------------------- |
 | Soft      | 5%      | Warning logged, pipeline continues                    |
-| Hard      | 20%     | Pipeline fails with exit code 83 (DATA_QUALITY_ERROR) |
+| Hard      | 20%     | Pipeline fails with exit code 83 (DATA-QUALITY-ERROR) |
 
 Configuration:
 
 ```yaml
 # configs/pipelines/chembl/activity.yaml
 dq:
-  soft_fail_threshold: 0.05  # 5%
-  hard_fail_threshold: 0.20  # 20%
+  soft-fail-threshold: 0.05  # 5%
+  hard-fail-threshold: 0.20  # 20%
 ```
 
 ## Symptoms
 
-- Pipeline exits with code 83 (DATA_QUALITY_ERROR, DQ hard threshold)
-- Log messages: `dq_soft_threshold_exceeded`
-- Prometheus metric: `bioetl_dq_soft_threshold_exceeded_total`
+- Pipeline exits with code 83 (DATA-QUALITY-ERROR, DQ hard threshold)
+- Log messages: `dq-soft-threshold-exceeded`
+- Prometheus metric: `bioetl-dq-soft-threshold-exceeded-total`
 - Records in quarantine directory
 
 ## Investigation Steps
@@ -34,15 +34,15 @@ dq:
 Check logs for DQ summary:
 
 ```bash
-grep "dq_check\|dq_threshold" logs/bioetl.log | tail -20
+grep "dq-check\|dq-threshold" logs/bioetl.log | tail -20
 ```
 
 Key log fields:
 
-- `dq_error_rate`: Percentage of failed records
-- `dq_errors_total`: Absolute count
-- `dq_records_processed`: Total records in batch
-- `validation_errors`: Types of failures
+- `dq-error-rate`: Percentage of failed records
+- `dq-errors-total`: Absolute count
+- `dq-records-processed`: Total records in batch
+- `validation-errors`: Types of failures
 
 ### Step 2: Examine Quarantine Records
 
@@ -64,12 +64,12 @@ Quarantine record structure:
 
 ```json
 {
-  "original_record": { ... },
-  "error_type": "validation_error",
-  "error_message": "Invalid SMILES: 'XYZ'",
-  "field": "canonical_smiles",
-  "quarantine_timestamp": "2026-01-02T14:30:00Z",
-  "run_id": "run-20260102-143022-abc123"
+  "original-record": { ... },
+  "error-type": "validation-error",
+  "error-message": "Invalid SMILES: 'XYZ'",
+  "field": "canonical-smiles",
+  "quarantine-timestamp": "2026-01-02T14:30:00Z",
+  "run-id": "run-20260102-143022-abc123"
 }
 ```
 
@@ -91,16 +91,16 @@ from collections import Counter
 from pathlib import Path
 
 # Count error types
-error_types = Counter()
-quarantine_dir = Path("data/quarantine/chembl/activity/2026-01-02")
+error-types = Counter()
+quarantine-dir = Path("data/quarantine/chembl/activity/2026-01-02")
 
-for f in quarantine_dir.glob("*.jsonl"):
-    for line in f.read_text().splitlines():
+for f in quarantine-dir.glob("*.jsonl"):
+    for line in f.read-text().splitlines():
         record = json.loads(line)
-        error_types[record.get("error_type", "unknown")] += 1
+        error-types[record.get("error-type", "unknown")] += 1
 
 print("Error distribution:")
-for error, count in error_types.most_common():
+for error, count in error-types.most-common():
     print(f"  {error}: {count}")
 ```
 
@@ -132,16 +132,16 @@ import polars as pl
 
 # Check current Silver table state
 dt = DeltaTable("data/output/silver/chembl/activity")
-df = pl.scan_delta(str(dt)).collect()
+df = pl.scan-delta(str(dt)).collect()
 
-# Count records by run_id
-run_stats = df.group_by("_run_id").agg(
+# Count records by run-id
+run-stats = df.group-by("-run-id").agg(
     [
         pl.count().alias("records"),
-        pl.col("_dq_passed").sum().alias("passed"),
+        pl.col("-dq-passed").sum().alias("passed"),
     ]
 )
-print(run_stats)
+print(run-stats)
 ```
 
 ## Resolution Procedures
@@ -155,26 +155,26 @@ import json
 from pathlib import Path
 
 
-def reprocess_quarantine(quarantine_dir: str, output_file: str):
+def reprocess-quarantine(quarantine-dir: str, output-file: str):
     """Extract and fix quarantined records."""
-    fixed_records = []
+    fixed-records = []
 
-    for f in Path(quarantine_dir).glob("*.jsonl"):
-        for line in f.read_text().splitlines():
+    for f in Path(quarantine-dir).glob("*.jsonl"):
+        for line in f.read-text().splitlines():
             record = json.loads(line)
-            original = record["original_record"]
+            original = record["original-record"]
 
             # Apply fixes based on error type
-            if record["error_type"] == "encoding_error":
+            if record["error-type"] == "encoding-error":
                 # Fix encoding
                 original["field"] = original["field"].encode("utf-8", "ignore").decode()
-                fixed_records.append(original)
+                fixed-records.append(original)
 
-    with open(output_file, "w") as f:
-        for record in fixed_records:
+    with open(output-file, "w") as f:
+        for record in fixed-records:
             f.write(json.dumps(record) + "\n")
 
-    print(f"Fixed {len(fixed_records)} records")
+    print(f"Fixed {len(fixed-records)} records")
 ```
 
 ### Option 2: Adjust Thresholds
@@ -184,8 +184,8 @@ If DQ issues are expected (e.g., known data quality in source):
 ```yaml
 # Temporarily relax thresholds
 dq:
-  soft_fail_threshold: 0.10  # 10%
-  hard_fail_threshold: 0.30  # 30%
+  soft-fail-threshold: 0.10  # 10%
+  hard-fail-threshold: 0.30  # 30%
 ```
 
 **Warning**: Document why thresholds were changed!
@@ -199,11 +199,11 @@ def transform(self, record: dict) -> dict:
     # Existing transformation
 
     # Add cleansing for known issues
-    if record.get("canonical_smiles") == "":
-        record["canonical_smiles"] = None
+    if record.get("canonical-smiles") == "":
+        record["canonical-smiles"] = None
 
-    if record.get("molecular_weight", 0) < 0:
-        record["molecular_weight"] = None
+    if record.get("molecular-weight", 0) < 0:
+        record["molecular-weight"] = None
 
     return record
 ```
@@ -214,10 +214,10 @@ For unfixable records, quarantine is the correct behavior:
 
 ```bash
 # View quarantine statistics
-bioetl quarantine stats --pipeline chembl_activity
+bioetl quarantine stats --pipeline chembl-activity
 
 # Purge old quarantine (> 30 days)
-bioetl quarantine purge --pipeline <pipeline_name> --older-than-days 30
+bioetl quarantine purge --pipeline <pipeline-name> --older-than-days 30
 ```
 
 ## Prevention
@@ -225,11 +225,11 @@ bioetl quarantine purge --pipeline <pipeline_name> --older-than-days 30
 ### Add Schema Tests
 
 ```python
-# tests/unit/test_chembl_schema.py
-def test_activity_schema_handles_null_smiles():
-    record = {"activity_id": 1, "canonical_smiles": None}
+# tests/unit/test-chembl-schema.py
+def test-activity-schema-handles-null-smiles():
+    record = {"activity-id": 1, "canonical-smiles": None}
     result = transform(record)
-    assert result["canonical_smiles"] is None
+    assert result["canonical-smiles"] is None
 ```
 
 ### Monitor DQ Trends
@@ -263,11 +263,11 @@ Maintain a list of known DQ issues:
 
 Key Prometheus metrics:
 
-- `bioetl_dq_records_processed_total{provider, entity}`
-- `bioetl_dq_records_passed_total{provider, entity}`
-- `bioetl_dq_records_failed_total{provider, entity}`
-- `bioetl_dq_soft_threshold_exceeded_total{provider, entity}`
-- `bioetl_dq_check_duration_ms{provider, entity}`
+- `bioetl-dq-records-processed-total{provider, entity}`
+- `bioetl-dq-records-passed-total{provider, entity}`
+- `bioetl-dq-records-failed-total{provider, entity}`
+- `bioetl-dq-soft-threshold-exceeded-total{provider, entity}`
+- `bioetl-dq-check-duration-ms{provider, entity}`
 
 ## Escalation
 

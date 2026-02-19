@@ -39,17 +39,17 @@ Workflow следует принципу "Safe-by-Design":
 - **Линтинг**: `make lint` (ruff + mypy).
 - **Тесты**: `make test-unit`, `make test-integration` (VCR).
 - **Архитектура**: `pytest tests/architecture/`.
-- **Конфиги**: `python scripts/validate_pipeline_configs.py`, `python scripts/config_gap_analysis.py`.
-- **Терминология**: `python scripts/lint_terminology.py`.
+- **Конфиги**: `python scripts/validate-pipeline-configs.py`, `python scripts/config-gap-analysis.py`.
+- **Терминология**: `python scripts/lint-terminology.py`.
 
 ---
 
 ## 4. Структура отчетов
 
-Отчеты сохраняются в `docs/99-archive/reports/<task_id>/` (согласно Johnny.Decimal).
+Отчеты сохраняются в `docs/99-archive/reports/<task-id>/` (согласно Johnny.Decimal).
 
 ```
-docs/99-archive/reports/<task_id>/
+docs/99-archive/reports/<task-id>/
 ├── 00-audit-baseline.md
 ├── 01-plan-initial.md
 ├── 02-test-baseline.md
@@ -77,5 +77,5 @@ docs/99-archive/reports/<task_id>/
 1. **Traceability**: Каждое изменение привязано к ID.
 2. **No Blind Changes**: Сначала `Plan`, потом `Implement`.
 3. **Architecture Gate**: Финальный аудит обязателен.
-4. **Config Compliance**: `config_gap_analysis.py` должен иметь 0 критических замечаний.
+4. **Config Compliance**: `config-gap-analysis.py` должен иметь 0 критических замечаний.
 5. **Zone Isolation**: Код в `src/`, конфиги в `configs/`, доки в `docs/`.

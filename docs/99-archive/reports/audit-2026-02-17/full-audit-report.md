@@ -31,9 +31,9 @@
 
 Zero active import boundary violations. All 9 directional checks clean.
 
-**Minor note:** Commented-out import at `src/bioetl/application/pipelines/__init__.py:13`:
+**Minor note:** Commented-out import at `src/bioetl/application/pipelines/--init--.py:13`:
 ```python
-# >>> from bioetl.composition.factories.pipeline_factories import get_factory
+# >>> from bioetl.composition.factories.pipeline-factories import get-factory
 ```
 Not an active violation but a maintenance risk.
 
@@ -47,17 +47,17 @@ All ports follow `*Port` naming convention and use `typing.Protocol`.
 
 ### ARCH-004: Adapter Health Check — PASS (false positive corrected)
 
-All 6 adapters inherit `health_check()` via `HealthCheckProviderMixin` (Template Method pattern).
-Each adapter provides a custom `_probe_health()` hook for provider-specific health probing.
+All 6 adapters inherit `health-check()` via `HealthCheckProviderMixin` (Template Method pattern).
+Each adapter provides a custom `-probe-health()` hook for provider-specific health probing.
 
-| # | Adapter | health_check() Source | Custom _probe_health() |
+| # | Adapter | health-check() Source | Custom -probe-health() |
 |---|---------|----------------------|----------------------|
 | 1 | ChemblAdapter | BaseHttpAdapter → HealthCheckProviderMixin | chembl/health.py:31 |
 | 2 | CrossRefAdapter | BaseHttpAdapter → HealthCheckProviderMixin | crossref/client.py:316 |
 | 3 | OpenAlexAdapter | BaseHttpAdapter → HealthCheckProviderMixin | openalex/client.py:629 |
 | 4 | PubChemAdapter | BaseSyncAdapter → HealthCheckProviderMixin | pubchem/client.py:256 |
 | 5 | UniProtAdapter | BaseHttpAdapter → HealthCheckProviderMixin | uniprot/client.py:645 |
-| 6 | PubMedAdapter | BaseHttpAdapter → HealthCheckProviderMixin | pubmed/_health.py:38 |
+| 6 | PubMedAdapter | BaseHttpAdapter → HealthCheckProviderMixin | pubmed/-health.py:38 |
 
 > Initial audit used `grep` on individual client files, missing inherited implementations.
 > Verified via MRO (Method Resolution Order) — no violation.
@@ -68,7 +68,7 @@ No `Factory()` calls found outside `composition/`.
 
 ### ARCH-006: Silver Layer ACID — N/A
 
-No `to_parquet`/`write_parquet` in silver storage. Silver directory structure
+No `to-parquet`/`write-parquet` in silver storage. Silver directory structure
 uses Delta Lake writers as expected.
 
 ### ARCH-008: Single Source of Port Imports — PASS
@@ -93,11 +93,11 @@ pattern, not a classical DI violation with external services.
 | File | Lines | Classes instantiated |
 |------|-------|---------------------|
 | `application/composite/merger.py` | 92-96 | EnricherDeduplicator, EnricherAggregator, ColumnRenamer, ColumnOrderer |
-| `application/core/batch_executor.py` | 153-183 | BatchMetricsRecorder, BatchTransformer, BatchWriter, BatchTracingManager |
-| `application/core/record_processor.py` | 74-92 | BatchMetricsRecorder, BatchTransformer, BatchWriter |
+| `application/core/batch-executor.py` | 153-183 | BatchMetricsRecorder, BatchTransformer, BatchWriter, BatchTracingManager |
+| `application/core/record-processor.py` | 74-92 | BatchMetricsRecorder, BatchTransformer, BatchWriter |
 | `application/composite/runner.py` | 195 | FSMStateHelper |
 | `application/core/base.py` | 103 | ShutdownSignal |
-| `application/core/lock_manager.py` | 220 | HeartbeatTask (DI-002: method-level) |
+| `application/core/lock-manager.py` | 220 | HeartbeatTask (DI-002: method-level) |
 | `application/pipelines/pubmed/extractors/date.py` | 195 | MedlineDateParser |
 
 **Mitigation:** These are internal decomposition helpers that wrap already-injected
@@ -116,8 +116,8 @@ ports. Practical impact is reduced testability (cannot mock without `unittest.mo
 ### DI-001: See AP-001 above (15 instances)
 ### DI-002: Method-level Instantiation — 1 violation
 
-`application/core/lock_manager.py:220` — `HeartbeatTask` created inside
-`start_heartbeat()` method rather than in constructor.
+`application/core/lock-manager.py:220` — `HeartbeatTask` created inside
+`start-heartbeat()` method rather than in constructor.
 
 ### DI-003: Service Locator — PASS (0 violations)
 ### DI-004: Import-time Side Effects — PASS (0 violations)
@@ -143,7 +143,7 @@ are reasonable but not in the current NAME-001 table.
 ### NAME-003: Module Naming — PASS
 
 No `utils.py`, `helpers.py`, `misc.py`, or `common.py` files exist.
-One borderline: `extractor_helpers.py` in UniProt extractors.
+One borderline: `extractor-helpers.py` in UniProt extractors.
 
 ---
 
@@ -159,18 +159,18 @@ All public functions have return type annotations.
 
 **Hotspots:**
 - UniProt extractors (12 instances) — untyped API JSON parsing
-- Transformer `entity_to_silver_record(entity: Any)` pattern (5 instances)
+- Transformer `entity-to-silver-record(entity: Any)` pattern (5 instances)
 - Domain filter config `val: Any` (4 instances)
-- `record_processor.py` `coro: Any`, `on_error: Any` (2 instances)
+- `record-processor.py` `coro: Any`, `on-error: Any` (2 instances)
 
 ### Future Annotations (PEP 563) — WARN
 
-4 non-`__init__.py` files missing `from __future__ import annotations`:
+4 non-`--init--.py` files missing `from --future-- import annotations`:
 
-1. `src/bioetl/domain/mapping/activity_fields.py`
-2. `src/bioetl/domain/mapping/molecule_fields.py`
+1. `src/bioetl/domain/mapping/activity-fields.py`
+2. `src/bioetl/domain/mapping/molecule-fields.py`
 3. `src/bioetl/infrastructure/adapters/pubmed/constants.py`
-4. `src/bioetl/interfaces/cli/__main__.py`
+4. `src/bioetl/interfaces/cli/--main--.py`
 
 ---
 
@@ -192,7 +192,7 @@ All matches were false positives (comments, docstrings, variable names).
 
 | Source | Version |
 |--------|---------|
-| `src/bioetl/__init__.py` | 5.14.0 |
+| `src/bioetl/--init--.py` | 5.14.0 |
 | `pyproject.toml` | 5.14.0 |
 | `README.md` | 5.14.0 |
 
@@ -214,14 +214,14 @@ Two different ADR-030 files exist in different directories.
 
 ### 7.5 Test Count — SIGNIFICANT DRIFT
 
-| Source | Claimed | Actual (`grep "def test_"`) |
+| Source | Claimed | Actual (`grep "def test-"`) |
 |--------|---------|----------------------------|
 | RULES.md v5.20 | ~11,985 | **9,438** |
 
 **Delta: -2,547 (21.3% overcount)**
 
 Likely cause: RULES.md may count parametrized test cases
-(`pytest --collect-only` count vs `def test_` function count).
+(`pytest --collect-only` count vs `def test-` function count).
 Methodology should be clarified in RULES.md.
 
 ### 7.6 Total Python Files — MINOR DRIFT
@@ -234,12 +234,12 @@ Methodology should be clarified in RULES.md.
 
 ARCH-001 matrix forbids `infrastructure -> composition`, but `.importlinter`
 `infrastructure-independence` contract (line 29-36) does NOT include
-`bioetl.composition` in `forbidden_modules`.
+`bioetl.composition` in `forbidden-modules`.
 
 ```ini
 # CURRENT (line 29-36):
 [importlinter:contract:infrastructure-independence]
-forbidden_modules =
+forbidden-modules =
     bioetl.application
     bioetl.interfaces
 
@@ -260,7 +260,7 @@ Correctly references RULES.md v5.20 (2026-02-16).
 | Fix | Action | Status |
 |-----|--------|--------|
 | FIX-001 | `.importlinter`: add `bioetl.composition` to infrastructure-independence | **DONE** |
-| FIX-002 | `from __future__ import annotations` in 4 files | **DONE** |
+| FIX-002 | `from --future-- import annotations` in 4 files | **DONE** |
 | FIX-003 | Orphaned ADR-030 → `docs/99-archive/decisions/` | **DONE** |
 | FIX-004 | Remove commented-out composition import | **DONE** |
 
@@ -269,7 +269,7 @@ Correctly references RULES.md v5.20 (2026-02-16).
 | Fix | Action | Status |
 |-----|--------|--------|
 | FIX-005 | `# Any: <reason>` comments on 21 unjustified instances | **DONE** (13 files) |
-| FIX-006 | RULES.md: clarify test count (`def test_`: ~9,442 vs parametrized: ~11,985) | **DONE** |
+| FIX-006 | RULES.md: clarify test count (`def test-`: ~9,442 vs parametrized: ~11,985) | **DONE** |
 | FIX-007 | RULES.md: update total Python files (~1,114 → ~1,161) | **DONE** |
 | FIX-008 | NAME-001 suffix table expanded (+11 suffixes) | **DONE** |
 
@@ -278,7 +278,7 @@ Correctly references RULES.md v5.20 (2026-02-16).
 | Fix | Action | Status | Reason |
 |-----|--------|--------|--------|
 | FIX-009 | Refactor 15 internal helper instantiations | **DEFERRED** | Large scope; internal helpers, not external DI violation |
-| FIX-010 | ARCH-004 health_check verification | **FALSE POSITIVE** | All 6 adapters inherit via HealthCheckProviderMixin |
+| FIX-010 | ARCH-004 health-check verification | **FALSE POSITIVE** | All 6 adapters inherit via HealthCheckProviderMixin |
 
 ---
 

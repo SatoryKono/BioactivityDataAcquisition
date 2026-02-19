@@ -2,22 +2,22 @@
 
 *Version 1.2.0 | Aligned with RULES.md v5.20*
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 1. Identification
 
 | Parameter        | Value                                                  |
 | ---------------- | ------------------------------------------------------ |
-| **Pipeline ID**  | `chembl_assay_parameters`                              |
+| **Pipeline ID**  | `chembl-assay-parameters`                              |
 | **Provider**     | ChEMBL (EBI)                                           |
-| **Entity**       | assay_parameters                                       |
+| **Entity**       | assay-parameters                                       |
 | **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/assay` (nested) |
-| **Library**      | `chembl_webresource_client`                            |
+| **Library**      | `chembl-webresource-client`                            |
 | **Rate Limit**   | None                                                   |
 | **Health Check** | `/chembl/api/data/status.json`                         |
 | **Auth Type**    | None (public API)                                      |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 2. Business Context
 
@@ -40,12 +40,12 @@ Assay Parameters describe **experimental conditions** for assays:
 ### 2.3. Entity Relationships
 
 ```
-assay_parameters
+assay-parameters
     │
-    └──FK──► assay.assay_id (M:1)
+    └──FK──► assay.assay-id (M:1)
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 3. Extraction (Bronze Layer)
 
@@ -53,21 +53,21 @@ ______________________________________________________________________
 
 | #   | API Field             | Type   | Nullable | Description           |
 | --- | --------------------- | ------ | -------- | --------------------- |
-| 1   | `assay_param_id`      | int    | No       | Primary key           |
-| 2   | `assay_id`            | string | No       | FK to assay           |
+| 1   | `assay-param-id`      | int    | No       | Primary key           |
+| 2   | `assay-id`            | string | No       | FK to assay           |
 | 3   | `type`                | string | No       | Parameter type        |
 | 4   | `relation`            | string | Yes      | Relation operator     |
 | 5   | `value`               | float  | Yes      | Numeric value         |
 | 6   | `units`               | string | Yes      | Original units        |
-| 7   | `text_value`          | string | Yes      | Text value            |
+| 7   | `text-value`          | string | Yes      | Text value            |
 | 8   | `comments`            | string | Yes      | Comments              |
-| 9   | `standard_type`       | string | Yes      | Standardized type     |
-| 10  | `standard_relation`   | string | Yes      | Standardized relation |
-| 11  | `standard_value`      | float  | Yes      | Standardized value    |
-| 12  | `standard_units`      | string | Yes      | Standardized units    |
-| 13  | `standard_text_value` | string | Yes      | Standardized text     |
+| 9   | `standard-type`       | string | Yes      | Standardized type     |
+| 10  | `standard-relation`   | string | Yes      | Standardized relation |
+| 11  | `standard-value`      | float  | Yes      | Standardized value    |
+| 12  | `standard-units`      | string | Yes      | Standardized units    |
+| 13  | `standard-text-value` | string | Yes      | Standardized text     |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 4. Validation
 
@@ -80,15 +80,15 @@ class AssayParametersSchema(ETLRecordSchema):
     """AssayParameters validation schema for Silver layer."""
 
     # === Primary Key ===
-    assay_param_id: Series[int] = pa.Field(
+    assay-param-id: Series[int] = pa.Field(
         nullable=False,
         ge=1,
     )
 
     # === Foreign Key ===
-    assay_id: Series[str] = pa.Field(
+    assay-id: Series[str] = pa.Field(
         nullable=False,
-        str_matches=r"^CHEMBL\d+$",
+        str-matches=r"^CHEMBL\d+$",
     )
 
     # === Parameter Type ===
@@ -98,15 +98,15 @@ class AssayParametersSchema(ETLRecordSchema):
     relation: Series[str] | None = pa.Field(nullable=True)
     value: Series[float] | None = pa.Field(nullable=True)
     units: Series[str] | None = pa.Field(nullable=True)
-    text_value: Series[str] | None = pa.Field(nullable=True)
+    text-value: Series[str] | None = pa.Field(nullable=True)
     comments: Series[str] | None = pa.Field(nullable=True)
 
     # === Standardized Values ===
-    standard_type: Series[str] | None = pa.Field(nullable=True)
-    standard_relation: Series[str] | None = pa.Field(nullable=True)
-    standard_value: Series[float] | None = pa.Field(nullable=True)
-    standard_units: Series[str] | None = pa.Field(nullable=True)
-    standard_text_value: Series[str] | None = pa.Field(nullable=True)
+    standard-type: Series[str] | None = pa.Field(nullable=True)
+    standard-relation: Series[str] | None = pa.Field(nullable=True)
+    standard-value: Series[float] | None = pa.Field(nullable=True)
+    standard-units: Series[str] | None = pa.Field(nullable=True)
+    standard-text-value: Series[str] | None = pa.Field(nullable=True)
 
     class Config:
         strict = True
@@ -114,28 +114,28 @@ class AssayParametersSchema(ETLRecordSchema):
         coerce = True
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 5. Pipeline Configuration
 
 ```yaml
-pipeline_name: chembl_assay_parameters
+pipeline-name: chembl-assay-parameters
 provider: chembl
-entity_type: assay_parameters
+entity-type: assay-parameters
 version: "1.2.0"
 
-primary_keys: ["assay_param_id"]
-silver_table: "chembl_assay_parameters"
-gold_table: "chembl_assay_parameters"
+primary-keys: ["assay-param-id"]
+silver-table: "chembl-assay-parameters"
+gold-table: "chembl-assay-parameters"
 
-gold_filters:
-  required_fields:
+gold-filters:
+  required-fields:
     - type
 
-input_filter:
+input-filter:
   enabled: true
-  source_path: "data/input/assay.csv"
-  column_name: "assay_id"
-  filter_field: "assay_id"
-  batch_size: 20
+  source-path: "data/input/assay.csv"
+  column-name: "assay-id"
+  filter-field: "assay-id"
+  batch-size: 20
 ```

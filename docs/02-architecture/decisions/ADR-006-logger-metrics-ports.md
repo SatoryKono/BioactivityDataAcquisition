@@ -48,7 +48,7 @@ logger: "structlog.BoundLogger"
 logger: LoggerPort
 
 # Tests can use any implementation
-mock_logger = MagicMock(spec=LoggerPort)
+mock-logger = MagicMock(spec=LoggerPort)
 ```
 
 ### 3. Future Flexibility
@@ -96,7 +96,7 @@ BoundLogger = LoggerPort
 ```python
 @dataclass(frozen=True)
 class PipelineServices:
-    data_source: DataSourcePort
+    data-source: DataSourcePort
     storage: StoragePort
     lock: LockPort
     checkpoint: CheckpointPort

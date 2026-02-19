@@ -20,24 +20,24 @@ This document outlines the standard operating procedures for responding to produ
 *   **Action**:
     1.  Verify the key in the secrets manager (or `.env` for local).
     2.  Rotate the key: Generate a new one from the provider's portal.
-    3.  Update the environment variable `BIOETL_{PROVIDER}_API_KEY`.
+    3.  Update the environment variable `BIOETL-{PROVIDER}-API-KEY`.
     4.  Restart the pipeline.
 
 ### 2. Rate Limit Exhausted (`429 Too Many Requests`)
-*   **Symptom**: Spike in `errors_total{type="recoverable"}` metric. Pipeline slows down effectively to a halt.
+*   **Symptom**: Spike in `errors-total{type="recoverable"}` metric. Pipeline slows down effectively to a halt.
 *   **Severity**: P2.
-*   **Diagnosis**: The configured `requests_per_second` exceeds the provider's current allowance.
+*   **Diagnosis**: The configured `requests-per-second` exceeds the provider's current allowance.
 *   **Action**:
     1.  Check the provider's status page for global issues.
     2.  Reduce the rate limit in the pipeline config (`configs/pipelines/{name}.yaml`):
         ```yaml
-        rate_limit:
-          requests_per_second: 2  # Decrease from 5
+        rate-limit:
+          requests-per-second: 2  # Decrease from 5
         ```
     3.  Redeploy/Restart the pipeline.
 
 ### 3. Schema Mismatch (Gold Layer)
-*   **Symptom**: Pipeline fails with `schema_violations > 0` and `SchemaValidationError`.
+*   **Symptom**: Pipeline fails with `schema-violations > 0` and `SchemaValidationError`.
 *   **Severity**: P1.
 *   **Diagnosis**: The source API has changed its response format (Schema Drift), breaking the Gold contract.
 *   **Action**:
@@ -53,7 +53,7 @@ This document outlines the standard operating procedures for responding to produ
     1.  Check for "zombie" processes on the worker nodes.
     2.  Manually release the lock:
         ```bash
-        make release-lock PIPELINE=chembl_activity
+        make release-lock PIPELINE=chembl-activity
         ```
     3.  Investigate why the job took so long (performance regression?).
 

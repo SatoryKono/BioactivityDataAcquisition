@@ -86,7 +86,7 @@ Ranked by architectural importance (Priority score). PNG renderings in `png/` su
 
 ## Definition of Done для новой диаграммы
 
-- [ ] Добавлен исходник `.mermaid` в `docs/02-architecture/diagrams/mermaid/`.
+- [ ] Добавлен исходник `.mermaid` в `docs/02-architecture/diagrams/`.
 - [ ] Сгенерирован `.png` в `docs/02-architecture/diagrams/png/`.
 - [ ] Добавлена строка в этот индекс (`diagrams-index.md`).
 - [ ] На архитектурной странице `docs/02-architecture/*.md` есть контекстный абзац со ссылкой на диаграмму.
@@ -103,15 +103,15 @@ python - <<'PY'
 from pathlib import Path
 import re
 
-idx = Path("diagrams-index.md").read_text(encoding="utf-8")
-table_files = sorted(set(re.findall(r"`([^`]+\.mermaid)`", idx)))
-disk_files = sorted(p.name for p in Path("mermaid").glob("*.mermaid"))
+idx = Path("diagrams-index.md").read-text(encoding="utf-8")
+table-files = sorted(set(re.findall(r"`([^`]+\.mermaid)`", idx)))
+disk-files = sorted(p.name for p in Path("mermaid").glob("*.mermaid"))
 
-missing_in_index = sorted(set(disk_files) - set(table_files))
-missing_on_disk = sorted(set(table_files) - set(disk_files))
+missing-in-index = sorted(set(disk-files) - set(table-files))
+missing-on-disk = sorted(set(table-files) - set(disk-files))
 
-print("Missing in index:", missing_in_index or "none")
-print("Missing on disk:", missing_on_disk or "none")
+print("Missing in index:", missing-in-index or "none")
+print("Missing on disk:", missing-on-disk or "none")
 PY
 ```
 
@@ -119,5 +119,5 @@ PY
 
 ```bash
 cd docs/02-architecture/diagrams
-./render_diagrams.sh
+./render-diagrams.sh
 ```

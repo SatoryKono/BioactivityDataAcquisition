@@ -27,20 +27,20 @@ This decision implements RULES.md Section 3.1.
 
 ```python
 # RetryConfig parameters
-max_attempts: 3
+max-attempts: 3
 multiplier: 2.0        # wait 1s, 2s, 4s...
 jitter: (0.1s, 0.5s)   # random range
 
 # Deterministic mode (for reproducibility)
 deterministic: True    # Hash-based jitter instead of random
-jitter_seed: 42        # Optional seed for reproducibility
+jitter-seed: 42        # Optional seed for reproducibility
 ```
 
 **Deterministic Jitter Calculation:**
 ```python
-hash_input = f"{attempt}:{url}:{seed}"
-jitter_factor = (hash(hash_input) % 1000) / 1000.0
-jitter = jitter_min + jitter_factor * (jitter_max - jitter_min)
+hash-input = f"{attempt}:{url}:{seed}"
+jitter-factor = (hash(hash-input) % 1000) / 1000.0
+jitter = jitter-min + jitter-factor * (jitter-max - jitter-min)
 ```
 
 ### 3. Circuit Breaker
@@ -51,15 +51,15 @@ State machine pattern for cascading failure protection:
          ┌─────────────────────────────────────────┐
          │                                         │
          ▼                                         │
-     ┌───────┐  failure_threshold  ┌──────┐      success
+     ┌───────┐  failure-threshold  ┌──────┐      success
      │CLOSED │ ─────────────────▶ │ OPEN │ ──────────┐
      └───────┘                     └──────┘          │
          ▲                            │              │
-         │                    recovery_timeout       │
+         │                    recovery-timeout       │
          │                            │              │
          │                            ▼              │
          │                      ┌───────────┐        │
-         └────── success ────── │ HALF_OPEN │ ───────┘
+         └────── success ────── │ HALF-OPEN │ ───────┘
                                 └───────────┘
                                       │
                                    failure
@@ -71,8 +71,8 @@ State machine pattern for cascading failure protection:
 ```
 
 **Configuration:**
-- `failure_threshold`: 5 consecutive errors
-- `recovery_timeout`: 300s (5 minutes)
+- `failure-threshold`: 5 consecutive errors
+- `recovery-timeout`: 300s (5 minutes)
 - Triggering errors: 5xx, 429, connection timeouts
 
 See [ADR-007](ADR-007-circuit-breaker-implementation.md) for implementation details.
@@ -83,17 +83,17 @@ All failed records are stored in a single quarantine table `common.quarantine`:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `ingestion_ts` | Timestamp | Time of incident |
-| `pipeline` | String | Pipeline name (e.g., `chembl_activity`) |
-| `error_code` | String | Error type (e.g., `SCHEMA_VIOLATION`) |
+| `ingestion-ts` | Timestamp | Time of incident |
+| `pipeline` | String | Pipeline name (e.g., `chembl-activity`) |
+| `error-code` | String | Error type (e.g., `SCHEMA-VIOLATION`) |
 | `payload` | JSON/Text | Raw record (**truncated to 64KB**) |
-| `payload_hash` | String | SHA256 for deduplication |
-| `bronze_batch_id` | UUID | Reference to source batch |
-| `dq_status` | String | `NEW` \| `IGNORED` \| `REPROCESSED` |
+| `payload-hash` | String | SHA256 for deduplication |
+| `bronze-batch-id` | UUID | Reference to source batch |
+| `dq-status` | String | `NEW` \| `IGNORED` \| `REPROCESSED` |
 
 **64KB Truncation Rationale:**
 - Prevents storage bloat from large malformed records
-- Maintains linkage to Bronze via `bronze_batch_id` for full payload access
+- Maintains linkage to Bronze via `bronze-batch-id` for full payload access
 - Sufficient context for debugging most issues
 
 ### 5. Batch Error Thresholds
@@ -104,8 +104,8 @@ All failed records are stored in a single quarantine table `common.quarantine`:
 | **Hard** | >20% DQ errors | Fail Batch |
 
 Metrics tracked:
-- `record_error_rate`: Ratio of bad rows
-- `entity_error_rate`: Ratio of bad unique entities
+- `record-error-rate`: Ratio of bad rows
+- `entity-error-rate`: Ratio of bad unique entities
 
 ## Justification
 
@@ -150,7 +150,7 @@ from bioetl.domain.exceptions import (
     DataQualityError,         # Log and skip
 )
 
-def handle_error(error: Exception) -> None:
+def handle-error(error: Exception) -> None:
     if isinstance(error, CriticalPipelineError):
         raise  # Pipeline fails
     elif isinstance(error, RecoverableError):
@@ -158,26 +158,26 @@ def handle_error(error: Exception) -> None:
         pass
     elif isinstance(error, DataQualityError):
         quarantine.write(
-            pipeline=context.pipeline_name,
-            error_code=error.code,
+            pipeline=context.pipeline-name,
+            error-code=error.code,
             payload=error.record,
-            bronze_batch_id=batch_id,
-            ingestion_ts=context.started_at,
+            bronze-batch-id=batch-id,
+            ingestion-ts=context.started-at,
         )
 ```
 
 ### Circuit Breaker Usage
 
 ```python
-from bioetl.infrastructure.adapters.http.circuit_breaker import (
+from bioetl.infrastructure.adapters.http.circuit-breaker import (
     CircuitBreaker,
-    is_circuit_breaker_error,
+    is-circuit-breaker-error,
 )
 
-cb = CircuitBreaker(provider="chembl", failure_threshold=5)
+cb = CircuitBreaker(provider="chembl", failure-threshold=5)
 
-async def fetch_with_protection(url: str) -> dict:
-    return await cb.call(http_client.get, url)
+async def fetch-with-protection(url: str) -> dict:
+    return await cb.call(http-client.get, url)
 ```
 
 ### Quarantine Port
@@ -187,23 +187,23 @@ class QuarantinePort(Protocol):
     async def write(
         self,
         pipeline: str,
-        error_code: str,
+        error-code: str,
         payload: dict[str, Any],
-        bronze_batch_id: BatchID,
-        run_id: RunID | None = None,
+        bronze-batch-id: BatchID,
+        run-id: RunID | None = None,
         metadata: dict[str, Any] | None = None,
         *,
-        ingestion_ts: datetime,
+        ingestion-ts: datetime,
     ) -> None: ...
 
     async def inspect(
         self,
         pipeline: str,
         limit: int = 10,
-        error_code: str | None = None,
+        error-code: str | None = None,
     ) -> list[dict[str, Any]]: ...
 
-    async def get_stats(self, pipeline: str) -> dict[str, Any]: ...
+    async def get-stats(self, pipeline: str) -> dict[str, Any]: ...
 ```
 
 ## Alternatives Considered

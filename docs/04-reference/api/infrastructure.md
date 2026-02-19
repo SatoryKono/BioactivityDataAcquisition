@@ -75,7 +75,7 @@ Observability infrastructure:
 Tracing is implemented via **Null Object Pattern** (`NoOpTracing`).
 
 **Rationale** (ADR-010, ADR-022): Local-Only Deployment does not require distributed
-tracing. Request correlation is provided via `run_id` in structured logs (RULES.md §4.5).
+tracing. Request correlation is provided via `run-id` in structured logs (RULES.md §4.5).
 
 **Extension Point**: For distributed deployment, replace `NoOpTracing` with
 `OpenTelemetryTracingAdapter` implementing `TracingPort`. The `OpenTelemetryTracer`
@@ -133,9 +133,9 @@ from bioetl.domain.ports import CircuitBreakerPort, MetricsPort, RateLimiterPort
 from bioetl.domain.resilience import RetryConfig
 
 client = UnifiedHTTPClient(
-    rate_limiter=rate_limiter,      # RateLimiterPort
-    circuit_breaker=circuit_breaker,  # CircuitBreakerPort
-    retry_config=retry_config,      # RetryConfig
+    rate-limiter=rate-limiter,      # RateLimiterPort
+    circuit-breaker=circuit-breaker,  # CircuitBreakerPort
+    retry-config=retry-config,      # RetryConfig
     metrics=metrics,                # MetricsPort
 )
 ```

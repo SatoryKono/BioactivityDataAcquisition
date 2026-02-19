@@ -11,17 +11,17 @@ Bronze/Silver/Gold Medallion layers использовали разные стр
 
 | Layer | Класс | Поля |
 |-------|-------|------|
-| Bronze | `OutputMetadata` | `total_records`, `total_bytes`, `files`, `format`, `compression` |
-| Silver | `SilverOutputMetadata` | `record_count`, `content_hash` |
-| Gold | `GoldOutputMetadata` | `record_count`, `partition_count`, `total_bytes`, `format` |
+| Bronze | `OutputMetadata` | `total-records`, `total-bytes`, `files`, `format`, `compression` |
+| Silver | `SilverOutputMetadata` | `record-count`, `content-hash` |
+| Gold | `GoldOutputMetadata` | `record-count`, `partition-count`, `total-bytes`, `format` |
 
 ### Проблемы
 
-1. **Несогласованное именование**: `total_records` vs `record_count`
+1. **Несогласованное именование**: `total-records` vs `record-count`
 2. **Отсутствует общий контракт**: Усложняет downstream-аналитику и мониторинг
-3. **Пропущенные поля**: `total_bytes` отсутствует в Silver
-4. **Нет timestamps записи**: Отсутствуют `write_started_at`/`write_completed_at`
-5. **Дублирование delta_version**: В Silver версии есть в `DeltaMetrics`, но не в output
+3. **Пропущенные поля**: `total-bytes` отсутствует в Silver
+4. **Нет timestamps записи**: Отсутствуют `write-started-at`/`write-completed-at`
+5. **Дублирование delta-version**: В Silver версии есть в `DeltaMetrics`, но не в output
 
 ## Decision
 
@@ -33,17 +33,17 @@ Bronze/Silver/Gold Medallion layers использовали разные стр
 class BaseOutputMetadata(BaseModel):
     """Base output metadata contract for all Medallion layers."""
 
-    model_config = ConfigDict(extra="forbid")
+    model-config = ConfigDict(extra="forbid")
 
-    record_count: int = Field(ge=0, description="Total records written")
-    total_bytes: int = Field(ge=0, description="Total size in bytes")
-    content_hash: str | None = Field(description="SHA256 hash for change detection")
-    write_started_at: datetime | None = Field(description="Write start timestamp")
-    write_completed_at: datetime | None = Field(description="Write completion timestamp")
+    record-count: int = Field(ge=0, description="Total records written")
+    total-bytes: int = Field(ge=0, description="Total size in bytes")
+    content-hash: str | None = Field(description="SHA256 hash for change detection")
+    write-started-at: datetime | None = Field(description="Write start timestamp")
+    write-completed-at: datetime | None = Field(description="Write completion timestamp")
 
-    @computed_field
+    @computed-field
     @property
-    def write_duration_ms(self) -> int | None:
+    def write-duration-ms(self) -> int | None:
         """Calculate write duration in milliseconds."""
 ```
 
@@ -56,11 +56,11 @@ class BronzeOutputExt(BaseModel):
     compression: str = "zstd"
 
 class SilverOutputExt(BaseModel):
-    delta_version_before: int | None
-    delta_version_after: int | None
+    delta-version-before: int | None
+    delta-version-after: int | None
 
 class GoldOutputExt(BaseModel):
-    partition_count: int = 0
+    partition-count: int = 0
     format: Literal["delta", "parquet"] = "delta"
 ```
 
@@ -69,15 +69,15 @@ class GoldOutputExt(BaseModel):
 ```python
 class BronzeMetadata(BaseModel):
     output: BaseOutputMetadata          # Unified base
-    output_ext: BronzeOutputExt         # Layer-specific
+    output-ext: BronzeOutputExt         # Layer-specific
 
 class SilverMetadata(BaseModel):
     output: BaseOutputMetadata          # Unified base
-    output_ext: SilverOutputExt         # Layer-specific
+    output-ext: SilverOutputExt         # Layer-specific
 
 class GoldMetadata(BaseModel):
     output: BaseOutputMetadata          # Unified base
-    output_ext: GoldOutputExt           # Layer-specific
+    output-ext: GoldOutputExt           # Layer-specific
 ```
 
 ### Metadata Schema Version Bump
@@ -97,13 +97,13 @@ class OutputMetadata(BaseModel):
         Will be removed in v6.0.
     """
 
-    def __init__(self, **data: object) -> None:
+    def --init--(self, **data: object) -> None:
         warnings.warn(
             "OutputMetadata is deprecated, use BaseOutputMetadata + BronzeOutputExt...",
             DeprecationWarning,
             stacklevel=2,
         )
-        super().__init__(**data)
+        super().--init--(**data)
 ```
 
 ## Consequences
@@ -111,19 +111,19 @@ class OutputMetadata(BaseModel):
 ### Positive
 
 1. **Unified analytics**: Все слои экспортируют одинаковые базовые метрики
-2. **Duration tracking**: `write_duration_ms` доступен через computed field
-3. **Change detection**: `content_hash` доступен на всех слоях
+2. **Duration tracking**: `write-duration-ms` доступен через computed field
+3. **Change detection**: `content-hash` доступен на всех слоях
 4. **Monitoring consistency**: Prometheus/Grafana dashboards могут использовать единый набор метрик
 5. **Type safety**: `extra="forbid"` предотвращает случайные поля
 
 ### Negative
 
-1. **Breaking change**: Существующий код использующий `output.total_records` (Bronze) требует обновления
+1. **Breaking change**: Существующий код использующий `output.total-records` (Bronze) требует обновления
 2. **Schema migration**: Существующие sidecar-файлы v1.0 не совместимы с v1.1
 
 ### Neutral
 
-- Delta versions дублируются в Silver: `DeltaMetrics.version_*` и `SilverOutputExt.delta_version_*`
+- Delta versions дублируются в Silver: `DeltaMetrics.version-*` и `SilverOutputExt.delta-version-*`
 - Это осознанное решение для полноты output-контракта
 
 ## Implementation
@@ -134,14 +134,14 @@ class OutputMetadata(BaseModel):
 - `src/bioetl/domain/models/metadata.py` — BaseOutputMetadata, *OutputExt классы
 
 **DTOs:**
-- `src/bioetl/domain/ports/metadata_coordinator.py` — Добавлены `version_before`, `total_bytes`, `partition_count`
+- `src/bioetl/domain/ports/metadata-coordinator.py` — Добавлены `version-before`, `total-bytes`, `partition-count`
 
 **Services:**
-- `src/bioetl/composition/services/metadata_coordinator.py` — Обновлены create_*_metadata методы
+- `src/bioetl/composition/services/metadata-coordinator.py` — Обновлены create-*-metadata методы
 
 **Infrastructure:**
-- `src/bioetl/infrastructure/storage/bronze_writer.py` — _build_full_bronze_metadata
-- `src/bioetl/infrastructure/storage/metadata_builder.py` — Silver/Gold builders
+- `src/bioetl/infrastructure/storage/bronze-writer.py` — -build-full-bronze-metadata
+- `src/bioetl/infrastructure/storage/metadata-builder.py` — Silver/Gold builders
 
 ### JSON Output Format
 
@@ -149,8 +149,8 @@ class OutputMetadata(BaseModel):
 ```json
 {
   "output": {
-    "total_records": 1000,
-    "total_bytes": 50000,
+    "total-records": 1000,
+    "total-bytes": 50000,
     "files": [...]
   }
 }
@@ -160,13 +160,13 @@ class OutputMetadata(BaseModel):
 ```json
 {
   "output": {
-    "record_count": 1000,
-    "total_bytes": 50000,
-    "content_hash": "sha256:...",
-    "write_started_at": "2026-01-23T12:00:00Z",
-    "write_completed_at": "2026-01-23T12:00:05Z"
+    "record-count": 1000,
+    "total-bytes": 50000,
+    "content-hash": "sha256:...",
+    "write-started-at": "2026-01-23T12:00:00Z",
+    "write-completed-at": "2026-01-23T12:00:05Z"
   },
-  "output_ext": {
+  "output-ext": {
     "files": [...],
     "format": "jsonl+zstd",
     "compression": "zstd"
@@ -178,11 +178,11 @@ class OutputMetadata(BaseModel):
 
 ### Unit Tests
 
-- `tests/unit/domain/models/test_metadata_output.py` — BaseOutputMetadata, *OutputExt
+- `tests/unit/domain/models/test-metadata-output.py` — BaseOutputMetadata, *OutputExt
 
 ### Architecture Tests
 
-- `tests/architecture/test_metadata_output_contract.py` — Contract validation
+- `tests/architecture/test-metadata-output-contract.py` — Contract validation
 
 ## References
 

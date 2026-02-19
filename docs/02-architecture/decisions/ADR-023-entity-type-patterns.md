@@ -1,4 +1,4 @@
-# ADR-023: Паттерны передачи entity_type в трансформерах
+# ADR-023: Паттерны передачи entity-type в трансформерах
 
 **Status:** Accepted
 **Date:** 2026-01-06
@@ -7,62 +7,62 @@
 
 ## Context
 
-При анализе интерфейсов трансформеров выявлено 3 паттерна передачи `entity_type`:
+При анализе интерфейсов трансформеров выявлено 3 паттерна передачи `entity-type`:
 
 ### Исходная Проблема
 
-`BaseTransformer.__init__()` принимает опциональный параметр `entity_type`:
+`BaseTransformer.--init--()` принимает опциональный параметр `entity-type`:
 
 ```python
-def __init__(
+def --init--(
     self,
     provider: str,
-    entity_type: str | None = None,  # Default: "unknown"
+    entity-type: str | None = None,  # Default: "unknown"
     ...
 ) -> None:
-    self.entity_type = entity_type or "unknown"
+    self.entity-type = entity-type or "unknown"
 ```
 
-Параметр `entity_type` используется для:
-- **Metrics labels**: `transform_duration_seconds{entity_type="..."}`, `transform_errors_total{entity_type="..."}`
-- **Tracing attributes**: `bioetl.entity_type` в span
-- **Entity ID generation**: `compute_entity_id()` формирует `{provider}:{entity_type}:{source_id}`
+Параметр `entity-type` используется для:
+- **Metrics labels**: `transform-duration-seconds{entity-type="..."}`, `transform-errors-total{entity-type="..."}`
+- **Tracing attributes**: `bioetl.entity-type` в span
+- **Entity ID generation**: `compute-entity-id()` формирует `{provider}:{entity-type}:{source-id}`
 
 ### Выявленные Паттерны
 
-| Паттерн | Описание | Количество | Итоговый entity_type |
+| Паттерн | Описание | Количество | Итоговый entity-type |
 |---------|----------|------------|----------------------|
-| **A** | ChEMBL через `BaseChemblTransformer` (не передаёт entity_type) | 12 | `"unknown"` |
-| **B** | Явная передача entity_type в `super().__init__()` | 6 | Корректный |
-| **C** | Нет entity_type, нет entity_class (PubMed) | 1 | `"unknown"` |
+| **A** | ChEMBL через `BaseChemblTransformer` (не передаёт entity-type) | 12 | `"unknown"` |
+| **B** | Явная передача entity-type в `super().--init--()` | 6 | Корректный |
+| **C** | Нет entity-type, нет entity-class (PubMed) | 1 | `"unknown"` |
 
-**Проблема**: 13 из 19 трансформеров имели `entity_type = "unknown"`, что приводило к потере ценной информации в метриках и трейсинге.
+**Проблема**: 13 из 19 трансформеров имели `entity-type = "unknown"`, что приводило к потере ценной информации в метриках и трейсинге.
 
 ### Паттерн A: ChEMBL (BaseChemblTransformer)
 
 ```python
 class BaseChemblTransformer(BaseTransformer):
-    entity_class: ClassVar[type[BaseEntity]]  # ✅ Определён
+    entity-class: ClassVar[type[BaseEntity]]  # ✅ Определён
 
-    def __init__(self, provider: str = "chembl", ...):
-        super().__init__(
+    def --init--(self, provider: str = "chembl", ...):
+        super().--init--(
             provider,
-            # entity_type НЕ передаётся! → "unknown"
+            # entity-type НЕ передаётся! → "unknown"
             tracer=tracer,
             ...
         )
 ```
 
-Все 12 ChEMBL трансформеров наследуют `BaseChemblTransformer` и получают `entity_type = "unknown"`.
+Все 12 ChEMBL трансформеров наследуют `BaseChemblTransformer` и получают `entity-type = "unknown"`.
 
 ### Паттерн B: Явная передача
 
 ```python
 class CrossRefPublicationTransformer(BaseTransformer):
-    def __init__(self, provider: str = "crossref", ...):
-        super().__init__(
+    def --init--(self, provider: str = "crossref", ...):
+        super().--init--(
             provider,
-            entity_type="publication",  # ✅ Явно передано
+            entity-type="publication",  # ✅ Явно передано
             ...
         )
 ```
@@ -71,45 +71,45 @@ class CrossRefPublicationTransformer(BaseTransformer):
 
 ```python
 class PubMedPublicationTransformer(BaseTransformer):
-    def __init__(self, provider: str = "pubmed", ...):
-        super().__init__(
+    def --init--(self, provider: str = "pubmed", ...):
+        super().--init--(
             provider,
-            # entity_type НЕ передаётся → "unknown"
+            # entity-type НЕ передаётся → "unknown"
             ...
         )
 ```
 
 ## The Decision
 
-### 1. Auto-derive entity_type в BaseChemblTransformer
+### 1. Auto-derive entity-type в BaseChemblTransformer
 
-`BaseChemblTransformer` автоматически выводит `entity_type` из `entity_class.__name__.lower()`:
+`BaseChemblTransformer` автоматически выводит `entity-type` из `entity-class.--name--.lower()`:
 
 ```python
 class BaseChemblTransformer(BaseTransformer):
-    entity_class: ClassVar[type[BaseEntity]]
+    entity-class: ClassVar[type[BaseEntity]]
 
-    def __init__(self, provider: str = "chembl", ...):
-        # Auto-derive entity_type from entity_class ClassVar
-        entity_type = self.entity_class.__name__.lower()
+    def --init--(self, provider: str = "chembl", ...):
+        # Auto-derive entity-type from entity-class ClassVar
+        entity-type = self.entity-class.--name--.lower()
 
-        super().__init__(
+        super().--init--(
             provider,
-            entity_type=entity_type,  # ✅ Автоматически
+            entity-type=entity-type,  # ✅ Автоматически
             ...
         )
 ```
 
 ### 2. Явная передача для non-ChEMBL трансформеров
 
-Трансформеры, не использующие `entity_class` ClassVar, должны явно передавать `entity_type`:
+Трансформеры, не использующие `entity-class` ClassVar, должны явно передавать `entity-type`:
 
 ```python
 class PubMedPublicationTransformer(BaseTransformer):
-    def __init__(self, provider: str = "pubmed", ...):
-        super().__init__(
+    def --init--(self, provider: str = "pubmed", ...):
+        super().--init--(
             provider,
-            entity_type="publication",  # ✅ Явно
+            entity-type="publication",  # ✅ Явно
             ...
         )
 ```
@@ -121,38 +121,38 @@ class PubMedPublicationTransformer(BaseTransformer):
 Auto-derive подход не требует изменений в существующих ChEMBL трансформерах:
 
 ```python
-# До: entity_type = "unknown"
+# До: entity-type = "unknown"
 class ActivityTransformer(BaseChemblTransformer):
-    entity_class = Bioactivity
+    entity-class = Bioactivity
     ...
 
-# После: entity_type = "bioactivity" (автоматически)
+# После: entity-type = "bioactivity" (автоматически)
 # Код трансформера не изменился
 ```
 
 ### 2. Консистентность с DRY
 
-`entity_class` уже определён как ClassVar в каждом ChEMBL трансформере. Дублирование `entity_type` нарушало бы DRY:
+`entity-class` уже определён как ClassVar в каждом ChEMBL трансформере. Дублирование `entity-type` нарушало бы DRY:
 
 ```python
 # ❌ DRY violation
 class ActivityTransformer(BaseChemblTransformer):
-    entity_class = Bioactivity
-    entity_type = "bioactivity"  # Дублирование!
+    entity-class = Bioactivity
+    entity-type = "bioactivity"  # Дублирование!
 ```
 
 ### 3. Observability (O1 Requirements)
 
-Осмысленные метки `entity_type` критичны для observability:
+Осмысленные метки `entity-type` критичны для observability:
 
 ```promql
 # До: все ChEMBL трансформеры неразличимы
-transform_duration_seconds{provider="chembl", entity_type="unknown"}
+transform-duration-seconds{provider="chembl", entity-type="unknown"}
 
 # После: гранулярные метрики
-transform_duration_seconds{provider="chembl", entity_type="bioactivity"}
-transform_duration_seconds{provider="chembl", entity_type="assay"}
-transform_duration_seconds{provider="chembl", entity_type="molecule"}
+transform-duration-seconds{provider="chembl", entity-type="bioactivity"}
+transform-duration-seconds{provider="chembl", entity-type="assay"}
+transform-duration-seconds{provider="chembl", entity-type="molecule"}
 ```
 
 ### 4. Tracing Attributes
@@ -161,10 +161,10 @@ Span атрибуты становятся информативными:
 
 ```json
 {
-  "name": "transform_record",
+  "name": "transform-record",
   "attributes": {
     "bioetl.provider": "chembl",
-    "bioetl.entity_type": "bioactivity"  // ← Вместо "unknown"
+    "bioetl.entity-type": "bioactivity"  // ← Вместо "unknown"
   }
 }
 ```
@@ -175,12 +175,12 @@ Span атрибуты становятся информативными:
 
 | Файл | Изменение |
 |------|-----------|
-| `application/pipelines/chembl/base_chembl_transformer.py` | Auto-derive `entity_type` из `entity_class` |
-| `application/pipelines/pubmed/transformer.py` | Явная передача `entity_type="publication"` |
+| `application/pipelines/chembl/base-chembl-transformer.py` | Auto-derive `entity-type` из `entity-class` |
+| `application/pipelines/pubmed/transformer.py` | Явная передача `entity-type="publication"` |
 
-### Результирующие entity_type
+### Результирующие entity-type
 
-| Трансформер | entity_class | entity_type |
+| Трансформер | entity-class | entity-type |
 |-------------|--------------|-------------|
 | ActivityTransformer | Bioactivity | `"bioactivity"` |
 | AssayTransformer | Assay | `"assay"` |
@@ -198,25 +198,25 @@ Span атрибуты становятся информативными:
 
 ## Alternatives Considered
 
-### 1. Explicit entity_type in each transformer
+### 1. Explicit entity-type in each transformer
 
 ```python
 class ActivityTransformer(BaseChemblTransformer):
-    entity_class = Bioactivity
-    entity_type = "activity"  # Explicit
+    entity-class = Bioactivity
+    entity-type = "activity"  # Explicit
 ```
 
 **Rejected** because:
 - Requires changes to all 12 ChEMBL transformers
-- Duplicates information (entity_class already provides this)
+- Duplicates information (entity-class already provides this)
 - Prone to inconsistencies (typos, naming variations)
 
 ### 2. Mapping dictionary
 
 ```python
-_ENTITY_TYPE_MAP = {
+-ENTITY-TYPE-MAP = {
     "Bioactivity": "activity",
-    "ProteinClassification": "protein_class",
+    "ProteinClassification": "protein-class",
     ...
 }
 ```
@@ -226,24 +226,24 @@ _ENTITY_TYPE_MAP = {
 - Must be updated when new entities added
 - Simple `.lower()` is sufficient for now
 
-### 3. entity_type parameter with default
+### 3. entity-type parameter with default
 
 ```python
 class BaseChemblTransformer(BaseTransformer):
-    def __init__(self, entity_type: str | None = None, ...):
-        derived = entity_type or self.entity_class.__name__.lower()
-        super().__init__(entity_type=derived, ...)
+    def --init--(self, entity-type: str | None = None, ...):
+        derived = entity-type or self.entity-class.--name--.lower()
+        super().--init--(entity-type=derived, ...)
 ```
 
 **Rejected** because:
 - Over-engineering for no clear benefit
-- Nobody needs to override entity_type for ChEMBL transformers
+- Nobody needs to override entity-type for ChEMBL transformers
 
 ## Consequences
 
 ### Positive
 
-- **(+) Meaningful metrics labels**: All transformers now have informative `entity_type`
+- **(+) Meaningful metrics labels**: All transformers now have informative `entity-type`
 - **(+) Better tracing**: Span attributes identify exact entity being transformed
 - **(+) Zero code changes in transformers**: Auto-derive approach is transparent
 - **(+) DRY principle**: No duplication of entity information
@@ -267,4 +267,4 @@ If more readable names needed, a mapping dictionary can be added later without b
 
 ## Related Documents
 
-- **Audit Report**: `docs/audits/entity_type_audit.md` — detailed analysis of all 19 transformers
+- **Audit Report**: `docs/audits/entity-type-audit.md` — detailed analysis of all 19 transformers

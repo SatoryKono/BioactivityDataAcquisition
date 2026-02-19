@@ -15,7 +15,7 @@ skips and duplicates.
 ## Decision (Summary)
 
 Treat OpenAlex publication pipelines as **full-scan only** and disable checkpoint resume.
-Deduplication occurs in Silver via `content_hash`.
+Deduplication occurs in Silver via `content-hash`.
 
 Full details and cross-provider context are documented in:
 - [ADR-030: Publication Pagination Strategy](ADR-030-publication-pagination-strategy.md)
