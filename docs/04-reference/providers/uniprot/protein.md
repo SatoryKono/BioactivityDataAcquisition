@@ -48,4 +48,4 @@
 
 - [Running Pipelines](../../03-guides/running-pipelines.md) - Запуск пайплайнов
 - [ChEMBL Activity](../chembl/activity.md) - Детальная документация (пример)
-- [Project Rules](../../RULES.md) - Правила обработки данных
+- [Project Rules](../../00-project/RULES.md) - Правила обработки данных

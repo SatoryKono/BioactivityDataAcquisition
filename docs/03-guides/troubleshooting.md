@@ -63,4 +63,4 @@
 - [Getting Started](getting-started.md) — первичная настройка
 - [ADR-010: Local-Only Deployment](../02-architecture/decisions/ADR-010-local-only-deployment.md) — режим локального запуска
 - [Local Storage Layout](local-storage-layout.md) — структура `data/` и слоёв хранения
-- [Project Rules](../RULES.md) — пороги качества данных и обработка ошибок
+- [Project Rules](../00-project/RULES.md) — пороги качества данных и обработка ошибок

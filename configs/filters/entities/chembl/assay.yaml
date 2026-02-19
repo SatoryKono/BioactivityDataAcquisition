@@ -14,11 +14,11 @@ entity: assay
 # -----------------------------------------------------------------------------
 # Filter assays by assay_chembl_id from CSV
 input_filter:
-  enabled: true
-  source_path: "data/input/assay.csv"
-  column_name: "assay_chembl_id"
-  filter_field: "assay_id"
-  batch_size: 20
+    enabled: true
+    source_path: "data/input/assay.csv"
+    column_name: "assay_chembl_id"
+    filter_field: "assay_id"
+    batch_size: 20
 
 # ---------------------------------------------------------------------------
 # Extraction-Level Filtering (ADR-028 §3)
@@ -43,7 +43,7 @@ extraction_params:
     assay_type__in: "B,F"
 
     # High confidence only (8 or 9 on the 0-9 scale)
-    confidence_score__gte: 8
+    confidence_score__gte: 8,9
 
     # Direct interaction only (exclude Homologous, Not-determined, etc.)
     relationship_type: "D"
@@ -60,9 +60,9 @@ silver_filters:
     # Column value filters — strict inclusion lists
     columns:
         # Binding (B) and Functional (F) assays only
-        assay_type: [B, F]
+        assay_type: [ B, F ]
         # Direct interaction only
-        relationship_type: [D]
+        relationship_type: [ D ]
 
     # Numeric range filters
     ranges:
@@ -84,16 +84,16 @@ silver_filters:
 # -----------------------------------------------------------------------------
 # Criteria for high-quality assay data
 gold_filters:
-  # Column value filters
-  columns:
-    # Binding (B) and Functional (F) assays
-    assay_type: [B, F]
-    # High confidence scores only (8 or 9 on 0-9 scale)
-    confidence_score: ["8", "9"]
-    # Direct interaction only
-    relationship_type: [D]
+    # Column value filters
+    columns:
+        # Binding (B) and Functional (F) assays
+        assay_type: [ B, F ]
+        # High confidence scores only (8 or 9 on 0-9 scale)
+        confidence_score: [ "8", "9" ]
+        # Direct interaction only
+        relationship_type: [ D ]
 
-  # Required fields
-  required_fields:
-    - assay_type
-    - description
+    # Required fields
+    required_fields:
+        - assay_type
+        - description

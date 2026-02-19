@@ -319,5 +319,5 @@ class ChemblEntityMapper:
 ## References
 
 - [glossary.md](../../glossary.md) — Ubiquitous Language definitions
-- [RULES.md §8.2](../../RULES.md) — Domain Layer guidelines
+- [RULES.md §8.2](../../00-project/RULES.md) — Domain Layer guidelines
 - [ADR-021](ADR-021-ddd-aggregates-adoption.md) — DDD Aggregates

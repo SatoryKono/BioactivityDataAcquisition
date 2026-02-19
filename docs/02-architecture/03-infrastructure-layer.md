@@ -168,4 +168,4 @@ ______________________________________________________________________
 - [Domain Layer](01-domain-layer.md) — порты, реализуемые адаптерами
 - [Composition Layer](05-composition-layer.md) — фабрики создания адаптеров
 - [API Reference: Infrastructure](../04-reference/api/infrastructure.md) — API документация слоя
-- [RULES.md §3 "Ошибки"](../RULES.md) — классификация ошибок, retry logic
+- [RULES.md §3 "Ошибки"](../00-project/RULES.md) — классификация ошибок, retry logic

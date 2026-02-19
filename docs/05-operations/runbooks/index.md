@@ -39,7 +39,7 @@ This section contains playbooks for handling common alerts and operational tasks
 
 ## See Also
 - [README](README.md) - Overview and quick links
-- [RULES.md](../../RULES.md) - Project rules and governance
+- [RULES.md](../../00-project/RULES.md) - Project rules and governance
 - [ADR-008: Graceful Shutdown](../../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)
 
 ---

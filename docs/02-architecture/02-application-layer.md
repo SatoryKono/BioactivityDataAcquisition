@@ -239,4 +239,4 @@ ______________________________________________________________________
 - [Domain Layer](01-domain-layer.md) — порты, используемые Application
 - [Composition Layer](05-composition-layer.md) — сборка и DI пайплайнов
 - [API Reference: Application](../04-reference/api/application.md) — API документация слоя
-- [RULES.md §1 "Архитектура и Слои"](../RULES.md) — матрица импортов
+- [RULES.md §1 "Архитектура и Слои"](../00-project/RULES.md) — матрица импортов
