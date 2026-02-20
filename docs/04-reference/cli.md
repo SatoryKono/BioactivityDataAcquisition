@@ -61,7 +61,7 @@ bioetl run --pipeline <NAME> [OPTIONS]
 | `--vacuum-retention-days`            | int    | 7             | Retention для VACUUM (дней)                       |
 | `--debug`                            | flag   | False         | Включить DEBUG логирование                        |
 | `--health-server/--no-health-server` | flag   | True          | Включить HTTP health server                       |
-| `--health-port`                      | int    | 8080          | Порт для health server                            |
+| `--health-port`                      | int    | 8081          | Порт для health server                            |
 
 **Примеры:**
 
@@ -368,7 +368,7 @@ bioetl checkpoint list --pipeline <NAME>
 #### `health server` — HTTP health server
 
 ```bash
-bioetl health server [--host 127.0.0.1] [--port 8080]
+bioetl health server [--host 127.0.0.1] [--port 8081]
 ```
 
 **Endpoints:**

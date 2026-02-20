@@ -42,11 +42,22 @@ class HealthServer:
     async def start(self) -> None:
         """Start the health server."""
         self._start_time = time.monotonic()
-        self._server = await asyncio.start_server(
-            self._handle_connection,
-            self.host,
-            self.port,
-        )
+        try:
+            self._server = await asyncio.start_server(
+                self._handle_connection,
+                self.host,
+                self.port,
+                reuse_address=True,
+            )
+        except OSError as exc:
+            if self._logger:
+                self._logger.warning(
+                    "health_server_bind_failed",
+                    host=self.host,
+                    port=self.port,
+                    error=str(exc),
+                )
+            raise
         if self._logger:
             self._logger.info("health_server_started", host=self.host, port=self.port)
 
@@ -284,7 +295,7 @@ class HealthServer:
 
 async def run_health_server(
     host: str = "0.0.0.0",
-    port: int = 8080,
+    port: int = 8081,
     health_monitor: HealthMonitorPort | None = None,
     logger: LoggerPort | None = None,
 ) -> None:
