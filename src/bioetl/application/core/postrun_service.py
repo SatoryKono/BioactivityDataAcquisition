@@ -35,8 +35,11 @@ if TYPE_CHECKING:
         BronzeDQConfigPort,
         GoldDQConfigPort,
         LoggerPort,
+        MetadataCoordinatorPort,
+        MetadataWriterPort,
         MetricsPort,
         SilverDQConfigPort,
+        StoragePort,
         TracingPort,
     )
 
@@ -319,6 +322,7 @@ class PostrunService:
             try:
                 # Use internal storage helper if available or standard reader
                 from deltalake import DeltaTable
+
                 dt = DeltaTable(str(silver_path))
                 version_after = dt.version()
             except Exception:
@@ -356,6 +360,7 @@ class PostrunService:
             version_after = None
             try:
                 from deltalake import DeltaTable
+
                 dt = DeltaTable(str(gold_path))
                 version_after = dt.version()
             except Exception:

@@ -141,6 +141,7 @@ def mock_storage() -> MagicMock:
 def mock_context() -> MagicMock:
     """Create a mock pipeline context."""
     from datetime import UTC, datetime
+
     context = MagicMock()
     context.started_at = datetime.now(UTC)
     return context
