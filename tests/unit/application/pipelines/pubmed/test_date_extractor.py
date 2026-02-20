@@ -1,7 +1,10 @@
-
 import pytest
 from xml.etree.ElementTree import Element, SubElement
-from bioetl.application.pipelines.pubmed.extractors.date import DateExtractor, MedlineDateParser
+from bioetl.application.pipelines.pubmed.extractors.date import (
+    DateExtractor,
+    MedlineDateParser,
+)
+
 
 @pytest.mark.unit
 class TestDateExtractorSingleton:
@@ -39,8 +42,8 @@ class TestDateExtractorSingleton:
         extractor = DateExtractor()
         raw = extractor.extract(root)
 
-        assert raw['year'] == "2023"
-        assert raw['month'] == "Feb"
+        assert raw["year"] == "2023"
+        assert raw["month"] == "Feb"
 
     def test_calendar_import_moved(self):
         """Test that calendar logic still works correctly."""

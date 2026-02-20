@@ -36,6 +36,7 @@ import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import DeltaError, SchemaMismatchError
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
+
 from bioetl.domain.exceptions import (
     MergeConflictError,
     PolicyViolationError,
