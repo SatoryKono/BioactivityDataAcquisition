@@ -113,7 +113,8 @@
       "Bash(bash -n:*)",
       "Bash(mmdc:*)",
       "Bash(npm --version:*)",
-      "Bash(where:*)"
+      "Bash(where:*)",
+      "Bash(git branch:*)"
     ]
   },
   "enabledPlugins": {
