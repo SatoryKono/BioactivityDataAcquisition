@@ -18,4 +18,5 @@ dev_setup.sh
 mkdocs.yml
 pyproject.toml
 requirements.txt
+run_extract.bat
 uv.lock

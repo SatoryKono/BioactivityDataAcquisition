@@ -1,7 +1,3 @@
-content_hash:
-  include: []
-  exclude: []
-
 # configs/schemas/composite/assay.yaml
 # =============================================================================
 # Data Schema for Composite Assay Pipeline

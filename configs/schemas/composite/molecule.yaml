@@ -1,7 +1,3 @@
-content_hash:
-  include: []
-  exclude: []
-
 # configs/schemas/composite/molecule.yaml
 # =============================================================================
 # Data Schema for Composite Molecule Pipeline
