@@ -3,7 +3,10 @@
     "list": [
       {
         "builtIn": 1,
-        "datasource": "-- Grafana --",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
@@ -15,11 +18,14 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 2,
+  "id": null,
   "links": [],
   "panels": [
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -90,16 +96,19 @@
       },
       "targets": [
         {
-          "expr": "bioetl_circuit_breaker_state",
-          "legendFormat": "Circuit Breaker State",
+          "expr": "bioetl_circuit_breaker_state{adapter=~\"$adapter\"}",
+          "legendFormat": "{{adapter}}",
           "refId": "A"
         }
       ],
-      "title": "Circuit Breaker State (if available)",
+      "title": "Circuit Breaker State",
       "type": "timeseries"
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -141,8 +150,8 @@
       },
       "targets": [
         {
-          "expr": "sum(bioetl_circuit_breaker_success_total)",
-          "legendFormat": "Success",
+          "expr": "sum(bioetl_circuit_breaker_success_total{adapter=~\"$adapter\"}) by (adapter)",
+          "legendFormat": "{{adapter}}",
           "refId": "A"
         }
       ],
@@ -150,7 +159,10 @@
       "type": "stat"
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -200,8 +212,8 @@
       },
       "targets": [
         {
-          "expr": "sum(bioetl_circuit_breaker_failure_total)",
-          "legendFormat": "Failures",
+          "expr": "sum(bioetl_circuit_breaker_failure_total{adapter=~\"$adapter\"}) by (adapter)",
+          "legendFormat": "{{adapter}}",
           "refId": "A"
         }
       ],
@@ -209,7 +221,10 @@
       "type": "stat"
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -251,8 +266,8 @@
       },
       "targets": [
         {
-          "expr": "sum(bioetl_circuit_breaker_trips_total)",
-          "legendFormat": "Trips",
+          "expr": "sum(bioetl_circuit_breaker_trips_total{adapter=~\"$adapter\"}) by (adapter)",
+          "legendFormat": "{{adapter}}",
           "refId": "A"
         }
       ],
@@ -260,7 +275,10 @@
       "type": "stat"
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -311,11 +329,37 @@
       "type": "stat"
     }
   ],
-  "schemaVersion": 27,
+  "schemaVersion": 30,
   "style": "dark",
   "tags": ["bioetl"],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(bioetl_circuit_breaker_state, adapter)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Adapter",
+        "multi": true,
+        "name": "adapter",
+        "options": [],
+        "query": "label_values(bioetl_circuit_breaker_state, adapter)",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
   },
   "time": {
     "from": "now-6h",
