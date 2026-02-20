@@ -39,6 +39,7 @@ class DataQualityService:
         _logger: Structured logger for DQ events.
         _metrics: Optional metrics port for observability.
         _pipeline_name: Pipeline name for metric labels.
+        _entity_type: Entity type for metric labels.
     """
 
     def __init__(
@@ -48,6 +49,7 @@ class DataQualityService:
         logger: LoggerPort,
         metrics: MetricsPort | None,
         pipeline_name: str,
+        entity_type: str,
     ) -> None:
         """Initialize DataQualityService.
 
@@ -57,12 +59,14 @@ class DataQualityService:
             logger: Structured logger for DQ events.
             metrics: Optional metrics port for observability.
             pipeline_name: Pipeline name for metric labels.
+            entity_type: Entity type for metric labels.
         """
         self._dq_monitor = dq_monitor
         self._config = config
         self._logger = logger
         self._metrics = metrics
         self._pipeline_name = pipeline_name
+        self._entity_type = entity_type
 
     async def evaluate(
         self,
@@ -86,6 +90,13 @@ class DataQualityService:
             DataQualityThresholdError: If error rate exceeds hard threshold.
         """
         error_rate = metrics.get("error_rate", 0.0)
+
+        # Emit validation score gauge (1.0 - error_rate)
+        if self._metrics:
+            labels = {"pipeline": self._pipeline_name, "entity": self._entity_type}
+            self._metrics.set_gauge("dq_validation_score", 1.0 - error_rate, labels)
+            # Reset freshness to 0 (meaning "just updated")
+            self._metrics.set_gauge("data_freshness_seconds", 0.0, labels)
 
         # Check hard threshold first - raises if exceeded
         self._check_hard_threshold(error_rate)

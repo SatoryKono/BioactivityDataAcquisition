@@ -3,7 +3,10 @@
     "list": [
       {
         "builtIn": 1,
-        "datasource": "-- Grafana --",
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
@@ -20,7 +23,10 @@
   "links": [],
   "panels": [
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "Total records quarantined",
       "fieldConfig": {
         "defaults": {
@@ -71,7 +77,7 @@
       },
       "targets": [
         {
-          "expr": "sum(bioetl_dq_records_quarantined_total)",
+          "expr": "sum(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\"})",
           "legendFormat": "Quarantined",
           "refId": "A"
         }
@@ -80,7 +86,10 @@
       "type": "stat"
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "Validation score (1.0 = all valid)",
       "fieldConfig": {
         "defaults": {
@@ -135,7 +144,7 @@
       },
       "targets": [
         {
-          "expr": "sum(bioetl_dq_validation_score)",
+          "expr": "sum(bioetl_dq_validation_score{pipeline=~\"$pipeline\"})",
           "legendFormat": "DQ Score",
           "refId": "A"
         }
@@ -144,7 +153,10 @@
       "type": "gauge"
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "Baseline samples count",
       "fieldConfig": {
         "defaults": {
@@ -187,7 +199,7 @@
       },
       "targets": [
         {
-          "expr": "sum(bioetl_dq_baseline_samples)",
+          "expr": "sum(bioetl_dq_baseline_samples{pipeline=~\"$pipeline\"})",
           "legendFormat": "Baseline",
           "refId": "A"
         }
@@ -196,7 +208,10 @@
       "type": "stat"
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "Quarantine rate per second (5m rate)",
       "fieldConfig": {
         "defaults": {
@@ -265,8 +280,8 @@
       },
       "targets": [
         {
-          "expr": "rate(bioetl_dq_records_quarantined_total[5m])",
-          "legendFormat": "Quarantine Rate",
+          "expr": "rate(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\"}[5m])",
+          "legendFormat": "{{pipeline}} / {{error_type}}",
           "refId": "A"
         }
       ],
@@ -274,7 +289,10 @@
       "type": "timeseries"
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "Anomalies detected (5m rate)",
       "fieldConfig": {
         "defaults": {
@@ -342,8 +360,8 @@
       },
       "targets": [
         {
-          "expr": "rate(bioetl_dq_anomaly_detected_total[5m])",
-          "legendFormat": "Anomalies",
+          "expr": "rate(bioetl_dq_anomaly_detected_total{pipeline=~\"$pipeline\"}[5m])",
+          "legendFormat": "{{pipeline}} / {{metric}}",
           "refId": "A"
         }
       ],
@@ -351,7 +369,10 @@
       "type": "timeseries"
     },
     {
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "DQ check duration percentiles",
       "fieldConfig": {
         "defaults": {
@@ -409,7 +430,7 @@
       "id": 9,
       "options": {
         "legend": {
-          "calcs": ["mean", "p95"],
+          "calcs": ["mean", "max"],
           "displayMode": "table",
           "placement": "bottom"
         },
@@ -420,17 +441,17 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, rate(bioetl_dq_check_duration_ms_bucket[5m]))",
+          "expr": "histogram_quantile(0.50, rate(bioetl_dq_check_duration_ms_bucket{pipeline=~\"$pipeline\"}[5m]))",
           "legendFormat": "p50",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.95, rate(bioetl_dq_check_duration_ms_bucket[5m]))",
+          "expr": "histogram_quantile(0.95, rate(bioetl_dq_check_duration_ms_bucket{pipeline=~\"$pipeline\"}[5m]))",
           "legendFormat": "p95",
           "refId": "B"
         },
         {
-          "expr": "histogram_quantile(0.99, rate(bioetl_dq_check_duration_ms_bucket[5m]))",
+          "expr": "histogram_quantile(0.99, rate(bioetl_dq_check_duration_ms_bucket{pipeline=~\"$pipeline\"}[5m]))",
           "legendFormat": "p99",
           "refId": "C"
         }
@@ -444,7 +465,33 @@
   "style": "dark",
   "tags": ["bioetl", "dq", "data-quality"],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(bioetl_dq_records_quarantined_total, pipeline)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Pipeline",
+        "multi": true,
+        "name": "pipeline",
+        "options": [],
+        "query": "label_values(bioetl_dq_records_quarantined_total, pipeline)",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
   },
   "time": {
     "from": "now-6h",
