@@ -34,7 +34,11 @@ from typing import TYPE_CHECKING, Any, Literal
 import orjson
 import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
-from deltalake.exceptions import DeltaError, SchemaMismatchError
+from deltalake.exceptions import (
+    CommitFailedError,
+    DeltaError,
+    SchemaMismatchError,
+)
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
 from bioetl.domain.exceptions import (
@@ -257,6 +261,9 @@ class SilverWriter(BaseDeltaWriter):
             ),
         )
 
+    _MERGE_MAX_RETRIES = 3
+    _MERGE_RETRY_DELAY = 0.5  # seconds, doubles each attempt
+
     async def _write_merge(
         self,
         table_path: str,
@@ -264,16 +271,32 @@ class SilverWriter(BaseDeltaWriter):
         primary_keys: list[str],
         partition_cols: list[str] | None,
     ) -> None:
-        """Write data using merge/upsert strategy."""
+        """Write data using merge/upsert strategy with conflict retry."""
         loop = asyncio.get_running_loop()
-        try:
-            dt = await loop.run_in_executor(
-                None,
-                lambda: DeltaTable(table_path),
-            )
-            await self._merge_records(dt, data, primary_keys)
-        except DeltaTableNotFoundError:
-            await self._write_append(table_path, data, partition_cols)
+        for attempt in range(self._MERGE_MAX_RETRIES + 1):
+            try:
+                dt = await loop.run_in_executor(
+                    None,
+                    lambda: DeltaTable(table_path),
+                )
+                await self._merge_records(dt, data, primary_keys)
+                return
+            except DeltaTableNotFoundError:
+                await self._write_append(table_path, data, partition_cols)
+                return
+            except CommitFailedError:
+                if attempt == self._MERGE_MAX_RETRIES:
+                    raise
+                delay = self._MERGE_RETRY_DELAY * (2**attempt)
+                if self.logger:
+                    self.logger.warning(
+                        "silver_merge_conflict_retry",
+                        attempt=attempt + 1,
+                        max_retries=self._MERGE_MAX_RETRIES,
+                        delay=delay,
+                        table_path=table_path,
+                    )
+                await asyncio.sleep(delay)
 
     def _validate_write_mode(self, mode: str) -> SilverWriteMode:
         """Validate and convert write mode string to enum."""

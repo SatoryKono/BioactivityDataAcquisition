@@ -3,10 +3,7 @@
     "list": [
       {
         "builtIn": 1,
-        "datasource": {
-          "type": "grafana",
-          "uid": "-- Grafana --"
-        },
+        "datasource": "-- Grafana --",
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
@@ -22,10 +19,7 @@
   "links": [],
   "panels": [
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+      "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -66,7 +60,7 @@
       },
       "targets": [
         {
-          "expr": "rate(bioetl_records_processed_total{pipeline=~\"$pipeline\"}[5m])",
+          "expr": "rate(bioetl_records_processed_total[5m])",
           "legendFormat": "{{pipeline}} / {{stage}}",
           "refId": "A"
         }
@@ -75,10 +69,7 @@
       "type": "timeseries"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
+      "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -119,7 +110,7 @@
       },
       "targets": [
         {
-          "expr": "rate(bioetl_errors_total{pipeline=~\"$pipeline\"}[5m])",
+          "expr": "rate(bioetl_errors_total[5m])",
           "legendFormat": "{{pipeline}} / {{error_code}}",
           "refId": "A"
         }
@@ -128,11 +119,7 @@
       "type": "timeseries"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Pipeline execution duration percentiles (p50, p95, p99)",
+      "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -171,17 +158,17 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"$pipeline\"}[5m]))",
+          "expr": "histogram_quantile(0.50, rate(bioetl_pipeline_duration_seconds_bucket[5m]))",
           "legendFormat": "p50",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.95, rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"$pipeline\"}[5m]))",
+          "expr": "histogram_quantile(0.95, rate(bioetl_pipeline_duration_seconds_bucket[5m]))",
           "legendFormat": "p95",
           "refId": "B"
         },
         {
-          "expr": "histogram_quantile(0.99, rate(bioetl_pipeline_duration_seconds_bucket{pipeline=~\"$pipeline\"}[5m]))",
+          "expr": "histogram_quantile(0.99, rate(bioetl_pipeline_duration_seconds_bucket[5m]))",
           "legendFormat": "p99",
           "refId": "C"
         }
@@ -190,11 +177,7 @@
       "type": "timeseries"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Batch size distribution percentiles",
+      "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -232,12 +215,12 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, rate(bioetl_batch_size_records_bucket{pipeline=~\"$pipeline\"}[5m]))",
+          "expr": "histogram_quantile(0.50, rate(bioetl_batch_size_records_bucket[5m]))",
           "legendFormat": "p50",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.95, rate(bioetl_batch_size_records_bucket{pipeline=~\"$pipeline\"}[5m]))",
+          "expr": "histogram_quantile(0.95, rate(bioetl_batch_size_records_bucket[5m]))",
           "legendFormat": "p95",
           "refId": "B"
         }
@@ -246,11 +229,7 @@
       "type": "timeseries"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Seconds since last successful data ingestion",
+      "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -286,7 +265,7 @@
       },
       "targets": [
         {
-          "expr": "bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}",
+          "expr": "bioetl_data_freshness_seconds",
           "legendFormat": "{{pipeline}} / {{entity}}",
           "refId": "A"
         }
@@ -295,11 +274,7 @@
       "type": "stat"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Total unique IDs loaded from input filter sources",
+      "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -333,7 +308,7 @@
       },
       "targets": [
         {
-          "expr": "sum(bioetl_filter_ids_loaded_total{pipeline=~\"$pipeline\"}) by (pipeline)",
+          "expr": "sum(bioetl_filter_ids_loaded_total) by (pipeline)",
           "legendFormat": "{{pipeline}}",
           "refId": "A"
         }
@@ -342,11 +317,7 @@
       "type": "stat"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Duplicate IDs found in input filter sources",
+      "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -382,7 +353,7 @@
       },
       "targets": [
         {
-          "expr": "sum(bioetl_filter_ids_duplicates_total{pipeline=~\"$pipeline\"}) by (pipeline)",
+          "expr": "sum(bioetl_filter_ids_duplicates_total) by (pipeline)",
           "legendFormat": "{{pipeline}}",
           "refId": "A"
         }
@@ -395,35 +366,7 @@
   "schemaVersion": 30,
   "style": "dark",
   "tags": ["bioetl"],
-  "templating": {
-    "list": [
-      {
-        "allValue": ".*",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "definition": "label_values(bioetl_records_processed_total, pipeline)",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Pipeline",
-        "multi": true,
-        "name": "pipeline",
-        "options": [],
-        "query": "label_values(bioetl_records_processed_total, pipeline)",
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 1,
-        "type": "query"
-      }
-    ]
-  },
+  "templating": { "list": [] },
   "time": {
     "from": "now-6h",
     "to": "now"
@@ -434,5 +377,5 @@
   "timezone": "",
   "title": "BioETL Overview",
   "uid": "bioetl-overview",
-  "version": 2
+  "version": 3
 }
