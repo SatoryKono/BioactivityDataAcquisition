@@ -290,6 +290,10 @@ class MetadataCoordinator:
         Returns:
             Complete SilverMetadata for sidecar file.
         """
+        # Validate records (REQ-METADATA-001)
+        if not input_data.records and input_data.total_records is None:
+            raise ValueError("Cannot create Silver metadata without records")
+
         # Build lineage from records and bronze_refs
         if input_data.source_batch_ids is not None:
             source_batch_ids = input_data.source_batch_ids
@@ -372,8 +376,8 @@ class MetadataCoordinator:
 
         # Build unified output metadata (ADR-029)
         output = BaseOutputMetadata(
-            record_count=rec_count,
-            total_bytes=getattr(input_data, "total_bytes", 0),
+            record_count=rec_count or 0,
+            total_bytes=getattr(input_data, "total_bytes", 0) or 0,
             write_started_at=input_data.started_at,
             write_completed_at=input_data.completed_at,
         )
@@ -388,7 +392,7 @@ class MetadataCoordinator:
             runtime=self._build_runtime_metadata(
                 started_at=input_data.started_at,
                 completed_at=input_data.completed_at,
-                duration_seconds=duration_seconds,
+                duration_seconds=duration_seconds or 0.0,
             ),
             pipeline=self._build_pipeline_metadata(),
             lineage=lineage,
@@ -492,6 +496,10 @@ class MetadataCoordinator:
         Returns:
             Complete GoldMetadata for sidecar file.
         """
+        # Validate records (REQ-METADATA-001)
+        if not input_data.records and input_data.total_records is None:
+            raise ValueError("Cannot create Gold metadata without records")
+
         # Build lineage from Silver refs (REQ-LINEAGE-002: Silver → Gold tracking)
         source_tables: dict[str, int] = {}
         if input_data.silver_refs:
@@ -523,6 +531,7 @@ class MetadataCoordinator:
             if input_data.total_records is not None
             else len(input_data.records or [])
         )
+        rec_count = rec_count or 0
         dq_summary = DQSummary(
             total_records=rec_count,
             valid_records=rec_count,
@@ -541,8 +550,8 @@ class MetadataCoordinator:
         )
 
         output = BaseOutputMetadata(
-            record_count=rec_count,
-            total_bytes=getattr(input_data, "total_bytes", 0),
+            record_count=rec_count or 0,
+            total_bytes=getattr(input_data, "total_bytes", 0) or 0,
             write_started_at=getattr(input_data, "started_at", None),
             write_completed_at=input_data.completed_at,
             composite_run_id=composite_ext.composite_run_id if composite_ext else None,
@@ -574,6 +583,7 @@ class MetadataCoordinator:
         return GoldMetadata(  # type: ignore[call-arg]
             runtime=self._build_runtime_metadata(
                 completed_at=input_data.completed_at,
+                duration_seconds=0.0,  # Gold duration currently not tracked per batch
             ),
             pipeline=self._build_pipeline_metadata(),
             lineage=lineage,
@@ -583,6 +593,7 @@ class MetadataCoordinator:
             output_ext=output_ext,
             scd=scd,
             environment=self._get_environment_metadata(),
+            dq_report_path=input_data.dq_report_path,
             governance=input_data.governance,
         )
 

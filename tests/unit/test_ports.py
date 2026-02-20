@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any
 
 import pytest
@@ -154,7 +155,9 @@ class TestStoragePortProtocol:
                 mode: Literal["merge", "append", "delete"] = "merge",
                 partition_cols: list[str] | None = None,
                 on_schema_mismatch: Literal["error", "evolve", "ignore"] = "error",
+                column_order: list[str] | None = None,
                 bronze_refs: list[BronzeWriteResult] | None = None,
+                key_nullability_rules: list[Any] | None = None,
             ) -> SilverWriteResult | None:
                 return None
 
@@ -166,11 +169,18 @@ class TestStoragePortProtocol:
                 primary_keys: list[str] | None = None,
                 mode: Literal["overwrite", "append", "scd2"] = "overwrite",
                 *,
-                ingestion_ts: Any = None,
-                run_id: Any = None,
+                scd_config: dict[str, Any] | None = None,
+                column_order: list[str] | None = None,
+                ingestion_ts: datetime | None = None,
+                run_id: RunID | None = None,
                 silver_refs: list[Any] | None = None,
             ) -> None:
                 pass
+
+            def get_table_path(self, table_name: str) -> Any:
+                from pathlib import Path
+
+                return Path("/tmp") / table_name
 
             async def read_silver(
                 self,
@@ -412,7 +422,6 @@ class TestQuarantinePortProtocol:
     def test_valid_quarantine_implementation(self) -> None:
         """QuarantinePort should accept valid implementations."""
         from collections.abc import Iterator
-        from datetime import datetime
 
         from bioetl.domain.types import QuarantineRecordStatus
 
@@ -475,7 +484,6 @@ class TestQuarantinePortProtocol:
     def test_missing_write_fails(self) -> None:
         """QuarantinePort should reject implementations missing write."""
         from collections.abc import Iterator
-        from datetime import datetime
 
         from bioetl.domain.types import QuarantineRecordStatus
 

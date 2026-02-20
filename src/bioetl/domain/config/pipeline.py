@@ -7,7 +7,7 @@ configuration for a single ETL pipeline run.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config._converters import freeze_sequences, resolve_loading_strategy
@@ -66,6 +66,9 @@ class PipelineConfig:
 
     # SCD Type 2 configuration (Gold layer)
     scd_config: dict[str, str] | None = None
+
+    # Gold schema for validation
+    gold_schema: Any | None = None
 
     def __post_init__(self) -> None:
         """Convert lists to tuples and validate configuration on creation."""

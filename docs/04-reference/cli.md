@@ -34,33 +34,34 @@ bioetl run --help
 Выполняет ETL-пайплайн для указанной сущности.
 
 **Синтаксис:**
+
 ```bash
 bioetl run --pipeline <NAME> [OPTIONS]
 ```
 
 **Обязательные параметры:**
 
-| Параметр | Описание |
-|----------|----------|
+| Параметр            | Описание                                                  |
+|---------------------|-----------------------------------------------------------|
 | `--pipeline <NAME>` | Имя пайплайна (соответствует YAML в `configs/pipelines/`) |
 
 **Опции:**
 
-| Опция | Тип | По умолчанию | Описание |
-|-------|-----|--------------|----------|
-| `--run-type` | choice | `incremental` | Тип запуска: `incremental`, `backfill`, `rebuild` |
-| `--limit` | int | None | Максимальное количество записей |
-| `--resume` | flag | False | Продолжить с последнего checkpoint |
-| `--dry-run` | flag | False | Предпросмотр без записи данных |
-| `--yes`, `-y` | flag | False | Пропустить подтверждение для rebuild/backfill |
-| `--input-csv` | path | None | Путь к CSV с ID для фильтрации |
-| `--filter-column` | str | `id` | Имя колонки в CSV с ID |
-| `--filter-field` | str | varies | Поле API для фильтрации |
-| `--vacuum-after-run` | flag | None | Запустить VACUUM после успешного выполнения |
-| `--vacuum-retention-days` | int | 7 | Retention для VACUUM (дней) |
-| `--debug` | flag | False | Включить DEBUG логирование |
-| `--health-server/--no-health-server` | flag | True | Включить HTTP health server |
-| `--health-port` | int | 8080 | Порт для health server |
+| Опция                                | Тип    | По умолчанию  | Описание                                          |
+|--------------------------------------|--------|---------------|---------------------------------------------------|
+| `--run-type`                         | choice | `incremental` | Тип запуска: `incremental`, `backfill`, `rebuild` |
+| `--limit`                            | int    | None          | Максимальное количество записей                   |
+| `--resume`                           | flag   | False         | Продолжить с последнего checkpoint                |
+| `--dry-run`                          | flag   | False         | Предпросмотр без записи данных                    |
+| `--yes`, `-y`                        | flag   | False         | Пропустить подтверждение для rebuild/backfill     |
+| `--input-csv`                        | path   | None          | Путь к CSV с ID для фильтрации                    |
+| `--filter-column`                    | str    | `id`          | Имя колонки в CSV с ID                            |
+| `--filter-field`                     | str    | varies        | Поле API для фильтрации                           |
+| `--vacuum-after-run`                 | flag   | None          | Запустить VACUUM после успешного выполнения       |
+| `--vacuum-retention-days`            | int    | 7             | Retention для VACUUM (дней)                       |
+| `--debug`                            | flag   | False         | Включить DEBUG логирование                        |
+| `--health-server/--no-health-server` | flag   | True          | Включить HTTP health server                       |
+| `--health-port`                      | int    | 8080          | Порт для health server                            |
 
 **Примеры:**
 
@@ -92,22 +93,22 @@ bioetl run --pipeline chembl-activity --debug
 
 **Типы запуска:**
 
-| Тип | Описание | Очистка данных |
-|-----|----------|----------------|
-| `incremental` | Обработка новых записей с последнего checkpoint | Нет |
-| `backfill` | Обработка определённого диапазона | Silver/Gold |
-| `rebuild` | Полная перезагрузка всех данных | Bronze/Silver/Gold |
+| Тип           | Описание                                        | Очистка данных     |
+|---------------|-------------------------------------------------|--------------------|
+| `incremental` | Обработка новых записей с последнего checkpoint | Нет                |
+| `backfill`    | Обработка определённого диапазона               | Silver/Gold        |
+| `rebuild`     | Полная перезагрузка всех данных                 | Bronze/Silver/Gold |
 
 **Exit Codes:**
 
-| Код | Значение |
-|-----|----------|
-| 0 | Успешное выполнение |
-| 82 | Ошибка выполнения пайплайна |
-| 83 | Превышен порог Data Quality |
-| 84 | Ошибка захвата блокировки |
-| 86 | Сетевая ошибка |
-| 130 | Прервано (Ctrl+C) |
+| Код | Значение                    |
+|-----|-----------------------------|
+| 0   | Успешное выполнение         |
+| 82  | Ошибка выполнения пайплайна |
+| 83  | Превышен порог Data Quality |
+| 84  | Ошибка захвата блокировки   |
+| 86  | Сетевая ошибка              |
+| 130 | Прервано (Ctrl+C)           |
 
 ---
 
@@ -116,21 +117,22 @@ bioetl run --pipeline chembl-activity --debug
 Последовательно выполняет все пайплайны для указанного провайдера.
 
 **Синтаксис:**
+
 ```bash
 bioetl run-all --source <PROVIDER> [OPTIONS]
 ```
 
 **Опции:**
 
-| Опция | Тип | По умолчанию | Описание |
-|-------|-----|--------------|----------|
-| `--source` | str | Required | Имя провайдера (chembl, pubchem, uniprot и др.) |
-| `--run-type` | choice | `incremental` | Тип запуска |
-| `--limit` | int | None | Лимит записей для каждого пайплайна |
-| `--dry-run` | flag | False | Показать пайплайны без выполнения |
-| `--yes`, `-y` | flag | False | Пропустить подтверждение |
-| `--list-only` | flag | False | Только показать список пайплайнов |
-| `--debug` | flag | False | DEBUG логирование |
+| Опция         | Тип    | По умолчанию  | Описание                                        |
+|---------------|--------|---------------|-------------------------------------------------|
+| `--source`    | str    | Required      | Имя провайдера (chembl, pubchem, uniprot и др.) |
+| `--run-type`  | choice | `incremental` | Тип запуска                                     |
+| `--limit`     | int    | None          | Лимит записей для каждого пайплайна             |
+| `--dry-run`   | flag   | False         | Показать пайплайны без выполнения               |
+| `--yes`, `-y` | flag   | False         | Пропустить подтверждение                        |
+| `--list-only` | flag   | False         | Только показать список пайплайнов               |
+| `--debug`     | flag   | False         | DEBUG логирование                               |
 
 **Примеры:**
 
@@ -155,22 +157,23 @@ bioetl run-all --source chembl --run-type rebuild --yes
 Выполняет композитный пайплайн (seed + enrichers) согласно ADR-026.
 
 **Синтаксис:**
+
 ```bash
 bioetl run-composite --composite <NAME> [OPTIONS]
 ```
 
 **Опции:**
 
-| Опция | Тип | По умолчанию | Описание |
-|-------|-----|--------------|----------|
-| `--composite` | str | Required | Имя композитного пайплайна |
-| `--resume` | flag | False | Продолжить с checkpoint |
-| `--dry-run` | flag | False | Предпросмотр без записи |
-| `--seed-limit` | int | None | Лимит записей для seed пайплайна |
-| `--enrich-only` | str | None | Запустить только указанные enrichers (через запятую) |
-| `--required-only` | flag | False | Пропустить опциональные enrichers |
-| `--force-enricher` | str | None | Принудительный перезапуск enricher |
-| `--debug` | flag | False | DEBUG логирование |
+| Опция              | Тип  | По умолчанию | Описание                                             |
+|--------------------|------|--------------|------------------------------------------------------|
+| `--composite`      | str  | Required     | Имя композитного пайплайна                           |
+| `--resume`         | flag | False        | Продолжить с checkpoint                              |
+| `--dry-run`        | flag | False        | Предпросмотр без записи                              |
+| `--seed-limit`     | int  | None         | Лимит записей для seed пайплайна                     |
+| `--enrich-only`    | str  | None         | Запустить только указанные enrichers (через запятую) |
+| `--required-only`  | flag | False        | Пропустить опциональные enrichers                    |
+| `--force-enricher` | str  | None         | Принудительный перезапуск enricher                   |
+| `--debug`          | flag | False        | DEBUG логирование                                    |
 
 **Примеры:**
 
@@ -195,27 +198,28 @@ bioetl run-composite --composite publication --required-only
 Экспортирует Delta-таблицы Silver/Gold в CSV, XLSX или TSV.
 
 **Синтаксис:**
+
 ```bash
 bioetl export [TABLE] [OPTIONS]
 ```
 
 **Аргументы:**
 
-| Аргумент | Описание |
-|----------|----------|
-| `TABLE` | Имя таблицы в формате `provider.entity` (опционально при `--list`) |
+| Аргумент | Описание                                                           |
+|----------|--------------------------------------------------------------------|
+| `TABLE`  | Имя таблицы в формате `provider.entity` (опционально при `--list`) |
 
 **Опции:**
 
-| Опция | Тип | По умолчанию | Описание |
-|-------|-----|--------------|----------|
-| `--list` | flag | False | Показать все доступные таблицы |
-| `--preview` | flag | False | Показать схему и sample данных |
-| `--format`, `-f` | choice | `csv` | Формат: `csv`, `xlsx`, `tsv` |
-| `--layer`, `-l` | choice | `silver` | Слой: `silver`, `gold` |
-| `--output`, `-o` | path | `data/exports` | Директория для экспорта |
-| `--limit` | int | None | Максимальное количество строк |
-| `--columns`, `-c` | str | None | Колонки для экспорта (через запятую) |
+| Опция             | Тип    | По умолчанию   | Описание                             |
+|-------------------|--------|----------------|--------------------------------------|
+| `--list`          | flag   | False          | Показать все доступные таблицы       |
+| `--preview`       | flag   | False          | Показать схему и sample данных       |
+| `--format`, `-f`  | choice | `csv`          | Формат: `csv`, `xlsx`, `tsv`         |
+| `--layer`, `-l`   | choice | `silver`       | Слой: `silver`, `gold`               |
+| `--output`, `-o`  | path   | `data/exports` | Директория для экспорта              |
+| `--limit`         | int    | None           | Максимальное количество строк        |
+| `--columns`, `-c` | str    | None           | Колонки для экспорта (через запятую) |
 
 **Примеры:**
 
@@ -255,6 +259,7 @@ bioetl config show <PIPELINE> [--format yaml|json]
 ```
 
 **Примеры:**
+
 ```bash
 bioetl config show chembl-activity
 bioetl config show chembl-activity --format json
@@ -294,13 +299,14 @@ Dashboard для работы с проблемными записями.
 bioetl quarantine inspect --pipeline <NAME> [OPTIONS]
 ```
 
-| Опция | Тип | По умолчанию | Описание |
-|-------|-----|--------------|----------|
-| `--pipeline` | str | Required | Имя пайплайна |
-| `--limit` | int | 100 | Максимум записей |
-| `--error-code` | str | None | Фильтр по коду ошибки |
+| Опция          | Тип | По умолчанию | Описание              |
+|----------------|-----|--------------|-----------------------|
+| `--pipeline`   | str | Required     | Имя пайплайна         |
+| `--limit`      | int | 100          | Максимум записей      |
+| `--error-code` | str | None         | Фильтр по коду ошибки |
 
 **Примеры:**
+
 ```bash
 bioetl quarantine inspect --pipeline chembl-activity
 bioetl quarantine inspect --pipeline chembl-activity --error-code DQ-MISSING-FIELD
@@ -320,12 +326,12 @@ bioetl quarantine stats --pipeline <NAME> [--json]
 bioetl quarantine replay --pipeline <NAME> [OPTIONS]
 ```
 
-| Опция | Тип | По умолчанию | Описание |
-|-------|-----|--------------|----------|
-| `--pipeline` | str | Required | Имя пайплайна |
-| `--error-code` | str | None | Фильтр по коду ошибки |
-| `--max-age-days` | int | 7 | Максимальный возраст записей |
-| `--dry-run` | flag | False | Предпросмотр |
+| Опция            | Тип  | По умолчанию | Описание                     |
+|------------------|------|--------------|------------------------------|
+| `--pipeline`     | str  | Required     | Имя пайплайна                |
+| `--error-code`   | str  | None         | Фильтр по коду ошибки        |
+| `--max-age-days` | int  | 7            | Максимальный возраст записей |
+| `--dry-run`      | flag | False        | Предпросмотр                 |
 
 #### `quarantine purge` — Удаление старых записей
 
@@ -333,11 +339,11 @@ bioetl quarantine replay --pipeline <NAME> [OPTIONS]
 bioetl quarantine purge --pipeline <NAME> [OPTIONS]
 ```
 
-| Опция | Тип | По умолчанию | Описание |
-|-------|-----|--------------|----------|
-| `--older-than-days` | int | 30 | Удалить записи старше N дней |
-| `--dry-run` | flag | False | Предпросмотр |
-| `--force` | flag | False | Без подтверждения |
+| Опция               | Тип  | По умолчанию | Описание                     |
+|---------------------|------|--------------|------------------------------|
+| `--older-than-days` | int  | 30           | Удалить записи старше N дней |
+| `--dry-run`         | flag | False        | Предпросмотр                 |
+| `--force`           | flag | False        | Без подтверждения            |
 
 #### `quarantine resolve` — Пометить как решённое
 
@@ -366,6 +372,7 @@ bioetl health server [--host 127.0.0.1] [--port 8080]
 ```
 
 **Endpoints:**
+
 - `GET /health` — общий статус
 - `GET /health/live` — Kubernetes liveness probe
 - `GET /health/ready` — Kubernetes readiness probe
@@ -380,6 +387,7 @@ bioetl health check [--provider chembl] [--json]
 Проверяет connectivity и health всех или указанных провайдеров.
 
 **Примеры:**
+
 ```bash
 bioetl health check
 bioetl health check --provider chembl --provider pubchem
@@ -414,12 +422,13 @@ bioetl lock check --pipeline <NAME> --run-id <UUID>
 bioetl maintenance vacuum <TABLE> [OPTIONS]
 ```
 
-| Опция | Тип | По умолчанию | Описание |
-|-------|-----|--------------|----------|
-| `--retention-days`, `-r` | int | 7 | Минимальный возраст файлов |
-| `--dry-run` | flag | False | Предпросмотр |
+| Опция                    | Тип  | По умолчанию | Описание                   |
+|--------------------------|------|--------------|----------------------------|
+| `--retention-days`, `-r` | int  | 7            | Минимальный возраст файлов |
+| `--dry-run`              | flag | False        | Предпросмотр               |
 
 **Примеры:**
+
 ```bash
 bioetl maintenance vacuum chembl.activity
 bioetl maintenance vacuum chembl.activity --dry-run
@@ -432,11 +441,11 @@ bioetl maintenance vacuum chembl.activity -r 30
 bioetl maintenance vacuum-all [OPTIONS]
 ```
 
-| Опция | Тип | По умолчанию | Описание |
-|-------|-----|--------------|----------|
-| `--retention-days`, `-r` | int | 7 | Минимальный возраст файлов |
-| `--dry-run` | flag | False | Предпросмотр |
-| `--layer` | choice | `all` | Слой: `all`, `silver`, `gold` |
+| Опция                    | Тип    | По умолчанию | Описание                      |
+|--------------------------|--------|--------------|-------------------------------|
+| `--retention-days`, `-r` | int    | 7            | Минимальный возраст файлов    |
+| `--dry-run`              | flag   | False        | Предпросмотр                  |
+| `--layer`                | choice | `all`        | Слой: `all`, `silver`, `gold` |
 
 #### `maintenance archive` — Архивирование таблицы
 
@@ -450,25 +459,26 @@ bioetl maintenance archive <TABLE> <TARGET-PATH> [--remove-source]
 bioetl maintenance bronze-cleanup [OPTIONS]
 ```
 
-| Опция | Тип | По умолчанию | Описание |
-|-------|-----|--------------|----------|
-| `--retention-days`, `-r` | int | 90 | Удалить файлы старше N дней |
-| `--dry-run` | flag | False | Предпросмотр |
+| Опция                    | Тип  | По умолчанию | Описание                    |
+|--------------------------|------|--------------|-----------------------------|
+| `--retention-days`, `-r` | int  | 90           | Удалить файлы старше N дней |
+| `--dry-run`              | flag | False        | Предпросмотр                |
 
 ---
 
 ## Переменные окружения
 
-| Переменная | Описание | По умолчанию |
-|------------|----------|--------------|
-| `BIOETL-ENV` | Окружение (`dev`, `prod`) | `dev` |
-| `BIOETL-DATA-DIR` | Директория данных | `./data` |
-| `BIOETL-LOG-LEVEL` | Уровень логирования | `INFO` |
-| `BIOETL-METRICS-ENABLED` | Включить Prometheus метрики | `true` |
-| `BIOETL-METRICS-PORT` | Порт для Prometheus | `8000` |
-| `BIOETL-TRACING-ENABLED` | Включить OpenTelemetry tracing | `false` |
+| Переменная               | Описание                       | По умолчанию |
+|--------------------------|--------------------------------|--------------|
+| `BIOETL-ENV`             | Окружение (`dev`, `prod`)      | `dev`        |
+| `BIOETL-DATA-DIR`        | Директория данных              | `./data`     |
+| `BIOETL-LOG-LEVEL`       | Уровень логирования            | `INFO`       |
+| `BIOETL-METRICS-ENABLED` | Включить Prometheus метрики    | `true`       |
+| `BIOETL-METRICS-PORT`    | Порт для Prometheus            | `8000`       |
+| `BIOETL-TRACING-ENABLED` | Включить OpenTelemetry tracing | `false`      |
 
 **API-ключи провайдеров:**
+
 - `BIOETL-UNIPROT-API-KEY`
 - `BIOETL-OPENALEX-API-KEY`
 - `BIOETL-SEMANTIC-SCHOLAR-API-KEY`
@@ -479,22 +489,35 @@ bioetl maintenance bronze-cleanup [OPTIONS]
 
 Коды возврата следуют стандартам Unix (sysexits.h):
 
-| Код | Константа | Описание |
-|-----|-----------|----------|
-| 0 | OK | Успешное выполнение |
-| 1 | FAIL | Неспецифицированная ошибка |
-| 64 | EX-USAGE | Ошибка использования командной строки |
-| 78 | EX-CONFIG | Ошибка конфигурации |
-| 80 | CONFIG-ERROR | Ошибка конфигурации пайплайна |
-| 81 | INIT-ERROR | Ошибка инициализации |
-| 82 | PIPELINE-ERROR | Ошибка выполнения пайплайна |
-| 83 | DATA-QUALITY-ERROR | Превышен DQ порог |
-| 84 | LOCK-ERROR | Ошибка блокировки |
-| 85 | STORAGE-ERROR | Ошибка хранилища |
-| 86 | NETWORK-ERROR | Сетевая ошибка |
-| 87 | CHECKPOINT-ERROR | Ошибка checkpoint |
-| 130 | SIGINT | Прервано Ctrl+C |
-| 143 | SIGTERM | Завершено SIGTERM |
+| Код | Константа          | Описание                              |
+|-----|--------------------|---------------------------------------|
+| 0   | OK                 | Успешное выполнение                   |
+| 1   | FAIL               | Неспецифицированная ошибка            |
+| 64  | EX_USAGE           | Ошибка использования командной строки |
+| 65  | EX_DATAERR         | Ошибка формата данных                 |
+| 66  | EX_NOINPUT         | Не удалось открыть входные данные     |
+| 67  | EX_NOUSER          | Адресат неизвестен                    |
+| 68  | EX_NOHOST          | Имя хоста неизвестно                  |
+| 69  | EX_UNAVAILABLE     | Сервис недоступен                     |
+| 70  | EX_SOFTWARE        | Внутренняя ошибка ПО                  |
+| 71  | EX_OSERR           | Ошибка ОС                             |
+| 72  | EX_OSFILE          | Отсутствует критический файл ОС       |
+| 73  | EX_CANTCREAT       | Не удалось создать выходной файл      |
+| 74  | EX_IOERR           | Ошибка ввода-вывода                   |
+| 75  | EX_TEMPFAIL        | Временная ошибка                      |
+| 76  | EX_PROTOCOL        | Ошибка протокола                      |
+| 77  | EX_NOPERM          | Отказано в доступе                    |
+| 78  | EX_CONFIG          | Ошибка конфигурации                   |
+| 80  | CONFIG_ERROR       | Ошибка конфигурации пайплайна         |
+| 81  | INIT_ERROR         | Ошибка инициализации                  |
+| 82  | PIPELINE_ERROR     | Ошибка выполнения пайплайна           |
+| 83  | DATA_QUALITY_ERROR | Превышен DQ порог                     |
+| 84  | LOCK_ERROR         | Ошибка блокировки                     |
+| 85  | STORAGE_ERROR      | Ошибка хранилища                      |
+| 86  | NETWORK_ERROR      | Сетевая ошибка                        |
+| 87  | CHECKPOINT_ERROR   | Ошибка checkpoint                     |
+| 130 | SIGINT             | Прервано Ctrl+C                       |
+| 143 | SIGTERM            | Завершено SIGTERM                     |
 
 ---
 

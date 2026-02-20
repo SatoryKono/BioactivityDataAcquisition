@@ -35,8 +35,11 @@ if TYPE_CHECKING:
         BronzeDQConfigPort,
         GoldDQConfigPort,
         LoggerPort,
+        MetadataCoordinatorPort,
+        MetadataWriterPort,
         MetricsPort,
         SilverDQConfigPort,
+        StoragePort,
         TracingPort,
     )
 
@@ -309,17 +312,35 @@ class PostrunService:
         if hasattr(executor, "get_run_statistics"):
             stats = executor.get_run_statistics()
 
+        if not self._metadata_coordinator or not self._metadata_writer:
+            return
+
         # 1. Write final Silver metadata
         silver_table = self._config.table.silver_table
         if silver_table:
             silver_path = self._storage.get_table_path(silver_table)
+
+            # Get Delta version for lineage (REQ-LINEAGE-002)
+            version_after = None
+            try:
+                # Use internal storage helper if available or standard reader
+                from deltalake import DeltaTable
+
+                dt = DeltaTable(str(silver_path))
+                version_after = dt.version()
+            except Exception:
+                pass
+
             silver_input = SilverMetadataInput(
                 table_path=str(silver_path),
                 primary_keys=list(self._config.table.primary_keys),
                 mode=self._config.table.silver_write_mode,
                 total_records=stats.get("records_silver"),
                 source_batch_ids=stats.get("source_batch_ids"),
-                dq_report_path=dq_reports.silver_path if dq_reports else None,
+                version_after=version_after,
+                dq_report_path=str(dq_reports.silver_report_path)
+                if dq_reports and dq_reports.silver_report_path
+                else None,
                 started_at=self._context.started_at,
                 completed_at=datetime.now(UTC),
             )
@@ -337,11 +358,25 @@ class PostrunService:
         gold_table = self._config.table.gold_table
         if gold_table:
             gold_path = self._storage.get_table_path(gold_table)
+
+            # Get Delta version
+            version_after = None
+            try:
+                from deltalake import DeltaTable
+
+                dt = DeltaTable(str(gold_path))
+                version_after = dt.version()
+            except Exception:
+                pass
+
             gold_input = GoldMetadataInput(
                 table_path=str(gold_path),
                 table_name=gold_table,
                 mode=self._config.table.gold_write_mode,
                 total_records=stats.get("records_gold"),
+                dq_report_path=str(dq_reports.gold_report_path)
+                if dq_reports and dq_reports.gold_report_path
+                else None,
                 completed_at=datetime.now(UTC),
                 gold_schema=self._config.gold_schema,
             )

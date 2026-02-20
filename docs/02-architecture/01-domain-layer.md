@@ -4,7 +4,9 @@
 
 ## 1. Назначение
 
-Слой `Domain` — это ядро системы, содержащее чистую бизнес-логику и правила. Он не зависит ни от каких других слоёв и не содержит кода, связанного с вводом-выводом (I/O), базами данных, веб-фреймворками или другими инфраструктурными деталями.
+Слой `Domain` — это ядро системы, содержащее чистую бизнес-логику и правила. Он не зависит ни от каких других слоёв и не
+содержит кода, связанного с вводом-выводом (I/O), базами данных, веб-фреймворками или другими инфраструктурными
+деталями.
 
 **Ключевые характеристики:**
 
@@ -18,7 +20,8 @@
 
 **Расположение:** `src/bioetl/domain/ports/`
 
-Этот пакет является краеугольным камнем архитектуры **Ports & Adapters**. Он определяет интерфейсы (через `typing.Protocol`), которые должны реализовывать адаптеры из слоя `Infrastructure`.
+Этот пакет является краеугольным камнем архитектуры **Ports & Adapters**. Он определяет интерфейсы (через
+`typing.Protocol`), которые должны реализовывать адаптеры из слоя `Infrastructure`.
 
 **Структура пакета (25 файлов):**
 
@@ -56,7 +59,8 @@
 
 - `HealthCheckPort`, `HealthMonitorPort`, `HealthStatePort` — проверка и мониторинг здоровья адаптеров
 - `AuditPort` — аудит операций
-- `ShutdownPort`, `MemoryMonitorPort`, `DeltaReaderPort`, `IDMappingPort`, `PiiHasherPort` — системные и вспомогательные порты
+- `ShutdownPort`, `MemoryMonitorPort`, `DeltaReaderPort`, `IDMappingPort`, `PiiHasherPort` — системные и вспомогательные
+  порты
 - `RunnablePort`, `RunnerFactoryPort`, `MetricsExtractorPort` — абстракция запуска пайплайнов
 - `RateLimiterPort`, `CircuitBreakerPort` — Resilience-порты (rate limiting, circuit breaker)
 - `DataNormalizationPort` — нормализация текста/данных
@@ -64,7 +68,8 @@
 
 **NoOp реализации (Null Object Pattern):**
 
-- `NoOpAudit`, `NoOpMemoryMonitor`, `NoOpMetadataWriter`, `NoOpMetrics`, `NoOpPiiHasher`, `NoOpTracing` — реализации-заглушки для опциональных зависимостей
+- `NoOpAudit`, `NoOpMemoryMonitor`, `NoOpMetadataWriter`, `NoOpMetrics`, `NoOpPiiHasher`, `NoOpTracing` —
+  реализации-заглушки для опциональных зависимостей
 
 **Правило импорта (MUST):**
 
@@ -99,25 +104,25 @@ src/bioetl/domain/aggregates/
 **Ключевые агрегаты:**
 
 | Aggregate         | Инварианты                                      | State Machine                                        |
-| ----------------- | ----------------------------------------------- | ---------------------------------------------------- |
+|-------------------|-------------------------------------------------|------------------------------------------------------|
 | `Batch`           | Records sealed before write; sequential indices | OPEN → SEALED → WRITING → COMMITTED/FAILED           |
 | `PipelineRun`     | COMPLETED only if all stages SUCCESS            | NEW → RUNNING → COMPLETED/FAILED/SHUTDOWN            |
-| `QuarantineEntry` | Controlled resolution lifecycle                 | NEW → UNDER-REVIEW → IGNORED / REPROCESSED / EXPIRED |
+| `QuarantineEntry` | Controlled resolution lifecycle                 | NEW → UNDER_REVIEW → IGNORED / REPROCESSED / EXPIRED |
 
 `QuarantineStatus(StrEnum)` (актуально по `quarantine-entry.py`):
 
 - `NEW`
-- `UNDER-REVIEW`
+- `UNDER_REVIEW`
 - `IGNORED`
 - `REPROCESSED`
 - `EXPIRED`
 
 Допустимые переходы:
 
-- `NEW` → `UNDER-REVIEW`
-- `NEW` или `UNDER-REVIEW` → `IGNORED`
-- `NEW` или `UNDER-REVIEW` → `REPROCESSED`
-- `NEW` или `UNDER-REVIEW` → `EXPIRED`
+- `NEW` → `UNDER_REVIEW`
+- `NEW` или `UNDER_REVIEW` → `IGNORED`
+- `NEW` или `UNDER_REVIEW` → `REPROCESSED`
+- `NEW` или `UNDER_REVIEW` → `EXPIRED`
 
 **Пример использования:**
 
@@ -149,7 +154,8 @@ events = batch.collect-events()  # [BatchCreated, BatchSealed, BatchWritten]
 
 **Измерения:**
 
-- `ActivityValue(value, unit, relation)` (`activity.py`, 329 LOC) — составной value object для биоактивности (IC50, EC50, Ki), включает `RelationOperator` enum и `ConfidenceScore`
+- `ActivityValue(value, unit, relation)` (`activity.py`, 329 LOC) — составной value object для биоактивности (IC50,
+  EC50, Ki), включает `RelationOperator` enum и `ConfidenceScore`
 
 **Data Quality:**
 
@@ -166,7 +172,8 @@ events = batch.collect-events()  # [BatchCreated, BatchSealed, BatchWritten]
 
 **Источник:** `src/bioetl/domain/types.py`
 
-Определяет простые и составные типы данных, используемые во всей системе для обеспечения консистентности и семантической ясности. Включает типизированные идентификаторы: `RunID`, `BatchID`, `EntityID`, `ContentHash`.
+Определяет простые и составные типы данных, используемые во всей системе для обеспечения консистентности и семантической
+ясности. Включает типизированные идентификаторы: `RunID`, `BatchID`, `EntityID`, `ContentHash`.
 
 ### 2.5. `config.py` — Конфигурационные Value Objects
 
@@ -194,7 +201,7 @@ events = batch.collect-events()  # [BatchCreated, BatchSealed, BatchWritten]
 Domain содержит 11 дополнительных поддиректорий:
 
 | Директория        | Назначение                      | Содержание                                               |
-| ----------------- | ------------------------------- | -------------------------------------------------------- |
+|-------------------|---------------------------------|----------------------------------------------------------|
 | `composite/`      | Composite pipeline domain       | Field groups, state, strategy                            |
 | `configs/`        | Конфигурационные базовые классы | Базовые dataclass-ы для конфигураций                     |
 | `contracts/gold/` | Gold-слой контракты данных      | Pandera DataFrameModel схемы                             |
@@ -210,8 +217,10 @@ Domain содержит 11 дополнительных поддиректори
 ## 3. Принципы Работы
 
 - **Никакого I/O:** В этом слое запрещены любые операции, связанные с сетью, файловой системой или базами данных.
-- **Валидация данных:** Логика валидации бизнес-сущностей (например, проверка SMILES-строк) может находиться здесь, если она не требует внешних зависимостей.
-- **Иммутабельность:** Предпочтение отдаётся иммутабельным структурам данных (например, `NamedTuple`, `dataclasses(frozen=True)`).
+- **Валидация данных:** Логика валидации бизнес-сущностей (например, проверка SMILES-строк) может находиться здесь, если
+  она не требует внешних зависимостей.
+- **Иммутабельность:** Предпочтение отдаётся иммутабельным структурам данных (например, `NamedTuple`,
+  `dataclasses(frozen=True)`).
 
 ----------------------------------------------------------------------
 
@@ -220,13 +229,13 @@ Domain содержит 11 дополнительных поддиректори
 ### Навигация по Слоям
 
 | ← Предыдущий | Текущий    | Следующий →                                  |
-| ------------ | ---------- | -------------------------------------------- |
+|--------------|------------|----------------------------------------------|
 | —            | **Domain** | [Application Layer](02-application-layer.md) |
 
 ### Связанные Диаграммы
 
-| Диаграмма            | Файл                                                                                            | Описание                                          |
-| -------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| Диаграмма            | Файл                                                                                    | Описание                                          |
+|----------------------|-----------------------------------------------------------------------------------------|---------------------------------------------------|
 | Domain Layer Classes | [04-domain-layer-class-diagram.mermaid](diagrams/04-domain-layer-class-diagram.mermaid) | Классы портов, сущностей, конфигурации            |
 | Domain DDD           | [08-domain-ddd.mermaid](diagrams/08-domain-ddd.mermaid)                                 | DDD-структура домена                              |
 | Domain Models        | [13-domain-models-relationship.mermaid](diagrams/13-domain-models-relationship.mermaid) | Связи доменных моделей                            |
@@ -236,7 +245,7 @@ Domain содержит 11 дополнительных поддиректори
 ### Связанные ADR
 
 | ADR                                                     | Тема                                        |
-| ------------------------------------------------------- | ------------------------------------------- |
+|---------------------------------------------------------|---------------------------------------------|
 | [ADR-004](decisions/ADR-004-pydantic-vs-dataclasses.md) | Pydantic vs Dataclasses — выбор dataclasses |
 | [ADR-021](decisions/ADR-021-ddd-aggregates-adoption.md) | DDD Aggregates — внедрение агрегатов        |
 

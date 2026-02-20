@@ -212,7 +212,7 @@ def test_no_silent_degradation_in_batch_writer() -> None:
     if not batch_writer_path.exists():
         pytest.skip(f"{batch_writer_path} does not exist")
 
-    source = batch_writer_path.read_text()
+    source = batch_writer_path.read_text(encoding="utf-8")
 
     # Check that the old silent degradation pattern is gone
     assert 'if write_mode == "overwrite":' not in source, (

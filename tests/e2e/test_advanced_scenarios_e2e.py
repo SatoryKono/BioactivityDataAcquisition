@@ -14,6 +14,7 @@ from __future__ import annotations
 import asyncio
 from datetime import UTC
 from pathlib import Path
+from typing import Any
 from uuid import uuid4
 
 import pytest
@@ -22,12 +23,26 @@ from deltalake import DeltaTable
 from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 from bioetl.domain.context import PipelineRunContext
 from bioetl.domain.types import RunID, RunType
-
 from .conftest import (
     assert_silver_table_has_records,
     create_test_context,
     get_silver_records,
 )
+
+# VCR cassette directory for ChEMBL multi-pipeline E2E tests
+CASSETTE_DIR = Path(__file__).parent.parent / "fixtures" / "vcr" / "chembl"
+
+
+@pytest.fixture(scope="module")
+def vcr_config() -> dict[str, Any]:
+    """Configure VCR for ChEMBL advanced E2E tests."""
+    return {
+        "cassette_library_dir": str(CASSETTE_DIR),
+        "record_mode": "all",
+        "match_on": ["method", "scheme", "host", "port", "path", "query"],
+        "decode_compressed_response": True,
+    }
+
 
 # ============================================================================
 # VACUUM After Run Tests

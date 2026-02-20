@@ -24,6 +24,7 @@ ALLOWED_ROOT_ENTRIES: frozenset[str] = frozenset(
         ".importlinter",
         ".jscpd.json",
         ".jules",
+        ".junie",
         ".pre-commit-config.yaml",
         ".secrets.baseline",
         "CHANGELOG.md",

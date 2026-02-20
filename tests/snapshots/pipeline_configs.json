@@ -282,6 +282,7 @@
         "target_id"
       ]
     },
+    "gold_schema": null,
     "loading_strategy": null,
     "pipeline_name": "chembl_activity",
     "provider": "chembl",
@@ -611,6 +612,7 @@
         "molecular_formula"
       ]
     },
+    "gold_schema": null,
     "loading_strategy": null,
     "pipeline_name": "pubchem_compound",
     "provider": "pubchem",
@@ -977,6 +979,7 @@
         "title"
       ]
     },
+    "gold_schema": null,
     "loading_strategy": "full_scan_only",
     "pipeline_name": "pubmed_publication",
     "provider": "pubmed",
@@ -1179,6 +1182,7 @@
         "organism"
       ]
     },
+    "gold_schema": null,
     "loading_strategy": null,
     "pipeline_name": "uniprot_protein",
     "provider": "uniprot",
