@@ -70,6 +70,16 @@ async def health_server_context(
 
     try:
         await server.start()
+    except OSError:
+        click.echo(
+            f"Warning: Health server failed to bind to {host}:{port} "
+            f"(port in use). Pipeline will continue without health server.",
+            err=True,
+        )
+        yield None
+        return
+
+    try:
         yield server
     finally:
         await server.stop()
