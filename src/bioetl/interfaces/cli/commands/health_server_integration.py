@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 
 # Default port for health server during pipeline operations
-DEFAULT_HEALTH_SERVER_PORT = 8080
+DEFAULT_HEALTH_SERVER_PORT = 8081
 
 
 @asynccontextmanager
@@ -45,7 +45,7 @@ async def health_server_context(
         HealthServer instance if enabled, None otherwise.
 
     Example:
-        async with health_server_context(enabled=True, port=8080) as server:
+        async with health_server_context(enabled=True, port=DEFAULT_HEALTH_SERVER_PORT) as server:
             # Health server is running
             await run_pipeline()
         # Health server is stopped
