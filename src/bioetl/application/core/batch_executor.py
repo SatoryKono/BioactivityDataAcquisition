@@ -17,6 +17,7 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
+from bioetl.application.core.batch_memory_manager import BatchMemoryManager
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
 from bioetl.application.core.batch_tracing import BatchTracingManager
 from bioetl.application.core.batch_transformer import BatchTransformer, TransformResult
@@ -124,14 +125,13 @@ class BatchExecutor:
             checkpoint_interval or self.DEFAULT_CHECKPOINT_INTERVAL
         )
 
-        # Memory management
-        self._memory_monitor = memory_monitor
-        self._memory_config = memory_config
-        self._adaptive_batch_size_enabled = memory_monitor is not None or (
-            memory_config is not None and memory_config.enable_adaptive_sizing
+        # Memory management (extracted to BatchMemoryManager)
+        self._memory = BatchMemoryManager(
+            self._initial_batch_size,
+            memory_monitor=memory_monitor,
+            memory_config=memory_config,
+            logger=self._logger,
         )
-        self._batch_size_reductions = 0
-        self._min_batch_size_used = self._initial_batch_size
 
         # Counters
         self.records_fetched = 0
@@ -190,7 +190,7 @@ class BatchExecutor:
             context=context,
             config=config,
             initial_batch_size=self._initial_batch_size,
-            adaptive_sizing_enabled=self._adaptive_batch_size_enabled,
+            adaptive_sizing_enabled=self._memory.enabled,
         )
 
         # Query string for metadata (stored during execute())
@@ -227,7 +227,9 @@ class BatchExecutor:
             # Try to get total from data source if available (e.g. CachedBronzeDataSource)
             get_total = getattr(self._services.data_source, "get_total_records", None)
             if get_total and callable(get_total):
-                self._total_records = await get_total()
+                result = await get_total()
+                if isinstance(result, int) and result > 0:
+                    self._total_records = result
 
         if self._total_records:
             # Report progress every 10%
@@ -250,8 +252,8 @@ class BatchExecutor:
                 total_silver=self.records_silver,
                 total_gold=self.records_gold,
                 total_quarantined=self.records_quarantined,
-                batch_size_reductions=self._batch_size_reductions,
-                min_batch_size_used=self._min_batch_size_used,
+                batch_size_reductions=self._memory.batch_size_reductions,
+                min_batch_size_used=self._memory.min_batch_size_used,
             )
         except PipelineShutdownError:
             await self._handle_shutdown(root_span)
@@ -271,7 +273,7 @@ class BatchExecutor:
         """Run the main extraction and processing loop."""
         batch: list[dict[str, Any]] = []
         current_batch_size = self.batch_size
-        check_interval = self._get_memory_check_interval()
+        check_interval = self._memory.get_check_interval()
 
         async for raw_record in self._extract(limit, query, offset=offset):
             if self._shutdown_signal.is_requested:
@@ -281,48 +283,18 @@ class BatchExecutor:
 
             batch.append(raw_record)
             self.records_fetched += 1
+            self._report_progress()
 
-            # Report progress every 10%
-            if (
-                self._progress_interval
-                and self._total_records
-                and self.records_fetched >= self._next_progress_threshold
-            ):
-                pct = min(100, (self.records_fetched / self._total_records) * 100)
-                self._logger.info(
-                    "Pipeline progress",
-                    progress=f"{pct:.0f}%",
-                    bronze=self.records_bronze,
-                    silver=self.records_silver,
-                    fetched=self.records_fetched,
-                )
-                self._next_progress_threshold += self._progress_interval
-
-            current_batch_size = self._check_memory_pressure(
-                current_batch_size, check_interval
+            current_batch_size = self._memory.check_pressure(
+                current_batch_size, check_interval, self.records_fetched
             )
 
             if len(batch) >= current_batch_size:
                 start_index = self.records_fetched - len(batch)
                 await self._process_batch(batch, start_index)
                 batch = []
-                current_batch_size = self._maybe_recover_batch_size(current_batch_size)
-
-            # Report progress every 10%
-            if (
-                self._progress_interval
-                and self._total_records
-                and self.records_fetched >= self._next_progress_threshold
-            ):
-                pct = min(100, (self.records_fetched / self._total_records) * 100)
-                self._logger.info(
-                    "Pipeline progress",
-                    progress=f"{pct:.0f}%",
-                    bronze=self.records_bronze,
-                    silver=self.records_silver,
-                    fetched=self.records_fetched,
-                )
-                self._next_progress_threshold += self._progress_interval
+                current_batch_size = self._memory.maybe_recover(current_batch_size)
+                self._report_progress()
 
             if self.records_fetched % self.checkpoint_interval == 0:
                 total = self._resume_offset + self.records_fetched
@@ -584,103 +556,25 @@ class BatchExecutor:
         self._tracing.end_span_with_shutdown(span)
 
     # -------------------------------------------------------------------------
-    # Memory management helpers (from PipelineExecutor)
+    # Progress reporting
     # -------------------------------------------------------------------------
 
-    def _get_memory_check_interval(self) -> int:
-        """Get interval for memory pressure checks.
-
-        Returns:
-            Number of records between memory monitor checks (defaults to 100).
-        """
-        if self._memory_config:
-            return self._memory_config.check_interval_records
-        return 100  # Default check every 100 records
-
-    def _check_memory_pressure(self, current_size: int, check_interval: int) -> int:
-        """Check memory pressure and adjust batch size if needed.
-
-        Args:
-            current_size: Current number of records in batch.
-            check_interval: Number of records between memory checks.
-
-        Returns:
-            Newly recommended batch size (may be smaller than current_size).
-
-        Note:
-            Only performs check if adaptive sizing is enabled and the
-            record count matches the check interval.
-        """
-        if not self._adaptive_batch_size_enabled:
-            return current_size
-        if self.records_fetched % check_interval != 0:
-            return current_size
-        return self._adjust_batch_size(current_size)
-
-    def _maybe_recover_batch_size(self, current_size: int) -> int:
-        """Try to recover batch size after processing if adaptive sizing enabled.
-
-        Args:
-            current_size: Current number of records in batch.
-
-        Returns:
-            Newly recommended batch size (may be larger than current_size).
-
-        Note:
-            Executed after a batch has been written to clear memory and
-            potentially scale back up to the initial batch size.
-        """
-        if not self._adaptive_batch_size_enabled:
-            return current_size
-        return self._try_recover_batch_size(current_size)
-
-    def _adjust_batch_size(self, current_size: int) -> int:
-        """Adjust batch size based on memory pressure."""
-        if self._memory_monitor:
-            new_size = self._memory_monitor.get_recommended_batch_size(current_size)
-        elif self._memory_config:
-            new_size = self._estimate_batch_size_from_config(current_size)
-        else:
-            return current_size
-
-        if new_size < current_size:
-            self._batch_size_reductions += 1
-            self._min_batch_size_used = min(self._min_batch_size_used, new_size)
+    def _report_progress(self) -> None:
+        """Report pipeline progress if threshold reached."""
+        if (
+            self._progress_interval
+            and self._total_records
+            and self.records_fetched >= self._next_progress_threshold
+        ):
+            pct = min(100, (self.records_fetched / self._total_records) * 100)
             self._logger.info(
-                "Reduced batch size due to memory pressure",
-                old_size=current_size,
-                new_size=new_size,
-                total_reductions=self._batch_size_reductions,
+                "Pipeline progress",
+                progress=f"{pct:.0f}%",
+                bronze=self.records_bronze,
+                silver=self.records_silver,
+                fetched=self.records_fetched,
             )
-
-        return new_size
-
-    def _estimate_batch_size_from_config(self, current_size: int) -> int:
-        """Estimate batch size without memory monitoring."""
-        if not self._memory_config:
-            return current_size
-
-        records_per_mb = 1000
-        max_records = self._memory_config.max_batch_memory_mb * records_per_mb
-
-        if current_size > max_records:
-            return max(max_records, self._memory_config.min_batch_size)
-
-        return current_size
-
-    def _try_recover_batch_size(self, current_size: int) -> int:
-        """Try to recover batch size after pressure is relieved."""
-        if self._memory_monitor:
-            return self._memory_monitor.get_recommended_batch_size(current_size)
-
-        if current_size < self._initial_batch_size:
-            recovery_size = min(
-                int(current_size * 1.1),
-                self._initial_batch_size,
-            )
-            return recovery_size
-
-        return current_size
+            self._next_progress_threshold += self._progress_interval
 
     # -------------------------------------------------------------------------
     # Data extraction

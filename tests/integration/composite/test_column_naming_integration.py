@@ -240,9 +240,9 @@ class TestSeedColumnRenaming:
         assert "_run_id" in result.columns
         assert "_ingestion_ts" in result.columns
 
-        # entity_id and content_hash are business columns, they get renamed
-        assert "chembl.publication.entity_id" in result.columns
-        assert "chembl.publication.content_hash" in result.columns
+        # entity_id and content_hash are identity columns, not renamed
+        assert "entity_id" in result.columns
+        assert "content_hash" in result.columns
 
 
 class TestEnricherColumnRenaming:

@@ -247,6 +247,7 @@ def maybe_start_metrics_server(settings: Settings) -> bool:
     # Start metrics server - let exceptions propagate to entrypoints
     return start_metrics_server(
         port=settings.metrics_port,
+        addr=settings.metrics_addr,
         fail_fast=obs.metrics_fail_fast,
         retry_count=obs.metrics_retry_count,
         retry_delay=obs.metrics_retry_delay,

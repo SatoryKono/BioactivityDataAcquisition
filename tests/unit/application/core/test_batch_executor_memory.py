@@ -138,7 +138,7 @@ class TestBatchExecutorMemory:
             shutdown_signal=ShutdownSignal(),
             memory_monitor=memory_monitor,
         )
-        assert executor._adaptive_batch_size_enabled is True
+        assert executor._memory.enabled is True
 
     @pytest.mark.asyncio
     async def test_check_memory_pressure_reduces_size(
@@ -182,8 +182,8 @@ class TestBatchExecutorMemory:
         await executor.execute(limit=None)
 
         # Verify batch size was reduced
-        assert executor._batch_size_reductions > 0
-        assert executor._min_batch_size_used <= 50
+        assert executor._memory.batch_size_reductions > 0
+        assert executor._memory.min_batch_size_used <= 50
         mock_services.logger.info.assert_called()
 
     @pytest.mark.asyncio
@@ -259,7 +259,7 @@ class TestBatchExecutorMemory:
         )
 
         # Force a check
-        new_size = executor._estimate_batch_size_from_config(20000)
+        new_size = executor._memory._estimate_from_config(20000)
         assert new_size <= 10000  # Should be capped by memory config
 
     @pytest.mark.asyncio
