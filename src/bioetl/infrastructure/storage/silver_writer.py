@@ -36,8 +36,6 @@ import pyarrow as pa
 from deltalake import DeltaTable, write_deltalake
 from deltalake.exceptions import DeltaError, SchemaMismatchError
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
-from pyarrow import ArrowTypeError
-
 from bioetl.domain.exceptions import (
     MergeConflictError,
     PolicyViolationError,
@@ -185,30 +183,32 @@ class SilverWriter(BaseDeltaWriter):
         """Prepare Arrow table from records with schema filtering and sorting."""
         from bioetl.domain.schemas.column_order import canonical_column_order
 
-        schema_fields = set(schema.names)
+        # Performance Optimization: Iterate over schema names (O(Schema)) instead of
+        # record items (O(RecordFields)) to handle sparse records efficiently.
+        schema_names = schema.names
         string_fields = {
-            field.name
-            for field in schema
-            if pa.types.is_string(field.type) or pa.types.is_large_string(field.type)
+            f.name
+            for f in schema
+            if pa.types.is_string(f.type) or pa.types.is_large_string(f.type)
         }
 
-        filtered_records = [
-            {
-                k: (
-                    # Uses OPT_SORT_KEYS for deterministic serialization (§2.8.1).
-                    # Complex objects in Gold layer are flattened; Silver preserves
-                    # JSON for forensic purposes.
-                    orjson.dumps(v, option=orjson.OPT_SORT_KEYS).decode("utf-8")
-                    if v is not None
-                    and k in string_fields
-                    and isinstance(v, (dict, list))
-                    else v
-                )
-                for k, v in rec.items()
-                if k in schema_fields
-            }
-            for rec in records
-        ]
+        filtered_records = []
+        for rec in records:
+            filtered_rec: dict[str, Any] = {}
+            for k in schema_names:
+                if k in rec:
+                    v = rec[k]
+                    if (
+                        v is not None
+                        and k in string_fields
+                        and isinstance(v, (dict, list))
+                    ):
+                        # Uses OPT_SORT_KEYS for deterministic serialization (§2.8.1).
+                        # Complex objects in Gold layer are flattened; Silver preserves
+                        # JSON for forensic purposes.
+                        v = orjson.dumps(v, option=orjson.OPT_SORT_KEYS).decode("utf-8")
+                    filtered_rec[k] = v
+            filtered_records.append(filtered_rec)
         arrow_data = pa.Table.from_pylist(filtered_records, schema=schema)
 
         if column_order:
@@ -649,7 +649,7 @@ class SilverWriter(BaseDeltaWriter):
                 await self._dispatch_write(
                     validated_mode, table_path, arrow_data, primary_keys, partition_cols
                 )
-            except (SchemaMismatchError, ArrowTypeError) as e:
+            except (SchemaMismatchError, pa.ArrowTypeError) as e:
                 raise SchemaViolationError(table_name, errors=[str(e)]) from e
             except DeltaError as e:
                 if "Merge-conflict" in str(e):
