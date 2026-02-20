@@ -156,9 +156,28 @@ target:
 # =============================================================================
 # Publication
 # =============================================================================
+# Unified publication types (kebab-case, cross-provider taxonomy).
+# ChEMBL-native types (PUBLICATION, PATENT, DATASET, BOOK) are mapped
+# to these canonical values by normalize_publication_type().
 publication:
   types:
-    - PUBLICATION
-    - PATENT
-    - DATASET
-    - BOOK
+    - journal-article
+    - patent
+    - dataset
+    - book
+    - review
+    - letter
+    - editorial
+    - clinical-trial
+    - meta-analysis
+    - case-reports
+    - comparative-study
+    - evaluation-study
+    - preprint
+    - book-chapter
+    - proceedings-article
+    - posted-content
+    - report
+    - standard
+    - dissertation
+    - other

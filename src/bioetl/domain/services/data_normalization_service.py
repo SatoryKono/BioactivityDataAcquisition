@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 _HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
 _WHITESPACE_PATTERN = re.compile(r"\s+")
-_CONTROL_CHARS_PATTERN = re.compile(r"[\x00-\x1f\x7f-\x9f]")
+_CONTROL_CHARS_PATTERN = re.compile(r"[\x00-\x08\x0e-\x1f\x7f-\x9f]")
 _DATE_FULL_FMT = "{0:04d}-{1:02d}-{2:02d}"
 _DOI_URL_PREFIXES = ("https://doi.org/", "http://doi.org/", "doi:")
 
@@ -350,7 +350,8 @@ class DefaultDataNormalizationService:
         normalized = _HTML_TAG_PATTERN.sub("", text)
         normalized = unescape(normalized)
 
-        # Step 2: Remove control characters
+        # Step 2: Remove non-whitespace control characters (NUL, DEL, C1 controls)
+        # Note: \t, \n, \r are handled by whitespace collapse in step 4
         normalized = _CONTROL_CHARS_PATTERN.sub("", normalized)
 
         # Step 3: Unicode NFC normalization (canonical composition)

@@ -160,9 +160,7 @@ class TestColumnRenamerFieldAliases:
             }
         )
         aliases = {"h_bond_acceptor_count": "hba_count"}
-        result = renamer.rename_dataframe(
-            df, "pubchem_compound", field_aliases=aliases
-        )
+        result = renamer.rename_dataframe(df, "pubchem_compound", field_aliases=aliases)
 
         assert "pubchem.compound.hba_count" in result.columns
         assert "pubchem.compound.molecular_weight" in result.columns
@@ -180,9 +178,7 @@ class TestColumnRenamerFieldAliases:
             "h_bond_acceptor_count": "hba_count",
             "h_bond_donor_count": "hbd_count",
         }
-        result = renamer.rename_dataframe(
-            df, "pubchem_compound", field_aliases=aliases
-        )
+        result = renamer.rename_dataframe(df, "pubchem_compound", field_aliases=aliases)
 
         assert result["pubchem.compound.hba_count"].to_list() == [5, 3]
         assert result["pubchem.compound.hbd_count"].to_list() == [2, 1]
@@ -205,9 +201,7 @@ class TestColumnRenamerFieldAliases:
             "xlogp": "logp",
             "inchi": "standard_inchi",
         }
-        result = renamer.rename_dataframe(
-            df, "pubchem_compound", field_aliases=aliases
-        )
+        result = renamer.rename_dataframe(df, "pubchem_compound", field_aliases=aliases)
 
         assert "pubchem.compound.hba_count" in result.columns
         assert "pubchem.compound.hbd_count" in result.columns
@@ -219,27 +213,21 @@ class TestColumnRenamerFieldAliases:
         """Fields not in alias map should pass through unchanged."""
         df = pl.DataFrame({"molecular_weight": [180.0]})
         aliases = {"h_bond_acceptor_count": "hba_count"}  # No mapping for MW
-        result = renamer.rename_dataframe(
-            df, "pubchem_compound", field_aliases=aliases
-        )
+        result = renamer.rename_dataframe(df, "pubchem_compound", field_aliases=aliases)
 
         assert "pubchem.compound.molecular_weight" in result.columns
 
     def test_none_aliases_no_effect(self, renamer: ColumnRenamer) -> None:
         """None field_aliases should behave like no aliases (backward compat)."""
         df = pl.DataFrame({"h_bond_acceptor_count": [5]})
-        result = renamer.rename_dataframe(
-            df, "pubchem_compound", field_aliases=None
-        )
+        result = renamer.rename_dataframe(df, "pubchem_compound", field_aliases=None)
 
         assert "pubchem.compound.h_bond_acceptor_count" in result.columns
 
     def test_empty_aliases_no_effect(self, renamer: ColumnRenamer) -> None:
         """Empty alias dict should behave like no aliases."""
         df = pl.DataFrame({"h_bond_acceptor_count": [5]})
-        result = renamer.rename_dataframe(
-            df, "pubchem_compound", field_aliases={}
-        )
+        result = renamer.rename_dataframe(df, "pubchem_compound", field_aliases={})
 
         assert "pubchem.compound.h_bond_acceptor_count" in result.columns
 
