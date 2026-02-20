@@ -10,7 +10,7 @@ __version__ = "6.0.0"
 try:
     import typing
 
-    import typing_inspect
+    import typing_inspect  # type: ignore[import-untyped]
 
     # Fix typing_inspect.get_origin BEFORE importing pandera backends
     _orig_get_origin = typing_inspect.get_origin
@@ -30,7 +30,9 @@ try:
 
     _orig_dispatcher_call = Dispatcher.__call__
 
-    def _dispatcher_call_with_any_fallback(self, *args, **kwargs):
+    def _dispatcher_call_with_any_fallback(
+        self: typing.Any, *args: typing.Any, **kwargs: typing.Any
+    ) -> typing.Any:
         input_data_type = type(args[0])
         fn = self._function_registry.get(input_data_type)
 
@@ -56,10 +58,10 @@ try:
         if fn is None and typing.Any in self._function_registry:
             fn = self._function_registry[typing.Any]
         if fn is None:
-            return _orig_dispatcher_call(self, *args, **kwargs)
+            return _orig_dispatcher_call(self, *args, **kwargs)  # type: ignore[no-untyped-call]
         return fn(*args, **kwargs)
 
-    Dispatcher.__call__ = _dispatcher_call_with_any_fallback
+    Dispatcher.__call__ = _dispatcher_call_with_any_fallback  # type: ignore[method-assign]
 except Exception:
     # Fail silently to avoid breaking the entire project if Pandera/Pandas are not present
     pass
