@@ -505,6 +505,7 @@ class TestPostrunServiceIntegrationWithDataQualityService:
             logger=mock_logger,
             metrics=mock_metrics,
             pipeline_name=pipeline_config.pipeline_name,
+            entity_type=pipeline_config.entity_type,
         )
 
         service = PostrunService(
@@ -551,6 +552,7 @@ class TestPostrunServiceIntegrationWithDataQualityService:
             logger=mock_logger,
             metrics=mock_metrics,
             pipeline_name=pipeline_config.pipeline_name,
+            entity_type=pipeline_config.entity_type,
         )
 
         service = PostrunService(

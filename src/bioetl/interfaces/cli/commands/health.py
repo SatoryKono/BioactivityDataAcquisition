@@ -33,7 +33,7 @@ def health() -> None:
 @click.option(
     "--port",
     "-p",
-    default=8080,
+    default=8081,
     type=int,
     help="Port to listen on.",
     show_default=True,
@@ -50,7 +50,7 @@ def health_server_command(host: str, port: int) -> None:
     - GET /health/providers - Detailed provider status
 
     Example:
-        bioetl health server --port 8080
+        bioetl health server --port 8081
     """
     click.echo(f"Starting health server on http://{host}:{port}")
     click.echo("Endpoints:")

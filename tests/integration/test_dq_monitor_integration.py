@@ -329,6 +329,7 @@ class TestDataQualityServiceMetricsEmission:
             logger=recording_logger,  # type: ignore
             metrics=recording_metrics,
             pipeline_name="test_integration_pipeline",
+            entity_type="test_entity",
         )
 
         # Error rate 10% - above soft (5%), below hard (20%)
@@ -370,6 +371,7 @@ class TestDataQualityServiceMetricsEmission:
             logger=recording_logger,  # type: ignore
             metrics=recording_metrics,
             pipeline_name="test_integration_pipeline",
+            entity_type="test_entity",
         )
 
         # Normal metrics - below all thresholds
@@ -414,6 +416,7 @@ class TestDataQualityServiceMetricsEmission:
             logger=recording_logger,  # type: ignore
             metrics=recording_metrics,
             pipeline_name="test_integration_pipeline",
+            entity_type="test_entity",
         )
 
         # Evaluate with normal metrics
@@ -454,6 +457,7 @@ class TestDataQualityServiceMetricsEmission:
             logger=recording_logger,  # type: ignore
             metrics=recording_metrics,
             pipeline_name="test_integration_pipeline",
+            entity_type="test_entity",
         )
 
         # Evaluate with multiple metrics
@@ -502,6 +506,7 @@ class TestDataQualityServiceMetricsEmission:
             logger=recording_logger,  # type: ignore
             metrics=recording_metrics,
             pipeline_name="test_integration_pipeline",
+            entity_type="test_entity",
         )
 
         # Error rate 3% - below soft threshold
@@ -545,6 +550,7 @@ class TestDataQualityServiceMetricsEmission:
             logger=recording_logger,  # type: ignore
             metrics=recording_metrics,
             pipeline_name="e2e_test_pipeline",
+            entity_type="test_entity",
         )
 
         # Trigger soft threshold warning

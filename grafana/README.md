@@ -1,163 +1,82 @@
-# Grafana-дашборды для BioETL
+# Мониторинг BioETL (Prometheus + Grafana)
 
-Локальный мониторинг пайплайнов BioETL через Prometheus + Grafana.
+Система мониторинга реального времени для отслеживания производительности, здоровья провайдеров и качества данных.
 
-## Обзор
+## Архитектура мониторинга
 
-BioETL экспортирует 40+ Prometheus-метрик на `http://localhost:8000/metrics`.
-Три дашборда визуализируют ключевые аспекты:
+1.  **BioETL App**: Экспортирует метрики через `prometheus_client` на порту `BIOETL_METRICS_PORT` (по умолчанию `8000`).
+2.  **Prometheus**: Скрейпит метрики из приложения и хранит их в TSDB.
+3.  **Grafana**: Визуализирует данные из Prometheus через предустановленные дашборды.
 
-| Дашборд | Файл | Что показывает |
-|---------|------|----------------|
-| **Overview** | `bioetl-overview.json` | Скорость обработки, ошибки, статус пайплайнов |
-| **Provider Health** | `bioetl-provider-health.json` | Здоровье провайдеров, состояние Circuit Breaker |
-| **Data Quality** | `bioetl-dq.json` | DQ-метрики, карантин, аномалии, длительность проверок |
+## Быстрый запуск (Docker Compose)
 
----
-
-## 1. Предварительные требования
-
-- **BioETL** запущен с метриками (по умолчанию включены)
-- Метрики доступны на `http://localhost:8000/metrics`
-- Порт настраивается через переменную `BIOETL_METRICS_PORT`
-
-Проверка:
+Самый простой способ запустить стек мониторинга:
 
 ```bash
-curl http://localhost:8000/metrics
-# Должны появиться строки вида: bioetl_records_processed_total{...}
+# Запуск Prometheus и Grafana
+make monitoring-up
+
+# Проверка статуса
+docker compose -f docker-compose.monitoring.yml ps
+
+# Просмотр логов
+make monitoring-logs
+
+# Остановка
+make monitoring-down
 ```
 
----
+После запуска:
+- **Prometheus**: [http://localhost:9090](http://localhost:9090)
+- **Grafana**: [http://localhost:3000](http://localhost:3000) (логин: `admin`, пароль: `admin`)
 
-## 2. Установка Prometheus
+Дашборды импортируются автоматически через механизм provisioning.
 
-### Windows
+## Доступные дашборды
 
-1. Скачать последний релиз: https://github.com/prometheus/prometheus/releases
-   - Файл `prometheus-*-windows-amd64.zip`
-2. Распаковать в удобную директорию (например, `C:\tools\prometheus\`)
-3. Запустить с конфигом BioETL:
+| Название | Описание | Основные метрики |
+| :--- | :--- | :--- |
+| **Overview** | Общий обзор пайплайнов | `pipeline_duration_seconds`, `records_processed_total`, `errors_total`, `batch_size_records`, `data_freshness_seconds`, `filter_ids_*` |
+| **Provider Health** | Здоровье API-адаптеров | `circuit_breaker_state`, `circuit_breaker_trips_total`, `circuit_breaker_success_total`, `circuit_breaker_failure_total` |
+| **Data Quality** | Качество данных и карантин | `dq_validation_score`, `dq_records_quarantined_total`, `dq_anomaly_detected`, `dq_check_duration_ms`, `dq_baseline_*` |
+| **Operations** | Обслуживание хранилища | `vacuum_files_removed_total`, `vacuum_duration_seconds`, `archive_files_total`, `archive_duration_seconds` |
+| **Infrastructure Health** | Статус инфраструктуры | `pipeline_health_check_passed`, `infrastructure_validated`, `health_check_duration_seconds` |
 
-```cmd
-cd C:\tools\prometheus
-prometheus.exe --config.file=<путь-к-репозиторию>\grafana\prometheus.yml
+## Конфигурация приложения
+
+Для корректной работы мониторинга убедитесь, что в `.env` установлены следующие переменные:
+
+```env
+BIOETL_METRICS_ENABLED=true
+BIOETL_METRICS_PORT=8000
+BIOETL_OBSERVABILITY__METRICS_SERVER_ENABLED=true
 ```
 
-4. Открыть http://localhost:9090 — интерфейс Prometheus
-5. Перейти в **Status > Targets** — target `bioetl` должен быть в состоянии **UP**
+## Устранение неполадок
 
-### Linux / macOS
+### Prometheus не видит приложение (Target Down)
 
-```bash
-# Linux (apt)
-sudo apt install prometheus
+Если вы запускаете мониторинг в Docker, а приложение — локально на хосте, убедитесь, что в `grafana/prometheus.yml` указано:
 
-# macOS (brew)
-brew install prometheus
-
-# Запуск
-prometheus --config.file=grafana/prometheus.yml
+```yaml
+static_configs:
+  - targets: ['host.docker.internal:8000']
 ```
 
----
+Для Windows и macOS это работает "из коробки". На Linux может потребоваться флаг `--add-host=host.docker.internal:host-gateway` при запуске контейнера.
 
-## 3. Установка Grafana
+### Дашборды пустые
 
-### Windows
+1.  Запустите любой пайплайн: `make run-local`.
+2.  Убедитесь, что метрики доступны локально: `curl http://localhost:8000/metrics`.
+3.  Проверьте соединение в Prometheus: **Status -> Targets**.
 
-1. Скачать: https://grafana.com/grafana/download?platform=windows
-   - ZIP-архив или MSI-установщик
-2. Запустить `grafana-server.exe` (из `bin/`)
-3. Открыть http://localhost:3000 (логин: `admin` / пароль: `admin`)
+## Ручная установка (без Docker)
 
-### Linux / macOS
+Если вы предпочитаете устанавливать компоненты вручную:
 
-```bash
-# Linux (apt)
-sudo apt install grafana
-sudo systemctl start grafana-server
-
-# macOS (brew)
-brew install grafana
-brew services start grafana
-```
-
----
-
-## 4. Настройка Datasource
-
-1. Открыть Grafana: http://localhost:3000
-2. Перейти в **Connections > Data sources > Add data source**
-3. Выбрать **Prometheus**
-4. Указать URL: `http://localhost:9090`
-5. Нажать **Save & Test** — должно быть "Successfully queried the Prometheus API"
-
----
-
-## 5. Импорт дашбордов
-
-### Вариант A: Ручной импорт (рекомендуется)
-
-1. Перейти в **Dashboards > New > Import**
-2. Нажать **Upload JSON file**
-3. Загрузить файлы из `grafana/dashboards/`:
-   - `bioetl-overview.json`
-   - `bioetl-provider-health.json`
-   - `bioetl-dq.json`
-4. Выбрать datasource **Prometheus** при импорте
-
-### Вариант B: Автопровизионирование
-
-Скопировать содержимое `grafana/provisioning/` в директорию провизионирования Grafana:
-
-```cmd
-:: Windows (путь зависит от способа установки)
-xcopy /E grafana\provisioning C:\tools\grafana\conf\provisioning\
-xcopy /E grafana\dashboards C:\tools\grafana\dashboards\bioetl\
-```
-
-Отредактировать `grafana/provisioning/dashboards/bioetl.yaml` — указать
-абсолютный путь к папке `grafana/dashboards/` в поле `options.path`.
-
-Перезапустить Grafana — дашборды появятся автоматически в папке "BioETL".
-
----
-
-## 6. Проверка работоспособности
-
-| Шаг | URL | Ожидание |
-|-----|-----|----------|
-| Метрики BioETL | http://localhost:8000/metrics | Строки `bioetl_*` |
-| Prometheus targets | http://localhost:9090/targets | Target `bioetl` = UP |
-| Grafana | http://localhost:3000 | Дашборды с данными |
-
----
-
-## Описание дашбордов
-
-### 1. BioETL Overview (`bioetl-overview.json`)
-
-Высокоуровневый обзор работы пайплайнов:
-- **Records Processed** — скорость обработки записей (`rate(bioetl_records_processed_total[5m])`)
-- **Error Rates** — частота ошибок по типам (`rate(bioetl_errors_total[5m])`)
-
-### 2. Provider Health (`bioetl-provider-health.json`)
-
-Мониторинг внешних провайдеров данных:
-- **Health Status** — таблица состояний: Healthy / Degraded / Unhealthy
-- **Circuit Breakers** — состояние circuit breaker (Closed / Open / Half-Open)
-
-### 3. Data Quality (`bioetl-dq.json`)
-
-Качество данных (10 панелей):
-- **DQ Validation Score** — общая оценка качества (0.0 — 1.0)
-- **Data Freshness** — время с последнего обновления
-- **Quarantine Records** — количество записей в карантине
-- **DQ Score Over Time** — динамика оценки качества
-- **Quarantine Rate** — скорость попадания в карантин
-- **Anomalies** — обнаруженные аномалии
-- **DQ Check Duration** — длительность проверок (p50/p95/p99)
-- **Quarantine by Error Type** — распределение ошибок по типам
-- **DQ Baseline Samples** — количество baseline-сэмплов
-- **Quarantine Details** — таблица карантинных записей
+1.  **Prometheus**: Используйте конфиг `grafana/prometheus.yml`.
+2.  **Grafana**:
+    - Добавьте Prometheus как DataSource (`http://localhost:9090`).
+    - Импортируйте JSON-файлы из `grafana/dashboards/`.
+    - Или настройте provisioning, отредактировав `grafana/provisioning/dashboards/bioetl.yaml` (поле `path` должно указывать на абсолютный путь к папке с JSON-файлами).

@@ -202,6 +202,8 @@ class Settings(BaseSettings):
     metrics_enabled: bool = Field(default=True)
     metrics_port: int = Field(default=8000, ge=1, le=65535)
     """Port for Prometheus metrics HTTP server (default: 8000)."""
+    metrics_addr: str = Field(default="0.0.0.0")
+    """Address to bind Prometheus metrics HTTP server (default: 0.0.0.0)."""
     strict_error_handling: bool = Field(
         default=False,
         description="When True, API client errors raise exceptions instead of being silently ignored. "

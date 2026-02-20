@@ -294,9 +294,10 @@ class GoldWriter(BaseDeltaWriter):
             table_name: The name of the table to write to.
             records: A list of dictionaries representing merged records.
             primary_keys: Optional list of column names for sorting.
-            schema: Optional Pandera schema for strict validation.
-                When provided, must have strict=True and all records
-                are validated before writing (REQ-DATA-009).
+            schema: Optional Pandera schema for validation.
+                When provided, records are validated before writing
+                (REQ-DATA-009). Composite schemas may use strict=False
+                to allow extra enricher columns.
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.
             preserve_column_order: If True, skip canonical_column_order()
@@ -304,8 +305,7 @@ class GoldWriter(BaseDeltaWriter):
                 ordering applied by ColumnOrderer in composite pipelines).
 
         Raises:
-            ValueError: If records are empty, schema is not strict, or
-                records fail schema validation.
+            ValueError: If records are empty or fail schema validation.
         """
         from bioetl.domain.schemas.column_order import canonical_column_order
 
@@ -317,8 +317,9 @@ class GoldWriter(BaseDeltaWriter):
             return
 
         # Validate against schema if provided (REQ-DATA-009)
+        # Note: composite schemas use strict=False to allow extra enricher
+        # columns, so we skip the strict check here (unlike write_gold).
         if schema is not None:
-            self._validate_schema_strict(schema)
             await self._validate_records_against_schema(records, schema)
 
         # Convert to Arrow and apply column order

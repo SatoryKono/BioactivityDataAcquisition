@@ -50,6 +50,7 @@ def dq_service(mock_logger, mock_metrics, dq_config):
         logger=mock_logger,
         metrics=mock_metrics,
         pipeline_name="test_pipeline",
+        entity_type="test_entity",
     )
 
 
@@ -65,6 +66,7 @@ class TestDataQualityServiceInit:
             logger=mock_logger,
             metrics=mock_metrics,
             pipeline_name="test_pipeline",
+            entity_type="test_entity",
         )
 
         assert service._dq_monitor is None
@@ -83,6 +85,7 @@ class TestDataQualityServiceInit:
             logger=mock_logger,
             metrics=mock_metrics,
             pipeline_name="test_pipeline",
+            entity_type="test_entity",
         )
 
         assert service._dq_monitor == mock_dq_monitor
@@ -103,6 +106,7 @@ class TestDataQualityServiceThresholds:
             logger=mock_logger,
             metrics=mock_metrics,
             pipeline_name="test_pipeline",
+            entity_type="test_entity",
         )
 
         # Metrics with 25% error rate (above hard threshold of 20%)
@@ -129,6 +133,7 @@ class TestDataQualityServiceThresholds:
             logger=mock_logger,
             metrics=mock_metrics,
             pipeline_name="test_pipeline",
+            entity_type="test_entity",
         )
 
         # Metrics with exactly 20% error rate
@@ -151,6 +156,7 @@ class TestDataQualityServiceThresholds:
             logger=mock_logger,
             metrics=mock_metrics,
             pipeline_name="test_pipeline",
+            entity_type="test_entity",
         )
 
         # Metrics with 10% error rate (above soft 5%, below hard 20%)
@@ -181,6 +187,7 @@ class TestDataQualityServiceThresholds:
             logger=mock_logger,
             metrics=mock_metrics,
             pipeline_name="test_pipeline",
+            entity_type="test_entity",
         )
 
         # Metrics with exactly 5% error rate
@@ -206,6 +213,7 @@ class TestDataQualityServiceThresholds:
             logger=mock_logger,
             metrics=mock_metrics,
             pipeline_name="test_pipeline",
+            entity_type="test_entity",
         )
 
         # Metrics with 3% error rate (below soft threshold)
@@ -238,6 +246,7 @@ class TestDataQualityServiceGracefulDegradation:
             logger=mock_logger,
             metrics=mock_metrics,
             pipeline_name="test_pipeline",
+            entity_type="test_entity",
         )
 
         metrics = {
@@ -261,6 +270,7 @@ class TestDataQualityServiceGracefulDegradation:
             logger=mock_logger,
             metrics=None,  # No metrics port
             pipeline_name="test_pipeline",
+            entity_type="test_entity",
         )
 
         metrics = {
@@ -293,6 +303,7 @@ class TestDataQualityServiceAnomalyDetection:
             logger=mock_logger,
             metrics=mock_metrics,
             pipeline_name="test_pipeline",
+            entity_type="test_entity",
         )
 
         metrics = {
@@ -340,6 +351,7 @@ class TestDataQualityServiceAnomalyDetection:
             logger=mock_logger,
             metrics=mock_metrics,
             pipeline_name="test_pipeline",
+            entity_type="test_entity",
         )
 
         metrics = {
@@ -387,6 +399,7 @@ class TestDataQualityServiceAnomalyDetection:
             logger=mock_logger,
             metrics=mock_metrics,
             pipeline_name="test_pipeline",
+            entity_type="test_entity",
         )
 
         metrics = {
@@ -415,6 +428,7 @@ class TestDataQualityServiceAnomalyDetection:
             logger=mock_logger,
             metrics=mock_metrics,
             pipeline_name="test_pipeline",
+            entity_type="test_entity",
         )
 
         metrics = {
@@ -449,6 +463,7 @@ class TestDataQualityServiceBaselineUpdates:
             logger=mock_logger,
             metrics=mock_metrics,
             pipeline_name="test_pipeline",
+            entity_type="test_entity",
         )
 
         metrics = {
@@ -500,6 +515,7 @@ class TestDataQualityServiceBaselineUpdates:
             logger=mock_logger,
             metrics=mock_metrics,
             pipeline_name="test_pipeline",
+            entity_type="test_entity",
         )
 
         metrics = {

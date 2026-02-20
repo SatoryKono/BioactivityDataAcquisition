@@ -48,6 +48,7 @@ def test_cli_rebuild_requires_confirmation(cli_runner, mock_registry):
 def test_cli_rebuild_with_yes(cli_runner, mock_registry):
     """Test that rebuild works with --yes."""
     from bioetl.application.services import PipelineRunResult
+    from bioetl.application.services.pipeline_runner_service import RunResult
 
     with (
         patch("bioetl.interfaces.cli.commands.run.get_pipeline_runner_service"),
@@ -57,12 +58,11 @@ def test_cli_rebuild_with_yes(cli_runner, mock_registry):
             return_value=mock_registry,
         ),
     ):
-        # asyncio.run mock returns the tuple that _run_pipeline_async would return
-        mock_asyncio_run.return_value = (
-            PipelineRunResult.SUCCESS,
-            None,
-            None,
-            "test-run-id",
+        mock_asyncio_run.return_value = RunResult(
+            status=PipelineRunResult.SUCCESS,
+            pipeline_name="test_pipe",
+            run_id="test-run-id",
+            run_type="rebuild",
         )
 
         result = cli_runner.invoke(

@@ -34,7 +34,7 @@ class TestStartMetricsServer:
             result = start_metrics_server(port=9999)
 
             assert result is True
-            mock_server.assert_called_once_with(9999)
+            mock_server.assert_called_once_with(9999, addr="0.0.0.0")
 
     def test_idempotent_multiple_calls(self):
         """Test server is only started once."""

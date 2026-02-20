@@ -680,6 +680,7 @@ def assemble_runner(
         logger=logger_port,
         metrics=pipeline.services.metrics,
         pipeline_name=pipeline.config.pipeline_name,
+        entity_type=pipeline.config.entity_type,
     )
 
     # Extract DQ configs from YAML config for DQ report generation
