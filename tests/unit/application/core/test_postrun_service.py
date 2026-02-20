@@ -124,7 +124,9 @@ def mock_metadata_coordinator():
 def mock_metadata_writer():
     """Create a mock metadata writer."""
     writer = MagicMock()
-    writer.write_silver_metadata = AsyncMock(return_value="/path/to/silver_metadata.yaml")
+    writer.write_silver_metadata = AsyncMock(
+        return_value="/path/to/silver_metadata.yaml"
+    )
     writer.write_gold_metadata = AsyncMock(return_value="/path/to/gold_metadata.yaml")
     return writer
 
@@ -133,6 +135,7 @@ def mock_metadata_writer():
 def mock_context():
     """Create a mock pipeline context."""
     from datetime import UTC, datetime
+
     context = MagicMock()
     context.started_at = datetime.now(UTC)
     return context

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any
 
 import pytest
@@ -421,7 +422,6 @@ class TestQuarantinePortProtocol:
     def test_valid_quarantine_implementation(self) -> None:
         """QuarantinePort should accept valid implementations."""
         from collections.abc import Iterator
-        from datetime import datetime
 
         from bioetl.domain.types import QuarantineRecordStatus
 
@@ -484,7 +484,6 @@ class TestQuarantinePortProtocol:
     def test_missing_write_fails(self) -> None:
         """QuarantinePort should reject implementations missing write."""
         from collections.abc import Iterator
-        from datetime import datetime
 
         from bioetl.domain.types import QuarantineRecordStatus
 
