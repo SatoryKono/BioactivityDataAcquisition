@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  warp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cloudflare-warp
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    privileged: true
+    volumes:
+      - warp-data:/var/lib/cloudflare-warp
+      - /dev/net/tun:/dev/net/tun
+    devices:
+      - /dev/net/tun
+    networks:
+      - warp-network
+
+networks:
+  warp-network:
+    driver: bridge
+
+volumes:
+  warp-data:

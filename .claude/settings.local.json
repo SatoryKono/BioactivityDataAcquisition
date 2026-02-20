@@ -119,7 +119,9 @@
       "mcp__claude_ai_Mermaid_Chart_2__validate_and_render_mermaid_diagram",
       "Bash(for f in grafana/dashboards/*.json)",
       "Bash(do python -c \"import json; json.load\\(open\\(''$f''\\)\\)\")",
-      "Bash(netstat:*)"
+      "Bash(netstat:*)",
+      "Bash(docker compose:*)",
+      "Bash(powershell -Command \"Get-Process -Id 38076 -ErrorAction SilentlyContinue | Select-Object Id,ProcessName,Path | Format-List; Get-Process -Id 22968 -ErrorAction SilentlyContinue | Select-Object Id,ProcessName,Path | Format-List\")"
     ]
   },
   "enabledPlugins": {
