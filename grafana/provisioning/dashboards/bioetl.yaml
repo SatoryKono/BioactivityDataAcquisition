@@ -14,4 +14,4 @@ providers:
       # Замените на актуальный путь к grafana/dashboards/ в вашей системе.
       # Пример Windows: C:/Users/<user>/projects/BioactivityDataAcquisition2/grafana/dashboards
       # Пример Linux:   /home/<user>/projects/BioactivityDataAcquisition2/grafana/dashboards
-      path: grafana/dashboards
+      path: /var/lib/grafana/dashboards
