@@ -330,6 +330,7 @@ class _MedallionConfigValidator:
         errors.extend(
             self._validate_path_uniqueness(bronze_path, silver_path, gold_path)
         )
+        errors.extend(self._validate_silver_partition_contract())
 
         policy = MedallionPolicy.for_run_type(runtime.run_type)
         errors.extend(
@@ -472,6 +473,30 @@ class _MedallionConfigValidator:
                     expected="unique paths for each layer",
                     actual=f"bronze_path == gold_path ({bronze_path})",
                     rule="Medallion Architecture: layers MUST have distinct paths",
+                )
+            )
+
+        return errors
+
+    def _validate_silver_partition_contract(self) -> list[ConfigValidationError]:
+        """Validate Silver partition contract year=YYYY/month=MM.
+
+        Silver path layout is represented physically by Delta partition columns,
+        producing directories year=YYYY/month=MM under provider/entity table path.
+        """
+        errors: list[ConfigValidationError] = []
+
+        partition_cols = list(self._config.table.partition_cols)
+        if not partition_cols:
+            return errors
+
+        if partition_cols != ["year", "month"]:
+            errors.append(
+                ConfigValidationError(
+                    field="table.partition_cols",
+                    expected="['year', 'month']",
+                    actual=str(partition_cols),
+                    rule="RULES §2.1: Silver path partitioning MUST be year=YYYY/month=MM",
                 )
             )
 

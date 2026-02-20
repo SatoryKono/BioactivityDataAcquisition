@@ -13,7 +13,7 @@ Convention-based path resolution (ADR-029):
         - schema_file: ../../schemas/{provider}/{entity_type}.yaml
 
     Sink Paths:
-        - sink.bronze.path: data/output/bronze/{provider}/{entity_type}
+        - sink.bronze.path: data/output/bronze/v1/{provider}/{entity_type}
         - sink.silver.path: data/output/silver/{provider}/{entity_type}
         - sink.gold.path: data/output/gold/{provider}/{entity_type}
         - sink.silver.csv_export.path: {sink.silver.path}
@@ -169,7 +169,10 @@ def _apply_layer_defaults(
 
     Sets path and csv_export.path if not specified.
     """
-    layer.setdefault("path", f"data/output/{layer_name}/{provider}/{entity_type}")
+    if layer_name == "bronze":
+        layer.setdefault("path", f"data/output/bronze/v1/{provider}/{entity_type}")
+    else:
+        layer.setdefault("path", f"data/output/{layer_name}/{provider}/{entity_type}")
 
     # Auto-set csv_export path to match layer path
     csv_export = layer.setdefault("csv_export", {})

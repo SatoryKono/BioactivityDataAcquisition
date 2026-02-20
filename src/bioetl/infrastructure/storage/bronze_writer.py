@@ -4,7 +4,7 @@ Implements RULES.md §2.1.1 - Bronze Layer specifications.
 
 Requirements:
 - REQ-DATA-001: JSONL + zstd format
-- REQ-DATA-002: Path format bronze/{provider}/{entity}/{date}/
+- REQ-DATA-002: Path format bronze/v1/{provider}/{entity}/{date}/
 - REQ-DATA-003: Append-only writes
 - REQ-DATA-004: Atomic writes (via temp file + rename)
 
@@ -57,7 +57,9 @@ class BronzeWriter:
     COMPRESSION_CHUNK_SIZE = 256 * 1024
     COMPRESSION_LEVEL = 3
     COMPRESSION_THREADS = -1  # zstd: auto-detect available CPU cores
-    BRONZE_PATH_FORMAT = "{provider}/{entity}/{date}/{filename}"
+    BRONZE_LAYOUT_VERSION = "v1"
+    BRONZE_PATH_FORMAT = "v1/{provider}/{entity}/{date}/{filename}"
+    LEGACY_BRONZE_PATH_FORMAT = "{provider}/{entity}/{date}/{filename}"
     BRONZE_FILE_SUFFIX = ".jsonl.zst"
 
     def __init__(
@@ -74,6 +76,8 @@ class BronzeWriter:
         save_metadata: bool = False,
         metadata_coordinator: MetadataCoordinatorPort | None = None,
         flat_structure: bool = False,
+        legacy_layout: bool = False,
+        compat_read_legacy_layout: bool = True,
     ) -> None:
         """Initialize Bronze writer.
 
@@ -104,6 +108,10 @@ class BronzeWriter:
             flat_structure: If True, write directly to base_path/{date}/ without
                           adding {provider}/{entity}/ prefix. Use when base_path
                           already includes provider/entity path segments.
+            legacy_layout: If True, writes Bronze files using legacy path
+                         {provider}/{entity}/{date}/ without v1 prefix.
+            compat_read_legacy_layout: If True, list/cleanup operations read both
+                                     v1 and legacy Bronze layouts.
 
         Note:
             Lock validation is now performed at Application layer (BatchWriter)
@@ -136,6 +144,8 @@ class BronzeWriter:
             metadata_coordinator
         )
         self._flat_structure = flat_structure
+        self._legacy_layout = legacy_layout
+        self._compat_read_legacy_layout = compat_read_legacy_layout
 
     def _resolve_bronze_path(
         self, provider: str, entity: str, date_str: str, filename: str
@@ -143,7 +153,26 @@ class BronzeWriter:
         """Resolve Bronze file path based on flat_structure setting."""
         if self._flat_structure:
             return f"{date_str}/{filename}"
-        return f"{provider}/{entity}/{date_str}/{filename}"
+        if self._legacy_layout:
+            return self.LEGACY_BRONZE_PATH_FORMAT.format(
+                provider=provider,
+                entity=entity,
+                date=date_str,
+                filename=filename,
+            )
+        return self.BRONZE_PATH_FORMAT.format(
+            provider=provider,
+            entity=entity,
+            date=date_str,
+            filename=filename,
+        )
+
+    def _iter_provider_entity_prefixes(self, provider: str, entity: str) -> list[str]:
+        """Get provider/entity prefixes for current and legacy Bronze layouts."""
+        prefixes = [f"{self.BRONZE_LAYOUT_VERSION}/{provider}/{entity}"]
+        if self._compat_read_legacy_layout:
+            prefixes.append(f"{provider}/{entity}")
+        return prefixes
 
     def _validate_bronze_names(self, provider: str, entity: str) -> None:
         """Validate provider and entity names (alphanumeric + underscores only)."""
@@ -718,11 +747,19 @@ class BronzeWriter:
             else:
                 search_path = self.base_path
         else:
-            # Standard path format: {provider}/{entity}/{date}/
-            prefix = f"{provider}/{entity}/"
-            if date:
-                prefix = f"{prefix}{date.strftime('%Y-%m-%d')}/"
-            search_path = self.base_path / prefix
+            files: list[Path] = []
+            pattern = "batch_*.jsonl.zst" if date else "**/*.jsonl.zst"
+            for prefix in self._iter_provider_entity_prefixes(provider, entity):
+                search_path = self.base_path / prefix
+                if date:
+                    search_path = search_path / date.strftime("%Y-%m-%d")
+                if search_path.exists():
+                    files.extend(search_path.glob(pattern))
+
+            if not files:
+                return []
+
+            return sorted({str(p.relative_to(self.base_path)) for p in files})
 
         if not search_path.exists():
             return []
@@ -746,19 +783,25 @@ class BronzeWriter:
         if not self.base_path.exists():
             return []
 
-        pattern = f"{provider or '*'}/{entity or '*'}"
         old_dirs: list[Path] = []
 
-        # Use glob to filter provider/entity structure efficiently
-        for entity_dir in self.base_path.glob(pattern):
-            if not entity_dir.is_dir():
-                continue
+        prefixes = [f"{provider or '*'}/{entity or '*'}"]
+        if self._compat_read_legacy_layout:
+            prefixes.insert(
+                0, f"{self.BRONZE_LAYOUT_VERSION}/{provider or '*'}/{entity or '*'}"
+            )
 
-            for date_dir in entity_dir.iterdir():
-                if self._is_old_date_dir(date_dir, cutoff_str):
-                    old_dirs.append(date_dir)
+        for pattern in prefixes:
+            # Use glob to filter provider/entity structure efficiently
+            for entity_dir in self.base_path.glob(pattern):
+                if not entity_dir.is_dir():
+                    continue
 
-        return old_dirs
+                for date_dir in entity_dir.iterdir():
+                    if self._is_old_date_dir(date_dir, cutoff_str):
+                        old_dirs.append(date_dir)
+
+        return sorted(set(old_dirs))
 
     def _is_old_date_dir(self, path: Path, cutoff_str: str) -> bool:
         """Check if path is a date directory older than cutoff."""

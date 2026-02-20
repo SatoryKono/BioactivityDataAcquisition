@@ -128,11 +128,11 @@ class MyAdapter:
 
 ### 2.1. Архитектура Medallion
 
-| Уровень            | Формат           | Валидация                  | Хранение (Retention)                          | Идемпотентность                                                                                                        |
-| ------------------ | ---------------- | -------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| **Bronze** (Сырые) | **JSONL + zstd** | Мин./Нет                   | 90 дней hot -> Archive (local archive policy) | Path: `bronze/{provider}/{entity}/{date}/`. Append-only.                                                               |
-| **Silver** (Норм.) | **Delta Lake**   | Мягкая (учет дрейфа схемы) | Постоянно                                     | **Merge/Upsert**. Raw Parquet в Silver **MUST NOT** использоваться. Обязателен ACID. Time Travel — для Ops, не для DR. |
-| **Gold** (Витрины) | Delta Lake       | Строгая (`strict=True`)    | Постоянно                                     | Версионированные снимки (SCD Type 2) или партиционирование по дате.                                                    |
+| Уровень            | Формат           | Валидация                  | Хранение (Retention)                          | Идемпотентность                                                                                                             |
+| ------------------ | ---------------- | -------------------------- | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **Bronze** (Сырые) | **JSONL + zstd** | Мин./Нет                   | 90 дней hot -> Archive (local archive policy) | Path: `bronze/v1/{provider}/{entity}/{date}/` (legacy: `bronze/{provider}/{entity}/{date}/` read-only compat). Append-only. |
+| **Silver** (Норм.) | **Delta Lake**   | Мягкая (учет дрейфа схемы) | Постоянно                                     | **Merge/Upsert**. Raw Parquet в Silver **MUST NOT** использоваться. Обязателен ACID. Time Travel — для Ops, не для DR.      |
+| **Gold** (Витрины) | Delta Lake       | Строгая (`strict=True`)    | Постоянно                                     | Версионированные снимки (SCD Type 2) или партиционирование по дате.                                                         |
 
 #### 2.1.1. Silver Write Modes (Режимы Записи)
 
@@ -260,8 +260,8 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
 
 | Уровень    | Стратегия партиционирования                   | Пример                                         |
 | ---------- | --------------------------------------------- | ---------------------------------------------- |
-| **Bronze** | По `ingestion_date` (YYYY-MM-DD)              | `bronze/chembl/activity/2025-05-20/`           |
-| **Silver** | По `source_date` или `entity_type`            | `silver/chembl/activity/year=2025/month=05/`   |
+| **Bronze** | По `ingestion_date` (YYYY-MM-DD)              | `bronze/v1/chembl/activity/2025-05-20/`        |
+| **Silver** | По `year` и `month` (`year=YYYY/month=MM`)    | `silver/chembl/activity/year=2025/month=05/`   |
 | **Gold**   | По use-case (часто по `target_id` или `date`) | `gold/activity_by_target/target_id=CHEMBL123/` |
 
 - **Soft Limits**: Warning при >10,000 партиций или >100 файлов в партиции.
@@ -1598,8 +1598,8 @@ fields:
 
 ## Приложение F: Реестр Architecture Decision Records (ADR)
 
-| ADR                                                                               | Название                                 | Статус             | Дата       |
-| --------------------------------------------------------------------------------- | ---------------------------------------- | ------------------ | ---------- |
+| ADR                                                                                  | Название                                 | Статус             | Дата       |
+| ------------------------------------------------------------------------------------ | ---------------------------------------- | ------------------ | ---------- |
 | [ADR-001](../02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md)             | Delta Lake vs Parquet                    | Accepted           | 2025-05    |
 | [ADR-002](../02-architecture/decisions/ADR-002-medallion-architecture.md)            | Medallion Architecture                   | Accepted           | 2025-05    |
 | [ADR-003](../02-architecture/decisions/ADR-003-in-memory-locking-strategy.md)        | In-Memory Locking (MemoryLock)           | Accepted (Revised) | 2025-12    |
@@ -1635,7 +1635,7 @@ fields:
 | [ADR-033](../02-architecture/decisions/ADR-033-publication-validation-strategy.md)   | Publication Metadata Validation Strategy | Proposed           | 2026-02-06 |
 | [ADR-034](../02-architecture/decisions/ADR-034-schema-domain-pairs.md)               | Schema↔Domain Configuration Pairs        | Accepted           | 2026-02-15 |
 | [ADR-035](../02-architecture/decisions/ADR-035-json-field-typing-policy.md)          | JSON Field Typing Policy (Silver↔Gold)   | Accepted           | 2026-02-17 |
-| [ADR-036](../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md)   | Gold Contract Versioning Policy           | Accepted           | 2026-02-18 |
+| [ADR-036](../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md)   | Gold Contract Versioning Policy          | Accepted           | 2026-02-18 |
 
 ## История Изменений (Changelog)
 

@@ -8,8 +8,8 @@ See docs/02-architecture/decisions/ADR-014-deterministic-writes.md
 
 from __future__ import annotations
 
-from pathlib import Path
 import re
+from pathlib import Path
 
 import pytest
 
@@ -108,7 +108,7 @@ class TestBronzeMetadataInvariants:
     ) -> None:
         """Bronze paths MUST include date partitioning.
 
-        Path format: bronze/{provider}/{entity}/{date}/
+        Path format: bronze/v1/{provider}/{entity}/{date}/
         """
         from unittest.mock import Mock
 
@@ -127,9 +127,11 @@ class TestBronzeMetadataInvariants:
             filename="batch_2026-01-21_123.jsonl.zst",
         )
         normalized = path.replace("\\", "/")
-        assert normalized == "chembl/activity/2026-01-21/batch_2026-01-21_123.jsonl.zst"
+        assert (
+            normalized == "v1/chembl/activity/2026-01-21/batch_2026-01-21_123.jsonl.zst"
+        )
         assert re.match(
-            r"^chembl/activity/\d{4}-\d{2}-\d{2}/.+\.jsonl\.zst$",
+            r"^v1/chembl/activity/\d{4}-\d{2}-\d{2}/.+\.jsonl\.zst$",
             normalized,
         )
 
