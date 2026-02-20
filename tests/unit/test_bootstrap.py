@@ -536,6 +536,7 @@ class TestMaybeStartMetricsServer:
         # Create mock settings with metrics config
         settings = MagicMock()
         settings.metrics_port = 9090
+        settings.metrics_addr = "0.0.0.0"
         settings.observability.metrics_enabled = True
         settings.observability.metrics_server_enabled = True
         settings.observability.metrics_fail_fast = False
@@ -549,6 +550,7 @@ class TestMaybeStartMetricsServer:
         assert result is True
         mock_start_server.assert_called_once_with(
             port=9090,
+            addr="0.0.0.0",
             fail_fast=False,
             retry_count=5,
             retry_delay=2.0,
