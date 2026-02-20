@@ -192,6 +192,18 @@ docker-reset: ## Stop services and remove volumes (clean slate)
 docker-logs: ## Show logs from Docker services
 	docker compose logs -f
 
+monitoring-up: ## Start monitoring services (Prometheus + Grafana)
+	@echo "$(BLUE)Starting monitoring services...$(NC)"
+	docker compose -f docker-compose.monitoring.yml up -d
+	@echo "$(GREEN)Monitoring started! Grafana: http://localhost:3000 (admin/admin)$(NC)"
+
+monitoring-down: ## Stop monitoring services
+	@echo "$(YELLOW)Stopping monitoring services...$(NC)"
+	docker compose -f docker-compose.monitoring.yml down
+
+monitoring-logs: ## Show logs from monitoring services
+	docker compose -f docker-compose.monitoring.yml logs -f
+
 seed-local: ## Load sample fixtures into local DB
 	@echo "$(YELLOW)Note: BioETL uses external APIs - no local seeding required$(NC)"
 	@echo "$(GREEN)Ready for pipeline run!$(NC)"

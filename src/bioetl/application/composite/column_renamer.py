@@ -36,6 +36,15 @@ class ColumnRenamer:
     # System column prefixes (not renamed)
     SYSTEM_PREFIXES: Final[frozenset[str]] = frozenset({"_"})
 
+    # Identity columns that are never provider-qualified.
+    # These are universal identifiers shared across all providers.
+    IDENTITY_COLUMNS: Final[frozenset[str]] = frozenset(
+        {
+            "entity_id",
+            "content_hash",
+        }
+    )
+
     # Join key columns (not renamed, case-insensitive)
     JOIN_KEY_COLUMNS: Final[frozenset[str]] = frozenset(
         {
@@ -193,7 +202,9 @@ class ColumnRenamer:
         return (parts[0].lower(), parts[1].lower())
 
     def _is_system_column(self, col: str) -> bool:
-        """Check if column is a system column (starts with '_')."""
+        """Check if column is a system or identity column."""
+        if col in self.IDENTITY_COLUMNS:
+            return True
         return any(col.startswith(prefix) for prefix in self.SYSTEM_PREFIXES)
 
     def _is_already_qualified(self, col: str) -> bool:

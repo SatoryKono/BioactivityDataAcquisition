@@ -349,6 +349,7 @@ class TestPIIHandling:
         {
             "noop_logger.py",  # Logging infrastructure, no PII
             "retry.py",  # Network retry logic, "address" = URL/endpoint
+            "server.py",  # Metrics server, "address" = network bind address
         }
     )
 

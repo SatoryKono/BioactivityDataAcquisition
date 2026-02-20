@@ -257,7 +257,7 @@ export OTEL-EXPORTER-OTLP-ENDPOINT=http://jaeger:4317
 При выполнении пайплайна автоматически запускается HTTP health server:
 
 ```bash
-# По умолчанию на порту 8080
+# По умолчанию на порту 8081
 bioetl run --pipeline chembl-activity
 
 # Кастомный порт
@@ -281,7 +281,7 @@ bioetl run --pipeline chembl-activity --no-health-server
 Для отдельного мониторинга без запуска пайплайна:
 
 ```bash
-bioetl health server --host 0.0.0.0 --port 8080
+bioetl health server --host 0.0.0.0 --port 8081
 ```
 
 ### CLI Health Check

@@ -89,7 +89,7 @@ class TestFileSizeLimits:
         "batch_writer.py": 575,  # 569 LOC - BatchWriter with Safety Guard + column_order + layer config filtering + key nullability
         "preflight_service.py": 845,  # 840 LOC - preflight validation (expanded) + contract policy preflight
         "preflight_validator.py": 655,  # 651 LOC - extracted preflight validators (REFACTOR-003)
-        "batch_executor.py": 890,  # 883 LOC - unified executor for batch processing + DQ context + MetadataCoordinator params + documented exception handlers
+        "batch_executor.py": 785,  # 777 LOC - unified executor (memory management extracted to batch_memory_manager.py)
         "transformer.py": 920,  # 917 LOC - UniProtProteinTransformer with complex protein data extraction
         "gold_analyzer.py": 200,  # 192 LOC - Thin orchestrator (checks extracted to _checks_*.py modules)
         "silver_analyzer.py": 650,  # 642 LOC - Silver layer analysis with extracted helper methods
@@ -106,7 +106,7 @@ class TestFileSizeLimits:
         "pipeline_factories.py": 680,  # 674 LOC - pipeline factory configurations + contract policy validation + composite schema registry
         "services_factory.py": 710,  # 701 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory + flat_structure + MetadataCoordinator param + PipelineCallbacksContext + loading_strategy (ADR-031) + silver_validator param
         # Infrastructure layer exemptions
-        "silver_writer.py": 1210,  # 1207 LOC - schema drift + merge logic + CSV export for merged (metadata builder extracted) + column_order support + key nullability enforcement
+        "silver_writer.py": 1240,  # 1231 LOC - schema drift + merge logic + CSV export for merged (metadata builder extracted) + column_order support + key nullability enforcement + column_renamer integration
         "gold_writer.py": 970,  # 963 LOC - SCD Type 2 (metadata/arrow logic extracted) + column_order + write_gold_merged schema validation + composite metadata
         "bronze_writer.py": 820,  # 813 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param + provider/entity params + flat_structure
         "gold.py": 1060,  # 1055 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + CrossRef/PubMed/ChEMBL lookup metadata fields + publication schemas + DATE_REGEX validation + PubMed forensic fields)
@@ -538,7 +538,7 @@ class TestFunctionLength:
     # Baseline updated 2026-01-27: titles_match() added
     # Baseline updated 2026-01-27: composite pipeline growth (dependencies phase, checkpoint)
     # Baseline updated 2026-02-03: technical debt allowance + function growth
-    MAX_VIOLATIONS = 140  # Increased for column_order support in writers + extractors growth + schema governance branches + field alias merge integration
+    MAX_VIOLATIONS = 141  # +1 column_renamer build_rename_map()
 
     def test_functions_under_50_lines(self, src_dir: Path) -> None:
         """All functions must be under 50 lines (with exemptions)."""
@@ -603,7 +603,7 @@ class TestClassSize:
         # Baseline exemptions for existing classes
         "StorageAdapter": 640,  # 633 lines - storage adapter with writers + BronzeWriteResult + SilverWriteResult + composite schemas
         "BaseTransformer": 770,  # 763 lines - Template Method with silver_filters + contract policy + content hash identity
-        "SilverWriter": 1140,  # 1132 lines - schema drift detection (metadata builder extracted) + column_order
+        "SilverWriter": 1155,  # 1148 lines - schema drift detection (metadata builder extracted) + column_order + column_renamer integration
         "GoldWriter": 920,  # 917 lines - SCD Type 2 (metadata/arrow logic extracted) + column_order
         "MedallionLifecycleService": 385,  # 379 lines - lifecycle orchestration service
         "GenericPipelineFactory": 350,  # 305 lines - factory pattern
@@ -611,7 +611,7 @@ class TestClassSize:
         "PreflightService": 545,  # 540 lines - preflight validation service
         "PostrunService": 355,  # 349 lines - postrun service
         "BronzeWriter": 770,  # 766 lines - JSONL + zstd + MetadataCoordinator fallback + SourceMetadata + query_string extraction + async read_bronze + flat_structure
-        "BatchExecutor": 825,  # 820 lines - unified executor for batch processing + DQ context + MetadataCoordinator + _extract_dq_entity helper
+        "BatchExecutor": 720,  # 713 lines - unified executor (memory management extracted to BatchMemoryManager)
         "BatchWriter": 535,  # 531 lines - batch writing with Safety Guard §4.6 lock validation + SourceMetadata param + Silver lineage + DQ defaults + column_order + key nullability
         # Application core classes
         "FilteredDataSource": 355,  # 348 lines - decorator with fallback mapping + direct multi-filter support

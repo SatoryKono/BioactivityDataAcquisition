@@ -85,7 +85,9 @@ def _create_chembl_data_source(
     DataSourceFactory, HttpClientFactory = _get_factories(
         get_data_source_factory, get_http_client_factory
     )
-    http_client = HttpClientFactory.create_for_provider("chembl", settings)
+    http_client = HttpClientFactory.create_for_provider(
+        "chembl", settings, metrics=metrics
+    )
 
     # Load adapter configuration from YAML (single source of truth)
     adapter_config = _get_adapter_config("chembl", default_page_size=1000)
@@ -183,7 +185,9 @@ def _create_uniprot_data_source(
     DataSourceFactory, HttpClientFactory = _get_factories(
         get_data_source_factory, get_http_client_factory
     )
-    http_client = HttpClientFactory.create_for_provider("uniprot", settings)
+    http_client = HttpClientFactory.create_for_provider(
+        "uniprot", settings, metrics=metrics
+    )
     data_source = DataSourceFactory.create(
         "uniprot",
         http_client=http_client,
@@ -206,7 +210,9 @@ def _create_pubmed_data_source(
     _, HttpClientFactory = _get_factories(
         get_data_source_factory, get_http_client_factory
     )
-    http_client = HttpClientFactory.create_for_provider("pubmed", settings)
+    http_client = HttpClientFactory.create_for_provider(
+        "pubmed", settings, metrics=metrics
+    )
 
     # Determine API key: config takes precedence over settings
     configured_api_key = pipeline_config.source.api_key

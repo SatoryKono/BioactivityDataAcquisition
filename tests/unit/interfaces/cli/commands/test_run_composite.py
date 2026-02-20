@@ -309,12 +309,12 @@ class TestRunCompositeAsync:
                 "publication",
                 CompositeRuntimeConfig(),
                 health_server_enabled=True,
-                health_port=8080,
+                health_port=8081,
             )
 
         assert success is True
         assert error is None
-        mock_context.assert_called_once_with(enabled=True, port=8080)
+        mock_context.assert_called_once_with(enabled=True, port=8081)
 
     @pytest.mark.asyncio
     async def test_with_health_server_disabled(self) -> None:

@@ -879,7 +879,7 @@ class TestGoldWriterArrowConversion:
 
 @pytest.mark.unit
 class TestGoldWriterMergedValidation:
-    """Tests for write_gold_merged strict validation (REQ-DATA-009)."""
+    """Tests for write_gold_merged schema validation (REQ-DATA-009)."""
 
     @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
     async def test_write_gold_merged_with_strict_schema_passes(
@@ -894,16 +894,17 @@ class TestGoldWriterMergedValidation:
 
         mock_write_deltalake.assert_called_once()
 
-    async def test_write_gold_merged_non_strict_schema_raises(
-        self, gold_writer, non_strict_schema, valid_records
+    @patch("bioetl.infrastructure.storage.gold_writer.write_deltalake")
+    async def test_write_gold_merged_non_strict_schema_allowed(
+        self, mock_write_deltalake, gold_writer, non_strict_schema, valid_records
     ):
-        """Test write_gold_merged rejects non-strict schema (REQ-DATA-009)."""
-        with pytest.raises(ValueError, match="strict=True"):
-            await gold_writer.write_gold_merged(
-                table_name="test.merged_table",
-                records=valid_records,
-                schema=non_strict_schema,
-            )
+        """Test write_gold_merged accepts non-strict schema (composite pipelines)."""
+        await gold_writer.write_gold_merged(
+            table_name="test.merged_table",
+            records=valid_records,
+            schema=non_strict_schema,
+        )
+        mock_write_deltalake.assert_called_once()
 
     async def test_write_gold_merged_schema_validation_failure(
         self, gold_writer, strict_schema

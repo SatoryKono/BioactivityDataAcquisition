@@ -299,8 +299,8 @@ export BIOETL-METRICS-ENABLED=false
 При выполнении пайплайна доступен HTTP health server:
 
 ```bash
-# Включён по умолчанию на порту 8080
-bioetl run --pipeline chembl-activity --health-port 8080
+# Включён по умолчанию на порту 8081
+bioetl run --pipeline chembl-activity --health-port 8081
 
 # Отключить
 bioetl run --pipeline chembl-activity --no-health-server
@@ -315,7 +315,7 @@ bioetl run --pipeline chembl-activity --no-health-server
 ### Standalone Health Server
 
 ```bash
-bioetl health server --port 8080
+bioetl health server --port 8081
 ```
 
 ----------------------------------------------------------------------

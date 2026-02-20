@@ -76,6 +76,7 @@ def _handle_unexpected_error(
 
 def start_metrics_server(
     port: int = 8000,
+    addr: str = "0.0.0.0",
     *,
     fail_fast: bool = False,
     retry_count: int = 3,
@@ -89,6 +90,7 @@ def start_metrics_server(
 
     Args:
         port: Port to bind the HTTP server (default: 8000)
+        addr: Address to bind the HTTP server (default: 0.0.0.0)
         fail_fast: If True, raise MetricsServerError on failure
         retry_count: Number of retries for transient errors (default: 3)
         retry_delay: Delay between retries in seconds (default: 1.0)
@@ -116,11 +118,12 @@ def start_metrics_server(
 
         for attempt in range(retry_count):
             try:
-                start_http_server(port)
+                start_http_server(port, addr=addr)
                 _SERVER_STARTED = True
                 logger.info(
                     "Prometheus metrics server started",
                     port=port,
+                    addr=addr,
                     attempt=attempt + 1,
                 )
                 return True

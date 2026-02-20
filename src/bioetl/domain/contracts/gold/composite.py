@@ -13,9 +13,9 @@ Int→Float coercion note:
     documented in RULES.md §2.6.
 
 Note on strict mode:
-    Composite schemas use `strict = "filter"` because the actual columns depend on
-    which enrichers succeeded. The schema validates core required fields and
-    filters optional qualified columns from enrichers.
+    Composite schemas use ``strict = False`` because the actual columns depend on
+    which enrichers succeeded. The schema validates core required fields while
+    allowing extra provider-qualified columns (e.g. chembl.publication.title) through.
 """
 
 from __future__ import annotations
@@ -41,7 +41,7 @@ class CompositePublicationGoldSchema(pa.DataFrameModel):
         - Title (required for valid publication)
         - Lineage metadata (_composite_run_id, etc.)
 
-    Note: Uses strict="filter" to enforce required fields while allowing variable enricher columns.
+    Note: Uses strict=False to enforce required fields while allowing variable enricher columns.
     """
 
     # =========================================================================
@@ -129,14 +129,13 @@ class CompositePublicationGoldSchema(pa.DataFrameModel):
     class Config:
         """Pandera configuration.
 
-        Note: strict="filter" keeps required columns while filtering additional enricher columns.
+        Note: strict=False validates required columns while allowing extra enricher columns.
         The actual columns depend on which enrichers succeeded and the merge strategy.
         """
 
-        # Keep required contract columns strict while filtering optional
-        # provider-qualified columns that are not part of the canonical
-        # composite contract.
-        strict = "filter"
+        # Validate required contract columns while allowing extra
+        # provider-qualified columns through.
+        strict = False
         coerce = True  # Enable type coercion for nullable integers
 
 
@@ -160,7 +159,7 @@ class CompositeMoleculeGoldSchema(pa.DataFrameModel):
         - Seed primary key (molecule_chembl_id)
         - Lineage metadata (_composite_run_id, etc.)
 
-    Note: Uses strict="filter" to enforce required fields while allowing variable enricher columns.
+    Note: Uses strict=False to enforce required fields while allowing variable enricher columns.
     """
 
     # =========================================================================
@@ -243,14 +242,13 @@ class CompositeMoleculeGoldSchema(pa.DataFrameModel):
     class Config:
         """Pandera configuration.
 
-        Note: strict="filter" keeps required columns while filtering additional enricher columns.
+        Note: strict=False validates required columns while allowing extra enricher columns.
         The actual columns depend on which enrichers succeeded and the merge strategy.
         """
 
-        # Keep required contract columns strict while filtering optional
-        # provider-qualified columns that are not part of the canonical
-        # composite contract.
-        strict = "filter"
+        # Validate required contract columns while allowing extra
+        # provider-qualified columns through.
+        strict = False
         coerce = True  # Enable type coercion for nullable integers
 
 
@@ -291,7 +289,7 @@ class CompositeActivityGoldSchema(pa.DataFrameModel):
     class Config:
         """Pandera configuration for composite activity output."""
 
-        strict = "filter"
+        strict = False
         coerce = True
 
 
@@ -329,7 +327,7 @@ class CompositeAssayGoldSchema(pa.DataFrameModel):
     class Config:
         """Pandera configuration for composite assay output."""
 
-        strict = "filter"
+        strict = False
         coerce = True
 
 
@@ -368,7 +366,7 @@ class CompositeTargetGoldSchema(pa.DataFrameModel):
     class Config:
         """Pandera configuration for composite target output."""
 
-        strict = "filter"
+        strict = False
         coerce = True
 
 
