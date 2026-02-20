@@ -5,21 +5,14 @@ Pure domain service (no I/O) per RULES.md §1.1.
 
 from __future__ import annotations
 
+import hashlib
 import re
 import unicodedata
 from dataclasses import dataclass, field
 from html import unescape
 from typing import TYPE_CHECKING, Any
 
-from bioetl.domain.services._date_helpers import (
-    format_date_parts as _format_date_parts,
-)
-from bioetl.domain.services._date_helpers import (
-    normalize_partial_date as _normalize_partial_date,
-)
-from bioetl.domain.services.author_normalization_service import (
-    AuthorNormalizationService,
-)
+from bioetl.domain.serialization import deserialize_from_json, serialize_to_json
 from bioetl.domain.services.data_normalization_config import DataNormalizationConfig
 
 if TYPE_CHECKING:
@@ -27,8 +20,14 @@ if TYPE_CHECKING:
 
 _HTML_TAG_PATTERN = re.compile(r"<[^>]+>")
 _WHITESPACE_PATTERN = re.compile(r"\s+")
-_CONTROL_CHARS_PATTERN = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]")
+_CONTROL_CHARS_PATTERN = re.compile(r"[\x00-\x1f\x7f-\x9f]")
+_DATE_FULL_FMT = "{0:04d}-{1:02d}-{2:02d}"
 _DOI_URL_PREFIXES = ("https://doi.org/", "http://doi.org/", "doi:")
+
+# Partial date patterns for end of period normalization
+_FULL_DATE_LEN = 10  # YYYY-MM-DD
+_PARTIAL_MONTH_LEN = 7  # YYYY-MM
+_PARTIAL_YEAR_LEN = 4  # YYYY
 
 
 @dataclass(frozen=True, slots=True)
@@ -36,13 +35,9 @@ class DefaultDataNormalizationService:
     """Default implementation of data normalization service.
 
     Orchestrates text and data normalization for publication metadata.
-    Delegates author/affiliation normalization to AuthorNormalizationService.
     """
 
     config: DataNormalizationConfig = field(default_factory=DataNormalizationConfig)
-    _author_service: AuthorNormalizationService = field(
-        default_factory=AuthorNormalizationService, init=False
-    )
 
     def normalize_doi(self, doi: str | None) -> str | None:
         """Normalize DOI to lowercase, stripped format.
@@ -101,9 +96,24 @@ class DefaultDataNormalizationService:
             return year, False
         return year, True
 
-    def normalize_authors(self, authors: list[str] | str | None) -> str | None:
-        """Parse and serialize author names. Returns JSON string or None."""
-        return self._author_service.normalize_author_list(authors)
+    def normalize_authors(
+        self, authors: list[str] | str | None, salt: str
+    ) -> str | None:
+        """Parse, hash, and serialize author names. Returns JSON string or None."""
+        author_list = self.parse_authors_to_list(authors)
+        if not author_list:
+            return None
+        hashed = [self._hash_pii(name, salt) for name in author_list]
+        return serialize_to_json(hashed, ensure_ascii=True)
+
+    def _hash_pii(self, value: str, salt: str) -> str:
+        """Hash a PII value with salt using SHA-256 per RULES.md §5.4.
+
+        Normalization: strip whitespace, lowercase before hashing.
+        Formula: sha256(lowercase(value) + SALT)
+        """
+        normalized = value.strip().lower()
+        return hashlib.sha256(f"{normalized}{salt}".encode()).hexdigest()
 
     def strip_html_tags(self, text: str | None) -> str | None:
         """Remove HTML tags, decode entities, normalize whitespace."""
@@ -128,7 +138,6 @@ class DefaultDataNormalizationService:
         stripped = value.strip()
         return stripped if stripped else None
 
-    # Any: accepts any type for s...
     def normalize_to_string(self, value: Any) -> str | None:
         """Convert value to string, strip whitespace, return None if empty."""
         if value is None:
@@ -137,60 +146,203 @@ class DefaultDataNormalizationService:
         return str_value if str_value else None
 
     def parse_authors_to_list(self, authors: list[str] | str | None) -> list[str]:
-        """Parse various author formats into a list of names.
-
-        .. deprecated:: 2.2.0
-            Use :meth:`normalize_author_list` instead for unified author normalization
-            with hashing. This method will be removed in version 3.0.0.
-
-        Args:
-            authors: Author data in various formats.
-
-        Returns:
-            List of author name strings.
-        """
-        import warnings
-
-        warnings.warn(
-            "parse_authors_to_list() is deprecated and will be removed in version 3.0.0. "
-            "Use normalize_author_list() instead for unified author normalization.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
-        # Delegate to AuthorNormalizationService (same parsing logic)
+        """Parse various author formats into a list of names."""
         if authors is None:
             return []
-        return self._author_service._parse_author_names(authors)
+        if isinstance(authors, list):
+            return self._parse_authors_from_list(authors)
+        if isinstance(authors, str) and authors.strip():
+            return self._parse_authors_string(authors.strip())
+        return []
+
+    def _parse_authors_from_list(self, authors: list[Any]) -> list[str]:
+        """Parse author list, filtering non-strings and empty values."""
+        return [a.strip() for a in authors if isinstance(a, str) and a.strip()]
+
+    def _parse_authors_string(self, text: str) -> list[str]:
+        """Parse string as JSON or delimited format."""
+        json_result = self._parse_authors_from_json(text)
+        return json_result if json_result is not None else self._parse_delimited(text)
+
+    def _parse_authors_from_json(self, text: str) -> list[str] | None:
+        """Try to parse JSON array of authors."""
+        if not text.startswith("["):
+            return None
+        parsed = self._try_json_loads(text)
+        if isinstance(parsed, list):
+            return self._filter_json_authors(parsed)
+        return None
+
+    def _try_json_loads(self, text: str) -> Any:
+        """Attempt JSON parsing, returning None on failure."""
+        try:
+            return deserialize_from_json(text)
+        except ValueError:
+            return None
+
+    def _filter_json_authors(self, items: list[Any]) -> list[str]:
+        """Filter and convert JSON array items to author strings."""
+        return [str(a).strip() for a in items if a is not None and str(a).strip()]
+
+    def _parse_delimited(self, text: str) -> list[str]:
+        """Parse delimited string (semicolon or comma separated)."""
+        delimiter = ";" if ";" in text else ","
+        parts = text.split(delimiter) if delimiter in text else [text]
+        return [a.strip() for a in parts if a.strip()]
 
     def normalize_partial_date(self, date_str: str | None) -> str | None:
         """Normalize partial date to full YYYY-MM-DD format (end of period).
 
-        Delegates to _date_helpers module. See _date_helpers.normalize_partial_date
-        for full documentation.
+        Partial dates are normalized to the END of the period:
+        - YYYY-MM → YYYY-MM-30 (end of month, day 30 for simplicity)
+        - YYYY → YYYY-12-31 (end of year)
+        - YYYY-MM-DD → unchanged
+        - None/empty → None
+
+        Args:
+            date_str: Date string in partial or full ISO format.
+
+        Returns:
+            Full ISO date string (YYYY-MM-DD), or None if invalid.
         """
-        return _normalize_partial_date(date_str)
+        cleaned = self._clean_date_string(date_str)
+        if not cleaned:
+            return None
+        return self._normalize_by_length(cleaned)
+
+    def _clean_date_string(self, date_str: str | None) -> str | None:
+        """Strip whitespace from date string, return None if empty."""
+        if not date_str:
+            return None
+        stripped = date_str.strip()
+        return stripped if stripped else None
+
+    def _normalize_by_length(self, date_str: str) -> str | None:
+        """Normalize date string based on length pattern."""
+        length = len(date_str)
+        if length == _FULL_DATE_LEN:
+            return self._validate_full_date(date_str)
+        if length == _PARTIAL_MONTH_LEN:
+            return self._normalize_partial_month(date_str)
+        if length == _PARTIAL_YEAR_LEN:
+            return self._normalize_partial_year(date_str)
+        return None
+
+    def _validate_full_date(self, date_str: str) -> str | None:
+        """Validate YYYY-MM-DD format, return as-is if valid."""
+        if date_str[4] == "-" and date_str[7] == "-":
+            return date_str
+        return None
+
+    def _normalize_partial_month(self, date_str: str) -> str | None:
+        """Normalize YYYY-MM to YYYY-MM-30 (end of month)."""
+        if date_str[4] == "-":
+            return f"{date_str}-30"
+        return None
+
+    def _normalize_partial_year(self, date_str: str) -> str | None:
+        """Normalize YYYY to YYYY-12-31 (end of year)."""
+        if date_str.isdigit():
+            return f"{date_str}-12-31"
+        return None
 
     def format_date_parts(
         self, date_parts: Sequence[Sequence[int]] | None
     ) -> str | None:
-        """Format CrossRef date-parts [[year, month?, day?]] to ISO YYYY-MM-DD.
+        """Format CrossRef date-parts [[year, month?, day?]] to ISO YYYY-MM-DD string.
 
-        Delegates to _date_helpers module. See _date_helpers.format_date_parts
-        for full documentation.
+        Uses end-of-period normalization for partial dates:
+        - Complete date [[2024, 3, 15]]: returns "2024-03-15"
+        - Month-only [[2024, 3]]: returns "2024-03-31" (last day of month)
+        - Year-only [[2024]]: returns "2024-12-31" (last day of year)
         """
-        return _format_date_parts(date_parts)
+        parts = self._extract_date_parts(date_parts)
+        if not parts:
+            return None
+        return self._format_parts_to_date(parts)
+
+    def _extract_date_parts(
+        self, date_parts: Sequence[Sequence[int]] | None
+    ) -> Sequence[int] | None:
+        """Extract first date-parts array if valid, else None."""
+        if not date_parts:
+            return None
+        parts = date_parts[0]
+        return parts if parts else None
+
+    def _format_parts_to_date(self, parts: Sequence[int]) -> str:
+        """Format date parts to YYYY-MM-DD with end-of-period normalization."""
+        from calendar import monthrange
+
+        year = parts[0]
+        if len(parts) >= 3:
+            return _DATE_FULL_FMT.format(year, parts[1], parts[2])
+        if len(parts) == 2:
+            return _DATE_FULL_FMT.format(year, parts[1], monthrange(year, parts[1])[1])
+        return _DATE_FULL_FMT.format(year, 12, 31)
 
     def normalize_title(self, title: str | None) -> str | None:
-        """Normalize title: strip HTML, control chars, NFC unicode, collapse whitespace."""
+        """Normalize publication title: HTML cleanup, whitespace, unicode NFC, trim.
+
+        Normalization steps:
+        1. Strip HTML tags and decode entities
+        2. Remove control characters (0x00-0x1F, 0x7F-0x9F)
+        3. Normalize unicode to NFC form
+        4. Collapse multiple whitespace to single space
+        5. Trim leading/trailing whitespace
+
+        Args:
+            title: Raw title string (may contain HTML tags, extra whitespace).
+
+        Returns:
+            Normalized title or None if input is None/empty after normalization.
+
+        Examples:
+            >>> service.normalize_title("<b>Hello</b>  World")
+            'Hello World'
+            >>> service.normalize_title("Café")  # é normalized to NFC
+            'Café'
+        """
         return self._normalize_text_field(title)
 
     def normalize_abstract(self, abstract: str | None) -> str | None:
-        """Normalize abstract: strip HTML, control chars, NFC unicode, collapse whitespace."""
+        """Normalize publication abstract: HTML cleanup, whitespace, unicode NFC, trim.
+
+        Uses same normalization pipeline as normalize_title():
+        1. Strip HTML tags and decode entities
+        2. Remove control characters
+        3. Normalize unicode to NFC form
+        4. Collapse multiple whitespace to single space
+        5. Trim leading/trailing whitespace
+
+        Args:
+            abstract: Raw abstract string (may contain HTML tags, extra whitespace).
+
+        Returns:
+            Normalized abstract or None if input is None/empty after normalization.
+
+        Examples:
+            >>> service.normalize_abstract("<p>Study of α-particles</p>")
+            'Study of α-particles'
+        """
         return self._normalize_text_field(abstract)
 
     def _normalize_text_field(self, text: str | None) -> str | None:
-        """Normalize text: HTML → control chars → NFC → whitespace → trim."""
+        """Internal method: normalize text field through complete pipeline.
+
+        Pipeline steps (order matters):
+        1. Strip HTML tags and decode HTML entities
+        2. Remove control characters (0x00-0x1F, 0x7F-0x9F)
+        3. Normalize unicode to NFC (canonical composition)
+        4. Collapse multiple whitespace (spaces, tabs, newlines) to single space
+        5. Trim leading/trailing whitespace
+
+        Args:
+            text: Raw text to normalize.
+
+        Returns:
+            Normalized text or None if input is None/empty after normalization.
+        """
         if not text:
             return None
 
@@ -211,67 +363,3 @@ class DefaultDataNormalizationService:
         normalized = normalized.strip()
 
         return normalized if normalized else None
-
-    def normalize_author_keys(
-        self,
-        authors: list[str] | list[dict[str, Any]] | str | None,
-    ) -> str | None:
-        """Normalize author names to short ``Surname_F`` keys.
-
-        Delegates to AuthorNormalizationService.
-
-        Args:
-            authors: Author data in any supported format.
-
-        Returns:
-            Pipe-delimited string of short keys or None if empty.
-        """
-        return self._author_service.normalize_author_keys(authors)
-
-    def normalize_author_list(
-        self,
-        authors: list[str] | list[dict[str, Any]] | str | None,
-    ) -> str | None:
-        """Parse and normalize author names to JSON string.
-
-        Delegates to AuthorNormalizationService.
-
-        Args:
-            authors: Author data in any supported format (list, dict, string, JSON).
-
-        Returns:
-            JSON string of normalized author names or None if empty.
-        """
-        return self._author_service.normalize_author_list(authors)
-
-    def normalize_affiliations(
-        self,
-        affiliations: list[str] | list[dict[str, Any]] | None,
-    ) -> str | None:
-        """Extract, normalize, and deduplicate affiliations to JSON string.
-
-        Delegates to AuthorNormalizationService.
-
-        Args:
-            affiliations: Affiliation data as strings or dicts.
-
-        Returns:
-            JSON string of unique normalized affiliations or None if empty.
-        """
-        return self._author_service.normalize_affiliations(affiliations)
-
-    def extract_affiliations_from_authors(
-        self,
-        authors: list[dict[str, Any]],
-    ) -> list[str]:
-        """Extract unique affiliations from author objects.
-
-        Delegates to AuthorNormalizationService.
-
-        Args:
-            authors: List of author dicts with 'affiliations' key.
-
-        Returns:
-            List of unique normalized affiliation strings (sorted).
-        """
-        return self._author_service.extract_affiliations_from_authors(authors)

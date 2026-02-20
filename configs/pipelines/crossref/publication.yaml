@@ -7,7 +7,6 @@
 pipeline_name: crossref_publication
 provider: crossref
 entity_type: publication
-schema_file: ../../schemas/crossref/publication.yaml
 version: "1.2.0"
 description: "Enrich publication records with CrossRef metadata via DOI resolution"
 
@@ -16,8 +15,7 @@ description: "Enrich publication records with CrossRef metadata via DOI resoluti
 # Deduplication is handled on Silver layer via content_hash.
 loading_strategy: full_scan_only
 
-business_primary_keys: ["doi"]
-technical_primary_key: "entity_id"
+primary_keys: ["doi"]
 silver_table: "crossref_publication"
 gold_table: "crossref_publication"
 
@@ -54,10 +52,4 @@ sink:
   silver:
     flat_structure: true
   gold:
-    mode: scd2
-    scd_config:
-      valid_from: _valid_from
-      valid_to: _valid_to
-      is_current: _is_current
-      version: _version
     flat_structure: true
