@@ -27,7 +27,7 @@ def test_no_json_import_in_storage_layer():
         if py_file.name in ALLOWED_FILES:
             continue
 
-        source = py_file.read_text()
+        source = py_file.read_text(encoding="utf-8")
         tree = ast.parse(source)
 
         for node in ast.walk(tree):
@@ -43,7 +43,7 @@ def test_no_json_import_in_storage_layer():
 
     # Check BatchWriter specifically as it's a hot path in application layer
     if BATCH_WRITER.exists():
-        source = BATCH_WRITER.read_text()
+        source = BATCH_WRITER.read_text(encoding="utf-8")
         tree = ast.parse(source)
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):

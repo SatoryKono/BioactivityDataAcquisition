@@ -283,14 +283,14 @@ class TestCliCommands:
         self, mock_asyncio_run, mock_register, cli_runner, mock_registry
     ):
         """Test that valid pipeline is executed."""
-        from bioetl.application.services import PipelineRunResult
+        from bioetl.application.services import PipelineRunResult, RunResult
 
-        # _run_pipeline_async returns (status, error_message, error_type, run_id) tuple
-        mock_asyncio_run.return_value = (
-            PipelineRunResult.SUCCESS,
-            None,
-            None,
-            "test-run-id",
+        # _run_pipeline_async returns RunResult
+        mock_asyncio_run.return_value = RunResult(
+            status=PipelineRunResult.SUCCESS,
+            pipeline_name="chembl_activity",
+            run_id="test-run-id",
+            run_type="incremental",
         )
 
         result = cli_runner.invoke(cli, ["run", "--pipeline", "chembl_activity"])
