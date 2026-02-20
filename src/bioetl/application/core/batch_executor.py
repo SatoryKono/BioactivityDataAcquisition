@@ -308,22 +308,6 @@ class BatchExecutor:
                 batch = []
                 current_batch_size = self._maybe_recover_batch_size(current_batch_size)
 
-            # Report progress every 10%
-            if (
-                self._progress_interval
-                and self._total_records
-                and self.records_fetched >= self._next_progress_threshold
-            ):
-                pct = min(100, (self.records_fetched / self._total_records) * 100)
-                self._logger.info(
-                    "Pipeline progress",
-                    progress=f"{pct:.0f}%",
-                    bronze=self.records_bronze,
-                    silver=self.records_silver,
-                    fetched=self.records_fetched,
-                )
-                self._next_progress_threshold += self._progress_interval
-
             if self.records_fetched % self.checkpoint_interval == 0:
                 total = self._resume_offset + self.records_fetched
                 await self._checkpoint_manager.save_checkpoint(total)
