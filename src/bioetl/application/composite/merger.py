@@ -16,6 +16,7 @@ from bioetl.domain.composite.result import (
     MergeResult,
 )
 from bioetl.domain.composite.strategy import ConflictResolution, MergeStrategy
+from bioetl.domain.registry.field_aliases import get_alias_map_for_provider
 
 JoinHow = Literal["inner", "left", "right", "full", "semi", "anti", "cross", "outer"]
 
@@ -155,6 +156,7 @@ class MergeService:
                 seed_df,
                 effective_seed_pipeline,
                 exclude_join_keys=False,  # Rename ALL columns including join keys
+                field_aliases=self._get_field_aliases(effective_seed_pipeline),
             )
             self._logger.info(
                 "Renamed seed columns to qualified format",
@@ -538,6 +540,27 @@ class MergeService:
         parts = pipeline.split("_", 1)
         return (parts[0], parts[1])
 
+    def _get_field_aliases(self, pipeline: str) -> dict[str, str] | None:
+        """Get field alias map for a pipeline's provider.
+
+        Looks up the provider from the pipeline name and returns a mapping
+        of provider-specific field names to canonical names. Returns None
+        if the provider has no aliases (all fields already canonical).
+
+        Args:
+            pipeline: Pipeline name in format 'provider_entity'.
+
+        Returns:
+            Dict mapping provider field names to canonical names,
+            or None if no aliases exist for the provider.
+        """
+        try:
+            provider, _entity = self._parse_pipeline_name(pipeline)
+        except ValueError:
+            return None
+        alias_map = get_alias_map_for_provider(provider)
+        return alias_map if alias_map else None
+
     def _extract_field_from_qualified(self, column: str) -> str:
         """Extract field name from qualified column (x.y.z → z)."""
         parts = column.split(".")
@@ -659,10 +682,12 @@ class MergeService:
 
             # Rename enricher columns to qualified format: {provider}.{entity}.{field}
             # Including join keys for full traceability
+            # Field aliases normalize provider-specific names to canonical names
             enricher_df = self._renamer.rename_dataframe(
                 enricher_df,
                 enricher.pipeline,
                 exclude_join_keys=False,  # Rename ALL columns including join keys
+                field_aliases=self._get_field_aliases(enricher.pipeline),
             )
 
             self._logger.debug(
@@ -827,7 +852,10 @@ class MergeService:
 
             # Rename dependency columns to qualified format: {provider}.{entity}.{field}
             dep_df = self._renamer.rename_dataframe(
-                dep_df, dep.pipeline, exclude_join_keys=False
+                dep_df,
+                dep.pipeline,
+                exclude_join_keys=False,
+                field_aliases=self._get_field_aliases(dep.pipeline),
             )
 
             self._logger.debug(
@@ -1014,7 +1042,10 @@ class MergeService:
 
         # Rename dependency columns to qualified format
         dep_df = self._renamer.rename_dataframe(
-            dep_df, dep.pipeline, exclude_join_keys=False
+            dep_df,
+            dep.pipeline,
+            exclude_join_keys=False,
+            field_aliases=self._get_field_aliases(dep.pipeline),
         )
 
         # Drop system columns from dependency
