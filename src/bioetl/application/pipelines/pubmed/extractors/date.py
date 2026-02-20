@@ -14,6 +14,7 @@ See: https://www.nlm.nih.gov/bsd/licensee/elements_descriptions.html
 
 from __future__ import annotations
 
+import calendar
 import re
 from typing import ClassVar, TypedDict
 from xml.etree.ElementTree import Element
@@ -119,7 +120,8 @@ class MedlineDateParser:
         if not tokens:
             return None
 
-        year = self._extract_year(tokens)
+        # Pass original text instead of list of tokens to avoid unnecessary string join
+        year = self._extract_year(text)
         if not year:
             return None
 
@@ -127,13 +129,13 @@ class MedlineDateParser:
 
         return RawDate(year=year, month=month, day=None)
 
-    def _extract_year(self, tokens: list[str]) -> str | None:
+    def _extract_year(self, text: str) -> str | None:
         """Extract year from MedlineDate text.
 
         Handles cross-year ranges like "2022 Dec-2023 Jan" by preferring
         the second (most recent) year if present.
         """
-        text = " ".join(tokens)
+        # Optimized: perform regex search directly on the text string
         years_found: list[str] = self._YEAR_PATTERN.findall(text)
 
         if not years_found:
@@ -189,10 +191,14 @@ class DateExtractor(BaseFieldExtractor):
     """
 
     MONTH_MAP: ClassVar[dict[str, str]] = MedlineDateParser.MONTH_MAP
+    _MEDLINE_PARSER: ClassVar[MedlineDateParser] = MedlineDateParser()
+    _instance: ClassVar[DateExtractor | None] = None
 
-    def __init__(self) -> None:
-        """Initialize with MedlineDate parser."""
-        self._medline_parser = MedlineDateParser()
+    def __new__(cls) -> DateExtractor:
+        """Implement Singleton pattern to reuse instance."""
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
 
     def extract(self, element: Element | None) -> RawDate | None:
         """Извлечь сырые компоненты даты из XML элемента.
@@ -221,7 +227,7 @@ class DateExtractor(BaseFieldExtractor):
         # Fallback: delegate to MedlineDate parser
         medline_date = get_text(element.find("MedlineDate"))
         if medline_date:
-            return self._medline_parser.parse(medline_date)
+            return self._MEDLINE_PARSER.parse(medline_date)
 
         return None
 
@@ -277,8 +283,6 @@ class DateExtractor(BaseFieldExtractor):
             day_num = day.zfill(2)
         else:
             # Calculate last day of month
-            import calendar
-
             try:
                 _, last_day = calendar.monthrange(int(year), int(month_num))
                 day_num = str(last_day).zfill(2)
