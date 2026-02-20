@@ -156,8 +156,8 @@ def _build_provider_alias_index(
     return index
 
 
-_MOLECULE_ALIAS_INDEX: Final[dict[str, dict[str, str]]] = (
-    _build_provider_alias_index(MOLECULE_FIELD_ALIASES)
+_MOLECULE_ALIAS_INDEX: Final[dict[str, dict[str, str]]] = _build_provider_alias_index(
+    MOLECULE_FIELD_ALIASES
 )
 
 

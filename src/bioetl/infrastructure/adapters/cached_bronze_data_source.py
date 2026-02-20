@@ -266,7 +266,9 @@ class CachedBronzeDataSource:
         batches = await self._list_batches_sorted()
         total = 0
 
-        self._logger.info("Estimating total records in Bronze cache...", batch_count=len(batches))
+        self._logger.info(
+            "Estimating total records in Bronze cache...", batch_count=len(batches)
+        )
 
         for batch_path in batches:
             # We use a simpler counting method if available, or just use the reader

@@ -15,7 +15,8 @@ description: "Enrich publication records with CrossRef metadata via DOI resoluti
 # Deduplication is handled on Silver layer via content_hash.
 loading_strategy: full_scan_only
 
-primary_keys: ["doi"]
+technical_primary_key: "entity_id"
+business_primary_keys: ["doi"]
 silver_table: "crossref_publication"
 gold_table: "crossref_publication"
 

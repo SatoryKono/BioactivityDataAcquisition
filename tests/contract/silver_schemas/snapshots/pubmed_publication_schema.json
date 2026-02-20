@@ -149,6 +149,15 @@
     "required": false,
     "unique": false
   },
+  "author_keys": {
+    "checks": [],
+    "coerce": false,
+    "description": "Pipe-delimited short author keys (Surname_F format)",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "author_orcids": {
     "checks": [],
     "coerce": false,
