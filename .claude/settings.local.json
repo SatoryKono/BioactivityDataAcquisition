@@ -121,7 +121,8 @@
       "Bash(do python -c \"import json; json.load\\(open\\(''$f''\\)\\)\")",
       "Bash(netstat:*)",
       "Bash(docker compose:*)",
-      "Bash(powershell -Command \"Get-Process -Id 38076 -ErrorAction SilentlyContinue | Select-Object Id,ProcessName,Path | Format-List; Get-Process -Id 22968 -ErrorAction SilentlyContinue | Select-Object Id,ProcessName,Path | Format-List\")"
+      "Bash(powershell -Command \"Get-Process -Id 38076 -ErrorAction SilentlyContinue | Select-Object Id,ProcessName,Path | Format-List; Get-Process -Id 22968 -ErrorAction SilentlyContinue | Select-Object Id,ProcessName,Path | Format-List\")",
+      "Bash(powershell -Command \"Stop-Process -Id 38076 -Force\")"
     ]
   },
   "enabledPlugins": {
