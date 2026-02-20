@@ -54,7 +54,7 @@ class TestHealthServerContext:
         mock_server.stop = AsyncMock()
         mock_server_cls.return_value = mock_server
 
-        async with health_server_context(enabled=True, port=8080) as server:
+        async with health_server_context(enabled=True, port=8081) as server:
             assert server is mock_server
             mock_server.start.assert_called_once()
 
@@ -119,18 +119,18 @@ class TestEchoHealthServerInfo:
         # Use click's echo with standalone mode to capture output
         @click.command()
         def test_cmd() -> None:
-            echo_health_server_info(True, 8080)
+            echo_health_server_info(True, 8081)
 
         runner = CliRunner()
         result = runner.invoke(test_cmd)
-        assert "Health server: http://127.0.0.1:8080/health" in result.output
+        assert "Health server: http://127.0.0.1:8081/health" in result.output
 
     def test_no_echo_when_disabled(self) -> None:
         """Test that nothing is echoed when health server is disabled."""
 
         @click.command()
         def test_cmd() -> None:
-            echo_health_server_info(False, 8080)
+            echo_health_server_info(False, 8081)
 
         runner = CliRunner()
         result = runner.invoke(test_cmd)
@@ -159,7 +159,7 @@ class TestRunCommandHealthServerOptions:
         assert "--health-server" in result.output
         assert "--no-health-server" in result.output
         assert "--health-port" in result.output
-        assert "8080" in result.output  # default port
+        assert "8081" in result.output  # default port
 
 
 class TestRunAllCommandHealthServerOptions:
@@ -195,6 +195,6 @@ class TestRunCompositeCommandHealthServerOptions:
 class TestDefaultHealthServerPort:
     """Test the default health server port constant."""
 
-    def test_default_port_is_8080(self) -> None:
-        """Test that default health server port is 8080."""
-        assert DEFAULT_HEALTH_SERVER_PORT == 8080
+    def test_default_port_is_8081(self) -> None:
+        """Test that default health server port is 8081."""
+        assert DEFAULT_HEALTH_SERVER_PORT == 8081
