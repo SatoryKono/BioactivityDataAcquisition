@@ -13,6 +13,9 @@ from html import unescape
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.serialization import deserialize_from_json, serialize_to_json
+from bioetl.domain.services.author_normalization_service import (
+    AuthorNormalizationService,
+)
 from bioetl.domain.services.data_normalization_config import DataNormalizationConfig
 
 if TYPE_CHECKING:
@@ -31,9 +34,10 @@ _PARTIAL_YEAR_LEN = 4  # YYYY
 
 
 @dataclass(frozen=True, slots=True)
-class DefaultDataNormalizationService:
+class DefaultDataNormalizationService(AuthorNormalizationService):
     """Default implementation of data normalization service.
 
+    Inherits author/affiliation normalization from AuthorNormalizationService.
     Orchestrates text and data normalization for publication metadata.
     """
 

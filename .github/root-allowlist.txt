@@ -15,8 +15,8 @@ Makefile
 README.md
 commitlint.config.js
 dev_setup.sh
+docker-compose.monitoring.yml
 mkdocs.yml
 pyproject.toml
 requirements.txt
-run_extract.bat
 uv.lock

@@ -28,10 +28,10 @@ from bioetl.domain.registry.publication import (
 )
 
 __all__ = [
-    "FieldAlias",
     "LEGACY_PUBLICATION_ALIASES",
     "MOLECULE_FIELD_ALIASES",
     "PUBLICATION_ENTITY_TYPES",
+    "FieldAlias",
     "PublicationMapping",
     "get_alias_map_for_provider",
     "get_canonical_name",
