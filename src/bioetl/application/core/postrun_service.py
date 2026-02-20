@@ -312,6 +312,9 @@ class PostrunService:
         if hasattr(executor, "get_run_statistics"):
             stats = executor.get_run_statistics()
 
+        if not self._metadata_coordinator or not self._metadata_writer:
+            return
+
         # 1. Write final Silver metadata
         silver_table = self._config.table.silver_table
         if silver_table:
