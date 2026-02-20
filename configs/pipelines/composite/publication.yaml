@@ -198,15 +198,6 @@ composite:
             - "semanticscholar.publication.citation_contexts"
             - "semanticscholar.publication.influential_citation_count"
             - "semanticscholar.publication.pmc_id"
-            - "chembl.publication.src_id"
-            - "pubmed.publication.abstract_structured"
-            - "pubmed.publication.affiliation_structured"
-            - "pubmed.publication.subject_keywords"
-            - "crossref.publication.subject_keywords"
-            - "pubmed.publication.gene_symbols"
-            - "crossref.publication.references"
-            - "crossref.publication.license_url"
-
         # Output paths for merged data
         output:
             silver: data/output/silver/composite/publication
@@ -261,12 +252,6 @@ composite:
                 - crossref       # CrossRef has most complete ORCID data
                 - openalex
                 - semanticscholar
-            author_keys:
-                - crossref       # CrossRef has best structured author names
-                - openalex
-                - pubmed
-                - semanticscholar
-                - chembl
             author_details:
                 - crossref       # CrossRef-unique detailed author objects
             author_s2_ids:
@@ -405,7 +390,6 @@ composite:
                 fields:
                     - author_count
                     - author_details
-                    - author_keys
                     - author_h_indices
                     - author_openalex_ids
                     - author_orcids
@@ -565,11 +549,12 @@ composite:
     # ---------------------------------------------------------------------------
     # Data Quality Configuration
     # ---------------------------------------------------------------------------
-    # Thresholds, required_fields, and field_validations externalized to:
-    #   configs/quality/entities/composite/publication.yaml
-    # Only pipeline-specific enricher_overrides remain inline.
     dq_overrides:
-        # Per-enricher threshold overrides (pipeline-specific)
+        # Composite-level thresholds (applied to merge result)
+        soft_fail_threshold: 0.10  # 10% errors = warning
+        hard_fail_threshold: 0.30  # 30% errors = failure
+
+        # Per-enricher threshold overrides
         enricher_overrides:
             # Semantic Scholar has higher rate limits, allow more errors
             semanticscholar_publication:
@@ -579,6 +564,139 @@ composite:
             pubmed_publication:
                 soft_fail_threshold: 0.15
                 hard_fail_threshold: 0.40
+
+        # Required fields in final Gold output
+        required_fields:
+            - publication_id
+            - title
+
+        # Field-level validation rules for new fields
+        field_validations:
+            # === Quality Indicators (CRITICAL) ===
+            is_retracted:
+                type: boolean
+                nullable: false  # OpenAlex always provides this
+                description: "Retraction status - CRITICAL for data integrity"
+
+            # === Citation Metrics ===
+            influential_citation_count:
+                type: integer
+                nullable: true
+                min_value: 0
+                description: "SemanticScholar influential citations (non-negative)"
+
+            fwci:
+                type: float
+                nullable: true
+                min_value: 0.0
+                description: "OpenAlex Field-Weighted Citation Impact (non-negative)"
+
+            # === JSON Array Fields (schema validation) ===
+            author_orcids:
+                type: json_array
+                nullable: true
+                description: "JSON array of ORCID identifiers"
+
+            author_details:
+                type: json_array
+                nullable: true
+                description: "JSON array of author objects (CrossRef)"
+
+            author_s2_ids:
+                type: json_array
+                nullable: true
+                description: "JSON array of S2 author IDs (40-char hex)"
+
+            author_openalex_ids:
+                type: json_array
+                nullable: true
+                description: "JSON array of OpenAlex author IDs (e.g., A1234567890)"
+
+            author_h_indices:
+                type: json_array
+                nullable: true
+                description: "JSON array of author h-index values"
+
+            subject_topics:
+                type: json_array
+                nullable: true
+                description: "OpenAlex hierarchical topics"
+
+            primary_topic:
+                type: json_object
+                nullable: true
+                description: "OpenAlex primary topic (single object)"
+
+            grants:
+                type: json_array
+                nullable: true
+                description: "OpenAlex funding/grant information"
+
+            references:
+                type: json_array
+                nullable: true
+                description: "CrossRef cited references"
+
+            citation_contexts:
+                type: json_array
+                nullable: true
+                description: "SemanticScholar citation context sentences"
+
+            chemicals:
+                type: json_array
+                nullable: true
+                description: "PubMed chemical substances"
+
+            databanks:
+                type: json_array
+                nullable: true
+                description: "PubMed databank accessions"
+
+            gene_symbols:
+                type: json_array
+                nullable: true
+                description: "PubMed gene symbols"
+
+            affiliation_list:
+                type: json_array
+                nullable: true
+                description: "Author affiliations (multiple providers)"
+
+            institution_ids:
+                type: json_array
+                nullable: true
+                description: "OpenAlex institution IDs (e.g., I1234567890)"
+
+            institution_country_codes:
+                type: json_array
+                nullable: true
+                description: "OpenAlex institution country codes (ISO 2-letter, e.g., US, GB)"
+
+            # === String Identifiers ===
+            pii:
+                type: string
+                nullable: true
+                description: "PubMed Publisher Item Identifier"
+
+            mid:
+                type: string
+                nullable: true
+                description: "PubMed Manuscript ID"
+
+            publisher_id:
+                type: string
+                nullable: true
+                description: "PubMed publisher-specific identifier"
+
+            dblp_id:
+                type: string
+                nullable: true
+                description: "SemanticScholar DBLP key"
+
+            mag_id:
+                type: string
+                nullable: true
+                description: "OpenAlex MAG legacy ID"
 
     # ---------------------------------------------------------------------------
     # Execution Options
@@ -642,11 +760,21 @@ composite:
             - subject_keywords
 
 # -----------------------------------------------------------------------------
+# Gold Filters (applied to merged output)
+# -----------------------------------------------------------------------------
+gold_filters:
+    # Only include publications with title
+    required_fields:
+        - title
+
+# -----------------------------------------------------------------------------
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
-# Gold filters and filter rules loaded from hierarchical config files.
-# No inline gold_filters needed — filter entity config is authoritative.
-filter_config_file: ../../filters/entities/composite/publication.yaml
+# Filter rules are loaded from hierarchical config files:
+#   1. configs/filters/_defaults.yaml (global defaults)
+#   2. configs/filters/providers/composite.yaml (provider-specific)
+#   3. configs/filters/entities/composite/publication.yaml (entity-specific)
+filter_config_file: ../../filter/entities/composite/publication.yaml
 
 # -----------------------------------------------------------------------------
 # Maintenance Configuration

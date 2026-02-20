@@ -9,7 +9,7 @@
 Анализ (`data-normalization-comparison.md`) выявил несогласованности в нормализации одинаковых данных между пайплайнами. В проекте уже есть инфраструктура для унификации:
 - `PublicationBaseSchema` — базовая схема для публикаций (5 провайдеров)
 - Value Objects: `DOI`, `InChIKey`, `SMILES`, `MolecularWeight`, `PublicationYear`, `PubMedId`
-- Composite pipeline configs (`publication.yaml`, `molecule.yaml`) с `field-priorities`
+- Composite pipeline configs (`publication.yaml`, `molecule.yaml`) с `field_priorities`
 - `ColumnRenamer` / `ColumnOrderer` для qualified column naming
 - `FieldSpec` DSL для декларативного маппинга
 
@@ -23,51 +23,51 @@ ChEMBL и PubChem используют разные имена для идент
 
 | Свойство | ChEMBL | PubChem | Каноническое (предлагаемое) |
 |---|---|---|---|
-| H-bond acceptors | `hba-count` | `h-bond-acceptor-count` | `hba-count` |
-| H-bond donors | `hbd-count` | `h-bond-donor-count` | `hbd-count` |
-| Polar surface area | `polar-surface-area` | `tpsa` | `polar-surface-area` |
+| H-bond acceptors | `hba_count` | `h_bond_acceptor_count` | `hba_count` |
+| H-bond donors | `hbd_count` | `h_bond_donor_count` | `hbd_count` |
+| Polar surface area | `polar_surface_area` | `tpsa` | `polar_surface_area` |
 | LogP | `logp` | `xlogp` | `logp` |
-| InChI | `standard-inchi` | `inchi` | `standard-inchi` |
+| InChI | `standard_inchi` | `inchi` | `standard_inchi` |
 
-**Текущее состояние:** composite/molecule.yaml использует `field-priorities` с каноническими именами ChEMBL (например, `hba-count`), но PubChem-трансформер выдаёт `h-bond-acceptor-count`. Merger должен знать алиасы.
+**Текущее состояние:** composite/molecule.yaml использует `field_priorities` с каноническими именами ChEMBL (например, `hba_count`), но PubChem-трансформер выдаёт `h_bond_acceptor_count`. Merger должен знать алиасы.
 
 ### Предложение: RF-NORM-01 — Canonical Field Alias Registry
 
 **Что:** Создать реестр алиасов полей в domain-слое.
 
-**Где:** `src/bioetl/domain/registry/field-aliases.py`
+**Где:** `src/bioetl/domain/registry/field_aliases.py`
 
 ```python
 @dataclass(frozen=True)
 class FieldAlias:
-    canonical-name: str          # Каноническое имя (используется в Gold)
-    provider-aliases: dict[str, str]  # {provider: provider-field-name}
+    canonical_name: str          # Каноническое имя (используется в Gold)
+    provider_aliases: dict[str, str]  # {provider: provider_field_name}
     description: str
 
-MOLECULE-FIELD-ALIASES: tuple[FieldAlias, ...] = (
+MOLECULE_FIELD_ALIASES: tuple[FieldAlias, ...] = (
     FieldAlias(
-        canonical-name="hba-count",
-        provider-aliases={"chembl": "hba-count", "pubchem": "h-bond-acceptor-count"},
+        canonical_name="hba_count",
+        provider_aliases={"chembl": "hba_count", "pubchem": "h_bond_acceptor_count"},
         description="Hydrogen bond acceptor count",
     ),
     FieldAlias(
-        canonical-name="hbd-count",
-        provider-aliases={"chembl": "hbd-count", "pubchem": "h-bond-donor-count"},
+        canonical_name="hbd_count",
+        provider_aliases={"chembl": "hbd_count", "pubchem": "h_bond_donor_count"},
         description="Hydrogen bond donor count",
     ),
     FieldAlias(
-        canonical-name="polar-surface-area",
-        provider-aliases={"chembl": "polar-surface-area", "pubchem": "tpsa"},
+        canonical_name="polar_surface_area",
+        provider_aliases={"chembl": "polar_surface_area", "pubchem": "tpsa"},
         description="Topological polar surface area (Å²)",
     ),
     FieldAlias(
-        canonical-name="logp",
-        provider-aliases={"chembl": "logp", "pubchem": "xlogp"},
+        canonical_name="logp",
+        provider_aliases={"chembl": "logp", "pubchem": "xlogp"},
         description="Octanol-water partition coefficient",
     ),
     FieldAlias(
-        canonical-name="standard-inchi",
-        provider-aliases={"chembl": "standard-inchi", "pubchem": "inchi"},
+        canonical_name="standard_inchi",
+        provider_aliases={"chembl": "standard_inchi", "pubchem": "inchi"},
         description="Standard IUPAC InChI identifier",
     ),
 )
@@ -79,9 +79,9 @@ MOLECULE-FIELD-ALIASES: tuple[FieldAlias, ...] = (
 - Gold-схема использует только канонические имена
 
 **Затрагивает:**
-- `src/bioetl/domain/registry/field-aliases.py` (новый)
-- `src/bioetl/application/composite/column-renamer.py` (расширить)
-- `configs/pipelines/composite/molecule.yaml` (добавить секцию `field-aliases`)
+- `src/bioetl/domain/registry/field_aliases.py` (новый)
+- `src/bioetl/application/composite/column_renamer.py` (расширить)
+- `configs/pipelines/composite/molecule.yaml` (добавить секцию `field_aliases`)
 
 ---
 
@@ -89,13 +89,13 @@ MOLECULE-FIELD-ALIASES: tuple[FieldAlias, ...] = (
 
 | Поле | ChEMBL | PubChem | Расхождение |
 |---|---|---|---|
-| `molecular-weight` | без bounds | [0, 100 000] | ChEMBL не ограничивает |
-| `hba-count` | ge=0 | [0, 50] | ChEMBL без верхней границы |
-| `hbd-count` | ge=0 | [0, 50] | ChEMBL без верхней границы |
-| `rotatable-bond-count` | ge=0 | [0, 100] | ChEMBL без верхней границы |
-| `heavy-atom-count` | ge=0 | [1, 500] | ChEMBL допускает 0 |
+| `molecular_weight` | без bounds | [0, 100 000] | ChEMBL не ограничивает |
+| `hba_count` | ge=0 | [0, 50] | ChEMBL без верхней границы |
+| `hbd_count` | ge=0 | [0, 50] | ChEMBL без верхней границы |
+| `rotatable_bond_count` | ge=0 | [0, 100] | ChEMBL без верхней границы |
+| `heavy_atom_count` | ge=0 | [1, 500] | ChEMBL допускает 0 |
 | `logp` | без bounds | [-20, 20] | ChEMBL не ограничивает |
-| `canonical-smiles` | без ограничений | max 10 000 chars | ChEMBL без лимита длины |
+| `canonical_smiles` | без ограничений | max 10 000 chars | ChEMBL без лимита длины |
 
 ### Предложение: RF-NORM-02 — Unified Validation Bounds
 
@@ -107,14 +107,14 @@ MOLECULE-FIELD-ALIASES: tuple[FieldAlias, ...] = (
 # === Canonical Validation Bounds (для Gold / composite слоя) ===
 # Объединяет bounds ChEMBL и PubChem с учётом химического смысла
 
-CANONICAL-MOLECULAR-WEIGHT-RANGE = (0.0, 100-000.0)    # Da
-CANONICAL-HBA-COUNT-RANGE = (0, 200)                     # Relaxed for biologics
-CANONICAL-HBD-COUNT-RANGE = (0, 200)                     # Relaxed for biologics
-CANONICAL-ROTATABLE-BOND-COUNT-RANGE = (0, 500)          # Large molecules
-CANONICAL-HEAVY-ATOM-COUNT-RANGE = (0, 2000)             # Biologics
-CANONICAL-LOGP-RANGE = (-30.0, 30.0)                     # Extended for edge cases
-CANONICAL-POLAR-SURFACE-AREA-RANGE = (0.0, 5000.0)       # Large molecules
-CANONICAL-SMILES-MAX-LENGTH = 20-000                     # Extended for biologics
+CANONICAL_MOLECULAR_WEIGHT_RANGE = (0.0, 100_000.0)    # Da
+CANONICAL_HBA_COUNT_RANGE = (0, 200)                     # Relaxed for biologics
+CANONICAL_HBD_COUNT_RANGE = (0, 200)                     # Relaxed for biologics
+CANONICAL_ROTATABLE_BOND_COUNT_RANGE = (0, 500)          # Large molecules
+CANONICAL_HEAVY_ATOM_COUNT_RANGE = (0, 2000)             # Biologics
+CANONICAL_LOGP_RANGE = (-30.0, 30.0)                     # Extended for edge cases
+CANONICAL_POLAR_SURFACE_AREA_RANGE = (0.0, 5000.0)       # Large molecules
+CANONICAL_SMILES_MAX_LENGTH = 20_000                     # Extended for biologics
 ```
 
 **Действие:**
@@ -125,7 +125,7 @@ CANONICAL-SMILES-MAX-LENGTH = 20-000                     # Extended for biologic
 **Затрагивает:**
 - `src/bioetl/domain/schemas/constants.py` (добавить секцию)
 - Gold-схемы composite entities (использовать canonical bounds)
-- `configs/pipelines/composite/molecule.yaml` → `dq-overrides.field-validations`
+- `configs/pipelines/composite/molecule.yaml` → `dq_overrides.field_validations`
 
 ---
 
@@ -137,34 +137,34 @@ Publications унифицированы через `PublicationBaseSchema`. Дл
 
 **Что:** Создать `MoleculeBaseSchema` с общими полями для ChEMBL и PubChem.
 
-**Где:** `src/bioetl/domain/schemas/common/molecule-base.py`
+**Где:** `src/bioetl/domain/schemas/common/molecule_base.py`
 
 ```python
 class MoleculeBaseSchema(ETLRecordSchema):
     """Base schema with common fields for molecule/compound entities."""
 
     # === Structural Identifiers ===
-    molecule-id: Series[str] = pa.Field(nullable=False)
-    canonical-smiles: Series[str] | None = pa.Field(nullable=True)
-    inchi-key: Series[str] | None = pa.Field(
-        nullable=True, str-matches=INCHI-KEY-REGEX-PATTERN,
+    molecule_id: Series[str] = pa.Field(nullable=False)
+    canonical_smiles: Series[str] | None = pa.Field(nullable=True)
+    inchi_key: Series[str] | None = pa.Field(
+        nullable=True, str_matches=INCHI_KEY_REGEX_PATTERN,
     )
-    molecular-formula: Series[str] | None = pa.Field(nullable=True)
+    molecular_formula: Series[str] | None = pa.Field(nullable=True)
 
     # === Physicochemical Properties (canonical names) ===
-    molecular-weight: Series[float] | None = pa.Field(nullable=True, ge=0)
-    hba-count: Series[int] | None = pa.Field(nullable=True, ge=0)
-    hbd-count: Series[int] | None = pa.Field(nullable=True, ge=0)
-    rotatable-bond-count: Series[int] | None = pa.Field(nullable=True, ge=0)
-    polar-surface-area: Series[float] | None = pa.Field(nullable=True, ge=0)
-    heavy-atom-count: Series[int] | None = pa.Field(nullable=True, ge=0)
+    molecular_weight: Series[float] | None = pa.Field(nullable=True, ge=0)
+    hba_count: Series[int] | None = pa.Field(nullable=True, ge=0)
+    hbd_count: Series[int] | None = pa.Field(nullable=True, ge=0)
+    rotatable_bond_count: Series[int] | None = pa.Field(nullable=True, ge=0)
+    polar_surface_area: Series[float] | None = pa.Field(nullable=True, ge=0)
+    heavy_atom_count: Series[int] | None = pa.Field(nullable=True, ge=0)
     logp: Series[float] | None = pa.Field(nullable=True)
 ```
 
 **Действие:**
 1. Оба провайдера наследуют `MoleculeBaseSchema`
 2. Каждый **переопределяет** bounds (PubChem — stricter, ChEMBL — laxer)
-3. PubChem-трансформер переименовывает поля в канонические (tpsa → polar-surface-area и т.д.)
+3. PubChem-трансформер переименовывает поля в канонические (tpsa → polar_surface_area и т.д.)
 4. Или оставляет provider-specific имена, а rename делает `ColumnRenamer` через алиасы
 
 **Варианты реализации:**
@@ -177,14 +177,14 @@ class MoleculeBaseSchema(ETLRecordSchema):
 **Вариант B — Rename в merger** (через FieldAlias registry из RF-NORM-01):
 - Плюс: Silver сохраняет provider-native имена (auditability)
 - Минус: сложнее — merger должен знать алиасы
-- Текущий подход: composite YAML уже имеет `field-priorities` с unified именами
+- Текущий подход: composite YAML уже имеет `field_priorities` с unified именами
 
 **Рекомендация: Вариант B** — rename в merger, Silver остаётся provider-native. Это лучше для auditability и lineage tracking.
 
 **Затрагивает:**
-- `src/bioetl/domain/schemas/common/molecule-base.py` (новый)
+- `src/bioetl/domain/schemas/common/molecule_base.py` (новый)
 - При варианте A: PubChem schema + transformer (refactor)
-- При варианте B: `field-aliases.py` + `column-renamer.py`
+- При варианте B: `field_aliases.py` + `column_renamer.py`
 
 ---
 
@@ -192,46 +192,46 @@ class MoleculeBaseSchema(ETLRecordSchema):
 
 | Операция | PubMed | CrossRef | OpenAlex | S2 | ChEMBL |
 |---|---|---|---|---|---|
-| `strip-html-tags()` для title | Да | Нет | Нет | Нет | Нет |
-| `strip-html-tags()` для abstract | Да | Нет | Нет | Нет | — |
-| `parse-page-range()` | Да | Да | Нет | Нет | Нет |
+| `strip_html_tags()` для title | Да | Нет | Нет | Нет | Нет |
+| `strip_html_tags()` для abstract | Да | Нет | Нет | Нет | — |
+| `parse_page_range()` | Да | Да | Нет | Нет | Нет |
 | End-of-period date normalization | Нет | Да | Нет | Нет | Нет |
 
 ### Предложение: RF-NORM-04 — Uniform Content Normalization
 
 **Что:** Поднять общую нормализацию контентных полей в `BasePublicationTransformer`.
 
-**Где:** `src/bioetl/application/core/base-publication-transformer.py` (или расширить существующий)
+**Где:** `src/bioetl/application/core/base_publication_transformer.py` (или расширить существующий)
 
 ```python
 class BasePublicationTransformer(BaseTransformer):
     """Common normalization for all publication transformers."""
 
-    def -normalize-content-fields(self, record: dict) -> dict:
+    def _normalize_content_fields(self, record: dict) -> dict:
         """Apply uniform normalization to content fields."""
         # 1. Title: strip HTML tags if present
         if "title" in record and record["title"]:
-            record["title"] = strip-html-tags(record["title"])
+            record["title"] = strip_html_tags(record["title"])
 
         # 2. Abstract: strip HTML tags if present
         if "abstract" in record and record["abstract"]:
-            record["abstract"] = strip-html-tags(record["abstract"])
+            record["abstract"] = strip_html_tags(record["abstract"])
 
         # 3. Page range: parse and expand abbreviations
-        if "page-range" in record or "pages" in record:
-            raw = record.get("page-range") or record.get("pages")
-            first, last = parse-page-range(raw)
-            record["page-first"] = first
-            record["page-last"] = last
+        if "page_range" in record or "pages" in record:
+            raw = record.get("page_range") or record.get("pages")
+            first, last = parse_page_range(raw)
+            record["page_first"] = first
+            record["page_last"] = last
 
         return record
 ```
 
-**Принцип:** `strip-html-tags()` — идемпотентная операция. На чистом тексте (без тегов) она ничего не меняет. Безопасно применять ко всем провайдерам.
+**Принцип:** `strip_html_tags()` — идемпотентная операция. На чистом тексте (без тегов) она ничего не меняет. Безопасно применять ко всем провайдерам.
 
 **Затрагивает:**
 - Base publication transformer (расширить или создать)
-- CrossRef, OpenAlex, S2 transformers — вызвать `-normalize-content-fields()`
+- CrossRef, OpenAlex, S2 transformers — вызвать `_normalize_content_fields()`
 - Тесты: проверить идемпотентность на чистом тексте
 
 ---
@@ -244,7 +244,7 @@ class BasePublicationTransformer(BaseTransformer):
 
 **Что:** Создать Value Objects для shared molecular descriptor fields.
 
-**Где:** `src/bioetl/domain/value-objects/molecular-descriptors.py`
+**Где:** `src/bioetl/domain/value_objects/molecular_descriptors.py`
 
 ```python
 class HydrogenBondCount(ValueObject[int]):
@@ -264,14 +264,14 @@ class LogP(ValueObject[float]):
 ```
 
 **Применение:**
-- Трансформеры: `self.validate-value-object(HeavyAtomCount, value)`
+- Трансформеры: `self.validate_value_object(HeavyAtomCount, value)`
 - Единая точка валидации для обоих провайдеров
 - Canonical bounds из RF-NORM-02
 
-**Приоритет:** MEDIUM. Текущие `safe-int()` + Pandera bounds работают. Value Objects добавят семантику и единую точку изменения bounds.
+**Приоритет:** MEDIUM. Текущие `safe_int()` + Pandera bounds работают. Value Objects добавят семантику и единую точку изменения bounds.
 
 **Затрагивает:**
-- `src/bioetl/domain/value-objects/molecular-descriptors.py` (новый)
+- `src/bioetl/domain/value_objects/molecular_descriptors.py` (новый)
 - ChEMBL molecule transformer (опционально — использовать VO)
 - PubChem transformer (опционально)
 
@@ -288,7 +288,7 @@ PubChem использует `pd.Int64Dtype` (nullable integer), ChEMBL — `Ser
 **Обоснование:**
 - `pd.Int64Dtype` — modern pandas nullable integer (рекомендация pandas 2.x)
 - Предотвращает int→float coercion (классическая pandas проблема: `[1, None]` → `[1.0, NaN]`)
-- Уже используется в `PublicationBaseSchema` (publication-year, citations-received и т.д.)
+- Уже используется в `PublicationBaseSchema` (publication_year, citations_received и т.д.)
 - PubChem уже на `Int64Dtype`
 
 **Затрагивает:**
@@ -309,7 +309,7 @@ PubChem валидирует `inchi.startswith("InChI=")`, ChEMBL — нет.
 
 **Что:** Создать `InChI` Value Object (аналогично `InChIKey`).
 
-**Где:** `src/bioetl/domain/value-objects/chemical.py`
+**Где:** `src/bioetl/domain/value_objects/chemical.py`
 
 ```python
 class InChI(ValueObject[str]):
@@ -319,7 +319,7 @@ class InChI(ValueObject[str]):
         - Must start with "InChI="
         - Normalized by stripping whitespace
     """
-    def -validate(self, value: str) -> str:
+    def _validate(self, value: str) -> str:
         normalized = value.strip()
         if not normalized.startswith("InChI="):
             raise ValueError(f"InChI must start with 'InChI=': {value!r}")
@@ -327,9 +327,9 @@ class InChI(ValueObject[str]):
 ```
 
 **Затрагивает:**
-- `src/bioetl/domain/value-objects/chemical.py` (добавить класс)
-- ChEMBL molecule transformer (использовать `validate-value-object(InChI, ...)`)
-- ChEMBL molecule schema (добавить `str-startswith="InChI="`)
+- `src/bioetl/domain/value_objects/chemical.py` (добавить класс)
+- ChEMBL molecule transformer (использовать `validate_value_object(InChI, ...)`)
+- ChEMBL molecule schema (добавить `str_startswith="InChI="`)
 
 ---
 
@@ -371,5 +371,5 @@ Phase 4 (Polish):
 2. **Gold = canonical** — Gold/composite-схемы используют канонические имена и unified bounds
 3. **Rename в merger, не в transformer** — трансформеры остаются provider-specific, унификация — в composite слое
 4. **Value Objects — single source of truth** — валидация bounds через VO, не дублировать в schemas
-5. **Идемпотентная нормализация** — `strip-html-tags()`, `normalize-doi()` безопасны для повторного применения
+5. **Идемпотентная нормализация** — `strip_html_tags()`, `normalize_doi()` безопасны для повторного применения
 6. **Обратная совместимость** — все изменения через расширение, не ломать существующие Silver-таблицы

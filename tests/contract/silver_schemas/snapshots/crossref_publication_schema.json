@@ -121,8 +121,8 @@
   "alternative_id": {
     "checks": [],
     "coerce": false,
-    "description": "Canonical JSON array of alternative IDs (publisher-specific, e.g., PII).",
-    "dtype": "str",
+    "description": "Alternative IDs (publisher-specific, e.g., PII)",
+    "dtype": "object",
     "nullable": true,
     "required": true,
     "unique": false
@@ -134,15 +134,6 @@
     "dtype": "str",
     "nullable": true,
     "required": true,
-    "unique": false
-  },
-  "author_keys": {
-    "checks": [],
-    "coerce": false,
-    "description": "Pipe-delimited short author keys (Surname_F format)",
-    "dtype": "str",
-    "nullable": true,
-    "required": false,
     "unique": false
   },
   "author_orcids": {
@@ -203,8 +194,8 @@
   "content_domain_domains": {
     "checks": [],
     "coerce": false,
-    "description": "Canonical JSON array of content domain domains.",
-    "dtype": "str",
+    "description": "Content domain domains (list of strings)",
+    "dtype": "object",
     "nullable": true,
     "required": true,
     "unique": false
