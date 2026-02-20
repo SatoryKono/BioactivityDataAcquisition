@@ -7,7 +7,7 @@ configuration for a single ETL pipeline run.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.composite.config import ColumnGroupConfig
 from bioetl.domain.config._converters import freeze_sequences, resolve_loading_strategy

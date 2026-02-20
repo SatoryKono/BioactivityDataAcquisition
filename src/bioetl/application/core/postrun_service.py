@@ -35,8 +35,11 @@ if TYPE_CHECKING:
         BronzeDQConfigPort,
         GoldDQConfigPort,
         LoggerPort,
+        MetadataCoordinatorPort,
+        MetadataWriterPort,
         MetricsPort,
         SilverDQConfigPort,
+        StoragePort,
         TracingPort,
     )
 
@@ -309,6 +312,9 @@ class PostrunService:
         if hasattr(executor, "get_run_statistics"):
             stats = executor.get_run_statistics()
 
+        if not self._metadata_coordinator or not self._metadata_writer:
+            return
+
         # 1. Write final Silver metadata
         silver_table = self._config.table.silver_table
         if silver_table:
@@ -319,6 +325,7 @@ class PostrunService:
             try:
                 # Use internal storage helper if available or standard reader
                 from deltalake import DeltaTable
+
                 dt = DeltaTable(str(silver_path))
                 version_after = dt.version()
             except Exception:
@@ -356,6 +363,7 @@ class PostrunService:
             version_after = None
             try:
                 from deltalake import DeltaTable
+
                 dt = DeltaTable(str(gold_path))
                 version_after = dt.version()
             except Exception:

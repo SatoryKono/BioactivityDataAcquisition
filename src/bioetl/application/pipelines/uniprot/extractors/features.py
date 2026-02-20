@@ -34,14 +34,14 @@ def _build_feature_dict(feature: dict[str, Any]) -> dict[str, Any]:  # Any: JSON
         Extracted feature data dict.
     """
     feature_data: dict[str, Any] = {}  # Any: JSON values
-    if feature.get("type"):
-        feature_data["type"] = feature.get("type")
-    if feature.get("description"):
-        feature_data["description"] = feature.get("description")
-    if feature.get("featureId"):
-        feature_data["feature_id"] = feature.get("featureId")
+    if val := feature.get("type"):
+        feature_data["type"] = val
+    if val := feature.get("description"):
+        feature_data["description"] = val
+    if val := feature.get("featureId"):
+        feature_data["feature_id"] = val
 
-    location = feature.get("location", {})
+    location = feature.get("location")
     if isinstance(location, dict):
         _extract_feature_location(location, feature_data)
 
@@ -346,18 +346,21 @@ class FeatureExtractor:
         mod_res_type = cls.FEATURE_TYPES["modified_residue"]
         extracted: list[dict[str, Any]] = []  # Any: JSON values
 
+        # Pre-normalize patterns once to avoid repeated lower() calls
+        normalized_patterns = tuple(p.lower() for p in patterns)
+
         for feature in features:
             if not isinstance(feature, dict):
                 continue
             if feature.get("type") != mod_res_type:
                 continue
 
-            description = feature.get("description", "")
-            if not isinstance(description, str):
+            description = feature.get("description")
+            if not description or not isinstance(description, str):
                 continue
 
             description_lower = description.lower()
-            if any(pattern.lower() in description_lower for pattern in patterns):
+            if any(pattern in description_lower for pattern in normalized_patterns):
                 feature_data = _build_feature_dict(feature)
                 if feature_data:
                     extracted.append(feature_data)
