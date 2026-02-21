@@ -312,6 +312,8 @@ module = [
     "bioetl.infrastructure.schemas.composite_config",
     "bioetl.infrastructure.schemas.dq_config",
     "bioetl.infrastructure.schemas.filter_config",
+    "bioetl.infrastructure.schemas.pipeline_contract_policy",
+    "bioetl.infrastructure.schemas.source_config",
     # Pandera @pa.check decorators
     "bioetl.domain.schemas.common.publication_base",
 ]
@@ -368,6 +370,7 @@ module = [
     # Pydantic BaseModel.model_validate returns Any without stubs
     "bioetl.infrastructure.config.filter_config_loader",
     "bioetl.infrastructure.config.dq_config_loader",
+    "bioetl.infrastructure.config.contract_policy_loader",
     # orjson returns Any without stubs
     "bioetl.domain.serialization",
     "bioetl.domain.services.dq_serializer",
