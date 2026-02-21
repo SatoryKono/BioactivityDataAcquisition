@@ -37,11 +37,6 @@ groups:
         columns:
           - semanticscholar.publication.dblp_id
 
-      - base_name: publication_type
-        columns:
-          - chembl.publication.publication_type
-          - pubmed.publication.publication_type
-
       - base_name: publication_id
         columns:
           - chembl.publication.publication_id
@@ -73,10 +68,6 @@ groups:
           - openalex.publication.entity_id
           - pubmed.publication.entity_id
           - semanticscholar.publication.entity_id
-
-      - base_name: fields_of_study
-        columns:
-          - semanticscholar.publication.fields_of_study
 
       - base_name: is_oa
         columns:
@@ -277,6 +268,14 @@ groups:
         columns:
           - semanticscholar.publication.author_h_indices
 
+      - base_name: author_keys
+        columns:
+          - chembl.publication.author_keys
+          - crossref.publication.author_keys
+          - openalex.publication.author_keys
+          - pubmed.publication.author_keys
+          - semanticscholar.publication.author_keys
+
       - base_name: author_openalex_ids
         columns:
           - openalex.publication.author_openalex_ids
@@ -320,6 +319,10 @@ groups:
     display_name: "Terms & Keywords & Topics"
     include_in_gold: true
     fields:
+      - base_name: fields_of_study
+        columns:
+          - semanticscholar.publication.fields_of_study
+
       - base_name: chemical_count
         columns:
           - pubmed.publication.chemical_count
@@ -510,6 +513,14 @@ groups:
     display_name: "Publication Types"
     include_in_gold: true
     fields:
+      - base_name: publication_type
+        columns:
+          - chembl.publication.publication_type
+          - crossref.publication.publication_type
+          - openalex.publication.publication_type
+          - pubmed.publication.publication_type
+          - semanticscholar.publication.publication_type
+
       - base_name: publication_type_list
         columns:
           - pubmed.publication.publication_type_list
@@ -524,6 +535,19 @@ groups:
           - crossref.publication.type
           - openalex.publication.type
 
+  # ===== SYSTEM_METADATA (excluded from Gold) =====
+  - id: system_metadata
+    display_name: "System Metadata"
+    include_in_gold: false
+    fields:
+      - base_name: content_hash
+        columns:
+          - chembl.publication.content_hash
+          - crossref.publication.content_hash
+          - openalex.publication.content_hash
+          - pubmed.publication.content_hash
+          - semanticscholar.publication.content_hash
+
   # ===== TRASH (excluded from Gold) =====
   - id: trash
     display_name: "Trash (Excluded)"
@@ -536,14 +560,6 @@ groups:
       - base_name: content_domain_domains
         columns:
           - crossref.publication.content_domain_domains
-
-      - base_name: content_hash
-        columns:
-          - chembl.publication.content_hash
-          - crossref.publication.content_hash
-          - openalex.publication.content_hash
-          - pubmed.publication.content_hash
-          - semanticscholar.publication.content_hash
 
       - base_name: language
         columns:

@@ -39,6 +39,7 @@ from bioetl.application.pipelines.openalex.extractors import (
     reconstruct_abstract,
 )
 from bioetl.domain.entities.openalex import OpenAlexPublicationEntity
+from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
 from bioetl.domain.services import IdentityService
 from bioetl.domain.value_objects import DOI, PublicationYear
 
@@ -251,7 +252,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "publication_date": self._data_normalizer.normalize_partial_date(
                 rec.get("publication_date")
             ),
-            "publication_type": rec.get("type"),  # Raw OpenAlex type
+            "publication_type": normalize_publication_type(rec.get("type")),
             **self._classify_publication_type("openalex", raw_type=rec.get("type")),
             "is_oa": oa_info.get("is_oa"),
             "oa_status": oa_info.get("oa_status"),

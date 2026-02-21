@@ -220,26 +220,7 @@ class BatchExecutor:
         """
         self._resume_offset = offset or 0
         self._query_string = query
-
-        # Estimate total records for progress reporting
-        self._total_records = limit
-        if not self._total_records:
-            # Try to get total from data source if available (e.g. CachedBronzeDataSource)
-            get_total = getattr(self._services.data_source, "get_total_records", None)
-            if get_total and callable(get_total):
-                result = await get_total()
-                if isinstance(result, int) and result > 0:
-                    self._total_records = result
-
-        if self._total_records:
-            # Report progress every 10%
-            self._progress_interval = max(1, self._total_records // 10)
-            self._next_progress_threshold = self._progress_interval
-            self._logger.info(
-                "Starting pipeline with total records estimate",
-                total_records=self._total_records,
-                progress_interval=self._progress_interval,
-            )
+        await self._init_progress_tracking(limit)
 
         root_span = self._tracing.start_execution_span()
 
@@ -263,6 +244,25 @@ class BatchExecutor:
             raise
         else:
             self._tracing.end_span(root_span)
+
+    async def _init_progress_tracking(self, limit: int | None) -> None:
+        """Estimate total records and configure progress reporting."""
+        self._total_records = limit
+        if not self._total_records:
+            get_total = getattr(self._services.data_source, "get_total_records", None)
+            if get_total and callable(get_total):
+                result = await get_total()
+                if isinstance(result, int) and result > 0:
+                    self._total_records = result
+
+        if self._total_records:
+            self._progress_interval = max(1, self._total_records // 10)
+            self._next_progress_threshold = self._progress_interval
+            self._logger.info(
+                "Starting pipeline with total records estimate",
+                total_records=self._total_records,
+                progress_interval=self._progress_interval,
+            )
 
     async def _run_extraction_loop(
         self,

@@ -24,6 +24,7 @@ from bioetl.application.pipelines.pubmed.extractors import (
 )
 from bioetl.application.pipelines.pubmed.xml_parser import get_text
 from bioetl.domain.entities.pubmed import PubMedPublicationEntity
+from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
 from bioetl.domain.normalization import normalize_pmc_id, parse_page_range
 from bioetl.domain.services import IdentityService
 from bioetl.domain.value_objects import DOI, PublicationYear, PubMedId
@@ -398,7 +399,10 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "pubmed",
             raw_types_list=pub_types,
         )
-        return {"publication_type": raw_type, **classification}
+        return {
+            "publication_type": normalize_publication_type(raw_type),
+            **classification,
+        }
 
     def _process_structured_affiliations(
         self, affiliations: list[StructuredAffiliation]
