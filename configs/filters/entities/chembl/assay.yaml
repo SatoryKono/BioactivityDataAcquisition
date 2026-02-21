@@ -14,11 +14,11 @@ entity: assay
 # -----------------------------------------------------------------------------
 # Filter assays by assay_chembl_id from CSV
 input_filter:
-    enabled: true
+    enabled: false
     source_path: "data/input/assay.csv"
     column_name: "assay_chembl_id"
     filter_field: "assay_id"
-    batch_size: 20
+
 
 # ---------------------------------------------------------------------------
 # Extraction-Level Filtering (ADR-028 §3)

@@ -422,13 +422,13 @@ class TestFunctionLength:
         "start_metrics_server": 65,  # Metrics server setup
         "_write_atomic_stream": 70,  # Atomic streaming with compression
         "write_bronze": 235,  # 233 lines - Full Bronze layer write with validation + SourceMetadata
-        "write_silver": 143,  # 141 lines - Full Silver layer write with merge + flat_structure
+        "write_silver": 150,  # 149 lines - Full Silver layer write with merge + flat_structure
         "_prepare_arrow_data": 55,  # 53 lines - Arrow data preparation for Silver
         "_write_metadata": 65,  # 63 lines - Metadata writing with flat_structure
         "_log_silver_audit": 75,  # Silver audit logging
         # FilterableDataSourcePort implementations
         "fetch_filtered": 70,  # Batch filtering with OR-query (UniProt)
-        "fetch_multi_filtered": 60,  # Multi-field AND filtering
+        "fetch_multi_filtered": 95,  # 91 lines - Multi-field AND filtering
         # Gold/Silver analyzer functions
         "analyze": 100,  # Layer analysis with multiple DQ checks
         # Gold DQ check modules (extracted from GoldDQAnalyzer to _checks_*.py)
@@ -532,8 +532,6 @@ class TestFunctionLength:
         # Configuration loader
         "_normalize_source_pagination": 60,  # 54 lines - normalization logic
         "health_server_context": 60,  # 58 lines
-        "write_silver": 150,  # 149 lines
-        "fetch_multi_filtered": 95,  # 91 lines
     }
 
     # Maximum allowed violations (for tracking technical debt)

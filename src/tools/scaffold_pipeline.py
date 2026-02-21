@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 class {source_title}Adapter(AsyncHttpDataSource):
     """Adapter for {source_title} API."""
-    
+
     async def fetch_incremental(
         self, context: PipelineContext, checkpoint: Any = None
     ) -> AsyncIterator[dict[str, Any]]:
@@ -44,7 +44,7 @@ from bioetl.application.pipelines.base import BasePipeline
 
 class {source_title}{entity_title}Pipeline(BasePipeline):
     """Pipeline for {source_title} {entity_title} data."""
-    
+
     def transform(self, df):
         """Clean and normalize data."""
         # TODO: Implement transformation
