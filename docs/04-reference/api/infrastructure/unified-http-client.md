@@ -301,7 +301,7 @@ http-request-duration-seconds{method="GET", provider="chembl"}
 rate-limiter-wait-total{provider="pubchem"}
 
 # Counter: Circuit breaker state changes
-circuit-breaker-state-change-total{provider="uniprot", state="open"}
+circuit-breaker-state-change-total{adapter="uniprot", state="open"}
 ```
 
 ### Tracing
