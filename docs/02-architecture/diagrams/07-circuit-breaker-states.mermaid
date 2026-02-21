@@ -62,14 +62,15 @@ stateDiagram-v2
         Parameters (from CircuitBreaker):
         • failure_threshold: 5
         • recovery_timeout: 300s
-        • provider: str (for metrics labels)
+        • provider: str (used as 'adapter' label in metrics)
     end note
 
     note right of OPEN
         Metrics Emitted:
-        • circuit_breaker_state{provider}
-        • circuit_breaker_trips_total{provider}
-        • circuit_breaker_failures_total{provider}
+        • circuit_breaker_state{adapter}
+        • circuit_breaker_trips_total{adapter}
+        • circuit_breaker_success_total{adapter}
+        • circuit_breaker_failure_total{adapter}
     end note
 
     note left of HALF_OPEN

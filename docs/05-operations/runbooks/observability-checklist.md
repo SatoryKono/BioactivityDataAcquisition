@@ -77,8 +77,10 @@ self.logger.info(
 | Metric                        | Type    | Labels                                        |
 | ----------------------------- | ------- | --------------------------------------------- |
 | `provider-health-status`      | Gauge   | provider (0=Unhealthy, 1=Degraded, 2=Healthy) |
-| `circuit-breaker-state`       | Gauge   | provider (0=Closed, 1=Half-Open, 2=Open)      |
-| `circuit-breaker-trips-total` | Counter | provider                                      |
+| `circuit-breaker-state`       | Gauge   | adapter (0=Closed, 1=Half-Open, 2=Open)       |
+| `circuit-breaker-trips-total` | Counter | adapter                                       |
+| `circuit-breaker-success-total` | Counter | adapter                                     |
+| `circuit-breaker-failure-total` | Counter | adapter                                     |
 
 ## Verification Commands
 
