@@ -14,11 +14,11 @@ schema_file: ../../schemas/chembl/assay.yaml
 version: "1.2.0"
 description: "Extract bioassay definitions from ChEMBL API"
 
-business_primary_keys: ["assay_id"]
+business_primary_keys: [ "assay_id" ]
 technical_primary_key: "entity_id"
 silver_table: "chembl_assay"
 gold_table: "chembl_assay"
-
+batch_size: 1000
 # -----------------------------------------------------------------------------
 # DQ Configuration (ADR-027)
 # -----------------------------------------------------------------------------
@@ -29,12 +29,12 @@ gold_table: "chembl_assay"
 # Sink Overrides (only non-convention values)
 # -----------------------------------------------------------------------------
 sink:
-  silver:
-    partition_by: ["assay_type"]
-  gold:
-    mode: scd2
-    scd_config:
-      valid_from: _valid_from
-      valid_to: _valid_to
-      is_current: _is_current
-      version: _version
+    silver:
+        partition_by: [ "assay_type" ]
+    gold:
+        mode: scd2
+        scd_config:
+            valid_from: _valid_from
+            valid_to: _valid_to
+            is_current: _is_current
+            version: _version
