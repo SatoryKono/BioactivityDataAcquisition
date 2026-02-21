@@ -44,7 +44,7 @@ dev = [
 ]
 
 [project.scripts]
-mcp-neo4j-memory = "mcp_neo4j_memory.main:main"
+mcp-neo4j-memory = "mcp_neo4j_memory.main:main_entry"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/mcp_neo4j_memory"]
@@ -58,13 +58,9 @@ asyncio_mode = "auto"
 python_version = "3.11"
 strict = true
 warn_return_any = true
-warn_unused_configs = true
 
 [[tool.mypy.overrides]]
-module = [
-    "neo4j.*",
-    "fastmcp.*",
-]
+module = ["neo4j.*", "fastmcp.*"]
 ignore_missing_imports = true
 
 [tool.ruff]

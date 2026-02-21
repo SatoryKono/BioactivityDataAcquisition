@@ -1,4 +1,4 @@
-"""Main entry point for MCP Neo4j Memory server"""
+"""Main entry point"""
 
 import sys
 from .server import main
