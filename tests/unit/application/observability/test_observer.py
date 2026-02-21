@@ -75,7 +75,7 @@ def test_pipeline_observer_success(metrics_mock, logger_mock, run_id):
     # Verify metrics
     metrics_mock.observe_histogram.assert_called_once()
     call_args = metrics_mock.observe_histogram.call_args
-    assert call_args[0][0] == "bioetl_pipeline_duration_seconds"
+    assert call_args[0][0] == "pipeline_duration_seconds"
     assert isinstance(call_args[0][1], float)
     assert call_args[1]["labels"]["status"] == "success"
     assert call_args[1]["labels"]["pipeline"] == "test_pipeline"
@@ -153,7 +153,7 @@ def test_observer_records_duration(metrics_mock, logger_mock, run_id):
     call_args = metrics_mock.observe_histogram.call_args
 
     # Check metric name
-    assert call_args[0][0] == "bioetl_pipeline_duration_seconds"
+    assert call_args[0][0] == "pipeline_duration_seconds"
 
     # Check duration is a positive float
     duration = call_args[0][1]
@@ -544,9 +544,9 @@ class TestObserverVacuumEvents:
 
         logger_mock.info.assert_called()
         metrics_mock.increment_counter.assert_called_with(
-            "vacuum_files_removed",
+            "vacuum_files_removed_total",
             42,
-            {"pipeline": "test_pipeline", "layer": "silver"},
+            {"table": "chembl_activity", "layer": "silver"},
         )
 
     def test_emit_vacuum_result_failure(self, metrics_mock, logger_mock, run_id):
@@ -629,6 +629,6 @@ class TestObserverSmokeTest:
         # Verify vacuum counter
         counter_calls = metrics_mock.increment_counter.call_args_list
         vacuum_counters = [
-            c for c in counter_calls if c[0][0] == "vacuum_files_removed"
+            c for c in counter_calls if c[0][0] == "vacuum_files_removed_total"
         ]
         assert len(vacuum_counters) == 1

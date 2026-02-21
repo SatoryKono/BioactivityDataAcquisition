@@ -46,7 +46,8 @@ sequenceDiagram
 
 All metrics MUST follow these naming conventions:
 
-*   Prefix: `bioetl-`
-*   Labels: `pipeline`, `run-type`, `stage`
+*   Prefix: `bioetl_` (underscores in Prometheus, hyphens in documentation)
+*   Common Labels: `pipeline`, `run_type`, `stage`, `provider`, `adapter`
+*   **47 metrics** registered across 12 categories: Pipeline Core, Pipeline Lifecycle, Circuit Breaker, Data Quality, Health Checks, Preflight, Transformer, Storage (Bronze/Silver/VACUUM), Adapter/HTTP, Rate Limiter, Shutdown, Input Filters
 
-See `docs/04-reference/contracts/observability.md` for the full catalog.
+See `docs/04-reference/contracts/observability.md` for the full catalog (v2.0.0).

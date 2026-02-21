@@ -357,13 +357,28 @@ class TestHealthAggregatorMetrics:
 
     @pytest.mark.asyncio
     async def test_records_duration_histogram(
-        self, health_aggregator, mock_services, mock_metrics
+        self,
+        mock_metrics,
+        mock_logger,
+        mock_storage,
+        mock_data_source_with_check_health,
     ):
-        """Test check_all records health_check_duration_seconds histogram."""
-        await health_aggregator.check_all(mock_services)
+        """Test check_all records health_check_latency_ms histogram.
 
-        # Should be called twice (storage and data_source)
-        assert mock_metrics.observe_histogram.call_count == 2
+        observe_histogram is called only for data_source with check_health()
+        that returns HealthCheckResult (providing latency_ms).  Storage uses
+        the legacy health_check() returning HealthStatus — no histogram.
+        """
+        aggregator = HealthAggregator(metrics=mock_metrics, logger=mock_logger)
+        services = MagicMock()
+        services.storage = mock_storage
+        services.data_source = mock_data_source_with_check_health
+        services.logger = mock_logger
+
+        await aggregator.check_all(services)
+
+        # Only data_source (with check_health) emits observe_histogram
+        assert mock_metrics.observe_histogram.call_count == 1
 
     @pytest.mark.asyncio
     async def test_gauge_labels_contain_component(

@@ -3,33 +3,87 @@ trigger: model_decision
 description: USE WHEN designing or editing pipelines; one source → one public pipeline; unified components; standard stages
 ---
 
-etl-architecture
+# 09. ETL Architecture & Patterns (Skills: Hexagonal, DI, DQ Monitoring)
 
-> Scope:
->
-> - USE WHEN designing or editing pipelines; one source → one public pipeline; unified components; standard stages
-> - Use when editing files matching: `src/bioetl/pipelines/**/*.py`, `docs/etl_contract/**/*.md`, `docs/pipelines/**/*.md`
+## Overview
+This document defines the architectural blueprint for the BioETL project, enforcing strict separation of concerns, dependency injection, and robust data quality monitoring.
 
-# NAMING
+## 1. Hexagonal Architecture (Ports & Adapters)
 
-- Pipeline names: `{source}_{entity}` (e.g., `chembl_activity`, `uniprot_protein`).
+### Core Principle
+Dependencies point **inwards**. The Domain layer knows nothing about the outside world (Infrastructure).
 
-# ARCHITECTURE
+1.  **Domain (Inner Hexagon)**: `src/bioetl/domain`
+    -   **Entities**: Pure Python dataclasses (e.g., `Compound`, `Target`). No ORM logic.
+    -   **Ports**: Abstract Base Classes (ABCs) or Protocols defining interfaces (e.g., `TargetRepository`, `ChemblClient`).
+    -   **Use Cases**: Application logic orchestration.
 
-- Unified components: Logger, OutputWriter, APIClient, Schema.
-- Adapter pattern for external sources.
-- Contract stages: extract → transform → validate → export.
-- Prefer star schema: dims (documents, targets, assays, testitems) + fact (activity).
+2.  **Application (Orchestration)**: `src/bioetl/application`
+    -   **Services**: Implement use cases using Ports.
+    -   **DTOs**: Data Transfer Objects for API inputs/outputs.
+    -   **Example**: `CompoundEnrichmentService` uses `CompoundRepository` (Port).
 
-# IDP
+3.  **Infrastructure (Adapters)**: `src/bioetl/infrastructure`
+    -   **Implementations**: Concrete classes implementing Domain Ports (e.g., `SqlTargetRepository`, `HttpChemblClient`).
+    -   **External Libs**: `httpx`, `polars`, `deltalake`.
 
-- Idempotent runs with deterministic sorting and hashing; re-runs do not duplicate data.
+4.  **Composition Root (Wiring)**: `src/bioetl/composition`
+    -   **The ONLY place** where classes are instantiated and dependencies injected.
+    -   **Bootstrap**: `bootstrap.py` assembles the object graph.
 
-# LOADING STRATEGY (ADR-031)
+## 2. Dependency Injection (Skill: Dependency Injection)
 
-- `full_scan_only`: Reserved ONLY for publication entities (e.g., `pubmed_publication`).
-- `null`: Default strategy for high-volume entities (activity, molecule, target) to allow checkpointing and incremental resume.
-- NEVER set `full_scan_only` for non-publication entities.
+### Pattern: Constructor Injection
+All dependencies must be passed explicitly via `__init__`.
+-   **Anti-Pattern**: Creating dependencies inside methods (`repo = SqlRepo()`).
+-   **Anti-Pattern**: Using global state or Singletons (`Repo.instance()`).
+
+### Composition Root Example
+```python
+# src/bioetl/composition/bootstrap.py
+
+def assemble_pipeline(settings: Settings) -> Pipeline:
+    # 1. Create Adapters (Infrastructure)
+    client = HttpxClient(base_url=settings.chembl_url)
+    repo = ChemblRepository(client)
+    logger = StructLogAdapter()
+
+    # 2. Create Service (Application)
+    service = CompoundEnrichmentService(repo, logger)
+
+    # 3. Create Pipeline (Domain/App)
+    return Pipeline(service)
+```
+
+## 3. Data Quality Monitoring (Skill: Data Quality Monitoring)
+
+### Strategy: "Trust but Verify"
+Data quality checks happen **before** loading into Silver/Gold layers.
+
+1.  **Schema Validation (Pandera)**:
+    -   Enforce types and constraints (e.g., `pchembl_value >= 0`).
+    -   Reject entire batch if critical schema violation occurs.
+
+2.  **Anomaly Detection (Statistical)**:
+    -   Monitor metrics like `row_count`, `null_percentage`, `mean_value`.
+    -   **Z-Score Check**: If `(current - mean) / std_dev > 3`, flag as anomaly.
+    -   **Action**: Log warning or halt pipeline based on severity (Configurable).
+
+3.  **Quarantine Pattern**:
+    -   **Bad Rows**: Rows failing non-critical checks (e.g., malformed date) are moved to `data/quarantine/`.
+    -   **Good Rows**: Proceed to next stage.
+    -   **Metric**: `quarantined_rows_count` must be exported to Prometheus.
+
+## 4. Pipeline Execution Flow
+
+1.  **Extract (Source -> Bronze)**: Raw download. Fail fast on network errors.
+2.  **Transform (Bronze -> Silver)**:
+    -   Validate Schema (Pandera).
+    -   Clean & Normalize (Polars).
+    -   Deduplicate (Content Hash).
+3.  **Load (Silver -> Gold)**:
+    -   Aggregate.
+    -   Optimize (Delta Lake Vacuum/Z-Order).
 
 # REFERENCE
 

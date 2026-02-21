@@ -113,10 +113,11 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
 
         # 1. Metrics (Histogram)
         self._metrics.observe_histogram(
-            "bioetl_pipeline_duration_seconds",
+            "pipeline_duration_seconds",
             duration,
             labels={
                 "pipeline": self.pipeline_name,
+                "stage": "pipeline",
                 "run_type": self.run_type,
                 "status": status,
             },
@@ -362,7 +363,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
 
         if success:
             self._metrics.increment_counter(
-                "vacuum_files_removed",
+                "vacuum_files_removed_total",
                 files_removed,
-                {"pipeline": self.pipeline_name, "layer": layer},
+                {"table": table, "layer": layer},
             )
