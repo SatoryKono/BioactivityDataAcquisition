@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "name": "BioETL Neo4j Memory Management",
+    "description": "Neo4j memory configuration and tuning for graph database",
+    "created_at": "2026-02-21T16:51:40.990712",
+    "last_updated": "2026-02-21T16:51:40.990732"
+  },
+  "memory_profiles": {
+    "development": {
+      "description": "Development environment (4GB host RAM)",
+      "heap_initial": "512m",
+      "heap_max": "2g",
+      "pagecache": "1g",
+      "transaction_max": "2g",
+      "global_tx_max": "20g",
+      "use_case": "Local development, small datasets"
+    },
+    "staging": {
+      "description": "Staging environment (8GB host RAM)",
+      "heap_initial": "1g",
+      "heap_max": "4g",
+      "pagecache": "2g",
+      "transaction_max": "4g",
+      "global_tx_max": "30g",
+      "use_case": "Testing, medium datasets"
+    },
+    "production": {
+      "description": "Production environment (16GB+ host RAM)",
+      "heap_initial": "2g",
+      "heap_max": "8g",
+      "pagecache": "6g",
+      "transaction_max": "8g",
+      "global_tx_max": "50g",
+      "use_case": "High throughput, large datasets"
+    }
+  },
+  "current_configuration": {
+    "environment": "development",
+    "heap_initial": "512m",
+    "heap_max": "2g",
+    "pagecache": "1g",
+    "transaction_max_size": "2g",
+    "global_transaction_max": "20g",
+    "jvm_opts": "-XX:+UseG1GC -XX:G1HeapRegionSize=16m"
+  },
+  "memory_allocation_rules": {
+    "heap_percentage": "25-40% of available host RAM",
+    "pagecache_percentage": "40-50% of available host RAM",
+    "os_buffer_reserve": "10-20% of available host RAM",
+    "rationale": "Optimal balance between JVM heap, graph storage caching, and OS buffer"
+  },
+  "custom_configurations": {},
+  "last_updated": "2026-02-21T16:51:40.990737"
+}
