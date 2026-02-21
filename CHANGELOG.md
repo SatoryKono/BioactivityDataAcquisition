@@ -39,8 +39,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Documentation Metrics Sync**: Updated observability contract (v2.0.0), metrics-monitoring guide, ADR-007, ADR-017 to reflect all 47 registered metrics and corrected labels
 
-- **Composite Gold Schema Fix**: Removed `_source`, `_lookup_method`, `_original_id` fields from `CompositeMoleculeGoldSchema`, `CompositeActivityGoldSchema`, `CompositeAssayGoldSchema`, `CompositeTargetGoldSchema` — these columns only exist in publication Silver tables, not in molecule/activity/assay/target. Updated corresponding JSON contracts.
-  - File: `src/bioetl/domain/contracts/gold/composite.py`, `docs/04-reference/contracts/gold/composite_*.json`
+- **Composite Gold Schema Fix**: Removed phantom lineage fields from composite Gold schemas that don't exist in corresponding Silver tables (CSV-filter pipelines, not enricher-mode):
+  - `CompositeMoleculeGoldSchema`: removed `_source` (molecule Silver has no `_source`)
+  - `CompositeActivityGoldSchema`, `CompositeAssayGoldSchema`, `CompositeTargetGoldSchema`: removed `_source`, `_lookup_method`, `_original_id`
+  - `CompositePublicationGoldSchema`: unchanged (publication Silver **does** have these fields)
+  - Updated JSON contracts (`docs/04-reference/contracts/gold/composite_*.json`), schema configs (`configs/schemas/composite/*.yaml`), and filter config comments
+  - File: `src/bioetl/domain/contracts/gold/composite.py`
 
 - **dev_setup.sh Fixes**: Added `--group dev` to `uv sync` for dependency-groups support, fixed `import ruff`/`import mypy` checks (ruff has no Python module), bumped RULES.md reference to v5.21
 

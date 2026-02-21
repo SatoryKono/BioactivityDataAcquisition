@@ -1,7 +1,7 @@
 # TOP-50 Diagram Selection — Scored and Ranked
 
 *Generated: 2026-02-17 | Source: 500-diagram-proposals.md*
-*Scoring aligned with RULES.md v5.20 and codebase analysis of 534 Python files*
+*Scoring aligned with RULES.md v5.21 and codebase analysis of 534 Python files*
 
 ---
 
@@ -237,4 +237,4 @@ Niche but important diagrams for specific areas.
 
 ---
 
-*Selection based on analysis of RULES.md v5.20, 34 ADRs, and 534 Python source files across 5 architectural layers.*
+*Selection based on analysis of RULES.md v5.21, 34 ADRs, and 534 Python source files across 5 architectural layers.*
