@@ -43,7 +43,7 @@ extraction_params:
     assay_type__in: "B,F"
 
     # High confidence only (8 or 9 on the 0-9 scale)
-    confidence_score__gte: 8,9
+    confidence_score__gte: 8
 
     # Direct interaction only (exclude Homologous, Not-determined, etc.)
     relationship_type: "D"

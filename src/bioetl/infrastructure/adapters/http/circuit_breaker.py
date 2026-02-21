@@ -58,8 +58,10 @@ class CircuitBreaker:
         >>> result = await cb.call(fetch_data, url="https://api.example.com")
 
     Metrics emitted:
-        - circuit_breaker_state{provider}: 0=Closed, 1=Half-Open, 2=Open
-        - circuit_breaker_trips_total{provider}: Counter of OPEN transitions
+        - circuit_breaker_state{adapter}: 0=Closed, 1=Half-Open, 2=Open
+        - circuit_breaker_trips_total{adapter}: Counter of OPEN transitions
+        - circuit_breaker_success_total{adapter}: Counter of successful calls
+        - circuit_breaker_failure_total{adapter}: Counter of failed calls
 
     """
 
@@ -96,7 +98,7 @@ class CircuitBreaker:
             self.metrics.set_gauge(
                 METRIC_CIRCUIT_BREAKER_STATE,
                 _STATE_VALUES[self._state],
-                {"provider": self.provider},
+                {"adapter": self.provider},
             )
 
     def _emit_trip_metric(self) -> None:
@@ -105,7 +107,7 @@ class CircuitBreaker:
             self.metrics.increment_counter(
                 METRIC_CIRCUIT_BREAKER_TRIPS,
                 1,
-                {"provider": self.provider},
+                {"adapter": self.provider},
             )
 
     def _should_attempt(self) -> bool:
@@ -128,6 +130,12 @@ class CircuitBreaker:
     def _on_success(self) -> None:
         """Handle successful request."""
         self._failure_count = 0
+        if self.metrics is not None:
+            self.metrics.increment_counter(
+                "circuit_breaker_success_total",
+                1,
+                {"adapter": self.provider},
+            )
         if self._state == CircuitBreakerState.HALF_OPEN:
             self._state = CircuitBreakerState.CLOSED
             self._emit_state_metric()
@@ -136,6 +144,12 @@ class CircuitBreaker:
         """Handle failed request."""
         self._failure_count += 1
         self._last_failure_time = time.monotonic()
+        if self.metrics is not None:
+            self.metrics.increment_counter(
+                "circuit_breaker_failure_total",
+                1,
+                {"adapter": self.provider},
+            )
 
         if self._state == CircuitBreakerState.HALF_OPEN:
             # Failed probe request, go back to OPEN

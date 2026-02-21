@@ -64,10 +64,10 @@ Metrics are exposed at `http://localhost:{BIOETL-METRICS-PORT}/metrics` (default
 
 | Metric | Type | Labels | Description |
 |--------|------|--------|-------------|
-| `circuit-breaker-state` | Gauge | provider | 0=Closed, 1=Half-Open, 2=Open |
-| `circuit-breaker-trips-total` | Counter | provider | Total OPEN transitions |
-| `circuit-breaker-success-total` | Counter | provider | Successful requests |
-| `circuit-breaker-failure-total` | Counter | provider | Failed requests |
+| `circuit-breaker-state` | Gauge | adapter | 0=Closed, 1=Half-Open, 2=Open |
+| `circuit-breaker-trips-total` | Counter | adapter | Total OPEN transitions |
+| `circuit-breaker-success-total` | Counter | adapter | Successful calls |
+| `circuit-breaker-failure-total` | Counter | adapter | Failed calls |
 
 **Data Quality Metrics:**
 
@@ -82,8 +82,8 @@ Metrics are exposed at `http://localhost:{BIOETL-METRICS-PORT}/metrics` (default
 | Metric | Type | Labels | Description |
 |--------|------|--------|-------------|
 | `vacuum-duration-seconds` | Histogram | table | VACUUM operation time |
-| `vacuum-files-removed-total` | Counter | table | Removed file count |
-| `archive-duration-seconds` | Histogram | provider, entity | Archive operation time |
+| `vacuum-files-removed-total` | Counter | table, layer | Removed file count |
+| `archive-duration-seconds` | Histogram | table | Archive operation time |
 
 ### 3. NoOp Implementations for Testing
 

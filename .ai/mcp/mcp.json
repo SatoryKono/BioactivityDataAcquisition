@@ -40,7 +40,7 @@
         "-i",
         "--rm",
         "-v",
-        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2/.ai/mcp/memory:/data",
+        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\.ai\\mcp\\memory:/data",
         "mcp/memory",
         "/data"
       ]
@@ -54,7 +54,7 @@
         "-e",
         "ARXIV_STORAGE_PATH=/papers",
         "-v",
-        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2/.ai/mcp/arxiv_papers:/papers",
+        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\.ai\\mcp\\arxiv_papers:/papers",
         "mcp/arxiv-mcp-server"
       ]
     },
@@ -67,7 +67,7 @@
         "-e",
         "DATABASE_URL=sqlite+aiosqlite:///data/mcp_db.sqlite",
         "-v",
-        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2/data:/data",
+        "E:\\g-drive\\05_AI\\github\\BioactivityDataAcquisition2\\data:/data",
         "souhardyak/mcp-db-server"
       ]
     },
@@ -80,8 +80,7 @@
         "-e",
         "GITHUB_PERSONAL_ACCESS_TOKEN",
         "ghcr.io/github/github-mcp-server"
-      ],
-      
+      ]
     },
     "duckduckgo": {
       "command": "docker",

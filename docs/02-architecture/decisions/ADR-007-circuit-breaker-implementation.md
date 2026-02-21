@@ -88,8 +88,10 @@ def is-circuit-breaker-error(exc: Exception) -> bool:
 ### 4. Metrics Integration
 
 The circuit breaker exposes metrics for observability:
-- `circuit-breaker-state{provider}`: Current state (0=Closed, 1=Half-Open, 2=Open)
-- `circuit-breaker-trips-total{provider}`: Total OPEN transitions
+- `circuit-breaker-state{adapter}`: Current state (0=Closed, 1=Half-Open, 2=Open)
+- `circuit-breaker-trips-total{adapter}`: Total OPEN transitions
+- `circuit-breaker-success-total{adapter}`: Successful calls
+- `circuit-breaker-failure-total{adapter}`: Failed calls
 
 ## Configuration
 
