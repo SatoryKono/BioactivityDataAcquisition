@@ -232,7 +232,7 @@ $ uv run pytest tests/architecture/test_layer_dependencies.py test_forbidden_imp
 
 ### Summary
 | Category | Status | Tests | Passed | Failed |
-|----------|--------|-------|--------|--------|
+|----------|--------|-------|--------|
 | Imports  | ✅     | 6     | 6      | 0      |
 | DI       | ✅     | 4     | 4      | 0      |
 | Metrics  | ⚠️     | 12    | 11     | 1      |
