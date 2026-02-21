@@ -113,10 +113,11 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
 
         # 1. Metrics (Histogram)
         self._metrics.observe_histogram(
-            "bioetl_pipeline_duration_seconds",
+            "pipeline_duration_seconds",
             duration,
             labels={
                 "pipeline": self.pipeline_name,
+                "stage": "pipeline",
                 "run_type": self.run_type,
                 "status": status,
             },

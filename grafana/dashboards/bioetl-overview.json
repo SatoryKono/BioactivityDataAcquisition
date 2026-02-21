@@ -265,7 +265,7 @@
       },
       "targets": [
         {
-          "expr": "bioetl_data_freshness_seconds",
+          "expr": "time() - bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}",
           "legendFormat": "{{pipeline}} / {{entity}}",
           "refId": "A"
         }
