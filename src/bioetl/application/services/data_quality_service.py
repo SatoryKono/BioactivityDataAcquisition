@@ -95,8 +95,11 @@ class DataQualityService:
         if self._metrics:
             labels = {"pipeline": self._pipeline_name, "entity": self._entity_type}
             self._metrics.set_gauge("dq_validation_score", 1.0 - error_rate, labels)
-            # Reset freshness to 0 (meaning "just updated")
-            self._metrics.set_gauge("data_freshness_seconds", 0.0, labels)
+            # Record current timestamp for freshness calculation
+            # Dashboard uses: time() - bioetl_data_freshness_seconds
+            self._metrics.set_gauge(
+                "data_freshness_seconds", time.time(), labels
+            )
 
         # Check hard threshold first - raises if exceeded
         self._check_hard_threshold(error_rate)
