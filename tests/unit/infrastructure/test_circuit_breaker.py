@@ -213,7 +213,7 @@ class TestCircuitBreakerMetrics:
         mock_metrics.set_gauge.assert_called_once_with(
             METRIC_CIRCUIT_BREAKER_STATE,
             0.0,  # CLOSED = 0
-            {"provider": "test"},
+            {"adapter": "test"},
         )
 
     @pytest.mark.unit
@@ -237,15 +237,16 @@ class TestCircuitBreakerMetrics:
         mock_metrics.set_gauge.assert_called_with(
             METRIC_CIRCUIT_BREAKER_STATE,
             2.0,  # OPEN = 2
-            {"provider": "test"},
+            {"adapter": "test"},
         )
 
-        # Check trip counter was incremented
-        mock_metrics.increment_counter.assert_called_once_with(
-            METRIC_CIRCUIT_BREAKER_TRIPS,
-            1,
-            {"provider": "test"},
-        )
+        # Check trip counter was incremented (among other counter calls)
+        trip_calls = [
+            c
+            for c in mock_metrics.increment_counter.call_args_list
+            if c[0][0] == METRIC_CIRCUIT_BREAKER_TRIPS
+        ]
+        assert len(trip_calls) == 1
 
     @pytest.mark.unit
     async def test_open_to_half_open_emits_metric(
@@ -287,14 +288,14 @@ class TestCircuitBreakerMetrics:
         assert calls[0][0] == (
             METRIC_CIRCUIT_BREAKER_STATE,
             1.0,  # HALF_OPEN = 1
-            {"provider": "test"},
+            {"adapter": "test"},
         )
 
         # Second call should be CLOSED (0.0)
         assert calls[1][0] == (
             METRIC_CIRCUIT_BREAKER_STATE,
             0.0,  # CLOSED = 0
-            {"provider": "test"},
+            {"adapter": "test"},
         )
 
     @pytest.mark.unit
@@ -339,12 +340,13 @@ class TestCircuitBreakerMetrics:
         # Second should be OPEN
         assert gauge_calls[1][0][1] == 2.0  # OPEN
 
-        # Should have incremented trip counter
-        mock_metrics.increment_counter.assert_called_with(
-            METRIC_CIRCUIT_BREAKER_TRIPS,
-            1,
-            {"provider": "test"},
-        )
+        # Should have incremented trip counter (among failure counters)
+        trip_calls = [
+            c
+            for c in mock_metrics.increment_counter.call_args_list
+            if c[0][0] == METRIC_CIRCUIT_BREAKER_TRIPS
+        ]
+        assert len(trip_calls) == 1
 
     @pytest.mark.unit
     def test_force_open_emits_metrics(self, mock_metrics: MagicMock) -> None:
@@ -357,12 +359,12 @@ class TestCircuitBreakerMetrics:
         mock_metrics.set_gauge.assert_called_with(
             METRIC_CIRCUIT_BREAKER_STATE,
             2.0,  # OPEN = 2
-            {"provider": "test"},
+            {"adapter": "test"},
         )
         mock_metrics.increment_counter.assert_called_once_with(
             METRIC_CIRCUIT_BREAKER_TRIPS,
             1,
-            {"provider": "test"},
+            {"adapter": "test"},
         )
 
     @pytest.mark.unit
@@ -377,7 +379,7 @@ class TestCircuitBreakerMetrics:
         mock_metrics.set_gauge.assert_called_with(
             METRIC_CIRCUIT_BREAKER_STATE,
             0.0,  # CLOSED = 0
-            {"provider": "test"},
+            {"adapter": "test"},
         )
 
     @pytest.mark.unit
@@ -406,4 +408,10 @@ class TestCircuitBreakerMetrics:
                 await cb.call(fail)
 
         assert cb.get_state() == CircuitBreakerState.CLOSED
-        mock_metrics.increment_counter.assert_not_called()
+        # Should emit failure counters but NOT trip counters
+        trip_calls = [
+            c
+            for c in mock_metrics.increment_counter.call_args_list
+            if c[0][0] == METRIC_CIRCUIT_BREAKER_TRIPS
+        ]
+        assert len(trip_calls) == 0

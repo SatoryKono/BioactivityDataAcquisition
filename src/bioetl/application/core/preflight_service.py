@@ -63,6 +63,7 @@ class _HealthAggregator:
         metrics: MetricsPort | None = None,
         logger: LoggerPort | None = None,
         health_monitor: HealthMonitorPort | None = None,
+        pipeline_name: str | None = None,
     ) -> None:
         """Initialize _HealthAggregator.
 
@@ -71,11 +72,13 @@ class _HealthAggregator:
             logger: Optional logger for health check status reporting.
             health_monitor: Optional HealthMonitorPort for centralized
                 health state tracking and alerting.
+            pipeline_name: Optional pipeline name for metric labels.
 
         """
         self._metrics = metrics
         self._logger = logger
         self._health_monitor = health_monitor
+        self._pipeline_name = pipeline_name
 
     async def check_all(self, services: PipelineServices) -> HealthReport:
         """Check health of all critical infrastructure components.
@@ -200,19 +203,16 @@ class _HealthAggregator:
         if self._metrics is None:
             return
 
-        labels = {"component": component}
+        component_labels = {"component": component}
 
         self._metrics.set_gauge(
             self.METRIC_HEALTH_STATUS,
             float(result.status.to_metric_value()),
-            labels,
+            component_labels,
         )
 
-        self._metrics.observe_histogram(
-            self.METRIC_HEALTH_DURATION,
-            result.duration_seconds,
-            labels,
-        )
+        # Note: HEALTH_CHECK_DURATION_SECONDS histogram requires 'pipeline' label only
+        # This is recorded at the aggregate level in PreflightService._record_health_check_metrics
 
         if health_result is not None:
             provider_labels = {"provider": health_result.provider}
@@ -611,6 +611,7 @@ class PreflightService:
         self._health_aggregator = _HealthAggregator(
             metrics=metrics,
             logger=logger,
+            pipeline_name=config.pipeline_name,
         )
         self._medallion_validator = _MedallionConfigValidator(
             config=config,

@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **End-to-End Metrics Audit**: Registered 32+ new Prometheus metrics that were previously silently dropped
+  - Pipeline lifecycle: `pipeline_runs_total`, `phase_duration_seconds`
+  - Transformer: `transform_duration_seconds`, `transform_errors_total`
+  - Adapter/HTTP: `adapter_request_duration_seconds`, `adapter_requests_total`, `http_request_duration_seconds`, `http_retries_total`, `http_request_errors_total`, and 4 more
+  - Bronze/Silver storage: `bronze_write_duration_seconds`, `bronze_records_written_total`, `bronze_bytes_written_total`, `policy_violations_total`, `silver_validation_failures_total`
+  - Health checks: `health_check_status`, `health_check_success_total`, `health_check_failures_total`, `health_check_latency_seconds`, and 3 more
+  - DQ: `dq_soft_threshold_exceeded`
+  - Preflight: `preflight_medallion_policy_valid`, `preflight_config_errors_total`
+  - Rate limiter: `rate_limiter_tokens_available`, `rate_limiter_wait_seconds`
+  - Shutdown: `shutdown_initiated`, `shutdown_completed`
+  - Storage: `storage_optimization_total`, `filter_combinations_loaded_total`
+  - Files: `src/bioetl/infrastructure/observability/metrics.py`, `prometheus_metrics.py`
+
+- **Circuit Breaker Success/Failure Counters**: Added `circuit_breaker_success_total` and `circuit_breaker_failure_total` emissions in `_on_success()` and `_on_failure()` methods
+  - File: `src/bioetl/infrastructure/adapters/http/circuit_breaker.py`
+
+### Fixed
+
+- **Circuit Breaker Label Mismatch**: Changed `{"provider": ...}` to `{"adapter": ...}` in circuit breaker metric emissions to match Prometheus definition labels
+  - File: `src/bioetl/infrastructure/adapters/http/circuit_breaker.py`
+
+- **Vacuum Metric Name and Labels**: Fixed `vacuum_files_removed` → `vacuum_files_removed_total` and labels from `{"pipeline": ..., "layer": ...}` to `{"table": ..., "layer": ...}` in PipelineObserver
+  - File: `src/bioetl/application/observability/observer.py`
+
+- **Circuit Breaker State Values Docstring**: Fixed `(0=closed, 0.5=half-open, 1=open)` → `(0=closed, 1=half-open, 2=open)` in metrics.py
+
+- **Grafana Dashboard Fixes**: Fixed docker-compose port conflicts (8080→8081), provisioning paths, datasource UIDs, and dashboard PromQL queries across 5 dashboard files
+
+- **Documentation Metrics Sync**: Updated observability contract (v2.0.0), metrics-monitoring guide, ADR-007, ADR-017 to reflect all 47 registered metrics and corrected labels
+
 ## [6.0.0] - 2026-02-18
 
 ### Added

@@ -363,7 +363,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
 
         if success:
             self._metrics.increment_counter(
-                "vacuum_files_removed",
+                "vacuum_files_removed_total",
                 files_removed,
-                {"pipeline": self.pipeline_name, "layer": layer},
+                {"table": table, "layer": layer},
             )
