@@ -8,8 +8,8 @@ import json
 from pathlib import Path
 from typing import Optional
 
-import polars as pl
 import click
+import polars as pl
 
 
 class LogExplorer:
@@ -26,17 +26,19 @@ class LogExplorer:
     def get_summary(self, last_n: int = 1000):
         """Get a summary of logs (counts by level and pipeline)."""
         lf = self._load_logs().tail(last_n)
-        
-        summary = lf.group_by(["level", "event"]).agg(pl.count().alias("count")).collect()
+
+        summary = (
+            lf.group_by(["level", "event"]).agg(pl.count().alias("count")).collect()
+        )
         return summary
 
-    def find_errors(self, pipeline: Optional[str] = None, limit: int = 10):
+    def find_errors(self, pipeline: str | None = None, limit: int = 10):
         """Find recent errors, optionally filtered by pipeline."""
         lf = self._load_logs().filter(pl.col("level") == "error")
-        
+
         if pipeline:
             lf = lf.filter(pl.col("pipeline") == pipeline)
-            
+
         errors = lf.sort("timestamp", descending=True).limit(limit).collect()
         return errors
 
@@ -44,15 +46,20 @@ class LogExplorer:
         """Analyze pipeline stage durations if logged."""
         # Assuming we log events like 'stage_completed' with 'duration' field
         lf = self._load_logs().filter(
-            (pl.col("pipeline") == pipeline) & 
-            (pl.col("event") == "stage_completed")
+            (pl.col("pipeline") == pipeline) & (pl.col("event") == "stage_completed")
         )
-        
-        perf = lf.group_by("stage").agg([
-            pl.col("duration").mean().alias("avg_duration"),
-            pl.col("duration").max().alias("max_duration"),
-            pl.count().alias("call_count")
-        ]).collect()
+
+        perf = (
+            lf.group_by("stage")
+            .agg(
+                [
+                    pl.col("duration").mean().alias("avg_duration"),
+                    pl.col("duration").max().alias("max_duration"),
+                    pl.count().alias("call_count"),
+                ]
+            )
+            .collect()
+        )
         return perf
 
 

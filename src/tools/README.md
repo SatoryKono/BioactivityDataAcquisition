@@ -2,6 +2,19 @@
 
 Utility scripts for BioETL project maintenance and development.
 
+## Structure and conventions
+
+- **Canonical tools** live under `src/tools` and `src/tools/scripts`.
+- **Environment setup** uses `./dev_setup.sh` as the primary entrypoint.
+- **Root `scripts/`** should be treated as thin wrappers or legacy entrypoints; prefer
+  `python src/tools/scripts/<tool>.py` (or `PYTHONPATH=src python -m tools.scripts.<tool>`).
+- **Compatibility wrappers** currently include:
+  - `scripts/setup.sh` → `dev_setup.sh`
+  - `src/tools/scripts/setup.sh` → `dev_setup.sh`
+  - `scripts/lint_terminology.py` → `src/tools/scripts/lint_terminology.py`
+- **Temporary files** (e.g., `_gen*.py`, `.cursor_tmp_*`) should be reviewed and cleaned up
+  explicitly as part of a dedicated cleanup pass.
+
 ## Available Tools
 
 ### file_merger.py
