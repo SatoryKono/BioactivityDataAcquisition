@@ -61,7 +61,6 @@ column_groups:
       - _run_id
       - _run_type
       - _source_batch_id
-      - _source
       - _ingestion_ts
       - _index
 

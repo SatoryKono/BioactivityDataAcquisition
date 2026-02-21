@@ -178,7 +178,12 @@ class DQReportWriter:
 
         if output_path is not None:
             output_path = Path(output_path)
-            return output_path / filename if output_path.is_dir() else output_path
+            # Always treat output_path as a directory and append filename.
+            # Previous logic used is_dir() which returned False for not-yet-created
+            # directories, causing the DQ report to be written as a file with the
+            # entity name (e.g. "target_component") instead of inside the directory.
+            output_path.mkdir(parents=True, exist_ok=True)
+            return output_path / filename
 
         if self._flat_structure:
             return self._base_path / filename

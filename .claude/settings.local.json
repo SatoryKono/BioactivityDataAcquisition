@@ -128,7 +128,8 @@
       "Bash(git config user.name 2>&1 && git config user.email 2>&122222)",
       "Bash(unset GITHUB_TOKEN && gh auth login --hostname github.com --git-protocol https --web 2>&1)",
       "Bash(unset GITHUB_TOKEN && gh auth status 2>&)",
-      "Bash(cd /e/g-drive/05_AI/github/BioactivityDataAcquisition2 && unset GITHUB_TOKEN && uv run python -m bioetl run-composite --composite molecule --seed-limit 5 --no-cached-bronze --no-health-server 2>&1)"
+      "Bash(cd /e/g-drive/05_AI/github/BioactivityDataAcquisition2 && unset GITHUB_TOKEN && uv run python -m bioetl run-composite --composite molecule --seed-limit 5 --no-cached-bronze --no-health-server 2>&1)",
+      "WebFetch(domain:www.uniprot.org)"
     ]
   },
   "enabledPlugins": {
