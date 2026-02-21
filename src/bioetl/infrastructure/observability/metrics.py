@@ -55,7 +55,7 @@ DQ_RECORDS_QUARANTINED_TOTAL = Counter(
 # Circuit Breaker metrics (per ADR-007)
 CIRCUIT_BREAKER_STATE = Gauge(
     "bioetl_circuit_breaker_state",
-    "Current state of the circuit breaker (0=closed, 0.5=half-open, 1=open)",
+    "Current state of the circuit breaker (0=closed, 1=half-open, 2=open)",
     ["adapter"],
 )
 
@@ -162,6 +162,241 @@ HEALTH_CHECK_DURATION_SECONDS = Histogram(
     "Duration of health check operations in seconds",
     ["pipeline"],
     buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0],
+)
+
+HEALTH_CHECK_STATUS = Gauge(
+    "bioetl_health_check_status",
+    "Health check status per component (0=unknown, 1=healthy, 2=degraded)",
+    ["component"],
+)
+
+HEALTH_CHECK_LATENCY_MS = Histogram(
+    "bioetl_health_check_latency_ms",
+    "Health check latency in milliseconds",
+    ["provider"],
+    buckets=[1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000],
+)
+
+HEALTH_CHECK_SUCCESS_TOTAL = Counter(
+    "bioetl_health_check_success_total",
+    "Total successful health checks",
+    ["provider"],
+)
+
+HEALTH_CHECK_FAILURES_TOTAL = Counter(
+    "bioetl_health_check_failures_total",
+    "Total failed health checks",
+    ["provider"],
+)
+
+HEALTH_CHECK_LATENCY_SECONDS = Histogram(
+    "bioetl_health_check_latency_seconds",
+    "Health check latency in seconds",
+    ["provider"],
+    buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0],
+)
+
+PREFLIGHT_MEDALLION_POLICY_VALID = Gauge(
+    "bioetl_preflight_medallion_policy_valid",
+    "Whether medallion policy is valid (1=valid, 0=invalid)",
+    ["pipeline", "run_id"],
+)
+
+PREFLIGHT_CONFIG_ERRORS_TOTAL = Gauge(
+    "bioetl_preflight_config_errors_total",
+    "Number of configuration errors found during preflight",
+    ["pipeline", "run_id"],
+)
+
+# =============================================================================
+# Pipeline lifecycle metrics
+# =============================================================================
+
+PIPELINE_RUNS_TOTAL = Counter(
+    "bioetl_pipeline_runs_total",
+    "Total number of pipeline runs",
+    ["pipeline", "run_type", "status"],
+)
+
+PHASE_DURATION_SECONDS = Histogram(
+    "bioetl_phase_duration_seconds",
+    "Duration of pipeline lifecycle phases in seconds",
+    ["pipeline", "phase", "status"],
+    buckets=[0.1, 0.5, 1.0, 5.0, 10.0, 30.0, 60.0, 120.0, 300.0, 600.0],
+)
+
+# =============================================================================
+# Transformer metrics
+# =============================================================================
+
+TRANSFORM_DURATION_SECONDS = Histogram(
+    "bioetl_transform_duration_seconds",
+    "Duration of data transformation in seconds",
+    ["provider", "entity_type"],
+    buckets=[0.1, 0.5, 1.0, 5.0, 10.0, 30.0, 60.0, 120.0],
+)
+
+TRANSFORM_ERRORS_TOTAL = Counter(
+    "bioetl_transform_errors_total",
+    "Total transformation errors",
+    ["provider", "entity_type", "error_type"],
+)
+
+# =============================================================================
+# DQ additional metrics
+# =============================================================================
+
+DQ_SOFT_THRESHOLD_EXCEEDED = Counter(
+    "bioetl_dq_soft_threshold_exceeded",
+    "Total times DQ soft threshold was exceeded",
+    ["pipeline"],
+)
+
+# =============================================================================
+# Shutdown metrics
+# =============================================================================
+
+SHUTDOWN_INITIATED = Counter(
+    "bioetl_shutdown_initiated",
+    "Total shutdown initiations",
+    ["reason"],
+)
+
+SHUTDOWN_COMPLETED = Counter(
+    "bioetl_shutdown_completed",
+    "Total shutdown completions",
+    ["reason"],
+)
+
+# =============================================================================
+# Storage optimization metrics
+# =============================================================================
+
+STORAGE_OPTIMIZATION_TOTAL = Counter(
+    "bioetl_storage_optimization_total",
+    "Total storage optimization operations",
+    ["pipeline", "status"],
+)
+
+FILTER_COMBINATIONS_LOADED_TOTAL = Counter(
+    "bioetl_filter_combinations_loaded_total",
+    "Total filter combinations loaded from multi-filter source",
+    ["pipeline", "source_file"],
+)
+
+# =============================================================================
+# Adapter / HTTP metrics
+# =============================================================================
+
+ADAPTER_REQUEST_DURATION_SECONDS = Histogram(
+    "bioetl_adapter_request_duration_seconds",
+    "Duration of adapter API requests in seconds",
+    ["provider", "endpoint"],
+    buckets=[0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 30.0],
+)
+
+ADAPTER_REQUESTS_TOTAL = Counter(
+    "bioetl_adapter_requests_total",
+    "Total adapter API requests",
+    ["provider", "endpoint", "status"],
+)
+
+ADAPTER_BATCH_SIZE = Histogram(
+    "bioetl_adapter_batch_size",
+    "Distribution of adapter response batch sizes",
+    ["provider", "endpoint"],
+    buckets=[10, 50, 100, 500, 1000, 5000, 10000],
+)
+
+ADAPTER_DROPPED_DUPLICATES_TOTAL = Counter(
+    "bioetl_adapter_dropped_duplicates_total",
+    "Total duplicate records dropped by adapter dedup",
+    ["provider", "entity_type"],
+)
+
+DATA_SOURCE_RETRIES_TOTAL = Counter(
+    "bioetl_data_source_retries_total",
+    "Total data source retry attempts",
+    ["provider", "operation"],
+)
+
+DATA_SOURCE_RETRY_EXHAUSTED_TOTAL = Counter(
+    "bioetl_data_source_retry_exhausted_total",
+    "Total data source retry exhaustions",
+    ["provider", "operation"],
+)
+
+HTTP_REQUEST_DURATION_SECONDS = Histogram(
+    "bioetl_http_request_duration_seconds",
+    "Duration of HTTP requests in seconds",
+    ["provider", "method", "status"],
+    buckets=[0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 30.0],
+)
+
+HTTP_RETRIES_TOTAL = Counter(
+    "bioetl_http_retries_total",
+    "Total HTTP request retries",
+    ["provider", "method"],
+)
+
+HTTP_REQUEST_ERRORS_TOTAL = Counter(
+    "bioetl_http_request_errors_total",
+    "Total HTTP request errors",
+    ["provider", "method", "error_type"],
+)
+
+PROVIDER_HEALTH_STATUS = Gauge(
+    "bioetl_provider_health_status",
+    "Provider health status (0=unknown, 1=healthy, 2=degraded)",
+    ["provider"],
+)
+
+RATE_LIMITER_TOKENS_AVAILABLE = Gauge(
+    "bioetl_rate_limiter_tokens_available",
+    "Current tokens available in rate limiter",
+    ["provider"],
+)
+
+RATE_LIMITER_WAIT_SECONDS = Histogram(
+    "bioetl_rate_limiter_wait_seconds",
+    "Rate limiter wait time in seconds",
+    ["provider"],
+    buckets=[0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0],
+)
+
+# =============================================================================
+# Bronze / Silver storage metrics
+# =============================================================================
+
+BRONZE_WRITE_DURATION_SECONDS = Histogram(
+    "bioetl_bronze_write_duration_seconds",
+    "Duration of bronze write operations in seconds",
+    ["provider", "entity"],
+    buckets=[0.1, 0.5, 1.0, 5.0, 10.0, 30.0, 60.0],
+)
+
+BRONZE_RECORDS_WRITTEN_TOTAL = Counter(
+    "bioetl_bronze_records_written_total",
+    "Total records written to bronze layer",
+    ["provider", "entity"],
+)
+
+BRONZE_BYTES_WRITTEN_TOTAL = Counter(
+    "bioetl_bronze_bytes_written_total",
+    "Total bytes written to bronze layer (compressed)",
+    ["provider", "entity"],
+)
+
+POLICY_VIOLATIONS_TOTAL = Counter(
+    "bioetl_policy_violations_total",
+    "Total write policy violations",
+    ["layer", "mode"],
+)
+
+SILVER_VALIDATION_FAILURES_TOTAL = Counter(
+    "bioetl_silver_validation_failures_total",
+    "Total silver schema validation failures",
+    ["table"],
 )
 
 

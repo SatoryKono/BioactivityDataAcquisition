@@ -544,9 +544,9 @@ class TestObserverVacuumEvents:
 
         logger_mock.info.assert_called()
         metrics_mock.increment_counter.assert_called_with(
-            "vacuum_files_removed",
+            "vacuum_files_removed_total",
             42,
-            {"pipeline": "test_pipeline", "layer": "silver"},
+            {"table": "chembl_activity", "layer": "silver"},
         )
 
     def test_emit_vacuum_result_failure(self, metrics_mock, logger_mock, run_id):
@@ -629,6 +629,6 @@ class TestObserverSmokeTest:
         # Verify vacuum counter
         counter_calls = metrics_mock.increment_counter.call_args_list
         vacuum_counters = [
-            c for c in counter_calls if c[0][0] == "vacuum_files_removed"
+            c for c in counter_calls if c[0][0] == "vacuum_files_removed_total"
         ]
         assert len(vacuum_counters) == 1

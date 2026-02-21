@@ -108,8 +108,13 @@ class TestFlappingBehavior:
 
         # Should have multiple gauge calls (CLOSED, OPEN, HALF_OPEN, CLOSED)
         assert mock_metrics.set_gauge.call_count > initial_calls
-        # Should have one trip counter increment
-        assert mock_metrics.increment_counter.call_count == 1
+        # Should have one trip counter increment (plus failure/success counters)
+        trip_calls = [
+            c
+            for c in mock_metrics.increment_counter.call_args_list
+            if c[0][0] == "circuit_breaker_trips_total"
+        ]
+        assert len(trip_calls) == 1
 
     @pytest.mark.unit
     async def test_flapping_with_probe_failures(self) -> None:
