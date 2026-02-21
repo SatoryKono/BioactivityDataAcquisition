@@ -124,7 +124,11 @@
       "Bash(powershell -Command \"Get-Process -Id 38076 -ErrorAction SilentlyContinue | Select-Object Id,ProcessName,Path | Format-List; Get-Process -Id 22968 -ErrorAction SilentlyContinue | Select-Object Id,ProcessName,Path | Format-List\")",
       "Bash(powershell -Command \"Stop-Process -Id 38076 -Force\")",
       "Bash(powershell -Command:*)",
-      "Bash(gh auth:*)"
+      "Bash(gh auth:*)",
+      "Bash(git config user.name 2>&1 && git config user.email 2>&122222)",
+      "Bash(unset GITHUB_TOKEN && gh auth login --hostname github.com --git-protocol https --web 2>&1)",
+      "Bash(unset GITHUB_TOKEN && gh auth status 2>&)",
+      "Bash(cd /e/g-drive/05_AI/github/BioactivityDataAcquisition2 && unset GITHUB_TOKEN && uv run python -m bioetl run-composite --composite molecule --seed-limit 5 --no-cached-bronze --no-health-server 2>&1)"
     ]
   },
   "enabledPlugins": {

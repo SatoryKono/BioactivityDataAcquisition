@@ -278,7 +278,7 @@ step_install_dependencies() {
 
     if [[ "$HAS_UV" == true ]]; then
         print_step "Установка зависимостей с помощью uv (рекомендуется)..."
-        uv sync --group dev --extra dev --extra tests --extra tracing --extra performance --extra export
+        uv sync --group dev --extra tracing --extra performance --extra export
         print_success "Зависимости установлены через uv"
     else
         VENV_PYTHON=$(resolve_venv_python) || {

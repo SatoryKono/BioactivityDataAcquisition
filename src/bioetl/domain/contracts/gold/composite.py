@@ -199,8 +199,8 @@ class CompositeMoleculeGoldSchema(pa.DataFrameModel):
     ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
     index: Series[int] = pa.Field(nullable=False, alias="_index")
 
-    # Source tracking (from seed)
-    source: Series[str] = pa.Field(nullable=True, alias="_source")
+    # Note: _source is NOT present in chembl_molecule Silver (CSV-filter pipeline,
+    # not enricher-mode). Provenance is tracked via _source_providers instead.
 
     # =========================================================================
     # Composite Lineage Metadata (added by MergeService)
