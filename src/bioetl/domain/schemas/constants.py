@@ -113,11 +113,26 @@ ASSAY_TEST_TYPES: frozenset[str] = frozenset(["In vivo", "In vitro", "Ex vivo"])
 
 ASSAY_CATEGORIES: frozenset[str] = frozenset(
     [
+        # Classic categories
         "screening",
         "confirmatory",
         "panel",
         "summary",
         "other",
+        # Extended categories (ChEMBL 35+)
+        "Affinity biochemical assay",
+        "Affinity on-target cellular assay",
+        "Affinity phenotypic cellular assay",
+        "Alphascreen assay",
+        "Cell health data",
+        "GPCR beta-arrestin recruitment assay",
+        "HTRF assay",
+        "ITC assay",
+        "Incucyte cell viability",
+        "NanoBRET assay",
+        "PDSP assay",
+        "Selectivity assay",
+        "Thermal shift assay",
     ]
 )
 

@@ -83,7 +83,16 @@ gold_filters:
     assay_category:
       type: string
       nullable: true
-      enum: ["screening", "confirmatory", "panel", "summary", "other"]
+      # Classic + extended categories (ChEMBL 35+)
+      enum: [
+        "screening", "confirmatory", "panel", "summary", "other",
+        "Affinity biochemical assay", "Affinity on-target cellular assay",
+        "Affinity phenotypic cellular assay", "Alphascreen assay",
+        "Cell health data", "GPCR beta-arrestin recruitment assay",
+        "HTRF assay", "ITC assay", "Incucyte cell viability",
+        "NanoBRET assay", "PDSP assay", "Selectivity assay",
+        "Thermal shift assay"
+      ]
       description: "Assay category"
 
     assay_test_type:

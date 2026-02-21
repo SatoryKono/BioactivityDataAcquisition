@@ -1,4 +1,4 @@
-"""Neo4j memory management and configuration"""
+"""Neo4j memory management"""
 
 from dataclasses import dataclass
 from typing import Any
@@ -37,7 +37,6 @@ class MemoryProfile:
 class Neo4jMemoryManager:
     """Neo4j memory management"""
 
-    # Built-in profiles
     PROFILES = {
         "development": MemoryProfile(
             name="development",
@@ -72,7 +71,6 @@ class Neo4jMemoryManager:
     }
 
     def __init__(self, storage_path: str = ".ai/mcp/neo4j-memory/memory.json"):
-        """Initialize memory manager"""
         self.storage_path = Path(storage_path)
         self.storage_path.parent.mkdir(parents=True, exist_ok=True)
         self.custom_profiles: dict[str, MemoryProfile] = {}
@@ -151,21 +149,13 @@ class Neo4jMemoryManager:
         heap_max = int(available_ram_gb * 0.35)
         heap_initial = max(1, int(available_ram_gb * 0.1))
         pagecache = int(available_ram_gb * 0.45)
-        os_reserve = int(available_ram_gb * 0.1)
 
         return {
             "available_ram_gb": available_ram_gb,
-            "recommendation": f"Based on {available_ram_gb}GB available RAM",
             "heap_initial": f"{heap_initial}g",
             "heap_max": f"{heap_max}g",
             "pagecache": f"{pagecache}g",
-            "os_reserve": f"{os_reserve}g",
-            "allocation_percentages": {
-                "heap": "35%",
-                "pagecache": "45%",
-                "os_reserve": "20%",
-            },
-            "rationale": "Heap 35%, PageCache 45%, OS Reserve 20% allocation",
+            "allocation": {"heap": "35%", "pagecache": "45%", "os": "20%"},
         }
 
     def export_env_vars(self, profile_name: str | None = None) -> dict[str, str]:
@@ -186,32 +176,11 @@ class Neo4jMemoryManager:
         """Get troubleshooting guide"""
         return {
             "out_of_memory": {
-                "symptom": "Container exits with code 137 (OOM kill)",
-                "cause": "heap + pagecache > available host RAM",
-                "solutions": [
-                    "Check host RAM: free -h (Linux) or Get-WmiObject (Windows)",
-                    "Reduce NEO4J_HEAP_MAX",
-                    "Reduce NEO4J_PAGECACHE",
-                    "Ensure total <= 80% of host RAM",
-                ],
+                "cause": "heap + pagecache exceeds available RAM",
+                "solution": "Reduce heap or pagecache, ensure total <= 80% RAM",
             },
             "slow_queries": {
-                "symptom": "Query performance degrades over time",
-                "cause": "Insufficient page cache or GC pauses",
-                "solutions": [
-                    "Increase NEO4J_PAGECACHE",
-                    "Enable G1GC with NEO4J_JVM_OPTS",
-                    "Profile queries with PROFILE clause",
-                    "Create appropriate indexes",
-                ],
-            },
-            "transaction_timeout": {
-                "symptom": "Transactions fail with timeout errors",
-                "cause": "NEO4J_TX_MAX_SIZE too small for operation",
-                "solutions": [
-                    "Increase NEO4J_TX_MAX_SIZE",
-                    "Batch large operations",
-                    "Use indexes for frequent queries",
-                ],
+                "cause": "Insufficient page cache",
+                "solution": "Increase NEO4J_PAGECACHE",
             },
         }
