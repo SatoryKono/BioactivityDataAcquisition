@@ -7,7 +7,7 @@
 #   ./dev_setup.sh --quick  # Только установка зависимостей (без тестов)
 #   ./dev_setup.sh --help   # Справка
 #
-# Синхронизировано с RULES.md v5.20 (2026-02-17)
+# Синхронизировано с RULES.md v5.21 (2026-02-17)
 # ==============================================================================
 
 set -euo pipefail
@@ -461,7 +461,7 @@ ${GREEN}Следующие шаги:${NC}
 
 3. Изучите документацию:
    - ${YELLOW}docs/00-project/agents/AGENT.md${NC}  — Инструкции для разработчика
-   - ${YELLOW}docs/00-project/RULES.md${NC}         — Конституция проекта (v5.20)
+   - ${YELLOW}docs/00-project/RULES.md${NC}         — Конституция проекта (v5.21)
    - ${YELLOW}docs/00-project/agents/CLAUDE.md${NC} — Справочник для Claude Code
 
 4. Основные команды:
@@ -484,7 +484,7 @@ ${GREEN}Следующие шаги:${NC}
 
 3. Изучите документацию:
    - ${YELLOW}docs/00-project/agents/AGENT.md${NC}  — Инструкции для разработчика
-   - ${YELLOW}docs/00-project/RULES.md${NC}         — Конституция проекта (v5.20)
+   - ${YELLOW}docs/00-project/RULES.md${NC}         — Конституция проекта (v5.21)
    - ${YELLOW}docs/00-project/agents/CLAUDE.md${NC} — Справочник для Claude Code
 
 4. Основные команды:
