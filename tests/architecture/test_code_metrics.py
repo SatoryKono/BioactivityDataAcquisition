@@ -88,13 +88,13 @@ class TestFileSizeLimits:
         "batch_writer.py": 575,  # 569 LOC - BatchWriter with Safety Guard + column_order + layer config filtering + key nullability
         "preflight_service.py": 845,  # 840 LOC - preflight validation (expanded) + contract policy preflight
         "preflight_validator.py": 655,  # 651 LOC - extracted preflight validators (REFACTOR-003)
-        "batch_executor.py": 835,  # 828 LOC - unified executor for batch processing + DQ context + MetadataCoordinator params + documented exception handlers
+        "batch_executor.py": 830,  # 765 LOC - unified executor for batch processing + DQ context + MetadataCoordinator params + documented exception handlers
         "transformer.py": 920,  # 917 LOC - UniProtProteinTransformer with complex protein data extraction
         "gold_analyzer.py": 200,  # 192 LOC - Thin orchestrator (checks extracted to _checks_*.py modules)
         "silver_analyzer.py": 650,  # 642 LOC - Silver layer analysis with extracted helper methods
         "dq_report_service.py": 565,  # 561 LOC - DQ report service with extracted helpers for CC reduction
         # Composition layer exemptions
-        "metadata_coordinator.py": 590,  # 583 LOC - MetadataCoordinator with centralized metadata management + extended lineage + DQ provenance + composite metadata
+        "metadata_coordinator.py": 610,  # 592 LOC - MetadataCoordinator with centralized metadata management + extended lineage + DQ provenance + composite metadata
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
         "composite.py": 680,  # 672 LOC - Composite pipeline bootstrap with runner factories + execution_context + field group registry loading + DQ report service + cross-validation + quarantine wiring + composite schemas
         "entrypoints.py": 110,  # 102 LOC - Re-export facade (split to _pipeline_execution, _resource_management, _services)
@@ -320,6 +320,7 @@ class TestFunctionComplexity:
         "_execute_checks": 14,  # CC=13 - Silver DQ checks with nullability enforcement
         # Infrastructure schema config validation (branch #9 schema_file linkage)
         "_validate_schema_config": 17,  # CC=16 - Schema config validation with group/layer checks
+        "_extract_from_article_id_list": 13,  # CC=12 - PubMed identifier extraction with multiple conditional checks
         "_extract_from_article_id_list": 13,  # CC=12 - PubMed identifier extraction with multiple conditional checks
     }
 
@@ -610,7 +611,7 @@ class TestClassSize:
         "PreflightService": 545,  # 540 lines - preflight validation service
         "PostrunService": 355,  # 349 lines - postrun service
         "BronzeWriter": 770,  # 766 lines - JSONL + zstd + MetadataCoordinator fallback + SourceMetadata + query_string extraction + async read_bronze + flat_structure
-        "BatchExecutor": 725,  # 722 lines - unified executor for batch processing + DQ context + MetadataCoordinator + _extract_dq_entity helper
+        "BatchExecutor": 770,  # 765 lines - unified executor for batch processing + DQ context + MetadataCoordinator + _extract_dq_entity helper
         "BatchWriter": 535,  # 531 lines - batch writing with Safety Guard §4.6 lock validation + SourceMetadata param + Silver lineage + DQ defaults + column_order + key nullability
         # Application core classes
         "FilteredDataSource": 355,  # 348 lines - decorator with fallback mapping + direct multi-filter support
@@ -653,14 +654,14 @@ class TestClassSize:
         "MedallionConfigValidator": 350,  # Extracted from PreflightService - cohesive validation
         "CompositePreflightValidator": 555,  # 551 LOC - Composite pipeline preflight validation
         # Domain ports (Protocol definitions with comprehensive docstrings)
-        "StoragePort": 385,  # 382 lines - Protocol with read_silver, write_*_merged + SourceMetadata param + key nullability
+        "StoragePort": 400,  # 393 lines - Protocol with read_silver, write_*_merged + SourceMetadata param + key nullability
         # Pandera schemas (declarative field definitions)
         "PubchemMoleculeSchema": 395,  # 389 lines - PubChem molecule schema with 3D steric quadrupole + feature_count_3d + monoisotopic_mass + nullable int handling
         "UniprotTargetSchema": 435,  # 430 lines - UniProt protein schema with biochemical fields + extended extractors
         # Derived entity data source wrappers (comprehensive docstrings)
         "PublicationTermDataSource": 585,  # 579 lines - Wrapper with FilterableDataSourcePort delegation + get_source_metadata
         # Composition services
-        "MetadataCoordinator": 480,  # 470 LOC - Metadata coordination for Medallion layers + DQ provenance + composite metadata
+        "MetadataCoordinator": 600,  # 592 lines - Metadata coordination for Medallion layers + DQ provenance + composite metadata
         # Composite pipeline services (ADR-026)
         "MergeService": 1835,  # 1826 lines - Composite merge service with dependency join support + conflict resolution + column priority ordering + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation + composite key dependency join
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service

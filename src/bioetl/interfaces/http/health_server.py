@@ -239,13 +239,30 @@ class HealthServer:
         if not self._health_monitor:
             return {}
         states = self._health_monitor.get_all_states()
-        return {
-            name: {
-                "status": state.status.value.lower(),
-                "consecutive_errors": state.consecutive_errors,
+        statuses = {}
+        for name, state in states.items():
+            # Handle potential tuple return (defensive programming)
+            if hasattr(state, "status"):
+                status_val = state.status.value.lower()
+                errors = state.consecutive_errors
+            elif isinstance(state, tuple) and len(state) >= 2:
+                # Fallback if state is a tuple (status, errors, ...)
+                status_obj = state[0]
+                status_val = (
+                    status_obj.value.lower()
+                    if hasattr(status_obj, "value")
+                    else str(status_obj).lower()
+                )
+                errors = state[1]
+            else:
+                status_val = "unknown"
+                errors = 0
+
+            statuses[name] = {
+                "status": status_val,
+                "consecutive_errors": errors,
             }
-            for name, state in states.items()
-        }
+        return statuses
 
     async def _send_json_response(
         self, writer: asyncio.StreamWriter, response: HealthResponse

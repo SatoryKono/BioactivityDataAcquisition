@@ -289,7 +289,13 @@ class MetadataCoordinator:
 
         Returns:
             Complete SilverMetadata for sidecar file.
+
+        Raises:
+            ValueError: If records are empty.
         """
+        if not input_data.records and input_data.total_records is None:
+            raise ValueError("Cannot create Silver metadata without records")
+
         # Build lineage from records and bronze_refs
         if input_data.source_batch_ids is not None:
             source_batch_ids = input_data.source_batch_ids
@@ -491,7 +497,13 @@ class MetadataCoordinator:
 
         Returns:
             Complete GoldMetadata for sidecar file.
+
+        Raises:
+            ValueError: If records are empty.
         """
+        if not input_data.records and input_data.total_records is None:
+            raise ValueError("Cannot create Gold metadata without records")
+
         # Build lineage from Silver refs (REQ-LINEAGE-002: Silver → Gold tracking)
         source_tables: dict[str, int] = {}
         if input_data.silver_refs:

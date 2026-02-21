@@ -303,71 +303,101 @@ class PostrunService:
             executor: Pipeline executor with accumulated metrics.
             dq_reports: Results from DQ report generation (for cross-links).
         """
-        from datetime import UTC, datetime
-
-        from bioetl.domain.ports import GoldMetadataInput, SilverMetadataInput
-
         # Get run-level statistics from executor
         stats = {}
         if hasattr(executor, "get_run_statistics"):
             stats = executor.get_run_statistics()
 
-        # 1. Write final Silver metadata
-        silver_table = self._config.table.silver_table
-        if silver_table:
-            silver_path = self._storage.get_table_path(silver_table)
-            silver_input = SilverMetadataInput(
-                table_path=str(silver_path),
-                primary_keys=list(self._config.table.primary_keys),
-                mode=self._config.table.silver_write_mode,
-                total_records=stats.get("records_silver"),
-                source_batch_ids=stats.get("source_batch_ids"),
-                dq_report_path=(
-                    str(dq_reports.silver_report_path)
-                    if dq_reports and dq_reports.silver_report_path
-                    else None
-                ),
-                started_at=self._context.started_at,
-                completed_at=datetime.now(UTC),
-            )
-            if self._metadata_coordinator:
-                silver_metadata = self._metadata_coordinator.create_silver_metadata(
-                    silver_input
-                )
-                if self._metadata_writer:
-                    await self._metadata_writer.write_silver_metadata(
-                        str(silver_path),
-                        silver_metadata,
-                        provider=self._config.provider,
-                        entity=self._config.entity_type,
-                    )
+        await self._write_layer_metadata(stats, dq_reports)
 
-        # 2. Write final Gold metadata
+    async def _write_layer_metadata(
+        self,
+        stats: dict[str, Any],
+        dq_reports: DQReportResult | None,
+    ) -> None:
+        """Write final metadata for both layers."""
+        await self._write_silver_final_metadata(stats, dq_reports)
+        await self._write_gold_final_metadata(stats)
+
+    async def _write_silver_final_metadata(
+        self,
+        stats: dict[str, Any],
+        dq_reports: DQReportResult | None,
+    ) -> None:
+        """Write final aggregated metadata for Silver layer."""
+        from datetime import UTC, datetime
+
+        from bioetl.domain.ports import SilverMetadataInput
+
+        silver_table = self._config.table.silver_table
+        if not silver_table:
+            return
+
+        silver_path = self._storage.get_table_path(silver_table)
+        silver_input = SilverMetadataInput(
+            table_path=str(silver_path),
+            primary_keys=list(self._config.table.primary_keys),
+            mode=self._config.table.silver_write_mode,
+            total_records=stats.get("records_silver"),
+            source_batch_ids=stats.get("source_batch_ids"),
+            dq_report_path=(
+                str(dq_reports.silver_report_path)
+                if dq_reports and dq_reports.silver_report_path
+                else None
+            ),
+            started_at=self._context.started_at,
+            completed_at=datetime.now(UTC),
+        )
+
+        if self._metadata_coordinator:
+            silver_metadata = self._metadata_coordinator.create_silver_metadata(
+                silver_input
+            )
+            if self._metadata_writer:
+                await self._metadata_writer.write_silver_metadata(
+                    str(silver_path),
+                    silver_metadata,
+                    provider=self._config.provider,
+                    entity=self._config.entity_type,
+                )
+
+    async def _write_gold_final_metadata(
+        self,
+        stats: dict[str, Any],
+    ) -> None:
+        """Write final aggregated metadata for Gold layer."""
+        from datetime import UTC, datetime
+
+        from bioetl.domain.ports import GoldMetadataInput
+
         gold_table = self._config.table.gold_table
         # Check if gold schema exists, assuming it's available in config
         gold_schema = getattr(self._config, "gold_schema", None)
 
-        if gold_table and gold_schema:
-            gold_path = self._storage.get_table_path(gold_table)
-            gold_input = GoldMetadataInput(
-                table_path=str(gold_path),
-                table_name=gold_table,
-                mode=self._config.table.gold_write_mode,
-                total_records=stats.get("records_gold"),
-                completed_at=datetime.now(UTC),
-                gold_schema=gold_schema,
+        if not (gold_table and gold_schema):
+            return
+
+        gold_path = self._storage.get_table_path(gold_table)
+        gold_input = GoldMetadataInput(
+            table_path=str(gold_path),
+            table_name=gold_table,
+            mode=self._config.table.gold_write_mode,
+            total_records=stats.get("records_gold"),
+            completed_at=datetime.now(UTC),
+            gold_schema=gold_schema,
+        )
+
+        if self._metadata_coordinator:
+            gold_metadata = self._metadata_coordinator.create_gold_metadata(
+                gold_input
             )
-            if self._metadata_coordinator:
-                gold_metadata = self._metadata_coordinator.create_gold_metadata(
-                    gold_input
+            if self._metadata_writer:
+                await self._metadata_writer.write_gold_metadata(
+                    str(gold_path),
+                    gold_metadata,
+                    provider=self._config.provider,
+                    entity=self._config.entity_type,
                 )
-                if self._metadata_writer:
-                    await self._metadata_writer.write_gold_metadata(
-                        str(gold_path),
-                        gold_metadata,
-                        provider=self._config.provider,
-                        entity=self._config.entity_type,
-                    )
 
     def _collect_batch_metrics(self, executor: ExecutorMetricsPort) -> dict[str, float]:
         """Collect batch metrics from executor.
