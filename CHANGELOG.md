@@ -39,6 +39,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Documentation Metrics Sync**: Updated observability contract (v2.0.0), metrics-monitoring guide, ADR-007, ADR-017 to reflect all 47 registered metrics and corrected labels
 
+- **Composite Gold Schema Fix**: Removed phantom lineage fields from composite Gold schemas that don't exist in corresponding Silver tables (CSV-filter pipelines, not enricher-mode):
+  - `CompositeMoleculeGoldSchema`: removed `_source` (molecule Silver has no `_source`)
+  - `CompositeActivityGoldSchema`, `CompositeAssayGoldSchema`, `CompositeTargetGoldSchema`: removed `_source`, `_lookup_method`, `_original_id`
+  - `CompositePublicationGoldSchema`: unchanged (publication Silver **does** have these fields)
+  - Updated JSON contracts (`docs/04-reference/contracts/gold/composite_*.json`), schema configs (`configs/schemas/composite/*.yaml`), and filter config comments
+  - File: `src/bioetl/domain/contracts/gold/composite.py`
+
+- **dev_setup.sh Fixes**: Added `--group dev` to `uv sync` for dependency-groups support, fixed `import ruff`/`import mypy` checks (ruff has no Python module), bumped RULES.md reference to v5.21
+
+- **Health Aggregator Test Fix**: Fixed `test_records_duration_histogram` — test expected 2 `observe_histogram` calls but code only emits histogram for data_source with `check_health()` method (storage uses legacy `health_check()` returning HealthStatus)
+  - File: `tests/unit/application/core/test_health_aggregator.py`
+
+- **Documentation Full Sync**: Synchronized ~60 documentation files with current code state (RULES.md v5.21, composite schema changes, metric counts, ADR count)
+
 ## [6.0.0] - 2026-02-18
 
 ### Added

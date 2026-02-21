@@ -14,6 +14,11 @@
       "args": ["-y", "@modelcontextprotocol/server-memory"],
       "env": { "MEMORY_FILE_PATH": "E:/g-drive/05_AI/github/BioactivityDataAcquisition2/.ai/mcp/memory/memory.json" }
     },
+    "neo4j-memory": {
+      "command": "python",
+      "args": [".ai/mcp/neo4j-memory/server.py"],
+      "env": { "MEMORY_FILE_PATH": ".ai/mcp/neo4j-memory/memory.json" }
+    },
     "fetch": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-fetch"]

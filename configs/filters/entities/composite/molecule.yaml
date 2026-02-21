@@ -124,7 +124,6 @@ gold_filters:
 #   - _lineage_created_at (not null, ISO timestamp)
 #
 # Optional seed fields:
-#   - _source (nullable)
 #   - _source_batch_id (nullable)
 #
 # Business fields use qualified names:

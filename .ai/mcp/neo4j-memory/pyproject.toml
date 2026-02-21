@@ -1,0 +1,80 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mcp-neo4j-memory"
+version = "1.0.0"
+description = "Model Context Protocol server for Neo4j memory management and optimization"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    { name = "BioETL", email = "bioetl@example.com" },
+]
+license = { text = "MIT" }
+keywords = ["mcp", "neo4j", "memory", "optimization", "graph-database"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Database",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+dependencies = [
+    "fastmcp>=2.0.0",
+    "neo4j>=5.26.0",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "pytest-cov>=4.0",
+    "mypy>=1.10",
+    "ruff>=0.4",
+    "black>=24.0",
+]
+
+[project.scripts]
+mcp-neo4j-memory = "mcp_neo4j_memory.main:main_entry"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mcp_neo4j_memory"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+asyncio_mode = "auto"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+
+[[tool.mypy.overrides]]
+module = ["neo4j.*", "fastmcp.*"]
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "C4", "UP", "ARG", "SIM"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["mcp_neo4j_memory"]
+
+[tool.black]
+line-length = 88
+target-version = ["py311"]

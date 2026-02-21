@@ -1,6 +1,6 @@
 # BioETL: Правила Проекта
 
-*Версия: 5.20 (JSON Field Typing Policy), 2026-02-17*
+*Версия: 5.21 (Deduplication Policy Implementation), 2026-02-21*
 
 ## Введение (Quick Reference)
 

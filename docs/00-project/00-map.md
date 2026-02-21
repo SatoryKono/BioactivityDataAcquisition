@@ -1,6 +1,6 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.20 | Last updated: 2026-02-17*
+*Synced with RULES.md v5.21 | Last updated: 2026-02-21*
 
 > **Documentation Update:** 2026-02-17
 > - Codebase metrics updated: 1,120 Python files (534 src + 586 tests), ~116,120 src LOC
@@ -44,7 +44,7 @@ docs/
 ├── 00-project/                  # Project rules & governance
 │   ├── 00-map.md                # This file (Project Navigator)
 │   ├── index.md                 # Welcome page
-│   ├── RULES.md                 # Canonical rules document (v5.20)
+│   ├── RULES.md                 # Canonical rules document (v5.21)
 │   ├── glossary.md              # Ubiquitous Language terminology
 │   ├── TOOLS.md                 # Tools & Setup
 │   ├── rules-summary.md         # TL;DR of RULES.md
@@ -351,12 +351,12 @@ graph TD
 
 | Document                 | Last Updated | Status                       |
 |--------------------------|--------------|------------------------------|
-| RULES.md                 | 2026-02-17   | v5.20 (Latest)               |
-| REQUIREMENTS.md          | 2026-02-04   | v1.5 (Local-Only sync)       |
+| RULES.md                 | 2026-02-21   | v5.21 (Latest)               |
+| REQUIREMENTS.md          | 2026-02-21   | v1.5 (Local-Only sync)       |
 | glossary.md              | 2026-02-06   | v2.5 (Ubiquitous Language)   |
-| 00-map.md                | 2026-02-17   | v7.3 Audit remediation       |
-| rules-summary.md         | 2026-02-17   | v5.20 Synced                 |
-| TOOLS.md                 | 2026-02-17   | v2.1 Synced with RULES v5.20 |
+| 00-map.md                | 2026-02-21   | v7.3 Audit remediation       |
+| rules-summary.md         | 2026-02-21   | v5.21 Synced                 |
+| TOOLS.md                 | 2026-02-21   | v2.1 Synced with RULES v5.21 |
 | 03-guides/               | 2026-01-20   | Consolidated (16 guides)     |
 | 03-development/          | 2026-01-26   | Config schema guidelines     |
 | ADR-001..034             | 2026-02-17   | All 34 ADRs documented       |
@@ -367,4 +367,4 @@ graph TD
 
 ---
 
-*Last updated: 2026-02-17. Audit remediation (P0+P1) applied.*
+*Last updated: 2026-02-21. Audit remediation (P0+P1) applied.*
