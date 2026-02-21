@@ -1,5 +1,6 @@
 # Tracked files allowed at repository root.
 # Any new root-level tracked file must be explicitly reviewed and added here.
+.dockerignore
 .editorconfig
 .env.example
 .gitattributes
@@ -10,12 +11,15 @@
 .pre-commit-config.yaml
 .secrets.baseline
 CHANGELOG.md
+Dockerfile
 LICENSE
 Makefile
 README.md
 commitlint.config.js
 dev_setup.sh
 docker-compose.monitoring.yml
+docker-compose.yml
+entrypoint.sh
 mkdocs.yml
 pyproject.toml
 requirements.txt
