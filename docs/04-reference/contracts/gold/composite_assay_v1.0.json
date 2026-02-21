@@ -53,30 +53,6 @@
       "nullable": false,
       "description": ""
     },
-    "_source": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "_lookup_method": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "_original_id": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
     "_composite_run_id": {
       "type": "string",
       "nullable": false,

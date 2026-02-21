@@ -404,7 +404,7 @@ All import boundary checks passed with **zero violations**:
 | 7 | Logging & Observability | 8% | 10 | 0.80 | UnifiedLogger, Prometheus, OpenTelemetry, 335 run-id occurrences |
 | 8 | Testing | 8% | 10 | 0.80 | 90.21% coverage (12,186 tests), 571 test files, ruff + mypy clean |
 | 9 | Security & Secrets | 8% | 10 | 0.80 | SecretStr, PII hashing with salt rotation, bandit + detect-secrets |
-| 10 | Documentation | 7% | 10 | 0.70 | 38 ADRs, active CHANGELOG, Gold contracts, RULES.md v5.20 |
+| 10 | Documentation | 7% | 10 | 0.70 | 38 ADRs, active CHANGELOG, Gold contracts, RULES.md v5.21 |
 | **Total** | | **100%** | | **9.90** | |
 
 ### 3.2. Interpretation

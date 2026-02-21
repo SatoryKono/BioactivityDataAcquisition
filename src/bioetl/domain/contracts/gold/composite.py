@@ -199,8 +199,8 @@ class CompositeMoleculeGoldSchema(pa.DataFrameModel):
     ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
     index: Series[int] = pa.Field(nullable=False, alias="_index")
 
-    # Source tracking (from seed)
-    source: Series[str] = pa.Field(nullable=True, alias="_source")
+    # Note: _source is NOT present in chembl_molecule Silver (CSV-filter pipeline,
+    # not enricher-mode). Provenance is tracked via _source_providers instead.
 
     # =========================================================================
     # Composite Lineage Metadata (added by MergeService)
@@ -273,9 +273,10 @@ class CompositeActivityGoldSchema(pa.DataFrameModel):
     source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
     ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
     index: Series[int] = pa.Field(nullable=False, alias="_index")
-    source: Series[str] = pa.Field(nullable=True, alias="_source")
-    lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
-    original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
+
+    # Note: _source, _lookup_method, _original_id are NOT present in
+    # chembl_activity Silver (CSV-filter pipeline, not enricher-mode).
+    # Provenance is tracked via _source_providers instead.
 
     composite_run_id: Series[str] = pa.Field(nullable=False, alias="_composite_run_id")
     source_providers: Series[str] = pa.Field(nullable=False, alias="_source_providers")
@@ -311,9 +312,10 @@ class CompositeAssayGoldSchema(pa.DataFrameModel):
     source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
     ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
     index: Series[int] = pa.Field(nullable=False, alias="_index")
-    source: Series[str] = pa.Field(nullable=True, alias="_source")
-    lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
-    original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
+
+    # Note: _source, _lookup_method, _original_id are NOT present in
+    # chembl_assay Silver (CSV-filter pipeline, not enricher-mode).
+    # Provenance is tracked via _source_providers instead.
 
     composite_run_id: Series[str] = pa.Field(nullable=False, alias="_composite_run_id")
     source_providers: Series[str] = pa.Field(nullable=False, alias="_source_providers")
@@ -350,9 +352,10 @@ class CompositeTargetGoldSchema(pa.DataFrameModel):
     source_batch_id: Series[str] = pa.Field(nullable=True, alias="_source_batch_id")
     ingestion_ts: Series[str] = pa.Field(nullable=False, alias="_ingestion_ts")
     index: Series[int] = pa.Field(nullable=False, alias="_index")
-    source: Series[str] = pa.Field(nullable=True, alias="_source")
-    lookup_method: Series[str] = pa.Field(nullable=True, alias="_lookup_method")
-    original_id: Series[str] = pa.Field(nullable=True, alias="_original_id")
+
+    # Note: _source, _lookup_method, _original_id are NOT present in
+    # chembl_target Silver (CSV-filter pipeline, not enricher-mode).
+    # Provenance is tracked via _source_providers instead.
 
     composite_run_id: Series[str] = pa.Field(nullable=False, alias="_composite_run_id")
     source_providers: Series[str] = pa.Field(nullable=False, alias="_source_providers")
