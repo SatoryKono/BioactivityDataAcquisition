@@ -25,4 +25,5 @@ def load_pipeline_contract_policy(provider: str, entity: str) -> PipelineContrac
     with open(path, encoding="utf-8") as f:
         raw: dict[str, Any] = yaml.safe_load(f) or {}
 
-    return PipelineContractPolicy.model_validate(raw)
+    result: PipelineContractPolicy = PipelineContractPolicy.model_validate(raw)
+    return result

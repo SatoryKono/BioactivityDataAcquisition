@@ -20,7 +20,7 @@ class PipelineContractPolicy(BaseModel):
     hash_exclude: list[str] = Field(default_factory=list)
     rename_map: dict[str, str] = Field(default_factory=dict)
 
-    @model_validator(mode="after")
+    @model_validator(mode="after")  # type: ignore[misc,untyped-decorator]
     def validate_merge_keys_subset(self) -> PipelineContractPolicy:
         """Ensure merge_keys is not disjoint from primary key definition."""
         pk_set = set(self.primary_key)
