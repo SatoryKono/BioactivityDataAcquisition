@@ -7,7 +7,7 @@
 #   ./dev_setup.sh --quick  # Только установка зависимостей (без тестов)
 #   ./dev_setup.sh --help   # Справка
 #
-# Синхронизировано с RULES.md v5.19 (2026-02-16)
+# Синхронизировано с RULES.md v5.20 (2026-02-17)
 # ==============================================================================
 
 set -euo pipefail
@@ -278,7 +278,7 @@ step_install_dependencies() {
 
     if [[ "$HAS_UV" == true ]]; then
         print_step "Установка зависимостей с помощью uv (рекомендуется)..."
-        uv sync --extra dev --extra tests --extra tracing --extra performance --extra export
+        uv sync --group dev --extra dev --extra tests --extra tracing --extra performance --extra export
         print_success "Зависимости установлены через uv"
     else
         VENV_PYTHON=$(resolve_venv_python) || {
@@ -368,10 +368,9 @@ print(f'pandas {pandas.__version__}, pandera {pandera.__version__}, deltalake {d
 
     # Проверяем dev-зависимости
     print_step "Проверка dev-зависимостей (ruff, mypy, pytest)..."
-    if "$VENV_PYTHON" -c "
-import ruff, mypy, pytest
-print(f'ruff {ruff.__version__}, mypy {mypy.__version__}, pytest {pytest.__version__}')
-" 2>/dev/null; then
+    if "$VENV_PYTHON" -c "import pytest; print(f'pytest {pytest.__version__}')" 2>/dev/null \
+       && "$VENV_PYTHON" -m ruff version 2>/dev/null \
+       && "$VENV_PYTHON" -m mypy --version 2>/dev/null; then
         print_success "Dev-зависимости доступны"
     else
         print_warning "Некоторые dev-зависимости не найдены (не критично для runtime)"
@@ -462,7 +461,7 @@ ${GREEN}Следующие шаги:${NC}
 
 3. Изучите документацию:
    - ${YELLOW}docs/00-project/agents/AGENT.md${NC}  — Инструкции для разработчика
-   - ${YELLOW}docs/00-project/RULES.md${NC}         — Конституция проекта (v5.19)
+   - ${YELLOW}docs/00-project/RULES.md${NC}         — Конституция проекта (v5.20)
    - ${YELLOW}docs/00-project/agents/CLAUDE.md${NC} — Справочник для Claude Code
 
 4. Основные команды:
@@ -485,7 +484,7 @@ ${GREEN}Следующие шаги:${NC}
 
 3. Изучите документацию:
    - ${YELLOW}docs/00-project/agents/AGENT.md${NC}  — Инструкции для разработчика
-   - ${YELLOW}docs/00-project/RULES.md${NC}         — Конституция проекта (v5.19)
+   - ${YELLOW}docs/00-project/RULES.md${NC}         — Конституция проекта (v5.20)
    - ${YELLOW}docs/00-project/agents/CLAUDE.md${NC} — Справочник для Claude Code
 
 4. Основные команды:
