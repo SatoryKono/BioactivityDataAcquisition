@@ -569,7 +569,7 @@ The following 34 diagrams already exist and are explicitly excluded:
 | 456 | Run ID Correlation Across All Observability Channels | flowchart | run-id (UUID) → bound to logger → included in metrics labels → set as trace attribute → correlates logs, metrics, traces |
 | 457 | Dataset Label in Metrics and Logs | flowchart | Pipeline may write to multiple tables → dataset label (e.g., chembl/activity) → added to every metric and log entry |
 | 458 | Provider Health Metric — provider-health-status Gauge | flowchart | 0=UNHEALTHY, 1=DEGRADED, 2=HEALTHY → set per provider → monitored for alerting → if stuck at 0 for >10min → P2 alert |
-| 459 | Circuit Breaker Metric — State and Trip Count | flowchart | circuit-breaker-state{provider} gauge (0/1/2) + trips-total{provider} counter → alert if Open >10min |
+| 459 | Circuit Breaker Metric — State and Trip Count | flowchart | circuit-breaker-state{adapter} gauge (0/1/2) + trips-total{adapter} counter → alert if Open >10min |
 | 460 | Graceful Degradation for Observability Failures | flowchart | Metrics server fails to start → log warning → continue pipeline → metrics data lost but pipeline runs normally |
 
 ## ErrorHandling (461–480)
