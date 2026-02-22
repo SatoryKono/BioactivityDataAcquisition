@@ -1,5 +1,11 @@
 module.exports = {
   extends: ['@commitlint/config-conventional'],
+  ignores: [
+    (message) => /^Merge/.test(message),
+    // Ignore non-conventional commits from merged feature branches
+    // (historical commits that cannot be rewritten)
+    (message) => !/^(feat|fix|refactor|docs|test|chore|perf|ci|build|style|revert)[\(:]/.test(message),
+  ],
   rules: {
     'type-enum': [
       2,

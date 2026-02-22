@@ -24,6 +24,7 @@ from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_tldr,
 )
 from bioetl.domain.entities.semanticscholar import SemanticScholarPublicationEntity
+from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
 from bioetl.domain.value_objects import DOI, PublicationYear, PubMedId
 
 if TYPE_CHECKING:
@@ -247,7 +248,9 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             "subject_fields": self.serialize_json(
                 extract_fields_of_study(rec.get("fieldsOfStudy"))
             ),
-            "publication_type": self._resolve_publication_type(publication_types),
+            "publication_type": normalize_publication_type(
+                self._resolve_publication_type(publication_types)
+            ),
             **self._classify_publication_type(
                 "semanticscholar",
                 raw_types_list=[

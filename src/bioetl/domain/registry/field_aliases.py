@@ -1,156 +1,235 @@
 """Canonical field alias registry for cross-provider field unification.
 
-Maps provider-specific field names to canonical names used in Gold/composite
-layer.  Silver schemas retain provider-native names for auditability;
-renaming happens in the composite merger via ``ColumnRenamer``.
+Provides a single source of truth for mapping provider-specific field names
+to canonical names used in Gold schemas and composite pipeline merge.
 
-RF-NORM-01: Normalization Unification Plan.
+Problem:
+    Different providers use different names for the same property:
+    - ChEMBL: ``hba_count``, PubChem: ``h_bond_acceptor_count``
+    - ChEMBL: ``polar_surface_area``, PubChem: ``tpsa``
 
-Usage::
+    Without normalization, the composite merger cannot group these fields
+    for conflict resolution or priority-based selection.
 
-    from bioetl.domain.registry.field_aliases import (
-        get_canonical_name,
-        get_provider_name,
-        MOLECULE_FIELD_ALIASES,
-    )
+Solution:
+    This registry defines canonical names and maps each provider's field
+    name to its canonical equivalent. The ``ColumnRenamer`` uses this
+    mapping during the rename step so that columns from different providers
+    share the same field name in qualified format:
 
-    # PubChem field → canonical
-    canonical = get_canonical_name("pubchem", "h_bond_acceptor_count")
-    assert canonical == "hba_count"
+    - ``pubchem.compound.hba_count`` (not ``pubchem.compound.h_bond_acceptor_count``)
+    - ``chembl.molecule.hba_count``
 
-    # canonical → PubChem field
-    provider = get_provider_name("pubchem", "hba_count")
-    assert provider == "h_bond_acceptor_count"
+Requirements:
+    - REQ-ARCH-003: No I/O in domain layer (immutable data only)
+
+See Also:
+    - ``application/composite/column_renamer.py``: Consumer of alias maps
+    - ``configs/pipelines/composite/molecule.yaml``: YAML field_aliases section
+    - ``domain/mapping/molecule_fields.py``: Legacy flat mapping (to be superseded)
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Final
 
 
 @dataclass(frozen=True, slots=True)
 class FieldAlias:
-    """Mapping between a canonical field name and provider-specific names.
+    """Immutable mapping from canonical field name to provider-specific aliases.
 
     Attributes:
-        canonical_name: Unified name used in Gold / composite schemas.
-        provider_aliases: ``{provider: provider_field_name}`` mapping.
-            Providers whose native name equals the canonical name MAY be
-            omitted (they are resolved automatically).
+        canonical_name: The canonical field name used in Gold schemas
+            and composite merge configuration.
+        provider_aliases: Mapping of ``{provider: provider_field_name}``.
+            Providers whose field name already matches the canonical name
+            may be omitted or included explicitly for documentation.
         description: Human-readable description of the field.
+
+    Example:
+        >>> alias = FieldAlias(
+        ...     canonical_name="hba_count",
+        ...     provider_aliases={"chembl": "hba_count", "pubchem": "h_bond_acceptor_count"},
+        ...     description="Hydrogen bond acceptor count",
+        ... )
+        >>> alias.get_provider_field("pubchem")
+        'h_bond_acceptor_count'
+        >>> alias.get_provider_field("chembl")
+        'hba_count'
     """
 
     canonical_name: str
     provider_aliases: dict[str, str]
     description: str
 
+    def get_provider_field(self, provider: str) -> str:
+        """Get the provider-specific field name.
 
-# ============================================================================
-# Molecule / Compound field aliases (ChEMBL ↔ PubChem)
-# ============================================================================
+        Args:
+            provider: Provider name (e.g., ``'chembl'``, ``'pubchem'``).
 
-MOLECULE_FIELD_ALIASES: tuple[FieldAlias, ...] = (
+        Returns:
+            Provider-specific field name, or canonical_name if provider
+            is not in the alias map.
+        """
+        return self.provider_aliases.get(provider, self.canonical_name)
+
+
+# =============================================================================
+# Molecule Field Alias Registry
+# =============================================================================
+# Canonical names follow ChEMBL conventions where possible (shorter, established).
+
+MOLECULE_FIELD_ALIASES: Final[tuple[FieldAlias, ...]] = (
     FieldAlias(
         canonical_name="hba_count",
-        provider_aliases={"pubchem": "h_bond_acceptor_count"},
+        provider_aliases={
+            "chembl": "hba_count",
+            "pubchem": "h_bond_acceptor_count",
+        },
         description="Hydrogen bond acceptor count",
     ),
     FieldAlias(
         canonical_name="hbd_count",
-        provider_aliases={"pubchem": "h_bond_donor_count"},
+        provider_aliases={
+            "chembl": "hbd_count",
+            "pubchem": "h_bond_donor_count",
+        },
         description="Hydrogen bond donor count",
     ),
     FieldAlias(
         canonical_name="polar_surface_area",
-        provider_aliases={"pubchem": "tpsa"},
-        description="Topological polar surface area (Å²)",
+        provider_aliases={
+            "chembl": "polar_surface_area",
+            "pubchem": "tpsa",
+        },
+        description="Topological polar surface area",
     ),
     FieldAlias(
         canonical_name="logp",
-        provider_aliases={"pubchem": "xlogp"},
+        provider_aliases={
+            "chembl": "logp",
+            "pubchem": "xlogp",
+        },
         description="Octanol-water partition coefficient",
     ),
     FieldAlias(
         canonical_name="standard_inchi",
-        provider_aliases={"pubchem": "inchi"},
+        provider_aliases={
+            "chembl": "standard_inchi",
+            "pubchem": "inchi",
+        },
         description="Standard IUPAC InChI identifier",
     ),
 )
 
 
-# ============================================================================
-# Lookup helpers
-# ============================================================================
-
-# Pre-built indices for O(1) lookups.
-# ``_PROVIDER_TO_CANONICAL[provider][provider_field] → canonical_name``
-_PROVIDER_TO_CANONICAL: dict[str, dict[str, str]] = {}
-# ``_CANONICAL_TO_PROVIDER[provider][canonical_name] → provider_field``
-_CANONICAL_TO_PROVIDER: dict[str, dict[str, str]] = {}
+# =============================================================================
+# Indexed Lookups
+# =============================================================================
 
 
-def _build_indices() -> None:
-    """Populate lookup indices from all alias tuples."""
-    for alias in MOLECULE_FIELD_ALIASES:
+def _build_provider_alias_index(
+    aliases: tuple[FieldAlias, ...],
+) -> dict[str, dict[str, str]]:
+    """Build reverse index: provider -> {provider_field: canonical_name}.
+
+    For each provider, creates a mapping from provider-specific field names
+    to canonical names. Only includes entries where the provider field name
+    differs from the canonical name (identity mappings are excluded since
+    they don't need renaming).
+
+    Args:
+        aliases: Tuple of FieldAlias definitions.
+
+    Returns:
+        Nested dict keyed by provider, then by provider-specific field name.
+    """
+    index: dict[str, dict[str, str]] = {}
+    for alias in aliases:
         for provider, provider_field in alias.provider_aliases.items():
-            _PROVIDER_TO_CANONICAL.setdefault(provider, {})[provider_field] = (
-                alias.canonical_name
-            )
-            _CANONICAL_TO_PROVIDER.setdefault(provider, {})[alias.canonical_name] = (
-                provider_field
-            )
+            if provider_field != alias.canonical_name:
+                if provider not in index:
+                    index[provider] = {}
+                index[provider][provider_field] = alias.canonical_name
+    return index
 
 
-_build_indices()
+_MOLECULE_ALIAS_INDEX: Final[dict[str, dict[str, str]]] = _build_provider_alias_index(
+    MOLECULE_FIELD_ALIASES
+)
 
 
 def get_canonical_name(provider: str, field_name: str) -> str:
-    """Return canonical name for a provider-specific field.
+    """Get the canonical field name for a provider-specific field.
 
-    If the field is not aliased, the original *field_name* is returned
-    unchanged (identity mapping).
-
-    Args:
-        provider: Provider identifier (e.g. ``"pubchem"``).
-        field_name: Provider-native field name.
-
-    Returns:
-        Canonical field name.
-    """
-    return _PROVIDER_TO_CANONICAL.get(provider, {}).get(field_name, field_name)
-
-
-def get_provider_name(provider: str, canonical_name: str) -> str:
-    """Return provider-specific name for a canonical field.
-
-    If no alias exists, the *canonical_name* is returned unchanged.
+    If the field has a known alias for the given provider, returns the
+    canonical name. Otherwise returns the field_name unchanged.
 
     Args:
-        provider: Provider identifier.
-        canonical_name: Canonical (Gold-layer) field name.
+        provider: Provider name (e.g., ``'pubchem'``).
+        field_name: Provider-specific field name (e.g., ``'h_bond_acceptor_count'``).
 
     Returns:
-        Provider-native field name.
+        Canonical field name (e.g., ``'hba_count'``).
+
+    Example:
+        >>> get_canonical_name("pubchem", "h_bond_acceptor_count")
+        'hba_count'
+        >>> get_canonical_name("pubchem", "molecular_weight")
+        'molecular_weight'
+        >>> get_canonical_name("chembl", "hba_count")
+        'hba_count'
     """
-    return _CANONICAL_TO_PROVIDER.get(provider, {}).get(canonical_name, canonical_name)
+    provider_map = _MOLECULE_ALIAS_INDEX.get(provider, {})
+    return provider_map.get(field_name, field_name)
 
 
-def get_all_aliases_for_provider(provider: str) -> dict[str, str]:
-    """Return all ``{provider_field: canonical_name}`` mappings for a provider.
+def get_alias_map_for_provider(provider: str) -> dict[str, str]:
+    """Get the full alias map for a provider.
+
+    Returns a mapping of ``{provider_field: canonical_field}`` for fields
+    where the provider uses a non-canonical name. Fields that already use
+    the canonical name are not included.
 
     Args:
-        provider: Provider identifier.
+        provider: Provider name (e.g., ``'pubchem'``).
 
     Returns:
-        Dictionary of provider-field → canonical-name mappings.
+        Dict mapping provider-specific field names to canonical names.
+        Empty dict if provider has no aliases.
+
+    Example:
+        >>> get_alias_map_for_provider("pubchem")
+        {'h_bond_acceptor_count': 'hba_count', 'h_bond_donor_count': 'hbd_count', ...}
+        >>> get_alias_map_for_provider("chembl")
+        {}
     """
-    return dict(_PROVIDER_TO_CANONICAL.get(provider, {}))
+    return dict(_MOLECULE_ALIAS_INDEX.get(provider, {}))
 
 
-__all__ = [
-    "MOLECULE_FIELD_ALIASES",
-    "FieldAlias",
-    "get_all_aliases_for_provider",
-    "get_canonical_name",
-    "get_provider_name",
-]
+def get_provider_field(canonical_name: str, provider: str) -> str:
+    """Get the provider-specific field name for a canonical name.
+
+    Reverse lookup: given a canonical name and a provider, returns the
+    field name that provider uses.
+
+    Args:
+        canonical_name: Canonical field name (e.g., ``'hba_count'``).
+        provider: Provider name (e.g., ``'pubchem'``).
+
+    Returns:
+        Provider-specific field name. Returns canonical_name if no alias
+        is registered for the provider.
+
+    Example:
+        >>> get_provider_field("hba_count", "pubchem")
+        'h_bond_acceptor_count'
+        >>> get_provider_field("hba_count", "chembl")
+        'hba_count'
+    """
+    for alias in MOLECULE_FIELD_ALIASES:
+        if alias.canonical_name == canonical_name:
+            return alias.get_provider_field(provider)
+    return canonical_name

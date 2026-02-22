@@ -146,3 +146,102 @@ class TestColumnRenamer:
         result = renamer.rename_dataframe(df, "ChEMBL_Publication")
 
         assert "chembl.publication.title" in result.columns
+
+
+class TestColumnRenamerFieldAliases:
+    """Tests for ColumnRenamer with field alias support."""
+
+    def test_alias_normalizes_field_name(self, renamer: ColumnRenamer) -> None:
+        """Field aliases should normalize provider-specific names to canonical."""
+        df = pl.DataFrame(
+            {
+                "h_bond_acceptor_count": [5],
+                "molecular_weight": [180.0],
+            }
+        )
+        aliases = {"h_bond_acceptor_count": "hba_count"}
+        result = renamer.rename_dataframe(df, "pubchem_compound", field_aliases=aliases)
+
+        assert "pubchem.compound.hba_count" in result.columns
+        assert "pubchem.compound.molecular_weight" in result.columns
+        assert "pubchem.compound.h_bond_acceptor_count" not in result.columns
+
+    def test_alias_preserves_data_values(self, renamer: ColumnRenamer) -> None:
+        """Data should be preserved after alias-based renaming."""
+        df = pl.DataFrame(
+            {
+                "h_bond_acceptor_count": [5, 3],
+                "h_bond_donor_count": [2, 1],
+            }
+        )
+        aliases = {
+            "h_bond_acceptor_count": "hba_count",
+            "h_bond_donor_count": "hbd_count",
+        }
+        result = renamer.rename_dataframe(df, "pubchem_compound", field_aliases=aliases)
+
+        assert result["pubchem.compound.hba_count"].to_list() == [5, 3]
+        assert result["pubchem.compound.hbd_count"].to_list() == [2, 1]
+
+    def test_alias_multiple_fields(self, renamer: ColumnRenamer) -> None:
+        """Multiple field aliases should all be applied."""
+        df = pl.DataFrame(
+            {
+                "h_bond_acceptor_count": [5],
+                "h_bond_donor_count": [2],
+                "tpsa": [75.0],
+                "xlogp": [1.5],
+                "inchi": ["InChI=1S/C6H12O6/..."],
+            }
+        )
+        aliases = {
+            "h_bond_acceptor_count": "hba_count",
+            "h_bond_donor_count": "hbd_count",
+            "tpsa": "polar_surface_area",
+            "xlogp": "logp",
+            "inchi": "standard_inchi",
+        }
+        result = renamer.rename_dataframe(df, "pubchem_compound", field_aliases=aliases)
+
+        assert "pubchem.compound.hba_count" in result.columns
+        assert "pubchem.compound.hbd_count" in result.columns
+        assert "pubchem.compound.polar_surface_area" in result.columns
+        assert "pubchem.compound.logp" in result.columns
+        assert "pubchem.compound.standard_inchi" in result.columns
+
+    def test_no_alias_passthrough(self, renamer: ColumnRenamer) -> None:
+        """Fields not in alias map should pass through unchanged."""
+        df = pl.DataFrame({"molecular_weight": [180.0]})
+        aliases = {"h_bond_acceptor_count": "hba_count"}  # No mapping for MW
+        result = renamer.rename_dataframe(df, "pubchem_compound", field_aliases=aliases)
+
+        assert "pubchem.compound.molecular_weight" in result.columns
+
+    def test_none_aliases_no_effect(self, renamer: ColumnRenamer) -> None:
+        """None field_aliases should behave like no aliases (backward compat)."""
+        df = pl.DataFrame({"h_bond_acceptor_count": [5]})
+        result = renamer.rename_dataframe(df, "pubchem_compound", field_aliases=None)
+
+        assert "pubchem.compound.h_bond_acceptor_count" in result.columns
+
+    def test_empty_aliases_no_effect(self, renamer: ColumnRenamer) -> None:
+        """Empty alias dict should behave like no aliases."""
+        df = pl.DataFrame({"h_bond_acceptor_count": [5]})
+        result = renamer.rename_dataframe(df, "pubchem_compound", field_aliases={})
+
+        assert "pubchem.compound.h_bond_acceptor_count" in result.columns
+
+    def test_build_rename_map_with_aliases(self, renamer: ColumnRenamer) -> None:
+        """build_rename_map should apply aliases in the mapping."""
+        columns = ["h_bond_acceptor_count", "molecular_weight", "_run_id"]
+        aliases = {"h_bond_acceptor_count": "hba_count"}
+        mapping = renamer.build_rename_map(
+            columns,
+            "pubchem_compound",
+            exclude_join_keys=True,
+            field_aliases=aliases,
+        )
+
+        assert mapping["h_bond_acceptor_count"] == "pubchem.compound.hba_count"
+        assert mapping["molecular_weight"] == "pubchem.compound.molecular_weight"
+        assert "_run_id" not in mapping
