@@ -1,48 +1,16 @@
 # configs/pipelines/chembl/assay_parameters.yaml
-# Pipeline configuration for ChEMBL AssayParameters entity.
-#
-# Inherits defaults from ../_base.yaml
-# Endpoint: /assay_parameters
+# ChEMBL Assay Parameters — inherits from _base.yaml.
+# DQ & Filters: loaded via hierarchy (ADR-027/028/029).
 
 pipeline_name: chembl_assay_parameters
 provider: chembl
 entity_type: assay_parameters
 schema_file: ../../schemas/chembl/assay_parameters.yaml
-version: "1.2.0"
 description: "Extract experimental assay parameters from ChEMBL API"
 
 business_primary_keys: ["assay_param_id"]
-technical_primary_key: "entity_id"
-silver_table: "chembl_assay_parameters"
-gold_table: "chembl_assay_parameters"
 
-
-# -----------------------------------------------------------------------------
-# Data Quality Configuration (ADR-027)
-# -----------------------------------------------------------------------------
-# DQ rules are loaded from hierarchical config files:
-#   1. configs/quality/_defaults.yaml (global defaults)
-#   2. configs/quality/providers/chembl.yaml (provider-specific)
-#   3. configs/quality/entities/chembl/assay_parameters.yaml (entity-specific)
-
-# -----------------------------------------------------------------------------
-# Filter Configuration (ADR-028)
-# -----------------------------------------------------------------------------
-# Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filters/_defaults.yaml (global defaults)
-#   2. configs/filters/providers/chembl.yaml (provider-specific)
-#   3. configs/filters/entities/chembl/assay_parameters.yaml (entity-specific)
-# Add inline overrides below only when extending/differing from entity filter config.
-
-# Entity-specific sink overrides
 sink:
-  bronze: {}
   silver:
+    # Override: partition by type for efficient type-specific queries
     partition_by: ["type"]
-  gold:
-    mode: scd2
-    scd_config:
-      valid_from: _valid_from
-      valid_to: _valid_to
-      is_current: _is_current
-      version: _version

@@ -1,49 +1,11 @@
 # configs/pipelines/chembl/compound_record.yaml
-# Pipeline configuration for ChEMBL Compound Record entity.
-#
-# Compound records link molecules to documents. Contains the original
-# compound name as it appears in the publication.
-#
-# Inherits defaults from ../_base.yaml
+# ChEMBL Compound Record — inherits all defaults from _base.yaml.
+# DQ & Filters: loaded via hierarchy (ADR-027/028/029).
 
 pipeline_name: chembl_compound_record
 provider: chembl
 entity_type: compound_record
 schema_file: ../../schemas/chembl/compound_record.yaml
-version: "1.2.0"
 description: "Extract compound records from ChEMBL API"
 
 business_primary_keys: ["record_id"]
-technical_primary_key: "entity_id"
-silver_table: "chembl_compound_record"
-gold_table: "chembl_compound_record"
-
-
-# -----------------------------------------------------------------------------
-# Data Quality Configuration (ADR-027)
-# -----------------------------------------------------------------------------
-# DQ rules are loaded from hierarchical config files:
-#   1. configs/quality/_defaults.yaml (global defaults)
-#   2. configs/quality/providers/chembl.yaml (provider-specific)
-#   3. configs/quality/entities/chembl/compound_record.yaml (entity-specific)
-
-# -----------------------------------------------------------------------------
-# Filter Configuration (ADR-028)
-# -----------------------------------------------------------------------------
-# Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filters/_defaults.yaml (global defaults)
-#   2. configs/filters/providers/chembl.yaml (provider-specific)
-#   3. configs/filters/entities/chembl/compound_record.yaml (entity-specific)
-# Add inline overrides below only when extending/differing from entity filter config.
-
-# Entity-specific sink overrides
-sink:
-  bronze: {}
-  silver: {}
-  gold:
-    mode: scd2
-    scd_config:
-      valid_from: _valid_from
-      valid_to: _valid_to
-      is_current: _is_current
-      version: _version
