@@ -66,7 +66,7 @@ class TestGoldPublicationSchemaUnifiedFields:
     @pytest.mark.parametrize(
         "schema_class,name",
         [
-            # ChEMBL excluded: publication_date not available from ChEMBL API
+            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
@@ -102,7 +102,7 @@ class TestGoldPublicationSchemaCrossRefFields:
     @pytest.mark.parametrize(
         "schema_class,name",
         [
-            # ChEMBL excluded: uses publication_doi (prefixed naming convention)
+            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
             (CrossRefPublicationGoldSchema, "CrossRef Publication"),
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
@@ -114,17 +114,10 @@ class TestGoldPublicationSchemaCrossRefFields:
         fields = get_schema_fields(schema_class)
         assert "doi" in fields, f"{name} missing doi field"
 
-    def test_chembl_schema_has_publication_doi_field(self):
-        """ChEMBL Document uses publication_doi (prefixed naming convention)."""
-        fields = get_schema_fields(ChEMBLDocumentGoldSchema)
-        assert "publication_doi" in fields, (
-            "ChEMBL Document missing publication_doi field"
-        )
-
     @pytest.mark.parametrize(
         "schema_class,name",
         [
-            # ChEMBL excluded: uses publication_pmid (prefixed naming convention)
+            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
             # CrossRef excluded: pmid explicitly excluded from transformer output
             (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
@@ -136,21 +129,14 @@ class TestGoldPublicationSchemaCrossRefFields:
         fields = get_schema_fields(schema_class)
         assert "pmid" in fields, f"{name} missing pmid field"
 
-    def test_chembl_schema_has_publication_pmid_field(self):
-        """ChEMBL Document uses publication_pmid (prefixed naming convention)."""
-        fields = get_schema_fields(ChEMBLDocumentGoldSchema)
-        assert "publication_pmid" in fields, (
-            "ChEMBL Document missing publication_pmid field"
-        )
-
     @pytest.mark.parametrize(
         "schema_class,name",
         [
-            # ChEMBL excluded: pmc_id not available from ChEMBL API
-            # CrossRef excluded: pmc_id explicitly excluded from transformer output
-            # OpenAlex excluded: pmc_id explicitly excluded from transformer output
-            # SemanticScholar excluded: pmc_id explicitly excluded from transformer output
+            (ChEMBLDocumentGoldSchema, "ChEMBL Document"),
+            (CrossRefPublicationGoldSchema, "CrossRef Publication"),
+            (OpenAlexPublicationGoldSchema, "OpenAlex Publication"),
             (PubMedPublicationGoldSchema, "PubMed Publication"),
+            (SemanticScholarPublicationGoldSchema, "SemanticScholar Publication"),
         ],
     )
     def test_schema_has_pmc_id_field(self, schema_class, name):
@@ -379,7 +365,7 @@ class TestGoldSchemaValidation:
             "pii": "S0123-4567(24)00001-X",
             "mid": "NIHMS123456",
             "publisher_id": "pub-12345",
-            "pub_date": "2024-03-15",
+            "pub_date": "2024 Mar 15",
             "pub_month": 3,
             "pub_day": 15,
             "publication_date": "2024-03-15",
@@ -433,33 +419,29 @@ class TestGoldSchemaValidation:
             "entity_id": "chembl_CHEMBL12345",
             "content_hash": "xyz789",
             "publication_id": "CHEMBL12345",
-            # Cross-reference IDs use publication_ prefix (ChEMBL naming convention)
-            "publication_doi": "10.1234/test",
-            "publication_pmid": "12345678",
-            "publication_pmc_id": None,
-            # Cross-reference IDs (raw identifiers for Silver↔Gold parity)
+            # Cross-reference IDs (unified naming, aligned with Silver)
             "doi": "10.1234/test",
-            "pmc_id": None,
             "pmid": "12345678",
-            "affiliation_list": None,
-            "author_keys": "One_A",
-            "author_orcids": None,
+            "pmc_id": None,
             "title": "Test Publication",
             "authors": '["Author One"]',
             "abstract": "Test abstract",
+            "affiliation_list": None,
+            "author_keys": None,
+            "author_orcids": None,
             "publication_type": "journal-article",
-            "publication_type_unified": "journal-article",
-            "publication_subclass": "journal",
-            "publication_class": "article",
+            "publication_type_unified": None,
+            "publication_subclass": None,
+            "publication_class": None,
+            "publication_date": None,
             "journal": "Test Journal",
             "publication_year": 2024,
-            "publication_date": None,
-            "language": None,
-            "is_oa": False,
             "volume": "10",
             "issue": "2",
             "page_first": "100",
             "page_last": "110",
+            "language": None,
+            "is_oa": None,
             "citations_received": None,
             "citations_made": None,
             "src_id": 1,
