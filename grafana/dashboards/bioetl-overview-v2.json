@@ -290,7 +290,7 @@
       },
       "targets": [
         {
-          "expr": "sum(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\"}) / sum(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"})",
+          "expr": "sum(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\"}) / clamp_min(sum(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}), 1)",
           "legendFormat": "Quality",
           "refId": "A"
         }

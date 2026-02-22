@@ -28,10 +28,10 @@
       },
       "id": 99,
       "options": {
-        "content": "<center><h2>$pipeline</h2></center>",
+        "content": "<center><h2>$provider</h2></center>",
         "mode": "html"
       },
-      "title": "Pipeline",
+      "title": "Provider",
       "type": "text"
     },
     {
@@ -43,10 +43,10 @@
       },
       "id": 100,
       "options": {
-        "content": "<center><h2>$run_type</h2></center>",
+        "content": "<center><h2>Provider Health</h2></center>",
         "mode": "html"
       },
-      "title": "Run Type",
+      "title": "Health Status",
       "type": "text"
     },
     {
@@ -111,8 +111,8 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(bioetl_adapter_request_duration_seconds_bucket{provider=~\"$pipeline\"}[5m])) by (le, provider))",
-          "legendFormat": "P95 {{provider}}",
+          "expr": "histogram_quantile(0.95, sum by (le, provider) (bioetl_health_check_latency_ms_bucket{provider=~\"$provider\"}))",
+          "legendFormat": "{{ provider }} p95",
           "refId": "A"
         }
       ],
@@ -124,34 +124,54 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "thresholds"
           },
-          "custom": {
-            "axisLabel": "Error Rate (%)",
-            "axisPlacement": "auto",
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "text": "Unknown",
+                  "color": "dark-gray",
+                  "index": 0
+                }
+              },
+              "type": "value"
             },
-            "thresholdsStyle": {
-              "mode": "off"
+            {
+              "options": {
+                "1": {
+                  "text": "Healthy",
+                  "color": "green",
+                  "index": 1
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "2": {
+                  "text": "Degraded",
+                  "color": "orange",
+                  "index": 2
+                }
+              },
+              "type": "value"
             }
-          },
-          "mappings": [],
+          ],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "dark-gray",
                 "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "orange",
+                "value": 2
               }
             ]
           }
@@ -166,28 +186,28 @@
       },
       "id": 2,
       "options": {
-        "legend": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
           "calcs": [
-            "mean",
-            "max"
+            "lastNotNull"
           ],
-          "displayMode": "table",
-          "placement": "bottom"
+          "fields": "",
+          "values": false
         },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
+        "textMode": "auto"
       },
       "targets": [
         {
-          "expr": "rate(bioetl_http_request_errors_total{provider=~\"$pipeline\"}[5m]) * 100",
-          "legendFormat": "Error Rate {{provider}}",
+          "expr": "bioetl_health_check_status",
+          "legendFormat": "{{ component }}",
           "refId": "A"
         }
       ],
-      "title": "Error Rate by Provider (Latest Run)",
-      "type": "timeseries"
+      "title": "Health Check Status",
+      "type": "stat"
     },
     {
       "datasource": "Prometheus",
@@ -220,7 +240,7 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "ms"
         },
         "overrides": []
       },
@@ -245,7 +265,7 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, rate(bioetl_adapter_request_duration_seconds_bucket{provider=\"uniprot\"}[5m]))",
+          "expr": "histogram_quantile(0.95, sum by (le) (bioetl_health_check_latency_ms_bucket{provider=\"uniprot\"}))",
           "legendFormat": "UniProt",
           "refId": "A"
         }
@@ -284,7 +304,7 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "ms"
         },
         "overrides": []
       },
@@ -309,7 +329,7 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, rate(bioetl_adapter_request_duration_seconds_bucket{provider=\"pubmed\"}[5m]))",
+          "expr": "histogram_quantile(0.95, sum by (le) (bioetl_health_check_latency_ms_bucket{provider=\"pubmed\"}))",
           "legendFormat": "PubMed",
           "refId": "A"
         }
@@ -348,7 +368,7 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "ms"
         },
         "overrides": []
       },
@@ -373,7 +393,7 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, rate(bioetl_adapter_request_duration_seconds_bucket{provider=\"pubchem\"}[5m]))",
+          "expr": "histogram_quantile(0.95, sum by (le) (bioetl_health_check_latency_ms_bucket{provider=\"pubchem\"}))",
           "legendFormat": "PubChem",
           "refId": "A"
         }
@@ -412,7 +432,7 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "ms"
         },
         "overrides": []
       },
@@ -437,7 +457,7 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, rate(bioetl_adapter_request_duration_seconds_bucket{provider=\"chembl\"}[5m]))",
+          "expr": "histogram_quantile(0.95, sum by (le) (bioetl_health_check_latency_ms_bucket{provider=\"chembl\"}))",
           "legendFormat": "ChemBL",
           "refId": "A"
         }
@@ -497,7 +517,7 @@
       },
       "targets": [
         {
-          "expr": "min(bioetl_records_processed_created{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}) * 1000",
+          "expr": "min(bioetl_health_check_latency_ms_created{provider=~\"$provider\"}) * 1000",
           "legendFormat": "Start Time",
           "refId": "A"
         }
@@ -519,56 +539,6 @@
   "templating": {
     "list": [
       {
-        "allValue": null,
-        "current": {},
-        "datasource": "Prometheus",
-        "definition": "label_values(bioetl_records_processed_total, pipeline)",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Pipeline",
-        "multi": true,
-        "name": "pipeline",
-        "options": [],
-        "query": {
-          "query": "label_values(bioetl_records_processed_total, pipeline)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 1,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {},
-        "datasource": "Prometheus",
-        "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_type)",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Run Type",
-        "multi": true,
-        "name": "run_type",
-        "options": [],
-        "query": {
-          "query": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_type)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 2,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
         "allValue": ".*",
         "current": {
           "selected": true,
@@ -576,21 +546,21 @@
           "value": "$__all"
         },
         "datasource": "Prometheus",
-        "definition": "label_values(bioetl_infrastructure_validated{pipeline=~\"$pipeline\"}, run_id)",
+        "definition": "label_values(bioetl_health_check_latency_ms_bucket, provider)",
         "hide": 0,
         "includeAll": true,
-        "label": "Execution",
-        "multi": false,
-        "name": "execution",
+        "label": "Provider",
+        "multi": true,
+        "name": "provider",
         "options": [],
         "query": {
-          "query": "label_values(bioetl_infrastructure_validated{pipeline=~\"$pipeline\"}, run_id)",
+          "query": "label_values(bioetl_health_check_latency_ms_bucket, provider)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
-        "sort": 3,
+        "sort": 1,
         "type": "query"
       }
     ]
