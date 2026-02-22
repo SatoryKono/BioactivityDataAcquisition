@@ -36,6 +36,12 @@ def get_all_valid_metric_names() -> set[str]:
                 all_valid_names.add(
                     f"{base_name}_total"
                 )  # Prometheus client often adds _total
+                all_valid_names.add(
+                    f"{base_name}_created"
+                )  # Prometheus auto-creates _created timestamp
+
+            # All metric types can have a _created suffix (OpenMetrics)
+            all_valid_names.add(f"{base_name}_created")
 
     return all_valid_names
 
@@ -82,7 +88,7 @@ def test_dashboard_metrics_contract(dashboard_path):
                 # Basic check: is this exact name or base name valid?
                 if m not in valid_metrics:
                     # Also check without common suffixes
-                    base = re.sub(r"(_total|_bucket|_sum|_count)$", "", m)
+                    base = re.sub(r"(_total|_bucket|_sum|_count|_created)$", "", m)
                     if base not in valid_metrics:
                         errors.append(
                             f"Panel '{panel.get('title')}' uses unknown metric: {m}"

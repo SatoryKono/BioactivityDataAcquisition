@@ -68,6 +68,14 @@
       "nullable": true,
       "description": ""
     },
+    "authors": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "tldr": {
       "type": [
         "string",

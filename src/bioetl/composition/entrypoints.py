@@ -24,6 +24,7 @@ from bioetl.composition._pipeline_execution import (
     build_pipeline_context,
     create_pipeline_runner,
     ensure_metrics_server_started,
+    push_metrics_to_gateway,
     run_pipeline,
 )
 from bioetl.composition._resource_management import (
@@ -98,4 +99,5 @@ __all__ = [
     # Metrics server entrypoint
     "ensure_metrics_server_started",
     "maybe_start_metrics_server",
+    "push_metrics_to_gateway",
 ]
