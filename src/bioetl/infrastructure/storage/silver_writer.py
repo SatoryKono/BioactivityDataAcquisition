@@ -1,27 +1,11 @@
 """Silver layer writer (Delta Lake with merge/upsert).
 
-Implements RULES.md §2.1.1 - Silver Layer specifications.
+Implements RULES.md §2.1.1 Silver Layer: REQ-DATA-006..008 (Delta Lake, merge/upsert,
+time travel), REQ-DELTA-001..003 (protocol version, vacuum, forensic retention),
+REQ-LINEAGE-001 (_source_batch_id).
 
-Requirements:
-- REQ-DATA-006: Delta Lake format (ACID transactions)
-- REQ-DATA-007: Merge/Upsert strategy
-- REQ-DATA-008: Time Travel support
-- REQ-DELTA-001: Protocol Version (Writer 2, Reader 1)
-- REQ-DELTA-002: VACUUM scheduler (7-day retention)
-- REQ-DELTA-003: Forensic retention (7-30 days configurable)
-- REQ-LINEAGE-001: Records contain _source_batch_id
-
-Architecture:
-- Uses deltalake (delta-rs) for Python
-- Local filesystem storage
-- Supports partitioning for query optimization
-- Implements merge/upsert based on primary keys
-- ACID guarantees for concurrent writes
-- CSV export delegated to CsvExporter (composition)
-
-Note:
-    This class was renamed from DeltaWriter to SilverWriter to follow
-    the Medallion layer naming convention (BronzeWriter, SilverWriter, GoldWriter).
+Uses deltalake (delta-rs) with local filesystem, partitioning, merge/upsert on
+primary keys, ACID writes. CSV export delegated to CsvExporter (composition).
 """
 
 from __future__ import annotations
@@ -110,35 +94,19 @@ class SilverWriter(BaseDeltaWriter):
         """Initialize Silver writer.
 
         Args:
-            base_path: Base path for Delta tables (local filesystem)
-            logger: Structured logger for observability (MUST be injected)
-            tracing: TracingPort for distributed tracing. Use NoOpTracing from
-                    composition layer if tracing is disabled. If None, NoOpTracing
-                    is used automatically (for test convenience).
-            csv_exporter: Optional CsvExporter for CSV output (None to disable)
-            write_policy: Optional WriteModePolicy for medallion layer validation.
-                If None, a default WriteModePolicy is created.
-            metrics: Optional MetricsPort for recording policy violation metrics.
-            audit: Optional AuditPort for write operation traceability.
-                  Use NoOpAudit from composition layer if audit disabled.
-            silver_validator: Optional SilverValidatorPort for Pandera validation.
-                            Use NoOpSilverValidator if validation is not required.
-            metadata_writer: Optional MetadataWriterPort for writing _metadata.yaml
-                           sidecar files. Use NoOpMetadataWriter if disabled.
-            metadata_coordinator: Optional MetadataCoordinator for centralized
-                                metadata creation. If provided, uses coordinator
-                                instead of local _write_silver_metadata() logic.
-                                Ensures consistent run_id across layers.
-            transform_version: Optional semver version of transform (e.g., '1.0.0')
-                             for lineage tracking in metadata.
-            transform_steps: Optional tuple of transform step names for lineage.
-            flat_structure: If True, Delta data written directly to base_path
-                          without table_name subdirectory.
-
-        Note:
-            LoggerPort is required per RULES.md DI requirements.
-            Lock validation is now performed at Application layer (BatchWriter)
-            per RULES.md §4.6 Safety Guard. Infrastructure writers are pure I/O.
+            base_path: Base path for Delta tables (local filesystem).
+            logger: Structured logger (MUST be injected per RULES.md).
+            tracing: Distributed tracing port (defaults to NoOpTracing).
+            csv_exporter: Optional CSV export handler (None to disable).
+            write_policy: Medallion write mode policy (defaults to WriteModePolicy()).
+            metrics: Optional metrics recording port.
+            audit: Optional audit trail port.
+            silver_validator: Optional Pandera validation port.
+            metadata_writer: Optional metadata sidecar writer port.
+            metadata_coordinator: Optional centralized metadata coordinator.
+            transform_version: Semver version for lineage tracking.
+            transform_steps: Tuple of transform step names for lineage.
+            flat_structure: Write directly to base_path (no subdirectory).
         """
         # Initialize base class (sets base_path, logger, _retention_manager, _flat_structure)
         super().__init__(base_path, logger, flat_structure=flat_structure)
