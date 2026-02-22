@@ -1,64 +1,14 @@
 # configs/pipelines/semanticscholar/publication.yaml
-# Pipeline for batch DOI resolution via Semantic Scholar with title fallback.
-#
-# Resolves DOIs from input CSV to enrich with publication metadata.
-# Falls back to title search when DOI is not found or empty.
-#
-# Inherits defaults from ../_base.yaml
+# Semantic Scholar Publication — batch DOI resolution with title fallback.
+# DQ & Filters: loaded via hierarchy (ADR-027/028/029).
 
 pipeline_name: semanticscholar_publication
 provider: semanticscholar
 entity_type: publication
 schema_file: ../../schemas/semanticscholar/publication.yaml
-version: "1.2.0"
 description: "Batch DOI resolution via Semantic Scholar with title fallback"
 
-# Loading strategy (ADR-030, ADR-031)
-# Publication entities require full scan on each run due to API offset instability.
-# Deduplication is handled on Silver layer via content_hash.
+# Override: full_scan required — API doesn't support stable incremental cursors
 loading_strategy: full_scan_only
 
 business_primary_keys: ["paper_id"]
-technical_primary_key: "entity_id"
-silver_table: "semanticscholar_publication"
-gold_table: "semanticscholar_publication"
-
-
-# -----------------------------------------------------------------------------
-# Data Quality Configuration (ADR-027)
-# -----------------------------------------------------------------------------
-# DQ rules are loaded from hierarchical config files:
-#   1. configs/quality/_defaults.yaml (global defaults)
-#   2. configs/quality/providers/semanticscholar.yaml (provider-specific)
-#   3. configs/quality/entities/semanticscholar/publication.yaml (entity-specific)
-
-# -----------------------------------------------------------------------------
-# Data Schema Configuration (Column Ordering)
-# -----------------------------------------------------------------------------
-# Use data_schema_file for layer-specific column configuration (silver/gold).
-
-# -----------------------------------------------------------------------------
-# Filter Configuration (ADR-028)
-# -----------------------------------------------------------------------------
-# Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filters/_defaults.yaml (global defaults)
-#   2. configs/filters/providers/semanticscholar.yaml (provider-specific)
-#   3. configs/filters/entities/semanticscholar/publication.yaml (entity-specific)
-# Add inline overrides below only when extending/differing from entity filter config.
-
-# Entity-specific sink configuration
-# Note: flat_structure=true means Delta data is written directly to path
-# without table_name subdirectory, matching chembl_publication pattern
-sink:
-  bronze:
-    flat_structure: true  # Path already includes provider/entity
-  silver:
-    flat_structure: true
-  gold:
-    mode: scd2
-    scd_config:
-      valid_from: _valid_from
-      valid_to: _valid_to
-      is_current: _is_current
-      version: _version
-    flat_structure: true

@@ -1,48 +1,22 @@
 # configs/pipelines/chembl/publication_similarity.yaml
-# Pipeline configuration for ChEMBL Publication Similarity entity.
-#
-# Inherits defaults from ../_base.yaml
+# ChEMBL Publication Similarity — inherits from _base.yaml.
+# DQ & Filters: loaded via hierarchy (ADR-027/028/029).
 # Note: entity_type=publication_similarity maps to ChEMBL API /document_similarity endpoint (ADR-024)
 
 pipeline_name: chembl_publication_similarity
 provider: chembl
 entity_type: publication_similarity
 schema_file: ../../schemas/chembl/publication_similarity.yaml
+# Override: v2.1.0 schema redesign after ADR-024 naming migration
 version: "2.1.0"
 description: "Extract publication similarity data (Tanimoto coefficients) from ChEMBL API"
 
-# Loading strategy (ADR-030, ADR-031)
-# Publication entities require full scan on each run due to API offset instability.
-# Deduplication is handled on Silver layer via content_hash.
+# Override: full_scan required — API doesn't support stable incremental cursors
 loading_strategy: full_scan_only
 
 business_primary_keys: ["sim_id"]
-technical_primary_key: "entity_id"
-silver_table: "chembl_publication_similarity"
-gold_table: "chembl_publication_similarity"
 
-
-# -----------------------------------------------------------------------------
-# Data Quality Configuration (ADR-027)
-# -----------------------------------------------------------------------------
-# DQ rules are loaded from hierarchical config files:
-#   1. configs/quality/_defaults.yaml (global defaults)
-#   2. configs/quality/providers/chembl.yaml (provider-specific)
-#   3. configs/quality/entities/chembl/publication_similarity.yaml (entity-specific)
-
-# -----------------------------------------------------------------------------
-# Filter Configuration (ADR-028)
-# -----------------------------------------------------------------------------
-# Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filters/_defaults.yaml (global defaults)
-#   2. configs/filters/providers/chembl.yaml (provider-specific)
-#   3. configs/filters/entities/chembl/publication_similarity.yaml (entity-specific)
-# Add inline overrides below only when extending/differing from entity filter config.
-
-# Entity-specific sink overrides
 sink:
-  bronze: {}
-  silver:
-    partition_by: []  # No good partition key
   gold:
+    # Override: similarity scores recomputed each run, no SCD tracking needed
     mode: overwrite

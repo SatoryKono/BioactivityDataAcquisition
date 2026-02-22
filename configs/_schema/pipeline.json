@@ -1,7 +1,7 @@
 {
   "$defs": {
     "ApiConfig": {
-      "description": "Configuration for API connection details.\n\nPydantic model for YAML parsing. Use `to_domain()` to convert to domain dataclass.",
+      "description": "Configuration for API connection details.",
       "properties": {
         "base_url": {
           "anyOf": [
@@ -14,30 +14,6 @@
           ],
           "default": null,
           "title": "Base Url"
-        },
-        "rate_limit": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Rate Limit"
-        },
-        "timeout": {
-          "anyOf": [
-            {
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Timeout"
         },
         "from_db": {
           "anyOf": [
@@ -375,6 +351,29 @@
       "title": "ConditionalValidationConfig",
       "type": "object"
     },
+    "ContentHashConfig": {
+      "description": "Configures include/exclude field policy for content hash generation.",
+      "properties": {
+        "include": {
+          "description": "Optional allowlist of fields included in content hash.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Include",
+          "type": "array"
+        },
+        "exclude": {
+          "description": "Optional denylist of fields excluded from content hash.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Exclude",
+          "type": "array"
+        }
+      },
+      "title": "ContentHashConfig",
+      "type": "object"
+    },
     "CrossFieldValidationConfig": {
       "description": "Configuration for cross-field validation rule.",
       "properties": {
@@ -401,6 +400,16 @@
             "custom"
           ],
           "title": "Condition",
+          "type": "string"
+        },
+        "severity": {
+          "default": "error",
+          "description": "Severity level (error or warn)",
+          "enum": [
+            "error",
+            "warn"
+          ],
+          "title": "Severity",
           "type": "string"
         },
         "trigger_field": {
@@ -654,6 +663,23 @@
           ],
           "title": "Severity",
           "type": "string"
+        },
+        "severity_enricher": {
+          "anyOf": [
+            {
+              "enum": [
+                "error",
+                "warn"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Override severity when running as enricher in composite pipeline",
+          "title": "Severity Enricher"
         },
         "min": {
           "anyOf": [
@@ -1003,43 +1029,6 @@
       "title": "ProviderSourceConfig",
       "type": "object"
     },
-    "QualityExpectations": {
-      "description": "Quality expectations for data governance.\n\nDefines target quality metrics for the data layer.\n\nAttributes:\n    completeness: Expected completeness rate (0.0-1.0).\n    accuracy: Expected accuracy rate (0.0-1.0).",
-      "properties": {
-        "completeness": {
-          "anyOf": [
-            {
-              "maximum": 1.0,
-              "minimum": 0.0,
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Expected completeness (0-1)",
-          "title": "Completeness"
-        },
-        "accuracy": {
-          "anyOf": [
-            {
-              "maximum": 1.0,
-              "minimum": 0.0,
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Expected accuracy (0-1)",
-          "title": "Accuracy"
-        }
-      },
-      "title": "QualityExpectations",
-      "type": "object"
-    },
     "RateLimitSourceConfig": {
       "description": "Rate limit configuration from source YAML.\n\nPydantic model for parsing rate_limit section from configs/sources/*.yaml.",
       "properties": {
@@ -1099,6 +1088,7 @@
       "type": "object"
     },
     "SinkLayerConfig": {
+      "additionalProperties": false,
       "description": "Configuration for a specific data layer (Bronze, Silver, Gold).",
       "properties": {
         "enabled": {
@@ -1154,29 +1144,6 @@
         "csv_export": {
           "$ref": "#/$defs/CsvExportConfig"
         },
-        "primary_key": {
-          "items": {
-            "type": "string"
-          },
-          "title": "Primary Key",
-          "type": "array"
-        },
-        "partition_by": {
-          "items": {
-            "type": "string"
-          },
-          "title": "Partition By",
-          "type": "array"
-        },
-        "sort_by": {
-          "$ref": "#/$defs/SortByConfig"
-        },
-        "deterministic": {
-          "default": true,
-          "description": "Enable deterministic write order",
-          "title": "Deterministic",
-          "type": "boolean"
-        },
         "on_schema_mismatch": {
           "default": "error",
           "description": "How to handle schema drift",
@@ -1192,275 +1159,49 @@
           "$ref": "#/$defs/SinkDQReportConfig",
           "description": "DQ report generation settings for this layer"
         },
+        "deterministic": {
+          "default": true,
+          "description": "Enable deterministic write order for Gold layer output",
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "partition_by": {
+          "description": "Columns to partition Delta tables by (Silver layer)",
+          "items": {
+            "type": "string"
+          },
+          "title": "Partition By",
+          "type": "array"
+        },
+        "scd_config": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "SCD Type 2 column mapping (valid_from, valid_to, is_current, version)",
+          "title": "Scd Config"
+        },
         "flat_structure": {
           "default": false,
           "description": "If True, Delta data written directly to path without table_name subdirectory. CSV, metadata, and DQ reports use {table_name}_* naming pattern.",
           "title": "Flat Structure",
           "type": "boolean"
-        },
-        "metadata": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/SinkMetadataConfig"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Governance metadata configuration for sidecar files. Includes owner, steward, tags, retention, SLA, and lineage info."
         }
       },
       "title": "SinkLayerConfig",
       "type": "object"
     },
-    "SinkLineageConfig": {
-      "description": "Lineage configuration within sink metadata.\n\nCaptures static lineage information for governance purposes.",
-      "properties": {
-        "source_system": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Source system identifier",
-          "title": "Source System"
-        },
-        "source_version": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Version of source system",
-          "title": "Source Version"
-        },
-        "extraction_method": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Extraction method (api, csv, parquet)",
-          "title": "Extraction Method"
-        },
-        "source_layer": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Source Medallion layer (bronze, silver)",
-          "title": "Source Layer"
-        },
-        "transformations": {
-          "description": "Transformation steps applied",
-          "items": {
-            "type": "string"
-          },
-          "title": "Transformations",
-          "type": "array"
-        },
-        "filters_applied": {
-          "anyOf": [
-            {
-              "type": "boolean"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Whether filters were applied",
-          "title": "Filters Applied"
-        },
-        "business_domain": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Business domain classification",
-          "title": "Business Domain"
-        },
-        "use_cases": {
-          "description": "Intended use cases",
-          "items": {
-            "type": "string"
-          },
-          "title": "Use Cases",
-          "type": "array"
-        }
-      },
-      "title": "SinkLineageConfig",
-      "type": "object"
-    },
-    "SinkMetadataConfig": {
-      "description": "Governance metadata configuration for sink layers.\n\nCaptures data stewardship and compliance information from pipeline YAML.\nThis is written to the _metadata.yaml sidecar file alongside execution metadata.\n\nExample YAML:\n    sink:\n      bronze:\n        save_metadata: true\n        metadata:\n          owner: \"data-team\"\n          steward: \"chembl-owner\"\n          description: \"Raw ChEMBL activity data\"\n          tags: [\"chembl\", \"activity\", \"raw\"]\n          retention_days: 90\n          sla_freshness_hours: 24\n          lineage:\n            source_system: \"chembl\"\n            extraction_method: \"api\"",
-      "properties": {
-        "owner": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Data owner team/individual",
-          "title": "Owner"
-        },
-        "steward": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Data steward",
-          "title": "Steward"
-        },
-        "description": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Human-readable data description",
-          "title": "Description"
-        },
-        "tags": {
-          "description": "Classification tags for discovery",
-          "items": {
-            "type": "string"
-          },
-          "title": "Tags",
-          "type": "array"
-        },
-        "retention_days": {
-          "anyOf": [
-            {
-              "minimum": 1,
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Data retention period in days",
-          "title": "Retention Days"
-        },
-        "sla_freshness_hours": {
-          "anyOf": [
-            {
-              "minimum": 1,
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "SLA for data freshness in hours",
-          "title": "Sla Freshness Hours"
-        },
-        "lineage": {
-          "$ref": "#/$defs/SinkLineageConfig",
-          "description": "Static lineage configuration"
-        },
-        "quality_expectations": {
-          "$ref": "#/$defs/QualityExpectations",
-          "description": "Target quality metrics"
-        },
-        "classification": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Data classification (public, internal, restricted)",
-          "title": "Classification"
-        }
-      },
-      "title": "SinkMetadataConfig",
-      "type": "object"
-    },
-    "SortByConfig": {
-      "description": "Configuration for deterministic sorting.\n\nExample YAML:\n    sort_by:\n      columns: [target_chembl_id, pref_name]\n      ascending: true",
-      "properties": {
-        "columns": {
-          "items": {
-            "type": "string"
-          },
-          "title": "Columns",
-          "type": "array"
-        },
-        "ascending": {
-          "default": true,
-          "title": "Ascending",
-          "type": "boolean"
-        }
-      },
-      "title": "SortByConfig",
-      "type": "object"
-    },
     "SourceConfig": {
-      "description": "Configuration for the data source.\n\nParses both pipeline source settings and configs/sources/*.yaml structure.\nThe `rate_limit`, `circuit_breaker`, and `provider_config` fields capture\nsettings from source configuration files that were previously ignored.",
+      "description": "Configuration for the data source.\n\nParses both pipeline source settings and configs/sources/*.yaml structure.\nThe `rate_limit`, `circuit_breaker`, and `provider_config` fields capture\nsettings from source configuration files.",
       "properties": {
-        "load_strategy": {
-          "default": "full",
-          "enum": [
-            "full",
-            "incremental"
-          ],
-          "title": "Load Strategy",
-          "type": "string"
-        },
-        "search_term": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Search Term"
-        },
         "email": {
           "anyOf": [
             {
@@ -1497,28 +1238,6 @@
         },
         "api": {
           "$ref": "#/$defs/ApiConfig"
-        },
-        "input_path": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "description": "Path to input file for file-based sources",
-          "title": "Input Path"
-        },
-        "type": {
-          "default": "api",
-          "enum": [
-            "api",
-            "file"
-          ],
-          "title": "Type",
-          "type": "string"
         },
         "batch_size": {
           "default": 100,
@@ -1569,6 +1288,7 @@
       "type": "object"
     }
   },
+  "additionalProperties": false,
   "description": "Strict schema for pipeline YAML configuration.\n\nPydantic model for YAML parsing.\n\nDQ Config Resolution:\n    The dq_config_file field references an external DQ configuration file\n    that is loaded through the DQConfigLoader hierarchy. If both dq_config_file\n    and dq_overrides are present, dq_overrides acts as inline overrides on top of\n    the file-based configuration.",
   "properties": {
     "pipeline_name": {
@@ -1620,8 +1340,23 @@
         }
       ],
       "default": null,
-      "description": "Batch size when input_filter is active. Overrides batch_size.",
+      "description": "Deprecated: use source pagination.id_batch_size instead. Batch size when input_filter is active. Overrides batch_size.",
       "title": "Filter Batch Size"
+    },
+    "page_size_override": {
+      "anyOf": [
+        {
+          "maximum": 10000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Override source pagination page_size for this pipeline. The only pagination parameter a pipeline may set. Source config defines pagination strategy and defaults.",
+      "title": "Page Size Override"
     },
     "checkpoint_interval": {
       "default": 1000,
@@ -1688,6 +1423,12 @@
       "description": "Path to column group config file relative to pipeline config.",
       "title": "Column Groups File"
     },
+    "schema_file": {
+      "description": "Required path to schema config file relative to pipeline config. Example: ../../schemas/chembl/activity.yaml",
+      "minLength": 1,
+      "title": "Schema File",
+      "type": "string"
+    },
     "data_schema_file": {
       "anyOf": [
         {
@@ -1698,24 +1439,10 @@
         }
       ],
       "default": null,
-      "description": "Path to data schema file with layer-specific columns (silver/gold).",
+      "description": "Deprecated alias for schema_file. Kept for backward compatibility.",
       "title": "Data Schema File"
     },
     "business_primary_keys": {
-      "items": {
-        "type": "string"
-      },
-      "minItems": 1,
-      "title": "Business Primary Keys",
-      "type": "array"
-    },
-    "technical_primary_key": {
-      "default": "entity_id",
-      "minLength": 1,
-      "title": "Technical Primary Key",
-      "type": "string"
-    },
-    "primary_keys": {
       "anyOf": [
         {
           "items": {
@@ -1729,11 +1456,34 @@
         }
       ],
       "default": null,
-      "description": "Deprecated alias for business_primary_keys.",
+      "title": "Business Primary Keys"
+    },
+    "technical_primary_key": {
+      "default": "entity_id",
+      "description": "Technical immutable record key in Silver (defaults to entity_id).",
+      "minLength": 1,
+      "title": "Technical Primary Key",
+      "type": "string"
+    },
+    "primary_keys": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Deprecated alias for business_primary_keys (kept for migration).",
       "title": "Primary Keys"
     },
     "silver_table": {
-      "minLength": 1,
+      "default": "",
+      "description": "Silver table name. Auto-computed as {provider}_{entity_type} if empty.",
       "title": "Silver Table",
       "type": "string"
     },
@@ -1783,6 +1533,10 @@
       "title": "Column Groups",
       "type": "array"
     },
+    "content_hash": {
+      "$ref": "#/$defs/ContentHashConfig",
+      "description": "Content-hash include/exclude rules loaded from schema config."
+    },
     "extraction_params": {
       "additionalProperties": {
         "anyOf": [
@@ -1797,7 +1551,7 @@
           }
         ]
       },
-      "description": "Server-side API query parameters for Bronze extraction (ADR-028 §3). Merged from filter config file. Keys are provider-specific query params.",
+      "description": "Server-side API query parameters for Bronze extraction (ADR-028 \u00a73). Merged from filter config file. Keys are provider-specific query params.",
       "title": "Extraction Params",
       "type": "object"
     },
@@ -1814,21 +1568,13 @@
       "default": null,
       "description": "Explicit loading strategy for the pipeline. 'full_scan_only': Each run performs full scan, checkpoint resume disabled. See ADR-031.",
       "title": "Loading Strategy"
-    },
-    "schema_file": {
-      "description": "Required path to schema config file relative to pipeline config. Example: ../../schemas/chembl/activity.yaml",
-      "minLength": 1,
-      "title": "Schema File",
-      "type": "string"
     }
   },
   "required": [
     "pipeline_name",
     "provider",
     "entity_type",
-    "business_primary_keys",
-    "schema_file",
-    "silver_table"
+    "schema_file"
   ],
   "title": "PipelineYamlConfig",
   "type": "object",
