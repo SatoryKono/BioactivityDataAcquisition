@@ -1,53 +1,16 @@
 # configs/pipelines/chembl/target.yaml
-# Pipeline configuration for ChEMBL Target entity.
-#
-# Inherits defaults from ../_base.yaml
+# ChEMBL Target — inherits from _base.yaml.
+# DQ & Filters: loaded via hierarchy (ADR-027/028/029).
 
 pipeline_name: chembl_target
 provider: chembl
 entity_type: target
 schema_file: ../../schemas/chembl/target.yaml
-version: "1.2.0"
 description: "Extract biological targets from ChEMBL API"
 
 business_primary_keys: ["target_id"]
-technical_primary_key: "entity_id"
-silver_table: "chembl_target"
-gold_table: "chembl_target"
 
-
-# -----------------------------------------------------------------------------
-# Data Quality Configuration (ADR-027)
-# -----------------------------------------------------------------------------
-# DQ rules are loaded from hierarchical config files:
-#   1. configs/quality/_defaults.yaml (global defaults)
-#   2. configs/quality/providers/chembl.yaml (provider-specific)
-#   3. configs/quality/entities/chembl/target.yaml (entity-specific)
-
-# -----------------------------------------------------------------------------
-# Filter Configuration (ADR-028)
-# -----------------------------------------------------------------------------
-# Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filters/_defaults.yaml (global defaults)
-#   2. configs/filters/providers/chembl.yaml (provider-specific)
-#   3. configs/filters/entities/chembl/target.yaml (entity-specific)
-# Add inline overrides below only when extending/differing from entity filter config.
-
-# -----------------------------------------------------------------------------
-# DQ Configuration (ADR-027)
-# -----------------------------------------------------------------------------
-# All DQ rules externalized to configs/quality/entities/chembl/target.yaml.
-# No inline overrides needed — entity config is authoritative.
-
-# Entity-specific sink overrides
 sink:
-  bronze: {}
   silver:
+    # Override: partition by target_type for efficient type-specific queries
     partition_by: ["target_type"]
-  gold:
-    mode: scd2
-    scd_config:
-      valid_from: _valid_from
-      valid_to: _valid_to
-      is_current: _is_current
-      version: _version

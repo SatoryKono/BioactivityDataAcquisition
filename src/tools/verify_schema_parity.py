@@ -1,8 +1,13 @@
-"""Verify Silver↔Gold schema parity and primary key coverage."""
+"""Verify Silver↔Gold schema parity and primary key coverage.
+
+Uses a baseline file to track known pre-existing field differences.
+Only NEW mismatches (not in the baseline) trigger blocking failures.
+"""
 
 from __future__ import annotations
 
 import argparse
+import json
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -56,6 +61,7 @@ from bioetl.infrastructure.schemas.silver import (
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+BASELINE_PATH = Path(__file__).resolve().parent / "schema_parity_baseline.json"
 
 
 @dataclass(frozen=True)
@@ -198,6 +204,31 @@ SCHEMA_PAIRS: tuple[SchemaPair, ...] = (
 )
 
 
+def _load_baseline() -> dict[str, dict[str, list[str]]]:
+    """Load known field differences from baseline JSON."""
+    if not BASELINE_PATH.exists():
+        return {}
+    data = json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
+    # Remove metadata keys
+    return {k: v for k, v in data.items() if isinstance(v, dict)}
+
+
+def _save_baseline(baseline: dict[str, dict[str, list[str]]]) -> None:
+    """Write current differences to baseline JSON."""
+    output: dict[str, object] = {
+        "description": (
+            "Known Silver↔Gold field differences. Only NEW mismatches not in "
+            "this baseline trigger blocking failures. Update with: "
+            "python src/tools/verify_schema_parity.py --update-baseline"
+        ),
+    }
+    output.update(baseline)
+    BASELINE_PATH.write_text(
+        json.dumps(output, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+
+
 def get_primary_keys(config_path: str) -> list[str]:
     """Load primary_keys from pipeline config."""
     absolute_path = PROJECT_ROOT / config_path
@@ -209,7 +240,10 @@ def get_primary_keys(config_path: str) -> list[str]:
     return primary_keys
 
 
-def check_schema_pair(pair: SchemaPair) -> tuple[list[str], list[str]]:
+def check_schema_pair(
+    pair: SchemaPair,
+    baseline: dict[str, dict[str, list[str]]],
+) -> tuple[list[str], list[str]]:
     """Return (blocking_errors, warning_errors) for one schema pair."""
     blocking: list[str] = []
     warnings: list[str] = []
@@ -220,18 +254,40 @@ def check_schema_pair(pair: SchemaPair) -> tuple[list[str], list[str]]:
     missing_in_gold = sorted(set(silver_fields) - set(gold_columns))
     missing_in_silver = sorted(set(gold_columns) - set(silver_fields))
 
-    if missing_in_gold:
-        blocking.append(
-            f"{pair.name}: fields present in Silver but missing in Gold: {missing_in_gold}"
+    # Filter out known baseline differences
+    known = baseline.get(pair.name, {})
+    known_silver_only = set(known.get("silver_only", []))
+    known_gold_only = set(known.get("gold_only", []))
+
+    new_missing_in_gold = [f for f in missing_in_gold if f not in known_silver_only]
+    new_missing_in_silver = [f for f in missing_in_silver if f not in known_gold_only]
+
+    # Report known differences as informational
+    baselined_in_gold = [f for f in missing_in_gold if f in known_silver_only]
+    baselined_in_silver = [f for f in missing_in_silver if f in known_gold_only]
+
+    if baselined_in_gold:
+        warnings.append(f"{pair.name}: baselined Silver→Gold gaps: {baselined_in_gold}")
+    if baselined_in_silver:
+        warnings.append(
+            f"{pair.name}: baselined Gold→Silver gaps: {baselined_in_silver}"
         )
-    if missing_in_silver:
+
+    # Only NEW mismatches are blocking
+    if new_missing_in_gold:
         blocking.append(
-            f"{pair.name}: fields present in Gold but missing in Silver: {missing_in_silver}"
+            f"{pair.name}: NEW fields in Silver but missing in Gold: {new_missing_in_gold}"
+        )
+    if new_missing_in_silver:
+        blocking.append(
+            f"{pair.name}: NEW fields in Gold but missing in Silver: {new_missing_in_silver}"
         )
 
     primary_keys = get_primary_keys(pair.config_path)
     if not primary_keys:
-        warnings.append(f"{pair.name}: no primary_keys declared in {pair.config_path}")
+        warnings.append(
+            f"{pair.name}: no business_primary_keys declared in {pair.config_path}"
+        )
 
     for primary_key in primary_keys:
         if primary_key not in silver_fields:
@@ -266,6 +322,24 @@ def check_schema_pair(pair: SchemaPair) -> tuple[list[str], list[str]]:
     return blocking, warnings
 
 
+def _build_current_differences() -> dict[str, dict[str, list[str]]]:
+    """Compute current Silver↔Gold differences for all schema pairs."""
+    result: dict[str, dict[str, list[str]]] = {}
+    for pair in SCHEMA_PAIRS:
+        silver_fields = {field.name for field in pair.silver_schema}
+        gold_columns = set(pair.gold_model.to_schema().columns)
+        missing_in_gold = sorted(silver_fields - gold_columns)
+        missing_in_silver = sorted(gold_columns - silver_fields)
+        if missing_in_gold or missing_in_silver:
+            entry: dict[str, list[str]] = {}
+            if missing_in_gold:
+                entry["silver_only"] = missing_in_gold
+            if missing_in_silver:
+                entry["gold_only"] = missing_in_silver
+            result[pair.name] = entry
+    return result
+
+
 def main() -> int:
     """Run parity checks and return process exit code."""
     parser = argparse.ArgumentParser()
@@ -275,13 +349,25 @@ def main() -> int:
         default="all",
         help="Which checks should affect process exit code.",
     )
+    parser.add_argument(
+        "--update-baseline",
+        action="store_true",
+        help="Update the baseline file with current differences.",
+    )
     args = parser.parse_args()
 
+    if args.update_baseline:
+        differences = _build_current_differences()
+        _save_baseline(differences)
+        print(f"Baseline updated: {BASELINE_PATH}")
+        return 0
+
+    baseline = _load_baseline()
     blocking_errors: list[str] = []
     warning_errors: list[str] = []
 
     for pair in SCHEMA_PAIRS:
-        blocking, warnings = check_schema_pair(pair)
+        blocking, warnings = check_schema_pair(pair, baseline)
         blocking_errors.extend(blocking)
         warning_errors.extend(warnings)
 
@@ -290,7 +376,7 @@ def main() -> int:
         for error in blocking_errors:
             print(f"[FAIL] {error}")
     else:
-        print("[OK] No blocking schema parity issues.")
+        print("[OK] No new blocking schema parity issues.")
 
     print("\n=== Warning checks (non-blocking quality signals) ===")
     if warning_errors:

@@ -1,52 +1,21 @@
 # configs/pipelines/chembl/protein_class.yaml
-# Pipeline configuration for ChEMBL Protein Classification entity.
-#
-# Reference table (~1,500 records) - full load strategy.
-# Hierarchical structure: parent_id -> protein_class_id
+# ChEMBL Protein Classification — reference table.
+# DQ & Filters: loaded via hierarchy (ADR-027/028/029).
 
 pipeline_name: chembl_protein_class
 provider: chembl
 entity_type: protein_class
 schema_file: ../../schemas/chembl/protein_class.yaml
-version: "1.2.0"
 description: "ChEMBL Protein Classification hierarchy (enzyme classes, receptor types, etc.)"
 
 business_primary_keys: ["protein_class_id"]
-technical_primary_key: "entity_id"
-silver_table: chembl_protein_class
-gold_table: chembl_protein_class
 
-
-# Full load for reference table
-batch_size: 500  # Reference table (~1.5K records), full load
+# Override: reference table ~1.5K records, smaller batches for full load
+batch_size: 500
+# Override: small dataset, more frequent checkpoints
 checkpoint_interval: 500
 
-# -----------------------------------------------------------------------------
-# Data Quality Configuration (ADR-027)
-# -----------------------------------------------------------------------------
-# DQ rules are loaded from hierarchical config files:
-#   1. configs/quality/_defaults.yaml (global defaults)
-#   2. configs/quality/providers/chembl.yaml (provider-specific)
-#   3. configs/quality/entities/chembl/protein_class.yaml (entity-specific)
-
-# -----------------------------------------------------------------------------
-# Filter Configuration (ADR-028)
-# -----------------------------------------------------------------------------
-# Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filters/_defaults.yaml (global defaults)
-#   2. configs/filters/providers/chembl.yaml (provider-specific)
-#   3. configs/filters/entities/chembl/protein_class.yaml (entity-specific)
-# Add inline overrides below only when extending/differing from entity filter config.
-
-# Entity-specific sink overrides
 sink:
-  bronze: {}
   silver:
+    # Override: partition by hierarchy level for efficient tree queries
     partition_by: ["class_level"]
-  gold:
-    mode: scd2
-    scd_config:
-      valid_from: _valid_from
-      valid_to: _valid_to
-      is_current: _is_current
-      version: _version

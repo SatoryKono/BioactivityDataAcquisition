@@ -1,25 +1,16 @@
 # configs/pipelines/uniprot/idmapping.yaml
-# Pipeline configuration for UniProt ID Mapping (ChEMBL → UniProt).
-#
-# Maps ChEMBL target IDs to UniProt accessions using UniProt ID Mapping REST API.
-# Input: CSV file with target_id column
-# Output: Silver/Gold records with mapping results (null for not_found)
-#
-# Inherits defaults from ../_base.yaml
+# UniProt ID Mapping (ChEMBL -> UniProt) — inherits from _base.yaml.
+# DQ & Filters: loaded via hierarchy (ADR-027/028/029).
 
 pipeline_name: uniprot_idmapping
 provider: uniprot
 entity_type: idmapping
 schema_file: ../../schemas/uniprot/idmapping.yaml
+# Override: v1.1.0 pre-standard schema
 version: "1.1.0"
 description: "Maps ChEMBL target IDs to UniProt accessions via UniProt ID Mapping API"
 
 business_primary_keys: ["target_id"]
-technical_primary_key: "entity_id"
-silver_table: "uniprot_idmapping"
-gold_table: "uniprot_idmapping"
-
-# Reference to provider source config (common UniProt settings)
 
 # Entity-specific source overrides for ID Mapping
 source:
@@ -29,40 +20,3 @@ source:
     # Database names as recognized by UniProt ID Mapping API
     from_db: ChEMBL
     to_db: UniProtKB
-
-# -----------------------------------------------------------------------------
-# Data Quality Configuration (ADR-027)
-# -----------------------------------------------------------------------------
-# DQ config is loaded from hierarchical files:
-#   1. configs/quality/_defaults.yaml (global defaults)
-#   2. configs/quality/providers/uniprot.yaml (provider-specific)
-#   3. configs/quality/entities/uniprot/idmapping.yaml (entity-specific)
-#
-# Entity-specific config contains:
-#   - Elevated thresholds: soft_fail=0.30, hard_fail=0.80 (ID mapping may have many not_found)
-#   - Field validations: target_id, mapping_status, uniprot_accession
-#   - Conditional validations: found_has_accession
-
-# -----------------------------------------------------------------------------
-# Filter Configuration (ADR-028)
-# -----------------------------------------------------------------------------
-# Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filters/_defaults.yaml (global defaults)
-#   2. configs/filters/providers/uniprot.yaml (provider-specific)
-#   3. configs/filters/entities/uniprot/idmapping.yaml (entity-specific)
-# Add inline overrides below only when extending/differing from entity filter config.
-
-# Sink configuration
-sink:
-  bronze: {}
-    # ID Mapping doesn't write Bronze (data comes from API, not raw files)
-    # NOTE: enabled: false is not yet implemented in code, so Bronze is still written
-  silver:
-    partition_by: []  # No partitioning - small dataset
-  gold:
-    mode: scd2
-    scd_config:
-      valid_from: _valid_from
-      valid_to: _valid_to
-      is_current: _is_current
-      version: _version

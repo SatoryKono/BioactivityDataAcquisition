@@ -1,55 +1,19 @@
 # configs/pipelines/chembl/subcellular_fraction.yaml
-# Pipeline configuration for ChEMBL Subcellular Fraction entity.
-#
-# Derived entity: Extracts unique subcellular fractions from Assay records.
-# Creates a lookup/reference table for biological context normalization.
-# Inherits defaults from ../_base.yaml
+# ChEMBL Subcellular Fraction — derived entity from Assay records.
+# DQ & Filters: loaded via hierarchy (ADR-027/028/029).
 # Note: entity_type=subcellular_fraction maps to ChEMBL API /assay endpoint (derived entity)
 
 pipeline_name: chembl_subcellular_fraction
 provider: chembl
 entity_type: subcellular_fraction
 schema_file: ../../schemas/chembl/subcellular_fraction.yaml
+# Override: v1.0.0 initial schema, not yet aligned with v1.2.0 standard
 version: "1.0.0"
 description: "Extract unique subcellular fractions from ChEMBL Assay records"
 
-# Loading strategy (ADR-030, ADR-031)
-# Derived entity requires full scan to ensure comprehensive deduplication.
-# Deduplication is handled both at DataSource level and on Silver layer via content_hash.
+# Override: full_scan required — derived entity needs comprehensive deduplication
 loading_strategy: full_scan_only
 
 # Primary key is the normalized subcellular_fraction name
 # entity_id is generated as SHA256 hash of normalized name
 business_primary_keys: ["entity_id"]
-technical_primary_key: "entity_id"
-silver_table: "chembl_subcellular_fraction"
-gold_table: "chembl_subcellular_fraction"
-
-
-# -----------------------------------------------------------------------------
-# Data Quality Configuration (ADR-027)
-# -----------------------------------------------------------------------------
-# DQ rules are loaded from hierarchical config files:
-#   1. configs/quality/_defaults.yaml (global defaults)
-#   2. configs/quality/providers/chembl.yaml (provider-specific)
-#   3. configs/quality/entities/chembl/subcellular_fraction.yaml (entity-specific)
-
-# -----------------------------------------------------------------------------
-# Filter Configuration (ADR-028)
-# -----------------------------------------------------------------------------
-# Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filters/_defaults.yaml (global defaults)
-#   2. configs/filters/providers/chembl.yaml (provider-specific)
-#   3. configs/filters/entities/chembl/subcellular_fraction.yaml (entity-specific)
-
-# Entity-specific sink overrides
-sink:
-  bronze: {}
-  silver: {}
-  gold:
-    mode: scd2
-    scd_config:
-      valid_from: _valid_from
-      valid_to: _valid_to
-      is_current: _is_current
-      version: _version
