@@ -177,16 +177,9 @@ def _apply_layer_defaults(
 
 
 def _apply_convention_defaults(config: dict[str, Any]) -> dict[str, Any]:
-    """Apply convention-based defaults for paths and references.
+    """Apply convention-based defaults for paths, references, and table names.
 
-    Auto-computes file references and sink paths from provider/entity_type
-    when not explicitly specified. This reduces config duplication.
-
-    Args:
-        config: Merged configuration dictionary.
-
-    Returns:
-        Configuration with convention-based defaults applied.
+    Auto-computes from provider/entity_type when not explicitly specified.
     """
     provider = config.get("provider")
     entity_type = config.get("entity_type")
@@ -195,13 +188,14 @@ def _apply_convention_defaults(config: dict[str, Any]) -> dict[str, Any]:
         return config
 
     primary_keys = config.get("primary_keys", [])
-
-    # Auto-compute file references
     _apply_file_reference_defaults(config, provider, entity_type)
 
-    # Auto-compute sink paths for each medallion layer
-    sink = config.setdefault("sink", {})
+    # Auto-compute table names from provider + entity_type
+    table_name = f"{provider}_{entity_type}"
+    config.setdefault("silver_table", table_name)
+    config.setdefault("gold_table", table_name)
 
+    sink = config.setdefault("sink", {})
     for layer_name in ("bronze", "silver", "gold"):
         layer = sink.setdefault(layer_name, {})
         _apply_layer_defaults(layer, provider, entity_type, layer_name, primary_keys)

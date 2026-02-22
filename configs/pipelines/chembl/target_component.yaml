@@ -1,47 +1,16 @@
 # configs/pipelines/chembl/target_component.yaml
-# Pipeline configuration for ChEMBL Target Component entity.
-#
-# Inherits defaults from ../_base.yaml
+# ChEMBL Target Component — inherits from _base.yaml.
+# DQ & Filters: loaded via hierarchy (ADR-027/028/029).
 
 pipeline_name: chembl_target_component
 provider: chembl
 entity_type: target_component
 schema_file: ../../schemas/chembl/target_component.yaml
-version: "1.2.0"
 description: "ChEMBL Target Components (protein sequences, etc.)"
 
 business_primary_keys: ["component_id"]
-technical_primary_key: "entity_id"
-silver_table: chembl_target_component
-gold_table: chembl_target_component
 
-
-# -----------------------------------------------------------------------------
-# Data Quality Configuration (ADR-027)
-# -----------------------------------------------------------------------------
-# DQ rules are loaded from hierarchical config files:
-#   1. configs/quality/_defaults.yaml (global defaults)
-#   2. configs/quality/providers/chembl.yaml (provider-specific)
-#   3. configs/quality/entities/chembl/target_component.yaml (entity-specific)
-
-# -----------------------------------------------------------------------------
-# Filter Configuration (ADR-028)
-# -----------------------------------------------------------------------------
-# Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filters/_defaults.yaml (global defaults)
-#   2. configs/filters/providers/chembl.yaml (provider-specific)
-#   3. configs/filters/entities/chembl/target_component.yaml (entity-specific)
-# Add inline overrides below only when extending/differing from entity filter config.
-
-# Entity-specific sink overrides
 sink:
-  bronze: {}
   silver:
+    # Override: partition by organism for efficient organism-specific queries
     partition_by: ["organism"]
-  gold:
-    mode: scd2
-    scd_config:
-      valid_from: _valid_from
-      valid_to: _valid_to
-      is_current: _is_current
-      version: _version

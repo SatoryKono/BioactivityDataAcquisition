@@ -1,51 +1,27 @@
 # configs/pipelines/chembl/publication_term.yaml
-# Pipeline configuration for ChEMBL Publication Term entity.
-#
-# Derived entity: Extracts and flattens terms from Publication records.
-# Inherits defaults from ../_base.yaml
+# ChEMBL Publication Term — derived entity from Publication records.
+# DQ & Filters: loaded via hierarchy (ADR-027/028/029).
 # Note: entity_type=publication_term maps to ChEMBL API /document endpoint (derived entity, ADR-024)
 
 pipeline_name: chembl_publication_term
 provider: chembl
 entity_type: publication_term
 schema_file: ../../schemas/chembl/publication_term.yaml
+# Override: v2.1.0 schema redesign after ADR-024 naming migration
 version: "2.1.0"
 description: "Extract publication terms (MeSH, keywords) from ChEMBL Publication records"
 
-# Loading strategy (ADR-030, ADR-031)
-# Publication entities require full scan on each run due to API offset instability.
-# Deduplication is handled on Silver layer via content_hash.
+# Override: full_scan required — API doesn't support stable incremental cursors
 loading_strategy: full_scan_only
 
 # Composite primary key (publication_id + term_type + term)
 # entity_id is generated as SHA256 hash of composite key
 business_primary_keys: ["entity_id"]
-technical_primary_key: "entity_id"
-silver_table: "chembl_publication_term"
-gold_table: "chembl_publication_term"
 
-
-# -----------------------------------------------------------------------------
-# Data Quality Configuration (ADR-027)
-# -----------------------------------------------------------------------------
-# DQ rules are loaded from hierarchical config files:
-#   1. configs/quality/_defaults.yaml (global defaults)
-#   2. configs/quality/providers/chembl.yaml (provider-specific)
-#   3. configs/quality/entities/chembl/publication_term.yaml (entity-specific)
-
-# -----------------------------------------------------------------------------
-# Filter Configuration (ADR-028)
-# -----------------------------------------------------------------------------
-# Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filters/_defaults.yaml (global defaults)
-#   2. configs/filters/providers/chembl.yaml (provider-specific)
-#   3. configs/filters/entities/chembl/publication_term.yaml (entity-specific)
-# Add inline overrides below only when extending/differing from entity filter config.
-
-# Entity-specific sink overrides
 sink:
-  bronze: {}
   silver:
+    # Override: partition by term_type for efficient type-specific queries
     partition_by: ["term_type"]
   gold:
+    # Override: terms recomputed each run, no SCD tracking needed
     mode: overwrite
