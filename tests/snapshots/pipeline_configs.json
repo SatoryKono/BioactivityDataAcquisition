@@ -720,7 +720,6 @@
       {
         "fields": [
           "authors",
-          "author_keys",
           "author_count",
           "authors_with_affiliations"
         ],

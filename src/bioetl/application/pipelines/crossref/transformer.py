@@ -33,6 +33,7 @@ from bioetl.application.pipelines.crossref.extractors import (
     extract_references,
 )
 from bioetl.domain.entities.crossref import CrossRefPublicationEntity
+from bioetl.domain.mapping.publication_type_mapping import normalize_publication_type
 from bioetl.domain.normalization import extract_first_string
 from bioetl.domain.services import IdentityService
 from bioetl.domain.value_objects import DOI, PublicationYear
@@ -199,7 +200,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
                 PublicationYear, raw_year, as_string=False
             ),
             "publication_date": publication_date,
-            "publication_type": rec.get("type"),  # Raw CrossRef type
+            "publication_type": normalize_publication_type(rec.get("type")),
             **self._classify_publication_type("crossref", raw_type=rec.get("type")),
             "citations_received": rec.get("is-referenced-by-count"),
             "citations_made": rec.get("references-count"),
