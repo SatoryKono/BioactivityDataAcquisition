@@ -5,6 +5,16 @@
   "description": "Gold layer data contract for chembl_tissue. Auto-generated from Pandera schema ChEMBLTissueGoldSchema.",
   "type": "object",
   "properties": {
+    "entity_id": {
+      "type": "string",
+      "nullable": false,
+      "description": ""
+    },
+    "content_hash": {
+      "type": "string",
+      "nullable": false,
+      "description": ""
+    },
     "tissue_id": {
       "type": "string",
       "nullable": false,
@@ -47,6 +57,16 @@
       "nullable": true,
       "description": "Uberon Ontology ID"
     },
+    "_dq_warn": {
+      "type": "boolean",
+      "nullable": false,
+      "description": ""
+    },
+    "_dq_error": {
+      "type": "boolean",
+      "nullable": false,
+      "description": ""
+    },
     "_run_id": {
       "type": "string",
       "nullable": false,
@@ -77,10 +97,14 @@
     }
   },
   "required": [
+    "_dq_error",
+    "_dq_warn",
     "_index",
     "_ingestion_ts",
     "_run_id",
     "_run_type",
+    "content_hash",
+    "entity_id",
     "pref_name",
     "tissue_id"
   ]

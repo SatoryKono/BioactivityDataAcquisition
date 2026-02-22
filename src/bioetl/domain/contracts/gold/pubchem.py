@@ -41,6 +41,28 @@ class PubChemCompoundGoldSchema(pa.DataFrameModel):
     iupac_name: Series[str] = pa.Field(nullable=True)
     content_hash: Series[str] = pa.Field(nullable=False)
 
+    # 3D molecular descriptors
+    complexity: Series[float] = pa.Field(nullable=True, coerce=True)
+    conformer_count_3d: Series[float] = pa.Field(nullable=True, coerce=True)
+    conformer_rmsd_3d: Series[float] = pa.Field(nullable=True, coerce=True)
+    effective_rotor_count_3d: Series[float] = pa.Field(nullable=True, coerce=True)
+    exact_mass: Series[float] = pa.Field(nullable=True, coerce=True)
+    feature_acceptor_count_3d: Series[float] = pa.Field(nullable=True, coerce=True)
+    feature_anion_count_3d: Series[float] = pa.Field(nullable=True, coerce=True)
+    feature_cation_count_3d: Series[float] = pa.Field(nullable=True, coerce=True)
+    feature_count_3d: Series[float] = pa.Field(nullable=True, coerce=True)
+    feature_donor_count_3d: Series[float] = pa.Field(nullable=True, coerce=True)
+    feature_hydrophobe_count_3d: Series[float] = pa.Field(nullable=True, coerce=True)
+    feature_ring_count_3d: Series[float] = pa.Field(nullable=True, coerce=True)
+    monoisotopic_mass: Series[float] = pa.Field(nullable=True, coerce=True)
+    x_steric_quadrupole_3d: Series[float] = pa.Field(nullable=True, coerce=True)
+    y_steric_quadrupole_3d: Series[float] = pa.Field(nullable=True, coerce=True)
+    z_steric_quadrupole_3d: Series[float] = pa.Field(nullable=True, coerce=True)
+
+    # DQ fields
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
+
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
     run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")

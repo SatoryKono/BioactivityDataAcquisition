@@ -28,6 +28,14 @@
       "nullable": true,
       "description": ""
     },
+    "acetylation": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "active_sites": {
       "type": [
         "string",
@@ -37,6 +45,14 @@
       "description": ""
     },
     "binding_sites": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "disulfide_bond": {
       "type": [
         "string",
         "null"
@@ -60,6 +76,86 @@
       "nullable": true,
       "description": ""
     },
+    "glycosylation": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "intramembrane": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "lipidation": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "modified_residue": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "phosphorylation": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "propeptide": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "signal_peptide": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "topology": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "transmembrane": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "ubiquitination": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "activity_regulation": {
       "type": [
         "string",
@@ -69,6 +165,14 @@
       "description": ""
     },
     "catalytic_activity": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "cellular_component": {
       "type": [
         "string",
         "null"
@@ -92,7 +196,31 @@
       "nullable": true,
       "description": ""
     },
+    "molecular_function": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "pathway": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "reaction_ec_numbers": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "reactions": {
       "type": [
         "string",
         "null"
@@ -188,9 +316,49 @@
       "nullable": true,
       "description": ""
     },
+    "genus": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "isoform_ids": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "isoform_names": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "isoform_synonyms": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "organism_id": {
       "type": [
         "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "phylum": {
+      "type": [
+        "string",
         "null"
       ],
       "nullable": true,
@@ -207,6 +375,14 @@
     "sequence_length": {
       "type": [
         "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "superkingdom": {
+      "type": [
+        "string",
         "null"
       ],
       "nullable": true,
@@ -234,6 +410,16 @@
         "null"
       ],
       "nullable": true,
+      "description": ""
+    },
+    "_dq_warn": {
+      "type": "boolean",
+      "nullable": false,
+      "description": ""
+    },
+    "_dq_error": {
+      "type": "boolean",
+      "nullable": false,
       "description": ""
     },
     "_run_id": {
@@ -266,6 +452,8 @@
     }
   },
   "required": [
+    "_dq_error",
+    "_dq_warn",
     "_index",
     "_ingestion_ts",
     "_run_id",

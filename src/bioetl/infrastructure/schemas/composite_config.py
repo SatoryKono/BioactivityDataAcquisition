@@ -819,7 +819,10 @@ def validate_composite_config_payload(
     """
 
     try:
-        return CompositeConfigFileSchema.model_validate(payload)
+        result: CompositeConfigFileSchema = CompositeConfigFileSchema.model_validate(
+            payload
+        )
+        return result
     except ValidationError:
         legacy_schema = LegacyCompositeConfigFileSchema.model_validate(payload)
         warnings.warn(
@@ -830,7 +833,8 @@ def validate_composite_config_payload(
             stacklevel=2,
         )
         normalized = legacy_schema.model_dump(mode="python")
-        return CompositeConfigFileSchema.model_validate(normalized)
+        result = CompositeConfigFileSchema.model_validate(normalized)
+        return result
 
 
 __all__ = [
