@@ -32,6 +32,29 @@ if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
 
 
+def push_metrics_to_gateway(
+    job: str = "bioetl",
+) -> bool:
+    """Push current metrics to Prometheus Pushgateway.
+
+    Reads gateway URL from settings (BIOETL_PUSHGATEWAY_URL) and delegates
+    to the infrastructure layer.
+
+    Args:
+        job: Job label for pushed metrics.
+
+    Returns:
+        True if push succeeded, False otherwise.
+    """
+    from bioetl.infrastructure.observability.server import (
+        push_metrics_to_gateway as _push,
+    )
+
+    settings = get_settings()
+    gateway = getattr(settings, "pushgateway_url", None) or "localhost:9091"
+    return _push(gateway=gateway, job=job)
+
+
 def ensure_metrics_server_started() -> bool:
     """Ensure metrics server is started if enabled in settings.
 

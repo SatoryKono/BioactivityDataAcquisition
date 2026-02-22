@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import errno
-import os
 import time
 from threading import Lock
 from typing import TYPE_CHECKING
@@ -170,7 +169,7 @@ def push_metrics_to_gateway(
     if logger is None:
         logger = NoOpLogger()
 
-    gateway = gateway or os.environ.get("BIOETL_PUSHGATEWAY_URL", "localhost:9091")
+    gateway = gateway or "localhost:9091"
 
     try:
         pushadd_to_gateway(gateway, job=job, registry=REGISTRY)

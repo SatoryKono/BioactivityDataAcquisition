@@ -419,7 +419,11 @@ class TestGoldSchemaValidation:
             "entity_id": "chembl_CHEMBL12345",
             "content_hash": "xyz789",
             "publication_id": "CHEMBL12345",
-            # Cross-reference IDs (unified naming, aligned with Silver)
+            # Cross-reference IDs (prefixed naming convention)
+            "publication_doi": "10.1234/test",
+            "publication_pmid": "12345678",
+            "publication_pmc_id": None,
+            # Cross-reference IDs (raw identifiers from Silver)
             "doi": "10.1234/test",
             "pmid": "12345678",
             "pmc_id": None,

@@ -18,7 +18,7 @@ from bioetl.composition.bootstrap.runtime.composite import (
     bootstrap_composite_runner,
     load_composite_config,
 )
-from bioetl.infrastructure.observability.server import push_metrics_to_gateway
+from bioetl.composition.entrypoints import push_metrics_to_gateway
 from bioetl.interfaces.cli.commands.health_server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
     echo_health_server_info,
