@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 import errno
+import os
 import time
 from threading import Lock
 from typing import TYPE_CHECKING
-
-import os
 
 from prometheus_client import REGISTRY, start_http_server
 from prometheus_client.exposition import pushadd_to_gateway
