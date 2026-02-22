@@ -240,7 +240,6 @@ class EnrichmentCrossValidator:
         """Add CV metadata columns and compute aggregate stats."""
         is_quarantine = enricher_error_counts >= self._config.quarantine_threshold
         quarantine_count = int(is_quarantine.sum())
-
         cv_details = _combine_cv_details(enricher_details, total_records)
 
         df = df.with_columns(
@@ -251,18 +250,15 @@ class EnrichmentCrossValidator:
                 cv_details.alias("_cv_details"),
             ]
         )
-
         if quarantine_count > 0:
             self._logger.warning(
                 "Seed records quarantined due to multiple enricher errors",
                 quarantine_count=quarantine_count,
                 threshold=self._config.quarantine_threshold,
             )
-
         errored_count = int((enricher_error_counts > 0).sum())
         warned_count = int((has_warning & (enricher_error_counts == 0)).sum())
         passed_count = total_records - errored_count - warned_count
-
         stats = CrossValidationStats(
             total_records=total_records,
             passed=passed_count,
@@ -271,7 +267,6 @@ class EnrichmentCrossValidator:
             quarantined=quarantine_count,
             enricher_stats=tuple(enricher_stats_list),
         )
-
         self._logger.info(
             "Cross-validation completed",
             total=total_records,
@@ -280,7 +275,6 @@ class EnrichmentCrossValidator:
             errored=errored_count,
             quarantined=quarantine_count,
         )
-
         return df, stats
 
     def _count_mismatches_vectorized(
