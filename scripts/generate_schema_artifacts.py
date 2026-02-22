@@ -117,6 +117,28 @@ def _emit(message: str, *, err: bool = False) -> None:
     stream.write(f"{message}\n")
 
 
+def _ruff_format(content: str) -> str:
+    """Run ruff format on generated content to ensure compliance."""
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "ruff",
+            "format",
+            "--stdin-filename",
+            "registry.py",
+            "-",
+        ],
+        input=content,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode == 0:
+        return result.stdout
+    return content
+
+
 def _write_if_changed(path: Path, content: str, check: bool) -> bool:
     current = path.read_text(encoding="utf-8") if path.exists() else None
     if current == content:
@@ -156,7 +178,7 @@ def main() -> int:
     args = parser.parse_args()
 
     entries = [_load_entry(path) for path in _iter_canonical_schema_files()]
-    registry_content = _build_registry(entries)
+    registry_content = _ruff_format(_build_registry(entries))
     stale_registry = _write_if_changed(
         PANDERA_REGISTRY_PATH, registry_content, args.check
     )

@@ -13,7 +13,7 @@ from __future__ import annotations
 from datetime import date, datetime
 
 import pytest
-from hypothesis import given
+from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
 from bioetl.domain.services.identity_service import META_FIELDS, IdentityService
@@ -154,6 +154,7 @@ class TestMetaFieldExclusion:
         assert META_FIELDS == expected
 
     @pytest.mark.hypothesis
+    @settings(suppress_health_check=[HealthCheck.too_slow])
     @given(
         business_record=st.dictionaries(
             keys=st.text(

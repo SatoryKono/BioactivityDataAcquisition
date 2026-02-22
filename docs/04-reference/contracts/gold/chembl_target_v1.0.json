@@ -140,12 +140,30 @@
       "nullable": true,
       "description": ""
     },
+    "component_descriptions": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
     "component_relationships": {
       "type": [
         "string",
         "null"
       ],
       "nullable": true,
+      "description": ""
+    },
+    "_dq_warn": {
+      "type": "boolean",
+      "nullable": false,
+      "description": ""
+    },
+    "_dq_error": {
+      "type": "boolean",
+      "nullable": false,
       "description": ""
     },
     "_run_id": {
@@ -178,6 +196,8 @@
     }
   },
   "required": [
+    "_dq_error",
+    "_dq_warn",
     "_index",
     "_ingestion_ts",
     "_run_id",
