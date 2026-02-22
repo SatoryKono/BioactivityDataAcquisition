@@ -193,23 +193,7 @@
       "nullable": true,
       "description": ""
     },
-    "pii": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "mid": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "publisher_id": {
+    "pub_date": {
       "type": [
         "string",
         "null"
@@ -282,6 +266,30 @@
       "description": ""
     },
     "publication_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "publication_type_unified": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "publication_subclass": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "publication_class": {
       "type": [
         "string",
         "null"

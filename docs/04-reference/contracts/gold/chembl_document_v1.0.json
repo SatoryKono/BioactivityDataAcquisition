@@ -20,7 +20,7 @@
       "nullable": false,
       "description": ""
     },
-    "publication_doi": {
+    "doi": {
       "type": [
         "string",
         "null"
@@ -28,7 +28,7 @@
       "nullable": true,
       "description": ""
     },
-    "publication_pmid": {
+    "pmc_id": {
       "type": [
         "string",
         "null"
@@ -36,7 +36,7 @@
       "nullable": true,
       "description": ""
     },
-    "publication_pmc_id": {
+    "pmid": {
       "type": [
         "string",
         "null"
