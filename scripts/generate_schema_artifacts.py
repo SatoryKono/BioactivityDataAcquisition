@@ -94,16 +94,19 @@ def _build_registry(entries: list[CanonicalSchemaEntry]) -> str:
         "CANONICAL_SCHEMA_REGISTRY: tuple[CanonicalSchemaRegistryEntry, ...] = ("
     )
     for entry in entries:
-        group_repr = repr(tuple(entry.column_groups))
-        lines.append(
-            "    CanonicalSchemaRegistryEntry("
-            f"provider={entry.provider!r}, entity={entry.entity!r}, "
-            f"yaml_path={entry.yaml_path!r}, column_groups={group_repr}),"
-        )
+        lines.append("    CanonicalSchemaRegistryEntry(")
+        lines.append(f'        provider="{entry.provider}",')
+        lines.append(f'        entity="{entry.entity}",')
+        lines.append(f'        yaml_path="{entry.yaml_path}",')
+        lines.append("        column_groups=(")
+        for g in entry.column_groups:
+            lines.append(f'            "{g}",')
+        lines.append("        ),")
+        lines.append("    ),")
     lines.append(")")
     lines.append("")
     lines.append(
-        "__all__ = ['CANONICAL_SCHEMA_REGISTRY', 'CanonicalSchemaRegistryEntry']"
+        '__all__ = ["CANONICAL_SCHEMA_REGISTRY", "CanonicalSchemaRegistryEntry"]'
     )
     lines.append("")
     return "\n".join(lines)
