@@ -130,7 +130,14 @@
       "Bash(unset GITHUB_TOKEN && gh auth status 2>&)",
       "Bash(cd /e/g-drive/05_AI/github/BioactivityDataAcquisition2 && unset GITHUB_TOKEN && uv run python -m bioetl run-composite --composite molecule --seed-limit 5 --no-cached-bronze --no-health-server 2>&1)",
       "WebFetch(domain:www.uniprot.org)",
-      "Bash(ls \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\\\\.venv\\\\Scripts\\\\ruff.exe\" 2>&1 && \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\\\\.venv\\\\Scripts\\\\ruff.exe\" --version 2>&12)"
+      "Bash(ls \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\\\\.venv\\\\Scripts\\\\ruff.exe\" 2>&1 && \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\\\\.venv\\\\Scripts\\\\ruff.exe\" --version 2>&12)",
+      "Bash(cd:2)",
+      "Bash(docker volume:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker stop:*)",
+      "Bash(du:*)",
+      "Bash(wmic process:*)",
+      "Bash(docker restart:*)"
     ]
   },
   "enabledPlugins": {

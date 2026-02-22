@@ -25,6 +25,7 @@ from bioetl.interfaces.cli.commands.health_server_integration import (
 from bioetl.interfaces.cli.commands.metrics_server_integration import (
     ensure_metrics_server_started,
 )
+from bioetl.infrastructure.observability.server import push_metrics_to_gateway
 from bioetl.interfaces.cli.commands.run_helpers import (
     get_runner_logger,
     handle_destructive_run_confirmation,
@@ -292,6 +293,7 @@ def run(
         echo_error("Unexpected error during pipeline execution", str(e))
         sys.exit(ExitCode.FAIL)
     finally:
+        push_metrics_to_gateway()
         if getattr(coro, "cr_frame", None) is not None:
             coro.close()
 
