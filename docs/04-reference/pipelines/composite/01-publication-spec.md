@@ -10,7 +10,7 @@ Merges publication data from multiple providers into a unified composite publica
 
 | Field | Value |
 |-------|-------|
-| Pipeline ID | `composite-publication` |
+| Pipeline ID | `composite_publication` |
 | Provider | `composite` |
 | Entity | `publication` |
 | Version | `1.2.0` |
@@ -18,8 +18,8 @@ Merges publication data from multiple providers into a unified composite publica
 
 ## Seed and Enrichers
 
-- **Seed**: `chembl-publication`
-- **Enrichers**: `crossref-publication`, `openalex-publication`, `pubmed-publication`, `semanticscholar-publication`
+- **Seed**: `chembl_publication`
+- **Enrichers**: `crossref_publication`, `openalex_publication`, `pubmed_publication`, `semanticscholar_publication`
 - **Dependencies**: none
 
 ## Outputs
@@ -31,9 +31,9 @@ Merges publication data from multiple providers into a unified composite publica
 
 ## Merge Features
 
-- **Conflict Resolution**: `seed-priority` — seed (ChEMBL) values always win over enricher values
+- **Conflict Resolution**: `seed_priority` — seed (ChEMBL) values always win over enricher values
 - **Preserve All Sources**: `true` — keeps provider-qualified columns (e.g., `crossref.publication.title`)
-- **Cross-Validation**: Compares paired fields (doi, title, volume, issue, page-first, page-last, publication-year, citations-received) between seed and each enricher before merge. Mismatches trigger warnings, errors, or quarantine.
+- **Cross-Validation**: Compares paired fields (doi, title, volume, issue, page_first, page_last, publication_year, citations_received) between seed and each enricher before merge. Mismatches trigger warnings, errors, or quarantine.
 - **Exclude Fields**: 40 redundant enricher columns excluded from output (CV-validated fields that duplicate seed values, plus low-value fields)
 
 ## Related Configs
@@ -43,6 +43,6 @@ Merges publication data from multiple providers into a unified composite publica
 
 ## Related ADRs
 
-- [ADR-026](../../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)
-- [ADR-028](../../../02-architecture/decisions/ADR-028-filter-rules-externalization.md)
-- [ADR-029](../../../02-architecture/decisions/ADR-029-output-metadata-unification.md)
+- [ADR-026](../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)
+- [ADR-028](../../02-architecture/decisions/ADR-028-filter-rules-externalization.md)
+- [ADR-029](../../02-architecture/decisions/ADR-029-output-metadata-unification.md)

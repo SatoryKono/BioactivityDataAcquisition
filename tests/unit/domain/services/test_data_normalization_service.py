@@ -131,19 +131,20 @@ class TestNormalizeAuthors:
     """Tests for normalize_authors method."""
 
     def test_normalize_authors_list(self) -> None:
-        """Test normalizing list of authors."""
+        """Test normalizing list of authors (hashed output)."""
         service = DefaultDataNormalizationService()
-        result = service.normalize_authors(["John Doe", "Jane Smith"])
+        result = service.normalize_authors(["John Doe", "Jane Smith"], salt="test")
 
         assert result is not None
         parsed = json.loads(result)
         assert len(parsed) == 2
-        assert parsed == ["John Doe", "Jane Smith"]
+        # normalize_authors hashes names with salt, so output are hex hashes
+        assert all(isinstance(h, str) and len(h) == 64 for h in parsed)
 
     def test_normalize_authors_string(self) -> None:
         """Test normalizing semicolon-separated authors."""
         service = DefaultDataNormalizationService()
-        result = service.normalize_authors("John Doe; Jane Smith")
+        result = service.normalize_authors("John Doe; Jane Smith", salt="test")
 
         assert result is not None
         parsed = json.loads(result)
@@ -152,7 +153,7 @@ class TestNormalizeAuthors:
     def test_normalize_authors_json_string(self) -> None:
         """Test normalizing JSON-serialized authors."""
         service = DefaultDataNormalizationService()
-        result = service.normalize_authors('["John Doe", "Jane Smith"]')
+        result = service.normalize_authors('["John Doe", "Jane Smith"]', salt="test")
 
         assert result is not None
         parsed = json.loads(result)
@@ -161,9 +162,9 @@ class TestNormalizeAuthors:
     def test_normalize_authors_empty(self) -> None:
         """Test empty authors returns None."""
         service = DefaultDataNormalizationService()
-        assert service.normalize_authors(None) is None
-        assert service.normalize_authors([]) is None
-        assert service.normalize_authors("") is None
+        assert service.normalize_authors(None, salt="test") is None
+        assert service.normalize_authors([], salt="test") is None
+        assert service.normalize_authors("", salt="test") is None
 
 
 class TestStripHtmlTags:
