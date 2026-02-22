@@ -345,30 +345,6 @@
       "nullable": true,
       "description": ""
     },
-    "publication_doi": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "publication_pmid": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
-    "publication_pmc_id": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true,
-      "description": ""
-    },
     "activity_comment": {
       "type": [
         "string",
