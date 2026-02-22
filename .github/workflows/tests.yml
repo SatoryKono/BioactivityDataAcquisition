@@ -48,6 +48,12 @@ jobs:
       - name: Validate pipeline configs + schema links (blocking)
         run: uv run python scripts/validate_pipeline_configs.py
 
+      - name: Validate docker-compose.yml syntax
+        run: docker compose config > /dev/null
+
+      - name: Validate docker-compose.monitoring.yml syntax
+        run: docker compose -f docker-compose.monitoring.yml config > /dev/null
+
       - name: Smoke check (dependencies + core imports)
         run: uv run pytest tests/smoke/ -v --tb=short
 

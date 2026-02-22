@@ -12,6 +12,7 @@
             }
         ]
     },
+    "description": "Pipeline overview for latest run only",
     "editable": true,
     "gnetId": null,
     "graphTooltip": 1,
@@ -23,34 +24,31 @@
             "fieldConfig": {
                 "defaults": {
                     "color": {
-                        "mode": "thresholds"
+                        "mode": "palette-classic"
                     },
-                    "decimals": 0,
+                    "custom": {
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        }
+                    },
                     "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            }
-                        ]
-                    },
                     "unit": "short"
                 },
                 "overrides": []
             },
             "gridPos": {
-                "h": 4,
+                "h": 3,
                 "w": 6,
                 "x": 0,
                 "y": 0
             },
-            "id": 1,
+            "id": 99,
             "options": {
-                "colorMode": "value",
-                "graphMode": "area",
-                "justifyMode": "auto",
+                "colorMode": "background",
+                "graphMode": "none",
+                "justifyMode": "center",
                 "orientation": "auto",
                 "reduceOptions": {
                     "calcs": [
@@ -63,12 +61,12 @@
             },
             "targets": [
                 {
-                    "expr": "sum(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_id=~\"$run_id\", stage=\"bronze\"})",
-                    "legendFormat": "Bronze",
+                    "expr": "max(label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, pipeline)) or vector(0)",
+                    "legendFormat": "Pipeline",
                     "refId": "A"
                 }
             ],
-            "title": "Bronze Records Total",
+            "title": "Pipeline",
             "type": "stat"
         },
         {
@@ -76,34 +74,31 @@
             "fieldConfig": {
                 "defaults": {
                     "color": {
-                        "mode": "thresholds"
+                        "mode": "palette-classic"
                     },
-                    "decimals": 0,
+                    "custom": {
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        }
+                    },
                     "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            }
-                        ]
-                    },
                     "unit": "short"
                 },
                 "overrides": []
             },
             "gridPos": {
-                "h": 4,
+                "h": 3,
                 "w": 6,
                 "x": 6,
                 "y": 0
             },
-            "id": 2,
+            "id": 100,
             "options": {
-                "colorMode": "value",
-                "graphMode": "area",
-                "justifyMode": "auto",
+                "colorMode": "background",
+                "graphMode": "none",
+                "justifyMode": "center",
                 "orientation": "auto",
                 "reduceOptions": {
                     "calcs": [
@@ -116,12 +111,12 @@
             },
             "targets": [
                 {
-                    "expr": "sum(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_id=~\"$run_id\", stage=\"silver\"})",
-                    "legendFormat": "Silver",
+                    "expr": "max(label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}, run_type)) or vector(0)",
+                    "legendFormat": "Run Type",
                     "refId": "A"
                 }
             ],
-            "title": "Silver Records Total",
+            "title": "Run Type",
             "type": "stat"
         },
         {
@@ -129,9 +124,27 @@
             "fieldConfig": {
                 "defaults": {
                     "color": {
-                        "mode": "thresholds"
+                        "mode": "palette-classic"
                     },
-                    "decimals": 0,
+                    "custom": {
+                        "axisLabel": "Records",
+                        "axisPlacement": "auto",
+                        "drawStyle": "line",
+                        "fillOpacity": 10,
+                        "gradientMode": "none",
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "pointSize": 5,
+                        "showPoints": "auto",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
                     "mappings": [],
                     "thresholds": {
                         "mode": "absolute",
@@ -141,23 +154,78 @@
                                 "value": null
                             }
                         ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 24,
+                "x": 0,
+                "y": 6
+            },
+            "id": 1,
+            "options": {
+                "legend": {
+                    "calcs": [
+                        "last"
+                    ],
+                    "displayMode": "table",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "multi",
+                    "sort": "desc"
+                }
+            },
+            "targets": [
+                {
+                    "expr": "sum(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}) by (stage)",
+                    "legendFormat": "{{stage}}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Processing Pipeline (Latest Run Only)",
+            "type": "timeseries"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
                     },
+                    "custom": {
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        }
+                    },
+                    "mappings": [],
                     "unit": "short"
                 },
                 "overrides": []
             },
             "gridPos": {
-                "h": 4,
-                "w": 6,
-                "x": 12,
-                "y": 0
+                "h": 8,
+                "w": 8,
+                "x": 0,
+                "y": 14
             },
-            "id": 3,
+            "id": 2,
             "options": {
-                "colorMode": "value",
-                "graphMode": "area",
-                "justifyMode": "auto",
-                "orientation": "auto",
+                "displayLabels": [
+                    "percent"
+                ],
+                "legend": {
+                    "displayMode": "table",
+                    "placement": "right",
+                    "values": [
+                        "value"
+                    ]
+                },
+                "pieType": "pie",
                 "reduceOptions": {
                     "calcs": [
                         "lastNotNull"
@@ -165,17 +233,80 @@
                     "fields": "",
                     "values": false
                 },
-                "textMode": "auto"
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
             },
             "targets": [
                 {
-                    "expr": "sum(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_id=~\"$run_id\", stage=\"gold\"})",
-                    "legendFormat": "Gold",
+                    "expr": "sum(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}) by (stage)",
+                    "legendFormat": "{{stage}}",
                     "refId": "A"
                 }
             ],
-            "title": "Gold Records Total",
-            "type": "stat"
+            "title": "Stage Distribution",
+            "type": "piechart"
+        },
+        {
+            "datasource": "Prometheus",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        }
+                    },
+                    "mappings": [],
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 8,
+                "x": 8,
+                "y": 14
+            },
+            "id": 3,
+            "options": {
+                "displayLabels": [
+                    "percent"
+                ],
+                "legend": {
+                    "displayMode": "table",
+                    "placement": "right",
+                    "values": [
+                        "value"
+                    ]
+                },
+                "pieType": "pie",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "targets": [
+                {
+                    "expr": "sum(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}) by (pipeline)",
+                    "legendFormat": "{{pipeline}}",
+                    "refId": "A"
+                }
+            ],
+            "title": "Pipeline Distribution",
+            "type": "piechart"
         },
         {
             "datasource": "Prometheus",
@@ -209,10 +340,10 @@
                 "overrides": []
             },
             "gridPos": {
-                "h": 4,
-                "w": 6,
-                "x": 18,
-                "y": 0
+                "h": 8,
+                "w": 8,
+                "x": 16,
+                "y": 14
             },
             "id": 4,
             "options": {
@@ -229,232 +360,13 @@
             },
             "targets": [
                 {
-                    "expr": "sum(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_id=~\"$run_id\", stage=\"gold\"}) / sum(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_id=~\"$run_id\", stage=\"bronze\"})",
-                    "legendFormat": "Gold/Bronze",
+                    "expr": "sum(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\"}) / sum(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"})",
+                    "legendFormat": "Quality",
                     "refId": "A"
                 }
             ],
-            "title": "Quality Ratio (Gold/Bronze)",
+            "title": "Overall Quality",
             "type": "gauge"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "custom": {
-                        "axisLabel": "Records/sec",
-                        "axisPlacement": "auto",
-                        "drawStyle": "line",
-                        "fillOpacity": 10,
-                        "gradientMode": "none",
-                        "lineInterpolation": "linear",
-                        "lineWidth": 2,
-                        "pointSize": 5,
-                        "showPoints": "auto",
-                        "spanNulls": false,
-                        "stacking": {
-                            "group": "A",
-                            "mode": "none"
-                        },
-                        "thresholdsStyle": {
-                            "mode": "off"
-                        }
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            }
-                        ]
-                    }
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 0,
-                "y": 4
-            },
-            "id": 5,
-            "options": {
-                "legend": {
-                    "calcs": [
-                        "mean",
-                        "max"
-                    ],
-                    "displayMode": "table",
-                    "placement": "bottom"
-                },
-                "tooltip": {
-                    "mode": "multi",
-                    "sort": "desc"
-                }
-            },
-            "targets": [
-                {
-                    "expr": "rate(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_id=~\"$run_id\"}[5m])",
-                    "legendFormat": "{{stage}}",
-                    "refId": "A"
-                }
-            ],
-            "title": "Processing Rate by Stage (5m)",
-            "type": "timeseries"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "custom": {
-                        "axisLabel": "Batch Count",
-                        "axisPlacement": "auto",
-                        "drawStyle": "bars",
-                        "fillOpacity": 50,
-                        "gradientMode": "none",
-                        "lineInterpolation": "linear",
-                        "lineWidth": 1,
-                        "pointSize": 5,
-                        "showPoints": "auto",
-                        "spanNulls": false,
-                        "stacking": {
-                            "group": "A",
-                            "mode": "normal"
-                        },
-                        "thresholdsStyle": {
-                            "mode": "off"
-                        }
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            }
-                        ]
-                    }
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 12,
-                "y": 4
-            },
-            "id": 6,
-            "options": {
-                "legend": {
-                    "calcs": [
-                        "sum"
-                    ],
-                    "displayMode": "table",
-                    "placement": "bottom"
-                },
-                "tooltip": {
-                    "mode": "multi",
-                    "sort": "desc"
-                }
-            },
-            "targets": [
-                {
-                    "expr": "sum(increase(bioetl_batch_size_records_count{pipeline=~\"$pipeline\", run_id=~\"$run_id\"}[5m])) by (stage)",
-                    "legendFormat": "{{stage}}",
-                    "refId": "A"
-                }
-            ],
-            "title": "Batch Count by Stage (5m)",
-            "type": "timeseries"
-        },
-        {
-            "datasource": "Prometheus",
-            "fieldConfig": {
-                "defaults": {
-                    "color": {
-                        "mode": "palette-classic"
-                    },
-                    "custom": {
-                        "axisLabel": "Records",
-                        "axisPlacement": "auto",
-                        "drawStyle": "line",
-                        "fillOpacity": 10,
-                        "gradientMode": "none",
-                        "lineInterpolation": "linear",
-                        "lineWidth": 1,
-                        "pointSize": 5,
-                        "showPoints": "auto",
-                        "spanNulls": false,
-                        "stacking": {
-                            "group": "A",
-                            "mode": "none"
-                        },
-                        "thresholdsStyle": {
-                            "mode": "off"
-                        }
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green",
-                                "value": null
-                            }
-                        ]
-                    }
-                },
-                "overrides": []
-            },
-            "gridPos": {
-                "h": 8,
-                "w": 12,
-                "x": 0,
-                "y": 12
-            },
-            "id": 7,
-            "options": {
-                "legend": {
-                    "calcs": [
-                        "mean",
-                        "max"
-                    ],
-                    "displayMode": "table",
-                    "placement": "bottom"
-                },
-                "tooltip": {
-                    "mode": "multi",
-                    "sort": "desc"
-                }
-            },
-            "targets": [
-                {
-                    "expr": "histogram_quantile(0.50, rate(bioetl_batch_size_records_bucket{pipeline=~\"$pipeline\", run_id=~\"$run_id\"}[5m]))",
-                    "legendFormat": "p50",
-                    "refId": "A"
-                },
-                {
-                    "expr": "histogram_quantile(0.95, rate(bioetl_batch_size_records_bucket{pipeline=~\"$pipeline\", run_id=~\"$run_id\"}[5m]))",
-                    "legendFormat": "p95",
-                    "refId": "B"
-                },
-                {
-                    "expr": "histogram_quantile(0.99, rate(bioetl_batch_size_records_bucket{pipeline=~\"$pipeline\", run_id=~\"$run_id\"}[5m]))",
-                    "legendFormat": "p99",
-                    "refId": "C"
-                }
-            ],
-            "title": "Batch Size Percentiles (p50/p95/p99)",
-            "type": "timeseries"
         },
         {
             "datasource": "Prometheus",
@@ -471,29 +383,31 @@
                         }
                     },
                     "mappings": [],
-                    "unit": "short"
+                    "unit": "short",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
                 },
                 "overrides": []
             },
             "gridPos": {
-                "h": 8,
+                "h": 3,
                 "w": 12,
                 "x": 12,
-                "y": 12
+                "y": 0
             },
-            "id": 8,
+            "id": 101,
             "options": {
-                "displayLabels": [
-                    "percent"
-                ],
-                "legend": {
-                    "displayMode": "table",
-                    "placement": "right",
-                    "values": [
-                        "value"
-                    ]
-                },
-                "pieType": "pie",
+                "colorMode": "background",
+                "graphMode": "none",
+                "justifyMode": "center",
+                "orientation": "auto",
                 "reduceOptions": {
                     "calcs": [
                         "lastNotNull"
@@ -501,20 +415,17 @@
                     "fields": "",
                     "values": false
                 },
-                "tooltip": {
-                    "mode": "single",
-                    "sort": "none"
-                }
+                "textMode": "auto"
             },
             "targets": [
                 {
-                    "expr": "sum(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_id=~\"$run_id\"}) by (stage)",
-                    "legendFormat": "{{stage}}",
+                    "expr": "min(bioetl_records_processed_created{pipeline=~\"$pipeline\", run_type=~\"$run_type\"})",
+                    "legendFormat": "Start Time",
                     "refId": "A"
                 }
             ],
-            "title": "Records Distribution by Stage",
-            "type": "piechart"
+            "title": "Execution Timestamp",
+            "type": "stat"
         }
     ],
     "refresh": "30s",
@@ -523,10 +434,9 @@
     "tags": [
         "bioetl",
         "overview",
-        "processing",
+        "pipeline",
         "v2",
-        "live",
-        "simple"
+        "latest-run"
     ],
     "templating": {
         "list": [
@@ -559,15 +469,15 @@
                 "allValue": null,
                 "current": {},
                 "datasource": "Prometheus",
-                "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_id)",
+                "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_type)",
                 "hide": 0,
                 "includeAll": true,
-                "label": "Run ID",
+                "label": "Run Type",
                 "multi": true,
-                "name": "run_id",
+                "name": "run_type",
                 "options": [],
                 "query": {
-                    "query": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_id)",
+                    "query": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_type)",
                     "refId": "StandardVariableQuery"
                 },
                 "refresh": 1,
@@ -583,7 +493,7 @@
         ]
     },
     "time": {
-        "from": "now-6h",
+        "from": "now-7d",
         "to": "now"
     },
     "timepicker": {
@@ -603,5 +513,5 @@
     "timezone": "",
     "title": "BioETL Overview v2",
     "uid": "bioetl-overview-v2",
-    "version": 1
+    "version": 2
 }
