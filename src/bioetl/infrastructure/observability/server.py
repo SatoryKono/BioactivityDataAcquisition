@@ -7,7 +7,10 @@ import time
 from threading import Lock
 from typing import TYPE_CHECKING
 
-from prometheus_client import start_http_server
+import os
+
+from prometheus_client import REGISTRY, start_http_server
+from prometheus_client.exposition import pushadd_to_gateway
 
 from bioetl.domain.exceptions import MetricsServerError
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
@@ -19,7 +22,12 @@ _SERVER_STARTED = False
 _SERVER_LOCK = Lock()
 
 # Re-export for backward compatibility
-__all__ = ["MetricsServerError", "reset_server_state", "start_metrics_server"]
+__all__ = [
+    "MetricsServerError",
+    "push_metrics_to_gateway",
+    "reset_server_state",
+    "start_metrics_server",
+]
 
 
 def _handle_port_in_use(
@@ -137,6 +145,44 @@ def start_metrics_server(
             except Exception as e:
                 return _handle_unexpected_error(port, e, fail_fast, logger)
 
+        return False
+
+
+def push_metrics_to_gateway(
+    gateway: str | None = None,
+    job: str = "bioetl",
+    logger: LoggerPort | None = None,
+) -> bool:
+    """Push current metrics to Prometheus Pushgateway.
+
+    Preserves metrics after batch pipeline exits so Grafana
+    dashboards continue to display data.
+
+    Args:
+        gateway: Pushgateway URL (default: from BIOETL_PUSHGATEWAY_URL
+                 env var, or 'localhost:9091').
+        job: Job label for pushed metrics.
+        logger: Structured logger.
+
+    Returns:
+        True if push succeeded, False otherwise.
+
+    """
+    if logger is None:
+        logger = NoOpLogger()
+
+    gateway = gateway or os.environ.get("BIOETL_PUSHGATEWAY_URL", "localhost:9091")
+
+    try:
+        pushadd_to_gateway(gateway, job=job, registry=REGISTRY)
+        logger.info("Metrics pushed to gateway", gateway=gateway, job=job)
+        return True
+    except Exception as e:
+        logger.warning(
+            "Failed to push metrics to gateway",
+            gateway=gateway,
+            error=str(e),
+        )
         return False
 
 

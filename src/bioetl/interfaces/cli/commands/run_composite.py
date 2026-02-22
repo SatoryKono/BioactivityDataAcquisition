@@ -26,6 +26,7 @@ from bioetl.interfaces.cli.commands.health_server_integration import (
 from bioetl.interfaces.cli.commands.metrics_server_integration import (
     ensure_metrics_server_started,
 )
+from bioetl.infrastructure.observability.server import push_metrics_to_gateway
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error, echo_info, echo_warning
 
@@ -260,6 +261,7 @@ def run_composite(
         echo_error("Unexpected error during composite execution", str(e))
         sys.exit(ExitCode.FAIL)
     finally:
+        push_metrics_to_gateway()
         if getattr(coro, "cr_frame", None) is not None:
             coro.close()
 
