@@ -46,6 +46,9 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("page_last", pa.string()),  # Unified: from last_page
         # === PUBLICATION_CROSSREF_FIELDS ===
         pa.field("publication_id", pa.string()),  # Primary key (provider)
+        pa.field("publication_doi", pa.string()),  # Cross-reference: DOI
+        pa.field("publication_pmid", pa.string()),  # Cross-reference: PubMed ID
+        pa.field("publication_pmc_id", pa.string()),  # Cross-reference: PMC ID
         pa.field("doi", pa.string()),
         pa.field("pmc_id", pa.string()),  # Not available from ChEMBL API (None values)
         pa.field("pmid", pa.string()),
@@ -117,6 +120,9 @@ CHEMBL_ACTIVITY_SCHEMA = pa.schema(
         pa.field("data_validity_description", pa.string()),
         pa.field("publication_id", pa.string()),
         pa.field("journal", pa.string()),
+        pa.field("publication_doi", pa.string()),  # Cross-reference: DOI
+        pa.field("publication_pmid", pa.string()),  # Cross-reference: PubMed ID
+        pa.field("publication_pmc_id", pa.string()),  # Cross-reference: PMC ID
         pa.field("publication_year", pa.int64()),
         pa.field("ligand_efficiency_bei", pa.float64()),
         pa.field("ligand_efficiency_le", pa.float64()),
@@ -361,10 +367,12 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         pa.field("language", pa.string()),
         pa.field("medline_pgn", pa.string()),  # Original PubMed pagination
         pa.field("mesh_heading_count", pa.int64()),
+        pa.field("mid", pa.string()),  # Manuscript ID (PMC submission)
         pa.field("nlm_unique_id", pa.string()),  # NLM catalog ID
         pa.field("page_first", pa.string()),
         pa.field("page_last", pa.string()),
         pa.field("page_range", pa.string()),  # Page range string
+        pa.field("pii", pa.string()),  # Publisher Item Identifier
         pa.field("pmc_id", pa.string()),
         pa.field("pmid", pa.string()),
         pa.field("pub_date", pa.string()),
@@ -383,6 +391,7 @@ PUBMED_PUBLICATION_SCHEMA = pa.schema(
         ),  # Level 3: "Journal Article", etc.
         pa.field("publication_types", pa.list_(pa.string())),
         pa.field("publication_year", pa.int64()),
+        pa.field("publisher_id", pa.string()),  # Publisher-specific identifier
         pa.field("subject_keywords", pa.list_(pa.string())),  # Author keywords
         pa.field("subject_mesh", pa.list_(pa.string())),  # MeSH terms
         pa.field("title", pa.string()),
@@ -772,6 +781,7 @@ SEMANTICSCHOLAR_PUBLICATION_SCHEMA = pa.schema(
         pa.field("author_keys", pa.string()),  # Pipe-delimited Surname_F keys
         pa.field("author_orcids", pa.string()),
         pa.field("author_s2_ids", pa.string()),  # JSON array of S2 author IDs
+        pa.field("authors", pa.string()),  # JSON-serialized list
         pa.field("citation_contexts", pa.string()),  # JSON array of context sentences
         pa.field("citations_made", pa.int64()),  # Unified: from referenceCount
         pa.field("citations_received", pa.int64()),  # Unified: from citationCount
