@@ -1,46 +1,18 @@
 # configs/pipelines/chembl/activity.yaml
-# =============================================================================
-# ChEMBL Activity Pipeline Configuration
-# =============================================================================
-# Minimal config using convention-based path resolution (ADR-029).
-# Inherits from _base.yaml with paths/filters auto-computed from provider/entity.
-#
-# Auto-computed by convention:
-#   - source_file: ../../sources/chembl.yaml
-#   - dq_config_file: ../../quality/entities/chembl/activity.yaml
-#   - filter_config_file: ../../filters/entities/chembl/activity.yaml
-#   - input_filter: loaded from filter_config_file
-#   - gold_filters: loaded from filter_config_file
-#   - sink paths: data/output/{layer}/chembl/activity
+# ChEMBL Activity — inherits from _base.yaml.
+# DQ & Filters: loaded via hierarchy (ADR-027/028/029).
 
 pipeline_name: chembl_activity
 provider: chembl
 entity_type: activity
 schema_file: ../../schemas/chembl/activity.yaml
-version: "1.2.0"
 description: "Extract biological activity records from ChEMBL API"
 
 business_primary_keys: [ "activity_id" ]
-technical_primary_key: "entity_id"
-loading_strategy: null
-silver_table: "chembl_activity"
-gold_table: "chembl_activity"
+# Override: large dataset requires bigger batches for throughput
 batch_size: 1000
-# Pagination: source config is the authority (configs/sources/chembl.yaml).
-# filter_batch_size removed — use source pagination.id_batch_size instead.
-# page_size_override only if this pipeline needs a different page size.
 
-# -----------------------------------------------------------------------------
-# Sink Configuration (ADR-014, ADR-025)
-# -----------------------------------------------------------------------------
-sink:
-    silver: { }
-    gold: { }
-
-# -----------------------------------------------------------------------------
-# DQ Configuration (ADR-027)
-# -----------------------------------------------------------------------------
-# Only rules that EXTEND or DIFFER from configs/quality/entities/chembl/activity.yaml
+# Only rules that EXTEND or DIFFER from configs/quality/entities/chembl/activity.yaml.
 # Redundant rules (same as entity config) have been removed per ADR-027.
 dq_overrides:
     field_validations:

@@ -1,33 +1,13 @@
 # configs/pipelines/chembl/tissue.yaml
-# Pipeline configuration for ChEMBL Tissue entity.
-#
-# Inherits defaults from ../_base.yaml
+# ChEMBL Tissue — inherits all defaults from _base.yaml.
+# DQ & Filters: loaded via hierarchy (ADR-027/028/029).
 
 pipeline_name: chembl_tissue
 provider: chembl
 entity_type: tissue
 schema_file: ../../schemas/chembl/tissue.yaml
+# Override: v1.0.0 initial schema, not yet aligned with v1.2.0 standard
 version: "1.0.0"
 description: "Extract tissues from ChEMBL API"
 
 business_primary_keys: ["tissue_id"]
-technical_primary_key: "entity_id"
-silver_table: "chembl_tissue"
-gold_table: "chembl_tissue"
-
-
-# -----------------------------------------------------------------------------
-# Data Quality Configuration (ADR-027)
-# -----------------------------------------------------------------------------
-
-# Entity-specific sink overrides
-sink:
-  bronze: {}
-  silver: {}
-  gold:
-    mode: scd2
-    scd_config:
-      valid_from: _valid_from
-      valid_to: _valid_to
-      is_current: _is_current
-      version: _version

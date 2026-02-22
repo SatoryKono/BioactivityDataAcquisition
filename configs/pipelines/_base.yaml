@@ -1,28 +1,25 @@
-# Base pipeline config format (defaults only).
-# Full documentation: docs/03-guides/CONFIG-GUIDE.md
+# =============================================================================
+# Base Pipeline Configuration — Single Source of Truth for defaults
+# =============================================================================
+# All entity pipeline configs inherit from this file.
+# Override only 1-3 params per entity with "# Override: <reason>" comment.
+#
+# DQ config: loaded from configs/quality/ hierarchy (ADR-027)
+# Filter config: loaded from configs/filters/ hierarchy (ADR-028)
+# Paths: auto-resolved by convention (ADR-029)
+# =============================================================================
+
+version: "1.2.0"
+technical_primary_key: "entity_id"
 
 source: {}
 
 transform:
   steps: []
 
-dq_overrides:
-  soft_fail_threshold: 0.05
-  hard_fail_threshold: 0.20
-  strict_validation: false
-  field_validations: []
-  cross_field_validations: []
-  conditional_validations: []
-  invalid_record_policy: "quarantine"
-  report:
-    enabled: true
-    format: "json"
-    include_sample_failures: true
-    sample_size: 10
-
-circuit_breaker:
-  failure_threshold: 5
-  recovery_timeout: 300
+# DQ defaults: loaded from configs/quality/_defaults.yaml by DQConfigLoader.
+# Do NOT duplicate thresholds here. Override per-entity via dq_overrides if needed.
+dq_overrides: {}
 
 sink:
   bronze:
@@ -50,7 +47,12 @@ sink:
   gold:
     enabled: true
     format: delta
-    mode: append
+    mode: scd2
+    scd_config:
+      valid_from: _valid_from
+      valid_to: _valid_to
+      is_current: _is_current
+      version: _version
     deterministic: true
     save_metadata: true
     dq_report:

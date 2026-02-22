@@ -1,46 +1,11 @@
 # configs/pipelines/chembl/cell_line.yaml
-# Pipeline configuration for ChEMBL Cell Line entity.
-#
-# Inherits defaults from ../_base.yaml
+# ChEMBL Cell Line — inherits all defaults from _base.yaml.
+# DQ & Filters: loaded via hierarchy (ADR-027/028/029).
 
 pipeline_name: chembl_cell_line
 provider: chembl
 entity_type: cell_line
 schema_file: ../../schemas/chembl/cell_line.yaml
-version: "1.2.0"
 description: "Extract cell lines from ChEMBL API"
 
 business_primary_keys: ["cell_id"]
-technical_primary_key: "entity_id"
-silver_table: "chembl_cell_line"
-gold_table: "chembl_cell_line"
-
-
-# -----------------------------------------------------------------------------
-# Data Quality Configuration (ADR-027)
-# -----------------------------------------------------------------------------
-# DQ rules are loaded from hierarchical config files:
-#   1. configs/quality/_defaults.yaml (global defaults)
-#   2. configs/quality/providers/chembl.yaml (provider-specific)
-#   3. configs/quality/entities/chembl/cell_line.yaml (entity-specific)
-
-# -----------------------------------------------------------------------------
-# Filter Configuration (ADR-028)
-# -----------------------------------------------------------------------------
-# Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filters/_defaults.yaml (global defaults)
-#   2. configs/filters/providers/chembl.yaml (provider-specific)
-#   3. configs/filters/entities/chembl/cell_line.yaml (entity-specific)
-# Add inline overrides below only when extending/differing from entity filter config.
-
-# Entity-specific sink overrides
-sink:
-  bronze: {}
-  silver: {}
-  gold:
-    mode: scd2
-    scd_config:
-      valid_from: _valid_from
-      valid_to: _valid_to
-      is_current: _is_current
-      version: _version
