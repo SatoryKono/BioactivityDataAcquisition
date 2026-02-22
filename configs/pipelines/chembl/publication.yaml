@@ -1,68 +1,20 @@
 # configs/pipelines/chembl/publication.yaml
-# Pipeline configuration for ChEMBL Publication entity.
-#
-# Inherits defaults from ../_base.yaml
+# ChEMBL Publication — inherits from _base.yaml.
+# DQ & Filters: loaded via hierarchy (ADR-027/028/029).
 # Note: entity_type=publication maps to ChEMBL API /document endpoint (ADR-024 naming)
 
 pipeline_name: chembl_publication
 provider: chembl
 entity_type: publication
 schema_file: ../../schemas/chembl/publication.yaml
+# Override: v2.1.0 schema redesign after ADR-024 naming migration
 version: "2.1.0"
 description: "Extract scientific publications from ChEMBL API"
 
-# Pagination override: smaller page for publication entities (full_scan_only).
-# Source pagination strategy defined in configs/sources/chembl.yaml.
+# Override: smaller page size for publication endpoint (full_scan_only strategy)
 page_size_override: 16
 
-# Loading strategy (ADR-030, ADR-031)
-# Publication entities require full scan on each run due to API offset instability.
-# Deduplication is handled on Silver layer via content_hash.
-# - full_scan_only: Explicit strategy disabling checkpoint resume
-# - watermark_based: Placeholder for future incremental loading (not implemented)
+# Override: full_scan required — API doesn't support stable incremental cursors
 loading_strategy: full_scan_only
 
 business_primary_keys: ["publication_id"]
-technical_primary_key: "entity_id"
-silver_table: "chembl_publication"
-gold_table: "chembl_publication"
-
-
-# -----------------------------------------------------------------------------
-# Data Quality Configuration (ADR-027)
-# -----------------------------------------------------------------------------
-# DQ rules are loaded from hierarchical config files:
-#   1. configs/quality/_defaults.yaml (global defaults)
-#   2. configs/quality/providers/chembl.yaml (provider-specific)
-#   3. configs/quality/entities/chembl/publication.yaml (entity-specific)
-
-# -----------------------------------------------------------------------------
-# Filter Configuration (ADR-028)
-# -----------------------------------------------------------------------------
-# Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filters/_defaults.yaml (global defaults)
-#   2. configs/filters/providers/chembl.yaml (provider-specific)
-#   3. configs/filters/entities/chembl/publication.yaml (entity-specific)
-# Add inline overrides below only when extending/differing from entity filter config.
-
-# -----------------------------------------------------------------------------
-# Data Schema Configuration (Column Ordering)
-# -----------------------------------------------------------------------------
-# Use data_schema_file for layer-specific column configuration (silver/gold).
-# Falls back to column_groups_file if data_schema_file not specified.
-
-# Entity-specific sink overrides
-# Note: dq_report.enabled inherited from _base.yaml for all layers
-sink:
-  bronze:
-    flat_structure: true  # Files written directly under path/{date}/, without provider/entity subdirs
-  silver:
-    flat_structure: true  # Delta directly in path, files named {table}_*.ext
-  gold:
-    mode: scd2
-    scd_config:
-      valid_from: _valid_from
-      valid_to: _valid_to
-      is_current: _is_current
-      version: _version
-    flat_structure: true  # Delta directly in path, files named {table}_*.ext

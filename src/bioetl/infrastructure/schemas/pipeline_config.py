@@ -705,7 +705,10 @@ class PipelineYamlConfig(BaseModel):
         default=None,
         description="Deprecated alias for business_primary_keys (kept for migration).",
     )
-    silver_table: str = Field(min_length=1)
+    silver_table: str = Field(
+        default="",
+        description="Silver table name. Auto-computed as {provider}_{entity_type} if empty.",
+    )
     gold_table: str | None = Field(default=None, min_length=1)
     silver_filters: GoldFiltersConfig = Field(default_factory=GoldFiltersConfig)
     gold_filters: GoldFiltersConfig = Field(default_factory=GoldFiltersConfig)

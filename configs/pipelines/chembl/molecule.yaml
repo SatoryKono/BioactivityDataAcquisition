@@ -1,53 +1,16 @@
 # configs/pipelines/chembl/molecule.yaml
-# Pipeline configuration for ChEMBL Molecule entity.
-#
-# Inherits defaults from ../_base.yaml
+# ChEMBL Molecule — inherits from _base.yaml.
+# DQ & Filters: loaded via hierarchy (ADR-027/028/029).
 
 pipeline_name: chembl_molecule
 provider: chembl
 entity_type: molecule
 schema_file: ../../schemas/chembl/molecule.yaml
-version: "1.2.0"
 description: "Extract molecules/compounds from ChEMBL API"
 
 business_primary_keys: ["molecule_id"]
-technical_primary_key: "entity_id"
-silver_table: "chembl_molecule"
-gold_table: "chembl_molecule"
 
-
-# -----------------------------------------------------------------------------
-# Data Quality Configuration (ADR-027)
-# -----------------------------------------------------------------------------
-# DQ rules are loaded from hierarchical config files:
-#   1. configs/quality/_defaults.yaml (global defaults)
-#   2. configs/quality/providers/chembl.yaml (provider-specific)
-#   3. configs/quality/entities/chembl/molecule.yaml (entity-specific)
-
-# -----------------------------------------------------------------------------
-# Filter Configuration (ADR-028)
-# -----------------------------------------------------------------------------
-# Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filters/_defaults.yaml (global defaults)
-#   2. configs/filters/providers/chembl.yaml (provider-specific)
-#   3. configs/filters/entities/chembl/molecule.yaml (entity-specific)
-# Add inline overrides below only when extending/differing from entity filter config.
-
-# -----------------------------------------------------------------------------
-# DQ Configuration (ADR-027)
-# -----------------------------------------------------------------------------
-# All DQ rules externalized to configs/quality/entities/chembl/molecule.yaml.
-# No inline overrides needed — entity config is authoritative.
-
-# Entity-specific sink overrides
 sink:
-  bronze: {}
   silver:
+    # Override: partition by molecule_type for efficient type-specific queries
     partition_by: ["molecule_type"]
-  gold:
-    mode: scd2
-    scd_config:
-      valid_from: _valid_from
-      valid_to: _valid_to
-      is_current: _is_current
-      version: _version

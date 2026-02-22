@@ -1,40 +1,18 @@
 # configs/pipelines/chembl/assay.yaml
-# =============================================================================
-# ChEMBL Assay Pipeline Configuration
-# =============================================================================
-# Minimal config using convention-based path resolution (ADR-029).
-# Inherits from _base.yaml with paths/filters auto-computed from provider/entity.
-#
-# Auto-computed by convention (see _base.yaml for full list)
+# ChEMBL Assay — inherits from _base.yaml.
+# DQ & Filters: loaded via hierarchy (ADR-027/028/029).
 
 pipeline_name: chembl_assay
 provider: chembl
 entity_type: assay
 schema_file: ../../schemas/chembl/assay.yaml
-version: "1.2.0"
 description: "Extract bioassay definitions from ChEMBL API"
 
 business_primary_keys: [ "assay_id" ]
-technical_primary_key: "entity_id"
-silver_table: "chembl_assay"
-gold_table: "chembl_assay"
+# Override: large dataset requires bigger batches for throughput
 batch_size: 1000
-# -----------------------------------------------------------------------------
-# DQ Configuration (ADR-027)
-# -----------------------------------------------------------------------------
-# All DQ rules externalized to configs/quality/entities/chembl/assay.yaml.
-# No inline overrides needed — entity config is authoritative.
 
-# -----------------------------------------------------------------------------
-# Sink Overrides (only non-convention values)
-# -----------------------------------------------------------------------------
 sink:
-    silver:
-        partition_by: [ "assay_type" ]
-    gold:
-        mode: scd2
-        scd_config:
-            valid_from: _valid_from
-            valid_to: _valid_to
-            is_current: _is_current
-            version: _version
+  silver:
+    # Override: partition by assay_type for efficient type-specific queries
+    partition_by: [ "assay_type" ]

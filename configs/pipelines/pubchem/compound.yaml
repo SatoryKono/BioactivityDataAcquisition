@@ -1,53 +1,16 @@
 # configs/pipelines/pubchem/compound.yaml
-# Pipeline configuration for PubChem Compound entity.
-#
-# Inherits defaults from ../_base.yaml
+# PubChem Compound — inherits from _base.yaml.
+# DQ & Filters: loaded via hierarchy (ADR-027/028/029).
 
 pipeline_name: pubchem_compound
 provider: pubchem
 entity_type: compound
 schema_file: ../../schemas/pubchem/compound.yaml
-version: "1.2.0"
 description: "Pipeline for ingesting PubChem compounds"
 
 business_primary_keys: ["molecule_id"]
-technical_primary_key: "entity_id"
-silver_table: "pubchem_compound"
-gold_table: "pubchem_compound"
 
-
-# -----------------------------------------------------------------------------
-# Data Quality Configuration (ADR-027)
-# -----------------------------------------------------------------------------
-# DQ rules are loaded from hierarchical config files:
-#   1. configs/quality/_defaults.yaml (global defaults)
-#   2. configs/quality/providers/pubchem.yaml (provider-specific)
-#   3. configs/quality/entities/pubchem/compound.yaml (entity-specific)
-
-# -----------------------------------------------------------------------------
-# Filter Configuration (ADR-028)
-# -----------------------------------------------------------------------------
-# Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filters/_defaults.yaml (global defaults)
-#   2. configs/filters/providers/pubchem.yaml (provider-specific)
-#   3. configs/filters/entities/pubchem/compound.yaml (entity-specific)
-# Add inline overrides below only when extending/differing from entity filter config.
-
-# -----------------------------------------------------------------------------
-# DQ Configuration (ADR-027)
-# -----------------------------------------------------------------------------
-# All DQ rules externalized to configs/quality/entities/pubchem/compound.yaml.
-# No inline overrides needed — entity config is authoritative.
-
-# Entity-specific sink overrides
 sink:
-  bronze: {}
   silver:
+    # Override: partition by batch_date for efficient date-range queries
     partition_by: ["batch_date"]
-  gold:
-    mode: scd2
-    scd_config:
-      valid_from: _valid_from
-      valid_to: _valid_to
-      is_current: _is_current
-      version: _version
