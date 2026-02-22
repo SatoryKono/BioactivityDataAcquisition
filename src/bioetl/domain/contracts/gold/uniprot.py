@@ -41,7 +41,9 @@ class UniProtProteinGoldSchema(pa.DataFrameModel):
     glycosylation: Series[str] = pa.Field(nullable=True)  # PTM: glycosylation sites
     intramembrane: Series[str] = pa.Field(nullable=True)  # Structural: intramembrane
     lipidation: Series[str] = pa.Field(nullable=True)  # PTM: lipidation sites
-    modified_residue: Series[str] = pa.Field(nullable=True)  # PTM: all modified residues
+    modified_residue: Series[str] = pa.Field(
+        nullable=True
+    )  # PTM: all modified residues
     phosphorylation: Series[str] = pa.Field(nullable=True)  # PTM: phosphorylation sites
     propeptide: Series[str] = pa.Field(nullable=True)  # Structural: propeptide
     signal_peptide: Series[str] = pa.Field(nullable=True)  # Structural: signal peptide
