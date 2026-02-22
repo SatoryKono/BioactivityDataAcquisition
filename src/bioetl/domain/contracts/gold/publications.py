@@ -128,6 +128,12 @@ class PubMedPublicationGoldSchema(pa.DataFrameModel):
     citations_made: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     chemical_count: Series[float] = pa.Field(nullable=True, coerce=True)
 
+    # Publication classification (unified taxonomy)
+    pub_date: Series[str] = pa.Field(nullable=True)
+    publication_class: Series[str] = pa.Field(nullable=True)
+    publication_subclass: Series[str] = pa.Field(nullable=True)
+    publication_type_unified: Series[str] = pa.Field(nullable=True)
+
     source: Series[str] = pa.Field(nullable=False, alias="_source")
 
     # Lookup metadata
@@ -167,10 +173,13 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     # doi: Digital Object Identifier (lowercase, without "https://doi.org/") - Primary key
     doi: Series[str] = pa.Field(nullable=False, str_matches=DOI_REGEX_PATTERN)
 
-    # Note: pmid and pmc_id excluded - CrossRef API doesn't provide PubMed identifiers
-    # and transformer explicitly removes these fields from output
+    # PubMed identifiers (None values — CrossRef doesn't provide these)
+    pmid: Series[str] = pa.Field(nullable=True)
+    pmc_id: Series[str] = pa.Field(nullable=True)
 
     # Core fields
+    abstract: Series[str] = pa.Field(nullable=True)
+    affiliation_list: Series[str] = pa.Field(nullable=True)  # JSON array
     title: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
     journal: Series[str] = pa.Field(nullable=True)
@@ -195,6 +204,9 @@ class CrossRefPublicationGoldSchema(pa.DataFrameModel):
     publication_type: Series[str] = pa.Field(
         nullable=True
     )  # Raw CrossRef type (journal-article, etc.)
+    publication_type_unified: Series[str] = pa.Field(nullable=True)
+    publication_subclass: Series[str] = pa.Field(nullable=True)
+    publication_class: Series[str] = pa.Field(nullable=True)
     citations_received: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     citations_made: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     language: Series[str] = pa.Field(nullable=True)
@@ -275,7 +287,7 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     doi: Series[str] = pa.Field(nullable=True, str_matches=DOI_REGEX_PATTERN)
     # pmid: PubMed ID (numeric string: "12345678")
     pmid: Series[str] = pa.Field(nullable=True)
-    # Note: pmc_id excluded from transformer output per design
+    pmc_id: Series[str] = pa.Field(nullable=True)
     title: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)  # JSON-serialized list
@@ -307,6 +319,9 @@ class OpenAlexPublicationGoldSchema(pa.DataFrameModel):
     publication_type: Series[str] = pa.Field(
         nullable=True
     )  # Raw OpenAlex type (article, etc.)
+    publication_type_unified: Series[str] = pa.Field(nullable=True)
+    publication_subclass: Series[str] = pa.Field(nullable=True)
+    publication_class: Series[str] = pa.Field(nullable=True)
     is_oa: Series[bool] = pa.Field(nullable=True, coerce=True)
     oa_status: Series[str] = pa.Field(nullable=True, isin=OA_STATUS_VALUES)
     is_retracted: Series[bool] = pa.Field(
@@ -383,7 +398,7 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     # External IDs
     doi: Series[str] = pa.Field(nullable=True, str_matches=DOI_REGEX_PATTERN)
     pmid: Series[str] = pa.Field(nullable=True)
-    # Note: pmc_id and arxiv_id excluded from transformer output per design
+    pmc_id: Series[str] = pa.Field(nullable=True)
     corpus_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64
 
     # Core fields
@@ -422,6 +437,9 @@ class SemanticScholarPublicationGoldSchema(pa.DataFrameModel):
     # Classification (JSON strings)
     subject_fields: Series[str] = pa.Field(nullable=True)
     publication_type: Series[str] = pa.Field(nullable=True)
+    publication_type_unified: Series[str] = pa.Field(nullable=True)
+    publication_subclass: Series[str] = pa.Field(nullable=True)
+    publication_class: Series[str] = pa.Field(nullable=True)
     publication_types: Series[str] = pa.Field(nullable=True)  # JSON array
     citation_contexts: Series[str] = pa.Field(nullable=True)  # JSON array
 

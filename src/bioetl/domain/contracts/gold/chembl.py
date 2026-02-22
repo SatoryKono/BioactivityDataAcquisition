@@ -117,6 +117,18 @@ class ChEMBLActivityGoldSchema(pa.DataFrameModel):
     activity_properties: Series[str] = pa.Field(nullable=True)
     toid: Series[float] = pa.Field(nullable=True, coerce=True)  # int64 in Silver
 
+    # Curation metadata
+    manual_curation_flag: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # int64 in Silver
+    original_activity_id: Series[float] = pa.Field(
+        nullable=True, coerce=True
+    )  # int64 in Silver
+
+    # DQ fields
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
+
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
     run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
@@ -173,6 +185,10 @@ class ChEMBLAssayGoldSchema(pa.DataFrameModel):
     assay_classifications: Series[str] = pa.Field(nullable=True)
     assay_parameters: Series[str] = pa.Field(nullable=True)
 
+    # DQ fields
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
+
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
     run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
@@ -221,6 +237,10 @@ class ChEMBLAssayParametersGoldSchema(pa.DataFrameModel):
     standard_units: Series[str] = pa.Field(nullable=True)
     standard_text_value: Series[str] = pa.Field(nullable=True)
 
+    # DQ fields
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
+
     # Lineage metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
     run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
@@ -260,6 +280,10 @@ class ChEMBLCellLineGoldSchema(pa.DataFrameModel):
     cl_lincs_id: Series[str] = pa.Field(nullable=True)
     efo_id: Series[str] = pa.Field(nullable=True)
 
+    # DQ fields
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
+
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
     run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
@@ -295,6 +319,10 @@ class ChEMBLCompoundRecordGoldSchema(pa.DataFrameModel):
     src_id: Series[float] = pa.Field(nullable=False, coerce=True)  # int64 in Silver
     src_compound_id: Series[str] = pa.Field(nullable=True)
 
+    # DQ fields
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
+
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
     run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
@@ -318,17 +346,30 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     publication_doi: Series[str] = pa.Field(nullable=True)
     publication_pmid: Series[str] = pa.Field(nullable=True)
     publication_pmc_id: Series[str] = pa.Field(nullable=True)
+    # Raw identifiers (from Silver)
+    doi: Series[str] = pa.Field(nullable=True)
+    pmc_id: Series[str] = pa.Field(nullable=True)
+    pmid: Series[str] = pa.Field(nullable=True)
     # patent_id excluded from unified publication schema
     title: Series[str] = pa.Field(nullable=True)
     authors: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
+    affiliation_list: Series[str] = pa.Field(nullable=True)  # JSON array
+    author_keys: Series[str] = pa.Field(nullable=True)  # Pipe-delimited Surname_F keys
+    author_orcids: Series[str] = pa.Field(nullable=True)
     publication_type: Series[str] = pa.Field(nullable=True)
+    publication_type_unified: Series[str] = pa.Field(nullable=True)
+    publication_subclass: Series[str] = pa.Field(nullable=True)
+    publication_class: Series[str] = pa.Field(nullable=True)
+    publication_date: Series[str] = pa.Field(nullable=True)
     journal: Series[str] = pa.Field(nullable=True)
     publication_year: Series[float] = pa.Field(nullable=True, coerce=True)
     volume: Series[str] = pa.Field(nullable=True)
     issue: Series[str] = pa.Field(nullable=True)
     page_first: Series[str] = pa.Field(nullable=True)
     page_last: Series[str] = pa.Field(nullable=True)
+    language: Series[str] = pa.Field(nullable=True)
+    is_oa: Series[bool] = pa.Field(nullable=True)
     citations_received: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     citations_made: Series[float] = pa.Field(nullable=True, ge=0, coerce=True)
     src_id: Series[float] = pa.Field(nullable=True, coerce=True)
@@ -336,8 +377,6 @@ class ChEMBLDocumentGoldSchema(pa.DataFrameModel):
     # ChEMBL release metadata
     chembl_release: Series[str] = pa.Field(nullable=True)
     creation_date: Series[str] = pa.Field(nullable=True)
-
-    # Примечание: citation_count маппится в citations_received; is_oa и language исключены
 
     # System field (per SYSTEM_FIELDS_PREFIX)
     source: Series[str] = pa.Field(nullable=True, alias="_source")
@@ -394,6 +433,10 @@ class ChEMBLDocumentSimilarityGoldSchema(pa.DataFrameModel):
     avg_tani: Series[float] = pa.Field(nullable=True, ge=0, le=1, coerce=True)
     max_tani: Series[float] = pa.Field(nullable=True, ge=0, le=1, coerce=True)
 
+    # DQ fields
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
+
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
     run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
@@ -426,6 +469,10 @@ class ChEMBLDocumentTermGoldSchema(pa.DataFrameModel):
     # MeSH-specific fields
     mesh_id: Series[str] = pa.Field(nullable=True)
     qualifier: Series[str] = pa.Field(nullable=True)
+
+    # DQ fields
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -499,6 +546,10 @@ class ChEMBLMoleculeGoldSchema(pa.DataFrameModel):
     standard_inchi: Series[str] = pa.Field(nullable=True)
     inchi_key: Series[str] = pa.Field(nullable=True)
 
+    # DQ fields
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
+
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
     run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
@@ -541,6 +592,10 @@ class ChEMBLProteinClassGoldSchema(pa.DataFrameModel):
     replaced_by: Series[float] = pa.Field(nullable=True, ge=1, coerce=True)
     downgraded: Series[float] = pa.Field(nullable=True, isin=[0, 1], coerce=True)
 
+    # DQ fields
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
+
     # Lineage metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
     run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
@@ -579,7 +634,12 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
     )  # int → float (nullable)
     component_ids: Series[str] = pa.Field(nullable=True)  # list[int]
     component_types: Series[str] = pa.Field(nullable=True)  # list[str]
+    component_descriptions: Series[str] = pa.Field(nullable=True)
     component_relationships: Series[str] = pa.Field(nullable=True)  # list[str]
+
+    # DQ fields
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -617,6 +677,10 @@ class ChEMBLTargetComponentGoldSchema(pa.DataFrameModel):
     )  # int → float (nullable)
     protein_classification_ids: Series[str] = pa.Field(nullable=True)  # list[int]
 
+    # DQ fields
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
+
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
     run_type: Series[str] = pa.Field(nullable=False, alias="_run_type")
@@ -638,6 +702,10 @@ class ChEMBLTissueGoldSchema(pa.DataFrameModel):
     - pref_name: Required, non-empty
     - Ontology IDs: Optional, format validation
     """
+
+    # System fields
+    entity_id: Series[str] = pa.Field(nullable=False)
+    content_hash: Series[str] = pa.Field(nullable=False)
 
     # Primary key (transformer maps tissue_chembl_id → tissue_id)
     tissue_id: Series[str] = pa.Field(
@@ -674,6 +742,10 @@ class ChEMBLTissueGoldSchema(pa.DataFrameModel):
         str_matches=r"^UBERON:\d{7}$",
         description="Uberon Ontology ID",
     )
+
+    # DQ fields
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -720,10 +792,14 @@ class ChEMBLSubcellularFractionGoldSchema(pa.DataFrameModel):
     )
 
     # Example reference
-    example_assay_chembl_id: Series[str] = pa.Field(
+    example_assay_id: Series[str] = pa.Field(
         nullable=True,
         description="Example assay ChEMBL ID",
     )
+
+    # DQ fields
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")

@@ -13,7 +13,7 @@ Scope: inferred Bronze CSV samples + Silver Pandera + Silver PyArrow + Gold cont
 | `_source_batch_id` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `abstract` | `null` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `accession` | `null|string` (nullable) | `str` (not-null) | `string` (nullable) | `str` (not-null) |
-| `acetylation` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | — |
+| `acetylation` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `action_type` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `action_type_description` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `action_type_parent_type` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
@@ -52,7 +52,7 @@ Scope: inferred Bronze CSV samples + Silver Pandera + Silver PyArrow + Gold cont
 | `author_openalex_ids` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `author_orcids` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `author_s2_ids` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
-| `authors` | `null|string` (nullable) | `str` (nullable) | — | `str` (nullable) |
+| `authors` | `null|string` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `authors_with_affiliations` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `bao_endpoint` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `bao_format` | `string` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
@@ -69,7 +69,7 @@ Scope: inferred Bronze CSV samples + Silver Pandera + Silver PyArrow + Gold cont
 | `cell_source_tissue` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `cell_type` | `unknown` (nullable) | `str` (nullable) | — | — |
 | `cellosaurus_id` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
-| `cellular_component` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | — |
+| `cellular_component` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `chembl_ids` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `chembl_release` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `chemicals` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
@@ -80,7 +80,7 @@ Scope: inferred Bronze CSV samples + Silver Pandera + Silver PyArrow + Gold cont
 | `cofactors` | `unknown` (nullable) | `str` (nullable) | — | — |
 | `comments` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `component_accessions` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
-| `component_descriptions` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | — |
+| `component_descriptions` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `component_ids` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `component_relationships` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `component_type` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
@@ -102,7 +102,7 @@ Scope: inferred Bronze CSV samples + Silver Pandera + Silver PyArrow + Gold cont
 | `definition` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `description` | `array|string` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `disease_involvement` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
-| `disulfide_bond` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | — |
+| `disulfide_bond` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `doi` | `string` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `domains` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `drugbank_ids` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
@@ -118,8 +118,8 @@ Scope: inferred Bronze CSV samples + Silver Pandera + Silver PyArrow + Gold cont
 | `gene_primary` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `gene_symbols` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `gene_synonyms` | `unknown` (nullable) | `str` (nullable) | — | — |
-| `genus` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | — |
-| `glycosylation` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | — |
+| `genus` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
+| `glycosylation` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `go_terms` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `grants` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `guidetopharmacology_ids` | `unknown` (nullable) | `str` (nullable) | — | — |
@@ -133,10 +133,10 @@ Scope: inferred Bronze CSV samples + Silver Pandera + Silver PyArrow + Gold cont
 | `institution_country_codes` | `unknown` (nullable) | `str` (nullable) | `list<item: string>` (nullable) | `str` (nullable) |
 | `institution_ids` | `unknown` (nullable) | `str` (nullable) | `list<item: string>` (nullable) | `str` (nullable) |
 | `interpro_xrefs` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
-| `intramembrane` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | — |
-| `isoform_ids` | `null|string` (nullable) | `str` (nullable) | `string` (nullable) | — |
-| `isoform_names` | `integer|null|string` (nullable) | `str` (nullable) | `string` (nullable) | — |
-| `isoform_synonyms` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | — |
+| `intramembrane` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
+| `isoform_ids` | `null|string` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
+| `isoform_names` | `integer|null|string` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
+| `isoform_synonyms` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `isomeric_smiles` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `issn` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `issn_electronic` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
@@ -152,16 +152,16 @@ Scope: inferred Bronze CSV samples + Silver Pandera + Silver PyArrow + Gold cont
 | `language` | `unknown` (nullable) | `str` (nullable) | — | — |
 | `license_url` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `lineage` | `unknown` (nullable) | `str` (nullable) | — | — |
-| `lipidation` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | — |
+| `lipidation` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `logp_method` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `mag_id` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `mapping_status` | `unknown` (nullable) | `str` (not-null) | `string` (nullable) | `str` (not-null) |
 | `medline_pgn` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `mesh_id` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
-| `mid` | `unknown` (nullable) | `str` (nullable) | — | `str` (nullable) |
-| `modified_residue` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | — |
+| `mid` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
+| `modified_residue` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `molecular_formula` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
-| `molecular_function` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | — |
+| `molecular_function` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `molecule_hierarchy` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `molecule_id` | `unknown` (nullable) | `str` (not-null) | `string` (nullable) | `str` (not-null) |
 | `molecule_pref_name` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
@@ -186,15 +186,15 @@ Scope: inferred Bronze CSV samples + Silver Pandera + Silver PyArrow + Gold cont
 | `pdb_xrefs` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `pfam_xrefs` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `pharmaceutical_use` | `unknown` (nullable) | `str` (nullable) | — | — |
-| `phosphorylation` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | — |
-| `phylum` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | — |
-| `pii` | `unknown` (nullable) | `str` (nullable) | — | `str` (nullable) |
+| `phosphorylation` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
+| `phylum` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
+| `pii` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `pipeline_stages` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
-| `pmc_id` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | — |
+| `pmc_id` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `pmid` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `pref_name` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `primary_topic` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
-| `propeptide` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | — |
+| `propeptide` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `protein_alternative_names` | `unknown` (nullable) | `str` (nullable) | — | — |
 | `protein_class_desc` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `protein_classification_ids` | `integer|string` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
@@ -203,30 +203,30 @@ Scope: inferred Bronze CSV samples + Silver Pandera + Silver PyArrow + Gold cont
 | `protein_existence` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `protein_name` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `protein_short_names` | `unknown` (nullable) | `str` (nullable) | — | — |
-| `pub_date` | `unknown` (nullable) | — | `string` (nullable) | — |
-| `publication_class` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | — |
+| `pub_date` | `unknown` (nullable) | — | `string` (nullable) | `str` (nullable) |
+| `publication_class` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `publication_date` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
-| `publication_doi` | `unknown` (nullable) | — | — | `str` (nullable) |
+| `publication_doi` | `unknown` (nullable) | — | `string` (nullable) | `str` (nullable) |
 | `publication_id` | `string` (nullable) | `str` (not-null) | `string` (nullable) | `str` (not-null) |
-| `publication_pmc_id` | `unknown` (nullable) | — | — | `str` (nullable) |
-| `publication_pmid` | `unknown` (nullable) | — | — | `str` (nullable) |
+| `publication_pmc_id` | `unknown` (nullable) | — | `string` (nullable) | `str` (nullable) |
+| `publication_pmid` | `unknown` (nullable) | — | `string` (nullable) | `str` (nullable) |
 | `publication_status` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
-| `publication_subclass` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | — |
+| `publication_subclass` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `publication_type` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `publication_type_list` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
-| `publication_type_unified` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | — |
+| `publication_type_unified` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `publication_types` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `published` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `published_online` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `published_print` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `publisher` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
-| `publisher_id` | `unknown` (nullable) | `str` (nullable) | — | `str` (nullable) |
+| `publisher_id` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `pubmed_id1` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `pubmed_id2` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `qualifier` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `qudt_units` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
-| `reaction_ec_numbers` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | — |
-| `reactions` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | — |
+| `reaction_ec_numbers` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
+| `reactions` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `reactome_xrefs` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `references` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `relation` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
@@ -238,7 +238,7 @@ Scope: inferred Bronze CSV samples + Silver Pandera + Silver PyArrow + Gold cont
 | `sequence` | `unknown` (nullable) | `str` (not-null) | — | — |
 | `sequence_checksum` | `unknown` (nullable) | `str` (nullable) | — | — |
 | `short_name` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
-| `signal_peptide` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | — |
+| `signal_peptide` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `similarity_comment` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `src_assay_id` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `src_compound_id` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
@@ -254,7 +254,7 @@ Scope: inferred Bronze CSV samples + Silver Pandera + Silver PyArrow + Gold cont
 | `subject_mesh` | `unknown` (nullable) | `str` (nullable) | `list<item: string>` (nullable) | `str` (nullable) |
 | `subject_topics` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `subunit` | `unknown` (nullable) | `str` (nullable) | — | — |
-| `superkingdom` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | — |
+| `superkingdom` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `target_component_synonyms` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `target_component_xrefs` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `target_components` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
@@ -269,10 +269,10 @@ Scope: inferred Bronze CSV samples + Silver Pandera + Silver PyArrow + Gold cont
 | `tissue_specificity` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `title` | `array|null|string` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `tldr` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
-| `topology` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | — |
-| `transmembrane` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | — |
+| `topology` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
+| `transmembrane` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `type` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (not-null) |
-| `ubiquitination` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | — |
+| `ubiquitination` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `uniprot_accession` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `uniprot_entry_name` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |
 | `units` | `unknown` (nullable) | `str` (nullable) | `string` (nullable) | `str` (nullable) |

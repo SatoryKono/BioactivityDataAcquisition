@@ -100,6 +100,16 @@
       "nullable": true,
       "description": ""
     },
+    "_dq_warn": {
+      "type": "boolean",
+      "nullable": false,
+      "description": ""
+    },
+    "_dq_error": {
+      "type": "boolean",
+      "nullable": false,
+      "description": ""
+    },
     "_run_id": {
       "type": "string",
       "nullable": false,
@@ -130,6 +140,8 @@
     }
   },
   "required": [
+    "_dq_error",
+    "_dq_warn",
     "_index",
     "_ingestion_ts",
     "_run_id",

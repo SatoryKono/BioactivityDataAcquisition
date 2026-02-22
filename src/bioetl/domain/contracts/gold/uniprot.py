@@ -32,17 +32,33 @@ class UniProtProteinGoldSchema(pa.DataFrameModel):
     entry_name: Series[str] = pa.Field(nullable=True)
 
     # Structural features (JSON)
+    acetylation: Series[str] = pa.Field(nullable=True)  # PTM: acetylation sites
     active_sites: Series[str] = pa.Field(nullable=True)  # ft_act_site features
     binding_sites: Series[str] = pa.Field(nullable=True)  # ft_binding features
+    disulfide_bond: Series[str] = pa.Field(nullable=True)  # PTM: disulfide bonds
     domains: Series[str] = pa.Field(nullable=True)  # ft_domain features
     features_json: Series[str] = pa.Field(nullable=True)  # All features (forensic)
+    glycosylation: Series[str] = pa.Field(nullable=True)  # PTM: glycosylation sites
+    intramembrane: Series[str] = pa.Field(nullable=True)  # Structural: intramembrane
+    lipidation: Series[str] = pa.Field(nullable=True)  # PTM: lipidation sites
+    modified_residue: Series[str] = pa.Field(nullable=True)  # PTM: all modified residues
+    phosphorylation: Series[str] = pa.Field(nullable=True)  # PTM: phosphorylation sites
+    propeptide: Series[str] = pa.Field(nullable=True)  # Structural: propeptide
+    signal_peptide: Series[str] = pa.Field(nullable=True)  # Structural: signal peptide
+    topology: Series[str] = pa.Field(nullable=True)  # Structural: topological domains
+    transmembrane: Series[str] = pa.Field(nullable=True)  # Structural: transmembrane
+    ubiquitination: Series[str] = pa.Field(nullable=True)  # PTM: ubiquitination sites
 
     # Functional annotations
     activity_regulation: Series[str] = pa.Field(nullable=True)
     catalytic_activity: Series[str] = pa.Field(nullable=True)
+    cellular_component: Series[str] = pa.Field(nullable=True)  # GO aspect C
     disease_involvement: Series[str] = pa.Field(nullable=True)
     function_comment: Series[str] = pa.Field(nullable=True)
+    molecular_function: Series[str] = pa.Field(nullable=True)  # GO aspect F
     pathway: Series[str] = pa.Field(nullable=True)
+    reaction_ec_numbers: Series[str] = pa.Field(nullable=True)
+    reactions: Series[str] = pa.Field(nullable=True)
     similarity_comment: Series[str] = pa.Field(nullable=True)
     subcellular_location: Series[str] = pa.Field(nullable=True)
     tissue_specificity: Series[str] = pa.Field(nullable=True)
@@ -58,11 +74,17 @@ class UniProtProteinGoldSchema(pa.DataFrameModel):
 
     # Basic protein data
     gene_names: Series[str] = pa.Field(nullable=True)  # list[str]
+    genus: Series[str] = pa.Field(nullable=True)  # Taxonomy: genus
+    isoform_ids: Series[str] = pa.Field(nullable=True)
+    isoform_names: Series[str] = pa.Field(nullable=True)
+    isoform_synonyms: Series[str] = pa.Field(nullable=True)
     organism_id: Series[float] = pa.Field(nullable=True, coerce=True)  # int64 → float
+    phylum: Series[str] = pa.Field(nullable=True)  # Taxonomy: phylum
     protein_name: Series[str] = pa.Field(nullable=True)
     sequence_length: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # int64 → float
+    superkingdom: Series[str] = pa.Field(nullable=True)  # Taxonomy: superkingdom
 
     # Quality metrics
     annotation_score: Series[float] = pa.Field(
@@ -72,6 +94,10 @@ class UniProtProteinGoldSchema(pa.DataFrameModel):
     reviewed: Series[bool] = pa.Field(
         nullable=True, coerce=True
     )  # Swiss-Prot vs TrEMBL
+
+    # DQ fields
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")
@@ -121,8 +147,9 @@ class UniProtIDMappingGoldSchema(pa.DataFrameModel):
     )  # int → float
     all_mappings: Series[str] = pa.Field(nullable=True)
 
-    # DQ warning flag (True for not_found)
+    # DQ fields
     dq_warn: Series[bool] = pa.Field(nullable=False, alias="_dq_warn")
+    dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
 
     # Metadata
     run_id: Series[str] = pa.Field(nullable=False, alias="_run_id")

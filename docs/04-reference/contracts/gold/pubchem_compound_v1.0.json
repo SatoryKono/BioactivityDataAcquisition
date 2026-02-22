@@ -92,6 +92,144 @@
       "nullable": false,
       "description": ""
     },
+    "complexity": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "conformer_count_3d": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "conformer_rmsd_3d": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "effective_rotor_count_3d": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "exact_mass": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "feature_acceptor_count_3d": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "feature_anion_count_3d": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "feature_cation_count_3d": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "feature_count_3d": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "feature_donor_count_3d": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "feature_hydrophobe_count_3d": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "feature_ring_count_3d": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "monoisotopic_mass": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "x_steric_quadrupole_3d": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "y_steric_quadrupole_3d": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "z_steric_quadrupole_3d": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": ""
+    },
+    "_dq_warn": {
+      "type": "boolean",
+      "nullable": false,
+      "description": ""
+    },
+    "_dq_error": {
+      "type": "boolean",
+      "nullable": false,
+      "description": ""
+    },
     "_run_id": {
       "type": "string",
       "nullable": false,
@@ -122,6 +260,8 @@
     }
   },
   "required": [
+    "_dq_error",
+    "_dq_warn",
     "_index",
     "_ingestion_ts",
     "_run_id",
