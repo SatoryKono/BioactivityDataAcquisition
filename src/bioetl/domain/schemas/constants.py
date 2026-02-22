@@ -3,6 +3,9 @@
 Provides regex patterns and enum values used across multiple schemas.
 All values are immutable (frozenset/tuple) to prevent accidental modification.
 
+Enum values originate from configs/enums/chembl.yaml (single source of truth).
+Sync is enforced by tests/unit/domain/schemas/test_constants_yaml.py.
+
 Usage:
     from bioetl.domain.schemas.constants import CHEMBL_ID_PATTERN, ASSAY_TYPES
 """

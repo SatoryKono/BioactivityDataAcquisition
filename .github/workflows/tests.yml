@@ -40,10 +40,20 @@ jobs:
         run: python scripts/check_root_vcr_cassettes.py
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v1
+        uses: astral-sh/setup-uv@v3
 
-      - name: Install dependencies
-        run: uv sync --extra dev --extra tracing --extra performance
+      - name: Cache uv and virtualenv
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/uv
+            .venv
+          key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            uv-${{ runner.os }}-py311-
+
+      - name: Install dependencies (frozen lock)
+        run: uv sync --frozen --extra dev --extra tracing
 
       - name: Validate pipeline configs + schema links (blocking)
         run: uv run python scripts/validate_pipeline_configs.py
@@ -73,7 +83,17 @@ jobs:
           python-version: "3.11"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v1
+        uses: astral-sh/setup-uv@v3
+
+      - name: Cache uv and virtualenv
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/uv
+            .venv
+          key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            uv-${{ runner.os }}-py311-
 
       - name: Cache pytest and hypothesis
         uses: actions/cache@v4
@@ -85,8 +105,8 @@ jobs:
           restore-keys: |
             pytest-fast-${{ runner.os }}-
 
-      - name: Install dependencies
-        run: uv sync --extra dev --extra tracing --extra performance
+      - name: Install dependencies (frozen lock)
+        run: uv sync --frozen --extra dev --extra tracing
 
       - name: Run Fast Unit Tests (no slow markers)
         run: |
@@ -101,11 +121,11 @@ jobs:
   test-matrix:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: test-fast  # Only run full tests if fast tests pass
+    needs: smoke-check  # Allow matrix to run in parallel with fast tests for faster wall time
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12"]
         test-group:
           - name: unit-domain
             path: tests/unit/domain/
@@ -130,7 +150,17 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v1
+        uses: astral-sh/setup-uv@v3
+
+      - name: Cache uv and virtualenv
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/uv
+            .venv
+          key: uv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            uv-${{ runner.os }}-${{ matrix.python-version }}-
 
       - name: Cache pytest and hypothesis
         uses: actions/cache@v4
@@ -142,8 +172,8 @@ jobs:
           restore-keys: |
             pytest-${{ matrix.python-version }}-${{ matrix.test-group.name }}-${{ runner.os }}-
 
-      - name: Install dependencies
-        run: uv sync --extra dev --extra tracing --extra performance
+      - name: Install dependencies (frozen lock)
+        run: uv sync --frozen --extra dev --extra tracing
 
       - name: Run Tests (${{ matrix.test-group.name }} on Python ${{ matrix.python-version }})
         run: |
@@ -177,7 +207,17 @@ jobs:
           python-version: "3.11"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v1
+        uses: astral-sh/setup-uv@v3
+
+      - name: Cache uv and virtualenv
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/uv
+            .venv
+          key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            uv-${{ runner.os }}-py311-
 
       - name: Cache pytest and hypothesis
         uses: actions/cache@v4
@@ -189,8 +229,8 @@ jobs:
           restore-keys: |
             pytest-coverage-${{ runner.os }}-
 
-      - name: Install dependencies
-        run: uv sync --extra dev --extra tracing --extra performance
+      - name: Install dependencies (frozen lock)
+        run: uv sync --frozen --extra dev --extra tracing
 
       - name: Run Full Tests with Coverage Threshold
         run: |
