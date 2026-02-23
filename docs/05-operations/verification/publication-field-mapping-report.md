@@ -19,13 +19,13 @@ Systematic verification of field mapping across all publication pipeline layers 
 
 | # | Pipeline | Provider | Entity | Status |
 |---|----------|----------|--------|--------|
-| 1 | `chembl-publication` | ChEMBL | publication | ⚠️ Missing Gold fields |
-| 2 | `chembl-publication-similarity` | ChEMBL | publication-similarity | ✅ Correct |
-| 3 | `chembl-publication-term` | ChEMBL | publication-term | ✅ Correct |
-| 4 | `pubmed-publication` | PubMed | publication | ⚠️ Missing Gold fields (Type mismatch ✅ FIXED) |
-| 5 | `crossref-publication` | CrossRef | work | ⚠️ Missing Gold fields (Type mismatch ✅ FIXED) |
-| 6 | `openalex-publication` | OpenAlex | publication | ✅ Correct (Type mismatch ✅ FIXED) |
-| 7 | `semanticscholar-publication` | SemanticScholar | publication | ✅ Correct |
+| 1 | `chembl_publication` | ChEMBL | publication | ⚠️ Missing Gold fields |
+| 2 | `chembl_publication_similarity` | ChEMBL | publication-similarity | ✅ Correct |
+| 3 | `chembl_publication_term` | ChEMBL | publication-term | ✅ Correct |
+| 4 | `pubmed_publication` | PubMed | publication | ⚠️ Missing Gold fields (Type mismatch ✅ FIXED) |
+| 5 | `crossref_publication` | CrossRef | work | ⚠️ Missing Gold fields (Type mismatch ✅ FIXED) |
+| 6 | `openalex_publication` | OpenAlex | publication | ✅ Correct (Type mismatch ✅ FIXED) |
+| 7 | `semanticscholar_publication` | SemanticScholar | publication | ✅ Correct |
 
 Примечание: API-ресурсы остаются `document*`, но canonical `entity-type` — `publication*` (см. ADR-024).
 
@@ -34,7 +34,7 @@ Systematic verification of field mapping across all publication pipeline layers 
 ## Finding 1: TYPE-MISMATCH - `authors` Field Type Inconsistency
 
 **Severity**: HIGH → ✅ **RESOLVED** (2026-01-26)
-**Affected Pipelines**: `pubmed-publication`, `crossref-publication`, `openalex-publication`
+**Affected Pipelines**: `pubmed_publication`, `crossref_publication`, `openalex_publication`
 
 ### Issue
 
@@ -73,7 +73,7 @@ Systematic verification of field mapping across all publication pipeline layers 
 ## Finding 2: MISSING-FIELD - CrossRef Gold Schema
 
 **Severity**: MEDIUM
-**Pipeline**: `crossref-publication`
+**Pipeline**: `crossref_publication`
 **Location**: `gold.py:748-810`
 
 ### Missing Fields
@@ -108,7 +108,7 @@ original-id: Series[str] = pa.Field(nullable=True, alias="-original-id")
 ## Finding 3: MISSING-FIELD - PubMed Gold Schema
 
 **Severity**: MEDIUM
-**Pipeline**: `pubmed-publication`
+**Pipeline**: `pubmed_publication`
 **Location**: `gold.py:211-262`
 
 ### Missing Fields
@@ -137,7 +137,7 @@ original-id: Series[str] = pa.Field(nullable=True, alias="-original-id")
 ## Finding 4: MISSING-FIELD - ChEMBL Document Gold Schema
 
 **Severity**: MEDIUM
-**Pipeline**: `chembl-publication`
+**Pipeline**: `chembl_publication`
 **Location**: `gold.py:400-444`
 
 ### Missing Fields
@@ -201,7 +201,7 @@ All providers use `normalize-pmc-id()`:
 
 ## Pipelines Verified as Correct
 
-### 1. chembl-publication-similarity ✅
+### 1. chembl_publication_similarity ✅
 
 - **Transformer**: `publication-similarity-transformer.py`
 - **Entity**: `DocumentSimilarity`
@@ -209,7 +209,7 @@ All providers use `normalize-pmc-id()`:
 - **Gold**: `ChEMBLDocumentSimilarityGoldSchema`
 - **Status**: All fields correctly mapped, types consistent
 
-### 2. chembl-publication-term ✅
+### 2. chembl_publication_term ✅
 
 - **Transformer**: `publication-term-transformer.py`
 - **Entity**: `DocumentTerm`
@@ -217,7 +217,7 @@ All providers use `normalize-pmc-id()`:
 - **Gold**: `ChEMBLDocumentTermGoldSchema`
 - **Status**: All fields correctly mapped, types consistent
 
-### 3. semanticscholar-publication ✅
+### 3. semanticscholar_publication ✅
 
 - **Transformer**: `semanticscholar/transformer.py`
 - **Entity**: `SemanticScholarPublicationEntity`
@@ -234,7 +234,7 @@ All providers use `normalize-pmc-id()`:
 | 1 | TYPE-MISMATCH | HIGH | pubmed, crossref, openalex | ✅ RESOLVED |
 | 2 | MISSING-FIELD | MEDIUM | crossref | Open |
 | 3 | MISSING-FIELD | MEDIUM | pubmed | Open |
-| 4 | MISSING-FIELD | MEDIUM | chembl-publication | Open |
+| 4 | MISSING-FIELD | MEDIUM | chembl_publication | Open |
 
 ---
 

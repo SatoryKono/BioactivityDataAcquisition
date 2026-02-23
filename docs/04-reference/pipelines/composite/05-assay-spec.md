@@ -10,7 +10,7 @@ Enriches ChEMBL assay data with cell line and tissue metadata from pre-populated
 
 | Field | Value |
 |-------|-------|
-| Pipeline ID | `composite-assay` |
+| Pipeline ID | `composite_assay` |
 | Provider | `composite` |
 | Entity | `assay` |
 | Version | `1.0.0` |
@@ -18,9 +18,9 @@ Enriches ChEMBL assay data with cell line and tissue metadata from pre-populated
 
 ## Seed and Enrichers
 
-- **Seed**: `chembl-assay`
+- **Seed**: `chembl_assay`
 - **Dependencies**: none
-- **Enrichers**: `chembl-cell-line` (cell context), `chembl-tissue` (tissue context)
+- **Enrichers**: `chembl_cell_line` (cell context), `chembl_tissue` (tissue context)
 
 ## Architecture Note
 

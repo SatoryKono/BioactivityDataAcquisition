@@ -31,13 +31,13 @@ Run 2 (resume): Fetch records 1000-2000
 
 | Pipeline | Provider | Entity Type | Primary Key |
 |----------|----------|-------------|-------------|
-| `chembl-publication` | ChEMBL | publication | document-chembl-id |
-| `chembl-publication-term` | ChEMBL | publication-term | entity-id |
-| `chembl-publication-similarity` | ChEMBL | publication-similarity | sim-id |
-| `pubmed-publication` | PubMed | publication | pmid |
-| `crossref-publication` | CrossRef | work | doi |
-| `openalex-publication` | OpenAlex | publication | openalex-id |
-| `semanticscholar-publication` | SemanticScholar | publication | paper-id |
+| `chembl_publication` | ChEMBL | publication | document-chembl-id |
+| `chembl_publication_term` | ChEMBL | publication-term | entity-id |
+| `chembl_publication_similarity` | ChEMBL | publication-similarity | sim-id |
+| `pubmed_publication` | PubMed | publication | pmid |
+| `crossref_publication` | CrossRef | work | doi |
+| `openalex_publication` | OpenAlex | publication | openalex-id |
+| `semanticscholar_publication` | SemanticScholar | publication | paper-id |
 
 ## Decision
 
@@ -64,7 +64,7 @@ class PipelineConfig:
 
 ```yaml
 # configs/pipelines/chembl/publication.yaml
-pipeline-name: chembl-publication
+pipeline-name: chembl_publication
 provider: chembl
 entity-type: publication
 
@@ -165,8 +165,8 @@ Records with identical `content-hash` are deduplicated during merge.
 - `src/bioetl/infrastructure/config/-base.py` — Pass `force-full-scan` in `yaml-config-to-domain`
 
 **Composition:**
-- `src/bioetl/composition/factories/services-factory.py` — Pass `force-full-scan` to `CheckpointManager`
-- `src/bioetl/composition/factories/pipeline-factory.py` — Use `config.force-full-scan`
+- `src/bioetl/composition/factories/services_factory.py` — Pass `force-full-scan` to `CheckpointManager`
+- `src/bioetl/composition/factories/pipeline_factory.py` — Use `config.force-full-scan`
 
 **Configs:**
 - `configs/pipelines/chembl/publication.yaml` — `force-full-scan: true`

@@ -58,10 +58,10 @@ configs/
 │   │   └── publication.yaml
 │   └── composite/               # 5 composite configs (ADR-026)
 │       ├── activity.yaml        # chembl_activity + enrichers
-│       ├── assay.yaml           # chembl-assay + enrichers
-│       ├── molecule.yaml        # chembl-molecule + enrichers
-│       ├── publication.yaml     # chembl-publication + enrichers
-│       └── target.yaml          # chembl-target + enrichers
+│       ├── assay.yaml           # chembl_assay + enrichers
+│       ├── molecule.yaml        # chembl_molecule + enrichers
+│       ├── publication.yaml     # chembl_publication + enrichers
+│       └── target.yaml          # chembl_target + enrichers
 ├── quality/                      # Data Quality правила (ADR-027, 31 файл)
 │   ├── -defaults.yaml           # Глобальные DQ defaults (soft-fail=0.05, hard-fail=0.20)
 │   ├── providers/               # 7 provider-specific DQ
@@ -216,23 +216,23 @@ Composite pipelines объединяют данные из нескольких 
 ```yaml
 # configs/pipelines/composite/publication.yaml
 composite:
-  name: composite-publication
+  name: composite_publication
   version: "1.1.0"
 
   seed:
-    pipeline: chembl-publication     # Базовый пайплайн (источник ID)
+    pipeline: chembl_publication     # Базовый пайплайн (источник ID)
 
   enrichers:                          # Обогащение из других провайдеров
-    - pipeline: crossref-publication
+    - pipeline: crossref_publication
       join-key: doi
       optional: true
-    - pipeline: openalex-publication
+    - pipeline: openalex_publication
       join-key: doi
       optional: true
-    - pipeline: pubmed-publication
+    - pipeline: pubmed_publication
       join-key: pmid
       optional: true
-    - pipeline: semanticscholar-publication
+    - pipeline: semanticscholar_publication
       join-key: doi
       optional: true
 
@@ -245,11 +245,11 @@ composite:
 
 | Composite               | Seed                 | Enrichers                                                           | Описание                      |
 | ----------------------- | -------------------- | ------------------------------------------------------------------- | ----------------------------- |
-| `composite-activity`    | `chembl_activity`    | enrichers                                                           | Обогащённые данные активности |
-| `composite-assay`       | `chembl-assay`       | enrichers                                                           | Обогащённые данные анализов   |
-| `composite-molecule`    | `chembl-molecule`    | pubchem-compound, enrichers                                         | Обогащённые молекулы          |
-| `composite-publication` | `chembl-publication` | crossref, openalex, pubmed, semanticscholar                         | Обогащённые публикации        |
-| `composite-target`      | `chembl-target`      | target-component, protein-class, uniprot-idmapping, uniprot-protein | Обогащённые targets           |
+| `composite_activity`    | `chembl_activity`    | enrichers                                                           | Обогащённые данные активности |
+| `composite_assay`       | `chembl_assay`       | enrichers                                                           | Обогащённые данные анализов   |
+| `composite_molecule`    | `chembl_molecule`    | pubchem_compound, enrichers                                         | Обогащённые молекулы          |
+| `composite_publication` | `chembl_publication` | crossref, openalex, pubmed, semanticscholar                         | Обогащённые публикации        |
+| `composite_target`      | `chembl_target`      | target-component, protein-class, uniprot_idmapping, uniprot_protein | Обогащённые targets           |
 
 ### Отличия от Regular Pipelines
 

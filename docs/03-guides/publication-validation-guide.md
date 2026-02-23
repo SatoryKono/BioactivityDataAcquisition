@@ -430,7 +430,7 @@ validation:
 
 **Пример Pipeline Override:**
 ```yaml
-# pipelines/pubmed-publication.yaml
+# pipelines/pubmed_publication.yaml
 validation:
   external:
     enabled: true  # Override: enable for PubMed
@@ -790,13 +790,13 @@ async def verify-dois-batch(dois: list[str]) -> dict[str, bool]:
 ```sql
 -- Запрос записей в карантине
 SELECT *
-FROM silver.pubmed-publication
+FROM silver.pubmed_publication
 WHERE -dq-warn = TRUE
 ORDER BY -dq-warn-count DESC
 LIMIT 100;
 
 -- Промоция в Gold после ручного review
-UPDATE silver.pubmed-publication
+UPDATE silver.pubmed_publication
 SET -dq-warn = FALSE
 WHERE pmid IN ('12345678', '87654321')
   AND manual-review-status = 'approved';

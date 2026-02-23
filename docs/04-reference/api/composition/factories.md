@@ -8,7 +8,7 @@ Component factories for Dependency Injection.
 
 Creates pipeline runners with proper dependency injection.
 
-::: bioetl.composition.factories.pipeline-factory.GenericPipelineFactory
+::: bioetl.composition.factories.pipeline_factory.GenericPipelineFactory
     options:
         show-root-heading: true
         show-source: false
@@ -17,11 +17,11 @@ Creates pipeline runners with proper dependency injection.
             - create-runner
             - create-executor
 
-### create-pipeline-factory
+### create-pipeline_factory
 
 Factory function to create GenericPipelineFactory instances.
 
-::: bioetl.composition.factories.pipeline-factory.create-pipeline-factory
+::: bioetl.composition.factories.pipeline_factory.create-pipeline_factory
     options:
         show-root-heading: true
         show-source: false
@@ -30,7 +30,7 @@ Factory function to create GenericPipelineFactory instances.
 
 Assemble a PipelineRunner with all dependencies.
 
-::: bioetl.composition.factories.pipeline-factory.assemble-runner
+::: bioetl.composition.factories.pipeline_factory.assemble-runner
     options:
         show-root-heading: true
         show-source: false
@@ -39,7 +39,7 @@ Assemble a PipelineRunner with all dependencies.
 
 Build PipelineServices bundle.
 
-::: bioetl.composition.factories.pipeline-factory.build-pipeline-services
+::: bioetl.composition.factories.pipeline_factory.build-pipeline-services
     options:
         show-root-heading: true
         show-source: false
@@ -50,7 +50,7 @@ Build PipelineServices bundle.
 
 Base factory for creating service bundles.
 
-::: bioetl.composition.factories.services-factory.BaseServicesFactory
+::: bioetl.composition.factories.services_factory.BaseServicesFactory
     options:
         show-root-heading: true
         show-source: false
@@ -59,7 +59,7 @@ Base factory for creating service bundles.
 
 Builder pattern for constructing service bundles.
 
-::: bioetl.composition.factories.services-factory.ServicesBuilder
+::: bioetl.composition.factories.services_factory.ServicesBuilder
     options:
         show-root-heading: true
         show-source: false
@@ -68,7 +68,7 @@ Builder pattern for constructing service bundles.
 
 Bundle of services for PipelineRunner.
 
-::: bioetl.composition.factories.services-factory.RunnerServices
+::: bioetl.composition.factories.services_factory.RunnerServices
     options:
         show-root-heading: true
         show-source: false
@@ -77,7 +77,7 @@ Bundle of services for PipelineRunner.
 
 Build RunnerServices bundle.
 
-::: bioetl.composition.factories.services-factory.build-runner-services
+::: bioetl.composition.factories.services_factory.build-runner-services
     options:
         show-root-heading: true
         show-source: false
@@ -88,7 +88,7 @@ Build RunnerServices bundle.
 
 Creates data source adapters.
 
-::: bioetl.composition.factories.data-source-factory.DataSourceFactory
+::: bioetl.composition.factories.data-source_factory.DataSourceFactory
     options:
         show-root-heading: true
         show-source: false
@@ -97,7 +97,7 @@ Creates data source adapters.
 
 Registry for data source creators.
 
-::: bioetl.composition.factories.data-source-factory.DataSourceRegistry
+::: bioetl.composition.factories.data-source_factory.DataSourceRegistry
     options:
         show-root-heading: true
         show-source: false
@@ -106,7 +106,7 @@ Registry for data source creators.
 
 Protocol for data source creator functions.
 
-::: bioetl.composition.factories.data-source-factory.DataSourceCreator
+::: bioetl.composition.factories.data-source_factory.DataSourceCreator
     options:
         show-root-heading: true
         show-source: false
@@ -146,7 +146,7 @@ Context for storage operations.
 
 Register a transformer class for an entity type.
 
-::: bioetl.composition.factories.transformer-factory.register-transformer
+::: bioetl.composition.factories.transformer_factory.register-transformer
     options:
         show-root-heading: true
         show-source: false
@@ -155,7 +155,7 @@ Register a transformer class for an entity type.
 
 Get transformer class for entity type.
 
-::: bioetl.composition.factories.transformer-factory.get-transformer-class
+::: bioetl.composition.factories.transformer_factory.get-transformer-class
     options:
         show-root-heading: true
         show-source: false
@@ -164,7 +164,7 @@ Get transformer class for entity type.
 
 Create transformer instance with dependencies.
 
-::: bioetl.composition.factories.transformer-factory.create-transformer
+::: bioetl.composition.factories.transformer_factory.create-transformer
     options:
         show-root-heading: true
         show-source: false
@@ -173,7 +173,7 @@ Create transformer instance with dependencies.
 
 Register all available transformers.
 
-::: bioetl.composition.factories.transformer-factory.register-all-transformers
+::: bioetl.composition.factories.transformer_factory.register-all-transformers
     options:
         show-root-heading: true
         show-source: false
@@ -184,7 +184,7 @@ Register all available transformers.
 
 Factory for creating HTTP clients.
 
-::: bioetl.composition.factories.http-client-factory.HttpClientFactory
+::: bioetl.composition.factories.http-client_factory.HttpClientFactory
     options:
         show-root-heading: true
         show-source: false
@@ -202,29 +202,29 @@ Factory for ChEMBL activity pipeline.
         show-root-heading: true
         show-source: false
 
-### pubchem-compound-factory
+### pubchem_compound_factory
 
 Factory for PubChem compound pipeline.
 
-::: bioetl.composition.factories.pipeline-factories.pubchem-compound-factory
+::: bioetl.composition.factories.pipeline_factories.pubchem_compound_factory
     options:
         show-root-heading: true
         show-source: false
 
-### uniprot-protein-factory
+### uniprot_protein_factory
 
 Factory for UniProt protein pipeline.
 
-::: bioetl.composition.factories.pipeline-factories.uniprot-protein-factory
+::: bioetl.composition.factories.pipeline_factories.uniprot_protein_factory
     options:
         show-root-heading: true
         show-source: false
 
-### pubmed-publication-factory
+### pubmed_publication_factory
 
 Factory for PubMed publication pipeline.
 
-::: bioetl.composition.factories.pipeline-factories.pubmed-publication-factory
+::: bioetl.composition.factories.pipeline_factories.pubmed_publication_factory
     options:
         show-root-heading: true
         show-source: false
@@ -268,13 +268,13 @@ from bioetl.composition.factories import (
 )
 
 # Create factories
-data-source-factory = DataSourceFactory()
-storage-factory = StorageFactory()
+data-source_factory = DataSourceFactory()
+storage_factory = StorageFactory()
 
 # Create pipeline factory
 # factory = GenericPipelineFactory(
-#     data-source-factory=data-source-factory,
-#     storage-factory=storage-factory,
+#     data-source_factory=data-source_factory,
+#     storage_factory=storage_factory,
 #     config=pipeline-config,
 # )
 

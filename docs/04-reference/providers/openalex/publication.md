@@ -1,6 +1,6 @@
 # Пайплайн: OpenAlex Publication
 
-**Имя пайплайна:** `openalex-publication`
+**Имя пайплайна:** `openalex_publication`
 **Провайдер:** `openalex`
 **Сущность:** `publication` (API-термин: `work`)
 **Версия схемы:** 1.2.0
@@ -209,16 +209,16 @@ input-filter:
 
 ```bash
 # Базовый запуск с файлом DOI
-bioetl run openalex-publication
+bioetl run openalex_publication
 
 # С ограничением количества записей
-bioetl run openalex-publication --limit 100
+bioetl run openalex_publication --limit 100
 
 # Проверка конфигурации без выполнения
-bioetl run openalex-publication --dry-run
+bioetl run openalex_publication --dry-run
 
 # Полная перезагрузка
-bioetl run openalex-publication --run-type rebuild
+bioetl run openalex_publication --run-type rebuild
 ```
 
 ### Подготовка входных данных

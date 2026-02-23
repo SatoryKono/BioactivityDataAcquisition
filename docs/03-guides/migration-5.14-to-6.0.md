@@ -19,7 +19,7 @@ Update every composite YAML:
 
 ```yaml
 composite:
-  name: composite-publication
+  name: composite_publication
   version: "1.1.0"  # required in v6+
 ```
 

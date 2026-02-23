@@ -133,7 +133,7 @@ sink:
 | Паттерн                         | Описание           | Пример                    |
 | ------------------------------- | ------------------ | ------------------------- |
 | `{provider}-{entity}`           | Стандартный формат | `chembl_activity`         |
-| `{provider}-{entity}-{variant}` | С вариантом        | `chembl-publication-term` |
+| `{provider}-{entity}-{variant}` | С вариантом        | `chembl_publication_term` |
 
 **НЕ используется**: `{entity}-{provider}` (например, `activity-chembl`)
 

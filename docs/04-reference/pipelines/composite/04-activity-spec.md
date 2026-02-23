@@ -10,7 +10,7 @@ Combines ChEMBL bioactivity data with compound record metadata, enabling correla
 
 | Field | Value |
 |-------|-------|
-| Pipeline ID | `composite-activity` |
+| Pipeline ID | `composite_activity` |
 | Provider | `composite` |
 | Entity | `activity` |
 | Version | `1.0.0` |
@@ -19,7 +19,7 @@ Combines ChEMBL bioactivity data with compound record metadata, enabling correla
 ## Seed and Dependencies
 
 - **Seed**: `chembl_activity`
-- **Dependencies**: `chembl-compound-record` (filtered by `molecule-id` + `publication-id` dual-key)
+- **Dependencies**: `chembl_compound_record` (filtered by `molecule-id` + `publication-id` dual-key)
 - **Enrichers**: none
 
 ## Join Strategy

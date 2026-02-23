@@ -442,7 +442,7 @@ Dependencies — пайплайны, которые запускаются **п�
 
 ```yaml
 dependencies:
-  - pipeline: chembl-target-component
+  - pipeline: chembl_target_component
     join-keys: [component-id]       # Ключ из seed
     silver-table: silver/chembl/target-component
 ```
@@ -454,15 +454,15 @@ dependencies:
 ```yaml
 dependencies:
   # 1. Стандартный: ключи из seed
-  - pipeline: chembl-target-component
+  - pipeline: chembl_target_component
     join-keys: [component-id]
     silver-table: silver/chembl/target-component
 
   # 2. Цепочечный: ключи из предыдущего dependency
-  - pipeline: chembl-protein-class
+  - pipeline: chembl_protein_class
     join-keys: [protein-classification-id]  # Колонка в source таблице
     filter-field: protein-class-id          # Поле API (если отличается)
-    key-source: chembl-target-component     # Читать ключи отсюда
+    key-source: chembl_target_component     # Читать ключи отсюда
     silver-table: silver/chembl/protein-class
 ```
 

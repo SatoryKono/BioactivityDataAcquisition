@@ -129,10 +129,10 @@ df = pl.read-delta("data/output/silver/chembl/activity", version=5)
 ```
 data/output/checkpoints/
 ├── chembl_activity.json
-├── chembl-molecule.json
-├── pubchem-compound.json
+├── chembl_molecule.json
+├── pubchem_compound.json
 └── composite/
-    └── composite-publication-enrichment-abc123.json
+    └── composite_publication_enrichment_abc123.json
 ```
 
 **Checkpoint structure:**

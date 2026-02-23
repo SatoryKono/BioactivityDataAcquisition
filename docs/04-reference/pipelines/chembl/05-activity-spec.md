@@ -399,9 +399,9 @@ Mode: Overwrite
 | Dependency        | Type     | Required    |
 | ----------------- | -------- | ----------- |
 | ChEMBL API        | API      | Yes         |
-| `chembl-assay`    | Pipeline | Recommended |
-| `chembl-molecule` | Pipeline | Recommended |
-| `chembl-target`   | Pipeline | Recommended |
+| `chembl_assay`    | Pipeline | Recommended |
+| `chembl_molecule` | Pipeline | Recommended |
+| `chembl_target`   | Pipeline | Recommended |
 
 ### 7.2. Downstream
 

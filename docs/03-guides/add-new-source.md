@@ -58,7 +58,7 @@ class PubMedAdapter:
 
 ```yaml
 pipeline:
-    name: pubmed-publication
+    name: pubmed_publication
     provider: pubmed
     entity: publication
 
@@ -75,7 +75,7 @@ sink:
 
 ## Шаг 3: Реализация пайплайна (Application Layer)
 
-Создайте `src/bioetl/application/pipelines/pubmed-publication.py`.
+Создайте `src/bioetl/application/pipelines/pubmed_publication.py`.
 
 ```python
 from bioetl.application.core.base import BasePipeline
@@ -117,7 +117,7 @@ ProviderRegistry.register(
     ProviderConfig(
         data-source-creator=-create-pubmed-data-source,
         transformers={"publication": PubMedPublicationTransformer},
-        pipelines=["pubmed-publication"],
+        pipelines=["pubmed_publication"],
     ),
 )
 ```
@@ -144,15 +144,15 @@ class PubMedPublicationTransformer(BaseTransformer):
 
 ### 4.3 Регистрация пайплайна
 
-Добавьте фабрику пайплайна в `src/bioetl/composition/factories/pipeline-factories.py`:
+Добавьте фабрику пайплайна в `src/bioetl/composition/factories/pipeline_factories.py`:
 
 ```python
 from bioetl.application.pipelines.pubmed.publication import PubMedPublicationPipeline
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.infrastructure.schemas.gold import PubMedPublicationGoldSchema
 
-pubmed-publication-factory = GenericPipelineFactory(
-    pipeline-name="pubmed-publication",
+pubmed_publication_factory = GenericPipelineFactory(
+    pipeline-name="pubmed_publication",
     pipeline-class=PubMedPublicationPipeline,
     provider="pubmed",
     transformer-class=PubMedPublicationTransformer,  # DI через GenericPipelineFactory
@@ -161,10 +161,10 @@ pubmed-publication-factory = GenericPipelineFactory(
 
 def register-all-pipelines() -> None:
     # ...
-    PipelineRegistry.register-factory(pubmed-publication-factory)
+    PipelineRegistry.register_factory(pubmed_publication_factory)
 ```
 
-Теперь ваш пайплайн автоматически доступен через CLI по имени `pubmed-publication`.
+Теперь ваш пайплайн автоматически доступен через CLI по имени `pubmed_publication`.
 
 ## Чек-лист
 
@@ -173,6 +173,6 @@ def register-all-pipelines() -> None:
 - [ ] Трансформер реализован с наследованием от `BaseTransformer`
 - [ ] Пайплайн реализован с наследованием от `BasePipeline`
 - [ ] Провайдер зарегистрирован в `ProviderRegistry` (`registration.py`)
-- [ ] Пайплайн зарегистрирован в `pipeline-factories.py` с `transformer-class`
+- [ ] Пайплайн зарегистрирован в `pipeline_factories.py` с `transformer-class`
 - [ ] Unit-тесты с инъекцией трансформера
 - [ ] Integration-тесты с VCR-кассетами

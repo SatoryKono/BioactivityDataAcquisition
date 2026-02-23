@@ -10,7 +10,7 @@ Merges ChEMBL molecules with PubChem compound data to produce a composite molecu
 
 | Field | Value |
 |-------|-------|
-| Pipeline ID | `composite-molecule` |
+| Pipeline ID | `composite_molecule` |
 | Provider | `composite` |
 | Entity | `molecule` |
 | Version | `1.0.0` |
@@ -18,8 +18,8 @@ Merges ChEMBL molecules with PubChem compound data to produce a composite molecu
 
 ## Seed and Enrichers
 
-- **Seed**: `chembl-molecule`
-- **Enricher**: `pubchem-compound`
+- **Seed**: `chembl_molecule`
+- **Enricher**: `pubchem_compound`
 - **Join keys**: `inchi-key` (primary), `canonical-smiles` (fallback)
 
 ## Outputs

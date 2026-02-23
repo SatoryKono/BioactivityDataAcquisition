@@ -1,6 +1,6 @@
 # Пайплайн: ChEMBL Assay Parameters
 
-**Имя пайплайна:** `chembl-assay-parameters`
+**Имя пайплайна:** `chembl_assay_parameters`
 **Провайдер:** `chembl`
 **Сущность:** `assay-parameters`
 **Версия схемы:** 1.2.0
@@ -103,13 +103,13 @@ type = param-type.upper() if param-type else "UNKNOWN"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl-assay-parameters
+bioetl run chembl_assay_parameters
 
 # С ограничением
-bioetl run chembl-assay-parameters --limit 1000
+bioetl run chembl_assay_parameters --limit 1000
 
 # С входным фильтром
-bioetl run chembl-assay-parameters --input-filter data/input/assay-parameters.csv
+bioetl run chembl_assay_parameters --input-filter data/input/assay-parameters.csv
 ```
 
 ---

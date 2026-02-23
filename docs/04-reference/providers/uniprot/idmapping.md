@@ -1,6 +1,6 @@
 # Пайплайн: UniProt ID Mapping
 
-**Имя пайплайна:** `uniprot-idmapping`
+**Имя пайплайна:** `uniprot_idmapping`
 **Провайдер:** `uniprot`
 **Сущность:** `idmapping`
 **Версия схемы:** 1.0.0
@@ -60,14 +60,14 @@
 **Источник:** `configs/pipelines/uniprot/idmapping.yaml`
 
 ```yaml
-pipeline-name: uniprot-idmapping
+pipeline-name: uniprot_idmapping
 provider: uniprot
 entity-type: idmapping
 version: "1.0.0"
 
 primary-keys: ["target-chembl-id"]
-silver-table: "uniprot-idmapping"
-gold-table: "uniprot-idmapping"
+silver-table: "uniprot_idmapping"
+gold-table: "uniprot_idmapping"
 
 source:
   type: file
@@ -216,7 +216,7 @@ CHEMBL9999999
 | **Silver Schema** | `src/bioetl/infrastructure/schemas/silver.py:134-154` |
 | **Gold Schema** | `src/bioetl/infrastructure/schemas/gold.py:166-198` |
 | **Unit Tests** | `tests/unit/application/pipelines/test-idmapping-transformer.py` |
-| **Integration Tests** | `tests/integration/adapters/test-uniprot-idmapping.py` |
+| **Integration Tests** | `tests/integration/adapters/test-uniprot_idmapping.py` |
 
 ---
 

@@ -1,6 +1,6 @@
 # Пайплайн: ChEMBL Tissue
 
-**Имя пайплайна:** `chembl-tissue`
+**Имя пайплайна:** `chembl_tissue`
 **Провайдер:** `chembl`
 **Сущность:** `tissue`
 **Версия схемы:** 1.0.0
@@ -77,13 +77,13 @@ entity-id = f"chembl:{tissue-id}"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl-tissue
+bioetl run chembl_tissue
 
 # С ограничением количества записей
-bioetl run chembl-tissue --limit 500
+bioetl run chembl_tissue --limit 500
 
 # Полная перезагрузка
-bioetl run chembl-tissue --run-type rebuild
+bioetl run chembl_tissue --run-type rebuild
 ```
 
 ---

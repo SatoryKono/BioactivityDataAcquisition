@@ -8,7 +8,7 @@
 
 | Parameter        | Value                                               |
 | ---------------- | --------------------------------------------------- |
-| **Pipeline ID**  | `pubchem-compound`                                  |
+| **Pipeline ID**  | `pubchem_compound`                                  |
 | **Provider**     | PubChem (NCBI)                                      |
 | **Entity**       | compound                                            |
 | **API Endpoint** | `https://pubchem.ncbi.nlm.nih.gov/rest/pug/`        |
@@ -41,9 +41,9 @@ PubChem compounds are **chemical structures** with computed descriptors:
 ### 2.3. Entity Relationships
 
 ```
-pubchem-compound
+pubchem_compound
     │
-    └──► chembl-molecule (via inchi-key)
+    └──► chembl_molecule (via inchi-key)
 ```
 
 ----------------------------------------------------------------------
@@ -198,14 +198,14 @@ class PubchemMoleculeSchema(ETLRecordSchema):
 ## 7. Pipeline Configuration
 
 ```yaml
-pipeline-name: pubchem-compound
+pipeline-name: pubchem_compound
 provider: pubchem
 entity-type: compound
 version: "1.2.0"
 
 primary-keys: ["molecule-id"]
-silver-table: "pubchem-compound"
-gold-table: "pubchem-compound"
+silver-table: "pubchem_compound"
+gold-table: "pubchem_compound"
 
 source:
   type: api

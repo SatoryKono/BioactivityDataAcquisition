@@ -122,7 +122,7 @@ is provided but deprecated.
 - `configs/pipelines/chembl/document.yaml` → `publication.yaml`
 - `configs/pipelines/chembl/document-similarity.yaml` → `publication-similarity.yaml`
 - `configs/pipelines/chembl/document-term.yaml` → `publication-term.yaml`
-- Pipeline names changed: `chembl-document` → `chembl-publication`, etc.
+- Pipeline names changed: `chembl-document` → `chembl_publication`, etc.
 
 **Pipeline Classes (renamed files):**
 
@@ -149,16 +149,16 @@ is provided but deprecated.
 
 **Factory Updates:**
 
-- `transformer-factory.py` — imports and registrations updated
-- `pipeline-factories.py` — imports, configs, and exports updated
+- `transformer_factory.py` — imports and registrations updated
+- `pipeline_factories.py` — imports, configs, and exports updated
 - `registration.py` — import updated
 
 **Test Files (renamed):**
 
 - `test-document-term-data-source.py` → `test-publication-term-data-source.py`
 - `test-document-similarity-transformer.py` → `test-publication-similarity-transformer.py`
-- `test-chembl-document-e2e.py` → `test-chembl-publication-e2e.py`
-- `test-chembl-document-term-e2e.py` → `test-chembl-publication-term-e2e.py`
+- `test-chembl-document_e2e.py` → `test-chembl_publication_e2e.py`
+- `test-chembl-document-term_e2e.py` → `test-chembl_publication_term_e2e.py`
 
 **Documentation:**
 
@@ -208,7 +208,7 @@ from bioetl.application.pipelines.chembl.publication import ChEMBLPublicationPip
 # bioetl run chembl-document  # ERROR: Unknown pipeline
 
 # Canonical names (ONLY option)
-bioetl run chembl-publication
+bioetl run chembl_publication
 ```
 
 ### Publication field alias compatibility window (update: 2026-02-18)

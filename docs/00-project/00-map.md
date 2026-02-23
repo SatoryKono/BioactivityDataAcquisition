@@ -247,9 +247,9 @@ src/bioetl/
 │   ├── providers/               # Provider registration
 │   ├── services/                # Composition services
 │   └── factories/               # Consolidated factories
-│       ├── pipeline-factory.py  # Pipeline factory
-│       ├── runner-factory.py    # Runner factory
-│       └── storage-factory.py   # Multi-layer storage factory
+│       ├── pipeline_factory.py  # Pipeline factory
+│       ├── runner_factory.py    # Runner factory
+│       └── storage_factory.py   # Multi-layer storage factory
 │
 ├── infrastructure/              # I/O adapters (§1.1)
 │   ├── adapters/                # External API clients
@@ -298,7 +298,7 @@ tests/
 │   └── adapters/                # HTTP adapter tests
 ├── e2e/                         # E2E tests (Local-Only arch)
 │   ├── conftest.py              # E2E helpers & fixtures
-│   └── test-pipeline-e2e.py     # Full pipeline cycle tests
+│   └── test-pipeline_e2e.py     # Full pipeline cycle tests
 ├── architecture/                # Architecture validation tests
 │   └── test-layer-imports.py    # Import matrix enforcement
 └── fixtures/                    # Test fixtures
