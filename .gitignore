@@ -153,3 +153,6 @@ data/input/chembl_target_component.csv
 /run_extract.bat
 /test_author_quick.py
 /temp_batch_executor.txt
+
+# Nested IDEA project files
+data/.idea/
