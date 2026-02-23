@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "Provider health metrics for latest run only",
+  "description": "Provider health metrics from pipeline health checks",
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
@@ -35,91 +35,6 @@
       "type": "text"
     },
     {
-      "gridPos": {
-        "h": 3,
-        "w": 6,
-        "x": 6,
-        "y": 0
-      },
-      "id": 100,
-      "options": {
-        "content": "<center><h2>Provider Health</h2></center>",
-        "mode": "html"
-      },
-      "title": "Health Status",
-      "type": "text"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "Processing Time (s)",
-            "axisPlacement": "auto",
-            "drawStyle": "bars",
-            "fillOpacity": 50,
-            "gradientMode": "none",
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "normal"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 6
-      },
-      "id": 1,
-      "options": {
-        "legend": {
-          "calcs": [
-            "sum",
-            "mean"
-          ],
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "targets": [
-        {
-          "expr": "histogram_quantile(0.95, sum by (le, provider) (bioetl_health_check_latency_ms_bucket{provider=~\"$provider\"}))",
-          "legendFormat": "{{ provider }} p95",
-          "refId": "A"
-        }
-      ],
-      "title": "Provider Response Time (Latest Run)",
-      "type": "timeseries"
-    },
-    {
       "datasource": "Prometheus",
       "fieldConfig": {
         "defaults": {
@@ -130,8 +45,8 @@
             {
               "options": {
                 "0": {
-                  "text": "Unknown",
-                  "color": "dark-gray",
+                  "text": "Failed",
+                  "color": "red",
                   "index": 0
                 }
               },
@@ -140,19 +55,9 @@
             {
               "options": {
                 "1": {
-                  "text": "Healthy",
+                  "text": "Passed",
                   "color": "green",
                   "index": 1
-                }
-              },
-              "type": "value"
-            },
-            {
-              "options": {
-                "2": {
-                  "text": "Degraded",
-                  "color": "orange",
-                  "index": 2
                 }
               },
               "type": "value"
@@ -162,16 +67,12 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "dark-gray",
+                "color": "red",
                 "value": null
               },
               {
                 "color": "green",
                 "value": 1
-              },
-              {
-                "color": "orange",
-                "value": 2
               }
             ]
           }
@@ -179,12 +80,12 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 6
+        "h": 3,
+        "w": 6,
+        "x": 6,
+        "y": 0
       },
-      "id": 2,
+      "id": 100,
       "options": {
         "colorMode": "background",
         "graphMode": "none",
@@ -201,269 +102,13 @@
       },
       "targets": [
         {
-          "expr": "bioetl_health_check_status",
-          "legendFormat": "{{ component }}",
+          "expr": "min(bioetl_pipeline_health_check_passed{pipeline=~\"$provider_.*\", component=\"data_source\"})",
+          "legendFormat": "Health",
           "refId": "A"
         }
       ],
       "title": "Health Check Status",
       "type": "stat"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 3,
-          "max": 10,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 0.5
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 0,
-        "y": 14
-      },
-      "id": 3,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true
-      },
-      "targets": [
-        {
-          "expr": "histogram_quantile(0.95, sum by (le) (bioetl_health_check_latency_ms_bucket{provider=\"uniprot\"}))",
-          "legendFormat": "UniProt",
-          "refId": "A"
-        }
-      ],
-      "title": "UniProt Latency",
-      "type": "gauge"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 3,
-          "max": 10,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 0.5
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 6,
-        "y": 14
-      },
-      "id": 4,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true
-      },
-      "targets": [
-        {
-          "expr": "histogram_quantile(0.95, sum by (le) (bioetl_health_check_latency_ms_bucket{provider=\"pubmed\"}))",
-          "legendFormat": "PubMed",
-          "refId": "A"
-        }
-      ],
-      "title": "PubMed Latency",
-      "type": "gauge"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 3,
-          "max": 10,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 0.5
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 12,
-        "y": 14
-      },
-      "id": 5,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true
-      },
-      "targets": [
-        {
-          "expr": "histogram_quantile(0.95, sum by (le) (bioetl_health_check_latency_ms_bucket{provider=\"pubchem\"}))",
-          "legendFormat": "PubChem",
-          "refId": "A"
-        }
-      ],
-      "title": "PubChem Latency",
-      "type": "gauge"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 3,
-          "max": 10,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 0.5
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 18,
-        "y": 14
-      },
-      "id": 6,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true
-      },
-      "targets": [
-        {
-          "expr": "histogram_quantile(0.95, sum by (le) (bioetl_health_check_latency_ms_bucket{provider=\"chembl\"}))",
-          "legendFormat": "ChemBL",
-          "refId": "A"
-        }
-      ],
-      "title": "ChemBL Latency",
-      "type": "gauge"
     },
     {
       "datasource": "Prometheus",
@@ -517,12 +162,275 @@
       },
       "targets": [
         {
-          "expr": "min(bioetl_health_check_latency_ms_created{provider=~\"$provider\"}) * 1000",
+          "expr": "min(bioetl_health_check_duration_seconds_created{pipeline=~\"$provider_.*\"}) * 1000",
           "legendFormat": "Start Time",
           "refId": "A"
         }
       ],
       "title": "Execution Timestamp",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "Duration (seconds)",
+            "axisPlacement": "auto",
+            "drawStyle": "bars",
+            "fillOpacity": 50,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 6
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "calcs": [
+            "sum",
+            "mean"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, pipeline) (bioetl_health_check_duration_seconds_bucket{pipeline=~\"$provider_.*\"}))",
+          "legendFormat": "{{ pipeline }} p95",
+          "refId": "A"
+        }
+      ],
+      "title": "Health Check Duration by Pipeline (p95)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "text": "Failed",
+                  "color": "red",
+                  "index": 0
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "1": {
+                  "text": "Passed",
+                  "color": "green",
+                  "index": 1
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 6
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "bioetl_pipeline_health_check_passed{pipeline=~\"$provider_.*\"}",
+          "legendFormat": "{{ pipeline }} ({{ component }})",
+          "refId": "A"
+        }
+      ],
+      "title": "Health Check Results by Pipeline",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "max": 10,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 2
+              },
+              {
+                "color": "orange",
+                "value": 5
+              },
+              {
+                "color": "red",
+                "value": 10
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 14
+      },
+      "id": 3,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, pipeline) (bioetl_health_check_duration_seconds_bucket{pipeline=~\"$provider_.*\"}))",
+          "legendFormat": "{{ pipeline }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Per-Pipeline Health Check Duration (p95)",
+      "type": "gauge"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 14
+      },
+      "id": 7,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "bioetl_health_check_duration_seconds_sum{pipeline=~\"$provider_.*\"}",
+          "legendFormat": "{{ pipeline }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Health Check Duration",
       "type": "stat"
     }
   ],
@@ -546,7 +454,7 @@
           "value": "$__all"
         },
         "datasource": "Prometheus",
-        "definition": "label_values(bioetl_health_check_latency_ms_bucket, provider)",
+        "definition": "label_values(bioetl_health_check_duration_seconds_bucket, pipeline)",
         "hide": 0,
         "includeAll": true,
         "label": "Provider",
@@ -554,63 +462,13 @@
         "name": "provider",
         "options": [],
         "query": {
-          "query": "label_values(bioetl_health_check_latency_ms_bucket, provider)",
+          "query": "label_values(bioetl_health_check_duration_seconds_bucket, pipeline)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 2,
-        "regex": "",
+        "regex": "/^([^_]+)_.*/",
         "skipUrlSync": false,
         "sort": 1,
-        "type": "query"
-      },
-      {
-        "allValue": null,
-        "current": {},
-        "datasource": "Prometheus",
-        "definition": "label_values(bioetl_records_processed_total, pipeline)",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Pipeline",
-        "multi": true,
-        "name": "pipeline",
-        "options": [],
-        "query": {
-          "query": "label_values(bioetl_records_processed_total, pipeline)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 1,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": ".*",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "Prometheus",
-        "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_id)",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Run ID",
-        "multi": false,
-        "name": "run_id",
-        "options": [],
-        "query": {
-          "query": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_id)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 3,
         "type": "query"
       }
     ]
@@ -636,5 +494,5 @@
   "timezone": "",
   "title": "BioETL Provider Health v2",
   "uid": "bioetl-provider-health-v2",
-  "version": 2
+  "version": 3
 }
