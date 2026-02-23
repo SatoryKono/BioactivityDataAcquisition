@@ -183,8 +183,8 @@ Pipelines are registered via decorator pattern:
 ```python
 from bioetl.composition.factories import register
 
-@register("chembl-activity")
-def chembl-activity-factory(ctx: PipelineContext) -> PipelineRunner:
+@register("chembl_activity")
+def chembl_activity-factory(ctx: PipelineContext) -> PipelineRunner:
     """Factory for ChEMBL activity pipeline."""
     ...
 ```
@@ -195,7 +195,7 @@ Each pipeline has YAML configuration:
 
 ```yaml
 # configs/pipelines/chembl/activity.yaml
-pipeline-name: chembl-activity
+pipeline-name: chembl_activity
 provider: chembl
 entity-type: activity
 batch-size: 100
@@ -224,7 +224,7 @@ from bioetl.domain.types import RunType
 
 # Create pipeline context
 ctx = PipelineContext(
-    pipeline-name="chembl-activity",
+    pipeline-name="chembl_activity",
     run-type=RunType.INCREMENTAL,
 )
 

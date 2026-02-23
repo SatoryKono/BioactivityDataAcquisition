@@ -406,7 +406,7 @@ Mode: Overwrite
 
 | Consumer                 | Impact                      |
 | ------------------------ | --------------------------- |
-| `chembl-activity`        | FK reference                |
+| `chembl_activity`        | FK reference                |
 | `chembl-compound-record` | FK reference                |
 | SAR analytics            | Structure-activity analysis |
 

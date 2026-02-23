@@ -193,11 +193,11 @@ Factory for creating HTTP clients.
 
 Pre-configured factory functions for each pipeline.
 
-### chembl-activity-factory
+### chembl_activity-factory
 
 Factory for ChEMBL activity pipeline.
 
-::: bioetl.composition.factories.pipeline-factories.chembl-activity-factory
+::: bioetl.composition.factories.pipeline-factories.chembl_activity-factory
     options:
         show-root-heading: true
         show-source: false
@@ -286,9 +286,9 @@ storage-factory = StorageFactory()
 # )
 
 # Or use the pre-configured factory
-from bioetl.composition.factories import chembl-activity-factory
+from bioetl.composition.factories import chembl_activity-factory
 
-# runner = chembl-activity-factory(ctx)
+# runner = chembl_activity-factory(ctx)
 # await runner.run()
 ```
 

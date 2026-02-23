@@ -126,9 +126,9 @@ Schema проверяет:
 
 | Элемент | Паттерн | Пример |
 |---------|---------|--------|
-| `pipeline-name` | `<provider>-<entity>` | `chembl-activity` |
-| `silver-table` | `<provider>-<entity>` | `chembl-activity` |
-| `gold-table` | `<provider>-<entity>` | `chembl-activity` |
+| `pipeline-name` | `<provider>-<entity>` | `chembl_activity` |
+| `silver-table` | `<provider>-<entity>` | `chembl_activity` |
+| `gold-table` | `<provider>-<entity>` | `chembl_activity` |
 | Config path | `configs/pipelines/<provider>/<entity>.yaml` | `configs/pipelines/chembl/activity.yaml` |
 
 **Статус**: Консистентность по всем 21 entity configs + 5 composite (верифицировано 2026-02-17).
@@ -219,7 +219,7 @@ dq-overrides:
 Use YAML anchors/aliases for config inheritance:
 ```yaml
 <<: *defaults
-pipeline-name: chembl-activity
+pipeline-name: chembl_activity
 ```
 
 **Rejected**: Requires multi-file anchor resolution. Current file-based inheritance через `-base.yaml` проще и поддерживается стандартными инструментами.

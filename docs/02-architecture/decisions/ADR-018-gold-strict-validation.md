@@ -110,7 +110,7 @@ Feature flag `strict-gold-validation` позволяет:
 ```yaml
 # configs/pipelines/chembl/activity.yaml
 pipeline:
-  name: chembl-activity
+  name: chembl_activity
   provider: chembl
   entity: activity
   strict-gold-validation: true

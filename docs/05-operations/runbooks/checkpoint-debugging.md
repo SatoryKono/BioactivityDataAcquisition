@@ -10,7 +10,7 @@ Checkpoints track pipeline progress to enable resumable execution. This runbook 
 data/checkpoints/{provider}-{entity}.json
 ```
 
-Example: `data/checkpoints/chembl-activity.json`
+Example: `data/checkpoints/chembl_activity.json`
 
 ## Checkpoint Structure
 
@@ -36,7 +36,7 @@ Example: `data/checkpoints/chembl-activity.json`
 **Diagnosis**:
 ```bash
 # Check checkpoint offset
-cat data/checkpoints/chembl-activity.json | jq '.last-offset'
+cat data/checkpoints/chembl_activity.json | jq '.last-offset'
 
 # Compare with source record count
 # (provider-specific, example for ChEMBL)
@@ -70,7 +70,7 @@ print(f"Duplicate records: {len(duplicates)}")
 2. Verify content-hash is being calculated correctly
 3. Run deduplication:
    ```bash
-   bioetl dedupe --table chembl-activity
+   bioetl dedupe --table chembl_activity
    ```
 
 ### Issue 3: Checkpoint Corruption
@@ -80,7 +80,7 @@ print(f"Duplicate records: {len(duplicates)}")
 **Diagnosis**:
 ```bash
 # Validate JSON
-python -m json.tool data/checkpoints/chembl-activity.json
+python -m json.tool data/checkpoints/chembl_activity.json
 
 # Check file permissions
 ls -la data/checkpoints/
@@ -92,10 +92,10 @@ ls -la data/checkpoints/
 
 ```bash
 # Backup corrupted checkpoint
-mv data/checkpoints/chembl-activity.json data/checkpoints/chembl-activity.json.corrupted
+mv data/checkpoints/chembl_activity.json data/checkpoints/chembl_activity.json.corrupted
 
 # Create fresh checkpoint (optional, will be created on first run)
-echo '{}' > data/checkpoints/chembl-activity.json
+echo '{}' > data/checkpoints/chembl_activity.json
 ```
 
 ### Issue 4: Checkpoint Not Updating
@@ -105,7 +105,7 @@ echo '{}' > data/checkpoints/chembl-activity.json
 **Diagnosis**:
 ```bash
 # Check file modification time
-stat data/checkpoints/chembl-activity.json
+stat data/checkpoints/chembl_activity.json
 
 # Verify write permissions
 touch data/checkpoints/test && rm data/checkpoints/test
@@ -128,7 +128,7 @@ touch data/checkpoints/test && rm data/checkpoints/test
 If schema version mismatch is intentional:
 ```bash
 # Full refresh with new schema
-bioetl run --pipeline chembl-activity --run-type rebuild
+bioetl run --pipeline chembl_activity --run-type rebuild
 ```
 
 ## Manual Checkpoint Operations
@@ -136,17 +136,17 @@ bioetl run --pipeline chembl-activity --run-type rebuild
 ### View Checkpoint
 
 ```bash
-cat data/checkpoints/chembl-activity.json | python -m json.tool
+cat data/checkpoints/chembl_activity.json | python -m json.tool
 ```
 
 ### Reset Checkpoint
 
 ```bash
 # Backup first
-cp data/checkpoints/chembl-activity.json data/checkpoints/chembl-activity.json.bak
+cp data/checkpoints/chembl_activity.json data/checkpoints/chembl_activity.json.bak
 
 # Reset to beginning
-echo '{"provider": "chembl", "entity": "activity", "last-offset": 0}' > data/checkpoints/chembl-activity.json
+echo '{"provider": "chembl", "entity": "activity", "last-offset": 0}' > data/checkpoints/chembl_activity.json
 ```
 
 ### Set Specific Offset
@@ -154,7 +154,7 @@ echo '{"provider": "chembl", "entity": "activity", "last-offset": 0}' > data/che
 ```python
 import json
 
-checkpoint-path = "data/checkpoints/chembl-activity.json"
+checkpoint-path = "data/checkpoints/chembl_activity.json"
 
 with open(checkpoint-path) as f:
     checkpoint = json.load(f)
@@ -222,15 +222,15 @@ validate-checkpoint("chembl", "activity")
 
 Checkpoints are backed up before each run:
 ```
-data/checkpoints/chembl-activity.json.bak
+data/checkpoints/chembl_activity.json.bak
 ```
 
 ### Manual Backup
 
 ```bash
 # Timestamp-based backup
-cp data/checkpoints/chembl-activity.json \
-   data/checkpoints/chembl-activity.$(date +%Y%m%d-%H%M%S).json
+cp data/checkpoints/chembl_activity.json \
+   data/checkpoints/chembl_activity.$(date +%Y%m%d-%H%M%S).json
 ```
 
 ### Recovery from Backup
@@ -240,7 +240,7 @@ cp data/checkpoints/chembl-activity.json \
 ls -la data/checkpoints/*.bak data/checkpoints/*.json.*
 
 # Restore from backup
-cp data/checkpoints/chembl-activity.json.bak data/checkpoints/chembl-activity.json
+cp data/checkpoints/chembl_activity.json.bak data/checkpoints/chembl_activity.json
 ```
 
 ## Monitoring

@@ -32,8 +32,8 @@
 | Cassette | Used By | Status |
 |----------|---------|--------|
 | `TestChEMBLIntegration.test-chembl-extract-transform-load.yaml` | E2E `test-full-pipeline.py` | OK |
-| `TestChEMBLPipelineE2E.test-chembl-activity-full-run.yaml` | E2E `test-chembl-activity-e2e.py` | OK |
-| `TestChemblActivityPipeline.test-chembl-activity-error-handling.yaml` | Integration `test-chembl-activity.py` | OK |
+| `TestChEMBLPipelineE2E.test-chembl_activity-full-run.yaml` | E2E `test-chembl_activity-e2e.py` | OK |
+| `TestChemblActivityPipeline.test-chembl_activity-error-handling.yaml` | Integration `test-chembl_activity.py` | OK |
 | `TestChemblAdapter.test-fetch-activities.yaml` | Integration `test-chembl.py` | OK |
 | `TestChemblAdapter.test-get-entity-count.yaml` | Integration `test-chembl.py` | OK |
 | `TestChemblAdapter.test-health-check.yaml` | Integration `test-chembl.py` | OK |
@@ -160,7 +160,7 @@ Pipeline configs exist for 15 ChEMBL entities but only 4 have dedicated integrat
 
 #### ChEMBL - Skipped VCR tests needing cassettes
 
-- [ ] `chembl/chembl-activity-filtered.yaml` -- `test-activity-extraction-params.py::test-filtered-api-request` is `@pytest.mark.skip` pending cassette recording
+- [ ] `chembl/chembl_activity-filtered.yaml` -- `test-activity-extraction-params.py::test-filtered-api-request` is `@pytest.mark.skip` pending cassette recording
 - [ ] `chembl/chembl-assay-filtered.yaml` -- `test-assay-extraction-params.py::test-assay-filtered-api-request` is `@pytest.mark.skip` pending cassette recording
 
 #### CrossRef - No VCR-backed tests at all

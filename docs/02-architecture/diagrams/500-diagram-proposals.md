@@ -106,7 +106,7 @@ The following 34 diagrams already exist and are explicitly excluded:
 | 43 | Domain Types Enum Hierarchy | classDiagram | HealthStatus, RunType, SilverWriteMode, GoldWriteMode, EntityType, LoadingStrategy enum classes and their values |
 | 44 | Exception Hierarchy Full Tree | classDiagram | BioETLError → NetworkError, ValidationError, StorageError, ConfigError, LockError with all subclasses |
 | 45 | Medallion Architecture Invariants | flowchart | REBUILD→clear both, BACKFILL→clear both, INCREMENTAL→clear neither — enforcement via MedallionLifecycleService |
-| 46 | Convention-Based Path Resolution | flowchart | From pipeline-name=chembl-activity → auto-computed source, dq, filter, sink paths without explicit config |
+| 46 | Convention-Based Path Resolution | flowchart | From pipeline-name=chembl_activity → auto-computed source, dq, filter, sink paths without explicit config |
 | 47 | Architecture Principles Mind Map | mindmap | Central: Hexagonal Architecture → Ports&Adapters, DI, Medallion, DDD Aggregates, Composition Root, Local-Only |
 | 48 | RULES.md Section Dependency Graph | flowchart | How RULES.md sections cross-reference: §1→§2 (layers→data flow), §3 (errors), §4 (code), §5 (ops) |
 | 49 | BasePipeline Decomposition (ADR-020) | flowchart | Original monolith → decomposed: BatchExecutor, BatchTransformer, BatchWriter, PreflightService, PostrunService |

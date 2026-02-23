@@ -198,7 +198,7 @@ Priority = (Arch×2 + Doc×1.5 + Freq×1.5 + Complex×2 + Coverage×1) / 8
 ### Rank 8: #221 — CLI Run → PipelineRunner Full Interaction (8.50)
 
 - **Arch=7**: Shows the entry point and full call chain
-- **Doc=10**: "What happens when I run `bioetl run chembl-activity`?"
+- **Doc=10**: "What happens when I run `bioetl run chembl_activity`?"
 - **Freq=10**: The most common operation in the system
 - **Complex=8**: CLI→bootstrap→factories→runner→executor→finalize
 - **Coverage=8**: Spans interfaces, composition, application layers

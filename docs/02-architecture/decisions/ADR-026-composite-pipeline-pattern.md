@@ -7,7 +7,7 @@
 ## Context
 
 BioETL uses Hexagonal Architecture + Medallion (Bronze→Silver→Gold) for ETL biоактивных данных. Current pipelines operate independently:
-- `chembl-activity`
+- `chembl_activity`
 - `chembl-publication`
 - `pubchem-compound`
 

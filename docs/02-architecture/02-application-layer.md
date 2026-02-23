@@ -86,7 +86,7 @@
 ```python
 # Пример инъекции трансформера в GenericPipelineFactory
 factory = GenericPipelineFactory(
-    pipeline-name="chembl-activity",
+    pipeline-name="chembl_activity",
     pipeline-class=ChEMBLActivityPipeline,
     provider="chembl",
     transformer-class=ActivityTransformer,  # <-- DI

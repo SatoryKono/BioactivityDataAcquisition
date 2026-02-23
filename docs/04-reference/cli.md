@@ -67,28 +67,28 @@ bioetl run --pipeline <NAME> [OPTIONS]
 
 ```bash
 # Инкрементальный запуск (по умолчанию)
-bioetl run --pipeline chembl-activity
+bioetl run --pipeline chembl_activity
 
 # С ограничением записей (для тестирования)
-bioetl run --pipeline chembl-activity --limit 100
+bioetl run --pipeline chembl_activity --limit 100
 
 # Полная перезагрузка данных
-bioetl run --pipeline chembl-activity --run-type rebuild --yes
+bioetl run --pipeline chembl_activity --run-type rebuild --yes
 
 # Предпросмотр очистки без выполнения
-bioetl run --pipeline chembl-activity --run-type rebuild --dry-run
+bioetl run --pipeline chembl_activity --run-type rebuild --dry-run
 
 # Продолжить прерванный запуск
-bioetl run --pipeline chembl-activity --resume
+bioetl run --pipeline chembl_activity --resume
 
 # С фильтрацией по CSV
-bioetl run --pipeline chembl-activity \
+bioetl run --pipeline chembl_activity \
     --input-csv data/filter-ids.csv \
     --filter-column molecule-id \
     --filter-field molecule-chembl-id
 
 # С DEBUG логированием
-bioetl run --pipeline chembl-activity --debug
+bioetl run --pipeline chembl_activity --debug
 ```
 
 **Типы запуска:**
@@ -261,8 +261,8 @@ bioetl config show <PIPELINE> [--format yaml|json]
 **Примеры:**
 
 ```bash
-bioetl config show chembl-activity
-bioetl config show chembl-activity --format json
+bioetl config show chembl_activity
+bioetl config show chembl_activity --format json
 ```
 
 #### `config validate` — Валидация конфигурации
@@ -308,8 +308,8 @@ bioetl quarantine inspect --pipeline <NAME> [OPTIONS]
 **Примеры:**
 
 ```bash
-bioetl quarantine inspect --pipeline chembl-activity
-bioetl quarantine inspect --pipeline chembl-activity --error-code DQ-MISSING-FIELD
+bioetl quarantine inspect --pipeline chembl_activity
+bioetl quarantine inspect --pipeline chembl_activity --error-code DQ-MISSING-FIELD
 ```
 
 #### `quarantine stats` — Статистика

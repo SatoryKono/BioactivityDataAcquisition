@@ -124,12 +124,12 @@ All logs include structured context per Log Schema (RULES.md §3.2.1):
 ```python
 logger = logger.bind(
     run-id=str(run-id),
-    pipeline="chembl-activity",
+    pipeline="chembl_activity",
     stage="extract",
 )
 
 # Output:
-# {"event": "batch-complete", "run-id": "abc-123", "pipeline": "chembl-activity", "stage": "extract", ...}
+# {"event": "batch-complete", "run-id": "abc-123", "pipeline": "chembl_activity", "stage": "extract", ...}
 ```
 
 ## Anomaly Detection
@@ -181,7 +181,7 @@ from bioetl.composition.bootstrap.runtime.observability import (
 
 # Initialize complete observability stack
 bundle = bootstrap-observability-bundle(
-    pipeline="chembl-activity",
+    pipeline="chembl_activity",
     run-id=run-id,
     settings=settings,
 )
@@ -192,7 +192,7 @@ bundle.logger.info("batch-started", stage="extract", batch-id=str(batch-id))
 bundle.metrics.increment-counter(
     "records-processed-total",
     records-count,
-    {"pipeline": "chembl-activity", "stage": "extract", "run-type": "incremental"},
+    {"pipeline": "chembl_activity", "stage": "extract", "run-type": "incremental"},
 )
 ```
 
@@ -204,7 +204,7 @@ from bioetl.infrastructure.observability.unified-logger import UnifiedLogger
 
 metrics = PrometheusMetrics()
 tracer = OpenTelemetryTracer(service-name="bioetl")
-logger = UnifiedLogger(pipeline="chembl-activity", run-id=run-id)
+logger = UnifiedLogger(pipeline="chembl_activity", run-id=run-id)
 ```
 
 ## Configuration

@@ -37,7 +37,7 @@
 | chembl-release | string | Версия ChEMBL (CHEMBL-XX) |
 | creation-date | string | Дата создания записи (YYYY-MM-DD) |
 
-### chembl-activity
+### chembl_activity
 | Поле | Тип | Описание |
 |---|---|---|
 | action-type-action-type | string | Тип действия (ChEMBL action-type) |

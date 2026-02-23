@@ -166,7 +166,7 @@ fi
 vacuum:
   default-retention-days: 7
   forensic-tables:
-    - chembl-activity
+    - chembl_activity
     - pubchem-compound
   forensic-retention-days: 30
 ```
@@ -183,7 +183,7 @@ VACUUM операции логируются с structlog pattern:
 {
   "event": "vacuum-completed",
   "layer": "silver",
-  "table": "chembl-activity",
+  "table": "chembl_activity",
   "files-removed": 42,
   "run-id": "abc123-..."
 }

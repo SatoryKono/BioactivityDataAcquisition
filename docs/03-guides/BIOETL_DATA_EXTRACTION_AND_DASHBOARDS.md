@@ -35,7 +35,7 @@ export BIOETL_METRICS_ENABLED=true
 export BIOETL_METRICS_PORT=8000
 
 # 2. Запустите пайплайн (любой)
-bioetl run --pipeline chembl-activity
+bioetl run --pipeline chembl_activity
 
 # 3. В другом терминале проверьте метрики
 curl http://localhost:8000/metrics | head -50
@@ -95,7 +95,7 @@ docker compose -f docker-compose.monitoring.yml up -d
 docker compose -f docker-compose.monitoring.yml ps
 
 # 3. Запустить пайплайн
-bioetl run --pipeline chembl-activity
+bioetl run --pipeline chembl_activity
 
 # 4. Дождаться первого scrape'а (15 сек)
 

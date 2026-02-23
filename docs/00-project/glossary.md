@@ -200,7 +200,7 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 ### CLI Conventions
 
 **Pipeline Names**: CLI uses `{provider}-{entity}` format for pipeline identifiers:
-- `chembl-molecule`, `chembl-activity`, `chembl-assay`
+- `chembl-molecule`, `chembl_activity`, `chembl-assay`
 - `pubchem-compound`
 - `uniprot-protein`
 - `pubmed-publication`

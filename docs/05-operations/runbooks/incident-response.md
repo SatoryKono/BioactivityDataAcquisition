@@ -53,7 +53,7 @@ This document outlines the standard operating procedures for responding to produ
     1.  Check for "zombie" processes on the worker nodes.
     2.  Manually release the lock:
         ```bash
-        make release-lock PIPELINE=chembl-activity
+        make release-lock PIPELINE=chembl_activity
         ```
     3.  Investigate why the job took so long (performance regression?).
 

@@ -151,5 +151,5 @@ input-filter:
 
 | Consumer                     | Impact                   |
 | ---------------------------- | ------------------------ |
-| `chembl-activity`            | FK reference (record-id) |
+| `chembl_activity`            | FK reference (record-id) |
 | Compound-literature analysis | Provenance tracking      |

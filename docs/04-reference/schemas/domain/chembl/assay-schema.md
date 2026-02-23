@@ -305,7 +305,7 @@ def -validate-invariants(self) -> None:
 | Artifact | Path |
 |----------|------|
 | Pandera Schema | `src/bioetl/domain/schemas/chembl/assay.py` |
-| Domain Entity | `src/bioetl/domain/entities/chembl-activity.py` |
+| Domain Entity | `src/bioetl/domain/entities/chembl_activity.py` |
 | Pipeline Config | `configs/pipelines/chembl/assay.yaml` |
 | Activity Schema | `docs/domain/schemas/chembl/activity-schema.md` |
 

@@ -211,10 +211,10 @@ Periodic cleanup of old data files:
 
 ```python
 # Silver layer: 7-day retention
-await silver-writer.vacuum(table-name="chembl-activity", retention-hours=168)
+await silver-writer.vacuum(table-name="chembl_activity", retention-hours=168)
 
 # Gold layer: 30-day retention (forensic)
-await gold-writer.vacuum(table-name="chembl-activity", retention-hours=720)
+await gold-writer.vacuum(table-name="chembl_activity", retention-hours=720)
 ```
 
 ## Usage Example
@@ -246,7 +246,7 @@ silver = SilverWriter(
     logger=logger,
 )
 await silver.write-silver(
-    table-name="chembl-activity",
+    table-name="chembl_activity",
     records=silver-records,
     primary-keys=["activity-id"],
     schema=arrow-schema,
@@ -259,7 +259,7 @@ gold = GoldWriter(
     logger=logger,
 )
 await gold.write-gold(
-    table-name="chembl-activity",
+    table-name="chembl_activity",
     records=gold-records,
     schema=pandera-schema,
     primary-keys=["activity-id"],
@@ -277,7 +277,7 @@ from bioetl.domain.ports.audit import AuditEntry, AuditLayer
 entry = AuditEntry(
     operation=AuditOperation.WRITE,
     layer=AuditLayer.SILVER,
-    table-name="chembl-activity",
+    table-name="chembl_activity",
     record-count=len(records),
     run-id=run-id,
 )
