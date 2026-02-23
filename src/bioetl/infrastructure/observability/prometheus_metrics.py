@@ -6,9 +6,7 @@ Prometheus client library.
 
 from __future__ import annotations
 
-import logging
-
-from bioetl.domain.ports import MetricsPort
+from bioetl.domain.ports import LoggerPort, MetricsPort
 from bioetl.infrastructure.observability.metrics import (
     ADAPTER_BATCH_SIZE,
     ADAPTER_DROPPED_DUPLICATES_TOTAL,
@@ -68,8 +66,7 @@ from bioetl.infrastructure.observability.metrics import (
     VACUUM_DURATION_SECONDS,
     VACUUM_FILES_REMOVED_TOTAL,
 )
-
-_logger = logging.getLogger(__name__)
+from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 
 # Registry of histogram metrics
 HISTOGRAMS = {
@@ -167,8 +164,9 @@ class PrometheusMetrics(MetricsPort):
     Maps metric names to pre-defined Prometheus metrics and records observations.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, logger: LoggerPort | None = None) -> None:
         """Initialize Prometheus metrics adapter."""
+        self._logger = logger or NoOpLogger()
         self._closed = False
 
     def observe_histogram(
@@ -181,7 +179,7 @@ class PrometheusMetrics(MetricsPort):
         if name in HISTOGRAMS:
             HISTOGRAMS[name].labels(**labels).observe(value)
         else:
-            _logger.warning("Unknown histogram metric: %s", name)
+            self._logger.warning("unknown_histogram_metric", metric_name=name)
 
     def increment_counter(
         self,
@@ -193,7 +191,7 @@ class PrometheusMetrics(MetricsPort):
         if name in COUNTERS:
             COUNTERS[name].labels(**labels).inc(value)
         else:
-            _logger.warning("Unknown counter metric: %s", name)
+            self._logger.warning("unknown_counter_metric", metric_name=name)
 
     def set_gauge(
         self,
@@ -205,7 +203,7 @@ class PrometheusMetrics(MetricsPort):
         if name in GAUGES:
             GAUGES[name].labels(**labels).set(value)
         else:
-            _logger.warning("Unknown gauge metric: %s", name)
+            self._logger.warning("unknown_gauge_metric", metric_name=name)
 
     def close(self) -> None:
         """Cleanup Prometheus metrics. Idempotent.

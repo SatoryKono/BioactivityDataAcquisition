@@ -4,7 +4,11 @@ LABEL maintainer="Your Organization" \
       description="Cloudflare WARP service container" \
       version="1.0"
 
+# hadolint: DL4006 — enable pipefail for safe piping
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 # Install dependencies and Cloudflare WARP in a single layer
+# hadolint ignore=DL3008
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     ca-certificates \

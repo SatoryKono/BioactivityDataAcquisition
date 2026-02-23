@@ -128,9 +128,7 @@ def test_no_duplicate_variable_names(dashboard_path):
     with open(dashboard_path, encoding="utf-8-sig") as f:
         dashboard = json.load(f)
 
-    var_names = [
-        v.get("name") for v in dashboard.get("templating", {}).get("list", [])
-    ]
+    var_names = [v.get("name") for v in dashboard.get("templating", {}).get("list", [])]
     duplicates = [name for name in var_names if var_names.count(name) > 1]
     assert not duplicates, (
         f"Dashboard {dashboard_path.name} has duplicate variables: {set(duplicates)}"
@@ -200,7 +198,7 @@ def test_no_corrupted_unicode(dashboard_path):
     mojibake_patterns = [
         r"\u0432\u2020",  # в† — common UTF-8 mojibake
         r"\u00c3\u00a2",  # Ã¢ — double-encoded UTF-8
-        r"\u00c2\u00b",   # Â — double-encoded UTF-8
+        r"\u00c2\u00b",  # Â — double-encoded UTF-8
     ]
     for pattern in mojibake_patterns:
         assert pattern not in content, (
@@ -236,9 +234,7 @@ def test_all_variables_used_in_panels_or_cascade(dashboard_path):
         if ref_count == 0:
             unused.append(name)
 
-    assert not unused, (
-        f"Dashboard {dashboard_path.name} has unused variables: {unused}"
-    )
+    assert not unused, f"Dashboard {dashboard_path.name} has unused variables: {unused}"
 
 
 # =============================================================================
