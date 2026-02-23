@@ -137,7 +137,9 @@
       "Bash(docker stop:*)",
       "Bash(du:*)",
       "Bash(wmic process:*)",
-      "Bash(docker restart:*)"
+      "Bash(docker restart:*)",
+      "Bash(echo === Pipeline Runs ===:*)",
+      "Bash(echo =========================================:*)"
     ]
   },
   "enabledPlugins": {

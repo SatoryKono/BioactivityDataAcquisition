@@ -37,8 +37,8 @@ bioetl_run_start_timestamp
 
 ```
 ┌──────────────────────┬────────────────┬──────────────────────────────┐
-│ Pipeline             │ Run ID         │ Execution Timestamp          │
-│ uniprot              │ run-492157     │ 1645382400                  │
+│ Pipeline             │ Run Type       │ Execution Timestamp          │
+│ uniprot              │ incremental    │ 1645382400                  │
 │                      │                │ (26 Feb 2026, 10:00:00 UTC) │
 └──────────────────────┴────────────────┴──────────────────────────────┘
 ```
@@ -54,7 +54,7 @@ bioetl_run_start_timestamp
 
 2. **В верхней части видны:**
    - ✅ Pipeline название
-   - ✅ Run ID
+   - ✅ Run Type
    - ✅ Execution Timestamp (время запуска)
 
 3. **Timestamp конвертируется автоматически:**
@@ -99,7 +99,7 @@ curl http://localhost:8000/metrics | grep bioetl_run_start_timestamp
 
 Теперь все три дашборда v2 полностью функциональны и отображают:
 - ✅ Pipeline (название)
-- ✅ Run ID (идентификатор)
+- ✅ Run Type (тип запуска)
 - ✅ Execution Timestamp (время запуска) ← **НОВОЕ!**
 
 **Готовы к production!** 🚀

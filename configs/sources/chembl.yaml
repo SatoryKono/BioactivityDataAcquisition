@@ -54,8 +54,10 @@ entities:
     - publication_term      # MeSH headings and keywords
     - molecule           # Chemical compounds
     - protein_class      # Protein classification hierarchy
+    - subcellular_fraction  # Subcellular localization reference
     - target             # Biological targets
     - target_component   # Target protein components
+    - tissue             # Tissue reference data
 
 # Entity-specific notes for documentation
 entity_notes:

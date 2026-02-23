@@ -2,7 +2,7 @@
 
 ## ✅ Что было исправлено
 
-Обновлены запросы для Execution Timestamp панели во всех дашбордах v2, чтобы работать с переменными pipeline и run_id.
+Обновлены запросы для Execution Timestamp панели во всех дашбордах v2, чтобы работать с переменными pipeline и run_type.
 
 ### ПроблемА
 
@@ -17,12 +17,12 @@ bioetl_run_start_timestamp
 
 **Стало:**
 ```promql
-max(bioetl_run_start_timestamp{pipeline=~"$pipeline", run_id=~"$run_id"})
+max(bioetl_records_processed_created{pipeline=~"$pipeline", run_type=~"$run_type"})
 ```
 
 Теперь запрос:
 - ✅ Использует переменную `$pipeline` для фильтрации
-- ✅ Использует переменную `$run_id` для фильтрации
+- ✅ Использует переменную `$run_type` для фильтрации
 - ✅ Берёт максимальное значение (если несколько значений)
 - ✅ Обновляется при изменении фильтров
 
@@ -37,14 +37,14 @@ max(bioetl_run_start_timestamp{pipeline=~"$pipeline", run_id=~"$run_id"})
    Pipeline: uniprot
    ```
 
-2. **Пользователь выбирает Run ID**
+2. **Пользователь выбирает Run Type**
    ```
-   Run ID: run-492157
+   Run Type: incremental
    ```
 
 3. **Execution Timestamp обновляется**
    ```promql
-   max(bioetl_run_start_timestamp{pipeline=~"uniprot", run_id=~"run-492157"})
+   max(bioetl_records_processed_created{pipeline=~"uniprot", run_type=~"incremental"})
    ```
 
 4. **Панель показывает время для этого конкретного run'а**
@@ -55,7 +55,7 @@ max(bioetl_run_start_timestamp{pipeline=~"$pipeline", run_id=~"$run_id"})
 ### При изменении фильтров
 
 - Если выбрать другой Pipeline → Timestamp обновится
-- Если выбрать другой Run ID → Timestamp обновится
+- Если выбрать другой Run Type → Timestamp обновится
 - Если выбрать "All" → Timestamp покажет максимальное значение
 
 ---
@@ -66,12 +66,12 @@ max(bioetl_run_start_timestamp{pipeline=~"$pipeline", run_id=~"$run_id"})
 
 ### Было:
 ```promql
-bioetl_records_processed_total{run_id=~"$latest_run_id"}
+bioetl_records_processed_total{run_id=~"..."}
 ```
 
 ### Стало:
 ```promql
-bioetl_records_processed_total{pipeline=~"$pipeline", run_id=~"$run_id"}
+bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}
 ```
 
 ---
@@ -92,33 +92,33 @@ bioetl_records_processed_total{pipeline=~"$pipeline", run_id=~"$run_id"}
 
 ```
 Pipeline: pubmed
-Run ID: run-492158
+Run Type: backfill
 
 Результат:
-- Execution Timestamp: 1645386000 (время запуска PubMed run'а)
-- Все графики: данные только для этого run'а
+- Execution Timestamp: 1645386000 (время запуска PubMed)
+- Все графики: данные только для backfill запусков
 ```
 
 ### Пример 2: Все run'ы одного pipeline
 
 ```
 Pipeline: uniprot
-Run ID: All
+Run Type: All
 
 Результат:
-- Execution Timestamp: максимальное время (последний run)
-- Все графики: объединённые данные всех uniprot run'ов
+- Execution Timestamp: максимальное время (последний запуск)
+- Все графики: объединённые данные всех типов запуска uniprot
 ```
 
 ### Пример 3: Все pipeline'ы и run'ы
 
 ```
 Pipeline: All
-Run ID: All
+Run Type: All
 
 Результат:
 - Execution Timestamp: максимальное время (последний запуск вообще)
-- Все графики: объединённые данные всех pipeline'ов и run'ов
+- Все графики: объединённые данные всех pipeline'ов и типов запуска
 ```
 
 ---
@@ -135,9 +135,9 @@ Run ID: All
    Pipeline: uniprot
    ```
 
-3. **Выберите Run ID:**
+3. **Выберите Run Type:**
    ```
-   Run ID: run-492157
+   Run Type: incremental
    ```
 
 4. **Проверьте Execution Timestamp:**
@@ -155,7 +155,7 @@ Run ID: All
 ## ✨ Достоинства этого исправления
 
 ✅ **Timestamp теперь привязан к фильтрам** — показывает время только для выбранных данных  
-✅ **Динамическое обновление** — при изменении Pipeline/Run ID обновляется автоматически  
+✅ **Динамическое обновление** — при изменении Pipeline/Run Type обновляется автоматически
 ✅ **Многовыборная фильтрация** — работает с "All" опциями  
 ✅ **Консистентность** — все панели используют одинаковую логику фильтрации  
 
@@ -169,18 +169,17 @@ grafana/dashboards/
 ├── bioetl-overview-v2.json (updated)
 └── bioetl-provider-health-v2.json (updated)
 
-fix_timestamp.py (скрипт для исправления)
 ```
 
 ---
 
 ## 🚀 Итог
 
-Execution Timestamp теперь полностью интегрирован с переменными pipeline и run_id. Дашборды v2 готовы к production!
+Execution Timestamp теперь полностью интегрирован с переменными pipeline и run_type. Дашборды v2 готовы к production!
 
 **Все три дашборда теперь имеют:**
 - ✅ Pipeline фильтр
-- ✅ Run ID фильтр (зависит от Pipeline)
+- ✅ Run Type фильтр (зависит от Pipeline)
 - ✅ Execution Timestamp (зависит от обоих фильтров)
 - ✅ Все графики и метрики (зависят от обоих фильтров)
 

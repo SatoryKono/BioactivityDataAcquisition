@@ -31,8 +31,8 @@
 **[docs/05-operations/01-monitoring-guide.md](../../../docs/05-operations/01-monitoring-guide.md)**
 - Архитектура наблюдаемости (Pull model)
 - Как использовать дашборды
-- Динамическая фильтрация (Pipeline, Run ID)
-- 5 основных дашбордов
+- Динамическая фильтрация (Pipeline, Run Type)
+- 4 основных дашборда
 - Runbook для типичных проблем
 
 ### 📋 Каталог метрик
@@ -55,7 +55,7 @@
 | **BIOETL_DASHBOARD_SETUP.md** | Полная пошаговая инструкция (60 минут) |
 | **BIOETL_DASHBOARD_VISUAL_GUIDE.md** | Диаграммы архитектуры, как читать графики |
 | **BIOETL_DASHBOARD_QUICKSTART.md** | За 5 минут на вход |
-| **VARIABLES_GUIDE.md** | Переменные Pipeline и Run ID |
+| **VARIABLES_GUIDE.md** | Переменные Pipeline и Run Type |
 | **TIMESTAMP_WITH_VARIABLES_FIX.md** | Исправление временных меток |
 | **INFO_PANELS_ADDED.md** | Информационные панели |
 | **DASHBOARD_V2_USAGE.md** | Как использовать v2 дашборды |
@@ -148,25 +148,16 @@
 
 ---
 
-## 📊 Основные метрики
+## 📊 Метрики, используемые в дашбордах
 
-**Pipeline Metrics:**
-- `bioetl_pipeline_duration_seconds` — длительность
-- `bioetl_records_processed_total` — обработанные записи
-- `bioetl_errors_total` — ошибки
-- `bioetl_batch_size_records` — размер батчей
+**Pipeline Metrics (Simple, DQ v2, Overview v2):**
+- `bioetl_records_processed_total` — обработанные записи (labels: pipeline, run_type, stage, status)
+- `bioetl_records_processed_created` — timestamp создания метрики
 
-**Data Quality Metrics:**
-- `bioetl_dq_records_quarantined_total` — карантинные записи
-- `bioetl_dq_validation_score` — оценка валидности
-- `bioetl_dq_anomaly_detected` — аномалии
-
-**Health Metrics:**
-- `bioetl_circuit_breaker_state` — состояние circuit breaker
-- `bioetl_health_check_status` — здоровье компонента
-- `bioetl_provider_health_status` — здоровье провайдера
-
-[Полный каталог 90+ метрик в metrics-monitoring.md]
+**Health Metrics (Provider Health v2):**
+- `bioetl_health_check_status` — статус health check (label: component)
+- `bioetl_health_check_latency_ms` — latency provider'а (histogram, label: provider)
+- `bioetl_health_check_latency_ms_created` — timestamp метрики latency
 
 ---
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any
 
 import pytest
 import yaml
@@ -17,6 +18,25 @@ PIPELINES_DIR = Path("configs/pipelines")
 GOLD_CONTRACTS_DIR = Path("docs/04-reference/contracts/gold")
 
 
+def _load_merged_config(config_path: Path) -> dict[str, Any]:
+    """Load entity config merged with _base.yaml (mirrors production loader)."""
+    base_path = config_path.parent.parent / "_base.yaml"
+    base: dict[str, Any] = {}
+    if base_path.exists():
+        base = yaml.safe_load(base_path.read_text(encoding="utf-8")) or {}
+
+    entity = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+
+    # Deep merge: entity overrides base
+    merged = base.copy()
+    for key, value in entity.items():
+        if key in merged and isinstance(merged[key], dict) and isinstance(value, dict):
+            merged[key] = {**merged[key], **value}
+        else:
+            merged[key] = value
+    return merged
+
+
 @pytest.mark.contracts
 @pytest.mark.no_api
 class TestGoldPkConsistency:
@@ -26,7 +46,7 @@ class TestGoldPkConsistency:
     def test_pk_fields_exist_in_gold_and_silver(self, schema_name: str) -> None:
         provider, entity = schema_name.split("_", 1)
         config_path = PIPELINES_DIR / provider / f"{entity}.yaml"
-        config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+        config = _load_merged_config(config_path)
 
         business_pks = config["business_primary_keys"]
         technical_pk = config["technical_primary_key"]
@@ -55,15 +75,15 @@ class TestGoldPkConsistency:
         violations: list[str] = []
 
         for path in pipeline_files:
-            data = yaml.safe_load(path.read_text(encoding="utf-8"))
+            config = _load_merged_config(path)
             # Composite pipelines have different structure (no direct PKs)
-            if "composite" in data:
+            if "composite" in config:
                 continue
-            if "business_primary_keys" not in data:
+            if "business_primary_keys" not in config:
                 violations.append(f"{path}: missing business_primary_keys")
-            if "technical_primary_key" not in data:
+            if "technical_primary_key" not in config:
                 violations.append(f"{path}: missing technical_primary_key")
-            if "primary_keys" in data:
+            if "primary_keys" in config:
                 violations.append(f"{path}: legacy primary_keys key must be removed")
 
         assert not violations, "\n".join(violations)

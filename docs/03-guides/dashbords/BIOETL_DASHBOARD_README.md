@@ -97,12 +97,11 @@
 │                   (Python)      (Container)     (Container)
 │
 │  ┌─────────────────────────────────────────────────────┐
-│  │ 8 дашбордов:                                       │
-│  │ • BioETL Simple        (основной)                  │
-│  │ • BioETL Overview      (обзор)                     │
-│  │ • BioETL Data Quality  (качество)                  │
-│  │ • BioETL Provider Health (статус)                  │
-│  │ • + 4 дополнительных                              │
+│  │ 4 дашборда:                                        │
+│  │ • BioETL Simple              (основной)            │
+│  │ • BioETL Data Quality v2     (качество данных)     │
+│  │ • BioETL Overview v2         (обзор pipeline)      │
+│  │ • BioETL Provider Health v2  (статус provider'ов)  │
 │  └─────────────────────────────────────────────────────┘
 │
 └─────────────────────────────────────────────────────────┘
@@ -112,13 +111,12 @@
 
 ## 🔑 Ключевые метрики
 
-| Метрика | Как читать | Где см |
-|---------|-----------|--------|
-| `bioetl_records_processed_total` | Кол-во обработанных записей | Все дашборды |
-| `bioetl_processing_duration_seconds` | Время обработки (гистограмма) | Overview, Health |
-| `bioetl_error_rate` | % ошибок | Data Quality, Overview |
-| `bioetl_quality_score` | Качество данных (0-100%) | Data Quality |
-| `up{job="bioetl"}` | Приложение работает? | Health |
+| Метрика | Как читать | Где используется |
+|---------|-----------|-----------------|
+| `bioetl_records_processed_total` | Кол-во обработанных записей по stage | Simple, DQ v2, Overview v2 |
+| `bioetl_records_processed_created` | Timestamp создания метрики | DQ v2, Overview v2 (Execution Timestamp) |
+| `bioetl_health_check_status` | Статус health check (1=healthy) | Provider Health v2 |
+| `bioetl_health_check_latency_ms` | P95 latency provider'а (histogram) | Provider Health v2 |
 
 ---
 
@@ -231,7 +229,7 @@ curl "http://localhost:9090/api/v1/label/__name__/values"
 ### Для новичков
 1. Посмотреть VISUAL_GUIDE.md
 2. Открыть BioETL Simple Dashboard
-3. Поменять фильтры (Pipeline, Run ID)
+3. Поменять фильтры (Pipeline, Run Type)
 4. Посмотреть как меняются графики
 
 ### Для intermediate
@@ -305,9 +303,9 @@ curl http://localhost:8000/health
 
 📂 Дашборды (автоматическое loading)
 ├── 📊 bioetl-simple.json
-├── 📊 bioetl-overview.json
 ├── 📊 bioetl-dq-v2.json
-└── 📊 bioetl-provider-health.json
+├── 📊 bioetl-overview-v2.json
+└── 📊 bioetl-provider-health-v2.json
 ```
 
 ---
@@ -332,7 +330,7 @@ curl http://localhost:8000/health
 Вы успешно:
 - ✅ Установили мониторинг (Prometheus + Grafana)
 - ✅ Запустили metrics сервер
-- ✅ Загрузили 8 дашбордов
+- ✅ Загрузили 4 дашборда
 - ✅ Видите метрики в реальном времени
 - ✅ Можете создавать свои дашборды
 - ✅ Понимаете архитектуру мониторинга
