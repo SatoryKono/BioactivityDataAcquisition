@@ -134,8 +134,14 @@ class UniprotCoreSchema(ETLRecordSchema):
 
     @pa.check("sequence", name="sequence_format")
     def _check_sequence(cls, series: Series[str]) -> Series[bool]:
-        """Validate amino acid sequence."""
-        return cast("Series[bool]", series.str.match(r"^[ACDEFGHIKLMNPQRSTVWY]+$"))
+        """Validate amino acid sequence.
+
+        Accepts IUPAC standard + extended amino acid codes:
+        - 20 standard: ACDEFGHIKLMNPQRSTVWY
+        - U (Selenocysteine), O (Pyrrolysine)
+        - B, J, X, Z (ambiguity codes used in UniProt)
+        """
+        return cast("Series[bool]", series.str.match(r"^[ACDEFGHIKLMNOPQRSTUVWXYZ]+$"))
 
     sequence_length: Series[pd.Int64Dtype] = pa.Field(
         nullable=False, description="Sequence length"

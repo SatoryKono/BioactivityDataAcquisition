@@ -10,8 +10,8 @@ from typing import TYPE_CHECKING
 
 from bioetl.composition._pipeline_execution import _ensure_registrations
 from bioetl.composition.bootstrap import (
-    bootstrap_adr_service,
     HealthServerDependencies,
+    bootstrap_adr_service,
     bootstrap_bronze_cleanup_service,
     bootstrap_checkpoint_service,
     bootstrap_config_service,
