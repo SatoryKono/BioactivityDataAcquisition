@@ -155,5 +155,15 @@ data/input/chembl_target_component.csv
 /test_author_quick.py
 /temp_batch_executor.txt
 
+# Codex CLI temp files
+.setup_wsl_codex.sh
+.run_codex.sh
+.test_api.sh
+.test_codex.sh
+.ca-bundle.pem
+.export_certs.ps1
+.oai_key_tmp
+.codex-sessions/
+
 # Nested IDEA project files
 data/.idea/
