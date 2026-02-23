@@ -439,8 +439,8 @@ def _create_uniprot_idmapping_data_source(
     from_db = "ChEMBL"
     to_db = "UniProtKB"
     if pipeline_config.source.api:
-        from_db = getattr(pipeline_config.source.api, "from_db", from_db)
-        to_db = getattr(pipeline_config.source.api, "to_db", to_db)
+        from_db = getattr(pipeline_config.source.api, "from_db", None) or from_db
+        to_db = getattr(pipeline_config.source.api, "to_db", None) or to_db
 
     # Extract seed IDs from filter_config (composite mode)
     seed_ids: list[str] | None = None
