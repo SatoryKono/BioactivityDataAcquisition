@@ -21,7 +21,7 @@
 | Review a pipeline       | [pipeline-review-checklist.md](../04-reference/templates/pipeline-review-checklist.md) |
 | Handle a prod error     | [runbooks/index.md](../05-operations/runbooks/index.md)                           |
 | Understand architecture | [00-overview.md](../02-architecture/00-overview.md)                  |
-| Check data contracts    | [chembl_activity-v1.0.json](../04-reference/contracts/gold/chembl_activity_v1.0.json)          |
+| Check data contracts    | [chembl_activity_v1.0.json](../04-reference/contracts/gold/chembl_activity_v1.0.json)          |
 
 ---
 
