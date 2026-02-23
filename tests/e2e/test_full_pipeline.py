@@ -122,6 +122,7 @@ class TestChEMBLPipelineE2E:
 @pytest.mark.e2e
 @pytest.mark.slow
 @pytest.mark.vcr
+@pytest.mark.serial
 async def test_pubchem_compound_pipeline(
     e2e_temp_storage,
     e2e_redis_client,
