@@ -117,7 +117,7 @@
           "refId": "A"
         }
       ],
-      "title": "Data Flow: Bronze \u0432\u2020\u2019 Silver \u0432\u2020\u2019 Gold (Latest Run Only)",
+      "title": "Data Flow: Bronze -> Silver -> Gold (Latest Run Only)",
       "type": "timeseries"
     },
     {

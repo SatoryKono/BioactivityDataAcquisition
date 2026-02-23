@@ -1,5 +1,8 @@
 name: Tests
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [ main, master, develop ]
@@ -17,6 +20,10 @@ on:
       - '.ai/**'
       - '.claude/**'
       - 'LICENSE'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   # Use CI hypothesis profile for faster property-based tests (10 examples instead of 50)

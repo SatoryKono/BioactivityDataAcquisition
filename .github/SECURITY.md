@@ -98,8 +98,10 @@ make security-check
 ```
 
 ### Automated Monitoring
-- **Dependabot alerts**: Enabled for security vulnerabilities
-- **pip-audit**: Integrated into CI pipeline (`.github/workflows/security.yml`)
+- **Dependabot alerts**: Enabled via `.github/dependabot.yml` (pip + GitHub Actions)
+- **detect-secrets**: Runs in CI (`.github/workflows/security.yml`) to prevent credential leaks
+- **pip-audit**: Runs in CI (`.github/workflows/security.yml`) for dependency vulnerability scanning
+- **Trivy**: Container image scanning in `.github/workflows/docker.yml` (SHA-pinned)
 - **Update policy**: Security patches applied within 72 hours
 
 ### Pinned Dependencies

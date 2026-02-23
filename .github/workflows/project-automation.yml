@@ -1,5 +1,8 @@
 name: Project Automation (Cursor Commands)
 
+permissions:
+  contents: read
+
 on:
     push:
         branches: [ main, master, develop ]
@@ -20,6 +23,10 @@ on:
             - '.github/workflows/**'
             - 'LICENSE'
 
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
 jobs:
     validate-and-test:
         name: Run Cursor Commands
@@ -33,18 +40,18 @@ jobs:
                 uses: actions/setup-python@v5
                 with:
                     python-version: "3.11"
-                    cache: "pip"
 
-            -   name: Install dependencies
-                run: |
-                    python -m pip install --upgrade pip
-                    python -m pip install -e .[dev]
+            -   name: Install uv
+                uses: astral-sh/setup-uv@v3
+
+            -   name: Install dependencies (frozen lock)
+                run: uv sync --frozen --extra dev --extra tracing
 
             # /run-tests command
             -   name: Run Tests (Coverage)
                 run: |
                     # Exclude e2e and benchmark tests (benchmark tests require manual run)
-                    pytest tests -m "not e2e and not benchmark" --ignore=tests/e2e --ignore=tests/contract \
+                    uv run pytest tests -m "not e2e and not benchmark" --ignore=tests/e2e --ignore=tests/contract \
                       --cov=src/bioetl --cov-report=term-missing --cov-fail-under=85
 
             # /render-diagrams command
@@ -53,7 +60,7 @@ jobs:
             -   name: Render Diagrams & Check Consistency
                 continue-on-error: true
                 run: |
-                    python scripts/render_diagrams.py
+                    uv run python scripts/render_diagrams.py
                     # Fail if diagrams were modified by the script (meaning they were out of sync)
                     if [[ -n $(git status --porcelain docs/) ]]; then
                       echo "Error: Diagrams are out of sync. Please run 'python scripts/render_diagrams.py' locally and commit the changes."
@@ -63,5 +70,4 @@ jobs:
 
             # Architecture checks (implied by project rules)
             -   name: Architecture Linting
-                run: |
-                    lint-imports --config .importlinter
+                run: uv run lint-imports --config .importlinter

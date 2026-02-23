@@ -41,6 +41,9 @@
 
 ---
 
+> Примечание: в репозитории сейчас поставляются только `bioetl-simple.json` и `*-v2.json` дашборды.
+> Разделы про v1 ниже сохранены как историческая/справочная документация.
+
 ## 1. Архитектура мониторинга
 
 ### 1.1 Обзор
@@ -101,16 +104,16 @@
 │  ┌──────────────────────────────────────────────────────────┐    │
 │  │  Provisioning (автоматическая загрузка)                    │    │
 │  │  - Datasource: Prometheus (prometheus.yml)                │    │
-│  │  - Dashboards: 7 JSON файлов (bioetl.yaml)               │    │
+│  │  - Dashboards: 4 JSON файлов (bioetl.yaml)               │    │
 │  │  - Обновление каждые 30 секунд                            │    │
 │  │  - allowUiUpdates: true                                   │    │
 │  └──────────────────────────────────────────────────────────┘    │
 │                                                                   │
-│  Дашборды:                                                       │
+│  Дашборды (shipped):                                             │
 │  - BioETL Simple (bioetl-simple)                                 │
-│  - BioETL Overview v1/v2 (bioetl-overview, bioetl-overview-v2)   │
-│  - BioETL Data Quality v1/v2 (bioetl-dq, bioetl-dq-v2)          │
-│  - BioETL Provider Health v1/v2 (bioetl-provider-health, ...)    │
+│  - BioETL Overview v2 (bioetl-overview-v2)                       │
+│  - BioETL Data Quality v2 (bioetl-dq-v2)                         │
+│  - BioETL Provider Health v2 (bioetl-provider-health-v2)         │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -144,11 +147,8 @@ grafana/
 │       └── bioetl.yaml                # Dashboard provisioning config
 └── dashboards/
     ├── bioetl-simple.json             # Минимальный live-дашборд
-    ├── bioetl-overview.json           # Полный обзор пайплайнов (v1)
     ├── bioetl-overview-v2.json        # Обзор для последнего запуска (v2)
-    ├── bioetl-dq.json                 # Data Quality (v1)
     ├── bioetl-dq-v2.json              # Data Quality для последнего запуска (v2)
-    ├── bioetl-provider-health.json    # Здоровье провайдеров (v1)
     └── bioetl-provider-health-v2.json # Здоровье провайдеров (v2)
 
 docker-compose.monitoring.yml          # Docker Compose для стека мониторинга
