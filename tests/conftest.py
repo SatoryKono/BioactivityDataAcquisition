@@ -94,15 +94,24 @@ def vcr_config() -> dict[str, object]:
     }
 
 
-def _strip_email_query(uri: str) -> list[tuple[str, str]]:
-    """Return query params excluding email for VCR matching."""
+_VCR_IGNORED_QUERY_KEYS = {"email", "api_key", "key"}
+
+
+def _strip_credential_query(uri: str) -> list[tuple[str, str]]:
+    """Return query params excluding credentials for VCR matching."""
     query_params = parse_qsl(urlparse(uri).query, keep_blank_values=True)
-    return [(key, value) for key, value in query_params if key.lower() != "email"]
+    return [
+        (key, value)
+        for key, value in query_params
+        if key.lower() not in _VCR_IGNORED_QUERY_KEYS
+    ]
 
 
 def query_ignore_email(request_1: Any, request_2: Any) -> bool:
-    """Custom VCR matcher that ignores email query parameter."""
-    return _strip_email_query(request_1.uri) == _strip_email_query(request_2.uri)
+    """Custom VCR matcher that ignores email and api_key query parameters."""
+    return _strip_credential_query(request_1.uri) == _strip_credential_query(
+        request_2.uri
+    )
 
 
 @pytest.fixture(scope="module")

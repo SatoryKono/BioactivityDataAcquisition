@@ -25,7 +25,6 @@ from .conftest import (
 CASSETTE_DIR = Path(__file__).parent.parent / "fixtures" / "vcr" / "chembl"
 
 
-
 @pytest.fixture(scope="module")
 def vcr_config() -> dict[str, Any]:
     """Configure VCR for ChEMBL Assay E2E tests."""

@@ -177,7 +177,9 @@
       "Bash(unset GITHUB_TOKEN && gh auth token 2>&1)",
       "Bash(wsl:*)",
       "Bash(debian.exe install --root 2>&1 || \"C:\\\\Program Files\\\\WindowsApps\\\\TheDebianProject.DebianGNULinux_1.12.2.0_x64__76v4gfsz19hv4\\\\debian.exe\" install --root 2>&1)",
-      "Bash(cd /tmp && unzip -o debian_extract/DistroLauncher-Appx_1.12.2.0_x64.appx install.tar.gz -d debian_extract 2>&1)"
+      "Bash(cd /tmp && unzip -o debian_extract/DistroLauncher-Appx_1.12.2.0_x64.appx install.tar.gz -d debian_extract 2>&1)",
+      "Bash(MSYS_NO_PATHCONV=1 wsl:*)",
+      "Bash(cat:*)"
     ]
   },
   "enabledPlugins": {
