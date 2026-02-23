@@ -150,15 +150,18 @@ testpaths = ["tests"]
 pythonpath = ["src"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
-# Base options without parallelization (compatible with pytest-benchmark)
-# For parallel execution, use: pytest -n auto --dist loadscope
-# Benchmark tests are excluded by default - run with: pytest -m benchmark
+# Parallel by default via xdist; benchmark tests excluded.
+# For serial execution (debugging): pytest -p no:xdist
+# For benchmarks: pytest -p no:xdist -m benchmark
 addopts = [
     "-ra",
     "-q",
     "--strict-markers",
     "--strict-config",
     "-m", "not benchmark",
+    "-n", "auto",
+    "--dist", "loadscope",
+    "--import-mode=importlib",
 ]
 # required_plugins check moved to CI for compatibility
 markers = [
