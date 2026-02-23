@@ -119,7 +119,7 @@ class SemanticScholarAdapter(BaseHttpAdapter):
             "Accept": "application/json",
             "Content-Type": "application/json",
         }
-        if self.api_key:
+        if self.api_key and not self.api_key.startswith("your_"):
             headers["x-api-key"] = self.api_key
         return headers
 
