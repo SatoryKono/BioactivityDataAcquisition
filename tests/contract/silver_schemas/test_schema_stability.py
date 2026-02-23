@@ -1,6 +1,6 @@
 """Silver Schema Stability Tests.
 
-Contract tests that ensure Silver schemas don't change acmolecule_identally.
+Contract tests that ensure Silver schemas don't change accidentally.
 Uses snapshot testing to detect any field additions, deletions, or type changes.
 
 To update snapshots after intentional schema changes:
@@ -31,7 +31,6 @@ UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
 
 @pytest.mark.contracts
 @pytest.mark.no_api
-@pytest.mark.no_api
 class TestSchemaStability:
     """Snapshot tests for Silver schema field structure."""
 
@@ -41,7 +40,7 @@ class TestSchemaStability:
     ) -> None:
         """Silver schema fields MUST NOT change without explicit snapshot update.
 
-        This test prevents acmolecule_idental schema modifications that would break
+        This test prevents accidental schema modifications that would break
         downstream consumers and Gold layer contracts.
 
         If schema change is intentional:
@@ -134,15 +133,12 @@ class TestSchemaStability:
         schema_class = SILVER_SCHEMAS[schema_name]
         fields = extract_field_metadata(schema_class)
 
-        # Load base config for inherited defaults (technical_primary_key)
-        base_path = Path("configs/pipelines/_base.yaml")
-        base_data = yaml.safe_load(base_path.read_text(encoding="utf-8"))
-
         provider, entity = schema_name.split("_", 1)
         config_path = Path("configs/pipelines") / provider / f"{entity}.yaml"
         data = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+        print(f"DEBUG: {schema_name} data keys: {list(data.keys())}")
 
-        technical_pk = data.get("technical_primary_key", base_data["technical_primary_key"])
+        technical_pk = data["technical_primary_key"]
         business_pks = data["business_primary_keys"]
 
         assert technical_pk in fields, (
