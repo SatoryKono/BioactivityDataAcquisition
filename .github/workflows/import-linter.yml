@@ -8,15 +8,11 @@ on:
     paths-ignore:
       - 'docs/**'
       - '*.md'
-      - '.ai/**'
-      - '.claude/**'
       - 'LICENSE'
   pull_request:
     paths-ignore:
       - 'docs/**'
       - '*.md'
-      - '.ai/**'
-      - '.claude/**'
       - 'LICENSE'
 
 jobs:
@@ -31,31 +27,22 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: "pyproject.toml"
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v3
-
-      - name: Cache uv and virtualenv
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/uv
-            .venv
-          key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
-          restore-keys: |
-            uv-${{ runner.os }}-py311-
-
-      - name: Install dependencies (frozen lock)
-        run: uv sync --frozen --extra dev --extra tracing
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install . ruff mypy
 
       - name: Ruff (lint)
-        run: uv run ruff check src tests
+        run: ruff check src tests
 
       - name: Ruff (format check)
-        run: uv run ruff format --check src tests
+        run: ruff format --check src tests
 
       - name: Mypy (strict-ish)
-        run: uv run mypy --config-file pyproject.toml src/bioetl
+        run: mypy --config-file pyproject.toml src/bioetl
 
   arch-tests:
     runs-on: ubuntu-latest
@@ -69,33 +56,22 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v3
-
-      - name: Cache uv and virtualenv
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/uv
-            .venv
-          key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
-          restore-keys: |
-            uv-${{ runner.os }}-py311-
-
-      - name: Install dependencies (frozen lock)
-        run: uv sync --frozen --extra dev --extra tracing
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install .[dev]
 
       - name: Architecture tests (all)
-        run: uv run pytest tests/architecture/ -v --tb=short
+        run: pytest tests/architecture/ -v --tb=short
 
       - name: Import Linter contract
-        run: uv run lint-imports --config .importlinter
+        run: lint-imports --config .importlinter
 
       - name: Application layer dependency graph
-        run: uv run python src/tools/scripts/check_application_deps.py
+        run: python src/tools/scripts/check_application_deps.py
 
       - name: Infrastructure layer architecture check
-        run: uv run python src/tools/scripts/check_architecture.py
+        run: python src/tools/scripts/check_architecture.py
 
   unit-tests:
     needs: lint
@@ -109,38 +85,29 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v3
-
-      - name: Cache uv and virtualenv
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/uv
-            .venv
-          key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
-          restore-keys: |
-            uv-${{ runner.os }}-py311-
+          cache: "pip"
+          cache-dependency-path: "pyproject.toml"
 
       - name: Restore pytest cache
         uses: actions/cache@v4
         with:
           path: .pytest_cache
-          key: ${{ runner.os }}-pytest-unit-${{ hashFiles('pyproject.toml') }}
+          key: ${{ runner.os }}-pytest-unit-${{ hashFiles('pyproject.toml', 'pytest.ini') }}
 
-      - name: Install dependencies (frozen lock)
-        run: uv sync --frozen --extra dev --extra tracing
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install .[dev]
 
       - name: Unit tests with coverage
         run: |
-          uv run pytest tests --ignore=tests/integration --ignore=tests/architecture \
+          pytest tests --ignore=tests/integration --ignore=tests/architecture \
             --ignore=tests/e2e --ignore=tests/contract \
             --cov=src/bioetl --cov-report=xml:coverage-unit.xml --cov-report=term-missing
 
       - name: Enforce coverage thresholds
         run: |
-          uv run python - <<'PY'
+          python - <<'PY'
           import sys
           import xml.etree.ElementTree as ET
 
@@ -201,32 +168,23 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v3
-
-      - name: Cache uv and virtualenv
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/uv
-            .venv
-          key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
-          restore-keys: |
-            uv-${{ runner.os }}-py311-
+          cache: "pip"
+          cache-dependency-path: "pyproject.toml"
 
       - name: Restore pytest cache
         uses: actions/cache@v4
         with:
           path: .pytest_cache
-          key: ${{ runner.os }}-pytest-integration-${{ hashFiles('pyproject.toml') }}
+          key: ${{ runner.os }}-pytest-integration-${{ hashFiles('pyproject.toml', 'pytest.ini') }}
 
-      - name: Install dependencies (frozen lock)
-        run: uv sync --frozen --extra dev --extra tracing
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install .[dev]
 
       - name: Integration tests
         run: |
-          uv run pytest tests/integration -v --tb=short
+          pytest tests/integration -v --tb=short
 
   checks-complete:
     needs:

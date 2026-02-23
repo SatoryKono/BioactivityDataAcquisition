@@ -24,14 +24,6 @@ model: sonnet
 
 ---
 
-## Memory
-
-> **При старте** прочитай специализированную память:
-> `.ai/memory/memory-py-doc-bot.md` — doc structure, ADR management, CHANGELOG, docstring conventions, sync checks.
-> Общий контекст: `.ai/memory/agent-memory.md`
-
----
-
 ## Контекст проекта
 
 **BioETL Overview:**

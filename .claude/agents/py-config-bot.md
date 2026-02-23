@@ -19,14 +19,6 @@ model: sonnet
 
 ---
 
-## Memory
-
-> **При старте** прочитай специализированную память:
-> `.ai/memory/memory-py-config-bot.md` — config hierarchy, templates, ADR compliance, composite rules, validation.
-> Общий контекст: `.ai/memory/agent-memory.md`
-
----
-
 ## Контекст проекта
 
 **BioETL Overview:**

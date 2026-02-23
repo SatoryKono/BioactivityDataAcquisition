@@ -16,14 +16,6 @@ model: opus
 
 ---
 
-## Memory
-
-> **При старте** прочитай специализированную память:
-> `.ai/memory/memory-py-debug-bot.md` — error classification, debugging methodology, known issues, fix patterns, escalation.
-> Общий контекст: `.ai/memory/agent-memory.md`
-
----
-
 ## Контекст проекта
 
 **BioETL Overview:**

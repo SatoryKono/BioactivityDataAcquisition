@@ -6,16 +6,12 @@ on:
     paths-ignore:
       - 'docs/**'
       - '*.md'
-      - '.ai/**'
-      - '.claude/**'
       - 'LICENSE'
   pull_request:
     branches: [ main ]
     paths-ignore:
       - 'docs/**'
       - '*.md'
-      - '.ai/**'
-      - '.claude/**'
       - 'LICENSE'
 
 env:
