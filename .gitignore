@@ -5,6 +5,9 @@ __pycache__/
 *.so
 *.pyd
 
+# Cygwin/MSYS crash dumps
+*.stackdump
+
 # Virtual environments
 .venv/
 venv/
@@ -150,9 +153,10 @@ data/input/bronze/chembl/publication/2026-02-09/batch_2026-02-09_045cc68f-7052-4
 # Stale caches
 .ruff_cache_cli/
 
-# Temp scripts
+# Temp scripts and artifacts
 /run_extract.bat
 /test_author_quick.py
+/temp_batch_executor.txt
 
 # Reports (generated, 100+ MB)
 /reports/
