@@ -8,9 +8,9 @@ operations via the AdrServicePort.
 from __future__ import annotations
 
 import re
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
 
 from bioetl.domain.ports.adr import (
     AdrDocument,
@@ -46,7 +46,7 @@ def _extract_meta(text: str) -> tuple[str | None, str | None]:
     """
     status: str | None = None
     date: str | None = None
-    for idx, line in enumerate(text.splitlines()[:50]):
+    for _idx, line in enumerate(text.splitlines()[:50]):
         norm = line.strip()
         if norm.lower().startswith("status:") and status is None:
             status = norm.split(":", 1)[1].strip()

@@ -76,9 +76,9 @@ class AdrServicePort(Protocol):
 
 
 __all__ = [
-    "AdrInfo",
     "AdrDocument",
+    "AdrInfo",
+    "AdrServicePort",
     "AdrValidationIssue",
     "AdrValidationReport",
-    "AdrServicePort",
 ]
