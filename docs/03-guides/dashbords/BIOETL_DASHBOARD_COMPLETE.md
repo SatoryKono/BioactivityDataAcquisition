@@ -27,7 +27,7 @@
 | **metrics_server.py** | Prometheus metrics endpoint | ✅ Работает |
 | **docker-compose.monitoring.yml** | Docker контейнеры (Prometheus, Grafana) | ✅ Готов |
 | **grafana/prometheus.yml** | Конфигурация Prometheus | ✅ Настроен |
-| **grafana/provisioning/** | Auto-provisioning дашбордов | ✅ 8 дашбордов |
+| **grafana/provisioning/** | Auto-provisioning дашбордов | ✅ 4 дашборда |
 
 ### 📊 Компоненты инфраструктуры
 
@@ -38,20 +38,16 @@
 | **Grafana** | 3000 | ✅ Запущен | http://localhost:3000 |
 | **Neo4j** (опция) | 7687 | ✅ Запущен | http://localhost:7474 |
 
-### 📊 Дашборды (8 штук)
+### 📊 Дашборды (4 штуки)
 
 | № | Дашборд | UID | Панели | Назначение |
 |----|---------|-----|--------|-----------|
 | 1 | BioETL Simple | bioetl-simple | 5 | Основная статистика |
-| 2 | BioETL Overview | bioetl-overview | 8 | Общий обзор |
-| 3 | BioETL Data Quality | bioetl-dq | 10 | Метрики качества |
-| 4 | BioETL Data Quality v2 | bioetl-dq-v2 | 12 | Расширенные метрики |
-| 5 | BioETL Overview v2 | bioetl-overview-v2 | 9 | Advanced обзор |
-| 6 | BioETL Provider Health | bioetl-provider-health | 6 | Статус provider'ов |
-| 7 | BioETL Provider Health v2 | bioetl-provider-health-v2 | 8 | Детальный health |
-| 8 | BioETL Simple Dashboard | (v10.2.0) | 5 | Совместимость |
+| 2 | BioETL Data Quality v2 | bioetl-dq-v2 | 7 | Метрики качества данных |
+| 3 | BioETL Overview v2 | bioetl-overview-v2 | 7 | Общий обзор pipeline |
+| 4 | BioETL Provider Health v2 | bioetl-provider-health-v2 | 9 | Статус и latency provider'ов |
 
-**Итого:** 8 полнофункциональных дашбордов
+**Итого:** 4 полнофункциональных дашборда
 
 ---
 
@@ -69,7 +65,7 @@
 - [x] Retention: 15 дней
 - [x] Data source: http://host.docker.internal:9090
 - [x] Provisioning: автоматическое
-- [x] Переменные фильтров: Pipeline, Run ID
+- [x] Переменные фильтров: Pipeline, Run Type, Execution
 
 ### ✅ Мониторинг
 - [x] Метрики собираются ✅
@@ -117,7 +113,7 @@ http://localhost:3000/d/bioetl-simple
 1. Открыть http://localhost:3000
 2. Выбрать Dashboard → BioETL
 3. Выбрать нужный дашборд
-4. Использовать фильтры (Pipeline, Run ID)
+4. Использовать фильтры (Pipeline, Run Type)
 5. Экспортировать данные при необходимости
 ```
 
@@ -138,18 +134,21 @@ http://localhost:3000/d/bioetl-simple
 ```
 ✅ bioetl_records_processed_total
    - pipeline (uniprot, pubmed, pubchem, chembl)
-   - run_id
+   - run_type (incremental, backfill, rebuild)
    - stage (bronze, silver, gold)
    - status (success, error)
 
-✅ bioetl_processing_duration_seconds
-   - pipeline
-   - stage
-   - histogram buckets (quantiles)
+✅ bioetl_records_processed_created
+   - pipeline, run_type
+   - Timestamp создания метрики (для Execution Timestamp панели)
 
-✅ bioetl_error_rate
-   - pipeline
-   - stage
+✅ bioetl_health_check_status
+   - component
+   - Статус health check (1=healthy)
+
+✅ bioetl_health_check_latency_ms
+   - provider (uniprot, pubmed, pubchem, chembl)
+   - Histogram с buckets для P95 latency
 ```
 
 ### Типичные запросы (PromQL):
@@ -161,11 +160,11 @@ sum(bioetl_records_processed_total) by (stage)
 # Скорость обработки (records/min)
 sum(rate(bioetl_records_processed_total[1m])) by (pipeline)
 
-# Error rate процент
-sum(bioetl_error_rate)
+# Quality ratio (Gold/Bronze)
+sum(bioetl_records_processed_total{stage="gold"}) / sum(bioetl_records_processed_total{stage="bronze"})
 
-# P95 latency
-histogram_quantile(0.95, bioetl_processing_duration_seconds)
+# P95 latency provider'а
+histogram_quantile(0.95, bioetl_health_check_latency_ms_bucket{provider="chembl"})
 ```
 
 ---
@@ -317,7 +316,7 @@ curl http://localhost:8000/metrics
 
 ✅ **Полнофункциональный мониторинг** — 3 компонента (Prometheus, Grafana, Metrics Server)
 
-✅ **8 готовых дашбордов** — с базовыми метриками и фильтрами
+✅ **4 готовых дашборда** — с базовыми метриками и фильтрами
 
 ✅ **1800+ строк документации** — от быстрого старта до advanced кастомизации
 
