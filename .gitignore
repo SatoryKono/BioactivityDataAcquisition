@@ -17,15 +17,18 @@ ENV/
 # Testing
 .pytest_cache/
 .hypothesis/
-htmlcov/
 .tox/
 .nox/
+.benchmarks/
+test-checkpoints/
 
 # Type checking / Linting
 .mypy_cache/
 **/.mypy_cache/
 .ruff_cache/
+.ruff_cache_cli/
 .dmypy.json
+.import_linter_cache/
 
 # Build / Distribution
 build/
@@ -40,8 +43,19 @@ dist/
 # Data outputs
 data/output/
 data/_output/
+data/bronze/
+data/silver/
+data/gold/
+data/quarantine/
+data/checkpoints/
+data/_dq_reports/
+data/chembl_*
+data/pubchem_*
+data/input/bronze/
+/data/json
 
 # Logs and reports
+logs/
 *.log
 *.tmp
 *report*.txt
@@ -51,6 +65,7 @@ project_rules_failures.txt
 git_commit_*.txt
 *_gitshow_err.txt
 log_test.txt
+/reports/
 
 # IDE / Editors
 .idea/
@@ -61,6 +76,14 @@ log_test.txt
 .cursorrules
 *.swp
 *~
+
+# AI assistant configs (vendor-specific, not project code)
+.ai/
+.aiassistant/
+.codex/
+.gemini/
+.jules/
+.junie/
 
 # OS
 .DS_Store
@@ -78,10 +101,6 @@ credentials.json
 docker-data/
 docker/volumes/
 
-# Logs directory
-logs/
-*.log
-
 # VCR cassettes (keep for testing, but exclude sensitive ones)
 tests/fixtures/vcr/*_sensitive.yaml
 
@@ -89,56 +108,36 @@ tests/fixtures/vcr/*_sensitive.yaml
 _delta_log/
 *.checkpoint.parquet
 
-# Bronze/Silver/Gold local storage
-data/bronze/
-data/silver/
-data/gold/
-data/quarantine/
-data/checkpoints/
-data/_dq_reports
-data/chembl_*
-data/pubchem_*
 # Temporary pipeline artifacts
 tmp/
-*.tmp
-
-# Test artifacts
-test-checkpoints/
-.benchmarks/
 
 # Node
 node_modules/
 
-# Other
+# Coverage
+.coverage
+.coverage.*
+coverage.xml
+coverage-*.xml
+/coverage.json
+coverage_output.txt
+coverage_summary.txt
+htmlcov/
+
+# Other generated artifacts
 .vercel/
 puppeteer-config.json
 *.png
 nul
 profile.svg
-/data/json
-data/input/chembl_target_component.csv
 .output.txt
 site/
-coverage.xml
-coverage_output.txt
-coverage_summary.txt
-.coverage
-.coverage.*
-htmlcov/
 tests.zip
-coverage-*.xml
 configs/pipelines.zip
-silver/composite/test/part-00000-948efb73-0e52-4037-9cf8-9615203fda36-c000.snappy.parquet
-gold/test_merged/part-00000-b6b05ee6-01a5-4345-976d-4cd349289aa1-c000.snappy.parquet
-/data/_dq_reports/21d59cae-1fcf-4e0c-b3fc-29f40921ceb6_dq_report.json
-data/input/bronze/chembl/publication/2026-02-09/batch_2026-02-09_045cc68f-7052-45e0-97d8-4919c31ecf2a.jsonl.zst
-/data/input/bronze
-
-# Root-level generated artifacts (MUST NOT be committed)
-/coverage.json
 /all_fixtures.txt
+data/input/chembl_target_component.csv
 
-# Root-level VCR cassettes (MUST be in tests/fixtures/vcr/)
+# Root-level test dump files (MUST be in tests/fixtures/vcr/)
 /test_backfill_*
 /test_chembl_*
 /test_failed_*
@@ -150,15 +149,7 @@ data/input/bronze/chembl/publication/2026-02-09/batch_2026-02-09_045cc68f-7052-4
 /test_run_type_*
 /test_vacuum_*
 
-# Stale caches
-.ruff_cache_cli/
-
 # Temp scripts and artifacts
 /run_extract.bat
 /test_author_quick.py
 /temp_batch_executor.txt
-
-# Reports (generated, 100+ MB)
-/reports/
-.ai/mcp/mcp.json
-.ai/mcp/mcp.json
