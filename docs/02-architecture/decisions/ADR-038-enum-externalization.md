@@ -1,4 +1,4 @@
-# ADR-035: ChEMBL Enum Values Externalization to YAML
+# ADR-038: ChEMBL Enum Values Externalization to YAML
 
 **Status:** Accepted
 **Date:** 2026-02-16

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import cast
 
-from bioetl.domain.ports.adr import AdrServicePort
+from bioetl.domain.ports import AdrServicePort
 from bioetl.infrastructure.adr.fs_adr_service import FsAdrService
 
 __all__ = ["bootstrap_adr_service"]

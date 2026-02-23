@@ -1,4 +1,4 @@
-"""Integration tests for DQ config loading through ConfigLoader.
+"""Integration tests for DQ config loading through PipelineConfigLoader.
 
 Tests end-to-end config loading with real file hierarchy.
 
@@ -14,7 +14,7 @@ from pathlib import Path
 import pytest
 
 from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
-from bioetl.infrastructure.config.pipeline_config_loader import ConfigLoader
+from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader
 
 
 @pytest.fixture(scope="module")
@@ -24,9 +24,9 @@ def real_configs_root() -> Path:
 
 
 @pytest.fixture(scope="module")
-def config_loader(real_configs_root: Path) -> ConfigLoader:
-    """Create ConfigLoader with real configs."""
-    return ConfigLoader(real_configs_root)
+def config_loader(real_configs_root: Path) -> PipelineConfigLoader:
+    """Create PipelineConfigLoader with real configs."""
+    return PipelineConfigLoader(real_configs_root)
 
 
 @pytest.fixture(scope="module")
@@ -81,13 +81,13 @@ class TestDQConfigIntegration:
 
 
 @pytest.mark.integration
-class TestConfigLoaderWithDQResolution:
-    """Integration tests for ConfigLoader DQ resolution."""
+class TestPipelineConfigLoaderWithDQResolution:
+    """Integration tests for PipelineConfigLoader DQ resolution."""
 
     def test_resolve_dq_config_for_chembl_activity(
-        self, config_loader: ConfigLoader
+        self, config_loader: PipelineConfigLoader
     ) -> None:
-        """Resolve DQ config through ConfigLoader for ChEMBL activity."""
+        """Resolve DQ config through PipelineConfigLoader for ChEMBL activity."""
         yaml_config = config_loader.load_pipeline_config("chembl_activity")
         dq_config = config_loader.resolve_dq_config(yaml_config)
 
@@ -96,8 +96,8 @@ class TestConfigLoaderWithDQResolution:
         assert dq_config.hard_fail_threshold > 0
         assert dq_config.hard_fail_threshold > dq_config.soft_fail_threshold
 
-    def test_config_loader_caching(self, config_loader: ConfigLoader) -> None:
-        """ConfigLoader should use cached DQ configs."""
+    def test_config_loader_caching(self, config_loader: PipelineConfigLoader) -> None:
+        """PipelineConfigLoader should use cached DQ configs."""
         yaml_config = config_loader.load_pipeline_config("chembl_activity")
 
         # Resolve twice
@@ -108,7 +108,7 @@ class TestConfigLoaderWithDQResolution:
         # Note: caching is internal to DQConfigLoader
         assert dq1.soft_fail_threshold == dq2.soft_fail_threshold
 
-    def test_clear_cache_works(self, config_loader: ConfigLoader) -> None:
+    def test_clear_cache_works(self, config_loader: PipelineConfigLoader) -> None:
         """clear_cache() should work without errors."""
         config_loader.clear_cache()
         # No assertion needed - just verifying no exceptions
@@ -377,7 +377,9 @@ class TestPublicationYearWarnRule:
 class TestBackwardCompatibility:
     """Tests for backward compatibility with inline dq_overrides."""
 
-    def test_inline_dq_overrides_still_work(self, config_loader: ConfigLoader) -> None:
+    def test_inline_dq_overrides_still_work(
+        self, config_loader: PipelineConfigLoader
+    ) -> None:
         """Pipeline configs with inline dq_overrides should still work."""
         # Load a pipeline config
         yaml_config = config_loader.load_pipeline_config("chembl_activity")
@@ -388,7 +390,7 @@ class TestBackwardCompatibility:
 
     def test_hierarchy_overrides_inline_defaults(
         self,
-        config_loader: ConfigLoader,
+        config_loader: PipelineConfigLoader,
     ) -> None:
         """Hierarchy config should override inline defaults when available."""
         yaml_config = config_loader.load_pipeline_config("chembl_activity")

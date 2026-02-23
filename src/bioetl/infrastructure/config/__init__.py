@@ -13,7 +13,7 @@ Re-exports from _base.py for backward compatibility:
 New components:
 - DQConfigLoader: Hierarchical DQ config loader
 - FilterConfigLoader: Hierarchical filter config loader (ADR-028)
-- ConfigLoader: Pipeline config loader with DQ/filter integration
+- PipelineConfigLoader: Pipeline config loader with DQ/filter integration
 """
 
 from __future__ import annotations
@@ -36,7 +36,10 @@ from bioetl.infrastructure.config.contract_policy_loader import (
 )
 from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
 from bioetl.infrastructure.config.filter_config_loader import FilterConfigLoader
-from bioetl.infrastructure.config.pipeline_config_loader import ConfigLoader
+from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader
+
+# Backward compatibility alias
+ConfigLoader = PipelineConfigLoader
 
 __all__ = [
     "BaseConfigLoader",
@@ -44,6 +47,7 @@ __all__ = [
     "DQConfigLoader",
     "FilterConfigLoader",
     "ObservabilitySettings",
+    "PipelineConfigLoader",
     "PipelineSettings",
     "Settings",
     "SourceYamlConfig",

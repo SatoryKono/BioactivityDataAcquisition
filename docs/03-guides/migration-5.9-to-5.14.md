@@ -416,7 +416,7 @@ export BIOETL-VALIDATION-MODE=fast  # Base only
 
 ## Getting Help
 
-**Issues:** [GitHub Issues](https://github.com/SatoryKono/BioactivityDataAcquisition/issues)
+**Issues:** [GitHub Issues](https://github.com/SatoryKono/BioactivityDataAcquisition2/issues)
 
 **Documentation:**
 - [CHANGELOG.md](../../CHANGELOG.md) — Full release notes

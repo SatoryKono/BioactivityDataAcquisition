@@ -107,12 +107,12 @@ def get_pipeline_config(pipeline_name: str) -> PipelineConfig:
         ValueError: If pipeline configuration not found
 
     """
-    from bioetl.infrastructure.config.pipeline_config_loader import ConfigLoader
+    from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader
 
     yaml_config = load_pipeline_config(pipeline_name)
 
-    # Use ConfigLoader to resolve DQ config from hierarchy
-    config_loader = ConfigLoader(Path("configs"))
+    # Use PipelineConfigLoader to resolve DQ config from hierarchy
+    config_loader = PipelineConfigLoader(Path("configs"))
     resolved_dq = config_loader.resolve_dq_config(yaml_config)
 
     return yaml_config_to_domain(yaml_config, resolved_dq_config=resolved_dq)

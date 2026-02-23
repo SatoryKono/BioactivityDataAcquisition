@@ -42,7 +42,7 @@ from bioetl.infrastructure.config import (
     load_pipeline_contract_policy,
     yaml_config_to_domain,
 )
-from bioetl.infrastructure.config.pipeline_config_loader import ConfigLoader
+from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLoader
 
 if TYPE_CHECKING:
     import pyarrow as pa
@@ -564,7 +564,7 @@ def create_pipeline_with_services(
         silver_validator=silver_validator,
     )
 
-    config_loader = ConfigLoader(
+    config_loader = PipelineConfigLoader(
         Path("configs"), relaxed_dq=settings.pipeline.relaxed_dq
     )
     resolved_dq = config_loader.resolve_dq_config(yaml_config)

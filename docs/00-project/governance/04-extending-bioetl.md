@@ -248,7 +248,7 @@ def test-<provider>-<entity>-has-sort-by():
 
 После создания pipeline обновите документацию:
 
-1. **`docs/providers/<provider>/README.md`** — добавить entity в список
+1. **`docs/04-reference/providers/<provider>/README.md`** — добавить entity в список
 1. **`docs/00-map.md`** — обновить счётчик pipelines
 1. **`CLAUDE.md`** — обновить метрики (если существенные изменения)
 

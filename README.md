@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code Style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
-[![Coverage](https://img.shields.io/badge/coverage-%E2%89%A585%25-brightgreen)](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/workflows/tests.yml)
+[![Coverage](https://img.shields.io/badge/coverage-%E2%89%A585%25-brightgreen)](https://github.com/SatoryKono/BioactivityDataAcquisition2/actions/workflows/tests.yml)
 [![Version](https://img.shields.io/badge/version-6.0.0-blue)](CHANGELOG.md)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-blue)](.github/SECURITY.md)
 
@@ -77,9 +77,9 @@ The domain layer implements Domain-Driven Design patterns:
 | Document                                                  | Description                                 |
 | --------------------------------------------------------- | ------------------------------------------- |
 | [API Reference](docs/04-reference/api/index.md)           | Full API documentation with mkdocstrings    |
-| [Architecture Decisions](docs/02-architecture/decisions/) | 36 ADRs explaining design choices           |
+| [Architecture Decisions](docs/02-architecture/decisions/) | 38 ADRs explaining design choices           |
 | [Ubiquitous Language](docs/00-project/glossary.md)        | Domain terminology and canonical naming     |
-| [RULES.md](docs/00-project/RULES.md)                      | Project governance and requirements (v5.20) |
+| [RULES.md](docs/00-project/RULES.md)                      | Project governance and requirements (v5.21) |
 | [Project Map](docs/00-project/00-map.md)                  | Documentation navigator and code map        |
 | [CLI Reference](docs/04-reference/cli.md)                 | Command-line interface documentation        |
 | [Operations Runbooks](docs/05-operations/runbooks/)       | Incident response and procedures            |
@@ -99,8 +99,8 @@ The domain layer implements Domain-Driven Design patterns:
 Use the `dev_setup.sh` script for a complete automated setup:
 
 ```bash
-git clone https://github.com/SatoryKono/BioactivityDataAcquisition.git
-cd BioactivityDataAcquisition
+git clone https://github.com/SatoryKono/BioactivityDataAcquisition2.git
+cd BioactivityDataAcquisition2
 ./dev_setup.sh
 ```
 
@@ -120,8 +120,8 @@ For quick setup without tests: `./dev_setup.sh --quick`
    Initialize the virtual environment and install project dependencies.
 
    ```bash
-   git clone https://github.com/SatoryKono/BioactivityDataAcquisition.git
-   cd BioactivityDataAcquisition
+   git clone https://github.com/SatoryKono/BioactivityDataAcquisition2.git
+   cd BioactivityDataAcquisition2
    make install
    ```
 
@@ -281,10 +281,10 @@ Access the docs at `http://localhost:8000`.
 .
 ├── configs/                  # YAML pipeline configurations
 ├── docs/                     # Documentation (Architecture, Guides, Runbooks)
-│   ├── 02-architecture/      # Layer docs, diagrams, ADRs (36 decisions)
+│   ├── 02-architecture/      # Layer docs, diagrams, ADRs (38 decisions)
 │   ├── 00-project/
 │   │   ├── glossary.md       # Ubiquitous Language glossary
-│   │   └── RULES.md          # Project governance (v5.20)
+│   │   └── RULES.md          # Project governance (v5.21)
 │   └── ...
 ├── src/
 │   └── bioetl/

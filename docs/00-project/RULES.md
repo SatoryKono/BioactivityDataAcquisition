@@ -72,7 +72,7 @@
 
   Остальные порты (`LoggerPort`, `MetricsPort`, `TracingPort` и т.д.) **MAY** не иметь `@runtime-checkable`.
 
-  > **Текущее состояние:** Все 38 портов декорированы `@runtime-checkable` (100% coverage).
+  > **Текущее состояние:** Все 39 портов декорированы `@runtime-checkable` (100% coverage).
   > Минимальное требование — 4 критических порта выше; остальные декорированы для единообразия.
 
 - **Импорт**: Порты **MUST** импортироваться из фасада (`from bioetl.domain.ports import ...`), а не из внутренних модулей. Проверяется архитектурным тестом.
@@ -385,22 +385,17 @@ if self.runtime.run-type in (RunType.REBUILD, RunType.BACKFILL):
 
 ### 2.7. Стратегия Загрузки (Load Strategy)
 
-| Критерий                              | Incremental        | Full Load                |
-| ------------------------------------- | ------------------ | ------------------------ |
-| Источник поддерживает `updated-since` | ✅ Предпочтительно | —                        |
-| Объём данных > 1M записей             | ✅ Обязательно     | Только при rebuild       |
-| Источник не гарантирует immutability  | —                  | ✅ Периодически (weekly) |
-| Первичная загрузка                    | —                  | ✅                       |
+| Критерий                                          | `loading_strategy: full_scan_only` |
+| ------------------------------------------------- | ---------------------------------- |
+| Источник с нестабильной offset-пагинацией         | ✅ Обязательно                     |
+| Checkpoint resume                                 | ❌ Запрещён                        |
+| Дедупликация                                      | ✅ Через content-hash в Silver     |
+| Типичные сущности                                 | Publication family, derived sets   |
 
-- **Watermark**: Для инкрементальной загрузки хранить `last-successful-watermark` (timestamp или ID).
-- **Конфигурация**: `load-strategy: incremental | full` в YAML пайплайна.
-
-> **Примечание**: `load-strategy` определяется в файле источника данных
-> (`configs/sources/{provider}.yaml`), а не непосредственно в pipeline config.
-> Pipeline config ссылается на источник через convention-based resolution
-> (`source-file: ../../sources/{provider}.yaml`) или явно через поле `data-schema-file`.
-
-- **Hybrid**: Incremental ежедневно + Full еженедельно для обеспечения консистентности.
+- **Watermark**: Механизм удалён согласно [ADR-011](../02-architecture/decisions/ADR-011-remove-watermark-mechanism.md).
+- **Конфигурация**: `loading_strategy: full_scan_only` задаётся в `configs/pipelines/*/*.yaml` (см. [ADR-031](../02-architecture/decisions/ADR-031-loading-strategy-formalization.md)).
+- **Default behavior**: При `loading_strategy: null` разрешён checkpoint-based resume (стандартный incremental-поток).
+- **Checkpoint policy**: Для `full_scan_only` возобновление через checkpoint **MUST NOT** использоваться.
 
 ### 2.8. Генерация ID Сущности (Entity ID)
 
@@ -1117,7 +1112,7 @@ async with services:  # --aenter-- инициализирует ресурсы
 ## 6. Документация (Автоматизация — приоритет)
 
 - **Карта и Схемы**: Генерируются скриптами в CI (pydantic-to-json-schema, eralchemy2, mkdocs).
-- **Именование**: Зеркальное (`src/bioetl/.../{provider}/` \<-> `docs/providers/{provider}/`).
+- **Именование**: Зеркальное (`src/bioetl/.../{provider}/` \<-> `docs/04-reference/providers/{provider}/`).
 
 ## 6.1. Детерминизм и Воспроизводимость
 
@@ -1336,7 +1331,7 @@ grep -B2 -A2 "ComponentName" docs/archived/refactoring-plan.md
 
 ### 8.1. Контракты Данных (Data Contracts)
 
-- **Реестр Схем**: Gold-схемы публикуются в `docs/contracts/gold/{entity}.json` (JSON Schema).
+- **Реестр Схем**: Gold-схемы публикуются в `docs/04-reference/contracts/gold/{entity}.json` (JSON Schema).
 - **Версионирование**: Семантическое версионирование схем: `{entity}-v{major}.{minor}`.
   - Minor: добавление nullable полей.
   - Major: удаление/переименование полей, изменение типов.
@@ -1636,6 +1631,8 @@ fields:
 | [ADR-034](../02-architecture/decisions/ADR-034-schema-domain-pairs.md)               | Schema↔Domain Configuration Pairs        | Accepted           | 2026-02-15 |
 | [ADR-035](../02-architecture/decisions/ADR-035-json-field-typing-policy.md)          | JSON Field Typing Policy (Silver↔Gold)   | Accepted           | 2026-02-17 |
 | [ADR-036](../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md)   | Gold Contract Versioning Policy           | Accepted           | 2026-02-18 |
+| [ADR-037](../02-architecture/decisions/ADR-037-canonical-schema-generation.md)       | Canonical Schema Source and Generation    | Accepted           | 2026-02-18 |
+| [ADR-038](../02-architecture/decisions/ADR-038-enum-externalization.md)              | ChEMBL Enum Values Externalization to YAML | Accepted          | 2026-02-16 |
 
 ## История Изменений (Changelog)
 
