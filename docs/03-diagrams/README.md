@@ -53,15 +53,86 @@ Render them with any Mermaid-compatible viewer, IDE plugin, or the [Mermaid Live
 
 ## Rendering
 
+### Prerequisites
+
 ```bash
-# Install Mermaid CLI
+# Mermaid CLI (required)
 npm install -g @mermaid-js/mermaid-cli
 
-# Render single diagram to SVG
-mmdc -i docs/03-diagrams/architecture/01-high-level-hexagonal.mmd -o output.svg
-
-# Render all diagrams
-for f in docs/03-diagrams/**/*.mmd; do
-  mmdc -i "$f" -o "${f%.mmd}.svg"
-done
+# librsvg — high-quality SVG → PNG (recommended)
+# macOS:
+brew install librsvg
+# Ubuntu/Debian:
+sudo apt-get install librsvg2-bin
 ```
+
+### Quick start
+
+```bash
+# Render ALL diagrams (SVG + PNG) with custom theme
+bash docs/03-diagrams/render.sh
+
+# SVG only (faster)
+bash docs/03-diagrams/render.sh --svg-only
+
+# Single diagram with theme
+mmdc -i docs/03-diagrams/architecture/01-high-level-hexagonal.mmd \
+     -o output.svg \
+     -c docs/03-diagrams/theme/mermaid-config.json \
+     --cssFile docs/03-diagrams/theme/custom.css
+```
+
+### Render options
+
+```bash
+# Filter by name glob
+bash docs/03-diagrams/render.sh --filter "01-*"
+
+# Single directory only
+bash docs/03-diagrams/render.sh --dir docs/03-diagrams/architecture
+
+# Adjust PNG resolution
+bash docs/03-diagrams/render.sh --scale 4 --width 3200 --height 2400
+
+# CI mode (Puppeteer sandbox disabled)
+bash docs/03-diagrams/render.sh --puppeteer /tmp/puppeteer-config.json
+```
+
+### Output layout
+
+```
+docs/03-diagrams/
+  architecture/
+    *.mmd           # source diagrams
+    svg/*.svg       # rendered vector (scalable)
+    png/*.png       # rendered raster (300 DPI)
+  class-diagrams/
+    *.mmd
+    svg/*.svg
+    png/*.png
+  theme/
+    mermaid-config.json   # colours, fonts, spacing
+    custom.css            # fine-tuned SVG styling
+  render.sh               # unified render script
+```
+
+### Theme customization
+
+The custom theme in `theme/mermaid-config.json` uses the BioETL colour palette:
+
+| Layer          | Fill      | Border    |
+|----------------|-----------|-----------|
+| Domain         | `#e8f5e9` | `#2e7d32` |
+| Application    | `#e3f2fd` | `#1565c0` |
+| Infrastructure | `#fff3e0` | `#e65100` |
+| Composition    | `#f3e5f5` | `#6a1b9a` |
+| Interfaces     | `#fce4ec` | `#b71c1c` |
+| Bronze         | `#fff3e0` | `#e65100` |
+| Silver         | `#eceff1` | `#607d8b` |
+| Gold           | `#fff8e1` | `#f9a825` |
+| Quarantine     | `#ffebee` | `#c62828` |
+
+### CI/CD
+
+Diagrams are validated and rendered automatically in GitHub Actions
+(`.github/workflows/docs.yml`). Rendered SVG/PNG are uploaded as build artifacts.

@@ -161,4 +161,7 @@ data/input/bronze/chembl/publication/2026-02-09/batch_2026-02-09_045cc68f-7052-4
 # Reports (generated, 100+ MB)
 /reports/
 .ai/mcp/mcp.json
-.ai/mcp/mcp.json
+
+# Rendered diagrams (generated from .mermaid / .mmd sources)
+docs/**/svg/
+docs/**/png/
