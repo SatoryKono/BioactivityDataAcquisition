@@ -6,6 +6,8 @@ on:
         paths-ignore:
             - 'docs/**'
             - '*.md'
+            - '.ai/**'
+            - '.claude/**'
             - '.github/workflows/**'
             - 'LICENSE'
     pull_request:
@@ -13,6 +15,8 @@ on:
         paths-ignore:
             - 'docs/**'
             - '*.md'
+            - '.ai/**'
+            - '.claude/**'
             - '.github/workflows/**'
             - 'LICENSE'
 
