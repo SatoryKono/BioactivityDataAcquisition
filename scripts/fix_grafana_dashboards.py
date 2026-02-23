@@ -1,109 +1,107 @@
-"""Script to inject Grafana variables and fix PromQL queries for BioETL pipelines."""
+"""Script to validate and fix Grafana dashboard variables for BioETL pipelines.
+
+Uses merge strategy: adds missing required variables without removing existing ones.
+Fixes run_id to use infrastructure_validated (which actually has run_id label).
+"""
 
 import json
 from pathlib import Path
-import re
 
-PIPELINE_VAR = {
-    "allValue": None,
-    "current": {},
-    "datasource": "Prometheus",
-    "definition": "label_values(bioetl_records_processed_total, pipeline)",
-    "hide": 0,
-    "includeAll": True,
-    "label": "Pipeline",
-    "multi": True,
-    "name": "pipeline",
-    "options": [],
-    "query": {
-        "query": "label_values(bioetl_records_processed_total, pipeline)",
-        "refId": "StandardVariableQuery"
+DATASOURCE = {"type": "prometheus", "uid": "prometheus"}
+
+REQUIRED_VARS = {
+    "pipeline": {
+        "allValue": None,
+        "current": {},
+        "datasource": DATASOURCE,
+        "definition": "label_values(bioetl_records_processed_total, pipeline)",
+        "hide": 0,
+        "includeAll": True,
+        "label": "Pipeline",
+        "multi": True,
+        "name": "pipeline",
+        "options": [],
+        "query": {
+            "query": "label_values(bioetl_records_processed_total, pipeline)",
+            "refId": "StandardVariableQuery",
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": False,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": False,
     },
-    "refresh": 1,
-    "regex": "",
-    "skipUrlSync": False,
-    "sort": 1,
-    "tagValuesQuery": "",
-    "tags": [],
-    "tagsQuery": "",
-    "type": "query",
-    "useTags": False
+    "run_id": {
+        "allValue": ".*",
+        "current": {"selected": True, "text": "All", "value": "$__all"},
+        "datasource": DATASOURCE,
+        "definition": 'label_values(bioetl_infrastructure_validated{pipeline=~"$pipeline"}, run_id)',
+        "hide": 0,
+        "includeAll": True,
+        "label": "Run ID",
+        "multi": False,
+        "name": "run_id",
+        "options": [],
+        "query": {
+            "query": 'label_values(bioetl_infrastructure_validated{pipeline=~"$pipeline"}, run_id)',
+            "refId": "StandardVariableQuery",
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": False,
+        "sort": 3,
+        "type": "query",
+    },
 }
 
-RUN_ID_VAR = {
-    "allValue": None,
-    "current": {},
-    "datasource": "Prometheus",
-    "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_id)",
-    "hide": 0,
-    "includeAll": True,
-    "label": "Run ID",
-    "multi": True,
-    "name": "run_id",
-    "options": [],
-    "query": {
-        "query": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_id)",
-        "refId": "StandardVariableQuery"
-    },
-    "refresh": 1,
-    "regex": "",
-    "skipUrlSync": False,
-    "sort": 1,
-    "tagValuesQuery": "",
-    "tags": [],
-    "tagsQuery": "",
-    "type": "query",
-    "useTags": False
-}
 
-def fix_dashboard(path):
+def fix_dashboard(path: Path) -> None:
+    """Fix dashboard variables using merge strategy."""
     print(f"Processing {path}...")
     try:
-        # Use utf-8-sig to handle possible BOM
-        with open(path, "r", encoding="utf-8-sig") as f:
+        with open(path, encoding="utf-8-sig") as f:
             data = json.load(f)
     except Exception as e:
-        print(f"Error reading {path}: {e}")
+        print(f"  Error reading {path}: {e}")
         return
 
-    # 1. Add variables
-    data["templating"]["list"] = [PIPELINE_VAR, RUN_ID_VAR]
+    existing_vars = data.get("templating", {}).get("list", [])
+    existing_names = {v.get("name") for v in existing_vars}
 
-    # 2. Update PromQL queries
-    panels = data.get("panels", [])
-    for row in data.get("rows", []):
-        panels.extend(row.get("panels", []))
+    # Merge: add missing required variables, fix existing ones
+    for req_name, req_var in REQUIRED_VARS.items():
+        if req_name in existing_names:
+            # Update existing variable
+            for i, v in enumerate(existing_vars):
+                if v.get("name") == req_name:
+                    existing_vars[i] = req_var
+                    print(f"  Updated variable: {req_name}")
+                    break
+        else:
+            existing_vars.append(req_var)
+            print(f"  Added variable: {req_name}")
 
-    for panel in panels:
-        targets = panel.get("targets", [])
-        if not targets: continue
-        
-        for target in targets:
-            expr = target.get("expr", "")
-            if not expr or ("bioetl_" not in expr): 
-                continue
-            
-            # Complex replacement: 
-            metrics_found = re.findall(r'bioetl_[a-z0-9_]+', expr)
-            new_expr = expr
-            
-            for m in metrics_found:
-                # If metric already has $pipeline filter, skip it
-                if '$pipeline' in new_expr:
-                    continue
-                    
-                if f"{m}{{" in new_expr:
-                    new_expr = new_expr.replace(f"{m}{{", f"{m}{{pipeline=~\"$pipeline\", run_id=~\"$run_id\", ")
-                else:
-                    new_expr = new_expr.replace(m, f"{m}{{pipeline=~\"$pipeline\", run_id=~\"$run_id\"}}")
-            
-            new_expr = new_expr.replace(", }", "}").replace(",,", ",")
-            target["expr"] = new_expr
+    # Remove duplicates (keep first occurrence)
+    seen = set()
+    deduped = []
+    for v in existing_vars:
+        name = v.get("name")
+        if name not in seen:
+            seen.add(name)
+            deduped.append(v)
+    data["templating"]["list"] = deduped
 
     with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4)
+        json.dump(data, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+    print(f"  Done ({len(deduped)} variables)")
+
 
 if __name__ == "__main__":
     dashboard_dir = Path("grafana/dashboards")
-    for file in dashboard_dir.glob("*.json"):
+    for file in sorted(dashboard_dir.glob("*.json")):
         fix_dashboard(file)

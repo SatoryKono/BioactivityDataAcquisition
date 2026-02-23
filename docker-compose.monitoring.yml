@@ -1,11 +1,11 @@
-version: '3.8'
-
 services:
   prometheus:
     image: prom/prometheus:latest
     container_name: bioetl-prometheus
     ports:
       - "9090:9090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # Linux compatibility
     volumes:
       - ./grafana/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus

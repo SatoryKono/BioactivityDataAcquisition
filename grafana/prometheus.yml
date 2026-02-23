@@ -13,7 +13,10 @@ global:
 scrape_configs:
   - job_name: 'bioetl'
     static_configs:
-      - targets: ['host.docker.internal:8000']
+      # host.docker.internal works on macOS/Windows Docker Desktop.
+      # On Linux, use --add-host=host.docker.internal:host-gateway in docker run,
+      # or set BIOETL_METRICS_HOST env var below.
+      - targets: ['${BIOETL_METRICS_HOST:-host.docker.internal}:8000']
     metrics_path: /metrics
 
   - job_name: 'pushgateway'

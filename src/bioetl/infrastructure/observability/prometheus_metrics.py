@@ -6,7 +6,11 @@ Prometheus client library.
 
 from __future__ import annotations
 
+import logging
+
 from bioetl.domain.ports import MetricsPort
+
+_logger = logging.getLogger(__name__)
 from bioetl.infrastructure.observability.metrics import (
     ADAPTER_BATCH_SIZE,
     ADAPTER_DROPPED_DUPLICATES_TOTAL,
@@ -75,7 +79,8 @@ HISTOGRAMS = {
     "archive_duration_seconds": ARCHIVE_DURATION_SECONDS,
     "dq_check_duration_ms": DQ_CHECK_DURATION_MS,
     # Pipeline lifecycle
-    "bioetl_phase_duration_seconds": PHASE_DURATION_SECONDS,
+    "phase_duration_seconds": PHASE_DURATION_SECONDS,
+    "bioetl_phase_duration_seconds": PHASE_DURATION_SECONDS,  # alias for callers using full name
     # Health checks
     "health_check_duration_seconds": HEALTH_CHECK_DURATION_SECONDS,
     "health_check_latency_ms": HEALTH_CHECK_LATENCY_MS,
@@ -87,7 +92,8 @@ HISTOGRAMS = {
     "adapter_batch_size": ADAPTER_BATCH_SIZE,
     "http_request_duration_seconds": HTTP_REQUEST_DURATION_SECONDS,
     # Rate limiter
-    "bioetl_rate_limiter_wait_seconds": RATE_LIMITER_WAIT_SECONDS,
+    "rate_limiter_wait_seconds": RATE_LIMITER_WAIT_SECONDS,
+    "bioetl_rate_limiter_wait_seconds": RATE_LIMITER_WAIT_SECONDS,  # alias
     # Bronze storage
     "bronze_write_duration_seconds": BRONZE_WRITE_DURATION_SECONDS,
 }
@@ -107,7 +113,8 @@ COUNTERS = {
     "dq_anomaly_detected": DQ_ANOMALY_DETECTED,
     "dq_baseline_updated": DQ_BASELINE_UPDATED,
     # Pipeline lifecycle
-    "bioetl_pipeline_runs_total": PIPELINE_RUNS_TOTAL,
+    "pipeline_runs_total": PIPELINE_RUNS_TOTAL,
+    "bioetl_pipeline_runs_total": PIPELINE_RUNS_TOTAL,  # alias
     # DQ
     "dq_soft_threshold_exceeded": DQ_SOFT_THRESHOLD_EXCEEDED,
     # Shutdown
@@ -149,7 +156,8 @@ GAUGES = {
     # Provider health
     "provider_health_status": PROVIDER_HEALTH_STATUS,
     # Rate limiter
-    "bioetl_rate_limiter_tokens_available": RATE_LIMITER_TOKENS_AVAILABLE,
+    "rate_limiter_tokens_available": RATE_LIMITER_TOKENS_AVAILABLE,
+    "bioetl_rate_limiter_tokens_available": RATE_LIMITER_TOKENS_AVAILABLE,  # alias
 }
 
 
@@ -172,6 +180,8 @@ class PrometheusMetrics(MetricsPort):
         """Observe a value for a Prometheus histogram."""
         if name in HISTOGRAMS:
             HISTOGRAMS[name].labels(**labels).observe(value)
+        else:
+            _logger.warning("Unknown histogram metric: %s", name)
 
     def increment_counter(
         self,
@@ -182,6 +192,8 @@ class PrometheusMetrics(MetricsPort):
         """Increment a Prometheus counter."""
         if name in COUNTERS:
             COUNTERS[name].labels(**labels).inc(value)
+        else:
+            _logger.warning("Unknown counter metric: %s", name)
 
     def set_gauge(
         self,
@@ -192,6 +204,8 @@ class PrometheusMetrics(MetricsPort):
         """Set a Prometheus gauge to a specific value."""
         if name in GAUGES:
             GAUGES[name].labels(**labels).set(value)
+        else:
+            _logger.warning("Unknown gauge metric: %s", name)
 
     def close(self) -> None:
         """Cleanup Prometheus metrics. Idempotent.
