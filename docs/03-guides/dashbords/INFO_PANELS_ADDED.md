@@ -1,28 +1,42 @@
-# Info Panels (Pipeline, Run ID, Timestamp) добавлены!
+# Info Panels (Pipeline, Run Type, Timestamp) добавлены!
 
 ## ✅ Что было сделано
 
-Добавлены три информационные панели в верхнюю часть каждого дашборда v2:
+Добавлены информационные панели в верхнюю часть каждого дашборда v2:
 
-### 1. Pipeline Panel
+### DQ v2 / Overview v2 — 3 info-панели:
+
+#### 1. Pipeline Panel
 ```
 Показывает: Текущий выбранный pipeline
-PromQL: max(label_values(bioetl_records_processed_total{pipeline=~"$pipeline"}, pipeline))
-Зависит от: переменной $pipeline
+Тип: Text (HTML), отображает $pipeline
 ```
 
-### 2. Run ID Panel
+#### 2. Run Type Panel
 ```
-Показывает: Текущий выбранный run_id
-PromQL: max(label_values(bioetl_records_processed_total{pipeline=~"$pipeline", run_id=~"$run_id"}, run_id))
-Зависит от: переменных $pipeline и $run_id
+Показывает: Текущий тип запуска (incremental/backfill/rebuild)
+Тип: Text (HTML), отображает $run_type
 ```
 
-### 3. Execution Timestamp Panel
+#### 3. Execution Timestamp Panel
 ```
-Показывает: Время запуска (Unix timestamp)
-PromQL: max(bioetl_run_start_timestamp{pipeline=~"$pipeline", run_id=~"$run_id"})
-Зависит от: переменных $pipeline и $run_id
+Показывает: Время создания метрики (Unix timestamp)
+Метрика: bioetl_records_processed_created
+Тип: Stat
+```
+
+### Provider Health v2 — 2 info-панели:
+
+#### 1. Provider Panel
+```
+Показывает: Текущий выбранный provider
+Тип: Text (HTML), отображает $provider
+```
+
+#### 2. Health Status Panel
+```
+Показывает: "Provider Health" (статический текст)
+Тип: Text (HTML)
 ```
 
 ---
@@ -30,14 +44,24 @@ PromQL: max(bioetl_run_start_timestamp{pipeline=~"$pipeline", run_id=~"$run_id"}
 ## 📊 Структура верхней строки дашборда
 
 ```
-┌─────────────────────┬──────────────────┬──────────────────────────────┐
-│  Pipeline (6 cols)  │  Run ID (6 cols) │  Timestamp (12 cols)         │
-├─────────────────────┴──────────────────┴──────────────────────────────┤
-│                                                                         │
-│                      Основные графики и метрики                        │
-│                    (24 cols - во всю ширину)                         │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────┘
+DQ v2 / Overview v2:
+┌─────────────────────┬───────────────────┬──────────────────────────────┐
+│  Pipeline (6 cols)  │  Run Type (6 cols)│  Timestamp (12 cols)         │
+├─────────────────────┴───────────────────┴──────────────────────────────┤
+│                                                                          │
+│                      Основные графики и метрики                         │
+│                    (24 cols - во всю ширину)                          │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────┘
+
+Provider Health v2:
+┌─────────────────────┬───────────────────┬──────────────────────────────┐
+│  Provider (6 cols)  │ Health Status(6c) │  Timestamp (12 cols)         │
+├─────────────────────┴───────────────────┴──────────────────────────────┤
+│                                                                          │
+│              Provider latency графики и gauges                          │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -58,24 +82,24 @@ PromQL: max(bioetl_run_start_timestamp{pipeline=~"$pipeline", run_id=~"$run_id"}
 
 ```
 Pipeline Panel: uniprot
-Run ID Panel: <обновляется список run_id'ов для uniprot>
-Timestamp Panel: <показывает время для выбранного run_id>
+Run Type Panel: <обновляется список run_type'ов для uniprot>
+Timestamp Panel: <показывает время для выбранного run_type>
 ```
 
 ### При выборе Pipeline = "All"
 
 ```
 Pipeline Panel: All (или последний используемый)
-Run ID Panel: <показывает все run_id'ы>
+Run Type Panel: <показывает все run_type'ы>
 Timestamp Panel: <показывает максимальное время>
 ```
 
-### При выборе Run ID
+### При выборе Run Type
 
 ```
 Pipeline Panel: <остаётся неизменным>
-Run ID Panel: <выбранный run_id>
-Timestamp Panel: <обновляется время для этого run_id>
+Run Type Panel: <выбранный run_type>
+Timestamp Panel: <обновляется время>
 ```
 
 ---
@@ -105,29 +129,33 @@ grafana/dashboards/
 ├── bioetl-overview-v2.json (updated - добавлены info panels)
 └── bioetl-provider-health-v2.json (updated - добавлены info panels)
 
-add_info_panels.py (скрипт для добавления панелей)
 ```
 
 ---
 
 ## 🚀 Итоговая структура дашбордов v2
 
-**Верхняя строка (3 height):**
+**Верхняя строка (3 height) — DQ v2 / Overview v2:**
 - Pipeline info (6 cols)
-- Run ID info (6 cols)
+- Run Type info (6 cols)
 - Execution Timestamp info (12 cols)
 
-**Фильтры (ниже info panels):**
-- Pipeline selector (dropdown)
-- Run ID selector (dropdown)
+**Верхняя строка (3 height) — Provider Health v2:**
+- Provider info (6 cols)
+- Health Status info (6 cols)
+- Execution Timestamp info (12 cols)
+
+**Фильтры (dropdown selectors):**
+- Pipeline / Run Type (DQ v2, Overview v2)
+- Provider (Provider Health v2)
 
 **Содержимое (графики и метрики):**
 - Bronze/Silver/Gold Records
-- Quality Score
+- Quality Score (ratio)
 - Processing pipelines
-- Error rates
-- Provider health
-- И другие метрики...
+- Stage/Pipeline Distribution (piechart)
+- Provider latency gauges
+- Health Check Status
 
 ---
 

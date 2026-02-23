@@ -63,7 +63,7 @@ python ./metrics_server.py &
     ↓ Scrape каждые 15 сек    ↓ Query для графиков
 ┌──────────────────────┐   ┌─────────────────────────┐
 │   Prometheus 9090    │   │   Grafana 3000          │
-│  - Хранилище TSDB    │   │  - 8 дашбордов          │
+│  - Хранилище TSDB    │   │  - 4 дашборда            │
 │  - Retention: 15 дней│   │  - Переменные фильтры   │
 │  - Scrape interval: 15s │  - Alerts & Annotations │
 └──────────┬───────────┘   └──────────┬──────────────┘
@@ -351,16 +351,16 @@ MY_METRIC.labels(pipeline='uniprot', stage='bronze').set(value)
 Доступные: uniprot, pubmed, pubchem, chembl, All
 ```
 
-**Run ID** — выбрать конкретный run
+**Run Type** — выбрать тип запуска
 ```
-Доступные: все активные run ID
+Доступные: incremental, backfill, rebuild, All
 ```
 
 **Пример использования:**
 ```
 1. Открыть BioETL Simple Dashboard
 2. В левой панели: Pipeline = "uniprot"
-3. Run ID = "run-492157"
+3. Run Type = "incremental"
 4. График обновится и покажет только данные для uniprot
 ```
 
