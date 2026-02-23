@@ -56,9 +56,6 @@ from bioetl.composition.bootstrap import (
     load_pipeline_config,
     maybe_start_metrics_server,
 )
-from bioetl.infrastructure.observability.server import (
-    push_metrics_to_gateway,
-)
 
 __all__ = [
     # Configuration
