@@ -170,7 +170,11 @@
       "Bash(cd \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" && unset GITHUB_TOKEN && gh api repos/SatoryKono/BioactivityDataAcquisition/branches/main/protection/enforce_admins -X POST 2>&1)",
       "WebFetch(domain:developers.openai.com)",
       "Bash(cd \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" && codex --version 2>&1)",
-      "Bash(echo Check auth manually:*)"
+      "Bash(echo Check auth manually:*)",
+      "Bash(cd \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" && codex login --help 2>&1)",
+      "Bash(powershell.exe:*)",
+      "Bash(tee:*)",
+      "Bash(unset GITHUB_TOKEN && gh auth token 2>&1)"
     ]
   },
   "enabledPlugins": {

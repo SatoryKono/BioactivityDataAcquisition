@@ -10,6 +10,7 @@ import click
 
 from bioetl import __version__
 from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+from bioetl.interfaces.cli.commands.adr import adr
 from bioetl.interfaces.cli.commands.checkpoint import checkpoint
 from bioetl.interfaces.cli.commands.config import config
 from bioetl.interfaces.cli.commands.export import export_command
@@ -32,6 +33,7 @@ def cli() -> None:
 cli.add_command(run)
 cli.add_command(run_all)
 cli.add_command(run_composite)
+cli.add_command(adr)
 cli.add_command(export_command, name="export")
 cli.add_command(quarantine)
 cli.add_command(checkpoint)
