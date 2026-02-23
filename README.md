@@ -6,7 +6,7 @@
 [![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
 [![Coverage](https://img.shields.io/badge/coverage-%E2%89%A585%25-brightgreen)](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/workflows/tests.yml)
 [![Version](https://img.shields.io/badge/version-6.0.0-blue)](CHANGELOG.md)
-[![Security Policy](https://img.shields.io/badge/Security-Policy-blue)](SECURITY.md)
+[![Security Policy](https://img.shields.io/badge/Security-Policy-blue)](.github/SECURITY.md)
 
 **BioETL** is a robust, scalable data engineering framework designed to acquire, normalize, and process bioactivity data
 from major public repositories (ChEMBL, PubChem, UniProt, etc.) into a unified, analysis-ready **Delta Lake** warehouse.
@@ -359,7 +359,7 @@ make docker-down
 
 ## Security
 
-Please review our **[Security Policy](SECURITY.md)** for:
+Please review our **[Security Policy](.github/SECURITY.md)** for:
 
 - Threat model and trust boundaries
 - Secret management guidelines

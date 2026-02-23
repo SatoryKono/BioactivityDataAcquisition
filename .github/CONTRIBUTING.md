@@ -21,9 +21,9 @@ Before contributing, read these documents:
 
 | Document                         | Purpose                           |
 | -------------------------------- | --------------------------------- |
-| [docs/RULES.md](docs/RULES.md)   | Project constitution (MUST read)  |
-| [AGENT.md](AGENT.md)             | Development workflow and patterns |
-| [docs/00-map.md](docs/00-map.md) | Documentation navigator           |
+| [docs/00-project/RULES.md](../docs/00-project/RULES.md) | Project constitution (MUST read)  |
+| [AGENTS.md](../AGENTS.md)                                | Development workflow and patterns |
+| [docs/00-project/00-map.md](../docs/00-project/00-map.md) | Documentation navigator         |
 
 ## Workflow
 
@@ -82,9 +82,12 @@ Before contributing, read these documents:
 
 For PRs to `main`, configure GitHub branch protection/rulesets to require:
 
+- `checks-complete` (from `.github/workflows/import-linter.yml` — lint, type check, unit + integration + arch tests)
+- `coverage-verify` (from `.github/workflows/tests.yml` — 85% coverage threshold)
 - `Schema Governance Status` (from `.github/workflows/schema-governance.yml`)
+- `detect-secrets` (from `.github/workflows/security.yml`)
 
-This keeps contract export drift as a blocking gate while schema parity remains non-blocking and visible in the CI report.
+This ensures no PR can be merged with failing tests, lint errors, or secret leaks.
 
 ## Pull Request Checklist
 
