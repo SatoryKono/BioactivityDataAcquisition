@@ -39,6 +39,7 @@ from bioetl.composition._resource_management import (
 )
 from bioetl.composition._services import (
     cleanup_bronze,
+    get_adr_service,
     get_bronze_cleanup_service,
     get_checkpoint_service,
     get_config_service,
@@ -77,6 +78,8 @@ __all__ = [
     "get_lifecycle_service",
     # Resource management (services - new)
     "get_checkpoint_service",
+    # ADR
+    "get_adr_service",
     "get_config_service",
     "get_health_server_dependencies",
     "get_health_service",

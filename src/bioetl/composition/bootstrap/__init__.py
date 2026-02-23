@@ -34,6 +34,7 @@ from bioetl.composition.bootstrap.assembly import (
 # =============================================================================
 from bioetl.composition.bootstrap.cli import (
     HealthServerDependencies,
+    bootstrap_adr_service,
     bootstrap_bronze_cleanup_service,
     bootstrap_checkpoint_manager,
     bootstrap_checkpoint_service,
@@ -69,6 +70,7 @@ from bioetl.infrastructure.config import load_pipeline_config
 
 __all__ = [
     "HealthServerDependencies",
+    "bootstrap_adr_service",
     "bootstrap_bronze_cleanup_service",
     "bootstrap_checkpoint_manager",
     "bootstrap_checkpoint_service",

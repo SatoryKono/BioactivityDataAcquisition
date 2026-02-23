@@ -597,7 +597,11 @@ def _load_column_groups_section(
 
 
 def _load_source_section(config: dict[str, Any], config_path: Path) -> None:
-    """Load source config from external file if specified."""
+    """Load source config from external file and merge with entity overrides.
+
+    The source file (configs/sources/{provider}.yaml) provides base settings.
+    Entity-specific source settings from the pipeline YAML override them.
+    """
     source_file = config.get("source_file")
     if not source_file:
         return
@@ -605,7 +609,9 @@ def _load_source_section(config: dict[str, Any], config_path: Path) -> None:
     if source_path.exists():
         with open(source_path, encoding="utf-8") as f:
             source_config = yaml.safe_load(f) or {}
-        config["source"] = source_config.get("source", source_config)
+        base_source = source_config.get("source", source_config)
+        entity_source = config.get("source", {})
+        config["source"] = _deep_merge(base_source, entity_source)
 
 
 @lru_cache(maxsize=10)

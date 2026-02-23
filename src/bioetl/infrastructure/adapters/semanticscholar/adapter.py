@@ -119,7 +119,7 @@ class SemanticScholarAdapter(BaseHttpAdapter):
             "Accept": "application/json",
             "Content-Type": "application/json",
         }
-        if self.api_key:
+        if self.api_key and not self.api_key.startswith("your_"):
             headers["x-api-key"] = self.api_key
         return headers
 
@@ -500,12 +500,13 @@ class SemanticScholarAdapter(BaseHttpAdapter):
                 )
             elapsed = time.monotonic() - start_time
 
-            # Rate limited (429) - return DEGRADED instead of UNHEALTHY
-            # Without API key, rate limiting is expected behavior
-            if response.status_code == 429:
+            # Rate limited (429) or forbidden (403) - return DEGRADED
+            # Without API key, 429/403 is expected; data endpoints may still work
+            if response.status_code in (429, 403):
                 self.logger.warning(
                     "semanticscholar_health_check_rate_limited",
-                    message="Rate limited (429). Consider using API key for stable access.",
+                    status_code=response.status_code,
+                    message="Rate limited or forbidden. Consider using API key for stable access.",
                 )
                 return HealthStatus.DEGRADED
 
@@ -527,12 +528,12 @@ class SemanticScholarAdapter(BaseHttpAdapter):
             return HealthStatus.HEALTHY
 
         except Exception as e:
-            # Check if it's a 429 error from httpx
+            # Check if it's a 429/403 error from httpx
             error_str = str(e)
-            if "429" in error_str:
+            if "429" in error_str or "403" in error_str:
                 self.logger.warning(
                     "semanticscholar_health_check_rate_limited",
-                    message="Rate limited (429). Consider using API key.",
+                    message="Rate limited or forbidden. Consider using API key.",
                 )
                 return HealthStatus.DEGRADED
             self.logger.warning(

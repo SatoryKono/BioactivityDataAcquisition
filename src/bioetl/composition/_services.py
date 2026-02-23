@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 from bioetl.composition._pipeline_execution import _ensure_registrations
 from bioetl.composition.bootstrap import (
     HealthServerDependencies,
+    bootstrap_adr_service,
     bootstrap_bronze_cleanup_service,
     bootstrap_checkpoint_service,
     bootstrap_config_service,
@@ -40,6 +41,7 @@ if TYPE_CHECKING:
     )
     from bioetl.application.services.lock_service import LockService
     from bioetl.domain.ports import QuarantinePort
+    from bioetl.domain.ports.adr import AdrServicePort
 
 
 def get_checkpoint_service() -> CheckpointService:
@@ -279,6 +281,18 @@ def get_metrics_service() -> MetricsService:
     """
     _ensure_registrations()
     return bootstrap_metrics_service()
+
+
+def get_adr_service() -> AdrServicePort:
+    """Get ADR service (port) for ADR management operations.
+
+    Provides read-only access to ADR documents and validation.
+
+    Returns:
+        AdrServicePort instance.
+    """
+    _ensure_registrations()
+    return bootstrap_adr_service()
 
 
 def get_quarantine_store(pipeline: str) -> QuarantinePort:
