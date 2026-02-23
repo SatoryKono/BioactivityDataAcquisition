@@ -1,6 +1,6 @@
 # Пайплайн: ChEMBL Compound Record
 
-**Имя пайплайна:** `chembl-compound-record`
+**Имя пайплайна:** `chembl_compound_record`
 **Провайдер:** `chembl`
 **Сущность:** `compound-record`
 **Версия схемы:** 1.2.0
@@ -50,7 +50,7 @@ Compound Record (M:1) → Source
 ```
 
 **Граф зависимостей:**
-- Для полного анализа рекомендуется сначала загрузить `chembl-molecule` и `chembl-publication`
+- Для полного анализа рекомендуется сначала загрузить `chembl_molecule` и `chembl_publication`
 - `src-id` ссылается на источник данных ChEMBL (1 = ChEMBL)
 
 ---
@@ -97,16 +97,16 @@ entity-id = f"chembl:{record-id}"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl-compound-record
+bioetl run chembl_compound_record
 
 # С ограничением количества записей
-bioetl run chembl-compound-record --limit 1000
+bioetl run chembl_compound_record --limit 1000
 
 # Полная перезагрузка
-bioetl run chembl-compound-record --run-type rebuild
+bioetl run chembl_compound_record --run-type rebuild
 
 # Dry-run (без записи)
-bioetl run chembl-compound-record --dry-run
+bioetl run chembl_compound_record --dry-run
 ```
 
 ---
@@ -155,7 +155,7 @@ gold-filters:
 | Конфигурация | `configs/pipelines/chembl/compound-record.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/chembl/compound-record-transformer.py` |
 | Пайплайн | `src/bioetl/application/pipelines/chembl/compound-record.py` |
-| Сущность | `src/bioetl/domain/entities/chembl-compound-record.py` |
+| Сущность | `src/bioetl/domain/entities/chembl_compound_record.py` |
 | Схема | `src/bioetl/domain/schemas/chembl/compound-record.py` |
 
 ---

@@ -10,7 +10,7 @@ Extracts publication similarity data (Tanimoto coefficients) from the ChEMBL `/d
 
 | Field | Value |
 |-------|-------|
-| Pipeline ID | `chembl-publication-similarity` |
+| Pipeline ID | `chembl_publication_similarity` |
 | Provider | `chembl` |
 | Entity | `publication-similarity` |
 | Version | `2.1.0` |

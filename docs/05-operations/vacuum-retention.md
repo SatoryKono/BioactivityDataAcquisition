@@ -167,7 +167,7 @@ vacuum:
   default-retention-days: 7
   forensic-tables:
     - chembl_activity
-    - pubchem-compound
+    - pubchem_compound
   forensic-retention-days: 30
 ```
 

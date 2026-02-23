@@ -68,7 +68,7 @@ class PipelineContext:
     run-id: RunID
     run-type: RunType
     logger: LoggerPort
-    started-at: datetime = field(default-factory=-now-utc)
+    started-at: datetime = field(default_factory=-now-utc)
 
     @classmethod
     def create(cls, run-id, run-type, logger, started-at=None):

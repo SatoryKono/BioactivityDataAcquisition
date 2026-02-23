@@ -89,7 +89,7 @@ The following 34 diagrams already exist and are explicitly excluded:
 | 26 | Single Instance Policy Enforcement | flowchart | How MemoryLock prevents multiple pipeline instances — lock key generation, TTL, heartbeat validation |
 | 27 | Dependency Injection Flow — Constructor Injection Pattern | sequenceDiagram | Sequence showing Composition creating adapters then injecting them into Application services via constructor |
 | 28 | Import Linter Configuration and Enforcement | flowchart | How import-linter rules map to ARCH-001 matrix and block PRs on violations |
-| 29 | GenericPipelineFactory Declarative Registration | flowchart | How pipeline-factories.py declares provider/entity/transformer/schema → factory auto-generates pipeline |
+| 29 | GenericPipelineFactory Declarative Registration | flowchart | How pipeline_factories.py declares provider/entity/transformer/schema → factory auto-generates pipeline |
 | 30 | Runtime Assembly Sequence — bootstrap/runtime/assembly.py | sequenceDiagram | Step-by-step assembly: create logger → create storage → create HTTP client → create adapter → create services → create runner |
 | 31 | DataSourceRegistry Lookup Flow | flowchart | Registry.get(provider) → creator function → adapter instantiation with HTTP client, rate limiter, circuit breaker |
 | 32 | StorageFactory Assembly — Bronze + Silver + Gold Writers | flowchart | StorageFactory combining BronzeWriter, SilverWriter, GoldWriter into unified StoragePort implementation |

@@ -1,6 +1,6 @@
 # Пайплайн: ChEMBL Assay
 
-**Имя пайплайна:** `chembl-assay`
+**Имя пайплайна:** `chembl_assay`
 **Провайдер:** `chembl`
 **Сущность:** `assay`
 **Версия схемы:** 1.2.0
@@ -18,12 +18,12 @@
 **Файл:** `configs/pipelines/chembl/assay.yaml`
 
 ```yaml
-pipeline-name: chembl-assay
+pipeline-name: chembl_assay
 provider: chembl
 entity-type: assay
 version: "1.2.0"
 primary-keys: ["assay-chembl-id"]
-silver-table: "chembl-assay"
+silver-table: "chembl_assay"
 
 gold-filter-types:
     - B  # Binding
@@ -416,7 +416,7 @@ def extract(self, -context, record) -> Watermark:
 | Watermark | `src/bioetl/application/pipelines/chembl/assay-watermark.py` |
 | Silver Schema | `src/bioetl/infrastructure/schemas/silver.py` |
 | Gold Schema | `src/bioetl/infrastructure/schemas/gold.py` |
-| Data Contract | `docs/contracts/chembl-assay-gold.json` |
+| Data Contract | `docs/04-reference/contracts/gold/chembl_assay_v1.0.json` |
 
 ---
 
@@ -424,16 +424,16 @@ def extract(self, -context, record) -> Watermark:
 
 ```bash
 # Инкрементальная загрузка (по умолчанию)
-bioetl run --pipeline chembl-assay
+bioetl run --pipeline chembl_assay
 
 # С ограничением количества записей
-bioetl run --pipeline chembl-assay --limit 1000
+bioetl run --pipeline chembl_assay --limit 1000
 
 # Полная перезагрузка
-bioetl run --pipeline chembl-assay --run-type rebuild
+bioetl run --pipeline chembl_assay --run-type rebuild
 
 # С фильтрацией по ID из CSV
-bioetl run --pipeline chembl-assay --input-csv data/input/assay.csv
+bioetl run --pipeline chembl_assay --input-csv data/input/assay.csv
 ```
 
 ---

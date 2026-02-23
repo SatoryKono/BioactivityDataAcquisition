@@ -68,7 +68,7 @@ class PipelineConfig:
 
 ```yaml
 # configs/pipelines/chembl/publication.yaml
-pipeline-name: chembl-publication
+pipeline-name: chembl_publication
 provider: chembl
 entity-type: publication
 
@@ -142,8 +142,8 @@ loading-strategy: full-scan-only
 - `src/bioetl/infrastructure/config/converters.py` — Pass `loading-strategy` in conversion
 
 **Composition:**
-- `src/bioetl/composition/factories/services-factory.py` — Pass `loading-strategy` to CheckpointManager
-- `src/bioetl/composition/factories/pipeline-factory.py` — Use `config.loading-strategy`
+- `src/bioetl/composition/factories/services_factory.py` — Pass `loading-strategy` to CheckpointManager
+- `src/bioetl/composition/factories/pipeline_factory.py` — Use `config.loading-strategy`
 
 **Configs:**
 - `configs/pipelines/chembl/publication.yaml` — Add `loading-strategy: full-scan-only`

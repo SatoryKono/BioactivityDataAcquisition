@@ -6,7 +6,7 @@
 
 ## ChEMBL
 
-### chembl-publication
+### chembl_publication
 | Поле | Тип | Описание |
 |---|---|---|
 | authors | string | JSON-массив авторов (строки) |
@@ -94,7 +94,7 @@
 | upper-value | float64 | Верхняя граница (сырье) |
 | value | float64 | Значение (сырье) |
 
-### chembl-assay
+### chembl_assay
 | Поле | Тип | Описание |
 |---|---|---|
 | aidx | string | Внутренний ID анализа |
@@ -135,7 +135,7 @@
 | variant-sequence-json | string | JSON исходной последовательности |
 | variant-taxonomy-id | float64 | Таксономия варианта (nullable int) |
 
-### chembl-assay-parameters
+### chembl_assay_parameters
 | Поле | Тип | Описание |
 |---|---|---|
 | assay-chembl-id | string | FK на анализ |
@@ -152,7 +152,7 @@
 | units | string | Единицы измерения |
 | value | float64 | Числовое значение |
 
-### chembl-target
+### chembl_target
 | Поле | Тип | Описание |
 |---|---|---|
 | component-accessions | list<string> | Accession компонентов |
@@ -173,7 +173,7 @@
 | target-type | string | Тип мишени |
 | taxonomy-id | float64 | NCBI Taxonomy ID (nullable) |
 
-### chembl-target-component
+### chembl_target_component
 | Поле | Тип | Описание |
 |---|---|---|
 | accession | string | UniProt accession |
@@ -188,7 +188,7 @@
 | target-component-xrefs | string | Кросс-референсы (JSON) |
 | taxonomy-id | int64 | NCBI Taxonomy ID |
 
-### chembl-cell-line
+### chembl_cell_line
 | Поле | Тип | Описание |
 |---|---|---|
 | cell-chembl-id | string | PK клеточной линии |
@@ -201,7 +201,7 @@
 | cl-lincs-id | string | LINCS ID |
 | efo-id | string | EFO ID |
 
-### chembl-tissue
+### chembl_tissue
 | Поле | Тип | Описание |
 |---|---|---|
 | bto-id | string | BRENDA Tissue Ontology ID |
@@ -211,7 +211,7 @@
 | tissue-chembl-id | string | PK ткани |
 | uberon-id | string | Uberon ID |
 
-### chembl-subcellular-fraction
+### chembl_subcellular_fraction
 | Поле | Тип | Описание |
 |---|---|---|
 | assay-count | int64 | Кол-во анализов с этой фракцией |
@@ -227,7 +227,7 @@
 | term | string | Терм MeSH |
 | term-type | string | Тип терма |
 
-### chembl-molecule
+### chembl_molecule
 | Поле | Тип | Описание |
 |---|---|---|
 | atc-classifications | string | ATC классификации (JSON) |
@@ -282,7 +282,7 @@
 | usan-year | float64 | Год присвоения USAN (nullable int) |
 | withdrawn-flag | bool | Флаг отзыва |
 
-### chembl-compound-record
+### chembl_compound_record
 | Поле | Тип | Описание |
 |---|---|---|
 | compound-key | string | Ключ соединения из документа |
@@ -308,7 +308,7 @@
 
 ## PubChem
 
-### pubchem-compound
+### pubchem_compound
 | Поле | Тип | Описание |
 |---|---|---|
 | canonical-smiles | string | Канонический SMILES |
@@ -340,7 +340,7 @@
 
 ## UniProt
 
-### uniprot-protein
+### uniprot_protein
 | Поле | Тип | Описание |
 |---|---|---|
 | accession | string | UniProt accession (PK) |
@@ -394,7 +394,7 @@
 | transmembrane | string | Трансмембранные области |
 | ubiquitination | string | Убиквитинирование |
 
-### uniprot-idmapping
+### uniprot_idmapping
 | Поле | Тип | Описание |
 |---|---|---|
 | all-mappings | string | JSON списка маппингов |
@@ -414,7 +414,7 @@
 
 ## PubMed
 
-### pubmed-publication
+### pubmed_publication
 | Поле | Тип | Описание |
 |---|---|---|
 | -lookup-method | string | Метод поиска (direct/doi/pmid/title-fallback/unknown) |
@@ -472,7 +472,7 @@
 
 ## CrossRef
 
-### crossref-publication
+### crossref_publication
 | Поле | Тип | Описание |
 |---|---|---|
 | -lookup-method | string | direct/doi/pmid/title-fallback/unknown |
@@ -518,7 +518,7 @@
 
 ## OpenAlex
 
-### openalex-publication
+### openalex_publication
 | Поле | Тип | Описание |
 |---|---|---|
 | -lookup-method | string | direct/doi/pmid/title-fallback/unknown |
@@ -565,7 +565,7 @@
 
 ## Semantic Scholar
 
-### semanticscholar-publication
+### semanticscholar_publication
 | Поле | Тип | Описание |
 |---|---|---|
 | -lookup-method | string | Метод поиска |

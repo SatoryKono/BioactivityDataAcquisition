@@ -98,7 +98,7 @@ Pipelines are registered via decorator:
 ```python
 from bioetl.composition.registry import register
 
-registry.register-factory("chembl_activity", factory-fn)
+registry.register_factory("chembl_activity", factory-fn)
 
 
 def chembl_activity_factory(ctx: PipelineRunContext) -> PipelineRunner:

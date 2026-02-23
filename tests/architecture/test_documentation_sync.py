@@ -193,8 +193,37 @@ def test_no_legacy_contract_path_in_active_docs() -> None:
     )
 
 
-def test_no_legacy_chembl_activity_id_in_active_docs() -> None:
-    """Active docs/workflows should not use legacy chembl-activity ID form."""
+def test_no_legacy_kebab_pipeline_ids_in_active_docs() -> None:
+    """Active docs/workflows should use underscore pipeline IDs."""
+    legacy_pipeline_ids = {
+        "chembl-protein-class",
+        "chembl-cell-line",
+        "chembl-molecule",
+        "chembl-target",
+        "chembl-activity",
+        "chembl-assay",
+        "chembl-publication",
+        "chembl-assay-parameters",
+        "chembl-compound-record",
+        "chembl-target-component",
+        "chembl-publication-term",
+        "chembl-publication-similarity",
+        "chembl-subcellular-fraction",
+        "chembl-tissue",
+        "uniprot-protein",
+        "uniprot-idmapping",
+        "pubchem-compound",
+        "pubmed-publication",
+        "crossref-publication",
+        "openalex-publication",
+        "semanticscholar-publication",
+        "composite-publication",
+        "composite-molecule",
+        "composite-target",
+        "composite-activity",
+        "composite-assay",
+    }
+
     candidates = [Path("README.md")]
     candidates.extend(
         path for path in Path("docs").rglob("*.md") if "99-archive" not in path.parts
@@ -204,11 +233,11 @@ def test_no_legacy_chembl_activity_id_in_active_docs() -> None:
     violations: list[str] = []
     for path in candidates:
         text = path.read_text(encoding="utf-8")
-        if "chembl-activity" in text:
+        if any(item in text for item in legacy_pipeline_ids):
             violations.append(path.as_posix())
 
     assert not violations, (
-        "Legacy chembl-activity identifier found in active docs/workflows:\n"
+        "Legacy kebab-case pipeline IDs found in active docs/workflows:\n"
         + "\n".join(f"  - {item}" for item in sorted(violations))
     )
 

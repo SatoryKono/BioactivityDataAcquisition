@@ -1,6 +1,6 @@
 # Пайплайн: ChEMBL Target Component
 
-**Имя пайплайна:** `chembl-target-component`
+**Имя пайплайна:** `chembl_target_component`
 **Провайдер:** `chembl`
 **Сущность:** `target-component`
 **Версия схемы:** 1.2.0
@@ -61,10 +61,10 @@ entity-id = f"chembl:component-{component-id}"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl-target-component
+bioetl run chembl_target_component
 
 # С ограничением
-bioetl run chembl-target-component --limit 500
+bioetl run chembl_target_component --limit 500
 ```
 
 ---

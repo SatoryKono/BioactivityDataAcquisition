@@ -1,6 +1,6 @@
 # Пайплайн: ChEMBL Protein Class
 
-**Имя пайплайна:** `chembl-protein-class`
+**Имя пайплайна:** `chembl_protein_class`
 **Провайдер:** `chembl`
 **Сущность:** `protein-class`
 **Версия схемы:** 1.2.0
@@ -85,10 +85,10 @@ parent-id → protein-class-id
 
 ```bash
 # Полная загрузка (справочная таблица)
-bioetl run chembl-protein-class
+bioetl run chembl_protein_class
 
 # С ограничением
-bioetl run chembl-protein-class --limit 500
+bioetl run chembl_protein_class --limit 500
 ```
 
 ---

@@ -6,7 +6,7 @@
 
 | Property           | Value                                 |
 | ------------------ | ------------------------------------- |
-| **Pipeline Name**  | `chembl-assay`                        |
+| **Pipeline Name**  | `chembl_assay`                        |
 | **Provider**       | ChEMBL                                |
 | **Entity**         | Assay                                 |
 | **Configuration**  | `configs/pipelines/chembl/assay.yaml` |
@@ -79,13 +79,13 @@ Records pass to Gold layer only if:
 
 ```bash
 # Incremental load (default)
-bioetl run --pipeline chembl-assay
+bioetl run --pipeline chembl_assay
 
 # With record limit
-bioetl run --pipeline chembl-assay --limit 100
+bioetl run --pipeline chembl_assay --limit 100
 
 # Full rebuild (re-fetch all data)
-bioetl run --pipeline chembl-assay --run-type rebuild
+bioetl run --pipeline chembl_assay --run-type rebuild
 ```
 
 ## Related Files

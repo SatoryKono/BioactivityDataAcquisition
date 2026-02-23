@@ -329,7 +329,7 @@ BaseFieldExtractor (Template Method)
 | BaseFieldExtractor | `test-base-field-extractor.py` | 6 |
 | **Итого экстракторы** | | **135** |
 | PubMedPublicationTransformer | `test-pubmed-transformer.py` | 24 |
-| PubMed Publication | `test-pubmed-publication.py` | 2 |
+| PubMed Publication | `test-pubmed_publication.py` | 2 |
 | **Итого** | | **161** |
 
 ### 8.2. Architecture тесты
