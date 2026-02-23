@@ -1,12 +1,7 @@
-# ADR-036: Canonical Schema Source and Generated Artifacts
+# ADR-037: Canonical Schema Source and Generated Artifacts
 
-## Status
-
-Accepted
-
-## Date
-
-2026-02-18
+**Status:** Accepted
+**Date:** 2026-02-18
 
 ## Context
 

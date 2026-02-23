@@ -9,8 +9,8 @@ TL;DR for setting up and running BioETL locally.
 
 ```bash
 # Clone and enter directory
-git clone https://github.com/SatoryKono/BioactivityDataAcquisition.git
-cd BioactivityDataAcquisition
+git clone https://github.com/SatoryKono/BioactivityDataAcquisition2.git
+cd BioactivityDataAcquisition2
 
 # Install dependencies (creates venv, installs packages)
 make install
@@ -28,7 +28,7 @@ source .venv/bin/activate  # Linux/macOS
 
 # Run ChEMBL activity pipeline (limited to 100 records)
 # Note: Use --no-cached-bronze for the very first run to fetch from API
-bioetl run --pipeline chembl-activity --limit 100 --no-cached-bronze
+bioetl run --pipeline chembl_activity --limit 100 --no-cached-bronze
 
 # Data will be stored in:
 # - data/output/bronze/chembl/activity/

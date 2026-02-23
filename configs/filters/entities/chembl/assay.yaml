@@ -38,6 +38,7 @@ input_filter:
 #     &confidence_score__gte=8
 #     &relationship_type=D
 #     &target_chembl_id__isnull=false
+#     &src_id=1
 extraction_params:
     # Assay types: Binding and Functional (exclude ADMET, Toxicity, etc.)
     assay_type__in: "B,F"
@@ -51,6 +52,9 @@ extraction_params:
     # Only assays with a known target
     target_chembl_id__isnull: false
 
+    # Only assays from ChEMBL literature source (src_id=1)
+    src_id: 1
+
 # -----------------------------------------------------------------------------
 # Silver Filters — Domain-level quality gates (applied BEFORE Silver write)
 # -----------------------------------------------------------------------------
@@ -63,6 +67,8 @@ silver_filters:
         assay_type: [ B, F ]
         # Direct interaction only
         relationship_type: [ D ]
+        # ChEMBL literature source only
+        src_id: [ "1" ]
 
     # Numeric range filters
     ranges:

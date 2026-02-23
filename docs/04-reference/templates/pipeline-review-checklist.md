@@ -47,7 +47,7 @@ Use this checklist when reviewing new or modified pipelines.
 
 - [ ] Pandera schema exists in `domain/schemas/{provider}/{entity}.py`
 - [ ] Schema defines: columns, types, order, nullability
-- [ ] Gold Data Contract published in `docs/contracts/gold/{entity}.json`
+- [ ] Gold Data Contract published in `docs/04-reference/contracts/gold/{entity}.json`
 - [ ] Schema Drift handling configured (Info/Warn/Critical levels)
 - [ ] Sentinel values NOT used (-1, "N/A", 9999)
 

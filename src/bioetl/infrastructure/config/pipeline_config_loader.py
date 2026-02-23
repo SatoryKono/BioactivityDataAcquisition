@@ -8,8 +8,8 @@ for loading pipeline configurations with proper DQ config resolution.
 
 Example:
     >>> from pathlib import Path
-    >>> from bioetl.infrastructure.config import ConfigLoader
-    >>> loader = ConfigLoader(Path("configs"))
+    >>> from bioetl.infrastructure.config import PipelineConfigLoader
+    >>> loader = PipelineConfigLoader(Path("configs"))
     >>> config = loader.load_pipeline_config("chembl_activity")
     >>> config.dq.soft_fail_threshold
     0.05
@@ -28,7 +28,7 @@ from bioetl.infrastructure.config_loader import load_pipeline_config as load_yam
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 
-class ConfigLoader:
+class PipelineConfigLoader:
     """Pipeline configuration loader with DQ and filter config integration.
 
     Loads pipeline configurations from YAML files and resolves DQ config
@@ -312,4 +312,4 @@ class ConfigLoader:
         self._filter_loader.clear_cache()
 
 
-__all__ = ["ConfigLoader"]
+__all__ = ["PipelineConfigLoader"]

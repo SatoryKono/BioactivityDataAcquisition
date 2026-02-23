@@ -415,7 +415,7 @@ def should-include(self, context, record) -> bool:
 
 #### Data Contract
 
-**Файл:** `docs/contracts/gold/activity.json`
+**Файл:** `docs/04-reference/contracts/gold/chembl_activity_v1.0.json`
 
 ```json
 {
@@ -524,7 +524,7 @@ def extract(self, context, record) -> Watermark:
 | Bronze Writer | `src/bioetl/infrastructure/storage/bronze-writer.py`              |
 | Delta Writer  | `src/bioetl/infrastructure/storage/delta-writer.py`               |
 | Gold Writer   | `src/bioetl/infrastructure/storage/gold-writer.py`                |
-| Data Contract | `docs/contracts/gold/activity.json`                               |
+| Data Contract | `docs/04-reference/contracts/gold/chembl_activity_v1.0.json`                               |
 
 ----------------------------------------------------------------------
 

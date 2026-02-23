@@ -1,12 +1,7 @@
 # ADR-034: Schema↔Domain Configuration Pairs
 
-## Status
-
-Accepted
-
-## Date
-
-2026-02-15
+**Status:** Accepted
+**Date:** 2026-02-15
 
 ## Context
 

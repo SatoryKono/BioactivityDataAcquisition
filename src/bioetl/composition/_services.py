@@ -40,8 +40,7 @@ if TYPE_CHECKING:
         VacuumService,
     )
     from bioetl.application.services.lock_service import LockService
-    from bioetl.domain.ports import QuarantinePort
-    from bioetl.domain.ports.adr import AdrServicePort
+    from bioetl.domain.ports import AdrServicePort, QuarantinePort
 
 
 def get_checkpoint_service() -> CheckpointService:

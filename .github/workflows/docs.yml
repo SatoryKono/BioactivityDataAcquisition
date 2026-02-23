@@ -5,14 +5,36 @@ on:
     branches: [ "main" ]
     paths:
       - 'docs/**'
+      - 'mkdocs.yml'
       - '.github/workflows/docs.yml'
   pull_request:
     branches: [ "main" ]
     paths:
       - 'docs/**'
+      - 'mkdocs.yml'
       - '.github/workflows/docs.yml'
 
 jobs:
+  validate-mkdocs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install docs dependencies
+        run: uv sync --frozen --extra docs
+
+      - name: Build docs in strict mode
+        run: uv run mkdocs build --strict
+
   validate-mermaid:
     runs-on: ubuntu-latest
     steps:

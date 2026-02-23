@@ -350,7 +350,7 @@ graph TD
 
 ## Related Resources
 
-- **Repository**: [SatoryKono/BioactivityDataAcquisition](https://github.com/SatoryKono/BioactivityDataAcquisition)
+- **Repository**: [SatoryKono/BioactivityDataAcquisition2](https://github.com/SatoryKono/BioactivityDataAcquisition2)
 - **Issues**: Report bugs and feature requests
 - **CI/CD**: GitHub Actions workflows ([GitHub Policy](governance/05-github-policy.md))
 

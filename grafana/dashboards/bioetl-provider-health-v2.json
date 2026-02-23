@@ -28,10 +28,10 @@
       },
       "id": 99,
       "options": {
-        "content": "<center><h2>$provider</h2></center>",
+        "content": "<center><h2>$pipeline</h2></center>",
         "mode": "html"
       },
-      "title": "Provider",
+      "title": "Pipeline",
       "type": "text"
     },
     {
@@ -102,7 +102,7 @@
       },
       "targets": [
         {
-          "expr": "min(bioetl_pipeline_health_check_passed{pipeline=~\"$provider_.*\", component=\"data_source\"})",
+          "expr": "min(bioetl_pipeline_health_check_passed{pipeline=~\"$pipeline\", component=\"data_source\"})",
           "legendFormat": "Health",
           "refId": "A"
         }
@@ -162,7 +162,7 @@
       },
       "targets": [
         {
-          "expr": "min(bioetl_health_check_duration_seconds_created{pipeline=~\"$provider_.*\"}) * 1000",
+          "expr": "min(bioetl_health_check_duration_seconds_created{pipeline=~\"$pipeline\"}) * 1000",
           "legendFormat": "Start Time",
           "refId": "A"
         }
@@ -233,7 +233,7 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum by (le, pipeline) (bioetl_health_check_duration_seconds_bucket{pipeline=~\"$provider_.*\"}))",
+          "expr": "histogram_quantile(0.95, sum by (le, pipeline) (bioetl_health_check_duration_seconds_bucket{pipeline=~\"$pipeline\"}))",
           "legendFormat": "{{ pipeline }} p95",
           "refId": "A"
         }
@@ -309,7 +309,7 @@
       },
       "targets": [
         {
-          "expr": "bioetl_pipeline_health_check_passed{pipeline=~\"$provider_.*\"}",
+          "expr": "bioetl_pipeline_health_check_passed{pipeline=~\"$pipeline\"}",
           "legendFormat": "{{ pipeline }} ({{ component }})",
           "refId": "A"
         }
@@ -373,7 +373,7 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum by (le, pipeline) (bioetl_health_check_duration_seconds_bucket{pipeline=~\"$provider_.*\"}))",
+          "expr": "histogram_quantile(0.95, sum by (le, pipeline) (bioetl_health_check_duration_seconds_bucket{pipeline=~\"$pipeline\"}))",
           "legendFormat": "{{ pipeline }}",
           "refId": "A"
         }
@@ -425,7 +425,7 @@
       },
       "targets": [
         {
-          "expr": "bioetl_health_check_duration_seconds_sum{pipeline=~\"$provider_.*\"}",
+          "expr": "bioetl_health_check_duration_seconds_sum{pipeline=~\"$pipeline\"}",
           "legendFormat": "{{ pipeline }}",
           "refId": "A"
         }
@@ -479,7 +479,7 @@
           "value": "$__all"
         },
         "datasource": "Prometheus",
-        "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_id)",
+        "definition": "label_values(bioetl_infrastructure_validated{pipeline=~\"$pipeline\"}, run_id)",
         "hide": 0,
         "includeAll": true,
         "label": "Run ID",
@@ -487,38 +487,13 @@
         "name": "run_id",
         "options": [],
         "query": {
-          "query": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_id)",
+          "query": "label_values(bioetl_infrastructure_validated{pipeline=~\"$pipeline\"}, run_id)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 3,
-        "type": "query"
-      },
-      {
-        "allValue": ".*",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "Prometheus",
-        "definition": "label_values(bioetl_health_check_duration_seconds_bucket, pipeline)",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Provider",
-        "multi": true,
-        "name": "provider",
-        "options": [],
-        "query": {
-          "query": "label_values(bioetl_health_check_duration_seconds_bucket, pipeline)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 2,
-        "regex": "/^([^_]+)_.*/",
-        "skipUrlSync": false,
-        "sort": 1,
         "type": "query"
       }
     ]

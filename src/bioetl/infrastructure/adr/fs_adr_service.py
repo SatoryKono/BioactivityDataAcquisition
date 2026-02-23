@@ -12,7 +12,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 
-from bioetl.domain.ports.adr import (
+from bioetl.domain.ports import (
     AdrDocument,
     AdrInfo,
     AdrServicePort,
@@ -21,6 +21,26 @@ from bioetl.domain.ports.adr import (
 )
 
 ADR_FILENAME_RE = re.compile(r"^ADR-(\d+)-(.+)\.md$", re.IGNORECASE)
+STATUS_PATTERNS = (
+    re.compile(r"^\*\*Status:\*\*\s*(.+)$", flags=re.IGNORECASE | re.MULTILINE),
+    re.compile(r"^\*\*Статус:\*\*\s*(.+)$", flags=re.IGNORECASE | re.MULTILINE),
+    re.compile(r"^Status:\s*(.+)$", flags=re.IGNORECASE | re.MULTILINE),
+    re.compile(r"^Статус:\s*(.+)$", flags=re.IGNORECASE | re.MULTILINE),
+    re.compile(
+        r"^\|\s*\*\*(?:Status|Статус)\*\*\s*\|\s*([^|]+?)\s*\|",
+        flags=re.IGNORECASE | re.MULTILINE,
+    ),
+)
+DATE_PATTERNS = (
+    re.compile(r"^\*\*Date:\*\*\s*(.+)$", flags=re.IGNORECASE | re.MULTILINE),
+    re.compile(r"^\*\*Дата:\*\*\s*(.+)$", flags=re.IGNORECASE | re.MULTILINE),
+    re.compile(r"^Date:\s*(.+)$", flags=re.IGNORECASE | re.MULTILINE),
+    re.compile(r"^Дата:\s*(.+)$", flags=re.IGNORECASE | re.MULTILINE),
+    re.compile(
+        r"^\|\s*\*\*(?:Date|Дата)\*\*\s*\|\s*([^|]+?)\s*\|",
+        flags=re.IGNORECASE | re.MULTILINE,
+    ),
+)
 
 
 def _iter_adr_files(base_dir: Path) -> Iterable[Path]:
@@ -37,23 +57,60 @@ def _parse_h1_title(text: str) -> str | None:
     return None
 
 
-def _extract_meta(text: str) -> tuple[str | None, str | None]:
-    """Extract status and date from the first ~50 lines if present.
+def _extract_with_patterns(
+    text: str, patterns: tuple[re.Pattern[str], ...]
+) -> str | None:
+    for pattern in patterns:
+        match = pattern.search(text)
+        if match:
+            value = match.group(1).strip()
+            if value:
+                return value
+    return None
 
-    Looks for lines like:
-      - "Status: Accepted"
-      - "Date: 2026-02-01"
-    """
-    status: str | None = None
-    date: str | None = None
-    for _idx, line in enumerate(text.splitlines()[:50]):
-        norm = line.strip()
-        if norm.lower().startswith("status:") and status is None:
-            status = norm.split(":", 1)[1].strip()
-        elif norm.lower().startswith("date:") and date is None:
-            date = norm.split(":", 1)[1].strip()
-        if status and date:
-            break
+
+def _extract_from_section(
+    text: str,
+    section_names: tuple[str, ...],
+) -> str | None:
+    lines = text.splitlines()[:120]
+    normalized_names = {name.lower() for name in section_names}
+
+    for index, line in enumerate(lines):
+        stripped = line.strip()
+        if not stripped.startswith("#"):
+            continue
+
+        heading = stripped.lstrip("#").strip()
+        heading_lower = heading.lower()
+
+        for name in normalized_names:
+            if heading_lower == name:
+                for candidate in lines[index + 1 : index + 8]:
+                    value = candidate.strip()
+                    if not value:
+                        continue
+                    if value.startswith("#") or value.startswith("|"):
+                        break
+                    return value
+            prefix = f"{name}:"
+            if heading_lower.startswith(prefix):
+                value = heading[len(prefix) :].strip()
+                if value:
+                    return value
+    return None
+
+
+def _extract_meta(text: str) -> tuple[str | None, str | None]:
+    """Extract status and date from common ADR metadata formats."""
+    status = _extract_with_patterns(text, STATUS_PATTERNS)
+    if status is None:
+        status = _extract_from_section(text, ("Status", "Статус"))
+
+    date = _extract_with_patterns(text, DATE_PATTERNS)
+    if date is None:
+        date = _extract_from_section(text, ("Date", "Дата"))
+
     return status, date
 
 
@@ -178,7 +235,7 @@ class FsAdrService(AdrServicePort):
                     AdrValidationIssue(
                         number=number,
                         path=str(p),
-                        message="Missing 'Status:' field in header",
+                        message="Missing status metadata (Status/Статус)",
                         severity="warning",
                     )
                 )

@@ -87,13 +87,13 @@
 
 #### REQ-DATA-006
 - **Уровень**: MUST
-- **Описание**: Silver данные хранятся в формате Delta Lake или Iceberg (ACID обязателен)
-- **Проверка**: Проверить наличие `-delta-log/` директории или Iceberg metadata
+- **Описание**: Silver данные хранятся в формате **Delta Lake** (ACID обязателен)
+- **Проверка**: Проверить наличие `-delta-log/` директории у Silver таблиц
 
 #### REQ-DATA-007
 - **Уровень**: MUST NOT
 - **Описание**: Raw Parquet без ACID в Silver запрещен
-- **Проверка**: Отсутствие .parquet файлов без Delta/Iceberg metadata в Silver
+- **Проверка**: Отсутствие `.parquet` Silver-таблиц без `-delta-log/`
 
 #### REQ-DATA-008
 - **Уровень**: MUST
@@ -287,13 +287,13 @@
 
 #### REQ-LOAD-001
 - **Уровень**: MUST
-- **Описание**: Для инкрементальной загрузки хранить `last-successful-watermark`
-- **Проверка**: Проверить сохранение watermark после успешного запуска
+- **Описание**: Для `loading_strategy: full_scan_only` checkpoint resume MUST быть отключён
+- **Проверка**: Unit/architecture тесты `CheckpointManager` блокируют resume для `full_scan_only`
 
 #### REQ-LOAD-002
 - **Уровень**: MUST
-- **Описание**: Incremental обязателен при объёме данных > 1M записей
-- **Проверка**: Проверить конфигурацию пайплайнов с большими объемами
+- **Описание**: Publication-related pipeline configs MUST явно задавать `loading_strategy: full_scan_only`
+- **Проверка**: Архитектурный тест `tests/architecture/test_force_full_scan_publication.py`
 
 ### 2.12 Entity ID Generation
 
@@ -800,7 +800,7 @@
 
 #### REQ-DOC-002
 - **Уровень**: MUST
-- **Описание**: Именование: `src/bioetl/.../{provider}/` <-> `docs/providers/{provider}/`
+- **Описание**: Именование: `src/bioetl/.../{provider}/` <-> `docs/04-reference/providers/{provider}/`
 - **Проверка**: Проверить соответствие структур папок
 
 ---
@@ -811,7 +811,7 @@
 
 #### REQ-CONTRACT-001
 - **Уровень**: MUST
-- **Описание**: Gold-схемы публикуются в `docs/contracts/gold/{entity}.json`
+- **Описание**: Gold-схемы публикуются в `docs/04-reference/contracts/gold/{entity}.json`
 - **Проверка**: Проверить наличие JSON Schema файлов
 
 #### REQ-CONTRACT-002

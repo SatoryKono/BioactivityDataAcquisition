@@ -42,7 +42,8 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-034](ADR-034-schema-domain-pairs.md)               | Schema↔Domain Configuration Pairs        | Accepted           | Architecture    | 2026-02-15 |
 | [ADR-035](ADR-035-json-field-typing-policy.md)          | JSON Field Typing Policy (Silver↔Gold)   | Accepted           | Data Modeling   | 2026-02-17 |
 | [ADR-036](ADR-036-gold-contract-versioning-policy.md)   | Gold Contract Versioning Policy          | Accepted           | Data Quality    | 2026-02-18 |
-| [ADR-037](ADR-036-canonical-schema-generation.md)       | Canonical Schema Source and Generation   | Accepted           | Data Contracts  | 2026-02-18 |
+| [ADR-037](ADR-037-canonical-schema-generation.md)       | Canonical Schema Source and Generation   | Accepted           | Data Contracts  | 2026-02-18 |
+| [ADR-038](ADR-038-enum-externalization.md)              | ChEMBL Enum Values Externalization to YAML | Accepted         | Configuration   | 2026-02-16 |
 
 ## ADRs by Category
 
@@ -93,7 +94,7 @@ This directory contains Architecture Decision Records documenting significant ar
 - [ADR-021](ADR-021-ddd-aggregates-adoption.md): DDD Aggregates Adoption
 - [ADR-029](ADR-029-output-metadata-unification.md): Output Metadata Unification — Unified output metadata contracts
 - [ADR-035](ADR-035-json-field-typing-policy.md): JSON Field Typing Policy (Silver↔Gold)
-- [ADR-036](ADR-036-canonical-schema-generation.md): Canonical schema source + generated artifact gates
+- [ADR-037](ADR-037-canonical-schema-generation.md): Canonical schema source + generated artifact gates
 
 ### Data Fetching
 
@@ -118,6 +119,7 @@ This directory contains Architecture Decision Records documenting significant ar
 
 - [ADR-025](ADR-025-pipeline-config-unification.md): Pipeline Config Unification
 - [ADR-028](ADR-028-filter-rules-externalization.md): Filter Rules Externalization — Hierarchical filter config
+- [ADR-038](ADR-038-enum-externalization.md): ChEMBL Enum Values Externalization to YAML
 
 ## ADR Relationships Graph
 

@@ -21,6 +21,18 @@ from pathlib import Path
 import pytest
 
 
+def _discover_internal_port_modules(src_dir: Path) -> list[str]:
+    """Return all concrete domain ports submodules (excluding facade __init__)."""
+    ports_dir = src_dir / "bioetl" / "domain" / "ports"
+    if not ports_dir.exists():
+        return []
+    return sorted(
+        f"bioetl.domain.ports.{py_file.stem}"
+        for py_file in ports_dir.glob("*.py")
+        if py_file.stem != "__init__"
+    )
+
+
 class TestLocalOnlyPolicy:
     """Tests enforcing the Local-Only Architecture (ADR-010)."""
 
@@ -175,35 +187,11 @@ class TestPortImportFacade:
         not via bioetl.domain.ports.storage etc.
         This provides a single entry point and simplifies navigation.
         """
-        # Forbidden import patterns (internal port modules)
-        # All port modules should be imported via facade: from bioetl.domain.ports import ...
-        internal_port_modules = [
-            "bioetl.domain.ports.audit",
-            "bioetl.domain.ports.checkpoint",
-            "bioetl.domain.ports.data_normalization",
-            "bioetl.domain.ports.data_source",
-            "bioetl.domain.ports.delta_reader",
-            "bioetl.domain.ports.dq_config",
-            "bioetl.domain.ports.dq_report",
-            "bioetl.domain.ports.filtering",
-            "bioetl.domain.ports.health_check",
-            "bioetl.domain.ports.idmapping",
-            "bioetl.domain.ports.locking",
-            "bioetl.domain.ports.memory",
-            "bioetl.domain.ports.metadata",
-            "bioetl.domain.ports.metadata_coordinator",
-            "bioetl.domain.ports.noop",
-            "bioetl.domain.ports.normalization",
-            "bioetl.domain.ports.observability",
-            "bioetl.domain.ports.pii",
-            "bioetl.domain.ports.quarantine",
-            "bioetl.domain.ports.resilience",
-            "bioetl.domain.ports.runner",
-            "bioetl.domain.ports.serialization",
-            "bioetl.domain.ports.shutdown",
-            "bioetl.domain.ports.storage",
-            "bioetl.domain.ports.validation",
-        ]
+        # Discover internal port modules dynamically to avoid stale allowlists.
+        # All modules under domain/ports (except __init__.py facade) are internal.
+        internal_port_modules = _discover_internal_port_modules(src_dir)
+        if not internal_port_modules:
+            pytest.skip("No internal port modules found")
 
         violations = []
 

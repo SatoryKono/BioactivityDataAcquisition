@@ -20,6 +20,13 @@ This package contains all port definitions organized by domain:
 - delta_reader: DeltaReaderPort for read-only Delta table access
 """
 
+from bioetl.domain.ports.adr import (
+    AdrDocument,
+    AdrInfo,
+    AdrServicePort,
+    AdrValidationIssue,
+    AdrValidationReport,
+)
 from bioetl.domain.ports.audit import (
     AuditEntry,
     AuditLayer,
@@ -91,6 +98,11 @@ from bioetl.domain.ports.storage import StoragePort
 from bioetl.domain.ports.validation import GoldValidatorPort, SilverValidatorPort
 
 __all__ = [
+    "AdrDocument",
+    "AdrInfo",
+    "AdrServicePort",
+    "AdrValidationIssue",
+    "AdrValidationReport",
     "AuditEntry",
     "AuditLayer",
     "AuditOperation",

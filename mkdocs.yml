@@ -94,7 +94,7 @@ nav:
             -   "Schema Artifact Migration": 03-guides/migration-schema-artifacts.md
             -   "File Path Audit Report": 03-guides/file-path-audit-report.md
     -   Providers:
-            -   "Overview": providers/README.md
+            -   "Overview": 04-reference/providers/README.md
     -   Pipelines:
             -   "Overview": 04-reference/pipelines/README.md
             -   "Publication Pipelines": 04-reference/pipelines/INDEX.md
@@ -136,6 +136,6 @@ nav:
             -   "Performance Baselines": 05-operations/performance-baselines.md
             -   "VACUUM & Retention": 05-operations/vacuum-retention.md
     -   Verification:
-            -   "Publication Field Mapping": verification/publication-field-mapping-report.md
-            -   "PubMed Extraction": verification/pubmed-extraction-verification-report.md
-            -   "SemanticScholar Publication": verification/semanticscholar-publication-pipeline-verification.md
+            -   "Publication Field Mapping": 05-operations/verification/publication-field-mapping-report.md
+            -   "PubMed Extraction": 05-operations/verification/pubmed-extraction-verification-report.md
+            -   "SemanticScholar Publication": 05-operations/verification/semanticscholar-publication-pipeline-verification.md
