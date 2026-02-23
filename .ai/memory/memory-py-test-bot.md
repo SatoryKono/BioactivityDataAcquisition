@@ -1,0 +1,203 @@
+# Memory: py-test-bot
+
+*Version: 1.0.0 | Date: 2026-02-23 | Parent: agent-memory.md*
+
+> **Focus**: Test execution, coverage analysis, VCR management, failure classification, baseline/final/retest.
+
+---
+
+## 1. Identity & Scope
+
+- **Role**: Objective code state measurement through tests
+- **Write zone**: `tests/`
+- **Output artifacts**: `02-test-baseline.md`, `05-test-final.md`
+- **ID system**: `FAIL-001`, `FAIL-002`, ...
+- **Model**: sonnet
+
+---
+
+## 2. Test Directory Structure
+
+```
+tests/
+├── unit/              # Fast, in-memory fakes
+├── integration/       # VCR.py for HTTP
+├── architecture/      # Layer boundaries (43 tests)
+├── contract/          # API contract tests
+├── e2e/               # End-to-end tests
+├── benchmarks/        # Performance benchmarks
+├── performance/       # Load tests
+├── security/          # Security tests
+├── smoke/             # Quick smoke tests
+└── fixtures/
+    └── vcr/           # VCR cassettes per provider
+        ├── chembl/
+        ├── pubchem/
+        ├── uniprot/
+        └── ...
+```
+
+---
+
+## 3. Quality Thresholds
+
+| Metric | Threshold | Action on Violation |
+|--------|:---------:|---------------------|
+| Coverage (overall) | >= 85% | MUST: add tests |
+| Coverage (domain) | >= 90% | MUST: add tests |
+| mypy errors | 0 | MUST: fix |
+| Architecture tests | 100% pass | MUST: fix |
+| New code without tests | 0 | MUST: add tests |
+
+---
+
+## 4. Test Selection Strategy
+
+| Changed Files | Tests to Run |
+|---------------|--------------|
+| `domain/**` | `tests/unit/domain/` + `tests/architecture/` |
+| `application/**` | `tests/unit/application/` + related integration |
+| `infrastructure/adapters/{provider}/` | `tests/unit/infrastructure/adapters/{provider}/` + `tests/integration/{provider}/` |
+| `composition/**` | `tests/unit/composition/` + `tests/architecture/` |
+| `interfaces/**` | `tests/unit/interfaces/` |
+| `configs/**` | `tests/integration/` (config validation) |
+| Any Python file | `make lint` first |
+
+---
+
+## 5. Execution Commands
+
+```bash
+# Unit tests (specific module)
+pytest tests/unit/path/to/test_module.py -v --tb=short
+
+# Unit tests with coverage
+pytest tests/unit/path/ -v --cov=src/bioetl/path/ --cov-report=term-missing
+
+# Integration tests
+pytest tests/integration/path/ -v --tb=short
+
+# Architecture tests (ALWAYS run for boundary changes)
+pytest tests/architecture/ -v
+
+# Full run (for final phase)
+pytest tests/ -v --cov=src/bioetl/ --cov-report=term-missing --tb=short
+
+# Type checking
+mypy src/bioetl/path/to/module.py --strict
+
+# Lint check
+make lint
+```
+
+---
+
+## 6. VCR.py Cassette Management
+
+```bash
+# Record new cassette (requires network)
+pytest tests/integration/chembl/ --vcr-record=new_episodes -v
+
+# Playback only (CI mode, default)
+pytest tests/integration/ --vcr-record=none -v
+```
+
+### Cassette Rules
+
+- One cassette per test function
+- Store in `tests/fixtures/vcr/{provider}/`
+- Sanitize secrets in `before_record` callback
+- Re-record when API contract changes
+
+---
+
+## 7. Failure Classification
+
+| Error Type | Diagnosis | Action |
+|------------|-----------|--------|
+| `AssertionError` | Logic bug, check expected vs actual | -> py-debug-bot |
+| `ImportError` | Missing dependency or circular import | Check layer boundaries |
+| `AttributeError` | API change or typo | Check signatures |
+| `TypeError` | Signature mismatch | Check type hints |
+| `ValidationError` | Schema violation (Pandera/Pydantic) | Check schema drift |
+| `ConnectionError` | Network/VCR cassette issue | Check VCR setup |
+| `TimeoutError` | Async timeout | Check async patterns |
+
+---
+
+## 8. Baseline Report Template
+
+```markdown
+# Test Baseline: <task_id>
+
+**Date**: YYYY-MM-DD HH:MM
+**Phase**: baseline | final | retest
+**RF scope**: RF-001, RF-002
+
+## Results
+| Category | Total | Pass | Fail | Skip | Error |
+|----------|:-----:|:----:|:----:|:----:|:-----:|
+| unit | 42 | 40 | 1 | 1 | 0 |
+| architecture | 97 | 97 | 0 | 0 | 0 |
+
+## Coverage
+| Module | Coverage |
+|--------|:--------:|
+| overall | 88.43% |
+
+## Failures (if any)
+### FAIL-001
+- **Test**: `tests/unit/.../test_X.py::test_something`
+- **RF**: RF-001
+- **Stack trace**: <first 20 lines>
+- **Status**: forwarded to py-debug-bot
+```
+
+---
+
+## 9. Test Writing Conventions
+
+### Unit Tests
+- Arrange-Act-Assert pattern
+- No I/O, mock via DI (inject fakes)
+- Test edge cases and error paths
+- Use `pytest.mark.parametrize` for variants
+
+### Integration Tests
+- VCR.py for HTTP (MANDATORY)
+- One cassette per test function
+- Test pagination, rate limiting, error responses
+
+### Architecture Tests
+- Verify import boundaries
+- 43 standard tests in `tests/architecture/`
+- Run after any layer boundary changes
+
+---
+
+## 10. Integration with Other Agents
+
+| Event | Action |
+|-------|--------|
+| Plan ready (py-plan-bot) | -> test-bot (phase=baseline) |
+| Baseline FAIL | -> py-debug-bot with FAIL-* report |
+| Code complete (py-code-bot/direct) | -> test-bot (phase=final) |
+| Final FAIL | -> py-debug-bot with FAIL-* report |
+| Fix applied (py-debug-bot) | -> test-bot (phase=retest) |
+| All tests pass | -> py-doc-bot + py-audit-bot (final) |
+
+---
+
+## 11. Key Files for Testing
+
+| What | Path |
+|------|------|
+| Test configuration | `pyproject.toml` (pytest section) |
+| Conftest (root) | `tests/conftest.py` |
+| VCR fixtures | `tests/fixtures/vcr/` |
+| Architecture tests | `tests/architecture/` |
+| Config gap analysis | `scripts/config_gap_analysis.py` |
+
+---
+
+*This memory file is specific to py-test-bot. For general project context see `agent-memory.md`.*
