@@ -103,10 +103,6 @@ async def test_chembl_molecule_then_activity_chain(e2e_data_dir: Path):
 @pytest.mark.vcr
 @pytest.mark.asyncio
 @pytest.mark.timeout(600)  # Extended timeout: 5 pipelines × ~60s each + Gold validation
-@pytest.mark.xfail(
-    reason="ChEMBL assay API returning errors — cassettes need re-recording",
-    raises=Exception,
-)
 async def test_all_chembl_pipelines_chain(e2e_data_dir: Path):
     """E2E: Run all ChEMBL pipelines in sequence.
 
