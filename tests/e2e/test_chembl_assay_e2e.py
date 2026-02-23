@@ -24,12 +24,6 @@ from .conftest import (
 # VCR cassette directory for ChEMBL E2E tests
 CASSETTE_DIR = Path(__file__).parent.parent / "fixtures" / "vcr" / "chembl"
 
-# ChEMBL assay endpoint returns 400/500 errors — cassettes need re-recording
-# with a working API. Mark all tests as xfail until cassettes are refreshed.
-pytestmark = pytest.mark.xfail(
-    reason="ChEMBL assay API returning errors — cassettes need re-recording",
-    raises=Exception,
-)
 
 
 @pytest.fixture(scope="module")
