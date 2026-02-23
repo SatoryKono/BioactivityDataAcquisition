@@ -18,6 +18,14 @@ model: opus
 
 ---
 
+## Memory
+
+> **При старте** прочитай специализированную память:
+> `.ai/memory/memory-py-plan-bot.md` — RF-* routing, DAG, composite design, parallelization, ADR reference.
+> Общий контекст: `.ai/memory/agent-memory.md`
+
+---
+
 ## Контекст проекта
 
 **BioETL Overview:**

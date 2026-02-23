@@ -1,0 +1,90 @@
+%% BioETL — CLI / Interface Layer
+%% Shows CLI commands, their routing, and interaction with composition.
+
+graph TB
+    subgraph User["User"]
+        TERM["Terminal"]
+    end
+
+    subgraph CLI["CLI Interface (Click)"]
+        MAIN["bioetl<br/>(main group)"]
+
+        subgraph RunCmds["Run Commands"]
+            RUN["bioetl run<br/>━━━━━━━━━━━━━━━━━<br/>--provider<br/>--entity<br/>--run-type<br/>--limit<br/>--resume<br/>--dry-run"]
+            RUN_COMP["bioetl run-composite<br/>━━━━━━━━━━━━━━━━━<br/>--config<br/>--run-type<br/>--resume"]
+        end
+
+        subgraph HealthCmds["Health Commands"]
+            HEALTH["bioetl health<br/>━━━━━━━━━━━━━━━━━<br/>--provider<br/>Check API health"]
+        end
+
+        subgraph DataCmds["Data Commands"]
+            EXPORT["bioetl export<br/>━━━━━━━━━━━━━━━━━<br/>--table<br/>--format csv"]
+            QUARANTINE["bioetl quarantine<br/>━━━━━━━━━━━━━━━━━<br/>inspect / replay / purge"]
+            CHECKPOINT["bioetl checkpoint<br/>━━━━━━━━━━━━━━━━━<br/>list / delete"]
+        end
+
+        subgraph MaintenanceCmds["Maintenance Commands"]
+            VACUUM["bioetl maintenance vacuum<br/>━━━━━━━━━━━━━━━━━<br/>--table / --all"]
+            ARCHIVE["bioetl maintenance archive<br/>━━━━━━━━━━━━━━━━━<br/>Archive old data"]
+        end
+
+        subgraph ConfigCmds["Config Commands"]
+            CONFIG["bioetl config<br/>━━━━━━━━━━━━━━━━━<br/>list / show"]
+        end
+    end
+
+    subgraph Composition["Composition Layer"]
+        BOOT["Bootstrap Assembly"]
+        RF["RunnerFactory"]
+        DSR["DataSourceRegistry"]
+        TF["TransformerFactory"]
+    end
+
+    subgraph Application["Application Layer"]
+        PRS["PipelineRunnerService"]
+        CPR["CompositePipelineRunner"]
+        HS["HealthService"]
+        ES["ExportService"]
+        QS["QuarantineService"]
+        CS["CheckpointService"]
+        VS["VacuumService"]
+        CFGS["ConfigService"]
+        SS["ShutdownService"]
+    end
+
+    %% CLI routing
+    TERM --> MAIN
+    MAIN --> RUN & RUN_COMP & HEALTH & EXPORT & QUARANTINE & CHECKPOINT & VACUUM & ARCHIVE & CONFIG
+
+    %% CLI → Composition
+    RUN --> BOOT
+    RUN_COMP --> BOOT
+
+    %% Composition → Application
+    BOOT --> RF --> PRS
+    BOOT --> DSR
+    BOOT --> TF
+    RUN_COMP --> CPR
+
+    %% Direct CLI → Application
+    HEALTH --> HS
+    EXPORT --> ES
+    QUARANTINE --> QS
+    CHECKPOINT --> CS
+    VACUUM --> VS
+    ARCHIVE --> VS
+    CONFIG --> CFGS
+
+    %% Shutdown
+    MAIN -.->|"SIGINT/SIGTERM"| SS
+
+    classDef user fill:#eceff1,stroke:#455a64
+    classDef cli fill:#fce4ec,stroke:#b71c1c,stroke-width:2px
+    classDef comp fill:#f3e5f5,stroke:#6a1b9a
+    classDef app fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+
+    class TERM user
+    class MAIN,RUN,RUN_COMP,HEALTH,EXPORT,QUARANTINE,CHECKPOINT,VACUUM,ARCHIVE,CONFIG cli
+    class BOOT,RF,DSR,TF comp
+    class PRS,CPR,HS,ES,QS,CS,VS,CFGS,SS app

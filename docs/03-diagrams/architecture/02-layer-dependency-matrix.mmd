@@ -1,0 +1,51 @@
+%% BioETL — Layer Dependency Matrix (ARCH-001)
+%% Enforced import boundaries between architectural layers.
+
+graph LR
+    subgraph Legend
+        direction TB
+        OK["✅ Allowed"]
+        FORBIDDEN["❌ Forbidden"]
+    end
+
+    subgraph Layers["Architectural Layers"]
+        direction TB
+        DOMAIN["domain<br/>(pure business logic,<br/>no I/O, no frameworks)"]
+        APP["application<br/>(use cases, orchestration,<br/>transformers)"]
+        INFRA["infrastructure<br/>(adapters, storage,<br/>observability)"]
+        COMP["composition<br/>(DI wiring, factories,<br/>bootstrap)"]
+        IFACE["interfaces<br/>(CLI, HTTP,<br/>orchestration)"]
+    end
+
+    %% Allowed dependencies (solid arrows)
+    IFACE -->|"imports"| COMP
+    IFACE -->|"imports"| APP
+    IFACE -->|"imports"| INFRA
+    IFACE -->|"imports"| DOMAIN
+
+    COMP -->|"imports"| INFRA
+    COMP -->|"imports"| APP
+    COMP -->|"imports"| DOMAIN
+
+    APP -->|"imports"| DOMAIN
+
+    INFRA -->|"imports"| DOMAIN
+
+    %% Self-references
+    DOMAIN -.->|"self"| DOMAIN
+    APP -.->|"self"| APP
+    INFRA -.->|"self"| INFRA
+    COMP -.->|"self"| COMP
+    IFACE -.->|"self"| IFACE
+
+    classDef domainStyle fill:#e8f5e9,stroke:#2e7d32,stroke-width:3px
+    classDef appStyle fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef infraStyle fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef compStyle fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    classDef ifaceStyle fill:#fce4ec,stroke:#b71c1c,stroke-width:2px
+
+    class DOMAIN domainStyle
+    class APP appStyle
+    class INFRA infraStyle
+    class COMP compStyle
+    class IFACE ifaceStyle
