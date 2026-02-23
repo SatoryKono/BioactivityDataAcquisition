@@ -168,7 +168,9 @@
       "Bash(cd \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" && unset GITHUB_TOKEN && gh api repos/SatoryKono/BioactivityDataAcquisition/rulesets/12803957 2>&1)",
       "Bash(cd \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" && unset GITHUB_TOKEN && gh api repos/SatoryKono/BioactivityDataAcquisition/rulesets/12803957 -X PUT \\\\\n  -f name=\"Ruleset Copilot\" \\\\\n  -f target=\"branch\" \\\\\n  -f enforcement=\"active\" \\\\\n  --input - <<'EOF'\n{\n  \"name\": \"Ruleset Copilot\",\n  \"target\": \"branch\",\n  \"enforcement\": \"active\",\n  \"conditions\": {\n    \"ref_name\": {\n      \"exclude\": [],\n      \"include\": [\"~DEFAULT_BRANCH\"]\n    }\n  },\n  \"rules\": [\n    {\"type\": \"deletion\"},\n    {\"type\": \"non_fast_forward\"}\n  ],\n  \"bypass_actors\": []\n}\nEOF)",
       "Bash(cd \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" && unset GITHUB_TOKEN && gh api repos/SatoryKono/BioactivityDataAcquisition/branches/main/protection/enforce_admins -X POST 2>&1)",
-      "WebFetch(domain:developers.openai.com)"
+      "WebFetch(domain:developers.openai.com)",
+      "Bash(cd \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" && codex --version 2>&1)",
+      "Bash(echo Check auth manually:*)"
     ]
   },
   "enabledPlugins": {
