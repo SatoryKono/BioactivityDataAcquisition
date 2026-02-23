@@ -160,7 +160,9 @@
       "Bash(cd \"E:/g-drive/05_AI/github/BioactivityDataAcquisition2\" && git stash && unset GITHUB_TOKEN && gh pr create --title \"chore: add PR and issue templates\" --body \"$\\(cat <<'EOF'\n## Summary\n\nAdd GitHub PR template and issue templates \\(bug report, feature request\\) to standardize contributions.\n\n## Changes\n\n- `.github/PULL_REQUEST_TEMPLATE.md` — PR template with layer checkboxes, test plan, ARCH-001 compliance\n- `.github/ISSUE_TEMPLATE/bug_report.yml` — structured bug report with layer/provider dropdowns\n- `.github/ISSUE_TEMPLATE/feature_request.yml` — feature request with scope selection\n\n## Test plan\n\n- [ ] Templates render correctly on GitHub \\(check PR creation and issue creation pages\\)\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\" 2>&1)",
       "Bash(cd \"E:/g-drive/05_AI/github/BioactivityDataAcquisition2\" && git stash && git checkout main && git stash pop 2>&1)",
       "Bash(tail:*)",
-      "Bash(grep test:*)"
+      "Bash(grep test:*)",
+      "Bash(cd \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" && unset GITHUB_TOKEN && gh auth status 2>&1)",
+      "Bash(cd E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2:*)"
     ]
   },
   "enabledPlugins": {
