@@ -35,10 +35,10 @@
 Фон: Выделенный (colored background)
 ```
 
-#### 2. **Run ID Panel** (верхняя левая часть)
+#### 2. **Run Type Panel** (верхняя левая часть)
 ```
-Показывает: Уникальный идентификатор последнего запуска
-Тип: Stat (текстовая статистика)
+Показывает: Тип запуска (incremental, backfill, rebuild)
+Тип: Text (HTML)
 Позиция: Вторая левая ячейка
 Размер: 6 колонок
 Фон: Выделенный (colored background)
@@ -50,15 +50,16 @@
 Тип: Stat (текстовая статистика)
 Позиция: Правая верхняя часть
 Размер: 12 колонок
-Фон: Выделенный (colored background)
+Метрика: bioetl_records_processed_created
 ```
 
-#### 4. **Автоматическая фильтрация последнего Run'а**
+#### 4. **Фильтрация по переменным**
 ```
-Механизм: Скрытая переменная (hidden variable)
-Имя переменной: $latest_run_id
-PromQL: sort_desc(label_values(bioetl_records_processed_total, run_id))[0]
-Результат: Дашборд автоматически показывает только последний run
+Механизм: Переменные Grafana (dropdown selectors)
+$pipeline: Выбор pipeline (multi-select, include all)
+$run_type: Выбор типа запуска (multi-select, include all)
+$execution: Скрытая переменная (hidden, single)
+Результат: Дашборд фильтрует данные по выбранным значениям
 ```
 
 ---
@@ -69,31 +70,40 @@ PromQL: sort_desc(label_values(bioetl_records_processed_total, run_id))[0]
 
 Все запросы обновлены для использования только последнего run'а:
 
-**Было:**
+**Типичный PromQL запрос в v2:**
 ```promql
-bioetl_records_processed_total{pipeline=~"$pipeline", run_id=~"$run_id"}
-```
-
-**Стало:**
-```promql
-bioetl_records_processed_total{run_id=~"$latest_run_id"}
+bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}
 ```
 
 ### Переменные Grafana
 
-**Добавлена скрытая переменная:**
+**Data Quality v2 / Overview v2 — 3 переменные:**
 ```yaml
-name: latest_run_id
-type: query
-datasource: Prometheus
-definition: sort_desc(label_values(bioetl_records_processed_total, run_id))[0]
-hide: 2  # Скрыта от пользователя
-refresh: 1  # Обновляется каждый раз
+# Видимые:
+pipeline:
+  type: query
+  definition: label_values(bioetl_records_processed_total, pipeline)
+  multi: true, includeAll: true
+
+run_type:
+  type: query
+  definition: label_values(bioetl_records_processed_total{pipeline=~"$pipeline"}, run_type)
+  multi: true, includeAll: true
+
+# Скрытая:
+execution:
+  type: query
+  hide: 2  # Скрыта от пользователя
+  single: true
 ```
 
-**Удалены/скрыты:**
-- Pipeline variable (была `includeAll: true`)
-- Run ID variable (больше не нужна, используется latest)
+**Provider Health v2 — 1 переменная:**
+```yaml
+provider:
+  type: query
+  definition: label_values(bioetl_health_check_latency_ms_bucket, provider)
+  multi: true, includeAll: true
+```
 
 ---
 
@@ -101,7 +111,7 @@ refresh: 1  # Обновляется каждый раз
 
 ```
 ┌─────────────────┬──────────────┬───────────────────────┐
-│   Pipeline      │   Run ID     │  Execution Timestamp  │
+│   Pipeline      │  Run Type    │  Execution Timestamp  │
 │   (6 cols)      │  (6 cols)    │     (12 cols)         │
 ├─────────────────┴──────────────┴───────────────────────┤
 │                                                         │
@@ -120,82 +130,83 @@ refresh: 1  # Обновляется каждый раз
 **Верхняя строка показывает:**
 ```
 Pipeline: uniprot
-Run ID: run-492157
+Run Type: incremental
 Execution Timestamp: 1645382400
 ```
 
 **Графики показывают:**
-- Data Flow: Bronze → Silver → Gold (только для run-492157)
-- Data Quality Score (процент качества)
-- Source Records (Bronze stage)
-- Clean Records (Gold stage)
+- Data Flow: Bronze → Silver → Gold (timeseries)
+- Data Quality Score (gauge, ratio Gold/Bronze)
+- Source Records (Bronze stage, stat)
+- Clean Records (Gold stage, stat)
 
 ### BioETL Overview v2
 
 **Верхняя строка показывает:**
 ```
 Pipeline: pubmed
-Run ID: run-492158
+Run Type: backfill
 Execution Timestamp: 1645386000
 ```
 
 **Графики показывают:**
-- Processing Pipeline (все стадии)
-- Stage Distribution (pie chart)
-- Pipeline Distribution (pie chart)
+- Processing Pipeline (timeseries по стадиям)
+- Stage Distribution (piechart)
+- Pipeline Distribution (piechart)
 - Overall Quality (gauge)
 
 ### BioETL Provider Health v2
 
 **Верхняя строка показывает:**
 ```
-Pipeline: pubchem
-Run ID: run-492159
+Provider: chembl
+Health Status: Provider Health
 Execution Timestamp: 1645389600
 ```
 
 **Графики показывают:**
-- Provider Response Time (по pipeline)
-- Error Rate by Provider
+- Provider Response Time (P95 latency, histogram_quantile)
+- Health Check Status (stat)
 - Individual Latency Gauges (UniProt, PubMed, PubChem, ChemBL)
 
 ---
 
-## 🔍 Как работает автоматическая фильтрация
+## 🔍 Как работает фильтрация
 
 **Процесс:**
 
 1. **Grafana загружает дашборд**
    ↓
-2. **Выполняется PromQL запрос для переменной `latest_run_id`**
+2. **Заполняются переменные из Prometheus labels**
    ```promql
-   sort_desc(label_values(bioetl_records_processed_total, run_id))[0]
+   label_values(bioetl_records_processed_total, pipeline)   → $pipeline
+   label_values(bioetl_records_processed_total, run_type)    → $run_type
    ```
    ↓
-3. **Результат:** Получается самый новый run ID
+3. **Пользователь выбирает нужные значения** в dropdown
    ```
-   run-492159
+   Pipeline: uniprot    Run Type: incremental
    ```
    ↓
-4. **Все панели используют эту переменную**
+4. **Все панели фильтруются по выбранным значениям**
    ```promql
-   bioetl_records_processed_total{run_id=~"$latest_run_id"}
+   bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}
    ```
    ↓
-5. **Дашборд показывает только данные последнего run'а**
+5. **Дашборд показывает отфильтрованные данные**
 
 ---
 
 ## 📊 Сравнение старой и новой версии
 
-| Параметр | v1 | v2 |
-|----------|----|----|
-| Фильтрация | Ручная (Pipeline + Run ID) | Автоматическая (Latest Run) |
-| Run ID видно | Нет | ✅ Да (в панели) |
-| Pipeline видно | Нет | ✅ Да (в панели) |
-| Timestamp видно | Нет | ✅ Да (в панели) |
-| Фильтры переменных | Показаны | Скрыты |
-| Обновление Run | Ручное | Автоматическое (refresh 1) |
+| Параметр | Simple (v1) | v2 дашборды |
+|----------|-------------|-------------|
+| Фильтрация | Pipeline + Run Type + Execution | Pipeline + Run Type (execution hidden) |
+| Run Type видно | В dropdown | ✅ Да (в info-панели + dropdown) |
+| Pipeline видно | В dropdown | ✅ Да (в info-панели + dropdown) |
+| Timestamp видно | Нет | ✅ Да (в info-панели) |
+| Refresh rate | 5 секунд | 30 секунд |
+| Time range | 1 час | 7 дней |
 
 ---
 
@@ -269,7 +280,7 @@ grafana/dashboards/
 
 ✅ Видеть последний запуск автоматически  
 ✅ Видеть название пайплайна в реальном времени  
-✅ Видеть Run ID и время запуска  
+✅ Видеть Run Type и время запуска
 ✅ Сравнивать разные run'ы (открыть в разных tabs)  
 ✅ Экспортировать данные для отчётов  
 ✅ Настроить alerts на основе последнего run'а  
@@ -280,7 +291,7 @@ grafana/dashboards/
 
 **Три дашборда v2 теперь:**
 - ✅ Показывают только последний запуск
-- ✅ Отображают Pipeline, Run ID и время запуска
+- ✅ Отображают Pipeline, Run Type и время запуска
 - ✅ Автоматически обновляются при новых запусках
 - ✅ Не требуют ручного выбора переменных
 

@@ -34,14 +34,17 @@ if TYPE_CHECKING:
 
 def push_metrics_to_gateway(
     job: str = "bioetl",
+    pipeline_name: str | None = None,
 ) -> bool:
     """Push current metrics to Prometheus Pushgateway.
 
     Reads gateway URL from settings (BIOETL_PUSHGATEWAY_URL) and delegates
-    to the infrastructure layer.
+    to the infrastructure layer. Uses pipeline_name as grouping key so that
+    successive pipeline runs don't overwrite each other's metrics.
 
     Args:
         job: Job label for pushed metrics.
+        pipeline_name: Pipeline name for grouping (e.g. "chembl_molecule").
 
     Returns:
         True if push succeeded, False otherwise.
@@ -52,7 +55,8 @@ def push_metrics_to_gateway(
 
     settings = get_settings()
     gateway = getattr(settings, "pushgateway_url", None) or "localhost:9091"
-    return _push(gateway=gateway, job=job)
+    grouping_key = {"pipeline": pipeline_name} if pipeline_name else {}
+    return _push(gateway=gateway, job=job, grouping_key=grouping_key)
 
 
 def ensure_metrics_server_started() -> bool:

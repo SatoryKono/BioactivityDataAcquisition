@@ -115,8 +115,8 @@ curl http://localhost:8000/metrics | grep bioetl_active_runs
    
 4. Add panel → Gauge
    Name: "Quality Score"
-   Query: avg(bioetl_quality_score)
-   Min: 0, Max: 100
+   Query: sum(bioetl_records_processed_total{stage="gold"}) / sum(bioetl_records_processed_total{stage="bronze"})
+   Min: 0, Max: 1
    
 5. Dashboard settings → Save as "Pipeline Performance"
 ```
