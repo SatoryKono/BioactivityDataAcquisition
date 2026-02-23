@@ -87,7 +87,7 @@ jobs:
 
       - name: Create Issue on Failure
         if: steps.contract_tests.outputs.TESTS_FAILED == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const today = new Date().toISOString().split('T')[0];
