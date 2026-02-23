@@ -115,9 +115,9 @@ make run-local     # Запуск на фикстурах
 > **py-code-bot** (opus, `src/bioetl/`) — определён в `.claude/agents/py-code-bot.md`,
 > но НЕ зарегистрирован как `subagent_type`. Production-код пишем напрямую через Edit/Write.
 
-### 3.2 Полные спецификации субагентов
+### 3.2 Полные спецификации и память субагентов
 
-Перед вызовом субагента — прочитай его спецификацию:
+Перед вызовом субагента — прочитай его спецификацию и память:
 
 ```
 .claude/agents/py-audit-bot.md    — входы, выходы, чеклисты, scoring
@@ -128,6 +128,18 @@ make run-local     # Запуск на фикстурах
 .claude/agents/py-debug-bot.md    — методология отладки, классификация ошибок
 .claude/agents/py-doc-bot.md      — структура docs, ADR management
 .claude/agents/ORCHESTRATION.md   — полный workflow, матрица взаимодействий
+```
+
+**Специализированная память (фокус на области работы агента):**
+
+```
+.ai/memory/memory-py-audit-bot.md   — import matrix, anti-patterns, naming, scoring, valid exceptions
+.ai/memory/memory-py-plan-bot.md    — RF-* routing, DAG, composite design, parallelization, ADR
+.ai/memory/memory-py-test-bot.md    — test structure, thresholds, VCR, failure classification
+.ai/memory/memory-py-config-bot.md  — config hierarchy, templates, ADR compliance, composite rules
+.ai/memory/memory-py-debug-bot.md   — error classification, debugging methodology, fix patterns
+.ai/memory/memory-py-doc-bot.md     — doc structure, ADR management, CHANGELOG, docstrings
+.ai/memory/memory-py-code-bot.md    — layer constraints, implementation patterns, scaffolding
 ```
 
 ### 3.3 Входы субагентов (обязательные параметры)
