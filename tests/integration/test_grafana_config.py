@@ -28,6 +28,10 @@ def get_all_valid_metric_names() -> set[str]:
             # Histograms and Summaries have auto-generated suffixes
             # We check the type by looking at the class name or internal structure
             class_name = type(item).__name__
+
+            # Prometheus client auto-creates _created timestamp for all metric types
+            all_valid_names.add(f"{base_name}_created")
+
             if "Histogram" in class_name or "Summary" in class_name:
                 all_valid_names.add(f"{base_name}_bucket")
                 all_valid_names.add(f"{base_name}_sum")

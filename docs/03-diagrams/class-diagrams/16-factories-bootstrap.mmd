@@ -1,0 +1,85 @@
+%% BioETL — Class Diagram: Factories & Bootstrap
+%% Composition layer factories and DI assembly.
+
+classDiagram
+    class DataSourceRegistry {
+        -_registry: dict~str, Callable~
+        +register(provider, entity_type, factory) None
+        +create(provider, entity_type, **kwargs) DataSourcePort
+        +list_providers() list~str~
+        +list_entities(provider) list~str~
+    }
+
+    class TransformerFactory {
+        -_registry: dict~str, Callable~
+        +register(provider, entity_type, factory) None
+        +create(provider, entity_type, **kwargs) BaseTransformer
+    }
+
+    class RunnerFactory {
+        -_data_source_registry: DataSourceRegistry
+        -_transformer_factory: TransformerFactory
+        +create_runner(config, runtime) PipelineRunner
+    }
+
+    class DQFactory {
+        +create_dq_analyzers(config) tuple
+    }
+
+    class RuntimeAssembly {
+        Central DI wiring
+        +assemble(config, runtime) PipelineRunner
+    }
+
+    class RunnerBootstrap {
+        +assemble_runner(config, runtime, services) PipelineRunner
+    }
+
+    class StorageBootstrap {
+        +assemble_storage(settings) StoragePort
+    }
+
+    class HealthBootstrap {
+        +assemble_health(settings) HealthService
+    }
+
+    class CheckpointBootstrap {
+        +assemble_checkpoint(settings) CheckpointPort
+    }
+
+    class LockBootstrap {
+        +assemble_lock(settings) LockPort
+    }
+
+    class ProviderRegistry {
+        +register_all() None
+        Registers all provider pipelines
+    }
+
+    class RunnerBuilder {
+        Fluent API for runner creation
+        +with_config(config) Self
+        +with_runtime(runtime) Self
+        +with_services(services) Self
+        +build() PipelineRunner
+    }
+
+    class GenericFactory {
+        <<Generic T>>
+        +create(**kwargs) T
+    }
+
+    RuntimeAssembly --> RunnerBootstrap
+    RuntimeAssembly --> StorageBootstrap
+    RuntimeAssembly --> HealthBootstrap
+    RuntimeAssembly --> CheckpointBootstrap
+    RuntimeAssembly --> LockBootstrap
+    RuntimeAssembly --> DataSourceRegistry
+    RuntimeAssembly --> TransformerFactory
+
+    RunnerFactory --> DataSourceRegistry
+    RunnerFactory --> TransformerFactory
+    RunnerFactory --> RunnerBuilder
+
+    ProviderRegistry --> DataSourceRegistry
+    ProviderRegistry --> TransformerFactory

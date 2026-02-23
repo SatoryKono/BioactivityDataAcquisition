@@ -1,0 +1,152 @@
+%% BioETL — Class Diagram: Types & Enums
+%% All type aliases, NewTypes, and enumerations.
+
+classDiagram
+    class RunID {
+        <<NewType>>
+        UUID
+    }
+
+    class EntityID {
+        <<NewType>>
+        str
+    }
+
+    class ContentHash {
+        <<NewType>>
+        str
+    }
+
+    class BatchID {
+        <<NewType>>
+        UUID
+    }
+
+    class RunType {
+        <<StrEnum>>
+        INCREMENTAL
+        BACKFILL
+        REBUILD
+    }
+
+    class PublicationType {
+        <<StrEnum>>
+        JOURNAL_ARTICLE
+        BOOK
+        DATASET
+        PATENT
+        REVIEW
+        LETTER
+        EDITORIAL
+        CLINICAL_TRIAL
+        META_ANALYSIS
+        CASE_REPORTS
+        COMPARATIVE_STUDY
+        EVALUATION_STUDY
+        BOOK_CHAPTER
+        PROCEEDINGS_ARTICLE
+        POSTED_CONTENT
+        REPORT
+        STANDARD
+        DISSERTATION
+        PREPRINT
+        OTHER
+    }
+
+    class HealthStatus {
+        <<StrEnum>>
+        HEALTHY
+        DEGRADED
+        UNHEALTHY
+    }
+
+    class CircuitBreakerState {
+        <<StrEnum>>
+        CLOSED
+        OPEN
+        HALF_OPEN
+    }
+
+    class ExecutionContext {
+        <<StrEnum>>
+        ISOLATED
+        ENRICHER
+        DEPENDENCY
+    }
+
+    class DriftLevel {
+        <<StrEnum>>
+        INFO
+        CRITICAL
+    }
+
+    class MedallionLayer {
+        <<StrEnum>>
+        BRONZE
+        SILVER
+        GOLD
+    }
+
+    class LoadingStrategy {
+        <<StrEnum>>
+        FULL_SCAN_ONLY
+    }
+
+    class QuarantineRecordStatus {
+        <<Enum>>
+        QUARANTINED
+        REPLAYED
+        PURGED
+    }
+
+    class ShutdownReason {
+        <<StrEnum>>
+        SIGINT
+        SIGTERM
+        LOCK_LOST
+        MEMORY_PRESSURE
+        DQ_THRESHOLD
+    }
+
+    class AggregationFunction {
+        <<StrEnum>>
+        FIRST
+        LAST
+        COLLECT
+        COUNT
+    }
+
+    class EnricherCardinality {
+        <<StrEnum>>
+        ONE_TO_ONE
+        ONE_TO_MANY
+    }
+
+    class MergeStrategy {
+        <<StrEnum>>
+        LEFT_JOIN
+        OUTER_JOIN
+    }
+
+    class ConflictResolution {
+        <<StrEnum>>
+        SEED_WINS
+        ENRICHER_WINS
+        LATEST_WINS
+    }
+
+    class CompositeState {
+        <<StrEnum>>
+        INIT
+        SEED_RUNNING
+        DEPS_RUNNING
+        ENRICHERS_RUNNING
+        MERGING
+        COMPLETED
+        FAILED
+    }
+
+    note for RunID "Pipeline run identifier"
+    note for EntityID "Business key for entities"
+    note for ContentHash "SHA256 hash for change detection"
+    note for BatchID "Batch processing identifier"

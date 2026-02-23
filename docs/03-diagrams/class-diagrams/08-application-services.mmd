@@ -1,0 +1,134 @@
+%% BioETL — Class Diagram: Application Services
+%% High-level application services.
+
+classDiagram
+    class DataQualityService {
+        -_dq_monitor: DQMonitorPort | None
+        -_config: DQConfig
+        -_logger: LoggerPort
+        -_metrics: MetricsPort | None
+        -_pipeline_name: str
+        -_entity_type: str
+        +evaluate(context, executor) DQResult
+    }
+
+    class DQReportService {
+        +generate_reports(context) DQReportResult
+    }
+
+    class MedallionLifecycleService {
+        <<dataclass>>
+        +storage: StoragePort
+        +logger: LoggerPort
+        +prepare_for_run(config, runtime) PrepareResult
+        +finalize_run(config, runtime) VacuumResult
+        +clear() None
+        +vacuum() None
+        +archive() None
+    }
+
+    class VacuumService {
+        <<dataclass>>
+        +storage: StoragePort
+        +logger: LoggerPort
+        +vacuum_table(table_name) None
+        +vacuum_all() None
+    }
+
+    class HealthService {
+        +check_provider(provider, factory) HealthResult
+        +check_all(factory) HealthCheckSummary
+    }
+
+    class ConfigService {
+        +list_pipelines() list
+        +get_pipeline(name) PipelineConfig
+    }
+
+    class ExportService {
+        +export(table_name, format, options) ExportResult
+    }
+
+    class CheckpointService {
+        +list_checkpoints() list
+        +delete_checkpoint(key) None
+    }
+
+    class MetricsService {
+        +start_server() None
+        +stop_server() None
+    }
+
+    class ShutdownService {
+        +shutdown(reason, grace_period) None
+    }
+
+    class QuarantineService {
+        +inspect(pipeline, limit) list
+        +get_stats(pipeline) dict
+        +replay(pipeline) int
+        +purge(pipeline) int
+    }
+
+    class BronzeCleanupService {
+        +cleanup(config, dry_run) BronzeCleanupResult
+    }
+
+    class LockService {
+        +get_lock_info(key) dict | None
+    }
+
+    class PipelineRunnerService {
+        +run_pipeline(config, runtime) None
+    }
+
+    class BronzeDQAnalyzer {
+        +analyze(records) DQMetrics
+        +check_completeness() float
+        +check_format() float
+    }
+
+    class SilverDQAnalyzer {
+        +analyze(delta_table) DQMetrics
+        +check_nullability() float
+        +check_schema() float
+    }
+
+    class GoldDQAnalyzer {
+        +analyze(delta_table) DQMetrics
+        +check_pk_uniqueness() float
+        +validate_schema() float
+    }
+
+    class PipelineObserver {
+        -_pipeline_name: str
+        -_run_id: RunID
+        -_run_type: RunType
+        -_metrics: MetricsPort
+        -_logger: LoggerPort
+        -_tracer: TracingPort | None
+        -_start_time: float
+        -_root_span: Span | None
+        -_phase: LifecyclePhase | None
+        +__enter__() Self
+        +__exit__(...) None
+        +emit_event(event) None
+        +on_preflight() None
+        +on_execution() None
+        +on_postrun() None
+    }
+
+    class LifecyclePhase {
+        <<StrEnum>>
+        STARTUP
+        PREFLIGHT
+        LIFECYCLE_CLEAR
+        EXECUTION
+        POSTRUN
+        CLEANUP
+    }
+
+    PipelineObserver --> LifecyclePhase
+    DQReportService --> BronzeDQAnalyzer
+    DQReportService --> SilverDQAnalyzer
+    DQReportService --> GoldDQAnalyzer
