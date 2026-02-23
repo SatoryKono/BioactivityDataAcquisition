@@ -28,7 +28,7 @@ tests/contract/silver-schemas/
 ├── test-validations.py            # Validation rules tests (~40 tests)
 ├── test-naming-conventions.py     # Naming consistency tests (~35 tests)
 ├── snapshots/                     # JSON snapshots (auto-generated)
-│   ├── chembl_activity-schema.json
+│   ├── chembl_activity_schema.json
 │   ├── chembl-molecule-schema.json
 │   └── ...
 └── README.md                      # Detailed test documentation
@@ -243,14 +243,14 @@ If breaking change:
 UPDATE-SNAPSHOTS=1 pytest tests/contract/silver-schemas/test-schema-stability.py -k chembl_activity
 
 # Verify snapshot updated
-git diff tests/contract/silver-schemas/snapshots/chembl_activity-schema.json
+git diff tests/contract/silver-schemas/snapshots/chembl_activity_schema.json
 ```
 
 ### Step 7: Commit with Context
 
 ```bash
 git add src/bioetl/domain/schemas/chembl/activity.py
-git add tests/contract/silver-schemas/snapshots/chembl_activity-schema.json
+git add tests/contract/silver-schemas/snapshots/chembl_activity_schema.json
 git commit -m "feat(schemas): add data-source-version to ActivitySchema
 
 - Added optional field for API version tracking

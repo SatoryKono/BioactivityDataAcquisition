@@ -101,7 +101,7 @@ from bioetl.composition.registry import register
 registry.register-factory("chembl_activity", factory-fn)
 
 
-def chembl_activity-factory(ctx: PipelineRunContext) -> PipelineRunner:
+def chembl_activity_factory(ctx: PipelineRunContext) -> PipelineRunner:
     """Factory function for ChEMBL activity pipeline."""
     ...
 

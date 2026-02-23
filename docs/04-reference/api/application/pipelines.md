@@ -184,7 +184,7 @@ Pipelines are registered via decorator pattern:
 from bioetl.composition.factories import register
 
 @register("chembl_activity")
-def chembl_activity-factory(ctx: PipelineContext) -> PipelineRunner:
+def chembl_activity_factory(ctx: PipelineContext) -> PipelineRunner:
     """Factory for ChEMBL activity pipeline."""
     ...
 ```

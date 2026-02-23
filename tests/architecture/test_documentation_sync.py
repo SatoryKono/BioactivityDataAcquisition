@@ -193,22 +193,22 @@ def test_no_legacy_contract_path_in_active_docs() -> None:
     )
 
 
-def test_onboarding_docs_use_underscore_pipeline_names() -> None:
-    """Primary onboarding docs should use current underscore pipeline IDs."""
-    onboarding_docs = [
-        Path("README.md"),
-        Path("docs/03-guides/quick-start.md"),
-        Path("docs/03-guides/getting-started.md"),
-    ]
+def test_no_legacy_chembl_activity_id_in_active_docs() -> None:
+    """Active docs/workflows should not use legacy chembl-activity ID form."""
+    candidates = [Path("README.md")]
+    candidates.extend(
+        path for path in Path("docs").rglob("*.md") if "99-archive" not in path.parts
+    )
+    candidates.extend(Path(".github/workflows").glob("*.yml"))
+
     violations: list[str] = []
-    for path in onboarding_docs:
+    for path in candidates:
         text = path.read_text(encoding="utf-8")
         if "chembl-activity" in text:
             violations.append(path.as_posix())
 
     assert not violations, (
-        "Onboarding docs contain legacy hyphen pipeline IDs "
-        "(expected chembl_activity):\n"
+        "Legacy chembl-activity identifier found in active docs/workflows:\n"
         + "\n".join(f"  - {item}" for item in sorted(violations))
     )
 

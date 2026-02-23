@@ -452,7 +452,7 @@ import vcr
 
 
 @pytest.mark.vcr(cassette-library-dir="tests/fixtures/vcr/chembl")
-async def test-chembl_activity-fetch-real():
+async def test_chembl_activity-fetch-real():
     """Test with recorded HTTP interactions."""
     client = UnifiedHTTPClient(
         base-url="https://www.ebi.ac.uk/chembl/api/data",

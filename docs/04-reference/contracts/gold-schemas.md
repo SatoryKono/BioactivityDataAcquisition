@@ -633,7 +633,7 @@ Gold-схемы реализованы как **Python Pandera DataFrameModel** 
 
 JSON exports для Gold-схем хранятся в `docs/04-reference/contracts/gold/`:
 
-- `chembl_activity-v1.0.json`
+- `chembl_activity_v1.0.json`
 - `chembl-assay-parameters-v1.0.json`
 - `chembl-assay-v1.0.json`
 - `chembl-cell-line-v1.0.json`
