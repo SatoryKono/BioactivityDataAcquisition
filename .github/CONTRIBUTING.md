@@ -24,6 +24,7 @@ Before contributing, read these documents:
 | [docs/00-project/RULES.md](../docs/00-project/RULES.md) | Project constitution (MUST read)  |
 | [AGENTS.md](../AGENTS.md)                                | Development workflow and patterns |
 | [docs/00-project/00-map.md](../docs/00-project/00-map.md) | Documentation navigator         |
+| [GitHub Policy](../docs/00-project/governance/05-github-policy.md) | CI/CD, branch protection, reviews |
 
 ## Workflow
 

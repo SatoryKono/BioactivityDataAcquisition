@@ -51,7 +51,8 @@ docs/
 │   └── governance/              # Project governance policies
 │       ├── 02-naming-policy.md  # Entity naming conventions
 │       ├── 03-file-policy.md
-│       └── 04-extending-bioetl.md
+│       ├── 04-extending-bioetl.md
+│       └── 05-github-policy.md  # CI/CD, branch protection, reviews
 │
 ├── 01-requirements/             # Requirements
 │   └── REQUIREMENTS.md          # 156 testable requirements
@@ -339,11 +340,19 @@ graph TD
 
 ---
 
+### CI/CD & GitHub
+
+| Topic | Document | RULES.md |
+|-------|----------|----------|
+| GitHub Policy | [05-github-policy.md](governance/05-github-policy.md) | §4, §5 |
+| Contributing | [CONTRIBUTING.md](../../.github/CONTRIBUTING.md) | — |
+| Security | [SECURITY.md](../../.github/SECURITY.md) | §5.4 |
+
 ## Related Resources
 
 - **Repository**: [SatoryKono/BioactivityDataAcquisition](https://github.com/SatoryKono/BioactivityDataAcquisition)
 - **Issues**: Report bugs and feature requests
-- **CI/CD**: GitHub Actions workflows
+- **CI/CD**: GitHub Actions workflows ([GitHub Policy](governance/05-github-policy.md))
 
 ---
 
