@@ -1,17 +1,24 @@
 # Variables для дашбордов v2
 
-## ✅ Добавлены переменные фильтрации
+## ✅ Переменные фильтрации
 
-Все три дашборда v2 теперь имеют открытые переменные для фильтрации:
+### Data Quality v2 / Overview v2 / Simple
 
-| Переменная | Определение | Тип | Multi | Include All |
-|-----------|-----------|------|-------|-------------|
-| **pipeline** | `label_values(bioetl_records_processed_total, pipeline)` | query | ✅ | ✅ |
-| **run_id** | `label_values(bioetl_records_processed_total{pipeline=~"$pipeline"}, run_id)` | query | ✅ | ✅ |
+| Переменная | Определение | Тип | Multi | Include All | Hidden |
+|-----------|-----------|------|-------|-------------|--------|
+| **pipeline** | `label_values(bioetl_records_processed_total, pipeline)` | query | ✅ | ✅ | Нет |
+| **run_type** | `label_values(bioetl_records_processed_total{pipeline=~"$pipeline"}, run_type)` | query | ✅ | ✅ | Нет |
+| **execution** | (зависит от pipeline) | query | ❌ | ❌ | ✅ (hide: 2) |
+
+### Provider Health v2
+
+| Переменная | Определение | Тип | Multi | Include All | Hidden |
+|-----------|-----------|------|-------|-------------|--------|
+| **provider** | `label_values(bioetl_health_check_latency_ms_bucket, provider)` | query | ✅ | ✅ | Нет |
 
 ---
 
-## 📊 Структура переменных
+## 📊 Описание переменных
 
 ### Pipeline Variable
 
@@ -27,12 +34,12 @@ Sort: Alphabetical (1)
 
 **Возвращает:** uniprot, pubmed, pubchem, chembl
 
-### Run ID Variable
+### Run Type Variable
 
 ```
-Name: run_id
+Name: run_type
 Type: Query (Prometheus)
-Definition: label_values(bioetl_records_processed_total{pipeline=~"$pipeline"}, run_id)
+Definition: label_values(bioetl_records_processed_total{pipeline=~"$pipeline"}, run_type)
 Multi: YES (можно выбрать несколько)
 Include All: YES (опция "All")
 Refresh: On dashboard load (1)
@@ -40,54 +47,87 @@ Sort: Alphabetical (1)
 Depends on: $pipeline
 ```
 
-**Возвращает:** Все run_id'ы для выбранного pipeline
+**Возвращает:** incremental, backfill, rebuild
+
+### Execution Variable (скрытая)
+
+```
+Name: execution
+Type: Query (Prometheus)
+Hide: 2 (полностью скрыта)
+Multi: NO (single value)
+Refresh: On dashboard load (1)
+Depends on: $pipeline
+```
+
+**Назначение:** Внутренняя переменная для фильтрации по конкретному запуску
+
+### Provider Variable (только Provider Health v2)
+
+```
+Name: provider
+Type: Query (Prometheus)
+Definition: label_values(bioetl_health_check_latency_ms_bucket, provider)
+Multi: YES (можно выбрать несколько)
+Include All: YES (опция "All")
+```
+
+**Возвращает:** uniprot, pubmed, pubchem, chembl
 
 ---
 
 ## 🎯 Как это работает
 
-### Работа фильтрации
+### Работа фильтрации (DQ v2 / Overview v2)
 
 1. **Пользователь выбирает Pipeline**
    - Например: `uniprot`
 
-2. **Run ID variable обновляется**
-   - PromQL: `label_values(bioetl_records_processed_total{pipeline=~"uniprot"}, run_id)`
-   - Возвращает только run_id'ы для uniprot
+2. **Run Type variable обновляется**
+   - PromQL: `label_values(bioetl_records_processed_total{pipeline=~"uniprot"}, run_type)`
+   - Возвращает только run_type'ы для uniprot
 
 3. **Все графики используют оба фильтра**
-   - PromQL в панелях: `bioetl_records_processed_total{pipeline=~"$pipeline", run_id=~"$run_id"}`
+   - PromQL в панелях: `bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}`
 
 4. **Дашборд обновляется**
    - Графики показывают только выбранные данные
+
+### Работа фильтрации (Provider Health v2)
+
+1. **Пользователь выбирает Provider**
+   - Например: `chembl`
+
+2. **Все графики фильтруются по provider**
+   - PromQL: `histogram_quantile(0.95, bioetl_health_check_latency_ms_bucket{provider=~"$provider"})`
 
 ---
 
 ## 📈 Примеры использования
 
-### Пример 1: Выбрать конкретный pipeline и run
+### Пример 1: Выбрать конкретный pipeline и run type
 
 ```
 Pipeline: uniprot
-Run ID: run-492157
+Run Type: incremental
 
-Результат: Дашборд показывает только данные для uniprot:run-492157
+Результат: Дашборд показывает только incremental данные для uniprot
 ```
 
-### Пример 2: Выбрать все run'ы одного pipeline
+### Пример 2: Выбрать все run type'ы одного pipeline
 
 ```
 Pipeline: pubmed
-Run ID: All
+Run Type: All
 
-Результат: Дашборд показывает все run'ы PubMed (объединенные графики)
+Результат: Дашборд показывает все типы запусков PubMed (объединенные графики)
 ```
 
 ### Пример 3: Выбрать все pipeline'ы
 
 ```
 Pipeline: All
-Run ID: All
+Run Type: All
 
 Результат: Дашборд показывает все данные со всех pipeline'ов
 ```
@@ -96,9 +136,9 @@ Run ID: All
 
 ```
 Pipeline: uniprot, pubmed, pubchem
-Run ID: run-492157
+Run Type: incremental
 
-Результат: Дашборд показывает данные для трех pipeline'ов в одном run
+Результат: Дашборд показывает incremental данные для трех pipeline'ов
 ```
 
 ---
@@ -107,14 +147,9 @@ Run ID: run-492157
 
 Графики используют переменные в PromQL:
 
-**Было (без фильтрации):**
+**PromQL с фильтрацией:**
 ```promql
-bioetl_records_processed_total{run_id=~"$latest_run_id"}
-```
-
-**Стало (с фильтрацией):**
-```promql
-bioetl_records_processed_total{pipeline=~"$pipeline", run_id=~"$run_id"}
+bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}
 ```
 
 ---
@@ -123,18 +158,18 @@ bioetl_records_processed_total{pipeline=~"$pipeline", run_id=~"$run_id"}
 
 ### BioETL Data Quality v2
 - URL: http://localhost:3000/d/bioetl-dq-v2
-- Переменные: Pipeline, Run ID
+- Переменные: Pipeline, Run Type, Execution (hidden)
 - Показывает: Data Flow, Quality Score, Source/Clean Records
 
 ### BioETL Overview v2
 - URL: http://localhost:3000/d/bioetl-overview-v2
-- Переменные: Pipeline, Run ID
+- Переменные: Pipeline, Run Type, Execution (hidden)
 - Показывает: Processing Pipeline, Stage Distribution, Quality
 
 ### BioETL Provider Health v2
 - URL: http://localhost:3000/d/bioetl-provider-health-v2
-- Переменные: Pipeline, Run ID
-- Показывает: Response Time, Error Rate, Provider Latencies
+- Переменные: Provider
+- Показывает: Response Time, Health Check Status, Provider Latencies
 
 ---
 
@@ -143,16 +178,16 @@ bioetl_records_processed_total{pipeline=~"$pipeline", run_id=~"$run_id"}
 ### Совет 1: Быстрая фильтрация
 ```
 1. Выберите Pipeline из dropdown
-2. Run ID автоматически обновится
-3. Выберите нужный Run ID
+2. Run Type автоматически обновится
+3. Выберите нужный Run Type
 4. Графики обновятся
 ```
 
 ### Совет 2: Сравнение данных
 ```
 1. Откройте дашборд в двух tabs
-2. Tab 1: Pipeline=uniprot, Run ID=run-492157
-3. Tab 2: Pipeline=uniprot, Run ID=run-492156
+2. Tab 1: Pipeline=uniprot, Run Type=incremental
+3. Tab 2: Pipeline=uniprot, Run Type=backfill
 4. Сравнивайте рядом
 ```
 
@@ -171,20 +206,20 @@ bioetl_records_processed_total{pipeline=~"$pipeline", run_id=~"$run_id"}
 ```
 Pipeline variable
     ↓ (фильтр)
-Run ID variable
+Run Type variable
     ↓ (фильтр)
 Все графики и панели
 ```
 
-При изменении Pipeline → Run ID автоматически обновляется
-При изменении Run ID → Все графики обновляются
+При изменении Pipeline → Run Type автоматически обновляется
+При изменении Run Type → Все графики обновляются
 
 ---
 
 ## ✨ Достоинства
 
 ✅ **Динамическая фильтрация** — выбирайте нужные данные  
-✅ **Зависимые переменные** — Run ID фильтруется по Pipeline  
+✅ **Зависимые переменные** — Run Type фильтруется по Pipeline  
 ✅ **Multi-select** — можно выбрать несколько значений  
 ✅ **Include All** — быстро выбрать все  
 ✅ **URL сохраняет фильтры** — можно поделиться ссылкой  
@@ -199,7 +234,6 @@ grafana/dashboards/
 ├── bioetl-overview-v2.json (updated)
 └── bioetl-provider-health-v2.json (updated)
 
-update_dashboards_vars.py (скрипт для обновления)
 ```
 
 ---

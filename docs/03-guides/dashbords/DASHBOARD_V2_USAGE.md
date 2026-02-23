@@ -4,22 +4,22 @@
 
 Три дашборда версии 2.0 теперь включают информацию о последнем запуске:
 
-| Дашборд | URL | Информация |
+| Дашборд | URL | Переменные |
 |---------|-----|-----------|
-| **Data Quality v2** | http://localhost:3000/d/bioetl-dq-v2 | Pipeline, Run ID, Timestamp |
-| **Overview v2** | http://localhost:3000/d/bioetl-overview-v2 | Pipeline, Run ID, Timestamp |
-| **Provider Health v2** | http://localhost:3000/d/bioetl-provider-health-v2 | Pipeline, Run ID, Timestamp |
+| **Data Quality v2** | http://localhost:3000/d/bioetl-dq-v2 | Pipeline, Run Type, Timestamp |
+| **Overview v2** | http://localhost:3000/d/bioetl-overview-v2 | Pipeline, Run Type, Timestamp |
+| **Provider Health v2** | http://localhost:3000/d/bioetl-provider-health-v2 | Provider, Timestamp |
 
 ---
 
 ## 📊 Что показывает каждый дашборд
 
 ### 1. BioETL Data Quality v2
-**Назначение:** Анализ качества данных для последнего запуска
+**Назначение:** Анализ качества данных
 
-**Верхняя строка:**
+**Верхняя строка (info-панели):**
 ```
-Pipeline: uniprot          Run ID: run-492157     Execution Timestamp: 1645382400
+Pipeline: uniprot          Run Type: incremental     Execution Timestamp: 1645382400
 ```
 
 **Графики:**
@@ -36,11 +36,11 @@ Pipeline: uniprot          Run ID: run-492157     Execution Timestamp: 164538240
 ---
 
 ### 2. BioETL Overview v2
-**Назначение:** Общий обзор обработки для последнего запуска
+**Назначение:** Общий обзор обработки pipeline
 
-**Верхняя строка:**
+**Верхняя строка (info-панели):**
 ```
-Pipeline: pubmed           Run ID: run-492158     Execution Timestamp: 1645386000
+Pipeline: pubmed           Run Type: backfill     Execution Timestamp: 1645386000
 ```
 
 **Графики:**
@@ -57,23 +57,25 @@ Pipeline: pubmed           Run ID: run-492158     Execution Timestamp: 164538600
 ---
 
 ### 3. BioETL Provider Health v2
-**Назначение:** Статус каждого provider'а для последнего запуска
+**Назначение:** Статус и latency каждого provider'а
 
-**Верхняя строка:**
+**Верхняя строка (info-панели):**
 ```
-Pipeline: pubchem          Run ID: run-492159     Execution Timestamp: 1645389600
+Provider: chembl           Health Status: Provider Health     Execution Timestamp: 1645389600
 ```
+
+**Переменная:** `$provider` (вместо $pipeline/$run_type в других дашбордах)
 
 **Графики:**
-- Provider Response Time (P95 latency)
-- Error Rate by Provider
+- Provider Response Time (P95 latency, histogram_quantile)
+- Health Check Status (stat)
 - Individual Latency Gauges (UniProt, PubMed, PubChem, ChemBL)
 
-**Интерпретация:**
-- Зелёный цвет ✅ — < 0.5s, отлично
-- Жёлтый ⚠️ — 0.5-1s, норма
-- Оранжевый ⚠️ — 1-2s, медленно
-- Красный ❌ — > 2s, проблема
+**Интерпретация (пороги в миллисекундах):**
+- Зелёный цвет ✅ — < 0.5ms
+- Жёлтый ⚠️ — 0.5-1ms
+- Оранжевый ⚠️ — 1-2ms
+- Красный ❌ — > 2ms
 
 ---
 
@@ -91,16 +93,16 @@ Pipeline: pubchem          Run ID: run-492159     Execution Timestamp: 164538960
    Home → Dashboards → BioETL → BioETL Data Quality v2
    ```
 
-3. **Дашборд автоматически покажет:**
-   - ✅ Pipeline название
-   - ✅ Run ID последний
-   - ✅ Execution Timestamp
-   - ✅ Все метрики для этого run'а
+3. **Дашборд покажет:**
+   - ✅ Pipeline название (info-панель)
+   - ✅ Run Type (info-панель)
+   - ✅ Execution Timestamp (info-панель)
+   - ✅ Все метрики с фильтрацией по выбранным значениям
 
 ### Регулярно
 
-1. **Открывайте дашборд** — автоматически обновляется
-2. **Смотрите Pipeline и Run ID** — всегда актуальные
+1. **Открывайте дашборд** — автоматически обновляется (каждые 30 сек)
+2. **Смотрите Pipeline и Run Type** — в info-панелях вверху
 3. **Проверяйте метрики** — сравнивайте с нормой
 
 ---
@@ -126,10 +128,10 @@ Pipeline: pubchem          Run ID: run-492159     Execution Timestamp: 164538960
 
 | Provider | Норма | Внимание | Критично |
 |----------|-------|----------|----------|
-| UniProt | < 0.5s | 0.5-1s | > 1s |
-| PubMed | < 1s | 1-2s | > 2s |
-| PubChem | < 1s | 1-2s | > 2s |
-| ChemBL | < 1s | 1-2s | > 2s |
+| UniProt | < 0.5ms | 0.5-1ms | > 1ms |
+| PubMed | < 1ms | 1-2ms | > 2ms |
+| PubChem | < 1ms | 1-2ms | > 2ms |
+| ChemBL | < 1ms | 1-2ms | > 2ms |
 
 ---
 
@@ -138,7 +140,7 @@ Pipeline: pubchem          Run ID: run-492159     Execution Timestamp: 164538960
 ### Если качество упало
 
 1. **Откройте BioETL Data Quality v2**
-2. **Посмотрите Pipeline и Run ID**
+2. **Посмотрите Pipeline и Run Type**
 3. **Проверьте Data Quality Score**
 4. **Если < 80%:**
    - Перейдите на **BioETL Provider Health v2**
@@ -157,9 +159,9 @@ Pipeline: pubchem          Run ID: run-492159     Execution Timestamp: 164538960
 ### Если provider недоступен
 
 1. **Откройте BioETL Provider Health v2**
-2. **Посмотрите Error Rate графики**
-3. **Найдите provider с ошибками**
-4. **Проверьте latency — если > 5s, то он заблокирован**
+2. **Посмотрите Health Check Status**
+3. **Проверьте Individual Latency Gauges**
+4. **Проверьте Provider Response Time — высокая latency указывает на проблему**
 
 ---
 
@@ -167,11 +169,11 @@ Pipeline: pubchem          Run ID: run-492159     Execution Timestamp: 164538960
 
 ### Совет 1: Сравнение разных запусков
 
-Хотите сравнить два разных run'а?
+Хотите сравнить два разных запуска?
 ```
 1. Откройте BioETL Overview v2 в Tab 1
-2. Откройте старый дашборд BioETL Overview в Tab 2 (с ручной фильтрацией)
-3. Выберите разные Run ID'ы
+2. Откройте BioETL Overview v2 в Tab 2
+3. Выберите разные значения Pipeline/Run Type в каждом Tab
 4. Сравните рядом
 ```
 
@@ -180,7 +182,7 @@ Pipeline: pubchem          Run ID: run-492159     Execution Timestamp: 164538960
 Хотите видеть тренд последних запусков?
 ```
 1. Откройте BioETL Data Quality v2
-2. Скопируйте Query: bioetl_records_processed_total{run_id=~"$latest_run_id"}
+2. Скопируйте Query: bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}
 3. Перейдите на http://localhost:9090/explore
 4. Вставьте query и смотрите тренд за 7 дней
 ```
@@ -212,7 +214,7 @@ python ./metrics_server.py &
 # 4. Обновить дашборд (F5)
 ```
 
-### Проблема: Pipeline/Run ID не показывается
+### Проблема: Pipeline/Run Type не показывается
 
 **Решение:**
 ```bash
@@ -243,16 +245,13 @@ docker restart bioetl-grafana
 
 ```
 Pipeline: uniprot
-Run ID: run-492157
+Run Type: incremental
 Execution Timestamp: 1645382400 (26 февраля, 10:00)
 
-Data Quality Score: 97%  ✅
+Data Quality Score: 0.97  ✅
 Bronze Records: 10,000
 Gold Records: 9,700
-Quality Ratio: 97%
-
-Error Rate: < 0.1%
-Response Time: 350ms
+Quality Ratio: 0.97
 ```
 
 **Вывод:** Отличный run, всё хорошо ✅
@@ -261,16 +260,13 @@ Response Time: 350ms
 
 ```
 Pipeline: pubmed
-Run ID: run-492158
+Run Type: backfill
 Execution Timestamp: 1645385000 (26 февраля, 10:50)
 
-Data Quality Score: 62%  ❌
+Data Quality Score: 0.62  ❌
 Bronze Records: 5,000
 Gold Records: 3,100
-Quality Ratio: 62%
-
-Error Rate: 5.2%  ⚠️
-Response Time: 2.1s  ⚠️
+Quality Ratio: 0.62
 ```
 
 **Вывод:** Проблема — PubMed медленный, много ошибок ❌
@@ -292,10 +288,10 @@ Response Time: 2.1s  ⚠️
 ## ✨ Итог
 
 **Три дашборда v2 теперь:**
-- ✅ Показывают только последний запуск
-- ✅ Отображают Pipeline, Run ID и время запуска
-- ✅ Автоматически обновляются при новых запусках
-- ✅ Не требуют ручного выбора переменных
+- ✅ Отображают Pipeline, Run Type и время запуска в info-панелях
+- ✅ Фильтрация по Pipeline и Run Type через dropdown
+- ✅ Автоматически обновляются (каждые 30 сек)
+- ✅ Provider Health v2 — отдельная фильтрация по Provider
 - ✅ Готовы к production использованию
 
 **Открывайте и мониторьте!** 🚀
