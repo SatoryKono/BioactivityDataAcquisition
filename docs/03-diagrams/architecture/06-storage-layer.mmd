@@ -1,0 +1,98 @@
+%% BioETL — Storage Layer Components
+%% Shows Bronze/Silver/Gold writers, Delta Lake, metadata, and validation.
+
+graph TB
+    subgraph Port["Domain Port"]
+        SP["StoragePort<br/>(Protocol)"]
+    end
+
+    subgraph Writers["Storage Writers"]
+        subgraph BronzeStorage["Bronze Storage"]
+            BW["BronzeWriter<br/>━━━━━━━━━━━━━━━━━<br/>base_path: Path<br/>logger: LoggerPort<br/>metrics: MetricsPort<br/>save_json: bool<br/>validate_json: bool<br/>━━━━━━━━━━━━━━━━━<br/>+ write_bronze()<br/>+ aclose()"]
+            AWG["AtomicWriteGroup<br/>━━━━━━━━━━━━━━━━━<br/>Atomic multi-file writes<br/>with rollback"]
+        end
+
+        subgraph SilverStorage["Silver Storage"]
+            BDW["BaseDeltaWriter<br/>━━━━━━━━━━━━━━━━━<br/>base_path: Path<br/>logger: LoggerPort<br/>_retention_manager<br/>━━━━━━━━━━━━━━━━━<br/>+ get_table_path()<br/>+ clear()<br/>+ _prepare_arrow_data()"]
+
+            SWR["SilverWriter<br/>━━━━━━━━━━━━━━━━━<br/>csv_exporter: CsvExporter<br/>write_policy: WriteModePolicy<br/>silver_validator: SilverValidatorPort<br/>━━━━━━━━━━━━━━━━━<br/>+ write_silver()<br/>+ merge_silver()<br/>+ clear_silver()"]
+        end
+
+        subgraph GoldStorage["Gold Storage"]
+            GWR["GoldWriter<br/>━━━━━━━━━━━━━━━━━<br/>csv_exporter: CsvExporter<br/>audit: AuditPort<br/>metadata_writer: MetadataWriterPort<br/>━━━━━━━━━━━━━━━━━<br/>+ write_gold()<br/>+ clear_gold()"]
+        end
+
+        subgraph Reader["Delta Reader"]
+            DR["DeltaReader<br/>━━━━━━━━━━━━━━━━━<br/>base_path: Path<br/>logger: LoggerPort<br/>━━━━━━━━━━━━━━━━━<br/>+ read_table()<br/>+ get_schema()<br/>+ get_row_count()"]
+        end
+    end
+
+    subgraph Support["Support Components"]
+        AC["ArrowDataConverter<br/>(records → PyArrow)"]
+        RM["RetentionManager<br/>(vacuum/retention)"]
+        MW["MetadataWriter<br/>(_metadata.yaml)"]
+        CSV["CsvExporter<br/>(Delta → CSV export)"]
+        DQW["DQReportWriter<br/>(DQ reports JSON)"]
+    end
+
+    subgraph Validation["Validation"]
+        PSV["PanderaSilverValidator<br/>(SilverValidatorPort)"]
+        PGV["PanderaGoldValidator<br/>(GoldValidatorPort)"]
+        NOV["NoOpValidator<br/>(Null Object)"]
+    end
+
+    subgraph FileSystem["File System Layout"]
+        FS_B["data/<br/>├── bronze/<br/>│   └── {provider}/{entity}/{date}/<br/>│       ├── batch_*.jsonl.zst<br/>│       └── _metadata.yaml"]
+        FS_S["├── silver/<br/>│   └── {provider}_{entity}/<br/>│       ├── _delta_log/<br/>│       ├── part-*.parquet<br/>│       └── _metadata.yaml"]
+        FS_G["└── gold/<br/>    └── {provider}_{entity}/<br/>        ├── _delta_log/<br/>        ├── part-*.parquet<br/>        └── _metadata.yaml"]
+    end
+
+    %% Inheritance
+    BDW --> SWR
+    BDW --> GWR
+
+    %% Port implementation
+    SP -.->|implements| BW
+    SP -.->|implements| SWR
+    SP -.->|implements| GWR
+    SP -.->|implements| DR
+
+    %% Composition
+    BW --> AWG
+    SWR --> AC
+    GWR --> AC
+    SWR --> RM
+    GWR --> RM
+    SWR --> MW
+    GWR --> MW
+    SWR --> CSV
+    GWR --> CSV
+    SWR --> PSV
+    GWR --> PGV
+
+    %% File system
+    BW -.-> FS_B
+    SWR -.-> FS_S
+    GWR -.-> FS_G
+
+    subgraph Metadata["Metadata Builders"]
+        BMB["BronzeMetadataBuilder"]
+        SMB["SilverMetadataBuilder"]
+        GMB["GoldMetadataBuilder"]
+    end
+
+    BW --> BMB
+    SWR --> SMB
+    GWR --> GMB
+
+    classDef port fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef writer fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef support fill:#e3f2fd,stroke:#1565c0
+    classDef valid fill:#f3e5f5,stroke:#6a1b9a
+    classDef fs fill:#eceff1,stroke:#455a64,stroke-width:1px
+
+    class SP port
+    class BW,SWR,GWR,DR,BDW writer
+    class AC,RM,MW,CSV,DQW,BMB,SMB,GMB,AWG support
+    class PSV,PGV,NOV valid
+    class FS_B,FS_S,FS_G fs

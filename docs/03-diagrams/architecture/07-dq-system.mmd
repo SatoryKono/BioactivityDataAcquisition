@@ -1,0 +1,94 @@
+%% BioETL — Data Quality (DQ) System
+%% Shows DQ monitoring, analysis, and reporting across all medallion layers.
+
+graph TB
+    subgraph Ports["Domain Ports"]
+        DQM["DQMonitorPort<br/>(Protocol)"]
+        BDQAP["BronzeDQAnalyzerPort"]
+        SDQAP["SilverDQAnalyzerPort"]
+        GDQAP["GoldDQAnalyzerPort"]
+        DQRWP["DQReportWriterPort"]
+    end
+
+    subgraph DomainTypes["Domain Value Objects"]
+        DQMetrics["DQMetrics<br/>━━━━━━━━━━━━━━━━━<br/>null_rate: float<br/>duplicate_rate: float<br/>schema_violations: int<br/>custom_metrics: dict"]
+        DQResult["DQResult<br/>━━━━━━━━━━━━━━━━━<br/>passed: bool<br/>error_rate: float<br/>metrics: DQMetrics<br/>anomalies: list"]
+        DQReport["DQReport<br/>━━━━━━━━━━━━━━━━━<br/>layer: MedallionLayer<br/>table_name: str<br/>results: DQResult"]
+        DQConfig["DQConfig<br/>━━━━━━━━━━━━━━━━━<br/>soft_error_threshold: float<br/>hard_error_threshold: float"]
+    end
+
+    subgraph AppServices["Application Services"]
+        DQS["DataQualityService<br/>━━━━━━━━━━━━━━━━━<br/>_dq_monitor: DQMonitorPort<br/>_config: DQConfig<br/>━━━━━━━━━━━━━━━━━<br/>+ evaluate(context, executor)"]
+        DQRS["DQReportService<br/>━━━━━━━━━━━━━━━━━<br/>+ generate_reports(context)"]
+    end
+
+    subgraph AppDQ["Application DQ Analyzers"]
+        BDA["BronzeDQAnalyzer<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(records)<br/>+ check_completeness()<br/>+ check_format()"]
+        SDA["SilverDQAnalyzer<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(delta_table)<br/>+ check_nullability()<br/>+ check_schema()"]
+        GDA["GoldDQAnalyzer<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(delta_table)<br/>+ check_pk_uniqueness()<br/>+ validate_schema()"]
+    end
+
+    subgraph Anomaly["Anomaly Detection"]
+        AD["AnomalyDetector"]
+        ZSD["ZScoreDetector<br/>(DetectorStrategy)"]
+        AN["Anomaly<br/>━━━━━━━━━━━━━━━━━<br/>type: AnomalyType<br/>severity: AnomalySeverity<br/>metric_name: str<br/>current_value: float<br/>baseline_value: float"]
+    end
+
+    subgraph InfraImpl["Infrastructure Implementations"]
+        DQCL["DQConfigLoader<br/>(YAML → DQConfig)"]
+        DQRW["DQReportWriter<br/>(JSON reports)"]
+    end
+
+    subgraph Pipeline["Pipeline Integration"]
+        QM["QuarantineManager<br/>━━━━━━━━━━━━━━━━━<br/>Quarantines records<br/>that fail DQ checks"]
+        EC["ErrorClassifier<br/>━━━━━━━━━━━━━━━━━<br/>Classifies errors as<br/>recoverable vs fatal"]
+        BT["BatchTransformer<br/>━━━━━━━━━━━━━━━━━<br/>_check_dq_thresholds()<br/>stops batch on threshold breach"]
+    end
+
+    %% Port implementations
+    BDQAP -.-> BDA
+    SDQAP -.-> SDA
+    GDQAP -.-> GDA
+    DQRWP -.-> DQRW
+
+    %% Service composition
+    DQS --> DQM
+    DQS --> DQConfig
+    DQRS --> BDA
+    DQRS --> SDA
+    DQRS --> GDA
+    DQRS --> DQRW
+
+    %% Anomaly detection
+    DQS --> AD
+    AD --> ZSD
+    AD --> AN
+
+    %% Pipeline integration
+    BT --> QM
+    BT --> EC
+    BT -->|threshold check| DQConfig
+
+    %% Config loading
+    DQCL --> DQConfig
+
+    %% Reports
+    DQRS --> DQReport
+    DQS --> DQResult
+    BDA --> DQMetrics
+    SDA --> DQMetrics
+    GDA --> DQMetrics
+
+    classDef port fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef domain fill:#c8e6c9,stroke:#2e7d32
+    classDef app fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef infra fill:#fff3e0,stroke:#e65100
+    classDef anomaly fill:#ffcdd2,stroke:#c62828
+    classDef pipeline fill:#f3e5f5,stroke:#6a1b9a
+
+    class DQM,BDQAP,SDQAP,GDQAP,DQRWP port
+    class DQMetrics,DQResult,DQReport,DQConfig domain
+    class DQS,DQRS,BDA,SDA,GDA app
+    class DQCL,DQRW infra
+    class AD,ZSD,AN anomaly
+    class QM,EC,BT pipeline

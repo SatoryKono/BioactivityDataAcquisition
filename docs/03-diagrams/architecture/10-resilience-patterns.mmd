@@ -1,0 +1,87 @@
+%% BioETL — Resilience Patterns
+%% Circuit Breaker, Rate Limiter, Retry, Health Check patterns.
+
+graph TB
+    subgraph Ports["Domain Ports"]
+        CBP["CircuitBreakerPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ get_state() → CircuitBreakerState<br/>+ get_failure_count() → int<br/>+ call(fn) → T<br/>+ reset()"]
+        RLP["RateLimiterPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ acquire(tokens)<br/>+ try_acquire() → bool<br/>+ available_tokens() → int"]
+        HCP["HealthCheckPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ check_health() → HealthCheckResult"]
+    end
+
+    subgraph CircuitBreaker["Circuit Breaker Pattern"]
+        CB["CircuitBreaker<br/>━━━━━━━━━━━━━━━━━<br/>provider: str<br/>failure_threshold: int<br/>recovery_timeout: int<br/>metrics: MetricsPort"]
+
+        subgraph CBStates["State Machine"]
+            CLOSED["CLOSED<br/>(normal operation)"]
+            OPEN["OPEN<br/>(fail fast,<br/>no requests)"]
+            HALF["HALF_OPEN<br/>(probe with<br/>single request)"]
+
+            CLOSED -->|"failures ≥ threshold"| OPEN
+            OPEN -->|"recovery_timeout elapsed"| HALF
+            HALF -->|"success"| CLOSED
+            HALF -->|"failure"| OPEN
+        end
+    end
+
+    subgraph RateLimiter["Rate Limiter (Token Bucket)"]
+        TB["TokenBucket<br/>━━━━━━━━━━━━━━━━━<br/>rate: float<br/>capacity: int<br/>provider: str<br/>metrics: MetricsPort<br/>━━━━━━━━━━━━━━━━━<br/>+ acquire(tokens=1)<br/>  waits until tokens available<br/>+ _refill()<br/>  replenish based on elapsed time"]
+
+        subgraph Rates["Provider Rate Limits"]
+            R_PC["PubChem: 5 req/s"]
+            R_UP["UniProt: 100 req/s"]
+            R_OA["OpenAlex: 10 req/s"]
+            R_CR["CrossRef: 50 req/s"]
+            R_SS["Semantic Scholar: 0.33 req/s"]
+            R_PM["PubMed: 3-10 req/s"]
+        end
+    end
+
+    subgraph Retry["Retry Logic"]
+        RP["Retry (in UnifiedHTTPClient)<br/>━━━━━━━━━━━━━━━━━<br/>max_retries: int<br/>backoff_factor: float<br/>retry_on: set[int]<br/>━━━━━━━━━━━━━━━━━<br/>Exponential backoff<br/>with jitter"]
+    end
+
+    subgraph HealthCheck["Health Check Template"]
+        HCPM["HealthCheckProviderMixin<br/>━━━━━━━━━━━━━━━━━<br/>Template Method Pattern:<br/>1. _probe_health() — override<br/>2. Log success/failure<br/>3. Record metrics<br/>4. Return HealthCheckResult<br/>5. Fallback to CB state"]
+
+        HCR["HealthCheckResult<br/>━━━━━━━━━━━━━━━━━<br/>status: HealthStatus<br/>latency_ms: float<br/>provider: str<br/>endpoint: str<br/>last_error: str | None<br/>consecutive_failures: int"]
+
+        HS["HealthStatus<br/>━━━━━━━━━━━━━━━━━<br/>HEALTHY<br/>DEGRADED<br/>UNHEALTHY"]
+    end
+
+    subgraph Client["UnifiedHTTPClient"]
+        UHC["UnifiedHTTPClient<br/>━━━━━━━━━━━━━━━━━<br/>Composes all patterns:<br/>1. acquire rate limiter<br/>2. check circuit breaker<br/>3. attempt request<br/>4. retry on failure<br/>5. record metrics"]
+    end
+
+    subgraph Decorators["Data Source Decorators"]
+        CBDSD["CircuitBreakerDataSourceDecorator<br/>━━━━━━━━━━━━━━━━━<br/>Wraps DataSourcePort<br/>with circuit breaker"]
+        RDSD["RetryingDataSourceDecorator<br/>━━━━━━━━━━━━━━━━━<br/>Wraps DataSourcePort<br/>with retry logic"]
+    end
+
+    %% Port implementations
+    CBP -.-> CB
+    RLP -.-> TB
+    HCP -.-> HCPM
+
+    %% Client composition
+    UHC --> TB
+    UHC --> CB
+    UHC --> RP
+
+    %% Health check
+    HCPM --> CB
+    HCPM --> HCR
+    HCR --> HS
+
+    classDef port fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef pattern fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef state fill:#fff3e0,stroke:#e65100
+    classDef health fill:#f3e5f5,stroke:#6a1b9a
+    classDef client fill:#fce4ec,stroke:#b71c1c,stroke-width:2px
+    classDef decorator fill:#eceff1,stroke:#455a64
+
+    class CBP,RLP,HCP port
+    class CB,TB,RP pattern
+    class CLOSED,OPEN,HALF state
+    class HCPM,HCR,HS health
+    class UHC client
+    class CBDSD,RDSD decorator
