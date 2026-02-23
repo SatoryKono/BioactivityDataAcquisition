@@ -174,7 +174,10 @@
       "Bash(cd \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" && codex login --help 2>&1)",
       "Bash(powershell.exe:*)",
       "Bash(tee:*)",
-      "Bash(unset GITHUB_TOKEN && gh auth token 2>&1)"
+      "Bash(unset GITHUB_TOKEN && gh auth token 2>&1)",
+      "Bash(wsl:*)",
+      "Bash(debian.exe install --root 2>&1 || \"C:\\\\Program Files\\\\WindowsApps\\\\TheDebianProject.DebianGNULinux_1.12.2.0_x64__76v4gfsz19hv4\\\\debian.exe\" install --root 2>&1)",
+      "Bash(cd /tmp && unzip -o debian_extract/DistroLauncher-Appx_1.12.2.0_x64.appx install.tar.gz -d debian_extract 2>&1)"
     ]
   },
   "enabledPlugins": {

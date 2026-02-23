@@ -38,8 +38,8 @@ from bioetl.composition._resource_management import (
     vacuum_table,
 )
 from bioetl.composition._services import (
-    get_adr_service,
     cleanup_bronze,
+    get_adr_service,
     get_bronze_cleanup_service,
     get_checkpoint_service,
     get_config_service,

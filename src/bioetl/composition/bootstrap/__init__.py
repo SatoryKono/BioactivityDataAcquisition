@@ -28,6 +28,7 @@ from __future__ import annotations
 from bioetl.composition.bootstrap.assembly import (
     bootstrap_quarantine_port,
 )
+
 # =============================================================================
 # CLI-specific services (NoOp observability, admin operations)
 # =============================================================================
@@ -49,6 +50,7 @@ from bioetl.composition.bootstrap.cli import (
     bootstrap_quarantine_service,
     bootstrap_vacuum_service,
 )
+
 # =============================================================================
 # Runtime services (full observability, pipeline execution)
 # =============================================================================
@@ -60,6 +62,7 @@ from bioetl.composition.bootstrap.runtime import (
     load_composite_config,
     maybe_start_metrics_server,
 )
+
 # =============================================================================
 # Config loader (re-exported for convenience)
 # =============================================================================

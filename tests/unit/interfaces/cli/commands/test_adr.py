@@ -46,5 +46,5 @@ def test_adr_list_json_uses_service(monkeypatch: Any, cli_runner: CliRunner) -> 
 
     result = cli_runner.invoke(cli, ["adr", "list", "--json"])  # type: ignore[arg-type]
     assert result.exit_code == 0
-    assert "\"number\": 1" in result.output
+    assert '"number": 1' in result.output
     assert "Test ADR" in result.output
