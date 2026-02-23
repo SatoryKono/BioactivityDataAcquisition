@@ -1,8 +1,7 @@
 """Gold layer writer — RULES.md §2.1.1, REQ-DATA-009/010, REQ-CONTRACT-001.
 
-This module contains no behavioral changes in this revision. The edit is
-formatting-only to ensure consistent line endings and satisfy Ruff formatter
-checks on Windows CI.
+Formatting-only touch to normalize file encoding/line endings so that
+`ruff format --check` remains clean on Windows and CI. No behavioral changes.
 """
 
 from __future__ import annotations
@@ -730,11 +729,7 @@ class GoldWriter(BaseDeltaWriter):
         for attempt in range(3):
             try:
                 await self._run_in_executor(
-                    lambda table_or_uri=table_path,
-                           data=arrow_data,
-                           mode=mode,
-                           partition_by=partition_cols,
-                           schema_mode=schema_mode: (
+                    lambda table_or_uri=table_path, data=arrow_data, mode=mode, partition_by=partition_cols, schema_mode=schema_mode: (
                         write_deltalake(
                             table_or_uri=table_or_uri,
                             data=pa.RecordBatchReader.from_batches(
@@ -753,7 +748,7 @@ class GoldWriter(BaseDeltaWriter):
                     raise e
                 # Exponential backoff with fixed jitter (Base 0.5s, Multiplier 2)
                 # Fixed 0.05s jitter for deterministic behavior (see ADR-014)
-                delay = 0.5 * (2 ** attempt) + 0.05
+                delay = 0.5 * (2**attempt) + 0.05
                 await asyncio.sleep(delay)
 
         # Delegate CSV export to CsvExporter if configured
@@ -824,10 +819,7 @@ class GoldWriter(BaseDeltaWriter):
                         records, column_order=column_order
                     )
                     await self._run_in_executor(
-                        lambda table_or_uri=table_path,
-                               data=arrow_data,
-                               mode="append",
-                               partition_by=partition_cols: (
+                        lambda table_or_uri=table_path, data=arrow_data, mode="append", partition_by=partition_cols: (
                             write_deltalake(
                                 table_or_uri=table_or_uri,
                                 data=pa.RecordBatchReader.from_batches(
@@ -843,7 +835,7 @@ class GoldWriter(BaseDeltaWriter):
                 if attempt == 2:
                     raise e
                 # Exponential backoff with fixed jitter (see ADR-014)
-                delay = 0.5 * (2 ** attempt) + 0.05
+                delay = 0.5 * (2**attempt) + 0.05
                 await asyncio.sleep(delay)
 
     async def _merge_scd2(
