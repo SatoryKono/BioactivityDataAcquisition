@@ -8,7 +8,7 @@
 |-----------|-----------|------|-------|-------------|--------|
 | **pipeline** | `label_values(bioetl_records_processed_total, pipeline)` | query | ✅ | ✅ | Нет |
 | **run_type** | `label_values(bioetl_records_processed_total{pipeline=~"$pipeline"}, run_type)` | query | ✅ | ✅ | Нет |
-| **execution** | (зависит от pipeline) | query | ❌ | ❌ | ✅ (hide: 2) |
+| **run_id** | `label_values(bioetl_infrastructure_validated{pipeline=~"$pipeline"}, run_id)` | query | ❌ | ✅ | Нет |
 
 ### Provider Health v2
 
@@ -49,18 +49,25 @@ Depends on: $pipeline
 
 **Возвращает:** incremental, backfill, rebuild
 
-### Execution Variable (скрытая)
+### Run ID Variable
 
 ```
-Name: execution
+Name: run_id
 Type: Query (Prometheus)
-Hide: 2 (полностью скрыта)
+Definition: label_values(bioetl_infrastructure_validated{pipeline=~"$pipeline"}, run_id)
 Multi: NO (single value)
-Refresh: On dashboard load (1)
+Include All: YES (опция "All")
+Refresh: On time range change (2)
+Sort: Numerical (desc) (3)
 Depends on: $pipeline
 ```
 
-**Назначение:** Внутренняя переменная для фильтрации по конкретному запуску
+**Назначение:** Фильтрация по конкретному run_id. Источник — `infrastructure_validated`
+(единственная core-метрика с label `run_id`).
+
+> **Важно:** `run_id` label отсутствует в `records_processed_total` и большинстве
+> других метрик. Переменная `run_id` используется для визуального контроля,
+> а не для PromQL фильтрации в панелях.
 
 ### Provider Variable (только Provider Health v2)
 
@@ -158,18 +165,18 @@ bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}
 
 ### BioETL Data Quality v2
 - URL: http://localhost:3000/d/bioetl-dq-v2
-- Переменные: Pipeline, Run Type, Execution (hidden)
+- Переменные: Pipeline, Run Type, Run ID
 - Показывает: Data Flow, Quality Score, Source/Clean Records
 
 ### BioETL Overview v2
 - URL: http://localhost:3000/d/bioetl-overview-v2
-- Переменные: Pipeline, Run Type, Execution (hidden)
+- Переменные: Pipeline, Run Type, Run ID
 - Показывает: Processing Pipeline, Stage Distribution, Quality
 
 ### BioETL Provider Health v2
 - URL: http://localhost:3000/d/bioetl-provider-health-v2
-- Переменные: Provider
-- Показывает: Response Time, Health Check Status, Provider Latencies
+- Переменные: Pipeline, Run ID, Provider
+- Показывает: Health Check Status, Duration, Circuit Breaker, HTTP Performance
 
 ---
 
@@ -238,5 +245,5 @@ grafana/dashboards/
 
 ---
 
-**Дата:** 22 февраля 2026  
-**Статус:** ✅ Production Ready
+**Дата:** 23 февраля 2026
+**Статус:** ✅ Production Ready (updated after Phase 1-5 refactoring)
