@@ -139,7 +139,11 @@
       "Bash(wmic process:*)",
       "Bash(docker restart:*)",
       "Bash(echo === Pipeline Runs ===:*)",
-      "Bash(echo =========================================:*)"
+      "Bash(echo =========================================:*)",
+      "Bash(echo === Stage Breakdown ===:*)",
+      "Bash(unset GITHUB_TOKEN && gh auth status 2>&1)",
+      "Bash(unset GITHUB_TOKEN && gh repo view SatoryKono/BioactivityDataAcquisition --json name,defaultBranchRef,isPrivate 2>&1)",
+      "Bash(unset GITHUB_TOKEN && gh repo view SatoryKono/BioactivityDataAcquisition --json name,url,defaultBranchRef,isPrivate,description 2>&1)"
     ]
   },
   "enabledPlugins": {
