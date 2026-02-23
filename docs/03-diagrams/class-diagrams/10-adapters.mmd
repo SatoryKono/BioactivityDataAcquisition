@@ -1,0 +1,157 @@
+%% BioETL — Class Diagram: Infrastructure Adapters
+%% HTTP adapter class hierarchy with mixins.
+
+classDiagram
+    class HealthCheckMixin {
+        <<Mixin>>
+        #_start_health_check(provider, endpoint) HealthCheckContext
+        #_handle_health_check_success(ctx, status) None
+        #_handle_health_check_failure(ctx, error) None
+    }
+
+    class HealthCheckProviderMixin {
+        <<Mixin>>
+        +health_check() HealthCheckResult
+        +check_health() HealthCheckResult
+        #_probe_health()* HealthCheckResult
+        #_fallback_health_status() HealthCheckResult
+        #_circuit_breaker: CircuitBreakerPort*
+    }
+
+    class BaseHttpAdapter {
+        +http_client: UnifiedHTTPClient
+        +logger: LoggerPort
+        +metrics: MetricsPort | None
+        +provider_name: str
+        #_error_handler: ErrorService
+        +__aenter__() Self
+        +__aexit__(...) None
+        +aclose() None
+    }
+
+    class BaseSyncAdapter {
+        +logger: LoggerPort
+        +metrics: MetricsPort | None
+        +rate_limiter: TokenBucket
+        +circuit_breaker: CircuitBreaker
+        +thread_pool: ThreadPoolExecutor
+    }
+
+    class UnifiedHTTPClient {
+        <<dataclass>>
+        +rate_limiter: RateLimiterPort
+        +circuit_breaker: CircuitBreakerPort
+        +retry_config: RetryConfig
+        +timeout: float
+        +run_id: RunID | None
+        +user_agent: str
+        +provider: str
+        +tracer: TracingPort | None
+        +metrics: MetricsPort | None
+        +get(url, params, headers) Response
+        +post(url, data, headers) Response
+        +head(url) Response
+        +get_once(url) Response
+    }
+
+    class ChemblAdapter {
+        +fetch() AsyncIterator~dict~
+        +fetch_filtered(filter_ids) AsyncIterator~dict~
+        +fetch_multi_filtered(filters) AsyncIterator~dict~
+        +fetch_filtered_with_fallback() AsyncIterator~dict~
+        +fetch_as_models() AsyncIterator~Model~
+    }
+
+    class PubMedAdapter {
+        +email: str
+        +api_key: str | None
+        +batch_size: int
+    }
+
+    class UniProtAdapter {
+        +api_key: str | None
+        +base_url: str
+    }
+
+    class CrossRefAdapter {
+        +mailto: str
+        +batch_size: int
+    }
+
+    class OpenAlexAdapter {
+        +mailto: str
+        +batch_size: int
+    }
+
+    class SemanticScholarAdapter {
+        +api_key: str
+        +batch_size: int
+        +fields: str
+    }
+
+    class PubChemAdapter {
+        Uses pubchempy (sync)
+        ThreadPoolExecutor wrapper
+    }
+
+    class CircuitBreaker {
+        <<dataclass>>
+        +provider: str
+        +failure_threshold: int
+        +recovery_timeout: int
+        +metrics: MetricsPort | None
+        +call(fn) T
+        +get_state() CircuitBreakerState
+        +get_failure_count() int
+        +get_trips_total() int
+    }
+
+    class TokenBucket {
+        <<dataclass>>
+        +rate: float
+        +capacity: int
+        +provider: str
+        +metrics: MetricsPort | None
+        +acquire(tokens) None
+        +try_acquire() bool
+        +available_tokens() int
+    }
+
+    class AdapterMetrics {
+        +metrics: MetricsPort
+        +provider: str
+        +measure_request() ContextManager
+    }
+
+    class CircuitBreakerDataSourceDecorator {
+        <<Decorator>>
+        wraps DataSourcePort
+    }
+
+    class RetryingDataSourceDecorator {
+        <<Decorator>>
+        wraps DataSourcePort
+    }
+
+    class CachedBronzeDataSource {
+        <<Decorator>>
+        wraps DataSourcePort
+    }
+
+    HealthCheckMixin <|-- HealthCheckProviderMixin
+    HealthCheckProviderMixin <|-- BaseHttpAdapter
+    HealthCheckProviderMixin <|-- BaseSyncAdapter
+
+    BaseHttpAdapter <|-- ChemblAdapter
+    BaseHttpAdapter <|-- PubMedAdapter
+    BaseHttpAdapter <|-- UniProtAdapter
+    BaseHttpAdapter <|-- CrossRefAdapter
+    BaseHttpAdapter <|-- OpenAlexAdapter
+    BaseHttpAdapter <|-- SemanticScholarAdapter
+
+    BaseSyncAdapter <|-- PubChemAdapter
+
+    BaseHttpAdapter o-- UnifiedHTTPClient
+    UnifiedHTTPClient o-- CircuitBreaker
+    UnifiedHTTPClient o-- TokenBucket
+    BaseHttpAdapter o-- AdapterMetrics

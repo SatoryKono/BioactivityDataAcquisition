@@ -1,0 +1,75 @@
+%% BioETL — Security, PII Hashing, and Audit Trail
+%% Shows how PII is handled and audit trail is maintained.
+
+graph TB
+    subgraph Ports["Domain Ports"]
+        PHP["PiiHasherPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ hash(value: str) → str"]
+        AP["AuditPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ log_write(entry: AuditEntry)<br/>+ get_entries(filters) → list"]
+    end
+
+    subgraph DomainTypes["Domain Types"]
+        AE["AuditEntry<br/>(frozen dataclass)<br/>━━━━━━━━━━━━━━━━━<br/>run_id: RunID<br/>timestamp: datetime<br/>layer: AuditLayer<br/>table_name: str<br/>operation: AuditOperation<br/>records_count: int<br/>metadata: dict"]
+        AL["AuditLayer (StrEnum)<br/>━━━━━━━━━━━━━━━━━<br/>BRONZE<br/>SILVER<br/>GOLD"]
+        AO["AuditOperation (StrEnum)<br/>━━━━━━━━━━━━━━━━━<br/>WRITE<br/>MERGE<br/>APPEND<br/>DELETE<br/>OVERWRITE"]
+    end
+
+    subgraph PIIFlow["PII Hashing Flow"]
+        RAW_PII["Raw PII Data<br/>(author names, emails,<br/>affiliations)"]
+        HASH_FN["SHA256(lowercase(value) + salt)"]
+        HASHED["Hashed Value<br/>(irreversible)"]
+
+        RAW_PII --> HASH_FN --> HASHED
+    end
+
+    subgraph InfraPII["Infrastructure: PII Hasher"]
+        SPH["Sha256PiiHasher<br/>━━━━━━━━━━━━━━━━━<br/>+ hash(value) → str"]
+        SC["SaltConfig<br/>(frozen dataclass)<br/>━━━━━━━━━━━━━━━━━<br/>current_salt: str<br/>next_salt: str | None<br/>rotation_active: bool<br/>━━━━━━━━━━━━━━━━━<br/>+ from_settings()<br/>+ from_env()"]
+    end
+
+    subgraph InfraAudit["Infrastructure: Audit"]
+        FAA["FileAuditAdapter<br/>━━━━━━━━━━━━━━━━━<br/>base_path: Path<br/>logger: LoggerPort<br/>━━━━━━━━━━━━━━━━━<br/>+ log_write(entry)<br/>+ get_entries(filters)<br/>+ aclose()"]
+        JSONL["audit_YYYY-MM-DD.jsonl<br/>(one file per day,<br/>append-only)"]
+    end
+
+    subgraph Usage["Usage in Transformers"]
+        BT["BaseTransformer<br/>━━━━━━━━━━━━━━━━━<br/>+ hash_pii_value(value) → str<br/>+ hash_pii_list(values) → list[str]"]
+    end
+
+    subgraph StorageAudit["Storage Audit Integration"]
+        BW["BronzeWriter<br/>━━━━━━━━━━━━━━━━━<br/>audit: AuditPort<br/>logs every write"]
+        SW["SilverWriter<br/>━━━━━━━━━━━━━━━━━<br/>audit: AuditPort<br/>logs merges/writes"]
+        GW["GoldWriter<br/>━━━━━━━━━━━━━━━━━<br/>audit: AuditPort<br/>logs writes"]
+    end
+
+    %% Port implementations
+    PHP -.-> SPH
+    AP -.-> FAA
+
+    %% PII composition
+    SPH --> SC
+
+    %% Audit storage
+    FAA --> JSONL
+
+    %% Usage
+    BT --> PHP
+    BW & SW & GW --> AP
+
+    %% Domain types
+    FAA --> AE
+    AE --> AL
+    AE --> AO
+
+    classDef port fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef domain fill:#c8e6c9,stroke:#2e7d32
+    classDef pii fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    classDef audit fill:#e3f2fd,stroke:#1565c0
+    classDef storage fill:#fff3e0,stroke:#e65100
+    classDef usage fill:#f3e5f5,stroke:#6a1b9a
+
+    class PHP,AP port
+    class AE,AL,AO domain
+    class RAW_PII,HASH_FN,HASHED,SPH,SC pii
+    class FAA,JSONL audit
+    class BW,SW,GW storage
+    class BT usage

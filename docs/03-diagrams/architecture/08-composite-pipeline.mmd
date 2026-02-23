@@ -1,0 +1,124 @@
+%% BioETL — Composite Pipeline Architecture
+%% Shows seed → dependencies → enrichers (parallel) → merge flow.
+
+graph TB
+    subgraph Config["Composite Configuration"]
+        CC["CompositeConfig<br/>━━━━━━━━━━━━━━━━━<br/>name: str<br/>seed: SeedConfig<br/>dependencies: DependencyConfig[]<br/>enrichers: EnricherConfig[]<br/>merge: MergeConfig"]
+        SC["SeedConfig"]
+        DC["DependencyConfig"]
+        EC["EnricherConfig"]
+        MC["MergeConfig"]
+    end
+
+    CC --> SC
+    CC --> DC
+    CC --> EC
+    CC --> MC
+
+    subgraph Runner["CompositePipelineRunner"]
+        CPR["CompositePipelineRunner<br/>━━━━━━━━━━━━━━━━━<br/>+ run() → CompositeResult<br/><br/>Orchestrates full<br/>composite execution"]
+    end
+
+    subgraph FSM["State Machine"]
+        INIT["INIT"]
+        SEED_RUN["SEED_RUNNING"]
+        DEP_RUN["DEPS_RUNNING"]
+        ENR_RUN["ENRICHERS_RUNNING"]
+        MERGE_RUN["MERGING"]
+        DONE["COMPLETED"]
+        FAILED["FAILED"]
+
+        INIT --> SEED_RUN
+        SEED_RUN --> DEP_RUN
+        DEP_RUN --> ENR_RUN
+        ENR_RUN --> MERGE_RUN
+        MERGE_RUN --> DONE
+        SEED_RUN --> FAILED
+        DEP_RUN --> FAILED
+        ENR_RUN --> FAILED
+        MERGE_RUN --> FAILED
+    end
+
+    subgraph Execution["Execution Components"]
+        SEED["Seed Pipeline<br/>━━━━━━━━━━━━━━━━━<br/>PipelineRunner<br/>produces base entity keys"]
+
+        subgraph DepsBlock["Dependencies (Sequential)"]
+            DEP_COORD["DependencyCoordinator<br/>━━━━━━━━━━━━━━━━━<br/>+ run_dependencies()<br/>Sequential with chaining"]
+            DEP1["Dependency 1<br/>(PipelineRunner)"]
+            DEP2["Dependency 2<br/>(PipelineRunner)"]
+        end
+
+        subgraph EnrichBlock["Enrichers (Parallel Fan-Out)"]
+            ENR_COORD["EnrichmentCoordinator<br/>━━━━━━━━━━━━━━━━━<br/>+ run_enrichers()<br/>Parallel with max_concurrency<br/>Timeout per enricher"]
+            ENR1["Enricher 1<br/>(e.g. PubMed)"]
+            ENR2["Enricher 2<br/>(e.g. CrossRef)"]
+            ENR3["Enricher 3<br/>(e.g. OpenAlex)"]
+            ENR4["Enricher 4<br/>(e.g. S2)"]
+        end
+
+        subgraph MergeBlock["Merge Phase"]
+            MS["MergeService<br/>━━━━━━━━━━━━━━━━━<br/>+ merge()"]
+            DEDUP["EnricherDeduplicator"]
+            AGG["EnricherAggregator"]
+            REN["ColumnRenamer"]
+            ORD["ColumnOrderer"]
+        end
+    end
+
+    subgraph CrossVal["Cross-Validation"]
+        CV["EnrichmentCrossValidator<br/>━━━━━━━━━━━━━━━━━<br/>Validates enrichment<br/>results across sources"]
+    end
+
+    subgraph Checkpoint["Checkpoint"]
+        CCM["CompositeCheckpointManager<br/>━━━━━━━━━━━━━━━━━<br/>Tracks completed stages<br/>for resume support"]
+    end
+
+    subgraph Preflight["Preflight"]
+        CPV["CompositePreflightValidator<br/>━━━━━━━━━━━━━━━━━<br/>Validates composite config<br/>before execution"]
+    end
+
+    subgraph Results["Results"]
+        ER["EnrichmentResult<br/>━━━━━━━━━━━━━━━━━<br/>status: EnrichmentStatus<br/>records_enriched: int<br/>enrichment_rate: float"]
+        MR["MergeResult<br/>━━━━━━━━━━━━━━━━━<br/>merged DataFrame<br/>+ merge statistics"]
+        CR["CompositeResult<br/>━━━━━━━━━━━━━━━━━<br/>seed_result<br/>enrichment_results<br/>merge_result"]
+    end
+
+    %% Flow
+    CPR --> CPV
+    CPR --> SEED
+    CPR --> DEP_COORD
+    CPR --> ENR_COORD
+    CPR --> MS
+    CPR --> CCM
+    CPR --> CV
+
+    DEP_COORD --> DEP1 --> DEP2
+
+    SEED -->|"entity keys"| ENR_COORD
+    ENR_COORD --> ENR1 & ENR2 & ENR3 & ENR4
+
+    ENR1 --> ER
+    ENR2 --> ER
+    ENR3 --> ER
+    ENR4 --> ER
+
+    MS --> DEDUP --> AGG --> REN --> ORD
+    MS --> MR
+
+    CPR --> CR
+
+    classDef config fill:#e8f5e9,stroke:#2e7d32
+    classDef runner fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef exec fill:#fff3e0,stroke:#e65100
+    classDef merge fill:#f3e5f5,stroke:#6a1b9a
+    classDef result fill:#c8e6c9,stroke:#2e7d32
+    classDef fsm fill:#eceff1,stroke:#455a64
+    classDef check fill:#fce4ec,stroke:#b71c1c
+
+    class CC,SC,DC,EC,MC config
+    class CPR runner
+    class SEED,DEP_COORD,DEP1,DEP2,ENR_COORD,ENR1,ENR2,ENR3,ENR4 exec
+    class MS,DEDUP,AGG,REN,ORD merge
+    class ER,MR,CR result
+    class INIT,SEED_RUN,DEP_RUN,ENR_RUN,MERGE_RUN,DONE,FAILED fsm
+    class CCM,CPV,CV check

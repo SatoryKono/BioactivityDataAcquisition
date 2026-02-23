@@ -1,0 +1,89 @@
+%% BioETL — Observability Stack
+%% Logging, Metrics, Tracing architecture.
+
+graph TB
+    subgraph Ports["Domain Ports"]
+        LP["LoggerPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ bind(**kwargs)<br/>+ info(msg, **fields)<br/>+ warning(msg, **fields)<br/>+ error(msg, **fields)<br/>+ debug(msg, **fields)<br/>+ exception(msg, **fields)"]
+        MP["MetricsPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ observe_histogram(name, value, labels)<br/>+ increment_counter(name, labels)<br/>+ set_gauge(name, value, labels)<br/>+ close()"]
+        TP["TracingPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ get_tracer(name) → Tracer<br/>+ close()"]
+        DQMP["DQMonitorPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ add_metric(name, value)<br/>+ check_quality()<br/>+ update_baseline_from_metrics()"]
+    end
+
+    subgraph AppObserver["Application Observability"]
+        PO["PipelineObserver<br/>━━━━━━━━━━━━━━━━━<br/>_metrics: MetricsPort<br/>_logger: LoggerPort<br/>_tracer: TracingPort<br/>━━━━━━━━━━━━━━━━━<br/>+ emit_event(event)<br/>+ on_preflight()<br/>+ on_execution()<br/>+ on_postrun()"]
+
+        BMR["BatchMetricsRecorder<br/>━━━━━━━━━━━━━━━━━<br/>+ track_batch_size()<br/>+ track_processed_records()<br/>+ track_error()<br/>+ track_quarantined_records()"]
+
+        BTM["BatchTracingManager<br/>━━━━━━━━━━━━━━━━━<br/>+ start_execution_span()<br/>+ start_batch_span()<br/>+ start_layer_span()<br/>+ end_span()"]
+    end
+
+    subgraph InfraLogging["Infrastructure: Logging"]
+        UL["UnifiedLogger<br/>(implements LoggerPort)<br/>━━━━━━━━━━━━━━━━━<br/>Structured JSON output<br/>Log Schema enforcement<br/>Secret filtering"]
+        SL["StructlogLogger<br/>(implements LoggerPort)"]
+        NOL["NoOpLogger<br/>(Null Object)"]
+    end
+
+    subgraph InfraMetrics["Infrastructure: Metrics"]
+        MC["MetricsCollector<br/>(implements MetricsPort)"]
+        PM["PrometheusMetrics<br/>(implements MetricsPort)<br/>━━━━━━━━━━━━━━━━━<br/>Histograms, Counters,<br/>Gauges for Prometheus"]
+        MSA["MetricsServerAdapter<br/>━━━━━━━━━━━━━━━━━<br/>HTTP server for<br/>/metrics endpoint"]
+        NOM["NoOpMetrics<br/>(Null Object)"]
+    end
+
+    subgraph InfraTracing["Infrastructure: Tracing"]
+        OTT["OpenTelemetryTracer<br/>(implements TracingPort)<br/>━━━━━━━━━━━━━━━━━<br/>OTLP export<br/>Span management"]
+        NOT["NoOpTracing<br/>(Null Object)"]
+    end
+
+    subgraph InfraAnomaly["Infrastructure: Anomaly Detection"]
+        AD["AnomalyDetector"]
+        DS["DetectorStrategy (ABC)"]
+        ZSD["ZScoreDetector"]
+
+        DS --> ZSD
+        AD --> DS
+    end
+
+    subgraph AdapterMetrics["Adapter-Level Metrics"]
+        AM["AdapterMetrics<br/>━━━━━━━━━━━━━━━━━<br/>provider: str<br/>━━━━━━━━━━━━━━━━━<br/>+ measure_request()<br/>  (context manager)<br/><br/>Metrics:<br/>  adapter_request_duration_seconds<br/>  adapter_requests_total"]
+    end
+
+    subgraph External["External Systems"]
+        PROM["Prometheus Server"]
+        GRAFANA["Grafana Dashboards"]
+        OTEL_COL["OpenTelemetry Collector"]
+        JAEGER["Jaeger / Tempo"]
+    end
+
+    %% Port implementations
+    LP -.-> UL & SL & NOL
+    MP -.-> MC & PM & NOM
+    TP -.-> OTT & NOT
+
+    %% Application usage
+    PO --> LP & MP & TP
+    BMR --> MP
+    BTM --> TP
+
+    %% Adapter metrics
+    AM --> MP
+
+    %% Infrastructure to external
+    PM --> MSA --> PROM --> GRAFANA
+    OTT --> OTEL_COL --> JAEGER
+
+    classDef port fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef app fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef logging fill:#fff9c4,stroke:#f57f17
+    classDef metrics fill:#f3e5f5,stroke:#6a1b9a
+    classDef tracing fill:#fce4ec,stroke:#b71c1c
+    classDef anomaly fill:#ffcdd2,stroke:#c62828
+    classDef ext fill:#eceff1,stroke:#455a64
+
+    class LP,MP,TP,DQMP port
+    class PO,BMR,BTM app
+    class UL,SL,NOL logging
+    class MC,PM,MSA,NOM,AM metrics
+    class OTT,NOT tracing
+    class AD,DS,ZSD anomaly
+    class PROM,GRAFANA,OTEL_COL,JAEGER ext
