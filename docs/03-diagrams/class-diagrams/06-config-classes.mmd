@@ -1,0 +1,138 @@
+%% BioETL — Class Diagram: Configuration Classes
+%% Domain and application configuration hierarchy.
+
+classDiagram
+    class RuntimeConfig {
+        <<frozen dataclass>>
+        +run_type: RunType
+        +resume: bool
+        +limit: int | None
+        +heartbeat_interval: int
+        +wait_for_lock: bool
+        +lock_wait_timeout: int
+        +lock_ttl: int | None
+        +query: str | None
+        +dry_run: bool
+        +vacuum_after_run: bool
+        +vacuum_retention_days: int
+        +optimize_storage: bool
+        +strict_validation: bool
+        +strict_gold_validation: bool
+        +skip_gold: bool
+        +effective_lock_ttl: int
+    }
+
+    class PipelineConfig {
+        <<frozen dataclass>>
+        +pipeline_name: str
+        +provider: str
+        +entity_type: str
+        +table: TableConfig
+        +silver_filters: SilverFilterConfig | None
+        +gold_filters: GoldFilterConfig | None
+        +batch_size: int
+        +checkpoint_interval: int
+        +fields: tuple~str~
+        +column_groups: tuple~ColumnGroupConfig~
+        +dq: DQConfig
+        +transform_version: str | None
+        +transform_steps: tuple~str~
+        +loading_strategy: LoadingStrategy | None
+        +scd_config: dict | None
+        +gold_schema: Any | None
+    }
+
+    class TableConfig {
+        <<dataclass>>
+        +silver_table: str | None
+        +gold_table: str | None
+    }
+
+    class DQConfig {
+        <<dataclass>>
+        +soft_error_threshold: float
+        +hard_error_threshold: float
+    }
+
+    class SilverFilterConfig {
+        <<dataclass>>
+        +source_path: str
+        +column_name: str
+    }
+
+    class GoldFilterConfig {
+        <<dataclass>>
+        +source_path: str
+        +column_name: str
+    }
+
+    class RecordProcessorConfig {
+        <<dataclass>>
+        +table_config: TableConfig
+        +silver_schema: Any
+        +gold_schema: Any
+        +dq_config: DQConfig
+    }
+
+    class LockConfig {
+        <<dataclass>>
+        +timeout: float
+        +heartbeat_interval: int
+        +max_retries: int
+    }
+
+    class CompositeConfig {
+        <<frozen dataclass>>
+        +name: str
+        +seed: SeedConfig
+        +dependencies: tuple~DependencyConfig~
+        +enrichers: tuple~EnricherConfig~
+        +merge: MergeConfig
+    }
+
+    class SeedConfig {
+        <<frozen dataclass>>
+        +pipeline: str
+        +output_keys: tuple~str~
+        +silver_table: str
+        +limit: int | None
+    }
+
+    class DependencyConfig {
+        <<frozen dataclass>>
+        +pipeline: str
+        +depends_on: tuple~str~
+    }
+
+    class EnricherConfig {
+        <<frozen dataclass>>
+        +pipeline: str
+        +primary_key: str
+        +enricher_cardinality: EnricherCardinality
+    }
+
+    class MergeConfig {
+        <<frozen dataclass>>
+        +merge_strategy: MergeStrategy
+        +conflict_resolution: ConflictResolution
+    }
+
+    class KeyNullabilityRule {
+        <<dataclass>>
+        +table_name: str
+        +key_columns: list~str~
+        +allow_nulls: bool
+    }
+
+    PipelineConfig *-- TableConfig
+    PipelineConfig *-- DQConfig
+    PipelineConfig *-- SilverFilterConfig
+    PipelineConfig *-- GoldFilterConfig
+
+    RecordProcessorConfig *-- TableConfig
+    RecordProcessorConfig *-- DQConfig
+
+    CompositeConfig *-- SeedConfig
+    CompositeConfig *-- DependencyConfig
+    CompositeConfig *-- EnricherConfig
+    CompositeConfig *-- MergeConfig
