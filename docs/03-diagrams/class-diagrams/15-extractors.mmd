@@ -77,16 +77,18 @@ classDiagram
 
     DateExtractor --> MedlineDateParser : uses
 
-    note "PubMed Extractors" as N1
-    AbstractExtractor .. N1
-    AuthorExtractor .. N1
-    DateExtractor .. N1
-    ClassificationExtractor .. N1
-    IdentifierExtractor .. N1
+    namespace PubMedExtractors {
+        class AbstractExtractor
+        class AuthorExtractor
+        class DateExtractor
+        class ClassificationExtractor
+        class IdentifierExtractor
+    }
 
-    note "UniProt Extractors" as N2
-    TaxonomyExtractor .. N2
-    GeneExtractor .. N2
-    FeatureExtractor .. N2
-    CrossRefExtractor .. N2
-    CommentExtractor .. N2
+    namespace UniProtExtractors {
+        class TaxonomyExtractor
+        class GeneExtractor
+        class FeatureExtractor
+        class CrossRefExtractor
+        class CommentExtractor
+    }
