@@ -150,7 +150,7 @@ class UniProtIDMappingGoldSchema(pa.DataFrameModel):
     all_mappings: Series[str] = pa.Field(nullable=True)
 
     # DQ fields
-    dq_warn: Series[bool] = pa.Field(nullable=False, alias="_dq_warn")
+    dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
     dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
 
     # Metadata
