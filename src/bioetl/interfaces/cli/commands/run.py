@@ -295,7 +295,7 @@ def run(
         echo_error("Unexpected error during pipeline execution", str(e))
         sys.exit(ExitCode.FAIL)
     finally:
-        push_metrics_to_gateway()
+        push_metrics_to_gateway(pipeline_name=pipeline)
         if getattr(coro, "cr_frame", None) is not None:
             coro.close()
 

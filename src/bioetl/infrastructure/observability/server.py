@@ -150,17 +150,22 @@ def push_metrics_to_gateway(
     gateway: str | None = None,
     job: str = "bioetl",
     logger: LoggerPort | None = None,
+    grouping_key: dict[str, str] | None = None,
 ) -> bool:
     """Push current metrics to Prometheus Pushgateway.
 
     Preserves metrics after batch pipeline exits so Grafana
     dashboards continue to display data.
 
+    Uses grouping_key to isolate metrics per pipeline so that
+    successive pipeline runs don't overwrite each other's data.
+
     Args:
         gateway: Pushgateway URL (default: from BIOETL_PUSHGATEWAY_URL
                  env var, or 'localhost:9091').
         job: Job label for pushed metrics.
         logger: Structured logger.
+        grouping_key: Additional grouping labels (e.g. {"pipeline": "chembl_molecule"}).
 
     Returns:
         True if push succeeded, False otherwise.
@@ -172,8 +177,18 @@ def push_metrics_to_gateway(
     gateway = gateway or "localhost:9091"
 
     try:
-        pushadd_to_gateway(gateway, job=job, registry=REGISTRY)
-        logger.info("Metrics pushed to gateway", gateway=gateway, job=job)
+        pushadd_to_gateway(
+            gateway,
+            job=job,
+            registry=REGISTRY,
+            grouping_key=grouping_key or {},
+        )
+        logger.info(
+            "Metrics pushed to gateway",
+            gateway=gateway,
+            job=job,
+            grouping_key=grouping_key,
+        )
         return True
     except Exception as e:
         logger.warning(

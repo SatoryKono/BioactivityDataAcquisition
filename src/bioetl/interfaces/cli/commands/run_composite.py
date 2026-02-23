@@ -261,7 +261,7 @@ def run_composite(
         echo_error("Unexpected error during composite execution", str(e))
         sys.exit(ExitCode.FAIL)
     finally:
-        push_metrics_to_gateway()
+        push_metrics_to_gateway(pipeline_name=f"composite_{composite}")
         if getattr(coro, "cr_frame", None) is not None:
             coro.close()
 
