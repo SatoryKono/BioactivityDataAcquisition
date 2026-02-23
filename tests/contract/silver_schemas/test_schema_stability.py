@@ -134,12 +134,15 @@ class TestSchemaStability:
         schema_class = SILVER_SCHEMAS[schema_name]
         fields = extract_field_metadata(schema_class)
 
+        # Load base config for inherited defaults (technical_primary_key)
+        base_path = Path("configs/pipelines/_base.yaml")
+        base_data = yaml.safe_load(base_path.read_text(encoding="utf-8"))
+
         provider, entity = schema_name.split("_", 1)
         config_path = Path("configs/pipelines") / provider / f"{entity}.yaml"
         data = yaml.safe_load(config_path.read_text(encoding="utf-8"))
-        print(f"DEBUG: {schema_name} data keys: {list(data.keys())}")
 
-        technical_pk = data["technical_primary_key"]
+        technical_pk = data.get("technical_primary_key", base_data["technical_primary_key"])
         business_pks = data["business_primary_keys"]
 
         assert technical_pk in fields, (
