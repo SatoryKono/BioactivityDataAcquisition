@@ -5,6 +5,8 @@ Generates synthetic metrics matching the production label schema defined in
 src/bioetl/infrastructure/observability/metrics.py.
 """
 
+from __future__ import annotations
+
 import random
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer

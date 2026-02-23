@@ -4,6 +4,8 @@ Uses merge strategy: adds missing required variables without removing existing o
 Fixes run_id to use infrastructure_validated (which actually has run_id label).
 """
 
+from __future__ import annotations
+
 import json
 import sys
 from pathlib import Path
