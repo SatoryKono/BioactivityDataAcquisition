@@ -57,7 +57,7 @@ configs/
 │   ├── semanticscholar/         # 1 entity config
 │   │   └── publication.yaml
 │   └── composite/               # 5 composite configs (ADR-026)
-│       ├── activity.yaml        # chembl-activity + enrichers
+│       ├── activity.yaml        # chembl_activity + enrichers
 │       ├── assay.yaml           # chembl-assay + enrichers
 │       ├── molecule.yaml        # chembl-molecule + enrichers
 │       ├── publication.yaml     # chembl-publication + enrichers
@@ -140,13 +140,13 @@ configs/
 
 ```yaml
 # configs/pipelines/chembl/activity.yaml
-pipeline-name: chembl-activity
+pipeline-name: chembl_activity
 provider: chembl
 entity-type: activity
 version: "1.2.0"
 business-primary-keys: ["activity-id"]
-silver-table: "chembl-activity"
-gold-table: "chembl-activity"
+silver-table: "chembl_activity"
+gold-table: "chembl_activity"
 ```
 
 ### Полная структура конфига
@@ -174,13 +174,13 @@ gold-table: "chembl-activity"
 
 ```yaml
 # configs/pipelines/chembl/activity.yaml
-pipeline-name: chembl-activity
+pipeline-name: chembl_activity
 provider: chembl
 entity-type: activity
 version: "1.2.0"
 business-primary-keys: ["activity-id"]
-silver-table: "chembl-activity"
-gold-table: "chembl-activity"
+silver-table: "chembl_activity"
+gold-table: "chembl_activity"
 
 # Переопределение batch-size
 batch-size: 500
@@ -245,7 +245,7 @@ composite:
 
 | Composite               | Seed                 | Enrichers                                                           | Описание                      |
 | ----------------------- | -------------------- | ------------------------------------------------------------------- | ----------------------------- |
-| `composite-activity`    | `chembl-activity`    | enrichers                                                           | Обогащённые данные активности |
+| `composite-activity`    | `chembl_activity`    | enrichers                                                           | Обогащённые данные активности |
 | `composite-assay`       | `chembl-assay`       | enrichers                                                           | Обогащённые данные анализов   |
 | `composite-molecule`    | `chembl-molecule`    | pubchem-compound, enrichers                                         | Обогащённые молекулы          |
 | `composite-publication` | `chembl-publication` | crossref, openalex, pubmed, semanticscholar                         | Обогащённые публикации        |
@@ -302,7 +302,7 @@ if "sort-by" not in sink-silver:
 
 ```yaml
 # НЕ нужно указывать sort-by — он auto-computed!
-pipeline-name: chembl-activity
+pipeline-name: chembl_activity
 business-primary-keys: ["activity-id"]  # → sort-by.columns = ["activity-id"]
 ```
 
@@ -621,10 +621,10 @@ maintenance:
 
 ```bash
 # Показать конфигурацию
-bioetl config show chembl-activity
+bioetl config show chembl_activity
 
 # Валидация
-bioetl config validate chembl-activity
+bioetl config validate chembl_activity
 
 # Показать глобальные настройки
 bioetl config show-settings
@@ -652,25 +652,25 @@ bioetl config list-pipelines
 ### Минимальный конфиг
 
 ```yaml
-pipeline-name: chembl-activity
+pipeline-name: chembl_activity
 provider: chembl
 entity-type: activity
 version: "1.2.0"
 business-primary-keys: ["activity-id"]
-silver-table: "chembl-activity"
-gold-table: "chembl-activity"
+silver-table: "chembl_activity"
+gold-table: "chembl_activity"
 ```
 
 ### С DQ переопределениями
 
 ```yaml
-pipeline-name: chembl-activity
+pipeline-name: chembl_activity
 provider: chembl
 entity-type: activity
 version: "1.2.0"
 business-primary-keys: ["activity-id"]
-silver-table: "chembl-activity"
-gold-table: "chembl-activity"
+silver-table: "chembl_activity"
+gold-table: "chembl_activity"
 
 dq-overrides:
   thresholds:
@@ -688,13 +688,13 @@ dq-overrides:
 ### С кастомными sink путями
 
 ```yaml
-pipeline-name: chembl-activity
+pipeline-name: chembl_activity
 provider: chembl
 entity-type: activity
 version: "1.2.0"
 business-primary-keys: ["activity-id"]
-silver-table: "chembl-activity"
-gold-table: "chembl-activity"
+silver-table: "chembl_activity"
+gold-table: "chembl_activity"
 
 sink:
   bronze:
@@ -719,7 +719,7 @@ sink:
 
 ```json
 {
-  "pipeline-name": "chembl-activity",
+  "pipeline-name": "chembl_activity",
   "provider": "chembl",
   "entity-type": "activity",
   "batch-size": 100
@@ -729,7 +729,7 @@ sink:
 **Стало (YAML):**
 
 ```yaml
-pipeline-name: chembl-activity
+pipeline-name: chembl_activity
 provider: chembl
 entity-type: activity
 batch-size: 100
@@ -744,7 +744,7 @@ batch-size: 100
 ### Ошибка валидации конфига
 
 ```bash
-bioetl config validate chembl-activity
+bioetl config validate chembl_activity
 ```
 
 **Распространённые ошибки:**
@@ -769,7 +769,7 @@ bioetl config validate chembl-activity
 1. Использовать CLI для просмотра resolved конфига:
 
    ```bash
-   bioetl config show chembl-activity --format json
+   bioetl config show chembl_activity --format json
    ```
 
 ----------------------------------------------------------------------

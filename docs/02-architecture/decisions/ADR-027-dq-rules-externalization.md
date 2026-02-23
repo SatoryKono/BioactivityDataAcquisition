@@ -48,7 +48,7 @@ configs/quality/
 
 Pipeline configs reference DQ config via `dq-config-file`:
 ```yaml
-pipeline-name: chembl-activity
+pipeline-name: chembl_activity
 dq-config-file: ../../quality/entities/chembl/activity.yaml
 ```
 

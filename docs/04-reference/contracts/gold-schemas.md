@@ -109,7 +109,7 @@ gold-filters:
 
 ### ChEMBL
 
-#### chembl-activity
+#### chembl_activity
 
 **Primary Key**: `activity-id`
 **Назначение**: Биоактивность соединений (IC50, Ki, EC50)
@@ -490,7 +490,7 @@ import polars as pl
 from deltalake import DeltaTable
 
 # Загрузка Gold-таблицы
-dt = DeltaTable("data/output/gold/chembl-activity")
+dt = DeltaTable("data/output/gold/chembl_activity")
 df = pl.from-arrow(dt.to-pyarrow-table())
 
 # Фильтрация активных IC50 для конкретной мишени
@@ -519,7 +519,7 @@ SELECT
     standard-value,
     pchembl-value,
     canonical-smiles
-FROM delta-scan('data/output/gold/chembl-activity')
+FROM delta-scan('data/output/gold/chembl_activity')
 WHERE target-chembl-id = 'CHEMBL1234'
   AND standard-type = 'IC50'
 ORDER BY standard-value ASC
@@ -537,7 +537,7 @@ SELECT
     m.property-alogp,
     m.property-mw-freebase AS mw,
     m.structure-canonical-smiles
-FROM delta-scan('data/output/gold/chembl-activity') a
+FROM delta-scan('data/output/gold/chembl_activity') a
 JOIN delta-scan('data/output/gold/chembl-molecule') m
   ON a.molecule-chembl-id = m.molecule-chembl-id
 WHERE a.standard-type = 'IC50'
@@ -554,7 +554,7 @@ SELECT
     COUNT(*) AS activity-count,
     AVG(a.pchembl-value) AS avg-pchembl,
     MIN(a.standard-value) AS best-ic50-nm
-FROM delta-scan('data/output/gold/chembl-activity') a
+FROM delta-scan('data/output/gold/chembl_activity') a
 JOIN delta-scan('data/output/gold/chembl-target') t
   ON a.target-chembl-id = t.target-chembl-id
 WHERE a.standard-type = 'IC50'
@@ -569,7 +569,7 @@ LIMIT 20;
 from deltalake import DeltaTable
 
 # Версия на определённый timestamp
-dt = DeltaTable("data/output/gold/chembl-activity")
+dt = DeltaTable("data/output/gold/chembl_activity")
 df-historical = pl.from-arrow(
     dt.load-as-version(datetime(2025, 1, 1)).to-pyarrow-table()
 )
@@ -607,7 +607,7 @@ from bioetl.infrastructure.schemas.gold import ChEMBLActivityGoldSchema
 import polars as pl
 
 # Загрузка и валидация
-df = pl.read-delta("data/output/gold/chembl-activity")
+df = pl.read-delta("data/output/gold/chembl_activity")
 validated = ChEMBLActivityGoldSchema.validate(df.to-pandas())
 ```
 
@@ -633,7 +633,7 @@ Gold-схемы реализованы как **Python Pandera DataFrameModel** 
 
 JSON exports для Gold-схем хранятся в `docs/04-reference/contracts/gold/`:
 
-- `chembl-activity-v1.0.json`
+- `chembl_activity-v1.0.json`
 - `chembl-assay-parameters-v1.0.json`
 - `chembl-assay-v1.0.json`
 - `chembl-cell-line-v1.0.json`

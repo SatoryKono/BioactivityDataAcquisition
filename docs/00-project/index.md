@@ -65,7 +65,7 @@ cd BioactivityDataAcquisition2
 make install
 
 # Run a pipeline
-bioetl run --pipeline chembl-activity --limit 100
+bioetl run --pipeline chembl_activity --limit 100
 
 # Run tests
 make test

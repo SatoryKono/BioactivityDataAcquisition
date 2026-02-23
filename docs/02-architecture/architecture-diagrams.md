@@ -711,7 +711,7 @@ Complete pipeline configuration с 100+ полями.
 **CLI:**
 
 ```bash
-bioetl run chembl-activity \
+bioetl run chembl_activity \
   --run-type incremental \
   --limit 1000 \
   --data-dir /path/to/data

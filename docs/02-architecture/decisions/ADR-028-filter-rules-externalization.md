@@ -49,7 +49,7 @@ configs/filters/
 
 Pipeline configs reference filter config via `filter-config-file`:
 ```yaml
-pipeline-name: chembl-activity
+pipeline-name: chembl_activity
 filter-config-file: ../../filters/entities/chembl/activity.yaml
 ```
 

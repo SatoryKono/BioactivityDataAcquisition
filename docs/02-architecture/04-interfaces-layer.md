@@ -46,7 +46,7 @@
 
 ```bash
 # Запуск пайплайна с лимитом
-python -m bioetl run --pipeline chembl-activity --limit 100
+python -m bioetl run --pipeline chembl_activity --limit 100
 
 # Запуск композитного пайплайна (ADR-026)
 python -m bioetl run-composite --composite publication

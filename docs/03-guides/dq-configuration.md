@@ -318,7 +318,7 @@ For exceptional cases, override DQ rules directly in pipeline config:
 
 ```yaml
 # configs/pipelines/chembl/activity.yaml
-pipeline-name: chembl-activity
+pipeline-name: chembl_activity
 dq-config-file: ../../quality/entities/chembl/activity.yaml
 
 # Temporary override for migration period

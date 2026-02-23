@@ -167,7 +167,7 @@ src/bioetl/domain/value-objects/taxonomy-id.py
 
 # Domain Layer — Entities
 src/bioetl/domain/entities/base.py
-src/bioetl/domain/entities/chembl-activity.py
+src/bioetl/domain/entities/chembl_activity.py
 src/bioetl/domain/entities/pubchem.py
 src/bioetl/domain/entities/uniprot.py
 src/bioetl/domain/entities/crossref.py

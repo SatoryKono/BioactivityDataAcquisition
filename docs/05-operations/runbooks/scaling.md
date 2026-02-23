@@ -8,7 +8,7 @@ The BioETL system is designed to be stateless, allowing for horizontal scaling b
 
 *   **Strategy**: Deploy multiple instances of the BioETL application.
 *   **Concurrency**: The distributed locking mechanism (`lock:{provider}-{entity}`) ensures that only one worker can process a specific pipeline at any given time, preventing race conditions.
-*   **Benefit**: Allows multiple different pipelines to run in parallel across the worker pool (e.g., `worker-1` runs `chembl-activity` while `worker-2` runs `pubchem-compound`).
+*   **Benefit**: Allows multiple different pipelines to run in parallel across the worker pool (e.g., `worker-1` runs `chembl_activity` while `worker-2` runs `pubchem-compound`).
 
 ## Vertical Scaling: Increasing Resources
 

@@ -282,7 +282,7 @@ if self.runtime.run-type in (RunType.REBUILD, RunType.BACKFILL):
 
 - `ingestion-ts` (Timestamp): Время инцидента. \[Код: `QuarantineEntry.-created-at`\]
 
-- `pipeline` (String): Имя пайплайна (напр., `chembl-activity`). \[Код: `QuarantineEntry.-pipeline-name`\]
+- `pipeline` (String): Имя пайплайна (напр., `chembl_activity`). \[Код: `QuarantineEntry.-pipeline-name`\]
 
 - `error-code` (String): Тип ошибки (напр., `SCHEMA-VIOLATION`). \[Код: `QuarantineEntry.-error-code`\]
 
@@ -683,7 +683,7 @@ content-hash → content-version → version-hash
 | timestamp    | MUST           | `2025-12-15T10:00:00Z`         |
 | level        | MUST           | `INFO`, `ERROR`                |
 | run-id       | MUST           | UUID                           |
-| pipeline     | MUST           | `chembl-activity`              |
+| pipeline     | MUST           | `chembl_activity`              |
 | stage        | MUST           | `extract`, `transform`, `load` |
 | dataset      | SHOULD         | `chembl/activity`              |
 | record-count | SHOULD         | 1000                           |
@@ -1515,15 +1515,15 @@ URL-адреса для ChEMBL формируются в `infrastructure/adapter
 #   - sink paths: data/output/{layer}/chembl/activity
 #   - sink.silver.primary-key: ["activity-id"]
 
-pipeline-name: chembl-activity
+pipeline-name: chembl_activity
 provider: chembl
 entity-type: activity
 version: "1.2.0"
 description: "Extract biological activity records from ChEMBL API"
 
 business-primary-keys: ["activity-id"]
-silver-table: "chembl-activity"
-gold-table: "chembl-activity"
+silver-table: "chembl_activity"
+gold-table: "chembl_activity"
 
 sink:
   silver:

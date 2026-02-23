@@ -25,8 +25,8 @@ from bioetl.composition.registry import PipelineRegistry
 pipelines = PipelineRegistry.list-keys()
 
 # Check if pipeline exists
-if PipelineRegistry.contains("chembl-activity"):
-    definition = PipelineRegistry.get("chembl-activity")
+if PipelineRegistry.contains("chembl_activity"):
+    definition = PipelineRegistry.get("chembl_activity")
 ```
 
 ### ProviderRegistry (Primary)

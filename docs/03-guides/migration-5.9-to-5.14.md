@@ -143,7 +143,7 @@ bioetl run --pipeline pubmed-publication --validation-mode fast
 **Purpose:** Combine ChEMBL activity data with compound record metadata in a single Gold table.
 
 **Structure:**
-- **Seed:** `chembl-activity` (bioactivity measurements)
+- **Seed:** `chembl_activity` (bioactivity measurements)
 - **Dependency:** `chembl-compound-record` (compound metadata, optional)
 - **Join:** LEFT OUTER join on `molecule-chembl-id`
 
@@ -289,16 +289,16 @@ ISSN-PATTERN = r"^\d{4}-\d{3}[\dX]$"
 
 **Old (5.9):**
 ```bash
-python -m bioetl.main run --pipeline chembl-activity
+python -m bioetl.main run --pipeline chembl_activity
 ```
 
 **New (5.14):**
 ```bash
 # Preferred (via setuptools entry point)
-bioetl run --pipeline chembl-activity
+bioetl run --pipeline chembl_activity
 
 # Or development mode
-python -m bioetl.interfaces.cli run --pipeline chembl-activity
+python -m bioetl.interfaces.cli run --pipeline chembl_activity
 ```
 
 **Note:** Old entry point still works but is considered legacy.

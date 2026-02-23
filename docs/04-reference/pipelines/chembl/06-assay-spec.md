@@ -258,6 +258,6 @@ input-filter:
 
 | Consumer                  | Impact                |
 | ------------------------- | --------------------- |
-| `chembl-activity`         | FK reference          |
+| `chembl_activity`         | FK reference          |
 | `chembl-assay-parameters` | FK reference          |
 | Protocol analysis         | Assay type statistics |

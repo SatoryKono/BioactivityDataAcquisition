@@ -43,13 +43,13 @@ data/
 bioetl health check
 
 # Resume from checkpoint
-bioetl run --pipeline chembl-activity --resume
+bioetl run --pipeline chembl_activity --resume
 
 # Force full refresh (rebuild)
-bioetl run --pipeline chembl-activity --run-type rebuild
+bioetl run --pipeline chembl_activity --run-type rebuild
 
 # Dry run (no writes)
-bioetl run --pipeline chembl-activity --dry-run
+bioetl run --pipeline chembl_activity --dry-run
 ```
 
 ## Prerequisites

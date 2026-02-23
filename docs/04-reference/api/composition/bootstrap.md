@@ -378,7 +378,7 @@ from bioetl.domain.types import RunType
 
 # Full bootstrap (recommended)
 ctx = PipelineContext(
-    pipeline-name="chembl-activity",
+    pipeline-name="chembl_activity",
     run-type=RunType.INCREMENTAL,
 )
 runner = bootstrap-pipeline-runner(ctx)

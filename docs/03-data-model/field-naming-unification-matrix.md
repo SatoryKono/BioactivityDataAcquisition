@@ -25,22 +25,22 @@
 ## Библиография публикаций
 | Канонический концепт | Провайдер → поле | Класс | Комментарий |
 |---|---|---|---|
-| publication-year | chembl:`publication-year`; pubmed:`publication-year`; crossref:`publication-year`; openalex:`publication-year`; semanticscholar:`publication-year`; chembl-activity:`document-year` | префикс/контекст | Activity legacy `document-year` → переименовать в `publication-year` (breaking). |
-| journal-name | chembl:`journal`; pubmed:`journal`; crossref:`journal`; openalex:`journal`; semanticscholar:`journal`; chembl-activity:`document-journal` | префикс/контекст | Activity legacy `document-journal` → переименовать в `journal` (breaking). |
+| publication-year | chembl:`publication-year`; pubmed:`publication-year`; crossref:`publication-year`; openalex:`publication-year`; semanticscholar:`publication-year`; chembl_activity:`document-year` | префикс/контекст | Activity legacy `document-year` → переименовать в `publication-year` (breaking). |
+| journal-name | chembl:`journal`; pubmed:`journal`; crossref:`journal`; openalex:`journal`; semanticscholar:`journal`; chembl_activity:`document-journal` | префикс/контекст | Activity legacy `document-journal` → переименовать в `journal` (breaking). |
 | page-first / page-last | chembl:`page-first`/`page-last`; pubmed:`page-first`/`page-last`; crossref:`page-first`/`page-last`; openalex:`page-first`/`page-last`; semanticscholar:`page-first`/`page-last` | синоним | Формат строка, диапазон в отдельных полях. |
 | publication-type | chembl:`publication-type`; pubmed:`publication-type`; crossref:`publication-type`; openalex:`publication-type`; semanticscholar:`publication-type` | синоним | Единый unified тип. |
 
 ## Организм / таксономия
 | Канонический концепт | Провайдер → поле | Класс | Комментарий |
 |---|---|---|---|
-| taxonomy-id | chembl-target:`taxonomy-id`; chembl-target-component:`taxonomy-id`; chembl-assay:`assay-taxonomy-id`; chembl-assay:`variant-taxonomy-id`; chembl-activity:`target-taxonomy-id`; uniprot-idmapping:`taxonomy-id`; uniprot-protein:`organism-id` | типовой конфликт | Разные имена/типы (int/float/string). Нужна нормализация в единый `taxonomy-id` (float, nullable int pattern). |
+| taxonomy-id | chembl-target:`taxonomy-id`; chembl-target-component:`taxonomy-id`; chembl-assay:`assay-taxonomy-id`; chembl-assay:`variant-taxonomy-id`; chembl_activity:`target-taxonomy-id`; uniprot-idmapping:`taxonomy-id`; uniprot-protein:`organism-id` | типовой конфликт | Разные имена/типы (int/float/string). Нужна нормализация в единый `taxonomy-id` (float, nullable int pattern). |
 | organism-name | chembl-assay:`assay-organism`; chembl-target:`organism`; chembl-target-component:`organism`; uniprot-idmapping:`organism-scientific`/`organism-common`; uniprot-protein: отсутствует строковый organism, только ID | префикс/контекст | Единый префикс `organism-*` и int ID. |
 
 ## Молекулярные идентификаторы и дескрипторы
 | Канонический концепт | Провайдер → поле | Класс | Комментарий |
 |---|---|---|---|
-| molecule-id | chembl-molecule:`molecule-chembl-id`; pubchem-compound:`cid`; chembl-activity:`molecule-chembl-id`; chembl-compound-record:`molecule-chembl-id` | типовой конфликт | Разные нотации; требуется alias-колонка `molecule-id` + `provider-molecule-id`. |
-| inchi-key | chembl-molecule:`inchikey`; pubchem-compound:`inchikey`; chembl-activity:`canonical-smiles` (структурный идентификатор, не InChIKey) | синоним | Имя совпадает, формат стандартный. |
+| molecule-id | chembl-molecule:`molecule-chembl-id`; pubchem-compound:`cid`; chembl_activity:`molecule-chembl-id`; chembl-compound-record:`molecule-chembl-id` | типовой конфликт | Разные нотации; требуется alias-колонка `molecule-id` + `provider-molecule-id`. |
+| inchi-key | chembl-molecule:`inchikey`; pubchem-compound:`inchikey`; chembl_activity:`canonical-smiles` (структурный идентификатор, не InChIKey) | синоним | Имя совпадает, формат стандартный. |
 | molecular-weight | chembl-molecule:`property-full-mwt`; pubchem-compound:`molecular-weight` | типовой конфликт | Нужно привести к `molecular-weight` (float) с alias. |
 | logp | chembl-molecule:`property-alogp`; pubchem-compound:`xlogp` | типовой конфликт | Канонизировать как `logp` с указанием метода (AlogP/XlogP). |
 | psa | chembl-molecule:`property-psa`; pubchem-compound:`tpsa` | префикс/контекст | Выбрать `polar-surface-area` с alias. |
@@ -49,8 +49,8 @@
 ## Названия и описания
 | Канонический концепт | Провайдер → поле | Класс | Комментарий |
 |---|---|---|---|
-| pref-name | chembl-molecule:`pref-name`; chembl-target:`pref-name`; chembl-activity:`molecule-pref-name`/`target-pref-name`; chembl-tissue:`pref-name`; chembl-protein-class:`pref-name`; uniprot-protein:`protein-name` | префикс/контекст | Единый `*-pref-name` по сущности; для белков — `protein-name`. |
-| description | chembl-assay:`description`; chembl-target-component:`description`; chembl-activity:`assay-description`; chembl-molecule: нет отдельного description | префикс/контекст | Уточнить, что `assay-description` → `description` в контексте assay. |
+| pref-name | chembl-molecule:`pref-name`; chembl-target:`pref-name`; chembl_activity:`molecule-pref-name`/`target-pref-name`; chembl-tissue:`pref-name`; chembl-protein-class:`pref-name`; uniprot-protein:`protein-name` | префикс/контекст | Единый `*-pref-name` по сущности; для белков — `protein-name`. |
+| description | chembl-assay:`description`; chembl-target-component:`description`; chembl_activity:`assay-description`; chembl-molecule: нет отдельного description | префикс/контекст | Уточнить, что `assay-description` → `description` в контексте assay. |
 
 ## Статусы open access и типы публикаций
 | Канонический концепт | Провайдер → поле | Класс | Комментарий |
@@ -61,9 +61,9 @@
 ## Связи Activity ↔ Publication/Assay/Target
 | Канонический концепт | Провайдер → поле | Класс | Комментарий |
 |---|---|---|---|
-| publication-id | chembl-activity:`document-chembl-id`; chembl-assay:`document-chembl-id` | префикс/контекст | Использовать `publication-id` (alias на provider PK). |
-| assay-id | chembl-activity:`assay-chembl-id`; chembl-assay:`assay-chembl-id`; chembl-assay-parameters:`assay-chembl-id` | синоним | Единое имя `assay-id`. |
-| target-id | chembl-activity:`target-chembl-id`; chembl-assay:`target-chembl-id`; chembl-target:`target-chembl-id`; uniprot-idmapping:`target-chembl-id` | синоним | Единое имя `target-id`. |
+| publication-id | chembl_activity:`document-chembl-id`; chembl-assay:`document-chembl-id` | префикс/контекст | Использовать `publication-id` (alias на provider PK). |
+| assay-id | chembl_activity:`assay-chembl-id`; chembl-assay:`assay-chembl-id`; chembl-assay-parameters:`assay-chembl-id` | синоним | Единое имя `assay-id`. |
+| target-id | chembl_activity:`target-chembl-id`; chembl-assay:`target-chembl-id`; chembl-target:`target-chembl-id`; uniprot-idmapping:`target-chembl-id` | синоним | Единое имя `target-id`. |
 
 ## Ключевые выводы
 - Большинство публикационных полей уже унифицированы; основные расхождения — PK и контекстные префиксы (`document-*` vs `publication-*`).

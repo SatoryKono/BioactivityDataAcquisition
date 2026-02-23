@@ -101,7 +101,7 @@ from uuid import uuid4
 
 # Create pipeline context
 ctx = PipelineContext(
-    pipeline-name="chembl-activity",
+    pipeline-name="chembl_activity",
     run-id=uuid4(),
     run-type=RunType.INCREMENTAL,
 )

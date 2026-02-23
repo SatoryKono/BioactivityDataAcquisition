@@ -69,7 +69,7 @@
    docker compose -f docker-compose.monitoring.yml up -d
    
 2. Запустить пайплайн
-   bioetl run --pipeline chembl-activity
+   bioetl run --pipeline chembl_activity
    
 3. Prometheus собирает метрики (каждые 15 сек)
    из http://localhost:8000/metrics
@@ -171,7 +171,7 @@
 
 ### 🟡 Intermediate (1 час)
 1. Прочитать: BIOETL_DATA_EXTRACTION_AND_DASHBOARDS.md
-2. Запустить пайплайн: `bioetl run --pipeline chembl-activity`
+2. Запустить пайплайн: `bioetl run --pipeline chembl_activity`
 3. Проверить метрики в Prometheus
 4. Создать простой дашборд через UI
 

@@ -67,7 +67,7 @@ export BIOETL-METRICS-ENABLED=false
 
 ```bash
 # Запуск пайплайна
-bioetl run --pipeline chembl-activity
+bioetl run --pipeline chembl_activity
 
 # В другом терминале
 curl http://localhost:8000/metrics | grep bioetl-
@@ -194,7 +194,7 @@ curl http://localhost:8000/metrics | grep bioetl-
 
 ```promql
 # Rate обработки записей за 5 минут
-rate(bioetl-records-processed-total{pipeline="chembl-activity"}[5m])
+rate(bioetl-records-processed-total{pipeline="chembl_activity"}[5m])
 
 # 95-й перцентиль длительности пайплайна
 histogram-quantile(0.95, rate(bioetl-pipeline-duration-seconds-bucket[5m]))
@@ -234,7 +234,7 @@ sum(rate(bioetl-records-processed-total[5m])) * 100
   "ts": "2026-01-26T10:30:45.123456Z",
   "level": "INFO",
   "run-id": "550e8400-e29b-41d4-a716-446655440000",
-  "pipeline": "chembl-activity",
+  "pipeline": "chembl_activity",
   "stage": "extract",
   "event": "Fetching records",
   "offset": 0,
@@ -259,7 +259,7 @@ sum(rate(bioetl-records-processed-total[5m])) * 100
 export BIOETL-LOG-LEVEL=DEBUG
 
 # Via CLI флаг
-bioetl run --pipeline chembl-activity --debug
+bioetl run --pipeline chembl_activity --debug
 ```
 
 ---
@@ -320,13 +320,13 @@ export OTEL-EXPORTER-OTLP-ENDPOINT=http://jaeger:4317
 
 ```bash
 # По умолчанию на порту 8081
-bioetl run --pipeline chembl-activity
+bioetl run --pipeline chembl_activity
 
 # Кастомный порт
-bioetl run --pipeline chembl-activity --health-port 9090
+bioetl run --pipeline chembl_activity --health-port 9090
 
 # Отключить
-bioetl run --pipeline chembl-activity --no-health-server
+bioetl run --pipeline chembl_activity --no-health-server
 ```
 
 ### Endpoints

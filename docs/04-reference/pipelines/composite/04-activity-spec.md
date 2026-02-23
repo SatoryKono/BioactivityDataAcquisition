@@ -18,7 +18,7 @@ Combines ChEMBL bioactivity data with compound record metadata, enabling correla
 
 ## Seed and Dependencies
 
-- **Seed**: `chembl-activity`
+- **Seed**: `chembl_activity`
 - **Dependencies**: `chembl-compound-record` (filtered by `molecule-id` + `publication-id` dual-key)
 - **Enrichers**: none
 
