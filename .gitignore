@@ -66,6 +66,7 @@ log_test.txt
 .DS_Store
 Thumbs.db
 desktop.ini
+*.stackdump
 
 # Secrets / API keys (RULES.md REQ-SECRET-004)
 *.env
