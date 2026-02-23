@@ -151,8 +151,8 @@ pythonpath = ["src"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
 # Parallel by default via xdist; benchmark tests excluded.
-# For serial execution (debugging): pytest -p no:xdist
-# For benchmarks: pytest -p no:xdist -m benchmark
+# For serial execution (debugging): pytest -n 0
+# For benchmarks: pytest -n 0 -m benchmark
 addopts = [
     "-ra",
     "-q",

@@ -256,9 +256,21 @@ class Settings(BaseSettings):
         default=None,
         description="API key for PubMed",
     )
+    uniprot_api_key: SecretStr | None = Field(
+        default=None,
+        description="API key for UniProt (higher rate limits)",
+    )
     semanticscholar_api_key: SecretStr | None = Field(
         default=None,
         description="API key for Semantic Scholar Academic Graph API",
+    )
+    openalex_email: str = Field(
+        default="821311@gmail.com",
+        description="Email for OpenAlex polite pool access",
+    )
+    crossref_email: str = Field(
+        default="821311@gmail.com",
+        description="Email for CrossRef polite pool access",
     )
 
     @property

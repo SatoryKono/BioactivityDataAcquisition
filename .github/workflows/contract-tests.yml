@@ -73,9 +73,9 @@ jobs:
           uv run pytest $PYTEST_ARGS --junit-xml=contract-results.xml || echo "TESTS_FAILED=true" >> $GITHUB_OUTPUT
         env:
           # API keys from secrets (optional - tests should work without them but with rate limits)
-          BIOETL_CHEMBL_API_KEY: ${{ secrets.CHEMBL_API_KEY }}
           BIOETL_PUBMED_API_KEY: ${{ secrets.PUBMED_API_KEY }}
           BIOETL_UNIPROT_API_KEY: ${{ secrets.UNIPROT_API_KEY }}
+          BIOETL_SEMANTICSCHOLAR_API_KEY: ${{ secrets.SEMANTICSCHOLAR_API_KEY }}
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
