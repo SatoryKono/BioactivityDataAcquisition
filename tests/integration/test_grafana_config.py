@@ -240,3 +240,40 @@ def test_all_variables_used_in_panels_or_cascade(dashboard_path):
     assert not unused, (
         f"Dashboard {dashboard_path.name} has unused variables: {unused}"
     )
+
+
+# =============================================================================
+# Phase 2 regression tests — modernization
+# =============================================================================
+
+
+@pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
+def test_datasource_uses_uid_format(dashboard_path):
+    """Ensure datasource references use UID object format, not plain strings."""
+    with open(dashboard_path, encoding="utf-8-sig") as f:
+        dashboard = json.load(f)
+
+    string_datasources = []
+    for panel in dashboard.get("panels", []):
+        ds = panel.get("datasource")
+        if isinstance(ds, str) and ds not in ("-- Mixed --",):
+            string_datasources.append(
+                f"Panel '{panel.get('title', 'unknown')}' uses string datasource: {ds}"
+            )
+
+    assert not string_datasources, (
+        f"Dashboard {dashboard_path.name} has legacy string datasources:\n"
+        + "\n".join(string_datasources)
+    )
+
+
+@pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
+def test_dashboard_has_inter_dashboard_links(dashboard_path):
+    """Ensure dashboards have navigation links to other dashboards."""
+    with open(dashboard_path, encoding="utf-8-sig") as f:
+        dashboard = json.load(f)
+
+    links = dashboard.get("links", [])
+    assert len(links) >= 1, (
+        f"Dashboard {dashboard_path.name} has no inter-dashboard links"
+    )
