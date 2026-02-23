@@ -5,6 +5,7 @@ Fixes run_id to use infrastructure_validated (which actually has run_id label).
 """
 
 import json
+import sys
 from pathlib import Path
 
 DATASOURCE = {"type": "prometheus", "uid": "prometheus"}
@@ -61,12 +62,12 @@ REQUIRED_VARS = {
 
 def fix_dashboard(path: Path) -> None:
     """Fix dashboard variables using merge strategy."""
-    print(f"Processing {path}...")
+    sys.stdout.write(f"Processing {path}...\n")
     try:
-        with open(path, encoding="utf-8-sig") as f:
+        with path.open(encoding="utf-8-sig") as f:
             data = json.load(f)
     except Exception as e:
-        print(f"  Error reading {path}: {e}")
+        sys.stderr.write(f"  Error reading {path}: {e}\n")
         return
 
     existing_vars = data.get("templating", {}).get("list", [])
@@ -79,14 +80,14 @@ def fix_dashboard(path: Path) -> None:
             for i, v in enumerate(existing_vars):
                 if v.get("name") == req_name:
                     existing_vars[i] = req_var
-                    print(f"  Updated variable: {req_name}")
+                    sys.stdout.write(f"  Updated variable: {req_name}\n")
                     break
         else:
             existing_vars.append(req_var)
-            print(f"  Added variable: {req_name}")
+            sys.stdout.write(f"  Added variable: {req_name}\n")
 
     # Remove duplicates (keep first occurrence)
-    seen = set()
+    seen: set[str] = set()
     deduped = []
     for v in existing_vars:
         name = v.get("name")
@@ -95,10 +96,10 @@ def fix_dashboard(path: Path) -> None:
             deduped.append(v)
     data["templating"]["list"] = deduped
 
-    with open(path, "w", encoding="utf-8") as f:
+    with path.open("w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
         f.write("\n")
-    print(f"  Done ({len(deduped)} variables)")
+    sys.stdout.write(f"  Done ({len(deduped)} variables)\n")
 
 
 if __name__ == "__main__":

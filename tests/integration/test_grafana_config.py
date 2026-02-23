@@ -140,7 +140,6 @@ def test_no_duplicate_variable_names(dashboard_path):
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
 def test_run_id_variable_uses_valid_metric(dashboard_path):
     """Ensure run_id variable queries a metric that actually has run_id label."""
-    valid_metrics = get_all_valid_metric_names()
     # Metrics that actually have run_id label
     metrics_with_run_id = {
         "bioetl_infrastructure_validated",

@@ -9,8 +9,6 @@ from __future__ import annotations
 import logging
 
 from bioetl.domain.ports import MetricsPort
-
-_logger = logging.getLogger(__name__)
 from bioetl.infrastructure.observability.metrics import (
     ADAPTER_BATCH_SIZE,
     ADAPTER_DROPPED_DUPLICATES_TOTAL,
@@ -70,6 +68,8 @@ from bioetl.infrastructure.observability.metrics import (
     VACUUM_DURATION_SECONDS,
     VACUUM_FILES_REMOVED_TOTAL,
 )
+
+_logger = logging.getLogger(__name__)
 
 # Registry of histogram metrics
 HISTOGRAMS = {

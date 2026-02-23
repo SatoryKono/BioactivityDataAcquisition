@@ -9,7 +9,7 @@ import random
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-from prometheus_client import Counter, Gauge, Histogram, generate_latest, REGISTRY
+from prometheus_client import REGISTRY, Counter, Gauge, Histogram, generate_latest
 
 # Metrics aligned with production schema (metrics.py)
 RECORDS_PROCESSED = Counter(
@@ -137,16 +137,16 @@ class MetricsHandler(BaseHTTPRequestHandler):
                 run_type=run_type,
             ).inc(random.randint(0, 10))
 
-    def log_message(self, format, *args):
+    def log_message(self, format, *args):  # noqa: ARG002
         """Suppress HTTP server logs."""
         return
 
 
 if __name__ == '__main__':
     server = HTTPServer(('0.0.0.0', 8000), MetricsHandler)
-    print('BioETL Metrics server running on http://0.0.0.0:8000/metrics', flush=True)
+    print('BioETL Metrics server running on http://0.0.0.0:8000/metrics', flush=True)  # noqa: T201
     try:
         server.serve_forever()
     except KeyboardInterrupt:
-        print('\nShutting down...', flush=True)
+        print('\nShutting down...', flush=True)  # noqa: T201
         server.shutdown()
