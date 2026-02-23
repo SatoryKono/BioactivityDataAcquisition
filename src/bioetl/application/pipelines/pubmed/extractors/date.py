@@ -149,6 +149,15 @@ class MedlineDateParser:
 
         Uses end-of-period strategy for ranges.
         """
+        # Optimization: Check for single month name first (most common case)
+        # Process in reverse order to prefer later months (end-of-period)
+        for token in reversed(tokens):
+            if not token.isalpha():
+                continue
+            token_lower = token.lower()[:3]
+            if token_lower in self.MONTH_MAP:
+                return token
+
         # Check for month range pattern (e.g., "Jan-Feb")
         range_match = self._MONTH_RANGE_PATTERN.search(text)
         if range_match:
@@ -165,15 +174,6 @@ class MedlineDateParser:
             token_lower = token.lower()
             if token_lower in self.SEASON_MAP:
                 return self.SEASON_MAP[token_lower]
-
-        # Check for single month name (pure alphabetic tokens only)
-        # Process in reverse order to prefer later months (end-of-period)
-        for token in reversed(tokens):
-            if not token.isalpha():
-                continue
-            token_lower = token.lower()[:3]
-            if token_lower in self.MONTH_MAP:
-                return token
 
         return None
 
