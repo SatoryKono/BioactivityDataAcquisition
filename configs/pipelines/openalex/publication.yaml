@@ -5,7 +5,6 @@
 pipeline_name: openalex_publication
 provider: openalex
 entity_type: publication
-schema_file: ../../schemas/openalex/publication.yaml
 description: "Batch DOI resolution via OpenAlex with title fallback"
 
 # Override: full_scan required — API doesn't support stable incremental cursors

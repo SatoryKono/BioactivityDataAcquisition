@@ -5,7 +5,6 @@
 pipeline_name: pubmed_publication
 provider: pubmed
 entity_type: publication
-schema_file: ../../schemas/pubmed/publication.yaml
 description: "Extract publication metadata from PubMed via Entrez API"
 
 # Override: full_scan required — API doesn't support stable incremental cursors

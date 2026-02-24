@@ -5,7 +5,6 @@
 pipeline_name: crossref_publication
 provider: crossref
 entity_type: publication
-schema_file: ../../schemas/crossref/publication.yaml
 description: "Enrich publication records with CrossRef metadata via DOI resolution"
 
 # Override: full_scan required — API doesn't support stable incremental cursors

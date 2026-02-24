@@ -5,7 +5,6 @@
 pipeline_name: pubchem_compound
 provider: pubchem
 entity_type: compound
-schema_file: ../../schemas/pubchem/compound.yaml
 description: "Pipeline for ingesting PubChem compounds"
 
 business_primary_keys: ["molecule_id"]

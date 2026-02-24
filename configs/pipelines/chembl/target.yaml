@@ -5,7 +5,6 @@
 pipeline_name: chembl_target
 provider: chembl
 entity_type: target
-schema_file: ../../schemas/chembl/target.yaml
 description: "Extract biological targets from ChEMBL API"
 
 business_primary_keys: ["target_id"]

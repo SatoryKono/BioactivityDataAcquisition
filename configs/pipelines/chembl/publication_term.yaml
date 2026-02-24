@@ -6,7 +6,6 @@
 pipeline_name: chembl_publication_term
 provider: chembl
 entity_type: publication_term
-schema_file: ../../schemas/chembl/publication_term.yaml
 # Override: v2.1.0 schema redesign after ADR-024 naming migration
 version: "2.1.0"
 description: "Extract publication terms (MeSH, keywords) from ChEMBL Publication records"
