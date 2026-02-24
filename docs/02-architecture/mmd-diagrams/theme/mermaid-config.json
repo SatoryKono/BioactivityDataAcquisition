@@ -1,11 +1,11 @@
 {
   "theme": "base",
   "themeVariables": {
-    "primaryColor": "#e3f2fd",
-    "primaryBorderColor": "#1565c0",
+    "primaryColor": "#f3e5f5",
+    "primaryBorderColor": "#6a1b9a",
     "primaryTextColor": "#212121",
-    "secondaryColor": "#fff3e0",
-    "secondaryBorderColor": "#e65100",
+    "secondaryColor": "#ffcdd2",
+    "secondaryBorderColor": "#c62828",
     "secondaryTextColor": "#212121",
     "tertiaryColor": "#e8f5e9",
     "tertiaryBorderColor": "#2e7d32",

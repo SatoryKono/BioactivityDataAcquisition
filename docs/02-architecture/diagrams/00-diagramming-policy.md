@@ -2,6 +2,10 @@
 
 *Synced with RULES.md v5.21 (2026-02-21)*
 
+> **Canonical policy:** [`docs/02-architecture/06-diagram-polisy.md`](../06-diagram-polisy.md) (POL-LLM-DIAGRAMS-001).
+> **Canonical diagrams:** [`docs/02-architecture/mmd-diagrams/`](../mmd-diagrams/README.md).
+> This file is kept for historical reference. All new diagram work should follow the canonical policy.
+
 ## Overview
 
 This document defines standards for creating, maintaining, and versioning architecture diagrams in the BioETL project.
