@@ -44,7 +44,9 @@ def load_pipeline_contract_policy(provider: str, entity: str) -> PipelineContrac
             result: PipelineContractPolicy = PipelineContractPolicy.model_validate(raw)
             return result
 
-    legacy_path = _CONFIGS_ROOT / "contracts" / "pipelines" / provider / f"{entity}.yaml"
+    legacy_path = (
+        _CONFIGS_ROOT / "contracts" / "pipelines" / provider / f"{entity}.yaml"
+    )
     if not legacy_path.exists():
         raise ValueError(
             "Contract policy file not found in "

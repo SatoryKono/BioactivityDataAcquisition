@@ -690,6 +690,7 @@ class TestClassSize:
         "FeatureExtractor": 335,  # 332 lines - UniProt feature extraction helper
         # Derived entity data source wrappers
         "SubcellularFractionDataSource": 490,  # 479 lines - Wrapper with FilterableDataSourcePort delegation (like PublicationTermDataSource)
+        "DQConfigLoader": 330,  # 322 LOC - Layered DQ config resolver during Config Unification migration
     }
 
     def test_classes_under_300_lines(self, src_dir: Path) -> None:
@@ -857,6 +858,7 @@ class TestGodObjectDetection:
         "SilverDQAnalyzer": "Cohesive analyzer - all methods relate to Silver layer data quality analysis",
         "DQReportSerializer": "Cohesive serializer - all methods relate to DQ report serialization formats",
         "CompositeCheckpointState": "Immutable dataclass - state transitions via with_* methods, serialization helpers are cohesive",
+        "DQConfigLoader": "Cohesive resolver - layered precedence merge (base/provider/entity/pipeline) for DQ configs",
     }
 
     def test_large_classes_have_delegation(self, src_dir: Path) -> None:

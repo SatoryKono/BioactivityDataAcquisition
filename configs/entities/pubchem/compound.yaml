@@ -1,0 +1,185 @@
+version: 1.0.0
+provider: pubchem
+entity: compound
+pipeline:
+  pipeline_name: pubchem_compound
+  provider: pubchem
+  entity_type: compound
+  description: Pipeline for ingesting PubChem compounds
+  business_primary_keys:
+  - molecule_id
+  sink:
+    silver:
+      partition_by:
+      - batch_date
+schema:
+  content_hash:
+    include: []
+    exclude: []
+  column_groups:
+  - name: system
+    fields:
+    - entity_id
+    - content_hash
+    - _run_id
+    - _run_type
+    - _source_batch_id
+    - _ingestion_ts
+    - _index
+  - name: business
+    fields:
+    - molecule_id
+    - canonical_smiles
+    - isomeric_smiles
+    - inchi
+    - inchi_key
+    - molecular_formula
+    - iupac_name
+    - molecular_weight
+    - exact_mass
+    - monoisotopic_mass
+    - xlogp
+    - tpsa
+    - complexity
+    - charge
+    - heavy_atom_count
+    - h_bond_donor_count
+    - h_bond_acceptor_count
+    - rotatable_bond_count
+    - atom_stereo_count
+    - defined_atom_stereo_count
+    - undefined_atom_stereo_count
+    - bond_stereo_count
+    - defined_bond_stereo_count
+    - undefined_bond_stereo_count
+    - isotope_atom_count
+    - covalent_unit_count
+    - volume_3d
+    - conformer_count_3d
+    - feature_acceptor_count_3d
+    - feature_donor_count_3d
+    - feature_anion_count_3d
+    - feature_cation_count_3d
+    - feature_ring_count_3d
+    - feature_hydrophobe_count_3d
+    - effective_rotor_count_3d
+    - conformer_rmsd_3d
+    - x_steric_quadrupole_3d
+    - y_steric_quadrupole_3d
+    - z_steric_quadrupole_3d
+    - feature_count_3d
+  - name: dq
+    pattern: ^_dq_
+  silver:
+    include_groups:
+    - system
+    - business
+    - dq
+    exclude_fields: []
+    alias_policy: preserve
+  gold:
+    include_groups:
+    - system
+    - business
+    exclude_fields:
+    - _dq_*
+    - _source_batch_id
+    - _index
+    alias_policy: canonical
+quality:
+  version: 1.1.0
+  provider: pubchem
+  entity: compound
+  field_validations:
+  - field: molecule_id
+    type: required
+    nullable: false
+    error_message: CID is required
+  - field: molecular_formula
+    type: pattern
+    pattern: ^[A-Z][A-Za-z0-9]*$
+    nullable: true
+    error_message: Molecular formula must start with uppercase letter
+  - field: molecular_weight
+    type: range
+    min: 10
+    max: 10000
+    nullable: true
+    error_message: Molecular weight must be between 10 and 10000 Da
+  - field: canonical_smiles
+    type: custom
+    validator: smiles_validator
+    nullable: true
+  - field: isomeric_smiles
+    type: custom
+    validator: smiles_validator
+    nullable: true
+  - field: xlogp
+    type: range
+    min: -20
+    max: 30
+    nullable: true
+  - field: tpsa
+    type: range
+    min: 0
+    max: 1000
+    nullable: true
+  - field: h_bond_donor_count
+    type: range
+    min: 0
+    max: 50
+    nullable: true
+  - field: h_bond_acceptor_count
+    type: range
+    min: 0
+    max: 50
+    nullable: true
+  cross_field_validations:
+  - name: structure_present
+    fields:
+    - canonical_smiles
+    - inchi
+    - inchi_key
+    condition: any_present
+    error_message: At least one structure identifier required
+  conditional_validations: []
+  key_nullability:
+  - field: molecule_id
+    key_type: merge
+    nullable: false
+  - field: batch_date
+    key_type: partition
+    nullable: false
+filters:
+  version: 1.0.0
+  provider: pubchem
+  entity: compound
+  input_filter:
+    enabled: true
+    source_path: data/input/molecule.csv
+    column_name: canonical_smiles
+    filter_field: smiles
+    batch_size: 1
+  gold_filters:
+    required_fields:
+    - molecule_id
+    - molecular_formula
+    columns: {}
+contracts:
+  primary_key:
+  - molecule_id
+  merge_keys:
+  - molecule_id
+  rename_map:
+    run_id: _run_id
+    run_type: _run_type
+    source_batch_id: _source_batch_id
+    ingestion_ts: _ingestion_ts
+    source: _source
+  hash_include: []
+  hash_exclude:
+  - _ingestion_ts
+  - _run_id
+  - _run_type
+  - _dq_errors
+  - _dq_status

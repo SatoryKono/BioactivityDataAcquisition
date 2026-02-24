@@ -1,0 +1,274 @@
+version: 1.0.0
+provider: uniprot
+entity: protein
+pipeline:
+  pipeline_name: uniprot_protein
+  provider: uniprot
+  entity_type: protein
+  description: Pipeline for ingesting UniProt proteins
+  business_primary_keys:
+  - accession
+  sink:
+    silver:
+      partition_by:
+      - organism
+schema:
+  content_hash:
+    include: []
+    exclude: []
+  column_groups:
+  - name: system
+    fields:
+    - entity_id
+    - content_hash
+    - _run_id
+    - _run_type
+    - _source_batch_id
+    - _ingestion_ts
+    - _index
+  - name: business
+    fields:
+    - accession
+    - entry_name
+    - entry_type
+    - secondary_accessions
+    - protein_name
+    - protein_short_names
+    - protein_alternative_names
+    - protein_ec_numbers
+    - flag
+    - gene_primary
+    - gene_synonyms
+    - gene_orf_names
+    - organism_scientific
+    - organism_common
+    - taxonomy_id
+    - lineage
+    - sequence
+    - sequence_length
+    - sequence_mass
+    - sequence_checksum
+    - sequence_modified
+    - entry_version
+    - entry_created
+    - entry_modified
+    - reviewed
+    - protein_existence
+    - annotation_score
+    - function_comment
+    - catalytic_activity
+    - activity_regulation
+    - subunit
+    - pathway
+    - subcellular_location
+    - tissue_specificity
+    - alternative_products
+    - disease_involvement
+    - pharmaceutical_use
+    - similarity_comment
+    - caution
+    - cofactors
+    - biophysicochemical_properties
+    - induction
+    - go_terms
+    - drugbank_ids
+    - chembl_ids
+    - guidetopharmacology_ids
+    - pdb_xrefs
+    - interpro_xrefs
+    - pfam_xrefs
+    - reactome_xrefs
+    - superkingdom
+    - phylum
+    - genus
+    - molecular_function
+    - cellular_component
+    - features_json
+    - domains
+    - binding_sites
+    - active_sites
+    - keywords
+    - topology
+    - transmembrane
+    - intramembrane
+    - signal_peptide
+    - propeptide
+    - glycosylation
+    - lipidation
+    - disulfide_bond
+    - modified_residue
+    - phosphorylation
+    - acetylation
+    - ubiquitination
+    - isoform_names
+    - isoform_ids
+    - isoform_synonyms
+    - reactions
+    - reaction_ec_numbers
+    - cross_reference_count
+    - feature_count
+    - keyword_count
+    - publication_count
+    - isoform_count
+  - name: dq
+    pattern: ^_dq_
+  silver:
+    include_groups:
+    - system
+    - business
+    - dq
+    exclude_fields: []
+    alias_policy: preserve
+  gold:
+    include_groups:
+    - system
+    - business
+    exclude_fields:
+    - _dq_*
+    - _source_batch_id
+    - _index
+    alias_policy: canonical
+quality:
+  version: 1.0.0
+  provider: uniprot
+  entity: protein
+  field_validations:
+  - field: accession
+    type: pattern
+    pattern: ^[A-Z0-9]{6,10}$
+    nullable: false
+    error_message: UniProt accession must be 6-10 alphanumeric chars
+  - field: entry_name
+    type: pattern
+    pattern: ^[A-Z0-9_]+$
+    nullable: true
+    error_message: Entry name must be alphanumeric with underscores
+  - field: organism
+    type: pattern
+    pattern: ^[A-Z][a-z]+ [a-z]+.*$
+    nullable: true
+    error_message: Organism should be in binomial nomenclature
+  - field: taxonomy_id
+    type: range
+    min: 1
+    max: 10000000
+    nullable: true
+    error_message: Taxonomy ID must be positive
+  - field: sequence_length
+    type: range
+    min: 1
+    max: 100000
+    nullable: true
+    error_message: Sequence length must be between 1 and 100,000
+  - field: mass
+    type: range
+    min: 100
+    max: 10000000
+    nullable: true
+    error_message: Molecular mass must be between 100 and 10,000,000 Da
+  - field: annotation_score
+    type: range
+    min: 1
+    max: 5
+    nullable: true
+    error_message: Annotation score must be between 1 and 5
+  - field: protein_existence
+    type: range
+    min: 1
+    max: 5
+    nullable: true
+    error_message: Protein existence level must be between 1 and 5
+  - field: go_terms
+    type: not_empty_list
+    nullable: true
+    error_message: GO terms list cannot be empty if present
+  - field: pdb_xrefs
+    type: not_empty_list
+    nullable: true
+    error_message: PDB xrefs list cannot be empty if present
+  - field: molecular_function
+    type: pattern
+    pattern: ^\[.*\]$
+    nullable: true
+    error_message: molecular_function must be JSON array
+  - field: cellular_component
+    type: pattern
+    pattern: ^\[.*\]$
+    nullable: true
+    error_message: cellular_component must be JSON array
+  - field: isoform_ids
+    type: pattern
+    pattern: ^\[.*\]$
+    nullable: true
+    error_message: isoform_ids must be JSON array
+  - field: isoform_names
+    type: pattern
+    pattern: ^\[.*\]$
+    nullable: true
+    error_message: isoform_names must be JSON array
+  - field: isoform_synonyms
+    type: pattern
+    pattern: ^\[.*\]$
+    nullable: true
+    error_message: isoform_synonyms must be JSON array
+  - field: reactions
+    type: pattern
+    pattern: ^\[.*\]$
+    nullable: true
+    error_message: reactions must be JSON array
+  - field: reaction_ec_numbers
+    type: pattern
+    pattern: ^\[.*\]$
+    nullable: true
+    error_message: reaction_ec_numbers must be JSON array
+  cross_field_validations:
+  - name: protein_identifiable
+    fields:
+    - accession
+    - entry_name
+    condition: all_present
+    error_message: Protein must have accession and entry name
+  conditional_validations: []
+  key_nullability:
+  - field: accession
+    key_type: merge
+    nullable: false
+  - field: organism
+    key_type: partition
+    nullable: false
+filters:
+  version: 1.0.0
+  provider: uniprot
+  entity: protein
+  input_filter:
+    enabled: true
+    source_path: data/input/protein.csv
+    column_name: uniprot_id
+    filter_field: accession
+    batch_size: 100
+  gold_filters:
+    columns:
+      reviewed:
+      - 'true'
+    required_fields:
+    - accession
+    - entry_name
+    - organism
+contracts:
+  primary_key:
+  - accession
+  merge_keys:
+  - accession
+  rename_map:
+    run_id: _run_id
+    run_type: _run_type
+    source_batch_id: _source_batch_id
+    ingestion_ts: _ingestion_ts
+    source: _source
+  hash_include: []
+  hash_exclude:
+  - _ingestion_ts
+  - _run_id
+  - _run_type
+  - _dq_errors
+  - _dq_status
