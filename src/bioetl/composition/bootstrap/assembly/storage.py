@@ -11,7 +11,6 @@ Note:
 
 from __future__ import annotations
 
-import warnings
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
@@ -124,9 +123,6 @@ def bootstrap_storage_adapter(*, enable_csv_export: bool = False) -> StorageAdap
 def bootstrap_storage(*, enable_csv_export: bool = False) -> StorageAdapter:
     """Bootstrap a storage adapter for CLI and composite pipeline operations.
 
-    .. deprecated::
-        Use :func:`bootstrap_storage_adapter` instead. This alias is kept for
-        backward compatibility and will be removed in a future version.
 
     Args:
         enable_csv_export: If True, creates CsvExporters for Silver and Gold
@@ -135,9 +131,4 @@ def bootstrap_storage(*, enable_csv_export: bool = False) -> StorageAdapter:
     Returns:
         StorageAdapter configured for the current environment.
     """
-    warnings.warn(
-        "bootstrap_storage() is deprecated, use bootstrap_storage_adapter() instead",
-        DeprecationWarning,
-        stacklevel=2,
-    )
     return bootstrap_storage_adapter(enable_csv_export=enable_csv_export)
