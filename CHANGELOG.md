@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Codex Agent Playbook**: Added `docs/00-project/agents/CODEX.md` with consolidated Codex operating instructions for architecture audit, verification protocol, and Definition of Done
+  - Cross-linked from `docs/00-project/agents/README.md` and `docs/00-project/00-map.md` for discoverability
+
 - **End-to-End Metrics Audit**: Registered 32+ new Prometheus metrics that were previously silently dropped
   - Pipeline lifecycle: `pipeline_runs_total`, `phase_duration_seconds`
   - Transformer: `transform_duration_seconds`, `transform_errors_total`
