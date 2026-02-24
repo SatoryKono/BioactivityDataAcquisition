@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid4
@@ -57,9 +56,6 @@ if TYPE_CHECKING:
 
 __all__ = [
     "CompositeRuntimeConfig",
-    # Deprecated alias (backward compatibility)
-    "bootstrap_composite_pipeline",
-    # Canonical name (use this)
     "bootstrap_composite_runner",
     "load_composite_config",
 ]
@@ -563,33 +559,6 @@ def bootstrap_composite_runner(
         dq_report_service=dq_report_service,
         quarantine_port=quarantine_port,
     )
-
-
-def bootstrap_composite_pipeline(
-    config: CompositeConfig,
-    runtime: CompositeRuntimeConfig,
-    run_id: str | None = None,
-) -> CompositePipelineRunner:
-    """Bootstrap a CompositePipelineRunner with all dependencies.
-
-    .. deprecated::
-        Use :func:`bootstrap_composite_runner` instead. This alias is kept for
-        backward compatibility and will be removed in a future version.
-
-    Args:
-        config: Composite pipeline configuration.
-        runtime: Runtime options (resume, dry_run, etc.).
-        run_id: Optional run ID (generated if not provided).
-
-    Returns:
-        CompositePipelineRunner ready for execution.
-    """
-    warnings.warn(
-        "bootstrap_composite_pipeline() is deprecated, use bootstrap_composite_runner() instead",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return bootstrap_composite_runner(config=config, runtime=runtime, run_id=run_id)
 
 
 def _load_field_group_registry(

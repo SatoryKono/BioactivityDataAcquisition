@@ -11,7 +11,6 @@ Note:
 
 from __future__ import annotations
 
-import warnings
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
@@ -31,7 +30,6 @@ from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 __all__ = [
     # Deprecated alias (backward compatibility)
-    "bootstrap_storage",
     # Canonical name (use this)
     "bootstrap_storage_adapter",
 ]
@@ -119,25 +117,3 @@ def bootstrap_storage_adapter(*, enable_csv_export: bool = False) -> StorageAdap
             metadata_coordinator=metadata_coordinator,
         ),
     )
-
-
-def bootstrap_storage(*, enable_csv_export: bool = False) -> StorageAdapter:
-    """Bootstrap a storage adapter for CLI and composite pipeline operations.
-
-    .. deprecated::
-        Use :func:`bootstrap_storage_adapter` instead. This alias is kept for
-        backward compatibility and will be removed in a future version.
-
-    Args:
-        enable_csv_export: If True, creates CsvExporters for Silver and Gold
-            layers. Used by composite pipelines that need CSV output.
-
-    Returns:
-        StorageAdapter configured for the current environment.
-    """
-    warnings.warn(
-        "bootstrap_storage() is deprecated, use bootstrap_storage_adapter() instead",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return bootstrap_storage_adapter(enable_csv_export=enable_csv_export)

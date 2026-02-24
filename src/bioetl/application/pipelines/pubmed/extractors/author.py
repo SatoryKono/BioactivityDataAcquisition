@@ -209,14 +209,6 @@ class AuthorExtractor(BaseFieldExtractor):
             This method is still used internally by PubMed transformer for
             backwards compatibility. New code should use the unified service.
         """
-        import warnings
-
-        warnings.warn(
-            "AuthorExtractor.normalize() is deprecated and will be removed in version 3.0.0. "
-            "Use DataNormalizationService.normalize_author_list() for unified author normalization.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
 
         authors = []
         for raw in raw_value:

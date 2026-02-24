@@ -13,7 +13,6 @@ Note:
 
 from __future__ import annotations
 
-import warnings
 from collections.abc import Callable
 from pathlib import Path
 
@@ -33,7 +32,6 @@ from bioetl.infrastructure.storage.delta_reader import DeltaReader
 __all__ = [
     "bootstrap_bronze_cleanup_service",
     # Deprecated alias (backward compatibility)
-    "bootstrap_cleanup",
     # Canonical name (use this)
     "bootstrap_cleanup_service",
     "bootstrap_export_service",
@@ -57,24 +55,6 @@ def bootstrap_cleanup_service() -> CleanupService:
     noop_logger = create_noop_logger()
 
     return CleanupService(storage=storage, logger=noop_logger)
-
-
-def bootstrap_cleanup() -> CleanupService:
-    """Bootstrap the cleanup service for CLI operations.
-
-    .. deprecated::
-        Use :func:`bootstrap_cleanup_service` instead. This alias is kept for
-        backward compatibility and will be removed in a future version.
-
-    Returns:
-        CleanupService configured for the current environment.
-    """
-    warnings.warn(
-        "bootstrap_cleanup() is deprecated, use bootstrap_cleanup_service() instead",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return bootstrap_cleanup_service()
 
 
 def bootstrap_lifecycle_service() -> MedallionLifecycleService:

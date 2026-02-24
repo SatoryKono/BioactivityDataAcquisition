@@ -10,7 +10,6 @@ Usage:
 
 from __future__ import annotations
 
-import warnings
 from typing import Any, Literal, Self
 
 from pydantic import BaseModel, Field, ValidationError, field_validator, model_validator
@@ -825,13 +824,6 @@ def validate_composite_config_payload(
         return result
     except ValidationError:
         legacy_schema = LegacyCompositeConfigFileSchema.model_validate(payload)
-        warnings.warn(
-            "Composite config without 'composite.version' is deprecated and will "
-            f"be removed in BioETL {COMPOSITE_VERSION_DEPRECATION_TARGET}. "
-            "Add 'composite.version' explicitly.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
         normalized = legacy_schema.model_dump(mode="python")
         result = CompositeConfigFileSchema.model_validate(normalized)
         return result

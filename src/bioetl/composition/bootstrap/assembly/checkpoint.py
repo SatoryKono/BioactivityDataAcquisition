@@ -11,7 +11,6 @@ Note:
 
 from __future__ import annotations
 
-import warnings
 from typing import TYPE_CHECKING
 
 from bioetl.infrastructure.checkpoint.local_checkpoint import LocalCheckpoint
@@ -23,10 +22,8 @@ if TYPE_CHECKING:
 
 __all__ = [
     # Deprecated aliases (backward compatibility)
-    "bootstrap_checkpoint",
     # Canonical names (use these)
     "bootstrap_checkpoint_port",
-    "bootstrap_quarantine",
     "bootstrap_quarantine_port",
 ]
 
@@ -45,24 +42,6 @@ def bootstrap_quarantine_port() -> QuarantinePort:
     """
     settings = get_settings()
     return UnifiedQuarantine(base_path=str(settings.quarantine_path))
-
-
-def bootstrap_quarantine() -> QuarantinePort:
-    """Bootstrap the quarantine port for record quarantine storage.
-
-    .. deprecated::
-        Use :func:`bootstrap_quarantine_port` instead. This alias is kept for
-        backward compatibility and will be removed in a future version.
-
-    Returns:
-        QuarantinePort implementation for quarantine operations.
-    """
-    warnings.warn(
-        "bootstrap_quarantine() is deprecated, use bootstrap_quarantine_port() instead",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return bootstrap_quarantine_port()
 
 
 def bootstrap_checkpoint_port(pipeline_name: str) -> CheckpointPort:
@@ -84,24 +63,3 @@ def bootstrap_checkpoint_port(pipeline_name: str) -> CheckpointPort:
         base_path=settings.checkpoint_path,
         pipeline_name=pipeline_name,
     )
-
-
-def bootstrap_checkpoint(pipeline_name: str) -> CheckpointPort:
-    """Bootstrap the checkpoint port for pipeline state persistence.
-
-    .. deprecated::
-        Use :func:`bootstrap_checkpoint_port` instead. This alias is kept for
-        backward compatibility and will be removed in a future version.
-
-    Args:
-        pipeline_name: Name of the pipeline for checkpoint scoping.
-
-    Returns:
-        CheckpointPort implementation for checkpoint operations.
-    """
-    warnings.warn(
-        "bootstrap_checkpoint() is deprecated, use bootstrap_checkpoint_port() instead",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return bootstrap_checkpoint_port(pipeline_name=pipeline_name)

@@ -26,7 +26,6 @@ from bioetl.composition.bootstrap.runtime.assembly import (
 )
 from bioetl.composition.bootstrap.runtime.composite import (
     # Deprecated alias
-    bootstrap_composite_pipeline,
     # Canonical name
     bootstrap_composite_runner,
     load_composite_config,
@@ -34,16 +33,11 @@ from bioetl.composition.bootstrap.runtime.composite import (
 from bioetl.composition.bootstrap.runtime.observability import (
     MetricsServerError,
     # Deprecated aliases
-    bootstrap_dq_monitor,
     # Canonical names
     bootstrap_dq_monitor_port,
-    bootstrap_logger,
     bootstrap_logger_port,
-    bootstrap_metrics,
     bootstrap_metrics_port,
-    bootstrap_observability,
     bootstrap_observability_bundle,
-    bootstrap_tracer,
     bootstrap_tracer_port,
     maybe_start_metrics_server,
     start_metrics_server,
@@ -51,7 +45,6 @@ from bioetl.composition.bootstrap.runtime.observability import (
 )
 from bioetl.composition.bootstrap.runtime.pipeline import (
     # Deprecated alias
-    bootstrap_pipeline,
     # Canonical name
     bootstrap_pipeline_runner,
 )
@@ -68,25 +61,18 @@ __all__ = [
     "assemble_runtime_config",
     "assemble_vacuum_settings",
     # Composite (deprecated alias)
-    "bootstrap_composite_pipeline",
     # Composite (canonical)
     "bootstrap_composite_runner",
     # Observability (deprecated aliases)
-    "bootstrap_dq_monitor",
     "bootstrap_dq_monitor_port",
-    "bootstrap_logger",
     "bootstrap_logger_port",
-    "bootstrap_metrics",
     "bootstrap_metrics_port",
-    "bootstrap_observability",
     "bootstrap_observability_bundle",
     # Pipeline (deprecated alias)
-    "bootstrap_pipeline",
     # Pipeline (canonical)
     "bootstrap_pipeline_runner",
     # Runner service
     "bootstrap_pipeline_runner_service",
-    "bootstrap_tracer",
     "bootstrap_tracer_port",
     # Utilities
     "load_composite_config",

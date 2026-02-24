@@ -195,14 +195,6 @@ def extract_affiliations(authors: list[dict[str, Any]] | None) -> list[str]:
         >>> extract_affiliations(authors)
         ['Univ A', 'Univ B']
     """
-    import warnings
-
-    warnings.warn(
-        "extract_affiliations() is deprecated and will be removed in version 3.0.0. "
-        "Use AuthorNormalizationService.normalize_affiliations() for unified affiliation normalization.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
     if not authors:
         return []
 

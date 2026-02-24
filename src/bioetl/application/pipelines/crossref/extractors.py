@@ -116,14 +116,6 @@ def extract_affiliations(publication: dict[str, Any]) -> list[str]:
         ... })
         ['University A', 'University B']
     """
-    import warnings
-
-    warnings.warn(
-        "extract_affiliations() is deprecated and will be removed in version 3.0.0. "
-        "Use AuthorNormalizationService.normalize_affiliations() for unified affiliation normalization.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
     affiliations: set[str] = set()
     for author in publication.get("author", []):
         if not isinstance(author, dict):
