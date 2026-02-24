@@ -136,16 +136,12 @@
                 "value": null
               },
               {
-                "color": "orange",
-                "value": 0.5
-              },
-              {
                 "color": "yellow",
                 "value": 0.8
               },
               {
                 "color": "green",
-                "value": 0.95
+                "value": 0.9
               }
             ]
           },
@@ -311,7 +307,7 @@
               },
               {
                 "color": "green",
-                "value": 0.95
+                "value": 0.9
               }
             ]
           },
