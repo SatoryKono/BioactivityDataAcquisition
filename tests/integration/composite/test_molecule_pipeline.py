@@ -379,7 +379,9 @@ class TestCompositeMoleculeConfig:
         """Verify configuration file exists."""
         from pathlib import Path
 
-        config_path = Path("configs/pipelines/composite/molecule.yaml")
+        config_path = Path("configs/composites/molecule.yaml")
+        if not config_path.exists():
+            config_path = Path("configs/pipelines/composite/molecule.yaml")
         assert config_path.exists(), f"Config file not found: {config_path}"
 
     def test_data_schema_file_exists(self) -> None:

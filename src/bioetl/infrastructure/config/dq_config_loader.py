@@ -14,9 +14,10 @@ from __future__ import annotations
 
 import copy
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from bioetl.domain.config import DQConfig
+from bioetl.infrastructure.config_merge import ListMergeFn, config_merge
 from bioetl.infrastructure.schemas.dq_config import DQConfigFile
 
 from .base_config_loader import _load_yaml_file
@@ -221,26 +222,34 @@ class DQConfigLoader:
         Returns:
             Merged dict (new object, inputs unchanged).
         """
-        result = copy.deepcopy(base)
+        return config_merge(
+            base,
+            override,
+            list_merger_resolver=self._resolve_list_merger,
+        )
 
-        for key, override_value in override.items():
-            if key not in result:
-                result[key] = copy.deepcopy(override_value)
-            elif isinstance(override_value, dict) and isinstance(result[key], dict):
-                # Recursive merge for nested dicts
-                result[key] = self._deep_merge(result[key], override_value)
-            elif (
-                isinstance(override_value, list)
-                and isinstance(result[key], list)
-                and key.endswith("_validations")
-            ):
-                # Concatenate validation lists (deduplicate by name/field)
-                result[key] = self._merge_validation_lists(result[key], override_value)
-            else:
-                # Scalar or non-validation list: override
-                result[key] = copy.deepcopy(override_value)
+    def _resolve_list_merger(self, key: str) -> ListMergeFn | None:
+        """Resolve list merge strategy for a given key."""
+        if key.endswith("_validations"):
+            return self._merge_validation_lists_for_key
+        return None
 
-        return result
+    def _merge_validation_lists_for_key(
+        self,
+        base: list[Any],
+        override: list[Any],
+        _key: str,
+    ) -> list[Any]:
+        """Adapter for config_merge list strategy callback."""
+        if not all(isinstance(item, dict) for item in base) or not all(
+            isinstance(item, dict) for item in override
+        ):
+            return copy.deepcopy(override)
+
+        return self._merge_validation_lists(
+            cast(list[dict[str, Any]], base),
+            cast(list[dict[str, Any]], override),
+        )
 
     def _merge_validation_lists(
         self,

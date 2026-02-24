@@ -12,21 +12,14 @@ from typing import Any
 
 import yaml
 
+from bioetl.infrastructure.config_merge import config_merge
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 from bioetl.infrastructure.schemas.source_config import SourceYamlConfig
 
 
 def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
     """Deep merge two dictionaries, with override taking precedence."""
-    result = base.copy()
-
-    for key, value in override.items():
-        if key in result and isinstance(result[key], dict) and isinstance(value, dict):
-            result[key] = _deep_merge(result[key], value)
-        else:
-            result[key] = value
-
-    return result
+    return config_merge(base, override)
 
 
 def _load_base_config(config_path: Path) -> dict[str, Any]:
@@ -673,27 +666,18 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
 
     if "_" in pipeline_name:
         provider, entity = pipeline_name.split("_", 1)
-        legacy_path = Path(f"configs/pipelines/{provider}/{entity}.yaml")
         unified_path = Path(f"configs/entities/{provider}/{entity}.yaml")
         unified_raw = _load_unified_entity_raw(unified_path)
         unified_pipeline = _get_unified_section(unified_raw, "pipeline")
         unified_schema = _get_unified_section(unified_raw, "schema")
 
-        if legacy_path.exists():
-            config_path = legacy_path
-            with open(legacy_path, encoding="utf-8") as f:
-                legacy_entity_config = yaml.safe_load(f) or {}
-            if unified_pipeline:
-                entity_config = _deep_merge(unified_pipeline, legacy_entity_config)
-            else:
-                entity_config = legacy_entity_config
-        elif unified_pipeline:
+        if unified_pipeline:
             config_path = unified_path
             entity_config = unified_pipeline
         else:
             raise ValueError(
-                f"Configuration file not found: {legacy_path} "
-                f"(and no pipeline section in {unified_path})"
+                "Configuration file not found or missing pipeline section: "
+                f"{unified_path}"
             )
     else:
         config_path = Path(f"configs/pipelines/{pipeline_name}.yaml")
