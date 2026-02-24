@@ -50,6 +50,9 @@ jobs:
       - name: Validate VCR cassette placement
         run: python scripts/check_root_vcr_cassettes.py
 
+      - name: Validate version consistency
+        run: python scripts/check_version_consistency.py
+
       - name: Install uv
         uses: astral-sh/setup-uv@v3
 
