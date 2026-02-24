@@ -1,6 +1,6 @@
 # BioETL Dashboard Guides — Индекс документации
 
-**Местоположение:** `/docs/03-guides/dashbords/`
+**Местоположение:** `/docs/03-guides/dashboards/`
 
 ## 📚 Документация
 
@@ -87,7 +87,7 @@ python ./metrics_server.py &
 ## 📊 Структура документации
 
 ```
-📂 dashbords/
+📂 dashboards/
 ├── 📄 README.md (этот файл)           ← Навигация
 │
 ├── 🌟 BIOETL_DASHBOARD_COMPLETE.md     ← Начните отсюда
