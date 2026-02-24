@@ -56,8 +56,8 @@
 
 | Документ | Описание | Покрытие |
 |----------|----------|----------|
-| **[Contract Tests README](../../tests/contract/silver_schemas/README.md)** | Описание контрактных тестов и snapshot-процесса | Contract tests |
-| **[Publication Schema Contracts](../../tests/contract/test_publication_schema_contracts.py)** | Тесты валидации схем публикаций | Contract tests |
+| **[Contract Tests README](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/tests/contract/silver_schemas/README.md)** | Описание контрактных тестов и snapshot-процесса | Contract tests |
+| **[Publication Schema Contracts](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/tests/contract/test_publication_schema_contracts.py)** | Тесты валидации схем публикаций | Contract tests |
 
 **Test Organization:**
 ```
@@ -220,8 +220,8 @@ cat /var/log/bioetl/pipeline.log | \
 ### QA / Test Engineer (Тестирование)
 
 1. **Изучить тесты:**
-    - [Contract Tests README](../../tests/contract/silver_schemas/README.md)
-    - [Publication Schema Contracts](../../tests/contract/test_publication_schema_contracts.py)
+    - [Contract Tests README](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/tests/contract/silver_schemas/README.md)
+    - [Publication Schema Contracts](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/tests/contract/test_publication_schema_contracts.py)
 
 2. **Расширить покрытие:**
    - Base Validation: добавить edge cases для string fields (empty, whitespace, very long)

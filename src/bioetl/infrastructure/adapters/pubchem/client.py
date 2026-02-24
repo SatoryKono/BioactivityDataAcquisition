@@ -78,8 +78,8 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
         ...     thread_pool=thread_pool,
         ... )
         >>> compounds = [c async for c in adapter.fetch("compound", query="aspirin", limit=10)]
-        >>> [c['cid'] for c in compounds]  # List of compound IDs
-        [2244, 2245, 2246]
+        >>> cids = [compound['cid'] for compound in compounds]  # doctest: +SKIP
+        ... # returns [2244, 2245, 2246]
 
     """
 

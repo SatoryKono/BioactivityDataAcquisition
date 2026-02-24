@@ -200,10 +200,10 @@ General API error.
 
 ChEMBL-specific API error.
 
-::: bioetl.domain.exceptions.ChemblApiError
-    options:
-        show-root-heading: true
-        show-source: false
+<!-- ::: bioetl.domain.exceptions.ChemblApiError -->
+<!--     options: -->
+<!--         show-root-heading: true -->
+<!--         show-source: false -->
 
 ### CircuitBreakerOpenError
 

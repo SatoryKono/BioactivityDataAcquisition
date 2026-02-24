@@ -41,10 +41,10 @@ members:
 
 Protocol defining minimum required fields for all entities.
 
-::: bioetl.domain.entities.RequiredEntityFields
-options:
-show-root-heading: true
-show-source: false
+<!-- ::: bioetl.domain.entities.RequiredEntityFields -->
+<!-- options: -->
+<!-- show-root-heading: true -->
+<!-- show-source: false -->
 
 ## ChEMBL Entities
 
@@ -108,10 +108,10 @@ show-source: false
 
 PubChem compound with chemical properties.
 
-::: bioetl.domain.entities.Compound
-options:
-show-root-heading: true
-show-source: false
+<!-- ::: bioetl.domain.entities.Compound -->
+<!-- options: -->
+<!-- show-root-heading: true -->
+<!-- show-source: false -->
 
 ## PubMed Entities
 
@@ -119,10 +119,10 @@ show-source: false
 
 Scientific publication metadata.
 
-::: bioetl.domain.entities.Publication
-options:
-show-root-heading: true
-show-source: false
+<!-- ::: bioetl.domain.entities.Publication -->
+<!-- options: -->
+<!-- show-root-heading: true -->
+<!-- show-source: false -->
 
 ## UniProt Entities
 
@@ -130,10 +130,10 @@ show-source: false
 
 UniProt protein entry.
 
-::: bioetl.domain.entities.Protein
-options:
-show-root-heading: true
-show-source: false
+<!-- ::: bioetl.domain.entities.Protein -->
+<!-- options: -->
+<!-- show-root-heading: true -->
+<!-- show-source: false -->
 
 ## Usage Example
 

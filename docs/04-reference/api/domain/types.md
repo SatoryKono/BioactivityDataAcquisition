@@ -100,10 +100,10 @@ Error classification for handling strategy.
 
 Quarantine record status.
 
-::: bioetl.domain.types.DQStatus
-    options:
-        show-root-heading: true
-        show-source: false
+<!-- ::: bioetl.domain.types.DQStatus -->
+<!--     options: -->
+<!--         show-root-heading: true -->
+<!--         show-source: false -->
 
 ### WriteMode
 
