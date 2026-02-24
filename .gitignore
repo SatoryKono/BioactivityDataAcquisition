@@ -74,6 +74,7 @@ log_test.txt
 .trae/
 .windsurf/
 .cursorrules
+.cursor_tmp_*
 *.swp
 *~
 

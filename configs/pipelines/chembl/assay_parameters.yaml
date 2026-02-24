@@ -6,7 +6,6 @@ pipeline_name: chembl_assay_parameters
 provider: chembl
 entity_type: assay_parameters
 description: "Extract experimental assay parameters from ChEMBL API"
-schema_file: "../../schemas/chembl/assay_parameters.yaml"
 
 business_primary_keys: ["assay_param_id"]
 

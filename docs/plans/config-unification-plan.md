@@ -5,13 +5,23 @@
 
 ---
 
+## 0. Актуализация Плана (2026-02-24)
+
+- Текущий факт: в `configs/` **154 YAML** (не 157).
+- RF-CFG-001, RF-CFG-002 и RF-CFG-005 уже выполнены в текущем коде.
+- RF-CFG-003 выполнен: явный `schema_file` удален из стандартных pipeline config'ов (остается convention-default).
+- В плане была внутренняя коллизия по `batch_size` (Phase 0 vs §5.2): принято корректное решение из RF-CFG-004 (**SKIPPED**), т.к. `pipeline.batch_size` и `input_filter.batch_size` относятся к разным уровням.
+- RF-CFG-043 требует корректировки номера ADR: **ADR-033 уже занят**, использовать следующий свободный номер.
+
+---
+
 ## 1. Результаты Аудита
 
 ### 1.1 Текущая Статистика
 
 | Метрика | Значение |
 |---------|----------|
-| Всего YAML файлов в `configs/` | **157** |
+| Всего YAML файлов в `configs/` | **154** |
 | JSON Schema файлов | 2 |
 | Категорий конфигов | 9 (pipelines, sources, schemas, quality, filters, contracts, hash_policy, enums, naming) |
 | Файлов на 1 стандартный pipeline | **11** |
@@ -560,7 +570,7 @@ filters:
 |---------|---------|---------|---|
 | Файлов на standard pipeline | 11 | **4** | -64% |
 | Файлов на composite pipeline | 12 | **5** | -58% |
-| Всего YAML файлов | 157 | **~40** | -75% |
+| Всего YAML файлов | 154 | **~40** | -74% |
 | Базовых файлов | 3 (разрозненные) | **2** (консолидированные) | -33% |
 | Provider файлов | 21 (3 dir × 7) | **7** (unified) | -67% |
 | Дублированных строк (contracts) | 357 | **0** | -100% |
@@ -578,11 +588,11 @@ filters:
 
 | ID | Задача | Файлы | Риск |
 |----|--------|-------|------|
-| RF-CFG-001 | Удалить `quality/entities/uniprot/target.yaml` (осиротевший) | 1 | LOW |
-| RF-CFG-002 | Удалить дублирующий `dq_overrides` из `pipelines/chembl/activity.yaml` (5/6 правил = копия entity DQ) | 1 | LOW |
-| RF-CFG-003 | Удалить явный `schema_file` из entity pipeline configs (convention-defaults вычислит) | 26 | LOW |
+| RF-CFG-001 | Удалить `quality/entities/uniprot/target.yaml` (осиротевший) — **DONE** | 1 | LOW |
+| RF-CFG-002 | Удалить дублирующий `dq_overrides` из `pipelines/chembl/activity.yaml` (5/6 правил = копия entity DQ) — **DONE** | 1 | LOW |
+| RF-CFG-003 | Удалить явный `schema_file` из entity pipeline configs (convention-defaults вычислит) — **DONE (21 standard pipelines)** | 21 | LOW |
 | RF-CFG-004 | ~~Выровнять `batch_size`~~ **SKIPPED**: pipeline `batch_size` (processing) ≠ filter `input_filter.batch_size` (API) — разные параметры | 0 | — |
-| RF-CFG-005 | Добавить `loading_strategy: full_scan_only` как параметр в `_base.yaml` (default: null) | 1 | LOW |
+| RF-CFG-005 | Добавить `loading_strategy: full_scan_only` как параметр в `_base.yaml` (default: null) — **DONE** | 1 | LOW |
 
 #### Phase 1: Консолидация Base (2 base файла)
 
@@ -626,7 +636,7 @@ filters:
 | RF-CFG-040 | Обновить JSON Schema (`_schema/pipeline.json`, `_schema/composite.json`) | 2 | MEDIUM |
 | RF-CFG-041 | Обновить golden master тесты | ~10 | HIGH |
 | RF-CFG-042 | Обновить `docs/04-reference/` — config reference docs | ~5 | LOW |
-| RF-CFG-043 | Создать ADR-033: Config Unification | 1 | LOW |
+| RF-CFG-043 | Создать ADR-039: Config Unification (ADR-033 уже занят) | 1 | LOW |
 | RF-CFG-044 | Обновить README в configs/ | 1 | LOW |
 
 ### 4.2 Порядок Выполнения
@@ -665,23 +675,25 @@ Phase 4 (validation + docs)  → 1 день  │ golden master + ADR
 
 ### 5.1 `schema_file` — можно удалить из entity configs
 
-Все 26 entity configs содержат явный `schema_file: ../../schemas/{p}/{e}.yaml`.
+Все 21 standard pipeline config содержали явный `schema_file: ../../schemas/{p}/{e}.yaml`.
 Код `_apply_convention_defaults` уже вычисляет этот путь автоматически.
-**Действие:** удалить `schema_file` из всех entity pipeline configs.
+**Статус:** выполнено для standard pipelines.
 
 ### 5.2 `batch_size` — дублируется в 2 местах
 
 - `pipelines/chembl/activity.yaml`: `batch_size: 1000`
 - `filters/providers/chembl.yaml`: `input_filter.batch_size: 1000`
 
-Оба читаются, но pipeline-level `batch_size` перезаписывается filter loader.
-**Действие:** удалить `batch_size` из pipeline config, оставить в filter config.
+Параметры выглядят похоже, но имеют разный смысл:
+- `pipeline.batch_size` = размер обработки/записи batch в pipeline execution.
+- `input_filter.batch_size` = размер API/input batch в filter extraction.
+**Действие:** не удалять `pipeline.batch_size`; оставить RF-CFG-004 в статусе **SKIPPED**.
 
 ### 5.3 `dq_overrides` — дубликаты с entity DQ config
 
 `chembl_activity` — единственный pipeline с inline `dq_overrides`.
-5 из 6 правил идентичны `quality/entities/chembl/activity.yaml`.
-**Действие:** оставить только уникальное правило `activity_completeness` cross-field.
+Ранее 5 из 6 правил были идентичны `quality/entities/chembl/activity.yaml`; дубли уже удалены.
+**Текущий остаток (валидный):** только narrowing overrides для `standard_type` и `standard_units`.
 
 ### 5.4 `loading_strategy` — добавить в base
 
@@ -694,7 +706,7 @@ Phase 4 (validation + docs)  → 1 день  │ golden master + ADR
 ## Приложение A: Полная Карта Файлов (Текущее → Целевое)
 
 ```
-ТЕКУЩЕЕ (157 YAML)                         ЦЕЛЕВОЕ (~40 YAML)
+ТЕКУЩЕЕ (154 YAML)                         ЦЕЛЕВОЕ (~40 YAML)
 ═══════════════════                         ═══════════════════
 
 pipelines/_base.yaml ──────────────────┐
