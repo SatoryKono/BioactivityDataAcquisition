@@ -48,7 +48,8 @@ class TestFileSizeLimits:
         "data_normalization_service.py": 380,  # 365 LOC - Data normalization with multiple field handlers
         "value_validator.py": 360,  # 351 LOC - Value objects validation
         "activity.py": 330,  # 327 LOC - Activity domain types with rich validation
-        "types.py": 420,  # 414 LOC - domain types + PublicationType + ExecutionContext enums
+        "types.py": 435,  # 428 LOC - domain types + PublicationType + CellularityType + ExecutionContext enums
+        "organism_classification.py": 420,  # ~410 LOC - Static taxonomy_id→CellularityType mapping (~100 entries from ChEMBL dataset)
         "context.py": 390,  # 385 LOC - PipelineContext with rich metadata and validation + InputFilterContext.from_multi_ids + execution_context
         "state.py": 380,  # 371 LOC - CompositePipelineState FSM with transition rules
         "chembl_structures.py": 510,  # 506 LOC - ChEMBL structural entities + deprecated alias __getattr__ (v2.0)
