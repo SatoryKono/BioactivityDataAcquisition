@@ -484,7 +484,7 @@ docker compose -f docker-compose.monitoring.yml down
 - **grafana/README.md** — быстрый старт
 - **docs/05-operations/01-monitoring-guide.md** — полный гайд
 - **docs/03-guides/metrics-monitoring.md** — каталог метрик
-- **docs/03-guides/dashbords/** — документация по дашбордам
+- **docs/03-guides/dashboards/** — документация по дашбордам
 
 ---
 

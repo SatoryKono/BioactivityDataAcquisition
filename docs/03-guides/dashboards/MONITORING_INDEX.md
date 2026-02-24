@@ -47,7 +47,7 @@
 
 ### 💡 Документация по дашбордам
 
-**[docs/03-guides/dashbords/](../dashbords/)**
+**[docs/03-guides/dashboards/](../dashboards/)**
 
 | Файл | Содержит |
 |------|----------|

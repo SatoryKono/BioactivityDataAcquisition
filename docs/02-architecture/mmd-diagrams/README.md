@@ -70,38 +70,38 @@ sudo apt-get install librsvg2-bin
 
 ```bash
 # Render ALL diagrams (SVG + PNG) with custom theme
-bash docs/03-diagrams/render.sh
+bash docs/02-architecture/mmd-diagrams/render.sh
 
 # SVG only (faster)
-bash docs/03-diagrams/render.sh --svg-only
+bash docs/02-architecture/mmd-diagrams/render.sh --svg-only
 
 # Single diagram with theme
-mmdc -i docs/03-diagrams/architecture/01-high-level-hexagonal.mmd \
+mmdc -i docs/02-architecture/mmd-diagrams/architecture/01-high-level-hexagonal.mmd \
      -o output.svg \
-     -c docs/03-diagrams/theme/mermaid-config.json \
-     --cssFile docs/03-diagrams/theme/custom.css
+     -c docs/02-architecture/mmd-diagrams/theme/mermaid-config.json \
+     --cssFile docs/02-architecture/mmd-diagrams/theme/custom.css
 ```
 
 ### Render options
 
 ```bash
 # Filter by name glob
-bash docs/03-diagrams/render.sh --filter "01-*"
+bash docs/02-architecture/mmd-diagrams/render.sh --filter "01-*"
 
 # Single directory only
-bash docs/03-diagrams/render.sh --dir docs/03-diagrams/architecture
+bash docs/02-architecture/mmd-diagrams/render.sh --dir docs/02-architecture/mmd-diagrams/architecture
 
 # Adjust PNG resolution
-bash docs/03-diagrams/render.sh --scale 4 --width 3200 --height 2400
+bash docs/02-architecture/mmd-diagrams/render.sh --scale 4 --width 3200 --height 2400
 
 # CI mode (Puppeteer sandbox disabled)
-bash docs/03-diagrams/render.sh --puppeteer /tmp/puppeteer-config.json
+bash docs/02-architecture/mmd-diagrams/render.sh --puppeteer /tmp/puppeteer-config.json
 ```
 
 ### Output layout
 
 ```
-docs/03-diagrams/
+docs/02-architecture/mmd-diagrams/
   architecture/
     *.mmd           # source diagrams
     svg/*.svg       # rendered vector (scalable)

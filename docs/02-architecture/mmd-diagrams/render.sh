@@ -8,7 +8,7 @@
 #   ./render.sh --svg-only             # SVG only (fast)
 #   ./render.sh --png-only             # PNG only
 #   ./render.sh --filter "01-*"        # glob filter on filename
-#   ./render.sh --dir docs/03-diagrams/architecture   # single dir
+#   ./render.sh --dir docs/02-architecture/mmd-diagrams/architecture   # single dir
 #   ./render.sh --help
 # ─────────────────────────────────────────────────────────────
 set -euo pipefail
@@ -33,8 +33,8 @@ JOBS=4           # parallel jobs
 # ── Diagram source directories ──────────────────────────────
 DEFAULT_DIRS=(
   "$REPO_ROOT/docs/02-architecture/diagrams"
-  "$REPO_ROOT/docs/03-diagrams/architecture"
-  "$REPO_ROOT/docs/03-diagrams/class-diagrams"
+  "$REPO_ROOT/docs/02-architecture/mmd-diagrams/architecture"
+  "$REPO_ROOT/docs/02-architecture/mmd-diagrams/class-diagrams"
 )
 
 # ── Colours ─────────────────────────────────────────────────
