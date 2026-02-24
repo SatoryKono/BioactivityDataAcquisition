@@ -261,6 +261,7 @@ class TestStrictErrorHandlingConfig:
         with patch.dict(
             os.environ,
             {"BIOETL_STRICT_ERROR_HANDLING": "true", "BIOETL_ENV": "staging"},
+            clear=True,
         ):
             from bioetl.infrastructure.config import Settings
 
@@ -272,6 +273,7 @@ class TestStrictErrorHandlingConfig:
         with patch.dict(
             os.environ,
             {"BIOETL_STRICT_ERROR_HANDLING": "True", "BIOETL_ENV": "staging"},
+            clear=True,
         ):
             from bioetl.infrastructure.config import Settings
 
@@ -281,6 +283,7 @@ class TestStrictErrorHandlingConfig:
         with patch.dict(
             os.environ,
             {"BIOETL_STRICT_ERROR_HANDLING": "TRUE", "BIOETL_ENV": "staging"},
+            clear=True,
         ):
             from bioetl.infrastructure.config import Settings
 
