@@ -5,7 +5,6 @@
 pipeline_name: chembl_cell_line
 provider: chembl
 entity_type: cell_line
-schema_file: ../../schemas/chembl/cell_line.yaml
 description: "Extract cell lines from ChEMBL API"
 
 business_primary_keys: ["cell_id"]

@@ -5,7 +5,6 @@
 pipeline_name: chembl_protein_class
 provider: chembl
 entity_type: protein_class
-schema_file: ../../schemas/chembl/protein_class.yaml
 description: "ChEMBL Protein Classification hierarchy (enzyme classes, receptor types, etc.)"
 
 business_primary_keys: ["protein_class_id"]

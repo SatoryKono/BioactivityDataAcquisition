@@ -12,6 +12,10 @@
 version: "1.2.0"
 technical_primary_key: "entity_id"
 
+# Loading strategy (ADR-031). null = default incremental.
+# Override per-entity: "full_scan_only" for APIs without stable cursors.
+loading_strategy: null
+
 source: {}
 
 transform:
