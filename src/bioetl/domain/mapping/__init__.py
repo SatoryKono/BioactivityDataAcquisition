@@ -26,10 +26,10 @@ from bioetl.domain.mapping.publication_type_mapping import (
 __all__ = [
     "ACTIVITY_FIELD_MAPPING",
     "MOLECULE_FIELD_MAPPING",
-    "OrganismClassificationResult",
     "PUBLICATION_FIELD_MAPPING",
     "PUBLICATION_TYPE_MAPPING",
     "UNIFIED_TO_PROVIDER",
+    "OrganismClassificationResult",
     "PublicationTypeEntry",
     "apply_field_mapping",
     "classify_organism",
