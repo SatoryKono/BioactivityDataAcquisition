@@ -58,5 +58,5 @@ def load_pipeline_contract_policy(provider: str, entity: str) -> PipelineContrac
 
     raw = legacy_raw
 
-    result: PipelineContractPolicy = PipelineContractPolicy.model_validate(raw)
-    return result
+    legacy_result: PipelineContractPolicy = PipelineContractPolicy.model_validate(raw)
+    return legacy_result
