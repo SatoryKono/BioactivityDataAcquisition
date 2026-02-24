@@ -1,7 +1,7 @@
 # Naming Convention Exceptions
 # This file documents allowed exceptions to the naming conventions in RULES.md §2.
 # Version: 2.1
-# Last Updated: 2026-01-21
+# Last Updated: 2026-02-24
 
 # Documentation files that are allowed to use UPPER_CASE names.
 # These are conventional files recognized by GitHub and standard tooling.
@@ -189,3 +189,50 @@ pipeline_id_format:
 # - The naming_audit.py tool uses this file's content as reference
 # - Violations against these exceptions should NOT be flagged
 # - Add new exceptions here with justification
+
+# Explicit exception registry for ADR-024 audit traceability
+exception_registry:
+  derived_entities:
+    - name: DocumentSimilarity
+      location: src/bioetl/domain/entities/chembl_structures.py
+      status: allowed
+      reason: ChEMBL-specific derived artifact kept by design.
+    - name: DocumentTerm
+      location: src/bioetl/domain/entities/chembl_structures.py
+      status: allowed
+      reason: ChEMBL-specific derived artifact kept by design.
+
+  pipeline_id_exceptions:
+    - name: pubchem_compound
+      location: configs/pipelines/pubchem/compound.yaml
+      status: allowed
+      reason: CLI/provider naming intentionally uses PubChem API term.
+    - name: uniprot_protein
+      location: configs/pipelines/uniprot/protein.yaml
+      status: allowed
+      reason: CLI/provider naming intentionally uses UniProt API term.
+
+  legacy_field_exceptions:
+    - field: document_id
+      status: allowed
+      reason: Foreign key alignment with ChEMBL API structure.
+    - field: document_chembl_id
+      status: allowed
+      reason: Foreign key alignment with ChEMBL API structure.
+
+  deprecated_aliases:
+    - alias: Document
+      canonical: ChemblPublication
+      status: not_implemented
+      removal_version: v3.0
+      reason: Direct migration to canonical names; no runtime alias exported.
+    - alias: Compound
+      canonical: PubchemMolecule
+      status: not_implemented
+      removal_version: v3.0
+      reason: Direct migration to canonical names; no runtime alias exported.
+    - alias: Protein
+      canonical: UniprotTarget
+      status: not_implemented
+      removal_version: v3.0
+      reason: Direct migration to canonical names; no runtime alias exported.
