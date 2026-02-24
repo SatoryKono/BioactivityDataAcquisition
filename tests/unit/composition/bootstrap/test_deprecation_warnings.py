@@ -150,17 +150,27 @@ class TestObservabilityDeprecationWarnings:
 class TestPipelineDeprecationWarnings:
     """Tests for deprecated aliases in runtime pipeline bootstrap layer."""
 
-    @pytest.mark.skip(reason="requires full composition context")
-    def test_bootstrap_pipeline_emits_deprecation_warning(self) -> None:
+    @patch(
+        "bioetl.composition.bootstrap.runtime.pipeline.bootstrap_pipeline_runner"
+    )
+    def test_bootstrap_pipeline_emits_deprecation_warning(
+        self, mock_runner: MagicMock
+    ) -> None:
         """bootstrap_pipeline must emit DeprecationWarning."""
+        mock_runner.return_value = MagicMock()
         from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline
 
         with pytest.warns(DeprecationWarning, match="bootstrap_pipeline.*deprecated"):
             bootstrap_pipeline(ctx=MagicMock())
 
-    @pytest.mark.skip(reason="requires full composition context")
-    def test_bootstrap_composite_pipeline_emits_deprecation_warning(self) -> None:
+    @patch(
+        "bioetl.composition.bootstrap.runtime.composite.bootstrap_composite_runner"
+    )
+    def test_bootstrap_composite_pipeline_emits_deprecation_warning(
+        self, mock_runner: MagicMock
+    ) -> None:
         """bootstrap_composite_pipeline must emit DeprecationWarning."""
+        mock_runner.return_value = MagicMock()
         from bioetl.composition.bootstrap.runtime.composite import (
             bootstrap_composite_pipeline,
         )

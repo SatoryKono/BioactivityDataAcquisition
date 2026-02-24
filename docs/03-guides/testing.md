@@ -124,7 +124,7 @@ make test-ci
 make test-serial
 
 # Явный параллельный запуск вручную
-pytest tests/ -m "not serial" -n auto --dist loadscope
+pytest tests/ -m "not serial" -n auto --dist loadscope --max-worker-restart=0
 ```
 
 **Производительность** (verified 2026-01-19):

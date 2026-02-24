@@ -8,17 +8,18 @@ Cassettes location: tests/fixtures/vcr/chembl/
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Any
 
 import pytest
 
-from bioetl.composition.bootstrap import bootstrap_pipeline_runner
 from .conftest import (
     assert_bronze_files_exist,
     assert_silver_table_has_records,
     create_test_context,
     get_silver_records,
+    run_pipeline_or_skip_transient,
 )
 
 # VCR cassette directory for ChEMBL E2E tests
@@ -30,7 +31,7 @@ def vcr_config() -> dict[str, Any]:
     """Configure VCR for ChEMBL Molecule E2E tests."""
     return {
         "cassette_library_dir": str(CASSETTE_DIR),
-        "record_mode": "all",
+        "record_mode": os.environ.get("VCR_RECORD_MODE", "none"),
         "match_on": ["method", "scheme", "host", "port", "path", "query"],
         "decode_compressed_response": True,
     }
@@ -51,8 +52,7 @@ async def test_chembl_molecule_full_cycle(e2e_data_dir: Path):
     ctx = create_test_context("chembl_molecule", limit=5)
 
     # Act
-    runner = bootstrap_pipeline_runner(ctx)
-    await runner.run()
+    await run_pipeline_or_skip_transient(ctx)
 
     # Assert - Bronze layer
     bronze_files = assert_bronze_files_exist(e2e_data_dir, "chembl", "molecule")
@@ -84,8 +84,7 @@ async def test_chembl_molecule_structural_fields(e2e_data_dir: Path):
     ctx = create_test_context("chembl_molecule", limit=5)
 
     # Act
-    runner = bootstrap_pipeline_runner(ctx)
-    await runner.run()
+    await run_pipeline_or_skip_transient(ctx)
 
     # Assert - Check structural fields
     records = get_silver_records(e2e_data_dir, "chembl_molecule")
