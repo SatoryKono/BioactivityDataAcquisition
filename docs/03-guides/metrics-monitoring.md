@@ -61,6 +61,25 @@ export BIOETL-METRICS-ENABLED=false
 
 ## Prometheus Metrics
 
+### Правила расширения MetricsPort (Implementation MUST)
+
+- **НЕ создавать** новый порт `domain/ports/metrics.py`.
+- Расширять существующий контракт `MetricsPort` только в
+  `src/bioetl/domain/ports/observability.py`.
+- В текущем проекте используется единый подход: **generic metrics API**.
+  Новые метрики добавляются через стандартные методы
+  `observe_histogram()` / `increment_counter()` / `set_gauge()` с
+  нормализованными строковыми именами.
+- Для каждой новой метрики обязательно:
+  1. определить объект метрики в
+     `src/bioetl/infrastructure/observability/metrics.py`,
+  2. зарегистрировать её в `HISTOGRAMS` / `COUNTERS` / `GAUGES` в
+     `src/bioetl/infrastructure/observability/prometheus_metrics.py`.
+
+> Если в будущем потребуется typed API, helper-методы добавляются в
+> `MetricsPort` в `observability.py` и синхронно реализуются в Prometheus и
+> NoOp реализациях без дублирования интерфейсов.
+
 ### Доступ к метрикам
 
 После запуска пайплайна метрики доступны на HTTP endpoint:
