@@ -2,7 +2,7 @@
 
 *Дата создания: 2026-02-17*
 
----
+______________________________________________________________________
 
 ## Контекст для AI-агента
 
@@ -11,7 +11,7 @@
 Hexagonal Architecture (Ports & Adapters) с 5 слоями и Medallion Architecture
 для хранения данных (Bronze → Silver → Gold).
 
----
+______________________________________________________________________
 
 ## Часть 0: Обязательное изучение проекта
 
@@ -39,7 +39,7 @@ docs/02-architecture/system-context.md       — System Context
 docs/02-architecture/observability-layers.md — Observability
 ```
 
-### 0.2 ADR (Architecture Decision Records) — все 34
+### 0.2 ADR (Architecture Decision Records) — все 38
 
 ```
 docs/02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md
@@ -76,6 +76,10 @@ docs/02-architecture/decisions/ADR-031-loading-strategy-formalization.md
 docs/02-architecture/decisions/ADR-032-unified-http-client.md
 docs/02-architecture/decisions/ADR-033-publication-validation-strategy.md
 docs/02-architecture/decisions/ADR-034-schema-domain-pairs.md
+docs/02-architecture/decisions/ADR-035-json-field-typing-policy.md
+docs/02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md
+docs/02-architecture/decisions/ADR-037-canonical-schema-generation.md
+docs/02-architecture/decisions/ADR-038-enum-externalization.md
 ```
 
 ### 0.3 Существующие диаграммы (НЕ дублировать!)
@@ -335,7 +339,7 @@ src/bioetl/interfaces/http/health-server.py
 - **Цвета**: Bronze=#FFA500, Silver=#C0C0C0, Gold=#FFD700, Error=#FF6B6B, Success=#4CAF50, External=#2196F3
 - **Каждая диаграмма MUST** содержать: Title (как comment), Legend (если нужна), RULES.md reference
 
----
+______________________________________________________________________
 
 ## Часть 1: Генерация 500 НОВЫХ диаграмм
 
@@ -343,17 +347,18 @@ src/bioetl/interfaces/http/health-server.py
 **ещё нет** среди 34 существующих. Для каждой диаграммы укажи:
 
 1. **Порядковый номер** (1–500)
-2. **Название** (англ.)
-3. **Тип диаграммы** (одно из: `classDiagram`, `sequenceDiagram`, `flowchart`,
+1. **Название** (англ.)
+1. **Тип диаграммы** (одно из: `classDiagram`, `sequenceDiagram`, `flowchart`,
    `stateDiagram`, `erDiagram`, `C4Context`, `C4Container`, `C4Component`,
    `mindmap`, `timeline`, `gantt`, `pie`, `gitgraph`, `block-beta`,
    `architecture-beta`, `sankey-beta`, `xychart-beta`)
-4. **Категория** (одна из: Architecture, DataFlow, Pattern, Component,
+1. **Категория** (одна из: Architecture, DataFlow, Pattern, Component,
    Interaction, Lifecycle, Configuration, Provider, Testing, Security,
    Observability, Composite, DomainModel, ErrorHandling, Performance)
-5. **Краткое описание** (1 предложение)
+1. **Краткое описание** (1 предложение)
 
 Распредели диаграммы по категориям равномерно, но с акцентом на:
+
 - **Architecture** (~60): высокоуровневая архитектура, C4, deployment
 - **DataFlow** (~60): потоки данных через Bronze/Silver/Gold
 - **Pattern** (~50): паттерны проектирования, применённые в проекте
@@ -381,7 +386,7 @@ src/bioetl/interfaces/http/health-server.py
   методы и модули из кодовой базы (534 Python файла)
 - **Разнообразие типов**: используй минимум 10 разных типов Mermaid-диаграмм
 
----
+______________________________________________________________________
 
 ## Часть 2: Выбор 50 наиболее важных
 
@@ -389,13 +394,13 @@ src/bioetl/interfaces/http/health-server.py
 
 ### Критерии оценки (каждый 1–10 баллов)
 
-| Критерий | Вес | Описание |
-|----------|-----|----------|
-| **Arch** | ×2.0 | Архитектурная важность: насколько критична для понимания архитектуры |
-| **Doc** | ×1.5 | Документационная ценность: полезность для нового разработчика |
-| **Freq** | ×1.5 | Частота использования: как часто нужна при работе с проектом |
-| **Complex** | ×2.0 | Сложность без диаграммы: насколько сложно понять без визуализации |
-| **Coverage** | ×1.0 | Охват кодовой базы: сколько компонентов покрывает |
+| Критерий     | Вес  | Описание                                                             |
+| ------------ | ---- | -------------------------------------------------------------------- |
+| **Arch**     | ×2.0 | Архитектурная важность: насколько критична для понимания архитектуры |
+| **Doc**      | ×1.5 | Документационная ценность: полезность для нового разработчика        |
+| **Freq**     | ×1.5 | Частота использования: как часто нужна при работе с проектом         |
+| **Complex**  | ×2.0 | Сложность без диаграммы: насколько сложно понять без визуализации    |
+| **Coverage** | ×1.0 | Охват кодовой базы: сколько компонентов покрывает                    |
 
 **Формула**: `Priority = (Arch×2 + Doc×1.5 + Freq×1.5 + Complex×2 + Coverage×1) / 8`
 
@@ -409,7 +414,7 @@ src/bioetl/interfaces/http/health-server.py
 - Минимум 2 диаграммы observability
 - Не более 15 диаграмм одной категории
 
----
+______________________________________________________________________
 
 ## Часть 3: Таблица 50 диаграмм
 
@@ -430,7 +435,7 @@ src/bioetl/interfaces/http/health-server.py
 почему эта диаграмма попала в TOP-50, какую проблему понимания она решает,
 и кому из участников проекта она наиболее полезна.
 
----
+______________________________________________________________________
 
 ## Часть 4: Создание и рендер TOP-25 диаграмм
 
@@ -486,6 +491,7 @@ done
 
 **Критерий читаемости**: после рендера открой каждый PNG и проверь,
 что все надписи свободно читаются при 100% масштабе. Если текст мелкий:
+
 - Увеличь `--scale` до 4 или 5
 - Или увеличь `--width` до 3200+
 - Или упрости диаграмму, разбив на 2 отдельных
@@ -495,9 +501,9 @@ done
 После создания всех файлов обнови:
 
 1. `docs/02-architecture/diagrams/diagrams-index.md` — добавь новые диаграммы
-2. Создай директорию `docs/02-architecture/diagrams/png/` если не существует
+1. Создай директорию `docs/02-architecture/diagrams/png/` если не существует
 
----
+______________________________________________________________________
 
 ## Часть 5: Проверка качества (self-review)
 
@@ -531,7 +537,7 @@ grep -rn "class ИмяКласса" src/bioetl/ --include="*.py"
 - Каждый PNG весит > 50KB (не пустой/битый)
 - Текст на каждой диаграмме читаем при 100% масштабе
 
----
+______________________________________________________________________
 
 ## Справочная информация
 
@@ -547,25 +553,25 @@ Infrastructure → Adapters (7 providers), Storage (Bronze/Silver/Gold), HTTP, L
 
 ### Матрица импортов
 
-| From \ To | domain | application | infrastructure | composition | interfaces |
-|-----------|--------|-------------|----------------|-------------|------------|
-| domain | ✅ | ❌ | ❌ | ❌ | ❌ |
-| application | ✅ | ✅ | ❌ | ❌ | ❌ |
-| infrastructure | ✅ | ❌ | ✅ | ❌ | ❌ |
-| composition | ✅ | ✅ | ✅ | ✅ | ❌ |
-| interfaces | ✅ | ✅ | ✅ | ✅ | ✅ |
+| From \\ To     | domain | application | infrastructure | composition | interfaces |
+| -------------- | ------ | ----------- | -------------- | ----------- | ---------- |
+| domain         | ✅     | ❌          | ❌             | ❌          | ❌         |
+| application    | ✅     | ✅          | ❌             | ❌          | ❌         |
+| infrastructure | ✅     | ❌          | ✅             | ❌          | ❌         |
+| composition    | ✅     | ✅          | ✅             | ✅          | ❌         |
+| interfaces     | ✅     | ✅          | ✅             | ✅          | ✅         |
 
 ### 7 провайдеров
 
-| Provider | Entity Types | Adapter |
-|----------|-------------|---------|
-| ChEMBL | activity, molecule, target, assay, compound-record, cell-line, protein-class, tissue, publication, publication-term, publication-similarity, subcellular-fraction, assay-parameters, target-component | `ChemblClient` |
-| PubChem | compound | `PubChemClient` |
-| UniProt | protein, idmapping | `UniProtClient` |
-| CrossRef | publication | `CrossRefClient` |
-| PubMed | publication | `PubMedClient` |
-| OpenAlex | publication | `OpenAlexClient` |
-| SemanticScholar | publication | `SemanticScholarAdapter` |
+| Provider        | Entity Types                                                                                                                                                                                          | Adapter                  |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| ChEMBL          | activity, molecule, target, assay, compound-record, cell-line, protein-class, tissue, publication, publication-term, publication-similarity, subcellular-fraction, assay-parameters, target-component | `ChemblClient`           |
+| PubChem         | compound                                                                                                                                                                                              | `PubChemClient`          |
+| UniProt         | protein, idmapping                                                                                                                                                                                    | `UniProtClient`          |
+| CrossRef        | publication                                                                                                                                                                                           | `CrossRefClient`         |
+| PubMed          | publication                                                                                                                                                                                           | `PubMedClient`           |
+| OpenAlex        | publication                                                                                                                                                                                           | `OpenAlexClient`         |
+| SemanticScholar | publication                                                                                                                                                                                           | `SemanticScholarAdapter` |
 
 ### 24 доменных порта
 
@@ -580,34 +586,34 @@ ShutdownPort, SerializationPort, DQConfigLoaderPort, FilterConfigLoaderPort
 
 ### 3 DDD Aggregates
 
-| Aggregate | States | Key Methods |
-|-----------|--------|-------------|
-| PipelineRun | PENDING → RUNNING → COMPLETED/FAILED/CANCELLED | start(), complete-stage(), fail(), cancel() |
-| Batch | OPEN → SEALED → WRITING → COMMITTED/FAILED | add-record(), seal(), mark-writing(), commit(), mark-failed() |
-| QuarantineEntry | NEW → UNDER-REVIEW → RESOLVED/DISCARDED | start-review(), resolve(), discard() |
+| Aggregate       | States                                         | Key Methods                                                   |
+| --------------- | ---------------------------------------------- | ------------------------------------------------------------- |
+| PipelineRun     | PENDING → RUNNING → COMPLETED/FAILED/CANCELLED | start(), complete-stage(), fail(), cancel()                   |
+| Batch           | OPEN → SEALED → WRITING → COMMITTED/FAILED     | add-record(), seal(), mark-writing(), commit(), mark-failed() |
+| QuarantineEntry | NEW → UNDER-REVIEW → RESOLVED/DISCARDED        | start-review(), resolve(), discard()                          |
 
 ### Ключевые параметры
 
-| Parameter | Value |
-|-----------|-------|
-| Lock TTL | 90s |
-| Heartbeat Interval | 30s |
-| Circuit Breaker Threshold | 5 failures |
-| Circuit Breaker Recovery Timeout | 300s |
-| DQ Soft Threshold | 5% |
-| DQ Hard Threshold | 20% |
-| Bronze Retention | 90 days |
-| Quarantine Retention | 30 days |
-| Max Retry Attempts | 3 |
-| Batch Size (default) | 1000 records |
+| Parameter                        | Value        |
+| -------------------------------- | ------------ |
+| Lock TTL                         | 90s          |
+| Heartbeat Interval               | 30s          |
+| Circuit Breaker Threshold        | 5 failures   |
+| Circuit Breaker Recovery Timeout | 300s         |
+| DQ Soft Threshold                | 5%           |
+| DQ Hard Threshold                | 20%          |
+| Bronze Retention                 | 90 days      |
+| Quarantine Retention             | 30 days      |
+| Max Retry Attempts               | 3            |
+| Batch Size (default)             | 1000 records |
 
 ### Статистика кодовой базы
 
-| Слой | Python файлов |
-|------|--------------|
-| domain | ~170 |
-| application | ~100 |
-| infrastructure | ~85 |
-| composition | ~55 |
-| interfaces | ~25 |
-| **Всего** | **~534** |
+| Слой           | Python файлов |
+| -------------- | ------------- |
+| domain         | ~170          |
+| application    | ~100          |
+| infrastructure | ~85           |
+| composition    | ~55           |
+| interfaces     | ~25           |
+| **Всего**      | **~534**      |
