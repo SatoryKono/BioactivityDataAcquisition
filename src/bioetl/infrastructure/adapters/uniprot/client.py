@@ -20,13 +20,8 @@ from typing import TYPE_CHECKING, Any
 
 from typing_extensions import override
 
-from bioetl.domain.ports import NoOpMetrics
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
-from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
-from bioetl.infrastructure.adapters.common.api_request_collector import (
-    APIRequestCollector,
-)
 from bioetl.infrastructure.adapters.http.pagination import PaginatedFetcherMixin
 from bioetl.infrastructure.adapters.uniprot.fasta_parser import FastaParser
 
@@ -125,13 +120,10 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
             metrics: MetricsPort instance for recording SLA metrics
 
         """
-        super().__init__(http_client, logger)
+        super().__init__(http_client, logger, metrics=metrics)
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.strict_error_handling = strict_error_handling
-        metrics_port = metrics if metrics is not None else NoOpMetrics()
-        self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
-        self._request_collector = APIRequestCollector()
         self._fetch_strategies = {
             "protein": self._fetch_proteins,
             "feature": self._fetch_features,
