@@ -70,6 +70,9 @@
 # Запуск всех тестов (кроме E2E)
 make test
 
+# CI-подобный устойчивый прогон (parallel + fallback + serial pass)
+make test-ci
+
 # Запуск только архитектурных тестов
 make test-architecture
 
@@ -107,14 +110,21 @@ pytest --cov=src/bioetl tests/
 
 ### 6.1. Параллельное Выполнение (pytest-xdist)
 
-Тесты поддерживают параллельное выполнение через `pytest-xdist`:
+Тесты поддерживают параллельное выполнение через `pytest-xdist`, но локальный
+дефолт теперь serial для стабильности:
 
 ```bash
-# Параллельное выполнение (рекомендуется)
-make test  # Использует -n auto --dist loadscope
+# Локальный стабильный дефолт (serial)
+make test
+
+# Явный CI-подобный режим (parallel + fallback при worker crash)
+make test-ci
 
 # Serial execution (для отладки)
 make test-serial
+
+# Явный параллельный запуск вручную
+pytest tests/ -m "not serial" -n auto --dist loadscope
 ```
 
 **Производительность** (verified 2026-01-19):
@@ -123,7 +133,7 @@ make test-serial
 - Parallel (auto): ~55-75s (зависит от hardware)
 - Улучшение: **~60-65%**
 
-**Статус pytest-xdist**: Работает корректно. Проблема с collection была решена в v5.9.0.
+**Статус pytest-xdist**: Используется в CI и explicit local runs; serial tests выполняются отдельным serial-pass.
 
 ### 6.2. Hypothesis Профили
 
@@ -208,7 +218,7 @@ Stage 5: Contract (ежемесячно)
 make setup-dev
 
 # Универсальный скрипт (создаст venv и установит зависимости)
-./dev-setup.sh
+./scripts/dev/dev_setup.sh
 ```
 
 Команда `make setup-dev` выполняет полную синхронизацию зависимостей и запускает расширенный набор проверок `test-deps-dev`.
