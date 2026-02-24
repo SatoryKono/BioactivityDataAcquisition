@@ -34,7 +34,7 @@ flowchart LR
 
 Writer for Bronze layer (raw data in JSONL + zstd compression).
 
-::: bioetl.infrastructure.storage.bronze-writer.BronzeWriter
+::: bioetl.infrastructure.storage.bronze_writer.BronzeWriter
     options:
         show-root-heading: true
         show-source: false
@@ -63,7 +63,7 @@ Writer for Silver layer (Delta Lake with merge/upsert).
 
 > **Note**: `DeltaWriter` is deprecated and will be removed after a 14-day deprecation period. Use `SilverWriter` instead. The class was renamed to follow the Medallion layer naming convention (BronzeWriter, SilverWriter, GoldWriter).
 
-::: bioetl.infrastructure.storage.silver-writer.SilverWriter
+::: bioetl.infrastructure.storage.silver_writer.SilverWriter
     options:
         show-root-heading: true
         show-source: false
@@ -88,7 +88,7 @@ Writer for Silver layer (Delta Lake with merge/upsert).
 
 Writer for Gold layer (validated, analytics-ready data).
 
-::: bioetl.infrastructure.storage.gold-writer.GoldWriter
+::: bioetl.infrastructure.storage.gold_writer.GoldWriter
     options:
         show-root-heading: true
         show-source: false
@@ -111,7 +111,7 @@ Writer for Gold layer (validated, analytics-ready data).
 
 Read-only access to Delta Lake tables for querying Silver/Gold data.
 
-::: bioetl.infrastructure.storage.delta-reader.DeltaReader
+::: bioetl.infrastructure.storage.delta_reader.DeltaReader
     options:
         show-root-heading: true
         show-source: false
@@ -128,7 +128,7 @@ Read-only access to Delta Lake tables for querying Silver/Gold data.
 
 Manages VACUUM, OPTIMIZE, and time travel operations for Delta tables.
 
-::: bioetl.infrastructure.storage.retention-manager.RetentionManager
+::: bioetl.infrastructure.storage.retention_manager.RetentionManager
     options:
         show-root-heading: true
         show-source: false
@@ -145,7 +145,7 @@ Manages VACUUM, OPTIMIZE, and time travel operations for Delta tables.
 
 Writes metadata for Bronze/Silver/Gold layers.
 
-::: bioetl.infrastructure.storage.metadata-writer.MetadataWriter
+::: bioetl.infrastructure.storage.metadata_writer.MetadataWriter
     options:
         show-root-heading: true
         show-source: false
@@ -154,7 +154,7 @@ Writes metadata for Bronze/Silver/Gold layers.
 
 Builder for Silver layer metadata.
 
-::: bioetl.infrastructure.storage.metadata-builder.SilverMetadataBuilder
+::: bioetl.infrastructure.storage.metadata_builder.SilverMetadataBuilder
     options:
         show-root-heading: true
         show-source: false
@@ -163,7 +163,7 @@ Builder for Silver layer metadata.
 
 Builder for Gold layer metadata.
 
-::: bioetl.infrastructure.storage.metadata-builder.GoldMetadataBuilder
+::: bioetl.infrastructure.storage.metadata_builder.GoldMetadataBuilder
     options:
         show-root-heading: true
         show-source: false

@@ -21,14 +21,14 @@ ChEMBL provides bioactivity data from medicinal chemistry literature.
 
 Bioactivity measurements (IC50, Ki, EC50, etc.).
 
-::: bioetl.application.pipelines.chembl.activity.ChEMBLActivityPipeline
+::: bioetl.application.pipelines.chembl.ChEMBLActivityPipeline
     options:
         show-root-heading: true
         show-source: false
 
 ### Activity Transformer
 
-::: bioetl.application.pipelines.chembl.activity-transformer.ActivityTransformer
+::: bioetl.application.pipelines.chembl.activity_transformer.ActivityTransformer
     options:
         show-root-heading: true
         show-source: false
@@ -37,14 +37,14 @@ Bioactivity measurements (IC50, Ki, EC50, etc.).
 
 Experimental assay descriptions.
 
-::: bioetl.application.pipelines.chembl.assay.ChEMBLAssayPipeline
+::: bioetl.application.pipelines.chembl.ChEMBLAssayPipeline
     options:
         show-root-heading: true
         show-source: false
 
 ### Assay Transformer
 
-::: bioetl.application.pipelines.chembl.assay-transformer.AssayTransformer
+::: bioetl.application.pipelines.chembl.assay_transformer.AssayTransformer
     options:
         show-root-heading: true
         show-source: false
@@ -53,14 +53,14 @@ Experimental assay descriptions.
 
 Chemical compound structures.
 
-::: bioetl.application.pipelines.chembl.molecule.ChEMBLMoleculePipeline
+::: bioetl.application.pipelines.chembl.ChEMBLMoleculePipeline
     options:
         show-root-heading: true
         show-source: false
 
 ### Molecule Transformer
 
-::: bioetl.application.pipelines.chembl.molecule-transformer.MoleculeTransformer
+::: bioetl.application.pipelines.chembl.molecule_transformer.MoleculeTransformer
     options:
         show-root-heading: true
         show-source: false
@@ -69,30 +69,30 @@ Chemical compound structures.
 
 Biological targets (proteins, genes).
 
-::: bioetl.application.pipelines.chembl.target.ChEMBLTargetPipeline
+::: bioetl.application.pipelines.chembl.ChEMBLTargetPipeline
     options:
         show-root-heading: true
         show-source: false
 
 ### Target Transformer
 
-::: bioetl.application.pipelines.chembl.target-transformer.TargetTransformer
+::: bioetl.application.pipelines.chembl.target_transformer.TargetTransformer
     options:
         show-root-heading: true
         show-source: false
 
-### Document Pipeline
+### Publication Pipeline
 
-Publications and patents.
+ChEMBL publications and patents.
 
-::: bioetl.application.pipelines.chembl.document.ChEMBLDocumentPipeline
+::: bioetl.application.pipelines.chembl.ChEMBLPublicationPipeline
     options:
         show-root-heading: true
         show-source: false
 
-### Document Transformer
+### Publication Transformer
 
-::: bioetl.application.pipelines.chembl.document-transformer.DocumentTransformer
+::: bioetl.application.pipelines.chembl.publication_transformer.PublicationTransformer
     options:
         show-root-heading: true
         show-source: false
@@ -101,14 +101,14 @@ Publications and patents.
 
 Target components (protein chains, domains).
 
-::: bioetl.application.pipelines.chembl.target-component.ChEMBLTargetComponentPipeline
+::: bioetl.application.pipelines.chembl.ChEMBLTargetComponentPipeline
     options:
         show-root-heading: true
         show-source: false
 
 ### Target Component Transformer
 
-::: bioetl.application.pipelines.chembl.target-component-transformer.TargetComponentTransformer
+::: bioetl.application.pipelines.chembl.target_component_transformer.TargetComponentTransformer
     options:
         show-root-heading: true
         show-source: false
@@ -117,7 +117,7 @@ Target components (protein chains, domains).
 
 Common functionality for all ChEMBL transformers.
 
-::: bioetl.application.pipelines.chembl.base-chembl-transformer.BaseChemblTransformer
+::: bioetl.application.pipelines.chembl.base_chembl_transformer.BaseChemblTransformer
     options:
         show-root-heading: true
         show-source: false
@@ -128,7 +128,7 @@ PubChem provides chemical compound data.
 
 ### Compound Pipeline
 
-::: bioetl.application.pipelines.pubchem.compound.PubChemCompoundPipeline
+::: bioetl.application.pipelines.pubchem.PubChemCompoundPipeline
     options:
         show-root-heading: true
         show-source: false
@@ -146,7 +146,7 @@ UniProt provides protein sequence and annotation data.
 
 ### Protein Pipeline
 
-::: bioetl.application.pipelines.uniprot.protein.UniProtProteinPipeline
+::: bioetl.application.pipelines.uniprot.UniProtProteinPipeline
     options:
         show-root-heading: true
         show-source: false
@@ -164,7 +164,7 @@ PubMed provides scientific publication metadata.
 
 ### Publications Pipeline
 
-::: bioetl.application.pipelines.pubmed.publications.PubMedPublicationsPipeline
+::: bioetl.application.pipelines.pubmed.PubMedPublicationPipeline
     options:
         show-root-heading: true
         show-source: false

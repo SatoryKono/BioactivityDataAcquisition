@@ -247,9 +247,9 @@ make test
 
 ## Связанные Документы
 
-- [ADR-029: Data Schema Externalization](../../../02-architecture/decisions/ADR-029-data-schema-externalization.md)
-- [RULES.md §2.6: Int→Float Coercion](../../../00-project/RULES.md)
-- [Composite Publication Schema](configs/schemas/composite/publication.yaml)
+- [ADR-029: Output Metadata Unification](../../02-architecture/decisions/ADR-029-output-metadata-unification.md)
+- [RULES.md §2.6: Int→Float Coercion](../../00-project/RULES.md)
+- [Composite Publication Schema](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/configs/schemas/composite/publication.yaml)
 
 ---
 

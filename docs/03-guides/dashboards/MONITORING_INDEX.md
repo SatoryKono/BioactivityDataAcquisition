@@ -10,7 +10,7 @@
 
 ### 🚀 Быстрый старт (5 минут)
 
-**[grafana/README.md](../../../grafana/README.md)**
+**[grafana/README.md](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/grafana/README.md)**
 - Запуск через Docker Compose: `make monitoring-up`
 - Проверка статуса контейнеров
 - Основные URL (Prometheus, Grafana)
@@ -28,7 +28,7 @@
 
 ### 📖 Использование дашбордов
 
-**[docs/05-operations/01-monitoring-guide.md](../../../docs/05-operations/01-monitoring-guide.md)**
+**[docs/05-operations/01-monitoring-guide.md](../../05-operations/01-monitoring-guide.md)**
 - Архитектура наблюдаемости (Pull model)
 - Как использовать дашборды
 - Динамическая фильтрация (Pipeline, Run Type)
