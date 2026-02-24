@@ -37,7 +37,6 @@ ALLOWED_ROOT_ENTRIES: frozenset[str] = frozenset(
         "commitlint.config.js",
         "configs",
         "data",
-        "dev_setup.sh",
         "docker-compose.monitoring.yml",
         "docker-compose.yml",
         "docs",

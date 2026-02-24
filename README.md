@@ -96,12 +96,12 @@ The domain layer implements Domain-Driven Design patterns:
 
 #### Option A: Automated Setup (Recommended)
 
-Use the `dev_setup.sh` script for a complete automated setup:
+Use the `scripts/dev/dev_setup.sh` script for a complete automated setup:
 
 ```bash
 git clone https://github.com/SatoryKono/BioactivityDataAcquisition2.git
 cd BioactivityDataAcquisition2
-./dev_setup.sh
+./scripts/dev/dev_setup.sh
 ```
 
 The script will:
@@ -112,7 +112,7 @@ The script will:
 - Configure environment variables
 - Run verification checks
 
-For quick setup without tests: `./dev_setup.sh --quick`
+For quick setup without tests: `./scripts/dev/dev_setup.sh --quick`
 
 #### Option B: Manual Setup
 
@@ -312,7 +312,6 @@ Access the docs at `http://localhost:8000`.
 │           └── orchestration/ # Reserved (empty; signal handlers removed 2025-12-31, shutdown logic in application/core/shutdown.py)
 ├── tests/                    # Unit, Integration, Architecture & E2E tests
 ├── scripts/                  # Utility scripts (lint_terminology.py, etc.)
-├── dev_setup.sh              # Automated development environment setup
 ├── Makefile                  # Automation commands
 └── pyproject.toml            # Dependencies & Tool configuration
 ```
