@@ -106,7 +106,17 @@
         "tooltip": {
           "mode": "multi",
           "sort": "desc"
-        }
+        },
+        "dataLinks": [
+          {
+            "title": "Open DQ Dashboard",
+            "url": "/d/bioetl-dq-v2?var-pipeline=${__field.labels.pipeline}&var-run_type=${__field.labels.run_type}&var-stage=${__field.labels.stage}&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+          },
+          {
+            "title": "Open Provider Health Dashboard",
+            "url": "/d/bioetl-provider-health-v2?var-pipeline=${__field.labels.pipeline}&var-run_type=${__field.labels.run_type}&var-stage=${__field.labels.stage}&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+          }
+        ]
       },
       "targets": [
         {
@@ -469,5 +479,5 @@
   "timezone": "",
   "title": "BioETL Overview v2",
   "uid": "bioetl-overview-v2",
-  "version": 2
+  "version": 3
 }
