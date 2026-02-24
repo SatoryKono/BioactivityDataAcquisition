@@ -110,6 +110,24 @@ class BatchMetricsRecorder:
                 },
             )
 
+    def track_dq_validation_failure(
+        self, stage: str, severity: str, count: int = 1
+    ) -> None:
+        """Record DQ validation failure with bounded labels.
+
+        Args:
+            stage: Validation stage label.
+            severity: Failure severity (e.g. soft_fail, hard_fail).
+            count: Number of failures.
+        """
+        if self._metrics:
+            self._metrics.inc_dq_validation_failures(
+                pipeline=self._pipeline_label,
+                stage=stage,
+                severity=severity,
+                count=count,
+            )
+
     def track_quarantined_records(self, error_type: ErrorType, count: int) -> None:
         """Record number of quarantined records.
 
@@ -127,4 +145,9 @@ class BatchMetricsRecorder:
                     "error_type": error_type.value,
                     "run_type": self._run_type_label,
                 },
+            )
+            self._metrics.inc_quarantine_records(
+                pipeline=self._pipeline_label,
+                reason=error_type.value,
+                count=count,
             )

@@ -29,6 +29,7 @@ theme:
 plugins:
     - search
     -   mkdocstrings:
+            enabled: true
             handlers:
                 python:
                     paths: ["src"]  # Path to source code
@@ -36,6 +37,7 @@ plugins:
                         docstring_style: google
                         show_root_heading: yes
                         show_source: true
+                        allow_inspection: true
 
 markdown_extensions:
     -   pymdownx.highlight:

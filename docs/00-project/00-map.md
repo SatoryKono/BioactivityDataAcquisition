@@ -345,8 +345,8 @@ graph TD
 | Topic | Document | RULES.md |
 |-------|----------|----------|
 | GitHub Policy | [05-github-policy.md](governance/05-github-policy.md) | §4, §5 |
-| Contributing | [CONTRIBUTING.md](../../.github/CONTRIBUTING.md) | — |
-| Security | [SECURITY.md](../../.github/SECURITY.md) | §5.4 |
+| Contributing | [CONTRIBUTING.md](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/.github/CONTRIBUTING.md) | — |
+| Security | [SECURITY.md](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/.github/SECURITY.md) | §5.4 |
 
 ## Related Resources
 

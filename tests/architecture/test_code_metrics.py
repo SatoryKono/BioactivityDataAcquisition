@@ -29,7 +29,7 @@ class TestFileSizeLimits:
     # Note: ports.py was split into ports/ package in main
     EXEMPTIONS = {
         # Application layer exemptions
-        "runner.py": 1140,  # 1135 LOC - Complex orchestration (FSM helpers extracted to fsm_helper.py) + CV quarantine
+        "runner.py": 1145,  # 1143 LOC - Complex orchestration (FSM helpers extracted to fsm_helper.py) + CV quarantine + metrics methods
         "cross_validator.py": 540,  # 528 LOC - Cross-validation service with module-level comparison helpers + per-record detail builders
         "checkpoint.py": 545,  # 544 LOC - CompositeCheckpointState with immutable state transitions + CompositeCheckpointManager
         "base.py": 600,  # Base classes may be larger
@@ -64,7 +64,7 @@ class TestFileSizeLimits:
         "chemical.py": 600,  # 575 LOC - Chemical structure Value Objects (InChIKey, SMILES, PublicationYear)
         "activity_values.py": 450,  # 436 LOC - Activity value objects (renamed from measurements.py)
         # Domain ports NoOp implementations
-        "noop.py": 475,  # 470 LOC - NoOp implementations for Null Object Pattern (+ NoOpMetadataWriter with provider/entity params)
+        "noop.py": 490,  # 485 LOC - NoOp implementations for Null Object Pattern (+ NoOpMetadataWriter with provider/entity params + new MetricsPort methods)
         # Domain models/metadata.py (models/metadata.py 877 LOC, ports/metadata.py only 104 LOC)
         "metadata.py": 880,  # 877 LOC - Metadata models with APIRequestDetails + RateLimitInfo for Bronze layer enrichment + extended fields + unified output metadata (ADR-029)
         # Domain ports (Protocol definitions with comprehensive docstrings)

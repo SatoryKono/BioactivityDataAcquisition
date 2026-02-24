@@ -19,6 +19,9 @@ import httpx
 
 from bioetl.domain.exceptions import CircuitBreakerOpenError
 from bioetl.domain.types import CircuitBreakerState
+from bioetl.infrastructure.observability.circuit_breaker_mapping import (
+    CIRCUIT_BREAKER_STATE_VALUES,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
@@ -31,13 +34,6 @@ T = TypeVar("T")
 # Metric names as constants for consistency
 METRIC_CIRCUIT_BREAKER_STATE = "circuit_breaker_state"
 METRIC_CIRCUIT_BREAKER_TRIPS = "circuit_breaker_trips_total"
-
-# State values for gauge metric
-_STATE_VALUES: dict[CircuitBreakerState, float] = {
-    CircuitBreakerState.CLOSED: 0.0,
-    CircuitBreakerState.HALF_OPEN: 1.0,
-    CircuitBreakerState.OPEN: 2.0,
-}
 
 
 @dataclass
@@ -97,7 +93,7 @@ class CircuitBreaker:
         if self.metrics is not None:
             self.metrics.set_gauge(
                 METRIC_CIRCUIT_BREAKER_STATE,
-                _STATE_VALUES[self._state],
+                CIRCUIT_BREAKER_STATE_VALUES[self._state],
                 {"adapter": self.provider},
             )
 

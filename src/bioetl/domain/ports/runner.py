@@ -19,14 +19,7 @@ class RunnablePort(Protocol):
     """
 
     async def run(self) -> None:
-        """Execute the pipeline.
-
-        Returns:
-            None.
-
-        Raises:
-            None.
-        """
+        """Execute the pipeline."""
         ...
 
     @property
@@ -35,9 +28,6 @@ class RunnablePort(Protocol):
 
         Returns:
             Shutdown signal object or None.
-
-        Raises:
-            None.
         """
         ...
 
@@ -75,9 +65,6 @@ class RunnerFactoryPort(Protocol):
 
         Returns:
             Sorted list of registered pipeline names.
-
-        Raises:
-            None.
         """
         ...
 
@@ -89,9 +76,6 @@ class RunnerFactoryPort(Protocol):
 
         Returns:
             True if pipeline exists, False otherwise.
-
-        Raises:
-            None.
         """
         ...
 
@@ -117,8 +101,5 @@ class MetricsExtractorPort(Protocol):
             - records_silver: Records written to Silver
             - records_gold: Records written to Gold
             - records_quarantined: Records sent to quarantine
-
-        Raises:
-            None.
         """
         ...

@@ -306,7 +306,7 @@ class TestPubMedYearValidation:
     """Year validation tests for PubMedPublicationSchema.
 
     Note: PubMed uses 'year' field (renamed from 'pub_year').
-    Schema renamed from ArticleSchema per ADR-024.
+    Canonical schema name follows ADR-024 publication naming.
     """
 
     @pytest.fixture

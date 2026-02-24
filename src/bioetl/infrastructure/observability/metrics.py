@@ -6,6 +6,10 @@ from typing import Any
 
 from prometheus_client import Counter, Gauge, Histogram
 
+from bioetl.infrastructure.observability.circuit_breaker_mapping import (
+    CIRCUIT_BREAKER_STATE_DESCRIPTION,
+)
+
 # Generic pipeline metrics
 PIPELINE_DURATION_SECONDS = Histogram(
     "bioetl_pipeline_duration_seconds",
@@ -52,10 +56,22 @@ DQ_RECORDS_QUARANTINED_TOTAL = Counter(
     ["pipeline", "error_type", "run_type"],
 )
 
+QUARANTINE_RECORDS_TOTAL = Counter(
+    "bioetl_quarantine_records_total",
+    "Total number of records written to quarantine",
+    ["pipeline", "reason"],
+)
+
+DQ_VALIDATION_FAILURES_TOTAL = Counter(
+    "bioetl_dq_validation_failures_total",
+    "Total number of DQ validation threshold failures",
+    ["pipeline", "stage", "severity"],
+)
+
 # Circuit Breaker metrics (per ADR-007)
 CIRCUIT_BREAKER_STATE = Gauge(
     "bioetl_circuit_breaker_state",
-    "Current state of the circuit breaker (0=closed, 1=half-open, 2=open)",
+    CIRCUIT_BREAKER_STATE_DESCRIPTION,
     ["adapter"],
 )
 

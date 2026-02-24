@@ -37,14 +37,7 @@ members:
 \- ingestion-ts
 \- source-batch-id
 
-### RequiredEntityFields
-
-Protocol defining minimum required fields for all entities.
-
-::: bioetl.domain.entities.RequiredEntityFields
-options:
-show-root-heading: true
-show-source: false
+<!-- RequiredEntityFields: planned protocol, not yet implemented -->
 
 ## ChEMBL Entities
 
@@ -104,36 +97,36 @@ show-source: false
 
 ## PubChem Entities
 
-### Compound
+### CompoundRecord
 
 PubChem compound with chemical properties.
 
-::: bioetl.domain.entities.Compound
-options:
-show-root-heading: true
-show-source: false
+::: bioetl.domain.entities.CompoundRecord
+    options:
+        show-root-heading: true
+        show-source: false
 
 ## PubMed Entities
 
-### Publication
+### PubMedPublicationEntity
 
 Scientific publication metadata.
 
-::: bioetl.domain.entities.Publication
-options:
-show-root-heading: true
-show-source: false
+::: bioetl.domain.entities.PubMedPublicationEntity
+    options:
+        show-root-heading: true
+        show-source: false
 
 ## UniProt Entities
 
-### Protein
+### ProteinClassification
 
-UniProt protein entry.
+UniProt protein classification.
 
-::: bioetl.domain.entities.Protein
-options:
-show-root-heading: true
-show-source: false
+::: bioetl.domain.entities.ProteinClassification
+    options:
+        show-root-heading: true
+        show-source: false
 
 ## Usage Example
 

@@ -303,7 +303,7 @@
       "type": "timeseries"
     }
   ],
-  "refresh": "5s",
+  "refresh": "30s",
   "schemaVersion": 30,
   "style": "dark",
   "tags": [
@@ -395,7 +395,7 @@
     ]
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-7d",
     "to": "now"
   },
   "timepicker": {
@@ -410,5 +410,5 @@
   "timezone": "",
   "title": "BioETL Simple Dashboard",
   "uid": "bioetl-simple",
-  "version": 1
+  "version": 2
 }
