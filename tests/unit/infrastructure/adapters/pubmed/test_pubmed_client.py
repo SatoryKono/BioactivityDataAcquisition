@@ -178,3 +178,53 @@ def test_provider_name(adapter):
 def test_health_endpoint(adapter):
     """Test that health endpoint is correct."""
     assert adapter._get_health_endpoint() == "/entrez/eutils/einfo.fcgi"
+
+
+@pytest.mark.asyncio
+async def test_fetch_applies_resume_offset_before_article_fetch(adapter) -> None:
+    """Fetch should skip PMIDs from checkpoint offset before fetching articles."""
+    adapter._get_pmids = AsyncMock(return_value=["1", "2", "3", "4"])  # type: ignore[method-assign]
+    called_with: list[tuple[list[str], int | None]] = []
+
+    async def _mock_yield_articles(pmids: list[str], limit: int | None):
+        called_with.append((pmids, limit))
+        if False:
+            yield {}
+
+    adapter._yield_articles_from_pmids = _mock_yield_articles  # type: ignore[method-assign]
+
+    records = [
+        record
+        async for record in adapter.fetch(
+            entity_type="publication", limit=4, offset=2, query="test"
+        )
+    ]
+
+    assert records == []
+    assert called_with == [(["3", "4"], 2)]
+
+
+@pytest.mark.asyncio
+async def test_fetch_returns_early_when_resume_offset_reaches_limit(adapter) -> None:
+    """Fetch should stop when checkpoint offset already consumed requested limit."""
+    adapter._get_pmids = AsyncMock(return_value=["1", "2"])  # type: ignore[method-assign]
+    called = False
+
+    async def _mock_yield_articles(pmids: list[str], limit: int | None):
+        nonlocal called
+        called = True
+        if False:
+            yield {}
+
+    adapter._yield_articles_from_pmids = _mock_yield_articles  # type: ignore[method-assign]
+
+    records = [
+        record
+        async for record in adapter.fetch(
+            entity_type="publication", limit=2, offset=2, query="test"
+        )
+    ]
+
+    assert records == []
+    adapter._get_pmids.assert_not_called()
+    assert called is False
