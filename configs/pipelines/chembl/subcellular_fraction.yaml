@@ -6,10 +6,10 @@
 pipeline_name: chembl_subcellular_fraction
 provider: chembl
 entity_type: subcellular_fraction
-schema_file: ../../schemas/chembl/subcellular_fraction.yaml
 # Override: v1.0.0 initial schema, not yet aligned with v1.2.0 standard
 version: "1.0.0"
 description: "Extract unique subcellular fractions from ChEMBL Assay records"
+schema_file: "../../schemas/chembl/subcellular_fraction.yaml"
 
 # Override: full_scan required — derived entity needs comprehensive deduplication
 loading_strategy: full_scan_only

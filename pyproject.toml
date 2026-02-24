@@ -150,8 +150,8 @@ testpaths = ["tests"]
 pythonpath = ["src"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
-# Parallel by default via xdist; benchmark tests excluded.
-# For serial execution (debugging): pytest -p no:xdist
+# Local default is serial for stability.
+# CI commands explicitly enable xdist where needed.
 # For benchmarks: pytest -p no:xdist -m benchmark
 addopts = [
     "-ra",
@@ -159,8 +159,6 @@ addopts = [
     "--strict-markers",
     "--strict-config",
     "-m", "not benchmark",
-    "-n", "auto",
-    "--dist", "loadscope",
     "--import-mode=importlib",
 ]
 # required_plugins check moved to CI for compatibility

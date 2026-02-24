@@ -5,8 +5,8 @@
 pipeline_name: semanticscholar_publication
 provider: semanticscholar
 entity_type: publication
-schema_file: ../../schemas/semanticscholar/publication.yaml
 description: "Batch DOI resolution via Semantic Scholar with title fallback"
+schema_file: "../../schemas/semanticscholar/publication.yaml"
 
 # Override: full_scan required — API doesn't support stable incremental cursors
 loading_strategy: full_scan_only

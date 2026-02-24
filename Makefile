@@ -1,7 +1,7 @@
 # BioETL Makefile
 # Production-ready ETL system for bioactivity data
 
-.PHONY: help install install-uv install-pip test lint run-local docker-up docker-down docker-reset seed-local clean clean-all
+.PHONY: help install install-uv install-pip test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-all
 .DEFAULT_GOAL := help
 
 # Detect uv availability (preferred package manager)
@@ -26,8 +26,10 @@ export PYTHONPATH :=
 # Use uv run if available, otherwise use venv python
 ifdef UV_EXISTS
 	RUN := uv run
+	PY_RUN := uv run python
 else
 	RUN := $(VENV_PYTHON) -m
+	PY_RUN := $(VENV_PYTHON)
 endif
 
 # Colors for output
@@ -64,9 +66,13 @@ install-pip: ## Install dependencies using pip (fallback)
 setup-dev: install test-deps-dev ## Full development environment setup and verification
 	@echo "$(GREEN)Development environment setup and verified!$(NC)"
 
-test: test-deps-dev ## Run all tests in parallel with coverage (excludes benchmarks)
-	@echo "$(BLUE)Running tests in parallel (excluding benchmarks)...$(NC)"
-	$(RUN) pytest tests/ -n auto --dist loadscope --cov=src/bioetl --cov-report=term-missing --cov-fail-under=85
+test: test-deps-dev ## Run all tests serially with coverage (stable local default)
+	@echo "$(BLUE)Running tests (serial default, excluding e2e and benchmarks)...$(NC)"
+	$(RUN) pytest tests/ -p no:xdist -m "not e2e" --cov=src/bioetl --cov-report=term-missing --cov-fail-under=85
+
+test-ci: test-deps-dev ## Run resilient CI flow (parallel + fallback + serial marker pass)
+	@echo "$(BLUE)Running resilient CI test flow...$(NC)"
+	$(PY_RUN) scripts/ci/run_pytest_resilient.py
 
 test-serial: ## Run all tests serially (for debugging)
 	@echo "$(BLUE)Running tests (serial mode)...$(NC)"
@@ -74,7 +80,7 @@ test-serial: ## Run all tests serially (for debugging)
 
 test-fast: ## Run fast tests only (no slow markers, CI hypothesis profile)
 	@echo "$(BLUE)Running fast tests (parallel mode)...$(NC)"
-	HYPOTHESIS_PROFILE=fast $(RUN) pytest tests/unit/ tests/architecture/ -n auto --dist loadscope -m "not slow" --ignore=tests/benchmarks
+	HYPOTHESIS_PROFILE=fast $(RUN) pytest tests/unit/ tests/architecture/ -n auto --dist loadscope -m "not slow and not serial" --ignore=tests/benchmarks
 
 test-smoke: ## Run smoke tests (quick sanity check for local development)
 	@echo "$(BLUE)Running smoke tests...$(NC)"
@@ -96,11 +102,11 @@ test-deps-dev: test-deps ## Verify all development dependencies are importable
 
 test-unit: ## Run only unit tests (parallel)
 	@echo "$(BLUE)Running unit tests...$(NC)"
-	$(RUN) pytest tests/unit/ -n auto --dist loadscope --ignore=tests/benchmarks
+	$(RUN) pytest tests/unit/ -n auto --dist loadscope -m "not serial" --ignore=tests/benchmarks
 
 test-unit-fast: ## Run unit tests without slow tests (fastest)
 	@echo "$(BLUE)Running fast unit tests...$(NC)"
-	HYPOTHESIS_PROFILE=fast $(RUN) pytest tests/unit/ -n auto --dist loadscope -m "not slow" --ignore=tests/benchmarks
+	HYPOTHESIS_PROFILE=fast $(RUN) pytest tests/unit/ -n auto --dist loadscope -m "not slow and not serial" --ignore=tests/benchmarks
 
 test-integration: ## Run integration tests with VCR
 	@echo "$(BLUE)Running integration tests...$(NC)"
@@ -131,15 +137,15 @@ test-profile: ## Profile test execution times (show top 50 slowest tests)
 
 test-ci-local: ## Run tests as they would run in CI (with HYPOTHESIS_PROFILE=ci)
 	@echo "$(BLUE)Running CI-like tests locally...$(NC)"
-	HYPOTHESIS_PROFILE=ci $(RUN) pytest tests/ -m "not e2e" -n auto --dist loadscope --cov=src/bioetl --cov-fail-under=85
+	HYPOTHESIS_PROFILE=ci $(RUN) pytest tests/ -m "not e2e and not serial" -n auto --dist loadscope --cov=src/bioetl --cov-fail-under=85
 
 test-failed: ## Run only the tests that failed in the last run
 	@echo "$(BLUE)Running failed tests...$(NC)"
-	$(RUN) pytest tests/ -v --lf
+	$(RUN) pytest tests/ -p no:xdist -v --lf
 
 test-quick: ## Run quickest possible tests (fast profile, parallel, no slow tests)
 	@echo "$(BLUE)Running quick tests (HYPOTHESIS_PROFILE=fast)...$(NC)"
-	HYPOTHESIS_PROFILE=fast $(RUN) pytest tests/unit/ -m "not slow" -n auto --dist loadscope -q --tb=line
+	HYPOTHESIS_PROFILE=fast $(RUN) pytest tests/unit/ -m "not slow and not serial" -n auto --dist loadscope -q --tb=line
 
 test-changed: ## Run tests for changed files (compared to main branch)
 	@echo "$(BLUE)Running tests for changed files...$(NC)"
