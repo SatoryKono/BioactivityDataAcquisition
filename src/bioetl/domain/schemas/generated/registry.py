@@ -1,4 +1,4 @@
-"""Auto-generated registry from configs/schemas canonical sources.
+"""Auto-generated registry from configs/entities schema sections.
 
 DO NOT EDIT MANUALLY. Run: python scripts/generate_schema_artifacts.py
 """

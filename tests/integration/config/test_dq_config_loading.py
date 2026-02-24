@@ -57,7 +57,7 @@ class TestDQConfigIntegration:
         # Check that validations from different levels are present
         field_names = [fv.field for fv in config.field_validations]
 
-        # From _defaults.yaml
+        # From base/quality.yaml
         assert "_content_hash" in field_names
 
         # From entities/chembl/activity.yaml
@@ -122,14 +122,14 @@ class TestRealConfigValidation:
         """All ChEMBL entity configs should load without errors."""
         entities = ["activity", "assay", "molecule", "target"]
         for entity in entities:
-            entity_path = Path(f"configs/quality/entities/chembl/{entity}.yaml")
+            entity_path = Path(f"configs/entities/chembl/{entity}.yaml")
             if entity_path.exists():
                 config = dq_loader.load("chembl", entity)
                 assert config.soft_fail_threshold < config.hard_fail_threshold
 
     def test_defaults_yaml_valid(self, dq_loader: DQConfigLoader) -> None:
-        """_defaults.yaml should be valid and loadable."""
-        # Loading any provider/entity uses _defaults.yaml first
+        """Base DQ defaults should be valid and loadable."""
+        # Loading any provider/entity uses defaults first
         config = dq_loader.load("test", "test")
 
         # Defaults should be set
@@ -143,13 +143,14 @@ class TestRealConfigValidation:
         """Provider configs should be loadable."""
         import yaml
 
-        providers_dir = Path("configs/quality/providers")
+        providers_dir = Path("configs/providers")
         if providers_dir.exists():
             for provider_file in providers_dir.glob("*.yaml"):
                 with open(provider_file) as f:
                     data = yaml.safe_load(f)
-                    # Provider files should have provider field
                     assert "provider" in data or "version" in data
+                    # Unified provider files should include quality section.
+                    assert "quality" in data or "field_validations" in data
 
 
 @pytest.mark.integration
@@ -157,11 +158,11 @@ class TestDQConfigFileStructure:
     """Tests for DQ config file structure consistency."""
 
     def test_defaults_has_required_sections(self) -> None:
-        """_defaults.yaml should have all required sections."""
+        """base/quality.yaml should have all required sections."""
         import yaml
 
-        defaults_path = Path("configs/quality/_defaults.yaml")
-        assert defaults_path.exists(), "Missing _defaults.yaml"
+        defaults_path = Path("configs/base/quality.yaml")
+        assert defaults_path.exists(), "Missing configs/base/quality.yaml"
 
         with open(defaults_path) as f:
             data = yaml.safe_load(f)
@@ -176,7 +177,7 @@ class TestDQConfigFileStructure:
         """Provider config files should have consistent format."""
         import yaml
 
-        providers_dir = Path("configs/quality/providers")
+        providers_dir = Path("configs/providers")
         if not providers_dir.exists():
             pytest.skip("No providers directory")
 
@@ -184,21 +185,19 @@ class TestDQConfigFileStructure:
             with open(provider_file) as f:
                 data = yaml.safe_load(f)
 
-            # Should have version
             assert "version" in data, f"Missing version in {provider_file}"
-
-            # Provider name should match filename
             if "provider" in data:
                 expected_provider = provider_file.stem
                 assert data["provider"] == expected_provider, (
                     f"Provider mismatch in {provider_file}"
                 )
+            assert "quality" in data or "field_validations" in data
 
     def test_entity_files_have_required_fields(self) -> None:
-        """Entity config files should have provider and entity fields."""
+        """Unified entity config files should have provider/entity/quality fields."""
         import yaml
 
-        entities_dir = Path("configs/quality/entities")
+        entities_dir = Path("configs/entities")
         if not entities_dir.exists():
             pytest.skip("No entities directory")
 
@@ -213,6 +212,7 @@ class TestDQConfigFileStructure:
                 # Should have provider and entity
                 assert "provider" in data, f"Missing provider in {entity_file}"
                 assert "entity" in data, f"Missing entity in {entity_file}"
+                assert "quality" in data, f"Missing quality section in {entity_file}"
 
                 # Provider should match directory name
                 assert data["provider"] == provider_dir.name, (
@@ -281,7 +281,7 @@ class TestChemblPublicationCrossFieldRules:
         }
 
         for provider, expected_pk in providers_and_pks.items():
-            entity_path = Path(f"configs/quality/entities/{provider}/publication.yaml")
+            entity_path = Path(f"configs/entities/{provider}/publication.yaml")
             if not entity_path.exists():
                 continue
 

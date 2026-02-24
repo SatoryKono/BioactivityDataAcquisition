@@ -184,7 +184,9 @@
       "Bash(unset GITHUB_TOKEN && gh api repos/aquasecurity/trivy-action/git/ref/tags/0.29.0 --jq '.object.sha' 2>&1)",
       "Bash(unset GITHUB_TOKEN && gh api repos/aquasecurity/trivy-action/releases/latest --jq '.tag_name' 2>&1)",
       "Bash(unset GITHUB_TOKEN && gh api repos/aquasecurity/trivy-action/git/ref/tags/0.34.1 --jq '.object.sha' 2>&1)",
-      "Bash(cd \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" && PYTHONPATH=src .venv/Scripts/lint-imports.exe --config .importlinter 2>&1)"
+      "Bash(cd \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" && PYTHONPATH=src .venv/Scripts/lint-imports.exe --config .importlinter 2>&1)",
+      "WebFetch(domain:chembl.gitbook.io)",
+      "WebFetch(domain:github.com)"
     ]
   },
   "enabledPlugins": {

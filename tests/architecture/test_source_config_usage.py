@@ -1,6 +1,6 @@
 """Architecture tests for source configuration usage.
 
-These tests verify that source configurations from configs/sources/*.yaml
+These tests verify that source configurations from configs/providers/*.yaml
 are used instead of hardcoded values.
 """
 
@@ -20,22 +20,22 @@ class TestSourceConfigFilesExist:
     """Verify that source configuration files exist for all providers."""
 
     @pytest.fixture
-    def source_configs_dir(self) -> Path:
-        """Get path to source configs directory."""
-        return Path("configs/sources")
+    def provider_configs_dir(self) -> Path:
+        """Get path to provider configs directory."""
+        return Path("configs/providers")
 
     @pytest.mark.parametrize(
         "provider",
         ["chembl", "pubchem", "uniprot", "pubmed"],
     )
     def test_source_config_exists(
-        self, source_configs_dir: Path, provider: str
+        self, provider_configs_dir: Path, provider: str
     ) -> None:
         """Each provider MUST have a source configuration file."""
-        config_file = source_configs_dir / f"{provider}.yaml"
+        config_file = provider_configs_dir / f"{provider}.yaml"
         assert config_file.exists(), (
             f"Source config missing: {config_file}. "
-            f"Create configs/sources/{provider}.yaml with rate_limit and circuit_breaker settings."
+            f"Create configs/providers/{provider}.yaml with source/rate_limit/circuit_breaker settings."
         )
 
     @pytest.mark.parametrize(
@@ -43,10 +43,10 @@ class TestSourceConfigFilesExist:
         ["chembl", "pubchem", "uniprot", "pubmed"],
     )
     def test_source_config_has_required_sections(
-        self, source_configs_dir: Path, provider: str
+        self, provider_configs_dir: Path, provider: str
     ) -> None:
         """Source config MUST have rate_limit and circuit_breaker sections."""
-        config_file = source_configs_dir / f"{provider}.yaml"
+        config_file = provider_configs_dir / f"{provider}.yaml"
         if not config_file.exists():
             pytest.skip(f"Config file {config_file} does not exist")
 
@@ -107,7 +107,7 @@ class TestSourceConfigLoading:
         config = load_source_config(provider)
 
         # Load raw YAML for comparison
-        with open(f"configs/sources/{provider}.yaml", encoding="utf-8") as f:
+        with open(f"configs/providers/{provider}.yaml", encoding="utf-8") as f:
             raw = yaml.safe_load(f)
 
         yaml_rate = raw["source"]["rate_limit"]["requests_per_second"]
@@ -213,7 +213,7 @@ class TestConfigValuesNotHardcoded:
     """Verify config values match YAML, proving they're not hardcoded."""
 
     def test_chembl_rate_limit_from_config(self) -> None:
-        """ChEMBL rate limit should match configs/sources/chembl.yaml."""
+        """ChEMBL rate limit should match configs/providers/chembl.yaml."""
         from bioetl.composition.providers.registration import (
             _get_rate_limit_from_config,
         )
@@ -221,7 +221,7 @@ class TestConfigValuesNotHardcoded:
         rate_limit = _get_rate_limit_from_config("chembl")
 
         # Load expected values from YAML
-        with open("configs/sources/chembl.yaml", encoding="utf-8") as f:
+        with open("configs/providers/chembl.yaml", encoding="utf-8") as f:
             raw = yaml.safe_load(f)
 
         expected_rate = raw["source"]["rate_limit"]["requests_per_second"]
@@ -235,7 +235,7 @@ class TestConfigValuesNotHardcoded:
         )
 
     def test_chembl_circuit_breaker_from_config(self) -> None:
-        """ChEMBL circuit breaker should match configs/sources/chembl.yaml."""
+        """ChEMBL circuit breaker should match configs/providers/chembl.yaml."""
         from bioetl.composition.providers.registration import (
             _get_circuit_breaker_from_config,
         )
@@ -243,7 +243,7 @@ class TestConfigValuesNotHardcoded:
         cb_config = _get_circuit_breaker_from_config("chembl")
 
         # Load expected values from YAML
-        with open("configs/sources/chembl.yaml", encoding="utf-8") as f:
+        with open("configs/providers/chembl.yaml", encoding="utf-8") as f:
             raw = yaml.safe_load(f)
 
         expected_threshold = raw["source"]["circuit_breaker"]["failure_threshold"]

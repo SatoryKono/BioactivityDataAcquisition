@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "Data Quality metrics for latest run only",
+  "description": "Data Quality metrics for selected time range",
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
@@ -115,7 +115,7 @@
           "refId": "A"
         }
       ],
-      "title": "Data Flow: Bronze -> Silver -> Gold (Latest Run Only)",
+      "title": "Data Flow: Bronze -> Silver -> Gold",
       "type": "timeseries"
     },
     {
@@ -770,7 +770,7 @@
       },
       "targets": [
         {
-          "expr": "sum(increase(bioetl_silver_validation_failures_total[24h]))",
+          "expr": "sum(increase(bioetl_silver_validation_failures_total{table=~\"$pipeline\"}[24h]))",
           "legendFormat": "Validation Failures",
           "refId": "A"
         }
@@ -847,8 +847,7 @@
     "data-quality",
     "dq",
     "validation",
-    "v2",
-    "latest-run"
+    "v2"
   ],
   "templating": {
     "list": [
@@ -901,31 +900,6 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
-      },
-      {
-        "allValue": ".*",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "Prometheus",
-        "definition": "label_values(bioetl_infrastructure_validated{pipeline=~\"$pipeline\"}, run_id)",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Run ID",
-        "multi": false,
-        "name": "run_id",
-        "options": [],
-        "query": {
-          "query": "label_values(bioetl_infrastructure_validated{pipeline=~\"$pipeline\"}, run_id)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 3,
-        "type": "query"
       }
     ]
   },

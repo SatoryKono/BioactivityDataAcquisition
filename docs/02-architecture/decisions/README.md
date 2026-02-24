@@ -44,6 +44,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-036](ADR-036-gold-contract-versioning-policy.md)   | Gold Contract Versioning Policy            | Accepted           | Data Quality    | 2026-02-18 |
 | [ADR-037](ADR-037-canonical-schema-generation.md)       | Canonical Schema Source and Generation     | Accepted           | Data Contracts  | 2026-02-18 |
 | [ADR-038](ADR-038-enum-externalization.md)              | ChEMBL Enum Values Externalization to YAML | Accepted           | Configuration   | 2026-02-16 |
+| [ADR-039](ADR-039-unified-entity-config-format.md)      | Unified Entity Config Format               | Accepted           | Configuration   | 2026-02-24 |
 
 ## ADRs by Category
 
@@ -120,6 +121,7 @@ This directory contains Architecture Decision Records documenting significant ar
 - [ADR-025](ADR-025-pipeline-config-unification.md): Pipeline Config Unification
 - [ADR-028](ADR-028-filter-rules-externalization.md): Filter Rules Externalization — Hierarchical filter config
 - [ADR-038](ADR-038-enum-externalization.md): ChEMBL Enum Values Externalization to YAML
+- [ADR-039](ADR-039-unified-entity-config-format.md): Unified Entity Config Format
 
 ## ADR Relationships Graph
 

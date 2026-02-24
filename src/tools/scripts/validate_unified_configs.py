@@ -1,163 +1,120 @@
 #!/usr/bin/env python3
-"""Validate unified config structure across all pipeline configs."""
+"""Validate unified entity configs (`configs/entities/**/*.yaml`)."""
+
+from __future__ import annotations
 
 import sys
 from pathlib import Path
+from typing import Any
 
 import yaml
 
-REQUIRED_TOP_LEVEL = {
+REQUIRED_ENTITY_TOP_LEVEL = {
+    "version",
+    "provider",
+    "entity",
+    "pipeline",
+    "schema",
+    "quality",
+    "filters",
+    "contracts",
+}
+REQUIRED_PIPELINE_KEYS = {
     "pipeline_name",
     "provider",
     "entity_type",
-    "version",
-    "description",
-    "primary_keys",
-    "silver_table",
-    "gold_table",
-    "sink",
-    "input_filter",
-    "gold_filters",
+    "business_primary_keys",
 }
 
-REQUIRED_SINK_LAYERS = {"bronze", "silver", "gold"}
-REQUIRED_SINK_SILVER = {"path", "primary_key", "partition_by", "csv_export"}
-REQUIRED_INPUT_FILTER = {"enabled"}
-REQUIRED_GOLD_FILTERS = {"required_fields"}
+
+def _load_yaml(path: Path) -> dict[str, Any]:
+    payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    return payload if isinstance(payload, dict) else {}
 
 
-def validate_config(path: Path) -> list[str]:
-    """Validate config structure, return list of errors."""
-    errors = []
+def validate_entity_config(path: Path, entities_dir: Path) -> list[str]:
+    """Validate unified entity config structure and return errors."""
+    errors: list[str] = []
+    config = _load_yaml(path)
+    if not config:
+        return [f"{path}: Empty or non-mapping config"]
 
-    with open(path) as f:
-        config = yaml.safe_load(f)
+    rel_path = path.relative_to(entities_dir)
 
-    if config is None:
-        return [f"{path}: Empty config"]
-
-    # Skip _base.yaml (base config file, not a pipeline)
-    if path.name == "_base.yaml":
-        return []
-
-    # Skip composite configs (ADR-026: different structure)
-    if "composite" in config:
-        return []
-
-    rel_path = path.relative_to(Path("configs/pipelines"))
-
-    # Check top-level keys
-    missing_top = REQUIRED_TOP_LEVEL - set(config.keys())
-
-    # source_file OR source is required
-    if "source_file" not in config and "source" not in config:
-        missing_top.add("source_file (or source)")
-    missing_top.discard("source_file")  # Remove if checking both
-
+    missing_top = REQUIRED_ENTITY_TOP_LEVEL - set(config.keys())
     if missing_top:
-        errors.append(f"{rel_path}: Missing required keys: {sorted(missing_top)}")
+        errors.append(f"{rel_path}: Missing top-level keys: {sorted(missing_top)}")
 
-    # Check sink structure
-    sink = config.get("sink", {})
-    missing_sink = REQUIRED_SINK_LAYERS - set(sink.keys())
-    if missing_sink:
-        errors.append(f"{rel_path}: Missing sink layers: {sorted(missing_sink)}")
+    pipeline = config.get("pipeline", {})
+    if not isinstance(pipeline, dict):
+        errors.append(f"{rel_path}: 'pipeline' must be a mapping")
+    else:
+        missing_pipeline = REQUIRED_PIPELINE_KEYS - set(pipeline.keys())
+        if missing_pipeline:
+            errors.append(
+                f"{rel_path}: Missing pipeline keys: {sorted(missing_pipeline)}"
+            )
+        if pipeline.get("provider") != config.get("provider"):
+            errors.append(
+                f"{rel_path}: provider mismatch ({config.get('provider')} != {pipeline.get('provider')})"
+            )
+        if pipeline.get("entity_type") != config.get("entity"):
+            errors.append(
+                f"{rel_path}: entity mismatch ({config.get('entity')} != {pipeline.get('entity_type')})"
+            )
 
-    # Check sink.silver
-    silver = sink.get("silver", {})
-    missing_silver = REQUIRED_SINK_SILVER - set(silver.keys())
-    if missing_silver:
-        errors.append(f"{rel_path}: Missing sink.silver keys: {sorted(missing_silver)}")
-
-    # Check sink.gold
-    gold = sink.get("gold", {})
-    if "path" not in gold:
-        errors.append(f"{rel_path}: Missing sink.gold.path")
-    if "csv_export" not in gold:
-        errors.append(f"{rel_path}: Missing sink.gold.csv_export")
-
-    # Check input_filter
-    input_filter = config.get("input_filter", {})
-    if "enabled" not in input_filter:
-        errors.append(f"{rel_path}: Missing input_filter.enabled")
-
-    # Check gold_filters
-    gold_filters = config.get("gold_filters", {})
-    missing_gf = REQUIRED_GOLD_FILTERS - set(gold_filters.keys())
-    if missing_gf:
-        errors.append(f"{rel_path}: Missing gold_filters keys: {sorted(missing_gf)}")
-
-    # Check for deprecated/redundant keys
-    deprecated_keys = []
-    if "transform" in config:
-        deprecated_keys.append("transform (removed - not used by code)")
-
-    # Check for redundant sink parameters that should use defaults
-    redundant_sink = []
-    if silver.get("format") == "delta":
-        redundant_sink.append("sink.silver.format")
-    if silver.get("mode") == "merge":
-        redundant_sink.append("sink.silver.mode")
-    if gold.get("format") == "delta":
-        redundant_sink.append("sink.gold.format")
-    if gold.get("mode") == "overwrite":
-        redundant_sink.append("sink.gold.mode")
-
-    # Only warn, don't error on redundant (they work, just unnecessary)
-    if deprecated_keys:
-        errors.append(f"{rel_path}: Deprecated keys: {deprecated_keys}")
+    contracts = config.get("contracts", {})
+    if isinstance(contracts, dict):
+        if "primary_key" not in contracts or "merge_keys" not in contracts:
+            errors.append(
+                f"{rel_path}: contracts must contain primary_key and merge_keys"
+            )
+    else:
+        errors.append(f"{rel_path}: 'contracts' must be a mapping")
 
     return errors
 
 
-def main():
-    configs_dir = Path("configs/pipelines")
-    all_errors = []
-    configs_validated = 0
-    configs_with_errors = 0
+def main() -> int:
+    entities_dir = Path("configs/entities")
+    if not entities_dir.exists():
+        print("ERROR: configs/entities not found")
+        return 1
+
+    all_errors: list[str] = []
+    validated = 0
 
     print("=" * 80)
-    print("CONFIG VALIDATION REPORT")
+    print("UNIFIED CONFIG VALIDATION REPORT")
     print("=" * 80)
     print()
 
-    for yaml_file in sorted(configs_dir.rglob("*.yaml")):
-        errors = validate_config(yaml_file)
-        configs_validated += 1
-
-        rel_path = yaml_file.relative_to(configs_dir)
-
-        # Check if this was skipped
-        with open(yaml_file) as f:
-            config_check = yaml.safe_load(f) or {}
-
-        if yaml_file.name == "_base.yaml":
-            continue  # Silent skip for base
-        elif "composite" in config_check:
-            print(f"  [SKIP] {rel_path} (composite config - ADR-026)")
+    for yaml_file in sorted(entities_dir.rglob("*.yaml")):
+        if yaml_file.name.startswith("_"):
             continue
+        errors = validate_entity_config(yaml_file, entities_dir)
+        validated += 1
 
+        rel_path = yaml_file.relative_to(entities_dir)
         if errors:
-            configs_with_errors += 1
-            for e in errors:
-                all_errors.append(e)
-                print(f"  [ERROR] {e}")
+            for err in errors:
+                all_errors.append(err)
+                print(f"[ERROR] {err}")
         else:
-            print(f"  [OK] {rel_path}")
+            print(f"[OK] {rel_path}")
 
     print()
     print("=" * 80)
-    print(f"Configs validated: {configs_validated}")
-    print(f"Configs with errors: {configs_with_errors}")
+    print(f"Configs validated: {validated}")
     print(f"Total errors: {len(all_errors)}")
     print("=" * 80)
 
     if all_errors:
         print("\nValidation FAILED")
         return 1
-    else:
-        print("\nValidation PASSED: All configs have unified structure")
-        return 0
+
+    print("\nValidation PASSED: unified entity configs are consistent")
+    return 0
 
 
 if __name__ == "__main__":

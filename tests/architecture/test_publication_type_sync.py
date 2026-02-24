@@ -1,7 +1,7 @@
 """Architecture test: verify CSV ↔ Python classification table sync.
 
 Ensures the Python constant _CLASSIFICATION_TABLE matches the reference
-CSV file configs/data_schema/publication_type_classification.csv.
+CSV file configs/enums/publication_type_classification.csv.
 """
 
 from __future__ import annotations
@@ -17,7 +17,7 @@ from bioetl.domain.mapping.publication_type_classification import (
 _CSV_PATH = (
     Path(__file__).resolve().parents[2]
     / "configs"
-    / "schemas"
+    / "enums"
     / "publication_type_classification.csv"
 )
 

@@ -29,48 +29,96 @@ logger = logging.getLogger(__name__)
 
 # Templates
 YAML_TEMPLATE = Template(
-    """# Pipeline Configuration for ${provider} ${entity}
-pipeline_name: "${provider}_${entity}"
-provider: "${provider}"
-entity_type: "${entity}"
+    """# Unified Entity Configuration for ${provider}/${entity}
+version: 1.0.0
+provider: ${provider}
+entity: ${entity}
 
-# Data Source Configuration
-source:
-  api:
-    base_url: "https://api.${provider}.org"
-    timeout_seconds: 30
-    rate_limit:
-      requests_per_second: 5.0
-      burst: 10
+pipeline:
+  pipeline_name: ${provider}_${entity}
+  provider: ${provider}
+  entity_type: ${entity}
+  description: TODO add description
+  business_primary_keys:
+    - ${entity}_id
+  silver_table: ${provider}_${entity}
+  gold_table: ${provider}_${entity}
+  batch_size: 100
 
-  # For manual pagination (if applicable)
-  pagination:
-    page_size: 100
+schema:
+  content_hash:
+    include: []
+    exclude: []
+  column_groups:
+    - name: system
+      fields:
+        - entity_id
+        - content_hash
+        - _run_id
+        - _run_type
+        - _source_batch_id
+        - _ingestion_ts
+        - _index
+    - name: business
+      fields:
+        - ${entity}_id
+    - name: dq
+      pattern: ^_dq_
+  silver:
+    include_groups: [system, business, dq]
+    exclude_fields: []
+    alias_policy: preserve
+  gold:
+    include_groups: [system, business]
+    exclude_fields: [_dq_*, _source_batch_id, _index]
+    alias_policy: canonical
 
-# Input Filtering (Optional)
-input_filter:
-  enabled: false
+quality:
+  version: 1.0.0
+  provider: ${provider}
+  entity: ${entity}
+  field_validations:
+    - field: ${entity}_id
+      type: required
+      nullable: false
+      error_message: ${entity}_id is required
 
-# Processing Configuration
-batch_size: 1000
-checkpoint_interval: 1000
+filters:
+  version: 1.0.0
+  provider: ${provider}
+  entity: ${entity}
+  input_filter:
+    enabled: false
+  extraction_params: {}
+  silver_filters:
+    columns: {}
+    ranges: {}
+    drop_nulls: []
+  gold_filters:
+    required_fields:
+      - ${entity}_id
+    columns: {}
+    ranges: {}
+    drop_nulls: []
 
-# Silver Layer Schema
-primary_keys:
-  - "${entity}_id"
-silver_table: "silver_${provider}_${entity}"
-
-# Gold Layer Logic
-gold_filters:
-  enabled: true
-  min_quality_score: 0.8
-  excluded_types: []
-
-# Data Quality Rules
-dq:
-  soft_fail_threshold: 0.05
-  hard_fail_threshold: 0.20
-  strict_validation: true
+contracts:
+  primary_key:
+    - ${entity}_id
+  merge_keys:
+    - ${entity}_id
+  rename_map:
+    run_id: _run_id
+    run_type: _run_type
+    source_batch_id: _source_batch_id
+    ingestion_ts: _ingestion_ts
+    source: _source
+  hash_include: []
+  hash_exclude:
+    - _ingestion_ts
+    - _run_id
+    - _run_type
+    - _dq_errors
+    - _dq_status
 """
 )
 
@@ -230,7 +278,7 @@ def main() -> int:
 
     # Paths
     root_dir = Path("src/bioetl")
-    config_dir = Path("configs/pipelines") / provider
+    config_dir = Path("configs/entities") / provider
     pipeline_dir = root_dir / "application/pipelines" / provider
     test_dir = Path("tests/unit/pipelines") / provider
 

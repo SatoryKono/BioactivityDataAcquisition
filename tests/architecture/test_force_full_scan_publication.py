@@ -35,13 +35,13 @@ FULL_SCAN_ENTITY_TYPES = PUBLICATION_ENTITY_TYPES | DERIVED_ENTITY_TYPES
 
 # All publication pipeline configs that MUST have loading_strategy: full_scan_only
 PUBLICATION_PIPELINE_CONFIGS = [
-    "configs/pipelines/chembl/publication.yaml",
-    "configs/pipelines/chembl/publication_term.yaml",
-    "configs/pipelines/chembl/publication_similarity.yaml",
-    "configs/pipelines/pubmed/publication.yaml",
-    "configs/pipelines/crossref/publication.yaml",
-    "configs/pipelines/openalex/publication.yaml",
-    "configs/pipelines/semanticscholar/publication.yaml",
+    "configs/entities/chembl/publication.yaml",
+    "configs/entities/chembl/publication_term.yaml",
+    "configs/entities/chembl/publication_similarity.yaml",
+    "configs/entities/pubmed/publication.yaml",
+    "configs/entities/crossref/publication.yaml",
+    "configs/entities/openalex/publication.yaml",
+    "configs/entities/semanticscholar/publication.yaml",
 ]
 
 
@@ -66,12 +66,12 @@ class TestLoadingStrategyPublicationConfigs:
         with path.open() as f:
             config = yaml.safe_load(f)
 
-        # Skip composite configs (they use sub-pipelines)
-        if "composite" in config:
-            pytest.skip(f"{config_path} is a composite pipeline")
+        pipeline_cfg = config.get("pipeline") if isinstance(config, dict) else None
+        if not isinstance(pipeline_cfg, dict):
+            pytest.skip(f"{config_path} has no pipeline section")
 
         # Verify loading_strategy is explicitly set to full_scan_only (ADR-031)
-        loading_strategy = config.get("loading_strategy")
+        loading_strategy = pipeline_cfg.get("loading_strategy")
         assert loading_strategy == "full_scan_only", (
             f"{config_path} MUST have 'loading_strategy: full_scan_only' per ADR-031. "
             f"Found: loading_strategy={loading_strategy}"
@@ -82,10 +82,10 @@ class TestLoadingStrategyPublicationConfigs:
 
         This ensures new publication configs are added to PUBLICATION_PIPELINE_CONFIGS.
         """
-        configs_dir = Path("configs/pipelines")
+        configs_dir = Path("configs/entities")
 
         if not configs_dir.exists():
-            pytest.skip("configs/pipelines directory does not exist")
+            pytest.skip("configs/entities directory does not exist")
 
         # Find all YAML files with "publication" in the name
         found_publication_configs = []
@@ -100,9 +100,6 @@ class TestLoadingStrategyPublicationConfigs:
         }
         missing_from_tests = []
         for config_path in found_publication_configs:
-            # Skip composite publication config
-            if "composite" in config_path:
-                continue
             # Normalize path for comparison
             normalized_path = config_path.replace("\\", "/")
             if normalized_path not in normalized_test_configs:
@@ -127,15 +124,15 @@ class TestLoadingStrategyNonPublicationConfigs:
         Only publication-related entities should use full_scan_only.
         Other entities (activity, compound, target) can use checkpoint resume.
         """
-        configs_dir = Path("configs/pipelines")
+        configs_dir = Path("configs/entities")
 
         if not configs_dir.exists():
-            pytest.skip("configs/pipelines directory does not exist")
+            pytest.skip("configs/entities directory does not exist")
 
         incorrectly_enabled = []
 
         for yaml_file in configs_dir.glob("**/*.yaml"):
-            # Skip publication configs and base configs
+            # Skip publication configs
             if "publication" in yaml_file.name or yaml_file.name.startswith("_"):
                 continue
 
@@ -145,12 +142,12 @@ class TestLoadingStrategyNonPublicationConfigs:
             if config is None:
                 continue
 
-            # Skip composite configs
-            if "composite" in config:
+            pipeline_cfg = config.get("pipeline") if isinstance(config, dict) else None
+            if not isinstance(pipeline_cfg, dict):
                 continue
 
-            entity_type = config.get("entity_type", "")
-            loading_strategy = config.get("loading_strategy")
+            entity_type = pipeline_cfg.get("entity_type", "")
+            loading_strategy = pipeline_cfg.get("loading_strategy")
 
             # Only publication and derived entities should have full_scan_only
             if (

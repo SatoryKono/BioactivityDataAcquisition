@@ -1,10 +1,10 @@
 """Factory for creating HTTP clients with standard configurations.
 
 Ensures consistent rate limiting and circuit breaker settings across providers.
-Uses source configuration from YAML files (configs/sources/*.yaml) for settings.
+Uses source configuration from YAML files (configs/providers/*.yaml) for settings.
 
 Configuration Priority:
-1. Source YAML config (configs/sources/{provider}.yaml) - PRIMARY
+1. Provider YAML config (configs/providers/{provider}.yaml) - PRIMARY
 2. Settings API key overrides (for rate limit boost with API keys)
 3. ProviderRegistry defaults (fallback only)
 
@@ -96,9 +96,9 @@ class HttpClientFactory:
         metrics: MetricsPort | None = None,
         logger: LoggerPort | None = None,
     ) -> UnifiedHTTPClient:
-        """Create HTTP client using source YAML configuration.
+        """Create HTTP client using provider YAML configuration.
 
-        Configuration is loaded from configs/sources/{provider}.yaml.
+        Configuration is loaded from configs/providers/{provider}.yaml.
         Falls back to ProviderRegistry defaults if source config not found.
 
         Args:
@@ -112,11 +112,11 @@ class HttpClientFactory:
         Returns:
             Configured UnifiedHTTPClient with observability
         """
-        # Load source config from YAML (primary source) if exists
-        from pathlib import Path
-
-        config_path = Path(f"configs/sources/{provider}.yaml")
-        source_config = load_source_config(provider) if config_path.exists() else None
+        # Load source config from provider YAML (primary source) if exists.
+        try:
+            source_config = load_source_config(provider)
+        except ValueError:
+            source_config = None
 
         # Get rate limit, circuit breaker, and client settings
         if source_config is not None:

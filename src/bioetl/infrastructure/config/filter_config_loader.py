@@ -3,8 +3,10 @@
 Loads and merges filter configurations from:
 1. defaults layer from configs/base/pipeline.yaml (preferred) or
    configs/filters/_defaults.yaml (legacy fallback)
-2. configs/filters/providers/{provider}.yaml (provider-specific)
-3. configs/filters/entities/{provider}/{entity}.yaml (entity-specific)
+2. configs/providers/{provider}.yaml (section "filters", preferred) or
+   configs/filters/providers/{provider}.yaml (legacy fallback)
+3. configs/entities/{provider}/{entity}.yaml (section "filters", preferred) or
+   configs/filters/entities/{provider}/{entity}.yaml (legacy fallback)
 4. Inline overrides from pipeline config
 
 Implements ADR-028: Filter Rules Externalization.

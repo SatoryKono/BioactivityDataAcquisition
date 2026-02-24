@@ -4,6 +4,8 @@ from collections import Counter
 import re
 from pathlib import Path
 
+import yaml
+
 
 def _resolve_composite_config_dir() -> Path:
     primary = Path("configs/composites")
@@ -21,12 +23,12 @@ def test_ports_count_matches_docs() -> None:
 
 
 def test_pipeline_count_matches_docs() -> None:
-    base = Path("configs/pipelines")
+    entities_dir = Path("configs/entities")
     composite_dir = _resolve_composite_config_dir()
     standard = [
         p
-        for p in base.rglob("*.yaml")
-        if p.parent.name != "composite" and p.name not in {"_base.yaml", "_schema.json"}
+        for p in entities_dir.rglob("*.yaml")
+        if p.name not in {"_base.yaml", "_schema.json"}
     ]
     composite = list(composite_dir.glob("*.yaml"))
     text = Path("docs/04-reference/pipelines/README.md").read_text(encoding="utf-8")
@@ -35,23 +37,21 @@ def test_pipeline_count_matches_docs() -> None:
 
 def test_pipeline_ids_match_reference_index() -> None:
     """Pipeline IDs in reference index must match config-defined IDs."""
-    base = Path("configs/pipelines")
+    entities_dir = Path("configs/entities")
     composite_dir = _resolve_composite_config_dir()
     provider_ids: list[str] = []
-    for path in sorted(base.rglob("*.yaml")):
-        if path.parent.name == "composite" or path.name in {
-            "_base.yaml",
-            "_schema.json",
-        }:
+    for path in sorted(entities_dir.rglob("*.yaml")):
+        if path.name in {"_base.yaml", "_schema.json"}:
             continue
-        text = path.read_text(encoding="utf-8")
-        match = re.search(
-            r"^pipeline_name:\s*([a-z0-9_]+)\s*$",
-            text,
-            flags=re.MULTILINE,
-        )
-        if match is not None:
-            provider_ids.append(match.group(1))
+        raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        if not isinstance(raw, dict):
+            continue
+        pipeline = raw.get("pipeline")
+        if not isinstance(pipeline, dict):
+            continue
+        pipeline_name = pipeline.get("pipeline_name")
+        if isinstance(pipeline_name, str):
+            provider_ids.append(pipeline_name)
 
     composite_ids: list[str] = []
     for path in sorted(composite_dir.glob("*.yaml")):

@@ -4,7 +4,7 @@
 
 Quick-reference validation checklists for all 7 BioETL data providers.
 Each section covers base configuration, health check, pagination, retry,
-and sample curl commands extracted from `configs/sources/{provider}.yaml`
+and sample curl commands extracted from `configs/providers/{provider}.yaml`
 and `src/bioetl/infrastructure/adapters/{provider}/` source code.
 
 ---
@@ -23,7 +23,7 @@ and `src/bioetl/infrastructure/adapters/{provider}/` source code.
 
 ## 1. ChEMBL
 
-**Source config:** `configs/sources/chembl.yaml`
+**Source config:** `configs/providers/chembl.yaml`
 **Adapter code:** `src/bioetl/infrastructure/adapters/chembl/client.py`
 **API Docs:** https://www.ebi.ac.uk/chembl/ws
 
@@ -73,7 +73,7 @@ curl -s "https://www.ebi.ac.uk/chembl/api/data/status?format=json" | python3 -m 
 }
 ```
 
-**Non-paginated entities:** `target`, `target-component`, `protein-class` (all records returned in single response).
+**Non-paginated entities:** `target`, `target_component`, `protein_class` (all records returned in single response).
 
 ### Retry & Circuit Breaker
 
@@ -117,13 +117,13 @@ print('Records:', len(d.get('molecules',[])))
 - [ ] `page-meta.next` is populated when more pages exist
 - [ ] `format=json` parameter is respected
 - [ ] Filter `--in` operator works for batch ID lookups
-- [ ] Non-paginated entities (target, protein-class) return all records without limit/offset
+- [ ] Non-paginated entities (target, protein_class) return all records without limit/offset
 
 ---
 
 ## 2. CrossRef
 
-**Source config:** `configs/sources/crossref.yaml`
+**Source config:** `configs/providers/crossref.yaml`
 **Adapter code:** `src/bioetl/infrastructure/adapters/crossref/client.py`
 **API Docs:** https://api.crossref.org/swagger-ui/index.html
 
@@ -223,7 +223,7 @@ print('Next cursor:', msg.get('next-cursor', 'N/A')[:20], '...')
 
 ## 3. OpenAlex
 
-**Source config:** `configs/sources/openalex.yaml`
+**Source config:** `configs/providers/openalex.yaml`
 **Adapter code:** `src/bioetl/infrastructure/adapters/openalex/client.py`
 **API Docs:** https://docs.openalex.org
 
@@ -330,7 +330,7 @@ for r in d.get('results', []):
 
 ## 4. PubChem
 
-**Source config:** `configs/sources/pubchem.yaml`
+**Source config:** `configs/providers/pubchem.yaml`
 **Adapter code:** `src/bioetl/infrastructure/adapters/pubchem/client.py`
 **API Docs:** https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest
 
@@ -418,7 +418,7 @@ done
 
 ## 5. PubMed
 
-**Source config:** `configs/sources/pubmed.yaml`
+**Source config:** `configs/providers/pubmed.yaml`
 **Adapter code:** `src/bioetl/infrastructure/adapters/pubmed/pubmed-client.py`
 **API Docs:** https://www.ncbi.nlm.nih.gov/books/NBK25500/
 
@@ -516,7 +516,7 @@ curl -s -o /dev/null -w "%{http-code}" \
 
 ## 6. Semantic Scholar
 
-**Source config:** `configs/sources/semanticscholar.yaml`
+**Source config:** `configs/providers/semanticscholar.yaml`
 **Adapter code:** `src/bioetl/infrastructure/adapters/semanticscholar/adapter.py`
 **API Docs:** https://api.semanticscholar.org/api-docs/
 
@@ -634,7 +634,7 @@ curl -s -o /dev/null -w "%{http-code}\n" "https://api.semanticscholar.org/graph/
 
 ## 7. UniProt
 
-**Source config:** `configs/sources/uniprot.yaml`
+**Source config:** `configs/providers/uniprot.yaml`
 **Adapter code:** `src/bioetl/infrastructure/adapters/uniprot/client.py`
 **API Docs:** https://www.uniprot.org/help/api
 

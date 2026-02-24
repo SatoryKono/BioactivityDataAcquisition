@@ -1,4 +1,4 @@
-"""Verify Silver↔Gold schema parity and primary key coverage.
+"""Verify Silver<->Gold schema parity and primary key coverage.
 
 Uses a baseline file to track known pre-existing field differences.
 Only NEW mismatches (not in the baseline) trigger blocking failures.
@@ -79,127 +79,127 @@ SCHEMA_PAIRS: tuple[SchemaPair, ...] = (
         "chembl_activity",
         CHEMBL_ACTIVITY_SCHEMA,
         ChEMBLActivityGoldSchema,
-        "configs/pipelines/chembl/activity.yaml",
+        "configs/entities/chembl/activity.yaml",
     ),
     SchemaPair(
         "chembl_assay",
         CHEMBL_ASSAY_SCHEMA,
         ChEMBLAssayGoldSchema,
-        "configs/pipelines/chembl/assay.yaml",
+        "configs/entities/chembl/assay.yaml",
     ),
     SchemaPair(
         "chembl_assay_parameters",
         CHEMBL_ASSAY_PARAMETERS_SCHEMA,
         ChEMBLAssayParametersGoldSchema,
-        "configs/pipelines/chembl/assay_parameters.yaml",
+        "configs/entities/chembl/assay_parameters.yaml",
     ),
     SchemaPair(
         "chembl_cell_line",
         CHEMBL_CELL_LINE_SCHEMA,
         ChEMBLCellLineGoldSchema,
-        "configs/pipelines/chembl/cell_line.yaml",
+        "configs/entities/chembl/cell_line.yaml",
     ),
     SchemaPair(
         "chembl_compound_record",
         CHEMBL_COMPOUND_RECORD_SCHEMA,
         ChEMBLCompoundRecordGoldSchema,
-        "configs/pipelines/chembl/compound_record.yaml",
+        "configs/entities/chembl/compound_record.yaml",
     ),
     SchemaPair(
         "chembl_document",
         CHEMBL_PUBLICATION_SCHEMA,
         ChEMBLDocumentGoldSchema,
-        "configs/pipelines/chembl/publication.yaml",
+        "configs/entities/chembl/publication.yaml",
     ),
     SchemaPair(
         "chembl_document_similarity",
         CHEMBL_DOCUMENT_SIMILARITY_SCHEMA,
         ChEMBLDocumentSimilarityGoldSchema,
-        "configs/pipelines/chembl/publication_similarity.yaml",
+        "configs/entities/chembl/publication_similarity.yaml",
     ),
     SchemaPair(
         "chembl_document_term",
         CHEMBL_DOCUMENT_TERM_SCHEMA,
         ChEMBLDocumentTermGoldSchema,
-        "configs/pipelines/chembl/publication_term.yaml",
+        "configs/entities/chembl/publication_term.yaml",
     ),
     SchemaPair(
         "chembl_molecule",
         CHEMBL_MOLECULE_SCHEMA,
         ChEMBLMoleculeGoldSchema,
-        "configs/pipelines/chembl/molecule.yaml",
+        "configs/entities/chembl/molecule.yaml",
     ),
     SchemaPair(
         "chembl_protein_class",
         CHEMBL_PROTEIN_CLASS_SCHEMA,
         ChEMBLProteinClassGoldSchema,
-        "configs/pipelines/chembl/protein_class.yaml",
+        "configs/entities/chembl/protein_class.yaml",
     ),
     SchemaPair(
         "chembl_target",
         CHEMBL_TARGET_SCHEMA,
         ChEMBLTargetGoldSchema,
-        "configs/pipelines/chembl/target.yaml",
+        "configs/entities/chembl/target.yaml",
     ),
     SchemaPair(
         "chembl_target_component",
         CHEMBL_TARGET_COMPONENT_SCHEMA,
         ChEMBLTargetComponentGoldSchema,
-        "configs/pipelines/chembl/target_component.yaml",
+        "configs/entities/chembl/target_component.yaml",
     ),
     SchemaPair(
         "chembl_tissue",
         CHEMBL_TISSUE_SCHEMA,
         ChEMBLTissueGoldSchema,
-        "configs/pipelines/chembl/tissue.yaml",
+        "configs/entities/chembl/tissue.yaml",
     ),
     SchemaPair(
         "chembl_subcellular_fraction",
         CHEMBL_SUBCELLULAR_FRACTION_SCHEMA,
         ChEMBLSubcellularFractionGoldSchema,
-        "configs/pipelines/chembl/subcellular_fraction.yaml",
+        "configs/entities/chembl/subcellular_fraction.yaml",
     ),
     SchemaPair(
         "pubchem_compound",
         PUBCHEM_COMPOUND_SCHEMA,
         PubChemCompoundGoldSchema,
-        "configs/pipelines/pubchem/compound.yaml",
+        "configs/entities/pubchem/compound.yaml",
     ),
     SchemaPair(
         "pubmed_publication",
         PUBMED_PUBLICATION_SCHEMA,
         PubMedPublicationGoldSchema,
-        "configs/pipelines/pubmed/publication.yaml",
+        "configs/entities/pubmed/publication.yaml",
     ),
     SchemaPair(
         "crossref_publication",
         CROSSREF_PUBLICATION_SCHEMA,
         CrossRefPublicationGoldSchema,
-        "configs/pipelines/crossref/publication.yaml",
+        "configs/entities/crossref/publication.yaml",
     ),
     SchemaPair(
         "openalex_publication",
         OPENALEX_PUBLICATION_SCHEMA,
         OpenAlexPublicationGoldSchema,
-        "configs/pipelines/openalex/publication.yaml",
+        "configs/entities/openalex/publication.yaml",
     ),
     SchemaPair(
         "semanticscholar_publication",
         SEMANTICSCHOLAR_PUBLICATION_SCHEMA,
         SemanticScholarPublicationGoldSchema,
-        "configs/pipelines/semanticscholar/publication.yaml",
+        "configs/entities/semanticscholar/publication.yaml",
     ),
     SchemaPair(
         "uniprot_protein",
         UNIPROT_PROTEIN_SCHEMA,
         UniProtProteinGoldSchema,
-        "configs/pipelines/uniprot/protein.yaml",
+        "configs/entities/uniprot/protein.yaml",
     ),
     SchemaPair(
         "uniprot_idmapping",
         UNIPROT_ID_MAPPING_SCHEMA,
         UniProtIDMappingGoldSchema,
-        "configs/pipelines/uniprot/idmapping.yaml",
+        "configs/entities/uniprot/idmapping.yaml",
     ),
 )
 
@@ -217,7 +217,7 @@ def _save_baseline(baseline: dict[str, dict[str, list[str]]]) -> None:
     """Write current differences to baseline JSON."""
     output: dict[str, object] = {
         "description": (
-            "Known Silver↔Gold field differences. Only NEW mismatches not in "
+            "Known Silver<->Gold field differences. Only NEW mismatches not in "
             "this baseline trigger blocking failures. Update with: "
             "python src/tools/verify_schema_parity.py --update-baseline"
         ),
@@ -230,13 +230,24 @@ def _save_baseline(baseline: dict[str, dict[str, list[str]]]) -> None:
 
 
 def get_primary_keys(config_path: str) -> list[str]:
-    """Load primary_keys from pipeline config."""
+    """Load business primary keys from unified entity config."""
     absolute_path = PROJECT_ROOT / config_path
     with absolute_path.open(encoding="utf-8") as file_obj:
         config = yaml.safe_load(file_obj) or {}
-    primary_keys = config.get("primary_keys", [])
+
+    if not isinstance(config, dict):
+        raise TypeError(f"config must be dict in {config_path}")
+
+    pipeline_cfg = config.get("pipeline")
+    if isinstance(pipeline_cfg, dict):
+        primary_keys = pipeline_cfg.get("business_primary_keys", [])
+    else:
+        primary_keys = config.get(
+            "business_primary_keys", config.get("primary_keys", [])
+        )
+
     if not isinstance(primary_keys, list):
-        raise TypeError(f"primary_keys must be list in {config_path}")
+        raise TypeError(f"business_primary_keys must be list in {config_path}")
     return primary_keys
 
 
@@ -267,10 +278,12 @@ def check_schema_pair(
     baselined_in_silver = [f for f in missing_in_silver if f in known_gold_only]
 
     if baselined_in_gold:
-        warnings.append(f"{pair.name}: baselined Silver→Gold gaps: {baselined_in_gold}")
+        warnings.append(
+            f"{pair.name}: baselined Silver->Gold gaps: {baselined_in_gold}"
+        )
     if baselined_in_silver:
         warnings.append(
-            f"{pair.name}: baselined Gold→Silver gaps: {baselined_in_silver}"
+            f"{pair.name}: baselined Gold->Silver gaps: {baselined_in_silver}"
         )
 
     # Only NEW mismatches are blocking
@@ -323,7 +336,7 @@ def check_schema_pair(
 
 
 def _build_current_differences() -> dict[str, dict[str, list[str]]]:
-    """Compute current Silver↔Gold differences for all schema pairs."""
+    """Compute current Silver<->Gold differences for all schema pairs."""
     result: dict[str, dict[str, list[str]]] = {}
     for pair in SCHEMA_PAIRS:
         silver_fields = {field.name for field in pair.silver_schema}
@@ -371,7 +384,7 @@ def main() -> int:
         blocking_errors.extend(blocking)
         warning_errors.extend(warnings)
 
-    print("\n=== Blocking checks (Silver↔Gold parity, PK coverage) ===")
+    print("\n=== Blocking checks (Silver<->Gold parity, PK coverage) ===")
     if blocking_errors:
         for error in blocking_errors:
             print(f"[FAIL] {error}")

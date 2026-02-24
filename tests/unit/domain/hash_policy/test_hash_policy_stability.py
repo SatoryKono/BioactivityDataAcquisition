@@ -17,7 +17,7 @@ UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
 ROOT = Path(__file__).resolve().parents[4]
 FIXTURES_DIR = ROOT / "tests/fixtures/hash_policy"
 SNAPSHOTS_DIR = Path(__file__).parent / "snapshots"
-POLICY_DIR = ROOT / "configs/hash_policy"
+POLICY_DIR = ROOT / "tests/fixtures/hash_policy/policy"
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -74,7 +74,7 @@ class TestHashPolicyStability:
 
     def test_hash_policy_contract_fields_are_explicit(self) -> None:
         """Policy file MUST explicitly define include/exclude and normalization rules."""
-        policy_path = POLICY_DIR / "chembl/activity.yaml"
+        policy_path = POLICY_DIR / "chembl_activity.yaml"
         policy = _load_yaml(policy_path)
 
         hash_policy = policy["hash_policy"]
@@ -92,7 +92,7 @@ class TestHashPolicyStability:
 
     def test_policy_change_requires_version_bump_and_migration_note(self) -> None:
         """Policy changes MUST bump contract version and include migration note."""
-        policy_path = POLICY_DIR / "chembl/activity.yaml"
+        policy_path = POLICY_DIR / "chembl_activity.yaml"
         snapshot_path = SNAPSHOTS_DIR / "chembl_activity_policy.json"
 
         policy = _load_yaml(policy_path)

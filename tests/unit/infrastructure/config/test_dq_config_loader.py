@@ -21,11 +21,9 @@ from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
 @pytest.fixture
 def test_configs_root(tmp_path: Path) -> Path:
     """Create test config structure with hierarchical DQ configs."""
-    dq_root = tmp_path / "quality"
-    dq_root.mkdir()
-
-    # _defaults.yaml
-    (dq_root / "_defaults.yaml").write_text(
+    base_root = tmp_path / "base"
+    base_root.mkdir()
+    (base_root / "quality.yaml").write_text(
         """
 version: "1.0.0"
 
@@ -55,6 +53,9 @@ common_field_validations:
 common_cross_field_validations: []
 """
     )
+
+    dq_root = tmp_path / "quality"
+    dq_root.mkdir()
 
     # providers/test_provider.yaml
     providers = dq_root / "providers"
@@ -125,7 +126,7 @@ class TestDQConfigLoaderBasics:
         assert config.soft_fail_threshold == 0.05
         assert config.hard_fail_threshold == 0.20
         assert config.strict_validation is False
-        # Only common validations (from _defaults.yaml)
+        # Only common validations (from base/quality.yaml)
         assert len(config.field_validations) == 2  # _content_hash + common_field
 
     def test_load_with_provider(self, loader: DQConfigLoader) -> None:
@@ -407,21 +408,21 @@ class TestDQConfigLoaderErrors:
     """Tests for error handling in DQConfigLoader."""
 
     def test_missing_defaults_raises(self, tmp_path: Path) -> None:
-        """Missing _defaults.yaml should raise FileNotFoundError."""
+        """Missing base/quality.yaml should raise FileNotFoundError."""
         dq_root = tmp_path / "quality"
         dq_root.mkdir()
-        # No _defaults.yaml created
+        # No base/quality.yaml created
 
         loader = DQConfigLoader(tmp_path)
 
-        with pytest.raises(FileNotFoundError, match=r"_defaults\.yaml"):
+        with pytest.raises(FileNotFoundError, match=r"base/quality\.yaml"):
             loader.load("any_provider", "any_entity")
 
     def test_invalid_yaml_raises(self, tmp_path: Path) -> None:
         """Invalid YAML should raise appropriate error."""
-        dq_root = tmp_path / "quality"
-        dq_root.mkdir()
-        (dq_root / "_defaults.yaml").write_text(
+        base_root = tmp_path / "base"
+        base_root.mkdir(parents=True)
+        (base_root / "quality.yaml").write_text(
             """
 version: "1.0.0"
 thresholds:
@@ -437,9 +438,9 @@ thresholds:
 
     def test_invalid_threshold_order_raises(self, tmp_path: Path) -> None:
         """soft_fail >= hard_fail should raise ValidationError."""
-        dq_root = tmp_path / "quality"
-        dq_root.mkdir()
-        (dq_root / "_defaults.yaml").write_text(
+        base_root = tmp_path / "base"
+        base_root.mkdir(parents=True)
+        (base_root / "quality.yaml").write_text(
             """
 version: "1.0.0"
 thresholds:
@@ -663,11 +664,11 @@ class TestNormalizeToFileFormat:
         assert len(result["entity_cross_field_validations"]) == 1
 
 
-def test_dq_loader_reads_quality_dir(tmp_path: Path) -> None:
-    """Loader should read configs/quality directory."""
-    root = tmp_path / "quality"
+def test_dq_loader_reads_base_defaults(tmp_path: Path) -> None:
+    """Loader should read defaults from configs/base/quality.yaml."""
+    root = tmp_path / "base"
     root.mkdir()
-    (root / "_defaults.yaml").write_text(
+    (root / "quality.yaml").write_text(
         """
 version: "1.0.0"
 thresholds:

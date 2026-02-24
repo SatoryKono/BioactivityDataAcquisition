@@ -1,8 +1,13 @@
 # BioETL: Извлечение данных и создание дашбордов
 
-**Версия:** 1.0  
+**Версия:** 1.0 (Legacy)  
 **Дата:** 22 февраля 2026  
-**Статус:** Production Ready
+**Статус:** Архивный документ
+
+> Этот файл сохранен для исторического контекста.  
+> Актуальное состояние дашбордов и переменных: `grafana/dashboards/*.json`,  
+> `docs/03-guides/dashboards/DASHBOARD_V2_UPDATES.md`,  
+> `docs/03-guides/dashboards/VARIABLES_GUIDE.md`.
 
 ---
 

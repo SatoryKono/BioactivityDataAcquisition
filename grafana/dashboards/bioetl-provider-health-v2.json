@@ -312,7 +312,7 @@
       "repeatDirection": "h",
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, bioetl_health_check_latency_ms_bucket{provider=\"$provider\"})",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(bioetl_health_check_latency_ms_bucket{provider=\"$provider\"}[5m])))",
           "legendFormat": "{{ provider }}",
           "refId": "A"
         }
@@ -460,8 +460,7 @@
     "bioetl",
     "provider",
     "health",
-    "v2",
-    "latest-run"
+    "v2"
   ],
   "templating": {
     "list": [
@@ -513,31 +512,6 @@
         "regex": "",
         "skipUrlSync": false,
         "sort": 1,
-        "type": "query"
-      },
-      {
-        "allValue": ".*",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "Prometheus",
-        "definition": "label_values(bioetl_infrastructure_validated{pipeline=~\"$pipeline\"}, run_id)",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Run ID",
-        "multi": false,
-        "name": "run_id",
-        "options": [],
-        "query": {
-          "query": "label_values(bioetl_infrastructure_validated{pipeline=~\"$pipeline\"}, run_id)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 3,
         "type": "query"
       }
     ]

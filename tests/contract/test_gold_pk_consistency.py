@@ -4,37 +4,18 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any
 
 import pytest
 import yaml
 
+from bioetl.infrastructure.config_loader import load_pipeline_config
 from tests.contract.silver_schemas.conftest import (
     SILVER_SCHEMAS,
     extract_field_metadata,
 )
 
-PIPELINES_DIR = Path("configs/pipelines")
+ENTITIES_DIR = Path("configs/entities")
 GOLD_CONTRACTS_DIR = Path("docs/04-reference/contracts/gold")
-
-
-def _load_merged_config(config_path: Path) -> dict[str, Any]:
-    """Load entity config merged with _base.yaml (mirrors production loader)."""
-    base_path = config_path.parent.parent / "_base.yaml"
-    base: dict[str, Any] = {}
-    if base_path.exists():
-        base = yaml.safe_load(base_path.read_text(encoding="utf-8")) or {}
-
-    entity = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
-
-    # Deep merge: entity overrides base
-    merged = base.copy()
-    for key, value in entity.items():
-        if key in merged and isinstance(merged[key], dict) and isinstance(value, dict):
-            merged[key] = {**merged[key], **value}
-        else:
-            merged[key] = value
-    return merged
 
 
 @pytest.mark.contracts
@@ -44,12 +25,10 @@ class TestGoldPkConsistency:
 
     @pytest.mark.parametrize("schema_name", sorted(SILVER_SCHEMAS.keys()))
     def test_pk_fields_exist_in_gold_and_silver(self, schema_name: str) -> None:
-        provider, entity = schema_name.split("_", 1)
-        config_path = PIPELINES_DIR / provider / f"{entity}.yaml"
-        config = _load_merged_config(config_path)
+        config = load_pipeline_config(schema_name)
 
-        business_pks = config["business_primary_keys"]
-        technical_pk = config["technical_primary_key"]
+        business_pks = list(config.business_primary_keys)
+        technical_pk = config.technical_primary_key
 
         contract_path = GOLD_CONTRACTS_DIR / f"{schema_name}_v1.0.json"
         if not contract_path.exists():
@@ -70,20 +49,32 @@ class TestGoldPkConsistency:
 
     def test_pipeline_configs_use_new_pk_naming(self) -> None:
         pipeline_files = sorted(
-            p for p in PIPELINES_DIR.rglob("*.yaml") if not p.name.startswith("_")
+            p for p in ENTITIES_DIR.rglob("*.yaml") if not p.name.startswith("_")
         )
         violations: list[str] = []
 
         for path in pipeline_files:
-            config = _load_merged_config(path)
-            # Composite pipelines have different structure (no direct PKs)
-            if "composite" in config:
+            with path.open(encoding="utf-8") as f:
+                raw = yaml.safe_load(f) or {}
+            pipeline_cfg = raw.get("pipeline")
+            if not isinstance(pipeline_cfg, dict):
+                violations.append(f"{path}: missing pipeline section")
                 continue
-            if "business_primary_keys" not in config:
+            if "business_primary_keys" not in pipeline_cfg:
                 violations.append(f"{path}: missing business_primary_keys")
-            if "technical_primary_key" not in config:
+            if "technical_primary_key" in pipeline_cfg:
+                # explicit value is optional; base default is allowed
+                pass
+            if "primary_keys" in pipeline_cfg:
+                violations.append(
+                    f"{path}: legacy primary_keys key must be removed from pipeline section"
+                )
+
+            # Ensure resolved config still has technical primary key from defaults.
+            provider = path.parent.name
+            entity = path.stem
+            resolved = load_pipeline_config(f"{provider}_{entity}")
+            if not resolved.technical_primary_key:
                 violations.append(f"{path}: missing technical_primary_key")
-            if "primary_keys" in config:
-                violations.append(f"{path}: legacy primary_keys key must be removed")
 
         assert not violations, "\n".join(violations)

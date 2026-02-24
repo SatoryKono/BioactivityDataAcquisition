@@ -49,7 +49,7 @@ src/bioetl/application/pipelines/{provider}/{entity}/
 ├── transformer.py   # {Provider}{Entity}Transformer
 └── config.py        # Config model
 
-configs/pipelines/{provider}/{entity}.yaml
+configs/entities/{provider}/{entity}.yaml
 tests/unit/application/pipelines/{provider}/test-{entity}.py
 ```
 

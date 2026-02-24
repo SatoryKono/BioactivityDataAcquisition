@@ -14,13 +14,10 @@ DQ rules are organized in a hierarchical configuration structure that enables:
 ## Hierarchical DQ Config Structure
 
 ```
-configs/quality/
-├── _defaults.yaml           # Level 1: Global defaults
-├── providers/
-│   └── {provider}.yaml      # Level 2: Provider overrides
-└── entities/
-    └── {provider}/
-        └── {entity}.yaml    # Level 3: Entity-specific rules
+configs/
+├── base/quality.yaml                 # Level 1: Global defaults
+├── providers/{provider}.yaml         # Level 2: Section "quality"
+└── entities/{provider}/{entity}.yaml # Level 3: Section "quality"
 ```
 
 ## Merge Behavior
@@ -29,9 +26,9 @@ Configurations are merged in order (later wins):
 
 | Level | File | Scope |
 |-------|------|-------|
-| 1 | `_defaults.yaml` | All pipelines |
-| 2 | `providers/{provider}.yaml` | All entities of provider |
-| 3 | `entities/{provider}/{entity}.yaml` | Specific entity |
+| 1 | `base/quality.yaml` | All pipelines |
+| 2 | `providers/{provider}.yaml` (`quality`) | All entities of provider |
+| 3 | `entities/{provider}/{entity}.yaml` (`quality`) | Specific entity |
 | 4 | Inline `dq_overrides` in pipeline | Override for exceptions |
 
 **Merge rules**:
@@ -48,7 +45,7 @@ BioETL uses two-level error thresholds (RULES.md §3.1.2):
 | `soft_fail` | 0.05 (5%) | Warning emitted, pipeline continues |
 | `hard_fail` | 0.20 (20%) | Batch fails, records quarantined |
 
-Configure in `_defaults.yaml`:
+Configure in `configs/base/quality.yaml`:
 
 ```yaml
 thresholds:
@@ -58,7 +55,7 @@ thresholds:
 
 **Invariant**: `soft_fail` must be strictly less than `hard_fail`.
 
-## Complete `_defaults.yaml` Key Reference
+## Complete `base/quality.yaml` Key Reference
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
@@ -87,52 +84,57 @@ Two validations are applied globally to all entities:
 ### Step 1: Check if provider config exists
 
 ```bash
-ls configs/quality/providers/{provider}.yaml
+ls configs/providers/{provider}.yaml
 ```
 
 If it doesn't exist, create it:
 
 ```yaml
-# configs/quality/providers/{provider}.yaml
+# configs/providers/{provider}.yaml
 version: "1.0.0"
 provider: {provider}
 
-# Optional: provider-wide field validations
-provider_field_validations: []
+quality:
+  # Optional: provider-wide field validations
+  provider_field_validations: []
 ```
 
 ### Step 2: Create entity config
 
 ```yaml
-# configs/quality/entities/{provider}/{entity}.yaml
+# configs/entities/{provider}/{entity}.yaml
 version: "1.0.0"
 provider: {provider}
 entity: {entity}
 
-# Override thresholds for this entity (optional)
-# thresholds:
-#   hard_fail: 0.10
+quality:
+  # Override thresholds for this entity (optional)
+  # thresholds:
+  #   hard_fail: 0.10
 
-# Field-level validations
-entity_field_validations:
-  - field: primary_id
-    type: required
-    nullable: false
-    error_message: "Primary ID is required"
+  # Field-level validations
+  entity_field_validations:
+    - field: primary_id
+      type: required
+      nullable: false
+      error_message: "Primary ID is required"
 
-# Cross-field validations
-entity_cross_field_validations: []
+  # Cross-field validations
+  entity_cross_field_validations: []
 
-# Conditional validations
-entity_conditional_validations: []
+  # Conditional validations
+  entity_conditional_validations: []
 ```
 
-### Step 3: Reference in pipeline config
+### Step 3: Add optional inline overrides in `pipeline`
 
 ```yaml
-# configs/pipelines/{provider}/{entity}.yaml
-pipeline_name: {provider}_{entity}
-dq_config_file: ../../quality/entities/{provider}/{entity}.yaml
+# configs/entities/{provider}/{entity}.yaml
+pipeline:
+  pipeline_name: {provider}_{entity}
+  dq_overrides:
+    thresholds:
+      hard_fail_threshold: 0.25
 ```
 
 ## Validation Types
@@ -258,58 +260,59 @@ entity_conditional_validations:
 ## Complete Entity DQ Config Example
 
 ```yaml
-# configs/quality/entities/chembl/activity.yaml
+# configs/entities/chembl/activity.yaml
 version: "1.0.0"
 provider: chembl
 entity: activity
 
-# Override provider thresholds (optional)
-# thresholds:
-#   hard_fail: 0.10
+quality:
+  # Override provider thresholds (optional)
+  # thresholds:
+  #   hard_fail: 0.10
 
-entity_field_validations:
-  - field: activity_id
-    type: required
-    nullable: false
-    error_message: "Activity ID is required"
+  entity_field_validations:
+    - field: activity_id
+      type: required
+      nullable: false
+      error_message: "Activity ID is required"
 
-  - field: standard_value
-    type: range
-    min: 0
-    nullable: true
-    error_message: "Standard value must be non-negative"
+    - field: standard_value
+      type: range
+      min: 0
+      nullable: true
+      error_message: "Standard value must be non-negative"
 
-  - field: pchembl_value
-    type: range
-    min: 0
-    max: 15
-    nullable: true
-    error_message: "pChEMBL value must be between 0 and 15"
+    - field: pchembl_value
+      type: range
+      min: 0
+      max: 15
+      nullable: true
+      error_message: "pChEMBL value must be between 0 and 15"
 
-  - field: standard_type
-    type: enum
-    allowed: [IC50, Ki, Kd, EC50, AC50, GI50, Potency, Activity, Inhibition]
-    nullable: true
-    error_message: "Invalid standard_type value"
+    - field: standard_type
+      type: enum
+      allowed: [IC50, Ki, Kd, EC50, AC50, GI50, Potency, Activity, Inhibition]
+      nullable: true
+      error_message: "Invalid standard_type value"
 
-entity_cross_field_validations:
-  - name: value_requires_units
-    fields: [standard_value, standard_units]
-    condition: conditional_required
-    trigger_field: standard_value
-    required_field: standard_units
-    error_message: "standard_units required when standard_value is present"
+  entity_cross_field_validations:
+    - name: value_requires_units
+      fields: [standard_value, standard_units]
+      condition: conditional_required
+      trigger_field: standard_value
+      required_field: standard_units
+      error_message: "standard_units required when standard_value is present"
 
-entity_conditional_validations:
-  - name: binding_requires_target
-    condition_field: assay_type
-    condition_value: B
-    condition_operator: eq
-    then_validations:
-      - field: target_chembl_id
-        type: required
-        nullable: false
-        error_message: "Binding assays must have a target"
+  entity_conditional_validations:
+    - name: binding_requires_target
+      condition_field: assay_type
+      condition_value: B
+      condition_operator: eq
+      then_validations:
+        - field: target_chembl_id
+          type: required
+          nullable: false
+          error_message: "Binding assays must have a target"
 ```
 
 ## Inline Overrides (Level 4)
@@ -317,18 +320,17 @@ entity_conditional_validations:
 For exceptional cases, override DQ rules directly in pipeline config:
 
 ```yaml
-# configs/pipelines/chembl/activity.yaml
-pipeline_name: chembl_activity
-dq_config_file: ../../quality/entities/chembl/activity.yaml
+# configs/entities/chembl/activity.yaml
+pipeline:
+  pipeline_name: chembl_activity
 
-# Temporary override for migration period
-dq_overrides:
-  thresholds:
-    hard_fail: 0.30  # Higher tolerance during migration
-  field_validations:
-    - field: legacy_id
-      type: required
-      nullable: false
+  # Temporary override for migration period
+  dq_overrides:
+    hard_fail_threshold: 0.30  # Higher tolerance during migration
+    field_validations:
+      - field: legacy_id
+        type: required
+        nullable: false
 ```
 
 **Note**: Inline overrides should be temporary. Prefer updating entity config for permanent changes.
@@ -358,22 +360,7 @@ print(f"Field validations: {len(dq_config.field_validations)}")
 Validate all DQ configs:
 
 ```bash
-# Validate via Python
-python -c "
-from pathlib import Path
-import yaml
-from bioetl.infrastructure.schemas.dq_config import DQConfigFile
-
-for f in Path('configs/quality').rglob('*.yaml'):
-    if f.name == 'README.md':
-        continue
-    with open(f) as fp:
-        data = yaml.safe_load(fp)
-        if data:  # Skip empty files
-            DQConfigFile.model_validate(data)
-    print(f'OK {f}')
-print('All configs valid!')
-"
+python src/tools/scripts/validate_unified_configs.py
 ```
 
 ## Troubleshooting
@@ -389,15 +376,15 @@ ValueError: soft_fail (0.25) must be < hard_fail (0.20)
 ### Error: Required field not found
 
 ```
-FileNotFoundError: Required DQ defaults file not found: configs/quality/_defaults.yaml
+FileNotFoundError: Required DQ defaults file not found: configs/base/quality.yaml
 ```
 
-**Fix**: Create `configs/quality/_defaults.yaml` with global settings.
+**Fix**: Create `configs/base/quality.yaml` with global settings.
 
 ### Validation not applied
 
 **Check**:
-1. Is `dq_config_file` path correct in pipeline config?
+1. Is `quality` section present in `configs/entities/{provider}/{entity}.yaml`?
 2. Is field name spelled correctly in validation?
 3. Is validation type correct for the field data type?
 

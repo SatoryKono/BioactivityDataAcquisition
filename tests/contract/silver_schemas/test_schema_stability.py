@@ -17,8 +17,8 @@ import os
 from pathlib import Path
 
 import pytest
-import yaml
 
+from bioetl.infrastructure.config_loader import load_pipeline_config
 from tests.contract.silver_schemas.conftest import (
     SILVER_SCHEMAS,
     extract_field_metadata,
@@ -133,17 +133,14 @@ class TestSchemaStability:
         schema_class = SILVER_SCHEMAS[schema_name]
         fields = extract_field_metadata(schema_class)
 
-        provider, entity = schema_name.split("_", 1)
-        config_path = Path("configs/pipelines") / provider / f"{entity}.yaml"
-        data = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
-        print(f"DEBUG: {schema_name} data keys: {list(data.keys())}")
+        yaml_config = load_pipeline_config(schema_name)
 
         # Some configs may rely on composition defaults (runner_builder)
         # where technical_primary_key implicitly defaults to "entity_id".
         # Tests should remain robust to such defaults while still verifying
         # that the referenced fields exist and are non-nullable in Silver.
-        technical_pk = data.get("technical_primary_key") or "entity_id"
-        business_pks = data.get("business_primary_keys") or []
+        technical_pk = yaml_config.technical_primary_key
+        business_pks = list(yaml_config.business_primary_keys)
 
         assert technical_pk in fields, (
             f"{schema_name}: Missing technical_primary_key '{technical_pk}' in Silver schema"

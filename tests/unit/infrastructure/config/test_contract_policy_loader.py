@@ -67,9 +67,7 @@ def test_load_contracts_from_legacy_path_fallback(
     load_pipeline_contract_policy.cache_clear()
     monkeypatch.chdir(tmp_path)
 
-    contracts_dir = (
-        tmp_path / "configs" / "contracts" / "pipelines" / "test_provider"
-    )
+    contracts_dir = tmp_path / "configs" / "contracts" / "pipelines" / "test_provider"
     contracts_dir.mkdir(parents=True)
     (contracts_dir / "test_entity.yaml").write_text(
         yaml.safe_dump(

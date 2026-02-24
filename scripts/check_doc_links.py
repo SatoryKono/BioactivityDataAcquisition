@@ -25,6 +25,8 @@ import re
 import sys
 from pathlib import Path
 
+import yaml
+
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DOCS_DIR = PROJECT_ROOT / "docs"
 PIPELINES_DIR = DOCS_DIR / "04-reference" / "pipelines"
@@ -120,41 +122,40 @@ def check_spec_files() -> list[tuple[str, str]]:
 
 
 def check_config_existence() -> list[tuple[str, str]]:
-    """Verify that configs referenced by convention exist.
-
-    For each pipeline config in configs/pipelines/{provider}/{entity}.yaml,
-    checks that the corresponding DQ and filter config files exist.
-    """
+    """Verify that unified entity/provider configs are present and complete."""
     configs_dir = PROJECT_ROOT / "configs"
-    pipelines_dir = configs_dir / "pipelines"
+    entities_dir = configs_dir / "entities"
+    providers_dir = configs_dir / "providers"
     missing: list[tuple[str, str]] = []
 
-    if not pipelines_dir.exists():
+    if not entities_dir.exists():
         return missing
 
-    for yaml_file in sorted(pipelines_dir.rglob("*.yaml")):
+    for yaml_file in sorted(entities_dir.rglob("*.yaml")):
         if yaml_file.name.startswith("_"):
-            continue
-
-        # Skip composite configs
-        if "composite" in yaml_file.parts:
             continue
 
         provider = yaml_file.parent.name
         entity = yaml_file.stem
 
-        # Check DQ config
-        dq_config = configs_dir / "quality" / "entities" / provider / f"{entity}.yaml"
-        if not dq_config.exists():
-            missing.append(
-                (f"{provider}/{entity}", f"configs/quality/entities/{provider}/{entity}.yaml")
-            )
+        payload = yaml.safe_load(yaml_file.read_text(encoding="utf-8")) or {}
 
-        # Check filter config
-        filter_config = configs_dir / "filters" / "entities" / provider / f"{entity}.yaml"
-        if not filter_config.exists():
+        for section in ("pipeline", "schema", "quality", "filters", "contracts"):
+            if section not in payload:
+                missing.append(
+                    (
+                        f"{provider}/{entity}",
+                        f"configs/entities/{provider}/{entity}.yaml::{section}",
+                    )
+                )
+
+        provider_config = providers_dir / f"{provider}.yaml"
+        if not provider_config.exists():
             missing.append(
-                (f"{provider}/{entity}", f"configs/filters/entities/{provider}/{entity}.yaml")
+                (
+                    f"{provider}/{entity}",
+                    f"configs/providers/{provider}.yaml",
+                )
             )
 
     return missing

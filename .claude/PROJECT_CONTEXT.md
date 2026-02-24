@@ -1,6 +1,6 @@
 # BioETL: Компактный Контекст для Claude
 
-*Синхронизировано с RULES.md v5.21 (2026-02-21)*
+*Синхронизировано с RULES.md v5.22 (2026-02-24)*
 
 > **Это сокращённая версия.** Полная документация:
 > - `docs/00-project/RULES.md` — **Единственный источник истины** для архитектурных правил
@@ -91,7 +91,8 @@ src/bioetl/
 | Adapters | `src/bioetl/infrastructure/adapters/{provider}/` |
 | Pipelines | `src/bioetl/application/pipelines/` |
 | Bootstrap | `src/bioetl/composition/bootstrap/` |
-| Configs | `configs/pipelines/{provider}/{entity}.yaml` |
+| Configs (unified) | `configs/entities/{provider}/{entity}.yaml` |
+| Configs (composite) | `configs/composites/{entity}.yaml` |
 | ADR | `docs/02-architecture/decisions/` |
 
 ---

@@ -17,10 +17,10 @@ def ensure_registration():
 
 def test_registry_completeness():
     """
-    Verify that every pipeline configuration file in configs/pipelines
+    Verify that every unified entity pipeline configuration file in configs/entities
     has a corresponding entry in the PipelineRegistry.
     """
-    config_dir = Path("configs/pipelines")
+    config_dir = Path("configs/entities")
     if not config_dir.exists():
         pytest.skip("Config directory not found")
 
@@ -35,7 +35,7 @@ def test_registry_completeness():
     for root, _, files in os.walk(config_dir):
         for file in files:
             if file.endswith(".yaml") or file.endswith(".yml"):
-                # Structure is configs/pipelines/{provider}/{entity}.yaml
+                # Structure is configs/entities/{provider}/{entity}.yaml
                 # The pipeline name is {provider}_{entity}
                 path = Path(root) / file
 
@@ -47,9 +47,6 @@ def test_registry_completeness():
                     provider = parts[0]
                     # Skip internal directories (documentation, templates, etc.)
                     if provider.startswith("_"):
-                        continue
-                    # Skip composite pipelines (different factory mechanism, see ADR-026)
-                    if provider == "composite":
                         continue
                     entity = os.path.splitext(parts[1])[0]
                     pipeline_name = f"{provider}_{entity}"

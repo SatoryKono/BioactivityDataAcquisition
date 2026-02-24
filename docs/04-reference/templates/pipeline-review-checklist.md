@@ -1,6 +1,6 @@
 # Pipeline Review Checklist
 
-*Synced with RULES.md v5.21 (2026-02-21)*
+*Synced with RULES.md v5.22 (2026-02-24)*
 
 Use this checklist when reviewing new or modified pipelines.
 
@@ -16,10 +16,10 @@ ______________________________________________________________________
 
 ## 2. Configuration (RULES.md App D)
 
-- [ ] Pipeline config exists at `configs/pipelines/{provider}/{entity}.yaml`
-- [ ] Config includes required sections: `pipeline`, `source`, `sink`, `dq-overrides`
-- [ ] `circuit-breaker` and `rate-limit` parameters defined
-- [ ] `load-strategy` specified (`incremental` | `full`)
+- [ ] Pipeline config exists at `configs/entities/{provider}/{entity}.yaml`
+- [ ] Unified config includes required sections: `pipeline`, `schema`, `quality`, `filters`, `contracts`
+- [ ] Provider config exists at `configs/providers/{provider}.yaml` (source, rate_limit, circuit_breaker)
+- [ ] `loading_strategy` specified (`full_scan_only` | `null`)
 - [ ] `forensic-retention` flag set for Critical tables if needed
 
 ## 3. Data Flow - Medallion Architecture (RULES.md §2.1)

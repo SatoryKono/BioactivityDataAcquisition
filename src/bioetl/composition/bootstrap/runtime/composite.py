@@ -66,7 +66,7 @@ __all__ = [
 # Default composite config path (RF-CFG-036)
 COMPOSITE_CONFIG_DIR = Path("configs/composites")
 LEGACY_COMPOSITE_CONFIG_DIR = Path("configs/pipelines/composite")
-FIELD_GROUP_CONFIG_DIR = Path("configs/composite/field_groups")
+FIELD_GROUP_CONFIG_DIR = Path("configs/composites/field_groups")
 
 
 COMPOSITE_GOLD_SCHEMA_REGISTRY: dict[str, type] = {

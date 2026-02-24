@@ -313,12 +313,13 @@ tests/
 graph TD
     subgraph configs
         direction LR
-        A(pipelines) --> A1("chembl/activity.yaml")
-        A --> A2("chembl/assay.yaml")
-        B(schemas) --> B1("bronze/README.md")
-        B --> B2("silver/README.md")
-        B --> B3("gold/README.md")
-        C(env) --> C1(".env.example")
+        A(entities) --> A1("chembl/activity.yaml")
+        A --> A2("pubmed/publication.yaml")
+        B(providers) --> B1("chembl.yaml")
+        B --> B2("openalex.yaml")
+        C(base) --> C1("pipeline.yaml")
+        C --> C2("quality.yaml")
+        D(composites) --> D1("publication.yaml")
     end
 ```
 
@@ -331,7 +332,7 @@ graph TD
 | `docs/00-project/RULES.md`                         | Master rules document     |
 | `docs/00-project/glossary.md`                      | Ubiquitous Language terminology |
 | `CHANGELOG.md`                                     | Version history           |
-| `configs/pipelines/{provider}/{entity}.yaml`       | Pipeline configuration    |
+| `configs/entities/{provider}/{entity}.yaml`       | Pipeline configuration    |
 | `src/bioetl/domain/ports/`                         | Protocol interfaces (package) |
 | `src/bioetl/composition/bootstrap-contexts.py`     | Composition root          |
 | `src/bioetl/infrastructure/config.py`              | Application settings      |
@@ -360,15 +361,15 @@ graph TD
 
 | Document                 | Last Updated | Status                       |
 |--------------------------|--------------|------------------------------|
-| RULES.md                 | 2026-02-21   | v5.21 (Latest)               |
+| RULES.md                 | 2026-02-24   | v5.22 (Latest)               |
 | REQUIREMENTS.md          | 2026-02-21   | v1.5 (Local-Only sync)       |
 | glossary.md              | 2026-02-06   | v2.5 (Ubiquitous Language)   |
 | 00-map.md                | 2026-02-21   | v7.3 Audit remediation       |
-| rules-summary.md         | 2026-02-21   | v5.21 Synced                 |
-| TOOLS.md                 | 2026-02-21   | v2.1 Synced with RULES v5.21 |
+| rules-summary.md         | 2026-02-24   | v5.22 Synced                 |
+| TOOLS.md                 | 2026-02-24   | v2.2 Synced with RULES v5.22 |
 | 03-guides/               | 2026-01-20   | Consolidated (16 guides)     |
 | 03-development/          | 2026-01-26   | Config schema guidelines     |
-| ADR-001..034             | 2026-02-17   | All 34 ADRs documented       |
+| ADR-001..039             | 2026-02-24   | All 39 ADRs documented       |
 | 05-operations/runbooks/  | 2026-01-04   | 16 active runbooks           |
 | domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
 | audits/                  | 2026-02-17   | Consolidated (audit/ merged) |
@@ -376,4 +377,4 @@ graph TD
 
 ---
 
-*Last updated: 2026-02-21. Audit remediation (P0+P1) applied.*
+*Last updated: 2026-02-24. Unified config docs sync.*

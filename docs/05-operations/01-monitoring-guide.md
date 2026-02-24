@@ -15,37 +15,37 @@ BioETL использует стек **Prometheus + Grafana** для обесп�
 
 ### Фильтрация и Изоляция данных
 В верхней части каждого дашборда расположены выпадающие списки:
-- **Pipeline**: Выбор конкретного пайплайна (напр. `chembl_activity`, `uniprot_protein`).
-- **Run ID**: Позволяет изолировать данные конкретного запуска внутри выбранного пайплайна.
+- **Simple / Overview v2 / DQ v2**: `$pipeline`, `$run_type`
+- **Provider Health v2**: `$pipeline`, `$provider`
 
 > **Важно**: Если вы не видите данных, убедитесь, что в фильтре выбран правильный пайплайн или стоит значение `All`.
 
 ### Основные Дашборды
 
-#### 1. BioETL Overview (Обзор)
+#### 1. BioETL Overview v2
 Центральный дашборд для контроля за выполнением пайплайнов.
-- **Bronze/Silver/Gold Records**: Скорость и объем данных на каждом слое Medallion.
-- **Success/Failure Rate**: Доля успешных и проваленных батчей.
-- **Batch Size**: Распределение размеров пакетов данных.
+- **Processing Pipeline**: динамика по стадиям (bronze/silver/gold/quarantined).
+- **Stage Distribution / Pipeline Distribution**: срезы распределения.
+- **Overall Quality**: `gold / clamp_min(bronze, 1)`.
 
-#### 2. Data Quality (Качество данных)
+#### 2. BioETL Data Quality v2
 Сфокусирован на чистоте данных и аномалиях.
-- **Quarantine Stats**: Количество записей, попавших в карантин, с разбивкой по типам ошибок.
-- **DQ Score**: Интегральная оценка качества данных (1.0 = идеал).
-- **Schema Drift**: Детекция изменений в структуре данных источника.
+- **Data Quality Score**: `(gold + quarantined) / clamp_min(bronze, 1)`.
+- **Quarantine / Soft Threshold / Validation Failures**: контроль деградаций по окнам времени.
+- **Anomalies / DQ p95 / Data Freshness**: детальные DQ-сигналы.
 
-#### 3. Provider Health (Здоровье провайдеров)
+#### 3. BioETL Provider Health v2
 Технический мониторинг состояния внешних API (ChEMBL, UniProt и др.).
-- **Circuit Breaker Status**: Состояние предохранителей (Closed/Open).
-- **Latency**: Время ответа внешних сервисов.
-- **HTTP Errors**: Группировка сетевых ошибок (429, 5xx).
+- **Health Check Latency by Provider (p95)**: тренд латентности провайдеров.
+- **Health Check Success / Total Checks**: объём и стабильность health-check.
+- **Per-provider gauges (102/103)**: повторяемые p95-панели по `$provider`.
 
 ## 3. Гарантии качества мониторинга
 
 Все конфигурации дашбордов проходят автоматическую проверку (**Contract Testing**). Это гарантирует, что:
 1.  Дашборды используют только реально существующие в коде метрики.
 2.  На всех панелях настроены правильные единицы измерения (nM, bytes, sec).
-3.  Переменные фильтрации `$pipeline` и `$run_id` работают корректно.
+3.  Переменные фильтрации `$pipeline`, `$run_type` и `$provider` работают корректно.
 
 Подробнее см. в документации по тестированию наблюдаемости.
 

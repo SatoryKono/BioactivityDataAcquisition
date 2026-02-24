@@ -155,21 +155,19 @@ bioetl run --pipeline chembl_activity \
 
 ## Конфигурация пайплайнов
 
-Все пайплайны настраиваются через **YAML-файлы** в `configs/pipelines/`:
+Стандартные пайплайны настраиваются через **YAML-файлы** в `configs/entities/`, composite-пайплайны — в `configs/composites/`:
 
 ```
 configs/
-├── pipelines/
-│   ├── -base.yaml           # Базовая конфигурация (наследуется)
-│   ├── chembl/
-│   │   ├── activity.yaml
-│   │   ├── molecule.yaml
-│   │   └── ...
-│   ├── pubchem/
-│   │   └── compound.yaml
-│   └── ...
-├── dq/                       # Data Quality правила
-└── filter/                   # Фильтры данных
+├── base/
+│   ├── pipeline.yaml         # Базовые pipeline/filter defaults
+│   └── quality.yaml          # Базовые DQ defaults
+├── providers/
+│   └── {provider}.yaml       # source + provider quality/filters
+├── entities/
+│   └── {provider}/{entity}.yaml  # unified entity config
+└── composites/
+    └── {entity}.yaml         # composite pipelines
 ```
 
 ### Просмотр конфигурации
@@ -187,21 +185,22 @@ bioetl config validate chembl_activity
 
 ### Структура YAML-конфига
 
-Минимальный конфиг (наследует из `-base.yaml`):
+Минимальный unified entity config:
 
 ```yaml
-pipeline-name: chembl_activity
+version: "1.0.0"
 provider: chembl
-entity-type: activity
-version: "1.2.0"
-business-primary-keys: ["activity-id"]
-silver-table: "chembl_activity"
-gold-table: "chembl_activity"
+entity: activity
 
-# Переопределения DQ правил (опционально)
-dq-overrides:
-  field-validations:
-    - field: standard-value
+pipeline:
+  pipeline_name: chembl_activity
+  provider: chembl
+  entity_type: activity
+  business_primary_keys: [activity_id]
+
+quality:
+  entity_field_validations:
+    - field: standard_value
       type: range
       min: 0
       nullable: true

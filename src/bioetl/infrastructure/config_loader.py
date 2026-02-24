@@ -1,7 +1,8 @@
 """Configuration loading utilities.
 
 Handles loading and merging of YAML configuration files
-with convention-based path resolution (ADR-029).
+with convention-based path resolution (ADR-029) and unified
+entity config support (ADR-039).
 """
 
 from __future__ import annotations
@@ -23,18 +24,14 @@ def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any
 
 
 def _load_base_config(config_path: Path) -> dict[str, Any]:
-    """Load pipeline base configuration with backward-compatible fallback.
+    """Load pipeline base configuration from consolidated base path.
 
     Resolution order:
     1. configs/base/pipeline.yaml (new consolidated base path)
-    2. configs/pipelines/_base.yaml (legacy path)
-    3. configs/pipelines/{provider}/_base.yaml (legacy per-provider path)
     """
     candidate_paths = (
         config_path.parent.parent.parent / "base" / "pipeline.yaml",
         config_path.parent.parent / "base" / "pipeline.yaml",
-        config_path.parent.parent / "_base.yaml",
-        config_path.parent / "_base.yaml",
     )
 
     for base_path in candidate_paths:
@@ -55,7 +52,7 @@ def _apply_file_reference_defaults(
 
     Sets source_file, dq_config_file, and filter_config_file if not specified.
     """
-    config.setdefault("source_file", f"../../sources/{provider}.yaml")
+    config.setdefault("source_file", f"../../providers/{provider}.yaml")
     config.setdefault(
         "dq_config_file", f"../../quality/entities/{provider}/{entity_type}.yaml"
     )
@@ -414,9 +411,8 @@ def _normalize_source_config(raw: dict[str, Any]) -> dict[str, Any]:
 
 @lru_cache(maxsize=10)
 def load_source_config(provider: str) -> SourceYamlConfig:
-    """Load source configuration from unified provider or legacy source YAML."""
+    """Load source configuration from unified provider YAML."""
     unified_path = Path(f"configs/providers/{provider}.yaml")
-    legacy_path = Path(f"configs/sources/{provider}.yaml")
 
     raw_config: dict[str, Any]
 
@@ -431,21 +427,13 @@ def load_source_config(provider: str) -> SourceYamlConfig:
                 value = unified_raw.get(key)
                 if value is not None:
                     raw_config[key] = value
-        elif legacy_path.exists():
-            with open(legacy_path, encoding="utf-8") as f:
-                raw_config = yaml.safe_load(f) or {}
         else:
-            raise ValueError(
-                f"Provider config found at {unified_path} but missing 'source' section, "
-                f"and legacy source config not found at {legacy_path}."
-            )
-    elif legacy_path.exists():
-        with open(legacy_path, encoding="utf-8") as f:
-            raw_config = yaml.safe_load(f) or {}
+            # Accept legacy-flat provider payload for compatibility with test fixtures.
+            raw_config = unified_raw
     else:
         raise ValueError(
-            f"Source configuration file not found in {unified_path} or {legacy_path}. "
-            f"Create provider/source config with rate_limit and circuit_breaker settings."
+            f"Source configuration file not found: {unified_path}. "
+            "Create provider config with source/rate_limit/circuit_breaker settings."
         )
 
     normalized_config = _normalize_source_config(raw_config)
@@ -592,8 +580,7 @@ def _load_column_groups_section(
 ) -> None:
     """Load column groups from external file unless explicitly set inline.
 
-    Priority:
-    explicit inline > unified schema section > schema_file >
+    Priority: explicit inline > unified schema section > schema_file >
     data_schema_file > column_groups_file (legacy).
     """
     if "column_groups" in entity_config:
@@ -633,7 +620,7 @@ def _load_column_groups_section(
 def _load_source_section(config: dict[str, Any], config_path: Path) -> None:
     """Load source config from external file and merge with entity overrides.
 
-    The source file (configs/sources/{provider}.yaml) provides base settings.
+    The source file (configs/providers/{provider}.yaml) provides base settings.
     Entity-specific source settings from the pipeline YAML override them.
     """
     source_file = config.get("source_file")
@@ -652,8 +639,9 @@ def _load_source_section(config: dict[str, Any], config_path: Path) -> None:
 def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     """Load pipeline configuration from YAML file and return typed model.
 
-    Loading order: base → entity merge → convention defaults (ADR-029)
-    → hierarchical filters (ADR-028) → column groups → source section.
+    Loading order: base → unified entity (ADR-039) → legacy entity →
+    convention defaults (ADR-029) → hierarchical filters (ADR-028)
+    → column groups → source section.
 
     Args:
         pipeline_name: Pipeline name (e.g., "chembl_activity").
@@ -666,18 +654,27 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
 
     if "_" in pipeline_name:
         provider, entity = pipeline_name.split("_", 1)
+        legacy_path = Path(f"configs/pipelines/{provider}/{entity}.yaml")
         unified_path = Path(f"configs/entities/{provider}/{entity}.yaml")
         unified_raw = _load_unified_entity_raw(unified_path)
         unified_pipeline = _get_unified_section(unified_raw, "pipeline")
         unified_schema = _get_unified_section(unified_raw, "schema")
 
-        if unified_pipeline:
+        if legacy_path.exists():
+            config_path = legacy_path
+            with open(legacy_path, encoding="utf-8") as f:
+                legacy_entity_config = yaml.safe_load(f) or {}
+            if unified_pipeline:
+                entity_config = _deep_merge(unified_pipeline, legacy_entity_config)
+            else:
+                entity_config = legacy_entity_config
+        elif unified_pipeline:
             config_path = unified_path
             entity_config = unified_pipeline
         else:
             raise ValueError(
-                "Configuration file not found or missing pipeline section: "
-                f"{unified_path}"
+                f"Configuration file not found: {legacy_path} "
+                f"(and no pipeline section in {unified_path})"
             )
     else:
         config_path = Path(f"configs/pipelines/{pipeline_name}.yaml")

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate schema artifacts from canonical configs/schemas YAML sources.
+"""Generate schema artifacts from canonical unified entity schema sections.
 
 Artifacts:
 - Pandera silver registry: src/bioetl/domain/schemas/generated/registry.py
@@ -21,7 +21,7 @@ from pathlib import Path
 import yaml
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-CANONICAL_DIR = PROJECT_ROOT / "configs" / "schemas"
+CANONICAL_DIR = PROJECT_ROOT / "configs" / "entities"
 PANDERA_REGISTRY_PATH = (
     PROJECT_ROOT / "src" / "bioetl" / "domain" / "schemas" / "generated" / "registry.py"
 )
@@ -41,8 +41,7 @@ class CanonicalSchemaEntry:
 def _iter_canonical_schema_files() -> list[Path]:
     files: list[Path] = []
     for yaml_path in sorted(CANONICAL_DIR.rglob("*.yaml")):
-        rel = yaml_path.relative_to(CANONICAL_DIR)
-        if rel.parts[0] in {"examples", "composite"}:
+        if yaml_path.name.startswith("_"):
             continue
         files.append(yaml_path)
     return files
@@ -50,7 +49,8 @@ def _iter_canonical_schema_files() -> list[Path]:
 
 def _load_entry(yaml_path: Path) -> CanonicalSchemaEntry:
     payload = yaml.safe_load(yaml_path.read_text(encoding="utf-8")) or {}
-    groups = payload.get("column_groups", [])
+    schema = payload.get("schema", {}) if isinstance(payload, dict) else {}
+    groups = schema.get("column_groups", []) if isinstance(schema, dict) else []
     group_names: list[str] = []
     for group in groups:
         if isinstance(group, dict) and "name" in group:
@@ -68,7 +68,7 @@ def _load_entry(yaml_path: Path) -> CanonicalSchemaEntry:
 
 def _build_registry(entries: list[CanonicalSchemaEntry]) -> str:
     lines: list[str] = []
-    lines.append('"""Auto-generated registry from configs/schemas canonical sources.')
+    lines.append('"""Auto-generated registry from configs/entities schema sections.')
     lines.append("")
     lines.append(
         "DO NOT EDIT MANUALLY. Run: python scripts/generate_schema_artifacts.py"
