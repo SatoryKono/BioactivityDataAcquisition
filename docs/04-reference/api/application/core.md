@@ -13,7 +13,7 @@ options:
 show-root-heading: true
 show-source: false
 members:
-\- --init--
+\- __init__
 \- run
 \- logger
 \- services
@@ -31,20 +31,20 @@ show-source: false
 
 Unified batch executor for ETL pipeline orchestration. Handles extraction → transformation → writing flow with adaptive batch sizing.
 
-::: bioetl.application.core.batch-executor.BatchExecutor
+::: bioetl.application.core.batch_executor.BatchExecutor
 options:
 show-root-heading: true
 show-source: false
 members:
-\- --init--
+\- __init__
 \- execute
-\- execute-batch
+\- execute_batch
 
 ### BatchResult
 
 Result of batch execution containing metrics and status.
 
-::: bioetl.application.core.batch-executor.BatchResult
+::: bioetl.application.core.batch_executor.BatchResult
 options:
 show-root-heading: true
 show-source: false
@@ -53,41 +53,14 @@ show-source: false
 
 Processes individual records through the transformation pipeline.
 
-::: bioetl.application.core.record-processor.RecordProcessor
+::: bioetl.application.core.record_processor.RecordProcessor
 options:
 show-root-heading: true
 show-source: false
 
 ## Batch Transformation
 
-### BatchTransformer
-
-Streaming-режим интегрирован в BatchTransformer как streaming-processing mode.
-
-Transforms batches of records from Bronze to Silver/Gold layers.
-
-::: bioetl.application.core.batch-transformer.BatchTransformer
-options:
-show-root-heading: true
-show-source: false
-
-### TransformResult
-
-Result of a transformation operation.
-
-::: bioetl.application.core.batch-transformer.TransformResult
-options:
-show-root-heading: true
-show-source: false
-
-### TransformedRecord
-
-Container for a transformed record with metadata.
-
-::: bioetl.application.core.batch-transformer.TransformedRecord
-options:
-show-root-heading: true
-show-source: false
+See [Transformers](transformers.md) for `BatchTransformer`, `TransformResult`, and `TransformedRecord`.
 
 ## Batch Writing
 
@@ -95,7 +68,7 @@ show-source: false
 
 Writes transformed batches to storage layers.
 
-::: bioetl.application.core.batch-writer.BatchWriter
+::: bioetl.application.core.batch_writer.BatchWriter
 options:
 show-root-heading: true
 show-source: false
@@ -106,7 +79,7 @@ show-source: false
 
 Bundle of common pipeline services injected via DI.
 
-::: bioetl.application.core.pipeline-services.PipelineServices
+::: bioetl.application.core.pipeline_services.PipelineServices
 options:
 show-root-heading: true
 show-source: false
@@ -117,7 +90,7 @@ show-source: false
 
 Pre-flight infrastructure validation before pipeline execution.
 
-::: bioetl.application.core.preflight-service.PreflightService
+::: bioetl.application.core.preflight_service.PreflightService
 options:
 show-root-heading: true
 show-source: false
@@ -128,7 +101,7 @@ members:
 
 Post-run operations: DQ checks, VACUUM, cleanup.
 
-::: bioetl.application.core.postrun-service.PostrunService
+::: bioetl.application.core.postrun_service.PostrunService
 options:
 show-root-heading: true
 show-source: false
@@ -139,7 +112,7 @@ members:
 
 Result of post-run operations.
 
-::: bioetl.application.core.postrun-service.PostrunResult
+::: bioetl.application.core.postrun_service.PostrunResult
 options:
 show-root-heading: true
 show-source: false
@@ -148,7 +121,7 @@ show-source: false
 
 Data quality check result.
 
-::: bioetl.application.core.postrun-service.DQResult
+::: bioetl.application.core.postrun_service.DQResult
 options:
 show-root-heading: true
 show-source: false
@@ -157,7 +130,7 @@ show-source: false
 
 Enumeration for DQ evaluation status (PASSED, SOFT-FAIL, HARD-FAIL).
 
-::: bioetl.application.core.postrun-service.DQEvaluationStatus
+::: bioetl.application.core.postrun_service.DQEvaluationStatus
 options:
 show-root-heading: true
 show-source: false
@@ -166,7 +139,7 @@ show-source: false
 
 Result of VACUUM operation.
 
-::: bioetl.application.core.postrun-service.VacuumResult
+::: bioetl.application.core.postrun_service.VacuumResult
 options:
 show-root-heading: true
 show-source: false
@@ -177,7 +150,7 @@ show-source: false
 
 Pipeline checkpoint persistence for resume capability.
 
-::: bioetl.application.core.checkpoint-manager.CheckpointManager
+::: bioetl.application.core.checkpoint_manager.CheckpointManager
 options:
 show-root-heading: true
 show-source: false
@@ -190,7 +163,7 @@ members:
 
 Distributed locking coordination.
 
-::: bioetl.application.core.lock-manager.LockManager
+::: bioetl.application.core.lock_manager.LockManager
 options:
 show-root-heading: true
 show-source: false
@@ -202,7 +175,7 @@ members:
 
 Failed record quarantine management.
 
-::: bioetl.application.core.quarantine-manager.QuarantineManager
+::: bioetl.application.core.quarantine_manager.QuarantineManager
 options:
 show-root-heading: true
 show-source: false
@@ -213,7 +186,7 @@ show-source: false
 
 Memory usage monitoring for adaptive batch sizing.
 
-::: bioetl.application.core.memory-monitor.MemoryMonitor
+::: bioetl.infrastructure.system.memory_monitor.MemoryMonitor
 options:
 show-root-heading: true
 show-source: false
@@ -222,7 +195,7 @@ show-source: false
 
 Memory monitoring configuration.
 
-::: bioetl.application.core.memory-monitor.MemoryConfig
+::: bioetl.domain.config.memory.MemoryConfig
 options:
 show-root-heading: true
 show-source: false
@@ -231,7 +204,7 @@ show-source: false
 
 Memory usage statistics.
 
-::: bioetl.application.core.memory-monitor.MemoryStats
+::: bioetl.domain.ports.memory.MemoryStats
 options:
 show-root-heading: true
 show-source: false
@@ -274,11 +247,11 @@ options:
 show-root-heading: true
 show-source: false
 
-### create-shutdown-service
+### create_shutdown_service
 
 Factory function for creating shutdown service.
 
-::: bioetl.application.core.shutdown.create-shutdown-service
+::: bioetl.application.core.shutdown.create_shutdown_service
 options:
 show-root-heading: true
 show-source: false
@@ -289,7 +262,7 @@ show-source: false
 
 Cleanup operations for Bronze/Silver/Gold layers.
 
-::: bioetl.application.core.cleanup-service.CleanupService
+::: bioetl.application.core.cleanup_service.CleanupService
 options:
 show-root-heading: true
 show-source: false
@@ -298,7 +271,7 @@ show-source: false
 
 Result of cleanup operation.
 
-::: bioetl.application.core.cleanup-service.CleanupResult
+::: bioetl.application.core.cleanup_service.CleanupResult
 options:
 show-root-heading: true
 show-source: false
@@ -307,7 +280,7 @@ show-source: false
 
 Preview of files to be cleaned up.
 
-::: bioetl.application.core.cleanup-service.CleanupPreview
+::: bioetl.application.core.cleanup_service.CleanupPreview
 options:
 show-root-heading: true
 show-source: false
@@ -316,7 +289,7 @@ show-source: false
 
 Information about a storage layer.
 
-::: bioetl.application.core.cleanup-service.LayerInfo
+::: bioetl.application.core.cleanup_service.LayerInfo
 options:
 show-root-heading: true
 show-source: false
@@ -325,18 +298,13 @@ show-source: false
 
 ### MedallionLifecycleService
 
-Service for managing Medallion layer lifecycle operations.
-
-::: bioetl.application.services.medallion-lifecycle.MedallionLifecycleService
-options:
-show-root-heading: true
-show-source: false
+See [Services](services.md#medallionlifecycleservice) for full documentation.
 
 ### ClearResult
 
 Result of a layer clear operation.
 
-::: bioetl.application.services.medallion-types.ClearResult
+::: bioetl.application.services.medallion_types.ClearResult
 options:
 show-root-heading: true
 show-source: false
@@ -345,7 +313,7 @@ show-source: false
 
 Result of a layer prepare operation.
 
-::: bioetl.application.services.medallion-types.PrepareResult
+::: bioetl.application.services.medallion_types.PrepareResult
 options:
 show-root-heading: true
 show-source: false
@@ -354,51 +322,51 @@ show-source: false
 
 Utility functions for data transformation.
 
-### normalize-string
+### normalize_string
 
-::: bioetl.application.core.dict-transformers.normalize-string
+::: bioetl.application.core.dict_transformers.normalize_string
 options:
 show-root-heading: true
 show-source: false
 
-### safe-extract
+### safe_extract
 
-::: bioetl.application.core.dict-transformers.safe-extract
+::: bioetl.application.core.dict_transformers.safe_extract
 options:
 show-root-heading: true
 show-source: false
 
-### flatten-nested-dict
+### flatten_nested_dict
 
-::: bioetl.application.core.transform-utils.flatten-nested-dict
+::: bioetl.application.core.dict_transformers.flatten_nested_dict
 options:
 show-root-heading: true
 show-source: false
 
-### extract-list-field
+### extract_list_field
 
-::: bioetl.application.core.transform-utils.extract-list-field
+::: bioetl.application.core.dict_transformers.extract_list_field
 options:
 show-root-heading: true
 show-source: false
 
-### aggregate-nested-lists
+### aggregate_nested_lists
 
-::: bioetl.application.core.transform-utils.aggregate-nested-lists
+::: bioetl.application.core.dict_transformers.aggregate_nested_lists
 options:
 show-root-heading: true
 show-source: false
 
-### parse-date-field
+### parse_date_field
 
-::: bioetl.application.core.dict-transformers.parse-date-field
+::: bioetl.application.core.dict_transformers.parse_date_field
 options:
 show-root-heading: true
 show-source: false
 
-### validate-smiles
+### validate_smiles
 
-::: bioetl.application.core.transform-utils.validate-smiles
+::: bioetl.application.core.dict_transformers.validate_smiles
 options:
 show-root-heading: true
 show-source: false
@@ -436,12 +404,7 @@ show-source: false
 
 ### WriteMode
 
-Enumeration for write modes (MERGE, APPEND, OVERWRITE).
-
-::: bioetl.domain.medallion.WriteMode
-options:
-show-root-heading: true
-show-source: false
+See [Domain Types](../domain/types.md#writemode) for `WriteMode` documentation.
 
 ### WriteModePolicy
 
@@ -469,29 +432,29 @@ from bioetl.application.core import (
 )
 
 # Components are assembled in composition layer
-# See: bioetl.composition.bootstrap.bootstrap-pipeline()
+# See: bioetl.composition.bootstrap.bootstrap_pipeline()
 ```
 
 ```python
 # Transform utilities example
 from bioetl.application.core import (
-    normalize-string,
-    safe-extract,
-    parse-date-field,
-    validate-smiles,
+    normalize_string,
+    safe_extract,
+    parse_date_field,
+    validate_smiles,
 )
 
 # Normalize strings for consistent comparison
-name = normalize-string("  John Doe  ")  # "john doe"
+name = normalize_string("  John Doe  ")  # "john doe"
 
 # Safely extract nested values
-value = safe-extract(data, "nested.path.to.value", default=None)
+value = safe_extract(data, "nested.path.to.value", default=None)
 
 # Parse date strings
-date = parse-date-field("2024-01-15", "%Y-%m-%d")
+date = parse_date_field("2024_01_15", "%Y-%m-%d")
 
 # Validate SMILES notation
-is-valid = validate-smiles("CCO")  # True for ethanol
+is_valid = validate_smiles("CCO")  # True for ethanol
 ```
 
 ## See Also

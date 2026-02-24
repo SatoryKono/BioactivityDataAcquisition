@@ -178,9 +178,6 @@ class MetadataCoordinatorPort(Protocol):
 
         Returns:
             Complete BronzeMetadata for sidecar file.
-
-        Raises:
-            None.
         """
         ...
 
@@ -192,9 +189,6 @@ class MetadataCoordinatorPort(Protocol):
 
         Returns:
             Complete SilverMetadata for sidecar file.
-
-        Raises:
-            None.
         """
         ...
 
@@ -206,8 +200,5 @@ class MetadataCoordinatorPort(Protocol):
 
         Returns:
             Complete GoldMetadata for sidecar file.
-
-        Raises:
-            None.
         """
         ...
