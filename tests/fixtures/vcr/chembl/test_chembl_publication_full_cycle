@@ -9991,4 +9991,492 @@ interactions:
     status:
       code: 200
       message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/status
+  response:
+    body:
+      string: '{"activities": 24267312, "chembl_db_version": "ChEMBL_36", "chembl_release_date":
+        "2025-07-28", "compound_records": 3774137, "disinct_compounds": 2878135, "publications":
+        99142, "status": "UP", "targets": 17803}'
+    headers:
+      Cache-Control:
+      - max-age=30000000, s-maxage=30000000
+      Connection:
+      - Keep-Alive
+      Content-Length:
+      - '211'
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 24 Feb 2026 06:40:16 GMT
+      Server:
+      - gunicorn/20.0.4
+      Strict-Transport-Security:
+      - max-age=0
+      Vary:
+      - Accept, Origin
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&doc_type=PUBLICATION&year__gte=1950&year__lte=2050&document_chembl_id__in=CHEMBL1121421%2CCHEMBL1121493%2CCHEMBL1121680%2CCHEMBL1121695%2CCHEMBL1121721%2CCHEMBL1121751%2CCHEMBL1121774%2CCHEMBL1121806%2CCHEMBL1121940%2CCHEMBL1121981
+  response:
+    body:
+      string: "{\"documents\": [{\"abstract\": \"A new route to 5-(p-hydroxybenzyl)pyrimidines
+        has been developed which utilizes phenolic Mannich bases plus pyrimidines
+        containing at least two activating groups. The products can be alkylated on
+        the phenolic oxygen or on the pyrimidine N-1 atom, depending on conditions.
+        This method has been used to prepare trimethoprim, a broad-spectrum antibacterial
+        agent, starting from 2,4-diaminopyrimidine and 2,6-dimethoxyphenol.\", \"authors\":
+        \"Roth B, Strelitz JZ, Rauckman BS.\", \"chembl_release\": {\"chembl_release\":
+        \"CHEMBL_1\", \"creation_date\": \"2009-09-03\"}, \"contact\": null, \"doc_type\":
+        \"PUBLICATION\", \"document_chembl_id\": \"CHEMBL1121421\", \"doi\": \"10.1021/jm00178a007\",
+        \"doi_chembl\": null, \"first_page\": \"379\", \"issue\": \"4\", \"journal\":
+        \"J Med Chem\", \"journal_full_title\": \"Journal of medicinal chemistry.\",
+        \"last_page\": \"384\", \"patent_id\": null, \"pubmed_id\": 6991692, \"src_id\":
+        1, \"title\": \"2,4-Diamino-5-benzylpyrimidines and analogues as antibacterial
+        agents. 2. C-Alkylation of pyrimidines with Mannich bases and application
+        to the synthesis of trimethoprim and analogues.\", \"volume\": \"23\", \"year\":
+        1980}, {\"abstract\": \"The synthesis of 11-thiohomoaminopterin (1), which
+        is a close analogue of 11-thiohomofolic acid (2), has been carried out by
+        modification of the Boon-Leigh procedure. Treatment of 1-chloro-4-[p-(carbomethoxy)thiopenoxy]-2-butanone
+        (5) with sodium azide gave 1-azido-4-[p-(carbomethoxy)thiophenoxy]-2-butanone
+        (6). After protection of the carbonyl group of 6, the product 7 was catalytically
+        hydrogenated to 1-amino-4-[p-(carbomethoxy)thiophenoxy]-2-butanone ketal (3).
+        Reaction of 32 with 6-chloro-2,4-diaminmo-5-nitropyrimidine gave the desired
+        pyrimidine intermediate, which was elaborated to 4-amino-4-deoxy-11-thiohomopteroic
+        acid (20) by standard procedures. Alternately, 1-azido-4-[p-(carbomethoxy)thiophenoxy]-2-butanone
+        ketal (7) was hydrolyzed to the corresponding acid (8) and coupled with diethyl
+        L-glutamate to obtain diethyl N-[p-(1-azido-2-oxo-4-thiobutanoyl)benzoyl]-L-glutamate
+        ketal (10), which was used for the large-scale preparation of 11-thiohomoaminopterin
+        (1). Although 11-thiohomoaminopterin showed antifolate activity against two
+        folate-requiring microorganisms and inhibited Lactobacillus casei dihydrogolate
+        reductase, it did not exhibit any antitumor activity against L-1210 lymphoid
+        leukemia in mice at a maximum dose of 48 mg/kg.\", \"authors\": \"Nair MG,
+        Chen SY, Kisliuk RL, Gaumont Y, Strumpf D.\", \"chembl_release\": {\"chembl_release\":
+        \"CHEMBL_1\", \"creation_date\": \"2009-09-03\"}, \"contact\": null, \"doc_type\":
+        \"PUBLICATION\", \"document_chembl_id\": \"CHEMBL1121493\", \"doi\": \"10.1021/jm00182a017\",
+        \"doi_chembl\": null, \"first_page\": \"899\", \"issue\": \"8\", \"journal\":
+        \"J Med Chem\", \"journal_full_title\": \"Journal of medicinal chemistry.\",
+        \"last_page\": \"903\", \"patent_id\": null, \"pubmed_id\": 6772788, \"src_id\":
+        1, \"title\": \"Folate analogues altered in the C9-N10 bridge region. 16.
+        Synthesis and antifolate activity of 11-thiohomoaminopterin.\", \"volume\":
+        \"23\", \"year\": 1980}, {\"abstract\": \"In order to study the preferential
+        involvement of mu or delta receptors in the analgesic effects of enkephalins,
+        several peptides which selectively interact with these two kinds of receptors
+        in peripheral organs were synthesized. The inhibitory potency on the electrically
+        stimulated mouse vas deferens (delta receptors) of the short peptide Tyr-D-Ala-Gly-NH-CH(CH3)CH2CH(CH3)2
+        (6) is 2100 times lower (IC50 = 1220 nM) than that of the longer and more
+        hydrophilic peptide Tyr-D-Ser-Gly-Phe-Leu-Thr (10) (IC50 = 0.58 nM). In contrast,
+        the IC50 values of all the synthesized compounds on the guinea pig ileum assay
+        (mu receptors) are in the same range (100-360 nM). Likewise, their analgesic
+        activities in mice, measured on the hot-plate test after intracerebroventricular
+        injection, are similar. Therefore, the dissociation between antinociceptive
+        properties in mice and potencies on the mouse vas deferens unambiguously reflects
+        a preferential implication of mu receptors in analgesia. The possible involvement
+        of brain delta receptors in behavioral effects is discussed.\", \"authors\":
+        \"Gacel G, Fourni\xE9-Zaluski MC, Fellion E, Roques BP.\", \"chembl_release\":
+        {\"chembl_release\": \"CHEMBL_1\", \"creation_date\": \"2009-09-03\"}, \"contact\":
+        null, \"doc_type\": \"PUBLICATION\", \"document_chembl_id\": \"CHEMBL1121721\",
+        \"doi\": \"10.1021/jm00142a002\", \"doi_chembl\": null, \"first_page\": \"1119\",
+        \"issue\": \"10\", \"journal\": \"J Med Chem\", \"journal_full_title\": \"Journal
+        of medicinal chemistry.\", \"last_page\": \"1124\", \"patent_id\": null, \"pubmed_id\":
+        6276540, \"src_id\": 1, \"title\": \"Evidence of the preferential involvement
+        of mu receptors in analgesia using enkephalins highly selective for peripheral
+        mu or delta receptors.\", \"volume\": \"24\", \"year\": 1981}, {\"abstract\":
+        \"\", \"authors\": \"Barr PJ, Nolan PA, Santi DV, Robins MJ.\", \"chembl_release\":
+        {\"chembl_release\": \"CHEMBL_1\", \"creation_date\": \"2009-09-03\"}, \"contact\":
+        null, \"doc_type\": \"PUBLICATION\", \"document_chembl_id\": \"CHEMBL1121751\",
+        \"doi\": \"10.1021/jm00144a003\", \"doi_chembl\": null, \"first_page\": \"1385\",
+        \"issue\": \"12\", \"journal\": \"J Med Chem\", \"journal_full_title\": \"Journal
+        of medicinal chemistry.\", \"last_page\": \"1388\", \"patent_id\": null, \"pubmed_id\":
+        6796687, \"src_id\": 1, \"title\": \"Inhibition of thymidylate synthetase
+        by 5-alkynyl-2'-deoxyuridylates.\", \"volume\": \"24\", \"year\": 1981}, {\"abstract\":
+        \"The interaction of 5-ethynyl-2'-deoxyuridylate (5-ethynyl-dUMP; 1) with
+        thymidylate (dTMP) synthetase has been investigated. The compound was an inhibitor
+        of the enzyme, competitive with 2'-deoxyuridylate (dUMP) when the reaction
+        was initiated by addition of enzyme (Ki = 2.7 X 10(-6) M). However, upon preincubation
+        of 1 with dTMP synthetase, the inhibition pattern became noncompetitive. The
+        time course of the enzyme reaction in the presence of 1 was nonlinear, indicating
+        an increase in binding with time. Irreversible inactivation of the enzyme
+        did not occur. The compound did not appear to become altered structurally
+        as a result of interaction with the enzyme. A ternary complex was formed among
+        dTMP synthetase, compound 1, and 5,10-methylenetetrahydrofolate, which was
+        stable enough to survive Sephadex G-25 filtration but dissociated upon denaturation
+        of the enzyme.\", \"authors\": \"Danenberg PV, Bhatt RS, Kundu NG, Danenberg
+        K, Heidelberger C.\", \"chembl_release\": {\"chembl_release\": \"CHEMBL_1\",
+        \"creation_date\": \"2009-09-03\"}, \"contact\": null, \"doc_type\": \"PUBLICATION\",
+        \"document_chembl_id\": \"CHEMBL1121774\", \"doi\": \"10.1021/jm00144a036\",
+        \"doi_chembl\": null, \"first_page\": \"1537\", \"issue\": \"12\", \"journal\":
+        \"J Med Chem\", \"journal_full_title\": \"Journal of medicinal chemistry.\",
+        \"last_page\": \"1540\", \"patent_id\": null, \"pubmed_id\": 6796692, \"src_id\":
+        1, \"title\": \"Interaction of 5-ethynyl-2'-deoxyuridylate with thymidylate
+        synthetase.\", \"volume\": \"24\", \"year\": 1981}, {\"abstract\": \"\", \"authors\":
+        \"Ondetti MA, Cushman DW.\", \"chembl_release\": {\"chembl_release\": \"CHEMBL_1\",
+        \"creation_date\": \"2009-09-03\"}, \"contact\": null, \"doc_type\": \"PUBLICATION\",
+        \"document_chembl_id\": \"CHEMBL1121806\", \"doi\": \"10.1021/jm00136a001\",
+        \"doi_chembl\": null, \"first_page\": \"355\", \"issue\": \"4\", \"journal\":
+        \"J Med Chem\", \"journal_full_title\": \"Journal of medicinal chemistry.\",
+        \"last_page\": \"361\", \"patent_id\": null, \"pubmed_id\": 6267277, \"src_id\":
+        1, \"title\": \"Inhibition of the renin-angiotensin system. A new approach
+        to the therapy of hypertension.\", \"volume\": \"24\", \"year\": 1981}, {\"abstract\":
+        \"Forty trimethoprim analogues in which the para substituent in the benzene
+        ring was varied were prepared for antibacterial evaluation. All were very
+        potent inhibitors of Escherichia coli dihydrofolate reductase. The similarity
+        of their inhibitory activities strongly suggested that the side chains beyond
+        the first two atoms were not in contact with the enzyme. However, among 38
+        ether derivatives which varied widely in their bulk and lipophilicity, very
+        few approached trimethoprim in their broad-spectrum in vitro antibacterial
+        activity. The 4'-methyl and 4'-ethyl analogues and the allyloxy and gamma-chloropropoxy
+        ethers had activities fairly close to that of trimethoprim. The two ethers
+        were chosen for further evaluation in vivo. Neither compound quite matched
+        trimethoprim in efficacy in mice, and their half-lives, as well as that of
+        the beta-methoxyethoxy analogue, were found to be shorter in dogs.\", \"authors\":
+        \"Roth B, Aig E, Rauckman BS, Strelitz JZ, Phillips AP, Ferone R, Bushby SR,
+        Sigel CW.\", \"chembl_release\": {\"chembl_release\": \"CHEMBL_1\", \"creation_date\":
+        \"2009-09-03\"}, \"contact\": null, \"doc_type\": \"PUBLICATION\", \"document_chembl_id\":
+        \"CHEMBL1121680\", \"doi\": \"10.1021/jm00140a005\", \"doi_chembl\": null,
+        \"first_page\": \"933\", \"issue\": \"8\", \"journal\": \"J Med Chem\", \"journal_full_title\":
+        \"Journal of medicinal chemistry.\", \"last_page\": \"941\", \"patent_id\":
+        null, \"pubmed_id\": 7035668, \"src_id\": 1, \"title\": \"2,4-Diamino-5-benzylpyrimidines
+        and analogues as antibacterial agents. 5. 3',5'-Dimethoxy-4'-substituted-benzyl
+        analogues of trimethoprim.\", \"volume\": \"24\", \"year\": 1981}, {\"abstract\":
+        \"The chemical synthesis of 11-oxahomoaminopterin (1) has been carried out
+        using procedures which were also found to be applicable to the synthesis of
+        11-oxahomofolic acid (2). Reaction of 1-bromo-4-[p-(caarbomethoxy)phenoxy]-2-butanone
+        (10) with sodium azide gave 1-azido-4-[p-(carbomethoxy)phenoxy]-2-butanone
+        (11). Protection of the carbonyl group of 11 as the ethylene ketal and subsequent
+        base hydrolysis of the product gave 1-azido-4-(p-carboxyphenoxy)-2-butanone
+        ketal (13). The glutamate conjugate 14 was prepared from 13 by the isobutyl
+        chloroformate method and was hydrogenated to diethyl N-[(alpha-amino-2-oxo-4-butanoyl)-p-anisoyl]-L-glutamate
+        ketal (15). Reaction of 15 with 6-chloro-2,4-diamino-5-nitropyrimidine (16)
+        and 2-amino-6-chloro-4-hydroxy-5-nitropyrimidine (17) and deprotection of
+        the corresponding products gave the intermediates 18 and 19, which were elaborated
+        to 1 and 2 using a series of steps involving deprotection, dithionite reduction,
+        cyclization, oxidation, and hydrolysis. Although 11-oxahomoaminopterin showed
+        antifolate activity against two folate-requiring microorganisms and inhibited
+        Lactobacillus casei DHFR, it was inactive against L-1210 leukemia in mice
+        at a maximum dose of 48 mg/kg. Compound Lactobacillus casei DHFR, it was inactive
+        against L-1210 leukemia in mice at a maximum dose of 48 mg/kg. Compound 1
+        was also tested for its ability to be transported via the methotrexate transport
+        system using the L-1210 and Ehrlich tumor cell lines, and these results are
+        compared with those of related analogues. The growth inhibitory activity of
+        1 in the L-1210 cell lines in culture was found to be 15 times weaker than
+        that of methotrexate.\", \"authors\": \"Nair MG, Bridges TW, Henkel TJ, Kisliuk
+        RL, Gaumont Y, Sirotnak FM.\", \"chembl_release\": {\"chembl_release\": \"CHEMBL_1\",
+        \"creation_date\": \"2009-09-03\"}, \"contact\": null, \"doc_type\": \"PUBLICATION\",
+        \"document_chembl_id\": \"CHEMBL1121695\", \"doi\": \"10.1021/jm00141a010\",
+        \"doi_chembl\": null, \"first_page\": \"1068\", \"issue\": \"9\", \"journal\":
+        \"J Med Chem\", \"journal_full_title\": \"Journal of medicinal chemistry.\",
+        \"last_page\": \"1073\", \"patent_id\": null, \"pubmed_id\": 6793726, \"src_id\":
+        1, \"title\": \"Folate analogues altered in the C9-N10 bridge region. 18.
+        Synthesis and antitumor evaluation of 11-oxahomoaminopterin and related compounds.\",
+        \"volume\": \"24\", \"year\": 1981}, {\"abstract\": \"\", \"authors\": \"Kuyper
+        LF, Roth B, Baccanari DP, Ferone R, Beddell CR, Champness JN, Stammers DK,
+        Dann JG, Norrington FE, Baker DJ, Goodford PJ.\", \"chembl_release\": {\"chembl_release\":
+        \"CHEMBL_1\", \"creation_date\": \"2009-09-03\"}, \"contact\": null, \"doc_type\":
+        \"PUBLICATION\", \"document_chembl_id\": \"CHEMBL1121940\", \"doi\": \"10.1021/jm00352a002\",
+        \"doi_chembl\": null, \"first_page\": \"1120\", \"issue\": \"10\", \"journal\":
+        \"J Med Chem\", \"journal_full_title\": \"Journal of medicinal chemistry.\",
+        \"last_page\": \"1122\", \"patent_id\": null, \"pubmed_id\": 6754932, \"src_id\":
+        1, \"title\": \"Receptor-based design of dihydrofolate reductase inhibitors:
+        comparison of crystallographically determined enzyme binding with enzyme affinity
+        in a series of carboxy-substituted trimethoprim analogues.\", \"volume\":
+        \"25\", \"year\": 1982}, {\"abstract\": \"In an effort to test the hypothesis
+        that the tyramine moiety present in opiates and in opioid peptides plays an
+        identical functional role at opioid receptors, a hybrid enkephalinamide (3)
+        that contains (-)-metazocine (4a) in place of Tyr was synthesized. It was
+        found that 3 and its congeners are inactive or feebly active in the electrically
+        stimulated guinea pig ileum and mouse vas deferens preparations. The results
+        of these studies suggest that the tyramine moiety in opiates and related structures
+        does not play the same functional role as that in the opioid peptides. It
+        is suggested that the different functional roles of the tyramine moiety in
+        opiates and opioid peptides is a consequence of different modes of interaction
+        with common receptors.\", \"authors\": \"Ramakrishnan K, Portoghese PS.\",
+        \"chembl_release\": {\"chembl_release\": \"CHEMBL_1\", \"creation_date\":
+        \"2009-09-03\"}, \"contact\": null, \"doc_type\": \"PUBLICATION\", \"document_chembl_id\":
+        \"CHEMBL1121981\", \"doi\": \"10.1021/jm00354a006\", \"doi_chembl\": null,
+        \"first_page\": \"1423\", \"issue\": \"12\", \"journal\": \"J Med Chem\",
+        \"journal_full_title\": \"Journal of medicinal chemistry.\", \"last_page\":
+        \"1427\", \"patent_id\": null, \"pubmed_id\": 7154002, \"src_id\": 1, \"title\":
+        \"Synthesis and biological evaluation of a metazocine-containing enkephalinamide.
+        Evidence for nonidentical roles of the tyramine moiety in opiates and opioid
+        peptides.\", \"volume\": \"25\", \"year\": 1982}], \"page_meta\": {\"limit\":
+        20, \"next\": null, \"offset\": 0, \"previous\": null, \"total_count\": 10}}"
+    headers:
+      Cache-Control:
+      - max-age=30000000, s-maxage=30000000
+      Connection:
+      - Keep-Alive
+      Content-Disposition:
+      - inline
+      Content-Length:
+      - '13794'
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 24 Feb 2026 06:40:23 GMT
+      Server:
+      - gunicorn/20.0.4
+      Strict-Transport-Security:
+      - max-age=0
+      Vary:
+      - Accept, Origin
+      X-ChEMBL-in-cache:
+      - 'True'
+      X-ChEMBL-retrieval-time:
+      - '0.002959728240966797'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/document?format=json&doc_type=PUBLICATION&year__gte=1950&year__lte=2050&document_chembl_id__in=CHEMBL1121421%2CCHEMBL1121493%2CCHEMBL1121680%2CCHEMBL1121695%2CCHEMBL1121721%2CCHEMBL1121751%2CCHEMBL1121774%2CCHEMBL1121806%2CCHEMBL1121940%2CCHEMBL1121981
+  response:
+    body:
+      string: "{\"documents\": [{\"abstract\": \"A new route to 5-(p-hydroxybenzyl)pyrimidines
+        has been developed which utilizes phenolic Mannich bases plus pyrimidines
+        containing at least two activating groups. The products can be alkylated on
+        the phenolic oxygen or on the pyrimidine N-1 atom, depending on conditions.
+        This method has been used to prepare trimethoprim, a broad-spectrum antibacterial
+        agent, starting from 2,4-diaminopyrimidine and 2,6-dimethoxyphenol.\", \"authors\":
+        \"Roth B, Strelitz JZ, Rauckman BS.\", \"chembl_release\": {\"chembl_release\":
+        \"CHEMBL_1\", \"creation_date\": \"2009-09-03\"}, \"contact\": null, \"doc_type\":
+        \"PUBLICATION\", \"document_chembl_id\": \"CHEMBL1121421\", \"doi\": \"10.1021/jm00178a007\",
+        \"doi_chembl\": null, \"first_page\": \"379\", \"issue\": \"4\", \"journal\":
+        \"J Med Chem\", \"journal_full_title\": \"Journal of medicinal chemistry.\",
+        \"last_page\": \"384\", \"patent_id\": null, \"pubmed_id\": 6991692, \"src_id\":
+        1, \"title\": \"2,4-Diamino-5-benzylpyrimidines and analogues as antibacterial
+        agents. 2. C-Alkylation of pyrimidines with Mannich bases and application
+        to the synthesis of trimethoprim and analogues.\", \"volume\": \"23\", \"year\":
+        1980}, {\"abstract\": \"The synthesis of 11-thiohomoaminopterin (1), which
+        is a close analogue of 11-thiohomofolic acid (2), has been carried out by
+        modification of the Boon-Leigh procedure. Treatment of 1-chloro-4-[p-(carbomethoxy)thiopenoxy]-2-butanone
+        (5) with sodium azide gave 1-azido-4-[p-(carbomethoxy)thiophenoxy]-2-butanone
+        (6). After protection of the carbonyl group of 6, the product 7 was catalytically
+        hydrogenated to 1-amino-4-[p-(carbomethoxy)thiophenoxy]-2-butanone ketal (3).
+        Reaction of 32 with 6-chloro-2,4-diaminmo-5-nitropyrimidine gave the desired
+        pyrimidine intermediate, which was elaborated to 4-amino-4-deoxy-11-thiohomopteroic
+        acid (20) by standard procedures. Alternately, 1-azido-4-[p-(carbomethoxy)thiophenoxy]-2-butanone
+        ketal (7) was hydrolyzed to the corresponding acid (8) and coupled with diethyl
+        L-glutamate to obtain diethyl N-[p-(1-azido-2-oxo-4-thiobutanoyl)benzoyl]-L-glutamate
+        ketal (10), which was used for the large-scale preparation of 11-thiohomoaminopterin
+        (1). Although 11-thiohomoaminopterin showed antifolate activity against two
+        folate-requiring microorganisms and inhibited Lactobacillus casei dihydrogolate
+        reductase, it did not exhibit any antitumor activity against L-1210 lymphoid
+        leukemia in mice at a maximum dose of 48 mg/kg.\", \"authors\": \"Nair MG,
+        Chen SY, Kisliuk RL, Gaumont Y, Strumpf D.\", \"chembl_release\": {\"chembl_release\":
+        \"CHEMBL_1\", \"creation_date\": \"2009-09-03\"}, \"contact\": null, \"doc_type\":
+        \"PUBLICATION\", \"document_chembl_id\": \"CHEMBL1121493\", \"doi\": \"10.1021/jm00182a017\",
+        \"doi_chembl\": null, \"first_page\": \"899\", \"issue\": \"8\", \"journal\":
+        \"J Med Chem\", \"journal_full_title\": \"Journal of medicinal chemistry.\",
+        \"last_page\": \"903\", \"patent_id\": null, \"pubmed_id\": 6772788, \"src_id\":
+        1, \"title\": \"Folate analogues altered in the C9-N10 bridge region. 16.
+        Synthesis and antifolate activity of 11-thiohomoaminopterin.\", \"volume\":
+        \"23\", \"year\": 1980}, {\"abstract\": \"In order to study the preferential
+        involvement of mu or delta receptors in the analgesic effects of enkephalins,
+        several peptides which selectively interact with these two kinds of receptors
+        in peripheral organs were synthesized. The inhibitory potency on the electrically
+        stimulated mouse vas deferens (delta receptors) of the short peptide Tyr-D-Ala-Gly-NH-CH(CH3)CH2CH(CH3)2
+        (6) is 2100 times lower (IC50 = 1220 nM) than that of the longer and more
+        hydrophilic peptide Tyr-D-Ser-Gly-Phe-Leu-Thr (10) (IC50 = 0.58 nM). In contrast,
+        the IC50 values of all the synthesized compounds on the guinea pig ileum assay
+        (mu receptors) are in the same range (100-360 nM). Likewise, their analgesic
+        activities in mice, measured on the hot-plate test after intracerebroventricular
+        injection, are similar. Therefore, the dissociation between antinociceptive
+        properties in mice and potencies on the mouse vas deferens unambiguously reflects
+        a preferential implication of mu receptors in analgesia. The possible involvement
+        of brain delta receptors in behavioral effects is discussed.\", \"authors\":
+        \"Gacel G, Fourni\xE9-Zaluski MC, Fellion E, Roques BP.\", \"chembl_release\":
+        {\"chembl_release\": \"CHEMBL_1\", \"creation_date\": \"2009-09-03\"}, \"contact\":
+        null, \"doc_type\": \"PUBLICATION\", \"document_chembl_id\": \"CHEMBL1121721\",
+        \"doi\": \"10.1021/jm00142a002\", \"doi_chembl\": null, \"first_page\": \"1119\",
+        \"issue\": \"10\", \"journal\": \"J Med Chem\", \"journal_full_title\": \"Journal
+        of medicinal chemistry.\", \"last_page\": \"1124\", \"patent_id\": null, \"pubmed_id\":
+        6276540, \"src_id\": 1, \"title\": \"Evidence of the preferential involvement
+        of mu receptors in analgesia using enkephalins highly selective for peripheral
+        mu or delta receptors.\", \"volume\": \"24\", \"year\": 1981}, {\"abstract\":
+        \"\", \"authors\": \"Barr PJ, Nolan PA, Santi DV, Robins MJ.\", \"chembl_release\":
+        {\"chembl_release\": \"CHEMBL_1\", \"creation_date\": \"2009-09-03\"}, \"contact\":
+        null, \"doc_type\": \"PUBLICATION\", \"document_chembl_id\": \"CHEMBL1121751\",
+        \"doi\": \"10.1021/jm00144a003\", \"doi_chembl\": null, \"first_page\": \"1385\",
+        \"issue\": \"12\", \"journal\": \"J Med Chem\", \"journal_full_title\": \"Journal
+        of medicinal chemistry.\", \"last_page\": \"1388\", \"patent_id\": null, \"pubmed_id\":
+        6796687, \"src_id\": 1, \"title\": \"Inhibition of thymidylate synthetase
+        by 5-alkynyl-2'-deoxyuridylates.\", \"volume\": \"24\", \"year\": 1981}, {\"abstract\":
+        \"The interaction of 5-ethynyl-2'-deoxyuridylate (5-ethynyl-dUMP; 1) with
+        thymidylate (dTMP) synthetase has been investigated. The compound was an inhibitor
+        of the enzyme, competitive with 2'-deoxyuridylate (dUMP) when the reaction
+        was initiated by addition of enzyme (Ki = 2.7 X 10(-6) M). However, upon preincubation
+        of 1 with dTMP synthetase, the inhibition pattern became noncompetitive. The
+        time course of the enzyme reaction in the presence of 1 was nonlinear, indicating
+        an increase in binding with time. Irreversible inactivation of the enzyme
+        did not occur. The compound did not appear to become altered structurally
+        as a result of interaction with the enzyme. A ternary complex was formed among
+        dTMP synthetase, compound 1, and 5,10-methylenetetrahydrofolate, which was
+        stable enough to survive Sephadex G-25 filtration but dissociated upon denaturation
+        of the enzyme.\", \"authors\": \"Danenberg PV, Bhatt RS, Kundu NG, Danenberg
+        K, Heidelberger C.\", \"chembl_release\": {\"chembl_release\": \"CHEMBL_1\",
+        \"creation_date\": \"2009-09-03\"}, \"contact\": null, \"doc_type\": \"PUBLICATION\",
+        \"document_chembl_id\": \"CHEMBL1121774\", \"doi\": \"10.1021/jm00144a036\",
+        \"doi_chembl\": null, \"first_page\": \"1537\", \"issue\": \"12\", \"journal\":
+        \"J Med Chem\", \"journal_full_title\": \"Journal of medicinal chemistry.\",
+        \"last_page\": \"1540\", \"patent_id\": null, \"pubmed_id\": 6796692, \"src_id\":
+        1, \"title\": \"Interaction of 5-ethynyl-2'-deoxyuridylate with thymidylate
+        synthetase.\", \"volume\": \"24\", \"year\": 1981}, {\"abstract\": \"\", \"authors\":
+        \"Ondetti MA, Cushman DW.\", \"chembl_release\": {\"chembl_release\": \"CHEMBL_1\",
+        \"creation_date\": \"2009-09-03\"}, \"contact\": null, \"doc_type\": \"PUBLICATION\",
+        \"document_chembl_id\": \"CHEMBL1121806\", \"doi\": \"10.1021/jm00136a001\",
+        \"doi_chembl\": null, \"first_page\": \"355\", \"issue\": \"4\", \"journal\":
+        \"J Med Chem\", \"journal_full_title\": \"Journal of medicinal chemistry.\",
+        \"last_page\": \"361\", \"patent_id\": null, \"pubmed_id\": 6267277, \"src_id\":
+        1, \"title\": \"Inhibition of the renin-angiotensin system. A new approach
+        to the therapy of hypertension.\", \"volume\": \"24\", \"year\": 1981}, {\"abstract\":
+        \"Forty trimethoprim analogues in which the para substituent in the benzene
+        ring was varied were prepared for antibacterial evaluation. All were very
+        potent inhibitors of Escherichia coli dihydrofolate reductase. The similarity
+        of their inhibitory activities strongly suggested that the side chains beyond
+        the first two atoms were not in contact with the enzyme. However, among 38
+        ether derivatives which varied widely in their bulk and lipophilicity, very
+        few approached trimethoprim in their broad-spectrum in vitro antibacterial
+        activity. The 4'-methyl and 4'-ethyl analogues and the allyloxy and gamma-chloropropoxy
+        ethers had activities fairly close to that of trimethoprim. The two ethers
+        were chosen for further evaluation in vivo. Neither compound quite matched
+        trimethoprim in efficacy in mice, and their half-lives, as well as that of
+        the beta-methoxyethoxy analogue, were found to be shorter in dogs.\", \"authors\":
+        \"Roth B, Aig E, Rauckman BS, Strelitz JZ, Phillips AP, Ferone R, Bushby SR,
+        Sigel CW.\", \"chembl_release\": {\"chembl_release\": \"CHEMBL_1\", \"creation_date\":
+        \"2009-09-03\"}, \"contact\": null, \"doc_type\": \"PUBLICATION\", \"document_chembl_id\":
+        \"CHEMBL1121680\", \"doi\": \"10.1021/jm00140a005\", \"doi_chembl\": null,
+        \"first_page\": \"933\", \"issue\": \"8\", \"journal\": \"J Med Chem\", \"journal_full_title\":
+        \"Journal of medicinal chemistry.\", \"last_page\": \"941\", \"patent_id\":
+        null, \"pubmed_id\": 7035668, \"src_id\": 1, \"title\": \"2,4-Diamino-5-benzylpyrimidines
+        and analogues as antibacterial agents. 5. 3',5'-Dimethoxy-4'-substituted-benzyl
+        analogues of trimethoprim.\", \"volume\": \"24\", \"year\": 1981}, {\"abstract\":
+        \"The chemical synthesis of 11-oxahomoaminopterin (1) has been carried out
+        using procedures which were also found to be applicable to the synthesis of
+        11-oxahomofolic acid (2). Reaction of 1-bromo-4-[p-(caarbomethoxy)phenoxy]-2-butanone
+        (10) with sodium azide gave 1-azido-4-[p-(carbomethoxy)phenoxy]-2-butanone
+        (11). Protection of the carbonyl group of 11 as the ethylene ketal and subsequent
+        base hydrolysis of the product gave 1-azido-4-(p-carboxyphenoxy)-2-butanone
+        ketal (13). The glutamate conjugate 14 was prepared from 13 by the isobutyl
+        chloroformate method and was hydrogenated to diethyl N-[(alpha-amino-2-oxo-4-butanoyl)-p-anisoyl]-L-glutamate
+        ketal (15). Reaction of 15 with 6-chloro-2,4-diamino-5-nitropyrimidine (16)
+        and 2-amino-6-chloro-4-hydroxy-5-nitropyrimidine (17) and deprotection of
+        the corresponding products gave the intermediates 18 and 19, which were elaborated
+        to 1 and 2 using a series of steps involving deprotection, dithionite reduction,
+        cyclization, oxidation, and hydrolysis. Although 11-oxahomoaminopterin showed
+        antifolate activity against two folate-requiring microorganisms and inhibited
+        Lactobacillus casei DHFR, it was inactive against L-1210 leukemia in mice
+        at a maximum dose of 48 mg/kg. Compound Lactobacillus casei DHFR, it was inactive
+        against L-1210 leukemia in mice at a maximum dose of 48 mg/kg. Compound 1
+        was also tested for its ability to be transported via the methotrexate transport
+        system using the L-1210 and Ehrlich tumor cell lines, and these results are
+        compared with those of related analogues. The growth inhibitory activity of
+        1 in the L-1210 cell lines in culture was found to be 15 times weaker than
+        that of methotrexate.\", \"authors\": \"Nair MG, Bridges TW, Henkel TJ, Kisliuk
+        RL, Gaumont Y, Sirotnak FM.\", \"chembl_release\": {\"chembl_release\": \"CHEMBL_1\",
+        \"creation_date\": \"2009-09-03\"}, \"contact\": null, \"doc_type\": \"PUBLICATION\",
+        \"document_chembl_id\": \"CHEMBL1121695\", \"doi\": \"10.1021/jm00141a010\",
+        \"doi_chembl\": null, \"first_page\": \"1068\", \"issue\": \"9\", \"journal\":
+        \"J Med Chem\", \"journal_full_title\": \"Journal of medicinal chemistry.\",
+        \"last_page\": \"1073\", \"patent_id\": null, \"pubmed_id\": 6793726, \"src_id\":
+        1, \"title\": \"Folate analogues altered in the C9-N10 bridge region. 18.
+        Synthesis and antitumor evaluation of 11-oxahomoaminopterin and related compounds.\",
+        \"volume\": \"24\", \"year\": 1981}, {\"abstract\": \"\", \"authors\": \"Kuyper
+        LF, Roth B, Baccanari DP, Ferone R, Beddell CR, Champness JN, Stammers DK,
+        Dann JG, Norrington FE, Baker DJ, Goodford PJ.\", \"chembl_release\": {\"chembl_release\":
+        \"CHEMBL_1\", \"creation_date\": \"2009-09-03\"}, \"contact\": null, \"doc_type\":
+        \"PUBLICATION\", \"document_chembl_id\": \"CHEMBL1121940\", \"doi\": \"10.1021/jm00352a002\",
+        \"doi_chembl\": null, \"first_page\": \"1120\", \"issue\": \"10\", \"journal\":
+        \"J Med Chem\", \"journal_full_title\": \"Journal of medicinal chemistry.\",
+        \"last_page\": \"1122\", \"patent_id\": null, \"pubmed_id\": 6754932, \"src_id\":
+        1, \"title\": \"Receptor-based design of dihydrofolate reductase inhibitors:
+        comparison of crystallographically determined enzyme binding with enzyme affinity
+        in a series of carboxy-substituted trimethoprim analogues.\", \"volume\":
+        \"25\", \"year\": 1982}, {\"abstract\": \"In an effort to test the hypothesis
+        that the tyramine moiety present in opiates and in opioid peptides plays an
+        identical functional role at opioid receptors, a hybrid enkephalinamide (3)
+        that contains (-)-metazocine (4a) in place of Tyr was synthesized. It was
+        found that 3 and its congeners are inactive or feebly active in the electrically
+        stimulated guinea pig ileum and mouse vas deferens preparations. The results
+        of these studies suggest that the tyramine moiety in opiates and related structures
+        does not play the same functional role as that in the opioid peptides. It
+        is suggested that the different functional roles of the tyramine moiety in
+        opiates and opioid peptides is a consequence of different modes of interaction
+        with common receptors.\", \"authors\": \"Ramakrishnan K, Portoghese PS.\",
+        \"chembl_release\": {\"chembl_release\": \"CHEMBL_1\", \"creation_date\":
+        \"2009-09-03\"}, \"contact\": null, \"doc_type\": \"PUBLICATION\", \"document_chembl_id\":
+        \"CHEMBL1121981\", \"doi\": \"10.1021/jm00354a006\", \"doi_chembl\": null,
+        \"first_page\": \"1423\", \"issue\": \"12\", \"journal\": \"J Med Chem\",
+        \"journal_full_title\": \"Journal of medicinal chemistry.\", \"last_page\":
+        \"1427\", \"patent_id\": null, \"pubmed_id\": 7154002, \"src_id\": 1, \"title\":
+        \"Synthesis and biological evaluation of a metazocine-containing enkephalinamide.
+        Evidence for nonidentical roles of the tyramine moiety in opiates and opioid
+        peptides.\", \"volume\": \"25\", \"year\": 1982}], \"page_meta\": {\"limit\":
+        20, \"next\": null, \"offset\": 0, \"previous\": null, \"total_count\": 10}}"
+    headers:
+      Cache-Control:
+      - max-age=30000000, s-maxage=30000000
+      Connection:
+      - Keep-Alive
+      Content-Disposition:
+      - inline
+      Content-Length:
+      - '13794'
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 24 Feb 2026 07:00:10 GMT
+      Server:
+      - gunicorn/20.0.4
+      Strict-Transport-Security:
+      - max-age=0
+      Vary:
+      - Accept, Origin
+      X-ChEMBL-in-cache:
+      - 'True'
+      X-ChEMBL-retrieval-time:
+      - '0.0022454261779785156'
+    status:
+      code: 200
+      message: OK
 version: 1
