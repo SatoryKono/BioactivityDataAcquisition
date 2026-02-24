@@ -85,6 +85,16 @@ class MetricsPort(Protocol):
     Note: MetricsPort uses synchronous methods for low-overhead operations.
     Unlike I/O ports, metric collection should be fast and non-blocking
     by design (using thread-safe counters, not I/O).
+
+    Implementation extension policy:
+        - DO NOT create a separate ``domain/ports/metrics.py`` contract.
+        - Extend this existing ``MetricsPort`` in ``observability.py``.
+        - Preferred approach is to keep the generic API
+          (``observe_histogram``, ``increment_counter``, ``set_gauge``)
+          and add standardized metric names plus infrastructure registries.
+        - If typed helper methods are introduced in the future, they MUST be
+          added to this protocol and implemented in both Prometheus and NoOp
+          adapters without interface duplication.
     """
 
     def observe_histogram(

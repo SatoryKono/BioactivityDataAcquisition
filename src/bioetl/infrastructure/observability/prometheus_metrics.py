@@ -156,7 +156,12 @@ GAUGES = {
 class PrometheusMetrics(MetricsPort):
     """Prometheus implementation of MetricsPort.
 
-    Maps metric names to pre-defined Prometheus metrics and records observations.
+    Uses the generic MetricsPort API with standardized metric names that map
+    into ``HISTOGRAMS``, ``COUNTERS``, and ``GAUGES`` registries.
+
+    Extension rule: add new metric definitions in
+    ``infrastructure/observability/metrics.py`` and register them in this
+    module, rather than creating duplicate domain-level metrics interfaces.
     """
 
     def __init__(self) -> None:
