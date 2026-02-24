@@ -96,14 +96,7 @@ Error classification for handling strategy.
         show-root-heading: true
         show-source: false
 
-### DQStatus
-
-Quarantine record status.
-
-<!-- ::: bioetl.domain.types.DQStatus -->
-<!--     options: -->
-<!--         show-root-heading: true -->
-<!--         show-source: false -->
+<!-- DQStatus: planned, not yet implemented -->
 
 ### WriteMode
 

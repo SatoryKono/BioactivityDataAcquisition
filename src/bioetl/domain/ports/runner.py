@@ -19,11 +19,7 @@ class RunnablePort(Protocol):
     """
 
     async def run(self) -> None:
-        """Execute the pipeline.
-
-        Returns:
-            None.
-        """
+        """Execute the pipeline."""
         ...
 
     @property

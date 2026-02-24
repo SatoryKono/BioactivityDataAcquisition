@@ -239,13 +239,11 @@ class OpenAlexAdapter(BaseHttpAdapter):
         Raises:
             NotImplementedError: Always, as OpenAlex doesn't support multi-field filtering.
         """
-        # AsyncIterator requires yield before raise for proper generator creation
-        if False:  # pragma: no cover
-            yield {}  # Required for AsyncIterator type signature
         raise NotImplementedError(
             "OpenAlex adapter does not support multi-field filtering. "
             "Use fetch_filtered() with filter_field='doi' instead."
         )
+        yield {}  # pragma: no cover - keeps AsyncIterator contract
 
     async def _batch_doi_lookup(
         self,

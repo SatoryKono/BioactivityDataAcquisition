@@ -13,21 +13,21 @@ The bootstrap package is organized into three modules:
 ```mermaid
 flowchart TB
     subgraph Assembly["assembly/"]
-        StorageAdapter[bootstrap_storage_adapter]
-        CheckpointPort[bootstrap_checkpoint_port]
-        QuarantinePort[bootstrap_quarantine_port]
+        StorageAdapter[bootstrap-storage-adapter]
+        CheckpointPort[bootstrap-checkpoint-port]
+        QuarantinePort[bootstrap-quarantine-port]
     end
 
     subgraph CLI["cli/"]
-        CleanupService[bootstrap_cleanup_service]
-        HealthService[bootstrap_health_service]
-        MetricsService[bootstrap_metrics_service]
+        CleanupService[bootstrap-cleanup-service]
+        HealthService[bootstrap-health-service]
+        MetricsService[bootstrap-metrics-service]
     end
 
     subgraph Runtime["runtime/"]
-        PipelineRunner[bootstrap_pipeline_runner]
-        Observability[bootstrap_observability_bundle]
-        CompositeRunner[bootstrap_composite_runner]
+        PipelineRunner[bootstrap-pipeline-runner]
+        Observability[bootstrap-observability-bundle]
+        CompositeRunner[bootstrap-composite-runner]
     end
 
     CLI --> Assembly
@@ -36,16 +36,16 @@ flowchart TB
 
 ## Main Entry Points
 
-### bootstrap_pipeline
+### bootstrap-pipeline
 
 The main entry point for creating a fully configured PipelineRunner (deprecated alias for `bootstrap-pipeline-runner`).
 
-<!-- ::: bioetl.composition.bootstrap.bootstrap_pipeline -->
-<!--     options: -->
-<!--         show-root-heading: true -->
-<!--         show-source: false -->
+::: bioetl.composition.bootstrap.runtime.pipeline.bootstrap_pipeline
+    options:
+        show-root-heading: true
+        show-source: false
 
-### bootstrap_pipeline_runner
+### bootstrap-pipeline-runner
 
 Canonical function for creating a PipelineRunner with full observability.
 
@@ -54,29 +54,29 @@ Canonical function for creating a PipelineRunner with full observability.
         show-root-heading: true
         show-source: false
 
-### bootstrap_composite_runner
+### bootstrap-composite-runner
 
 Bootstrap function for composite pipelines (multiple data sources).
 
-<!-- ::: bioetl.composition.bootstrap.bootstrap_composite_runner -->
-<!--     options: -->
-<!--         show-root-heading: true -->
-<!--         show-source: false -->
+::: bioetl.composition.bootstrap.runtime.composite.bootstrap_composite_runner
+    options:
+        show-root-heading: true
+        show-source: false
 
 ## Runtime Observability
 
 Functions for initializing the full observability stack during pipeline execution.
 
-### bootstrap_observability_bundle
+### bootstrap-observability-bundle
 
 Initialize all observability components (logging, tracing, metrics) as a bundle.
 
-<!-- ::: bioetl.composition.bootstrap.bootstrap_observability_bundle -->
-<!--     options: -->
-<!--         show-root-heading: true -->
-<!--         show-source: false -->
+::: bioetl.composition.bootstrap.runtime.observability.bootstrap_observability_bundle
+    options:
+        show-root-heading: true
+        show-source: false
 
-### bootstrap_logger_port
+### bootstrap-logger-port
 
 Create structured logger instance.
 
@@ -85,16 +85,16 @@ Create structured logger instance.
         show-root-heading: true
         show-source: false
 
-### bootstrap_tracer_port
+### bootstrap-tracer-port
 
 Create tracing exporter instance.
 
-<!-- ::: bioetl.composition.bootstrap.bootstrap_tracer_port -->
-<!--     options: -->
-<!--         show-root-heading: true -->
-<!--         show-source: false -->
+::: bioetl.composition.bootstrap.runtime.observability.bootstrap_tracer_port
+    options:
+        show-root-heading: true
+        show-source: false
 
-### bootstrap_metrics_port
+### bootstrap-metrics-port
 
 Create metrics exporter instance.
 
@@ -103,38 +103,38 @@ Create metrics exporter instance.
         show-root-heading: true
         show-source: false
 
-### bootstrap_dq_monitor_port
+### bootstrap-dq-monitor-port
 
 Create data quality anomaly monitor.
 
-<!-- ::: bioetl.composition.bootstrap.bootstrap_dq_monitor_port -->
-<!--     options: -->
-<!--         show-root-heading: true -->
-<!--         show-source: false -->
+::: bioetl.composition.bootstrap.runtime.observability.bootstrap_dq_monitor_port
+    options:
+        show-root-heading: true
+        show-source: false
 
 ## Assembly (Shared Infrastructure)
 
 Functions for creating infrastructure components used by both CLI and runtime.
 
-### bootstrap_storage_adapter
+### bootstrap-storage-adapter
 
 Create storage adapter for all Medallion layers.
 
-<!-- ::: bioetl.composition.bootstrap.bootstrap_storage_adapter -->
-<!--     options: -->
-<!--         show-root-heading: true -->
-<!--         show-source: false -->
+::: bioetl.composition.bootstrap.assembly.storage.bootstrap_storage_adapter
+    options:
+        show-root-heading: true
+        show-source: false
 
-### bootstrap_checkpoint_port
+### bootstrap-checkpoint-port
 
 Create checkpoint port implementation.
 
-<!-- ::: bioetl.composition.bootstrap.bootstrap_checkpoint_port -->
-<!--     options: -->
-<!--         show-root-heading: true -->
-<!--         show-source: false -->
+::: bioetl.composition.bootstrap.assembly.checkpoint.bootstrap_checkpoint_port
+    options:
+        show-root-heading: true
+        show-source: false
 
-### bootstrap_quarantine_port
+### bootstrap-quarantine-port
 
 Create quarantine port implementation.
 
@@ -147,7 +147,7 @@ Create quarantine port implementation.
 
 Bootstrap functions for CLI-only commands. These use NoOp observability implementations for admin/maintenance operations.
 
-### bootstrap_cleanup_service
+### bootstrap-cleanup-service
 
 Create cleanup service for storage management.
 
@@ -156,7 +156,7 @@ Create cleanup service for storage management.
         show-root-heading: true
         show-source: false
 
-### bootstrap_lifecycle_service
+### bootstrap-lifecycle-service
 
 Create Medallion lifecycle service.
 
@@ -165,7 +165,7 @@ Create Medallion lifecycle service.
         show-root-heading: true
         show-source: false
 
-### bootstrap_checkpoint_manager
+### bootstrap-checkpoint-manager
 
 Create checkpoint manager instance.
 
@@ -174,7 +174,7 @@ Create checkpoint manager instance.
         show-root-heading: true
         show-source: false
 
-### bootstrap_quarantine_manager
+### bootstrap-quarantine-manager
 
 Create quarantine manager instance.
 
@@ -183,7 +183,7 @@ Create quarantine manager instance.
         show-root-heading: true
         show-source: false
 
-### bootstrap_health_service
+### bootstrap-health-service
 
 Create health check service for CLI.
 
@@ -192,7 +192,7 @@ Create health check service for CLI.
         show-root-heading: true
         show-source: false
 
-### bootstrap_lock_service
+### bootstrap-lock-service
 
 Create lock service for CLI.
 
@@ -201,7 +201,7 @@ Create lock service for CLI.
         show-root-heading: true
         show-source: false
 
-### bootstrap_vacuum_service
+### bootstrap-vacuum-service
 
 Create vacuum service for Delta table maintenance.
 
@@ -210,7 +210,7 @@ Create vacuum service for Delta table maintenance.
         show-root-heading: true
         show-source: false
 
-### bootstrap_metrics_service
+### bootstrap-metrics-service
 
 Create metrics service for CLI.
 
@@ -219,7 +219,7 @@ Create metrics service for CLI.
         show-root-heading: true
         show-source: false
 
-### bootstrap_export_service
+### bootstrap-export-service
 
 Create export service for CLI.
 
@@ -232,41 +232,41 @@ Create export service for CLI.
 
 Pure functions for assembling configuration without side effects.
 
-### assemble_runtime_config
+### assemble-runtime-config
 
 Assemble runtime configuration from CLI arguments and environment.
 
-<!-- ::: bioetl.composition.bootstrap.assemble_runtime_config -->
-<!--     options: -->
-<!--         show-root-heading: true -->
-<!--         show-source: false -->
+::: bioetl.composition.bootstrap.runtime.assembly.assemble_runtime_config
+    options:
+        show-root-heading: true
+        show-source: false
 
-### assemble_filter_config
+### assemble-filter-config
 
 Assemble filter configuration from YAML and CLI overrides.
 
-<!-- ::: bioetl.composition.bootstrap.assemble_filter_config -->
-<!--     options: -->
-<!--         show-root-heading: true -->
-<!--         show-source: false -->
+::: bioetl.composition.bootstrap.runtime.assembly.assemble_filter_config
+    options:
+        show-root-heading: true
+        show-source: false
 
-### assemble_vacuum_settings
+### assemble-vacuum-settings
 
 Assemble VACUUM settings for Delta table maintenance.
 
-<!-- ::: bioetl.composition.bootstrap.assemble_vacuum_settings -->
-<!--     options: -->
-<!--         show-root-heading: true -->
-<!--         show-source: false -->
+::: bioetl.composition.bootstrap.runtime.assembly.assemble_vacuum_settings
+    options:
+        show-root-heading: true
+        show-source: false
 
 ### VacuumSettings
 
 Configuration for VACUUM operations.
 
-<!-- ::: bioetl.composition.bootstrap.VacuumSettings -->
-<!--     options: -->
-<!--         show-root-heading: true -->
-<!--         show-source: false -->
+::: bioetl.composition.bootstrap.runtime.assembly.VacuumSettings
+    options:
+        show-root-heading: true
+        show-source: false
 
 ## Pipeline Registry
 
@@ -281,9 +281,9 @@ Registry for pipeline factory functions.
         members:
             - register
             - get
-            - list_pipelines
+            - list-pipelines
 
-### get_default_registry
+### get-default-registry
 
 Get the global default registry instance.
 
@@ -294,16 +294,7 @@ Get the global default registry instance.
 
 ## Metrics Server
 
-### start_metrics_server
-
-Start Prometheus metrics HTTP server.
-
-<!-- ::: bioetl.composition.bootstrap.start_metrics_server -->
-<!--     options: -->
-<!--         show-root-heading: true -->
-<!--         show-source: false -->
-
-### maybe_start_metrics_server
+### maybe-start-metrics-server
 
 Conditionally start metrics server if enabled.
 
@@ -316,10 +307,10 @@ Conditionally start metrics server if enabled.
 
 Error raised when metrics server fails to start.
 
-<!-- ::: bioetl.composition.bootstrap.MetricsServerError -->
-<!--     options: -->
-<!--         show-root-heading: true -->
-<!--         show-source: false -->
+::: bioetl.domain.exceptions.internal.MetricsServerError
+    options:
+        show-root-heading: true
+        show-source: false
 
 ## Bootstrap Sequence
 
@@ -331,22 +322,22 @@ sequenceDiagram
     participant Factory
     participant Runner
 
-    CLI->>Bootstrap: bootstrap_pipeline_runner(ctx)
-    Bootstrap->>Bootstrap: register_all_providers()
-    Bootstrap->>Bootstrap: register_all_pipelines()
-    Bootstrap->>Bootstrap: load_pipeline_config()
-    Bootstrap->>Bootstrap: bootstrap_observability_bundle()
-    Bootstrap->>Bootstrap: assemble_filter_config()
-    Bootstrap->>Registry: get(pipeline_name)
+    CLI->>Bootstrap: bootstrap-pipeline-runner(ctx)
+    Bootstrap->>Bootstrap: register-all-providers()
+    Bootstrap->>Bootstrap: register-all-pipelines()
+    Bootstrap->>Bootstrap: load-pipeline-config()
+    Bootstrap->>Bootstrap: bootstrap-observability-bundle()
+    Bootstrap->>Bootstrap: assemble-filter-config()
+    Bootstrap->>Registry: get(pipeline-name)
     Registry-->>Bootstrap: factory
-    Bootstrap->>Factory: create_runner(ctx, ...)
+    Bootstrap->>Factory: create-runner(ctx, ...)
     Factory-->>Bootstrap: runner
     Bootstrap-->>CLI: PipelineRunner
 ```
 
 ## Configuration Loading
 
-### load_pipeline_config
+### load-pipeline-config
 
 Load pipeline configuration from YAML file.
 
@@ -355,7 +346,7 @@ Load pipeline configuration from YAML file.
         show-root-heading: true
         show-source: false
 
-### load_composite_config
+### load-composite-config
 
 Load composite pipeline configuration.
 
@@ -368,43 +359,43 @@ Load composite pipeline configuration.
 
 ```python
 from bioetl.composition.bootstrap import (
-    bootstrap_pipeline_runner,
-    bootstrap_observability_bundle,
-    bootstrap_storage_adapter,
-    assemble_runtime_config,
+    bootstrap-pipeline-runner,
+    bootstrap-observability-bundle,
+    bootstrap-storage-adapter,
+    assemble-runtime-config,
 )
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 
 # Full bootstrap (recommended)
 ctx = PipelineContext(
-    pipeline_name="chembl_activity",
-    run_type=RunType.INCREMENTAL,
+    pipeline-name="chembl_activity",
+    run-type=RunType.INCREMENTAL,
 )
-runner = bootstrap_pipeline_runner(ctx)
+runner = bootstrap-pipeline-runner(ctx)
 await runner.run()
 ```
 
 ```python
 # Partial bootstrap (for testing or custom assembly)
 from bioetl.composition.bootstrap import (
-    bootstrap_observability_bundle,
-    bootstrap_storage_adapter,
-    bootstrap_checkpoint_port,
+    bootstrap-observability-bundle,
+    bootstrap-storage-adapter,
+    bootstrap-checkpoint-port,
 )
 
 # Create observability components
-obs = bootstrap_observability_bundle(ctx)
+obs = bootstrap-observability-bundle(ctx)
 
 # Create storage adapter
-storage = bootstrap_storage_adapter(
+storage = bootstrap-storage-adapter(
     ctx,
     logger=obs.logger,
     metrics=obs.metrics,
 )
 
 # Create checkpoint port
-checkpoint = bootstrap_checkpoint_port(ctx)
+checkpoint = bootstrap-checkpoint-port(ctx)
 ```
 
 ## Deprecated Aliases

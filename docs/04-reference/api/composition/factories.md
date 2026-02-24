@@ -13,11 +13,11 @@ Creates pipeline runners with proper dependency injection.
         show-root-heading: true
         show-source: false
         members:
-            - __init__
-            - create_runner
-            - create_executor
+            - --init--
+            - create-runner
+            - create-executor
 
-### create_pipeline_factory
+### create-pipeline_factory
 
 Factory function to create GenericPipelineFactory instances.
 
@@ -26,7 +26,7 @@ Factory function to create GenericPipelineFactory instances.
         show-root-heading: true
         show-source: false
 
-### assemble_runner
+### assemble-runner
 
 Assemble a PipelineRunner with all dependencies.
 
@@ -35,7 +35,7 @@ Assemble a PipelineRunner with all dependencies.
         show-root-heading: true
         show-source: false
 
-### build_pipeline_services
+### build-pipeline-services
 
 Build PipelineServices bundle.
 
@@ -64,23 +64,7 @@ Builder pattern for constructing service bundles.
         show-root-heading: true
         show-source: false
 
-### RunnerServices
-
-Bundle of services for PipelineRunner.
-
-<!-- ::: bioetl.composition.factories.services_factory.RunnerServices -->
-<!--     options: -->
-<!--         show-root-heading: true -->
-<!--         show-source: false -->
-
-### build_runner_services
-
-Build RunnerServices bundle.
-
-<!-- ::: bioetl.composition.factories.services_factory.build_runner_services -->
-<!--     options: -->
-<!--         show-root-heading: true -->
-<!--         show-source: false -->
+<!-- RunnerServices and build_runner_services: planned, not yet implemented -->
 
 ## Data Source Factory
 
@@ -142,7 +126,7 @@ Context for storage operations.
 
 ## Transformer Factory
 
-### register_transformer
+### register-transformer
 
 Register a transformer class for an entity type.
 
@@ -151,7 +135,7 @@ Register a transformer class for an entity type.
         show-root-heading: true
         show-source: false
 
-### get_transformer_class
+### get-transformer-class
 
 Get transformer class for entity type.
 
@@ -160,7 +144,7 @@ Get transformer class for entity type.
         show-root-heading: true
         show-source: false
 
-### create_transformer
+### create-transformer
 
 Create transformer instance with dependencies.
 
@@ -169,7 +153,7 @@ Create transformer instance with dependencies.
         show-root-heading: true
         show-source: false
 
-### register_all_transformers
+### register-all-transformers
 
 Register all available transformers.
 
@@ -234,8 +218,8 @@ Factory for PubMed publication pipeline.
 ```mermaid
 classDiagram
     class GenericPipelineFactory {
-        +create_runner() PipelineRunner
-        +create_executor() BatchExecutor
+        +create-runner() PipelineRunner
+        +create-executor() BatchExecutor
     }
 
     class DataSourceFactory {
@@ -247,8 +231,8 @@ classDiagram
     }
 
     class ServicesBuilder {
-        +with_logger() ServicesBuilder
-        +with_metrics() ServicesBuilder
+        +with-logger() ServicesBuilder
+        +with-metrics() ServicesBuilder
         +build() RunnerServices
     }
 
@@ -264,28 +248,28 @@ from bioetl.composition.factories import (
     GenericPipelineFactory,
     DataSourceFactory,
     StorageFactory,
-    build_runner_services,
+    build-runner-services,
 )
 
 # Create factories
-data_source_factory = DataSourceFactory()
+data-source_factory = DataSourceFactory()
 storage_factory = StorageFactory()
 
 # Create pipeline factory
 # factory = GenericPipelineFactory(
-#     data_source_factory=data_source_factory,
+#     data-source_factory=data-source_factory,
 #     storage_factory=storage_factory,
-#     config=pipeline_config,
+#     config=pipeline-config,
 # )
 
 # Create runner
-# runner = factory.create_runner(
+# runner = factory.create-runner(
 #     ctx=ctx,
 #     services=services,
-#     checkpoint_manager=checkpoint_manager,
+#     checkpoint-manager=checkpoint-manager,
 # )
 
-# Or use the pre_configured factory
+# Or use the pre-configured factory
 from bioetl.composition.factories import chembl_activity_factory
 
 # runner = chembl_activity_factory(ctx)

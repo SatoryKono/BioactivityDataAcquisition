@@ -44,6 +44,7 @@ class PiiHasherPort(Protocol):
             SHA256 hex digest of normalized(value) + salt,
             or None if input is None.
 
+
         """
         ...
 
@@ -57,6 +58,7 @@ class PiiHasherPort(Protocol):
         Returns:
             List of SHA256 hex digests, or None if input is None.
 
+
         """
         ...
 
@@ -66,6 +68,7 @@ class PiiHasherPort(Protocol):
         Returns:
             Short identifier of current salt (first 8 chars of salt hash).
             Used for tracking which salt version was used for hashing.
+
 
         """
         ...

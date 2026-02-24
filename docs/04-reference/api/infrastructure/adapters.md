@@ -13,7 +13,7 @@ Unified HTTP client with rate limiting, circuit breaker, and observability.
         show-root-heading: true
         show-source: false
         members:
-            - __init__
+            - --init--
             - get
             - post
             - head
@@ -27,10 +27,10 @@ Token bucket rate limiter implementation.
         show-root-heading: true
         show-source: false
         members:
-            - __init__
+            - --init--
             - acquire
-            - try_acquire
-            - available_tokens
+            - try-acquire
+            - available-tokens
 
 ### CircuitBreaker
 
@@ -41,7 +41,7 @@ Circuit breaker pattern implementation.
         show-root-heading: true
         show-source: false
         members:
-            - __init__
+            - --init--
             - call
             - state
 
@@ -54,7 +54,7 @@ Mixin for handling paginated API responses.
         show-root-heading: true
         show-source: false
         members:
-            - fetch_all_pages
+            - fetch-all-pages
 
 ## Base Adapters
 
@@ -67,9 +67,9 @@ Abstract base class for HTTP-based data source adapters.
         show-root-heading: true
         show-source: false
         members:
-            - __init__
+            - --init--
             - fetch
-            - health_check
+            - health-check
 
 ### BaseSyncAdapter
 
@@ -103,9 +103,9 @@ Data source adapter for ChEMBL database.
         show-root-heading: true
         show-source: false
         members:
-            - __init__
+            - --init--
             - fetch
-            - health_check
+            - health-check
 
 **Features**:
 - Async HTTP requests with rate limiting
@@ -145,7 +145,7 @@ API URLs are constructed in `infrastructure/adapters/chembl/entity-mapper.py`:
 ```python
 params = {
     "format": "json",        # Required (ChEMBL no longer supports .json extension)
-    "limit": batch_size,     # Health_aware: full/half depending on circuit breaker
+    "limit": batch-size,     # Health-aware: full/half depending on circuit breaker
     "offset": offset,        # Pagination offset
 }
 # Filter parameters: "{field}--in": "ID1,ID2,ID3"
@@ -155,12 +155,12 @@ params = {
 
 ```yaml
 source:
-    provider_config:
-        base_url: https://www.ebi.ac.uk/chembl/api/data
-        page_size: 20
-        batch_size: 20
-    rate_limit:
-        requests_per_second: 3
+    provider-config:
+        base-url: https://www.ebi.ac.uk/chembl/api/data
+        page-size: 20
+        batch-size: 20
+    rate-limit:
+        requests-per-second: 3
 ```
 
 ### PubChemAdapter
@@ -172,9 +172,9 @@ Data source adapter for PubChem database (via pubchempy library).
         show-root-heading: true
         show-source: false
         members:
-            - __init__
+            - --init--
             - fetch
-            - health_check
+            - health-check
 
 **Features**:
 - Sync library wrapped with `run-in-executor`
@@ -190,9 +190,9 @@ Data source adapter for UniProt protein database.
         show-root-heading: true
         show-source: false
         members:
-            - __init__
+            - --init--
             - fetch
-            - health_check
+            - health-check
 
 **Features**:
 - Paginated fetching via `PaginatedFetcherMixin`
@@ -217,9 +217,9 @@ Data source adapter for PubMed/NCBI E-utilities.
         show-root-heading: true
         show-source: false
         members:
-            - __init__
+            - --init--
             - fetch
-            - health_check
+            - health-check
 
 **Features**:
 - ESearch/EFetch API integration
@@ -235,9 +235,9 @@ Data source adapter for CrossRef metadata API.
         show-root-heading: true
         show-source: false
         members:
-            - __init__
+            - --init--
             - fetch
-            - health_check
+            - health-check
 
 **Features**:
 - Polite pool rate limiting
@@ -253,9 +253,9 @@ Data source adapter for OpenAlex scholarly data API.
         show-root-heading: true
         show-source: false
         members:
-            - __init__
+            - --init--
             - fetch
-            - health_check
+            - health-check
 
 **Features**:
 - Rate limiting (10 req/sec)
@@ -271,44 +271,14 @@ Data source adapter for Semantic Scholar API.
         show-root-heading: true
         show-source: false
         members:
-            - __init__
+            - --init--
             - fetch
-            - health_check
+            - health-check
 
 **Features**:
 - Rate limiting (100 req/5min)
 - Paper and author endpoints
 - Citation graph access
-
-## Storage Adapters
-
-### SilverWriter
-
-Storage adapter for Delta Lake (Silver layer).
-
-> **Note**: `DeltaWriter` is deprecated and will be removed after a 14-day deprecation period. Use `SilverWriter` instead.
-
-::: bioetl.infrastructure.storage.silver_writer.SilverWriter
-    options:
-        show-root-heading: true
-        show-source: false
-        members:
-            - write_silver
-            - vacuum
-            - optimize
-            - get_table_info
-
-### BronzeWriter
-
-Storage adapter for local filesystem (Bronze layer).
-
-::: bioetl.infrastructure.storage.bronze_writer.BronzeWriter
-    options:
-        show-root-heading: true
-        show-source: false
-        members:
-            - write_bronze
-            - list_files
 
 ## Lock Adapters
 
@@ -348,14 +318,14 @@ Observability components are documented in [Observability](observability.md).
 
 ```python
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+from bioetl.infrastructure.adapters.http.rate-limiter import TokenBucket
 
 # Create rate limiter
 limiter = TokenBucket(rate=5.0, capacity=10)
 
 # Create client
 client = UnifiedHTTPClient(
-    rate_limiter=limiter,
+    rate-limiter=limiter,
     provider="chembl",
 )
 
