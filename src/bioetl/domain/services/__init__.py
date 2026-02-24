@@ -41,6 +41,11 @@ from bioetl.domain.services.dq_serializer import DQReportSerializer
 from bioetl.domain.services.identity_service import IdentityService
 from bioetl.domain.services.normalization_config import NormalizationConfig
 from bioetl.domain.services.normalization_service import NormalizationService
+from bioetl.domain.services.organism_classification_service import (
+    OrganismClass,
+    OrganismClassificationResult,
+    classify_organism,
+)
 from bioetl.domain.services.text_similarity import jaccard_similarity, normalize_text
 from bioetl.domain.services.unit_converter import UnitConverter
 from bioetl.domain.services.value_validator import ValueValidator
@@ -59,8 +64,11 @@ __all__ = [
     "IdentityService",
     "NormalizationConfig",
     "NormalizationService",
+    "OrganismClass",
+    "OrganismClassificationResult",
     "UnitConverter",
     "ValueValidator",
+    "classify_organism",
     "jaccard_similarity",
     "normalize_text",
 ]

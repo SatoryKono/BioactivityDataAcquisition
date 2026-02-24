@@ -41,8 +41,7 @@ def load_pipeline_contract_policy(provider: str, entity: str) -> PipelineContrac
         contracts_section = unified_raw.get("contracts")
         if isinstance(contracts_section, dict):
             raw = {**base_defaults, **contracts_section}
-            result: PipelineContractPolicy = PipelineContractPolicy.model_validate(raw)
-            return result
+            return PipelineContractPolicy.model_validate(raw)
 
     legacy_path = (
         _CONFIGS_ROOT / "contracts" / "pipelines" / provider / f"{entity}.yaml"
@@ -58,5 +57,4 @@ def load_pipeline_contract_policy(provider: str, entity: str) -> PipelineContrac
 
     raw = legacy_raw
 
-    result: PipelineContractPolicy = PipelineContractPolicy.model_validate(raw)
-    return result
+    return PipelineContractPolicy.model_validate(raw)
