@@ -131,7 +131,7 @@ entity_conditional_validations: []
 
 ```yaml
 # configs/pipelines/{provider}/{entity}.yaml
-pipeline_name: {provider}-{entity}
+pipeline_name: {provider}_{entity}
 dq_config_file: ../../quality/entities/{provider}/{entity}.yaml
 ```
 
@@ -238,7 +238,7 @@ entity_conditional_validations:
     condition_value: B
     condition_operator: eq
     then_validations:
-      - field: target-chembl_id
+      - field: target_chembl_id
         type: required
         nullable: false
         error_message: "Binding assays must have a target"
@@ -306,7 +306,7 @@ entity_conditional_validations:
     condition_value: B
     condition_operator: eq
     then_validations:
-      - field: target-chembl_id
+      - field: target_chembl_id
         type: required
         nullable: false
         error_message: "Binding assays must have a target"
@@ -348,8 +348,8 @@ dq_config = loader.load(
 )
 
 # Access domain objects
-print(f"Soft threshold: {dq_config.soft_fail-threshold}")
-print(f"Hard threshold: {dq_config.hard_fail-threshold}")
+print(f"Soft threshold: {dq_config.soft_fail_threshold}")
+print(f"Hard threshold: {dq_config.hard_fail_threshold}")
 print(f"Field validations: {len(dq_config.field_validations)}")
 ```
 
