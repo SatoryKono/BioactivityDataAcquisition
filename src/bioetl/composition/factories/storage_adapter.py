@@ -258,7 +258,6 @@ class StorageAdapter:
             run_id: Optional composite run ID for metadata tracking.
             sources_used: Optional list of source pipelines used in merge.
             preserve_column_order: If True, skip canonical reordering.
-            schema: Optional Pandera schema for strict contract validation.
         """
         await self.silver.write_silver_merged(
             table_name,

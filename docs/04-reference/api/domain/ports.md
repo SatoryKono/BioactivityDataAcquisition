@@ -317,10 +317,10 @@ Interface for Gold DQ configuration.
 
 Interface for normalization services.
 
-::: bioetl.domain.ports.NormalizationServicePort
-    options:
-        show-root-heading: true
-        show-source: false
+<!-- ::: bioetl.domain.ports.NormalizationServicePort -->
+<!--     options: -->
+<!--         show-root-heading: true -->
+<!--         show-source: false -->
 
 ### DataNormalizationPort
 
@@ -335,37 +335,37 @@ Interface for general data normalization.
 
 Interface for unit conversion.
 
-::: bioetl.domain.ports.UnitConverterPort
-    options:
-        show-root-heading: true
-        show-source: false
+<!-- ::: bioetl.domain.ports.UnitConverterPort -->
+<!--     options: -->
+<!--         show-root-heading: true -->
+<!--         show-source: false -->
 
 ### ValueValidatorPort
 
 Interface for value validation.
 
-::: bioetl.domain.ports.ValueValidatorPort
-    options:
-        show-root-heading: true
-        show-source: false
+<!-- ::: bioetl.domain.ports.ValueValidatorPort -->
+<!--     options: -->
+<!--         show-root-heading: true -->
+<!--         show-source: false -->
 
 ### ActivityAggregatorPort
 
 Interface for activity aggregation.
 
-::: bioetl.domain.ports.ActivityAggregatorPort
-    options:
-        show-root-heading: true
-        show-source: false
+<!-- ::: bioetl.domain.ports.ActivityAggregatorPort -->
+<!--     options: -->
+<!--         show-root-heading: true -->
+<!--         show-source: false -->
 
 ### OutlierFilterPort
 
 Interface for filtering outliers.
 
-::: bioetl.domain.ports.OutlierFilterPort
-    options:
-        show-root-heading: true
-        show-source: false
+<!-- ::: bioetl.domain.ports.OutlierFilterPort -->
+<!--     options: -->
+<!--         show-root-heading: true -->
+<!--         show-source: false -->
 
 ### InputFilterPort
 

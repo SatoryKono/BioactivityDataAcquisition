@@ -18,15 +18,15 @@ BioETL provides three observability pillars:
 
 Prometheus-compatible metrics exporter.
 
-::: bioetl.infrastructure.observability.prometheus-metrics.PrometheusMetrics
+::: bioetl.infrastructure.observability.prometheus_metrics.PrometheusMetrics
     options:
         show-root-heading: true
         show-source: false
         members:
-            - --init--
-            - observe-histogram
-            - increment-counter
-            - set-gauge
+            - __init__
+            - observe_histogram
+            - increment_counter
+            - set_gauge
             - close
 
 ### NoOpMetrics
@@ -63,8 +63,8 @@ OpenTelemetry tracing exporter.
         show-root-heading: true
         show-source: false
         members:
-            - --init--
-            - get-tracer
+            - __init__
+            - get_tracer
             - close
 
 ### NoOpTracing
@@ -99,11 +99,11 @@ pipeline-run
 
 ## Logging
 
-### create-logger
+### create_logger
 
 Factory function for creating structured loggers.
 
-::: bioetl.infrastructure.observability.logging.create-logger
+::: bioetl.infrastructure.observability.logging.create_logger
     options:
         show-root-heading: true
         show-source: false
@@ -112,7 +112,7 @@ Factory function for creating structured loggers.
 
 No-op implementation for testing.
 
-::: bioetl.infrastructure.observability.noop-logger.NoOpLogger
+::: bioetl.infrastructure.observability.noop_logger.NoOpLogger
     options:
         show-root-heading: true
         show-source: false
@@ -123,13 +123,13 @@ All logs include structured context per Log Schema (RULES.md §3.2.1):
 
 ```python
 logger = logger.bind(
-    run-id=str(run-id),
+    run_id=str(run_id),
     pipeline="chembl_activity",
     stage="extract",
 )
 
 # Output:
-# {"event": "batch-complete", "run-id": "abc-123", "pipeline": "chembl_activity", "stage": "extract", ...}
+# {"event": "batch_complete", "run_id": "abc_123", "pipeline": "chembl_activity", "stage": "extract", ...}
 ```
 
 ## Anomaly Detection
@@ -153,18 +153,18 @@ Monitors metrics for anomalies in batch processing.
 
 ## Metrics Server
 
-### start-metrics-server
+### start_metrics_server
 
 HTTP server for Prometheus scraping.
 
-::: bioetl.infrastructure.observability.server.start-metrics-server
+::: bioetl.infrastructure.observability.server.start_metrics_server
     options:
         show-root-heading: true
         show-source: false
 
 ```python
 # Start metrics server (default port: 8000)
-start-metrics-server(port=8000)
+start_metrics_server(port=8000)
 
 # Prometheus can scrape at http://localhost:8000/metrics
 ```
@@ -176,23 +176,23 @@ functions in `composition/bootstrap/runtime/observability.py`:
 
 ```python
 from bioetl.composition.bootstrap.runtime.observability import (
-    bootstrap-observability-bundle,
+    bootstrap_observability_bundle,
 )
 
 # Initialize complete observability stack
-bundle = bootstrap-observability-bundle(
+bundle = bootstrap_observability_bundle(
     pipeline="chembl_activity",
-    run-id=run-id,
+    run_id=run_id,
     settings=settings,
 )
 
 # Use logger, metrics, tracer from the bundle
-bundle.logger.info("batch-started", stage="extract", batch-id=str(batch-id))
+bundle.logger.info("batch_started", stage="extract", batch_id=str(batch_id))
 
-bundle.metrics.increment-counter(
-    "records-processed-total",
-    records-count,
-    {"pipeline": "chembl_activity", "stage": "extract", "run-type": "incremental"},
+bundle.metrics.increment_counter(
+    "records_processed_total",
+    records_count,
+    {"pipeline": "chembl_activity", "stage": "extract", "run_type": "incremental"},
 )
 ```
 
@@ -200,11 +200,11 @@ For manual initialization (e.g., tests):
 
 ```python
 from bioetl.infrastructure.observability import PrometheusMetrics, OpenTelemetryTracer
-from bioetl.infrastructure.observability.unified-logger import UnifiedLogger
+from bioetl.infrastructure.observability.unified_logger import UnifiedLogger
 
 metrics = PrometheusMetrics()
-tracer = OpenTelemetryTracer(service-name="bioetl")
-logger = UnifiedLogger(pipeline="chembl_activity", run-id=run-id)
+tracer = OpenTelemetryTracer(service_name="bioetl")
+logger = UnifiedLogger(pipeline="chembl_activity", run_id=run_id)
 ```
 
 ## Configuration

@@ -3,7 +3,7 @@
 **Status:** Superseded (Renamed)
 **Date:** 2026-01-26
 **Decision makers:** @BioETL-Team
-**Superseded by:** [ADR-030: Publication Pagination Strategy](ADR-030-publication-pagination-strategy.md)
+**Superseded by:** [ADR-030: Publication Pagination Strategy](../../02-architecture/decisions/ADR-030-publication-pagination-strategy.md)
 **Relates to:** ADR-009 (Paginated Fetcher Mixin), ADR-011 (Remove Watermark)
 
 ## Context
@@ -18,7 +18,7 @@ Treat OpenAlex publication pipelines as **full-scan only** and disable checkpoin
 Deduplication occurs in Silver via `content-hash`.
 
 Full details and cross-provider context are documented in:
-- [ADR-030: Publication Pagination Strategy](ADR-030-publication-pagination-strategy.md)
+- [ADR-030: Publication Pagination Strategy](../../02-architecture/decisions/ADR-030-publication-pagination-strategy.md)
 
 ## Consequences (Summary)
 
