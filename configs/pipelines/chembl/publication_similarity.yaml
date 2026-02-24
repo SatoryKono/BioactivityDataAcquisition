@@ -6,10 +6,10 @@
 pipeline_name: chembl_publication_similarity
 provider: chembl
 entity_type: publication_similarity
-schema_file: ../../schemas/chembl/publication_similarity.yaml
 # Override: v2.1.0 schema redesign after ADR-024 naming migration
 version: "2.1.0"
 description: "Extract publication similarity data (Tanimoto coefficients) from ChEMBL API"
+schema_file: "../../schemas/chembl/publication_similarity.yaml"
 
 # Override: full_scan required — API doesn't support stable incremental cursors
 loading_strategy: full_scan_only

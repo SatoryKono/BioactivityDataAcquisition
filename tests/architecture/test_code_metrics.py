@@ -89,7 +89,7 @@ class TestFileSizeLimits:
         "batch_writer.py": 575,  # 569 LOC - BatchWriter with Safety Guard + column_order + layer config filtering + key nullability
         "preflight_service.py": 845,  # 840 LOC - preflight validation (expanded) + contract policy preflight
         "preflight_validator.py": 655,  # 651 LOC - extracted preflight validators (REFACTOR-003)
-        "batch_executor.py": 785,  # 777 LOC - unified executor (memory management extracted to batch_memory_manager.py)
+        "batch_executor.py": 795,  # 789 LOC - unified executor (memory management extracted to batch_memory_manager.py) + crash checkpoint save
         "transformer.py": 920,  # 917 LOC - UniProtProteinTransformer with complex protein data extraction
         "gold_analyzer.py": 200,  # 192 LOC - Thin orchestrator (checks extracted to _checks_*.py modules)
         "silver_analyzer.py": 650,  # 642 LOC - Silver layer analysis with extracted helper methods
@@ -614,7 +614,7 @@ class TestClassSize:
         "PreflightService": 545,  # 540 lines - preflight validation service
         "PostrunService": 355,  # 349 lines - postrun service
         "BronzeWriter": 770,  # 766 lines - JSONL + zstd + MetadataCoordinator fallback + SourceMetadata + query_string extraction + async read_bronze + flat_structure
-        "BatchExecutor": 720,  # 713 lines - unified executor (memory management extracted to BatchMemoryManager)
+        "BatchExecutor": 730,  # 725 lines - unified executor (memory management extracted to BatchMemoryManager) + crash checkpoint save
         "BatchWriter": 535,  # 531 lines - batch writing with Safety Guard §4.6 lock validation + SourceMetadata param + Silver lineage + DQ defaults + column_order + key nullability
         # Application core classes
         "FilteredDataSource": 355,  # 348 lines - decorator with fallback mapping + direct multi-filter support

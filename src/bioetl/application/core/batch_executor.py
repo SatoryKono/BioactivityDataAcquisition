@@ -240,6 +240,18 @@ class BatchExecutor:
             await self._handle_shutdown(root_span)
             raise
         except Exception as e:
+            # Save checkpoint on crash for future --resume recovery
+            try:
+                total = self._resume_offset + self.records_fetched
+                if total > 0:
+                    await self._checkpoint_manager.save_checkpoint(total)
+                    self._logger.warning(
+                        "Checkpoint saved on exception for recovery",
+                        records_processed=total,
+                        error_type=type(e).__name__,
+                    )
+            except Exception:
+                pass  # Don't mask the original exception
             self._tracing.end_span(root_span, e)
             raise
         else:
