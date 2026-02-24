@@ -149,6 +149,124 @@ class TestFilterConfigLoaderBasics:
         assert len(gold_filters.range_filters) == 1
         assert gold_filters.range_filters[0].column == "value_field"
 
+    def test_load_defaults_from_base_pipeline(self, tmp_path: Path) -> None:
+        """Loader should read defaults from configs/base/pipeline.yaml."""
+        base_root = tmp_path / "base"
+        base_root.mkdir(parents=True)
+        (base_root / "pipeline.yaml").write_text(
+            """
+version: "1.0.0"
+input_filter:
+  enabled: false
+  batch_size: 333
+filter_defaults:
+  gold_filters:
+    required_fields: [base_required]
+    columns: {}
+    ranges: {}
+    list_lengths: {}
+    list_contains: {}
+    exclude_if_present: []
+"""
+        )
+
+        # Keep filters tree available for optional provider/entity layers.
+        (tmp_path / "filters").mkdir()
+
+        loader = FilterConfigLoader(tmp_path)
+        input_filter, _, gold_filters, _ = loader.load("missing_provider", "missing")
+
+        assert input_filter.batch_size == 333
+        assert "base_required" in gold_filters.required_fields
+
+    def test_load_provider_layer_from_unified_provider_file(
+        self, tmp_path: Path
+    ) -> None:
+        """Provider-level filters should load from configs/providers/{provider}.yaml."""
+        base_root = tmp_path / "base"
+        base_root.mkdir(parents=True)
+        (base_root / "pipeline.yaml").write_text(
+            """
+version: "1.0.0"
+input_filter:
+  enabled: false
+  batch_size: 100
+filter_defaults:
+  gold_filters:
+    required_fields: []
+    columns: {}
+    ranges: {}
+    list_lengths: {}
+    list_contains: {}
+    exclude_if_present: []
+"""
+        )
+
+        providers_root = tmp_path / "providers"
+        providers_root.mkdir(parents=True)
+        (providers_root / "test_provider.yaml").write_text(
+            """
+version: "1.0.0"
+provider: test_provider
+filters:
+  input_filter:
+    batch_size: 77
+  gold_filters:
+    columns:
+      provider_column: ["from_provider"]
+"""
+        )
+
+        (tmp_path / "filters").mkdir()
+
+        loader = FilterConfigLoader(tmp_path)
+        input_filter, _, gold_filters, _ = loader.load("test_provider", "missing")
+        assert input_filter.batch_size == 77
+        assert "provider_column" in {c.column for c in gold_filters.column_filters}
+
+    def test_load_entity_layer_from_unified_entity_file(self, tmp_path: Path) -> None:
+        """Entity-level filters should load from configs/entities/{p}/{e}.yaml."""
+        base_root = tmp_path / "base"
+        base_root.mkdir(parents=True)
+        (base_root / "pipeline.yaml").write_text(
+            """
+version: "1.0.0"
+input_filter:
+  enabled: false
+  batch_size: 100
+filter_defaults:
+  gold_filters:
+    required_fields: []
+    columns: {}
+    ranges: {}
+    list_lengths: {}
+    list_contains: {}
+    exclude_if_present: []
+"""
+        )
+
+        entities_root = tmp_path / "entities" / "test_provider"
+        entities_root.mkdir(parents=True)
+        (entities_root / "test_entity.yaml").write_text(
+            """
+version: "1.0.0"
+provider: test_provider
+entity: test_entity
+filters:
+  input_filter:
+    batch_size: 44
+  gold_filters:
+    required_fields: [entity_field]
+"""
+        )
+
+        (tmp_path / "filters").mkdir()
+
+        loader = FilterConfigLoader(tmp_path)
+        input_filter, _, gold_filters, _ = loader.load("test_provider", "test_entity")
+        assert input_filter.batch_size == 44
+        assert "entity_field" in gold_filters.required_fields
+
 
 class TestFilterConfigLoaderMerge:
     """Tests for merge behavior in FilterConfigLoader."""

@@ -7,11 +7,13 @@
 
 ## 0. Актуализация Плана (2026-02-24)
 
-- Текущий факт: в `configs/` **154 YAML** (не 157).
+- Текущий факт (после Phase 1/2 backward-compat): в `configs/` **162 YAML**.
 - RF-CFG-001, RF-CFG-002 и RF-CFG-005 уже выполнены в текущем коде.
 - RF-CFG-003 выполнен: явный `schema_file` удален из стандартных pipeline config'ов (остается convention-default).
 - В плане была внутренняя коллизия по `batch_size` (Phase 0 vs §5.2): принято корректное решение из RF-CFG-004 (**SKIPPED**), т.к. `pipeline.batch_size` и `input_filter.batch_size` относятся к разным уровням.
 - RF-CFG-043 требует корректировки номера ADR: **ADR-033 уже занят**, использовать следующий свободный номер.
+- RF-CFG-010..015 реализованы (base-консолидация + fallback).
+- RF-CFG-020..024 реализованы в backward-compat режиме (новые `configs/providers/*.yaml` + fallback на legacy paths).
 
 ---
 
@@ -21,7 +23,7 @@
 
 | Метрика | Значение |
 |---------|----------|
-| Всего YAML файлов в `configs/` | **154** |
+| Всего YAML файлов в `configs/` | **162** |
 | JSON Schema файлов | 2 |
 | Категорий конфигов | 9 (pipelines, sources, schemas, quality, filters, contracts, hash_policy, enums, naming) |
 | Файлов на 1 стандартный pipeline | **11** |
@@ -570,7 +572,7 @@ filters:
 |---------|---------|---------|---|
 | Файлов на standard pipeline | 11 | **4** | -64% |
 | Файлов на composite pipeline | 12 | **5** | -58% |
-| Всего YAML файлов | 154 | **~40** | -74% |
+| Всего YAML файлов | 162 | **~40** | -75% |
 | Базовых файлов | 3 (разрозненные) | **2** (консолидированные) | -33% |
 | Provider файлов | 21 (3 dir × 7) | **7** (unified) | -67% |
 | Дублированных строк (contracts) | 357 | **0** | -100% |
@@ -598,22 +600,22 @@ filters:
 
 | ID | Задача | Файлы | Риск |
 |----|--------|-------|------|
-| RF-CFG-010 | Создать `configs/base/pipeline.yaml` из `pipelines/_base.yaml` + `filter_defaults` + `contract_defaults` | 2→1 | MEDIUM |
-| RF-CFG-011 | Создать `configs/base/quality.yaml` (= rename `quality/_defaults.yaml`) | 1→1 | LOW |
-| RF-CFG-012 | Обновить `load_pipeline_config()` для чтения из `base/` | 1 | MEDIUM |
-| RF-CFG-013 | Обновить `DQConfigLoader` для чтения из `base/` | 1 | MEDIUM |
-| RF-CFG-014 | Удалить `filters/_defaults.yaml` | 1 | LOW |
-| RF-CFG-015 | Добавить backward-compat fallback: если `base/pipeline.yaml` нет, читать `pipelines/_base.yaml` | 1 | LOW |
+| RF-CFG-010 | Создать `configs/base/pipeline.yaml` из `pipelines/_base.yaml` + `filter_defaults` + `contract_defaults` — **DONE** | 2→1 | MEDIUM |
+| RF-CFG-011 | Создать `configs/base/quality.yaml` (= rename `quality/_defaults.yaml`) — **DONE with fallback** (legacy file оставлен на transition) | 1→1 | LOW |
+| RF-CFG-012 | Обновить `load_pipeline_config()` для чтения из `base/` — **DONE** | 1 | MEDIUM |
+| RF-CFG-013 | Обновить `DQConfigLoader` для чтения из `base/` — **DONE** | 1 | MEDIUM |
+| RF-CFG-014 | Удалить `filters/_defaults.yaml` — **DONE** | 1 | LOW |
+| RF-CFG-015 | Добавить backward-compat fallback: если `base/pipeline.yaml` нет, читать `pipelines/_base.yaml` — **DONE** | 1 | LOW |
 
 #### Phase 2: Консолидация Provider (1 файл per provider)
 
 | ID | Задача | Файлы | Риск |
 |----|--------|-------|------|
-| RF-CFG-020 | Создать `configs/providers/{p}.yaml` = merge `sources/{p}` + `quality/providers/{p}` + `filters/providers/{p}` | 7×3→7 | MEDIUM |
-| RF-CFG-021 | Обновить `load_source_config()` для чтения `providers/{p}.yaml` → section `source` | 1 | MEDIUM |
-| RF-CFG-022 | Обновить `DQConfigLoader` для чтения `providers/{p}.yaml` → section `quality` | 1 | MEDIUM |
-| RF-CFG-023 | Обновить `FilterConfigLoader` для чтения `providers/{p}.yaml` → section `filters` | 1 | MEDIUM |
-| RF-CFG-024 | Backward-compat: если `providers/{p}.yaml` нет, fallback на `sources/{p}.yaml` | 1 | LOW |
+| RF-CFG-020 | Создать `configs/providers/{p}.yaml` = merge `sources/{p}` + `quality/providers/{p}` + `filters/providers/{p}` — **DONE** | 7×3→7 | MEDIUM |
+| RF-CFG-021 | Обновить `load_source_config()` для чтения `providers/{p}.yaml` → section `source` — **DONE** | 1 | MEDIUM |
+| RF-CFG-022 | Обновить `DQConfigLoader` для чтения `providers/{p}.yaml` → section `quality` — **DONE** | 1 | MEDIUM |
+| RF-CFG-023 | Обновить `FilterConfigLoader` для чтения `providers/{p}.yaml` → section `filters` — **DONE** | 1 | MEDIUM |
+| RF-CFG-024 | Backward-compat: если `providers/{p}.yaml` нет, fallback на `sources/{p}.yaml` — **DONE** | 1 | LOW |
 | RF-CFG-025 | Удалить `sources/`, `quality/providers/`, `filters/providers/` | 21 | LOW |
 
 #### Phase 3: Консолидация Entity (1 файл per entity)
@@ -706,7 +708,7 @@ Phase 4 (validation + docs)  → 1 день  │ golden master + ADR
 ## Приложение A: Полная Карта Файлов (Текущее → Целевое)
 
 ```
-ТЕКУЩЕЕ (154 YAML)                         ЦЕЛЕВОЕ (~40 YAML)
+ТЕКУЩЕЕ (162 YAML)                         ЦЕЛЕВОЕ (~40 YAML)
 ═══════════════════                         ═══════════════════
 
 pipelines/_base.yaml ──────────────────┐

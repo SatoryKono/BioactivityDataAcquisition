@@ -131,6 +131,46 @@ def test_load_nonexistent_pipeline(setup_configs):
         load_pipeline_config("nonexistent_pipeline")
 
 
+def test_load_pipeline_from_unified_entity_when_legacy_missing(tmp_path, monkeypatch):
+    """load_pipeline_config should support configs/entities/{provider}/{entity}.yaml."""
+    load_pipeline_config_cached.cache_clear()
+    load_source_config.cache_clear()
+
+    entity_dir = tmp_path / "configs" / "entities" / "demo"
+    entity_dir.mkdir(parents=True)
+    (entity_dir / "item.yaml").write_text(
+        yaml.dump(
+            {
+                "version": "1.0.0",
+                "provider": "demo",
+                "entity": "item",
+                "pipeline": {
+                    "pipeline_name": "demo_item",
+                    "provider": "demo",
+                    "entity_type": "item",
+                    "business_primary_keys": ["id"],
+                },
+                "schema": {
+                    "column_groups": [
+                        {"name": "system", "fields": ["_ingestion_ts"]},
+                        {"name": "business", "fields": ["id"]},
+                    ],
+                    "silver": {"include_groups": ["system", "business"]},
+                    "gold": {"include_groups": ["business"]},
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.chdir(tmp_path)
+    config = load_pipeline_config("demo_item")
+    assert isinstance(config, PipelineYamlConfig)
+    assert config.pipeline_name == "demo_item"
+    assert config.provider == "demo"
+    assert config.entity_type == "item"
+
+
 def test_load_invalid_name_format(setup_configs):
     """Verify behavior with name that doesn't split by underscore."""
     # This might fall back to configs/pipelines/invalidname.yaml which doesn't exist
@@ -230,6 +270,42 @@ def test_load_source_config_legacy_and_new_format_equivalent_chembl(
         cfg_legacy.rate_limit.requests_per_second
         == cfg_new.rate_limit.requests_per_second
     )
+
+
+def test_load_source_config_from_unified_provider_file(tmp_path, monkeypatch):
+    """Source config should load from configs/providers/{provider}.yaml source section."""
+    load_source_config.cache_clear()
+
+    providers_dir = tmp_path / "configs" / "providers"
+    providers_dir.mkdir(parents=True)
+
+    unified_provider = {
+        "version": "1.0.0",
+        "provider": "chembl",
+        "source": {
+            "type": "api",
+            "load_strategy": "full",
+            "provider_config": {
+                "provider": "chembl",
+                "base_url": "https://example.chembl/api",
+                "auth_type": "public",
+                "client": {"timeout_sec": 55.0, "max_retries": 4},
+                "pagination": {"page_size": 111, "id_batch_size": 22},
+            },
+            "rate_limit": {"requests_per_second": 4.0, "burst": 8},
+            "circuit_breaker": {"failure_threshold": 6, "recovery_timeout": 200},
+        },
+    }
+    (providers_dir / "chembl.yaml").write_text(yaml.dump(unified_provider))
+
+    monkeypatch.chdir(tmp_path)
+    cfg = load_source_config("chembl")
+
+    assert cfg.base_url == "https://example.chembl/api"
+    assert cfg.timeout_sec == 55.0
+    assert cfg.max_retries == 4
+    assert cfg.page_size == 111
+    assert cfg.batch_size == 22
 
 
 def test_load_source_config_legacy_and_new_format_equivalent_pubmed(
