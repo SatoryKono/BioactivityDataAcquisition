@@ -127,7 +127,6 @@ class CircuitBreakerDataSourceDecorator:
         # The circuit_breaker.call() method handles success recording
         # but since we're not using call(), we need to reset on success
         # For now, the adapter-level circuit breaker handles this
-        pass
 
     def _record_failure(self, exc: Exception) -> None:
         """Record failed operation to circuit breaker.

@@ -15,6 +15,9 @@ from bioetl.infrastructure.adapters.http.circuit_breaker import (
     METRIC_CIRCUIT_BREAKER_TRIPS,
     CircuitBreaker,
 )
+from bioetl.infrastructure.observability.circuit_breaker_mapping import (
+    CIRCUIT_BREAKER_STATE_VALUES,
+)
 
 
 class TestCircuitBreaker:
@@ -295,6 +298,38 @@ class TestCircuitBreakerMetrics:
         assert calls[1][0] == (
             METRIC_CIRCUIT_BREAKER_STATE,
             0.0,  # CLOSED = 0
+            {"adapter": "test"},
+        )
+
+    @pytest.mark.unit
+    async def test_state_metric_uses_canonical_mapping(
+        self, mock_metrics: MagicMock
+    ) -> None:
+        """Gauge emissions should follow canonical state-to-number mapping."""
+        cb = CircuitBreaker(
+            provider="test",
+            failure_threshold=1,
+            recovery_timeout=0,
+            metrics=mock_metrics,
+        )
+
+        async def fail() -> None:
+            raise RuntimeError("error")
+
+        # Initial emission in __post_init__
+        assert mock_metrics.set_gauge.call_args_list[0][0] == (
+            METRIC_CIRCUIT_BREAKER_STATE,
+            CIRCUIT_BREAKER_STATE_VALUES[CircuitBreakerState.CLOSED],
+            {"adapter": "test"},
+        )
+
+        with pytest.raises(RuntimeError):
+            await cb.call(fail)
+
+        # OPEN emission after threshold breach
+        assert mock_metrics.set_gauge.call_args_list[1][0] == (
+            METRIC_CIRCUIT_BREAKER_STATE,
+            CIRCUIT_BREAKER_STATE_VALUES[CircuitBreakerState.OPEN],
             {"adapter": "test"},
         )
 

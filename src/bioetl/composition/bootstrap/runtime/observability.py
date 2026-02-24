@@ -18,7 +18,6 @@ Note:
 
 from __future__ import annotations
 
-import warnings
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
@@ -145,11 +144,6 @@ def bootstrap_logger(
     log_level: str = "INFO",
 ) -> LoggerPort:
     """Deprecated: use :func:`bootstrap_logger_port` instead."""
-    warnings.warn(
-        "bootstrap_logger() is deprecated, use bootstrap_logger_port() instead",
-        DeprecationWarning,
-        stacklevel=2,
-    )
     return bootstrap_logger_port(pipeline=pipeline, run_id=run_id, log_level=log_level)
 
 
@@ -184,11 +178,6 @@ def bootstrap_tracer(
     service_name: str = "bioetl",
 ) -> TracingPort:
     """Deprecated: use :func:`bootstrap_tracer_port` instead."""
-    warnings.warn(
-        "bootstrap_tracer() is deprecated, use bootstrap_tracer_port() instead",
-        DeprecationWarning,
-        stacklevel=2,
-    )
     return bootstrap_tracer_port(settings=settings, service_name=service_name)
 
 
@@ -256,11 +245,6 @@ def maybe_start_metrics_server(settings: Settings) -> bool:
 
 def bootstrap_metrics(settings: Settings) -> MetricsPort:
     """Deprecated: use :func:`bootstrap_metrics_port` instead."""
-    warnings.warn(
-        "bootstrap_metrics() is deprecated, use bootstrap_metrics_port() instead",
-        DeprecationWarning,
-        stacklevel=2,
-    )
     return bootstrap_metrics_port(settings=settings)
 
 
@@ -316,11 +300,6 @@ def bootstrap_dq_monitor(
     settings: Settings, logger: LoggerPort | None = None
 ) -> DQMonitorPort | None:
     """Deprecated: use :func:`bootstrap_dq_monitor_port` instead."""
-    warnings.warn(
-        "bootstrap_dq_monitor() is deprecated, use bootstrap_dq_monitor_port() instead",
-        DeprecationWarning,
-        stacklevel=2,
-    )
     return bootstrap_dq_monitor_port(settings=settings, logger=logger)
 
 
@@ -400,11 +379,6 @@ def bootstrap_observability(
     log_level: str = "INFO",
 ) -> ObservabilityBundle:
     """Deprecated: use :func:`bootstrap_observability_bundle` instead."""
-    warnings.warn(
-        "bootstrap_observability() is deprecated, use bootstrap_observability_bundle() instead",
-        DeprecationWarning,
-        stacklevel=2,
-    )
     return bootstrap_observability_bundle(
         pipeline=pipeline, run_id=run_id, settings=settings, log_level=log_level
     )

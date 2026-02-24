@@ -564,6 +564,23 @@ class TestMetricsPortProtocol:
             ) -> None:
                 pass
 
+            def inc_quarantine_records(
+                self,
+                pipeline: str,
+                reason: str,
+                count: int = 1,
+            ) -> None:
+                pass
+
+            def inc_dq_validation_failures(
+                self,
+                pipeline: str,
+                stage: str,
+                severity: str,
+                count: int = 1,
+            ) -> None:
+                pass
+
             def close(self) -> None:
                 pass
 

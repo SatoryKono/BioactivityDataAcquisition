@@ -121,6 +121,11 @@ class TestDataQualityServiceThresholds:
         assert exc_info.value.error_rate == 0.25
         assert exc_info.value.threshold == 0.20
         mock_logger.error.assert_called_once()
+        mock_metrics.inc_dq_validation_failures.assert_called_once_with(
+            pipeline="test_pipeline",
+            stage="threshold",
+            severity="hard_fail",
+        )
 
     @pytest.mark.asyncio
     async def test_hard_threshold_exactly_at_limit_raises_error(
@@ -144,6 +149,12 @@ class TestDataQualityServiceThresholds:
 
         with pytest.raises(DataQualityThresholdError):
             await service.evaluate(metrics)
+
+        mock_metrics.inc_dq_validation_failures.assert_called_once_with(
+            pipeline="test_pipeline",
+            stage="threshold",
+            severity="hard_fail",
+        )
 
     @pytest.mark.asyncio
     async def test_soft_threshold_exceeded_logs_warning_and_emits_metric(
@@ -175,6 +186,11 @@ class TestDataQualityServiceThresholds:
             1,
             {"pipeline": "test_pipeline"},
         )
+        mock_metrics.inc_dq_validation_failures.assert_called_once_with(
+            pipeline="test_pipeline",
+            stage="threshold",
+            severity="soft_fail",
+        )
 
     @pytest.mark.asyncio
     async def test_soft_threshold_exactly_at_limit_logs_warning(
@@ -201,6 +217,7 @@ class TestDataQualityServiceThresholds:
         assert result.status == DQEvaluationStatus.WARNING
         mock_logger.warning.assert_called_once()
         mock_metrics.increment_counter.assert_called_once()
+        mock_metrics.inc_dq_validation_failures.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_below_soft_threshold_passes(

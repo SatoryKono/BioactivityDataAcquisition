@@ -82,6 +82,7 @@ class RecordProcessor:
             quarantine_manager=QuarantineManager(
                 quarantine_port=services.quarantine,
                 pipeline_name=config.pipeline_name,
+                metrics=services.metrics,
             ),
             batch_metrics=self._batch_metrics,
             transform_callback=transform_callback,

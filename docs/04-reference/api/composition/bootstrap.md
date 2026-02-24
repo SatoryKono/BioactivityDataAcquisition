@@ -40,7 +40,7 @@ flowchart TB
 
 The main entry point for creating a fully configured PipelineRunner (deprecated alias for `bootstrap-pipeline-runner`).
 
-::: bioetl.composition.bootstrap.bootstrap-pipeline
+::: bioetl.composition.bootstrap.runtime.pipeline.bootstrap_pipeline
     options:
         show-root-heading: true
         show-source: false
@@ -49,7 +49,7 @@ The main entry point for creating a fully configured PipelineRunner (deprecated 
 
 Canonical function for creating a PipelineRunner with full observability.
 
-::: bioetl.composition.bootstrap.bootstrap-pipeline-runner
+::: bioetl.composition.bootstrap.bootstrap_pipeline_runner
     options:
         show-root-heading: true
         show-source: false
@@ -58,7 +58,7 @@ Canonical function for creating a PipelineRunner with full observability.
 
 Bootstrap function for composite pipelines (multiple data sources).
 
-::: bioetl.composition.bootstrap.bootstrap-composite-runner
+::: bioetl.composition.bootstrap.runtime.composite.bootstrap_composite_runner
     options:
         show-root-heading: true
         show-source: false
@@ -71,7 +71,7 @@ Functions for initializing the full observability stack during pipeline executio
 
 Initialize all observability components (logging, tracing, metrics) as a bundle.
 
-::: bioetl.composition.bootstrap.bootstrap-observability-bundle
+::: bioetl.composition.bootstrap.runtime.observability.bootstrap_observability_bundle
     options:
         show-root-heading: true
         show-source: false
@@ -80,7 +80,7 @@ Initialize all observability components (logging, tracing, metrics) as a bundle.
 
 Create structured logger instance.
 
-::: bioetl.composition.bootstrap.bootstrap-logger-port
+::: bioetl.composition.bootstrap.bootstrap_logger_port
     options:
         show-root-heading: true
         show-source: false
@@ -89,7 +89,7 @@ Create structured logger instance.
 
 Create tracing exporter instance.
 
-::: bioetl.composition.bootstrap.bootstrap-tracer-port
+::: bioetl.composition.bootstrap.runtime.observability.bootstrap_tracer_port
     options:
         show-root-heading: true
         show-source: false
@@ -98,7 +98,7 @@ Create tracing exporter instance.
 
 Create metrics exporter instance.
 
-::: bioetl.composition.bootstrap.bootstrap-metrics-port
+::: bioetl.composition.bootstrap.bootstrap_metrics_port
     options:
         show-root-heading: true
         show-source: false
@@ -107,7 +107,7 @@ Create metrics exporter instance.
 
 Create data quality anomaly monitor.
 
-::: bioetl.composition.bootstrap.bootstrap-dq-monitor-port
+::: bioetl.composition.bootstrap.runtime.observability.bootstrap_dq_monitor_port
     options:
         show-root-heading: true
         show-source: false
@@ -120,7 +120,7 @@ Functions for creating infrastructure components used by both CLI and runtime.
 
 Create storage adapter for all Medallion layers.
 
-::: bioetl.composition.bootstrap.bootstrap-storage-adapter
+::: bioetl.composition.bootstrap.assembly.storage.bootstrap_storage_adapter
     options:
         show-root-heading: true
         show-source: false
@@ -129,7 +129,7 @@ Create storage adapter for all Medallion layers.
 
 Create checkpoint port implementation.
 
-::: bioetl.composition.bootstrap.bootstrap-checkpoint-port
+::: bioetl.composition.bootstrap.assembly.checkpoint.bootstrap_checkpoint_port
     options:
         show-root-heading: true
         show-source: false
@@ -138,7 +138,7 @@ Create checkpoint port implementation.
 
 Create quarantine port implementation.
 
-::: bioetl.composition.bootstrap.bootstrap-quarantine-port
+::: bioetl.composition.bootstrap.bootstrap_quarantine_port
     options:
         show-root-heading: true
         show-source: false
@@ -151,7 +151,7 @@ Bootstrap functions for CLI-only commands. These use NoOp observability implemen
 
 Create cleanup service for storage management.
 
-::: bioetl.composition.bootstrap.bootstrap-cleanup-service
+::: bioetl.composition.bootstrap.bootstrap_cleanup_service
     options:
         show-root-heading: true
         show-source: false
@@ -160,7 +160,7 @@ Create cleanup service for storage management.
 
 Create Medallion lifecycle service.
 
-::: bioetl.composition.bootstrap.bootstrap-lifecycle-service
+::: bioetl.composition.bootstrap.bootstrap_lifecycle_service
     options:
         show-root-heading: true
         show-source: false
@@ -169,7 +169,7 @@ Create Medallion lifecycle service.
 
 Create checkpoint manager instance.
 
-::: bioetl.composition.bootstrap.bootstrap-checkpoint-manager
+::: bioetl.composition.bootstrap.bootstrap_checkpoint_manager
     options:
         show-root-heading: true
         show-source: false
@@ -178,7 +178,7 @@ Create checkpoint manager instance.
 
 Create quarantine manager instance.
 
-::: bioetl.composition.bootstrap.bootstrap-quarantine-manager
+::: bioetl.composition.bootstrap.bootstrap_quarantine_manager
     options:
         show-root-heading: true
         show-source: false
@@ -187,7 +187,7 @@ Create quarantine manager instance.
 
 Create health check service for CLI.
 
-::: bioetl.composition.bootstrap.bootstrap-health-service
+::: bioetl.composition.bootstrap.bootstrap_health_service
     options:
         show-root-heading: true
         show-source: false
@@ -196,7 +196,7 @@ Create health check service for CLI.
 
 Create lock service for CLI.
 
-::: bioetl.composition.bootstrap.bootstrap-lock-service
+::: bioetl.composition.bootstrap.bootstrap_lock_service
     options:
         show-root-heading: true
         show-source: false
@@ -205,7 +205,7 @@ Create lock service for CLI.
 
 Create vacuum service for Delta table maintenance.
 
-::: bioetl.composition.bootstrap.bootstrap-vacuum-service
+::: bioetl.composition.bootstrap.bootstrap_vacuum_service
     options:
         show-root-heading: true
         show-source: false
@@ -214,7 +214,7 @@ Create vacuum service for Delta table maintenance.
 
 Create metrics service for CLI.
 
-::: bioetl.composition.bootstrap.bootstrap-metrics-service
+::: bioetl.composition.bootstrap.bootstrap_metrics_service
     options:
         show-root-heading: true
         show-source: false
@@ -223,7 +223,7 @@ Create metrics service for CLI.
 
 Create export service for CLI.
 
-::: bioetl.composition.bootstrap.bootstrap-export-service
+::: bioetl.composition.bootstrap.bootstrap_export_service
     options:
         show-root-heading: true
         show-source: false
@@ -236,7 +236,7 @@ Pure functions for assembling configuration without side effects.
 
 Assemble runtime configuration from CLI arguments and environment.
 
-::: bioetl.composition.bootstrap.assemble-runtime-config
+::: bioetl.composition.bootstrap.runtime.assembly.assemble_runtime_config
     options:
         show-root-heading: true
         show-source: false
@@ -245,7 +245,7 @@ Assemble runtime configuration from CLI arguments and environment.
 
 Assemble filter configuration from YAML and CLI overrides.
 
-::: bioetl.composition.bootstrap.assemble-filter-config
+::: bioetl.composition.bootstrap.runtime.assembly.assemble_filter_config
     options:
         show-root-heading: true
         show-source: false
@@ -254,7 +254,7 @@ Assemble filter configuration from YAML and CLI overrides.
 
 Assemble VACUUM settings for Delta table maintenance.
 
-::: bioetl.composition.bootstrap.assemble-vacuum-settings
+::: bioetl.composition.bootstrap.runtime.assembly.assemble_vacuum_settings
     options:
         show-root-heading: true
         show-source: false
@@ -263,7 +263,7 @@ Assemble VACUUM settings for Delta table maintenance.
 
 Configuration for VACUUM operations.
 
-::: bioetl.composition.bootstrap.VacuumSettings
+::: bioetl.composition.bootstrap.runtime.assembly.VacuumSettings
     options:
         show-root-heading: true
         show-source: false
@@ -287,27 +287,18 @@ Registry for pipeline factory functions.
 
 Get the global default registry instance.
 
-::: bioetl.composition.registry.get-default-registry
+::: bioetl.composition.registry.get_default_registry
     options:
         show-root-heading: true
         show-source: false
 
 ## Metrics Server
 
-### start-metrics-server
-
-Start Prometheus metrics HTTP server.
-
-::: bioetl.composition.bootstrap.start-metrics-server
-    options:
-        show-root-heading: true
-        show-source: false
-
 ### maybe-start-metrics-server
 
 Conditionally start metrics server if enabled.
 
-::: bioetl.composition.bootstrap.maybe-start-metrics-server
+::: bioetl.composition.bootstrap.maybe_start_metrics_server
     options:
         show-root-heading: true
         show-source: false
@@ -316,7 +307,7 @@ Conditionally start metrics server if enabled.
 
 Error raised when metrics server fails to start.
 
-::: bioetl.composition.bootstrap.MetricsServerError
+::: bioetl.domain.exceptions.internal.MetricsServerError
     options:
         show-root-heading: true
         show-source: false
@@ -350,7 +341,7 @@ sequenceDiagram
 
 Load pipeline configuration from YAML file.
 
-::: bioetl.infrastructure.config.load-pipeline-config
+::: bioetl.infrastructure.config.load_pipeline_config
     options:
         show-root-heading: true
         show-source: false
@@ -359,7 +350,7 @@ Load pipeline configuration from YAML file.
 
 Load composite pipeline configuration.
 
-::: bioetl.composition.bootstrap.load-composite-config
+::: bioetl.composition.bootstrap.load_composite_config
     options:
         show-root-heading: true
         show-source: false

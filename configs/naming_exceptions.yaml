@@ -1,7 +1,7 @@
 # Naming Convention Exceptions
 # This file documents allowed exceptions to the naming conventions in RULES.md §2.
 # Version: 2.1
-# Last Updated: 2026-01-21
+# Last Updated: 2026-02-24
 
 # Documentation files that are allowed to use UPPER_CASE names.
 # These are conventional files recognized by GitHub and standard tooling.
@@ -189,3 +189,29 @@ pipeline_id_format:
 # - The naming_audit.py tool uses this file's content as reference
 # - Violations against these exceptions should NOT be flagged
 # - Add new exceptions here with justification
+
+
+# ADR-024 exception registry (audited 2026-02-24)
+adr_024_known_exceptions:
+  derived_entities:
+    - entity: DocumentSimilarity
+      location: src/bioetl/domain/entities/chembl_structures.py
+      reason: ChEMBL-specific derived entity kept per ADR-024
+    - entity: DocumentTerm
+      location: src/bioetl/domain/entities/chembl_structures.py
+      reason: ChEMBL-specific derived entity kept per ADR-024
+  pipeline_ids:
+    - pipeline: pubchem_compound
+      location: configs/pipelines/pubchem/compound.yaml
+      reason: CLI compatibility uses provider API term per glossary
+    - pipeline: uniprot_protein
+      location: configs/pipelines/uniprot/protein.yaml
+      reason: CLI compatibility uses provider API term per glossary
+  legacy_fields:
+    - field: document_id
+      reason: foreign-key compatibility with ChEMBL API source model
+    - field: document_chembl_id
+      reason: foreign-key compatibility with ChEMBL API source model
+  backward_compatibility:
+    - module: src/bioetl/domain/entities/__init__.py
+      note: compatibility export surface retained until alias removal window (v3.0).
