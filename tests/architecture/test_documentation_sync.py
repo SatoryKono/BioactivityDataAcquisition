@@ -100,13 +100,12 @@ def test_adr_index_links_match_decision_files() -> None:
 
     adr_files = {path.name for path in decisions_dir.glob("ADR-*.md")}
     readme_text = readme_path.read_text(encoding="utf-8")
-    linked_files = {
-        match
-        for match in re.findall(
+    linked_files = set(
+        re.findall(
             r"\(ADR-\d{3}-[a-z0-9-]+\.md\)",
             readme_text,
         )
-    }
+    )
     linked_files = {item.strip("()") for item in linked_files}
 
     missing_from_index = sorted(adr_files - linked_files)
