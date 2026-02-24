@@ -1535,6 +1535,36 @@ groups:
           summary: "Data quality ratio below 80%"
 ```
 
+### 24.4 Встроенные правила наблюдения для `chembl_assay`
+
+В репозитории добавлен файл правил:
+
+`grafana/prometheus-rules/bioetl_observability.yml`
+
+Правила покрывают:
+
+- деградацию health-check провайдера ChEMBL;
+- падение preflight data source проверки;
+- `infrastructure_validated=0` для `chembl_assay`;
+- неуспешные запуски `chembl_assay`;
+- исчерпание retry для провайдера `chembl`.
+
+Эти rules автоматически загружаются через:
+
+- `grafana/prometheus.yml` (`rule_files: /etc/prometheus/rules/*.yml`);
+- volume mount в `docker-compose.monitoring.yml`:
+  `./grafana/prometheus-rules:/etc/prometheus/rules:ro`.
+
+Проверка после применения:
+
+```bash
+docker compose -f docker-compose.monitoring.yml restart prometheus
+# Rules:
+open http://localhost:9090/rules
+# Active alerts:
+open http://localhost:9090/alerts
+```
+
 ---
 
 ## 25. Глоссарий

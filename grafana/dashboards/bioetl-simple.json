@@ -16,7 +16,20 @@
   "gnetId": null,
   "graphTooltip": 1,
   "id": null,
-  "links": [],
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "Back to Overview",
+      "tooltip": "",
+      "type": "link",
+      "url": "/d/bioetl-overview-v2"
+    }
+  ],
   "panels": [
     {
       "datasource": "Prometheus",
@@ -319,7 +332,11 @@
     "list": [
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "chembl_activity",
+          "value": "chembl_activity"
+        },
         "datasource": "Prometheus",
         "definition": "label_values(bioetl_records_processed_total, pipeline)",
         "hide": 0,
@@ -344,7 +361,11 @@
       },
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "incremental",
+          "value": "incremental"
+        },
         "datasource": "Prometheus",
         "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_type)",
         "hide": 0,
@@ -370,7 +391,7 @@
     ]
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-12h",
     "to": "now"
   },
   "timepicker": {
