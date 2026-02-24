@@ -20,24 +20,24 @@ data/
     ├── silver/
     │   └── {provider}/
     │       └── {entity}/                # Delta Lake table
-    │           ├── -delta-log/
+    │           ├── _delta_log/
     │           ├── part-00000-*.parquet
     │           ├── {provider}-{entity}-metadata.yaml
     │           └── silver-{provider}-{entity}-dq-report.json
     ├── gold/
     │   └── {provider}/
     │       └── {entity}/                # Delta Lake table (flattened)
-    │           ├── -delta-log/
+    │           ├── _delta_log/
     │           ├── part-00000-*.parquet
     │           ├── {provider}-{entity}-metadata.yaml
     │           └── gold-{provider}-{entity}-dq-report.json
     ├── checkpoints/
-    │   ├── {pipeline-name}.json         # Flat structure (e.g., chembl_activity.json)
+    │   ├── {pipeline_name}.json         # Flat structure (e.g., chembl_activity.json)
     │   └── composite/
     │       └── composite-{name}-{run-id}.json
     ├── quarantine/
     │   └── common.quarantine/           # Unified quarantine table
-    │       ├── -delta-log/
+    │       ├── _delta_log/
     │       └── part-00000-*.parquet
     └── reports/
         └── dq/                          # Composite DQ reports
@@ -76,7 +76,7 @@ data/output/bronze/pubchem/compound/2025-01-15/batch-2025-01-15-e5f6g7h8.jsonl.z
 | Format | Delta Lake (delta-rs) |
 | Path Pattern | `data/output/silver/{provider}/{entity}/` |
 | Retention | Permanent |
-| Idempotency | Merge/Upsert by `content-hash` |
+| Idempotency | Merge/Upsert by `content_hash` |
 
 **Key characteristics:**
 - ACID transactions via Delta Lake
@@ -92,10 +92,10 @@ data/output/bronze/pubchem/compound/2025-01-15/batch-2025-01-15-e5f6g7h8.jsonl.z
 import polars as pl
 
 # Current version
-df = pl.read-delta("data/output/silver/chembl/activity")
+df = pl.read_delta("data/output/silver/chembl/activity")
 
 # Historical version (time travel)
-df = pl.read-delta("data/output/silver/chembl/activity", version=5)
+df = pl.read_delta("data/output/silver/chembl/activity", version=5)
 ```
 
 ### Gold Layer
@@ -109,7 +109,7 @@ df = pl.read-delta("data/output/silver/chembl/activity", version=5)
 
 **Key characteristics:**
 - Flattened structure (no nested JSON)
-- Excludes fields from `GOLD-EXCLUDE-FIELDS`
+- Excludes fields from `GOLD_EXCLUDE_FIELDS`
 - Optimized for analytics queries
 
 **Sidecar files:**
@@ -121,7 +121,7 @@ df = pl.read-delta("data/output/silver/chembl/activity", version=5)
 | Aspect | Value |
 |--------|-------|
 | Format | JSON |
-| Path Pattern | `data/output/checkpoints/{pipeline-name}.json` |
+| Path Pattern | `data/output/checkpoints/{pipeline_name}.json` |
 | Composite Pattern | `data/output/checkpoints/composite/composite-{name}-{run-id}.json` |
 | Purpose | Resume interrupted pipelines |
 
@@ -139,11 +139,11 @@ data/output/checkpoints/
 ```json
 {
   "pipeline": "chembl_activity",
-  "run-id": "550e8400-e29b-41d4-a716-446655440000",
+  "run_id": "550e8400-e29b-41d4-a716-446655440000",
   "metadata": {
-    "last-processed-id": "CHEMBL12345",
-    "last-processed-ts": "2025-01-15T10:30:00Z",
-    "batch-count": 42
+    "last_processed_id": "CHEMBL12345",
+    "last_processed_ts": "2025-01-15T10:30:00Z",
+    "batch_count": 42
   },
   "version": "2.0"
 }
@@ -157,7 +157,7 @@ All file writes use atomic patterns to prevent data corruption:
 2. Fsync to ensure durability
 3. Atomic rename to final path
 
-See `src/bioetl/infrastructure/storage/-atomic.py` for implementation.
+See `src/bioetl/infrastructure/storage/_atomic.py` for implementation.
 
 ## Maintenance Operations
 
@@ -170,7 +170,7 @@ Remove old Delta Lake files:
 python -c "
 from deltalake import DeltaTable
 dt = DeltaTable('data/output/silver/chembl/activity')
-dt.vacuum(retention-hours=168)  # 7 days
+dt.vacuum(retention_hours=168)  # 7 days
 "
 ```
 
@@ -180,7 +180,7 @@ After successful pipeline completion, checkpoints are automatically deleted.
 For manual cleanup:
 
 ```bash
-rm data/output/checkpoints/{pipeline-name}.json
+rm data/output/checkpoints/{pipeline_name}.json
 ```
 
 ### Quarantine Purge
@@ -197,7 +197,7 @@ Storage paths are configured via environment variables or `Settings`:
 from bioetl.infrastructure.config import Settings
 
 settings = Settings()
-print(settings.data-dir)  # Path("data")
+print(settings.data_dir)  # Path("data")
 # Actual paths use data/output/ hierarchy:
 # - Bronze: data/output/bronze/
 # - Silver: data/output/silver/
@@ -220,9 +220,9 @@ sink:
     # path defaults to: data/output/gold/chembl/activity
 ```
 
-**Resolution logic** (`src/bioetl/infrastructure/config-loader.py`):
+**Resolution logic** (`src/bioetl/infrastructure/config_loader.py`):
 ```python
-layer.setdefault("path", f"data/output/{layer-name}/{provider}/{entity-type}")
+layer.setdefault("path", f"data/output/{layer_name}/{provider}/{entity_type}")
 ```
 
 This convention ensures consistent paths across all pipelines without repetitive
@@ -235,7 +235,7 @@ configuration. Explicit paths can still be specified to override the defaults.
 ```
 configs/
 ├── quality/                              # DQ Configuration Hierarchy (ADR-027)
-│   ├── -defaults.yaml                 # Global defaults (thresholds, common validations)
+│   ├── _defaults.yaml                 # Global defaults (thresholds, common validations)
 │   ├── providers/
 │   │   ├── chembl.yaml                # ChEMBL provider overrides
 │   │   ├── pubchem.yaml               # PubChem provider overrides
@@ -252,9 +252,9 @@ configs/
 │           └── target.yaml
 │
 ├── filters/                              # Filter Configuration Hierarchy (ADR-028)
-│   ├── -defaults.yaml                 # Global defaults (batch-size=100)
+│   ├── _defaults.yaml                 # Global defaults (batch_size=100)
 │   ├── providers/
-│   │   ├── chembl.yaml                # ChEMBL batch-size=1000
+│   │   ├── chembl.yaml                # ChEMBL batch_size=1000
 │   │   └── ...                        # Other providers
 │   └── entities/
 │       ├── chembl/
@@ -263,7 +263,7 @@ configs/
 │       └── ...
 │
 ├── pipelines/                         # Pipeline orchestration configs
-│   ├── -base.yaml                     # Unified base defaults (ADR-025)
+│   ├── _base.yaml                     # Unified base defaults (ADR-025)
 │   ├── chembl/
 │   │   ├── activity.yaml              # Convention-based path resolution
 │   │   ├── assay.yaml
@@ -287,7 +287,7 @@ configs/
 
 | Level | Path | Purpose |
 |-------|------|---------|
-| Global | `quality/-defaults.yaml` | Base thresholds (0.05/0.20), common validations |
+| Global | `quality/_defaults.yaml` | Base thresholds (0.05/0.20), common validations |
 | Provider | `quality/providers/{provider}.yaml` | Provider-specific overrides |
 | Entity | `quality/entities/{provider}/{entity}.yaml` | Entity-specific rules |
 
@@ -295,7 +295,11 @@ configs/
 
 | Level | Path | Purpose |
 |-------|------|---------|
-| Global | `filters/-defaults.yaml` | Default batch-size (100) |
+<<<<<<< ours
+| Global | `filters/_defaults.yaml` | Default batch_size (100) |
+=======
+| Global | `filters/_defaults.yaml` | Default batch_size (100) |
+>>>>>>> theirs
 | Provider | `filters/providers/{provider}.yaml` | Provider-specific batch sizes |
 | Entity | `filters/entities/{provider}/{entity}.yaml` | Entity-specific filter rules |
 
@@ -308,7 +312,7 @@ See [DQ Configuration Guide](dq-configuration.md) and [Pipeline Configuration Gu
 If migrating from a previous S3-based deployment:
 
 1. Download S3 data: `aws s3 sync s3://bioetl-bronze/ data/bronze/`
-2. Update environment: Remove `AWS-*` variables
+2. Update environment: Remove `AWS_*` variables
 3. Reinstall: `pip install -e .[dev]`
 
 See [ADR-010 Migration Notes](../02-architecture/decisions/ADR-010-local-only-deployment.md#migration-notes).
