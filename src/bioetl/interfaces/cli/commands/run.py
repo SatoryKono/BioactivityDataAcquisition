@@ -155,6 +155,13 @@ def _echo_run_result(result: RunResult) -> None:
     help="Type of run",
 )
 @click.option("--resume", is_flag=True, help="Resume from last checkpoint")
+@click.option(
+    "--start-offset",
+    type=int,
+    default=None,
+    help="Start extraction from specific record offset (skips checkpoint). "
+    "Use after crash to resume from known position.",
+)
 @click.option("--limit", type=int, help="Maximum number of records to process")
 @click.option(
     "--input-csv",
@@ -236,6 +243,7 @@ def run(
     pipeline: str,
     run_type: str,
     resume: bool,
+    start_offset: int | None,
     limit: int | None,
     input_csv: str | None,
     filter_column: str | None,
@@ -252,6 +260,18 @@ def run(
     cached_bronze_path: str | None,
 ) -> None:
     """Run an ETL pipeline."""
+    # Validate --start-offset constraints
+    if start_offset is not None:
+        if start_offset < 0:
+            echo_error("--start-offset must be non-negative")
+            sys.exit(ExitCode.CONFIG_ERROR)
+        if run_type != "incremental":
+            echo_error("--start-offset requires --run-type=incremental")
+            sys.exit(ExitCode.CONFIG_ERROR)
+        if resume:
+            echo_error("--start-offset and --resume cannot be used together")
+            sys.exit(ExitCode.CONFIG_ERROR)
+
     # Handle confirmation for destructive operations (CLI responsibility)
     if not handle_destructive_run_confirmation(pipeline, run_type, dry_run, yes):
         return
@@ -260,6 +280,7 @@ def run(
     options = RunOptions(
         run_type=run_type,
         resume=resume,
+        start_offset=start_offset,
         limit=limit,
         dry_run=dry_run,
         input_csv=input_csv,
