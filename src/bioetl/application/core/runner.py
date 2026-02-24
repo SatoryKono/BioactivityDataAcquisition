@@ -147,6 +147,7 @@ class PipelineRunner:
                     )
 
                     # Execute pipeline (with manual offset or checkpoint-based resume)
+                    offset: int | None
                     if self._runtime.start_offset is not None:
                         offset = self._runtime.start_offset
                         self._logger.info(
@@ -157,11 +158,12 @@ class PipelineRunner:
                         checkpoint_meta = (
                             await self._checkpoint_manager.load_checkpoint()
                         )
-                        offset = (
+                        raw_offset: int | None = (
                             checkpoint_meta.get("records_processed")
                             if checkpoint_meta
                             else None
                         )
+                        offset = raw_offset
                     await self._executor.execute(
                         limit=self._runtime.limit,
                         query=self._runtime.query,

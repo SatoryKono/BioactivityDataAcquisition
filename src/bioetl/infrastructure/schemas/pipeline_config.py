@@ -684,10 +684,10 @@ class PipelineYamlConfig(BaseModel):
         default=None,
         description="Path to column group config file relative to pipeline config.",
     )
-    schema_file: str = Field(
-        ...,
-        min_length=1,
-        description="Required path to schema config file relative to pipeline config. "
+    schema_file: str | None = Field(
+        default=None,
+        description="Path to schema config file relative to pipeline config. "
+        "Auto-computed from provider/entity_type by convention if not specified. "
         "Example: ../../schemas/chembl/activity.yaml",
     )
     data_schema_file: str | None = Field(

@@ -19,10 +19,8 @@ from bioetl.domain.exceptions import (
     RetryExhaustedError,
 )
 from bioetl.domain.models.filter import ExtractionParams
-from bioetl.domain.ports import NoOpMetrics
 from bioetl.domain.resilience import AdapterConfig
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
-from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
 from bioetl.infrastructure.adapters.chembl.constants import (
     _NO_PAGINATION_ENTITIES,
     _SILVER_TO_CHEMBL_API_FIELD,
@@ -38,9 +36,6 @@ from bioetl.infrastructure.adapters.chembl.entity_mapper import (
 )
 from bioetl.infrastructure.adapters.chembl.health import ChemblHealthMixin
 from bioetl.infrastructure.adapters.chembl.metadata import ChemblMetadataMixin
-from bioetl.infrastructure.adapters.common.api_request_collector import (
-    APIRequestCollector,
-)
 from bioetl.infrastructure.adapters.error_handling import ErrorService
 
 if TYPE_CHECKING:
@@ -73,9 +68,6 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
     _page_size: int = field(init=False, default=1000)
     _filter_batch_size: int = field(init=False, default=20)
     _mapper: ChemblEntityMapper = field(init=False, default_factory=ChemblEntityMapper)
-    _request_collector: APIRequestCollector = field(
-        init=False, default_factory=APIRequestCollector
-    )
     _extraction_params: ExtractionParams = field(
         init=False, default_factory=ExtractionParams.empty
     )
@@ -91,8 +83,7 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         self._page_size = config.page_size
         self._filter_batch_size = config.batch_size
 
-        metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
-        self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
+        self._init_adapter_metrics()
 
         # Resolve extraction params
         self._extraction_params = self.extraction_params or ExtractionParams.empty()

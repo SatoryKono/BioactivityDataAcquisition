@@ -250,11 +250,13 @@ class RecordingMetrics:
         count: int = 1,
     ) -> None:
         """Record DQ validation failure increment."""
-        self.counters.append((
-            "dq_validation_failures",
-            count,
-            {"pipeline": pipeline, "stage": stage, "severity": severity},
-        ))
+        self.counters.append(
+            (
+                "dq_validation_failures",
+                count,
+                {"pipeline": pipeline, "stage": stage, "severity": severity},
+            )
+        )
 
     def close(self) -> None:
         """No-op close."""

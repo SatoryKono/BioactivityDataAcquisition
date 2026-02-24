@@ -8,5 +8,6 @@ entity_type: tissue
 # Override: v1.0.0 initial schema, not yet aligned with v1.2.0 standard
 version: "1.0.0"
 description: "Extract tissues from ChEMBL API"
+schema_file: "../../schemas/chembl/tissue.yaml"
 
 business_primary_keys: ["tissue_id"]

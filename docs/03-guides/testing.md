@@ -96,7 +96,7 @@ pytest --cov=src/bioetl tests/
 
 - Если нужен быстрый прогон без HTML-отчёта и без бенчмарков, используйте `make test-fast`.
 - Для корректного прохождения трассировки и мониторинга установите опциональные зависимости (`psutil`, `opentelemetry-*`).
-- В CI используется тот же профиль `make test`, поэтому локальный запуск обязателен перед коммитом.
+- В CI для полного устойчивого прогона используется `make test-ci`; локальный запуск `make test` обязателен перед коммитом.
 
 ## 5. План по устранению избыточности (ChEMBL Target Component)
 
@@ -124,7 +124,7 @@ make test-ci
 make test-serial
 
 # Явный параллельный запуск вручную
-pytest tests/ -m "not serial" -n auto --dist loadscope
+pytest tests/ -m "not serial" -n auto --dist loadscope --max-worker-restart=0
 ```
 
 **Производительность** (verified 2026-01-19):

@@ -24,13 +24,8 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 from bioetl.domain.models.metadata import SourceMetadata
-from bioetl.domain.ports import NoOpMetrics
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
-from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
-from bioetl.infrastructure.adapters.common.api_request_collector import (
-    APIRequestCollector,
-)
 from bioetl.infrastructure.adapters.openalex.fallback import TitleFallbackHandler
 
 if TYPE_CHECKING:
@@ -73,15 +68,9 @@ class OpenAlexAdapter(BaseHttpAdapter):
     provider_name: str = field(init=False, default="openalex")
     """Provider identifier (required by DataSourcePort)."""
 
-    _request_collector: APIRequestCollector = field(
-        init=False, default_factory=APIRequestCollector
-    )
-    """Collects API request metadata for Bronze layer enrichment."""
-
     def __post_init__(self) -> None:
         """Initialize adapter metrics and helper components."""
-        metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
-        self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
+        self._init_adapter_metrics()
 
         # Initialize helper components for fallback handling
         self._fallback_handler = TitleFallbackHandler(
