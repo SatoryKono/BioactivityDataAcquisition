@@ -6,7 +6,6 @@ pipeline_name: chembl_target_component
 provider: chembl
 entity_type: target_component
 description: "ChEMBL Target Components (protein sequences, etc.)"
-schema_file: "../../schemas/chembl/target_component.yaml"
 
 business_primary_keys: ["component_id"]
 

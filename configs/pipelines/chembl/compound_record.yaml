@@ -6,6 +6,5 @@ pipeline_name: chembl_compound_record
 provider: chembl
 entity_type: compound_record
 description: "Extract compound records from ChEMBL API"
-schema_file: "../../schemas/chembl/compound_record.yaml"
 
 business_primary_keys: ["record_id"]

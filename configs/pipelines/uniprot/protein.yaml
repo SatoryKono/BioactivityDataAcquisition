@@ -6,7 +6,6 @@ pipeline_name: uniprot_protein
 provider: uniprot
 entity_type: protein
 description: "Pipeline for ingesting UniProt proteins"
-schema_file: "../../schemas/uniprot/protein.yaml"
 
 business_primary_keys: ["accession"]
 
