@@ -7,7 +7,7 @@
 #   ./dev_setup.sh --quick  # Только установка зависимостей (без тестов)
 #   ./dev_setup.sh --help   # Справка
 #
-# Синхронизировано с RULES.md v5.21 (2026-02-17)
+# BioETL v6.0.0 | Синхронизировано с RULES.md v5.21 (2026-02-24)
 # ==============================================================================
 
 set -euo pipefail
@@ -79,8 +79,9 @@ BioETL — Скрипт настройки окружения разработк
     ./dev_setup.sh --force      # Пересоздать окружение с нуля
 
 Документация:
+    - docs/03-guides/quick-start.md      Быстрый старт
+    - docs/00-project/RULES.md           Конституция проекта (v5.21)
     - docs/00-project/agents/AGENT.md    Инструкции для разработчика
-    - docs/00-project/RULES.md           Конституция проекта
     - docs/00-project/agents/CLAUDE.md   Справочник для Claude Code
 EOF
     exit 0
@@ -290,7 +291,7 @@ step_install_dependencies() {
         "$VENV_PYTHON" -m pip install --upgrade pip setuptools wheel --quiet
 
         print_step "Установка зависимостей разработки..."
-        "$VENV_PYTHON" -m pip install -e ".[dev,tests,tracing,performance,export]" --quiet
+        "$VENV_PYTHON" -m pip install -e ".[dev,tracing,performance,export]" --quiet
 
         print_success "Зависимости установлены через pip"
     fi
@@ -328,7 +329,15 @@ step_setup_precommit() {
 }
 
 step_setup_env() {
-    print_header "Шаг 5: Настройка переменных окружения"
+    print_header "Шаг 5: Настройка переменных окружения и директорий"
+
+    # Создание рабочих директорий
+    for dir in data logs reports; do
+        if [[ ! -d "$dir" ]]; then
+            mkdir -p "$dir"
+            print_success "Создана директория: $dir/"
+        fi
+    done
 
     if [[ -f ".env" ]]; then
         print_success "Файл .env уже существует"
@@ -404,11 +413,25 @@ step_run_checks() {
     fi
 
     # Запуск линтеров
-    print_step "Запуск ruff..."
+    print_step "Запуск ruff check..."
     if "$VENV_PYTHON" -m ruff check src/ tests/ --quiet; then
-        print_success "Ruff: без ошибок"
+        print_success "Ruff check: без ошибок"
     else
-        print_warning "Ruff: обнаружены проблемы (не критично для установки)"
+        print_warning "Ruff check: обнаружены проблемы (не критично для установки)"
+    fi
+
+    print_step "Проверка форматирования (ruff format)..."
+    if "$VENV_PYTHON" -m ruff format --check src/ tests/ --quiet 2>/dev/null; then
+        print_success "Ruff format: код отформатирован"
+    else
+        print_warning "Ruff format: обнаружены проблемы форматирования (make lint-fix для исправления)"
+    fi
+
+    print_step "Проверка import ordering (ruff --select I)..."
+    if "$VENV_PYTHON" -m ruff check --select I src/ tests/ --quiet 2>/dev/null; then
+        print_success "Import ordering: без проблем"
+    else
+        print_warning "Import ordering: нарушен порядок импортов (make lint-fix для исправления)"
     fi
 
     print_step "Запуск mypy..."
@@ -460,15 +483,18 @@ ${GREEN}Следующие шаги:${NC}
    ${BLUE}make lint && make test${NC}
 
 3. Изучите документацию:
-   - ${YELLOW}docs/00-project/agents/AGENT.md${NC}  — Инструкции для разработчика
+   - ${YELLOW}docs/03-guides/quick-start.md${NC}    — Быстрый старт
    - ${YELLOW}docs/00-project/RULES.md${NC}         — Конституция проекта (v5.21)
-   - ${YELLOW}docs/00-project/agents/CLAUDE.md${NC} — Справочник для Claude Code
+   - ${YELLOW}docs/00-project/agents/AGENT.md${NC}  — Инструкции для разработчика
 
 4. Основные команды:
    ${BLUE}make help${NC}            — Список всех команд
    ${BLUE}make test${NC}            — Запуск тестов
    ${BLUE}make lint${NC}            — Проверка кода
+   ${BLUE}make lint-fix${NC}        — Автоисправление линтинга и форматирования
+   ${BLUE}make arch-test${NC}       — Архитектурные тесты
    ${BLUE}make run-local${NC}       — Запуск пайплайна на фикстурах
+   ${BLUE}make docs-serve${NC}      — Локальный просмотр документации
 
 ${GREEN}Удачной разработки!${NC}
 EOF
@@ -483,15 +509,18 @@ ${GREEN}Следующие шаги:${NC}
    ${BLUE}make lint && make test${NC}
 
 3. Изучите документацию:
-   - ${YELLOW}docs/00-project/agents/AGENT.md${NC}  — Инструкции для разработчика
+   - ${YELLOW}docs/03-guides/quick-start.md${NC}    — Быстрый старт
    - ${YELLOW}docs/00-project/RULES.md${NC}         — Конституция проекта (v5.21)
-   - ${YELLOW}docs/00-project/agents/CLAUDE.md${NC} — Справочник для Claude Code
+   - ${YELLOW}docs/00-project/agents/AGENT.md${NC}  — Инструкции для разработчика
 
 4. Основные команды:
    ${BLUE}make help${NC}            — Список всех команд
    ${BLUE}make test${NC}            — Запуск тестов
    ${BLUE}make lint${NC}            — Проверка кода
+   ${BLUE}make lint-fix${NC}        — Автоисправление линтинга и форматирования
+   ${BLUE}make arch-test${NC}       — Архитектурные тесты
    ${BLUE}make run-local${NC}       — Запуск пайплайна на фикстурах
+   ${BLUE}make docs-serve${NC}      — Локальный просмотр документации
 
 ${GREEN}Удачной разработки!${NC}
 EOF
