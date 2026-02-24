@@ -408,3 +408,67 @@ class TestEdgeCases:
         data = {"emoji": "😀🎉"}
         result = encoder.loads(encoder.dumps(data))
         assert result == data
+
+
+@pytest.mark.skipif(not ORJSON_AVAILABLE, reason="orjson not installed")
+class TestOrjsonOptimization:
+    """Tests specifically for OrjsonEncoder optimizations."""
+
+    @pytest.fixture
+    def encoder(self) -> OrjsonEncoder:
+        return OrjsonEncoder()
+
+    def test_dumps_ensure_ascii_optimization(self, encoder: OrjsonEncoder) -> None:
+        """
+        Verify that ensure_ascii=True works correctly with the isascii() optimization.
+        It should return the same result as without optimization (for ASCII strings).
+        """
+        data = {"key": "value", "id": 123}
+
+        # This triggers the fast path (isascii() -> True)
+        result_optimized = encoder.dumps(data, ensure_ascii=True)
+
+        # This is what it should look like
+        assert result_optimized == '{"id":123,"key":"value"}'
+        assert result_optimized.isascii()
+
+    def test_dumps_canonical_optimization(self, encoder: OrjsonEncoder) -> None:
+        """
+        Verify that dumps_canonical works correctly with the isascii() optimization.
+        """
+        data = {"key": "value", "id": 123}
+
+        # This triggers the fast path
+        result = encoder.dumps_canonical(data)
+
+        assert result == '{"id":123,"key":"value"}'
+        assert result.isascii()
+
+    def test_dumps_ensure_ascii_fallback(self, encoder: OrjsonEncoder) -> None:
+        """
+        Verify that non-ASCII input still goes through the slow path (escape behavior).
+        """
+        data = {"key": "café"}
+
+        # This triggers the slow path (isascii() -> False)
+        result = encoder.dumps(data, ensure_ascii=True)
+
+        # Verify it is escaped (legacy/current behavior)
+        # Note: OrjsonEncoder currently produces \xe9 format which is technically invalid JSON
+        # but we preserve this behavior for now.
+        assert "café" not in result
+        assert result.isascii()
+        # Ensure it didn't just return the UTF-8 bytes decoded blindly
+        assert "\\x" in result or "\\u" in result  # \xe9 or \u00e9
+
+    def test_dumps_canonical_fallback(self, encoder: OrjsonEncoder) -> None:
+        """
+        Verify that non-ASCII input in dumps_canonical still works as before.
+        """
+        data = {"key": "café"}
+
+        # This triggers the slow path
+        result = encoder.dumps_canonical(data)
+
+        assert "café" not in result
+        assert result.isascii()

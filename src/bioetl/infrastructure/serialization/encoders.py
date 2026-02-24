@@ -36,9 +36,11 @@ try:
 
     _orjson: types.ModuleType | None = _orjson_module
     ORJSON_AVAILABLE = True
+    _OPT_SORT_KEYS = _orjson.OPT_SORT_KEYS  # type: ignore[union-attr]
 except ImportError:
     _orjson = None
     ORJSON_AVAILABLE = False
+    _OPT_SORT_KEYS = 0
 
 
 class StdLibJsonEncoder:
@@ -149,16 +151,20 @@ class OrjsonEncoder:
             Compact JSON string
         """
         assert _orjson is not None
-        options = _orjson.OPT_SORT_KEYS if sort_keys else 0
+        options = _OPT_SORT_KEYS if sort_keys else 0
 
-        result: str = _orjson.dumps(obj, option=options).decode("utf-8")
+        # Optimization: orjson returns bytes.
+        # If result is ASCII, we can decode directly and skip escaping check.
+        result_bytes: bytes = _orjson.dumps(obj, option=options)
 
-        # orjson doesn't have ensure_ascii option
-        # For ASCII-only output, we need to escape non-ASCII chars
         if ensure_ascii:
-            return result.encode("unicode_escape").decode("ascii")
+            # Fast path: if bytes are ASCII, no escaping needed
+            if result_bytes.isascii():
+                return result_bytes.decode("utf-8")
+            # Slow path: escape non-ASCII chars
+            return result_bytes.decode("utf-8").encode("unicode_escape").decode("ascii")
 
-        return result
+        return result_bytes.decode("utf-8")
 
     def dumps_canonical(self, obj: dict[str, Any]) -> str:
         """Serialize object to canonical JSON for hashing.
@@ -173,9 +179,15 @@ class OrjsonEncoder:
         """
         # For canonical output, we need ensure_ascii=True for hashing consistency
         assert _orjson is not None
-        result: str = _orjson.dumps(obj, option=_orjson.OPT_SORT_KEYS).decode("utf-8")
-        # Escape non-ASCII for canonical form
-        return result.encode("unicode_escape").decode("ascii")
+
+        # Optimization: check if result is already ASCII before expensive escape dance
+        result_bytes: bytes = _orjson.dumps(obj, option=_OPT_SORT_KEYS)
+
+        if result_bytes.isascii():
+            return result_bytes.decode("utf-8")
+
+        # Escape non-ASCII for canonical form (preserving existing behavior)
+        return result_bytes.decode("utf-8").encode("unicode_escape").decode("ascii")
 
     def loads(self, data: str | bytes) -> dict[str, Any] | list[Any]:
         """Deserialize JSON string to Python object using orjson.
