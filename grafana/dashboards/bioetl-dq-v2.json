@@ -138,16 +138,12 @@
                 "value": null
               },
               {
-                "color": "orange",
-                "value": 0.5
-              },
-              {
                 "color": "yellow",
                 "value": 0.8
               },
               {
                 "color": "green",
-                "value": 0.95
+                "value": 0.9
               }
             ]
           },
@@ -313,7 +309,7 @@
               },
               {
                 "color": "green",
-                "value": 0.95
+                "value": 0.9
               }
             ]
           },
@@ -956,5 +952,5 @@
   "timezone": "",
   "title": "BioETL Data Quality v2",
   "uid": "bioetl-dq-v2",
-  "version": 2
+  "version": 3
 }

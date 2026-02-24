@@ -256,12 +256,12 @@
                 "value": null
               },
               {
-                "color": "orange",
+                "color": "yellow",
                 "value": 0.8
               },
               {
                 "color": "green",
-                "value": 0.95
+                "value": 0.9
               }
             ]
           },
@@ -469,5 +469,5 @@
   "timezone": "",
   "title": "BioETL Overview v2",
   "uid": "bioetl-overview-v2",
-  "version": 2
+  "version": 3
 }
