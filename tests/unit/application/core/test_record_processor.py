@@ -65,9 +65,9 @@ def _write_temp_pipeline_config(
     )
 
     # Create DQ defaults file (required by DQConfigLoader)
-    dq_dir = base_path / "configs" / "quality"
-    dq_dir.mkdir(parents=True, exist_ok=True)
-    dq_defaults_path = dq_dir / "_defaults.yaml"
+    base_dir = base_path / "configs" / "base"
+    base_dir.mkdir(parents=True, exist_ok=True)
+    dq_defaults_path = base_dir / "quality.yaml"
     dq_defaults_path.write_text(
         "\n".join(
             [

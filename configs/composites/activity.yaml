@@ -313,4 +313,3 @@ composite:
 #   2. configs/filters/providers/composite.yaml (provider-specific)
 #   3. configs/filters/entities/composite/activity.yaml (entity-specific)
 # No inline gold_filters needed — filter entity config is authoritative.
-filter_config_file: ../filters/entities/composite/activity.yaml

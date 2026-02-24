@@ -18,6 +18,7 @@ from unittest.mock import MagicMock
 
 import polars as pl
 import pytest
+import yaml
 
 from bioetl.application.composite.column_renamer import ColumnRenamer
 from bioetl.domain.composite.config import (
@@ -384,12 +385,18 @@ class TestCompositeMoleculeConfig:
             config_path = Path("configs/pipelines/composite/molecule.yaml")
         assert config_path.exists(), f"Config file not found: {config_path}"
 
-    def test_data_schema_file_exists(self) -> None:
-        """Verify data schema file exists."""
+    def test_inline_schema_exists(self) -> None:
+        """Verify inline merge.column_groups schema exists in composite config."""
         from pathlib import Path
 
-        schema_path = Path("configs/schemas/composite/molecule.yaml")
-        assert schema_path.exists(), f"Data schema file not found: {schema_path}"
+        config_path = Path("configs/composites/molecule.yaml")
+        if not config_path.exists():
+            config_path = Path("configs/pipelines/composite/molecule.yaml")
+        raw = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+        groups = raw.get("composite", {}).get("merge", {}).get("column_groups")
+        assert isinstance(groups, list) and groups, (
+            f"Missing composite.merge.column_groups in {config_path}"
+        )
 
     def test_config_loads_successfully(self) -> None:
         """Verify configuration loads without validation errors."""

@@ -1,14 +1,7 @@
 #!/usr/bin/env python3
-"""Validate pipeline YAML configs against JSON Schema.
+"""Validate unified pipeline and composite configs against JSON schemas."""
 
-Usage:
-    python scripts/validate_pipeline_configs.py [--verbose]
-
-Exit codes:
-    0 - All configs valid
-    1 - Validation errors found
-    2 - Schema file not found
-"""
+from __future__ import annotations
 
 import argparse
 import json
@@ -30,112 +23,104 @@ def load_schema(schema_path: Path) -> dict[str, Any]:
     if not schema_path.exists():
         sys.stderr.write(f"ERROR: Schema file not found: {schema_path}\n")
         sys.exit(2)
-    raw_schema: dict[str, Any] = json.loads(schema_path.read_text())
-    return raw_schema
+    return json.loads(schema_path.read_text(encoding="utf-8"))
 
 
-def find_config_files(configs_dir: Path) -> list[Path]:
-    """Find all entity config files (excluding base configs)."""
-    return [
-        p
-        for p in configs_dir.rglob("*.yaml")
-        if not p.name.startswith("_") and p.parent.name != "_providers"
-    ]
+def _find_entity_files(entities_dir: Path) -> list[Path]:
+    return [p for p in sorted(entities_dir.rglob("*.yaml")) if not p.name.startswith("_")]
 
 
-def validate_config(config_path: Path, schema: dict[str, Any]) -> tuple[bool, str]:
-    """Validate single config file against schema."""
+def _find_composite_files(composites_dir: Path) -> list[Path]:
+    return [p for p in sorted(composites_dir.glob("*.yaml")) if not p.name.startswith("_")]
+
+
+def _validate_yaml_schema(
+    payload: Any, schema: dict[str, Any]
+) -> tuple[bool, str]:
     try:
-        config = yaml.safe_load(config_path.read_text())
-        jsonschema.validate(config, schema)
+        jsonschema.validate(payload, schema)
         return True, ""
-    except yaml.YAMLError as e:
-        return False, f"YAML parse error: {e}"
-    except jsonschema.ValidationError as e:
-        return False, f"Schema validation: {e.message} at {'.'.join(map(str, e.path))}"
+    except jsonschema.ValidationError as exc:
+        path = ".".join(str(part) for part in exc.path)
+        suffix = f" at {path}" if path else ""
+        return False, f"Schema validation: {exc.message}{suffix}"
 
 
-def validate_paths_hierarchy(config: dict[str, Any]) -> list[str]:
-    """Check that paths follow {provider}/{entity} hierarchy."""
-    warnings = []
-    provider = config.get("provider", "")
-    entity = config.get("entity_type", "")
-
-    for layer in ["bronze", "silver", "gold"]:
-        sink = config.get("sink", {}).get(layer, {})
-        path = sink.get("path", "")
-        expected_suffix = f"{provider}/{entity}"
-
-        if path and not path.endswith(expected_suffix):
-            warnings.append(
-                f"sink.{layer}.path should end with '{expected_suffix}', got: {path}"
-            )
-
-    return warnings
-
-
-def validate_schema_link(config: dict[str, Any], config_path: Path) -> list[str]:
-    """Validate required schema_file reference and non-empty schema config."""
+def _validate_pipeline_payload(pipeline_payload: dict[str, Any]) -> list[str]:
     errors: list[str] = []
+    required = ("pipeline_name", "provider", "entity_type", "business_primary_keys")
+    for key in required:
+        if key not in pipeline_payload:
+            errors.append(f"Missing pipeline key: {key}")
 
-    schema_file = config.get("schema_file")
-    if not isinstance(schema_file, str) or not schema_file.strip():
-        errors.append("schema_file is required and must be a non-empty string")
-        return errors
-
-    schema_path = (config_path.parent / schema_file).resolve()
-    if not schema_path.exists():
-        errors.append(
-            f"schema_file does not exist: {schema_file} (resolved: {schema_path})"
-        )
-        return errors
-
-    schema = yaml.safe_load(schema_path.read_text()) or {}
-    groups = schema.get("column_groups")
-    if not isinstance(groups, list) or len(groups) == 0:
-        errors.append(f"schema_file has empty column_groups: {schema_file}")
-        return errors
-
-    names = {g.get("name") for g in groups if isinstance(g, dict)}
-    has_system = "system" in names
-    has_business = "business" in names or any(
-        isinstance(name, str)
-        and name != "system"
-        and not name.startswith("dq")
-        for name in names
-    )
-    if not (has_system and has_business):
-        errors.append(
-            f"schema_file must contain system and business groups: {schema_file}"
-        )
-
-    for layer in ("silver", "gold"):
-        layer_cfg = schema.get(layer)
-        include_groups = (
-            layer_cfg.get("include_groups") if isinstance(layer_cfg, dict) else None
-        )
-        if not isinstance(include_groups, list) or not include_groups:
-            errors.append(
-                f"schema_file missing non-empty {layer}.include_groups: {schema_file}"
-            )
-
+    keys = pipeline_payload.get("business_primary_keys")
+    if not isinstance(keys, list) or not keys:
+        errors.append("pipeline.business_primary_keys must be a non-empty list")
     return errors
 
 
-def validate_sort_by_present(config: dict[str, Any]) -> list[str]:
-    """Check that sort_by is defined for determinism (ADR-014)."""
-    warnings = []
+def _validate_entity_config_sections(entity_payload: dict[str, Any]) -> list[str]:
+    errors: list[str] = []
+    for section in ("pipeline", "schema", "quality", "filters", "contracts"):
+        if section not in entity_payload:
+            errors.append(f"Missing required top-level section: {section}")
+    return errors
 
-    for layer in ["silver", "gold"]:
-        sink = config.get("sink", {}).get(layer, {})
-        if "sort_by" not in sink:
+
+def _validate_provider_entity_consistency(entity_payload: dict[str, Any]) -> list[str]:
+    errors: list[str] = []
+    provider = entity_payload.get("provider")
+    entity = entity_payload.get("entity")
+    pipeline = entity_payload.get("pipeline")
+    if not isinstance(pipeline, dict):
+        return errors
+
+    pipeline_provider = pipeline.get("provider")
+    pipeline_entity = pipeline.get("entity_type")
+    if provider and pipeline_provider and provider != pipeline_provider:
+        errors.append(
+            f"provider mismatch: top-level '{provider}' vs pipeline '{pipeline_provider}'"
+        )
+    if entity and pipeline_entity and entity != pipeline_entity:
+        errors.append(
+            f"entity mismatch: top-level '{entity}' vs pipeline '{pipeline_entity}'"
+        )
+    return errors
+
+
+def _validate_sink_paths_and_sort(pipeline_payload: dict[str, Any]) -> list[str]:
+    warnings: list[str] = []
+
+    provider = pipeline_payload.get("provider", "")
+    entity = pipeline_payload.get("entity_type", "")
+    expected_suffix = f"{provider}/{entity}" if provider and entity else ""
+    sink = pipeline_payload.get("sink", {})
+    if not isinstance(sink, dict):
+        return warnings
+
+    for layer in ("bronze", "silver", "gold"):
+        layer_cfg = sink.get(layer, {})
+        if not isinstance(layer_cfg, dict):
+            continue
+        layer_path = layer_cfg.get("path", "")
+        if expected_suffix and isinstance(layer_path, str) and layer_path:
+            if not layer_path.endswith(expected_suffix):
+                warnings.append(
+                    f"sink.{layer}.path should end with '{expected_suffix}', got: {layer_path}"
+                )
+
+    for layer in ("silver", "gold"):
+        if layer not in sink:
+            continue
+        layer_cfg = sink.get(layer, {})
+        if isinstance(layer_cfg, dict) and "sort_by" not in layer_cfg:
             warnings.append(f"sink.{layer}.sort_by missing (ADR-014 determinism)")
 
     return warnings
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate pipeline configs")
+    parser = argparse.ArgumentParser(description="Validate unified pipeline configs")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     parser.add_argument(
         "--strict",
@@ -144,76 +129,79 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    configs_dir = Path("configs/pipelines")
     schema_dir = Path("configs/_schema")
-    schema_path = schema_dir / "pipeline.json"
-    composite_schema_path = schema_dir / "composite.json"
+    composite_schema = load_schema(schema_dir / "composite.json")
 
-    schema = load_schema(schema_path)
-    composite_schema = load_schema(composite_schema_path)
-    config_files = find_config_files(configs_dir)
+    entity_files = _find_entity_files(Path("configs/entities"))
+    composite_files = _find_composite_files(Path("configs/composites"))
 
-    errors = []
-    warnings = []
+    errors: list[str] = []
+    warnings: list[str] = []
 
-    for config_path in config_files:
+    for config_path in entity_files:
         if args.verbose:
-            sys.stdout.write(f"Checking: {config_path}\n")
+            sys.stdout.write(f"Checking entity: {config_path}\n")
 
-        is_composite_config = "composite" in config_path.parts
-        active_schema = composite_schema if is_composite_config else schema
+        try:
+            payload = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+        except yaml.YAMLError as exc:
+            errors.append(f"{config_path}: YAML parse error: {exc}")
+            continue
 
-        # Schema validation
-        valid, error_msg = validate_config(config_path, active_schema)
+        if not isinstance(payload, dict):
+            errors.append(f"{config_path}: entity config must be a YAML mapping")
+            continue
+
+        for err in _validate_entity_config_sections(payload):
+            errors.append(f"{config_path}: {err}")
+
+        for err in _validate_provider_entity_consistency(payload):
+            errors.append(f"{config_path}: {err}")
+
+        pipeline_payload = payload.get("pipeline")
+        if not isinstance(pipeline_payload, dict):
+            errors.append(f"{config_path}: missing or invalid 'pipeline' section")
+            continue
+
+        for err in _validate_pipeline_payload(pipeline_payload):
+            errors.append(f"{config_path}: {err}")
+
+        for warn in _validate_sink_paths_and_sort(pipeline_payload):
+            warnings.append(f"{config_path}: {warn}")
+
+    for config_path in composite_files:
+        if args.verbose:
+            sys.stdout.write(f"Checking composite: {config_path}\n")
+        try:
+            payload = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+        except yaml.YAMLError as exc:
+            errors.append(f"{config_path}: YAML parse error: {exc}")
+            continue
+
+        valid, err_msg = _validate_yaml_schema(payload, composite_schema)
         if not valid:
-            errors.append(f"{config_path}: {error_msg}")
-            continue
+            errors.append(f"{config_path}: {err_msg}")
 
-        # Load config for additional checks
-        config = yaml.safe_load(config_path.read_text())
-
-        # Hierarchy and sort checks apply only to standard pipeline configs.
-        if is_composite_config:
-            continue
-
-        # schema_file linkage and non-empty schema config (blocking)
-        schema_errors = validate_schema_link(config, config_path)
-        for e in schema_errors:
-            errors.append(f"{config_path}: {e}")
-
-        # Path hierarchy check
-        path_warnings = validate_paths_hierarchy(config)
-        for w in path_warnings:
-            warnings.append(f"{config_path}: {w}")
-
-        # sort_by check
-        sort_warnings = validate_sort_by_present(config)
-        for w in sort_warnings:
-            warnings.append(f"{config_path}: {w}")
-
-    # Output results
     if errors:
-        sys.stderr.write("\n❌ ERRORS:\n")
-        for e in errors:
-            sys.stderr.write(f"  {e}\n")
+        sys.stderr.write("\nERRORS:\n")
+        for err in errors:
+            sys.stderr.write(f"  {err}\n")
 
     if warnings:
-        sys.stdout.write("\n⚠️  WARNINGS:\n")
-        for w in warnings:
-            sys.stdout.write(f"  {w}\n")
+        sys.stdout.write("\nWARNINGS:\n")
+        for warn in warnings:
+            sys.stdout.write(f"  {warn}\n")
 
+    total = len(entity_files) + len(composite_files)
     if not errors and not warnings:
-        sys.stdout.write(f"✅ All {len(config_files)} configs valid\n")
+        sys.stdout.write(f"OK: all {total} configs validated\n")
         return 0
 
     if errors:
         return 1
 
-    if args.strict and warnings:
-        return 1
-
-    return 0
+    return 1 if args.strict else 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())

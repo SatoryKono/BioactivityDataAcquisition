@@ -2,10 +2,10 @@
 
 Ensures structural integrity of all YAML configuration files:
   INV-CFG-001: No legacy naming (document→publication, dq/→quality/, filter/→filters/)
-  INV-CFG-002: Schema/DQ/filter/source files exist for every pipeline
+  INV-CFG-002: Unified entity sections (schema/quality/filters/contracts) and provider config exist
   INV-CFG-003: loading_strategy is null or a valid LoadingStrategy enum value
   INV-CFG-004: Providers requiring auth declare API key / mailto env vars
-  INV-CFG-005: No unknown top-level keys in pipeline, source, quality, filter configs
+  INV-CFG-005: No unknown keys in unified entity/composite/provider configs
   INV-CFG-006: pipeline_name matches {provider}_{entity_type} convention
 
 Reference:
@@ -27,11 +27,9 @@ import yaml
 # ---------------------------------------------------------------------------
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 CONFIGS_DIR = PROJECT_ROOT / "configs"
-PIPELINES_DIR = CONFIGS_DIR / "pipelines"
-SOURCES_DIR = CONFIGS_DIR / "sources"
-QUALITY_DIR = CONFIGS_DIR / "quality"
-FILTERS_DIR = CONFIGS_DIR / "filters"
-SCHEMAS_DIR = CONFIGS_DIR / "schemas"
+ENTITIES_DIR = CONFIGS_DIR / "entities"
+COMPOSITES_DIR = CONFIGS_DIR / "composites"
+PROVIDERS_DIR = CONFIGS_DIR / "providers"
 
 # ---------------------------------------------------------------------------
 # Known providers and canonical data
@@ -47,7 +45,7 @@ KNOWN_PROVIDERS: set[str] = {
     "composite",
 }
 
-# Providers that require authentication credentials in configs/sources/
+# Providers that require authentication credentials in configs/providers/
 # Maps provider -> list of required env-var keys (at least one must appear)
 PROVIDER_AUTH_REQUIREMENTS: dict[str, list[str]] = {
     "openalex": ["mailto"],
@@ -93,6 +91,18 @@ PIPELINE_ALLOWED_KEYS: set[str] = {
     "schema_file",
 }
 
+ENTITY_ALLOWED_KEYS: set[str] = {
+    "version",
+    "provider",
+    "entity",
+    "pipeline",
+    "schema",
+    "quality",
+    "filters",
+    "contracts",
+    "hash_policy",
+}
+
 COMPOSITE_ALLOWED_KEYS: set[str] = {
     "composite",
     "gold_filters",
@@ -102,37 +112,14 @@ COMPOSITE_ALLOWED_KEYS: set[str] = {
     "maintenance",
 }
 
-SOURCE_ALLOWED_KEYS: set[str] = {
+PROVIDER_ALLOWED_KEYS: set[str] = {
+    "version",
+    "provider",
     "source",
+    "quality",
+    "filters",
     "entities",
     "entity_notes",
-}
-
-QUALITY_ALLOWED_KEYS: set[str] = {
-    "version",
-    "provider",
-    "entity",
-    "thresholds",
-    "strict_validation",
-    "invalid_record_policy",
-    "field_validations",
-    "cross_field_validations",
-    "conditional_validations",
-    "report",
-    "required_fields",
-    "key_nullability",
-}
-
-FILTER_ALLOWED_KEYS: set[str] = {
-    "version",
-    "provider",
-    "entity",
-    "input_filter",
-    "silver_filters",
-    "gold_filters",
-    "extraction_params",
-    "batch_size",
-    "page_size",
 }
 
 # Legacy entity names that MUST NOT appear in configs (ADR-024).
@@ -159,22 +146,20 @@ def _load_yaml(path: Path) -> dict[str, Any]:
 
 
 def _collect_pipeline_configs() -> list[Path]:
-    """Collect all entity-level pipeline YAML configs (skip _base.yaml)."""
+    """Collect all unified entity YAML configs."""
+    return sorted(p for p in ENTITIES_DIR.rglob("*.yaml") if not p.name.startswith("_"))
+
+
+def _collect_composite_configs() -> list[Path]:
+    """Collect all composite YAML configs."""
     return sorted(
-        p for p in PIPELINES_DIR.rglob("*.yaml") if not p.name.startswith("_")
+        p for p in COMPOSITES_DIR.glob("*.yaml") if not p.name.startswith("_")
     )
 
 
-def _collect_source_configs() -> list[Path]:
-    return sorted(SOURCES_DIR.glob("*.yaml"))
-
-
-def _collect_quality_configs() -> list[Path]:
-    return sorted(p for p in QUALITY_DIR.rglob("*.yaml") if not p.name.startswith("_"))
-
-
-def _collect_filter_configs() -> list[Path]:
-    return sorted(p for p in FILTERS_DIR.rglob("*.yaml") if not p.name.startswith("_"))
+def _collect_provider_configs() -> list[Path]:
+    """Collect unified provider YAML configs."""
+    return sorted(p for p in PROVIDERS_DIR.glob("*.yaml") if not p.name.startswith("_"))
 
 
 def _rel(path: Path) -> str:
@@ -209,7 +194,12 @@ class TestNoLegacyNaming:
         """Pipeline configs must not use deprecated entity names (ADR-024)."""
         violations: list[str] = []
         for path, data in all_pipeline_configs:
-            entity = data.get("entity_type", "")
+            pipeline_cfg = data.get("pipeline")
+            entity = (
+                pipeline_cfg.get("entity_type", "")
+                if isinstance(pipeline_cfg, dict)
+                else ""
+            )
             if entity in LEGACY_ENTITY_NAMES:
                 violations.append(
                     f"{_rel(path)}: entity_type={entity!r} is legacy, "
@@ -236,74 +226,72 @@ class TestNoLegacyNaming:
 # INV-CFG-002: Schema / DQ / filter / source files exist
 # ---------------------------------------------------------------------------
 class TestConfigFilesExist:
-    """INV-CFG-002: every pipeline must have companion config files."""
+    """INV-CFG-002: every unified entity must include required sections."""
 
     @pytest.fixture(scope="class")
-    def standard_pipelines(self) -> list[tuple[str, str, Path]]:
-        """Return (provider, entity, path) for non-composite pipelines."""
-        result = []
-        for p in _collect_pipeline_configs():
-            if "composite" in p.parts:
-                continue
-            data = _load_yaml(p)
-            provider = data.get("provider", p.parent.name)
-            entity = data.get("entity_type", p.stem)
-            result.append((provider, entity, p))
+    def standard_pipelines(self) -> list[tuple[str, str, Path, dict[str, Any]]]:
+        """Return (provider, entity, path, raw) for unified entity configs."""
+        result: list[tuple[str, str, Path, dict[str, Any]]] = []
+        for path in _collect_pipeline_configs():
+            data = _load_yaml(path)
+            provider = str(data.get("provider", path.parent.name))
+            entity = str(data.get("entity", path.stem))
+            result.append((provider, entity, path, data))
         return result
 
-    def test_schema_file_exists(
-        self, standard_pipelines: list[tuple[str, str, Path]]
+    def test_schema_section_exists(
+        self, standard_pipelines: list[tuple[str, str, Path, dict[str, Any]]]
     ) -> None:
-        """Each pipeline must have a corresponding configs/schemas/{provider}/{entity}.yaml."""
+        """Each unified entity config must have schema section."""
         missing: list[str] = []
-        for provider, entity, pipeline_path in standard_pipelines:
-            schema_path = SCHEMAS_DIR / provider / f"{entity}.yaml"
-            if not schema_path.exists():
-                missing.append(
-                    f"{_rel(pipeline_path)}: missing schema at {_rel(schema_path)}"
-                )
+        for _provider, _entity, pipeline_path, data in standard_pipelines:
+            if not isinstance(data.get("schema"), dict):
+                missing.append(f"{_rel(pipeline_path)}: missing schema section")
         assert not missing, "\n".join(missing)
 
-    def test_quality_config_exists(
-        self, standard_pipelines: list[tuple[str, str, Path]]
+    def test_quality_section_exists(
+        self, standard_pipelines: list[tuple[str, str, Path, dict[str, Any]]]
     ) -> None:
-        """Each pipeline must have a DQ config in configs/quality/entities/."""
+        """Each unified entity config must have quality section."""
         missing: list[str] = []
-        for provider, entity, pipeline_path in standard_pipelines:
-            dq_path = QUALITY_DIR / "entities" / provider / f"{entity}.yaml"
-            if not dq_path.exists():
-                missing.append(
-                    f"{_rel(pipeline_path)}: missing DQ config at {_rel(dq_path)}"
-                )
+        for _provider, _entity, pipeline_path, data in standard_pipelines:
+            if not isinstance(data.get("quality"), dict):
+                missing.append(f"{_rel(pipeline_path)}: missing quality section")
         assert not missing, "\n".join(missing)
 
-    def test_filter_config_exists(
-        self, standard_pipelines: list[tuple[str, str, Path]]
+    def test_filter_section_exists(
+        self, standard_pipelines: list[tuple[str, str, Path, dict[str, Any]]]
     ) -> None:
-        """Each pipeline must have a filter config in configs/filters/entities/."""
+        """Each unified entity config must have filters section."""
         missing: list[str] = []
-        for provider, entity, pipeline_path in standard_pipelines:
-            filter_path = FILTERS_DIR / "entities" / provider / f"{entity}.yaml"
-            if not filter_path.exists():
-                missing.append(
-                    f"{_rel(pipeline_path)}: missing filter config at "
-                    f"{_rel(filter_path)}"
-                )
+        for _provider, _entity, pipeline_path, data in standard_pipelines:
+            if not isinstance(data.get("filters"), dict):
+                missing.append(f"{_rel(pipeline_path)}: missing filters section")
+        assert not missing, "\n".join(missing)
+
+    def test_contracts_section_exists(
+        self, standard_pipelines: list[tuple[str, str, Path, dict[str, Any]]]
+    ) -> None:
+        """Each unified entity config must have contracts section."""
+        missing: list[str] = []
+        for _provider, _entity, pipeline_path, data in standard_pipelines:
+            if not isinstance(data.get("contracts"), dict):
+                missing.append(f"{_rel(pipeline_path)}: missing contracts section")
         assert not missing, "\n".join(missing)
 
     def test_source_config_exists(
-        self, standard_pipelines: list[tuple[str, str, Path]]
+        self, standard_pipelines: list[tuple[str, str, Path, dict[str, Any]]]
     ) -> None:
-        """Each provider used in pipelines must have a source config."""
+        """Each provider used in entities must have provider config."""
         providers_seen: set[str] = set()
         missing: list[str] = []
-        for provider, _entity, _path in standard_pipelines:
+        for provider, _entity, _path, _data in standard_pipelines:
             if provider in providers_seen:
                 continue
             providers_seen.add(provider)
-            source_path = SOURCES_DIR / f"{provider}.yaml"
-            if not source_path.exists():
-                missing.append(f"Missing source config: {_rel(source_path)}")
+            provider_path = PROVIDERS_DIR / f"{provider}.yaml"
+            if not provider_path.exists():
+                missing.append(f"Missing provider config: {_rel(provider_path)}")
         assert not missing, "\n".join(missing)
 
 
@@ -316,7 +304,12 @@ class TestValidLoadingStrategy:
     @pytest.mark.parametrize("config_path", _collect_pipeline_configs(), ids=_rel)
     def test_loading_strategy_value(self, config_path: Path) -> None:
         data = _load_yaml(config_path)
-        strategy = data.get("loading_strategy")
+        pipeline_cfg = data.get("pipeline")
+        strategy = (
+            pipeline_cfg.get("loading_strategy")
+            if isinstance(pipeline_cfg, dict)
+            else None
+        )
         if strategy is not None:
             assert strategy in VALID_LOADING_STRATEGIES, (
                 f"{_rel(config_path)}: loading_strategy={strategy!r} "
@@ -338,15 +331,14 @@ class TestProviderAuthRequirements:
     def test_source_has_auth_keys(
         self, provider: str, required_keys: list[str]
     ) -> None:
-        source_path = SOURCES_DIR / f"{provider}.yaml"
-        if not source_path.exists():
-            pytest.skip(f"No source config for {provider}")
-
-        text = source_path.read_text(encoding="utf-8")
+        provider_path = PROVIDERS_DIR / f"{provider}.yaml"
+        if not provider_path.exists():
+            pytest.skip(f"No provider config for {provider}")
+        text = provider_path.read_text(encoding="utf-8")
 
         found = [key for key in required_keys if key in text]
         assert found, (
-            f"configs/sources/{provider}.yaml: must declare at least one of "
+            f"{provider}: config must declare at least one of "
             f"{required_keys} for authentication. None found in file."
         )
 
@@ -358,41 +350,42 @@ class TestNoUnknownKeys:
     """INV-CFG-005: config files must not contain unrecognized top-level keys."""
 
     @pytest.mark.parametrize("config_path", _collect_pipeline_configs(), ids=_rel)
-    def test_pipeline_keys(self, config_path: Path) -> None:
+    def test_entity_top_level_keys(self, config_path: Path) -> None:
         data = _load_yaml(config_path)
-        is_composite = "composite" in config_path.parts
-        allowed = COMPOSITE_ALLOWED_KEYS if is_composite else PIPELINE_ALLOWED_KEYS
-        unknown = set(data.keys()) - allowed
+        unknown = set(data.keys()) - ENTITY_ALLOWED_KEYS
         assert not unknown, (
             f"{_rel(config_path)}: unknown top-level keys: {unknown}. "
-            f"Allowed: {sorted(allowed)}"
+            f"Allowed: {sorted(ENTITY_ALLOWED_KEYS)}"
         )
 
-    @pytest.mark.parametrize("config_path", _collect_source_configs(), ids=_rel)
-    def test_source_keys(self, config_path: Path) -> None:
+    @pytest.mark.parametrize("config_path", _collect_pipeline_configs(), ids=_rel)
+    def test_pipeline_section_keys(self, config_path: Path) -> None:
         data = _load_yaml(config_path)
-        unknown = set(data.keys()) - SOURCE_ALLOWED_KEYS
+        pipeline_cfg = data.get("pipeline")
+        if not isinstance(pipeline_cfg, dict):
+            pytest.fail(f"{_rel(config_path)}: missing pipeline section")
+        unknown = set(pipeline_cfg.keys()) - PIPELINE_ALLOWED_KEYS
         assert not unknown, (
-            f"{_rel(config_path)}: unknown top-level keys: {unknown}. "
-            f"Allowed: {sorted(SOURCE_ALLOWED_KEYS)}"
+            f"{_rel(config_path)}: unknown pipeline section keys: {unknown}. "
+            f"Allowed: {sorted(PIPELINE_ALLOWED_KEYS)}"
         )
 
-    @pytest.mark.parametrize("config_path", _collect_quality_configs(), ids=_rel)
-    def test_quality_keys(self, config_path: Path) -> None:
+    @pytest.mark.parametrize("config_path", _collect_composite_configs(), ids=_rel)
+    def test_composite_keys(self, config_path: Path) -> None:
         data = _load_yaml(config_path)
-        unknown = set(data.keys()) - QUALITY_ALLOWED_KEYS
+        unknown = set(data.keys()) - COMPOSITE_ALLOWED_KEYS
         assert not unknown, (
             f"{_rel(config_path)}: unknown top-level keys: {unknown}. "
-            f"Allowed: {sorted(QUALITY_ALLOWED_KEYS)}"
+            f"Allowed: {sorted(COMPOSITE_ALLOWED_KEYS)}"
         )
 
-    @pytest.mark.parametrize("config_path", _collect_filter_configs(), ids=_rel)
-    def test_filter_keys(self, config_path: Path) -> None:
+    @pytest.mark.parametrize("config_path", _collect_provider_configs(), ids=_rel)
+    def test_provider_keys(self, config_path: Path) -> None:
         data = _load_yaml(config_path)
-        unknown = set(data.keys()) - FILTER_ALLOWED_KEYS
+        unknown = set(data.keys()) - PROVIDER_ALLOWED_KEYS
         assert not unknown, (
             f"{_rel(config_path)}: unknown top-level keys: {unknown}. "
-            f"Allowed: {sorted(FILTER_ALLOWED_KEYS)}"
+            f"Allowed: {sorted(PROVIDER_ALLOWED_KEYS)}"
         )
 
 
@@ -404,14 +397,17 @@ class TestPipelineNameConvention:
 
     @pytest.mark.parametrize(
         "config_path",
-        [p for p in _collect_pipeline_configs() if "composite" not in p.parts],
+        _collect_pipeline_configs(),
         ids=lambda p: _rel(p),
     )
     def test_pipeline_name_matches_convention(self, config_path: Path) -> None:
         data = _load_yaml(config_path)
-        name = data.get("pipeline_name", "")
-        provider = data.get("provider", "")
-        entity = data.get("entity_type", "")
+        pipeline_cfg = data.get("pipeline")
+        if not isinstance(pipeline_cfg, dict):
+            pytest.fail(f"{_rel(config_path)}: missing pipeline section")
+        name = pipeline_cfg.get("pipeline_name", "")
+        provider = pipeline_cfg.get("provider", data.get("provider", ""))
+        entity = pipeline_cfg.get("entity_type", data.get("entity", ""))
         expected = f"{provider}_{entity}"
         assert name == expected, (
             f"{_rel(config_path)}: pipeline_name={name!r} does not match "

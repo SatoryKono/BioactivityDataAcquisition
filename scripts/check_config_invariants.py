@@ -32,7 +32,7 @@ import yaml
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 CONFIGS_DIR = PROJECT_ROOT / "configs"
 PIPELINES_DIR = CONFIGS_DIR / "pipelines"
-SOURCES_DIR = CONFIGS_DIR / "sources"
+SOURCES_DIR = CONFIGS_DIR / "providers"
 QUALITY_DIR = CONFIGS_DIR / "quality"
 FILTERS_DIR = CONFIGS_DIR / "filters"
 SCHEMAS_DIR = CONFIGS_DIR / "schemas"
@@ -233,7 +233,7 @@ def check_inv_004(verbose: bool) -> list[str]:
         found = [k for k in keys if k in text]
         if not found:
             errors.append(
-                f"INV-CFG-004 configs/sources/{provider}.yaml: "
+                f"INV-CFG-004 configs/providers/{provider}.yaml: "
                 f"must declare at least one of {keys}"
             )
     if verbose and not errors:

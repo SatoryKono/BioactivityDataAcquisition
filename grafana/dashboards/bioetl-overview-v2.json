@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "Pipeline overview for latest run only",
+  "description": "Pipeline overview for selected time range",
   "editable": true,
   "gnetId": null,
   "graphTooltip": 1,
@@ -95,11 +95,11 @@
         "dataLinks": [
           {
             "title": "Open DQ Dashboard",
-            "url": "/d/bioetl-dq-v2?var-pipeline=${__field.labels.pipeline}&var-run_type=${__field.labels.run_type}&var-stage=${__field.labels.stage}&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+            "url": "/d/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
           },
           {
             "title": "Open Provider Health Dashboard",
-            "url": "/d/bioetl-provider-health-v2?var-pipeline=${__field.labels.pipeline}&var-run_type=${__field.labels.run_type}&var-stage=${__field.labels.stage}&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}"
+            "url": "/d/bioetl-provider-health-v2?var-pipeline=$pipeline&${__url_time_range}"
           }
         ]
       },
@@ -110,7 +110,7 @@
           "refId": "A"
         }
       ],
-      "title": "Processing Pipeline (Latest Run Only)",
+      "title": "Processing Pipeline",
       "type": "timeseries"
     },
     {
@@ -361,8 +361,7 @@
     "bioetl",
     "overview",
     "pipeline",
-    "v2",
-    "latest-run"
+    "v2"
   ],
   "templating": {
     "list": [
@@ -415,31 +414,6 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
-      },
-      {
-        "allValue": ".*",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "Prometheus",
-        "definition": "label_values(bioetl_infrastructure_validated{pipeline=~\"$pipeline\"}, run_id)",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Run ID",
-        "multi": false,
-        "name": "run_id",
-        "options": [],
-        "query": {
-          "query": "label_values(bioetl_infrastructure_validated{pipeline=~\"$pipeline\"}, run_id)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 3,
-        "type": "query"
       }
     ]
   },

@@ -45,7 +45,7 @@ def _get_factories(
 
 
 def _get_source_config(provider: str) -> SourceYamlConfig | None:
-    """Load config from configs/sources/{provider}.yaml or return None.
+    """Load config from configs/providers/{provider}.yaml or return None.
 
     Returns:
         SourceYamlConfig if found, None if config file does not exist.
@@ -55,7 +55,7 @@ def _get_source_config(provider: str) -> SourceYamlConfig | None:
     """
     from pathlib import Path
 
-    config_path = Path(f"configs/sources/{provider}.yaml")
+    config_path = Path(f"configs/providers/{provider}.yaml")
     if not config_path.exists():
         return None
     return load_source_config(provider)
@@ -107,7 +107,7 @@ def _get_adapter_config(provider: str, default_page_size: int = 1000) -> Adapter
     """Get AdapterConfig from source YAML config.
 
     This is the single source of truth for adapter parameters (RULES.md §12.1.2).
-    Loads from configs/sources/{provider}.yaml and converts to domain dataclass.
+    Loads from configs/providers/{provider}.yaml and converts to domain dataclass.
 
     Args:
         provider: Provider name (e.g., 'chembl', 'pubchem')

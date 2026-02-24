@@ -1,7 +1,8 @@
 """Typed model for pipeline contract policies.
 
-Policy files live under configs/contracts/pipelines/{provider}/{entity}.yaml and
-capture keys/hash/rename directives externalized from transformer and factory code.
+Policy data lives in configs/entities/{provider}/{entity}.yaml (section "contracts")
+with optional legacy fallback to configs/contracts/pipelines/{provider}/{entity}.yaml.
+It captures keys/hash/rename directives externalized from transformer and factory code.
 """
 
 from __future__ import annotations

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import yaml
+
 from bioetl.composition.bootstrap.runtime.composite import (
     COMPOSITE_GOLD_SCHEMA_REGISTRY,
 )
@@ -25,7 +27,6 @@ def _resolve_composite_config_dir() -> Path:
 def test_each_composite_pipeline_has_schema_and_contract() -> None:
     """Every composite pipeline config must define matching schema and contract."""
     config_dir = _resolve_composite_config_dir()
-    schema_dir = Path("configs/schemas/composite")
 
     config_stems = sorted(path.stem for path in config_dir.glob("*.yaml"))
     assert config_stems, "No composite pipeline configs found"
@@ -35,9 +36,14 @@ def test_each_composite_pipeline_has_schema_and_contract() -> None:
     missing_registry_links: list[str] = []
 
     for stem in config_stems:
-        schema_path = schema_dir / f"{stem}.yaml"
-        if not schema_path.exists():
-            missing_schemas.append(str(schema_path))
+        config_path = config_dir / f"{stem}.yaml"
+        raw = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+        merge = raw.get("composite", {}).get("merge", {})
+        groups = merge.get("column_groups")
+        if not isinstance(groups, list) or not groups:
+            missing_schemas.append(
+                f"{config_path}: missing composite.merge.column_groups"
+            )
 
         contract_name = _expected_contract_name(stem)
         if not hasattr(composite_contracts, contract_name):
@@ -46,7 +52,7 @@ def test_each_composite_pipeline_has_schema_and_contract() -> None:
         if stem not in COMPOSITE_GOLD_SCHEMA_REGISTRY:
             missing_registry_links.append(stem)
 
-    assert not missing_schemas, "Missing composite schema YAML files:\n" + "\n".join(
+    assert not missing_schemas, "Missing inline composite schemas:\n" + "\n".join(
         f"  - {path}" for path in missing_schemas
     )
     assert not missing_contracts, (

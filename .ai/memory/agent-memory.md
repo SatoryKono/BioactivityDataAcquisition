@@ -1,6 +1,6 @@
 # Agent Memory — BioETL Project
 
-*Версия: 1.0.0 | Дата: 2026-02-23 | Синхронизировано с ORCHESTRATION.md v3.0, RULES.md v5.21*
+*Версия: 1.0.1 | Дата: 2026-02-24 | Синхронизировано с ORCHESTRATION.md v3.0, RULES.md v5.22*
 
 > **Назначение**: Полный контекст для быстрого онбординга нового чата Claude Code.
 > При старте новой сессии — попроси Claude прочитать этот файл:
@@ -17,9 +17,9 @@
 | Архитектура | Hexagonal (Ports & Adapters) + Medallion (Bronze→Silver→Gold) + DDD |
 | Deployment | Local-Only (ADR-010) — без Docker/Redis в runtime |
 | Провайдеры | ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar, IUPHAR, Open Targets |
-| ADR | 33 штуки (ADR-001..ADR-033), все Accepted |
+| ADR | 39 штук (ADR-001..ADR-039), все Accepted |
 | Coverage target | ≥85% overall, ≥90% domain |
-| RULES.md | v5.21 (2026-02-21) |
+| RULES.md | v5.22 (2026-02-24) |
 
 ### Ключевые файлы
 
@@ -37,7 +37,8 @@
 | Adapters | `src/bioetl/infrastructure/adapters/{provider}/` |
 | Pipelines | `src/bioetl/application/pipelines/` |
 | Bootstrap | `src/bioetl/composition/bootstrap/` |
-| Configs | `configs/pipelines/{provider}/{entity}.yaml` |
+| Configs (unified) | `configs/entities/{provider}/{entity}.yaml` |
+| Configs (composite) | `configs/composites/{entity}.yaml` |
 
 ### Быстрые команды
 

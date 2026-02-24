@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any, Generic, TypeVar
 
 import yaml
+
 from bioetl.infrastructure.config_merge import config_merge
 
 T = TypeVar("T")

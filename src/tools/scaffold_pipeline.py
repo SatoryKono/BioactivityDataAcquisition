@@ -51,11 +51,75 @@ class {source_title}{entity_title}Pipeline(BasePipeline):
         return df
 '''
 
-CONFIG_TEMPLATE = """# {source}_{entity} pipeline configuration
-name: "{source}_{entity}"
-source: "{source}"
-entity: "{entity}"
-batch_size: 100
+CONFIG_TEMPLATE = """# Unified entity config: {source}/{entity}
+version: 1.0.0
+provider: {source}
+entity: {entity}
+
+pipeline:
+  pipeline_name: {source}_{entity}
+  provider: {source}
+  entity_type: {entity}
+  description: TODO add description
+  business_primary_keys:
+    - {entity}_id
+  silver_table: {source}_{entity}
+  gold_table: {source}_{entity}
+
+schema:
+  content_hash:
+    include: []
+    exclude: []
+  column_groups:
+    - name: system
+      fields: [entity_id, content_hash, _run_id, _run_type, _source_batch_id, _ingestion_ts, _index]
+    - name: business
+      fields: [{entity}_id]
+    - name: dq
+      pattern: ^_dq_
+  silver:
+    include_groups: [system, business, dq]
+    exclude_fields: []
+    alias_policy: preserve
+  gold:
+    include_groups: [system, business]
+    exclude_fields: [_dq_*, _source_batch_id, _index]
+    alias_policy: canonical
+
+quality:
+  version: 1.0.0
+  provider: {source}
+  entity: {entity}
+  field_validations: []
+
+filters:
+  version: 1.0.0
+  provider: {source}
+  entity: {entity}
+  input_filter:
+    enabled: false
+  extraction_params: {{}}
+  silver_filters:
+    columns: {{}}
+    ranges: {{}}
+    drop_nulls: []
+  gold_filters:
+    required_fields: [{entity}_id]
+    columns: {{}}
+    ranges: {{}}
+    drop_nulls: []
+
+contracts:
+  primary_key: [{entity}_id]
+  merge_keys: [{entity}_id]
+  rename_map:
+    run_id: _run_id
+    run_type: _run_type
+    source_batch_id: _source_batch_id
+    ingestion_ts: _ingestion_ts
+    source: _source
+  hash_include: []
+  hash_exclude: [_ingestion_ts, _run_id, _run_type, _dq_errors, _dq_status]
 """
 
 
@@ -86,7 +150,7 @@ def scaffold(source, entity):
     )
 
     # 3. Create Config
-    config_file = Path(f"configs/pipelines/{source}_{entity}.yaml")
+    config_file = Path(f"configs/entities/{source}/{entity}.yaml")
     config_file.parent.mkdir(parents=True, exist_ok=True)
     config_file.write_text(CONFIG_TEMPLATE.format(source=source, entity=entity))
 

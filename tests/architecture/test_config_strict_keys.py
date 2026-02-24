@@ -17,15 +17,12 @@ from pydantic import ValidationError
 
 from bioetl.infrastructure.config_loader import load_pipeline_config
 
-# Discover all pipeline configs (provider/entity.yaml → provider_entity)
-_PIPELINES_DIR = Path("configs/pipelines")
+# Discover all unified entity configs (provider/entity.yaml → provider_entity)
+_ENTITIES_DIR = Path("configs/entities")
 
 _PIPELINE_NAMES: list[str] = []
-for provider_dir in sorted(_PIPELINES_DIR.iterdir()):
+for provider_dir in sorted(_ENTITIES_DIR.iterdir()):
     if not provider_dir.is_dir() or provider_dir.name.startswith(("_", ".")):
-        continue
-    # Skip composite pipelines — they use a different schema
-    if provider_dir.name == "composite":
         continue
     for yaml_file in sorted(provider_dir.glob("*.yaml")):
         if yaml_file.name.startswith("_"):

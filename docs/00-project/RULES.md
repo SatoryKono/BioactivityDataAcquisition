@@ -1,6 +1,6 @@
 # BioETL: Правила Проекта
 
-*Версия: 5.21 (Deduplication Policy Implementation), 2026-02-21*
+*Версия: 5.21 (DQ Config Loader), 2026-02-21*
 
 ## Введение (Quick Reference)
 
@@ -162,7 +162,7 @@ class MyAdapter:
 - **Publication metadata** -> `mode: scd2`
 - **Recomputed aggregates** -> `mode: overwrite`
 
-Для SCD2-кандидатов Gold mode **MUST** быть задан явно в каждом `configs/pipelines/*/*.yaml`.
+Для SCD2-кандидатов Gold mode **MUST** быть задан явно в каждом `configs/entities/{provider}/{entity}.yaml` (секция `pipeline:`).
 Не допускается опора на implicit baseline из `-base.yaml`.
 
 `scd-config` для `mode: scd2` **MUST** содержать все обязательные поля:
@@ -183,10 +183,10 @@ sink:
 | Entity                                                                                                                                | Current Mode         | Recommended Mode     | Breaking | Migration                                                                            |
 | ------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | -------------------- | -------- | ------------------------------------------------------------------------------------ |
 | publication (chembl/pubmed/crossref/openalex/semanticscholar)                                                                         | implicit `overwrite` | `scd2`               | Yes      | Bootstrap snapshot, затем включить SCD2 и backfill интервалов валидности             |
-| reference dictionaries (chembl: assay, assay-parameters, cell-line, tissue, protein-class, subcellular-fraction)                      | implicit `overwrite` | `scd2`               | Yes      | Единоразовый rebuild + переход на versioned upsert                                   |
-| slowly evolving records (chembl: target, target-component, molecule, compound-record; uniprot: protein, idmapping; pubchem: compound) | implicit `overwrite` | `scd2`               | Yes      | Инициализировать current как version=1, дальнейшие изменения писать как новые версии |
+| reference dictionaries (chembl: assay, assay_parameters, cell_line, tissue, protein_class, subcellular_fraction)                      | implicit `overwrite` | `scd2`               | Yes      | Единоразовый rebuild + переход на versioned upsert                                   |
+| slowly evolving records (chembl: target, target_component, molecule, compound_record; uniprot: protein, idmapping; pubchem: compound) | implicit `overwrite` | `scd2`               | Yes      | Инициализировать current как version=1, дальнейшие изменения писать как новые версии |
 | high-volume facts (chembl: activity)                                                                                                  | implicit `overwrite` | `append`             | No       | Явно зафиксировать append в pipeline YAML                                            |
-| recomputed derived outputs (chembl: publication-similarity, publication-term)                                                         | implicit `overwrite` | explicit `overwrite` | No       | Оставить overwrite, но задать явно в pipeline YAML                                   |
+| recomputed derived outputs (chembl: publication_similarity, publication_term)                                                         | implicit `overwrite` | explicit `overwrite` | No       | Оставить overwrite, но задать явно в pipeline YAML                                   |
 
 ### 2.1.3. Инфраструктура Delta Lake
 
@@ -393,7 +393,7 @@ if self.runtime.run - type in (RunType.REBUILD, RunType.BACKFILL):
 | Типичные сущности                         | Publication family, derived sets   |
 
 - **Watermark**: Механизм удалён согласно [ADR-011](../02-architecture/decisions/ADR-011-remove-watermark-mechanism.md).
-- **Конфигурация**: `loading_strategy: full_scan_only` задаётся в `configs/pipelines/*/*.yaml` (см. [ADR-031](../02-architecture/decisions/ADR-031-loading-strategy-formalization.md)).
+- **Конфигурация**: `loading_strategy: full_scan_only` задаётся в `configs/entities/{provider}/{entity}.yaml` секция `pipeline:` (см. [ADR-031](../02-architecture/decisions/ADR-031-loading-strategy-formalization.md)).
 - **Default behavior**: При `loading_strategy: null` разрешён checkpoint-based resume (стандартный incremental-поток).
 - **Checkpoint policy**: Для `full_scan_only` возобновление через checkpoint **MUST NOT** использоваться.
 
@@ -444,7 +444,7 @@ Dependencies — пайплайны, которые запускаются **п�
 dependencies:
   - pipeline: chembl_target_component
     join-keys: [component-id]       # Ключ из seed
-    silver-table: silver/chembl/target-component
+    silver-table: silver/chembl/target_component
 ```
 
 **Chained Dependencies (цепочечные зависимости):**
@@ -456,14 +456,14 @@ dependencies:
   # 1. Стандартный: ключи из seed
   - pipeline: chembl_target_component
     join-keys: [component-id]
-    silver-table: silver/chembl/target-component
+    silver-table: silver/chembl/target_component
 
   # 2. Цепочечный: ключи из предыдущего dependency
   - pipeline: chembl_protein_class
-    join-keys: [protein-classification-id]  # Колонка в source таблице
-    filter-field: protein-class-id          # Поле API (если отличается)
+    join-keys: [protein_classification-id]  # Колонка в source таблице
+    filter-field: protein_class-id          # Поле API (если отличается)
     key-source: chembl_target_component     # Читать ключи отсюда
-    silver-table: silver/chembl/protein-class
+    silver-table: silver/chembl/protein_class
 ```
 
 **Поля DependencyConfig:**
@@ -504,7 +504,7 @@ dependencies:
 **Пример:**
 
 ```yaml
-# configs/pipelines/composite/publication.yaml
+# configs/composites/publication.yaml
 merge:
   strategy: left-outer
   conflict-resolution: seed-priority
@@ -587,7 +587,7 @@ Gold читает из Silver (Medallion flow), поэтому видит Silver
 **Формат конфигурации:**
 
 ```yaml
-# configs/schemas/{provider}/{entity}.yaml
+# configs/entities/{provider}/{entity}.yaml
 column-groups: [...]  # Shared groups
 
 silver:
@@ -1430,7 +1430,7 @@ ______________________________________________________________________
 \* **Generic Probe**: Lightweight GET-запрос к базовому endpoint API (e.g., root или `/status`). Если API не предоставляет dedicated health endpoint, использовать минимальный запрос данных с timeout 5 секунд.
 
 > **Каноническая конфигурация rate limits** (burst, batch-size, конкретные числа) находится в
-> `configs/sources/{provider}.yaml`. Подробная таблица: [pipeline-configuration.md](../03-guides/pipeline-configuration.md#provider-rate-limits).
+> `configs/providers/{provider}.yaml`. Подробная таблица: [pipeline-configuration.md](../03-guides/pipeline-configuration.md#provider-rate-limits).
 
 ### А.1. Формирование URL для ChEMBL API
 
@@ -1449,15 +1449,15 @@ URL-адреса для ChEMBL формируются в `infrastructure/adapter
 | ------------------ | ------------------------ | -------------------- |
 | `activity`         | `activity`               | `activity-id`        |
 | `assay`            | `assay`                  | `assay-chembl-id`    |
-| `assay-parameters` | `assay`                  | *(composite)*        |
-| `cell-line`        | `cell-line`              | `cell-chembl-id`     |
+| `assay_parameters` | `assay`                  | *(composite)*        |
+| `cell_line`        | `cell_line`              | `cell-chembl-id`     |
 | `compound`         | `molecule`               | `molecule-chembl-id` |
-| `compound-record`  | `compound-record`        | `record-id`          |
+| `compound_record`  | `compound_record`        | `record-id`          |
 | `molecule`         | `molecule`               | `molecule-chembl-id` |
-| `protein-class`    | `protein-classification` | `protein-class-id`   |
+| `protein_class`    | `protein_classification` | `protein_class-id`   |
 | `publication`      | `document`               | `document-chembl-id` |
 | `target`           | `target`                 | `target-chembl-id`   |
-| `target-component` | `target-component`       | `component-id`       |
+| `target_component` | `target_component`       | `component-id`       |
 | `tissue`           | `tissue`                 | `tissue-chembl-id`   |
 
 **Query parameters** (формируются в `ChemblAdapter.-build-params()`):
@@ -1466,7 +1466,7 @@ URL-адреса для ChEMBL формируются в `infrastructure/adapter
 - `limit`, `offset` — пагинация (health-aware: уменьшается при деградации)
 - `{field}--in=ID1,ID2,...` — фильтрация по списку ID
 
-**Конфигурация**: `configs/sources/chembl.yaml`
+**Конфигурация**: `configs/providers/chembl.yaml`
 
 **Health Check Endpoints**:
 
@@ -1501,48 +1501,80 @@ URL-адреса для ChEMBL формируются в `infrastructure/adapter
 
 ## Приложение D: Схема Конфигурации Пайплайна
 
-См. [ADR-025](../02-architecture/decisions/ADR-025-pipeline-config-unification.md) для унификации конфигурации, [ADR-027](../02-architecture/decisions/ADR-027-dq-rules-externalization.md) для DQ rules и [ADR-028](../02-architecture/decisions/ADR-028-filter-rules-externalization.md) для filter rules.
+См. [ADR-039](../02-architecture/decisions/ADR-039-unified-entity-config-format.md) для unified entity config format, [ADR-025](../02-architecture/decisions/ADR-025-pipeline-config-unification.md) для исходной унификации конфигурации, [ADR-027](../02-architecture/decisions/ADR-027-dq-rules-externalization.md) для DQ rules и [ADR-028](../02-architecture/decisions/ADR-028-filter-rules-externalization.md) для filter rules.
+
+Начиная с 2026-02-24, все 21 стандартных pipeline используют **unified entity config** формат:
+
+```
+configs/entities/{provider}/{entity}.yaml
+```
+
+Файл объединяет 5–6 ранее отдельных конфигов в одном YAML с явными секциями.
 
 ```yaml
-# configs/pipelines/chembl/activity.yaml
-# Minimal config using convention-based path resolution (ADR-029).
-# Inherits from -base.yaml with paths/filters auto-computed from provider/entity.
-#
-# Auto-computed by convention:
-#   - source-file: ../../sources/chembl.yaml
-#   - dq-config-file: ../../quality/entities/chembl/activity.yaml
-#   - filter-config-file: ../../filters/entities/chembl/activity.yaml
-#   - sink paths: data/output/{layer}/chembl/activity
-#   - sink.silver.primary-key: ["activity-id"]
-
-pipeline-name: chembl_activity
+# configs/entities/chembl/activity.yaml
+# Unified entity config (ADR-039).
+# Combines pipeline, schema, quality, filters, contracts, hash_policy.
+version: 1.0.0
 provider: chembl
-entity-type: activity
-version: "1.2.0"
-description: "Extract biological activity records from ChEMBL API"
+entity: activity
 
-business-primary-keys: ["activity-id"]
-silver-table: "chembl_activity"
-gold-table: "chembl_activity"
+pipeline:
+  pipeline_name: chembl_activity
+  provider: chembl
+  entity_type: activity
+  description: Extract biological activity records from ChEMBL API
+  business_primary_keys: [activity_id]
+  batch_size: 1000
+  dq_overrides:
+    field_validations:
+      - field: standard_value
+        type: range
+        min: 0
+        max: 1000000000
+        nullable: true
 
-sink:
+schema:
+  column_groups:
+    - name: system
+      fields: [entity_id, content_hash, _run_id, ...]
+    - name: business
+      fields: [activity_id, assay_id, ...]
+    - name: dq
+      pattern: ^_dq_
   silver:
-    primary-key: ["activity-id"]
-    sort-by:
-      columns: ["activity-id"]
+    include_groups: [system, business, dq]
+    alias_policy: preserve
   gold:
-    sort-by:
-      columns: ["activity-id"]
+    include_groups: [system, business]
+    exclude_fields: [_dq_*, _source_batch_id]
+    alias_policy: canonical
 
-# DQ Overrides (applied on top of entity DQ config)
-dq-overrides:
-  field-validations:
-    - field: "standard-value"
-      type: "range"
-      min: 0
-      max: 1000000000
-      nullable: true
+quality:
+  field_validations:
+    - field: activity_id
+      type: required
+      nullable: false
+  cross_field_validations: [...]
+  conditional_validations: [...]
+
+filters:
+  extraction_params:
+    standard_type__in: IC50,Ki
+  silver_filters:
+    columns:
+      standard_type: [IC50, Ki]
+  gold_filters:
+    required_fields: [standard_value, target_id]
+
+contracts:
+  primary_key: [activity_id]
+  merge_keys: [activity_id]
+  rename_map: {run_id: _run_id}
+  hash_exclude: [_ingestion_ts, _run_id]
 ```
+
+Composite pipeline конфиги расположены в `configs/composites/{entity}.yaml`.
 
 ## Приложение E: Примеры Schema Evolution
 
@@ -1644,15 +1676,18 @@ fields:
 | [ADR-036](../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md)   | Gold Contract Versioning Policy            | Accepted           | 2026-02-18 |
 | [ADR-037](../02-architecture/decisions/ADR-037-canonical-schema-generation.md)       | Canonical Schema Source and Generation     | Accepted           | 2026-02-18 |
 | [ADR-038](../02-architecture/decisions/ADR-038-enum-externalization.md)              | ChEMBL Enum Values Externalization to YAML | Accepted           | 2026-02-16 |
+| [ADR-039](../02-architecture/decisions/ADR-039-unified-entity-config-format.md)      | Unified Entity Configuration Format        | Accepted           | 2026-02-24 |
 
 ## История Изменений (Changelog)
 
+- **5.22** (2026-02-24): Unified Entity Config. ADR-039 добавлен — Unified Entity Config Format. 21 стандартных pipeline config переведены из `configs/pipelines/` в `configs/entities/`; composite configs перенесены в `configs/composites/`; provider source configs — в `configs/providers/`.
+- **5.21** (2026-02-21): Deduplication Policy Implementation.
 - **5.20** (2026-02-17): Audit Sync. Future annotations (497→501, 93.8%). Тест-функций (`def test-`): ~9,442; параметризованных кейсов (`pytest --collect-only`): ~11,985. Python-файлов (~1,114→~1,161). Исправлен .importlinter gap (infrastructure→composition). Архивирован orphaned ADR-030. TYPE-002 `Any` justification — 21 инстанс.
 - **5.19** (2026-02-16): Documentation Sync. Файлов кода (517→534), future annotations (481→497, 93.1%). ADR-034 (Schema↔Domain Configuration Pairs) добавлен в реестр. Тестов (~7,090→~11,985). Python-файлов (~1,094→~1,114). Синхронизация 00-map.md, CLAUDE.md, 00-overview.md, decisions/README.md.
 - **5.18** (2026-02-15): Statistics Update. Обновлены числовые данные по результатам аудита 2026-02-14: файлов кода (499→517), future annotations (468→481), Int→Float coercion occurrences (~34→~88), publication field groups (94→106), LOC для ChemblAdapter (517→975), GoldWriter (593→946), PreflightService (527→818).
 - **5.17** (2026-02-03): Chained Dependencies. Добавлена секция §2.9.1 "Dependency Pipelines (Chained Dependencies)" — поддержка `key-source` и `filter-field` для цепочечных зависимостей в composite pipelines. Обновлён ADR-026.
 - **5.16** (2026-02-02): ADR Registry Update + Doc Sync. Добавлен ADR-032 в реестр (Приложение F): Unified HTTP Client Pattern. Синхронизация метрик с кодовой базой.
-- **5.15** (2026-01-29): Field Group Registry. Добавлена §2.9.4 "Field Group Registry" — семантическая группировка полей для Gold-фильтрации и сортировки колонок. Домен: `FieldGroupRegistry`, `FieldMapping`, `FieldGroupDefinition`. YAML-конфиг: `configs/composite/field-groups/publication.yaml`. Интеграция с `MergeService` для автоматической фильтрации TRASH-полей из Gold.
+- **5.15** (2026-01-29): Field Group Registry. Добавлена §2.9.4 "Field Group Registry" — семантическая группировка полей для Gold-фильтрации и сортировки колонок. Домен: `FieldGroupRegistry`, `FieldMapping`, `FieldGroupDefinition`. YAML-конфиг: `configs/composites/field_groups/publication.yaml`. Интеграция с `MergeService` для автоматической фильтрации TRASH-полей из Gold.
 - **5.14** (2026-01-28): Composite Pipeline Documentation. Добавлена секция §2.9 "Composite Pipelines" с документацией `preserve-all-sources` feature, column groups и merge strategies. Ссылка на ADR-026.
 - **5.13** (2026-01-28): ADR Registry Update. Добавлены ADR-029..031 в реестр (Приложение F): Output Metadata Unification, Publication Pagination Strategy, Loading Strategy Formalization.
 - **5.12** (2026-01-21): ADR Registry Update. Добавлены ADR-021..028 в реестр (Приложение F). Добавлены inline ссылки на новые ADR в соответствующие секции (§1.1, §2.8, §3.2, App D).

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import pytest
 import yaml
@@ -46,6 +47,50 @@ def _create_minimal_schema_for_pipeline(pipeline_yaml_path: Path) -> None:
     schema_path.write_text(yaml.dump(schema_data))
 
 
+def _minimal_unified_schema() -> dict[str, Any]:
+    return {
+        "column_groups": [
+            {"name": "system", "fields": ["_etl_timestamp"]},
+            {"name": "business", "fields": ["id"]},
+        ],
+        "silver": {"include_groups": ["system", "business"]},
+        "gold": {"include_groups": ["business"]},
+    }
+
+
+def _write_unified_entity_config(
+    entities_dir: Path,
+    provider: str,
+    entity: str,
+    pipeline_cfg: dict[str, Any],
+    *,
+    schema: dict[str, Any] | None = None,
+    filters: dict[str, Any] | None = None,
+    quality: dict[str, Any] | None = None,
+    contracts: dict[str, Any] | None = None,
+) -> Path:
+    entity_dir = entities_dir / provider
+    entity_dir.mkdir(parents=True, exist_ok=True)
+    entity_path = entity_dir / f"{entity}.yaml"
+
+    payload = {
+        "version": "1.0.0",
+        "provider": provider,
+        "entity": entity,
+        "pipeline": pipeline_cfg,
+        "schema": schema or _minimal_unified_schema(),
+        "quality": quality or {},
+        "filters": filters or {},
+        "contracts": contracts
+        or {
+            "primary_key": ["id"],
+            "merge_keys": ["id"],
+        },
+    }
+    entity_path.write_text(yaml.dump(payload))
+    return entity_path
+
+
 @pytest.fixture
 def setup_configs(tmp_path, monkeypatch):
     """
@@ -58,9 +103,9 @@ def setup_configs(tmp_path, monkeypatch):
     load_pipeline_config_cached.cache_clear()
     load_source_config.cache_clear()
 
-    # Create the configs/pipelines directory structure in the temp dir
-    pipelines_dir = tmp_path / "configs" / "pipelines"
-    pipelines_dir.mkdir(parents=True)
+    # Create unified entities directory in temp dir
+    entities_dir = tmp_path / "configs" / "entities"
+    entities_dir.mkdir(parents=True)
 
     # Base valid config data
     base_config = {
@@ -73,16 +118,15 @@ def setup_configs(tmp_path, monkeypatch):
         "checkpoint_interval": 1000,
     }
 
-    # Create dummy/test.yaml (for dummy_test)
-    dummy_dir = pipelines_dir / "dummy"
-    dummy_dir.mkdir()
-    dummy_yaml = dummy_dir / "test.yaml"
-    dummy_yaml.write_text(yaml.dump(base_config))
-    _create_minimal_schema_for_pipeline(dummy_yaml)
+    # Create configs/entities/dummy/test.yaml (for dummy_test)
+    _write_unified_entity_config(
+        entities_dir,
+        "dummy",
+        "test",
+        base_config,
+    )
 
-    # Create chembl/activity.yaml (mocking a real one)
-    chembl_dir = pipelines_dir / "chembl"
-    chembl_dir.mkdir()
+    # Create configs/entities/chembl/activity.yaml
     chembl_config = base_config.copy()
     chembl_config.update(
         {
@@ -92,14 +136,17 @@ def setup_configs(tmp_path, monkeypatch):
             "silver_table": "chembl.activity_silver",
         }
     )
-    chembl_yaml = chembl_dir / "activity.yaml"
-    chembl_yaml.write_text(yaml.dump(chembl_config))
-    _create_minimal_schema_for_pipeline(chembl_yaml)
+    _write_unified_entity_config(
+        entities_dir,
+        "chembl",
+        "activity",
+        chembl_config,
+    )
 
-    # Change CWD to tmp_path so "configs/pipelines/..." resolves to our temp files
+    # Change CWD to tmp_path so "configs/entities/..." resolves to our temp files
     monkeypatch.chdir(tmp_path)
 
-    yield pipelines_dir
+    yield entities_dir
 
     # Teardown: Clear the LRU cache to prevent cross-test contamination
     # This is critical for test isolation when integration tests run after unit tests
@@ -109,7 +156,7 @@ def setup_configs(tmp_path, monkeypatch):
 
 def test_load_dynamic_pipeline(setup_configs):
     """Verify that a dynamically created pipeline loads correctly."""
-    # dummy_test corresponds to configs/pipelines/dummy/test.yaml
+    # dummy_test corresponds to configs/entities/dummy/test.yaml
     config = load_pipeline_config("dummy_test")
     assert isinstance(config, PipelineYamlConfig)
     assert config.pipeline_name == "dummy_test"
@@ -118,7 +165,7 @@ def test_load_dynamic_pipeline(setup_configs):
 
 def test_load_registered_pipeline(setup_configs):
     """Verify that a standard pipeline loads correctly via dynamic resolution."""
-    # chembl_activity should resolve to configs/pipelines/chembl/activity.yaml
+    # chembl_activity should resolve to configs/entities/chembl/activity.yaml
     config = load_pipeline_config("chembl_activity")
     assert isinstance(config, PipelineYamlConfig)
     assert config.provider == "chembl"
@@ -181,7 +228,9 @@ def test_load_invalid_name_format(setup_configs):
 def test_load_fallback_no_underscore(setup_configs):
     """Verify fallback for names without underscore if file exists."""
     # Create configs/pipelines/simple.yaml
-    pipelines_dir = setup_configs
+    _ = setup_configs
+    pipelines_dir = Path("configs/pipelines")
+    pipelines_dir.mkdir(parents=True, exist_ok=True)
 
     simple_config = {
         "pipeline_name": "simple",
@@ -208,8 +257,8 @@ def test_load_source_config_legacy_and_new_format_equivalent_chembl(
     """New source format should normalize to same result as legacy format (chembl)."""
     load_source_config.cache_clear()
 
-    sources_dir = tmp_path / "configs" / "sources"
-    sources_dir.mkdir(parents=True)
+    providers_dir = tmp_path / "configs" / "providers"
+    providers_dir.mkdir(parents=True)
 
     legacy = {
         "source": {
@@ -255,8 +304,8 @@ def test_load_source_config_legacy_and_new_format_equivalent_chembl(
     }
 
     monkeypatch.chdir(tmp_path)
-    (sources_dir / "chembl_legacy.yaml").write_text(yaml.dump(legacy))
-    (sources_dir / "chembl_new.yaml").write_text(yaml.dump(new))
+    (providers_dir / "chembl_legacy.yaml").write_text(yaml.dump(legacy))
+    (providers_dir / "chembl_new.yaml").write_text(yaml.dump(new))
 
     cfg_legacy = load_source_config("chembl_legacy")
     load_source_config.cache_clear()
@@ -314,8 +363,8 @@ def test_load_source_config_legacy_and_new_format_equivalent_pubmed(
     """New source format should normalize to same result as legacy format (pubmed)."""
     load_source_config.cache_clear()
 
-    sources_dir = tmp_path / "configs" / "sources"
-    sources_dir.mkdir(parents=True)
+    providers_dir = tmp_path / "configs" / "providers"
+    providers_dir.mkdir(parents=True)
 
     legacy = {
         "source": {
@@ -361,8 +410,8 @@ def test_load_source_config_legacy_and_new_format_equivalent_pubmed(
     }
 
     monkeypatch.chdir(tmp_path)
-    (sources_dir / "pubmed_legacy.yaml").write_text(yaml.dump(legacy))
-    (sources_dir / "pubmed_new.yaml").write_text(yaml.dump(new))
+    (providers_dir / "pubmed_legacy.yaml").write_text(yaml.dump(legacy))
+    (providers_dir / "pubmed_new.yaml").write_text(yaml.dump(new))
 
     cfg_legacy = load_source_config("pubmed_legacy")
     load_source_config.cache_clear()
@@ -437,8 +486,8 @@ def test_load_source_config_top_level_flat_format(tmp_path, monkeypatch) -> None
     """Flat top-level source config should load through SourceYamlConfig."""
     load_source_config.cache_clear()
 
-    sources_dir = tmp_path / "configs" / "sources"
-    sources_dir.mkdir(parents=True)
+    providers_dir = tmp_path / "configs" / "providers"
+    providers_dir.mkdir(parents=True)
 
     flat = {
         "api": {
@@ -453,7 +502,7 @@ def test_load_source_config_top_level_flat_format(tmp_path, monkeypatch) -> None
     }
 
     monkeypatch.chdir(tmp_path)
-    (sources_dir / "pubmed_flat.yaml").write_text(yaml.dump(flat))
+    (providers_dir / "pubmed_flat.yaml").write_text(yaml.dump(flat))
 
     cfg = load_source_config("pubmed_flat")
 
@@ -466,7 +515,7 @@ def test_load_source_config_top_level_flat_format(tmp_path, monkeypatch) -> None
 
 def test_dq_thresholds_are_validated_once(setup_configs):
     """DQ thresholds must satisfy domain invariants even in YAML schema."""
-    pipelines_dir = setup_configs
+    entities_dir = setup_configs
 
     invalid_config = {
         "pipeline_name": "dummy_invalid",
@@ -477,9 +526,12 @@ def test_dq_thresholds_are_validated_once(setup_configs):
         "dq_overrides": {"soft_fail_threshold": 0.3, "hard_fail_threshold": 0.2},
     }
 
-    invalid_yaml = pipelines_dir / "dummy" / "invalid.yaml"
-    invalid_yaml.write_text(yaml.dump(invalid_config))
-    _create_minimal_schema_for_pipeline(invalid_yaml)
+    _write_unified_entity_config(
+        entities_dir,
+        "dummy",
+        "invalid",
+        invalid_config,
+    )
 
     with pytest.raises(ValueError, match="soft_fail_threshold must be strictly less"):
         load_pipeline_config("dummy_invalid")
@@ -487,7 +539,7 @@ def test_dq_thresholds_are_validated_once(setup_configs):
 
 def test_gold_filters_loading(setup_configs):
     """Verify loading of gold_filters from YAML."""
-    pipelines_dir = setup_configs
+    entities_dir = setup_configs
 
     config_data = {
         "pipeline_name": "chembl_filters",
@@ -502,9 +554,13 @@ def test_gold_filters_loading(setup_configs):
         },
     }
 
-    filters_yaml = pipelines_dir / "chembl" / "filters.yaml"
-    filters_yaml.write_text(yaml.dump(config_data))
-    _create_minimal_schema_for_pipeline(filters_yaml)
+    _write_unified_entity_config(
+        entities_dir,
+        "chembl",
+        "filters",
+        config_data,
+        filters={"gold_filters": config_data["gold_filters"]},
+    )
 
     config = load_pipeline_config("chembl_filters")
     # Note: load_pipeline_config returns PipelineYamlConfig (infrastructure layer)
@@ -521,7 +577,7 @@ def test_gold_filters_loading(setup_configs):
 
 def test_convention_based_source_file(setup_configs, tmp_path):
     """Verify source_file is auto-computed from provider when not specified."""
-    pipelines_dir = setup_configs
+    entities_dir = setup_configs
 
     # Create a config without source_file
     config_data = {
@@ -532,11 +588,12 @@ def test_convention_based_source_file(setup_configs, tmp_path):
         "silver_table": "test.entity",
     }
 
-    test_dir = pipelines_dir / "testprovider"
-    test_dir.mkdir()
-    test_yaml = test_dir / "entity.yaml"
-    test_yaml.write_text(yaml.dump(config_data))
-    _create_minimal_schema_for_pipeline(test_yaml)
+    _write_unified_entity_config(
+        entities_dir,
+        "testprovider",
+        "entity",
+        config_data,
+    )
 
     config = load_pipeline_config("testprovider_entity")
 
@@ -550,7 +607,7 @@ def test_convention_based_source_file(setup_configs, tmp_path):
 
 def test_convention_based_sink_paths(setup_configs, tmp_path):
     """Verify sink paths are auto-computed from provider/entity when not specified."""
-    pipelines_dir = setup_configs
+    entities_dir = setup_configs
 
     # Create a config without sink paths
     config_data = {
@@ -561,11 +618,12 @@ def test_convention_based_sink_paths(setup_configs, tmp_path):
         "silver_table": "auto.entity",
     }
 
-    auto_dir = pipelines_dir / "autoprov"
-    auto_dir.mkdir()
-    auto_yaml = auto_dir / "autoent.yaml"
-    auto_yaml.write_text(yaml.dump(config_data))
-    _create_minimal_schema_for_pipeline(auto_yaml)
+    _write_unified_entity_config(
+        entities_dir,
+        "autoprov",
+        "autoent",
+        config_data,
+    )
 
     config = load_pipeline_config("autoprov_autoent")
 
@@ -577,7 +635,7 @@ def test_convention_based_sink_paths(setup_configs, tmp_path):
 
 def test_explicit_paths_override_convention(setup_configs, tmp_path):
     """Verify explicitly specified paths override convention defaults."""
-    pipelines_dir = setup_configs
+    entities_dir = setup_configs
 
     config_data = {
         "pipeline_name": "explicit_paths",
@@ -592,11 +650,12 @@ def test_explicit_paths_override_convention(setup_configs, tmp_path):
         },
     }
 
-    explicit_dir = pipelines_dir / "explicit"
-    explicit_dir.mkdir()
-    explicit_yaml = explicit_dir / "entity.yaml"
-    explicit_yaml.write_text(yaml.dump(config_data))
-    _create_minimal_schema_for_pipeline(explicit_yaml)
+    _write_unified_entity_config(
+        entities_dir,
+        "explicit",
+        "entity",
+        config_data,
+    )
 
     config = load_pipeline_config("explicit_entity")
 
@@ -608,14 +667,10 @@ def test_explicit_paths_override_convention(setup_configs, tmp_path):
 
 def test_filter_config_merging(setup_configs, tmp_path):
     """Verify filter config is loaded and merged from filter_config_file."""
-    pipelines_dir = setup_configs
+    entities_dir = setup_configs
 
-    # Create filter config directory structure
-    filter_dir = tmp_path / "configs" / "filters" / "entities" / "filtertest"
-    filter_dir.mkdir(parents=True)
-
-    # Create filter entity config with complete input_filter
-    filter_config = {
+    # Create unified entity config with complete filters section
+    filters_section = {
         "input_filter": {
             "enabled": True,
             "source_path": "data/input/filter.csv",
@@ -628,7 +683,6 @@ def test_filter_config_merging(setup_configs, tmp_path):
             "required_fields": ["id", "name"],
         },
     }
-    (filter_dir / "entity.yaml").write_text(yaml.dump(filter_config))
 
     # Create pipeline config that references the filter config
     config_data = {
@@ -640,11 +694,13 @@ def test_filter_config_merging(setup_configs, tmp_path):
         # filter_config_file will be auto-computed to ../../filters/entities/filtertest/entity.yaml
     }
 
-    filter_pipeline_dir = pipelines_dir / "filtertest"
-    filter_pipeline_dir.mkdir()
-    filter_yaml = filter_pipeline_dir / "entity.yaml"
-    filter_yaml.write_text(yaml.dump(config_data))
-    _create_minimal_schema_for_pipeline(filter_yaml)
+    _write_unified_entity_config(
+        entities_dir,
+        "filtertest",
+        "entity",
+        config_data,
+        filters=filters_section,
+    )
 
     config = load_pipeline_config("filtertest_entity")
 
@@ -658,14 +714,10 @@ def test_filter_config_merging(setup_configs, tmp_path):
 
 def test_filter_config_explicit_override(setup_configs, tmp_path):
     """Verify explicit pipeline config overrides filter config."""
-    pipelines_dir = setup_configs
+    entities_dir = setup_configs
 
-    # Create filter config directory structure
-    filter_dir = tmp_path / "configs" / "filters" / "entities" / "override"
-    filter_dir.mkdir(parents=True)
-
-    # Create filter entity config
-    filter_config = {
+    # Create unified entity config filters section
+    filters_section = {
         "input_filter": {
             "enabled": True,
             "source_path": "data/input/base.csv",
@@ -678,7 +730,6 @@ def test_filter_config_explicit_override(setup_configs, tmp_path):
             "required_fields": ["id"],
         },
     }
-    (filter_dir / "entity.yaml").write_text(yaml.dump(filter_config))
 
     # Create pipeline config with explicit overrides
     config_data = {
@@ -696,11 +747,13 @@ def test_filter_config_explicit_override(setup_configs, tmp_path):
         },
     }
 
-    override_dir = pipelines_dir / "override"
-    override_dir.mkdir()
-    override_yaml = override_dir / "entity.yaml"
-    override_yaml.write_text(yaml.dump(config_data))
-    _create_minimal_schema_for_pipeline(override_yaml)
+    _write_unified_entity_config(
+        entities_dir,
+        "override",
+        "entity",
+        config_data,
+        filters=filters_section,
+    )
 
     config = load_pipeline_config("override_entity")
 

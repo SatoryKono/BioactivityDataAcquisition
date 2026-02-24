@@ -2,10 +2,11 @@
 
 Loads and merges DQ configurations from:
 1. configs/base/quality.yaml (global defaults, preferred)
-2. configs/quality/_defaults.yaml (legacy fallback)
-3. configs/quality/providers/{provider}.yaml (provider-specific)
-4. configs/quality/entities/{provider}/{entity}.yaml (entity-specific)
-5. Inline overrides from pipeline config
+2. configs/providers/{provider}.yaml (section "quality", preferred)
+3. configs/quality/providers/{provider}.yaml (legacy fallback)
+4. configs/entities/{provider}/{entity}.yaml (section "quality", preferred)
+5. configs/quality/entities/{provider}/{entity}.yaml (legacy fallback)
+6. Inline overrides from pipeline config
 
 Implements RULES.md §3.1.2 DQ Thresholds.
 """
@@ -110,9 +111,8 @@ class DQConfigLoader:
         merged = self._load_defaults_layer()
         if not merged:
             raise FileNotFoundError(
-                "Required DQ defaults file not found in configs/base/quality.yaml "
-                "or configs/quality/_defaults.yaml. "
-                "Create defaults in one of these locations."
+                "Required DQ defaults file not found in configs/base/quality.yaml. "
+                "Create defaults in this location."
             )
 
         for layer in (
@@ -131,14 +131,10 @@ class DQConfigLoader:
         return merged
 
     def _load_defaults_layer(self) -> dict[str, Any]:
-        """Load DQ defaults from consolidated base path or legacy fallback."""
+        """Load DQ defaults from consolidated base path."""
         base_defaults_path = self._base_root / "quality.yaml"
         if base_defaults_path.exists():
             return self._load_yaml(base_defaults_path)
-
-        legacy_defaults_path = self._dq_root / "_defaults.yaml"
-        if legacy_defaults_path.exists():
-            return self._load_yaml(legacy_defaults_path)
 
         return {}
 
@@ -151,7 +147,7 @@ class DQConfigLoader:
         """Load merged DQ config for provider/entity.
 
         Merge order (later wins for scalars, concatenate for lists):
-        1. base/quality.yaml (or legacy _defaults.yaml)
+        1. base/quality.yaml
         2. providers/{provider}.yaml
         3. entities/{provider}/{entity}.yaml
         4. inline_overrides (from pipeline config)

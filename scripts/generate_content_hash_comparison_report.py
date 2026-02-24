@@ -28,11 +28,25 @@ def _legacy_generate_content_hash(record: dict[str, Any], provider: str) -> str:
 def _load_content_hash_config(
     provider: str, entity: str
 ) -> tuple[set[str] | None, set[str]]:
-    schema_path = Path("configs/schemas") / provider / f"{entity}.yaml"
-    if not schema_path.exists():
-        return None, set()
-    data = yaml.safe_load(schema_path.read_text()) or {}
-    cfg = data.get("content_hash", {}) if isinstance(data, dict) else {}
+    unified_entity_path = Path("configs/entities") / provider / f"{entity}.yaml"
+    if unified_entity_path.exists():
+        unified_data = yaml.safe_load(unified_entity_path.read_text()) or {}
+        schema_section = (
+            unified_data.get("schema", {}) if isinstance(unified_data, dict) else {}
+        )
+        cfg = (
+            schema_section.get("content_hash", {})
+            if isinstance(schema_section, dict)
+            else {}
+        )
+    else:
+        # Legacy fallback kept for historical snapshots.
+        schema_path = Path("configs/schemas") / provider / f"{entity}.yaml"
+        if not schema_path.exists():
+            return None, set()
+        data = yaml.safe_load(schema_path.read_text()) or {}
+        cfg = data.get("content_hash", {}) if isinstance(data, dict) else {}
+
     include = set(cfg.get("include", [])) if isinstance(cfg, dict) else set()
     exclude = set(cfg.get("exclude", [])) if isinstance(cfg, dict) else set()
     return (include or None), exclude

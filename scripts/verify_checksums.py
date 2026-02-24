@@ -61,9 +61,12 @@ DEFAULT_MANIFEST = PROJECT_ROOT / "checksums.json"
 
 # Critical artifact patterns to verify
 CRITICAL_PATTERNS: list[tuple[str, str]] = [
-    # Pipeline configurations
-    ("configs/pipelines/**/*.yaml", "pipeline_config"),
-    ("configs/pipelines/**/*.yml", "pipeline_config"),
+    # Unified configuration artifacts
+    ("configs/base/**/*.yaml", "config_base"),
+    ("configs/providers/**/*.yaml", "provider_config"),
+    ("configs/entities/**/*.yaml", "entity_config"),
+    ("configs/composites/**/*.yaml", "composite_config"),
+    ("configs/_schema/**/*.json", "config_schema"),
     # Schema definitions
     ("src/bioetl/domain/schemas/*.py", "domain_schema"),
     ("src/bioetl/infrastructure/schemas/*.py", "infra_schema"),

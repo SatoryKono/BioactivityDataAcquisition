@@ -19,8 +19,8 @@ from pathlib import Path
 
 import yaml
 
-CONFIGS_DIR = Path("configs/pipelines")
-DQ_DIR = Path("configs/quality")
+ENTITY_CONFIGS_DIR = Path("configs/entities")
+COMPOSITES_DIR = Path("configs/composites")
 
 
 @dataclass
@@ -109,19 +109,6 @@ def analyze_standard_config(config: dict, gaps: ConfigGaps) -> None:
         if "soft_fail_threshold" in dq or "hard_fail_threshold" in dq:
             gaps.medium.append("Inline dq_overrides thresholds (deprecated per ADR-027)")
 
-    # Check for dq_config_file reference
-    if "dq_config_file" not in config:
-        if provider and entity:
-            expected_dq = DQ_DIR / "entities" / provider / f"{entity}.yaml"
-            if expected_dq.exists():
-                gaps.low.append(
-                    f"DQ file exists at {expected_dq.relative_to('.')} but not referenced"
-                )
-            else:
-                gaps.low.append(
-                    f"No dq_config_file and no DQ file at entities/{provider}/{entity}.yaml"
-                )
-
     # === ADR-025: gold_filters ===
     gf = config.get("gold_filters", {})
     if not gf:
@@ -203,8 +190,17 @@ def analyze_config(config_path: Path) -> ConfigGaps:
     # Detect composite vs standard config
     if "composite" in config:
         analyze_composite_config(config, gaps)
+    elif isinstance(config.get("pipeline"), dict):
+        pipeline_config = dict(config["pipeline"])
+        pipeline_config.setdefault("provider", config.get("provider"))
+        pipeline_config.setdefault("entity_type", config.get("entity"))
+        analyze_standard_config(pipeline_config, gaps)
+        for section in ("schema", "quality", "filters", "contracts"):
+            if section not in config:
+                gaps.critical.append(f"Missing unified section: {section}")
     else:
         analyze_standard_config(config, gaps)
+        gaps.low.append("Legacy standalone pipeline format detected")
 
     return gaps
 
@@ -242,12 +238,20 @@ def generate_report(all_gaps: list[ConfigGaps]) -> str:
         "",
     ]
 
+    def _rel(path: Path) -> Path:
+        for root in (ENTITY_CONFIGS_DIR, COMPOSITES_DIR):
+            try:
+                return path.relative_to(root)
+            except ValueError:
+                continue
+        return path
+
     # Critical
     critical_gaps = [g for g in all_gaps if g.critical]
     if critical_gaps:
         lines.extend(["## Critical Issues (MUST fix)", ""])
         for g in critical_gaps:
-            rel = g.path.relative_to(CONFIGS_DIR)
+            rel = _rel(g.path)
             config_type = " (composite)" if g.is_composite else ""
             lines.append(f"### `{rel}`{config_type}")
             for issue in g.critical:
@@ -263,7 +267,7 @@ def generate_report(all_gaps: list[ConfigGaps]) -> str:
     if medium_gaps:
         lines.extend(["## Medium Issues (SHOULD fix)", ""])
         for g in medium_gaps:
-            rel = g.path.relative_to(CONFIGS_DIR)
+            rel = _rel(g.path)
             config_type = " (composite)" if g.is_composite else ""
             lines.append(f"### `{rel}`{config_type}")
             for issue in g.medium:
@@ -275,7 +279,7 @@ def generate_report(all_gaps: list[ConfigGaps]) -> str:
     if low_gaps:
         lines.extend(["## Low Issues (MAY fix)", ""])
         for g in low_gaps:
-            rel = g.path.relative_to(CONFIGS_DIR)
+            rel = _rel(g.path)
             config_type = " (composite)" if g.is_composite else ""
             lines.append(f"### `{rel}`{config_type}")
             for issue in g.low:
@@ -328,14 +332,23 @@ def main() -> int:
     args = parser.parse_args()
 
     all_gaps: list[ConfigGaps] = []
-    for cfg in sorted(CONFIGS_DIR.rglob("*.yaml")):
+    config_files = sorted(ENTITY_CONFIGS_DIR.rglob("*.yaml")) + sorted(
+        COMPOSITES_DIR.glob("*.yaml")
+    )
+    for cfg in config_files:
         if cfg.name.startswith("_"):
             continue
         gaps = analyze_config(cfg)
         all_gaps.append(gaps)
 
         if args.verbose:
-            rel = cfg.relative_to(CONFIGS_DIR)
+            rel = cfg
+            for root in (ENTITY_CONFIGS_DIR, COMPOSITES_DIR):
+                try:
+                    rel = cfg.relative_to(root)
+                    break
+                except ValueError:
+                    continue
             status = (
                 "❌"
                 if gaps.critical

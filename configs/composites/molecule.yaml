@@ -385,7 +385,6 @@ composite:
 # -----------------------------------------------------------------------------
 # Gold filters and filter rules loaded from hierarchical config files.
 # No inline gold_filters needed — filter entity config is authoritative.
-filter_config_file: ../filters/entities/composite/molecule.yaml
 
 # -----------------------------------------------------------------------------
 # Maintenance Configuration

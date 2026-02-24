@@ -286,3 +286,4 @@ pipeline-name: chembl_activity
 | 2026-02-17 | Claude Code | Fixed: DQ path `configs/dq/` → `configs/quality/` (consistent with ADR-027) |
 | 2026-02-17 | Claude Code | Fixed: Removed `-schema.json` reference (validation via Pydantic schemas) |
 | 2026-02-17 | Claude Code | Fixed: Composite directory listing (activity, assay, molecule, publication, target) |
+| 2026-02-24 | Claude Code | Superseded (partially): Entity configs consolidated into unified format (see ADR-039). Config path `configs/pipelines/{p}/{e}.yaml` replaced by `configs/entities/{p}/{e}.yaml`. Legacy directories removed (RF-CFG-035). |

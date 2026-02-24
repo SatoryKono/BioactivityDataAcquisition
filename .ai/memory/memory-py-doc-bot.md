@@ -50,7 +50,7 @@ docs/
 ## 3. ADR Management
 
 ### Current State
-- 33 ADRs: ADR-001 through ADR-033
+- 39 ADRs: ADR-001 through ADR-039 (all present, verified 2026-02-24)
 - All in status: Accepted
 - Location: `docs/02-architecture/decisions/`
 
@@ -91,7 +91,10 @@ Accepted | Proposed | Deprecated | Superseded by ADR-0YY
 | ADR-027 | DQ Rules Externalization |
 | ADR-028 | Filter Rules Externalization |
 | ADR-029 | Convention-based Config |
-| ADR-033 | (Latest) |
+| ADR-033 | Publication Validation Strategy |
+| ADR-037 | config_merge() Unification |
+| ADR-038 | Enum Externalization to YAML |
+| ADR-039 | Unified Entity Config Format (Latest) |
 
 ---
 
