@@ -73,14 +73,11 @@ class NotSupportedMultiFilterMixin:
         # Mark unused parameters
         del entity_type, filters, limit
 
-        # AsyncIterator requires yield before raise for proper generator creation
-        if False:  # pragma: no cover
-            yield {}  # Required for AsyncIterator type signature
-
         raise NotImplementedError(
             f"{self.provider_name} does not support multi-field filtering. "
             "Use fetch_filtered() with a single filter_field instead."
         )
+        yield {}  # pragma: no cover - keeps AsyncIterator contract
 
 
 class DelegatingFallbackMixin:

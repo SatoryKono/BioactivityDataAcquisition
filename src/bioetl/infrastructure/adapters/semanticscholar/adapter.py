@@ -361,12 +361,11 @@ class SemanticScholarAdapter(BaseHttpAdapter):
             NotImplementedError: Always, as S2 doesn't support multi-field filtering.
 
         """
-        if False:  # pragma: no cover
-            yield {}
         raise NotImplementedError(
             "Semantic Scholar adapter supports only DOI filtering. "
             "Use fetch_filtered() or fetch_filtered_with_fallback()."
         )
+        yield {}  # pragma: no cover - keeps AsyncIterator contract
 
     # =========================================================================
     # Internal methods
