@@ -173,6 +173,23 @@ class NoOpMetrics:
     def set_gauge(self, name: str, value: float, labels: dict[str, str]) -> None:
         """Set a gauge metric to a specific value (no-op)."""
 
+    def inc_quarantine_records(
+        self,
+        pipeline: str,
+        reason: str,
+        count: int = 1,
+    ) -> None:
+        """Increment quarantine records counter (no-op)."""
+
+    def inc_dq_validation_failures(
+        self,
+        pipeline: str,
+        stage: str,
+        severity: str,
+        count: int = 1,
+    ) -> None:
+        """Increment DQ validation failures counter (no-op)."""
+
     def close(self) -> None:
         """No-op close. Idempotent."""
 

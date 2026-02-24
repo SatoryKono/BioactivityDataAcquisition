@@ -132,6 +132,38 @@ class MetricsPort(Protocol):
         """
         ...
 
+    def inc_quarantine_records(
+        self,
+        pipeline: str,
+        reason: str,
+        count: int = 1,
+    ) -> None:
+        """Increment quarantine records counter.
+
+        Args:
+            pipeline: Pipeline name.
+            reason: Bounded quarantine reason label.
+            count: Increment value.
+        """
+        ...
+
+    def inc_dq_validation_failures(
+        self,
+        pipeline: str,
+        stage: str,
+        severity: str,
+        count: int = 1,
+    ) -> None:
+        """Increment DQ validation failures counter.
+
+        Args:
+            pipeline: Pipeline name.
+            stage: Bounded stage label.
+            severity: Bounded severity label.
+            count: Increment value.
+        """
+        ...
+
     def close(self) -> None:
         """Cleanup metrics resources.
 
