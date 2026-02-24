@@ -218,13 +218,13 @@ Seed Pipeline → Extract Keys → [CrossRef, OpenAlex, PubMed, SemanticScholar]
 
 | Диаграмма                 | Файл                                                                                                                 | Описание                                 |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| Application Layer Classes | [06-application-layer-class-diagram.mermaid](diagrams/06-application-layer-class-diagram.mermaid)            | Классы слоя Application                  |
-| Pipeline Execution        | [06-pipeline-execution.mermaid](diagrams/06-pipeline-execution.mermaid)                                      | Поток выполнения пайплайна               |
-| Pipeline Hierarchy        | [17-pipeline-hierarchy.mermaid](diagrams/17-pipeline-hierarchy.mermaid)                                      | Иерархия Pipeline/Transformer            |
-| Layers Interaction        | [05-layers-interaction.mermaid](diagrams/05-layers-interaction.mermaid)                                      | Взаимодействие слоёв (включая Composite) |
-| Composite Pipeline        | [29-composite-pipeline-workflow.mermaid](diagrams/29-composite-pipeline-workflow.mermaid)                     | Workflow Composite Pipeline              |
-| Pipeline Core             | [40-application-core-collaboration.mermaid](diagrams/40-application-core-collaboration.mermaid)              | Ядро пайплайнов                          |
-| BaseTransformer           | [45-template-method-transformer.mermaid](diagrams/45-template-method-transformer.mermaid)                    | Template Method паттерн                  |
+| Application Layer Classes | [06-application-layer-class-diagram.mmd](mmd-diagrams/foundation/06-application-layer-class-diagram.mmd)            | Классы слоя Application                  |
+| Pipeline Execution        | [06-pipeline-execution.mmd](mmd-diagrams/foundation/06-pipeline-execution.mmd)                                      | Поток выполнения пайплайна               |
+| Pipeline Hierarchy        | [17-pipeline-hierarchy.mmd](mmd-diagrams/foundation/17-pipeline-hierarchy.mmd)                                      | Иерархия Pipeline/Transformer            |
+| Layers Interaction        | [05-layers-interaction.mmd](mmd-diagrams/foundation/05-layers-interaction.mmd)                                      | Взаимодействие слоёв (включая Composite) |
+| Composite Pipeline        | [29-composite-pipeline-workflow.mmd](mmd-diagrams/foundation/29-composite-pipeline-workflow.mmd)                     | Workflow Composite Pipeline              |
+| Pipeline Core             | [40-application-core-collaboration.mmd](mmd-diagrams/foundation/40-application-core-collaboration.mmd)              | Ядро пайплайнов                          |
+| BaseTransformer           | [45-template-method-transformer.mmd](mmd-diagrams/foundation/45-template-method-transformer.mmd)                    | Template Method паттерн                  |
 
 ### Связанные ADR
 
