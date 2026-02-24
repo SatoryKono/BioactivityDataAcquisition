@@ -19,11 +19,11 @@ make lint && make test && git commit
 
 Before contributing, read these documents:
 
-| Document                         | Purpose                           |
-| -------------------------------- | --------------------------------- |
-| [docs/00-project/RULES.md](../docs/00-project/RULES.md) | Project constitution (MUST read)  |
-| [AGENTS.md](../AGENTS.md)                                | Development workflow and patterns |
-| [docs/00-project/00-map.md](../docs/00-project/00-map.md) | Documentation navigator         |
+| Document                                                           | Purpose                           |
+| ------------------------------------------------------------------ | --------------------------------- |
+| [docs/00-project/RULES.md](../docs/00-project/RULES.md)            | Project constitution (MUST read)  |
+| [AGENTS.md](../AGENTS.md)                                          | Development workflow and patterns |
+| [docs/00-project/00-map.md](../docs/00-project/00-map.md)          | Documentation navigator           |
 | [GitHub Policy](../docs/00-project/governance/05-github-policy.md) | CI/CD, branch protection, reviews |
 
 ## Workflow
@@ -89,6 +89,14 @@ For PRs to `main`, configure GitHub branch protection/rulesets to require:
 - `detect-secrets` (from `.github/workflows/security.yml`)
 
 This ensures no PR can be merged with failing tests, lint errors, or secret leaks.
+
+## Release Documentation Sync (MUST)
+
+When preparing a release, contributors **MUST** keep release metadata synchronized:
+
+- Update `docs/00-project/index.md` section `Current Version` to match `pyproject.toml` version and release date from `CHANGELOG.md`.
+- Run `uv run python scripts/check_docs_version_sync.py` and ensure it passes.
+- Include documentation sync changes in the same release PR.
 
 ## Pull Request Checklist
 
