@@ -29,6 +29,9 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v3
 
+      - name: Validate version consistency
+        run: python scripts/check_version_consistency.py
+
       - name: Install docs dependencies
         run: uv sync --frozen --extra docs
 
