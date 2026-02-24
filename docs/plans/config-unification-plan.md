@@ -14,6 +14,10 @@
 - RF-CFG-043 требует корректировки номера ADR: **ADR-033 уже занят**, использовать следующий свободный номер.
 - RF-CFG-010..015 реализованы (base-консолидация + fallback).
 - RF-CFG-020..024 реализованы в backward-compat режиме (новые `configs/providers/*.yaml` + fallback на legacy paths).
+- RF-CFG-030 выполнен для **всех standard pipelines (21/21)**: добавлены unified entity files в `configs/entities/{provider}/{entity}.yaml` для `chembl`, `crossref`, `openalex`, `pubchem`, `pubmed`, `semanticscholar`, `uniprot`.
+- RF-CFG-032 выполнен в backward-compat режиме: `load_pipeline_config()` и секционные loaders читают unified entity sections (`pipeline/schema/quality/filters/contracts`) с fallback на legacy paths.
+- RF-CFG-033 пока **не завершен**: `PipelineContractPolicyLoader` сохранен и переведен на режим unified-first + legacy fallback.
+- Технический эффект Phase 3: `DQConfigLoader` вырос до 322 LOC; добавлены явные архитектурные exemptions в `tests/architecture/test_code_metrics.py` как переходная мера до декомпозиции (RF-CFG-031/RF-CFG-037).
 
 ---
 
@@ -622,11 +626,11 @@ filters:
 
 | ID | Задача | Файлы | Риск |
 |----|--------|-------|------|
-| RF-CFG-030 | Создать `configs/entities/{p}/{e}.yaml` = merge 5 файлов в один | 5→1 (×26) | HIGH |
+| RF-CFG-030 | Создать `configs/entities/{p}/{e}.yaml` = merge 5 файлов в один — **DONE для standard pipelines (21/21), composite pending** | 5→1 (×26) | HIGH |
 | RF-CFG-031 | Создать `UnifiedEntityConfigLoader` — один loader для entity | 1 new | HIGH |
-| RF-CFG-032 | Рефакторить `load_pipeline_config()` для чтения unified entity | 1 | HIGH |
-| RF-CFG-033 | Удалить `PipelineContractPolicyLoader` (contracts в entity) | 1 | MEDIUM |
-| RF-CFG-034 | Удалить `FieldGroupLoader` для стандартных pipelines (schema в entity) | 1 | MEDIUM |
+| RF-CFG-032 | Рефакторить `load_pipeline_config()` для чтения unified entity — **DONE (unified-first + legacy fallback)** | 1 | HIGH |
+| RF-CFG-033 | Удалить `PipelineContractPolicyLoader` (contracts в entity) — **IN PROGRESS** (loader оставлен для backward-compat) | 1 | MEDIUM |
+| RF-CFG-034 | Удалить `FieldGroupLoader` для стандартных pipelines (schema в entity) — **PARTIAL** (standard path читает `schema` section) | 1 | MEDIUM |
 | RF-CFG-035 | Удалить старые dirs: `pipelines/{p}/`, `schemas/{p}/`, `quality/entities/`, `filters/entities/`, `contracts/` | ~130 | MEDIUM |
 | RF-CFG-036 | Перенести `pipelines/composite/*.yaml` → `composites/*.yaml` | 5 | LOW |
 | RF-CFG-037 | Унифицировать 3 deep_merge в одну `config_merge()` утилиту | 3→1 | MEDIUM |
