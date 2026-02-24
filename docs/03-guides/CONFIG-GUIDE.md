@@ -107,7 +107,7 @@ Deviations from defaults should be documented in entity config rationale.
 
 ### Cross-field validations
 
-`dq_overrides.cross-field_validations` supports conditions:
+`dq_overrides.cross_field_validations` supports conditions:
 
 - `all_present`
 - `any_present`
@@ -262,7 +262,7 @@ Migration table (Gold write mode):
 Related ADRs:
 
 - [ADR-014: Deterministic Writes](../02-architecture/decisions/ADR-014-deterministic-writes.md)
-- [ADR-018: Gold Strict Validation](../02-architecture/decisions/ADR-018-gold-strict_validation.md)
+- [ADR-018: Gold Strict Validation](../02-architecture/decisions/ADR-018-gold-strict-validation.md)
 - [ADR-029: Output Metadata Unification](../02-architecture/decisions/ADR-029-output-metadata-unification.md)
 
 ## Convention Defaults

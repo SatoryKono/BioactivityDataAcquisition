@@ -295,11 +295,7 @@ configs/
 
 | Level | Path | Purpose |
 |-------|------|---------|
-<<<<<<< ours
 | Global | `filters/_defaults.yaml` | Default batch_size (100) |
-=======
-| Global | `filters/_defaults.yaml` | Default batch_size (100) |
->>>>>>> theirs
 | Provider | `filters/providers/{provider}.yaml` | Provider-specific batch sizes |
 | Entity | `filters/entities/{provider}/{entity}.yaml` | Entity-specific filter rules |
 
