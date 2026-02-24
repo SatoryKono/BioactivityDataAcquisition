@@ -1,5 +1,10 @@
 # BioETL Dashboard — Визуальный гайд
 
+> **Path verification (required):** before applying this guide/prompt, locate the runtime observability modules with `rg -n "PrometheusMetrics|start_http_server|metrics_server_integration" src/bioetl`.
+> Use these runtime paths:
+> Metric definitions/registries — `src/bioetl/infrastructure/observability/metrics.py`, `src/bioetl/infrastructure/observability/prometheus_metrics.py`.
+> Metrics server wiring/integration — `src/bioetl/infrastructure/observability/metrics_server_adapter.py`, `src/bioetl/interfaces/cli/commands/metrics_server_integration.py`.
+
 ## 🎯 Архитектура на одной странице
 
 ```
@@ -50,21 +55,21 @@
        ╚══════════╝  ╚═══════════╝  ╚════════════╝ ╚═════════════╝
 ```
 
----
+______________________________________________________________________
 
 ## 📊 Типы панелей в Grafana
 
-| Тип | Иконка | Пример | Когда использовать |
-|-----|--------|--------|-------------------|
-| **Stat** | 📊 | `Bronze Records: 4,523` | Текущее значение, KPI |
-| **Gauge** | 🎯 | Полукруг с % | Прогресс, процент, ratio |
-| **Graph/Timeseries** | 📈 | Линейный график | Тренды, изменения во времени |
-| **Table** | 📋 | Таблица с данными | Список метрик, детали |
-| **Heatmap** | 🔥 | Тепловая карта | Распределение, плотность |
-| **Piechart** | 🥧 | Круговая диаграмма | Доля компонентов |
-| **Alert list** | 🔔 | Список alert'ов | Активные алерты |
+| Тип                  | Иконка | Пример                  | Когда использовать           |
+| -------------------- | ------ | ----------------------- | ---------------------------- |
+| **Stat**             | 📊     | `Bronze Records: 4,523` | Текущее значение, KPI        |
+| **Gauge**            | 🎯     | Полукруг с %            | Прогресс, процент, ratio     |
+| **Graph/Timeseries** | 📈     | Линейный график         | Тренды, изменения во времени |
+| **Table**            | 📋     | Таблица с данными       | Список метрик, детали        |
+| **Heatmap**          | 🔥     | Тепловая карта          | Распределение, плотность     |
+| **Piechart**         | 🥧     | Круговая диаграмма      | Доля компонентов             |
+| **Alert list**       | 🔔     | Список alert'ов         | Активные алерты              |
 
----
+______________________________________________________________________
 
 ## 🔍 Как читать каждый дашборд
 
@@ -107,7 +112,7 @@ Records by Stage (Live)
 - Если золото не растёт → problem в Stage 3 ⚠️
 ```
 
----
+______________________________________________________________________
 
 ### 2️⃣ BioETL Overview Dashboard
 
@@ -132,7 +137,7 @@ Records by Stage (Live)
 └───────────────────────────────────────────────────┘
 ```
 
----
+______________________________________________________________________
 
 ### 3️⃣ BioETL Data Quality Dashboard
 
@@ -156,7 +161,7 @@ Quality Scores:
 └─────────────────────────────────┘
 ```
 
----
+______________________________________________________________________
 
 ### 4️⃣ BioETL Provider Health Dashboard
 
@@ -186,7 +191,7 @@ Provider Status:
 └───────────────────────────────────────┘
 ```
 
----
+______________________________________________________________________
 
 ## 🎛️ Фильтры и переменные
 
@@ -206,13 +211,14 @@ Run Type: [incremental ▼]  ← выбрать тип запуска
 5. Выбрать "All" чтобы увидеть все
 ```
 
----
+______________________________________________________________________
 
 ## ⚠️ Когда что-то не работает
 
 ### Признак: Дашборд пуст / "No data"
 
 **Диагностика:**
+
 ```
 1. Видны ли фильтры (Pipeline, Run Type)?
    ✅ Да   → перейти к шагу 2
@@ -227,10 +233,10 @@ Run Type: [incremental ▼]  ← выбрать тип запуска
 3. Работает ли metrics_server?
    curl http://localhost:8000/metrics
    ✅ Возвращает метрики → всё OK, подождать 15 сек
-   ❌ Connection refused  → запустить metrics_server.py
+   ❌ Connection refused  → запустить src/bioetl/infrastructure/observability/prometheus_metrics.py
 
 Решение:
-python ./metrics_server.py &
+python ./src/bioetl/infrastructure/observability/prometheus_metrics.py &
 # Дождаться 15 сек scrape interval
 # Обновить дашборд (Ctrl+R)
 ```
@@ -249,8 +255,8 @@ python ./metrics_server.py &
 1. Проверить metrics_server
    curl http://localhost:8000/metrics
    ❌ Если ошибка:
-   pkill -f metrics_server.py
-   python ./metrics_server.py &
+   pkill -f src/bioetl/infrastructure/observability/prometheus_metrics.py
+   python ./src/bioetl/infrastructure/observability/prometheus_metrics.py &
 
 2. Если URL неправильный (не host.docker.internal):
    docker logs bioetl-prometheus | grep -i error
@@ -258,33 +264,33 @@ python ./metrics_server.py &
    # Перезагрузить: docker restart bioetl-prometheus
 ```
 
----
+______________________________________________________________________
 
 ## 📈 Цели мониторинга
 
-| Метрика | Норма | Предупреждение | Критично |
-|---------|-------|----------------|----------|
-| Error Rate | <1% | 1-5% ⚠️ | >5% ❌ |
-| Quality Ratio | >90% | 80-90% ⚠️ | <80% ❌ |
-| Response Time (P95) | <500ms | 500-1000ms ⚠️ | >1000ms ❌ |
-| Records/min | >100 | 50-100 ⚠️ | <50 ❌ |
-| Provider Uptime | >99% | 95-99% ⚠️ | <95% ❌ |
+| Метрика             | Норма   | Предупреждение | Критично   |
+| ------------------- | ------- | -------------- | ---------- |
+| Error Rate          | \<1%    | 1-5% ⚠️        | >5% ❌     |
+| Quality Ratio       | >90%    | 80-90% ⚠️      | \<80% ❌   |
+| Response Time (P95) | \<500ms | 500-1000ms ⚠️  | >1000ms ❌ |
+| Records/min         | >100    | 50-100 ⚠️      | \<50 ❌    |
+| Provider Uptime     | >99%    | 95-99% ⚠️      | \<95% ❌   |
 
----
+______________________________________________________________________
 
 ## 🔧 Быстрые действия
 
-| Действие | Как сделать | Результат |
-|----------|------------|-----------|
-| **Обновить дашборд** | F5 или ⟲ кнопка | Свежие данные |
-| **Изменить время** | "Last 1 hour" ← клик | Другой временной диапазон |
-| **Зум на график** | Drag on graph | Увеличить участок |
-| **Export panel** | ⋮ → Export | Сохранить как PNG/CSV |
-| **Edit panel** | ⋮ → Edit | Изменить query |
-| **Save dashboard** | Ctrl+S или кнопка | Сохранить изменения |
-| **Поделиться** | ⋮ → Share | Link или embed |
+| Действие             | Как сделать          | Результат                 |
+| -------------------- | -------------------- | ------------------------- |
+| **Обновить дашборд** | F5 или ⟲ кнопка      | Свежие данные             |
+| **Изменить время**   | "Last 1 hour" ← клик | Другой временной диапазон |
+| **Зум на график**    | Drag on graph        | Увеличить участок         |
+| **Export panel**     | ⋮ → Export           | Сохранить как PNG/CSV     |
+| **Edit panel**       | ⋮ → Edit             | Изменить query            |
+| **Save dashboard**   | Ctrl+S или кнопка    | Сохранить изменения       |
+| **Поделиться**       | ⋮ → Share            | Link или embed            |
 
----
+______________________________________________________________________
 
 ## 🎓 Обучающие примеры
 
@@ -340,8 +346,8 @@ python ./metrics_server.py &
 - Или добавить параллельную обработку
 ```
 
----
+______________________________________________________________________
 
-**Дата:** 22 февраля 2026  
-**Версия:** 1.0  
+**Дата:** 22 февраля 2026
+**Версия:** 1.0
 **Для:** Визуальное понимание BioETL Dashboard

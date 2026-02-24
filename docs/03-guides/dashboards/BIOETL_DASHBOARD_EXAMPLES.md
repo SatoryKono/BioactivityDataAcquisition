@@ -1,40 +1,41 @@
 # BioETL Dashboard — Примеры кастомизации
 
-## Содержание
-1. [Добавить новую метрику](#добавить-новую-метрику)
-2. [Создать пользовательский дашборд](#создать-пользовательский-дашборд)
-3. [Настроить Alert](#настроить-alert)
-4. [Использовать переменные фильтров](#использовать-переменные-фильтров)
-5. [Экспортировать/Импортировать дашборды](#экспортироватьимпортировать-дашборды)
+> **Path verification (required):** before applying this guide/prompt, locate the runtime observability modules with `rg -n "PrometheusMetrics|start_http_server|metrics_server_integration" src/bioetl`.
+> Use these runtime paths:
+> Metric definitions/registries — `src/bioetl/infrastructure/observability/metrics.py`, `src/bioetl/infrastructure/observability/prometheus_metrics.py`.
+> Metrics server wiring/integration — `src/bioetl/infrastructure/observability/metrics_server_adapter.py`, `src/bioetl/interfaces/cli/commands/metrics_server_integration.py`.
 
----
+## Содержание
+
+1. [Добавить новую метрику](#%D0%B4%D0%BE%D0%B1%D0%B0%D0%B2%D0%B8%D1%82%D1%8C-%D0%BD%D0%BE%D0%B2%D1%83%D1%8E-%D0%BC%D0%B5%D1%82%D1%80%D0%B8%D0%BA%D1%83)
+1. [Создать пользовательский дашборд](#%D1%81%D0%BE%D0%B7%D0%B4%D0%B0%D1%82%D1%8C-%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D0%BA%D0%B8%D0%B9-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4)
+1. [Настроить Alert](#%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B8%D1%82%D1%8C-alert)
+1. [Использовать переменные фильтров](#%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D1%82%D1%8C-%D0%BF%D0%B5%D1%80%D0%B5%D0%BC%D0%B5%D0%BD%D0%BD%D1%8B%D0%B5-%D1%84%D0%B8%D0%BB%D1%8C%D1%82%D1%80%D0%BE%D0%B2)
+1. [Экспортировать/Импортировать дашборды](#%D1%8D%D0%BA%D1%81%D0%BF%D0%BE%D1%80%D1%82%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D1%82%D1%8C%D0%B8%D0%BC%D0%BF%D0%BE%D1%80%D1%82%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D1%82%D1%8C-%D0%B4%D0%B0%D1%88%D0%B1%D0%BE%D1%80%D0%B4%D1%8B)
+
+______________________________________________________________________
 
 ## Добавить новую метрику
 
-### Шаг 1: Определить метрику в metrics_server.py
+### Шаг 1: Определить метрику в src/bioetl/infrastructure/observability/prometheus_metrics.py
 
 ```python
 # Добавить в начало файла
 from prometheus_client import Counter, Gauge, Histogram
 
 # Новая метрика: количество активных run
-ACTIVE_RUNS = Gauge(
-    'bioetl_active_runs',
-    'Number of active pipeline runs'
-)
+ACTIVE_RUNS = Gauge("bioetl_active_runs", "Number of active pipeline runs")
 
 # Метрика: время ответа API
 API_RESPONSE_TIME = Histogram(
-    'bioetl_api_response_seconds',
-    'API response time in seconds',
-    ['endpoint', 'method']
+    "bioetl_api_response_seconds",
+    "API response time in seconds",
+    ["endpoint", "method"],
 )
 
 # Метрика: ошибки по типам
 ERRORS_BY_TYPE = Counter(
-    'bioetl_errors_total',
-    'Total errors by type',
-    ['error_type', 'pipeline']
+    "bioetl_errors_total", "Total errors by type", ["error_type", "pipeline"]
 )
 ```
 
@@ -44,32 +45,30 @@ ERRORS_BY_TYPE = Counter(
 def _generate_synthetic_metrics(self):
     """Generate synthetic BioETL metrics."""
     # ... существующий код ...
-    
+
     # Добавить новые метрики
     ACTIVE_RUNS.set(random.randint(3, 8))
-    
+
     # API response time
-    for endpoint in ['/fetch', '/process', '/validate']:
-        for method in ['GET', 'POST']:
-            API_RESPONSE_TIME.labels(
-                endpoint=endpoint,
-                method=method
-            ).observe(random.uniform(0.1, 2.0))
-    
+    for endpoint in ["/fetch", "/process", "/validate"]:
+        for method in ["GET", "POST"]:
+            API_RESPONSE_TIME.labels(endpoint=endpoint, method=method).observe(
+                random.uniform(0.1, 2.0)
+            )
+
     # Errors by type
-    for error_type in ['validation_error', 'network_error', 'timeout']:
-        for pipeline in ['uniprot', 'pubmed', 'pubchem']:
-            ERRORS_BY_TYPE.labels(
-                error_type=error_type,
-                pipeline=pipeline
-            ).inc(random.randint(0, 5))
+    for error_type in ["validation_error", "network_error", "timeout"]:
+        for pipeline in ["uniprot", "pubmed", "pubchem"]:
+            ERRORS_BY_TYPE.labels(error_type=error_type, pipeline=pipeline).inc(
+                random.randint(0, 5)
+            )
 ```
 
-### Шаг 3: Перезапустить metrics_server.py
+### Шаг 3: Перезапустить src/bioetl/infrastructure/observability/prometheus_metrics.py
 
 ```bash
-pkill -f metrics_server.py
-python ./metrics_server.py &
+pkill -f src/bioetl/infrastructure/observability/prometheus_metrics.py
+python ./src/bioetl/infrastructure/observability/prometheus_metrics.py &
 ```
 
 ### Шаг 4: Дождаться scrape и использовать в Grafana
@@ -93,7 +92,7 @@ curl http://localhost:8000/metrics | grep bioetl_active_runs
 5. Save dashboard
 ```
 
----
+______________________________________________________________________
 
 ## Создать пользовательский дашборд
 
@@ -107,17 +106,17 @@ curl http://localhost:8000/metrics | grep bioetl_active_runs
    Name: "Records per Pipeline"
    Query: sum(rate(bioetl_records_processed_total[5m])) by (pipeline)
    Legend: {{pipeline}}
-   
+
 3. Add panel → Stat
    Name: "Error Rate"
    Query: avg(bioetl_error_rate)
    Thresholds: Green <5%, Orange <10%, Red >10%
-   
+
 4. Add panel → Gauge
    Name: "Quality Score"
    Query: sum(bioetl_records_processed_total{stage="gold"}) / sum(bioetl_records_processed_total{stage="bronze"})
    Min: 0, Max: 1
-   
+
 5. Dashboard settings → Save as "Pipeline Performance"
 ```
 
@@ -270,7 +269,7 @@ cp custom-dashboard.json ./grafana/dashboards/
 # Перезапустить: docker restart bioetl-grafana
 ```
 
----
+______________________________________________________________________
 
 ## Настроить Alert
 
@@ -346,7 +345,7 @@ groups:
           description: "P95 latency is {{ $value }}s"
 ```
 
----
+______________________________________________________________________
 
 ## Использовать переменные фильтров
 
@@ -415,7 +414,7 @@ Legend:
 {{stage}}
 ```
 
----
+______________________________________________________________________
 
 ## Экспортировать/Импортировать дашборды
 
@@ -475,7 +474,7 @@ docker restart bioetl-grafana
 # Дашборды автоматически загрузятся!
 ```
 
----
+______________________________________________________________________
 
 ## Продвинутые примеры
 
@@ -575,7 +574,7 @@ groups:
 4. Test → Save
 ```
 
----
+______________________________________________________________________
 
 ## Шпаргалка по PromQL
 
@@ -607,7 +606,7 @@ metric1 / metric2                                  # Деление
 metric1 > 100                                      # Сравнение
 ```
 
----
+______________________________________________________________________
 
-**Дата:** 22 февраля 2026  
+**Дата:** 22 февраля 2026
 **Версия:** 1.0

@@ -1,5 +1,10 @@
 # BioETL Dashboard — Чек-лист быстрого старта
 
+> **Path verification (required):** before applying this guide/prompt, locate the runtime observability modules with `rg -n "PrometheusMetrics|start_http_server|metrics_server_integration" src/bioetl`.
+> Use these runtime paths:
+> Metric definitions/registries — `src/bioetl/infrastructure/observability/metrics.py`, `src/bioetl/infrastructure/observability/prometheus_metrics.py`.
+> Metrics server wiring/integration — `src/bioetl/infrastructure/observability/metrics_server_adapter.py`, `src/bioetl/interfaces/cli/commands/metrics_server_integration.py`.
+
 ## ✅ Pre-flight Checklist
 
 - [ ] Python 3.11+ установлен: `python --version`
@@ -10,12 +15,14 @@
 ## 🚀 Запуск (5 минут)
 
 ### 1️⃣ Клонировать/Обновить проект
+
 ```bash
 cd /path/to/BioactivityDataAcquisition2
 git pull origin main
 ```
 
 ### 2️⃣ Установить зависимости BioETL
+
 ```bash
 pip install -e .
 # Или через uv (быстрее)
@@ -23,6 +30,7 @@ uv sync
 ```
 
 ### 3️⃣ Запустить контейнеры мониторинга
+
 ```bash
 docker compose -f docker-compose.monitoring.yml up -d
 # Проверить статус
@@ -30,15 +38,17 @@ docker compose -f docker-compose.monitoring.yml ps
 ```
 
 ### 4️⃣ Запустить metrics сервер
+
 ```bash
 # Способ A: В фоне (разработка)
-python ./metrics_server.py &
+python ./src/bioetl/infrastructure/observability/prometheus_metrics.py &
 
 # Способ B: В отдельном терминале (удобно для debug)
-python ./metrics_server.py
+python ./src/bioetl/infrastructure/observability/prometheus_metrics.py
 ```
 
 ### 5️⃣ Проверить, что всё работает
+
 ```bash
 # Metrics endpoint
 curl http://localhost:8000/metrics | head -10
@@ -53,6 +63,7 @@ curl http://localhost:9090/api/v1/query?query=bioetl_records_processed_total
 ```
 
 ### 6️⃣ Открыть дашборд
+
 ```
 URL: http://localhost:3000/d/bioetl-simple
 Логин: admin
@@ -61,42 +72,45 @@ URL: http://localhost:3000/d/bioetl-simple
 
 ## 📊 Что смотреть в дашбордах
 
-| Дашборд | URL | Что показывает |
-|---------|-----|-----------------|
-| Simple | /d/bioetl-simple | Основные метрики (Records, Quality) |
-| Overview | /d/bioetl-overview | Общая статистика |
-| Data Quality | /d/bioetl-dq-v2 | Метрики качества данных |
-| Provider Health | /d/bioetl-provider-health | Статус каждого provider |
+| Дашборд         | URL                       | Что показывает                      |
+| --------------- | ------------------------- | ----------------------------------- |
+| Simple          | /d/bioetl-simple          | Основные метрики (Records, Quality) |
+| Overview        | /d/bioetl-overview        | Общая статистика                    |
+| Data Quality    | /d/bioetl-dq-v2           | Метрики качества данных             |
+| Provider Health | /d/bioetl-provider-health | Статус каждого provider             |
 
 ## 🔍 Отладка (если что-то не работает)
 
 ### Prometheus не собирает метрики (targets = DOWN)
+
 ```bash
 # Проверить metrics сервер
 curl http://localhost:8000/metrics
 
 # Если ошибка → перезапустить
-pkill -f metrics_server.py
-python ./metrics_server.py &
+pkill -f src/bioetl/infrastructure/observability/prometheus_metrics.py
+python ./src/bioetl/infrastructure/observability/prometheus_metrics.py &
 
 # Дождаться 15 сек, затем проверить Prometheus targets:
 # http://localhost:9090/targets
 ```
 
 ### Дашборд пуст (No data)
+
 ```bash
 # 1. Проверить Prometheus query
 # http://localhost:9090 → Explore
 # Query: bioetl_records_processed_total
 
 # 2. Если нет результатов → метрики не генерируются
-# Проверить metrics_server.py работает:
+# Проверить src/bioetl/infrastructure/observability/prometheus_metrics.py работает:
 ps aux | grep metrics_server
 
 # 3. Обновить дашборд (F5) после 15 сек scrape interval
 ```
 
 ### Grafana не подключается к Prometheus
+
 ```bash
 # Проверить статус Prometheus
 curl http://localhost:9090/-/healthy
@@ -113,12 +127,14 @@ curl http://localhost:9090/-/healthy
 ### BioETL Simple Dashboard
 
 **Верхняя строка (Stat панели):**
+
 - Bronze Records: 4000+ (исходные данные)
 - Silver Records: 3800+ (очищенные данные)
 - Gold Records: 3500+ (готовые данные)
 - Quality Ratio: 87% (процент данных, дошедших до gold)
 
 **Нижний график (Timeseries):**
+
 - Тренд обработки за последний час
 - Три линии: bronze (зелёная), silver (синяя), gold (красная)
 - Если линия плоская → данные не обновляются (проверить metrics)
@@ -130,7 +146,7 @@ curl http://localhost:9090/-/healthy
 docker compose -f docker-compose.monitoring.yml down
 
 # Остановить metrics сервер
-pkill -f metrics_server.py
+pkill -f src/bioetl/infrastructure/observability/prometheus_metrics.py
 
 # Удалить все данные (осторожно!)
 docker compose -f docker-compose.monitoring.yml down -v
@@ -138,38 +154,43 @@ docker compose -f docker-compose.monitoring.yml down -v
 
 ## 📝 Полезные файлы
 
-| Файл | Назначение |
-|------|-----------|
-| `docker-compose.monitoring.yml` | Конфигурация контейнеров |
-| `grafana/prometheus.yml` | Конфигурация Prometheus |
-| `grafana/provisioning/` | Автозагрузка дашбордов |
-| `metrics_server.py` | Metrics endpoint |
-| `BIOETL_DASHBOARD_SETUP.md` | Полная инструкция |
+| Файл                                                            | Назначение               |
+| --------------------------------------------------------------- | ------------------------ |
+| `docker-compose.monitoring.yml`                                 | Конфигурация контейнеров |
+| `grafana/prometheus.yml`                                        | Конфигурация Prometheus  |
+| `grafana/provisioning/`                                         | Автозагрузка дашбордов   |
+| `src/bioetl/infrastructure/observability/prometheus_metrics.py` | Metrics endpoint         |
+| `BIOETL_DASHBOARD_SETUP.md`                                     | Полная инструкция        |
 
 ## 🎯 Типичный workflow
 
 1. **Запустить**
+
    ```bash
    docker compose -f docker-compose.monitoring.yml up -d
-   python ./metrics_server.py &
+   python ./src/bioetl/infrastructure/observability/prometheus_metrics.py &
    ```
 
-2. **Открыть Grafana**
+1. **Открыть Grafana**
+
    ```
    http://localhost:3000/d/bioetl-simple
    ```
 
-3. **Мониторить метрики**
+1. **Мониторить метрики**
+
    - Обновляется каждые 5 сек (refresh rate в дашборде)
    - Данные собираются каждые 15 сек (scrape interval)
 
-4. **При нужде отредактировать**
+1. **При нужде отредактировать**
+
    - Dashboard → Edit panel → Update query → Save
 
-5. **Остановить**
+1. **Остановить**
+
    ```bash
    docker compose -f docker-compose.monitoring.yml down
-   pkill -f metrics_server.py
+   pkill -f src/bioetl/infrastructure/observability/prometheus_metrics.py
    ```
 
 ## ❓ FAQ
@@ -178,7 +199,7 @@ docker compose -f docker-compose.monitoring.yml down -v
 A: `docker exec bioetl-grafana grafana-cli admin reset-admin-password newpassword`
 
 **Q: Как добавить свою метрику?**
-A: Отредактировать `metrics_server.py`, добавить Counter/Gauge, перезапустить
+A: Отредактировать `src/bioetl/infrastructure/observability/prometheus_metrics.py`, добавить Counter/Gauge, перезапустить
 
 **Q: Как сохранить дашборд?**
 A: Dashboard → Export → Save JSON → Поделиться с командой
@@ -189,8 +210,8 @@ A: В Docker volume `bioetl_prometheus_data` (retention: 15 дней)
 **Q: Как скачать метрики?**
 A: `http://localhost:9090/api/v1/query_range?query=...&start=...&end=...`
 
----
+______________________________________________________________________
 
-**Дата:** 22 февраля 2026  
-**Версия:** 1.0  
+**Дата:** 22 февраля 2026
+**Версия:** 1.0
 **Поддержка:** См. BIOETL_DASHBOARD_SETUP.md (раздел Troubleshooting)

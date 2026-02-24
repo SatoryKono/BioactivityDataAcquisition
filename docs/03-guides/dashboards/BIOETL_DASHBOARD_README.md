@@ -1,50 +1,64 @@
 # BioETL Dashboard Documentation — Полный индекс
 
+> **Path verification (required):** before applying this guide/prompt, locate the runtime observability modules with `rg -n "PrometheusMetrics|start_http_server|metrics_server_integration" src/bioetl`.
+> Use these runtime paths:
+> Metric definitions/registries — `src/bioetl/infrastructure/observability/metrics.py`, `src/bioetl/infrastructure/observability/prometheus_metrics.py`.
+> Metrics server wiring/integration — `src/bioetl/infrastructure/observability/metrics_server_adapter.py`, `src/bioetl/interfaces/cli/commands/metrics_server_integration.py`.
+
 ## 📚 Документация
 
-| Файл | Размер | Для кого | Читать |
-|------|--------|---------|--------|
-| **BIOETL_DASHBOARD_QUICKSTART.md** | 6.5 KB | 🚀 Разработчиков (за 5 минут) | [→](./BIOETL_DASHBOARD_QUICKSTART.md) |
-| **BIOETL_DASHBOARD_SETUP.md** | 23 KB | 📖 Полная инструкция (60 минут) | [→](./BIOETL_DASHBOARD_SETUP.md) |
-| **BIOETL_DASHBOARD_VISUAL_GUIDE.md** | 17 KB | 👁️ Визуальный гайд (20 минут) | [→](./BIOETL_DASHBOARD_VISUAL_GUIDE.md) |
-| **BIOETL_DASHBOARD_EXAMPLES.md** | 15 KB | 💡 Примеры кастомизации (30 минут) | [→](./BIOETL_DASHBOARD_EXAMPLES.md) |
-| **Этот файл** | 10 KB | 🗺️ Карта и навигация | - |
+| Файл                                 | Размер | Для кого                           | Читать                                  |
+| ------------------------------------ | ------ | ---------------------------------- | --------------------------------------- |
+| **BIOETL_DASHBOARD_QUICKSTART.md**   | 6.5 KB | 🚀 Разработчиков (за 5 минут)      | [→](./BIOETL_DASHBOARD_QUICKSTART.md)   |
+| **BIOETL_DASHBOARD_SETUP.md**        | 23 KB  | 📖 Полная инструкция (60 минут)    | [→](./BIOETL_DASHBOARD_SETUP.md)        |
+| **BIOETL_DASHBOARD_VISUAL_GUIDE.md** | 17 KB  | 👁️ Визуальный гайд (20 минут)      | [→](./BIOETL_DASHBOARD_VISUAL_GUIDE.md) |
+| **BIOETL_DASHBOARD_EXAMPLES.md**     | 15 KB  | 💡 Примеры кастомизации (30 минут) | [→](./BIOETL_DASHBOARD_EXAMPLES.md)     |
+| **Этот файл**                        | 10 KB  | 🗺️ Карта и навигация               | -                                       |
 
----
+______________________________________________________________________
 
 ## 🎯 С чего начать?
 
 ### Если у вас есть 5 минут ⏱️
+
 → Прочитайте [BIOETL_DASHBOARD_QUICKSTART.md](./BIOETL_DASHBOARD_QUICKSTART.md)
+
 - ✅ Чек-лист установки
 - ✅ 6 простых шагов
 - ✅ Быстрая диагностика
 
 ### Если у вас есть 1 час 📚
+
 → Прочитайте [BIOETL_DASHBOARD_SETUP.md](./BIOETL_DASHBOARD_SETUP.md)
+
 - ✅ Полная архитектура
 - ✅ Пошаговая установка
 - ✅ Конфигурация каждого компонента
 - ✅ Troubleshooting гайд
 
 ### Если вы визуал 👁️
+
 → Посмотрите [BIOETL_DASHBOARD_VISUAL_GUIDE.md](./BIOETL_DASHBOARD_VISUAL_GUIDE.md)
+
 - ✅ Диаграммы и схемы
 - ✅ Как читать дашборды
 - ✅ Примеры графиков
 
 ### Если вы хотите кастомизировать 💡
+
 → Изучите [BIOETL_DASHBOARD_EXAMPLES.md](./BIOETL_DASHBOARD_EXAMPLES.md)
+
 - ✅ Добавить метрики
 - ✅ Создать дашборды
 - ✅ Настроить алерты
 - ✅ PromQL примеры
 
----
+______________________________________________________________________
 
 ## 📊 Типичные сценарии
 
 ### Сценарий 1: "Я только что клонировал проект"
+
 ```
 1. Прочитать: QUICKSTART.md (5 минут)
 2. Выполнить: чек-лист установки (10 минут)
@@ -52,6 +66,7 @@
 ```
 
 ### Сценарий 2: "Дашборд пуст, нет данных"
+
 ```
 1. Перейти: SETUP.md → Troubleshooting
 2. Найти: раздел "Дашборд показывает No data"
@@ -59,14 +74,16 @@
 ```
 
 ### Сценарий 3: "Хочу добавить свою метрику"
+
 ```
 1. Перейти: EXAMPLES.md → Добавить новую метрику
-2. Отредактировать: metrics_server.py
+2. Отредактировать: src/bioetl/infrastructure/observability/prometheus_metrics.py
 3. Перезапустить: metrics сервер
 4. Использовать в Grafana: PromQL query
 ```
 
 ### Сценарий 4: "Нужно создать собственный дашборд"
+
 ```
 1. Перейти: EXAMPLES.md → Создать пользовательский дашборд
 2. Выбрать: Способ A (UI) или Способ B (JSON)
@@ -75,6 +92,7 @@
 ```
 
 ### Сценарий 5: "Нужно настроить алерты"
+
 ```
 1. Перейти: EXAMPLES.md → Настроить Alert
 2. Выбрать: простой способ (UI) или advanced (YAML)
@@ -82,7 +100,7 @@
 4. Протестировать: alert
 ```
 
----
+______________________________________________________________________
 
 ## 🏗️ Архитектура компонентов
 
@@ -107,18 +125,18 @@
 └─────────────────────────────────────────────────────────┘
 ```
 
----
+______________________________________________________________________
 
 ## 🔑 Ключевые метрики
 
-| Метрика | Как читать | Где используется |
-|---------|-----------|-----------------|
-| `bioetl_records_processed_total` | Кол-во обработанных записей по stage | Simple, DQ v2, Overview v2 |
-| `bioetl_records_processed_created` | Timestamp создания метрики | DQ v2, Overview v2 (Execution Timestamp) |
-| `bioetl_health_check_status` | Статус health check (1=healthy) | Provider Health v2 |
-| `bioetl_health_check_latency_ms` | P95 latency provider'а (histogram) | Provider Health v2 |
+| Метрика                            | Как читать                           | Где используется                         |
+| ---------------------------------- | ------------------------------------ | ---------------------------------------- |
+| `bioetl_records_processed_total`   | Кол-во обработанных записей по stage | Simple, DQ v2, Overview v2               |
+| `bioetl_records_processed_created` | Timestamp создания метрики           | DQ v2, Overview v2 (Execution Timestamp) |
+| `bioetl_health_check_status`       | Статус health check (1=healthy)      | Provider Health v2                       |
+| `bioetl_health_check_latency_ms`   | P95 latency provider'а (histogram)   | Provider Health v2                       |
 
----
+______________________________________________________________________
 
 ## 🎛️ Команды для справки
 
@@ -142,13 +160,13 @@ docker compose -f docker-compose.monitoring.yml down
 
 ```bash
 # Запустить
-python ./metrics_server.py &
+python ./src/bioetl/infrastructure/observability/prometheus_metrics.py &
 
 # Проверить
 curl http://localhost:8000/metrics
 
 # Остановить
-pkill -f metrics_server.py
+pkill -f src/bioetl/infrastructure/observability/prometheus_metrics.py
 ```
 
 ### Grafana
@@ -178,73 +196,84 @@ start=1704067200&end=1704153600&step=300"
 curl "http://localhost:9090/api/v1/label/__name__/values"
 ```
 
----
+______________________________________________________________________
 
 ## 🔍 Где искать информацию
 
 ### Установка и первый запуск
+
 → **QUICKSTART.md** или **SETUP.md** раздел "Пошаговая установка"
 
 ### Диагностика проблем
+
 → **SETUP.md** раздел "Troubleshooting"
 
 ### Как использовать дашборды
+
 → **VISUAL_GUIDE.md** раздел "Как читать каждый дашборд"
 
 ### Кастомизация метрик
+
 → **EXAMPLES.md** раздел "Добавить новую метрику"
 
 ### Создание дашбордов
+
 → **EXAMPLES.md** раздел "Создать пользовательский дашборд"
 
 ### Настройка алертов
+
 → **EXAMPLES.md** раздел "Настроить Alert"
 
 ### PromQL примеры
+
 → **EXAMPLES.md** раздел "Шпаргалка по PromQL"
 
 ### Конфигурация компонентов
+
 → **SETUP.md** раздел "Конфигурация компонентов"
 
----
+______________________________________________________________________
 
 ## 📈 Быстрые ссылки
 
-| Компонент | URL | Назначение |
-|-----------|-----|-----------|
-| Grafana Home | http://localhost:3000 | Главная страница |
-| Simple Dashboard | http://localhost:3000/d/bioetl-simple | Основной дашборд |
-| Все дашборды | http://localhost:3000/dashboards | Список дашбордов |
-| Query Explorer | http://localhost:3000/explore | Тестирование PromQL |
-| Prometheus | http://localhost:9090 | Главная Prometheus |
-| Prometheus Targets | http://localhost:9090/targets | Статус target'ов |
-| Prometheus Graph | http://localhost:9090/graph | Ломаное UI (deprecated) |
-| Metrics endpoint | http://localhost:8000/metrics | Raw Prometheus metrics |
-| Health check | http://localhost:8000/health | Статус metrics сервера |
+| Компонент          | URL                                   | Назначение              |
+| ------------------ | ------------------------------------- | ----------------------- |
+| Grafana Home       | http://localhost:3000                 | Главная страница        |
+| Simple Dashboard   | http://localhost:3000/d/bioetl-simple | Основной дашборд        |
+| Все дашборды       | http://localhost:3000/dashboards      | Список дашбордов        |
+| Query Explorer     | http://localhost:3000/explore         | Тестирование PromQL     |
+| Prometheus         | http://localhost:9090                 | Главная Prometheus      |
+| Prometheus Targets | http://localhost:9090/targets         | Статус target'ов        |
+| Prometheus Graph   | http://localhost:9090/graph           | Ломаное UI (deprecated) |
+| Metrics endpoint   | http://localhost:8000/metrics         | Raw Prometheus metrics  |
+| Health check       | http://localhost:8000/health          | Статус metrics сервера  |
 
----
+______________________________________________________________________
 
 ## 🎓 Обучающие ресурсы
 
 ### Для новичков
+
 1. Посмотреть VISUAL_GUIDE.md
-2. Открыть BioETL Simple Dashboard
-3. Поменять фильтры (Pipeline, Run Type)
-4. Посмотреть как меняются графики
+1. Открыть BioETL Simple Dashboard
+1. Поменять фильтры (Pipeline, Run Type)
+1. Посмотреть как меняются графики
 
 ### Для intermediate
+
 1. Изучить PromQL в EXAMPLES.md
-2. Открыть http://localhost:9090/graph → Explore
-3. Написать собственный query
-4. Добавить панель в дашборд
+1. Открыть http://localhost:9090/graph → Explore
+1. Написать собственный query
+1. Добавить панель в дашборд
 
 ### Для advanced
-1. Отредактировать metrics_server.py
-2. Добавить собственную метрику
-3. Создать дашборд с JSON
-4. Настроить alerts с Prometheus
 
----
+1. Отредактировать src/bioetl/infrastructure/observability/prometheus_metrics.py
+1. Добавить собственную метрику
+1. Создать дашборд с JSON
+1. Настроить alerts с Prometheus
+
+______________________________________________________________________
 
 ## 🚨 Emergency Checklist
 
@@ -256,8 +285,8 @@ docker compose -f docker-compose.monitoring.yml down
 docker compose -f docker-compose.monitoring.yml up -d
 
 # 2. Перезапустить metrics сервер
-pkill -f metrics_server.py
-python ./metrics_server.py &
+pkill -f src/bioetl/infrastructure/observability/prometheus_metrics.py
+python ./src/bioetl/infrastructure/observability/prometheus_metrics.py &
 
 # 3. Дождаться 15 секунд scrape interval
 sleep 15
@@ -274,16 +303,16 @@ curl http://localhost:3000/api/health
 curl http://localhost:8000/health
 ```
 
----
+______________________________________________________________________
 
 ## 📞 Получить помощь
 
 1. **Проверить Troubleshooting**: SETUP.md
-2. **Посмотреть логи**: `docker logs bioetl-prometheus`
-3. **Диагностировать**: [SETUP.md - Troubleshooting](./BIOETL_DASHBOARD_SETUP.md#troubleshooting)
-4. **Проверить архитектуру**: VISUAL_GUIDE.md
+1. **Посмотреть логи**: `docker logs bioetl-prometheus`
+1. **Диагностировать**: [SETUP.md - Troubleshooting](./BIOETL_DASHBOARD_SETUP.md#troubleshooting)
+1. **Проверить архитектуру**: VISUAL_GUIDE.md
 
----
+______________________________________________________________________
 
 ## 📦 Что включено в инструкцию
 
@@ -296,7 +325,7 @@ curl http://localhost:8000/health
 └── 📄 README.md (этот файл)
 
 📂 Конфигурация
-├── 📄 metrics_server.py                   (Metrics endpoint)
+├── 📄 src/bioetl/infrastructure/observability/prometheus_metrics.py                   (Metrics endpoint)
 ├── 📄 docker-compose.monitoring.yml       (Docker контейнеры)
 ├── 📄 grafana/prometheus.yml              (Prometheus конфиг)
 └── 📄 grafana/provisioning/               (Auto-provisioning)
@@ -308,7 +337,7 @@ curl http://localhost:8000/health
 └── 📊 bioetl-provider-health-v2.json
 ```
 
----
+______________________________________________________________________
 
 ## ✨ Что можно делать с BioETL Dashboard
 
@@ -323,11 +352,12 @@ curl http://localhost:8000/health
 - ✅ Интегрировать с другими системами (Slack, PagerDuty)
 - ✅ Использовать для внутренних презентаций
 
----
+______________________________________________________________________
 
 ## 🎯 Конечная цель
 
 Вы успешно:
+
 - ✅ Установили мониторинг (Prometheus + Grafana)
 - ✅ Запустили metrics сервер
 - ✅ Загрузили 4 дашборда
@@ -336,10 +366,10 @@ curl http://localhost:8000/health
 - ✅ Понимаете архитектуру мониторинга
 - ✅ Умеете диагностировать проблемы
 
----
+______________________________________________________________________
 
-**Последнее обновление:** 22 февраля 2026  
-**Версия:** 1.0  
+**Последнее обновление:** 22 февраля 2026
+**Версия:** 1.0
 **Статус:** ✅ Готово к использованию
 
 Начните с [BIOETL_DASHBOARD_QUICKSTART.md](./BIOETL_DASHBOARD_QUICKSTART.md) — займет 5 минут! ⏱️
