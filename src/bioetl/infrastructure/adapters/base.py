@@ -24,6 +24,10 @@ from types import TracebackType
 from typing import TYPE_CHECKING, Self
 
 from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort, NoOpMetrics
+from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
+from bioetl.infrastructure.adapters.common.api_request_collector import (
+    APIRequestCollector,
+)
 from bioetl.infrastructure.adapters.error_handling import ErrorService
 from bioetl.infrastructure.adapters.health_check_mixin import HealthCheckProviderMixin
 
@@ -62,6 +66,8 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
     logger: LoggerPort
     metrics: MetricsPort | None  # Runtime-resolved to NoOpMetrics if None
     _error_handler: ErrorService
+    _adapter_metrics: AdapterMetrics
+    _request_collector: APIRequestCollector
 
     def __init__(
         self,
@@ -82,6 +88,21 @@ class BaseHttpAdapter(HealthCheckProviderMixin, DataSourcePort):
         self.logger = logger
         self.metrics = metrics if metrics is not None else NoOpMetrics()
         self._error_handler = ErrorService(logger)
+        self._init_adapter_metrics()
+
+    def _init_adapter_metrics(self) -> None:
+        """Initialize adapter metrics and request collector.
+
+        Creates standardized AdapterMetrics and APIRequestCollector instances.
+        Resolves None metrics to NoOpMetrics for the metrics port.
+
+        Called automatically from ``__init__``. For ``@dataclass`` subclasses
+        that bypass ``__init__``, call explicitly from ``__post_init__``.
+
+        """
+        metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
+        self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
+        self._request_collector = APIRequestCollector()
 
     @property
     def _circuit_breaker(self) -> CircuitBreakerPort:
