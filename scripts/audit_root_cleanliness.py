@@ -28,6 +28,8 @@ ALLOWED_ROOT_ENTRIES: frozenset[str] = frozenset(
         ".junie",
         ".pre-commit-config.yaml",
         ".secrets.baseline",
+        ".setup_wsl_codex.sh",
+        "AGENTS.md",
         "CHANGELOG.md",
         "Dockerfile",
         "LICENSE",
