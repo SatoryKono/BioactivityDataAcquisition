@@ -50,7 +50,7 @@ if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
-    from bioetl.domain.ports import LockPort, LoggerPort, QuarantinePort
+    from bioetl.domain.ports import LockPort, LoggerPort, MetricsPort, QuarantinePort
 
 
 @dataclass(frozen=True, slots=True)
@@ -144,6 +144,7 @@ class CompositePipelineRunner:
         | None = None,
         dependency_coordinator: DependencyCoordinator | None = None,
         quarantine_port: QuarantinePort | None = None,
+        metrics: MetricsPort | None = None,
     ) -> None:
         """Initialize composite pipeline runner.
 
@@ -188,6 +189,7 @@ class CompositePipelineRunner:
         self._dq_report_service = dq_report_service
         self._preflight_validator = preflight_validator
         self._quarantine_port = quarantine_port
+        self._metrics = metrics
 
         # Initialize FSM helper for state transition logic
         from bioetl.application.composite.fsm_helper import FSMStateHelper
@@ -1133,3 +1135,9 @@ class CompositePipelineRunner:
                 composite=self._config.name,
                 quarantine_count=written,
             )
+            if self._metrics:
+                self._metrics.inc_quarantine_records(
+                    pipeline=pipeline_name,
+                    reason="cross_validation",
+                    count=written,
+                )

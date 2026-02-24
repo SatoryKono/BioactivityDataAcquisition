@@ -189,6 +189,10 @@ class BatchTransformer:
             and dq_config.hard_fail_threshold < 1.0
             and error_rate >= dq_config.hard_fail_threshold
         ):
+            self._batch_metrics.track_dq_validation_failure(
+                stage="transform",
+                severity="hard_fail",
+            )
             raise DataQualityThresholdError(error_rate, dq_config.hard_fail_threshold)
 
         # Soft fail check with detailed logging
@@ -204,6 +208,10 @@ class BatchTransformer:
                 total_count=total_count,
                 hard_threshold=dq_config.hard_fail_threshold,
                 pipeline=self._config.pipeline_name,
+            )
+            self._batch_metrics.track_dq_validation_failure(
+                stage="transform",
+                severity="soft_fail",
             )
 
     async def transform_single(
