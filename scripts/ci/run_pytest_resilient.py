@@ -69,7 +69,7 @@ def _is_no_tests_collected(result: PassResult) -> bool:
 
 def _effective_exit_code(result: PassResult, *, allow_no_tests: bool = False) -> int:
     """Normalize pytest exit code for pass evaluation."""
-    if allow_no_tests and _is_no_tests_collected(result):
+    if allow_no_tests and result.return_code == 5:
         return 0
     return result.return_code
 
