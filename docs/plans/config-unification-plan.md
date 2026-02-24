@@ -18,6 +18,8 @@
 - RF-CFG-032 выполнен в backward-compat режиме: `load_pipeline_config()` и секционные loaders читают unified entity sections (`pipeline/schema/quality/filters/contracts`) с fallback на legacy paths.
 - RF-CFG-033 пока **не завершен**: `PipelineContractPolicyLoader` сохранен и переведен на режим unified-first + legacy fallback.
 - Технический эффект Phase 3: `DQConfigLoader` вырос до 322 LOC; добавлены явные архитектурные exemptions в `tests/architecture/test_code_metrics.py` как переходная мера до декомпозиции (RF-CFG-031/RF-CFG-037).
+- RF-CFG-036 выполнен: composite configs перенесены в `configs/composites/*.yaml`, `load_composite_config()` переведен на new-first path (`configs/composites`) с legacy fallback (`configs/pipelines/composite`).
+- RF-CFG-037 выполнен: 3 реализации `deep_merge` унифицированы через `src/bioetl/infrastructure/config_merge.py::config_merge` с параметризуемыми list-стратегиями (concat keys, resolver-based merge для DQ validations).
 
 ---
 
@@ -632,8 +634,8 @@ filters:
 | RF-CFG-033 | Удалить `PipelineContractPolicyLoader` (contracts в entity) — **IN PROGRESS** (loader оставлен для backward-compat) | 1 | MEDIUM |
 | RF-CFG-034 | Удалить `FieldGroupLoader` для стандартных pipelines (schema в entity) — **PARTIAL** (standard path читает `schema` section) | 1 | MEDIUM |
 | RF-CFG-035 | Удалить старые dirs: `pipelines/{p}/`, `schemas/{p}/`, `quality/entities/`, `filters/entities/`, `contracts/` | ~130 | MEDIUM |
-| RF-CFG-036 | Перенести `pipelines/composite/*.yaml` → `composites/*.yaml` | 5 | LOW |
-| RF-CFG-037 | Унифицировать 3 deep_merge в одну `config_merge()` утилиту | 3→1 | MEDIUM |
+| RF-CFG-036 | Перенести `pipelines/composite/*.yaml` → `composites/*.yaml` — **DONE** (`load_composite_config`: new-first + fallback) | 5 | LOW |
+| RF-CFG-037 | Унифицировать 3 deep_merge в одну `config_merge()` утилиту — **DONE** (`src/bioetl/infrastructure/config_merge.py`) | 3→1 | MEDIUM |
 
 #### Phase 4: Валидация и Документация
 

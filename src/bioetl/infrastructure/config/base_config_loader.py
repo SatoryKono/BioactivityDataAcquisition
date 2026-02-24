@@ -12,12 +12,12 @@ Used by:
 
 from __future__ import annotations
 
-import copy
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Generic, TypeVar
 
 import yaml
+from bioetl.infrastructure.config_merge import config_merge
 
 T = TypeVar("T")
 
@@ -104,28 +104,12 @@ class BaseConfigLoader(ABC, Generic[T]):
         Returns:
             Merged dict (new object, inputs unchanged).
         """
-        result = copy.deepcopy(base)
-
-        for key, override_value in override.items():
-            if key not in result:
-                result[key] = copy.deepcopy(override_value)
-            elif isinstance(override_value, dict) and isinstance(result[key], dict):
-                # Recursive merge for nested dicts
-                result[key] = self._deep_merge_base(
-                    result[key], override_value, list_concat_keys
-                )
-            elif (
-                isinstance(override_value, list)
-                and isinstance(result[key], list)
-                and key in list_concat_keys
-            ):
-                # Concatenate lists for specified keys
-                result[key] = self._merge_lists(result[key], override_value, key)
-            else:
-                # Scalar or other list: override wins
-                result[key] = copy.deepcopy(override_value)
-
-        return result
+        return config_merge(
+            base,
+            override,
+            list_concat_keys=list_concat_keys,
+            concat_list_merger=self._merge_lists,
+        )
 
     def _merge_lists(
         self,

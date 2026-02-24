@@ -14,9 +14,17 @@ def _expected_contract_name(stem: str) -> str:
     return f"Composite{stem.capitalize()}GoldSchema"
 
 
+def _resolve_composite_config_dir() -> Path:
+    """Resolve composite config dir with new-first + legacy fallback."""
+    primary = Path("configs/composites")
+    if primary.exists() and any(primary.glob("*.yaml")):
+        return primary
+    return Path("configs/pipelines/composite")
+
+
 def test_each_composite_pipeline_has_schema_and_contract() -> None:
     """Every composite pipeline config must define matching schema and contract."""
-    config_dir = Path("configs/pipelines/composite")
+    config_dir = _resolve_composite_config_dir()
     schema_dir = Path("configs/schemas/composite")
 
     config_stems = sorted(path.stem for path in config_dir.glob("*.yaml"))

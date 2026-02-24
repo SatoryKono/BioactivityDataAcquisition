@@ -1,6 +1,6 @@
 """Pydantic schemas for composite pipeline configuration files.
 
-Validates composite pipeline YAML files (configs/pipelines/composite/*.yaml)
+Validates composite pipeline YAML files (configs/composites/*.yaml)
 before converting to domain objects. Implements ADR-026 Composite Pipeline Pattern.
 
 Usage:

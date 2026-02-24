@@ -63,8 +63,9 @@ __all__ = [
     "load_composite_config",
 ]
 
-# Default composite config path
-COMPOSITE_CONFIG_DIR = Path("configs/pipelines/composite")
+# Default composite config path (RF-CFG-036)
+COMPOSITE_CONFIG_DIR = Path("configs/composites")
+LEGACY_COMPOSITE_CONFIG_DIR = Path("configs/pipelines/composite")
 FIELD_GROUP_CONFIG_DIR = Path("configs/composite/field_groups")
 
 
@@ -97,11 +98,24 @@ def _to_id_str(val: Any) -> str:  # Any: accepts int, float, st...
     return str(val)
 
 
+def _resolve_composite_config_path(name: str) -> Path:
+    """Resolve composite config path with new-first + legacy fallback."""
+    primary_path = COMPOSITE_CONFIG_DIR / f"{name}.yaml"
+    if primary_path.exists():
+        return primary_path
+
+    legacy_path = LEGACY_COMPOSITE_CONFIG_DIR / f"{name}.yaml"
+    if legacy_path.exists():
+        return legacy_path
+
+    raise FileNotFoundError(
+        f"Composite config not found: {primary_path} (fallback: {legacy_path})"
+    )
+
+
 def load_composite_config(name: str) -> CompositeConfig:
     """Load and validate composite pipeline configuration from YAML."""
-    config_path = COMPOSITE_CONFIG_DIR / f"{name}.yaml"
-    if not config_path.exists():
-        raise FileNotFoundError(f"Composite config not found: {config_path}")
+    config_path = _resolve_composite_config_path(name)
 
     with config_path.open(encoding="utf-8") as f:
         raw = yaml.safe_load(f)

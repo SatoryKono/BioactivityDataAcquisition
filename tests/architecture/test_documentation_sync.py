@@ -5,6 +5,13 @@ import re
 from pathlib import Path
 
 
+def _resolve_composite_config_dir() -> Path:
+    primary = Path("configs/composites")
+    if primary.exists() and any(primary.glob("*.yaml")):
+        return primary
+    return Path("configs/pipelines/composite")
+
+
 def test_ports_count_matches_docs() -> None:
     actual = len(list(Path("src/bioetl/domain/ports").glob("*.py")))
     text = Path("docs/02-architecture/01-domain-layer.md").read_text(encoding="utf-8")
@@ -15,12 +22,13 @@ def test_ports_count_matches_docs() -> None:
 
 def test_pipeline_count_matches_docs() -> None:
     base = Path("configs/pipelines")
+    composite_dir = _resolve_composite_config_dir()
     standard = [
         p
         for p in base.rglob("*.yaml")
         if p.parent.name != "composite" and p.name not in {"_base.yaml", "_schema.json"}
     ]
-    composite = list((base / "composite").glob("*.yaml"))
+    composite = list(composite_dir.glob("*.yaml"))
     text = Path("docs/04-reference/pipelines/README.md").read_text(encoding="utf-8")
     assert str(len(standard)) in text and str(len(composite)) in text
 
@@ -28,6 +36,7 @@ def test_pipeline_count_matches_docs() -> None:
 def test_pipeline_ids_match_reference_index() -> None:
     """Pipeline IDs in reference index must match config-defined IDs."""
     base = Path("configs/pipelines")
+    composite_dir = _resolve_composite_config_dir()
     provider_ids: list[str] = []
     for path in sorted(base.rglob("*.yaml")):
         if path.parent.name == "composite" or path.name in {
@@ -45,7 +54,6 @@ def test_pipeline_ids_match_reference_index() -> None:
             provider_ids.append(match.group(1))
 
     composite_ids: list[str] = []
-    composite_dir = base / "composite"
     for path in sorted(composite_dir.glob("*.yaml")):
         text = path.read_text(encoding="utf-8")
         match = re.search(
