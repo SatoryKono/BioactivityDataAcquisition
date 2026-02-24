@@ -169,9 +169,10 @@ class TestPublicationExtractionParams:
         assert publication_input_filter_field not in extraction_params.params
 
     @pytest.mark.vcr("chembl_publication_filtered.yaml")
-    @pytest.mark.skip(
+    @pytest.mark.skipif(
+        not (CASSETTE_DIR / "chembl_publication_filtered.yaml").exists(),
         reason="VCR cassette not yet recorded. "
-        "Record with: VCR_RECORD_MODE=new_episodes pytest -k test_publication_filtered_api_request"
+        "Record with: VCR_RECORD_MODE=new_episodes pytest -k test_publication_filtered_api_request",
     )
     async def test_publication_filtered_api_request(
         self,

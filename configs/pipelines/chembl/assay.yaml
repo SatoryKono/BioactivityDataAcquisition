@@ -6,6 +6,7 @@ pipeline_name: chembl_assay
 provider: chembl
 entity_type: assay
 description: "Extract bioassay definitions from ChEMBL API"
+schema_file: "../../schemas/chembl/assay.yaml"
 
 business_primary_keys: [ "assay_id" ]
 # Override: large dataset requires bigger batches for throughput

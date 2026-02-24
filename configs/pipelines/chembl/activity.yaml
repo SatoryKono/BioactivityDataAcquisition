@@ -6,6 +6,7 @@ pipeline_name: chembl_activity
 provider: chembl
 entity_type: activity
 description: "Extract biological activity records from ChEMBL API"
+schema_file: "../../schemas/chembl/activity.yaml"
 
 business_primary_keys: [ "activity_id" ]
 # Override: large dataset requires bigger batches for throughput

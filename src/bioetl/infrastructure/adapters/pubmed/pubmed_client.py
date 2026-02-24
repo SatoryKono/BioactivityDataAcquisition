@@ -13,12 +13,7 @@ from typing import TYPE_CHECKING, Any
 from pydantic import BaseModel
 
 from bioetl.domain.entities.pubmed import ArticleRecord
-from bioetl.domain.ports import NoOpMetrics
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
-from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
-from bioetl.infrastructure.adapters.common.api_request_collector import (
-    APIRequestCollector,
-)
 from bioetl.infrastructure.adapters.error_handling import ErrorService
 from bioetl.infrastructure.adapters.filterable_mixin import NotSupportedMultiFilterMixin
 from bioetl.infrastructure.adapters.pubmed._fetch import PubMedFetchMixin
@@ -75,15 +70,10 @@ class PubMedAdapter(
         default=None, init=False, repr=False
     )
 
-    _request_collector: APIRequestCollector = field(
-        init=False, default_factory=APIRequestCollector
-    )
-
     def __post_init__(self) -> None:
         """Initialize metrics, error handler and fallback handler."""
         self._error_handler = ErrorService(self.logger)
-        metrics_port = self.metrics if self.metrics is not None else NoOpMetrics()
-        self._adapter_metrics = AdapterMetrics(metrics_port, self.provider_name)
+        self._init_adapter_metrics()
 
         self._fallback_handler = TitleFallbackHandler(
             logger=self.logger,
