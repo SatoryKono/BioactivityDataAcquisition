@@ -13,28 +13,28 @@ data/
     │   └── {provider}/
     │       └── {entity}/
     │           └── {date}/              # YYYY-MM-DD
-    │               ├── batch-{date}-{batch-id}.jsonl.zst
-    │               ├── batch-{date}-{batch-id}.jsonl     # Optional JSON copy
-    │               ├── {provider}-{entity}-metadata.yaml # Optional metadata
-    │               └── batch-{date}-{provider}-{entity}-dq-report.json
+    │               ├── batch_{date}_{batch_id}.jsonl.zst
+    │               ├── batch_{date}_{batch_id}.jsonl     # Optional JSON copy
+    │               ├── {provider}_{entity}_metadata.yaml # Optional metadata
+    │               └── batch_{date}_{provider}_{entity}_dq_report.json
     ├── silver/
     │   └── {provider}/
     │       └── {entity}/                # Delta Lake table
     │           ├── _delta_log/
     │           ├── part-00000-*.parquet
-    │           ├── {provider}-{entity}-metadata.yaml
-    │           └── silver-{provider}-{entity}-dq-report.json
+    │           ├── {provider}_{entity}_metadata.yaml
+    │           └── silver_{provider}_{entity}_dq_report.json
     ├── gold/
     │   └── {provider}/
     │       └── {entity}/                # Delta Lake table (flattened)
     │           ├── _delta_log/
     │           ├── part-00000-*.parquet
-    │           ├── {provider}-{entity}-metadata.yaml
-    │           └── gold-{provider}-{entity}-dq-report.json
+    │           ├── {provider}_{entity}_metadata.yaml
+    │           └── gold_{provider}_{entity}_dq_report.json
     ├── checkpoints/
     │   ├── {pipeline_name}.json         # Flat structure (e.g., chembl_activity.json)
     │   └── composite/
-    │       └── composite-{name}-{run-id}.json
+    │       └── composite_{name}_{run_id}.json
     ├── quarantine/
     │   └── common.quarantine/           # Unified quarantine table
     │       ├── _delta_log/
@@ -55,19 +55,19 @@ data/
 |--------|-------|
 | Format | JSONL + zstd compression |
 | Path Pattern | `data/output/bronze/{provider}/{entity}/{date}/` |
-| File Pattern | `batch-{YYYY-MM-DD}-{batch-id}.jsonl.zst` |
+| File Pattern | `batch_{YYYY-MM-DD}_{batch_id}.jsonl.zst` |
 | Retention | 90 days (manual cleanup) |
 | Idempotency | Append-only |
 
 **Example paths:**
 ```
-data/output/bronze/chembl/activity/2025-01-15/batch-2025-01-15-a1b2c3d4.jsonl.zst
-data/output/bronze/pubchem/compound/2025-01-15/batch-2025-01-15-e5f6g7h8.jsonl.zst
+data/output/bronze/chembl/activity/2025-01-15/batch_2025-01-15_a1b2c3d4.jsonl.zst
+data/output/bronze/pubchem/compound/2025-01-15/batch_2025-01-15_e5f6g7h8.jsonl.zst
 ```
 
 **Sidecar files (optional):**
-- `{provider}-{entity}-metadata.yaml` - Batch metadata (record counts, timestamps)
-- `batch-{date}-{provider}-{entity}-dq-report.json` - Data quality report
+- `{provider}_{entity}_metadata.yaml` - Batch metadata (record counts, timestamps)
+- `batch_{date}_{provider}_{entity}_dq_report.json` - Data quality report
 
 ### Silver Layer
 
@@ -84,8 +84,8 @@ data/output/bronze/pubchem/compound/2025-01-15/batch-2025-01-15-e5f6g7h8.jsonl.z
 - Time travel available via `version` parameter
 
 **Sidecar files:**
-- `{provider}-{entity}-metadata.yaml` - Table metadata with lineage
-- `silver-{provider}-{entity}-dq-report.json` - Data quality report
+- `{provider}_{entity}_metadata.yaml` - Table metadata with lineage
+- `silver_{provider}_{entity}_dq_report.json` - Data quality report
 
 **Reading Silver data:**
 ```python
@@ -113,8 +113,8 @@ df = pl.read_delta("data/output/silver/chembl/activity", version=5)
 - Optimized for analytics queries
 
 **Sidecar files:**
-- `{provider}-{entity}-metadata.yaml` - Table metadata with SCD info
-- `gold-{provider}-{entity}-dq-report.json` - Data quality report
+- `{provider}_{entity}_metadata.yaml` - Table metadata with SCD info
+- `gold_{provider}_{entity}_dq_report.json` - Data quality report
 
 ### Checkpoints
 
@@ -122,7 +122,7 @@ df = pl.read_delta("data/output/silver/chembl/activity", version=5)
 |--------|-------|
 | Format | JSON |
 | Path Pattern | `data/output/checkpoints/{pipeline_name}.json` |
-| Composite Pattern | `data/output/checkpoints/composite/composite-{name}-{run-id}.json` |
+| Composite Pattern | `data/output/checkpoints/composite/composite_{name}_{run_id}.json` |
 | Purpose | Resume interrupted pipelines |
 
 **Flat structure** (not nested):
