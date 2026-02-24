@@ -5,6 +5,7 @@
 pipeline_name: chembl_activity
 provider: chembl
 entity_type: activity
+schema_file: "../../schemas/chembl/activity.yaml"
 description: "Extract biological activity records from ChEMBL API"
 
 business_primary_keys: [ "activity_id" ]
