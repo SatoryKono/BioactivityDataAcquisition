@@ -211,3 +211,39 @@ class TestPrometheusMetricsClose:
         prometheus_metrics.close()  # Should not raise
 
         assert prometheus_metrics._closed is True
+
+
+@pytest.mark.unit
+class TestPrometheusCustomCounters:
+    """Tests for convenience counter methods with bounded labels."""
+
+    def test_inc_quarantine_records_bounded_reason(self, prometheus_metrics):
+        with patch.dict(COUNTERS, {"quarantine_records_total": MagicMock()}):
+            prometheus_metrics.inc_quarantine_records(
+                pipeline="chembl_activity",
+                reason="Unbounded Random Reason",
+                count=2,
+            )
+
+            COUNTERS["quarantine_records_total"].labels.assert_called_once_with(
+                pipeline="chembl_activity",
+                reason="other",
+            )
+            COUNTERS["quarantine_records_total"].labels().inc.assert_called_once_with(2)
+
+    def test_inc_dq_validation_failures_bounded_labels(self, prometheus_metrics):
+        with patch.dict(COUNTERS, {"dq_validation_failures_total": MagicMock()}):
+            prometheus_metrics.inc_dq_validation_failures(
+                pipeline="chembl_activity",
+                stage="Threshold",
+                severity="SOFT-FAIL",
+            )
+
+            COUNTERS["dq_validation_failures_total"].labels.assert_called_once_with(
+                pipeline="chembl_activity",
+                stage="threshold",
+                severity="soft_fail",
+            )
+            COUNTERS[
+                "dq_validation_failures_total"
+            ].labels().inc.assert_called_once_with(1)

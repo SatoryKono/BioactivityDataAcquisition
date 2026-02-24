@@ -142,6 +142,12 @@ class DataQualityService:
                 threshold=self._config.hard_fail_threshold,
                 pipeline=self._pipeline_name,
             )
+            if self._metrics:
+                self._metrics.inc_dq_validation_failures(
+                    pipeline=self._pipeline_name,
+                    stage="threshold",
+                    severity="hard_fail",
+                )
             raise DataQualityThresholdError(
                 error_rate=error_rate,
                 threshold=self._config.hard_fail_threshold,
@@ -177,6 +183,11 @@ class DataQualityService:
                 "dq_soft_threshold_exceeded",
                 1,
                 {"pipeline": self._pipeline_name},
+            )
+            self._metrics.inc_dq_validation_failures(
+                pipeline=self._pipeline_name,
+                stage="threshold",
+                severity="soft_fail",
             )
 
     def _run_anomaly_detection(

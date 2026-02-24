@@ -13,7 +13,7 @@ options:
 show-root-heading: true
 show-source: false
 members:
-\- __init__
+\- --init--
 \- run
 \- logger
 \- services
@@ -36,9 +36,9 @@ options:
 show-root-heading: true
 show-source: false
 members:
-\- __init__
+\- --init--
 \- execute
-\- execute_batch
+\- execute-batch
 
 ### BatchResult
 
@@ -54,21 +54,6 @@ show-source: false
 Processes individual records through the transformation pipeline.
 
 ::: bioetl.application.core.record_processor.RecordProcessor
-options:
-show-root-heading: true
-show-source: false
-
-## Batch Transformation
-
-See [Transformers](transformers.md) for `BatchTransformer`, `TransformResult`, and `TransformedRecord`.
-
-## Batch Writing
-
-### BatchWriter
-
-Writes transformed batches to storage layers.
-
-::: bioetl.application.core.batch_writer.BatchWriter
 options:
 show-root-heading: true
 show-source: false
@@ -247,7 +232,7 @@ options:
 show-root-heading: true
 show-source: false
 
-### create_shutdown_service
+### create-shutdown-service
 
 Factory function for creating shutdown service.
 
@@ -294,11 +279,25 @@ options:
 show-root-heading: true
 show-source: false
 
-## Medallion Lifecycle
+## Medallion Types
 
-### MedallionLifecycleService
+### Layer
 
-See [Services](services.md#medallionlifecycleservice) for full documentation.
+Enumeration for Medallion layers (BRONZE, SILVER, GOLD).
+
+::: bioetl.domain.medallion.Layer
+options:
+show-root-heading: true
+show-source: false
+
+### WriteModePolicy
+
+Policy for determining write mode based on run type and layer.
+
+::: bioetl.domain.medallion.WriteModePolicy
+options:
+show-root-heading: true
+show-source: false
 
 ### ClearResult
 
@@ -314,59 +313,6 @@ show-source: false
 Result of a layer prepare operation.
 
 ::: bioetl.application.services.medallion_types.PrepareResult
-options:
-show-root-heading: true
-show-source: false
-
-## Transform Utilities
-
-Utility functions for data transformation.
-
-### normalize_string
-
-::: bioetl.application.core.dict_transformers.normalize_string
-options:
-show-root-heading: true
-show-source: false
-
-### safe_extract
-
-::: bioetl.application.core.dict_transformers.safe_extract
-options:
-show-root-heading: true
-show-source: false
-
-### flatten_nested_dict
-
-::: bioetl.application.core.dict_transformers.flatten_nested_dict
-options:
-show-root-heading: true
-show-source: false
-
-### extract_list_field
-
-::: bioetl.application.core.dict_transformers.extract_list_field
-options:
-show-root-heading: true
-show-source: false
-
-### aggregate_nested_lists
-
-::: bioetl.application.core.dict_transformers.aggregate_nested_lists
-options:
-show-root-heading: true
-show-source: false
-
-### parse_date_field
-
-::: bioetl.application.core.dict_transformers.parse_date_field
-options:
-show-root-heading: true
-show-source: false
-
-### validate_smiles
-
-::: bioetl.application.core.dict_transformers.validate_smiles
 options:
 show-root-heading: true
 show-source: false
@@ -391,70 +337,32 @@ options:
 show-root-heading: true
 show-source: false
 
-## Medallion Types
-
-### Layer
-
-Enumeration for Medallion layers (BRONZE, SILVER, GOLD).
-
-::: bioetl.domain.medallion.Layer
-options:
-show-root-heading: true
-show-source: false
-
-### WriteMode
-
-See [Domain Types](../domain/types.md#writemode) for `WriteMode` documentation.
-
-### WriteModePolicy
-
-Policy for determining write mode based on run type and layer.
-
-::: bioetl.domain.medallion.WriteModePolicy
-options:
-show-root-heading: true
-show-source: false
-
 ## Usage Example
 
 ```python
-from bioetl.application.core import (
-    PipelineRunner,
-    PipelineServices,
-    CheckpointManager,
-    PreflightService,
-    BatchExecutor,
-    BatchTransformer,
-    BatchWriter,
-    PipelineConfig,
-    RuntimeConfig,
-    WriteMode,
-)
+from bioetl.application.core.runner import PipelineRunner
+from bioetl.application.core.pipeline_services import PipelineServices
+from bioetl.application.core.checkpoint_manager import CheckpointManager
+from bioetl.application.core.preflight_service import PreflightService
+from bioetl.application.core.batch_executor import BatchExecutor
+from bioetl.domain.config import PipelineConfig, RuntimeConfig
 
 # Components are assembled in composition layer
 # See: bioetl.composition.bootstrap.bootstrap_pipeline()
 ```
 
 ```python
-# Transform utilities example
-from bioetl.application.core import (
+# Batch transformation and writing (see Transformers page)
+from bioetl.application.core.batch_transformer import BatchTransformer, TransformResult
+from bioetl.application.core.batch_writer import BatchWriter
+
+# Transform utilities (see Transformers page)
+from bioetl.application.core.dict_transformers import (
     normalize_string,
     safe_extract,
     parse_date_field,
     validate_smiles,
 )
-
-# Normalize strings for consistent comparison
-name = normalize_string("  John Doe  ")  # "john doe"
-
-# Safely extract nested values
-value = safe_extract(data, "nested.path.to.value", default=None)
-
-# Parse date strings
-date = parse_date_field("2024_01_15", "%Y-%m-%d")
-
-# Validate SMILES notation
-is_valid = validate_smiles("CCO")  # True for ethanol
 ```
 
 ## See Also

@@ -13,7 +13,6 @@ Note:
 
 from __future__ import annotations
 
-import warnings
 from collections.abc import Callable
 from pathlib import Path
 
@@ -62,18 +61,10 @@ def bootstrap_cleanup_service() -> CleanupService:
 def bootstrap_cleanup() -> CleanupService:
     """Bootstrap the cleanup service for CLI operations.
 
-    .. deprecated::
-        Use :func:`bootstrap_cleanup_service` instead. This alias is kept for
-        backward compatibility and will be removed in a future version.
 
     Returns:
         CleanupService configured for the current environment.
     """
-    warnings.warn(
-        "bootstrap_cleanup() is deprecated, use bootstrap_cleanup_service() instead",
-        DeprecationWarning,
-        stacklevel=2,
-    )
     return bootstrap_cleanup_service()
 
 

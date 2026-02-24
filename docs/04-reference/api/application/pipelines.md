@@ -83,7 +83,7 @@ Biological targets (proteins, genes).
 
 ### Publication Pipeline
 
-Publications and patents.
+ChEMBL publications and patents.
 
 ::: bioetl.application.pipelines.chembl.ChEMBLPublicationPipeline
     options:

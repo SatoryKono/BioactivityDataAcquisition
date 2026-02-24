@@ -242,6 +242,22 @@ class RecordingMetrics:
         """Record gauge set."""
         self.gauges.append((name, value, labels))
 
+    def inc_dq_validation_failures(
+        self,
+        pipeline: str,
+        stage: str,
+        severity: str,
+        count: int = 1,
+    ) -> None:
+        """Record DQ validation failure increment."""
+        self.counters.append(
+            (
+                "dq_validation_failures",
+                count,
+                {"pipeline": pipeline, "stage": stage, "severity": severity},
+            )
+        )
+
     def close(self) -> None:
         """No-op close."""
         pass

@@ -194,10 +194,6 @@ class AuthorExtractor(BaseFieldExtractor):
     def normalize(self, raw_value: list[RawAuthor]) -> list[str]:
         """Нормализовать список авторов в формат 'LastName, Initials'.
 
-        .. deprecated:: 2.2.0
-            This method is deprecated and will be removed in version 3.0.0.
-            Use :meth:`~bioetl.domain.services.data_normalization_service.DataNormalizationService.normalize_author_list`
-            instead for unified cross-provider author normalization.
 
         Args:
             raw_value: List of raw author dicts.
@@ -209,14 +205,6 @@ class AuthorExtractor(BaseFieldExtractor):
             This method is still used internally by PubMed transformer for
             backwards compatibility. New code should use the unified service.
         """
-        import warnings
-
-        warnings.warn(
-            "AuthorExtractor.normalize() is deprecated and will be removed in version 3.0.0. "
-            "Use DataNormalizationService.normalize_author_list() for unified author normalization.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
 
         authors = []
         for raw in raw_value:
