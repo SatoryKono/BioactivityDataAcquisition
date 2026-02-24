@@ -640,14 +640,12 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         Raises:
             NotImplementedError: Always, as this is not a data source.
         """
-        # AsyncIterator requires yield before raise for proper generator creation
-        if False:  # pragma: no cover
-            yield {}  # Required for AsyncIterator type signature
         raise NotImplementedError(
             "UniProtIDMappingClient is not a DataSourcePort. "
             "Use IDMappingDataSource for pipeline integration, "
             "or call map_ids() directly for ID mapping operations."
         )
+        yield {}  # pragma: no cover - keeps AsyncIterator contract
 
     def __repr__(self) -> str:
         """Return string representation."""
