@@ -47,16 +47,16 @@ BioETL использует стек **Prometheus + Grafana** для обесп�
 2.  На всех панелях настроены правильные единицы измерения (nM, bytes, sec).
 3.  Переменные фильтрации `$pipeline` и `$run_id` работают корректно.
 
-Подробнее см. в [Тестирование наблюдаемости](./observability-testing.md).
+Подробнее см. в документации по тестированию наблюдаемости.
 
 ## 4. Что делать если... (Runbook Lite)
 
-- **График "Error Rate" покраснел**: Используйте инструмент [Log Explorer](../04-reference/developer-tools.md) для получения деталей исключений.
+- **График "Error Rate" покраснел**: Используйте `structlog` для получения деталей исключений.
 - **Дашборд пустой**: 
     1. Проверьте статус контейнеров: `docker ps`.
     2. Убедитесь, что пайплайн запущен с метриками (`BIOETL_METRICS_ENABLED=true`).
     3. Проверьте доступность порта 8000: `Test-NetConnection localhost -Port 8000`.
-- **Метрики показывают UNHEALTHY для storage**: Запустите [Storage Debugger](../04-reference/developer-tools.md) для проверки прав доступа к папкам `data/`.
+- **Метрики показывают UNHEALTHY для storage**: Проверьте права доступа к папкам `data/`.
 
 ## 5. Ссылки
 - [Архитектурное решение ADR-017 (Observability)](../02-architecture/decisions/ADR-017-observability-architecture.md)
