@@ -10,12 +10,13 @@ This checklist documents the pre-release verification completed for BioETL v5.9.
 
 ### 5.1. Build & Test Verification
 
-| Command        | Status  | Notes                                                |
-| -------------- | ------- | ---------------------------------------------------- |
-| `make clean`   | ✅ Pass | Build artifacts cleaned                              |
-| `make install` | ✅ Pass | Dependencies installed via uv                        |
-| `make lint`    | ✅ Pass | ruff: All checks passed, mypy: 0 issues in 389 files |
-| `make test`    | ✅ Pass | 5,277 tests green (serial mode)                      |
+| Command                | Status  | Notes                                                |
+| ---------------------- | ------- | ---------------------------------------------------- |
+| `make clean`           | ✅ Pass | Build artifacts cleaned                              |
+| `make clean-preflight` | ✅ Pass | Extended cleanup via `scripts/preflight_cleanup.sh`  |
+| `make install`         | ✅ Pass | Dependencies installed via uv                        |
+| `make lint`            | ✅ Pass | ruff: All checks passed, mypy: 0 issues in 389 files |
+| `make test`            | ✅ Pass | 5,277 tests green (serial mode)                      |
 
 ### 5.2. Smoke Tests
 
@@ -92,6 +93,7 @@ Tests now run correctly with `pytest-xdist` using `--dist loadscope`.
 
 ## Release Steps
 
+1. ✅ Run `make clean-preflight` (or `make clean-preflight DRY_RUN=1` for preview)
 1. ✅ Complete this checklist verification
 1. ✅ Fix urllib3 vulnerability (CVE-2026-21441)
 1. ⏳ Create release branch: `git checkout -b release/v5.9.0`
@@ -99,7 +101,7 @@ Tests now run correctly with `pytest-xdist` using `--dist loadscope`.
 1. ⏳ Push tag: `git push origin v5.9.0`
 1. ⏳ Create GitHub Release with release notes
 
-----------------------------------------------------------------------
+______________________________________________________________________
 
 *Verified: 2026-01-13*
 *Version: 5.9.0*
