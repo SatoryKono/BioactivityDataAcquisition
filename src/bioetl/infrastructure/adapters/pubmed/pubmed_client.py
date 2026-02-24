@@ -175,7 +175,12 @@ class PubMedAdapter(
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch PubMed records."""
+        """Fetch PubMed records.
+
+        Supports checkpoint resume via ``offset`` by skipping the already
+        processed PMID segment before article fetch, which avoids refetching
+        records from completed part of the previous run.
+        """
         if filter_ids:
             effective_filter_field = filter_field or "pmid"
             async for record in self.fetch_filtered(
@@ -187,13 +192,32 @@ class PubMedAdapter(
         if entity_type != "publication":
             raise ValueError("PubMedAdapter only supports 'publication'")
 
+        resume_offset = max(0, offset or 0)
+        if limit is not None and resume_offset >= limit:
+            self.logger.info(
+                "pubmed_resume_offset_reached_limit",
+                offset=resume_offset,
+                limit=limit,
+            )
+            return
+
         search_term = query or "pharmacogenomics[Title/Abstract]"
         pmids = await self._get_pmids(search_term, limit or 10000)
 
         if not pmids:
             return
 
-        async for record in self._yield_articles_from_pmids(pmids, limit):
+        if resume_offset:
+            self.logger.info(
+                "pubmed_resume_skip_processed",
+                offset=resume_offset,
+                pmids_found=len(pmids),
+            )
+            pmids = pmids[resume_offset:]
+
+        remaining_limit = None if limit is None else max(0, limit - resume_offset)
+
+        async for record in self._yield_articles_from_pmids(pmids, remaining_limit):
             yield record
 
     async def fetch_as_models(
