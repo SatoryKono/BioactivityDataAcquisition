@@ -325,7 +325,6 @@
             "mode": "thresholds"
           },
           "decimals": 2,
-          "max": 10,
           "min": 0,
           "thresholds": {
             "mode": "absolute",
@@ -336,29 +335,30 @@
               },
               {
                 "color": "yellow",
-                "value": 2
+                "value": 1
               },
               {
                 "color": "orange",
-                "value": 5
+                "value": 2
               },
               {
                 "color": "red",
-                "value": 10
+                "value": 5
               }
             ]
           },
-          "unit": "s"
+          "unit": "ms"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
+        "w": 6,
         "x": 0,
         "y": 14
       },
-      "id": 3,
+      "id": 103,
+      "maxPerRow": 4,
       "options": {
         "orientation": "auto",
         "reduceOptions": {
@@ -371,14 +371,16 @@
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
+      "repeat": "provider",
+      "repeatDirection": "h",
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum by (le, pipeline) (bioetl_health_check_duration_seconds_bucket{pipeline=~\"$pipeline\"}))",
-          "legendFormat": "{{ pipeline }}",
+          "expr": "histogram_quantile(0.95, bioetl_health_check_latency_ms_bucket{provider=\"$provider\"})",
+          "legendFormat": "{{ provider }}",
           "refId": "A"
         }
       ],
-      "title": "Per-Pipeline Health Check Duration (p95)",
+      "title": "Provider Latency p95 ($provider)",
       "type": "gauge"
     },
     {
@@ -479,6 +481,31 @@
           "value": "$__all"
         },
         "datasource": "Prometheus",
+        "definition": "label_values(bioetl_health_check_latency_ms_bucket, provider)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Provider",
+        "multi": true,
+        "name": "provider",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_health_check_latency_ms_bucket, provider)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "Prometheus",
         "definition": "label_values(bioetl_infrastructure_validated{pipeline=~\"$pipeline\"}, run_id)",
         "hide": 0,
         "includeAll": true,
@@ -519,5 +546,5 @@
   "timezone": "",
   "title": "BioETL Provider Health v2",
   "uid": "bioetl-provider-health-v2",
-  "version": 3
+  "version": 4
 }
