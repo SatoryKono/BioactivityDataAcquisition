@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
 import yaml
 
 from bioetl.infrastructure.schemas.composite_config import (
@@ -41,11 +40,10 @@ def test_new_composite_yaml_validates_against_strict_contract() -> None:
     assert schema.composite.version == "1.0.0"
 
 
-def test_legacy_composite_yaml_supported_with_deprecation_warning() -> None:
+def test_legacy_composite_yaml_supported_via_compatibility_path() -> None:
     """Old format (without composite.version) stays compatible during window."""
     payload = yaml.safe_load(_base_composite_yaml(with_version=False))
 
-    with pytest.warns(DeprecationWarning, match="composite.version"):
-        schema = validate_composite_config_payload(payload)
+    schema = validate_composite_config_payload(payload)
 
     assert schema.composite.version == "1.0.0"

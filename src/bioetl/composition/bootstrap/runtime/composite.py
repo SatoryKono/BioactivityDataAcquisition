@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid4
@@ -572,9 +571,6 @@ def bootstrap_composite_pipeline(
 ) -> CompositePipelineRunner:
     """Bootstrap a CompositePipelineRunner with all dependencies.
 
-    .. deprecated::
-        Use :func:`bootstrap_composite_runner` instead. This alias is kept for
-        backward compatibility and will be removed in a future version.
 
     Args:
         config: Composite pipeline configuration.
@@ -584,11 +580,6 @@ def bootstrap_composite_pipeline(
     Returns:
         CompositePipelineRunner ready for execution.
     """
-    warnings.warn(
-        "bootstrap_composite_pipeline() is deprecated, use bootstrap_composite_runner() instead",
-        DeprecationWarning,
-        stacklevel=2,
-    )
     return bootstrap_composite_runner(config=config, runtime=runtime, run_id=run_id)
 
 
