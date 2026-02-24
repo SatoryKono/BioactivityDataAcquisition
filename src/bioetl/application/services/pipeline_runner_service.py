@@ -120,6 +120,7 @@ class RunOptions:
     Attributes:
         run_type: Type of run (incremental, backfill, rebuild). Default: incremental.
         resume: Whether to resume from the last checkpoint.
+        start_offset: Manual start offset (overrides checkpoint). Requires incremental.
         limit: Maximum number of records to process.
         dry_run: Preview mode without execution.
         input_csv: Path to CSV file with filter IDs.
@@ -141,6 +142,7 @@ class RunOptions:
 
     run_type: str = "incremental"
     resume: bool = False
+    start_offset: int | None = None
     limit: int | None = None
     dry_run: bool = False
     input_csv: str | None = None
@@ -383,6 +385,7 @@ class PipelineRunnerService:
             run_id=run_id,
             run_type=RunType(options.run_type),
             resume=options.resume,
+            start_offset=options.start_offset,
             limit=options.limit,
             dry_run=options.dry_run,
             input_filter=input_filter,

@@ -352,6 +352,7 @@ class PipelineRunContext:
     # Truly optional fields (None means "not specified, use config default")
     limit: int | None = None
     query: str | None = None
+    start_offset: int | None = None
 
     # Logging configuration
     log_level: str = "INFO"
