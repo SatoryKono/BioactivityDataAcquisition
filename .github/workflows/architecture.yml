@@ -67,7 +67,7 @@ jobs:
         run: |
           # Run tests with coverage threshold (parallel for speed)
           # Exclude e2e and benchmark tests (benchmark tests require manual run)
-          uv run pytest tests/ -m "not e2e and not benchmark" \
+          uv run pytest tests/ -m "not e2e and not benchmark and not serial" \
             --ignore=tests/e2e --ignore=tests/contract \
             -n auto --dist loadscope \
             --cov=src/bioetl \

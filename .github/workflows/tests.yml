@@ -124,7 +124,7 @@ jobs:
           # Quick feedback: run unit tests without slow markers
           # Uses HYPOTHESIS_PROFILE=fast for minimal property-based examples
           HYPOTHESIS_PROFILE=fast uv run pytest tests/unit/ tests/architecture/ \
-            -m "not slow" \
+            -m "not slow and not serial" \
             -n auto --dist loadscope \
             -q --tb=short
 
@@ -189,6 +189,7 @@ jobs:
       - name: Run Tests (${{ matrix.test-group.name }} on Python ${{ matrix.python-version }})
         run: |
           uv run pytest ${{ matrix.test-group.path }} \
+            -m "not serial" \
             -n auto --dist loadscope \
             --cov=src/bioetl \
             --cov-report=xml:coverage-${{ matrix.test-group.name }}-py${{ matrix.python-version }}.xml \
@@ -243,17 +244,18 @@ jobs:
       - name: Install dependencies (frozen lock)
         run: uv sync --frozen --extra dev --extra tracing
 
-      - name: Run Full Tests with Coverage Threshold
+      - name: Run Full Tests with Coverage Threshold (resilient)
         run: |
           # Final coverage verification: 85% threshold (RULES.md §4.2)
-          # Exclude e2e and benchmark tests (benchmark tests require manual run)
-          uv run pytest tests/ -m "not e2e and not benchmark" \
-            --ignore=tests/e2e --ignore=tests/contract \
-            -n auto --dist loadscope \
-            --cov=src/bioetl \
-            --cov-report=term-missing \
-            --cov-report=xml:coverage.xml \
-            --cov-fail-under=85
+          # Runs parallel first, then falls back to serial on xdist worker crashes.
+          uv run python scripts/ci/run_pytest_resilient.py \
+            --target tests/ \
+            --reports-dir reports/pytest \
+            --parallel-marker "not e2e and not benchmark and not serial" \
+            --parallel-addopts "-q --tb=short --ignore=tests/e2e --ignore=tests/contract -n auto --dist loadscope --cov=src/bioetl --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=85" \
+            --fallback-addopts "-q --tb=short --ignore=tests/e2e --ignore=tests/contract -p no:xdist --cov=src/bioetl --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=85" \
+            --serial-marker "serial and not e2e and not benchmark" \
+            --serial-addopts "-q --tb=short -p no:xdist --ignore=tests/e2e --ignore=tests/contract"
 
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
@@ -261,4 +263,13 @@ jobs:
         with:
           name: coverage-report
           path: coverage.xml
+          retention-days: 30
+
+      - name: Upload resilient pytest diagnostics
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pytest-resilient-diagnostics
+          path: reports/pytest/
+          if-no-files-found: warn
           retention-days: 30
