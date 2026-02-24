@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Codex Agent Governance Profile**: Added `docs/00-project/agents/CODEX.md` with Architecture Auditor + Implementation Engineer protocol, verification checklist, and BioETL-specific compliance guardrails; synchronized agent index and project navigator references.
+
 - **End-to-End Metrics Audit**: Registered 32+ new Prometheus metrics that were previously silently dropped
   - Pipeline lifecycle: `pipeline_runs_total`, `phase_duration_seconds`
   - Transformer: `transform_duration_seconds`, `transform_errors_total`

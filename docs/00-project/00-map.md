@@ -31,7 +31,7 @@
 |----------|----------|----------|
 | **Public-facing** | English | README.md, CONTRIBUTING.md, CHANGELOG.md |
 | **User guides** | English | docs/03-guides/*, docs/04-reference/* |
-| **Internal governance** | Russian | RULES.md, AGENT.md, docs/00-project/governance/* |
+| **Internal governance** | Russian | RULES.md, AGENT.md, CLAUDE.md, GEMINI.md, CODEX.md, docs/00-project/governance/* |
 | **Architecture docs** | Russian | docs/02-architecture/* |
 | **Code comments** | Russian | Docstrings, inline comments |
 
