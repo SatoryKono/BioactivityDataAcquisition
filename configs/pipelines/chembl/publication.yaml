@@ -6,6 +6,7 @@
 pipeline_name: chembl_publication
 provider: chembl
 entity_type: publication
+schema_file: "../../schemas/chembl/publication.yaml"
 # Override: v2.1.0 schema redesign after ADR-024 naming migration
 version: "2.1.0"
 description: "Extract scientific publications from ChEMBL API"
