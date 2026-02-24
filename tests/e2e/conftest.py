@@ -16,18 +16,28 @@ from __future__ import annotations
 import os
 from collections.abc import Generator
 from pathlib import Path
+from typing import Any
 from uuid import uuid4
 
 import pytest
 from deltalake import DeltaTable
 
 from bioetl.domain.context import PipelineRunContext
+from bioetl.domain.exceptions.network import ExternalServiceError
 from bioetl.domain.types import RunType
 
 # Default timeout for E2E tests (seconds)
 # E2E tests run full pipelines with HTTP calls, Delta Lake operations,
 # and PyArrow imports which can be slow, especially on Python 3.14
 E2E_DEFAULT_TIMEOUT = 120
+_TRANSIENT_EXTERNAL_ERROR_MARKERS: tuple[str, ...] = (
+    "429",
+    "500",
+    "502",
+    "503",
+    "504",
+    "timeout",
+)
 
 
 _E2E_VCR_CASSETTE_DIR_BY_TEST: dict[str, str] = {
@@ -254,6 +264,26 @@ def create_test_context(
         query=query,
         input_filter=input_filter,
     )
+
+
+def _is_transient_external_error(exc: ExternalServiceError) -> bool:
+    """Return True when ExternalServiceError is likely upstream/transient."""
+    message = str(exc).lower()
+    return any(marker in message for marker in _TRANSIENT_EXTERNAL_ERROR_MARKERS)
+
+
+async def run_pipeline_or_skip_transient(context: PipelineRunContext) -> Any:
+    """Run pipeline and skip current test on transient upstream failures."""
+    from bioetl.composition.bootstrap import bootstrap_pipeline_runner
+
+    runner = bootstrap_pipeline_runner(context)
+    try:
+        await runner.run()
+    except ExternalServiceError as exc:
+        if _is_transient_external_error(exc):
+            pytest.skip(f"Transient upstream/API error during E2E execution: {exc}")
+        raise
+    return runner
 
 
 # ============================================================================

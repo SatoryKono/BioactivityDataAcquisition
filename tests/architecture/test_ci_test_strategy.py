@@ -18,6 +18,9 @@ def test_coverage_job_uses_resilient_pytest_runner() -> None:
     )
     assert '--parallel-marker "not e2e and not benchmark and not serial"' in workflow
     assert '--serial-marker "serial and not e2e and not benchmark"' in workflow
+    assert "--parallel-timeout-seconds 900" in workflow
+    assert "--fallback-timeout-seconds 1200" in workflow
+    assert "--serial-timeout-seconds 1200" in workflow
 
 
 def test_parallel_ci_jobs_exclude_serial_marker() -> None:
@@ -28,4 +31,7 @@ def test_parallel_ci_jobs_exclude_serial_marker() -> None:
     )
     assert '-m "not serial"' in workflow, (
         "test-matrix job must exclude serial marker in parallel mode"
+    )
+    assert "--max-worker-restart=0" in workflow, (
+        "parallel CI jobs must fail fast on worker restart loops"
     )

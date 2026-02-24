@@ -170,9 +170,10 @@ class TestTargetExtractionParams:
         assert target_input_filter_field not in extraction_params.params
 
     @pytest.mark.vcr("chembl_target_filtered.yaml")
-    @pytest.mark.skip(
+    @pytest.mark.skipif(
+        not (CASSETTE_DIR / "chembl_target_filtered.yaml").exists(),
         reason="VCR cassette not yet recorded. "
-        "Record with: VCR_RECORD_MODE=new_episodes pytest -k test_target_filtered_api_request"
+        "Record with: VCR_RECORD_MODE=new_episodes pytest -k test_target_filtered_api_request",
     )
     async def test_target_filtered_api_request(
         self,

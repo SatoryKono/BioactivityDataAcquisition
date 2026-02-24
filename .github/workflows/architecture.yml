@@ -69,7 +69,7 @@ jobs:
           # Exclude e2e and benchmark tests (benchmark tests require manual run)
           uv run pytest tests/ -m "not e2e and not benchmark and not serial" \
             --ignore=tests/e2e --ignore=tests/contract \
-            -n auto --dist loadscope \
+            -n auto --dist loadscope --max-worker-restart=0 \
             --cov=src/bioetl \
             --cov-report=term-missing \
             --cov-fail-under=85
