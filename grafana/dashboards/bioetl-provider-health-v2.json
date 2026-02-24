@@ -501,7 +501,7 @@
         "name": "provider",
         "options": [],
         "query": {
-          "query": "label_values(bioetl_health_check_success_total, provider)",
+          "query": "label_values(bioetl_health_check_latency_ms_bucket, provider)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
