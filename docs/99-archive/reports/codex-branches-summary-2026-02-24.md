@@ -102,11 +102,115 @@
 | Naming Config | 2 | 4 | +300 | −2 | configs, docs |
 | **Итого** | **18** | **79** | **+1140** | **−1154** | — |
 
-## Рекомендации по интеграции
+## План консолидации
 
-1. **Начать с Cleanup** (группа 3) — минимальный риск, нет конфликтов.
-2. **Deprecated код** (группа 2) — определиться между жёстким удалением (`remove-deprecated-code-from-bioetl`) и мягким (`remove-deprecated-code-in-bioetl`). Точечные ветки `-oqx9dz` и `-6ecjp0` независимы.
-3. **Метрики** (группа 1) — мержить `expand-metricsport` первой, затем `enforce-single-canonical-mapping`, в конце `update-metrics-implementation-instructions`.
-4. **PubMed Resume** (группа 4) — независимая, мержить в любой момент.
-5. **Дашборды** (группа 5) — мержить последовательно, начиная с `update-bioetl-provider-health-dashboard` (baseline семантика), затем остальные.
-6. **Naming Config** (группа 6) — выбрать одну из двух веток (`-r1a4c4` предпочтительнее — более свежая).
+### Карта конфликтов (по файлам)
+
+```
+observability.py ─────── expand-metricsport ◄──► enforce-single-canonical
+prometheus_metrics.py ── expand-metricsport ◄──► update-metrics-instructions
+metrics.py ────────────── expand-metricsport ◄──► enforce-single-canonical
+
+12 файлов bootstrap ──── remove-deprecated-from ◄══► remove-deprecated-in  (ВЗАИМОИСКЛЮЧАЮЩИЕ)
+
+provider-health-v2.json ── update-provider-health ◄──► update-provider-health-dss28t
+                                                  ◄──► update-grafana-dashboard-panels
+                                                  ◄──► enforce-single-canonical-mapping
+dq-v2.json ──────────────── add-datalinks ◄──► update-grafana-dashboard-panels
+                                          ◄──► update-gauge-panels
+overview-v2.json ────────── add-datalinks ◄──► update-grafana-dashboard-panels
+                                          ◄──► update-gauge-panels
+```
+
+### Решения по дублирующимся веткам
+
+| Пара | Выбор | Обоснование |
+|------|-------|-------------|
+| `remove-deprecated-from` vs `remove-deprecated-in` | **`remove-deprecated-in`** | Сохраняет alias-тесты (`test_alias_bootstrap_functions.py`) вместо удаления coverage. `remove-deprecated-from` удаляет `__init__.py` файлов пакетов — потенциально ломает импорты. |
+| `conduct-naming-compliance-audit` vs `-r1a4c4` | **`-r1a4c4`** | Более свежая. YAML-структура проще (`adr_024_known_exceptions` vs `exception_registry`). Отчёт в плоской директории — консистентно с остальными отчётами. |
+
+### Ветки к отклонению
+
+| Ветка | Причина |
+|-------|---------|
+| `codex/remove-deprecated-code-from-bioetl` | Дублируется `remove-deprecated-in`, но агрессивнее — удаляет `__init__.py` и все тесты без замены |
+| `codex/conduct-naming-compliance-audit` | Дублируется `-r1a4c4`, менее удобная структура YAML |
+
+### Фазы интеграции
+
+```
+Фаза 1 ──┬── cleanup-dead-and-unused-code          (5 py, −15)
+(cleanup) └── cleanup-dead-and-unused-code-3j1ahg   (5 py, −8)
+              Нет пересечений между собой. Нет пересечений с другими фазами.
+              Merge order: любой. Конфликты: нет.
+
+Фаза 2 ──┬── remove-deprecated-code-in-bioetl       (14 py, +94/−321)
+(deprec.) ├── remove-deprecated-code-from-bioetl-oqx9dz  (2 py, +4/−15)
+          └── remove-deprecated-code-from-bioetl-6ecjp0   (1 py, +12/−60)
+              Основная ветка: `-in-bioetl`. Точечные `-oqx9dz` и `-6ecjp0` не
+              пересекаются с ней. Merge order: основная первой, потом точечные.
+              Конфликты: нет (разные файлы).
+
+Фаза 3 ──── refactor-code-for-data-merging-after-reload-1sq8e7  (2 py, +76/−2)
+(pubmed)    Полностью изолирована (pubmed_client.py + тест).
+            Конфликты: нет.
+
+Фаза 4 ──┬── expand-metricsport-with-new-methods    (14 py, +260/−54)
+(metrics) ├── enforce-single-canonical-mapping       (4 py + 1 json, +148/−12)
+          └── update-metrics-implementation-instructions  (2 py + 1 md, +35/−1)
+              Конфликтные файлы:
+              • observability.py — expand-metricsport + enforce-single (оба добавляют методы)
+              • prometheus_metrics.py — expand-metricsport + update-metrics (оба расширяют класс)
+              • metrics.py — expand-metricsport + enforce-single (оба модифицируют)
+              Merge order: expand-metricsport → enforce-single-canonical → update-metrics.
+              Конфликты: ОЖИДАЮТСЯ в 3 файлах, ручное разрешение.
+
+Фаза 5 ──┬── update-bioetl-provider-health-dashboard     (1 json, +106/−48)  ← базовая семантика
+(grafana) ├── update-bioetl-provider-health-dashboard-dss28t  (1 json, +38/−11)
+          ├── update-grafana-dashboard-panels              (3 json, +26/−132)
+          ├── add-datalinks-and-version-increment          (2 json, +27/−4)
+          ├── update-gauge-panels-in-grafana-dashboards    (2 json, +6/−10)
+          └── update-grafana-dashboard-settings            (1 json, +3/−3)  ← изолирована
+              Конфликтная матрица:
+              • provider-health-v2.json: 3 ветки + enforce-single из Фазы 4
+              • dq-v2.json: 3 ветки
+              • overview-v2.json: 3 ветки
+              • bioetl-simple.json: только update-grafana-dashboard-settings
+              Merge order: provider-health (baseline) → dss28t (gauge) →
+                dashboard-panels (layout) → datalinks → gauge-panels → settings.
+              Конфликты: ГАРАНТИРОВАНЫ в JSON. Рекомендация — после первого мержа
+              rebas'ить оставшиеся и разрешать по одной.
+
+Фаза 6 ──── conduct-naming-compliance-audit-r1a4c4  (1 yaml + 1 md, +166/−1)
+(naming)    Изолирована. Конфликты: нет.
+```
+
+### Визуальная последовательность
+
+```
+main ─── Фаза 1 (cleanup) ─── Фаза 2 (deprecated) ─── Фаза 3 (pubmed) ───┐
+         2 ветки, 0 конфл.     3 ветки, 0 конфл.       1 ветка, 0 конфл.  │
+                                                                            │
+    ┌───────────────────────────────────────────────────────────────────────┘
+    │
+    └─── Фаза 4 (metrics) ──── Фаза 5 (grafana) ──── Фаза 6 (naming) ─── ✓
+         3 ветки, ~3 конфл.     6 веток, ~8 конфл.    1 ветка, 0 конфл.
+```
+
+### Итого
+
+| Метрика | Значение |
+|---------|----------|
+| Веток к интеграции | 16 из 18 (2 отклонены как дубли) |
+| Фаз | 6 |
+| Ожидаемых конфликтов | ~11 (3 в метриках, ~8 в дашбордах) |
+| Безконфликтных фаз | 4 из 6 (фазы 1–3, 6) |
+| Фаз с ручным разрешением | 2 (фазы 4, 5) |
+
+### Рекомендации
+
+1. **Фазы 1–3** можно выполнить автоматически (merge --no-ff) без ручного вмешательства.
+2. **Фаза 4 (metrics)** — после мержа `expand-metricsport`, rebase двух оставшихся веток на main и разрешить конфликты в `observability.py`, `prometheus_metrics.py`, `metrics.py`.
+3. **Фаза 5 (grafana)** — наиболее трудоёмкая. JSON-конфликты плохо мержатся автоматически. Альтернатива: взять самую полную ветку (`update-grafana-dashboard-panels`) как базу и cherry-pick отдельных изменений из остальных.
+4. **Тесты** — после каждой фазы прогонять `pytest tests/architecture/ -v` и `pytest tests/unit/ -x`.
+5. **Параллелизация** — фазы 1–3 можно мержить параллельно (нет пересечений), затем merge main в рабочую ветку и продолжить фазы 4–6 последовательно.
