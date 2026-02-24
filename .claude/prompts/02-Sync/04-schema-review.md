@@ -2,31 +2,31 @@
 
 *Priority: medium | Version: 1.0 | Aligned with RULES.md v5.19*
 
----
+______________________________________________________________________
 
 ## Goal
 
 Review schema coverage for a given `{{source}}`: verify that every DataFrame column produced by the transformer is covered by both a Pandera schema and a Pydantic/dataclass entity, with correct types and constraints.
 
----
+______________________________________________________________________
 
 ## Input
 
-| Parameter | Source | Example |
-|-----------|--------|---------|
-| `{{source}}` | User argument | `chembl`, `chembl/activity` |
-| schemas | `src/bioetl/domain/schemas/{{provider}}/` | Pandera DataFrameModel |
-| entities | `src/bioetl/domain/entities/{{provider}}.py` | Dataclass entities |
-| gold contracts | `src/bioetl/domain/contracts/gold/{{provider}}.py` | Gold Pandera schemas |
-| transformers | `src/bioetl/application/pipelines/{{provider}}/{{entity}}_transformer.py` | Field producers |
+| Parameter      | Source                                                                    | Example                     |
+| -------------- | ------------------------------------------------------------------------- | --------------------------- |
+| `{{source}}`   | User argument                                                             | `chembl`, `chembl/activity` |
+| schemas        | `src/bioetl/domain/schemas/{{provider}}/`                                 | Pandera DataFrameModel      |
+| entities       | `src/bioetl/domain/entities/{{provider}}.py`                              | Dataclass entities          |
+| gold contracts | `src/bioetl/domain/contracts/gold/{{provider}}.py`                        | Gold Pandera schemas        |
+| transformers   | `src/bioetl/application/pipelines/{{provider}}/{{entity}}_transformer.py` | Field producers             |
 
----
+______________________________________________________________________
 
 ## Output
 
 A checklist in Markdown format, suitable for a PR body or review comment.
 
----
+______________________________________________________________________
 
 ## Algorithm
 
@@ -35,12 +35,14 @@ A checklist in Markdown format, suitable for a PR body or review comment.
 Parse each transformer's `_transform_impl` method to extract the `business_data` dict keys. These are the columns that will appear in the Silver DataFrame.
 
 Also collect system columns added by `BaseTransformer`:
+
 - `entity_id`, `content_hash`
 - `_run_id`, `_run_type`, `_source_batch_id`, `_ingestion_ts`, `_index`
 
 ### 2. Collect schema fields
 
 From Pandera schema (Silver):
+
 ```python
 # src/bioetl/domain/schemas/{{provider}}/{{entity}}.py
 class EntitySchema(pa.DataFrameModel):
@@ -48,6 +50,7 @@ class EntitySchema(pa.DataFrameModel):
 ```
 
 From domain entity:
+
 ```python
 # src/bioetl/domain/entities/{{provider}}.py
 @dataclass
@@ -56,6 +59,7 @@ class Entity(BaseEntity):
 ```
 
 From Gold contract:
+
 ```python
 # src/bioetl/domain/contracts/gold/{{provider}}.py
 class EntityGoldSchema(pa.DataFrameModel):
@@ -66,9 +70,9 @@ class EntityGoldSchema(pa.DataFrameModel):
 
 For each column in transformer output:
 
-| Column | Transformer | Silver Schema | Entity | Gold Schema | Type Match | Nullable Match | Notes |
-|--------|-------------|---------------|--------|-------------|------------|----------------|-------|
-| `field` | `file:line` | `file:line` / MISSING | `file:line` / MISSING | `file:line` / MISSING | OK/MISMATCH | OK/MISMATCH | |
+| Column  | Transformer | Silver Schema         | Entity                | Gold Schema           | Type Match  | Nullable Match | Notes |
+| ------- | ----------- | --------------------- | --------------------- | --------------------- | ----------- | -------------- | ----- |
+| `field` | `file:line` | `file:line` / MISSING | `file:line` / MISSING | `file:line` / MISSING | OK/MISMATCH | OK/MISMATCH    |       |
 
 ### 4. Check architectural compliance
 
@@ -114,7 +118,7 @@ For each column in transformer output:
 - [ ] **ISSUE:** `FooSchema` in `infrastructure/` — move to `domain/schemas/`
 ```
 
----
+______________________________________________________________________
 
 ## Commit & PR Convention (`{{C}}`)
 
@@ -122,7 +126,7 @@ For each column in transformer output:
 - **PR title:** `refactor(schema): {{source}} coverage gaps`
 - **Labels:** `schema`
 
----
+______________________________________________________________________
 
 ## Example
 
@@ -137,7 +141,7 @@ Adding `tpsa` field to ChEMBL molecule:
   - Gold schema: chembl.py:ChemblMoleculeGoldSchema (MISSING)
 ```
 
----
+______________________________________________________________________
 
 ## Constraints
 
@@ -146,3 +150,10 @@ Adding `tpsa` field to ChEMBL molecule:
 - Respect EXC-015: Config classes with defaults are valid.
 - Fields starting with `_` are system/lineage fields — verify they follow `BaseTransformer` convention.
 - If schema files don't exist, flag as `[SCHEMA FILE NOT FOUND]`.
+
+## ADR Status Guardrail
+
+- Перед выводами по ADR пересчитать baseline как фактическое количество файлов `docs/02-architecture/decisions/ADR-*.md` (не фиксировать число вручную).
+- Разрешённые базовые статусы ADR: `Accepted`, `Superseded`, `Deprecated`, `Added`.
+- `Superseded` НЕ считать автоматическим дефектом: это нормальная эволюция архитектуры при наличии ADR-замены/контекста.
+- Дефектом считать только отсутствие статуса, невалидный статус или `Superseded` без связи с заменяющим ADR.

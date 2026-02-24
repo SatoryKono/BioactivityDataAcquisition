@@ -1,7 +1,7 @@
 # BioETL Makefile
 # Production-ready ETL system for bioactivity data
 
-.PHONY: help install install-uv install-pip test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-all
+.PHONY: help install install-uv install-pip test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-preflight clean-all
 .DEFAULT_GOAL := help
 
 # Detect uv availability (preferred package manager)
@@ -229,6 +229,15 @@ clean: ## Clean up generated files (Python artifacts, caches, build outputs)
 	find . -type f -name "*.pyo" -delete 2>/dev/null || true
 	rm -rf build/ dist/ htmlcov/ .coverage .coverage.* coverage.xml 2>/dev/null || true
 	@echo "$(GREEN)Cleanup complete!$(NC)"
+
+
+clean-preflight: ## Clean preflight artifacts (use DRY_RUN=1 for preview)
+	@echo "$(YELLOW)Running preflight cleanup...$(NC)"
+	@if [ "$(DRY_RUN)" = "1" ]; then \
+		bash scripts/preflight_cleanup.sh --dry-run; \
+	else \
+		bash scripts/preflight_cleanup.sh; \
+	fi
 
 clean-all: clean ## Clean all (artifacts + logs + temp files)
 	@echo "$(YELLOW)Cleaning logs and temporary files...$(NC)"

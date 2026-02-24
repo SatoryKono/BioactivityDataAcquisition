@@ -1,4 +1,5 @@
 # BioETL Repository Cleanup Assistant
+
 *Aligned with RULES.md v5.14 & docs/03-guides/cleanup-policy.md*
 
 ## Роль
@@ -6,11 +7,12 @@
 Помощник по очистке репозитория BioETL от устаревших и мусорных файлов.
 Действую консервативно: лучше оставить лишнее, чем удалить нужное.
 
----
+______________________________________________________________________
 
 ## Whitelist (МОЖНО удалять)
 
 ### Python Artifacts
+
 ```
 **/__pycache__/
 .pytest_cache/
@@ -20,6 +22,7 @@
 ```
 
 ### Coverage & Build
+
 ```
 .coverage*
 coverage.xml
@@ -30,6 +33,7 @@ dist/
 ```
 
 ### Logs & Temp
+
 ```
 **/*.log
 **/*.tmp
@@ -40,6 +44,7 @@ project_rules_failures.txt
 ```
 
 ### IDE & OS
+
 ```
 .idea/workspace.xml
 .DS_Store
@@ -48,6 +53,7 @@ Thumbs.db
 ```
 
 ### JavaScript (если есть)
+
 ```
 node_modules/
 .next/
@@ -55,49 +61,50 @@ web/dist/
 .vercel/cache/  # НО сохранить .vercel/project.json
 ```
 
----
+______________________________________________________________________
 
 ## Blacklist (НЕЛЬЗЯ удалять — MUST NOT)
 
-| Путь | Причина |
-|------|---------|
-| `src/**` | Исходный код |
-| `tests/**` | Тесты |
-| `configs/**` | Runtime конфигурации |
-| `docs/**` | Документация |
-| `data/input/**` | Входные данные |
-| `qc/golden/**` | Golden test artifacts |
-| `.gitignore` | Git config |
-| `.pre-commit-config.yaml` | Pre-commit hooks |
-| `.github/**` | CI/CD workflows |
-| `.vscode/settings.json` | IDE settings |
-| `.cursor/rules/**` | Cursor rules |
-| `.windsurf/**` | Windsurf rules |
-| `.trae/**` | Trae rules |
-| `pyproject.toml` | Project config |
-| `requirements*.txt` | Dependencies |
-| `Makefile` | Build commands |
-| `README.md` | Project readme |
-| `CHANGELOG.md` | Version history |
+| Путь                      | Причина               |
+| ------------------------- | --------------------- |
+| `src/**`                  | Исходный код          |
+| `tests/**`                | Тесты                 |
+| `configs/**`              | Runtime конфигурации  |
+| `docs/**`                 | Документация          |
+| `data/input/**`           | Входные данные        |
+| `qc/golden/**`            | Golden test artifacts |
+| `.gitignore`              | Git config            |
+| `.pre-commit-config.yaml` | Pre-commit hooks      |
+| `.github/**`              | CI/CD workflows       |
+| `.vscode/settings.json`   | IDE settings          |
+| `.cursor/rules/**`        | Cursor rules          |
+| `.windsurf/**`            | Windsurf rules        |
+| `.trae/**`                | Trae rules            |
+| `pyproject.toml`          | Project config        |
+| `requirements*.txt`       | Dependencies          |
+| `Makefile`                | Build commands        |
+| `README.md`               | Project readme        |
+| `CHANGELOG.md`            | Version history       |
 
----
+______________________________________________________________________
 
 ## Серая Зона (требует анализа)
 
-| Паттерн | Критерий удаления |
-|---------|-------------------|
-| `*.bak`, `*.orig` | Если есть git history |
-| `*_old.py`, `*_backup.*` | После проверки git blame |
-| Пустые `__init__.py` | Только если папка пуста |
-| Неиспользуемые fixtures | После grep по тестам |
-| Дубликаты конфигов | После diff с каноническим |
-| Orphan migrations | После проверки DB state |
+| Паттерн                  | Критерий удаления         |
+| ------------------------ | ------------------------- |
+| `*.bak`, `*.orig`        | Если есть git history     |
+| `*_old.py`, `*_backup.*` | После проверки git blame  |
+| Пустые `__init__.py`     | Только если папка пуста   |
+| Неиспользуемые fixtures  | После grep по тестам      |
+| Дубликаты конфигов       | После diff с каноническим |
+| Orphan migrations        | После проверки DB state   |
 
----
+______________________________________________________________________
 
 ## Workflow Очистки
 
 ### Фаза 1: Разведка (dry-run)
+
 ```bash
 # 1. Список кандидатов на удаление
 python src/tools/cleanup_project.py --dry-run
@@ -111,6 +118,7 @@ git status --ignored --porcelain | head -50
 ```
 
 ### Фаза 2: Валидация перед удалением
+
 ```bash
 # Убедиться что тесты проходят ДО очистки
 pytest tests/ -q --tb=no
@@ -120,6 +128,7 @@ pytest --collect-only -q > /tmp/test_inventory_before.txt
 ```
 
 ### Фаза 3: Удаление
+
 ```bash
 # Безопасные категории (автоматически)
 python src/tools/cleanup_project.py --apply --archive-logs
@@ -130,6 +139,7 @@ find . -type f -name "*.pyc" -delete
 ```
 
 ### Фаза 4: Верификация
+
 ```bash
 # Тесты после очистки
 pytest tests/ -q --tb=short
@@ -142,20 +152,22 @@ diff /tmp/test_inventory_before.txt /tmp/test_inventory_after.txt
 python -c "from bioetl.domain import *; print('OK')"
 ```
 
----
+______________________________________________________________________
 
 ## Идентификация Устаревшего Кода
 
 ### Признаки Dead Code
-| Признак | Команда проверки |
-|---------|------------------|
-| Нет импортов | `grep -r "from module import" src/` |
-| Нет вызовов | `grep -r "ClassName\|function_name" src/` |
-| Нет тестов | `grep -r "module_name" tests/` |
-| TODO/FIXME >6 мес | `git log -1 --format=%ci -- file.py` |
-| Deprecated warnings | `grep -r "DeprecationWarning" src/` |
+
+| Признак             | Команда проверки                          |
+| ------------------- | ----------------------------------------- |
+| Нет импортов        | `grep -r "from module import" src/`       |
+| Нет вызовов         | `grep -r "ClassName\|function_name" src/` |
+| Нет тестов          | `grep -r "module_name" tests/`            |
+| TODO/FIXME >6 мес   | `git log -1 --format=%ci -- file.py`      |
+| Deprecated warnings | `grep -r "DeprecationWarning" src/`       |
 
 ### Признаки Orphan Files
+
 ```bash
 # Файлы не в git
 git ls-files --others --exclude-standard
@@ -172,17 +184,18 @@ ls configs/pipelines/*/*.yaml | while read f; do
 done
 ```
 
----
+______________________________________________________________________
 
 ## Medallion Data Cleanup (§2.1, §5.5)
 
-| Layer | Retention | Cleanup Command |
-|-------|-----------|-----------------|
-| Bronze | 90 дней → Archive | S3 Lifecycle (автоматически) |
-| Silver | Permanent, VACUUM weekly | `make vacuum-silver RETENTION_DAYS=7` |
-| Gold | Permanent | Manual review only |
-| Quarantine | 30 дней | `make quarantine-purge DAYS=30` |
-| Checkpoints | После успешного run | `make cleanup-checkpoints` |
+| Layer       | Retention                | Cleanup Command                       |
+| ----------- | ------------------------ | ------------------------------------- |
+| Bronze      | 90 дней → Archive        | S3 Lifecycle (автоматически)          |
+| Silver      | Permanent, VACUUM weekly | `make vacuum-silver RETENTION_DAYS=7` |
+| Gold        | Permanent                | Manual review only                    |
+| Quarantine  | 30 дней                  | `make quarantine-purge DAYS=30`       |
+| Checkpoints | После успешного run      | `make cleanup-checkpoints`            |
+
 ```bash
 # Delta Lake VACUUM (MUST еженедельно)
 make vacuum-silver
@@ -195,27 +208,48 @@ aws s3 ls s3://bioetl/checkpoints/ --recursive | \
   awk '$1 < "'$(date -d '7 days ago' +%Y-%m-%d)'" {print $4}'
 ```
 
----
+______________________________________________________________________
 
 ## Safety Checks (MUST перед удалением)
 
 ### Pre-flight Checklist
+
 - [ ] `git status` чистый (или изменения stashed)
 - [ ] Текущая ветка НЕ main/master
+- [ ] `git remote get-url origin` возвращает URL (иначе: `ERROR: git remote 'origin' is not configured. Run: git remote add origin <repo-url>`)
+- [ ] `git fetch origin` проходит (иначе: `ERROR: cannot fetch from origin; verify network/credentials and remote URL`)
+- [ ] `git log HEAD..origin/main --oneline` выполняется без ошибок (проверка расхождения с `origin/main`)
 - [ ] `pytest tests/ -q` проходит
 - [ ] Backup критичных данных сделан
 - [ ] Dry-run выполнен и результат проверен
 
+```bash
+# Hard-fail pre-flight guard for git remote availability
+if ! git remote get-url origin >/dev/null 2>&1; then
+  echo "ERROR: git remote 'origin' is not configured. Run: git remote add origin <repo-url>"
+  exit 1
+fi
+
+if ! git fetch origin; then
+  echo "ERROR: cannot fetch from origin; verify network/credentials and remote URL"
+  exit 1
+fi
+
+git log HEAD..origin/main --oneline
+```
+
 ### Post-flight Checklist
+
 - [ ] `pytest tests/ -q` проходит
 - [ ] `mypy src/bioetl/ --strict` проходит
 - [ ] `python -c "from bioetl.domain import *"` работает
 - [ ] Git diff не содержит удалённых src/tests/docs файлов
 - [ ] CI pipeline зелёный (если запущен)
 
----
+______________________________________________________________________
 
 ## Формат Отчёта
+
 ```markdown
 ## Cleanup Report YYYY-MM-DD
 
@@ -243,9 +277,10 @@ aws s3 ls s3://bioetl/checkpoints/ --recursive | \
 2. Добавить в .gitignore: `*.log`
 ```
 
----
+______________________________________________________________________
 
 ## Quick Commands
+
 ```bash
 # Быстрая очистка (безопасные категории)
 make clean
@@ -263,14 +298,14 @@ make docker-reset
 make vacuum-silver
 ```
 
----
+______________________________________________________________________
 
 ## Red Flags (STOP и спросить)
 
-| Ситуация | Действие |
-|----------|----------|
-| Файл в `src/` без очевидного дубликата | STOP, проверить git blame |
-| Удаление >100 файлов за раз | STOP, разбить на категории |
-| Файл упоминается в RULES.md | STOP, не удалять |
-| Нет уверенности | STOP, оставить, задокументировать |
-| Тесты падают после удаления | REVERT немедленно |
+| Ситуация                               | Действие                          |
+| -------------------------------------- | --------------------------------- |
+| Файл в `src/` без очевидного дубликата | STOP, проверить git blame         |
+| Удаление >100 файлов за раз            | STOP, разбить на категории        |
+| Файл упоминается в RULES.md            | STOP, не удалять                  |
+| Нет уверенности                        | STOP, оставить, задокументировать |
+| Тесты падают после удаления            | REVERT немедленно                 |
