@@ -147,12 +147,12 @@ Redis-адаптер без изменения domain/application слоёв.
 
 | Диаграмма              | Файл                                                                                                            | Описание                                         |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| Infrastructure Classes | [10-infrastructure-layer-class-diagram.mermaid](diagrams/10-infrastructure-layer-class-diagram.mermaid) | Классы слоя Infrastructure                       |
-| Provider Adapters      | [30-port-adapter-mapping.mermaid](diagrams/30-port-adapter-mapping.mermaid)                              | Обзор 7 провайдеров и их rate limits             |
-| HTTP Infrastructure    | [10-infrastructure-layer-class-diagram.mermaid](diagrams/10-infrastructure-layer-class-diagram.mermaid) | UnifiedHTTPClient, Rate Limiter, Circuit Breaker |
-| Circuit Breaker        | [07-circuit-breaker-states.mermaid](diagrams/07-circuit-breaker-states.mermaid)                         | Состояния Circuit Breaker                        |
-| Storage Architecture   | [19-delta-lake-write-sequence.mermaid](diagrams/19-delta-lake-write-sequence.mermaid)                    | Bronze, Silver, Gold writers                     |
-| MemoryLock             | [16-memory-lock-class.mermaid](diagrams/16-memory-lock-class.mermaid)                                   | Класс MemoryLock                                 |
+| Infrastructure Classes | [10-infrastructure-layer-class-diagram.mmd](mmd-diagrams/foundation/10-infrastructure-layer-class-diagram.mmd) | Классы слоя Infrastructure                       |
+| Provider Adapters      | [30-port-adapter-mapping.mmd](mmd-diagrams/foundation/30-port-adapter-mapping.mmd)                              | Обзор 7 провайдеров и их rate limits             |
+| HTTP Infrastructure    | [10-infrastructure-layer-class-diagram.mmd](mmd-diagrams/foundation/10-infrastructure-layer-class-diagram.mmd) | UnifiedHTTPClient, Rate Limiter, Circuit Breaker |
+| Circuit Breaker        | [07-circuit-breaker-states.mmd](mmd-diagrams/foundation/07-circuit-breaker-states.mmd)                         | Состояния Circuit Breaker                        |
+| Storage Architecture   | [19-delta-lake-write-sequence.mmd](mmd-diagrams/foundation/19-delta-lake-write-sequence.mmd)                    | Bronze, Silver, Gold writers                     |
+| MemoryLock             | [16-memory-lock-class.mmd](mmd-diagrams/foundation/16-memory-lock-class.mmd)                                   | Класс MemoryLock                                 |
 
 ### Связанные ADR
 
