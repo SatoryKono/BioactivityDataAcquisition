@@ -4,7 +4,7 @@ Aligned with RULES.md v5.10 and MEDLINE DTD.
 Source: https://dtd.nlm.nih.gov/ncbi/pubmed/out/pubmed_230101.dtd
 
 Note: File renamed from article.py to publication.py per ADR-024 Entity Naming Unification.
-PubMedPublicationSchema replaces ArticleSchema for consistency with other providers.
+PubMedPublicationSchema is the canonical schema name for PubMed publications.
 """
 
 from __future__ import annotations
@@ -25,8 +25,8 @@ from bioetl.domain.validation import (
     DOI_REGEX_PATTERN,
 )
 
-# Re-export for backwards compatibility
-__all__ = ["LOOKUP_METHODS", "ArticleSchema", "PubMedPublicationSchema"]
+# Public exports
+__all__ = ["LOOKUP_METHODS", "PubMedPublicationSchema"]
 
 # === Fixed Value Constants ===
 PUBLICATION_STATUSES = ["ppublish", "epublish", "aheadofprint"]
@@ -37,9 +37,6 @@ class PubMedPublicationSchema(PublicationBaseSchema):
     """PubMed Publication validation schema for Silver layer.
 
     Represents a MEDLINE/PubMed citation record.
-
-    Note: Renamed from ArticleSchema per ADR-024 for consistency with
-    entity_type='publication' in pipeline configs and other providers.
 
     Fields excluded from PyArrow/Gold schemas (API deprecated 2026-01):
     - vernacular_title: Original non-English title (deprecated)
@@ -293,11 +290,3 @@ class PubMedPublicationSchema(PublicationBaseSchema):
         coerce = True
         name = "PubMedPublicationSchema"
         description = "PubMed Publication Silver layer validation"
-
-
-# Backward compatibility alias (deprecated)
-ArticleSchema = PubMedPublicationSchema
-"""Deprecated alias for PubMedPublicationSchema.
-
-Use PubMedPublicationSchema instead. This alias will be removed in v3.0.
-"""
