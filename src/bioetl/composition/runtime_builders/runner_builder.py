@@ -81,6 +81,7 @@ def _assemble_runtime_config(
     return RuntimeConfig(
         run_type=ctx.run_type,
         resume=ctx.resume,
+        start_offset=ctx.start_offset,
         limit=ctx.limit,
         heartbeat_interval=heartbeat_interval,
         query=ctx.query,

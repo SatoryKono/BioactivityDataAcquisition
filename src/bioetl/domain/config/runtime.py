@@ -56,6 +56,11 @@ class RuntimeConfig:
     # preventing individual Gold writes during composite execution
     skip_gold: bool = False
 
+    # Manual start offset for crash recovery (overrides checkpoint)
+    # When set, extraction starts from this offset instead of checkpoint.
+    # Requires run_type=incremental to avoid clearing already-loaded data.
+    start_offset: int | None = None
+
     def __post_init__(self) -> None:
         """Validate runtime config."""
         self._validate_positive_values()
@@ -78,6 +83,10 @@ class RuntimeConfig:
             (
                 self.vacuum_retention_days <= 0,
                 f"vacuum_retention_days must be positive, got {self.vacuum_retention_days}",
+            ),
+            (
+                self.start_offset is not None and self.start_offset < 0,
+                f"start_offset must be non-negative or None, got {self.start_offset}",
             ),
         ]
         for condition, message in validations:
