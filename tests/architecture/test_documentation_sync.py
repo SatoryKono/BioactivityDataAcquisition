@@ -139,6 +139,48 @@ def test_adr_h1_number_matches_filename() -> None:
     assert not mismatches, "ADR heading/filename mismatch:\n" + "\n".join(mismatches)
 
 
+def test_adr_status_is_from_allowed_set() -> None:
+    """Each ADR file must declare a status from the allowed normalized set."""
+    decisions_dir = Path("docs/02-architecture/decisions")
+    allowed_statuses = {"accepted", "superseded", "deprecated", "added"}
+    violations: list[str] = []
+
+    status_patterns = (
+        re.compile(r"^\*\*Status:\*\*\s*(.+)$", flags=re.MULTILINE),
+        re.compile(r"^\*\s+\*\*Status\*\*:\s*(.+)$", flags=re.MULTILINE),
+        re.compile(
+            r"^\|\s*\*\*Статус\*\*\s*\|\s*(.+?)\s*\|$",
+            flags=re.MULTILINE,
+        ),
+        re.compile(
+            r"^\|\s*\*\*Status\*\*\s*\|\s*(.+?)\s*\|$",
+            flags=re.MULTILINE,
+        ),
+    )
+
+    for path in sorted(decisions_dir.glob("ADR-*.md")):
+        text = path.read_text(encoding="utf-8")
+        raw_status: str | None = None
+        for pattern in status_patterns:
+            match = pattern.search(text)
+            if match is not None:
+                raw_status = match.group(1).strip()
+                break
+
+        if raw_status is None:
+            violations.append(f"{path.name}: missing status field")
+            continue
+
+        normalized = re.split(r"[\s(]", raw_status, maxsplit=1)[0].strip().lower()
+        if normalized not in allowed_statuses:
+            violations.append(
+                f"{path.name}: invalid status '{raw_status}' "
+                f"(allowed: {sorted(allowed_statuses)})"
+            )
+
+    assert not violations, "ADR status validation failed:\n" + "\n".join(violations)
+
+
 def test_mkdocs_nav_references_existing_markdown_files() -> None:
     """All markdown paths referenced in mkdocs navigation MUST exist."""
     mkdocs_text = Path("mkdocs.yml").read_text(encoding="utf-8")

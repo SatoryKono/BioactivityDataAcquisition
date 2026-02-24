@@ -5,6 +5,7 @@
 pipeline_name: chembl_tissue
 provider: chembl
 entity_type: tissue
+schema_file: "../../schemas/chembl/tissue.yaml"
 # Override: v1.0.0 initial schema, not yet aligned with v1.2.0 standard
 version: "1.0.0"
 description: "Extract tissues from ChEMBL API"

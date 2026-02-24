@@ -4,7 +4,7 @@
 
 Use this checklist when reviewing new or modified pipelines.
 
----
+______________________________________________________________________
 
 ## 1. Architecture & Structure (RULES.md §1)
 
@@ -166,17 +166,23 @@ Use this checklist when reviewing new or modified pipelines.
   - [ ] Degraded: 1-2 errors → timeout×2, batch-size÷2
   - [ ] Unhealthy: ≥3 errors → pause, Alert P2
 
----
+## 17. Pre-flight Repository Hygiene
+
+- [ ] `uv run python scripts/validate_data_dir.py` проходит без ошибок
+- [ ] Тяжёлые/временные локальные артефакты вынесены в `data/local/` или `tmp/`
+- [ ] В релиз не попадают локальные артефакты (`data/local/**`, `tmp/**`)
+
+______________________________________________________________________
 
 ## Sign-off
 
 | Role          | Name | Date | Approved |
-|---------------|------|------|----------|
+| ------------- | ---- | ---- | -------- |
 | Developer     |      |      | [ ]      |
 | Reviewer      |      |      | [ ]      |
 | Data Engineer |      |      | [ ]      |
 
----
+______________________________________________________________________
 
 ## Notes
 
