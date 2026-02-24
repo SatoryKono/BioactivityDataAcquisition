@@ -20,11 +20,24 @@
   "links": [],
   "panels": [
     {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 90,
+      "panels": [],
+      "title": "Pipeline-based Health (legacy)",
+      "type": "row"
+    },
+    {
       "gridPos": {
         "h": 3,
         "w": 6,
         "x": 0,
-        "y": 0
+        "y": 1
       },
       "id": 99,
       "options": {
@@ -83,7 +96,7 @@
         "h": 3,
         "w": 6,
         "x": 6,
-        "y": 0
+        "y": 1
       },
       "id": 100,
       "options": {
@@ -143,7 +156,7 @@
         "h": 3,
         "w": 12,
         "x": 12,
-        "y": 0
+        "y": 1
       },
       "id": 101,
       "options": {
@@ -206,7 +219,7 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "ms"
         },
         "overrides": []
       },
@@ -214,7 +227,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 6
+        "y": 23
       },
       "id": 1,
       "options": {
@@ -233,12 +246,12 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum by (le, pipeline) (bioetl_health_check_duration_seconds_bucket{pipeline=~\"$pipeline\"}))",
-          "legendFormat": "{{ pipeline }} p95",
+          "expr": "histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency_ms_bucket{provider=~\"$provider\"}[5m])))",
+          "legendFormat": "{{ provider }} p95",
           "refId": "A"
         }
       ],
-      "title": "Health Check Duration by Pipeline (p95)",
+      "title": "Health Check Latency by Provider (p95)",
       "type": "timeseries"
     },
     {
@@ -290,7 +303,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 6
+        "y": 23
       },
       "id": 2,
       "options": {
@@ -309,12 +322,12 @@
       },
       "targets": [
         {
-          "expr": "bioetl_pipeline_health_check_passed{pipeline=~\"$pipeline\"}",
-          "legendFormat": "{{ pipeline }} ({{ component }})",
+          "expr": "sum by (provider) (increase(bioetl_health_check_success_total{provider=~\"$provider\"}[15m]))",
+          "legendFormat": "{{ provider }} successes",
           "refId": "A"
         }
       ],
-      "title": "Health Check Results by Pipeline",
+      "title": "Health Check Success by Provider (15m)",
       "type": "stat"
     },
     {
@@ -325,30 +338,16 @@
             "mode": "thresholds"
           },
           "decimals": 2,
-          "max": 10,
-          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 2
-              },
-              {
-                "color": "orange",
-                "value": 5
-              },
-              {
-                "color": "red",
-                "value": 10
               }
             ]
           },
-          "unit": "s"
+          "unit": "none"
         },
         "overrides": []
       },
@@ -356,57 +355,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 14
-      },
-      "id": 3,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true
-      },
-      "targets": [
-        {
-          "expr": "histogram_quantile(0.95, sum by (le, pipeline) (bioetl_health_check_duration_seconds_bucket{pipeline=~\"$pipeline\"}))",
-          "legendFormat": "{{ pipeline }}",
-          "refId": "A"
-        }
-      ],
-      "title": "Per-Pipeline Health Check Duration (p95)",
-      "type": "gauge"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 2,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "s"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 14
+        "y": 31
       },
       "id": 7,
       "options": {
@@ -425,13 +374,93 @@
       },
       "targets": [
         {
-          "expr": "bioetl_health_check_duration_seconds_sum{pipeline=~\"$pipeline\"}",
-          "legendFormat": "{{ pipeline }}",
+          "expr": "sum by (provider) (increase(bioetl_health_check_success_total{provider=~\"$provider\"}[15m]) + increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[15m]))",
+          "legendFormat": "{{ provider }} total checks",
           "refId": "A"
         }
       ],
-      "title": "Total Health Check Duration",
+      "title": "Total Health Checks by Provider (15m)",
       "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "id": 91,
+      "panels": [],
+      "title": "Provider Health",
+      "type": "row"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "max": 5000,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 100
+              },
+              {
+                "color": "orange",
+                "value": 500
+              },
+              {
+                "color": "red",
+                "value": 1000
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 31
+      },
+      "id": 102,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "repeat": "provider",
+      "repeatDirection": "h",
+      "maxPerRow": 4,
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency_ms_bucket{provider=~\"$provider\"}[5m])))",
+          "legendFormat": "{{ provider }}",
+          "refId": "A"
+        }
+      ],
+      "title": "Provider Health Check Latency (p95) - $provider",
+      "type": "gauge"
     }
   ],
   "refresh": "30s",
@@ -459,6 +488,35 @@
         "options": [],
         "query": {
           "query": "label_values(bioetl_records_processed_total, pipeline)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "Prometheus",
+        "definition": "label_values(bioetl_health_check_latency_ms_bucket, provider)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Provider",
+        "multi": true,
+        "name": "provider",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_health_check_latency_ms_bucket, provider)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -519,5 +577,5 @@
   "timezone": "",
   "title": "BioETL Provider Health v2",
   "uid": "bioetl-provider-health-v2",
-  "version": 3
+  "version": 4
 }
