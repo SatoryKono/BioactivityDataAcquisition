@@ -1,10 +1,11 @@
 """DQ Configuration loader with hierarchical merge.
 
 Loads and merges DQ configurations from:
-1. configs/quality/_defaults.yaml (global defaults)
-2. configs/quality/providers/{provider}.yaml (provider-specific)
-3. configs/quality/entities/{provider}/{entity}.yaml (entity-specific)
-4. Inline overrides from pipeline config
+1. configs/base/quality.yaml (global defaults, preferred)
+2. configs/quality/_defaults.yaml (legacy fallback)
+3. configs/quality/providers/{provider}.yaml (provider-specific)
+4. configs/quality/entities/{provider}/{entity}.yaml (entity-specific)
+5. Inline overrides from pipeline config
 
 Implements RULES.md §3.1.2 DQ Thresholds.
 """
@@ -40,6 +41,7 @@ class DQConfigLoader:
             relaxed_dq: Whether to relax DQ thresholds (default: False).
         """
         self._configs_root = configs_root
+        self._base_root = configs_root / "base"
         self._dq_root = configs_root / "quality"
         self._relaxed_dq = relaxed_dq
         self._cache: dict[str, DQConfig] = {}
@@ -49,6 +51,54 @@ class DQConfigLoader:
         path = self._dq_root.joinpath(*parts)
         return self._load_yaml(path) if path.exists() else {}
 
+    def _load_provider_layer(self, provider: str) -> dict[str, Any]:
+        """Load provider DQ layer from unified provider config or legacy path."""
+        unified_provider_path = self._configs_root / "providers" / f"{provider}.yaml"
+        if unified_provider_path.exists():
+            unified_raw = self._load_yaml(unified_provider_path)
+
+            quality_section = unified_raw.get("quality")
+            if isinstance(quality_section, dict):
+                return quality_section
+
+            if any(
+                key in unified_raw
+                for key in (
+                    "thresholds",
+                    "field_validations",
+                    "provider_field_validations",
+                    "cross_field_validations",
+                )
+            ):
+                return unified_raw
+
+        return self._load_optional("providers", f"{provider}.yaml")
+
+    def _load_entity_layer(self, provider: str, entity: str) -> dict[str, Any]:
+        """Load entity DQ layer from unified entity config or legacy path."""
+        unified_entity_path = (
+            self._configs_root / "entities" / provider / f"{entity}.yaml"
+        )
+        if unified_entity_path.exists():
+            unified_raw = self._load_yaml(unified_entity_path)
+
+            quality_section = unified_raw.get("quality")
+            if isinstance(quality_section, dict):
+                return quality_section
+
+            if any(
+                key in unified_raw
+                for key in (
+                    "thresholds",
+                    "field_validations",
+                    "entity_field_validations",
+                    "cross_field_validations",
+                )
+            ):
+                return unified_raw
+
+        return self._load_optional("entities", provider, f"{entity}.yaml")
+
     def _merge_hierarchy(
         self,
         provider: str,
@@ -56,17 +106,17 @@ class DQConfigLoader:
         inline_overrides: dict[str, Any] | None,
     ) -> dict[str, Any]:
         """Build merged config from defaults → provider → entity → inline."""
-        defaults_path = self._dq_root / "_defaults.yaml"
-        if not defaults_path.exists():
+        merged = self._load_defaults_layer()
+        if not merged:
             raise FileNotFoundError(
-                "Required DQ defaults file not found in configs/quality/. "
-                "Create _defaults.yaml with global DQ settings."
+                "Required DQ defaults file not found in configs/base/quality.yaml "
+                "or configs/quality/_defaults.yaml. "
+                "Create defaults in one of these locations."
             )
-        merged = self._load_yaml(defaults_path)
 
         for layer in (
-            self._load_optional("providers", f"{provider}.yaml"),
-            self._load_optional("entities", provider, f"{entity}.yaml"),
+            self._load_provider_layer(provider),
+            self._load_entity_layer(provider, entity),
             inline_overrides or {},
         ):
             if layer:
@@ -79,6 +129,18 @@ class DQConfigLoader:
             )
         return merged
 
+    def _load_defaults_layer(self) -> dict[str, Any]:
+        """Load DQ defaults from consolidated base path or legacy fallback."""
+        base_defaults_path = self._base_root / "quality.yaml"
+        if base_defaults_path.exists():
+            return self._load_yaml(base_defaults_path)
+
+        legacy_defaults_path = self._dq_root / "_defaults.yaml"
+        if legacy_defaults_path.exists():
+            return self._load_yaml(legacy_defaults_path)
+
+        return {}
+
     def load(
         self,
         provider: str,
@@ -88,7 +150,7 @@ class DQConfigLoader:
         """Load merged DQ config for provider/entity.
 
         Merge order (later wins for scalars, concatenate for lists):
-        1. _defaults.yaml
+        1. base/quality.yaml (or legacy _defaults.yaml)
         2. providers/{provider}.yaml
         3. entities/{provider}/{entity}.yaml
         4. inline_overrides (from pipeline config)
@@ -102,7 +164,7 @@ class DQConfigLoader:
             Merged DQConfig domain object.
 
         Raises:
-            FileNotFoundError: If _defaults.yaml doesn't exist.
+            FileNotFoundError: If no DQ defaults file exists.
             ValidationError: If merged config fails validation.
         """
         cache_key = f"{provider}:{entity}:relaxed={self._relaxed_dq}"

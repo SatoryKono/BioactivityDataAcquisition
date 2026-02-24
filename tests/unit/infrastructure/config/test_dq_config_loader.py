@@ -150,6 +150,111 @@ class TestDQConfigLoaderBasics:
         assert len(config.key_nullability_rules) == 1
         assert config.key_nullability_rules[0].field == "entity_id"
 
+    def test_load_defaults_from_base_quality(self, tmp_path: Path) -> None:
+        """Loader should read defaults from configs/base/quality.yaml."""
+        base_root = tmp_path / "base"
+        base_root.mkdir(parents=True)
+        (base_root / "quality.yaml").write_text(
+            """
+version: "1.0.0"
+thresholds:
+  soft_fail: 0.07
+  hard_fail: 0.19
+strict_validation: false
+invalid_record_policy: quarantine
+field_validations: []
+cross_field_validations: []
+"""
+        )
+
+        # Keep quality/providers|entities available for optional layers.
+        (tmp_path / "quality").mkdir()
+
+        loader = DQConfigLoader(tmp_path)
+        config = loader.load("missing_provider", "missing_entity")
+        assert config.soft_fail_threshold == 0.07
+        assert config.hard_fail_threshold == 0.19
+
+    def test_load_provider_layer_from_unified_provider_file(
+        self, tmp_path: Path
+    ) -> None:
+        """Provider-level DQ rules should load from configs/providers/{provider}.yaml."""
+        base_root = tmp_path / "base"
+        base_root.mkdir(parents=True)
+        (base_root / "quality.yaml").write_text(
+            """
+version: "1.0.0"
+thresholds:
+  soft_fail: 0.05
+  hard_fail: 0.20
+strict_validation: false
+invalid_record_policy: quarantine
+field_validations: []
+cross_field_validations: []
+"""
+        )
+
+        providers_root = tmp_path / "providers"
+        providers_root.mkdir(parents=True)
+        (providers_root / "test_provider.yaml").write_text(
+            """
+version: "1.0.0"
+provider: test_provider
+quality:
+  thresholds:
+    hard_fail: 0.12
+  field_validations:
+    - field: provider_field
+      type: required
+      nullable: true
+"""
+        )
+
+        (tmp_path / "quality").mkdir()
+
+        loader = DQConfigLoader(tmp_path)
+        config = loader.load("test_provider", "missing_entity")
+        assert config.hard_fail_threshold == 0.12
+        assert "provider_field" in [fv.field for fv in config.field_validations]
+
+    def test_load_entity_layer_from_unified_entity_file(self, tmp_path: Path) -> None:
+        """Entity-level DQ rules should load from configs/entities/{p}/{e}.yaml."""
+        base_root = tmp_path / "base"
+        base_root.mkdir(parents=True)
+        (base_root / "quality.yaml").write_text(
+            """
+version: "1.0.0"
+thresholds:
+  soft_fail: 0.05
+  hard_fail: 0.20
+strict_validation: false
+invalid_record_policy: quarantine
+field_validations: []
+cross_field_validations: []
+"""
+        )
+
+        entities_root = tmp_path / "entities" / "test_provider"
+        entities_root.mkdir(parents=True)
+        (entities_root / "test_entity.yaml").write_text(
+            """
+version: "1.0.0"
+provider: test_provider
+entity: test_entity
+quality:
+  field_validations:
+    - field: entity_field
+      type: required
+      nullable: false
+"""
+        )
+
+        (tmp_path / "quality").mkdir()
+
+        loader = DQConfigLoader(tmp_path)
+        config = loader.load("test_provider", "test_entity")
+        assert "entity_field" in [fv.field for fv in config.field_validations]
+
 
 class TestDQConfigLoaderMerge:
     """Tests for merge behavior in DQConfigLoader."""

@@ -1,0 +1,144 @@
+version: 1.0.0
+provider: chembl
+entity: publication_term
+pipeline:
+  pipeline_name: chembl_publication_term
+  provider: chembl
+  entity_type: publication_term
+  version: 2.1.0
+  description: Extract publication terms (MeSH, keywords) from ChEMBL Publication
+    records
+  loading_strategy: full_scan_only
+  business_primary_keys:
+  - entity_id
+  sink:
+    silver:
+      partition_by:
+      - term_type
+    gold:
+      mode: overwrite
+schema:
+  content_hash:
+    include: []
+    exclude: []
+  column_groups:
+  - name: system
+    fields:
+    - entity_id
+    - content_hash
+    - _run_id
+    - _run_type
+    - _source_batch_id
+    - _ingestion_ts
+    - _index
+  - name: business
+    fields:
+    - publication_id
+    - term
+    - term_type
+    - mesh_id
+    - qualifier
+  - name: dq
+    pattern: ^_dq_
+  silver:
+    include_groups:
+    - system
+    - business
+    - dq
+    exclude_fields: []
+    alias_policy: preserve
+  gold:
+    include_groups:
+    - system
+    - business
+    exclude_fields:
+    - _dq_*
+    - _source_batch_id
+    - _index
+    alias_policy: canonical
+quality:
+  version: 1.0.0
+  provider: chembl
+  entity: publication_term
+  field_validations:
+  - field: entity_id
+    type: pattern
+    pattern: ^[a-f0-9]{64}$
+    nullable: false
+    error_message: entity_id must be a 64-char SHA256 hash
+  - field: publication_id
+    type: pattern
+    pattern: ^CHEMBL\d+$
+    nullable: false
+    error_message: publication_id must match CHEMBL format
+  - field: term_type
+    type: enum
+    allowed:
+    - MESH_HEADING
+    - KEYWORD
+    - AUTHOR
+    - INSTITUTION
+    nullable: false
+    error_message: term_type is required and must be valid
+  - field: term
+    type: pattern
+    pattern: ^.{1,500}$
+    nullable: false
+    error_message: term is required and must not exceed 500 chars
+  cross_field_validations:
+  - name: term_completeness
+    fields:
+    - publication_id
+    - term
+    - term_type
+    condition: all_present
+    error_message: All term fields are required
+  conditional_validations: []
+  key_nullability:
+  - field: entity_id
+    key_type: merge
+    nullable: false
+  - field: term_type
+    key_type: partition
+    nullable: false
+filters:
+  version: 1.0.0
+  provider: chembl
+  entity: publication_term
+  input_filter:
+    enabled: true
+    source_path: data/input/publication.csv
+    column_name: publication_id
+    filter_field: publication_id
+    batch_size: 20
+  extraction_params:
+    doc_type: PUBLICATION
+    year__gte: 1950
+    year__lte: 2050
+  gold_filters:
+    columns:
+      term_type:
+      - MESH_HEADING
+      - KEYWORD
+    required_fields:
+    - publication_id
+    - term
+    - term_type
+contracts:
+  primary_key:
+  - entity_id
+  merge_keys:
+  - entity_id
+  rename_map:
+    run_id: _run_id
+    run_type: _run_type
+    source_batch_id: _source_batch_id
+    ingestion_ts: _ingestion_ts
+    source: _source
+  hash_include: []
+  hash_exclude:
+  - _ingestion_ts
+  - _run_id
+  - _run_type
+  - _dq_errors
+  - _dq_status

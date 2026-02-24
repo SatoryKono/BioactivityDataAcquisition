@@ -1,7 +1,8 @@
 """Filter Configuration loader with hierarchical merge.
 
 Loads and merges filter configurations from:
-1. configs/filters/_defaults.yaml (global defaults)
+1. defaults layer from configs/base/pipeline.yaml (preferred) or
+   configs/filters/_defaults.yaml (legacy fallback)
 2. configs/filters/providers/{provider}.yaml (provider-specific)
 3. configs/filters/entities/{provider}/{entity}.yaml (entity-specific)
 4. Inline overrides from pipeline config
@@ -47,6 +48,7 @@ class FilterConfigLoader(
             configs_root: Path to configs/ directory.
         """
         super().__init__(configs_root)
+        self._base_root = configs_root / "base"
         self._filter_root = configs_root / "filters"
 
     def load(
@@ -60,7 +62,9 @@ class FilterConfigLoader(
         """Load merged filter config for provider/entity.
 
         Merge order (later wins for scalars, special handling for collections):
-        1. _defaults.yaml (MUST exist)
+        1. defaults layer (MUST exist):
+           - configs/base/pipeline.yaml (filter defaults), or
+           - configs/filters/_defaults.yaml (legacy fallback)
         2. providers/{provider}.yaml
         3. entities/{provider}/{entity}.yaml
         4. inline_overrides (from pipeline config filter_rules)
@@ -75,7 +79,7 @@ class FilterConfigLoader(
             ExtractionParams) domain objects.
 
         Raises:
-            FileNotFoundError: If _defaults.yaml doesn't exist.
+            FileNotFoundError: If no defaults layer exists.
             ValidationError: If merged config fails validation.
         """
         cache_key = f"{provider}:{entity}"
@@ -83,15 +87,20 @@ class FilterConfigLoader(
         if inline_overrides is None and cache_key in self._cache:
             return self._cache[cache_key]
 
-        # _defaults.yaml MUST exist for validated domain conversion
-        defaults_path = self._filter_root / "_defaults.yaml"
-        if not defaults_path.exists():
+        defaults = self._load_defaults_layer()
+        if not defaults:
             raise FileNotFoundError(
-                "Required filter defaults file not found in configs/filters/. "
-                "Create _defaults.yaml with global filter settings."
+                "Required filter defaults file not found in "
+                "configs/filters/_defaults.yaml and no filter defaults found in "
+                "configs/base/pipeline.yaml."
             )
 
-        merged = self._merge_hierarchy(provider, entity, inline_overrides)
+        merged = self._merge_hierarchy(
+            provider,
+            entity,
+            inline_overrides,
+            defaults=defaults,
+        )
 
         # Validate via Pydantic
         validated = FilterConfigFile.model_validate(merged)
@@ -118,7 +127,7 @@ class FilterConfigLoader(
         Returns empty dict when no filter config files exist at all.
 
         Merge order (later wins for scalars, concat for collection keys):
-        1. _defaults.yaml (optional — empty dict if absent)
+        1. defaults layer (optional — empty dict if absent)
         2. providers/{provider}.yaml (optional)
         3. entities/{provider}/{entity}.yaml (optional)
         4. inline_overrides from pipeline config (highest priority)
@@ -141,6 +150,7 @@ class FilterConfigLoader(
         provider: str,
         entity: str,
         inline_overrides: dict[str, Any] | None = None,
+        defaults: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Merge the 4-level filter config hierarchy into a single dict.
 
@@ -150,25 +160,21 @@ class FilterConfigLoader(
             provider: Provider name.
             entity: Entity name.
             inline_overrides: Optional inline overrides.
+            defaults: Preloaded defaults layer. If omitted, loaded automatically.
 
         Returns:
             Merged configuration dict.
         """
         # 1. Load defaults (returns {} if absent)
-        defaults_path = self._filter_root / "_defaults.yaml"
-        merged = self._load_yaml(defaults_path)
+        merged = defaults if defaults is not None else self._load_defaults_layer()
 
         # 2. Load provider config (optional)
-        provider_path = self._filter_root / "providers" / f"{provider}.yaml"
-        provider_config = (
-            self._load_yaml(provider_path) if provider_path.exists() else {}
-        )
+        provider_config = self._load_provider_layer(provider)
         if provider_config:
             merged = self._deep_merge(merged, provider_config)
 
         # 3. Load entity config (optional)
-        entity_path = self._filter_root / "entities" / provider / f"{entity}.yaml"
-        entity_config = self._load_yaml(entity_path) if entity_path.exists() else {}
+        entity_config = self._load_entity_layer(provider, entity)
         if entity_config:
             merged = self._deep_merge(merged, entity_config)
 
@@ -177,6 +183,90 @@ class FilterConfigLoader(
             merged = self._deep_merge(merged, inline_overrides)
 
         return merged
+
+    def _load_defaults_layer(self) -> dict[str, Any]:
+        """Load filter defaults from base/pipeline.yaml or legacy _defaults.yaml."""
+        base_pipeline_path = self._base_root / "pipeline.yaml"
+        if base_pipeline_path.exists():
+            base_pipeline = self._load_yaml(base_pipeline_path)
+            defaults: dict[str, Any] = {}
+
+            # input_filter defaults are still a top-level pipeline concern.
+            input_filter = base_pipeline.get("input_filter")
+            if isinstance(input_filter, dict):
+                defaults["input_filter"] = input_filter
+
+            filter_defaults = base_pipeline.get("filter_defaults")
+            if isinstance(filter_defaults, dict):
+                defaults = self._deep_merge(defaults, filter_defaults)
+
+            if defaults:
+                defaults.setdefault("version", "1.0.0")
+                return defaults
+
+        legacy_defaults_path = self._filter_root / "_defaults.yaml"
+        if legacy_defaults_path.exists():
+            return self._load_yaml(legacy_defaults_path)
+
+        return {}
+
+    def _load_provider_layer(self, provider: str) -> dict[str, Any]:
+        """Load provider filter layer from unified provider config or legacy path."""
+        unified_provider_path = self._configs_root / "providers" / f"{provider}.yaml"
+        if unified_provider_path.exists():
+            unified_raw = self._load_yaml(unified_provider_path)
+
+            filters_section = unified_raw.get("filters")
+            if isinstance(filters_section, dict):
+                return filters_section
+
+            if any(
+                key in unified_raw
+                for key in (
+                    "input_filter",
+                    "silver_filters",
+                    "gold_filters",
+                    "extraction_params",
+                )
+            ):
+                return unified_raw
+
+        legacy_provider_path = self._filter_root / "providers" / f"{provider}.yaml"
+        if legacy_provider_path.exists():
+            return self._load_yaml(legacy_provider_path)
+
+        return {}
+
+    def _load_entity_layer(self, provider: str, entity: str) -> dict[str, Any]:
+        """Load entity filter layer from unified entity config or legacy path."""
+        unified_entity_path = (
+            self._configs_root / "entities" / provider / f"{entity}.yaml"
+        )
+        if unified_entity_path.exists():
+            unified_raw = self._load_yaml(unified_entity_path)
+
+            filters_section = unified_raw.get("filters")
+            if isinstance(filters_section, dict):
+                return filters_section
+
+            if any(
+                key in unified_raw
+                for key in (
+                    "input_filter",
+                    "silver_filters",
+                    "gold_filters",
+                    "extraction_params",
+                )
+            ):
+                return unified_raw
+
+        legacy_entity_path = (
+            self._filter_root / "entities" / provider / f"{entity}.yaml"
+        )
+        if legacy_entity_path.exists():
+            return self._load_yaml(legacy_entity_path)
+
+        return {}
 
     def _deep_merge(
         self,
