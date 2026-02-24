@@ -22,7 +22,7 @@
     {
       "gridPos": {
         "h": 3,
-        "w": 6,
+        "w": 12,
         "x": 0,
         "y": 0
       },
@@ -33,82 +33,6 @@
       },
       "title": "Pipeline",
       "type": "text"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [
-            {
-              "options": {
-                "0": {
-                  "text": "Failed",
-                  "color": "red",
-                  "index": 0
-                }
-              },
-              "type": "value"
-            },
-            {
-              "options": {
-                "1": {
-                  "text": "Passed",
-                  "color": "green",
-                  "index": 1
-                }
-              },
-              "type": "value"
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "green",
-                "value": 1
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 6,
-        "x": 6,
-        "y": 0
-      },
-      "id": 100,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "targets": [
-        {
-          "expr": "min(bioetl_pipeline_health_check_passed{pipeline=~\"$pipeline\", component=\"data_source\"})",
-          "legendFormat": "Health",
-          "refId": "A"
-        }
-      ],
-      "title": "Health Check Status",
-      "type": "stat"
     },
     {
       "datasource": "Prometheus",
@@ -214,7 +138,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 6
+        "y": 3
       },
       "id": 1,
       "options": {
@@ -290,7 +214,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 6
+        "y": 3
       },
       "id": 2,
       "options": {
@@ -356,7 +280,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 14
+        "y": 11
       },
       "id": 3,
       "options": {
@@ -406,7 +330,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 14
+        "y": 11
       },
       "id": 7,
       "options": {
@@ -519,5 +443,5 @@
   "timezone": "",
   "title": "BioETL Provider Health v2",
   "uid": "bioetl-provider-health-v2",
-  "version": 3
+  "version": 4
 }
