@@ -191,4 +191,3 @@ class DeltaReader:
 
     async def aclose(self) -> None:
         """Gracefully close the reader (no-op, no persistent resources)."""
-        pass

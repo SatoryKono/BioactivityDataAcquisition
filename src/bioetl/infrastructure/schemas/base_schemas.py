@@ -22,9 +22,6 @@ from bioetl.domain.resilience import CircuitBreakerConfig as DomainCircuitBreake
 if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig
     from bioetl.domain.filtering.input_config import (
-        FilterColumn as DomainFilterColumn,
-    )
-    from bioetl.domain.filtering.input_config import (
         InputFilterConfig as DomainInputFilterConfig,
     )
 
