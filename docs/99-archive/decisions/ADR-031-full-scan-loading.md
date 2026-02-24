@@ -3,7 +3,7 @@
 **Status:** Superseded (Renamed)
 **Date:** 2026-01-26
 **Decision makers:** @BioETL-Team
-**Superseded by:** [ADR-031: Loading Strategy Formalization](ADR-031-loading-strategy-formalization.md)
+**Superseded by:** [ADR-031: Loading Strategy Formalization](../../02-architecture/decisions/ADR-031-loading-strategy-formalization.md)
 **Relates to:** ADR-030 (Publication Pagination Strategy), ADR-011 (Remove Watermark)
 
 ## Context
@@ -19,7 +19,7 @@ Formalize loading behavior via an explicit `LoadingStrategy` enum and keep
 backward compatibility, but `loading-strategy` is the explicit source of truth.
 
 See the canonical ADR for full details:
-- [ADR-031: Loading Strategy Formalization](ADR-031-loading-strategy-formalization.md)
+- [ADR-031: Loading Strategy Formalization](../../02-architecture/decisions/ADR-031-loading-strategy-formalization.md)
 
 ## Consequences (Summary)
 

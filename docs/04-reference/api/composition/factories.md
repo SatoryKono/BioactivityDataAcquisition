@@ -13,33 +13,33 @@ Creates pipeline runners with proper dependency injection.
         show-root-heading: true
         show-source: false
         members:
-            - --init--
-            - create-runner
-            - create-executor
+            - __init__
+            - create_runner
+            - create_executor
 
-### create-pipeline_factory
+### create_pipeline_factory
 
 Factory function to create GenericPipelineFactory instances.
 
-::: bioetl.composition.factories.pipeline_factory.create-pipeline_factory
+::: bioetl.composition.factories.pipeline_factory.create_pipeline_factory
     options:
         show-root-heading: true
         show-source: false
 
-### assemble-runner
+### assemble_runner
 
 Assemble a PipelineRunner with all dependencies.
 
-::: bioetl.composition.factories.pipeline_factory.assemble-runner
+::: bioetl.composition.factories.pipeline_factory.assemble_runner
     options:
         show-root-heading: true
         show-source: false
 
-### build-pipeline-services
+### build_pipeline_services
 
 Build PipelineServices bundle.
 
-::: bioetl.composition.factories.pipeline_factory.build-pipeline-services
+::: bioetl.composition.factories.pipeline_factory.build_pipeline_services
     options:
         show-root-heading: true
         show-source: false
@@ -68,19 +68,19 @@ Builder pattern for constructing service bundles.
 
 Bundle of services for PipelineRunner.
 
-::: bioetl.composition.factories.services_factory.RunnerServices
-    options:
-        show-root-heading: true
-        show-source: false
+<!-- ::: bioetl.composition.factories.services_factory.RunnerServices -->
+<!--     options: -->
+<!--         show-root-heading: true -->
+<!--         show-source: false -->
 
-### build-runner-services
+### build_runner_services
 
 Build RunnerServices bundle.
 
-::: bioetl.composition.factories.services_factory.build-runner-services
-    options:
-        show-root-heading: true
-        show-source: false
+<!-- ::: bioetl.composition.factories.services_factory.build_runner_services -->
+<!--     options: -->
+<!--         show-root-heading: true -->
+<!--         show-source: false -->
 
 ## Data Source Factory
 
@@ -88,7 +88,7 @@ Build RunnerServices bundle.
 
 Creates data source adapters.
 
-::: bioetl.composition.factories.data-source_factory.DataSourceFactory
+::: bioetl.composition.factories.data_source_factory.DataSourceFactory
     options:
         show-root-heading: true
         show-source: false
@@ -97,7 +97,7 @@ Creates data source adapters.
 
 Registry for data source creators.
 
-::: bioetl.composition.factories.data-source_factory.DataSourceRegistry
+::: bioetl.composition.factories.data_source_factory.DataSourceRegistry
     options:
         show-root-heading: true
         show-source: false
@@ -106,7 +106,7 @@ Registry for data source creators.
 
 Protocol for data source creator functions.
 
-::: bioetl.composition.factories.data-source_factory.DataSourceCreator
+::: bioetl.composition.factories.data_source_factory.DataSourceCreator
     options:
         show-root-heading: true
         show-source: false
@@ -142,38 +142,38 @@ Context for storage operations.
 
 ## Transformer Factory
 
-### register-transformer
+### register_transformer
 
 Register a transformer class for an entity type.
 
-::: bioetl.composition.factories.transformer_factory.register-transformer
+::: bioetl.composition.factories.transformer_factory.register_transformer
     options:
         show-root-heading: true
         show-source: false
 
-### get-transformer-class
+### get_transformer_class
 
 Get transformer class for entity type.
 
-::: bioetl.composition.factories.transformer_factory.get-transformer-class
+::: bioetl.composition.factories.transformer_factory.get_transformer_class
     options:
         show-root-heading: true
         show-source: false
 
-### create-transformer
+### create_transformer
 
 Create transformer instance with dependencies.
 
-::: bioetl.composition.factories.transformer_factory.create-transformer
+::: bioetl.composition.factories.transformer_factory.create_transformer
     options:
         show-root-heading: true
         show-source: false
 
-### register-all-transformers
+### register_all_transformers
 
 Register all available transformers.
 
-::: bioetl.composition.factories.transformer_factory.register-all-transformers
+::: bioetl.composition.factories.transformer_factory.register_all_transformers
     options:
         show-root-heading: true
         show-source: false
@@ -184,7 +184,7 @@ Register all available transformers.
 
 Factory for creating HTTP clients.
 
-::: bioetl.composition.factories.http-client_factory.HttpClientFactory
+::: bioetl.composition.factories.http_client_factory.HttpClientFactory
     options:
         show-root-heading: true
         show-source: false
@@ -234,8 +234,8 @@ Factory for PubMed publication pipeline.
 ```mermaid
 classDiagram
     class GenericPipelineFactory {
-        +create-runner() PipelineRunner
-        +create-executor() BatchExecutor
+        +create_runner() PipelineRunner
+        +create_executor() BatchExecutor
     }
 
     class DataSourceFactory {
@@ -247,8 +247,8 @@ classDiagram
     }
 
     class ServicesBuilder {
-        +with-logger() ServicesBuilder
-        +with-metrics() ServicesBuilder
+        +with_logger() ServicesBuilder
+        +with_metrics() ServicesBuilder
         +build() RunnerServices
     }
 
@@ -264,28 +264,28 @@ from bioetl.composition.factories import (
     GenericPipelineFactory,
     DataSourceFactory,
     StorageFactory,
-    build-runner-services,
+    build_runner_services,
 )
 
 # Create factories
-data-source_factory = DataSourceFactory()
+data_source_factory = DataSourceFactory()
 storage_factory = StorageFactory()
 
 # Create pipeline factory
 # factory = GenericPipelineFactory(
-#     data-source_factory=data-source_factory,
+#     data_source_factory=data_source_factory,
 #     storage_factory=storage_factory,
-#     config=pipeline-config,
+#     config=pipeline_config,
 # )
 
 # Create runner
-# runner = factory.create-runner(
+# runner = factory.create_runner(
 #     ctx=ctx,
 #     services=services,
-#     checkpoint-manager=checkpoint-manager,
+#     checkpoint_manager=checkpoint_manager,
 # )
 
-# Or use the pre-configured factory
+# Or use the pre_configured factory
 from bioetl.composition.factories import chembl_activity_factory
 
 # runner = chembl_activity_factory(ctx)

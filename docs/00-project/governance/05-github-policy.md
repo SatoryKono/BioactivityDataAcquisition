@@ -259,7 +259,7 @@ BioETL follows **Semantic Versioning** (SemVer):
 
 ## 9. Security Policy
 
-Full security policy: [`.github/SECURITY.md`](../../../.github/SECURITY.md)
+Full security policy: [`.github/SECURITY.md`](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/.github/SECURITY.md)
 
 ### Key Points
 
@@ -320,4 +320,4 @@ concurrency:
 
 ----------------------------------------------------------------------
 
-*See also: [CONTRIBUTING.md](../../../.github/CONTRIBUTING.md) | [SECURITY.md](../../../.github/SECURITY.md) | [RULES.md](../RULES.md)*
+*See also: [CONTRIBUTING.md](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/.github/CONTRIBUTING.md) | [SECURITY.md](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/.github/SECURITY.md) | [RULES.md](../RULES.md)*

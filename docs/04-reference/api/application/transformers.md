@@ -12,9 +12,9 @@ flowchart LR
     Silver --> Gold["Gold<br/>(Validated)"]
 
     subgraph Transform["BaseTransformer"]
-        T1[-transform-impl]
-        T2[entity-to-silver-record]
-        T3[transform-for-gold]
+        T1[-transform_impl]
+        T2[entity_to_silver_record]
+        T3[transform_for_gold]
     end
 
     Bronze --> T1
@@ -30,25 +30,25 @@ flowchart LR
 
 Abstract base class implementing Template Method pattern for transformations.
 
-::: bioetl.application.core.base-transformer.BaseTransformer
+::: bioetl.application.core.base_transformer.BaseTransformer
     options:
         show-root-heading: true
         show-source: false
         members:
-            - --init--
+            - __init__
             - transform
-            - compute-content-hash
-            - serialize-json
-            - entity-to-silver-record
-            - transform-for-gold
-            - should-write-gold
-            - GOLD-EXCLUDE-FIELDS
+            - compute_content_hash
+            - serialize_json
+            - entity_to_silver_record
+            - transform_for_gold
+            - should_write_gold
+            - GOLD_EXCLUDE_FIELDS
 
 ### TransformationError
 
 Raised when transformation fails due to invalid data.
 
-::: bioetl.application.core.base-transformer.TransformationError
+::: bioetl.application.core.base_transformer.TransformationError
     options:
         show-root-heading: true
         show-source: false
@@ -59,7 +59,7 @@ Raised when transformation fails due to invalid data.
 
 Batch-oriented transformation with parallel processing.
 
-::: bioetl.application.core.batch-transformer.BatchTransformer
+::: bioetl.application.core.batch_transformer.BatchTransformer
     options:
         show-root-heading: true
         show-source: false
@@ -68,7 +68,7 @@ Batch-oriented transformation with parallel processing.
 
 Streaming batch processor for memory-efficient processing.
 
-::: bioetl.application.core.batch-transformer.StreamingBatchProcessor
+::: bioetl.application.core.batch_transformer.StreamingBatchProcessor
     options:
         show-root-heading: true
         show-source: false
@@ -77,7 +77,7 @@ Streaming batch processor for memory-efficient processing.
 
 Result container for batch transformation.
 
-::: bioetl.application.core.batch-transformer.TransformResult
+::: bioetl.application.core.batch_transformer.TransformResult
     options:
         show-root-heading: true
         show-source: false
@@ -86,7 +86,7 @@ Result container for batch transformation.
 
 Individual transformed record with metadata.
 
-::: bioetl.application.core.batch-transformer.TransformedRecord
+::: bioetl.application.core.batch_transformer.TransformedRecord
     options:
         show-root-heading: true
         show-source: false
@@ -97,7 +97,7 @@ Individual transformed record with metadata.
 
 Writes transformed batches to storage layers.
 
-::: bioetl.application.core.batch-writer.BatchWriter
+::: bioetl.application.core.batch_writer.BatchWriter
     options:
         show-root-heading: true
         show-source: false
@@ -106,65 +106,65 @@ Writes transformed batches to storage layers.
 
 Common transformation helper functions.
 
-### safe-extract
+### safe_extract
 
 Safely extract value from nested dictionary.
 
-::: bioetl.application.core.transform-utils.safe-extract
+::: bioetl.application.core.dict_transformers.safe_extract
     options:
         show-root-heading: true
         show-source: false
 
-### normalize-string
+### normalize_string
 
 Normalize string values (strip, lowercase, etc.).
 
-::: bioetl.application.core.transform-utils.normalize-string
+::: bioetl.application.core.dict_transformers.normalize_string
     options:
         show-root-heading: true
         show-source: false
 
-### parse-date-field
+### parse_date_field
 
 Parse date fields to ISO format.
 
-::: bioetl.application.core.transform-utils.parse-date-field
+::: bioetl.application.core.dict_transformers.parse_date_field
     options:
         show-root-heading: true
         show-source: false
 
-### validate-smiles
+### validate_smiles
 
 Validate SMILES chemical notation.
 
-::: bioetl.application.core.transform-utils.validate-smiles
+::: bioetl.application.core.dict_transformers.validate_smiles
     options:
         show-root-heading: true
         show-source: false
 
-### flatten-nested-dict
+### flatten_nested_dict
 
 Flatten nested dictionary to dot notation.
 
-::: bioetl.application.core.transform-utils.flatten-nested-dict
+::: bioetl.application.core.dict_transformers.flatten_nested_dict
     options:
         show-root-heading: true
         show-source: false
 
-### extract-list-field
+### extract_list_field
 
 Extract and process list fields.
 
-::: bioetl.application.core.transform-utils.extract-list-field
+::: bioetl.application.core.dict_transformers.extract_list_field
     options:
         show-root-heading: true
         show-source: false
 
-### aggregate-nested-lists
+### aggregate_nested_lists
 
 Aggregate values from nested lists.
 
-::: bioetl.application.core.transform-utils.aggregate-nested-lists
+::: bioetl.application.core.dict_transformers.aggregate_nested_lists
     options:
         show-root-heading: true
         show-source: false
@@ -181,17 +181,17 @@ class BaseTransformer(ABC):
         """Template method - fixed algorithm structure."""
         try:
             # 1. Abstract hook - implemented by subclasses
-            silver-record = await self.-transform-impl(context, record)
-            return silver-record
+            silver_record = await self.-transform_impl(context, record)
+            return silver_record
 
         except TransformationError as e:
             # 2. Handle errors uniformly (fixed step)
-            self.-log-transformation-error(e)
+            self.-log_transformation_error(e)
             return None
 
     @abstractmethod
-    async def -transform-impl(self, context: PipelineContext, record: BronzeRecord) -> SilverRecord | None:
-        """Abstract hook - subclasses implement entity-specific logic."""
+    async def -transform_impl(self, context: PipelineContext, record: BronzeRecord) -> SilverRecord | None:
+        """Abstract hook - subclasses implement entity_specific logic."""
         ...
 ```
 
@@ -204,25 +204,25 @@ from bioetl.domain.entities import Activity
 class ActivityTransformer(BaseTransformer):
     """Transform ChEMBL activity records."""
 
-    async def -transform-impl(self, context: PipelineContext, record: dict) -> SilverRecord | None:
+    async def -transform_impl(self, context: PipelineContext, record: dict) -> SilverRecord | None:
         # Extract required fields
-        activity-id = self.-get-required-field(record, "activity-id")
-        molecule-id = self.-get-required-field(record, "molecule-chembl-id")
+        activity_id = self.-get_required_field(record, "activity_id")
+        molecule_id = self.-get_required_field(record, "molecule_chembl_id")
 
         # Create entity with lineage
-        entity = self.-create-entity(
+        entity = self.-create_entity(
             Activity,
             context,
-            entity-id=str(activity-id),
-            content-hash=self.compute-content-hash(record),
-            activity-id=activity-id,
-            molecule-chembl-id=molecule-id,
-            standard-type=record.get("standard-type"),
-            standard-value=record.get("standard-value"),
-            standard-units=record.get("standard-units"),
+            entity_id=str(activity_id),
+            content_hash=self.compute_content_hash(record),
+            activity_id=activity_id,
+            molecule_chembl_id=molecule_id,
+            standard_type=record.get("standard_type"),
+            standard_value=record.get("standard_value"),
+            standard_units=record.get("standard_units"),
         )
         
-        return self.entity-to-silver-record(entity)
+        return self.entity_to_silver_record(entity)
 ```
 
 ## Content Hash Generation
@@ -231,13 +231,13 @@ Content hash ensures record deduplication:
 
 ```python
 # Hash computed from canonical JSON representation
-hash = compute-content-hash(business-data, exclude-none=True)
+hash = compute_content_hash(business_data, exclude_none=True)
 
 # Normalization rules:
 # - NaN/Inf → null
 # - Floats → round(val, 10)
-# - Dates → ISO "YYYY-MM-DD"
-# - Excludes: -ingestion-ts, -run-id, -run-type, -dq-*
+# - Dates → ISO "YYYY_MM_DD"
+# - Excludes: -ingestion_ts, -run_id, -run_type, -dq-*
 ```
 
 ## See Also

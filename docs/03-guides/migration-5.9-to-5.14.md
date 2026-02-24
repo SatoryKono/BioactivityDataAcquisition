@@ -419,7 +419,7 @@ export BIOETL-VALIDATION-MODE=fast  # Base only
 **Issues:** [GitHub Issues](https://github.com/SatoryKono/BioactivityDataAcquisition2/issues)
 
 **Documentation:**
-- [CHANGELOG.md](../../CHANGELOG.md) — Full release notes
+- [CHANGELOG.md](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/CHANGELOG.md) — Full release notes
 - [RULES.md](../00-project/RULES.md) — Project governance
 - [ADRs](../02-architecture/decisions/) — Architecture decisions
 
