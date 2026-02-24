@@ -111,6 +111,8 @@ _delta_log/
 
 # Temporary pipeline artifacts
 tmp/
+data/local/*
+!data/local/.gitkeep
 
 # Node
 node_modules/
