@@ -114,7 +114,7 @@ class TestFileSizeLimits:
         "client.py": 1210,  # ChemblAdapter growth after batch reduction compatibility + extraction params support
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
         "idmapping_client.py": 660,  # 651 LOC
-        "config_loader.py": 680,  # 677 LOC - config loading with schema validation + schema_file linkage
+        "config_loader.py": 725,  # 721 LOC - config loading with schema validation + schema_file linkage + unified entity config
         "pipeline_config.py": 1110,  # 1105 LOC - Pipeline configuration loading and validation + TransformConfig + FilterConfig (ADR-028) + GoldColumnFilterConfig + flat_structure + extended schemas + publication entity validation (ADR-024) + loading_strategy (ADR-031) + column_groups + extraction_params + DQ severity/max_length/not_null
         "composite_config.py": 865,  # 861 LOC - Composite pipeline configuration schema with validation + DependencySchema.filter_fields + CrossValidationSchema + LineageSchema.provider_lookup_fields/track_source_for_fields + composite version contract (v6)
         # Interfaces layer exemptions
