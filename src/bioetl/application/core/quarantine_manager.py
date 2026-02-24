@@ -8,7 +8,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from bioetl.domain.ports import QuarantinePort
+from bioetl.domain.ports import MetricsPort, QuarantinePort
 from bioetl.domain.types import BatchID, ErrorType
 
 
@@ -23,6 +23,7 @@ class QuarantineManager:
         self,
         quarantine_port: QuarantinePort,
         pipeline_name: str,
+        metrics: MetricsPort | None = None,
     ) -> None:
         """Initialize QuarantineManager with explicit dependencies.
 
@@ -33,6 +34,7 @@ class QuarantineManager:
         """
         self._quarantine = quarantine_port
         self._pipeline_name = pipeline_name
+        self._metrics = metrics
 
     async def quarantine_record(
         self,
@@ -62,6 +64,11 @@ class QuarantineManager:
             metadata={"error_details": {"message": error_details}},
             ingestion_ts=ingestion_ts,
         )
+        if self._metrics:
+            self._metrics.inc_quarantine_records(
+                pipeline=self._pipeline_name,
+                reason=error_type.value,
+            )
 
     async def inspect(
         self,
