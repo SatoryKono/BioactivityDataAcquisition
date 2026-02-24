@@ -22,7 +22,7 @@ Unified HTTP client with rate limiting, circuit breaker, and observability.
 
 Token bucket rate limiter implementation.
 
-::: bioetl.infrastructure.adapters.http.rate-limiter.TokenBucket
+::: bioetl.infrastructure.adapters.http.rate_limiter.TokenBucket
     options:
         show-root-heading: true
         show-source: false
@@ -36,7 +36,7 @@ Token bucket rate limiter implementation.
 
 Circuit breaker pattern implementation.
 
-::: bioetl.infrastructure.adapters.http.circuit-breaker.CircuitBreaker
+::: bioetl.infrastructure.adapters.http.circuit_breaker.CircuitBreaker
     options:
         show-root-heading: true
         show-source: false
@@ -75,7 +75,7 @@ Abstract base class for HTTP-based data source adapters.
 
 Base class for synchronous data source adapters (e.g., PubChem via pubchempy).
 
-::: bioetl.infrastructure.adapters.sync-base.BaseSyncAdapter
+::: bioetl.infrastructure.adapters.sync_base.BaseSyncAdapter
     options:
         show-root-heading: true
         show-source: false
@@ -87,7 +87,7 @@ Base class for synchronous data source adapters (e.g., PubChem via pubchempy).
 
 Metrics collection for data source adapters.
 
-::: bioetl.infrastructure.adapters.base-metrics.AdapterMetrics
+::: bioetl.infrastructure.adapters.base_metrics.AdapterMetrics
     options:
         show-root-heading: true
         show-source: false
@@ -203,7 +203,7 @@ Data source adapter for UniProt protein database.
 
 Specialized client for UniProt ID mapping operations.
 
-::: bioetl.infrastructure.adapters.uniprot.idmapping-client.UniProtIDMappingClient
+::: bioetl.infrastructure.adapters.uniprot.idmapping_client.UniProtIDMappingClient
     options:
         show-root-heading: true
         show-source: false
@@ -212,7 +212,7 @@ Specialized client for UniProt ID mapping operations.
 
 Data source adapter for PubMed/NCBI E-utilities.
 
-::: bioetl.infrastructure.adapters.pubmed.pubmed-client.PubMedAdapter
+::: bioetl.infrastructure.adapters.pubmed.pubmed_client.PubMedAdapter
     options:
         show-root-heading: true
         show-source: false
@@ -280,43 +280,13 @@ Data source adapter for Semantic Scholar API.
 - Paper and author endpoints
 - Citation graph access
 
-## Storage Adapters
-
-### SilverWriter
-
-Storage adapter for Delta Lake (Silver layer).
-
-> **Note**: `DeltaWriter` is deprecated and will be removed after a 14-day deprecation period. Use `SilverWriter` instead.
-
-::: bioetl.infrastructure.storage.silver-writer.SilverWriter
-    options:
-        show-root-heading: true
-        show-source: false
-        members:
-            - write-silver
-            - vacuum
-            - optimize
-            - get-table-info
-
-### BronzeWriter
-
-Storage adapter for local filesystem (Bronze layer).
-
-::: bioetl.infrastructure.storage.bronze-writer.BronzeWriter
-    options:
-        show-root-heading: true
-        show-source: false
-        members:
-            - write-bronze
-            - list-files
-
 ## Lock Adapters
 
 ### MemoryLock
 
 In-memory lock implementation (Local-Only).
 
-::: bioetl.infrastructure.locking.memory-lock.MemoryLock
+::: bioetl.infrastructure.locking.memory_lock.MemoryLock
     options:
         show-root-heading: true
         show-source: false
@@ -331,7 +301,7 @@ In-memory lock implementation (Local-Only).
 
 Local filesystem checkpoint implementation.
 
-::: bioetl.infrastructure.checkpoint.local-checkpoint.LocalCheckpoint
+::: bioetl.infrastructure.checkpoint.local_checkpoint.LocalCheckpoint
     options:
         show-root-heading: true
         show-source: false

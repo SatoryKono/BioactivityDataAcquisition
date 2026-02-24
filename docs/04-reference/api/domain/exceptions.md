@@ -196,14 +196,7 @@ General API error.
         show-root-heading: true
         show-source: false
 
-### ChemblApiError
-
-ChEMBL-specific API error.
-
-::: bioetl.domain.exceptions.ChemblApiError
-    options:
-        show-root-heading: true
-        show-source: false
+<!-- ChemblApiError: removed, use ApiError instead -->
 
 ### CircuitBreakerOpenError
 

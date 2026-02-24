@@ -236,6 +236,6 @@ def test_provider_dashboard_uses_pipeline_filters():
     variables = [
         var.get("name") for var in dashboard.get("templating", {}).get("list", [])
     ]
-    assert "provider" not in variables, (
-        "Provider dashboard should not define redundant 'provider' variable"
+    assert "pipeline" in variables, (
+        "Provider dashboard must define 'pipeline' template variable"
     )

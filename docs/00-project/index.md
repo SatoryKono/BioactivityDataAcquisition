@@ -54,7 +54,7 @@ See [Composite Pipeline Diagram](../02-architecture/diagrams/29-composite-pipeli
 
 ## Current Version
 
-**v5.9.0** (2026-01-06) — See [CHANGELOG](../../CHANGELOG.md) for details.
+**v5.9.0** (2026-01-06) — See [CHANGELOG](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/CHANGELOG.md) for details.
 
 ## Getting Started
 

@@ -18,7 +18,7 @@ BioETL provides three observability pillars:
 
 Prometheus-compatible metrics exporter.
 
-::: bioetl.infrastructure.observability.prometheus-metrics.PrometheusMetrics
+::: bioetl.infrastructure.observability.prometheus_metrics.PrometheusMetrics
     options:
         show-root-heading: true
         show-source: false
@@ -103,7 +103,7 @@ pipeline-run
 
 Factory function for creating structured loggers.
 
-::: bioetl.infrastructure.observability.logging.create-logger
+::: bioetl.infrastructure.observability.logging.create_logger
     options:
         show-root-heading: true
         show-source: false
@@ -112,7 +112,7 @@ Factory function for creating structured loggers.
 
 No-op implementation for testing.
 
-::: bioetl.infrastructure.observability.noop-logger.NoOpLogger
+::: bioetl.infrastructure.observability.noop_logger.NoOpLogger
     options:
         show-root-heading: true
         show-source: false
@@ -157,7 +157,7 @@ Monitors metrics for anomalies in batch processing.
 
 HTTP server for Prometheus scraping.
 
-::: bioetl.infrastructure.observability.server.start-metrics-server
+::: bioetl.infrastructure.observability.server.start_metrics_server
     options:
         show-root-heading: true
         show-source: false

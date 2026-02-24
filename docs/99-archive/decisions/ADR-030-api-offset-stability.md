@@ -3,7 +3,7 @@
 **Status:** Superseded (Renamed)
 **Date:** 2026-01-26
 **Decision makers:** @BioETL-Team
-**Superseded by:** [ADR-030: Publication Pagination Strategy](ADR-030-publication-pagination-strategy.md)
+**Superseded by:** [ADR-030: Publication Pagination Strategy](../../02-architecture/decisions/ADR-030-publication-pagination-strategy.md)
 **Relates to:** ADR-009 (Paginated Fetcher Mixin), ADR-011 (Remove Watermark)
 
 ## Context
@@ -20,7 +20,7 @@ Adopt a **full-scan strategy** for publication pipelines and explicitly block
 checkpoint-based resume. Deduplication is handled in Silver using `content-hash`.
 
 The canonical, detailed decision record is:
-- [ADR-030: Publication Pagination Strategy](ADR-030-publication-pagination-strategy.md)
+- [ADR-030: Publication Pagination Strategy](../../02-architecture/decisions/ADR-030-publication-pagination-strategy.md)
 
 ## Consequences (Summary)
 

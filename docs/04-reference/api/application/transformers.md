@@ -30,7 +30,7 @@ flowchart LR
 
 Abstract base class implementing Template Method pattern for transformations.
 
-::: bioetl.application.core.base-transformer.BaseTransformer
+::: bioetl.application.core.base_transformer.BaseTransformer
     options:
         show-root-heading: true
         show-source: false
@@ -48,7 +48,7 @@ Abstract base class implementing Template Method pattern for transformations.
 
 Raised when transformation fails due to invalid data.
 
-::: bioetl.application.core.base-transformer.TransformationError
+::: bioetl.application.core.base_transformer.TransformationError
     options:
         show-root-heading: true
         show-source: false
@@ -59,7 +59,7 @@ Raised when transformation fails due to invalid data.
 
 Batch-oriented transformation with parallel processing.
 
-::: bioetl.application.core.batch-transformer.BatchTransformer
+::: bioetl.application.core.batch_transformer.BatchTransformer
     options:
         show-root-heading: true
         show-source: false
@@ -68,7 +68,7 @@ Batch-oriented transformation with parallel processing.
 
 Streaming batch processor for memory-efficient processing.
 
-::: bioetl.application.core.batch-transformer.StreamingBatchProcessor
+::: bioetl.application.core.batch_transformer.StreamingBatchProcessor
     options:
         show-root-heading: true
         show-source: false
@@ -77,7 +77,7 @@ Streaming batch processor for memory-efficient processing.
 
 Result container for batch transformation.
 
-::: bioetl.application.core.batch-transformer.TransformResult
+::: bioetl.application.core.batch_transformer.TransformResult
     options:
         show-root-heading: true
         show-source: false
@@ -86,7 +86,7 @@ Result container for batch transformation.
 
 Individual transformed record with metadata.
 
-::: bioetl.application.core.batch-transformer.TransformedRecord
+::: bioetl.application.core.batch_transformer.TransformedRecord
     options:
         show-root-heading: true
         show-source: false
@@ -97,7 +97,7 @@ Individual transformed record with metadata.
 
 Writes transformed batches to storage layers.
 
-::: bioetl.application.core.batch-writer.BatchWriter
+::: bioetl.application.core.batch_writer.BatchWriter
     options:
         show-root-heading: true
         show-source: false
@@ -110,7 +110,7 @@ Common transformation helper functions.
 
 Safely extract value from nested dictionary.
 
-::: bioetl.application.core.transform-utils.safe-extract
+::: bioetl.application.core.dict_transformers.safe_extract
     options:
         show-root-heading: true
         show-source: false
@@ -119,7 +119,7 @@ Safely extract value from nested dictionary.
 
 Normalize string values (strip, lowercase, etc.).
 
-::: bioetl.application.core.transform-utils.normalize-string
+::: bioetl.application.core.dict_transformers.normalize_string
     options:
         show-root-heading: true
         show-source: false
@@ -128,7 +128,7 @@ Normalize string values (strip, lowercase, etc.).
 
 Parse date fields to ISO format.
 
-::: bioetl.application.core.transform-utils.parse-date-field
+::: bioetl.application.core.dict_transformers.parse_date_field
     options:
         show-root-heading: true
         show-source: false
@@ -137,7 +137,7 @@ Parse date fields to ISO format.
 
 Validate SMILES chemical notation.
 
-::: bioetl.application.core.transform-utils.validate-smiles
+::: bioetl.application.core.dict_transformers.validate_smiles
     options:
         show-root-heading: true
         show-source: false
@@ -146,7 +146,7 @@ Validate SMILES chemical notation.
 
 Flatten nested dictionary to dot notation.
 
-::: bioetl.application.core.transform-utils.flatten-nested-dict
+::: bioetl.application.core.dict_transformers.flatten_nested_dict
     options:
         show-root-heading: true
         show-source: false
@@ -155,7 +155,7 @@ Flatten nested dictionary to dot notation.
 
 Extract and process list fields.
 
-::: bioetl.application.core.transform-utils.extract-list-field
+::: bioetl.application.core.dict_transformers.extract_list_field
     options:
         show-root-heading: true
         show-source: false
@@ -164,7 +164,7 @@ Extract and process list fields.
 
 Aggregate values from nested lists.
 
-::: bioetl.application.core.transform-utils.aggregate-nested-lists
+::: bioetl.application.core.dict_transformers.aggregate_nested_lists
     options:
         show-root-heading: true
         show-source: false

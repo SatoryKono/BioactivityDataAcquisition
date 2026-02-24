@@ -21,7 +21,7 @@ Creates pipeline runners with proper dependency injection.
 
 Factory function to create GenericPipelineFactory instances.
 
-::: bioetl.composition.factories.pipeline_factory.create-pipeline_factory
+::: bioetl.composition.factories.pipeline_factory.create_pipeline_factory
     options:
         show-root-heading: true
         show-source: false
@@ -30,7 +30,7 @@ Factory function to create GenericPipelineFactory instances.
 
 Assemble a PipelineRunner with all dependencies.
 
-::: bioetl.composition.factories.pipeline_factory.assemble-runner
+::: bioetl.composition.factories.pipeline_factory.assemble_runner
     options:
         show-root-heading: true
         show-source: false
@@ -39,7 +39,7 @@ Assemble a PipelineRunner with all dependencies.
 
 Build PipelineServices bundle.
 
-::: bioetl.composition.factories.pipeline_factory.build-pipeline-services
+::: bioetl.composition.factories.pipeline_factory.build_pipeline_services
     options:
         show-root-heading: true
         show-source: false
@@ -64,23 +64,7 @@ Builder pattern for constructing service bundles.
         show-root-heading: true
         show-source: false
 
-### RunnerServices
-
-Bundle of services for PipelineRunner.
-
-::: bioetl.composition.factories.services_factory.RunnerServices
-    options:
-        show-root-heading: true
-        show-source: false
-
-### build-runner-services
-
-Build RunnerServices bundle.
-
-::: bioetl.composition.factories.services_factory.build-runner-services
-    options:
-        show-root-heading: true
-        show-source: false
+<!-- RunnerServices and build_runner_services: planned, not yet implemented -->
 
 ## Data Source Factory
 
@@ -88,7 +72,7 @@ Build RunnerServices bundle.
 
 Creates data source adapters.
 
-::: bioetl.composition.factories.data-source_factory.DataSourceFactory
+::: bioetl.composition.factories.data_source_factory.DataSourceFactory
     options:
         show-root-heading: true
         show-source: false
@@ -97,7 +81,7 @@ Creates data source adapters.
 
 Registry for data source creators.
 
-::: bioetl.composition.factories.data-source_factory.DataSourceRegistry
+::: bioetl.composition.factories.data_source_factory.DataSourceRegistry
     options:
         show-root-heading: true
         show-source: false
@@ -106,7 +90,7 @@ Registry for data source creators.
 
 Protocol for data source creator functions.
 
-::: bioetl.composition.factories.data-source_factory.DataSourceCreator
+::: bioetl.composition.factories.data_source_factory.DataSourceCreator
     options:
         show-root-heading: true
         show-source: false
@@ -146,7 +130,7 @@ Context for storage operations.
 
 Register a transformer class for an entity type.
 
-::: bioetl.composition.factories.transformer_factory.register-transformer
+::: bioetl.composition.factories.transformer_factory.register_transformer
     options:
         show-root-heading: true
         show-source: false
@@ -155,7 +139,7 @@ Register a transformer class for an entity type.
 
 Get transformer class for entity type.
 
-::: bioetl.composition.factories.transformer_factory.get-transformer-class
+::: bioetl.composition.factories.transformer_factory.get_transformer_class
     options:
         show-root-heading: true
         show-source: false
@@ -164,7 +148,7 @@ Get transformer class for entity type.
 
 Create transformer instance with dependencies.
 
-::: bioetl.composition.factories.transformer_factory.create-transformer
+::: bioetl.composition.factories.transformer_factory.create_transformer
     options:
         show-root-heading: true
         show-source: false
@@ -173,7 +157,7 @@ Create transformer instance with dependencies.
 
 Register all available transformers.
 
-::: bioetl.composition.factories.transformer_factory.register-all-transformers
+::: bioetl.composition.factories.transformer_factory.register_all_transformers
     options:
         show-root-heading: true
         show-source: false
@@ -184,7 +168,7 @@ Register all available transformers.
 
 Factory for creating HTTP clients.
 
-::: bioetl.composition.factories.http-client_factory.HttpClientFactory
+::: bioetl.composition.factories.http_client_factory.HttpClientFactory
     options:
         show-root-heading: true
         show-source: false
