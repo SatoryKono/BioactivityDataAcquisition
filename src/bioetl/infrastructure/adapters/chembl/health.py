@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+import httpx
+
 from bioetl.domain.exceptions import CriticalError
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.chembl.constants import CHEMBL_STATUS_URL
@@ -34,7 +36,35 @@ class ChemblHealthMixin:
             with self._adapter_metrics.measure_request("/status"):
                 response = await self.http_client.get_once(CHEMBL_STATUS_URL)
             return self._handle_health_response(response)
-        except Exception:
+        except Exception as exc:
+            status_code = self._extract_http_status_code(exc)
+            if status_code is not None and 500 <= status_code < 600:
+                self.logger.warning(
+                    "health_check_degraded",
+                    provider=self.provider_name,
+                    reason="status_endpoint_5xx",
+                    status_code=status_code,
+                    error_type=type(exc).__name__,
+                    error_message=str(exc),
+                )
+                return HealthStatus.DEGRADED
+            if isinstance(
+                exc,
+                (
+                    httpx.TimeoutException,
+                    httpx.ConnectError,
+                    httpx.ReadError,
+                    httpx.WriteError,
+                ),
+            ):
+                self.logger.warning(
+                    "health_check_degraded",
+                    provider=self.provider_name,
+                    reason="transient_network_error",
+                    error_type=type(exc).__name__,
+                    error_message=str(exc),
+                )
+                return HealthStatus.DEGRADED
             raise
 
     def _get_health_status(self) -> HealthStatus:
@@ -93,6 +123,15 @@ class ChemblHealthMixin:
                 status_code=response.status_code,
             )
             return HealthStatus.DEGRADED
+
+    @staticmethod
+    def _extract_http_status_code(error: Exception) -> int | None:
+        """Extract HTTP status code from exception response if available."""
+        response = getattr(error, "response", None)
+        if response is None:
+            return None
+        status_code = getattr(response, "status_code", None)
+        return int(status_code) if isinstance(status_code, int) else None
 
     def get_error_stats(self) -> dict[str, Any]:
         """Get error statistics from circuit breaker for monitoring."""

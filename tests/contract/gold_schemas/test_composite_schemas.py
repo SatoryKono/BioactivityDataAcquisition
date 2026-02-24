@@ -16,9 +16,10 @@ CONTRACTS_DIR = Path("docs/04-reference/contracts/gold")
 
 
 def _required_composite_columns() -> set[str]:
+    # Note: content_hash is excluded from Gold layer by FieldGroupRegistry
+    # (SYSTEM_METADATA group, include_in_gold=False). It lives in Silver only.
     return {
         "entity_id",
-        "content_hash",
         "_dq_warn",
         "_dq_error",
         "_run_id",
@@ -88,11 +89,10 @@ class TestCompositeGoldJsonContracts:
         contract = json.loads(path.read_text(encoding="utf-8"))
         properties = contract.get("properties", {})
 
-        missing = _required_composite_columns() - set(properties.keys())
+        # JSON contracts may still document content_hash for Silver reference,
+        # but it is not required in Gold output (excluded by FieldGroupRegistry).
+        required_in_gold = _required_composite_columns()
+        missing = required_in_gold - set(properties.keys())
         assert not missing, f"{filename} missing contract properties: {missing}"
 
         assert properties["entity_id"]["description"] == entity_description
-        assert (
-            properties["content_hash"]["description"]
-            == "Deterministic SHA-256 hash for SCD Type 2 change tracking."
-        )

@@ -303,5 +303,6 @@ class TestHealthCheckLogging:
         assert call_kwargs["error_message"] == "Connection refused"
 
         # Result should contain error details
+        assert result.status == HealthStatus.UNHEALTHY
         assert result.last_error == "Connection refused"
         assert result.provider == "test_provider"
