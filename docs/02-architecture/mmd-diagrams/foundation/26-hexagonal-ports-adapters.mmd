@@ -3,13 +3,13 @@
 %% Rank: 1 (Score 9.38) — All 24 domain ports mapped to infrastructure adapters
 %% Updated: 2026-02-17
 
-%% @version 1.0.0
+%% @version 1.1.0
 %% @date    2026-02-24
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
-flowchart LR
+flowchart TB
     subgraph Hexagon["Domain Layer — Ports (Protocol)"]
         direction TB
 
@@ -120,3 +120,13 @@ flowchart LR
     %% Styling
     style Hexagon fill:#f0f4ff,stroke:#4a6fa5,stroke-width:2px
     style Adapters fill:#f4fff0,stroke:#4a9f6a,stroke-width:2px
+
+    classDef dataPorts fill:#e3f2fd,stroke:#1e88e5,stroke-width:1px
+    classDef coordPorts fill:#f3e5f5,stroke:#8e24aa,stroke-width:1px
+    classDef obsPorts fill:#fff3e0,stroke:#fb8c00,stroke-width:1px
+
+    class DSP,FDSP,SP,DRP dataPorts
+    class LP,CPP,QP coordPorts
+    class LGP,MP,TP,DQM obsPorts
+
+    linkStyle default stroke:#666,stroke-width:1px,color:#666

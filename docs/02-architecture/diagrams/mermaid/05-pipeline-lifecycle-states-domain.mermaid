@@ -1,0 +1,65 @@
+%% View: Domain-Focus | Parent: 05-pipeline-lifecycle-states-full.mermaid
+flowchart TB
+
+    subgraph Domain["🟡 Domain Layer"]
+        direction TB
+        N1["ERROR"]
+        N4["LoadingConfig"]
+        N5["HealthChecks"]
+        N6["PassRecords"]
+        N7["WarnRecords"]
+        N9["LogError"]
+        N11["ComputeHash"]
+        N14["*"]
+        N15["SHUTDOWN_REQUESTED"]
+        N16["EXTRACTING"]
+        N17["VALIDATING"]
+        N18["ThresholdCheck"]
+        N19["LOADING"]
+    end
+
+    subgraph Application["🟢 Application Layer"]
+        direction TB
+        N2["TRANSFORMING"]
+        N3["FetchBatch"]
+        N12["FailBatch"]
+        N13["FinishCurrentBatch"]
+    end
+
+    subgraph Infrastructure["🔵 Infrastructure Layer"]
+        direction TB
+        N8["DQMetrics"]
+        N20["RequestLock"]
+    end
+
+    subgraph Composition["🟣 Composition Layer"]
+        direction TB
+        N10["BootstrapServices"]
+    end
+
+    N14 --> N4
+    N4 --> N10
+    N14 --> N20
+    N14 --> N5
+    N14 --> N3
+    N16 --> N2
+    N16 --> N1
+    N2 --> N17
+    N2 --> N1
+    N18 --> N6
+    N18 --> N7
+    N18 --> N12
+    N17 --> N19
+    N17 --> N1
+    N19 --> N1
+    N14 --> N8
+    N14 --> N9
+    N16 --> N15
+    N2 --> N15
+    N17 --> N15
+    N19 --> N15
+
+    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
+    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
+    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
+    style Composition fill:#F5F3FF,stroke:#7C3AED,stroke-width:2px

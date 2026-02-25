@@ -1,0 +1,50 @@
+%% View: Domain-Focus | Parent: 08-complete-etl-workflow-full.mermaid
+flowchart TB
+
+    subgraph Domain["🟡 Domain Layer"]
+        direction TB
+        N4["B1"]
+        N7["B2"]
+        N8["B4"]
+        N9["B3"]
+        N10["B5"]
+        N11["B8"]
+        N12["D7"]
+        N13["D8"]
+        N14["D9"]
+        N15["E1"]
+        N16["D3"]
+        N17["D4"]
+        N18["D5"]
+        N19["E2"]
+        N20["D10"]
+    end
+
+    subgraph Infrastructure["🔵 Infrastructure Layer"]
+        direction TB
+        N1["A6"]
+        N2["A7"]
+        N3["A8"]
+        N5["A4"]
+        N6["A5"]
+    end
+
+    N5 --> N1
+    N6 --> N1
+    N1 --> N2
+    N2 --> N3
+    N4 --> N7
+    N9 --> N8
+    N8 --> N10
+    N11 --> N8
+    N16 --> N12
+    N17 --> N13
+    N13 --> N12
+    N18 --> N14
+    N14 --> N13
+    N15 --> N19
+    N3 --> N4
+    N12 --> N15
+
+    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
+    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px

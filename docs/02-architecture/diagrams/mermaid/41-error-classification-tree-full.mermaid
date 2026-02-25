@@ -1,0 +1,68 @@
+%% Parent source: docs/02-architecture/mmd-diagrams/foundation/41-error-classification-tree.mmd
+%% Full reference diagram retained after decomposition.
+%% Title: Error Classification Decision Tree — Full Logic
+%% Covers: RULES.md §3.1 (Error Handling), domain/exceptions/
+%% Rank: 16 (Score 8.06) — Complete error classification reference
+%% Updated: 2026-02-17
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   Mixed (System / Component / Class)
+
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+flowchart TB
+    ERROR["Error Occurred"]
+
+    ERROR --> HTTP{{"HTTP Status Code?"}}
+    ERROR --> DOMAIN{{"Domain Error?"}}
+    ERROR --> INFRA{{"Infrastructure Error?"}}
+
+    %% HTTP errors
+    HTTP -->|"401, 403"| AUTH["ServiceAuthenticationError\n(CriticalError)\n→ FAIL FAST, no retry\n→ Check API key config"]
+    HTTP -->|"404"| NOTFOUND["ApiError\n(RecoverableError)\n→ Log warning\n→ Skip entity"]
+    HTTP -->|"429"| RATE["RateLimitExceededError\n(RecoverableError)\n→ Check Retry-After header\n→ Exponential backoff"]
+    HTTP -->|"500, 502, 504"| SERVER["ServiceUnavailableError\n(RecoverableError)\n→ Retry with backoff\n→ Max 3 attempts"]
+    HTTP -->|"Other"| UNKNOWN_HTTP["ExternalServiceError\n→ Log, classify, retry"]
+
+    %% Domain errors
+    DOMAIN -->|"Schema mismatch"| SCHEMA["SchemaViolationError\n(DataQualityError → ValidationError)\n→ Route to Quarantine"]
+    DOMAIN -->|"Missing field"| MISSING["MissingRequiredFieldError\n(ValidationError)\n→ Route to Quarantine"]
+    DOMAIN -->|"Invalid format"| FORMAT["InvalidDataFormatError\n(ValidationError)\n→ Route to Quarantine"]
+    DOMAIN -->|"DQ threshold"| DQTHRESH["DataQualityThresholdError\n→ error_rate > 20%\n→ FAIL entire batch"]
+
+    %% Infrastructure errors
+    INFRA -->|"Lock lost"| LOCK["LockLostError\n(CriticalError)\n→ ABORT immediately\n→ No partial write"]
+    INFRA -->|"Lock timeout"| LOCKACQ["LockAcquisitionError\n(CriticalError)\n→ FAIL, another instance running"]
+    INFRA -->|"Storage failure"| STORE["StorageError\n(RecoverableError)\n→ Retry Delta write"]
+    INFRA -->|"CB tripped"| CB["CircuitBreakerOpenError\n(RecoverableError)\n→ Wait recovery_timeout (300s)\n→ HALF_OPEN probe"]
+
+    %% Actions
+    subgraph Actions["Error Actions"]
+        RETRY["🔄 RETRY\n• max_attempts: 3\n• multiplier: 2.0\n• jitter: MD5-based"]
+        QUARANTINE2["🔒 QUARANTINE\n• QuarantineEntry created\n• payload truncated 64KB\n• payload_hash computed"]
+        FAIL_FAST["💥 FAIL FAST\n• No retry\n• Pipeline terminates\n• ExitCode.PIPELINE_ERROR"]
+        BATCH_FAIL["🚫 BATCH FAIL\n• error_rate > 20%\n• Entire batch rejected\n• Checkpoint NOT saved"]
+    end
+
+    AUTH --> FAIL_FAST
+    RATE --> RETRY
+    SERVER --> RETRY
+    SCHEMA --> QUARANTINE2
+    MISSING --> QUARANTINE2
+    FORMAT --> QUARANTINE2
+    DQTHRESH --> BATCH_FAIL
+    LOCK --> FAIL_FAST
+    LOCKACQ --> FAIL_FAST
+    STORE --> RETRY
+    CB --> RETRY
+
+    %% Retry exhaustion
+    RETRY -->|"max attempts\nexhausted"| EXHAUST["RetryExhaustedError\n→ Record CB failure\n→ Circuit may trip"]
+    EXHAUST --> FAIL_FAST
+
+    %% Styling
+    style Actions fill:#fff3e0,stroke:#e65100
+    style FAIL_FAST fill:#ffebee,stroke:#c62828
+    style QUARANTINE2 fill:#FF6B6B,stroke:#cc4444,color:#000
+    style RETRY fill:#e8f5e9,stroke:#2e7d32

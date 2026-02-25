@@ -1,0 +1,60 @@
+%% View: Infrastructure-Mapping | Parent: 14-provider-health-states-full.mermaid
+flowchart TB
+
+    subgraph Domain["🟡 Domain Layer"]
+        direction TB
+        N18["HP"]
+        N2["WatchingErrors"]
+        N7["ErrorAccumulating"]
+        N13["MinorError"]
+    end
+
+    subgraph Infrastructure["🔵 Infrastructure Layer"]
+        direction TB
+        N1["*"]
+        N3["ProcessingRequest"]
+        N4["HEALTHY"]
+        N5["DEGRADED"]
+        N6["RequestSuccess"]
+        N8["RecoveryProgress"]
+        N9["UNHEALTHY"]
+        N10["WaitingForProbe"]
+        N11["SendProbe"]
+        N12["NormalOperation"]
+        N14["ReducedCapacity"]
+        N15["Paused"]
+        N16["ProbeResult"]
+        N19["DM"]
+        N20["UH"]
+    end
+
+    subgraph Composition["🟣 Composition Layer"]
+        direction TB
+        N17["ConfiguredProviders"]
+    end
+
+    N1 --> N4
+    N1 --> N12
+    N1 --> N3
+    N3 --> N6
+    N3 --> N13
+    N6 --> N3
+    N4 --> N5
+    N1 --> N14
+    N1 --> N2
+    N2 --> N7
+    N2 --> N8
+    N7 --> N2
+    N8 --> N2
+    N5 --> N4
+    N5 --> N9
+    N1 --> N15
+    N1 --> N10
+    N10 --> N11
+    N11 --> N16
+    N9 --> N5
+    N1 --> N17
+
+    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
+    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
+    style Composition fill:#F5F3FF,stroke:#7C3AED,stroke-width:2px

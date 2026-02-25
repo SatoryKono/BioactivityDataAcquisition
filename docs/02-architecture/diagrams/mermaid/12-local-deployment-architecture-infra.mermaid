@@ -1,0 +1,52 @@
+%% View: Infrastructure-Mapping | Parent: 12-local-deployment-architecture-full.mermaid
+flowchart TB
+
+    subgraph Infrastructure["🔵 Infrastructure Layer"]
+        direction TB
+        N1["Quarantine"]
+        N2["Checkpoints"]
+        N3["Metrics"]
+        N4["MemoryLock"]
+        N5["chembl_activity"]
+        N7["pubchem_compound"]
+        N8["uniprot_protein"]
+        N9["ChEMBL_API"]
+        N10["PubChem_API"]
+        N11["UniProt_API"]
+        N12["PubMed_API"]
+        N13["chembl_assay"]
+        N14["chembl_target"]
+        N15["chembl_molecule"]
+        N16["Schedule"]
+        N17["Bronze"]
+        N18["Silver"]
+        N19["Gold"]
+        N20["Lineage"]
+    end
+
+    subgraph Interfaces["⚪ Interfaces Layer"]
+        direction TB
+        N6["CLI"]
+    end
+
+    N9 --> N5
+    N10 --> N7
+    N11 --> N8
+    N12 --> N5
+    N6 --> N5
+    N6 --> N13
+    N6 --> N14
+    N6 --> N15
+    N6 --> N7
+    N6 --> N8
+    N16 --> N6
+    N5 --> N17
+    N5 --> N18
+    N5 --> N19
+    N5 --> N1
+    N5 --> N2
+    N5 --> N20
+    N5 --> N3
+
+    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
+    style Interfaces fill:#F1F5F9,stroke:#64748B,stroke-width:2px

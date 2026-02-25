@@ -1,0 +1,59 @@
+%% View: Domain-Focus | Parent: 05-layers-interaction-full.mermaid
+flowchart TB
+
+    subgraph Domain["🟡 Domain Layer"]
+        direction TB
+        N6["Ports"]
+        N7["Exceptions"]
+        N8["Domain"]
+        N9["Factories"]
+        N12["Coordinator"]
+        N15["Application"]
+        N16["Types"]
+        N17["Entities"]
+        N20["Observability"]
+    end
+
+    subgraph Application["🟢 Application Layer"]
+        direction TB
+        N2["BatchExec"]
+        N3["CompositeRunner"]
+        N4["Transformer"]
+        N5["Services"]
+        N13["Merger"]
+        N1["Runner"]
+    end
+
+    subgraph Infrastructure["🔵 Infrastructure Layer"]
+        direction TB
+        N18["Adapters"]
+        N19["Storage"]
+    end
+
+    subgraph Composition["🟣 Composition Layer"]
+        direction TB
+        N10["Bootstrap"]
+        N11["Registry"]
+    end
+
+    subgraph Interfaces["⚪ Interfaces Layer"]
+        direction TB
+        N14["CLI"]
+    end
+
+    N10 --> N11
+    N10 --> N9
+    N1 --> N2
+    N2 --> N4
+    N1 --> N5
+    N3 --> N12
+    N3 --> N13
+    N14 --> N10
+    N9 --> N1
+    N15 --> N6
+
+    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
+    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
+    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
+    style Composition fill:#F5F3FF,stroke:#7C3AED,stroke-width:2px
+    style Interfaces fill:#F1F5F9,stroke:#64748B,stroke-width:2px

@@ -1,0 +1,55 @@
+%% View: Infrastructure-Mapping | Parent: 08-domain-ddd-full.mermaid
+flowchart TB
+
+    subgraph Domain["🟡 Domain Layer"]
+        direction TB
+        N4["RunID"]
+        N11["BatchID"]
+        N12["EntityID"]
+    end
+
+    subgraph Application["🟢 Application Layer"]
+        direction TB
+        N3["Batch"]
+        N5["PipelineRun"]
+        N6["BatchCreated"]
+        N7["BatchSealed"]
+        N8["BatchWritten"]
+    end
+
+    subgraph Infrastructure["🔵 Infrastructure Layer"]
+        direction TB
+        N1["QuarantineEntry"]
+        N2["RecordQuarantined"]
+        N9["RunStarted"]
+        N10["RunCompleted"]
+        N13["ContentHash"]
+        N14["R_RUNNING"]
+        N15["R_PENDING"]
+        N16["R_COMPLETED"]
+        N17["R_FAILED"]
+        N18["R_SHUTDOWN"]
+        N19["B_WRITING"]
+        N20["B_SEALED"]
+    end
+
+    N3 --> N6
+    N3 --> N7
+    N3 --> N8
+    N3 --> N2
+    N5 --> N9
+    N5 --> N10
+    N3 --> N4
+    N3 --> N11
+    N5 --> N4
+    N1 --> N12
+    N1 --> N13
+    N20 --> N19
+    N15 --> N14
+    N14 --> N16
+    N14 --> N17
+    N14 --> N18
+
+    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
+    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
+    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
