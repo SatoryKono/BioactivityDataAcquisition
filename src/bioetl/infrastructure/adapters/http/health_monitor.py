@@ -297,6 +297,20 @@ class ProviderHealthMonitor:
             labels={"provider": result.provider},
         )
 
+        # Record success/failure counters
+        if result.status == HealthStatus.HEALTHY:
+            self.metrics.increment_counter(
+                "health_check_success_total",
+                1,
+                labels={"provider": result.provider},
+            )
+        else:
+            self.metrics.increment_counter(
+                "health_check_failures_total",
+                1,
+                labels={"provider": result.provider},
+            )
+
         # Apply state transitions
         new_status = self.record_health_check_result(result.provider, result.status)
 
