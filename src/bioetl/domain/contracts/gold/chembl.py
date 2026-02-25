@@ -621,6 +621,7 @@ class ChEMBLTargetGoldSchema(pa.DataFrameModel):
     taxonomy_id: Series[float] = pa.Field(
         nullable=True, coerce=True
     )  # Standardized name
+    organism_class: Series[str] = pa.Field(nullable=True)
     species_group_flag: Series[bool] = pa.Field(nullable=True)
     description: Series[str] = pa.Field(nullable=True)
     downgraded: Series[bool] = pa.Field(nullable=True, coerce=True)

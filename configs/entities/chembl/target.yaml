@@ -33,6 +33,7 @@ schema:
     - pref_name
     - taxonomy_id
     - organism
+    - organism_class
     - species_group_flag
     - description
     - downgraded
