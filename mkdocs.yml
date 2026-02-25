@@ -68,10 +68,21 @@ nav:
             -   "RULES": 00-project/RULES.md
             -   "Requirements": 01-requirements/REQUIREMENTS.md
             -   "Rules Summary": 00-project/rules-summary.md
-            -   "File Policy": 00-project/governance/03-file-policy.md
-            -   "Extending BioETL": 00-project/governance/04-extending-bioetl.md
+            -   "Glossary": 00-project/glossary.md
+            -   "Tools": 00-project/TOOLS.md
+            -   Governance:
+                    -   "Naming Policy": 00-project/governance/02-naming-policy.md
+                    -   "File Policy": 00-project/governance/03-file-policy.md
+                    -   "Extending BioETL": 00-project/governance/04-extending-bioetl.md
+                    -   "GitHub Policy": 00-project/governance/05-github-policy.md
     -   Architecture:
             -   "Overview": 02-architecture/00-overview.md
+            -   Layers:
+                    -   "Domain": 02-architecture/01-domain-layer.md
+                    -   "Application": 02-architecture/02-application-layer.md
+                    -   "Infrastructure": 02-architecture/03-infrastructure-layer.md
+                    -   "Interfaces": 02-architecture/04-interfaces-layer.md
+                    -   "Composition": 02-architecture/05-composition-layer.md
             -   "System Context": 02-architecture/system-context.md
             -   "Container Diagram": 02-architecture/container-diagram.md
             -   "Data Flow": 02-architecture/data-flow.md
@@ -79,7 +90,47 @@ nav:
             -   "Observability Layers": 02-architecture/observability-layers.md
             -   "Diagrams": 02-architecture/diagrams.md
             -   "Diagramming Policy": 02-architecture/diagrams/00-diagramming-policy.md
-            -   "Decisions": 02-architecture/decisions/README.md
+            -   Decisions:
+                    -   "Index": 02-architecture/decisions/README.md
+                    -   "ADR-001 Delta Lake vs Parquet": 02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md
+                    -   "ADR-002 Medallion Architecture": 02-architecture/decisions/ADR-002-medallion-architecture.md
+                    -   "ADR-003 In-Memory Locking": 02-architecture/decisions/ADR-003-in-memory-locking-strategy.md
+                    -   "ADR-004 Pydantic vs Dataclasses": 02-architecture/decisions/ADR-004-pydantic-vs-dataclasses.md
+                    -   "ADR-005 Composition Layer": 02-architecture/decisions/ADR-005-composition-layer-separation.md
+                    -   "ADR-006 Logger & Metrics Ports": 02-architecture/decisions/ADR-006-logger-metrics-ports.md
+                    -   "ADR-007 Circuit Breaker": 02-architecture/decisions/ADR-007-circuit-breaker-implementation.md
+                    -   "ADR-008 Graceful Shutdown": 02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md
+                    -   "ADR-009 Paginated Fetcher": 02-architecture/decisions/ADR-009-paginated-fetcher-mixin.md
+                    -   "ADR-010 Local-Only Deployment": 02-architecture/decisions/ADR-010-local-only-deployment.md
+                    -   "ADR-011 Remove Watermark": 02-architecture/decisions/ADR-011-remove-watermark-mechanism.md
+                    -   "ADR-012 Storage Clear Contract": 02-architecture/decisions/ADR-012-storage-clear-contract-and-run-id.md
+                    -   "ADR-013 Async Storage Cleanup": 02-architecture/decisions/ADR-013-async-storage-cleanup.md
+                    -   "ADR-014 Deterministic Writes": 02-architecture/decisions/ADR-014-deterministic-writes.md
+                    -   "ADR-015 Pipeline Lifecycle": 02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md
+                    -   "ADR-016 Error Handling": 02-architecture/decisions/ADR-016-error-handling-strategy.md
+                    -   "ADR-017 Observability Architecture": 02-architecture/decisions/ADR-017-observability-architecture.md
+                    -   "ADR-018 Gold Strict Validation": 02-architecture/decisions/ADR-018-gold-strict-validation.md
+                    -   "ADR-019 Observability Port Enforcement": 02-architecture/decisions/ADR-019-observability-port-enforcement.md
+                    -   "ADR-020 BasePipeline Decomposition": 02-architecture/decisions/ADR-020-basepipeline-decomposition.md
+                    -   "ADR-021 DDD Aggregates": 02-architecture/decisions/ADR-021-ddd-aggregates-adoption.md
+                    -   "ADR-022 Tracing NoOp": 02-architecture/decisions/ADR-022-tracing-noop.md
+                    -   "ADR-023 Entity Type Patterns": 02-architecture/decisions/ADR-023-entity-type-patterns.md
+                    -   "ADR-024 Entity Naming Unification": 02-architecture/decisions/ADR-024-entity-naming-unification.md
+                    -   "ADR-025 Pipeline Config Unification": 02-architecture/decisions/ADR-025-pipeline-config-unification.md
+                    -   "ADR-026 Composite Pipeline Pattern": 02-architecture/decisions/ADR-026-composite-pipeline-pattern.md
+                    -   "ADR-027 DQ Rules Externalization": 02-architecture/decisions/ADR-027-dq-rules-externalization.md
+                    -   "ADR-028 Filter Rules Externalization": 02-architecture/decisions/ADR-028-filter-rules-externalization.md
+                    -   "ADR-029 Output Metadata Unification": 02-architecture/decisions/ADR-029-output-metadata-unification.md
+                    -   "ADR-030 Publication Pagination": 02-architecture/decisions/ADR-030-publication-pagination-strategy.md
+                    -   "ADR-031 Loading Strategy": 02-architecture/decisions/ADR-031-loading-strategy-formalization.md
+                    -   "ADR-032 Unified HTTP Client": 02-architecture/decisions/ADR-032-unified-http-client.md
+                    -   "ADR-033 Publication Validation": 02-architecture/decisions/ADR-033-publication-validation-strategy.md
+                    -   "ADR-034 Schema↔Domain Pairs": 02-architecture/decisions/ADR-034-schema-domain-pairs.md
+                    -   "ADR-035 JSON Field Typing": 02-architecture/decisions/ADR-035-json-field-typing-policy.md
+                    -   "ADR-036 Gold Contract Versioning": 02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md
+                    -   "ADR-037 Canonical Schema Generation": 02-architecture/decisions/ADR-037-canonical-schema-generation.md
+                    -   "ADR-038 Enum Externalization": 02-architecture/decisions/ADR-038-enum-externalization.md
+                    -   "ADR-039 Unified Entity Config": 02-architecture/decisions/ADR-039-unified-entity-config-format.md
     -   Guides:
             -   "Getting Started": 03-guides/getting-started.md
             -   "Quick Start": 03-guides/quick-start.md
@@ -87,6 +138,7 @@ nav:
             -   "Pipeline Configuration": 03-guides/pipeline-configuration.md
             -   "Pipeline Lifecycle": 03-guides/pipeline-lifecycle.md
             -   "DQ Configuration": 03-guides/dq-configuration.md
+            -   "Publication Validation": 03-guides/publication-validation-guide.md
             -   "Date Handling": 03-guides/date-handling.md
             -   "Local Storage Layout": 03-guides/local-storage-layout.md
             -   "Metrics & Monitoring": 03-guides/metrics-monitoring.md
@@ -96,13 +148,78 @@ nav:
             -   "Add Pipeline (Existing Source)": 03-guides/add-pipeline-existing-source.md
             -   "Cleanup Policy": 03-guides/cleanup-policy.md
             -   "Registry Pattern": 03-guides/registry-pattern.md
-            -   "Schema Artifact Migration": 03-guides/migration-schema-artifacts.md
+            -   "Config Schema Guidelines": 03-guides/development/config-schema-guidelines.md
+            -   Migration:
+                    -   "Schema Artifact Migration": 03-guides/migration-schema-artifacts.md
+                    -   "v5.9 → v5.14": 03-guides/migration-5.9-to-5.14.md
+                    -   "v5.14 → v6.0": 03-guides/migration-5.14-to-6.0.md
             -   "File Path Audit Report": 03-guides/file-path-audit-report.md
     -   Providers:
             -   "Overview": 04-reference/providers/README.md
+            -   ChEMBL:
+                    -   "Activity": 04-reference/providers/chembl/activity.md
+                    -   "Assay": 04-reference/providers/chembl/assay.md
+                    -   "Assay Parameters": 04-reference/providers/chembl/assay-parameters.md
+                    -   "Cell Line": 04-reference/providers/chembl/cell-line.md
+                    -   "Compound Record": 04-reference/providers/chembl/compound-record.md
+                    -   "Molecule": 04-reference/providers/chembl/molecule.md
+                    -   "Protein Class": 04-reference/providers/chembl/protein-class.md
+                    -   "Publication": 04-reference/providers/chembl/publication.md
+                    -   "Publication Similarity": 04-reference/providers/chembl/publication-similarity.md
+                    -   "Publication Term": 04-reference/providers/chembl/publication-term.md
+                    -   "Target": 04-reference/providers/chembl/target.md
+                    -   "Target Component": 04-reference/providers/chembl/target-component.md
+                    -   "Tissue": 04-reference/providers/chembl/tissue.md
+            -   PubChem:
+                    -   "Compound": 04-reference/providers/pubchem/compound.md
+            -   UniProt:
+                    -   "Protein": 04-reference/providers/uniprot/protein.md
+                    -   "ID Mapping": 04-reference/providers/uniprot/idmapping.md
+            -   PubMed:
+                    -   "Publication": 04-reference/providers/pubmed/publication.md
+            -   CrossRef:
+                    -   "Publication": 04-reference/providers/crossref/publication.md
+            -   OpenAlex:
+                    -   "Publication": 04-reference/providers/openalex/publication.md
+            -   SemanticScholar:
+                    -   "Publication": 04-reference/providers/semanticscholar/publication.md
     -   Pipelines:
             -   "Overview": 04-reference/pipelines/README.md
             -   "Publication Pipelines": 04-reference/pipelines/INDEX.md
+            -   ChEMBL:
+                    -   "Protein Class": 04-reference/pipelines/chembl/01-protein-class-spec.md
+                    -   "Cell Line": 04-reference/pipelines/chembl/02-cell-line-spec.md
+                    -   "Molecule": 04-reference/pipelines/chembl/03-molecule-spec.md
+                    -   "Target": 04-reference/pipelines/chembl/04-target-spec.md
+                    -   "Activity": 04-reference/pipelines/chembl/05-activity-spec.md
+                    -   "Assay": 04-reference/pipelines/chembl/06-assay-spec.md
+                    -   "Publication": 04-reference/pipelines/chembl/07-publication-spec.md
+                    -   "Assay Parameters": 04-reference/pipelines/chembl/08-assay-parameters-spec.md
+                    -   "Compound Record": 04-reference/pipelines/chembl/09-compound-record-spec.md
+                    -   "Target Component": 04-reference/pipelines/chembl/10-target-component-spec.md
+                    -   "Publication Term": 04-reference/pipelines/chembl/11-publication-term-spec.md
+                    -   "Publication Similarity": 04-reference/pipelines/chembl/12-publication-similarity-spec.md
+                    -   "Subcellular Fraction": 04-reference/pipelines/chembl/14-subcellular-fraction-spec.md
+                    -   "Tissue": 04-reference/pipelines/chembl/15-tissue-spec.md
+            -   PubChem:
+                    -   "Compound": 04-reference/pipelines/pubchem/01-compound-spec.md
+            -   UniProt:
+                    -   "Protein": 04-reference/pipelines/uniprot/01-protein-spec.md
+                    -   "ID Mapping": 04-reference/pipelines/uniprot/02-idmapping-spec.md
+            -   PubMed:
+                    -   "Publication": 04-reference/pipelines/pubmed/01-publication-spec.md
+            -   CrossRef:
+                    -   "Publication": 04-reference/pipelines/crossref/01-publication-spec.md
+            -   OpenAlex:
+                    -   "Publication": 04-reference/pipelines/openalex/01-publication-spec.md
+            -   SemanticScholar:
+                    -   "Publication": 04-reference/pipelines/semanticscholar/01-publication-spec.md
+            -   Composite:
+                    -   "Publication": 04-reference/pipelines/composite/01-publication-spec.md
+                    -   "Molecule": 04-reference/pipelines/composite/02-molecule-spec.md
+                    -   "Target": 04-reference/pipelines/composite/03-target-spec.md
+                    -   "Activity": 04-reference/pipelines/composite/04-activity-spec.md
+                    -   "Assay": 04-reference/pipelines/composite/05-assay-spec.md
     -   "Data Contracts":
             -   "Gold Schemas": 04-reference/contracts/gold-schemas.md
             -   "Observability Metrics": 04-reference/contracts/observability.md
@@ -131,15 +248,36 @@ nav:
                             -   Overview: 04-reference/api/composition.md
                             -   Bootstrap: 04-reference/api/composition/bootstrap.md
                             -   Factories: 04-reference/api/composition/factories.md
-            -   "Pipelines Reference": 04-reference/pipelines/README.md
-            -   "Config Schema Guidelines": 03-guides/development/config-schema-guidelines.md
-            -   "Tools": 00-project/TOOLS.md
+            -   Schemas:
+                    -   "Activity Schema": 04-reference/schemas/domain/chembl/activity-schema.md
+                    -   "Assay Schema": 04-reference/schemas/domain/chembl/assay-schema.md
+                    -   "Molecule Schema": 04-reference/schemas/domain/chembl/molecule-schema.md
+                    -   "Target Schema": 04-reference/schemas/domain/chembl/target-schema.md
     -   Operations:
             -   Overview: 05-operations/README.md
-            -   "Runbooks": 05-operations/runbooks/index.md
+            -   Runbooks:
+                    -   "Index": 05-operations/runbooks/index.md
+                    -   "Pipeline Failure (Critical)": 05-operations/runbooks/pipeline-failure-critical.md
+                    -   "Pipeline Failure (Recovery)": 05-operations/runbooks/pipeline-failure-recovery.md
+                    -   "Pipeline Failure (DQ)": 05-operations/runbooks/pipeline-failure-dq.md
+                    -   "DQ Failure Investigation": 05-operations/runbooks/dq-failure-investigation.md
+                    -   "Data Recovery": 05-operations/runbooks/data-recovery.md
+                    -   "Incident Response": 05-operations/runbooks/incident-response.md
+                    -   "Backfill & Rebuild": 05-operations/runbooks/backfill-rebuild.md
+                    -   "Checkpoint Debugging": 05-operations/runbooks/checkpoint-debugging.md
+                    -   "Schema Evolution": 05-operations/runbooks/schema-evolution.md
+                    -   "Stale Lock": 05-operations/runbooks/stale-lock.md
+                    -   "Quarantine Management": 05-operations/runbooks/quarantine-management.md
+                    -   "VACUUM Procedures": 05-operations/runbooks/vacuum-procedures.md
+                    -   "Observability Checklist": 05-operations/runbooks/observability-checklist.md
+                    -   "Scaling": 05-operations/runbooks/scaling.md
+                    -   "Publication Validation": 05-operations/runbooks/publication-validation-runbook.md
             -   "Release Checklist": 05-operations/RELEASE_CHECKLIST.md
             -   "Performance Baselines": 05-operations/performance-baselines.md
             -   "VACUUM & Retention": 05-operations/vacuum-retention.md
+            -   Deployment:
+                    -   "Kubernetes Guide": 05-operations/deployment/DEPLOYMENT_GUIDE.md
+                    -   "K8S Summary": 05-operations/deployment/K8S_SUMMARY.md
     -   Verification:
             -   "Publication Field Mapping": 05-operations/verification/publication-field-mapping-report.md
             -   "PubMed Extraction": 05-operations/verification/pubmed-extraction-verification-report.md
