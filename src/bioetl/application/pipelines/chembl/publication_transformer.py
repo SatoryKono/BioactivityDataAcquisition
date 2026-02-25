@@ -12,8 +12,9 @@ Uses declarative field_specs DSL for mapping.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.application.core.base_transformer import TransformationError
 from bioetl.application.core.field_specs import (
     PMID,
     FieldGroup,
@@ -21,11 +22,6 @@ from bioetl.application.core.field_specs import (
     int_fields,
     map_field_groups,
     simple_fields,
-)
-from bioetl.application.core.publication_aliases import (
-    LEGACY_PUBLICATION_ALIASES_CUTOFF_DATE,
-    PUBLICATION_SCHEMA_FIELD_ALIASES,
-    build_publication_legacy_to_canonical_map,
 )
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
@@ -101,14 +97,6 @@ _PUBLICATION_GROUPS: tuple[FieldGroup, ...] = (
     _SOURCE_INFO,
 )
 
-# Legacy -> canonical table assembled from FieldSpec(target=...) + field_aliases.
-PUBLICATION_LEGACY_TO_CANONICAL: dict[str, str] = (
-    build_publication_legacy_to_canonical_map(
-        _PUBLICATION_GROUPS,
-        field_aliases=PUBLICATION_SCHEMA_FIELD_ALIASES,
-    )
-)
-
 
 class PublicationTransformer(BaseChemblTransformer):
     """Transforms ChEMBL bronze publication records to silver.
@@ -122,33 +110,6 @@ class PublicationTransformer(BaseChemblTransformer):
 
     entity_class = ChemblPublication
     primary_id_field = "publication_id"
-
-    async def _transform_impl(
-        self,
-        context: PipelineContext,
-        record: BronzeRecord,
-        index: int,
-    ) -> SilverRecord | None:
-        """Support both unified and legacy publication identifier field names."""
-        aliased_record = dict(record)
-        used_legacy_aliases: list[str] = []
-
-        for legacy_name, canonical_name in PUBLICATION_LEGACY_TO_CANONICAL.items():
-            if (
-                canonical_name not in aliased_record
-                and aliased_record.get(legacy_name) is not None
-            ):
-                aliased_record[canonical_name] = aliased_record.get(legacy_name)
-                used_legacy_aliases.append(legacy_name)
-
-        if used_legacy_aliases:
-            context.logger.warning(
-                "Legacy publication aliases used on read path; aliases are deprecated",
-                legacy_aliases=sorted(set(used_legacy_aliases)),
-                deprecation_cutoff_date=LEGACY_PUBLICATION_ALIASES_CUTOFF_DATE,
-            )
-
-        return await super()._transform_impl(context, aliased_record, index)
 
     def __init__(
         self,
@@ -191,6 +152,47 @@ class PublicationTransformer(BaseChemblTransformer):
             data_normalizer=data_normalizer,
             contract_policy=contract_policy,
         )
+
+    async def _transform_impl(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> SilverRecord | None:
+        """Handle legacy and unified publication ID fields."""
+        primary_id = record.get(self.primary_id_field) or record.get(
+            "document_chembl_id"
+        )
+        if not primary_id:
+            raise TransformationError(
+                "Missing required field: publication_id or document_chembl_id",
+                field=self.primary_id_field,
+            )
+
+        # 2. Generate entity ID using IdentityService
+        entity_id = self.compute_entity_id(
+            source_id=str(primary_id),
+            record={self.primary_id_field: str(primary_id)},
+        )
+
+        # 3. Extract business data (delegated to subclass)
+        business_data = self._extract_business_data(record, primary_id)
+
+        # 4. Compute content hash
+        content_hash = self.compute_content_hash(business_data, exclude_none=True)
+
+        # 5. Create domain entity
+        entity = self._create_entity(
+            self.entity_class,
+            context,
+            entity_id=entity_id,
+            content_hash=content_hash,
+            index=index,
+            **business_data,
+        )
+
+        # 6. Convert to SilverRecord
+        return cast("SilverRecord", self.entity_to_silver_record(entity))
 
     def _extract_business_data(
         self,

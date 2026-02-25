@@ -1,5 +1,7 @@
 # BioETL Architecture & Class Diagrams
 
+*Canonical diagram location — all `.mmd` sources live here.*
+
 All diagrams are in [Mermaid](https://mermaid.js.org/) format (`.mmd` files).
 Render them with any Mermaid-compatible viewer, IDE plugin, or the [Mermaid Live Editor](https://mermaid.live/).
 
@@ -49,6 +51,101 @@ Render them with any Mermaid-compatible viewer, IDE plugin, or the [Mermaid Live
 | 15 | Extractors | `class-diagrams/15-extractors.mmd` | BaseFieldExtractor, PubMed & UniProt extractors |
 | 16 | Factories & Bootstrap | `class-diagrams/16-factories-bootstrap.mmd` | DataSourceRegistry, TransformerFactory, RunnerBuilder |
 
+## Foundation Diagrams (59)
+
+Historical/foundational diagrams consolidated from `docs/02-architecture/diagrams/`.
+
+### Foundation 01–25
+
+| # | File | Description |
+|---|------|-------------|
+| 01a | `foundation/01-full-system-component.mmd` | Full system component diagram (C4-style) |
+| 01b | `foundation/01-high-level.mmd` | High-level system overview |
+| 02a | `foundation/02-full-medallion-data-flow.mmd` | Medallion architecture data flow (detailed) |
+| 02b | `foundation/02-medallion.mmd` | Medallion architecture (simplified) |
+| 03a | `foundation/03-pipeline-execution-happy-path.mmd` | Pipeline execution sequence (happy path) |
+| 03b | `foundation/03-pipeline-sequence.mmd` | Pipeline sequence diagram |
+| 04a | `foundation/04-domain-layer-class-diagram.mmd` | Domain layer ports, entities, config |
+| 04b | `foundation/04-error-flow.mmd` | Error handling flow |
+| 05a | `foundation/05-layers-interaction.mmd` | Layer interaction diagram |
+| 05b | `foundation/05-locking.mmd` | Locking mechanism |
+| 05c | `foundation/05-pipeline-lifecycle-states.mmd` | Pipeline state machine |
+| 06a | `foundation/06-application-layer-class-diagram.mmd` | Application layer classes |
+| 06b | `foundation/06-pipeline-execution.mmd` | Pipeline execution flow |
+| 07a | `foundation/07-circuit-breaker-states.mmd` | Circuit breaker state machine |
+| 07b | `foundation/07-medallion-flow.mmd` | Medallion data flow |
+| 08a | `foundation/08-complete-etl-workflow.mmd` | Complete ETL workflow |
+| 08b | `foundation/08-domain-ddd.mmd` | Domain-driven design diagram |
+| 09 | `foundation/09-full-er-diagram.mmd` | Entity-relationship diagram |
+| 10 | `foundation/10-infrastructure-layer-class-diagram.mmd` | Infrastructure layer classes |
+| 11 | `foundation/11-lock-acquisition-sequence.mmd` | Lock acquisition sequence |
+| 12 | `foundation/12-local-deployment-architecture.mmd` | Local deployment architecture (ADR-010) |
+| 13 | `foundation/13-domain-models-relationship.mmd` | Domain model relationships |
+| 14 | `foundation/14-provider-health-states.mmd` | Provider health states |
+| 15 | `foundation/15-dq-check-workflow.mmd` | Data quality check workflow |
+| 16 | `foundation/16-memory-lock-class.mmd` | MemoryLock class diagram |
+| 17 | `foundation/17-pipeline-hierarchy.mmd` | Pipeline/Transformer hierarchy |
+| 18 | `foundation/18-bronze-write-sequence.mmd` | Bronze write sequence |
+| 19 | `foundation/19-delta-lake-write-sequence.mmd` | Delta Lake write sequence |
+| 20 | `foundation/20-quarantine-record-states.mmd` | Quarantine record states |
+| 21 | `foundation/21-activity-entity-data-flow.mmd` | Activity entity data flow |
+| 22 | `foundation/22-client-api-request-sequence.mmd` | Client API request sequence |
+| 23 | `foundation/23-silver-writer-class.mmd` | SilverWriter class diagram |
+| 24 | `foundation/24-hash-service-class.mmd` | Hash service class diagram |
+| 25 | `foundation/25-circuit-breaker-observer-class.mmd` | CircuitBreaker class diagram |
+
+### Foundation 26–50 (TOP-25 Architecture)
+
+| # | File | Type | Description |
+|---|------|------|-------------|
+| 26 | `foundation/26-hexagonal-ports-adapters.mmd` | flowchart | Hexagonal Architecture — all 24 ports mapped to adapters |
+| 27 | `foundation/27-import-matrix-enforcement.mmd` | flowchart | ARCH-001 Import Matrix — 5-layer dependency rules |
+| 28 | `foundation/28-composition-root-di-graph.mmd` | flowchart | Composition Root DI Graph — full DI assembly |
+| 29 | `foundation/29-composite-pipeline-workflow.mmd` | sequence | Composite Pipeline (ADR-026) — Seed→Deps→FanOut→Merge→Gold |
+| 30 | `foundation/30-port-adapter-mapping.mmd` | flowchart | Port → Adapter Reference — all 24 ports |
+| 31 | `foundation/31-pipeline-run-lifecycle.mmd` | state | PipelineRun Aggregate FSM |
+| 32 | `foundation/32-single-record-journey.mmd` | flowchart | Single Record Journey — API→Bronze→Transform→Silver→Gold |
+| 33 | `foundation/33-cli-run-interaction.mmd` | sequence | CLI → PipelineRunnerService interaction |
+| 34 | `foundation/34-batch-processing-flow.mmd` | sequence | Batch Processing — BatchExecutor cycle |
+| 35 | `foundation/35-bootstrap-sequence.mmd` | sequence | Bootstrap 9-step Sequence |
+| 36 | `foundation/36-architecture-principles-mindmap.mmd` | mindmap | Architecture Principles Mindmap |
+| 37 | `foundation/37-cli-entry-full-chain.mmd` | sequence | CLI Entry → Exit Code full chain |
+| 38 | `foundation/38-runtime-assembly-sequence.mmd` | sequence | Runtime Assembly — phases 1–8 |
+| 39 | `foundation/39-medallion-invariants.mmd` | flowchart | Medallion Invariants — ARCH-007 RunType clear policy |
+| 40 | `foundation/40-application-core-collaboration.mmd` | flowchart | Application Core — PipelineRunner orchestrating services |
+| 41 | `foundation/41-error-classification-tree.mmd` | flowchart | Error Classification — HTTP→Domain→Actions |
+| 42 | `foundation/42-pipeline-runner-class.mmd` | class | PipelineRunner Class — all 14 DI dependencies |
+| 43 | `foundation/43-fan-out-fan-in-pattern.mmd` | sequence | Fan-Out/Fan-In — asyncio.gather parallel enrichment |
+| 44 | `foundation/44-cross-provider-enrichment.mmd` | flowchart | Cross-Provider Enrichment — 5-provider publication flow |
+| 45 | `foundation/45-template-method-transformer.mmd` | class | Template Method Pattern — BaseTransformer hierarchy |
+| 46 | `foundation/46-yaml-config-resolution.mmd` | flowchart | YAML Config Resolution — hierarchical merge |
+| 47 | `foundation/47-publication-merge-sources.mmd` | sequence | Publication Composite — multi-source merge |
+| 48 | `foundation/48-composite-phase-lifecycle.mmd` | state | Composite Pipeline FSM — 10-state lifecycle |
+| 49 | `foundation/49-composite-runner-class.mmd` | class | CompositePipelineRunner — component diagram |
+| 50 | `foundation/50-exception-hierarchy.mmd` | flowchart | Exception Hierarchy — BioETLError full tree |
+
+---
+
+## Colour Scheme
+
+| Layer          | Colour | Fill      | Border    |
+|----------------|--------|-----------|-----------|
+| Domain         | Purple | `#f3e5f5` | `#6a1b9a` |
+| Application    | Green  | `#e8f5e9` | `#2e7d32` |
+| Infrastructure | Red    | `#ffcdd2` | `#c62828` |
+| Interfaces     | Blue   | `#e3f2fd` | `#1565c0` |
+| Composition    | Orange | `#fff3e0` | `#e65100` |
+| External       | Gray   | `#eceff1` | `#455a64` |
+
+### Medallion Layers
+
+| Layer      | Fill      | Border    |
+|------------|-----------|-----------|
+| Bronze     | `#fff3e0` | `#e65100` |
+| Silver     | `#eceff1` | `#607d8b` |
+| Gold       | `#fff8e1` | `#f9a825` |
+| Quarantine | `#ffebee` | `#d32f2f` |
+
 ---
 
 ## Rendering
@@ -58,6 +155,9 @@ Render them with any Mermaid-compatible viewer, IDE plugin, or the [Mermaid Live
 ```bash
 # Mermaid CLI (required)
 npm install -g @mermaid-js/mermaid-cli
+
+# svgo — SVG optimization (recommended)
+npm install -g svgo
 
 # librsvg — high-quality SVG → PNG (recommended)
 # macOS:
@@ -70,10 +170,13 @@ sudo apt-get install librsvg2-bin
 
 ```bash
 # Render ALL diagrams (SVG + PNG) with custom theme
-bash docs/02-architecture/mmd-diagrams/render.sh
+make render-diagrams
 
 # SVG only (faster)
-bash docs/02-architecture/mmd-diagrams/render.sh --svg-only
+make render-diagrams-svg
+
+# Or run the script directly
+bash docs/02-architecture/mmd-diagrams/render.sh
 
 # Single diagram with theme
 mmdc -i docs/02-architecture/mmd-diagrams/architecture/01-high-level-hexagonal.mmd \
@@ -103,36 +206,26 @@ bash docs/02-architecture/mmd-diagrams/render.sh --puppeteer /tmp/puppeteer-conf
 ```
 docs/02-architecture/mmd-diagrams/
   architecture/
-    *.mmd           # source diagrams
+    *.mmd           # source diagrams (18)
     svg/*.svg       # rendered vector (scalable)
     png/*.png       # rendered raster (300 DPI)
   class-diagrams/
-    *.mmd
+    *.mmd           # source diagrams (16)
+    svg/*.svg
+    png/*.png
+  foundation/
+    *.mmd           # source diagrams (59)
     svg/*.svg
     png/*.png
   theme/
     mermaid-config.json   # colours, fonts, spacing
     custom.css            # fine-tuned SVG styling
   render.sh               # unified render script
+  README.md               # this file
 ```
-
-### Theme customization
-
-The custom theme in `theme/mermaid-config.json` uses the BioETL colour palette:
-
-| Layer          | Fill      | Border    |
-|----------------|-----------|-----------|
-| Domain         | `#e8f5e9` | `#2e7d32` |
-| Application    | `#e3f2fd` | `#1565c0` |
-| Infrastructure | `#fff3e0` | `#e65100` |
-| Composition    | `#f3e5f5` | `#6a1b9a` |
-| Interfaces     | `#fce4ec` | `#b71c1c` |
-| Bronze         | `#fff3e0` | `#e65100` |
-| Silver         | `#eceff1` | `#607d8b` |
-| Gold           | `#fff8e1` | `#f9a825` |
-| Quarantine     | `#ffebee` | `#c62828` |
 
 ### CI/CD
 
 Diagrams are validated and rendered automatically in GitHub Actions
 (`.github/workflows/docs.yml`). Rendered SVG/PNG are uploaded as build artifacts.
+A drift check warns when `.mmd` sources change without re-rendering.

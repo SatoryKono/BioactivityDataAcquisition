@@ -156,7 +156,7 @@
               }
             ]
           },
-          "unit": "ms"
+          "unit": "s"
         },
         "overrides": []
       },
@@ -183,7 +183,7 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency_ms_bucket{provider=~\"$provider\"}[5m])))",
+          "expr": "histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[5m])))",
           "legendFormat": "{{ provider }} p95",
           "refId": "A"
         }
@@ -253,7 +253,7 @@
           "color": {
             "mode": "thresholds"
           },
-          "decimals": 2,
+          "decimals": 3,
           "min": 0,
           "thresholds": {
             "mode": "absolute",
@@ -264,7 +264,7 @@
               },
               {
                 "color": "yellow",
-                "value": 1
+                "value": 0.5
               },
               {
                 "color": "orange",
@@ -276,7 +276,7 @@
               }
             ]
           },
-          "unit": "ms"
+          "unit": "s"
         },
         "overrides": []
       },
@@ -304,7 +304,7 @@
       "repeatDirection": "h",
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum by (le) (rate(bioetl_health_check_latency_ms_bucket{provider=\"$provider\"}[5m])))",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(bioetl_health_check_latency_seconds_bucket{provider=\"$provider\"}[5m])))",
           "legendFormat": "{{ provider }}",
           "refId": "A"
         }
@@ -384,8 +384,8 @@
           "color": {
             "mode": "thresholds"
           },
-          "decimals": 2,
-          "max": 5000,
+          "decimals": 3,
+          "max": 10,
           "min": 0,
           "thresholds": {
             "mode": "absolute",
@@ -396,19 +396,19 @@
               },
               {
                 "color": "yellow",
-                "value": 100
+                "value": 0.5
               },
               {
                 "color": "orange",
-                "value": 500
+                "value": 2
               },
               {
                 "color": "red",
-                "value": 1000
+                "value": 5
               }
             ]
           },
-          "unit": "ms"
+          "unit": "s"
         },
         "overrides": []
       },
@@ -436,7 +436,7 @@
       "maxPerRow": 4,
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency_ms_bucket{provider=~\"$provider\"}[5m])))",
+          "expr": "histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[5m])))",
           "legendFormat": "{{ provider }}",
           "refId": "A"
         }
@@ -493,7 +493,7 @@
           "value": "$__all"
         },
         "datasource": "Prometheus",
-        "definition": "label_values(bioetl_health_check_success_total, provider)",
+        "definition": "label_values(bioetl_health_check_latency_ms_bucket, provider)",
         "hide": 0,
         "includeAll": true,
         "label": "Provider",
@@ -501,7 +501,7 @@
         "name": "provider",
         "options": [],
         "query": {
-          "query": "label_values(bioetl_health_check_success_total, provider)",
+          "query": "label_values(bioetl_health_check_latency_ms_bucket, provider)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,

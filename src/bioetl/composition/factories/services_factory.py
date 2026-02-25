@@ -136,6 +136,7 @@ class BaseServicesFactory:
         logger: LoggerPort,
         data_source: DataSourcePort,
         pipeline_config: PipelineYamlConfig,
+        metrics: MetricsPort | None = None,
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,
         metadata_coordinator: MetadataCoordinator | None = None,
@@ -148,6 +149,7 @@ class BaseServicesFactory:
             logger: Structured logger
             data_source: Data source port implementation
             pipeline_config: Pipeline YAML configuration
+            metrics: Optional shared MetricsPort. If not provided, created from settings.
             tracer: Optional tracer (defaults to NoOpTracing if not provided)
             dq_monitor: Optional data quality monitor for anomaly detection
             metadata_coordinator: Optional MetadataCoordinator for centralized
@@ -158,8 +160,8 @@ class BaseServicesFactory:
         Returns:
             PipelineServices with all dependencies configured
         """
-        # Create metrics first so it can be passed to storage factory
-        metrics = cls._create_metrics(settings)
+        # Reuse shared metrics when provided so data source/storage write to same port.
+        metrics_port = metrics if metrics is not None else cls._create_metrics(settings)
 
         if (
             settings.env == "prod"
@@ -175,7 +177,7 @@ class BaseServicesFactory:
             settings,
             pipeline_config,
             logger,
-            metrics=metrics,
+            metrics=metrics_port,
             metadata_coordinator=metadata_coordinator,
             silver_validator=silver_validator,
         )
@@ -209,7 +211,7 @@ class BaseServicesFactory:
             lock=lock,
             checkpoint=checkpoint,
             quarantine=quarantine,
-            metrics=metrics,
+            metrics=metrics_port,
             tracing=tracer,
             logger=logger,
             dq_monitor=dq_monitor,

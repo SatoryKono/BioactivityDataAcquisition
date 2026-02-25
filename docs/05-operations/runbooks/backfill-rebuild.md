@@ -1,6 +1,6 @@
 # Backfill and Rebuild Operations
 
-*Reference: [RULES.md §2.4](../../00-project/RULES.md#24-%D0%BF%D0%BE%D0%BB%D0%B8%D1%82%D0%B8%D0%BA%D0%B0-backfill--replay)*
+*Reference: [RULES.md §2.4](../../00-project/RULES.md#24-политика-backfill--replay)*
 
 This runbook describes how to perform Backfill (historical load) and Rebuild (full reload) operations.
 

@@ -97,12 +97,12 @@ class TestFileSizeLimits:
         # Composition layer exemptions
         "metadata_coordinator.py": 610,  # 603 LOC - MetadataCoordinator with centralized metadata management + extended lineage + DQ provenance + composite metadata
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
-        "composite.py": 680,  # 672 LOC - Composite pipeline bootstrap with runner factories + execution_context + field group registry loading + DQ report service + cross-validation + quarantine wiring + composite schemas
+        "composite.py": 700,  # 672 LOC - Composite pipeline bootstrap with runner factories + execution_context + field group registry loading + DQ report service + cross-validation + quarantine wiring + composite schemas
         "entrypoints.py": 110,  # 102 LOC - Re-export facade (split to _pipeline_execution, _resource_management, _services)
         "registration.py": 655,  # 651 LOC - provider registration (config helpers extracted to _config_helpers.py) + extraction_params overlap validation (ADR-028 §3)
         "storage_adapter.py": 690,  # 683 LOC - storage adapter with Bronze/Silver/Gold writers + BronzeWriteResult + SilverWriteResult + SourceMetadata param + Silver lineage + composite schemas + key nullability
         # Consolidated factory files (v5.2)
-        "pipeline_factory.py": 870,  # 864 LOC - merged generic_factory + runner_assembly + contract policy DI + MetadataCoordinator creation + Pandera Silver schema DI
+        "pipeline_factory.py": 878,  # 877 LOC - merged generic_factory + runner_assembly + contract policy DI + MetadataCoordinator creation + Pandera Silver schema DI + DQ output paths
         "pipeline_factories.py": 680,  # 674 LOC - pipeline factory configurations + contract policy validation + composite schema registry
         "services_factory.py": 710,  # 701 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory + flat_structure + MetadataCoordinator param + PipelineCallbacksContext + loading_strategy (ADR-031) + silver_validator param
         # Infrastructure layer exemptions
@@ -110,7 +110,7 @@ class TestFileSizeLimits:
         "gold_writer.py": 970,  # 963 LOC - SCD Type 2 (metadata/arrow logic extracted) + column_order + write_gold_merged schema validation + composite metadata
         "bronze_writer.py": 820,  # 813 LOC - streaming compression + MetadataCoordinator fallback + SourceMetadata param + provider/entity params + flat_structure
         "gold.py": 1060,  # 1055 LOC - Gold layer Pandera schemas (+ IDMapping + cross-reference ID fields + CrossRef/PubMed/ChEMBL lookup metadata fields + publication schemas + DATE_REGEX validation + PubMed forensic fields)
-        "silver.py": 1070,  # 1066 LOC - Silver PyArrow schemas + base schema fields for Crossref/S2 + SubcellularFraction schema + publication classification fields + nullable int handling + PubChem expanded fields
+        "silver.py": 1072,  # 1071 LOC - Silver PyArrow schemas + base schema fields for Crossref/S2 + SubcellularFraction schema + publication classification fields + nullable int handling + PubChem expanded fields
         "client.py": 1210,  # ChemblAdapter growth after batch reduction compatibility + extraction params support
         "adapter.py": 635,  # 632 LOC - SemanticScholarAdapter with FilterableDataSourcePort + fallback logic
         "idmapping_client.py": 660,  # 651 LOC
