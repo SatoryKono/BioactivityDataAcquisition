@@ -493,7 +493,7 @@
           "value": "$__all"
         },
         "datasource": "Prometheus",
-        "definition": "label_values(bioetl_health_check_latency_ms_bucket, provider)",
+        "definition": "label_values(bioetl_health_check_success_total, provider)",
         "hide": 0,
         "includeAll": true,
         "label": "Provider",
@@ -501,7 +501,7 @@
         "name": "provider",
         "options": [],
         "query": {
-          "query": "label_values(bioetl_health_check_latency_ms_bucket, provider)",
+          "query": "label_values(bioetl_health_check_success_total, provider)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
