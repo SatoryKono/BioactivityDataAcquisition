@@ -102,9 +102,9 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install Mermaid CLI + librsvg
+      - name: Install Mermaid CLI + librsvg + svgo
         run: |
-          npm install -g @mermaid-js/mermaid-cli@10.6.1
+          npm install -g @mermaid-js/mermaid-cli@10.6.1 svgo
           sudo apt-get update -qq && sudo apt-get install -y -qq librsvg2-bin
 
       - name: Create Puppeteer config
@@ -125,15 +125,45 @@ jobs:
         with:
           name: diagrams-svg
           path: |
-            docs/02-architecture/diagrams/svg/
             docs/02-architecture/mmd-diagrams/architecture/svg/
             docs/02-architecture/mmd-diagrams/class-diagrams/svg/
+            docs/02-architecture/mmd-diagrams/foundation/svg/
 
       - name: Upload PNG artifacts
         uses: actions/upload-artifact@v4
         with:
           name: diagrams-png
           path: |
-            docs/02-architecture/diagrams/png/
             docs/02-architecture/mmd-diagrams/architecture/png/
             docs/02-architecture/mmd-diagrams/class-diagrams/png/
+            docs/02-architecture/mmd-diagrams/foundation/png/
+
+  check-diagram-drift:
+    needs: validate-mermaid
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for source-vs-rendered drift
+        run: |
+          echo "Checking if diagram sources changed without updating rendered outputs..."
+          # Get list of changed .mmd files in PR
+          changed_mmd=$(git diff --name-only origin/main...HEAD -- '*.mmd' || true)
+          if [ -z "$changed_mmd" ]; then
+            echo "No .mmd files changed — skipping drift check."
+            exit 0
+          fi
+
+          echo "Changed diagram sources:"
+          echo "$changed_mmd"
+
+          # Check if corresponding SVG/PNG directories have changes too
+          changed_rendered=$(git diff --name-only origin/main...HEAD -- '*/svg/*.svg' '*/png/*.png' || true)
+          if [ -z "$changed_rendered" ]; then
+            echo "::warning::Diagram sources changed but no rendered outputs updated."
+            echo "Run 'make render-diagrams' and commit the rendered SVG/PNG files."
+          else
+            echo "Rendered outputs also updated — OK."
+          fi

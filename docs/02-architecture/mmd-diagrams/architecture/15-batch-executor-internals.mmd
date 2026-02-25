@@ -1,6 +1,11 @@
 %% BioETL — BatchExecutor Internal Architecture
 %% Shows the composition of BatchExecutor and its helper components.
 
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   System / Component
+
 graph TB
     subgraph BatchExecutor["BatchExecutor"]
         BE["BatchExecutor<br/>━━━━━━━━━━━━━━━━━<br/>_services: PipelineServices<br/>_context: PipelineContext<br/>_config: RecordProcessorConfig<br/>batch_size: int<br/>checkpoint_interval: int<br/>━━━━━━━━━━━━━━━━━<br/>+ execute(limit, query, offset)<br/>+ process(records, start_index)<br/>+ get_dq_context()<br/>+ get_run_statistics()"]
