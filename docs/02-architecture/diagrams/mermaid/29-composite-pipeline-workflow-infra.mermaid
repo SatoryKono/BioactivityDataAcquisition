@@ -1,12 +1,12 @@
 %% View: Infrastructure-Mapping | Parent: 29-composite-pipeline-workflow-full.mermaid
 flowchart TB
 
-    subgraph Domain["🟡 Domain Layer"]
+    subgraph Domain["Domain Layer"]
         direction TB
         N6["SP"]
     end
 
-    subgraph Infrastructure["🔵 Infrastructure Layer"]
+    subgraph Infrastructure["Infrastructure Layer"]
         direction TB
         N1["EC"]
         N2["KEYS"]
@@ -52,8 +52,8 @@ flowchart TB
     N19 --> N16
     N16 --> N20
 
-    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
-    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
 
     linkStyle 0 stroke:#1E293B,stroke-width:4px
     linkStyle 1 stroke:#1E293B,stroke-width:4px

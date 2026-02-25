@@ -1,7 +1,7 @@
 %% View: Domain-Focus | Parent: 26-hexagonal-ports-adapters-full.mermaid
 flowchart TB
 
-    subgraph Domain["🟡 Domain Layer"]
+    subgraph Domain["Domain Layer"]
         direction TB
         N1["DQM"]
         N3["DSP"]
@@ -11,7 +11,7 @@ flowchart TB
         N19["CPP"]
     end
 
-    subgraph Infrastructure["🔵 Infrastructure Layer"]
+    subgraph Infrastructure["Infrastructure Layer"]
         direction TB
         N2["DQMon"]
         N4["CA"]
@@ -44,8 +44,8 @@ flowchart TB
     N19 --> N20
     N1 --> N2
 
-    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
-    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
 
     linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
     linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5

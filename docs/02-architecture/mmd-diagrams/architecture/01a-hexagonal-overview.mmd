@@ -1,0 +1,60 @@
+%% BioETL — Hexagonal Overview
+%% Covers 5 architectural layers, external systems, and main dependency directions.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @view    overview
+%% @parent  01-high-level-hexagonal.mmd
+%% @nodes   11
+
+graph TB
+    subgraph Interfaces["Interfaces Layer"]
+        CLI["CLI Commands (Click)"]
+        ORCH["Orchestration"]
+    end
+
+    subgraph Composition["Composition Layer"]
+        BOOTSTRAP["Bootstrap / Assembly"]
+    end
+
+    subgraph Application["Application Layer"]
+        CORE["Application Core"]
+    end
+
+    subgraph Domain["Domain Layer"]
+        PORTS["Port Protocols"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        ADAPTERS["Provider Adapters"]
+        STORAGE["Storage Writers / Reader"]
+        OBS_INFRA["Observability Infra"]
+    end
+
+    ExternalAPIs["External APIs"]
+    FS["File System"]
+    PROM["Prometheus"]
+    OTEL["OpenTelemetry"]
+
+    ExternalAPIs -.-> ADAPTERS
+    FS -.-> STORAGE
+    PROM -.-> OBS_INFRA
+    OTEL -.-> OBS_INFRA
+    CLI --> BOOTSTRAP
+    ORCH --> BOOTSTRAP
+    BOOTSTRAP --> CORE
+    BOOTSTRAP --> ADAPTERS
+    BOOTSTRAP --> STORAGE
+    BOOTSTRAP --> OBS_INFRA
+    CORE --> PORTS
+    ADAPTERS -->|implements| PORTS
+    STORAGE -->|implements| PORTS
+    OBS_INFRA -->|implements| PORTS
+
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    style Composition fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style Interfaces fill:#e3f2fd,stroke:#1565c0,stroke-width:2px

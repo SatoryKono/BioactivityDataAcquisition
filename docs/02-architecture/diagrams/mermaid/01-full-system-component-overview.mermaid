@@ -1,14 +1,14 @@
 %% View: Overview | Parent: 01-full-system-component-full.mermaid
 flowchart TB
 
-    subgraph Domain["🟡 Domain Layer"]
+    subgraph Domain["Domain Layer"]
         direction TB
         N8["DataSourcePort"]
         N9["StoragePort"]
         N10["LockPort"]
     end
 
-    subgraph Application["🟢 Application Layer"]
+    subgraph Application["Application Layer"]
         direction TB
         N2["PipelineRunner"]
         N3["PipelineExecutor"]
@@ -20,18 +20,18 @@ flowchart TB
         N13["BatchTransformer"]
     end
 
-    subgraph Infrastructure["🔵 Infrastructure Layer"]
+    subgraph Infrastructure["Infrastructure Layer"]
         direction TB
         N5["LockManager"]
         N14["ChemblAdapter"]
     end
 
-    subgraph Composition["🟣 Composition Layer"]
+    subgraph Composition["Composition Layer"]
         direction TB
         N1["Bootstrap"]
     end
 
-    subgraph Interfaces["⚪ Interfaces Layer"]
+    subgraph Interfaces["Interfaces Layer"]
         direction TB
         N15["UnifiedHTTPClient"]
     end
@@ -50,11 +50,11 @@ flowchart TB
     N2 --> N10
     N14 --> N15
 
-    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
-    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
-    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
-    style Composition fill:#F5F3FF,stroke:#7C3AED,stroke-width:2px
-    style Interfaces fill:#F1F5F9,stroke:#64748B,stroke-width:2px
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    style Composition fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style Interfaces fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
 
     linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
     linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5

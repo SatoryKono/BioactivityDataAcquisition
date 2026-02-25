@@ -1,0 +1,62 @@
+%% BioETL — Bootstrap: Wiring Graph
+%% Covers runtime assembly sequence and main dependency injection graph.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @view    bootstrap-wiring
+%% @parent  12-bootstrap-di-container.mmd
+%% @nodes   15
+
+graph TB
+    subgraph Composition["Composition Layer"]
+        RA["bootstrap_pipeline_runner"]
+        RBA["RunnerBootstrap"]
+        SBA["StorageBootstrap"]
+        CBA["CheckpointBootstrap"]
+        LBA["LockBootstrap"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        ADAPTER["Provider Adapter (DataSourcePort)"]
+        STORAGE["BronzeWriter / SilverWriter / GoldWriter"]
+        LOGGER["UnifiedLogger (LoggerPort)"]
+        METRICS["PrometheusMetrics (MetricsPort)"]
+        TRACER["OpenTelemetryTracer (TracingPort)"]
+        LOCK["MemoryLock (LockPort)"]
+        CHKPT["LocalCheckpoint (CheckpointPort)"]
+        QUAR["UnifiedQuarantine (QuarantinePort)"]
+    end
+
+    subgraph Application["Application Layer"]
+        PS["PipelineServices"]
+        RUNNER["PipelineRunner"]
+    end
+
+    RA --> RBA
+    RA --> SBA
+    RA --> CBA
+    RA --> LBA
+    RA --> ADAPTER
+    SBA --> STORAGE
+    RA --> LOGGER
+    RA --> METRICS
+    RA --> TRACER
+    LBA --> LOCK
+    CBA --> CHKPT
+    RA --> QUAR
+    ADAPTER --> PS
+    STORAGE --> PS
+    LOGGER --> PS
+    METRICS --> PS
+    TRACER --> PS
+    LOCK --> PS
+    CHKPT --> PS
+    QUAR --> PS
+    RBA --> RUNNER
+    PS --> RUNNER
+
+    style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    style Composition fill:#fff3e0,stroke:#e65100,stroke-width:2px

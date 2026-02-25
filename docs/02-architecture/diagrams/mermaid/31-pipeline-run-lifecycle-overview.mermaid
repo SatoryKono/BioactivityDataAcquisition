@@ -1,12 +1,12 @@
 %% View: Overview | Parent: 31-pipeline-run-lifecycle-full.mermaid
 flowchart TB
 
-    subgraph Domain["🟡 Domain Layer"]
+    subgraph Domain["Domain Layer"]
         direction TB
         N12["VALIDATING"]
     end
 
-    subgraph Application["🟢 Application Layer"]
+    subgraph Application["Application Layer"]
         direction TB
         N1["EXTRACTING"]
         N2["FAILED"]
@@ -22,7 +22,7 @@ flowchart TB
         N15["PENDING"]
     end
 
-    subgraph Infrastructure["🔵 Infrastructure Layer"]
+    subgraph Infrastructure["Infrastructure Layer"]
         direction TB
         N5["CHECKPOINTING"]
         N8["LOCKING"]
@@ -50,9 +50,9 @@ flowchart TB
     N2 --> N11
     N11 --> N14
 
-    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
-    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
-    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
 
     linkStyle 0 stroke:#1E293B,stroke-width:4px
     linkStyle 1 stroke:#1E293B,stroke-width:4px

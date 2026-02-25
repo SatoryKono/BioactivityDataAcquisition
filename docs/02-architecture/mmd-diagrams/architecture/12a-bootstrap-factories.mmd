@@ -1,0 +1,41 @@
+%% BioETL — Bootstrap: Factories and Registries
+%% Covers composition root factories, provider registry, and builder assembly.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @view    bootstrap-factories
+%% @parent  12-bootstrap-di-container.mmd
+%% @nodes   10
+
+graph TB
+    subgraph Interfaces["Interfaces Layer"]
+        CLI["CLI Commands (Click)"]
+        HTTP["HTTP Interface"]
+    end
+
+    subgraph Composition["Composition Layer"]
+        RA["bootstrap_pipeline_runner"]
+        DSR["DataSourceRegistry"]
+        TF["GenericPipelineFactory"]
+        RF["RunnerFactory"]
+        DQF["DQServicesFactory"]
+        PR["ProviderRegistry"]
+        EP["ExtractionParams Registration"]
+        RB["ServicesBuilder"]
+    end
+
+    CLI --> RA
+    HTTP --> RA
+    RA --> DSR
+    RA --> TF
+    RA --> RF
+    RA --> DQF
+    PR --> DSR
+    PR --> TF
+    EP --> PR
+    RF --> RB
+
+    style Composition fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style Interfaces fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
