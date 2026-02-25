@@ -126,9 +126,7 @@
       "file": "docs/04-reference/contracts/gold/chembl_target_v1.0.json",
       "status": "updated",
       "diff": {
-        "added_properties": [
-          "organism_class"
-        ],
+        "added_properties": [],
         "removed_properties": [],
         "changed_properties": [],
         "required_changed": false
@@ -149,11 +147,9 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "content_hash"
-        ],
+        "removed_properties": [],
         "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "composite_assay": {
@@ -161,11 +157,9 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "content_hash"
-        ],
+        "removed_properties": [],
         "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "composite_molecule": {
@@ -173,11 +167,9 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "content_hash"
-        ],
+        "removed_properties": [],
         "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "composite_publication": {
@@ -185,11 +177,9 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "content_hash"
-        ],
+        "removed_properties": [],
         "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "composite_target": {
@@ -197,11 +187,9 @@
       "status": "updated",
       "diff": {
         "added_properties": [],
-        "removed_properties": [
-          "content_hash"
-        ],
+        "removed_properties": [],
         "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "crossref_publication": {
