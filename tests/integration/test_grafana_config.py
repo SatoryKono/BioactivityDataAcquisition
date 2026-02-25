@@ -200,9 +200,9 @@ def test_variable_query_sources(dashboard_path):
         provider_query_text = (
             provider_query.get("query", "") if isinstance(provider_query, dict) else ""
         )
-        assert "bioetl_health_check_latency_ms_bucket" in provider_query_text, (
+        assert "bioetl_health_check_success_total" in provider_query_text, (
             f"Dashboard {dashboard_path.name} 'provider' query must use "
-            "bioetl_health_check_latency_ms_bucket"
+            "bioetl_health_check_success_total"
         )
     else:
         run_type_var = variable_map.get("run_type")
