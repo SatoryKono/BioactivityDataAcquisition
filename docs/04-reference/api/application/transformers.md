@@ -32,8 +32,8 @@ Abstract base class implementing Template Method pattern for transformations.
 
 ::: bioetl.application.core.base_transformer.BaseTransformer
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
         members:
             - __init__
             - transform
@@ -50,8 +50,8 @@ Raised when transformation fails due to invalid data.
 
 ::: bioetl.application.core.base_transformer.TransformationError
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ## Batch Processing
 
@@ -61,8 +61,8 @@ Batch-oriented transformation with parallel processing.
 
 ::: bioetl.application.core.batch_transformer.BatchTransformer
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ### StreamingBatchProcessor
 
@@ -70,8 +70,8 @@ Streaming batch processor for memory-efficient processing.
 
 ::: bioetl.application.core.batch_transformer.StreamingBatchProcessor
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ### TransformResult
 
@@ -79,8 +79,8 @@ Result container for batch transformation.
 
 ::: bioetl.application.core.batch_transformer.TransformResult
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ### TransformedRecord
 
@@ -88,8 +88,8 @@ Individual transformed record with metadata.
 
 ::: bioetl.application.core.batch_transformer.TransformedRecord
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ## Batch Writing
 
@@ -99,8 +99,8 @@ Writes transformed batches to storage layers.
 
 ::: bioetl.application.core.batch_writer.BatchWriter
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ## Transform Utilities
 
@@ -112,8 +112,8 @@ Safely extract value from nested dictionary.
 
 ::: bioetl.application.core.dict_transformers.safe_extract
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ### normalize_string
 
@@ -121,8 +121,8 @@ Normalize string values (strip, lowercase, etc.).
 
 ::: bioetl.application.core.dict_transformers.normalize_string
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ### parse_date_field
 
@@ -130,8 +130,8 @@ Parse date fields to ISO format.
 
 ::: bioetl.application.core.dict_transformers.parse_date_field
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ### validate_smiles
 
@@ -139,8 +139,8 @@ Validate SMILES chemical notation.
 
 ::: bioetl.application.core.dict_transformers.validate_smiles
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ### flatten_nested_dict
 
@@ -148,8 +148,8 @@ Flatten nested dictionary to dot notation.
 
 ::: bioetl.application.core.dict_transformers.flatten_nested_dict
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ### extract_list_field
 
@@ -157,8 +157,8 @@ Extract and process list fields.
 
 ::: bioetl.application.core.dict_transformers.extract_list_field
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ### aggregate_nested_lists
 
@@ -166,8 +166,8 @@ Aggregate values from nested lists.
 
 ::: bioetl.application.core.dict_transformers.aggregate_nested_lists
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ## Template Method Pattern
 
