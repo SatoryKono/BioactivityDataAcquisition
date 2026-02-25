@@ -482,6 +482,7 @@
     'downgraded': False,
     'entity_id': '<entity_id>',
     'organism': 'Homo sapiens',
+    'organism_class': 'multicellular',
     'pipeline_stages': None,
     'pref_name': 'Cyclooxygenase-2',
     'primary_component_id': 123,
