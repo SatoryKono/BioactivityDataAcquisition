@@ -124,6 +124,13 @@ repos:
         additional_dependencies:
           - pyyaml>=6.0
 
+      - id: lint-diagrams
+        name: Lint Mermaid/MMD diagram files
+        entry: python scripts/lint_diagrams.py
+        language: python
+        pass_filenames: false
+        files: '\.mmd$|\.mermaid$'
+
       - id: check-root-vcr-cassettes
         name: Block root-level VCR cassette files
         entry: python scripts/check_root_vcr_cassettes.py

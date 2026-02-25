@@ -1,7 +1,7 @@
 %% View: Domain-Focus | Parent: 31-pipeline-run-lifecycle-full.mermaid
 flowchart TB
 
-    subgraph Domain["🟡 Domain Layer"]
+    subgraph Domain["Domain Layer"]
         direction TB
         N4["EXTRACTING"]
         N5["FAILED"]
@@ -16,7 +16,7 @@ flowchart TB
         N20["COMPLETED"]
     end
 
-    subgraph Application["🟢 Application Layer"]
+    subgraph Application["Application Layer"]
         direction TB
         N1["TRANSFORMING"]
         N2["BATCH_DONE"]
@@ -26,7 +26,7 @@ flowchart TB
         N19["POSTRUN"]
     end
 
-    subgraph Infrastructure["🔵 Infrastructure Layer"]
+    subgraph Infrastructure["Infrastructure Layer"]
         direction TB
         N7["LOCKING"]
         N11["CHECKPOINTING"]
@@ -61,34 +61,35 @@ flowchart TB
     N5 --> N13
     N13 --> N14
 
-    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
-    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
-    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
 
-    linkStyle 0 stroke:#1E293B,stroke-width:4px
-    linkStyle 1 stroke:#1E293B,stroke-width:4px
-    linkStyle 2 stroke:#1E293B,stroke-width:4px
-    linkStyle 3 stroke:#1E293B,stroke-width:4px
-    linkStyle 4 stroke:#1E293B,stroke-width:4px
-    linkStyle 5 stroke:#1E293B,stroke-width:4px
-    linkStyle 6 stroke:#1E293B,stroke-width:4px
-    linkStyle 7 stroke:#1E293B,stroke-width:4px
-    linkStyle 8 stroke:#1E293B,stroke-width:4px
-    linkStyle 9 stroke:#1E293B,stroke-width:4px
-    linkStyle 10 stroke:#1E293B,stroke-width:4px
-    linkStyle 11 stroke:#1E293B,stroke-width:4px
-    linkStyle 12 stroke:#1E293B,stroke-width:4px
-    linkStyle 13 stroke:#1E293B,stroke-width:4px
-    linkStyle 14 stroke:#1E293B,stroke-width:4px
-    linkStyle 15 stroke:#1E293B,stroke-width:4px
-    linkStyle 16 stroke:#1E293B,stroke-width:4px
-    linkStyle 17 stroke:#1E293B,stroke-width:4px
-    linkStyle 18 stroke:#1E293B,stroke-width:4px
-    linkStyle 19 stroke:#1E293B,stroke-width:4px
-    linkStyle 20 stroke:#1E293B,stroke-width:4px
-    linkStyle 21 stroke:#1E293B,stroke-width:4px
-    linkStyle 22 stroke:#1E293B,stroke-width:4px
-    linkStyle 23 stroke:#1E293B,stroke-width:4px
-    linkStyle 24 stroke:#1E293B,stroke-width:4px
-    linkStyle 25 stroke:#1E293B,stroke-width:4px
-    linkStyle 26 stroke:#1E293B,stroke-width:4px
+    %% linkStyle: data 0-10, orch 11-15, DI 16-20, obs 21-23, err 24-26
+    linkStyle 0 stroke:#1E293B,stroke-width:3px
+    linkStyle 1 stroke:#1E293B,stroke-width:3px
+    linkStyle 2 stroke:#1E293B,stroke-width:3px
+    linkStyle 3 stroke:#1E293B,stroke-width:3px
+    linkStyle 4 stroke:#1E293B,stroke-width:3px
+    linkStyle 5 stroke:#1E293B,stroke-width:3px
+    linkStyle 6 stroke:#1E293B,stroke-width:3px
+    linkStyle 7 stroke:#1E293B,stroke-width:3px
+    linkStyle 8 stroke:#1E293B,stroke-width:3px
+    linkStyle 9 stroke:#1E293B,stroke-width:3px
+    linkStyle 10 stroke:#1E293B,stroke-width:3px
+    linkStyle 11 stroke:#2e7d32,stroke-width:2px
+    linkStyle 12 stroke:#2e7d32,stroke-width:2px
+    linkStyle 13 stroke:#2e7d32,stroke-width:2px
+    linkStyle 14 stroke:#2e7d32,stroke-width:2px
+    linkStyle 15 stroke:#2e7d32,stroke-width:2px
+    linkStyle 16 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 17 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 18 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 19 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 20 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 21 stroke:#94A3B8,stroke-width:1px
+    linkStyle 22 stroke:#94A3B8,stroke-width:1px
+    linkStyle 23 stroke:#94A3B8,stroke-width:1px
+    linkStyle 24 stroke:#c62828,stroke-width:2px,stroke-dasharray:4
+    linkStyle 25 stroke:#c62828,stroke-width:2px,stroke-dasharray:4
+    linkStyle 26 stroke:#c62828,stroke-width:2px,stroke-dasharray:4

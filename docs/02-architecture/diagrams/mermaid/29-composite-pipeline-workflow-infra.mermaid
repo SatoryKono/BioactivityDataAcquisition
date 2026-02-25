@@ -1,12 +1,12 @@
 %% View: Infrastructure-Mapping | Parent: 29-composite-pipeline-workflow-full.mermaid
 flowchart TB
 
-    subgraph Domain["🟡 Domain Layer"]
+    subgraph Domain["Domain Layer"]
         direction TB
         N6["SP"]
     end
 
-    subgraph Infrastructure["🔵 Infrastructure Layer"]
+    subgraph Infrastructure["Infrastructure Layer"]
         direction TB
         N1["EC"]
         N2["KEYS"]
@@ -52,28 +52,29 @@ flowchart TB
     N19 --> N16
     N16 --> N20
 
-    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
-    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
 
-    linkStyle 0 stroke:#1E293B,stroke-width:4px
-    linkStyle 1 stroke:#1E293B,stroke-width:4px
-    linkStyle 2 stroke:#1E293B,stroke-width:4px
-    linkStyle 3 stroke:#1E293B,stroke-width:4px
-    linkStyle 4 stroke:#1E293B,stroke-width:4px
-    linkStyle 5 stroke:#1E293B,stroke-width:4px
-    linkStyle 6 stroke:#1E293B,stroke-width:4px
-    linkStyle 7 stroke:#1E293B,stroke-width:4px
-    linkStyle 8 stroke:#1E293B,stroke-width:4px
-    linkStyle 9 stroke:#1E293B,stroke-width:4px
-    linkStyle 10 stroke:#1E293B,stroke-width:4px
-    linkStyle 11 stroke:#1E293B,stroke-width:4px
-    linkStyle 12 stroke:#1E293B,stroke-width:4px
-    linkStyle 13 stroke:#1E293B,stroke-width:4px
-    linkStyle 14 stroke:#1E293B,stroke-width:4px
-    linkStyle 15 stroke:#1E293B,stroke-width:4px
-    linkStyle 16 stroke:#1E293B,stroke-width:4px
-    linkStyle 17 stroke:#1E293B,stroke-width:4px
-    linkStyle 18 stroke:#1E293B,stroke-width:4px
-    linkStyle 19 stroke:#1E293B,stroke-width:4px
-    linkStyle 20 stroke:#1E293B,stroke-width:4px
-    linkStyle 21 stroke:#1E293B,stroke-width:4px
+    %% linkStyle: data 0-8, orch 9-12, DI 13-16, obs 17-18, err 19-21
+    linkStyle 0 stroke:#1E293B,stroke-width:3px
+    linkStyle 1 stroke:#1E293B,stroke-width:3px
+    linkStyle 2 stroke:#1E293B,stroke-width:3px
+    linkStyle 3 stroke:#1E293B,stroke-width:3px
+    linkStyle 4 stroke:#1E293B,stroke-width:3px
+    linkStyle 5 stroke:#1E293B,stroke-width:3px
+    linkStyle 6 stroke:#1E293B,stroke-width:3px
+    linkStyle 7 stroke:#1E293B,stroke-width:3px
+    linkStyle 8 stroke:#1E293B,stroke-width:3px
+    linkStyle 9 stroke:#2e7d32,stroke-width:2px
+    linkStyle 10 stroke:#2e7d32,stroke-width:2px
+    linkStyle 11 stroke:#2e7d32,stroke-width:2px
+    linkStyle 12 stroke:#2e7d32,stroke-width:2px
+    linkStyle 13 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 14 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 15 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 16 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 17 stroke:#94A3B8,stroke-width:1px
+    linkStyle 18 stroke:#94A3B8,stroke-width:1px
+    linkStyle 19 stroke:#c62828,stroke-width:2px,stroke-dasharray:4
+    linkStyle 20 stroke:#c62828,stroke-width:2px,stroke-dasharray:4
+    linkStyle 21 stroke:#c62828,stroke-width:2px,stroke-dasharray:4

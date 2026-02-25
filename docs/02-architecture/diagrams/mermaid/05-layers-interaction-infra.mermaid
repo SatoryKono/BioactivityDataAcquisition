@@ -1,14 +1,14 @@
 %% View: Infrastructure-Mapping | Parent: 05-layers-interaction-full.mermaid
 flowchart TB
 
-    subgraph Domain["🟡 Domain Layer"]
+    subgraph Domain["Domain Layer"]
         direction TB
         N15["Ports"]
         N17["Types"]
         N19["Exceptions"]
     end
 
-    subgraph Application["🟢 Application Layer"]
+    subgraph Application["Application Layer"]
         direction TB
         N7["Runner"]
         N8["BatchExec"]
@@ -18,7 +18,7 @@ flowchart TB
         N14["Merger"]
     end
 
-    subgraph Infrastructure["🔵 Infrastructure Layer"]
+    subgraph Infrastructure["Infrastructure Layer"]
         direction TB
         N2["Adapters"]
         N3["Storage"]
@@ -30,13 +30,13 @@ flowchart TB
         N20["Observability"]
     end
 
-    subgraph Composition["🟣 Composition Layer"]
+    subgraph Composition["Composition Layer"]
         direction TB
         N1["Registry"]
         N5["Bootstrap"]
     end
 
-    subgraph Interfaces["⚪ Interfaces Layer"]
+    subgraph Interfaces["Interfaces Layer"]
         direction TB
         N11["CLI"]
     end
@@ -52,19 +52,20 @@ flowchart TB
     N6 --> N7
     N16 --> N15
 
-    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
-    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
-    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
-    style Composition fill:#F5F3FF,stroke:#7C3AED,stroke-width:2px
-    style Interfaces fill:#F1F5F9,stroke:#64748B,stroke-width:2px
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    style Composition fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style Interfaces fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
 
-    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 8 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    %% linkStyle: data 0-3, orch 4-5, DI 6-7, obs 8-8, err 9-9
+    linkStyle 0 stroke:#1E293B,stroke-width:3px
+    linkStyle 1 stroke:#1E293B,stroke-width:3px
+    linkStyle 2 stroke:#1E293B,stroke-width:3px
+    linkStyle 3 stroke:#1E293B,stroke-width:3px
+    linkStyle 4 stroke:#2e7d32,stroke-width:2px
+    linkStyle 5 stroke:#2e7d32,stroke-width:2px
+    linkStyle 6 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 7 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 8 stroke:#94A3B8,stroke-width:1px
+    linkStyle 9 stroke:#c62828,stroke-width:2px,stroke-dasharray:4

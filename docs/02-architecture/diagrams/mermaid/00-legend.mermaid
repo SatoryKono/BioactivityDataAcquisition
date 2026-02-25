@@ -1,5 +1,11 @@
 %% Shared legend for coded edge labels and link weights
 flowchart TB
+    subgraph LinkWeights["Link Types"]
+        LW1[ ] -->|"data flow"| LW2[ ]
+        LW3[ ] -.->|"DI/implements"| LW4[ ]
+        LW5[ ] -->|"error"| LW6[ ]
+    end
+
     subgraph Legend["📋 Legend"]
         direction TB
         S1["Main data flow: solid, 4px"]
@@ -49,5 +55,3 @@ flowchart TB
     end
 
     style Legend fill:#F8FAFC,stroke:#94A3B8,stroke-width:2px
-
-

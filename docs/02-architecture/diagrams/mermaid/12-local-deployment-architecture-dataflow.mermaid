@@ -1,7 +1,7 @@
 %% View: Data-Flow | Parent: 12-local-deployment-architecture-full.mermaid
 flowchart TB
 
-    subgraph Infrastructure["🔵 Infrastructure Layer"]
+    subgraph Infrastructure["Infrastructure Layer"]
         direction TB
         N1["Bronze"]
         N2["Silver"]
@@ -16,7 +16,7 @@ flowchart TB
         N4["Quarantine"]
     end
 
-    subgraph Interfaces["⚪ Interfaces Layer"]
+    subgraph Interfaces["Interfaces Layer"]
         direction TB
         N6["CLI"]
     end
@@ -33,17 +33,18 @@ flowchart TB
     N5 --> N3
     N5 --> N4
 
-    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
-    style Interfaces fill:#F1F5F9,stroke:#64748B,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    style Interfaces fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
 
-    linkStyle 0 stroke:#1E293B,stroke-width:4px
-    linkStyle 1 stroke:#1E293B,stroke-width:4px
-    linkStyle 2 stroke:#1E293B,stroke-width:4px
-    linkStyle 3 stroke:#1E293B,stroke-width:4px
-    linkStyle 4 stroke:#1E293B,stroke-width:4px
-    linkStyle 5 stroke:#1E293B,stroke-width:4px
-    linkStyle 6 stroke:#1E293B,stroke-width:4px
-    linkStyle 7 stroke:#1E293B,stroke-width:4px
-    linkStyle 8 stroke:#1E293B,stroke-width:4px
-    linkStyle 9 stroke:#1E293B,stroke-width:4px
-    linkStyle 10 stroke:#1E293B,stroke-width:4px
+    %% linkStyle: data 0-3, orch 4-5, DI 6-7, obs 8-8, err 9-10
+    linkStyle 0 stroke:#1E293B,stroke-width:3px
+    linkStyle 1 stroke:#1E293B,stroke-width:3px
+    linkStyle 2 stroke:#1E293B,stroke-width:3px
+    linkStyle 3 stroke:#1E293B,stroke-width:3px
+    linkStyle 4 stroke:#2e7d32,stroke-width:2px
+    linkStyle 5 stroke:#2e7d32,stroke-width:2px
+    linkStyle 6 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 7 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 8 stroke:#94A3B8,stroke-width:1px
+    linkStyle 9 stroke:#c62828,stroke-width:2px,stroke-dasharray:4
+    linkStyle 10 stroke:#c62828,stroke-width:2px,stroke-dasharray:4
