@@ -194,8 +194,6 @@ class TestRoundTrip:
         assert restored == original
 
 
-
-
 class TestIsOrjsonAvailable:
     """Tests for is_orjson_available function."""
 
