@@ -1,0 +1,37 @@
+%% View: Data-Flow | Parent: 32-single-record-journey-full.mermaid
+flowchart TB
+
+    N1["SW"]
+    N2["ST"]
+    N3["TFG"]
+    N4["GV"]
+    N5["GW"]
+    N6["CLEAN"]
+    N7["WARN"]
+    N8["GT"]
+    N9["BW"]
+    N10["BF"]
+    N11["BT"]
+    N12["TI"]
+
+    N9 --> N10
+    N10 --> N11
+    N11 --> N12
+    N6 --> N1
+    N7 --> N1
+    N1 --> N2
+    N2 --> N3
+    N3 --> N4
+    N4 --> N5
+    N5 --> N8
+
+    linkStyle 0 stroke:#1E293B,stroke-width:4px
+    linkStyle 1 stroke:#1E293B,stroke-width:4px
+    linkStyle 2 stroke:#1E293B,stroke-width:4px
+    linkStyle 3 stroke:#1E293B,stroke-width:4px
+    linkStyle 4 stroke:#1E293B,stroke-width:4px
+    linkStyle 5 stroke:#1E293B,stroke-width:4px
+    linkStyle 6 stroke:#1E293B,stroke-width:4px
+    linkStyle 7 stroke:#1E293B,stroke-width:4px
+    linkStyle 8 stroke:#1E293B,stroke-width:4px
+    linkStyle 9 stroke:#1E293B,stroke-width:4px

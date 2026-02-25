@@ -1,6 +1,6 @@
 # BioETL: Правила Проекта
 
-*Версия: 5.21 (DQ Config Loader), 2026-02-21*
+*Версия: 5.22 (Unified Entity Config), 2026-02-24*
 
 ## Введение (Quick Reference)
 
