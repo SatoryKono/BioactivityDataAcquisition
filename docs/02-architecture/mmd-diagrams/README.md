@@ -30,6 +30,17 @@ Render them with any Mermaid-compatible viewer, IDE plugin, or the [Mermaid Live
 | 17 | Security, PII & Audit | `architecture/17-security-pii-audit.mmd` | PII hashing, salt rotation, audit trail |
 | 18 | Lock, Checkpoint & Shutdown | `architecture/18-lock-checkpoint-shutdown.mmd` | Fencing tokens, safety guard, graceful shutdown |
 
+## Decomposed Architecture Diagrams
+
+Parent diagrams remain canonical references. Sub-files provide focused, low-density views for review and onboarding.
+
+| Parent (canonical) | Decomposed sub-files |
+|---|---|
+| `architecture/01-high-level-hexagonal.mmd` | `architecture/01a-hexagonal-overview.mmd`, `architecture/01b-hexagonal-domain-app.mmd`, `architecture/01c-hexagonal-infra-comp.mmd` |
+| `architecture/05-provider-adapter-hierarchy.mmd` | `architecture/05a-adapter-hierarchy-base.mmd`, `architecture/05b-adapter-hierarchy-providers.mmd` |
+| `architecture/12-bootstrap-di-container.mmd` | `architecture/12a-bootstrap-factories.mmd`, `architecture/12b-bootstrap-wiring.mmd` |
+| `architecture/13-port-protocol-contracts.mmd` | `architecture/13a-port-contracts-data-sources.mmd`, `architecture/13b-port-contracts-storage.mmd`, `architecture/13c-port-contracts-observability.mmd`, `architecture/13d-port-contracts-services.mmd` |
+
 ## Class Diagrams (16 families)
 
 | # | Family | File | Description |

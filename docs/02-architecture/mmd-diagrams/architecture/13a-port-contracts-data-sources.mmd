@@ -1,0 +1,32 @@
+%% BioETL — Port Contracts: Data Sources
+%% Covers DataSourcePort and FilterableDataSourcePort implementations per provider.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @view    data-sources
+%% @parent  13-port-protocol-contracts.mmd
+%% @nodes   9
+
+graph LR
+    subgraph Domain["Domain Layer"]
+        DSP["DataSourcePort"]
+        FDSP["FilterableDataSourcePort"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        CA["ChemblAdapter"]
+        PA["PubMedAdapter"]
+        UA["UniProtAdapter"]
+        CRA["CrossRefAdapter"]
+        OAA["OpenAlexAdapter"]
+        SSA["SemanticScholarAdapter"]
+        PCA["PubChemAdapter"]
+    end
+
+    DSP --- CA & PA & UA & CRA & OAA & SSA & PCA
+
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+

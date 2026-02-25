@@ -1,0 +1,45 @@
+%% BioETL — Adapter Hierarchy: Provider Implementations
+%% Covers concrete provider adapters and provider-specific mixins.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @view    hierarchy-providers
+%% @parent  05-provider-adapter-hierarchy.mmd
+%% @nodes   15
+
+graph TB
+    subgraph Infrastructure["Infrastructure Layer"]
+        BHA["BaseHttpAdapter"]
+        BSA["BaseSyncAdapter"]
+        CA["ChemblAdapter"]
+        PA["PubMedAdapter"]
+        UA["UniProtAdapter"]
+        CRA["CrossRefAdapter"]
+        OAA["OpenAlexAdapter"]
+        SSA["SemanticScholarAdapter"]
+        PCA["PubChemAdapter"]
+        UIDM["UniProtIDMappingClient"]
+        CHM["ChemblHealthMixin"]
+        CMM["ChemblMetadataMixin"]
+        PSM["PubMedSearchMixin"]
+        PFetchM["PubMedFetchMixin"]
+        PHM["PubMedHealthMixin"]
+    end
+
+    BHA --> CA
+    BHA --> PA
+    BHA --> UA
+    BHA --> CRA
+    BHA --> OAA
+    BHA --> SSA
+    BSA --> PCA
+    CHM --> CA
+    CMM --> CA
+    PSM --> PA
+    PFetchM --> PA
+    PHM --> PA
+
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+

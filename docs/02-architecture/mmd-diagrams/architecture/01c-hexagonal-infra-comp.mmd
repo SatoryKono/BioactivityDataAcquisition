@@ -1,0 +1,51 @@
+%% BioETL — Hexagonal Infrastructure and Composition
+%% Covers infrastructure adapters and composition-root wiring points.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @view    infra-comp
+%% @parent  01-high-level-hexagonal.mmd
+%% @nodes   14
+
+graph TB
+    subgraph Composition["Composition Layer"]
+        BOOTSTRAP["Bootstrap / Assembly"]
+        FACTORIES["Factories"]
+        PROVIDERS["Provider Registry"]
+        RT_BUILDERS["Runtime Builders"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        ADAPTERS["HTTP Adapters"]
+        STORAGE["Storage"]
+        OBS_INFRA["Observability Infra"]
+        RESILIENCE["Resilience"]
+        SECURITY["Security"]
+        CHECKPOINT["Checkpoint"]
+        LOCKING["Locking"]
+        AUDIT["Audit"]
+        VALIDATION["Validation"]
+    end
+
+    subgraph Domain["Domain Layer"]
+        PORTS["Port Protocols"]
+    end
+
+    BOOTSTRAP --> ADAPTERS
+    BOOTSTRAP --> STORAGE
+    BOOTSTRAP --> OBS_INFRA
+    ADAPTERS -->|implements| PORTS
+    STORAGE -->|implements| PORTS
+    OBS_INFRA -->|implements| PORTS
+    RESILIENCE -->|implements| PORTS
+    SECURITY -->|implements| PORTS
+    CHECKPOINT -->|implements| PORTS
+    LOCKING -->|implements| PORTS
+    AUDIT -->|implements| PORTS
+
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    style Composition fill:#fff3e0,stroke:#e65100,stroke-width:2px
+

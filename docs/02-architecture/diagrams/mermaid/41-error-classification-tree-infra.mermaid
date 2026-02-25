@@ -1,14 +1,14 @@
 %% View: Infrastructure-Mapping | Parent: 41-error-classification-tree-full.mermaid
 flowchart TB
 
-    subgraph Domain["🟡 Domain Layer"]
+    subgraph Domain["Domain Layer"]
         direction TB
         N14["SCHEMA"]
         N1["HTTP"]
         N6["ERROR"]
     end
 
-    subgraph Infrastructure["🔵 Infrastructure Layer"]
+    subgraph Infrastructure["Infrastructure Layer"]
         direction TB
         N2["QUARANTINE2"]
         N3["LOCK"]
@@ -46,8 +46,8 @@ flowchart TB
     N4 --> N5
     N17 --> N5
 
-    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
-    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
 
     linkStyle 0 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
     linkStyle 1 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4

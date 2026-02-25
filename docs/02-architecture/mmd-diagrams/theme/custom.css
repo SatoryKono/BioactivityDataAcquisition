@@ -6,7 +6,7 @@
 
 /* ── Global ─────────────────────────────────────────── */
 svg {
-  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     Oxygen, Ubuntu, sans-serif;
 }
 
@@ -16,120 +16,120 @@ svg {
 .node ellipse,
 .node polygon,
 .node path {
-  stroke-width: 1.5px;
-  rx: 6;
-  ry: 6;
+    stroke-width: 1.5px;
+    rx: 6;
+    ry: 6;
 }
 
 /* Shadow for primary nodes */
 .node rect {
-  filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
 }
 
 /* ── Subgraph / cluster ─────────────────────────────── */
 .cluster rect {
-  rx: 8;
-  ry: 8;
-  stroke-width: 1.5px;
-  stroke-dasharray: none;
-  filter: drop-shadow(2px 3px 4px rgba(0, 0, 0, 0.06));
+    rx: 8;
+    ry: 8;
+    stroke-width: 1.5px;
+    stroke-dasharray: none;
+    filter: drop-shadow(2px 3px 2px rgba(0, 0, 0, 0.06));
 }
 
 .cluster text {
-  font-weight: 600;
-  font-size: 15px;
+    font-weight: 600;
+    font-size: 15px;
 }
 
 /* ── Edges / links ──────────────────────────────────── */
 .edgePath .path {
-  stroke-width: 1.8px;
+    stroke-width: 1.8px;
 }
 
 .edgeLabel {
-  font-size: 12px;
-  background-color: #ffffff;
-  padding: 2px 6px;
-  border-radius: 3px;
+    font-size: 12px;
+    background-color: #ffffff;
+    padding: 2px 6px;
+    border-radius: 3px;
 }
 
 /* ── Sequence diagram ───────────────────────────────── */
 .actor {
-  stroke-width: 1.5px;
-  rx: 4;
-  ry: 4;
+    stroke-width: 1.5px;
+    rx: 4;
+    ry: 4;
 }
 
 .messageLine0,
 .messageLine1 {
-  stroke-width: 1.6px;
+    stroke-width: 1.6px;
 }
 
 .messageText {
-  font-size: 13px;
+    font-size: 13px;
 }
 
 .activation0 {
-  stroke-width: 1px;
+    stroke-width: 1px;
 }
 
 .note {
-  rx: 4;
-  ry: 4;
-  stroke-width: 1px;
-  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+    rx: 4;
+    ry: 4;
+    stroke-width: 1px;
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
 }
 
 /* ── Class diagram ──────────────────────────────────── */
 g.classGroup rect {
-  rx: 4;
-  ry: 4;
-  stroke-width: 1.5px;
-  filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+    rx: 4;
+    ry: 4;
+    stroke-width: 1.5px;
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
 }
 
 g.classGroup text {
-  font-size: 13px;
+    font-size: 13px;
 }
 
 g.classGroup line {
-  stroke-width: 1px;
+    stroke-width: 1px;
 }
 
 .relation {
-  stroke-width: 1.5px;
+    stroke-width: 1.5px;
 }
 
 /* ── State diagram ──────────────────────────────────── */
 g.stateGroup rect {
-  rx: 8;
-  ry: 8;
+    rx: 8;
+    ry: 8;
 }
 
 .statediagram-state rect {
-  rx: 8;
-  ry: 8;
-  stroke-width: 1.5px;
-  filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+    rx: 8;
+    ry: 8;
+    stroke-width: 1.5px;
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
 }
 
 /* ── ER diagram ─────────────────────────────────────── */
 .er.entityBox {
-  stroke-width: 1.5px;
-  rx: 4;
-  ry: 4;
-  filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+    stroke-width: 1.5px;
+    rx: 4;
+    ry: 4;
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
 }
 
 /* ── Mindmap ────────────────────────────────────────── */
 .mindmap-node rect,
 .mindmap-node circle {
-  stroke-width: 1.5px;
-  filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.1));
+    stroke-width: 1.5px;
+    filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.1));
 }
 
 /* ── Markers / arrowheads ───────────────────────────── */
 marker path {
-  fill: #546e7a;
+    fill: #546e7a;
 }
 
 /* ── BioETL-specific layer colours ──────────────────── */
@@ -137,15 +137,53 @@ marker path {
    These selectors are fallback targets for
    subgraphs whose id starts with a known prefix. */
 
-[id*="Domain"] > rect { fill: #f3e5f5 !important; stroke: #6a1b9a !important; }
-[id*="Application"] > rect { fill: #e8f5e9 !important; stroke: #2e7d32 !important; }
-[id*="Infrastructure"] > rect { fill: #ffcdd2 !important; stroke: #c62828 !important; }
-[id*="Composition"] > rect { fill: #fff3e0 !important; stroke: #e65100 !important; }
-[id*="Interfaces"] > rect { fill: #e3f2fd !important; stroke: #1565c0 !important; }
-[id*="External"] > rect { fill: #eceff1 !important; stroke: #455a64 !important; }
+[id*="Domain"] > rect {
+    fill: #f3e5f5 !important;
+    stroke: #6a1b9a !important;
+}
+
+[id*="Application"] > rect {
+    fill: #e8f5e9 !important;
+    stroke: #2e7d32 !important;
+}
+
+[id*="Infrastructure"] > rect {
+    fill: #ffcdd2 !important;
+    stroke: #c62828 !important;
+}
+
+[id*="Composition"] > rect {
+    fill: #fff3e0 !important;
+    stroke: #e65100 !important;
+}
+
+[id*="Interfaces"] > rect {
+    fill: #e3f2fd !important;
+    stroke: #1565c0 !important;
+}
+
+[id*="External"] > rect {
+    fill: #eceff1 !important;
+    stroke: #455a64 !important;
+}
 
 /* Medallion colours for data-flow diagrams */
-[id*="Bronze"] > rect { fill: #fff3e0 !important; stroke: #e65100 !important; }
-[id*="Silver"] > rect { fill: #eceff1 !important; stroke: #607d8b !important; }
-[id*="Gold"] > rect { fill: #fff8e1 !important; stroke: #f9a825 !important; }
-[id*="Quarantine"] > rect { fill: #ffebee !important; stroke: #c62828 !important; }
+[id*="Bronze"] > rect {
+    fill: #fff3e0 !important;
+    stroke: #e65100 !important;
+}
+
+[id*="Silver"] > rect {
+    fill: #eceff1 !important;
+    stroke: #607d8b !important;
+}
+
+[id*="Gold"] > rect {
+    fill: #fff8e1 !important;
+    stroke: #f9a825 !important;
+}
+
+[id*="Quarantine"] > rect {
+    fill: #ffebee !important;
+    stroke: #c62828 !important;
+}

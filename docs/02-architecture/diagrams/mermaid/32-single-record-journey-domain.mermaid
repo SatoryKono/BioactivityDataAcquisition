@@ -1,7 +1,7 @@
 %% View: Domain-Focus | Parent: 32-single-record-journey-full.mermaid
 flowchart TB
 
-    subgraph Domain["🟡 Domain Layer"]
+    subgraph Domain["Domain Layer"]
         direction TB
         N1["HASH"]
         N2["DQ"]
@@ -21,7 +21,7 @@ flowchart TB
         N20["QT"]
     end
 
-    subgraph Infrastructure["🔵 Infrastructure Layer"]
+    subgraph Infrastructure["Infrastructure Layer"]
         direction TB
         N8["BW"]
         N9["PSV"]
@@ -47,8 +47,8 @@ flowchart TB
     N15 --> N18
     N19 --> N20
 
-    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
-    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
 
     linkStyle 0 stroke:#1E293B,stroke-width:4px
     linkStyle 1 stroke:#1E293B,stroke-width:4px

@@ -1,7 +1,7 @@
 %% View: Overview | Parent: 10-infrastructure-layer-class-diagram-full.mermaid
 flowchart TB
 
-    subgraph Domain["🟡 Domain Layer"]
+    subgraph Domain["Domain Layer"]
         direction TB
         N8["RetryPolicy"]
         N9["DataSourcePort"]
@@ -10,7 +10,7 @@ flowchart TB
         N15["CsvExporter"]
     end
 
-    subgraph Infrastructure["🔵 Infrastructure Layer"]
+    subgraph Infrastructure["Infrastructure Layer"]
         direction TB
         N1["ChemblAdapter"]
         N3["PubchemAdapter"]
@@ -23,7 +23,7 @@ flowchart TB
         N7["TokenBucket"]
     end
 
-    subgraph Interfaces["⚪ Interfaces Layer"]
+    subgraph Interfaces["Interfaces Layer"]
         direction TB
         N2["UnifiedHTTPClient"]
     end
@@ -46,9 +46,9 @@ flowchart TB
     N10 --> N15
     N12 --> N15
 
-    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
-    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
-    style Interfaces fill:#F1F5F9,stroke:#64748B,stroke-width:2px
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    style Interfaces fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
 
     linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
     linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
