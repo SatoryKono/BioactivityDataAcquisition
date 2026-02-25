@@ -1,0 +1,46 @@
+%% Hexagonal architecture — domain and application detail
+%% Covers application orchestration and domain contracts/entities.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    detail
+%% @parent  01-high-level-hexagonal.mmd
+%% @nodes  13
+
+flowchart LR
+    subgraph Application
+        RUN[PipelineRunner]
+        EXEC[BatchExecutor]
+        TRANS[BatchTransformer]
+        WRITE[BatchWriter]
+        DQ[DataQualityService]
+    end
+
+    subgraph Domain
+        DSP[DataSourcePort]
+        STP[StoragePort]
+        DQP[DQMonitorPort]
+        ENT[PipelineRun]
+        VO[WriteResult VO]
+        EX[BioETLError]
+        CFG[PipelineConfig]
+        IDS[IdentityService]
+    end
+
+    RUN --> EXEC
+    EXEC --> TRANS
+    EXEC --> WRITE
+    TRANS --> IDS
+    RUN --> DSP
+    WRITE --> STP
+    DQ --> DQP
+    RUN --> ENT
+    TRANS --> VO
+    EXEC --> EX
+    RUN --> CFG
+
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px

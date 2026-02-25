@@ -1,0 +1,52 @@
+%% System component — ETL data pipeline detail
+%% Covers extract-transform-load path from adapters to medallion storage.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    data-pipeline
+%% @parent  01-full-system-component.mmd
+%% @nodes   15
+
+flowchart LR
+    subgraph Ingestion
+        SRC[DataSourcePort]
+        ADP[ProviderAdapter]
+        RET[Retry/CircuitBreaker]
+    end
+    subgraph Application
+        EXE[BatchExecutor]
+        TRN[BatchTransformer]
+        WR[BatchWriter]
+    end
+    subgraph Medallion
+        BR[BronzeWriter]
+        SV[SilverWriter]
+        GD[GoldWriter]
+        DLT[Delta Lake]
+        QT[Quarantine]
+    end
+    subgraph CrossCutting
+        DQ[DQ Monitor]
+        AUD[Audit]
+        MET[Metadata]
+        LOCK[LockManager]
+    end
+
+    ADP --> SRC
+    SRC --> RET
+    RET --> EXE
+    EXE --> TRN
+    TRN --> WR
+    WR --> BR
+    WR --> SV
+    WR --> GD
+    SV --> DLT
+    GD --> DLT
+    TRN --> QT
+    EXE --> DQ
+    WR --> AUD
+    WR --> MET
+    EXE --> LOCK

@@ -1,0 +1,46 @@
+%% System component — layer overview
+%% Covers high-level component map with external systems and five layers.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    overview
+%% @parent  01-full-system-component.mmd
+%% @nodes   11
+
+flowchart TB
+    subgraph External
+        APIs[Provider APIs]
+        FILES[data/ filesystem]
+    end
+    subgraph Interfaces
+        CLI[CLI]
+    end
+    subgraph Composition
+        BOOT[Bootstrap]
+    end
+    subgraph Application
+        RUN[PipelineRunner]
+        EXEC[BatchExecutor]
+    end
+    subgraph Domain
+        PORTS[Domain Ports]
+        MODELS[Entities/VO]
+    end
+    subgraph Infrastructure
+        ADP[Provider Adapters]
+        STORE[Bronze/Silver/Gold Writers]
+        OBS[Logging/Metrics/Tracing]
+    end
+
+    APIs --> ADP
+    FILES --> STORE
+    CLI --> BOOT
+    BOOT --> RUN
+    RUN --> EXEC
+    EXEC --> PORTS
+    ADP --> PORTS
+    STORE --> PORTS
+    RUN --> MODELS

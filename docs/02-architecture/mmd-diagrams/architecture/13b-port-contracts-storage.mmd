@@ -1,0 +1,45 @@
+%% Port contracts — storage and metadata interfaces
+%% Covers Storage/Delta/Metadata contracts and key implementations.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    storage
+%% @parent  13-port-protocol-contracts.mmd
+%% @nodes  13
+
+flowchart LR
+    subgraph Domain
+        STP[StoragePort]
+        DRP[DeltaReaderPort]
+        MWP[MetadataWriterPort]
+        MCP[MetadataCoordinatorPort]
+        SVP[SilverValidatorPort]
+        GVP[GoldValidatorPort]
+    end
+
+    subgraph Infrastructure
+        BW[BronzeWriter]
+        SW[SilverWriter]
+        GW[GoldWriter]
+        DR[DeltaReader]
+        MW[MetadataWriter]
+        PSV[PanderaSilverValidator]
+        PGV[PanderaGoldValidator]
+    end
+
+    BW --> STP
+    SW --> STP
+    GW --> STP
+    DR --> DRP
+    MW --> MWP
+    SW -.-> SVP
+    GW -.-> GVP
+    PSV --> SVP
+    PGV --> GVP
+    MCP -.-> MWP
+
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px

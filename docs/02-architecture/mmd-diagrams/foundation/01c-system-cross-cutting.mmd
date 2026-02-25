@@ -1,0 +1,45 @@
+%% System component — cross-cutting services
+%% Covers configuration, DI, observability, resilience, and lifecycle services.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    cross-cutting
+%% @parent  01-full-system-component.mmd
+%% @nodes   13
+
+flowchart LR
+    subgraph Composition
+        BOOT[Bootstrap]
+        CFGF[ConfigFactory]
+        PIPF[PipelineFactory]
+    end
+    subgraph Application
+        PREF[PreflightService]
+        POST[PostrunService]
+        LIFE[LifecycleOrchestrator]
+    end
+    subgraph Infrastructure
+        LOG[UnifiedLogger]
+        MET[PrometheusMetrics]
+        TR[OpenTelemetryTracer]
+        CB[CircuitBreaker]
+        RL[TokenBucket]
+        CP[Checkpoint]
+        LK[MemoryLock]
+    end
+
+    BOOT --> CFGF
+    BOOT --> PIPF
+    PIPF --> PREF
+    PIPF --> POST
+    PIPF --> LIFE
+    PREF --> LK
+    LIFE --> CP
+    LIFE --> CB
+    LIFE --> RL
+    LIFE --> LOG
+    LIFE --> MET
+    LIFE --> TR

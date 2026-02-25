@@ -1,0 +1,59 @@
+%% Hexagonal architecture — overview by layers
+%% Covers top-level dependencies between interfaces, composition, application, domain, and infrastructure.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    overview
+%% @parent  01-high-level-hexagonal.mmd
+%% @nodes  14
+
+flowchart TB
+    subgraph External
+        APIs[External APIs]
+        FS[Filesystem]
+        OBS[Prometheus/OTel]
+    end
+    subgraph Interfaces
+        CLI[CLI]
+        HTTP[HTTP Interface]
+    end
+    subgraph Composition
+        BOOT[Bootstrap]
+        FAC[Factories]
+    end
+    subgraph Application
+        CORE[Core Services]
+        PIPE[Pipeline Services]
+    end
+    subgraph Domain
+        PORTS[Domain Ports]
+        MODEL[Entities/Types]
+    end
+    subgraph Infrastructure
+        ADP[Adapters]
+        STORE[Storage]
+        OBSI[Observability]
+    end
+
+    APIs --> ADP
+    FS --> STORE
+    OBS --> OBSI
+    CLI --> BOOT
+    HTTP --> BOOT
+    BOOT --> CORE
+    FAC --> PIPE
+    CORE --> PORTS
+    PIPE --> PORTS
+    ADP --> PORTS
+    STORE --> PORTS
+    OBSI --> PORTS
+
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    style Composition fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style Interfaces fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style External fill:#eceff1,stroke:#455a64,stroke-width:2px

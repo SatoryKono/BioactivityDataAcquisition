@@ -1,0 +1,35 @@
+%% Exception hierarchy — data quality errors view
+%% Covers DQ classification and quarantine-oriented exceptions.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   Class
+%% @status  active
+%% @view    dq
+%% @parent  50-exception-hierarchy.mmd
+%% @nodes   11
+
+flowchart TD
+    BIO[BioETLError]
+    DQ[DataQualityError]
+    INVALID[ValidationError]
+    SCHEMA[SchemaViolationError]
+    NULLS[UnexpectedNullError]
+    RANGE[OutOfRangeError]
+    HASH[ContentHashError]
+    QUAR[QuarantineRequiredError]
+    DQTH[DQThresholdExceededError]
+    REPORT[DQReportWriteError]
+    CLASS[DQClassifier]
+
+    BIO --> DQ
+    DQ --> INVALID
+    DQ --> SCHEMA
+    DQ --> NULLS
+    DQ --> RANGE
+    DQ --> HASH
+    DQ --> QUAR
+    DQ --> DQTH
+    DQ --> REPORT
+    CLASS --> DQ

@@ -1,0 +1,44 @@
+%% Port contracts — observability and resilience
+%% Covers logging, metrics, tracing, rate limit, and circuit breaker ports.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    observability
+%% @parent  13-port-protocol-contracts.mmd
+%% @nodes  14
+
+flowchart LR
+    subgraph Domain
+        LGP[LoggerPort]
+        MTP[MetricsPort]
+        TRP[TracingPort]
+        RLP[RateLimiterPort]
+        CBP[CircuitBreakerPort]
+        DQMP[DQMonitorPort]
+    end
+
+    subgraph Infrastructure
+        ULOG[UnifiedLogger]
+        SLOG[StructlogLogger]
+        PMET[PrometheusMetrics]
+        OTEL[OpenTelemetryTracer]
+        RATE[TokenBucket]
+        CBR[CircuitBreaker]
+        DQM[DQMonitor]
+        NOM[NoOpMetrics]
+    end
+
+    ULOG --> LGP
+    SLOG --> LGP
+    PMET --> MTP
+    NOM --> MTP
+    OTEL --> TRP
+    RATE --> RLP
+    CBR --> CBP
+    DQM --> DQMP
+
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px

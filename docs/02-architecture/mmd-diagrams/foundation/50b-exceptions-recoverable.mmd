@@ -1,0 +1,37 @@
+%% Exception hierarchy — recoverable errors view
+%% Covers recoverable failures and retry-oriented branches.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   Class
+%% @status  active
+%% @view    recoverable
+%% @parent  50-exception-hierarchy.mmd
+%% @nodes   12
+
+flowchart TD
+    BIO[BioETLError]
+    REC[RecoverableError]
+    HTTP[HTTPError]
+    TIME[TimeoutError]
+    RATE[RateLimitError]
+    TEMP[TemporaryProviderError]
+    RETRY[RetryExhaustedError]
+    CBOPEN[CircuitBreakerOpenError]
+    CHECK[CheckpointReadError]
+    MEM[MemoryPressureError]
+    WARN[WarningThresholdExceeded]
+    RETRY_DECISION[RetryPolicyDecision]
+
+    BIO --> REC
+    REC --> HTTP
+    REC --> TIME
+    REC --> RATE
+    REC --> TEMP
+    REC --> RETRY
+    REC --> CBOPEN
+    REC --> CHECK
+    REC --> MEM
+    REC --> WARN
+    RETRY --> RETRY_DECISION
