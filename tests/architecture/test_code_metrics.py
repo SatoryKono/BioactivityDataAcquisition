@@ -50,6 +50,7 @@ class TestFileSizeLimits:
         "activity.py": 330,  # 327 LOC - Activity domain types with rich validation
         "types.py": 435,  # 428 LOC - domain types + PublicationType + CellularityType + ExecutionContext enums
         "organism_classification.py": 420,  # ~410 LOC - Static taxonomy_id→CellularityType mapping (~100 entries from ChEMBL dataset)
+        "organism_classification_service.py": 320,  # 313 LOC - OrganismClassificationService with batch classification, enrichment, filtering, stats
         "context.py": 390,  # 385 LOC - PipelineContext with rich metadata and validation + InputFilterContext.from_multi_ids + execution_context
         "state.py": 380,  # 371 LOC - CompositePipelineState FSM with transition rules
         "chembl_structures.py": 510,  # 506 LOC - ChEMBL structural entities + deprecated alias __getattr__ (v2.0)
