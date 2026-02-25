@@ -77,9 +77,9 @@ The domain layer implements Domain-Driven Design patterns:
 | Document                                                  | Description                                 |
 | --------------------------------------------------------- | ------------------------------------------- |
 | [API Reference](docs/04-reference/api/index.md)           | Full API documentation with mkdocstrings    |
-| [Architecture Decisions](docs/02-architecture/decisions/) | 38 ADRs explaining design choices           |
+| [Architecture Decisions](docs/02-architecture/decisions/) | 39 ADRs explaining design choices           |
 | [Ubiquitous Language](docs/00-project/glossary.md)        | Domain terminology and canonical naming     |
-| [RULES.md](docs/00-project/RULES.md)                      | Project governance and requirements (v5.21) |
+| [RULES.md](docs/00-project/RULES.md)                      | Project governance and requirements (v5.22) |
 | [Project Map](docs/00-project/00-map.md)                  | Documentation navigator and code map        |
 | [CLI Reference](docs/04-reference/cli.md)                 | Command-line interface documentation        |
 | [Operations Runbooks](docs/05-operations/runbooks/)       | Incident response and procedures            |
@@ -306,10 +306,10 @@ Access the docs at `http://localhost:8000`.
 .
 ├── configs/                  # YAML pipeline configurations
 ├── docs/                     # Documentation (Architecture, Guides, Runbooks)
-│   ├── 02-architecture/      # Layer docs, diagrams, ADRs (38 decisions)
+│   ├── 02-architecture/      # Layer docs, diagrams, ADRs (39 decisions)
 │   ├── 00-project/
 │   │   ├── glossary.md       # Ubiquitous Language glossary
-│   │   └── RULES.md          # Project governance (v5.21)
+│   │   └── RULES.md          # Project governance (v5.22)
 │   └── ...
 ├── src/
 │   └── bioetl/

@@ -1,6 +1,6 @@
 # Operations Documentation
 
-*Synced with RULES.md v5.21 (2026-02-21)*
+*Synced with RULES.md v5.22 (2026-02-24)*
 
 ## Overview
 
