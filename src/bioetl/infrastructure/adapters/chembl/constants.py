@@ -40,7 +40,7 @@ CHEMBL_DTO_MODELS: dict[str, type[BaseModel]] = {
 # These endpoints return all records in a single response
 _NO_PAGINATION_ENTITIES: frozenset[str] = frozenset(
     {
-
+        "target",
         "target_component",
         "protein_class",
     }

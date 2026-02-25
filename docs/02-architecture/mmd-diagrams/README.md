@@ -2,6 +2,9 @@
 
 *Canonical diagram location — all `.mmd` sources live here.*
 
+> **Governance:** [ADR-040 — Diagram Governance and Layout Policy](../decisions/ADR-040-diagram-governance.md)
+> Colour scheme, linkStyle differentiation, view decomposition rules, CI validation — all defined in ADR-040.
+
 All diagrams are in [Mermaid](https://mermaid.js.org/) format (`.mmd` files).
 Render them with any Mermaid-compatible viewer, IDE plugin, or the [Mermaid Live Editor](https://mermaid.live/).
 
