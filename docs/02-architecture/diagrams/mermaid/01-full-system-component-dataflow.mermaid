@@ -1,12 +1,12 @@
 %% View: Data-Flow | Parent: 01-full-system-component-full.mermaid
 flowchart TB
 
-    subgraph Domain["🟡 Domain Layer"]
+    subgraph Domain["Domain Layer"]
         direction TB
         N7["DataSourcePort"]
     end
 
-    subgraph Application["🟢 Application Layer"]
+    subgraph Application["Application Layer"]
         direction TB
         N1["PipelineRunner"]
         N2["BatchTransformer"]
@@ -16,7 +16,7 @@ flowchart TB
         N6["MoleculeTransformer"]
     end
 
-    subgraph Infrastructure["🔵 Infrastructure Layer"]
+    subgraph Infrastructure["Infrastructure Layer"]
         direction TB
         N8["BronzeWriter"]
         N9["SilverWriter"]
@@ -34,15 +34,16 @@ flowchart TB
     N8 --> N11
     N9 --> N12
 
-    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
-    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
-    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
 
-    linkStyle 0 stroke:#1E293B,stroke-width:4px
-    linkStyle 1 stroke:#1E293B,stroke-width:4px
-    linkStyle 2 stroke:#1E293B,stroke-width:4px
-    linkStyle 3 stroke:#1E293B,stroke-width:4px
-    linkStyle 4 stroke:#1E293B,stroke-width:4px
-    linkStyle 5 stroke:#1E293B,stroke-width:4px
-    linkStyle 6 stroke:#1E293B,stroke-width:4px
-    linkStyle 7 stroke:#1E293B,stroke-width:4px
+    %% linkStyle: data 2-4,6-7, orch 0-1, di 5
+    linkStyle 0 stroke:#2e7d32,stroke-width:2px
+    linkStyle 1 stroke:#2e7d32,stroke-width:2px
+    linkStyle 2 stroke:#1E293B,stroke-width:3px
+    linkStyle 3 stroke:#1E293B,stroke-width:3px
+    linkStyle 4 stroke:#1E293B,stroke-width:3px
+    linkStyle 5 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 6 stroke:#1E293B,stroke-width:3px
+    linkStyle 7 stroke:#1E293B,stroke-width:3px

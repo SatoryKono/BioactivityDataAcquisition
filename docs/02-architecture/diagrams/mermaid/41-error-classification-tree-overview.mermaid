@@ -1,13 +1,13 @@
 %% View: Overview | Parent: 41-error-classification-tree-full.mermaid
 flowchart TB
 
-    subgraph Domain["🟡 Domain Layer"]
+    subgraph Domain["Domain Layer"]
         direction TB
         N2["HTTP"]
         N1["ERROR"]
     end
 
-    subgraph Application["🟢 Application Layer"]
+    subgraph Application["Application Layer"]
         direction TB
         N3["INFRA"]
         N4["no"]
@@ -20,7 +20,7 @@ flowchart TB
         N15["CB"]
     end
 
-    subgraph Infrastructure["🔵 Infrastructure Layer"]
+    subgraph Infrastructure["Infrastructure Layer"]
         direction TB
         N13["LOCKACQ"]
         N6["retry"]
@@ -41,19 +41,20 @@ flowchart TB
     N14 --> N10
     N15 --> N10
 
-    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
-    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
-    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
 
-    linkStyle 0 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
-    linkStyle 1 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
-    linkStyle 2 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
-    linkStyle 3 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
-    linkStyle 4 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
-    linkStyle 5 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
-    linkStyle 6 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
-    linkStyle 7 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
-    linkStyle 8 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
-    linkStyle 9 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
-    linkStyle 10 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
-    linkStyle 11 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    %% linkStyle: data 2-3, err 0-1,4-11
+    linkStyle 0 stroke:#c62828,stroke-width:2px,stroke-dasharray:4
+    linkStyle 1 stroke:#c62828,stroke-width:2px,stroke-dasharray:4
+    linkStyle 2 stroke:#1E293B,stroke-width:3px
+    linkStyle 3 stroke:#1E293B,stroke-width:3px
+    linkStyle 4 stroke:#c62828,stroke-width:2px,stroke-dasharray:4
+    linkStyle 5 stroke:#c62828,stroke-width:2px,stroke-dasharray:4
+    linkStyle 6 stroke:#c62828,stroke-width:2px,stroke-dasharray:4
+    linkStyle 7 stroke:#c62828,stroke-width:2px,stroke-dasharray:4
+    linkStyle 8 stroke:#c62828,stroke-width:2px,stroke-dasharray:4
+    linkStyle 9 stroke:#c62828,stroke-width:2px,stroke-dasharray:4
+    linkStyle 10 stroke:#c62828,stroke-width:2px,stroke-dasharray:4
+    linkStyle 11 stroke:#c62828,stroke-width:2px,stroke-dasharray:4

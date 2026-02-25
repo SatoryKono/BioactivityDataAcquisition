@@ -338,3 +338,9 @@ LLM запрещается:
 
 LLM не “рисует”.
 LLM моделирует систему в формализованном виде, соответствующем архитектуре проекта.
+
+---
+
+## Related
+
+- [ADR-040: Diagram Governance and Layout Policy](decisions/ADR-040-diagram-governance.md) — colour scheme, node limits, CI validation

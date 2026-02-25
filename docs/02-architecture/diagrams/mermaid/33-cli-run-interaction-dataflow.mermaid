@@ -1,12 +1,12 @@
 %% View: Data-Flow | Parent: 33-cli-run-interaction-full.mermaid
 flowchart TB
 
-    subgraph Application["🟢 Application Layer"]
+    subgraph Application["Application Layer"]
         direction TB
         N1["Runner"]
     end
 
-    subgraph Infrastructure["🔵 Infrastructure Layer"]
+    subgraph Infrastructure["Infrastructure Layer"]
         direction TB
         N2["PRS"]
         N4["Boot"]
@@ -19,7 +19,7 @@ flowchart TB
         N12["Obs"]
     end
 
-    subgraph Interfaces["⚪ Interfaces Layer"]
+    subgraph Interfaces["Interfaces Layer"]
         direction TB
         N3["CLI"]
         N9["User"]
@@ -46,27 +46,28 @@ flowchart TB
     N2 --> N3
     N3 --> N9
 
-    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
-    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
-    style Interfaces fill:#F1F5F9,stroke:#64748B,stroke-width:2px
+    style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    style Interfaces fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
 
-    linkStyle 0 stroke:#1E293B,stroke-width:4px
-    linkStyle 1 stroke:#1E293B,stroke-width:4px
-    linkStyle 2 stroke:#1E293B,stroke-width:4px
-    linkStyle 3 stroke:#1E293B,stroke-width:4px
-    linkStyle 4 stroke:#1E293B,stroke-width:4px
-    linkStyle 5 stroke:#1E293B,stroke-width:4px
-    linkStyle 6 stroke:#1E293B,stroke-width:4px
-    linkStyle 7 stroke:#1E293B,stroke-width:4px
-    linkStyle 8 stroke:#1E293B,stroke-width:4px
-    linkStyle 9 stroke:#1E293B,stroke-width:4px
-    linkStyle 10 stroke:#1E293B,stroke-width:4px
-    linkStyle 11 stroke:#1E293B,stroke-width:4px
-    linkStyle 12 stroke:#1E293B,stroke-width:4px
-    linkStyle 13 stroke:#1E293B,stroke-width:4px
-    linkStyle 14 stroke:#1E293B,stroke-width:4px
-    linkStyle 15 stroke:#1E293B,stroke-width:4px
-    linkStyle 16 stroke:#1E293B,stroke-width:4px
-    linkStyle 17 stroke:#1E293B,stroke-width:4px
-    linkStyle 18 stroke:#1E293B,stroke-width:4px
-    linkStyle 19 stroke:#1E293B,stroke-width:4px
+    %% linkStyle: data 0-8,18-19, orch 9-17
+    linkStyle 0 stroke:#1E293B,stroke-width:3px
+    linkStyle 1 stroke:#1E293B,stroke-width:3px
+    linkStyle 2 stroke:#1E293B,stroke-width:3px
+    linkStyle 3 stroke:#1E293B,stroke-width:3px
+    linkStyle 4 stroke:#1E293B,stroke-width:3px
+    linkStyle 5 stroke:#1E293B,stroke-width:3px
+    linkStyle 6 stroke:#1E293B,stroke-width:3px
+    linkStyle 7 stroke:#1E293B,stroke-width:3px
+    linkStyle 8 stroke:#1E293B,stroke-width:3px
+    linkStyle 9 stroke:#2e7d32,stroke-width:2px
+    linkStyle 10 stroke:#2e7d32,stroke-width:2px
+    linkStyle 11 stroke:#2e7d32,stroke-width:2px
+    linkStyle 12 stroke:#2e7d32,stroke-width:2px
+    linkStyle 13 stroke:#2e7d32,stroke-width:2px
+    linkStyle 14 stroke:#2e7d32,stroke-width:2px
+    linkStyle 15 stroke:#2e7d32,stroke-width:2px
+    linkStyle 16 stroke:#2e7d32,stroke-width:2px
+    linkStyle 17 stroke:#2e7d32,stroke-width:2px
+    linkStyle 18 stroke:#1E293B,stroke-width:3px
+    linkStyle 19 stroke:#1E293B,stroke-width:3px

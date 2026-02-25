@@ -1,7 +1,7 @@
 %% View: Overview | Parent: 46-yaml-config-resolution-full.mermaid
 flowchart TB
 
-    subgraph Domain["🟡 Domain Layer"]
+    subgraph Domain["Domain Layer"]
         direction TB
         N2["dq_config_file"]
         N5["override"]
@@ -10,7 +10,7 @@ flowchart TB
         N13["DQ_ENTITY"]
     end
 
-    subgraph Application["🟢 Application Layer"]
+    subgraph Application["Application Layer"]
         direction TB
         N1["PIPELINE"]
         N3["br"]
@@ -22,7 +22,7 @@ flowchart TB
         N15["FILTER_DEFAULTS"]
     end
 
-    subgraph Composition["🟣 Composition Layer"]
+    subgraph Composition["Composition Layer"]
         direction TB
         N9["PROVIDER_BASE"]
         N12["DQ_PROVIDER"]
@@ -33,11 +33,12 @@ flowchart TB
     N1 --> N2
     N1 --> N3
 
-    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
-    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
-    style Composition fill:#F5F3FF,stroke:#7C3AED,stroke-width:2px
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Composition fill:#fff3e0,stroke:#e65100,stroke-width:2px
 
-    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    %% linkStyle: data 0, orch 3, di 1-2
+    linkStyle 0 stroke:#1E293B,stroke-width:3px
+    linkStyle 1 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 2 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 3 stroke:#2e7d32,stroke-width:2px

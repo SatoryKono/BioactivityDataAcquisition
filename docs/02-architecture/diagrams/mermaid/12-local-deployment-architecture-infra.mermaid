@@ -1,7 +1,7 @@
 %% View: Infrastructure-Mapping | Parent: 12-local-deployment-architecture-full.mermaid
 flowchart TB
 
-    subgraph Infrastructure["🔵 Infrastructure Layer"]
+    subgraph Infrastructure["Infrastructure Layer"]
         direction TB
         N1["Quarantine"]
         N2["Checkpoints"]
@@ -24,7 +24,7 @@ flowchart TB
         N20["Lineage"]
     end
 
-    subgraph Interfaces["⚪ Interfaces Layer"]
+    subgraph Interfaces["Interfaces Layer"]
         direction TB
         N6["CLI"]
     end
@@ -48,24 +48,25 @@ flowchart TB
     N5 --> N20
     N5 --> N3
 
-    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
-    style Interfaces fill:#F1F5F9,stroke:#64748B,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    style Interfaces fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
 
-    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 8 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 10 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 11 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 12 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 13 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 14 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 15 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 16 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 17 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    %% linkStyle: data 0-13,15-16, obs 17, err 14
+    linkStyle 0 stroke:#1E293B,stroke-width:3px
+    linkStyle 1 stroke:#1E293B,stroke-width:3px
+    linkStyle 2 stroke:#1E293B,stroke-width:3px
+    linkStyle 3 stroke:#1E293B,stroke-width:3px
+    linkStyle 4 stroke:#1E293B,stroke-width:3px
+    linkStyle 5 stroke:#1E293B,stroke-width:3px
+    linkStyle 6 stroke:#1E293B,stroke-width:3px
+    linkStyle 7 stroke:#1E293B,stroke-width:3px
+    linkStyle 8 stroke:#1E293B,stroke-width:3px
+    linkStyle 9 stroke:#1E293B,stroke-width:3px
+    linkStyle 10 stroke:#1E293B,stroke-width:3px
+    linkStyle 11 stroke:#1E293B,stroke-width:3px
+    linkStyle 12 stroke:#1E293B,stroke-width:3px
+    linkStyle 13 stroke:#1E293B,stroke-width:3px
+    linkStyle 14 stroke:#c62828,stroke-width:2px,stroke-dasharray:4
+    linkStyle 15 stroke:#1E293B,stroke-width:3px
+    linkStyle 16 stroke:#1E293B,stroke-width:3px
+    linkStyle 17 stroke:#94A3B8,stroke-width:1px

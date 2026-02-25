@@ -54,3 +54,4 @@ Each decomposed diagram has 5 artifacts: `-full`, `-overview`, `-domain`, `-infr
 - Inventory table: [diagram-views-inventory.md](./diagram-views-inventory.md)
 - Decomposition plan: [diagram-views-plan.md](./diagram-views-plan.md)
 - Canonical `.mmd` sources: [`../mmd-diagrams/README.md`](../mmd-diagrams/README.md)
+- Governance: [ADR-040: Diagram Governance](../decisions/ADR-040-diagram-governance.md)

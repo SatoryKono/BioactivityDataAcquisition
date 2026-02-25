@@ -2,22 +2,29 @@
 """
 lint_diagrams.py - Diagram policy linter for BioETL project.
 
-Validates .mermaid diagram files against the diagramming policy
-defined in docs/02-architecture/diagrams/00-diagramming-policy.md.
+Validates .mmd and .mermaid diagram files against the diagramming policy
+defined in docs/02-architecture/diagrams/00-diagramming-policy.md and
+ADR-040 (Diagram Governance).
 
 Checks performed:
-- Presence of structured metadata headers (Title, Covers, Updated, Components)
-- Naming convention compliance (NN-topic.mermaid)
-- No placeholder/stub content
-- Staleness detection based on %% Updated: date
-- File extension consistency (.mermaid only, no .mmd)
+- META-001: Presence of structured metadata (format-aware: @-tags for .mmd, View for .mermaid)
+- NAME-001: Naming convention compliance (NN-topic or NNa-topic)
+- CONTENT-001: No placeholder/stub content
+- CONTENT-002: Minimum 3 non-comment lines
+- STALE-001/002: Staleness detection based on %% Updated: or @date
+- SIZE-001/002: Node count limits (35 hard, 20 soft)
+- COLOUR-001: Approved colour palette enforcement
+
+Scans two directories:
+- docs/02-architecture/mmd-diagrams/ (canonical .mmd files)
+- docs/02-architecture/diagrams/mermaid/ (decomposed .mermaid views)
 
 Usage:
-    # Check all diagrams
+    # Check all diagrams (both directories)
     python scripts/lint_diagrams.py
 
     # Check specific directory
-    python scripts/lint_diagrams.py docs/02-architecture/diagrams/
+    python scripts/lint_diagrams.py docs/02-architecture/mmd-diagrams/
 
     # Output JSON format
     python scripts/lint_diagrams.py --json
@@ -27,6 +34,7 @@ Usage:
 
 References:
     - docs/02-architecture/diagrams/00-diagramming-policy.md
+    - docs/02-architecture/decisions/ADR-040-diagram-governance.md
     - RULES.md §1 (Architecture)
 """
 from __future__ import annotations
@@ -39,11 +47,23 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
 
-DIAGRAM_DIR = Path("docs/02-architecture/diagrams")
-NAMING_PATTERN = re.compile(r"^\d{2}-[a-z0-9]+(?:-[a-z0-9]+)*\.mermaid$")
+DIAGRAM_DIRS = [
+    Path("docs/02-architecture/mmd-diagrams"),
+    Path("docs/02-architecture/diagrams/mermaid"),
+]
+NAMING_PATTERN = re.compile(
+    r"^\d{2}[a-z]?-[a-z0-9]+(?:-[a-z0-9]+)*\.(?:mmd|mermaid)$"
+)
 PLACEHOLDER_MARKERS = ["placeholder", "TODO", "FIXME", "stub"]
 DEFAULT_STALE_DAYS = 90
 WARNING_STALE_DAYS = 180
+
+# Approved fill colours from custom.css (ADR-040 D1)
+APPROVED_FILLS = {
+    "#f3e5f5", "#e8f5e9", "#ffcdd2", "#fff3e0",
+    "#e3f2fd", "#eceff1", "#fff8e1", "#ffebee",
+    "#f8fafc",  # Legend background
+}
 
 
 @dataclass
@@ -70,38 +90,67 @@ class LintResult:
         return any(i.severity == "ERROR" for i in self.issues)
 
 
+def find_diagram_files(base: Path) -> list[Path]:
+    """Find all .mmd and .mermaid files recursively."""
+    return sorted(
+        list(base.rglob("*.mmd")) + list(base.rglob("*.mermaid"))
+    )
+
+
 def check_metadata_headers(path: Path, lines: list[str]) -> list[Issue]:
-    """Check for structured metadata headers: Title, Covers, Updated, Components."""
+    """Check for structured metadata — format depends on file extension."""
     issues: list[Issue] = []
     fname = str(path)
 
-    header_lines = [
-        line for line in lines if line.startswith("%% ") and ": " in line
-    ]
-    headers_found = {
-        line.split(": ", 1)[0].replace("%% ", "") for line in header_lines
-    }
+    # Skip template files
+    if path.name.startswith("_"):
+        return issues
 
-    required = {"Title", "Covers", "Updated", "Components"}
-    missing = required - headers_found
-
-    for h in sorted(missing):
-        issues.append(
-            Issue(
-                file=fname,
-                severity="ERROR",
-                rule="META-001",
-                message=f"Missing required metadata header: %% {h}:",
+    if path.suffix == ".mmd":
+        # @-format metadata (mmd-diagrams/)
+        required_tags = {"@version", "@date", "@type", "@level"}
+        found_tags: set[str] = set()
+        for line in lines:
+            for tag in required_tags:
+                if line.strip().startswith(f"%% {tag}"):
+                    found_tags.add(tag)
+        missing = required_tags - found_tags
+        for tag in sorted(missing):
+            issues.append(
+                Issue(
+                    file=fname,
+                    severity="WARNING",
+                    rule="META-001",
+                    message=f"Missing metadata: %% {tag}",
+                )
             )
+    else:
+        # View-format metadata (diagrams/mermaid/)
+        has_view = any(
+            line.startswith("%% View:") or line.startswith("%% @view")
+            for line in lines
         )
+        if not has_view:
+            issues.append(
+                Issue(
+                    file=fname,
+                    severity="WARNING",
+                    rule="META-001",
+                    message="Missing %% View: metadata line",
+                )
+            )
 
     return issues
 
 
 def check_naming_convention(path: Path) -> list[Issue]:
-    """Check file follows NN-topic.mermaid naming convention."""
+    """Check file follows NN-topic or NNa-topic naming convention."""
     issues: list[Issue] = []
     fname = str(path)
+
+    # Skip template files and non-standard utility files
+    if path.name.startswith("_"):
+        return issues
 
     if not NAMING_PATTERN.match(path.name):
         issues.append(
@@ -111,7 +160,7 @@ def check_naming_convention(path: Path) -> list[Issue]:
                 rule="NAME-001",
                 message=(
                     f"File name '{path.name}' does not follow "
-                    f"NN-topic.mermaid convention"
+                    f"NN-topic.{{mmd,mermaid}} convention"
                 ),
             )
         )
@@ -123,6 +172,11 @@ def check_placeholder_content(path: Path, lines: list[str]) -> list[Issue]:
     """Check for placeholder/stub content."""
     issues: list[Issue] = []
     fname = str(path)
+
+    # Skip template files
+    if path.name.startswith("_"):
+        return issues
+
     content = "\n".join(lines).lower()
 
     for marker in PLACEHOLDER_MARKERS:
@@ -164,20 +218,22 @@ def check_staleness(
     lines: list[str],
     stale_days: int,
 ) -> list[Issue]:
-    """Check if diagram is stale based on %% Updated: date."""
+    """Check if diagram is stale based on %% Updated: or %% @date."""
     issues: list[Issue] = []
     fname = str(path)
 
-    updated_line = None
+    date_str = None
     for line in lines:
         if line.startswith("%% Updated:"):
-            updated_line = line
+            date_str = line.replace("%% Updated:", "").strip()
+            break
+        if line.strip().startswith("%% @date"):
+            date_str = line.strip().replace("%% @date", "").strip()
             break
 
-    if updated_line is None:
-        return issues  # Already caught by META-001
+    if date_str is None:
+        return issues  # No date found — caught by META-001
 
-    date_str = updated_line.replace("%% Updated:", "").strip()
     try:
         updated_date = datetime.strptime(date_str, "%Y-%m-%d")
     except ValueError:
@@ -186,7 +242,7 @@ def check_staleness(
                 file=fname,
                 severity="ERROR",
                 rule="META-002",
-                message=f"Invalid date format in %% Updated: '{date_str}' (expected YYYY-MM-DD)",
+                message=f"Invalid date format: '{date_str}' (expected YYYY-MM-DD)",
             )
         )
         return issues
@@ -216,20 +272,67 @@ def check_staleness(
     return issues
 
 
-def check_extension_consistency(diagram_dir: Path) -> list[Issue]:
-    """Check for .mmd files that should be .mermaid."""
+def check_node_count(path: Path, lines: list[str]) -> list[Issue]:
+    """Warn if diagram exceeds node limits."""
     issues: list[Issue] = []
+    fname = str(path)
+    content = "\n".join(lines)
 
-    for mmd_file in diagram_dir.rglob("*.mmd"):
+    # Skip -full reference diagrams and templates
+    if "-full." in path.name or path.name.startswith("_"):
+        return issues
+
+    node_patterns = [
+        r'\w+\["',        # flowchart: NodeId["
+        r'\w+\[',         # flowchart: NodeId[
+        r'\w+\(',         # flowchart: NodeId(
+        r'\w+\{',         # flowchart: NodeId{
+        r'class\s+\w+',   # classDiagram
+        r'participant\s',  # sequenceDiagram
+        r'state\s+\w+',   # stateDiagram
+    ]
+    node_count = 0
+    for pattern in node_patterns:
+        node_count += len(re.findall(pattern, content))
+
+    if node_count > 35:
         issues.append(
             Issue(
-                file=str(mmd_file),
+                file=fname,
                 severity="ERROR",
-                rule="EXT-001",
-                message="Legacy .mmd extension found. Rename to .mermaid.",
+                rule="SIZE-001",
+                message=f"~{node_count} nodes (>35 CRITICAL). Decompose.",
+            )
+        )
+    elif node_count > 20:
+        issues.append(
+            Issue(
+                file=fname,
+                severity="WARNING",
+                rule="SIZE-002",
+                message=f"~{node_count} nodes (>20 soft limit).",
             )
         )
 
+    return issues
+
+
+def check_subgraph_colours(path: Path, lines: list[str]) -> list[Issue]:
+    """Check subgraph styles use approved colour scheme."""
+    issues: list[Issue] = []
+    fname = str(path)
+    for i, line in enumerate(lines):
+        if line.strip().startswith("style ") and "fill:" in line:
+            fill_match = re.search(r"fill:(#[0-9a-fA-F]{6})", line)
+            if fill_match and fill_match.group(1).lower() not in APPROVED_FILLS:
+                issues.append(
+                    Issue(
+                        file=fname,
+                        severity="WARNING",
+                        rule="COLOUR-001",
+                        message=f"L{i+1}: Unapproved fill {fill_match.group(1)}",
+                    )
+                )
     return issues
 
 
@@ -254,21 +357,19 @@ def lint_file(path: Path, stale_days: int) -> list[Issue]:
     issues.extend(check_naming_convention(path))
     issues.extend(check_placeholder_content(path, lines))
     issues.extend(check_staleness(path, lines, stale_days))
+    issues.extend(check_node_count(path, lines))
+    issues.extend(check_subgraph_colours(path, lines))
 
     return issues
 
 
 def lint_directory(diagram_dir: Path, stale_days: int) -> LintResult:
-    """Lint all .mermaid files in directory."""
+    """Lint all .mmd and .mermaid files in directory."""
     result = LintResult()
 
-    # Check for .mmd files
-    result.issues.extend(check_extension_consistency(diagram_dir))
+    diagram_files = find_diagram_files(diagram_dir)
 
-    # Check all .mermaid files
-    mermaid_files = sorted(diagram_dir.glob("*.mermaid"))
-
-    for path in mermaid_files:
+    for path in diagram_files:
         result.files_checked += 1
         file_issues = lint_file(path, stale_days)
         if not any(i.severity == "ERROR" for i in file_issues):
@@ -276,6 +377,18 @@ def lint_directory(diagram_dir: Path, stale_days: int) -> LintResult:
         result.issues.extend(file_issues)
 
     return result
+
+
+def lint_all_directories(stale_days: int) -> LintResult:
+    """Lint all configured diagram directories."""
+    combined = LintResult()
+    for d in DIAGRAM_DIRS:
+        if d.is_dir():
+            result = lint_directory(d, stale_days)
+            combined.files_checked += result.files_checked
+            combined.files_passed += result.files_passed
+            combined.issues.extend(result.issues)
+    return combined
 
 
 def format_text(result: LintResult) -> str:
@@ -343,8 +456,11 @@ def main() -> int:
     parser.add_argument(
         "path",
         nargs="?",
-        default=str(DIAGRAM_DIR),
-        help="Directory or file to check (default: docs/02-architecture/diagrams/)",
+        default=None,
+        help=(
+            "Directory or file to check. "
+            "If omitted, scans both mmd-diagrams/ and diagrams/mermaid/."
+        ),
     )
     parser.add_argument(
         "--json",
@@ -360,19 +476,22 @@ def main() -> int:
     )
 
     args = parser.parse_args()
-    target = Path(args.path)
 
-    if target.is_file():
-        result = LintResult(files_checked=1)
-        issues = lint_file(target, args.stale_days)
-        result.issues = issues
-        if not any(i.severity == "ERROR" for i in issues):
-            result.files_passed = 1
-    elif target.is_dir():
-        result = lint_directory(target, args.stale_days)
+    if args.path is None:
+        result = lint_all_directories(args.stale_days)
     else:
-        print(f"Error: {target} does not exist", file=sys.stderr)
-        return 2
+        target = Path(args.path)
+        if target.is_file():
+            result = LintResult(files_checked=1)
+            issues = lint_file(target, args.stale_days)
+            result.issues = issues
+            if not any(i.severity == "ERROR" for i in issues):
+                result.files_passed = 1
+        elif target.is_dir():
+            result = lint_directory(target, args.stale_days)
+        else:
+            print(f"Error: {target} does not exist", file=sys.stderr)
+            return 2
 
     if args.json_output:
         print(format_json(result))

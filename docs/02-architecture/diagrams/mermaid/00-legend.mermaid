@@ -1,11 +1,16 @@
 %% Shared legend for coded edge labels and link weights
 flowchart TB
-    subgraph Legend["📋 Legend"]
+    subgraph LinkWeights["Link Types"]
+        direction LR
+        LW1[" "] -->|"data flow"| LW2[" "]
+        LW3[" "] -.->|"DI/implements"| LW4[" "]
+        LW5[" "] -->|"orchestration"| LW6[" "]
+        LW7[" "] -->|"observability"| LW8[" "]
+        LW9[" "] -.->|"error/quarantine"| LW10[" "]
+    end
+
+    subgraph Legend["Legend"]
         direction TB
-        S1["Main data flow: solid, 4px"]
-        S2["Dependency/DI: dashed, 2px"]
-        S3["Observability: gray, 1px"]
-        S4["Error/Quarantine: red dashed, 2px"]
         C0["Codes used in diagrams"]
         K01["K01 = Transform & normalize"]
         K02["K02 = Validate & flatten"]
@@ -48,6 +53,11 @@ flowchart TB
         K39["K39 = DATA_QUALITY"]
     end
 
+    style LinkWeights fill:#F8FAFC,stroke:#475569,stroke-width:2px
     style Legend fill:#F8FAFC,stroke:#94A3B8,stroke-width:2px
 
-
+    linkStyle 0 stroke:#1E293B,stroke-width:3px
+    linkStyle 1 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 2 stroke:#2e7d32,stroke-width:2px
+    linkStyle 3 stroke:#94A3B8,stroke-width:1px
+    linkStyle 4 stroke:#c62828,stroke-width:2px,stroke-dasharray:4

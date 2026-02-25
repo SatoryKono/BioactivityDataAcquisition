@@ -1,0 +1,66 @@
+%% Port/Protocol Contracts — Service Ports and their implementations
+%% Covers LockPort, CheckpointPort, QuarantinePort, AuditPort, PiiHasherPort, DQ Ports
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @view    services
+%% @parent  13-port-protocol-contracts.mmd
+%% @nodes   18
+
+graph LR
+    subgraph Domain["Domain Ports"]
+        LKP["LockPort"]
+        CKP["CheckpointPort"]
+        QRP["QuarantinePort"]
+        ADP["AuditPort"]
+        PIIP["PiiHasherPort"]
+        SVP["SilverValidatorPort"]
+        GVP["GoldValidatorPort"]
+        DQMP["DQMonitorPort"]
+        BDQP["BronzeDQAnalyzerPort"]
+        SDQP["SilverDQAnalyzerPort"]
+        GDQP["GoldDQAnalyzerPort"]
+        DQRWP["DQReportWriterPort"]
+    end
+
+    subgraph Infrastructure["Infrastructure Implementations"]
+        ML["MemoryLock"]
+        LC["LocalCheckpoint"]
+        UQ["UnifiedQuarantine"]
+        FA["FileAuditAdapter"]
+        SPH["Sha256PiiHasher"]
+        PSV["PanderaSilverValidator"]
+        PGV["PanderaGoldValidator"]
+        NOV["NoOpValidator"]
+        DQRW_I["DQReportWriter"]
+    end
+
+    subgraph Application["Application Implementations"]
+        BDA["BronzeDQAnalyzer"]
+        SDA["SilverDQAnalyzer"]
+        GDA["GoldDQAnalyzer"]
+    end
+
+    LKP --- ML
+    CKP --- LC
+    QRP --- UQ
+    ADP --- FA
+    PIIP --- SPH
+    SVP --- PSV & NOV
+    GVP --- PGV
+    BDQP --- BDA
+    SDQP --- SDA
+    GDQP --- GDA
+    DQRWP --- DQRW_I
+
+    classDef port fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    classDef infra fill:#ffcdd2,stroke:#c62828
+    classDef app fill:#e8f5e9,stroke:#2e7d32
+    classDef noop fill:#eceff1,stroke:#455a64,stroke-dasharray: 5 5
+
+    class LKP,CKP,QRP,ADP,PIIP,SVP,GVP,DQMP,BDQP,SDQP,GDQP,DQRWP port
+    class ML,LC,UQ,FA,SPH,PSV,PGV,DQRW_I infra
+    class BDA,SDA,GDA app
+    class NOV noop

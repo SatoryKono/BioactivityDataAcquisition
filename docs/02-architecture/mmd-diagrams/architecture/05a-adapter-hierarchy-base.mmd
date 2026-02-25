@@ -1,0 +1,60 @@
+%% Provider Adapter Hierarchy — Base classes, mixins, and decorators
+%% Covers BaseHttpAdapter, BaseSyncAdapter, all mixins, and adapter decorators
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @view    base
+%% @parent  05-provider-adapter-hierarchy.mmd
+%% @nodes   12
+
+graph TB
+    subgraph Ports["Domain Ports"]
+        DSP["DataSourcePort<br/>(Protocol)"]
+        FDSP["FilterableDataSourcePort<br/>(Protocol)"]
+        HCP["HealthCheckPort"]
+    end
+
+    DSP -->|extends| FDSP
+
+    subgraph Mixins["Mixins"]
+        HCM["HealthCheckMixin"]
+        HCPM["HealthCheckProviderMixin"]
+        NSMF["NotSupportedMultiFilterMixin"]
+        DFM["DelegatingFallbackMixin"]
+        FSM["FilterableStubMixin"]
+        PFM["PaginatedFetcherMixin"]
+    end
+
+    HCM --> HCPM
+
+    subgraph Base["Base Adapters"]
+        BHA["BaseHttpAdapter<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch() + health_check() + aclose()"]
+        BSA["BaseSyncAdapter<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch() + health_check()"]
+    end
+
+    HCPM --> BHA
+    DSP -.->|implements| BHA
+    HCPM --> BSA
+    DSP -.->|implements| BSA
+
+    subgraph Decorators["Adapter Decorators"]
+        CBD["CircuitBreakerDataSourceDecorator"]
+        RDD["RetryingDataSourceDecorator"]
+        CBDS["CachedBronzeDataSource"]
+    end
+
+    DSP -.->|wraps| CBD
+    DSP -.->|wraps| RDD
+    DSP -.->|wraps| CBDS
+
+    classDef port fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    classDef base fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef mixin fill:#f3e5f5,stroke:#6a1b9a,stroke-width:1px
+    classDef decorator fill:#eceff1,stroke:#455a64,stroke-width:1px
+
+    class DSP,FDSP,HCP port
+    class BHA,BSA base
+    class HCM,HCPM,NSMF,DFM,FSM,PFM mixin
+    class CBD,RDD,CBDS decorator

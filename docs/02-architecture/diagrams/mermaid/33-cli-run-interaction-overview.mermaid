@@ -1,13 +1,13 @@
 %% View: Overview | Parent: 33-cli-run-interaction-full.mermaid
 flowchart TB
 
-    subgraph Domain["🟡 Domain Layer"]
+    subgraph Domain["Domain Layer"]
         direction TB
         N13["config"]
         N7["owner_id"]
     end
 
-    subgraph Application["🟢 Application Layer"]
+    subgraph Application["Application Layer"]
         direction TB
         N1["PRS"]
         N2["Runner"]
@@ -22,7 +22,7 @@ flowchart TB
         N15["SB"]
     end
 
-    subgraph Interfaces["⚪ Interfaces Layer"]
+    subgraph Interfaces["Interfaces Layer"]
         direction TB
         N10["CLI"]
         N14["User"]
@@ -51,29 +51,30 @@ flowchart TB
     N1 --> N10
     N10 --> N14
 
-    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
-    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
-    style Interfaces fill:#F1F5F9,stroke:#64748B,stroke-width:2px
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Interfaces fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
 
-    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 8 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 10 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 11 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 12 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 13 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 14 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 15 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 16 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 17 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 18 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 19 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 20 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 21 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    %% linkStyle: data 0-2,4-7,20-21, orch 8-19, di 3
+    linkStyle 0 stroke:#1E293B,stroke-width:3px
+    linkStyle 1 stroke:#1E293B,stroke-width:3px
+    linkStyle 2 stroke:#1E293B,stroke-width:3px
+    linkStyle 3 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 4 stroke:#1E293B,stroke-width:3px
+    linkStyle 5 stroke:#1E293B,stroke-width:3px
+    linkStyle 6 stroke:#1E293B,stroke-width:3px
+    linkStyle 7 stroke:#1E293B,stroke-width:3px
+    linkStyle 8 stroke:#2e7d32,stroke-width:2px
+    linkStyle 9 stroke:#2e7d32,stroke-width:2px
+    linkStyle 10 stroke:#2e7d32,stroke-width:2px
+    linkStyle 11 stroke:#2e7d32,stroke-width:2px
+    linkStyle 12 stroke:#2e7d32,stroke-width:2px
+    linkStyle 13 stroke:#2e7d32,stroke-width:2px
+    linkStyle 14 stroke:#2e7d32,stroke-width:2px
+    linkStyle 15 stroke:#2e7d32,stroke-width:2px
+    linkStyle 16 stroke:#2e7d32,stroke-width:2px
+    linkStyle 17 stroke:#2e7d32,stroke-width:2px
+    linkStyle 18 stroke:#2e7d32,stroke-width:2px
+    linkStyle 19 stroke:#2e7d32,stroke-width:2px
+    linkStyle 20 stroke:#1E293B,stroke-width:3px
+    linkStyle 21 stroke:#1E293B,stroke-width:3px

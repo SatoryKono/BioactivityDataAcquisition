@@ -1,0 +1,53 @@
+%% Bootstrap / DI Container — Factories and Registry
+%% Covers all Factory classes, Provider Registry, and their relationships
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @view    factories
+%% @parent  12-bootstrap-di-container.mmd
+%% @nodes   14
+
+graph TB
+    subgraph Entry["Entry Points"]
+        CLI["CLI Commands (Click)"]
+        HTTP["HTTP Interface"]
+    end
+
+    subgraph Composition["Composition Layer"]
+        subgraph Bootstrap["Bootstrap Assembly"]
+            RA["RuntimeAssembly"]
+            RBA["RunnerBootstrap"]
+            SBA["StorageBootstrap"]
+            HBA["HealthBootstrap"]
+            CBA["CheckpointBootstrap"]
+            LBA["LockBootstrap"]
+        end
+
+        subgraph Factories["Factories"]
+            DSR["DataSourceRegistry"]
+            TF["TransformerFactory"]
+            RF["RunnerFactory"]
+            DQF["DQFactory"]
+        end
+
+        subgraph Providers["Provider Registry"]
+            PR["ProviderRegistry"]
+            EP["ExtractionParams"]
+        end
+    end
+
+    CLI --> RA
+    HTTP --> RA
+    RA --> RBA & SBA & HBA & CBA & LBA
+    RA --> DSR & TF & RF & DQF
+    PR --> DSR
+    PR --> TF
+    EP --> PR
+
+    classDef entry fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef comp fill:#fff3e0,stroke:#e65100,stroke-width:2px
+
+    class CLI,HTTP entry
+    class RA,RBA,SBA,HBA,CBA,LBA,DSR,TF,RF,DQF,PR,EP comp

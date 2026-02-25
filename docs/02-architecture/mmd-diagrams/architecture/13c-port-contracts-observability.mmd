@@ -1,0 +1,51 @@
+%% Port/Protocol Contracts — Observability Ports and their implementations
+%% Covers LoggerPort, MetricsPort, TracingPort, CircuitBreakerPort, RateLimiterPort, MemoryMonitorPort
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @view    observability
+%% @parent  13-port-protocol-contracts.mmd
+%% @nodes   15
+
+graph LR
+    subgraph Domain["Domain Ports"]
+        LGP["LoggerPort"]
+        MTP["MetricsPort"]
+        TRP["TracingPort"]
+        CBP["CircuitBreakerPort"]
+        RLP["RateLimiterPort"]
+        HCP["HealthCheckPort"]
+        MMP["MemoryMonitorPort"]
+        SHP["ShutdownPort"]
+    end
+
+    subgraph Infrastructure["Infrastructure Implementations"]
+        UL["UnifiedLogger"]
+        SLG["StructlogLogger"]
+        NOL["NoOpLogger"]
+        MCO["MetricsCollector"]
+        PME["PrometheusMetrics"]
+        NOM["NoOpMetrics"]
+        OTT["OpenTelemetryTracer"]
+        NOT_T["NoOpTracing"]
+        CB["CircuitBreaker"]
+        TB_I["TokenBucket"]
+        MMGR["MemoryMonitor"]
+    end
+
+    LGP --- UL & SLG & NOL
+    MTP --- MCO & PME & NOM
+    TRP --- OTT & NOT_T
+    CBP --- CB
+    RLP --- TB_I
+    MMP --- MMGR
+
+    classDef port fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    classDef infra fill:#ffcdd2,stroke:#c62828
+    classDef noop fill:#eceff1,stroke:#455a64,stroke-dasharray: 5 5
+
+    class LGP,MTP,TRP,CBP,RLP,HCP,MMP,SHP port
+    class UL,SLG,MCO,PME,OTT,CB,TB_I,MMGR infra
+    class NOL,NOM,NOT_T noop

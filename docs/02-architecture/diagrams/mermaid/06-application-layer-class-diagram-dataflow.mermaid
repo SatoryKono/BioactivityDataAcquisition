@@ -1,7 +1,7 @@
 %% View: Data-Flow | Parent: 06-application-layer-class-diagram-full.mermaid
 flowchart TB
 
-    subgraph Application["🟢 Application Layer"]
+    subgraph Application["Application Layer"]
         direction TB
         N1["BaseChemblTransformer"]
         N2["RecordProcessor"]
@@ -15,7 +15,7 @@ flowchart TB
         N12["ActivityTransformer"]
     end
 
-    subgraph Infrastructure["🔵 Infrastructure Layer"]
+    subgraph Infrastructure["Infrastructure Layer"]
         direction TB
         N9["QuarantineManager"]
         N11["BatchMetricsRecorder"]
@@ -32,16 +32,17 @@ flowchart TB
     N6 --> N7
     N3 --> N8
 
-    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
-    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
+    style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
 
-    linkStyle 0 stroke:#1E293B,stroke-width:4px
-    linkStyle 1 stroke:#1E293B,stroke-width:4px
-    linkStyle 2 stroke:#1E293B,stroke-width:4px
-    linkStyle 3 stroke:#1E293B,stroke-width:4px
-    linkStyle 4 stroke:#1E293B,stroke-width:4px
-    linkStyle 5 stroke:#1E293B,stroke-width:4px
-    linkStyle 6 stroke:#1E293B,stroke-width:4px
-    linkStyle 7 stroke:#1E293B,stroke-width:4px
-    linkStyle 8 stroke:#1E293B,stroke-width:4px
-    linkStyle 9 stroke:#1E293B,stroke-width:4px
+    %% linkStyle: data 0-1,5,8, orch 2-4,9, obs 7, err 6
+    linkStyle 0 stroke:#1E293B,stroke-width:3px
+    linkStyle 1 stroke:#1E293B,stroke-width:3px
+    linkStyle 2 stroke:#2e7d32,stroke-width:2px
+    linkStyle 3 stroke:#2e7d32,stroke-width:2px
+    linkStyle 4 stroke:#2e7d32,stroke-width:2px
+    linkStyle 5 stroke:#1E293B,stroke-width:3px
+    linkStyle 6 stroke:#c62828,stroke-width:2px,stroke-dasharray:4
+    linkStyle 7 stroke:#94A3B8,stroke-width:1px
+    linkStyle 8 stroke:#1E293B,stroke-width:3px
+    linkStyle 9 stroke:#2e7d32,stroke-width:2px

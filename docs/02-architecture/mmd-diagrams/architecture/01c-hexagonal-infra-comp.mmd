@@ -1,0 +1,52 @@
+%% BioETL — Hexagonal Architecture: Infrastructure + Composition layers detail
+%% Shows Infrastructure adapters and Composition factories
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @view    infra-comp
+%% @parent  01-high-level-hexagonal.mmd
+%% @nodes   18
+
+graph TB
+    subgraph External["External Systems"]
+        CHEMBL_API["ChEMBL API"]
+        PUBMED_API["PubMed API"]
+        UNIPROT_API["UniProt API"]
+        PUBCHEM_API["PubChem API"]
+        CROSSREF_API["CrossRef API"]
+        OPENALEX_API["OpenAlex API"]
+        SEMSCHOLAR_API["Semantic Scholar API"]
+        FS["File System"]
+    end
+
+    subgraph Composition["Composition Layer"]
+        BOOTSTRAP["Bootstrap / Assembly"]
+        FACTORIES["Factories"]
+        PROVIDERS["Provider Registry"]
+        RT_BUILDERS["Runtime Builders"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        ADAPTERS["HTTP Adapters<br/>(7 providers)"]
+        STORAGE["Storage<br/>(Bronze, Silver, Gold Writers)"]
+        OBS_INFRA["Observability Infra<br/>(Logger, Metrics, Tracing)"]
+        RESILIENCE["Resilience<br/>(CircuitBreaker, TokenBucket)"]
+        SECURITY["Security (PII Hasher)"]
+        CHECKPOINT["Checkpoint + Lock + Audit"]
+    end
+
+    ExternalAPIs -.-> ADAPTERS
+    FS -.-> STORAGE
+    BOOTSTRAP --> ADAPTERS
+    BOOTSTRAP --> STORAGE
+    BOOTSTRAP --> OBS_INFRA
+
+    classDef infra fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    classDef comp fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef ext fill:#eceff1,stroke:#455a64,stroke-width:1px
+
+    class ADAPTERS,STORAGE,OBS_INFRA,RESILIENCE,SECURITY,CHECKPOINT infra
+    class BOOTSTRAP,FACTORIES,PROVIDERS,RT_BUILDERS comp
+    class CHEMBL_API,PUBMED_API,UNIPROT_API,PUBCHEM_API,CROSSREF_API,OPENALEX_API,SEMSCHOLAR_API,FS ext

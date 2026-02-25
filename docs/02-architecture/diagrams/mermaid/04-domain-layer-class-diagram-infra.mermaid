@@ -1,7 +1,7 @@
 %% View: Infrastructure-Mapping | Parent: 04-domain-layer-class-diagram-full.mermaid
 flowchart TB
 
-    subgraph Domain["🟡 Domain Layer"]
+    subgraph Domain["Domain Layer"]
         direction TB
         N1["StoragePort"]
         N2["LockPort"]
@@ -18,7 +18,7 @@ flowchart TB
         N20["DataSourcePort"]
     end
 
-    subgraph Infrastructure["🔵 Infrastructure Layer"]
+    subgraph Infrastructure["Infrastructure Layer"]
         direction TB
         N10["Activity"]
         N11["Molecule"]
@@ -40,16 +40,17 @@ flowchart TB
     N15 --> N18
     N15 --> N19
 
-    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
-    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
 
-    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 8 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    %% linkStyle: data 0-5, di 6-9
+    linkStyle 0 stroke:#1E293B,stroke-width:3px
+    linkStyle 1 stroke:#1E293B,stroke-width:3px
+    linkStyle 2 stroke:#1E293B,stroke-width:3px
+    linkStyle 3 stroke:#1E293B,stroke-width:3px
+    linkStyle 4 stroke:#1E293B,stroke-width:3px
+    linkStyle 5 stroke:#1E293B,stroke-width:3px
+    linkStyle 6 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 7 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 8 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 9 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5

@@ -1,7 +1,7 @@
 %% View: Overview | Parent: 06-application-layer-class-diagram-full.mermaid
 flowchart TB
 
-    subgraph Application["🟢 Application Layer"]
+    subgraph Application["Application Layer"]
         direction TB
         N1["PipelineRunner"]
         N2["RunnerServices"]
@@ -19,7 +19,7 @@ flowchart TB
         N15["RecordProcessor"]
     end
 
-    subgraph Infrastructure["🔵 Infrastructure Layer"]
+    subgraph Infrastructure["Infrastructure Layer"]
         direction TB
         N5["LockManager"]
     end
@@ -37,18 +37,19 @@ flowchart TB
     N2 --> N8
     N2 --> N9
 
-    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
-    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
+    style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
 
-    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 8 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 10 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 11 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    %% linkStyle: data 0-4, orch 5-10, obs 11
+    linkStyle 0 stroke:#1E293B,stroke-width:3px
+    linkStyle 1 stroke:#1E293B,stroke-width:3px
+    linkStyle 2 stroke:#1E293B,stroke-width:3px
+    linkStyle 3 stroke:#1E293B,stroke-width:3px
+    linkStyle 4 stroke:#1E293B,stroke-width:3px
+    linkStyle 5 stroke:#2e7d32,stroke-width:2px
+    linkStyle 6 stroke:#2e7d32,stroke-width:2px
+    linkStyle 7 stroke:#2e7d32,stroke-width:2px
+    linkStyle 8 stroke:#2e7d32,stroke-width:2px
+    linkStyle 9 stroke:#2e7d32,stroke-width:2px
+    linkStyle 10 stroke:#2e7d32,stroke-width:2px
+    linkStyle 11 stroke:#94A3B8,stroke-width:1px

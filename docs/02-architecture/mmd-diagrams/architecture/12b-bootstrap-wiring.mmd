@@ -1,0 +1,59 @@
+%% Bootstrap / DI Container — Assembly wiring and injection graph
+%% Shows how factories create components and wire them together
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @view    wiring
+%% @parent  12-bootstrap-di-container.mmd
+%% @nodes   15
+
+graph TB
+    subgraph Factories["Factories (Composition)"]
+        DSR["DataSourceRegistry"]
+        SBA["StorageBootstrap"]
+        RA["RuntimeAssembly"]
+        LBA["LockBootstrap"]
+        CBA["CheckpointBootstrap"]
+        TF["TransformerFactory"]
+        RBA["RunnerBootstrap"]
+        RF["RunnerFactory"]
+    end
+
+    subgraph InfraCreated["Created Infrastructure"]
+        ADAPTER["Provider Adapter"]
+        STORAGE["Bronze + Silver + Gold Writers"]
+        LOGGER["UnifiedLogger"]
+        METRICS["PrometheusMetrics"]
+        TRACER["OpenTelemetryTracer"]
+        LOCK["MemoryLock"]
+        CHKPT["LocalCheckpoint"]
+        QUAR["UnifiedQuarantine"]
+    end
+
+    subgraph AppCreated["Created Application"]
+        PS["PipelineServices"]
+        RUNNER["PipelineRunner"]
+        TRANSFORMER["BaseTransformer"]
+    end
+
+    DSR -->|creates| ADAPTER
+    SBA -->|creates| STORAGE
+    RA -->|creates| LOGGER & METRICS & TRACER & QUAR
+    LBA -->|creates| LOCK
+    CBA -->|creates| CHKPT
+    TF -->|creates| TRANSFORMER
+    RBA -->|creates| RUNNER
+
+    ADAPTER & STORAGE & LOGGER & METRICS & TRACER & LOCK & CHKPT & QUAR --> PS
+    PS --> RUNNER
+    TRANSFORMER --> RUNNER
+
+    classDef factory fill:#fff3e0,stroke:#e65100
+    classDef infra fill:#ffcdd2,stroke:#c62828
+    classDef app fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+
+    class DSR,SBA,RA,LBA,CBA,TF,RBA,RF factory
+    class ADAPTER,STORAGE,LOGGER,METRICS,TRACER,LOCK,CHKPT,QUAR infra
+    class PS,RUNNER,TRANSFORMER app

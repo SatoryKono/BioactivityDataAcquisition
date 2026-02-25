@@ -30,6 +30,29 @@ Render them with any Mermaid-compatible viewer, IDE plugin, or the [Mermaid Live
 | 17 | Security, PII & Audit | `architecture/17-security-pii-audit.mmd` | PII hashing, salt rotation, audit trail |
 | 18 | Lock, Checkpoint & Shutdown | `architecture/18-lock-checkpoint-shutdown.mmd` | Fencing tokens, safety guard, graceful shutdown |
 
+## Decomposed Architecture Diagrams
+
+Four overloaded architecture diagrams (>20 nodes) have been decomposed into smaller,
+focused sub-files. Originals are preserved as full reference.
+
+| Original | Sub-files | View | Nodes |
+|----------|-----------|------|-------|
+| `01-high-level-hexagonal.mmd` (39 nodes) | [`01a-hexagonal-overview.mmd`](architecture/01a-hexagonal-overview.mmd) | overview | ~11 |
+| | [`01b-hexagonal-domain-app.mmd`](architecture/01b-hexagonal-domain-app.mmd) | domain-app | ~15 |
+| | [`01c-hexagonal-infra-comp.mmd`](architecture/01c-hexagonal-infra-comp.mmd) | infra-comp | ~18 |
+| `05-provider-adapter-hierarchy.mmd` (27 nodes) | [`05a-adapter-hierarchy-base.mmd`](architecture/05a-adapter-hierarchy-base.mmd) | base | ~12 |
+| | [`05b-adapter-hierarchy-providers.mmd`](architecture/05b-adapter-hierarchy-providers.mmd) | providers | ~15 |
+| `12-bootstrap-di-container.mmd` (29 nodes) | [`12a-bootstrap-factories.mmd`](architecture/12a-bootstrap-factories.mmd) | factories | ~14 |
+| | [`12b-bootstrap-wiring.mmd`](architecture/12b-bootstrap-wiring.mmd) | wiring | ~15 |
+| `13-port-protocol-contracts.mmd` (68 nodes) | [`13a-port-contracts-data-sources.mmd`](architecture/13a-port-contracts-data-sources.mmd) | data-sources | ~12 |
+| | [`13b-port-contracts-storage.mmd`](architecture/13b-port-contracts-storage.mmd) | storage | ~12 |
+| | [`13c-port-contracts-observability.mmd`](architecture/13c-port-contracts-observability.mmd) | observability | ~15 |
+| | [`13d-port-contracts-services.mmd`](architecture/13d-port-contracts-services.mmd) | services | ~18 |
+
+See [ADR-040](../decisions/ADR-040-diagram-governance.md) for governance rules.
+
+---
+
 ## Class Diagrams (16 families)
 
 | # | Family | File | Description |
@@ -206,7 +229,7 @@ bash docs/02-architecture/mmd-diagrams/render.sh --puppeteer /tmp/puppeteer-conf
 ```
 docs/02-architecture/mmd-diagrams/
   architecture/
-    *.mmd           # source diagrams (18)
+    *.mmd           # source diagrams (18 + 11 decomposed)
     svg/*.svg       # rendered vector (scalable)
     png/*.png       # rendered raster (300 DPI)
   class-diagrams/

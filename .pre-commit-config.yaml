@@ -129,3 +129,10 @@ repos:
         entry: python scripts/check_root_vcr_cassettes.py
         language: system
         pass_filenames: false
+
+      - id: lint-diagrams
+        name: Lint Mermaid/MMD diagram files
+        entry: python scripts/lint_diagrams.py
+        language: python
+        pass_filenames: false
+        files: '\.mmd$|\.mermaid$'
