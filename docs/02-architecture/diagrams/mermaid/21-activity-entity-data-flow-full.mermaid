@@ -4,6 +4,7 @@
 %% Covers: RULES.md §2.8 (Transformation), §4.1 (ChEMBL Activity)
 %% Updated: 2026-02-17
 %% Components: Activity entity, ActivityTransformer, BronzeWriter, SilverWriter, GoldWriter, Pandera schemas
+%% Legend: see 00-legend.mermaid
 
 %% @version 1.0.0
 %% @date    2026-02-24
@@ -76,9 +77,9 @@ flowchart LR
     L1 --> L2
 
     %% Foreign key relationships
-    L1 -.->|"assay_id FK"| Assay
-    L1 -.->|"molecule_id FK"| Molecule
-    L1 -.->|"target_id FK"| Target
+    L1 -.->|K03| Assay
+    L1 -.->|K04| Molecule
+    L1 -.->|K05| Target
 
     %% Styling
     style API fill:#E3F2FD
@@ -103,3 +104,22 @@ flowchart LR
         S11["_run_type: str"]
         S12["_ingestion_ts: datetime"]
     end
+
+    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 8 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 10 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 11 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 12 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 13 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 14 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 15 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 16 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 17 stroke:#475569,stroke-width:2px,stroke-dasharray:5

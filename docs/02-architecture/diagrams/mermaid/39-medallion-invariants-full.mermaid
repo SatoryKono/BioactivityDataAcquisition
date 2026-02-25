@@ -4,6 +4,7 @@
 %% Covers: RULES.md §2.1 (Medallion), ARCH-007 clear policy
 %% Rank: 14 (Score 8.19) — Critical data safety rules
 %% Updated: 2026-02-17
+%% Legend: see 00-legend.mermaid
 
 %% @version 1.0.0
 %% @date    2026-02-24
@@ -59,7 +60,7 @@ flowchart TB
     BF --> CHECK
     RB --> CHECK
 
-    CHECK -->|"INCREMENTAL"| I1
+    CHECK -->|K17| I1
     I1 --> I2 --> I3 --> I4
 
     CHECK -->|"BACKFILL"| B1
@@ -71,7 +72,7 @@ flowchart TB
     E1 -.-> CHECK
     E2 -.-> Policy
 
-    BZ -.->|"unaffected by run_type"| Bronze
+    BZ -.->|K18| Bronze
 
     %% Styling
     style IncPath fill:#e8f5e9,stroke:#2e7d32
@@ -79,3 +80,16 @@ flowchart TB
     style RBPath fill:#ffebee,stroke:#c62828
     style Bronze fill:#FFA500,stroke:#cc8400,color:#000
     style Policy fill:#e3f2fd,stroke:#1565c0
+
+    linkStyle 0 stroke:#1E293B,stroke-width:4px
+    linkStyle 1 stroke:#1E293B,stroke-width:4px
+    linkStyle 2 stroke:#1E293B,stroke-width:4px
+    linkStyle 3 stroke:#1E293B,stroke-width:4px
+    linkStyle 4 stroke:#1E293B,stroke-width:4px
+    linkStyle 5 stroke:#1E293B,stroke-width:4px
+    linkStyle 6 stroke:#1E293B,stroke-width:4px
+    linkStyle 7 stroke:#1E293B,stroke-width:4px
+    linkStyle 8 stroke:#1E293B,stroke-width:4px
+    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 10 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 11 stroke:#475569,stroke-width:2px,stroke-dasharray:5

@@ -4,6 +4,7 @@
 %% Covers: RULES.md §2.1-§2.6 (Data Flow, DQ), §2.8 (Normalization)
 %% Rank: 7 (Score 8.56) — Best onboarding diagram: follow one record
 %% Updated: 2026-02-17
+%% Legend: see 00-legend.mermaid
 
 %% @version 1.0.0
 %% @date    2026-02-24
@@ -63,9 +64,9 @@ flowchart TB
     HASH --> PSV --> DQ
 
     DQ -->|"0% errors"| CLEAN
-    DQ -->|"< 5% errors"| WARN
-    DQ -->|"per-record error"| QUAR
-    DQ -->|"> 20% errors"| FAIL
+    DQ -->|K14| WARN
+    DQ -->|K15| QUAR
+    DQ -->|K16| FAIL
 
     CLEAN --> SW
     WARN --> SW
@@ -79,3 +80,16 @@ flowchart TB
     style Silver fill:#C0C0C0,stroke:#808080,color:#000
     style GoldLayer fill:#FFD700,stroke:#ccac00,color:#000
     style QuarDB fill:#FF6B6B,stroke:#cc4444,color:#000
+
+    linkStyle 0 stroke:#1E293B,stroke-width:4px
+    linkStyle 1 stroke:#1E293B,stroke-width:4px
+    linkStyle 2 stroke:#1E293B,stroke-width:4px
+    linkStyle 3 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 4 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 5 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 6 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 7 stroke:#1E293B,stroke-width:4px
+    linkStyle 8 stroke:#1E293B,stroke-width:4px
+    linkStyle 9 stroke:#1E293B,stroke-width:4px
+    linkStyle 10 stroke:#1E293B,stroke-width:4px
+    linkStyle 11 stroke:#1E293B,stroke-width:4px
