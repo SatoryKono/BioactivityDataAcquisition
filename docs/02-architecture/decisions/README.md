@@ -181,7 +181,7 @@ This directory contains Architecture Decision Records documenting significant ar
                                        │
                                 ┌───────────┐
                                 │  ADR-010  │
-                                │Local-Only │──────► ADR-003 (Superseded)
+                                │Local-Only │──────► ADR-003 (Revised: Redis→MemoryLock)
                                 └───────────┘
                                        │
                                        ▼
