@@ -1,6 +1,6 @@
 # Pipeline Failure: Critical Error (P1)
 
-*Reference: [RULES.md §3.1.1](../../00-project/RULES.md#311-%D0%BA%D0%BB%D0%B0%D1%81%D1%81%D0%B8%D1%84%D0%B8%D0%BA%D0%B0%D1%86%D0%B8%D1%8F-%D0%BE%D1%88%D0%B8%D0%B1%D0%BE%D0%BA)*
+*Reference: [RULES.md §3.1.1](../../00-project/RULES.md#311-классификация-ошибок)*
 
 This runbook describes how to handle critical pipeline failures (P1 incidents).
 
