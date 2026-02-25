@@ -44,7 +44,7 @@ docs/
 ├── 00-project/                  # Project rules & governance
 │   ├── 00-map.md                # This file (Project Navigator)
 │   ├── index.md                 # Welcome page
-│   ├── RULES.md                 # Canonical rules document (v5.21)
+│   ├── RULES.md                 # Canonical rules document (v5.22)
 │   ├── glossary.md              # Ubiquitous Language terminology
 │   ├── TOOLS.md                 # Tools & Setup
 │   ├── rules-summary.md         # TL;DR of RULES.md

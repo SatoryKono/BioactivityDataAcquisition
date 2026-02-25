@@ -1,6 +1,6 @@
 # TOP-50 Diagram Detailed Table
 
-*Generated: 2026-02-21 | Scoring: RULES.md v5.21 | Codebase: 534 Python files*
+*Generated: 2026-02-21 | Scoring: RULES.md v5.22 | Codebase: 534 Python files*
 
 ## Scoring Formula
 
