@@ -1,0 +1,36 @@
+%% Hexagonal overview — layer boundaries and dependency direction
+%% Covers high-level system decomposition and external integrations.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    overview
+%% @parent  01-high-level-hexagonal.mmd
+%% @nodes   11
+
+flowchart TB
+    External[External Systems]
+    Interfaces[Interfaces Layer]
+    Composition[Composition Layer]
+    Application[Application Layer]
+    Domain[Domain Layer]
+    Infrastructure[Infrastructure Layer]
+    Bronze[Bronze]
+    Silver[Silver]
+    Gold[Gold]
+    Quarantine[Quarantine]
+    Observability[Observability]
+
+    External --> Interfaces
+    Interfaces --> Composition
+    Composition --> Application
+    Application --> Domain
+    Infrastructure -.-> Domain
+    Application --> Bronze --> Silver --> Gold
+    Silver --> Quarantine
+    Application --> Observability
+
+    classDef layer fill:#FAFAFA,stroke:#455a64,stroke-width:1.5px
+    class External,Interfaces,Composition,Application,Domain,Infrastructure,Bronze,Silver,Gold,Quarantine,Observability layer

@@ -161,7 +161,13 @@ for dir in "${DIRS[@]}"; do
   fi
   shopt -s nullglob
   for f in "$dir"/$FILTER.mermaid "$dir"/$FILTER.mmd; do
-    [[ -f "$f" ]] && files+=("$f")
+    if [[ -f "$f" ]]; then
+      if grep -Eq '^%% @status\s+superseded' "$f"; then
+        log_info "SKIP (superseded): $f"
+        continue
+      fi
+      files+=("$f")
+    fi
   done
   shopt -u nullglob
 done

@@ -1,0 +1,39 @@
+%% Port contracts — observability and resilience contracts
+%% Covers logging, metrics, tracing, and safety controls.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    observability
+%% @parent  13-port-protocol-contracts.mmd
+%% @nodes   10
+
+flowchart LR
+    subgraph Domain["Domain Layer"]
+        direction TB
+        LoggerPort[LoggerPort]
+        MetricsPort[MetricsPort]
+        TracingPort[TracingPort]
+        CircuitBreakerPort[CircuitBreakerPort]
+        RateLimiterPort[RateLimiterPort]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        UnifiedLogger[UnifiedLogger]
+        PrometheusMetrics[PrometheusMetrics]
+        OpenTelemetryTracing[OpenTelemetryTracing]
+        CircuitBreakerAdapter[CircuitBreakerAdapter]
+        TokenBucketRateLimiter[TokenBucketRateLimiter]
+    end
+
+    UnifiedLogger -.-> LoggerPort
+    PrometheusMetrics -.-> MetricsPort
+    OpenTelemetryTracing -.-> TracingPort
+    CircuitBreakerAdapter -.-> CircuitBreakerPort
+    TokenBucketRateLimiter -.-> RateLimiterPort
+
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px

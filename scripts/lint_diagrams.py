@@ -1,34 +1,6 @@
 #!/usr/bin/env python3
-"""
-lint_diagrams.py - Diagram policy linter for BioETL project.
+"""lint_diagrams.py - Diagram policy linter for BioETL."""
 
-Validates .mermaid diagram files against the diagramming policy
-defined in docs/02-architecture/diagrams/00-diagramming-policy.md.
-
-Checks performed:
-- Presence of structured metadata headers (Title, Covers, Updated, Components)
-- Naming convention compliance (NN-topic.mermaid)
-- No placeholder/stub content
-- Staleness detection based on %% Updated: date
-- File extension consistency (.mermaid only, no .mmd)
-
-Usage:
-    # Check all diagrams
-    python scripts/lint_diagrams.py
-
-    # Check specific directory
-    python scripts/lint_diagrams.py docs/02-architecture/diagrams/
-
-    # Output JSON format
-    python scripts/lint_diagrams.py --json
-
-    # Set staleness threshold (days)
-    python scripts/lint_diagrams.py --stale-days 90
-
-References:
-    - docs/02-architecture/diagrams/00-diagramming-policy.md
-    - RULES.md §1 (Architecture)
-"""
 from __future__ import annotations
 
 import argparse
@@ -39,9 +11,12 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
 
-DIAGRAM_DIR = Path("docs/02-architecture/diagrams")
-NAMING_PATTERN = re.compile(r"^\d{2}-[a-z0-9]+(?:-[a-z0-9]+)*\.mermaid$")
-PLACEHOLDER_MARKERS = ["placeholder", "TODO", "FIXME", "stub"]
+DIAGRAM_DIRS = [
+    Path("docs/02-architecture/mmd-diagrams"),
+    Path("docs/02-architecture/diagrams"),
+]
+NAMING_PATTERN = re.compile(r"^\d{2}[a-z]?-[a-z0-9]+(?:-[a-z0-9]+)*\.(?:mmd|mermaid)$")
+PLACEHOLDER_MARKERS = ["placeholder", "todo", "fixme", "stub"]
 DEFAULT_STALE_DAYS = 90
 WARNING_STALE_DAYS = 180
 
@@ -49,7 +24,7 @@ WARNING_STALE_DAYS = 180
 @dataclass
 class Issue:
     file: str
-    severity: str  # ERROR, WARNING, INFO
+    severity: str
     rule: str
     message: str
 
@@ -62,74 +37,76 @@ class LintResult:
 
     @property
     def files_failed(self) -> int:
-        failed_files = {i.file for i in self.issues if i.severity == "ERROR"}
-        return len(failed_files)
+        return len({i.file for i in self.issues if i.severity == "ERROR"})
 
     @property
     def has_errors(self) -> bool:
         return any(i.severity == "ERROR" for i in self.issues)
 
 
+def should_skip(_path: Path, lines: list[str]) -> bool:
+    """Skip superseded and legend files from content checks."""
+    for line in lines[:10]:
+        if "@status" in line and "superseded" in line:
+            return True
+        if "@type" in line and "legend" in line:
+            return True
+    return False
+
+
 def check_metadata_headers(path: Path, lines: list[str]) -> list[Issue]:
-    """Check for structured metadata headers: Title, Covers, Updated, Components."""
+    """Accept both legacy and modern metadata conventions."""
     issues: list[Issue] = []
     fname = str(path)
 
-    header_lines = [
-        line for line in lines if line.startswith("%% ") and ": " in line
-    ]
-    headers_found = {
-        line.split(": ", 1)[0].replace("%% ", "") for line in header_lines
-    }
+    has_legacy_title = any(line.startswith("%% Title:") for line in lines)
+    has_legacy_covers = any(line.startswith("%% Covers:") for line in lines)
+    has_legacy_updated = any(line.startswith("%% Updated:") for line in lines)
+    has_modern_version = any(line.startswith("%% @version") for line in lines)
+    has_modern_date = any(line.startswith("%% @date") for line in lines)
+    has_modern_type = any(line.startswith("%% @type") for line in lines)
+    has_modern_level = any(line.startswith("%% @level") for line in lines)
 
-    required = {"Title", "Covers", "Updated", "Components"}
-    missing = required - headers_found
+    if has_modern_version and has_modern_date and has_modern_type and has_modern_level:
+        return issues
 
-    for h in sorted(missing):
+    if not (has_legacy_title and has_legacy_covers and has_legacy_updated):
         issues.append(
             Issue(
                 file=fname,
                 severity="ERROR",
                 rule="META-001",
-                message=f"Missing required metadata header: %% {h}:",
+                message=(
+                    "Missing required metadata headers. "
+                    "Use legacy (Title/Covers/Updated) or modern (@version/@date/@type/@level)."
+                ),
             )
         )
-
     return issues
 
 
 def check_naming_convention(path: Path) -> list[Issue]:
-    """Check file follows NN-topic.mermaid naming convention."""
-    issues: list[Issue] = []
-    fname = str(path)
-
-    if not NAMING_PATTERN.match(path.name):
-        issues.append(
-            Issue(
-                file=fname,
-                severity="ERROR",
-                rule="NAME-001",
-                message=(
-                    f"File name '{path.name}' does not follow "
-                    f"NN-topic.mermaid convention"
-                ),
-            )
+    if NAMING_PATTERN.match(path.name):
+        return []
+    return [
+        Issue(
+            file=str(path),
+            severity="ERROR",
+            rule="NAME-001",
+            message=f"File name '{path.name}' does not follow NN[a]-topic.(mmd|mermaid) convention",
         )
-
-    return issues
+    ]
 
 
 def check_placeholder_content(path: Path, lines: list[str]) -> list[Issue]:
-    """Check for placeholder/stub content."""
     issues: list[Issue] = []
-    fname = str(path)
     content = "\n".join(lines).lower()
 
     for marker in PLACEHOLDER_MARKERS:
-        if marker.lower() in content:
+        if marker in content:
             issues.append(
                 Issue(
-                    file=fname,
+                    file=str(path),
                     severity="ERROR",
                     rule="CONTENT-001",
                     message=f"Contains placeholder marker: '{marker}'",
@@ -137,158 +114,261 @@ def check_placeholder_content(path: Path, lines: list[str]) -> list[Issue]:
             )
             break
 
-    # Check for files that are too short to be real diagrams
     non_comment_lines = [
-        line
-        for line in lines
-        if line.strip() and not line.strip().startswith("%%")
+        line for line in lines if line.strip() and not line.strip().startswith("%%")
     ]
     if len(non_comment_lines) < 3:
         issues.append(
             Issue(
-                file=fname,
+                file=str(path),
                 severity="ERROR",
                 rule="CONTENT-002",
-                message=(
-                    f"Diagram has only {len(non_comment_lines)} "
-                    f"non-comment lines (minimum 3)"
-                ),
+                message=f"Diagram has only {len(non_comment_lines)} non-comment lines (minimum 3)",
             )
         )
-
     return issues
 
 
-def check_staleness(
-    path: Path,
-    lines: list[str],
-    stale_days: int,
-) -> list[Issue]:
-    """Check if diagram is stale based on %% Updated: date."""
-    issues: list[Issue] = []
-    fname = str(path)
-
-    updated_line = None
-    for line in lines:
-        if line.startswith("%% Updated:"):
-            updated_line = line
-            break
-
+def check_staleness(path: Path, lines: list[str], stale_days: int) -> list[Issue]:
+    updated_line = next(
+        (line for line in lines if line.startswith("%% Updated:")), None
+    )
     if updated_line is None:
-        return issues  # Already caught by META-001
+        return []
 
     date_str = updated_line.replace("%% Updated:", "").strip()
     try:
         updated_date = datetime.strptime(date_str, "%Y-%m-%d")
     except ValueError:
-        issues.append(
+        return [
             Issue(
-                file=fname,
+                file=str(path),
                 severity="ERROR",
                 rule="META-002",
                 message=f"Invalid date format in %% Updated: '{date_str}' (expected YYYY-MM-DD)",
             )
-        )
-        return issues
+        ]
 
-    now = datetime.now()
-    age = now - updated_date
-
+    age = datetime.now() - updated_date
     if age > timedelta(days=WARNING_STALE_DAYS):
-        issues.append(
+        return [
             Issue(
-                file=fname,
+                file=str(path),
                 severity="ERROR",
                 rule="STALE-001",
                 message=f"Diagram is {age.days} days old (>{WARNING_STALE_DAYS}d threshold)",
             )
-        )
-    elif age > timedelta(days=stale_days):
-        issues.append(
+        ]
+    if age > timedelta(days=stale_days):
+        return [
             Issue(
-                file=fname,
+                file=str(path),
                 severity="WARNING",
                 rule="STALE-002",
                 message=f"Diagram is {age.days} days old (>{stale_days}d threshold)",
             )
-        )
+        ]
+    return []
 
-    return issues
 
-
-def check_extension_consistency(diagram_dir: Path) -> list[Issue]:
-    """Check for .mmd files that should be .mermaid."""
+def check_view_metadata(path: Path, lines: list[str]) -> list[Issue]:
     issues: list[Issue] = []
+    if not re.match(r"^\d{2}[a-z]-", path.name):
+        return issues
 
-    for mmd_file in diagram_dir.rglob("*.mmd"):
+    has_view = any(line.strip().startswith("%% @view") for line in lines)
+    has_parent = any(line.strip().startswith("%% @parent") for line in lines)
+
+    if not has_view:
         issues.append(
             Issue(
-                file=str(mmd_file),
-                severity="ERROR",
-                rule="EXT-001",
-                message="Legacy .mmd extension found. Rename to .mermaid.",
+                file=str(path),
+                severity="WARNING",
+                rule="VIEW-001",
+                message="Decomposed diagram missing %% @view metadata",
             )
         )
-
+    if not has_parent:
+        issues.append(
+            Issue(
+                file=str(path),
+                severity="WARNING",
+                rule="VIEW-002",
+                message="Decomposed diagram missing %% @parent metadata",
+            )
+        )
     return issues
+
+
+def detect_diagram_type(lines: list[str]) -> str | None:
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("%%") or not stripped:
+            continue
+        token = stripped.split()[0]
+        if token in {"flowchart", "graph"}:
+            return "flowchart"
+        if token == "classDiagram":  # nosec B105
+            return "classDiagram"
+        if token == "sequenceDiagram":  # nosec B105
+            return "sequenceDiagram"
+        if token.startswith("stateDiagram"):
+            return "stateDiagram"
+        if token == "erDiagram":  # nosec B105
+            return "erDiagram"
+        if token == "mindmap":  # nosec B105
+            return "mindmap"
+        return None
+    return None
+
+
+def check_node_count(path: Path, lines: list[str]) -> list[Issue]:
+    patterns_by_type: dict[str | None, list[str]] = {
+        "flowchart": [
+            r"^\s+(\w+)\[",
+            r"^\s+(\w+)\(",
+            r"^\s+(\w+)\{",
+            r"^\s+(\w+)>",
+            r"^\s+(\w+)\[\[",
+        ],
+        "classDiagram": [r"^\s*class\s+(\w+)"],
+        "sequenceDiagram": [r"^\s*participant\s+(\w+)", r"^\s*actor\s+(\w+)"],
+        "stateDiagram": [r"^\s*state\s+\"?(\w+)"],
+    }
+    dtype = detect_diagram_type(lines)
+    patterns = patterns_by_type.get(dtype, patterns_by_type["flowchart"])
+
+    node_names: set[str] = set()
+    content = "\n".join(lines)
+    for pattern in patterns:
+        for match in re.finditer(pattern, content, re.MULTILINE):
+            node_names.add(match.group(1))
+
+    node_count = len(node_names)
+    if node_count > 35:
+        return [
+            Issue(
+                file=str(path),
+                severity="ERROR",
+                rule="SIZE-001",
+                message=f"Estimated {node_count} unique nodes (>35 CRITICAL). Decompose into Views.",
+            )
+        ]
+    if node_count > 20:
+        return [
+            Issue(
+                file=str(path),
+                severity="WARNING",
+                rule="SIZE-002",
+                message=f"Estimated {node_count} unique nodes (>20 soft limit). Consider decomposition.",
+            )
+        ]
+    return []
+
+
+def check_subgraph_colours(path: Path, lines: list[str]) -> list[Issue]:
+    issues: list[Issue] = []
+    approved_fills = {
+        "#f3e5f5",
+        "#e8f5e9",
+        "#ffcdd2",
+        "#fff3e0",
+        "#e3f2fd",
+        "#eceff1",
+        "#fff8e1",
+        "#ffebee",
+        "#fafafa",
+    }
+    for idx, line in enumerate(lines, start=1):
+        stripped = line.strip()
+        if stripped.startswith("style ") and "fill:" in stripped:
+            fill_match = re.search(r"fill:(#[0-9a-fA-F]{6})", stripped)
+            if fill_match is None:
+                continue
+            colour = fill_match.group(1).lower()
+            if colour not in approved_fills:
+                issues.append(
+                    Issue(
+                        file=str(path),
+                        severity="WARNING",
+                        rule="COLOUR-001",
+                        message=f"Line {idx}: Unapproved fill colour {fill_match.group(1)}. See README.md colour scheme.",
+                    )
+                )
+    return issues
+
+
+def check_layout_hacks(path: Path, lines: list[str]) -> list[Issue]:
+    hack_count = sum(1 for line in lines if "LAYOUT-HACK" in line)
+    if hack_count > 5:
+        return [
+            Issue(
+                file=str(path),
+                severity="WARNING",
+                rule="HACK-001",
+                message=f"{hack_count} LAYOUT-HACK comments (>5). Consider further decomposition.",
+            )
+        ]
+    return []
 
 
 def lint_file(path: Path, stale_days: int) -> list[Issue]:
-    """Run all checks on a single diagram file."""
     try:
-        content = path.read_text(encoding="utf-8")
-    except (OSError, UnicodeDecodeError) as e:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except (OSError, UnicodeDecodeError) as exc:
         return [
             Issue(
                 file=str(path),
                 severity="ERROR",
                 rule="IO-001",
-                message=f"Cannot read file: {e}",
+                message=f"Cannot read file: {exc}",
             )
         ]
 
-    lines = content.splitlines()
+    if should_skip(path, lines):
+        return []
 
     issues: list[Issue] = []
     issues.extend(check_metadata_headers(path, lines))
     issues.extend(check_naming_convention(path))
     issues.extend(check_placeholder_content(path, lines))
     issues.extend(check_staleness(path, lines, stale_days))
-
+    issues.extend(check_view_metadata(path, lines))
+    issues.extend(check_node_count(path, lines))
+    issues.extend(check_subgraph_colours(path, lines))
+    issues.extend(check_layout_hacks(path, lines))
     return issues
 
 
 def lint_directory(diagram_dir: Path, stale_days: int) -> LintResult:
-    """Lint all .mermaid files in directory."""
     result = LintResult()
+    diagram_files = sorted(
+        list(diagram_dir.rglob("*.mmd")) + list(diagram_dir.rglob("*.mermaid"))
+    )
 
-    # Check for .mmd files
-    result.issues.extend(check_extension_consistency(diagram_dir))
-
-    # Check all .mermaid files
-    mermaid_files = sorted(diagram_dir.glob("*.mermaid"))
-
-    for path in mermaid_files:
+    for path in diagram_files:
         result.files_checked += 1
         file_issues = lint_file(path, stale_days)
         if not any(i.severity == "ERROR" for i in file_issues):
             result.files_passed += 1
         result.issues.extend(file_issues)
-
     return result
 
 
-def format_text(result: LintResult) -> str:
-    """Format results as human-readable text."""
-    lines: list[str] = []
-    lines.append("Diagram Policy Lint Results")
-    lines.append("=" * 40)
-    lines.append("")
+def merge_results(results: list[LintResult]) -> LintResult:
+    merged = LintResult()
+    for result in results:
+        merged.issues.extend(result.issues)
+        merged.files_checked += result.files_checked
+        merged.files_passed += result.files_passed
+    return merged
 
+
+def format_text(result: LintResult) -> str:
+    lines: list[str] = ["Diagram Policy Lint Results", "=" * 40, ""]
     if not result.issues:
         lines.append("All diagrams pass policy checks.")
     else:
-        # Group by file
         by_file: dict[str, list[Issue]] = {}
         for issue in result.issues:
             by_file.setdefault(issue.file, []).append(issue)
@@ -296,12 +376,8 @@ def format_text(result: LintResult) -> str:
         for file, issues in sorted(by_file.items()):
             lines.append(f"  {file}")
             for issue in issues:
-                marker = {"ERROR": "E", "WARNING": "W", "INFO": "I"}[
-                    issue.severity
-                ]
-                lines.append(
-                    f"    [{marker}] {issue.rule}: {issue.message}"
-                )
+                marker = {"ERROR": "E", "WARNING": "W", "INFO": "I"}[issue.severity]
+                lines.append(f"    [{marker}] {issue.rule}: {issue.message}")
             lines.append("")
 
     lines.append(f"Files checked: {result.files_checked}")
@@ -312,12 +388,10 @@ def format_text(result: LintResult) -> str:
         f"({sum(1 for i in result.issues if i.severity == 'ERROR')} errors, "
         f"{sum(1 for i in result.issues if i.severity == 'WARNING')} warnings)"
     )
-
     return "\n".join(lines)
 
 
 def format_json(result: LintResult) -> str:
-    """Format results as JSON."""
     data = {
         "files_checked": result.files_checked,
         "files_passed": result.files_passed,
@@ -325,12 +399,12 @@ def format_json(result: LintResult) -> str:
         "has_errors": result.has_errors,
         "issues": [
             {
-                "file": i.file,
-                "severity": i.severity,
-                "rule": i.rule,
-                "message": i.message,
+                "file": issue.file,
+                "severity": issue.severity,
+                "rule": issue.rule,
+                "message": issue.message,
             }
-            for i in result.issues
+            for issue in result.issues
         ],
     }
     return json.dumps(data, indent=2)
@@ -338,19 +412,16 @@ def format_json(result: LintResult) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Lint diagram files against BioETL diagramming policy.",
+        description="Lint Mermaid diagram files against BioETL policy."
     )
     parser.add_argument(
         "path",
         nargs="?",
-        default=str(DIAGRAM_DIR),
-        help="Directory or file to check (default: docs/02-architecture/diagrams/)",
+        default=None,
+        help="Directory or file to check (default: canonical + legacy diagram directories)",
     )
     parser.add_argument(
-        "--json",
-        action="store_true",
-        dest="json_output",
-        help="Output results as JSON",
+        "--json", action="store_true", dest="json_output", help="Output results as JSON"
     )
     parser.add_argument(
         "--stale-days",
@@ -360,25 +431,32 @@ def main() -> int:
     )
 
     args = parser.parse_args()
-    target = Path(args.path)
 
-    if target.is_file():
-        result = LintResult(files_checked=1)
-        issues = lint_file(target, args.stale_days)
-        result.issues = issues
-        if not any(i.severity == "ERROR" for i in issues):
-            result.files_passed = 1
-    elif target.is_dir():
-        result = lint_directory(target, args.stale_days)
+    if args.path is not None:
+        target = Path(args.path)
+        if target.is_file():
+            result = LintResult(files_checked=1)
+            issues = lint_file(target, args.stale_days)
+            result.issues = issues
+            if not any(i.severity == "ERROR" for i in issues):
+                result.files_passed = 1
+        elif target.is_dir():
+            result = lint_directory(target, args.stale_days)
+        else:
+            sys.stderr.write(f"Error: {target} does not exist\n")
+            return 2
     else:
-        print(f"Error: {target} does not exist", file=sys.stderr)
-        return 2
+        existing_dirs = [p for p in DIAGRAM_DIRS if p.exists()]
+        if not existing_dirs:
+            sys.stderr.write("Error: no diagram directories found\n")
+            return 2
+        result = merge_results(
+            [lint_directory(d, args.stale_days) for d in existing_dirs]
+        )
 
-    if args.json_output:
-        print(format_json(result))
-    else:
-        print(format_text(result))
-
+    sys.stdout.write(
+        (format_json(result) if args.json_output else format_text(result)) + "\n"
+    )
     return 1 if result.has_errors else 0
 
 

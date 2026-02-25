@@ -1,0 +1,48 @@
+%% Port contracts — data source provider ports and adapters
+%% Covers ingestion-side protocols and provider clients.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    data-sources
+%% @parent  13-port-protocol-contracts.mmd
+%% @nodes   12
+
+flowchart LR
+    subgraph Domain["Domain Layer"]
+        direction TB
+        DataSourcePort[DataSourcePort]
+        ActivityPort[ActivityPort]
+        MoleculePort[MoleculePort]
+        PublicationPort[PublicationPort]
+        TargetPort[TargetPort]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        ChEMBLClient[ChEMBLClient]
+        PubChemClient[PubChemClient]
+        PubMedClient[PubMedClient]
+        UniProtClient[UniProtClient]
+        CrossRefClient[CrossRefClient]
+        OpenAlexClient[OpenAlexClient]
+        SemanticScholarClient[SemanticScholarClient]
+    end
+
+    ChEMBLClient -.->|implements| ActivityPort
+    ChEMBLClient -.->|implements| MoleculePort
+    PubChemClient -.->|implements| MoleculePort
+    PubMedClient -.->|implements| PublicationPort
+    CrossRefClient -.->|implements| PublicationPort
+    OpenAlexClient -.->|implements| PublicationPort
+    SemanticScholarClient -.->|implements| PublicationPort
+    UniProtClient -.->|implements| TargetPort
+    DataSourcePort --> ActivityPort
+    DataSourcePort --> MoleculePort
+    DataSourcePort --> PublicationPort
+    DataSourcePort --> TargetPort
+
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px

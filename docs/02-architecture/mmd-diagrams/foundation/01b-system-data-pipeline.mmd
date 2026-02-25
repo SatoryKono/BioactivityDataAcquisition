@@ -1,0 +1,33 @@
+%% System data pipeline — ingestion to medallion persistence
+%% Covers adapter, transform, and storage interactions.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    data-pipeline
+%% @parent  01-full-system-component.mmd
+%% @nodes   13
+
+flowchart TB
+    Sources[Provider Sources]
+    Fetchers[HTTP Adapters]
+    Normalizers[Transformers]
+    Validators[Pandera Validators]
+    BronzeWriter[Bronze Writer]
+    SilverWriter[Silver Writer]
+    GoldWriter[Gold Writer]
+    DeltaReader[Delta Reader]
+    DQEngine[DQ Engine]
+    QuarantineWriter[Quarantine Writer]
+    HashService[IdentityHashService]
+    PipelineRunner[PipelineRunner]
+    BatchExecutor[BatchExecutor]
+
+    PipelineRunner --> BatchExecutor --> Fetchers
+    Sources --> Fetchers --> Normalizers --> Validators
+    Validators --> BronzeWriter --> SilverWriter --> GoldWriter
+    DQEngine --> QuarantineWriter
+    Normalizers --> HashService
+    DeltaReader --> SilverWriter

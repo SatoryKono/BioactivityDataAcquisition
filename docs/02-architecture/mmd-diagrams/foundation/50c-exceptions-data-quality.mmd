@@ -1,0 +1,35 @@
+%% Exception hierarchy — data quality and quarantine handling
+%% Covers DQ violations and quarantine routing.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   Class
+%% @status  active
+%% @view    dq
+%% @parent  50-exception-hierarchy.mmd
+%% @nodes   11
+
+flowchart TD
+    BioETLError[BioETLError]
+    DataQualityError[DataQualityError]
+    SchemaValidationError[SchemaValidationError]
+    NullConstraintError[NullConstraintError]
+    DuplicateRecordError[DuplicateRecordError]
+    ThresholdExceededError[ThresholdExceededError]
+    DQReport[DQ Report]
+    QuarantineWrite[Quarantine Write]
+    BatchWarning[Batch Warning]
+    BatchFail[Batch Fail]
+    ContinuePipeline[Continue Pipeline]
+
+    BioETLError --> DataQualityError
+    DataQualityError --> SchemaValidationError
+    DataQualityError --> NullConstraintError
+    DataQualityError --> DuplicateRecordError
+    DataQualityError --> ThresholdExceededError
+    DataQualityError --> DQReport
+    DataQualityError --> QuarantineWrite
+    ThresholdExceededError --> BatchFail
+    DataQualityError --> BatchWarning
+    DataQualityError --> ContinuePipeline

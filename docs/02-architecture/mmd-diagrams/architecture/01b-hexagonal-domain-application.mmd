@@ -1,0 +1,45 @@
+%% Hexagonal detail — domain contracts and application services
+%% Covers orchestration services and port usage direction.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    detail
+%% @parent  01-high-level-hexagonal.mmd
+%% @nodes   11
+
+flowchart LR
+    subgraph Domain["Domain Layer"]
+        direction TB
+        DataSourcePort[DataSourcePort]
+        StoragePort[StoragePort]
+        LoggerPort[LoggerPort]
+        MetricsPort[MetricsPort]
+        LockPort[LockPort]
+        DQPolicy[DQ Policies]
+    end
+
+    subgraph Application["Application Layer"]
+        direction TB
+        PipelineRunner[PipelineRunner]
+        BatchExecutor[BatchExecutor]
+        CompositePipelineCoordinator[CompositePipelineCoordinator]
+        DQOrchestrator[DQOrchestrator]
+        MedallionService[MedallionLifecycleService]
+    end
+
+    PipelineRunner --> BatchExecutor
+    BatchExecutor --> DataSourcePort
+    BatchExecutor --> StoragePort
+    BatchExecutor --> DQOrchestrator
+    DQOrchestrator --> DQPolicy
+    PipelineRunner --> LoggerPort
+    PipelineRunner --> MetricsPort
+    PipelineRunner --> LockPort
+    CompositePipelineCoordinator --> PipelineRunner
+    CompositePipelineCoordinator --> MedallionService
+
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
