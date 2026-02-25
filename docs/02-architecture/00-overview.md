@@ -104,12 +104,12 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 
 | Diagram                 | Description                                    | File                                                                                                          |
 | ----------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| Five Layer Architecture | Complete system architecture with all 5 layers | [01-high-level.mermaid](diagrams/01-high-level.mermaid)                                                       |
-| Layers Interaction      | How layers communicate                         | [05-layers-interaction.mermaid](diagrams/05-layers-interaction.mermaid)                                |
-| Composite Pipeline      | ADR-026 workflow: seed → enrich → merge        | [29-composite-pipeline-workflow.mermaid](diagrams/29-composite-pipeline-workflow.mermaid)                      |
-| Provider Adapters       | 7 providers with rate limits                   | [30-port-adapter-mapping.mermaid](diagrams/30-port-adapter-mapping.mermaid)                                    |
-| Pipeline Hierarchy      | Pipeline/Transformer inheritance               | [17-pipeline-hierarchy.mermaid](diagrams/17-pipeline-hierarchy.mermaid)                                |
-| Local Deployment        | ADR-010 local-only runtime architecture        | [12-local-deployment-architecture.mermaid](diagrams/12-local-deployment-architecture.mermaid)          |
+| Five Layer Architecture | Complete system architecture with all 5 layers | [01-high-level.mmd](mmd-diagrams/foundation/01-high-level.mmd)                                                       |
+| Layers Interaction      | How layers communicate                         | [05-layers-interaction.mmd](mmd-diagrams/foundation/05-layers-interaction.mmd)                                |
+| Composite Pipeline      | ADR-026 workflow: seed → enrich → merge        | [29-composite-pipeline-workflow.mmd](mmd-diagrams/foundation/29-composite-pipeline-workflow.mmd)                      |
+| Provider Adapters       | 7 providers with rate limits                   | [30-port-adapter-mapping.mmd](mmd-diagrams/foundation/30-port-adapter-mapping.mmd)                                    |
+| Pipeline Hierarchy      | Pipeline/Transformer inheritance               | [17-pipeline-hierarchy.mmd](mmd-diagrams/foundation/17-pipeline-hierarchy.mmd)                                |
+| Local Deployment        | ADR-010 local-only runtime architecture        | [12-local-deployment-architecture.mmd](mmd-diagrams/foundation/12-local-deployment-architecture.mmd)          |
 
 ----------------------------------------------------------------------
 

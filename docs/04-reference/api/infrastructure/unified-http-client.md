@@ -490,7 +490,7 @@ http-config:
     timeout-seconds: 60
 ```
 
-**Note:** See [ADR-032 Configuration](../../../02-architecture/decisions/ADR-032-unified-http-client.md#configuration) for full schema.
+**Note:** See [ADR-032 Configuration](../../../02-architecture/decisions/ADR-032-unified-http-client.md#client-configuration) for full schema.
 
 ----------------------------------------------------------------------
 

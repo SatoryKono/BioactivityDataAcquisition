@@ -32,9 +32,9 @@ JOBS=4           # parallel jobs
 
 # ── Diagram source directories ──────────────────────────────
 DEFAULT_DIRS=(
-  "$REPO_ROOT/docs/02-architecture/diagrams"
   "$REPO_ROOT/docs/02-architecture/mmd-diagrams/architecture"
   "$REPO_ROOT/docs/02-architecture/mmd-diagrams/class-diagrams"
+  "$REPO_ROOT/docs/02-architecture/mmd-diagrams/foundation"
 )
 
 # ── Colours ─────────────────────────────────────────────────
@@ -142,6 +142,14 @@ if [[ ! -f "$CSS" ]]; then
   CSS=""
 fi
 
+HAS_SVGO=0
+if command -v svgo &>/dev/null; then
+  HAS_SVGO=1
+  log_info "svgo found (SVG optimization enabled)"
+else
+  log_warn "svgo not found; SVG optimization skipped. Install: npm install -g svgo"
+fi
+
 echo ""
 
 # ── Collect diagram files ──────────────────────────────────
@@ -190,6 +198,10 @@ render_one() {
     mkdir -p "$svg_dir"
     local svg_out="$svg_dir/${base}.svg"
     if mmdc -i "$src" -o "$svg_out" "${MMDC_ARGS[@]}" -w "$WIDTH" -H "$HEIGHT" -b "$BG" 2>/dev/null; then
+      # Optimize SVG with svgo if available
+      if [[ $HAS_SVGO -eq 1 ]]; then
+        svgo --quiet "$svg_out" -o "$svg_out" 2>/dev/null || true
+      fi
       echo -e "  ${GREEN}✓${NC} SVG  [$idx/$TOTAL]  $base"
     else
       echo -e "  ${RED}✗${NC} SVG  [$idx/$TOTAL]  $base"

@@ -144,10 +144,10 @@ docs/
 | Topic            | Document                                                                                            | RULES.md |
 |------------------|-----------------------------------------------------------------------------------------------------|----------|
 | Medallion Layers | [data-flow.md](../02-architecture/data-flow.md)                                                        | §2.1     |
-| Schema Drift     | [RULES.md](RULES.md#22-обработка-дрейфа-схемы)   | §2.2     |
+| Schema Drift     | [RULES.md](RULES.md#22-политика-дрейфа-схемы-schema-drift)   | §2.2     |
 | Data Lineage     | [system-context.md](../02-architecture/system-context.md)                                              | §2.3     |
-| Backfill/Replay  | [RULES.md](RULES.md#24-стратегия-backfill-и-replay)            | §2.4     |
-| Quarantine       | [RULES.md](RULES.md#26-dead-letter-queue--quarantine) | §2.6     |
+| Backfill/Replay  | [RULES.md](RULES.md#24-политика-backfill--replay)            | §2.4     |
+| Quarantine       | [RULES.md](RULES.md#26-политика-null-и-пропущенных-значений) | §2.6     |
 | Content Hash     | [system-context.md](../02-architecture/system-context.md)                                              | §2.8     |
 
 ### Schema Documentation
@@ -166,7 +166,7 @@ docs/
 | Error Handling    | [ADR-016](../02-architecture/decisions/ADR-016-error-handling-strategy.md)         | §3.1     |
 | Circuit Breaker   | [ADR-007](../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md)  | §3.1.4   |
 | Locking           | [ADR-003](../02-architecture/decisions/ADR-003-in-memory-locking-strategy.md)      | §3.3     |
-| DQ Metrics        | [RULES.md](RULES.md#34-data-quality-метрики)                                    | §3.4     |
+| DQ Metrics        | [RULES.md](RULES.md#34-data-quality)                                    | §3.4     |
 | Graceful Shutdown | [ADR-008](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)      | §5.3     |
 | DR Procedures     | [runbooks/index.md](../05-operations/runbooks/index.md)                            | §5.5     |
 | Cleanup           | [cleanup-policy.md](../03-guides/cleanup-policy.md)                                | §2.1.1   |
