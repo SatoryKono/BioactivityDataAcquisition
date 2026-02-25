@@ -1,6 +1,11 @@
 %% BioETL — Storage Layer Components
 %% Shows Bronze/Silver/Gold writers, Delta Lake, metadata, and validation.
 
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   System / Component
+
 graph TB
     subgraph Port["Domain Port"]
         SP["StoragePort<br/>(Protocol)"]
@@ -85,8 +90,8 @@ graph TB
     SWR --> SMB
     GWR --> GMB
 
-    classDef port fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    classDef writer fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef port fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    classDef writer fill:#ffcdd2,stroke:#c62828,stroke-width:2px
     classDef support fill:#e3f2fd,stroke:#1565c0
     classDef valid fill:#f3e5f5,stroke:#6a1b9a
     classDef fs fill:#eceff1,stroke:#455a64,stroke-width:1px

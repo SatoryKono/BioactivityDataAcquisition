@@ -1,6 +1,11 @@
 # BioETL Architecture Diagrams
 
-*Updated: 2026-02-17*
+*Updated: 2026-02-24*
+
+> **Note:** Canonical diagram sources have been consolidated into
+> [`docs/02-architecture/mmd-diagrams/`](../mmd-diagrams/README.md).
+> The `.mermaid` files in this directory are kept for historical reference.
+> All new diagrams should be added as `.mmd` files in the `mmd-diagrams/` directory.
 
 В каталоге 59 исходных файлов диаграмм Mermaid, документирующих архитектуру BioETL.
 Диаграммы 26–50 созданы на основе TOP-25 из 500 архитектурных предложений (см. `top-50-diagram-selection.md`).

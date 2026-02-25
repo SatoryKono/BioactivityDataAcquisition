@@ -1,6 +1,11 @@
 %% BioETL — Port/Protocol Contracts (Full Map)
 %% All domain Ports and their infrastructure implementations.
 
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   System / Component
+
 graph LR
     subgraph Domain["Domain Ports (Protocols)"]
         DSP["DataSourcePort"]
@@ -140,9 +145,9 @@ graph LR
     %% Memory Monitor
     MMP --- MMGR
 
-    classDef port fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    classDef infra fill:#fff3e0,stroke:#e65100
-    classDef app fill:#e3f2fd,stroke:#1565c0
+    classDef port fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    classDef infra fill:#ffcdd2,stroke:#c62828
+    classDef app fill:#e8f5e9,stroke:#2e7d32
     classDef noop fill:#eceff1,stroke:#455a64,stroke-dasharray: 5 5
 
     class DSP,FDSP,STP,LKP,CKP,QRP,ADP,LGP,MTP,TRP,CBP,RLP,SVP,GVP,HCP,PIIP,MWP,MCP,DNP,DRP,IFP,DQMP,BDQP,SDQP,GDQP,DQRWP,JEP,MMP,SHP port

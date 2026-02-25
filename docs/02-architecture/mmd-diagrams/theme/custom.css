@@ -137,11 +137,11 @@ marker path {
    These selectors are fallback targets for
    subgraphs whose id starts with a known prefix. */
 
-[id*="Domain"] > rect { fill: #e8f5e9 !important; stroke: #2e7d32 !important; }
-[id*="Application"] > rect { fill: #e3f2fd !important; stroke: #1565c0 !important; }
-[id*="Infrastructure"] > rect { fill: #fff3e0 !important; stroke: #e65100 !important; }
-[id*="Composition"] > rect { fill: #f3e5f5 !important; stroke: #6a1b9a !important; }
-[id*="Interfaces"] > rect { fill: #fce4ec !important; stroke: #b71c1c !important; }
+[id*="Domain"] > rect { fill: #f3e5f5 !important; stroke: #6a1b9a !important; }
+[id*="Application"] > rect { fill: #e8f5e9 !important; stroke: #2e7d32 !important; }
+[id*="Infrastructure"] > rect { fill: #ffcdd2 !important; stroke: #c62828 !important; }
+[id*="Composition"] > rect { fill: #fff3e0 !important; stroke: #e65100 !important; }
+[id*="Interfaces"] > rect { fill: #e3f2fd !important; stroke: #1565c0 !important; }
 [id*="External"] > rect { fill: #eceff1 !important; stroke: #455a64 !important; }
 
 /* Medallion colours for data-flow diagrams */

@@ -69,8 +69,8 @@
      sort | uniq -c | sort -rn | head -10
    ```
 
-3. Если проблема в **Base Validation** → проверить схему (см. [Base Validation Failures](#base-validation-failures))
-4. Если проблема в **External Verification** → проверить доступность API (см. [External API Unavailable](#external-api-unavailable))
+3. Если проблема в **Base Validation** → проверить схему (см. [Base Validation Failures](#level-1-base-validation-failures))
+4. Если проблема в **External Verification** → проверить доступность API (см. [External Verification Failures](#level-3-external-verification-failures))
 
 ---
 

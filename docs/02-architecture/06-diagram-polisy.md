@@ -204,12 +204,23 @@ LLM обязано соблюдать:
 
 5.1. Цветовая схема фиксирована:
 
-Слой	Цвет
+| Слой | Цвет | Fill | Stroke |
+|------|------|------|--------|
+| domain | purple | `#f3e5f5` | `#6a1b9a` |
+| application | green | `#e8f5e9` | `#2e7d32` |
+| infrastructure | red | `#ffcdd2` | `#c62828` |
+| interfaces | blue | `#e3f2fd` | `#1565c0` |
+| composition | orange | `#fff3e0` | `#e65100` |
+| external | gray | `#eceff1` | `#455a64` |
 
-domain	blue
-application	green
-infrastructure	orange
-interfaces	purple
+Medallion layers:
+
+| Слой | Цвет | Fill | Stroke |
+|------|------|------|--------|
+| Bronze | orange | `#fff3e0` | `#e65100` |
+| Silver | gray | `#eceff1` | `#607d8b` |
+| Gold | amber | `#fff8e1` | `#f9a825` |
+| Quarantine | red | `#ffebee` | `#d32f2f` |
 
 
 5.2. Обозначения:
