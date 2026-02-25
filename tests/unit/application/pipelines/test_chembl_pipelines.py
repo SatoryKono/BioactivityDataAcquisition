@@ -155,6 +155,7 @@ class TestChEMBLPublicationPipeline:
     async def test_transform_bronze_to_silver(self, pipeline):
         """Test transformation of document record."""
         record = {
+            "publication_id": "CHEMBL789012",
             "document_chembl_id": "CHEMBL789012",
             "title": "Test Document",
             "pmid": "12345678",
