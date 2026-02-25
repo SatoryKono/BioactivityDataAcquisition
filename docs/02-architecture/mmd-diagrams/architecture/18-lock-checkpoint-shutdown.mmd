@@ -1,6 +1,11 @@
 %% BioETL — Locking, Checkpoint, and Graceful Shutdown
 %% Shows distributed safety mechanisms.
 
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   System / Component
+
 graph TB
     subgraph Ports["Domain Ports"]
         LKP["LockPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ acquire(key, owner, ttl)<br/>+ release(key, owner)<br/>+ heartbeat(key, owner)<br/>+ validate_owner(key, owner)<br/>+ validate_fencing_token(token)"]
@@ -72,10 +77,10 @@ graph TB
     %% Safety guard
     SG --> LM
 
-    classDef port fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef port fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
     classDef domain fill:#c8e6c9,stroke:#2e7d32
-    classDef app fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
-    classDef infra fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef app fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef infra fill:#ffcdd2,stroke:#c62828,stroke-width:2px
     classDef safety fill:#ffcdd2,stroke:#c62828,stroke-width:2px
     classDef lifecycle fill:#eceff1,stroke:#455a64
 

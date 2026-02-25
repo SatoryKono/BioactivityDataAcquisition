@@ -17,7 +17,20 @@
   "gnetId": null,
   "graphTooltip": 1,
   "id": null,
-  "links": [],
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "Back to Overview",
+      "tooltip": "",
+      "type": "link",
+      "url": "/d/bioetl-overview-v2"
+    }
+  ],
   "panels": [
     {
       "collapsed": false,
@@ -143,7 +156,7 @@
               }
             ]
           },
-          "unit": "ms"
+          "unit": "s"
         },
         "overrides": []
       },
@@ -170,7 +183,7 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency_ms_bucket{provider=~\"$provider\"}[5m])))",
+          "expr": "histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[5m])))",
           "legendFormat": "{{ provider }} p95",
           "refId": "A"
         }
@@ -185,28 +198,7 @@
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [
-            {
-              "options": {
-                "0": {
-                  "text": "Failed",
-                  "color": "red",
-                  "index": 0
-                }
-              },
-              "type": "value"
-            },
-            {
-              "options": {
-                "1": {
-                  "text": "Passed",
-                  "color": "green",
-                  "index": 1
-                }
-              },
-              "type": "value"
-            }
-          ],
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -232,7 +224,7 @@
       "id": 2,
       "options": {
         "colorMode": "background",
-        "graphMode": "none",
+        "graphMode": "area",
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
@@ -246,12 +238,12 @@
       },
       "targets": [
         {
-          "expr": "sum by (provider) (increase(bioetl_health_check_success_total{provider=~\"$provider\"}[15m]))",
-          "legendFormat": "{{ provider }} successes",
+          "expr": "bioetl_health_check_success_total{provider=~\"$provider\"}",
+          "legendFormat": "{{ provider }}",
           "refId": "A"
         }
       ],
-      "title": "Health Check Success by Provider (15m)",
+      "title": "Health Check Successes by Provider (total)",
       "type": "stat"
     },
     {
@@ -261,7 +253,7 @@
           "color": {
             "mode": "thresholds"
           },
-          "decimals": 2,
+          "decimals": 3,
           "min": 0,
           "thresholds": {
             "mode": "absolute",
@@ -272,7 +264,7 @@
               },
               {
                 "color": "yellow",
-                "value": 1
+                "value": 0.5
               },
               {
                 "color": "orange",
@@ -284,7 +276,7 @@
               }
             ]
           },
-          "unit": "ms"
+          "unit": "s"
         },
         "overrides": []
       },
@@ -312,7 +304,7 @@
       "repeatDirection": "h",
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum by (le) (rate(bioetl_health_check_latency_ms_bucket{provider=\"$provider\"}[5m])))",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(bioetl_health_check_latency_seconds_bucket{provider=\"$provider\"}[5m])))",
           "legendFormat": "{{ provider }}",
           "refId": "A"
         }
@@ -327,7 +319,7 @@
           "color": {
             "mode": "thresholds"
           },
-          "decimals": 2,
+          "decimals": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -337,7 +329,7 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "short"
         },
         "overrides": []
       },
@@ -350,7 +342,7 @@
       "id": 7,
       "options": {
         "colorMode": "value",
-        "graphMode": "none",
+        "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
@@ -364,12 +356,12 @@
       },
       "targets": [
         {
-          "expr": "sum by (provider) (increase(bioetl_health_check_success_total{provider=~\"$provider\"}[15m]) + increase(bioetl_health_check_failures_total{provider=~\"$provider\"}[15m]))",
-          "legendFormat": "{{ provider }} total checks",
+          "expr": "bioetl_health_check_success_total{provider=~\"$provider\"} + bioetl_health_check_failures_total{provider=~\"$provider\"}",
+          "legendFormat": "{{ provider }}",
           "refId": "A"
         }
       ],
-      "title": "Total Health Checks by Provider (15m)",
+      "title": "Total Health Checks by Provider",
       "type": "stat"
     },
     {
@@ -392,8 +384,8 @@
           "color": {
             "mode": "thresholds"
           },
-          "decimals": 2,
-          "max": 5000,
+          "decimals": 3,
+          "max": 10,
           "min": 0,
           "thresholds": {
             "mode": "absolute",
@@ -404,19 +396,19 @@
               },
               {
                 "color": "yellow",
-                "value": 100
+                "value": 0.5
               },
               {
                 "color": "orange",
-                "value": 500
+                "value": 2
               },
               {
                 "color": "red",
-                "value": 1000
+                "value": 5
               }
             ]
           },
-          "unit": "ms"
+          "unit": "s"
         },
         "overrides": []
       },
@@ -444,7 +436,7 @@
       "maxPerRow": 4,
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency_ms_bucket{provider=~\"$provider\"}[5m])))",
+          "expr": "histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency_seconds_bucket{provider=~\"$provider\"}[5m])))",
           "legendFormat": "{{ provider }}",
           "refId": "A"
         }
@@ -466,7 +458,11 @@
     "list": [
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "chembl_activity",
+          "value": "chembl_activity"
+        },
         "datasource": "Prometheus",
         "definition": "label_values(bioetl_records_processed_total, pipeline)",
         "hide": 0,
@@ -497,7 +493,7 @@
           "value": "$__all"
         },
         "datasource": "Prometheus",
-        "definition": "label_values(bioetl_health_check_latency_ms_bucket, provider)",
+        "definition": "label_values(bioetl_health_check_success_total, provider)",
         "hide": 0,
         "includeAll": true,
         "label": "Provider",
@@ -505,7 +501,7 @@
         "name": "provider",
         "options": [],
         "query": {
-          "query": "label_values(bioetl_health_check_latency_ms_bucket, provider)",
+          "query": "label_values(bioetl_health_check_success_total, provider)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -513,36 +509,11 @@
         "skipUrlSync": false,
         "sort": 1,
         "type": "query"
-      },
-      {
-        "allValue": null,
-        "current": {},
-        "datasource": "Prometheus",
-        "definition": "label_values(bioetl_infrastructure_validated{pipeline=~\"$pipeline\"}, run_id)",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Run ID",
-        "multi": true,
-        "name": "run_id",
-        "options": [],
-        "query": {
-          "query": "label_values(bioetl_infrastructure_validated{pipeline=~\"$pipeline\"}, run_id)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 2,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
       }
     ]
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-12h",
     "to": "now"
   },
   "timepicker": {

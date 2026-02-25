@@ -1,0 +1,101 @@
+%% Title: PipelineRunner Internal Component Diagram
+%% Covers: application/core/runner.py, application/core/pipeline_services.py
+%% Rank: 17 (Score 8.06) — PipelineRunner with all DI dependencies
+%% Updated: 2026-02-17
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    classDiagram
+%% @level   Mixed (System / Component / Class)
+
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+classDiagram
+    class PipelineRunner {
+        -_services: PipelineServices
+        -_data_source: DataSourcePort
+        -_config: PipelineYamlConfig
+        -_lock_manager: LockManager
+        -_preflight: PreflightService
+        -_batch_executor: BatchExecutor
+        -_postrun: PostrunService
+        -_checkpoint_manager: CheckpointManager
+        -_heartbeat: HeartbeatTask
+        -_observer: PipelineObserver
+        -_shutdown: ShutdownService
+        +run() PipelineRunState
+    }
+
+    class PipelineServices {
+        <<frozen dataclass>>
+        +storage_bronze: BronzeWriter
+        +storage_silver: SilverWriter
+        +storage_gold: GoldWriter
+        +lock: LockPort
+        +checkpoint: CheckpointPort
+        +quarantine: QuarantinePort
+        +logger: LoggerPort
+        +metrics: MetricsPort
+        +tracing: TracingPort
+        +silver_validator: SilverValidatorPort
+        +gold_validator: GoldValidatorPort
+        +pii_hasher: PiiHasherPort
+        +memory_monitor: MemoryMonitorPort
+    }
+
+    class LockManager {
+        -_lock: LockPort
+        -_logger: LoggerPort
+        +acquire(key, owner_id, ttl) bool
+        +release(key, owner_id) bool
+        +validate_ownership() bool
+    }
+
+    class PreflightService {
+        -_services: PipelineServices
+        -_config: PipelineYamlConfig
+        +run() PreflightReport
+    }
+
+    class BatchExecutor {
+        -_transformer: BatchTransformer
+        -_writer: BatchWriter
+        -_metrics: BatchMetricsRecorder
+        -_tracing: BatchTracingManager
+        +execute_batch(batch_num) BatchResult
+    }
+
+    class PostrunService {
+        -_services: PipelineServices
+        +run() PostrunResult
+    }
+
+    class CheckpointManager {
+        -_checkpoint: CheckpointPort
+        +save(last_id, batch_num) void
+        +load() CheckpointState
+        +delete() void
+    }
+
+    class HeartbeatTask {
+        -_lock: LockPort
+        -_interval: float
+        -_running: bool
+        +start() void
+        +stop() void
+    }
+
+    class PipelineObserver {
+        -_metrics: MetricsPort
+        -_logger: LoggerPort
+        +__enter__() PipelineObserver
+        +__exit__(exc_type, exc_val, tb) void
+    }
+
+    PipelineRunner --> PipelineServices : uses
+    PipelineRunner --> LockManager : _lock_manager
+    PipelineRunner --> PreflightService : _preflight
+    PipelineRunner --> BatchExecutor : _batch_executor
+    PipelineRunner --> PostrunService : _postrun
+    PipelineRunner --> CheckpointManager : _checkpoint_manager
+    PipelineRunner --> HeartbeatTask : _heartbeat
+    PipelineRunner --> PipelineObserver : _observer

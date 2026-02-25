@@ -36,12 +36,15 @@ class CompositePublicationGoldSchema(pa.DataFrameModel):
         Example: chembl.publication.title, crossref.publication.citation_count
 
     Required fields:
-        - System fields (entity_id, content_hash)
+        - System fields (entity_id)
         - Seed primary key (document_chembl_id via qualified name)
         - Title (required for valid publication)
         - Lineage metadata (_composite_run_id, etc.)
 
     Note: Uses strict=False to enforce required fields while allowing variable enricher columns.
+    Note: content_hash is excluded from Gold layer by FieldGroupRegistry
+          (SYSTEM_METADATA group, include_in_gold=False). It is computed in Silver
+          for SCD Type 2 tracking but filtered out before Gold schema validation.
     """
 
     # =========================================================================
@@ -50,10 +53,6 @@ class CompositePublicationGoldSchema(pa.DataFrameModel):
     entity_id: Series[str] = pa.Field(
         nullable=False,
         description="Stable business identifier for merged publication entity.",
-    )
-    content_hash: Series[str] = pa.Field(
-        nullable=False,
-        description="Deterministic SHA-256 hash for SCD Type 2 change tracking.",
     )
 
     # =========================================================================
@@ -155,11 +154,13 @@ class CompositeMoleculeGoldSchema(pa.DataFrameModel):
         - Fallback: canonical_smiles (less reliable due to canonization differences)
 
     Required fields:
-        - System fields (entity_id, content_hash)
+        - System fields (entity_id)
         - Seed primary key (molecule_chembl_id)
         - Lineage metadata (_composite_run_id, etc.)
 
     Note: Uses strict=False to enforce required fields while allowing variable enricher columns.
+    Note: content_hash is excluded from Gold layer by FieldGroupRegistry
+          (SYSTEM_METADATA group, include_in_gold=False).
     """
 
     # =========================================================================
@@ -168,10 +169,6 @@ class CompositeMoleculeGoldSchema(pa.DataFrameModel):
     entity_id: Series[str] = pa.Field(
         nullable=False,
         description="Stable business identifier for merged molecule entity.",
-    )
-    content_hash: Series[str] = pa.Field(
-        nullable=False,
-        description="Deterministic SHA-256 hash for SCD Type 2 change tracking.",
     )
 
     # =========================================================================
@@ -262,8 +259,8 @@ class CompositeActivityGoldSchema(pa.DataFrameModel):
     availability and merge configuration.
     """
 
+    # Note: content_hash excluded from Gold (SYSTEM_METADATA, include_in_gold=False)
     entity_id: Series[str] = pa.Field(nullable=False)
-    content_hash: Series[str] = pa.Field(nullable=False)
 
     dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
     dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
@@ -301,8 +298,8 @@ class CompositeAssayGoldSchema(pa.DataFrameModel):
     enricher data from cell line and tissue.
     """
 
+    # Note: content_hash excluded from Gold (SYSTEM_METADATA, include_in_gold=False)
     entity_id: Series[str] = pa.Field(nullable=False)
-    content_hash: Series[str] = pa.Field(nullable=False)
 
     dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
     dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")
@@ -341,8 +338,8 @@ class CompositeTargetGoldSchema(pa.DataFrameModel):
     UniProt protein datasets.
     """
 
+    # Note: content_hash excluded from Gold (SYSTEM_METADATA, include_in_gold=False)
     entity_id: Series[str] = pa.Field(nullable=False)
-    content_hash: Series[str] = pa.Field(nullable=False)
 
     dq_warn: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_warn")
     dq_error: Series[bool] = pa.Field(nullable=False, default=False, alias="_dq_error")

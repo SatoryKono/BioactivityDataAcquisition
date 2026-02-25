@@ -250,7 +250,7 @@ infrastructure/adapters/
 
 **Related:**
 - [ADR-005: Composition Layer Separation](../../../02-architecture/decisions/ADR-005-composition-layer-separation.md)
-- [ARCH-001: Import Matrix](../../../00-project/RULES.md#arch-001-import-matrix)
+- [ARCH-001: Import Matrix](../../../00-project/RULES.md#11-слои-и-контракты)
 
 ---
 

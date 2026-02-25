@@ -306,7 +306,10 @@ class HealthCheckProviderMixin(HealthCheckMixin):
             self._handle_health_check_success(ctx, status)
         except Exception as e:
             last_error = str(e)
-            status = self._fallback_health_status()
+            # check_health() contract: probe failures must be surfaced as UNHEALTHY
+            # with error details so preflight can fail fast instead of proceeding
+            # with a false healthy status from circuit-breaker fallback.
+            status = HealthStatus.UNHEALTHY
             # Log and record metrics for the failure
             self._handle_health_check_failure(ctx, e)
             # Get failure count from circuit breaker

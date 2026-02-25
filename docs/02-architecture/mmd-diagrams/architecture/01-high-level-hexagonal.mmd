@@ -1,6 +1,11 @@
 %% BioETL — High-Level Hexagonal Architecture
 %% Shows the Ports & Adapters (Hexagonal) pattern across all layers.
 
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   System / Component
+
 graph TB
     subgraph External["External Systems"]
         CHEMBL_API["ChEMBL API"]
@@ -106,11 +111,11 @@ graph TB
     AUDIT -->|implements| PORTS
     SECURITY -->|implements| PORTS
 
-    classDef domain fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    classDef app fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
-    classDef infra fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef comp fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-    classDef iface fill:#fce4ec,stroke:#b71c1c,stroke-width:2px
+    classDef domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    classDef app fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef infra fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    classDef comp fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef iface fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
     classDef ext fill:#eceff1,stroke:#455a64,stroke-width:1px
 
     class PORTS,ENTITIES,VO,CFG,DOM_SVC,TYPES,EXCEPTIONS,SCHEMAS domain

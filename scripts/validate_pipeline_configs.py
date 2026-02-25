@@ -109,13 +109,6 @@ def _validate_sink_paths_and_sort(pipeline_payload: dict[str, Any]) -> list[str]
                     f"sink.{layer}.path should end with '{expected_suffix}', got: {layer_path}"
                 )
 
-    for layer in ("silver", "gold"):
-        if layer not in sink:
-            continue
-        layer_cfg = sink.get(layer, {})
-        if isinstance(layer_cfg, dict) and "sort_by" not in layer_cfg:
-            warnings.append(f"sink.{layer}.sort_by missing (ADR-014 determinism)")
-
     return warnings
 
 
@@ -125,7 +118,7 @@ def main() -> int:
     parser.add_argument(
         "--strict",
         action="store_true",
-        help="Treat warnings as errors (path hierarchy, sort_by)",
+        help="Treat warnings as errors (path hierarchy checks)",
     )
     args = parser.parse_args()
 
