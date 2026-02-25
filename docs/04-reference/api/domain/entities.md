@@ -27,8 +27,8 @@ Base class containing system fields for lineage and versioning.
 
 ::: bioetl.domain.entities.BaseEntity
 options:
-show-root-heading: true
-show-source: true
+show_root_heading: true
+show_source: true
 members:
 \- entity-id
 \- content-hash
@@ -47,8 +47,8 @@ Bioactivity measurement from ChEMBL database.
 
 ::: bioetl.domain.entities.Bioactivity
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ### Assay
 
@@ -56,8 +56,8 @@ Experimental assay information.
 
 ::: bioetl.domain.entities.Assay
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ### Molecule
 
@@ -65,8 +65,8 @@ Chemical compound structure.
 
 ::: bioetl.domain.entities.Molecule
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ### Target
 
@@ -74,8 +74,8 @@ Biological target (protein, gene, etc.).
 
 ::: bioetl.domain.entities.Target
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ### TargetComponent
 
@@ -83,8 +83,8 @@ Component of a complex biological target.
 
 ::: bioetl.domain.entities.TargetComponent
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ### ChemblPublication
 
@@ -92,8 +92,8 @@ Publication or patent reference.
 
 ::: bioetl.domain.entities.ChemblPublication
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ## PubChem Entities
 
@@ -103,8 +103,8 @@ PubChem compound with chemical properties.
 
 ::: bioetl.domain.entities.CompoundRecord
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ## PubMed Entities
 
@@ -114,8 +114,8 @@ Scientific publication metadata.
 
 ::: bioetl.domain.entities.PubMedPublicationEntity
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ## UniProt Entities
 
@@ -125,8 +125,8 @@ UniProt protein classification.
 
 ::: bioetl.domain.entities.ProteinClassification
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ## Usage Example
 

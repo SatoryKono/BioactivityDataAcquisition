@@ -10,8 +10,8 @@ Orchestrates pipeline execution lifecycle. Coordinates locking, checkpointing, a
 
 ::: bioetl.application.core.runner.PipelineRunner
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 members:
 \- --init--
 \- run
@@ -24,8 +24,8 @@ Abstract base class for all ETL pipelines. Provides template method pattern for 
 
 ::: bioetl.application.core.base.BasePipeline
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ### BatchExecutor
 
@@ -33,8 +33,8 @@ Unified batch executor for ETL pipeline orchestration. Handles extraction → tr
 
 ::: bioetl.application.core.batch_executor.BatchExecutor
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 members:
 \- --init--
 \- execute
@@ -46,8 +46,8 @@ Result of batch execution containing metrics and status.
 
 ::: bioetl.application.core.batch_executor.BatchResult
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ### RecordProcessor
 
@@ -55,8 +55,8 @@ Processes individual records through the transformation pipeline.
 
 ::: bioetl.application.core.record_processor.RecordProcessor
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ## Service Bundles
 
@@ -66,8 +66,8 @@ Bundle of common pipeline services injected via DI.
 
 ::: bioetl.application.core.pipeline_services.PipelineServices
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ## Infrastructure Services
 
@@ -77,8 +77,8 @@ Pre-flight infrastructure validation before pipeline execution.
 
 ::: bioetl.application.core.preflight_service.PreflightService
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 members:
 \- execute
 
@@ -88,8 +88,8 @@ Post-run operations: DQ checks, VACUUM, cleanup.
 
 ::: bioetl.application.core.postrun_service.PostrunService
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 members:
 \- execute
 
@@ -99,8 +99,8 @@ Result of post-run operations.
 
 ::: bioetl.application.core.postrun_service.PostrunResult
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ### DQResult
 
@@ -108,8 +108,8 @@ Data quality check result.
 
 ::: bioetl.application.core.postrun_service.DQResult
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ### DQEvaluationStatus
 
@@ -117,8 +117,8 @@ Enumeration for DQ evaluation status (PASSED, SOFT-FAIL, HARD-FAIL).
 
 ::: bioetl.application.core.postrun_service.DQEvaluationStatus
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ### VacuumResult
 
@@ -126,8 +126,8 @@ Result of VACUUM operation.
 
 ::: bioetl.application.core.postrun_service.VacuumResult
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ## State Management
 
@@ -137,8 +137,8 @@ Pipeline checkpoint persistence for resume capability.
 
 ::: bioetl.application.core.checkpoint_manager.CheckpointManager
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 members:
 \- save
 \- load
@@ -150,8 +150,8 @@ Distributed locking coordination.
 
 ::: bioetl.application.core.lock_manager.LockManager
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 members:
 \- acquire
 \- release
@@ -162,8 +162,8 @@ Failed record quarantine management.
 
 ::: bioetl.application.core.quarantine_manager.QuarantineManager
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ## Memory Management
 
@@ -173,8 +173,8 @@ Memory usage monitoring for adaptive batch sizing.
 
 ::: bioetl.infrastructure.system.memory_monitor.MemoryMonitor
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ### MemoryConfig
 
@@ -182,8 +182,8 @@ Memory monitoring configuration.
 
 ::: bioetl.domain.config.memory.MemoryConfig
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ### MemoryStats
 
@@ -191,8 +191,8 @@ Memory usage statistics.
 
 ::: bioetl.domain.ports.memory.MemoryStats
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ## Shutdown Handling
 
@@ -202,8 +202,8 @@ Graceful shutdown signal handler.
 
 ::: bioetl.application.core.shutdown.ShutdownSignal
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ### ShutdownService
 
@@ -211,8 +211,8 @@ Service for coordinating graceful shutdown.
 
 ::: bioetl.application.core.shutdown.ShutdownService
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ### ShutdownReason
 
@@ -220,8 +220,8 @@ Enumeration for shutdown reasons.
 
 ::: bioetl.application.core.shutdown.ShutdownReason
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ### PipelineShutdownError
 
@@ -229,8 +229,8 @@ Raised when pipeline receives shutdown signal.
 
 ::: bioetl.application.core.shutdown.PipelineShutdownError
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ### create-shutdown-service
 
@@ -238,8 +238,8 @@ Factory function for creating shutdown service.
 
 ::: bioetl.application.core.shutdown.create_shutdown_service
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ## Cleanup Operations
 
@@ -249,8 +249,8 @@ Cleanup operations for Bronze/Silver/Gold layers.
 
 ::: bioetl.application.core.cleanup_service.CleanupService
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ### CleanupResult
 
@@ -258,8 +258,8 @@ Result of cleanup operation.
 
 ::: bioetl.application.core.cleanup_service.CleanupResult
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ### CleanupPreview
 
@@ -267,8 +267,8 @@ Preview of files to be cleaned up.
 
 ::: bioetl.application.core.cleanup_service.CleanupPreview
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ### LayerInfo
 
@@ -276,8 +276,8 @@ Information about a storage layer.
 
 ::: bioetl.application.core.cleanup_service.LayerInfo
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ## Medallion Types
 
@@ -287,8 +287,8 @@ Enumeration for Medallion layers (BRONZE, SILVER, GOLD).
 
 ::: bioetl.domain.medallion.Layer
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ### WriteModePolicy
 
@@ -296,8 +296,8 @@ Policy for determining write mode based on run type and layer.
 
 ::: bioetl.domain.medallion.WriteModePolicy
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ### ClearResult
 
@@ -305,8 +305,8 @@ Result of a layer clear operation.
 
 ::: bioetl.application.services.medallion_types.ClearResult
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ### PrepareResult
 
@@ -314,8 +314,8 @@ Result of a layer prepare operation.
 
 ::: bioetl.application.services.medallion_types.PrepareResult
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ## Configuration
 
@@ -325,8 +325,8 @@ Static pipeline configuration loaded from YAML.
 
 ::: bioetl.domain.config.PipelineConfig
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ### RuntimeConfig
 
@@ -334,8 +334,8 @@ Runtime configuration from CLI/environment.
 
 ::: bioetl.domain.config.RuntimeConfig
 options:
-show-root-heading: true
-show-source: false
+show_root_heading: true
+show_source: false
 
 ## Usage Example
 

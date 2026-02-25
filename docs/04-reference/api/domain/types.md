@@ -10,8 +10,8 @@ Unique identifier for a pipeline run (UUID).
 
 ::: bioetl.domain.types.RunID
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ### EntityID
 
@@ -19,8 +19,8 @@ Business key for an entity (e.g., 'CHEMBL123').
 
 ::: bioetl.domain.types.EntityID
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ### ContentHash
 
@@ -28,8 +28,8 @@ SHA256 hash of canonical record representation.
 
 ::: bioetl.domain.types.ContentHash
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ### BatchID
 
@@ -37,8 +37,8 @@ Unique identifier for a data batch.
 
 ::: bioetl.domain.types.BatchID
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ## Enums
 
@@ -48,8 +48,8 @@ Type of pipeline run (incremental, backfill, rebuild).
 
 ::: bioetl.domain.types.RunType
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ### DriftLevel
 
@@ -57,8 +57,8 @@ Schema drift severity levels.
 
 ::: bioetl.domain.types.DriftLevel
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ### HealthStatus
 
@@ -66,8 +66,8 @@ Provider health status.
 
 ::: bioetl.domain.types.HealthStatus
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ### CircuitBreakerState
 
@@ -75,8 +75,8 @@ Circuit breaker state machine states.
 
 ::: bioetl.domain.types.CircuitBreakerState
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ### DataClassification
 
@@ -84,8 +84,8 @@ Data sensitivity classification.
 
 ::: bioetl.domain.types.DataClassification
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ### ErrorType
 
@@ -93,8 +93,8 @@ Error classification for handling strategy.
 
 ::: bioetl.domain.types.ErrorType
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 <!-- DQStatus: planned, not yet implemented -->
 
@@ -104,8 +104,8 @@ Write mode for data operations.
 
 ::: bioetl.domain.medallion.WriteMode
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ## Records
 
@@ -115,8 +115,8 @@ Untyped dictionary representing a raw record.
 
 ::: bioetl.domain.types.BronzeRecord
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ### SilverRecord
 
@@ -124,8 +124,8 @@ Normalized record for Silver layer.
 
 ::: bioetl.domain.types.SilverRecord
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ## Reports
 
@@ -135,8 +135,8 @@ Result of record validation.
 
 ::: bioetl.domain.types.ValidationResult
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ### ConfigValidationError
 
@@ -144,8 +144,8 @@ Single configuration validation error.
 
 ::: bioetl.domain.types.ConfigValidationError
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ### ComponentHealthResult
 
@@ -153,8 +153,8 @@ Result of a single component health check.
 
 ::: bioetl.domain.types.ComponentHealthResult
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ### HealthReport
 
@@ -162,8 +162,8 @@ Aggregated health check report.
 
 ::: bioetl.domain.types.HealthReport
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ### PreflightReport
 
@@ -171,8 +171,8 @@ Preflight validation report.
 
 ::: bioetl.domain.types.PreflightReport
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ## Usage Example
 
