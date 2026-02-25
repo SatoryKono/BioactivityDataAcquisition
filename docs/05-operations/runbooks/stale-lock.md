@@ -1,6 +1,6 @@
 # Stale Lock Detected (P2)
 
-*Reference: [RULES.md §3.3](../../00-project/RULES.md#33-%D0%BA%D0%BE%D0%BD%D0%BA%D1%83%D1%80%D0%B5%D0%BD%D1%82%D0%BD%D0%BE%D1%81%D1%82%D1%8C-%D0%B8-%D0%B1%D0%BB%D0%BE%D0%BA%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B8)*
+*Reference: [RULES.md §3.3](../../00-project/RULES.md#33-конкурентность-и-блокировки)*
 
 This runbook describes how to handle "Stale Lock" alerts.
 

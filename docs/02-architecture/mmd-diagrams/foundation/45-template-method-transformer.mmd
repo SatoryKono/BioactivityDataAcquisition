@@ -1,0 +1,115 @@
+%% Title: Template Method Pattern — BaseTransformer._transform_impl()
+%% Covers: application/core/base_transformer.py, 23+ transformer subclasses
+%% Rank: 20 (Score 7.94) — Core design pattern for data transformation
+%% Updated: 2026-02-17
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    classDiagram
+%% @level   Mixed (System / Component / Class)
+
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+classDiagram
+    class BaseTransformer {
+        <<abstract>>
+        -_logger: LoggerPort
+        -_config: PipelineYamlConfig
+        +transform(records: list) DataFrame
+        +transform_for_gold(df: DataFrame) DataFrame
+        #_transform_impl(records: list)* DataFrame
+        #_get_silver_schema() type
+        #_get_gold_schema() type
+        -_normalize_values(df) DataFrame
+        -_add_metadata(df, run_context) DataFrame
+        -_compute_content_hash(df) DataFrame
+    }
+
+    class BaseChemblTransformer {
+        <<abstract>>
+        #_transform_impl(records)* DataFrame
+        #_chembl_specific_normalization(df) DataFrame
+    }
+
+    class BasePublicationTransformer {
+        <<abstract>>
+        #_transform_impl(records)* DataFrame
+        #_normalize_authors(raw) list
+        #_normalize_date(raw) str
+    }
+
+    class ActivityTransformer {
+        +_transform_impl(records) DataFrame
+        +_get_silver_schema() ActivitySchema
+        +_get_gold_schema() ChEMBLActivityGoldSchema
+    }
+
+    class MoleculeTransformer {
+        +_transform_impl(records) DataFrame
+        +_get_silver_schema() MoleculeSchema
+        +_get_gold_schema() ChEMBLMoleculeGoldSchema
+    }
+
+    class AssayTransformer {
+        +_transform_impl(records) DataFrame
+        +_get_silver_schema() AssaySchema
+        +_get_gold_schema() ChEMBLAssayGoldSchema
+    }
+
+    class TargetTransformer {
+        +_transform_impl(records) DataFrame
+        +_get_silver_schema() TargetSchema
+        +_get_gold_schema() ChEMBLTargetGoldSchema
+    }
+
+    class PubMedPublicationTransformer {
+        +_transform_impl(records) DataFrame
+        +_get_silver_schema() PubMedPublicationSchema
+        +_get_gold_schema() PubMedPublicationGoldSchema
+    }
+
+    class CrossRefPublicationTransformer {
+        +_transform_impl(records) DataFrame
+        +_get_silver_schema() PublicationEnrichedSchema
+        +_get_gold_schema() CrossRefPublicationGoldSchema
+    }
+
+    class OpenAlexPublicationTransformer {
+        +_transform_impl(records) DataFrame
+        +_get_silver_schema() OpenAlexPublicationSchema
+        +_get_gold_schema() OpenAlexPublicationGoldSchema
+    }
+
+    class SemanticScholarPublicationTransformer {
+        +_transform_impl(records) DataFrame
+        +_get_silver_schema() SemanticScholarPublicationSchema
+        +_get_gold_schema() SemanticScholarPublicationGoldSchema
+    }
+
+    class PubChemCompoundTransformer {
+        +_transform_impl(records) DataFrame
+        +_get_silver_schema() PubchemMoleculeSchema
+        +_get_gold_schema() PubChemCompoundGoldSchema
+    }
+
+    class UniProtProteinTransformer {
+        +_transform_impl(records) DataFrame
+        +_get_silver_schema() UniprotTargetSchema
+        +_get_gold_schema() UniProtProteinGoldSchema
+    }
+
+    BaseTransformer <|-- BaseChemblTransformer
+    BaseTransformer <|-- BasePublicationTransformer
+    BaseTransformer <|-- PubChemCompoundTransformer
+    BaseTransformer <|-- UniProtProteinTransformer
+
+    BaseChemblTransformer <|-- ActivityTransformer
+    BaseChemblTransformer <|-- MoleculeTransformer
+    BaseChemblTransformer <|-- AssayTransformer
+    BaseChemblTransformer <|-- TargetTransformer
+
+    BasePublicationTransformer <|-- PubMedPublicationTransformer
+    BasePublicationTransformer <|-- CrossRefPublicationTransformer
+    BasePublicationTransformer <|-- OpenAlexPublicationTransformer
+    BasePublicationTransformer <|-- SemanticScholarPublicationTransformer
+
+    note for BaseTransformer "Template Method Pattern:\ntransform() calls _transform_impl()\nwhich is abstract and overridden by subclasses"

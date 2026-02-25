@@ -1,6 +1,6 @@
 # Observability Checklist
 
-*Reference: [RULES.md §3.2](../../00-project/RULES.md#32-%D0%BD%D0%B0%D0%B1%D0%BB%D1%8E%D0%B4%D0%B0%D0%B5%D0%BC%D0%BE%D1%81%D1%82%D1%8C-observability)*
+*Reference: [RULES.md §3.2](../../00-project/RULES.md#32-наблюдаемость-observability)*
 
 This checklist ensures all components meet the project's observability requirements.
 

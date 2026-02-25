@@ -800,4 +800,4 @@ The following fields are created by the transformer but not defined in Silver sc
 - [S2 Paper Object Schema](https://api.semanticscholar.org/api-docs/graph#tag/Paper-Data/operation/get-graph-get-paper)
 - [ADR-030: Publication Pagination Strategy](../../02-architecture/decisions/ADR-030-publication-pagination-strategy.md)
 - [ADR-031: Loading Strategy Formalization](../../02-architecture/decisions/ADR-031-loading-strategy-formalization.md)
-- [RULES.md: Medallion Architecture](../../00-project/RULES.md#2-medallion-architecture)
+- [RULES.md: Medallion Architecture](../../00-project/RULES.md#2-поток-данных-и-стратегия-medallion)

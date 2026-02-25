@@ -1,0 +1,47 @@
+%% Title: Pipeline Locking Mechanism (Local-Only)
+%% Covers: RULES.md §3.3 (Locking), ADR-010 (Local-Only Deployment)
+%% Updated: 2026-02-17
+%% Components: MemoryLock, LockManager, PipelineRunner, Data Lake
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    sequenceDiagram
+%% @level   Mixed (System / Component / Class)
+
+%%{init: {'theme': 'base'}}%%
+sequenceDiagram
+    title Pipeline Locking Mechanism (Local-Only)
+
+    Note right of Worker: Local-Only Deployment (ADR-010)
+
+    participant Worker as Pipeline Worker
+    participant LockManager as MemoryLock (In-Process)
+    participant Lake as Data Lake (Local FS)
+
+    rect rgb(240, 248, 255)
+        Note over Worker,Lake: == Incremental Run ==
+        Worker->>LockManager: acquire("lock:chembl_activity")
+        alt Lock acquired successfully
+            LockManager-->>Worker: Lock granted
+            Worker->>Lake: Write Bronze/Silver/Gold
+            Worker->>LockManager: release()
+        else Lock is already held
+            LockManager-->>Worker: Lock denied (another pipeline running)
+            Worker->>Worker: Abort with error
+        end
+    end
+
+    rect rgb(255, 250, 240)
+        Note over Worker,Lake: == Exclusive Run (Backfill/Rebuild) ==
+        Worker->>LockManager: acquire("lock:chembl_activity:exclusive")
+        alt Lock acquired
+            LockManager-->>Worker: Exclusive lock granted
+            Worker->>Lake: Clear & rebuild data
+            Worker->>LockManager: release()
+        else Active incremental lock exists
+            LockManager-->>Worker: Lock denied
+            Worker->>Worker: Wait or abort
+        end
+    end
+
+    Note over Worker,Lake: Lock Max Duration: 4 hours
