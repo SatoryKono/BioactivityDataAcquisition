@@ -1,6 +1,11 @@
 %% BioETL — Configuration System
 %% Shows how YAML configs are loaded, validated, and used across the system.
 
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   System / Component
+
 graph TB
     subgraph YAML["YAML Config Files"]
         PC_YAML["configs/pipelines/<br/>*.yaml<br/>(pipeline configs)"]
@@ -92,8 +97,8 @@ graph TB
     classDef yaml fill:#fff9c4,stroke:#f57f17,stroke-width:2px
     classDef loader fill:#fff3e0,stroke:#e65100
     classDef schema fill:#fce4ec,stroke:#b71c1c
-    classDef domain fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    classDef app fill:#e3f2fd,stroke:#1565c0
+    classDef domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    classDef app fill:#e8f5e9,stroke:#2e7d32
     classDef settings fill:#eceff1,stroke:#455a64
 
     class PC_YAML,DQ_YAML,FILT_YAML,COMP_YAML,FG_YAML yaml

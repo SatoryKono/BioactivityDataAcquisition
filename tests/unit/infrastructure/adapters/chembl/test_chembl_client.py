@@ -265,10 +265,44 @@ async def test_health_check_degraded_response(adapter, mock_http_client):
     mock_response = MagicMock()
     mock_response.status_code = 200
     mock_response.json.return_value = {"status": "DEGRADED"}
-    mock_http_client.get.return_value = mock_response
+    mock_http_client.get_once = AsyncMock(return_value=mock_response)
 
     status = await adapter.health_check()
     assert status == HealthStatus.DEGRADED
+
+
+@pytest.mark.asyncio
+async def test_health_check_status_endpoint_500_returns_degraded(
+    adapter, mock_http_client
+):
+    """Treat ChEMBL status endpoint 5xx as DEGRADED to avoid hard preflight block."""
+
+    class StatusProbeError(Exception):
+        pass
+
+    error = StatusProbeError("status endpoint failed")
+    error.response = MagicMock(status_code=500)
+    mock_http_client.get_once = AsyncMock(side_effect=error)
+
+    status = await adapter.health_check()
+    assert status == HealthStatus.DEGRADED
+
+
+@pytest.mark.asyncio
+async def test_check_health_status_endpoint_500_returns_degraded(
+    adapter, mock_http_client
+):
+    """check_health() should return DEGRADED (not UNHEALTHY) on status endpoint 5xx."""
+
+    class StatusProbeError(Exception):
+        pass
+
+    error = StatusProbeError("status endpoint failed")
+    error.response = MagicMock(status_code=500)
+    mock_http_client.get_once = AsyncMock(side_effect=error)
+
+    result = await adapter.check_health()
+    assert result.status == HealthStatus.DEGRADED
 
 
 @pytest.mark.unit

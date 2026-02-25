@@ -52,6 +52,9 @@ markdown_extensions:
     - admonition
     -   toc:
             permalink: true
+            slugify: !!python/object/apply:pymdownx.slugs.slugify
+                kwds:
+                    case: lower
 
 # Mermaid init (theme sync). Mermaid runtime is provided by the theme/plugin.
 extra_javascript:

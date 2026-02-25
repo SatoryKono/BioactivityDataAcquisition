@@ -17,7 +17,32 @@
   "gnetId": null,
   "graphTooltip": 1,
   "id": null,
-  "links": [],
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "BioETL Data Quality",
+      "tooltip": "",
+      "type": "link",
+      "url": "/d/bioetl-dq-v2"
+    },
+    {
+      "asDropdown": false,
+      "icon": "external link",
+      "includeVars": true,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "BioETL Provider Health",
+      "tooltip": "",
+      "type": "link",
+      "url": "/d/bioetl-provider-health-v2"
+    }
+  ],
   "panels": [
     {
       "gridPos": {
@@ -367,7 +392,11 @@
     "list": [
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "chembl_activity",
+          "value": "chembl_activity"
+        },
         "datasource": "Prometheus",
         "definition": "label_values(bioetl_records_processed_total, pipeline)",
         "hide": 0,
@@ -392,7 +421,11 @@
       },
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "incremental",
+          "value": "incremental"
+        },
         "datasource": "Prometheus",
         "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_type)",
         "hide": 0,
@@ -414,36 +447,11 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {},
-        "datasource": "Prometheus",
-        "definition": "label_values(bioetl_infrastructure_validated{pipeline=~\"$pipeline\"}, run_id)",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Run ID",
-        "multi": true,
-        "name": "run_id",
-        "options": [],
-        "query": {
-          "query": "label_values(bioetl_infrastructure_validated{pipeline=~\"$pipeline\"}, run_id)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 2,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
       }
     ]
   },
   "time": {
-    "from": "now-7d",
+    "from": "now-12h",
     "to": "now"
   },
   "timepicker": {

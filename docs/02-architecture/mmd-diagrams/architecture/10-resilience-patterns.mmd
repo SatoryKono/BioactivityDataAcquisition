@@ -1,6 +1,11 @@
 %% BioETL — Resilience Patterns
 %% Circuit Breaker, Rate Limiter, Retry, Health Check patterns.
 
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   System / Component
+
 graph TB
     subgraph Ports["Domain Ports"]
         CBP["CircuitBreakerPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ get_state() → CircuitBreakerState<br/>+ get_failure_count() → int<br/>+ call(fn) → T<br/>+ reset()"]
@@ -72,7 +77,7 @@ graph TB
     HCPM --> HCR
     HCR --> HS
 
-    classDef port fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef port fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
     classDef pattern fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
     classDef state fill:#fff3e0,stroke:#e65100
     classDef health fill:#f3e5f5,stroke:#6a1b9a

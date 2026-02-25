@@ -1,7 +1,7 @@
 # BioETL Makefile
 # Production-ready ETL system for bioactivity data
 
-.PHONY: help install install-uv install-pip test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-preflight clean-all
+.PHONY: help install install-uv install-pip test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-preflight clean-all render-diagrams
 .DEFAULT_GOAL := help
 
 # Detect uv availability (preferred package manager)
@@ -377,6 +377,17 @@ ci-quality: quality ## Run full quality gate
 
 ci-build: ## Build distribution packages
 	$(RUN) build
+
+# Diagrams
+render-diagrams: ## Render all Mermaid diagrams to SVG + PNG
+	@echo "$(BLUE)Rendering Mermaid diagrams...$(NC)"
+	bash docs/02-architecture/mmd-diagrams/render.sh
+	@echo "$(GREEN)Diagrams rendered!$(NC)"
+
+render-diagrams-svg: ## Render diagrams (SVG only, faster)
+	@echo "$(BLUE)Rendering Mermaid diagrams (SVG only)...$(NC)"
+	bash docs/02-architecture/mmd-diagrams/render.sh --svg-only
+	@echo "$(GREEN)SVG diagrams rendered!$(NC)"
 
 # Documentation
 docs-serve: ## Serve documentation locally

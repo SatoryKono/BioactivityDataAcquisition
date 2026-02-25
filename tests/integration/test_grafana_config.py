@@ -125,13 +125,28 @@ def test_dashboard_metrics_contract(dashboard_path):
 
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
 def test_dashboard_has_required_variables(dashboard_path):
-    """Check if mandatory dashboard variables are present."""
-    required_vars = {"pipeline", "run_id"}
+    """Check dashboard variables match the current contract."""
+    expected_vars_by_dashboard = {
+        "bioetl-simple.json": {"pipeline", "run_type"},
+        "bioetl-overview-v2.json": {"pipeline", "run_type"},
+        "bioetl-dq-v2.json": {"pipeline", "run_type"},
+        "bioetl-provider-health-v2.json": {"pipeline", "provider"},
+    }
     dashboard = load_dashboard(dashboard_path)
-    variables = {v.get("name") for v in dashboard.get("templating", {}).get("list", [])}
+    variables = {
+        v.get("name")
+        for v in dashboard.get("templating", {}).get("list", [])
+        if v.get("name")
+    }
+    expected_vars = expected_vars_by_dashboard.get(dashboard_path.name)
 
-    missing = required_vars - variables
-    assert not missing, f"Dashboard {dashboard_path.name} missing variables: {missing}"
+    assert expected_vars is not None, (
+        f"Unexpected dashboard file: {dashboard_path.name}"
+    )
+    assert variables == expected_vars, (
+        f"Dashboard {dashboard_path.name} variables mismatch. "
+        f"Expected: {sorted(expected_vars)}, got: {sorted(variables)}"
+    )
 
 
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
@@ -150,29 +165,60 @@ def test_no_duplicate_variable_names(dashboard_path):
 
 
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
-def test_run_id_variable_source(dashboard_path):
-    """Ensure run_id variable is sourced from infrastructure_validated metric."""
+def test_variable_query_sources(dashboard_path):
+    """Ensure templating variables use the intended metric sources."""
     dashboard = load_dashboard(dashboard_path)
-    run_id_vars = [
-        var
+    variable_map = {
+        var.get("name"): var
         for var in dashboard.get("templating", {}).get("list", [])
-        if var.get("name") == "run_id"
-    ]
-    assert run_id_vars, f"Dashboard {dashboard_path.name} has no run_id variable"
+        if var.get("name")
+    }
 
-    for run_id_var in run_id_vars:
-        definition = run_id_var.get("definition", "")
-        query_block = run_id_var.get("query", {})
-        query_text = (
-            query_block.get("query", "") if isinstance(query_block, dict) else ""
+    assert "run_id" not in variable_map, (
+        f"Dashboard {dashboard_path.name} must not define deprecated 'run_id' variable"
+    )
+
+    pipeline_var = variable_map.get("pipeline")
+    assert pipeline_var is not None, (
+        f"Dashboard {dashboard_path.name} must define 'pipeline' variable"
+    )
+    pipeline_query = pipeline_var.get("query", {})
+    pipeline_query_text = (
+        pipeline_query.get("query", "") if isinstance(pipeline_query, dict) else ""
+    )
+    assert "bioetl_records_processed_total" in pipeline_query_text, (
+        f"Dashboard {dashboard_path.name} 'pipeline' query must use "
+        "bioetl_records_processed_total"
+    )
+
+    if dashboard_path.name == "bioetl-provider-health-v2.json":
+        provider_var = variable_map.get("provider")
+        assert provider_var is not None, (
+            f"Dashboard {dashboard_path.name} must define 'provider' variable"
         )
-        assert "bioetl_infrastructure_validated" in definition, (
-            f"Dashboard {dashboard_path.name} run_id definition must use "
-            "bioetl_infrastructure_validated"
+        provider_query = provider_var.get("query", {})
+        provider_query_text = (
+            provider_query.get("query", "") if isinstance(provider_query, dict) else ""
         )
-        assert "bioetl_infrastructure_validated" in query_text, (
-            f"Dashboard {dashboard_path.name} run_id query must use "
-            "bioetl_infrastructure_validated"
+        assert "bioetl_health_check_success_total" in provider_query_text, (
+            f"Dashboard {dashboard_path.name} 'provider' query must use "
+            "bioetl_health_check_success_total"
+        )
+    else:
+        run_type_var = variable_map.get("run_type")
+        assert run_type_var is not None, (
+            f"Dashboard {dashboard_path.name} must define 'run_type' variable"
+        )
+        run_type_query = run_type_var.get("query", {})
+        run_type_query_text = (
+            run_type_query.get("query", "") if isinstance(run_type_query, dict) else ""
+        )
+        assert "bioetl_records_processed_total" in run_type_query_text, (
+            f"Dashboard {dashboard_path.name} 'run_type' query must use "
+            "bioetl_records_processed_total"
+        )
+        assert "run_type" in run_type_query_text, (
+            f"Dashboard {dashboard_path.name} 'run_type' query must select run_type label"
         )
 
 
