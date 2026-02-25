@@ -4,6 +4,7 @@
 %% Covers: RULES.md §1.1 (Composition Layer), ADR-005
 %% Rank: 3 (Score 9.00) — Complete dependency injection assembly
 %% Updated: 2026-02-17
+%% Legend: see 00-legend.mermaid
 
 %% @version 1.1.0
 %% @date    2026-02-24
@@ -81,13 +82,13 @@ flowchart TB
     STA --> BW & SW & GW
     BOOT --> DQF
     BOOT --> SB
-    SB -->|"injects storage"| BW & SW & GW
-    SB -->|"injects lock"| ML
-    SB -->|"injects checkpoint"| LC
-    SB -->|"injects quarantine"| UQ
-    SB -->|"injects logger"| SLL
-    SB -->|"injects metrics"| PMM
-    SB -->|"injects tracing"| NOT
+    SB -->|K06| BW & SW & GW
+    SB -->|K07| ML
+    SB -->|K08| LC
+    SB -->|K09| UQ
+    SB -->|K10| SLL
+    SB -->|K11| PMM
+    SB -->|K12| NOT
     SB --> PS
     BOOT --> RF
     RF -->|"uses"| PS
@@ -95,7 +96,7 @@ flowchart TB
     RF --> RUN
 
     %% Registry connections
-    GPF -->|"registered in"| PLREG
+    GPF -->|K13| PLREG
     PR -->|"contains"| DSR
 
     %% Styling
@@ -108,3 +109,32 @@ flowchart TB
     style ClientFactories fill:#e3f2fd,stroke:#2196f3,stroke-dasharray: 5 5
     style StorageFactories fill:#f3e5f5,stroke:#9c27b0,stroke-dasharray: 5 5
     style PipelineFactories fill:#e0f2f1,stroke:#009688,stroke-dasharray: 5 5
+
+    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 8 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 10 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 11 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 12 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 13 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 14 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 15 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 16 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 17 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 18 stroke:#94A3B8,stroke-width:1px
+    linkStyle 19 stroke:#94A3B8,stroke-width:1px
+    linkStyle 20 stroke:#94A3B8,stroke-width:1px
+    linkStyle 21 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 22 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 23 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 24 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 25 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 26 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 27 stroke:#475569,stroke-width:2px,stroke-dasharray:5

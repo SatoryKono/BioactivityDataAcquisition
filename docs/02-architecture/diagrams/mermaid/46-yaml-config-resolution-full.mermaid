@@ -4,6 +4,7 @@
 %% Covers: infrastructure/config_loader.py, infrastructure/config/, domain/config/
 %% Rank: 21 (Score 7.38) — Hierarchical config merge underpins every pipeline
 %% Updated: 2026-02-17
+%% Legend: see 00-legend.mermaid
 
 %% @version 1.0.0
 %% @date    2026-02-24
@@ -61,9 +62,9 @@ flowchart TD
     BASE -->|"layer 1"| YAML_LOADER
     PROVIDER_BASE -->|"layer 2"| YAML_LOADER
     PIPELINE -->|"layer 3"| YAML_LOADER
-    SOURCE -->|"source merge"| YAML_LOADER
-    YAML_LOADER -->|"_deep_merge(base, override)"| PIPELINE_YAML_CFG
-    PIPELINE_YAML_CFG -->|"to_domain()"| PIPELINE_CONFIG
+    SOURCE -->|K32| YAML_LOADER
+    YAML_LOADER -->|K33| PIPELINE_YAML_CFG
+    PIPELINE_YAML_CFG -->|K34| PIPELINE_CONFIG
     PIPELINE_CONFIG --- TABLE_CONFIG
 
     %% DQ resolution
@@ -72,7 +73,7 @@ flowchart TD
     DQ_ENTITY -->|"layer 3"| DQ_CONFIG_LOADER
     DQ_INLINE -->|"layer 4"| DQ_CONFIG_LOADER
     DQ_CONFIG_LOADER -->|"validate"| DQ_CONFIG_FILE
-    DQ_CONFIG_FILE -->|"to_domain()"| DQ_CONFIG
+    DQ_CONFIG_FILE -->|K34| DQ_CONFIG
 
     %% Filter resolution
     FILTER_DEFAULTS -->|"layer 1"| FILTER_CONFIG_LOADER
@@ -80,19 +81,19 @@ flowchart TD
     FILTER_ENTITY -->|"layer 3"| FILTER_CONFIG_LOADER
     FILTER_INLINE -->|"layer 4"| FILTER_CONFIG_LOADER
     FILTER_CONFIG_LOADER -->|"validate"| FILTER_CONFIG_FILE
-    FILTER_CONFIG_FILE -->|"to_domain()"| INPUT_FILTER
-    FILTER_CONFIG_FILE -->|"to_domain()"| SILVER_FILTER
-    FILTER_CONFIG_FILE -->|"to_domain()"| GOLD_FILTER
+    FILTER_CONFIG_FILE -->|K34| INPUT_FILTER
+    FILTER_CONFIG_FILE -->|K34| SILVER_FILTER
+    FILTER_CONFIG_FILE -->|K34| GOLD_FILTER
 
     %% Inheritance
     BASE_CONFIG_LOADER -.->|"base class"| DQ_CONFIG_LOADER
     BASE_CONFIG_LOADER -.->|"base class"| FILTER_CONFIG_LOADER
     CONFIG_LOADER -->|"delegates"| YAML_LOADER
-    CONFIG_LOADER -->|"resolve_dq_config()"| DQ_CONFIG_LOADER
+    CONFIG_LOADER -->|K35| DQ_CONFIG_LOADER
 
     %% Convention-based auto-resolution (ADR-029)
-    PIPELINE -.->|"ADR-029: auto-resolve<br/>source_file, dq_config_file,<br/>filter_config_file"| SOURCE
-    PIPELINE -.->|"ADR-029: auto-resolve<br/>sink paths from<br/>provider + entity_type"| PIPELINE_CONFIG
+    PIPELINE -.->|K36| SOURCE
+    PIPELINE -.->|K37| PIPELINE_CONFIG
 
     %% Merge rules
     style YAML_FILES fill:#f5f5f5,stroke:#333
@@ -101,3 +102,31 @@ flowchart TD
     style LOADERS fill:#FFF3E0,stroke:#E65100
     style DOMAIN_CONFIG fill:#FFD700,stroke:#B8860B
     style VALIDATION fill:#F3E5F5,stroke:#6A1B9A
+
+    linkStyle 0 stroke:#1E293B,stroke-width:4px
+    linkStyle 1 stroke:#1E293B,stroke-width:4px
+    linkStyle 2 stroke:#1E293B,stroke-width:4px
+    linkStyle 3 stroke:#1E293B,stroke-width:4px
+    linkStyle 4 stroke:#1E293B,stroke-width:4px
+    linkStyle 5 stroke:#1E293B,stroke-width:4px
+    linkStyle 6 stroke:#1E293B,stroke-width:4px
+    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 8 stroke:#1E293B,stroke-width:4px
+    linkStyle 9 stroke:#1E293B,stroke-width:4px
+    linkStyle 10 stroke:#1E293B,stroke-width:4px
+    linkStyle 11 stroke:#1E293B,stroke-width:4px
+    linkStyle 12 stroke:#1E293B,stroke-width:4px
+    linkStyle 13 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 14 stroke:#1E293B,stroke-width:4px
+    linkStyle 15 stroke:#1E293B,stroke-width:4px
+    linkStyle 16 stroke:#1E293B,stroke-width:4px
+    linkStyle 17 stroke:#1E293B,stroke-width:4px
+    linkStyle 18 stroke:#1E293B,stroke-width:4px
+    linkStyle 19 stroke:#1E293B,stroke-width:4px
+    linkStyle 20 stroke:#1E293B,stroke-width:4px
+    linkStyle 21 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 22 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 23 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 24 stroke:#1E293B,stroke-width:4px
+    linkStyle 25 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 26 stroke:#475569,stroke-width:2px,stroke-dasharray:5

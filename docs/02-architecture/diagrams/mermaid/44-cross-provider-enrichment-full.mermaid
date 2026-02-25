@@ -4,6 +4,7 @@
 %% Covers: ADR-026 (Composite), publication composite pipeline config
 %% Rank: 19 (Score 8.00) — 5 providers merging into unified Gold
 %% Updated: 2026-02-17
+%% Legend: see 00-legend.mermaid
 
 %% @version 1.0.0
 %% @date    2026-02-24
@@ -59,11 +60,11 @@ flowchart LR
     OAA --> OAT --> OAS
     SSA --> SST --> S2S
 
-    CS -->|"seed (doi, pmid,\ntitle, authors)"| MS
-    CRS -->|"enriches (citations,\nfunders, references)"| MS
-    PMS -->|"enriches (abstract,\nmesh_terms, pub_type)"| MS
-    OAS -->|"enriches (concepts,\ninstitutions, cited_by)"| MS
-    S2S -->|"enriches (tldr,\nembedding, fields_of_study)"| MS
+    CS -->|K27| MS
+    CRS -->|K28| MS
+    PMS -->|K29| MS
+    OAS -->|K30| MS
+    S2S -->|K31| MS
 
     MS --> FIELDS
     FIELDS --> GS --> GT
@@ -72,3 +73,16 @@ flowchart LR
     style ChEMBL fill:#FFA500,stroke:#cc8400,color:#000
     style Merge fill:#C0C0C0,stroke:#808080,color:#000
     style Gold fill:#FFD700,stroke:#ccac00,color:#000
+
+    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 8 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 10 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 11 stroke:#475569,stroke-width:2px,stroke-dasharray:5
