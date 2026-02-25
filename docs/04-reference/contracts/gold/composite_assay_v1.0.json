@@ -10,11 +10,6 @@
       "nullable": false,
       "description": ""
     },
-    "content_hash": {
-      "type": "string",
-      "nullable": false,
-      "description": ""
-    },
     "_dq_warn": {
       "type": "boolean",
       "nullable": false,
@@ -85,7 +80,6 @@
     "_run_id",
     "_run_type",
     "_source_providers",
-    "content_hash",
     "entity_id"
   ]
 }
