@@ -1,13 +1,13 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.21 | Last updated: 2026-02-21*
+*Synced with RULES.md v5.22 | Last updated: 2026-02-25*
 
-> **Documentation Update:** 2026-02-17
+> **Documentation Update:** 2026-02-25
 > - Codebase metrics updated: 1,120 Python files (534 src + 586 tests), ~116,120 src LOC
-> - ADR count: 34 ADRs (ADR-001 through ADR-034)
+> - ADR count: 39 ADRs (ADR-001 through ADR-039)
 > - Pipeline configs: 26 configurations (21 single-source + 5 composite)
 > - YAML configs total: 121 (26 pipelines + 35 DQ + 34 filters + 26 schemas)
-> - Documentation files: 273 markdown files
+> - Documentation files: 366 markdown files
 > - Adapter listing completed (all 7 providers)
 > - Diagrams: 50+ Mermaid source files
 
@@ -59,7 +59,7 @@ docs/
 │
 ├── 02-architecture/             # Architecture & Decisions
 │   ├── 00-overview.md           # Architecture overview
-│   ├── decisions/               # ADRs (ADR-001..034)
+│   ├── decisions/               # ADRs (ADR-001..039)
 │   ├── diagrams/                # System diagrams
 │   │   └── mermaid/             # Mermaid source files
 │   └── ... (Layer docs: 01-domain, 02-application, etc.)
@@ -138,6 +138,13 @@ docs/
 | [ADR-030: Publication Pagination Strategy](../02-architecture/decisions/ADR-030-publication-pagination-strategy.md) | Publication pagination strategy | -       |
 | [ADR-031: Loading Strategy Formalization](../02-architecture/decisions/ADR-031-loading-strategy-formalization.md) | Loading strategy formalization | -       |
 | [ADR-032: Unified HTTP Client](../02-architecture/decisions/ADR-032-unified-http-client.md) | Unified HTTP client pattern | App A   |
+| [ADR-033: Publication Validation Strategy](../02-architecture/decisions/ADR-033-publication-validation-strategy.md) | Five-level publication validation | §3.4 |
+| [ADR-034: Schema↔Domain Pairs](../02-architecture/decisions/ADR-034-schema-domain-pairs.md) | Schema↔Domain configuration pairs | §2.8 |
+| [ADR-035: JSON Field Typing Policy](../02-architecture/decisions/ADR-035-json-field-typing-policy.md) | JSON field typing (Silver↔Gold) | §2.8 |
+| [ADR-036: Gold Contract Versioning](../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md) | Gold contract versioning policy | §2.7 |
+| [ADR-037: Canonical Schema Generation](../02-architecture/decisions/ADR-037-canonical-schema-generation.md) | Canonical schema source and generation | §2.8 |
+| [ADR-038: Enum Externalization](../02-architecture/decisions/ADR-038-enum-externalization.md) | ChEMBL enum values externalization | App D |
+| [ADR-039: Unified Entity Config](../02-architecture/decisions/ADR-039-unified-entity-config-format.md) | Unified entity configuration format | App D |
 
 ### Data Management
 
@@ -364,7 +371,7 @@ graph TD
 | RULES.md                 | 2026-02-24   | v5.22 (Latest)               |
 | REQUIREMENTS.md          | 2026-02-21   | v1.5 (Local-Only sync)       |
 | glossary.md              | 2026-02-06   | v2.5 (Ubiquitous Language)   |
-| 00-map.md                | 2026-02-21   | v7.3 Audit remediation       |
+| 00-map.md                | 2026-02-25   | v7.4 ADR-033..039 added      |
 | rules-summary.md         | 2026-02-24   | v5.22 Synced                 |
 | TOOLS.md                 | 2026-02-24   | v2.2 Synced with RULES v5.22 |
 | 03-guides/               | 2026-01-20   | Consolidated (16 guides)     |
@@ -377,4 +384,4 @@ graph TD
 
 ---
 
-*Last updated: 2026-02-24. Unified config docs sync.*
+*Last updated: 2026-02-25. ADR-033..039 added, version sync v5.22.*
