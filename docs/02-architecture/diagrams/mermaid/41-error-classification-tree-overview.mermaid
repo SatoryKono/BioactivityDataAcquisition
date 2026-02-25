@@ -1,0 +1,46 @@
+%% View: Overview | Parent: 41-error-classification-tree-full.mermaid
+flowchart TB
+
+    subgraph Domain["🟡 Domain Layer"]
+        direction TB
+        N2["HTTP"]
+        N1["ERROR"]
+    end
+
+    subgraph Application["🟢 Application Layer"]
+        direction TB
+        N3["INFRA"]
+        N4["no"]
+        N5["classify"]
+        N7["AUTH"]
+        N8["FAIL_FAST"]
+        N9["RATE"]
+        N11["SERVER"]
+        N14["STORE"]
+        N15["CB"]
+    end
+
+    subgraph Infrastructure["🔵 Infrastructure Layer"]
+        direction TB
+        N13["LOCKACQ"]
+        N6["retry"]
+        N10["RETRY"]
+        N12["LOCK"]
+    end
+
+    N1 --> N2
+    N1 --> N3
+    N2 --> N4
+    N2 --> N5
+    N2 --> N6
+    N7 --> N8
+    N9 --> N10
+    N11 --> N10
+    N12 --> N8
+    N13 --> N8
+    N14 --> N10
+    N15 --> N10
+
+    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
+    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
+    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px

@@ -1,0 +1,42 @@
+%% View: Overview | Parent: 32-single-record-journey-full.mermaid
+flowchart TB
+
+    subgraph Application["🟢 Application Layer"]
+        direction TB
+        N2["ST"]
+        N4["BF"]
+        N5["BT"]
+        N6["TI"]
+        N7["NORM"]
+        N8["META"]
+        N9["HASH"]
+        N11["CLEAN"]
+        N12["WARN"]
+        N13["TFG"]
+        N14["GV"]
+    end
+
+    subgraph Infrastructure["🔵 Infrastructure Layer"]
+        direction TB
+        N1["SW"]
+        N3["BW"]
+        N10["PSV"]
+        N15["GW"]
+    end
+
+    N3 --> N4
+    N4 --> N5
+    N5 --> N6
+    N6 --> N7
+    N7 --> N8
+    N8 --> N9
+    N9 --> N10
+    N11 --> N1
+    N12 --> N1
+    N1 --> N2
+    N2 --> N13
+    N13 --> N14
+    N14 --> N15
+
+    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
+    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px

@@ -1,0 +1,45 @@
+%% View: Overview | Parent: 04-domain-layer-class-diagram-full.mermaid
+flowchart TB
+
+    subgraph Domain["🟡 Domain Layer"]
+        direction TB
+        N1["BaseEntity"]
+        N2["PublicationEntityBase"]
+        N7["PipelineConfig"]
+        N8["TableConfig"]
+        N12["DQConfig"]
+        N13["FilterableDataSourcePort"]
+        N14["DataSourcePort"]
+        N15["RuntimeConfig"]
+    end
+
+    subgraph Application["🟢 Application Layer"]
+        direction TB
+        N3["Activity"]
+        N4["Molecule"]
+        N5["Assay"]
+        N6["Target"]
+        N11["ChemblPublication"]
+    end
+
+    subgraph Infrastructure["🔵 Infrastructure Layer"]
+        direction TB
+        N9["SilverWriteMode"]
+        N10["GoldWriteMode"]
+    end
+
+    N1 --> N3
+    N1 --> N4
+    N1 --> N5
+    N1 --> N6
+    N1 --> N2
+    N2 --> N11
+    N13 --> N14
+    N7 --> N8
+    N7 --> N12
+    N8 --> N9
+    N8 --> N10
+
+    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
+    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
+    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px

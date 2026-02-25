@@ -1,0 +1,34 @@
+%% View: Data-Flow | Parent: 04-domain-layer-class-diagram-full.mermaid
+flowchart TB
+
+    subgraph Domain["🟡 Domain Layer"]
+        direction TB
+        N1["PipelineConfig"]
+        N2["DataSourcePort"]
+        N3["FilterableDataSourcePort"]
+        N6["QuarantinePort"]
+        N7["TableConfig"]
+        N8["DQConfig"]
+        N9["BaseEntity"]
+        N10["PublicationEntityBase"]
+    end
+
+    subgraph Infrastructure["🔵 Infrastructure Layer"]
+        direction TB
+        N4["SilverWriteMode"]
+        N5["GoldWriteMode"]
+        N11["Activity"]
+        N12["Molecule"]
+    end
+
+    N9 --> N11
+    N9 --> N12
+    N9 --> N10
+    N3 --> N2
+    N1 --> N7
+    N1 --> N8
+    N7 --> N4
+    N7 --> N5
+
+    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
+    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px

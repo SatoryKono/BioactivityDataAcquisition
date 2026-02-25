@@ -1,0 +1,51 @@
+%% View: Data-Flow | Parent: 33-cli-run-interaction-full.mermaid
+flowchart TB
+
+    subgraph Application["🟢 Application Layer"]
+        direction TB
+        N1["Runner"]
+    end
+
+    subgraph Infrastructure["🔵 Infrastructure Layer"]
+        direction TB
+        N2["PRS"]
+        N4["Boot"]
+        N5["PF"]
+        N6["LM"]
+        N7["BE"]
+        N8["Post"]
+        N10["SB"]
+        N11["RF"]
+        N12["Obs"]
+    end
+
+    subgraph Interfaces["⚪ Interfaces Layer"]
+        direction TB
+        N3["CLI"]
+        N9["User"]
+    end
+
+    N9 --> N3
+    N3 --> N2
+    N2 --> N4
+    N4 --> N10
+    N10 --> N4
+    N4 --> N11
+    N11 --> N4
+    N4 --> N2
+    N2 --> N12
+    N2 --> N1
+    N1 --> N6
+    N6 --> N1
+    N1 --> N5
+    N5 --> N1
+    N1 --> N7
+    N7 --> N1
+    N1 --> N8
+    N1 --> N2
+    N2 --> N3
+    N3 --> N9
+
+    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
+    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
+    style Interfaces fill:#F1F5F9,stroke:#64748B,stroke-width:2px

@@ -1,0 +1,30 @@
+%% View: Overview | Parent: 39-medallion-invariants-full.mermaid
+flowchart TB
+
+    N1["INC"]
+    N2["CHECK"]
+    N3["BF"]
+    N4["RB"]
+    N5["E1"]
+    N6["I2"]
+    N7["I3"]
+    N8["B2"]
+    N9["B3"]
+    N10["R2"]
+    N11["R3"]
+    N12["I1"]
+    N13["I4"]
+    N14["B1"]
+    N15["B4"]
+
+    N1 --> N2
+    N3 --> N2
+    N4 --> N2
+    N12 --> N6
+    N6 --> N7
+    N7 --> N13
+    N14 --> N8
+    N8 --> N9
+    N9 --> N15
+    N10 --> N11
+    N5 --> N2

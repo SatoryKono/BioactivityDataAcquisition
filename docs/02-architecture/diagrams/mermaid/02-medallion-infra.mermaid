@@ -1,0 +1,26 @@
+%% View: Infrastructure-Mapping | Parent: 02-medallion-full.mermaid
+flowchart TB
+
+    N1["Quarantine"]
+    N2["Bronze"]
+    N3["normalize"]
+    N4["Silver"]
+    N5["flatten"]
+    N6["B1"]
+    N7["B2"]
+    N8["B3"]
+    N9["B4"]
+    N10["S1"]
+    N11["S2"]
+    N12["S3"]
+    N13["S4"]
+    N14["G1"]
+    N15["G2"]
+    N16["G3"]
+    N17["G4"]
+    N18["Q1"]
+    N19["Q2"]
+    N20["Q3"]
+
+    N2 --> N3
+    N4 --> N5

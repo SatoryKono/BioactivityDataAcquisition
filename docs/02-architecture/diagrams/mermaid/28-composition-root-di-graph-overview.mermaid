@@ -1,0 +1,50 @@
+%% View: Overview | Parent: 28-composition-root-di-graph-full.mermaid
+flowchart TB
+
+    subgraph Application["🟢 Application Layer"]
+        direction TB
+        N1["BOOT"]
+        N2["SB"]
+        N3["BL"]
+        N4["HCF"]
+        N5["DSF"]
+        N6["STF"]
+        N7["RF"]
+        N9["DQF"]
+        N10["STA"]
+        N14["PS"]
+        N15["SLL"]
+    end
+
+    subgraph Infrastructure["🔵 Infrastructure Layer"]
+        direction TB
+        N11["SW"]
+        N12["GW"]
+        N13["BW"]
+    end
+
+    subgraph Interfaces["⚪ Interfaces Layer"]
+        direction TB
+        N8["CLI"]
+    end
+
+    N8 --> N1
+    N1 --> N3
+    N3 --> N15
+    N1 --> N4
+    N1 --> N5
+    N1 --> N6
+    N6 --> N10
+    N10 --> N13
+    N10 --> N11
+    N10 --> N12
+    N1 --> N9
+    N1 --> N2
+    N2 --> N11
+    N2 --> N12
+    N2 --> N14
+    N1 --> N7
+
+    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
+    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
+    style Interfaces fill:#F1F5F9,stroke:#64748B,stroke-width:2px

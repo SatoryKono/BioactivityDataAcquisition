@@ -1,6 +1,6 @@
 # BioETL Architecture Diagrams
 
-*Updated: 2026-02-24*
+*Updated: 2026-02-25*
 
 > **Note:** Canonical diagram sources have been consolidated into
 > [`docs/02-architecture/mmd-diagrams/`](../mmd-diagrams/README.md).
@@ -9,6 +9,25 @@
 
 В каталоге 59 исходных файлов диаграмм Mermaid, документирующих архитектуру BioETL.
 Диаграммы 26–50 созданы на основе TOP-25 из 500 архитектурных предложений (см. `top-50-diagram-selection.md`).
+
+## Diagram Views
+
+Overloaded diagrams are decomposed into focused views in [`README.md`](./README.md)
+and `./mermaid/`:
+
+- `*-overview.mermaid` — key entities and primary relations (recommended first read)
+- `*-domain.mermaid` — entities, domain services, and ports
+- `*-infra.mermaid` — entities mapped to adapters and storage components
+- `*-dataflow.mermaid` — Bronze → Silver → Gold data movement only
+- `*-full.mermaid` — full reference source retained for traceability
+
+Recommended onboarding order:
+
+1. Overview views
+2. Domain views
+3. Infrastructure views
+4. Data-flow views
+5. Full reference views
 
 ## Diagram Overview
 

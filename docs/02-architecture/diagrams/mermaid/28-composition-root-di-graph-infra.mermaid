@@ -1,0 +1,58 @@
+%% View: Infrastructure-Mapping | Parent: 28-composition-root-di-graph-full.mermaid
+flowchart TB
+
+    subgraph Domain["🟡 Domain Layer"]
+        direction TB
+        N14["ADP"]
+    end
+
+    subgraph Infrastructure["🔵 Infrastructure Layer"]
+        direction TB
+        N1["BOOT"]
+        N2["SB"]
+        N3["BL"]
+        N4["HCF"]
+        N5["DSF"]
+        N6["STF"]
+        N7["STA"]
+        N8["SW"]
+        N9["GW"]
+        N10["RF"]
+        N12["SLL"]
+        N13["UHC"]
+        N15["BW"]
+        N16["DQF"]
+        N17["PS"]
+        N18["RUN"]
+        N19["GPF"]
+        N20["PR"]
+    end
+
+    subgraph Interfaces["⚪ Interfaces Layer"]
+        direction TB
+        N11["CLI"]
+    end
+
+    N11 --> N1
+    N1 --> N3
+    N3 --> N12
+    N1 --> N4
+    N4 --> N13
+    N1 --> N5
+    N5 --> N14
+    N1 --> N6
+    N6 --> N7
+    N7 --> N15
+    N7 --> N8
+    N7 --> N9
+    N1 --> N16
+    N1 --> N2
+    N2 --> N8
+    N2 --> N9
+    N2 --> N17
+    N1 --> N10
+    N10 --> N18
+
+    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
+    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
+    style Interfaces fill:#F1F5F9,stroke:#64748B,stroke-width:2px

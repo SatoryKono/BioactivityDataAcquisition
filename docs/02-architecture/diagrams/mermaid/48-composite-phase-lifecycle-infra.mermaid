@@ -1,0 +1,64 @@
+%% View: Infrastructure-Mapping | Parent: 48-composite-phase-lifecycle-full.mermaid
+flowchart TB
+
+    subgraph Domain["🟡 Domain Layer"]
+        direction TB
+        N12["idle"]
+    end
+
+    subgraph Application["🟢 Application Layer"]
+        direction TB
+        N19["merge_active"]
+    end
+
+    subgraph Infrastructure["🔵 Infrastructure Layer"]
+        direction TB
+        N1["*"]
+        N2["FAILED"]
+        N3["ENRICHING"]
+        N4["SEED_RUNNING"]
+        N5["SEED_COMPLETED"]
+        N6["DEPENDENCIES_RUNNING"]
+        N7["MERGING"]
+        N8["NOT_STARTED"]
+        N9["DEPENDENCIES_COMPLETED"]
+        N10["ENRICHMENT_COMPLETED"]
+        N11["COMPLETED"]
+        N13["extracting_seed"]
+        N14["keys_extracted"]
+        N15["running_deps"]
+        N16["deps_done"]
+        N17["fan_out"]
+        N18["enrichers_done"]
+        N20["success"]
+    end
+
+    N1 --> N8
+    N8 --> N4
+    N4 --> N5
+    N4 --> N2
+    N5 --> N6
+    N5 --> N3
+    N6 --> N9
+    N6 --> N2
+    N9 --> N3
+    N3 --> N10
+    N3 --> N2
+    N10 --> N7
+    N7 --> N11
+    N7 --> N2
+    N11 --> N1
+    N2 --> N1
+    N1 --> N12
+    N1 --> N13
+    N1 --> N14
+    N1 --> N15
+    N1 --> N16
+    N1 --> N17
+    N1 --> N18
+    N1 --> N19
+    N1 --> N20
+
+    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
+    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
+    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px

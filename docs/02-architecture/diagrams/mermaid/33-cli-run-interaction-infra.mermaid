@@ -1,0 +1,72 @@
+%% View: Infrastructure-Mapping | Parent: 33-cli-run-interaction-full.mermaid
+flowchart TB
+
+    subgraph Domain["🟡 Domain Layer"]
+        direction TB
+        N19["config"]
+        N15["owner_id"]
+    end
+
+    subgraph Application["🟢 Application Layer"]
+        direction TB
+        N4["Runner"]
+    end
+
+    subgraph Infrastructure["🔵 Infrastructure Layer"]
+        direction TB
+        N1["storage"]
+        N2["metrics"]
+        N3["PF"]
+        N5["PRS"]
+        N7["Boot"]
+        N8["LM"]
+        N9["BE"]
+        N10["Post"]
+        N12["SB"]
+        N13["RF"]
+        N14["Obs"]
+        N16["HB"]
+        N17["resolve"]
+        N18["options"]
+        N20["ttl"]
+    end
+
+    subgraph Interfaces["⚪ Interfaces Layer"]
+        direction TB
+        N6["CLI"]
+        N11["User"]
+    end
+
+    N11 --> N6
+    N6 --> N17
+    N6 --> N5
+    N6 --> N18
+    N5 --> N7
+    N5 --> N19
+    N7 --> N12
+    N12 --> N7
+    N7 --> N13
+    N13 --> N7
+    N7 --> N5
+    N5 --> N14
+    N5 --> N4
+    N4 --> N8
+    N4 --> N15
+    N4 --> N20
+    N8 --> N4
+    N4 --> N16
+    N4 --> N3
+    N3 --> N1
+    N3 --> N4
+    N4 --> N9
+    N9 --> N4
+    N4 --> N10
+    N10 --> N2
+    N4 --> N5
+    N5 --> N6
+    N6 --> N11
+
+    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
+    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
+    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
+    style Interfaces fill:#F1F5F9,stroke:#64748B,stroke-width:2px

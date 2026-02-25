@@ -1,0 +1,41 @@
+%% View: Overview | Parent: 06-application-layer-class-diagram-full.mermaid
+flowchart TB
+
+    subgraph Application["🟢 Application Layer"]
+        direction TB
+        N1["PipelineRunner"]
+        N2["RunnerServices"]
+        N3["BaseChemblTransformer"]
+        N4["BaseTransformer"]
+        N6["PreflightService"]
+        N7["PostrunService"]
+        N8["LifecycleOrchestrator"]
+        N9["PipelineObserver"]
+        N10["ActivityTransformer"]
+        N11["MoleculeTransformer"]
+        N12["AssayTransformer"]
+        N13["TargetTransformer"]
+        N14["PipelineExecutor"]
+        N15["RecordProcessor"]
+    end
+
+    subgraph Infrastructure["🔵 Infrastructure Layer"]
+        direction TB
+        N5["LockManager"]
+    end
+
+    N3 --> N4
+    N10 --> N3
+    N11 --> N3
+    N12 --> N3
+    N13 --> N3
+    N1 --> N2
+    N14 --> N15
+    N2 --> N5
+    N2 --> N6
+    N2 --> N7
+    N2 --> N8
+    N2 --> N9
+
+    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
+    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px

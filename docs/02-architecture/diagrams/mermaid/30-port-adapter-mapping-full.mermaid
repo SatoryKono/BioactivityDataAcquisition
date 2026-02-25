@@ -1,0 +1,118 @@
+%% Parent source: docs/02-architecture/mmd-diagrams/foundation/30-port-adapter-mapping.mmd
+%% Full reference diagram retained after decomposition.
+%% Title: Port-to-Adapter Mapping Table Diagram
+%% Covers: RULES.md §1.2 (Ports & Adapters), ARCH-008 (Single Source)
+%% Rank: 5 (Score 8.63) — Reference diagram: "where is X implemented?"
+%% Updated: 2026-02-17
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   Mixed (System / Component / Class)
+
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+flowchart LR
+    subgraph Ports["Domain Ports (domain/ports/)"]
+        direction TB
+        P1["DataSourcePort"]
+        P2["FilterableDataSourcePort"]
+        P3["StoragePort"]
+        P4["LockPort"]
+        P5["CheckpointPort"]
+        P6["QuarantinePort"]
+        P7["LoggerPort"]
+        P8["MetricsPort"]
+        P9["TracingPort"]
+        P10["DQMonitorPort"]
+        P11["SilverValidatorPort"]
+        P12["GoldValidatorPort"]
+        P13["PiiHasherPort"]
+        P14["MetadataWriterPort"]
+        P15["MetadataCoordinatorPort"]
+        P16["DeltaReaderPort"]
+        P17["MemoryMonitorPort"]
+        P18["ShutdownPort"]
+        P19["AuditPort"]
+        P20["HealthCheckPort"]
+        P21["JsonEncoderPort"]
+        P22["InputFilterPort"]
+        P23["RateLimiterPort"]
+        P24["CircuitBreakerPort"]
+    end
+
+    subgraph Adapters["Infrastructure Adapters"]
+        direction TB
+        A1["ChemblAdapter\nPubChemAdapter\nUniProtAdapter\nPubMedAdapter\nCrossRefAdapter\nOpenAlexAdapter\nSemanticScholarAdapter"]
+        A2["FilteredDataSource\nCachedBronzeDataSource"]
+        A3["BronzeWriter + SilverWriter + GoldWriter"]
+        A4["MemoryLock"]
+        A5["LocalCheckpoint"]
+        A6["UnifiedQuarantine"]
+        A7["StructlogLogger\nUnifiedLogger"]
+        A8["PrometheusMetrics"]
+        A9["NoOpTracing\nOpenTelemetryTracer"]
+        A10["DataQualityMonitor"]
+        A11["PanderaSilverValidator"]
+        A12["PanderaGoldValidator"]
+        A13["Sha256PiiHasher"]
+        A14["MetadataWriter"]
+        A15["MetadataCoordinator"]
+        A16["DeltaReader"]
+        A17["MemoryMonitor"]
+        A18["ShutdownService"]
+        A19["FileAuditAdapter"]
+        A20["HealthCheckMixin"]
+        A21["StdLibJsonEncoder\nOrjsonEncoder"]
+        A22["CsvFilterReader"]
+        A23["TokenBucket"]
+        A24["CircuitBreaker"]
+    end
+
+    subgraph NoOps["NoOp Implementations (domain/ports/noop.py)"]
+        direction TB
+        N1["NoOpTracing"]
+        N2["NoOpMetrics"]
+        N3["NoOpAudit"]
+        N4["NoOpPiiHasher"]
+        N5["NoOpMemoryMonitor"]
+        N6["NoOpMetadataWriter"]
+    end
+
+    %% Mappings
+    P1 --> A1
+    P2 --> A2
+    P3 --> A3
+    P4 --> A4
+    P5 --> A5
+    P6 --> A6
+    P7 --> A7
+    P8 --> A8
+    P9 --> A9
+    P10 --> A10
+    P11 --> A11
+    P12 --> A12
+    P13 --> A13
+    P14 --> A14
+    P15 --> A15
+    P16 --> A16
+    P17 --> A17
+    P18 --> A18
+    P19 --> A19
+    P20 --> A20
+    P21 --> A21
+    P22 --> A22
+    P23 --> A23
+    P24 --> A24
+
+    %% NoOp fallbacks
+    P9 -.->|"default"| N1
+    P8 -.->|"fallback"| N2
+    P19 -.->|"fallback"| N3
+    P13 -.->|"fallback"| N4
+    P17 -.->|"fallback"| N5
+    P14 -.->|"fallback"| N6
+
+    %% Styling
+    style Ports fill:#e8f5e9,stroke:#2e7d32
+    style Adapters fill:#fff3e0,stroke:#e65100
+    style NoOps fill:#f5f5f5,stroke:#9e9e9e

@@ -1,0 +1,31 @@
+%% View: Overview | Parent: 02-medallion-full.mermaid
+flowchart TB
+
+    subgraph Application["🟢 Application Layer"]
+        direction TB
+        N2["normalize"]
+        N4["flatten"]
+        N5["B1"]
+        N6["B2"]
+        N7["B3"]
+        N8["B4"]
+        N9["S1"]
+        N10["S2"]
+        N11["S3"]
+        N12["S4"]
+        N13["G1"]
+        N14["G2"]
+        N15["G3"]
+    end
+
+    subgraph Infrastructure["🔵 Infrastructure Layer"]
+        direction TB
+        N1["Bronze"]
+        N3["Silver"]
+    end
+
+    N1 --> N2
+    N3 --> N4
+
+    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
+    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px

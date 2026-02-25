@@ -1,0 +1,36 @@
+%% View: Data-Flow | Parent: 26-hexagonal-ports-adapters-full.mermaid
+flowchart TB
+
+    subgraph Domain["🟡 Domain Layer"]
+        direction TB
+        N1["DSP"]
+        N9["SP"]
+    end
+
+    subgraph Infrastructure["🔵 Infrastructure Layer"]
+        direction TB
+        N2["CA"]
+        N3["PCA"]
+        N4["UA"]
+        N5["PMA"]
+        N6["CRA"]
+        N7["OAA"]
+        N8["SSA"]
+        N10["BW"]
+        N11["SW"]
+        N12["GW"]
+    end
+
+    N1 --> N2
+    N1 --> N3
+    N1 --> N4
+    N1 --> N5
+    N1 --> N6
+    N1 --> N7
+    N1 --> N8
+    N9 --> N10
+    N9 --> N11
+    N9 --> N12
+
+    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
+    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px

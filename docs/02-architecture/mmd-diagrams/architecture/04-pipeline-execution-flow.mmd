@@ -1,7 +1,7 @@
 %% BioETL — Pipeline Execution Lifecycle
 %% Sequence of phases in a single pipeline run.
 
-%% @version 1.0.0
+%% @version 1.1.0
 %% @date    2026-02-24
 %% @type    sequenceDiagram
 %% @level   System / Component
@@ -17,8 +17,8 @@ sequenceDiagram
     participant Writer as BatchWriter
     participant Postrun as PostrunService
     participant Observer as PipelineObserver
-    participant Storage as StoragePort
     participant DS as DataSourcePort
+    participant Storage as StoragePort
 
     CLI->>Boot: create_pipeline(config, runtime)
     Boot->>Boot: assemble DI container
