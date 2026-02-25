@@ -1,20 +1,22 @@
 %% BioETL — High-Level Hexagonal Architecture
 %% Shows the Ports & Adapters (Hexagonal) pattern across all layers.
 
-%% @version 1.0.0
+%% @version 1.1.0
 %% @date    2026-02-24
 %% @type    flowchart
 %% @level   System / Component
 
 graph TB
     subgraph External["External Systems"]
-        CHEMBL_API["ChEMBL API"]
-        PUBMED_API["PubMed API"]
-        UNIPROT_API["UniProt API"]
-        PUBCHEM_API["PubChem API"]
-        CROSSREF_API["CrossRef API"]
-        OPENALEX_API["OpenAlex API"]
-        SEMSCHOLAR_API["Semantic Scholar API"]
+        subgraph ExternalAPIs["External APIs"]
+            CHEMBL_API["ChEMBL API"]
+            PUBMED_API["PubMed API"]
+            UNIPROT_API["UniProt API"]
+            PUBCHEM_API["PubChem API"]
+            CROSSREF_API["CrossRef API"]
+            OPENALEX_API["OpenAlex API"]
+            SEMSCHOLAR_API["Semantic Scholar API"]
+        end
         FS["File System<br/>(Delta Lake / Parquet / JSONL)"]
         PROM["Prometheus"]
         OTEL["OpenTelemetry"]
@@ -65,13 +67,7 @@ graph TB
     end
 
     %% External → Infrastructure
-    CHEMBL_API -.-> ADAPTERS
-    PUBMED_API -.-> ADAPTERS
-    UNIPROT_API -.-> ADAPTERS
-    PUBCHEM_API -.-> ADAPTERS
-    CROSSREF_API -.-> ADAPTERS
-    OPENALEX_API -.-> ADAPTERS
-    SEMSCHOLAR_API -.-> ADAPTERS
+    ExternalAPIs -.-> ADAPTERS
     FS -.-> STORAGE
     PROM -.-> OBS_INFRA
     OTEL -.-> OBS_INFRA
@@ -124,3 +120,7 @@ graph TB
     class BOOTSTRAP,FACTORIES,PROVIDERS,RT_BUILDERS comp
     class CLI,HTTP_IF,ORCH iface
     class CHEMBL_API,PUBMED_API,UNIPROT_API,PUBCHEM_API,CROSSREF_API,OPENALEX_API,SEMSCHOLAR_API,FS,PROM,OTEL ext
+
+    linkStyle default stroke:#666,stroke-width:1px,color:#666
+    linkStyle 1,2,3,4 stroke-dasharray: 5 5
+    linkStyle 19,20,21,22,23,24,25,26 stroke:#c62828,stroke-width:2px

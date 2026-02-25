@@ -13,7 +13,13 @@
 | Shared memory | [memory.md](memory.md)                                           | Краткая оперативная память по проекту                     |
 | Orchestration | [orchestration/ORCHESTRATION.md](orchestration/ORCHESTRATION.md) | Порядок взаимодействия субагентов и артефакты             |
 
+## Claude Code Subagents
+
+Канонические спецификации субагентов находятся в `.claude/agents/` (SSOT).
+Файлы в `orchestration/subagents/` — устаревшие дубликаты.
+
 ## Notes
 
 - `RULES.md` остаётся canonical source всех RFC 2119 требований.
 - При конфликте инструкций приоритет: System/Developer/User > локальные инструкции агента.
+- Для Claude Code: `.claude/agents/ORCHESTRATION.md` — SSOT оркестрации.

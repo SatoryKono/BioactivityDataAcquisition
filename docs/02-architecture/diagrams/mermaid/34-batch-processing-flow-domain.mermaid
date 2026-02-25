@@ -1,0 +1,90 @@
+%% View: Domain-Focus | Parent: 34-batch-processing-flow-full.mermaid
+flowchart TB
+
+    subgraph Domain["🟡 Domain Layer"]
+        direction TB
+        N2["errors"]
+        N3["error_count"]
+        N5["BE"]
+        N6["BT"]
+        N8["BTM"]
+        N9["DS"]
+        N10["Trans"]
+        N11["br"]
+        N12["filter_ids"]
+        N13["strip"]
+        N14["dates"]
+        N15["_run_type"]
+        N16["_ingestion_ts"]
+        N19["primary_keys"]
+    end
+
+    subgraph Application["🟢 Application Layer"]
+        direction TB
+        N4["batch_num"]
+        N1["Runner"]
+    end
+
+    subgraph Infrastructure["🔵 Infrastructure Layer"]
+        direction TB
+        N7["BW"]
+        N17["Bronze"]
+        N18["Silver"]
+        N20["Gold"]
+    end
+
+    N1 --> N5
+    N5 --> N8
+    N5 --> N9
+    N5 --> N11
+    N5 --> N12
+    N9 --> N5
+    N5 --> N6
+    N6 --> N10
+    N10 --> N6
+    N6 --> N13
+    N6 --> N14
+    N6 --> N15
+    N6 --> N16
+    N6 --> N5
+    N6 --> N2
+    N5 --> N7
+    N7 --> N17
+    N7 --> N18
+    N7 --> N19
+    N7 --> N20
+    N7 --> N5
+    N5 --> N2
+    N5 --> N1
+    N5 --> N3
+    N1 --> N4
+
+    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
+    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
+    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
+
+    linkStyle 0 stroke:#1E293B,stroke-width:4px
+    linkStyle 1 stroke:#1E293B,stroke-width:4px
+    linkStyle 2 stroke:#1E293B,stroke-width:4px
+    linkStyle 3 stroke:#1E293B,stroke-width:4px
+    linkStyle 4 stroke:#1E293B,stroke-width:4px
+    linkStyle 5 stroke:#1E293B,stroke-width:4px
+    linkStyle 6 stroke:#1E293B,stroke-width:4px
+    linkStyle 7 stroke:#1E293B,stroke-width:4px
+    linkStyle 8 stroke:#1E293B,stroke-width:4px
+    linkStyle 9 stroke:#1E293B,stroke-width:4px
+    linkStyle 10 stroke:#1E293B,stroke-width:4px
+    linkStyle 11 stroke:#1E293B,stroke-width:4px
+    linkStyle 12 stroke:#1E293B,stroke-width:4px
+    linkStyle 13 stroke:#1E293B,stroke-width:4px
+    linkStyle 14 stroke:#1E293B,stroke-width:4px
+    linkStyle 15 stroke:#1E293B,stroke-width:4px
+    linkStyle 16 stroke:#1E293B,stroke-width:4px
+    linkStyle 17 stroke:#1E293B,stroke-width:4px
+    linkStyle 18 stroke:#1E293B,stroke-width:4px
+    linkStyle 19 stroke:#1E293B,stroke-width:4px
+    linkStyle 20 stroke:#1E293B,stroke-width:4px
+    linkStyle 21 stroke:#1E293B,stroke-width:4px
+    linkStyle 22 stroke:#1E293B,stroke-width:4px
+    linkStyle 23 stroke:#1E293B,stroke-width:4px
+    linkStyle 24 stroke:#1E293B,stroke-width:4px

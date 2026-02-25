@@ -1,0 +1,79 @@
+%% View: Overview | Parent: 33-cli-run-interaction-full.mermaid
+flowchart TB
+
+    subgraph Domain["🟡 Domain Layer"]
+        direction TB
+        N13["config"]
+        N7["owner_id"]
+    end
+
+    subgraph Application["🟢 Application Layer"]
+        direction TB
+        N1["PRS"]
+        N2["Runner"]
+        N3["PF"]
+        N4["LM"]
+        N5["BE"]
+        N6["Post"]
+        N8["HB"]
+        N9["ttl"]
+        N11["Boot"]
+        N12["Obs"]
+        N15["SB"]
+    end
+
+    subgraph Interfaces["⚪ Interfaces Layer"]
+        direction TB
+        N10["CLI"]
+        N14["User"]
+    end
+
+    N14 --> N10
+    N10 --> N1
+    N1 --> N11
+    N1 --> N13
+    N11 --> N15
+    N15 --> N11
+    N11 --> N1
+    N1 --> N12
+    N1 --> N2
+    N2 --> N4
+    N2 --> N7
+    N2 --> N9
+    N4 --> N2
+    N2 --> N8
+    N2 --> N3
+    N3 --> N2
+    N2 --> N5
+    N5 --> N2
+    N2 --> N6
+    N2 --> N1
+    N1 --> N10
+    N10 --> N14
+
+    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
+    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
+    style Interfaces fill:#F1F5F9,stroke:#64748B,stroke-width:2px
+
+    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 8 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 10 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 11 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 12 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 13 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 14 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 15 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 16 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 17 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 18 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 19 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 20 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 21 stroke:#475569,stroke-width:2px,stroke-dasharray:5

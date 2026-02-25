@@ -1,0 +1,69 @@
+%% View: Domain-Focus | Parent: 29-composite-pipeline-workflow-full.mermaid
+flowchart TB
+
+    N1["EC"]
+    N2["KEYS"]
+    N3["KE"]
+    N4["SB"]
+    N5["DC"]
+    N6["SP"]
+    N7["BOOT"]
+    N8["PFV"]
+    N9["DEP1"]
+    N10["DEP2"]
+    N11["E1"]
+    N12["E2"]
+    N13["E3"]
+    N14["E4"]
+    N15["ES1"]
+    N16["DD"]
+    N17["ES2"]
+    N18["ES3"]
+    N19["ES4"]
+    N20["MS"]
+
+    N8 --> N7
+    N7 --> N6
+    N6 --> N4
+    N4 --> N5
+    N5 --> N9
+    N5 --> N10
+    N4 --> N3
+    N3 --> N2
+    N2 --> N1
+    N1 --> N11
+    N1 --> N12
+    N1 --> N13
+    N1 --> N14
+    N11 --> N15
+    N12 --> N17
+    N13 --> N18
+    N14 --> N19
+    N15 --> N16
+    N17 --> N16
+    N18 --> N16
+    N19 --> N16
+    N16 --> N20
+
+    linkStyle 0 stroke:#1E293B,stroke-width:4px
+    linkStyle 1 stroke:#1E293B,stroke-width:4px
+    linkStyle 2 stroke:#1E293B,stroke-width:4px
+    linkStyle 3 stroke:#1E293B,stroke-width:4px
+    linkStyle 4 stroke:#1E293B,stroke-width:4px
+    linkStyle 5 stroke:#1E293B,stroke-width:4px
+    linkStyle 6 stroke:#1E293B,stroke-width:4px
+    linkStyle 7 stroke:#1E293B,stroke-width:4px
+    linkStyle 8 stroke:#1E293B,stroke-width:4px
+    linkStyle 9 stroke:#1E293B,stroke-width:4px
+    linkStyle 10 stroke:#1E293B,stroke-width:4px
+    linkStyle 11 stroke:#1E293B,stroke-width:4px
+    linkStyle 12 stroke:#1E293B,stroke-width:4px
+    linkStyle 13 stroke:#1E293B,stroke-width:4px
+    linkStyle 14 stroke:#1E293B,stroke-width:4px
+    linkStyle 15 stroke:#1E293B,stroke-width:4px
+    linkStyle 16 stroke:#1E293B,stroke-width:4px
+    linkStyle 17 stroke:#1E293B,stroke-width:4px
+    linkStyle 18 stroke:#1E293B,stroke-width:4px
+    linkStyle 19 stroke:#1E293B,stroke-width:4px
+    linkStyle 20 stroke:#1E293B,stroke-width:4px
+    linkStyle 21 stroke:#1E293B,stroke-width:4px

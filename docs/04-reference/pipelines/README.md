@@ -1,6 +1,6 @@
 # BioETL Pipeline Documentation
 
-*Updated: 2026-02-21 | Aligned with RULES.md v5.21*
+*Updated: 2026-02-21 | Aligned with RULES.md v5.22*
 
 This directory contains documentation for all BioETL pipelines, including composite pipelines.
 

@@ -1,0 +1,85 @@
+%% View: Domain-Focus | Parent: 48-composite-phase-lifecycle-full.mermaid
+flowchart TB
+
+    subgraph Domain["🟡 Domain Layer"]
+        direction TB
+        N1["error"]
+        N2["*"]
+        N3["FAILED"]
+        N4["ENRICHING"]
+        N5["SEED_RUNNING"]
+        N6["SEED_COMPLETED"]
+        N7["DEPENDENCIES_RUNNING"]
+        N8["MERGING"]
+        N9["NOT_STARTED"]
+        N10["DEPENDENCIES_COMPLETED"]
+        N11["ENRICHMENT_COMPLETED"]
+        N12["COMPLETED"]
+        N13["idle"]
+        N14["extracting_seed"]
+        N15["keys_extracted"]
+        N16["running_deps"]
+        N17["deps_done"]
+        N18["fan_out"]
+        N19["enrichers_done"]
+    end
+
+    subgraph Application["🟢 Application Layer"]
+        direction TB
+        N20["merge_active"]
+    end
+
+    N2 --> N9
+    N9 --> N5
+    N5 --> N6
+    N5 --> N3
+    N6 --> N7
+    N6 --> N4
+    N7 --> N10
+    N7 --> N3
+    N10 --> N4
+    N4 --> N11
+    N4 --> N3
+    N11 --> N8
+    N8 --> N12
+    N8 --> N3
+    N12 --> N2
+    N3 --> N2
+    N2 --> N13
+    N2 --> N14
+    N2 --> N15
+    N2 --> N16
+    N2 --> N17
+    N2 --> N18
+    N2 --> N19
+    N2 --> N20
+    N2 --> N1
+
+    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
+    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
+
+    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 8 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 10 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 11 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 12 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 13 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 14 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 15 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 16 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 17 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 18 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 19 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 20 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 21 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 22 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 23 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 24 stroke:#475569,stroke-width:2px,stroke-dasharray:5
