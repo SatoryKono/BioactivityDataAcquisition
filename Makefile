@@ -1,7 +1,7 @@
 # BioETL Makefile
 # Production-ready ETL system for bioactivity data
 
-.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-preflight clean-all
+.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-preflight clean-all deploy deploy-status deploy-stop deploy-update deploy-teardown deploy-logs
 .DEFAULT_GOAL := help
 
 # Detect uv availability (preferred package manager)
@@ -215,6 +215,24 @@ monitoring-down: ## Stop monitoring services
 
 monitoring-logs: ## Show logs from monitoring services
 	docker compose -f docker-compose.monitoring.yml logs -f
+
+deploy: ## Deploy BioETL stack (app + infra + monitoring) via Docker Compose
+	@bash scripts/deploy-bioetl.sh deploy $(ENV)
+
+deploy-status: ## Show status of deployed BioETL services
+	@bash scripts/deploy-bioetl.sh status $(ENV)
+
+deploy-stop: ## Stop all deployed services (preserve data)
+	@bash scripts/deploy-bioetl.sh stop $(ENV)
+
+deploy-update: ## Rebuild and restart BioETL app container
+	@bash scripts/deploy-bioetl.sh update $(ENV)
+
+deploy-teardown: ## Stop services and remove volumes (destructive)
+	@bash scripts/deploy-bioetl.sh teardown $(ENV)
+
+deploy-logs: ## Stream logs from deployed services (COMPONENT=bioetl|neo4j|prometheus|grafana)
+	@bash scripts/deploy-bioetl.sh logs $(ENV) $(COMPONENT)
 
 seed-local: ## Load sample fixtures into local DB
 	@echo "$(YELLOW)Note: BioETL uses external APIs - no local seeding required$(NC)"

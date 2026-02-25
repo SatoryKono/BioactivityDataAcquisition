@@ -1,0 +1,48 @@
+# BioETL Application Service
+# Usage: docker compose -f docker-compose.app.yml up -d
+# Combined: docker compose -f docker-compose.yml -f docker-compose.app.yml up -d
+
+services:
+  bioetl:
+    build:
+      context: .
+      dockerfile: docs/05-operations/Dockerfile
+      target: production
+    container_name: bioetl-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      BIOETL_ENV: ${BIOETL_ENV:-dev}
+      BIOETL_DATA_DIR: /data
+      BIOETL_LOG_FILE: /data/logs/bioetl.log
+      BIOETL_METRICS_PORT: "8000"
+      BIOETL_METRICS_ENABLED: "true"
+    volumes:
+      - bioetl-data:/data
+      - ./configs:/app/configs:ro
+    ports:
+      - "${BIOETL_METRICS_PORT:-8000}:8000"
+    networks:
+      - warp-network
+    healthcheck:
+      test: ["CMD", "bioetl", "--version"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: ${BIOETL_MEMORY_LIMIT:-4g}
+          cpus: "${BIOETL_CPU_LIMIT:-2.0}"
+        reservations:
+          memory: ${BIOETL_MEMORY_RESERVE:-512m}
+          cpus: "${BIOETL_CPU_RESERVE:-0.5}"
+
+networks:
+  warp-network:
+    driver: bridge
+
+volumes:
+  bioetl-data:
