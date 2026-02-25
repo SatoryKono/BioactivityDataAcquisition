@@ -262,6 +262,16 @@ The project uses `pytest` for testing, split into Unit, Integration, and Archite
   make arch-test
   ```
 
+### Codex Skills
+
+- **Sync project skills into Codex**:
+
+  ```bash
+  make setup-skills
+  ```
+
+  This syncs local project skills from `.codex/skills` into `$CODEX_HOME/skills` (default `~/.codex/skills`).
+
 ### Code Quality
 
 Strict quality standards are enforced using `ruff`, `mypy`, and other tools.

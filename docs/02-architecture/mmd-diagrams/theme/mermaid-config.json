@@ -77,7 +77,7 @@
     "padding": 24,
     "nodeSpacing": 50,
     "rankSpacing": 60,
-    "htmlLabels": true,
+    "htmlLabels": false,
     "useMaxWidth": false,
     "diagramPadding": 16,
     "wrappingWidth": 200
