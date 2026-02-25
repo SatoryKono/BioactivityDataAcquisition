@@ -155,8 +155,15 @@ class OrjsonEncoder:
 
         # orjson doesn't have ensure_ascii option
         # For ASCII-only output, we need to escape non-ASCII chars
-        if ensure_ascii:
-            return result.encode("unicode_escape").decode("ascii")
+        if ensure_ascii and not result.isascii():
+            # Fallback to stdlib json for correct escaping
+            # (unicode_escape would produce invalid JSON like \xXX)
+            return json.dumps(
+                obj,
+                sort_keys=sort_keys,
+                ensure_ascii=True,
+                separators=(",", ":"),
+            )
 
         return result
 

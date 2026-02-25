@@ -129,16 +129,6 @@ def deserialize_from_json(data: str | bytes) -> dict[str, Any] | list[Any]:
     return _deserialize_with_stdlib(data)
 
 
-def _escape_non_ascii(text: str) -> str:
-    """Escape non-ASCII characters using JSON unicode escape format (\\uNNNN)."""
-    return "".join(f"\\u{ord(c):04x}" if ord(c) > 127 else c for c in text)
-
-
-def _has_non_ascii(text: str) -> bool:
-    """Check if text contains non-ASCII characters."""
-    return any(ord(c) > 127 for c in text)
-
-
 def _get_orjson_options(sort_keys: bool) -> int:
     """Get orjson options based on configuration."""
     assert orjson is not None
@@ -156,10 +146,14 @@ def _serialize_with_orjson(
     """Serialize using orjson with OPT_SORT_KEYS for determinism."""
     assert orjson is not None
     result = orjson.dumps(data, option=_get_orjson_options(sort_keys)).decode("utf-8")
-    # orjson doesn't have ensure_ascii option - escape non-ASCII if needed
-    return (
-        _escape_non_ascii(result) if ensure_ascii and _has_non_ascii(result) else result
-    )
+
+    # Fast path: if ASCII or escaping not requested, we are done
+    if not ensure_ascii or result.isascii():
+        return result
+
+    # Fallback to stdlib json for correct escaping of non-ASCII characters
+    # This is faster than manual string iteration and escaping
+    return _serialize_with_stdlib(data, sort_keys=sort_keys, ensure_ascii=True)
 
 
 def _serialize_with_stdlib(

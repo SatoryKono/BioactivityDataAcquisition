@@ -200,6 +200,8 @@ class TestOrjsonEncoder:
         # Russian text should be escaped
         assert "тест" not in result
         assert result.isascii()
+        # Should be valid JSON (previously this produced invalid \x escapes)
+        assert json.loads(result) == data
 
     def test_dumps_list(self, encoder: OrjsonEncoder) -> None:
         """Should serialize lists correctly."""
