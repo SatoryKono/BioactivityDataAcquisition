@@ -36,8 +36,8 @@ Writer for Bronze layer (raw data in JSONL + zstd compression).
 
 ::: bioetl.infrastructure.storage.bronze_writer.BronzeWriter
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
         members:
             - __init__
             - write
@@ -65,8 +65,8 @@ Writer for Silver layer (Delta Lake with merge/upsert).
 
 ::: bioetl.infrastructure.storage.silver_writer.SilverWriter
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
         members:
             - __init__
             - write_silver
@@ -90,8 +90,8 @@ Writer for Gold layer (validated, analytics-ready data).
 
 ::: bioetl.infrastructure.storage.gold_writer.GoldWriter
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
         members:
             - __init__
             - write
@@ -113,8 +113,8 @@ Read-only access to Delta Lake tables for querying Silver/Gold data.
 
 ::: bioetl.infrastructure.storage.delta_reader.DeltaReader
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
         members:
             - __init__
             - read_table
@@ -130,8 +130,8 @@ Manages VACUUM, OPTIMIZE, and time travel operations for Delta tables.
 
 ::: bioetl.infrastructure.storage.retention_manager.RetentionManager
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
         members:
             - __init__
             - vacuum
@@ -147,8 +147,8 @@ Writes metadata for Bronze/Silver/Gold layers.
 
 ::: bioetl.infrastructure.storage.metadata_writer.MetadataWriter
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ### SilverMetadataBuilder
 
@@ -156,8 +156,8 @@ Builder for Silver layer metadata.
 
 ::: bioetl.infrastructure.storage.metadata_builder.SilverMetadataBuilder
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ### GoldMetadataBuilder
 
@@ -165,8 +165,8 @@ Builder for Gold layer metadata.
 
 ::: bioetl.infrastructure.storage.metadata_builder.GoldMetadataBuilder
     options:
-        show-root-heading: true
-        show-source: false
+        show_root_heading: true
+        show_source: false
 
 ## Write Modes
 
