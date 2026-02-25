@@ -191,6 +191,14 @@ bioetl checkpoint list
 
 The project uses `pytest` for testing, split into Unit, Integration, and Architecture tests.
 
+- **Setup Plugins (pytest + pre-commit):**
+
+  ```bash
+  make setup-plugins
+  ```
+
+  This command validates required pytest plugins and installs pre-commit hooks.
+
 - **Quick Check (with dependencies auto-synced and coverage):**
 
   ```bash
@@ -213,6 +221,13 @@ The project uses `pytest` for testing, split into Unit, Integration, and Archite
   ```bash
   uv sync --extra dev --extra tests
   uv run python -m pytest tests --cov=src/bioetl --cov-report=term
+  ```
+
+  To include tracing and pre-commit plugin setup:
+
+  ```bash
+  uv sync --extra dev --extra tests --extra tracing
+  uv run python -m pre_commit install --install-hooks
   ```
 
   Если `pytest` сообщает об отсутствии обязательных плагинов (`pytest-asyncio`, `pytest-cov`), выполните повторную синхронизацию:
