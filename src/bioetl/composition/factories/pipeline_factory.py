@@ -331,6 +331,7 @@ def _create_data_source(
     pipeline_config: PipelineYamlConfig,
     logger: LoggerPort,
     filter_config: InputFilterConfig | None = None,
+    metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
 ) -> DataSourcePort:
     """Create data source using the provided creator function.
@@ -341,13 +342,19 @@ def _create_data_source(
         pipeline_config: Pipeline configuration
         logger: Structured logger
         filter_config: Optional filter configuration
+        metrics: Optional metrics port for provider-level observability.
         pipeline_name: Pipeline name for logging context
 
     Returns:
         Configured DataSourcePort
     """
     return create_data_source_fn(
-        settings, pipeline_config, logger, filter_config, pipeline_name=pipeline_name
+        settings,
+        pipeline_config,
+        logger,
+        filter_config,
+        metrics=metrics,
+        pipeline_name=pipeline_name,
     )
 
 
@@ -441,6 +448,7 @@ def build_pipeline_services(
         Configured PipelineServices instance
     """
     pipeline_config = config or load_pipeline_config(pipeline_name)
+    shared_metrics = BaseServicesFactory._create_metrics(settings)
 
     # Choose data source based on cached_bronze mode
     if cached_bronze is not None and cached_bronze.enabled:
@@ -463,6 +471,7 @@ def build_pipeline_services(
             pipeline_config,
             logger,
             filter_config,
+            metrics=shared_metrics,
             pipeline_name=pipeline_name,
         )
 
@@ -471,6 +480,7 @@ def build_pipeline_services(
         logger=logger,
         data_source=data_source,
         pipeline_config=pipeline_config,
+        metrics=shared_metrics,
         tracer=tracer,
         dq_monitor=dq_monitor,
         metadata_coordinator=metadata_coordinator,
