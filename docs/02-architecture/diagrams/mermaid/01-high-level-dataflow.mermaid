@@ -1,0 +1,52 @@
+%% View: Data-Flow | Parent: 01-high-level-full.mermaid
+flowchart TB
+
+    subgraph Application["🟢 Application Layer"]
+        direction TB
+        N7["Executor"]
+        N9["Runner"]
+    end
+
+    subgraph Infrastructure["🔵 Infrastructure Layer"]
+        direction TB
+        N1["Bronze"]
+        N2["Silver"]
+        N3["Gold"]
+        N4["Sources"]
+        N8["Adapters"]
+        N11["Boot"]
+        N12["Trans"]
+        N5["Quarantine"]
+        N6["Storage"]
+    end
+
+    subgraph Composition["🟣 Composition Layer"]
+        direction TB
+        N10["Factory"]
+    end
+
+    N4 --> N8
+    N11 --> N10
+    N10 --> N9
+    N9 --> N7
+    N7 --> N12
+    N12 --> N8
+    N6 --> N1
+    N6 --> N2
+    N6 --> N3
+    N7 --> N6
+
+    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
+    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
+    style Composition fill:#F5F3FF,stroke:#7C3AED,stroke-width:2px
+
+    linkStyle 0 stroke:#1E293B,stroke-width:4px
+    linkStyle 1 stroke:#1E293B,stroke-width:4px
+    linkStyle 2 stroke:#1E293B,stroke-width:4px
+    linkStyle 3 stroke:#1E293B,stroke-width:4px
+    linkStyle 4 stroke:#1E293B,stroke-width:4px
+    linkStyle 5 stroke:#1E293B,stroke-width:4px
+    linkStyle 6 stroke:#1E293B,stroke-width:4px
+    linkStyle 7 stroke:#1E293B,stroke-width:4px
+    linkStyle 8 stroke:#1E293B,stroke-width:4px
+    linkStyle 9 stroke:#1E293B,stroke-width:4px

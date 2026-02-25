@@ -1,6 +1,6 @@
 # BioETL Glossary (Ubiquitous Language)
 
-*Version 2.5 | Updated: 2026-02-06 | Created: 2025-12-29*
+*Version 2.6 | Updated: 2026-02-25 | Created: 2025-12-29*
 
 This glossary defines the canonical terminology used throughout BioETL. Following Domain-Driven Design principles, these terms form the **Ubiquitous Language** — a shared vocabulary understood by both developers and domain experts.
 
@@ -94,6 +94,9 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | **Run** | A single execution instance of a pipeline, identified by `run-id` | `execution`, `instance` |
 | **Run Type** | The mode of pipeline execution: `INCREMENTAL`, `BACKFILL`, `REBUILD` | `mode` |
 | **Loading Strategy** | Enum defining pipeline loading behavior: `FULL-SCAN-ONLY`, `WATERMARK-BASED` (ADR-031) | `force-full-scan` (deprecated boolean) |
+| **Entity Config** | Unified YAML config combining pipeline, DQ, filter, schema, and enum settings for a single entity in `configs/entities/{provider}/{entity}.yaml` (ADR-039) | `pipeline config` (when referring to the unified file) |
+| **Provider Source Config** | Provider-level API settings in `configs/providers/{provider}.yaml` (ADR-039) | `source config` |
+| **Composite Config** | Multi-source pipeline config in `configs/composites/{entity}.yaml` (ADR-039) | `composite pipeline config` |
 
 ### Batch Processing
 

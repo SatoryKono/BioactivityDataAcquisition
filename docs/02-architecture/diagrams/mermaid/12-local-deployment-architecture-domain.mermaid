@@ -1,0 +1,78 @@
+%% View: Domain-Focus | Parent: 12-local-deployment-architecture-full.mermaid
+flowchart TB
+
+    subgraph Domain["🟡 Domain Layer"]
+        direction TB
+        N1["chembl_activity"]
+        N3["pubchem_compound"]
+        N4["uniprot_protein"]
+        N5["ChEMBL_API"]
+        N6["PubChem_API"]
+        N7["UniProt_API"]
+        N8["PubMed_API"]
+        N9["chembl_assay"]
+        N10["chembl_target"]
+        N11["chembl_molecule"]
+        N12["Schedule"]
+        N18["Lineage"]
+        N19["Logs"]
+    end
+
+    subgraph Infrastructure["🔵 Infrastructure Layer"]
+        direction TB
+        N17["Checkpoints"]
+        N13["Bronze"]
+        N14["Silver"]
+        N15["Gold"]
+        N16["Quarantine"]
+        N20["Metrics"]
+    end
+
+    subgraph Interfaces["⚪ Interfaces Layer"]
+        direction TB
+        N2["CLI"]
+    end
+
+    N5 --> N1
+    N6 --> N3
+    N7 --> N4
+    N8 --> N1
+    N2 --> N1
+    N2 --> N9
+    N2 --> N10
+    N2 --> N11
+    N2 --> N3
+    N2 --> N4
+    N12 --> N2
+    N1 --> N13
+    N1 --> N14
+    N1 --> N15
+    N1 --> N16
+    N1 --> N17
+    N1 --> N18
+    N1 --> N19
+    N1 --> N20
+
+    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
+    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
+    style Interfaces fill:#F1F5F9,stroke:#64748B,stroke-width:2px
+
+    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 8 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 10 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 11 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 12 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 13 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 14 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 15 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 16 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 17 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 18 stroke:#475569,stroke-width:2px,stroke-dasharray:5

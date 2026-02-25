@@ -1,0 +1,77 @@
+%% View: Overview | Parent: 31-pipeline-run-lifecycle-full.mermaid
+flowchart TB
+
+    subgraph Domain["🟡 Domain Layer"]
+        direction TB
+        N12["VALIDATING"]
+    end
+
+    subgraph Application["🟢 Application Layer"]
+        direction TB
+        N1["EXTRACTING"]
+        N2["FAILED"]
+        N3["PREFLIGHT_PASSED"]
+        N4["TRANSFORMING"]
+        N6["DRAINING"]
+        N7["WRITING"]
+        N9["PREFLIGHT"]
+        N10["CLEARING"]
+        N11["RELEASING"]
+        N13["QUARANTINING"]
+        N14["*"]
+        N15["PENDING"]
+    end
+
+    subgraph Infrastructure["🔵 Infrastructure Layer"]
+        direction TB
+        N5["CHECKPOINTING"]
+        N8["LOCKING"]
+    end
+
+    N14 --> N15
+    N15 --> N8
+    N8 --> N2
+    N9 --> N3
+    N9 --> N2
+    N3 --> N10
+    N3 --> N1
+    N10 --> N1
+    N1 --> N4
+    N4 --> N12
+    N12 --> N7
+    N12 --> N13
+    N13 --> N7
+    N7 --> N5
+    N5 --> N1
+    N1 --> N6
+    N4 --> N6
+    N7 --> N2
+    N1 --> N2
+    N2 --> N11
+    N11 --> N14
+
+    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
+    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
+    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
+
+    linkStyle 0 stroke:#1E293B,stroke-width:4px
+    linkStyle 1 stroke:#1E293B,stroke-width:4px
+    linkStyle 2 stroke:#1E293B,stroke-width:4px
+    linkStyle 3 stroke:#1E293B,stroke-width:4px
+    linkStyle 4 stroke:#1E293B,stroke-width:4px
+    linkStyle 5 stroke:#1E293B,stroke-width:4px
+    linkStyle 6 stroke:#1E293B,stroke-width:4px
+    linkStyle 7 stroke:#1E293B,stroke-width:4px
+    linkStyle 8 stroke:#1E293B,stroke-width:4px
+    linkStyle 9 stroke:#1E293B,stroke-width:4px
+    linkStyle 10 stroke:#1E293B,stroke-width:4px
+    linkStyle 11 stroke:#1E293B,stroke-width:4px
+    linkStyle 12 stroke:#1E293B,stroke-width:4px
+    linkStyle 13 stroke:#1E293B,stroke-width:4px
+    linkStyle 14 stroke:#1E293B,stroke-width:4px
+    linkStyle 15 stroke:#1E293B,stroke-width:4px
+    linkStyle 16 stroke:#1E293B,stroke-width:4px
+    linkStyle 17 stroke:#1E293B,stroke-width:4px
+    linkStyle 18 stroke:#1E293B,stroke-width:4px
+    linkStyle 19 stroke:#1E293B,stroke-width:4px
+    linkStyle 20 stroke:#1E293B,stroke-width:4px

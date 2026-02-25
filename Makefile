@@ -1,7 +1,7 @@
 # BioETL Makefile
 # Production-ready ETL system for bioactivity data
 
-.PHONY: help install install-uv install-pip setup-plugins test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-preflight clean-all
+.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-preflight clean-all
 .DEFAULT_GOAL := help
 
 # Detect uv availability (preferred package manager)
@@ -68,6 +68,9 @@ setup-dev: install test-deps-dev ## Full development environment setup and verif
 
 setup-plugins: ## Configure pytest/pre-commit plugins for local development
 	@bash scripts/setup_plugins.sh
+
+setup-skills: ## Sync project Codex skills into CODEX_HOME (default: ~/.codex/skills)
+	@bash scripts/setup_skills.sh
 
 test: test-deps-dev ## Run all tests serially with coverage (stable local default)
 	@echo "$(BLUE)Running tests (serial default, excluding e2e and benchmarks)...$(NC)"

@@ -13,7 +13,7 @@
 # ─────────────────────────────────────────────────────────────
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 THEME_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/theme" && pwd)"
 CONFIG="$THEME_DIR/mermaid-config.json"
 CSS="$THEME_DIR/custom.css"

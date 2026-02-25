@@ -170,3 +170,8 @@ data/input/chembl_target_component.csv
 
 # Nested IDEA project files
 data/.idea/
+*.svg
+*.hyb
+*.pak
+*.json
+/CUsersFedor/.cache/puppeteer
