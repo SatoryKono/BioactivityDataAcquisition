@@ -483,6 +483,7 @@ CHEMBL_TARGET_SCHEMA = pa.schema(
         pa.field("description", pa.string()),
         pa.field("downgraded", pa.bool_()),
         pa.field("organism", pa.string()),
+        pa.field("organism_class", pa.string()),
         pa.field("pipeline_stages", pa.string()),
         pa.field("pref_name", pa.string()),
         pa.field("primary_component_id", pa.float64()),
