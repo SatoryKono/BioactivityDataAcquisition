@@ -1,0 +1,99 @@
+%% Parent source: docs/02-architecture/mmd-diagrams/foundation/41-error-classification-tree.mmd
+%% Full reference diagram retained after decomposition.
+%% Title: Error Classification Decision Tree — Full Logic
+%% Covers: RULES.md §3.1 (Error Handling), domain/exceptions/
+%% Rank: 16 (Score 8.06) — Complete error classification reference
+%% Updated: 2026-02-17
+%% Legend: see 00-legend.mermaid
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   Mixed (System / Component / Class)
+
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+flowchart TB
+    ERROR["Error Occurred"]
+
+    ERROR --> HTTP{{"HTTP Status Code?"}}
+    ERROR --> DOMAIN{{"Domain Error?"}}
+    ERROR --> INFRA{{"Infrastructure Error?"}}
+
+    %% HTTP errors
+    HTTP -->|"401, 403"| AUTH["ServiceAuthenticationError\n(CriticalError)\n→ FAIL FAST, no retry\n→ Check API key config"]
+    HTTP -->|"404"| NOTFOUND["ApiError\n(RecoverableError)\n→ Log warning\n→ Skip entity"]
+    HTTP -->|"429"| RATE["RateLimitExceededError\n(RecoverableError)\n→ Check Retry-After header\n→ Exponential backoff"]
+    HTTP -->|K19| SERVER["ServiceUnavailableError\n(RecoverableError)\n→ Retry with backoff\n→ Max 3 attempts"]
+    HTTP -->|"Other"| UNKNOWN_HTTP["ExternalServiceError\n→ Log, classify, retry"]
+
+    %% Domain errors
+    DOMAIN -->|K20| SCHEMA["SchemaViolationError\n(DataQualityError → ValidationError)\n→ Route to Quarantine"]
+    DOMAIN -->|K21| MISSING["MissingRequiredFieldError\n(ValidationError)\n→ Route to Quarantine"]
+    DOMAIN -->|K22| FORMAT["InvalidDataFormatError\n(ValidationError)\n→ Route to Quarantine"]
+    DOMAIN -->|K23| DQTHRESH["DataQualityThresholdError\n→ error_rate > 20%\n→ FAIL entire batch"]
+
+    %% Infrastructure errors
+    INFRA -->|"Lock lost"| LOCK["LockLostError\n(CriticalError)\n→ ABORT immediately\n→ No partial write"]
+    INFRA -->|K24| LOCKACQ["LockAcquisitionError\n(CriticalError)\n→ FAIL, another instance running"]
+    INFRA -->|K25| STORE["StorageError\n(RecoverableError)\n→ Retry Delta write"]
+    INFRA -->|"CB tripped"| CB["CircuitBreakerOpenError\n(RecoverableError)\n→ Wait recovery_timeout (300s)\n→ HALF_OPEN probe"]
+
+    %% Actions
+    subgraph Actions["Error Actions"]
+        RETRY["🔄 RETRY\n• max_attempts: 3\n• multiplier: 2.0\n• jitter: MD5-based"]
+        QUARANTINE2["🔒 QUARANTINE\n• QuarantineEntry created\n• payload truncated 64KB\n• payload_hash computed"]
+        FAIL_FAST["💥 FAIL FAST\n• No retry\n• Pipeline terminates\n• ExitCode.PIPELINE_ERROR"]
+        BATCH_FAIL["🚫 BATCH FAIL\n• error_rate > 20%\n• Entire batch rejected\n• Checkpoint NOT saved"]
+    end
+
+    AUTH --> FAIL_FAST
+    RATE --> RETRY
+    SERVER --> RETRY
+    SCHEMA --> QUARANTINE2
+    MISSING --> QUARANTINE2
+    FORMAT --> QUARANTINE2
+    DQTHRESH --> BATCH_FAIL
+    LOCK --> FAIL_FAST
+    LOCKACQ --> FAIL_FAST
+    STORE --> RETRY
+    CB --> RETRY
+
+    %% Retry exhaustion
+    RETRY -->|K26| EXHAUST["RetryExhaustedError\n→ Record CB failure\n→ Circuit may trip"]
+    EXHAUST --> FAIL_FAST
+
+    %% Styling
+    style Actions fill:#fff3e0,stroke:#e65100
+    style FAIL_FAST fill:#ffebee,stroke:#c62828
+    style QUARANTINE2 fill:#FF6B6B,stroke:#cc4444,color:#000
+    style RETRY fill:#e8f5e9,stroke:#2e7d32
+
+    linkStyle 0 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 1 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 2 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 3 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 4 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 5 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 6 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 7 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 8 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 9 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 10 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 11 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 12 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 13 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 14 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 15 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 16 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 17 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 18 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 19 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 20 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 21 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 22 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 23 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 24 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 25 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 26 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 27 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 28 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4

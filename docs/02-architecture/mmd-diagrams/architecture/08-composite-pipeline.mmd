@@ -1,18 +1,21 @@
 %% BioETL — Composite Pipeline Architecture
 %% Shows seed → dependencies → enrichers (parallel) → merge flow.
 
-%% @version 1.0.0
+%% @version 1.1.0
 %% @date    2026-02-24
 %% @type    flowchart
 %% @level   System / Component
 
 graph TB
     subgraph Config["Composite Configuration"]
-        CC["CompositeConfig<br/>━━━━━━━━━━━━━━━━━<br/>name: str<br/>seed: SeedConfig<br/>dependencies: DependencyConfig[]<br/>enrichers: EnricherConfig[]<br/>merge: MergeConfig"]
+        CC["CompositeConfig"]
         SC["SeedConfig"]
         DC["DependencyConfig"]
         EC["EnricherConfig"]
         MC["MergeConfig"]
+
+        NoteConfig["Config Details:<br/>• name: str<br/>• seed: SeedConfig<br/>• dependencies: DependencyConfig[]<br/>• enrichers: EnricherConfig[]<br/>• merge: MergeConfig"]
+        CC -.- NoteConfig
     end
 
     CC --> SC
@@ -21,7 +24,9 @@ graph TB
     CC --> MC
 
     subgraph Runner["CompositePipelineRunner"]
-        CPR["CompositePipelineRunner<br/>━━━━━━━━━━━━━━━━━<br/>+ run() → CompositeResult<br/><br/>Orchestrates full<br/>composite execution"]
+        CPR["CompositePipelineRunner"]
+        NoteRunner["Orchestrates full<br/>composite execution"]
+        CPR -.- NoteRunner
     end
 
     subgraph FSM["State Machine"]
@@ -45,24 +50,24 @@ graph TB
     end
 
     subgraph Execution["Execution Components"]
-        SEED["Seed Pipeline<br/>━━━━━━━━━━━━━━━━━<br/>PipelineRunner<br/>produces base entity keys"]
+        SEED["Seed Pipeline"]
 
         subgraph DepsBlock["Dependencies (Sequential)"]
-            DEP_COORD["DependencyCoordinator<br/>━━━━━━━━━━━━━━━━━<br/>+ run_dependencies()<br/>Sequential with chaining"]
-            DEP1["Dependency 1<br/>(PipelineRunner)"]
-            DEP2["Dependency 2<br/>(PipelineRunner)"]
+            DEP_COORD["DependencyCoordinator"]
+            DEP1["Dependency 1"]
+            DEP2["Dependency 2"]
         end
 
         subgraph EnrichBlock["Enrichers (Parallel Fan-Out)"]
-            ENR_COORD["EnrichmentCoordinator<br/>━━━━━━━━━━━━━━━━━<br/>+ run_enrichers()<br/>Parallel with max_concurrency<br/>Timeout per enricher"]
-            ENR1["Enricher 1<br/>(e.g. PubMed)"]
-            ENR2["Enricher 2<br/>(e.g. CrossRef)"]
-            ENR3["Enricher 3<br/>(e.g. OpenAlex)"]
-            ENR4["Enricher 4<br/>(e.g. S2)"]
+            ENR_COORD["EnrichmentCoordinator"]
+            ENR1["Enricher 1"]
+            ENR2["Enricher 2"]
+            ENR3["Enricher 3"]
+            ENR4["Enricher 4"]
         end
 
         subgraph MergeBlock["Merge Phase"]
-            MS["MergeService<br/>━━━━━━━━━━━━━━━━━<br/>+ merge()"]
+            MS["MergeService"]
             DEDUP["EnricherDeduplicator"]
             AGG["EnricherAggregator"]
             REN["ColumnRenamer"]
@@ -71,21 +76,21 @@ graph TB
     end
 
     subgraph CrossVal["Cross-Validation"]
-        CV["EnrichmentCrossValidator<br/>━━━━━━━━━━━━━━━━━<br/>Validates enrichment<br/>results across sources"]
+        CV["EnrichmentCrossValidator"]
     end
 
     subgraph Checkpoint["Checkpoint"]
-        CCM["CompositeCheckpointManager<br/>━━━━━━━━━━━━━━━━━<br/>Tracks completed stages<br/>for resume support"]
+        CCM["CompositeCheckpointManager"]
     end
 
     subgraph Preflight["Preflight"]
-        CPV["CompositePreflightValidator<br/>━━━━━━━━━━━━━━━━━<br/>Validates composite config<br/>before execution"]
+        CPV["CompositePreflightValidator"]
     end
 
     subgraph Results["Results"]
-        ER["EnrichmentResult<br/>━━━━━━━━━━━━━━━━━<br/>status: EnrichmentStatus<br/>records_enriched: int<br/>enrichment_rate: float"]
-        MR["MergeResult<br/>━━━━━━━━━━━━━━━━━<br/>merged DataFrame<br/>+ merge statistics"]
-        CR["CompositeResult<br/>━━━━━━━━━━━━━━━━━<br/>seed_result<br/>enrichment_results<br/>merge_result"]
+        ER["EnrichmentResult"]
+        MR["MergeResult"]
+        CR["CompositeResult"]
     end
 
     %% Flow

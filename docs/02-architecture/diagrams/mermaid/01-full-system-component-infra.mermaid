@@ -1,0 +1,47 @@
+%% View: Infrastructure-Mapping | Parent: 01-full-system-component-full.mermaid
+flowchart TB
+
+    subgraph Domain["🟡 Domain Layer"]
+        direction TB
+        N4["StoragePort"]
+        N5["LockPort"]
+        N17["CheckpointPort"]
+        N18["QuarantinePort"]
+        N19["MetricsPort"]
+        N20["TracingPort"]
+    end
+
+    subgraph Infrastructure["🔵 Infrastructure Layer"]
+        direction TB
+        N2["ChemblAdapter"]
+        N3["LockManager"]
+        N6["PubchemAdapter"]
+        N7["UniprotAdapter"]
+        N8["PubmedAdapter"]
+        N9["CrossRefAdapter"]
+        N10["OpenAlexAdapter"]
+        N11["S2Adapter"]
+        N12["BronzeWriter"]
+        N13["SilverWriter"]
+        N14["GoldWriter"]
+        N16["CheckpointManager"]
+    end
+
+    subgraph Composition["🟣 Composition Layer"]
+        direction TB
+        N15["Registry"]
+    end
+
+    subgraph Interfaces["⚪ Interfaces Layer"]
+        direction TB
+        N1["UnifiedHTTPClient"]
+    end
+
+    N2 --> N1
+
+    style Domain fill:#FFF7ED,stroke:#F59E0B,stroke-width:2px
+    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
+    style Composition fill:#F5F3FF,stroke:#7C3AED,stroke-width:2px
+    style Interfaces fill:#F1F5F9,stroke:#64748B,stroke-width:2px
+
+    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5

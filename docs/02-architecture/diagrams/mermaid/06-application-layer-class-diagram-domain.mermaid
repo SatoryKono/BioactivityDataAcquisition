@@ -1,0 +1,73 @@
+%% View: Domain-Focus | Parent: 06-application-layer-class-diagram-full.mermaid
+flowchart TB
+
+    subgraph Application["🟢 Application Layer"]
+        direction TB
+        N1["RunnerServices"]
+        N2["BaseChemblTransformer"]
+        N3["RecordProcessor"]
+        N4["BasePipeline"]
+        N5["PipelineRunner"]
+        N6["PipelineExecutor"]
+        N7["BatchTransformer"]
+        N8["BaseTransformer"]
+        N9["PipelineServices"]
+        N10["PreflightService"]
+        N11["PostrunService"]
+        N12["PipelineObserver"]
+        N14["ActivityTransformer"]
+        N15["MoleculeTransformer"]
+        N16["AssayTransformer"]
+        N17["TargetTransformer"]
+        N20["LifecycleOrchestrator"]
+    end
+
+    subgraph Infrastructure["🔵 Infrastructure Layer"]
+        direction TB
+        N13["BatchMetricsRecorder"]
+        N18["QuarantineManager"]
+        N19["LockManager"]
+    end
+
+    N2 --> N8
+    N14 --> N2
+    N15 --> N2
+    N16 --> N2
+    N17 --> N2
+    N5 --> N4
+    N5 --> N1
+    N6 --> N4
+    N6 --> N3
+    N3 --> N7
+    N3 --> N18
+    N3 --> N13
+    N7 --> N8
+    N4 --> N9
+    N1 --> N19
+    N1 --> N10
+    N1 --> N11
+    N1 --> N20
+    N1 --> N12
+
+    style Application fill:#ECFDF5,stroke:#10B981,stroke-width:2px
+    style Infrastructure fill:#EFF6FF,stroke:#2563EB,stroke-width:2px
+
+    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 8 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 10 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 11 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 12 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 13 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 14 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 15 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 16 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 17 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 18 stroke:#475569,stroke-width:2px,stroke-dasharray:5

@@ -3,7 +3,7 @@
 %% Rank: 3 (Score 9.00) — Complete dependency injection assembly
 %% Updated: 2026-02-17
 
-%% @version 1.0.0
+%% @version 1.1.0
 %% @date    2026-02-24
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
@@ -17,15 +17,27 @@ flowchart TB
 
     subgraph Factories["Composition Factories"]
         direction TB
-        BL["BootstrapLogger\n• configure structlog"]
-        HCF["HttpClientFactory\n• create(provider)\n→ UnifiedHTTPClient"]
-        DSF["DataSourceFactory\n• create(provider, config)\n→ DataSourcePort impl"]
-        STF["StorageFactory\n• create(config)\n→ BronzeWriter + SilverWriter\n  + GoldWriter"]
-        STA["StorageAdapter\n• create_bronze()\n• create_silver()\n• create_gold()"]
-        SB["ServicesBuilder\n• with_storage()\n• with_lock()\n• with_logger()\n• with_metrics()\n• build() → PipelineServices"]
-        RF["RunnerFactory\n• create_runner()\n→ PipelineRunner"]
-        DQF["DQServicesFactory\n• create()\n→ DQ analyzers + monitor"]
-        GPF["GenericPipelineFactory\n• _pipeline_class\n• _transformer_class\n• _gold_schema"]
+
+        subgraph LoggerFactories["Logger & Observability"]
+            BL["BootstrapLogger\n• configure structlog"]
+            DQF["DQServicesFactory\n• create()\n→ DQ analyzers + monitor"]
+        end
+
+        subgraph ClientFactories["Client & Data Source"]
+            HCF["HttpClientFactory\n• create(provider)\n→ UnifiedHTTPClient"]
+            DSF["DataSourceFactory\n• create(provider, config)\n→ DataSourcePort impl"]
+        end
+
+        subgraph StorageFactories["Storage & Services"]
+            STF["StorageFactory\n• create(config)\n→ BronzeWriter + SilverWriter\n  + GoldWriter"]
+            STA["StorageAdapter\n• create_bronze()\n• create_silver()\n• create_gold()"]
+            SB["ServicesBuilder\n• with_storage()\n• with_lock()\n• with_logger()\n• with_metrics()\n• build() → PipelineServices"]
+        end
+
+        subgraph PipelineFactories["Pipeline Construction"]
+            RF["RunnerFactory\n• create_runner()\n→ PipelineRunner"]
+            GPF["GenericPipelineFactory\n• _pipeline_class\n• _transformer_class\n• _gold_schema"]
+        end
     end
 
     subgraph Registry["Registration"]
@@ -89,3 +101,8 @@ flowchart TB
     style Factories fill:#fce4ec,stroke:#c62828
     style Registry fill:#fff3e0,stroke:#e65100
     style Created fill:#e8f5e9,stroke:#2e7d32
+
+    style LoggerFactories fill:#fffde7,stroke:#fbc02d,stroke-dasharray: 5 5
+    style ClientFactories fill:#e3f2fd,stroke:#2196f3,stroke-dasharray: 5 5
+    style StorageFactories fill:#f3e5f5,stroke:#9c27b0,stroke-dasharray: 5 5
+    style PipelineFactories fill:#e0f2f1,stroke:#009688,stroke-dasharray: 5 5
