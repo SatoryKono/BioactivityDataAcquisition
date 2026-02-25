@@ -45,7 +45,9 @@ CHEMBL_PUBLICATION_SCHEMA = pa.schema(
         pa.field("page_first", pa.string()),  # Unified: from first_page
         pa.field("page_last", pa.string()),  # Unified: from last_page
         # === PUBLICATION_CROSSREF_FIELDS ===
-        pa.field("publication_id", pa.string(), nullable=False),  # Primary key (provider)
+        pa.field(
+            "publication_id", pa.string(), nullable=False
+        ),  # Primary key (provider)
         pa.field("publication_doi", pa.string()),  # Cross-reference: DOI
         pa.field("publication_pmid", pa.string()),  # Cross-reference: PubMed ID
         pa.field("publication_pmc_id", pa.string()),  # Cross-reference: PMC ID

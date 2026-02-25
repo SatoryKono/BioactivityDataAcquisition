@@ -378,8 +378,6 @@ def _create_cached_bronze_data_source(
     Returns:
         CachedBronzeDataSource implementing DataSourcePort.
     """
-    from pathlib import Path
-
     from bioetl.domain.ports import NoOpMetrics
     from bioetl.infrastructure.adapters import CachedBronzeDataSource
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
