@@ -187,7 +187,9 @@
       "Bash(cd \"E:\\\\g-drive\\\\05_AI\\\\github\\\\BioactivityDataAcquisition2\" && PYTHONPATH=src .venv/Scripts/lint-imports.exe --config .importlinter 2>&1)",
       "WebFetch(domain:chembl.gitbook.io)",
       "WebFetch(domain:github.com)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(tr '\\\\n' '|')",
+      "Bash(cd \"E:/g-drive/05_AI/github/BioactivityDataAcquisition2\" && bash docs/02-architecture/mmd-diagrams/render.sh --png-only 2>&1)"
     ]
   },
   "enabledPlugins": {

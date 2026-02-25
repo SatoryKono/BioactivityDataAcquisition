@@ -1,5 +1,5 @@
-%% Port/Protocol Contracts — Observability Ports and their implementations
-%% Covers LoggerPort, MetricsPort, TracingPort, CircuitBreakerPort, RateLimiterPort, MemoryMonitorPort
+%% BioETL — Port Contracts: Observability and Resilience
+%% Covers Logger/Metrics/Tracing ports plus resilience control ports.
 
 %% @version 1.0.0
 %% @date    2026-02-25
@@ -10,18 +10,15 @@
 %% @nodes   15
 
 graph LR
-    subgraph Domain["Domain Ports"]
+    subgraph Domain["Domain Layer"]
         LGP["LoggerPort"]
         MTP["MetricsPort"]
         TRP["TracingPort"]
         CBP["CircuitBreakerPort"]
         RLP["RateLimiterPort"]
-        HCP["HealthCheckPort"]
-        MMP["MemoryMonitorPort"]
-        SHP["ShutdownPort"]
     end
 
-    subgraph Infrastructure["Infrastructure Implementations"]
+    subgraph Infrastructure["Infrastructure Layer"]
         UL["UnifiedLogger"]
         SLG["StructlogLogger"]
         NOL["NoOpLogger"]
@@ -32,7 +29,6 @@ graph LR
         NOT_T["NoOpTracing"]
         CB["CircuitBreaker"]
         TB_I["TokenBucket"]
-        MMGR["MemoryMonitor"]
     end
 
     LGP --- UL & SLG & NOL
@@ -40,12 +36,7 @@ graph LR
     TRP --- OTT & NOT_T
     CBP --- CB
     RLP --- TB_I
-    MMP --- MMGR
 
-    classDef port fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-    classDef infra fill:#ffcdd2,stroke:#c62828
-    classDef noop fill:#eceff1,stroke:#455a64,stroke-dasharray: 5 5
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
 
-    class LGP,MTP,TRP,CBP,RLP,HCP,MMP,SHP port
-    class UL,SLG,MCO,PME,OTT,CB,TB_I,MMGR infra
-    class NOL,NOM,NOT_T noop

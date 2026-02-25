@@ -1,60 +1,45 @@
-%% Provider Adapter Hierarchy — Concrete provider adapters
-%% Covers all 7 concrete provider adapters with their specific mixins
+%% BioETL — Adapter Hierarchy: Provider Implementations
+%% Covers concrete provider adapters and provider-specific mixins.
 
 %% @version 1.0.0
 %% @date    2026-02-25
 %% @type    flowchart
 %% @level   System / Component
-%% @view    providers
+%% @view    hierarchy-providers
 %% @parent  05-provider-adapter-hierarchy.mmd
 %% @nodes   15
 
 graph TB
-    subgraph Base["Base"]
+    subgraph Infrastructure["Infrastructure Layer"]
         BHA["BaseHttpAdapter"]
         BSA["BaseSyncAdapter"]
-    end
-
-    subgraph ChEMBL["ChEMBL"]
-        CHM["ChemblHealthMixin"]
-        CMM["ChemblMetadataMixin"]
         CA["ChemblAdapter"]
-    end
-
-    BHA --> CA
-    CHM --> CA
-    CMM --> CA
-
-    subgraph PubMed["PubMed"]
-        PSM["PubMedSearchMixin"]
-        PFetchM["PubMedFetchMixin"]
-        PHM["PubMedHealthMixin"]
         PA["PubMedAdapter"]
-    end
-
-    BHA --> PA
-    PSM --> PA
-    PFetchM --> PA
-    PHM --> PA
-
-    subgraph Others["Other Providers"]
         UA["UniProtAdapter"]
         CRA["CrossRefAdapter"]
         OAA["OpenAlexAdapter"]
         SSA["SemanticScholarAdapter"]
         PCA["PubChemAdapter"]
+        UIDM["UniProtIDMappingClient"]
+        CHM["ChemblHealthMixin"]
+        CMM["ChemblMetadataMixin"]
+        PSM["PubMedSearchMixin"]
+        PFetchM["PubMedFetchMixin"]
+        PHM["PubMedHealthMixin"]
     end
 
+    BHA --> CA
+    BHA --> PA
     BHA --> UA
     BHA --> CRA
     BHA --> OAA
     BHA --> SSA
     BSA --> PCA
+    CHM --> CA
+    CMM --> CA
+    PSM --> PA
+    PFetchM --> PA
+    PHM --> PA
 
-    classDef base fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    classDef adapter fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-    classDef mixin fill:#f3e5f5,stroke:#6a1b9a,stroke-width:1px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
 
-    class BHA,BSA base
-    class CA,PA,UA,CRA,OAA,SSA,PCA adapter
-    class CHM,CMM,PSM,PFetchM,PHM mixin

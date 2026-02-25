@@ -1,5 +1,5 @@
-%% BioETL — Hexagonal Architecture: Infrastructure + Composition layers detail
-%% Shows Infrastructure adapters and Composition factories
+%% BioETL — Hexagonal Infrastructure and Composition
+%% Covers infrastructure adapters and composition-root wiring points.
 
 %% @version 1.0.0
 %% @date    2026-02-25
@@ -7,20 +7,9 @@
 %% @level   System / Component
 %% @view    infra-comp
 %% @parent  01-high-level-hexagonal.mmd
-%% @nodes   18
+%% @nodes   14
 
 graph TB
-    subgraph External["External Systems"]
-        CHEMBL_API["ChEMBL API"]
-        PUBMED_API["PubMed API"]
-        UNIPROT_API["UniProt API"]
-        PUBCHEM_API["PubChem API"]
-        CROSSREF_API["CrossRef API"]
-        OPENALEX_API["OpenAlex API"]
-        SEMSCHOLAR_API["Semantic Scholar API"]
-        FS["File System"]
-    end
-
     subgraph Composition["Composition Layer"]
         BOOTSTRAP["Bootstrap / Assembly"]
         FACTORIES["Factories"]
@@ -29,24 +18,34 @@ graph TB
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        ADAPTERS["HTTP Adapters<br/>(7 providers)"]
-        STORAGE["Storage<br/>(Bronze, Silver, Gold Writers)"]
-        OBS_INFRA["Observability Infra<br/>(Logger, Metrics, Tracing)"]
-        RESILIENCE["Resilience<br/>(CircuitBreaker, TokenBucket)"]
-        SECURITY["Security (PII Hasher)"]
-        CHECKPOINT["Checkpoint + Lock + Audit"]
+        ADAPTERS["HTTP Adapters"]
+        STORAGE["Storage"]
+        OBS_INFRA["Observability Infra"]
+        RESILIENCE["Resilience"]
+        SECURITY["Security"]
+        CHECKPOINT["Checkpoint"]
+        LOCKING["Locking"]
+        AUDIT["Audit"]
+        VALIDATION["Validation"]
     end
 
-    ExternalAPIs -.-> ADAPTERS
-    FS -.-> STORAGE
+    subgraph Domain["Domain Layer"]
+        PORTS["Port Protocols"]
+    end
+
     BOOTSTRAP --> ADAPTERS
     BOOTSTRAP --> STORAGE
     BOOTSTRAP --> OBS_INFRA
+    ADAPTERS -->|implements| PORTS
+    STORAGE -->|implements| PORTS
+    OBS_INFRA -->|implements| PORTS
+    RESILIENCE -->|implements| PORTS
+    SECURITY -->|implements| PORTS
+    CHECKPOINT -->|implements| PORTS
+    LOCKING -->|implements| PORTS
+    AUDIT -->|implements| PORTS
 
-    classDef infra fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-    classDef comp fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef ext fill:#eceff1,stroke:#455a64,stroke-width:1px
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    style Composition fill:#fff3e0,stroke:#e65100,stroke-width:2px
 
-    class ADAPTERS,STORAGE,OBS_INFRA,RESILIENCE,SECURITY,CHECKPOINT infra
-    class BOOTSTRAP,FACTORIES,PROVIDERS,RT_BUILDERS comp
-    class CHEMBL_API,PUBMED_API,UNIPROT_API,PUBCHEM_API,CROSSREF_API,OPENALEX_API,SEMSCHOLAR_API,FS ext

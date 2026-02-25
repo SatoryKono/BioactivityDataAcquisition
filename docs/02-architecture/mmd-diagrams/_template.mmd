@@ -1,28 +1,73 @@
-%% <TITLE — one-line description>
-%% <COVERS — what architectural aspect>
+%% BioETL — <TITLE: one-line description>
+%% <COVERS: what architectural concern / RULES.md section>
 
 %% @version 1.0.0
 %% @date    <YYYY-MM-DD>
 %% @type    <flowchart|classDiagram|sequenceDiagram|stateDiagram|erDiagram|mindmap>
-%% @level   <System / Component | Class | Sequence | State>
-%% @view    <subdomain-name> (if decomposed)
-%% @parent  <original-file.mmd> (if decomposed)
-%% @nodes   <approximate count>
-%% @adr     <related ADR numbers>
+%% @level   <System / Component | Class / Interface | Sequence | State>
+%% @nodes   <approximate node count>
+%% @adr     <ADR-NNN, ADR-NNN — related Architecture Decision Records>
 %%
-%% Styles: theme/mermaid-config.json + theme/custom.css
-%% Colour scheme: see README.md § Colour Scheme
-%% Subgraph palette:
-%%   Domain:         fill:#f3e5f5,stroke:#6a1b9a
-%%   Application:    fill:#e8f5e9,stroke:#2e7d32
-%%   Infrastructure: fill:#ffcdd2,stroke:#c62828
-%%   Composition:    fill:#fff3e0,stroke:#e65100
-%%   Interfaces:     fill:#e3f2fd,stroke:#1565c0
-%%   External:       fill:#eceff1,stroke:#455a64
+%% Optional (decomposed views only):
+%% @view    <view-name>  e.g. Overview | Domain | Infrastructure | Dataflow
+%% @parent  <original-file.mmd>
+%%
+%% Rendering:
+%%   Styles: theme/mermaid-config.json + theme/custom.css
+%%   Colour scheme: see README.md § Colour Scheme
+%%
+%% Subgraph palette (copy-paste as needed):
+%%   Domain:         fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+%%   Application:    fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+%%   Infrastructure: fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+%%   Composition:    fill:#fff3e0,stroke:#e65100,stroke-width:2px
+%%   Interfaces:     fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+%%   External:       fill:#eceff1,stroke:#455a64,stroke-width:2px
+%%   Bronze:         fill:#fff3e0,stroke:#e65100,stroke-width:2px
+%%   Silver:         fill:#eceff1,stroke:#607d8b,stroke-width:2px
+%%   Gold:           fill:#fff8e1,stroke:#f9a825,stroke-width:2px
+%%   Quarantine:     fill:#ffebee,stroke:#d32f2f,stroke-width:2px
+%%
+%% linkStyle weights (see 00-legend.mermaid):
+%%   data flow:      stroke:#1E293B,stroke-width:2px
+%%   orchestration:  stroke:#2e7d32,stroke-width:2px
+%%   DI/implements:  stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+%%   observability:  stroke:#94A3B8,stroke-width:1px
+%%   error/quarant:  stroke:#c62828,stroke-width:2px,stroke-dasharray:4
 
 flowchart TD
     %% === NODES ===
+    %%
+    %% Example node shapes:
+    %%   N1["Label"]          — rectangle
+    %%   N2(["Label"])        — rounded rectangle
+    %%   N3{{"Label"}}        — hexagon (decision)
+    %%   N4[("Label")]        — cylinder (storage)
+    %%   N5(("Label"))        — circle
+    %%
+    %% Example subgraph:
+    %%   subgraph Domain["Domain Layer"]
+    %%       direction TB
+    %%       N1["DataSourcePort"]
+    %%   end
 
     %% === LINKS ===
+    %%
+    %% Example links (choose arrow type to match semantic):
+    %%   N1 --> N2                   — data flow / call
+    %%   N1 -.->|implements| N2      — DI / interface impl
+    %%   N1 -->|"label text"| N2     — labelled link
+    %%   N1 -.-> N2                  — dependency (dashed)
+    %%
+    %% %% linkStyle: <type> <indices>
+    %%   linkStyle 0 stroke:#1E293B,stroke-width:2px
 
     %% === SUBGRAPH STYLES ===
+    %%
+    %% Paste relevant style lines below (only layers present in this diagram):
+    %%   style Domain         fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    %%   style Application    fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    %%   style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    %%   style Composition    fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    %%   style Interfaces     fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    %%   style External       fill:#eceff1,stroke:#455a64,stroke-width:2px

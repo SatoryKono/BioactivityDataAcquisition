@@ -1,5 +1,5 @@
-%% Port/Protocol Contracts — Data Source Ports and their adapter implementations
-%% Covers DataSourcePort, FilterableDataSourcePort and all 7 provider adapters
+%% BioETL — Port Contracts: Data Sources
+%% Covers DataSourcePort and FilterableDataSourcePort implementations per provider.
 
 %% @version 1.0.0
 %% @date    2026-02-25
@@ -7,15 +7,15 @@
 %% @level   System / Component
 %% @view    data-sources
 %% @parent  13-port-protocol-contracts.mmd
-%% @nodes   12
+%% @nodes   9
 
 graph LR
-    subgraph Domain["Domain Ports"]
+    subgraph Domain["Domain Layer"]
         DSP["DataSourcePort"]
         FDSP["FilterableDataSourcePort"]
     end
 
-    subgraph Infrastructure["Infrastructure Adapters"]
+    subgraph Infrastructure["Infrastructure Layer"]
         CA["ChemblAdapter"]
         PA["PubMedAdapter"]
         UA["UniProtAdapter"]
@@ -25,18 +25,8 @@ graph LR
         PCA["PubChemAdapter"]
     end
 
-    subgraph Application["Application (DQ)"]
-        IFP_A["InputFilterPort"]
-        CSVR["CsvFilterReader"]
-    end
-
     DSP --- CA & PA & UA & CRA & OAA & SSA & PCA
-    DSP -->|extends| FDSP
 
-    classDef port fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-    classDef infra fill:#ffcdd2,stroke:#c62828
-    classDef app fill:#e8f5e9,stroke:#2e7d32
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
 
-    class DSP,FDSP port
-    class CA,PA,UA,CRA,OAA,SSA,PCA infra
-    class IFP_A,CSVR app
