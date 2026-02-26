@@ -226,7 +226,7 @@ def process_file(fpath: Path, dry_run: bool = False) -> tuple[bool, str]:
         return False, f"too_few ({len(conns)})"
 
     node_layer = build_node_layer_map(lines)
-    type_set = {classify(s, t, a, l, node_layer) for s, a, l, t in conns}
+    type_set = {classify(s, t, a, lbl, node_layer) for s, a, lbl, t in conns}
     if len(type_set) < 3:
         return False, f"only_{len(type_set)}_types ({','.join(sorted(type_set))})"
 
@@ -238,7 +238,7 @@ def process_file(fpath: Path, dry_run: bool = False) -> tuple[bool, str]:
                 ls_start = i
             ls_end = i
 
-    new_ls_lines, type_indices = build_linkstyle_block(conns, node_layer)
+    new_ls_lines, _type_indices = build_linkstyle_block(conns, node_layer)
 
     if ls_start is not None:
         new_lines = lines[:ls_start] + new_ls_lines + lines[ls_end + 1 :]
