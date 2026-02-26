@@ -25,4 +25,3 @@ mkdocs.yml
 pyproject.toml
 requirements.txt
 uv.lock
-setup_env.sh

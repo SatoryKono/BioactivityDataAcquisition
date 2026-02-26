@@ -52,7 +52,6 @@ ALLOWED_ROOT_ENTRIES: frozenset[str] = frozenset(
         "src",
         "tests",
         "uv.lock",
-        "setup_env.sh",
     }
 )
 
