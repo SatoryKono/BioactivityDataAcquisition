@@ -181,6 +181,20 @@
     "required": false,
     "unique": false
   },
+  "organism_class": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Organism cellularity classification.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
   "pipeline_stages": {
     "checks": [],
     "coerce": false,

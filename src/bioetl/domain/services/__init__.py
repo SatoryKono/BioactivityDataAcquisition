@@ -8,6 +8,7 @@ This package provides specialized services for domain operations:
 - ActivityAggregator: Aggregation of multiple measurements
 - NormalizationService: Orchestrator facade combining bioactivity normalization
 - DataNormalizationService: Text and data normalization (DOI, PMID, authors, HTML)
+- OrganismClassificationService: Organism cellularity classification for assay filtering
 
 Services are pure domain logic (no I/O) per RULES.md §1.1.
 
@@ -41,6 +42,10 @@ from bioetl.domain.services.dq_serializer import DQReportSerializer
 from bioetl.domain.services.identity_service import IdentityService
 from bioetl.domain.services.normalization_config import NormalizationConfig
 from bioetl.domain.services.normalization_service import NormalizationService
+from bioetl.domain.services.organism_classification_service import (
+    ClassificationStats,
+    OrganismClassificationService,
+)
 from bioetl.domain.services.text_similarity import jaccard_similarity, normalize_text
 from bioetl.domain.services.unit_converter import UnitConverter
 from bioetl.domain.services.value_validator import ValueValidator
@@ -50,6 +55,7 @@ DataNormalizationService = DefaultDataNormalizationService
 
 __all__ = [
     "ActivityAggregator",
+    "ClassificationStats",
     "DQMetricsCalculator",
     "DQMetricsInput",
     "DQReportSerializer",
@@ -59,6 +65,7 @@ __all__ = [
     "IdentityService",
     "NormalizationConfig",
     "NormalizationService",
+    "OrganismClassificationService",
     "UnitConverter",
     "ValueValidator",
     "jaccard_similarity",

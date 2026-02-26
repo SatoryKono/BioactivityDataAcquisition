@@ -31,6 +31,26 @@ except ImportError:  # pragma: no cover
 
 
 @pytest.fixture(scope="session", autouse=True)
+def _sanitize_bioetl_env_vars() -> None:
+    """Strip inline comments from BIOETL_ env vars.
+
+    Some CI environments load .env.example with inline comments
+    (e.g. ``100  # 1-10000``), which Pydantic interprets as invalid
+    string values. This fixture strips everything after ``#`` for
+    all BIOETL_ variables so Settings() can parse them correctly.
+    """
+    import re
+
+    inline_comment_re = re.compile(r"\s+#\s.*$")
+    for key in list(os.environ):
+        if key.startswith("BIOETL_"):
+            val = os.environ[key]
+            cleaned = inline_comment_re.sub("", val)
+            if cleaned != val:
+                os.environ[key] = cleaned
+
+
+@pytest.fixture(scope="session", autouse=True)
 def default_vcr_record_mode() -> None:
     """Set deterministic default VCR mode for local runs.
 
