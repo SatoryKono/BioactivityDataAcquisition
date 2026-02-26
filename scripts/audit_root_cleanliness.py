@@ -45,6 +45,7 @@ ALLOWED_ROOT_ENTRIES: frozenset[str] = frozenset(
         "entrypoint.sh",
         "grafana",
         "mkdocs.yml",
+        "prompts",
         "pyproject.toml",
         "reports",
         "requirements.txt",
