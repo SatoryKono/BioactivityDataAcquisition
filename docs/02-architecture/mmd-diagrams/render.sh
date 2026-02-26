@@ -166,13 +166,23 @@ for dir in "${DIRS[@]}"; do
   shopt -u nullglob
 done
 
+filtered_files=()
+for f in "${files[@]}"; do
+  if grep -q "@status.*superseded" "$f"; then
+    log_info "SKIP (superseded): $f"
+    continue
+  fi
+  filtered_files+=("$f")
+done
+files=("${filtered_files[@]}")
+
 TOTAL=${#files[@]}
 if [[ $TOTAL -eq 0 ]]; then
-  log_warn "No diagrams found matching filter '$FILTER'"
+  log_warn "No active diagrams found matching filter '$FILTER'"
   exit 0
 fi
 
-log_info "Found ${BOLD}$TOTAL${NC} diagrams across ${#DIRS[@]} directories"
+log_info "Found ${BOLD}$TOTAL${NC} active diagrams across ${#DIRS[@]} directories"
 echo ""
 
 # ── Build mmdc base args ───────────────────────────────────

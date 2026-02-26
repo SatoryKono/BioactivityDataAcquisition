@@ -1,0 +1,27 @@
+%% Exception Hierarchy — Data Quality Branch
+%% Covers DQ failures and quarantine decision flow.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    dq
+%% @parent  50-exception-hierarchy.mmd
+%% @nodes   8
+
+flowchart TD
+    ROOT[Exception]
+    BIO[BioETLError]
+    DQ[DataQualityError]
+    SCHEMA[SchemaValidationError]
+    MISSING[MissingFieldError]
+    RANGE[OutOfRangeError]
+    QACTION[Action: QUARANTINE]
+    STORE[QuarantineEntry]
+
+    ROOT --> BIO --> DQ
+    DQ --> SCHEMA
+    DQ --> MISSING
+    DQ --> RANGE
+    DQ --> QACTION --> STORE

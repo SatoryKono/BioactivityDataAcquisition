@@ -1,0 +1,26 @@
+%% Exception Hierarchy — Recoverable Branch
+%% Covers retryable failures and recovery actions.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    recoverable
+%% @parent  50-exception-hierarchy.mmd
+%% @nodes   7
+
+flowchart TD
+    ROOT[Exception]
+    BIO[BioETLError]
+    REC[RecoverableError]
+    NET[NetworkError]
+    RATE[RateLimitError]
+    TEMP[TemporaryServiceError]
+    RETRY[Action: RETRY]
+
+    ROOT --> BIO --> REC
+    REC --> NET
+    REC --> RATE
+    REC --> TEMP
+    REC --> RETRY

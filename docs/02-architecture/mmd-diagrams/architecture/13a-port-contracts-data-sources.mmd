@@ -1,0 +1,33 @@
+%% Port Contracts — Data Source Ports and Adapters
+%% Covers source-fetch interfaces and concrete provider adapters.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    data-sources
+%% @parent  13-port-protocol-contracts.mmd
+%% @nodes   9
+
+flowchart LR
+    subgraph Domain
+        DSP[DataSourcePort]
+        FDSP[FilterableDataSourcePort]
+    end
+
+    subgraph Infrastructure
+        CA[ChemblAdapter]
+        PA[PubMedAdapter]
+        UA[UniProtAdapter]
+        CRA[CrossRefAdapter]
+        OAA[OpenAlexAdapter]
+        SSA[SemanticScholarAdapter]
+        PCA[PubChemAdapter]
+    end
+
+    DSP --- CA & PA & UA & CRA & OAA & SSA & PCA
+    FDSP --- PCA
+
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px

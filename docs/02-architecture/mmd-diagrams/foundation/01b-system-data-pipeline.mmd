@@ -1,0 +1,50 @@
+%% System Data Pipeline — ETL Record Flow
+%% Covers adapters, transformers and medallion storage path.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    data-pipeline
+%% @parent  01-full-system-component.mmd
+%% @nodes   11
+
+flowchart LR
+    subgraph Infrastructure
+        ADP[ProviderAdapter]
+        BW[BronzeWriter]
+        SW[SilverWriter]
+        GW[GoldWriter]
+    end
+    subgraph Application
+        BATCH[BatchTransformer]
+        REC[RecordProcessor]
+    end
+    subgraph Domain
+        DSP[DataSourcePort]
+        STP[StoragePort]
+    end
+    subgraph Bronze
+        BR[(Bronze JSONL)]
+    end
+    subgraph Silver
+        SI[(Silver Delta)]
+    end
+    subgraph Gold
+        GO[(Gold Delta/Parquet)]
+    end
+
+    ADP --> DSP
+    DSP --> REC --> BATCH
+    BATCH --> STP
+    STP --> BW --> BR
+    STP --> SW --> SI
+    STP --> GW --> GO
+
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    style Bronze fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style Silver fill:#eceff1,stroke:#607d8b,stroke-width:2px
+    style Gold fill:#fff8e1,stroke:#f9a825,stroke-width:2px

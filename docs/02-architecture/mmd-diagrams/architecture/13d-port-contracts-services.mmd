@@ -1,0 +1,50 @@
+%% Port Contracts — Validation, DQ and Service Ports
+%% Covers quality/security service ports and adapters.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    services
+%% @parent  13-port-protocol-contracts.mmd
+%% @nodes   16
+
+flowchart LR
+    subgraph Domain
+        SVP[SilverValidatorPort]
+        GVP[GoldValidatorPort]
+        QRP[QuarantinePort]
+        ADP[AuditPort]
+        PIIP[PiiHasherPort]
+        BDQP[BronzeDQAnalyzerPort]
+        SDQP[SilverDQAnalyzerPort]
+        GDQP[GoldDQAnalyzerPort]
+    end
+
+    subgraph Application
+        BDA[BronzeDQAnalyzer]
+        SDA[SilverDQAnalyzer]
+        GDA[GoldDQAnalyzer]
+    end
+
+    subgraph Infrastructure
+        PSV[PanderaSilverValidator]
+        PGV[PanderaGoldValidator]
+        UQ[UnifiedQuarantine]
+        FA[FileAuditAdapter]
+        SPH[Sha256PiiHasher]
+    end
+
+    SVP --- PSV
+    GVP --- PGV
+    QRP --- UQ
+    ADP --- FA
+    PIIP --- SPH
+    BDQP --- BDA
+    SDQP --- SDA
+    GDQP --- GDA
+
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px

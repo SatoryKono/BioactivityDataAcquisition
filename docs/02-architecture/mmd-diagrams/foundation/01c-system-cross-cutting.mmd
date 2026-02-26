@@ -1,0 +1,49 @@
+%% System Cross-Cutting Concerns — DI, Config, Observability
+%% Covers runtime controls and platform concerns.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    cross-cutting
+%% @parent  01-full-system-component.mmd
+%% @nodes   14
+
+flowchart TB
+    subgraph Composition
+        BOOT[Bootstrap]
+        CFG[RuntimeConfig]
+        DQC[DQConfig]
+    end
+    subgraph Application
+        RUN[PipelineRunner]
+    end
+    subgraph Domain
+        LKP[LockPort]
+        CKP[CheckpointPort]
+        MTP[MetricsPort]
+        TRP[TracingPort]
+        CBP[CircuitBreakerPort]
+    end
+    subgraph Infrastructure
+        ML[MemoryLock]
+        LC[LocalCheckpoint]
+        PM[PrometheusMetrics]
+        OT[OpenTelemetryTracer]
+        CB[CircuitBreaker]
+    end
+
+    BOOT --> RUN
+    CFG --> RUN
+    DQC --> RUN
+    RUN --> LKP --> ML
+    RUN --> CKP --> LC
+    RUN --> MTP --> PM
+    RUN --> TRP --> OT
+    RUN --> CBP --> CB
+
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    style Composition fill:#fff3e0,stroke:#e65100,stroke-width:2px

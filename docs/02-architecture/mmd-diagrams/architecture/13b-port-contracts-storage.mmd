@@ -1,0 +1,39 @@
+%% Port Contracts — Storage and Persistence Contracts
+%% Covers storage, checkpoint, lock and metadata writer contracts.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    storage
+%% @parent  13-port-protocol-contracts.mmd
+%% @nodes   12
+
+flowchart LR
+    subgraph Domain
+        STP[StoragePort]
+        DRP[DeltaReaderPort]
+        LKP[LockPort]
+        CKP[CheckpointPort]
+        MWP[MetadataWriterPort]
+    end
+
+    subgraph Infrastructure
+        BW[BronzeWriter]
+        SW[SilverWriter]
+        GW[GoldWriter]
+        DRI[DeltaReader]
+        ML[MemoryLock]
+        LC[LocalCheckpoint]
+        MWI[MetadataWriter]
+    end
+
+    STP --- BW & SW & GW
+    DRP --- DRI
+    LKP --- ML
+    CKP --- LC
+    MWP --- MWI
+
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px

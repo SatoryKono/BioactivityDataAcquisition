@@ -1,0 +1,44 @@
+%% System Overview — Layers and External Boundaries
+%% Covers compact full-system component overview.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    overview
+%% @parent  01-full-system-component.mmd
+%% @nodes   8
+
+flowchart TB
+    subgraph External
+        APIs[External Provider APIs]
+        FS[Local Filesystem]
+    end
+    subgraph Interfaces
+        CLI[CLI Interface]
+    end
+    subgraph Composition
+        BOOT[Bootstrap + Registry]
+    end
+    subgraph Application
+        ORCH[Pipeline Orchestration]
+    end
+    subgraph Domain
+        PORTS[Domain Ports]
+    end
+    subgraph Infrastructure
+        ADP[Adapters]
+        WR[Bronze/Silver/Gold Writers]
+    end
+
+    CLI --> BOOT --> ORCH --> PORTS
+    APIs --> ADP --> PORTS
+    ORCH --> WR --> FS
+
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    style Composition fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style Interfaces fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style External fill:#eceff1,stroke:#455a64,stroke-width:2px

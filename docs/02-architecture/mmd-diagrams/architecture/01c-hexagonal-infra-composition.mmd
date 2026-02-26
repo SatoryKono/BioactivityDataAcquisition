@@ -1,0 +1,54 @@
+%% Hexagonal Detail — Infrastructure and Composition Assembly
+%% Covers adapter wiring and runtime composition.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    detail
+%% @parent  01-high-level-hexagonal.mmd
+%% @nodes   12
+
+flowchart TB
+    subgraph Composition
+        BOOT[Bootstrap]
+        REG[ProviderRegistry]
+        FAC[Factories]
+        RT[RuntimeBuilders]
+    end
+
+    subgraph Infrastructure
+        ADP[Provider Adapters]
+        STR[Writers + DeltaReader]
+        OBS[Logger/Metrics/Tracing]
+        CTRL[Lock/Checkpoint/Quarantine]
+    end
+
+    subgraph Domain
+        PORTS[Port Protocols]
+    end
+
+    subgraph External
+        APIs[Provider APIs]
+        FS[Local data/]
+        MON[Prometheus + OTEL]
+    end
+
+    BOOT --> REG
+    BOOT --> FAC --> RT
+    RT --> ADP
+    RT --> STR
+    RT --> OBS
+    RT --> CTRL
+    ADP --> PORTS
+    STR --> PORTS
+    OBS --> PORTS
+    APIs --> ADP
+    FS --> STR
+    MON --> OBS
+
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    style Composition fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style External fill:#eceff1,stroke:#455a64,stroke-width:2px
