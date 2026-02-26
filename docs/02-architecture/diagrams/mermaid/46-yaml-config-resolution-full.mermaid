@@ -17,48 +17,48 @@
 flowchart TD
 %% keep-orphan: SOURCE_YAML_CFG
     subgraph YAML_FILES["YAML File Hierarchy"]
-        BASE["configs/pipelines/_base.yaml&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(global defaults)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        PROVIDER_BASE["configs/pipelines/{provider}/_base.yaml&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(provider defaults)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        PIPELINE["configs/pipelines/{provider}/{entity}.yaml&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(pipeline config)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        SOURCE["configs/sources/{provider}.yaml&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(source config)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        BASE["configs/pipelines/_base.yaml<br/>(global defaults)<br/><br/><br/>"]
+        PROVIDER_BASE["configs/pipelines/{provider}/_base.yaml<br/>(provider defaults)<br/><br/><br/>"]
+        PIPELINE["configs/pipelines/{provider}/{entity}.yaml<br/>(pipeline config)<br/><br/><br/>"]
+        SOURCE["configs/sources/{provider}.yaml<br/>(source config)<br/><br/><br/>"]
     end
 
     subgraph DQ_HIERARCHY["DQ Config Hierarchy (DQConfigLoader)"]
-        DQ_DEFAULTS["configs/quality/_defaults.yaml&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(global DQ defaults)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        DQ_PROVIDER["configs/quality/providers/{provider}.yaml&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(provider DQ)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        DQ_ENTITY["configs/quality/entities/{provider}/{entity}.yaml<br/>(entity DQ)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        DQ_INLINE["pipeline.dq_overrides&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(inline overrides)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        DQ_DEFAULTS["configs/quality/_defaults.yaml<br/>(global DQ defaults)<br/><br/><br/>"]
+        DQ_PROVIDER["configs/quality/providers/{provider}.yaml<br/>(provider DQ)<br/><br/><br/>"]
+        DQ_ENTITY["configs/quality/entities/{provider}/{entity}.yaml<br/>(entity DQ)<br/><br/><br/>"]
+        DQ_INLINE["pipeline.dq_overrides<br/>(inline overrides)<br/><br/><br/>"]
     end
 
     subgraph FILTER_HIERARCHY["Filter Config Hierarchy (FilterConfigLoader)"]
-        FILTER_DEFAULTS["configs/filters/_defaults.yaml&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(global filter defaults)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        FILTER_PROVIDER["configs/filters/providers/{provider}.yaml&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(provider filters)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        FILTER_ENTITY["configs/filters/entities/{provider}/{entity}.yaml<br/>(entity filters)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        FILTER_INLINE["pipeline.filter_rules&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(inline overrides)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        FILTER_DEFAULTS["configs/filters/_defaults.yaml<br/>(global filter defaults)<br/><br/><br/>"]
+        FILTER_PROVIDER["configs/filters/providers/{provider}.yaml<br/>(provider filters)<br/><br/><br/>"]
+        FILTER_ENTITY["configs/filters/entities/{provider}/{entity}.yaml<br/>(entity filters)<br/><br/><br/>"]
+        FILTER_INLINE["pipeline.filter_rules<br/>(inline overrides)<br/><br/><br/>"]
     end
 
     subgraph LOADERS["Infrastructure Config Loaders"]
-        CONFIG_LOADER["ConfigLoader&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>load_pipeline_config()<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        BASE_CONFIG_LOADER["BaseConfigLoader&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>_deep_merge_base()<br/>_merge_lists()<br/>&nbsp;<br/>&nbsp;"]
-        DQ_CONFIG_LOADER["DQConfigLoader&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>_merge_hierarchy()<br/>_deep_merge()<br/>_merge_validation_lists()<br/>&nbsp;"]
-        FILTER_CONFIG_LOADER["FilterConfigLoader&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>load()<br/>_merge_lists()<br/>&nbsp;<br/>&nbsp;"]
-        YAML_LOADER["config_loader.py&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>_load_base_config()<br/>_deep_merge()<br/>load_pipeline_config()<br/>&nbsp;"]
+        CONFIG_LOADER["ConfigLoader<br/>load_pipeline_config()<br/><br/><br/>"]
+        BASE_CONFIG_LOADER["BaseConfigLoader<br/>_deep_merge_base()<br/>_merge_lists()<br/><br/>"]
+        DQ_CONFIG_LOADER["DQConfigLoader<br/>_merge_hierarchy()<br/>_deep_merge()<br/>_merge_validation_lists()<br/>"]
+        FILTER_CONFIG_LOADER["FilterConfigLoader<br/>load()<br/>_merge_lists()<br/><br/>"]
+        YAML_LOADER["config_loader.py<br/>_load_base_config()<br/>_deep_merge()<br/>load_pipeline_config()<br/>"]
     end
 
     subgraph DOMAIN_CONFIG["Domain Config Objects (Frozen)"]
-        PIPELINE_CONFIG["PipelineConfig&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(frozen dataclass)<br/>pipeline_name, provider,<br/>entity_type, table, dq,<br/>batch_size, fields"]
-        TABLE_CONFIG["TableConfig&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(frozen dataclass)<br/>primary_keys, silver_table,<br/>gold_table<br/>&nbsp;"]
-        DQ_CONFIG["DQConfig&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(frozen dataclass)<br/>soft_fail_threshold=0.05<br/>hard_fail_threshold=0.20<br/>field_validations"]
-        INPUT_FILTER["InputFilterConfig&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        SILVER_FILTER["SilverFilterConfig&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        GOLD_FILTER["GoldFilterConfig&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        PIPELINE_CONFIG["PipelineConfig<br/>(frozen dataclass)<br/>pipeline_name, provider,<br/>entity_type, table, dq,<br/>batch_size, fields"]
+        TABLE_CONFIG["TableConfig<br/>(frozen dataclass)<br/>primary_keys, silver_table,<br/>gold_table<br/>"]
+        DQ_CONFIG["DQConfig<br/>(frozen dataclass)<br/>soft_fail_threshold=0.05<br/>hard_fail_threshold=0.20<br/>field_validations"]
+        INPUT_FILTER["InputFilterConfig<br/><br/><br/><br/>"]
+        SILVER_FILTER["SilverFilterConfig<br/><br/><br/><br/>"]
+        GOLD_FILTER["GoldFilterConfig<br/><br/><br/><br/>"]
     end
 
     subgraph VALIDATION["Pydantic Validation Layer"]
-        PIPELINE_YAML_CFG["PipelineYamlConfig&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Pydantic BaseModel)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        SOURCE_YAML_CFG["SourceYamlConfig&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Pydantic BaseModel)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        DQ_CONFIG_FILE["DQConfigFile&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Pydantic BaseModel)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        FILTER_CONFIG_FILE["FilterConfigFile&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Pydantic BaseModel)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        PIPELINE_YAML_CFG["PipelineYamlConfig<br/>(Pydantic BaseModel)<br/><br/><br/>"]
+        SOURCE_YAML_CFG["SourceYamlConfig<br/>(Pydantic BaseModel)<br/><br/><br/>"]
+        DQ_CONFIG_FILE["DQConfigFile<br/>(Pydantic BaseModel)<br/><br/><br/>"]
+        FILTER_CONFIG_FILE["FilterConfigFile<br/>(Pydantic BaseModel)<br/><br/><br/>"]
     end
 
     %% Pipeline config resolution
