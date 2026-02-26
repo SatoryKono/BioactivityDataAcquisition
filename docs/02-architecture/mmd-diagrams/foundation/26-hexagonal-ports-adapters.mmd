@@ -16,45 +16,45 @@ flowchart TB
         direction TB
 
         subgraph DataPorts["Data Ports"]
-            DSP["DataSourcePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• fetch() → AsyncIterator<br/>• health_check() → HealthStatus<br/>&nbsp;"]
-            FDSP["FilterableDataSourcePort<br/>• fetch_filtered()<br/>&nbsp;<br/>&nbsp;"]
-            SP["StoragePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• write_bronze()<br/>• write_silver()<br/>• write_gold()"]
-            DRP["DeltaReaderPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• read_table()<br/>• get_schema()<br/>&nbsp;"]
+            DSP["DataSourcePort<br/>• fetch() → AsyncIterator<br/>• health_check() → HealthStatus<br/>"]
+            FDSP["FilterableDataSourcePort<br/>• fetch_filtered()<br/><br/>"]
+            SP["StoragePort<br/>• write_bronze()<br/>• write_silver()<br/>• write_gold()"]
+            DRP["DeltaReaderPort<br/>• read_table()<br/>• get_schema()<br/>"]
         end
 
         subgraph CoordPorts["Coordination Ports"]
-            LP["LockPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• acquire()<br/>• release()<br/>• renew()"]
-            CPP["CheckpointPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• save()<br/>• load()<br/>• delete()"]
-            QP["QuarantinePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• write()<br/>• read_sample()<br/>• purge()"]
+            LP["LockPort<br/>• acquire()<br/>• release()<br/>• renew()"]
+            CPP["CheckpointPort<br/>• save()<br/>• load()<br/>• delete()"]
+            QP["QuarantinePort<br/>• write()<br/>• read_sample()<br/>• purge()"]
         end
 
         subgraph ObsPorts["Observability Ports"]
-            LGP["LoggerPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• info() / warning()<br/>• error() / debug()<br/>• bind()"]
-            MP["MetricsPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• increment_counter()<br/>• observe_histogram()<br/>• set_gauge()"]
-            TP["TracingPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• get_tracer()<br/>• start_span()<br/>&nbsp;"]
-            DQM["DQMonitorPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• record_metrics()<br/>&nbsp;<br/>&nbsp;"]
+            LGP["LoggerPort<br/>• info() / warning()<br/>• error() / debug()<br/>• bind()"]
+            MP["MetricsPort<br/>• increment_counter()<br/>• observe_histogram()<br/>• set_gauge()"]
+            TP["TracingPort<br/>• get_tracer()<br/>• start_span()<br/>"]
+            DQM["DQMonitorPort<br/>• record_metrics()<br/><br/>"]
         end
 
         subgraph QualityPorts["Quality & Security Ports"]
-            SVP["SilverValidatorPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• validate()<br/>&nbsp;<br/>&nbsp;"]
-            GVP["GoldValidatorPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• validate()<br/>&nbsp;<br/>&nbsp;"]
-            PIIP["PiiHasherPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• hash_field()<br/>&nbsp;<br/>&nbsp;"]
-            INP["InputFilterPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• filter()<br/>&nbsp;<br/>&nbsp;"]
+            SVP["SilverValidatorPort<br/>• validate()<br/><br/>"]
+            GVP["GoldValidatorPort<br/>• validate()<br/><br/>"]
+            PIIP["PiiHasherPort<br/>• hash_field()<br/><br/>"]
+            INP["InputFilterPort<br/>• filter()<br/><br/>"]
         end
 
         subgraph MetaPorts["Metadata & Config Ports"]
-            MWP["MetadataWriterPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• write()<br/>&nbsp;<br/>&nbsp;"]
-            MCP2["MetadataCoordinatorPort&nbsp;<br/>• coordinate()<br/>&nbsp;<br/>&nbsp;"]
-            SRLP["JsonEncoderPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• encode() / decode()<br/>&nbsp;<br/>&nbsp;"]
-            MMP["MemoryMonitorPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• get_stats()<br/>&nbsp;<br/>&nbsp;"]
+            MWP["MetadataWriterPort<br/>• write()<br/><br/>"]
+            MCP2["MetadataCoordinatorPort<br/>• coordinate()<br/><br/>"]
+            SRLP["JsonEncoderPort<br/>• encode() / decode()<br/><br/>"]
+            MMP["MemoryMonitorPort<br/>• get_stats()<br/><br/>"]
         end
 
         subgraph LifecyclePorts["Lifecycle Ports"]
-            SHP["ShutdownPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• is_shutting_down()<br/>&nbsp;<br/>&nbsp;"]
-            AP["AuditPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• log_operation()<br/>&nbsp;<br/>&nbsp;"]
-            HCP["HealthCheckPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• check_health()<br/>&nbsp;<br/>&nbsp;"]
-            RLMP["RateLimiterPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• acquire()<br/>&nbsp;<br/>&nbsp;"]
-            CBP["CircuitBreakerPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• call()<br/>&nbsp;<br/>&nbsp;"]
+            SHP["ShutdownPort<br/>• is_shutting_down()<br/><br/>"]
+            AP["AuditPort<br/>• log_operation()<br/><br/>"]
+            HCP["HealthCheckPort<br/>• check_health()<br/><br/>"]
+            RLMP["RateLimiterPort<br/>• acquire()<br/><br/>"]
+            CBP["CircuitBreakerPort<br/>• call()<br/><br/>"]
         end
     end
 
@@ -62,34 +62,34 @@ flowchart TB
         direction TB
 
         subgraph DataAdapters["Data Source Adapters"]
-            CA["ChemblAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+            CA["ChemblAdapter<br/><br/><br/>"]
         end
 
         subgraph StorageAdapters["Storage Adapters"]
-            BW["BronzeWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-            DR["DeltaReader&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+            BW["BronzeWriter<br/><br/><br/>"]
+            DR["DeltaReader<br/><br/><br/>"]
         end
 
         subgraph CoordAdapters["Coordination Adapters"]
-            ML["MemoryLock&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-            LC["LocalCheckpoint&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-            UQ["UnifiedQuarantine&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+            ML["MemoryLock<br/><br/><br/>"]
+            LC["LocalCheckpoint<br/><br/><br/>"]
+            UQ["UnifiedQuarantine<br/><br/><br/>"]
         end
 
         subgraph ObsAdapters["Observability Adapters"]
-            SL["StructlogLogger&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-            PM["PrometheusMetrics&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-            NOT["NoOpTracing&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-            DQMon["DataQualityMonitor&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+            SL["StructlogLogger<br/><br/><br/>"]
+            PM["PrometheusMetrics<br/><br/><br/>"]
+            NOT["NoOpTracing<br/><br/><br/>"]
+            DQMon["DataQualityMonitor<br/><br/><br/>"]
         end
 
         subgraph QualAdapters["Quality & Other Adapters"]
-            PSV["PanderaSilverValidator&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-            PGV["PanderaGoldValidator&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-            PIH["Sha256PiiHasher&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-            MW["MetadataWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-            FAA["FileAuditAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-            MM["MemoryMonitor&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+            PSV["PanderaSilverValidator<br/><br/><br/>"]
+            PGV["PanderaGoldValidator<br/><br/><br/>"]
+            PIH["Sha256PiiHasher<br/><br/><br/>"]
+            MW["MetadataWriter<br/><br/><br/>"]
+            FAA["FileAuditAdapter<br/><br/><br/>"]
+            MM["MemoryMonitor<br/><br/><br/>"]
         end
     end
 
