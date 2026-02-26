@@ -65,7 +65,8 @@ project_rules_failures.txt
 git_commit_*.txt
 *_gitshow_err.txt
 log_test.txt
-/reports/
+/reports/*
+!/reports/review/
 
 # IDE / Editors
 .idea/
