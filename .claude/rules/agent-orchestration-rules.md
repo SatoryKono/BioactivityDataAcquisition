@@ -21,6 +21,7 @@
 | `py-debug-bot` | opus | RCA падений тестов, исправление ошибок | `src/bioetl/`, `tests/` |
 | `py-doc-bot` | sonnet | Документация, ADR, CHANGELOG, docstrings | `docs/`, docstrings |
 | `py-test-swarm` | opus | Иерархическое тестирование, flakiness tracking, coverage audit | `tests/`, `reports/` |
+| `py-doc-swarm` | opus | Иерархическое документирование, drift detection, docstring sweep, ADR audit | `docs/`, docstrings, `reports/` |
 
 > **py-code-bot** не зарегистрирован как subagent_type — production-код пишем напрямую.
 
@@ -37,6 +38,10 @@
 | Полный аудит тестового покрытия | `py-test-swarm` | `task_id=SWARM-001, mode=full_audit, scope=весь проект` |
 | Массовая отладка падающих тестов | `py-test-swarm` | `task_id=SWARM-002, mode=fix_failures, scope=domain` |
 | Сбор статистики flakiness | `py-test-swarm` | `task_id=SWARM-003, mode=flakiness_scan, flakiness_runs=10` |
+| Полный аудит документации | `py-doc-swarm` | `task_id=DSWARM-001, mode=full_audit, scope=весь проект` |
+| Массовое добавление docstrings | `py-doc-swarm` | `task_id=DSWARM-002, mode=docstring_sweep, scope=domain` |
+| Обнаружение расхождений код↔документация | `py-doc-swarm` | `task_id=DSWARM-003, mode=drift_detection` |
+| Аудит ADR | `py-doc-swarm` | `task_id=DSWARM-004, mode=adr_audit` |
 
 ## Стандартный workflow
 
@@ -50,6 +55,7 @@
 
 - **Quick-fix**: test(baseline) → fix → test(final) → doc
 - **Doc-only**: py-doc-bot → py-audit-bot(targeted, docs)
+- **Doc-swarm**: py-doc-swarm(full_audit) → py-audit-bot(targeted, docs)
 - **Config-only**: audit → plan → py-config-bot → test → audit
 
 ## Репозиторные Skills (ручное исполнение)
