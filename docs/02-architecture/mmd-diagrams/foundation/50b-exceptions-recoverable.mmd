@@ -1,0 +1,39 @@
+%% Exception hierarchy — recoverable branch with retry behavior
+%% Covers transient and provider errors handled by resilience patterns.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   Class
+%% @status  active
+%% @view    recoverable
+%% @parent  50-exception-hierarchy.mmd
+%% @nodes   13
+
+flowchart TD
+    BioETLError[BioETLError]
+    RecoverableError[RecoverableError]
+    ProviderUnavailableError[ProviderUnavailableError]
+    HttpTimeoutError[HttpTimeoutError]
+    RateLimitError[RateLimitError]
+    RetryableStorageError[RetryableStorageError]
+    RetryBudgetExceeded[RetryBudgetExceeded]
+    CircuitBreakerOpen[CircuitBreakerOpen]
+    FallbackPath[Fallback Path]
+    RetryStrategy[Retry Strategy]
+    ContinueBatch[Continue Batch]
+    WarnLog[Warning Log]
+    FailBatch[Fail Batch]
+
+    BioETLError --> RecoverableError
+    RecoverableError --> ProviderUnavailableError
+    RecoverableError --> HttpTimeoutError
+    RecoverableError --> RateLimitError
+    RecoverableError --> RetryableStorageError
+    RecoverableError --> RetryStrategy
+    RetryStrategy --> ContinueBatch
+    RetryStrategy --> RetryBudgetExceeded
+    RetryStrategy --> CircuitBreakerOpen
+    RetryBudgetExceeded --> FailBatch
+    CircuitBreakerOpen --> FallbackPath
+    RecoverableError --> WarnLog

@@ -9,6 +9,10 @@ Checks performed:
 - Naming convention compliance (NN-topic.{mmd|mermaid})
 - No placeholder/stub content
 - Staleness detection based on %% Updated: or %% @date
+- Node count thresholds (SIZE-001/002, ADR-040 D5)
+- Approved colour palette enforcement (COLOUR-001, ADR-040 D3)
+- View metadata for decomposed files (VIEW-001/002)
+- Layout hack accumulation warning (HACK-001)
 
 Usage:
     # Check all diagrams
@@ -53,6 +57,19 @@ PLACEHOLDER_PATTERNS = {
 }
 DEFAULT_STALE_DAYS = 90
 WARNING_STALE_DAYS = 180
+
+# ADR-040 D3: Approved fill colours from theme/custom.css
+APPROVED_FILLS = {
+    "#f3e5f5",  # Domain
+    "#e8f5e9",  # Application
+    "#ffcdd2",  # Infrastructure
+    "#fff3e0",  # Composition / Bronze
+    "#e3f2fd",  # Interfaces
+    "#eceff1",  # External / Silver
+    "#fff8e1",  # Gold
+    "#ffebee",  # Quarantine
+    "#fafafa",  # Neutral / container
+}
 
 
 @dataclass
@@ -259,6 +276,165 @@ def check_staleness(
     return issues
 
 
+def should_skip(path: Path, lines: list[str]) -> bool:
+    """Skip superseded and legend files from content checks."""
+    for line in lines[:10]:
+        low = line.lower()
+        if "@status" in low and "superseded" in low:
+            return True
+        if "@type" in low and "legend" in low:
+            return True
+    return False
+
+
+def detect_diagram_type(lines: list[str]) -> str | None:
+    """Identify diagram type from the first non-comment directive."""
+    for line in lines:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("%%"):
+            continue
+        low = stripped.lower()
+        if low.startswith(("flowchart", "graph")):
+            return "flowchart"
+        if low.startswith("classdiagram"):
+            return "classDiagram"
+        if low.startswith("sequencediagram"):
+            return "sequenceDiagram"
+        if low.startswith("statediagram"):
+            return "stateDiagram"
+        return None
+    return None
+
+
+def check_node_count(path: Path, lines: list[str]) -> list[Issue]:
+    """SIZE-001/002: Check estimated node count against ADR-040 thresholds."""
+    issues: list[Issue] = []
+    content = "\n".join(lines)
+    dtype = detect_diagram_type(lines)
+
+    patterns_by_type: dict[str | None, list[str]] = {
+        "flowchart": [
+            r"^\s+(\w+)\[\[",
+            r"^\s+(\w+)\[",
+            r"^\s+(\w+)\(",
+            r"^\s+(\w+)\{",
+            r"^\s+(\w+)>",
+        ],
+        "classDiagram": [r"^\s+class\s+(\w+)"],
+        "sequenceDiagram": [r"^\s+participant\s+(\w+)", r"^\s+actor\s+(\w+)"],
+        "stateDiagram": [r"^\s+state\s+\"?(\w+)"],
+        None: [
+            r"^\s+(\w+)\[\[",
+            r"^\s+(\w+)\[",
+            r"^\s+(\w+)\(",
+            r"^\s+(\w+)\{",
+            r"^\s+(\w+)>",
+        ],
+    }
+
+    node_names: set[str] = set()
+    for pattern in patterns_by_type.get(dtype, patterns_by_type[None]):
+        for match in re.finditer(pattern, content, re.MULTILINE):
+            node_names.add(match.group(1))
+
+    node_count = len(node_names)
+    if node_count > 35:
+        issues.append(
+            Issue(
+                file=str(path),
+                severity="ERROR",
+                rule="SIZE-001",
+                message=(
+                    f"Estimated {node_count} unique nodes (>35 CRITICAL). "
+                    "Decompose into Views."
+                ),
+            )
+        )
+    elif node_count > 20:
+        issues.append(
+            Issue(
+                file=str(path),
+                severity="WARNING",
+                rule="SIZE-002",
+                message=(
+                    f"Estimated {node_count} unique nodes (>20 soft limit). "
+                    "Consider decomposition."
+                ),
+            )
+        )
+    return issues
+
+
+def check_subgraph_colours(path: Path, lines: list[str]) -> list[Issue]:
+    """COLOUR-001: Validate fill colours against ADR-040 approved palette."""
+    issues: list[Issue] = []
+    for idx, line in enumerate(lines, start=1):
+        stripped = line.strip()
+        if stripped.startswith("style ") and "fill:" in stripped:
+            match = re.search(r"fill:(#[0-9a-fA-F]{6})", stripped)
+            if match and match.group(1).lower() not in APPROVED_FILLS:
+                issues.append(
+                    Issue(
+                        file=str(path),
+                        severity="WARNING",
+                        rule="COLOUR-001",
+                        message=(
+                            f"Line {idx}: Unapproved fill colour {match.group(1)}. "
+                            "See README.md colour scheme."
+                        ),
+                    )
+                )
+    return issues
+
+
+def check_view_metadata(path: Path, lines: list[str]) -> list[Issue]:
+    """VIEW-001/002: Check decomposed files have @view and @parent metadata."""
+    issues: list[Issue] = []
+    if not re.match(r"^\d{2}[a-z]-", path.name):
+        return issues
+
+    has_view = any(line.strip().startswith("%% @view") for line in lines)
+    has_parent = any(line.strip().startswith("%% @parent") for line in lines)
+
+    if not has_view:
+        issues.append(
+            Issue(
+                file=str(path),
+                severity="WARNING",
+                rule="VIEW-001",
+                message="Decomposed diagram missing %% @view metadata",
+            )
+        )
+    if not has_parent:
+        issues.append(
+            Issue(
+                file=str(path),
+                severity="WARNING",
+                rule="VIEW-002",
+                message="Decomposed diagram missing %% @parent metadata",
+            )
+        )
+    return issues
+
+
+def check_layout_hacks(path: Path, lines: list[str]) -> list[Issue]:
+    """HACK-001: Warn when excessive LAYOUT-HACK comments accumulate."""
+    hack_count = sum(1 for line in lines if "LAYOUT-HACK" in line)
+    if hack_count <= 5:
+        return []
+    return [
+        Issue(
+            file=str(path),
+            severity="WARNING",
+            rule="HACK-001",
+            message=(
+                f"{hack_count} LAYOUT-HACK comments (>5). "
+                "Consider further decomposition."
+            ),
+        )
+    ]
+
+
 def lint_file(path: Path, stale_days: int) -> list[Issue]:
     """Run all checks on a single diagram file."""
     try:
@@ -275,11 +451,18 @@ def lint_file(path: Path, stale_days: int) -> list[Issue]:
 
     lines = content.splitlines()
 
+    if should_skip(path, lines):
+        return []
+
     issues: list[Issue] = []
     issues.extend(check_metadata_headers(path, lines))
     issues.extend(check_naming_convention(path))
     issues.extend(check_placeholder_content(path, lines))
     issues.extend(check_staleness(path, lines, stale_days))
+    issues.extend(check_view_metadata(path, lines))
+    issues.extend(check_node_count(path, lines))
+    issues.extend(check_subgraph_colours(path, lines))
+    issues.extend(check_layout_hacks(path, lines))
 
     return issues
 

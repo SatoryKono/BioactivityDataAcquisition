@@ -1,0 +1,33 @@
+%% Exception hierarchy — critical failure branch
+%% Covers fatal failures that immediately abort execution.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   Class
+%% @status  active
+%% @view    critical
+%% @parent  50-exception-hierarchy.mmd
+%% @nodes   10
+
+flowchart TD
+    BioETLError[BioETLError]
+    CriticalError[CriticalError]
+    ConfigurationError[ConfigurationError]
+    BootstrapError[BootstrapError]
+    SchemaMismatchError[SchemaMismatchError]
+    ContractViolationError[ContractViolationError]
+    SecurityViolationError[SecurityViolationError]
+    FatalStorageError[FatalStorageError]
+    SystemIntegrityError[SystemIntegrityError]
+    AbortRun[Abort Run]
+
+    BioETLError --> CriticalError
+    CriticalError --> ConfigurationError
+    CriticalError --> BootstrapError
+    CriticalError --> SchemaMismatchError
+    CriticalError --> ContractViolationError
+    CriticalError --> SecurityViolationError
+    CriticalError --> FatalStorageError
+    CriticalError --> SystemIntegrityError
+    CriticalError --> AbortRun

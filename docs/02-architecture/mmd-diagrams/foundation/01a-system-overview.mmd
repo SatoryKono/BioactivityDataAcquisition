@@ -1,0 +1,28 @@
+%% System overview — top-level components and external systems
+%% Covers layer-level map for onboarding.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    overview
+%% @parent  01-full-system-component.mmd
+%% @nodes   10
+
+flowchart LR
+    External[External APIs]
+    Interfaces[Interfaces]
+    Composition[Composition]
+    Application[Application]
+    Domain[Domain]
+    Infrastructure[Infrastructure]
+    Bronze[Bronze]
+    Silver[Silver]
+    Gold[Gold]
+    Quarantine[Quarantine]
+
+    External --> Interfaces --> Composition --> Application --> Domain
+    Infrastructure -.-> Domain
+    Application --> Bronze --> Silver --> Gold
+    Silver --> Quarantine

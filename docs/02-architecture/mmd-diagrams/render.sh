@@ -258,6 +258,12 @@ for i in "${!files[@]}"; do
     echo ""
   fi
 
+  # Skip superseded diagrams
+  if grep -qiE '^%% @status\s+superseded' "$src"; then
+    log_info "SKIP (superseded): ${src#"$REPO_ROOT/"}"
+    continue
+  fi
+
   if render_one "$src" "$idx"; then
     success=$((success + 1))
   else

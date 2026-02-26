@@ -1,0 +1,39 @@
+%% System cross-cutting — DI, observability, resilience and config
+%% Covers shared runtime concerns.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    cross-cutting
+%% @parent  01-full-system-component.mmd
+%% @nodes   14
+
+flowchart LR
+    Bootstrap[Bootstrap]
+    Factories[Factories]
+    ConfigLoader[Config Loader]
+    PipelineRunner[PipelineRunner]
+    Logger[UnifiedLogger]
+    Metrics[Metrics]
+    Tracing[Tracing]
+    CircuitBreaker[Circuit Breaker]
+    RateLimiter[Rate Limiter]
+    RetryPolicy[Retry Policy]
+    MemoryLock[MemoryLock]
+    LocalCheckpoint[LocalCheckpoint]
+    AuditTrail[FileAuditAdapter]
+    ShutdownManager[Graceful Shutdown]
+
+    Bootstrap --> Factories --> PipelineRunner
+    ConfigLoader --> PipelineRunner
+    PipelineRunner --> Logger
+    PipelineRunner --> Metrics
+    PipelineRunner --> Tracing
+    PipelineRunner --> CircuitBreaker --> RetryPolicy
+    PipelineRunner --> RateLimiter
+    PipelineRunner --> MemoryLock
+    PipelineRunner --> LocalCheckpoint
+    PipelineRunner --> AuditTrail
+    PipelineRunner --> ShutdownManager
