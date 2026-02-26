@@ -5,6 +5,9 @@ Updated: 2026-02-25
 This directory contains decomposed Mermaid views for overloaded architecture diagrams.
 Each decomposed diagram has 5 artifacts: `-full`, `-overview`, `-domain`, `-infra`, `-dataflow`.
 
+> **Governance:** [ADR-040 — Diagram Governance and Layout Policy](../decisions/ADR-040-diagram-governance.md)
+> Colour scheme, linkStyle differentiation, view decomposition thresholds, CI validation — all defined in ADR-040.
+
 ## Diagram Views
 
 | Parent | Overview | Domain-Focus | Infrastructure-Mapping | Data-Flow | Full |
