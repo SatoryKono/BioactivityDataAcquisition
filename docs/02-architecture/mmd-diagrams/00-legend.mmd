@@ -1,0 +1,49 @@
+%% Legend — BioETL Diagram Colour Scheme and Link Types
+%% Reference file for all architecture diagrams
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    legend
+%% @level   Reference
+%% @status  active
+%% @nodes   0
+
+flowchart LR
+    subgraph Layers["Layer Colours"]
+        direction TB
+        L1["Domain"]:::port
+        L2["Application"]:::service
+        L3["Infrastructure"]:::adapter
+        L4["Composition"]:::factory
+        L5["Interfaces"]:::iface
+        L6["External"]:::external
+    end
+    subgraph Medallion["Medallion Layers"]
+        direction TB
+        M1["Bronze"]:::bronze
+        M2["Silver"]:::silver
+        M3["Gold"]:::gold
+        M4["Quarantine"]:::quar
+    end
+    subgraph LinkTypes["Link Types"]
+        direction TB
+        DA[" src "] -->|data flow| DB[" dst "]
+        DC[" src "] -.->|implements| DD[" dst "]
+        DE[" src "] -->|error| DF[" dst "]
+    end
+    classDef port fill:#f3e5f5,stroke:#6a1b9a,stroke-width:1.5px
+    classDef service fill:#e8f5e9,stroke:#2e7d32,stroke-width:1.5px
+    classDef adapter fill:#ffcdd2,stroke:#c62828,stroke-width:1.5px
+    classDef factory fill:#fff3e0,stroke:#e65100,stroke-width:1.5px
+    classDef iface fill:#e3f2fd,stroke:#1565c0,stroke-width:1.5px
+    classDef external fill:#eceff1,stroke:#455a64,stroke-width:1.5px,stroke-dasharray:5
+    classDef bronze fill:#fff3e0,stroke:#e65100,stroke-width:1.5px
+    classDef silver fill:#eceff1,stroke:#607d8b,stroke-width:1.5px
+    classDef gold fill:#fff8e1,stroke:#f9a825,stroke-width:1.5px
+    classDef quar fill:#ffebee,stroke:#d32f2f,stroke-width:1.5px
+    linkStyle 0 stroke:#1E293B,stroke-width:3px
+    linkStyle 1 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 2 stroke:#c62828,stroke-width:2px,stroke-dasharray:4
+    style Layers fill:#FAFAFA,stroke:#E0E0E0,stroke-width:1px
+    style Medallion fill:#FAFAFA,stroke:#E0E0E0,stroke-width:1px
+    style LinkTypes fill:#FAFAFA,stroke:#E0E0E0,stroke-width:1px

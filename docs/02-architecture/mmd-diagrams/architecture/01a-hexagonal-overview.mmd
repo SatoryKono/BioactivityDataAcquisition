@@ -1,0 +1,48 @@
+%% Hexagonal Architecture — overview view
+%% Covers five layers, dependency direction, and external systems.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    overview
+%% @parent  01-high-level-hexagonal.mmd
+%% @nodes   11
+
+flowchart TB
+    subgraph External["External Layer"]
+        direction TB
+        APIs[External APIs]:::external
+        FS[File System]:::external
+    end
+    subgraph Interfaces["Interfaces Layer"]
+        direction TB
+        CLI[CLI Commands]:::iface
+    end
+    subgraph Composition["Composition Layer"]
+        direction TB
+        Boot[Bootstrap]:::factory
+    end
+    subgraph Application["Application Layer"]
+        direction TB
+        Runner[PipelineRunnerService]:::service
+    end
+    subgraph Domain["Domain Layer"]
+        direction TB
+        Ports[DataSourcePort / StoragePort]:::port
+    end
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        Adapters[Provider Adapters]:::adapter
+        Writers[BronzeWriter / SilverWriter / GoldWriter]:::adapter
+    end
+    CLI --> Boot --> Runner --> Ports
+    APIs --> Adapters -.-> Ports
+    FS --> Writers -.-> Ports
+    classDef port fill:#f3e5f5,stroke:#6a1b9a,stroke-width:1.5px
+    classDef adapter fill:#ffcdd2,stroke:#c62828,stroke-width:1.5px
+    classDef service fill:#e8f5e9,stroke:#2e7d32,stroke-width:1.5px
+    classDef factory fill:#fff3e0,stroke:#e65100,stroke-width:1.5px
+    classDef iface fill:#e3f2fd,stroke:#1565c0,stroke-width:1.5px
+    classDef external fill:#eceff1,stroke:#455a64,stroke-width:1.5px,stroke-dasharray:5

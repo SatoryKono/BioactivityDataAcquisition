@@ -1,0 +1,27 @@
+%% Full System Component — data pipeline view
+%% Covers ETL data path from adapters through transformers to medallion storage.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    data-pipeline
+%% @parent  01-full-system-component.mmd
+%% @nodes   14
+
+flowchart LR
+    API[Provider APIs] --> ADP[Provider Adapters]
+    ADP --> BR[BronzeWriter]
+    BR --> TF[BaseTransformer]
+    TF --> SV[SilverWriter]
+    SV --> GV[GoldWriter]
+    SV --> DQ[DQMonitor]
+    DQ --> Q[UnifiedQuarantine]
+    style API fill:#eceff1,stroke:#455a64,stroke-width:2px
+    style ADP fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    style BR fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style TF fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style SV fill:#eceff1,stroke:#607d8b,stroke-width:2px
+    style GV fill:#fff8e1,stroke:#f9a825,stroke-width:2px
+    style Q fill:#ffebee,stroke:#d32f2f,stroke-width:2px

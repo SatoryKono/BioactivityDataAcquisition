@@ -1,0 +1,41 @@
+%% Port Contracts — Services view
+%% Covers service support ports (checkpoint, lock, quarantine, DQ, health).
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    services
+%% @parent  13-port-protocol-contracts.mmd
+%% @nodes   17
+
+flowchart LR
+    subgraph Domain["Domain Layer"]
+        direction TB
+        LKP[LockPort]:::port
+        CKP[CheckpointPort]:::port
+        QRP[QuarantinePort]:::port
+        ADP[AuditPort]:::port
+        HCP[HealthCheckPort]:::port
+        DQR[DQReportWriterPort]:::port
+    end
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        ML[MemoryLock]:::adapter
+        LC[LocalCheckpoint]:::adapter
+        UQ[UnifiedQuarantine]:::adapter
+        FA[FileAuditAdapter]:::adapter
+        DQW[DQReportWriter]:::adapter
+        MM[MemoryMonitor]:::adapter
+    end
+    LKP -.-> ML
+    CKP -.-> LC
+    QRP -.-> UQ
+    ADP -.-> FA
+    DQR -.-> DQW
+    HCP -.-> MM
+    classDef port fill:#f3e5f5,stroke:#6a1b9a,stroke-width:1.5px
+    classDef adapter fill:#ffcdd2,stroke:#c62828,stroke-width:1.5px
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px

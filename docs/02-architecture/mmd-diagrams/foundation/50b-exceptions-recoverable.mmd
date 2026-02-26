@@ -1,0 +1,23 @@
+%% Exception Hierarchy — recoverable view
+%% Covers RecoverableError branch and retry semantics.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   Class
+%% @status  active
+%% @view    recoverable
+%% @parent  50-exception-hierarchy.mmd
+%% @nodes   14
+
+flowchart TD
+    BIO[BioETLError] --> REC[RecoverableError]
+    REC --> NET[NetworkError]
+    REC --> TMO[TimeoutError]
+    REC --> RLE[RateLimitError]
+    REC --> CBO[CircuitBreakerOpenError]
+    REC --> API[ApiError]
+    REC --> STR[StorageError]
+    STR --> DWC[DeltaWriteConflictError]
+    STR --> SEO[SchemaEvolutionError]
+    REC -.-> RETRY[Retry with Backoff]

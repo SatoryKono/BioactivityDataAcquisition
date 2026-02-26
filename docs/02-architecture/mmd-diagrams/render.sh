@@ -159,11 +159,29 @@ for dir in "${DIRS[@]}"; do
     log_warn "Directory not found, skipping: $dir"
     continue
   fi
-  shopt -s nullglob
-  for f in "$dir"/$FILTER.mermaid "$dir"/$FILTER.mmd; do
-    [[ -f "$f" ]] && files+=("$f")
-  done
-  shopt -u nullglob
+
+  while IFS= read -r -d '' f; do
+    base="$(basename "$f")"
+    [[ ! "$base" == $FILTER*.mmd && ! "$base" == $FILTER*.mermaid ]] && continue
+
+    if grep -q '@status.*superseded' "$f"; then
+      log_info "SKIP (superseded): ${f#"$REPO_ROOT/"}"
+      continue
+    fi
+
+    files+=("$f")
+  done < <(find "$dir" -type f \( -name "*.mmd" -o -name "*.mermaid" \) -print0)
+done
+
+# include top-level legend/template files when matched
+TOP_DIR="$REPO_ROOT/docs/02-architecture/mmd-diagrams"
+for f in "$TOP_DIR"/$FILTER.mmd "$TOP_DIR"/$FILTER.mermaid; do
+  [[ -f "$f" ]] || continue
+  if grep -q '@status.*superseded' "$f"; then
+    log_info "SKIP (superseded): ${f#"$REPO_ROOT/"}"
+    continue
+  fi
+  files+=("$f")
 done
 
 TOTAL=${#files[@]}

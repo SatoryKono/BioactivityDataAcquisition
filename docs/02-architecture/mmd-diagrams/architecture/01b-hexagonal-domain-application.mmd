@@ -1,0 +1,36 @@
+%% Hexagonal Architecture — domain and application detail
+%% Covers domain ports/entities and application orchestration services.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    detail
+%% @parent  01-high-level-hexagonal.mmd
+%% @nodes   14
+
+flowchart LR
+    subgraph Domain["Domain Layer"]
+        direction TB
+        DSP[DataSourcePort]:::port
+        STP[StoragePort]:::port
+        LKP[LockPort]:::port
+        BRE[Batch]:::port
+        PRN[PipelineRun]:::port
+    end
+    subgraph Application["Application Layer"]
+        direction TB
+        PRS[PipelineRunnerService]:::service
+        BEX[BatchExecutorService]:::service
+        DQS[DqService]:::service
+        HLS[HealthService]:::service
+    end
+    PRS --> DSP
+    PRS --> STP
+    PRS --> LKP
+    BEX --> STP
+    DQS --> BRE
+    HLS --> PRN
+    classDef port fill:#f3e5f5,stroke:#6a1b9a,stroke-width:1.5px
+    classDef service fill:#e8f5e9,stroke:#2e7d32,stroke-width:1.5px

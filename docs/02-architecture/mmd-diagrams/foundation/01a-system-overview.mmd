@@ -1,0 +1,28 @@
+%% Full System Component — overview view
+%% Covers top-level layers and external systems only.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    overview
+%% @parent  01-full-system-component.mmd
+%% @nodes   10
+
+flowchart TB
+    External[External Systems]
+    Interfaces[Interfaces Layer]
+    Composition[Composition Layer]
+    Application[Application Layer]
+    Domain[Domain Layer]
+    Infrastructure[Infrastructure Layer]
+    External --> Interfaces --> Composition --> Application --> Domain
+    Infrastructure -.-> Domain
+    Composition --> Infrastructure
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    style Composition fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style Interfaces fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style External fill:#eceff1,stroke:#455a64,stroke-width:2px

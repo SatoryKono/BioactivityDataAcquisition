@@ -1,0 +1,21 @@
+%% Exception Hierarchy — critical view
+%% Covers CriticalError branch and abort outcomes.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   Class
+%% @status  active
+%% @view    critical
+%% @parent  50-exception-hierarchy.mmd
+%% @nodes   13
+
+flowchart TD
+    BIO[BioETLError] --> CRT[CriticalError]
+    CRT --> LOCK[LockLostError]
+    CRT --> POL[PolicyViolationError]
+    CRT --> INF[InfrastructureError]
+    CRT --> DTX[DeltaTransactionError]
+    CRT --> AUTH[AuthFailureError]
+    CRT --> QUOTA[StorageQuotaExceededError]
+    CRT -.-> ABORT[Abort Pipeline]

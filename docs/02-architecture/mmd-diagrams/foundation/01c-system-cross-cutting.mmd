@@ -1,0 +1,25 @@
+%% Full System Component — cross-cutting view
+%% Covers DI, observability, locking, and resilience mechanisms.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    cross-cutting
+%% @parent  01-full-system-component.mmd
+%% @nodes   13
+
+flowchart LR
+    CLI[CLI] --> BOOT[Bootstrap]
+    BOOT --> RUN[PipelineRunnerService]
+    RUN --> LOCK[MemoryLock]
+    RUN --> CKP[LocalCheckpoint]
+    RUN --> LOG[UnifiedLogger]
+    RUN --> MET[MetricsCollector]
+    RUN --> TR[OpenTelemetryTracer]
+    RUN --> CB[CircuitBreaker]
+    RUN --> RL[TokenBucket]
+    style BOOT fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style RUN fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style LOCK fill:#ffcdd2,stroke:#c62828,stroke-width:2px

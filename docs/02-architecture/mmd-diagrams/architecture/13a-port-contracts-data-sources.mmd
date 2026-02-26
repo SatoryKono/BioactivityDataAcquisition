@@ -1,0 +1,43 @@
+%% Port Contracts — Data Sources view
+%% Covers DataSource-related domain ports and infrastructure adapters.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @status  active
+%% @view    data-sources
+%% @parent  13-port-protocol-contracts.mmd
+%% @nodes   12
+
+flowchart LR
+    subgraph Domain["Domain Layer"]
+        direction TB
+        DSP[DataSourcePort]:::port
+        FDSP[FilterableDataSourcePort]:::port
+        IFP[InputFilterPort]:::port
+    end
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        CA[ChemblAdapter]:::adapter
+        PA[PubMedAdapter]:::adapter
+        UA[UniProtAdapter]:::adapter
+        CRA[CrossRefAdapter]:::adapter
+        OAA[OpenAlexAdapter]:::adapter
+        SSA[SemanticScholarAdapter]:::adapter
+        PCA[PubChemAdapter]:::adapter
+        CSVR[CsvFilterReader]:::adapter
+    end
+    DSP -.-> CA
+    DSP -.-> PA
+    DSP -.-> UA
+    DSP -.-> CRA
+    DSP -.-> OAA
+    DSP -.-> SSA
+    DSP -.-> PCA
+    FDSP -.-> IFP
+    IFP -.-> CSVR
+    classDef port fill:#f3e5f5,stroke:#6a1b9a,stroke-width:1.5px
+    classDef adapter fill:#ffcdd2,stroke:#c62828,stroke-width:1.5px
+    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
