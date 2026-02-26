@@ -15,6 +15,7 @@ from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
 )
 from bioetl.domain.entities import Target
+from bioetl.domain.services import OrganismClassificationService
 from bioetl.domain.transformations import safe_int
 from bioetl.domain.value_objects import TaxonomyId
 
@@ -28,6 +29,11 @@ class TargetTransformer(BaseChemblTransformer):
 
     entity_class = Target
     primary_id_field = "target_id"
+
+    _organism_classifier: OrganismClassificationService = OrganismClassificationService(
+        organism_field="organism",
+        taxonomy_id_field="tax_id",
+    )
 
     async def _transform_impl(
         self,
@@ -167,6 +173,15 @@ class TargetTransformer(BaseChemblTransformer):
         )
         taxonomy_id = taxonomy_id_vo.value if taxonomy_id_vo else None
 
+        # Classify organism cellularity using OrganismClassificationService
+        organism_name = record.get("organism")
+        classification = self._organism_classifier.classify(organism_name, raw_tax_id)
+        organism_class = (
+            classification.organism_class.value
+            if classification.organism_class
+            else None
+        )
+
         return {
             # Primary identifier
             "target_id": str(primary_id),
@@ -175,9 +190,11 @@ class TargetTransformer(BaseChemblTransformer):
             # Core metadata
             "pref_name": record.get("pref_name"),
             "target_type": record.get("target_type"),
-            "organism": record.get("organism"),
+            "organism": organism_name,
             # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
             "taxonomy_id": taxonomy_id,
+            # Organism cellularity classification
+            "organism_class": organism_class,
             "species_group_flag": record.get("species_group_flag"),
             "description": record.get("target_description")
             or record.get("description"),

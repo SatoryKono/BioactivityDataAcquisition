@@ -48,6 +48,11 @@ class TargetSchema(ETLRecordSchema):
         nullable=True, description="NCBI Taxonomy ID (float for nullable int)."
     )
     organism: Series[str] | None = pa.Field(nullable=True, description="Organism.")
+    organism_class: Series[str] | None = pa.Field(
+        nullable=True,
+        isin=["acellular", "unicellular", "multicellular"],
+        description="Organism cellularity classification.",
+    )
     species_group_flag: Series[bool] | None = pa.Field(
         nullable=True,
         description="Species group flag.",
