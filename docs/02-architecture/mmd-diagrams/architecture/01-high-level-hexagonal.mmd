@@ -7,7 +7,9 @@
 %% @level   System / Component
 %% @nodes   39
 
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE'}}}%%
 graph TB
+%% keep-orphan: CFG, EXCEPTIONS, OBSERVER, PROVIDERS, SCHEMAS, TYPES, VALIDATION
     subgraph External["External Systems"]
         subgraph ExternalAPIs["External APIs"]
             CHEMBL_API["ChEMBL API"]

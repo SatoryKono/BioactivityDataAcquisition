@@ -189,7 +189,9 @@
       "WebFetch(domain:github.com)",
       "Bash(powershell:*)",
       "Bash(tr '\\\\n' '|')",
-      "Bash(cd \"E:/g-drive/05_AI/github/BioactivityDataAcquisition2\" && bash docs/02-architecture/mmd-diagrams/render.sh --png-only 2>&1)"
+      "Bash(cd \"E:/g-drive/05_AI/github/BioactivityDataAcquisition2\" && bash docs/02-architecture/mmd-diagrams/render.sh --png-only 2>&1)",
+      "Bash(\"E:/g-drive/05_AI/github/BioactivityDataAcquisition2/.venv/Scripts/python.exe\":*)",
+      "Bash(.venv/Scripts/python.exe:*)"
     ]
   },
   "enabledPlugins": {

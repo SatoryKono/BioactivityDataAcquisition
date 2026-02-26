@@ -10,6 +10,7 @@
 
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 flowchart TD
+%% keep-orphan: SOURCE_YAML_CFG
     subgraph YAML_FILES["YAML File Hierarchy"]
         BASE["configs/pipelines/_base.yaml<br/>(global defaults)"]
         PROVIDER_BASE["configs/pipelines/{provider}/_base.yaml<br/>(provider defaults)"]

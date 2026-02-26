@@ -10,6 +10,7 @@
 
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 flowchart TB
+%% keep-orphan: E3, E4
     subgraph RunTypes["RunType Enum (domain/types.py)"]
         INC["RunType.INCREMENTAL\n'Fetch new data since last run'"]
         BF["RunType.BACKFILL\n'Re-fetch a date range'"]

@@ -8,6 +8,7 @@
 %% @nodes   15
 
 graph TB
+%% keep-orphan: CBDSD, RDSD, R_CR, R_OA, R_PC, R_PM, R_SS, R_UP
     subgraph Ports["Domain Ports"]
         CBP["CircuitBreakerPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ get_state() → CircuitBreakerState<br/>+ get_failure_count() → int<br/>+ call(fn) → T<br/>+ reset()"]
         RLP["RateLimiterPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ acquire(tokens)<br/>+ try_acquire() → bool<br/>+ available_tokens() → int"]

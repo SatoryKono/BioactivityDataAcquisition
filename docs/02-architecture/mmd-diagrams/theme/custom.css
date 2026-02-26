@@ -43,6 +43,19 @@ svg {
 /* ── Edges / links ──────────────────────────────────── */
 .edgePath .path {
     stroke-width: 1.8px;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+/* Global rounded joins/caps for link-like paths across diagram types */
+.edgePath path,
+.flowchart-link,
+.relation,
+.messageLine0,
+.messageLine1,
+.transition path {
+    stroke-linejoin: round;
+    stroke-linecap: round;
 }
 
 .edgeLabel {
@@ -97,6 +110,39 @@ g.classGroup line {
 
 .relation {
     stroke-width: 1.5px;
+}
+
+/*
+ * Class diagram — adaptive font sizes (foreignObject / HTML path).
+ *
+ * Mermaid renders class boxes via foreignObject → HTML, so we target
+ * .nodeLabel (the HTML <span>) scoped to each group:
+ *
+ *   g.label-group      → class name    e.g. "BaseFieldExtractor"
+ *   g.annotation-group → stereotype    e.g. "<<interface>>"
+ *   g.members-group    → attributes    e.g. "+ field : str"
+ *   g.methods-group    → methods       e.g. "+ extract() str"
+ */
+
+/* Class name — larger and bold */
+g.label-group .nodeLabel {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.01em;
+}
+
+/* Stereotype annotation — small italic */
+g.annotation-group .nodeLabel {
+    font-size: 11px !important;
+    font-style: italic !important;
+    opacity: 0.8;
+}
+
+/* Attributes and methods — compact, keep readable */
+g.members-group .nodeLabel,
+g.methods-group .nodeLabel {
+    font-size: 12px !important;
+    font-weight: 400 !important;
 }
 
 /* ── State diagram ──────────────────────────────────── */

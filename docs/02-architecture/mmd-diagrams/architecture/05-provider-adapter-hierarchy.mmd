@@ -7,7 +7,9 @@
 %% @level   System / Component
 %% @nodes   27
 
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE'}}}%%
 graph TB
+%% keep-orphan: DFM, HCP, UIDM
     subgraph Ports["Domain Ports"]
         DSP["DataSourcePort<br/>(Protocol)"]
         FDSP["FilterableDataSourcePort<br/>(Protocol)"]

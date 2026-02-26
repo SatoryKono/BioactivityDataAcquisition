@@ -27,6 +27,8 @@ from pathlib import Path
 DIAGRAMS_BASE = Path("docs/02-architecture/diagrams")
 MERMAID_DIR = DIAGRAMS_BASE / "mermaid"
 PNG_DIR = DIAGRAMS_BASE / "png"
+THEME_CONFIG = Path("docs/02-architecture/mmd-diagrams/theme/mermaid-config.json")
+THEME_CSS = Path("docs/02-architecture/mmd-diagrams/theme/custom.css")
 
 
 def _find_mmdc() -> str | None:
@@ -50,25 +52,33 @@ def render_with_mmdc(
     scale: int = 3,
     *,
     mmdc_path: str = "mmdc",
+    config_path: Path | None = None,
+    css_path: Path | None = None,
 ) -> bool:
     """Render using mermaid-cli (mmdc)."""
     try:
+        cmd = [
+            mmdc_path,
+            "-i",
+            str(input_path),
+            "-o",
+            str(output_path),
+            "-w",
+            str(width),
+            "-H",
+            str(height),
+            "-s",
+            str(scale),
+            "-b",
+            "transparent",
+        ]
+        if config_path is not None and config_path.exists():
+            cmd.extend(["-c", str(config_path)])
+        if css_path is not None and css_path.exists():
+            cmd.extend(["--cssFile", str(css_path)])
+
         result = subprocess.run(
-            [
-                mmdc_path,
-                "-i",
-                str(input_path),
-                "-o",
-                str(output_path),
-                "-w",
-                str(width),
-                "-H",
-                str(height),
-                "-s",
-                str(scale),
-                "-b",
-                "transparent",
-            ],
+            cmd,
             capture_output=True,
             text=True,
             timeout=120,
@@ -205,6 +215,10 @@ def main() -> None:
     print(f"Found {len(mermaid_files)} mermaid file(s)")
     print(f"  Source: {mermaid_dir}")
     print(f"  Output: {output_dir}")
+    if THEME_CONFIG.exists():
+        print(f"  Theme config: {THEME_CONFIG}")
+    if THEME_CSS.exists():
+        print(f"  Theme CSS: {THEME_CSS}")
 
     # Determine rendering method
     method = args.method
@@ -223,7 +237,9 @@ def main() -> None:
         if found:
             mmdc_path = found
         else:
-            print("Error: mmdc not found. Install with: npm install -g @mermaid-js/mermaid-cli")
+            print(
+                "Error: mmdc not found. Install with: npm install -g @mermaid-js/mermaid-cli"
+            )
             sys.exit(1)
 
     # Render each file
@@ -234,7 +250,14 @@ def main() -> None:
 
         if method == "mmdc":
             success = render_with_mmdc(
-                mf, output_path, args.width, args.height, args.scale, mmdc_path=mmdc_path
+                mf,
+                output_path,
+                args.width,
+                args.height,
+                args.scale,
+                mmdc_path=mmdc_path,
+                config_path=THEME_CONFIG,
+                css_path=THEME_CSS,
             )
         else:
             success = render_with_api(mf, output_path)

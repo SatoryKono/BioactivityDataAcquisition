@@ -7,7 +7,9 @@
 %% @level   System / Component
 %% @nodes   21
 
-graph TB
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE'}}}%%
+graph LR
+%% keep-orphan: DQW, NOV
     subgraph Port["Domain Port"]
         SP["StoragePort<br/>(Protocol)"]
     end
