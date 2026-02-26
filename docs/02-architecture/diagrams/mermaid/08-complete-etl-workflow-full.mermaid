@@ -12,6 +12,7 @@
 
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 flowchart TD
+%% keep-orphan: M1, M2, M3, M4, N1, N2, N3, N4, P1, P2
     subgraph Prepare["Phase 1: Prepare"]
         A1[Load YAML Config] --> A2[Validate Parameters]
         A2 --> A3{Resume Mode?}

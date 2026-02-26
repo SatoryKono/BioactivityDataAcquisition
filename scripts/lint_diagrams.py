@@ -47,6 +47,17 @@ NAMING_PATTERN = re.compile(
     r"^\d{2}[a-z]?-[a-z0-9]+(?:-[a-z0-9]+)*\.(?:mmd|mermaid)$"
 )
 PLACEHOLDER_MARKERS = ["placeholder", "TODO", "FIXME", "stub"]
+
+# ── Layout rules (ADR-040 adaptive layout) ────────────────────────────────────
+_NODES_RE = re.compile(r"%%\s*@nodes\s+(\d+)")
+_GRAPH_LINE_RE = re.compile(r"^(graph|flowchart)\b", re.IGNORECASE)
+_ELK_RE = re.compile(r"%%\{init.*layout.*elk", re.IGNORECASE)
+_NON_FLOW_RE = re.compile(
+    r"^(classDiagram|sequenceDiagram|stateDiagram|erDiagram|mindmap|gantt|pie)",
+    re.IGNORECASE,
+)
+ELK_WARN_THRESHOLD = 20
+ELK_ERROR_THRESHOLD = 40
 PLACEHOLDER_PATTERNS = {
     marker: re.compile(rf"\b{re.escape(marker)}\b", re.IGNORECASE)
     for marker in PLACEHOLDER_MARKERS
@@ -80,12 +91,20 @@ class LintResult:
 
 
 def find_diagram_files(base: Path) -> list[Path]:
-    """Find all supported diagram files recursively for a base path."""
+    """Find all supported diagram files recursively for a base path.
+
+    Files starting with '_' (e.g. _template.mmd) are excluded — they are
+    scaffolding/template files, not renderable diagrams.
+    """
     if base.is_file():
-        return [base] if base.suffix in SUPPORTED_SUFFIXES else []
+        if base.suffix in SUPPORTED_SUFFIXES and not base.name.startswith("_"):
+            return [base]
+        return []
 
     return sorted(
-        list(base.rglob("*.mmd")) + list(base.rglob("*.mermaid"))
+        f
+        for f in list(base.rglob("*.mmd")) + list(base.rglob("*.mermaid"))
+        if not f.name.startswith("_")
     )
 
 
@@ -259,6 +278,130 @@ def check_staleness(
     return issues
 
 
+def check_layout_policy(path: Path, lines: list[str]) -> list[Issue]:
+    """Check adaptive layout rules (ADR-040).
+
+    LAYOUT-001: flowchart/graph with @nodes > 20 and no ELK init → WARNING
+    LAYOUT-002: flowchart/graph with @nodes > 40 and no ELK init → ERROR
+    """
+    issues: list[Issue] = []
+    fname = str(path)
+
+    # Only applies to .mmd canonical files
+    if path.suffix != ".mmd":
+        return issues
+
+    # Determine diagram type — skip non-flowchart types
+    is_flowchart = False
+    for ln in lines:
+        s = ln.strip()
+        if not s or s.startswith("%%"):
+            # skip init directives and comments
+            if s.startswith("%%{"):
+                continue
+            continue
+        if _GRAPH_LINE_RE.match(s):
+            is_flowchart = True
+            break
+        if _NON_FLOW_RE.match(s):
+            return issues  # not a flowchart — skip
+        break
+
+    if not is_flowchart:
+        return issues
+
+    # Parse @nodes count
+    nodes: int | None = None
+    for ln in lines:
+        m = _NODES_RE.search(ln)
+        if m:
+            nodes = int(m.group(1))
+            break
+
+    if nodes is None:
+        return issues
+
+    # Check ELK presence
+    has_elk = any(_ELK_RE.search(ln) for ln in lines)
+
+    if not has_elk and nodes > ELK_ERROR_THRESHOLD:
+        issues.append(
+            Issue(
+                file=fname,
+                severity="ERROR",
+                rule="LAYOUT-002",
+                message=(
+                    f"@nodes={nodes} > {ELK_ERROR_THRESHOLD} without ELK layout init — "
+                    "add %%{init: {'layout': 'elk'}}%% before graph declaration"
+                ),
+            )
+        )
+    elif not has_elk and nodes > ELK_WARN_THRESHOLD:
+        issues.append(
+            Issue(
+                file=fname,
+                severity="WARNING",
+                rule="LAYOUT-001",
+                message=(
+                    f"@nodes={nodes} > {ELK_WARN_THRESHOLD} without ELK layout init — "
+                    "consider adding %%{init: {'layout': 'elk'}}%% for better edge routing"
+                ),
+            )
+        )
+
+    return issues
+
+
+def check_orphan_nodes(path: Path, lines: list[str]) -> list[Issue]:
+    """Check for orphan nodes — GRAPH-001 (WARNING, ADR-040 D6).
+
+    Delegates to prune_orphan_nodes parser for flowchart/graph and
+    sequenceDiagram files only.  classDiagram and other types are skipped.
+    """
+    import sys as _sys
+    _sys.path.insert(0, str(Path(__file__).parent))
+    try:
+        from prune_orphan_nodes import (
+            detect_diagram_type,
+            parse_flowchart_orphans,
+            parse_keep_orphans,
+            parse_sequence_orphans,
+        )
+    except ImportError:
+        return []
+
+    issues: list[Issue] = []
+    fname = str(path)
+
+    dtype = detect_diagram_type(lines)
+    if dtype not in {"flowchart", "sequence"}:
+        return issues
+
+    keep = parse_keep_orphans(lines)
+
+    if dtype == "flowchart":
+        orphans, _, _ = parse_flowchart_orphans(lines, keep)
+    else:
+        orphans, _, _ = parse_sequence_orphans(lines, keep)
+
+    if orphans:
+        issues.append(
+            Issue(
+                file=fname,
+                severity="WARNING",
+                rule="GRAPH-001",
+                message=(
+                    f"Orphan node(s) found (no edges): "
+                    f"{', '.join(sorted(orphans))}. "
+                    "Add %% keep-orphan: NodeId to exempt, or run "
+                    "scripts/prune_orphan_nodes.py --fix"
+                ),
+            )
+        )
+
+    return issues
+
+
 def lint_file(path: Path, stale_days: int) -> list[Issue]:
     """Run all checks on a single diagram file."""
     try:
@@ -280,6 +423,8 @@ def lint_file(path: Path, stale_days: int) -> list[Issue]:
     issues.extend(check_naming_convention(path))
     issues.extend(check_placeholder_content(path, lines))
     issues.extend(check_staleness(path, lines, stale_days))
+    issues.extend(check_layout_policy(path, lines))
+    issues.extend(check_orphan_nodes(path, lines))
 
     return issues
 

@@ -7,7 +7,9 @@
 %% @level   System / Component
 %% @nodes   29
 
-graph TB
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE'}}}%%
+graph LR
+%% keep-orphan: APC, CBC, CCFG, OBS_SET, PCP, PIPE_SET, SETTINGS, SRC
     subgraph YAML["YAML Config Files"]
         PC_YAML["configs/pipelines/<br/>*.yaml<br/>(pipeline configs)"]
         DQ_YAML["configs/quality/<br/>*.yaml<br/>(DQ rules)"]

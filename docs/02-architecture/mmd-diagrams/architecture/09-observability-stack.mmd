@@ -7,7 +7,9 @@
 %% @level   System / Component
 %% @nodes   24
 
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE'}}}%%
 graph TB
+%% keep-orphan: DQMP
     subgraph Ports["Domain Ports"]
         LP["LoggerPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ bind(**kwargs)<br/>+ info(msg, **fields)<br/>+ warning(msg, **fields)<br/>+ error(msg, **fields)<br/>+ debug(msg, **fields)<br/>+ exception(msg, **fields)"]
         MP["MetricsPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ observe_histogram(name, value, labels)<br/>+ increment_counter(name, labels)<br/>+ set_gauge(name, value, labels)<br/>+ close()"]

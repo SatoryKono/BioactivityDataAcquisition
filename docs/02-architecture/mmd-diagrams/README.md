@@ -243,3 +243,56 @@ docs/02-architecture/mmd-diagrams/
 Diagrams are validated and rendered automatically in GitHub Actions
 (`.github/workflows/docs.yml`). Rendered SVG/PNG are uploaded as build artifacts.
 A drift check warns when `.mmd` sources change without re-rendering.
+
+---
+
+## Validation Rules
+
+`scripts/lint_diagrams.py` enforces:
+
+| Rule | Description | Severity |
+|------|-------------|----------|
+| META-001 | Missing `@version`/`@date`/`@type`/`@level` in `.mmd` | WARN |
+| META-002 | Missing `%% View:` in `.mermaid` view-file | WARN |
+| COLOUR-001 | Non-canonical palette in `style`/`classDef` | ERROR |
+| COLOUR-002 | Emoji in subgraph labels | ERROR |
+| SIZE-001 | `@nodes > 35` | ERROR |
+| SIZE-002 | `@nodes > 20` | WARN |
+| LAYOUT-001 | `flowchart/graph` with `@nodes > 20` without ELK init | WARN |
+| LAYOUT-002 | `flowchart/graph` with `@nodes > 40` without ELK init | ERROR |
+| GRAPH-001 | Orphan nodes (defined but not in any edge) | WARN |
+
+### Orphan Node Detection (GRAPH-001)
+
+`scripts/prune_orphan_nodes.py` detects nodes defined in a diagram but not
+participating in any edge or message.
+
+**Applies to:** `flowchart` / `graph` and `sequenceDiagram` only.
+**Skipped:** `classDiagram`, `stateDiagram`, `erDiagram`, `mindmap`, legend files.
+
+```bash
+# Report orphans (CI mode)
+python scripts/prune_orphan_nodes.py --check
+
+# Machine-readable output
+python scripts/prune_orphan_nodes.py --check --json
+
+# Remove confirmed garbage orphans (in-place)
+python scripts/prune_orphan_nodes.py --fix
+
+# Exempt all current orphans (one-time grandfathering)
+python scripts/prune_orphan_nodes.py --grandfather
+```
+
+**To keep an intentional "documentation" node that has no edges:**
+
+```
+%% keep-orphan: NodeId
+%% keep-orphan: NodeA, NodeB, NodeC
+```
+
+Insert anywhere in the file (commonly after the diagram-type declaration).
+
+**Lenient subgraph rule:** nodes inside a subgraph whose *name* appears in an
+edge (e.g. `Bronze --> Silver`) are **not** flagged — they are considered
+descriptive children of a connected subgraph container.

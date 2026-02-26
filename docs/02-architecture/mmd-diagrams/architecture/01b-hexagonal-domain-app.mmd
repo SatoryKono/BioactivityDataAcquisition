@@ -10,6 +10,7 @@
 %% @nodes   13
 
 graph TB
+%% keep-orphan: CFG, EXCEPTIONS, OBSERVER, SCHEMAS, TYPES
     subgraph Application["Application Layer"]
         CORE["Core (Runner, BatchExecutor, Transformer, Writer)"]
         SERVICES["Services (DQ, Export, Health, Medallion Lifecycle)"]

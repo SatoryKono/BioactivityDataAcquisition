@@ -7,7 +7,8 @@
 %% @level   System / Component
 %% @nodes   24
 
-graph TB
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE'}}}%%
+graph LR
     subgraph User["User"]
         TERM["Terminal"]
     end

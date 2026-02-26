@@ -7,7 +7,9 @@
 %% @level   System / Component
 %% @nodes   68
 
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE'}}}%%
 graph LR
+%% keep-orphan: DNP, DQMP, FDSP, HCP, MCP, SHP
     subgraph Domain["Domain Ports (Protocols)"]
         DSP["DataSourcePort"]
         FDSP["FilterableDataSourcePort"]

@@ -162,16 +162,62 @@ View-файлы с ≥3 типами связей и >5 соединениями
 | META-002 | Отсутствие `%% View:` в `.mermaid` view-файле → WARN |
 | COLOUR-001 | Использование неканонической палитры → ERROR |
 | COLOUR-002 | Emoji в subgraph labels → ERROR |
+| GRAPH-001 | Orphan nodes (defined but not in any edge) в `flowchart`/`sequenceDiagram` → WARN |
 
-Pre-commit hook: `lint-diagrams`.
+Pre-commit hooks: `lint-diagrams`, `prune-orphan-diagram-nodes`.
+
+#### GRAPH-001 — Orphan Node Rule
+
+Реализован в `scripts/prune_orphan_nodes.py`. Нода считается orphan, если:
+- Определена (`NodeId["label"]` или bare `NodeId`) в diagram
+- Не участвует ни в одном edge / message в том же файле
+
+**Исключения (нода не флагируется):**
+- Аннотация `%% keep-orphan: NodeId` (inline в файле)
+- Нода внутри subgraph, чьё имя встречается в edge (lenient subgraph rule)
+- Файлы `00-legend*`
+- `classDiagram`, `stateDiagram`, `erDiagram`, `mindmap`
+
+**Инструмент:**
+```bash
+python scripts/prune_orphan_nodes.py --check      # аудит
+python scripts/prune_orphan_nodes.py --fix         # удалить garbage orphans
+python scripts/prune_orphan_nodes.py --grandfather # exemption для всех текущих
+```
 
 ### D7: Tool Selection Criteria
 
-| Условие | Инструмент |
-|---------|-----------|
-| ≤20 узлов, стандартный layout | Mermaid |
-| 20–40 узлов, сложный layout | PlantUML |
-| >40 узлов | D2 (ELK layout engine) |
+| Условие | Инструмент | Layout |
+|---------|------------|--------|
+| ≤20 узлов | Mermaid (Dagre) | TB или LR |
+| 21–40 узлов | Mermaid + ELK init | TB или LR |
+| >40 узлов | Mermaid + ELK init (preferred) или D2 (ELK engine) | TB или LR |
+
+### D8: Adaptive Layout Rules
+
+ELK (Eclipse Layout Kernel) SHOULD использоваться для `flowchart`/`graph` диаграмм с `@nodes > 20`.
+
+**Синтаксис (вставлять перед объявлением `graph`/`flowchart`):**
+
+```
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE'}}}%%
+```
+
+**Direction selection:**
+
+| Паттерн | Direction | Примеры |
+|---------|-----------|---------|
+| Иерархия / DI граф / port map | `TB` | `01-high-level-hexagonal`, `12-bootstrap-di-container` |
+| Pipeline / data flow / config chain | `LR` | `03-medallion-data-flow`, `11-configuration-system` |
+
+**CI Rules (lint_diagrams.py):**
+
+| Rule | Условие | Severity |
+|------|---------|----------|
+| LAYOUT-001 | `flowchart/graph` с `@nodes > 20` без ELK init | WARNING |
+| LAYOUT-002 | `flowchart/graph` с `@nodes > 40` без ELK init | ERROR |
+
+**Инструмент:** `src/tools/apply_elk_layout.py --dry-run` для аудита, без `--dry-run` для применения.
 
 ---
 
