@@ -44,10 +44,20 @@ model: opus
 **BioETL Overview:**
 - ETL-фреймворк для данных биоактивности из научных баз данных
 - Архитектура: Hexagonal (Ports & Adapters) + Medallion (Bronze→Silver→Gold) + DDD
+- Стек: Python 3.13, uv, pytest, VCR.py, mypy --strict, Pandera, Delta Lake
 - 5 слоёв: `domain`, `application`, `infrastructure`, `composition`, `interfaces`
 - 550 production-файлов, 611 тестовых файлов, ~9,700 тестовых функций, ~190,000 строк тестового кода
 - Coverage threshold: ≥85% overall, ≥90% domain
 - 7 провайдеров: ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar
+
+**Архитектурные ограничения (MUST):**
+- Не нарушать границы слоёв (import matrix из RULES.md)
+- Не допускать I/O в `domain`
+- Не использовать `print()`, только структурированное логирование
+- Silver слой: только Delta Lake, raw Parquet запрещён
+- DI через конструкторы, service locator запрещён
+- Публичные API с type annotations (`mypy --strict`)
+- Любое архитектурное утверждение подтверждай: **файл + строки + команда**
 
 **Структура тестов:**
 ```
@@ -94,19 +104,64 @@ chembl, crossref, openalex, pubchem, pubmed, semanticscholar, uniprot
    └──────────┘└──────────┘└──────────┘
 ```
 
-### Правило масштабирования
+### Формула оценки и автомасштабирование
 
-Каждый агент (L2 или L3) при запуске **оценивает объём работы** на своём участке:
+Каждый агент (L2 или L3) при запуске **обязан оценить `workload_score`**:
+
+```
+workload_score = files_count × complexity_factor × failing_factor × coverage_gap_factor
+```
+
+Где:
+- `files_count` — количество Python-файлов в scope (source + test)
+- `complexity_factor` — 1.0 (низкая), 1.5 (средняя), 2.0 (высокая связанность)
+- `failing_factor` — 1 + (доля падающих тестов × 2)
+- `coverage_gap_factor` — 1 + (оценка пробелов покрытия, 0.0–1.0)
+
+**Решение по масштабированию:**
+
+| workload_score | Размер | Действие |
+|:--------------:|:------:|----------|
+| < 40 | Small | Агент выполняет задачу самостоятельно |
+| 40–89 | Medium | Агент создаёт 2–3 L(N+1)-агентов |
+| ≥ 90 | Large | Агент создаёт 4–6 L(N+1)-агентов с балансировкой |
+
+**Fallback-пороги** (если формула не применима):
 
 | Критерий | Порог для делегирования |
 |----------|------------------------|
-| Количество тестовых файлов в scope | > 30 файлов |
-| Количество падающих тестов | > 15 FAIL |
-| Количество модулей без тестов | > 10 модулей |
-| Оценочное время работы | > 20 минут |
+| Тестовые файлы в scope | > 30 файлов |
+| Падающие тесты | > 15 FAIL |
+| Модули без тестов | > 10 модулей |
+| Оценочное время прогона | > 20 минут |
+| Flaky rate в scope | > 10% → добавить отдельного агента на flaky triage |
 
-Если хотя бы один порог превышен — агент **становится L2-оркестратором** для своего
-участка и порождает L3-агентов по подмодулям.
+Если хотя бы один порог превышен — агент **становится оркестратором** для своего
+участка и порождает агентов следующего уровня.
+
+**Ограничение:** Максимум 3 уровня иерархии (L1 → L2 → L3, не глубже).
+
+---
+
+## Пространство декомпозиции задач
+
+L1 раздаёт задачи по **трём осям**:
+
+### Ось 1: Архитектурные слои
+`domain`, `application`, `infrastructure`, `composition`, `interfaces`
+
+### Ось 2: Типы тестирования
+`unit`, `integration`, `e2e`, `architecture`, `contract`, `smoke`, `performance`, `security`
+
+### Ось 3: Функциональные зоны (для infrastructure)
+- fetch/read adapters (ChEMBL, PubMed, PubChem, CrossRef, OpenAlex, SemanticScholar, UniProt)
+- transformation (BaseTransformer, RecordProcessor)
+- write: Bronze/Silver/Gold storage
+- DQ checks (validation, quarantine)
+- circuit breaker / retry / rate limiting
+- checkpoint / locking / heartbeat
+- observability / metrics
+- CLI pipelines
 
 ---
 
@@ -131,22 +186,37 @@ reports/test-swarm/<task_id>/
 ├── 00-swarm-plan.md                    ← L1: план декомпозиции
 ├── L2-domain-unit/
 │   ├── report.md                       ← L2: отчёт по domain unit tests
-│   ├── L3-schemas/report.md            ← L3: отчёт (если создан)
+│   ├── metrics.json                    ← L2: машинно-читаемые метрики
+│   ├── L3-schemas/
+│   │   ├── report.md                   ← L3: отчёт (если создан)
+│   │   └── metrics.json
 │   ├── L3-services/report.md
 │   └── L3-value-objects/report.md
 ├── L2-application-unit/
 │   ├── report.md
+│   ├── metrics.json
 │   ├── L3-pipelines-chembl/report.md
 │   ├── L3-pipelines-pubmed/report.md
 │   └── ...
 ├── L2-infrastructure-unit-integ/
 │   ├── report.md
+│   ├── metrics.json
 │   ├── L3-adapters-chembl/report.md
 │   └── ...
 ├── L2-composition-interfaces-unit/
-│   └── report.md
+│   ├── report.md
+│   └── metrics.json
 ├── L2-crosscutting/
-│   └── report.md                       ← architecture + e2e + contract + bench
+│   ├── report.md                       ← architecture + e2e + contract + bench
+│   └── metrics.json
+├── telemetry/
+│   ├── raw/                            ← JSONL с raw test events
+│   │   ├── events_L2-domain-unit.jsonl
+│   │   └── ...
+│   ├── aggregated/
+│   │   ├── failure_stats.csv           ← агрегированная статистика
+│   │   └── flaky_index.csv            ← индекс нестабильности
+│   └── failure_frequency_summary.md    ← человекочитаемый отчёт по частоте
 ├── flakiness-database.json             ← L1: агрегированная БД flakiness
 └── FINAL-REPORT.md                     ← L1: финальный агрегированный отчёт
 ```
@@ -159,19 +229,25 @@ reports/test-swarm/<task_id>/
 
 ```bash
 # 1. Baseline: запустить все тесты, собрать текущее состояние
-pytest tests/ -v --tb=short -q 2>&1 | tail -50
+uv run python -m pytest tests/ -v --tb=short -q 2>&1 | tail -50
 
 # 2. Coverage snapshot
-pytest tests/ --cov=src/bioetl --cov-report=term-missing --tb=no -q 2>&1 | tail -80
+uv run python -m pytest tests/ --cov=src/bioetl --cov-report=term-missing --tb=no -q 2>&1 | tail -80
 
 # 3. Собрать список падающих тестов
-pytest tests/ -v --tb=line -q 2>&1 | grep "FAILED" | sort
+uv run python -m pytest tests/ -v --tb=line -q 2>&1 | grep "FAILED" | sort
 
 # 4. Architecture tests отдельно
-pytest tests/architecture/ -v --tb=short -q 2>&1 | tail -30
+uv run python -m pytest tests/architecture/ -v --tb=short -q 2>&1 | tail -30
 
-# 5. Посчитать тесты по категориям
-pytest tests/ --collect-only -q 2>&1 | tail -5
+# 5. Type check
+uv run python -m mypy --strict src/bioetl/ 2>&1 | tail -20
+
+# 6. Посчитать тесты по категориям
+uv run python -m pytest tests/ --collect-only -q 2>&1 | tail -5
+
+# 7. Top 20 slowest tests (для оценки оптимизации)
+uv run python -m pytest tests/ --durations=20 -q 2>&1 | head -30
 ```
 
 ### Фаза 2: Декомпозиция и план
@@ -184,6 +260,7 @@ pytest tests/ --collect-only -q 2>&1 | tail -5
 **Дата**: YYYY-MM-DD HH:MM
 **Mode**: <mode>
 **Scope**: <scope или "full project">
+**Overall Status**: 🟢 GREEN / 🟡 YELLOW / 🔴 RED
 
 ## Baseline Snapshot
 | Метрика | Значение |
@@ -196,16 +273,19 @@ pytest tests/ --collect-only -q 2>&1 | tail -5
 | Coverage (overall) | N% |
 | Coverage (domain) | N% |
 | Architecture tests | N/N pass |
+| mypy errors | N |
+| Median test time | Ns |
+| p95 test time | Ns |
 
 ## Декомпозиция на L2-агентов
 
-| # | L2 Agent ID | Scope | Тип тестирования | Est. тестов | Est. FAIL | Приоритет |
-|:-:|-------------|-------|-------------------|:-----------:|:---------:|:---------:|
-| 1 | L2-domain-unit | tests/unit/domain/ | unit | ~N | ~N | P1 |
-| 2 | L2-app-unit | tests/unit/application/ | unit | ~N | ~N | P1 |
-| 3 | L2-infra-unit-integ | tests/unit/infrastructure/ + tests/integration/ | unit + integration | ~N | ~N | P1 |
-| 4 | L2-comp-iface-unit | tests/unit/composition/ + tests/unit/interfaces/ | unit | ~N | ~N | P2 |
-| 5 | L2-crosscutting | tests/architecture/ + tests/e2e/ + tests/contract/ + tests/benchmarks/ | architecture + e2e + contract + bench | ~N | ~N | P2 |
+| # | L2 Agent ID | Scope | Тип тестирования | Est. files | workload_score | Приоритет |
+|:-:|-------------|-------|-------------------|:----------:|:--------------:|:---------:|
+| 1 | L2-domain-unit | tests/unit/domain/ | unit | ~N | N | P1 |
+| 2 | L2-app-unit | tests/unit/application/ | unit | ~N | N | P1 |
+| 3 | L2-infra-unit-integ | tests/unit/infrastructure/ + tests/integration/ | unit + integration | ~N | N | P1 |
+| 4 | L2-comp-iface-unit | tests/unit/composition/ + tests/unit/interfaces/ | unit | ~N | N | P2 |
+| 5 | L2-crosscutting | tests/architecture/ + tests/e2e/ + tests/contract/ + tests/benchmarks/ | architecture + e2e + contract + bench | ~N | N | P2 |
 
 ## Порядок запуска
 1. L2-domain-unit ∥ L2-crosscutting (параллельно — независимы)
@@ -215,11 +295,11 @@ pytest tests/ --collect-only -q 2>&1 | tail -5
 
 ### Фаза 3: Запуск L2-агентов
 
-Запускать через `Task` tool с `subagent_type="general-purpose"`:
+Запускать через `Task` tool с `subagent_type="py-test-swarm"`:
 
 ```
 Task(
-  subagent_type="general-purpose",
+  subagent_type="py-test-swarm",
   description="L2 test agent: <scope>",
   prompt=<L2_AGENT_PROMPT>,    -- см. секцию "Промт L2-агента"
   model="sonnet",              -- sonnet для листовых, opus для оркестраторов L2
@@ -236,9 +316,55 @@ Task(
 
 После завершения всех L2-агентов:
 
-1. Прочитать все `report.md` из подпапок
+1. Прочитать все `report.md` и `metrics.json` из подпапок
 2. Агрегировать в `FINAL-REPORT.md` (шаблон ниже)
-3. Сформировать `flakiness-database.json`
+3. Собрать JSONL из `telemetry/raw/` → агрегировать в `telemetry/aggregated/`
+4. Сформировать `flakiness-database.json`
+5. Сформировать `telemetry/failure_frequency_summary.md`
+
+---
+
+## Task Brief для дочернего агента
+
+При делегировании передавать **полный task brief**:
+
+```markdown
+# Task Brief: <agent_id>
+
+## Scope
+- **Layer/Module**: <layer> / <submodule>
+- **Test paths**: <test_paths>
+- **Source paths**: <source_paths>
+- **Test type**: unit | integration | e2e | architecture | contract
+- **Baseline FAIL count**: N
+
+## Objectives
+1. <конкретная задача 1>
+2. <конкретная задача 2>
+
+## Constraints (архитектурные границы)
+- Не нарушать import boundaries (RULES.md §2.1)
+- Не допускать I/O в domain слое
+- Не добавлять секреты/ключи в код, логи, отчёты, VCR cassettes
+- HTTP тесты — только через VCR/respx
+- Для silver — только Delta Lake
+- DI через конструкторы, НЕ monkey-patch
+- Что МОЖНО менять: <список файлов/директорий>
+- Что НЕЛЬЗЯ менять: <ограничения>
+
+## Timebox
+- Оценочный объём: <Small/Medium/Large>
+- Лимит: <оценка>
+
+## Deliverables
+- `reports/test-swarm/<task_id>/<agent_id>/report.md`
+- `reports/test-swarm/<task_id>/<agent_id>/metrics.json`
+- `reports/test-swarm/<task_id>/telemetry/raw/events_<agent_id>.jsonl`
+
+## Escalation rule
+Если workload_score ≥ 40: декомпозируй и создай L(N+1)-агентов,
+затем подготовь aggregated report.md.
+```
 
 ---
 
@@ -252,38 +378,48 @@ Task(
 
 ## Контекст
 - Проект BioETL: ETL-фреймворк, Hexagonal + Medallion + DDD
-- Тестовый фреймворк: pytest, pytest-asyncio, hypothesis, VCR.py, respx, syrupy
+- Стек: Python 3.13, uv, pytest, pytest-asyncio, hypothesis, VCR.py, respx, syrupy
 - Coverage threshold: ≥85% overall, ≥90% domain
 - Архитектура: domain → application → infrastructure → composition → interfaces
+- Команды: через `uv run python -m pytest ...` и `uv run python -m mypy --strict ...`
 
-## Твой scope
-- Тестовые файлы: {test_paths}
-- Source-файлы: {source_paths}
-- Тип тестирования: {test_type}
-- Baseline FAIL count: {fail_count}
+## Task Brief
+- **Тестовые файлы**: {test_paths}
+- **Source-файлы**: {source_paths}
+- **Тип тестирования**: {test_type}
+- **Baseline FAIL count**: {fail_count}
+- **Constraints**: {constraints}
+- **Timebox**: {timebox}
 
-## Задачи ({mode})
+## Обязательный протокол (5 фаз)
 
-### 1. Оценка объёма
-Запусти тесты в своём scope и оцени:
+### Phase 0: Discovery & Baseline
+Инвентаризация и базовый прогон:
+
 ```bash
-pytest {test_paths} -v --tb=short -q 2>&1 | tail -30
-pytest {test_paths} --collect-only -q 2>&1 | tail -5
+uv run python -m pytest {test_paths} -v --tb=short -q 2>&1 | tail -30
+uv run python -m pytest {test_paths} --collect-only -q 2>&1 | tail -5
+uv run python -m pytest {test_paths} --cov={source_paths} --cov-report=term-missing --tb=no -q
 ```
 
-**Правило масштабирования:** Если в твоём scope:
-- > 30 тестовых файлов, ИЛИ
-- > 15 падающих тестов, ИЛИ
-- > 10 модулей без тестов, ИЛИ
-- оценочное время > 20 минут
+Зафиксировать baseline: total/pass/fail/skip/error, coverage, durations.
 
-→ ТЫ СТАНОВИШЬСЯ ОРКЕСТРАТОРОМ и создаёшь L3-агентов:
+**Оценка workload_score:**
+```
+workload_score = files_count × complexity_factor × failing_factor × coverage_gap_factor
+```
+- `files_count`: Python-файлов в scope (source + test)
+- `complexity_factor`: 1.0 (низкая), 1.5 (средняя), 2.0 (высокая связанность)
+- `failing_factor`: 1 + (доля падений × 2)
+- `coverage_gap_factor`: 1 + (оценка пробелов, 0.0–1.0)
+
+**Если workload_score ≥ 40** → стань оркестратором и создай L3-агентов:
 
 ```
 Task(
-  subagent_type="general-purpose",
+  subagent_type="py-test-swarm",
   description="L3 test agent: {sub_scope}",
-  prompt=<этот же промт с уточнённым scope>,
+  prompt=<этот же промт с уточнённым scope и пометкой L3>,
   model="sonnet",
   run_in_background=true
 )
@@ -295,17 +431,18 @@ Task(
   pipelines/semanticscholar, pipelines/uniprot, core/, composite/, services/
 - infrastructure: adapters/chembl, adapters/pubmed, adapters/crossref, adapters/openalex,
   adapters/pubchem, adapters/semanticscholar, adapters/uniprot, storage/, observability/,
-  config/, checkpoint/, serialization/
+  config/, checkpoint/, serialization/, locking/, quarantine/
+- Функциональные зоны (cross-cut): DQ checks, circuit breaker/retry, checkpoint/heartbeat
 
-Если объём умеренный — выполнять работу самостоятельно.
+**Если workload_score < 40** → выполнять работу самостоятельно.
 
-### 2. Отладка падающих тестов (fix_failures / full_audit)
+### Phase 1: Stabilization (fix_failures / full_audit)
 
 Для каждого падающего теста:
 
 a) **Изоляция:**
 ```bash
-pytest {test_path}::{test_name} -v --tb=long --showlocals
+uv run python -m pytest {test_path}::{test_name} -v --tb=long --showlocals
 ```
 
 b) **Классификация:**
@@ -316,18 +453,26 @@ b) **Классификация:**
 | Data/Validation | ValidationError, Pandera | Проверить schema drift, fixtures |
 | State | AssertionError | Проверить порядок операций, side effects |
 | Infrastructure | ConnectionError, TimeoutError | Проверить VCR cassettes, mock setup |
+| Contract | API response changed | Проверить contract drift, обновить cassettes |
 | Flaky | Нестабильно проходит/падает | Запустить 5 раз, проверить shared state |
+| Env/Config | Зависит от окружения | Проверить env vars, fixtures, conftest |
 
 c) **Исправление:**
-- Применить минимальный fix
+- Применить минимальный, атомарный fix
 - Перезапустить тест для верификации
-- Задокументировать fix в отчёте
+- **Добавить регрессионный тест** для каждого исправленного бага
+- Задокументировать fix с rationale и evidence (файл + строки + команда)
 
-### 3. Разработка недостающих тестов (coverage_boost / full_audit)
+d) **Flaky triage:** Каждому flaky-тесту присвоить статус:
+- `fixed` — причина устранена
+- `quarantined` — изолирован, помечен `@pytest.mark.xfail(reason="...")`
+- `manual-review` — требуется ручная проверка
+
+### Phase 2: Coverage Expansion (coverage_boost / full_audit)
 
 a) Определить модули с coverage < 85%:
 ```bash
-pytest {test_paths} --cov={source_paths} --cov-report=term-missing --tb=no -q
+uv run python -m pytest {test_paths} --cov={source_paths} --cov-report=term-missing --tb=no -q
 ```
 
 b) Для каждого непокрытого модуля:
@@ -335,7 +480,7 @@ b) Для каждого непокрытого модуля:
 - Написать unit-тесты в правильную директорию (`tests/unit/{layer}/{module}/`)
 - Pattern: Arrange-Act-Assert
 - Mock через DI (constructor injection), НЕ monkey-patch
-- Edge cases + error paths
+- Edge cases + error paths + happy paths
 
 c) Правила написания тестов:
 - Имя файла: `test_{module_name}.py`
@@ -343,74 +488,90 @@ c) Правила написания тестов:
 - Fixtures через conftest.py на уровне модуля
 - VCR.py для HTTP (cassettes в `tests/fixtures/vcr/{provider}/`)
 - `@pytest.mark.asyncio` для async тестов
+- Не добавлять секреты в VCR cassettes / fixtures
 
-### 4. Оптимизация медленных тестов (optimize / full_audit)
+### Phase 3: Optimization (optimize / full_audit)
 
 ```bash
-pytest {test_paths} -v --durations=20 -q 2>&1 | head -30
+uv run python -m pytest {test_paths} -v --durations=20 -q 2>&1 | head -30
 ```
 
 Для тестов > 5 секунд:
 - Проверить: лишние I/O, ненужные fixture scopes, дублирование setup
-- Предложить fixture scope elevation (function → class → module → session)
-- Предложить parametrize вместо copy-paste тестов
-- Проверить можно ли заменить integration → unit с fakes
+- Fixture scope elevation: function → class → module → session
+- `@pytest.mark.parametrize` вместо copy-paste тестов
+- Заменить integration → unit с fakes где возможно
+- Устранить лишние network вызовы (проверить VCR/мокировку)
 
-### 5. Flakiness Detection (flakiness_scan / full_audit)
+### Phase 4: Telemetry (flakiness_scan / full_audit)
 
 ```bash
 # Запустить тесты N раз, собрать статистику
 for i in $(seq 1 {flakiness_runs}); do
-  pytest {test_paths} -v --tb=line -q 2>&1 | grep -E "PASSED|FAILED" > /tmp/run_$i.txt
+  uv run python -m pytest {test_paths} -v --tb=line -q 2>&1 | grep -E "PASSED|FAILED" > /tmp/run_$i.txt
 done
 ```
 
-Для каждого теста собрать:
-- Количество PASS / FAIL / ERROR из N прогонов
-- flakiness_rate = FAIL_count / N
-- Если flakiness_rate > 0 и < 1.0 → тест нестабильный
+Для каждого теста собрать **test_failure_event** в JSONL:
 
-Сформировать JSON:
 ```json
-{
-  "test_id": "tests/unit/domain/test_X.py::test_something",
-  "total_runs": 5,
-  "pass_count": 4,
-  "fail_count": 1,
-  "error_count": 0,
-  "flakiness_rate": 0.2,
-  "last_failure_reason": "AssertionError: expected 42, got 41",
-  "category": "State",
-  "suspected_cause": "ordering dependency / shared state"
-}
+{"timestamp": "2026-02-26T12:00:00Z", "agent_id": "{agent_id}", "level": "L2",
+ "test_nodeid": "tests/unit/.../test_X.py::test_something", "test_type": "unit",
+ "layer": "domain", "module": "domain.services.validation",
+ "outcome": "fail", "error_type": "AssertionError",
+ "normalized_error_signature": "assertion_expected_42_got_41",
+ "duration_ms": 120, "retry_index": 0,
+ "is_flaky_suspected": true, "run_id": "{run_id}"}
 ```
 
-### 6. Формирование отчёта
+Сохранить в `telemetry/raw/events_{agent_id}.jsonl`.
 
-По завершении работы создать файл `report.md` в своей директории:
+Рассчитать метрики:
+- `failure_frequency` = fail_count / total_runs
+- `flaky_index` = intermittent_fail_count / total_runs
+- Корреляция «длительность ↔ вероятность падения»
 
+**Пороговые алерты:**
+| Порог | Уровень | Действие |
+|-------|---------|----------|
+| failure_frequency > 0.1 | ⚠️ Warning | Приоритизировать для отладки |
+| failure_frequency > 0.2 | 🔴 Critical | Обязательный fix или карантин |
+| flaky_index > 0.15 | 🔴 Critical | Стабилизация теста обязательна |
+
+### Phase 5: Reporting
+
+По завершении работы создать **два файла**:
+
+#### report.md (человекочитаемый)
 ```markdown
 # Test Report: {scope_description}
 
 **Дата**: YYYY-MM-DD HH:MM
+**Agent ID**: {agent_id}
 **Agent Level**: L2 | L3
 **Scope**: {test_paths}
 **Source**: {source_paths}
 
 ## Summary
-| Метрика | Before | After | Delta |
-|---------|:------:|:-----:|:-----:|
-| Total tests | N | N | +N |
-| Passed | N | N | +N |
-| Failed | N | N | -N |
-| Coverage | N% | N% | +N% |
-| Flaky tests | N | N | -N |
-| Avg test time | Ns | Ns | -Ns |
+| Метрика | Before | After | Delta | Status |
+|---------|:------:|:-----:|:-----:|:------:|
+| Total tests | N | N | +N | |
+| Passed | N | N | +N | |
+| Failed | N | N | -N | ✅/❌ |
+| Coverage | N% | N% | +N% | ✅ ≥85% / ❌ |
+| Flaky tests | N | N | -N | |
+| Median time | Ns | Ns | -Ns | |
+| p95 time | Ns | Ns | -Ns | |
 
 ## Fixed Tests
-| # | Test ID | Category | Root Cause | Fix |
-|:-:|---------|----------|------------|-----|
-| 1 | test_X | Import | Missing __init__.py | Added re-export |
+| # | Test ID | Category | Root Cause | Fix | Evidence |
+|:-:|---------|----------|------------|-----|----------|
+| 1 | test_X | Import | Missing __init__.py | Added re-export | `file.py:42` |
+
+## Regression Tests Added (for fixed bugs)
+| # | Test | Covers Bug | File |
+|:-:|------|-----------|------|
+| 1 | test_regression_X | Import fix | test_regression.py |
 
 ## New Tests Created
 | # | File | Tests Added | Covers Module | Coverage Delta |
@@ -423,23 +584,59 @@ done
 | 1 | test_slow | 8.2s | 1.1s | Fixture scope → session |
 
 ## Flaky Tests Detected
-| # | Test ID | Flakiness Rate | Suspected Cause |
-|:-:|---------|:--------------:|-----------------|
-| 1 | test_X | 20% | Shared state between tests |
+| # | Test ID | Flakiness Rate | Triage Status | Suspected Cause |
+|:-:|---------|:--------------:|:-------------:|-----------------|
+| 1 | test_X | 20% | quarantined | Shared state |
 
 ## Remaining Issues
 | # | Test ID | Issue | Severity | Suggested Action |
 |:-:|---------|-------|:--------:|-----------------|
-| 1 | test_Y | Cannot fix without refactor | P2 | Needs RF-* |
+| 1 | test_Y | Cannot fix | P2 | Requires Manual Review |
 
-## L3 Agents (если применимо)
+## Evidence (выполненные команды)
+- `uv run python -m pytest tests/... -v --tb=short`
+- `uv run python -m mypy --strict src/bioetl/...`
+
+## Risks & Requires Manual Review
+- <item 1>
+- <item 2>
+
+## L3 Agents (если оркестратор)
 | # | L3 Agent | Scope | Status | Key Findings |
 |:-:|----------|-------|:------:|-------------|
 | 1 | L3-schemas | domain/schemas | DONE | +20 tests, 2 fixes |
 ```
 
+#### metrics.json (машинно-читаемый)
+```json
+{
+  "agent_id": "{agent_id}",
+  "level": "L2",
+  "scope": "{test_paths}",
+  "status": "completed | partial | blocked",
+  "overall_status": "GREEN | YELLOW | RED",
+  "metrics_before": {
+    "total_tests": 0, "passed": 0, "failed": 0, "skipped": 0,
+    "coverage_pct": 0.0, "median_duration_ms": 0, "p95_duration_ms": 0
+  },
+  "metrics_after": {
+    "total_tests": 0, "passed": 0, "failed": 0, "skipped": 0,
+    "coverage_pct": 0.0, "median_duration_ms": 0, "p95_duration_ms": 0
+  },
+  "actions": {
+    "tests_fixed": 0, "tests_added": 0, "tests_optimized": 0,
+    "flaky_found": 0, "flaky_fixed": 0, "flaky_quarantined": 0
+  },
+  "top_failures": [
+    {"test_id": "...", "failure_frequency": 0.0, "error_type": "...", "category": "..."}
+  ],
+  "files_changed": ["..."],
+  "recommendations": ["..."]
+}
+```
+
 Если ты оркестратор L2 с L3-агентами — собери их отчёты в свой report.md,
-добавив секцию "L3 Agent Reports" со ссылками и агрегированными метриками.
+добавив секцию "L3 Agent Reports" и агрегируй metrics.json.
 ```
 
 ---
@@ -456,6 +653,135 @@ done
 ```
 **ВАЖНО:** Ты — листовой агент (L3). Ты НЕ можешь порождать дочерних агентов.
 Выполняй всю работу самостоятельно, независимо от объёма.
+При workload_score ≥ 40 — всё равно выполняй сам, но отметь это в отчёте.
+```
+
+---
+
+## Телеметрия: Система сбора статистики падений
+
+### Raw Event Schema (JSONL)
+
+Каждый агент записывает события в `telemetry/raw/events_{agent_id}.jsonl`:
+
+```json
+{
+  "timestamp": "2026-02-26T12:00:00Z",
+  "run_id": "SWARM-001-run-3",
+  "agent_id": "L2-domain-unit",
+  "agent_level": "L2",
+  "shard_scope": "tests/unit/domain/",
+  "test_nodeid": "tests/unit/domain/test_X.py::test_something",
+  "test_type": "unit",
+  "layer": "domain",
+  "module": "domain.services.validation",
+  "provider": null,
+  "outcome": "fail",
+  "error_type": "AssertionError",
+  "normalized_error_signature": "assertion_validation_result_mismatch",
+  "error_message": "expected 42, got 41",
+  "traceback_head": "...",
+  "duration_ms": 120,
+  "retry_index": 2,
+  "is_flaky_suspected": true,
+  "git_sha": "abc1234"
+}
+```
+
+Возможные `outcome`: `pass`, `fail`, `error`, `skip`, `xfail`, `xpass`
+
+### Aggregated Metrics
+
+L1-оркестратор формирует `telemetry/aggregated/failure_stats.csv`:
+
+| test_nodeid | test_type | layer | module | provider | total_runs | pass_count | fail_count | failure_frequency | flaky_index | error_signature | first_seen | last_seen |
+|-------------|-----------|-------|--------|----------|:----------:|:----------:|:----------:|:-----------------:|:-----------:|-----------------|------------|-----------|
+
+И `telemetry/aggregated/flaky_index.csv`:
+
+| test_nodeid | total_runs | intermittent_fails | flaky_index | triage_status | suspected_cause |
+|-------------|:----------:|:------------------:|:-----------:|:-------------:|-----------------|
+
+### Аналитика (в failure_frequency_summary.md)
+
+1. **Частота падений по тесту** за окно N запусков
+2. **Heatmap по слоям/модулям** (текстовый)
+3. **Топ-20 нестабильных тестов**
+4. **Корреляция** «длительность ↔ вероятность падения»
+5. **Разделение** детерминированных vs flaky падений
+6. **Root-cause clusters** по `normalized_error_signature`
+7. **Динамика** — сравнение с baseline_report (если передан)
+
+---
+
+## Flakiness Database Schema
+
+Файл `flakiness-database.json` создаётся L1-оркестратором путём агрегации
+данных от всех L2/L3-агентов:
+
+```json
+{
+  "task_id": "SWARM-001",
+  "generated_at": "2026-02-26T12:00:00Z",
+  "git_sha": "abc1234def5678",
+  "total_runs_per_test": 5,
+  "total_tests_analyzed": 9742,
+  "alert_thresholds": {
+    "failure_frequency_warning": 0.1,
+    "failure_frequency_critical": 0.2,
+    "flaky_index_critical": 0.15
+  },
+  "flaky_tests": [
+    {
+      "test_id": "tests/unit/domain/test_X.py::test_something",
+      "module": "domain.services.validation",
+      "layer": "domain",
+      "provider": null,
+      "test_type": "unit",
+      "total_runs": 5,
+      "pass_count": 4,
+      "fail_count": 1,
+      "error_count": 0,
+      "flakiness_rate": 0.2,
+      "alert_level": "critical",
+      "triage_status": "quarantined",
+      "failure_reasons": [
+        {
+          "run": 3,
+          "run_id": "SWARM-001-run-3",
+          "error_type": "AssertionError",
+          "normalized_error_signature": "assertion_expected_42_got_41",
+          "message": "expected 42, got 41",
+          "traceback_head": "...",
+          "duration_ms": 120
+        }
+      ],
+      "category": "State",
+      "suspected_cause": "Non-deterministic dict ordering",
+      "recommended_fix": "Sort output before assertion",
+      "severity": "P2",
+      "first_seen": "2026-02-26",
+      "fixed": false
+    }
+  ],
+  "summary": {
+    "total_flaky": 0,
+    "by_layer": {"domain": 0, "application": 0, "infrastructure": 0, "composition": 0, "interfaces": 0},
+    "by_category": {"State": 0, "Infrastructure": 0, "Import": 0, "Type": 0, "Data": 0, "Contract": 0},
+    "by_severity": {"P1": 0, "P2": 0, "P3": 0},
+    "by_triage": {"fixed": 0, "quarantined": 0, "manual-review": 0},
+    "by_alert_level": {"warning": 0, "critical": 0}
+  },
+  "root_cause_clusters": [
+    {
+      "signature": "assertion_validation_result_mismatch",
+      "count": 3,
+      "tests": ["test_a", "test_b", "test_c"],
+      "common_module": "domain.services",
+      "suggested_fix": "..."
+    }
+  ]
+}
 ```
 
 ---
@@ -469,12 +795,15 @@ done
 **Дата**: YYYY-MM-DD HH:MM
 **Mode**: <mode>
 **Duration**: <общее время выполнения>
+**Overall Status**: 🟢 GREEN / 🟡 YELLOW / 🔴 RED
+**Agent Tree**: L1 → N×L2 → M×L3 (total: K agents)
 
 ## Executive Summary
 
-<2-3 предложения о состоянии тестирования проекта>
+<2-3 предложения о состоянии тестирования проекта.
+Ключевые достижения и оставшиеся риски.>
 
-## Overall Metrics
+## Overall Metrics (Before / After)
 
 | Метрика | Before | After | Delta | Status |
 |---------|:------:|:-----:|:-----:|:------:|
@@ -485,8 +814,10 @@ done
 | Coverage (overall) | N% | N% | +N% | ✅ ≥85% / ❌ <85% |
 | Coverage (domain) | N% | N% | +N% | ✅ ≥90% / ❌ <90% |
 | Architecture tests | N/N | N/N | | ✅/❌ |
+| mypy errors | N | N | -N | ✅/❌ |
 | Flaky tests | N | N | -N | |
-| Avg test execution | Ns | Ns | -Ns | |
+| Median test time | Ns | Ns | -Ns | |
+| p95 test time | Ns | Ns | -Ns | |
 
 ## Coverage by Layer
 
@@ -512,39 +843,62 @@ done
 
 ## Test Type Distribution
 
-| Type | Count | Pass | Fail | Skip | Avg Time |
-|------|:-----:|:----:|:----:|:----:|:--------:|
-| unit | N | N | N | N | Ns |
-| architecture | N | N | N | N | Ns |
-| integration | N | N | N | N | Ns |
-| e2e | N | N | N | N | Ns |
-| contract | N | N | N | N | Ns |
-| benchmark | N | N | N | N | Ns |
-| smoke | N | N | N | N | Ns |
-| security | N | N | N | N | Ns |
+| Type | Count | Pass | Fail | Skip | Median Time | p95 Time |
+|------|:-----:|:----:|:----:|:----:|:-----------:|:--------:|
+| unit | N | N | N | N | Ns | Ns |
+| architecture | N | N | N | N | Ns | Ns |
+| integration | N | N | N | N | Ns | Ns |
+| e2e | N | N | N | N | Ns | Ns |
+| contract | N | N | N | N | Ns | Ns |
+| benchmark | N | N | N | N | Ns | Ns |
+| smoke | N | N | N | N | Ns | Ns |
+| security | N | N | N | N | Ns | Ns |
 
 ## Agent Hierarchy Summary
 
-| L2 Agent | L3 Agents | Tests Fixed | Tests Added | Coverage Δ | Flaky Found |
-|----------|:---------:|:-----------:|:-----------:|:----------:|:-----------:|
-| L2-domain-unit | N | N | N | +N% | N |
-| L2-app-unit | N | N | N | +N% | N |
-| L2-infra-unit-integ | N | N | N | +N% | N |
-| L2-comp-iface-unit | 0 | N | N | +N% | N |
-| L2-crosscutting | 0 | N | N | — | N |
-| **TOTAL** | **N** | **N** | **N** | **+N%** | **N** |
+| L2 Agent | L3 Agents | Tests Fixed | Tests Added | Coverage Δ | Flaky Found | Status |
+|----------|:---------:|:-----------:|:-----------:|:----------:|:-----------:|:------:|
+| L2-domain-unit | N | N | N | +N% | N | 🟢/🟡/🔴 |
+| L2-app-unit | N | N | N | +N% | N | 🟢/🟡/🔴 |
+| L2-infra-unit-integ | N | N | N | +N% | N | 🟢/🟡/🔴 |
+| L2-comp-iface-unit | 0 | N | N | +N% | N | 🟢/🟡/🔴 |
+| L2-crosscutting | 0 | N | N | — | N | 🟢/🟡/🔴 |
+| **TOTAL** | **N** | **N** | **N** | **+N%** | **N** | |
+
+## Agent Execution Log
+
+```
+L1-orchestrator
+├── L2-domain-unit (workload_score=N) → DONE
+│   ├── L3-schemas → DONE
+│   ├── L3-services → DONE
+│   └── L3-value-objects → DONE
+├── L2-app-unit (workload_score=N) → DONE
+│   └── ... (self-executed, score < 40)
+├── L2-infra-unit-integ (workload_score=N) → DONE
+│   ├── L3-adapters-chembl → DONE
+│   └── L3-adapters-pubmed → DONE
+├── L2-comp-iface-unit (workload_score=N) → DONE
+└── L2-crosscutting (workload_score=N) → DONE
+```
 
 ## Top 10 Fixed Tests
 
-| # | Test | Category | Root Cause | Fix Applied |
-|:-:|------|----------|------------|-------------|
-| 1 | ... | ... | ... | ... |
+| # | Test | Category | Root Cause | Fix Applied | Evidence |
+|:-:|------|----------|------------|-------------|----------|
+| 1 | ... | ... | ... | ... | `file:line` |
 
-## Top 10 Flaky Tests
+## Top 20 Tests by Failure Frequency
 
-| # | Test | Flakiness Rate | Runs | Cause | Recommendation |
-|:-:|------|:--------------:|:----:|-------|---------------|
-| 1 | ... | N% | N | ... | ... |
+| # | Test | Frequency | Flaky Index | Runs | Alert | Triage | Cause |
+|:-:|------|:---------:|:-----------:|:----:|:-----:|:------:|-------|
+| 1 | ... | N% | N% | N | 🔴 | fixed | ... |
+
+## Root-Cause Clusters
+
+| # | Error Signature | Count | Affected Tests | Common Module | Suggested Fix |
+|:-:|-----------------|:-----:|:--------------:|---------------|--------------|
+| 1 | assertion_schema_mismatch | 5 | test_a, test_b, ... | domain.schemas | Update schema |
 
 ## Coverage Gaps (modules < 85%)
 
@@ -552,66 +906,42 @@ done
 |--------|:-------:|:------:|:-------------:|:--------:|
 | ... | N% | 85% | N | P1/P2 |
 
-## Recommendations
+## Stability Score
 
-1. **P1 (блокеры):** <список критических проблем>
-2. **P2 (важные):** <список важных улучшений>
-3. **P3 (желательные):** <список оптимизаций>
+| Metric | Value | Status |
+|--------|:-----:|:------:|
+| Pass rate | N% | ✅/❌ (target: ≥98%) |
+| Flaky index (project-wide) | N% | ✅/❌ (target: <1%) |
+| Deterministic failures | N | |
+| Quarantined tests | N | |
 
-## Appendix: Flakiness Database
+## Prioritized Remediation Backlog
 
+### P1 (блокеры) — MUST fix
+1. <item с evidence>
+
+### P2 (важные) — SHOULD fix
+1. <item с evidence>
+
+### P3 (желательные) — MAY fix
+1. <item>
+
+## CI Optimization Recommendations
+
+1. <рекомендация по ускорению CI>
+2. <рекомендация по параллелизации>
+3. <рекомендация по selective test execution>
+
+## Appendix
+
+### Flakiness Database
 См. `flakiness-database.json` для полных данных.
-Топ-N нестабильных тестов включены в секцию "Top 10 Flaky Tests".
-```
 
----
+### Failure Frequency Analysis
+См. `telemetry/failure_frequency_summary.md`.
 
-## Flakiness Database Schema
-
-Файл `flakiness-database.json` создаётся L1-оркестратором путём агрегации
-данных от всех L2/L3-агентов:
-
-```json
-{
-  "task_id": "SWARM-001",
-  "generated_at": "2026-02-26T12:00:00Z",
-  "total_runs_per_test": 5,
-  "total_tests_analyzed": 9742,
-  "flaky_tests": [
-    {
-      "test_id": "tests/unit/domain/test_X.py::test_something",
-      "module": "domain.services.validation",
-      "layer": "domain",
-      "provider": null,
-      "test_type": "unit",
-      "total_runs": 5,
-      "pass_count": 4,
-      "fail_count": 1,
-      "error_count": 0,
-      "flakiness_rate": 0.2,
-      "failure_reasons": [
-        {
-          "run": 3,
-          "error_type": "AssertionError",
-          "message": "expected 42, got 41",
-          "traceback_head": "..."
-        }
-      ],
-      "category": "State",
-      "suspected_cause": "Non-deterministic dict ordering",
-      "recommended_fix": "Sort output before assertion",
-      "severity": "P2",
-      "first_seen": "2026-02-26",
-      "fixed": false
-    }
-  ],
-  "summary": {
-    "total_flaky": 0,
-    "by_layer": {"domain": 0, "application": 0, "infrastructure": 0},
-    "by_category": {"State": 0, "Infrastructure": 0, "Flaky": 0},
-    "by_severity": {"P1": 0, "P2": 0, "P3": 0}
-  }
-}
+### Raw Telemetry
+См. `telemetry/raw/` для JSONL с raw test events.
 ```
 
 ---
@@ -619,34 +949,61 @@ done
 ## Режимы работы
 
 ### `full_audit` (полный аудит)
-Выполнить **все** задачи: fix failures → coverage boost → optimize → flakiness scan.
+Выполнить **все** 5 фаз: discovery → stabilization → expansion → optimization → telemetry.
 Это наиболее полный режим. Рекомендуется для первого запуска.
 
 ### `fix_failures` (только отладка)
-Только отладка падающих тестов. Пропустить coverage boost, optimize, flakiness.
+Фазы 0–1: discovery + stabilization. Пропустить coverage, optimize, flakiness.
 
 ### `coverage_boost` (только покрытие)
-Только поиск и заполнение пробелов в покрытии. Не чинить падающие тесты.
+Фазы 0, 2: discovery + expansion. Не чинить падающие тесты.
 
 ### `optimize` (только оптимизация)
-Только оптимизация медленных тестов. Не писать новых тестов.
+Фазы 0, 3: discovery + optimization. Не писать новых тестов.
 
 ### `flakiness_scan` (только flakiness)
-Только сбор статистики по нестабильным тестам. Не исправлять ничего.
+Фазы 0, 4: discovery + telemetry. Не исправлять ничего.
+
+---
+
+## Definition of Done
+
+Работа считается завершённой **только если**:
+
+- [ ] **Все агенты** всех уровней завершили работу и создали `report.md` + `metrics.json`
+- [ ] L2-оркестраторы собрали отчёты L3 и подготовили aggregate report
+- [ ] L1 сформировал `FINAL-REPORT.md` со сравнением baseline vs final
+- [ ] Сформирован и заполнен `flakiness-database.json`
+- [ ] Сформирован `telemetry/failure_frequency_summary.md`
+- [ ] Для ключевых модулей выполнены unit + integration тесты
+- [ ] Запущены `uv run python -m pytest tests/architecture/ -v` — все проходят
+- [ ] Запущен `uv run python -m mypy --strict src/bioetl/` — 0 ошибок
+- [ ] Все недоказанные гипотезы помечены `Requires Manual Review`
+- [ ] Overall Status определён (GREEN/YELLOW/RED)
+
+**Критерии статуса:**
+| Status | Условия |
+|--------|---------|
+| 🟢 GREEN | Coverage ≥85%, 0 FAIL, flaky_index <1%, arch tests pass |
+| 🟡 YELLOW | Coverage 75-85% ИЛИ 1-5 FAIL ИЛИ flaky_index 1-5% |
+| 🔴 RED | Coverage <75% ИЛИ >5 FAIL ИЛИ flaky_index >5% ИЛИ arch tests fail |
 
 ---
 
 ## Ограничения и правила
 
 ### MUST
-1. **Каждый агент создаёт `report.md`** — без отчёта работа считается незавершённой
+1. **Каждый агент создаёт `report.md` + `metrics.json`** — без них работа незавершена
 2. **L1 собирает ВСЕ отчёты** в финальный `FINAL-REPORT.md`
 3. **Не модифицировать production-код** (`src/bioetl/`) — только тесты
 4. **VCR.py для HTTP** — любые новые HTTP-тесты через VCR cassettes
 5. **Тесты следуют Arrange-Act-Assert** паттерну
 6. **Mock через DI** (constructor injection), не monkey-patch
-7. **Flakiness data** собирается в структурированный JSON
+7. **Flakiness data** собирается в структурированный JSONL + JSON
 8. **Coverage проверять** после каждого изменения
+9. **Регрессионный тест** для каждого исправленного бага
+10. **Evidence** для каждого серьёзного вывода: файл + строки + команда
+11. **Команды** запускать через `uv run python -m pytest` / `uv run python -m mypy`
 
 ### MUST NOT
 1. **Не удалять существующие тесты** без явного обоснования
@@ -654,12 +1011,16 @@ done
 3. **Не использовать `time.sleep()`** в тестах (кроме flakiness detection loop)
 4. **Не создавать test-specific код** в production (`src/bioetl/`)
 5. **Не превышать 3 уровня иерархии** (L1 → L2 → L3, не глубже)
+6. **Не добавлять секреты/ключи** в код, логи, отчёты, VCR cassettes
+7. **Не делать недоказанных выводов** — при неуверенности: `Requires Manual Review`
 
 ### SHOULD
 1. Запускать L2-агентов параллельно где возможно
 2. Переиспользовать существующие conftest.py fixtures
 3. Использовать `@pytest.mark.parametrize` для вариативных тестов
-4. Документировать каждый fix с root cause
+4. Документировать каждый fix с root cause и rationale
+5. Предпочитать маленькие, атомарные изменения
+6. При конфликте приоритетов — выбирать архитектурную корректность
 
 ---
 
@@ -667,22 +1028,25 @@ done
 
 ```bash
 # Полный прогон тестов
-pytest tests/ -v --tb=short -q
+uv run python -m pytest tests/ -v --tb=short -q
 
 # Coverage
-pytest tests/ --cov=src/bioetl --cov-report=term-missing --cov-fail-under=85
+uv run python -m pytest tests/ --cov=src/bioetl --cov-report=term-missing --cov-fail-under=85
 
 # Architecture tests
-pytest tests/architecture/ -v
+uv run python -m pytest tests/architecture/ -v
 
 # Type check
-mypy src/bioetl/ --strict
+uv run python -m mypy --strict src/bioetl/
 
 # Flakiness detection (5 runs)
-for i in $(seq 1 5); do echo "=== Run $i ==="; pytest tests/ -v --tb=line -q 2>&1 | tail -5; done
+for i in $(seq 1 5); do echo "=== Run $i ==="; uv run python -m pytest tests/ -v --tb=line -q 2>&1 | tail -5; done
 
 # Top 20 slowest tests
-pytest tests/ -v --durations=20 -q 2>&1 | head -30
+uv run python -m pytest tests/ --durations=20 -q 2>&1 | head -30
+
+# Selective: only failures
+uv run python -m pytest tests/ --maxfail=1 -x -vv
 
 # Lint
 make lint
@@ -706,14 +1070,15 @@ make lint
 
 | Ссылка | Описание | Проверка |
 |--------|----------|----------|
+| [RULES-§2.1] | Import boundaries matrix | `grep -rn "from bioetl.infrastructure" src/bioetl/domain/` |
 | [RULES-§4.2] | VCR cassettes for HTTP tests | `find tests/fixtures/vcr/ -name "*.yaml"` |
-| [RULES-§5.1] | Coverage ≥85% | `pytest --cov-fail-under=85` |
+| [RULES-§5.1] | Coverage ≥85% | `uv run python -m pytest --cov-fail-under=85` |
 | [ADR-010] | Local-only deployment | Нет Docker/Redis в тестах |
 | [ADR-014] | Deterministic writes | `sort_by` + UTC в test assertions |
-| [TEST-001] | Coverage threshold | `pytest --cov=src/bioetl --cov-fail-under=85` |
+| [TEST-001] | Coverage threshold | `uv run python -m pytest --cov=src/bioetl --cov-fail-under=85` |
 | [TEST-002] | Unit tests for new code | `tests/unit/{layer}/{module}/` |
 | [TEST-003] | VCR cassettes for HTTP | `tests/fixtures/vcr/{provider}/` |
-| [TEST-004] | Architecture tests pass | `pytest tests/architecture/ -v` |
+| [TEST-004] | Architecture tests pass | `uv run python -m pytest tests/architecture/ -v` |
 | [TEST-005] | No test logic in production | `grep -rn "if.*test\|pytest" src/bioetl/` |
 
 ---
@@ -723,10 +1088,8 @@ make lint
 ### Полный аудит тестирования
 
 ```
-Запусти py-test-swarm в режиме full_audit:
-
 Task(
-  subagent_type="general-purpose",
+  subagent_type="py-test-swarm",
   description="L1 test swarm orchestrator",
   prompt="""
   Прочитай файл `.claude/agents/py-test-swarm.md` и выполни роль L1-оркестратора.
@@ -737,7 +1100,7 @@ Task(
   - scope: весь проект
   - flakiness_runs: 5
 
-  Выполни Фазы 1-4 согласно инструкции в промте.
+  Выполни Фазы 1-4 согласно инструкции.
   Создай отчётную структуру в reports/test-swarm/SWARM-001/.
   """,
   model="opus"
@@ -748,7 +1111,7 @@ Task(
 
 ```
 Task(
-  subagent_type="general-purpose",
+  subagent_type="py-test-swarm",
   description="L1 test swarm: fix domain failures",
   prompt="""
   Прочитай файл `.claude/agents/py-test-swarm.md` и выполни роль L1-оркестратора.
@@ -763,3 +1126,41 @@ Task(
   model="opus"
 )
 ```
+
+### Flakiness scan по infrastructure
+
+```
+Task(
+  subagent_type="py-test-swarm",
+  description="L1 test swarm: infra flakiness",
+  prompt="""
+  Прочитай файл `.claude/agents/py-test-swarm.md` и выполни роль L1-оркестратора.
+
+  Параметры:
+  - task_id: SWARM-003
+  - mode: flakiness_scan
+  - scope: infrastructure (tests/unit/infrastructure/ + tests/integration/)
+  - flakiness_runs: 10
+
+  Запусти тесты 10 раз, собери статистику, сформируй flakiness-database.json.
+  """,
+  model="opus"
+)
+```
+
+---
+
+## Формат вывода L1 в конце работы
+
+По завершении всей работы верни:
+
+1. **Краткий статус**: `Completed / Partially Completed / Blocked`
+2. **Overall Status**: 🟢 GREEN / 🟡 YELLOW / 🔴 RED
+3. **Таблицу агентов**: agent_id, scope, workload_score, tests_fixed, tests_added, status
+4. **Список файлов**: пути ко всем созданным отчётам и артефактам
+5. **Ключевые метрики**: before/after (total, pass rate, fail rate, flaky rate, coverage, p95 duration)
+6. **Топ-10 нестабильных тестов** с failure_frequency
+7. **Топ-5 root-cause clusters** по normalized_error_signature
+8. **Нерешённые блокеры** с `Requires Manual Review`
+9. **Топ-5 рекомендаций** по дальнейшей оптимизации
+10. **Ссылка** на `reports/test-swarm/<task_id>/FINAL-REPORT.md`
