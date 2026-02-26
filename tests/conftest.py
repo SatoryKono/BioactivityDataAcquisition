@@ -1,9 +1,16 @@
 import os
+import enum
 from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qsl, urlparse
 
 import pytest
+
+def pytest_configure(config):
+    # Workaround for xdist serialization error with syrupy DiffMode enum
+    # See: https://github.com/tophat/syrupy/issues/741
+    if hasattr(config.option, "diff_mode") and isinstance(config.option.diff_mode, enum.Enum):
+        config.option.diff_mode = config.option.diff_mode.value
 
 # Heavy deps are guarded so that minimal CI environments (e.g. detect-secrets
 # workflow, which only installs pytest) can still collect tests without

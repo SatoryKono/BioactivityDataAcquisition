@@ -2,10 +2,11 @@
 param(
     [switch]$SvgOnly,
     [switch]$PngOnly,
+    [switch]$NoFit,
     [string]$Filter = '*',
     [int]$Scale = 3,
-    [int]$Width = 2400,
-    [int]$Height = 1800,
+    [int]$Width = 0,
+    [int]$Height = 0,
     [string[]]$Dirs = @()
 )
 Set-StrictMode -Version Latest
@@ -20,6 +21,17 @@ $sourceDirs  = if ($Dirs.Count -gt 0) { $Dirs } else { $defaultDirs | ForEach-Ob
 
 $doSvg = -not $PngOnly
 $doPng = -not $SvgOnly
+
+# Adaptive mode: omit -w/-H so mmdc sizes to content
+$adaptive = -not $NoFit
+if ($NoFit -and $Width -eq 0)  { $Width  = 2400 }
+if ($NoFit -and $Height -eq 0) { $Height = 1800 }
+
+# Build size args
+$sizeArgs = @()
+if (-not $adaptive) {
+    $sizeArgs += @('-w', $Width, '-H', $Height)
+}
 
 $ok = 0; $fail = 0
 
@@ -39,7 +51,7 @@ foreach ($srcDir in $sourceDirs) {
             $svgDir = Join-Path $srcDir 'svg'
             $null   = New-Item -ItemType Directory -Force -Path $svgDir
             $svgOut = Join-Path $svgDir "$($f.BaseName).svg"
-            mmdc -i $f.FullName -o $svgOut -c $theme --cssFile $css -w $Width -H $Height 2>&1 | Out-Null
+            mmdc -i $f.FullName -o $svgOut -c $theme --cssFile $css @sizeArgs 2>&1 | Out-Null
             $svgOk = Test-Path $svgOut
         }
 
@@ -47,7 +59,7 @@ foreach ($srcDir in $sourceDirs) {
             $pngDir = Join-Path $srcDir 'png'
             $null   = New-Item -ItemType Directory -Force -Path $pngDir
             $pngOut = Join-Path $pngDir "$($f.BaseName).png"
-            mmdc -i $f.FullName -o $pngOut -c $theme --cssFile $css -s $Scale -w $Width -H $Height -b white 2>&1 | Out-Null
+            mmdc -i $f.FullName -o $pngOut -c $theme --cssFile $css -s $Scale @sizeArgs -b white 2>&1 | Out-Null
             $pngOk = Test-Path $pngOut
         }
 
@@ -62,5 +74,6 @@ foreach ($srcDir in $sourceDirs) {
     }
 }
 
-Write-Host "`nDone: OK=$ok  FAIL=$fail"
+$mode = if ($adaptive) { "adaptive (ELK)" } else { "fixed (${Width}x${Height})" }
+Write-Host "`nDone: OK=$ok  FAIL=$fail  Layout=$mode"
 if ($fail -gt 0) { exit 1 }

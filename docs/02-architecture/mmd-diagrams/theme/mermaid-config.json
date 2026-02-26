@@ -77,10 +77,11 @@
     "padding": 24,
     "nodeSpacing": 50,
     "rankSpacing": 60,
-    "htmlLabels": false,
-    "useMaxWidth": false,
+    "htmlLabels": true,
+    "useMaxWidth": true,
     "diagramPadding": 16,
-    "wrappingWidth": 200
+    "wrappingWidth": 200,
+    "defaultRenderer": "elk"
   },
   "sequence": {
     "mirrorActors": false,
@@ -94,32 +95,33 @@
     "messageMargin": 40,
     "diagramMarginX": 50,
     "diagramMarginY": 16,
-    "useMaxWidth": false,
+    "useMaxWidth": true,
     "rightAngles": false,
     "showSequenceNumbers": false
   },
   "class": {
-    "defaultRenderer": "dagre-wrapper",
-    "useMaxWidth": false
+    "defaultRenderer": "elk",
+    "useMaxWidth": true
   },
   "state": {
-    "useMaxWidth": false,
+    "useMaxWidth": true,
     "padding": 12,
-    "dividerColor": "#90a4ae"
+    "dividerColor": "#90a4ae",
+    "defaultRenderer": "elk"
   },
   "er": {
-    "useMaxWidth": false,
+    "useMaxWidth": true,
     "fontSize": 13
   },
   "pie": {
-    "useMaxWidth": false
+    "useMaxWidth": true
   },
   "mindmap": {
-    "useMaxWidth": false,
+    "useMaxWidth": true,
     "padding": 20
   },
   "gantt": {
-    "useMaxWidth": false,
+    "useMaxWidth": true,
     "fontSize": 13,
     "barHeight": 24,
     "barGap": 6,
@@ -127,5 +129,10 @@
     "leftPadding": 100,
     "gridLineStartPadding": 40,
     "numberSectionStyles": 4
+  },
+  "elk": {
+    "mergeEdges": true,
+    "nodePlacementStrategy": "NETWORK_SIMPLEX",
+    "cycleBreakingStrategy": "GREEDY"
   }
 }

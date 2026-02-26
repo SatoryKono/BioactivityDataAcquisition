@@ -20,8 +20,8 @@ CSS="$THEME_DIR/custom.css"
 
 # ── Defaults ────────────────────────────────────────────────
 SCALE=3          # 3x ≈ 300 DPI
-WIDTH=2400
-HEIGHT=1800
+WIDTH=0          # 0 = adaptive (fit to content)
+HEIGHT=0         # 0 = adaptive (fit to content)
 BG="white"
 FORMAT_SVG=1
 FORMAT_PNG=1
@@ -29,6 +29,7 @@ FILTER="*"
 EXTRA_DIRS=()
 PUPPETEER_CFG=""
 JOBS=4           # parallel jobs
+FIT=1            # adaptive sizing by default
 
 # ── Diagram source directories ──────────────────────────────
 DEFAULT_DIRS=(
@@ -63,8 +64,9 @@ Options:
   --svg-only          Render SVG only (skip PNG conversion)
   --png-only          Render PNG only
   --scale N           PNG scale factor        (default: $SCALE)
-  --width N           PNG width in pixels     (default: $WIDTH)
-  --height N          PNG height in pixels    (default: $HEIGHT)
+  --width N           Viewport width (0=auto) (default: $WIDTH)
+  --height N          Viewport height (0=auto)(default: $HEIGHT)
+  --no-fit            Use fixed width/height instead of adaptive
   --bg COLOR          Background colour       (default: $BG)
   --filter GLOB       Only render matching    (default: "$FILTER")
   --dir DIR           Add extra source dir    (repeatable)
@@ -91,6 +93,7 @@ while [[ $# -gt 0 ]]; do
     --filter)       FILTER="$2";                        shift 2 ;;
     --dir)          EXTRA_DIRS+=("$2");                 shift 2 ;;
     --jobs)         JOBS="$2";                          shift 2 ;;
+    --no-fit)       FIT=0; WIDTH=${WIDTH:-2400}; HEIGHT=${HEIGHT:-1800}; shift ;;
     --puppeteer)    PUPPETEER_CFG="$2";                 shift 2 ;;
     -h|--help)      usage; exit 0 ;;
     *)              log_err "Unknown option: $1"; usage; exit 1 ;;
@@ -193,11 +196,19 @@ render_one() {
   local svg_dir="$dir/svg"
   local png_dir="$dir/png"
 
+  # Build per-format mmdc size args
+  local size_args=()
+  if [[ $FIT -eq 0 ]]; then
+    # Fixed size mode (--no-fit)
+    size_args+=(-w "$WIDTH" -H "$HEIGHT")
+  fi
+  # In adaptive mode (FIT=1), omit -w/-H so mmdc sizes SVG to content
+
   # Render SVG
   if [[ $FORMAT_SVG -eq 1 ]]; then
     mkdir -p "$svg_dir"
     local svg_out="$svg_dir/${base}.svg"
-    if mmdc -i "$src" -o "$svg_out" "${MMDC_ARGS[@]}" -w "$WIDTH" -H "$HEIGHT" -b "$BG" 2>/dev/null; then
+    if mmdc -i "$src" -o "$svg_out" "${MMDC_ARGS[@]}" "${size_args[@]}" -b "$BG" 2>/dev/null; then
       # Optimize SVG with svgo if available
       if [[ $HAS_SVGO -eq 1 ]]; then
         svgo --quiet "$svg_out" -o "$svg_out" 2>/dev/null || true
@@ -215,16 +226,20 @@ render_one() {
     local png_out="$png_dir/${base}.png"
 
     if [[ $FORMAT_SVG -eq 1 && $HAS_RSVG -eq 1 ]]; then
-      # SVG → PNG via rsvg-convert (best quality)
-      rsvg-convert -w "$WIDTH" "$svg_dir/${base}.svg" -o "$png_out" 2>/dev/null
+      # SVG → PNG via rsvg-convert (adaptive: use SVG intrinsic size)
+      if [[ $FIT -eq 0 ]]; then
+        rsvg-convert -w "$WIDTH" "$svg_dir/${base}.svg" -o "$png_out" 2>/dev/null
+      else
+        rsvg-convert -d 300 -p 300 "$svg_dir/${base}.svg" -o "$png_out" 2>/dev/null
+      fi
     elif [[ $FORMAT_SVG -eq 1 && $HAS_RSVG -eq 2 ]]; then
       # SVG → PNG via inkscape
       inkscape "$svg_dir/${base}.svg" --export-type=png --export-dpi=300 \
         --export-filename="$png_out" 2>/dev/null
     else
-      # Direct mmdc → PNG
+      # Direct mmdc → PNG (adaptive: use -s scale only)
       mmdc -i "$src" -o "$png_out" "${MMDC_ARGS[@]}" \
-        -w "$WIDTH" -H "$HEIGHT" -s "$SCALE" -b "$BG" 2>/dev/null
+        "${size_args[@]}" -s "$SCALE" -b "$BG" 2>/dev/null
     fi
 
     if [[ -f "$png_out" ]]; then
@@ -321,6 +336,11 @@ formats=""
 [[ $FORMAT_SVG -eq 1 ]] && formats+="SVG "
 [[ $FORMAT_PNG -eq 1 ]] && formats+="PNG "
 echo -e "  Formats: ${BOLD}${formats}${NC}"
+if [[ $FIT -eq 1 ]]; then
+  echo -e "  Layout:  ${BOLD}adaptive${NC} (fit to content, ELK engine)"
+else
+  echo -e "  Layout:  ${BOLD}fixed${NC} (${WIDTH}x${HEIGHT})"
+fi
 echo ""
 
 if [[ $failed -eq 0 ]]; then

@@ -322,7 +322,7 @@ def process_file(path: Path, fix: bool) -> FileResult:
     max_desc_lines = max(n.desc_lines for n in nodes)
 
     width = clamp(BASE_W + (CHAR_W * max_title_len), MIN_W, MAX_W)
-    height = clamp(BASE_H + (LINE_H * max(1, max_desc_lines)), MIN_H, MAX_H)
+    height = clamp(BASE_H + (LINE_H * max_desc_lines), MIN_H, MAX_H)
 
     result.max_title_len = max_title_len
     result.max_desc_lines = max_desc_lines

@@ -56,9 +56,13 @@ markdown_extensions:
                 kwds:
                     case: lower
 
-# Mermaid init (theme sync). Mermaid runtime is provided by the theme/plugin.
+# Mermaid init (theme sync + adaptive layout).
 extra_javascript:
     - 'assets/javascripts/mermaid-init.js'
+
+# Responsive diagram styles
+extra_css:
+    - 'assets/stylesheets/mermaid-responsive.css'
 
 # Navigation structure
 nav:
