@@ -70,7 +70,7 @@ def flatten_nested_dict(
         {'hierarchy_child_chembl_id': 'CHEMBL25'}
 
     """
-    result = {}
+    result: dict[str, Any] = {}
 
     if not data or not isinstance(data, dict):
         for key in field_mapping:
