@@ -1,7 +1,7 @@
 # BioETL Makefile
 # Production-ready ETL system for bioactivity data
 
-.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-preflight clean-all
+.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-preflight clean-all diagram-preflight lint-diagrams validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png diagrams-all report-diagram-padding
 .DEFAULT_GOAL := help
 
 # Detect uv availability (preferred package manager)
@@ -179,6 +179,42 @@ lint-fix: ## Auto-fix linting issues
 	@echo "$(BLUE)Auto-fixing with ruff...$(NC)"
 	$(RUN) ruff check --fix src/ tests/
 	$(RUN) ruff format src/ tests/
+
+diagram-preflight: ## Check Mermaid render dependencies (mmdc required, svgo/rsvg optional)
+	@echo "$(BLUE)Checking diagram toolchain...$(NC)"
+	@command -v mmdc >/dev/null 2>&1 || (echo "$(YELLOW)mmdc missing. Install: npm install -g @mermaid-js/mermaid-cli$(NC)" && exit 1)
+	@command -v svgo >/dev/null 2>&1 || echo "$(YELLOW)svgo missing (optional). Install: npm install -g svgo$(NC)"
+	@command -v rsvg-convert >/dev/null 2>&1 || command -v inkscape >/dev/null 2>&1 || echo "$(YELLOW)rsvg-convert/inkscape missing (optional; PNG quality fallback to mmdc)$(NC)"
+	@echo "$(GREEN)Diagram toolchain check complete.$(NC)"
+
+lint-diagrams: ## Lint all Mermaid source files in docs/ (excluding docs/99-archive/**)
+	@echo "$(BLUE)Linting diagram policies...$(NC)"
+	$(PY_RUN) scripts/lint_diagrams.py docs
+
+validate-diagrams-syntax: diagram-preflight ## Validate Mermaid syntax for docs/**/*.mmd|*.mermaid
+	@echo "$(BLUE)Validating Mermaid syntax...$(NC)"
+	bash scripts/validate_mermaid_syntax.sh
+
+render-diagrams-all: diagram-preflight ## Render all docs diagrams to SVG+PNG (excluding docs/99-archive/**)
+	@echo "$(BLUE)Rendering all diagrams (SVG+PNG)...$(NC)"
+	bash docs/02-architecture/mmd-diagrams/render.sh
+
+render-diagrams: render-diagrams-all ## Backward-compatible alias for full diagram rendering
+
+render-diagrams-svg: diagram-preflight ## Render all docs diagrams to SVG only
+	@echo "$(BLUE)Rendering all diagrams (SVG only)...$(NC)"
+	bash docs/02-architecture/mmd-diagrams/render.sh --svg-only
+
+render-diagrams-png: diagram-preflight ## Render all docs diagrams to PNG only
+	@echo "$(BLUE)Rendering all diagrams (PNG only)...$(NC)"
+	bash docs/02-architecture/mmd-diagrams/render.sh --png-only
+
+diagrams-all: lint-diagrams validate-diagrams-syntax render-diagrams-all ## Full diagram pipeline (lint + validate + render)
+	@echo "$(GREEN)Diagram pipeline complete.$(NC)"
+
+report-diagram-padding: ## Report top files by &nbsp; usage in Mermaid sources
+	@echo "$(BLUE)Reporting Mermaid &nbsp; usage...$(NC)"
+	$(PY_RUN) scripts/report_diagram_padding.py --top 30
 
 security: ## Run security audit (osv-scanner + pip-audit)
 	@echo "$(BLUE)Running security audit...$(NC)"

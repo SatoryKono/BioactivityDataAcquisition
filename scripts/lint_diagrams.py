@@ -2,13 +2,16 @@
 """
 lint_diagrams.py - Diagram policy linter for BioETL project.
 
-Validates Mermaid diagram files across canonical and decomposed docs trees.
+Validates Mermaid diagram files across docs/ tree.
 
 Checks performed:
 - Presence of structured metadata headers (format-aware)
 - Naming convention compliance (NN-topic.{mmd|mermaid})
 - No placeholder/stub content
 - Staleness detection based on %% Updated: or %% @date
+- Deprecated palette detection in style/classDef lines
+- Emoji detection in subgraph labels
+- Node-count threshold checks via %% @nodes
 
 Usage:
     # Check all diagrams
@@ -25,8 +28,9 @@ Usage:
     python scripts/lint_diagrams.py --stale-days 90
 
 References:
-    - docs/02-architecture/mmd-diagrams/
-    - docs/02-architecture/diagrams/mermaid/
+    - docs/**/*.mmd
+    - docs/**/*.mermaid
+    - excludes docs/99-archive/**
 """
 from __future__ import annotations
 
@@ -39,10 +43,10 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 DIAGRAM_DIRS = [
-    Path("docs/02-architecture/mmd-diagrams"),
-    Path("docs/02-architecture/diagrams/mermaid"),
+    Path("docs"),
 ]
 SUPPORTED_SUFFIXES = {".mmd", ".mermaid"}
+EXCLUDED_PATH_PARTS = {"99-archive"}
 NAMING_PATTERN = re.compile(
     r"^\d{2}[a-z]?-[a-z0-9]+(?:-[a-z0-9]+)*\.(?:mmd|mermaid)$"
 )
@@ -56,14 +60,33 @@ _NON_FLOW_RE = re.compile(
     r"^(classDiagram|sequenceDiagram|stateDiagram|erDiagram|mindmap|gantt|pie)",
     re.IGNORECASE,
 )
+_STYLE_OR_CLASSDEF_RE = re.compile(r"^\s*(style|classDef)\b")
+_HEX_COLOR_RE = re.compile(r"#[0-9a-fA-F]{6}\b")
+_SUBGRAPH_RE = re.compile(r"^\s*subgraph\b", re.IGNORECASE)
 ELK_WARN_THRESHOLD = 20
 ELK_ERROR_THRESHOLD = 40
+SIZE_WARN_THRESHOLD = 20
+SIZE_ERROR_THRESHOLD = 35
 PLACEHOLDER_PATTERNS = {
     marker: re.compile(rf"\b{re.escape(marker)}\b", re.IGNORECASE)
     for marker in PLACEHOLDER_MARKERS
 }
 DEFAULT_STALE_DAYS = 90
 WARNING_STALE_DAYS = 180
+DISALLOWED_SUBGRAPH_EMOJI = ("🟡", "🟢", "🔵", "🟣", "⚪")
+# ADR-040 pre-harmonization palette (blocked in style/classDef rules).
+DEPRECATED_PALETTE = {
+    "#fff7ed",
+    "#f59e0b",
+    "#ecfdf5",
+    "#10b981",
+    "#eff6ff",
+    "#2563eb",
+    "#f5f3ff",
+    "#7c3aed",
+    "#f1f5f9",
+    "#64748b",
+}
 
 
 @dataclass
@@ -97,14 +120,21 @@ def find_diagram_files(base: Path) -> list[Path]:
     scaffolding/template files, not renderable diagrams.
     """
     if base.is_file():
-        if base.suffix in SUPPORTED_SUFFIXES and not base.name.startswith("_"):
+        if (
+            base.suffix in SUPPORTED_SUFFIXES
+            and not base.name.startswith("_")
+            and not EXCLUDED_PATH_PARTS.intersection(base.parts)
+        ):
             return [base]
         return []
 
     return sorted(
         f
         for f in list(base.rglob("*.mmd")) + list(base.rglob("*.mermaid"))
-        if not f.name.startswith("_")
+        if (
+            not f.name.startswith("_")
+            and not EXCLUDED_PATH_PARTS.intersection(f.parts)
+        )
     )
 
 
@@ -278,6 +308,108 @@ def check_staleness(
     return issues
 
 
+def check_colour_policy(path: Path, lines: list[str]) -> list[Issue]:
+    """Check for deprecated non-canonical palette usage (COLOUR-001)."""
+    issues: list[Issue] = []
+    fname = str(path)
+
+    found: set[str] = set()
+    for line in lines:
+        if not _STYLE_OR_CLASSDEF_RE.match(line):
+            continue
+        for color in _HEX_COLOR_RE.findall(line):
+            normalized = color.lower()
+            if normalized in DEPRECATED_PALETTE:
+                found.add(normalized)
+
+    if found:
+        issues.append(
+            Issue(
+                file=fname,
+                severity="ERROR",
+                rule="COLOUR-001",
+                message=(
+                    "Deprecated palette color(s) in style/classDef: "
+                    f"{', '.join(sorted(found))}"
+                ),
+            )
+        )
+
+    return issues
+
+
+def check_subgraph_emoji(path: Path, lines: list[str]) -> list[Issue]:
+    """Disallow emoji prefixes in subgraph labels (COLOUR-002)."""
+    issues: list[Issue] = []
+    fname = str(path)
+
+    found: set[str] = set()
+    for line in lines:
+        if not _SUBGRAPH_RE.match(line):
+            continue
+        for icon in DISALLOWED_SUBGRAPH_EMOJI:
+            if icon in line:
+                found.add(icon)
+
+    if found:
+        issues.append(
+            Issue(
+                file=fname,
+                severity="ERROR",
+                rule="COLOUR-002",
+                message=(
+                    "Emoji prefixes in subgraph labels are forbidden: "
+                    f"{', '.join(sorted(found))}"
+                ),
+            )
+        )
+
+    return issues
+
+
+def check_node_count_policy(path: Path, lines: list[str]) -> list[Issue]:
+    """Check ADR-040 node-count thresholds (SIZE-001/SIZE-002)."""
+    issues: list[Issue] = []
+    fname = str(path)
+
+    # Keep full reference views exempt from density limits.
+    if path.name.endswith("-full.mermaid"):
+        return issues
+    if path.name.startswith("00-legend"):
+        return issues
+
+    nodes: int | None = None
+    for ln in lines:
+        m = _NODES_RE.search(ln)
+        if m:
+            nodes = int(m.group(1))
+            break
+
+    if nodes is None:
+        return issues
+
+    if nodes > SIZE_ERROR_THRESHOLD:
+        issues.append(
+            Issue(
+                file=fname,
+                severity="ERROR",
+                rule="SIZE-001",
+                message=f"@nodes={nodes} > {SIZE_ERROR_THRESHOLD}",
+            )
+        )
+    elif nodes > SIZE_WARN_THRESHOLD:
+        issues.append(
+            Issue(
+                file=fname,
+                severity="WARNING",
+                rule="SIZE-002",
+                message=f"@nodes={nodes} > {SIZE_WARN_THRESHOLD}",
+            )
+        )
+
+    return issues
+
+
 def check_layout_policy(path: Path, lines: list[str]) -> list[Issue]:
     """Check adaptive layout rules (ADR-040).
 
@@ -423,6 +555,9 @@ def lint_file(path: Path, stale_days: int) -> list[Issue]:
     issues.extend(check_naming_convention(path))
     issues.extend(check_placeholder_content(path, lines))
     issues.extend(check_staleness(path, lines, stale_days))
+    issues.extend(check_colour_policy(path, lines))
+    issues.extend(check_subgraph_emoji(path, lines))
+    issues.extend(check_node_count_policy(path, lines))
     issues.extend(check_layout_policy(path, lines))
     issues.extend(check_orphan_nodes(path, lines))
 
@@ -451,7 +586,11 @@ def lint_paths(targets: list[Path], stale_days: int) -> LintResult:
 
     for target in targets:
         if target.is_file():
-            if target.suffix in SUPPORTED_SUFFIXES and target not in seen:
+            if (
+                target.suffix in SUPPORTED_SUFFIXES
+                and target not in seen
+                and not EXCLUDED_PATH_PARTS.intersection(target.parts)
+            ):
                 seen.add(target)
                 files.append(target)
             continue
@@ -538,8 +677,7 @@ def main() -> int:
         nargs="*",
         help=(
             "Files and/or directories to check. "
-            "Default: docs/02-architecture/mmd-diagrams and "
-            "docs/02-architecture/diagrams/mermaid"
+            "Default: docs/ (excluding docs/99-archive/**)"
         ),
     )
     parser.add_argument(
