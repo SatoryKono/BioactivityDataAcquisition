@@ -194,7 +194,10 @@
       "Bash(.venv/Scripts/python.exe:*)",
       "Bash(bash:*)",
       "Bash(node:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(do echo:*)",
+      "Bash(do:*)",
+      "Bash(sed:*)"
     ]
   },
   "enabledPlugins": {

@@ -1,32 +1,33 @@
 %% View: Infrastructure-Mapping | Parent: 41-error-classification-tree-full.mermaid
+%% @uniform width=140 height=56 max_title_len=11 max_desc_lines=0
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N14["SCHEMA"]
-        N1["HTTP"]
-        N6["ERROR"]
+        N14["SCHEMA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N1["HTTP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["ERROR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
         N2["QUARANTINE2"]
-        N3["LOCK"]
-        N4["LOCKACQ"]
-        N5["FAIL_FAST"]
-        N7["INFRA"]
-        N8["DOMAIN"]
-        N9["no"]
-        N10["classify"]
-        N11["retry"]
-        N12["another"]
-        N13["AUTH"]
-        N15["MISSING"]
-        N16["FORMAT"]
-        N17["EXHAUST"]
-        N18["RETRY"]
-        N19["RATE"]
-        N20["SERVER"]
+        N3["LOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N4["LOCKACQ&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["FAIL_FAST&nbsp;&nbsp;"]
+        N7["INFRA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["DOMAIN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["no&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["classify&nbsp;&nbsp;&nbsp;"]
+        N11["retry&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["another&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N13["AUTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N15["MISSING&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N16["FORMAT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N17["EXHAUST&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N18["RETRY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N19["RATE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N20["SERVER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N6 --> N1

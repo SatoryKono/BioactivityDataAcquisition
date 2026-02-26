@@ -70,7 +70,7 @@ def render_with_mmdc(
             "-s",
             str(scale),
             "-b",
-            "transparent",
+            "white",
         ]
         if config_path is not None and config_path.exists():
             cmd.extend(["-c", str(config_path)])

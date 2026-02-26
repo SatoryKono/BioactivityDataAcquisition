@@ -1,27 +1,28 @@
 %% View: Overview | Parent: 32-single-record-journey-full.mermaid
+%% @uniform width=140 height=56 max_title_len=5 max_desc_lines=0
 flowchart TB
 
     subgraph Application["Application Layer"]
         direction TB
-        N2["ST"]
-        N4["BF"]
-        N5["BT"]
-        N6["TI"]
-        N7["NORM"]
-        N8["META"]
-        N9["HASH"]
+        N2["ST&nbsp;&nbsp;&nbsp;"]
+        N4["BF&nbsp;&nbsp;&nbsp;"]
+        N5["BT&nbsp;&nbsp;&nbsp;"]
+        N6["TI&nbsp;&nbsp;&nbsp;"]
+        N7["NORM&nbsp;"]
+        N8["META&nbsp;"]
+        N9["HASH&nbsp;"]
         N11["CLEAN"]
-        N12["WARN"]
-        N13["TFG"]
-        N14["GV"]
+        N12["WARN&nbsp;"]
+        N13["TFG&nbsp;&nbsp;"]
+        N14["GV&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N1["SW"]
-        N3["BW"]
-        N10["PSV"]
-        N15["GW"]
+        N1["SW&nbsp;&nbsp;&nbsp;"]
+        N3["BW&nbsp;&nbsp;&nbsp;"]
+        N10["PSV&nbsp;&nbsp;"]
+        N15["GW&nbsp;&nbsp;&nbsp;"]
     end
 
     N3 --> N4

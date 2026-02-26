@@ -42,7 +42,7 @@ svg {
 
 /* ── Edges / links ──────────────────────────────────── */
 .edgePath .path {
-    stroke-width: 1.8px;
+    stroke-width: 2.5px;
     stroke-linejoin: round;
     stroke-linecap: round;
 }
@@ -58,11 +58,25 @@ svg {
     stroke-linecap: round;
 }
 
+/* State diagram transitions — match edge stroke for consistent rounding */
+.transition path {
+    stroke-width: 2.5px;
+}
+
 .edgeLabel {
-    font-size: 12px;
+    font-size: 13px;
     background-color: #ffffff;
     padding: 2px 6px;
     border-radius: 3px;
+}
+
+/* Force opaque background on edge labels — Mermaid generates
+   .labelBkg { background-color: rgba(255,255,255,.5) } with
+   ID-scoped selector, making labels invisible on transparent PNGs. */
+.edgeLabel .labelBkg,
+.labelBkg {
+    background-color: #ffffff !important;
+    opacity: 1 !important;
 }
 
 /* ── Sequence diagram ───────────────────────────────── */
@@ -109,7 +123,7 @@ g.classGroup line {
 }
 
 .relation {
-    stroke-width: 1.5px;
+    stroke-width: 2.5px;
 }
 
 /*

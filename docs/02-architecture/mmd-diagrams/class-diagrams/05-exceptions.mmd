@@ -5,89 +5,121 @@
 %% @date    2026-02-24
 %% @type    classDiagram
 %% @level   Class / Interface
+%% @uniform class width=240 height=90 max_title_len=25 max_desc_lines=3
 
 classDiagram
     class BioETLError {
-        <<Base Exception>>
-        +context: dict
+        <<Base Exception>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +context: dict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         +with_context(**extra) Self
     }
 
     class CriticalError {
         Unrecoverable system errors
+        &nbsp;
+        &nbsp;
     }
 
     class RecoverableError {
         Transient errors that can be retried
+        &nbsp;
+        &nbsp;
     }
 
     class DataQualityError {
-        Data validation failures
+        Data validation failures&nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class ValidationError {
         Schema or field validation failures
+        &nbsp;
+        &nbsp;
     }
 
     class SchemaViolationError {
-        +table: str
-        +errors: list
+        +table: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +errors: list&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
     }
 
     class MissingRequiredFieldError {
-        +field: str
-        +record_id: str
+        +field: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +record_id: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
     }
 
     class InvalidDataFormatError {
-        +field: str
-        +value: Any
-        +expected_format: str
+        +field: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +value: Any&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +expected_format: str&nbsp;&nbsp;&nbsp;&nbsp;
     }
 
     class DataQualityThresholdError {
-        +error_rate: float
-        +threshold: float
+        +error_rate: float&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +threshold: float&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
     }
 
     class LockNotHeldError {
         Lock was lost during operation
+        &nbsp;
+        &nbsp;
     }
 
     class PipelineConfigError {
         Invalid pipeline configuration
+        &nbsp;
+        &nbsp;
     }
 
     class AdapterError {
         External API adapter errors
+        &nbsp;
+        &nbsp;
     }
 
     class StorageError {
-        Storage I/O errors
+        Storage I/O errors&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class AtomicWriteError {
-        Atomic write failure
+        Atomic write failure&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class CheckpointError {
         Checkpoint save/load failure
+        &nbsp;
+        &nbsp;
     }
 
     class CircuitBreakerOpenError {
-        Circuit breaker is OPEN
+        Circuit breaker is OPEN&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class RateLimitExceededError {
-        Rate limit exhausted
+        Rate limit exhausted&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class NetworkError {
         Network connectivity errors
+        &nbsp;
+        &nbsp;
     }
 
     class TimeoutError {
-        Operation timed out
+        Operation timed out&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     BioETLError <|-- CriticalError

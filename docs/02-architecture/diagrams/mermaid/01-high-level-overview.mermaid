@@ -1,36 +1,37 @@
 %% View: Overview | Parent: 01-high-level-full.mermaid
+%% @uniform width=140 height=56 max_title_len=8 max_desc_lines=0
 flowchart TB
 %% keep-orphan: N13, N14, N15
 
     subgraph Application["Application Layer"]
         direction TB
         N1["Executor"]
-        N3["Runner"]
-        N4["Trans"]
-        N8["Boot"]
-        N11["Sources"]
+        N3["Runner&nbsp;&nbsp;"]
+        N4["Trans&nbsp;&nbsp;&nbsp;"]
+        N8["Boot&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["Sources&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
         N10["Adapters"]
-        N5["Bronze"]
-        N6["Silver"]
-        N7["Gold"]
-        N13["A1"]
-        N14["A2"]
-        N15["A3"]
-        N2["Storage"]
+        N5["Bronze&nbsp;&nbsp;"]
+        N6["Silver&nbsp;&nbsp;"]
+        N7["Gold&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N13["A1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N14["A2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N15["A3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["Storage&nbsp;"]
     end
 
     subgraph Composition["Composition Layer"]
         direction TB
-        N9["Factory"]
+        N9["Factory&nbsp;"]
     end
 
     subgraph Interfaces["Interfaces Layer"]
         direction TB
-        N12["CLI"]
+        N12["CLI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N11 --> N10

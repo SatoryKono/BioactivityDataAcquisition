@@ -1,29 +1,30 @@
 %% View: Data-Flow | Parent: 50-exception-hierarchy-full.mermaid
+%% @uniform width=176 height=56 max_title_len=17 max_desc_lines=0
 flowchart TB
 %% keep-orphan: N7, N8
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N3["DELTA_SCHEMA_V"]
-        N4["BRONZE_VALID"]
-        N7["record_id"]
+        N3["DELTA_SCHEMA_V&nbsp;&nbsp;&nbsp;"]
+        N4["BRONZE_VALID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["record_id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N1["MERGE_CONFLICT"]
-        N12["EXT_SERVICE"]
+        N1["MERGE_CONFLICT&nbsp;&nbsp;&nbsp;"]
+        N12["EXT_SERVICE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N2["DELTA_TX"]
-        N5["DELTA_WRITE"]
-        N6["DELTA_OPT"]
+        N2["DELTA_TX&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["DELTA_WRITE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["DELTA_OPT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         N8["ACTION_QUARANTINE"]
-        N9["CRITICAL"]
-        N10["STORAGE_ERR"]
-        N11["RECOVERABLE"]
+        N9["CRITICAL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["STORAGE_ERR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["RECOVERABLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N9 --> N1

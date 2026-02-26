@@ -1,36 +1,37 @@
 %% View: Domain-Focus | Parent: 34-batch-processing-flow-full.mermaid
+%% @uniform width=144 height=56 max_title_len=13 max_desc_lines=0
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N2["errors"]
-        N3["error_count"]
-        N5["BE"]
-        N6["BT"]
-        N8["BTM"]
-        N9["DS"]
-        N10["Trans"]
-        N11["br"]
-        N12["filter_ids"]
-        N13["strip"]
-        N14["dates"]
-        N15["_run_type"]
+        N2["errors&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N3["error_count&nbsp;&nbsp;"]
+        N5["BE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["BT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["BTM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["DS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["Trans&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["br&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["filter_ids&nbsp;&nbsp;&nbsp;"]
+        N13["strip&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N14["dates&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N15["_run_type&nbsp;&nbsp;&nbsp;&nbsp;"]
         N16["_ingestion_ts"]
-        N19["primary_keys"]
+        N19["primary_keys&nbsp;"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N4["batch_num"]
-        N1["Runner"]
+        N4["batch_num&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N1["Runner&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N7["BW"]
-        N17["Bronze"]
-        N18["Silver"]
-        N20["Gold"]
+        N7["BW&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N17["Bronze&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N18["Silver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N20["Gold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N1 --> N5

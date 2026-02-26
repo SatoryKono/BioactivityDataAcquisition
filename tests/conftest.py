@@ -6,11 +6,29 @@ from urllib.parse import parse_qsl, urlparse
 
 import pytest
 
+
+def pytest_cmdline_main(config):
+    # Workaround for xdist serialization error with enums (like syrupy DiffMode)
+    # This must run early in pytest_cmdline_main before xdist plugins serialize the config
+    if hasattr(config, "option"):
+        for attr in dir(config.option):
+            if attr.startswith("_"):
+                continue
+            try:
+                val = getattr(config.option, attr)
+                if isinstance(val, enum.Enum):
+                    setattr(config.option, attr, val.value)
+            except Exception:
+                pass
+
+
 def pytest_configure(config):
-    # Workaround for xdist serialization error with syrupy DiffMode enum
-    # See: https://github.com/tophat/syrupy/issues/741
-    if hasattr(config.option, "diff_mode") and isinstance(config.option.diff_mode, enum.Enum):
+    # Keep it here as well just in case
+    if hasattr(config.option, "diff_mode") and isinstance(
+        config.option.diff_mode, enum.Enum
+    ):
         config.option.diff_mode = config.option.diff_mode.value
+
 
 # Heavy deps are guarded so that minimal CI environments (e.g. detect-secrets
 # workflow, which only installs pytest) can still collect tests without

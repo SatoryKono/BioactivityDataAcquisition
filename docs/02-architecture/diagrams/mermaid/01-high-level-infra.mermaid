@@ -1,41 +1,42 @@
 %% View: Infrastructure-Mapping | Parent: 01-high-level-full.mermaid
+%% @uniform width=140 height=56 max_title_len=10 max_desc_lines=0
 flowchart TB
 %% keep-orphan: N14, N15, N16, N17, N18, N19, N20, N4
 
     subgraph Application["Application Layer"]
         direction TB
-        N5["Executor"]
-        N7["Runner"]
+        N5["Executor&nbsp;&nbsp;"]
+        N7["Runner&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N1["Storage"]
-        N3["Adapters"]
+        N1["Storage&nbsp;&nbsp;&nbsp;"]
+        N3["Adapters&nbsp;&nbsp;"]
         N4["Quarantine"]
-        N6["Boot"]
-        N8["Trans"]
-        N9["Sources"]
-        N11["Bronze"]
-        N12["Silver"]
-        N13["Gold"]
-        N14["A1"]
-        N15["A2"]
-        N16["A3"]
-        N17["A4"]
-        N18["A5"]
-        N19["A6"]
-        N20["A7"]
+        N6["Boot&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["Trans&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["Sources&nbsp;&nbsp;&nbsp;"]
+        N11["Bronze&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["Silver&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N13["Gold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N14["A1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N15["A2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N16["A3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N17["A4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N18["A5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N19["A6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N20["A7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Composition["Composition Layer"]
         direction TB
-        N2["Factory"]
+        N2["Factory&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Interfaces["Interfaces Layer"]
         direction TB
-        N10["CLI"]
+        N10["CLI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N9 --> N3

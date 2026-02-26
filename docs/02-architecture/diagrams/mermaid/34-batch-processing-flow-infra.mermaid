@@ -1,36 +1,37 @@
 %% View: Infrastructure-Mapping | Parent: 34-batch-processing-flow-full.mermaid
+%% @uniform width=144 height=56 max_title_len=13 max_desc_lines=0
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N11["strip"]
-        N8["errors"]
-        N10["filter_ids"]
-        N13["_run_type"]
+        N11["strip&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["errors&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["filter_ids&nbsp;&nbsp;&nbsp;"]
+        N13["_run_type&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N4["Runner"]
+        N4["Runner&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N1["BE"]
-        N2["BT"]
-        N3["BW"]
-        N5["BTM"]
-        N6["DS"]
-        N7["Trans"]
-        N9["br"]
-        N12["dates"]
+        N1["BE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["BT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N3["BW&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["BTM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["DS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["Trans&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["br&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["dates&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         N14["_ingestion_ts"]
-        N15["Bronze"]
-        N16["Silver"]
-        N17["primary_keys"]
-        N18["Gold"]
-        N19["QM"]
-        N20["BMR"]
+        N15["Bronze&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N16["Silver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N17["primary_keys&nbsp;"]
+        N18["Gold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N19["QM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N20["BMR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N4 --> N1

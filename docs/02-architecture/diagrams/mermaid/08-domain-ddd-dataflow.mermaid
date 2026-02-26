@@ -1,28 +1,29 @@
 %% View: Data-Flow | Parent: 08-domain-ddd-full.mermaid
+%% @uniform width=176 height=56 max_title_len=17 max_desc_lines=0
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N4["BatchID"]
-        N9["RunID"]
-        N12["EntityID"]
+        N4["BatchID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["RunID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["EntityID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N1["Batch"]
-        N2["PipelineRun"]
-        N5["BatchCreated"]
-        N6["BatchSealed"]
-        N7["BatchWritten"]
+        N1["Batch&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["PipelineRun&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["BatchCreated&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["BatchSealed&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["BatchWritten&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N3["QuarantineEntry"]
+        N3["QuarantineEntry&nbsp;&nbsp;"]
         N8["RecordQuarantined"]
-        N10["RunStarted"]
-        N11["RunCompleted"]
+        N10["RunStarted&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["RunCompleted&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N1 --> N5

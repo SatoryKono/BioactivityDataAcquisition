@@ -1,37 +1,38 @@
 %% View: Infrastructure-Mapping | Parent: 05-pipeline-lifecycle-states-full.mermaid
+%% @uniform width=184 height=56 max_title_len=18 max_desc_lines=0
 flowchart TB
 %% keep-orphan: N10, N12, N5
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N16["ERROR"]
-        N6["ValidateLock"]
-        N18["VALIDATING"]
+        N16["ERROR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["ValidateLock&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N18["VALIDATING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N20["PREFLIGHT"]
-        N17["TRANSFORMING"]
+        N20["PREFLIGHT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N17["TRANSFORMING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N1["LOCK_ACQUIRING"]
-        N2["RequestLock"]
-        N3["WaitingForLock"]
-        N4["LockAcquired"]
-        N5["RouteQuarantine"]
-        N7["DQMetrics"]
-        N8["CleanupCheckpoint"]
-        N9["CHECKPOINT_SAVED"]
-        N10["CheckpointLoad"]
-        N11["ReleaseLock"]
-        N12["SaveCheckpoint"]
-        N13["*"]
+        N1["LOCK_ACQUIRING&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["RequestLock&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N3["WaitingForLock&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N4["LockAcquired&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["RouteQuarantine&nbsp;&nbsp;&nbsp;"]
+        N7["DQMetrics&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["CleanupCheckpoint&nbsp;"]
+        N9["CHECKPOINT_SAVED&nbsp;&nbsp;"]
+        N10["CheckpointLoad&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["ReleaseLock&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["SaveCheckpoint&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N13["*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         N14["SHUTDOWN_REQUESTED"]
-        N15["EXTRACTING"]
-        N19["LOADING"]
+        N15["EXTRACTING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N19["LOADING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N13 --> N2

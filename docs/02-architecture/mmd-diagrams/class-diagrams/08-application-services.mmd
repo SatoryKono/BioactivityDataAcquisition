@@ -5,132 +5,349 @@
 %% @date    2026-02-24
 %% @type    classDiagram
 %% @level   Class / Interface
+%% @uniform class width=240 height=240 max_title_len=25 max_desc_lines=15
 
 classDiagram
     class DataQualityService {
         -_dq_monitor: DQMonitorPort | None
-        -_config: DQConfig
-        -_logger: LoggerPort
+        -_config: DQConfig&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        -_logger: LoggerPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         -_metrics: MetricsPort | None
-        -_pipeline_name: str
-        -_entity_type: str
+        -_pipeline_name: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        -_entity_type: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         +evaluate(context, executor) DQResult
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class DQReportService {
         +generate_reports(context) DQReportResult
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class MedallionLifecycleService {
-        <<dataclass>>
-        +storage: StoragePort
-        +logger: LoggerPort
+        <<dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +storage: StoragePort&nbsp;&nbsp;&nbsp;&nbsp;
+        +logger: LoggerPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         +prepare_for_run(config, runtime) PrepareResult
         +finalize_run(config, runtime) VacuumResult
-        +clear() None
-        +vacuum() None
-        +archive() None
+        +clear() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +vacuum() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +archive() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class VacuumService {
-        <<dataclass>>
-        +storage: StoragePort
-        +logger: LoggerPort
+        <<dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +storage: StoragePort&nbsp;&nbsp;&nbsp;&nbsp;
+        +logger: LoggerPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         +vacuum_table(table_name) None
-        +vacuum_all() None
+        +vacuum_all() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class HealthService {
         +check_provider(provider, factory) HealthResult
         +check_all(factory) HealthCheckSummary
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class ConfigService {
-        +list_pipelines() list
+        +list_pipelines() list&nbsp;&nbsp;&nbsp;
         +get_pipeline(name) PipelineConfig
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class ExportService {
         +export(table_name, format, options) ExportResult
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class CheckpointService {
-        +list_checkpoints() list
+        +list_checkpoints() list&nbsp;
         +delete_checkpoint(key) None
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class MetricsService {
-        +start_server() None
-        +stop_server() None
+        +start_server() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +stop_server() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class ShutdownService {
         +shutdown(reason, grace_period) None
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class QuarantineService {
         +inspect(pipeline, limit) list
         +get_stats(pipeline) dict
-        +replay(pipeline) int
-        +purge(pipeline) int
+        +replay(pipeline) int&nbsp;&nbsp;&nbsp;&nbsp;
+        +purge(pipeline) int&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class BronzeCleanupService {
         +cleanup(config, dry_run) BronzeCleanupResult
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class LockService {
         +get_lock_info(key) dict | None
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class PipelineRunnerService {
         +run_pipeline(config, runtime) None
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class BronzeDQAnalyzer {
         +analyze(records) DQMetrics
         +check_completeness() float
-        +check_format() float
+        +check_format() float&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class SilverDQAnalyzer {
         +analyze(delta_table) DQMetrics
         +check_nullability() float
-        +check_schema() float
+        +check_schema() float&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class GoldDQAnalyzer {
         +analyze(delta_table) DQMetrics
         +check_pk_uniqueness() float
-        +validate_schema() float
+        +validate_schema() float&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class PipelineObserver {
-        -_pipeline_name: str
-        -_run_id: RunID
-        -_run_type: RunType
-        -_metrics: MetricsPort
-        -_logger: LoggerPort
+        -_pipeline_name: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        -_run_id: RunID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        -_run_type: RunType&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        -_metrics: MetricsPort&nbsp;&nbsp;&nbsp;
+        -_logger: LoggerPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         -_tracer: TracingPort | None
-        -_start_time: float
-        -_root_span: Span | None
+        -_start_time: float&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        -_root_span: Span | None&nbsp;
         -_phase: LifecyclePhase | None
-        +__enter__() Self
-        +__exit__(...) None
-        +emit_event(event) None
-        +on_preflight() None
-        +on_execution() None
-        +on_postrun() None
+        +__enter__() Self&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +__exit__(...) None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +emit_event(event) None&nbsp;&nbsp;
+        +on_preflight() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +on_execution() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +on_postrun() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     }
 
     class LifecyclePhase {
-        <<StrEnum>>
-        STARTUP
-        PREFLIGHT
-        LIFECYCLE_CLEAR
-        EXECUTION
-        POSTRUN
-        CLEANUP
+        <<StrEnum>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        STARTUP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        PREFLIGHT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        LIFECYCLE_CLEAR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        EXECUTION&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        POSTRUN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        CLEANUP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     PipelineObserver --> LifecyclePhase

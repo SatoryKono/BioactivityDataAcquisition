@@ -1,28 +1,29 @@
 %% View: Data-Flow | Parent: 10-infrastructure-layer-class-diagram-full.mermaid
+%% @uniform width=232 height=56 max_title_len=24 max_desc_lines=0
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N1["DataSourcePort"]
+        N1["DataSourcePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         N6["FilterableDataSourcePort"]
-        N7["QuarantinePort"]
-        N10["StoragePort"]
+        N7["QuarantinePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["StoragePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N2["SilverWriter"]
-        N3["GoldWriter"]
-        N4["BronzeWriter"]
-        N5["QuarantineWriter"]
-        N8["ChemblAdapter"]
-        N11["PubchemAdapter"]
-        N12["UniprotAdapter"]
+        N2["SilverWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N3["GoldWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N4["BronzeWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["QuarantineWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["ChemblAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["PubchemAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["UniprotAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Interfaces["Interfaces Layer"]
         direction TB
-        N9["UnifiedHTTPClient"]
+        N9["UnifiedHTTPClient&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N8 --> N1

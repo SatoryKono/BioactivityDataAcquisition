@@ -1,29 +1,30 @@
 %% View: Data-Flow | Parent: 31-pipeline-run-lifecycle-full.mermaid
+%% @uniform width=168 height=56 max_title_len=16 max_desc_lines=0
 flowchart TB
 %% keep-orphan: N4
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N10["VALIDATING"]
+        N10["VALIDATING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N8["PREFLIGHT"]
-        N2["TRANSFORMING"]
-        N3["BATCH_DONE"]
-        N4["BatchLoop"]
+        N8["PREFLIGHT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["TRANSFORMING&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N3["BATCH_DONE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N4["BatchLoop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         N9["PREFLIGHT_PASSED"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N1["EXTRACTING"]
-        N5["FAILED"]
-        N6["WRITING"]
-        N7["LOCKING"]
-        N11["CHECKPOINTING"]
-        N12["DRAINING"]
+        N1["EXTRACTING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["FAILED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["WRITING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["LOCKING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["CHECKPOINTING&nbsp;&nbsp;&nbsp;"]
+        N12["DRAINING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N7 --> N5

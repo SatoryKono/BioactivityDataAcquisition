@@ -5,30 +5,33 @@
 %% @date    2026-02-24
 %% @type    classDiagram
 %% @level   Class / Interface
+%% @uniform class width=216 height=216 max_title_len=22 max_desc_lines=10
 
 classDiagram
     class BaseDeltaWriter {
-        +base_path: Path
-        +logger: LoggerPort
+        +base_path: Path&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +logger: LoggerPort&nbsp;&nbsp;&nbsp;
         #_retention_manager: RetentionManager
         #_flat_structure: bool
         +get_table_path(provider, entity) Path
         +clear(table_path) None
         #_prepare_arrow_data(records, schema) Table
         #_get_table_schema(table_path) Schema
+        &nbsp;
+        &nbsp;
     }
 
     class BronzeWriter {
-        +base_path: Path
-        +logger: LoggerPort
-        +metrics: MetricsPort
+        +base_path: Path&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +logger: LoggerPort&nbsp;&nbsp;&nbsp;
+        +metrics: MetricsPort&nbsp;
         +tracing: TracingPort | None
-        +save_json: bool
-        +validate_json: bool
+        +save_json: bool&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +validate_json: bool&nbsp;&nbsp;
         +audit: AuditPort | None
         +metadata_writer: MetadataWriterPort | None
         +write_bronze(records, config, metadata) BronzeWriteResult
-        +aclose() None
+        +aclose() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     }
 
     class SilverWriter {
@@ -40,6 +43,8 @@ classDiagram
         +write_silver(records, config) SilverWriteResult
         +merge_silver(records, config) SilverWriteResult
         +clear_silver(table_name) None
+        &nbsp;
+        &nbsp;
     }
 
     class GoldWriter {
@@ -48,61 +53,167 @@ classDiagram
         +metadata_writer: MetadataWriterPort | None
         +write_gold(records, config) None
         +clear_gold(table_name) None
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class DeltaReader {
-        +base_path: Path
-        +logger: LoggerPort
+        +base_path: Path&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +logger: LoggerPort&nbsp;&nbsp;&nbsp;
         +read_table(path, columns, limit) DataFrame
         +get_schema(path) Schema
         +get_row_count(path) int
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class ArrowDataConverter {
         +convert(records, schema) Table
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class RetentionManager {
         +manage_retention(table_path, hours) None
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class MetadataWriter {
         +write(path, metadata) None
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class BronzeMetadataBuilder {
         +build(config, result) dict
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class SilverMetadataBuilder {
         +build(config, result) dict
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class GoldMetadataBuilder {
         +build(config, result) dict
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class AtomicWriteGroup {
-        +add(path, data) None
-        +commit() None
-        +rollback() None
+        +add(path, data) None&nbsp;
+        +commit() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +rollback() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class CsvExporter {
         +export(table_path, output_path) None
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class PanderaSilverValidator {
         +validate(df, schema) ValidationResult
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class PanderaGoldValidator {
         +validate(df, schema) ValidationResult
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class NoOpValidator {
-        <<Null Object>>
+        <<Null Object>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         +validate(df, schema) ValidationResult
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     BaseDeltaWriter <|-- SilverWriter

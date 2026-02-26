@@ -1,36 +1,37 @@
 %% View: Overview | Parent: 05-layers-interaction-full.mermaid
+%% @uniform width=160 height=56 max_title_len=15 max_desc_lines=0
 flowchart TB
 %% keep-orphan: N14, N15
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N13["Ports"]
-        N14["Types"]
+        N13["Ports&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N14["Types&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N2["Factories"]
-        N3["Runner"]
-        N4["BatchExec"]
-        N6["Services"]
-        N8["Transformer"]
+        N2["Factories&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N3["Runner&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N4["BatchExec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["Services&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["Transformer&nbsp;&nbsp;&nbsp;&nbsp;"]
         N9["CompositeRunner"]
-        N10["Coordinator"]
-        N11["Merger"]
-        N12["Application"]
-        N15["Entities"]
+        N10["Coordinator&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["Merger&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["Application&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N15["Entities&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Composition["Composition Layer"]
         direction TB
-        N1["Bootstrap"]
-        N5["Registry"]
+        N1["Bootstrap&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["Registry&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Interfaces["Interfaces Layer"]
         direction TB
-        N7["CLI"]
+        N7["CLI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N1 --> N5

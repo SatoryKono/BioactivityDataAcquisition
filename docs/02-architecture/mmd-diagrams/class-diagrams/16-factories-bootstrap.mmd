@@ -5,6 +5,7 @@
 %% @date    2026-02-24
 %% @type    classDiagram
 %% @level   Class / Interface
+%% @uniform class width=192 height=126 max_title_len=19 max_desc_lines=5
 
 classDiagram
     class DataSourceRegistry {
@@ -19,46 +20,80 @@ classDiagram
         -_registry: dict~str, Callable~
         +register(provider, entity_type, factory) None
         +create(provider, entity_type, **kwargs) BaseTransformer
+        &nbsp;
+        &nbsp;
     }
 
     class RunnerFactory {
         -_data_source_registry: DataSourceRegistry
         -_transformer_factory: TransformerFactory
         +create_runner(config, runtime) PipelineRunner
+        &nbsp;
+        &nbsp;
     }
 
     class DQFactory {
         +create_dq_analyzers(config) tuple
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class RuntimeAssembly {
-        Central DI wiring
+        Central DI wiring&nbsp;&nbsp;
         +assemble(config, runtime) PipelineRunner
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class RunnerBootstrap {
         +assemble_runner(config, runtime, services) PipelineRunner
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class StorageBootstrap {
         +assemble_storage(settings) StoragePort
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class HealthBootstrap {
         +assemble_health(settings) HealthService
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class CheckpointBootstrap {
         +assemble_checkpoint(settings) CheckpointPort
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class LockBootstrap {
         +assemble_lock(settings) LockPort
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class ProviderRegistry {
         +register_all() None
         Registers all provider pipelines
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class RunnerBuilder {
@@ -70,8 +105,11 @@ classDiagram
     }
 
     class GenericFactory {
-        <<Generic T>>
+        <<Generic T>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         +create(**kwargs) T
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     RuntimeAssembly --> RunnerBootstrap

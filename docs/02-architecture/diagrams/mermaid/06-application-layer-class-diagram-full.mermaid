@@ -11,31 +11,41 @@
 %% @level   Mixed (System / Component / Class)
 
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% @uniform class width=208 height=240 max_title_len=21 max_desc_lines=13
 classDiagram
     direction TB
 
     namespace Core {
         class BasePipeline {
-            <<abstract>>
+            <<abstract>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             #config: PipelineConfig
             #runtime: RuntimeConfig
             #services: PipelineServices
             +create(config, runtime, services)$ BasePipeline
-            +pipeline_name() str
-            +provider() str
-            +run_id() RunID
+            +pipeline_name() str&nbsp;
+            +provider() str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            +run_id() RunID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
         }
 
         class PipelineRunner {
             -_pipeline: BasePipeline
             -_services: RunnerServices
-            -_lock_key: str
-            +run() RunResult
+            -_lock_key: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            +run() RunResult&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             -_acquire_lock() bool
             -_run_preflight() PreflightResult
             -_execute() ExecutionResult
             -_run_postrun() PostrunResult
             -_release_lock() None
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
         }
 
         class PipelineExecutor {
@@ -46,6 +56,12 @@ classDiagram
             +execute() ExecutionResult
             -_fetch_and_process() AsyncIterator~BatchResult~
             -_adaptive_batch_size() int
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
         }
 
         class RecordProcessor {
@@ -55,98 +71,175 @@ classDiagram
             -_metrics: BatchMetricsRecorder
             +process_batch(records) BatchResult
             +process_stream(records) AsyncIterator~BatchResult~
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
         }
 
         class BatchTransformer {
             -_transformer: BaseTransformer
-            -_logger: LoggerPort
+            -_logger: LoggerPort&nbsp;
             +transform_batch(records) TransformResult
             +transform_stream(records) AsyncIterator~TransformResult~
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
         }
 
         class PipelineServices {
-            <<frozen dataclass>>
+            <<frozen dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             +data_source: DataSourcePort
             +storage: StoragePort
-            +lock: LockPort
+            +lock: LockPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             +checkpoint: CheckpointPort
             +quarantine: QuarantinePort
             +metrics: MetricsPort
             +tracing: TracingPort
-            +logger: LoggerPort
+            +logger: LoggerPort&nbsp;&nbsp;
             +dq_monitor: DQMonitorPort?
+            &nbsp;
+            &nbsp;
+            &nbsp;
         }
 
         class RunnerServices {
-            <<frozen dataclass>>
+            <<frozen dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             +lock_manager: LockManager
             +preflight: PreflightService
             +postrun: PostrunService
             +lifecycle_orch: LifecycleOrchestrator
             +observer: PipelineObserver
             +context_holder: LockContextHolder?
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
         }
     }
 
     namespace Services {
         class LockManager {
-            -_lock: LockPort
-            -_logger: LoggerPort
-            -_ttl: int = 90
+            -_lock: LockPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            -_logger: LoggerPort&nbsp;
+            -_ttl: int = 90&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             -_heartbeat_interval: int = 30
             +acquire_lock(resource, owner_id) LockResult
             +release_lock(resource, owner_id) bool
             +refresh_lock(resource, owner_id) bool
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
         }
 
         class CheckpointManager {
             -_checkpoint: CheckpointPort
-            -_logger: LoggerPort
+            -_logger: LoggerPort&nbsp;
             +load_checkpoint(key) CheckpointState?
             +save_checkpoint(key, state) None
             +delete_checkpoint(key) None
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
         }
 
         class QuarantineManager {
             -_quarantine: QuarantinePort
-            -_logger: LoggerPort
+            -_logger: LoggerPort&nbsp;
             +quarantine_record(record, error) None
             +quarantine_batch(records, errors) int
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
         }
 
         class PreflightService {
             -_data_source: DataSourcePort
             -_storage: StoragePort
-            -_logger: LoggerPort
+            -_logger: LoggerPort&nbsp;
             +run_checks() PreflightResult
             -_check_data_source_health() HealthStatus
             -_check_storage_health() bool
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
         }
 
         class PostrunService {
             -_storage: StoragePort
             -_metrics: MetricsPort
-            -_logger: LoggerPort
+            -_logger: LoggerPort&nbsp;
             -_dq_config: DQConfig
             +run_checks(execution_metrics) PostrunResult
             -_check_dq_thresholds() DQCheckResult
             -_emit_dq_metrics() None
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
         }
 
         class LifecycleOrchestrator {
             -_lifecycle_service: MedallionLifecycleService
             -_policy: MedallionPolicy
-            -_logger: LoggerPort
+            -_logger: LoggerPort&nbsp;
             +clear_for_run(run_type, tables) ClearResult
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
         }
 
         class PipelineObserver {
             -_tracer: TracingPort
             -_metrics: MetricsPort
-            -_logger: LoggerPort
+            -_logger: LoggerPort&nbsp;
             +observe_batch(batch_id, records) Span
             +record_duration(stage, duration) None
             +record_error(error_type) None
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
         }
 
         class MemoryMonitor {
@@ -155,6 +248,14 @@ classDiagram
             +get_memory_stats() MemoryStats
             +should_reduce_batch() bool
             -_get_stats_estimate() MemoryStats
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
         }
 
         class BatchMetricsRecorder {
@@ -162,15 +263,24 @@ classDiagram
             +record_fetch(count, duration) None
             +record_transform(count, duration) None
             +record_write(count, duration, layer) None
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
         }
     }
 
     namespace Transformers {
         class BaseTransformer {
-            <<abstract>>
+            <<abstract>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             #config: PipelineConfig
             #runtime: RuntimeConfig
-            #logger: LoggerPort
+            #logger: LoggerPort&nbsp;&nbsp;
             +transform(record: BronzeRecord) SilverRecord
             +transform_batch(records) list~SilverRecord~
             #_transform_impl(record)* SilverRecord
@@ -183,29 +293,83 @@ classDiagram
         }
 
         class BaseChemblTransformer {
-            <<abstract>>
+            <<abstract>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             #_normalize_chembl_id(id) str
             #_normalize_units(value, units) tuple
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
         }
 
         class ActivityTransformer {
             +entity: str = "activity"
             #_transform_impl(record) SilverRecord
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
         }
 
         class MoleculeTransformer {
             +entity: str = "molecule"
             #_transform_impl(record) SilverRecord
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
         }
 
         class AssayTransformer {
             +entity: str = "assay"
             #_transform_impl(record) SilverRecord
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
         }
 
         class TargetTransformer {
             +entity: str = "target"
             #_transform_impl(record) SilverRecord
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
         }
     }
 

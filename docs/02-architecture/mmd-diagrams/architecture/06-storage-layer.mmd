@@ -8,51 +8,51 @@
 %% @nodes   21
 
 %%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE'}}}%%
+%% @uniform width=216 height=198 max_title_len=22 max_desc_lines=9
 graph LR
 %% keep-orphan: DQW, NOV
     subgraph Port["Domain Port"]
-        SP["StoragePort<br/>(Protocol)"]
+        SP["StoragePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Protocol)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Writers["Storage Writers"]
         subgraph BronzeStorage["Bronze Storage"]
-            BW["BronzeWriter<br/>━━━━━━━━━━━━━━━━━<br/>base_path: Path<br/>logger: LoggerPort<br/>metrics: MetricsPort<br/>save_json: bool<br/>validate_json: bool<br/>━━━━━━━━━━━━━━━━━<br/>+ write_bronze()<br/>+ aclose()"]
-            AWG["AtomicWriteGroup<br/>━━━━━━━━━━━━━━━━━<br/>Atomic multi-file writes<br/>with rollback"]
+            BW["BronzeWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>base_path: Path<br/>logger: LoggerPort<br/>metrics: MetricsPort<br/>save_json: bool<br/>validate_json: bool<br/>━━━━━━━━━━━━━━━━━<br/>+ write_bronze()<br/>+ aclose()"]
+            AWG["AtomicWriteGroup&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>Atomic multi-file writes<br/>with rollback<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
         end
 
         subgraph SilverStorage["Silver Storage"]
-            BDW["BaseDeltaWriter<br/>━━━━━━━━━━━━━━━━━<br/>base_path: Path<br/>logger: LoggerPort<br/>_retention_manager<br/>━━━━━━━━━━━━━━━━━<br/>+ get_table_path()<br/>+ clear()<br/>+ _prepare_arrow_data()"]
+            BDW["BaseDeltaWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>base_path: Path<br/>logger: LoggerPort<br/>_retention_manager<br/>━━━━━━━━━━━━━━━━━<br/>+ get_table_path()<br/>+ clear()<br/>+ _prepare_arrow_data()<br/>&nbsp;"]
 
-            SWR["SilverWriter<br/>━━━━━━━━━━━━━━━━━<br/>csv_exporter: CsvExporter<br/>write_policy: WriteModePolicy<br/>silver_validator: SilverValidatorPort<br/>━━━━━━━━━━━━━━━━━<br/>+ write_silver()<br/>+ merge_silver()<br/>+ clear_silver()"]
+            SWR["SilverWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>csv_exporter: CsvExporter<br/>write_policy: WriteModePolicy<br/>silver_validator: SilverValidatorPort<br/>━━━━━━━━━━━━━━━━━<br/>+ write_silver()<br/>+ merge_silver()<br/>+ clear_silver()<br/>&nbsp;"]
         end
 
         subgraph GoldStorage["Gold Storage"]
-            GWR["GoldWriter<br/>━━━━━━━━━━━━━━━━━<br/>csv_exporter: CsvExporter<br/>audit: AuditPort<br/>metadata_writer: MetadataWriterPort<br/>━━━━━━━━━━━━━━━━━<br/>+ write_gold()<br/>+ clear_gold()"]
+            GWR["GoldWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>csv_exporter: CsvExporter<br/>audit: AuditPort<br/>metadata_writer: MetadataWriterPort<br/>━━━━━━━━━━━━━━━━━<br/>+ write_gold()<br/>+ clear_gold()<br/>&nbsp;<br/>&nbsp;"]
         end
 
         subgraph Reader["Delta Reader"]
-            DR["DeltaReader<br/>━━━━━━━━━━━━━━━━━<br/>base_path: Path<br/>logger: LoggerPort<br/>━━━━━━━━━━━━━━━━━<br/>+ read_table()<br/>+ get_schema()<br/>+ get_row_count()"]
         end
     end
 
     subgraph Support["Support Components"]
-        AC["ArrowDataConverter<br/>(records → PyArrow)"]
-        RM["RetentionManager<br/>(vacuum/retention)"]
-        MW["MetadataWriter<br/>(_metadata.yaml)"]
-        CSV["CsvExporter<br/>(Delta → CSV export)"]
-        DQW["DQReportWriter<br/>(DQ reports JSON)"]
+        AC["ArrowDataConverter&nbsp;&nbsp;&nbsp;&nbsp;<br/>(records → PyArrow)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        RM["RetentionManager&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(vacuum/retention)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        MW["MetadataWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(_metadata.yaml)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        CSV["CsvExporter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Delta → CSV export)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        DQW["DQReportWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(DQ reports JSON)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Validation["Validation"]
-        PSV["PanderaSilverValidator<br/>(SilverValidatorPort)"]
-        PGV["PanderaGoldValidator<br/>(GoldValidatorPort)"]
-        NOV["NoOpValidator<br/>(Null Object)"]
+        PSV["PanderaSilverValidator<br/>(SilverValidatorPort)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        PGV["PanderaGoldValidator&nbsp;&nbsp;<br/>(GoldValidatorPort)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        NOV["NoOpValidator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Null Object)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph FileSystem["File System Layout"]
-        FS_B["data/<br/>├── bronze/<br/>│   └── {provider}/{entity}/{date}/<br/>│       ├── batch_*.jsonl.zst<br/>│       └── _metadata.yaml"]
-        FS_S["├── silver/<br/>│   └── {provider}_{entity}/<br/>│       ├── _delta_log/<br/>│       ├── part-*.parquet<br/>│       └── _metadata.yaml"]
-        FS_G["└── gold/<br/>    └── {provider}_{entity}/<br/>        ├── _delta_log/<br/>        ├── part-*.parquet<br/>        └── _metadata.yaml"]
+        FS_B["data/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>├── bronze/<br/>│   └── {provider}/{entity}/{date}/<br/>│       ├── batch_*.jsonl.zst<br/>│       └── _metadata.yaml<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        FS_S["├── silver/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>│   └── {provider}_{entity}/<br/>│       ├── _delta_log/<br/>│       ├── part-*.parquet<br/>│       └── _metadata.yaml<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        FS_G["└── gold/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>└── {provider}_{entity}/<br/>├── _delta_log/<br/>├── part-*.parquet<br/>└── _metadata.yaml<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     %% Inheritance
@@ -84,9 +84,9 @@ graph LR
     GWR -.-> FS_G
 
     subgraph Metadata["Metadata Builders"]
-        BMB["BronzeMetadataBuilder"]
-        SMB["SilverMetadataBuilder"]
-        GMB["GoldMetadataBuilder"]
+        BMB["BronzeMetadataBuilder&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        SMB["SilverMetadataBuilder&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        GMB["GoldMetadataBuilder&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     BW --> BMB

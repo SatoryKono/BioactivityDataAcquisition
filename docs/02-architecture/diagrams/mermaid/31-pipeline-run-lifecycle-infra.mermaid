@@ -1,36 +1,37 @@
 %% View: Infrastructure-Mapping | Parent: 31-pipeline-run-lifecycle-full.mermaid
+%% @uniform width=168 height=56 max_title_len=16 max_desc_lines=0
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N11["VALIDATING"]
+        N11["VALIDATING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N8["PREFLIGHT"]
-        N19["POSTRUN"]
+        N8["PREFLIGHT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N19["POSTRUN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         N9["PREFLIGHT_PASSED"]
-        N10["TRANSFORMING"]
-        N18["BATCH_DONE"]
+        N10["TRANSFORMING&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N18["BATCH_DONE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N1["LOCKING"]
-        N2["CHECKPOINTING"]
-        N3["LOCKED"]
+        N1["LOCKING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["CHECKPOINTING&nbsp;&nbsp;&nbsp;"]
+        N3["LOCKED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         N4["CHECKPOINT_SAVED"]
-        N5["EXTRACTING"]
-        N6["FAILED"]
-        N7["WRITING"]
-        N12["DRAINING"]
-        N13["RELEASING"]
-        N14["*"]
-        N15["PENDING"]
-        N16["CLEARING"]
-        N17["QUARANTINING"]
-        N20["COMPLETED"]
+        N5["EXTRACTING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["FAILED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["WRITING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["DRAINING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N13["RELEASING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N14["*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N15["PENDING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N16["CLEARING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N17["QUARANTINING&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N20["COMPLETED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N14 --> N15

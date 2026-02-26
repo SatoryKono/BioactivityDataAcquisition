@@ -8,25 +8,26 @@
 %% @view    hierarchy-providers
 %% @parent  05-provider-adapter-hierarchy.mmd
 %% @nodes   15
+%% @uniform width=216 height=56 max_title_len=22 max_desc_lines=0
 
 graph TB
 %% keep-orphan: UIDM
     subgraph Infrastructure["Infrastructure Layer"]
-        BHA["BaseHttpAdapter"]
-        BSA["BaseSyncAdapter"]
-        CA["ChemblAdapter"]
-        PA["PubMedAdapter"]
-        UA["UniProtAdapter"]
-        CRA["CrossRefAdapter"]
-        OAA["OpenAlexAdapter"]
+        BHA["BaseHttpAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        BSA["BaseSyncAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        CA["ChemblAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        PA["PubMedAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        UA["UniProtAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        CRA["CrossRefAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        OAA["OpenAlexAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         SSA["SemanticScholarAdapter"]
-        PCA["PubChemAdapter"]
+        PCA["PubChemAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         UIDM["UniProtIDMappingClient"]
-        CHM["ChemblHealthMixin"]
-        CMM["ChemblMetadataMixin"]
-        PSM["PubMedSearchMixin"]
-        PFetchM["PubMedFetchMixin"]
-        PHM["PubMedHealthMixin"]
+        CHM["ChemblHealthMixin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        CMM["ChemblMetadataMixin&nbsp;&nbsp;&nbsp;"]
+        PSM["PubMedSearchMixin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        PFetchM["PubMedFetchMixin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        PHM["PubMedHealthMixin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     BHA --> CA
@@ -43,4 +44,3 @@ graph TB
     PHM --> PA
 
     style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-

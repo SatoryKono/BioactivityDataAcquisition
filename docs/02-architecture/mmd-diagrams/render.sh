@@ -81,24 +81,57 @@ log_warn()  { echo -e "${YELLOW}[WARN]${NC}  $*"; }
 log_err()   { echo -e "${RED}[ERR]${NC}   $*"; }
 log_step()  { echo -e "${CYAN}[STEP]${NC}  $*"; }
 
+require_option_value() {
+  local option_name="$1"
+  local arg_count="$2"
+  if [[ "$arg_count" -lt 2 ]]; then
+    log_err "Option $option_name requires a value"
+    usage
+    exit 1
+  fi
+}
+
 # ── Parse args ──────────────────────────────────────────────
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --svg-only)     FORMAT_SVG=1; FORMAT_PNG=0;         shift ;;
     --png-only)     FORMAT_SVG=0; FORMAT_PNG=1;         shift ;;
-    --scale)        SCALE="$2";                         shift 2 ;;
-    --width)        WIDTH="$2";                         shift 2 ;;
-    --height)       HEIGHT="$2";                        shift 2 ;;
-    --bg)           BG="$2";                            shift 2 ;;
-    --filter)       FILTER="$2";                        shift 2 ;;
-    --dir)          EXTRA_DIRS+=("$2");                 shift 2 ;;
-    --jobs)         JOBS="$2";                          shift 2 ;;
-    --no-fit)       FIT=0; WIDTH=${WIDTH:-2400}; HEIGHT=${HEIGHT:-1800}; shift ;;
-    --puppeteer)    PUPPETEER_CFG="$2";                 shift 2 ;;
+    --scale)        require_option_value "$1" "$#"; SCALE="$2";         shift 2 ;;
+    --width)        require_option_value "$1" "$#"; WIDTH="$2";         shift 2 ;;
+    --height)       require_option_value "$1" "$#"; HEIGHT="$2";        shift 2 ;;
+    --bg)           require_option_value "$1" "$#"; BG="$2";            shift 2 ;;
+    --filter)       require_option_value "$1" "$#"; FILTER="$2";        shift 2 ;;
+    --dir)          require_option_value "$1" "$#"; EXTRA_DIRS+=("$2"); shift 2 ;;
+    --jobs)         require_option_value "$1" "$#"; JOBS="$2";          shift 2 ;;
+    --no-fit)       FIT=0;                                                shift ;;
+    --puppeteer)    require_option_value "$1" "$#"; PUPPETEER_CFG="$2"; shift 2 ;;
     -h|--help)      usage; exit 0 ;;
     *)              log_err "Unknown option: $1"; usage; exit 1 ;;
   esac
 done
+
+if ! [[ "$SCALE" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+  log_err "--scale must be a positive number (got: $SCALE)"
+  exit 1
+fi
+if ! [[ "$WIDTH" =~ ^[0-9]+$ ]]; then
+  log_err "--width must be a non-negative integer (got: $WIDTH)"
+  exit 1
+fi
+if ! [[ "$HEIGHT" =~ ^[0-9]+$ ]]; then
+  log_err "--height must be a non-negative integer (got: $HEIGHT)"
+  exit 1
+fi
+if ! [[ "$JOBS" =~ ^[0-9]+$ ]] || [[ "$JOBS" -lt 1 ]]; then
+  log_err "--jobs must be an integer >= 1 (got: $JOBS)"
+  exit 1
+fi
+
+if [[ $FIT -eq 0 ]]; then
+  # In fixed mode, treat zero values as "use defaults".
+  [[ "$WIDTH" -eq 0 ]] && WIDTH=2400
+  [[ "$HEIGHT" -eq 0 ]] && HEIGHT=1800
+fi
 
 # ── Determine directories ──────────────────────────────────
 if [[ ${#EXTRA_DIRS[@]} -gt 0 ]]; then
@@ -211,7 +244,7 @@ render_one() {
     if mmdc -i "$src" -o "$svg_out" "${MMDC_ARGS[@]}" "${size_args[@]}" -b "$BG" 2>/dev/null; then
       # Optimize SVG with svgo if available
       if [[ $HAS_SVGO -eq 1 ]]; then
-        svgo --quiet "$svg_out" -o "$svg_out" 2>/dev/null || true
+        svgo --quiet --config "$THEME_DIR/../svgo.config.js" "$svg_out" -o "$svg_out" 2>/dev/null || true
       fi
       echo -e "  ${GREEN}✓${NC} SVG  [$idx/$TOTAL]  $base"
     else
@@ -228,14 +261,19 @@ render_one() {
     if [[ $FORMAT_SVG -eq 1 && $HAS_RSVG -eq 1 ]]; then
       # SVG → PNG via rsvg-convert (adaptive: use SVG intrinsic size)
       if [[ $FIT -eq 0 ]]; then
-        rsvg-convert -w "$WIDTH" "$svg_dir/${base}.svg" -o "$png_out" 2>/dev/null
+        rsvg-convert -w "$WIDTH" -h "$HEIGHT" "$svg_dir/${base}.svg" -o "$png_out" 2>/dev/null
       else
         rsvg-convert -d 300 -p 300 "$svg_dir/${base}.svg" -o "$png_out" 2>/dev/null
       fi
     elif [[ $FORMAT_SVG -eq 1 && $HAS_RSVG -eq 2 ]]; then
       # SVG → PNG via inkscape
-      inkscape "$svg_dir/${base}.svg" --export-type=png --export-dpi=300 \
-        --export-filename="$png_out" 2>/dev/null
+      if [[ $FIT -eq 0 ]]; then
+        inkscape "$svg_dir/${base}.svg" --export-type=png --export-width="$WIDTH" \
+          --export-height="$HEIGHT" --export-filename="$png_out" 2>/dev/null
+      else
+        inkscape "$svg_dir/${base}.svg" --export-type=png --export-dpi=300 \
+          --export-filename="$png_out" 2>/dev/null
+      fi
     else
       # Direct mmdc → PNG (adaptive: use -s scale only)
       mmdc -i "$src" -o "$png_out" "${MMDC_ARGS[@]}" \
@@ -260,25 +298,65 @@ success=0
 failed=0
 current_dir=""
 
-for i in "${!files[@]}"; do
-  src="${files[$i]}"
-  idx=$((i + 1))
-  dir="$(dirname "$src")"
+if [[ "$JOBS" -eq 1 ]]; then
+  for i in "${!files[@]}"; do
+    src="${files[$i]}"
+    idx=$((i + 1))
+    dir="$(dirname "$src")"
 
-  # Print directory header on change
-  if [[ "$dir" != "$current_dir" ]]; then
-    current_dir="$dir"
-    echo ""
-    log_step "Directory: ${dir#"$REPO_ROOT/"}"
-    echo ""
-  fi
+    # Print directory header on change
+    if [[ "$dir" != "$current_dir" ]]; then
+      current_dir="$dir"
+      echo ""
+      log_step "Directory: ${dir#"$REPO_ROOT/"}"
+      echo ""
+    fi
 
-  if render_one "$src" "$idx"; then
-    success=$((success + 1))
-  else
-    failed=$((failed + 1))
-  fi
-done
+    if render_one "$src" "$idx"; then
+      success=$((success + 1))
+    else
+      failed=$((failed + 1))
+    fi
+  done
+else
+  log_step "Rendering in parallel with $JOBS jobs..."
+  echo ""
+  result_dir="$(mktemp -d)"
+  active_jobs=0
+
+  for i in "${!files[@]}"; do
+    src="${files[$i]}"
+    idx=$((i + 1))
+    (
+      if render_one "$src" "$idx"; then
+        printf "ok\n" > "$result_dir/$idx.status"
+      else
+        printf "fail\n" > "$result_dir/$idx.status"
+      fi
+    ) &
+    active_jobs=$((active_jobs + 1))
+
+    if [[ "$active_jobs" -ge "$JOBS" ]]; then
+      wait -n || true
+      active_jobs=$((active_jobs - 1))
+    fi
+  done
+
+  while [[ "$active_jobs" -gt 0 ]]; do
+    wait -n || true
+    active_jobs=$((active_jobs - 1))
+  done
+
+  for i in "${!files[@]}"; do
+    idx=$((i + 1))
+    if [[ -f "$result_dir/$idx.status" ]] && [[ "$(cat "$result_dir/$idx.status")" == "ok" ]]; then
+      success=$((success + 1))
+    else
+      failed=$((failed + 1))
+    fi
+  done
+  rm -rf "$result_dir"
+fi
 
 # ── Generate index files per output directory ───────────────
 log_step "Generating index files..."

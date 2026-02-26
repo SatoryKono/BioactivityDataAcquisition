@@ -1,27 +1,28 @@
 %% View: Overview | Parent: 07-circuit-breaker-states-full.mermaid
+%% @uniform width=152 height=56 max_title_len=14 max_desc_lines=0
 flowchart TB
 
     subgraph Application["Application Layer"]
         direction TB
-        N1["*"]
-        N2["CLOSED"]
+        N1["*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["CLOSED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         N3["ProcessRequest"]
-        N4["SendProbe"]
-        N5["Waiting"]
-        N6["Operational"]
-        N8["Probing"]
-        N9["OPEN"]
-        N10["HALF_OPEN"]
-        N11["Success"]
-        N12["Failure"]
-        N13["ProbeSuccess"]
-        N14["ProbeFailure"]
-        N15["RecordSuccess"]
+        N4["SendProbe&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["Waiting&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["Operational&nbsp;&nbsp;&nbsp;"]
+        N8["Probing&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["OPEN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["HALF_OPEN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["Success&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["Failure&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N13["ProbeSuccess&nbsp;&nbsp;"]
+        N14["ProbeFailure&nbsp;&nbsp;"]
+        N15["RecordSuccess&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N7["Blocking"]
+        N7["Blocking&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N1 --> N2

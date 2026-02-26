@@ -1,45 +1,46 @@
 %% View: Domain-Focus | Parent: 01-high-level-full.mermaid
+%% @uniform width=140 height=56 max_title_len=10 max_desc_lines=0
 flowchart TB
 %% keep-orphan: N13, N14, N15, N16, N17, N18, N19, N20
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N5["Boot"]
-        N6["Trans"]
-        N8["Sources"]
+        N5["Boot&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["Trans&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["Sources&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N1["Runner"]
-        N2["Executor"]
+        N1["Runner&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["Executor&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N7["Adapters"]
-        N10["Bronze"]
-        N11["Silver"]
-        N12["Gold"]
-        N13["A1"]
-        N14["A2"]
-        N15["A3"]
-        N16["A4"]
-        N17["A5"]
-        N18["A6"]
-        N19["A7"]
-        N3["Storage"]
+        N7["Adapters&nbsp;&nbsp;"]
+        N10["Bronze&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["Silver&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["Gold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N13["A1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N14["A2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N15["A3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N16["A4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N17["A5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N18["A6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N19["A7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N3["Storage&nbsp;&nbsp;&nbsp;"]
         N20["Quarantine"]
     end
 
     subgraph Composition["Composition Layer"]
         direction TB
-        N4["Factory"]
+        N4["Factory&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Interfaces["Interfaces Layer"]
         direction TB
-        N9["CLI"]
+        N9["CLI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N8 --> N7

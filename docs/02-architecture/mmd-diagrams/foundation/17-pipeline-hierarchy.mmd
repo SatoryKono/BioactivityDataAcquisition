@@ -9,32 +9,31 @@
 %% @level   Mixed (System / Component / Class)
 
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% @uniform class width=216 height=240 max_title_len=22 max_desc_lines=13
 classDiagram
     direction TB
 
     class BasePipeline {
-        <<abstract>>
+        <<abstract>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         #_config: PipelineConfig
         #_runtime: RuntimeConfig
         #_services: PipelineServices
-
         +create(config, runtime, services)$ BasePipeline
         +config() PipelineConfig
         +runtime() RuntimeConfig
         +services() PipelineServices
-        +pipeline_name() str
-        +provider() str
-        +entity() str
-        +run_id() RunID
-        +run_type() RunType
+        +pipeline_name() str&nbsp;&nbsp;
+        +provider() str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +entity() str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +run_id() RunID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +run_type() RunType&nbsp;&nbsp;&nbsp;
     }
 
     class BaseTransformer {
-        <<abstract>>
+        <<abstract>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         #_config: PipelineConfig
         #_runtime: RuntimeConfig
-        #_logger: LoggerPort
-
+        #_logger: LoggerPort&nbsp;&nbsp;
         +transform(record: BronzeRecord) SilverRecord
         +transform_batch(records: list) list~SilverRecord~
         #_transform_impl(record)* SilverRecord
@@ -47,11 +46,19 @@ classDiagram
     }
 
     class BaseChemblTransformer {
-        <<abstract>>
+        <<abstract>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         +provider: str = "chembl"
         #_normalize_chembl_id(id: str) str
         #_normalize_units(value, units) tuple
         #_parse_chembl_date(date_str) date
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class ActivityTransformer {
@@ -59,6 +66,15 @@ classDiagram
         #_transform_impl(record) SilverRecord
         -_normalize_activity_value(record) float
         -_extract_target_info(record) dict
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class MoleculeTransformer {
@@ -66,12 +82,31 @@ classDiagram
         #_transform_impl(record) SilverRecord
         -_normalize_smiles(smiles) str
         -_extract_properties(record) dict
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class AssayTransformer {
         +entity: str = "assay"
         #_transform_impl(record) SilverRecord
         -_normalize_assay_type(type) str
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class TargetTransformer {
@@ -79,30 +114,79 @@ classDiagram
         #_transform_impl(record) SilverRecord
         -_extract_uniprot_accessions(record) list
         -_extract_gene_names(record) list
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class DocumentTransformer {
         +entity: str = "document"
         #_transform_impl(record) SilverRecord
         -_parse_authors(authors) list
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class BasePubchemTransformer {
-        <<abstract>>
+        <<abstract>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         +provider: str = "pubchem"
         #_normalize_cid(cid) str
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class CompoundTransformer {
         +entity: str = "compound"
         #_transform_impl(record) SilverRecord
         -_extract_properties(record) dict
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class BaseUniprotTransformer {
-        <<abstract>>
+        <<abstract>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         +provider: str = "uniprot"
         #_normalize_accession(acc) str
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class ProteinTransformer {
@@ -110,12 +194,31 @@ classDiagram
         #_transform_impl(record) SilverRecord
         -_extract_features(record) dict
         -_extract_go_terms(record) list
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class BasePubmedTransformer {
-        <<abstract>>
+        <<abstract>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         +provider: str = "pubmed"
         #_normalize_pmid(pmid) str
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class PublicationTransformer {
@@ -123,6 +226,15 @@ classDiagram
         #_transform_impl(record) SilverRecord
         -_parse_authors(authors) list
         -_extract_mesh_terms(record) list
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     %% Inheritance - Transformers

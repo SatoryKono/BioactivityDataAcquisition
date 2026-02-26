@@ -5,63 +5,64 @@
 %% @date    2026-02-24
 %% @type    classDiagram
 %% @level   Class / Interface
+%% @uniform class width=224 height=72 max_title_len=23 max_desc_lines=2
 
 classDiagram
     class BaseFieldExtractor {
-        <<ABC>>
+        <<ABC>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         +extract(record: dict) dict*
     }
 
     note for BaseFieldExtractor "Strategy pattern for\nextracting fields from\nraw API records"
 
     class AbstractExtractor {
-        PubMed abstract text
-        +extract(record) dict
+        PubMed abstract text&nbsp;&nbsp;&nbsp;
+        +extract(record) dict&nbsp;&nbsp;
     }
 
     class AuthorExtractor {
         Author name normalization
-        +extract(record) dict
+        +extract(record) dict&nbsp;&nbsp;
     }
 
     class DateExtractor {
         Publication date parsing
-        +extract(record) dict
+        +extract(record) dict&nbsp;&nbsp;
     }
 
     class ClassificationExtractor {
         Publication type classification
-        +extract(record) dict
+        +extract(record) dict&nbsp;&nbsp;
     }
 
     class IdentifierExtractor {
-        DOI, PMID, etc.
-        +extract(record) dict
+        DOI, PMID, etc.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +extract(record) dict&nbsp;&nbsp;
     }
 
     class TaxonomyExtractor {
         UniProt organism/taxonomy
-        +extract(record) dict
+        +extract(record) dict&nbsp;&nbsp;
     }
 
     class GeneExtractor {
         UniProt gene information
-        +extract(record) dict
+        +extract(record) dict&nbsp;&nbsp;
     }
 
     class FeatureExtractor {
         UniProt protein features
-        +extract(record) dict
+        +extract(record) dict&nbsp;&nbsp;
     }
 
     class CrossRefExtractor {
         UniProt cross-references
-        +extract(record) dict
+        +extract(record) dict&nbsp;&nbsp;
     }
 
     class CommentExtractor {
         UniProt protein comments
-        +extract(record) dict
+        +extract(record) dict&nbsp;&nbsp;
     }
 
     class MedlineDateParser {

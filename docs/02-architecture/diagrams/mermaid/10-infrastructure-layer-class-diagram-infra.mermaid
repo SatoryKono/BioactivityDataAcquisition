@@ -1,36 +1,37 @@
 %% View: Infrastructure-Mapping | Parent: 10-infrastructure-layer-class-diagram-full.mermaid
+%% @uniform width=208 height=56 max_title_len=21 max_desc_lines=0
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N3["StoragePort"]
-        N9["MetricsPort"]
-        N17["LockPort"]
-        N18["CheckpointPort"]
-        N19["QuarantinePort"]
-        N20["LoggerPort"]
+        N3["StoragePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["MetricsPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N17["LockPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N18["CheckpointPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N19["QuarantinePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N20["LoggerPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N2["ChemblAdapter"]
-        N4["PubchemAdapter"]
-        N5["UniprotAdapter"]
-        N6["PubmedAdapter"]
-        N7["SilverWriter"]
-        N8["GoldWriter"]
-        N10["BronzeWriter"]
-        N11["MemoryLock"]
-        N12["QuarantineWriter"]
+        N2["ChemblAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N4["PubchemAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["UniprotAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["PubmedAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["SilverWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["GoldWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["BronzeWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["MemoryLock&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["QuarantineWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         N13["FileCheckpointManager"]
-        N14["StructlogAdapter"]
-        N15["PrometheusMetrics"]
-        N16["NoOpMetrics"]
+        N14["StructlogAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N15["PrometheusMetrics&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N16["NoOpMetrics&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Interfaces["Interfaces Layer"]
         direction TB
-        N1["UnifiedHTTPClient"]
+        N1["UnifiedHTTPClient&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N10 --> N3

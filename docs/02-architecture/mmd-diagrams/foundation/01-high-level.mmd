@@ -9,42 +9,35 @@
 %% @level   Mixed (System / Component / Class)
 
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% @uniform width=200 height=56 max_title_len=20 max_desc_lines=1
 flowchart TD
     subgraph Sources["External Data Sources"]
-        A1[ChEMBL API]
-        A2[PubChem API]
-        A3[UniProt API]
-        A4[PubMed API]
-        A5[CrossRef API]
-        A6[OpenAlex API]
-        A7[Semantic Scholar API]
     end
 
     subgraph Interfaces["Interfaces Layer"]
-        CLI["CLI (Click)"]
+        CLI["CLI (Click)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Composition["Composition Layer"]
-        Boot[bootstrap_pipeline]
-        Factory[PipelineFactory]
+        Boot[bootstrap_pipeline&nbsp;&nbsp;<br/>&nbsp;]
+        Factory[PipelineFactory&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;]
     end
 
     subgraph Application["Application Layer"]
-        Runner[PipelineRunner]
-        Executor[PipelineExecutor]
-        Trans[BaseTransformer]
+        Runner[PipelineRunner&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;]
+        Executor[PipelineExecutor&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;]
+        Trans[BaseTransformer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        Adapters[HTTP Adapters<br/>7 providers]
-        Storage[Storage Writers]
+        Adapters[HTTP Adapters&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>7 providers]
+        Storage[Storage Writers&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;]
     end
 
     subgraph Lake["Data Lake — Local Storage"]
-        Bronze["Bronze Layer<br/>(JSONL + zstd)"]
-        Silver["Silver Layer<br/>(Delta Lake)"]
-        Gold["Gold Layer<br/>(Delta Lake)"]
-        Quarantine["Quarantine<br/>(failed records)"]
+        Bronze["Bronze Layer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(JSONL + zstd)"]
+        Silver["Silver Layer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Delta Lake)"]
+        Gold["Gold Layer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Delta Lake)"]
     end
 
     Sources --> Adapters

@@ -1,4 +1,5 @@
 %% View: Data-Flow | Parent: 33-cli-run-interaction-full.mermaid
+%% @uniform width=140 height=56 max_title_len=6 max_desc_lines=0
 flowchart TB
 
     subgraph Application["Application Layer"]
@@ -8,21 +9,21 @@ flowchart TB
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N2["PRS"]
-        N4["Boot"]
-        N5["PF"]
-        N6["LM"]
-        N7["BE"]
-        N8["Post"]
-        N10["SB"]
-        N11["RF"]
-        N12["Obs"]
+        N2["PRS&nbsp;&nbsp;&nbsp;"]
+        N4["Boot&nbsp;&nbsp;"]
+        N5["PF&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["LM&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["BE&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["Post&nbsp;&nbsp;"]
+        N10["SB&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["RF&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["Obs&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Interfaces["Interfaces Layer"]
         direction TB
-        N3["CLI"]
-        N9["User"]
+        N3["CLI&nbsp;&nbsp;&nbsp;"]
+        N9["User&nbsp;&nbsp;"]
     end
 
     N9 --> N3

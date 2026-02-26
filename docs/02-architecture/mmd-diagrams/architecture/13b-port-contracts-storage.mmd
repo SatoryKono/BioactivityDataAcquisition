@@ -8,21 +8,19 @@
 %% @view    storage
 %% @parent  13-port-protocol-contracts.mmd
 %% @nodes   9
+%% @uniform width=184 height=56 max_title_len=18 max_desc_lines=0
 
 graph LR
     subgraph Domain["Domain Layer"]
-        STP["StoragePort"]
-        DRP["DeltaReaderPort"]
+        STP["StoragePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        DRP["DeltaReaderPort&nbsp;&nbsp;&nbsp;"]
         MWP["MetadataWriterPort"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        BW["BronzeWriter"]
-        SW["SilverWriter"]
-        GW["GoldWriter"]
-        DR_I["DeltaReader"]
-        MW_I["MetadataWriter"]
-        NOMW["NoOpMetadataWriter"]
+        BW["BronzeWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        DR_I["DeltaReader&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        MW_I["MetadataWriter&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     STP --- BW & SW & GW
@@ -31,4 +29,3 @@ graph LR
 
     style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
     style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-

@@ -1,24 +1,25 @@
 %% View: Data-Flow | Parent: 14-provider-health-states-full.mermaid
+%% @uniform width=176 height=56 max_title_len=17 max_desc_lines=0
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N2["WatchingErrors"]
+        N2["WatchingErrors&nbsp;&nbsp;&nbsp;"]
         N7["ErrorAccumulating"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N1["*"]
+        N1["*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         N3["ProcessingRequest"]
-        N4["HEALTHY"]
-        N5["DEGRADED"]
-        N6["RequestSuccess"]
-        N8["RecoveryProgress"]
-        N9["UNHEALTHY"]
-        N10["WaitingForProbe"]
-        N11["SendProbe"]
-        N12["NormalOperation"]
+        N4["HEALTHY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["DEGRADED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["RequestSuccess&nbsp;&nbsp;&nbsp;"]
+        N8["RecoveryProgress&nbsp;"]
+        N9["UNHEALTHY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["WaitingForProbe&nbsp;&nbsp;"]
+        N11["SendProbe&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["NormalOperation&nbsp;&nbsp;"]
     end
 
     N1 --> N4

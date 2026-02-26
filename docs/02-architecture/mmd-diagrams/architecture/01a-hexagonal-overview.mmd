@@ -8,35 +8,36 @@
 %% @view    overview
 %% @parent  01-high-level-hexagonal.mmd
 %% @nodes   11
+%% @uniform width=232 height=56 max_title_len=24 max_desc_lines=0
 
 graph TB
     subgraph Interfaces["Interfaces Layer"]
-        CLI["CLI Commands (Click)"]
-        ORCH["Orchestration"]
+        CLI["CLI Commands (Click)&nbsp;&nbsp;&nbsp;&nbsp;"]
+        ORCH["Orchestration&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Composition["Composition Layer"]
-        BOOTSTRAP["Bootstrap / Assembly"]
+        BOOTSTRAP["Bootstrap / Assembly&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Application["Application Layer"]
-        CORE["Application Core"]
+        CORE["Application Core&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Domain["Domain Layer"]
-        PORTS["Port Protocols"]
+        PORTS["Port Protocols&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        ADAPTERS["Provider Adapters"]
+        ADAPTERS["Provider Adapters&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         STORAGE["Storage Writers / Reader"]
-        OBS_INFRA["Observability Infra"]
+        OBS_INFRA["Observability Infra&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
-    ExternalAPIs["External APIs"]
-    FS["File System"]
-    PROM["Prometheus"]
-    OTEL["OpenTelemetry"]
+    ExternalAPIs["External APIs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+    FS["File System&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+    PROM["Prometheus&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+    OTEL["OpenTelemetry&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
 
     ExternalAPIs -.-> ADAPTERS
     FS -.-> STORAGE

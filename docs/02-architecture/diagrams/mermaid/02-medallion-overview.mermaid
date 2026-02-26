@@ -1,28 +1,29 @@
 %% View: Overview | Parent: 02-medallion-full.mermaid
+%% @uniform width=140 height=56 max_title_len=9 max_desc_lines=0
 flowchart TB
 %% keep-orphan: N10, N11, N12, N13, N14, N15, N5, N6, N7, N8, N9
 
     subgraph Application["Application Layer"]
         direction TB
         N2["normalize"]
-        N4["flatten"]
-        N5["B1"]
-        N6["B2"]
-        N7["B3"]
-        N8["B4"]
-        N9["S1"]
-        N10["S2"]
-        N11["S3"]
-        N12["S4"]
-        N13["G1"]
-        N14["G2"]
-        N15["G3"]
+        N4["flatten&nbsp;&nbsp;"]
+        N5["B1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["B2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["B3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["B4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["S1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["S2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["S3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["S4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N13["G1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N14["G2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N15["G3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N1["Bronze"]
-        N3["Silver"]
+        N1["Bronze&nbsp;&nbsp;&nbsp;"]
+        N3["Silver&nbsp;&nbsp;&nbsp;"]
     end
 
     N1 --> N2

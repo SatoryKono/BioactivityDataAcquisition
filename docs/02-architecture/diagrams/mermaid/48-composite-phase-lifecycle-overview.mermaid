@@ -1,27 +1,28 @@
 %% View: Overview | Parent: 48-composite-phase-lifecycle-full.mermaid
+%% @uniform width=160 height=56 max_title_len=15 max_desc_lines=0
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N14["error"]
-        N5["idle"]
+        N14["error&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["idle&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N1["FAILED"]
-        N2["*"]
-        N3["NOT_STARTED"]
-        N4["COMPLETED"]
+        N1["FAILED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N3["NOT_STARTED&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N4["COMPLETED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         N6["extracting_seed"]
-        N7["keys_extracted"]
-        N8["running_deps"]
-        N9["deps_done"]
-        N10["fan_out"]
-        N11["enrichers_done"]
-        N12["merge_active"]
-        N13["success"]
-        N15["ENRICHING"]
+        N7["keys_extracted&nbsp;"]
+        N8["running_deps&nbsp;&nbsp;&nbsp;"]
+        N9["deps_done&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["fan_out&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["enrichers_done&nbsp;"]
+        N12["merge_active&nbsp;&nbsp;&nbsp;"]
+        N13["success&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N15["ENRICHING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N2 --> N3

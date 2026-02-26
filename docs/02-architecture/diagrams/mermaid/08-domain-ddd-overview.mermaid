@@ -1,26 +1,27 @@
 %% View: Overview | Parent: 08-domain-ddd-full.mermaid
+%% @uniform width=176 height=56 max_title_len=17 max_desc_lines=0
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N2["RunID"]
-        N7["BatchID"]
+        N2["RunID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["BatchID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N1["Batch"]
-        N3["BatchCreated"]
-        N4["BatchSealed"]
-        N5["BatchWritten"]
-        N8["PipelineRun"]
-        N9["B_SEALED"]
-        N10["B_WRITING"]
-        N11["R_PENDING"]
-        N12["R_RUNNING"]
-        N13["R_COMPLETED"]
-        N14["R_FAILED"]
-        N15["R_SHUTDOWN"]
+        N1["Batch&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N3["BatchCreated&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N4["BatchSealed&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["BatchWritten&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["PipelineRun&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["B_SEALED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["B_WRITING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["R_PENDING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["R_RUNNING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N13["R_COMPLETED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N14["R_FAILED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N15["R_SHUTDOWN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]

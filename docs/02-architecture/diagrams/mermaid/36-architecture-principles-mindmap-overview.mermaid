@@ -1,35 +1,36 @@
 %% View: Overview | Parent: 36-architecture-principles-mindmap-full.mermaid
+%% @uniform width=224 height=56 max_title_len=23 max_desc_lines=1
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N9["DDD Aggregates"]
-        N10["24 Domain Ports"]
+        N9["DDD Aggregates&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        N10["24 Domain Ports&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N1["BioETL<br/>Architecture"]
-        N2["Five-Layer Architecture"]
-        N4["Local Only Deployment"]
-        N5["Resilience Patterns"]
-        N6["Data Quality"]
-        N7["Hexagonal Architecture"]
-        N8["Medallion Architecture"]
-        N11["Domain"]
-        N13["Application"]
-        N14["Infrastructure"]
+        N1["BioETL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Architecture"]
+        N2["Five-Layer Architecture<br/>&nbsp;"]
+        N4["Local Only Deployment&nbsp;&nbsp;<br/>&nbsp;"]
+        N5["Resilience Patterns&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        N6["Data Quality&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        N7["Hexagonal Architecture&nbsp;<br/>&nbsp;"]
+        N8["Medallion Architecture&nbsp;<br/>&nbsp;"]
+        N11["Domain&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        N13["Application&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        N14["Infrastructure&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N15["Infrastructure Adapters"]
+        N15["Infrastructure Adapters<br/>&nbsp;"]
     end
 
     subgraph Composition["Composition Layer"]
         direction TB
-        N3["Composition Root"]
-        N12["Composition"]
+        N3["Composition Root&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        N12["Composition&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
     end
 
     N1 --> N7

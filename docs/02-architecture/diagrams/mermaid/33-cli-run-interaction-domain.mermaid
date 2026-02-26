@@ -1,36 +1,37 @@
 %% View: Domain-Focus | Parent: 33-cli-run-interaction-full.mermaid
+%% @uniform width=140 height=56 max_title_len=8 max_desc_lines=0
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N2["config"]
-        N3["health"]
-        N4["errors"]
-        N5["DQ"]
-        N6["PRS"]
-        N8["Boot"]
-        N9["PF"]
-        N10["LM"]
-        N11["BE"]
-        N12["Post"]
-        N14["SB"]
-        N15["RF"]
-        N16["Obs"]
+        N2["config&nbsp;&nbsp;"]
+        N3["health&nbsp;&nbsp;"]
+        N4["errors&nbsp;&nbsp;"]
+        N5["DQ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["PRS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["Boot&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["PF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["LM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["BE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["Post&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N14["SB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N15["RF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N16["Obs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         N17["owner_id"]
-        N18["HB"]
-        N19["resolve"]
-        N20["options"]
+        N18["HB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N19["resolve&nbsp;"]
+        N20["options&nbsp;"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N1["Runner"]
+        N1["Runner&nbsp;&nbsp;"]
     end
 
     subgraph Interfaces["Interfaces Layer"]
         direction TB
-        N7["CLI"]
-        N13["User"]
+        N7["CLI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N13["User&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N13 --> N7

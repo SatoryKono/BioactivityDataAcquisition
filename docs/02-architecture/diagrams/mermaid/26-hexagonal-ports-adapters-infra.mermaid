@@ -1,32 +1,33 @@
 %% View: Infrastructure-Mapping | Parent: 26-hexagonal-ports-adapters-full.mermaid
+%% @uniform width=140 height=56 max_title_len=3 max_desc_lines=0
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
         N1["DSP"]
-        N9["SP"]
+        N9["SP&nbsp;"]
         N13["DRP"]
-        N15["LP"]
+        N15["LP&nbsp;"]
         N17["CPP"]
-        N19["QP"]
+        N19["QP&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N2["CA"]
+        N2["CA&nbsp;"]
         N3["PCA"]
-        N4["UA"]
+        N4["UA&nbsp;"]
         N5["PMA"]
         N6["CRA"]
         N7["OAA"]
         N8["SSA"]
-        N10["BW"]
-        N11["SW"]
-        N12["GW"]
-        N14["DR"]
-        N16["ML"]
-        N18["LC"]
-        N20["UQ"]
+        N10["BW&nbsp;"]
+        N11["SW&nbsp;"]
+        N12["GW&nbsp;"]
+        N14["DR&nbsp;"]
+        N16["ML&nbsp;"]
+        N18["LC&nbsp;"]
+        N20["UQ&nbsp;"]
     end
 
     N1 --> N2

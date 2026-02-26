@@ -1,34 +1,35 @@
 %% View: Overview | Parent: 01-full-system-component-full.mermaid
+%% @uniform width=176 height=56 max_title_len=17 max_desc_lines=0
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N8["DataSourcePort"]
-        N9["StoragePort"]
-        N10["LockPort"]
+        N8["DataSourcePort&nbsp;&nbsp;&nbsp;"]
+        N9["StoragePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["LockPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N2["PipelineRunner"]
-        N3["PipelineExecutor"]
-        N4["Orchestration"]
-        N6["PreflightService"]
-        N7["PostrunService"]
-        N11["Factories"]
-        N12["RecordProcessor"]
-        N13["BatchTransformer"]
+        N2["PipelineRunner&nbsp;&nbsp;&nbsp;"]
+        N3["PipelineExecutor&nbsp;"]
+        N4["Orchestration&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["PreflightService&nbsp;"]
+        N7["PostrunService&nbsp;&nbsp;&nbsp;"]
+        N11["Factories&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["RecordProcessor&nbsp;&nbsp;"]
+        N13["BatchTransformer&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N5["LockManager"]
-        N14["ChemblAdapter"]
+        N5["LockManager&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N14["ChemblAdapter&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Composition["Composition Layer"]
         direction TB
-        N1["Bootstrap"]
+        N1["Bootstrap&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Interfaces["Interfaces Layer"]

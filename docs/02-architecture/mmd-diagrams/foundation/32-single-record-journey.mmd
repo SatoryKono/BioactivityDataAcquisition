@@ -9,50 +9,49 @@
 %% @level   Mixed (System / Component / Class)
 
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% @uniform width=304 height=108 max_title_len=33 max_desc_lines=4
 flowchart TB
     subgraph Source["1. External API"]
-        API["REST API Response\n(e.g., ChEMBL /activity)"]
+        API["REST API Response&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(e.g., ChEMBL /activity)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Bronze["2. Bronze Layer"]
-        BW["BronzeWriter.write_bronze()\n• JSONL serialization\n• zstd compression\n• atomic rename\n• _manifest.json"]
-        BF[("Bronze File\nbronze/chembl/activity/\n2026-02-17/batch_001.jsonl.zst")]
+        BW["BronzeWriter.write_bronze()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• JSONL serialization<br/>• zstd compression<br/>• atomic rename<br/>• _manifest.json"]
+        BF[("Bronze File&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>bronze/chembl/activity/<br/>2026-02-17/batch_001.jsonl.zst"<br/>&nbsp;<br/>&nbsp;)]
     end
 
     subgraph Transform["3. Transform (RecordProcessor)"]
-        BT["BatchTransformer.transform()"]
-        TI["BaseTransformer._transform_impl()\n(e.g., ActivityTransformer)"]
-        NORM["Data Normalization\n• NaN → null\n• strip strings\n• dates → ISO\n• floats → round(10)"]
-        META["Add Metadata\n• _run_id (UUID)\n• _run_type (incremental/backfill)\n• _source_batch_id (FK)\n• _ingestion_ts (UTC now)"]
-        HASH["Compute _content_hash\n• exclude META_FIELDS\n• canonical JSON (sort_keys)\n• sha256 digest"]
+        BT["BatchTransformer.transform()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        TI["BaseTransformer._transform_impl()<br/>(e.g., ActivityTransformer)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        NORM["Data Normalization&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• NaN → null<br/>• strip strings<br/>• dates → ISO<br/>• floats → round(10)"]
+        META["Add Metadata&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• _run_id (UUID)<br/>• _run_type (incremental/backfill)<br/>• _source_batch_id (FK)<br/>• _ingestion_ts (UTC now)"]
+        HASH["Compute _content_hash&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• exclude META_FIELDS<br/>• canonical JSON (sort_keys)<br/>• sha256 digest<br/>&nbsp;"]
     end
 
     subgraph Validate["4. Validate"]
-        PSV["PanderaSilverValidator.validate()\nActivitySchema (soft mode)"]
-        DQ{{"DQ Error Rate?"}}
+        PSV["PanderaSilverValidator.validate()<br/>ActivitySchema (soft mode)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        DQ{{"DQ Error Rate?&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"}}
     end
 
     subgraph Route["5. Route Decision"]
-        CLEAN["✅ Clean Record\n_dq_warn = false"]
-        WARN["⚠️ Warning Record\n_dq_warn = true\n(error rate < 5%)"]
-        QUAR["❌ Quarantine Record\nQuarantineManager.route()\nQuarantineEntry created"]
-        FAIL["💥 Batch FAIL\n(error rate > 20%)"]
+        CLEAN["✅ Clean Record&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>_dq_warn = false<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        WARN["⚠️ Warning Record&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>_dq_warn = true<br/>(error rate < 5%)<br/>&nbsp;<br/>&nbsp;"]
+        QUAR["❌ Quarantine Record&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>QuarantineManager.route()<br/>QuarantineEntry created<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Silver["6. Silver Layer"]
-        SW["SilverWriter.write_silver()\n• merge/upsert by PK\n• content_hash dedup\n• Delta Lake transaction"]
-        ST[("Silver Table\nsilver/chembl/activity/\n_delta_log/")]
+        SW["SilverWriter.write_silver()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• merge/upsert by PK<br/>• content_hash dedup<br/>• Delta Lake transaction<br/>&nbsp;"]
+        ST[("Silver Table&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>silver/chembl/activity/<br/>_delta_log/"<br/>&nbsp;<br/>&nbsp;)]
     end
 
     subgraph GoldLayer["7. Gold Layer"]
-        TFG["transform_for_gold()\n• exclude JSON fields\n  (molecule_properties,\n   molecule_structures, etc.)"]
-        GV["PanderaGoldValidator.validate()\nChEMBLActivityGoldSchema\n(strict mode)"]
-        GW["GoldWriter.write_gold()"]
-        GT[("Gold Table\ngold/chembl/activity/\n_delta_log/")]
+        TFG["transform_for_gold()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• exclude JSON fields<br/>(molecule_properties,<br/>molecule_structures, etc.)<br/>&nbsp;"]
+        GV["PanderaGoldValidator.validate()&nbsp;&nbsp;<br/>ChEMBLActivityGoldSchema<br/>(strict mode)<br/>&nbsp;<br/>&nbsp;"]
+        GW["GoldWriter.write_gold()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph QuarDB["Quarantine Storage"]
-        QT[("Quarantine Table\nquarantine/chembl/activity/")]
+        QT[("Quarantine Table&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>quarantine/chembl/activity/"<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;)]
     end
 
     %% Flow

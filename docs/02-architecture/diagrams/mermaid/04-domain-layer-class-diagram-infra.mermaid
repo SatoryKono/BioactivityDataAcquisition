@@ -1,33 +1,34 @@
 %% View: Infrastructure-Mapping | Parent: 04-domain-layer-class-diagram-full.mermaid
+%% @uniform width=208 height=56 max_title_len=21 max_desc_lines=0
 flowchart TB
 %% keep-orphan: N1, N2, N20, N3, N4, N5, N6, N7
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N1["StoragePort"]
-        N2["LockPort"]
-        N3["CheckpointPort"]
-        N4["QuarantinePort"]
-        N5["MetricsPort"]
-        N6["TracingPort"]
-        N7["LoggerPort"]
-        N8["BaseEntity"]
+        N1["StoragePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["LockPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N3["CheckpointPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N4["QuarantinePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["MetricsPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["TracingPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["LoggerPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["BaseEntity&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         N9["PublicationEntityBase"]
-        N15["TableConfig"]
-        N16["PipelineConfig"]
-        N17["DQConfig"]
-        N20["DataSourcePort"]
+        N15["TableConfig&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N16["PipelineConfig&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N17["DQConfig&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N20["DataSourcePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N10["Activity"]
-        N11["Molecule"]
-        N12["Assay"]
-        N13["Target"]
-        N14["ChemblPublication"]
-        N18["SilverWriteMode"]
-        N19["GoldWriteMode"]
+        N10["Activity&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["Molecule&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["Assay&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N13["Target&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N14["ChemblPublication&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N18["SilverWriteMode&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N19["GoldWriteMode&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N8 --> N10
