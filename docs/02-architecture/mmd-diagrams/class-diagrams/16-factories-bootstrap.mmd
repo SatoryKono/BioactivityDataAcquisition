@@ -8,6 +8,7 @@
 %% @uniform class width=192 height=126 max_title_len=19 max_desc_lines=5
 
 classDiagram
+    direction TB
     class DataSourceRegistry {
         -_registry: dict~str, Callable~
         +register(provider, entity_type, factory) None

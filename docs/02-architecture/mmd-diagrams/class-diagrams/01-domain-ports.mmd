@@ -8,6 +8,7 @@
 %% @uniform class width=232 height=216 max_title_len=24 max_desc_lines=10
 
 classDiagram
+    direction TB
     class DataSourcePort {
         <<Protocol>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         +fetch(entity_type, limit, query, filter_ids, filter_field) AsyncIterator~dict~

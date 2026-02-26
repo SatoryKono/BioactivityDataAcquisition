@@ -160,9 +160,18 @@ View-файлы с ≥3 типами связей и >5 соединениями
 | SIZE-002 | Node count > 20 → WARN |
 | META-001 | Отсутствие `@version`/`@date`/`@type`/`@level` в `.mmd` → WARN |
 | META-002 | Отсутствие `%% View:` в `.mermaid` view-файле → WARN |
-| COLOUR-001 | Использование неканонической палитры → ERROR |
+| COLOUR-001 | Использование deprecated pre-ADR-040 палитры в `style`/`classDef` → ERROR |
 | COLOUR-002 | Emoji в subgraph labels → ERROR |
 | GRAPH-001 | Orphan nodes (defined but not in any edge) в `flowchart`/`sequenceDiagram` → WARN |
+
+Примечание по реализации `SIZE-*`:
+- `*-full.mermaid` reference views исключены из `SIZE-001`/`SIZE-002`.
+- `00-legend*` исключены из `SIZE-001`/`SIZE-002`.
+
+Примечание по size-normalization (`scripts/uniform_diagram_sizes.py`):
+- `@uniform-group` задаёт групповую нормализацию высоты.
+- `@uniform-width global` (по умолчанию) использует общую ширину для всех групп.
+- `@uniform-width group` разрешает width per group для снижения `&nbsp;`-padding в перегруженных class-diagram family.
 
 Pre-commit hooks: `lint-diagrams`, `prune-orphan-diagram-nodes`.
 
@@ -200,7 +209,7 @@ ELK (Eclipse Layout Kernel) SHOULD использоваться для `flowchar
 **Синтаксис (вставлять перед объявлением `graph`/`flowchart`):**
 
 ```
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE'}}}%%
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
 ```
 
 **Direction selection:**

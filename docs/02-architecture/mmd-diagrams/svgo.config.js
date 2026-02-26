@@ -10,6 +10,9 @@ module.exports = {
           // inlining styles breaks label rendering in PNG conversion.
           removeHiddenElems: false,
           inlineStyles: false,
+          // Prevent merging/stripping of !important overrides for edge
+          // label opacity and background (custom.css vs Mermaid defaults).
+          minifyStyles: false,
         },
       },
     },
