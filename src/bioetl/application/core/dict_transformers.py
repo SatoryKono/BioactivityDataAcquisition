@@ -70,6 +70,8 @@ def flatten_nested_dict(
         {'hierarchy_child_chembl_id': 'CHEMBL25'}
 
     """
+    # Optimized for speed: Single-pass iteration merging prefixing and renaming.
+    # Uses explicit type annotation for mypy strict mode.
     result: dict[str, Any] = {}
 
     if not data or not isinstance(data, dict):
