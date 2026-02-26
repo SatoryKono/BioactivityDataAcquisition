@@ -1,8 +1,7 @@
-// Mermaid theme sync: match diagram theme to light/dark mode toggle.
-// The Material theme exposes a `__md_get` helper for palette state.
+// Mermaid adaptive init: responsive diagrams + theme sync.
+// Material theme exposes `__md_get` for palette state.
 document.addEventListener("DOMContentLoaded", function () {
-  var defined = typeof mermaid !== "undefined";
-  if (!defined) return;
+  if (typeof mermaid === "undefined") return;
 
   var palette = __md_get("__palette");
   var dark = palette && palette.color && palette.color.scheme === "slate";
@@ -10,5 +9,30 @@ document.addEventListener("DOMContentLoaded", function () {
   mermaid.initialize({
     startOnLoad: true,
     theme: dark ? "dark" : "default",
+    // Adaptive: SVG scales to container width
+    flowchart: { useMaxWidth: true, defaultRenderer: "elk" },
+    sequence: { useMaxWidth: true },
+    class: { useMaxWidth: true, defaultRenderer: "elk" },
+    state: { useMaxWidth: true, defaultRenderer: "elk" },
+    er: { useMaxWidth: true },
+    pie: { useMaxWidth: true },
+    mindmap: { useMaxWidth: true },
+    gantt: { useMaxWidth: true },
+    elk: {
+      mergeEdges: true,
+      nodePlacementStrategy: "NETWORK_SIMPLEX",
+      cycleBreakingStrategy: "GREEDY",
+    },
   });
+});
+
+// Re-init on palette toggle (light / dark)
+document.addEventListener("change", function (ev) {
+  if (
+    ev.target &&
+    ev.target.closest &&
+    ev.target.closest("[data-md-color-scheme]")
+  ) {
+    location.reload();
+  }
 });

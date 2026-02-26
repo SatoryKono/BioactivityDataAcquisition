@@ -1,0 +1,43 @@
+/*
+ * BioETL — Responsive Mermaid diagrams in MkDocs Material.
+ *
+ * Makes diagrams scale to their container, adds horizontal scroll
+ * for very wide diagrams on small screens, and allows pinch-zoom.
+ */
+
+/* Container wrapping every mermaid diagram */
+.mermaid {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  text-align: center;
+}
+
+/* The SVG itself scales to container */
+.mermaid svg {
+  max-width: 100%;
+  height: auto !important;
+}
+
+/* On narrow screens, allow horizontal scroll and pinch-zoom */
+@media (max-width: 960px) {
+  .mermaid {
+    overflow-x: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mermaid svg {
+    /* Let wide diagrams exceed container, scrollable */
+    max-width: none;
+    min-width: 600px;
+  }
+}
+
+/* Print: fit diagram to page width */
+@media print {
+  .mermaid svg {
+    max-width: 100% !important;
+    page-break-inside: avoid;
+  }
+}

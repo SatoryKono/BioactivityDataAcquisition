@@ -1,10 +1,28 @@
 # BioETL Diagrams — SVG Index
 
-_Generated: 2026-02-25T21:09:30+03:00_
+_Generated: 2026-02-26T11:26:30+03:00_
 
 ## High Level Hexagonal
 
 ![01-high-level-hexagonal](./01-high-level-hexagonal.svg)
+
+---
+
+## 01ahexagonal Overview
+
+![01a-hexagonal-overview](./01a-hexagonal-overview.svg)
+
+---
+
+## 01bhexagonal Domain App
+
+![01b-hexagonal-domain-app](./01b-hexagonal-domain-app.svg)
+
+---
+
+## 01chexagonal Infra Comp
+
+![01c-hexagonal-infra-comp](./01c-hexagonal-infra-comp.svg)
 
 ---
 
@@ -29,6 +47,18 @@ _Generated: 2026-02-25T21:09:30+03:00_
 ## Provider Adapter Hierarchy
 
 ![05-provider-adapter-hierarchy](./05-provider-adapter-hierarchy.svg)
+
+---
+
+## 05aadapter Hierarchy Base
+
+![05a-adapter-hierarchy-base](./05a-adapter-hierarchy-base.svg)
+
+---
+
+## 05badapter Hierarchy Providers
+
+![05b-adapter-hierarchy-providers](./05b-adapter-hierarchy-providers.svg)
 
 ---
 
@@ -74,9 +104,45 @@ _Generated: 2026-02-25T21:09:30+03:00_
 
 ---
 
+## 12abootstrap Factories
+
+![12a-bootstrap-factories](./12a-bootstrap-factories.svg)
+
+---
+
+## 12bbootstrap Wiring
+
+![12b-bootstrap-wiring](./12b-bootstrap-wiring.svg)
+
+---
+
 ## Port Protocol Contracts
 
 ![13-port-protocol-contracts](./13-port-protocol-contracts.svg)
+
+---
+
+## 13aport Contracts Data Sources
+
+![13a-port-contracts-data-sources](./13a-port-contracts-data-sources.svg)
+
+---
+
+## 13bport Contracts Storage
+
+![13b-port-contracts-storage](./13b-port-contracts-storage.svg)
+
+---
+
+## 13cport Contracts Observability
+
+![13c-port-contracts-observability](./13c-port-contracts-observability.svg)
+
+---
+
+## 13dport Contracts Services
+
+![13d-port-contracts-services](./13d-port-contracts-services.svg)
 
 ---
 
