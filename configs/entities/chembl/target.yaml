@@ -13,57 +13,58 @@ pipeline:
             partition_by:
                 - target_type
 schema:
-    content_hash:
-        include: [ ]
-        exclude: [ ]
-    column_groups:
-        -   name: system
-            fields:
-                - entity_id
-                - content_hash
-                - _run_id
-                - _run_type
-                - _source_batch_id
-                - _ingestion_ts
-                - _index
-        -   name: business
-            fields:
-                - target_id
-                - target_type
-                - pref_name
-                - taxonomy_id
-                - organism
-                - species_group_flag
-                - description
-                - downgraded
-                - target_components
-                - cross_references
-                - pipeline_stages
-                - target_component_synonyms
-                - component_accessions
-                - component_descriptions
-                - primary_component_id
-                - component_ids
-                - component_types
-                - component_relationships
-        -   name: dq
-            pattern: ^_dq_
-    silver:
-        include_groups:
-            - system
-            - business
-            - dq
-        exclude_fields: [ ]
-        alias_policy: preserve
-    gold:
-        include_groups:
-            - system
-            - business
-        exclude_fields:
-            - _dq_*
-            - _source_batch_id
-            - _index
-        alias_policy: canonical
+  content_hash:
+    include: []
+    exclude: []
+  column_groups:
+  - name: system
+    fields:
+    - entity_id
+    - content_hash
+    - _run_id
+    - _run_type
+    - _source_batch_id
+    - _ingestion_ts
+    - _index
+  - name: business
+    fields:
+    - target_id
+    - target_type
+    - pref_name
+    - taxonomy_id
+    - organism
+    - organism_class
+    - species_group_flag
+    - description
+    - downgraded
+    - target_components
+    - cross_references
+    - pipeline_stages
+    - target_component_synonyms
+    - component_accessions
+    - component_descriptions
+    - primary_component_id
+    - component_ids
+    - component_types
+    - component_relationships
+  - name: dq
+    pattern: ^_dq_
+  silver:
+    include_groups:
+    - system
+    - business
+    - dq
+    exclude_fields: []
+    alias_policy: preserve
+  gold:
+    include_groups:
+    - system
+    - business
+    exclude_fields:
+    - _dq_*
+    - _source_batch_id
+    - _index
+    alias_policy: canonical
 quality:
     version: 1.1.0
     provider: chembl

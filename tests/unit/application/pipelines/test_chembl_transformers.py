@@ -651,6 +651,82 @@ class TestTargetTransformer:
         assert result["downgraded"] is False  # Default value
         assert result["pipeline_stages"] is None
 
+    @pytest.mark.asyncio
+    async def test_transform_organism_class_multicellular(
+        self, transformer, mock_context
+    ):
+        """Test organism_class is set to multicellular for Homo sapiens."""
+        record = {
+            "target_id": "CHEMBL1862",
+            "organism": "Homo sapiens",
+            "tax_id": 9606,
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["organism_class"] == "multicellular"
+
+    @pytest.mark.asyncio
+    async def test_transform_organism_class_unicellular(
+        self, transformer, mock_context
+    ):
+        """Test organism_class is set to unicellular for E. coli."""
+        record = {
+            "target_id": "CHEMBL2000",
+            "organism": "Escherichia coli",
+            "tax_id": 562,
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["organism_class"] == "unicellular"
+
+    @pytest.mark.asyncio
+    async def test_transform_organism_class_acellular(self, transformer, mock_context):
+        """Test organism_class is set to acellular for HIV-1."""
+        record = {
+            "target_id": "CHEMBL3000",
+            "organism": "Human immunodeficiency virus 1",
+            "tax_id": 11676,
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["organism_class"] == "acellular"
+
+    @pytest.mark.asyncio
+    async def test_transform_organism_class_none_when_unresolved(
+        self, transformer, mock_context
+    ):
+        """Test organism_class is None when organism cannot be classified."""
+        record = {
+            "target_id": "CHEMBL4000",
+            # No organism or tax_id
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["organism_class"] is None
+
+    @pytest.mark.asyncio
+    async def test_transform_organism_class_from_name_only(
+        self, transformer, mock_context
+    ):
+        """Test organism_class can be resolved from organism name without tax_id."""
+        record = {
+            "target_id": "CHEMBL5000",
+            "organism": "Mus musculus",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["organism_class"] == "multicellular"
+
 
 @pytest.mark.unit
 class TestTargetComponentTransformer:
