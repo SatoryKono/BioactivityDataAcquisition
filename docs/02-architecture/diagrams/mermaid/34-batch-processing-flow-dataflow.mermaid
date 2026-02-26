@@ -1,28 +1,29 @@
 %% View: Data-Flow | Parent: 34-batch-processing-flow-full.mermaid
+%% @uniform width=140 height=56 max_title_len=9 max_desc_lines=0
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N12["errors"]
+        N12["errors&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N8["Runner"]
+        N8["Runner&nbsp;&nbsp;&nbsp;"]
         N4["batch_num"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N1["Bronze"]
-        N2["Silver"]
-        N3["Gold"]
-        N5["BW"]
-        N6["BE"]
-        N7["BT"]
-        N9["BTM"]
-        N10["DS"]
-        N11["Trans"]
+        N1["Bronze&nbsp;&nbsp;&nbsp;"]
+        N2["Silver&nbsp;&nbsp;&nbsp;"]
+        N3["Gold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["BW&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["BE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["BT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["BTM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["DS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["Trans&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N8 --> N6

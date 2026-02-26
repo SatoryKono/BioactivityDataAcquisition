@@ -1,33 +1,34 @@
 %% View: Domain-Focus | Parent: 07-circuit-breaker-states-full.mermaid
+%% @uniform width=152 height=56 max_title_len=14 max_desc_lines=0
 flowchart TB
 %% keep-orphan: N18, N19, N20
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N1["RecordSuccess"]
-        N2["RecordFailure"]
-        N3["Success"]
+        N1["RecordSuccess&nbsp;"]
+        N2["RecordFailure&nbsp;"]
+        N3["Success&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         N4["ProcessRequest"]
-        N5["*"]
-        N6["CLOSED"]
-        N7["OPEN"]
-        N8["HALF_OPEN"]
-        N9["SendProbe"]
-        N10["Failure"]
-        N11["Waiting"]
-        N12["Operational"]
-        N14["Expired"]
-        N15["Probing"]
-        N16["ProbeSuccess"]
-        N17["ProbeFailure"]
-        N18["CH"]
-        N19["OT"]
-        N20["HP"]
+        N5["*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["CLOSED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["OPEN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["HALF_OPEN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["SendProbe&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["Failure&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["Waiting&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["Operational&nbsp;&nbsp;&nbsp;"]
+        N14["Expired&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N15["Probing&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N16["ProbeSuccess&nbsp;&nbsp;"]
+        N17["ProbeFailure&nbsp;&nbsp;"]
+        N18["CH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N19["OT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N20["HP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N13["Blocking"]
+        N13["Blocking&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N5 --> N6

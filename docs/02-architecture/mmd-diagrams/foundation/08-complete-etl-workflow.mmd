@@ -9,10 +9,10 @@
 %% @level   Mixed (System / Component / Class)
 
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% @uniform width=352 height=56 max_title_len=39 max_desc_lines=1
 flowchart TD
 %% keep-orphan: M1, M2, M3, M4, N1, N2, N3, N4, P1, P2
     subgraph Prepare["Phase 1: Prepare"]
-        A1[Load YAML Config] --> A2[Validate Parameters]
         A2 --> A3{Resume Mode?}
         A3 -->|Yes| A4[Load Checkpoint]
         A3 -->|No| A5[Fresh Start]
@@ -41,23 +41,22 @@ flowchart TD
     end
 
     subgraph Transform["Phase 3: Transform"]
-        C1[Load Bronze Records] --> C2[Normalize Values]
         C2 --> C3[Add Metadata]
         C3 --> C4[Compute content_hash]
         C4 --> C5[Create Entity Objects]
 
         subgraph Normalize["Normalization Rules"]
-            N1["NaN/Inf → null"]
-            N2["Floats → round(10)"]
-            N3["Dates → ISO YYYY-MM-DD"]
-            N4["Strings → strip()"]
+            N1["NaN/Inf → null&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            N2["Floats → round(10)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            N3["Dates → ISO YYYY-MM-DD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            N4["Strings → strip()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
         end
 
         subgraph Metadata["Metadata Fields"]
-            M1["_run_id: UUID"]
-            M2["_run_type: INCREMENTAL|BACKFILL|REBUILD"]
-            M3["_ingestion_ts: datetime"]
-            M4["_source_batch_id: UUID"]
+            M1["_run_id: UUID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            M2["_run_type: INCREMENTAL|BACKFILL|REBUILD<br/>&nbsp;"]
+            M3["_ingestion_ts: datetime&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            M4["_source_batch_id: UUID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
         end
     end
 
@@ -97,8 +96,8 @@ flowchart TD
 
     subgraph Parallel["Parallel Processes"]
         direction LR
-        P1["⏱️ Heartbeat Thread\nEvery 30s: refresh TTL"]
-        P2["📊 Metrics Export\nPrometheus/CloudWatch"]
+        P1["⏱️ Heartbeat Thread&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Every 30s: refresh TTL"]
+        P2["📊 Metrics Export&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Prometheus/CloudWatch"]
     end
 
     %% Flow connections

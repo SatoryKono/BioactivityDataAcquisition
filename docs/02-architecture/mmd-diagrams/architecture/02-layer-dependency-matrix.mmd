@@ -6,22 +6,23 @@
 %% @type    flowchart
 %% @level   System / Component
 %% @nodes   5
+%% @uniform width=152 height=72 max_title_len=14 max_desc_lines=2
 
 graph LR
 %% keep-orphan: FORBIDDEN, OK
     subgraph Legend
         direction TB
-        OK["✅ Allowed"]
-        FORBIDDEN["❌ Forbidden"]
+        OK["✅ Allowed&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        FORBIDDEN["❌ Forbidden&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Layers["Architectural Layers"]
         direction TB
-        DOMAIN["domain<br/>(pure business logic,<br/>no I/O, no frameworks)"]
-        APP["application<br/>(use cases, orchestration,<br/>transformers)"]
+        DOMAIN["domain&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(pure business logic,<br/>no I/O, no frameworks)"]
+        APP["application&nbsp;&nbsp;&nbsp;<br/>(use cases, orchestration,<br/>transformers)"]
         INFRA["infrastructure<br/>(adapters, storage,<br/>observability)"]
-        COMP["composition<br/>(DI wiring, factories,<br/>bootstrap)"]
-        IFACE["interfaces<br/>(CLI, HTTP,<br/>orchestration)"]
+        COMP["composition&nbsp;&nbsp;&nbsp;<br/>(DI wiring, factories,<br/>bootstrap)"]
+        IFACE["interfaces&nbsp;&nbsp;&nbsp;&nbsp;<br/>(CLI, HTTP,<br/>orchestration)"]
     end
 
     %% Allowed dependencies (solid arrows)

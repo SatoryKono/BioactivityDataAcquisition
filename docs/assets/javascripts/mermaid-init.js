@@ -10,19 +10,14 @@ document.addEventListener("DOMContentLoaded", function () {
     startOnLoad: true,
     theme: dark ? "dark" : "default",
     // Adaptive: SVG scales to container width
-    flowchart: { useMaxWidth: true, defaultRenderer: "elk" },
+    flowchart: { useMaxWidth: true },
     sequence: { useMaxWidth: true },
-    class: { useMaxWidth: true, defaultRenderer: "elk" },
-    state: { useMaxWidth: true, defaultRenderer: "elk" },
+    class: { useMaxWidth: true },
+    state: { useMaxWidth: true },
     er: { useMaxWidth: true },
     pie: { useMaxWidth: true },
     mindmap: { useMaxWidth: true },
     gantt: { useMaxWidth: true },
-    elk: {
-      mergeEdges: true,
-      nodePlacementStrategy: "NETWORK_SIMPLEX",
-      cycleBreakingStrategy: "GREEDY",
-    },
   });
 });
 

@@ -8,26 +8,20 @@
 %% @view    data-sources
 %% @parent  13-port-protocol-contracts.mmd
 %% @nodes   9
+%% @uniform width=232 height=56 max_title_len=24 max_desc_lines=0
 
 graph LR
 %% keep-orphan: FDSP
     subgraph Domain["Domain Layer"]
-        DSP["DataSourcePort"]
+        DSP["DataSourcePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         FDSP["FilterableDataSourcePort"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        CA["ChemblAdapter"]
-        PA["PubMedAdapter"]
-        UA["UniProtAdapter"]
-        CRA["CrossRefAdapter"]
-        OAA["OpenAlexAdapter"]
-        SSA["SemanticScholarAdapter"]
-        PCA["PubChemAdapter"]
+        CA["ChemblAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     DSP --- CA & PA & UA & CRA & OAA & SSA & PCA
 
     style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
     style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-

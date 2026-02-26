@@ -11,26 +11,27 @@
 %% @level   Mixed (System / Component / Class)
 
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% @uniform sequence width=200 max_title_len=20
 sequenceDiagram
     autonumber
 
     box Application Layer
-    participant Runner as PipelineRunner
-    participant BE as BatchExecutor<br/>(786 LOC)
-    participant BT as BatchTransformer
-    participant Trans as BaseTransformer<br/>(e.g., ActivityTransformer)
-    participant BTM as BatchTracingManager
+    participant Runner as PipelineRunner&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    participant BE as BatchExecutor&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(786 LOC)
+    participant BT as BatchTransformer&nbsp;&nbsp;&nbsp;&nbsp;
+    participant Trans as BaseTransformer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(e.g., ActivityTransformer)
+    participant BTM as BatchTracingManager&nbsp;
     end
 
     box Infrastructure Layer
-    participant DS as DataSourcePort<br/>(e.g., ChemblAdapter)
-    participant BW as BatchWriter
-    participant Bronze as BronzeWriter
-    participant Silver as SilverWriter
-    participant Gold as GoldWriter
-    participant QM as QuarantineManager
+    participant DS as DataSourcePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(e.g., ChemblAdapter)
+    participant BW as BatchWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    participant Bronze as BronzeWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    participant Silver as SilverWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    participant Gold as GoldWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    participant QM as QuarantineManager&nbsp;&nbsp;&nbsp;
     participant BMR as BatchMetricsRecorder
-    participant CM as CheckpointManager
+    participant CM as CheckpointManager&nbsp;&nbsp;&nbsp;
     end
 
     Runner->>BE: execute_batch(batch_num)

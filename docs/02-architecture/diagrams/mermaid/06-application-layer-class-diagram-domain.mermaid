@@ -1,32 +1,33 @@
 %% View: Domain-Focus | Parent: 06-application-layer-class-diagram-full.mermaid
+%% @uniform width=208 height=56 max_title_len=21 max_desc_lines=0
 flowchart TB
 
     subgraph Application["Application Layer"]
         direction TB
-        N1["RunnerServices"]
+        N1["RunnerServices&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         N2["BaseChemblTransformer"]
-        N3["RecordProcessor"]
-        N4["BasePipeline"]
-        N5["PipelineRunner"]
-        N6["PipelineExecutor"]
-        N7["BatchTransformer"]
-        N8["BaseTransformer"]
-        N9["PipelineServices"]
-        N10["PreflightService"]
-        N11["PostrunService"]
-        N12["PipelineObserver"]
-        N14["ActivityTransformer"]
-        N15["MoleculeTransformer"]
-        N16["AssayTransformer"]
-        N17["TargetTransformer"]
+        N3["RecordProcessor&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N4["BasePipeline&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["PipelineRunner&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["PipelineExecutor&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["BatchTransformer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["BaseTransformer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["PipelineServices&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["PreflightService&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["PostrunService&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["PipelineObserver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N14["ActivityTransformer&nbsp;&nbsp;"]
+        N15["MoleculeTransformer&nbsp;&nbsp;"]
+        N16["AssayTransformer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N17["TargetTransformer&nbsp;&nbsp;&nbsp;&nbsp;"]
         N20["LifecycleOrchestrator"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N13["BatchMetricsRecorder"]
-        N18["QuarantineManager"]
-        N19["LockManager"]
+        N13["BatchMetricsRecorder&nbsp;"]
+        N18["QuarantineManager&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N19["LockManager&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N2 --> N8

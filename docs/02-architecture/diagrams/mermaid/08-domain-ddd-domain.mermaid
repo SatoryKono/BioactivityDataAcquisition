@@ -1,37 +1,38 @@
 %% View: Domain-Focus | Parent: 08-domain-ddd-full.mermaid
+%% @uniform width=176 height=56 max_title_len=17 max_desc_lines=0
 flowchart TB
 %% keep-orphan: N10, N20
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N3["BatchID"]
-        N4["EntityID"]
-        N5["ContentHash"]
-        N10["HealthStatus"]
-        N11["RunID"]
-        N13["RunStarted"]
-        N14["RunCompleted"]
-        N15["R_RUNNING"]
-        N16["R_PENDING"]
-        N17["R_COMPLETED"]
-        N18["R_FAILED"]
-        N19["R_SHUTDOWN"]
-        N20["B_WRITING"]
+        N3["BatchID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N4["EntityID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["ContentHash&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["HealthStatus&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["RunID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N13["RunStarted&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N14["RunCompleted&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N15["R_RUNNING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N16["R_PENDING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N17["R_COMPLETED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N18["R_FAILED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N19["R_SHUTDOWN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N20["B_WRITING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N2["PipelineRun"]
-        N6["BatchCreated"]
-        N7["BatchSealed"]
-        N8["BatchWritten"]
-        N1["Batch"]
+        N2["PipelineRun&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["BatchCreated&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["BatchSealed&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["BatchWritten&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N1["Batch&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
         N9["RecordQuarantined"]
-        N12["QuarantineEntry"]
+        N12["QuarantineEntry&nbsp;&nbsp;"]
     end
 
     N1 --> N6

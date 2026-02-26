@@ -1,41 +1,42 @@
 %% View: Domain-Focus | Parent: 05-pipeline-lifecycle-states-full.mermaid
+%% @uniform width=184 height=56 max_title_len=18 max_desc_lines=0
 flowchart TB
 %% keep-orphan: N11, N13
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N1["ERROR"]
-        N4["LoadingConfig"]
-        N5["HealthChecks"]
-        N6["PassRecords"]
-        N7["WarnRecords"]
-        N9["LogError"]
-        N11["ComputeHash"]
-        N14["*"]
+        N1["ERROR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N4["LoadingConfig&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["HealthChecks&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["PassRecords&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["WarnRecords&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["LogError&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["ComputeHash&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N14["*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         N15["SHUTDOWN_REQUESTED"]
-        N16["EXTRACTING"]
-        N17["VALIDATING"]
-        N18["ThresholdCheck"]
-        N19["LOADING"]
+        N16["EXTRACTING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N17["VALIDATING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N18["ThresholdCheck&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N19["LOADING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N2["TRANSFORMING"]
-        N3["FetchBatch"]
-        N12["FailBatch"]
+        N2["TRANSFORMING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N3["FetchBatch&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["FailBatch&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         N13["FinishCurrentBatch"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N8["DQMetrics"]
-        N20["RequestLock"]
+        N8["DQMetrics&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N20["RequestLock&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Composition["Composition Layer"]
         direction TB
-        N10["BootstrapServices"]
+        N10["BootstrapServices&nbsp;"]
     end
 
     N14 --> N4

@@ -8,68 +8,62 @@
 %% @nodes   36
 
 %%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE'}}}%%
+%% @uniform width=200 height=56 max_title_len=20 max_desc_lines=1
 graph LR
     subgraph Sources["External Data Sources"]
-        API1["ChEMBL API"]
-        API2["PubMed API"]
-        API3["UniProt API"]
-        API4["PubChem API"]
-        API5["CrossRef API"]
-        API6["OpenAlex API"]
-        API7["Semantic Scholar API"]
+        API7["Semantic Scholar API<br/>&nbsp;"]
     end
 
     subgraph Ingestion["Data Ingestion"]
-        DS["DataSourcePort<br/>fetch() / fetch_filtered()"]
-        RL["RateLimiter<br/>(TokenBucket)"]
-        CB["CircuitBreaker"]
-        RETRY["Retry Logic"]
+        DS["DataSourcePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>fetch() / fetch_filtered()"]
+        RL["RateLimiter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(TokenBucket)"]
+        CB["CircuitBreaker&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        RETRY["Retry Logic&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Bronze["Bronze Layer (Raw)"]
-        BW["BronzeWriter"]
-        BJSONL["JSONL + zstd<br/>compressed files"]
-        BMETA["_metadata.yaml<br/>sidecar"]
-        BAUDIT["Audit Log"]
+        BW["BronzeWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        BJSONL["JSONL + zstd&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>compressed files"]
+        BMETA["_metadata.yaml&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>sidecar"]
+        BAUDIT["Audit Log&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Transform["Transformation"]
-        BT["BaseTransformer<br/>(Template Method)"]
-        NORM["Normalization<br/>(text, units, dates)"]
-        HASH["Identity Service<br/>(entity_id + content_hash)"]
-        PII["PII Hasher<br/>(SHA256 + salt)"]
-        DQ_CHECK["DQ Thresholds<br/>Check"]
+        BT["BaseTransformer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Template Method)"]
+        NORM["Normalization&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(text, units, dates)"]
+        HASH["Identity Service&nbsp;&nbsp;&nbsp;&nbsp;<br/>(entity_id + content_hash)"]
+        PII["PII Hasher&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(SHA256 + salt)"]
+        DQ_CHECK["DQ Thresholds&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Check"]
     end
 
     subgraph Silver["Silver Layer (Normalized)"]
-        SW["SilverWriter<br/>(Delta Lake)"]
-        DELTA_S["Delta Table<br/>(merge/upsert)"]
-        SV["Silver Validator<br/>(Pandera)"]
-        SMETA["_metadata.yaml"]
+        SW["SilverWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Delta Lake)"]
+        DELTA_S["Delta Table&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(merge/upsert)"]
+        SV["Silver Validator&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Pandera)"]
+        SMETA["_metadata.yaml&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
     end
 
     subgraph GoldTransform["Gold Transformation"]
-        GFILT["Gold Filters"]
-        GMAP["Field Mapping<br/>(exclude fields)"]
-        GV["Gold Validator<br/>(Pandera strict)"]
+        GFILT["Gold Filters&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        GMAP["Field Mapping&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(exclude fields)"]
+        GV["Gold Validator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Pandera strict)"]
     end
 
     subgraph Gold["Gold Layer (Business-Ready)"]
-        GW["GoldWriter<br/>(Delta Lake)"]
-        DELTA_G["Delta Table<br/>(validated, typed)"]
-        GMETA["_metadata.yaml"]
+        GW["GoldWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Delta Lake)"]
+        DELTA_G["Delta Table&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(validated, typed)"]
+        GMETA["_metadata.yaml&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Quarantine["Quarantine"]
-        QM["QuarantineManager"]
-        QS["Quarantine Store"]
+        QM["QuarantineManager&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        QS["Quarantine Store&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
     end
 
     subgraph DQ["Data Quality Reports"]
-        DQ_B["Bronze DQ<br/>Analyzer"]
-        DQ_S["Silver DQ<br/>Analyzer"]
-        DQ_G["Gold DQ<br/>Analyzer"]
-        DQ_RPT["DQ Reports<br/>(JSON)"]
+        DQ_B["Bronze DQ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Analyzer"]
+        DQ_S["Silver DQ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Analyzer"]
+        DQ_G["Gold DQ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Analyzer"]
     end
 
     %% Flow

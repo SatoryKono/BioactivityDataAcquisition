@@ -9,92 +9,188 @@
 %% @level   Mixed (System / Component / Class)
 
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% @uniform class width=336 height=234 max_title_len=37 max_desc_lines=11
 classDiagram
     class BaseTransformer {
-        <<abstract>>
-        -_logger: LoggerPort
-        -_config: PipelineYamlConfig
-        +transform(records: list) DataFrame
+        <<abstract>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        -_logger: LoggerPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        -_config: PipelineYamlConfig&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +transform(records: list) DataFrame&nbsp;&nbsp;
         +transform_for_gold(df: DataFrame) DataFrame
         #_transform_impl(records: list)* DataFrame
-        #_get_silver_schema() type
-        #_get_gold_schema() type
-        -_normalize_values(df) DataFrame
+        #_get_silver_schema() type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        #_get_gold_schema() type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        -_normalize_values(df) DataFrame&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         -_add_metadata(df, run_context) DataFrame
-        -_compute_content_hash(df) DataFrame
+        -_compute_content_hash(df) DataFrame&nbsp;
     }
 
     class BaseChemblTransformer {
-        <<abstract>>
-        #_transform_impl(records)* DataFrame
+        <<abstract>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        #_transform_impl(records)* DataFrame&nbsp;
         #_chembl_specific_normalization(df) DataFrame
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class BasePublicationTransformer {
-        <<abstract>>
-        #_transform_impl(records)* DataFrame
-        #_normalize_authors(raw) list
-        #_normalize_date(raw) str
+        <<abstract>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        #_transform_impl(records)* DataFrame&nbsp;
+        #_normalize_authors(raw) list&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        #_normalize_date(raw) str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class ActivityTransformer {
-        +_transform_impl(records) DataFrame
-        +_get_silver_schema() ActivitySchema
+        +_transform_impl(records) DataFrame&nbsp;&nbsp;
+        +_get_silver_schema() ActivitySchema&nbsp;
         +_get_gold_schema() ChEMBLActivityGoldSchema
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class MoleculeTransformer {
-        +_transform_impl(records) DataFrame
-        +_get_silver_schema() MoleculeSchema
+        +_transform_impl(records) DataFrame&nbsp;&nbsp;
+        +_get_silver_schema() MoleculeSchema&nbsp;
         +_get_gold_schema() ChEMBLMoleculeGoldSchema
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class AssayTransformer {
-        +_transform_impl(records) DataFrame
-        +_get_silver_schema() AssaySchema
+        +_transform_impl(records) DataFrame&nbsp;&nbsp;
+        +_get_silver_schema() AssaySchema&nbsp;&nbsp;&nbsp;&nbsp;
         +_get_gold_schema() ChEMBLAssayGoldSchema
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class TargetTransformer {
-        +_transform_impl(records) DataFrame
-        +_get_silver_schema() TargetSchema
+        +_transform_impl(records) DataFrame&nbsp;&nbsp;
+        +_get_silver_schema() TargetSchema&nbsp;&nbsp;&nbsp;
         +_get_gold_schema() ChEMBLTargetGoldSchema
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class PubMedPublicationTransformer {
-        +_transform_impl(records) DataFrame
+        +_transform_impl(records) DataFrame&nbsp;&nbsp;
         +_get_silver_schema() PubMedPublicationSchema
         +_get_gold_schema() PubMedPublicationGoldSchema
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class CrossRefPublicationTransformer {
-        +_transform_impl(records) DataFrame
+        +_transform_impl(records) DataFrame&nbsp;&nbsp;
         +_get_silver_schema() PublicationEnrichedSchema
         +_get_gold_schema() CrossRefPublicationGoldSchema
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class OpenAlexPublicationTransformer {
-        +_transform_impl(records) DataFrame
+        +_transform_impl(records) DataFrame&nbsp;&nbsp;
         +_get_silver_schema() OpenAlexPublicationSchema
         +_get_gold_schema() OpenAlexPublicationGoldSchema
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class SemanticScholarPublicationTransformer {
-        +_transform_impl(records) DataFrame
+        +_transform_impl(records) DataFrame&nbsp;&nbsp;
         +_get_silver_schema() SemanticScholarPublicationSchema
         +_get_gold_schema() SemanticScholarPublicationGoldSchema
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class PubChemCompoundTransformer {
-        +_transform_impl(records) DataFrame
+        +_transform_impl(records) DataFrame&nbsp;&nbsp;
         +_get_silver_schema() PubchemMoleculeSchema
         +_get_gold_schema() PubChemCompoundGoldSchema
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class UniProtProteinTransformer {
-        +_transform_impl(records) DataFrame
+        +_transform_impl(records) DataFrame&nbsp;&nbsp;
         +_get_silver_schema() UniprotTargetSchema
         +_get_gold_schema() UniProtProteinGoldSchema
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     BaseTransformer <|-- BaseChemblTransformer

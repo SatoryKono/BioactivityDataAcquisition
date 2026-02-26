@@ -5,6 +5,7 @@
 %% @date    2026-02-24
 %% @type    classDiagram
 %% @level   Class / Interface
+%% @uniform class width=248 height=72 max_title_len=26 max_desc_lines=2
 
 classDiagram
     class IdentityService {
@@ -13,12 +14,13 @@ classDiagram
     }
 
     class NormalizationService {
-        +normalize_text(text) str
+        +normalize_text(text) str&nbsp;
         +normalize_values(values) dict
     }
 
     class DataNormalizationService {
         +normalize_field(value, field_type) Any
+        &nbsp;
     }
 
     class AuthorNormalizationService {
@@ -28,15 +30,17 @@ classDiagram
 
     class ActivityAggregator {
         +aggregate(activities) AggregatedActivity
+        &nbsp;
     }
 
     class UnitConverter {
         +convert(value, from_unit, to_unit) float
-        +normalize_unit(unit) str
+        +normalize_unit(unit) str&nbsp;
     }
 
     class ValueValidator {
         +validate(value, constraints) ValidationResult
+        &nbsp;
     }
 
     class TextSimilarity {
@@ -46,10 +50,11 @@ classDiagram
 
     class DQMetricsCalculator {
         +calculate(records, config) DQMetrics
+        &nbsp;
     }
 
     class DQSerializer {
-        +serialize(metrics) dict
+        +serialize(metrics) dict&nbsp;&nbsp;
         +deserialize(data) DQMetrics
     }
 

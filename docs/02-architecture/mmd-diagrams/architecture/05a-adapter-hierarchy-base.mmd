@@ -8,25 +8,22 @@
 %% @view    hierarchy-base
 %% @parent  05-provider-adapter-hierarchy.mmd
 %% @nodes   12
+%% @uniform width=304 height=56 max_title_len=33 max_desc_lines=0
 
 graph TB
 %% keep-orphan: FSM, HCP, NSMF, PFM
     subgraph Domain["Domain Layer"]
-        DSP["DataSourcePort"]
-        FDSP["FilterableDataSourcePort"]
-        HCP["HealthCheckPort"]
+        DSP["DataSourcePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        HCP["HealthCheckPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        HCPM["HealthCheckProviderMixin"]
-        NSMF["NotSupportedMultiFilterMixin"]
-        FSM["FilterableStubMixin"]
-        PFM["PaginatedFetcherMixin"]
-        BHA["BaseHttpAdapter"]
-        BSA["BaseSyncAdapter"]
-        CBD["CircuitBreakerDataSourceDecorator"]
-        RDD["RetryingDataSourceDecorator"]
-        CBDS["CachedBronzeDataSource"]
+        HCPM["HealthCheckProviderMixin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        NSMF["NotSupportedMultiFilterMixin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        FSM["FilterableStubMixin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        PFM["PaginatedFetcherMixin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        BHA["BaseHttpAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        BSA["BaseSyncAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     DSP -->|extends| FDSP
@@ -40,4 +37,3 @@ graph TB
 
     style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
     style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-

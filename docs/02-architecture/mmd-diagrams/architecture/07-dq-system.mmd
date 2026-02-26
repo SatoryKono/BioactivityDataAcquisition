@@ -8,48 +8,49 @@
 %% @nodes   22
 
 %%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE'}}}%%
+%% @uniform width=200 height=144 max_title_len=20 max_desc_lines=6
 graph TB
     subgraph Ports["Domain Ports"]
-        DQM["DQMonitorPort<br/>(Protocol)"]
-        BDQAP["BronzeDQAnalyzerPort"]
-        SDQAP["SilverDQAnalyzerPort"]
-        GDQAP["GoldDQAnalyzerPort"]
-        DQRWP["DQReportWriterPort"]
+        DQM["DQMonitorPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Protocol)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        BDQAP["BronzeDQAnalyzerPort<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        SDQAP["SilverDQAnalyzerPort<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        GDQAP["GoldDQAnalyzerPort&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        DQRWP["DQReportWriterPort&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph DomainTypes["Domain Value Objects"]
-        DQMetrics["DQMetrics<br/>━━━━━━━━━━━━━━━━━<br/>null_rate: float<br/>duplicate_rate: float<br/>schema_violations: int<br/>custom_metrics: dict"]
-        DQResult["DQResult<br/>━━━━━━━━━━━━━━━━━<br/>passed: bool<br/>error_rate: float<br/>metrics: DQMetrics<br/>anomalies: list"]
-        DQReport["DQReport<br/>━━━━━━━━━━━━━━━━━<br/>layer: MedallionLayer<br/>table_name: str<br/>results: DQResult"]
-        DQConfig["DQConfig<br/>━━━━━━━━━━━━━━━━━<br/>soft_error_threshold: float<br/>hard_error_threshold: float"]
+        DQMetrics["DQMetrics&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>null_rate: float<br/>duplicate_rate: float<br/>schema_violations: int<br/>custom_metrics: dict<br/>&nbsp;"]
+        DQResult["DQResult&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>passed: bool<br/>error_rate: float<br/>metrics: DQMetrics<br/>anomalies: list<br/>&nbsp;"]
+        DQReport["DQReport&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>layer: MedallionLayer<br/>table_name: str<br/>results: DQResult<br/>&nbsp;<br/>&nbsp;"]
+        DQConfig["DQConfig&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>soft_error_threshold: float<br/>hard_error_threshold: float<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph AppServices["Application Services"]
-        DQS["DataQualityService<br/>━━━━━━━━━━━━━━━━━<br/>_dq_monitor: DQMonitorPort<br/>_config: DQConfig<br/>━━━━━━━━━━━━━━━━━<br/>+ evaluate(context, executor)"]
-        DQRS["DQReportService<br/>━━━━━━━━━━━━━━━━━<br/>+ generate_reports(context)"]
+        DQS["DataQualityService&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>_dq_monitor: DQMonitorPort<br/>_config: DQConfig<br/>━━━━━━━━━━━━━━━━━<br/>+ evaluate(context, executor)<br/>&nbsp;"]
+        DQRS["DQReportService&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>+ generate_reports(context)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph AppDQ["Application DQ Analyzers"]
-        BDA["BronzeDQAnalyzer<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(records)<br/>+ check_completeness()<br/>+ check_format()"]
-        SDA["SilverDQAnalyzer<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(delta_table)<br/>+ check_nullability()<br/>+ check_schema()"]
-        GDA["GoldDQAnalyzer<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(delta_table)<br/>+ check_pk_uniqueness()<br/>+ validate_schema()"]
+        BDA["BronzeDQAnalyzer&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(records)<br/>+ check_completeness()<br/>+ check_format()<br/>&nbsp;<br/>&nbsp;"]
+        SDA["SilverDQAnalyzer&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(delta_table)<br/>+ check_nullability()<br/>+ check_schema()<br/>&nbsp;<br/>&nbsp;"]
+        GDA["GoldDQAnalyzer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(delta_table)<br/>+ check_pk_uniqueness()<br/>+ validate_schema()<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Anomaly["Anomaly Detection"]
-        AD["AnomalyDetector"]
-        ZSD["ZScoreDetector<br/>(DetectorStrategy)"]
-        AN["Anomaly<br/>━━━━━━━━━━━━━━━━━<br/>type: AnomalyType<br/>severity: AnomalySeverity<br/>metric_name: str<br/>current_value: float<br/>baseline_value: float"]
+        AD["AnomalyDetector&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        ZSD["ZScoreDetector&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(DetectorStrategy)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        AN["Anomaly&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>type: AnomalyType<br/>severity: AnomalySeverity<br/>metric_name: str<br/>current_value: float<br/>baseline_value: float"]
     end
 
     subgraph InfraImpl["Infrastructure Implementations"]
-        DQCL["DQConfigLoader<br/>(YAML → DQConfig)"]
-        DQRW["DQReportWriter<br/>(JSON reports)"]
+        DQCL["DQConfigLoader&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(YAML → DQConfig)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        DQRW["DQReportWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(JSON reports)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Pipeline["Pipeline Integration"]
-        QM["QuarantineManager<br/>━━━━━━━━━━━━━━━━━<br/>Quarantines records<br/>that fail DQ checks"]
-        EC["ErrorClassifier<br/>━━━━━━━━━━━━━━━━━<br/>Classifies errors as<br/>recoverable vs fatal"]
-        BT["BatchTransformer<br/>━━━━━━━━━━━━━━━━━<br/>_check_dq_thresholds()<br/>stops batch on threshold breach"]
+        QM["QuarantineManager&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>Quarantines records<br/>that fail DQ checks<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        EC["ErrorClassifier&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>Classifies errors as<br/>recoverable vs fatal<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        BT["BatchTransformer&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>_check_dq_thresholds()<br/>stops batch on threshold breach<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     %% Port implementations

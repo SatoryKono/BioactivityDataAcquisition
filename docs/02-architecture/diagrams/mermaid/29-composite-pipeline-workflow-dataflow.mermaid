@@ -1,28 +1,29 @@
 %% View: Data-Flow | Parent: 29-composite-pipeline-workflow-full.mermaid
+%% @uniform width=140 height=56 max_title_len=6 max_desc_lines=0
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N11["SP"]
+        N11["SP&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N1["Merge"]
+        N1["Merge&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N2["Gold"]
-        N3["CCM"]
-        N4["Deps"]
+        N2["Gold&nbsp;&nbsp;"]
+        N3["CCM&nbsp;&nbsp;&nbsp;"]
+        N4["Deps&nbsp;&nbsp;"]
         N5["Enrich"]
-        N6["EC"]
-        N7["KEYS"]
-        N8["KE"]
-        N9["SB"]
-        N10["DC"]
-        N12["BOOT"]
+        N6["EC&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["KEYS&nbsp;&nbsp;"]
+        N8["KE&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["SB&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["DC&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["BOOT&nbsp;&nbsp;"]
     end
 
     N12 --> N11

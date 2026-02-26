@@ -8,22 +8,23 @@
 %% @view    bootstrap-factories
 %% @parent  12-bootstrap-di-container.mmd
 %% @nodes   10
+%% @uniform width=272 height=56 max_title_len=29 max_desc_lines=0
 
 graph TB
     subgraph Interfaces["Interfaces Layer"]
-        CLI["CLI Commands (Click)"]
-        HTTP["HTTP Interface"]
+        CLI["CLI Commands (Click)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        HTTP["HTTP Interface&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Composition["Composition Layer"]
-        RA["bootstrap_pipeline_runner"]
-        DSR["DataSourceRegistry"]
-        TF["GenericPipelineFactory"]
-        RF["RunnerFactory"]
-        DQF["DQServicesFactory"]
-        PR["ProviderRegistry"]
+        RA["bootstrap_pipeline_runner&nbsp;&nbsp;&nbsp;&nbsp;"]
+        DSR["DataSourceRegistry&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        TF["GenericPipelineFactory&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        RF["RunnerFactory&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        DQF["DQServicesFactory&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        PR["ProviderRegistry&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         EP["ExtractionParams Registration"]
-        RB["ServicesBuilder"]
+        RB["ServicesBuilder&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     CLI --> RA

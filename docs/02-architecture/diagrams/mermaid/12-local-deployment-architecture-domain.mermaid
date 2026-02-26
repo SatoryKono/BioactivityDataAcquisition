@@ -1,36 +1,37 @@
 %% View: Domain-Focus | Parent: 12-local-deployment-architecture-full.mermaid
+%% @uniform width=168 height=56 max_title_len=16 max_desc_lines=0
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N1["chembl_activity"]
+        N1["chembl_activity&nbsp;"]
         N3["pubchem_compound"]
-        N4["uniprot_protein"]
-        N5["ChEMBL_API"]
-        N6["PubChem_API"]
-        N7["UniProt_API"]
-        N8["PubMed_API"]
-        N9["chembl_assay"]
-        N10["chembl_target"]
-        N11["chembl_molecule"]
-        N12["Schedule"]
-        N18["Lineage"]
-        N19["Logs"]
+        N4["uniprot_protein&nbsp;"]
+        N5["ChEMBL_API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["PubChem_API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["UniProt_API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["PubMed_API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["chembl_assay&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["chembl_target&nbsp;&nbsp;&nbsp;"]
+        N11["chembl_molecule&nbsp;"]
+        N12["Schedule&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N18["Lineage&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N19["Logs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N17["Checkpoints"]
-        N13["Bronze"]
-        N14["Silver"]
-        N15["Gold"]
-        N16["Quarantine"]
-        N20["Metrics"]
+        N17["Checkpoints&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N13["Bronze&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N14["Silver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N15["Gold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N16["Quarantine&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N20["Metrics&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Interfaces["Interfaces Layer"]
         direction TB
-        N2["CLI"]
+        N2["CLI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N5 --> N1

@@ -1,29 +1,30 @@
 %% View: Data-Flow | Parent: 01-full-system-component-full.mermaid
+%% @uniform width=192 height=56 max_title_len=19 max_desc_lines=0
 flowchart TB
 %% keep-orphan: N10
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N7["DataSourcePort"]
+        N7["DataSourcePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N1["PipelineRunner"]
-        N2["BatchTransformer"]
-        N3["PipelineExecutor"]
-        N4["RecordProcessor"]
+        N1["PipelineRunner&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["BatchTransformer&nbsp;&nbsp;&nbsp;"]
+        N3["PipelineExecutor&nbsp;&nbsp;&nbsp;"]
+        N4["RecordProcessor&nbsp;&nbsp;&nbsp;&nbsp;"]
         N5["ActivityTransformer"]
         N6["MoleculeTransformer"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N8["BronzeWriter"]
-        N9["SilverWriter"]
-        N10["GoldWriter"]
-        N11["Bronze"]
-        N12["Silver"]
+        N8["BronzeWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["SilverWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["GoldWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["Bronze&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["Silver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N1 --> N3

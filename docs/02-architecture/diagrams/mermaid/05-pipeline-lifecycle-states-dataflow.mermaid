@@ -1,29 +1,30 @@
 %% View: Data-Flow | Parent: 05-pipeline-lifecycle-states-full.mermaid
+%% @uniform width=160 height=56 max_title_len=15 max_desc_lines=0
 flowchart TB
 %% keep-orphan: N11
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N8["ValidateLock"]
+        N8["ValidateLock&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N2["TRANSFORMING"]
-        N3["FetchBatch"]
-        N11["FailBatch"]
+        N2["TRANSFORMING&nbsp;&nbsp;&nbsp;"]
+        N3["FetchBatch&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["FailBatch&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N1["EXTRACTING"]
-        N4["WriteBronze"]
-        N5["PassRecords"]
-        N6["WarnRecords"]
+        N1["EXTRACTING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N4["WriteBronze&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["PassRecords&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["WarnRecords&nbsp;&nbsp;&nbsp;&nbsp;"]
         N7["RouteQuarantine"]
-        N9["MergeSilver"]
-        N10["WriteGold"]
-        N12["PostWriteCheck"]
+        N9["MergeSilver&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["WriteGold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["PostWriteCheck&nbsp;"]
     end
 
     N3 --> N4

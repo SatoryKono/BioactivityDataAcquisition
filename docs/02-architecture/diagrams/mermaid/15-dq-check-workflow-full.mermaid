@@ -11,18 +11,19 @@
 %% @level   Mixed (System / Component / Class)
 
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% @uniform width=288 height=56 max_title_len=31 max_desc_lines=1
 flowchart TD
 %% keep-orphan: CFG1, CFG2, CFG3
     subgraph Input["Input Stage"]
-        A[/"📥 Input Records<br/>(from Bronze)"/]
+        A[/"📥 Input Records&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(from Bronze)"/]
     end
 
     subgraph Validation["Validation Stage"]
-        B["🔍 Pandera Schema Validation"]
-        B1["Check required fields"]
-        B2["Validate data types"]
-        B3["Check value constraints"]
-        B4["Validate relationships"]
+        B["🔍 Pandera Schema Validation&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        B1["Check required fields&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        B2["Validate data types&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        B3["Check value constraints&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        B4["Validate relationships&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
 
         B --> B1
         B --> B2
@@ -31,32 +32,32 @@ flowchart TD
     end
 
     subgraph Classification["Error Classification"]
-        C{{"📊 Calculate Error Rate"}}
-        D["✅ 0% errors"]
-        E["⚠️ < 5% errors<br/>(soft_fail_threshold)"]
-        F["⚠️ 5-20% errors<br/>(warning zone)"]
-        G["❌ > 20% errors<br/>(hard_fail_threshold)"]
+        C{{"📊 Calculate Error Rate&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"}}
+        D["✅ 0% errors&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        E["⚠️ < 5% errors&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(soft_fail_threshold)"]
+        F["⚠️ 5-20% errors&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(warning zone)"]
+        G["❌ > 20% errors&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(hard_fail_threshold)"]
     end
 
     subgraph Actions["Action Paths"]
-        H["✅ All Pass<br/>No warnings"]
-        I["✅ Pass with Quarantine<br/>Route failures"]
-        J["⚠️ Pass with Warnings<br/>Set _dq_warn=true"]
-        K["❌ FAIL Batch<br/>All to Quarantine"]
+        H["✅ All Pass&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>No warnings"]
+        I["✅ Pass with Quarantine&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Route failures"]
+        J["⚠️ Pass with Warnings&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Set _dq_warn=true"]
+        K["❌ FAIL Batch&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>All to Quarantine"]
     end
 
     subgraph Routing["Record Routing"]
-        L[("💾 Silver Layer<br/>SilverWriter.merge()")]
-        M[("🗑️ Quarantine<br/>QuarantineWriter")]
-        N["🚨 Alert<br/>P2 Notification"]
+        L[("💾 Silver Layer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>SilverWriter.merge()")]
+        M[("🗑️ Quarantine&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>QuarantineWriter")]
+        N["🚨 Alert&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>P2 Notification"]
     end
 
     subgraph Metrics["Metrics Export"]
-        O["📈 dq_validation_score<br/>Gauge: 0.0-1.0"]
-        P["📈 record_error_rate<br/>Gauge: percentage"]
-        Q["📈 dq_check_duration_ms<br/>Histogram"]
-        R["📈 dq_soft_threshold_exceeded<br/>Counter"]
-        S["📈 quarantine_records_total<br/>Counter"]
+        O["📈 dq_validation_score&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Gauge: 0.0-1.0"]
+        P["📈 record_error_rate&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Gauge: percentage"]
+        Q["📈 dq_check_duration_ms&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Histogram"]
+        R["📈 dq_soft_threshold_exceeded&nbsp;&nbsp;&nbsp;<br/>Counter"]
+        S["📈 quarantine_records_total&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Counter"]
     end
 
     %% Main flow
@@ -103,9 +104,9 @@ flowchart TD
     %% Configuration annotation
     subgraph Config["DQConfig Parameters"]
         direction LR
-        CFG1["soft_fail_threshold: 0.05 (5%)"]
-        CFG2["hard_fail_threshold: 0.20 (20%)"]
-        CFG3["strict_validation: false"]
+        CFG1["soft_fail_threshold: 0.05 (5%)&nbsp;<br/>&nbsp;"]
+        CFG2["hard_fail_threshold: 0.20 (20%)<br/>&nbsp;"]
+        CFG3["strict_validation: false&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
     end
 
     linkStyle 0 stroke:#1E293B,stroke-width:4px

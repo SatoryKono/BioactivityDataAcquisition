@@ -1,33 +1,34 @@
 %% View: Infrastructure-Mapping | Parent: 06-application-layer-class-diagram-full.mermaid
+%% @uniform width=208 height=56 max_title_len=21 max_desc_lines=0
 flowchart TB
 %% keep-orphan: N4, N5
 
     subgraph Application["Application Layer"]
         direction TB
-        N6["RunnerServices"]
-        N7["RecordProcessor"]
-        N8["PipelineRunner"]
-        N9["BasePipeline"]
-        N10["PipelineExecutor"]
-        N11["BatchTransformer"]
-        N12["BaseTransformer"]
+        N6["RunnerServices&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["RecordProcessor&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["PipelineRunner&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["BasePipeline&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["PipelineExecutor&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["BatchTransformer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["BaseTransformer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         N13["BaseChemblTransformer"]
-        N14["ActivityTransformer"]
-        N15["MoleculeTransformer"]
-        N16["AssayTransformer"]
-        N17["TargetTransformer"]
-        N18["PipelineServices"]
-        N19["PreflightService"]
-        N20["PostrunService"]
+        N14["ActivityTransformer&nbsp;&nbsp;"]
+        N15["MoleculeTransformer&nbsp;&nbsp;"]
+        N16["AssayTransformer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N17["TargetTransformer&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N18["PipelineServices&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N19["PreflightService&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N20["PostrunService&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N1["LockManager"]
-        N2["QuarantineManager"]
-        N3["BatchMetricsRecorder"]
-        N4["CheckpointManager"]
-        N5["MemoryMonitor"]
+        N1["LockManager&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["QuarantineManager&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N3["BatchMetricsRecorder&nbsp;"]
+        N4["CheckpointManager&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["MemoryMonitor&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N13 --> N12

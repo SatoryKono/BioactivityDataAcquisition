@@ -1,40 +1,41 @@
 %% View: Infrastructure-Mapping | Parent: 33-cli-run-interaction-full.mermaid
+%% @uniform width=140 height=56 max_title_len=8 max_desc_lines=0
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N19["config"]
+        N19["config&nbsp;&nbsp;"]
         N15["owner_id"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N4["Runner"]
+        N4["Runner&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N1["storage"]
-        N2["metrics"]
-        N3["PF"]
-        N5["PRS"]
-        N7["Boot"]
-        N8["LM"]
-        N9["BE"]
-        N10["Post"]
-        N12["SB"]
-        N13["RF"]
-        N14["Obs"]
-        N16["HB"]
-        N17["resolve"]
-        N18["options"]
-        N20["ttl"]
+        N1["storage&nbsp;"]
+        N2["metrics&nbsp;"]
+        N3["PF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["PRS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["Boot&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["LM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["BE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["Post&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["SB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N13["RF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N14["Obs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N16["HB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N17["resolve&nbsp;"]
+        N18["options&nbsp;"]
+        N20["ttl&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Interfaces["Interfaces Layer"]
         direction TB
-        N6["CLI"]
-        N11["User"]
+        N6["CLI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["User&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N11 --> N6

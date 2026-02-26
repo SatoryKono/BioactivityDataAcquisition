@@ -1,31 +1,32 @@
 %% View: Overview | Parent: 41-error-classification-tree-full.mermaid
+%% @uniform width=140 height=56 max_title_len=9 max_desc_lines=0
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N2["HTTP"]
-        N1["ERROR"]
+        N2["HTTP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N1["ERROR&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N3["INFRA"]
-        N4["no"]
-        N5["classify"]
-        N7["AUTH"]
+        N3["INFRA&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N4["no&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["classify&nbsp;"]
+        N7["AUTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         N8["FAIL_FAST"]
-        N9["RATE"]
-        N11["SERVER"]
-        N14["STORE"]
-        N15["CB"]
+        N9["RATE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["SERVER&nbsp;&nbsp;&nbsp;"]
+        N14["STORE&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N15["CB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N13["LOCKACQ"]
-        N6["retry"]
-        N10["RETRY"]
-        N12["LOCK"]
+        N13["LOCKACQ&nbsp;&nbsp;"]
+        N6["retry&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["RETRY&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["LOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N1 --> N2

@@ -1,27 +1,28 @@
 %% View: Data-Flow | Parent: 36-architecture-principles-mindmap-full.mermaid
+%% @uniform width=168 height=56 max_title_len=16 max_desc_lines=0
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N7["DataSourcePort"]
+        N7["DataSourcePort&nbsp;&nbsp;"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N5["Batch"]
-        N4["PipelineRun"]
-        N10["PipelineRunner"]
-        N11["BatchExecutor"]
-        N12["23 Transformers"]
+        N5["Batch&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N4["PipelineRun&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["PipelineRunner&nbsp;&nbsp;"]
+        N11["BatchExecutor&nbsp;&nbsp;&nbsp;"]
+        N12["23 Transformers&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N1["Bronze"]
-        N2["Silver"]
-        N3["Gold"]
-        N6["QuarantineEntry"]
-        N8["Storage Writers"]
+        N1["Bronze&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["Silver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N3["Gold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["QuarantineEntry&nbsp;"]
+        N8["Storage Writers&nbsp;"]
     end
 
     subgraph Composition["Composition Layer"]

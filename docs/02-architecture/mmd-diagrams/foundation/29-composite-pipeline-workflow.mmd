@@ -9,58 +9,57 @@
 %% @level   Mixed (System / Component / Class)
 
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% @uniform width=288 height=90 max_title_len=31 max_desc_lines=3
 flowchart TB
     subgraph Init["Phase 1: Initialization"]
-        CFG["Load CompositeConfig\nfrom YAML"]
-        PFV["CompositePreflightValidator\n• validate seed\n• validate enrichers\n• check silver tables"]
-        BOOT["bootstrap_composite_runner()\n→ CompositePipelineRunner"]
+        CFG["Load CompositeConfig&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>from YAML<br/>&nbsp;<br/>&nbsp;"]
+        PFV["CompositePreflightValidator&nbsp;&nbsp;&nbsp;&nbsp;<br/>• validate seed<br/>• validate enrichers<br/>• check silver tables"]
+        BOOT["bootstrap_composite_runner()&nbsp;&nbsp;&nbsp;<br/>→ CompositePipelineRunner<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Seed["Phase 2: Seed Pipeline"]
-        SP["Run Seed Pipeline\n(e.g., chembl_publication)"]
-        SB[("Seed Silver Table\nsilver/chembl/publication/")]
+        SP["Run Seed Pipeline&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(e.g., chembl_publication)<br/>&nbsp;<br/>&nbsp;"]
+        SB[("Seed Silver Table&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>silver/chembl/publication/"<br/>&nbsp;<br/>&nbsp;)]
     end
 
     subgraph Deps["Phase 3: Dependencies"]
-        DC["DependencyCoordinator\n• run_dependencies()"]
-        DEP1["Dependency 1\n(e.g., uniprot_protein)"]
-        DEP2["Dependency 2\n(optional)"]
-        DS1[("Dep 1 Silver Table")]
-        DS2[("Dep 2 Silver Table")]
+        DC["DependencyCoordinator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• run_dependencies()<br/>&nbsp;<br/>&nbsp;"]
+        DEP1["Dependency 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(e.g., uniprot_protein)<br/>&nbsp;<br/>&nbsp;"]
+        DEP2["Dependency 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(optional)<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Keys["Phase 3.5: Key Extraction"]
-        KE["KeyExtractorService\n• extract_keys(seed_silver,\n  join_keys=[doi, pmid])"]
-        KEYS["Filter Keys\n(DOIs, PMIDs)"]
+        KE["KeyExtractorService&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• extract_keys(seed_silver,<br/>join_keys=[doi, pmid])<br/>&nbsp;"]
+        KEYS["Filter Keys&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(DOIs, PMIDs)<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Enrich["Phase 4: Fan-Out Enrichment"]
-        EC["EnrichmentCoordinator\n• asyncio.gather(*enrichers,\n  return_exceptions=True)"]
-        E1["CrossRef Enricher\nfilter_ids=DOIs"]
-        E2["PubMed Enricher\nfilter_ids=PMIDs"]
-        E3["OpenAlex Enricher\nfilter_ids=DOIs"]
-        E4["SemanticScholar Enricher\nfilter_ids=DOIs"]
-        ES1[("crossref/publication/")]
-        ES2[("pubmed/publication/")]
-        ES3[("openalex/publication/")]
-        ES4[("semanticscholar/publication/")]
+        EC["EnrichmentCoordinator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• asyncio.gather(*enrichers,<br/>return_exceptions=True)<br/>&nbsp;"]
+        E1["CrossRef Enricher&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>filter_ids=DOIs<br/>&nbsp;<br/>&nbsp;"]
+        E2["PubMed Enricher&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>filter_ids=PMIDs<br/>&nbsp;<br/>&nbsp;"]
+        E3["OpenAlex Enricher&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>filter_ids=DOIs<br/>&nbsp;<br/>&nbsp;"]
+        E4["SemanticScholar Enricher&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>filter_ids=DOIs<br/>&nbsp;<br/>&nbsp;"]
+        ES1[("crossref/publication/"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;)]
+        ES2[("pubmed/publication/"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;)]
+        ES3[("openalex/publication/"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;)]
+        ES4[("semanticscholar/publication/"<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;)]
     end
 
     subgraph Merge["Phase 5: Merge"]
-        DD["EnricherDeduplicator\n• deduplicate across sources"]
-        MS["MergeService\n• LEFT OUTER JOIN\n• conflict_resolution\n• column_ordering"]
-        CO["ColumnOrderer\n• FieldGroup priority\n• exclude TRASH group"]
-        CR["ColumnRenamer\n• qualified names\n• e.g., crossref.publication.title"]
+        DD["EnricherDeduplicator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• deduplicate across sources<br/>&nbsp;<br/>&nbsp;"]
+        MS["MergeService&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• LEFT OUTER JOIN<br/>• conflict_resolution<br/>• column_ordering"]
+        CO["ColumnOrderer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• FieldGroup priority<br/>• exclude TRASH group<br/>&nbsp;"]
+        CR["ColumnRenamer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• qualified names<br/>• e.g., crossref.publication.title<br/>&nbsp;"]
     end
 
     subgraph Gold["Phase 6: Gold Write"]
-        XV["EnrichmentCrossValidator\n• check join coverage\n• detect orphans"]
-        GW["GoldWriter.write_gold()\nCompositePublicationGoldSchema\n(Pandera strict validation)"]
-        GT[("Gold Table\ngold/composite/publication/")]
+        XV["EnrichmentCrossValidator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• check join coverage<br/>• detect orphans<br/>&nbsp;"]
+        GW["GoldWriter.write_gold()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>CompositePublicationGoldSchema<br/>(Pandera strict validation)<br/>&nbsp;"]
+        GT[("Gold Table&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>gold/composite/publication/"<br/>&nbsp;<br/>&nbsp;)]
     end
 
     subgraph CKP["Checkpointing (each phase)"]
-        CCM["CompositeCheckpointManager\n• save after each phase\n• resume from any phase"]
+        CCM["CompositeCheckpointManager&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• save after each phase<br/>• resume from any phase<br/>&nbsp;"]
     end
 
     %% Flow

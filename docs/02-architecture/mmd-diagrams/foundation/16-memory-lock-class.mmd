@@ -9,16 +9,26 @@
 %% @level   Mixed (System / Component / Class)
 
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% @uniform class width=168 height=240 max_title_len=16 max_desc_lines=15
 classDiagram
     direction TB
 
     class LockPort {
-        <<Protocol>>
+        <<Protocol>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         +acquire(key: str, owner_id: str, ttl: int, wait: bool, timeout: int, exclusive: bool) bool
         +release(key: str, owner_id: str, exclusive: bool) bool
         +heartbeat(key: str, owner_id: str, exclusive: bool) bool
         +validate_owner(key: str, owner_id: str) bool
-        +aclose() None
+        +aclose() None&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class MemoryLock {
@@ -27,13 +37,11 @@ classDiagram
         -_ttl_check_interval: float = 1.0
         -_ttl_task: asyncio.Task | None
         -_running: bool = True
-
         +acquire(key: str, owner_id: str, ttl: int = 90, wait: bool = False, timeout: int = 300, exclusive: bool = False) bool
         +release(key: str, owner_id: str, exclusive: bool = False) bool
         +heartbeat(key: str, owner_id: str, exclusive: bool = False) bool
         +validate_owner(key: str, owner_id: str) bool
-        +aclose() None
-
+        +aclose() None&nbsp;&nbsp;
         -_start_ttl_checker() None
         -_ttl_checker_loop() None
         -_cleanup_expired() None
@@ -42,59 +50,93 @@ classDiagram
     }
 
     class LockEntry {
-        <<dataclass>>
-        +owner_id: str
+        <<dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +owner_id: str&nbsp;&nbsp;
         +lock: asyncio.Lock
         +expires_at: float
         +original_ttl: int
         +exclusive: bool = False
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class LockResult {
-        <<dataclass>>
-        +acquired: bool
-        +owner_id: str
-        +key: str
-        +ttl: int
+        <<dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +acquired: bool&nbsp;
+        +owner_id: str&nbsp;&nbsp;
+        +key: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +ttl: int&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         +message: str | None
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class LockNotHeldError {
-        <<Exception>>
-        +key: str
+        <<Exception>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +key: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         +expected_owner: str
         +actual_owner: str | None
-        +message: str
+        +message: str&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class LockManager {
         -_lock: LockPort
         -_logger: LoggerPort
-        -_ttl: int = 90
+        -_ttl: int = 90&nbsp;
         -_heartbeat_interval: int = 30
         -_wait_for_lock: bool = False
         -_wait_timeout: int = 300
         -_heartbeat_task: asyncio.Task | None
-
         +acquire_lock(resource: str, owner_id: str) LockResult
         +release_lock(resource: str, owner_id: str) bool
         +refresh_lock(resource: str, owner_id: str) bool
         +start_heartbeat(resource: str, owner_id: str) None
         +stop_heartbeat() None
-
         -_heartbeat_loop(resource: str, owner_id: str) None
         -_build_lock_key(resource: str) str
+        &nbsp;
     }
 
     class BackfillLock {
         -_lock: LockPort
         -_run_type: RunType
         -_logger: LoggerPort
-
         +acquire_exclusive(resource: str, owner_id: str, wait_timeout: int) bool
         +release_exclusive(resource: str, owner_id: str) bool
-
         +get_lock_key(provider: str, entity: str, run_type: RunType)$ str
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     %% Relationships

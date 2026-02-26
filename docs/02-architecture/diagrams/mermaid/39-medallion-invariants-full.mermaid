@@ -12,48 +12,49 @@
 %% @level   Mixed (System / Component / Class)
 
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% @uniform width=256 height=90 max_title_len=27 max_desc_lines=3
 flowchart TB
 %% keep-orphan: E3, E4
     subgraph RunTypes["RunType Enum (domain/types.py)"]
-        INC["RunType.INCREMENTAL\n'Fetch new data since last run'"]
-        BF["RunType.BACKFILL\n'Re-fetch a date range'"]
-        RB["RunType.REBUILD\n'Full clean rebuild'"]
+        INC["RunType.INCREMENTAL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>'Fetch new data since last run'<br/>&nbsp;<br/>&nbsp;"]
+        BF["RunType.BACKFILL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>'Re-fetch a date range'<br/>&nbsp;<br/>&nbsp;"]
+        RB["RunType.REBUILD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>'Full clean rebuild'<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Policy["MedallionLifecycleService\n(application/services/medallion_lifecycle.py)"]
-        CHECK{{"Check RunType"}}
+        CHECK{{"Check RunType&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"}}
     end
 
     subgraph IncPath["INCREMENTAL Path"]
-        I1["❌ DO NOT clear Silver"]
-        I2["❌ DO NOT clear Gold"]
-        I3["Silver: merge/upsert\n(content_hash dedup)"]
-        I4["Gold: merge/append"]
+        I1["❌ DO NOT clear Silver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        I2["❌ DO NOT clear Gold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        I3["Silver: merge/upsert&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(content_hash dedup)<br/>&nbsp;<br/>&nbsp;"]
+        I4["Gold: merge/append&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph BFPath["BACKFILL Path"]
-        B1["✅ MUST clear Silver\nSilverWriter.clear()"]
-        B2["✅ MUST clear Gold\nGoldWriter.clear()"]
-        B3["Silver: full reload"]
-        B4["Gold: full reload"]
+        B1["✅ MUST clear Silver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>SilverWriter.clear()<br/>&nbsp;<br/>&nbsp;"]
+        B2["✅ MUST clear Gold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>GoldWriter.clear()<br/>&nbsp;<br/>&nbsp;"]
+        B3["Silver: full reload&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        B4["Gold: full reload&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph RBPath["REBUILD Path"]
-        R1["✅ MUST clear Silver\nSilverWriter.clear()"]
-        R2["✅ MUST clear Gold\nGoldWriter.clear()"]
-        R3["Silver: full rebuild\nfrom Bronze/API"]
-        R4["Gold: full rebuild\nfrom Silver"]
+        R1["✅ MUST clear Silver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>SilverWriter.clear()<br/>&nbsp;<br/>&nbsp;"]
+        R2["✅ MUST clear Gold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>GoldWriter.clear()<br/>&nbsp;<br/>&nbsp;"]
+        R3["Silver: full rebuild&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>from Bronze/API<br/>&nbsp;<br/>&nbsp;"]
+        R4["Gold: full rebuild&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>from Silver<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Enforcement["Enforcement"]
-        E1["PipelineRunner checks\nrun_type before execution"]
-        E2["MedallionLifecycleService\nenforces clear policy"]
-        E3["ClearResult tracks\nwhat was cleared"]
-        E4["Tests verify:\nINCREMENTAL never clears"]
+        E1["PipelineRunner checks&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>run_type before execution<br/>&nbsp;<br/>&nbsp;"]
+        E2["MedallionLifecycleService&nbsp;&nbsp;<br/>enforces clear policy<br/>&nbsp;<br/>&nbsp;"]
+        E3["ClearResult tracks&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>what was cleared<br/>&nbsp;<br/>&nbsp;"]
+        E4["Tests verify:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>INCREMENTAL never clears<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Bronze["Bronze Layer (Always Append)"]
-        BZ["BronzeWriter.write_bronze()\n• ALWAYS append-only\n• Never cleared by run_type\n• 90-day retention policy"]
+        BZ["BronzeWriter.write_bronze()<br/>• ALWAYS append-only<br/>• Never cleared by run_type<br/>• 90-day retention policy"]
     end
 
     %% Flow

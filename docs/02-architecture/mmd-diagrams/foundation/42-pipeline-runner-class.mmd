@@ -9,6 +9,7 @@
 %% @level   Mixed (System / Component / Class)
 
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% @uniform class width=176 height=240 max_title_len=17 max_desc_lines=14
 classDiagram
     class PipelineRunner {
         -_services: PipelineServices
@@ -23,14 +24,16 @@ classDiagram
         -_observer: PipelineObserver
         -_shutdown: ShutdownService
         +run() PipelineRunState
+        &nbsp;
+        &nbsp;
     }
 
     class PipelineServices {
-        <<frozen dataclass>>
+        <<frozen dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         +storage_bronze: BronzeWriter
         +storage_silver: SilverWriter
         +storage_gold: GoldWriter
-        +lock: LockPort
+        +lock: LockPort&nbsp;&nbsp;
         +checkpoint: CheckpointPort
         +quarantine: QuarantinePort
         +logger: LoggerPort
@@ -43,17 +46,37 @@ classDiagram
     }
 
     class LockManager {
-        -_lock: LockPort
+        -_lock: LockPort&nbsp;
         -_logger: LoggerPort
         +acquire(key, owner_id, ttl) bool
         +release(key, owner_id) bool
         +validate_ownership() bool
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class PreflightService {
         -_services: PipelineServices
         -_config: PipelineYamlConfig
         +run() PreflightReport
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class BatchExecutor {
@@ -62,26 +85,66 @@ classDiagram
         -_metrics: BatchMetricsRecorder
         -_tracing: BatchTracingManager
         +execute_batch(batch_num) BatchResult
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class PostrunService {
         -_services: PipelineServices
         +run() PostrunResult
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class CheckpointManager {
         -_checkpoint: CheckpointPort
         +save(last_id, batch_num) void
         +load() CheckpointState
-        +delete() void
+        +delete() void&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class HeartbeatTask {
-        -_lock: LockPort
+        -_lock: LockPort&nbsp;
         -_interval: float
-        -_running: bool
-        +start() void
-        +stop() void
+        -_running: bool&nbsp;&nbsp;
+        +start() void&nbsp;&nbsp;&nbsp;&nbsp;
+        +stop() void&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class PipelineObserver {
@@ -89,6 +152,16 @@ classDiagram
         -_logger: LoggerPort
         +__enter__() PipelineObserver
         +__exit__(exc_type, exc_val, tb) void
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     PipelineRunner --> PipelineServices : uses

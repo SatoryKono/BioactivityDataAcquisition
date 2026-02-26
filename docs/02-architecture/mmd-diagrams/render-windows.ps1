@@ -74,6 +74,6 @@ foreach ($srcDir in $sourceDirs) {
     }
 }
 
-$mode = if ($adaptive) { "adaptive (ELK)" } else { "fixed (${Width}x${Height})" }
+$mode = if ($adaptive) { "adaptive" } else { "fixed (${Width}x${Height})" }
 Write-Host "`nDone: OK=$ok  FAIL=$fail  Layout=$mode"
 if ($fail -gt 0) { exit 1 }

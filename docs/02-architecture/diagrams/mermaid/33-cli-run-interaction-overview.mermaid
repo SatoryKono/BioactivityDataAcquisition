@@ -1,31 +1,32 @@
 %% View: Overview | Parent: 33-cli-run-interaction-full.mermaid
+%% @uniform width=140 height=56 max_title_len=8 max_desc_lines=0
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N13["config"]
+        N13["config&nbsp;&nbsp;"]
         N7["owner_id"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N1["PRS"]
-        N2["Runner"]
-        N3["PF"]
-        N4["LM"]
-        N5["BE"]
-        N6["Post"]
-        N8["HB"]
-        N9["ttl"]
-        N11["Boot"]
-        N12["Obs"]
-        N15["SB"]
+        N1["PRS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["Runner&nbsp;&nbsp;"]
+        N3["PF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N4["LM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["BE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["Post&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["HB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["ttl&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["Boot&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["Obs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N15["SB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Interfaces["Interfaces Layer"]
         direction TB
-        N10["CLI"]
-        N14["User"]
+        N10["CLI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N14["User&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N14 --> N10

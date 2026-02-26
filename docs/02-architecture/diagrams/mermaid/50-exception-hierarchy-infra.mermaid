@@ -1,37 +1,38 @@
 %% View: Infrastructure-Mapping | Parent: 50-exception-hierarchy-full.mermaid
+%% @uniform width=192 height=56 max_title_len=19 max_desc_lines=0
 flowchart TB
 %% keep-orphan: N11
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N5["METRICS_ERROR"]
-        N8["DELTA_SCHEMA_V"]
-        N17["DQ_ERROR"]
-        N18["VALIDATION"]
+        N5["METRICS_ERROR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["DELTA_SCHEMA_V&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N17["DQ_ERROR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N18["VALIDATION&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N14["EXT_SERVICE"]
+        N14["EXT_SERVICE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N1["STORAGE_ERR"]
-        N2["LOCK_LOST"]
-        N3["LOCK_ACQ"]
+        N1["STORAGE_ERR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["LOCK_LOST&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N3["LOCK_ACQ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         N4["CHECKPOINT_CONFLICT"]
-        N6["STORAGE_QUOTA"]
-        N7["DELTA_TX"]
-        N9["DELTA_WRITE"]
-        N10["DELTA_OPT"]
-        N11["ACTION_QUARANTINE"]
-        N12["CRITICAL"]
-        N13["RECOVERABLE"]
-        N15["BIOETL"]
-        N16["status_code"]
-        N19["operation"]
-        N20["expected"]
+        N6["STORAGE_QUOTA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["DELTA_TX&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["DELTA_WRITE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["DELTA_OPT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["ACTION_QUARANTINE&nbsp;&nbsp;"]
+        N12["CRITICAL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N13["RECOVERABLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N15["BIOETL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N16["status_code&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N19["operation&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N20["expected&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N15 --> N12

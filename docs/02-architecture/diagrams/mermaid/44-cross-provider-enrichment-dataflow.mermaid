@@ -1,25 +1,26 @@
 %% View: Data-Flow | Parent: 44-cross-provider-enrichment-full.mermaid
+%% @uniform width=140 height=56 max_title_len=10 max_desc_lines=0
 flowchart TB
 %% keep-orphan: N12
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N4["pmid"]
+        N4["pmid&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N1["CS"]
-        N2["CT"]
-        N3["CA"]
-        N5["ntitle"]
-        N6["authors"]
-        N7["CRS"]
-        N8["CRT"]
-        N9["CRA"]
-        N10["nfunders"]
+        N1["CS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["CT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N3["CA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["ntitle&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["authors&nbsp;&nbsp;&nbsp;"]
+        N7["CRS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["CRT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["CRA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["nfunders&nbsp;&nbsp;"]
         N11["references"]
-        N12["PMS"]
+        N12["PMS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     N3 --> N2

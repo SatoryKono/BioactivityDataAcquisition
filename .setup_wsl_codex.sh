@@ -1,5 +1,5 @@
 #!/bin/bash
-# Fix OpenAI DNS in WSL2 (VPN workaround)
+/# Fix OpenAI DNS in WSL2 (VPN workaround)
 # Run: bash /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.setup_wsl_codex.sh
 
 ensure_host() {

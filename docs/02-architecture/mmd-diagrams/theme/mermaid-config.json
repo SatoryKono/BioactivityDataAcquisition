@@ -77,11 +77,10 @@
     "padding": 24,
     "nodeSpacing": 50,
     "rankSpacing": 60,
-    "htmlLabels": true,
+    "htmlLabels": false,
     "useMaxWidth": true,
     "diagramPadding": 16,
-    "wrappingWidth": 200,
-    "defaultRenderer": "elk"
+    "wrappingWidth": 200
   },
   "sequence": {
     "mirrorActors": false,
@@ -129,10 +128,5 @@
     "leftPadding": 100,
     "gridLineStartPadding": 40,
     "numberSectionStyles": 4
-  },
-  "elk": {
-    "mergeEdges": true,
-    "nodePlacementStrategy": "NETWORK_SIMPLEX",
-    "cycleBreakingStrategy": "GREEDY"
   }
 }
