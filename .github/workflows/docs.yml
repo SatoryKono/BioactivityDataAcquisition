@@ -67,9 +67,10 @@ jobs:
           failed=0
           count=0
 
-          # Validate both .mermaid and .mmd files
+          # Validate both .mermaid and .mmd files (skip _-prefixed templates)
           for file in docs/**/*.mermaid docs/**/*.mmd; do
             [ -f "$file" ] || continue
+            [[ "$(basename "$file")" == _* ]] && continue
             count=$((count + 1))
             echo "Validating $file..."
             base="$(basename "${file%.*}")"
