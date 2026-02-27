@@ -39,6 +39,24 @@ plugins:
                         show_source: true
                         allow_inspection: true
 
+validation:
+    nav:
+        omitted_files: info
+        not_found: warn
+        absolute_links: info
+    links:
+        not_found: warn
+        anchors: info
+        unrecognized_links: info
+
+not_in_nav: |
+    /plans/**
+    /reports/**
+    /99-archive/**
+    /02-architecture/diagrams/**
+    /02-architecture/mmd-diagrams/**/svg/**
+    /02-architecture/mmd-diagrams/**/png/**
+
 markdown_extensions:
     -   pymdownx.highlight:
             anchor_linenums: true
