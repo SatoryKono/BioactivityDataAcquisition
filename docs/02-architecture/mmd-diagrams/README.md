@@ -144,21 +144,21 @@ Historical/foundational diagrams consolidated from `docs/02-architecture/diagram
 
 | Layer          | Colour | Fill      | Border    |
 |----------------|--------|-----------|-----------|
-| Domain         | Purple | `#f3e5f5` | `#6a1b9a` |
-| Application    | Green  | `#e8f5e9` | `#2e7d32` |
-| Infrastructure | Red    | `#ffcdd2` | `#c62828` |
-| Interfaces     | Blue   | `#e3f2fd` | `#1565c0` |
-| Composition    | Orange | `#fff3e0` | `#e65100` |
-| External       | Gray   | `#eceff1` | `#455a64` |
+| Domain         | Purple | `#f5f3ff` | `#7c3aed` |
+| Application    | Green  | `#f0fdf4` | `#16a34a` |
+| Infrastructure | Red    | `#fff1f2` | `#dc2626` |
+| Interfaces     | Blue   | `#eff6ff` | `#2563eb` |
+| Composition    | Orange | `#fff7ed` | `#f59e0b` |
+| External       | Gray   | `#f1f5f9` | `#64748b` |
 
 ### Medallion Layers
 
 | Layer      | Fill      | Border    |
 |------------|-----------|-----------|
-| Bronze     | `#fff3e0` | `#e65100` |
-| Silver     | `#eceff1` | `#607d8b` |
-| Gold       | `#fff8e1` | `#f9a825` |
-| Quarantine | `#ffebee` | `#d32f2f` |
+| Bronze     | `#fff7ed` | `#f59e0b` |
+| Silver     | `#f8fafc` | `#475569` |
+| Gold       | `#fefce8` | `#ca8a04` |
+| Quarantine | `#ffe4e6` | `#e11d48` |
 
 ---
 
