@@ -42,7 +42,7 @@ def test_runner_routes_checks_through_scope_manifests() -> None:
 def test_runner_renders_single_diagram_with_dir_and_filter() -> None:
     script = _script_text()
 
-    assert 'run_render_step()' in script
+    assert "run_render_step()" in script
     assert '--dir "$REPO_ROOT/$diagram_dir"' in script
     assert '--filter "$diagram_stem"' in script
     assert '--puppeteer "$PUPPETEER_CFG"' in script

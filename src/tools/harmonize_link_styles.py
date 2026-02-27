@@ -199,7 +199,7 @@ def process_svg(fpath: Path, dry_run: bool) -> tuple[bool, str]:
     """Process one SVG file. Returns (modified, reason)."""
     try:
         ET.register_namespace("", SVG_NS)
-        tree = ET.parse(fpath)  # noqa: S314
+        tree = ET.parse(fpath)
     except ET.ParseError as e:
         return False, f"XML parse error: {e}"
 

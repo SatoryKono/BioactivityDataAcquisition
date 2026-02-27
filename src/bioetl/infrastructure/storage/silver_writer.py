@@ -948,7 +948,7 @@ class SilverWriter(BaseDeltaWriter):
                 merge_future,
                 timeout=self._MERGE_EXEC_TIMEOUT_SECONDS,
             )
-        except asyncio.TimeoutError as exc:
+        except TimeoutError as exc:
             self.logger.error(
                 "silver_merge_timeout",
                 table_path=table_path,
