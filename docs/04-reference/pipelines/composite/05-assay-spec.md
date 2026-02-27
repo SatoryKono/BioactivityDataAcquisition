@@ -14,7 +14,7 @@ Enriches ChEMBL assay data with cell line and tissue metadata from pre-populated
 | Provider | `composite` |
 | Entity | `assay` |
 | Version | `1.0.0` |
-| Config | `configs/pipelines/composite/assay.yaml` |
+| Config | `configs/composites/assay.yaml` |
 
 ## Seed and Enrichers
 

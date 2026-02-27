@@ -14,7 +14,7 @@ Merges publication data from multiple providers into a unified composite publica
 | Provider | `composite` |
 | Entity | `publication` |
 | Version | `1.2.0` |
-| Config | `configs/pipelines/composite/publication.yaml` |
+| Config | `configs/composites/publication.yaml` |
 
 ## Seed and Enrichers
 
@@ -31,9 +31,9 @@ Merges publication data from multiple providers into a unified composite publica
 
 ## Merge Features
 
-- **Conflict Resolution**: `seed_priority` — seed (ChEMBL) values always win over enricher values
+- **Conflict Resolution**: `seed-priority` — seed (ChEMBL) values always win over enricher values
 - **Preserve All Sources**: `true` — keeps provider-qualified columns (e.g., `crossref.publication.title`)
-- **Cross-Validation**: Compares paired fields (doi, title, volume, issue, page_first, page_last, publication_year, citations_received) between seed and each enricher before merge. Mismatches trigger warnings, errors, or quarantine.
+- **Cross-Validation**: Compares paired fields (doi, title, volume, issue, page-first, page-last, publication-year, citations-received) between seed and each enricher before merge. Mismatches trigger warnings, errors, or quarantine.
 - **Exclude Fields**: 40 redundant enricher columns excluded from output (CV-validated fields that duplicate seed values, plus low-value fields)
 
 ## Related Configs

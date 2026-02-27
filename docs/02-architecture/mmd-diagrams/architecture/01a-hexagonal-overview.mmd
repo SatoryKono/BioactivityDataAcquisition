@@ -8,37 +8,37 @@
 %% @view    overview
 %% @parent  01-high-level-hexagonal.mmd
 %% @nodes   11
-%% @uniform width=232 height=56 max_title_len=24 max_desc_lines=0
+%% @uniform width=240 height=56 max_title_len=24 max_desc_lines=1
 
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'POLYLINE'}}}%%
 graph TB
     subgraph Interfaces["Interfaces Layer"]
-        CLI["CLI Commands (Click)&nbsp;&nbsp;&nbsp;&nbsp;"]
-        ORCH["Orchestration&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        CLI["CLI Commands (Click)"]:::size-sm
+        ORCH["Orchestration"]:::size-sm
     end
 
     subgraph Composition["Composition Layer"]
-        BOOTSTRAP["Bootstrap / Assembly&nbsp;&nbsp;&nbsp;&nbsp;"]
+        BOOTSTRAP["Bootstrap / Assembly"]:::size-sm
     end
 
     subgraph Application["Application Layer"]
-        CORE["Application Core&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        CORE["Application Core"]:::size-sm
     end
 
     subgraph Domain["Domain Layer"]
-        PORTS["Port Protocols&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        PORTS["Port Protocols"]:::size-sm
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        ADAPTERS["Provider Adapters&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        STORAGE["Storage Writers / Reader"]
-        OBS_INFRA["Observability Infra&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        ADAPTERS["Provider Adapters"]:::size-sm
+        STORAGE["Storage Writers / Reader"]:::size-sm
+        OBS_INFRA["Observability Infra"]:::size-sm
     end
 
-    ExternalAPIs["External APIs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-    FS["File System&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-    PROM["Prometheus&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-    OTEL["OpenTelemetry&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-
+    ExternalAPIs["External APIs"]:::size-sm
+    FS["File System"]:::size-sm
+    PROM["Prometheus"]:::size-sm
+    OTEL["OpenTelemetry"]:::size-sm
     ExternalAPIs -.-> ADAPTERS
     FS -.-> STORAGE
     PROM -.-> OBS_INFRA
@@ -54,8 +54,16 @@ graph TB
     STORAGE -->|implements| PORTS
     OBS_INFRA -->|implements| PORTS
 
-    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-    style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-    style Composition fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    style Interfaces fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef domain fill:#f5f3ff,stroke:#7c3aed
+    classDef app fill:#f0fdf4,stroke:#16a34a
+    classDef infra fill:#fff1f2,stroke:#dc2626
+    classDef comp fill:#fff7ed,stroke:#f59e0b
+    classDef iface fill:#eff6ff,stroke:#2563eb
+    classDef ext fill:#f1f5f9,stroke:#64748b
+
+    class CLI,ORCH iface
+    class BOOTSTRAP comp
+    class CORE app
+    class PORTS domain
+    class ADAPTERS,STORAGE,OBS_INFRA infra
+    class ExternalAPIs,FS,PROM,OTEL ext

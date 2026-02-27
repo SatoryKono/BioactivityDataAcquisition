@@ -601,7 +601,7 @@ Add `preserve-all-sources: bool = False` to `MergeConfig`. When enabled:
 ### Configuration
 
 ```yaml
-# configs/pipelines/composite/publication.yaml
+# configs/composites/publication.yaml
 merge:
   strategy: left-outer
   conflict-resolution: seed-priority  # Used when preserve-all-sources=false
@@ -737,8 +737,8 @@ class CompositePipelineRunner:
         self,
         config: CompositeConfig,
         runtime: CompositeRuntimeConfig,
-        seed-runner_factory: Callable[[], PipelineRunner],  # skip-gold=True
-        enricher-runner_factory: Callable[[str], PipelineRunner],  # skip-gold=True
+        seed-runner-factory: Callable[[], PipelineRunner],  # skip-gold=True
+        enricher-runner-factory: Callable[[str], PipelineRunner],  # skip-gold=True
         key-extractor: KeyExtractorService,
         coordinator: EnrichmentCoordinator,
         merger: MergeService,
@@ -841,7 +841,7 @@ class EnrichmentCoordinator:
         """Run a single enricher with timeout and error handling."""
         try:
             async with asyncio.timeout(enricher.timeout-seconds):
-                runner = self.-runner_factory(enricher.pipeline)
+                runner = self.-runner-factory(enricher.pipeline)
                 # Pass keys via input filter mechanism
                 await runner.run()
                 return self.-build-success-result(enricher)
@@ -937,7 +937,7 @@ class MergeService:
 ### YAML Configuration
 
 ```yaml
-# configs/pipelines/composite/publication.yaml
+# configs/composites/publication.yaml
 schema-version: "2.0.0"
 
 composite:

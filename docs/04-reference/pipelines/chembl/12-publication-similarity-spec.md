@@ -16,7 +16,7 @@ Extracts publication similarity data (Tanimoto coefficients) from the ChEMBL `/d
 | Version | `2.1.0` |
 | Loading Strategy | `full-scan-only` (force full scan) |
 | Primary Keys | `sim-id` |
-| Config | `configs/pipelines/chembl/publication-similarity.yaml` |
+| Config | `configs/entities/chembl/publication-similarity.yaml` |
 
 ## Outputs
 

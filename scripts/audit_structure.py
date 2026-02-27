@@ -70,6 +70,9 @@ ALLOWED_ROOT_DIRS: set[str] = {
     "assets",  # MkDocs theme assets (stylesheets, javascripts)
     # Performance tests
     "benchmarks",  # pytest-benchmark tests (separate from unit tests)
+    # Browsers & Tools
+    "chrome-headless-shell",  # For integration tests requiring browser
+    "prompts",  # Reusable agent prompts and templates
 }
 
 # Directories that SHOULD NOT be committed (generated or temp)
@@ -101,6 +104,8 @@ ALLOWED_PYTHON_PATHS: tuple[str, ...] = (
     "tests/",
     "scripts/",
     "benchmarks/",  # Performance tests
+    "docs/skills/",  # Agent skills scripts
+    ".ai/mcp/",      # MCP server implementations
 )
 
 # Allowed root-level Python files
@@ -291,10 +296,17 @@ def _check_no_python_in_docs(project_root: Path) -> Iterator[Violation]:
         return
 
     for py_file in docs_path.rglob("*.py"):
+        rel_path = py_file.relative_to(project_root)
+        posix_path = rel_path.as_posix()
+
+        # Allow scripts in docs/skills/
+        if posix_path.startswith("docs/skills/"):
+            continue
+
         yield Violation(
             category="DOCS_CODE",
-            path=str(py_file.relative_to(project_root)),
-            message="Python-код в docs/ запрещён",
+            path=str(rel_path),
+            message="Python-код в docs/ запрещён (кроме docs/skills/)",
             severity="MUST",
         )
 

@@ -73,7 +73,7 @@ For backward compatibility, the following legacy methods are available:
 
 | Registry | Legacy Method | Unified Method |
 |----------|---------------|----------------|
-| `PipelineRegistry` | `register_factory(factory)` | `register(key, factory)` |
+| `PipelineRegistry` | `register-factory(factory)` | `register(key, factory)` |
 | `PipelineRegistry` | `list-pipelines()` | `list-keys()` |
 | `DataSourceRegistry` | `list-providers()` | `list-keys()` |
 | `DataSourceRegistry` | `get(provider)` | `ProviderRegistry.create-data-source()` |

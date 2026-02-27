@@ -15,7 +15,7 @@ BioETL использует стек **Prometheus + Grafana** для обесп�
 
 ### Фильтрация и Изоляция данных
 В верхней части каждого дашборда расположены выпадающие списки:
-- **Simple / Overview v2 / DQ v2**: `$pipeline`, `$run_type`
+- **Simple / Overview v2 / DQ v2**: `$pipeline`, `$run-type`
 - **Provider Health v2**: `$pipeline`, `$provider`
 
 > **Важно**: Если вы не видите данных, убедитесь, что в фильтре выбран правильный пайплайн или стоит значение `All`.
@@ -26,11 +26,11 @@ BioETL использует стек **Prometheus + Grafana** для обесп�
 Центральный дашборд для контроля за выполнением пайплайнов.
 - **Processing Pipeline**: динамика по стадиям (bronze/silver/gold/quarantined).
 - **Stage Distribution / Pipeline Distribution**: срезы распределения.
-- **Overall Quality**: `gold / clamp_min(bronze, 1)`.
+- **Overall Quality**: `gold / clamp-min(bronze, 1)`.
 
 #### 2. BioETL Data Quality v2
 Сфокусирован на чистоте данных и аномалиях.
-- **Data Quality Score**: `(gold + quarantined) / clamp_min(bronze, 1)`.
+- **Data Quality Score**: `(gold + quarantined) / clamp-min(bronze, 1)`.
 - **Quarantine / Soft Threshold / Validation Failures**: контроль деградаций по окнам времени.
 - **Anomalies / DQ p95 / Data Freshness**: детальные DQ-сигналы.
 
@@ -45,7 +45,7 @@ BioETL использует стек **Prometheus + Grafana** для обесп�
 Все конфигурации дашбордов проходят автоматическую проверку (**Contract Testing**). Это гарантирует, что:
 1.  Дашборды используют только реально существующие в коде метрики.
 2.  На всех панелях настроены правильные единицы измерения (nM, bytes, sec).
-3.  Переменные фильтрации `$pipeline`, `$run_type` и `$provider` работают корректно.
+3.  Переменные фильтрации `$pipeline`, `$run-type` и `$provider` работают корректно.
 
 Подробнее см. в документации по тестированию наблюдаемости.
 
@@ -54,7 +54,7 @@ BioETL использует стек **Prometheus + Grafana** для обесп�
 - **График "Error Rate" покраснел**: Используйте `structlog` для получения деталей исключений.
 - **Дашборд пустой**: 
     1. Проверьте статус контейнеров: `docker ps`.
-    2. Убедитесь, что пайплайн запущен с метриками (`BIOETL_METRICS_ENABLED=true`).
+    2. Убедитесь, что пайплайн запущен с метриками (`BIOETL-METRICS-ENABLED=true`).
     3. Проверьте доступность порта 8000: `Test-NetConnection localhost -Port 8000`.
 - **Метрики показывают UNHEALTHY для storage**: Проверьте права доступа к папкам `data/`.
 

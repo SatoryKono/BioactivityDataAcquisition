@@ -1,0 +1,65 @@
+%% BioETL — Validation and Data Quality Ports
+%% Ports for ensuring data correctness and quality reporting.
+
+%% @version 1.0.0
+%% @date    2026-02-27
+%% @type    flowchart
+%% @level   System / Component
+%% @nodes   20
+
+%%{init: {
+  'layout': 'elk',
+  'theme': 'base',
+  'themeVariables': { 'fontFamily': 'Inter, system-ui, sans-serif' },
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'cycleBreakingStrategy': 'GREEDY',
+    'direction': 'RIGHT',
+    'spacing.nodeNode': 40,
+    'spacing.edgeNode': 30,
+    'spacing.edgeEdge': 20,
+    'edgeRouting': 'POLYLINE'
+  }
+}}%%
+
+%% @uniform width=232 height=56 max_title_len=24 max_desc_lines=0
+graph LR
+    subgraph Domain["Domain Ports"]
+        SVP["fa:fa-check-double SilverValidatorPort"]:::size-sm
+        GVP["fa:fa-shield-check GoldValidatorPort"]:::size-sm
+        BDQP["fa:fa-magnifying-glass BronzeDQAnalyzerPort"]:::size-sm
+        SDQP["fa:fa-magnifying-glass-plus SilverDQAnalyzerPort"]:::size-sm
+        GDQP["fa:fa-magnifying-glass-chart GoldDQAnalyzerPort"]:::size-sm
+        DQRWP["fa:fa-file-contract DQReportWriterPort"]:::size-sm
+        QRP["fa:fa-biohazard QuarantinePort"]:::size-sm
+    end
+
+    subgraph Infrastructure["Infrastructure"]
+        PSV["PanderaSilverValidator"]:::size-sm
+        PGV["PanderaGoldValidator"]:::size-sm
+        DQRW_I["DQReportWriter"]:::size-sm
+        UQ["UnifiedQuarantine"]:::size-sm
+    end
+
+    subgraph Application["Application"]
+        BDA["BronzeDQAnalyzer"]:::size-sm
+        SDA["SilverDQAnalyzer"]:::size-sm
+        GDA["GoldDQAnalyzer"]:::size-sm
+    end
+
+    SVP --- PSV
+    GVP --- PGV
+    BDQP --- BDA
+    SDQP --- SDA
+    GDQP --- GDA
+    DQRWP --- DQRW_I
+    QRP --- UQ
+
+    classDef domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef infra  fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    classDef app    fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+
+    class SVP,GVP,BDQP,SDQP,GDQP,DQRWP,QRP domain
+    class PSV,PGV,DQRW_I,UQ infra
+    class BDA,SDA,GDA app

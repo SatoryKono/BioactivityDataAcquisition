@@ -8,36 +8,36 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
-%% @uniform width=200 height=56 max_title_len=20 max_desc_lines=1
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%% @uniform width=120 height=72 max_title_len=12 max_desc_lines=2
 flowchart TD
     subgraph Sources["External Data Sources"]
     end
 
     subgraph Interfaces["Interfaces Layer"]
-        CLI["CLI (Click)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        CLI["CLI (Click)<br/>"]
     end
 
     subgraph Composition["Composition Layer"]
-        Boot[bootstrap_pipeline&nbsp;&nbsp;<br/>&nbsp;]
-        Factory[PipelineFactory&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;]
+        Boot[bootstrap_pipeline<br/>]
+        Factory[PipelineFactory<br/>]
     end
 
     subgraph Application["Application Layer"]
-        Runner[PipelineRunner&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;]
-        Executor[PipelineExecutor&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;]
-        Trans[BaseTransformer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;]
+        Runner[PipelineRunner<br/>]
+        Executor[PipelineExecutor<br/>]
+        Trans[BaseTransformer<br/>]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        Adapters[HTTP Adapters&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>7 providers]
-        Storage[Storage Writers&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;]
+        Adapters[HTTP Adapters<br/>7 providers]
+        Storage[Storage Writers<br/>]
     end
 
     subgraph Lake["Data Lake — Local Storage"]
-        Bronze["Bronze Layer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(JSONL + zstd)"]
-        Silver["Silver Layer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Delta Lake)"]
-        Gold["Gold Layer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Delta Lake)"]
+        Bronze["Bronze Layer<br/>(JSONL + zstd)"]
+        Silver["Silver Layer<br/>(Delta Lake)"]
+        Gold["Gold Layer<br/>(Delta Lake)"]
     end
 
     Sources --> Adapters
@@ -54,15 +54,15 @@ flowchart TD
     Executor --> Storage
 
     %% Styling — Medallion color scheme per diagramming policy §4.3
-    classDef source fill:#e3f2fd,stroke:#2196F3,color:#0d47a1
-    classDef iface fill:#e3f2fd,stroke:#1565c0,color:#0d47a1
-    classDef comp fill:#fff3e0,stroke:#e65100,color:#bf360c
-    classDef app fill:#e8f5e9,stroke:#388e3c,color:#1b5e20
-    classDef infra fill:#ffcdd2,stroke:#c62828,color:#b71c1c
-    classDef bronze fill:#fff8e1,stroke:#FFA500,color:#e65100
-    classDef silver fill:#eceff1,stroke:#607d8b,color:#263238
-    classDef gold fill:#fff8e1,stroke:#FFD700,color:#f57f17
-    classDef quarantine fill:#ffebee,stroke:#FF6B6B,color:#b71c1c
+    classDef source fill:#eff6ff,stroke:#2563eb,color:#212121
+    classDef iface fill:#eff6ff,stroke:#2563eb,color:#212121
+    classDef comp fill:#fff7ed,stroke:#f59e0b,color:#212121
+    classDef app fill:#f0fdf4,stroke:#16a34a,color:#212121
+    classDef infra fill:#fff1f2,stroke:#dc2626,color:#212121
+    classDef bronze fill:#fff7ed,stroke:#f59e0b,color:#212121
+    classDef silver fill:#f1f5f9,stroke:#475569,color:#212121
+    classDef gold fill:#fefce8,stroke:#ca8a04,color:#212121
+    classDef quarantine fill:#ffe4e6,stroke:#dc2626,color:#212121
 
     class A1,A2,A3,A4,A5,A6,A7 source
     class CLI iface

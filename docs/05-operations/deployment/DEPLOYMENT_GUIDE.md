@@ -99,13 +99,13 @@ kubectl edit secret bioetl-secrets
 **Critical Secrets to Update:**
 
 ```yaml
-BIOETL_PII_SALT_CURRENT: "YOUR_RANDOM_64_CHAR_STRING"
-BIOETL_UNIPROT_API_KEY: "your-actual-key"
-BIOETL_OPENALEX_EMAIL: "your@email.com"
-BIOETL_SEMANTICSCHOLAR_API_KEY: "your-actual-key"
-BIOETL_PUBMED_API_KEY: "your-actual-key"
-BIOETL_PUBMED_EMAIL: "your@email.com"
-BIOETL_CROSSREF_EMAIL: "your@email.com"
+BIOETL-PII-SALT-CURRENT: "YOUR-RANDOM-64-CHAR-STRING"
+BIOETL-UNIPROT-API-KEY: "your-actual-key"
+BIOETL-OPENALEX-EMAIL: "your@email.com"
+BIOETL-SEMANTICSCHOLAR-API-KEY: "your-actual-key"
+BIOETL-PUBMED-API-KEY: "your-actual-key"
+BIOETL-PUBMED-EMAIL: "your@email.com"
+BIOETL-CROSSREF-EMAIL: "your@email.com"
 ```
 
 ---
@@ -156,7 +156,7 @@ metadata:
   name: fast-ssd
 provisioner: kubernetes.io/azure-disk
 parameters:
-  storageaccounttype: Premium_LRS
+  storageaccounttype: Premium-LRS
   kind: Managed
 EOF
 ```

@@ -76,8 +76,8 @@ squash-merged. No rebase needed.
 
 **Branch 2** (`update-documentation-for-current-version`):
 - **SKIP** — it's a subset of branch 1:
-  - `check_docs_version_sync.py` checks 2 sources (pyproject + index.md)
-  - `check_version_consistency.py` from branch 1 checks 4 sources (pyproject + init.py + index.md + CHANGELOG)
+  - `check-docs-version-sync.py` checks 2 sources (pyproject + index.md)
+  - `check-version-consistency.py` from branch 1 checks 4 sources (pyproject + init.py + index.md + CHANGELOG)
 - Delete branch after branch 1 is merged
 
 ### Step 3: Post-merge cleanup
@@ -109,9 +109,9 @@ git push origin --delete codex/update-documentation-for-current-version
 
 | Branch | What it adds |
 |--------|-------------|
-| #1 | `scripts/check_version_consistency.py` + CI steps in 2 workflows |
-| #3 | `scripts/preflight_cleanup.sh` + `make clean-preflight` |
-| #4 | `scripts/validate_data_dir.py` + removes 45MB .xlsx from repo |
+| #1 | `scripts/check-version-consistency.py` + CI steps in 2 workflows |
+| #3 | `scripts/preflight-cleanup.sh` + `make clean-preflight` |
+| #4 | `scripts/validate-data-dir.py` + removes 45MB .xlsx from repo |
 | #5 | ADR status validation test in architecture test suite |
 | #6 | AGENT.md, CLAUDE.md, ORCHESTRATION.md synced to v6.0.0 |
 | #7 | Git preflight guard doc + cleanup assistant prompt |

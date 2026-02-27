@@ -35,10 +35,10 @@ ChEMBL provides comprehensive bioactivity data with multiple entity types:
 
 ## Provider Configuration
 
-Pipeline configurations for providers are in `configs/pipelines/{provider}/`:
+Pipeline configurations for providers are in `configs/entities/{provider}/`:
 
 ```
-configs/pipelines/
+configs/entities/
 - chembl/           # ChEMBL pipeline configs
 - pubchem/          # PubChem configs
 - uniprot/          # UniProt configs

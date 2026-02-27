@@ -15,7 +15,7 @@
 
 ## 2. Конфигурация
 
-**Файл:** `configs/pipelines/chembl/activity.yaml`
+**Файл:** `configs/entities/chembl/activity.yaml`
 
 ```yaml
 pipeline-name: chembl_activity
@@ -415,7 +415,7 @@ def should-include(self, context, record) -> bool:
 
 #### Data Contract
 
-**Файл:** `docs/04-reference/contracts/gold/chembl_activity_v1.0.json`
+**Файл:** `docs/04-reference/contracts/gold/chembl_activity-v1.0.json`
 
 ```json
 {
@@ -515,7 +515,7 @@ def extract(self, context, record) -> Watermark:
 
 | Компонент     | Путь                                                              |
 | ------------- | ----------------------------------------------------------------- |
-| Конфигурация  | `configs/pipelines/chembl/activity.yaml`                          |
+| Конфигурация  | `configs/entities/chembl/activity.yaml`                          |
 | Сущность      | `src/bioetl/domain/entities/bioactivity.py`                       |
 | Трансформер   | `src/bioetl/application/pipelines/chembl/activity-transformer.py` |
 | Gold-фильтр   | `src/bioetl/application/pipelines/chembl/activity-gold-filter.py` |
@@ -524,7 +524,7 @@ def extract(self, context, record) -> Watermark:
 | Bronze Writer | `src/bioetl/infrastructure/storage/bronze-writer.py`              |
 | Delta Writer  | `src/bioetl/infrastructure/storage/delta-writer.py`               |
 | Gold Writer   | `src/bioetl/infrastructure/storage/gold-writer.py`                |
-| Data Contract | `docs/04-reference/contracts/gold/chembl_activity_v1.0.json`                               |
+| Data Contract | `docs/04-reference/contracts/gold/chembl_activity-v1.0.json`                               |
 
 ----------------------------------------------------------------------
 

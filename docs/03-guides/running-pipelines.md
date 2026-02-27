@@ -193,14 +193,14 @@ provider: chembl
 entity: activity
 
 pipeline:
-  pipeline_name: chembl_activity
+  pipeline-name: chembl_activity
   provider: chembl
-  entity_type: activity
-  business_primary_keys: [activity_id]
+  entity-type: activity
+  business-primary-keys: [activity-id]
 
 quality:
-  entity_field_validations:
-    - field: standard_value
+  entity-field-validations:
+    - field: standard-value
       type: range
       min: 0
       nullable: true

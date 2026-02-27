@@ -124,7 +124,7 @@ Silver-таблица партиционируется по полю `type` дл
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/assay-parameters.yaml` |
+| Конфигурация | `configs/entities/chembl/assay-parameters.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/chembl/assay-parameters-transformer.py` |
 | Пайплайн | `src/bioetl/application/pipelines/chembl/assay-parameters.py` |
 

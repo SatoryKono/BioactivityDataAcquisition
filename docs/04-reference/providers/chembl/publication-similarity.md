@@ -87,7 +87,7 @@ bioetl run chembl_publication_similarity --limit 1000
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/publication-similarity.yaml` |
+| Конфигурация | `configs/entities/chembl/publication-similarity.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/chembl/publication-similarity-transformer.py` |
 | Пайплайн | `src/bioetl/application/pipelines/chembl/publication-similarity.py` |
 

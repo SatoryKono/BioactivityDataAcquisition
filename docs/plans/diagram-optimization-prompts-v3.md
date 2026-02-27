@@ -12,10 +12,10 @@
 
 ```
 docs/02-architecture/
-├── mmd-diagrams/                          ← КАНОНИЧЕСКОЕ расположение (84 .mmd)
-│   ├── architecture/  (18 .mmd)           ← НЕ декомпозированы
-│   ├── class-diagrams/ (16 .mmd)          ← НЕ декомпозированы
-│   ├── foundation/    (50 .mmd)           ← Исходники (с %%{init:})
+├── mmd-diagrams/                          ← КАНОНИЧЕСКОЕ расположение (84 .mermaid)
+│   ├── architecture/  (18 .mermaid)           ← НЕ декомпозированы
+│   ├── class-diagrams/ (16 .mermaid)          ← НЕ декомпозированы
+│   ├── foundation/    (50 .mermaid)           ← Исходники (с %%{init:})
 │   ├── theme/
 │   │   ├── mermaid-config.json            ← 131 строка, полная
 │   │   └── custom.css                     ← 152 строки, layer colours
@@ -44,7 +44,7 @@ docs/02-architecture/
 | П.1: Декомпозиция по Views | **ВЫПОЛНЕН** (foundation/) | 31 × 5 = 155 views + 1 legend = 156 файлов |
 | П.2: Subgraph/namespace | **ЧАСТИЧНО** | Views используют subgraph, но без `namespace` для classDiagram |
 | П.3: Визуальный вес | **ЧАСТИЧНО** | linkStyle есть, но одинаковый для всех связей |
-| П.4: Шаблон + CI | **НЕ выполнен** | Нет `_template.mmd`, lint не обновлён |
+| П.4: Шаблон + CI | **НЕ выполнен** | Нет `-template.mermaid`, lint не обновлён |
 | П.5: Layout-хаки | **НЕ выполнен** | — |
 | П.6: ADR | **НЕ выполнен** | — |
 
@@ -69,7 +69,7 @@ docs/02-architecture/
 
 | Аспект | `mmd-diagrams/` (канонические) | `diagrams/mermaid/` (views) |
 |--------|-------------------------------|---------------------------|
-| Расширение | `.mmd` | `.mermaid` |
+| Расширение | `.mermaid` | `.mermaid` |
 | Метаданные | `@version`, `@date`, `@type`, `@level` | `%% View: ... \| Parent: ...` (1 строка) |
 | `%%{init:}` | 55/84 файлов | 0/156 файлов |
 | Render pipeline | `render.sh` (SVG+PNG, theme) | Нет своего render |
@@ -94,7 +94,7 @@ docs/02-architecture/
 
 Обоснование:
 - custom.css — утверждённая, задокументирована в README.md
-- 84 .mmd файла + render.sh уже используют эту схему
+- 84 .mermaid файла + render.sh уже используют эту схему
 - POL-LLM-DIAGRAMS-001 ссылается на неё
 
 ### Целевая палитра (из custom.css строки 140-151)
@@ -199,10 +199,10 @@ end
 
 ---
 
-## Промт 3: Декомпозиция architecture/ (18 .mmd файлов)
+## Промт 3: Декомпозиция architecture/ (18 .mermaid файлов)
 
 **Приоритет:** HIGH — каноническое расположение НЕ затронуто декомпозицией
-**Scope:** `mmd-diagrams/architecture/*.mmd`
+**Scope:** `mmd-diagrams/architecture/*.mermaid`
 
 ```
 Режим: DOC → CODE
@@ -212,16 +212,16 @@ Main выполнил декомпозицию ТОЛЬКО для `foundation/`
 Каталог `mmd-diagrams/architecture/` (18 файлов) — НЕ декомпозирован.
 Эти файлы — каноническая архитектурная документация проекта.
 
-## Инвентаризация architecture/*.mmd
+## Инвентаризация architecture/*.mermaid
 
 Перегруженные файлы (нужна декомпозиция):
 
 | Файл | Узлов | Статус |
 |------|-------|--------|
-| `13-port-protocol-contracts.mmd` | ~68 | CRITICAL |
-| `01-high-level-hexagonal.mmd` | ~39 | CRITICAL |
-| `05-provider-adapter-hierarchy.mmd` | ~27 | OVERLOADED |
-| `12-bootstrap-di-container.mmd` | ~29 | OVERLOADED |
+| `13-port-protocol-contracts.mermaid` | ~68 | CRITICAL |
+| `01-high-level-hexagonal.mermaid` | ~39 | CRITICAL |
+| `05-provider-adapter-hierarchy.mermaid` | ~27 | OVERLOADED |
+| `12-bootstrap-di-container.mermaid` | ~29 | OVERLOADED |
 
 Остальные 14 файлов — ≤20 узлов, декомпозиция НЕ нужна.
 
@@ -231,36 +231,36 @@ Foundation декомпозированы по 4 стандартным views (o
 Для architecture/ используем **предметную** декомпозицию — она семантически
 точнее для reference-диаграмм:
 
-### 13-port-protocol-contracts.mmd (68 узлов → 4 файла)
+### 13-port-protocol-contracts.mermaid (68 узлов → 4 файла)
 
 | Файл | Содержание | ≤N узлов |
 |------|-----------|----------|
-| `13a-port-contracts-data-sources.mmd` | DataSourcePort, FilterableDataSourcePort + 7 adapter-ов | ≤15 |
-| `13b-port-contracts-storage.mmd` | StoragePort, DeltaReaderPort, MetadataWriterPort + writers | ≤12 |
-| `13c-port-contracts-observability.mmd` | LoggerPort, MetricsPort, TracingPort, CircuitBreakerPort, RateLimiterPort | ≤15 |
-| `13d-port-contracts-services.mmd` | LockPort, CheckpointPort, QuarantinePort, AuditPort, PiiHasherPort, InputFilterPort, DQMonitorPort | ≤18 |
+| `13a-port-contracts-data-sources.mermaid` | DataSourcePort, FilterableDataSourcePort + 7 adapter-ов | ≤15 |
+| `13b-port-contracts-storage.mermaid` | StoragePort, DeltaReaderPort, MetadataWriterPort + writers | ≤12 |
+| `13c-port-contracts-observability.mermaid` | LoggerPort, MetricsPort, TracingPort, CircuitBreakerPort, RateLimiterPort | ≤15 |
+| `13d-port-contracts-services.mermaid` | LockPort, CheckpointPort, QuarantinePort, AuditPort, PiiHasherPort, InputFilterPort, DQMonitorPort | ≤18 |
 
-### 01-high-level-hexagonal.mmd (39 узлов → 3 файла)
-
-| Файл | Содержание | ≤N узлов |
-|------|-----------|----------|
-| `01a-hexagonal-overview.mmd` | 5 layers + external APIs + dependency arrows | ≤15 |
-| `01b-hexagonal-domain-app.mmd` | Domain ports + Application services detail | ≤18 |
-| `01c-hexagonal-infra-comp.mmd` | Infrastructure adapters + Composition factories | ≤18 |
-
-### 05-provider-adapter-hierarchy.mmd (27 узлов → 2 файла)
+### 01-high-level-hexagonal.mermaid (39 узлов → 3 файла)
 
 | Файл | Содержание | ≤N узлов |
 |------|-----------|----------|
-| `05a-adapter-hierarchy-base.mmd` | BaseHttpAdapter, mixins, decorators | ≤12 |
-| `05b-adapter-hierarchy-providers.mmd` | 7 concrete provider adapters + configs | ≤15 |
+| `01a-hexagonal-overview.mermaid` | 5 layers + external APIs + dependency arrows | ≤15 |
+| `01b-hexagonal-domain-app.mermaid` | Domain ports + Application services detail | ≤18 |
+| `01c-hexagonal-infra-comp.mermaid` | Infrastructure adapters + Composition factories | ≤18 |
 
-### 12-bootstrap-di-container.mmd (29 узлов → 2 файла)
+### 05-provider-adapter-hierarchy.mermaid (27 узлов → 2 файла)
 
 | Файл | Содержание | ≤N узлов |
 |------|-----------|----------|
-| `12a-bootstrap-factories.mmd` | Все Factory-классы, Registry | ≤15 |
-| `12b-bootstrap-wiring.mmd` | Assembly sequence, injection graph | ≤15 |
+| `05a-adapter-hierarchy-base.mermaid` | BaseHttpAdapter, mixins, decorators | ≤12 |
+| `05b-adapter-hierarchy-providers.mermaid` | 7 concrete provider adapters + configs | ≤15 |
+
+### 12-bootstrap-di-container.mermaid (29 узлов → 2 файла)
+
+| Файл | Содержание | ≤N узлов |
+|------|-----------|----------|
+| `12a-bootstrap-factories.mermaid` | Все Factory-классы, Registry | ≤15 |
+| `12b-bootstrap-wiring.mermaid` | Assembly sequence, injection graph | ≤15 |
 
 ## Формат новых файлов
 
@@ -274,7 +274,7 @@ Foundation декомпозированы по 4 стандартным views (o
 %% @type    <flowchart|classDiagram>
 %% @level   System / Component
 %% @view    <data-sources|storage|observability|services|overview|domain-app|infra-comp|...>
-%% @parent  <original-filename.mmd>
+%% @parent  <original-filename.mermaid>
 %% @nodes   <count>
 ```
 
@@ -298,63 +298,63 @@ style Interfaces fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
 - НЕ трогать class-diagrams/ и foundation/
 
 ## Выходные артефакты
-1. ~11 новых `.mmd` файлов в `mmd-diagrams/architecture/`
+1. ~11 новых `.mermaid` файлов в `mmd-diagrams/architecture/`
 2. `@nodes` метаданные добавлены к оригиналам (18 файлов)
 3. Обновлённый `mmd-diagrams/README.md`
 ```
 
 ---
 
-## Промт 4: Расширение lint_diagrams.py + pre-commit hook
+## Промт 4: Расширение lint-diagrams.py + pre-commit hook
 
 **Приоритет:** MEDIUM — CI-валидация
-**Scope:** `scripts/lint_diagrams.py` + `.pre-commit-config.yaml`
+**Scope:** `scripts/lint-diagrams.py` + `.pre-commit-config.yaml`
 
 ```
 Режим: CODE
 
 ## Контекст
-Существующий `scripts/lint_diagrams.py` (387 строк) работает ТОЛЬКО
+Существующий `scripts/lint-diagrams.py` (387 строк) работает ТОЛЬКО
 с `docs/02-architecture/diagrams/*.mermaid` (legacy каталог).
 Теперь в проекте ДВА каталога диаграмм:
-1. `docs/02-architecture/mmd-diagrams/**/*.mmd` — 84 канонических файла
+1. `docs/02-architecture/mmd-diagrams/**/*.mermaid` — 84 канонических файла
 2. `docs/02-architecture/diagrams/mermaid/*.mermaid` — 156 decomposed views
 
-Текущие проверки lint_diagrams.py:
+Текущие проверки lint-diagrams.py:
 - META-001: Required headers (Title, Covers, Updated, Components)
 - NAME-001: Naming convention (NN-topic.mermaid)
 - CONTENT-001: Placeholder markers
 - CONTENT-002: Minimum 3 non-comment lines
 - STALE-001/002: Staleness detection
-- EXT-001: .mmd extension → ERROR (УСТАРЕЛО! .mmd теперь каноническое)
+- EXT-001: .mermaid extension → ERROR (УСТАРЕЛО! .mermaid теперь каноническое)
 
 ## Задача
 
 ### 1. Поддержка обоих каталогов и расширений
 
 ```python
-DIAGRAM_DIRS = [
-    Path("docs/02-architecture/mmd-diagrams"),     # canonical .mmd
+DIAGRAM-DIRS = [
+    Path("docs/02-architecture/mmd-diagrams"),     # canonical .mermaid
     Path("docs/02-architecture/diagrams/mermaid"),  # decomposed .mermaid views
 ]
 
 # Glob for both extensions
-def find_diagram_files(base: Path) -> list[Path]:
+def find-diagram-files(base: Path) -> list[Path]:
     return sorted(
-        list(base.rglob("*.mmd")) +
+        list(base.rglob("*.mermaid")) +
         list(base.rglob("*.mermaid"))
     )
 ```
 
 ### 2. Удалить EXT-001
 
-Удалить `check_extension_consistency()` — `.mmd` теперь каноническое расширение.
+Удалить `check-extension-consistency()` — `.mermaid` теперь каноническое расширение.
 
-### 3. Обновить NAMING_PATTERN
+### 3. Обновить NAMING-PATTERN
 
 ```python
-# Поддержка: NN-topic.mmd, NN-topic.mermaid, NNa-topic.mmd, NN-topic-view.mermaid
-NAMING_PATTERN = re.compile(
+# Поддержка: NN-topic.mermaid, NN-topic.mermaid, NNa-topic.mermaid, NN-topic-view.mermaid
+NAMING-PATTERN = re.compile(
     r"^\d{2}[a-z]?-[a-z0-9]+(?:-[a-z0-9]+)*\.(?:mmd|mermaid)$"
 )
 ```
@@ -365,20 +365,20 @@ mmd-diagrams/ используют `@version`, `@date`, `@type`, `@level`.
 diagrams/mermaid/ используют `%% View: ... | Parent: ...`.
 
 ```python
-def check_metadata_headers(path: Path, lines: list[str]) -> list[Issue]:
+def check-metadata-headers(path: Path, lines: list[str]) -> list[Issue]:
     """Check for structured metadata — format depends on location."""
     issues: list[Issue] = []
     fname = str(path)
 
-    if path.suffix == ".mmd":
+    if path.suffix == ".mermaid":
         # @-format metadata (mmd-diagrams/)
-        required_tags = {"@version", "@date", "@type", "@level"}
-        found_tags = set()
+        required-tags = {"@version", "@date", "@type", "@level"}
+        found-tags = set()
         for line in lines:
-            for tag in required_tags:
+            for tag in required-tags:
                 if line.strip().startswith(f"%% {tag}"):
-                    found_tags.add(tag)
-        missing = required_tags - found_tags
+                    found-tags.add(tag)
+        missing = required-tags - found-tags
         for tag in sorted(missing):
             issues.append(Issue(
                 file=fname, severity="WARNING", rule="META-001",
@@ -386,11 +386,11 @@ def check_metadata_headers(path: Path, lines: list[str]) -> list[Issue]:
             ))
     else:
         # View-format metadata (diagrams/mermaid/)
-        has_view = any(
+        has-view = any(
             line.startswith("%% View:") or line.startswith("%% @view")
             for line in lines
         )
-        if not has_view:
+        if not has-view:
             issues.append(Issue(
                 file=fname, severity="WARNING", rule="META-001",
                 message="Missing %% View: metadata line",
@@ -401,7 +401,7 @@ def check_metadata_headers(path: Path, lines: list[str]) -> list[Issue]:
 ### 5. Добавить SIZE проверки
 
 ```python
-def check_node_count(path: Path, lines: list[str]) -> list[Issue]:
+def check-node-count(path: Path, lines: list[str]) -> list[Issue]:
     """Warn if diagram exceeds node limits."""
     issues: list[Issue] = []
     fname = str(path)
@@ -411,7 +411,7 @@ def check_node_count(path: Path, lines: list[str]) -> list[Issue]:
     if "-full." in path.name:
         return issues
 
-    node_patterns = [
+    node-patterns = [
         r'\w+\["',        # flowchart: NodeId["
         r'\w+\[',         # flowchart: NodeId[
         r'\w+\(',         # flowchart: NodeId(
@@ -420,19 +420,19 @@ def check_node_count(path: Path, lines: list[str]) -> list[Issue]:
         r'participant\s',  # sequenceDiagram
         r'state\s+\w+',   # stateDiagram
     ]
-    node_count = 0
-    for pattern in node_patterns:
-        node_count += len(re.findall(pattern, content))
+    node-count = 0
+    for pattern in node-patterns:
+        node-count += len(re.findall(pattern, content))
 
-    if node_count > 35:
+    if node-count > 35:
         issues.append(Issue(
             file=fname, severity="ERROR", rule="SIZE-001",
-            message=f"~{node_count} nodes (>35 CRITICAL). Decompose.",
+            message=f"~{node-count} nodes (>35 CRITICAL). Decompose.",
         ))
-    elif node_count > 20:
+    elif node-count > 20:
         issues.append(Issue(
             file=fname, severity="WARNING", rule="SIZE-002",
-            message=f"~{node_count} nodes (>20 soft limit).",
+            message=f"~{node-count} nodes (>20 soft limit).",
         ))
     return issues
 ```
@@ -440,22 +440,22 @@ def check_node_count(path: Path, lines: list[str]) -> list[Issue]:
 ### 6. Добавить COLOUR проверку
 
 ```python
-APPROVED_FILLS = {
+APPROVED-FILLS = {
     "#f3e5f5", "#e8f5e9", "#ffcdd2", "#fff3e0",
     "#e3f2fd", "#eceff1", "#fff8e1", "#ffebee",
 }
 
-def check_subgraph_colours(path: Path, lines: list[str]) -> list[Issue]:
+def check-subgraph-colours(path: Path, lines: list[str]) -> list[Issue]:
     """Check subgraph styles use approved colour scheme."""
     issues: list[Issue] = []
     fname = str(path)
     for i, line in enumerate(lines):
         if line.strip().startswith("style ") and "fill:" in line:
-            fill_match = re.search(r"fill:(#[0-9a-fA-F]{6})", line)
-            if fill_match and fill_match.group(1).lower() not in APPROVED_FILLS:
+            fill-match = re.search(r"fill:(#[0-9a-fA-F]{6})", line)
+            if fill-match and fill-match.group(1).lower() not in APPROVED-FILLS:
                 issues.append(Issue(
                     file=fname, severity="WARNING", rule="COLOUR-001",
-                    message=f"L{i+1}: Unapproved fill {fill_match.group(1)}",
+                    message=f"L{i+1}: Unapproved fill {fill-match.group(1)}",
                 ))
     return issues
 ```
@@ -467,10 +467,10 @@ def check_subgraph_colours(path: Path, lines: list[str]) -> list[Issue]:
 ```yaml
       - id: lint-diagrams
         name: Lint Mermaid/MMD diagram files
-        entry: python scripts/lint_diagrams.py
+        entry: python scripts/lint-diagrams.py
         language: python
-        pass_filenames: false
-        files: '\.mmd$|\.mermaid$'
+        pass-filenames: false
+        files: '\.mermaid$|\.mermaid$'
 ```
 
 ## Ограничения
@@ -479,16 +479,16 @@ def check_subgraph_colours(path: Path, lines: list[str]) -> list[Issue]:
 - Node count — эвристика, ±20% допустимо
 
 ## Выходные артефакты
-1. Обновлённый `scripts/lint_diagrams.py`
+1. Обновлённый `scripts/lint-diagrams.py`
 2. Обновлённый `.pre-commit-config.yaml`
 ```
 
 ---
 
-## Промт 5: Шаблон _template.mmd + стандартизация @nodes
+## Промт 5: Шаблон -template.mermaid + стандартизация @nodes
 
 **Приоритет:** MEDIUM — стандартизация метаданных
-**Scope:** `mmd-diagrams/_template.mmd` + 18 architecture/ файлов
+**Scope:** `mmd-diagrams/-template.mermaid` + 18 architecture/ файлов
 
 ```
 Режим: CODE
@@ -500,9 +500,9 @@ Decomposed views используют `%% View: ... | Parent: ...`.
 
 ## Задача
 
-### Шаг 1: Создать _template.mmd
+### Шаг 1: Создать -template.mermaid
 
-Создать `docs/02-architecture/mmd-diagrams/_template.mmd`:
+Создать `docs/02-architecture/mmd-diagrams/-template.mermaid`:
 
 ```
 %% <TITLE — one-line description>
@@ -513,7 +513,7 @@ Decomposed views используют `%% View: ... | Parent: ...`.
 %% @type    <flowchart|classDiagram|sequenceDiagram|stateDiagram|erDiagram|mindmap>
 %% @level   <System / Component | Class | Sequence | State>
 %% @view    <subdomain-name> (если декомпозирован)
-%% @parent  <original-file.mmd> (если декомпозирован)
+%% @parent  <original-file.mermaid> (если декомпозирован)
 %% @nodes   <approximate count>
 %% @adr     <related ADR numbers>
 %%
@@ -537,7 +537,7 @@ flowchart TD
 
 ### Шаг 2: Добавить @nodes к architecture/ файлам
 
-Для каждого из 18 файлов `architecture/*.mmd`:
+Для каждого из 18 файлов `architecture/*.mermaid`:
 1. Подсчитать узлы (grep + manual)
 2. Добавить ПОСЛЕ строки `%% @level`:
    ```
@@ -549,8 +549,8 @@ flowchart TD
 Foundation файлы используют `%%{init:}` (legacy). Не тратить время.
 
 ## Выходные артефакты
-1. `_template.mmd`
-2. 18 обновлённых `architecture/*.mmd` с `@nodes`
+1. `-template.mermaid`
+2. 18 обновлённых `architecture/*.mermaid` с `@nodes`
 ```
 
 ---
@@ -604,7 +604,7 @@ C ----> D     %% longer
 | >40 | D2 (ELK) |
 
 ## Выходные артефакты
-1. Исправленные `.mmd` / `.mermaid` файлы
+1. Исправленные `.mermaid` / `.mermaid` файлы
 2. PNG до/после
 ```
 
@@ -634,7 +634,7 @@ Accepted
 
 ## Context
 BioETL содержит два каталога диаграмм:
-- `docs/02-architecture/mmd-diagrams/` — 84 канонических `.mmd` файла
+- `docs/02-architecture/mmd-diagrams/` — 84 канонических `.mermaid` файла
   (architecture: 18, class-diagrams: 16, foundation: 50)
 - `docs/02-architecture/diagrams/mermaid/` — 156 decomposed `.mermaid` views
   (31 parent × 5 views + legend)
@@ -645,19 +645,19 @@ Architecture-диаграммы — частично (4 OVERLOADED файла �
 Существующая инфраструктура:
 - Тема: `theme/mermaid-config.json` + `theme/custom.css`
 - Render: `render.sh` (SVG + PNG)
-- Lint: `scripts/lint_diagrams.py` (расширен для .mmd + .mermaid)
+- Lint: `scripts/lint-diagrams.py` (расширен для .mermaid + .mermaid)
 
 ## Decision
 
 ### D1: Canonical Colour Scheme
 Единая палитра зафиксирована в `theme/custom.css` строки 140-151.
-Все inline `style` в `.mermaid` и `.mmd` файлах MUST использовать эту палитру.
+Все inline `style` в `.mermaid` и `.mermaid` файлах MUST использовать эту палитру.
 Domain=purple (`#f3e5f5`/`#6a1b9a`), Application=green, Infrastructure=red.
 
 ### D2: Dual Repository Structure
-- `.mmd` в `mmd-diagrams/` — каноническое расположение для НЕ-decomposed
+- `.mermaid` в `mmd-diagrams/` — каноническое расположение для НЕ-decomposed
 - `.mermaid` в `diagrams/mermaid/` — decomposed views (foundation)
-- Новые architecture views создаются как `.mmd` в `mmd-diagrams/architecture/`
+- Новые architecture views создаются как `.mermaid` в `mmd-diagrams/architecture/`
 
 ### D3: View-based Decomposition Rules
 - Hard limit: 20 узлов на view-файл (Mermaid Dagre constraint)
@@ -668,11 +668,11 @@ Domain=purple (`#f3e5f5`/`#6a1b9a`), Application=green, Infrastructure=red.
 - Оригиналы сохраняются как *-full reference
 
 ### D4: Metadata Formats
-- `.mmd` файлы: `@version`, `@date`, `@type`, `@level`, `@nodes`
+- `.mermaid` файлы: `@version`, `@date`, `@type`, `@level`, `@nodes`
 - `.mermaid` views: `%% View: <type> | Parent: <file>`
 
 ### D5: CI Validation
-`scripts/lint_diagrams.py` проверяет оба каталога:
+`scripts/lint-diagrams.py` проверяет оба каталога:
 - SIZE-001/002: node limits
 - META-001: metadata presence
 - COLOUR-001: approved palette
@@ -692,7 +692,7 @@ Pre-commit hook: `lint-diagrams`.
 
 ### Negative
 - Два каталога + два расширения — cognitive overhead
-- Синхронизация foundation/*.mmd ↔ diagrams/mermaid/*-full.mermaid
+- Синхронизация foundation/*.mermaid ↔ diagrams/mermaid/*-full.mermaid
 
 ### Risks
 - linkStyle индексы хрупкие
@@ -739,7 +739,7 @@ CRITICAL    HIGH         HIGH         MEDIUM       MEDIUM       LOW         GOVE
 | 1: Декомпозиция CRITICAL (foundation) | **УДАЛЁН** | Уже выполнен в main (156 файлов) |
 | 2: Subgraph | Поглощён Промтом 1 + 3 | Subgraph уже есть в views; focus на цвета |
 | 3: linkStyle | → Промт 2 | Без изменений по сути |
-| 4: lint_diagrams.py | → Промт 4 | Адаптирован для двух каталогов |
+| 4: lint-diagrams.py | → Промт 4 | Адаптирован для двух каталогов |
 | 5: Template | → Промт 5 | Без изменений |
 | 6: Layout | → Промт 6 | Без изменений |
 | 7: ADR-040 | → Промт 7 | Обновлён: dual-repo, два расширения |
@@ -751,10 +751,10 @@ CRITICAL    HIGH         HIGH         MEDIUM       MEDIUM       LOW         GOVE
 | Категория | Файлов |
 |-----------|--------|
 | Обновлённые .mermaid (цвета + linkStyle) | ~156 |
-| Новые .mmd (architecture decomposition) | ~11 |
-| Обновлённые .mmd (метаданные @nodes) | ~18 |
+| Новые .mermaid (architecture decomposition) | ~11 |
+| Обновлённые .mermaid (метаданные @nodes) | ~18 |
 | Новые файлы (template) | 1 |
-| Обновлённые скрипты | 1 (lint_diagrams.py) |
+| Обновлённые скрипты | 1 (lint-diagrams.py) |
 | Обновлённый pre-commit | 1 |
 | Новый ADR | 1 |
 | Обновлённая документация | 3–4 (READMEs, policy) |

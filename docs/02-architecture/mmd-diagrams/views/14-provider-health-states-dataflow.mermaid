@@ -1,0 +1,60 @@
+%% View: Data-Flow | Parent: 14-provider-health-states-full.mermaid
+%% @uniform width=176 height=56 max_title_len=17 max_desc_lines=0
+flowchart TB
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        N2["WatchingErrors"]
+        N7["ErrorAccumulating"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N1["*"]
+        N3["ProcessingRequest"]
+        N4["HEALTHY"]
+        N5["DEGRADED"]
+        N6["RequestSuccess"]
+        N8["RecoveryProgress"]
+        N9["UNHEALTHY"]
+        N10["WaitingForProbe"]
+        N11["SendProbe"]
+        N12["NormalOperation"]
+    end
+
+    N1 --> N4
+    N1 --> N12
+    N1 --> N3
+    N3 --> N6
+    N6 --> N3
+    N4 --> N5
+    N1 --> N2
+    N2 --> N7
+    N2 --> N8
+    N7 --> N2
+    N8 --> N2
+    N5 --> N4
+    N5 --> N9
+    N1 --> N10
+    N10 --> N11
+    N9 --> N5
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+
+    linkStyle 0 stroke:#1E293B,stroke-width:4px
+    linkStyle 1 stroke:#1E293B,stroke-width:4px
+    linkStyle 2 stroke:#1E293B,stroke-width:4px
+    linkStyle 3 stroke:#1E293B,stroke-width:4px
+    linkStyle 4 stroke:#1E293B,stroke-width:4px
+    linkStyle 5 stroke:#1E293B,stroke-width:4px
+    linkStyle 6 stroke:#1E293B,stroke-width:4px
+    linkStyle 7 stroke:#1E293B,stroke-width:4px
+    linkStyle 8 stroke:#1E293B,stroke-width:4px
+    linkStyle 9 stroke:#1E293B,stroke-width:4px
+    linkStyle 10 stroke:#1E293B,stroke-width:4px
+    linkStyle 11 stroke:#1E293B,stroke-width:4px
+    linkStyle 12 stroke:#1E293B,stroke-width:4px
+    linkStyle 13 stroke:#1E293B,stroke-width:4px
+    linkStyle 14 stroke:#1E293B,stroke-width:4px
+    linkStyle 15 stroke:#1E293B,stroke-width:4px

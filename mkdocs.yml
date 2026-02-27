@@ -79,6 +79,7 @@ nav:
                     -   "File Policy": 00-project/governance/03-file-policy.md
                     -   "Extending BioETL": 00-project/governance/04-extending-bioetl.md
                     -   "GitHub Policy": 00-project/governance/05-github-policy.md
+                    -   "Docs Publication Policy": 00-project/governance/06-doc-publication-policy.md
     -   Architecture:
             -   "Overview": 02-architecture/00-overview.md
             -   Layers:
@@ -92,8 +93,13 @@ nav:
             -   "Data Flow": 02-architecture/data-flow.md
             -   "Data Layers": 02-architecture/data-layers.md
             -   "Observability Layers": 02-architecture/observability-layers.md
-            -   "Diagrams": 02-architecture/diagrams.md
-            -   "Diagramming Policy": 02-architecture/diagrams/00-diagramming-policy.md
+            -   Diagrams:
+                    -   "Overview": 02-architecture/diagrams.md
+                    -   "Diagramming Policy": 02-architecture/mmd-diagrams/docs/00-diagramming-policy.md
+                    -   "Diagram Catalog": 02-architecture/mmd-diagrams/docs/diagram-catalog.md
+                    -   "Diagram Index": 02-architecture/mmd-diagrams/docs/diagrams-index.md
+                    -   "Views Inventory": 02-architecture/mmd-diagrams/docs/diagram-views-inventory.md
+                    -   "Workflow Guide": 02-architecture/mmd-diagrams/docs/DIAGRAM-WORKFLOW-GUIDE.md
             -   Decisions:
                     -   "Index": 02-architecture/decisions/README.md
                     -   "ADR-001 Delta Lake vs Parquet": 02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md
@@ -135,6 +141,7 @@ nav:
                     -   "ADR-037 Canonical Schema Generation": 02-architecture/decisions/ADR-037-canonical-schema-generation.md
                     -   "ADR-038 Enum Externalization": 02-architecture/decisions/ADR-038-enum-externalization.md
                     -   "ADR-039 Unified Entity Config": 02-architecture/decisions/ADR-039-unified-entity-config-format.md
+                    -   "ADR-040 Diagram Governance": 02-architecture/decisions/ADR-040-diagram-governance.md
     -   Guides:
             -   "Getting Started": 03-guides/getting-started.md
             -   "Quick Start": 03-guides/quick-start.md
@@ -157,6 +164,12 @@ nav:
                     -   "Schema Artifact Migration": 03-guides/migration-schema-artifacts.md
                     -   "v5.9 → v5.14": 03-guides/migration-5.9-to-5.14.md
                     -   "v5.14 → v6.0": 03-guides/migration-5.14-to-6.0.md
+            -   Dashboards:
+                    -   "Overview": 03-guides/dashboards/README.md
+                    -   "V2 Updates": 03-guides/dashboards/DASHBOARD_V2_UPDATES.md
+                    -   "V2 Usage": 03-guides/dashboards/DASHBOARD_V2_USAGE.md
+                    -   "Monitoring Index": 03-guides/dashboards/MONITORING_INDEX.md
+                    -   "Variables Guide": 03-guides/dashboards/VARIABLES_GUIDE.md
             -   "File Path Audit Report": 03-guides/file-path-audit-report.md
     -   Providers:
             -   "Overview": 04-reference/providers/README.md
@@ -173,6 +186,7 @@ nav:
                     -   "Publication Term": 04-reference/providers/chembl/publication-term.md
                     -   "Target": 04-reference/providers/chembl/target.md
                     -   "Target Component": 04-reference/providers/chembl/target-component.md
+                    -   "Subcellular Fraction": 04-reference/providers/chembl/subcellular-fraction.md
                     -   "Tissue": 04-reference/providers/chembl/tissue.md
             -   PubChem:
                     -   "Compound": 04-reference/providers/pubchem/compound.md

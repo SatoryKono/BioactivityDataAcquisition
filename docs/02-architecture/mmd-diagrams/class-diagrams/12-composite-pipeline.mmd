@@ -6,7 +6,9 @@
 %% @type    classDiagram
 %% @level   Class / Interface
 
+%% @uniform class width=256 height=198 max_title_len=27 max_desc_lines=9
 classDiagram
+    direction TB
     class CompositePipelineRunner {
         -_config: CompositeConfig
         -_runtime: CompositeRuntimeConfig
@@ -25,6 +27,10 @@ classDiagram
         +dry_run: bool
         +enrich_only: bool
         +cached_bronze: bool
+        
+        
+        
+        
     }
 
     class EnrichmentCoordinator {
@@ -32,12 +38,23 @@ classDiagram
         +dq_config: CompositeDQConfig
         +max_concurrency: int
         +run_enrichers(keys, enrichers, factory) dict~str, EnrichmentResult~
+        
+        
+        
+        
+        
     }
 
     class DependencyCoordinator {
         -_logger: LoggerPort
         -_delta_reader: DeltaReaderPort | None
         +run_dependencies(keys, deps, completed, factory) dict~str, DependencyResult~
+        
+        
+        
+        
+        
+        
     }
 
     class MergeService {
@@ -46,45 +63,118 @@ classDiagram
         -_renamer: ColumnRenamer
         -_orderer: ColumnOrderer
         +merge(seed_table, enrichers, results, ...) MergeResult
+        
+        
+        
+        
     }
 
     class EnricherAggregator {
         +aggregate(df, config, enricher_name) DataFrame
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class EnricherDeduplicator {
         +deduplicate(df, config) DataFrame
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class ColumnRenamer {
         +rename_columns(df, rename_map) DataFrame
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class ColumnOrderer {
         +order_column_names(columns) list~str~
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class KeyExtractorService {
         +extract_keys(df, key_column) DataFrame
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class CompositeCheckpointManager {
         +save_state(stage, data) None
         +load_state() dict | None
         +get_completed_stages() set~str~
+        
+        
+        
+        
+        
+        
     }
 
     class CompositePreflightValidator {
         +validate(config) list~str~
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class FSMStateHelper {
         +transition(current, event) CompositeState
         +is_terminal(state) bool
+        
+        
+        
+        
+        
+        
+        
     }
 
     class EnrichmentCrossValidator {
         +validate(results) CrossValidationStats
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     CompositePipelineRunner *-- EnrichmentCoordinator

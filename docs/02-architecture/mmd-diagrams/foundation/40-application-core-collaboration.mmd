@@ -8,35 +8,35 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
-%% @uniform width=256 height=126 max_title_len=27 max_desc_lines=5
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%% @uniform width=256 height=144 max_title_len=25 max_desc_lines=6
 flowchart TB
     subgraph Runner["PipelineRunner (application/core/runner.py)"]
-        RUN["run() — main orchestrator&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        RUN["run() — main orchestrator<br/><br/><br/><br/><br/>"]
     end
 
     subgraph Lifecycle["Lifecycle Services"]
-        LM["LockManager&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• acquire(key, owner, ttl=90s)<br/>• release(key, owner)<br/>• validate_ownership()<br/>&nbsp;<br/>&nbsp;"]
+        LM["LockManager<br/>• acquire(key, owner, ttl=90s)<br/>• release(key, owner)<br/>• validate_ownership()<br/><br/>"]
     end
 
     subgraph Validation["Pre/Post Services"]
     end
 
     subgraph Execution["Batch Execution"]
-        BE["BatchExecutor (786 LOC)&nbsp;&nbsp;&nbsp;&nbsp;<br/>• execute_batch()<br/>• _extract()<br/>• _transform()<br/>• _write()<br/>&nbsp;"]
-        BT["BatchTransformer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• transform(records)<br/>→ TransformResult<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        BWR["BatchWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• write(batch_data)<br/>• write_bronze()<br/>• write_silver()<br/>• write_gold()<br/>&nbsp;"]
-        QM["QuarantineManager&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• route_failed_records()<br/>• create_entry()<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        BE["BatchExecutor (786 LOC)<br/>• execute_batch()<br/>• _extract()<br/>• _transform()<br/>• _write()<br/>"]
+        BT["BatchTransformer<br/>• transform(records)<br/>→ TransformResult<br/><br/><br/>"]
+        BWR["BatchWriter<br/>• write(batch_data)<br/>• write_bronze()<br/>• write_silver()<br/>• write_gold()<br/>"]
+        QM["QuarantineManager<br/>• route_failed_records()<br/>• create_entry()<br/><br/><br/>"]
     end
 
     subgraph Observability["Observability"]
-        OBS["PipelineObserver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• __enter__() → started<br/>• __exit__() → completed/failed<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        BMR["BatchMetricsRecorder&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• record(size, duration, errors)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        BTM["BatchTracingManager&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• start_span()<br/>• end_span()<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        OBS["PipelineObserver<br/>• __enter__() → started<br/>• __exit__() → completed/failed<br/><br/><br/>"]
+        BMR["BatchMetricsRecorder<br/>• record(size, duration, errors)<br/><br/><br/><br/>"]
+        BTM["BatchTracingManager<br/>• start_span()<br/>• end_span()<br/><br/><br/>"]
     end
 
     subgraph Bundle["PipelineServices (frozen dataclass)"]
-        PS["All ports injected:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• storage (bronze+silver+gold)<br/>• lock, checkpoint<br/>• quarantine<br/>• logger, metrics, tracing<br/>• validators, pii_hasher"]
+        PS["All ports injected:<br/>• storage (bronze+silver+gold)<br/>• lock, checkpoint<br/>• quarantine<br/>• logger, metrics, tracing<br/>• validators, pii_hasher"]
     end
 
     %% Runner orchestration
@@ -61,5 +61,5 @@ flowchart TB
     PS -.->|"provides ports to"| Runner & Lifecycle & Validation & Execution
 
     %% Styling
-    style Runner fill:#e3f2fd,stroke:#1565c0,stroke-width:3px
+    style Runner fill:#eff6ff,stroke:#2563eb,stroke-width:3px
     style Bundle fill:#f5f5f5,stroke:#9e9e9e

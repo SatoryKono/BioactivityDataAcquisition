@@ -13,8 +13,8 @@
 
 ## 1. Чек-лист создания нового Pipeline
 
-- [ ] Создать entity config в `configs/pipelines/<provider>/<entity>.yaml`
-- [ ] Валидировать через `-schema.json`
+- [ ] Создать entity config в `configs/entities/<provider>/<entity>.yaml`
+- [ ] Валидировать через `configs/-schema/pipeline.json` и `scripts/validate_pipeline_configs.py`
 - [ ] Выбрать каноническое имя согласно [02-naming-policy.md](02-naming-policy.md)
 - [ ] Создать трансформер в `src/bioetl/application/pipelines/`
 - [ ] Зарегистрировать в `PipelineRegistry`
@@ -29,10 +29,10 @@
 ### 2.1. Минимальный шаблон
 
 ```yaml
-# configs/pipelines/<provider>/<entity>.yaml
+# configs/entities/<provider>/<entity>.yaml
 # Pipeline configuration for <Provider> <Entity>.
 #
-# Inherits defaults from ../-defaults.yaml:
+# Uses defaults from configs/base/pipeline.yaml:
 # - dq-overrides, circuit-breaker, sink structure, maintenance, input-filter
 #
 # IMPORTANT: Use Canonical Terms from 02-naming-policy.md
@@ -80,7 +80,7 @@ sink:
 
 ### 3.1. Автоматическая валидация
 
-Все entity configs валидируются через `configs/pipelines/-schema.json`.
+Все entity configs валидируются через `configs/-schema/pipeline.json`.
 
 **Pre-commit hook:**
 
@@ -90,28 +90,28 @@ sink:
   hooks:
     - id: validate-pipeline-configs
       name: Validate pipeline configs
-      entry: python scripts/validate-pipeline-configs.py
+      entry: python scripts/validate_pipeline_configs.py
       language: python
-      files: ^configs/pipelines/.+\.yaml$
-      exclude: ^configs/pipelines/-
+      files: ^configs/entities/.+\.yaml$
+      exclude: ^configs/entities/.*/-
 ```
 
 ### 3.2. Ручная валидация
 
 ```bash
-# Валидация одного файла
-python scripts/validate-pipeline-configs.py configs/pipelines/chembl/activity.yaml
+# Валидация всех entity/composite конфигов
+python scripts/validate_pipeline_configs.py --verbose
 
 # Валидация всех конфигов
-python scripts/validate-pipeline-configs.py
+python scripts/validate_pipeline_configs.py
 
-# Или через make
-make validate-configs
+# Строгий режим (warnings как errors)
+python scripts/validate_pipeline_configs.py --strict
 ```
 
 ### 3.3. Структура JSON Schema
 
-Схема `-schema.json` проверяет:
+Схема `configs/-schema/pipeline.json` проверяет:
 
 | Проверка          | Описание                                    |
 | ----------------- | ------------------------------------------- |
@@ -225,9 +225,9 @@ import jsonschema
 
 
 def test-<provider>-<entity>-config-valid():
-    with open("configs/pipelines/-schema.json") as f:
+    with open("configs/-schema/pipeline.json") as f:
         schema = json.load(f)
-    with open("configs/pipelines/<provider>/<entity>.yaml") as f:
+    with open("configs/entities/<provider>/<entity>.yaml") as f:
         config = yaml.safe-load(f)
 
     # Должен пройти без исключений
@@ -235,7 +235,7 @@ def test-<provider>-<entity>-config-valid():
 
 
 def test-<provider>-<entity>-has-sort-by():
-    with open("configs/pipelines/<provider>/<entity>.yaml") as f:
+    with open("configs/entities/<provider>/<entity>.yaml") as f:
         config = yaml.safe-load(f)
 
     assert "sort-by" in config["sink"]["silver"]
@@ -259,7 +259,7 @@ def test-<provider>-<entity>-has-sort-by():
 ### 7.1. Config
 
 ```yaml
-# configs/pipelines/chembl/target-component.yaml
+# configs/entities/chembl/target-component.yaml
 pipeline-name: chembl_target_component
 provider: chembl
 entity-type: target-component
@@ -304,8 +304,8 @@ input-filter:
 ### 7.2. Валидация
 
 ```bash
-# Проверить соответствие схеме
-python scripts/validate-pipeline-configs.py configs/pipelines/chembl/target-component.yaml
+# Проверить соответствие схемам
+python scripts/validate_pipeline_configs.py --verbose
 ```
 
 ----------------------------------------------------------------------

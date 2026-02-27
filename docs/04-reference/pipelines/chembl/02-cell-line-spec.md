@@ -383,7 +383,7 @@ Mode: Overwrite
 ## 10. Pipeline Configuration
 
 ```yaml
-# configs/pipelines/chembl/cell-line.yaml
+# configs/entities/chembl/cell-line.yaml
 
 pipeline-name: chembl_cell_line
 provider: chembl

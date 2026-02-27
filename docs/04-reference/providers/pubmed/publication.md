@@ -109,7 +109,7 @@ bioetl run pubmed_publication --run-type rebuild
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/pubmed/publication.yaml` |
+| Конфигурация | `configs/entities/pubmed/publication.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/pubmed/transformer.py` |
 | XML Utils | `src/bioetl/application/pipelines/pubmed/xml-utils.py` |
 

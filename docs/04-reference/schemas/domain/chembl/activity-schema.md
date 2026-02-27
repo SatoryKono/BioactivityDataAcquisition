@@ -453,7 +453,7 @@ Gold layer contains only records passing gold-filters:
 | Domain Entity | `src/bioetl/domain/entities/chembl_activity.py` |
 | Base Schema | `src/bioetl/domain/schemas/base.py` |
 | Transformer | `src/bioetl/application/pipelines/chembl/activity-transformer.py` |
-| Pipeline Config | `configs/pipelines/chembl/activity.yaml` |
+| Pipeline Config | `configs/entities/chembl/activity.yaml` |
 | VCR Cassettes | `tests/fixtures/vcr/TestChemblActivityPipeline.*.yaml` |
 
 ---

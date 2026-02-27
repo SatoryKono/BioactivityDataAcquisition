@@ -8,34 +8,35 @@
 %% @uniform class width=232 height=216 max_title_len=24 max_desc_lines=10
 
 classDiagram
+    direction TB
     class DataSourcePort {
-        <<Protocol>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<Protocol>>
         +fetch(entity_type, limit, query, filter_ids, filter_field) AsyncIterator~dict~
         +health_check() HealthCheckResult
-        +aclose() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +__aenter__() Self&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +__aexit__(...) None&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        +aclose() None
+        +__aenter__() Self
+        +__aexit__(...) None
+        
+        
+        
+        
     }
 
     class FilterableDataSourcePort {
-        <<Protocol>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<Protocol>>
         +fetch_filtered(entity_type, filter_ids, filter_field, limit) AsyncIterator~dict~
         +fetch_multi_filtered(entity_type, filters, limit) AsyncIterator~dict~
         +fetch_filtered_with_fallback(entity_type, filter_ids, filter_field, limit) AsyncIterator~dict~
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
+        
     }
 
     class StoragePort {
-        <<Protocol>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<Protocol>>
         +write_bronze(records, config, metadata) BronzeWriteResult
         +write_silver(records, config) SilverWriteResult
         +write_gold(records, config) None
@@ -48,211 +49,231 @@ classDiagram
     }
 
     class LockPort {
-        <<Protocol>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<Protocol>>
         +acquire(key, owner_id, ttl) FencingToken
         +release(key, owner_id) None
         +heartbeat(key, owner_id) None
         +validate_owner(key, owner_id) bool
         +validate_fencing_token(token) bool
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
     }
 
     class CheckpointPort {
-        <<Protocol>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +save(key, data) None&nbsp;&nbsp;&nbsp;
-        +load(key) dict | None&nbsp;&nbsp;
-        +list_all() list&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +delete(key) None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        <<Protocol>>
+        +save(key, data) None
+        +load(key) dict | None
+        +list_all() list
+        +delete(key) None
+        
+        
+        
+        
+        
     }
 
     class QuarantinePort {
-        <<Protocol>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<Protocol>>
         +write(records, pipeline, error_code) None
         +inspect(pipeline, limit) list
         +get_stats(pipeline) dict
         +replay(pipeline, filter_fn) int
         +purge(pipeline, before) int
         +update_status(payload_hash, status) None
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
     }
 
     class AuditPort {
-        <<Protocol>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<Protocol>>
         +log_write(entry: AuditEntry) None
         +get_entries(filters) list~AuditEntry~
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
+        
+        
     }
 
     class LoggerPort {
-        <<Protocol>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<Protocol>>
         +bind(**kwargs) LoggerPort
         +info(msg, **fields) None
         +warning(msg, **fields) None
         +error(msg, **fields) None
         +debug(msg, **fields) None
         +exception(msg, **fields) None
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
     }
 
     class MetricsPort {
-        <<Protocol>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<Protocol>>
         +observe_histogram(name, value, labels) None
         +increment_counter(name, labels) None
         +set_gauge(name, value, labels) None
-        +close() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        +close() None
+        
+        
+        
+        
+        
     }
 
     class TracingPort {
-        <<Protocol>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<Protocol>>
         +get_tracer(name) Tracer
-        +close() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        +close() None
+        
+        
+        
+        
+        
+        
+        
     }
 
     class CircuitBreakerPort {
-        <<Protocol>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<Protocol>>
         +get_state() CircuitBreakerState
         +get_failure_count() int
-        +call(fn) T&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +reset() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        +call(fn) T
+        +reset() None
+        
+        
+        
+        
+        
     }
 
     class RateLimiterPort {
-        <<Protocol>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +acquire(tokens) None&nbsp;&nbsp;&nbsp;
-        +try_acquire() bool&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +available_tokens() int&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        <<Protocol>>
+        +acquire(tokens) None
+        +try_acquire() bool
+        +available_tokens() int
+        
+        
+        
+        
+        
+        
     }
 
     class PiiHasherPort {
-        <<Protocol>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +hash(value: str) str&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        <<Protocol>>
+        +hash(value: str) str
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class MetadataWriterPort {
-        <<Protocol>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<Protocol>>
         +write(path, metadata) None
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class DeltaReaderPort {
-        <<Protocol>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<Protocol>>
         +read_table(path, columns, limit) DataFrame
         +get_schema(path) Schema
         +get_row_count(path) int
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
+        
     }
 
     class InputFilterPort {
-        <<Protocol>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<Protocol>>
         +load_filter_ids(path, column) FilterLoadResult
         +load_multi_column_filter(path, columns) FilterLoadResult
         +load_filter_with_fallback(path, column, fallback) FilterLoadResult
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
+        
     }
 
     class DQMonitorPort {
-        <<Protocol>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<Protocol>>
         +add_metric(name, value) None
         +check_quality() DQResult
         +update_baseline_from_metrics() None
         +get_baseline_stats() dict
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
     }
 
     class JsonEncoderPort {
-        <<Protocol>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +encode(obj) str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +decode(s) Any&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        <<Protocol>>
+        +encode(obj) str
+        +decode(s) Any
+        
+        
+        
+        
+        
+        
+        
     }
 
     class MemoryMonitorPort {
-        <<Protocol>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<Protocol>>
         +get_stats() MemoryStats
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     DataSourcePort <|-- FilterableDataSourcePort
+
+    style DataSourcePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style FilterableDataSourcePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style StoragePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style LockPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style CheckpointPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style QuarantinePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style AuditPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style LoggerPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style MetricsPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style TracingPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style CircuitBreakerPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style RateLimiterPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style PiiHasherPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style MetadataWriterPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style DeltaReaderPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style InputFilterPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style DQMonitorPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style JsonEncoderPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style MemoryMonitorPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px

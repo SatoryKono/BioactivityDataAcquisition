@@ -8,22 +8,23 @@
 %% @view    hierarchy-base
 %% @parent  05-provider-adapter-hierarchy.mmd
 %% @nodes   12
-%% @uniform width=304 height=56 max_title_len=33 max_desc_lines=0
+%% @uniform width=280 height=56 max_title_len=28 max_desc_lines=1
 
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'POLYLINE'}}}%%
 graph TB
 %% keep-orphan: FSM, HCP, NSMF, PFM
     subgraph Domain["Domain Layer"]
-        DSP["DataSourcePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        HCP["HealthCheckPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        DSP["DataSourcePort"]:::size-sm
+        HCP["HealthCheckPort"]:::size-sm
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        HCPM["HealthCheckProviderMixin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        NSMF["NotSupportedMultiFilterMixin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        FSM["FilterableStubMixin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        PFM["PaginatedFetcherMixin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        BHA["BaseHttpAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        BSA["BaseSyncAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        HCPM["HealthCheckProviderMixin"]:::size-sm
+        NSMF["NotSupportedMultiFilterMixin"]:::size-sm
+        FSM["FilterableStubMixin"]:::size-sm
+        PFM["PaginatedFetcherMixin"]:::size-sm
+        BHA["BaseHttpAdapter"]:::size-sm
+        BSA["BaseSyncAdapter"]:::size-sm
     end
 
     DSP -->|extends| FDSP
@@ -35,5 +36,8 @@ graph TB
     DSP -.->|wraps| RDD
     DSP -.->|wraps| CBDS
 
-    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    classDef domain fill:#f5f3ff,stroke:#7c3aed
+    classDef infra fill:#fff1f2,stroke:#dc2626
+
+    class DSP,HCP domain
+    class HCPM,NSMF,FSM,PFM,BHA,BSA infra

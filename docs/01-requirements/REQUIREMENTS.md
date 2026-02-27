@@ -1,7 +1,7 @@
 # BioETL: Требования к Проекту
 
 *Версия: 1.5 (2026-02-04)*
-*Синхронизировано с RULES.md v5.22 (2026-02-21)*
+*Синхронизировано с RULES.md v5.22 (2026-02-27)*
 
 ---
 
@@ -287,13 +287,13 @@
 
 #### REQ-LOAD-001
 - **Уровень**: MUST
-- **Описание**: Для `loading_strategy: full_scan_only` checkpoint resume MUST быть отключён
-- **Проверка**: Unit/architecture тесты `CheckpointManager` блокируют resume для `full_scan_only`
+- **Описание**: Для `loading-strategy: full-scan-only` checkpoint resume MUST быть отключён
+- **Проверка**: Unit/architecture тесты `CheckpointManager` блокируют resume для `full-scan-only`
 
 #### REQ-LOAD-002
 - **Уровень**: MUST
-- **Описание**: Publication-related pipeline configs MUST явно задавать `loading_strategy: full_scan_only`
-- **Проверка**: Архитектурный тест `tests/architecture/test_force_full_scan_publication.py`
+- **Описание**: Publication-related pipeline configs MUST явно задавать `loading-strategy: full-scan-only`
+- **Проверка**: Архитектурный тест `tests/architecture/test-force-full-scan-publication.py`
 
 ### 2.12 Entity ID Generation
 

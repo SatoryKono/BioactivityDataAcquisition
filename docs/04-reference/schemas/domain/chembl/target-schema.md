@@ -256,7 +256,7 @@ def -validate-invariants(self) -> None:
 |----------|------|
 | Pandera Schema | `src/bioetl/domain/schemas/chembl/target.py` |
 | Domain Entity | `src/bioetl/domain/entities/chembl-structures.py` |
-| Pipeline Config | `configs/pipelines/chembl/target.yaml` |
+| Pipeline Config | `configs/entities/chembl/target.yaml` |
 | Target Component Schema | `src/bioetl/domain/schemas/chembl/target-component.py` |
 
 ---

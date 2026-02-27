@@ -144,7 +144,7 @@ For persistent 429 errors:
 1. Check current rate limit configuration in pipeline YAML
 1. Reduce batch size if needed:
    ```yaml
-   # configs/pipelines/chembl/activity.yaml
+   # configs/entities/chembl/activity.yaml
    batch-size: 500  # Reduce from default
    ```
 1. Add delay between requests:

@@ -7,7 +7,7 @@
 %% @date    2026-02-24
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
-%% @uniform width=240 height=126 max_title_len=25 max_desc_lines=5
+%% @uniform width=256 height=144 max_title_len=25 max_desc_lines=6
 
 flowchart TB
 %% keep-orphan: CheckpointPort, CriticalError, DataQualityError, DataSourcePort, HealthStatus, InvalidStateError, LockPort, Measurement, MetricsPort, QuarantinePort, RecoverableError, RunType, StoragePort, TracingPort
@@ -23,11 +23,11 @@ flowchart TB
         end
 
         subgraph aggregates["aggregates/"]
-            Batch["Batch Aggregate&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>───────────────<br/>• add_record()<br/>• quarantine_record()<br/>• seal()<br/>• mark_committed()"]
+            Batch["Batch Aggregate<br/>───────────────<br/>• add_record()<br/>• quarantine_record()<br/>• seal()<br/>• mark_committed()"]
 
-            PipelineRun["PipelineRun Aggregate&nbsp;&nbsp;&nbsp;&nbsp;<br/>───────────────<br/>• start()<br/>• record_stage_success()<br/>• complete()<br/>• fail()"]
+            PipelineRun["PipelineRun Aggregate<br/>───────────────<br/>• start()<br/>• record_stage_success()<br/>• complete()<br/>• fail()"]
 
-            QuarantineEntry["QuarantineEntry Aggregate<br/>───────────────<br/>• mark_retrying()<br/>• mark_recovered()<br/>• mark_dead_letter()<br/>&nbsp;"]
+            QuarantineEntry["QuarantineEntry Aggregate<br/>───────────────<br/>• mark_retrying()<br/>• mark_recovered()<br/>• mark_dead_letter()<br/>"]
         end
 
         subgraph events["Domain Events"]
@@ -40,16 +40,16 @@ flowchart TB
         end
 
         subgraph value_objects["value_objects/"]
-            RunID["RunID (UUID)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-            BatchID["BatchID (UUID)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-            EntityID["EntityID (str)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-            ContentHash["ContentHash (str)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-            Measurement["Measurement&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(value, unit, relation)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+            RunID["RunID (UUID)<br/><br/><br/><br/><br/>"]
+            BatchID["BatchID (UUID)<br/><br/><br/><br/><br/>"]
+            EntityID["EntityID (str)<br/><br/><br/><br/><br/>"]
+            ContentHash["ContentHash (str)<br/><br/><br/><br/><br/>"]
+            Measurement["Measurement<br/>(value, unit, relation)<br/><br/><br/><br/>"]
         end
 
         subgraph types["types.py"]
-            RunType["RunType Enum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(INCREMENTAL, BACKFILL, REBUILD)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-            HealthStatus["HealthStatus Enum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(HEALTHY, DEGRADED, UNHEALTHY)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+            RunType["RunType Enum<br/>(INCREMENTAL, BACKFILL, REBUILD)<br/><br/><br/><br/>"]
+            HealthStatus["HealthStatus Enum<br/>(HEALTHY, DEGRADED, UNHEALTHY)<br/><br/><br/><br/>"]
         end
 
         subgraph exceptions["exceptions/"]

@@ -1,0 +1,63 @@
+%% View: Overview | Parent: 07-circuit-breaker-states-full.mermaid
+%% @uniform width=152 height=56 max_title_len=14 max_desc_lines=0
+flowchart TB
+
+    subgraph Application["Application Layer"]
+        direction TB
+        N1["*"]
+        N2["CLOSED"]
+        N3["ProcessRequest"]
+        N4["SendProbe"]
+        N5["Waiting"]
+        N6["Operational"]
+        N8["Probing"]
+        N9["OPEN"]
+        N10["HALF_OPEN"]
+        N11["Success"]
+        N12["Failure"]
+        N13["ProbeSuccess"]
+        N14["ProbeFailure"]
+        N15["RecordSuccess"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N7["Blocking"]
+    end
+
+    N1 --> N2
+    N1 --> N6
+    N1 --> N3
+    N3 --> N11
+    N3 --> N12
+    N11 --> N15
+    N2 --> N9
+    N1 --> N7
+    N1 --> N5
+    N9 --> N10
+    N1 --> N8
+    N1 --> N4
+    N4 --> N13
+    N4 --> N14
+    N10 --> N2
+    N10 --> N9
+
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+
+    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 8 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 10 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 11 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 12 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 13 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 14 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 15 stroke:#475569,stroke-width:2px,stroke-dasharray:5

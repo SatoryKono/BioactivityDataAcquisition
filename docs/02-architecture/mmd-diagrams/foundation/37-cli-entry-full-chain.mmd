@@ -8,41 +8,41 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
-%% @uniform width=264 height=162 max_title_len=28 max_desc_lines=7
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%% @uniform width=712 height=184 max_title_len=71 max_desc_lines=8
 flowchart TB
     subgraph CLI["Interfaces Layer (Click)"]
-        CMD["$ bioetl run chembl_activity\n--run-type incremental\n--batch-size 1000"]
-        PARSE["Parse CLI Arguments&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• pipeline_name<br/>• run_type (RunType enum)<br/>• batch_size, resume flag<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        OPTS["Build RunOptions&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• pipeline_name<br/>• run_type<br/>• batch_size<br/>• resume: bool<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        CMD["$ bioetl run chembl_activity\n--run-type incremental\n--batch-size 1000<br/><br/><br/><br/><br/><br/><br/>"]
+        PARSE["Parse CLI Arguments<br/>• pipeline_name<br/>• run_type (RunType enum)<br/>• batch_size, resume flag<br/><br/><br/><br/>"]
+        OPTS["Build RunOptions<br/>• pipeline_name<br/>• run_type<br/>• batch_size<br/>• resume: bool<br/><br/><br/>"]
     end
 
     subgraph Service["Application Service Layer"]
-        PRS["PipelineRunnerService.run()&nbsp;<br/>• lookup pipeline in registry<br/>• validate run options<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        RESOLVE["PipelineRegistry.get(name)&nbsp;&nbsp;<br/>→ PipelineFactoryPort<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        PRS["PipelineRunnerService.run()<br/>• lookup pipeline in registry<br/>• validate run options<br/><br/><br/><br/><br/>"]
+        RESOLVE["PipelineRegistry.get(name)<br/>→ PipelineFactoryPort<br/><br/><br/><br/><br/><br/>"]
     end
 
     subgraph Bootstrap["Composition Layer"]
-        BOOT["bootstrap_pipeline()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>→ assembly.py<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        ASSEMBLE["Full Assembly Sequence&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>1. Logger<br/>2. Config<br/>3. Storage<br/>4. HTTP Client<br/>5. Adapter<br/>6. Services<br/>7. Runner"]
+        BOOT["bootstrap_pipeline()<br/>→ assembly.py<br/><br/><br/><br/><br/><br/>"]
+        ASSEMBLE["Full Assembly Sequence<br/>1. Logger<br/>2. Config<br/>3. Storage<br/>4. HTTP Client<br/>5. Adapter<br/>6. Services<br/>7. Runner"]
     end
 
     subgraph Execute["Application Core"]
-        OBS_ENTER["PipelineObserver.__enter__()<br/>→ log started, inc counter<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        RUNNER["PipelineRunner.run()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        LOCK["LockManager.acquire()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>→ HeartbeatTask.start()<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        PRE["PreflightService.run()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>→ PreflightReport<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        BATCH["BatchExecutor loop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>→ extract/transform/validate/write<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        POST["PostrunService.run()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>→ vacuum, DQ report<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        UNLOCK["LockManager.release()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>→ HeartbeatTask.stop()<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        OBS_EXIT["PipelineObserver.__exit__()&nbsp;<br/>→ observe duration<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        OBS_ENTER["PipelineObserver.__enter__()<br/>→ log started, inc counter<br/><br/><br/><br/><br/><br/>"]
+        RUNNER["PipelineRunner.run()<br/><br/><br/><br/><br/><br/><br/>"]
+        LOCK["LockManager.acquire()<br/>→ HeartbeatTask.start()<br/><br/><br/><br/><br/><br/>"]
+        PRE["PreflightService.run()<br/>→ PreflightReport<br/><br/><br/><br/><br/><br/>"]
+        BATCH["BatchExecutor loop<br/>→ extract/transform/validate/write<br/><br/><br/><br/><br/><br/>"]
+        POST["PostrunService.run()<br/>→ vacuum, DQ report<br/><br/><br/><br/><br/><br/>"]
+        UNLOCK["LockManager.release()<br/>→ HeartbeatTask.stop()<br/><br/><br/><br/><br/><br/>"]
+        OBS_EXIT["PipelineObserver.__exit__()<br/>→ observe duration<br/><br/><br/><br/><br/><br/>"]
     end
 
     subgraph Result["Result & Exit"]
-        RES_OK["RunResult(status=SUCCESS)&nbsp;&nbsp;&nbsp;<br/>PipelineRunResult.SUCCESS<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        RES_FAIL["RunResult(status=FAILED)&nbsp;&nbsp;&nbsp;&nbsp;<br/>PipelineRunResult.FAILED<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        EXIT_OK["ExitCode.SUCCESS (0)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        EXIT_ERR["ExitCode.PIPELINE_ERROR (1)&nbsp;<br/>ExitCode.CONFIG_ERROR (2)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        RES_OK["RunResult(status=SUCCESS)<br/>PipelineRunResult.SUCCESS<br/><br/><br/><br/><br/><br/>"]
+        RES_FAIL["RunResult(status=FAILED)<br/>PipelineRunResult.FAILED<br/><br/><br/><br/><br/><br/>"]
+        EXIT_OK["ExitCode.SUCCESS (0)<br/><br/><br/><br/><br/><br/><br/>"]
+        EXIT_ERR["ExitCode.PIPELINE_ERROR (1)<br/>ExitCode.CONFIG_ERROR (2)<br/><br/><br/><br/><br/><br/>"]
     end
 
     %% Flow
@@ -70,7 +70,7 @@ flowchart TB
     RES_FAIL --> EXIT_ERR
 
     %% Styling
-    style CLI fill:#f3e5f5,stroke:#6a1b9a
-    style Bootstrap fill:#fce4ec,stroke:#c62828
-    style Execute fill:#e3f2fd,stroke:#1565c0
-    style Result fill:#e8f5e9,stroke:#2e7d32
+    style CLI fill:#f5f3ff,stroke:#7c3aed
+    style Bootstrap fill:#ffe4e6,stroke:#dc2626
+    style Execute fill:#eff6ff,stroke:#2563eb
+    style Result fill:#f0fdf4,stroke:#16a34a

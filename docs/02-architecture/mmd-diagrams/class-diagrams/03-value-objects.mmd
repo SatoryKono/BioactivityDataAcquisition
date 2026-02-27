@@ -8,8 +8,9 @@
 %% @uniform class width=176 height=240 max_title_len=17 max_desc_lines=13
 
 classDiagram
+    direction TB
     class BronzeWriteResult {
-        <<frozen dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<frozen dataclass>>
         +batch_id: BatchID
         +relative_path: str
         +absolute_path: str
@@ -18,111 +19,111 @@ classDiagram
         +uncompressed_size: int
         +checksum_blake2: str
         +compression_ratio: float
-        +exists() bool&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        +exists() bool
+        
+        
+        
     }
 
     class SilverWriteResult {
-        <<frozen dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +table_name: str&nbsp;
-        +table_path: str&nbsp;
+        <<frozen dataclass>>
+        +table_name: str
+        +table_path: str
         +delta_version: int
         +record_count: int
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class RunContext {
-        <<dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +run_id: RunID&nbsp;&nbsp;&nbsp;
+        <<dataclass>>
+        +run_id: RunID
         +run_type: RunType
         +started_at: datetime
         +checkpoint_offset: int | None
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class HealthCheckResult {
-        <<frozen dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<frozen dataclass>>
         +status: HealthStatus
         +latency_ms: float
-        +provider: str&nbsp;&nbsp;&nbsp;
-        +endpoint: str&nbsp;&nbsp;&nbsp;
+        +provider: str
+        +endpoint: str
         +last_error: str | None
         +consecutive_failures: int
         +checked_at: datetime
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
     }
 
     class FencingToken {
-        <<frozen dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +sequence: int&nbsp;&nbsp;&nbsp;
-        +key: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +owner_id: RunID&nbsp;
+        <<frozen dataclass>>
+        +sequence: int
+        +key: str
+        +owner_id: RunID
         +issued_at: float
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class LockContext {
-        <<frozen dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +key: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +owner_id: RunID&nbsp;
-        +exclusive: bool&nbsp;
+        <<frozen dataclass>>
+        +key: str
+        +owner_id: RunID
+        +exclusive: bool
         +acquired_at: float | None
         +fencing_token: FencingToken | None
         +create() LockContext
-        +is_valid() bool&nbsp;
+        +is_valid() bool
         +matches_table(table) bool
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
     }
 
     class AuditEntry {
-        <<frozen dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +run_id: RunID&nbsp;&nbsp;&nbsp;
+        <<frozen dataclass>>
+        +run_id: RunID
         +timestamp: datetime
         +layer: AuditLayer
-        +table_name: str&nbsp;
+        +table_name: str
         +operation: AuditOperation
         +records_count: int
-        +metadata: dict&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        +metadata: dict
+        
+        
+        
+        
+        
     }
 
     class FilterLoadResult {
-        <<dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +ids: tuple~str~&nbsp;
+        <<dataclass>>
+        +ids: tuple~str~
         +total_count: int
         +unique_count: int
         +duplicate_count: int
@@ -130,78 +131,78 @@ classDiagram
         +column_ids: dict
         +valid_combinations: frozenset
         +filter_fields: list~str~
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
     }
 
     class MemoryStats {
-        <<dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +rss_bytes: int&nbsp;&nbsp;
-        +vms_bytes: int&nbsp;&nbsp;
-        +percent: float&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        <<dataclass>>
+        +rss_bytes: int
+        +vms_bytes: int
+        +percent: float
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class SourceMetadata {
-        <<dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +type: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<dataclass>>
+        +type: str
         +api_endpoint: str | None
         +request_details: dict | None
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class DQMetrics {
-        <<dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<dataclass>>
         +null_rate: float
         +duplicate_rate: float
         +schema_violations: int
         +custom_metrics: dict
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class DQResult {
-        <<dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +passed: bool&nbsp;&nbsp;&nbsp;&nbsp;
+        <<dataclass>>
+        +passed: bool
         +error_rate: float
         +metrics: DQMetrics
-        +anomalies: list&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        +anomalies: list
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class EnrichmentResult {
-        <<frozen dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<frozen dataclass>>
         +enricher_name: str
         +status: EnrichmentStatus
         +records_input: int
@@ -223,63 +224,77 @@ classDiagram
     HealthCheckResult --> HealthStatus
     EnrichmentResult --> EnrichmentStatus
 
+    style BronzeWriteResult fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style SilverWriteResult fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style RunContext fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style HealthCheckResult fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style FencingToken fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style LockContext fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style AuditEntry fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style FilterLoadResult fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style MemoryStats fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style SourceMetadata fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style DQMetrics fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style DQResult fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style EnrichmentResult fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+
     class AuditLayer {
-        <<StrEnum>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        BRONZE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        SILVER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        GOLD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        <<StrEnum>>
+        BRONZE
+        SILVER
+        GOLD
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
     class AuditOperation {
-        <<StrEnum>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        WRITE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        MERGE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        APPEND&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        DELETE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        OVERWRITE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        <<StrEnum>>
+        WRITE
+        MERGE
+        APPEND
+        DELETE
+        OVERWRITE
+        
+        
+        
+        
+        
+        
+        
     }
     class HealthStatus {
-        <<StrEnum>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        HEALTHY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        DEGRADED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        UNHEALTHY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        <<StrEnum>>
+        HEALTHY
+        DEGRADED
+        UNHEALTHY
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
     class EnrichmentStatus {
-        <<StrEnum>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        SUCCESS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        PARTIAL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        FAILED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        SKIPPED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        NOT_RUN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        TIMEOUT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        <<StrEnum>>
+        SUCCESS
+        PARTIAL
+        FAILED
+        SKIPPED
+        NOT_RUN
+        TIMEOUT
+        
+        
+        
+        
+        
+        
     }

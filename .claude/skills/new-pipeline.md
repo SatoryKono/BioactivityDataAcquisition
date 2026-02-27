@@ -31,13 +31,14 @@
 ### Шаг 2: Валидация
 
 Проверь:
-- [ ] Pipeline `configs/pipelines/{provider}/{entity}.yaml` НЕ существует
+- [ ] Entity config `configs/entities/{provider}/{entity}.yaml` НЕ существует
 - [ ] Naming conventions: snake_case для всех идентификаторов
-- [ ] Если новый provider — предупреди что нужен `configs/sources/{provider}.yaml`
+- [ ] Если новый provider — предупреди что нужен `configs/providers/{provider}.yaml`
 
 ### Шаг 3: Генерация файлов
 
-Создай 7 файлов по шаблонам ниже. Создай директории если не существуют.
+Создай 5 файлов по шаблонам ниже. Создай директории если не существуют.
+> **Примечание:** Конфиги проекта используют unified YAML — одного файла `configs/entities/{provider}/{entity}.yaml` достаточно для всех секций (pipeline, schema, quality, filters, contracts, hash_policy).
 
 ### Шаг 4: Регистрация
 
@@ -56,90 +57,104 @@ make lint && pytest tests/unit/application/pipelines/{provider}/ -v --tb=short
 
 ## Шаблоны
 
-### 1. Pipeline Config
+### 1. Unified Entity Config
 
-**Путь:** `configs/pipelines/{provider}/{entity}.yaml`
-
-```yaml
-# =============================================================================
-# {PROVIDER_TITLE} {ENTITY_TITLE} Pipeline Configuration
-# =============================================================================
-# Minimal config using convention-based path resolution (ADR-029).
-# Auto-computed paths from provider/entity_type.
-#
-# Convention-based defaults:
-#   source_file: ../../sources/{provider}.yaml
-#   dq_config_file: ../../quality/entities/{provider}/{entity}.yaml
-#   filter_config_file: ../../filters/entities/{provider}/{entity}.yaml
-#   sink.*.path: data/output/{layer}/{provider}/{entity}
-
-pipeline_name: {provider}_{entity}
-provider: {provider}
-entity_type: {entity}
-version: "1.0.0"
-description: "Extract {entity} records from {PROVIDER_TITLE} API"
-
-primary_keys: ["{primary_key}"]
-silver_table: "{provider}_{entity}"
-gold_table: "{provider}_{entity}"
-
-# Batch processing
-batch_size: 100
-checkpoint_interval: 1000
-```
-
-### 2. DQ Config
-
-**Путь:** `configs/quality/entities/{provider}/{entity}.yaml`
+**Путь:** `configs/entities/{provider}/{entity}.yaml`
 
 ```yaml
 # =============================================================================
-# {PROVIDER_TITLE} {ENTITY_TITLE} DQ Rules
+# {PROVIDER_TITLE} {ENTITY_TITLE} Entity Configuration
 # =============================================================================
-# Inherits from: _defaults.yaml -> providers/{provider}.yaml
+# Unified config: pipeline + schema + quality + filters + contracts + hash_policy.
+# Reference: configs/entities/chembl/activity.yaml
 
 version: "1.0.0"
 provider: {provider}
 entity: {entity}
 
-# Entity-specific field validations
-entity_field_validations:
-  - field: {primary_key}
-    type: required
-    nullable: false
-    error_message: "{primary_key} is required"
+pipeline:
+    pipeline_name: {provider}_{entity}
+    provider: {provider}
+    entity_type: {entity}
+    description: "Extract {entity} records from {PROVIDER_TITLE} API"
+    business_primary_keys:
+        - {primary_key}
+    batch_size: 100
+
+schema:
+    content_hash:
+        include: []
+        exclude: []
+    column_groups:
+        - name: system
+          fields:
+              - entity_id
+              - content_hash
+              - _run_id
+              - _run_type
+              - _source_batch_id
+              - _ingestion_ts
+              - _index
+        - name: business
+          fields:
+              - {primary_key}
+{SCHEMA_BUSINESS_FIELDS}
+        - name: dq
+          pattern: ^_dq_
+    silver:
+        include_groups: [system, business, dq]
+        exclude_fields: []
+        alias_policy: preserve
+    gold:
+        include_groups: [system, business]
+        exclude_fields: [_dq_*, _source_batch_id, _index]
+        alias_policy: canonical
+
+quality:
+    version: "1.0.0"
+    provider: {provider}
+    entity: {entity}
+    field_validations:
+        - field: {primary_key}
+          type: required
+          nullable: false
+          error_message: "{primary_key} is required"
 {FIELD_VALIDATIONS}
+    cross_field_validations: []
+    conditional_validations: []
 
-# Cross-field validations
-entity_cross_field_validations: []
+filters:
+    version: "1.0.0"
+    provider: {provider}
+    entity: {entity}
+    input_filter:
+        enabled: false
+    gold_filters:
+        required_fields:
+            - {primary_key}
+        columns: {}
 
-# Conditional validations
-entity_conditional_validations: []
+contracts:
+    primary_key:
+        - {primary_key}
+    merge_keys:
+        - {primary_key}
+    rename_map:
+        run_id: _run_id
+        run_type: _run_type
+        source_batch_id: _source_batch_id
+        ingestion_ts: _ingestion_ts
+        source: _source
+    hash_include: []
+    hash_exclude:
+        - _ingestion_ts
+        - _run_id
+        - _run_type
+        - _dq_errors
+        - _dq_status
 ```
 
-### 3. Filter Config
-
-**Путь:** `configs/filters/entities/{provider}/{entity}.yaml`
-
-```yaml
-# =============================================================================
-# {PROVIDER_TITLE} {ENTITY_TITLE} Filter Configuration
-# =============================================================================
-
-version: "1.0.0"
-provider: {provider}
-entity: {entity}
-
-input_filter:
-  enabled: false
-
-gold_filters:
-  required_fields:
-    - {primary_key}
-  columns: {}
-```
-
-### 4. Domain Entity
+### 2. Domain Entity
 
 **Путь:** `src/bioetl/domain/entities/{provider}.py` (создать или дополнить)
 
@@ -173,7 +188,7 @@ class {ProviderEntity}(BaseEntity):
             raise ValueError("{ProviderEntity} requires {primary_key}")
 ```
 
-### 5. Transformer
+### 3. Transformer
 
 **Путь:** `src/bioetl/application/pipelines/{provider}/{entity}_transformer.py`
 
@@ -274,7 +289,7 @@ class {ProviderEntity}Transformer(BaseTransformer):
         return cast("SilverRecord", self.entity_to_silver_record(entity))
 ```
 
-### 6. Gold Schema
+### 4. Gold Schema
 
 **Путь:** `src/bioetl/domain/contracts/gold/{provider}.py` (создать или дополнить)
 
@@ -313,7 +328,7 @@ class {ProviderEntity}GoldSchema(pa.DataFrameModel):
         coerce = True
 ```
 
-### 7. Unit Tests
+### 5. Unit Tests
 
 **Путь:** `tests/unit/application/pipelines/{provider}/test_{entity}_transformer.py`
 
@@ -455,9 +470,7 @@ Claude: Создаю пайплайн для ChEMBL Mechanism...
    → molecule_chembl_id:str:true
 
 Создаю файлы:
-✓ configs/pipelines/chembl/mechanism.yaml
-✓ configs/quality/entities/chembl/mechanism.yaml
-✓ configs/filters/entities/chembl/mechanism.yaml
+✓ configs/entities/chembl/mechanism.yaml (unified config)
 ✓ src/bioetl/domain/entities/chembl.py (updated)
 ✓ src/bioetl/application/pipelines/chembl/mechanism_transformer.py
 ✓ src/bioetl/domain/contracts/gold/chembl.py (updated)

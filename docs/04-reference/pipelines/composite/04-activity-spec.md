@@ -14,7 +14,7 @@ Combines ChEMBL bioactivity data with compound record metadata, enabling correla
 | Provider | `composite` |
 | Entity | `activity` |
 | Version | `1.0.0` |
-| Config | `configs/pipelines/composite/activity.yaml` |
+| Config | `configs/composites/activity.yaml` |
 
 ## Seed and Dependencies
 

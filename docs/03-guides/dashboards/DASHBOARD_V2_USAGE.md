@@ -14,16 +14,16 @@
 
 ## Фильтрация
 
-- `bioetl-simple`, `bioetl-overview-v2`, `bioetl-dq-v2`: `$pipeline`, `$run_type`
+- `bioetl-simple`, `bioetl-overview-v2`, `bioetl-dq-v2`: `$pipeline`, `$run-type`
 - `bioetl-provider-health-v2`: `$pipeline`, `$provider`
-- Переменные `$run_id` и `execution` не используются.
+- Переменные `$run-id` и `execution` не используются.
 
 ## Что смотреть в первую очередь
 
 1. `bioetl-overview-v2`, panel `id=4`:
-`sum(gold) / clamp_min(sum(bronze), 1)`
+`sum(gold) / clamp-min(sum(bronze), 1)`
 2. `bioetl-dq-v2`, panel `id=2`:
-`(gold + quarantined) / clamp_min(bronze, 1)`
+`(gold + quarantined) / clamp-min(bronze, 1)`
 3. `bioetl-dq-v2`, panel `id=6`, `id=7`, `id=12`:
 рост quarantine/threshold/failures за 24h.
 4. `bioetl-provider-health-v2`, panel `id=1`, `id=102`, `id=103`:
@@ -43,7 +43,7 @@ p95 latency по провайдерам.
 1. `No data`:
 проверьте `http://localhost:8000/metrics`, затем `http://localhost:9090/targets`.
 2. Пустой `$provider`:
-нет серии `bioetl_health_check_latency_ms_bucket` в metrics endpoint.
-3. Пустой `$run_type`:
-нет метрик `bioetl_records_processed_total` для выбранного `$pipeline`.
+нет серии `bioetl-health-check-latency-ms-bucket` в metrics endpoint.
+3. Пустой `$run-type`:
+нет метрик `bioetl-records-processed-total` для выбранного `$pipeline`.
 

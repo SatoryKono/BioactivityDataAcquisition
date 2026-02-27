@@ -40,7 +40,7 @@
 Запусти критические проверки, блокирующие PR:
 
 ```bash
-cd "E:\google_drive\05_AI\github\BioactivityDataAcquisition2"
+cd "E:\g-drive\05_AI\github\BioactivityDataAcquisition2"
 
 # 1. Layer imports (БЛОКЕР)
 uv run pytest tests/architecture/test_layer_dependencies.py tests/architecture/test_forbidden_imports.py -v --tb=short 2>&1 | tail -30
@@ -196,7 +196,7 @@ uv run pytest tests/architecture/test_code_formatting.py \
 
 ```bash
 # Только критические проверки (30 сек)
-make arch-test-critical
+uv run pytest tests/architecture/test_layer_dependencies.py tests/architecture/test_forbidden_imports.py tests/architecture/test_di_compliance.py tests/architecture/test_di_constructors.py -v --tb=short
 
 # Полная проверка (2-3 мин)
 make arch-test

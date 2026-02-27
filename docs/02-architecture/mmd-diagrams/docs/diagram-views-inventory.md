@@ -1,0 +1,59 @@
+# Diagram Inventory (.mermaid/.puml)
+
+Source scope: `docs/02-architecture/mmd-diagrams/foundation/*.mmd` (canonical Mermaid sources). Decomposed views in `views/*.mermaid`.
+
+| File | Type | Nodes | Edges | Status |
+|---|---|---:|---:|---|
+| 01-full-system-component.mermaid | flowchart | 60 | 32 | CRITICAL |
+| 01-high-level.mermaid | flowchart | 20 | 12 | OVERLOADED |
+| 02-full-medallion-data-flow.mermaid | flowchart | 16 | 16 | OK |
+| 03-pipeline-execution-happy-path.mermaid | sequenceDiagram | 17 | 34 | OK |
+| 04-domain-layer-class-diagram.mermaid | classDiagram | 26 | 12 | OVERLOADED |
+| 04-error-flow.mermaid | flowchart | 19 | 21 | OK |
+| 05-layers-interaction.mermaid | flowchart | 24 | 14 | OVERLOADED |
+| 05-pipeline-lifecycle-states.mermaid | stateDiagram | 51 | 65 | CRITICAL |
+| 06-application-layer-class-diagram.mermaid | classDiagram | 22 | 19 | OVERLOADED |
+| 06-pipeline-execution.mermaid | sequenceDiagram | 10 | 30 | OK |
+| 07-circuit-breaker-states.mermaid | stateDiagram | 21 | 18 | OVERLOADED |
+| 07-medallion-flow.mermaid | flowchart | 13 | 9 | OK |
+| 08-complete-etl-workflow.mermaid | flowchart | 62 | 57 | CRITICAL |
+| 08-domain-ddd.mermaid | flowchart | 26 | 19 | OVERLOADED |
+| 09-full-er-diagram.mermaid | erDiagram | 14 | 9 | OK |
+| 10-infrastructure-layer-class-diagram.mermaid | classDiagram | 28 | 25 | OVERLOADED |
+| 11-lock-acquisition-sequence.mermaid | sequenceDiagram | 11 | 29 | OK |
+| 12-local-deployment-architecture.mermaid | flowchart | 21 | 23 | OVERLOADED |
+| 13-domain-models-relationship.mermaid | classDiagram | 17 | 24 | OK |
+| 14-provider-health-states.mermaid | stateDiagram | 21 | 22 | OVERLOADED |
+| 15-dq-check-workflow.mermaid | flowchart | 26 | 29 | OVERLOADED |
+| 16-memory-lock-class.mermaid | classDiagram | 7 | 6 | OK |
+| 17-pipeline-hierarchy.mermaid | classDiagram | 14 | 13 | OK |
+| 18-bronze-write-sequence.mermaid | sequenceDiagram | 15 | 19 | OK |
+| 19-delta-lake-write-sequence.mermaid | sequenceDiagram | 18 | 31 | OK |
+| 20-quarantine-record-states.mermaid | stateDiagram | 18 | 10 | OK |
+| 21-activity-entity-data-flow.mermaid | flowchart | 31 | 18 | OVERLOADED |
+| 22-client-api-request-sequence.mermaid | sequenceDiagram | 8 | 27 | OK |
+| 23-silver-writer-class.mermaid | classDiagram | 11 | 11 | OK |
+| 24-hash-service-class.mermaid | classDiagram | 5 | 4 | OK |
+| 25-circuit-breaker-observer-class.mermaid | classDiagram | 8 | 7 | OK |
+| 26-hexagonal-ports-adapters.mermaid | flowchart | 48 | 16 | CRITICAL |
+| 27-import-matrix-enforcement.mermaid | flowchart | 11 | 22 | OK |
+| 28-composition-root-di-graph.mermaid | flowchart | 28 | 28 | OVERLOADED |
+| 29-composite-pipeline-workflow.mermaid | flowchart | 33 | 26 | OVERLOADED |
+| 31-pipeline-run-lifecycle.mermaid | stateDiagram | 22 | 30 | OVERLOADED |
+| 32-single-record-journey.mermaid | flowchart | 20 | 21 | OVERLOADED |
+| 33-cli-run-interaction.mermaid | sequenceDiagram | 23 | 34 | OVERLOADED |
+| 34-batch-processing-flow.mermaid | sequenceDiagram | 23 | 24 | OVERLOADED |
+| 36-architecture-principles-mindmap.mermaid | mindmap | 81 | 80 | CRITICAL |
+| 37-cli-entry-full-chain.mermaid | flowchart | 19 | 21 | OK |
+| 38-runtime-assembly-sequence.mermaid | sequenceDiagram | 17 | 40 | OK |
+| 39-medallion-invariants.mermaid | flowchart | 22 | 18 | OVERLOADED |
+| 40-application-core-collaboration.mermaid | flowchart | 17 | 15 | OK |
+| 41-error-classification-tree.mermaid | flowchart | 24 | 29 | OVERLOADED |
+| 42-pipeline-runner-class.mermaid | classDiagram | 9 | 8 | OK |
+| 43-fan-out-fan-in-pattern.mermaid | flowchart | 18 | 17 | OK |
+| 44-cross-provider-enrichment.mermaid | flowchart | 30 | 18 | OVERLOADED |
+| 46-yaml-config-resolution.mermaid | flowchart | 30 | 27 | OVERLOADED |
+| 47-publication-merge-sources.mermaid | sequenceDiagram | 18 | 29 | OK |
+| 48-composite-phase-lifecycle.mermaid | stateDiagram | 22 | 26 | OVERLOADED |
+| 49-composite-runner-class.mermaid | classDiagram | 13 | 12 | OK |
+| 50-exception-hierarchy.mermaid | flowchart | 82 | 50 | CRITICAL |

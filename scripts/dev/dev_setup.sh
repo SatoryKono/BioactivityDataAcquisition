@@ -351,8 +351,29 @@ step_setup_env() {
     fi
 }
 
+step_mcp_preflight() {
+    print_header "Шаг 6: Проверка MCP-конфигурации (Codex)"
+
+    if [[ ! -x "scripts/check_mcp.sh" ]]; then
+        print_warning "scripts/check_mcp.sh не найден или не исполняемый — шаг пропущен"
+        return 0
+    fi
+
+    if ! command -v codex &> /dev/null; then
+        print_warning "codex CLI не найден — MCP preflight пропущен"
+        return 0
+    fi
+
+    print_step "Запуск scripts/check_mcp.sh..."
+    if bash scripts/check_mcp.sh; then
+        print_success "MCP-конфигурация проверена"
+    else
+        print_warning "MCP preflight выявил проблемы (не блокирует setup)"
+    fi
+}
+
 step_verify_installation() {
-    print_header "Шаг 6: Проверка установки"
+    print_header "Шаг 7: Проверка установки"
 
     # Проверяем импорт основного модуля
     print_step "Проверка импорта bioetl..."
@@ -405,7 +426,7 @@ print(f'pandas {pandas.__version__}, pandera {pandera.__version__}, deltalake {d
 }
 
 step_run_checks() {
-    print_header "Шаг 7: Запуск проверок качества"
+    print_header "Шаг 8: Запуск проверок качества"
 
     if [[ "$QUICK_MODE" == true ]]; then
         print_warning "Быстрый режим: проверки пропущены (--quick)"
@@ -541,6 +562,7 @@ main() {
     step_install_dependencies
     step_setup_precommit
     step_setup_env
+    step_mcp_preflight
     step_verify_installation
     step_run_checks
     print_final_instructions

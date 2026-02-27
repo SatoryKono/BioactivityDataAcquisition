@@ -9,8 +9,8 @@ description: Full audit and update of BioETL project documentation for v5.14+. U
 Perform a full documentation audit of BioETL and bring docs in sync with code and ADRs (v5.14+). Produce a clear audit report, a prioritized plan, and updated documentation changes.
 
 ## Required inputs (before starting)
-- Load `references/audit-checklist.md` — checklist for each audit area.
-- Load `references/report-template.md` — template for the audit report.
+- Load `.claude/skills/documentation-audit.audit-checklist.md` — checklist for each audit area.
+- Load `.claude/skills/documentation-audit.report-template.md` — template for the audit report.
 
 ## Workflow
 
@@ -56,14 +56,14 @@ rg --files docs
 ```
 
 ## Output format
-- Use `references/report-template.md` structure for the audit report.
+- Use `.claude/skills/documentation-audit.report-template.md` structure for the audit report.
 - Provide a short prioritized change list and required user decisions.
 - Do not change code unless explicitly requested; focus on documentation.
 
 ## Constraints
 
 ### MUST
-- Use report-template.md for the audit report.
+- Use `.claude/skills/documentation-audit.report-template.md` for the audit report.
 - Verify findings against actual code and configs.
 - Record severity for each finding.
 

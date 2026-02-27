@@ -1,6 +1,6 @@
 # BioETL Diagrams — PNG Index
 
-_Generated: 2026-02-26T13:35:42+03:00_
+_Generated: 2026-02-27T18:43:48+03:00_
 
 ## Domain Ports
 

@@ -10,7 +10,7 @@
 
 ## 2. Конфигурация
 
-**Источник конфигурации:** `configs/pipelines/pubchem/compound.yaml`
+**Источник конфигурации:** `configs/entities/pubchem/compound.yaml`
 
 | Параметр | Значение | Описание |
 |---|---|---|

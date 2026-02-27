@@ -299,8 +299,8 @@ gold-filters:
 
 | Компонент              | Путь                                                       |
 | ---------------------- | ---------------------------------------------------------- |
-| Конфигурация пайплайна | `configs/pipelines/openalex/publication.yaml`              |
-| Конфигурация источника | `configs/sources/openalex.yaml`                            |
+| Конфигурация пайплайна | `configs/entities/openalex/publication.yaml`              |
+| Конфигурация источника | `configs/providers/openalex.yaml`                            |
 | Трансформер            | `src/bioetl/application/pipelines/openalex/transformer.py` |
 | Экстракторы            | `src/bioetl/application/pipelines/openalex/extractors.py`  |
 | Адаптер                | `src/bioetl/infrastructure/adapters/openalex/client.py`    |
