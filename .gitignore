@@ -189,3 +189,4 @@ data/.idea/
 *.mermaid
 /docs/02-architecture/diagrams/mermaid
 unnamed.patch
+/chrome-headless-shell
