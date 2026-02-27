@@ -1,10 +1,11 @@
 %% View: Infrastructure-Mapping | Parent: 34-batch-processing-flow-full.mermaid
-%% @uniform width=144 height=56 max_title_len=13 max_desc_lines=0
+%% @uniform width=232 height=64 max_title_len=28 max_desc_lines=1
+%%{init: {'theme':'base','layout':'elk','flowchart':{'curve':'linear'},'elk':{'nodePlacementStrategy':'BRANDES_KOEPF','mergeEdges':true,'edgeRouting':'ORTHOGONAL'}}}%%
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N11["strip"]
+        N11["strip_values"]
         N8["errors"]
         N10["filter_ids"]
         N13["_run_type"]
@@ -12,26 +13,26 @@ flowchart TB
 
     subgraph Application["Application Layer"]
         direction TB
-        N4["Runner"]
+        N4["PipelineRunner"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N1["BE"]
-        N2["BT"]
-        N3["BW"]
-        N5["BTM"]
-        N6["DS"]
-        N7["Trans"]
-        N9["br"]
-        N12["dates"]
+        N1["BatchExecutor"]
+        N2["BatchTransformer"]
+        N3["BatchWriter"]
+        N5["BatchTracingManager"]
+        N6["DataSourcePort"]
+        N7["BaseTransformer"]
+        N9["BronzeWriter"]
+        N12["normalize_dates"]
         N14["_ingestion_ts"]
-        N15["Bronze"]
-        N16["Silver"]
+        N15["Bronze Layer"]
+        N16["Silver Layer"]
         N17["primary_keys"]
-        N18["Gold"]
-        N19["QM"]
-        N20["BMR"]
+        N18["Gold Layer"]
+        N19["QuarantineManager"]
+        N20["BatchMetricsRecorder"]
     end
 
     N4 --> N1
@@ -64,28 +65,5 @@ flowchart TB
     style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
     style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
 
-    linkStyle 0 stroke:#1E293B,stroke-width:4px
-    linkStyle 1 stroke:#1E293B,stroke-width:4px
-    linkStyle 2 stroke:#1E293B,stroke-width:4px
-    linkStyle 3 stroke:#1E293B,stroke-width:4px
-    linkStyle 4 stroke:#1E293B,stroke-width:4px
-    linkStyle 5 stroke:#1E293B,stroke-width:4px
-    linkStyle 6 stroke:#1E293B,stroke-width:4px
-    linkStyle 7 stroke:#1E293B,stroke-width:4px
-    linkStyle 8 stroke:#1E293B,stroke-width:4px
-    linkStyle 9 stroke:#1E293B,stroke-width:4px
-    linkStyle 10 stroke:#1E293B,stroke-width:4px
-    linkStyle 11 stroke:#1E293B,stroke-width:4px
-    linkStyle 12 stroke:#1E293B,stroke-width:4px
-    linkStyle 13 stroke:#1E293B,stroke-width:4px
-    linkStyle 14 stroke:#1E293B,stroke-width:4px
-    linkStyle 15 stroke:#1E293B,stroke-width:4px
-    linkStyle 16 stroke:#1E293B,stroke-width:4px
-    linkStyle 17 stroke:#1E293B,stroke-width:4px
-    linkStyle 18 stroke:#1E293B,stroke-width:4px
-    linkStyle 19 stroke:#1E293B,stroke-width:4px
-    linkStyle 20 stroke:#1E293B,stroke-width:4px
-    linkStyle 21 stroke:#1E293B,stroke-width:4px
-    linkStyle 22 stroke:#1E293B,stroke-width:4px
-    linkStyle 23 stroke:#1E293B,stroke-width:4px
-    linkStyle 24 stroke:#1E293B,stroke-width:4px
+    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 stroke:#1E293B,stroke-width:4px
+    linkStyle 24 stroke:#1E293B,stroke-width:4px,opacity:0.85

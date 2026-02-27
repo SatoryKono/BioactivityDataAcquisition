@@ -163,7 +163,7 @@ gold-filters:
 
 ```python
 # Endpoint: GET /configure/idmapping/fields
-await client.health-check()  # Returns HealthStatus.HEALTHY
+await client.health_check()  # Returns HealthStatus.HEALTHY
 ```
 
 ---

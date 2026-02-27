@@ -23,7 +23,7 @@
 **Пример:** `configs/entities/chembl/target.yaml`
 
 ```yaml
-# Inherits defaults from ../-base.yaml
+# Inherits defaults from ../../base/pipeline.yaml
 pipeline-name: chembl_target
 provider: chembl
 entity-type: target
@@ -34,13 +34,13 @@ business-primary-keys: ["target-chembl-id"]
 silver-table: "chembl_target"
 gold-table: "chembl_target"
 
-source-file: ../../sources/chembl.yaml
+source-file: ../../providers/chembl.yaml
 
 # DQ rules loaded from hierarchical config files (ADR-027):
-#   1. configs/quality/-defaults.yaml
-#   2. configs/quality/providers/chembl.yaml
-#   3. configs/quality/entities/chembl/target.yaml
-dq-config-file: ../../quality/entities/chembl/target.yaml
+#   1. configs/base/quality.yaml
+#   2. configs/providers/chembl.yaml#quality
+#   3. configs/entities/chembl/target.yaml#quality
+dq-config-file: ../../entities/chembl/target.yaml
 
 # Paths auto-computed by convention (ADR-029),
 # override only when different from default
@@ -65,7 +65,7 @@ sink:
 **Пример:** `src/bioetl/application/pipelines/chembl/target-transformer.py`
 
 ```python
-from --future-- import annotations
+from __future__ import annotations
 
 from typing import Any
 

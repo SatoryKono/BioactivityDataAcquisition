@@ -11,9 +11,9 @@ etc.) were defined in three places:
 
 1. **Python frozensets** in `domain/schemas/constants.py` — used by Pandera schema
    validation (`pa.Field(isin=list(...))`)
-2. **Filter YAML configs** in `configs/filters/entities/chembl/*.yaml` — hardcoded
+2. **Filter YAML sections** in `configs/entities/chembl/*.yaml#filters` — hardcoded
    subsets in `columns:` and `extraction-params:`
-3. **DQ YAML configs** in `configs/quality/entities/chembl/*.yaml` — hardcoded
+3. **DQ YAML sections** in `configs/entities/chembl/*.yaml#quality` — hardcoded
    `allowed:` lists
 
 No single source of truth existed. Updating to a new ChEMBL DB version required
@@ -107,7 +107,7 @@ Generate `constants.py` from YAML via template. Rejected because:
 | Requirement | Status | Notes |
 |-------------|--------|-------|
 | Domain purity (ARCH-002) | PASS | No I/O in `constants.py` |
-| Public API unchanged | PASS | All `--all--` exports identical |
+| Public API unchanged | PASS | All `__all__` exports identical |
 | Types preserved | PASS | `frozenset[str]`, `tuple[float, ...]` |
 | Sync enforcement | PASS | 20 sync tests in `test-constants-yaml.py` |
 

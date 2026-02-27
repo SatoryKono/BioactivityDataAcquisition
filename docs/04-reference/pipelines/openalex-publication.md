@@ -381,9 +381,9 @@ The following Silver fields are **excluded** from Gold output:
 ### Filter Configuration Hierarchy
 
 Filters are loaded from (ADR-028, ADR-029):
-1. `configs/filters/-defaults.yaml` (global)
-2. `configs/filters/providers/openalex.yaml` (provider)
-3. `configs/filters/entities/openalex/publication.yaml` (entity)
+1. `configs/base/pipeline.yaml#filter_defaults` (global)
+2. `configs/providers/openalex.yaml#filters` (provider)
+3. `configs/entities/openalex/publication.yaml#filters` (entity)
 
 ---
 

@@ -2,81 +2,90 @@
 %% Shows how YAML configs are loaded, validated, and used across the system.
 
 %% @version 1.0.0
-%% @date    2026-02-24
+%% @date    2026-02-27
 %% @type    flowchart
 %% @level   System / Component
+%% @png-scale 6
+%% @png-dpi   600
 %% @nodes   29
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
+%%{init: {'layout': 'elk', 'theme': 'base', 'flowchart': {'nodeSpacing': 56, 'rankSpacing': 84, 'padding': 24, 'curve': 'linear'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'direction': 'RIGHT', 'spacing.nodeNode': 44, 'spacing.edgeNode': 32, 'spacing.edgeEdge': 24, 'edgeRouting': 'ORTHOGONAL'}}}%%
 %% @uniform width=216 height=198 max_title_len=22 max_desc_lines=9
-graph LR
+flowchart LR
 %% keep-orphan: APC, CBC, CCFG, OBS_SET, PCP, PIPE_SET, SETTINGS, SRC
     subgraph YAML["YAML Config Files"]
-        PC_YAML["configs/pipelines/<br/>*.yaml<br/>(pipeline configs)<br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        DQ_YAML["configs/quality/<br/>*.yaml<br/>(DQ rules)<br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        FILT_YAML["configs/filters/<br/>*.yaml<br/>(filter configs)<br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        COMP_YAML["configs/composite/<br/>*.yaml<br/>(composite pipeline configs)<br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        FG_YAML["configs/field_groups/<br/>*.yaml<br/>(field group definitions)<br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        direction TB
+        PC_YAML["configs/entities/*/*.yaml<br/>pipeline configs"]:::size-lg
+        DQ_YAML["configs/quality/*.yaml<br/>DQ rules"]:::size-lg
+        FILT_YAML["configs/filters/*.yaml<br/>filter configs"]:::size-lg
+        COMP_YAML["configs/composites/*.yaml<br/>composite configs"]:::size-lg
+        FG_YAML["configs/field_groups/*.yaml<br/>field groups"]:::size-lg
     end
 
     subgraph Loaders["Infrastructure Config Loaders"]
-        PCL["PipelineConfigLoader<br/>━━━━━━━━━━━━━━━━━<br/>+ load(path) → PipelineConfig<br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        DQCL["DQConfigLoader<br/>━━━━━━━━━━━━━━━━━<br/>+ load(path) → DQConfig<br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        FCL["FilterConfigLoader<br/>━━━━━━━━━━━━━━━━━<br/>+ load(path) → FilterConfig<br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        FGL["FieldGroupLoader<br/>━━━━━━━━━━━━━━━━━<br/>+ load(path) → FieldGroupConfig<br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        BCL["BaseConfigLoader<br/>(ABC, Generic[T])<br/>━━━━━━━━━━━━━━━━━<br/>+ load() → T<br/>+ _validate() → T<br/><br/><br/><br/><br/>"]:::size-lg
+        direction TB
+        PCL["PipelineConfigLoader<br/>load(path) -> PipelineConfig"]:::size-lg
+        DQCL["DQConfigLoader<br/>load(path) -> DQConfig"]:::size-lg
+        FCL["FilterConfigLoader<br/>load(path) -> FilterConfig"]:::size-lg
+        FGL["FieldGroupLoader<br/>load(path) -> FieldGroupConfig"]:::size-lg
+        BCL["BaseConfigLoader<br/>load()/validate() base logic"]:::size-lg
     end
 
     subgraph InfraSchemas["Infrastructure Schemas (Pydantic)"]
-        PYC["PipelineYamlConfig<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        APC["ApiConfig<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        SRC["SourceConfig<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        CBC["CircuitBreakerConfig<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        DQF["DQConfigFile<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        FFG["FilterConfigFile<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        PCP["PipelineContractPolicy<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        direction TB
+        PYC["PipelineYamlConfig"]:::size-lg
+        APC["ApiConfig"]:::size-lg
+        SRC["SourceConfig"]:::size-lg
+        CBC["CircuitBreakerConfig"]:::size-lg
+        DQF["DQConfigFile"]:::size-lg
+        FFG["FilterConfigFile"]:::size-lg
+        PCP["PipelineContractPolicy"]:::size-lg
     end
 
     subgraph DomainConfig["Domain Configuration"]
-        RT["RuntimeConfig<br/>━━━━━━━━━━━━━━━━━<br/>run_type: RunType<br/>resume: bool<br/>limit: int | None<br/>heartbeat_interval: int<br/>dry_run: bool<br/>vacuum_after_run: bool<br/>strict_validation: bool<br/>skip_gold: bool"]:::size-lg
-        PIPE["PipelineConfig<br/>━━━━━━━━━━━━━━━━━<br/>pipeline_name: str<br/>provider: str<br/>entity_type: str<br/>table: TableConfig<br/>batch_size: int<br/>checkpoint_interval: int<br/>dq: DQConfig<br/>loading_strategy: LoadingStrategy"]:::size-lg
-        TC["TableConfig<br/>━━━━━━━━━━━━━━━━━<br/>silver_table: str<br/>gold_table: str<br/><br/><br/><br/><br/><br/>"]:::size-lg
-        DQC["DQConfig<br/>━━━━━━━━━━━━━━━━━<br/>soft_error_threshold: float<br/>hard_error_threshold: float<br/><br/><br/><br/><br/><br/>"]:::size-lg
-        SFC["SilverFilterConfig<br/>━━━━━━━━━━━━━━━━━<br/>source_path: str<br/>column_name: str<br/><br/><br/><br/><br/><br/>"]:::size-lg
-        GFC["GoldFilterConfig<br/>━━━━━━━━━━━━━━━━━<br/>source_path: str<br/>column_name: str<br/><br/><br/><br/><br/><br/>"]:::size-lg
+        direction TB
+        RT["RuntimeConfig<br/>run flags, limits, strict-mode"]:::size-lg
+        PIPE["PipelineConfig<br/>provider/entity/table/dq settings"]:::size-lg
+        TC["TableConfig<br/>silver_table / gold_table"]:::size-lg
+        DQC["DQConfig<br/>soft/hard thresholds + validations"]:::size-lg
+        SFC["SilverFilterConfig<br/>source_path + column_name"]:::size-lg
+        GFC["GoldFilterConfig<br/>source_path + column_name"]:::size-lg
     end
 
     subgraph CompositeConfig["Composite Domain Config"]
-        CCFG["CompositeConfig<br/>━━━━━━━━━━━━━━━━━<br/>name: str<br/>seed: SeedConfig<br/>dependencies: DependencyConfig[]<br/>enrichers: EnricherConfig[]<br/>merge: MergeConfig<br/><br/><br/>"]:::size-lg
+        direction TB
+        CCFG["CompositeConfig<br/>seed/dependencies/enrichers/merge"]:::size-lg
     end
 
     subgraph AppConfig["Application Config"]
-        RPC["RecordProcessorConfig<br/>━━━━━━━━━━━━━━━━━<br/>table_config: TableConfig<br/>silver_schema<br/>gold_schema<br/>dq_config: DQConfig<br/><br/><br/><br/>"]:::size-lg
-        LC["LockConfig<br/>━━━━━━━━━━━━━━━━━<br/>timeout: float<br/>heartbeat_interval: int<br/>max_retries: int<br/><br/><br/><br/><br/>"]:::size-lg
+        direction TB
+        RPC["RecordProcessorConfig<br/>table + schemas + dq"]:::size-lg
+        LC["LockConfig<br/>timeout + heartbeat + retries"]:::size-lg
     end
 
     subgraph InfraSettings["Infrastructure Settings"]
-        SETTINGS["Settings<br/>(pydantic BaseSettings)<br/>━━━━━━━━━━━━━━━━━<br/>data_dir: Path<br/>log_level: str<br/>providers: dict<br/>+ from YAML + ENV<br/><br/><br/>"]:::size-lg
-        OBS_SET["ObservabilitySettings<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        PIPE_SET["PipelineSettings<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        direction TB
+        SETTINGS["Settings<br/>BaseSettings from YAML + ENV"]:::size-lg
+        OBS_SET["ObservabilitySettings"]:::size-lg
+        PIPE_SET["PipelineSettings"]:::size-lg
     end
 
     %% YAML → Loaders
-    PC_YAML --> PCL
-    DQ_YAML --> DQCL
-    FILT_YAML --> FCL
+    PC_YAML ==> PCL
+    DQ_YAML ==> DQCL
+    FILT_YAML ==> FCL
     FG_YAML --> FGL
-    COMP_YAML --> PCL
+    COMP_YAML ==> PCL
 
     %% Loaders inheritance
-    BCL --> PCL
-    BCL --> DQCL
-    BCL --> FCL
+    BCL -.->|"inherits"| PCL
+    BCL -.->|"inherits"| DQCL
+    BCL -.->|"inherits"| FCL
 
     %% Loaders → Infra Schemas (validation)
-    PCL --> PYC
-    DQCL --> DQF
-    FCL --> FFG
+    PCL -->|"validates"| PYC
+    DQCL -->|"validates"| DQF
+    FCL -->|"validates"| FFG
 
     %% Infra Schemas → Domain Config
     PYC --> PIPE
@@ -93,16 +102,17 @@ graph LR
     PIPE --> RPC
     RT --> LC
 
-    classDef yaml fill:#fff9c4,stroke:#f57f17,stroke-width:2px
-    classDef loader fill:#fff7ed,stroke:#f59e0b
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    classDef service fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef process fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     classDef schema fill:#ffe4e6,stroke:#dc2626
-    classDef domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
-    classDef app fill:#f0fdf4,stroke:#16a34a
-    classDef settings fill:#f1f5f9,stroke:#64748b
+    classDef settings fill:#f1f5f9,stroke:#64748b,stroke-width:2px
 
-    class PC_YAML,DQ_YAML,FILT_YAML,COMP_YAML,FG_YAML yaml
-    class PCL,DQCL,FCL,FGL,BCL loader
+    class PC_YAML,DQ_YAML,FILT_YAML,COMP_YAML,FG_YAML storage
+    class PCL,DQCL,FCL,FGL,BCL adapter
     class PYC,APC,SRC,CBC,DQF,FFG,PCP schema
-    class RT,PIPE,TC,DQC,SFC,GFC,CCFG domain
-    class RPC,LC app
+    class RT,PIPE,TC,DQC,SFC,GFC,CCFG port
+    class RPC,LC service
     class SETTINGS,OBS_SET,PIPE_SET settings

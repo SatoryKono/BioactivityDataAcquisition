@@ -38,7 +38,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-030](ADR-030-publication-pagination-strategy.md)   | Publication Pagination Strategy            | Accepted           | Data Fetching   | 2026-01-25 |
 | [ADR-031](ADR-031-loading-strategy-formalization.md)    | Loading Strategy Formalization             | Accepted           | Data Loading    | 2026-01-26 |
 | [ADR-032](ADR-032-unified-http-client.md)               | Unified HTTP Client Pattern                | Accepted           | HTTP/Networking | 2026-01-28 |
-| [ADR-033](ADR-033-publication-validation-strategy.md)   | Publication Metadata Validation Strategy   | Added              | Data Quality    | 2026-02-06 |
+| [ADR-033](ADR-033-publication-validation-strategy.md)   | Publication Metadata Validation Strategy   | Accepted           | Data Quality    | 2026-02-06 |
 | [ADR-034](ADR-034-schema-domain-pairs.md)               | Schema↔Domain Configuration Pairs          | Accepted           | Architecture    | 2026-02-15 |
 | [ADR-035](ADR-035-json-field-typing-policy.md)          | JSON Field Typing Policy (Silver↔Gold)     | Accepted           | Data Modeling   | 2026-02-17 |
 | [ADR-036](ADR-036-gold-contract-versioning-policy.md)   | Gold Contract Versioning Policy            | Accepted           | Data Quality    | 2026-02-18 |

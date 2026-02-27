@@ -66,8 +66,8 @@ Combines ChEMBL bioactivity data with compound record metadata, enabling correla
 
 ## Related Configs
 
-- DQ rules: `configs/quality/entities/composite/activity.yaml`
-- Filters: `configs/filters/entities/composite/activity.yaml`
+- DQ rules: `configs/composites/activity.yaml#quality`
+- Filters: `configs/composites/activity.yaml#filters`
 - Schema: `configs/schemas/composite/activity.yaml`
 
 ## Related ADRs

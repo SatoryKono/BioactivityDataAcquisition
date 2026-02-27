@@ -384,6 +384,7 @@ class SilverWriter(BaseDeltaWriter):
             field: str,
             key_type: Literal["merge", "partition"],
         ) -> int:
+            """Count records where a non-nullable key field is None."""
             rule = rules.get((field, key_type))
             if rule is None or rule.nullable:
                 return 0

@@ -18,7 +18,7 @@
 |---|---|---|---|---|
 | `$pipeline` | `label-values(bioetl-records-processed-total, pipeline)` | Yes | Yes | On dashboard load (`1`) |
 | `$run-type` | `label-values(bioetl-records-processed-total{pipeline=~"$pipeline"}, run-type)` | Yes | Yes | On dashboard load (`1`) |
-| `$provider` | `label-values(bioetl-health-check-latency-ms-bucket, provider)` | Yes | Yes | On dashboard load (`1`) |
+| `$provider` | `label-values(bioetl-health_check-latency-ms-bucket, provider)` | Yes | Yes | On dashboard load (`1`) |
 
 ## Важно
 
@@ -32,10 +32,10 @@
 sum(bioetl-records-processed-total{pipeline=~"$pipeline", run-type=~"$run-type", stage="bronze"})
 
 # Provider Health p95
-histogram-quantile(0.95, sum by (le, provider) (rate(bioetl-health-check-latency-ms-bucket{provider=~"$provider"}[5m])))
+histogram-quantile(0.95, sum by (le, provider) (rate(bioetl-health_check-latency-ms-bucket{provider=~"$provider"}[5m])))
 
 # Provider repeat panel (ID 103)
-histogram-quantile(0.95, sum by (le) (rate(bioetl-health-check-latency-ms-bucket{provider="$provider"}[5m])))
+histogram-quantile(0.95, sum by (le) (rate(bioetl-health_check-latency-ms-bucket{provider="$provider"}[5m])))
 ```
 
 ## Зависимости

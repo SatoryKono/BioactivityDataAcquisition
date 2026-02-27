@@ -1,13 +1,13 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.22 | Last updated: 2026-02-25*
+*Synced with RULES.md v5.22 | Last updated: 2026-02-27*
 
-> **Documentation Update:** 2026-02-25
-> - Codebase metrics updated: 1,120 Python files (534 src + 586 tests), ~116,120 src LOC
+> **Documentation Update:** 2026-02-27
+> - Codebase metrics updated: 1,195 Python files (575 src + 620 tests)
 > - ADR count: 40 ADRs (ADR-001 through ADR-040)
-> - Pipeline configs: 26 configurations (21 single-source + 5 composite)
-> - YAML configs total: 38 (21 entities + 7 providers + 6 composites + 2 base + 1 enum + 1 schema)
-> - Documentation files: 331 markdown files
+> - Pipeline configs: 27 configurations (21 single-source + 6 composite)
+> - YAML configs total: 39 (`configs/` tree)
+> - Documentation files: 353 markdown files
 > - Adapter listing completed (all 7 providers)
 > - Diagrams: 271 Mermaid source files (103 .mmd + 168 .mermaid)
 
@@ -173,7 +173,7 @@ docs/
 | Error Handling    | [ADR-016](../02-architecture/decisions/ADR-016-error-handling-strategy.md)         | §3.1     |
 | Circuit Breaker   | [ADR-007](../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md)  | §3.1.4   |
 | Locking           | [ADR-003](../02-architecture/decisions/ADR-003-in-memory-locking-strategy.md)      | §3.3     |
-| DQ Metrics        | [RULES.md](RULES.md#34-data-quality)                                    | §3.4     |
+| DQ Metrics        | [RULES.md](RULES.md)                                    | §3.4     |
 | Graceful Shutdown | [ADR-008](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)      | §5.3     |
 | DR Procedures     | [runbooks/index.md](../05-operations/runbooks/index.md)                            | §5.5     |
 | Cleanup           | [cleanup-policy.md](../03-guides/cleanup-policy.md)                                | §2.1.1   |
@@ -188,7 +188,7 @@ docs/
 | Testing          | [testing.md](../03-guides/testing.md)                                                              | §4.2     |
 | E2E Testing      | [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md)                           | §4.2.3   |
 | Date Handling    | [date-handling.md](../03-guides/date-handling.md)                                                  | §2.4     |
-| Code Style       | [RULES.md §4](RULES.md#4-качество-кода-и-тестирование)                                          | §4       |
+| Code Style       | [RULES.md §4](RULES.md)                                          | §4       |
 
 ---
 
@@ -198,7 +198,7 @@ docs/
 src/bioetl/
 ├── domain/                      # Pure logic, no I/O (§1.1)
 │   ├── ports/                   # Protocol interfaces (Ports & Adapters)
-│   │   ├── --init--.py          # Facade — single import point
+│   │   ├── __init__.py          # Facade — single import point
 │   │   ├── data-source.py       # DataSourcePort, FilterableDataSourcePort
 │   │   ├── storage.py           # StoragePort
 │   │   ├── locking.py           # LockPort
@@ -284,7 +284,7 @@ src/bioetl/
 │
 └── interfaces/                  # External interfaces
     ├── cli/                     # CLI package (bioetl run/quarantine/checkpoint)
-    │   ├── --init--.py          # CLI package entry
+    │   ├── __init__.py          # CLI package entry
     │   ├── --main--.py          # CLI module entrypoint
     │   ├── exit-codes.py        # CLI exit codes
     │   ├── formatters.py        # CLI output formatting
@@ -369,14 +369,14 @@ graph TD
 | Document                 | Last Updated | Status                       |
 |--------------------------|--------------|------------------------------|
 | RULES.md                 | 2026-02-24   | v5.22 (Latest)               |
-| REQUIREMENTS.md          | 2026-02-21   | v1.5 (Local-Only sync)       |
+| REQUIREMENTS.md          | 2026-02-27   | v1.6 (RULES v5.22 sync)      |
 | glossary.md              | 2026-02-06   | v2.5 (Ubiquitous Language)   |
 | 00-map.md                | 2026-02-25   | v7.4 ADR-033..039 added      |
 | rules-summary.md         | 2026-02-24   | v5.22 Synced                 |
 | TOOLS.md                 | 2026-02-24   | v2.2 Synced with RULES v5.22 |
 | 03-guides/               | 2026-01-20   | Consolidated (16 guides)     |
 | 03-development/          | 2026-01-26   | Config schema guidelines     |
-| ADR-001..040             | 2026-02-24   | All 40 ADRs documented       |
+| ADR-001..040             | 2026-02-25   | All 40 ADRs documented       |
 | 05-operations/runbooks/  | 2026-01-04   | 16 active runbooks           |
 | domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
 | audits/                  | 2026-02-17   | Consolidated (audit/ merged) |
@@ -384,4 +384,4 @@ graph TD
 
 ---
 
-*Last updated: 2026-02-25. ADR-033..039 added, version sync v5.22.*
+*Last updated: 2026-02-27. ADR-040 included, metrics synchronized with repository state.*

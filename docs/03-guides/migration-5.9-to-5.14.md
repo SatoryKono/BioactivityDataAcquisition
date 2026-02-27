@@ -62,7 +62,7 @@ FROM chembl.publication;
 If you have custom DQ rules referencing these fields:
 
 ```yaml
-# configs/quality/entities/chembl/publication.yaml
+# configs/entities/chembl/publication.yaml#quality
 
 # BEFORE (5.9)
 - field: citation-count
@@ -421,7 +421,7 @@ export BIOETL-VALIDATION-MODE=fast  # Base only
 **Documentation:**
 - [CHANGELOG.md](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/CHANGELOG.md) — Full release notes
 - [RULES.md](../00-project/RULES.md) — Project governance
-- [ADRs](../02-architecture/decisions/) — Architecture decisions
+- [ADRs](../02-architecture/decisions/README.md) — Architecture decisions
 
 **Support:** Create an issue with:
 - BioETL version

@@ -248,10 +248,10 @@ Lock key включает тип запуска:
 
 ```python
 # В MedallionLifecycleService.clear()
-if self.runtime.run - type in (RunType.REBUILD, RunType.BACKFILL):
-    await self.services.storage.clear - silver(self.config.silver - table)
-    if self.config.gold - table:
-        await self.services.storage.clear - gold(self.config.gold - table)
+if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
+    await self.services.storage.clear_silver(self.config.silver_table)
+    if self.config.gold_table:
+        await self.services.storage.clear_gold(self.config.gold_table)
 ```
 
 **Проверка:** Интеграционный тест `tests/integration/test-runner-lifecycle.py::test-incremental-skips-clear`.
@@ -310,9 +310,9 @@ if self.runtime.run - type in (RunType.REBUILD, RunType.BACKFILL):
 
 **Причина**: Pandas/Polars исторически не поддерживали nullable integers без специального типа `Int64` (с заглавной I). Float — единственный способ представить `int + NULL` без потери данных для больших значений. `NaN` используется для отсутствующих значений.
 
-<!-- Updated: was ~34, now ~88 (audit 2026-02-14) -->
+<!-- Updated: was ~34→~88→~104 (audit 2026-02-27) -->
 
-**Затронутые поля (~88 occurrences)**:
+**Затронутые поля (~104 occurrences)**:
 
 > **Примечание**: Для получения актуального числа occurrences:
 > `grep -rn "coerce=True" src/bioetl/infrastructure/schemas/ src/bioetl/domain/schemas/ --include="*.py" | grep -c "Series\[float\]"`
@@ -340,7 +340,7 @@ if self.runtime.run - type in (RunType.REBUILD, RunType.BACKFILL):
 - **MAY** конвертировать `float → int` после проверки на `NaN` (если бизнес-логика требует)
 - **MUST NOT** предполагать, что все значения — целые числа
 
-**Реализация**: `src/bioetl/infrastructure/schemas/gold.py`
+**Реализация**: `src/bioetl/domain/contracts/gold/` (`chembl.py`, `composite.py`, `publications.py`, `pubchem.py`, `uniprot.py`)
 
 #### Schema Typing Policy (JSON-like поля)
 
@@ -567,9 +567,9 @@ merge:
 
 <!-- Updated: was 94, now 106 (audit 2026-02-14) -->
 
-**Конфигурация:** `configs/composite/field-groups/publication.yaml` — 106 базовых полей, маппинг на провайдерские колонки.
+**Конфигурация:** `configs/composites/field_groups/publication.yaml` — 106 базовых полей, маппинг на провайдерские колонки.
 
-**Доменные модели** (`domain/composite/field-groups.py`):
+**Доменные модели** (`domain/composite/field_groups.py`):
 
 - `FieldMapping` — маппинг `base-name → provider-columns + group`
 - `FieldGroupDefinition` — определение группы с её полями
@@ -691,7 +691,7 @@ content-hash → content-version → version-hash
 
 ### 3.2.2. Prometheus Metrics
 
-**Endpoint:** `http://localhost:{BIOETL-METRICS-PORT}/metrics` (default port: 8000)
+**Endpoint:** `http://localhost:{BIOETL_METRICS_PORT}/metrics` (default port: 8000)
 
 **Запуск метрик:**
 
@@ -802,10 +802,13 @@ content-hash → content-version → version-hash
 
 | Адаптер          | Базовый класс     | HTTP-клиент              | Статус            |
 | ---------------- | ----------------- | ------------------------ | ----------------- |
-| `ChemblAdapter`  | `BaseHttpAdapter` | `UnifiedHTTPClient`      | ✅ Унифицирован   |
-| `UniProtAdapter` | `BaseHttpAdapter` | `UnifiedHTTPClient`      | ✅ Унифицирован   |
-| `PubMedAdapter`  | `@dataclass`      | `UnifiedHTTPClient`      | ✅ Унифицирован   |
-| `PubChemAdapter` | `BaseSyncAdapter` | `pubchempy` + ThreadPool | ✅ Legacy-обёртка |
+| `ChemblAdapter`          | `BaseHttpAdapter` | `UnifiedHTTPClient`      | ✅ Унифицирован   |
+| `UniProtAdapter`         | `BaseHttpAdapter` | `UnifiedHTTPClient`      | ✅ Унифицирован   |
+| `PubMedAdapter`          | Mixin-based       | `UnifiedHTTPClient`      | ✅ Унифицирован   |
+| `PubChemAdapter`         | `BaseSyncAdapter` | `pubchempy` + ThreadPool | ✅ Legacy-обёртка |
+| `CrossRefAdapter`        | `BaseHttpAdapter` | `UnifiedHTTPClient`      | ✅ Унифицирован   |
+| `OpenAlexAdapter`        | `BaseHttpAdapter` | `UnifiedHTTPClient`      | ✅ Унифицирован   |
+| `SemanticScholarAdapter` | `BaseHttpAdapter` | `UnifiedHTTPClient`      | ✅ Унифицирован   |
 
 **Компоненты `UnifiedHTTPClient`:**
 
@@ -824,36 +827,36 @@ from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
 class NewProviderAdapter(BaseHttpAdapter):
-    def --init--(
+    def __init__(
         self,
-        http-client: UnifiedHTTPClient,
+        http_client: UnifiedHTTPClient,
         logger: LoggerPort,
     ):
-        super().--init--(http-client, logger)
-        self.provider-name = "new-provider"
+        super().__init__(http_client, logger)
+        self.provider_name = "new-provider"
 ```
 
 **Для sync-библиотек** используйте `BaseSyncAdapter` с DI:
 
 ```python
-from bioetl.infrastructure.adapters.sync-base import BaseSyncAdapter
+from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
 
 class LegacyAdapter(BaseSyncAdapter):
-    provider-name = "legacy"
+    provider_name = "legacy"
 
-    def --init--(
+    def __init__(
         self,
         logger: LoggerPort,
-        rate-limiter: TokenBucket,
-        circuit-breaker: CircuitBreaker,
-        thread-pool: ThreadPoolExecutor,
+        rate_limiter: TokenBucket,
+        circuit_breaker: CircuitBreaker,
+        thread_pool: ThreadPoolExecutor,
     ):
         # Все зависимости инжектируются из Composition Root
-        super().--init--(logger, rate-limiter, circuit-breaker, thread-pool)
+        super().__init__(logger, rate_limiter, circuit_breaker, thread_pool)
 
     async def fetch(self, ...):
         # Sync call wrapped in executor
-        result = await self.-run-in-executor(sync-library.fetch, query)
+        result = await self._run_in_executor(sync_library.fetch, query)
 ```
 
 ### 4.2. Политика Тестирования
@@ -938,20 +941,20 @@ RetryConfig(
 При `deterministic=True` jitter вычисляется как:
 
 ```python
-hash - input = f"{attempt}:{url}:{seed}"
-jitter - factor = (hash(hash - input) % 1000) / 1000.0
+hash_input = f"{attempt}:{url}:{seed}"
+jitter_factor = (hash(hash_input) % 1000) / 1000.0
 ```
 
 #### Единый Источник Времени
 
 ```python
 # Application layer создаёт timestamp
-context = PipelineContext.create(run - id, run - type, logger)
-# context.started-at используется во всех компонентах
+context = PipelineContext.create(run_id, run_type, logger)
+# context.started_at используется во всех компонентах
 
 # Infrastructure получает timestamp как параметр
-await bronze - writer.write - bronze(..., ingestion - ts=context.started - at)
-await quarantine.write(..., ingestion - ts=context.started - at)
+await bronze_writer.write_bronze(..., ingestion_ts=context.started_at)
+await quarantine.write(..., ingestion_ts=context.started_at)
 ```
 
 ### 4.4. Python Standards
@@ -961,7 +964,7 @@ await quarantine.write(..., ingestion - ts=context.started - at)
 Все Python-файлы **MUST** начинаться с:
 
 ```python
-from --future-- import annotations
+from __future__ import annotations
 ```
 
 **Причины:**
@@ -977,17 +980,17 @@ from --future-- import annotations
 1. Shebang (если есть): `#!/usr/bin/env python`
 1. Encoding declaration (если есть): `# -*- coding: utf-8 -*-`
 1. Module docstring
-1. `from --future-- import annotations` ← сразу после docstring
+1. `from __future__ import annotations` ← сразу после docstring
 1. Другие импорты
 
-> **Исключение**: `--init--.py` файлы, содержащие только re-exports (`from ... import ...`)
-> и `--all--`, **MAY** опускать `from --future-- import annotations`, так как
+> **Исключение**: `__init__.py` файлы, содержащие только re-exports (`from ... import ...`)
+> и `__all__`, **MAY** опускать `from __future__ import annotations`, так как
 > они не содержат type annotations, требующих отложенной эвалюации.
 
 <!-- Updated: was 497/534 (93.1%), now 501/534 (93.8%); was 37, now 33 (audit 2026-02-17) -->
 
 > Текущее состояние: 501 из 534 файлов (93.8%) содержат импорт;
-> 33 файла без импорта — все `--init--.py` (re-export only).
+> 33 файла без импорта — все `__init__.py` (re-export only).
 
 #### 4.4.2. Type Hints
 
@@ -1005,7 +1008,7 @@ from --future-- import annotations
 ### 5.2. Управление Секретами
 
 - **Источник**: Переменные окружения (`os.environ`).
-- **Формат**: `BIOETL-{PROVIDER}-{KEY}` (например, `BIOETL-PUBCHEM-API-KEY`).
+- **Формат**: `BIOETL_{PROVIDER}_{KEY}` (например, `BIOETL_PUBCHEM_API_KEY`).
 - **Запрещено**: Хардкод секретов **MUST NOT**. Файлы `.env` в git **MUST NOT**.
 
 ### 5.3. Graceful Shutdown (Штатное завершение)
@@ -1142,9 +1145,9 @@ async with services:  # --aenter-- инициализирует ресурсы
 
 ```python
 # domain/resilience.py — MD5-based jitter для кросс-процессной стабильности
-hash - input = f"{attempt}:{url}:{seed}"
-digest = hashlib.md5(hash - input.encode(), usedforsecurity=False).hexdigest()
-jitter - factor = int(digest[:8], 16) / 0xFFFFFFFF
+hash_input = f"{attempt}:{url}:{seed}"
+digest = hashlib.md5(hash_input.encode(), usedforsecurity=False).hexdigest()
+jitter_factor = int(digest[:8], 16) / 0xFFFFFFFF
 ```
 
 При `RetryConfig(deterministic=False)` выдаётся `DeprecationWarning` — рекомендуется переход на детерминистичный режим.
@@ -1157,7 +1160,7 @@ jitter - factor = int(digest[:8], 16) / 0xFFFFFFFF
 > Утверждения делались без проверки фактического состояния кода.
 
 > **⚠️ ОБЯЗАТЕЛЬНО**: Перед предложением рефакторинга **MUST** выполнить верификацию согласно
-> протоколу из `CLAUDE.md` §0 и сверяться с секцией "УЖЕ РЕАЛИЗОВАНО" в `docs/archived/refactoring-plan.md`.
+> протоколу из `CLAUDE.md` §0 и сверяться с секцией "УЖЕ РЕАЛИЗОВАНО" в `docs/99-archive/refactoring-plan.md`.
 
 При проведении архитектурных обзоров **MUST** выполнять двойную верификацию каждой найденной проблемы:
 
@@ -1174,7 +1177,7 @@ grep -c "def \|async def " src/bioetl/path/to/file.py
 grep -n "self\.-.*\." src/bioetl/path/to/file.py | head -20
 
 # 3. Сверить с известными ложными утверждениями
-grep -A3 "ЛОЖНЫЕ УТВЕРЖДЕНИЯ" docs/archived/refactoring-plan.md
+grep -A3 "ЛОЖНЫЕ УТВЕРЖДЕНИЯ" docs/99-archive/refactoring-plan.md
 
 # 4. Найти существующие реализации
 grep -r "class ClassName\|def method-name" src/bioetl/
@@ -1234,12 +1237,12 @@ PipelineRunner.run() создаёт PipelineObserver напрямую вмест
 
 #### 7.1.4. Типичные Ложные Выводы
 
-<!-- Updated: ChemblAdapter was 517, now 975; GoldWriter was 593, now 946 (audit 2026-02-14) -->
+<!-- Updated: ChemblAdapter 975→992; GoldWriter 946→960 (audit 2026-02-27) -->
 
 | Паттерн                             | Почему ошибочен                                                         | Пример из кодовой базы                                                                         |
 | ----------------------------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| "500+ LOC = god object"             | Размер ≠ сложность. Когезивный сервис с единой ответственностью валиден | `ChemblAdapter` (975 LOC) делегирует через `EntityMapper`, `ErrorClassifier`, `AdapterMetrics` |
-| "Монолит требует декомпозиции"      | Файл с делегированием — НЕ монолит                                      | `GoldWriter` (946 LOC) делегирует `CsvExporter`, `AuditPort`, режимы записи когезивны          |
+| "500+ LOC = god object"             | Размер ≠ сложность. Когезивный сервис с единой ответственностью валиден | `ChemblAdapter` (992 LOC) делегирует через `EntityMapper`, `ErrorClassifier`, `AdapterMetrics` |
+| "Монолит требует декомпозиции"      | Файл с делегированием — НЕ монолит                                      | `GoldWriter` (960 LOC) делегирует `CsvExporter`, `AuditPort`, режимы записи когезивны          |
 | "NoOp default = нарушение DI"       | Null Object Pattern валиден для опциональных зависимостей               | `NoOpMetrics`, `NoOpTracing`                                                                   |
 | "Optional parameter = нарушение DI" | \`policy: Policy                                                        | None = None\` — допустимый паттерн для value objects                                           |
 | "click.echo в CLI = нарушение"      | User-facing output — законная ответственность interfaces слоя           | `cli.py` confirmation prompts                                                                  |
@@ -1272,7 +1275,7 @@ grep -o "self\.-[a-z-]*" src/bioetl/path/to/file.py | sort -u | wc -l
 grep -c "^    def \|^    async def " src/bioetl/path/to/file.py
 
 # 4. Сверить с известными ложными утверждениями
-grep "ChemblAdapter\|GoldWriter\|PreflightService" docs/archived/refactoring-plan.md
+grep "ChemblAdapter\|GoldWriter\|PreflightService" docs/99-archive/refactoring-plan.md
 ```
 
 **Критерии "монолита" (ВСЕ должны выполняться):**
@@ -1284,24 +1287,24 @@ grep "ChemblAdapter\|GoldWriter\|PreflightService" docs/archived/refactoring-pla
 
 **Контрпримеры (НЕ монолиты, несмотря на размер):**
 
-<!-- Updated: ChemblAdapter was 517→975; GoldWriter was 593→946; PreflightService was 527→818 (audit 2026-02-14) -->
+<!-- Updated: ChemblAdapter 975→992; GoldWriter 946→960; PreflightService 818→841 (audit 2026-02-27) -->
 
-- `ChemblAdapter` (975 LOC): Делегирует 4 компонентам, когезивная ответственность
-- `GoldWriter` (946 LOC): Делегирует `CsvExporter`, `AuditPort`, режимы записи когезивны
-- `PreflightService` (818 LOC): 21 метод с единой ответственностью (preflight validation)
+- `ChemblAdapter` (992 LOC): Делегирует 4 компонентам, когезивная ответственность
+- `GoldWriter` (960 LOC): Делегирует `CsvExporter`, `AuditPort`, режимы записи когезивны
+- `PreflightService` (841 LOC): 21 метод с единой ответственностью (preflight validation)
 
 ### 7.2. Обновление Документации
 
 При обнаружении ложного утверждения **MUST**:
 
-1. Добавить в `docs/archived/refactoring-plan.md` → секция "❌ ЛОЖНЫЕ УТВЕРЖДЕНИЯ"
+1. Добавить в `docs/99-archive/refactoring-plan.md` → секция "❌ ЛОЖНЫЕ УТВЕРЖДЕНИЯ"
 1. Указать причину, почему утверждение ложно
 1. Добавить ссылку на код (`файл:строка`)
 1. Закоммитить изменения
 
 При реализации задачи **MUST**:
 
-1. Переместить в `docs/archived/refactoring-plan.md` → секция "✅ УЖЕ РЕАЛИЗОВАНО"
+1. Переместить в `docs/99-archive/refactoring-plan.md` → секция "✅ УЖЕ РЕАЛИЗОВАНО"
 1. Добавить ссылку на коммит или файл
 1. Указать дату реализации
 
@@ -1322,7 +1325,7 @@ grep "^from\|^import" src/bioetl/path/to/file.py | head -20
 find tests -name "*.py" -exec grep -l "ClassName" {} \;
 
 # Проверка в списке ложных утверждений
-grep -B2 -A2 "ComponentName" docs/archived/refactoring-plan.md
+grep -B2 -A2 "ComponentName" docs/99-archive/refactoring-plan.md
 ```
 
 ----------------------------------------------------------------------
@@ -1430,7 +1433,7 @@ make run-local    # запуск сэмплового пайплайна на ф
 \* **Generic Probe**: Lightweight GET-запрос к базовому endpoint API (e.g., root или `/status`). Если API не предоставляет dedicated health endpoint, использовать минимальный запрос данных с timeout 5 секунд.
 
 > **Каноническая конфигурация rate limits** (burst, batch-size, конкретные числа) находится в
-> `configs/providers/{provider}.yaml`. Подробная таблица: [pipeline-configuration.md](../03-guides/pipeline-configuration.md#provider-rate-limits).
+> `configs/providers/{provider}.yaml`. Подробная таблица: [pipeline-configuration.md](../03-guides/pipeline-configuration.md).
 
 ### А.1. Формирование URL для ChEMBL API
 
@@ -1645,7 +1648,7 @@ fields:
 | [ADR-005](../02-architecture/decisions/ADR-005-composition-layer-separation.md)      | Composition Layer Separation               | Accepted           | 2025-12    |
 | [ADR-006](../02-architecture/decisions/ADR-006-logger-metrics-ports.md)              | Logger and Metrics Ports                   | Accepted           | 2025-12-18 |
 | [ADR-007](../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md)    | Circuit Breaker Implementation             | Accepted           | 2025-12-22 |
-| [ADR-008](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)        | Graceful Shutdown Strategy                 | Accepted           | 2025-12-22 |
+| [ADR-008](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)        | Graceful Shutdown Strategy                 | Superseded         | 2025-12-22 |
 | [ADR-009](../02-architecture/decisions/ADR-009-paginated-fetcher-mixin.md)           | PaginatedFetcherMixin Design               | Accepted           | 2025-12-22 |
 | [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md)             | Local-Only Deployment                      | Accepted           | 2025-12-23 |
 | [ADR-011](../02-architecture/decisions/ADR-011-remove-watermark-mechanism.md)        | Remove Watermark Mechanism                 | Accepted           | 2025-12-23 |
@@ -1670,13 +1673,14 @@ fields:
 | [ADR-030](../02-architecture/decisions/ADR-030-publication-pagination-strategy.md)   | Publication Pagination Strategy            | Accepted           | 2026-01-26 |
 | [ADR-031](../02-architecture/decisions/ADR-031-loading-strategy-formalization.md)    | Loading Strategy Formalization             | Accepted           | 2026-01-26 |
 | [ADR-032](../02-architecture/decisions/ADR-032-unified-http-client.md)               | Unified HTTP Client Pattern                | Accepted           | 2026-01-28 |
-| [ADR-033](../02-architecture/decisions/ADR-033-publication-validation-strategy.md)   | Publication Metadata Validation Strategy   | Added              | 2026-02-06 |
+| [ADR-033](../02-architecture/decisions/ADR-033-publication-validation-strategy.md)   | Publication Metadata Validation Strategy   | Accepted           | 2026-02-06 |
 | [ADR-034](../02-architecture/decisions/ADR-034-schema-domain-pairs.md)               | Schema↔Domain Configuration Pairs          | Accepted           | 2026-02-15 |
 | [ADR-035](../02-architecture/decisions/ADR-035-json-field-typing-policy.md)          | JSON Field Typing Policy (Silver↔Gold)     | Accepted           | 2026-02-17 |
 | [ADR-036](../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md)   | Gold Contract Versioning Policy            | Accepted           | 2026-02-18 |
 | [ADR-037](../02-architecture/decisions/ADR-037-canonical-schema-generation.md)       | Canonical Schema Source and Generation     | Accepted           | 2026-02-18 |
 | [ADR-038](../02-architecture/decisions/ADR-038-enum-externalization.md)              | ChEMBL Enum Values Externalization to YAML | Accepted           | 2026-02-16 |
 | [ADR-039](../02-architecture/decisions/ADR-039-unified-entity-config-format.md)      | Unified Entity Configuration Format        | Accepted           | 2026-02-24 |
+| [ADR-040](../02-architecture/decisions/ADR-040-diagram-governance.md)                | Diagram Governance and Layout Policy       | Accepted           | 2026-02-25 |
 
 ## История Изменений (Changelog)
 

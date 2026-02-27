@@ -179,7 +179,7 @@ Steps:
        async def update-watermark(self, pipeline-name: str, watermark: ...) -> None: ...
        async def clear-watermark(self, pipeline-name: str) -> None: ...
    ```
-3. Export `WatermarkStrategyPort` from `src/bioetl/domain/ports/--init--.py`
+3. Export `WatermarkStrategyPort` from `src/bioetl/domain/ports/__init__.py`
 4. Implement `LocalWatermarkStorage` adapter
 5. Add `watermark-field` to pipeline config
 6. Update fetchers to use watermark filtering

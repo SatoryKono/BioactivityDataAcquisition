@@ -26,31 +26,31 @@ input-filter:
 
 This pattern follows ADR-027 (DQ Rules Externalization) to create a consistent hierarchical configuration system.
 
+> Note (2026-02-27): After ADR-039 config unification, filter rules are stored in unified
+> sections inside `configs/base/pipeline.yaml`, `configs/providers/{provider}.yaml`,
+> and `configs/entities/{provider}/{entity}.yaml`.
+
 ## Decision
 
 Extract filter rules into a hierarchical configuration structure:
 
 ```
-configs/filters/
-├── -defaults.yaml           # Global defaults (Level 1)
-├── README.md                # Documentation
-├── providers/
-│   └── {provider}.yaml      # Provider overrides (Level 2)
-└── entities/
-    └── {provider}/
-        └── {entity}.yaml    # Entity-specific rules (Level 3)
+configs/
+├── base/pipeline.yaml               # filter_defaults (Level 1)
+├── providers/{provider}.yaml        # filters section (Level 2)
+└── entities/{provider}/{entity}.yaml  # filters section (Level 3)
 ```
 
 **Merge priority** (later wins for scalars, special handling for collections):
-1. `-defaults.yaml`
-2. `providers/{provider}.yaml`
-3. `entities/{provider}/{entity}.yaml`
+1. `configs/base/pipeline.yaml#filter_defaults`
+2. `configs/providers/{provider}.yaml#filters`
+3. `configs/entities/{provider}/{entity}.yaml#filters`
 4. Inline `filter-rules` in pipeline config (for exceptional cases)
 
 Pipeline configs reference filter config via `filter-config-file`:
 ```yaml
 pipeline-name: chembl_activity
-filter-config-file: ../../filters/entities/chembl/activity.yaml
+filter-config-file: ../../entities/chembl/activity.yaml
 ```
 
 ### Implementation Components
@@ -72,10 +72,10 @@ filter-config-file: ../../filters/entities/chembl/activity.yaml
    - Delegates to `FilterConfigLoader.load-as-dict()` for the full hierarchy
    - Collects inline overrides from pipeline YAML (`input-filter`, `gold-filters`, `silver-filters`, `extraction-params`, `filter-rules`)
 
-4. **Config files**: `configs/filters/`
-   - `-defaults.yaml`: Global defaults (batch-size=100)
-   - `providers/{provider}.yaml`: Provider-specific settings (e.g., ChEMBL batch-size=1000)
-   - `entities/{provider}/{entity}.yaml`: Entity-specific rules
+4. **Config files**: unified hierarchy in `configs/base|providers|entities`
+   - `base/pipeline.yaml#filter_defaults`: Global defaults (batch-size=100)
+   - `providers/{provider}.yaml#filters`: Provider-specific settings (e.g., ChEMBL batch-size=1000)
+   - `entities/{provider}/{entity}.yaml#filters`: Entity-specific rules
 
 5. **Pipeline schema**: `src/bioetl/infrastructure/schemas/pipeline-config.py`
    - `filter-config-file` field for convention-based path (informational)
@@ -156,10 +156,10 @@ Bronze extraction. Сокращают объём трафика — API возв
 
 #### Конфигурация
 
-Размещается в `configs/filters/` hierarchy как секция `extraction-params`:
+Размещается в unified hierarchy как секция `filters.extraction-params`:
 
 ```yaml
-# configs/filters/entities/chembl/activity.yaml
+# configs/entities/chembl/activity.yaml
 extraction-params:
   standard-type--in: "IC50,Ki"
   standard-units: "nM"
@@ -173,8 +173,8 @@ extraction-params:
 
 #### Merge order
 
-`configs/filters/-defaults.yaml` → `providers/{provider}.yaml`
-→ `entities/{provider}/{entity}.yaml`
+`configs/base/pipeline.yaml#filter_defaults` → `configs/providers/{provider}.yaml#filters`
+→ `configs/entities/{provider}/{entity}.yaml#filters`
 
 Entity-level `extraction-params` полностью заменяет provider-level
 (не merge отдельных ключей, а full override секции).
@@ -253,8 +253,8 @@ Define filters in Python code. Rejected because:
 |-------------|--------|----------------|
 | Hierarchical merge | PASS | `FilterConfigLoader.-merge-hierarchy()` |
 | Single merge mechanism | PASS | Consolidated into `FilterConfigLoader` (no duplication) |
-| Provider defaults | PASS | `providers/{provider}.yaml` |
-| Entity overrides | PASS | `entities/{provider}/{entity}.yaml` |
+| Provider defaults | PASS | `configs/providers/{provider}.yaml#filters` |
+| Entity overrides | PASS | `configs/entities/{provider}/{entity}.yaml#filters` |
 | Inline overrides | PASS | `filter-rules` / inline sections in pipeline YAML |
 | Backward compatibility | PASS | Inline `input-filter`/`gold-filters` supported |
 | Domain conversion | PASS | `FilterConfigFile.to-domain()` |
@@ -268,7 +268,7 @@ Define filters in Python code. Rejected because:
 - Schema: `src/bioetl/infrastructure/schemas/filter-config.py`
 - Loader: `src/bioetl/infrastructure/config/filter-config-loader.py`
 - Pipeline integration: `src/bioetl/infrastructure/config-loader.py` (`-apply-hierarchical-filter-config`)
-- Config files: `configs/filters/`
+- Config files: `configs/base/pipeline.yaml#filter_defaults`, `configs/providers/*#filters`, `configs/entities/*/*#filters`
 - Tests: `tests/unit/infrastructure/config/test-filter-config-loader.py`
 
 ## Changelog

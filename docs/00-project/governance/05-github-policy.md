@@ -263,7 +263,7 @@ Full security policy: [`.github/SECURITY.md`](https://github.com/SatoryKono/Bioa
 
 ### Key Points
 
-- Secrets: Environment variables only (`BIOETL-{PROVIDER}-{KEY}`)
+- Secrets: Environment variables only (`BIOETL_{PROVIDER}_{KEY}`)
 - VCR cassettes: Sanitized via `before-record` hooks
 - Vulnerability reporting: security@example.com (72h response SLA)
 - Automated scanning: detect-secrets, pip-audit, Trivy, Dependabot

@@ -37,7 +37,7 @@ BioETL использует стек **Prometheus + Grafana** для обесп�
 #### 3. BioETL Provider Health v2
 Технический мониторинг состояния внешних API (ChEMBL, UniProt и др.).
 - **Health Check Latency by Provider (p95)**: тренд латентности провайдеров.
-- **Health Check Success / Total Checks**: объём и стабильность health-check.
+- **Health Check Success / Total Checks**: объём и стабильность health_check.
 - **Per-provider gauges (102/103)**: повторяемые p95-панели по `$provider`.
 
 ## 3. Гарантии качества мониторинга
