@@ -76,6 +76,7 @@ WARNING_STALE_DAYS = 180
 DISALLOWED_SUBGRAPH_EMOJI = ("🟡", "🟢", "🔵", "🟣", "⚪")
 # ADR-040 pre-harmonization palette (blocked in style/classDef rules).
 DEPRECATED_PALETTE = {
+    # Pre-ADR-040 Material Design palette (now replaced by Tailwind Slate)
     "#fff7ed",
     "#f59e0b",
     "#ecfdf5",
@@ -86,6 +87,32 @@ DEPRECATED_PALETTE = {
     "#7c3aed",
     "#f1f5f9",
     "#64748b",
+    # Material 500-level fills (replaced by ADR-040 canonical fills)
+    "#f3e5f5",
+    "#e8f5e9",
+    "#ffcdd2",
+    "#fff3e0",
+    "#e3f2fd",
+    "#eceff1",
+    "#fff8e1",
+    "#ffebee",
+    "#fce4ec",
+    "#e0f7fa",
+    "#efebe9",
+    # Material border/accent colours
+    "#1565c0",
+    "#0d47a1",
+    "#b71c1c",
+    "#00838f",
+    "#4e342e",
+    "#546e7a",
+    "#90a4ae",
+    "#bbdefb",
+    "#90caf9",
+    "#64b5f6",
+    "#42a5f5",
+    "#1e88e5",
+    "#1976d2",
 }
 
 
@@ -484,6 +511,32 @@ def check_layout_policy(path: Path, lines: list[str]) -> list[Issue]:
     return issues
 
 
+def check_nbsp_padding(path: Path, lines: list[str]) -> list[Issue]:
+    """Check for &nbsp; padding — NBSP-001 (ERROR).
+
+    &nbsp; padding is deprecated in favour of CSS size tiers.
+    See custom.css size-sm / size-md / size-lg classes.
+    """
+    issues: list[Issue] = []
+    fname = str(path)
+    nbsp_lines = [i + 1 for i, line in enumerate(lines) if "&nbsp;" in line]
+    if nbsp_lines:
+        count = sum(line.count("&nbsp;") for line in lines)
+        sample = nbsp_lines[:5]
+        issues.append(
+            Issue(
+                file=fname,
+                severity="ERROR",
+                rule="NBSP-001",
+                message=(
+                    f"Found {count} &nbsp; occurrences on {len(nbsp_lines)} lines "
+                    f"(first: {sample}). Use CSS size tiers instead."
+                ),
+            )
+        )
+    return issues
+
+
 def check_orphan_nodes(path: Path, lines: list[str]) -> list[Issue]:
     """Check for orphan nodes — GRAPH-001 (WARNING, ADR-040 D6).
 
@@ -559,6 +612,7 @@ def lint_file(path: Path, stale_days: int) -> list[Issue]:
     issues.extend(check_subgraph_emoji(path, lines))
     issues.extend(check_node_count_policy(path, lines))
     issues.extend(check_layout_policy(path, lines))
+    issues.extend(check_nbsp_padding(path, lines))
     issues.extend(check_orphan_nodes(path, lines))
 
     return issues
