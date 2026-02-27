@@ -10,8 +10,6 @@ import pyarrow as pa
 import pytest
 
 from bioetl.domain.serialization import (
-    _escape_non_ascii,
-    _has_non_ascii,
     deserialize_from_json,
     flatten_arrow_table_for_export,
     is_orjson_available,
@@ -193,54 +191,6 @@ class TestRoundTrip:
         restored = deserialize_from_json(json_str)
         assert restored == original
 
-
-class TestEscapeNonAscii:
-    """Tests for _escape_non_ascii helper function."""
-
-    def test_escape_cyrillic(self) -> None:
-        """Escape Cyrillic characters."""
-        text = "тест"
-        result = _escape_non_ascii(text)
-        # Each char should be escaped
-        assert "\\u" in result
-        assert len(result) > len(text)
-
-    def test_escape_ascii_unchanged(self) -> None:
-        """ASCII text is unchanged."""
-        text = "hello world"
-        result = _escape_non_ascii(text)
-        assert result == text
-
-    def test_escape_mixed_content(self) -> None:
-        """Mixed ASCII and non-ASCII content."""
-        text = "hello мир"
-        result = _escape_non_ascii(text)
-        assert result.startswith("hello ")
-        assert "\\u" in result
-
-    def test_escape_empty_string(self) -> None:
-        """Empty string returns empty string."""
-        assert _escape_non_ascii("") == ""
-
-
-class TestHasNonAscii:
-    """Tests for _has_non_ascii helper function."""
-
-    def test_has_non_ascii_with_cyrillic(self) -> None:
-        """Detect Cyrillic characters."""
-        assert _has_non_ascii("тест") is True
-
-    def test_has_non_ascii_with_emoji(self) -> None:
-        """Detect emoji characters."""
-        assert _has_non_ascii("hello 🌍") is True
-
-    def test_has_non_ascii_pure_ascii(self) -> None:
-        """Pure ASCII returns False."""
-        assert _has_non_ascii("hello world 123") is False
-
-    def test_has_non_ascii_empty_string(self) -> None:
-        """Empty string returns False."""
-        assert _has_non_ascii("") is False
 
 
 class TestIsOrjsonAvailable:
