@@ -513,7 +513,7 @@ pytest tests/e2e/ -v -m e2e  # E2E тесты
 | `docs/00-project/RULES.md`             | **Конституция проекта** — единственный источник истины для архитектурных правил |
 | `docs/00-project/agents/AGENT.md`      | Инструкции для агента (персона, workflow, специфика работы)                     |
 | `.claude/PROJECT-CONTEXT.md`           | Компактный контекст для быстрой справки                                         |
-| `docs/02-architecture/decisions/`      | ADR (001-038) — архитектурные решения                                           |
+| `docs/02-architecture/decisions/`      | ADR (001-040) — архитектурные решения                                           |
 | `docs/01-requirements/REQUIREMENTS.md` | 127 тестируемых требований                                                      |
 
 > **Иерархия документации**: При противоречиях приоритет имеет `docs/00-project/RULES.md`.

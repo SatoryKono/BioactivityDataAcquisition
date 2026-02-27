@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 
 @dataclass(frozen=True)
 class FilterLoadResult:
-    """Результат загрузки фильтра ID с метаданными о дубликатах.
+    """Filter ID load result with deduplication metadata.
 
     Supports both single-column and multi-column filtering modes:
     - Single-column: Use ids, total_count, unique_count, duplicate_count, duplicates
@@ -19,11 +19,11 @@ class FilterLoadResult:
       exact row-wise combinations to filter
 
     Attributes:
-        ids: Уникальные отсортированные ID (single-column mode).
-        total_count: Всего записей в источнике (до дедупликации).
-        unique_count: Количество уникальных ID (single-column mode).
-        duplicate_count: Количество удалённых дубликатов.
-        duplicates: ID, которые встречались более одного раза.
+        ids: Unique sorted IDs (single-column mode).
+        total_count: Total records in the source (before deduplication).
+        unique_count: Number of unique IDs (single-column mode).
+        duplicate_count: Number of removed duplicates.
+        duplicates: IDs that appeared more than once.
         column_ids: Per-field unique IDs for multi-column mode.
             Mapping from filter_field to tuple of unique IDs.
         valid_combinations: Exact row-wise combinations to match (multi-column mode).
@@ -58,7 +58,7 @@ class FilterLoadResult:
 
     @property
     def has_duplicates(self) -> bool:
-        """Проверяет, были ли найдены дубликаты."""
+        """Check whether any duplicates were found."""
         return self.duplicate_count > 0
 
     @property

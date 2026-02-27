@@ -21,7 +21,7 @@ class AbstractExtractor(BaseFieldExtractor):
     """
 
     def extract(self, element: Element | None) -> list[str] | None:
-        """Извлечь сырые данные из XML элемента Abstract.
+        """Extract raw data from an XML Abstract element.
 
         Args:
             element: The Article element.
@@ -52,7 +52,7 @@ class AbstractExtractor(BaseFieldExtractor):
         return texts if texts else None
 
     def normalize(self, raw_value: list[str]) -> str:
-        """Нормализовать извлечённый текст абстракта.
+        """Normalize extracted abstract text.
 
         Args:
             raw_value: List of abstract text parts.

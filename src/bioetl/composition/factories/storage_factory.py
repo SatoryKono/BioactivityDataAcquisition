@@ -118,6 +118,45 @@ class StorageFactory:
     ) -> StorageAdapter:
         """Create StorageAdapter with all writers configured.
 
+        Instantiates BronzeWriter, SilverWriter, and GoldWriter with the
+        provided paths, configs, and observability ports, then composes
+        them into a unified StorageAdapter.
+
+        Args:
+            bronze_path: Base filesystem path for Bronze layer output.
+            silver_path: Base filesystem path for Silver layer Delta tables.
+            gold_path: Base filesystem path for Gold layer Delta tables.
+            bronze_config: Pydantic sink config for Bronze layer (save_json,
+                save_metadata, flat_structure settings).
+            silver_config: Pydantic sink config for Silver layer (save_metadata,
+                flat_structure settings).
+            gold_config: Pydantic sink config for Gold layer (save_metadata,
+                flat_structure settings).
+            silver_csv_exporter: Optional CsvExporter for Silver layer CSV output.
+            gold_csv_exporter: Optional CsvExporter for Gold layer CSV output.
+            logger: Structured logger for all writer observability.
+            metrics: Metrics port for Bronze write observability.
+            tracing: Optional TracingPort for distributed tracing. Falls back
+                to NoOpTracing if None.
+            metadata_coordinator: Optional MetadataCoordinator for centralized
+                metadata creation across all layers with consistent run_id
+                and timestamps.
+            transform_version: Optional version string for lineage tracking
+                in Silver and Gold metadata.
+            transform_steps: Optional tuple of transform step names for
+                lineage tracking in Silver and Gold metadata.
+            bronze_flat_structure: If True, Bronze writes directly to base_path
+                without provider/entity subdirectories.
+            silver_flat_structure: If True, Silver writes directly to base_path
+                without table_name subdirectories.
+            gold_flat_structure: If True, Gold writes directly to base_path
+                without table_name subdirectories.
+            silver_validator: Optional SilverValidatorPort for Pandera validation
+                in SilverWriter. If None, validation is skipped.
+
+        Returns:
+            Configured StorageAdapter with Bronze, Silver, and Gold writers.
+
         Note:
             Lock validation is performed at Application layer (BatchWriter)
             per RULES.md §4.6 Safety Guard. Infrastructure writers are pure I/O.

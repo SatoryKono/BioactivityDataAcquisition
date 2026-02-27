@@ -16,15 +16,15 @@ from enum import StrEnum
 
 
 class FilterOperator(StrEnum):
-    """Операторы сравнения для column filters.
+    """Comparison operators for column filters.
 
     Attributes:
-        IN: Значение должно быть в списке допустимых.
-        NOT_IN: Значение не должно быть в списке исключаемых.
-        IS_NULL: Значение должно быть None или пустой строкой.
-        IS_NOT_NULL: Значение не должно быть None или пустой строкой.
-        IS_EMPTY: Значение должно быть "пустым" (None, "", [], {}).
-        IS_NOT_EMPTY: Значение не должно быть "пустым".
+        IN: Value must be in the allowed list.
+        NOT_IN: Value must not be in the excluded list.
+        IS_NULL: Value must be None or an empty string.
+        IS_NOT_NULL: Value must not be None or an empty string.
+        IS_EMPTY: Value must be "empty" (None, "", [], {}).
+        IS_NOT_EMPTY: Value must not be "empty".
     """
 
     IN = "in"
@@ -37,12 +37,12 @@ class FilterOperator(StrEnum):
 
 @dataclass(frozen=True, slots=True)
 class GoldColumnFilter:
-    """Фильтр по колонке с поддержкой операторов.
+    """Column filter with operator support.
 
     Attributes:
-        column: Имя колонки для фильтрации.
-        operator: Оператор фильтрации (default: IN).
-        values: Множество значений (для IN/NOT_IN, None для NULL-операторов).
+        column: Column name to filter on.
+        operator: Filter operator (default: IN).
+        values: Set of values (for IN/NOT_IN, None for NULL operators).
     """
 
     column: str
@@ -56,7 +56,7 @@ class GoldColumnFilter:
         self._validate_operator_values()
 
     def _validate_operator_values(self) -> None:
-        """Валидирует соответствие values и operator."""
+        """Validate that values and operator are consistent."""
         requires_values = self.operator in (FilterOperator.IN, FilterOperator.NOT_IN)
         if requires_values and not self.values:
             raise ValueError(

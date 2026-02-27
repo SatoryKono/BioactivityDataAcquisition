@@ -1,6 +1,6 @@
 # pk-issue — Primary Key Mismatch Issue Creator
 
-*Priority: critical | Version: 1.0 | Aligned with RULES.md v5.19*
+*Priority: critical | Version: 1.0 | Aligned with RULES.md v5.22*
 
 ---
 

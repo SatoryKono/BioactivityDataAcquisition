@@ -37,7 +37,7 @@ class ClassificationExtractor(BaseFieldExtractor):
     """
 
     def extract(self, element: Element | None) -> RawClassification | None:
-        """Извлечь сырые данные классификации из XML.
+        """Extract raw classification data from XML.
 
         Args:
             element: Root PubmedArticle element.
@@ -58,7 +58,7 @@ class ClassificationExtractor(BaseFieldExtractor):
         )
 
     def normalize(self, raw_value: RawClassification) -> NormalizedClassification:
-        """Нормализовать данные классификации.
+        """Normalize classification data.
 
         Args:
             raw_value: Raw classification dict.

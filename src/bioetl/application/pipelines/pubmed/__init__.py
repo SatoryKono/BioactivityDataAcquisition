@@ -15,7 +15,7 @@ from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTra
 
 
 class PubMedPublicationPipeline(BasePipeline):
-    """Пайплайн для данных о публикациях из PubMed.
+    """Pipeline for PubMed publication data.
 
     Transformer is injected via DI from GenericPipelineFactory.
     """

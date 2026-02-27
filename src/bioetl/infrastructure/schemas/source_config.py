@@ -1,6 +1,6 @@
 """Schema validation for source configuration.
 
-Implements strict validation for source YAML configurations (configs/sources/*.yaml).
+Implements strict validation for source YAML configurations (configs/providers/*.yaml).
 These configs define provider-specific settings like rate limits, circuit breaker,
 pagination, and batch sizes that were previously hardcoded.
 
@@ -64,7 +64,7 @@ class PaginationConfig(BaseModel):
     """API pagination configuration.
 
     Single source of truth for all API pagination parameters.
-    Defined per-provider in configs/sources/*.yaml.
+    Defined per-provider in configs/providers/*.yaml.
 
     Pipelines may only override ``page_size`` via ``page_size_override``
     but cannot redefine the pagination strategy.
@@ -156,7 +156,7 @@ class ProviderConfigYaml(BaseModel):
 class SourceSectionConfig(BaseModel):
     """Source section configuration from YAML.
 
-    This represents the 'source' section in configs/sources/*.yaml files.
+    This represents the 'source' section in configs/providers/*.yaml files.
 
     Attributes:
         batch_size: Batch size for data loading.
@@ -182,7 +182,7 @@ class SourceSectionConfig(BaseModel):
 class SourceYamlConfig(BaseModel):
     """Root schema for source configuration files.
 
-    Validates configs/sources/*.yaml files.
+    Validates configs/providers/*.yaml files.
 
     Example YAML:
         source:

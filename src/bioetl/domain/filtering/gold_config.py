@@ -9,4 +9,4 @@ from bioetl.domain.filtering._base_filter_config import BaseFilterConfig
 
 @dataclass(frozen=True, slots=True)
 class GoldFilterConfig(BaseFilterConfig):
-    """Полная конфигурация фильтров для Gold слоя."""
+    """Full filter configuration for the Gold layer."""

@@ -41,7 +41,7 @@ class BaseFilterConfig:
         )
 
     def should_include(self, record: dict[str, Any]) -> bool:  # Any: record vals vary
-        """Проверяет все правила фильтрации."""
+        """Check all filtering rules against a record."""
         checks = [
             self._check_required_fields,
             self._check_exclude_if_present,
@@ -54,22 +54,22 @@ class BaseFilterConfig:
 
     # Any: record vals vary
     def _check_required_fields(self, record: dict[str, Any]) -> bool:
-        """Проверяет наличие обязательных полей."""
+        """Check that all required fields are present and non-empty."""
         return all(record.get(fld) not in (None, "") for fld in self.required_fields)
 
     # Any: record vals vary
     def _check_exclude_if_present(self, record: dict[str, Any]) -> bool:
-        """Проверяет отсутствие исключающих полей."""
+        """Check that exclusion fields are absent or empty."""
         return all(record.get(fld) in (None, "") for fld in self.exclude_if_present)
 
     # Any: record vals vary
     def _check_column_filters(self, record: dict[str, Any]) -> bool:
-        """Проверяет соответствие значений колонок фильтрам."""
+        """Check that column values match the configured filters."""
         return all(self._check_single_column(record, f) for f in self.column_filters)
 
     # Any: record vals vary
     def _check_single_column(self, record: dict[str, Any], f: GoldColumnFilter) -> bool:
-        """Проверяет одну колонку по оператору."""
+        """Check a single column value against its filter operator."""
         val = record.get(f.column)
         checker = _OPERATOR_CHECKERS.get(f.operator)
         if checker is None:
@@ -78,37 +78,37 @@ class BaseFilterConfig:
 
     # Any: val varies
     def _check_op_in(self, val: Any, values: frozenset[str] | None) -> bool:
-        """Проверяет оператор IN."""
+        """Check the IN operator."""
         return str(val) in values  # type: ignore[operator]
 
     # Any: val varies
     def _check_op_not_in(self, val: Any, values: frozenset[str] | None) -> bool:
-        """Проверяет оператор NOT_IN."""
+        """Check the NOT_IN operator."""
         return str(val) not in values  # type: ignore[operator]
 
     # Any: val varies
     def _check_op_is_null(self, val: Any, _values: frozenset[str] | None) -> bool:
-        """Проверяет оператор IS_NULL."""
+        """Check the IS_NULL operator."""
         return val is None or val == ""
 
     # Any: val varies
     def _check_op_is_not_null(self, val: Any, _values: frozenset[str] | None) -> bool:
-        """Проверяет оператор IS_NOT_NULL."""
+        """Check the IS_NOT_NULL operator."""
         return val is not None and val != ""
 
     # Any: val varies
     def _check_op_is_empty(self, val: Any, _values: frozenset[str] | None) -> bool:
-        """Проверяет оператор IS_EMPTY."""
+        """Check the IS_EMPTY operator."""
         return self._is_empty_value(val)
 
     # Any: val varies
     def _check_op_is_not_empty(self, val: Any, _values: frozenset[str] | None) -> bool:
-        """Проверяет оператор IS_NOT_EMPTY."""
+        """Check the IS_NOT_EMPTY operator."""
         return not self._is_empty_value(val)
 
     @staticmethod
     def _is_empty_value(val: Any) -> bool:  # Any: record value type varies
-        """Проверяет, является ли значение 'пустым'."""
+        """Check whether a value is considered 'empty'."""
         if val is None:
             return True
         if isinstance(val, str) and val.strip() == "":
@@ -117,12 +117,12 @@ class BaseFilterConfig:
 
     # Any: record vals vary
     def _check_range_filters(self, record: dict[str, Any]) -> bool:
-        """Проверяет попадание значений в диапазоны."""
+        """Check that values fall within the configured ranges."""
         return all(self._check_single_range(record, f) for f in self.range_filters)
 
     # Any: record vals vary
     def _check_list_length_filters(self, record: dict[str, Any]) -> bool:
-        """Проверяет длину списков в колонках."""
+        """Check list lengths in columns against configured bounds."""
         return all(
             self._check_single_list_length(record, f) for f in self.list_length_filters
         )
@@ -132,13 +132,13 @@ class BaseFilterConfig:
         record: dict[str, Any],
         f: GoldListLengthFilter,  # Any: record vals vary
     ) -> bool:
-        """Проверяет длину одного списка."""
+        """Check the length of a single list column."""
         length = self._get_list_length(record.get(f.column))
         return self._length_in_bounds(length, f.min_length, f.max_length)
 
     @staticmethod
     def _get_list_length(val: Any) -> int:  # Any: record value type varies
-        """Вычисляет длину значения как списка."""
+        """Compute the length of a value treated as a list."""
         if val is None:
             return 0
         if isinstance(val, list):
@@ -149,14 +149,14 @@ class BaseFilterConfig:
     def _length_in_bounds(
         length: int, min_len: int | None, max_len: int | None
     ) -> bool:
-        """Проверяет, находится ли длина в допустимых границах."""
+        """Check whether the length falls within the allowed bounds."""
         if min_len is not None and length < min_len:
             return False
         return not (max_len is not None and length > max_len)
 
     # Any: record vals vary
     def _check_list_contains_filters(self, record: dict[str, Any]) -> bool:
-        """Проверяет содержание списков."""
+        """Check list-contains filters against record values."""
         return all(
             self._check_single_list_contains(record, f)
             for f in self.list_contains_filters
@@ -167,7 +167,7 @@ class BaseFilterConfig:
         record: dict[str, Any],
         f: GoldListContainsFilter,  # Any: record vals vary
     ) -> bool:
-        """Проверяет содержание одного списка."""
+        """Check a single list-contains filter against a record value."""
         val = record.get(f.column)
         if not val:
             return True
@@ -177,7 +177,7 @@ class BaseFilterConfig:
 
     @staticmethod
     def _to_string_set(val: Any) -> set[str]:  # Any: record value type varies
-        """Преобразует значение в множество строк."""
+        """Convert a value to a set of strings."""
         if not isinstance(val, list):
             val = [val]
         return {str(v) for v in val}
@@ -186,14 +186,14 @@ class BaseFilterConfig:
     def _matches_contains_mode(
         val_set: set[str], allowed: frozenset[str], mode: str
     ) -> bool:
-        """Проверяет соответствие множества значений режиму фильтра."""
+        """Check whether the value set matches the filter mode."""
         if mode == "all":
             return val_set.issubset(allowed)
         return bool(val_set.intersection(allowed))
 
     # Any: record vals vary
     def _check_single_range(self, record: dict[str, Any], f: GoldRangeFilter) -> bool:
-        """Проверяет одно значение на попадание в диапазон."""
+        """Check a single value against a range filter."""
         val = record.get(f.column)
         if val is None or val == "":
             return False
@@ -206,27 +206,27 @@ class BaseFilterConfig:
         return self._in_range(num_val, f)
 
     def _in_range(self, num_val: float, f: GoldRangeFilter) -> bool:
-        """Проверяет, находится ли значение в диапазоне."""
+        """Check whether a numeric value falls within a range."""
         min_ok = self._check_min_bound(num_val, f.min_value, f.include_min)
         max_ok = self._check_max_bound(num_val, f.max_value, f.include_max)
         return min_ok and max_ok
 
     @staticmethod
     def _check_min_bound(val: float, min_val: float | None, inclusive: bool) -> bool:
-        """Проверяет нижнюю границу диапазона."""
+        """Check the lower bound of a range."""
         if min_val is None:
             return True
         return val >= min_val if inclusive else val > min_val
 
     @staticmethod
     def _check_max_bound(val: float, max_val: float | None, inclusive: bool) -> bool:
-        """Проверяет верхнюю границу диапазона."""
+        """Check the upper bound of a range."""
         if max_val is None:
             return True
         return val <= max_val if inclusive else val < max_val
 
     def is_empty(self) -> bool:
-        """Проверяет, пуста ли конфигурация фильтров."""
+        """Check whether the filter configuration is empty."""
         all_filters = (
             self.column_filters,
             self.range_filters,

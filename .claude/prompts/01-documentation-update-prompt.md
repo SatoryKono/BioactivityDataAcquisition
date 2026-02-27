@@ -12,7 +12,7 @@
 - 117 markdown-файлов в `docs/`
 - 20 ADR документов
 - Архитектурные обзоры и планы рефакторинга требуют консолидации
-- RULES.md v5.14 — источник истины
+- RULES.md v5.22 — источник истины
 - Проект зрелый: 2895 тестов, 89% coverage
 
 ---
@@ -23,7 +23,7 @@
 
 **Критерии удаления:**
 - Дублирование контента с каноническим источником
-- Версия ниже v5.14 без актуального контента
+- Версия ниже v5.22 без актуального контента
 - Stub-файлы с перенаправлениями
 - Промежуточные версии аудитов/планов
 
@@ -79,7 +79,7 @@ rm docs/<file>.md
 ```markdown
 # BioETL Architecture Audit
 
-*Last Updated: YYYY-MM-DD | RULES.md v5.14*
+*Last Updated: YYYY-MM-DD | RULES.md v5.22*
 
 ## Executive Summary
 ## 1. Objective Metrics
@@ -122,11 +122,11 @@ mv docs/plans/refactoring-detail-2025-12-29.md docs/archived/refactoring-plans/
 
 ### 4. Обновление Версий и Синхронизация
 
-**Документы для обновления версии на v5.14:**
+**Документы для обновления версии на v5.22:**
 
 | Документ | Действие |
 |----------|----------|
-| `docs/00-map.md` | Обновить "Synced with RULES.md v5.14" |
+| `docs/00-map.md` | Обновить "Synced with RULES.md v5.22" |
 | `docs/index.md` | Обновить версию |
 | `docs/00-project_rules/00-rules-summary.md` | Обновить версию, синхронизировать с RULES.md |
 | `docs/00-project_rules/02-user-rules.md` | Обновить версию |
@@ -137,7 +137,7 @@ mv docs/plans/refactoring-detail-2025-12-29.md docs/archived/refactoring-plans/
 
 **Шаблон версионирования:**
 ```markdown
-*Synced with RULES.md v5.14 | Last updated: 2025-12-29*
+*Synced with RULES.md v5.22 | Last updated: 2025-12-29*
 ```
 
 ---
@@ -297,7 +297,7 @@ docs/
 - [ ] Все ссылки обновлены
 
 **Версионирование:**
-- [ ] Все документы обновлены до v5.14
+- [ ] Все документы обновлены до v5.22
 - [ ] Даты обновлены на текущую
 
 **Диаграммы:**
@@ -308,7 +308,7 @@ docs/
 **Финализация:**
 - [ ] `make lint` — проходит
 - [ ] `00-map.md` обновлён
-- [ ] Коммит с сообщением: `docs: consolidate documentation and update to v5.14`
+- [ ] Коммит с сообщением: `docs: consolidate documentation and update to v5.22`
 
 ---
 
