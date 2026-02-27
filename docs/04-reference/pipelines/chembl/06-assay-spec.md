@@ -8,7 +8,7 @@
 
 | Parameter        | Value                                         |
 | ---------------- | --------------------------------------------- |
-| **Pipeline ID**  | `chembl_assay`                                |
+| **Pipeline ID**  | `chembl-assay`                                |
 | **Provider**     | ChEMBL (EBI)                                  |
 | **Entity**       | assay                                         |
 | **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/assay` |
@@ -220,14 +220,14 @@ class AssaySchema(ETLRecordSchema):
 ## 6. Pipeline Configuration
 
 ```yaml
-pipeline-name: chembl_assay
+pipeline-name: chembl-assay
 provider: chembl
 entity-type: assay
 version: "1.2.0"
 
 primary-keys: ["assay-id"]
-silver-table: "chembl_assay"
-gold-table: "chembl_assay"
+silver-table: "chembl-assay"
+gold-table: "chembl-assay"
 
 gold-filters:
   required-fields:
@@ -252,12 +252,12 @@ input-filter:
 | Dependency      | Type     | Required    |
 | --------------- | -------- | ----------- |
 | ChEMBL API      | API      | Yes         |
-| `chembl_target` | Pipeline | Recommended |
+| `chembl-target` | Pipeline | Recommended |
 
 ### 7.2. Downstream
 
 | Consumer                  | Impact                |
 | ------------------------- | --------------------- |
-| `chembl_activity`         | FK reference          |
-| `chembl_assay_parameters` | FK reference          |
+| `chembl-activity`         | FK reference          |
+| `chembl-assay-parameters` | FK reference          |
 | Protocol analysis         | Assay type statistics |

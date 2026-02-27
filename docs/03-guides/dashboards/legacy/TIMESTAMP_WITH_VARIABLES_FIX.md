@@ -2,27 +2,27 @@
 
 ## ✅ Что было исправлено
 
-Обновлены запросы для Execution Timestamp панели во всех дашбордах v2, чтобы работать с переменными pipeline и run_type.
+Обновлены запросы для Execution Timestamp панели во всех дашбордах v2, чтобы работать с переменными pipeline и run-type.
 
 ### ПроблемА
 
 **Было:**
 ```promql
-bioetl_run_start_timestamp
+bioetl-run-start-timestamp
 ```
 
-Этот запрос не использовал переменные pipeline и run_id, поэтому всегда показывал глобальное время независимо от выбранных фильтров.
+Этот запрос не использовал переменные pipeline и run-id, поэтому всегда показывал глобальное время независимо от выбранных фильтров.
 
 ### РешениЕ
 
 **Стало:**
 ```promql
-max(bioetl_records_processed_created{pipeline=~"$pipeline", run_type=~"$run_type"})
+max(bioetl-records-processed-created{pipeline=~"$pipeline", run-type=~"$run-type"})
 ```
 
 Теперь запрос:
 - ✅ Использует переменную `$pipeline` для фильтрации
-- ✅ Использует переменную `$run_type` для фильтрации
+- ✅ Использует переменную `$run-type` для фильтрации
 - ✅ Берёт максимальное значение (если несколько значений)
 - ✅ Обновляется при изменении фильтров
 
@@ -44,7 +44,7 @@ max(bioetl_records_processed_created{pipeline=~"$pipeline", run_type=~"$run_type
 
 3. **Execution Timestamp обновляется**
    ```promql
-   max(bioetl_records_processed_created{pipeline=~"uniprot", run_type=~"incremental"})
+   max(bioetl-records-processed-created{pipeline=~"uniprot", run-type=~"incremental"})
    ```
 
 4. **Панель показывает время для этого конкретного run'а**
@@ -66,12 +66,12 @@ max(bioetl_records_processed_created{pipeline=~"$pipeline", run_type=~"$run_type
 
 ### Было:
 ```promql
-bioetl_records_processed_total{run_id=~"..."}
+bioetl-records-processed-total{run-id=~"..."}
 ```
 
 ### Стало:
 ```promql
-bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}
+bioetl-records-processed-total{pipeline=~"$pipeline", run-type=~"$run-type"}
 ```
 
 ---
@@ -175,7 +175,7 @@ grafana/dashboards/
 
 ## 🚀 Итог
 
-Execution Timestamp теперь полностью интегрирован с переменными pipeline и run_type. Дашборды v2 готовы к production!
+Execution Timestamp теперь полностью интегрирован с переменными pipeline и run-type. Дашборды v2 готовы к production!
 
 **Все три дашборда теперь имеют:**
 - ✅ Pipeline фильтр

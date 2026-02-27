@@ -89,7 +89,7 @@ The following 34 diagrams already exist and are explicitly excluded:
 | 26 | Single Instance Policy Enforcement | flowchart | How MemoryLock prevents multiple pipeline instances — lock key generation, TTL, heartbeat validation |
 | 27 | Dependency Injection Flow — Constructor Injection Pattern | sequenceDiagram | Sequence showing Composition creating adapters then injecting them into Application services via constructor |
 | 28 | Import Linter Configuration and Enforcement | flowchart | How import-linter rules map to ARCH-001 matrix and block PRs on violations |
-| 29 | GenericPipelineFactory Declarative Registration | flowchart | How pipeline_factories.py declares provider/entity/transformer/schema → factory auto-generates pipeline |
+| 29 | GenericPipelineFactory Declarative Registration | flowchart | How pipeline-factories.py declares provider/entity/transformer/schema → factory auto-generates pipeline |
 | 30 | Runtime Assembly Sequence — bootstrap/runtime/assembly.py | sequenceDiagram | Step-by-step assembly: create logger → create storage → create HTTP client → create adapter → create services → create runner |
 | 31 | DataSourceRegistry Lookup Flow | flowchart | Registry.get(provider) → creator function → adapter instantiation with HTTP client, rate limiter, circuit breaker |
 | 32 | StorageFactory Assembly — Bronze + Silver + Gold Writers | flowchart | StorageFactory combining BronzeWriter, SilverWriter, GoldWriter into unified StoragePort implementation |
@@ -106,7 +106,7 @@ The following 34 diagrams already exist and are explicitly excluded:
 | 43 | Domain Types Enum Hierarchy | classDiagram | HealthStatus, RunType, SilverWriteMode, GoldWriteMode, EntityType, LoadingStrategy enum classes and their values |
 | 44 | Exception Hierarchy Full Tree | classDiagram | BioETLError → NetworkError, ValidationError, StorageError, ConfigError, LockError with all subclasses |
 | 45 | Medallion Architecture Invariants | flowchart | REBUILD→clear both, BACKFILL→clear both, INCREMENTAL→clear neither — enforcement via MedallionLifecycleService |
-| 46 | Convention-Based Path Resolution | flowchart | From pipeline-name=chembl_activity → auto-computed source, dq, filter, sink paths without explicit config |
+| 46 | Convention-Based Path Resolution | flowchart | From pipeline-name=chembl-activity → auto-computed source, dq, filter, sink paths without explicit config |
 | 47 | Architecture Principles Mind Map | mindmap | Central: Hexagonal Architecture → Ports&Adapters, DI, Medallion, DDD Aggregates, Composition Root, Local-Only |
 | 48 | RULES.md Section Dependency Graph | flowchart | How RULES.md sections cross-reference: §1→§2 (layers→data flow), §3 (errors), §4 (code), §5 (ops) |
 | 49 | BasePipeline Decomposition (ADR-020) | flowchart | Original monolith → decomposed: BatchExecutor, BatchTransformer, BatchWriter, PreflightService, PostrunService |

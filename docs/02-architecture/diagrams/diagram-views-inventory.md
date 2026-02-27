@@ -1,19 +1,16 @@
 # Diagram Inventory (.mermaid/.puml)
 
-Source scope: `docs/02-architecture/mmd-diagrams/foundation/*.mmd` (canonical Mermaid sources) mapped to `.mermaid` naming for decomposition tracking.
+Source scope: `docs/02-architecture/mmd-diagrams/foundation/*.mermaid` (canonical Mermaid sources) mapped to `.mermaid` naming for decomposition tracking.
 
 | File | Type | Nodes | Edges | Status |
 |---|---|---:|---:|---|
 | 01-full-system-component.mermaid | flowchart | 60 | 32 | CRITICAL |
 | 01-high-level.mermaid | flowchart | 20 | 12 | OVERLOADED |
 | 02-full-medallion-data-flow.mermaid | flowchart | 16 | 16 | OK |
-| 02-medallion.mermaid | flowchart | 20 | 5 | OVERLOADED |
 | 03-pipeline-execution-happy-path.mermaid | sequenceDiagram | 17 | 34 | OK |
-| 03-pipeline-sequence.mermaid | sequenceDiagram | 11 | 16 | OK |
 | 04-domain-layer-class-diagram.mermaid | classDiagram | 26 | 12 | OVERLOADED |
 | 04-error-flow.mermaid | flowchart | 19 | 21 | OK |
 | 05-layers-interaction.mermaid | flowchart | 24 | 14 | OVERLOADED |
-| 05-locking.mermaid | sequenceDiagram | 4 | 12 | OK |
 | 05-pipeline-lifecycle-states.mermaid | stateDiagram | 51 | 65 | CRITICAL |
 | 06-application-layer-class-diagram.mermaid | classDiagram | 22 | 19 | OVERLOADED |
 | 06-pipeline-execution.mermaid | sequenceDiagram | 10 | 30 | OK |
@@ -42,12 +39,10 @@ Source scope: `docs/02-architecture/mmd-diagrams/foundation/*.mmd` (canonical Me
 | 27-import-matrix-enforcement.mermaid | flowchart | 11 | 22 | OK |
 | 28-composition-root-di-graph.mermaid | flowchart | 28 | 28 | OVERLOADED |
 | 29-composite-pipeline-workflow.mermaid | flowchart | 33 | 26 | OVERLOADED |
-| 30-port-adapter-mapping.mermaid | flowchart | 54 | 30 | CRITICAL |
 | 31-pipeline-run-lifecycle.mermaid | stateDiagram | 22 | 30 | OVERLOADED |
 | 32-single-record-journey.mermaid | flowchart | 20 | 21 | OVERLOADED |
 | 33-cli-run-interaction.mermaid | sequenceDiagram | 23 | 34 | OVERLOADED |
 | 34-batch-processing-flow.mermaid | sequenceDiagram | 23 | 24 | OVERLOADED |
-| 35-bootstrap-sequence.mermaid | flowchart | 35 | 27 | CRITICAL |
 | 36-architecture-principles-mindmap.mermaid | mindmap | 81 | 80 | CRITICAL |
 | 37-cli-entry-full-chain.mermaid | flowchart | 19 | 21 | OK |
 | 38-runtime-assembly-sequence.mermaid | sequenceDiagram | 17 | 40 | OK |
@@ -57,7 +52,6 @@ Source scope: `docs/02-architecture/mmd-diagrams/foundation/*.mmd` (canonical Me
 | 42-pipeline-runner-class.mermaid | classDiagram | 9 | 8 | OK |
 | 43-fan-out-fan-in-pattern.mermaid | flowchart | 18 | 17 | OK |
 | 44-cross-provider-enrichment.mermaid | flowchart | 30 | 18 | OVERLOADED |
-| 45-template-method-transformer.mermaid | classDiagram | 13 | 12 | OK |
 | 46-yaml-config-resolution.mermaid | flowchart | 30 | 27 | OVERLOADED |
 | 47-publication-merge-sources.mermaid | sequenceDiagram | 18 | 29 | OK |
 | 48-composite-phase-lifecycle.mermaid | stateDiagram | 22 | 26 | OVERLOADED |

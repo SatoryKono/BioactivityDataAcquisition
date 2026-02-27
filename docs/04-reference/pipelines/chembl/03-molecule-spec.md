@@ -8,7 +8,7 @@
 
 | Parameter        | Value                                            |
 | ---------------- | ------------------------------------------------ |
-| **Pipeline ID**  | `chembl_molecule`                                |
+| **Pipeline ID**  | `chembl-molecule`                                |
 | **Provider**     | ChEMBL (EBI)                                     |
 | **Entity**       | molecule                                         |
 | **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/molecule` |
@@ -406,8 +406,8 @@ Mode: Overwrite
 
 | Consumer                 | Impact                      |
 | ------------------------ | --------------------------- |
-| `chembl_activity`        | FK reference                |
-| `chembl_compound_record` | FK reference                |
+| `chembl-activity`        | FK reference                |
+| `chembl-compound-record` | FK reference                |
 | SAR analytics            | Structure-activity analysis |
 
 ### 7.3. Cross-Provider Mapping
@@ -422,17 +422,17 @@ Mode: Overwrite
 ## 8. Pipeline Configuration
 
 ```yaml
-# configs/pipelines/chembl/molecule.yaml
+# configs/entities/chembl/molecule.yaml
 
-pipeline-name: chembl_molecule
+pipeline-name: chembl-molecule
 provider: chembl
 entity-type: molecule
 version: "1.2.0"
 description: "Extract molecules from ChEMBL API"
 
 primary-keys: ["molecule-id"]
-silver-table: "chembl_molecule"
-gold-table: "chembl_molecule"
+silver-table: "chembl-molecule"
+gold-table: "chembl-molecule"
 
 source-file: ../../sources/chembl.yaml
 

@@ -14,14 +14,14 @@ MUST содержать комментарий-обоснование (`# Overri
 ```
 configs/
 ├── pipelines/
-│   ├── _base.yaml              ← шаблон по умолчанию
+│   ├── -base.yaml              ← шаблон по умолчанию
 │   └── {provider}/{entity}.yaml ← 27 pipeline-конфигов
 ├── quality/
-│   ├── _defaults.yaml           ← глобальные DQ-пороги
+│   ├── -defaults.yaml           ← глобальные DQ-пороги
 │   ├── providers/{provider}.yaml
 │   └── entities/{provider}/{entity}.yaml
 ├── filters/
-│   ├── _defaults.yaml
+│   ├── -defaults.yaml
 │   ├── providers/{provider}.yaml
 │   └── entities/{provider}/{entity}.yaml
 └── sources/
@@ -37,7 +37,7 @@ configs/
 ### 1.3 Действующий merge-порядок
 
 ```
-_defaults.yaml → providers/{provider}.yaml → entities/{provider}/{entity}.yaml → inline overrides
+-defaults.yaml → providers/{provider}.yaml → entities/{provider}/{entity}.yaml → inline overrides
 ```
 
 ---
@@ -46,29 +46,29 @@ _defaults.yaml → providers/{provider}.yaml → entities/{provider}/{entity}.ya
 
 ### 2.1 CRITICAL — DQ-пороги дублируются в двух SSOT
 
-**Проблема:** `soft_fail_threshold` и `hard_fail_threshold` определены одновременно в
-`pipelines/_base.yaml` (строки 10–11) И в `quality/_defaults.yaml` (строки 17–18) с
+**Проблема:** `soft-fail-threshold` и `hard-fail-threshold` определены одновременно в
+`pipelines/-base.yaml` (строки 10–11) И в `quality/-defaults.yaml` (строки 17–18) с
 идентичными значениями (0.05 / 0.20).
 
 ```yaml
-# configs/pipelines/_base.yaml (строки 9-16)
-dq_overrides:
-  soft_fail_threshold: 0.05    # ← ДУБЛЬ
-  hard_fail_threshold: 0.20    # ← ДУБЛЬ
-  strict_validation: false     # ← ДУБЛЬ (то же в quality/_defaults.yaml:23)
-  invalid_record_policy: "quarantine"  # ← ДУБЛЬ (то же в quality/_defaults.yaml:28)
+# configs/pipelines/-base.yaml (строки 9-16)
+dq-overrides:
+  soft-fail-threshold: 0.05    # ← ДУБЛЬ
+  hard-fail-threshold: 0.20    # ← ДУБЛЬ
+  strict-validation: false     # ← ДУБЛЬ (то же в quality/-defaults.yaml:23)
+  invalid-record-policy: "quarantine"  # ← ДУБЛЬ (то же в quality/-defaults.yaml:28)
   report:
-    enabled: true              # ← ДУБЛЬ (то же в quality/_defaults.yaml:34)
+    enabled: true              # ← ДУБЛЬ (то же в quality/-defaults.yaml:34)
     format: "json"             # ← ДУБЛЬ
-    include_sample_failures: true
-    sample_size: 10
+    include-sample-failures: true
+    sample-size: 10
 
-# configs/quality/_defaults.yaml (строки 16-38)
+# configs/quality/-defaults.yaml (строки 16-38)
 thresholds:
-  soft_fail: 0.05             # ← SSOT (должен быть единственным)
-  hard_fail: 0.20
-strict_validation: false
-invalid_record_policy: quarantine
+  soft-fail: 0.05             # ← SSOT (должен быть единственным)
+  hard-fail: 0.20
+strict-validation: false
+invalid-record-policy: quarantine
 report:
   enabled: true
   format: json
@@ -77,62 +77,62 @@ report:
 
 **Риск:** При изменении порога в одном файле второй рассинхронизируется.
 
-**Решение:** Удалить блок `dq_overrides` целиком из `_base.yaml`. DQ-параметры уже
-загружаются через `DQConfigLoader` из `quality/_defaults.yaml`. Оставить только пустой
+**Решение:** Удалить блок `dq-overrides` целиком из `-base.yaml`. DQ-параметры уже
+загружаются через `DQConfigLoader` из `quality/-defaults.yaml`. Оставить только пустой
 маркер:
 
 ```yaml
-# configs/pipelines/_base.yaml
+# configs/pipelines/-base.yaml
 # DQ configuration: loaded from configs/quality/ hierarchy (ADR-027).
 # Override only in entity pipeline config if needed (max 1-3 params with # Override: comment).
-dq_overrides: {}
+dq-overrides: {}
 ```
 
 ---
 
 ### 2.2 HIGH — SCD2-блок копипастится в 20+ файлах
 
-**Проблема:** Идентичный блок sink.gold.scd_config повторяется дословно в 20 из 27
+**Проблема:** Идентичный блок sink.gold.scd-config повторяется дословно в 20 из 27
 pipeline-конфигов:
 
 ```yaml
-# Дублируется в: chembl/target, chembl/molecule, chembl/cell_line,
-# chembl/compound_record, chembl/tissue, chembl/assay, pubmed/publication,
+# Дублируется в: chembl/target, chembl/molecule, chembl/cell-line,
+# chembl/compound-record, chembl/tissue, chembl/assay, pubmed/publication,
 # openalex/publication, crossref/publication, semanticscholar/publication,
 # uniprot/protein, uniprot/idmapping, pubchem/compound, и т.д.
 gold:
   mode: scd2
-  scd_config:
-    valid_from: _valid_from
-    valid_to: _valid_to
-    is_current: _is_current
-    version: _version
+  scd-config:
+    valid-from: -valid-from
+    valid-to: -valid-to
+    is-current: -is-current
+    version: -version
 ```
 
-**Решение:** Вынести SCD2 как дефолт в `_base.yaml`:
+**Решение:** Вынести SCD2 как дефолт в `-base.yaml`:
 
 ```yaml
-# configs/pipelines/_base.yaml
+# configs/pipelines/-base.yaml
 sink:
   gold:
     enabled: true
     format: delta
     mode: scd2                  # Default: SCD Type 2 for all entities
-    scd_config:                 # Default SCD2 column names
-      valid_from: _valid_from
-      valid_to: _valid_to
-      is_current: _is_current
-      version: _version
+    scd-config:                 # Default SCD2 column names
+      valid-from: -valid-from
+      valid-to: -valid-to
+      is-current: -is-current
+      version: -version
     deterministic: true
     ...
 ```
 
 В дочерних pipeline-конфигах SCD2-блок полностью удаляется. Исключения
-(publication_similarity, publication_term — `mode: overwrite`) сохраняют ТОЛЬКО
+(publication-similarity, publication-term — `mode: overwrite`) сохраняют ТОЛЬКО
 переопределённый параметр с комментарием:
 
 ```yaml
-# configs/pipelines/chembl/publication_similarity.yaml
+# configs/pipelines/chembl/publication-similarity.yaml
 sink:
   gold:
     # Override: similarity scores are computed fresh each run, no SCD tracking needed
@@ -141,9 +141,9 @@ sink:
 
 ---
 
-### 2.3 HIGH — flat_structure: true дублируется в publication-пайплайнах
+### 2.3 HIGH — flat-structure: true дублируется в publication-пайплайнах
 
-**Проблема:** `flat_structure: true` задаётся для bronze/silver/gold в 5 publication
+**Проблема:** `flat-structure: true` задаётся для bronze/silver/gold в 5 publication
 pipeline-конфигах (pubmed, openalex, crossref, semanticscholar, chembl/publication)
 с идентичным комментарием.
 
@@ -151,48 +151,48 @@ pipeline-конфигах (pubmed, openalex, crossref, semanticscholar, chembl/p
 # Повторяется 5 раз:
 sink:
   bronze:
-    flat_structure: true  # Path already includes provider/entity
+    flat-structure: true  # Path already includes provider/entity
   silver:
-    flat_structure: true
+    flat-structure: true
   gold:
-    flat_structure: true
+    flat-structure: true
 ```
 
-**Решение (вариант A — рекомендуемый):** `flat_structure: true` уже задан в `_base.yaml`
+**Решение (вариант A — рекомендуемый):** `flat-structure: true` уже задан в `-base.yaml`
 (строки 34, 48, 63). Удалить дублирующие переопределения из дочерних конфигов, так как
 они идентичны дефолту.
 
 **Решение (вариант B — если нужна категоризация):** Ввести provider-level pipeline
-defaults `configs/pipelines/{provider}/_provider.yaml`, которые наследуются всеми
-entity-конфигами этого провайдера. Тогда `flat_structure` задаётся один раз для
+defaults `configs/pipelines/{provider}/-provider.yaml`, которые наследуются всеми
+entity-конфигами этого провайдера. Тогда `flat-structure` задаётся один раз для
 провайдера.
 
 ---
 
-### 2.4 MEDIUM — technical_primary_key и silver/gold_table формульные
+### 2.4 MEDIUM — technical-primary-key и silver/gold-table формульные
 
 **Проблема:** Каждый pipeline-конфиг повторяет:
 
 ```yaml
-technical_primary_key: "entity_id"  # Одинаков в 27 из 27 файлов
-silver_table: "{provider}_{entity}" # Всегда формула от provider+entity
-gold_table: "{provider}_{entity}"   # Всегда формула от provider+entity
+technical-primary-key: "entity-id"  # Одинаков в 27 из 27 файлов
+silver-table: "{provider}-{entity}" # Всегда формула от provider+entity
+gold-table: "{provider}-{entity}"   # Всегда формула от provider+entity
 ```
 
-**Решение:** Вынести `technical_primary_key: "entity_id"` в `_base.yaml` как дефолт.
-Вычислять `silver_table` / `gold_table` автоматически из `provider` + `entity_type` в
+**Решение:** Вынести `technical-primary-key: "entity-id"` в `-base.yaml` как дефолт.
+Вычислять `silver-table` / `gold-table` автоматически из `provider` + `entity-type` в
 `PipelineConfigLoader`, если не заданы явно. Удалить из всех 27 entity-конфигов.
 
 **Изменение в коде (PipelineConfigLoader):**
 
 ```python
-# В load_pipeline_config() или при сборке PipelineConfig:
-if not raw_config.get("silver_table"):
-    raw_config["silver_table"] = f"{provider}_{entity_type}"
-if not raw_config.get("gold_table"):
-    raw_config["gold_table"] = f"{provider}_{entity_type}"
-if not raw_config.get("technical_primary_key"):
-    raw_config["technical_primary_key"] = "entity_id"
+# В load-pipeline-config() или при сборке PipelineConfig:
+if not raw-config.get("silver-table"):
+    raw-config["silver-table"] = f"{provider}-{entity-type}"
+if not raw-config.get("gold-table"):
+    raw-config["gold-table"] = f"{provider}-{entity-type}"
+if not raw-config.get("technical-primary-key"):
+    raw-config["technical-primary-key"] = "entity-id"
 ```
 
 ---
@@ -207,7 +207,7 @@ if not raw_config.get("technical_primary_key"):
 # Data Quality Configuration (ADR-027)
 # -----------------------------------------------------------------------------
 # DQ rules are loaded from hierarchical config files:
-#   1. configs/quality/_defaults.yaml (global defaults)
+#   1. configs/quality/-defaults.yaml (global defaults)
 #   2. configs/quality/providers/{provider}.yaml (provider-specific)
 #   3. configs/quality/entities/{provider}/{entity}.yaml (entity-specific)
 
@@ -215,28 +215,28 @@ if not raw_config.get("technical_primary_key"):
 # Filter Configuration (ADR-028)
 # -----------------------------------------------------------------------------
 # Filters loaded from hierarchical config files via convention (ADR-029):
-#   1. configs/filters/_defaults.yaml (global defaults)
+#   1. configs/filters/-defaults.yaml (global defaults)
 #   2. configs/filters/providers/{provider}.yaml (provider-specific)
 #   3. configs/filters/entities/{provider}/{entity}.yaml (entity-specific)
 ```
 
-**Решение:** Удалить из entity-конфигов. Задокументировать один раз в `_base.yaml`
+**Решение:** Удалить из entity-конфигов. Задокументировать один раз в `-base.yaml`
 (уже есть) и в CONFIG-GUIDE.md. В entity-конфигах оставить однострочную ссылку:
 
 ```yaml
-# DQ & Filters: loaded via hierarchy (ADR-027/028/029). See _base.yaml for details.
+# DQ & Filters: loaded via hierarchy (ADR-027/028/029). See -base.yaml for details.
 ```
 
 ---
 
-### 2.6 MEDIUM — circuit_breaker дублируется в _base.yaml и sources
+### 2.6 MEDIUM — circuit-breaker дублируется в -base.yaml и sources
 
-**Проблема:** `circuit_breaker` с идентичными значениями (`failure_threshold: 5`,
-`recovery_timeout: 300`) определён в `pipelines/_base.yaml` И во всех
+**Проблема:** `circuit-breaker` с идентичными значениями (`failure-threshold: 5`,
+`recovery-timeout: 300`) определён в `pipelines/-base.yaml` И во всех
 `sources/{provider}.yaml`.
 
-**Решение:** Оставить `circuit_breaker` только в `sources/{provider}.yaml` — это
-настройки устойчивости конкретного API-источника. Удалить из `_base.yaml`.
+**Решение:** Оставить `circuit-breaker` только в `sources/{provider}.yaml` — это
+настройки устойчивости конкретного API-источника. Удалить из `-base.yaml`.
 
 ---
 
@@ -244,29 +244,29 @@ if not raw_config.get("technical_primary_key"):
 
 **Проблема:** `version: "1.2.0"` задана в 20+ pipeline-конфигах.
 
-**Решение:** Вынести в `_base.yaml` как дефолт. Переопределять только при реальном
-отличии версии конфига (publication_similarity v2.1.0 и т.д.):
+**Решение:** Вынести в `-base.yaml` как дефолт. Переопределять только при реальном
+отличии версии конфига (publication-similarity v2.1.0 и т.д.):
 
 ```yaml
-# configs/pipelines/chembl/publication_similarity.yaml
+# configs/pipelines/chembl/publication-similarity.yaml
 # Override: v2.1.0 schema redesign after ADR-024 naming migration
 version: "2.1.0"
 ```
 
 ---
 
-### 2.8 LOW — loading_strategy: full_scan_only с одинаковым комментарием
+### 2.8 LOW — loading-strategy: full-scan-only с одинаковым комментарием
 
-**Проблема:** `loading_strategy: full_scan_only` с комментарием про "API offset
-instability" повторяется в 6 файлах (все publication + subcellular_fraction +
-publication_similarity + publication_term).
+**Проблема:** `loading-strategy: full-scan-only` с комментарием про "API offset
+instability" повторяется в 6 файлах (все publication + subcellular-fraction +
+publication-similarity + publication-term).
 
 **Решение:** Не является дублированием в строгом смысле (разные entity действительно
-нуждаются в full_scan), но комментарий можно сократить до:
+нуждаются в full-scan), но комментарий можно сократить до:
 
 ```yaml
-# Override: full_scan required — API doesn't support stable incremental cursors
-loading_strategy: full_scan_only
+# Override: full-scan required — API doesn't support stable incremental cursors
+loading-strategy: full-scan-only
 ```
 
 ---
@@ -280,13 +280,13 @@ loading_strategy: full_scan_only
 | # | Параметр | Когда переопределять |
 |---|----------|---------------------|
 | 1 | `sink.gold.mode` | Если entity не использует SCD2 (напр. `overwrite`) |
-| 2 | `sink.silver.partition_by` | Entity-specific партиционирование |
-| 3 | `batch_size` | Если объём данных entity сильно отличается от дефолта |
-| 4 | `loading_strategy` | Если entity требует `full_scan_only` |
-| 5 | `page_size_override` | Если API endpoint имеет другой лимит |
+| 2 | `sink.silver.partition-by` | Entity-specific партиционирование |
+| 3 | `batch-size` | Если объём данных entity сильно отличается от дефолта |
+| 4 | `loading-strategy` | Если entity требует `full-scan-only` |
+| 5 | `page-size-override` | Если API endpoint имеет другой лимит |
 | 6 | `version` | Если версия конфига отличается от дефолта |
 
-Любой другой параметр **MUST** быть в `_base.yaml`, `quality/`, `filters/`, или `sources/`.
+Любой другой параметр **MUST** быть в `-base.yaml`, `quality/`, `filters/`, или `sources/`.
 
 ### 3.2 Формат комментария переопределения
 
@@ -301,16 +301,16 @@ parameter: value
 
 ```yaml
 # Override: reference table with ~1.5K records, smaller batches for full load
-batch_size: 500
+batch-size: 500
 
 # Override: similarity scores recomputed each run, no history tracking needed
 mode: overwrite
 
-# Override: smaller page size for publication endpoint (full_scan_only strategy)
-page_size_override: 16
+# Override: smaller page size for publication endpoint (full-scan-only strategy)
+page-size-override: 16
 
-# Override: partition by molecule_type for query performance
-partition_by: ["molecule_type"]
+# Override: partition by molecule-type for query performance
+partition-by: ["molecule-type"]
 ```
 
 ---
@@ -320,75 +320,75 @@ partition_by: ["molecule_type"]
 ### 4.1 Минимальный конфиг (нет переопределений)
 
 ```yaml
-# configs/pipelines/chembl/cell_line.yaml
-# ChEMBL Cell Line — inherits all defaults from _base.yaml.
+# configs/pipelines/chembl/cell-line.yaml
+# ChEMBL Cell Line — inherits all defaults from -base.yaml.
 # DQ & Filters: loaded via hierarchy (ADR-027/028/029).
 
-pipeline_name: chembl_cell_line
+pipeline-name: chembl-cell-line
 provider: chembl
-entity_type: cell_line
-schema_file: ../../schemas/chembl/cell_line.yaml
+entity-type: cell-line
+schema-file: ../../schemas/chembl/cell-line.yaml
 description: "Extract cell lines from ChEMBL API"
 
-business_primary_keys: ["cell_id"]
+business-primary-keys: ["cell-id"]
 ```
 
-**Всё остальное** (`technical_primary_key`, `silver_table`, `gold_table`, `version`,
-`sink`, `dq_overrides`) наследуется из `_base.yaml` или вычисляется.
+**Всё остальное** (`technical-primary-key`, `silver-table`, `gold-table`, `version`,
+`sink`, `dq-overrides`) наследуется из `-base.yaml` или вычисляется.
 
 ### 4.2 Конфиг с 1–2 переопределениями
 
 ```yaml
 # configs/pipelines/chembl/molecule.yaml
-# ChEMBL Molecule — inherits from _base.yaml.
+# ChEMBL Molecule — inherits from -base.yaml.
 # DQ & Filters: loaded via hierarchy (ADR-027/028/029).
 
-pipeline_name: chembl_molecule
+pipeline-name: chembl-molecule
 provider: chembl
-entity_type: molecule
-schema_file: ../../schemas/chembl/molecule.yaml
+entity-type: molecule
+schema-file: ../../schemas/chembl/molecule.yaml
 description: "Extract molecules/compounds from ChEMBL API"
 
-business_primary_keys: ["molecule_id"]
+business-primary-keys: ["molecule-id"]
 
 sink:
   silver:
-    # Override: partition by molecule_type for efficient type-specific queries
-    partition_by: ["molecule_type"]
+    # Override: partition by molecule-type for efficient type-specific queries
+    partition-by: ["molecule-type"]
 ```
 
 ### 4.3 Конфиг с максимумом переопределений (3)
 
 ```yaml
-# configs/pipelines/chembl/protein_class.yaml
+# configs/pipelines/chembl/protein-class.yaml
 # ChEMBL Protein Classification — reference table.
 # DQ & Filters: loaded via hierarchy (ADR-027/028/029).
 
-pipeline_name: chembl_protein_class
+pipeline-name: chembl-protein-class
 provider: chembl
-entity_type: protein_class
-schema_file: ../../schemas/chembl/protein_class.yaml
+entity-type: protein-class
+schema-file: ../../schemas/chembl/protein-class.yaml
 description: "ChEMBL Protein Classification hierarchy"
 
-business_primary_keys: ["protein_class_id"]
+business-primary-keys: ["protein-class-id"]
 
 # Override: reference table ~1.5K records, smaller batches for full load
-batch_size: 500
+batch-size: 500
 # Override: small dataset, more frequent checkpoints
-checkpoint_interval: 500
+checkpoint-interval: 500
 
 sink:
   silver:
     # Override: partition by hierarchy level for efficient tree queries
-    partition_by: ["class_level"]
+    partition-by: ["class-level"]
 ```
 
 ---
 
-## 5. Целевое состояние _base.yaml (After)
+## 5. Целевое состояние -base.yaml (After)
 
 ```yaml
-# configs/pipelines/_base.yaml
+# configs/pipelines/-base.yaml
 # =============================================================================
 # Base Pipeline Configuration — Single Source of Truth for defaults
 # =============================================================================
@@ -401,94 +401,94 @@ sink:
 # =============================================================================
 
 version: "1.2.0"
-technical_primary_key: "entity_id"
+technical-primary-key: "entity-id"
 
 source: {}
 
 transform:
   steps: []
 
-# DQ defaults: loaded from configs/quality/_defaults.yaml by DQConfigLoader.
-# Do NOT duplicate thresholds here. Override per-entity via dq_overrides: {} if needed.
-dq_overrides: {}
+# DQ defaults: loaded from configs/quality/-defaults.yaml by DQConfigLoader.
+# Do NOT duplicate thresholds here. Override per-entity via dq-overrides: {} if needed.
+dq-overrides: {}
 
 sink:
   bronze:
     format: jsonl
-    save_json: true
-    save_metadata: true
-    dq_report:
+    save-json: true
+    save-metadata: true
+    dq-report:
       enabled: true
-    flat_structure: true
+    flat-structure: true
 
   silver:
     format: delta
     mode: merge
-    on_schema_mismatch: evolve
-    save_metadata: true
-    dq_report:
+    on-schema-mismatch: evolve
+    save-metadata: true
+    dq-report:
       enabled: true
-    csv_export:
+    csv-export:
       enabled: true
       delimiter: ","
       header: true
       encoding: "utf-8"
-    flat_structure: true
+    flat-structure: true
 
   gold:
     enabled: true
     format: delta
     mode: scd2
-    scd_config:
-      valid_from: _valid_from
-      valid_to: _valid_to
-      is_current: _is_current
-      version: _version
+    scd-config:
+      valid-from: -valid-from
+      valid-to: -valid-to
+      is-current: -is-current
+      version: -version
     deterministic: true
-    save_metadata: true
-    dq_report:
+    save-metadata: true
+    dq-report:
       enabled: true
-    csv_export:
+    csv-export:
       enabled: true
       delimiter: ","
       header: true
       encoding: "utf-8"
-    flat_structure: true
+    flat-structure: true
 
 maintenance:
-  auto_vacuum: false
-  vacuum_retention_days: 7
+  auto-vacuum: false
+  vacuum-retention-days: 7
 
-input_filter:
+input-filter:
   enabled: false
-  batch_size: 100
+  batch-size: 100
 ```
 
 ---
 
 ## 6. План выполнения (поэтапно)
 
-### Phase 1: _base.yaml (SSOT)
+### Phase 1: -base.yaml (SSOT)
 
-1. Добавить `version`, `technical_primary_key` в `_base.yaml`
-2. Добавить `sink.gold.mode: scd2` + `scd_config` в `_base.yaml`
-3. Удалить дублирующий `dq_overrides` блок (оставить `dq_overrides: {}`)
-4. Удалить `circuit_breaker` из `_base.yaml`
+1. Добавить `version`, `technical-primary-key` в `-base.yaml`
+2. Добавить `sink.gold.mode: scd2` + `scd-config` в `-base.yaml`
+3. Удалить дублирующий `dq-overrides` блок (оставить `dq-overrides: {}`)
+4. Удалить `circuit-breaker` из `-base.yaml`
 
 ### Phase 2: PipelineConfigLoader (auto-compute)
 
-5. Добавить auto-compute для `silver_table` = `{provider}_{entity_type}`
-6. Добавить auto-compute для `gold_table` = `{provider}_{entity_type}`
-7. Добавить default для `technical_primary_key` = `"entity_id"`
-8. Добавить default для `version` из `_base.yaml`
+5. Добавить auto-compute для `silver-table` = `{provider}-{entity-type}`
+6. Добавить auto-compute для `gold-table` = `{provider}-{entity-type}`
+7. Добавить default для `technical-primary-key` = `"entity-id"`
+8. Добавить default для `version` из `-base.yaml`
 
 ### Phase 3: Entity configs cleanup
 
-9. Удалить `technical_primary_key` из всех 27 entity-конфигов
-10. Удалить `silver_table` / `gold_table` из всех entity-конфигов
+9. Удалить `technical-primary-key` из всех 27 entity-конфигов
+10. Удалить `silver-table` / `gold-table` из всех entity-конфигов
 11. Удалить `version: "1.2.0"` из конфигов где совпадает с дефолтом
 12. Удалить SCD2-блоки из entity-конфигов (кроме overwrite-исключений)
-13. Удалить дублирующие `flat_structure: true` (совпадает с `_base.yaml`)
+13. Удалить дублирующие `flat-structure: true` (совпадает с `-base.yaml`)
 14. Удалить бойлерплейт-комментарии про DQ/Filter hierarchy
 15. Добавить `# Override: <reason>` ко всем оставшимся переопределениям
 16. Удалить пустые секции `sink: bronze: {}` / `silver: {}` где нет overrides
@@ -497,7 +497,7 @@ input_filter:
 
 17. Запустить `pytest tests/` — убедиться что ничего не сломалось
 18. Запустить `pytest tests/architecture/` — проверить import boundaries
-19. Проверить что `ConfigLoader.load_pipeline_config()` возвращает те же
+19. Проверить что `ConfigLoader.load-pipeline-config()` возвращает те же
     domain-объекты что и до рефакторинга (snapshot test)
 20. Проверить каждый entity-конфиг: max 1–3 override-параметров
 
@@ -527,7 +527,7 @@ input_filter:
 - **НЕ трогать** `sources/` — они являются SSOT для API-параметров
 - **НЕ трогать** composite pipeline конфиги — у них другая структура
 - **НЕ менять** семантику merge в `DQConfigLoader` / `FilterConfigLoader`
-- `dq_overrides` в pipeline-конфигах (напр. `chembl/activity.yaml`)
-  остаются если содержат entity-специфичные правила (не дубли _defaults)
-- Auto-compute `silver_table` / `gold_table` MUST иметь fallback на
+- `dq-overrides` в pipeline-конфигах (напр. `chembl/activity.yaml`)
+  остаются если содержат entity-специфичные правила (не дубли -defaults)
+- Auto-compute `silver-table` / `gold-table` MUST иметь fallback на
   explicit value (если задано в YAML — использовать YAML)

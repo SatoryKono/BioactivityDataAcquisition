@@ -9,17 +9,17 @@
 
 - Текущий факт (после Phase 1/2 backward-compat): в `configs/` **162 YAML**.
 - RF-CFG-001, RF-CFG-002 и RF-CFG-005 уже выполнены в текущем коде.
-- RF-CFG-003 выполнен: явный `schema_file` удален из стандартных pipeline config'ов (остается convention-default).
-- В плане была внутренняя коллизия по `batch_size` (Phase 0 vs §5.2): принято корректное решение из RF-CFG-004 (**SKIPPED**), т.к. `pipeline.batch_size` и `input_filter.batch_size` относятся к разным уровням.
+- RF-CFG-003 выполнен: явный `schema-file` удален из стандартных pipeline config'ов (остается convention-default).
+- В плане была внутренняя коллизия по `batch-size` (Phase 0 vs §5.2): принято корректное решение из RF-CFG-004 (**SKIPPED**), т.к. `pipeline.batch-size` и `input-filter.batch-size` относятся к разным уровням.
 - RF-CFG-043 требует корректировки номера ADR: **ADR-033 уже занят**, использовать следующий свободный номер.
 - RF-CFG-010..015 реализованы (base-консолидация + fallback).
 - RF-CFG-020..024 реализованы в backward-compat режиме (новые `configs/providers/*.yaml` + fallback на legacy paths).
 - RF-CFG-030 выполнен для **всех standard pipelines (21/21)**: добавлены unified entity files в `configs/entities/{provider}/{entity}.yaml` для `chembl`, `crossref`, `openalex`, `pubchem`, `pubmed`, `semanticscholar`, `uniprot`.
-- RF-CFG-032 выполнен в backward-compat режиме: `load_pipeline_config()` и секционные loaders читают unified entity sections (`pipeline/schema/quality/filters/contracts`) с fallback на legacy paths.
+- RF-CFG-032 выполнен в backward-compat режиме: `load-pipeline-config()` и секционные loaders читают unified entity sections (`pipeline/schema/quality/filters/contracts`) с fallback на legacy paths.
 - RF-CFG-033 пока **не завершен**: `PipelineContractPolicyLoader` сохранен и переведен на режим unified-first + legacy fallback.
-- Технический эффект Phase 3: `DQConfigLoader` вырос до 322 LOC; добавлены явные архитектурные exemptions в `tests/architecture/test_code_metrics.py` как переходная мера до декомпозиции (RF-CFG-031/RF-CFG-037).
-- RF-CFG-036 выполнен: composite configs перенесены в `configs/composites/*.yaml`, `load_composite_config()` переведен на new-first path (`configs/composites`) с legacy fallback (`configs/pipelines/composite`).
-- RF-CFG-037 выполнен: 3 реализации `deep_merge` унифицированы через `src/bioetl/infrastructure/config_merge.py::config_merge` с параметризуемыми list-стратегиями (concat keys, resolver-based merge для DQ validations).
+- Технический эффект Phase 3: `DQConfigLoader` вырос до 322 LOC; добавлены явные архитектурные exemptions в `tests/architecture/test-code-metrics.py` как переходная мера до декомпозиции (RF-CFG-031/RF-CFG-037).
+- RF-CFG-036 выполнен: composite configs перенесены в `configs/composites/*.yaml`, `load-composite-config()` переведен на new-first path (`configs/composites`) с legacy fallback (`configs/pipelines/composite`).
+- RF-CFG-037 выполнен: 3 реализации `deep-merge` унифицированы через `src/bioetl/infrastructure/config-merge.py::config-merge` с параметризуемыми list-стратегиями (concat keys, resolver-based merge для DQ validations).
 - RF-CFG-035 выполнен (без backward-compat периода по решению): удалены legacy dirs `configs/pipelines/{providers}`, `configs/schemas/{providers}`, `configs/quality/entities/`, `configs/filters/entities/`, `configs/contracts/`; тесты/инварианты переведены на unified `configs/entities/` + `configs/composites/`.
 
 ---
@@ -32,28 +32,28 @@
 |---------|----------|
 | Всего YAML файлов в `configs/` | **162** |
 | JSON Schema файлов | 2 |
-| Категорий конфигов | 9 (pipelines, sources, schemas, quality, filters, contracts, hash_policy, enums, naming) |
+| Категорий конфигов | 9 (pipelines, sources, schemas, quality, filters, contracts, hash-policy, enums, naming) |
 | Файлов на 1 стандартный pipeline | **11** |
 | Файлов на 1 composite pipeline | **8-12** |
-| Базовых/общих файлов | 5 (`_base.yaml` × 3, `_schema/` × 2) |
+| Базовых/общих файлов | 5 (`-base.yaml` × 3, `-schema/` × 2) |
 
 ### 1.2 Файлы, Загружаемые для Одного Pipeline
 
-Пример: `chembl_activity` — **11 файлов**:
+Пример: `chembl-activity` — **11 файлов**:
 
 | # | Файл | Тип | Роль |
 |---|------|-----|------|
-| 1 | `pipelines/_base.yaml` | BASE | Pipeline execution defaults |
+| 1 | `pipelines/-base.yaml` | BASE | Pipeline execution defaults |
 | 2 | `pipelines/chembl/activity.yaml` | ENTITY | Pipeline identity + overrides |
 | 3 | `sources/chembl.yaml` | PROVIDER | API connection, rate limits |
-| 4 | `schemas/chembl/activity.yaml` | ENTITY | Column groups, content_hash |
-| 5 | `contracts/pipelines/chembl/activity.yaml` | ENTITY | PK, merge_keys, rename_map |
-| 6 | `quality/_defaults.yaml` | BASE | DQ thresholds, common validations |
+| 4 | `schemas/chembl/activity.yaml` | ENTITY | Column groups, content-hash |
+| 5 | `contracts/pipelines/chembl/activity.yaml` | ENTITY | PK, merge-keys, rename-map |
+| 6 | `quality/-defaults.yaml` | BASE | DQ thresholds, common validations |
 | 7 | `quality/providers/chembl.yaml` | PROVIDER | ChEMBL ID pattern validations |
 | 8 | `quality/entities/chembl/activity.yaml` | ENTITY | Activity DQ rules |
-| 9 | `filters/_defaults.yaml` | BASE | Filter structure template |
-| 10 | `filters/providers/chembl.yaml` | PROVIDER | batch_size override |
-| 11 | `filters/entities/chembl/activity.yaml` | ENTITY | extraction_params, silver/gold filters |
+| 9 | `filters/-defaults.yaml` | BASE | Filter structure template |
+| 10 | `filters/providers/chembl.yaml` | PROVIDER | batch-size override |
+| 11 | `filters/entities/chembl/activity.yaml` | ENTITY | extraction-params, silver/gold filters |
 
 **Итого:** 3 BASE + 2 PROVIDER + 6 ENTITY = 11 файлов.
 
@@ -65,32 +65,32 @@
 
 ```yaml
 # ОДИНАКОВО у ВСЕХ 21 entity:
-rename_map:
-  run_id: _run_id
-  run_type: _run_type
-  source_batch_id: _source_batch_id
-  ingestion_ts: _ingestion_ts
-  source: _source
-hash_include: []
-hash_exclude:
-  - _ingestion_ts
-  - _run_id
-  - _run_type
-  - _dq_errors
-  - _dq_status
+rename-map:
+  run-id: -run-id
+  run-type: -run-type
+  source-batch-id: -source-batch-id
+  ingestion-ts: -ingestion-ts
+  source: -source
+hash-include: []
+hash-exclude:
+  - -ingestion-ts
+  - -run-id
+  - -run-type
+  - -dq-errors
+  - -dq-status
 ```
 
-**Уникальна только 1 строка:** `primary_key` / `merge_keys` (и то = `business_primary_keys` из pipeline config).
+**Уникальна только 1 строка:** `primary-key` / `merge-keys` (и то = `business-primary-keys` из pipeline config).
 
 **Вывод:** 21 файл × 18 строк = 378 строк, из которых 357 — копипаста.
 
 #### P-002: DQ Pipeline Overrides Дублируют Entity Config (HIGH)
 
-`pipelines/chembl/activity.yaml` содержит `dq_overrides` с 6 правилами, **5 из которых идентичны** правилам в `quality/entities/chembl/activity.yaml`.
+`pipelines/chembl/activity.yaml` содержит `dq-overrides` с 6 правилами, **5 из которых идентичны** правилам в `quality/entities/chembl/activity.yaml`.
 
 Пример дубликата:
-- Pipeline inline: `standard_value range [0, 1e9]`
-- Entity DQ config: `standard_value range [0, 1e9]` (строки 22-27)
+- Pipeline inline: `standard-value range [0, 1e9]`
+- Entity DQ config: `standard-value range [0, 1e9]` (строки 22-27)
 
 DQ loader дедуплицирует по `(field, type, severity)`, но поддержка двух мест — когнитивная нагрузка.
 
@@ -98,10 +98,10 @@ DQ loader дедуплицирует по `(field, type, severity)`, но под
 
 `filters/providers/chembl.yaml` содержит лишь:
 ```yaml
-input_filter:
-  batch_size: 1000
-gold_filters:
-  required_fields: []
+input-filter:
+  batch-size: 1000
+gold-filters:
+  required-fields: []
   columns: {}
 ```
 
@@ -110,34 +110,34 @@ gold_filters:
 #### P-004: Schema + Contract = Разделённая Ответственность (HIGH)
 
 `schemas/chembl/activity.yaml` определяет:
-- `content_hash.include/exclude` — то же что `contracts/.../hash_include/exclude`
-- `column_groups` — семантическая группировка полей
+- `content-hash.include/exclude` — то же что `contracts/.../hash-include/exclude`
+- `column-groups` — семантическая группировка полей
 
 `contracts/chembl/activity.yaml` определяет:
-- `primary_key`, `merge_keys` — то же что `business_primary_keys` в pipeline
-- `rename_map` — одинаков везде
-- `hash_include/exclude` — дублирует schema
+- `primary-key`, `merge-keys` — то же что `business-primary-keys` в pipeline
+- `rename-map` — одинаков везде
+- `hash-include/exclude` — дублирует schema
 
 **Два файла описывают одну сущность с перекрытием.**
 
-#### P-005: filter/_defaults.yaml — Пустой Шаблон (LOW)
+#### P-005: filter/-defaults.yaml — Пустой Шаблон (LOW)
 
 77 строк, из которых 70 — комментарии. Всё = пустые списки и `enabled: false`. Полезен как документация, но не как runtime-конфиг.
 
 #### P-006: Неконсистентные Параметры Между Pipeline Configs (MEDIUM)
 
-| Параметр | chembl_activity | chembl_molecule | pubmed_publication | crossref_publication |
+| Параметр | chembl-activity | chembl-molecule | pubmed-publication | crossref-publication |
 |----------|----------------|-----------------|--------------------|-----------------------|
-| `batch_size` | 1000 (в pipeline) | - (default 100) | - (default 100) | - (default 100) |
-| `loading_strategy` | - | - | full_scan_only | full_scan_only |
-| `schema_file` | явный путь | явный путь | явный путь | явный путь |
-| `partition_by` | - | molecule_type | - | - |
-| `source` credentials | - | - | email + api_key | - |
-| `dq_overrides` inline | 56 строк | - | - | - |
+| `batch-size` | 1000 (в pipeline) | - (default 100) | - (default 100) | - (default 100) |
+| `loading-strategy` | - | - | full-scan-only | full-scan-only |
+| `schema-file` | явный путь | явный путь | явный путь | явный путь |
+| `partition-by` | - | molecule-type | - | - |
+| `source` credentials | - | - | email + api-key | - |
+| `dq-overrides` inline | 56 строк | - | - | - |
 
-- `batch_size` дублируется: в pipeline config (1000) и в filter provider config (1000).
-- `schema_file` указан явно у всех, хотя convention-defaults вычисляет его автоматически.
-- `loading_strategy: full_scan_only` повторяется у 4/5 publication providers — можно вынести в base publication config.
+- `batch-size` дублируется: в pipeline config (1000) и в filter provider config (1000).
+- `schema-file` указан явно у всех, хотя convention-defaults вычисляет его автоматически.
+- `loading-strategy: full-scan-only` повторяется у 4/5 publication providers — можно вынести в base publication config.
 
 #### P-007: Асимметрия Между Подсистемами (LOW)
 
@@ -146,7 +146,7 @@ gold_filters:
 | quality/entities | 14 | 3 (protein, idmapping, **target** — нет pipeline!) |
 | filters/entities | 14 | 2 (protein, idmapping) |
 | contracts | 14 | 2 |
-| hash_policy | 1 (только activity) | 0 |
+| hash-policy | 1 (только activity) | 0 |
 
 `quality/entities/uniprot/target.yaml` не имеет соответствующего pipeline config — осиротевший файл.
 
@@ -157,36 +157,36 @@ gold_filters:
 ### 2.1 Цепочка Разрешения (для стандартного pipeline)
 
 ```
-load_pipeline_config(name)
+load-pipeline-config(name)
   │
-  ├─ READ _base.yaml ──────────┐
-  ├─ READ {provider}/{entity}.yaml ─┤ deep_merge → unified dict
+  ├─ READ -base.yaml ──────────┐
+  ├─ READ {provider}/{entity}.yaml ─┤ deep-merge → unified dict
   │                                  │
-  ├─ _apply_convention_defaults ─────┤ auto-set paths if missing
+  ├─ -apply-convention-defaults ─────┤ auto-set paths if missing
   │                                  │
-  ├─ FilterConfigLoader.load_as_dict ┤ 4-level filter merge
-  │   ├─ _defaults.yaml              │
+  ├─ FilterConfigLoader.load-as-dict ┤ 4-level filter merge
+  │   ├─ -defaults.yaml              │
   │   ├─ providers/{p}.yaml          │
   │   └─ entities/{p}/{e}.yaml       │
   │                                  │
-  ├─ _load_column_groups_section ────┤ schema file → column_groups
+  ├─ -load-column-groups-section ────┤ schema file → column-groups
   │   └─ schemas/{p}/{e}.yaml       │
   │                                  │
-  ├─ _load_source_section ───────────┤ source file → provider config
+  ├─ -load-source-section ───────────┤ source file → provider config
   │   └─ sources/{p}.yaml           │
   │                                  │
-  └─ PipelineYamlConfig.model_validate ─→ validated config
+  └─ PipelineYamlConfig.model-validate ─→ validated config
 
-PipelineConfigLoader.resolve_dq_config(yaml_config)
+PipelineConfigLoader.resolve-dq-config(yaml-config)
   │
   ├─ DQConfigLoader.load(provider, entity)
-  │   ├─ _defaults.yaml
+  │   ├─ -defaults.yaml
   │   ├─ providers/{p}.yaml
   │   └─ entities/{p}/{e}.yaml
   │
-  └─ merge with inline dq_overrides
+  └─ merge with inline dq-overrides
 
-yaml_config_to_domain(yaml_config, dq_config)
+yaml-config-to-domain(yaml-config, dq-config)
   └─ → PipelineConfig (domain object)
 ```
 
@@ -194,20 +194,20 @@ yaml_config_to_domain(yaml_config, dq_config)
 
 | Loader | Файл | Загружает | Кеш |
 |--------|------|-----------|-----|
-| `load_pipeline_config` | `infrastructure/config_loader.py` | `_base.yaml` + entity YAML + source + schema + filters | `@lru_cache(10)` |
-| `DQConfigLoader` | `infrastructure/config/dq_config_loader.py` | `quality/` hierarchy (3 уровня) | internal dict |
-| `FilterConfigLoader` | `infrastructure/config/filter_config_loader.py` | `filters/` hierarchy (3 уровня) | internal dict |
-| `PipelineContractPolicyLoader` | `infrastructure/config/contract_policy_loader.py` | `contracts/pipelines/{p}/{e}.yaml` | `@lru_cache(128)` |
-| `FieldGroupLoader` | `infrastructure/config/field_group_loader.py` | `schemas/composite/field_groups/` | none |
-| `load_composite_config` | `composition/bootstrap/runtime/composite.py` | `pipelines/composite/{name}.yaml` | none |
+| `load-pipeline-config` | `infrastructure/config-loader.py` | `-base.yaml` + entity YAML + source + schema + filters | `@lru-cache(10)` |
+| `DQConfigLoader` | `infrastructure/config/dq-config-loader.py` | `quality/` hierarchy (3 уровня) | internal dict |
+| `FilterConfigLoader` | `infrastructure/config/filter-config-loader.py` | `filters/` hierarchy (3 уровня) | internal dict |
+| `PipelineContractPolicyLoader` | `infrastructure/config/contract-policy-loader.py` | `contracts/pipelines/{p}/{e}.yaml` | `@lru-cache(128)` |
+| `FieldGroupLoader` | `infrastructure/config/field-group-loader.py` | `schemas/composite/field-groups/` | none |
+| `load-composite-config` | `composition/bootstrap/runtime/composite.py` | `pipelines/composite/{name}.yaml` | none |
 
-### 2.3 Три Разных Реализации deep_merge
+### 2.3 Три Разных Реализации deep-merge
 
 | Реализация | Файл | Логика list-слияния |
 |------------|------|---------------------|
-| `config_loader._deep_merge` | `config_loader.py:37` | scalar override (no list merge) |
-| `BaseConfigLoader._deep_merge_base` | `base_config_loader.py:91` | configurable `list_concat_keys` (concat + dedup) |
-| `DQConfigLoader._deep_merge` | `dq_config_loader.py` | `*_validations` dedup by composite key |
+| `config-loader.-deep-merge` | `config-loader.py:37` | scalar override (no list merge) |
+| `BaseConfigLoader.-deep-merge-base` | `base-config-loader.py:91` | configurable `list-concat-keys` (concat + dedup) |
+| `DQConfigLoader.-deep-merge` | `dq-config-loader.py` | `*-validations` dedup by composite key |
 
 ---
 
@@ -256,7 +256,7 @@ configs/
 │   ├── publication.yaml
 │   └── ... (5 composites)
 │
-├── _schema/                   # JSON Schema (kept as-is)
+├── -schema/                   # JSON Schema (kept as-is)
 │   ├── pipeline.json
 │   └── composite.json
 │
@@ -268,9 +268,9 @@ configs/
 
 | Текущий файл/dir | Целевое место | Действие |
 |-------------------|---------------|----------|
-| `pipelines/_base.yaml` | `base/pipeline.yaml` | Rename |
-| `quality/_defaults.yaml` | `base/quality.yaml` | Rename |
-| `filters/_defaults.yaml` | `base/pipeline.yaml` (section `filter_defaults`) | Merge into base |
+| `pipelines/-base.yaml` | `base/pipeline.yaml` | Rename |
+| `quality/-defaults.yaml` | `base/quality.yaml` | Rename |
+| `filters/-defaults.yaml` | `base/pipeline.yaml` (section `filter-defaults`) | Merge into base |
 | `sources/{p}.yaml` | `providers/{p}.yaml` (section `source`) | Merge |
 | `quality/providers/{p}.yaml` | `providers/{p}.yaml` (section `quality`) | Merge |
 | `filters/providers/{p}.yaml` | `providers/{p}.yaml` (section `filters`) | Merge |
@@ -279,9 +279,9 @@ configs/
 | `quality/entities/{p}/{e}.yaml` | `entities/{p}/{e}.yaml` (section `quality`) | Merge |
 | `filters/entities/{p}/{e}.yaml` | `entities/{p}/{e}.yaml` (section `filters`) | Merge |
 | `contracts/pipelines/{p}/{e}.yaml` | `entities/{p}/{e}.yaml` (section `contracts`) | Merge |
-| `hash_policy/{p}/{e}.yaml` | `entities/{p}/{e}.yaml` (section `hash_policy`) | Merge |
+| `hash-policy/{p}/{e}.yaml` | `entities/{p}/{e}.yaml` (section `hash-policy`) | Merge |
 | `pipelines/composite/{e}.yaml` | `composites/{e}.yaml` | Move |
-| `naming_exceptions.yaml` | Keep as-is (utility, not per-pipeline) | No change |
+| `naming-exceptions.yaml` | Keep as-is (utility, not per-pipeline) | No change |
 
 ### 3.4 Пример Целевых Файлов
 
@@ -292,7 +292,7 @@ configs/
 # All entity configs inherit these defaults.
 
 version: "1.2.0"
-technical_primary_key: "entity_id"
+technical-primary-key: "entity-id"
 source: {}
 transform:
   steps: []
@@ -300,73 +300,73 @@ transform:
 sink:
   bronze:
     format: jsonl
-    save_json: true
-    save_metadata: true
-    dq_report: { enabled: true }
-    flat_structure: true
+    save-json: true
+    save-metadata: true
+    dq-report: { enabled: true }
+    flat-structure: true
   silver:
     format: delta
     mode: merge
-    on_schema_mismatch: evolve
-    save_metadata: true
-    dq_report: { enabled: true }
-    csv_export: { enabled: true, delimiter: ",", header: true, encoding: "utf-8" }
-    flat_structure: true
+    on-schema-mismatch: evolve
+    save-metadata: true
+    dq-report: { enabled: true }
+    csv-export: { enabled: true, delimiter: ",", header: true, encoding: "utf-8" }
+    flat-structure: true
   gold:
     enabled: true
     format: delta
     mode: scd2
-    scd_config:
-      valid_from: _valid_from
-      valid_to: _valid_to
-      is_current: _is_current
-      version: _version
+    scd-config:
+      valid-from: -valid-from
+      valid-to: -valid-to
+      is-current: -is-current
+      version: -version
     deterministic: true
-    save_metadata: true
-    dq_report: { enabled: true }
-    csv_export: { enabled: true, delimiter: ",", header: true, encoding: "utf-8" }
-    flat_structure: true
+    save-metadata: true
+    dq-report: { enabled: true }
+    csv-export: { enabled: true, delimiter: ",", header: true, encoding: "utf-8" }
+    flat-structure: true
 
 maintenance:
-  auto_vacuum: false
-  vacuum_retention_days: 7
+  auto-vacuum: false
+  vacuum-retention-days: 7
 
-input_filter:
+input-filter:
   enabled: false
-  batch_size: 100
+  batch-size: 100
 
-# Filter structure defaults (previously filters/_defaults.yaml)
-filter_defaults:
-  silver_filters:
-    required_fields: []
+# Filter structure defaults (previously filters/-defaults.yaml)
+filter-defaults:
+  silver-filters:
+    required-fields: []
     columns: {}
     ranges: {}
-    list_lengths: {}
-    list_contains: {}
-    exclude_if_present: []
-  gold_filters:
-    required_fields: []
+    list-lengths: {}
+    list-contains: {}
+    exclude-if-present: []
+  gold-filters:
+    required-fields: []
     columns: {}
     ranges: {}
-    list_lengths: {}
-    list_contains: {}
-    exclude_if_present: []
+    list-lengths: {}
+    list-contains: {}
+    exclude-if-present: []
 
 # Contract defaults (previously identical across ALL 21 entities)
-contract_defaults:
-  rename_map:
-    run_id: _run_id
-    run_type: _run_type
-    source_batch_id: _source_batch_id
-    ingestion_ts: _ingestion_ts
-    source: _source
-  hash_include: []
-  hash_exclude:
-    - _ingestion_ts
-    - _run_id
-    - _run_type
-    - _dq_errors
-    - _dq_status
+contract-defaults:
+  rename-map:
+    run-id: -run-id
+    run-type: -run-type
+    source-batch-id: -source-batch-id
+    ingestion-ts: -ingestion-ts
+    source: -source
+  hash-include: []
+  hash-exclude:
+    - -ingestion-ts
+    - -run-id
+    - -run-type
+    - -dq-errors
+    - -dq-status
 ```
 
 #### BASE-2: `configs/base/quality.yaml`
@@ -377,32 +377,32 @@ contract_defaults:
 version: "1.0.0"
 
 thresholds:
-  soft_fail: 0.05
-  hard_fail: 0.20
+  soft-fail: 0.05
+  hard-fail: 0.20
 
-strict_validation: false
-invalid_record_policy: quarantine
+strict-validation: false
+invalid-record-policy: quarantine
 
 report:
   enabled: true
   format: json
-  include_sample_failures: true
-  sample_size: 10
-  output_path: null
+  include-sample-failures: true
+  sample-size: 10
+  output-path: null
 
 # Common validations applied to ALL entities
-field_validations:
-  - field: _content_hash
+field-validations:
+  - field: -content-hash
     type: required
     nullable: false
-    error_message: "Content hash is required for deduplication"
-  - field: _ingestion_ts
+    error-message: "Content hash is required for deduplication"
+  - field: -ingestion-ts
     type: pattern
     pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}'
     nullable: false
-    error_message: "Ingestion timestamp must be ISO 8601 format"
+    error-message: "Ingestion timestamp must be ISO 8601 format"
 
-cross_field_validations: []
+cross-field-validations: []
 ```
 
 #### PROVIDER: `configs/providers/chembl.yaml`
@@ -414,75 +414,75 @@ provider: chembl
 
 # --- Connection (previously sources/chembl.yaml) ---
 source:
-  batch_size: 10
-  provider_config:
+  batch-size: 10
+  provider-config:
     provider: chembl
-    base_url: https://www.ebi.ac.uk/chembl/api/data
-    auth_type: public
+    base-url: https://www.ebi.ac.uk/chembl/api/data
+    auth-type: public
     client:
-      timeout_sec: 60.0
-      max_retries: 3
+      timeout-sec: 60.0
+      max-retries: 3
     pagination:
-      page_size: 1000
-      id_batch_size: 20
+      page-size: 1000
+      id-batch-size: 20
       strategy: offset
-      max_url_length: 2000
-  circuit_breaker:
-    failure_threshold: 5
-    recovery_timeout: 300
-  rate_limit:
-    requests_per_second: 3
+      max-url-length: 2000
+  circuit-breaker:
+    failure-threshold: 5
+    recovery-timeout: 300
+  rate-limit:
+    requests-per-second: 3
     burst: 10
-  health_check:
+  health-check:
     endpoint: /chembl/api/data/status.json
     timeout: 5
   retry:
-    use_retry_after: false
+    use-retry-after: false
 
 # --- DQ Rules (previously quality/providers/chembl.yaml) ---
 quality:
   thresholds:
-    hard_fail: 0.15   # Stricter than default
-  field_validations:
-    - field: molecule_id
+    hard-fail: 0.15   # Stricter than default
+  field-validations:
+    - field: molecule-id
       type: pattern
       pattern: '^CHEMBL\d+$'
       nullable: true
-      error_message: "Invalid ChEMBL molecule ID format"
-    - field: target_id
+      error-message: "Invalid ChEMBL molecule ID format"
+    - field: target-id
       type: pattern
       pattern: '^CHEMBL\d+$'
       nullable: true
-      error_message: "Invalid ChEMBL target ID format"
-    - field: assay_id
+      error-message: "Invalid ChEMBL target ID format"
+    - field: assay-id
       type: pattern
       pattern: '^CHEMBL\d+$'
       nullable: true
-    - field: publication_id
+    - field: publication-id
       type: pattern
       pattern: '^CHEMBL\d+$'
       nullable: true
 
 # --- Filter Defaults (previously filters/providers/chembl.yaml) ---
 filters:
-  input_filter:
-    batch_size: 1000
+  input-filter:
+    batch-size: 1000
 
 # --- Entity List ---
 entities:
   - activity
   - assay
-  - assay_parameters
-  - cell_line
-  - compound_record
+  - assay-parameters
+  - cell-line
+  - compound-record
   - molecule
-  - protein_class
+  - protein-class
   - publication
-  - publication_similarity
-  - publication_term
-  - subcellular_fraction
+  - publication-similarity
+  - publication-term
+  - subcellular-fraction
   - target
-  - target_component
+  - target-component
   - tissue
 ```
 
@@ -496,81 +496,81 @@ entity: molecule
 
 # --- Pipeline (previously pipelines/chembl/molecule.yaml) ---
 pipeline:
-  name: chembl_molecule
+  name: chembl-molecule
   description: "Extract molecules/compounds from ChEMBL API"
-  business_primary_keys: [molecule_id]
+  business-primary-keys: [molecule-id]
   sink:
     silver:
-      partition_by: [molecule_type]
+      partition-by: [molecule-type]
 
 # --- Contracts (previously contracts/pipelines/chembl/molecule.yaml) ---
-# Only entity-specific keys; rename_map and hash_exclude from base/pipeline.yaml
+# Only entity-specific keys; rename-map and hash-exclude from base/pipeline.yaml
 contracts:
-  primary_key: [molecule_id]
-  merge_keys: [molecule_id]
+  primary-key: [molecule-id]
+  merge-keys: [molecule-id]
 
 # --- Schema (previously schemas/chembl/molecule.yaml) ---
 schema:
-  content_hash:
+  content-hash:
     include: []
     exclude: []
-  column_groups:
+  column-groups:
     - name: system
-      fields: [entity_id, content_hash, _run_id, _run_type, _source_batch_id, _ingestion_ts, _index]
+      fields: [entity-id, content-hash, -run-id, -run-type, -source-batch-id, -ingestion-ts, -index]
     - name: business
       fields:
-        - molecule_id
-        - pref_name
-        - max_phase
-        - molecule_type
+        - molecule-id
+        - pref-name
+        - max-phase
+        - molecule-type
         - ... # (полный список полей)
     - name: dq
-      pattern: "^_dq_"
+      pattern: "^-dq-"
   silver:
-    include_groups: [system, business, dq]
-    exclude_fields: []
-    alias_policy: preserve
+    include-groups: [system, business, dq]
+    exclude-fields: []
+    alias-policy: preserve
   gold:
-    include_groups: [system, business]
-    exclude_fields: [_dq_*, _source_batch_id, _index]
-    alias_policy: canonical
+    include-groups: [system, business]
+    exclude-fields: [-dq-*, -source-batch-id, -index]
+    alias-policy: canonical
 
 # --- Quality (previously quality/entities/chembl/molecule.yaml) ---
 quality:
-  field_validations:
-    - field: molecule_id
+  field-validations:
+    - field: molecule-id
       type: required
       nullable: false
-      error_message: "Molecule ID is required"
-    - field: molecule_type
+      error-message: "Molecule ID is required"
+    - field: molecule-type
       type: enum
       allowed: [Small molecule, Protein, Antibody, Oligosaccharide, Enzyme, Cell, Unknown]
       nullable: true
 
 # --- Filters (previously filters/entities/chembl/molecule.yaml) ---
 filters:
-  input_filter:
+  input-filter:
     enabled: true
-    source_path: "data/input/molecule.csv"
-    column_name: "molecule_chembl_id"
-    filter_field: "molecule_id"
-    batch_size: 20
-  extraction_params:
-    molecule_type: "Small molecule"
-    structure_type: "MOL"
-    inorganic_flag: 0
-  silver_filters:
+    source-path: "data/input/molecule.csv"
+    column-name: "molecule-chembl-id"
+    filter-field: "molecule-id"
+    batch-size: 20
+  extraction-params:
+    molecule-type: "Small molecule"
+    structure-type: "MOL"
+    inorganic-flag: 0
+  silver-filters:
     columns:
-      molecule_type: [Small molecule]
-      structure_type: [MOL]
-      inorganic_flag: ["0"]
-    required_fields: [molecule_id]
-  gold_filters:
+      molecule-type: [Small molecule]
+      structure-type: [MOL]
+      inorganic-flag: ["0"]
+    required-fields: [molecule-id]
+  gold-filters:
     columns:
-      molecule_type: [Small molecule]
-      structure_type: [MOL]
-      inorganic_flag: ["0"]
-    required_fields: [molecule_id]
+      molecule-type: [Small molecule]
+      structure-type: [MOL]
+      inorganic-flag: ["0"]
+    required-fields: [molecule-id]
 ```
 
 ### 3.5 Сравнение: До и После
@@ -584,7 +584,7 @@ filters:
 | Provider файлов | 21 (3 dir × 7) | **7** (unified) | -67% |
 | Дублированных строк (contracts) | 357 | **0** | -100% |
 | Config loaders в коде | 6 | **3** | -50% |
-| deep_merge реализаций | 3 | **1** | -67% |
+| deep-merge реализаций | 3 | **1** | -67% |
 | Dirs в configs/ | 9 | **5** | -44% |
 
 ---
@@ -598,28 +598,28 @@ filters:
 | ID | Задача | Файлы | Риск |
 |----|--------|-------|------|
 | RF-CFG-001 | Удалить `quality/entities/uniprot/target.yaml` (осиротевший) — **DONE** | 1 | LOW |
-| RF-CFG-002 | Удалить дублирующий `dq_overrides` из `pipelines/chembl/activity.yaml` (5/6 правил = копия entity DQ) — **DONE** | 1 | LOW |
-| RF-CFG-003 | Удалить явный `schema_file` из entity pipeline configs (convention-defaults вычислит) — **DONE (21 standard pipelines)** | 21 | LOW |
-| RF-CFG-004 | ~~Выровнять `batch_size`~~ **SKIPPED**: pipeline `batch_size` (processing) ≠ filter `input_filter.batch_size` (API) — разные параметры | 0 | — |
-| RF-CFG-005 | Добавить `loading_strategy: full_scan_only` как параметр в `_base.yaml` (default: null) — **DONE** | 1 | LOW |
+| RF-CFG-002 | Удалить дублирующий `dq-overrides` из `pipelines/chembl/activity.yaml` (5/6 правил = копия entity DQ) — **DONE** | 1 | LOW |
+| RF-CFG-003 | Удалить явный `schema-file` из entity pipeline configs (convention-defaults вычислит) — **DONE (21 standard pipelines)** | 21 | LOW |
+| RF-CFG-004 | ~~Выровнять `batch-size`~~ **SKIPPED**: pipeline `batch-size` (processing) ≠ filter `input-filter.batch-size` (API) — разные параметры | 0 | — |
+| RF-CFG-005 | Добавить `loading-strategy: full-scan-only` как параметр в `-base.yaml` (default: null) — **DONE** | 1 | LOW |
 
 #### Phase 1: Консолидация Base (2 base файла)
 
 | ID | Задача | Файлы | Риск |
 |----|--------|-------|------|
-| RF-CFG-010 | Создать `configs/base/pipeline.yaml` из `pipelines/_base.yaml` + `filter_defaults` + `contract_defaults` — **DONE** | 2→1 | MEDIUM |
-| RF-CFG-011 | Создать `configs/base/quality.yaml` (= rename `quality/_defaults.yaml`) — **DONE with fallback** (legacy file оставлен на transition) | 1→1 | LOW |
-| RF-CFG-012 | Обновить `load_pipeline_config()` для чтения из `base/` — **DONE** | 1 | MEDIUM |
+| RF-CFG-010 | Создать `configs/base/pipeline.yaml` из `pipelines/-base.yaml` + `filter-defaults` + `contract-defaults` — **DONE** | 2→1 | MEDIUM |
+| RF-CFG-011 | Создать `configs/base/quality.yaml` (= rename `quality/-defaults.yaml`) — **DONE with fallback** (legacy file оставлен на transition) | 1→1 | LOW |
+| RF-CFG-012 | Обновить `load-pipeline-config()` для чтения из `base/` — **DONE** | 1 | MEDIUM |
 | RF-CFG-013 | Обновить `DQConfigLoader` для чтения из `base/` — **DONE** | 1 | MEDIUM |
-| RF-CFG-014 | Удалить `filters/_defaults.yaml` — **DONE** | 1 | LOW |
-| RF-CFG-015 | Добавить backward-compat fallback: если `base/pipeline.yaml` нет, читать `pipelines/_base.yaml` — **DONE** | 1 | LOW |
+| RF-CFG-014 | Удалить `filters/-defaults.yaml` — **DONE** | 1 | LOW |
+| RF-CFG-015 | Добавить backward-compat fallback: если `base/pipeline.yaml` нет, читать `pipelines/-base.yaml` — **DONE** | 1 | LOW |
 
 #### Phase 2: Консолидация Provider (1 файл per provider)
 
 | ID | Задача | Файлы | Риск |
 |----|--------|-------|------|
 | RF-CFG-020 | Создать `configs/providers/{p}.yaml` = merge `sources/{p}` + `quality/providers/{p}` + `filters/providers/{p}` — **DONE** | 7×3→7 | MEDIUM |
-| RF-CFG-021 | Обновить `load_source_config()` для чтения `providers/{p}.yaml` → section `source` — **DONE** | 1 | MEDIUM |
+| RF-CFG-021 | Обновить `load-source-config()` для чтения `providers/{p}.yaml` → section `source` — **DONE** | 1 | MEDIUM |
 | RF-CFG-022 | Обновить `DQConfigLoader` для чтения `providers/{p}.yaml` → section `quality` — **DONE** | 1 | MEDIUM |
 | RF-CFG-023 | Обновить `FilterConfigLoader` для чтения `providers/{p}.yaml` → section `filters` — **DONE** | 1 | MEDIUM |
 | RF-CFG-024 | Backward-compat: если `providers/{p}.yaml` нет, fallback на `sources/{p}.yaml` — **DONE** | 1 | LOW |
@@ -631,18 +631,18 @@ filters:
 |----|--------|-------|------|
 | RF-CFG-030 | Создать `configs/entities/{p}/{e}.yaml` = merge 5 файлов в один — **DONE для standard pipelines (21/21), composite pending** | 5→1 (×26) | HIGH |
 | RF-CFG-031 | Создать `UnifiedEntityConfigLoader` — один loader для entity | 1 new | HIGH |
-| RF-CFG-032 | Рефакторить `load_pipeline_config()` для чтения unified entity — **DONE (unified-first + legacy fallback)** | 1 | HIGH |
+| RF-CFG-032 | Рефакторить `load-pipeline-config()` для чтения unified entity — **DONE (unified-first + legacy fallback)** | 1 | HIGH |
 | RF-CFG-033 | Удалить `PipelineContractPolicyLoader` (contracts в entity) — **IN PROGRESS** (loader оставлен для backward-compat) | 1 | MEDIUM |
 | RF-CFG-034 | Удалить `FieldGroupLoader` для стандартных pipelines (schema в entity) — **PARTIAL** (standard path читает `schema` section) | 1 | MEDIUM |
 | RF-CFG-035 | Удалить старые dirs: `pipelines/{p}/`, `schemas/{p}/`, `quality/entities/`, `filters/entities/`, `contracts/` — **DONE** | ~130 | MEDIUM |
-| RF-CFG-036 | Перенести `pipelines/composite/*.yaml` → `composites/*.yaml` — **DONE** (`load_composite_config`: new-first + fallback) | 5 | LOW |
-| RF-CFG-037 | Унифицировать 3 deep_merge в одну `config_merge()` утилиту — **DONE** (`src/bioetl/infrastructure/config_merge.py`) | 3→1 | MEDIUM |
+| RF-CFG-036 | Перенести `pipelines/composite/*.yaml` → `composites/*.yaml` — **DONE** (`load-composite-config`: new-first + fallback) | 5 | LOW |
+| RF-CFG-037 | Унифицировать 3 deep-merge в одну `config-merge()` утилиту — **DONE** (`src/bioetl/infrastructure/config-merge.py`) | 3→1 | MEDIUM |
 
 #### Phase 4: Валидация и Документация
 
 | ID | Задача | Файлы | Риск |
 |----|--------|-------|------|
-| RF-CFG-040 | Обновить JSON Schema (`_schema/pipeline.json`, `_schema/composite.json`) | 2 | MEDIUM |
+| RF-CFG-040 | Обновить JSON Schema (`-schema/pipeline.json`, `-schema/composite.json`) | 2 | MEDIUM |
 | RF-CFG-041 | Обновить golden master тесты | ~10 | HIGH |
 | RF-CFG-042 | Обновить `docs/04-reference/` — config reference docs | ~5 | LOW |
 | RF-CFG-043 | Создать ADR-039: Config Unification (ADR-033 уже занят) | 1 | LOW |
@@ -673,7 +673,7 @@ Phase 4 (validation + docs)  → 1 день  │ golden master + ADR
 | # | Вопрос | Рекомендация |
 |---|--------|--------------|
 | D-1 | Нужен ли backward-compat period? | Да, 1 релиз (loaders ищут оба пути) |
-| D-2 | Один deep_merge или специализированные? | Один с параметром `list_strategy` |
+| D-2 | Один deep-merge или специализированные? | Один с параметром `list-strategy` |
 | D-3 | Формат entity YAML — flat или sectioned? | Sectioned (`pipeline:`, `schema:`, `quality:`, `filters:`, `contracts:`) |
 | D-4 | Оставить `configs/enums/` отдельно? | Да, это reference data, не per-pipeline |
 | D-5 | Composite configs — отдельный dir или в entities? | Отдельный `composites/` — другая структура |
@@ -682,33 +682,33 @@ Phase 4 (validation + docs)  → 1 день  │ golden master + ADR
 
 ## 5. Параметры Для Выравнивания (Phase 0)
 
-### 5.1 `schema_file` — можно удалить из entity configs
+### 5.1 `schema-file` — можно удалить из entity configs
 
-Все 21 standard pipeline config содержали явный `schema_file: ../../schemas/{p}/{e}.yaml`.
-Код `_apply_convention_defaults` уже вычисляет этот путь автоматически.
+Все 21 standard pipeline config содержали явный `schema-file: ../../schemas/{p}/{e}.yaml`.
+Код `-apply-convention-defaults` уже вычисляет этот путь автоматически.
 **Статус:** выполнено для standard pipelines.
 
-### 5.2 `batch_size` — дублируется в 2 местах
+### 5.2 `batch-size` — дублируется в 2 местах
 
-- `pipelines/chembl/activity.yaml`: `batch_size: 1000`
-- `filters/providers/chembl.yaml`: `input_filter.batch_size: 1000`
+- `pipelines/chembl/activity.yaml`: `batch-size: 1000`
+- `filters/providers/chembl.yaml`: `input-filter.batch-size: 1000`
 
 Параметры выглядят похоже, но имеют разный смысл:
-- `pipeline.batch_size` = размер обработки/записи batch в pipeline execution.
-- `input_filter.batch_size` = размер API/input batch в filter extraction.
-**Действие:** не удалять `pipeline.batch_size`; оставить RF-CFG-004 в статусе **SKIPPED**.
+- `pipeline.batch-size` = размер обработки/записи batch в pipeline execution.
+- `input-filter.batch-size` = размер API/input batch в filter extraction.
+**Действие:** не удалять `pipeline.batch-size`; оставить RF-CFG-004 в статусе **SKIPPED**.
 
-### 5.3 `dq_overrides` — дубликаты с entity DQ config
+### 5.3 `dq-overrides` — дубликаты с entity DQ config
 
-`chembl_activity` — единственный pipeline с inline `dq_overrides`.
+`chembl-activity` — единственный pipeline с inline `dq-overrides`.
 Ранее 5 из 6 правил были идентичны `quality/entities/chembl/activity.yaml`; дубли уже удалены.
-**Текущий остаток (валидный):** только narrowing overrides для `standard_type` и `standard_units`.
+**Текущий остаток (валидный):** только narrowing overrides для `standard-type` и `standard-units`.
 
-### 5.4 `loading_strategy` — добавить в base
+### 5.4 `loading-strategy` — добавить в base
 
-4 pipeline configs содержат `loading_strategy: full_scan_only`.
-Не определено в `_base.yaml`.
-**Действие:** добавить `loading_strategy: null` в `_base.yaml` (null = default incremental).
+4 pipeline configs содержат `loading-strategy: full-scan-only`.
+Не определено в `-base.yaml`.
+**Действие:** добавить `loading-strategy: null` в `-base.yaml` (null = default incremental).
 
 ---
 
@@ -718,11 +718,11 @@ Phase 4 (validation + docs)  → 1 день  │ golden master + ADR
 ТЕКУЩЕЕ (162 YAML)                         ЦЕЛЕВОЕ (~40 YAML)
 ═══════════════════                         ═══════════════════
 
-pipelines/_base.yaml ──────────────────┐
-filters/_defaults.yaml ────────────────┼──→ base/pipeline.yaml
-contracts (21 файлов, rename_map) ─────┘
+pipelines/-base.yaml ──────────────────┐
+filters/-defaults.yaml ────────────────┼──→ base/pipeline.yaml
+contracts (21 файлов, rename-map) ─────┘
 
-quality/_defaults.yaml ──────────────────→ base/quality.yaml
+quality/-defaults.yaml ──────────────────→ base/quality.yaml
 
 sources/chembl.yaml ───────────────────┐
 quality/providers/chembl.yaml ─────────┼──→ providers/chembl.yaml
@@ -738,8 +738,8 @@ contracts/pipelines/chembl/activity.yaml┘
 
 pipelines/composite/*.yaml ───────────→ composites/*.yaml (5)
 
-_schema/*.json ───────────────────────→ _schema/*.json (2, kept)
+-schema/*.json ───────────────────────→ -schema/*.json (2, kept)
 enums/chembl.yaml ────────────────────→ enums/chembl.yaml (kept)
-naming_exceptions.yaml ───────────────→ naming_exceptions.yaml (kept)
-hash_policy/chembl/activity.yaml ─────→ entities/chembl/activity.yaml (section hash_policy)
+naming-exceptions.yaml ───────────────→ naming-exceptions.yaml (kept)
+hash-policy/chembl/activity.yaml ─────→ entities/chembl/activity.yaml (section hash-policy)
 ```

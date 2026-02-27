@@ -43,6 +43,15 @@ graph LR
         GDA["GoldDQAnalyzer"]
     end
 
+    subgraph NoOps["NoOp Implementations (fallback defaults)"]
+        NTP["NoOpTracing"]
+        NMP["NoOpMetrics"]
+        NAP["NoOpAudit"]
+        NPH["NoOpPiiHasher"]
+        NMM["NoOpMemoryMonitor"]
+        NMW["NoOpMetadataWriter"]
+    end
+
     LKP --- ML
     CKP --- LC
     QRP --- UQ
@@ -54,10 +63,15 @@ graph LR
     GDQP --- GDA
     DQRWP --- DQRW_I
 
+    ADP -.->|"fallback"| NAP
+    PIIP -.->|"fallback"| NPH
+
     classDef domain fill:#f3e5f5,stroke:#6a1b9a
     classDef app fill:#e8f5e9,stroke:#2e7d32
     classDef infra fill:#ffcdd2,stroke:#c62828
+    classDef noop fill:#f5f5f5,stroke:#9e9e9e
 
     class LKP,CKP,QRP,ADP,PIIP,IFP,DQMP,BDQP,SDQP,GDQP,DQRWP domain
     class BDA,SDA,GDA app
     class ML,LC,UQ,FA,SPH,CSVR,DQRW_I infra
+    class NTP,NMP,NAP,NPH,NMM,NMW noop

@@ -1,6 +1,6 @@
 # Пайплайн: ChEMBL Publication Term
 
-**Имя пайплайна:** `chembl_publication_term`
+**Имя пайплайна:** `chembl-publication-term`
 **Провайдер:** `chembl`
 **Сущность:** `publication-term`
 **Версия схемы:** 1.2.0
@@ -86,13 +86,13 @@ gold-filters:
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_publication_term
+bioetl run chembl-publication-term
 
 # С ограничением
-bioetl run chembl_publication_term --limit 1000
+bioetl run chembl-publication-term --limit 1000
 
 # С фильтрацией по публикациям
-bioetl run chembl_publication_term --input-filter data/input/publications.csv
+bioetl run chembl-publication-term --input-filter data/input/publications.csv
 ```
 
 ---
@@ -113,7 +113,7 @@ sink:
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/publication-term.yaml` |
+| Конфигурация | `configs/entities/chembl/publication-term.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/chembl/publication-term-transformer.py` |
 | Пайплайн | `src/bioetl/application/pipelines/chembl/publication-term.py` |
 | Сущность | `src/bioetl/domain/entities/chembl-structures.py` (PublicationTerm) |
@@ -123,11 +123,11 @@ sink:
 
 ## 8. Связь с родительской сущностью
 
-`chembl_publication_term` — производная от `chembl_publication`. Для полного покрытия рекомендуется сначала загрузить публикации:
+`chembl-publication-term` — производная от `chembl-publication`. Для полного покрытия рекомендуется сначала загрузить публикации:
 
 ```bash
-bioetl run chembl_publication --limit 100
-bioetl run chembl_publication_term --limit 1000
+bioetl run chembl-publication --limit 100
+bioetl run chembl-publication-term --limit 1000
 ```
 
 ---

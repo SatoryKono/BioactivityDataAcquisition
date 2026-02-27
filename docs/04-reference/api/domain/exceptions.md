@@ -58,8 +58,8 @@ Base exception for all BioETL errors.
 
 ::: bioetl.domain.exceptions.BioETLError
     options:
-        show_root_heading: true
-        show_source: true
+        show-root-heading: true
+        show-source: true
         members:
             - error-type
             - get-error-type
@@ -72,8 +72,8 @@ Errors requiring immediate pipeline stop.
 
 ::: bioetl.domain.exceptions.CriticalError
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### RecoverableError
 
@@ -81,8 +81,8 @@ Transient errors that may succeed on retry.
 
 ::: bioetl.domain.exceptions.RecoverableError
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### DataQualityError
 
@@ -90,8 +90,8 @@ Data quality issues (skip record, continue pipeline).
 
 ::: bioetl.domain.exceptions.DataQualityError
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ## Critical Errors
 
@@ -101,8 +101,8 @@ Infrastructure-level failures (database, storage).
 
 ::: bioetl.domain.exceptions.InfrastructureError
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### LockAcquisitionError
 
@@ -110,8 +110,8 @@ Failed to acquire distributed lock.
 
 ::: bioetl.domain.exceptions.LockAcquisitionError
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### LockLostError
 
@@ -119,8 +119,8 @@ Lock was lost during execution.
 
 ::: bioetl.domain.exceptions.LockLostError
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### AuthFailureError
 
@@ -128,8 +128,8 @@ Authentication or authorization failure.
 
 ::: bioetl.domain.exceptions.AuthFailureError
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### MergeConflictError
 
@@ -137,8 +137,8 @@ Conflict during Delta Lake merge operation.
 
 ::: bioetl.domain.exceptions.MergeConflictError
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### PolicyViolationError
 
@@ -146,8 +146,8 @@ Business policy violation.
 
 ::: bioetl.domain.exceptions.PolicyViolationError
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### CheckpointConflictError
 
@@ -155,8 +155,8 @@ Checkpoint state conflict.
 
 ::: bioetl.domain.exceptions.CheckpointConflictError
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ## Recoverable Errors
 
@@ -166,8 +166,8 @@ Network connectivity issues.
 
 ::: bioetl.domain.exceptions.NetworkError
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### RateLimitError
 
@@ -175,8 +175,8 @@ API rate limit exceeded (HTTP 429).
 
 ::: bioetl.domain.exceptions.RateLimitError
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### TimeoutError
 
@@ -184,8 +184,8 @@ Request timeout exceeded.
 
 ::: bioetl.domain.exceptions.TimeoutError
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### ApiError
 
@@ -193,8 +193,8 @@ General API error.
 
 ::: bioetl.domain.exceptions.ApiError
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 <!-- ChemblApiError: removed, use ApiError instead -->
 
@@ -204,8 +204,8 @@ Circuit breaker is open, requests blocked.
 
 ::: bioetl.domain.exceptions.CircuitBreakerOpenError
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### RetryExhaustedError
 
@@ -213,8 +213,8 @@ All retry attempts exhausted.
 
 ::: bioetl.domain.exceptions.RetryExhaustedError
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ## Data Quality Errors
 
@@ -224,8 +224,8 @@ Record violates expected schema.
 
 ::: bioetl.domain.exceptions.SchemaViolationError
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### MissingRequiredFieldError
 
@@ -233,8 +233,8 @@ Required field is missing or null.
 
 ::: bioetl.domain.exceptions.MissingRequiredFieldError
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### InvalidDataFormatError
 
@@ -242,8 +242,8 @@ Data format is invalid.
 
 ::: bioetl.domain.exceptions.InvalidDataFormatError
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### DataQualityThresholdError
 
@@ -251,8 +251,8 @@ DQ error threshold exceeded.
 
 ::: bioetl.domain.exceptions.DataQualityThresholdError
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ## Storage Errors
 
@@ -262,8 +262,8 @@ General storage operation error.
 
 ::: bioetl.domain.exceptions.StorageError
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### SchemaEvolutionError
 
@@ -271,8 +271,8 @@ Schema evolution incompatibility.
 
 ::: bioetl.domain.exceptions.SchemaEvolutionError
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### BronzeValidationError
 
@@ -280,8 +280,8 @@ Bronze layer validation failure.
 
 ::: bioetl.domain.exceptions.BronzeValidationError
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### TableNotFoundError
 
@@ -289,8 +289,8 @@ Delta table does not exist.
 
 ::: bioetl.domain.exceptions.TableNotFoundError
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### BucketNotFoundError
 
@@ -298,8 +298,8 @@ Storage bucket not found.
 
 ::: bioetl.domain.exceptions.BucketNotFoundError
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### UploadError
 
@@ -307,8 +307,8 @@ File upload failed.
 
 ::: bioetl.domain.exceptions.UploadError
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ## Usage Example
 

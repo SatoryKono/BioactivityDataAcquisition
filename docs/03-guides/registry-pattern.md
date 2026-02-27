@@ -25,8 +25,8 @@ from bioetl.composition.registry import PipelineRegistry
 pipelines = PipelineRegistry.list-keys()
 
 # Check if pipeline exists
-if PipelineRegistry.contains("chembl_activity"):
-    definition = PipelineRegistry.get("chembl_activity")
+if PipelineRegistry.contains("chembl-activity"):
+    definition = PipelineRegistry.get("chembl-activity")
 ```
 
 ### ProviderRegistry (Primary)
@@ -73,7 +73,7 @@ For backward compatibility, the following legacy methods are available:
 
 | Registry | Legacy Method | Unified Method |
 |----------|---------------|----------------|
-| `PipelineRegistry` | `register_factory(factory)` | `register(key, factory)` |
+| `PipelineRegistry` | `register-factory(factory)` | `register(key, factory)` |
 | `PipelineRegistry` | `list-pipelines()` | `list-keys()` |
 | `DataSourceRegistry` | `list-providers()` | `list-keys()` |
 | `DataSourceRegistry` | `get(provider)` | `ProviderRegistry.create-data-source()` |

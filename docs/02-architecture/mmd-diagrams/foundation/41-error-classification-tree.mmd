@@ -38,30 +38,30 @@ flowchart TB
 
     %% Actions
     subgraph Actions["Error Actions"]
-        RETRY["🔄 RETRY<br/>• max_attempts: 3<br/>• multiplier: 2.0<br/>• jitter: MD5-based"]
-        QUARANTINE2["🔒 QUARANTINE<br/>• QuarantineEntry created<br/>• payload truncated 64KB<br/>• payload_hash computed"]
-        FAIL_FAST["💥 FAIL FAST<br/>• No retry<br/>• Pipeline terminates<br/>• ExitCode.PIPELINE_ERROR"]
-        BATCH_FAIL["🚫 BATCH FAIL<br/>• error_rate > 20%<br/>• Entire batch rejected<br/>• Checkpoint NOT saved"]
+        ACT_RETRY["RETRY<br/>max_attempts: 3<br/>multiplier: 2.0<br/>jitter: MD5-based"]
+        ACT_QUARANTINE["QUARANTINE<br/>QuarantineEntry created<br/>payload truncated 64KB<br/>payload_hash computed"]
+        FAIL_FAST["FAIL FAST<br/>No retry<br/>Pipeline terminates<br/>ExitCode.PIPELINE_ERROR"]
+        BATCH_FAIL["BATCH FAIL<br/>error_rate > 20%<br/>Entire batch rejected<br/>Checkpoint NOT saved"]
     end
 
     AUTH --> FAIL_FAST
-    RATE --> RETRY
-    SERVER --> RETRY
-    SCHEMA --> QUARANTINE2
-    MISSING --> QUARANTINE2
-    FORMAT --> QUARANTINE2
+    RATE --> ACT_RETRY
+    SERVER --> ACT_RETRY
+    SCHEMA --> ACT_QUARANTINE
+    MISSING --> ACT_QUARANTINE
+    FORMAT --> ACT_QUARANTINE
     DQTHRESH --> BATCH_FAIL
     LOCK --> FAIL_FAST
     LOCKACQ --> FAIL_FAST
-    STORE --> RETRY
-    CB --> RETRY
+    STORE --> ACT_RETRY
+    CB --> ACT_RETRY
 
     %% Retry exhaustion
-    RETRY -->|"max attempts\nexhausted"| EXHAUST["RetryExhaustedError\n→ Record CB failure\n→ Circuit may trip"]
+    ACT_RETRY -->|"max exhausted"| EXHAUST["RetryExhaustedError<br/>Record CB failure<br/>Circuit may trip"]
     EXHAUST --> FAIL_FAST
 
     %% Styling
     style Actions fill:#fff3e0,stroke:#e65100
     style FAIL_FAST fill:#ffebee,stroke:#c62828
-    style QUARANTINE2 fill:#ffebee,stroke:#c62828,color:#212121
-    style RETRY fill:#e8f5e9,stroke:#2e7d32
+    style ACT_QUARANTINE fill:#ffebee,stroke:#c62828,color:#212121
+    style ACT_RETRY fill:#e8f5e9,stroke:#2e7d32

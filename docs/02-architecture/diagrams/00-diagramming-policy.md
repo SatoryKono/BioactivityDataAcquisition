@@ -56,7 +56,7 @@ docs/02-architecture/diagrams/
 - Format: `NN-<topic>.mermaid`
 - Examples:
   - `01-high-level.mermaid`
-  - `03-pipeline-sequence.mermaid`
+  - `03-pipeline-execution-happy-path.mermaid`
 - Prefix `NN-` for ordering
 - Topic in kebab-case
 - Extension: `.mermaid` (standardized)
@@ -103,7 +103,7 @@ Use for:
 actor User
 participant CLI
 participant Pipeline
-User -> CLI: run --pipeline chembl_activity
+User -> CLI: run --pipeline chembl-activity
 CLI -> Pipeline: execute()
 @enduml
 ```
@@ -247,7 +247,7 @@ participant Worker
 participant MemoryLock
 participant DeltaLake
 
-Worker -> MemoryLock: acquire lock:chembl_activity (TTL 90s)
+Worker -> MemoryLock: acquire lock:chembl-activity (TTL 90s)
 MemoryLock --> Worker: OK
 
 loop Every 30s (heartbeat)

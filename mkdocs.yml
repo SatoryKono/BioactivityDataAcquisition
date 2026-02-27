@@ -79,6 +79,7 @@ nav:
                     -   "File Policy": 00-project/governance/03-file-policy.md
                     -   "Extending BioETL": 00-project/governance/04-extending-bioetl.md
                     -   "GitHub Policy": 00-project/governance/05-github-policy.md
+                    -   "Docs Publication Policy": 00-project/governance/06-doc-publication-policy.md
     -   Architecture:
             -   "Overview": 02-architecture/00-overview.md
             -   Layers:

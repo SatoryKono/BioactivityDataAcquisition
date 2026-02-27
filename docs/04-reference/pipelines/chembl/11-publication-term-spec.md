@@ -10,13 +10,13 @@ Derived pipeline that extracts and flattens publication terms (MeSH, keywords) f
 
 | Field            | Value                                                   |
 | ---------------- | ------------------------------------------------------- |
-| Pipeline ID      | `chembl_publication_term`                               |
+| Pipeline ID      | `chembl-publication-term`                               |
 | Provider         | `chembl`                                                |
 | Entity           | `publication-term` (derived from `/document`)           |
 | Version          | `2.1.0`                                                 |
 | Loading Strategy | `full-scan-only` (force full scan)                      |
 | Primary Keys     | `entity-id` (hash of publication-id + term-type + term) |
-| Config           | `configs/pipelines/chembl/publication-term.yaml`        |
+| Config           | `configs/entities/chembl/publication-term.yaml`        |
 
 ## Outputs
 

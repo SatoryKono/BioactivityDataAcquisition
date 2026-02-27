@@ -12,10 +12,10 @@
 BioETL содержит два каталога диаграмм с разными форматами и назначением:
 
 **Canonical sources** (`docs/02-architecture/mmd-diagrams/`):
-- `architecture/` — 18 canonical + 11 subdomain-decomposed = 29 `.mmd` файлов
-- `class-diagrams/` — 16 `.mmd` файлов (class diagram families)
-- `foundation/` — 59 `.mmd` файлов (historical + TOP-25)
-- Итого: **104 `.mmd` файла** (93 canonical по README)
+- `architecture/` — 18 canonical + 11 subdomain-decomposed = 29 `.mermaid` файлов
+- `class-diagrams/` — 16 `.mermaid` файлов (class diagram families)
+- `foundation/` — 59 `.mermaid` файлов (historical + TOP-25)
+- Итого: **104 `.mermaid` файла** (93 canonical по README)
 
 **Decomposed views** (`docs/02-architecture/diagrams/mermaid/`):
 - 31 parent diagram × 5 views (`-full`, `-overview`, `-domain`, `-infra`, `-dataflow`)
@@ -41,8 +41,8 @@ BioETL содержит два каталога диаграмм с разным
 
 - Тема: `theme/mermaid-config.json` + `theme/custom.css` (строки 140–151)
 - Рендер: `render.sh` (SVG + PNG, 300 DPI)
-- Lint: `scripts/lint_diagrams.py`
-- Шаблон: `mmd-diagrams/_template.mmd`
+- Lint: `scripts/lint-diagrams.py`
+- Шаблон: `mmd-diagrams/-template.mermaid`
 - Политика LLM: `docs/02-architecture/06-diagram-policy.md` (POL-LLM-DIAGRAMS-001)
 
 ---
@@ -52,7 +52,7 @@ BioETL содержит два каталога диаграмм с разным
 ### D1: Canonical Colour Scheme
 
 Единственным источником палитры является **`theme/custom.css` строки 140–151**.
-Все inline `style` директивы в `.mermaid` и `.mmd` файлах MUST соответствовать этой схеме.
+Все inline `style` директивы в `.mermaid` и `.mermaid` файлах MUST соответствовать этой схеме.
 
 | Слой | Fill | Stroke |
 |------|------|--------|
@@ -72,11 +72,11 @@ BioETL содержит два каталога диаграмм с разным
 ### D2: Dual Repository Structure
 
 ```
-mmd-diagrams/          ← canonical .mmd (rendered via render.sh)
+mmd-diagrams/          ← canonical .mermaid (rendered via render.sh)
   architecture/        ← system/component-level diagrams
   class-diagrams/      ← class structure diagrams
   foundation/          ← historical reference + TOP-25
-  _template.mmd        ← шаблон для новых диаграмм
+  -template.mermaid        ← шаблон для новых диаграмм
 diagrams/mermaid/      ← decomposed .mermaid views (foundation)
   *-full.mermaid       ← полные reference копии
   *-overview.mermaid   ← cross-layer overview
@@ -86,7 +86,7 @@ diagrams/mermaid/      ← decomposed .mermaid views (foundation)
   00-legend.mermaid    ← link types + code glossary
 ```
 
-Новые **architecture views** создаются как `.mmd` в `mmd-diagrams/architecture/`.
+Новые **architecture views** создаются как `.mermaid` в `mmd-diagrams/architecture/`.
 Foundation views создаются как `.mermaid` в `diagrams/mermaid/`.
 
 ### D3: View-based Decomposition Rules
@@ -106,13 +106,13 @@ Foundation views создаются как `.mermaid` в `diagrams/mermaid/`.
 - `-dataflow` — data movement (≤15 узлов)
 
 Для **architecture/** — декомпозиция по subdomain (предметная группировка),
-суффиксы `a/b/c/d` по теме (например, `13a-port-contracts-data-sources.mmd`).
+суффиксы `a/b/c/d` по теме (например, `13a-port-contracts-data-sources.mermaid`).
 
 Оригиналы сохраняются как `-full` reference и не удаляются.
 
 ### D4: Metadata Formats
 
-**`.mmd` файлы** (canonical):
+**`.mermaid` файлы** (canonical):
 ```
 %% BioETL — <Title>
 %% <Covers>
@@ -152,13 +152,13 @@ View-файлы с ≥3 типами связей и >5 соединениями
 
 ### D6: CI Validation
 
-`scripts/lint_diagrams.py` проверяет оба каталога:
+`scripts/lint-diagrams.py` проверяет оба каталога:
 
 | Rule | Description |
 |------|-------------|
 | SIZE-001 | Node count > 35 → ERROR |
 | SIZE-002 | Node count > 20 → WARN |
-| META-001 | Отсутствие `@version`/`@date`/`@type`/`@level` в `.mmd` → WARN |
+| META-001 | Отсутствие `@version`/`@date`/`@type`/`@level` в `.mermaid` → WARN |
 | META-002 | Отсутствие `%% View:` в `.mermaid` view-файле → WARN |
 | COLOUR-001 | Использование deprecated pre-ADR-040 палитры в `style`/`classDef` → ERROR |
 | COLOUR-002 | Emoji в subgraph labels → ERROR |
@@ -168,7 +168,7 @@ View-файлы с ≥3 типами связей и >5 соединениями
 - `*-full.mermaid` reference views исключены из `SIZE-001`/`SIZE-002`.
 - `00-legend*` исключены из `SIZE-001`/`SIZE-002`.
 
-Примечание по size-normalization (`scripts/uniform_diagram_sizes.py`):
+Примечание по size-normalization (`scripts/uniform-diagram-sizes.py`):
 - `@uniform-group` задаёт групповую нормализацию высоты.
 - `@uniform-width global` (по умолчанию) использует общую ширину для всех групп.
 - `@uniform-width group` разрешает width per group для снижения `&nbsp;`-padding в перегруженных class-diagram family.
@@ -177,7 +177,7 @@ Pre-commit hooks: `lint-diagrams`, `prune-orphan-diagram-nodes`.
 
 #### GRAPH-001 — Orphan Node Rule
 
-Реализован в `scripts/prune_orphan_nodes.py`. Нода считается orphan, если:
+Реализован в `scripts/prune-orphan-nodes.py`. Нода считается orphan, если:
 - Определена (`NodeId["label"]` или bare `NodeId`) в diagram
 - Не участвует ни в одном edge / message в том же файле
 
@@ -189,9 +189,9 @@ Pre-commit hooks: `lint-diagrams`, `prune-orphan-diagram-nodes`.
 
 **Инструмент:**
 ```bash
-python scripts/prune_orphan_nodes.py --check      # аудит
-python scripts/prune_orphan_nodes.py --fix         # удалить garbage orphans
-python scripts/prune_orphan_nodes.py --grandfather # exemption для всех текущих
+python scripts/prune-orphan-nodes.py --check      # аудит
+python scripts/prune-orphan-nodes.py --fix         # удалить garbage orphans
+python scripts/prune-orphan-nodes.py --grandfather # exemption для всех текущих
 ```
 
 ### D7: Tool Selection Criteria
@@ -219,14 +219,14 @@ ELK (Eclipse Layout Kernel) SHOULD использоваться для `flowchar
 | Иерархия / DI граф / port map | `TB` | `01-high-level-hexagonal`, `12-bootstrap-di-container` |
 | Pipeline / data flow / config chain | `LR` | `03-medallion-data-flow`, `11-configuration-system` |
 
-**CI Rules (lint_diagrams.py):**
+**CI Rules (lint-diagrams.py):**
 
 | Rule | Условие | Severity |
 |------|---------|----------|
 | LAYOUT-001 | `flowchart/graph` с `@nodes > 20` без ELK init | WARNING |
 | LAYOUT-002 | `flowchart/graph` с `@nodes > 40` без ELK init | ERROR |
 
-**Инструмент:** `src/tools/apply_elk_layout.py --dry-run` для аудита, без `--dry-run` для применения.
+**Инструмент:** `src/tools/apply-elk-layout.py --dry-run` для аудита, без `--dry-run` для применения.
 
 ### D9: Cross-Diagram Link Harmonization
 
@@ -247,10 +247,10 @@ ELK (Eclipse Layout Kernel) SHOULD использоваться для `flowchar
 
 | Уровень | Механизм | Обязательность | Scope |
 |---------|----------|----------------|-------|
-| **L1** — `%%{init}` | `themeVariables.lineColor` per type | MUST для новых диаграмм | Все `.mmd` |
+| **L1** — `%%{init}` | `themeVariables.lineColor` per type | MUST для новых диаграмм | Все `.mermaid` |
 | **L2** — CSS | `theme/custom.css` D9 секция | Автоматически при SVG render | Все SVG |
 | **L3** — Метки | `[DATA]`, `[DI]`, `[ORCH]`, `[OBS]`, `[ERR]` prefix | SHOULD для >10 рёбер | Исходники |
-| **L4** — SVG post-proc | `harmonize_link_styles.py` | MAY для публикуемых | Rendered SVG |
+| **L4** — SVG post-proc | `harmonize-link-styles.py` | MAY для публикуемых | Rendered SVG |
 
 **Per-type %%{init} presets:**
 
@@ -268,7 +268,7 @@ ELK (Eclipse Layout Kernel) SHOULD использоваться для `flowchar
 %%{init: {'theme': 'base', 'themeVariables': {'lineColor': '#1E293B'}}}%%
 ```
 
-**Инструмент:** `src/tools/harmonize_link_styles.py --dry-run` для аудита rendered SVG.
+**Инструмент:** `src/tools/harmonize-link-styles.py --dry-run` для аудита rendered SVG.
 
 ---
 
@@ -281,10 +281,10 @@ ELK (Eclipse Layout Kernel) SHOULD использоваться для `flowchar
 | Гармонизация цветовой схемы | 106 `.mermaid` файлов | 300 замен, старая Tailwind-палитра удалена |
 | Удаление emoji из subgraph labels | 106 файлов | 286 emoji убрано |
 | linkStyle дифференциация | 16 flowchart файлов | 5 типов связей |
-| Создание `_template.mmd` | `mmd-diagrams/` | Единый шаблон для новых диаграмм |
+| Создание `-template.mermaid` | `mmd-diagrams/` | Единый шаблон для новых диаграмм |
 | `@nodes` в architecture/ | 29 файлов | Уже присутствовали |
-| D9 Link Harmonization | CSS + tool + template | `lineColor` #475569, CSS D9 секция, `harmonize_link_styles.py` |
-| ELK `edgeRouting: ORTHOGONAL` | 14 `.mmd` + config | Ортогональные рёбра во всех ELK-диаграммах |
+| D9 Link Harmonization | CSS + tool + template | `lineColor` #475569, CSS D9 секция, `harmonize-link-styles.py` |
+| ELK `edgeRouting: ORTHOGONAL` | 14 `.mermaid` + config | Ортогональные рёбра во всех ELK-диаграммах |
 
 ---
 
@@ -295,20 +295,20 @@ ELK (Eclipse Layout Kernel) SHOULD использоваться для `flowchar
 - Единая палитра — нет визуальных конфликтов между `mmd-diagrams/` и `diagrams/mermaid/`
 - linkStyle дифференциация даёт семантическое разделение (data / DI / orchestration)
 - CI предотвращает деградацию при добавлении новых диаграмм
-- `_template.mmd` стандартизирует создание новых диаграмм
+- `-template.mermaid` стандартизирует создание новых диаграмм
 - Два каталога позволяют независимое развитие canonical sources и decomposed views
 
 ### Negative
 
 - Два каталога + два расширения — когнитивная нагрузка при навигации
-- Синхронизация `foundation/*.mmd` ↔ `diagrams/mermaid/*-full.mermaid` ручная
+- Синхронизация `foundation/*.mermaid` ↔ `diagrams/mermaid/*-full.mermaid` ручная
 - linkStyle индексы хрупкие: любое добавление/удаление связи требует пересчёта
 
 ### Risks
 
 - **linkStyle fragility**: изменение порядка связей ломает индексацию. Митигация: комментарий `%% linkStyle: ...` как проверочная документация
 - **Эвристика `@nodes`**: подсчёт узлов ±20% от реального (subgraph границы). Митигация: lint проверяет только >35 threshold
-- **Расхождение `-full.mermaid` с источником**: `foundation/*.mmd` и `diagrams/mermaid/*-full.mermaid` могут разойтись. Митигация: CI drift check (планируется)
+- **Расхождение `-full.mermaid` с источником**: `foundation/*.mermaid` и `diagrams/mermaid/*-full.mermaid` могут разойтись. Митигация: CI drift check (планируется)
 
 ---
 

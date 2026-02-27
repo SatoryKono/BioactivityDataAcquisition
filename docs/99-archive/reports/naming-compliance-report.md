@@ -15,19 +15,19 @@ Scope: Entity naming compliance (ADR-024 + glossary v2.0), deprecated-term drift
 
 ## [P2] Terminology linter entrypoint is broken
 
-**Location**: `scripts/lint_terminology.py:61`
+**Location**: `scripts/lint-terminology.py:61`
 **Rule**: RULES.md §2 naming governance / mandatory terminology verification workflow.
 
 **Evidence**:
 
 ```python
-patterns = list(impl.PYTHON_PATTERNS)
+patterns = list(impl.PYTHON-PATTERNS)
 ```
 
 Runtime error observed:
 
 ```text
-AttributeError: module 'tools.scripts.lint_terminology' has no attribute 'PYTHON_PATTERNS'
+AttributeError: module 'tools.scripts.lint-terminology' has no attribute 'PYTHON-PATTERNS'
 ```
 
 **Impact**:
@@ -37,14 +37,14 @@ AttributeError: module 'tools.scripts.lint_terminology' has no attribute 'PYTHON
 
 **Recommendation**:
 
-- Align wrapper expectations with `tools.scripts.lint_terminology` public API.
+- Align wrapper expectations with `tools.scripts.lint-terminology` public API.
 - Add a smoke test for the script entrypoint.
 
-**Verification command**: `uv run python scripts/lint_terminology.py src/bioetl/ --strict`
+**Verification command**: `uv run python scripts/lint-terminology.py src/bioetl/ --strict`
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
-## [P2] `import_linter` check cannot execute in current environment
+## [P2] `import-linter` check cannot execute in current environment
 
 **Location**: environment dependency (missing module)
 **Rule**: 5-layer architecture boundary verification phase.
@@ -52,7 +52,7 @@ ______________________________________________________________________
 **Evidence**:
 
 ```text
-/workspace/BioactivityDataAcquisition/.venv/bin/python3: No module named import_linter
+/workspace/BioactivityDataAcquisition/.venv/bin/python3: No module named import-linter
 ```
 
 **Impact**:
@@ -64,19 +64,19 @@ ______________________________________________________________________
 
 - Add `import-linter` to project dev dependencies and CI architecture target.
 
-**Verification command**: `uv run python -m import_linter`
+**Verification command**: `uv run python -m import-linter`
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## [P2] Architecture suite fails due test formatting drift
 
-**Location**: `tests/architecture/test_ci_test_strategy.py`
+**Location**: `tests/architecture/test-ci-test-strategy.py`
 **Rule**: formatting compliance gate in architecture suite.
 
 **Evidence**:
 
 ```text
-Would reformat: tests/architecture/test_ci_test_strategy.py
+Would reformat: tests/architecture/test-ci-test-strategy.py
 1 file would be reformatted
 ```
 
@@ -87,7 +87,7 @@ Would reformat: tests/architecture/test_ci_test_strategy.py
 
 **Recommendation**:
 
-- Run `ruff format tests/architecture/test_ci_test_strategy.py` and re-run architecture suite.
+- Run `ruff format tests/architecture/test-ci-test-strategy.py` and re-run architecture suite.
 
 **Verification command**: `uv run python -m pytest tests/architecture/ -v`
 
@@ -106,19 +106,19 @@ Would reformat: tests/architecture/test_ci_test_strategy.py
 ### [P3] Known exceptions remain explicitly intentional
 
 - `DocumentSimilarity` and `DocumentTerm` kept as ChEMBL derived entities.
-- CLI pipeline IDs `pubchem_compound` and `uniprot_protein` remain for compatibility.
+- CLI pipeline IDs `pubchem-compound` and `uniprot-protein` remain for compatibility.
 
 ## Positive Observations
 
-- `scripts/naming_audit.py` reports **0 naming violations**.
-- Config names include canonical `chembl_publication` pipeline and related derivative pipelines.
+- `scripts/naming-audit.py` reports **0 naming violations**.
+- Config names include canonical `chembl-publication` pipeline and related derivative pipelines.
 - Architecture tests show broad boundary compliance (high pass volume).
 
 ## Migration Progress (ADR-024)
 
 - Canonical class migration (`ChemblPublication`, `PubchemMolecule`, `UniprotTarget`): **Complete**.
 - Deprecated class aliases (`Document`, `Compound`, `Protein`): **Not present as active class definitions**.
-- Exception handling: registered in `configs/naming_exceptions.yaml` (derived entities, CLI pipeline IDs, legacy fields).
+- Exception handling: registered in `configs/naming-exceptions.yaml` (derived entities, CLI pipeline IDs, legacy fields).
 
 ## Verification Log
 
@@ -130,10 +130,10 @@ Would reformat: tests/architecture/test_ci_test_strategy.py
 1. `grep -rn "class PubchemMolecule" src/bioetl/ --include="*.py"`
 1. `grep -rn "class UniprotTarget" src/bioetl/ --include="*.py"`
 1. `uv run python -m pytest tests/architecture/ -v`
-1. `uv run python -m import_linter`
-1. `uv run python scripts/lint_terminology.py src/bioetl/`
-1. `uv run python scripts/lint_terminology.py src/bioetl/ --strict`
-1. `grep -rn "chembl_document[^_]" configs/`
-1. `grep -rn "pubchem_compound" configs/`
-1. `grep -rn "chembl_publication" configs/`
-1. `uv run python scripts/naming_audit.py`
+1. `uv run python -m import-linter`
+1. `uv run python scripts/lint-terminology.py src/bioetl/`
+1. `uv run python scripts/lint-terminology.py src/bioetl/ --strict`
+1. `grep -rn "chembl-document[^-]" configs/`
+1. `grep -rn "pubchem-compound" configs/`
+1. `grep -rn "chembl-publication" configs/`
+1. `uv run python scripts/naming-audit.py`

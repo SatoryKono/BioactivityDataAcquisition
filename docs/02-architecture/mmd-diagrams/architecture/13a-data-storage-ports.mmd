@@ -1,0 +1,37 @@
+%% BioETL — DataSource and Storage Ports
+%% @version 1.0.0
+%% @date    2026-02-27
+%% @type    flowchart
+%% @level   System / Component
+%% @nodes   20
+
+graph LR
+%% keep-orphan: FDSP
+    subgraph Domain["Domain Ports"]
+        DSP["DataSourcePort"]
+        FDSP["FilterableDataSourcePort"]
+        STP["StoragePort"]
+        DRP["DeltaReaderPort"]
+        IFP["InputFilterPort"]
+    end
+
+    subgraph Infrastructure["Implementations"]
+        CA["ChemblAdapter"]
+        PA["PubchemAdapter"]
+        UA["UniprotAdapter"]
+        BW["BronzeWriter"]
+        SW["SilverWriter"]
+        GW["GoldWriter"]
+        DR_I["DeltaReader"]
+        CSVR["CsvFilterReader"]
+    end
+
+    DSP --- CA & PA & UA
+    STP --- BW & SW & GW
+    DRP --- DR_I
+    IFP --- CSVR
+
+    classDef port fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    classDef infra fill:#ffcdd2,stroke:#c62828
+    class DSP,FDSP,STP,DRP,IFP port
+    class CA,PA,UA,BW,SW,GW,DR_I,CSVR infra

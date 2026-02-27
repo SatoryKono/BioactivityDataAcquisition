@@ -1,6 +1,6 @@
 # Пайплайн: ChEMBL Protein Class
 
-**Имя пайплайна:** `chembl_protein_class`
+**Имя пайплайна:** `chembl-protein-class`
 **Провайдер:** `chembl`
 **Сущность:** `protein-class`
 **Версия схемы:** 1.2.0
@@ -85,10 +85,10 @@ parent-id → protein-class-id
 
 ```bash
 # Полная загрузка (справочная таблица)
-bioetl run chembl_protein_class
+bioetl run chembl-protein-class
 
 # С ограничением
-bioetl run chembl_protein_class --limit 500
+bioetl run chembl-protein-class --limit 500
 ```
 
 ---
@@ -111,7 +111,7 @@ Gold-таблица сортируется по `class-level`, `sort-order`, `pr
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/protein-class.yaml` |
+| Конфигурация | `configs/entities/chembl/protein-class.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/chembl/protein-class-transformer.py` |
 | Пайплайн | `src/bioetl/application/pipelines/chembl/protein-class.py` |
 

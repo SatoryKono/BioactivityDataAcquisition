@@ -216,21 +216,21 @@ Run Type: [incremental ▼]  ← выбрать тип запуска
 ```
 1. Видны ли фильтры (Pipeline, Run Type)?
    ✅ Да   → перейти к шагу 2
-   ❌ Нет  → metrics_server не работает
+   ❌ Нет  → metrics-server не работает
 
 2. Может ли Prometheus получить метрики?
    Открыть http://localhost:9090 → Explore
-   Query: bioetl_records_processed_total
+   Query: bioetl-records-processed-total
    ✅ Есть результаты   → перейти к шагу 3
-   ❌ No data          → metrics_server не запущен
+   ❌ No data          → metrics-server не запущен
 
-3. Работает ли metrics_server?
+3. Работает ли metrics-server?
    curl http://localhost:8000/metrics
    ✅ Возвращает метрики → всё OK, подождать 15 сек
-   ❌ Connection refused  → запустить metrics_server.py
+   ❌ Connection refused  → запустить metrics-server.py
 
 Решение:
-python ./metrics_server.py &
+python ./metrics-server.py &
 # Дождаться 15 сек scrape interval
 # Обновить дашборд (Ctrl+R)
 ```
@@ -246,11 +246,11 @@ python ./metrics_server.py &
 └─────────────────────────────────┘
 
 Решение:
-1. Проверить metrics_server
+1. Проверить metrics-server
    curl http://localhost:8000/metrics
    ❌ Если ошибка:
-   pkill -f metrics_server.py
-   python ./metrics_server.py &
+   pkill -f metrics-server.py
+   python ./metrics-server.py &
 
 2. Если URL неправильный (не host.docker.internal):
    docker logs bioetl-prometheus | grep -i error
@@ -336,7 +336,7 @@ python ./metrics_server.py &
 
 Решение:
 - Разбить на батчи поменьше
-- Увеличить batch_size в конфиге
+- Увеличить batch-size в конфиге
 - Или добавить параллельную обработку
 ```
 

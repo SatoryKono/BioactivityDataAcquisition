@@ -1,6 +1,6 @@
 # Пайплайн: ChEMBL Molecule
 
-**Имя пайплайна:** `chembl_molecule`
+**Имя пайплайна:** `chembl-molecule`
 **Провайдер:** `chembl`
 **Сущность:** `molecule`
 **Версия схемы:** 1.2.0
@@ -96,13 +96,13 @@ entity-id = f"chembl:{molecule-chembl-id}"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_molecule
+bioetl run chembl-molecule
 
 # С ограничением
-bioetl run chembl_molecule --limit 1000
+bioetl run chembl-molecule --limit 1000
 
 # Полная перезагрузка
-bioetl run chembl_molecule --run-type rebuild
+bioetl run chembl-molecule --run-type rebuild
 ```
 
 ---
@@ -111,7 +111,7 @@ bioetl run chembl_molecule --run-type rebuild
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/molecule.yaml` |
+| Конфигурация | `configs/entities/chembl/molecule.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/chembl/molecule-transformer.py` |
 | Сущность | `src/bioetl/domain/entities.py` |
 

@@ -12,11 +12,11 @@
 
 | Ветка | Файлы | Изменения | Суть |
 |-------|-------|-----------|------|
-| `codex/expand-metricsport-with-new-methods` | 14 .py | +260/−54 | Расширяет `MetricsPort` методами quarantine и DQ validation метрик. Обновляет `NoOpMetrics`, `PrometheusMetrics`, инструментирует `quarantine_manager`, `batch_metrics`, `data_quality_service`. Добавлены тесты. |
-| `codex/enforce-single-canonical-mapping-end-to-end` | 4 .py, 1 .json | +148/−12 | Унифицирует маппинг состояний circuit breaker. Выделяет `circuit_breaker_mapping.py`, убирает дубликаты маппинга в `metrics.py` и `circuit_breaker.py`. Обновляет Grafana dashboard. Тесты добавлены. |
-| `codex/update-metrics-implementation-instructions` | 2 .py, 1 .md | +35/−1 | Документирует policy расширения `MetricsPort`. Добавляет `record_custom_event` и `observe_pipeline_duration` в port и prometheus-реализацию. |
+| `codex/expand-metricsport-with-new-methods` | 14 .py | +260/−54 | Расширяет `MetricsPort` методами quarantine и DQ validation метрик. Обновляет `NoOpMetrics`, `PrometheusMetrics`, инструментирует `quarantine-manager`, `batch-metrics`, `data-quality-service`. Добавлены тесты. |
+| `codex/enforce-single-canonical-mapping-end-to-end` | 4 .py, 1 .json | +148/−12 | Унифицирует маппинг состояний circuit breaker. Выделяет `circuit-breaker-mapping.py`, убирает дубликаты маппинга в `metrics.py` и `circuit-breaker.py`. Обновляет Grafana dashboard. Тесты добавлены. |
+| `codex/update-metrics-implementation-instructions` | 2 .py, 1 .md | +35/−1 | Документирует policy расширения `MetricsPort`. Добавляет `record-custom-event` и `observe-pipeline-duration` в port и prometheus-реализацию. |
 
-**Оценка:** Связанная группа — все три ветки расширяют систему метрик. `expand-metricsport` — основная, остальные дополняют. Потенциальные конфликты в `observability.py` и `prometheus_metrics.py` при мерже.
+**Оценка:** Связанная группа — все три ветки расширяют систему метрик. `expand-metricsport` — основная, остальные дополняют. Потенциальные конфликты в `observability.py` и `prometheus-metrics.py` при мерже.
 
 ---
 
@@ -26,10 +26,10 @@
 
 | Ветка | Файлы | Изменения | Суть |
 |-------|-------|-----------|------|
-| `codex/remove-deprecated-code-from-bioetl` | 15 .py | −456 | Удаляет deprecated aliases и `DeprecationWarning` emissions из bootstrap (assembly, runtime, CLI), extractors (crossref, openalex, pubmed, semanticscholar), composite_config. Удаляет тесты deprecation warnings целиком. |
-| `codex/remove-deprecated-code-in-bioetl` | 14 .py | +94/−321 | Аналогичная задача, но мягче: удаляет `DeprecationWarning` из compatibility paths, заменяет тесты deprecation на тесты alias bootstrap (`test_alias_bootstrap_functions.py`). |
+| `codex/remove-deprecated-code-from-bioetl` | 15 .py | −456 | Удаляет deprecated aliases и `DeprecationWarning` emissions из bootstrap (assembly, runtime, CLI), extractors (crossref, openalex, pubmed, semanticscholar), composite-config. Удаляет тесты deprecation warnings целиком. |
+| `codex/remove-deprecated-code-in-bioetl` | 14 .py | +94/−321 | Аналогичная задача, но мягче: удаляет `DeprecationWarning` из compatibility paths, заменяет тесты deprecation на тесты alias bootstrap (`test-alias-bootstrap-functions.py`). |
 | `codex/remove-deprecated-code-from-bioetl-oqx9dz` | 2 .py | +4/−15 | Точечное удаление deprecated `ArticleSchema` alias в PubMed schemas. |
-| `codex/remove-deprecated-code-from-bioetl-6ecjp0` | 1 .py | +12/−60 | Рефакторинг `scripts/lint_terminology.py` — восстановление совместимости wrapper. |
+| `codex/remove-deprecated-code-from-bioetl-6ecjp0` | 1 .py | +12/−60 | Рефакторинг `scripts/lint-terminology.py` — восстановление совместимости wrapper. |
 
 **Оценка:** Ветки `remove-deprecated-code-from-bioetl` и `remove-deprecated-code-in-bioetl` — конкурирующие подходы к одной задаче. Первая удаляет жёстко (включая тесты), вторая — сохраняет alias-тесты. Нужно выбрать одну стратегию. Ветки `-oqx9dz` и `-6ecjp0` — самостоятельные точечные исправления.
 
@@ -42,7 +42,7 @@
 | Ветка | Файлы | Изменения | Суть |
 |-------|-------|-----------|------|
 | `codex/cleanup-dead-and-unused-code-3j1ahg` | 5 .py | −8 | Удаляет неиспользуемые импорты и no-op statements из infrastructure adapters/storage. |
-| `codex/cleanup-dead-and-unused-code` | 5 .py | +5/−15 | Удаляет невозможные async-generator ветки (bare `return` after `yield`) в адаптерах crossref, openalex, semanticscholar, uniprot, filterable_mixin. |
+| `codex/cleanup-dead-and-unused-code` | 5 .py | +5/−15 | Удаляет невозможные async-generator ветки (bare `return` after `yield`) в адаптерах crossref, openalex, semanticscholar, uniprot, filterable-mixin. |
 
 **Оценка:** Безопасные, неконфликтующие cleanup-ы. Можно мержить оба.
 
@@ -54,7 +54,7 @@
 
 | Ветка | Файлы | Изменения | Суть |
 |-------|-------|-----------|------|
-| `codex/refactor-code-for-data-merging-after-reload-1sq8e7` | 2 .py | +76/−2 | Добавляет обработку resume offset в `pubmed_client.py` для пропуска уже обработанных записей при перезапуске. Тесты добавлены. |
+| `codex/refactor-code-for-data-merging-after-reload-1sq8e7` | 2 .py | +76/−2 | Добавляет обработку resume offset в `pubmed-client.py` для пропуска уже обработанных записей при перезапуске. Тесты добавлены. |
 
 **Оценка:** Самостоятельная фича. Остальные 3 ветки с тем же префиксом содержат только `.md` анализ (планы рефакторинга), поэтому исключены.
 
@@ -108,7 +108,7 @@
 
 ```
 observability.py ─────── expand-metricsport ◄──► enforce-single-canonical
-prometheus_metrics.py ── expand-metricsport ◄──► update-metrics-instructions
+prometheus-metrics.py ── expand-metricsport ◄──► update-metrics-instructions
 metrics.py ────────────── expand-metricsport ◄──► enforce-single-canonical
 
 12 файлов bootstrap ──── remove-deprecated-from ◄══► remove-deprecated-in  (ВЗАИМОИСКЛЮЧАЮЩИЕ)
@@ -126,14 +126,14 @@ overview-v2.json ────────── add-datalinks ◄──► updat
 
 | Пара | Выбор | Обоснование |
 |------|-------|-------------|
-| `remove-deprecated-from` vs `remove-deprecated-in` | **`remove-deprecated-in`** | Сохраняет alias-тесты (`test_alias_bootstrap_functions.py`) вместо удаления coverage. `remove-deprecated-from` удаляет `__init__.py` файлов пакетов — потенциально ломает импорты. |
-| `conduct-naming-compliance-audit` vs `-r1a4c4` | **`-r1a4c4`** | Более свежая. YAML-структура проще (`adr_024_known_exceptions` vs `exception_registry`). Отчёт в плоской директории — консистентно с остальными отчётами. |
+| `remove-deprecated-from` vs `remove-deprecated-in` | **`remove-deprecated-in`** | Сохраняет alias-тесты (`test-alias-bootstrap-functions.py`) вместо удаления coverage. `remove-deprecated-from` удаляет `--init--.py` файлов пакетов — потенциально ломает импорты. |
+| `conduct-naming-compliance-audit` vs `-r1a4c4` | **`-r1a4c4`** | Более свежая. YAML-структура проще (`adr-024-known-exceptions` vs `exception-registry`). Отчёт в плоской директории — консистентно с остальными отчётами. |
 
 ### Ветки к отклонению
 
 | Ветка | Причина |
 |-------|---------|
-| `codex/remove-deprecated-code-from-bioetl` | Дублируется `remove-deprecated-in`, но агрессивнее — удаляет `__init__.py` и все тесты без замены |
+| `codex/remove-deprecated-code-from-bioetl` | Дублируется `remove-deprecated-in`, но агрессивнее — удаляет `--init--.py` и все тесты без замены |
 | `codex/conduct-naming-compliance-audit` | Дублируется `-r1a4c4`, менее удобная структура YAML |
 
 ### Фазы интеграции
@@ -152,7 +152,7 @@ overview-v2.json ────────── add-datalinks ◄──► updat
               Конфликты: нет (разные файлы).
 
 Фаза 3 ──── refactor-code-for-data-merging-after-reload-1sq8e7  (2 py, +76/−2)
-(pubmed)    Полностью изолирована (pubmed_client.py + тест).
+(pubmed)    Полностью изолирована (pubmed-client.py + тест).
             Конфликты: нет.
 
 Фаза 4 ──┬── expand-metricsport-with-new-methods    (14 py, +260/−54)
@@ -160,7 +160,7 @@ overview-v2.json ────────── add-datalinks ◄──► updat
           └── update-metrics-implementation-instructions  (2 py + 1 md, +35/−1)
               Конфликтные файлы:
               • observability.py — expand-metricsport + enforce-single (оба добавляют методы)
-              • prometheus_metrics.py — expand-metricsport + update-metrics (оба расширяют класс)
+              • prometheus-metrics.py — expand-metricsport + update-metrics (оба расширяют класс)
               • metrics.py — expand-metricsport + enforce-single (оба модифицируют)
               Merge order: expand-metricsport → enforce-single-canonical → update-metrics.
               Конфликты: ОЖИДАЮТСЯ в 3 файлах, ручное разрешение.
@@ -210,7 +210,7 @@ main ─── Фаза 1 (cleanup) ─── Фаза 2 (deprecated) ─── 
 ### Рекомендации
 
 1. **Фазы 1–3** можно выполнить автоматически (merge --no-ff) без ручного вмешательства.
-2. **Фаза 4 (metrics)** — после мержа `expand-metricsport`, rebase двух оставшихся веток на main и разрешить конфликты в `observability.py`, `prometheus_metrics.py`, `metrics.py`.
+2. **Фаза 4 (metrics)** — после мержа `expand-metricsport`, rebase двух оставшихся веток на main и разрешить конфликты в `observability.py`, `prometheus-metrics.py`, `metrics.py`.
 3. **Фаза 5 (grafana)** — наиболее трудоёмкая. JSON-конфликты плохо мержатся автоматически. Альтернатива: взять самую полную ветку (`update-grafana-dashboard-panels`) как базу и cherry-pick отдельных изменений из остальных.
 4. **Тесты** — после каждой фазы прогонять `pytest tests/architecture/ -v` и `pytest tests/unit/ -x`.
 5. **Параллелизация** — фазы 1–3 можно мержить параллельно (нет пересечений), затем merge main в рабочую ветку и продолжить фазы 4–6 последовательно.

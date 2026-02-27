@@ -1,6 +1,6 @@
 # Пайплайн: Semantic Scholar Publication
 
-**Имя пайплайна:** `semanticscholar_publication`
+**Имя пайплайна:** `semanticscholar-publication`
 **Провайдер:** `semanticscholar`
 **Сущность:** `publication`
 **Версия схемы:** 1.0.0
@@ -14,7 +14,7 @@
 ### Основные сценарии использования
 
 1. **Обогащение документов ChEMBL** — добавление цитирований и метаданных к публикациям из ChEMBL Documents
-2. **Обогащение PubMed публикаций** — получение citation_count, TLDR, fields_of_study
+2. **Обогащение PubMed публикаций** — получение citation-count, TLDR, fields-of-study
 3. **Резолюция DOI** — получение полных метаданных по списку DOI
 4. **Поиск по заголовку** — когда DOI отсутствует или не найден в базе S2
 
@@ -33,12 +33,12 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `paper_id` | `str` | Semantic Scholar Paper ID (40-char hex) |
+| `paper-id` | `str` | Semantic Scholar Paper ID (40-char hex) |
 | `doi` | `str \| None` | Digital Object Identifier |
 | `pmid` | `str \| None` | PubMed ID |
 | `pmcid` | `str \| None` | PubMed Central ID |
-| `arxiv_id` | `str \| None` | ArXiv ID |
-| `corpus_id` | `int \| None` | S2 Corpus ID |
+| `arxiv-id` | `str \| None` | ArXiv ID |
+| `corpus-id` | `int \| None` | S2 Corpus ID |
 
 ### Метаданные публикации
 
@@ -57,37 +57,37 @@
 | `journal` | `str \| None` | Название журнала |
 | `volume` | `str \| None` | Том |
 | `pages` | `str \| None` | Страницы |
-| `publication_year` | `int \| None` | Год публикации (1500-2100) |
-| `publication_date` | `str \| None` | Дата публикации (YYYY-MM-DD) |
+| `publication-year` | `int \| None` | Год публикации (1500-2100) |
+| `publication-date` | `str \| None` | Дата публикации (YYYY-MM-DD) |
 
 ### Метрики цитирования
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `citations_received` | `int \| None` | Количество цитирований |
-| `citations_made`     | `int \| None` | Количество ссылок в публикации |
+| `citations-received` | `int \| None` | Количество цитирований |
+| `citations-made`     | `int \| None` | Количество ссылок в публикации |
 
 ### Open Access
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `is_open_access` | `bool \| None` | Доступна ли публикация бесплатно |
-| `open_access_url` | `str \| None` | Прямая ссылка на PDF |
-| `open_access_status` | `str \| None` | Статус OA: GREEN, GOLD, HYBRID, BRONZE |
+| `is-open-access` | `bool \| None` | Доступна ли публикация бесплатно |
+| `open-access-url` | `str \| None` | Прямая ссылка на PDF |
+| `open-access-status` | `str \| None` | Статус OA: GREEN, GOLD, HYBRID, BRONZE |
 
 ### Классификация
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `fields_of_study` | `str` | JSON-массив научных областей |
-| `publication_types` | `str` | JSON-массив типов публикации |
+| `fields-of-study` | `str` | JSON-массив научных областей |
+| `publication-types` | `str` | JSON-массив типов публикации |
 
 ### Lookup Metadata
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `_lookup_method` | `str` | Метод резолюции: `doi`, `title_fallback`, `title_only` |
-| `_original_doi` | `str \| None` | Исходный DOI для fallback записей |
+| `-lookup-method` | `str` | Метод резолюции: `doi`, `title-fallback`, `title-only` |
+| `-original-doi` | `str \| None` | Исходный DOI для fallback записей |
 
 ---
 
@@ -99,26 +99,26 @@
 
 | Функция | Назначение |
 |---------|------------|
-| `extract_external_ids()` | DOI, PMID, PMCID, ArXiv, CorpusId из externalIds |
-| `extract_authors()` | Список авторов из authors array |
-| `extract_journal_info()` | Журнал, том, страницы из journal/venue |
-| `extract_open_access_info()` | OA статус и URL из isOpenAccess/openAccessPdf |
-| `extract_tldr()` | AI-сгенерированное описание из tldr.text |
-| `extract_fields_of_study()` | Научные области из fieldsOfStudy |
-| `validate_year()` | Валидация года (1500-2100) |
+| `extract-external-ids()` | DOI, PMID, PMCID, ArXiv, CorpusId из externalIds |
+| `extract-authors()` | Список авторов из authors array |
+| `extract-journal-info()` | Журнал, том, страницы из journal/venue |
+| `extract-open-access-info()` | OA статус и URL из isOpenAccess/openAccessPdf |
+| `extract-tldr()` | AI-сгенерированное описание из tldr.text |
+| `extract-fields-of-study()` | Научные области из fieldsOfStudy |
+| `validate-year()` | Валидация года (1500-2100) |
 
 ### Entity ID
 
 ```python
-# Формат entity_id на базе paper_id
-entity_id = f"semanticscholar:{paper_id}"
+# Формат entity-id на базе paper-id
+entity-id = f"semanticscholar:{paper-id}"
 ```
 
 ### Content Hash
 
 Вычисляется по бизнес-полям для дедупликации:
-- Исключаются lineage поля (`_run_id`, `_ingestion_ts`, etc.)
-- Исключаются lookup metadata поля (`_lookup_method`, `_original_doi`)
+- Исключаются lineage поля (`-run-id`, `-ingestion-ts`, etc.)
+- Исключаются lookup metadata поля (`-lookup-method`, `-original-doi`)
 - None-значения исключаются из хэша
 
 ---
@@ -146,26 +146,26 @@ Semantic Scholar API предоставляет различные лимиты:
 ### Fallback by Title
 
 При получении `null` для DOI:
-1. Если в `fallback_mapping` есть заголовок для DOI
+1. Если в `fallback-mapping` есть заголовок для DOI
 2. Выполняется поиск по заголовку: GET `/paper/search?query=...`
-3. Возвращается первый результат с `_lookup_method: title_fallback`
+3. Возвращается первый результат с `-lookup-method: title-fallback`
 
 ### Title-Only Lookup
 
 Для записей без DOI (пустая строка в input CSV):
 1. Сразу выполняется поиск по заголовку
-2. Возвращается с `_lookup_method: title_only`
+2. Возвращается с `-lookup-method: title-only`
 
 ### Конфигурация Input Filter
 
 ```yaml
-input_filter:
+input-filter:
   enabled: true
-  source_path: "data/input/dois.csv"
-  column_name: "doi"
-  filter_field: "doi"
-  batch_size: 100
-  fallback_column: "title"  # Поиск по заголовку при не найденном DOI
+  source-path: "data/input/dois.csv"
+  column-name: "doi"
+  filter-field: "doi"
+  batch-size: 100
+  fallback-column: "title"  # Поиск по заголовку при не найденном DOI
 ```
 
 ---
@@ -174,16 +174,16 @@ input_filter:
 
 ```bash
 # Базовый запуск с файлом DOI
-bioetl run semanticscholar_publication
+bioetl run semanticscholar-publication
 
 # С ограничением количества записей
-bioetl run semanticscholar_publication --limit 100
+bioetl run semanticscholar-publication --limit 100
 
 # Проверка конфигурации без выполнения
-bioetl run semanticscholar_publication --dry-run
+bioetl run semanticscholar-publication --dry-run
 
 # Полная перезагрузка
-bioetl run semanticscholar_publication --run-type rebuild
+bioetl run semanticscholar-publication --run-type rebuild
 ```
 
 ### Подготовка входных данных
@@ -202,7 +202,7 @@ doi,title
 ### Настройка API Key
 
 ```bash
-export BIOETL_SEMANTICSCHOLAR_API_KEY=your-api-key
+export BIOETL-SEMANTICSCHOLAR-API-KEY=your-api-key
 
 # Получить API key: https://www.semanticscholar.org/product/api
 ```
@@ -240,7 +240,7 @@ Semantic Scholar adapter реализует health check через `/paper/sear
 
 | Условие | Поведение |
 |---------|-----------|
-| Missing paper_id | Skip record (log warning) |
+| Missing paper-id | Skip record (log warning) |
 | Invalid year | Set to None |
 | Empty title | Record kept (title nullable) |
 
@@ -249,9 +249,9 @@ Semantic Scholar adapter реализует health check через `/paper/sear
 ## 8. Gold Filters
 
 ```yaml
-gold_filters:
-  required_fields:
-    - paper_id
+gold-filters:
+  required-fields:
+    - paper-id
     - title
   ranges:
     year:
@@ -265,14 +265,14 @@ gold_filters:
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация пайплайна | `configs/pipelines/semanticscholar/publication.yaml` |
-| Конфигурация источника | `configs/sources/semanticscholar.yaml` |
+| Конфигурация пайплайна | `configs/entities/semanticscholar/publication.yaml` |
+| Конфигурация источника | `configs/providers/semanticscholar.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/semanticscholar/transformer.py` |
 | Extractors | `src/bioetl/application/pipelines/semanticscholar/extractors.py` |
 | Адаптер | `src/bioetl/infrastructure/adapters/semanticscholar/adapter.py` |
 | Pandera Schema | `src/bioetl/domain/schemas/semanticscholar/publication.py` |
-| Unit Tests | `tests/unit/infrastructure/adapters/semanticscholar/test_adapter.py` |
-| Integration Tests | `tests/integration/adapters/test_semanticscholar.py` |
+| Unit Tests | `tests/unit/infrastructure/adapters/semanticscholar/test-adapter.py` |
+| Integration Tests | `tests/integration/adapters/test-semanticscholar.py` |
 | VCR Cassettes | `tests/fixtures/vcr/semanticscholar/` |
 
 ---
@@ -323,12 +323,12 @@ gold_filters:
 
 ```json
 {
-  "paper_id": "a88fbdb9b47a8e8aef2b8cabd1fe0adfb96a9f25",
+  "paper-id": "a88fbdb9b47a8e8aef2b8cabd1fe0adfb96a9f25",
   "doi": "10.1038/nature12373",
   "pmid": "23868264",
   "pmcid": null,
-  "arxiv_id": null,
-  "corpus_id": 4463122,
+  "arxiv-id": null,
+  "corpus-id": 4463122,
   "title": "Crystal structure of rhodopsin bound to arrestin",
   "abstract": "G-protein-coupled receptors signal through G proteins or arrestins.",
   "tldr": "The crystal structure provides a basis for understanding GPCR signalling.",
@@ -337,23 +337,23 @@ gold_filters:
   "volume": "523",
   "pages": "561-567",
   "venue": "Nature",
-  "publication_year": 2015,
-  "publication_date": "2015-07-22",
-  "citations_received": 892,
-  "citations_made": 50,
-  "is_open_access": true,
-  "open_access_url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4536825/pdf/...",
-  "open_access_status": "GREEN",
-  "fields_of_study": "[\"Biology\", \"Chemistry\"]",
-  "publication_types": "[\"JournalArticle\"]",
+  "publication-year": 2015,
+  "publication-date": "2015-07-22",
+  "citations-received": 892,
+  "citations-made": 50,
+  "is-open-access": true,
+  "open-access-url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4536825/pdf/...",
+  "open-access-status": "GREEN",
+  "fields-of-study": "[\"Biology\", \"Chemistry\"]",
+  "publication-types": "[\"JournalArticle\"]",
   "source": "semanticscholar",
-  "_lookup_method": "doi",
-  "_original_doi": null,
-  "_run_id": "...",
-  "_run_type": "incremental",
-  "_ingestion_ts": "2026-01-06T12:00:00Z",
-  "entity_id": "semanticscholar:a88fbdb9b47a8e8aef2b8cabd1fe0adfb96a9f25",
-  "content_hash": "sha256:..."
+  "-lookup-method": "doi",
+  "-original-doi": null,
+  "-run-id": "...",
+  "-run-type": "incremental",
+  "-ingestion-ts": "2026-01-06T12:00:00Z",
+  "entity-id": "semanticscholar:a88fbdb9b47a8e8aef2b8cabd1fe0adfb96a9f25",
+  "content-hash": "sha256:..."
 }
 ```
 

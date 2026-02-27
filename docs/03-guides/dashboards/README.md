@@ -5,12 +5,12 @@
 
 ## Актуальные документы
 
-- `DASHBOARD_V2_UPDATES.md` — что именно проверено и исправлено в JSON.
-- `DASHBOARD_V2_USAGE.md` — как использовать дашборды в операционной работе.
-- `VARIABLES_GUIDE.md` — фактические Grafana variables и их PromQL.
+- `DASHBOARD-V2-UPDATES.md` — что именно проверено и исправлено в JSON.
+- `DASHBOARD-V2-USAGE.md` — как использовать дашборды в операционной работе.
+- `VARIABLES-GUIDE.md` — фактические Grafana variables и их PromQL.
 
 ## Legacy-документы
 
 Архивные материалы перемещены в `docs/03-guides/dashboards/legacy/`.
 
-Они могут содержать устаревшие переменные (`$run_id`, `execution`) и старые формулы.
+Они могут содержать устаревшие переменные (`$run-id`, `execution`) и старые формулы.

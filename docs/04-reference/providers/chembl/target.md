@@ -1,6 +1,6 @@
 # Пайплайн: ChEMBL Target
 
-**Имя пайплайна:** `chembl_target`
+**Имя пайплайна:** `chembl-target`
 **Провайдер:** `chembl`
 **Сущность:** `target`
 **Версия схемы:** 1.2.0
@@ -87,13 +87,13 @@ entity-id = f"chembl:{target-chembl-id}"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_target
+bioetl run chembl-target
 
 # С ограничением
-bioetl run chembl_target --limit 500
+bioetl run chembl-target --limit 500
 
 # Полная перезагрузка
-bioetl run chembl_target --run-type rebuild
+bioetl run chembl-target --run-type rebuild
 ```
 
 ---
@@ -102,7 +102,7 @@ bioetl run chembl_target --run-type rebuild
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/target.yaml` |
+| Конфигурация | `configs/entities/chembl/target.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/chembl/target-transformer.py` |
 | Сущность | `src/bioetl/domain/entities.py` |
 

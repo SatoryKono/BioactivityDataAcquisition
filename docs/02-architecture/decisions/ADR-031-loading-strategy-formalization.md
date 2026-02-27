@@ -67,8 +67,8 @@ class PipelineConfig:
 ### 3. YAML Configuration
 
 ```yaml
-# configs/pipelines/chembl/publication.yaml
-pipeline-name: chembl_publication
+# configs/entities/chembl/publication.yaml
+pipeline-name: chembl-publication
 provider: chembl
 entity-type: publication
 
@@ -142,17 +142,17 @@ loading-strategy: full-scan-only
 - `src/bioetl/infrastructure/config/converters.py` — Pass `loading-strategy` in conversion
 
 **Composition:**
-- `src/bioetl/composition/factories/services_factory.py` — Pass `loading-strategy` to CheckpointManager
-- `src/bioetl/composition/factories/pipeline_factory.py` — Use `config.loading-strategy`
+- `src/bioetl/composition/factories/services-factory.py` — Pass `loading-strategy` to CheckpointManager
+- `src/bioetl/composition/factories/pipeline-factory.py` — Use `config.loading-strategy`
 
 **Configs:**
-- `configs/pipelines/chembl/publication.yaml` — Add `loading-strategy: full-scan-only`
-- `configs/pipelines/chembl/publication-term.yaml` — Add `loading-strategy: full-scan-only`
-- `configs/pipelines/chembl/publication-similarity.yaml` — Add `loading-strategy: full-scan-only`
-- `configs/pipelines/pubmed/publication.yaml` — Add `loading-strategy: full-scan-only`
-- `configs/pipelines/crossref/publication.yaml` — Add `loading-strategy: full-scan-only`
-- `configs/pipelines/openalex/publication.yaml` — Add `loading-strategy: full-scan-only`
-- `configs/pipelines/semanticscholar/publication.yaml` — Add `loading-strategy: full-scan-only`
+- `configs/entities/chembl/publication.yaml` — Add `loading-strategy: full-scan-only`
+- `configs/entities/chembl/publication-term.yaml` — Add `loading-strategy: full-scan-only`
+- `configs/entities/chembl/publication-similarity.yaml` — Add `loading-strategy: full-scan-only`
+- `configs/entities/pubmed/publication.yaml` — Add `loading-strategy: full-scan-only`
+- `configs/entities/crossref/publication.yaml` — Add `loading-strategy: full-scan-only`
+- `configs/entities/openalex/publication.yaml` — Add `loading-strategy: full-scan-only`
+- `configs/entities/semanticscholar/publication.yaml` — Add `loading-strategy: full-scan-only`
 
 ### Tests
 

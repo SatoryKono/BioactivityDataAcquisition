@@ -6,7 +6,7 @@
 
 ## Context
 
-Filter configurations (`input-filter` and `gold-filters`) were embedded directly in pipeline YAML configuration files (`configs/pipelines/{provider}/{entity}.yaml`). This caused several problems:
+Filter configurations (`input-filter` and `gold-filters`) were embedded directly in pipeline YAML configuration files (`configs/entities/{provider}/{entity}.yaml`). This caused several problems:
 
 1. **Duplication**: Same filter patterns repeated across pipelines (e.g., batch-size defaults)
 2. **Maintenance burden**: Changing global filter policies required editing multiple files
@@ -15,11 +15,11 @@ Filter configurations (`input-filter` and `gold-filters`) were embedded directly
 
 Example of duplication:
 ```yaml
-# configs/pipelines/chembl/activity.yaml
+# configs/entities/chembl/activity.yaml
 input-filter:
   batch-size: 20
 
-# configs/pipelines/chembl/molecule.yaml
+# configs/entities/chembl/molecule.yaml
 input-filter:
   batch-size: 20  # Duplicated provider default
 ```
@@ -49,7 +49,7 @@ configs/filters/
 
 Pipeline configs reference filter config via `filter-config-file`:
 ```yaml
-pipeline-name: chembl_activity
+pipeline-name: chembl-activity
 filter-config-file: ../../filters/entities/chembl/activity.yaml
 ```
 

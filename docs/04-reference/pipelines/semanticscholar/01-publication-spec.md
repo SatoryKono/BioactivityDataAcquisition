@@ -8,7 +8,7 @@
 
 | Parameter | Value |
 |-----------|-------|
-| **Pipeline ID** | `semanticscholar_publication` |
+| **Pipeline ID** | `semanticscholar-publication` |
 | **Provider** | Semantic Scholar |
 | **Entity** | publication (paper) |
 | **API Endpoint** | `https://api.semanticscholar.org/graph/v1/paper/` |
@@ -255,14 +255,14 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
 ## 7. Pipeline Configuration
 
 ```yaml
-pipeline-name: semanticscholar_publication
+pipeline-name: semanticscholar-publication
 provider: semanticscholar
 entity-type: publication
 version: "1.2.0"
 
 primary-keys: ["paper-id"]
-silver-table: "semanticscholar_publication"
-gold-table: "semanticscholar_publication"
+silver-table: "semanticscholar-publication"
+gold-table: "semanticscholar-publication"
 
 source:
   type: api

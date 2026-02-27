@@ -1,6 +1,6 @@
 # Пайплайн: OpenAlex Publication
 
-**Имя пайплайна:** `openalex_publication`
+**Имя пайплайна:** `openalex-publication`
 **Провайдер:** `openalex`
 **Сущность:** `publication` (API-термин: `work`)
 **Версия схемы:** 1.2.0
@@ -209,16 +209,16 @@ input-filter:
 
 ```bash
 # Базовый запуск с файлом DOI
-bioetl run openalex_publication
+bioetl run openalex-publication
 
 # С ограничением количества записей
-bioetl run openalex_publication --limit 100
+bioetl run openalex-publication --limit 100
 
 # Проверка конфигурации без выполнения
-bioetl run openalex_publication --dry-run
+bioetl run openalex-publication --dry-run
 
 # Полная перезагрузка
-bioetl run openalex_publication --run-type rebuild
+bioetl run openalex-publication --run-type rebuild
 ```
 
 ### Подготовка входных данных
@@ -299,8 +299,8 @@ gold-filters:
 
 | Компонент              | Путь                                                       |
 | ---------------------- | ---------------------------------------------------------- |
-| Конфигурация пайплайна | `configs/pipelines/openalex/publication.yaml`              |
-| Конфигурация источника | `configs/sources/openalex.yaml`                            |
+| Конфигурация пайплайна | `configs/entities/openalex/publication.yaml`              |
+| Конфигурация источника | `configs/providers/openalex.yaml`                            |
 | Трансформер            | `src/bioetl/application/pipelines/openalex/transformer.py` |
 | Экстракторы            | `src/bioetl/application/pipelines/openalex/extractors.py`  |
 | Адаптер                | `src/bioetl/infrastructure/adapters/openalex/client.py`    |

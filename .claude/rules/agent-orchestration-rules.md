@@ -60,11 +60,21 @@
 |-------|------|-------|
 | architecture-guardian | `.claude/skills/architecture-guardian.skill.md` | Проверка arch boundaries |
 | new-pipeline | `.claude/skills/new-pipeline.md` | Scaffolding нового ETL pipeline |
+| new-composite | `.claude/skills/new-composite.md` | Создание composite pipeline |
 | vcr-record | `.claude/skills/vcr-record.md` | Управление VCR cassettes |
 | verify-architecture | `.claude/skills/verify-architecture.md` | Pre-commit проверка (43 теста) |
 | documentation-audit | `.claude/skills/documentation-audit.skill.md` | Аудит документации |
-| test-swarm | `.claude/skills/test-swarm.md` | Иерархическое тестирование (L1→L2→L3) |
 | documentation-cascade-audit | `.claude/skills/documentation-cascade-audit.skill.md` | Каскадный аудит документации |
+| test-swarm | `.claude/skills/test-swarm.md` | Иерархическое тестирование (L1→L2→L3) |
+| review-orchestrator | `.claude/skills/review-orchestrator.md` | Иерархический code review (S1-S8) |
+| mermaid-design | `.claude/skills/mermaid-design.md` | Mermaid-диаграммы с ADR-040 compliance |
+| config-validate | `.claude/skills/config-validate.md` | Валидация YAML configs vs JSON-schemas |
+| schema-parity | `.claude/skills/schema-parity.md` | Silver↔Gold schema parity check |
+| provider-health | `.claude/skills/provider-health.md` | Статус провайдеров, адаптеров, cassettes |
+| release-checklist | `.claude/skills/release-checklist.md` | Pre-release audit чеклист |
+| ci-diagnose | `.claude/skills/ci-diagnose.md` | Диагностика падающих CI workflows |
+| migration | `.claude/skills/migration.md` | Миграции Delta Lake таблиц |
+| dependency-audit | `.claude/skills/dependency-audit.md` | Аудит зависимостей: CVE, лицензии |
 
 ## Полный контекст
 

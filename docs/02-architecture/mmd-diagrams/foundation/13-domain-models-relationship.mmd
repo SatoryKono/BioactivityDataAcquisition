@@ -20,22 +20,22 @@ classDiagram
         +run_id: RunID
         +run_type: RunType
         +ingestion_ts: datetime
-        +source_batch_id: BatchID
-        +dq_warn: bool = False
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+        +_index: int
+        +source_batch_id: BatchID | None
+        +_dq_warn: bool
+        +_dq_error: bool
+        +__post_init__()
+
+
+
+
+
+
+
+
+
+
+
     }
 
     class Activity {
@@ -280,6 +280,27 @@ classDiagram
         
         
         
+    }
+
+    class Batch {
+        <<Aggregate Root>>
+        -_batch_id: BatchID
+        -_status: BatchStatus
+        -_records: list~BatchRecord~
+        +create(batch_id) Batch
+        +add_record(record) None
+        +seal() None
+        +collect_events() list~DomainEvent~
+    }
+
+    class PipelineRun {
+        <<Aggregate Root>>
+        -_run_id: RunID
+        -_state: PipelineRunState
+        -_stages: dict~str, StageResult~
+        +start_stage(name) None
+        +complete_stage(name, result) None
+        +fail_stage(name, error) None
     }
 
     %% Inheritance from BaseEntity

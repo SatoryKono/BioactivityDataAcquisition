@@ -114,7 +114,7 @@ def request(self) -> None:
 @dataclass
 class ShutdownSignal:
     -requested: bool = field(default=False, init=False)
-    -event: asyncio.Event = field(default_factory=asyncio.Event, init=False)
+    -event: asyncio.Event = field(default-factory=asyncio.Event, init=False)
 
     @property
     def is-requested(self) -> bool:

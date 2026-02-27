@@ -8,7 +8,7 @@
 
 | Parameter | Value |
 |-----------|-------|
-| **Pipeline ID** | `pubmed_publication` |
+| **Pipeline ID** | `pubmed-publication` |
 | **Provider** | PubMed (NCBI) |
 | **Entity** | publication |
 | **API Endpoint** | `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/` |
@@ -203,14 +203,14 @@ class ArticleSchema(ETLRecordSchema):
 ## 7. Pipeline Configuration
 
 ```yaml
-pipeline-name: pubmed_publication
+pipeline-name: pubmed-publication
 provider: pubmed
 entity-type: publications
 version: "1.2.0"
 
 primary-keys: ["pmid"]
-silver-table: "pubmed_publication"
-gold-table: "pubmed_publication"
+silver-table: "pubmed-publication"
+gold-table: "pubmed-publication"
 
 source:
   type: api

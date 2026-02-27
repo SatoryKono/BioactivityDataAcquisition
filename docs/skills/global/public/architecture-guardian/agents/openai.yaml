@@ -1,0 +1,5 @@
+interface:
+  display_name: "Architecture Guardian"
+  short_description: "Validate BioETL architecture and ADR compliance"
+  default_prompt: "Use $architecture-guardian to validate BioETL architecture changes."
+  brand_color: "#16A34A"

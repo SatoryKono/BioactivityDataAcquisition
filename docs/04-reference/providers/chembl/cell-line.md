@@ -1,6 +1,6 @@
 # Пайплайн: ChEMBL Cell Line
 
-**Имя пайплайна:** `chembl_cell_line`
+**Имя пайплайна:** `chembl-cell-line`
 **Провайдер:** `chembl`
 **Сущность:** `cell-line`
 **Версия схемы:** 1.2.0
@@ -93,16 +93,16 @@ entity-id = f"chembl:{cell-chembl-id}"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_cell_line
+bioetl run chembl-cell-line
 
 # С ограничением количества записей
-bioetl run chembl_cell_line --limit 500
+bioetl run chembl-cell-line --limit 500
 
 # Полная перезагрузка
-bioetl run chembl_cell_line --run-type rebuild
+bioetl run chembl-cell-line --run-type rebuild
 
 # С входным фильтром по списку ID
-bioetl run chembl_cell_line --input-filter data/input/cell.csv
+bioetl run chembl-cell-line --input-filter data/input/cell.csv
 ```
 
 ---
@@ -111,12 +111,12 @@ bioetl run chembl_cell_line --input-filter data/input/cell.csv
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/cell-line.yaml` |
+| Конфигурация | `configs/entities/chembl/cell-line.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/chembl/cell-line-transformer.py` |
 | Пайплайн | `src/bioetl/application/pipelines/chembl/cell-line.py` |
 | Схема | `src/bioetl/domain/schemas/chembl/cell-line.py` |
 | Сущность | `src/bioetl/domain/entities.py` |
-| Фабрика | `src/bioetl/composition/factories/pipeline_factories.py` |
+| Фабрика | `src/bioetl/composition/factories/pipeline-factories.py` |
 
 ---
 

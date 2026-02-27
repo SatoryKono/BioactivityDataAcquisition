@@ -45,19 +45,19 @@ composition/bootstrap/
 
 | Файл                          | Фабрика                                                                                     | Назначение                                                     |
 | ----------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `pipeline_factory.py`         | `GenericPipelineFactory`                                                                    | Универсальный конструктор пайплайнов (декларативно)            |
-| `pipeline_factories.py`       | Реестр фабрик                                                                               | Все зарегистрированные pipeline factories                      |
-| `data-source_factory.py`      | `DataSourceFactory`                                                                         | Создает `DataSourcePort` для провайдера                        |
-| `http-client_factory.py`      | `HttpClientFactory`                                                                         | Настроенные `UnifiedHTTPClient` с Rate Limits, Circuit Breaker |
-| `storage_factory.py`          | `StorageFactory`                                                                            | Сборка `StoragePort` (Bronze + Silver + Gold)                  |
+| `pipeline-factory.py`         | `GenericPipelineFactory`                                                                    | Универсальный конструктор пайплайнов (декларативно)            |
+| `pipeline-factories.py`       | Реестр фабрик                                                                               | Все зарегистрированные pipeline factories                      |
+| `data-source-factory.py`      | `DataSourceFactory`                                                                         | Создает `DataSourcePort` для провайдера                        |
+| `http-client-factory.py`      | `HttpClientFactory`                                                                         | Настроенные `UnifiedHTTPClient` с Rate Limits, Circuit Breaker |
+| `storage-factory.py`          | `StorageFactory`                                                                            | Сборка `StoragePort` (Bronze + Silver + Gold)                  |
 | `storage-adapter.py`          | `StorageAdapter`                                                                            | Создание отдельных storage адаптеров                           |
 | `storage.py`                  | Storage helpers                                                                             | Вспомогательные функции для storage                            |
 | `bootstrap/cli/checkpoint.py` | CLI checkpoint bootstrap                                                                    | Настройка checkpoint зависимостей                              |
 | `bootstrap/cli/storage.py`    | CLI storage bootstrap                                                                       | Настройка storage зависимостей                                 |
-| `runner_factory.py`           | `RunnerFactory`                                                                             | Создание `PipelineRunner` с DI                                 |
-| `services_factory.py`         | `BaseServicesFactory / ServicesBuilder`                                                     | Создание `PipelineServices` bundle                             |
-| `transformer_factory.py`      | `transformer_factory.py — модуль с функциями register-transformer() и create-transformer()` | Создание трансформеров по провайдеру                           |
-| `dq_factory.py`               | `DQServicesFactory`                                                                         | Создание Data Quality компонентов                              |
+| `runner-factory.py`           | `RunnerFactory`                                                                             | Создание `PipelineRunner` с DI                                 |
+| `services-factory.py`         | `BaseServicesFactory / ServicesBuilder`                                                     | Создание `PipelineServices` bundle                             |
+| `transformer-factory.py`      | `transformer-factory.py — модуль с функциями register-transformer() и create-transformer()` | Создание трансформеров по провайдеру                           |
+| `dq-factory.py`               | `DQServicesFactory`                                                                         | Создание Data Quality компонентов                              |
 
 **Root-level файлы:**
 
@@ -65,9 +65,9 @@ composition/bootstrap/
 
 ### 2.3. Реестр провайдеров и DataSourceRegistry
 
-**Расположение:** `src/bioetl/composition/factories/data-source_factory.py:100` (DataSourceRegistry) и `src/bioetl/composition/providers/` (ProviderRegistry).
+**Расположение:** `src/bioetl/composition/factories/data-source-factory.py:100` (DataSourceRegistry) и `src/bioetl/composition/providers/` (ProviderRegistry).
 
-Централизованная регистрация всех провайдеров данных (8 провайдеров, включая `uniprot_idmapping`):
+Централизованная регистрация всех провайдеров данных (8 провайдеров, включая `uniprot-idmapping`):
 
 - **`ProviderRegistry`**: Главный реестр провайдеров. Хранит конфигурацию каждого провайдера (data source creator, transformer class, pipelines).
 - **`DataSourceRegistry`**: Фасад для backward compatibility. Делегирует создание в `ProviderRegistry`.
@@ -83,14 +83,14 @@ data-source = creator(settings, config, logger)
 data-source = ProviderRegistry.create-data-source("chembl", settings, config, logger)
 ```
 
-**Зарегистрированные провайдеры (8 шт, включая uniprot_idmapping):**
+**Зарегистрированные провайдеры (8 шт, включая uniprot-idmapping):**
 
 | Provider          | Data Sources           | Pipelines                                                                                                                                                                                                  | Rate Limit   |
 | ----------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
 | chembl            | ChemblAdapter          | activity, assay, assay-parameters, cell-line, compound-record, molecule, target, target-component, protein-class, publication, publication-similarity, publication-term, tissue, subcellular-fraction (14) | None         |
 | pubchem           | PubChemAdapter         | compound                                                                                                                                                                                                   | 5 req/sec    |
 | uniprot           | UniProtAdapter         | protein                                                                                                                                                                                                    | 100 req/sec  |
-| uniprot_idmapping | IDMappingDataSource    | id-mapping                                                                                                                                                                                                 | —            |
+| uniprot-idmapping | IDMappingDataSource    | id-mapping                                                                                                                                                                                                 | —            |
 | pubmed            | PubMedAdapter          | publications                                                                                                                                                                                               | 3 req/sec    |
 | crossref          | CrossRefAdapter        | publication                                                                                                                                                                                                | Polite pool  |
 | openalex          | OpenAlexAdapter        | publication                                                                                                                                                                                                | 10 req/sec   |
@@ -98,13 +98,13 @@ data-source = ProviderRegistry.create-data-source("chembl", settings, config, lo
 
 ### 2.3. `registry.py` — Реестр пайплайнов
 
-Предоставляет механизмы для динамического поиска и регистрации пайплайнов. Это позволяет CLI находить доступные пайплайны по их именам (например, `chembl_activity`).
+Предоставляет механизмы для динамического поиска и регистрации пайплайнов. Это позволяет CLI находить доступные пайплайны по их именам (например, `chembl-activity`).
 
 ## 3. Принципы Работы
 
 - **Composition Root:** Вся логика создания объектов должна находиться как можно ближе к точке входа в приложение. В BioETL это `src/bioetl/composition/`.
 - **Dependency Injection (DI):** Объекты никогда не создают свои зависимости сами. Если пайплайну нужен доступ к базе данных, он запрашивает `StoragePort` в конструкторе, а фабрика из слоя Composition предоставляет ему конкретную реализацию.
-- **Декларативность:** Использование `GenericPipelineFactory` позволяет добавлять новые пайплайны простым объявлением в `pipeline_factories.py` без написания шаблонного кода сборки.
+- **Декларативность:** Использование `GenericPipelineFactory` позволяет добавлять новые пайплайны простым объявлением в `pipeline-factories.py` без написания шаблонного кода сборки.
 
 ### 3.1. Composite Pipeline Bootstrap (ADR-026)
 
@@ -138,10 +138,10 @@ runner = bootstrap-composite-runner(
 
 | Диаграмма               | Файл                                                                                               | Описание                           |
 | ----------------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| Composition Root        | [28-composition-root-di-graph.mmd](mmd-diagrams/foundation/28-composition-root-di-graph.mmd)     | DI container, factories, bootstrap |
-| Factory Pattern         | [35-bootstrap-sequence.mmd](mmd-diagrams/foundation/35-bootstrap-sequence.mmd)                   | Использование Factory паттерна     |
-| Five Layer Architecture | [01-high-level.mmd](mmd-diagrams/foundation/01-high-level.mmd)                                   | Composition слой в архитектуре     |
-| Layers Interaction      | [05-layers-interaction.mmd](mmd-diagrams/foundation/05-layers-interaction.mmd)                    | Bootstrap → Factories → Runner     |
+| Composition Root        | [28-composition-root-di-graph.mermaid](mmd-diagrams/foundation/28-composition-root-di-graph.mermaid)     | DI container, factories, bootstrap |
+| Factory Pattern         | [35-bootstrap-sequence.mermaid](mmd-diagrams/foundation/35-bootstrap-sequence.mermaid)                   | Использование Factory паттерна     |
+| Five Layer Architecture | [01-high-level.mermaid](mmd-diagrams/foundation/01-high-level.mermaid)                                   | Composition слой в архитектуре     |
+| Layers Interaction      | [05-layers-interaction.mermaid](mmd-diagrams/foundation/05-layers-interaction.mermaid)                    | Bootstrap → Factories → Runner     |
 
 ### Связанные ADR
 

@@ -98,16 +98,16 @@ Pipelines are registered via decorator:
 ```python
 from bioetl.composition.registry import register
 
-registry.register_factory("chembl_activity", factory-fn)
+registry.register-factory("chembl-activity", factory-fn)
 
 
-def chembl_activity_factory(ctx: PipelineRunContext) -> PipelineRunner:
+def chembl-activity-factory(ctx: PipelineRunContext) -> PipelineRunner:
     """Factory function for ChEMBL activity pipeline."""
     ...
 
 
 # Later: retrieve and create
-factory = registry.get("chembl_activity")
+factory = registry.get("chembl-activity")
 runner = factory(ctx)
 ```
 
@@ -145,7 +145,7 @@ from uuid import uuid4
 
 # Create context with pipeline parameters
 ctx = PipelineRunContext(
-    pipeline-name="chembl_activity",
+    pipeline-name="chembl-activity",
     run-id=uuid4(),
     run-type=RunType.INCREMENTAL,
     limit=1000,

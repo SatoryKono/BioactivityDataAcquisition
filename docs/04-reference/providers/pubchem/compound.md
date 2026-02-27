@@ -1,6 +1,6 @@
 # Пайплайн: PubChem Compound
 
-**Имя пайплайна:** `pubchem_compound`
+**Имя пайплайна:** `pubchem-compound`
 **Провайдер:** `pubchem`
 **Сущность:** `compound`
 
@@ -10,11 +10,11 @@
 
 ## 2. Конфигурация
 
-**Источник конфигурации:** `configs/pipelines/pubchem/compound.yaml`
+**Источник конфигурации:** `configs/entities/pubchem/compound.yaml`
 
 | Параметр | Значение | Описание |
 |---|---|---|
-| `pipeline-name` | `pubchem_compound` | Уникальное имя пайплайна. |
+| `pipeline-name` | `pubchem-compound` | Уникальное имя пайплайна. |
 | `provider` | `pubchem` | Имя провайдера данных. |
 | `entity-type` | `compound` | Тип извлекаемой сущности. |
 | `primary-keys` | `["cid"]` | Ключи для слияния в Silver-слое. |
@@ -37,7 +37,7 @@
 | Слой | Формат | Стратегия | Таблица/Путь |
 |---|---|---|---|
 | **Bronze** | `jsonl` (сжатый `zstd`) | Append-only | `bronze/pubchem/compound/...` |
-| **Silver** | `delta` | Merge (по `cid`) | `pubchem_compound` |
+| **Silver** | `delta` | Merge (по `cid`) | `pubchem-compound` |
 | **Gold** | `delta` | - | `dim-compound` |
 
 ## 4. Качество Данных (DQ)

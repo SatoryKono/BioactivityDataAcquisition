@@ -30,7 +30,7 @@
 docker compose -f docker-compose.monitoring.yml up -d
 
 # 2. Запустить Prometheus metrics сервер (в фоне)
-python ./metrics_server.py &
+python ./metrics-server.py &
 
 # 3. Открыть Grafana
 # Браузер: http://localhost:3000
@@ -53,9 +53,9 @@ python ./metrics_server.py &
                  ↓ HTTP GET /metrics
 ┌─────────────────────────────────────────────────────────┐
 │         Prometheus Metrics Endpoint (8000)              │
-│  - bioetl_records_processed_total                       │
-│  - bioetl_processing_duration_seconds                   │
-│  - bioetl_error_rate                                    │
+│  - bioetl-records-processed-total                       │
+│  - bioetl-processing-duration-seconds                   │
+│  - bioetl-error-rate                                    │
 └────────────────┬────────────────────────────────────────┘
                  │
     ┌────────────┴────────────┐
@@ -102,7 +102,7 @@ python --version
 pip install -e .
 
 # Проверить, что prometheus-client установлен
-python -c "import prometheus_client; print('OK')"
+python -c "import prometheus-client; print('OK')"
 ```
 
 ### Шаг 2: Запустить контейнеры мониторинга
@@ -127,7 +127,7 @@ docker compose -f docker-compose.monitoring.yml ps
 
 ```bash
 # Запустить metrics сервер в фоне
-python ./metrics_server.py &
+python ./metrics-server.py &
 
 # Проверить, что работает
 curl http://localhost:8000/metrics | head -20
@@ -146,7 +146,7 @@ After=network.target
 Type=simple
 User=bioetl
 WorkingDirectory=/opt/bioetl
-ExecStart=/usr/bin/python3 /opt/bioetl/metrics_server.py
+ExecStart=/usr/bin/python3 /opt/bioetl/metrics-server.py
 Restart=always
 RestartSec=10
 
@@ -168,9 +168,9 @@ cat > Dockerfile.metrics << 'EOF'
 FROM python:3.13-slim
 WORKDIR /app
 RUN pip install prometheus-client
-COPY metrics_server.py .
+COPY metrics-server.py .
 EXPOSE 8000
-CMD ["python", "metrics_server.py"]
+CMD ["python", "metrics-server.py"]
 EOF
 
 # Собрать и запустить
@@ -220,23 +220,23 @@ docker run -d --name bioetl-metrics \
 
 ```yaml
 global:
-  scrape_interval: 15s       # Как часто собирать метрики
-  evaluation_interval: 15s   # Как часто вычислять правила
-  external_labels:
+  scrape-interval: 15s       # Как часто собирать метрики
+  evaluation-interval: 15s   # Как часто вычислять правила
+  external-labels:
     monitor: 'bioetl-monitor'
 
-scrape_configs:
-  - job_name: 'bioetl'
-    static_configs:
+scrape-configs:
+  - job-name: 'bioetl'
+    static-configs:
       - targets: ['host.docker.internal:8000']
-    metrics_path: /metrics
-    scrape_interval: 15s
-    scrape_timeout: 10s
+    metrics-path: /metrics
+    scrape-interval: 15s
+    scrape-timeout: 10s
 ```
 
 **Параметры:**
-- `scrape_interval`: Интервал сбора метрик (15s = каждые 15 секунд)
-- `metrics_path`: Путь к метрикам (/metrics)
+- `scrape-interval`: Интервал сбора метрик (15s = каждые 15 секунд)
+- `metrics-path`: Путь к метрикам (/metrics)
 - `targets`: Адреса приложений для мониторинга
 
 **Если изменить:**
@@ -254,35 +254,35 @@ docker restart bioetl-prometheus
 ```yaml
 grafana:
   image: grafana/grafana:latest
-  container_name: bioetl-grafana
+  container-name: bioetl-grafana
   ports:
     - "3000:3000"
   environment:
-    GF_SECURITY_ADMIN_PASSWORD: admin    # Измени на production!
-    GF_USERS_ALLOW_SIGN_UP: 'false'
-    GF_INSTALL_PLUGINS: 'grafana-piechart-panel'
+    GF-SECURITY-ADMIN-PASSWORD: admin    # Измени на production!
+    GF-USERS-ALLOW-SIGN-UP: 'false'
+    GF-INSTALL-PLUGINS: 'grafana-piechart-panel'
   volumes:
-    - grafana_storage:/var/lib/grafana
+    - grafana-storage:/var/lib/grafana
     - ./grafana/provisioning:/etc/grafana/provisioning
   networks:
     - monitoring
 ```
 
 **Важные переменные:**
-- `GF_SECURITY_ADMIN_PASSWORD` — пароль admin
-- `GF_USERS_ALLOW_SIGN_UP` — разрешить регистрацию пользователей
+- `GF-SECURITY-ADMIN-PASSWORD` — пароль admin
+- `GF-USERS-ALLOW-SIGN-UP` — разрешить регистрацию пользователей
 
 **Изменить пароль в production:**
 ```bash
 # В docker-compose.monitoring.yml
 environment:
-  GF_SECURITY_ADMIN_PASSWORD: your_secure_password_here
+  GF-SECURITY-ADMIN-PASSWORD: your-secure-password-here
 
 # Перезапустить
 docker compose -f docker-compose.monitoring.yml up -d
 ```
 
-### BioETL Metrics Server (metrics_server.py)
+### BioETL Metrics Server (metrics-server.py)
 
 ```python
 # Порт и адрес
@@ -290,25 +290,25 @@ HOST = '0.0.0.0'  # Слушать на всех интерфейсах
 PORT = 8000       # Порт для метрик
 
 # Метрики
-RECORDS_PROCESSED = Counter(
-    'bioetl_records_processed_total',
+RECORDS-PROCESSED = Counter(
+    'bioetl-records-processed-total',
     'Total records processed',
-    ['pipeline', 'run_id', 'stage', 'status']  # Labels
+    ['pipeline', 'run-id', 'stage', 'status']  # Labels
 )
 ```
 
 **Добавить собственную метрику:**
 ```python
-from prometheus_client import Gauge
+from prometheus-client import Gauge
 
-MY_METRIC = Gauge(
-    'bioetl_my_metric',
+MY-METRIC = Gauge(
+    'bioetl-my-metric',
     'My custom metric',
     ['pipeline', 'stage']
 )
 
 # В коде приложения:
-MY_METRIC.labels(pipeline='uniprot', stage='bronze').set(value)
+MY-METRIC.labels(pipeline='uniprot', stage='bronze').set(value)
 ```
 
 ---
@@ -396,36 +396,36 @@ Dashboard → Share (🔗)
 **1. В BioETL приложении (например, в src/bioetl/interfaces/observability.py):**
 
 ```python
-from prometheus_client import Counter, Gauge, Histogram
+from prometheus-client import Counter, Gauge, Histogram
 
 # Определить метрику
-API_REQUESTS = Counter(
-    'bioetl_api_requests_total',
+API-REQUESTS = Counter(
+    'bioetl-api-requests-total',
     'Total API requests',
     ['endpoint', 'method', 'status']
 )
 
-RESPONSE_TIME = Histogram(
-    'bioetl_api_response_time_seconds',
+RESPONSE-TIME = Histogram(
+    'bioetl-api-response-time-seconds',
     'API response time',
     ['endpoint']
 )
 
 # В коде API:
-API_REQUESTS.labels(
+API-REQUESTS.labels(
     endpoint='/fetch',
     method='GET',
     status='200'
 ).inc()
 
-RESPONSE_TIME.labels(endpoint='/fetch').observe(duration)
+RESPONSE-TIME.labels(endpoint='/fetch').observe(duration)
 ```
 
 **2. Prometheus автоматически подберёт новую метрику**
 
 **3. Использовать в Grafana:**
 ```
-Query: bioetl_api_requests_total
+Query: bioetl-api-requests-total
 Legend: {{endpoint}} - {{status}}
 ```
 
@@ -454,7 +454,7 @@ cat > custom-dashboard.json << 'EOF'
         "title": "Records Processed",
         "targets": [
           {
-            "expr": "sum(bioetl_records_processed_total) by (pipeline)"
+            "expr": "sum(bioetl-records-processed-total) by (pipeline)"
           }
         ],
         "type": "graph"
@@ -474,7 +474,7 @@ EOF
 ```
 1. Dashboard → Alert rules
 2. Create new alert rule
-3. Set condition: "if sum(bioetl_error_rate) > 0.1"
+3. Set condition: "if sum(bioetl-error-rate) > 0.1"
 4. Set notification channel (Email, Slack, PagerDuty)
 5. Save
 ```
@@ -528,8 +528,8 @@ curl http://localhost:8000/metrics
 
 # 2. Если curl не работает:
 # a) Перезапустить metrics сервер
-pkill -f metrics_server.py
-python ./metrics_server.py &
+pkill -f metrics-server.py
+python ./metrics-server.py &
 
 # b) Проверить в логах контейнера Prometheus
 docker logs bioetl-prometheus | tail -20
@@ -548,14 +548,14 @@ docker logs bioetl-prometheus | tail -20
 ```bash
 # 1. Проверить Prometheus query
 # Home → Explore
-# Query: bioetl_records_processed_total
+# Query: bioetl-records-processed-total
 # Если результат пуст → метрики не собираются
 
 # 2. Проверить, генерируется ли метрика
-curl http://localhost:8000/metrics | grep bioetl_records_processed
+curl http://localhost:8000/metrics | grep bioetl-records-processed
 
 # 3. Если метрик нет → перезапустить metrics сервер
-python ./metrics_server.py
+python ./metrics-server.py
 
 # 4. Дождаться 15 сек (интервал scrape)
 # затем обновить дашборд (F5)
@@ -615,7 +615,7 @@ docker logs bioetl-prometheus -f
 
 # 3. Если проблема в запросе Prometheus:
 # Home → Explore
-# Query: bioetl_records_processed_total
+# Query: bioetl-records-processed-total
 # Если запрос долго выполняется → увеличить retention в Prometheus
 # или уменьшить временной диапазон (1h вместо 7d)
 
@@ -627,12 +627,12 @@ docker restart bioetl-grafana
 
 ```bash
 # Способ 1: Через CLI
-docker exec bioetl-grafana grafana-cli admin reset-admin-password new_password
+docker exec bioetl-grafana grafana-cli admin reset-admin-password new-password
 
 # Способ 2: Через конфиг
 # Отредактировать docker-compose.monitoring.yml:
 environment:
-  GF_SECURITY_ADMIN_PASSWORD: new_password
+  GF-SECURITY-ADMIN-PASSWORD: new-password
 
 docker compose -f docker-compose.monitoring.yml up -d --force-recreate
 ```
@@ -641,7 +641,7 @@ docker compose -f docker-compose.monitoring.yml up -d --force-recreate
 
 ```bash
 # Проверить размер БД
-du -sh /var/lib/docker/volumes/bioetl_prometheus_data/_data
+du -sh /var/lib/docker/volumes/bioetl-prometheus-data/-data
 
 # Решения:
 # 1. Уменьшить retention в prometheus.yml
@@ -684,22 +684,22 @@ docker exec -it bioetl-prometheus sh
 
 ```promql
 # Все метрики BioETL
-{__name__=~"bioetl_.*"}
+{--name--=~"bioetl-.*"}
 
 # Текущее значение обработанных записей
-sum(bioetl_records_processed_total)
+sum(bioetl-records-processed-total)
 
 # По стадиям
-sum(bioetl_records_processed_total) by (stage)
+sum(bioetl-records-processed-total) by (stage)
 
 # По pipeline
-sum(bioetl_records_processed_total) by (pipeline)
+sum(bioetl-records-processed-total) by (pipeline)
 
 # Error rate за последний час
-rate(bioetl_records_processed_total{status="error"}[1h])
+rate(bioetl-records-processed-total{status="error"}[1h])
 
 # Среднее время обработки
-avg(bioetl_processing_duration_seconds_bucket)
+avg(bioetl-processing-duration-seconds-bucket)
 ```
 
 ### Полезные URL
@@ -730,7 +730,7 @@ avg(bioetl_processing_duration_seconds_bucket)
    ```bash
    docker compose -f docker-compose.monitoring.yml down
    docker compose -f docker-compose.monitoring.yml up -d
-   python ./metrics_server.py &
+   python ./metrics-server.py &
    ```
 
 3. **Проверить здоровье компонентов**

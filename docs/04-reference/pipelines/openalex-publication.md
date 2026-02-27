@@ -1,4 +1,4 @@
-# openalex_publication
+# openalex-publication
 
 > **Status**: Deprecated. This legacy guide is superseded by current pipeline specs in `docs/pipelines/` (see `docs/pipelines/INDEX.md`).
 
@@ -8,7 +8,7 @@ OpenAlex Works pipeline for scholarly publication metadata with DOI resolution a
 
 ## Overview
 
-The `openalex_publication` pipeline ingests scholarly work records from the [OpenAlex Works API](https://docs.openalex.org/api-entities/works), transforming them through Bronze (raw JSON), Silver (normalized), and Gold (analytics-ready) layers.
+The `openalex-publication` pipeline ingests scholarly work records from the [OpenAlex Works API](https://docs.openalex.org/api-entities/works), transforming them through Bronze (raw JSON), Silver (normalized), and Gold (analytics-ready) layers.
 
 **Key Features:**
 - Batch DOI resolution with automatic title-based fallback
@@ -30,7 +30,7 @@ The `openalex_publication` pipeline ingests scholarly work records from the [Ope
 
 | Property | Value |
 |----------|-------|
-| **Pipeline Name** | `openalex_publication` |
+| **Pipeline Name** | `openalex-publication` |
 | **Version** | 1.2.0 |
 | **Provider** | `openalex` |
 | **Entity Type** | `publication` |
@@ -441,7 +441,7 @@ sequenceDiagram
     participant Bronze as Bronze Layer
     participant Silver as Silver Layer
     participant Gold as Gold Layer
-    participant Composite as composite_publication
+    participant Composite as composite-publication
 
     API->>Bronze: Raw JSON (ZSTD)
     Bronze->>Silver: Transform + Validate
@@ -463,18 +463,18 @@ sequenceDiagram
 
 | Consumer | Usage |
 |----------|-------|
-| `composite_publication` | Silver merge input |
+| `composite-publication` | Silver merge input |
 | Analytics dashboards | Gold layer queries |
 | DOI enrichment services | Publication metadata lookup |
 
 ### Composite Pipeline Integration
 
-The `composite_publication` pipeline uses OpenAlex Silver data as an enricher:
+The `composite-publication` pipeline uses OpenAlex Silver data as an enricher:
 
 ```yaml
-# composite_publication config excerpt
+# composite-publication config excerpt
 enrichers:
-  - name: openalex_publication
+  - name: openalex-publication
     source: silver/openalex/publication
     join-keys: [doi, pmid]
     priority: 2

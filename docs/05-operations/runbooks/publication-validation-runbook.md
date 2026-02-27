@@ -106,7 +106,7 @@ histogram-quantile(0.95, bioetl-validation-duration-seconds) > 300
    - Отключить временно:
      ```bash
      bioetl run \
-       --pipeline pubmed_publication \
+       --pipeline pubmed-publication \
        --skip-semantic
      ```
 
@@ -436,7 +436,7 @@ curl -v --connect-timeout 5 https://api.crossref.org/
 - Временно отключить External Verification:
   ```bash
   bioetl run \
-    --pipeline crossref_publication \
+    --pipeline crossref-publication \
     --skip-external
   ```
 
@@ -502,7 +502,7 @@ print(future-years[['openalex-id', 'publication-year', 'title']].head())
 - Если точно ошибка — обновить в Bronze:
   ```sql
   -- Исправить известные ошибки (например, 2099 → 2019)
-  UPDATE bronze.openalex_publication
+  UPDATE bronze.openalex-publication
   SET publication-year = 2019
   WHERE publication-year = 2099;
   ```
@@ -645,7 +645,7 @@ pkill -f "bioetl.interfaces.cli.main run-pipeline"
 
 # Перезапустить без External Verification
 bioetl run \
-  --pipeline pubmed_publication \
+  --pipeline pubmed-publication \
   --skip-external \
   --skip-semantic
 ```
@@ -722,7 +722,7 @@ curl http://localhost:8000/metrics | grep bioetl-validation
 ```bash
 # Перезапустить pipeline с Prometheus exporter
 bioetl run \
-  --pipeline pubmed_publication \
+  --pipeline pubmed-publication \
   --enable-metrics \
   --metrics-port 8000
 

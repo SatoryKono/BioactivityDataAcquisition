@@ -47,10 +47,10 @@ BioETL supports multi-source data enrichment through Composite Pipelines:
 
 ```bash
 # Run composite publication pipeline (seed from ChEMBL, enrich from CrossRef, OpenAlex, PubMed)
-bioetl run --pipeline composite_publication --limit 1000
+bioetl run --pipeline composite-publication --limit 1000
 ```
 
-See [Composite Pipeline Diagram](../02-architecture/mmd-diagrams/foundation/29-composite-pipeline-workflow.mmd) for workflow visualization.
+See [Composite Pipeline Diagram](../02-architecture/mmd-diagrams/foundation/29-composite-pipeline-workflow.mermaid) for workflow visualization.
 
 ## Current Version
 
@@ -65,12 +65,12 @@ cd BioactivityDataAcquisition2
 make install
 
 # Run a pipeline
-bioetl run --pipeline chembl_activity --limit 100
+bioetl run --pipeline chembl-activity --limit 100
 
 # Run tests
 make test
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 *Last updated: 2026-02-24*

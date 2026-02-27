@@ -4,10 +4,10 @@
 
 | Файл | Размер | Для кого | Читать |
 |------|--------|---------|--------|
-| **BIOETL_DASHBOARD_QUICKSTART.md** | 6.5 KB | 🚀 Разработчиков (за 5 минут) | [→](./BIOETL_DASHBOARD_QUICKSTART.md) |
-| **BIOETL_DASHBOARD_SETUP.md** | 23 KB | 📖 Полная инструкция (60 минут) | [→](./BIOETL_DASHBOARD_SETUP.md) |
-| **BIOETL_DASHBOARD_VISUAL_GUIDE.md** | 17 KB | 👁️ Визуальный гайд (20 минут) | [→](./BIOETL_DASHBOARD_VISUAL_GUIDE.md) |
-| **BIOETL_DASHBOARD_EXAMPLES.md** | 15 KB | 💡 Примеры кастомизации (30 минут) | [→](./BIOETL_DASHBOARD_EXAMPLES.md) |
+| **BIOETL-DASHBOARD-QUICKSTART.md** | 6.5 KB | 🚀 Разработчиков (за 5 минут) | [→](./BIOETL-DASHBOARD-QUICKSTART.md) |
+| **BIOETL-DASHBOARD-SETUP.md** | 23 KB | 📖 Полная инструкция (60 минут) | [→](./BIOETL-DASHBOARD-SETUP.md) |
+| **BIOETL-DASHBOARD-VISUAL-GUIDE.md** | 17 KB | 👁️ Визуальный гайд (20 минут) | [→](./BIOETL-DASHBOARD-VISUAL-GUIDE.md) |
+| **BIOETL-DASHBOARD-EXAMPLES.md** | 15 KB | 💡 Примеры кастомизации (30 минут) | [→](./BIOETL-DASHBOARD-EXAMPLES.md) |
 | **Этот файл** | 10 KB | 🗺️ Карта и навигация | - |
 
 ---
@@ -15,26 +15,26 @@
 ## 🎯 С чего начать?
 
 ### Если у вас есть 5 минут ⏱️
-→ Прочитайте [BIOETL_DASHBOARD_QUICKSTART.md](./BIOETL_DASHBOARD_QUICKSTART.md)
+→ Прочитайте [BIOETL-DASHBOARD-QUICKSTART.md](./BIOETL-DASHBOARD-QUICKSTART.md)
 - ✅ Чек-лист установки
 - ✅ 6 простых шагов
 - ✅ Быстрая диагностика
 
 ### Если у вас есть 1 час 📚
-→ Прочитайте [BIOETL_DASHBOARD_SETUP.md](./BIOETL_DASHBOARD_SETUP.md)
+→ Прочитайте [BIOETL-DASHBOARD-SETUP.md](./BIOETL-DASHBOARD-SETUP.md)
 - ✅ Полная архитектура
 - ✅ Пошаговая установка
 - ✅ Конфигурация каждого компонента
 - ✅ Troubleshooting гайд
 
 ### Если вы визуал 👁️
-→ Посмотрите [BIOETL_DASHBOARD_VISUAL_GUIDE.md](./BIOETL_DASHBOARD_VISUAL_GUIDE.md)
+→ Посмотрите [BIOETL-DASHBOARD-VISUAL-GUIDE.md](./BIOETL-DASHBOARD-VISUAL-GUIDE.md)
 - ✅ Диаграммы и схемы
 - ✅ Как читать дашборды
 - ✅ Примеры графиков
 
 ### Если вы хотите кастомизировать 💡
-→ Изучите [BIOETL_DASHBOARD_EXAMPLES.md](./BIOETL_DASHBOARD_EXAMPLES.md)
+→ Изучите [BIOETL-DASHBOARD-EXAMPLES.md](./BIOETL-DASHBOARD-EXAMPLES.md)
 - ✅ Добавить метрики
 - ✅ Создать дашборды
 - ✅ Настроить алерты
@@ -61,7 +61,7 @@
 ### Сценарий 3: "Хочу добавить свою метрику"
 ```
 1. Перейти: EXAMPLES.md → Добавить новую метрику
-2. Отредактировать: metrics_server.py
+2. Отредактировать: metrics-server.py
 3. Перезапустить: metrics сервер
 4. Использовать в Grafana: PromQL query
 ```
@@ -113,10 +113,10 @@
 
 | Метрика | Как читать | Где используется |
 |---------|-----------|-----------------|
-| `bioetl_records_processed_total` | Кол-во обработанных записей по stage | Simple, DQ v2, Overview v2 |
-| `bioetl_records_processed_created` | Timestamp создания метрики | DQ v2, Overview v2 (Execution Timestamp) |
-| `bioetl_health_check_status` | Статус health check (1=healthy) | Provider Health v2 |
-| `bioetl_health_check_latency_ms` | P95 latency provider'а (histogram) | Provider Health v2 |
+| `bioetl-records-processed-total` | Кол-во обработанных записей по stage | Simple, DQ v2, Overview v2 |
+| `bioetl-records-processed-created` | Timestamp создания метрики | DQ v2, Overview v2 (Execution Timestamp) |
+| `bioetl-health-check-status` | Статус health check (1=healthy) | Provider Health v2 |
+| `bioetl-health-check-latency-ms` | P95 latency provider'а (histogram) | Provider Health v2 |
 
 ---
 
@@ -142,13 +142,13 @@ docker compose -f docker-compose.monitoring.yml down
 
 ```bash
 # Запустить
-python ./metrics_server.py &
+python ./metrics-server.py &
 
 # Проверить
 curl http://localhost:8000/metrics
 
 # Остановить
-pkill -f metrics_server.py
+pkill -f metrics-server.py
 ```
 
 ### Grafana
@@ -167,15 +167,15 @@ docker exec bioetl-grafana \
 
 ```bash
 # Текущее значение метрики
-curl "http://localhost:9090/api/v1/query?query=bioetl_records_processed_total"
+curl "http://localhost:9090/api/v1/query?query=bioetl-records-processed-total"
 
 # График за временной диапазон
-curl "http://localhost:9090/api/v1/query_range?\
-query=bioetl_records_processed_total&\
+curl "http://localhost:9090/api/v1/query-range?\
+query=bioetl-records-processed-total&\
 start=1704067200&end=1704153600&step=300"
 
 # Список всех метрик
-curl "http://localhost:9090/api/v1/label/__name__/values"
+curl "http://localhost:9090/api/v1/label/--name--/values"
 ```
 
 ---
@@ -189,7 +189,7 @@ curl "http://localhost:9090/api/v1/label/__name__/values"
 → **SETUP.md** раздел "Troubleshooting"
 
 ### Как использовать дашборды
-→ **VISUAL_GUIDE.md** раздел "Как читать каждый дашборд"
+→ **VISUAL-GUIDE.md** раздел "Как читать каждый дашборд"
 
 ### Кастомизация метрик
 → **EXAMPLES.md** раздел "Добавить новую метрику"
@@ -227,7 +227,7 @@ curl "http://localhost:9090/api/v1/label/__name__/values"
 ## 🎓 Обучающие ресурсы
 
 ### Для новичков
-1. Посмотреть VISUAL_GUIDE.md
+1. Посмотреть VISUAL-GUIDE.md
 2. Открыть BioETL Simple Dashboard
 3. Поменять фильтры (Pipeline, Run Type)
 4. Посмотреть как меняются графики
@@ -239,7 +239,7 @@ curl "http://localhost:9090/api/v1/label/__name__/values"
 4. Добавить панель в дашборд
 
 ### Для advanced
-1. Отредактировать metrics_server.py
+1. Отредактировать metrics-server.py
 2. Добавить собственную метрику
 3. Создать дашборд с JSON
 4. Настроить alerts с Prometheus
@@ -256,8 +256,8 @@ docker compose -f docker-compose.monitoring.yml down
 docker compose -f docker-compose.monitoring.yml up -d
 
 # 2. Перезапустить metrics сервер
-pkill -f metrics_server.py
-python ./metrics_server.py &
+pkill -f metrics-server.py
+python ./metrics-server.py &
 
 # 3. Дождаться 15 секунд scrape interval
 sleep 15
@@ -280,8 +280,8 @@ curl http://localhost:8000/health
 
 1. **Проверить Troubleshooting**: SETUP.md
 2. **Посмотреть логи**: `docker logs bioetl-prometheus`
-3. **Диагностировать**: [SETUP.md - Troubleshooting](./BIOETL_DASHBOARD_SETUP.md#troubleshooting)
-4. **Проверить архитектуру**: VISUAL_GUIDE.md
+3. **Диагностировать**: [SETUP.md - Troubleshooting](./BIOETL-DASHBOARD-SETUP.md#troubleshooting)
+4. **Проверить архитектуру**: VISUAL-GUIDE.md
 
 ---
 
@@ -289,14 +289,14 @@ curl http://localhost:8000/health
 
 ```
 📂 Документация
-├── 📄 BIOETL_DASHBOARD_QUICKSTART.md      (5 минут)
-├── 📄 BIOETL_DASHBOARD_SETUP.md           (60 минут)
-├── 📄 BIOETL_DASHBOARD_VISUAL_GUIDE.md    (20 минут)
-├── 📄 BIOETL_DASHBOARD_EXAMPLES.md        (30 минут)
+├── 📄 BIOETL-DASHBOARD-QUICKSTART.md      (5 минут)
+├── 📄 BIOETL-DASHBOARD-SETUP.md           (60 минут)
+├── 📄 BIOETL-DASHBOARD-VISUAL-GUIDE.md    (20 минут)
+├── 📄 BIOETL-DASHBOARD-EXAMPLES.md        (30 минут)
 └── 📄 README.md (этот файл)
 
 📂 Конфигурация
-├── 📄 metrics_server.py                   (Metrics endpoint)
+├── 📄 metrics-server.py                   (Metrics endpoint)
 ├── 📄 docker-compose.monitoring.yml       (Docker контейнеры)
 ├── 📄 grafana/prometheus.yml              (Prometheus конфиг)
 └── 📄 grafana/provisioning/               (Auto-provisioning)
@@ -342,4 +342,4 @@ curl http://localhost:8000/health
 **Версия:** 1.0  
 **Статус:** ✅ Готово к использованию
 
-Начните с [BIOETL_DASHBOARD_QUICKSTART.md](./BIOETL_DASHBOARD_QUICKSTART.md) — займет 5 минут! ⏱️
+Начните с [BIOETL-DASHBOARD-QUICKSTART.md](./BIOETL-DASHBOARD-QUICKSTART.md) — займет 5 минут! ⏱️

@@ -8,7 +8,7 @@
 
 | Parameter | Value |
 |-----------|-------|
-| **Pipeline ID** | `openalex_publication` |
+| **Pipeline ID** | `openalex-publication` |
 | **Provider** | OpenAlex |
 | **Entity** | publication (works) |
 | **API Endpoint** | `https://api.openalex.org/works` |
@@ -249,14 +249,14 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
 ## 7. Pipeline Configuration
 
 ```yaml
-pipeline-name: openalex_publication
+pipeline-name: openalex-publication
 provider: openalex
 entity-type: publication
 version: "1.2.0"
 
 primary-keys: ["openalex-id"]
-silver-table: "openalex_publication"
-gold-table: "openalex_publication"
+silver-table: "openalex-publication"
+gold-table: "openalex-publication"
 
 source:
   type: api

@@ -14,7 +14,7 @@ Data Quality (DQ) checks ensure data integrity throughout the pipeline. This run
 Configuration:
 
 ```yaml
-# configs/pipelines/chembl/activity.yaml
+# configs/entities/chembl/activity.yaml
 dq:
   soft-fail-threshold: 0.05  # 5%
   hard-fail-threshold: 0.20  # 20%
@@ -214,7 +214,7 @@ For unfixable records, quarantine is the correct behavior:
 
 ```bash
 # View quarantine statistics
-bioetl quarantine stats --pipeline chembl_activity
+bioetl quarantine stats --pipeline chembl-activity
 
 # Purge old quarantine (> 30 days)
 bioetl quarantine purge --pipeline <pipeline-name> --older-than-days 30

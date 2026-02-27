@@ -10,8 +10,8 @@ Unified HTTP client with rate limiting, circuit breaker, and observability.
 
 ::: bioetl.infrastructure.adapters.http.client.UnifiedHTTPClient
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
         members:
             - --init--
             - get
@@ -22,10 +22,10 @@ Unified HTTP client with rate limiting, circuit breaker, and observability.
 
 Token bucket rate limiter implementation.
 
-::: bioetl.infrastructure.adapters.http.rate_limiter.TokenBucket
+::: bioetl.infrastructure.adapters.http.rate-limiter.TokenBucket
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
         members:
             - --init--
             - acquire
@@ -36,10 +36,10 @@ Token bucket rate limiter implementation.
 
 Circuit breaker pattern implementation.
 
-::: bioetl.infrastructure.adapters.http.circuit_breaker.CircuitBreaker
+::: bioetl.infrastructure.adapters.http.circuit-breaker.CircuitBreaker
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
         members:
             - --init--
             - call
@@ -51,8 +51,8 @@ Mixin for handling paginated API responses.
 
 ::: bioetl.infrastructure.adapters.http.pagination.PaginatedFetcherMixin
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
         members:
             - fetch-all-pages
 
@@ -64,8 +64,8 @@ Abstract base class for HTTP-based data source adapters.
 
 ::: bioetl.infrastructure.adapters.base.BaseHttpAdapter
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
         members:
             - --init--
             - fetch
@@ -75,10 +75,10 @@ Abstract base class for HTTP-based data source adapters.
 
 Base class for synchronous data source adapters (e.g., PubChem via pubchempy).
 
-::: bioetl.infrastructure.adapters.sync_base.BaseSyncAdapter
+::: bioetl.infrastructure.adapters.sync-base.BaseSyncAdapter
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
         members:
             - fetch
             - -run-in-executor
@@ -87,10 +87,10 @@ Base class for synchronous data source adapters (e.g., PubChem via pubchempy).
 
 Metrics collection for data source adapters.
 
-::: bioetl.infrastructure.adapters.base_metrics.AdapterMetrics
+::: bioetl.infrastructure.adapters.base-metrics.AdapterMetrics
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ## Provider Adapters
 
@@ -100,8 +100,8 @@ Data source adapter for ChEMBL database.
 
 ::: bioetl.infrastructure.adapters.chembl.client.ChemblAdapter
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
         members:
             - --init--
             - fetch
@@ -151,7 +151,7 @@ params = {
 # Filter parameters: "{field}--in": "ID1,ID2,ID3"
 ```
 
-**Configuration**: `configs/sources/chembl.yaml`
+**Configuration**: `configs/providers/chembl.yaml`
 
 ```yaml
 source:
@@ -169,8 +169,8 @@ Data source adapter for PubChem database (via pubchempy library).
 
 ::: bioetl.infrastructure.adapters.pubchem.client.PubChemAdapter
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
         members:
             - --init--
             - fetch
@@ -187,8 +187,8 @@ Data source adapter for UniProt protein database.
 
 ::: bioetl.infrastructure.adapters.uniprot.client.UniProtAdapter
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
         members:
             - --init--
             - fetch
@@ -203,19 +203,19 @@ Data source adapter for UniProt protein database.
 
 Specialized client for UniProt ID mapping operations.
 
-::: bioetl.infrastructure.adapters.uniprot.idmapping_client.UniProtIDMappingClient
+::: bioetl.infrastructure.adapters.uniprot.idmapping-client.UniProtIDMappingClient
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### PubMedAdapter
 
 Data source adapter for PubMed/NCBI E-utilities.
 
-::: bioetl.infrastructure.adapters.pubmed.pubmed_client.PubMedAdapter
+::: bioetl.infrastructure.adapters.pubmed.pubmed-client.PubMedAdapter
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
         members:
             - --init--
             - fetch
@@ -232,8 +232,8 @@ Data source adapter for CrossRef metadata API.
 
 ::: bioetl.infrastructure.adapters.crossref.client.CrossRefAdapter
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
         members:
             - --init--
             - fetch
@@ -250,8 +250,8 @@ Data source adapter for OpenAlex scholarly data API.
 
 ::: bioetl.infrastructure.adapters.openalex.client.OpenAlexAdapter
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
         members:
             - --init--
             - fetch
@@ -268,8 +268,8 @@ Data source adapter for Semantic Scholar API.
 
 ::: bioetl.infrastructure.adapters.semanticscholar.adapter.SemanticScholarAdapter
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
         members:
             - --init--
             - fetch
@@ -286,10 +286,10 @@ Data source adapter for Semantic Scholar API.
 
 In-memory lock implementation (Local-Only).
 
-::: bioetl.infrastructure.locking.memory_lock.MemoryLock
+::: bioetl.infrastructure.locking.memory-lock.MemoryLock
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
         members:
             - acquire
             - release
@@ -301,10 +301,10 @@ In-memory lock implementation (Local-Only).
 
 Local filesystem checkpoint implementation.
 
-::: bioetl.infrastructure.checkpoint.local_checkpoint.LocalCheckpoint
+::: bioetl.infrastructure.checkpoint.local-checkpoint.LocalCheckpoint
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
         members:
             - save
             - load

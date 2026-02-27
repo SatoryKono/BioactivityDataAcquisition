@@ -1,6 +1,6 @@
 # BioETL Diagrams — PNG Index
 
-_Generated: 2026-02-26T22:31:36+03:00_
+_Generated: 2026-02-27T13:18:29+03:00_
 
 ## Full System Component
 
@@ -20,21 +20,9 @@ _Generated: 2026-02-26T22:31:36+03:00_
 
 ---
 
-## Medallion
-
-![02-medallion](./02-medallion.png)
-
----
-
 ## Pipeline Execution Happy Path
 
 ![03-pipeline-execution-happy-path](./03-pipeline-execution-happy-path.png)
-
----
-
-## Pipeline Sequence
-
-![03-pipeline-sequence](./03-pipeline-sequence.png)
 
 ---
 
@@ -53,12 +41,6 @@ _Generated: 2026-02-26T22:31:36+03:00_
 ## Layers Interaction
 
 ![05-layers-interaction](./05-layers-interaction.png)
-
----
-
-## Locking
-
-![05-locking](./05-locking.png)
 
 ---
 
@@ -230,12 +212,6 @@ _Generated: 2026-02-26T22:31:36+03:00_
 
 ---
 
-## Port Adapter Mapping
-
-![30-port-adapter-mapping](./30-port-adapter-mapping.png)
-
----
-
 ## Pipeline Run Lifecycle
 
 ![31-pipeline-run-lifecycle](./31-pipeline-run-lifecycle.png)
@@ -257,12 +233,6 @@ _Generated: 2026-02-26T22:31:36+03:00_
 ## Batch Processing Flow
 
 ![34-batch-processing-flow](./34-batch-processing-flow.png)
-
----
-
-## Bootstrap Sequence
-
-![35-bootstrap-sequence](./35-bootstrap-sequence.png)
 
 ---
 
@@ -317,12 +287,6 @@ _Generated: 2026-02-26T22:31:36+03:00_
 ## Cross Provider Enrichment
 
 ![44-cross-provider-enrichment](./44-cross-provider-enrichment.png)
-
----
-
-## Template Method Transformer
-
-![45-template-method-transformer](./45-template-method-transformer.png)
 
 ---
 

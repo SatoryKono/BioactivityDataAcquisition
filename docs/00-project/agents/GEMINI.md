@@ -56,7 +56,7 @@ make test-integration # VCR-backed integration tests
 
 ### Running Pipelines
 ```bash
-bioetl run --pipeline chembl_activity --run-type incremental --limit 100
+bioetl run --pipeline chembl-activity --run-type incremental --limit 100
 ```
 
 ## 5. Testing Strategy

@@ -31,17 +31,17 @@ configs/
 │   ├── chembl/                  # 14 entity configs
 │   │   ├── activity.yaml
 │   │   ├── assay.yaml
-│   │   ├── assay_parameters.yaml
-│   │   ├── cell_line.yaml
-│   │   ├── compound_record.yaml
+│   │   ├── assay-parameters.yaml
+│   │   ├── cell-line.yaml
+│   │   ├── compound-record.yaml
 │   │   ├── molecule.yaml
-│   │   ├── protein_class.yaml
+│   │   ├── protein-class.yaml
 │   │   ├── publication.yaml
-│   │   ├── publication_similarity.yaml
-│   │   ├── publication_term.yaml
-│   │   ├── subcellular_fraction.yaml
+│   │   ├── publication-similarity.yaml
+│   │   ├── publication-term.yaml
+│   │   ├── subcellular-fraction.yaml
 │   │   ├── target.yaml
-│   │   ├── target_component.yaml
+│   │   ├── target-component.yaml
 │   │   └── tissue.yaml
 │   ├── pubchem/                 # 1 entity config
 │   │   └── compound.yaml
@@ -57,11 +57,11 @@ configs/
 │   ├── semanticscholar/         # 1 entity config
 │   │   └── publication.yaml
 │   └── composite/               # 5 composite configs (ADR-026)
-│       ├── activity.yaml        # chembl_activity + enrichers
-│       ├── assay.yaml           # chembl_assay + enrichers
-│       ├── molecule.yaml        # chembl_molecule + enrichers
-│       ├── publication.yaml     # chembl_publication + enrichers
-│       └── target.yaml          # chembl_target + enrichers
+│       ├── activity.yaml        # chembl-activity + enrichers
+│       ├── assay.yaml           # chembl-assay + enrichers
+│       ├── molecule.yaml        # chembl-molecule + enrichers
+│       ├── publication.yaml     # chembl-publication + enrichers
+│       └── target.yaml          # chembl-target + enrichers
 ├── quality/                      # Data Quality правила (ADR-027, 31 файл)
 │   ├── -defaults.yaml           # Глобальные DQ defaults (soft-fail=0.05, hard-fail=0.20)
 │   ├── providers/               # 7 provider-specific DQ
@@ -144,10 +144,10 @@ provider: chembl
 entity: activity
 
 pipeline:
-  pipeline_name: chembl_activity
+  pipeline-name: chembl-activity
   provider: chembl
-  entity_type: activity
-  business_primary_keys: [activity_id]
+  entity-type: activity
+  business-primary-keys: [activity-id]
 ```
 
 ### Полная структура конфига
@@ -172,14 +172,14 @@ provider: chembl
 entity: activity
 
 pipeline:
-  pipeline_name: chembl_activity
+  pipeline-name: chembl-activity
   provider: chembl
-  entity_type: activity
-  business_primary_keys: [activity_id]
-  batch_size: 500
-  dq_overrides:
-    field_validations:
-      - field: standard_value
+  entity-type: activity
+  business-primary-keys: [activity-id]
+  batch-size: 500
+  dq-overrides:
+    field-validations:
+      - field: standard-value
         type: range
         min: 0
         nullable: true
@@ -196,23 +196,23 @@ Composite pipelines объединяют данные из нескольких 
 ```yaml
 # configs/composites/publication.yaml
 composite:
-  name: composite_publication
+  name: composite-publication
   version: "1.1.0"
 
   seed:
-    pipeline: chembl_publication     # Базовый пайплайн (источник ID)
+    pipeline: chembl-publication     # Базовый пайплайн (источник ID)
 
   enrichers:                          # Обогащение из других провайдеров
-    - pipeline: crossref_publication
+    - pipeline: crossref-publication
       join-key: doi
       optional: true
-    - pipeline: openalex_publication
+    - pipeline: openalex-publication
       join-key: doi
       optional: true
-    - pipeline: pubmed_publication
+    - pipeline: pubmed-publication
       join-key: pmid
       optional: true
-    - pipeline: semanticscholar_publication
+    - pipeline: semanticscholar-publication
       join-key: doi
       optional: true
 
@@ -225,11 +225,11 @@ composite:
 
 | Composite               | Seed                 | Enrichers                                                           | Описание                      |
 | ----------------------- | -------------------- | ------------------------------------------------------------------- | ----------------------------- |
-| `composite_activity`    | `chembl_activity`    | enrichers                                                           | Обогащённые данные активности |
-| `composite_assay`       | `chembl_assay`       | enrichers                                                           | Обогащённые данные анализов   |
-| `composite_molecule`    | `chembl_molecule`    | pubchem_compound, enrichers                                         | Обогащённые молекулы          |
-| `composite_publication` | `chembl_publication` | crossref, openalex, pubmed, semanticscholar                         | Обогащённые публикации        |
-| `composite_target`      | `chembl_target`      | target_component, protein_class, uniprot_idmapping, uniprot_protein | Обогащённые targets           |
+| `composite-activity`    | `chembl-activity`    | enrichers                                                           | Обогащённые данные активности |
+| `composite-assay`       | `chembl-assay`       | enrichers                                                           | Обогащённые данные анализов   |
+| `composite-molecule`    | `chembl-molecule`    | pubchem-compound, enrichers                                         | Обогащённые молекулы          |
+| `composite-publication` | `chembl-publication` | crossref, openalex, pubmed, semanticscholar                         | Обогащённые публикации        |
+| `composite-target`      | `chembl-target`      | target-component, protein-class, uniprot-idmapping, uniprot-protein | Обогащённые targets           |
 
 ### Отличия от Regular Pipelines
 
@@ -282,7 +282,7 @@ if "sort-by" not in sink-silver:
 
 ```yaml
 # НЕ нужно указывать sort-by — он auto-computed!
-pipeline-name: chembl_activity
+pipeline-name: chembl-activity
 business-primary-keys: ["activity-id"]  # → sort-by.columns = ["activity-id"]
 ```
 
@@ -601,10 +601,10 @@ maintenance:
 
 ```bash
 # Показать конфигурацию
-bioetl config show chembl_activity
+bioetl config show chembl-activity
 
 # Валидация
-bioetl config validate chembl_activity
+bioetl config validate chembl-activity
 
 # Показать глобальные настройки
 bioetl config show-settings
@@ -632,25 +632,25 @@ bioetl config list-pipelines
 ### Минимальный конфиг
 
 ```yaml
-pipeline-name: chembl_activity
+pipeline-name: chembl-activity
 provider: chembl
 entity-type: activity
 version: "1.2.0"
 business-primary-keys: ["activity-id"]
-silver-table: "chembl_activity"
-gold-table: "chembl_activity"
+silver-table: "chembl-activity"
+gold-table: "chembl-activity"
 ```
 
 ### С DQ переопределениями
 
 ```yaml
-pipeline-name: chembl_activity
+pipeline-name: chembl-activity
 provider: chembl
 entity-type: activity
 version: "1.2.0"
 business-primary-keys: ["activity-id"]
-silver-table: "chembl_activity"
-gold-table: "chembl_activity"
+silver-table: "chembl-activity"
+gold-table: "chembl-activity"
 
 dq-overrides:
   thresholds:
@@ -668,13 +668,13 @@ dq-overrides:
 ### С кастомными sink путями
 
 ```yaml
-pipeline-name: chembl_activity
+pipeline-name: chembl-activity
 provider: chembl
 entity-type: activity
 version: "1.2.0"
 business-primary-keys: ["activity-id"]
-silver-table: "chembl_activity"
-gold-table: "chembl_activity"
+silver-table: "chembl-activity"
+gold-table: "chembl-activity"
 
 sink:
   bronze:
@@ -699,7 +699,7 @@ sink:
 
 ```json
 {
-  "pipeline-name": "chembl_activity",
+  "pipeline-name": "chembl-activity",
   "provider": "chembl",
   "entity-type": "activity",
   "batch-size": 100
@@ -709,7 +709,7 @@ sink:
 **Стало (YAML):**
 
 ```yaml
-pipeline-name: chembl_activity
+pipeline-name: chembl-activity
 provider: chembl
 entity-type: activity
 batch-size: 100
@@ -724,7 +724,7 @@ batch-size: 100
 ### Ошибка валидации конфига
 
 ```bash
-bioetl config validate chembl_activity
+bioetl config validate chembl-activity
 ```
 
 **Распространённые ошибки:**
@@ -749,7 +749,7 @@ bioetl config validate chembl_activity
 1. Использовать CLI для просмотра resolved конфига:
 
    ```bash
-   bioetl config show chembl_activity --format json
+   bioetl config show chembl-activity --format json
    ```
 
 ----------------------------------------------------------------------

@@ -8,7 +8,7 @@
 
 | Parameter         | Value                                         |
 | ----------------- | --------------------------------------------- |
-| **Pipeline ID**   | `chembl_subcellular_fraction`                 |
+| **Pipeline ID**   | `chembl-subcellular-fraction`                 |
 | **Provider**      | ChEMBL (EBI)                                  |
 | **Entity**        | subcellular-fraction                          |
 | **Source Entity** | assay                                         |
@@ -34,7 +34,7 @@ Subcellular Fractions represent specific **cellular compartments** (like mitocho
 
 ## 3. Extraction & Transformation
 
-This is a **derived entity** created by extracting unique values from the `assay-subcellular-fraction` field in the `chembl_assay` pipeline.
+This is a **derived entity** created by extracting unique values from the `assay-subcellular-fraction` field in the `chembl-assay` pipeline.
 
 ### 3.1. Fields
 
@@ -80,12 +80,12 @@ class ChEMBLSubcellularFractionGoldSchema(pa.DataFrameModel):
 ## 5. Pipeline Configuration
 
 ```yaml
-pipeline-name: chembl_subcellular_fraction
+pipeline-name: chembl-subcellular-fraction
 provider: chembl
 entity-type: subcellular-fraction
 version: "1.0.0"
 
 primary-keys: ["subcellular-fraction"]
-silver-table: "chembl_subcellular_fraction"
-gold-table: "chembl_subcellular_fraction"
+silver-table: "chembl-subcellular-fraction"
+gold-table: "chembl-subcellular-fraction"
 ```
