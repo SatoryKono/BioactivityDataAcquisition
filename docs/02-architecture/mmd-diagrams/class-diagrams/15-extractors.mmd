@@ -10,65 +10,65 @@
 classDiagram
     direction TB
     class BaseFieldExtractor {
-        <<ABC>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +extract(record: dict) dict*&nbsp;&nbsp;&nbsp;
+        <<ABC>>
+        +extract(record: dict) dict*
     }
 
     note for BaseFieldExtractor "Strategy pattern for\nextracting fields from\nraw API records"
 
     class AbstractExtractor {
-        PubMed abstract text&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +extract(record) dict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        PubMed abstract text
+        +extract(record) dict
     }
 
     class AuthorExtractor {
-        Author name normalization&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +extract(record) dict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        Author name normalization
+        +extract(record) dict
     }
 
     class DateExtractor {
-        Publication date parsing&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +extract(record) dict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        Publication date parsing
+        +extract(record) dict
     }
 
     class ClassificationExtractor {
         Publication type classification
-        +extract(record) dict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +extract(record) dict
     }
 
     class IdentifierExtractor {
-        DOI, PMID, etc.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +extract(record) dict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        DOI, PMID, etc.
+        +extract(record) dict
     }
 
     class TaxonomyExtractor {
-        UniProt organism/taxonomy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +extract(record) dict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        UniProt organism/taxonomy
+        +extract(record) dict
     }
 
     class GeneExtractor {
-        UniProt gene information&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +extract(record) dict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        UniProt gene information
+        +extract(record) dict
     }
 
     class FeatureExtractor {
-        UniProt protein features&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +extract(record) dict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        UniProt protein features
+        +extract(record) dict
     }
 
     class CrossRefExtractor {
-        UniProt cross-references&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +extract(record) dict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        UniProt cross-references
+        +extract(record) dict
     }
 
     class CommentExtractor {
-        UniProt protein comments&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +extract(record) dict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        UniProt protein comments
+        +extract(record) dict
     }
 
     class MedlineDateParser {
-        Parses various date formats&nbsp;&nbsp;&nbsp;&nbsp;
-        +parse(date_str) date | None&nbsp;&nbsp;&nbsp;
+        Parses various date formats
+        +parse(date_str) date | None
     }
 
     BaseFieldExtractor <|-- AbstractExtractor

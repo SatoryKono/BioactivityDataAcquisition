@@ -12,19 +12,19 @@
 
 graph TB
     subgraph Interfaces["Interfaces Layer"]
-        CLI["CLI Commands (Click)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        HTTP["HTTP Interface&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        CLI["CLI Commands (Click)"]
+        HTTP["HTTP Interface"]
     end
 
     subgraph Composition["Composition Layer"]
-        RA["bootstrap_pipeline_runner&nbsp;&nbsp;&nbsp;&nbsp;"]
-        DSR["DataSourceRegistry&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        TF["GenericPipelineFactory&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        RF["RunnerFactory&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        DQF["DQServicesFactory&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        PR["ProviderRegistry&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        RA["bootstrap_pipeline_runner"]
+        DSR["DataSourceRegistry"]
+        TF["GenericPipelineFactory"]
+        RF["RunnerFactory"]
+        DQF["DQServicesFactory"]
+        PR["ProviderRegistry"]
         EP["ExtractionParams Registration"]
-        RB["ServicesBuilder&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        RB["ServicesBuilder"]
     end
 
     CLI --> RA

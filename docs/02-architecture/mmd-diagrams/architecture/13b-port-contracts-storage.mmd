@@ -12,15 +12,15 @@
 
 graph LR
     subgraph Domain["Domain Layer"]
-        STP["StoragePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        DRP["DeltaReaderPort&nbsp;&nbsp;&nbsp;"]
+        STP["StoragePort"]
+        DRP["DeltaReaderPort"]
         MWP["MetadataWriterPort"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        BW["BronzeWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        DR_I["DeltaReader&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        MW_I["MetadataWriter&nbsp;&nbsp;&nbsp;&nbsp;"]
+        BW["BronzeWriter"]
+        DR_I["DeltaReader"]
+        MW_I["MetadataWriter"]
     end
 
     STP --- BW & SW & GW

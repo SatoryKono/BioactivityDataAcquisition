@@ -11,9 +11,9 @@
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 %% @uniform width=200 height=112 max_title_len=19 max_desc_lines=4
 flowchart TD
-    ROOT["Exception&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Python built-in)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+    ROOT["Exception<br/>(Python built-in)<br/><br/>"]
 
-    BIOETL["BioETLError&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>domain/exceptions/base.py&nbsp;&nbsp;&nbsp;<br/>error_type: ErrorType&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>context: dict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+    BIOETL["BioETLError<br/>domain/exceptions/base.py<br/>error_type: ErrorType<br/>context: dict"]
 
     ROOT --> BIOETL
 
@@ -72,14 +72,14 @@ flowchart TD
     BIOETL --> DQ_THRESHOLD["DataQualityThresholdError<br/>pipeline, ratio, threshold"]
 
     %% ── ErrorClassifier ──
-    CLASSIFIER["ErrorClassifier&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>domain/error_classifier.py&nbsp;&nbsp;<br/>.classify(error) → ErrorType<br/>&nbsp;"]
+    CLASSIFIER["ErrorClassifier<br/>domain/error_classifier.py<br/>.classify(error) → ErrorType<br/>"]
     CLASSIFIER -.->|"CRITICAL"| CRITICAL
     CLASSIFIER -.->|"RECOVERABLE"| RECOVERABLE
     CLASSIFIER -.->|"DATA_QUALITY"| DQ_ERROR
     CLASSIFIER -.->|"UNKNOWN"| ROOT
 
     %% ── ErrorType enum ──
-    ERROR_TYPE["ErrorType (StrEnum)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>domain/types.py&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>CRITICAL | RECOVERABLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>DATA_QUALITY | UNKNOWN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+    ERROR_TYPE["ErrorType (StrEnum)<br/>domain/types.py<br/>CRITICAL | RECOVERABLE<br/>DATA_QUALITY | UNKNOWN"]
     CLASSIFIER --> ERROR_TYPE
 
     %% ── Action outcomes ──

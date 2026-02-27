@@ -13,27 +13,27 @@
 %%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'POLYLINE'}}}%%
 graph TB
     subgraph Composition["Composition Layer"]
-        RA["bootstrap_pipeline_runner&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        RBA["RunnerBootstrap&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        SBA["StorageBootstrap&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        CBA["CheckpointBootstrap&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        LBA["LockBootstrap&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        RA["bootstrap_pipeline_runner"]
+        RBA["RunnerBootstrap"]
+        SBA["StorageBootstrap"]
+        CBA["CheckpointBootstrap"]
+        LBA["LockBootstrap"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        ADAPTER["Provider Adapter (DataSourcePort)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        ADAPTER["Provider Adapter (DataSourcePort)"]
         STORAGE["BronzeWriter / SilverWriter / GoldWriter"]
-        LOGGER["UnifiedLogger (LoggerPort)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        METRICS["PrometheusMetrics (MetricsPort)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        TRACER["OpenTelemetryTracer (TracingPort)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        LOCK["MemoryLock (LockPort)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        CHKPT["LocalCheckpoint (CheckpointPort)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        QUAR["UnifiedQuarantine (QuarantinePort)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        LOGGER["UnifiedLogger (LoggerPort)"]
+        METRICS["PrometheusMetrics (MetricsPort)"]
+        TRACER["OpenTelemetryTracer (TracingPort)"]
+        LOCK["MemoryLock (LockPort)"]
+        CHKPT["LocalCheckpoint (CheckpointPort)"]
+        QUAR["UnifiedQuarantine (QuarantinePort)"]
     end
 
     subgraph Application["Application Layer"]
-        PS["PipelineServices&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        RUNNER["PipelineRunner&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        PS["PipelineServices"]
+        RUNNER["PipelineRunner"]
     end
 
     RA --> RBA
