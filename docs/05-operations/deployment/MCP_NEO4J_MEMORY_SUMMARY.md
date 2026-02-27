@@ -41,7 +41,7 @@ MCP Neo4j Memory Management has been successfully configured for BioETL.
 ### Created
 ```
 .ai/mcp/neo4j-memory/
-├── --init--.py              # Package marker
+├── __init__.py              # Package marker
 ├── server.py                # Python MCP server (PRIMARY)
 ├── server.js                # Node.js MCP server (alternative)
 ├── memory.json              # Configuration storage

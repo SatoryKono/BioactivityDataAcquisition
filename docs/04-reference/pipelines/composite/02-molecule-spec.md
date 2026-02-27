@@ -31,7 +31,7 @@ Merges ChEMBL molecules with PubChem compound data to produce a composite molecu
 
 ## Related Configs
 
-- Filters: `configs/filters/entities/composite/molecule.yaml`
+- Filters: `configs/composites/molecule.yaml#filters`
 
 ## Related ADRs
 

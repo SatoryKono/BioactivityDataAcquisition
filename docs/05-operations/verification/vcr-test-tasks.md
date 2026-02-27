@@ -36,7 +36,7 @@
 | `TestChemblActivityPipeline.test-chembl_activity-error-handling.yaml` | Integration `test-chembl_activity.py` | OK |
 | `TestChemblAdapter.test-fetch-activities.yaml` | Integration `test-chembl.py` | OK |
 | `TestChemblAdapter.test-get-entity-count.yaml` | Integration `test-chembl.py` | OK |
-| `TestChemblAdapter.test-health-check.yaml` | Integration `test-chembl.py` | OK |
+| `TestChemblAdapter.test-health_check.yaml` | Integration `test-chembl.py` | OK |
 | `TestChemblCellLinePipeline.test-chembl_cell_line-happy-path.yaml` | Integration `test-chembl_cell_line.py` | OK |
 | `TestChemblCellLinePipeline.test-chembl_cell_line-source-fields.yaml` | Integration `test-chembl_cell_line.py` | OK |
 | `TestChemblCompoundRecordPipeline.test-chembl_compound_record-error-handling.yaml` | Integration `test-chembl_compound_record.py` | OK |
@@ -69,7 +69,7 @@
 | Cassette | Used By | Status |
 |----------|---------|--------|
 | `test-fetch-publications.yaml` | E2E `test-pubmed_publication-e2e.py` | OK |
-| `test-health-check.yaml` | E2E `test-pubmed_publication-e2e.py` / root-level dup | VERIFY - duplicate at root |
+| `test-health_check.yaml` | E2E `test-pubmed_publication-e2e.py` / root-level dup | VERIFY - duplicate at root |
 | `test-pubmed_publication-classification-fields.yaml` | E2E `test-pubmed_publication-e2e.py` | OK |
 | `test-pubmed_publication-date-fields.yaml` | E2E `test-pubmed_publication-e2e.py` | OK |
 | `test-pubmed_publication-full-cycle.yaml` | E2E `test-pubmed_publication-e2e.py` | OK |
@@ -82,7 +82,7 @@
 |----------|---------|--------|
 | `test-crossref-batch-fetch.yaml` | **ORPHAN** - no test references this | ORPHAN |
 | `test-crossref-fetch-by-doi.yaml` | **ORPHAN** - no test references this | ORPHAN |
-| `test-crossref-health-check.yaml` | **ORPHAN** - no test references this | ORPHAN |
+| `test-crossref-health_check.yaml` | **ORPHAN** - no test references this | ORPHAN |
 | `test-crossref-search-by-title.yaml` | **ORPHAN** - no test references this | ORPHAN |
 | `works-batch.yaml` | **ORPHAN** - no test references this | ORPHAN |
 
@@ -96,7 +96,7 @@
 | `TestOpenAlexAdapterIntegration.test-fetch-filtered-by-doi.yaml` | Integration `test-adapter.py` | OK |
 | `TestOpenAlexAdapterIntegration.test-fetch-filtered-with-fallback.yaml` | Integration `test-adapter.py` | OK |
 | `TestOpenAlexAdapterIntegration.test-fetch-with-query.yaml` | Integration `test-adapter.py` | OK |
-| `TestOpenAlexAdapterIntegration.test-health-check.yaml` | Integration `test-adapter.py` | OK |
+| `TestOpenAlexAdapterIntegration.test-health_check.yaml` | Integration `test-adapter.py` | OK |
 | `TestOpenAlexAdapterIntegration.test-title-only-lookup.yaml` | Integration `test-adapter.py` | OK |
 | `TestOpenAlexAdapterRateLimiting.test-rate-limiting-not-exceeded.yaml` | Integration `test-adapter.py` | OK |
 
@@ -108,7 +108,7 @@
 | `TestSemanticScholarAdapterIntegration.test-fetch-by-doi.yaml` | Integration `test-semanticscholar.py` | OK |
 | `TestSemanticScholarAdapterIntegration.test-fetch-filtered-with-fallback.yaml` | Integration `test-semanticscholar.py` | OK |
 | `TestSemanticScholarAdapterIntegration.test-fetch-with-query.yaml` | Integration `test-semanticscholar.py` | OK |
-| `TestSemanticScholarAdapterIntegration.test-health-check.yaml` | Integration `test-semanticscholar.py` | OK |
+| `TestSemanticScholarAdapterIntegration.test-health_check.yaml` | Integration `test-semanticscholar.py` | OK |
 | `TestSemanticScholarAdapterIntegration.test-title-only-lookup.yaml` | Integration `test-semanticscholar.py` | OK |
 
 ### uniprot/ (10 cassettes)
@@ -116,10 +116,10 @@
 | Cassette | Used By | Status |
 |----------|---------|--------|
 | `TestUniProtAdapterIntegration.test-fetch-proteins.yaml` | Integration `test-uniprot.py` | OK |
-| `TestUniProtAdapterIntegration.test-health-check.yaml` | Integration `test-uniprot.py` | OK |
+| `TestUniProtAdapterIntegration.test-health_check.yaml` | Integration `test-uniprot.py` | OK |
 | `TestUniProtClientIntegration.test-fetch-proteins.yaml` | **ORPHAN** - no matching test class | ORPHAN |
-| `TestUniProtClientIntegration.test-health-check.yaml` | **ORPHAN** - no matching test class | ORPHAN |
-| `TestUniProtIDMappingIntegration.test-health-check.yaml` | Integration `test-uniprot_idmapping.py` | OK |
+| `TestUniProtClientIntegration.test-health_check.yaml` | **ORPHAN** - no matching test class | ORPHAN |
+| `TestUniProtIDMappingIntegration.test-health_check.yaml` | Integration `test-uniprot_idmapping.py` | OK |
 | `TestUniProtIDMappingIntegration.test-map-mixed-results.yaml` | Integration `test-uniprot_idmapping.py` | OK |
 | `TestUniProtIDMappingIntegration.test-map-multiple-ids.yaml` | Integration `test-uniprot_idmapping.py` | OK |
 | `TestUniProtIDMappingIntegration.test-map-not-found-id.yaml` | Integration `test-uniprot_idmapping.py` | OK |
@@ -139,7 +139,7 @@
 | Cassette | Used By | Status |
 |----------|---------|--------|
 | `test-chembl-and-uniprot-sequential-run.yaml` | **DUPLICATE** of `multi-provider/` version | ORPHAN/DUPLICATE |
-| `test-health-check.yaml` | **DUPLICATE** of `pubmed/` version | ORPHAN/DUPLICATE |
+| `test-health_check.yaml` | **DUPLICATE** of `pubmed/` version | ORPHAN/DUPLICATE |
 | `test-pubchem_compound-pipeline.yaml` | **DUPLICATE** of `pubchem/` version | ORPHAN/DUPLICATE |
 
 ---
@@ -152,7 +152,7 @@
 
 Pipeline configs exist for 15 ChEMBL entities but only 4 have dedicated integration pipeline tests (activity, cell-line, compound-record, target-component). The following entities lack VCR-backed integration/E2E pipeline tests:
 
-- [ ] `chembl/assay-parameters` -- has pipeline config `configs/pipelines/chembl/assay-parameters.yaml` and transformer `assay-parameters-transformer.py`, but no integration test or VCR cassette
+- [ ] `chembl/assay-parameters` -- has pipeline config `configs/entities/chembl/assay-parameters.yaml` and transformer `assay-parameters-transformer.py`, but no integration test or VCR cassette
 - [ ] `chembl/protein-class` -- has pipeline config and transformer, no integration test
 - [ ] `chembl/publication-similarity` -- has pipeline config and transformer, no integration test
 - [ ] `chembl/subcellular-fraction` -- has pipeline config and transformer, no integration test
@@ -165,20 +165,20 @@ Pipeline configs exist for 15 ChEMBL entities but only 4 have dedicated integrat
 
 #### CrossRef - No VCR-backed tests at all
 
-- [ ] `crossref/publication-pipeline` -- CrossRef publication pipeline (`configs/pipelines/crossref/publication.yaml`) has no E2E VCR test; adapter tests use `respx` only
+- [ ] `crossref/publication-pipeline` -- CrossRef publication pipeline (`configs/entities/crossref/publication.yaml`) has no E2E VCR test; adapter tests use `respx` only
 - [ ] `crossref/adapter-integration` -- Consider migrating respx tests to VCR for consistency with other providers
 
 #### OpenAlex - Missing E2E pipeline test
 
-- [ ] `openalex/publication-pipeline` -- OpenAlex publication pipeline (`configs/pipelines/openalex/publication.yaml`) has adapter-level VCR tests but no E2E full-pipeline test
+- [ ] `openalex/publication-pipeline` -- OpenAlex publication pipeline (`configs/entities/openalex/publication.yaml`) has adapter-level VCR tests but no E2E full-pipeline test
 
 #### Semantic Scholar - Missing E2E pipeline test
 
-- [ ] `semanticscholar/publication-pipeline` -- Semantic Scholar publication pipeline (`configs/pipelines/semanticscholar/publication.yaml`) has adapter-level VCR tests but no E2E full-pipeline test
+- [ ] `semanticscholar/publication-pipeline` -- Semantic Scholar publication pipeline (`configs/entities/semanticscholar/publication.yaml`) has adapter-level VCR tests but no E2E full-pipeline test
 
 #### UniProt - ID Mapping pipeline test
 
-- [ ] `uniprot/idmapping-pipeline` -- UniProt ID mapping pipeline (`configs/pipelines/uniprot/idmapping.yaml`) has adapter-level VCR tests but no E2E full-pipeline test
+- [ ] `uniprot/idmapping-pipeline` -- UniProt ID mapping pipeline (`configs/entities/uniprot/idmapping.yaml`) has adapter-level VCR tests but no E2E full-pipeline test
 
 ---
 
@@ -230,13 +230,13 @@ Similar corruption found in `openalex/extractors.py` (line 431-439) and `semanti
 ### [VERIFY] Cassettes to validate
 
 - [ ] `pubchem/test-pubchem_compound-pipeline.yaml` -- Duplicate exists at root level (`tests/fixtures/vcr/test-pubchem_compound-pipeline.yaml`). Verify which one is actually loaded and remove the unused duplicate.
-- [ ] `pubmed/test-health-check.yaml` -- Duplicate exists at root level. Verify which is used.
+- [ ] `pubmed/test-health_check.yaml` -- Duplicate exists at root level. Verify which is used.
 - [ ] `multi-provider/test-chembl-and-uniprot-sequential-run.yaml` -- Duplicate exists at root level. E2E conftest maps to `multi-provider/` dir.
 - [ ] `uniprot/TestUniProtClientIntegration.test-fetch-proteins.yaml` -- Orphan cassette. No test class named `TestUniProtClientIntegration` found in current tests (class was likely renamed to `TestUniProtAdapterIntegration`).
-- [ ] `uniprot/TestUniProtClientIntegration.test-health-check.yaml` -- Same orphan issue as above.
+- [ ] `uniprot/TestUniProtClientIntegration.test-health_check.yaml` -- Same orphan issue as above.
 - [ ] `crossref/test-crossref-batch-fetch.yaml` -- Orphan cassette. All CrossRef tests use `respx`, not VCR.
 - [ ] `crossref/test-crossref-fetch-by-doi.yaml` -- Orphan cassette.
-- [ ] `crossref/test-crossref-health-check.yaml` -- Orphan cassette.
+- [ ] `crossref/test-crossref-health_check.yaml` -- Orphan cassette.
 - [ ] `crossref/test-crossref-search-by-title.yaml` -- Orphan cassette.
 - [ ] `crossref/works-batch.yaml` -- Orphan cassette.
 
@@ -265,13 +265,13 @@ Similar corruption found in `openalex/extractors.py` (line 431-439) and `semanti
 |----------|----------|--------|
 | crossref | `test-crossref-batch-fetch.yaml` | No VCR-using test references this cassette |
 | crossref | `test-crossref-fetch-by-doi.yaml` | No VCR-using test references this cassette |
-| crossref | `test-crossref-health-check.yaml` | No VCR-using test references this cassette |
+| crossref | `test-crossref-health_check.yaml` | No VCR-using test references this cassette |
 | crossref | `test-crossref-search-by-title.yaml` | No VCR-using test references this cassette |
 | crossref | `works-batch.yaml` | No VCR-using test references this cassette |
 | uniprot | `TestUniProtClientIntegration.test-fetch-proteins.yaml` | Class renamed to TestUniProtAdapterIntegration |
-| uniprot | `TestUniProtClientIntegration.test-health-check.yaml` | Class renamed to TestUniProtAdapterIntegration |
+| uniprot | `TestUniProtClientIntegration.test-health_check.yaml` | Class renamed to TestUniProtAdapterIntegration |
 | root | `test-chembl-and-uniprot-sequential-run.yaml` | Duplicate of `multi-provider/` version |
-| root | `test-health-check.yaml` | Duplicate of `pubmed/` version |
+| root | `test-health_check.yaml` | Duplicate of `pubmed/` version |
 | root | `test-pubchem_compound-pipeline.yaml` | Duplicate of `pubchem/` version |
 
 ---

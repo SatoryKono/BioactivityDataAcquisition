@@ -1710,7 +1710,7 @@ class TestSilverWriterCsvExport:
 
     @pytest.mark.asyncio
     async def test_write_silver_csv_exporter_with_merge_passes_primary_keys(
-        self, noop_logger, valid_records
+        self, noop_logger, valid_records, tmp_path
     ):
         """Test CSV exporter receives primary_keys when mode is merge."""
         import pyarrow as pa
@@ -1742,10 +1742,14 @@ class TestSilverWriterCsvExport:
                 "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
                 side_effect=DeltaTableNotFoundError("Not found"),
             ),
+            patch(
+                "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+                side_effect=DeltaTableNotFoundError("Not found"),
+            ),
             patch("bioetl.infrastructure.storage.silver_writer.write_deltalake"),
         ):
             writer = SilverWriter(
-                base_path="/tmp/silver",
+                base_path=str(tmp_path / "silver"),
                 logger=noop_logger,
                 csv_exporter=mock_exporter,
             )

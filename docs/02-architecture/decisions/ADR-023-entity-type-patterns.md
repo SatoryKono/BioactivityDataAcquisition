@@ -11,10 +11,10 @@
 
 ### Исходная Проблема
 
-`BaseTransformer.--init--()` принимает опциональный параметр `entity-type`:
+`BaseTransformer.__init__()` принимает опциональный параметр `entity-type`:
 
 ```python
-def --init--(
+def __init__(
     self,
     provider: str,
     entity-type: str | None = None,  # Default: "unknown"
@@ -33,7 +33,7 @@ def --init--(
 | Паттерн | Описание | Количество | Итоговый entity-type |
 |---------|----------|------------|----------------------|
 | **A** | ChEMBL через `BaseChemblTransformer` (не передаёт entity-type) | 12 | `"unknown"` |
-| **B** | Явная передача entity-type в `super().--init--()` | 6 | Корректный |
+| **B** | Явная передача entity-type в `super().__init__()` | 6 | Корректный |
 | **C** | Нет entity-type, нет entity-class (PubMed) | 1 | `"unknown"` |
 
 **Проблема**: 13 из 19 трансформеров имели `entity-type = "unknown"`, что приводило к потере ценной информации в метриках и трейсинге.
@@ -44,8 +44,8 @@ def --init--(
 class BaseChemblTransformer(BaseTransformer):
     entity-class: ClassVar[type[BaseEntity]]  # ✅ Определён
 
-    def --init--(self, provider: str = "chembl", ...):
-        super().--init--(
+    def __init__(self, provider: str = "chembl", ...):
+        super().__init__(
             provider,
             # entity-type НЕ передаётся! → "unknown"
             tracer=tracer,
@@ -59,8 +59,8 @@ class BaseChemblTransformer(BaseTransformer):
 
 ```python
 class CrossRefPublicationTransformer(BaseTransformer):
-    def --init--(self, provider: str = "crossref", ...):
-        super().--init--(
+    def __init__(self, provider: str = "crossref", ...):
+        super().__init__(
             provider,
             entity-type="publication",  # ✅ Явно передано
             ...
@@ -71,8 +71,8 @@ class CrossRefPublicationTransformer(BaseTransformer):
 
 ```python
 class PubMedPublicationTransformer(BaseTransformer):
-    def --init--(self, provider: str = "pubmed", ...):
-        super().--init--(
+    def __init__(self, provider: str = "pubmed", ...):
+        super().__init__(
             provider,
             # entity-type НЕ передаётся → "unknown"
             ...
@@ -89,11 +89,11 @@ class PubMedPublicationTransformer(BaseTransformer):
 class BaseChemblTransformer(BaseTransformer):
     entity-class: ClassVar[type[BaseEntity]]
 
-    def --init--(self, provider: str = "chembl", ...):
+    def __init__(self, provider: str = "chembl", ...):
         # Auto-derive entity-type from entity-class ClassVar
         entity-type = self.entity-class.--name--.lower()
 
-        super().--init--(
+        super().__init__(
             provider,
             entity-type=entity-type,  # ✅ Автоматически
             ...
@@ -106,8 +106,8 @@ class BaseChemblTransformer(BaseTransformer):
 
 ```python
 class PubMedPublicationTransformer(BaseTransformer):
-    def --init--(self, provider: str = "pubmed", ...):
-        super().--init--(
+    def __init__(self, provider: str = "pubmed", ...):
+        super().__init__(
             provider,
             entity-type="publication",  # ✅ Явно
             ...
@@ -230,9 +230,9 @@ class ActivityTransformer(BaseChemblTransformer):
 
 ```python
 class BaseChemblTransformer(BaseTransformer):
-    def --init--(self, entity-type: str | None = None, ...):
+    def __init__(self, entity-type: str | None = None, ...):
         derived = entity-type or self.entity-class.--name--.lower()
-        super().--init--(entity-type=derived, ...)
+        super().__init__(entity-type=derived, ...)
 ```
 
 **Rejected** because:

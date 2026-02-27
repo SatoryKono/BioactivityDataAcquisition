@@ -130,7 +130,7 @@ src/bioetl/
 | **BaseTransformer**         | "Нет DQ-валидации"           | Template Method — DQ в конкретных трансформерах    |
 | **CLI-composition связь**   | "Плотная связанность"        | CLI использует `entrypoints.py` — правильный фасад |
 
-**См. полный список в** `CLAUDE.md` §2.3 и `docs/archived/refactoring-plan.md`
+**См. полный список в** `CLAUDE.md` §2.3 и `docs/99-archive/refactoring-plan.md`
 
 ### 3.4. 🛡️ Протокол Обязательной Верификации
 
@@ -267,13 +267,13 @@ flowchart TD
 1. **Адаптер:** Создай класс в `src/bioetl/infrastructure/adapters/{provider}/`
 1. **Реализация:**
    - Класс **MUST** реализовывать порт.
-   - Зависимости (`httpx.AsyncClient`, `config`) **MUST** приниматься в `--init--`.
-   - **MUST** реализовывать `health-check()`.
+   - Зависимости (`httpx.AsyncClient`, `config`) **MUST** приниматься в `__init__`.
+   - **MUST** реализовывать `health_check()`.
    - **MUST** соблюдать rate limits провайдера.
 
 ### 7.2. Создание Нового Пайплайна
 
-1. **Конфиг:** Создай `configs/pipelines/{provider}/{entity}.yaml`. Определи `load-strategy` (`incremental` или `full`).
+1. **Конфиг:** Создай `configs/entities/{provider}/{entity}.yaml`. Определи `load-strategy` (`incremental` или `full`).
 1. **Трансформер:** Наследуй от `BaseTransformer` (`src/bioetl/application/core/base-transformer.py`).
 1. **Пайплайн:** Создай класс в `src/bioetl/application/pipelines/`.
 1. **Фабрика:** Создай фабрику в `src/bioetl/composition/factories/`.

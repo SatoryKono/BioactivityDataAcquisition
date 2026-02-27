@@ -29,7 +29,7 @@ sum(increase(bioetl-silver-validation-failures-total{table=~"$pipeline"}[24h]))
 4. Исправлен Provider Health panel `id=103`:
 
 ```promql
-histogram-quantile(0.95, sum by (le) (rate(bioetl-health-check-latency-ms-bucket{provider="$provider"}[5m])))
+histogram-quantile(0.95, sum by (le) (rate(bioetl-health_check-latency-ms-bucket{provider="$provider"}[5m])))
 ```
 
 ## Актуальные ключевые панели

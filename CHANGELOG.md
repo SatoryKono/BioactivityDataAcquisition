@@ -371,7 +371,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Heartbeat interval: 30s
   - Synchronized documentation with implementation in `domain/config.py`
 
-## [Unreleased]
+## [5.8.0] - 2025-12-25
 
 ### Breaking Changes
 

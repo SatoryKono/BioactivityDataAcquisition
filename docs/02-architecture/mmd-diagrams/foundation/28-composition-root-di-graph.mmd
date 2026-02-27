@@ -7,9 +7,38 @@
 %% @date    2026-02-24
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
+%% @uniform-group entry     nodes=CLI,BOOT
+%% @uniform-group factories nodes=BL,DQF,HCF,DSF,STF,STA,SB,RF,GPF
+%% @uniform-group registry  nodes=PR,OB
+%% @uniform-group created   nodes=UHC,ADP,BW,SLL,PS,RUN
+%% @uniform-width group
 
-%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
-%% @uniform width=296 height=144 max_title_len=29 max_desc_lines=6
+%% @uniform width=296 groups=4 width_strategy=group
+%% @uniform-stats entry        width=296 height=144 max_desc_lines=6
+%% @uniform-stats factories    width=224 height=144 max_desc_lines=6
+%% @uniform-stats registry     width=200 height=144 max_desc_lines=6
+%% @uniform-stats created      width=176 height=144 max_desc_lines=6
+%%{init: {
+%%  'layout': 'elk',
+%%  'theme': 'base',
+%%  'themeVariables': {'lineWidth': '2'},
+%%  'flowchart': {
+%%    'nodeSpacing': 64,
+%%    'rankSpacing': 80,
+%%    'padding': 24,
+%%    'curve': 'linear'
+%%  },
+%%  'elk': {
+%%    'mergeEdges': true,
+%%    'nodePlacementStrategy': 'BRANDES_KOEPF',
+%%    'cycleBreakingStrategy': 'GREEDY',
+%%    'direction': 'DOWN',
+%%    'spacing.nodeNode': 52,
+%%    'spacing.edgeNode': 36,
+%%    'spacing.edgeEdge': 24,
+%%    'edgeRouting': 'ORTHOGONAL'
+%%  }
+%%}}%%
 flowchart TB
 %% keep-orphan: OB
     subgraph Entry["Entry Point"]
@@ -18,7 +47,7 @@ flowchart TB
     end
 
     subgraph Factories["Composition Factories"]
-        direction TB
+        direction LR
 
         subgraph LoggerFactories["Logger & Observability"]
             BL["BootstrapLogger<br/>• configure structlog<br/><br/><br/><br/>"]
@@ -49,45 +78,56 @@ flowchart TB
 
     subgraph Created["Created Instances"]
         direction TB
-        UHC["UnifiedHTTPClient<br/>+ TokenBucket<br/>+ CircuitBreaker<br/><br/><br/>"]
-        ADP["Provider Adapter<br/>(ChemblAdapter, etc.)<br/><br/><br/><br/>"]
-        BW["BronzeWriter<br/><br/><br/><br/><br/>"]
-        SLL["StructlogLogger<br/><br/><br/><br/><br/>"]
-        PS["PipelineServices<br/>(frozen bundle)<br/><br/><br/><br/>"]
-        RUN["PipelineRunner<br/>(fully assembled)<br/><br/><br/><br/>"]
+        subgraph RuntimeInfra["Infra Instances"]
+            direction TB
+            UHC["UnifiedHTTPClient<br/>+ TokenBucket<br/>+ CircuitBreaker<br/><br/><br/>"]
+            ADP["Provider Adapter<br/>(ChemblAdapter, etc.)<br/><br/><br/><br/>"]
+            BW["BronzeWriter<br/><br/><br/><br/><br/>"]
+            SLL["StructlogLogger<br/><br/><br/><br/><br/>"]
+        end
+        subgraph RuntimeCore["Application Instances"]
+            direction TB
+            PS["PipelineServices<br/>(frozen bundle)<br/><br/><br/><br/>"]
+            RUN["PipelineRunner<br/>(fully assembled)<br/><br/><br/><br/>"]
+        end
     end
 
     %% Bootstrap flow
-    CLI --> BOOT
-    BOOT --> BL
+    CLI ==> BOOT
+    BOOT -.-> BL
     BL --> SLL
-    BOOT --> HCF
-    HCF --> UHC
-    BOOT --> DSF
-    DSF -->|"uses"| PR
-    DSF -->|"uses"| UHC
+    BOOT -.-> HCF
+    HCF -.-> UHC
+    BOOT -.-> DSF
+    DSF -.->|"uses"| PR
+    DSF -.->|"uses"| UHC
     DSF --> ADP
-    BOOT --> STF
-    STF --> STA
-    STA --> BW & SW & GW
-    BOOT --> DQF
-    BOOT --> SB
-    SB -->|"injects storage"| BW & SW & GW
-    SB -->|"injects lock"| ML
-    SB -->|"injects checkpoint"| LC
-    SB -->|"injects quarantine"| UQ
-    SB -->|"injects logger"| SLL
-    SB -->|"injects metrics"| PMM
-    SB -->|"injects tracing"| NOT
-    SB --> PS
-    BOOT --> RF
-    RF -->|"uses"| PS
-    RF -->|"uses"| ADP
-    RF --> RUN
+    BOOT -.-> STF
+    STF -.-> STA
+    STA ==> BW & SW & GW
+    BOOT -.-> DQF
+    BOOT ==> SB
+    SB -.->|"injects"| BW & SW & GW
+    SB -.->|"injects"| ML
+    SB -.->|"injects"| LC
+    SB -.->|"injects"| UQ
+    SB -.->|"injects"| SLL
+    SB -.->|"injects"| PMM
+    SB -.->|"injects"| NOT
+    SB ==> PS
+    BOOT ==> RF
+    RF -.->|"uses"| PS
+    RF -.->|"uses"| ADP
+    RF ==> RUN
 
     %% Registry connections
-    GPF -->|"registered in"| PLREG
-    PR -->|"contains"| DSR
+    GPF -.->|"registers"| PLREG
+    PR -.->|"maps"| DSR
+
+    %% Layout constraints
+    CLI ~~~ BOOT
+    PR ~~~ OB
+    UHC ~~~ ADP ~~~ BW ~~~ SLL ~~~ PS ~~~ RUN
 
     %% Styling
     style Entry fill:#f5f3ff,stroke:#7c3aed
@@ -99,3 +139,20 @@ flowchart TB
     style ClientFactories fill:#eff6ff,stroke:#2563eb,stroke-dasharray: 5 5
     style StorageFactories fill:#f5f3ff,stroke:#9c27b0,stroke-dasharray: 5 5
     style PipelineFactories fill:#e0f2f1,stroke:#009688,stroke-dasharray: 5 5
+
+    %% Layer palette (semantic)
+    classDef layer_domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:1.8px;
+    classDef layer_application fill:#f0fdf4,stroke:#16a34a,stroke-width:1.8px;
+    classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
+    classDef layer_composition fill:#fff7ed,stroke:#d97706,stroke-width:1.8px;
+    classDef layer_interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:1.8px;
+
+    class CLI layer_interfaces;
+    class BOOT,BL,DQF,HCF,DSF,STF,STA,SB,RF,GPF,PR,OB layer_composition;
+    class PS,RUN layer_application;
+    class UHC,ADP,BW,SLL layer_infrastructure;
+
+    %% Click tooltips
+    click SB "../../02-architecture/decisions/ADR-005-composition-layer-separation.md" "Injects storage, lock, checkpoint, quarantine, logger, metrics, tracing"
+    click DSF "../../00-project/RULES.md" "Resolves provider registry and shared HTTP client"
+    click RF "../../00-project/RULES.md" "Builds PipelineRunner from composed services and adapter"
