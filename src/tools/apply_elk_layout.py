@@ -114,7 +114,9 @@ def build_elk_init(edge_routing: str) -> str:
     return ELK_INIT_TEMPLATE.replace("__EDGE_ROUTING__", edge_routing)
 
 
-def enforce_edge_routing(lines: list[str], edge_routing: str) -> tuple[list[str], bool, bool]:
+def enforce_edge_routing(
+    lines: list[str], edge_routing: str
+) -> tuple[list[str], bool, bool]:
     """Replace ELK edgeRouting value in existing init block(s).
 
     Returns: (new_lines, changed, found_edge_routing_field)
@@ -160,7 +162,9 @@ def apply_elk(
 
     if has_elk_init(lines):
         if edge_routing is not None:
-            lines, changed, found = enforce_edge_routing(lines, edge_routing=edge_routing)
+            lines, changed, found = enforce_edge_routing(
+                lines, edge_routing=edge_routing
+            )
             if changed:
                 changes.append(f"edgeRouting->{edge_routing}")
             elif not found:
@@ -185,7 +189,9 @@ def apply_elk(
 
     # ── Insert ELK init directive before graph declaration ────────────────────
     selected_routing = edge_routing or DEFAULT_EDGE_ROUTING
-    new_lines = lines[:graph_idx] + [build_elk_init(selected_routing)] + lines[graph_idx:]
+    new_lines = (
+        lines[:graph_idx] + [build_elk_init(selected_routing)] + lines[graph_idx:]
+    )
     changes.append("elk_init")
 
     # ── Optionally override direction ─────────────────────────────────────────
