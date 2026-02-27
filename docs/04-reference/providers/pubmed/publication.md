@@ -1,6 +1,6 @@
 # Пайплайн: PubMed Publication
 
-**Имя пайплайна:** `pubmed_publication`
+**Имя пайплайна:** `pubmed-publication`
 **Провайдер:** `pubmed`
 **Сущность:** `publication`
 **Версия схемы:** 1.0.0
@@ -94,13 +94,13 @@ PubMed API имеет строгие лимиты:
 
 ```bash
 # Инкрементальная загрузка
-bioetl run pubmed_publication
+bioetl run pubmed-publication
 
 # С ограничением
-bioetl run pubmed_publication --limit 100
+bioetl run pubmed-publication --limit 100
 
 # Полная перезагрузка
-bioetl run pubmed_publication --run-type rebuild
+bioetl run pubmed-publication --run-type rebuild
 ```
 
 ---
@@ -109,7 +109,7 @@ bioetl run pubmed_publication --run-type rebuild
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/pubmed/publication.yaml` |
+| Конфигурация | `configs/entities/pubmed/publication.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/pubmed/transformer.py` |
 | XML Utils | `src/bioetl/application/pipelines/pubmed/xml-utils.py` |
 

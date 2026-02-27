@@ -450,10 +450,10 @@ Gold layer contains only records passing gold-filters:
 | Artifact | Path |
 |----------|------|
 | Pandera Schema | `src/bioetl/domain/schemas/chembl/activity.py` |
-| Domain Entity | `src/bioetl/domain/entities/chembl_activity.py` |
+| Domain Entity | `src/bioetl/domain/entities/chembl-activity.py` |
 | Base Schema | `src/bioetl/domain/schemas/base.py` |
 | Transformer | `src/bioetl/application/pipelines/chembl/activity-transformer.py` |
-| Pipeline Config | `configs/pipelines/chembl/activity.yaml` |
+| Pipeline Config | `configs/entities/chembl/activity.yaml` |
 | VCR Cassettes | `tests/fixtures/vcr/TestChemblActivityPipeline.*.yaml` |
 
 ---

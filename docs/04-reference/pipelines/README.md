@@ -12,37 +12,37 @@ This directory contains documentation for all BioETL pipelines, including compos
 
 | #   | Pipeline ID                     | Provider         | Entity                 | Spec                                             |
 | --- | ------------------------------- | ---------------- | ---------------------- | ------------------------------------------------ |
-| 1   | `chembl_protein_class`          | ChEMBL           | protein_class          | [Spec](chembl/01-protein-class-spec.md)          |
-| 2   | `chembl_cell_line`              | ChEMBL           | cell_line              | [Spec](chembl/02-cell-line-spec.md)              |
-| 3   | `chembl_molecule`               | ChEMBL           | molecule               | [Spec](chembl/03-molecule-spec.md)               |
-| 4   | `chembl_target`                 | ChEMBL           | target                 | [Spec](chembl/04-target-spec.md)                 |
-| 5   | `chembl_activity`               | ChEMBL           | activity               | [Spec](chembl/05-activity-spec.md)               |
-| 6   | `chembl_assay`                  | ChEMBL           | assay                  | [Spec](chembl/06-assay-spec.md)                  |
-| 7   | `chembl_publication`            | ChEMBL           | publication            | [Spec](chembl/07-publication-spec.md)            |
-| 8   | `chembl_assay_parameters`       | ChEMBL           | assay_parameters       | [Spec](chembl/08-assay-parameters-spec.md)       |
-| 9   | `chembl_compound_record`        | ChEMBL           | compound_record        | [Spec](chembl/09-compound-record-spec.md)        |
-| 10  | `chembl_target_component`       | ChEMBL           | target_component       | [Spec](chembl/10-target-component-spec.md)       |
-| 11  | `chembl_publication_term`       | ChEMBL           | publication_term       | [Spec](chembl/11-publication-term-spec.md)       |
-| 12  | `chembl_publication_similarity` | ChEMBL           | publication_similarity | [Spec](chembl/12-publication-similarity-spec.md) |
-| 13  | `chembl_subcellular_fraction`   | ChEMBL           | subcellular_fraction   | [Spec](chembl/14-subcellular-fraction-spec.md)   |
-| 14  | `chembl_tissue`                 | ChEMBL           | tissue                 | [Spec](chembl/15-tissue-spec.md)                 |
-| 15  | `uniprot_protein`               | UniProt          | protein                | [Spec](uniprot/01-protein-spec.md)               |
-| 16  | `uniprot_idmapping`             | UniProt          | idmapping              | [Spec](uniprot/02-idmapping-spec.md)             |
-| 17  | `pubchem_compound`              | PubChem          | compound               | [Spec](pubchem/01-compound-spec.md)              |
-| 18  | `pubmed_publication`            | PubMed           | publication            | [Spec](pubmed/01-publication-spec.md)            |
-| 19  | `crossref_publication`          | CrossRef         | publication            | [Spec](crossref/01-publication-spec.md)          |
-| 20  | `openalex_publication`          | OpenAlex         | publication            | [Spec](openalex/01-publication-spec.md)          |
-| 21  | `semanticscholar_publication`   | Semantic Scholar | publication            | [Spec](semanticscholar/01-publication-spec.md)   |
+| 1   | `chembl-protein-class`          | ChEMBL           | protein-class          | [Spec](chembl/01-protein-class-spec.md)          |
+| 2   | `chembl-cell-line`              | ChEMBL           | cell-line              | [Spec](chembl/02-cell-line-spec.md)              |
+| 3   | `chembl-molecule`               | ChEMBL           | molecule               | [Spec](chembl/03-molecule-spec.md)               |
+| 4   | `chembl-target`                 | ChEMBL           | target                 | [Spec](chembl/04-target-spec.md)                 |
+| 5   | `chembl-activity`               | ChEMBL           | activity               | [Spec](chembl/05-activity-spec.md)               |
+| 6   | `chembl-assay`                  | ChEMBL           | assay                  | [Spec](chembl/06-assay-spec.md)                  |
+| 7   | `chembl-publication`            | ChEMBL           | publication            | [Spec](chembl/07-publication-spec.md)            |
+| 8   | `chembl-assay-parameters`       | ChEMBL           | assay-parameters       | [Spec](chembl/08-assay-parameters-spec.md)       |
+| 9   | `chembl-compound-record`        | ChEMBL           | compound-record        | [Spec](chembl/09-compound-record-spec.md)        |
+| 10  | `chembl-target-component`       | ChEMBL           | target-component       | [Spec](chembl/10-target-component-spec.md)       |
+| 11  | `chembl-publication-term`       | ChEMBL           | publication-term       | [Spec](chembl/11-publication-term-spec.md)       |
+| 12  | `chembl-publication-similarity` | ChEMBL           | publication-similarity | [Spec](chembl/12-publication-similarity-spec.md) |
+| 13  | `chembl-subcellular-fraction`   | ChEMBL           | subcellular-fraction   | [Spec](chembl/14-subcellular-fraction-spec.md)   |
+| 14  | `chembl-tissue`                 | ChEMBL           | tissue                 | [Spec](chembl/15-tissue-spec.md)                 |
+| 15  | `uniprot-protein`               | UniProt          | protein                | [Spec](uniprot/01-protein-spec.md)               |
+| 16  | `uniprot-idmapping`             | UniProt          | idmapping              | [Spec](uniprot/02-idmapping-spec.md)             |
+| 17  | `pubchem-compound`              | PubChem          | compound               | [Spec](pubchem/01-compound-spec.md)              |
+| 18  | `pubmed-publication`            | PubMed           | publication            | [Spec](pubmed/01-publication-spec.md)            |
+| 19  | `crossref-publication`          | CrossRef         | publication            | [Spec](crossref/01-publication-spec.md)          |
+| 20  | `openalex-publication`          | OpenAlex         | publication            | [Spec](openalex/01-publication-spec.md)          |
+| 21  | `semanticscholar-publication`   | Semantic Scholar | publication            | [Spec](semanticscholar/01-publication-spec.md)   |
 
 ### Composite Pipelines (5)
 
 | #   | Pipeline ID             | Provider  | Entity      | Spec                                     |
 | --- | ----------------------- | --------- | ----------- | ---------------------------------------- |
-| 22  | `composite_publication` | Composite | publication | [Spec](composite/01-publication-spec.md) |
-| 23  | `composite_molecule`    | Composite | molecule    | [Spec](composite/02-molecule-spec.md)    |
-| 24  | `composite_target`      | Composite | target      | [Spec](composite/03-target-spec.md)      |
-| 25  | `composite_activity`    | Composite | activity    | [Spec](composite/04-activity-spec.md)    |
-| 26  | `composite_assay`       | Composite | assay       | [Spec](composite/05-assay-spec.md)       |
+| 22  | `composite-publication` | Composite | publication | [Spec](composite/01-publication-spec.md) |
+| 23  | `composite-molecule`    | Composite | molecule    | [Spec](composite/02-molecule-spec.md)    |
+| 24  | `composite-target`      | Composite | target      | [Spec](composite/03-target-spec.md)      |
+| 25  | `composite-activity`    | Composite | activity    | [Spec](composite/04-activity-spec.md)    |
+| 26  | `composite-assay`       | Composite | assay       | [Spec](composite/05-assay-spec.md)       |
 
 ----------------------------------------------------------------------
 
@@ -84,7 +84,7 @@ Each pipeline specification includes:
 | **InChI Key** | `structure-standard-inchi-key` | -            | `inchi-key` | -      | -        | -        | -      |
 | **DOI**       | `document.doi`                 | -            | -           | `doi`  | `DOI`    | `doi`    | `doi`  |
 | **PubMed ID** | `document.pubmed-id`           | -            | -           | `pmid` | -        | -        | `pmid` |
-| **UniProt**   | `target_component.accession`   | `accession`  | -           | -      | -        | -        | -      |
+| **UniProt**   | `target-component.accession`   | `accession`  | -           | -      | -        | -        | -      |
 | **ChEMBL**    | ID                             | `chembl-ids` | -           | -      | -        | -        | -      |
 
 ----------------------------------------------------------------------
@@ -94,23 +94,23 @@ Each pipeline specification includes:
 For standard pipelines, schema definition is stored in the same unified entity file
 (`configs/entities/{provider}/{entity}.yaml`, section `schema`).
 Composite pipelines keep merge schema in `configs/composites/{entity}.yaml`
-(section `composite.merge.column_groups`).
+(section `composite.merge.column-groups`).
 
 | Pipeline config                                        | Schema config                                        |
 | ------------------------------------------------------ | ---------------------------------------------------- |
 | `configs/entities/chembl/activity.yaml`               | `schema` section in same file                        |
 | `configs/entities/chembl/assay.yaml`                  | `schema` section in same file                        |
-| `configs/entities/chembl/assay_parameters.yaml`       | `schema` section in same file                        |
-| `configs/entities/chembl/cell_line.yaml`              | `schema` section in same file                        |
-| `configs/entities/chembl/compound_record.yaml`        | `schema` section in same file                        |
+| `configs/entities/chembl/assay-parameters.yaml`       | `schema` section in same file                        |
+| `configs/entities/chembl/cell-line.yaml`              | `schema` section in same file                        |
+| `configs/entities/chembl/compound-record.yaml`        | `schema` section in same file                        |
 | `configs/entities/chembl/molecule.yaml`               | `schema` section in same file                        |
-| `configs/entities/chembl/protein_class.yaml`          | `schema` section in same file                        |
+| `configs/entities/chembl/protein-class.yaml`          | `schema` section in same file                        |
 | `configs/entities/chembl/publication.yaml`            | `schema` section in same file                        |
-| `configs/entities/chembl/publication_similarity.yaml` | `schema` section in same file                        |
-| `configs/entities/chembl/publication_term.yaml`       | `schema` section in same file                        |
-| `configs/entities/chembl/subcellular_fraction.yaml`   | `schema` section in same file                        |
+| `configs/entities/chembl/publication-similarity.yaml` | `schema` section in same file                        |
+| `configs/entities/chembl/publication-term.yaml`       | `schema` section in same file                        |
+| `configs/entities/chembl/subcellular-fraction.yaml`   | `schema` section in same file                        |
 | `configs/entities/chembl/target.yaml`                 | `schema` section in same file                        |
-| `configs/entities/chembl/target_component.yaml`       | `schema` section in same file                        |
+| `configs/entities/chembl/target-component.yaml`       | `schema` section in same file                        |
 | `configs/entities/chembl/tissue.yaml`                 | `schema` section in same file                        |
 | `configs/entities/crossref/publication.yaml`          | `schema` section in same file                        |
 | `configs/entities/openalex/publication.yaml`          | `schema` section in same file                        |

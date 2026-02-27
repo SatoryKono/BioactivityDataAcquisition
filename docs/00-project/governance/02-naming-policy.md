@@ -67,13 +67,13 @@
 
 **Формат:** `{provider}-{entity}` (snake-case)
 - Должны совпадать с идентификатором пайплайна.
-- **Пример**: `chembl_publication`.
+- **Пример**: `chembl-publication`.
 
 ### 3.2. Файлы конфигурации
 
-**Путь**: `configs/pipelines/{provider}/{entity}.yaml`
+**Путь**: `configs/entities/{provider}/{entity}.yaml`
 - Имя файла должно совпадать с именем сущности (entity).
-- **Пример**: `configs/pipelines/chembl/publication.yaml`.
+- **Пример**: `configs/entities/chembl/publication.yaml`.
 
 ---
 

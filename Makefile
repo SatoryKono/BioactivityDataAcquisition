@@ -1,7 +1,7 @@
 # BioETL Makefile
 # Production-ready ETL system for bioactivity data
 
-.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-preflight clean-all mcp-preflight diagram-preflight lint-diagrams validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png diagrams-all report-diagram-padding
+.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint docs-legacy-check run-local docker-up docker-down docker-reset seed-local clean clean-preflight clean-all mcp-preflight diagram-preflight lint-diagrams validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png diagrams-all report-diagram-padding
 .DEFAULT_GOAL := help
 
 # Detect uv availability (preferred package manager)
@@ -174,6 +174,10 @@ lint: ## Run ruff and mypy
 	$(RUN) ruff check src/ tests/
 	@echo "$(BLUE)Running mypy...$(NC)"
 	$(RUN) mypy src/bioetl
+
+docs-legacy-check: ## Fail if legacy config/script tokens appear in mkdocs nav docs
+	@echo "$(BLUE)Checking docs for legacy config/script tokens...$(NC)"
+	$(PY_RUN) scripts/check_doc_links.py --legacy-paths
 
 lint-fix: ## Auto-fix linting issues
 	@echo "$(BLUE)Auto-fixing with ruff...$(NC)"

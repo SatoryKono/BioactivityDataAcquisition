@@ -8,7 +8,7 @@
 
 | Parameter        | Value                                 |
 | ---------------- | ------------------------------------- |
-| **Pipeline ID**  | `uniprot_protein`                     |
+| **Pipeline ID**  | `uniprot-protein`                     |
 | **Provider**     | UniProt (EBI/SIB/PIR)                 |
 | **Entity**       | protein                               |
 | **API Endpoint** | `https://rest.uniprot.org/uniprotkb/` |
@@ -42,9 +42,9 @@ UniProt proteins are **curated protein entries** with comprehensive annotations:
 ### 2.3. Entity Relationships
 
 ```
-uniprot_protein
+uniprot-protein
     │
-    ├──► chembl_target (via chembl-ids cross-ref)
+    ├──► chembl-target (via chembl-ids cross-ref)
     │
     ├──► drugbank (via drugbank-ids cross-ref)
     │
@@ -269,14 +269,14 @@ class UniprotTargetSchema(ETLRecordSchema):
 ## 7. Pipeline Configuration
 
 ```yaml
-pipeline-name: uniprot_protein
+pipeline-name: uniprot-protein
 provider: uniprot
 entity-type: protein
 version: "1.2.0"
 
 primary-keys: ["accession"]
-silver-table: "uniprot_protein"
-gold-table: "uniprot_protein"
+silver-table: "uniprot-protein"
+gold-table: "uniprot-protein"
 
 source-file: ../../sources/uniprot.yaml
 
@@ -314,7 +314,7 @@ input-filter:
 | Dependency          | Type     | Required                      |
 | ------------------- | -------- | ----------------------------- |
 | UniProt REST API    | API      | Yes                           |
-| `uniprot_idmapping` | Pipeline | Optional (for ChEMBL→UniProt) |
+| `uniprot-idmapping` | Pipeline | Optional (for ChEMBL→UniProt) |
 
 ### 8.2. Downstream
 

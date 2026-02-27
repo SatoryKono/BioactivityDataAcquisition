@@ -158,7 +158,7 @@ def quarantine-path(self) -> Path:
 | Aspect | Documented | Implementation | Status |
 |--------|------------|----------------|--------|
 | File naming | `{table-name}.csv` | `csv-exporter.py:270` | ✅ Match |
-| Location | Configured via `csv-export.path` in YAML | `storage_factory.py` | ✅ Match |
+| Location | Configured via `csv-export.path` in YAML | `storage-factory.py` | ✅ Match |
 
 ---
 

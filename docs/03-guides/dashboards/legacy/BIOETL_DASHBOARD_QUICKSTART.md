@@ -32,20 +32,20 @@ docker compose -f docker-compose.monitoring.yml ps
 ### 4️⃣ Запустить metrics сервер
 ```bash
 # Способ A: В фоне (разработка)
-python ./metrics_server.py &
+python ./metrics-server.py &
 
 # Способ B: В отдельном терминале (удобно для debug)
-python ./metrics_server.py
+python ./metrics-server.py
 ```
 
 ### 5️⃣ Проверить, что всё работает
 ```bash
 # Metrics endpoint
 curl http://localhost:8000/metrics | head -10
-# Output: # HELP bioetl_records_processed_total ...
+# Output: # HELP bioetl-records-processed-total ...
 
 # Prometheus API
-curl http://localhost:9090/api/v1/query?query=bioetl_records_processed_total
+curl http://localhost:9090/api/v1/query?query=bioetl-records-processed-total
 # Output: JSON с метриками
 
 # Grafana UI
@@ -76,8 +76,8 @@ URL: http://localhost:3000/d/bioetl-simple
 curl http://localhost:8000/metrics
 
 # Если ошибка → перезапустить
-pkill -f metrics_server.py
-python ./metrics_server.py &
+pkill -f metrics-server.py
+python ./metrics-server.py &
 
 # Дождаться 15 сек, затем проверить Prometheus targets:
 # http://localhost:9090/targets
@@ -87,11 +87,11 @@ python ./metrics_server.py &
 ```bash
 # 1. Проверить Prometheus query
 # http://localhost:9090 → Explore
-# Query: bioetl_records_processed_total
+# Query: bioetl-records-processed-total
 
 # 2. Если нет результатов → метрики не генерируются
-# Проверить metrics_server.py работает:
-ps aux | grep metrics_server
+# Проверить metrics-server.py работает:
+ps aux | grep metrics-server
 
 # 3. Обновить дашборд (F5) после 15 сек scrape interval
 ```
@@ -130,7 +130,7 @@ curl http://localhost:9090/-/healthy
 docker compose -f docker-compose.monitoring.yml down
 
 # Остановить metrics сервер
-pkill -f metrics_server.py
+pkill -f metrics-server.py
 
 # Удалить все данные (осторожно!)
 docker compose -f docker-compose.monitoring.yml down -v
@@ -143,15 +143,15 @@ docker compose -f docker-compose.monitoring.yml down -v
 | `docker-compose.monitoring.yml` | Конфигурация контейнеров |
 | `grafana/prometheus.yml` | Конфигурация Prometheus |
 | `grafana/provisioning/` | Автозагрузка дашбордов |
-| `metrics_server.py` | Metrics endpoint |
-| `BIOETL_DASHBOARD_SETUP.md` | Полная инструкция |
+| `metrics-server.py` | Metrics endpoint |
+| `BIOETL-DASHBOARD-SETUP.md` | Полная инструкция |
 
 ## 🎯 Типичный workflow
 
 1. **Запустить**
    ```bash
    docker compose -f docker-compose.monitoring.yml up -d
-   python ./metrics_server.py &
+   python ./metrics-server.py &
    ```
 
 2. **Открыть Grafana**
@@ -169,7 +169,7 @@ docker compose -f docker-compose.monitoring.yml down -v
 5. **Остановить**
    ```bash
    docker compose -f docker-compose.monitoring.yml down
-   pkill -f metrics_server.py
+   pkill -f metrics-server.py
    ```
 
 ## ❓ FAQ
@@ -178,19 +178,19 @@ docker compose -f docker-compose.monitoring.yml down -v
 A: `docker exec bioetl-grafana grafana-cli admin reset-admin-password newpassword`
 
 **Q: Как добавить свою метрику?**
-A: Отредактировать `metrics_server.py`, добавить Counter/Gauge, перезапустить
+A: Отредактировать `metrics-server.py`, добавить Counter/Gauge, перезапустить
 
 **Q: Как сохранить дашборд?**
 A: Dashboard → Export → Save JSON → Поделиться с командой
 
 **Q: Куда сохраняются данные Prometheus?**
-A: В Docker volume `bioetl_prometheus_data` (retention: 15 дней)
+A: В Docker volume `bioetl-prometheus-data` (retention: 15 дней)
 
 **Q: Как скачать метрики?**
-A: `http://localhost:9090/api/v1/query_range?query=...&start=...&end=...`
+A: `http://localhost:9090/api/v1/query-range?query=...&start=...&end=...`
 
 ---
 
 **Дата:** 22 февраля 2026  
 **Версия:** 1.0  
-**Поддержка:** См. BIOETL_DASHBOARD_SETUP.md (раздел Troubleshooting)
+**Поддержка:** См. BIOETL-DASHBOARD-SETUP.md (раздел Troubleshooting)

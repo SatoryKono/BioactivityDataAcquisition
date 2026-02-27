@@ -21,9 +21,9 @@
 | Average module size | 118,442 / 542 | **~218 lines** | ~same |
 | TODO/FIXME/HACK | `grep -rE "(TODO\|FIXME\|XXX\|HACK)" src/` | **0** | — |
 | print() in production code | `grep -r "print(" src/bioetl --include="*.py"` | **0** | — |
-| Hardcoded secrets | `grep -rE "(api_key\|password\|secret)\s*=" src/` | **0** real violations (14 parameter names) | — |
+| Hardcoded secrets | `grep -rE "(api-key\|password\|secret)\s*=" src/` | **0** real violations (14 parameter names) | — |
 | Port/Protocol count | Protocols in `domain/ports/` | **38** | — |
-| `@runtime_checkable` count | decorators in `domain/ports/` | **38** (100%) | — |
+| `@runtime-checkable` count | decorators in `domain/ports/` | **38** (100%) | — |
 | ADR documents | `ls docs/02-architecture/decisions/ADR-*.md` | **37** | ↓ from 38 ¹ |
 | VCR cassettes | `find tests/fixtures/vcr -type f` | **147** | ↑ from 136 |
 | Unit test files | `find tests -name "*.py" -path "*/unit/*"` | **417** | ↑ from 415 |
@@ -34,13 +34,13 @@
 | Security test files | `find tests -name "*.py" -path "*/security/*"` | **4** | — |
 | Import linter contracts | `lint-imports` | **5 kept, 0 broken** | — |
 | Ruff formatting | `ruff format --check src/` | **1 file needs formatting** ² | Regression |
-| `run_id` occurrences | `grep -rn "run_id" src/bioetl` | **653** across 109 files | ↑ from 335/50 |
-| Health check adapters | files containing `health_check` in adapters | **17** | — |
+| `run-id` occurrences | `grep -rn "run-id" src/bioetl` | **653** across 109 files | ↑ from 335/50 |
+| Health check adapters | files containing `health-check` in adapters | **17** | — |
 | Quarantine classes | classes matching `*Quarantine*` | **11** | — |
 | Content hash / dedup | occurrences across codebase | **~300** across 75+ files | — |
 
 ¹ ADR count appears 37 vs. 38 in prior audit — likely 1 ADR moved to archive.
-² `gold_writer.py` needs `ruff format`; 567 other files already formatted (99.8% compliant).
+² `gold-writer.py` needs `ruff format`; 567 other files already formatted (99.8% compliant).
 
 ---
 
@@ -76,14 +76,14 @@ All import boundary checks passed with **zero violations**:
 | Application layer must not directly import concrete infrastructure classes | KEPT |
 
 **Additional verification:**
-- `structlog` usage: Only in `infrastructure/observability/` (3 files) and `composition/bootstrap_logger.py` (1 file) — all allowed per RULES.md §4.3
+- `structlog` usage: Only in `infrastructure/observability/` (3 files) and `composition/bootstrap-logger.py` (1 file) — all allowed per RULES.md §4.3
 - No I/O in domain layer (no `requests`, `httpx`, `aiohttp`, `open()` calls)
 - No `Factory()` calls in application or domain layers (ARCH-005)
 - No `print()` statements in production code (AP-006)
 - `ruff check` passes cleanly
 
 **Minor finding:**
-- 1 file (`gold_writer.py`) needs `ruff format` — cosmetic only, not an import boundary issue
+- 1 file (`gold-writer.py`) needs `ruff format` — cosmetic only, not an import boundary issue
 
 ---
 
@@ -93,10 +93,10 @@ All import boundary checks passed with **zero violations**:
 
 **38 Protocol-based ports** defined in `src/bioetl/domain/ports/` across 23 files:
 
-| Port | File | @runtime_checkable |
+| Port | File | @runtime-checkable |
 |------|------|-------------------|
-| `DataSourcePort` | `data_source.py` | Yes |
-| `FilterableDataSourcePort` | `data_source.py` | Yes |
+| `DataSourcePort` | `data-source.py` | Yes |
+| `FilterableDataSourcePort` | `data-source.py` | Yes |
 | `StoragePort` | `storage.py` | Yes |
 | `LockPort` | `locking.py` | Yes |
 | `LoggerPort` | `observability.py` | Yes |
@@ -108,34 +108,34 @@ All import boundary checks passed with **zero violations**:
 | `QuarantinePort` | `quarantine.py` | Yes |
 | `CheckpointPort` | `checkpoint.py` | Yes |
 | `PiiHasherPort` | `pii.py` | Yes |
-| `HealthCheckPort` | `health_check.py` | Yes |
-| `HealthStatePort` | `health_check.py` | Yes |
-| `HealthMonitorPort` | `health_check.py` | Yes |
+| `HealthCheckPort` | `health-check.py` | Yes |
+| `HealthStatePort` | `health-check.py` | Yes |
+| `HealthMonitorPort` | `health-check.py` | Yes |
 | `AuditPort` | `audit.py` | Yes |
 | `SilverValidatorPort` | `validation.py` | Yes |
 | `GoldValidatorPort` | `validation.py` | Yes |
 | `MetadataWriterPort` | `metadata.py` | Yes |
-| `MetadataCoordinatorPort` | `metadata_coordinator.py` | Yes |
+| `MetadataCoordinatorPort` | `metadata-coordinator.py` | Yes |
 | `MemoryMonitorPort` | `memory.py` | Yes |
 | `ShutdownPort` | `shutdown.py` | Yes |
-| `DeltaReaderPort` | `delta_reader.py` | Yes |
+| `DeltaReaderPort` | `delta-reader.py` | Yes |
 | `InputFilterPort` | `filtering.py` | Yes |
 | `JsonEncoderPort` | `serialization.py` | Yes |
 | `DataNormalizationPort` | `normalization.py` | Yes |
 | `IDMappingPort` | `idmapping.py` | Yes |
-| `BronzeDQAnalyzerPort` | `dq_analyzer.py` | Yes |
-| `SilverDQAnalyzerPort` | `dq_analyzer.py` | Yes |
-| `GoldDQAnalyzerPort` | `dq_analyzer.py` | Yes |
-| `BronzeDQConfigPort` | `dq_config.py` | Yes |
-| `SilverDQConfigPort` | `dq_config.py` | Yes |
-| `GoldDQConfigPort` | `dq_config.py` | Yes |
-| `DQReportWriterPort` | `dq_report.py` | Yes |
+| `BronzeDQAnalyzerPort` | `dq-analyzer.py` | Yes |
+| `SilverDQAnalyzerPort` | `dq-analyzer.py` | Yes |
+| `GoldDQAnalyzerPort` | `dq-analyzer.py` | Yes |
+| `BronzeDQConfigPort` | `dq-config.py` | Yes |
+| `SilverDQConfigPort` | `dq-config.py` | Yes |
+| `GoldDQConfigPort` | `dq-config.py` | Yes |
+| `DQReportWriterPort` | `dq-report.py` | Yes |
 | `RunnablePort` | `runner.py` | Yes |
 | `RunnerFactoryPort` | `runner.py` | Yes |
 | `MetricsExtractorPort` | `runner.py` | Yes |
 
 **All ports:**
-- 100% `@runtime_checkable` (38/38)
+- 100% `@runtime-checkable` (38/38)
 - 100% `*Port` suffix naming (ARCH-003, NAME-001)
 - Exported from facade `bioetl.domain.ports` (ARCH-008)
 
@@ -145,17 +145,17 @@ All import boundary checks passed with **zero violations**:
 
 **Concrete DataSourcePort implementations (7 providers):**
 
-| Adapter | File | `health_check()` |
+| Adapter | File | `health-check()` |
 |---------|------|-------------------|
 | `ChemblAdapter` | `infrastructure/adapters/chembl/client.py:57` | Yes |
 | `CrossrefClient` | `infrastructure/adapters/crossref/client.py` | Yes |
 | `OpenalexAdapter` | `infrastructure/adapters/openalex/client.py` | Yes |
 | `PubchemClient` | `infrastructure/adapters/pubchem/client.py` | Yes |
-| `PubmedClient` | `infrastructure/adapters/pubmed/pubmed_client.py` | Yes |
+| `PubmedClient` | `infrastructure/adapters/pubmed/pubmed-client.py` | Yes |
 | `SemanticScholarAdapter` | `infrastructure/adapters/semanticscholar/adapter.py` | Yes |
 | `UniprotClient` | `infrastructure/adapters/uniprot/client.py` | Yes |
 
-All 7 adapters implement `async def health_check() -> HealthStatus` (ARCH-004).
+All 7 adapters implement `async def health-check() -> HealthStatus` (ARCH-004).
 
 ---
 
@@ -167,18 +167,18 @@ All 7 adapters implement `async def health_check() -> HealthStatus` (ARCH-004).
 
 | Requirement | Status | Evidence |
 |-------------|--------|----------|
-| Format: JSONL + zstd | ✅ | `bronze_writer.py:61` — `BRONZE_FILE_SUFFIX = ".jsonl.zst"` |
-| Compression: zstd level 3 | ✅ | `bronze_writer.py:59` — `COMPRESSION_LEVEL = 3` |
+| Format: JSONL + zstd | ✅ | `bronze-writer.py:61` — `BRONZE-FILE-SUFFIX = ".jsonl.zst"` |
+| Compression: zstd level 3 | ✅ | `bronze-writer.py:59` — `COMPRESSION-LEVEL = 3` |
 | Write mode: Append-only | ✅ | `medallion.py:140` — `Layer.BRONZE: {WriteMode.APPEND}` |
-| Atomic writes | ✅ | Uses `atomic_write_bytes` (temp file + rename) |
+| Atomic writes | ✅ | Uses `atomic-write-bytes` (temp file + rename) |
 | Path format | ✅ | `{provider}/{entity}/{date}/{filename}` |
 
 #### Silver Layer
 
 | Requirement | Status | Evidence |
 |-------------|--------|----------|
-| Format: Delta Lake | ✅ | `silver_writer.py:36` — `from deltalake import DeltaTable, write_deltalake` |
-| No raw Parquet | ✅ | 0 occurrences of `to_parquet`/`write_parquet` in silver/ |
+| Format: Delta Lake | ✅ | `silver-writer.py:36` — `from deltalake import DeltaTable, write-deltalake` |
+| No raw Parquet | ✅ | 0 occurrences of `to-parquet`/`write-parquet` in silver/ |
 | ACID transactions | ✅ | Delta Lake provides ACID guarantees |
 | Merge/Upsert default | ✅ | `storage.py:88` — `mode = "merge"` |
 | Time Travel | ✅ | Delta Lake native feature |
@@ -188,9 +188,9 @@ All 7 adapters implement `async def health_check() -> HealthStatus` (ARCH-004).
 
 | Requirement | Status | Evidence |
 |-------------|--------|----------|
-| Format: Delta Lake | ✅ | `gold_writer.py` — uses `write_deltalake` |
-| Pandera strict validation | ✅ | `import pandera as pandera_pa`, `strict=True` |
-| SCD Type 2 support | ✅ | `scd_config` parameter in `write_gold()` |
+| Format: Delta Lake | ✅ | `gold-writer.py` — uses `write-deltalake` |
+| Pandera strict validation | ✅ | `import pandera as pandera-pa`, `strict=True` |
+| SCD Type 2 support | ✅ | `scd-config` parameter in `write-gold()` |
 | Deterministic writes | ✅ | Sort by PK before write |
 
 #### Medallion Clear Policy (ARCH-007)
@@ -201,7 +201,7 @@ All 7 adapters implement `async def health_check() -> HealthStatus` (ARCH-004).
 | BACKFILL | ✅ MUST | ✅ MUST | ✅ Enforced (`medallion.py:276`) |
 | INCREMENTAL | ❌ MUST NOT | ❌ MUST NOT | ✅ Enforced (`medallion.py:278`) |
 
-Policy consistency validated at preflight (`preflight_service.py:447+` — `_MedallionConfigValidator`).
+Policy consistency validated at preflight (`preflight-service.py:447+` — `-MedallionConfigValidator`).
 
 ---
 
@@ -223,16 +223,16 @@ Policy consistency validated at preflight (`preflight_service.py:447+` — `_Med
 
 #### Circuit Breaker (RULES §3.1.4)
 
-**Implementation:** `infrastructure/adapters/http/circuit_breaker.py`
+**Implementation:** `infrastructure/adapters/http/circuit-breaker.py`
 **Port:** `domain/ports/resilience.py` — `CircuitBreakerPort`
 
 | Parameter | Spec (RULES) | Implementation | Status |
 |-----------|--------------|----------------|--------|
-| Trigger | 5 consecutive failures | ✅ Configurable `failure_threshold` | ✅ |
-| Open Duration | 5 minutes | ✅ `recovery_timeout` configurable | ✅ |
-| States | CLOSED→OPEN→HALF_OPEN | ✅ FSM with 3 states | ✅ |
+| Trigger | 5 consecutive failures | ✅ Configurable `failure-threshold` | ✅ |
+| Open Duration | 5 minutes | ✅ `recovery-timeout` configurable | ✅ |
+| States | CLOSED→OPEN→HALF-OPEN | ✅ FSM with 3 states | ✅ |
 | Recovery | Half-Open → 1 probe | ✅ Single probe request | ✅ |
-| Metrics | `circuit_breaker_state`, `trips_total` | ✅ Via `MetricsPort` | ✅ |
+| Metrics | `circuit-breaker-state`, `trips-total` | ✅ Via `MetricsPort` | ✅ |
 
 #### Retry Logic (RULES §3.1.3)
 
@@ -256,7 +256,7 @@ Policy consistency validated at preflight (`preflight_service.py:447+` — `_Med
 #### Implementation: MemoryLock
 
 **Port:** `domain/ports/locking.py` — `LockPort`
-**Impl:** `infrastructure/locking/memory_lock.py`
+**Impl:** `infrastructure/locking/memory-lock.py`
 **Policy:** Local-Only Deployment (ADR-010)
 
 | Requirement | Spec (RULES §3.3) | Implementation | Status |
@@ -265,9 +265,9 @@ Policy consistency validated at preflight (`preflight_service.py:447+` — `_Med
 | Lock TTL | heartbeat × 3 = 90s | ✅ Configured in `RuntimeConfig` | ✅ |
 | Heartbeat | 30 seconds | ✅ Configurable interval | ✅ |
 | Max lock duration | 4 hours | ✅ Force release after max duration | ✅ |
-| Fencing token | Owner ID validation | ✅ `owner_id` on lock acquisition | ✅ |
+| Fencing token | Owner ID validation | ✅ `owner-id` on lock acquisition | ✅ |
 | Safety guard | Validate lock before write | ✅ `BatchWriter` checks lock status | ✅ |
-| Backfill exclusive lock | `lock:{provider}_{entity}:exclusive` | ✅ Lock key includes run type | ✅ |
+| Backfill exclusive lock | `lock:{provider}-{entity}:exclusive` | ✅ Lock key includes run type | ✅ |
 
 **Design decision (ADR-010):** Redis/distributed locks explicitly REJECTED. System is single-instance by design. MemoryLock is sufficient for the local-only deployment model.
 
@@ -300,11 +300,11 @@ Policy consistency validated at preflight (`preflight_service.py:447+` — `_Med
 | Feature | Status | Evidence |
 |---------|--------|----------|
 | Unified quarantine table | ✅ | Single `common.quarantine` table |
-| Fields: ingestion_ts, pipeline, error_code, payload | ✅ | `QuarantineEntry` dataclass |
+| Fields: ingestion-ts, pipeline, error-code, payload | ✅ | `QuarantineEntry` dataclass |
 | Payload truncation (64KB) | ✅ | Truncation logic in writer |
-| DQ status lifecycle | ✅ | NEW → UNDER_REVIEW → IGNORED/REPROCESSED/EXPIRED |
+| DQ status lifecycle | ✅ | NEW → UNDER-REVIEW → IGNORED/REPROCESSED/EXPIRED |
 | Retention (30 days) | ✅ | Configurable retention policy |
-| Deduplication (payload_hash) | ✅ | Hash-based dedup |
+| Deduplication (payload-hash) | ✅ | Hash-based dedup |
 
 #### DQ Thresholds (RULES §3.1.2)
 
@@ -317,20 +317,20 @@ Policy consistency validated at preflight (`preflight_service.py:447+` — `_Med
 
 | Feature | Status | Evidence |
 |---------|--------|----------|
-| Algorithm: sha256 | ✅ | `domain/services/identity_service.py` |
-| Canonical JSON | ✅ | `sort_keys=True, separators=(',', ':')` |
+| Algorithm: sha256 | ✅ | `domain/services/identity-service.py` |
+| Canonical JSON | ✅ | `sort-keys=True, separators=(',', ':')` |
 | NaN/Inf → null | ✅ | Normalization before hashing |
 | Float rounding (10 digits) | ✅ | `round(val, 10)` |
-| Meta-field exclusion (`_` prefix) | ✅ | `domain/constants.py:META_FIELDS` |
-| Collision detection | ✅ | `_source_record_id` check on upsert |
+| Meta-field exclusion (`-` prefix) | ✅ | `domain/constants.py:META-FIELDS` |
+| Collision detection | ✅ | `-source-record-id` check on upsert |
 
 #### DQ Analyzers (3-tier)
 
 | Analyzer | Port | Implementation |
 |----------|------|----------------|
-| `BronzeDQAnalyzerPort` | `domain/ports/dq_analyzer.py` | `application/services/dq/bronze_analyzer.py` |
-| `SilverDQAnalyzerPort` | `domain/ports/dq_analyzer.py` | `application/services/dq/silver_analyzer.py` |
-| `GoldDQAnalyzerPort` | `domain/ports/dq_analyzer.py` | `application/services/dq/gold_analyzer.py` |
+| `BronzeDQAnalyzerPort` | `domain/ports/dq-analyzer.py` | `application/services/dq/bronze-analyzer.py` |
+| `SilverDQAnalyzerPort` | `domain/ports/dq-analyzer.py` | `application/services/dq/silver-analyzer.py` |
+| `GoldDQAnalyzerPort` | `domain/ports/dq-analyzer.py` | `application/services/dq/gold-analyzer.py` |
 
 **Anomaly detection:** `DQMonitorPort` with Z-score analysis, baseline (30-day sliding average), cold-start silence (days 1-7).
 
@@ -344,10 +344,10 @@ Policy consistency validated at preflight (`preflight_service.py:447+` — `_Med
 
 | Requirement | Status | Evidence |
 |-------------|--------|----------|
-| UnifiedLogger | ✅ | `infrastructure/observability/unified_logger.py` |
-| Mandatory fields: ts, level, run_id, pipeline, stage | ✅ | Bound at initialization |
-| JSON format (structlog) | ✅ | `logging_config.py` configures structlog |
-| run_id in all logs | ✅ | 653 occurrences across 109 files |
+| UnifiedLogger | ✅ | `infrastructure/observability/unified-logger.py` |
+| Mandatory fields: ts, level, run-id, pipeline, stage | ✅ | Bound at initialization |
+| JSON format (structlog) | ✅ | `logging-config.py` configures structlog |
+| run-id in all logs | ✅ | 653 occurrences across 109 files |
 | No direct structlog in app/interfaces | ✅ | Only in `infrastructure/observability/` |
 | No print() in production | ✅ | 0 occurrences |
 
@@ -360,11 +360,11 @@ Policy consistency validated at preflight (`preflight_service.py:447+` — `_Med
 
 | Category | Metrics |
 |----------|---------|
-| **Histograms** (5) | `pipeline_duration_seconds`, `batch_size_records`, `vacuum_duration_seconds`, `archive_duration_seconds`, `dq_check_duration_ms` |
-| **Counters** (12) | `records_processed_total`, `errors_total`, `filter_ids_loaded_total`, `filter_ids_duplicates_total`, `dq_records_quarantined_total`, `circuit_breaker_trips_total`, `circuit_breaker_success_total`, `circuit_breaker_failure_total`, `vacuum_files_removed_total`, `archive_files_total`, `dq_anomaly_detected`, `dq_baseline_updated` |
-| **Gauges** (4) | `circuit_breaker_state`, `dq_baseline_samples`, `dq_validation_score`, `data_freshness_seconds` |
+| **Histograms** (5) | `pipeline-duration-seconds`, `batch-size-records`, `vacuum-duration-seconds`, `archive-duration-seconds`, `dq-check-duration-ms` |
+| **Counters** (12) | `records-processed-total`, `errors-total`, `filter-ids-loaded-total`, `filter-ids-duplicates-total`, `dq-records-quarantined-total`, `circuit-breaker-trips-total`, `circuit-breaker-success-total`, `circuit-breaker-failure-total`, `vacuum-files-removed-total`, `archive-files-total`, `dq-anomaly-detected`, `dq-baseline-updated` |
+| **Gauges** (4) | `circuit-breaker-state`, `dq-baseline-samples`, `dq-validation-score`, `data-freshness-seconds` |
 
-**Implementation:** `infrastructure/observability/prometheus_metrics.py` (via `MetricsPort`)
+**Implementation:** `infrastructure/observability/prometheus-metrics.py` (via `MetricsPort`)
 
 #### Tracing
 
@@ -400,19 +400,19 @@ Policy consistency validated at preflight (`preflight_service.py:447+` — `_Med
 
 | Test | Issue | Severity |
 |------|-------|----------|
-| `test_ruff_formatting_src` | 1 file (`gold_writer.py`) needs formatting | LOW |
-| `test_infrastructure_files_under_limit` | Some infrastructure files exceed LOC limit | LOW |
-| `test_functions_under_50_lines` | Several functions in `merger.py` exceed 50-line limit | MEDIUM |
-| `test_classes_under_300_lines` | `SilverWriter` at 1148 lines (limit 1140, +8 over) | LOW |
+| `test-ruff-formatting-src` | 1 file (`gold-writer.py`) needs formatting | LOW |
+| `test-infrastructure-files-under-limit` | Some infrastructure files exceed LOC limit | LOW |
+| `test-functions-under-50-lines` | Several functions in `merger.py` exceed 50-line limit | MEDIUM |
+| `test-classes-under-300-lines` | `SilverWriter` at 1148 lines (limit 1140, +8 over) | LOW |
 
 #### XFAIL Tests (4)
 
 | Test | Reason |
 |------|--------|
-| `test_chembl_assay_full_cycle` | ChEMBL assay API returning errors — cassettes need re-recording |
-| `test_chembl_assay_metadata_fields` | Same |
-| `test_chembl_assay_confidence_score` | Same |
-| `test_all_chembl_pipelines_chain` | Same |
+| `test-chembl-assay-full-cycle` | ChEMBL assay API returning errors — cassettes need re-recording |
+| `test-chembl-assay-metadata-fields` | Same |
+| `test-chembl-assay-confidence-score` | Same |
+| `test-all-chembl-pipelines-chain` | Same |
 
 **Score rationale:** 8/10 due to:
 - 4 architecture test failures (code metrics, not functional)
@@ -427,13 +427,13 @@ Policy consistency validated at preflight (`preflight_service.py:447+` — `_Med
 
 | Requirement | Status | Evidence |
 |-------------|--------|----------|
-| Secrets via env vars | ✅ | `os.getenv("BIOETL_...")` throughout |
+| Secrets via env vars | ✅ | `os.getenv("BIOETL-...")` throughout |
 | No hardcoded credentials | ✅ | 0 real violations (14 parameter-name false positives) |
 | `.env` in `.gitignore` | ✅ | `.gitignore:67-72` — `*.env`, `!.env.example` |
 | `.env.example` template | ✅ | Placeholder values only |
-| PII hashing (SHA256+salt) | ✅ | `infrastructure/security/pii_hasher.py` |
+| PII hashing (SHA256+salt) | ✅ | `infrastructure/security/pii-hasher.py` |
 | Salt ≥32 chars validation | ✅ | Enforced at initialization |
-| Salt rotation support | ✅ | `BIOETL_PII_SALT_NEXT` + `BIOETL_SALT_ROTATION_ACTIVE` |
+| Salt rotation support | ✅ | `BIOETL-PII-SALT-NEXT` + `BIOETL-SALT-ROTATION-ACTIVE` |
 | NFKC normalization | ✅ | Unicode → lowercase → strip → concat salt → SHA256 |
 | Gitleaks pre-commit | ✅ | `.gitleaks.toml` configured |
 | No credentials in URLs | ✅ | 0 violations |
@@ -475,12 +475,12 @@ Policy consistency validated at preflight (`preflight_service.py:447+` — `_Med
 | # | Category | Weight | Score | Weighted | Key Findings |
 |---|----------|--------|-------|----------|--------------|
 | 1 | Layered Architecture | 15% | **10** | 1.50 | 0 boundary violations, 5/5 import-linter contracts kept |
-| 2 | Contracts and Ports | 12% | **10** | 1.20 | 38 ports, 100% @runtime_checkable, 7 adapters with health_check |
+| 2 | Contracts and Ports | 12% | **10** | 1.20 | 38 ports, 100% @runtime-checkable, 7 adapters with health-check |
 | 3 | Medallion Architecture | 12% | **10** | 1.20 | Bronze JSONL+zstd, Silver Delta, Gold Pandera strict. Clear policy enforced |
 | 4 | Error Handling / CB | 10% | **9** | 0.90 | 3-tier error classification, CB with metrics, deterministic jitter |
 | 5 | Locks and Concurrency | 10% | **9** | 0.90 | MemoryLock + heartbeat + fencing + safety guard (ADR-010 local-only) |
 | 6 | Validation and DQ | 10% | **9** | 0.90 | Pandera 13+ entities, quarantine lifecycle, content hash, DQ anomaly detection |
-| 7 | Logging / Observability | 8% | **10** | 0.80 | UnifiedLogger, run_id everywhere, 21 Prometheus metrics, OTel tracing |
+| 7 | Logging / Observability | 8% | **10** | 0.80 | UnifiedLogger, run-id everywhere, 21 Prometheus metrics, OTel tracing |
 | 8 | Testing | 8% | **8** | 0.64 | 89.13% coverage (>85%), 4 arch test failures, 4 XFAIL cassettes |
 | 9 | Security and Secrets | 8% | **10** | 0.80 | 0 hardcoded secrets, PII SHA256+salt, gitleaks, SecretStr |
 | 10 | Documentation | 7% | **9** | 0.63 | 37 ADRs, CHANGELOG current, 290+ docs, Gold contracts documented |
@@ -505,7 +505,7 @@ Policy consistency validated at preflight (`preflight_service.py:447+` — `_Med
 | 2026-02-18 | 6.0.0 | 9.75 | — |
 | **2026-02-21** | **6.0.0** | **9.47** | **-0.28** |
 
-**Note on score change:** The -0.28 decrease reflects more granular measurement (import-linter numerical verification, architecture test failure tracking) rather than actual regression. The codebase has improved (more VCR cassettes, more unit tests, more run_id coverage). The lower score results from counting 4 architecture test failures (code metrics) and the slight coverage decrease from 90.21% to 89.13%.
+**Note on score change:** The -0.28 decrease reflects more granular measurement (import-linter numerical verification, architecture test failure tracking) rather than actual regression. The codebase has improved (more VCR cassettes, more unit tests, more run-id coverage). The lower score results from counting 4 architecture test failures (code metrics) and the slight coverage decrease from 90.21% to 89.13%.
 
 ---
 
@@ -518,20 +518,20 @@ Policy consistency validated at preflight (`preflight_service.py:447+` — `_Med
 **Impact on total:** +0.08
 
 **Problem:** 4 architecture tests fail on code metrics:
-1. `gold_writer.py` needs `ruff format` (1 file)
+1. `gold-writer.py` needs `ruff format` (1 file)
 2. Some infrastructure files exceed LOC limits
 3. `merger.py` has functions exceeding 50-line limit
 4. `SilverWriter` is 1148 lines (limit 1140, +8 lines over)
 
 **Solution:**
-1. Run `ruff format src/bioetl/infrastructure/storage/gold_writer.py`
+1. Run `ruff format src/bioetl/infrastructure/storage/gold-writer.py`
 2. Extract helper methods from long functions in `merger.py` (e.g., `merge()` at 241 lines)
 3. Extract 8+ lines from `SilverWriter` to bring under 1140 limit
 
 **Files:**
-- `src/bioetl/infrastructure/storage/gold_writer.py`
+- `src/bioetl/infrastructure/storage/gold-writer.py`
 - `src/bioetl/application/composite/merger.py`
-- `src/bioetl/infrastructure/storage/silver_writer.py`
+- `src/bioetl/infrastructure/storage/silver-writer.py`
 
 **Risks:** Minimal — extracting methods preserves behavior
 **Criterion:** All 4 architecture tests pass
@@ -549,7 +549,7 @@ Policy consistency validated at preflight (`preflight_service.py:447+` — `_Med
 
 **Solution:** Re-record cassettes:
 ```bash
-VCR_RECORD_MODE=new_episodes pytest tests/e2e/test_chembl_assay_e2e.py -v
+VCR-RECORD-MODE=new-episodes pytest tests/e2e/test-chembl-assay-e2e.py -v
 ```
 
 **Files:** `tests/fixtures/vcr/chembl/assay/` cassettes
@@ -569,13 +569,13 @@ VCR_RECORD_MODE=new_episodes pytest tests/e2e/test_chembl_assay_e2e.py -v
 **Problem:** RULES §2.1.2 specifies explicit `mode: scd2` for publications, reference dictionaries, and slowly evolving records. Current pipelines use implicit `overwrite`.
 
 **Solution:**
-1. Add explicit `mode: scd2` + `scd_config` to pipeline YAML configs for:
+1. Add explicit `mode: scd2` + `scd-config` to pipeline YAML configs for:
    - Publications (chembl/pubmed/crossref/openalex/semanticscholar)
    - Reference dictionaries (assay, cell-line, tissue, protein-class, etc.)
    - Slowly evolving records (target, molecule, compound-record, protein)
 2. Bootstrap snapshot for initial SCD2 population
 3. Add explicit `mode: append` for high-volume facts (activity)
-4. Add explicit `mode: overwrite` for recomputed outputs (publication_similarity, publication_term)
+4. Add explicit `mode: overwrite` for recomputed outputs (publication-similarity, publication-term)
 
 **Files:** `configs/pipelines/*/*.yaml`
 
@@ -613,11 +613,11 @@ VCR_RECORD_MODE=new_episodes pytest tests/e2e/test_chembl_assay_e2e.py -v
 **Impact on total:** +0.08
 
 **Problem:** 5 integration tests skipped because VCR cassettes not yet recorded:
-- `test_filtered_api_request` for activity, assay, molecule, publication, target
+- `test-filtered-api-request` for activity, assay, molecule, publication, target
 
 **Solution:**
 ```bash
-VCR_RECORD_MODE=new_episodes pytest tests/integration/chembl/ -k test_filtered_api_request -v
+VCR-RECORD-MODE=new-episodes pytest tests/integration/chembl/ -k test-filtered-api-request -v
 ```
 
 **Files:** `tests/fixtures/vcr/chembl/` cassettes
@@ -634,17 +634,17 @@ VCR_RECORD_MODE=new_episodes pytest tests/integration/chembl/ -k test_filtered_a
 **Current → Target score:** 9 → 10
 **Impact on total:** +0.07
 
-**Problem:** Some infrastructure files exceed the LOC limit tested by `test_infrastructure_files_under_limit`.
+**Problem:** Some infrastructure files exceed the LOC limit tested by `test-infrastructure-files-under-limit`.
 
 **Solution:**
 1. Identify oversized files
 2. Extract logical subsections into separate modules
 3. Use delegation pattern to maintain cohesion
 
-**Files:** Files identified by `test_infrastructure_files_under_limit`
+**Files:** Files identified by `test-infrastructure-files-under-limit`
 
 **Risks:** Low — file extraction preserves behavior
-**Criterion:** `test_infrastructure_files_under_limit` passes
+**Criterion:** `test-infrastructure-files-under-limit` passes
 **Effort:** M (days)
 
 ---
@@ -655,7 +655,7 @@ VCR_RECORD_MODE=new_episodes pytest tests/integration/chembl/ -k test_filtered_a
 
 | Item | Effort | Expected Score Impact |
 |------|--------|----------------------|
-| Fix ruff formatting (gold_writer.py) | 5 min | +0.01 |
+| Fix ruff formatting (gold-writer.py) | 5 min | +0.01 |
 | Extract long functions in merger.py | 2-4 hours | +0.02 |
 | Trim SilverWriter by 8 lines | 1 hour | +0.01 |
 | Re-record ChEMBL assay VCR cassettes | 1-2 hours | +0.04 |

@@ -56,7 +56,7 @@ def --init--(
 - `tests/unit/application/test-base-pipeline.py` - тесты
 - `tests/unit/application/core/test-batch-executor.py` - тесты
 - `tests/unit/application/test-pipeline-config.py` - тесты
-- `tests/unit/application/pipelines/test_chembl_activity_unit.py` - тесты
+- `tests/unit/application/pipelines/test-chembl-activity-unit.py` - тесты
 
 ## Решение
 
@@ -246,7 +246,7 @@ finally:
 
 - [x] `test-base-pipeline.py`
 - [x] `test-batch-executor.py`
-- [x] `test_chembl_activity_unit.py`
+- [x] `test-chembl-activity-unit.py`
 
 ### Фаза 6: Удаление shim
 

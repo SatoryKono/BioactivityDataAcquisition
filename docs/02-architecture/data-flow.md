@@ -10,46 +10,8 @@ Medallion Architecture — трёхслойная модель хранения 
 
 ## Medallion Architecture Diagram
 
-```mermaid
-flowchart LR
-  subgraph Sources["External Sources"]
-    SRC1["ChEMBL"]
-    SRC2["PubChem"]
-    SRC3["UniProt"]
-  end
-
-  subgraph Bronze["Bronze Layer"]
-    direction TB
-    B1["JSONL + zstd"]
-    B2["Append-only"]
-    B3["90 days retention"]
-  end
-
-  subgraph Silver["Silver Layer"]
-    direction TB
-    S1["Delta Lake"]
-    S2["Merge/Upsert"]
-    S-perm["Permanent"]
-  end
-
-  subgraph Gold["Gold Layer"]
-    direction TB
-    G1["Delta / Parquet"]
-    G2["SCD Type 2"]
-    G3["Permanent"]
-  end
-
-  subgraph Side["Side Tables"]
-    Q["Quarantine<br/>(DQ failures)"]
-    L["Lineage Log<br/>(Provenance)"]
-  end
-
-  Sources -->|REST API| Bronze
-  Bronze -->|Transform + Validate| Silver
-  Silver -->|Transform + Filter| Gold
-  Silver -.->|DQ errors| Q
-  Bronze -.->|batch-id FK| L
-```
+> **Diagram:** See [`03-medallion-data-flow.mmd`](mmd-diagrams/architecture/03-medallion-data-flow.mmd)
+> *(rendered: [overview](diagrams/rendered/03-medallion-data-flow-overview.png))*
 
 ----------------------------------------------------------------------
 
@@ -94,58 +56,14 @@ data/output/                       # Local-Only (current)
 
 **Note**: Silver partitioning is **configurable** via `partition-by` field in pipeline YAML configs.
 Examples: `["year", "month"]`, `["assay-type"]`, `["organism"]`, or `[]` (no partitioning).
-See `configs/pipelines/{provider}/{entity}.yaml` for specific configurations.
+See `configs/entities/{provider}/{entity}.yaml` for specific configurations.
 
 ----------------------------------------------------------------------
 
 ## Pipeline Execution Flow
 
-```mermaid
-flowchart TB
-  subgraph Prepare
-    A1["Lock Acquire<br/>(MemoryLock)"]
-    A2["Load Config"]
-    A3["Checkpoint Load<br/>(if --resume)"]
-  end
-
-  subgraph Extract
-    B1["Fetch from API<br/>(Circuit Breaker)"]
-    B2["Write Bronze<br/>(JSONL + zstd)"]
-    B3["Record Lineage"]
-  end
-
-  subgraph Transform
-    C1["Normalize Values"]
-    C2["Add Metadata<br/>(-run-id, -run-type)"]
-    C3["Compute Content Hash"]
-  end
-
-  subgraph Validate
-    D1["Pandera Schema"]
-    D2["DQ Metrics"]
-    D3["Route to Quarantine"]
-  end
-
-  subgraph Load
-    E1["Safety Guard<br/>(validate lock)"]
-    E2["Delta Lake Write<br/>(Silver)"]
-    E3["Gold Transform<br/>(exclude JSON fields)"]
-    E4["Delta Lake Write<br/>(Gold)<br/><i>skipped if skip-gold=True</i>"]
-  end
-
-  subgraph Finalize
-    F1["Delete Checkpoint"]
-    F2["Release Lock"]
-    F3["Publish Metrics"]
-  end
-
-  A1 --> A2 --> A3 --> B1
-  B1 --> B2 --> B3 --> C1
-  C1 --> C2 --> C3 --> D1
-  D1 --> D2 --> D3 --> E1
-  E1 --> E2 --> E3 --> E4 --> F1
-  F1 --> F2 --> F3
-```
+> **Diagram:** See [`04-pipeline-execution-flow.mmd`](mmd-diagrams/architecture/04-pipeline-execution-flow.mmd)
+> *(rendered: [overview](diagrams/rendered/04-pipeline-execution-flow-overview.png))*
 
 ----------------------------------------------------------------------
 

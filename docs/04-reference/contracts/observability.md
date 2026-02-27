@@ -34,7 +34,7 @@
 | Labels | `pipeline`, `stage`, `status`, `run-type` |
 
 **Labels:**
-- `pipeline`: Имя пайплайна (e.g., `chembl_activity`)
+- `pipeline`: Имя пайплайна (e.g., `chembl-activity`)
 - `stage`: Этап (`fetch`, `transform`, `write-bronze`, `write-silver`, `write-gold`)
 - `status`: Результат (`success`, `failure`, `timeout`)
 - `run-type`: Тип запуска (`incremental`, `backfill`, `rebuild`)

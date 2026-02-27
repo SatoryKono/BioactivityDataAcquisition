@@ -1,6 +1,6 @@
 # Пайплайн: ChEMBL Publication
 
-**Имя пайплайна:** `chembl_publication`
+**Имя пайплайна:** `chembl-publication`
 **Провайдер:** `chembl`
 **Сущность:** `publication`
 **Версия схемы:** 1.2.0
@@ -71,10 +71,10 @@ entity-id = f"chembl:{document-chembl-id}"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_publication
+bioetl run chembl-publication
 
 # С ограничением
-bioetl run chembl_publication --limit 1000
+bioetl run chembl-publication --limit 1000
 ```
 
 ---
@@ -83,7 +83,7 @@ bioetl run chembl_publication --limit 1000
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/publication.yaml` |
+| Конфигурация | `configs/entities/chembl/publication.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/chembl/publication-transformer.py` |
 | Пайплайн | `src/bioetl/application/pipelines/chembl/publication.py` |
 

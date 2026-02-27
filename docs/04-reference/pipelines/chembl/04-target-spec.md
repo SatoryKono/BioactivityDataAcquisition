@@ -8,7 +8,7 @@
 
 | Parameter        | Value                                          |
 | ---------------- | ---------------------------------------------- |
-| **Pipeline ID**  | `chembl_target`                                |
+| **Pipeline ID**  | `chembl-target`                                |
 | **Provider**     | ChEMBL (EBI)                                   |
 | **Entity**       | target                                         |
 | **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/target` |
@@ -202,14 +202,14 @@ class TargetSchema(ETLRecordSchema):
 ## 7. Pipeline Configuration
 
 ```yaml
-pipeline-name: chembl_target
+pipeline-name: chembl-target
 provider: chembl
 entity-type: target
 version: "1.2.0"
 
 primary-keys: ["target-id"]
-silver-table: "chembl_target"
-gold-table: "chembl_target"
+silver-table: "chembl-target"
+gold-table: "chembl-target"
 
 gold-filters:
   required-fields:

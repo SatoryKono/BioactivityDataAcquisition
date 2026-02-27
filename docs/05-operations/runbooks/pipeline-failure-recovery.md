@@ -83,7 +83,7 @@ Checkpoint contains:
 For recoverable failures, simply resume:
 
 ```bash
-bioetl run --pipeline chembl_activity --resume
+bioetl run --pipeline chembl-activity --resume
 ```
 
 The pipeline will:
@@ -98,7 +98,7 @@ If checkpoint is corrupted or data inconsistent:
 
 ```bash
 # Clear checkpoint and reprocess all data
-bioetl run --pipeline chembl_activity --run-type rebuild
+bioetl run --pipeline chembl-activity --run-type rebuild
 ```
 
 **Warning**: This will reprocess all records from the beginning.
@@ -112,13 +112,13 @@ For schema issues or data corruption:
 mv data/output/silver/chembl/activity data/output/silver/chembl/activity.bak
 
 # 2. Clear checkpoint
-rm data/checkpoints/chembl_activity.json
+rm data/checkpoints/chembl-activity.json
 
 # 3. Full refresh
-bioetl run --pipeline chembl_activity --run-type rebuild
+bioetl run --pipeline chembl-activity --run-type rebuild
 
 # 4. Verify data
-Для проверки данных используйте: `bioetl run --pipeline chembl_activity --run-type rebuild --limit 10`
+Для проверки данных используйте: `bioetl run --pipeline chembl-activity --run-type rebuild --limit 10`
 
 # 5. Remove backup if successful
 rm -rf data/output/silver/chembl/activity.bak
@@ -144,7 +144,7 @@ For persistent 429 errors:
 1. Check current rate limit configuration in pipeline YAML
 1. Reduce batch size if needed:
    ```yaml
-   # configs/pipelines/chembl/activity.yaml
+   # configs/entities/chembl/activity.yaml
    batch-size: 500  # Reduce from default
    ```
 1. Add delay between requests:

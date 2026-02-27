@@ -1,0 +1,43 @@
+%% BioETL — Operational and Observability Ports
+%% @version 1.0.0
+%% @date    2026-02-27
+%% @type    flowchart
+%% @level   System / Component
+%% @nodes   25
+
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'NETWORK_SIMPLEX', 'edgeRouting': 'POLYLINE'}}}%%
+graph LR
+%% keep-orphan: SHP
+    subgraph Domain["Domain Ports"]
+        LKP["LockPort"]
+        CKP["CheckpointPort"]
+        LGP["LoggerPort"]
+        MTP["MetricsPort"]
+        TRP["TracingPort"]
+        CBP["CircuitBreakerPort"]
+        MMP["MemoryMonitorPort"]
+        SHP["ShutdownPort"]
+    end
+
+    subgraph Infrastructure["Implementations"]
+        ML["MemoryLock"]
+        LC["LocalCheckpoint"]
+        UL["UnifiedLogger"]
+        MCO["MetricsCollector"]
+        OTT["OpenTelemetryTracer"]
+        CB["CircuitBreaker"]
+        MMGR["MemoryMonitor"]
+    end
+
+    LKP --- ML
+    CKP --- LC
+    LGP --- UL
+    MTP --- MCO
+    TRP --- OTT
+    CBP --- CB
+    MMP --- MMGR
+
+    classDef port fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    classDef infra fill:#ffcdd2,stroke:#c62828
+    class LKP,CKP,LGP,MTP,TRP,CBP,MMP,SHP port
+    class ML,LC,UL,MCO,OTT,CB,MMGR infra

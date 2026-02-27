@@ -84,7 +84,7 @@ All failed records are stored in a single quarantine table `common.quarantine`:
 | Field | Type | Description |
 |-------|------|-------------|
 | `ingestion-ts` | Timestamp | Time of incident |
-| `pipeline` | String | Pipeline name (e.g., `chembl_activity`) |
+| `pipeline` | String | Pipeline name (e.g., `chembl-activity`) |
 | `error-code` | String | Error type (e.g., `SCHEMA-VIOLATION`) |
 | `payload` | JSON/Text | Raw record (**truncated to 64KB**) |
 | `payload-hash` | String | SHA256 for deduplication |

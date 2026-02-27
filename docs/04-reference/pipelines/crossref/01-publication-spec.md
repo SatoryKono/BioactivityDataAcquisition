@@ -8,7 +8,7 @@
 
 | Parameter | Value |
 |-----------|-------|
-| **Pipeline ID** | `crossref_publication` |
+| **Pipeline ID** | `crossref-publication` |
 | **Provider** | CrossRef |
 | **Entity** | publication |
 | **API Endpoint** | `https://api.crossref.org/works/` |
@@ -199,14 +199,14 @@ class PublicationEnrichedSchema(ETLRecordSchema):
 ## 7. Pipeline Configuration
 
 ```yaml
-pipeline-name: crossref_publication
+pipeline-name: crossref-publication
 provider: crossref
 entity-type: publication
 version: "1.2.0"
 
 primary-keys: ["doi"]
-silver-table: "crossref_publication"
-gold-table: "crossref_publication"
+silver-table: "crossref-publication"
+gold-table: "crossref-publication"
 
 source:
   type: api

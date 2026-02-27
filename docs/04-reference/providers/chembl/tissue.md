@@ -1,6 +1,6 @@
 # Пайплайн: ChEMBL Tissue
 
-**Имя пайплайна:** `chembl_tissue`
+**Имя пайплайна:** `chembl-tissue`
 **Провайдер:** `chembl`
 **Сущность:** `tissue`
 **Версия схемы:** 1.0.0
@@ -77,13 +77,13 @@ entity-id = f"chembl:{tissue-id}"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_tissue
+bioetl run chembl-tissue
 
 # С ограничением количества записей
-bioetl run chembl_tissue --limit 500
+bioetl run chembl-tissue --limit 500
 
 # Полная перезагрузка
-bioetl run chembl_tissue --run-type rebuild
+bioetl run chembl-tissue --run-type rebuild
 ```
 
 ---
@@ -92,7 +92,7 @@ bioetl run chembl_tissue --run-type rebuild
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/tissue.yaml` |
+| Конфигурация | `configs/entities/chembl/tissue.yaml` |
 | DQ Rules | `configs/quality/entities/chembl/tissue.yaml` |
 | Схема | `configs/schemas/chembl/tissue.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/chembl/tissue-transformer.py` |

@@ -15,13 +15,13 @@
 #### 2. Run Type Panel
 ```
 Показывает: Текущий тип запуска (incremental/backfill/rebuild)
-Тип: Text (HTML), отображает $run_type
+Тип: Text (HTML), отображает $run-type
 ```
 
 #### 3. Execution Timestamp Panel
 ```
 Показывает: Время создания метрики (Unix timestamp)
-Метрика: bioetl_records_processed_created
+Метрика: bioetl-records-processed-created
 Тип: Stat
 ```
 
@@ -82,15 +82,15 @@ Provider Health v2:
 
 ```
 Pipeline Panel: uniprot
-Run Type Panel: <обновляется список run_type'ов для uniprot>
-Timestamp Panel: <показывает время для выбранного run_type>
+Run Type Panel: <обновляется список run-type'ов для uniprot>
+Timestamp Panel: <показывает время для выбранного run-type>
 ```
 
 ### При выборе Pipeline = "All"
 
 ```
 Pipeline Panel: All (или последний используемый)
-Run Type Panel: <показывает все run_type'ы>
+Run Type Panel: <показывает все run-type'ы>
 Timestamp Panel: <показывает максимальное время>
 ```
 
@@ -98,7 +98,7 @@ Timestamp Panel: <показывает максимальное время>
 
 ```
 Pipeline Panel: <остаётся неизменным>
-Run Type Panel: <выбранный run_type>
+Run Type Panel: <выбранный run-type>
 Timestamp Panel: <обновляется время>
 ```
 

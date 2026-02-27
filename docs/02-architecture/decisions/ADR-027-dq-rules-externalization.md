@@ -6,7 +6,7 @@
 
 ## Context
 
-Data Quality (DQ) rules were embedded directly in pipeline YAML configuration files (`configs/pipelines/{provider}/{entity}.yaml`). This caused several problems:
+Data Quality (DQ) rules were embedded directly in pipeline YAML configuration files (`configs/entities/{provider}/{entity}.yaml`). This caused several problems:
 
 1. **Duplication**: Same thresholds and validation rules repeated across pipelines
 2. **Maintenance burden**: Changing global DQ policies required editing multiple files
@@ -15,12 +15,12 @@ Data Quality (DQ) rules were embedded directly in pipeline YAML configuration fi
 
 Example of duplication:
 ```yaml
-# configs/pipelines/chembl/activity.yaml
+# configs/entities/chembl/activity.yaml
 dq-overrides:
   soft-fail-threshold: 0.05
   hard-fail-threshold: 0.20
 
-# configs/pipelines/chembl/molecule.yaml
+# configs/entities/chembl/molecule.yaml
 dq-overrides:
   soft-fail-threshold: 0.05  # Duplicated
   hard-fail-threshold: 0.20  # Duplicated
@@ -48,7 +48,7 @@ configs/quality/
 
 Pipeline configs reference DQ config via `dq-config-file`:
 ```yaml
-pipeline-name: chembl_activity
+pipeline-name: chembl-activity
 dq-config-file: ../../quality/entities/chembl/activity.yaml
 ```
 

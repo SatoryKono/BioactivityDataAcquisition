@@ -5,7 +5,7 @@
 > **Note:** Canonical diagram sources have been consolidated into
 > [`docs/02-architecture/mmd-diagrams/`](../mmd-diagrams/README.md).
 > The `.mermaid` files in this directory are kept for historical reference.
-> All new diagrams should be added as `.mmd` files in the `mmd-diagrams/` directory.
+> All new diagrams should be added as `.mermaid` files in the `mmd-diagrams/` directory.
 
 В каталоге 59 исходных файлов диаграмм Mermaid, документирующих архитектуру BioETL.
 Диаграммы 26–50 созданы на основе TOP-25 из 500 архитектурных предложений (см. `top-50-diagram-selection.md`).
@@ -38,13 +38,10 @@ Recommended onboarding order:
 | 01a | `01-full-system-component.mermaid` | Full system component diagram (C4-style) |
 | 01b | `01-high-level.mermaid` | High-level system overview |
 | 02a | `02-full-medallion-data-flow.mermaid` | Medallion architecture data flow (detailed) |
-| 02b | `02-medallion.mermaid` | Medallion architecture (simplified) |
 | 03a | `03-pipeline-execution-happy-path.mermaid` | Pipeline execution sequence (happy path) |
-| 03b | `03-pipeline-sequence.mermaid` | Pipeline sequence diagram |
 | 04a | `04-domain-layer-class-diagram.mermaid` | Domain layer ports, entities, config |
 | 04b | `04-error-flow.mermaid` | Error handling flow |
 | 05a | `05-layers-interaction.mermaid` | Layer interaction diagram |
-| 05b | `05-locking.mermaid` | Locking mechanism |
 | 05c | `05-pipeline-lifecycle-states.mermaid` | Pipeline state machine |
 | 06a | `06-application-layer-class-diagram.mermaid` | Application layer classes |
 | 06b | `06-pipeline-execution.mermaid` | Pipeline execution flow |
@@ -80,12 +77,10 @@ Ranked by architectural importance (Priority score). PNG renderings in `png/` su
 | 27 | `27-import-matrix-enforcement.mermaid` | flowchart | 9.00 | ARCH-001 Import Matrix — 5-layer dependency rules with allowed/forbidden imports |
 | 28 | `28-composition-root-di-graph.mermaid` | flowchart | 9.00 | Composition Root DI Graph — full dependency injection assembly |
 | 29 | `29-composite-pipeline-workflow.mermaid` | sequenceDiagram | 8.94 | Composite Pipeline (ADR-026) — Seed→Deps→FanOut→Merge→Gold |
-| 30 | `30-port-adapter-mapping.mermaid` | flowchart | 8.88 | Port → Adapter Reference — all 24 ports with concrete + NoOp implementations |
 | 31 | `31-pipeline-run-lifecycle.mermaid` | stateDiagram | 8.81 | PipelineRun Aggregate FSM — PENDING→LOCKING→PREFLIGHT→…→COMPLETED/FAILED |
 | 32 | `32-single-record-journey.mermaid` | flowchart | 8.75 | Single Record Journey — API→Bronze→Transform→Validate→Silver/Quarantine→Gold |
 | 33 | `33-cli-run-interaction.mermaid` | sequenceDiagram | 8.69 | CLI → PipelineRunnerService full interaction sequence |
 | 34 | `34-batch-processing-flow.mermaid` | sequenceDiagram | 8.63 | Batch Processing — BatchExecutor extract→transform→validate→write cycle |
-| 35 | `35-bootstrap-sequence.mermaid` | sequenceDiagram | 8.56 | Bootstrap 9-step Sequence — Logger→Config→Obs→Storage→HTTP→DataSource→Services→Runner |
 | 36 | `36-architecture-principles-mindmap.mermaid` | mindmap | 8.50 | Architecture Principles Mindmap — all ADRs and design principles |
 | 37 | `37-cli-entry-full-chain.mermaid` | sequenceDiagram | 8.44 | CLI Entry → Exit Code full chain with error handling |
 | 38 | `38-runtime-assembly-sequence.mermaid` | sequenceDiagram | 8.38 | Runtime Assembly — assembly.py phases 1–8 factory orchestration |
@@ -95,7 +90,6 @@ Ranked by architectural importance (Priority score). PNG renderings in `png/` su
 | 42 | `42-pipeline-runner-class.mermaid` | classDiagram | 8.13 | PipelineRunner Class — all 14 DI dependencies |
 | 43 | `43-fan-out-fan-in-pattern.mermaid` | sequenceDiagram | 8.06 | Fan-Out/Fan-In — asyncio.gather parallel enrichment |
 | 44 | `44-cross-provider-enrichment.mermaid` | flowchart | 8.00 | Cross-Provider Enrichment — 5-provider publication flow |
-| 45 | `45-template-method-transformer.mermaid` | classDiagram | 7.94 | Template Method Pattern — BaseTransformer hierarchy with 11 concrete transformers |
 | 46 | `46-yaml-config-resolution.mermaid` | flowchart | 7.38 | YAML Config Resolution — hierarchical merge (defaults→provider→entity→inline) |
 | 47 | `47-publication-merge-sources.mermaid` | sequenceDiagram | 7.38 | Publication Composite — multi-source merge with field priority resolution |
 | 48 | `48-composite-phase-lifecycle.mermaid` | stateDiagram | 7.31 | Composite Pipeline FSM — CompositePipelineState 10-state lifecycle |

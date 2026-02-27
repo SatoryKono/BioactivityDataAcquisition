@@ -8,7 +8,7 @@
 
 ## Context
 
-Система требует механизм блокировок для предотвращения одновременного запуска одного пайплайна (например, `chembl_activity`). Это защищает от race conditions, повреждения данных и избыточных API-вызовов.
+Система требует механизм блокировок для предотвращения одновременного запуска одного пайплайна (например, `chembl-activity`). Это защищает от race conditions, повреждения данных и избыточных API-вызовов.
 
 ### Исходное решение (Superseded)
 
@@ -76,21 +76,21 @@ lock = MemoryLock()
 
 # Захват блокировки
 await lock.acquire(
-    key="pipeline:chembl_activity",
+    key="pipeline:chembl-activity",
     owner-id=run-id,
     ttl=90,
     exclusive=True
 )
 
 # Heartbeat в пайплайне (каждые 30s)
-await lock.heartbeat(key="pipeline:chembl_activity", owner-id=run-id)
+await lock.heartbeat(key="pipeline:chembl-activity", owner-id=run-id)
 
 # Safety Guard перед записью
-if not await lock.validate-owner(key="pipeline:chembl_activity", owner-id=run-id):
+if not await lock.validate-owner(key="pipeline:chembl-activity", owner-id=run-id):
     raise LockNotHeldError("Lock lost during processing")
 
 # Освобождение
-await lock.release(key="pipeline:chembl_activity", owner-id=run-id)
+await lock.release(key="pipeline:chembl-activity", owner-id=run-id)
 
 # Graceful Shutdown
 await lock.aclose()

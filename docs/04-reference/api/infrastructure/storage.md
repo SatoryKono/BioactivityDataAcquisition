@@ -8,7 +8,7 @@ Concrete implementations of `StoragePort` for Medallion architecture layers.
 flowchart LR
     subgraph Bronze["Bronze Layer"]
         BW[BronzeWriter]
-        BF["JSONL + zstd<br/>Append_only"]
+        BF["JSONL + zstd<br/>Append-only"]
     end
 
     subgraph Silver["Silver Layer"]
@@ -34,15 +34,15 @@ flowchart LR
 
 Writer for Bronze layer (raw data in JSONL + zstd compression).
 
-::: bioetl.infrastructure.storage.bronze_writer.BronzeWriter
+::: bioetl.infrastructure.storage.bronze-writer.BronzeWriter
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
         members:
-            - __init__
+            - --init--
             - write
-            - stream_write
-            - list_files
+            - stream-write
+            - list-files
             - archive
             - vacuum
 
@@ -63,16 +63,16 @@ Writer for Silver layer (Delta Lake with merge/upsert).
 
 > **Note**: `DeltaWriter` is deprecated and will be removed after a 14-day deprecation period. Use `SilverWriter` instead. The class was renamed to follow the Medallion layer naming convention (BronzeWriter, SilverWriter, GoldWriter).
 
-::: bioetl.infrastructure.storage.silver_writer.SilverWriter
+::: bioetl.infrastructure.storage.silver-writer.SilverWriter
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
         members:
-            - __init__
-            - write_silver
+            - --init--
+            - write-silver
             - vacuum
             - optimize
-            - get_table_info
+            - get-table-info
 
 **Features**:
 - ACID transactions via Delta Lake
@@ -88,12 +88,12 @@ Writer for Silver layer (Delta Lake with merge/upsert).
 
 Writer for Gold layer (validated, analytics-ready data).
 
-::: bioetl.infrastructure.storage.gold_writer.GoldWriter
+::: bioetl.infrastructure.storage.gold-writer.GoldWriter
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
         members:
-            - __init__
+            - --init--
             - write
             - merge
             - vacuum
@@ -111,16 +111,16 @@ Writer for Gold layer (validated, analytics-ready data).
 
 Read-only access to Delta Lake tables for querying Silver/Gold data.
 
-::: bioetl.infrastructure.storage.delta_reader.DeltaReader
+::: bioetl.infrastructure.storage.delta-reader.DeltaReader
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
         members:
-            - __init__
-            - read_table
+            - --init--
+            - read-table
             - query
-            - get_table_info
-            - list_tables
+            - get-table-info
+            - list-tables
 
 ## Retention Management
 
@@ -128,16 +128,16 @@ Read-only access to Delta Lake tables for querying Silver/Gold data.
 
 Manages VACUUM, OPTIMIZE, and time travel operations for Delta tables.
 
-::: bioetl.infrastructure.storage.retention_manager.RetentionManager
+::: bioetl.infrastructure.storage.retention-manager.RetentionManager
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
         members:
-            - __init__
+            - --init--
             - vacuum
             - optimize
-            - get_history
-            - restore_to_version
+            - get-history
+            - restore-to-version
 
 ## Metadata Writers
 
@@ -145,28 +145,28 @@ Manages VACUUM, OPTIMIZE, and time travel operations for Delta tables.
 
 Writes metadata for Bronze/Silver/Gold layers.
 
-::: bioetl.infrastructure.storage.metadata_writer.MetadataWriter
+::: bioetl.infrastructure.storage.metadata-writer.MetadataWriter
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### SilverMetadataBuilder
 
 Builder for Silver layer metadata.
 
-::: bioetl.infrastructure.storage.metadata_builder.SilverMetadataBuilder
+::: bioetl.infrastructure.storage.metadata-builder.SilverMetadataBuilder
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### GoldMetadataBuilder
 
 Builder for Gold layer metadata.
 
-::: bioetl.infrastructure.storage.metadata_builder.GoldMetadataBuilder
+::: bioetl.infrastructure.storage.metadata-builder.GoldMetadataBuilder
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ## Write Modes
 
@@ -181,10 +181,10 @@ from bioetl.domain.medallion import WriteMode
 
 # Write mode is determined by WriteModePolicy
 policy = WriteModePolicy()
-mode = policy.get_mode(run_type, layer)
+mode = policy.get-mode(run-type, layer)
 
 if mode == WriteMode.MERGE:
-    await writer.merge(records, primary_keys=["activity_id"])
+    await writer.merge(records, primary-keys=["activity-id"])
 elif mode == WriteMode.APPEND:
     await writer.write(records, mode="append")
 elif mode == WriteMode.OVERWRITE:
@@ -197,12 +197,12 @@ SilverWriter handles schema evolution:
 
 ```python
 try:
-    await writer.write_silver(records, ...)
+    await writer.write-silver(records, ...)
 except SchemaEvolutionError as e:
     # New columns detected
-    logger.warning(f"Schema drift: {e.new_fields}")
-    # Auto_evolve schema if enabled
-    await writer.write_silver(records, ..., on_schema_mismatch="evolve")
+    logger.warning(f"Schema drift: {e.new-fields}")
+    # Auto-evolve schema if enabled
+    await writer.write-silver(records, ..., on-schema-mismatch="evolve")
 ```
 
 ## VACUUM Operations
@@ -210,11 +210,11 @@ except SchemaEvolutionError as e:
 Periodic cleanup of old data files:
 
 ```python
-# Silver layer: 7_day retention
-await silver_writer.vacuum(table_name="chembl_activity", retention_hours=168)
+# Silver layer: 7-day retention
+await silver-writer.vacuum(table-name="chembl-activity", retention-hours=168)
 
-# Gold layer: 30_day retention (forensic)
-await gold_writer.vacuum(table_name="chembl_activity", retention_hours=720)
+# Gold layer: 30-day retention (forensic)
+await gold-writer.vacuum(table-name="chembl-activity", retention-hours=720)
 ```
 
 ## Usage Example
@@ -225,44 +225,44 @@ from bioetl.domain.medallion import SilverWriteMode
 
 # Bronze: raw data storage
 bronze = BronzeWriter(
-    base_path="/data/bronze",
+    base-path="/data/bronze",
     logger=logger,
     metrics=metrics,
 )
-await bronze.write_bronze(
-    records=raw_records,
+await bronze.write-bronze(
+    records=raw-records,
     provider="chembl",
     entity="activity",
     date=date,
-    batch_id=batch_id,
-    run_id=run_id,
-    run_type=run_type,
-    ingestion_ts=ingestion_ts,
+    batch-id=batch-id,
+    run-id=run-id,
+    run-type=run-type,
+    ingestion-ts=ingestion-ts,
 )
 
 # Silver: normalized data (using SilverWriter, formerly DeltaWriter)
 silver = SilverWriter(
-    base_path="/data/silver",
+    base-path="/data/silver",
     logger=logger,
 )
-await silver.write_silver(
-    table_name="chembl_activity",
-    records=silver_records,
-    primary_keys=["activity_id"],
-    schema=arrow_schema,
+await silver.write-silver(
+    table-name="chembl-activity",
+    records=silver-records,
+    primary-keys=["activity-id"],
+    schema=arrow-schema,
     mode=SilverWriteMode.MERGE.value,
 )
 
 # Gold: validated data
 gold = GoldWriter(
-    base_path="/data/gold",
+    base-path="/data/gold",
     logger=logger,
 )
-await gold.write_gold(
-    table_name="chembl_activity",
-    records=gold_records,
-    schema=pandera_schema,
-    primary_keys=["activity_id"],
+await gold.write-gold(
+    table-name="chembl-activity",
+    records=gold-records,
+    schema=pandera-schema,
+    primary-keys=["activity-id"],
 )
 ```
 
@@ -277,11 +277,11 @@ from bioetl.domain.ports.audit import AuditEntry, AuditLayer
 entry = AuditEntry(
     operation=AuditOperation.WRITE,
     layer=AuditLayer.SILVER,
-    table_name="chembl_activity",
-    record_count=len(records),
-    run_id=run_id,
+    table-name="chembl-activity",
+    record-count=len(records),
+    run-id=run-id,
 )
-await audit_port.log(entry)
+await audit-port.log(entry)
 ```
 
 ## See Also

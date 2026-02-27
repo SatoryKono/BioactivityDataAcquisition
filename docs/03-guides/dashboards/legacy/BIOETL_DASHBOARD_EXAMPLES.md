@@ -11,73 +11,73 @@
 
 ## Добавить новую метрику
 
-### Шаг 1: Определить метрику в metrics_server.py
+### Шаг 1: Определить метрику в metrics-server.py
 
 ```python
 # Добавить в начало файла
-from prometheus_client import Counter, Gauge, Histogram
+from prometheus-client import Counter, Gauge, Histogram
 
 # Новая метрика: количество активных run
-ACTIVE_RUNS = Gauge(
-    'bioetl_active_runs',
+ACTIVE-RUNS = Gauge(
+    'bioetl-active-runs',
     'Number of active pipeline runs'
 )
 
 # Метрика: время ответа API
-API_RESPONSE_TIME = Histogram(
-    'bioetl_api_response_seconds',
+API-RESPONSE-TIME = Histogram(
+    'bioetl-api-response-seconds',
     'API response time in seconds',
     ['endpoint', 'method']
 )
 
 # Метрика: ошибки по типам
-ERRORS_BY_TYPE = Counter(
-    'bioetl_errors_total',
+ERRORS-BY-TYPE = Counter(
+    'bioetl-errors-total',
     'Total errors by type',
-    ['error_type', 'pipeline']
+    ['error-type', 'pipeline']
 )
 ```
 
 ### Шаг 2: Генерировать данные метрик
 
 ```python
-def _generate_synthetic_metrics(self):
+def -generate-synthetic-metrics(self):
     """Generate synthetic BioETL metrics."""
     # ... существующий код ...
     
     # Добавить новые метрики
-    ACTIVE_RUNS.set(random.randint(3, 8))
+    ACTIVE-RUNS.set(random.randint(3, 8))
     
     # API response time
     for endpoint in ['/fetch', '/process', '/validate']:
         for method in ['GET', 'POST']:
-            API_RESPONSE_TIME.labels(
+            API-RESPONSE-TIME.labels(
                 endpoint=endpoint,
                 method=method
             ).observe(random.uniform(0.1, 2.0))
     
     # Errors by type
-    for error_type in ['validation_error', 'network_error', 'timeout']:
+    for error-type in ['validation-error', 'network-error', 'timeout']:
         for pipeline in ['uniprot', 'pubmed', 'pubchem']:
-            ERRORS_BY_TYPE.labels(
-                error_type=error_type,
+            ERRORS-BY-TYPE.labels(
+                error-type=error-type,
                 pipeline=pipeline
             ).inc(random.randint(0, 5))
 ```
 
-### Шаг 3: Перезапустить metrics_server.py
+### Шаг 3: Перезапустить metrics-server.py
 
 ```bash
-pkill -f metrics_server.py
-python ./metrics_server.py &
+pkill -f metrics-server.py
+python ./metrics-server.py &
 ```
 
 ### Шаг 4: Дождаться scrape и использовать в Grafana
 
 ```bash
 # Проверить, что метрика доступна
-curl http://localhost:8000/metrics | grep bioetl_active_runs
-# Output: bioetl_active_runs 5.0
+curl http://localhost:8000/metrics | grep bioetl-active-runs
+# Output: bioetl-active-runs 5.0
 ```
 
 ### Шаг 5: Добавить панель в дашборд
@@ -86,9 +86,9 @@ curl http://localhost:8000/metrics | grep bioetl_active_runs
 1. Grafana → Dashboard → Edit
 2. Add panel → New visualization
 3. Prometheus query:
-   bioetl_active_runs
+   bioetl-active-runs
    или
-   avg(bioetl_api_response_seconds) by (endpoint)
+   avg(bioetl-api-response-seconds) by (endpoint)
 4. Customize title, legend, colors
 5. Save dashboard
 ```
@@ -105,17 +105,17 @@ curl http://localhost:8000/metrics | grep bioetl_active_runs
 1. Home → Dashboards → New → Create new dashboard
 2. Add panel → Time series
    Name: "Records per Pipeline"
-   Query: sum(rate(bioetl_records_processed_total[5m])) by (pipeline)
+   Query: sum(rate(bioetl-records-processed-total[5m])) by (pipeline)
    Legend: {{pipeline}}
    
 3. Add panel → Stat
    Name: "Error Rate"
-   Query: avg(bioetl_error_rate)
+   Query: avg(bioetl-error-rate)
    Thresholds: Green <5%, Orange <10%, Red >10%
    
 4. Add panel → Gauge
    Name: "Quality Score"
-   Query: sum(bioetl_records_processed_total{stage="gold"}) / sum(bioetl_records_processed_total{stage="bronze"})
+   Query: sum(bioetl-records-processed-total{stage="gold"}) / sum(bioetl-records-processed-total{stage="bronze"})
    Min: 0, Max: 1
    
 5. Dashboard settings → Save as "Pipeline Performance"
@@ -173,7 +173,7 @@ curl http://localhost:8000/metrics | grep bioetl_active_runs
       },
       "targets": [
         {
-          "expr": "sum(rate(bioetl_records_processed_total[5m])) by (pipeline)",
+          "expr": "sum(rate(bioetl-records-processed-total[5m])) by (pipeline)",
           "legendFormat": "{{pipeline}}",
           "refId": "A"
         }
@@ -229,7 +229,7 @@ curl http://localhost:8000/metrics | grep bioetl_active_runs
       },
       "targets": [
         {
-          "expr": "avg(bioetl_error_rate) * 100",
+          "expr": "avg(bioetl-error-rate) * 100",
           "refId": "A"
         }
       ],
@@ -280,7 +280,7 @@ cp custom-dashboard.json ./grafana/dashboards/
 1. Dashboard → Alert rules (звоночек 🔔)
 2. Create alert rule → Prometheus
 3. Condition:
-   Query A: avg(bioetl_error_rate)
+   Query A: avg(bioetl-error-rate)
    If: A > 0.1 (10%)
 4. Duration: 5m (alert если больше 5 минут)
 5. Notification channel: Email/Slack/PagerDuty
@@ -293,21 +293,21 @@ cp custom-dashboard.json ./grafana/dashboards/
 
 ```yaml
 global:
-  scrape_interval: 15s
-  evaluation_interval: 15s
+  scrape-interval: 15s
+  evaluation-interval: 15s
 
-rule_files:
+rule-files:
   - /etc/prometheus/alerts.yml
 
 alerting:
   alertmanagers:
-    - static_configs:
+    - static-configs:
         - targets:
             - alertmanager:9093
 
-scrape_configs:
-  - job_name: 'bioetl'
-    static_configs:
+scrape-configs:
+  - job-name: 'bioetl'
+    static-configs:
       - targets: ['host.docker.internal:8000']
 ```
 
@@ -315,11 +315,11 @@ scrape_configs:
 
 ```yaml
 groups:
-  - name: bioetl_alerts
+  - name: bioetl-alerts
     interval: 30s
     rules:
       - alert: HighErrorRate
-        expr: avg(bioetl_error_rate) > 0.1
+        expr: avg(bioetl-error-rate) > 0.1
         for: 5m
         labels:
           severity: warning
@@ -328,7 +328,7 @@ groups:
           description: "Error rate is {{ $value | humanizePercentage }}"
 
       - alert: RecordsNotProcessing
-        expr: increase(bioetl_records_processed_total[5m]) == 0
+        expr: increase(bioetl-records-processed-total[5m]) == 0
         for: 10m
         labels:
           severity: critical
@@ -337,7 +337,7 @@ groups:
           description: "Pipeline might be stuck"
 
       - alert: SlowProcessing
-        expr: histogram_quantile(0.95, rate(bioetl_processing_duration_seconds_bucket[5m])) > 30
+        expr: histogram-quantile(0.95, rate(bioetl-processing-duration-seconds-bucket[5m])) > 30
         for: 5m
         labels:
           severity: warning
@@ -369,7 +369,7 @@ groups:
         "includeAll": false,
         "label": "Time Range",
         "multi": false,
-        "name": "time_range",
+        "name": "time-range",
         "options": [
           {"text": "Last hour", "value": "now-1h"},
           {"text": "Last 6 hours", "value": "now-6h"},
@@ -386,7 +386,7 @@ groups:
         "allValue": null,
         "current": {},
         "datasource": "Prometheus",
-        "definition": "label_values(bioetl_records_processed_total, stage)",
+        "definition": "label-values(bioetl-records-processed-total, stage)",
         "hide": 0,
         "includeAll": true,
         "label": "Stage",
@@ -394,7 +394,7 @@ groups:
         "name": "stage",
         "options": [],
         "query": {
-          "query": "label_values(bioetl_records_processed_total, stage)",
+          "query": "label-values(bioetl-records-processed-total, stage)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -409,7 +409,7 @@ groups:
 
 ```
 Query:
-sum(bioetl_records_processed_total{stage=~"$stage"})
+sum(bioetl-records-processed-total{stage=~"$stage"})
 
 Legend:
 {{stage}}
@@ -430,7 +430,7 @@ Legend:
 
 # Способ 2: Через API
 curl http://localhost:3000/api/dashboards/uid/bioetl-simple \
-  -H "Authorization: Bearer YOUR_API_TOKEN" > bioetl-simple.json
+  -H "Authorization: Bearer YOUR-API-TOKEN" > bioetl-simple.json
 ```
 
 ### Импортировать дашборд
@@ -443,7 +443,7 @@ curl http://localhost:3000/api/dashboards/uid/bioetl-simple \
 # Способ 2: Через API
 curl -X POST http://localhost:3000/api/dashboards/db \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_API_TOKEN" \
+  -H "Authorization: Bearer YOUR-API-TOKEN" \
   -d @bioetl-simple.json
 ```
 
@@ -502,7 +502,7 @@ docker restart bioetl-grafana
       "title": "Error Rate Trend",
       "targets": [
         {
-          "expr": "avg(bioetl_error_rate) over time"
+          "expr": "avg(bioetl-error-rate) over time"
         }
       ],
       "type": "timeseries"
@@ -511,7 +511,7 @@ docker restart bioetl-grafana
       "title": "Processing Latency",
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, rate(bioetl_processing_duration_seconds_bucket[5m]))"
+          "expr": "histogram-quantile(0.95, rate(bioetl-processing-duration-seconds-bucket[5m]))"
         }
       ],
       "type": "timeseries"
@@ -531,7 +531,7 @@ docker restart bioetl-grafana
         "name": "pipeline",
         "type": "query",
         "datasource": "Prometheus",
-        "definition": "label_values(bioetl_records_processed_total, pipeline)",
+        "definition": "label-values(bioetl-records-processed-total, pipeline)",
         "includeAll": false
       }
     ]
@@ -541,7 +541,7 @@ docker restart bioetl-grafana
       "title": "$pipeline - Records Processed",
       "targets": [
         {
-          "expr": "sum(bioetl_records_processed_total{pipeline=\"$pipeline\"}) by (stage)"
+          "expr": "sum(bioetl-records-processed-total{pipeline=\"$pipeline\"}) by (stage)"
         }
       ]
     }
@@ -556,14 +556,14 @@ docker restart bioetl-grafana
 ```yaml
 # В Prometheus alerts.yml
 groups:
-  - name: slack_alerts
+  - name: slack-alerts
     rules:
       - alert: PipelineDown
         expr: up{job="bioetl"} == 0
         for: 1m
         annotations:
-          slack_channel: "#alerts"
-          slack_message: "🚨 BioETL Pipeline DOWN!"
+          slack-channel: "#alerts"
+          slack-message: "🚨 BioETL Pipeline DOWN!"
 ```
 
 **Или через Grafana Slack integration:**
@@ -581,25 +581,25 @@ groups:
 
 ```promql
 # Базовые операции
-bioetl_records_processed_total                    # Все значения метрики
-bioetl_records_processed_total{stage="bronze"}    # С фильтром
-bioetl_records_processed_total{stage=~".*"}       # Regex фильтр
-bioetl_records_processed_total offset 1h           # 1 час назад
+bioetl-records-processed-total                    # Все значения метрики
+bioetl-records-processed-total{stage="bronze"}    # С фильтром
+bioetl-records-processed-total{stage=~".*"}       # Regex фильтр
+bioetl-records-processed-total offset 1h           # 1 час назад
 
 # Агрегация
-sum(bioetl_records_processed_total)               # Сумма всех
-avg(bioetl_records_processed_total)               # Среднее
-max(bioetl_records_processed_total)               # Максимум
+sum(bioetl-records-processed-total)               # Сумма всех
+avg(bioetl-records-processed-total)               # Среднее
+max(bioetl-records-processed-total)               # Максимум
 
 # По меткам
-sum(bioetl_records_processed_total) by (stage)    # Группировка
-topk(3, bioetl_error_rate)                        # Top 3
+sum(bioetl-records-processed-total) by (stage)    # Группировка
+topk(3, bioetl-error-rate)                        # Top 3
 
 # Функции
 rate(metric[5m])                                   # Скорость за 5 минут
 increase(metric[1h])                               # Прирост за час
-histogram_quantile(0.95, metric)                   # 95 перцентиль
-time() - metric_timestamp                         # Время жизни
+histogram-quantile(0.95, metric)                   # 95 перцентиль
+time() - metric-timestamp                         # Время жизни
 
 # Логические операции
 metric1 + metric2                                  # Сложение

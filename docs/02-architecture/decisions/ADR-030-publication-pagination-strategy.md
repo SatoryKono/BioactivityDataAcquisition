@@ -31,13 +31,13 @@ Run 2 (resume): Fetch records 1000-2000
 
 | Pipeline | Provider | Entity Type | Primary Key |
 |----------|----------|-------------|-------------|
-| `chembl_publication` | ChEMBL | publication | document-chembl-id |
-| `chembl_publication_term` | ChEMBL | publication-term | entity-id |
-| `chembl_publication_similarity` | ChEMBL | publication-similarity | sim-id |
-| `pubmed_publication` | PubMed | publication | pmid |
-| `crossref_publication` | CrossRef | work | doi |
-| `openalex_publication` | OpenAlex | publication | openalex-id |
-| `semanticscholar_publication` | SemanticScholar | publication | paper-id |
+| `chembl-publication` | ChEMBL | publication | document-chembl-id |
+| `chembl-publication-term` | ChEMBL | publication-term | entity-id |
+| `chembl-publication-similarity` | ChEMBL | publication-similarity | sim-id |
+| `pubmed-publication` | PubMed | publication | pmid |
+| `crossref-publication` | CrossRef | work | doi |
+| `openalex-publication` | OpenAlex | publication | openalex-id |
+| `semanticscholar-publication` | SemanticScholar | publication | paper-id |
 
 ## Decision
 
@@ -63,8 +63,8 @@ class PipelineConfig:
 ### YAML Configuration
 
 ```yaml
-# configs/pipelines/chembl/publication.yaml
-pipeline-name: chembl_publication
+# configs/entities/chembl/publication.yaml
+pipeline-name: chembl-publication
 provider: chembl
 entity-type: publication
 
@@ -165,17 +165,17 @@ Records with identical `content-hash` are deduplicated during merge.
 - `src/bioetl/infrastructure/config/-base.py` — Pass `force-full-scan` in `yaml-config-to-domain`
 
 **Composition:**
-- `src/bioetl/composition/factories/services_factory.py` — Pass `force-full-scan` to `CheckpointManager`
-- `src/bioetl/composition/factories/pipeline_factory.py` — Use `config.force-full-scan`
+- `src/bioetl/composition/factories/services-factory.py` — Pass `force-full-scan` to `CheckpointManager`
+- `src/bioetl/composition/factories/pipeline-factory.py` — Use `config.force-full-scan`
 
 **Configs:**
-- `configs/pipelines/chembl/publication.yaml` — `force-full-scan: true`
-- `configs/pipelines/chembl/publication-term.yaml` — `force-full-scan: true`
-- `configs/pipelines/chembl/publication-similarity.yaml` — `force-full-scan: true`
-- `configs/pipelines/pubmed/publication.yaml` — `force-full-scan: true`
-- `configs/pipelines/crossref/publication.yaml` — `force-full-scan: true`
-- `configs/pipelines/openalex/publication.yaml` — `force-full-scan: true`
-- `configs/pipelines/semanticscholar/publication.yaml` — `force-full-scan: true`
+- `configs/entities/chembl/publication.yaml` — `force-full-scan: true`
+- `configs/entities/chembl/publication-term.yaml` — `force-full-scan: true`
+- `configs/entities/chembl/publication-similarity.yaml` — `force-full-scan: true`
+- `configs/entities/pubmed/publication.yaml` — `force-full-scan: true`
+- `configs/entities/crossref/publication.yaml` — `force-full-scan: true`
+- `configs/entities/openalex/publication.yaml` — `force-full-scan: true`
+- `configs/entities/semanticscholar/publication.yaml` — `force-full-scan: true`
 
 ### Tests
 

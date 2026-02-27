@@ -36,10 +36,10 @@
 | Ветка | Дата | Merge статус | Файлы (целевые) |
 |-------|------|-------------|-----------------|
 | `bolt/optimize-date-extractor-2826375097710156585` | 2026-02-15 | **CLEAN** | `extractors/date.py`, +тесты |
-| `bolt-optimize-pubmed-identifiers-9455405533693776821` | 2026-02-17 | **CLEAN** | `extractors/identifier.py`, `transformer.py`, +`identifier_types.py` |
+| `bolt-optimize-pubmed-identifiers-9455405533693776821` | 2026-02-17 | **CLEAN** | `extractors/identifier.py`, `transformer.py`, +`identifier-types.py` |
 | `bolt-pubmed-identifier-opt-169219971728294416` | 2026-02-14 | **CLEAN** (individual) | `extractors/identifier.py`, `transformer.py` |
 | `bolt/uniprot-feature-optimization-1706687305301958106` | 2026-02-12 | **CONFLICTS** (features.py) | `extractors/features.py` |
-| `bolt-optimize-pubmed-identifiers-17563303524360502919` | 2026-02-16 | **CONFLICTS** (3 files) | `extractors/identifier.py`, +`identifier_helper.py`, +`identifier_types.py`, `transformer.py`, `_author_helpers.py`, `author_normalization_service.py` |
+| `bolt-optimize-pubmed-identifiers-17563303524360502919` | 2026-02-16 | **CONFLICTS** (3 files) | `extractors/identifier.py`, +`identifier-helper.py`, +`identifier-types.py`, `transformer.py`, `-author-helpers.py`, `author-normalization-service.py` |
 
 ### Orphaned ветки (НЕТ ОБЩЕГО ПРЕДКА)
 
@@ -51,7 +51,7 @@
 
 ### Группа A: Silver Writer (12 веток)
 
-**Целевой файл:** `src/bioetl/infrastructure/storage/silver_writer.py`
+**Целевой файл:** `src/bioetl/infrastructure/storage/silver-writer.py`
 
 | Ветка | Дата | Статус | Diff lines | Оптимизация |
 |-------|------|--------|-----------|-------------|
@@ -72,33 +72,33 @@
 **Общий паттерн оптимизации во всех ветках:**
 ```python
 # БЫЛО (main): итерация по всем полям записи, фильтрация по схеме
-filtered = [{k: v for k, v in rec.items() if k in schema_fields} for rec in records]
+filtered = [{k: v for k, v in rec.items() if k in schema-fields} for rec in records]
 
 # СТАЛО: итерация по полям СХЕМЫ (меньше), lookup в записи
 for rec in records:
-    new_rec = {}
+    new-rec = {}
     for name in schema.names:      # O(schema) вместо O(record)
         if name in rec:
-            new_rec[name] = rec[name]
+            new-rec[name] = rec[name]
 ```
 
 **Дополнительные изменения (в некоторых ветках):**
-- Удаление `_validate_key_nullability()` (спорно — убирает валидацию)
-- Удаление фильтрации `_state` перед валидацией (рискованно)
+- Удаление `-validate-key-nullability()` (спорно — убирает валидацию)
+- Удаление фильтрации `-state` перед валидацией (рискованно)
 - Рефакторинг импортов (`ArrowTypeError` → `pa.ArrowTypeError`)
 
-**Рекомендация:** Cherry-pick паттерна оптимизации цикла из `bolt-silver-writer-optimization-4078771543740170219` (самая свежая, чистый код). **НЕ** включать удаление `_validate_key_nullability()` без обоснования.
+**Рекомендация:** Cherry-pick паттерна оптимизации цикла из `bolt-silver-writer-optimization-4078771543740170219` (самая свежая, чистый код). **НЕ** включать удаление `-validate-key-nullability()` без обоснования.
 
 ---
 
 ### Группа B: Gold Writer / Batch Writer (2 ветки)
 
-**Целевые файлы:** `gold_writer.py`, `batch_writer.py`
+**Целевые файлы:** `gold-writer.py`, `batch-writer.py`
 
 | Ветка | Дата | Статус | Оптимизация |
 |-------|------|--------|-------------|
 | `bolt/gold-writer-optimization-9251521540080561602` | 01-22 | Orphaned | Удаление column ordering, GoldMetadataBuilder |
-| `bolt/optimize-batch-writer-gold-8224212234072549004` | 01-20 | Orphaned | In-place filtering, кэш `_gold_schema_columns` |
+| `bolt/optimize-batch-writer-gold-8224212234072549004` | 01-20 | Orphaned | In-place filtering, кэш `-gold-schema-columns` |
 
 **Ветка 1 (gold-writer-optimization):**
 - Чистое удаление ColumnOrderer/schema normalization
@@ -137,9 +137,9 @@ for rec in records:
 
 | Ветка | Дата | Статус | Подход |
 |-------|------|--------|--------|
-| `bolt-optimize-pubmed-identifiers-9455405533693776821` | 02-17 | **MERGEABLE** | Integrated: single-pass XML, `identifier_types.py`, walrus operators |
+| `bolt-optimize-pubmed-identifiers-9455405533693776821` | 02-17 | **MERGEABLE** | Integrated: single-pass XML, `identifier-types.py`, walrus operators |
 | `bolt-pubmed-identifier-opt-169219971728294416` | 02-14 | **MERGEABLE** (individual) | Aggressive: deprecate old methods, plain dict returns |
-| `bolt-optimize-pubmed-identifiers-17563303524360502919` | 02-16 | **CONFLICTS** | Module extraction: `identifier_helper.py` + `identifier_types.py` + domain changes |
+| `bolt-optimize-pubmed-identifiers-17563303524360502919` | 02-16 | **CONFLICTS** | Module extraction: `identifier-helper.py` + `identifier-types.py` + domain changes |
 
 **ВАЖНО:** Ветки 1 и 3 конфликтуют друг с другом (оба меняют `identifier.py` и `transformer.py`). Нужно выбрать ОДНУ.
 
@@ -147,7 +147,7 @@ for rec in records:
 
 | Критерий | Ветка 9455... | Ветка 169219... | Ветка 17563... |
 |----------|-------------|---------------|---------------|
-| Новые файлы | 1 (`identifier_types.py`) | 0 | 2 (`identifier_helper.py`, `identifier_types.py`) |
+| Новые файлы | 1 (`identifier-types.py`) | 0 | 2 (`identifier-helper.py`, `identifier-types.py`) |
 | Чистота merge | Clean | Clean | Конфликты |
 | Type safety | TypedDict | plain dict (потеря!) | TypedDict |
 | Backward compat | Хорошая | Deprecation warnings | Хорошая |
@@ -165,7 +165,7 @@ for rec in records:
 | `bolt/pubmed-transformer-optimization-1564101723275582547` | 02-13 | Orphaned |
 | `bolt-pubmed-optimization-11776621839494351834` | 02-11 | Orphaned |
 
-Обе orphaned, затрагивают десятки файлов. Целевые изменения в `transformer.py` (удаление service calls, инлайн month_map, static methods). Идеи полезные, но merge невозможен.
+Обе orphaned, затрагивают десятки файлов. Целевые изменения в `transformer.py` (удаление service calls, инлайн month-map, static methods). Идеи полезные, но merge невозможен.
 
 **Рекомендация:** Cherry-pick специфических идей вручную после стабилизации main.
 
@@ -191,7 +191,7 @@ for rec in records:
 | `bolt/optimize-silver-serialization-17048994287352894847` | 02-11 | Orphaned |
 
 **420 файлов изменено, 13900+ / 18507- строк.** Это фактически полная переработка кодовой базы, а не оптимизация silver serialization. Включает:
-- Переименование модулей (`xml_parser.py` → `xml_utils.py`)
+- Переименование модулей (`xml-parser.py` → `xml-utils.py`)
 - Удаление целых модулей (domain/config/*, mapping/*, schemas/uniprot/*)
 - Рефакторинг всех пайплайнов
 - Реорганизация domain layer
@@ -214,7 +214,7 @@ for rec in records:
 
 | # | Источник | Что взять |
 |---|----------|-----------|
-| 4 | `bolt-silver-writer-optimization-4078771543740170219` | Паттерн оптимизации цикла в `silver_writer.py` (итерация по schema.names) |
+| 4 | `bolt-silver-writer-optimization-4078771543740170219` | Паттерн оптимизации цикла в `silver-writer.py` (итерация по schema.names) |
 | 5 | `bolt/gold-writer-optimization-9251521540080561602` | Удаление ColumnOrderer overhead, GoldMetadataBuilder extraction |
 
 ### ОТКЛОНИТЬ (22 ветки)
@@ -241,7 +241,7 @@ git merge --no-ff origin/bolt/optimize-date-extractor-2826375097710156585 \
 
 # Шаг 1.2: PubMed Identifier optimization
 git merge --no-ff origin/bolt-optimize-pubmed-identifiers-9455405533693776821 \
-  -m "perf(pubmed): optimize identifier extraction — single-pass XML, identifier_types.py"
+  -m "perf(pubmed): optimize identifier extraction — single-pass XML, identifier-types.py"
 ```
 
 **Проверки после каждого merge:**
@@ -272,12 +272,12 @@ mypy --strict src/bioetl/application/pipelines/uniprot/
 ```bash
 # Шаг 3.1: Silver Writer loop optimization
 # НЕ merge, а ручное применение паттерна из bolt-silver-writer-optimization-4078771543740170219
-# Целевой файл: src/bioetl/infrastructure/storage/silver_writer.py
+# Целевой файл: src/bioetl/infrastructure/storage/silver-writer.py
 # Изменение: заменить итерацию по rec.items() на итерацию по schema.names
 
 # Шаг 3.2: Gold Writer cleanup (опционально)
 # НЕ merge, а ручное применение идей из bolt/gold-writer-optimization-9251521540080561602
-# Целевые файлы: gold_writer.py, batch_writer.py
+# Целевые файлы: gold-writer.py, batch-writer.py
 # Изменение: удаление ColumnOrderer overhead, извлечение GoldMetadataBuilder
 ```
 
@@ -353,7 +353,7 @@ git push origin --delete \
 │       └── identifier-opt ────► Перекрыта identifiers-9455
 └── 22 orphaned
     ├── 2 с ценными идеями ───► CHERRY-PICK вручную (этап 3)
-    │   ├── silver-writer-4078 ► Паттерн цикла silver_writer.py
+    │   ├── silver-writer-4078 ► Паттерн цикла silver-writer.py
     │   └── gold-writer-9251 ──► GoldMetadataBuilder
     └── 20 устаревших ─────────► УДАЛИТЬ
 ```

@@ -5,13 +5,13 @@
 %% @date    2026-02-24
 %% @type    flowchart
 %% @level   System / Component
-%% @nodes   36
+%% @nodes   26
 
 %%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'NETWORK_SIMPLEX', 'edgeRouting': 'POLYLINE'}}}%%
 %% @uniform width=200 height=56 max_title_len=20 max_desc_lines=1
 graph LR
     subgraph Sources["External Data Sources"]
-        API7["Semantic Scholar API<br/>"]
+        APIS["Public APIs<br/>(ChEMBL, UniProt, PubMed, etc.)"]
     end
 
     subgraph Ingestion["Data Ingestion"]
@@ -56,18 +56,18 @@ graph LR
     end
 
     subgraph Quarantine["Quarantine"]
-        QM["QuarantineManager<br/>"]
-        QS["Quarantine Store<br/>"]
+        QS["Quarantine Store<br/>(Invalid Records)"]
     end
 
     subgraph DQ["Data Quality Reports"]
         DQ_B["Bronze DQ<br/>Analyzer"]
         DQ_S["Silver DQ<br/>Analyzer"]
         DQ_G["Gold DQ<br/>Analyzer"]
+        DQ_RPT["DQ Report<br/>Writer"]
     end
 
     %% Flow
-    API1 & API2 & API3 & API4 & API5 & API6 & API7 --> DS
+    APIS --> DS
     DS --> RL --> CB --> RETRY
 
     RETRY --> BW
@@ -80,7 +80,7 @@ graph LR
     PII --> DQ_CHECK
 
     DQ_CHECK -->|"pass"| SW
-    DQ_CHECK -->|"fail"| QM --> QS
+    DQ_CHECK -->|"fail"| QS
 
     SW --> SV --> DELTA_S
     SW --> SMETA
@@ -104,7 +104,7 @@ graph LR
     class BW,BJSONL,BMETA,BAUDIT bronze
     class SW,DELTA_S,SV,SMETA silver
     class GW,DELTA_G,GV,GMETA gold
-    class API1,API2,API3,API4,API5,API6,API7 source
+    class APIS source
     class DS,RL,CB,RETRY,BT,NORM,HASH,PII,DQ_CHECK,GFILT,GMAP process
-    class QM,QS quarantine
+    class QS quarantine
     class DQ_B,DQ_S,DQ_G,DQ_RPT dq

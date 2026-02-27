@@ -41,7 +41,7 @@
 |---|---|---|
 | `codex/remove-deprecated-code-in-bioetl` | `refactor: remove DeprecationWarning emissions` | Консервативно: убирает warnings, добавляет alias-тесты. 14 files, -321 lines |
 | `codex/remove-deprecated-code-from-bioetl` | `refactor: remove deprecated aliases and warning emissions` | Радикально: удаляет deprecated модули целиком. 15 files, -456 lines |
-| `codex/remove-deprecated-code-from-bioetl-6ecjp0` | `fix(scripts): restore terminology wrapper compatibility` | Точечно: упрощает `scripts/lint_terminology.py`. 1 file, -60/+12 lines |
+| `codex/remove-deprecated-code-from-bioetl-6ecjp0` | `fix(scripts): restore terminology wrapper compatibility` | Точечно: упрощает `scripts/lint-terminology.py`. 1 file, -60/+12 lines |
 
 ---
 
@@ -51,8 +51,8 @@
 
 | Branch | Commit | Scope |
 |---|---|---|
-| `codex/cleanup-dead-and-unused-code` | `chore: remove impossible async-generator branches` | crossref, openalex, semanticscholar, uniprot, filterable_mixin. 5 files, -10 lines |
-| `codex/cleanup-dead-and-unused-code-3j1ahg` | `chore: remove unused imports and no-op statements` | cached_bronze, circuit_breaker, base_schemas, delta_reader, metadata_writer. 5 files, -8 lines |
+| `codex/cleanup-dead-and-unused-code` | `chore: remove impossible async-generator branches` | crossref, openalex, semanticscholar, uniprot, filterable-mixin. 5 files, -10 lines |
+| `codex/cleanup-dead-and-unused-code-3j1ahg` | `chore: remove unused imports and no-op statements` | cached-bronze, circuit-breaker, base-schemas, delta-reader, metadata-writer. 5 files, -8 lines |
 
 ---
 
@@ -112,6 +112,6 @@
    - `codex/cleanup-dead-and-unused-code` — unreachable async branches
    - `codex/cleanup-dead-and-unused-code-3j1ahg` — unused imports
    - `codex/remove-deprecated-code-from-bioetl` — удаление deprecated modules
-   - `codex/remove-deprecated-code-from-bioetl-6ecjp0` — чистка lint_terminology.py
+   - `codex/remove-deprecated-code-from-bioetl-6ecjp0` — чистка lint-terminology.py
    - `codex/remove-deprecated-code-in-bioetl` — убрать DeprecationWarnings
    - `codex/refactor-code-for-data-merging-after-reload-1sq8e7` — PubMed resume offset

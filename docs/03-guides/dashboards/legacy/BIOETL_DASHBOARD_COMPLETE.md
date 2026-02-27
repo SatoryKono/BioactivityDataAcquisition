@@ -12,11 +12,11 @@
 
 | Документ | Размер | Аудитория | Содержание |
 |----------|--------|----------|-----------|
-| **BIOETL_DASHBOARD_README.md** | 264 строк | 🗺️ Все | Навигация и индекс |
-| **BIOETL_DASHBOARD_QUICKSTART.md** | 148 строк | 🚀 Разработчики | За 5 минут на вход |
-| **BIOETL_DASHBOARD_SETUP.md** | 572 строк | 📖 Полная инструкция | Все детали (60 минут) |
-| **BIOETL_DASHBOARD_VISUAL_GUIDE.md** | 278 строк | 👁️ Визуалы | Диаграммы и примеры |
-| **BIOETL_DASHBOARD_EXAMPLES.md** | 529 строк | 💡 Кастомизация | Примеры и расширение |
+| **BIOETL-DASHBOARD-README.md** | 264 строк | 🗺️ Все | Навигация и индекс |
+| **BIOETL-DASHBOARD-QUICKSTART.md** | 148 строк | 🚀 Разработчики | За 5 минут на вход |
+| **BIOETL-DASHBOARD-SETUP.md** | 572 строк | 📖 Полная инструкция | Все детали (60 минут) |
+| **BIOETL-DASHBOARD-VISUAL-GUIDE.md** | 278 строк | 👁️ Визуалы | Диаграммы и примеры |
+| **BIOETL-DASHBOARD-EXAMPLES.md** | 529 строк | 💡 Кастомизация | Примеры и расширение |
 
 **Итого:** ~1,800 строк документации
 
@@ -24,7 +24,7 @@
 
 | Файл | Назначение | Статус |
 |------|-----------|--------|
-| **metrics_server.py** | Prometheus metrics endpoint | ✅ Работает |
+| **metrics-server.py** | Prometheus metrics endpoint | ✅ Работает |
 | **docker-compose.monitoring.yml** | Docker контейнеры (Prometheus, Grafana) | ✅ Готов |
 | **grafana/prometheus.yml** | Конфигурация Prometheus | ✅ Настроен |
 | **grafana/provisioning/** | Auto-provisioning дашбордов | ✅ 4 дашборда |
@@ -87,13 +87,13 @@
 ### Шаг 1: Быстрый старт (5 минут)
 ```bash
 # Прочитать
-cat BIOETL_DASHBOARD_QUICKSTART.md
+cat BIOETL-DASHBOARD-QUICKSTART.md
 
 # Запустить контейнеры
 docker compose -f docker-compose.monitoring.yml up -d
 
 # Запустить metrics сервер
-python ./metrics_server.py &
+python ./metrics-server.py &
 
 # Открыть
 http://localhost:3000/d/bioetl-simple
@@ -103,7 +103,7 @@ http://localhost:3000/d/bioetl-simple
 ```
 1. README (навигация) — 5 минут
 2. QUICKSTART (за 5 минут) — 10 минут
-3. VISUAL_GUIDE (диаграммы) — 20 минут
+3. VISUAL-GUIDE (диаграммы) — 20 минут
 4. SETUP (полная инструкция) — 60 минут
 5. EXAMPLES (кастомизация) — 30 минут
 ```
@@ -119,7 +119,7 @@ http://localhost:3000/d/bioetl-simple
 
 ### Шаг 4: Кастомизировать (опционально)
 ```
-1. Добавить метрики в metrics_server.py
+1. Добавить метрики в metrics-server.py
 2. Создать собственный дашборд
 3. Настроить alerts
 4. Интегрировать с Slack/Email
@@ -132,21 +132,21 @@ http://localhost:3000/d/bioetl-simple
 ### Доступные метрики:
 
 ```
-✅ bioetl_records_processed_total
+✅ bioetl-records-processed-total
    - pipeline (uniprot, pubmed, pubchem, chembl)
-   - run_type (incremental, backfill, rebuild)
+   - run-type (incremental, backfill, rebuild)
    - stage (bronze, silver, gold)
    - status (success, error)
 
-✅ bioetl_records_processed_created
-   - pipeline, run_type
+✅ bioetl-records-processed-created
+   - pipeline, run-type
    - Timestamp создания метрики (для Execution Timestamp панели)
 
-✅ bioetl_health_check_status
+✅ bioetl-health-check-status
    - component
    - Статус health check (1=healthy)
 
-✅ bioetl_health_check_latency_ms
+✅ bioetl-health-check-latency-ms
    - provider (uniprot, pubmed, pubchem, chembl)
    - Histogram с buckets для P95 latency
 ```
@@ -155,16 +155,16 @@ http://localhost:3000/d/bioetl-simple
 
 ```promql
 # Текущие значения
-sum(bioetl_records_processed_total) by (stage)
+sum(bioetl-records-processed-total) by (stage)
 
 # Скорость обработки (records/min)
-sum(rate(bioetl_records_processed_total[1m])) by (pipeline)
+sum(rate(bioetl-records-processed-total[1m])) by (pipeline)
 
 # Quality ratio (Gold/Bronze)
-sum(bioetl_records_processed_total{stage="gold"}) / sum(bioetl_records_processed_total{stage="bronze"})
+sum(bioetl-records-processed-total{stage="gold"}) / sum(bioetl-records-processed-total{stage="bronze"})
 
 # P95 latency provider'а
-histogram_quantile(0.95, bioetl_health_check_latency_ms_bucket{provider="chembl"})
+histogram-quantile(0.95, bioetl-health-check-latency-ms-bucket{provider="chembl"})
 ```
 
 ---
@@ -172,7 +172,7 @@ histogram_quantile(0.95, bioetl_health_check_latency_ms_bucket{provider="chembl"
 ## 🔧 Кастомизация
 
 ### Добавить метрику:
-1. Отредактировать `metrics_server.py`
+1. Отредактировать `metrics-server.py`
 2. Добавить Counter/Gauge/Histogram
 3. Перезапустить сервер
 4. Использовать в Grafana
@@ -186,7 +186,7 @@ histogram_quantile(0.95, bioetl_health_check_latency_ms_bucket{provider="chembl"
 ### Настроить alert:
 1. Dashboard → Alert rules
 2. Create alert rule
-3. Set condition (например, error_rate > 10%)
+3. Set condition (например, error-rate > 10%)
 4. Выбрать notification channel
 
 ---
@@ -201,8 +201,8 @@ histogram_quantile(0.95, bioetl_health_check_latency_ms_bucket{provider="chembl"
    curl http://localhost:8000/metrics
    
    # Если ошибка, перезапустить
-   pkill -f metrics_server.py
-   python ./metrics_server.py &
+   pkill -f metrics-server.py
+   python ./metrics-server.py &
    ```
 
 2. **Prometheus target DOWN**
@@ -241,7 +241,7 @@ histogram_quantile(0.95, bioetl_health_check_latency_ms_bucket{provider="chembl"
 ## 🎓 Обучение
 
 ### Для новичков (40 минут):
-1. Прочитать VISUAL_GUIDE.md — 20 минут
+1. Прочитать VISUAL-GUIDE.md — 20 минут
 2. Открыть BioETL Simple Dashboard — 10 минут
 3. Поменять фильтры — 10 минут
 
@@ -261,11 +261,11 @@ histogram_quantile(0.95, bioetl_health_check_latency_ms_bucket{provider="chembl"
 ## 📞 Справка
 
 ### Основные файлы
-- `BIOETL_DASHBOARD_QUICKSTART.md` — Начните отсюда ⭐
-- `BIOETL_DASHBOARD_README.md` — Индекс всей документации
-- `BIOETL_DASHBOARD_SETUP.md` — Полная инструкция
-- `BIOETL_DASHBOARD_VISUAL_GUIDE.md` — Диаграммы и примеры
-- `BIOETL_DASHBOARD_EXAMPLES.md` — Кастомизация
+- `BIOETL-DASHBOARD-QUICKSTART.md` — Начните отсюда ⭐
+- `BIOETL-DASHBOARD-README.md` — Индекс всей документации
+- `BIOETL-DASHBOARD-SETUP.md` — Полная инструкция
+- `BIOETL-DASHBOARD-VISUAL-GUIDE.md` — Диаграммы и примеры
+- `BIOETL-DASHBOARD-EXAMPLES.md` — Кастомизация
 
 ### Основные URL
 - Grafana: http://localhost:3000
@@ -276,11 +276,11 @@ histogram_quantile(0.95, bioetl_health_check_latency_ms_bucket{provider="chembl"
 ```bash
 # Запустить
 docker compose -f docker-compose.monitoring.yml up -d
-python ./metrics_server.py &
+python ./metrics-server.py &
 
 # Остановить
 docker compose -f docker-compose.monitoring.yml down
-pkill -f metrics_server.py
+pkill -f metrics-server.py
 
 # Диагностика
 curl http://localhost:9090/-/healthy
@@ -332,16 +332,16 @@ curl http://localhost:8000/metrics
 
 **Вариант 1: Быстрый старт (5 минут)**
 ```bash
-cat BIOETL_DASHBOARD_QUICKSTART.md
+cat BIOETL-DASHBOARD-QUICKSTART.md
 docker compose -f docker-compose.monitoring.yml up -d
-python ./metrics_server.py &
+python ./metrics-server.py &
 open http://localhost:3000
 ```
 
 **Вариант 2: Полная подготовка (2 часа)**
 ```bash
-cat BIOETL_DASHBOARD_SETUP.md          # 60 минут
-cat BIOETL_DASHBOARD_VISUAL_GUIDE.md   # 20 минут
+cat BIOETL-DASHBOARD-SETUP.md          # 60 минут
+cat BIOETL-DASHBOARD-VISUAL-GUIDE.md   # 20 минут
 # Следовать инструкциям                # 40 минут
 open http://localhost:3000/d/bioetl-simple
 ```
@@ -353,7 +353,7 @@ open http://localhost:3000/d/bioetl-simple
 Все ответы в документации:
 - **Установка** → QUICKSTART.md
 - **Проблемы** → SETUP.md (Troubleshooting)
-- **Как использовать** → VISUAL_GUIDE.md
+- **Как использовать** → VISUAL-GUIDE.md
 - **Кастомизация** → EXAMPLES.md
 
 ---
@@ -364,4 +364,4 @@ open http://localhost:3000/d/bioetl-simple
 
 🎊 **Спасибо за использование BioETL Dashboard!** 🎊
 
-Начните с [BIOETL_DASHBOARD_QUICKSTART.md](./BIOETL_DASHBOARD_QUICKSTART.md) прямо сейчас! ⏱️
+Начните с [BIOETL-DASHBOARD-QUICKSTART.md](./BIOETL-DASHBOARD-QUICKSTART.md) прямо сейчас! ⏱️

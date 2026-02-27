@@ -5,11 +5,13 @@ Checks:
   1. Markdown relative links in docs/ resolve to existing files
   2. Pipeline specs referenced in docs/04-reference/pipelines/README.md exist
   3. Config files referenced in pipeline YAML configs exist
+  4. Legacy config/script tokens are absent in mkdocs nav docs
 
 Usage:
     python scripts/check_doc_links.py          # Full check
     python scripts/check_doc_links.py --specs   # Only spec file check
     python scripts/check_doc_links.py --links   # Only broken link check
+    python scripts/check_doc_links.py --legacy-paths   # Only legacy token check
 
 Exit code: 0 = clean, 1 = violations found
 
@@ -50,6 +52,12 @@ SKIP_DIRS = frozenset(
 
 # Regex to match markdown relative links: [text](path) — excludes http(s)
 MD_LINK_RE = re.compile(r"\[([^\]]*)\]\((?!https?://|mailto:)([^)#]+)")
+MD_PATH_RE = re.compile(r"[A-Za-z0-9_./-]+\.md")
+LEGACY_DOC_TOKENS = (
+    "configs/pipelines/",
+    "configs/sources/",
+    "scripts/validate-pipeline-configs.py",
+)
 
 
 def _should_skip(path: Path) -> bool:
@@ -92,6 +100,34 @@ def check_broken_links(root: Path) -> list[tuple[Path, int, str, str]]:
                     broken.append((md_file, line_no, link_text, raw_target))
 
     return broken
+
+
+def _load_nav_docs() -> list[Path]:
+    """Load docs paths from mkdocs.yml navigation."""
+    mkdocs_file = PROJECT_ROOT / "mkdocs.yml"
+    if not mkdocs_file.exists():
+        return []
+
+    text = mkdocs_file.read_text(encoding="utf-8", errors="replace")
+    nav_paths = sorted(set(MD_PATH_RE.findall(text)))
+    return [DOCS_DIR / rel_path for rel_path in nav_paths]
+
+
+def check_legacy_paths_in_nav_docs() -> list[tuple[Path, int, str]]:
+    """Find legacy config/script tokens in active docs (mkdocs nav)."""
+    violations: list[tuple[Path, int, str]] = []
+
+    for md_file in _load_nav_docs():
+        if not md_file.exists() or _should_skip(md_file):
+            continue
+
+        lines = md_file.read_text(encoding="utf-8", errors="replace").splitlines()
+        for line_no, line in enumerate(lines, start=1):
+            for token in LEGACY_DOC_TOKENS:
+                if token in line:
+                    violations.append((md_file, line_no, token))
+
+    return violations
 
 
 def check_spec_files() -> list[tuple[str, str]]:
@@ -166,10 +202,15 @@ def main() -> int:
     parser.add_argument("--links", action="store_true", help="Only check broken links")
     parser.add_argument("--specs", action="store_true", help="Only check spec files")
     parser.add_argument("--configs", action="store_true", help="Only check config existence")
+    parser.add_argument(
+        "--legacy-paths",
+        action="store_true",
+        help="Only check legacy path tokens in mkdocs nav docs",
+    )
     args = parser.parse_args()
 
     # Default: run all checks
-    run_all = not (args.links or args.specs or args.configs)
+    run_all = not (args.links or args.specs or args.configs or args.legacy_paths)
     violations = 0
 
     if run_all or args.links:
@@ -208,6 +249,19 @@ def main() -> int:
             violations += len(missing_configs)
         else:
             print("Configs: OK (all convention-based config files exist)")
+
+    if run_all or args.legacy_paths:
+        legacy_hits = check_legacy_paths_in_nav_docs()
+        if legacy_hits:
+            print(f"\n{'='*60}")
+            print(f"LEGACY PATH TOKENS ({len(legacy_hits)} found)")
+            print(f"{'='*60}")
+            for filepath, line_no, token in legacy_hits:
+                rel = filepath.relative_to(PROJECT_ROOT)
+                print(f"  {rel}:{line_no}: contains '{token}'")
+            violations += len(legacy_hits)
+        else:
+            print("Legacy paths: OK (no legacy tokens in mkdocs nav docs)")
 
     if violations:
         print(f"\nTotal violations: {violations}")

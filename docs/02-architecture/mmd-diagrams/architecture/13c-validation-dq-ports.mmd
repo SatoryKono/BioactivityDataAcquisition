@@ -1,0 +1,45 @@
+%% BioETL — Validation and Data Quality Ports
+%% @version 1.0.0
+%% @date    2026-02-27
+%% @type    flowchart
+%% @level   System / Component
+%% @nodes   20
+
+graph LR
+    subgraph Domain["Domain Ports"]
+        SVP["SilverValidatorPort"]
+        GVP["GoldValidatorPort"]
+        BDQP["BronzeDQAnalyzerPort"]
+        SDQP["SilverDQAnalyzerPort"]
+        GDQP["GoldDQAnalyzerPort"]
+        DQRWP["DQReportWriterPort"]
+        QRP["QuarantinePort"]
+    end
+
+    subgraph Infrastructure["Infrastructure"]
+        PSV["PanderaSilverValidator"]
+        PGV["PanderaGoldValidator"]
+        DQRW_I["DQReportWriter"]
+        UQ["UnifiedQuarantine"]
+    end
+
+    subgraph Application["Application"]
+        BDA["BronzeDQAnalyzer"]
+        SDA["SilverDQAnalyzer"]
+        GDA["GoldDQAnalyzer"]
+    end
+
+    SVP --- PSV
+    GVP --- PGV
+    BDQP --- BDA
+    SDQP --- SDA
+    GDQP --- GDA
+    DQRWP --- DQRW_I
+    QRP --- UQ
+
+    classDef port fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    classDef infra fill:#ffcdd2,stroke:#c62828
+    classDef app fill:#e8f5e9,stroke:#2e7d32
+    class SVP,GVP,BDQP,SDQP,GDQP,DQRWP,QRP port
+    class PSV,PGV,DQRW_I,UQ infra
+    class BDA,SDA,GDA app

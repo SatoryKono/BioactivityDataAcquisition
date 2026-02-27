@@ -46,7 +46,7 @@
 
 ```bash
 # Запуск пайплайна с лимитом
-python -m bioetl run --pipeline chembl_activity --limit 100
+python -m bioetl run --pipeline chembl-activity --limit 100
 
 # Запуск композитного пайплайна (ADR-026)
 python -m bioetl run-composite --composite publication
@@ -100,9 +100,9 @@ Graceful shutdown обрабатывается непосредственно в
 
 | Диаграмма               | Файл                                                                                               | Описание                              |
 | ----------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| Five Layer Architecture | [01-high-level.mmd](mmd-diagrams/foundation/01-high-level.mmd)                                   | Полная архитектура с Interfaces слоем |
-| Layers Interaction      | [05-layers-interaction.mmd](mmd-diagrams/foundation/05-layers-interaction.mmd)                    | Взаимодействие слоёв                  |
-| Graceful Shutdown       | [05-pipeline-lifecycle-states.mmd](mmd-diagrams/foundation/05-pipeline-lifecycle-states.mmd)      | Sequence diagram graceful shutdown    |
+| Five Layer Architecture | [01-high-level.mermaid](mmd-diagrams/foundation/01-high-level.mermaid)                                   | Полная архитектура с Interfaces слоем |
+| Layers Interaction      | [05-layers-interaction.mermaid](mmd-diagrams/foundation/05-layers-interaction.mermaid)                    | Взаимодействие слоёв                  |
+| Graceful Shutdown       | [05-pipeline-lifecycle-states.mermaid](mmd-diagrams/foundation/05-pipeline-lifecycle-states.mermaid)      | Sequence diagram graceful shutdown    |
 
 ### Связанные ADR
 

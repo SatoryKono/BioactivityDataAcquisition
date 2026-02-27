@@ -6,8 +6,8 @@
 
 > Этот файл сохранен для исторического контекста.  
 > Актуальное состояние дашбордов и переменных: `grafana/dashboards/*.json`,  
-> `docs/03-guides/dashboards/DASHBOARD_V2_UPDATES.md`,  
-> `docs/03-guides/dashboards/VARIABLES_GUIDE.md`.
+> `docs/03-guides/dashboards/DASHBOARD-V2-UPDATES.md`,  
+> `docs/03-guides/dashboards/VARIABLES-GUIDE.md`.
 
 ---
 
@@ -36,11 +36,11 @@ http://localhost:8000/metrics
 
 ```bash
 # 1. Убедитесь, что метрики включены в .env
-export BIOETL_METRICS_ENABLED=true
-export BIOETL_METRICS_PORT=8000
+export BIOETL-METRICS-ENABLED=true
+export BIOETL-METRICS-PORT=8000
 
 # 2. Запустите пайплайн (любой)
-bioetl run --pipeline chembl_activity
+bioetl run --pipeline chembl-activity
 
 # 3. В другом терминале проверьте метрики
 curl http://localhost:8000/metrics | head -50
@@ -49,28 +49,28 @@ curl http://localhost:8000/metrics | head -50
 ### Метрики, которые экспортирует BioETL
 
 **Pipeline метрики (обязательные):**
-- `bioetl_pipeline_duration_seconds` (Histogram) — длительность выполнения
-- `bioetl_records_processed_total` (Counter) — обработанные записи
-- `bioetl_errors_total` (Counter) — количество ошибок
-- `bioetl_batch_size_records` (Histogram) — размер батчей
-- `bioetl_pipeline_runs_total` (Counter) — количество запусков
+- `bioetl-pipeline-duration-seconds` (Histogram) — длительность выполнения
+- `bioetl-records-processed-total` (Counter) — обработанные записи
+- `bioetl-errors-total` (Counter) — количество ошибок
+- `bioetl-batch-size-records` (Histogram) — размер батчей
+- `bioetl-pipeline-runs-total` (Counter) — количество запусков
 
 **Data Quality метрики:**
-- `bioetl_dq_records_quarantined_total` (Counter) — карантинные записи
-- `bioetl_dq_validation_score` (Gauge) — оценка валидности
-- `bioetl_dq_anomaly_detected` (Counter) — обнаруженные аномалии
-- `bioetl_data_freshness_seconds` (Gauge) — свежесть данных
+- `bioetl-dq-records-quarantined-total` (Counter) — карантинные записи
+- `bioetl-dq-validation-score` (Gauge) — оценка валидности
+- `bioetl-dq-anomaly-detected` (Counter) — обнаруженные аномалии
+- `bioetl-data-freshness-seconds` (Gauge) — свежесть данных
 
 **Health метрики:**
-- `bioetl_circuit_breaker_state` (Gauge) — состояние circuit breaker
-- `bioetl_health_check_status` (Gauge) — статус здоровья
-- `bioetl_provider_health_status` (Gauge) — статус провайдера
+- `bioetl-circuit-breaker-state` (Gauge) — состояние circuit breaker
+- `bioetl-health-check-status` (Gauge) — статус здоровья
+- `bioetl-provider-health-status` (Gauge) — статус провайдера
 
 **Adapter метрики:**
-- `bioetl_adapter_request_duration_seconds` (Histogram) — длительность API запросов
-- `bioetl_adapter_requests_total` (Counter) — количество API запросов
-- `bioetl_http_request_duration_seconds` (Histogram) — длительность HTTP запросов
-- `bioetl_http_retries_total` (Counter) — HTTP retry попытки
+- `bioetl-adapter-request-duration-seconds` (Histogram) — длительность API запросов
+- `bioetl-adapter-requests-total` (Counter) — количество API запросов
+- `bioetl-http-request-duration-seconds` (Histogram) — длительность HTTP запросов
+- `bioetl-http-retries-total` (Counter) — HTTP retry попытки
 
 [Полный каталог 90+ метрик см. в docs/03-guides/metrics-monitoring.md]
 
@@ -100,7 +100,7 @@ docker compose -f docker-compose.monitoring.yml up -d
 docker compose -f docker-compose.monitoring.yml ps
 
 # 3. Запустить пайплайн
-bioetl run --pipeline chembl_activity
+bioetl run --pipeline chembl-activity
 
 # 4. Дождаться первого scrape'а (15 сек)
 
@@ -112,14 +112,14 @@ http://localhost:3000 (admin/admin)
 
 ```yaml
 global:
-  scrape_interval: 15s          # Как часто собирать метрики
-  evaluation_interval: 15s      # Как часто вычислять правила
+  scrape-interval: 15s          # Как часто собирать метрики
+  evaluation-interval: 15s      # Как часто вычислять правила
 
-scrape_configs:
-  - job_name: 'bioetl'
-    static_configs:
+scrape-configs:
+  - job-name: 'bioetl'
+    static-configs:
       - targets: ['host.docker.internal:8000']  # BioETL metrics endpoint
-    metrics_path: /metrics
+    metrics-path: /metrics
 ```
 
 ### Конфигурация Grafana
@@ -179,7 +179,7 @@ Home → Dashboards → Import → Upload JSON
         "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
         "targets": [
           {
-            "expr": "rate(bioetl_records_processed_total[5m])",
+            "expr": "rate(bioetl-records-processed-total[5m])",
             "legendFormat": "{{pipeline}}"
           }
         ]
@@ -191,7 +191,7 @@ Home → Dashboards → Import → Upload JSON
         "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
         "targets": [
           {
-            "expr": "rate(bioetl_errors_total[5m])",
+            "expr": "rate(bioetl-errors-total[5m])",
             "legendFormat": "{{pipeline}}"
           }
         ]
@@ -203,7 +203,7 @@ Home → Dashboards → Import → Upload JSON
           "name": "pipeline",
           "type": "query",
           "datasource": "Prometheus",
-          "definition": "label_values(bioetl_records_processed_total, pipeline)",
+          "definition": "label-values(bioetl-records-processed-total, pipeline)",
           "includeAll": true,
           "multi": true
         }
@@ -218,10 +218,10 @@ Home → Dashboards → Import → Upload JSON
 
 | Метрика | Тип графика | Пример |
 |---------|-------------|--------|
-| Скорость обработки | Timeseries | `rate(bioetl_records_processed_total[5m])` |
-| Статус | Stat | `bioetl_circuit_breaker_state` |
-| Распределение | Histogram | `bioetl_batch_size_records` |
-| Процент | Gauge | `bioetl_dq_validation_score * 100` |
+| Скорость обработки | Timeseries | `rate(bioetl-records-processed-total[5m])` |
+| Статус | Stat | `bioetl-circuit-breaker-state` |
+| Распределение | Histogram | `bioetl-batch-size-records` |
+| Процент | Gauge | `bioetl-dq-validation-score * 100` |
 | Таблица | Table | Результаты с label'ами |
 
 ---
@@ -246,7 +246,7 @@ Dashboard Settings → Variables → Add variable
 - Name: pipeline
 - Type: Query
 - Data source: Prometheus
-- Query: label_values(bioetl_records_processed_total, pipeline)
+- Query: label-values(bioetl-records-processed-total, pipeline)
 - Include All: true
 - Multi: true
 ```
@@ -259,17 +259,17 @@ Dashboard Settings → Variables → Add variable
       "name": "pipeline",
       "type": "query",
       "datasource": "Prometheus",
-      "definition": "label_values(bioetl_records_processed_total, pipeline)",
+      "definition": "label-values(bioetl-records-processed-total, pipeline)",
       "includeAll": true,
       "multi": true,
       "refresh": 1,
       "sort": 1
     },
     {
-      "name": "run_id",
+      "name": "run-id",
       "type": "query",
       "datasource": "Prometheus",
-      "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_id)",
+      "definition": "label-values(bioetl-records-processed-total{pipeline=~\"$pipeline\"}, run-id)",
       "includeAll": true,
       "multi": true,
       "refresh": 1,
@@ -283,7 +283,7 @@ Dashboard Settings → Variables → Add variable
 
 ```promql
 # Использовать переменную в запросе
-bioetl_records_processed_total{pipeline=~"$pipeline", run_id=~"$run_id"}
+bioetl-records-processed-total{pipeline=~"$pipeline", run-id=~"$run-id"}
 
 # Регулярное выражение (любое значение)
 pipeline=~".*"
@@ -300,70 +300,70 @@ pipeline="chembl"
 
 **Скорость обработки записей (records/sec):**
 ```promql
-rate(bioetl_records_processed_total{pipeline="$pipeline"}[5m])
+rate(bioetl-records-processed-total{pipeline="$pipeline"}[5m])
 ```
 
 **Текущее количество обработанных записей:**
 ```promql
-sum(bioetl_records_processed_total{pipeline="$pipeline"})
+sum(bioetl-records-processed-total{pipeline="$pipeline"})
 ```
 
 **95-й перцентиль длительности пайплайна:**
 ```promql
-histogram_quantile(0.95, rate(bioetl_pipeline_duration_seconds_bucket[5m]))
+histogram-quantile(0.95, rate(bioetl-pipeline-duration-seconds-bucket[5m]))
 ```
 
 **Процент ошибок:**
 ```promql
-sum(rate(bioetl_errors_total[5m])) / sum(rate(bioetl_records_processed_total[5m])) * 100
+sum(rate(bioetl-errors-total[5m])) / sum(rate(bioetl-records-processed-total[5m])) * 100
 ```
 
 ### Data Quality Metrics
 
 **Процент карантинных записей:**
 ```promql
-sum(rate(bioetl_dq_records_quarantined_total[5m])) / 
-sum(rate(bioetl_records_processed_total[5m])) * 100
+sum(rate(bioetl-dq-records-quarantined-total[5m])) / 
+sum(rate(bioetl-records-processed-total[5m])) * 100
 ```
 
 **Validation score по pipeline:**
 ```promql
-bioetl_dq_validation_score{pipeline="$pipeline"}
+bioetl-dq-validation-score{pipeline="$pipeline"}
 ```
 
 **Аномалии по типу:**
 ```promql
-sum(rate(bioetl_dq_anomaly_detected[1h])) by (anomaly_type)
+sum(rate(bioetl-dq-anomaly-detected[1h])) by (anomaly-type)
 ```
 
 ### Health Metrics
 
 **Circuit Breaker статус (0=closed, 1=half-open, 2=open):**
 ```promql
-bioetl_circuit_breaker_state{adapter="$adapter"}
+bioetl-circuit-breaker-state{adapter="$adapter"}
 ```
 
 **Health статус компонентов:**
 ```promql
-bioetl_health_check_status
+bioetl-health-check-status
 ```
 
 **Provider response time (P95):**
 ```promql
-histogram_quantile(0.95, rate(bioetl_adapter_request_duration_seconds_bucket[5m]))
+histogram-quantile(0.95, rate(bioetl-adapter-request-duration-seconds-bucket[5m]))
 ```
 
 ### Adapter Metrics
 
 **HTTP retry rate:**
 ```promql
-rate(bioetl_http_retries_total[5m])
+rate(bioetl-http-retries-total[5m])
 ```
 
 **Request success rate:**
 ```promql
-sum(rate(bioetl_adapter_requests_total{status=~"2.."}[5m])) / 
-sum(rate(bioetl_adapter_requests_total[5m])) * 100
+sum(rate(bioetl-adapter-requests-total{status=~"2.."}[5m])) / 
+sum(rate(bioetl-adapter-requests-total[5m])) * 100
 ```
 
 ---
@@ -421,11 +421,11 @@ docker run --add-host=host.docker.internal:host-gateway ...
 # Редактировать prometheus.yml: retention: 7d (вместо 15d)
 
 # 2. Уменьшить количество метрик в запросе
-# Вместо: bioetl_records_processed_total{} by (pipeline, stage, status)
-# Использовать: bioetl_records_processed_total{pipeline="$pipeline"}
+# Вместо: bioetl-records-processed-total{} by (pipeline, stage, status)
+# Использовать: bioetl-records-processed-total{pipeline="$pipeline"}
 
-# 3. Увеличить scrape_interval (если метрики не критичны)
-# scrape_interval: 30s (вместо 15s)
+# 3. Увеличить scrape-interval (если метрики не критичны)
+# scrape-interval: 30s (вместо 15s)
 
 # 4. Перезапустить Prometheus
 docker restart bioetl-prometheus
@@ -438,8 +438,8 @@ docker restart bioetl-prometheus
 **Решение:**
 ```bash
 # 1. Проверить что Run ID переменная зависит от Pipeline
-# Dashboard Settings → Variables → run_id
-# Убедитесь: definition = "label_values(...{pipeline=~\"$pipeline\"}...)"
+# Dashboard Settings → Variables → run-id
+# Убедитесь: definition = "label-values(...{pipeline=~\"$pipeline\"}...)"
 
 # 2. Обновить страницу дашборда (F5)
 

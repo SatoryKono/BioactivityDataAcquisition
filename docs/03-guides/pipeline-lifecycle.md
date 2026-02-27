@@ -4,29 +4,8 @@
 
 ## Порядок выполнения PipelineRunner.run()
 
-```mermaid
-sequenceDiagram
-    participant CLI
-    participant Runner
-    participant Services
-    participant Lock
-    participant Storage
-    participant Checkpoint
-    participant Executor
-
-    CLI->>Runner: run()
-    Runner->>Services: --aenter--()
-    Runner->>Lock: --aenter--() (acquire)
-    alt RunType == REBUILD or BACKFILL
-        Runner->>Storage: clear-silver()
-        Runner->>Storage: clear-gold()
-    end
-    Runner->>Checkpoint: load-checkpoint()
-    Runner->>Executor: execute()
-    Runner->>Checkpoint: delete-checkpoint()
-    Runner->>Lock: --aexit--() (release)
-    Runner->>Services: --aexit--()
-```
+> **Diagram:** See [`04-pipeline-execution-flow.mmd`](../02-architecture/mmd-diagrams/architecture/04-pipeline-execution-flow.mmd)
+> *(rendered: [overview](../02-architecture/diagrams/rendered/04-pipeline-execution-flow-overview.png))*
 
 ## Очистка слоёв по типу запуска
 
@@ -105,24 +84,8 @@ metrics:
 Composite pipelines используют отдельный оркестратор (`CompositePipelineRunner`)
 вместо стандартного `PipelineRunner` + `Transformer`.
 
-```mermaid
-sequenceDiagram
-    participant CLI
-    participant Composite as CompositePipelineRunner
-    participant Seed as Seed Pipeline
-    participant Deps as Dependency Pipelines
-    participant Enrichers as EnrichmentCoordinator
-    participant Merge as MergeService
-    participant Gold as GoldWriter
-
-    CLI->>Composite: run-composite()
-    Composite->>Seed: run (standard pipeline)
-    Composite->>Deps: run dependencies (chained)
-    Composite->>Enrichers: fan-out enrichers (parallel)
-    Enrichers-->>Composite: enriched Silver data
-    Composite->>Merge: merge(seed + enrichers)
-    Merge->>Gold: write merged Gold
-```
+> **Diagram:** See [`08-composite-pipeline.mmd`](../02-architecture/mmd-diagrams/architecture/08-composite-pipeline.mmd)
+> *(rendered: [overview](../02-architecture/diagrams/rendered/08-composite-pipeline-overview.png))*
 
 ### Ключевые отличия
 

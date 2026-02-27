@@ -8,7 +8,7 @@
 
 | Parameter        | Value                                             |
 | ---------------- | ------------------------------------------------- |
-| **Pipeline ID**  | `chembl_cell_line`                                |
+| **Pipeline ID**  | `chembl-cell-line`                                |
 | **Provider**     | ChEMBL (EBI)                                      |
 | **Entity**       | cell-line                                         |
 | **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/cell-line` |
@@ -367,7 +367,7 @@ Mode: Overwrite
 
 | Consumer                       | Impact                   |
 | ------------------------------ | ------------------------ |
-| `chembl_assay`                 | FK reference (cell-id)   |
+| `chembl-assay`                 | FK reference (cell-id)   |
 | Cell line enrichment analytics | Tissue/organism analysis |
 
 ### 9.3. Cross-Provider Mapping
@@ -383,17 +383,17 @@ Mode: Overwrite
 ## 10. Pipeline Configuration
 
 ```yaml
-# configs/pipelines/chembl/cell-line.yaml
+# configs/entities/chembl/cell-line.yaml
 
-pipeline-name: chembl_cell_line
+pipeline-name: chembl-cell-line
 provider: chembl
 entity-type: cell-line
 version: "1.2.0"
 description: "Extract cell lines from ChEMBL API"
 
 primary-keys: ["cell-id"]
-silver-table: "chembl_cell_line"
-gold-table: "chembl_cell_line"
+silver-table: "chembl-cell-line"
+gold-table: "chembl-cell-line"
 
 source-file: ../../sources/chembl.yaml
 

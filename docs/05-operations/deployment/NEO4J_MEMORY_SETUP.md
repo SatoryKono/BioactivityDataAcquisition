@@ -9,7 +9,7 @@
 
 2. Update Neo4j credentials in .env:
    ```bash
-   NEO4J_AUTH=neo4j/your_secure_password
+   NEO4J-AUTH=neo4j/your-secure-password
    ```
 
 3. Start Neo4j:
@@ -20,33 +20,33 @@
 4. Access Neo4j Browser:
    - URL: http://localhost:7474/browser/
    - Username: neo4j
-   - Password: (from NEO4J_AUTH)
+   - Password: (from NEO4J-AUTH)
 
 ## Memory Configuration Profiles
 
 ### Development (Local, 4GB host RAM)
 ```
-NEO4J_HEAP_INITIAL=512m
-NEO4J_HEAP_MAX=2g
-NEO4J_PAGECACHE=1g
-NEO4J_TX_MAX_SIZE=2g
+NEO4J-HEAP-INITIAL=512m
+NEO4J-HEAP-MAX=2g
+NEO4J-PAGECACHE=1g
+NEO4J-TX-MAX-SIZE=2g
 ```
 
 ### Staging (8GB host RAM)
 ```
-NEO4J_HEAP_INITIAL=1g
-NEO4J_HEAP_MAX=4g
-NEO4J_PAGECACHE=2g
-NEO4J_TX_MAX_SIZE=4g
+NEO4J-HEAP-INITIAL=1g
+NEO4J-HEAP-MAX=4g
+NEO4J-PAGECACHE=2g
+NEO4J-TX-MAX-SIZE=4g
 ```
 
 ### Production (16GB+ host RAM)
 ```
-NEO4J_HEAP_INITIAL=2g
-NEO4J_HEAP_MAX=8g
-NEO4J_PAGECACHE=6g
-NEO4J_TX_MAX_SIZE=8g
-NEO4J_GLOBAL_TX_MAX=50g
+NEO4J-HEAP-INITIAL=2g
+NEO4J-HEAP-MAX=8g
+NEO4J-PAGECACHE=6g
+NEO4J-TX-MAX-SIZE=8g
+NEO4J-GLOBAL-TX-MAX=50g
 ```
 
 ## Memory Allocation Rules
@@ -65,12 +65,12 @@ NEO4J_GLOBAL_TX_MAX=50g
 
 | Setting | Purpose | Default |
 |---------|---------|---------|
-| `NEO4J_HEAP_INITIAL` | Starting JVM heap size | 512m |
-| `NEO4J_HEAP_MAX` | Maximum JVM heap size | 2g |
-| `NEO4J_PAGECACHE` | Graph store page cache | 1g |
-| `NEO4J_TX_MAX_SIZE` | Single transaction memory limit | 2g |
-| `NEO4J_GLOBAL_TX_MAX` | All active transactions combined | 20g |
-| `NEO4J_JVM_OPTS` | JVM garbage collector settings | G1GC |
+| `NEO4J-HEAP-INITIAL` | Starting JVM heap size | 512m |
+| `NEO4J-HEAP-MAX` | Maximum JVM heap size | 2g |
+| `NEO4J-PAGECACHE` | Graph store page cache | 1g |
+| `NEO4J-TX-MAX-SIZE` | Single transaction memory limit | 2g |
+| `NEO4J-GLOBAL-TX-MAX` | All active transactions combined | 20g |
+| `NEO4J-JVM-OPTS` | JVM garbage collector settings | G1GC |
 
 ## Health Check
 
@@ -113,12 +113,12 @@ docker compose down neo4j
    - Run: `:sysinfo`
 
 3. **If Out of Memory (OOM)**:
-   - Increase `NEO4J_HEAP_MAX`
-   - Reduce `NEO4J_PAGECACHE`
+   - Increase `NEO4J-HEAP-MAX`
+   - Reduce `NEO4J-PAGECACHE`
    - Optimize query patterns
 
 4. **For High Transaction Volume**:
-   - Increase `NEO4J_GLOBAL_TX_MAX`
+   - Increase `NEO4J-GLOBAL-TX-MAX`
    - Consider connection pooling in application
 
 ## Ports

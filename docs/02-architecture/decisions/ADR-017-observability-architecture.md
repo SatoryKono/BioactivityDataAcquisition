@@ -120,7 +120,7 @@ Structured JSON logs with mandatory fields:
 | `ts` | MUST | `2025-12-26T10:00:00Z` |
 | `level` | MUST | `INFO`, `ERROR` |
 | `run-id` | MUST | UUID |
-| `pipeline` | MUST | `chembl_activity` |
+| `pipeline` | MUST | `chembl-activity` |
 | `stage` | MUST | `extract`, `transform`, `load` |
 | `dataset` | SHOULD | `chembl.activity` |
 | `record-count` | SHOULD | 1000 |
@@ -148,7 +148,7 @@ Consistent labeling across all metrics:
 - `pipeline`: identifies the data pipeline
 - `stage`: extract/transform/load phase
 - `run-type`: incremental/backfill/rebuild
-- Enables PromQL queries like: `sum(errors-total{pipeline="chembl_activity"}) by (error-code)`
+- Enables PromQL queries like: `sum(errors-total{pipeline="chembl-activity"}) by (error-code)`
 
 ### 4. Runtime Checkable Protocols
 

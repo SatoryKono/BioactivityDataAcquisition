@@ -219,7 +219,10 @@
       "Bash(chmod +x:*)",
       "Bash(py:*)",
       "Bash(npx:*)",
-      "Bash(claude mcp:*)"
+      "Bash(claude mcp:*)",
+      "Bash(rm:*)",
+      "Bash(__NEW_LINE_2cfe010950fc366c__ echo:*)",
+      "Bash(__NEW_LINE_31d4d05757a07416__ echo:*)"
     ]
   },
   "enabledPlugins": {

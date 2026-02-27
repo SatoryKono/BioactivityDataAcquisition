@@ -1,6 +1,6 @@
 # Пайплайн: ChEMBL Assay Parameters
 
-**Имя пайплайна:** `chembl_assay_parameters`
+**Имя пайплайна:** `chembl-assay-parameters`
 **Провайдер:** `chembl`
 **Сущность:** `assay-parameters`
 **Версия схемы:** 1.2.0
@@ -103,13 +103,13 @@ type = param-type.upper() if param-type else "UNKNOWN"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_assay_parameters
+bioetl run chembl-assay-parameters
 
 # С ограничением
-bioetl run chembl_assay_parameters --limit 1000
+bioetl run chembl-assay-parameters --limit 1000
 
 # С входным фильтром
-bioetl run chembl_assay_parameters --input-filter data/input/assay-parameters.csv
+bioetl run chembl-assay-parameters --input-filter data/input/assay-parameters.csv
 ```
 
 ---
@@ -124,7 +124,7 @@ Silver-таблица партиционируется по полю `type` дл
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/assay-parameters.yaml` |
+| Конфигурация | `configs/entities/chembl/assay-parameters.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/chembl/assay-parameters-transformer.py` |
 | Пайплайн | `src/bioetl/application/pipelines/chembl/assay-parameters.py` |
 

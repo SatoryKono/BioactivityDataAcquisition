@@ -23,15 +23,15 @@ Bioactivity measurements (IC50, Ki, EC50, etc.).
 
 ::: bioetl.application.pipelines.chembl.ChEMBLActivityPipeline
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### Activity Transformer
 
-::: bioetl.application.pipelines.chembl.activity_transformer.ActivityTransformer
+::: bioetl.application.pipelines.chembl.activity-transformer.ActivityTransformer
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### Assay Pipeline
 
@@ -39,15 +39,15 @@ Experimental assay descriptions.
 
 ::: bioetl.application.pipelines.chembl.ChEMBLAssayPipeline
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### Assay Transformer
 
-::: bioetl.application.pipelines.chembl.assay_transformer.AssayTransformer
+::: bioetl.application.pipelines.chembl.assay-transformer.AssayTransformer
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### Molecule Pipeline
 
@@ -55,15 +55,15 @@ Chemical compound structures.
 
 ::: bioetl.application.pipelines.chembl.ChEMBLMoleculePipeline
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### Molecule Transformer
 
-::: bioetl.application.pipelines.chembl.molecule_transformer.MoleculeTransformer
+::: bioetl.application.pipelines.chembl.molecule-transformer.MoleculeTransformer
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### Target Pipeline
 
@@ -71,15 +71,15 @@ Biological targets (proteins, genes).
 
 ::: bioetl.application.pipelines.chembl.ChEMBLTargetPipeline
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### Target Transformer
 
-::: bioetl.application.pipelines.chembl.target_transformer.TargetTransformer
+::: bioetl.application.pipelines.chembl.target-transformer.TargetTransformer
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### Publication Pipeline
 
@@ -87,15 +87,15 @@ ChEMBL publications and patents.
 
 ::: bioetl.application.pipelines.chembl.ChEMBLPublicationPipeline
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### Publication Transformer
 
-::: bioetl.application.pipelines.chembl.publication_transformer.PublicationTransformer
+::: bioetl.application.pipelines.chembl.publication-transformer.PublicationTransformer
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### Target Component Pipeline
 
@@ -103,24 +103,24 @@ Target components (protein chains, domains).
 
 ::: bioetl.application.pipelines.chembl.ChEMBLTargetComponentPipeline
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### Target Component Transformer
 
-::: bioetl.application.pipelines.chembl.target_component_transformer.TargetComponentTransformer
+::: bioetl.application.pipelines.chembl.target-component-transformer.TargetComponentTransformer
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### Base ChEMBL Transformer
 
 Common functionality for all ChEMBL transformers.
 
-::: bioetl.application.pipelines.chembl.base_chembl_transformer.BaseChemblTransformer
+::: bioetl.application.pipelines.chembl.base-chembl-transformer.BaseChemblTransformer
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ## PubChem Pipeline
 
@@ -130,15 +130,15 @@ PubChem provides chemical compound data.
 
 ::: bioetl.application.pipelines.pubchem.PubChemCompoundPipeline
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### Compound Transformer
 
 ::: bioetl.application.pipelines.pubchem.transformer.PubChemCompoundTransformer
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ## UniProt Pipeline
 
@@ -148,15 +148,15 @@ UniProt provides protein sequence and annotation data.
 
 ::: bioetl.application.pipelines.uniprot.UniProtProteinPipeline
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### Protein Transformer
 
 ::: bioetl.application.pipelines.uniprot.transformer.UniProtProteinTransformer
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ## PubMed Pipeline
 
@@ -166,15 +166,15 @@ PubMed provides scientific publication metadata.
 
 ::: bioetl.application.pipelines.pubmed.PubMedPublicationPipeline
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ### Publication Transformer
 
 ::: bioetl.application.pipelines.pubmed.transformer.PubMedPublicationTransformer
     options:
-        show_root_heading: true
-        show_source: false
+        show-root-heading: true
+        show-source: false
 
 ## Pipeline Registration
 
@@ -183,8 +183,8 @@ Pipelines are registered via decorator pattern:
 ```python
 from bioetl.composition.factories import register
 
-@register("chembl_activity")
-def chembl_activity_factory(ctx: PipelineContext) -> PipelineRunner:
+@register("chembl-activity")
+def chembl-activity-factory(ctx: PipelineContext) -> PipelineRunner:
     """Factory for ChEMBL activity pipeline."""
     ...
 ```
@@ -194,42 +194,42 @@ def chembl_activity_factory(ctx: PipelineContext) -> PipelineRunner:
 Each pipeline has YAML configuration:
 
 ```yaml
-# configs/pipelines/chembl/activity.yaml
-pipeline_name: chembl_activity
+# configs/entities/chembl/activity.yaml
+pipeline-name: chembl-activity
 provider: chembl
-entity_type: activity
-batch_size: 100
-primary_keys:
-  - activity_id
+entity-type: activity
+batch-size: 100
+primary-keys:
+  - activity-id
 
 # Silver layer field filtering
-silver_filters:
-  include_fields: null  # All fields
-  exclude_fields:
-    - _internal_field
+silver-filters:
+  include-fields: null  # All fields
+  exclude-fields:
+    - -internal-field
 
 # Gold layer configuration
-gold_filters:
-  exclude_json_fields:
-    - molecule_structures
-    - target_components
+gold-filters:
+  exclude-json-fields:
+    - molecule-structures
+    - target-components
 ```
 
 ## Usage Example
 
 ```python
-from bioetl.composition.bootstrap import bootstrap_pipeline
+from bioetl.composition.bootstrap import bootstrap-pipeline
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.types import RunType
 
 # Create pipeline context
 ctx = PipelineContext(
-    pipeline_name="chembl_activity",
-    run_type=RunType.INCREMENTAL,
+    pipeline-name="chembl-activity",
+    run-type=RunType.INCREMENTAL,
 )
 
 # Bootstrap and run
-runner = bootstrap_pipeline(ctx)
+runner = bootstrap-pipeline(ctx)
 await runner.run()
 ```
 

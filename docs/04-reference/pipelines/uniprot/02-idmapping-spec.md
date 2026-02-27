@@ -8,7 +8,7 @@
 
 | Parameter | Value |
 |-----------|-------|
-| **Pipeline ID** | `uniprot_idmapping` |
+| **Pipeline ID** | `uniprot-idmapping` |
 | **Provider** | UniProt (EBI/SIB/PIR) |
 | **Entity** | idmapping |
 | **API Endpoint** | `https://rest.uniprot.org/idmapping/` |
@@ -61,7 +61,7 @@ submit-url = "https://rest.uniprot.org/idmapping/run"
 job-response = await client.post(submit-url, data={
     "from": "ChEMBL",
     "to": "UniProtKB",
-    "ids": ",".join(chembl_target_ids)  # Max 100,000 IDs
+    "ids": ",".join(chembl-target-ids)  # Max 100,000 IDs
 })
 job-id = job-response.json()["jobId"]
 
@@ -259,17 +259,17 @@ Mode: Overwrite
 ## 7. Pipeline Configuration
 
 ```yaml
-# configs/pipelines/uniprot/idmapping.yaml
+# configs/entities/uniprot/idmapping.yaml
 
-pipeline-name: uniprot_idmapping
+pipeline-name: uniprot-idmapping
 provider: uniprot
 entity-type: idmapping
 version: "1.1.0"
 description: "Maps ChEMBL target IDs to UniProt accessions via UniProt ID Mapping API"
 
 primary-keys: ["target-id"]
-silver-table: "uniprot_idmapping"
-gold-table: "uniprot_idmapping"
+silver-table: "uniprot-idmapping"
+gold-table: "uniprot-idmapping"
 
 source:
   type: file
@@ -318,7 +318,7 @@ input-filter:
 
 | Consumer | Impact |
 |----------|--------|
-| `uniprot_protein` | Provides accessions for protein fetch |
+| `uniprot-protein` | Provides accessions for protein fetch |
 | Target enrichment | Enables ChEMBL→UniProt linking |
 | Cross-provider analytics | ID harmonization |
 

@@ -1,6 +1,6 @@
 # Пайплайн: ChEMBL Target Component
 
-**Имя пайплайна:** `chembl_target_component`
+**Имя пайплайна:** `chembl-target-component`
 **Провайдер:** `chembl`
 **Сущность:** `target-component`
 **Версия схемы:** 1.2.0
@@ -61,10 +61,10 @@ entity-id = f"chembl:component-{component-id}"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_target_component
+bioetl run chembl-target-component
 
 # С ограничением
-bioetl run chembl_target_component --limit 500
+bioetl run chembl-target-component --limit 500
 ```
 
 ---
@@ -73,7 +73,7 @@ bioetl run chembl_target_component --limit 500
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/target-component.yaml` |
+| Конфигурация | `configs/entities/chembl/target-component.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/chembl/target-component-transformer.py` |
 
 ---

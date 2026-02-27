@@ -164,7 +164,7 @@ Track VACUUM metrics:
 
 Log example:
 ```
-INFO  | vacuum-completed | table=chembl_activity | files-removed=150 | bytes-freed=524288000 | duration-s=45.2
+INFO  | vacuum-completed | table=chembl-activity | files-removed=150 | bytes-freed=524288000 | duration-s=45.2
 ```
 
 ## Best Practices

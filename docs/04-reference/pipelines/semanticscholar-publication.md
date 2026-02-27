@@ -1,4 +1,4 @@
-# semanticscholar_publication
+# semanticscholar-publication
 
 > **Status**: Deprecated. This legacy guide is superseded by current pipeline specs in `docs/pipelines/` (see `docs/pipelines/INDEX.md`).
 
@@ -8,7 +8,7 @@ Semantic Scholar Academic Graph API pipeline for publication metadata enrichment
 
 ## Overview
 
-The `semanticscholar_publication` pipeline ingests scholarly publication records from the [Semantic Scholar Academic Graph API](https://api.semanticscholar.org/api-docs/graph), transforming them through Bronze (raw JSON), Silver (normalized), and Gold (analytics-ready) layers.
+The `semanticscholar-publication` pipeline ingests scholarly publication records from the [Semantic Scholar Academic Graph API](https://api.semanticscholar.org/api-docs/graph), transforming them through Bronze (raw JSON), Silver (normalized), and Gold (analytics-ready) layers.
 
 **Key Features:**
 - Batch DOI resolution with automatic title-based fallback
@@ -32,7 +32,7 @@ The `semanticscholar_publication` pipeline ingests scholarly publication records
 
 | Property | Value |
 |----------|-------|
-| **Pipeline Name** | `semanticscholar_publication` |
+| **Pipeline Name** | `semanticscholar-publication` |
 | **Version** | 1.2.0 |
 | **Provider** | `semanticscholar` |
 | **Entity Type** | `publication` |
@@ -521,7 +521,7 @@ sequenceDiagram
     participant Bronze as Bronze Layer
     participant Silver as Silver Layer
     participant Gold as Gold Layer
-    participant Composite as composite_publication
+    participant Composite as composite-publication
 
     Input->>API: DOIs/Titles
     API->>Bronze: Raw JSON (ZSTD)
@@ -545,17 +545,17 @@ sequenceDiagram
 
 | Consumer | Usage |
 |----------|-------|
-| `composite_publication` | Silver merge input |
+| `composite-publication` | Silver merge input |
 | Analytics dashboards | Gold layer queries |
 | DOI enrichment services | Publication metadata lookup |
 
 ### Composite Pipeline Integration
 
-The `composite_publication` pipeline uses Semantic Scholar Silver data as an enricher:
+The `composite-publication` pipeline uses Semantic Scholar Silver data as an enricher:
 
 ```yaml
 enrichers:
-  - name: semanticscholar_publication
+  - name: semanticscholar-publication
     source: silver/semanticscholar/publication
     join-keys: [doi, pmid]
     priority: 3

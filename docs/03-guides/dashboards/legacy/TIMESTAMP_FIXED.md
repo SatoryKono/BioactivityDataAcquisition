@@ -2,20 +2,20 @@
 
 ## ✅ Что было исправлено
 
-Добавлена новая метрика в `metrics_server.py` для отображения времени запуска:
+Добавлена новая метрика в `metrics-server.py` для отображения времени запуска:
 
-### Обновление metrics_server.py
+### Обновление metrics-server.py
 
 **Добавлены две новые метрики:**
 
-1. **bioetl_run_start_timestamp** (Gauge)
+1. **bioetl-run-start-timestamp** (Gauge)
    - Unix timestamp времени запуска
    - Используется в дашбордах для отображения
    - Обновляется каждый запрос
 
-2. **bioetl_run** (Info)
+2. **bioetl-run** (Info)
    - Полная информация о запуске
-   - Включает: run_id, pipeline, start_time, timestamp
+   - Включает: run-id, pipeline, start-time, timestamp
 
 ### Обновление дашбордов v2
 
@@ -23,12 +23,12 @@
 
 **Было:**
 ```promql
-timestamp(bioetl_records_processed_total) / 1000
+timestamp(bioetl-records-processed-total) / 1000
 ```
 
 **Стало:**
 ```promql
-bioetl_run_start_timestamp
+bioetl-run-start-timestamp
 ```
 
 ---
@@ -69,10 +69,10 @@ bioetl_run_start_timestamp
 
 ```bash
 # 1. Проверить metrics endpoint
-curl http://localhost:8000/metrics | grep bioetl_run_start_timestamp
+curl http://localhost:8000/metrics | grep bioetl-run-start-timestamp
 
 # 2. Результат должен быть похож на:
-# bioetl_run_start_timestamp{pipeline="uniprot",run_id="run-492157"} 1645382400.0
+# bioetl-run-start-timestamp{pipeline="uniprot",run-id="run-492157"} 1645382400.0
 ```
 
 ---
@@ -80,8 +80,8 @@ curl http://localhost:8000/metrics | grep bioetl_run_start_timestamp
 ## 📄 Файлы, которые изменились
 
 ```
-✓ metrics_server.py
-  - Добавлены метрики bioetl_run_start_timestamp и bioetl_run
+✓ metrics-server.py
+  - Добавлены метрики bioetl-run-start-timestamp и bioetl-run
   
 ✓ grafana/dashboards/bioetl-dq-v2.json
   - Обновлен запрос для Execution Timestamp

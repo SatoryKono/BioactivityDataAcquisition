@@ -7,9 +7,9 @@
 ## Context
 
 BioETL uses Hexagonal Architecture + Medallion (Bronze→Silver→Gold) for ETL biоактивных данных. Current pipelines operate independently:
-- `chembl_activity`
-- `chembl_publication`
-- `pubchem_compound`
+- `chembl-activity`
+- `chembl-publication`
+- `pubchem-compound`
 
 A common use case requires combining data from multiple sources:
 1. **Seed Pipeline** extracts primary entities (e.g., publications from ChEMBL)
@@ -89,7 +89,7 @@ Implement **Composite Pipeline Pattern** with the following architecture:
 1. Seed writes → Silver/chembl/publication/
 2. Extract keys → In-memory DataFrame (small)
 3. Enrichers write → Silver/{enricher}/publication/
-4. Merger reads all → Gold/composite_publication/
+4. Merger reads all → Gold/composite-publication/
 ```
 
 ### 3. Join Strategy: Configurable per Enricher
@@ -141,23 +141,23 @@ pipelines to populate Silver tables.
 
 **Problem:** Some dependencies need keys from *another dependency's* output, not from seed.
 
-**Example:** `chembl_protein_class` needs `protein-classification-id` values, but these
-come from `chembl_target_component` Silver table, not from seed.
+**Example:** `chembl-protein-class` needs `protein-classification-id` values, but these
+come from `chembl-target-component` Silver table, not from seed.
 
 **Solution:** `key-source` field specifies where to read join keys from.
 
 ```yaml
 dependencies:
   # Standard dependency: uses keys from seed
-  - pipeline: chembl_target_component
+  - pipeline: chembl-target-component
     join-keys: [component-id]      # Column in seed
     silver-table: silver/chembl/target-component
 
   # Chained dependency: uses keys from another dependency
-  - pipeline: chembl_protein_class
+  - pipeline: chembl-protein-class
     join-keys: [protein-classification-id]  # Column in key-source table
     filter-field: protein-class-id          # API filter field name
-    key-source: chembl_target_component     # Read keys from this Silver table
+    key-source: chembl-target-component     # Read keys from this Silver table
     silver-table: silver/chembl/protein-class
 ```
 
@@ -182,27 +182,27 @@ dependencies:
 #### Example: Target Composite Pipeline
 
 ```
-Seed: chembl_target
+Seed: chembl-target
   └─ Provides: target-chembl-id, component-id
 
 Dependencies:
-  1. chembl_target_component (component-id from seed)
+  1. chembl-target-component (component-id from seed)
      └─ Populates: Silver with protein-classification-id
-  2. chembl_protein_class (protein-classification-id from #1)
+  2. chembl-protein-class (protein-classification-id from #1)
      └─ Populates: Silver with protein class hierarchy
 
 Enrichers:
-  - uniprot_idmapping (target-chembl-id from seed)
+  - uniprot-idmapping (target-chembl-id from seed)
 ```
 
 ### 5. Locking Strategy: Hierarchical Locks
 
 ```
-lock:composite_publication              # Parent lock (exclusive)
-├── lock:chembl_publication             # Seed lock (shared under parent)
-├── lock:crossref_publication           # Enricher lock (shared)
-├── lock:openalex_publication           # Enricher lock (shared)
-└── lock:pubmed_publication             # Enricher lock (shared)
+lock:composite-publication              # Parent lock (exclusive)
+├── lock:chembl-publication             # Seed lock (shared under parent)
+├── lock:crossref-publication           # Enricher lock (shared)
+├── lock:openalex-publication           # Enricher lock (shared)
+└── lock:pubmed-publication             # Enricher lock (shared)
 ```
 
 **Rationale:**
@@ -401,7 +401,7 @@ class DependencyConfig:
     Dependencies run after seed but before enrichers to populate Silver tables.
     Supports chained dependencies via key-source field.
     """
-    pipeline: str                    # Pipeline name (e.g., "chembl_protein_class")
+    pipeline: str                    # Pipeline name (e.g., "chembl-protein-class")
     join-keys: tuple[str, ...]       # Keys to extract for filtering
     required: bool = False           # If True, failure = composite failure
     timeout-seconds: int = 600       # Per-dependency timeout
@@ -418,7 +418,7 @@ class DependencyConfig:
 @dataclass(frozen=True, slots=True)
 class EnricherConfig:
     """Configuration for a single enrichment pipeline."""
-    pipeline: str                    # Pipeline name (e.g., "crossref_publication")
+    pipeline: str                    # Pipeline name (e.g., "crossref-publication")
     join-keys: tuple[str, ...]       # Keys to join on (e.g., ("doi", "pmid"))
     required: bool = False           # If True, failure = composite failure
     filter-condition: str | None = None  # SQL-like filter (e.g., "pmid IS NOT NULL")
@@ -439,7 +439,7 @@ class MergeConfig:
 @dataclass(frozen=True, slots=True)
 class CompositeConfig:
     """Complete composite pipeline configuration."""
-    name: str                        # e.g., "composite_publication"
+    name: str                        # e.g., "composite-publication"
     seed: SeedConfig                 # Seed pipeline config
     enrichers: tuple[EnricherConfig, ...]
     merge: MergeConfig
@@ -521,9 +521,9 @@ class ConflictResolution(str, Enum):
 **Примеры**:
 | Source | Original | Qualified |
 |--------|----------|-----------|
-| chembl_publication (seed) | title | chembl.publication.title |
-| crossref_publication (enricher) | title | crossref.publication.title |
-| crossref_publication (enricher) | citation-count | crossref.publication.citation-count |
+| chembl-publication (seed) | title | chembl.publication.title |
+| crossref-publication (enricher) | title | crossref.publication.title |
+| crossref-publication (enricher) | citation-count | crossref.publication.citation-count |
 
 **Исключения** (НЕ переименовываются):
 1. **Join keys**: `doi`, `pmid`, `pmc-id` — для совместимости с join операциями
@@ -601,7 +601,7 @@ Add `preserve-all-sources: bool = False` to `MergeConfig`. When enabled:
 ### Configuration
 
 ```yaml
-# configs/pipelines/composite/publication.yaml
+# configs/composites/publication.yaml
 merge:
   strategy: left-outer
   conflict-resolution: seed-priority  # Used when preserve-all-sources=false
@@ -737,8 +737,8 @@ class CompositePipelineRunner:
         self,
         config: CompositeConfig,
         runtime: CompositeRuntimeConfig,
-        seed-runner_factory: Callable[[], PipelineRunner],  # skip-gold=True
-        enricher-runner_factory: Callable[[str], PipelineRunner],  # skip-gold=True
+        seed-runner-factory: Callable[[], PipelineRunner],  # skip-gold=True
+        enricher-runner-factory: Callable[[str], PipelineRunner],  # skip-gold=True
         key-extractor: KeyExtractorService,
         coordinator: EnrichmentCoordinator,
         merger: MergeService,
@@ -841,7 +841,7 @@ class EnrichmentCoordinator:
         """Run a single enricher with timeout and error handling."""
         try:
             async with asyncio.timeout(enricher.timeout-seconds):
-                runner = self.-runner_factory(enricher.pipeline)
+                runner = self.-runner-factory(enricher.pipeline)
                 # Pass keys via input filter mechanism
                 await runner.run()
                 return self.-build-success-result(enricher)
@@ -937,18 +937,18 @@ class MergeService:
 ### YAML Configuration
 
 ```yaml
-# configs/pipelines/composite/publication.yaml
+# configs/composites/publication.yaml
 schema-version: "2.0.0"
 
 composite:
-  name: composite_publication
+  name: composite-publication
   version: "1.0.0"
 
   # ---------------------------------------------------------------------------
   # Seed Pipeline Configuration
   # ---------------------------------------------------------------------------
   seed:
-    pipeline: chembl_publication
+    pipeline: chembl-publication
     output-keys:
       - document-id      # ChEMBL document ID
       - doi              # Digital Object Identifier
@@ -960,14 +960,14 @@ composite:
   # ---------------------------------------------------------------------------
   enrichers:
     # CrossRef: Required enricher for citation data
-    - pipeline: crossref_publication
+    - pipeline: crossref-publication
       join-keys:
         - doi            # Primary join key
       required: true     # Failure = composite failure
       timeout-seconds: 900
 
     # OpenAlex: Optional enricher for academic metadata
-    - pipeline: openalex_publication
+    - pipeline: openalex-publication
       join-keys:
         - doi            # Primary
         - pmid           # Fallback
@@ -976,7 +976,7 @@ composite:
       timeout-seconds: 600
 
     # PubMed: Optional enricher for medical metadata
-    - pipeline: pubmed_publication
+    - pipeline: pubmed-publication
       join-keys:
         - pmid
       required: false
@@ -984,7 +984,7 @@ composite:
       timeout-seconds: 600
 
     # Semantic Scholar: Optional enricher for AI/ML features
-    - pipeline: semanticscholar_publication
+    - pipeline: semanticscholar-publication
       join-keys:
         - doi
         - pmid
@@ -1022,7 +1022,7 @@ composite:
 
     # Per-enricher overrides
     enricher-overrides:
-      semanticscholar_publication:
+      semanticscholar-publication:
         soft-fail-threshold: 0.20  # Higher tolerance for S2
         hard-fail-threshold: 0.50
 
@@ -1134,17 +1134,17 @@ class TestEnrichmentCoordinator:
 ### Integration Tests
 
 ```python
-# tests/integration/composite/test-composite_publication.py
+# tests/integration/composite/test-composite-publication.py
 
 @pytest.mark.integration
 class TestCompositePublicationPipeline:
-    """Integration tests for composite_publication pipeline."""
+    """Integration tests for composite-publication pipeline."""
 
     @pytest.mark.vcr
     async def test-full-composite-run(self, vcr-cassette):
         """Full composite run with all enrichers."""
         runner = await bootstrap-composite-pipeline(
-            "composite_publication",
+            "composite-publication",
             limit=10,
         )
 
@@ -1159,7 +1159,7 @@ class TestCompositePublicationPipeline:
         """Resume should skip completed enrichers."""
         # First run with simulated failure
         runner = await bootstrap-composite-pipeline(
-            "composite_publication",
+            "composite-publication",
             limit=10,
         )
         # Simulate failure after seed
@@ -1167,7 +1167,7 @@ class TestCompositePublicationPipeline:
 
         # Resume run
         runner = await bootstrap-composite-pipeline(
-            "composite_publication",
+            "composite-publication",
             resume=True,
         )
         result = await runner.run()
@@ -1223,31 +1223,31 @@ def test-composite-port-contracts():
 
 ```bash
 # Full composite run
-bioetl run --pipeline composite_publication
+bioetl run --pipeline composite-publication
 
 # With options
-bioetl run --pipeline composite_publication \
+bioetl run --pipeline composite-publication \
     --limit 1000 \
     --dry-run
 
 # Re-enrich specific source only
-bioetl run --pipeline composite_publication \
+bioetl run --pipeline composite-publication \
     --enrich-only pubmed,openalex
 
 # Skip optional enrichers (fast mode)
-bioetl run --pipeline composite_publication \
+bioetl run --pipeline composite-publication \
     --required-only
 
 # Resume after failure
-bioetl run --pipeline composite_publication \
+bioetl run --pipeline composite-publication \
     --resume
 
 # Force re-run of specific enricher
-bioetl run --pipeline composite_publication \
+bioetl run --pipeline composite-publication \
     --force-enricher crossref
 
 # List composite pipeline status
-bioetl status composite_publication
+bioetl status composite-publication
 ```
 
 ### CLI Implementation

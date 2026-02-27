@@ -1,6 +1,6 @@
 # Пайплайн: ChEMBL Publication Similarity
 
-**Имя пайплайна:** `chembl_publication_similarity`
+**Имя пайплайна:** `chembl-publication-similarity`
 **Провайдер:** `chembl`
 **Сущность:** `publication-similarity`
 **Версия схемы:** 1.2.0
@@ -75,10 +75,10 @@ max-tani = round(max(tid-tani, mol-tani), 6)
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_publication_similarity
+bioetl run chembl-publication-similarity
 
 # С ограничением
-bioetl run chembl_publication_similarity --limit 1000
+bioetl run chembl-publication-similarity --limit 1000
 ```
 
 ---
@@ -87,7 +87,7 @@ bioetl run chembl_publication_similarity --limit 1000
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/publication-similarity.yaml` |
+| Конфигурация | `configs/entities/chembl/publication-similarity.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/chembl/publication-similarity-transformer.py` |
 | Пайплайн | `src/bioetl/application/pipelines/chembl/publication-similarity.py` |
 

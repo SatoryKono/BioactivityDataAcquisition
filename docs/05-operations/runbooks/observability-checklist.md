@@ -35,7 +35,7 @@ All log messages **MUST** include:
 | Field      | Required | Example                        |
 | ---------- | -------- | ------------------------------ |
 | `run-id`   | MUST     | UUID                           |
-| `pipeline` | MUST     | `chembl_activity`              |
+| `pipeline` | MUST     | `chembl-activity`              |
 | `stage`    | MUST     | `extract`, `transform`, `load` |
 | `dataset`  | SHOULD   | `chembl/activity`              |
 

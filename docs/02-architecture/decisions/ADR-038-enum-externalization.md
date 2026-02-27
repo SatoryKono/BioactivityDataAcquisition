@@ -6,13 +6,13 @@
 
 ## Context
 
-ChEMBL enum values (allowed values for `standard_type`, `assay_type`, `molecule_type`,
+ChEMBL enum values (allowed values for `standard-type`, `assay-type`, `molecule-type`,
 etc.) were defined in three places:
 
 1. **Python frozensets** in `domain/schemas/constants.py` — used by Pandera schema
    validation (`pa.Field(isin=list(...))`)
 2. **Filter YAML configs** in `configs/filters/entities/chembl/*.yaml` — hardcoded
-   subsets in `columns:` and `extraction_params:`
+   subsets in `columns:` and `extraction-params:`
 3. **DQ YAML configs** in `configs/quality/entities/chembl/*.yaml` — hardcoded
    `allowed:` lists
 
@@ -35,7 +35,7 @@ configs/enums/
 ### Sync mechanism
 
 `domain/schemas/constants.py` contains pure Python frozensets (no file I/O).
-`tests/unit/domain/schemas/test_constants_yaml.py` verifies that every Python
+`tests/unit/domain/schemas/test-constants-yaml.py` verifies that every Python
 constant matches the corresponding YAML value exactly.
 
 **Workflow for ChEMBL version update:**
@@ -46,7 +46,7 @@ constant matches the corresponding YAML value exactly.
 
 ### What is NOT externalized
 
-- **Regex patterns** (`CHEMBL_ID_PATTERN`, `BAO_ID_PATTERN`, etc.) — format-dependent,
+- **Regex patterns** (`CHEMBL-ID-PATTERN`, `BAO-ID-PATTERN`, etc.) — format-dependent,
   not DB-version-dependent
 - **Domain StrEnums** (`RunType`, `HealthStatus`) — business logic, not external DB data
 - **Non-ChEMBL enums** (CrossRef, OpenAlex) — can follow same pattern later
@@ -87,7 +87,7 @@ Generate `constants.py` from YAML via template. Rejected because:
 - **SSOT**: `configs/enums/chembl.yaml` is the declared authoritative source
 - **Domain purity preserved**: `constants.py` has no I/O, passes ARCH-002 checks
 - **Zero migration cost**: Public API unchanged, all consumers work as-is
-- **Versionable**: `version: "chembl_35"` enables audit and rollback
+- **Versionable**: `version: "chembl-35"` enables audit and rollback
 - **Consistent**: Follows `configs/` hierarchy pattern (ADR-027, ADR-028)
 - **Enforced sync**: Tests catch drift between YAML and Python immediately
 
@@ -107,9 +107,9 @@ Generate `constants.py` from YAML via template. Rejected because:
 | Requirement | Status | Notes |
 |-------------|--------|-------|
 | Domain purity (ARCH-002) | PASS | No I/O in `constants.py` |
-| Public API unchanged | PASS | All `__all__` exports identical |
+| Public API unchanged | PASS | All `--all--` exports identical |
 | Types preserved | PASS | `frozenset[str]`, `tuple[float, ...]` |
-| Sync enforcement | PASS | 20 sync tests in `test_constants_yaml.py` |
+| Sync enforcement | PASS | 20 sync tests in `test-constants-yaml.py` |
 
 ## References
 
@@ -117,4 +117,4 @@ Generate `constants.py` from YAML via template. Rejected because:
 - ADR-028: Filter Rules Externalization
 - `configs/enums/chembl.yaml` — SSOT file
 - `src/bioetl/domain/schemas/constants.py` — pure Python constants
-- `tests/unit/domain/schemas/test_constants_yaml.py` — sync tests
+- `tests/unit/domain/schemas/test-constants-yaml.py` — sync tests

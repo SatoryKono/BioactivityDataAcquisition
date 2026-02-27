@@ -2,7 +2,7 @@
 
 *Дата создания: 2026-02-17*
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Контекст для AI-агента
 
@@ -11,7 +11,7 @@ ______________________________________________________________________
 Hexagonal Architecture (Ports & Adapters) с 5 слоями и Medallion Architecture
 для хранения данных (Bronze → Silver → Gold).
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Часть 0: Обязательное изучение проекта
 
@@ -91,13 +91,10 @@ docs/02-architecture/decisions/ADR-038-enum-externalization.md
 01-full-system-component.mermaid     (150 LOC) — Full system component diagram (C4-style)
 01-high-level.mermaid                 (45 LOC) — High-level system overview
 02-full-medallion-data-flow.mermaid   (68 LOC) — Medallion architecture data flow (detailed)
-02-medallion.mermaid                  (30 LOC) — Medallion architecture (simplified)
 03-pipeline-execution-happy-path.mermaid (87 LOC) — Pipeline execution (happy path)
-03-pipeline-sequence.mermaid          (35 LOC) — Pipeline sequence
 04-domain-layer-class-diagram.mermaid (244 LOC) — Domain layer classes
 04-error-flow.mermaid                 (12 LOC) — Error handling flow
 05-layers-interaction.mermaid         (71 LOC) — Layer interaction
-05-locking.mermaid                    (37 LOC) — Locking mechanism
 05-pipeline-lifecycle-states.mermaid (173 LOC) — Pipeline state machine
 06-application-layer-class-diagram.mermaid (222 LOC) — Application layer classes
 06-pipeline-execution.mermaid         (73 LOC) — Pipeline execution flow
@@ -171,7 +168,7 @@ src/bioetl/domain/value-objects/taxonomy-id.py
 
 # Domain Layer — Entities
 src/bioetl/domain/entities/base.py
-src/bioetl/domain/entities/chembl_activity.py
+src/bioetl/domain/entities/chembl-activity.py
 src/bioetl/domain/entities/pubchem.py
 src/bioetl/domain/entities/uniprot.py
 src/bioetl/domain/entities/crossref.py
@@ -302,14 +299,14 @@ src/bioetl/composition/bootstrap/runtime/pipeline.py
 src/bioetl/composition/bootstrap/runtime/runner.py
 src/bioetl/composition/bootstrap/runtime/composite.py
 src/bioetl/composition/bootstrap/runtime/observability.py
-src/bioetl/composition/factories/pipeline_factory.py
-src/bioetl/composition/factories/runner_factory.py
-src/bioetl/composition/factories/services_factory.py
-src/bioetl/composition/factories/storage_factory.py
-src/bioetl/composition/factories/http-client_factory.py
-src/bioetl/composition/factories/data-source_factory.py
-src/bioetl/composition/factories/transformer_factory.py
-src/bioetl/composition/factories/dq_factory.py
+src/bioetl/composition/factories/pipeline-factory.py
+src/bioetl/composition/factories/runner-factory.py
+src/bioetl/composition/factories/services-factory.py
+src/bioetl/composition/factories/storage-factory.py
+src/bioetl/composition/factories/http-client-factory.py
+src/bioetl/composition/factories/data-source-factory.py
+src/bioetl/composition/factories/transformer-factory.py
+src/bioetl/composition/factories/dq-factory.py
 src/bioetl/composition/providers/provider-registry.py
 src/bioetl/composition/providers/registration.py
 src/bioetl/composition/registry.py
@@ -339,7 +336,7 @@ src/bioetl/interfaces/http/health-server.py
 - **Цвета**: Bronze=#FFA500, Silver=#C0C0C0, Gold=#FFD700, Error=#FF6B6B, Success=#4CAF50, External=#2196F3
 - **Каждая диаграмма MUST** содержать: Title (как comment), Legend (если нужна), RULES.md reference
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Часть 1: Генерация 500 НОВЫХ диаграмм
 
@@ -386,7 +383,7 @@ ______________________________________________________________________
   методы и модули из кодовой базы (534 Python файла)
 - **Разнообразие типов**: используй минимум 10 разных типов Mermaid-диаграмм
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Часть 2: Выбор 50 наиболее важных
 
@@ -414,7 +411,7 @@ ______________________________________________________________________
 - Минимум 2 диаграммы observability
 - Не более 15 диаграмм одной категории
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Часть 3: Таблица 50 диаграмм
 
@@ -435,7 +432,7 @@ ______________________________________________________________________
 почему эта диаграмма попала в TOP-50, какую проблему понимания она решает,
 и кому из участников проекта она наиболее полезна.
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Часть 4: Создание и рендер TOP-25 диаграмм
 
@@ -503,7 +500,7 @@ done
 1. `docs/02-architecture/diagrams/diagrams-index.md` — добавь новые диаграммы
 1. Создай директорию `docs/02-architecture/diagrams/png/` если не существует
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Часть 5: Проверка качества (self-review)
 
@@ -537,7 +534,7 @@ grep -rn "class ИмяКласса" src/bioetl/ --include="*.py"
 - Каждый PNG весит > 50KB (не пустой/битый)
 - Текст на каждой диаграмме читаем при 100% масштабе
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Справочная информация
 

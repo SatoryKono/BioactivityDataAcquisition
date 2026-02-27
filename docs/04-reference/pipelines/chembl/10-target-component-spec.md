@@ -8,7 +8,7 @@
 
 | Parameter        | Value                                                    |
 | ---------------- | -------------------------------------------------------- |
-| **Pipeline ID**  | `chembl_target_component`                                |
+| **Pipeline ID**  | `chembl-target-component`                                |
 | **Provider**     | ChEMBL (EBI)                                             |
 | **Entity**       | target-component                                         |
 | **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/target-component` |
@@ -127,14 +127,14 @@ class TargetComponentSchema(ETLRecordSchema):
 ## 6. Pipeline Configuration
 
 ```yaml
-pipeline-name: chembl_target_component
+pipeline-name: chembl-target-component
 provider: chembl
 entity-type: target-component
 version: "1.2.0"
 
 primary-keys: ["targcomp-id"]
-silver-table: "chembl_target_component"
-gold-table: "chembl_target_component"
+silver-table: "chembl-target-component"
+gold-table: "chembl-target-component"
 
 gold-filters:
   required-fields:

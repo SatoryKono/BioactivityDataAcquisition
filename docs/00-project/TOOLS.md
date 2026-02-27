@@ -78,7 +78,7 @@ python src/tools/create-pipeline.py --provider pubchem --entity compound --dry-r
 
 **Зависимости bioetl:**
 - `bioetl.domain.entities.bioactivity.Bioactivity`
-- `bioetl.domain.entities.chembl_activity.Assay`
+- `bioetl.domain.entities.chembl-activity.Assay`
 - `bioetl.domain.entities.chembl-structures.Molecule, Target`
 - `bioetl.infrastructure.schemas.gold`
 - `bioetl.infrastructure.schemas.silver`
@@ -231,7 +231,7 @@ python scripts/salt-rotate.py --emergency
 python scripts/dq-baseline-update.py
 
 # Для конкретного пайплайна
-python scripts/dq-baseline-update.py --pipeline chembl_activity
+python scripts/dq-baseline-update.py --pipeline chembl-activity
 ```
 
 | Параметр | Описание |

@@ -33,7 +33,7 @@ This runbook describes how to handle pipeline failures due to high Data Quality 
    - Update Pandera schemas in `src/bioetl/infrastructure/schemas/`.
    - Deploy new version.
 3. **If Threshold is Too Strict**:
-   - Temporarily increase threshold in `configs/pipelines/{pipeline}.yaml`:
+   - Temporarily increase threshold in `configs/entities/{pipeline}.yaml`:
      ```yaml
      dq-overrides:
        hard-fail-threshold: 0.30  # Increase to 30%
