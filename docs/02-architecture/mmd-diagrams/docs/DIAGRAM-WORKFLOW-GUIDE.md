@@ -324,11 +324,7 @@ python scripts/prune-orphan-nodes.py --grandfather   # Пометить все �
 ### 8.1. Конвейер рендеринга
 
 ```bash
-# Linux/WSL
 bash docs/02-architecture/mmd-diagrams/render.sh
-
-# Windows (PowerShell)
-pwsh docs/02-architecture/mmd-diagrams/render-windows.ps1
 ```
 
 Формат вывода: SVG + PNG (300 DPI). Применяется тема из `theme/mermaid-config.json` и `theme/custom.css`. SVG-файлы дополнительно оптимизируются через SVGO (`svgo.config.js`).
@@ -375,7 +371,7 @@ python scripts/check-diagram-visual-smoke.py \
 5. **Применить ELK** (если @nodes > 20): `python src/tools/apply-elk-layout.py`
 6. **Применить linkStyle** (если flowchart с 5+ связями): `python src/tools/differentiate-linkstyle.py`
 7. **Проверить orphan-ноды:** `python scripts/prune-orphan-nodes.py --check`
-8. **Отрендерить:** `render.sh` или `render-windows.ps1`
+8. **Отрендерить:** `render.sh`
 9. **Добавить в индекс:** обновить `README.md` каталога
 
 ---
@@ -390,7 +386,6 @@ python scripts/check-diagram-visual-smoke.py \
 | lint-diagrams.py | `scripts/` | Lint-проверка по 14 правилам |
 | prune-orphan-nodes.py | `scripts/` | Детекция и удаление orphan-нод |
 | render.sh | `mmd-diagrams/` | Рендеринг SVG + PNG (300 DPI) |
-| render-windows.ps1 | `mmd-diagrams/` | Windows-версия рендеринга |
 
 ---
 

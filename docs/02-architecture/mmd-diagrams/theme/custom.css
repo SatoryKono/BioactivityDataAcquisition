@@ -25,7 +25,7 @@ svg {
 .node rect,
 .node circle,
 .node polygon {
-    filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.05));
+    filter: drop-shadow(1px 2px 4px rgba(0, 0, 0, 0.06));
 }
 
 /* ── Subgraph / cluster ─────────────────────────────── */
@@ -34,8 +34,9 @@ svg {
     ry: 10;
     stroke-width: 1.5px;
     stroke-dasharray: none;
-    fill-opacity: 0.03;
-    filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.05));
+    stroke-opacity: 0.8;
+    fill-opacity: 0.06;
+    filter: drop-shadow(1px 2px 4px rgba(0, 0, 0, 0.06));
 }
 
 .cluster text {
@@ -103,8 +104,8 @@ svg {
 /* ── Sequence diagram ───────────────────────────────── */
 .actor {
     stroke-width: 1.5px;
-    rx: 4;
-    ry: 4;
+    rx: 6;
+    ry: 6;
 }
 
 .messageLine0,
@@ -215,6 +216,16 @@ g.classGroup foreignObject > div {
 .node.size-sm foreignObject > div { min-height: 80px; min-width: 180px; }
 .node.size-md foreignObject > div { min-height: 140px; min-width: 260px; }
 .node.size-lg foreignObject > div { min-height: 200px; min-width: 340px; }
+
+/* Class diagram sizing tiers */
+g.classGroup.size-sm foreignObject > div { min-width: 200px; }
+g.classGroup.size-md foreignObject > div { min-width: 320px; }
+g.classGroup.size-lg foreignObject > div { min-width: 450px; }
+g.classGroup.size-xl foreignObject > div { min-width: 600px; }
+
+/* Sequence diagram actor sizing tiers */
+.actor.size-sm rect { width: 120px; }
+.actor.size-md rect { width: 180px; }
 
 /* ── State diagram ──────────────────────────────────── */
 g.stateGroup rect {
