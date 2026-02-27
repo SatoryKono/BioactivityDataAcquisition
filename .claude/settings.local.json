@@ -212,7 +212,8 @@
       "Bash(__NEW_LINE_6f3d58c2d62d5327__:*)",
       "Bash(npx:*)",
       "Bash(mkdir:*)",
-      "Bash(do if:*)"
+      "Bash(do if:*)",
+      "mcp__Context7__resolve-library-id"
     ]
   },
   "enabledPlugins": {
