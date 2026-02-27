@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "entities": {
     "chembl_activity": {
-      "file": "docs\\04-reference\\contracts\\gold\\chembl_activity_v1.0.json",
+      "file": "docs/04-reference/contracts/gold/chembl_activity_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -13,7 +13,7 @@
       }
     },
     "chembl_assay": {
-      "file": "docs\\04-reference\\contracts\\gold\\chembl_assay_v1.0.json",
+      "file": "docs/04-reference/contracts/gold/chembl_assay_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -23,7 +23,7 @@
       }
     },
     "chembl_assay_parameters": {
-      "file": "docs\\04-reference\\contracts\\gold\\chembl_assay_parameters_v1.0.json",
+      "file": "docs/04-reference/contracts/gold/chembl_assay_parameters_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -33,7 +33,7 @@
       }
     },
     "chembl_cell_line": {
-      "file": "docs\\04-reference\\contracts\\gold\\chembl_cell_line_v1.0.json",
+      "file": "docs/04-reference/contracts/gold/chembl_cell_line_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -43,7 +43,7 @@
       }
     },
     "chembl_compound_record": {
-      "file": "docs\\04-reference\\contracts\\gold\\chembl_compound_record_v1.0.json",
+      "file": "docs/04-reference/contracts/gold/chembl_compound_record_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -53,7 +53,7 @@
       }
     },
     "chembl_publication": {
-      "file": "docs\\04-reference\\contracts\\gold\\chembl_publication_v1.0.json",
+      "file": "docs/04-reference/contracts/gold/chembl_publication_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -63,7 +63,7 @@
       }
     },
     "chembl_publication_similarity": {
-      "file": "docs\\04-reference\\contracts\\gold\\chembl_publication_similarity_v1.0.json",
+      "file": "docs/04-reference/contracts/gold/chembl_publication_similarity_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -73,7 +73,7 @@
       }
     },
     "chembl_publication_term": {
-      "file": "docs\\04-reference\\contracts\\gold\\chembl_publication_term_v1.0.json",
+      "file": "docs/04-reference/contracts/gold/chembl_publication_term_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -83,7 +83,7 @@
       }
     },
     "chembl_molecule": {
-      "file": "docs\\04-reference\\contracts\\gold\\chembl_molecule_v1.0.json",
+      "file": "docs/04-reference/contracts/gold/chembl_molecule_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -93,7 +93,7 @@
       }
     },
     "chembl_protein_class": {
-      "file": "docs\\04-reference\\contracts\\gold\\chembl_protein_class_v1.0.json",
+      "file": "docs/04-reference/contracts/gold/chembl_protein_class_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -103,7 +103,7 @@
       }
     },
     "chembl_subcellular_fraction": {
-      "file": "docs\\04-reference\\contracts\\gold\\chembl_subcellular_fraction_v1.0.json",
+      "file": "docs/04-reference/contracts/gold/chembl_subcellular_fraction_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -113,7 +113,7 @@
       }
     },
     "chembl_target_component": {
-      "file": "docs\\04-reference\\contracts\\gold\\chembl_target_component_v1.0.json",
+      "file": "docs/04-reference/contracts/gold/chembl_target_component_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -123,7 +123,7 @@
       }
     },
     "chembl_target": {
-      "file": "docs\\04-reference\\contracts\\gold\\chembl_target_v1.0.json",
+      "file": "docs/04-reference/contracts/gold/chembl_target_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -133,7 +133,7 @@
       }
     },
     "chembl_tissue": {
-      "file": "docs\\04-reference\\contracts\\gold\\chembl_tissue_v1.0.json",
+      "file": "docs/04-reference/contracts/gold/chembl_tissue_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -143,7 +143,7 @@
       }
     },
     "composite_activity": {
-      "file": "docs\\04-reference\\contracts\\gold\\composite_activity_v1.0.json",
+      "file": "docs/04-reference/contracts/gold/composite_activity_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -153,7 +153,7 @@
       }
     },
     "composite_assay": {
-      "file": "docs\\04-reference\\contracts\\gold\\composite_assay_v1.0.json",
+      "file": "docs/04-reference/contracts/gold/composite_assay_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -163,7 +163,7 @@
       }
     },
     "composite_molecule": {
-      "file": "docs\\04-reference\\contracts\\gold\\composite_molecule_v1.0.json",
+      "file": "docs/04-reference/contracts/gold/composite_molecule_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -173,7 +173,7 @@
       }
     },
     "composite_publication": {
-      "file": "docs\\04-reference\\contracts\\gold\\composite_publication_v1.0.json",
+      "file": "docs/04-reference/contracts/gold/composite_publication_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -183,7 +183,7 @@
       }
     },
     "composite_target": {
-      "file": "docs\\04-reference\\contracts\\gold\\composite_target_v1.0.json",
+      "file": "docs/04-reference/contracts/gold/composite_target_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -193,7 +193,7 @@
       }
     },
     "crossref_publication": {
-      "file": "docs\\04-reference\\contracts\\gold\\crossref_publication_v1.0.json",
+      "file": "docs/04-reference/contracts/gold/crossref_publication_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -203,7 +203,7 @@
       }
     },
     "openalex_publication": {
-      "file": "docs\\04-reference\\contracts\\gold\\openalex_publication_v1.0.json",
+      "file": "docs/04-reference/contracts/gold/openalex_publication_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -213,7 +213,7 @@
       }
     },
     "pubchem_compound": {
-      "file": "docs\\04-reference\\contracts\\gold\\pubchem_compound_v1.0.json",
+      "file": "docs/04-reference/contracts/gold/pubchem_compound_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -223,7 +223,7 @@
       }
     },
     "pubmed_publication": {
-      "file": "docs\\04-reference\\contracts\\gold\\pubmed_publication_v1.0.json",
+      "file": "docs/04-reference/contracts/gold/pubmed_publication_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -233,7 +233,7 @@
       }
     },
     "semanticscholar_publication": {
-      "file": "docs\\04-reference\\contracts\\gold\\semanticscholar_publication_v1.0.json",
+      "file": "docs/04-reference/contracts/gold/semanticscholar_publication_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -243,7 +243,7 @@
       }
     },
     "uniprot_idmapping": {
-      "file": "docs\\04-reference\\contracts\\gold\\uniprot_idmapping_v1.0.json",
+      "file": "docs/04-reference/contracts/gold/uniprot_idmapping_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -253,7 +253,7 @@
       }
     },
     "uniprot_protein": {
-      "file": "docs\\04-reference\\contracts\\gold\\uniprot_protein_v1.0.json",
+      "file": "docs/04-reference/contracts/gold/uniprot_protein_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
