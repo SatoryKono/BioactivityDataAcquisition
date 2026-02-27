@@ -460,6 +460,11 @@ class EdgeInfo:
     stroke_color: str = ""
     stroke_width: str = ""
     stroke_dasharray: str = ""
+    # Derived display fields (resolved from arrow_type syntax)
+    edge_type: str = ""       # solid / dashed / thick
+    line_style: str = ""      # solid / dashed / dotted
+    arrow_start: str = ""     # none / open / filled
+    arrow_end: str = ""       # open / filled / none
 
 
 @dataclass
@@ -598,6 +603,69 @@ def _arrow_semantic(arrow: str, label: str) -> str:
     if arrow == "==>":
         return "critical_data_flow"
     return "data_flow"
+
+
+def _resolve_edge_display(edge: EdgeInfo) -> None:
+    """Resolve edge_type, line_style, arrow_start, arrow_end from arrow_type syntax."""
+    a = edge.arrow_type
+
+    # Mermaid edge syntax:
+    #  -->   solid line, filled arrow end
+    #  --->  solid line, filled arrow end (longer)
+    #  ---->  solid line, filled arrow end (longest)
+    #  -.->  dashed line, filled arrow end
+    #  ==>   thick line, filled arrow end
+    #  --    solid line, no arrow
+    #  --|   solid line, no arrow (with text block)
+    #  -.-|  dashed line, no arrow (with text block)
+    #  ->>   solid line, open arrow (sequence)
+    #  -->>  dashed line, open arrow (sequence)
+    #  -)    solid line, open arrow (sequence async)
+    #  --)   dashed line, open arrow (sequence async)
+    #  ->    solid line, open arrow (sequence)
+    #  <|--  inheritance (class diagrams)
+    #  <|..  implementation (class diagrams)
+    #  ..    dotted line
+    #  *--   composition
+    #  o--   aggregation
+
+    # Determine line_style / edge_type
+    if "==" in a:
+        edge.edge_type = "thick"
+        edge.line_style = "solid"
+    elif "-." in a or ".." in a or "-.." in a:
+        edge.edge_type = "dashed"
+        edge.line_style = "dashed"
+    elif edge.stroke_dasharray:
+        edge.edge_type = "dashed"
+        edge.line_style = "dashed"
+    else:
+        edge.edge_type = "solid"
+        edge.line_style = "solid"
+
+    # Arrow end
+    if a.endswith(">>"):
+        edge.arrow_end = "open"
+    elif a.endswith(">") or a.endswith("->"):
+        edge.arrow_end = "filled"
+    elif a.endswith("|"):
+        edge.arrow_end = "none"
+    elif a.endswith(")"):
+        edge.arrow_end = "open"
+    else:
+        edge.arrow_end = "filled"
+
+    # Arrow start
+    if a.startswith("<|"):
+        edge.arrow_start = "filled"
+    elif a.startswith("*"):
+        edge.arrow_start = "filled"  # composition
+    elif a.startswith("o"):
+        edge.arrow_start = "open"  # aggregation
+    elif a.startswith("<"):
+        edge.arrow_start = "open"
+    else:
+        edge.arrow_start = "none"
 
 
 def _detect_diagram_type(lines: list[str]) -> str:
@@ -1359,6 +1427,63 @@ def parse_diagram(path: Path, theme: ThemeParams) -> DiagramReport:
             node_style_map, linkstyle_map, linkstyle_default, theme,
         )
 
+    # ── Resolve edge display properties (edge_type, line_style, arrows) ──
+    for e_dict in rpt.edges:
+        tmp = EdgeInfo(
+            index=e_dict["index"], source=e_dict["source"], target=e_dict["target"],
+            arrow_type=e_dict.get("arrow_type", ""),
+            stroke_dasharray=e_dict.get("stroke_dasharray", ""),
+        )
+        _resolve_edge_display(tmp)
+        e_dict["edge_type"] = tmp.edge_type
+        e_dict["line_style"] = tmp.line_style
+        e_dict["arrow_start"] = tmp.arrow_start
+        e_dict["arrow_end"] = tmp.arrow_end
+
+    # ── Estimate sizes for stub nodes (created from edge references) ─────
+    uniform_w, uniform_h = _parse_uniform(rpt.uniform) if rpt.uniform else (None, None)
+    for n_dict in rpt.nodes:
+        if not n_dict.get("est_width") and not n_dict.get("est_height"):
+            label = n_dict.get("label", n_dict.get("id", ""))
+            w, h = _estimate_node_size(
+                label, n_dict.get("shape", "rect"), n_dict.get("size_tier", ""),
+                uniform_w, uniform_h, dtype, theme,
+            )
+            n_dict["est_width"] = w
+            n_dict["est_height"] = h
+            if not n_dict.get("title_font_size"):
+                if dtype == "classDiagram":
+                    n_dict["title_font_size"] = theme.class_title_font_size
+                    n_dict["body_font_size"] = theme.class_member_font_size
+                elif dtype == "sequenceDiagram":
+                    n_dict["title_font_size"] = theme.global_font_size
+                    n_dict["body_font_size"] = theme.seq_message_font_size
+                else:
+                    n_dict["title_font_size"] = theme.node_text_font_size
+                    n_dict["body_font_size"] = theme.node_text_font_size
+            if not n_dict.get("text_color"):
+                n_dict["text_color"] = theme.node_text_color
+            if not n_dict.get("text_align"):
+                n_dict["text_align"] = "left" if dtype == "classDiagram" else theme.node_text_align
+
+    # ── Resolve subgraph node_count and class_def ────────────────────────
+    for sg_dict in rpt.subgraphs:
+        sg_dict["node_count"] = len(sg_dict.get("child_nodes", []))
+        # Resolve class_def from style maps
+        sg_id = sg_dict.get("id", "")
+        if not sg_dict.get("class_def") and sg_id in node_class_map:
+            sg_dict["class_def"] = node_class_map[sg_id]
+        # Populate style if empty but have resolved_layer
+        if not sg_dict.get("style") and (sg_dict.get("style_fill") or sg_dict.get("style_stroke")):
+            parts = []
+            if sg_dict.get("style_fill"):
+                parts.append(f"fill:{sg_dict['style_fill']}")
+            if sg_dict.get("style_stroke"):
+                parts.append(f"stroke:{sg_dict['style_stroke']}")
+            if sg_dict.get("style_stroke_width"):
+                parts.append(f"stroke-width:{sg_dict['style_stroke_width']}")
+            sg_dict["style"] = ",".join(parts)
+
     # ── Group 3: Statistics ───────────────────────────────────────────────
     rpt.nodes_actual = len(rpt.nodes)
     rpt.edges_count = len(rpt.edges)
@@ -1533,12 +1658,13 @@ def _to_markdown(reports: list[DiagramReport]) -> str:
 
         if r.subgraphs:
             lines.append("\n### 6. Subgraphs\n")
-            lines.append("| ID | Label | Parent | Depth | Layer | Nodes |")
-            lines.append("|----|-------|--------|-------|-------|-------|")
+            lines.append("| ID | Label | Parent | Depth | Layer | Nodes | Style | classDef |")
+            lines.append("|----|-------|--------|-------|-------|-------|-------|----------|")
             for sg in r.subgraphs:
                 lines.append(
                     f"| `{sg['id']}` | {sg['label']} | `{sg['parent']}` | "
-                    f"{sg['depth']} | {sg['resolved_layer']} | {len(sg['child_nodes'])} |"
+                    f"{sg['depth']} | {sg['resolved_layer']} | {sg.get('node_count', len(sg.get('child_nodes', [])))} | "
+                    f"`{sg.get('style', '')}` | `{sg.get('class_def', '')}` |"
                 )
 
         if r.nodes:
@@ -1557,12 +1683,13 @@ def _to_markdown(reports: list[DiagramReport]) -> str:
 
         if r.edges:
             lines.append("\n### 8. Edges\n")
-            lines.append("| # | Source→Target | Arrow | Type | Label | Stroke | Width | Dash |")
-            lines.append("|---|-------------|-------|------|-------|--------|-------|------|")
+            lines.append("| # | Source→Target | Arrow | EdgeType | LineStyle | ArrowStart | ArrowEnd | Semantic | Label | Stroke | Width | Dash |")
+            lines.append("|---|-------------|-------|----------|-----------|------------|----------|----------|-------|--------|-------|------|")
             for e in r.edges:
                 lines.append(
                     f"| {e['index']} | `{e['source']}`→`{e['target']}` | "
-                    f"`{e['arrow_type']}` | {e['semantic_type']} | "
+                    f"`{e['arrow_type']}` | {e.get('edge_type', '')} | {e.get('line_style', '')} | "
+                    f"{e.get('arrow_start', '')} | {e.get('arrow_end', '')} | {e['semantic_type']} | "
                     f"{e['label']} | `{e['stroke_color']}` | "
                     f"`{e['stroke_width']}` | `{e['stroke_dasharray']}` |"
                 )
