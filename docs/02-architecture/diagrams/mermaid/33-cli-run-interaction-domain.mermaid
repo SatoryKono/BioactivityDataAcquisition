@@ -1,37 +1,38 @@
 %% View: Domain-Focus | Parent: 33-cli-run-interaction-full.mermaid
 %% @uniform width=140 height=56 max_title_len=8 max_desc_lines=0
+%%{init: {'theme': 'neutral', 'flowchart': {'defaultRenderer': 'elk'}}}%%
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N2["config&nbsp;&nbsp;"]
-        N3["health&nbsp;&nbsp;"]
-        N4["errors&nbsp;&nbsp;"]
-        N5["DQ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N6["PRS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N8["Boot&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N9["PF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N10["LM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N11["BE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N12["Post&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N14["SB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N15["RF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N16["Obs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["config"]
+        N3["health"]
+        N4["errors"]
+        N5["DQ"]
+        N6["PRS"]
+        N8["Boot"]
+        N9["PF"]
+        N10["LM"]
+        N11["BE"]
+        N12["Post"]
+        N14["SB"]
+        N15["RF"]
+        N16["Obs"]
         N17["owner_id"]
-        N18["HB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N19["resolve&nbsp;"]
-        N20["options&nbsp;"]
+        N18["HB"]
+        N19["resolve"]
+        N20["options"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N1["Runner&nbsp;&nbsp;"]
+        N1["Runner"]
     end
 
     subgraph Interfaces["Interfaces Layer"]
         direction TB
-        N7["CLI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N13["User&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["CLI"]
+        N13["User"]
     end
 
     N13 --> N7
@@ -68,31 +69,6 @@ flowchart TB
     style Interfaces fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
 
     %% linkStyle: orchestration 0,27 | di 1-11,13-14,16-18,20,22-25 | generic 12,15,19,21,26
-    linkStyle 0 stroke:#2e7d32,stroke-width:2px
-    linkStyle 1 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
-    linkStyle 2 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
-    linkStyle 3 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
-    linkStyle 4 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
-    linkStyle 5 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
-    linkStyle 6 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
-    linkStyle 7 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
-    linkStyle 8 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
-    linkStyle 9 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
-    linkStyle 10 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
-    linkStyle 11 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
-    linkStyle 12 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 13 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
-    linkStyle 14 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
-    linkStyle 15 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 16 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
-    linkStyle 17 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
-    linkStyle 18 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
-    linkStyle 19 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 20 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
-    linkStyle 21 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 22 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
-    linkStyle 23 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
-    linkStyle 24 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
-    linkStyle 25 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
-    linkStyle 26 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 27 stroke:#2e7d32,stroke-width:2px
+    linkStyle 0,27 stroke:#2e7d32,stroke-width:2px
+    linkStyle 1,2,3,4,5,6,7,8,9,10,11,13,14,16,17,18,20,22,23,24,25 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 12,15,19,21,26 stroke:#475569,stroke-width:2px,stroke-dasharray:5

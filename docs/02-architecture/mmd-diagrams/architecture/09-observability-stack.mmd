@@ -7,56 +7,56 @@
 %% @level   System / Component
 %% @nodes   24
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE'}}}%%
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'NETWORK_SIMPLEX', 'edgeRouting': 'POLYLINE'}}}%%
 %% @uniform width=224 height=198 max_title_len=23 max_desc_lines=9
 graph TB
 %% keep-orphan: DQMP
     subgraph Ports["Domain Ports"]
-        LP["LoggerPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ bind(**kwargs)<br/>+ info(msg, **fields)<br/>+ warning(msg, **fields)<br/>+ error(msg, **fields)<br/>+ debug(msg, **fields)<br/>+ exception(msg, **fields)<br/>&nbsp;"]
-        MP["MetricsPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ observe_histogram(name, value, labels)<br/>+ increment_counter(name, labels)<br/>+ set_gauge(name, value, labels)<br/>+ close()<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        TP["TracingPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ get_tracer(name) → Tracer<br/>+ close()<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        DQMP["DQMonitorPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ add_metric(name, value)<br/>+ check_quality()<br/>+ update_baseline_from_metrics()<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        LP["LoggerPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ bind(**kwargs)<br/>+ info(msg, **fields)<br/>+ warning(msg, **fields)<br/>+ error(msg, **fields)<br/>+ debug(msg, **fields)<br/>+ exception(msg, **fields)<br/>"]
+        MP["MetricsPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ observe_histogram(name, value, labels)<br/>+ increment_counter(name, labels)<br/>+ set_gauge(name, value, labels)<br/>+ close()<br/>"]
+        TP["TracingPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ get_tracer(name) → Tracer<br/>+ close()<br/>"]
+        DQMP["DQMonitorPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ add_metric(name, value)<br/>+ check_quality()<br/>+ update_baseline_from_metrics()<br/>"]
     end
 
     subgraph AppObserver["Application Observability"]
-        PO["PipelineObserver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>_metrics: MetricsPort<br/>_logger: LoggerPort<br/>_tracer: TracingPort<br/>━━━━━━━━━━━━━━━━━<br/>+ emit_event(event)<br/>+ on_preflight()<br/>+ on_execution()<br/>+ on_postrun()"]
+        PO["PipelineObserver<br/>━━━━━━━━━━━━━━━━━<br/>_metrics: MetricsPort<br/>_logger: LoggerPort<br/>_tracer: TracingPort<br/>━━━━━━━━━━━━━━━━━<br/>+ emit_event(event)<br/>+ on_preflight()<br/>+ on_execution()<br/>+ on_postrun()"]
 
-        BMR["BatchMetricsRecorder&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>+ track_batch_size()<br/>+ track_processed_records()<br/>+ track_error()<br/>+ track_quarantined_records()<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        BMR["BatchMetricsRecorder<br/>━━━━━━━━━━━━━━━━━<br/>+ track_batch_size()<br/>+ track_processed_records()<br/>+ track_error()<br/>+ track_quarantined_records()<br/>"]
 
-        BTM["BatchTracingManager&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>+ start_execution_span()<br/>+ start_batch_span()<br/>+ start_layer_span()<br/>+ end_span()<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        BTM["BatchTracingManager<br/>━━━━━━━━━━━━━━━━━<br/>+ start_execution_span()<br/>+ start_batch_span()<br/>+ start_layer_span()<br/>+ end_span()<br/>"]
     end
 
     subgraph InfraLogging["Infrastructure: Logging"]
-        UL["UnifiedLogger&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(implements LoggerPort)<br/>━━━━━━━━━━━━━━━━━<br/>Structured JSON output<br/>Log Schema enforcement<br/>Secret filtering<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        UL["UnifiedLogger<br/>(implements LoggerPort)<br/>━━━━━━━━━━━━━━━━━<br/>Structured JSON output<br/>Log Schema enforcement<br/>Secret filtering<br/>"]
     end
 
     subgraph InfraMetrics["Infrastructure: Metrics"]
-        MC["MetricsCollector&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(implements MetricsPort)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        PM["PrometheusMetrics&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(implements MetricsPort)<br/>━━━━━━━━━━━━━━━━━<br/>Histograms, Counters,<br/>Gauges for Prometheus<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        MSA["MetricsServerAdapter&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>HTTP server for<br/>/metrics endpoint<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        MC["MetricsCollector<br/>(implements MetricsPort)<br/>"]
+        PM["PrometheusMetrics<br/>(implements MetricsPort)<br/>━━━━━━━━━━━━━━━━━<br/>Histograms, Counters,<br/>Gauges for Prometheus<br/>"]
+        MSA["MetricsServerAdapter<br/>━━━━━━━━━━━━━━━━━<br/>HTTP server for<br/>/metrics endpoint<br/>"]
     end
 
     subgraph InfraTracing["Infrastructure: Tracing"]
-        OTT["OpenTelemetryTracer&nbsp;&nbsp;&nbsp;&nbsp;<br/>(implements TracingPort)<br/>━━━━━━━━━━━━━━━━━<br/>OTLP export<br/>Span management<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        OTT["OpenTelemetryTracer<br/>(implements TracingPort)<br/>━━━━━━━━━━━━━━━━━<br/>OTLP export<br/>Span management<br/>"]
     end
 
     subgraph InfraAnomaly["Infrastructure: Anomaly Detection"]
-        AD["AnomalyDetector&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        DS["DetectorStrategy (ABC)&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        ZSD["ZScoreDetector&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        AD["AnomalyDetector<br/>"]
+        DS["DetectorStrategy (ABC)<br/>"]
+        ZSD["ZScoreDetector<br/>"]
 
         DS --> ZSD
         AD --> DS
     end
 
     subgraph AdapterMetrics["Adapter-Level Metrics"]
-        AM["AdapterMetrics&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>provider: str<br/>━━━━━━━━━━━━━━━━━<br/>+ measure_request()<br/>(context manager)<br/>Metrics:<br/>adapter_request_duration_seconds<br/>adapter_requests_total<br/>&nbsp;"]
+        AM["AdapterMetrics<br/>━━━━━━━━━━━━━━━━━<br/>provider: str<br/>━━━━━━━━━━━━━━━━━<br/>+ measure_request()<br/>(context manager)<br/>Metrics:<br/>adapter_request_duration_seconds<br/>adapter_requests_total<br/>"]
     end
 
     subgraph External["External Systems"]
-        PROM["Prometheus Server&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        GRAFANA["Grafana Dashboards&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        OTEL_COL["OpenTelemetry Collector<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        PROM["Prometheus Server<br/>"]
+        GRAFANA["Grafana Dashboards<br/>"]
+        OTEL_COL["OpenTelemetry Collector<br/>"]
     end
 
     %% Port implementations

@@ -5,34 +5,34 @@ flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N2["DQ_ERROR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["DQ_ERROR"]
         N3["POLICY_VIOLATION"]
-        N4["METRICS_ERROR&nbsp;&nbsp;&nbsp;"]
-        N5["port&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N7["INFRA_ERROR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N8["last_error&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N9["API_ERROR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N10["record_id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N11["entity_type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N12["DQ_THRESHOLD&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N13["ERROR_TYPE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N14["CRITICAL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N15["RECOVERABLE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N17["VALIDATION&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N18["BIOETL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N19["status_code&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N20["operation&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N4["METRICS_ERROR"]
+        N5["port"]
+        N7["INFRA_ERROR"]
+        N8["last_error"]
+        N9["API_ERROR"]
+        N10["record_id"]
+        N11["entity_type"]
+        N12["DQ_THRESHOLD"]
+        N13["ERROR_TYPE"]
+        N14["CRITICAL"]
+        N15["RECOVERABLE"]
+        N17["VALIDATION"]
+        N18["BIOETL"]
+        N19["status_code"]
+        N20["operation"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N1["EXT_SERVICE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N6["RUNNER_EXECUTED&nbsp;"]
+        N1["EXT_SERVICE"]
+        N6["RUNNER_EXECUTED"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N16["STORAGE_ERR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N16["STORAGE_ERR"]
     end
 
     N18 --> N14

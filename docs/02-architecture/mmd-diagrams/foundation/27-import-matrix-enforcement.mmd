@@ -8,22 +8,22 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 %% @uniform width=216 height=108 max_title_len=22 max_desc_lines=4
 flowchart TB
 %% keep-orphan: BLOCK, OK, SR
     subgraph Legend["Legend"]
         direction LR
-        OK["✅ Allowed Import&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        BLOCK["❌ Forbidden Import&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        OK["✅ Allowed Import<br/>"]
+        BLOCK["❌ Forbidden Import<br/>"]
     end
 
     subgraph Layers["BioETL Five-Layer Architecture"]
-        INT["<b>Interfaces Layer</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>CLI (Click), HealthServer<br/><i>src/bioetl/interfaces/</i><br/>&nbsp;<br/>&nbsp;"]
-        COMP["<b>Composition Layer</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>GenericPipelineFactory, RunnerFactory<br/>ServicesBuilder, PipelineRegistry<br/><i>src/bioetl/composition/</i><br/>&nbsp;"]
-        APP["<b>Application Layer</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>PipelineRunner, BatchExecutor<br/>PreflightService, PostrunService<br/>23 Transformers<br/><i>src/bioetl/application/</i>"]
-        INFRA["<b>Infrastructure Layer</b>&nbsp;&nbsp;<br/>ChemblAdapter, PubChemAdapter<br/>SilverWriter, MemoryLock<br/>UnifiedHTTPClient, PrometheusMetrics<br/><i>src/bioetl/infrastructure/</i>"]
-        DOM["<b>Domain Layer</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>24 Ports (Protocol)<br/>Entities, Aggregates, Schemas<br/>Config, Types, Exceptions<br/><i>src/bioetl/domain/</i>"]
+        INT["<b>Interfaces Layer</b><br/>CLI (Click), HealthServer<br/><i>src/bioetl/interfaces/</i><br/>"]
+        COMP["<b>Composition Layer</b><br/>GenericPipelineFactory, RunnerFactory<br/>ServicesBuilder, PipelineRegistry<br/><i>src/bioetl/composition/</i><br/>"]
+        APP["<b>Application Layer</b><br/>PipelineRunner, BatchExecutor<br/>PreflightService, PostrunService<br/>23 Transformers<br/><i>src/bioetl/application/</i>"]
+        INFRA["<b>Infrastructure Layer</b><br/>ChemblAdapter, PubChemAdapter<br/>SilverWriter, MemoryLock<br/>UnifiedHTTPClient, PrometheusMetrics<br/><i>src/bioetl/infrastructure/</i>"]
+        DOM["<b>Domain Layer</b><br/>24 Ports (Protocol)<br/>Entities, Aggregates, Schemas<br/>Config, Types, Exceptions<br/><i>src/bioetl/domain/</i>"]
     end
 
     %% Allowed imports (solid green arrows)
@@ -57,9 +57,9 @@ flowchart TB
     COMP -.-x|"❌ FORBIDDEN"| INT
 
     subgraph Enforcement["Enforcement Mechanism"]
-        IL["import-linter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Blocks PR on violation<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        AT["tests/architecture/&nbsp;&nbsp;&nbsp;<br/>pytest architecture tests<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        SR["ai-selfreview-rules.md<br/>ARCH-001 detection scripts<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        IL["import-linter<br/>Blocks PR on violation<br/>"]
+        AT["tests/architecture/<br/>pytest architecture tests<br/>"]
+        SR["ai-selfreview-rules.md<br/>ARCH-001 detection scripts<br/>"]
     end
 
     IL -.-> Layers

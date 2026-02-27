@@ -4,26 +4,26 @@ flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N3["SCHEMA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N7["HTTP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N8["ERROR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N3["SCHEMA"]
+        N7["HTTP"]
+        N8["ERROR"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N2["BATCH_FAIL&nbsp;"]
+        N2["BATCH_FAIL"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
         N1["QUARANTINE2"]
-        N4["MISSING&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N5["FORMAT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N6["DQTHRESH&nbsp;&nbsp;&nbsp;"]
-        N9["INFRA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N10["DOMAIN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N11["no&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N12["classify&nbsp;&nbsp;&nbsp;"]
+        N4["MISSING"]
+        N5["FORMAT"]
+        N6["DQTHRESH"]
+        N9["INFRA"]
+        N10["DOMAIN"]
+        N11["no"]
+        N12["classify"]
     end
 
     N8 --> N7

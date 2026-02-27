@@ -4,26 +4,26 @@ flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N4["BatchID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N9["RunID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N12["EntityID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N4["BatchID"]
+        N9["RunID"]
+        N12["EntityID"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N1["Batch&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N2["PipelineRun&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N5["BatchCreated&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N6["BatchSealed&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N7["BatchWritten&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N1["Batch"]
+        N2["PipelineRun"]
+        N5["BatchCreated"]
+        N6["BatchSealed"]
+        N7["BatchWritten"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N3["QuarantineEntry&nbsp;&nbsp;"]
+        N3["QuarantineEntry"]
         N8["RecordQuarantined"]
-        N10["RunStarted&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N11["RunCompleted&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["RunStarted"]
+        N11["RunCompleted"]
     end
 
     N1 --> N5

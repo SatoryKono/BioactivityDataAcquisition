@@ -1,3 +1,4 @@
+%% View: Full | Parent: (root)
 %% Parent source: docs/02-architecture/mmd-diagrams/foundation/02-medallion.mmd
 %% Full reference diagram retained after decomposition.
 %% Title: Medallion Architecture Layers
@@ -16,33 +17,33 @@
 flowchart LR
     subgraph Bronze["Bronze Layer"]
         direction TB
-        B1["Raw Data&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>JSONL + zstd"]
-        B2["Append-Only writes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
-        B3["Retention: 90 days&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
-        B4["content_hash tracking&nbsp;&nbsp;<br/>&nbsp;"]
+        B1["Raw Data<br/>JSONL + zstd"]
+        B2["Append-Only writes<br/>"]
+        B3["Retention: 90 days<br/>"]
+        B4["content_hash tracking<br/>"]
     end
 
     subgraph Silver["Silver Layer"]
         direction TB
-        S1["Normalized Data&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Delta Lake (ACID)"]
-        S2["Merge by content_hash&nbsp;&nbsp;<br/>&nbsp;"]
-        S3["Schema enforcement&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
-        S4["Deduplication&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        S1["Normalized Data<br/>Delta Lake (ACID)"]
+        S2["Merge by content_hash<br/>"]
+        S3["Schema enforcement<br/>"]
+        S4["Deduplication<br/>"]
     end
 
     subgraph Gold["Gold Layer"]
         direction TB
-        G1["Business-Ready Data&nbsp;&nbsp;&nbsp;&nbsp;<br/>Delta Lake"]
-        G2["Strict validation&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Pandera schemas)"]
-        G3["SCD Type 2 /&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Overwrite modes"]
-        G4["Flattened for analytics<br/>&nbsp;"]
+        G1["Business-Ready Data<br/>Delta Lake"]
+        G2["Strict validation<br/>(Pandera schemas)"]
+        G3["SCD Type 2 /<br/>Overwrite modes"]
+        G4["Flattened for analytics<br/>"]
     end
 
     subgraph Quarantine["Quarantine"]
         direction TB
-        Q1["Failed records&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(DQ errors)"]
-        Q2["Error metadata +&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>stack trace"]
-        Q3["Replay support&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        Q1["Failed records<br/>(DQ errors)"]
+        Q2["Error metadata +<br/>stack trace"]
+        Q3["Replay support<br/>"]
     end
 
     Bronze -->|K01| Silver

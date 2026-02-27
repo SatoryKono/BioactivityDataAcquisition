@@ -8,46 +8,46 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 %% @uniform width=336 height=162 max_title_len=37 max_desc_lines=7
 flowchart LR
     subgraph ChEMBL["ChEMBL (Seed)"]
-        CA["ChemblAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>/document endpoint<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        CT["PublicationTransformer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        CS[("Silver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>chembl/publication"<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;)]
+        CA["ChemblAdapter<br/>/document endpoint<br/>"]
+        CT["PublicationTransformer<br/>"]
+        CS[("Silver<br/>chembl/publication"<br/>)]
     end
 
     subgraph CrossRef["CrossRef (Enricher)"]
-        CRA["CrossRefAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>/works?filter=doi:...<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        CRT["CrossRefPublicationTransformer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        CRS[("Silver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>crossref/publication"<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;)]
+        CRA["CrossRefAdapter<br/>/works?filter=doi:...<br/>"]
+        CRT["CrossRefPublicationTransformer<br/>"]
+        CRS[("Silver<br/>crossref/publication"<br/>)]
     end
 
     subgraph PubMed["PubMed (Enricher)"]
-        PMA["PubMedAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>efetch(PMIDs)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        PMT["PubMedPublicationTransformer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        PMS[("Silver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>pubmed/publication"<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;)]
+        PMA["PubMedAdapter<br/>efetch(PMIDs)<br/>"]
+        PMT["PubMedPublicationTransformer<br/>"]
+        PMS[("Silver<br/>pubmed/publication"<br/>)]
     end
 
     subgraph OpenAlex["OpenAlex (Enricher)"]
-        OAA["OpenAlexAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>/works?filter=doi:...<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        OAT["OpenAlexPublicationTransformer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        OAS[("Silver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>openalex/publication"<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;)]
+        OAA["OpenAlexAdapter<br/>/works?filter=doi:...<br/>"]
+        OAT["OpenAlexPublicationTransformer<br/>"]
+        OAS[("Silver<br/>openalex/publication"<br/>)]
     end
 
     subgraph S2["Semantic Scholar (Enricher)"]
-        SSA["SemanticScholarAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>/paper/batch<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        SST["SemanticScholarPublicationTransformer<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        S2S[("Silver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>semanticscholar/publication"<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;)]
+        SSA["SemanticScholarAdapter<br/>/paper/batch<br/>"]
+        SST["SemanticScholarPublicationTransformer<br/>"]
+        S2S[("Silver<br/>semanticscholar/publication"<br/>)]
     end
 
     subgraph Merge["Merge Phase"]
-        MS["MergeService&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>LEFT OUTER JOIN<br/>conflict: coalesce<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        FIELDS["Field Groups:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• ID_AND_STATUS<br/>• BIBLIOGRAPHY<br/>• AUTHOR<br/>• TERMS<br/>• CITATIONS<br/>• DATES<br/>• PUB_TYPES"]
+        MS["MergeService<br/>LEFT OUTER JOIN<br/>conflict: coalesce<br/>"]
+        FIELDS["Field Groups:<br/>• ID_AND_STATUS<br/>• BIBLIOGRAPHY<br/>• AUTHOR<br/>• TERMS<br/>• CITATIONS<br/>• DATES<br/>• PUB_TYPES"]
     end
 
     subgraph Gold["Gold Output"]
-        GS["CompositePublicationGoldSchema&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Pandera strict validation)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        GS["CompositePublicationGoldSchema<br/>(Pandera strict validation)<br/>"]
     end
 
     %% Flows
@@ -67,6 +67,6 @@ flowchart LR
     FIELDS --> GS --> GT
 
     %% Styling
-    style ChEMBL fill:#FFA500,stroke:#cc8400,color:#000
-    style Merge fill:#C0C0C0,stroke:#808080,color:#000
-    style Gold fill:#FFD700,stroke:#ccac00,color:#000
+    style ChEMBL fill:#fff3e0,stroke:#e65100,color:#212121
+    style Merge fill:#eceff1,stroke:#607d8b,color:#212121
+    style Gold fill:#fff8e1,stroke:#f9a825,color:#212121

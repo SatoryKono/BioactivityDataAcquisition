@@ -4,29 +4,29 @@ flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N7["LoadingConfig&nbsp;&nbsp;"]
-        N11["ValidateLock&nbsp;&nbsp;&nbsp;"]
-        N14["LogError&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["LoadingConfig"]
+        N11["ValidateLock"]
+        N14["LogError"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N1["*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N3["FetchBatch&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N5["FAILED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N6["INIT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N8["HealthChecks&nbsp;&nbsp;&nbsp;"]
+        N1["*"]
+        N3["FetchBatch"]
+        N5["FAILED"]
+        N6["INIT"]
+        N8["HealthChecks"]
         N9["NormalizeValues"]
-        N10["PanderaCheck&nbsp;&nbsp;&nbsp;"]
-        N13["COMPLETED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N15["StopNewWork&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["PanderaCheck"]
+        N13["COMPLETED"]
+        N15["StopNewWork"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N2["RequestLock&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N4["WriteBronze&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N12["DQMetrics&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["RequestLock"]
+        N4["WriteBronze"]
+        N12["DQMetrics"]
     end
 
     N1 --> N6

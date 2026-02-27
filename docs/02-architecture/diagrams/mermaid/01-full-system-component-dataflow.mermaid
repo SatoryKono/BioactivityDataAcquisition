@@ -5,26 +5,26 @@ flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N7["DataSourcePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["DataSourcePort"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N1["PipelineRunner&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N2["BatchTransformer&nbsp;&nbsp;&nbsp;"]
-        N3["PipelineExecutor&nbsp;&nbsp;&nbsp;"]
-        N4["RecordProcessor&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N1["PipelineRunner"]
+        N2["BatchTransformer"]
+        N3["PipelineExecutor"]
+        N4["RecordProcessor"]
         N5["ActivityTransformer"]
         N6["MoleculeTransformer"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N8["BronzeWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N9["SilverWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N10["GoldWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N11["Bronze&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N12["Silver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["BronzeWriter"]
+        N9["SilverWriter"]
+        N10["GoldWriter"]
+        N11["Bronze"]
+        N12["Silver"]
     end
 
     N1 --> N3

@@ -8,19 +8,20 @@
 %% @uniform class width=248 height=72 max_title_len=26 max_desc_lines=2
 
 classDiagram
+    direction TB
     class IdentityService {
         +compute_entity_id(provider, entity_type, source_id, record) EntityID
         +compute_content_hash(provider, record) ContentHash
     }
 
     class NormalizationService {
-        +normalize_text(text) str&nbsp;
+        +normalize_text(text) str
         +normalize_values(values) dict
     }
 
     class DataNormalizationService {
         +normalize_field(value, field_type) Any
-        &nbsp;
+        
     }
 
     class AuthorNormalizationService {
@@ -30,17 +31,17 @@ classDiagram
 
     class ActivityAggregator {
         +aggregate(activities) AggregatedActivity
-        &nbsp;
+        
     }
 
     class UnitConverter {
         +convert(value, from_unit, to_unit) float
-        +normalize_unit(unit) str&nbsp;
+        +normalize_unit(unit) str
     }
 
     class ValueValidator {
         +validate(value, constraints) ValidationResult
-        &nbsp;
+        
     }
 
     class TextSimilarity {
@@ -50,11 +51,11 @@ classDiagram
 
     class DQMetricsCalculator {
         +calculate(records, config) DQMetrics
-        &nbsp;
+        
     }
 
     class DQSerializer {
-        +serialize(metrics) dict&nbsp;&nbsp;
+        +serialize(metrics) dict
         +deserialize(data) DQMetrics
     }
 

@@ -5,33 +5,33 @@ flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N4["StoragePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N5["LockPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N17["CheckpointPort&nbsp;&nbsp;&nbsp;"]
-        N18["QuarantinePort&nbsp;&nbsp;&nbsp;"]
-        N19["MetricsPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N20["TracingPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N4["StoragePort"]
+        N5["LockPort"]
+        N17["CheckpointPort"]
+        N18["QuarantinePort"]
+        N19["MetricsPort"]
+        N20["TracingPort"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N2["ChemblAdapter&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N3["LockManager&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N6["PubchemAdapter&nbsp;&nbsp;&nbsp;"]
-        N7["UniprotAdapter&nbsp;&nbsp;&nbsp;"]
-        N8["PubmedAdapter&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N9["CrossRefAdapter&nbsp;&nbsp;"]
-        N10["OpenAlexAdapter&nbsp;&nbsp;"]
-        N11["S2Adapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N12["BronzeWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N13["SilverWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N14["GoldWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["ChemblAdapter"]
+        N3["LockManager"]
+        N6["PubchemAdapter"]
+        N7["UniprotAdapter"]
+        N8["PubmedAdapter"]
+        N9["CrossRefAdapter"]
+        N10["OpenAlexAdapter"]
+        N11["S2Adapter"]
+        N12["BronzeWriter"]
+        N13["SilverWriter"]
+        N14["GoldWriter"]
         N16["CheckpointManager"]
     end
 
     subgraph Composition["Composition Layer"]
         direction TB
-        N15["Registry&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N15["Registry"]
     end
 
     subgraph Interfaces["Interfaces Layer"]

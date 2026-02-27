@@ -6,32 +6,32 @@ flowchart TB
     subgraph Application["Application Layer"]
         direction TB
         N1["Executor"]
-        N3["Runner&nbsp;&nbsp;"]
-        N4["Trans&nbsp;&nbsp;&nbsp;"]
-        N8["Boot&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N11["Sources&nbsp;"]
+        N3["Runner"]
+        N4["Trans"]
+        N8["Boot"]
+        N11["Sources"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
         N10["Adapters"]
-        N5["Bronze&nbsp;&nbsp;"]
-        N6["Silver&nbsp;&nbsp;"]
-        N7["Gold&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N13["A1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N14["A2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N15["A3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N2["Storage&nbsp;"]
+        N5["Bronze"]
+        N6["Silver"]
+        N7["Gold"]
+        N13["A1"]
+        N14["A2"]
+        N15["A3"]
+        N2["Storage"]
     end
 
     subgraph Composition["Composition Layer"]
         direction TB
-        N9["Factory&nbsp;"]
+        N9["Factory"]
     end
 
     subgraph Interfaces["Interfaces Layer"]
         direction TB
-        N12["CLI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N12["CLI"]
     end
 
     N11 --> N10

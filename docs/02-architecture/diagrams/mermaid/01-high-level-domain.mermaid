@@ -5,42 +5,42 @@ flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N5["Boot&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N6["Trans&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N8["Sources&nbsp;&nbsp;&nbsp;"]
+        N5["Boot"]
+        N6["Trans"]
+        N8["Sources"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N1["Runner&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N2["Executor&nbsp;&nbsp;"]
+        N1["Runner"]
+        N2["Executor"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N7["Adapters&nbsp;&nbsp;"]
-        N10["Bronze&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N11["Silver&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N12["Gold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N13["A1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N14["A2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N15["A3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N16["A4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N17["A5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N18["A6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N19["A7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N3["Storage&nbsp;&nbsp;&nbsp;"]
+        N7["Adapters"]
+        N10["Bronze"]
+        N11["Silver"]
+        N12["Gold"]
+        N13["A1"]
+        N14["A2"]
+        N15["A3"]
+        N16["A4"]
+        N17["A5"]
+        N18["A6"]
+        N19["A7"]
+        N3["Storage"]
         N20["Quarantine"]
     end
 
     subgraph Composition["Composition Layer"]
         direction TB
-        N4["Factory&nbsp;&nbsp;&nbsp;"]
+        N4["Factory"]
     end
 
     subgraph Interfaces["Interfaces Layer"]
         direction TB
-        N9["CLI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["CLI"]
     end
 
     N8 --> N7

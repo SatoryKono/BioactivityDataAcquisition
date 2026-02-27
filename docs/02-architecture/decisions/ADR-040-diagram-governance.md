@@ -160,9 +160,18 @@ View-файлы с ≥3 типами связей и >5 соединениями
 | SIZE-002 | Node count > 20 → WARN |
 | META-001 | Отсутствие `@version`/`@date`/`@type`/`@level` в `.mmd` → WARN |
 | META-002 | Отсутствие `%% View:` в `.mermaid` view-файле → WARN |
-| COLOUR-001 | Использование неканонической палитры → ERROR |
+| COLOUR-001 | Использование deprecated pre-ADR-040 палитры в `style`/`classDef` → ERROR |
 | COLOUR-002 | Emoji в subgraph labels → ERROR |
 | GRAPH-001 | Orphan nodes (defined but not in any edge) в `flowchart`/`sequenceDiagram` → WARN |
+
+Примечание по реализации `SIZE-*`:
+- `*-full.mermaid` reference views исключены из `SIZE-001`/`SIZE-002`.
+- `00-legend*` исключены из `SIZE-001`/`SIZE-002`.
+
+Примечание по size-normalization (`scripts/uniform_diagram_sizes.py`):
+- `@uniform-group` задаёт групповую нормализацию высоты.
+- `@uniform-width global` (по умолчанию) использует общую ширину для всех групп.
+- `@uniform-width group` разрешает width per group для снижения `&nbsp;`-padding в перегруженных class-diagram family.
 
 Pre-commit hooks: `lint-diagrams`, `prune-orphan-diagram-nodes`.
 
@@ -200,7 +209,7 @@ ELK (Eclipse Layout Kernel) SHOULD использоваться для `flowchar
 **Синтаксис (вставлять перед объявлением `graph`/`flowchart`):**
 
 ```
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE'}}}%%
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
 ```
 
 **Direction selection:**
@@ -219,6 +228,48 @@ ELK (Eclipse Layout Kernel) SHOULD использоваться для `flowchar
 
 **Инструмент:** `src/tools/apply_elk_layout.py --dry-run` для аудита, без `--dry-run` для применения.
 
+### D9: Cross-Diagram Link Harmonization
+
+Все диаграммы проекта SHOULD использовать единую семантическую палитру для связей.
+
+**Каноническая палитра (5 семантических типов + baseline):**
+
+| Семантика | Цвет | Толщина | Пунктир | Flowchart | Sequence | Class | State | ER |
+|-----------|-------|---------|---------|-----------|----------|-------|-------|----|
+| Data flow | `#1E293B` | 2px | — | `linkStyle` | `->>` sync | `-->` | — | `\|\|--o{` solid |
+| Orchestration | `#2e7d32` | 2px | — | `linkStyle` | `->> [ORCH]` | `-->` delegates | `-->` transition | — |
+| DI/implements | `#6a1b9a` | 1.5px | `5` | `linkStyle` | — | `<\|--` / `..>` | — | `\|o..o\|` dashed |
+| Observability | `#94A3B8` | 1px | — | `linkStyle` | `-->>` return | `..>` observes | — | — |
+| Error/quarant | `#c62828` | 2px | `4 3` | `linkStyle` | `-->> [ERR]` | — | `-->` error | — |
+| Baseline | `#475569` | 2px | — | default | default | default | — | — |
+
+**Реализация по уровням:**
+
+| Уровень | Механизм | Обязательность | Scope |
+|---------|----------|----------------|-------|
+| **L1** — `%%{init}` | `themeVariables.lineColor` per type | MUST для новых диаграмм | Все `.mmd` |
+| **L2** — CSS | `theme/custom.css` D9 секция | Автоматически при SVG render | Все SVG |
+| **L3** — Метки | `[DATA]`, `[DI]`, `[ORCH]`, `[OBS]`, `[ERR]` prefix | SHOULD для >10 рёбер | Исходники |
+| **L4** — SVG post-proc | `harmonize_link_styles.py` | MAY для публикуемых | Rendered SVG |
+
+**Per-type %%{init} presets:**
+
+```
+%% sequenceDiagram:
+%%{init: {'theme': 'base', 'themeVariables': {'signalColor': '#475569', 'actorLineColor': '#475569'}}}%%
+
+%% classDiagram:
+%%{init: {'theme': 'base', 'themeVariables': {'lineColor': '#475569'}}}%%
+
+%% stateDiagram:
+%%{init: {'theme': 'base', 'themeVariables': {'lineColor': '#2e7d32'}}}%%
+
+%% erDiagram:
+%%{init: {'theme': 'base', 'themeVariables': {'lineColor': '#1E293B'}}}%%
+```
+
+**Инструмент:** `src/tools/harmonize_link_styles.py --dry-run` для аудита rendered SVG.
+
 ---
 
 ## Implementation
@@ -232,6 +283,8 @@ ELK (Eclipse Layout Kernel) SHOULD использоваться для `flowchar
 | linkStyle дифференциация | 16 flowchart файлов | 5 типов связей |
 | Создание `_template.mmd` | `mmd-diagrams/` | Единый шаблон для новых диаграмм |
 | `@nodes` в architecture/ | 29 файлов | Уже присутствовали |
+| D9 Link Harmonization | CSS + tool + template | `lineColor` #475569, CSS D9 секция, `harmonize_link_styles.py` |
+| ELK `edgeRouting: ORTHOGONAL` | 14 `.mmd` + config | Ортогональные рёбра во всех ELK-диаграммах |
 
 ---
 

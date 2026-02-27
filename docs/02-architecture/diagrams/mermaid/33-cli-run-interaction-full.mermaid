@@ -1,3 +1,4 @@
+%% View: Full | Parent: (root)
 %% Parent source: docs/02-architecture/mmd-diagrams/foundation/33-cli-run-interaction.mmd
 %% Full reference diagram retained after decomposition.
 %% Title: CLI Run Command → PipelineRunner Full Interaction
@@ -16,25 +17,25 @@ sequenceDiagram
     autonumber
 
     box Interfaces Layer
-    participant User as User&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    participant CLI as CLI (Click)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>interfaces/cli/
+    participant User as User
+    participant CLI as CLI (Click)<br/>interfaces/cli/
     end
 
     box Composition Layer
-    participant Boot as bootstrap_pipeline()&nbsp;<br/>composition/bootstrap/
-    participant RF as RunnerFactory&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>composition/factories/
-    participant SB as ServicesBuilder&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>composition/factories/
+    participant Boot as bootstrap_pipeline()<br/>composition/bootstrap/
+    participant RF as RunnerFactory<br/>composition/factories/
+    participant SB as ServicesBuilder<br/>composition/factories/
     end
 
     box Application Layer
     participant PRS as PipelineRunnerService<br/>application/services/
-    participant Runner as PipelineRunner&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>application/core/
-    participant PF as PreflightService&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>application/core/
-    participant LM as LockManager&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>application/core/
-    participant HB as HeartbeatTask&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>application/core/
-    participant BE as BatchExecutor&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>application/core/
-    participant Post as PostrunService&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>application/core/
-    participant Obs as PipelineObserver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>application/observability/
+    participant Runner as PipelineRunner<br/>application/core/
+    participant PF as PreflightService<br/>application/core/
+    participant LM as LockManager<br/>application/core/
+    participant HB as HeartbeatTask<br/>application/core/
+    participant BE as BatchExecutor<br/>application/core/
+    participant Post as PostrunService<br/>application/core/
+    participant Obs as PipelineObserver<br/>application/observability/
     end
 
     User->>CLI: bioetl run chembl_activity<br/>--run-type incremental

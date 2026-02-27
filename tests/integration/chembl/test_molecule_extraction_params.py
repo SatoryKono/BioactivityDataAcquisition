@@ -20,6 +20,17 @@ from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 
 # VCR cassette directory for ChEMBL extraction params tests
 CASSETTE_DIR = Path(__file__).parent.parent.parent / "fixtures" / "vcr" / "chembl"
+FILTERED_CASSETTE_NAMES = (
+    "TestMoleculeExtractionParams.test_molecule_filtered_api_request",
+    "TestMoleculeExtractionParams.test_molecule_filtered_api_request.yaml",
+    "chembl_molecule_filtered.yaml",
+)
+
+
+def _has_any_cassette(*cassette_names: str) -> bool:
+    return any(
+        (CASSETTE_DIR / cassette_name).exists() for cassette_name in cassette_names
+    )
 
 
 @pytest.fixture(scope="module")
@@ -168,9 +179,9 @@ class TestMoleculeExtractionParams:
         molecule_input_filter_field = "molecule_id"
         assert molecule_input_filter_field not in extraction_params.params
 
-    @pytest.mark.vcr("chembl_molecule_filtered.yaml")
+    @pytest.mark.vcr
     @pytest.mark.skipif(
-        not (CASSETTE_DIR / "chembl_molecule_filtered.yaml").exists(),
+        not _has_any_cassette(*FILTERED_CASSETTE_NAMES),
         reason="VCR cassette not yet recorded. "
         "Record with: VCR_RECORD_MODE=new_episodes pytest -k test_molecule_filtered_api_request",
     )

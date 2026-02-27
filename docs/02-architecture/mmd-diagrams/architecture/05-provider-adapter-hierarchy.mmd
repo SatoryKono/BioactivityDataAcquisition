@@ -7,31 +7,31 @@
 %% @level   System / Component
 %% @nodes   27
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE'}}}%%
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'NETWORK_SIMPLEX', 'edgeRouting': 'POLYLINE'}}}%%
 %% @uniform width=304 height=180 max_title_len=33 max_desc_lines=8
 graph TB
 %% keep-orphan: DFM, HCP, UIDM
     subgraph Ports["Domain Ports"]
-        DSP["DataSourcePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Protocol)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        HCP["HealthCheckPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Protocol)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        DSP["DataSourcePort<br/>(Protocol)<br/>"]
+        HCP["HealthCheckPort<br/>(Protocol)<br/>"]
     end
 
     DSP -->|extends| FDSP
 
     subgraph Mixins["Mixins"]
-        HCM["HealthCheckMixin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        HCPM["HealthCheckProviderMixin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        NSMF["NotSupportedMultiFilterMixin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        DFM["DelegatingFallbackMixin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        FSM["FilterableStubMixin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        PFM["PaginatedFetcherMixin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        HCM["HealthCheckMixin<br/>"]
+        HCPM["HealthCheckProviderMixin<br/>"]
+        NSMF["NotSupportedMultiFilterMixin<br/>"]
+        DFM["DelegatingFallbackMixin<br/>"]
+        FSM["FilterableStubMixin<br/>"]
+        PFM["PaginatedFetcherMixin<br/>"]
     end
 
     HCM --> HCPM
 
     subgraph Base["Base Adapters"]
-        BHA["BaseHttpAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>http_client: UnifiedHTTPClient<br/>logger: LoggerPort<br/>metrics: MetricsPort<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ health_check()<br/>+ aclose()"]
-        BSA["BaseSyncAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>logger: LoggerPort<br/>rate_limiter: TokenBucket<br/>circuit_breaker: CircuitBreaker<br/>thread_pool: ThreadPoolExecutor<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ health_check()"]
+        BHA["BaseHttpAdapter<br/>━━━━━━━━━━━━━━━━━<br/>http_client: UnifiedHTTPClient<br/>logger: LoggerPort<br/>metrics: MetricsPort<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ health_check()<br/>+ aclose()"]
+        BSA["BaseSyncAdapter<br/>━━━━━━━━━━━━━━━━━<br/>logger: LoggerPort<br/>rate_limiter: TokenBucket<br/>circuit_breaker: CircuitBreaker<br/>thread_pool: ThreadPoolExecutor<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ health_check()"]
     end
 
     HCPM --> BHA
@@ -40,9 +40,9 @@ graph TB
     DSP -.->|implements| BSA
 
     subgraph ChEMBL["ChEMBL"]
-        CHM["ChemblHealthMixin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        CMM["ChemblMetadataMixin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        CA["ChemblAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_multi_filtered()<br/>+ fetch_filtered_with_fallback()<br/>+ fetch_as_models()<br/>&nbsp;<br/>&nbsp;"]
+        CHM["ChemblHealthMixin<br/>"]
+        CMM["ChemblMetadataMixin<br/>"]
+        CA["ChemblAdapter<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_multi_filtered()<br/>+ fetch_filtered_with_fallback()<br/>+ fetch_as_models()<br/>"]
     end
 
     BHA --> CA
@@ -50,10 +50,10 @@ graph TB
     CMM --> CA
 
     subgraph PubMed["PubMed"]
-        PSM["PubMedSearchMixin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        PFetchM["PubMedFetchMixin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        PHM["PubMedHealthMixin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        PA["PubMedAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>email: str<br/>api_key: str | None<br/>batch_size: int<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()"]
+        PSM["PubMedSearchMixin<br/>"]
+        PFetchM["PubMedFetchMixin<br/>"]
+        PHM["PubMedHealthMixin<br/>"]
+        PA["PubMedAdapter<br/>━━━━━━━━━━━━━━━━━<br/>email: str<br/>api_key: str | None<br/>batch_size: int<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()"]
     end
 
     BHA --> PA
@@ -63,33 +63,33 @@ graph TB
     PHM --> PA
 
     subgraph UniProt["UniProt"]
-        UA["UniProtAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>api_key: str | None<br/>base_url: str<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_multi_filtered()<br/>&nbsp;"]
-        UIDM["UniProtIDMappingClient&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        UA["UniProtAdapter<br/>━━━━━━━━━━━━━━━━━<br/>api_key: str | None<br/>base_url: str<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_multi_filtered()<br/>"]
+        UIDM["UniProtIDMappingClient<br/>"]
     end
 
     BHA --> UA
     PFM --> UA
 
     subgraph CrossRef["CrossRef"]
-        CRA["CrossRefAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>mailto: str<br/>batch_size: int<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()<br/>&nbsp;"]
+        CRA["CrossRefAdapter<br/>━━━━━━━━━━━━━━━━━<br/>mailto: str<br/>batch_size: int<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()<br/>"]
     end
 
     BHA --> CRA
 
     subgraph OpenAlex["OpenAlex"]
-        OAA["OpenAlexAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>mailto: str<br/>batch_size: int<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()<br/>&nbsp;"]
+        OAA["OpenAlexAdapter<br/>━━━━━━━━━━━━━━━━━<br/>mailto: str<br/>batch_size: int<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()<br/>"]
     end
 
     BHA --> OAA
 
     subgraph SemanticScholar["Semantic Scholar"]
-        SSA["SemanticScholarAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>api_key: str<br/>batch_size: int<br/>fields: str<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()"]
+        SSA["SemanticScholarAdapter<br/>━━━━━━━━━━━━━━━━━<br/>api_key: str<br/>batch_size: int<br/>fields: str<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()"]
     end
 
     BHA --> SSA
 
     subgraph PubChem["PubChem"]
-        PCA["PubChemAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>(sync via ThreadPoolExecutor)<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_as_models()<br/>&nbsp;<br/>&nbsp;"]
+        PCA["PubChemAdapter<br/>━━━━━━━━━━━━━━━━━<br/>(sync via ThreadPoolExecutor)<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_as_models()<br/>"]
     end
 
     BSA --> PCA
