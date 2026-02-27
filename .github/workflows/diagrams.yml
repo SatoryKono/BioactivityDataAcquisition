@@ -1,0 +1,35 @@
+name: diagram-validation
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**/*.mmd'
+      - 'docs/**/*.mermaid'
+      - 'docs/**/*.png'
+      - 'docs/**/*.svg'
+      - 'scripts/validate_diagrams.sh'
+      - 'scripts/diagram_audit.py'
+      - '.pre-commit-config.yaml'
+      - '.github/workflows/diagrams.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**/*.mmd'
+      - 'docs/**/*.mermaid'
+      - 'docs/**/*.png'
+      - 'docs/**/*.svg'
+      - 'scripts/validate_diagrams.sh'
+      - 'scripts/diagram_audit.py'
+      - '.pre-commit-config.yaml'
+      - '.github/workflows/diagrams.yml'
+
+jobs:
+  validate-diagrams:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate diagram policy (fail-fast)
+        run: |
+          bash scripts/validate_diagrams.sh --docs docs
