@@ -279,8 +279,6 @@ render_one() {
       fi
       # Inject CSS overrides for edge label readability
       python "$REPO_ROOT/scripts/inject_svg_styles.py" --fix -f "$svg_out" >/dev/null 2>&1 || true
-      # Harmonize link colours across diagram types (ADR-040 D9)
-      python "$REPO_ROOT/src/tools/harmonize_link_styles.py" --dir "$(dirname "$svg_out")" >/dev/null 2>&1 || true
       echo -e "  ${GREEN}✓${NC} SVG  [$idx/$TOTAL]  $base"
     else
       echo -e "  ${RED}✗${NC} SVG  [$idx/$TOTAL]  $base"
@@ -292,46 +290,34 @@ render_one() {
   if [[ $FORMAT_PNG -eq 1 ]]; then
     mkdir -p "$png_dir"
     local png_out="$png_dir/${base}.png"
-    local png_tmp="${png_out%.png}.tmp.${BASHPID}.png"
-    local png_ok=0
-
-    rm -f "$png_tmp"
 
     if [[ $FORMAT_SVG -eq 1 && $HAS_RSVG -eq 1 ]]; then
       # SVG → PNG via rsvg-convert (adaptive: use SVG intrinsic size)
       if [[ $FIT -eq 0 ]]; then
-        if rsvg-convert -w "$WIDTH" -h "$HEIGHT" "$svg_dir/${base}.svg" -o "$png_tmp" 2>/dev/null; then
-          png_ok=1
-        fi
+        rsvg-convert -w "$WIDTH" -h "$HEIGHT" "$svg_dir/${base}.svg" -o "$png_out" 2>/dev/null
       else
-        if rsvg-convert -d 300 -p 300 "$svg_dir/${base}.svg" -o "$png_tmp" 2>/dev/null; then
-          png_ok=1
-        fi
+        rsvg-convert -d 300 -p 300 "$svg_dir/${base}.svg" -o "$png_out" 2>/dev/null
       fi
     elif [[ $FORMAT_SVG -eq 1 && $HAS_RSVG -eq 2 ]]; then
       # SVG → PNG via inkscape
       if [[ $FIT -eq 0 ]]; then
         inkscape "$svg_dir/${base}.svg" --export-type=png --export-width="$WIDTH" \
-          --export-height="$HEIGHT" --export-filename="$png_tmp" 2>/dev/null && png_ok=1
+          --export-height="$HEIGHT" --export-filename="$png_out" 2>/dev/null
       else
         inkscape "$svg_dir/${base}.svg" --export-type=png --export-dpi=300 \
-          --export-filename="$png_tmp" 2>/dev/null && png_ok=1
+          --export-filename="$png_out" 2>/dev/null
       fi
     else
       # Direct mmdc → PNG (adaptive: use -s scale only)
-      if mmdc -i "$src" -o "$png_tmp" "${MMDC_ARGS[@]}" \
-        "${size_args[@]}" -s "$SCALE" -b "$BG" 2>/dev/null; then
-        png_ok=1
-      fi
+      mmdc -i "$src" -o "$png_out" "${MMDC_ARGS[@]}" \
+        "${size_args[@]}" -s "$SCALE" -b "$BG" 2>/dev/null
     fi
 
-    if [[ "$png_ok" -eq 1 && -s "$png_tmp" ]]; then
-      mv -f "$png_tmp" "$png_out"
+    if [[ -f "$png_out" ]]; then
       local size
       size=$(du -h "$png_out" | cut -f1)
       echo -e "  ${GREEN}✓${NC} PNG  [$idx/$TOTAL]  $base  (${size})"
     else
-      rm -f "$png_tmp"
       echo -e "  ${RED}✗${NC} PNG  [$idx/$TOTAL]  $base"
       return 1
     fi

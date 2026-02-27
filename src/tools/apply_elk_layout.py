@@ -1,20 +1,15 @@
-"""Apply ELK layout engine to Mermaid flowchart diagrams.
+"""Apply ELK layout engine to Mermaid flowchart diagrams with high node count.
 
 Inserts  %%{init: {'layout': 'elk'}}%%  before the graph/flowchart declaration
 for .mmd files where:
-  - @nodes metadata present (any count)
+  - @nodes > NODE_THRESHOLD (default 20)
   - diagram type is flowchart or graph (not classDiagram / sequenceDiagram / etc.)
   - ELK init directive is not already present
-
-Adaptive strategy by node density:
-  - default:     ELK + POLYLINE routing + NETWORK_SIMPLEX placement
-  - optional:    ELK + ORTHOGONAL for very dense diagrams via CLI flag
 
 Optionally overrides layout direction (TB → LR) for pipeline-style diagrams.
 
 Usage:
     python src/tools/apply_elk_layout.py [--dry-run] [--threshold N] [--no-direction]
-    python src/tools/apply_elk_layout.py --dense-orthogonal-from 60
 """
 
 from __future__ import annotations
@@ -33,26 +28,9 @@ ARCH_DIR = REPO_ROOT / "docs/02-architecture/mmd-diagrams/architecture"
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 
-NODE_THRESHOLD = 15
+NODE_THRESHOLD = 20
 
-# ── ELK strategy ──────────────────────────────────────────────────────────────
-# Default policy:
-#   - use POLYLINE for readability across architecture flowcharts
-# Optional policy:
-#   - switch to ORTHOGONAL only for very dense diagrams if explicitly enabled
-
-DEFAULT_DENSE_ORTHOGONAL_FROM = 60  # recommended when opt-in is used
-
-ELK_POLYLINE = "%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'NETWORK_SIMPLEX', 'edgeRouting': 'POLYLINE'}}}%%"
-ELK_ORTHOGONAL = "%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'NETWORK_SIMPLEX', 'edgeRouting': 'ORTHOGONAL'}}}%%"
-
-
-def get_elk_init(node_count: int, dense_orthogonal_from: int | None) -> tuple[str, str]:
-    """Select ELK init directive based on optional dense threshold."""
-    if dense_orthogonal_from is not None and node_count > dense_orthogonal_from:
-        return ELK_ORTHOGONAL, "ORTHOGONAL"
-    return ELK_POLYLINE, "POLYLINE"
-
+ELK_INIT = "%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%"
 
 # Diagrams whose content is a linear pipeline chain — better rendered LR.
 # Pattern matched against stem (filename without extension).
@@ -119,7 +97,6 @@ def should_use_lr(stem: str) -> bool:
 def apply_elk(
     fpath: Path,
     threshold: int,
-    dense_orthogonal_from: int | None,
     auto_direction: bool,
     dry_run: bool,
 ) -> tuple[bool, str]:
@@ -147,9 +124,8 @@ def apply_elk(
     changes: list[str] = []
 
     # ── Insert ELK init directive before graph declaration ────────────────────
-    elk_init, routing = get_elk_init(nodes, dense_orthogonal_from)
-    new_lines = lines[:graph_idx] + [elk_init] + lines[graph_idx:]
-    changes.append(f"elk_init({routing})")
+    new_lines = lines[:graph_idx] + [ELK_INIT] + lines[graph_idx:]
+    changes.append("elk_init")
 
     # ── Optionally override direction ─────────────────────────────────────────
     if auto_direction and should_use_lr(fpath.stem):
@@ -194,15 +170,6 @@ def main() -> None:
         help="Skip automatic TB→LR direction optimization for pipeline diagrams",
     )
     parser.add_argument(
-        "--dense-orthogonal-from",
-        type=int,
-        default=None,
-        help=(
-            "Optional: use ORTHOGONAL routing for @nodes > N. "
-            f"Recommended start: {DEFAULT_DENSE_ORTHOGONAL_FROM}"
-        ),
-    )
-    parser.add_argument(
         "--dir",
         type=Path,
         default=ARCH_DIR,
@@ -217,21 +184,14 @@ def main() -> None:
     print(
         f"ELK LAYOUT {'(DRY RUN) ' if args.dry_run else ''}| "
         f"threshold=@nodes>{args.threshold} | "
-        f"direction_opt={'on' if auto_direction else 'off'} | "
-        f"dense_orthogonal_from={args.dense_orthogonal_from if args.dense_orthogonal_from is not None else 'disabled'}"
+        f"direction_opt={'on' if auto_direction else 'off'}"
     )
     print("=" * 65)
 
     modified = skipped_threshold = skipped_elk = skipped_other = 0
 
     for f in files:
-        ok, reason = apply_elk(
-            f,
-            args.threshold,
-            args.dense_orthogonal_from,
-            auto_direction,
-            args.dry_run,
-        )
+        ok, reason = apply_elk(f, args.threshold, auto_direction, args.dry_run)
         if ok:
             modified += 1
             print(f"  [OK]   {f.name}  ({reason})")

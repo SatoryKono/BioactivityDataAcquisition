@@ -38,9 +38,9 @@ def test_emoji_rule_flags_subgraph_prefix_icons() -> None:
     """COLOUR-002 must reject emoji prefixes in subgraph labels."""
     lint = _load_lint_module()
     lines = [
-        "flowchart TB",
+        'flowchart TB',
         'subgraph Domain["🟡 Domain Layer"]',
-        "end",
+        'end',
     ]
 
     issues = lint.check_subgraph_emoji(Path("docs/02-architecture/demo.mmd"), lines)
@@ -69,20 +69,3 @@ def test_size_rules_apply_and_reference_full_is_exempt() -> None:
     assert any(issue.rule == "SIZE-002" for issue in warning)
     assert any(issue.rule == "SIZE-001" for issue in error)
     assert full_view_exempt == []
-
-
-def test_nbsp_rule_flags_manual_spacing_entities() -> None:
-    """NBSP-001 must fail when manual '&nbsp;' spacing is present."""
-    lint = _load_lint_module()
-    lines = [
-        "flowchart TB",
-        'A["Node&nbsp;&nbsp;A"] --> B["Node B"]',
-    ]
-
-    issues = lint.check_manual_spacing_entities(
-        Path("docs/02-architecture/diagrams/mermaid/sample.mermaid"),
-        lines,
-    )
-    rules = {issue.rule for issue in issues}
-
-    assert "NBSP-001" in rules

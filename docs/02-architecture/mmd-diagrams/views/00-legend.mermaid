@@ -1,7 +1,7 @@
 %% View: Legend | Parent: (root)
 %% Shared legend for coded edge labels and link weights
 flowchart TB
-%% keep-orphan: C0, K01, K02, K03, K04, K05, K06, K07, K08, K09, K10, K11, K12, K13, K14, K15, K16, K17, K18, K19, K20, K21, K22, K23, K24, K25, K26, K27, K28, K29, K30, K31, K32, K33, K34, K35, K36, K37, K38, K39, S1, S2, S3, S4, CM2, CM3, CM6
+%% keep-orphan: C0, K01, K02, K03, K04, K05, K06, K07, K08, K09, K10, K11, K12, K13, K14, K15, K16, K17, K18, K19, K20, K21, K22, K23, K24, K25, K26, K27, K28, K29, K30, K31, K32, K33, K34, K35, K36, K37, K38, K39, S1, S2, S3, S4
     subgraph Legend["📋 Legend"]
         direction TB
 
@@ -65,15 +65,4 @@ flowchart TB
         K39["K39 = DATA_QUALITY"]
     end
 
-    subgraph CrossDiagram["Cross-Diagram Semantic Mapping (ADR-040 D9)"]
-        direction TB
-        CM1["flowchart:  -->  = data flow"]
-        CM2["sequence:   ->>  = sync call (data)"]
-        CM3["class:      <|-- = inheritance (DI)"]
-        CM4["state:      -->  = transition (orch)"]
-        CM5["ER:         ||--o{ = relationship (data)"]
-        CM6["Label prefixes: DATA, DI, ORCH, OBS, ERR"]
-    end
-
     style Legend fill:#F8FAFC,stroke:#94A3B8,stroke-width:2px
-    style CrossDiagram fill:#eceff1,stroke:#94A3B8,stroke-width:1px

@@ -11,7 +11,7 @@ from pathlib import Path
 SUPPORTED_SUFFIXES = {".mmd", ".mermaid"}
 DEFAULT_ROOTS = [
     Path("docs/02-architecture/mmd-diagrams"),
-    Path("docs/02-architecture/mmd-diagrams/views"),
+    Path("docs/02-architecture/diagrams/mermaid"),
 ]
 
 
