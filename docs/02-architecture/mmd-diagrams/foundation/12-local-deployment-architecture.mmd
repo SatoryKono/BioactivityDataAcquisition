@@ -37,12 +37,12 @@ flowchart TB
         end
 
         subgraph Data["Local filesystem (data/)"]
-            Bronze[("📁 bronze/<br/>JSONL+zstd&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")]
-            Silver[("📁 silver/<br/>Delta Lake&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")]
-            Gold[("📁 gold/<br/>Delta/Parquet&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")]
-            Quarantine[("📁 quarantine/<br/>Parquet&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")]
-            Checkpoints[("📁 checkpoints/<br/>JSON&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")]
-            Lineage[("📁 lineage/<br/>Parquet&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")]
+            Bronze[("📁 bronze/<br/>JSONL+zstd")]
+            Silver[("📁 silver/<br/>Delta Lake")]
+            Gold[("📁 gold/<br/>Delta/Parquet")]
+            Quarantine[("📁 quarantine/<br/>Parquet")]
+            Checkpoints[("📁 checkpoints/<br/>JSON")]
+            Lineage[("📁 lineage/<br/>Parquet")]
         end
 
         subgraph Observability["Local Observability"]

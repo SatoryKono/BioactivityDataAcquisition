@@ -30,7 +30,7 @@ flowchart TD
     end
 
     subgraph Classification["Error Classification"]
-        C{{"📊 Calculate Error Rate<br/>&nbsp;"}}
+        C{{"📊 Calculate Error Rate<br/>"}}
         D["✅ 0% errors<br/>"]
         E["⚠️ < 5% errors<br/>(soft_fail_threshold)"]
         F["⚠️ 5-20% errors<br/>(warning zone)"]
@@ -45,8 +45,8 @@ flowchart TD
     end
 
     subgraph Routing["Record Routing"]
-        L[("💾 Silver Layer<br/>SilverWriter.merge()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")]
-        M[("🗑️ Quarantine<br/>QuarantineWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")]
+        L[("💾 Silver Layer<br/>SilverWriter.merge()")]
+        M[("🗑️ Quarantine<br/>QuarantineWriter")]
         N["🚨 Alert<br/>P2 Notification"]
     end
 

@@ -24,19 +24,19 @@ flowchart LR
     subgraph Bronze_Layer["Bronze Layer"]
         direction TB
         BronzeWriter["BronzeWriter<br/><br/><br/><br/><br/><br/>"]
-        Bronze[("Bronze Storage<br/>━━━━━━━━━━━━━━━<br/>📁 Format: JSONL + zstd<br/>⏱️ Retention: 90 days<br/>✅ Validation: None<br/>📍 Path: bronze/v1/<br/>{provider}/{entity}/{date}/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")]
+        Bronze[("Bronze Storage<br/>━━━━━━━━━━━━━━━<br/>📁 Format: JSONL + zstd<br/>⏱️ Retention: 90 days<br/>✅ Validation: None<br/>📍 Path: bronze/v1/<br/>{provider}/{entity}/{date}/")]
     end
 
     subgraph Silver_Layer["Silver Layer"]
         direction TB
         SilverWriter["SilverWriter<br/><br/><br/><br/><br/><br/>"]
-        Silver[("Silver Storage<br/>━━━━━━━━━━━━━━━<br/>📁 Format: Delta Lake<br/>⏱️ Retention: Permanent<br/>✅ Validation: Pandera (soft<br/>)\n🔄 Strategy: Merge/Upsert\n🔑 Key: content_hash<br/>&nbsp;")]
+        Silver[("Silver Storage<br/>━━━━━━━━━━━━━━━<br/>📁 Format: Delta Lake<br/>⏱️ Retention: Permanent<br/>✅ Validation: Pandera (soft<br/>)\n🔄 Strategy: Merge/Upsert\n🔑 Key: content_hash<br/>")]
     end
 
     subgraph Gold_Layer["Gold Layer"]
         direction TB
         GoldWriter["GoldWriter<br/><br/><br/><br/><br/><br/>"]
-        Gold[("Gold Storage<br/>━━━━━━━━━━━━━━━<br/>📁 Format: Delta/Parquet<br/>⏱️ Retention: Permanent<br/>✅ Validation: Pandera (strict<br/>)\n🔄 Strategy: SCD2/Append<br/>&nbsp;")]
+        Gold[("Gold Storage<br/>━━━━━━━━━━━━━━━<br/>📁 Format: Delta/Parquet<br/>⏱️ Retention: Permanent<br/>✅ Validation: Pandera (strict<br/>)\n🔄 Strategy: SCD2/Append<br/>")]
     end
 
     subgraph DQ_Branch["Data Quality Branch"]

@@ -34,12 +34,12 @@ flowchart LR
         V1["📋 ActivityTableSchema<br/>(Pandera)<br/>"]
         V2["✅ Check standard_value range<br/>0 < value < 1e12<br/>"]
         V3["🧪 Validate SMILES if present<br/>(optional field)<br/>"]
-        V4{{"📊 Error Rate Check<br/><br/>&nbsp;"}}
+        V4{{"📊 Error Rate Check<br/><br/>"}}
     end
 
     subgraph Load["Load Phase"]
-        L1[("🥈 Silver Layer<br/>silver/chembl/activity/<br/>year=/month=/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")]
-        L2[("🥇 Gold Layer<br/>gold/activity_by_target/<br/>target_id=/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")]
+        L1[("🥈 Silver Layer<br/>silver/chembl/activity/<br/>year=/month=/")]
+        L2[("🥇 Gold Layer<br/>gold/activity_by_target/<br/>target_id=/")]
     end
 
     subgraph Related["Related Entities (Silver)"]

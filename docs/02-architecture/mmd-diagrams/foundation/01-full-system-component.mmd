@@ -106,9 +106,9 @@ flowchart TB
     end
 
     subgraph DataLake["Data Lake (Local FS)"]
-        Bronze[("Bronze<br/>JSONL+zstd&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")]
-        Silver[("Silver<br/>Delta Lake&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")]
-        Gold[("Gold<br/>Delta/Parquet&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")]
+        Bronze[("Bronze<br/>JSONL+zstd")]
+        Silver[("Silver<br/>Delta Lake")]
+        Gold[("Gold<br/>Delta/Parquet")]
         Quarantine[("Quarantine"<br/>)]
         Checkpoints[("Checkpoints"<br/>)]
     end
