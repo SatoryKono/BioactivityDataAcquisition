@@ -62,7 +62,7 @@ sequenceDiagram
     DSF->>PR: get_creator(provider)
     PR-->>DSF: DataSourceCreator
     DSF->>DSF: creator(settings, config, logger)
-    DSF-->>Asm: DataSourcePort impl
+    DSF-.->>Asm: DataSourcePort impl
 
     Note over Asm,SB: Phase 7: Services Bundle
     Asm->>SB: new ServicesBuilder()

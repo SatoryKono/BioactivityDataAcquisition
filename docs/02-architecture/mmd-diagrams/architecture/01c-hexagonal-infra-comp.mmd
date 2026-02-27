@@ -35,7 +35,7 @@ graph TB
     subgraph Domain["Domain Layer"]
     end
 
-    BOOTSTRAP --> ADAPTERS
+    BOOTSTRAP ==> ADAPTERS
     BOOTSTRAP --> STORAGE
     BOOTSTRAP --> OBS_INFRA
     ADAPTERS -->|implements| PORTS

@@ -68,7 +68,7 @@ graph LR
     end
 
     %% Flow
-    API1 & API2 & API3 & API4 & API5 & API6 & API7 --> DS
+    API1 & API2 & API3 & API4 & API5 & API6 & API7 -.-> DS
     DS --> RL --> CB --> RETRY
 
     RETRY --> BW

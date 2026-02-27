@@ -47,7 +47,7 @@ flowchart TB
 
     %% Flow
     CMD --> PARSE --> OPTS
-    OPTS --> PRS
+    OPTS ==> PRS
     PRS --> RESOLVE
     RESOLVE --> BOOT --> ASSEMBLE
 
