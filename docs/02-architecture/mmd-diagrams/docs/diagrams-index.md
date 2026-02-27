@@ -12,7 +12,7 @@
 
 ## Diagram Views
 
-Overloaded diagrams are decomposed into focused views in [`README.md`](./README.md)
+Overloaded diagrams are decomposed into focused views in [`README.md`](../README.md)
 and `./mermaid/`:
 
 - `*-overview.mermaid` — key entities and primary relations (recommended first read)

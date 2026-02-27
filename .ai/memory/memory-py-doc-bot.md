@@ -29,7 +29,7 @@ docs/
 ├── 00-map.md                       # Navigation hub
 ├── 01-getting-started/             # Onboarding guides
 ├── 02-architecture/
-│   ├── decisions/                  # ADRs (ADR-001 through ADR-033)
+│   ├── decisions/                  # ADRs (ADR-001 through ADR-040)
 │   └── diagrams/                   # Mermaid diagrams
 ├── 03-guides/                      # Development guides
 ├── 04-reference/                   # API documentation

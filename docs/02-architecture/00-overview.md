@@ -75,8 +75,8 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 | [ADR-032](decisions/ADR-032-unified-http-client.md)               | Unified HTTP Client Pattern              | §3.1               |
 | [ADR-033](decisions/ADR-033-publication-validation-strategy.md)   | Publication Metadata Validation Strategy | -                  |
 | [ADR-034](decisions/ADR-034-schema-domain-pairs.md)               | Schema↔Domain Configuration Pairs        | -                  |
-| [ADR-035](decisions/ADR-035-json-field-typing-strategy.md)        | JSON Field Typing Strategy               | -                  |
-| [ADR-036](decisions/ADR-036-gold-contract-versioning.md)          | Gold Contract Versioning                 | §2.1               |
+| [ADR-035](decisions/ADR-035-json-field-typing-policy.md)          | JSON Field Typing Strategy               | -                  |
+| [ADR-036](decisions/ADR-036-gold-contract-versioning-policy.md)   | Gold Contract Versioning                 | §2.1               |
 | [ADR-037](decisions/ADR-037-canonical-schema-generation.md)       | Canonical Schema Generation              | -                  |
 | [ADR-038](decisions/ADR-038-enum-externalization.md)              | Enum Externalization                     | -                  |
 | [ADR-039](decisions/ADR-039-unified-entity-config-format.md)      | Unified Entity Config Format             | App D              |
