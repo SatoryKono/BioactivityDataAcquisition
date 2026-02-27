@@ -111,7 +111,7 @@ bioetl run chembl_molecule --run-type rebuild
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/molecule.yaml` |
+| Конфигурация | `configs/entities/chembl/molecule.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/chembl/molecule-transformer.py` |
 | Сущность | `src/bioetl/domain/entities.py` |
 

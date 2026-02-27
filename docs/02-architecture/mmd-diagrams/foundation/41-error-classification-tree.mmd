@@ -8,10 +8,10 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
-%% @uniform width=152 height=90 max_title_len=14 max_desc_lines=3
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%% @uniform width=168 height=112 max_title_len=14 max_desc_lines=4
 flowchart TB
-    ERROR["Error Occurred<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+    ERROR["Error Occurred<br/><br/><br/>"]
 
     ERROR --> HTTP{{"HTTP Status Code?"}}
     ERROR --> DOMAIN{{"Domain Error?"}}
@@ -38,30 +38,30 @@ flowchart TB
 
     %% Actions
     subgraph Actions["Error Actions"]
-        RETRY["🔄 RETRY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• max_attempts: 3<br/>• multiplier: 2.0<br/>• jitter: MD5-based"]
-        QUARANTINE2["🔒 QUARANTINE&nbsp;&nbsp;<br/>• QuarantineEntry created<br/>• payload truncated 64KB<br/>• payload_hash computed"]
-        FAIL_FAST["💥 FAIL FAST&nbsp;&nbsp;&nbsp;<br/>• No retry<br/>• Pipeline terminates<br/>• ExitCode.PIPELINE_ERROR"]
-        BATCH_FAIL["🚫 BATCH FAIL&nbsp;&nbsp;<br/>• error_rate > 20%<br/>• Entire batch rejected<br/>• Checkpoint NOT saved"]
+        ACT_RETRY["RETRY<br/>max_attempts: 3<br/>multiplier: 2.0<br/>jitter: MD5-based"]
+        ACT_QUARANTINE["QUARANTINE<br/>QuarantineEntry created<br/>payload truncated 64KB<br/>payload_hash computed"]
+        FAIL_FAST["FAIL FAST<br/>No retry<br/>Pipeline terminates<br/>ExitCode.PIPELINE_ERROR"]
+        BATCH_FAIL["BATCH FAIL<br/>error_rate > 20%<br/>Entire batch rejected<br/>Checkpoint NOT saved"]
     end
 
     AUTH --> FAIL_FAST
-    RATE --> RETRY
-    SERVER --> RETRY
-    SCHEMA --> QUARANTINE2
-    MISSING --> QUARANTINE2
-    FORMAT --> QUARANTINE2
+    RATE --> ACT_RETRY
+    SERVER --> ACT_RETRY
+    SCHEMA --> ACT_QUARANTINE
+    MISSING --> ACT_QUARANTINE
+    FORMAT --> ACT_QUARANTINE
     DQTHRESH --> BATCH_FAIL
     LOCK --> FAIL_FAST
     LOCKACQ --> FAIL_FAST
-    STORE --> RETRY
-    CB --> RETRY
+    STORE --> ACT_RETRY
+    CB --> ACT_RETRY
 
     %% Retry exhaustion
-    RETRY -->|"max attempts\nexhausted"| EXHAUST["RetryExhaustedError\n→ Record CB failure\n→ Circuit may trip"]
+    ACT_RETRY -->|"max exhausted"| EXHAUST["RetryExhaustedError<br/>Record CB failure<br/>Circuit may trip"]
     EXHAUST --> FAIL_FAST
 
     %% Styling
-    style Actions fill:#fff3e0,stroke:#e65100
-    style FAIL_FAST fill:#ffebee,stroke:#c62828
-    style QUARANTINE2 fill:#FF6B6B,stroke:#cc4444,color:#000
-    style RETRY fill:#e8f5e9,stroke:#2e7d32
+    style Actions fill:#fff7ed,stroke:#f59e0b
+    style FAIL_FAST fill:#ffe4e6,stroke:#dc2626
+    style ACT_QUARANTINE fill:#ffe4e6,stroke:#dc2626,color:#212121
+    style ACT_RETRY fill:#f0fdf4,stroke:#16a34a

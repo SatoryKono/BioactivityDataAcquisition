@@ -236,11 +236,11 @@ Domain содержит 11 дополнительных поддиректори
 
 | Диаграмма            | Файл                                                                                    | Описание                                          |
 |----------------------|-----------------------------------------------------------------------------------------|---------------------------------------------------|
-| Domain Layer Classes | [04-domain-layer-class-diagram.mmd](mmd-diagrams/foundation/04-domain-layer-class-diagram.mmd) | Классы портов, сущностей, конфигурации            |
-| Domain DDD           | [08-domain-ddd.mmd](mmd-diagrams/foundation/08-domain-ddd.mmd)                                 | DDD-структура домена                              |
-| Domain Models        | [13-domain-models-relationship.mmd](mmd-diagrams/foundation/13-domain-models-relationship.mmd) | Связи доменных моделей                            |
-| DDD Aggregates       | [08-domain-ddd.mmd](mmd-diagrams/foundation/08-domain-ddd.mmd)                                 | DDD агрегаты: Batch, PipelineRun, QuarantineEntry |
-| Ports Architecture   | [30-port-adapter-mapping.mmd](mmd-diagrams/foundation/30-port-adapter-mapping.mmd)             | Архитектура 26 портов                             |
+| Domain Layer Classes | [04-domain-layer-class-diagram.mermaid](mmd-diagrams/foundation/04-domain-layer-class-diagram.mmd) | Классы портов, сущностей, конфигурации            |
+| Domain DDD           | [08-domain-ddd.mermaid](mmd-diagrams/foundation/08-domain-ddd.mmd)                                 | DDD-структура домена                              |
+| Domain Models        | [13-domain-models-relationship.mermaid](mmd-diagrams/foundation/13-domain-models-relationship.mmd) | Связи доменных моделей                            |
+| DDD Aggregates       | [08-domain-ddd.mermaid](mmd-diagrams/foundation/08-domain-ddd.mmd)                                 | DDD агрегаты: Batch, PipelineRun, QuarantineEntry |
+| Ports Architecture   | [30-port-adapter-mapping.mermaid](mmd-diagrams/foundation/26-hexagonal-ports-adapters.mmd)             | Архитектура 26 портов                             |
 
 ### Связанные ADR
 

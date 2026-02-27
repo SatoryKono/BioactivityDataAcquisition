@@ -70,22 +70,28 @@ def flatten_nested_dict(
         {'hierarchy_child_chembl_id': 'CHEMBL25'}
 
     """
-    if not data or not isinstance(data, dict):
-        result = {f"{prefix}{key}": None for key in field_mapping}
-    else:
-        result = {}
-        for source_key, converter in field_mapping.items():
-            value = data.get(source_key)
-            if converter is not None and value is not None:
-                result[f"{prefix}{source_key}"] = converter(value)
-            else:
-                result[f"{prefix}{source_key}"] = value
+    # Optimized for speed: Single-pass iteration merging prefixing and renaming.
+    # Uses explicit type annotation for mypy strict mode.
+    result: dict[str, Any] = {}
 
-    # Apply renames if provided
-    if renames:
-        for old_key, new_key in renames.items():
-            if old_key in result:
-                result[new_key] = result.pop(old_key)
+    if not data or not isinstance(data, dict):
+        for key in field_mapping:
+            full_key = f"{prefix}{key}"
+            final_key = renames.get(full_key, full_key) if renames else full_key
+            result[final_key] = None
+        return result
+
+    for source_key, converter in field_mapping.items():
+        # Construct the full key once
+        full_key = f"{prefix}{source_key}"
+        # Determine the final key (handle rename immediately)
+        final_key = renames.get(full_key, full_key) if renames else full_key
+
+        value = data.get(source_key)
+        if converter is not None and value is not None:
+            result[final_key] = converter(value)
+        else:
+            result[final_key] = value
 
     return result
 

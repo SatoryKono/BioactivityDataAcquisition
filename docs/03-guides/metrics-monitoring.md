@@ -68,13 +68,13 @@ export BIOETL-METRICS-ENABLED=false
   `src/bioetl/domain/ports/observability.py`.
 - В текущем проекте используется единый подход: **generic metrics API**.
   Новые метрики добавляются через стандартные методы
-  `observe_histogram()` / `increment_counter()` / `set_gauge()` с
+  `observe-histogram()` / `increment-counter()` / `set-gauge()` с
   нормализованными строковыми именами.
 - Для каждой новой метрики обязательно:
   1. определить объект метрики в
      `src/bioetl/infrastructure/observability/metrics.py`,
   2. зарегистрировать её в `HISTOGRAMS` / `COUNTERS` / `GAUGES` в
-     `src/bioetl/infrastructure/observability/prometheus_metrics.py`.
+     `src/bioetl/infrastructure/observability/prometheus-metrics.py`.
 
 > Если в будущем потребуется typed API, helper-методы добавляются в
 > `MetricsPort` в `observability.py` и синхронно реализуются в Prometheus и

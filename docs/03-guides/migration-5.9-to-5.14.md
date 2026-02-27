@@ -159,7 +159,7 @@ bioetl run-composite --composite activity --seed-limit 1000
 
 **Output:** `data/gold/composite_activity/`
 
-**Configuration:** `configs/pipelines/composite/activity.yaml`
+**Configuration:** `configs/composites/activity.yaml`
 
 **Documentation:** [ADR-026: Composite Pipeline Pattern](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)
 
@@ -229,14 +229,14 @@ silver-config:
 
 **Before (5.9):**
 ```yaml
-# configs/pipelines/composite/activity.yaml
+# configs/composites/activity.yaml
 output:
   gold-path: data/gold/composite_activity
 ```
 
 **After (5.14):**
 ```yaml
-# configs/pipelines/composite/activity.yaml
+# configs/composites/activity.yaml
 # output.gold-path removed — auto-computed as:
 # data/gold/composite-{pipeline-name}/
 ```

@@ -102,7 +102,7 @@ bioetl run chembl_target --run-type rebuild
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/target.yaml` |
+| Конфигурация | `configs/entities/chembl/target.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/chembl/target-transformer.py` |
 | Сущность | `src/bioetl/domain/entities.py` |
 

@@ -362,7 +362,7 @@ Mode: Overwrite (reference table)
 ## 10. Pipeline Configuration
 
 ```yaml
-# configs/pipelines/chembl/protein-class.yaml
+# configs/entities/chembl/protein-class.yaml
 
 pipeline-name: chembl_protein_class
 provider: chembl

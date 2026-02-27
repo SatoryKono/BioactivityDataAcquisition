@@ -5,66 +5,73 @@
 %% @date    2026-02-24
 %% @type    flowchart
 %% @level   System / Component
-%% @nodes   39
+%% @nodes   46
 
-%%{init: {'theme': 'base'}}%%
+%%{init: {'theme': 'base', 'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
 %% @uniform width=208 height=72 max_title_len=21 max_desc_lines=2
 graph TB
 %% keep-orphan: CFG, EXCEPTIONS, OBSERVER, PROVIDERS, SCHEMAS, TYPES, VALIDATION
     subgraph External["External Systems"]
         subgraph ExternalAPIs["External APIs"]
+            CHEMBL_API["ChEMBL<br/><br/>"]:::size-md
+            PUBMED_API["PubMed<br/><br/>"]:::size-md
+            UNIPROT_API["UniProt<br/><br/>"]:::size-md
+            PUBCHEM_API["PubChem<br/><br/>"]:::size-md
+            CROSSREF_API["CrossRef<br/><br/>"]:::size-md
+            OPENALEX_API["OpenAlex<br/><br/>"]:::size-md
+            SEMSCHOLAR_API["Semantic Scholar<br/><br/>"]:::size-md
         end
-        FS["File System&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Delta Lake / Parquet / JSONL)<br/>&nbsp;"]
-        PROM["Prometheus&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        OTEL["OpenTelemetry&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        FS["File System<br/>(Delta Lake / Parquet / JSONL)<br/>"]:::size-md
+        PROM["Prometheus<br/><br/>"]:::size-md
+        OTEL["OpenTelemetry<br/><br/>"]:::size-md
     end
 
     subgraph Interfaces["interfaces layer"]
-        CLI["CLI Commands&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Click)<br/>&nbsp;"]
-        HTTP_IF["HTTP Interface&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        ORCH["Orchestration&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        CLI["CLI Commands<br/>(Click)<br/>"]:::size-md
+        HTTP_IF["HTTP Interface<br/><br/>"]:::size-md
+        ORCH["Orchestration<br/><br/>"]:::size-md
     end
 
     subgraph Composition["composition layer"]
-        BOOTSTRAP["Bootstrap / Assembly&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        FACTORIES["Factories&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        PROVIDERS["Provider Registry&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        RT_BUILDERS["Runtime Builders&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        BOOTSTRAP["Bootstrap / Assembly<br/><br/>"]:::size-md
+        FACTORIES["Factories<br/><br/>"]:::size-md
+        PROVIDERS["Provider Registry<br/><br/>"]:::size-md
+        RT_BUILDERS["Runtime Builders<br/><br/>"]:::size-md
     end
 
     subgraph Application["application layer"]
-        CORE["Core&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Runner, BatchExecutor,<br/>Transformer, Writer)"]
-        SERVICES["Services&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(DQ, Export, Health,<br/>Medallion Lifecycle)"]
-        COMPOSITE["Composite Pipeline&nbsp;&nbsp;&nbsp;<br/>(Coordinator, Merger,<br/>FSM)"]
-        PIPELINES["Pipeline Transformers<br/>(per provider)<br/>&nbsp;"]
-        OBSERVER["Observability&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(PipelineObserver)<br/>&nbsp;"]
+        CORE["Core<br/>(Runner, BatchExecutor,<br/>Transformer, Writer)"]:::size-md
+        SERVICES["Services<br/>(DQ, Export, Health,<br/>Medallion Lifecycle)"]:::size-md
+        COMPOSITE["Composite Pipeline<br/>(Coordinator, Merger,<br/>FSM)"]:::size-md
+        PIPELINES["Pipeline Transformers<br/>(per provider)<br/>"]:::size-md
+        OBSERVER["Observability<br/>(PipelineObserver)<br/>"]:::size-md
     end
 
     subgraph Domain["domain layer (pure, no I/O)"]
-        PORTS["Port Protocols&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(DataSourcePort, StoragePort,<br/>LockPort, MetricsPort, ...)"]
-        ENTITIES["Entities & Aggregates<br/>(Batch, PipelineRun,<br/>BaseEntity)"]
-        VO["Value Objects&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(BronzeWriteResult,<br/>SilverWriteResult, ...)"]
-        CFG["Configuration&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(PipelineConfig,<br/>RuntimeConfig, DQConfig)"]
-        DOM_SVC["Domain Services&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Identity, Normalization,<br/>UnitConverter)"]
-        TYPES["Types & Enums&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(RunType, HealthStatus,<br/>PublicationType)"]
-        EXCEPTIONS["Exception Hierarchy&nbsp;&nbsp;<br/>(BioETLError tree)<br/>&nbsp;"]
-        SCHEMAS["Schemas&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Pandera DataFrameModel)<br/>&nbsp;"]
+        PORTS["Port Protocols<br/>(DataSourcePort, StoragePort,<br/>LockPort, MetricsPort, ...)"]:::size-md
+        ENTITIES["Entities & Aggregates<br/>(Batch, PipelineRun,<br/>BaseEntity)"]:::size-md
+        VO["Value Objects<br/>(BronzeWriteResult,<br/>SilverWriteResult, ...)"]:::size-md
+        CFG["Configuration<br/>(PipelineConfig,<br/>RuntimeConfig, DQConfig)"]:::size-md
+        DOM_SVC["Domain Services<br/>(Identity, Normalization,<br/>UnitConverter)"]:::size-md
+        TYPES["Types & Enums<br/>(RunType, HealthStatus,<br/>PublicationType)"]:::size-md
+        EXCEPTIONS["Exception Hierarchy<br/>(BioETLError tree)<br/>"]:::size-md
+        SCHEMAS["Schemas<br/>(Pandera DataFrameModel)<br/>"]:::size-md
     end
 
     subgraph Infrastructure["infrastructure layer"]
-        ADAPTERS["HTTP Adapters&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(ChEMBL, PubMed, UniProt,<br/>CrossRef, OpenAlex, S2, PubChem)"]
-        STORAGE["Storage&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(BronzeWriter, SilverWriter,<br/>GoldWriter, DeltaReader)"]
-        OBS_INFRA["Observability Infra&nbsp;&nbsp;<br/>(UnifiedLogger, Metrics,<br/>Tracing)"]
-        RESILIENCE["Resilience&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(CircuitBreaker,<br/>TokenBucket, Retry)"]
-        SECURITY["Security&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(PII Hasher)<br/>&nbsp;"]
-        CHECKPOINT["Checkpoint&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(LocalCheckpoint)<br/>&nbsp;"]
-        LOCKING["Locking&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(MemoryLock)<br/>&nbsp;"]
-        AUDIT["Audit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(FileAuditAdapter)<br/>&nbsp;"]
-        VALIDATION["Validation&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Pandera Validators)<br/>&nbsp;"]
+        ADAPTERS["HTTP Adapters<br/>(ChEMBL, PubMed, UniProt,<br/>CrossRef, OpenAlex, S2, PubChem)"]:::size-md
+        STORAGE["Storage<br/>(BronzeWriter, SilverWriter,<br/>GoldWriter, DeltaReader)"]:::size-md
+        OBS_INFRA["Observability Infra<br/>(UnifiedLogger, Metrics,<br/>Tracing)"]:::size-md
+        RESILIENCE["Resilience<br/>(CircuitBreaker,<br/>TokenBucket, Retry)"]:::size-md
+        SECURITY["Security<br/>(PII Hasher)<br/>"]:::size-md
+        CHECKPOINT["Checkpoint<br/>(LocalCheckpoint)<br/>"]:::size-md
+        LOCKING["Locking<br/>(MemoryLock)<br/>"]:::size-md
+        AUDIT["Audit<br/>(FileAuditAdapter)<br/>"]:::size-md
+        VALIDATION["Validation<br/>(Pandera Validators)<br/>"]:::size-md
     end
 
     %% External → Infrastructure
-    ExternalAPIs -.-> ADAPTERS
+    ExternalAPIs -.->|REST/HTTP| ADAPTERS
     FS -.-> STORAGE
     PROM -.-> OBS_INFRA
     OTEL -.-> OBS_INFRA
@@ -104,12 +111,12 @@ graph TB
     AUDIT -->|implements| PORTS
     SECURITY -->|implements| PORTS
 
-    classDef domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-    classDef app fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    classDef infra fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-    classDef comp fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef iface fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
-    classDef ext fill:#eceff1,stroke:#455a64,stroke-width:1px
+    classDef domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    classDef infra fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    classDef comp fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    classDef iface fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    classDef ext fill:#f1f5f9,stroke:#64748b,stroke-width:1px
 
     class PORTS,ENTITIES,VO,CFG,DOM_SVC,TYPES,EXCEPTIONS,SCHEMAS domain
     class CORE,SERVICES,COMPOSITE,PIPELINES,OBSERVER app
@@ -119,5 +126,5 @@ graph TB
     class CHEMBL_API,PUBMED_API,UNIPROT_API,PUBCHEM_API,CROSSREF_API,OPENALEX_API,SEMSCHOLAR_API,FS,PROM,OTEL ext
 
     linkStyle default stroke:#666,stroke-width:1px,color:#666
-    linkStyle 1,2,3,4 stroke-dasharray: 5 5
-    linkStyle 19,20,21,22,23,24,25,26 stroke:#c62828,stroke-width:2px
+    linkStyle 0,1,2,3 stroke-dasharray: 5 5
+    linkStyle 21,22,23,24,25,26,27,28 stroke:#dc2626,stroke-width:2px

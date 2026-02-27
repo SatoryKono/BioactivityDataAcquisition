@@ -2,234 +2,34 @@
 
 ## High-Level Architecture
 
-```mermaid
-flowchart TD
-    subgraph "External Sources"
-        A[Public APIs e.g., ChEMBL]
-    end
-
-    subgraph "BioETL Application"
-        B(Orchestrator)
-        C(Extractor)
-        D(Transformer)
-        E(Loader)
-    end
-
-    subgraph "Composition Layer"
-        CP[Bootstrap / Factories]
-    end
-
-    CLI --> CP
-    CP --> B
-
-    subgraph "Data Lake (Medallion)"
-        F[Bronze Layer]
-        G[Silver Layer]
-        H[Gold Layer]
-    end
-
-    A --> C
-    B --> C
-    C --> F
-    F --> D
-    D --> G
-    G --> H
-    D --> E
-    E --> G
-```
+> **Diagram:** See [`01-high-level-hexagonal.mmd`](mmd-diagrams/architecture/01-high-level-hexagonal.mmd)
 
 ## Medallion Architecture
 
-```mermaid
-flowchart LR
-    subgraph Sources["External Sources"]
-        SRC1["ChEMBL"]
-        SRC2["PubChem"]
-        SRC3["UniProt"]
-        SRC4["PubMed"]
-        SRC5["CrossRef"]
-        SRC6["OpenAlex"]
-        SRC7["Semantic Scholar"]
-    end
-
-    subgraph Bronze["Bronze Layer"]
-        direction TB
-        B1["JSONL + zstd"]
-        B2["Append-only"]
-        B3["90 days retention"]
-    end
-
-    subgraph Silver["Silver Layer"]
-        direction TB
-        S1["Delta Lake"]
-        S2["Merge/Upsert"]
-        LocalFS["Permanent"]
-    end
-
-    subgraph Gold["Gold Layer"]
-        direction TB
-        G1["Delta / Parquet"]
-        G2["SCD Type 2"]
-        G3["Permanent"]
-    end
-
-    subgraph Side["Side Tables"]
-        Q["Quarantine<br/>(DQ failures)"]
-        L["Lineage Log<br/>(Provenance)"]
-    end
-
-    Sources -->|REST API| Bronze
-    Bronze -->|Transform + Validate| Silver
-    Silver -->|Aggregate| Gold
-    Silver -.->|DQ errors| Q
-    Bronze -.->|batch-id FK| L
-```
+> **Diagram:** See [`03-medallion-data-flow.mmd`](mmd-diagrams/architecture/03-medallion-data-flow.mmd)
 
 ## Class Diagram
 
-```mermaid
-classDiagram
-    class BioEtlPipeline {
-        +run()
-    }
-
-    class Extractor {
-        +extract()
-    }
-
-    class Transformer {
-        +transform()
-    }
-
-    class Loader {
-        +load()
-    }
-
-    class DataLake {
-        +write()
-        +read()
-    }
-
-    BioEtlPipeline --> Extractor
-    BioEtlPipeline --> Transformer
-    BioEtlPipeline --> Loader
-    Extractor --> DataLake
-    Transformer --> DataLake
-    Loader --> DataLake
-```
+> **Diagram:** See [`07-application-core-services.mmd`](mmd-diagrams/class-diagrams/07-application-core-services.mmd)
 
 ## Layer Interaction
 
 Shows how BioETL layers communicate following Hexagonal Architecture:
 
-```mermaid
-flowchart TB
-    subgraph Interfaces["Interfaces Layer"]
-        CLI[CLI Entry Point]
-    end
-
-    subgraph Composition["Composition Layer"]
-        Bootstrap[bootstrap-pipeline]
-        Factories[Factories]
-    end
-
-    subgraph Application["Application Layer"]
-        Runner[PipelineRunner]
-        Executor[PipelineExecutor]
-        Transformer[BaseTransformer]
-    end
-
-    subgraph Domain["Domain Layer"]
-        Ports[Port Interfaces]
-        Types[Core Types]
-    end
-
-    subgraph Infrastructure["Infrastructure Layer"]
-        Adapters[Data Source Adapters]
-        Storage[Storage Writers]
-    end
-
-    CLI --> Bootstrap
-    Bootstrap --> Factories
-    Factories --> Runner
-    Runner --> Executor
-    Executor --> Transformer
-    Application --> Ports
-    Adapters -.->|implements| Ports
-    Storage -.->|implements| Ports
-```
+> **Diagram:** See [`02-layer-dependency-matrix.mmd`](mmd-diagrams/architecture/02-layer-dependency-matrix.mmd)
 
 ## Pipeline Execution Sequence
 
 Shows the complete execution flow from CLI to data storage:
 
-```mermaid
-sequenceDiagram
-    autonumber
-    participant CLI
-    participant Runner as PipelineRunner
-    participant Preflight as PreflightService
-    participant Executor as PipelineExecutor
-    participant DataSource
-    participant Transformer
-    participant Storage
-
-    CLI->>Runner: run()
-    Runner->>Preflight: execute()
-    Preflight->>Storage: health-check()
-    Preflight->>DataSource: health-check()
-    Preflight-->>Runner: success
-
-    Runner->>Runner: acquire-lock()
-    Runner->>Executor: execute()
-
-    loop Each Batch
-        Executor->>DataSource: fetch(batch)
-        Executor->>Transformer: transform(records)
-        Executor->>Storage: write-bronze()
-        Executor->>Storage: write-silver()
-        Executor->>Storage: write-gold()
-    end
-
-    Runner->>Runner: release-lock()
-    Runner-->>CLI: result
-```
+> **Diagram:** See [`04-pipeline-execution-flow.mmd`](mmd-diagrams/architecture/04-pipeline-execution-flow.mmd)
 
 ## Medallion Data Flow
 
 Shows data transformation through Bronze → Silver → Gold layers:
 
-```mermaid
-flowchart LR
-    subgraph Sources["External Sources"]
-        ChEMBL[(ChEMBL)]
-        PubChem[(PubChem)]
-        UniProt[(UniProt)]
-        PubMed[(PubMed)]
-        CrossRef[(CrossRef)]
-        OpenAlex[(OpenAlex)]
-        S2[(Semantic Scholar)]
-    end
-
-    subgraph Bronze["Bronze Layer"]
-        BW[BronzeWriter]
-        BD[("JSONL+zstd")]
-    end
-
-    subgraph Silver["Silver Layer"]
-        DW[SilverWriter]
-        SD[("Delta Lake")]
-    end
-
-    subgraph Gold["Gold Layer"]
-        GW[GoldWriter]
-        GD[("Delta Lake")]
-    end
-
-    Sources --> BW --> BD
-    BD --> DW --> SD
-    SD --> GW --> GD
-```
+> **Diagram:** See [`03-medallion-data-flow.mmd`](mmd-diagrams/architecture/03-medallion-data-flow.mmd)
+> *(detailed version with DQ and quarantine)*
 
 ## Domain Layer (DDD)
 

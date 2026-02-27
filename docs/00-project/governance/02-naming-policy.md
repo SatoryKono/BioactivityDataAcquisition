@@ -71,9 +71,9 @@
 
 ### 3.2. Файлы конфигурации
 
-**Путь**: `configs/pipelines/{provider}/{entity}.yaml`
+**Путь**: `configs/entities/{provider}/{entity}.yaml`
 - Имя файла должно совпадать с именем сущности (entity).
-- **Пример**: `configs/pipelines/chembl/publication.yaml`.
+- **Пример**: `configs/entities/chembl/publication.yaml`.
 
 ---
 

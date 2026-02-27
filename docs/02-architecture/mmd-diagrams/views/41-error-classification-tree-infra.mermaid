@@ -1,0 +1,68 @@
+%% View: Infrastructure-Mapping | Parent: 41-error-classification-tree-full.mermaid
+%% @uniform width=140 height=56 max_title_len=11 max_desc_lines=0
+flowchart TB
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        N14["SCHEMA"]
+        N1["HTTP"]
+        N6["ERROR"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N2["QUARANTINE2"]
+        N3["LOCK"]
+        N4["LOCKACQ"]
+        N5["FAIL_FAST"]
+        N7["INFRA"]
+        N8["DOMAIN"]
+        N9["no"]
+        N10["classify"]
+        N11["retry"]
+        N12["another"]
+        N13["AUTH"]
+        N15["MISSING"]
+        N16["FORMAT"]
+        N17["EXHAUST"]
+        N18["RETRY"]
+        N19["RATE"]
+        N20["SERVER"]
+    end
+
+    N6 --> N1
+    N6 --> N8
+    N6 --> N7
+    N1 --> N9
+    N1 --> N10
+    N1 --> N11
+    N7 --> N12
+    N13 --> N5
+    N19 --> N18
+    N20 --> N18
+    N14 --> N2
+    N15 --> N2
+    N16 --> N2
+    N3 --> N5
+    N4 --> N5
+    N17 --> N5
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+
+    linkStyle 0 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 1 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 2 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 3 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 4 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 5 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 6 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 7 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 8 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 9 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 10 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 11 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 12 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 13 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 14 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 15 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4

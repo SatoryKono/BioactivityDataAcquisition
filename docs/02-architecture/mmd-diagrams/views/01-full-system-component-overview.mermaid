@@ -1,0 +1,73 @@
+%% View: Overview | Parent: 01-full-system-component-full.mermaid
+%% @uniform width=176 height=56 max_title_len=17 max_desc_lines=0
+flowchart TB
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        N8["DataSourcePort"]
+        N9["StoragePort"]
+        N10["LockPort"]
+    end
+
+    subgraph Application["Application Layer"]
+        direction TB
+        N2["PipelineRunner"]
+        N3["PipelineExecutor"]
+        N4["Orchestration"]
+        N6["PreflightService"]
+        N7["PostrunService"]
+        N11["Factories"]
+        N12["RecordProcessor"]
+        N13["BatchTransformer"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N5["LockManager"]
+        N14["ChemblAdapter"]
+    end
+
+    subgraph Composition["Composition Layer"]
+        direction TB
+        N1["Bootstrap"]
+    end
+
+    subgraph Interfaces["Interfaces Layer"]
+        direction TB
+        N15["UnifiedHTTPClient"]
+    end
+
+    N4 --> N2
+    N1 --> N11
+    N1 --> N2
+    N2 --> N3
+    N2 --> N5
+    N2 --> N6
+    N2 --> N7
+    N3 --> N12
+    N12 --> N13
+    N2 --> N8
+    N2 --> N9
+    N2 --> N10
+    N14 --> N15
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style Composition fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style Interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+
+    %% linkStyle: data 4,12 | orchestration 0-3,5-8 | di 9-11
+    linkStyle 0 stroke:#16a34a,stroke-width:2px
+    linkStyle 1 stroke:#16a34a,stroke-width:2px
+    linkStyle 2 stroke:#16a34a,stroke-width:2px
+    linkStyle 3 stroke:#16a34a,stroke-width:2px
+    linkStyle 4 stroke:#1E293B,stroke-width:2px
+    linkStyle 5 stroke:#16a34a,stroke-width:2px
+    linkStyle 6 stroke:#16a34a,stroke-width:2px
+    linkStyle 7 stroke:#16a34a,stroke-width:2px
+    linkStyle 8 stroke:#16a34a,stroke-width:2px
+    linkStyle 9 stroke:#7c3aed,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 10 stroke:#7c3aed,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 11 stroke:#7c3aed,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 12 stroke:#1E293B,stroke-width:2px

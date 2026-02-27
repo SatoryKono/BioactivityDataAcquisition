@@ -8,7 +8,7 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 flowchart TD
     subgraph Pipeline["Pipeline Execution"]
         B -->|Pass| C[BatchTransformer<br/>normalize & enrich]
@@ -42,10 +42,10 @@ flowchart TD
     end
 
     %% Styling
-    classDef success fill:#e8f5e9,stroke:#4CAF50,color:#1b5e20
-    classDef error fill:#ffebee,stroke:#FF6B6B,color:#b71c1c
-    classDef quarantine fill:#fff3e0,stroke:#FFA500,color:#e65100
-    classDef classify fill:#e3f2fd,stroke:#2196F3,color:#0d47a1
+    classDef success fill:#f0fdf4,stroke:#16a34a,color:#212121
+    classDef error fill:#ffe4e6,stroke:#dc2626,color:#212121
+    classDef quarantine fill:#fff7ed,stroke:#f59e0b,color:#212121
+    classDef classify fill:#eff6ff,stroke:#2563eb,color:#212121
 
     class H,G success
     class Critical,LogCritical error

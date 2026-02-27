@@ -28,8 +28,8 @@ tests/contract/silver-schemas/
 ├── test-validations.py            # Validation rules tests (~40 tests)
 ├── test-naming-conventions.py     # Naming consistency tests (~35 tests)
 ├── snapshots/                     # JSON snapshots (auto-generated)
-│   ├── chembl_activity_schema.json
-│   ├── chembl_molecule_schema.json
+│   ├── chembl_activity-schema.json
+│   ├── chembl_molecule-schema.json
 │   └── ...
 └── README.md                      # Detailed test documentation
 ```
@@ -172,7 +172,7 @@ SILVER-SCHEMAS = {
 pytest tests/contract/silver-schemas/test-schema-stability.py -k provider-entity
 
 # Verify snapshot created
-ls tests/contract/silver-schemas/snapshots/provider-entity_schema.json
+ls tests/contract/silver-schemas/snapshots/provider-entity-schema.json
 ```
 
 ### Step 4: Commit Together
@@ -180,7 +180,7 @@ ls tests/contract/silver-schemas/snapshots/provider-entity_schema.json
 ```bash
 git add src/bioetl/domain/schemas/provider/entity.py
 git add tests/contract/silver-schemas/conftest.py
-git add tests/contract/silver-schemas/snapshots/provider-entity_schema.json
+git add tests/contract/silver-schemas/snapshots/provider-entity-schema.json
 git commit -m "feat(schemas): add EntitySchema for Provider"
 ```
 
@@ -243,14 +243,14 @@ If breaking change:
 UPDATE-SNAPSHOTS=1 pytest tests/contract/silver-schemas/test-schema-stability.py -k chembl_activity
 
 # Verify snapshot updated
-git diff tests/contract/silver-schemas/snapshots/chembl_activity_schema.json
+git diff tests/contract/silver-schemas/snapshots/chembl_activity-schema.json
 ```
 
 ### Step 7: Commit with Context
 
 ```bash
 git add src/bioetl/domain/schemas/chembl/activity.py
-git add tests/contract/silver-schemas/snapshots/chembl_activity_schema.json
+git add tests/contract/silver-schemas/snapshots/chembl_activity-schema.json
 git commit -m "feat(schemas): add data-source-version to ActivitySchema
 
 - Added optional field for API version tracking

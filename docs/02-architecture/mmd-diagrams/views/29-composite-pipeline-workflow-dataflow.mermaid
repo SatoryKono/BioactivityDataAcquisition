@@ -1,0 +1,53 @@
+%% View: Data-Flow | Parent: 29-composite-pipeline-workflow-full.mermaid
+%% @uniform width=140 height=56 max_title_len=6 max_desc_lines=0
+flowchart TB
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        N11["SP"]
+    end
+
+    subgraph Application["Application Layer"]
+        direction TB
+        N1["Merge"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N2["Gold"]
+        N3["CCM"]
+        N4["Deps"]
+        N5["Enrich"]
+        N6["EC"]
+        N7["KEYS"]
+        N8["KE"]
+        N9["SB"]
+        N10["DC"]
+        N12["BOOT"]
+    end
+
+    N12 --> N11
+    N11 --> N9
+    N9 --> N10
+    N9 --> N8
+    N8 --> N7
+    N7 --> N6
+    N3 --> N4
+    N3 --> N5
+    N3 --> N1
+    N3 --> N2
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+
+    linkStyle 0 stroke:#1E293B,stroke-width:4px
+    linkStyle 1 stroke:#1E293B,stroke-width:4px
+    linkStyle 2 stroke:#1E293B,stroke-width:4px
+    linkStyle 3 stroke:#1E293B,stroke-width:4px
+    linkStyle 4 stroke:#1E293B,stroke-width:4px
+    linkStyle 5 stroke:#1E293B,stroke-width:4px
+    linkStyle 6 stroke:#1E293B,stroke-width:4px
+    linkStyle 7 stroke:#1E293B,stroke-width:4px
+    linkStyle 8 stroke:#1E293B,stroke-width:4px
+    linkStyle 9 stroke:#1E293B,stroke-width:4px

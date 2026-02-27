@@ -2,16 +2,16 @@
 
 ## Overview
 
-`configs/pipelines/_base.yaml` defines the canonical schema for all BioETL pipeline configs. Entity configs inherit defaults from `_base.yaml` and override only entity-specific values.
+`configs/pipelines/-base.yaml` defines the canonical schema for all BioETL pipeline configs. Entity configs inherit defaults from `-base.yaml` and override only entity-specific values.
 
 Inheritance chain:
 
-`_base.yaml` → `configs/pipelines/<provider>/<entity>.yaml`
+`-base.yaml` → `configs/pipelines/<provider>/<entity>.yaml`
 
 Recommended minimal fields in entity configs:
 
-- `pipeline_name`, `provider`, `entity_type`, `version`
-- `primary_keys`, `silver_table`, `gold_table`
+- `pipeline-name`, `provider`, `entity-type`, `version`
+- `primary-keys`, `silver-table`, `gold-table`
 - DQ overrides only when different from entity DQ defaults
 - Explicit path/config overrides only when conventions are insufficient
 
@@ -29,14 +29,14 @@ Migration table (Gold write mode):
 | Entity                                                                                                                                | Current Mode         | Recommended Mode     | Breaking | Migration                                             |
 | ------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | -------------------- | -------- | ----------------------------------------------------- |
 | publication (chembl/pubmed/crossref/openalex/semanticscholar)                                                                         | implicit `overwrite` | `scd2`               | Yes      | Bootstrap snapshot, затем SCD2 + backfill интервалов  |
-| reference dictionaries (chembl: assay, assay_parameters, cell_line, tissue, protein_class, subcellular_fraction)                      | implicit `overwrite` | `scd2`               | Yes      | Rebuild и включить versioned updates                  |
-| slowly evolving records (chembl: target, target_component, molecule, compound_record; uniprot: protein, idmapping; pubchem: compound) | implicit `overwrite` | `scd2`               | Yes      | Инициализировать version=1, далее писать новые версии |
+| reference dictionaries (chembl: assay, assay-parameters, cell-line, tissue, protein-class, subcellular-fraction)                      | implicit `overwrite` | `scd2`               | Yes      | Rebuild и включить versioned updates                  |
+| slowly evolving records (chembl: target, target-component, molecule, compound-record; uniprot: protein, idmapping; pubchem: compound) | implicit `overwrite` | `scd2`               | Yes      | Инициализировать version=1, далее писать новые версии |
 | high-volume facts (chembl: activity)                                                                                                  | implicit `overwrite` | `append`             | No       | Явно указать append                                   |
-| recomputed derived outputs (chembl: publication_similarity, publication_term)                                                         | implicit `overwrite` | explicit `overwrite` | No       | Явно указать overwrite                                |
+| recomputed derived outputs (chembl: publication-similarity, publication-term)                                                         | implicit `overwrite` | explicit `overwrite` | No       | Явно указать overwrite                                |
 
 Related ADRs:
 
-- [ADR-025: Pipeline Config Unification](../02-architecture/decisions/ADR-025-pipeline-config-unification.md)
+- [ADR-025: Pipeline Config Unification](../../02-architecture/decisions/ADR-025-pipeline-config-unification.md)
 - [ADR-027: DQ Rules Externalization](../02-architecture/decisions/ADR-027-dq-rules-externalization.md)
 - [ADR-028: Filter Rules Externalization](../02-architecture/decisions/ADR-028-filter-rules-externalization.md)
 - [ADR-029: Output Metadata Unification](../02-architecture/decisions/ADR-029-output-metadata-unification.md)
@@ -47,18 +47,18 @@ Related ADRs:
 
 Entity configs must define:
 
-- `pipeline_name`: unique identifier (`<provider>_<entity>`)
+- `pipeline-name`: unique identifier (`<provider>-<entity>`)
 - `provider`: source provider (`chembl`, `pubchem`, `uniprot`, ...)
-- `entity_type`: entity (`activity`, `assay`, `molecule`, ...)
+- `entity-type`: entity (`activity`, `assay`, `molecule`, ...)
 - `version`: semantic version
 
 ### Source
 
 - `source.type`: default `api`
-- `source.load_strategy`: `full` (default) or `incremental`
-- `source.watermark_field`: should be defined for incremental mode
+- `source.load-strategy`: `full` (default) or `incremental`
+- `source.watermark-field`: should be defined for incremental mode
 
-Provider-level source settings (`type`, `load_strategy`, rate limits, circuit breaker) are maintained in `configs/sources/<provider>.yaml`.
+Provider-level source settings (`type`, `load-strategy`, rate limits, circuit breaker) are maintained in `configs/sources/<provider>.yaml`.
 
 ### Transform
 
@@ -67,38 +67,38 @@ Provider-level source settings (`type`, `load_strategy`, rate limits, circuit br
 
 Typical step names used in documentation:
 
-- `normalize_units`
-- `validate_smiles`
+- `normalize-units`
+- `validate-smiles`
 - `deduplicate`
-- `enrich_metadata`
+- `enrich-metadata`
 
 ### Circuit Breaker
 
 Defaults:
 
-- `failure_threshold`: `5`
-- `recovery_timeout`: `300` seconds
+- `failure-threshold`: `5`
+- `recovery-timeout`: `300` seconds
 
 Provider-specific overrides are defined in source configs.
 
 ### Maintenance
 
-- `maintenance.auto_vacuum`: default `false`
-- `maintenance.vacuum_retention_days`: default `7`
+- `maintenance.auto-vacuum`: default `false`
+- `maintenance.vacuum-retention-days`: default `7`
 
 ## DQ
 
 Default DQ thresholds:
 
-- `soft_fail_threshold`: `0.05` (warning)
-- `hard_fail_threshold`: `0.20` (batch failure)
-- `strict_validation`: `false`
+- `soft-fail-threshold`: `0.05` (warning)
+- `hard-fail-threshold`: `0.20` (batch failure)
+- `strict-validation`: `false`
 
 Deviations from defaults should be documented in entity config rationale.
 
 ### Field-level validations
 
-`dq_overrides.field_validations` supports:
+`dq-overrides.field-validations` supports:
 
 - `range`: numeric min/max
 - `pattern`: regex validation
@@ -107,28 +107,28 @@ Deviations from defaults should be documented in entity config rationale.
 
 ### Cross-field validations
 
-`dq_overrides.cross_field_validations` supports conditions:
+`dq-overrides.cross-field-validations` supports conditions:
 
-- `all_present`
-- `any_present`
-- `mutually_exclusive`
-- `conditional_required`
+- `all-present`
+- `any-present`
+- `mutually-exclusive`
+- `conditional-required`
 - `custom`
 
 ### Conditional validations
 
-`dq_overrides.conditional_validations` applies checks when condition is met.
+`dq-overrides.conditional-validations` applies checks when condition is met.
 
 Supported operators:
 
 - `eq`
 - `ne`
 - `in`
-- `not_in`
+- `not-in`
 
 ### Invalid record policy
 
-`dq_overrides.invalid_record_policy` values:
+`dq-overrides.invalid-record-policy` values:
 
 - `quarantine` (default)
 - `skip`
@@ -136,36 +136,36 @@ Supported operators:
 
 ### DQ report
 
-`dq_overrides.report` defaults:
+`dq-overrides.report` defaults:
 
 - `enabled: true`
 - `format: json` (`json | yaml | csv`)
-- `include_sample_failures: true`
-- `sample_size: 10`
+- `include-sample-failures: true`
+- `sample-size: 10`
 
 ## Filters
 
 ### Input filter
 
-`input_filter` controls CSV-driven selective processing:
+`input-filter` controls CSV-driven selective processing:
 
 - `enabled`: default `false`
-- `batch_size`: default `100`
+- `batch-size`: default `100`
 - Entity-specific fields when enabled:
-  - `source_path`
-  - `column_name`
-  - `filter_field`
-  - `fallback_column` (optional)
+  - `source-path`
+  - `column-name`
+  - `filter-field`
+  - `fallback-column` (optional)
 
 ### Gold filters
 
 Gold filters are typically entity-specific and can include:
 
 - `columns`: allowed values per field
-- `ranges`: min/max with `include_min` / `include_max`
-- `required_fields`
-- `list_lengths`
-- `list_contains` (`mode: any|all`)
+- `ranges`: min/max with `include-min` / `include-max`
+- `required-fields`
+- `list-lengths`
+- `list-contains` (`mode: any|all`)
 
 Related ADR:
 
@@ -178,11 +178,11 @@ Related ADR:
 Defaults:
 
 - `format: jsonl`
-- `save_json: true`
+- `save-json: true`
 - `deterministic: true`
-- `save_metadata: true`
-- `dq_report.enabled: true`
-- `flat_structure: true`
+- `save-metadata: true`
+- `dq-report.enabled: true`
+- `flat-structure: true`
 
 Metadata block includes lineage, ownership, tags, retention and SLA placeholders.
 
@@ -192,22 +192,22 @@ Defaults:
 
 - `format: delta` (Delta Lake required)
 - `mode: merge`
-- `on_schema_mismatch: evolve`
+- `on-schema-mismatch: evolve`
 - `classification: public`
-- `forensic_retention: false` (true for critical tables with rationale)
+- `forensic-retention: false` (true for critical tables with rationale)
 - `deterministic: true`
-- `save_metadata: true`
-- `dq_report.enabled: true`
-- `csv_export.enabled: true`
-- `partition_by: []`
-- `sort_by.ascending: true`
-- `flat_structure: true`
+- `save-metadata: true`
+- `dq-report.enabled: true`
+- `csv-export.enabled: true`
+- `partition-by: []`
+- `sort-by.ascending: true`
+- `flat-structure: true`
 
 Entity config should define:
 
 - `path`
-- `primary_key`
-- `sort_by.columns`
+- `primary-key`
+- `sort-by.columns`
 
 ### Gold
 
@@ -218,11 +218,11 @@ Defaults:
 - `format: delta`
 - `mode: append`
 - `deterministic: true`
-- `save_metadata: true`
-- `dq_report.enabled: true`
-- `csv_export.enabled: true`
-- `sort_by.ascending: true`
-- `flat_structure: true`
+- `save-metadata: true`
+- `dq-report.enabled: true`
+- `csv-export.enabled: true`
+- `sort-by.ascending: true`
+- `flat-structure: true`
 
 History retention criteria for Gold mode selection:
 
@@ -231,66 +231,66 @@ History retention criteria for Gold mode selection:
 - Publication metadata -> `mode: scd2`
 - Recomputed aggregates -> `mode: overwrite`
 
-For `mode: scd2`, configure mandatory `scd_config` fields:
+For `mode: scd2`, configure mandatory `scd-config` fields:
 
 ```yaml
 sink:
   gold:
     mode: scd2
-    scd_config:
-      valid_from: _valid_from
-      valid_to: _valid_to
-      is_current: _is_current
-      version: _version
+    scd-config:
+      valid-from: -valid-from
+      valid-to: -valid-to
+      is-current: -is-current
+      version: -version
 ```
 
 Entity config should define:
 
 - `path`
-- `sort_by.columns`
+- `sort-by.columns`
 
 Migration table (Gold write mode):
 
 | Entity                                                                                                                                | Current Mode         | Recommended Mode     | Breaking | Migration                                             |
 | ------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | -------------------- | -------- | ----------------------------------------------------- |
 | publication (chembl/pubmed/crossref/openalex/semanticscholar)                                                                         | implicit `overwrite` | `scd2`               | Yes      | Bootstrap snapshot, затем SCD2 + backfill интервалов  |
-| reference dictionaries (chembl: assay, assay_parameters, cell_line, tissue, protein_class, subcellular_fraction)                      | implicit `overwrite` | `scd2`               | Yes      | Rebuild и включить versioned updates                  |
-| slowly evolving records (chembl: target, target_component, molecule, compound_record; uniprot: protein, idmapping; pubchem: compound) | implicit `overwrite` | `scd2`               | Yes      | Инициализировать version=1, далее писать новые версии |
+| reference dictionaries (chembl: assay, assay-parameters, cell-line, tissue, protein-class, subcellular-fraction)                      | implicit `overwrite` | `scd2`               | Yes      | Rebuild и включить versioned updates                  |
+| slowly evolving records (chembl: target, target-component, molecule, compound-record; uniprot: protein, idmapping; pubchem: compound) | implicit `overwrite` | `scd2`               | Yes      | Инициализировать version=1, далее писать новые версии |
 | high-volume facts (chembl: activity)                                                                                                  | implicit `overwrite` | `append`             | No       | Явно указать append                                   |
-| recomputed derived outputs (chembl: publication_similarity, publication_term)                                                         | implicit `overwrite` | explicit `overwrite` | No       | Явно указать overwrite                                |
+| recomputed derived outputs (chembl: publication-similarity, publication-term)                                                         | implicit `overwrite` | explicit `overwrite` | No       | Явно указать overwrite                                |
 
 Related ADRs:
 
-- [ADR-014: Deterministic Writes](../02-architecture/decisions/ADR-014-deterministic-writes.md)
+- [ADR-014: Deterministic Writes](../../02-architecture/decisions/ADR-014-deterministic-writes.md)
 - [ADR-018: Gold Strict Validation](../02-architecture/decisions/ADR-018-gold-strict-validation.md)
 - [ADR-029: Output Metadata Unification](../02-architecture/decisions/ADR-029-output-metadata-unification.md)
 
 ## Convention Defaults
 
-When `provider` and `entity_type` are set, config loader can auto-compute references and sink defaults.
+When `provider` and `entity-type` are set, config loader can auto-compute references and sink defaults.
 
 Auto-computed file references:
 
-- `source_file` → `../../sources/{provider}.yaml`
-- `dq_config_file` → `../../quality/entities/{provider}/{entity_type}.yaml`
-- `filter_config_file` → `../../filters/entities/{provider}/{entity_type}.yaml`
+- `source-file` → `../../sources/{provider}.yaml`
+- `dq-config-file` → `../../quality/entities/{provider}/{entity-type}.yaml`
+- `filter-config-file` → `../../filters/entities/{provider}/{entity-type}.yaml`
 
 Auto-computed sink paths:
 
-- `sink.bronze.path` → `data/output/bronze/{provider}/{entity_type}`
-- `sink.silver.path` → `data/output/silver/{provider}/{entity_type}`
-- `sink.gold.path` → `data/output/gold/{provider}/{entity_type}`
-- `sink.silver.csv_export.path` → `{sink.silver.path}`
-- `sink.gold.csv_export.path` → `{sink.gold.path}`
+- `sink.bronze.path` → `data/output/bronze/{provider}/{entity-type}`
+- `sink.silver.path` → `data/output/silver/{provider}/{entity-type}`
+- `sink.gold.path` → `data/output/gold/{provider}/{entity-type}`
+- `sink.silver.csv-export.path` → `{sink.silver.path}`
+- `sink.gold.csv-export.path` → `{sink.gold.path}`
 
 Auto-propagated primary keys:
 
-- `sink.silver.primary_key` ← `primary_keys`
-- `sink.silver.sort_by.columns` ← `primary_keys`
-- `sink.gold.sort_by.columns` ← `primary_keys`
+- `sink.silver.primary-key` ← `primary-keys`
+- `sink.silver.sort-by.columns` ← `primary-keys`
+- `sink.gold.sort-by.columns` ← `primary-keys`
 
 Rule loading:
 
-- `input_filter` and `gold_filters` are loaded from `filter_config_file`
-- `dq_overrides` are loaded from `dq_config_file`
+- `input-filter` and `gold-filters` are loaded from `filter-config-file`
+- `dq-overrides` are loaded from `dq-config-file`
 - Inline pipeline values are merged on top of file-based defaults

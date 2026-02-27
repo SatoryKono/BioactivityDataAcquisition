@@ -1,6 +1,6 @@
 # BioETL Diagrams — PNG Index
 
-_Generated: 2026-02-26T13:35:40+03:00_
+_Generated: 2026-02-27T18:43:48+03:00_
 
 ## High Level Hexagonal
 
@@ -122,9 +122,21 @@ _Generated: 2026-02-26T13:35:40+03:00_
 
 ---
 
+## 13adata Storage Ports
+
+![13a-data-storage-ports](./13a-data-storage-ports.png)
+
+---
+
 ## 13aport Contracts Data Sources
 
 ![13a-port-contracts-data-sources](./13a-port-contracts-data-sources.png)
+
+---
+
+## 13boperational Ports
+
+![13b-operational-ports](./13b-operational-ports.png)
 
 ---
 
@@ -137,6 +149,12 @@ _Generated: 2026-02-26T13:35:40+03:00_
 ## 13cport Contracts Observability
 
 ![13c-port-contracts-observability](./13c-port-contracts-observability.png)
+
+---
+
+## 13cvalidation Dq Ports
+
+![13c-validation-dq-ports](./13c-validation-dq-ports.png)
 
 ---
 

@@ -29,7 +29,7 @@ This document outlines the standard operating procedures for responding to produ
 *   **Diagnosis**: The configured `requests-per-second` exceeds the provider's current allowance.
 *   **Action**:
     1.  Check the provider's status page for global issues.
-    2.  Reduce the rate limit in the pipeline config (`configs/pipelines/{name}.yaml`):
+    2.  Reduce the rate limit in the pipeline config (`configs/entities/{name}.yaml`):
         ```yaml
         rate-limit:
           requests-per-second: 2  # Decrease from 5

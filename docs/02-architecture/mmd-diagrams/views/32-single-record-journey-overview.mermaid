@@ -1,0 +1,48 @@
+%% View: Overview | Parent: 32-single-record-journey-full.mermaid
+%% @uniform width=140 height=56 max_title_len=5 max_desc_lines=0
+%%{init: {'theme': 'neutral', 'flowchart': {'defaultRenderer': 'elk'}}}%%
+flowchart TB
+
+    subgraph Application["Application Layer"]
+        direction TB
+        N2["ST"]
+        N4["BF"]
+        N5["BT"]
+        N6["TI"]
+        N7["NORM"]
+        N8["META"]
+        N9["HASH"]
+        N11["CLEAN"]
+        N12["WARN"]
+        N13["TFG"]
+        N14["GV"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N1["SW"]
+        N3["BW"]
+        N10["PSV"]
+        N15["GW"]
+    end
+
+    N3 --> N4
+    N4 --> N5
+    N5 --> N6
+    N6 --> N7
+    N7 --> N8
+    N8 --> N9
+    N9 --> N10
+    N11 --> N1
+    N12 --> N1
+    N1 --> N2
+    N2 --> N13
+    N13 --> N14
+    N14 --> N15
+
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+
+    %% linkStyle: primary 0-6,9-12 | routing 7-8
+    linkStyle 0,1,2,3,4,5,6,9,10,11,12 stroke:#1E293B,stroke-width:3px
+    linkStyle 7,8 stroke:#16a34a,stroke-width:2px

@@ -1,0 +1,59 @@
+%% View: Overview | Parent: 48-composite-phase-lifecycle-full.mermaid
+%% @uniform width=160 height=56 max_title_len=15 max_desc_lines=0
+flowchart TB
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        N14["error"]
+        N5["idle"]
+    end
+
+    subgraph Application["Application Layer"]
+        direction TB
+        N1["FAILED"]
+        N2["*"]
+        N3["NOT_STARTED"]
+        N4["COMPLETED"]
+        N6["extracting_seed"]
+        N7["keys_extracted"]
+        N8["running_deps"]
+        N9["deps_done"]
+        N10["fan_out"]
+        N11["enrichers_done"]
+        N12["merge_active"]
+        N13["success"]
+        N15["ENRICHING"]
+    end
+
+    N2 --> N3
+    N15 --> N1
+    N4 --> N2
+    N1 --> N2
+    N2 --> N5
+    N2 --> N6
+    N2 --> N7
+    N2 --> N8
+    N2 --> N9
+    N2 --> N10
+    N2 --> N11
+    N2 --> N12
+    N2 --> N13
+    N2 --> N14
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+
+    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 8 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 10 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 11 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 12 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 13 stroke:#475569,stroke-width:2px,stroke-dasharray:5

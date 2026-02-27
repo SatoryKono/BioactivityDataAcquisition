@@ -15,7 +15,7 @@
 
 ## 2. Конфигурация
 
-**Файл:** `configs/pipelines/chembl/assay.yaml`
+**Файл:** `configs/entities/chembl/assay.yaml`
 
 ```yaml
 pipeline-name: chembl_assay
@@ -409,14 +409,14 @@ def extract(self, -context, record) -> Watermark:
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/assay.yaml` |
+| Конфигурация | `configs/entities/chembl/assay.yaml` |
 | Сущность | `src/bioetl/domain/entities.py` |
 | Трансформер | `src/bioetl/application/pipelines/chembl/assay-transformer.py` |
 | Gold-фильтр | `src/bioetl/application/pipelines/chembl/assay-filter.py` |
 | Watermark | `src/bioetl/application/pipelines/chembl/assay-watermark.py` |
 | Silver Schema | `src/bioetl/infrastructure/schemas/silver.py` |
 | Gold Schema | `src/bioetl/infrastructure/schemas/gold.py` |
-| Data Contract | `docs/04-reference/contracts/gold/chembl_assay_v1.0.json` |
+| Data Contract | `docs/04-reference/contracts/gold/chembl_assay-v1.0.json` |
 
 ---
 

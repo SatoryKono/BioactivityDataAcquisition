@@ -14,7 +14,7 @@ Merges ChEMBL molecules with PubChem compound data to produce a composite molecu
 | Provider | `composite` |
 | Entity | `molecule` |
 | Version | `1.0.0` |
-| Config | `configs/pipelines/composite/molecule.yaml` |
+| Config | `configs/composites/molecule.yaml` |
 
 ## Seed and Enrichers
 

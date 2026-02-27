@@ -8,24 +8,27 @@
 %% @view    storage
 %% @parent  13-port-protocol-contracts.mmd
 %% @nodes   9
-%% @uniform width=184 height=56 max_title_len=18 max_desc_lines=0
+%% @uniform width=184 height=56 max_title_len=18 max_desc_lines=1
 
 graph LR
     subgraph Domain["Domain Layer"]
-        STP["StoragePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        DRP["DeltaReaderPort&nbsp;&nbsp;&nbsp;"]
-        MWP["MetadataWriterPort"]
+        STP["StoragePort"]:::size-sm
+        DRP["DeltaReaderPort"]:::size-sm
+        MWP["MetadataWriterPort"]:::size-sm
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        BW["BronzeWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        DR_I["DeltaReader&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        MW_I["MetadataWriter&nbsp;&nbsp;&nbsp;&nbsp;"]
+        BW["BronzeWriter"]:::size-sm
+        DR_I["DeltaReader"]:::size-sm
+        MW_I["MetadataWriter"]:::size-sm
     end
 
     STP --- BW & SW & GW
     DRP --- DR_I
     MWP --- MW_I & NOMW
 
-    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    classDef domain fill:#f5f3ff,stroke:#7c3aed
+    classDef infra fill:#fff1f2,stroke:#dc2626
+
+    class STP,DRP,MWP domain
+    class BW,SW,GW,DR_I,MW_I,NOMW infra

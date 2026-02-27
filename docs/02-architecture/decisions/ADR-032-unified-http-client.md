@@ -108,7 +108,7 @@ adapter = ChEMBLAdapter(http-client=mock-client)
 class UnifiedHTTPClient:
     rate-limiter: RateLimiterPort
     circuit-breaker: CircuitBreakerPort
-    retry-config: RetryConfig = field(default_factory=RetryConfig)
+    retry-config: RetryConfig = field(default-factory=RetryConfig)
     timeout: float = 30.0
     run-id: RunID | None = None
     user-agent: str = "BioETL/5.0.0"

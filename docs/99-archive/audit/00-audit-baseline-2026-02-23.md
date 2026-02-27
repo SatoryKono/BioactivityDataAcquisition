@@ -3,11 +3,11 @@
 **Mode:** AUDIT | **Phase:** baseline | **Scope:** `src/bioetl/`
 
 ```yaml
-code_review:
+code-review:
   date: "2026-02-23"
   mode: "AUDIT"
   scope: "src/bioetl/"
-  task_id: "full-audit-2026-02-23"
+  task-id: "full-audit-2026-02-23"
   phase: "baseline"
   status: "PASS"
 ```
@@ -34,44 +34,44 @@ code_review:
 
 | Test Suite | Passed | Failed | Skipped | Notes |
 |-----------|--------|--------|---------|-------|
-| `test_layer_dependencies.py` | 16 | 0 | 1 | Vulture skipped (not installed) |
-| `test_forbidden_imports.py` | 7 | 0 | 0 | All import isolation checks pass |
-| `test_domain_purity.py` | 4 | 0 | 1 | Cyclomatic complexity skipped (radon not installed) |
-| `test_antipatterns.py` | 3 | 1 | 0 | `test_no_hardcoded_secrets` fails -- detect_secrets not installed |
-| `test_di_compliance.py` | 10 | 0 | 0 | All DI checks pass |
-| `test_di_constructors.py` | 6 | 0 | 0 | All constructor checks pass |
-| `test_di_discipline.py` | 1 | 0 | 0 | Service creation isolation verified |
-| `test_naming_conventions.py` | 3 | 0 | 0 | Suffixes, snake_case, UPPER_SNAKE pass |
-| `test_no_structlog_in_application_interfaces.py` | 5 | 0 | 0 | No structlog in app/interfaces |
-| `test_no_print_in_docstrings.py` | 5 | 0 | 0 | All layers verified |
-| `test_base_pipeline_purity.py` | PASS | 0 | 0 | |
-| `test_bootstrap_layer_boundaries.py` | PASS | 0 | 0 | |
-| `test_code_formatting.py` | PASS | 0 | 0 | |
-| `test_code_metrics.py` | PASS | 0 | 0 | |
-| `test_composite_layer_boundaries.py` | PASS | 0 | 0 | |
-| `test_composition_factory_import_boundaries.py` | PASS | 0 | 0 | |
-| `test_env_var_centralization.py` | PASS | 0 | 0 | |
-| `test_factory_validator_enforcement.py` | PASS | 0 | 0 | |
-| `test_interfaces_no_infrastructure.py` | 15 | 2 | 0 | 2 failures = pandera not installed |
-| `test_no_datetime_now_in_infrastructure.py` | PASS | 0 | 0 | |
-| `test_no_fstring_in_logs.py` | PASS | 0 | 0 | |
-| `test_no_logging_getlogger_in_infrastructure.py` | PASS | 0 | 0 | |
-| `test_no_random_in_writers.py` | PASS | 0 | 0 | |
-| `test_no_side_effects_in_composition.py` | PASS | 0 | 0 | |
-| `test_no_transformer_fallback.py` | PASS | 0 | 0 | |
-| `test_performance.py` | PASS | 0 | varies | |
-| `test_tracing_enforcement.py` | 12 | 5 | 1 | 5 failures = pandera not installed |
-| `test_write_mode_types.py` | 0 | 6 | 0 | All 6 = pandera not installed |
-| `test_domain_public_api.py` | 0 | 7 | 0 | All 7 = pandera not installed |
-| `test_adapter_contracts.py` | PASS | 0 | varies | |
-| `test_aggregate_boundaries.py` | PASS | 0 | 0 | |
-| `test_docs_version_sync.py` | PASS | 0 | 0 | |
-| `test_documentation.py` | PASS | 0 | varies | |
-| `test_documentation_sync.py` | PASS | 0 | 0 | |
+| `test-layer-dependencies.py` | 16 | 0 | 1 | Vulture skipped (not installed) |
+| `test-forbidden-imports.py` | 7 | 0 | 0 | All import isolation checks pass |
+| `test-domain-purity.py` | 4 | 0 | 1 | Cyclomatic complexity skipped (radon not installed) |
+| `test-antipatterns.py` | 3 | 1 | 0 | `test-no-hardcoded-secrets` fails -- detect-secrets not installed |
+| `test-di-compliance.py` | 10 | 0 | 0 | All DI checks pass |
+| `test-di-constructors.py` | 6 | 0 | 0 | All constructor checks pass |
+| `test-di-discipline.py` | 1 | 0 | 0 | Service creation isolation verified |
+| `test-naming-conventions.py` | 3 | 0 | 0 | Suffixes, snake-case, UPPER-SNAKE pass |
+| `test-no-structlog-in-application-interfaces.py` | 5 | 0 | 0 | No structlog in app/interfaces |
+| `test-no-print-in-docstrings.py` | 5 | 0 | 0 | All layers verified |
+| `test-base-pipeline-purity.py` | PASS | 0 | 0 | |
+| `test-bootstrap-layer-boundaries.py` | PASS | 0 | 0 | |
+| `test-code-formatting.py` | PASS | 0 | 0 | |
+| `test-code-metrics.py` | PASS | 0 | 0 | |
+| `test-composite-layer-boundaries.py` | PASS | 0 | 0 | |
+| `test-composition-factory-import-boundaries.py` | PASS | 0 | 0 | |
+| `test-env-var-centralization.py` | PASS | 0 | 0 | |
+| `test-factory-validator-enforcement.py` | PASS | 0 | 0 | |
+| `test-interfaces-no-infrastructure.py` | 15 | 2 | 0 | 2 failures = pandera not installed |
+| `test-no-datetime-now-in-infrastructure.py` | PASS | 0 | 0 | |
+| `test-no-fstring-in-logs.py` | PASS | 0 | 0 | |
+| `test-no-logging-getlogger-in-infrastructure.py` | PASS | 0 | 0 | |
+| `test-no-random-in-writers.py` | PASS | 0 | 0 | |
+| `test-no-side-effects-in-composition.py` | PASS | 0 | 0 | |
+| `test-no-transformer-fallback.py` | PASS | 0 | 0 | |
+| `test-performance.py` | PASS | 0 | varies | |
+| `test-tracing-enforcement.py` | 12 | 5 | 1 | 5 failures = pandera not installed |
+| `test-write-mode-types.py` | 0 | 6 | 0 | All 6 = pandera not installed |
+| `test-domain-public-api.py` | 0 | 7 | 0 | All 7 = pandera not installed |
+| `test-adapter-contracts.py` | PASS | 0 | varies | |
+| `test-aggregate-boundaries.py` | PASS | 0 | 0 | |
+| `test-docs-version-sync.py` | PASS | 0 | 0 | |
+| `test-documentation.py` | PASS | 0 | varies | |
+| `test-documentation-sync.py` | PASS | 0 | 0 | |
 
-**Totals (tests that could run):** 179 passed, 22 failed (all due to missing deps: pandera/pandas/pyarrow/detect_secrets), 11 skipped
+**Totals (tests that could run):** 179 passed, 22 failed (all due to missing deps: pandera/pandas/pyarrow/detect-secrets), 11 skipped
 
-**Conclusion:** All architecture tests PASS when dependencies are available. Failures are purely environment-related (CI sandbox lacks pandera, pandas, pyarrow, hypothesis, detect_secrets, radon, vulture, yaml, orjson).
+**Conclusion:** All architecture tests PASS when dependencies are available. Failures are purely environment-related (CI sandbox lacks pandera, pandas, pyarrow, hypothesis, detect-secrets, radon, vulture, yaml, orjson).
 
 ---
 
@@ -85,12 +85,12 @@ code_review:
 - **Rule Violated:** TYPE-003 / RULES.md mypy --strict compliance
 - **Evidence:**
   ```
-  src/bioetl/__init__.py:13: error: Unused "type: ignore[import-untyped]" comment  [unused-ignore]
-  src/bioetl/__init__.py:61: error: Unused "type: ignore" comment  [unused-ignore]
-  src/bioetl/__init__.py:64: error: Unused "type: ignore" comment  [unused-ignore]
+  src/bioetl/--init--.py:13: error: Unused "type: ignore[import-untyped]" comment  [unused-ignore]
+  src/bioetl/--init--.py:61: error: Unused "type: ignore" comment  [unused-ignore]
+  src/bioetl/--init--.py:64: error: Unused "type: ignore" comment  [unused-ignore]
   src/bioetl/domain/ports/storage.py:235: error: Unused "type: ignore" comment  [unused-ignore]
-  src/bioetl/infrastructure/system/memory_monitor.py:147: error: Unused "type: ignore" comment  [unused-ignore]
-  src/bioetl/composition/factories/storage_adapter.py:281: error: Unused "type: ignore" comment  [unused-ignore]
+  src/bioetl/infrastructure/system/memory-monitor.py:147: error: Unused "type: ignore" comment  [unused-ignore]
+  src/bioetl/composition/factories/storage-adapter.py:281: error: Unused "type: ignore" comment  [unused-ignore]
   ```
 - **Verification 1:**
   - Command: `mypy --strict src/bioetl/ 2>&1 | grep "unused-ignore"`
@@ -108,10 +108,10 @@ code_review:
 - **Rule Violated:** TYPE-003 / RULES.md mypy --strict compliance
 - **Evidence:**
   ```
-  src/bioetl/infrastructure/schemas/pipeline_contract_policy.py:12: error: Class cannot subclass "BaseModel" (has type "Any")  [misc]
-  src/bioetl/domain/schemas/uniprot/_xrefs.py:12: error: Class cannot subclass "DataFrameModel" (has type "Any")  [misc]
-  src/bioetl/domain/schemas/uniprot/_features.py:15: error: Class cannot subclass "DataFrameModel" (has type "Any")  [misc]
-  src/bioetl/domain/schemas/uniprot/_annotations.py:12: error: Class cannot subclass "DataFrameModel" (has type "Any")  [misc]
+  src/bioetl/infrastructure/schemas/pipeline-contract-policy.py:12: error: Class cannot subclass "BaseModel" (has type "Any")  [misc]
+  src/bioetl/domain/schemas/uniprot/-xrefs.py:12: error: Class cannot subclass "DataFrameModel" (has type "Any")  [misc]
+  src/bioetl/domain/schemas/uniprot/-features.py:15: error: Class cannot subclass "DataFrameModel" (has type "Any")  [misc]
+  src/bioetl/domain/schemas/uniprot/-annotations.py:12: error: Class cannot subclass "DataFrameModel" (has type "Any")  [misc]
   ```
 - **Verification 1:**
   - Command: `mypy --strict src/bioetl/ 2>&1 | grep "has type .Any."`
@@ -130,27 +130,27 @@ code_review:
 - **Evidence (sample):**
   ```python
   # src/bioetl/application/composite/merger.py:86
-  gold_schema: Any | None = None,
+  gold-schema: Any | None = None,
 
-  # src/bioetl/application/core/base_transformer.py:655
+  # src/bioetl/application/core/base-transformer.py:655
   self, entity: Any
 
-  # src/bioetl/application/pipelines/chembl/publication_transformer.py:164
-  contract_policy: Any = None,
+  # src/bioetl/application/pipelines/chembl/publication-transformer.py:164
+  contract-policy: Any = None,
 
   # src/bioetl/application/pipelines/crossref/transformer.py:79
-  contract_policy: Any = None,
+  contract-policy: Any = None,
 
-  # Multiple transformers: entity_to_silver_record(self, entity: Any) -> dict[str, Any]
+  # Multiple transformers: entity-to-silver-record(self, entity: Any) -> dict[str, Any]
   ```
 - **Verification 1:**
-  - Command: `grep -rn ": Any\|-> Any" src/bioetl/ --include="*.py" | grep -v "#.*Any\|TYPE_CHECKING\|test\|__init__.py\|# noqa" | wc -l`
+  - Command: `grep -rn ": Any\|-> Any" src/bioetl/ --include="*.py" | grep -v "#.*Any\|TYPE-CHECKING\|test\|--init--.py\|# noqa" | wc -l`
   - Result: 95 occurrences
 - **Verification 2:**
-  - Command: Manual review of sample files -- `contract_policy: Any = None` appears in all transformers without comment, `entity: Any` in entity_to_silver_record methods.
+  - Command: Manual review of sample files -- `contract-policy: Any = None` appears in all transformers without comment, `entity: Any` in entity-to-silver-record methods.
   - Result: Most are legitimate patterns (JSON data, external API types) but lack the required `# Any: <reason>` comment
 - **Recommendation:** Add justification comments to the most common patterns:
-  - `contract_policy: Any = None  # Any: generic policy protocol, typed at factory level`
+  - `contract-policy: Any = None  # Any: generic policy protocol, typed at factory level`
   - `entity: Any  # Any: polymorphic domain entity, concrete type known at transformer level`
   - `dict[str, Any]  # Any: JSON-originated data with heterogeneous values`
   - Consider creating `TypeAlias` for common patterns (e.g., `SilverRecord = dict[str, Any]`)
@@ -168,29 +168,29 @@ All 7 layer boundary checks pass. No violations found:
 
 ### ARCH-002: Domain Purity -- CLEAN
 - No HTTP libraries (requests, httpx, aiohttp) in domain
-- No file I/O (open(), read_text, write_text) in domain (the `_assert_open` matches are method names, not file I/O)
+- No file I/O (open(), read-text, write-text) in domain (the `-assert-open` matches are method names, not file I/O)
 - No structlog in domain
 
 ### ARCH-003: Port Protocol Naming -- CLEAN
 All Protocols in `domain/ports/` use `*Port` suffix.
 
 ### ARCH-004: Adapter Health Checks -- CLEAN
-All HTTP adapters inherit from `BaseHttpAdapter` or `BaseSyncAdapter` which include `HealthCheckProviderMixin` providing standardized `health_check()`. Provider-specific health logic exists in dedicated files (e.g., `chembl/health.py`, `pubmed/_health.py`).
+All HTTP adapters inherit from `BaseHttpAdapter` or `BaseSyncAdapter` which include `HealthCheckProviderMixin` providing standardized `health-check()`. Provider-specific health logic exists in dedicated files (e.g., `chembl/health.py`, `pubmed/-health.py`).
 
 ### ARCH-005: Composition Root Isolation -- CLEAN
 No `Factory()` instantiation calls found in application or domain layers. Factory references in application are docstrings or injected factory parameters.
 
 ### ARCH-006 / AP-007: Silver Layer ACID -- CLEAN
-No raw `to_parquet`/`write_parquet` calls targeting Silver layer found.
+No raw `to-parquet`/`write-parquet` calls targeting Silver layer found.
 
 ### ARCH-007: Medallion Clear Policy -- NOT TESTED
-Requires runtime integration testing with full dependencies. Static analysis shows proper `run_type` handling in pipeline code.
+Requires runtime integration testing with full dependencies. Static analysis shows proper `run-type` handling in pipeline code.
 
 ### ARCH-008: Single Source Imports -- CLEAN
 `grep -rn "from bioetl.domain.ports\." src/bioetl/ --include="*.py" | grep -v "domain/ports/"` returns no results. All external port imports use the facade `from bioetl.domain.ports import X`.
 
 ### AP-001 / DI-001: Hard-coded Constructors -- CLEAN
-Initial grep found internal helper class composition (e.g., `EnricherDeduplicator(logger)`, `BatchMetricsRecorder(...)` in `batch_executor.py`). All are:
+Initial grep found internal helper class composition (e.g., `EnricherDeduplicator(logger)`, `BatchMetricsRecorder(...)` in `batch-executor.py`). All are:
 - Same-layer application helper classes (not infrastructure dependencies)
 - Accept injected dependencies (logger, metrics, etc.)
 - Represent internal decomposition of large classes per EXC-005
@@ -203,10 +203,10 @@ No structlog imports in application or interfaces layers.
 See ARCH-001 above.
 
 ### AP-004: Sentinel Values -- CLEAN
-Only match: `COMPRESSION_THREADS = -1` in `bronze_writer.py` -- this is a zstd library constant meaning "auto-detect CPU cores", not a sentinel value. **Valid-by-design (EXC-015).**
+Only match: `COMPRESSION-THREADS = -1` in `bronze-writer.py` -- this is a zstd library constant meaning "auto-detect CPU cores", not a sentinel value. **Valid-by-design (EXC-015).**
 
 ### AP-005: Hardcoded Secrets -- CLEAN
-No hardcoded passwords, api_keys, or secrets found. Architecture test `test_no_hardcoded_secrets` cannot run without `detect_secrets` module.
+No hardcoded passwords, api-keys, or secrets found. Architecture test `test-no-hardcoded-secrets` cannot run without `detect-secrets` module.
 
 ### AP-006: Print Statements -- CLEAN
 No `print()` statements found in production code.
@@ -227,13 +227,13 @@ No module-level constructor calls in application or domain layers.
 No factory instantiation outside composition layer.
 
 ### NAME-001: Class Suffixes -- CLEAN
-Architecture test `test_class_naming_suffixes` PASSES. Some classes without standard suffixes are legitimate domain concepts (e.g., `FencingToken`, `ActivityValue`, `ConfidenceScore` are value objects, `CircuitBreaker` is a well-known pattern name).
+Architecture test `test-class-naming-suffixes` PASSES. Some classes without standard suffixes are legitimate domain concepts (e.g., `FencingToken`, `ActivityValue`, `ConfidenceScore` are value objects, `CircuitBreaker` is a well-known pattern name).
 
 ### NAME-003: Module Naming -- CLEAN
-Architecture test `test_module_naming_snake_case` PASSES. No `utils.py`, `helpers.py`, or `misc.py` files found.
+Architecture test `test-module-naming-snake-case` PASSES. No `utils.py`, `helpers.py`, or `misc.py` files found.
 
 ### NAME-005: Constants -- CLEAN
-Architecture test `test_constants_upper_snake_case` PASSES.
+Architecture test `test-constants-upper-snake-case` PASSES.
 
 ### NAME-006: Enum Values -- CLEAN
 No lowercase enum values found.
@@ -247,10 +247,10 @@ The following checks could not be fully executed due to missing dependencies in 
 | Check | Missing Dependency | Impact |
 |-------|--------------------|--------|
 | Architecture tests (20 of 334) | pandera, pandas, pyarrow, hypothesis, yaml, orjson | Collection errors, NOT code issues |
-| `test_no_hardcoded_secrets` | detect_secrets | Could not run security scan |
+| `test-no-hardcoded-secrets` | detect-secrets | Could not run security scan |
 | Coverage threshold (TEST-001) | Full test suite deps | Cannot verify >=85% coverage |
-| `test_dead_code_vulture` | vulture | Skipped |
-| `test_cyclomatic_complexity_domain_layer` | radon | Skipped |
+| `test-dead-code-vulture` | vulture | Skipped |
+| `test-cyclomatic-complexity-domain-layer` | radon | Skipped |
 
 ---
 
@@ -268,16 +268,16 @@ scores:
       imports CLEAN. 179 architecture tests pass (failures are env-related).
     deductions: "None"
 
-  anti_patterns:
+  anti-patterns:
     score: "10/10"
     weight: "25%"
     notes: >
-      No sentinel values (COMPRESSION_THREADS=-1 is valid zstd constant).
+      No sentinel values (COMPRESSION-THREADS=-1 is valid zstd constant).
       No hardcoded secrets. No print() in production. No raw Parquet in Silver.
       No blocking I/O in async. No structlog in app/interfaces.
     deductions: "None"
 
-  di_violations:
+  di-violations:
     score: "10/10"
     weight: "20%"
     notes: >
@@ -291,7 +291,7 @@ scores:
     weight: "10%"
     notes: >
       Architecture tests for naming pass. Class suffixes correct. Module naming
-      snake_case. Constants UPPER_SNAKE_CASE. Enum values UPPER_SNAKE_CASE.
+      snake-case. Constants UPPER-SNAKE-CASE. Enum values UPPER-SNAKE-CASE.
     deductions: "None"
 
   types:
@@ -315,7 +315,7 @@ scores:
       blocked by missing dependencies (not a code issue).
     deductions: "None"
 
-weighted_total: "9.85/10"
+weighted-total: "9.85/10"
 ```
 
 ### Score Calculation
@@ -356,7 +356,7 @@ The BioETL codebase is in **excellent** architectural health. All critical invar
 
 ### Recommendations (non-blocking)
 
-1. **AUD-001 (quick fix):** Remove 6 unused `# type: ignore` comments from `__init__.py`, `storage.py`, `memory_monitor.py`, `storage_adapter.py`.
+1. **AUD-001 (quick fix):** Remove 6 unused `# type: ignore` comments from `--init--.py`, `storage.py`, `memory-monitor.py`, `storage-adapter.py`.
 2. **AUD-002 (low priority):** Add `# type: ignore[misc]` with explanatory comments to the 4 pandera/pydantic subclass lines, or await upstream type stubs.
 3. **AUD-003 (medium priority):** Add `# Any: <reason>` comments to the most common `Any` usage patterns. Consider introducing type aliases for recurring patterns like `SilverRecord = dict[str, Any]`.
 

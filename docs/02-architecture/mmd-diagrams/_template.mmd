@@ -17,26 +17,52 @@
 %%   Colour scheme: see README.md § Colour Scheme
 %%
 %% Subgraph palette (copy-paste as needed):
-%%   Domain:         fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-%%   Application:    fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-%%   Infrastructure: fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-%%   Composition:    fill:#fff3e0,stroke:#e65100,stroke-width:2px
-%%   Interfaces:     fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
-%%   External:       fill:#eceff1,stroke:#455a64,stroke-width:2px
-%%   Bronze:         fill:#fff3e0,stroke:#e65100,stroke-width:2px
-%%   Silver:         fill:#eceff1,stroke:#607d8b,stroke-width:2px
-%%   Gold:           fill:#fff8e1,stroke:#f9a825,stroke-width:2px
-%%   Quarantine:     fill:#ffebee,stroke:#d32f2f,stroke-width:2px
+%%   Domain:         fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+%%   Application:    fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+%%   Infrastructure: fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+%%   Composition:    fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+%%   Interfaces:     fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+%%   External:       fill:#f1f5f9,stroke:#64748b,stroke-width:2px
+%%   Bronze:         fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+%%   Silver:         fill:#f8fafc,stroke:#475569,stroke-width:2px
+%%   Gold:           fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+%%   Quarantine:     fill:#ffe4e6,stroke:#e11d48,stroke-width:2px
 %%
 %% linkStyle weights (see 00-legend.mermaid):
 %%   data flow:      stroke:#1E293B,stroke-width:2px
-%%   orchestration:  stroke:#2e7d32,stroke-width:2px
-%%   DI/implements:  stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+%%   orchestration:  stroke:#16a34a,stroke-width:2px
+%%   DI/implements:  stroke:#7c3aed,stroke-width:1.5px,stroke-dasharray:5
 %%   observability:  stroke:#94A3B8,stroke-width:1px
-%%   error/quarant:  stroke:#c62828,stroke-width:2px,stroke-dasharray:4
+%%   error/quarant:  stroke:#dc2626,stroke-width:2px,stroke-dasharray:4
+
+%% classDef naming convention:
+%%
+%%   Tier 1 — Layer palette (flowchart with architecture layers):
+%%     classDef domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+%%     classDef app    fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+%%     classDef infra  fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+%%     classDef comp   fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+%%     classDef iface  fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+%%     classDef ext    fill:#f1f5f9,stroke:#64748b,stroke-width:1.5px
+%%
+%%   Tier 2 — Medallion palette (data-flow diagrams):
+%%     classDef bronze     fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+%%     classDef silver     fill:#f8fafc,stroke:#475569,stroke-width:2px
+%%     classDef gold       fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+%%     classDef quarantine fill:#ffe4e6,stroke:#e11d48,stroke-width:2px
+%%
+%%   Tier 3 — Semantic (free naming; colours MUST come from Tier 1/2):
+%%     e.g. port, base, adapter, mixin, decorator, pipeline, factory
+%%
+%%   Size tiers (CSS-driven, see theme/custom.css):
+%%     :::size-sm — 1 line label (min 80x180)
+%%     :::size-md — 2-4 <br/> (min 140x260)
+%%     :::size-lg — 5+ <br/> or rich content (min 200x340)
+%%
+%%   Rules: use camelCase, NO *Style suffix (use `domain` not `domainStyle`)
 
 %% Layout (uncomment if @nodes > 20 — enables ELK smart edge routing):
-%% %%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE'}}}%%
+%% %%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'direction': 'RIGHT', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'ORTHOGONAL'}}}%%
 %%
 %% Direction guide:
 %%   TB — layered/hierarchical diagrams (DI graph, port maps, class hierarchies)
@@ -72,9 +98,9 @@ flowchart TD
     %% === SUBGRAPH STYLES ===
     %%
     %% Paste relevant style lines below (only layers present in this diagram):
-    %%   style Domain         fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-    %%   style Application    fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    %%   style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-    %%   style Composition    fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    %%   style Interfaces     fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
-    %%   style External       fill:#eceff1,stroke:#455a64,stroke-width:2px
+    %%   style Domain         fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    %%   style Application    fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    %%   style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    %%   style Composition    fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    %%   style Interfaces     fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    %%   style External       fill:#f1f5f9,stroke:#64748b,stroke-width:2px

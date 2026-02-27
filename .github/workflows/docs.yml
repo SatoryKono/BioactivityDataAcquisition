@@ -62,33 +62,8 @@ jobs:
 
       - name: Validate Mermaid diagrams (.mermaid + .mmd)
         run: |
-          shopt -s globstar nullglob
-          mkdir -p /tmp/mermaid-validation
-          failed=0
-          count=0
-
-          # Validate both .mermaid and .mmd files
-          for file in docs/**/*.mermaid docs/**/*.mmd; do
-            [ -f "$file" ] || continue
-            count=$((count + 1))
-            echo "Validating $file..."
-            base="$(basename "${file%.*}")"
-            outfile="/tmp/mermaid-validation/${base}.svg"
-            if ! mmdc -i "$file" -o "$outfile" \
-                 -c docs/02-architecture/mmd-diagrams/theme/mermaid-config.json \
-                 -p /tmp/puppeteer-config.json 2>&1; then
-              echo "::error file=$file::Mermaid validation failed for $file"
-              failed=1
-            fi
-          done
-
-          rm -rf /tmp/mermaid-validation
-
-          if [ $failed -eq 1 ]; then
-            echo "::error::One or more Mermaid diagrams failed validation"
-            exit 1
-          fi
-          echo "All $count Mermaid diagrams validated successfully"
+          bash scripts/validate_mermaid_syntax.sh \
+            --puppeteer /tmp/puppeteer-config.json
 
   render-diagrams:
     needs: validate-mermaid
@@ -120,23 +95,28 @@ jobs:
           bash docs/02-architecture/mmd-diagrams/render.sh \
             --puppeteer /tmp/puppeteer-config.json
 
+      - name: Visual smoke regression (selected SVG baselines)
+        run: |
+          python3 scripts/check_diagram_visual_smoke.py \
+            --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
+
+      - name: Validate link harmonization post-processor
+        run: |
+          python3 src/tools/harmonize_link_styles.py --dry-run --fail-on-errors
+
       - name: Upload SVG artifacts
         uses: actions/upload-artifact@v4
         with:
           name: diagrams-svg
           path: |
-            docs/02-architecture/mmd-diagrams/architecture/svg/
-            docs/02-architecture/mmd-diagrams/class-diagrams/svg/
-            docs/02-architecture/mmd-diagrams/foundation/svg/
+            docs/**/svg/*.svg
 
       - name: Upload PNG artifacts
         uses: actions/upload-artifact@v4
         with:
           name: diagrams-png
           path: |
-            docs/02-architecture/mmd-diagrams/architecture/png/
-            docs/02-architecture/mmd-diagrams/class-diagrams/png/
-            docs/02-architecture/mmd-diagrams/foundation/png/
+            docs/**/png/*.png
 
   check-diagram-drift:
     needs: validate-mermaid
@@ -149,21 +129,30 @@ jobs:
       - name: Check for source-vs-rendered drift
         run: |
           echo "Checking if diagram sources changed without updating rendered outputs..."
-          # Get list of changed .mmd files in PR
-          changed_mmd=$(git diff --name-only origin/main...HEAD -- '*.mmd' || true)
-          if [ -z "$changed_mmd" ]; then
-            echo "No .mmd files changed — skipping drift check."
+          # Get list of changed diagram source files in PR
+          changed_diagrams=$(
+            git diff --name-only origin/main...HEAD -- \
+              ':(glob)docs/**/*.mmd' \
+              ':(glob)docs/**/*.mermaid' \
+              ':(exclude)docs/99-archive/**' || true
+          )
+          if [ -z "$changed_diagrams" ]; then
+            echo "No diagram source files changed — skipping drift check."
             exit 0
           fi
 
           echo "Changed diagram sources:"
-          echo "$changed_mmd"
+          echo "$changed_diagrams"
 
-          # Check if corresponding SVG/PNG directories have changes too
-          changed_rendered=$(git diff --name-only origin/main...HEAD -- '*/svg/*.svg' '*/png/*.png' || true)
+          # Check if corresponding SVG/PNG outputs changed too
+          changed_rendered=$(
+            git diff --name-only origin/main...HEAD -- \
+              ':(glob)docs/**/svg/*.svg' \
+              ':(glob)docs/**/png/*.png' || true
+          )
           if [ -z "$changed_rendered" ]; then
             echo "::warning::Diagram sources changed but no rendered outputs updated."
-            echo "Run 'make render-diagrams' and commit the rendered SVG/PNG files."
+            echo "Run 'make render-diagrams-all' and commit rendered SVG/PNG files."
           else
             echo "Rendered outputs also updated — OK."
           fi

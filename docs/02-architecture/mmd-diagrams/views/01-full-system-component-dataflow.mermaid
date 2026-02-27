@@ -1,0 +1,50 @@
+%% View: Data-Flow | Parent: 01-full-system-component-full.mermaid
+%% @uniform width=192 height=56 max_title_len=19 max_desc_lines=0
+flowchart TB
+%% keep-orphan: N10
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        N7["DataSourcePort"]
+    end
+
+    subgraph Application["Application Layer"]
+        direction TB
+        N1["PipelineRunner"]
+        N2["BatchTransformer"]
+        N3["PipelineExecutor"]
+        N4["RecordProcessor"]
+        N5["ActivityTransformer"]
+        N6["MoleculeTransformer"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N8["BronzeWriter"]
+        N9["SilverWriter"]
+        N10["GoldWriter"]
+        N11["Bronze"]
+        N12["Silver"]
+    end
+
+    N1 --> N3
+    N3 --> N4
+    N4 --> N2
+    N2 --> N5
+    N2 --> N6
+    N1 --> N7
+    N8 --> N11
+    N9 --> N12
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+
+    linkStyle 0 stroke:#1E293B,stroke-width:4px
+    linkStyle 1 stroke:#1E293B,stroke-width:4px
+    linkStyle 2 stroke:#1E293B,stroke-width:4px
+    linkStyle 3 stroke:#1E293B,stroke-width:4px
+    linkStyle 4 stroke:#1E293B,stroke-width:4px
+    linkStyle 5 stroke:#1E293B,stroke-width:4px
+    linkStyle 6 stroke:#1E293B,stroke-width:4px
+    linkStyle 7 stroke:#1E293B,stroke-width:4px

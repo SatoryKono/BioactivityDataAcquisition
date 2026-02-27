@@ -28,11 +28,11 @@ BioETL содержит два каталога диаграмм с разным
 
 | Слой | Старая (Tailwind-based) | Новая (canonical) |
 |------|------------------------|-------------------|
-| Domain | `#FFF7ED / #F59E0B` | `#f3e5f5 / #6a1b9a` |
-| Application | `#ECFDF5 / #10B981` | `#e8f5e9 / #2e7d32` |
-| Infrastructure | `#EFF6FF / #2563EB` | `#ffcdd2 / #c62828` |
-| Composition | `#F5F3FF / #7C3AED` | `#fff3e0 / #e65100` |
-| Interfaces | `#F1F5F9 / #64748B` | `#e3f2fd / #1565c0` |
+| Domain | `#FFF7ED / #F59E0B` | `#f5f3ff / #7c3aed` |
+| Application | `#ECFDF5 / #10B981` | `#f0fdf4 / #16a34a` |
+| Infrastructure | `#EFF6FF / #2563EB` | `#fff1f2 / #dc2626` |
+| Composition | `#F5F3FF / #7C3AED` | `#fff7ed / #f59e0b` |
+| Interfaces | `#F1F5F9 / #64748B` | `#eff6ff / #2563eb` |
 
 Дополнительно: 286 emoji-префиксов в subgraph labels (`🟡 Domain Layer`) мешали CLI-рендерингу.
 Все 156 `.mermaid` view-файлов использовали uniform `linkStyle` без семантического разделения типов связей.
@@ -56,16 +56,16 @@ BioETL содержит два каталога диаграмм с разным
 
 | Слой | Fill | Stroke |
 |------|------|--------|
-| Domain | `#f3e5f5` | `#6a1b9a` |
-| Application | `#e8f5e9` | `#2e7d32` |
-| Infrastructure | `#ffcdd2` | `#c62828` |
-| Composition | `#fff3e0` | `#e65100` |
-| Interfaces | `#e3f2fd` | `#1565c0` |
-| External | `#eceff1` | `#455a64` |
-| Bronze | `#fff3e0` | `#e65100` |
-| Silver | `#eceff1` | `#607d8b` |
-| Gold | `#fff8e1` | `#f9a825` |
-| Quarantine | `#ffebee` | `#d32f2f` |
+| Domain | `#f5f3ff` | `#7c3aed` |
+| Application | `#f0fdf4` | `#16a34a` |
+| Infrastructure | `#fff1f2` | `#dc2626` |
+| Composition | `#fff7ed` | `#f59e0b` |
+| Interfaces | `#eff6ff` | `#2563eb` |
+| External | `#f1f5f9` | `#64748b` |
+| Bronze | `#fff7ed` | `#f59e0b` |
+| Silver | `#f8fafc` | `#475569` |
+| Gold | `#fefce8` | `#ca8a04` |
+| Quarantine | `#ffe4e6` | `#e11d48` |
 
 Использование произвольных цветов MUST NOT. Emoji-префиксы в subgraph labels MUST NOT.
 
@@ -139,10 +139,10 @@ View-файлы с ≥3 типами связей и >5 соединениями
 | Тип связи | Стиль |
 |-----------|-------|
 | data flow | `stroke:#1E293B,stroke-width:2px` |
-| orchestration | `stroke:#2e7d32,stroke-width:2px` |
-| DI / implements | `stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5` |
+| orchestration | `stroke:#16a34a,stroke-width:2px` |
+| DI / implements | `stroke:#7c3aed,stroke-width:1.5px,stroke-dasharray:5` |
 | observability | `stroke:#94A3B8,stroke-width:1px` |
-| error / quarantine | `stroke:#c62828,stroke-width:2px,stroke-dasharray:4` |
+| error / quarantine | `stroke:#dc2626,stroke-width:2px,stroke-dasharray:4` |
 | generic | `stroke:#475569,stroke-width:2px,stroke-dasharray:5` |
 
 Каждый differentiated блок MUST сопровождаться комментарием:
@@ -160,9 +160,18 @@ View-файлы с ≥3 типами связей и >5 соединениями
 | SIZE-002 | Node count > 20 → WARN |
 | META-001 | Отсутствие `@version`/`@date`/`@type`/`@level` в `.mmd` → WARN |
 | META-002 | Отсутствие `%% View:` в `.mermaid` view-файле → WARN |
-| COLOUR-001 | Использование неканонической палитры → ERROR |
+| COLOUR-001 | Использование deprecated pre-ADR-040 палитры в `style`/`classDef` → ERROR |
 | COLOUR-002 | Emoji в subgraph labels → ERROR |
 | GRAPH-001 | Orphan nodes (defined but not in any edge) в `flowchart`/`sequenceDiagram` → WARN |
+
+Примечание по реализации `SIZE-*`:
+- `*-full.mermaid` reference views исключены из `SIZE-001`/`SIZE-002`.
+- `00-legend*` исключены из `SIZE-001`/`SIZE-002`.
+
+Примечание по size-normalization (`scripts/uniform_diagram_sizes.py`):
+- `@uniform-group` задаёт групповую нормализацию высоты.
+- `@uniform-width global` (по умолчанию) использует общую ширину для всех групп.
+- `@uniform-width group` разрешает width per group для снижения `&nbsp;`-padding в перегруженных class-diagram family.
 
 Pre-commit hooks: `lint-diagrams`, `prune-orphan-diagram-nodes`.
 
@@ -200,7 +209,7 @@ ELK (Eclipse Layout Kernel) SHOULD использоваться для `flowchar
 **Синтаксис (вставлять перед объявлением `graph`/`flowchart`):**
 
 ```
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE'}}}%%
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'direction': 'RIGHT', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'ORTHOGONAL'}}}%%
 ```
 
 **Direction selection:**

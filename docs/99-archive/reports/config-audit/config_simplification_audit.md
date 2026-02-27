@@ -21,7 +21,7 @@ Key metrics:
 | **Total** | **149** | **~9,400** | **~30%** |
 
 **Top 3 problems:**
-1. Composite pipeline configs are 2,417 lines for 5 files (avg 483 LOC) with massive column_groups and cross-validation duplication
+1. Composite pipeline configs are 2,417 lines for 5 files (avg 483 LOC) with massive column-groups and cross-validation duplication
 2. CI workflows repeat identical Python setup, cache, and artifact patterns across 13+ files
 3. pyproject.toml has duplicate dependency declarations between `[project.optional-dependencies]` and `[dependency-groups]`
 
@@ -35,7 +35,7 @@ Key metrics:
 
 | File | Lines | Issue |
 |------|-------|-------|
-| composite/publication.yaml | 781 | 60 exclude_fields + 100 field_priorities + 160 column_groups |
+| composite/publication.yaml | 781 | 60 exclude-fields + 100 field-priorities + 160 column-groups |
 | composite/target.yaml | 495 | Similar pattern |
 | composite/molecule.yaml | 411 | Similar pattern |
 | composite/activity.yaml | 383 | Similar pattern |
@@ -43,20 +43,20 @@ Key metrics:
 
 **Specific duplication patterns:**
 
-**A) `column_groups` repeated across composites:**
-Each composite defines a `system` group with identical fields (`entity_id`, `content_hash`, `_run_id`, `_run_type`, `_source_batch_id`, `_source`, `_ingestion_ts`, `_index`). This exact block appears in all 5 composites. The `date` group, `doc_type` group, and `citations` group are also near-identical across composites.
+**A) `column-groups` repeated across composites:**
+Each composite defines a `system` group with identical fields (`entity-id`, `content-hash`, `-run-id`, `-run-type`, `-source-batch-id`, `-source`, `-ingestion-ts`, `-index`). This exact block appears in all 5 composites. The `date` group, `doc-type` group, and `citations` group are also near-identical across composites.
 
-**B) `cross_validation.enricher_pairings` repeated fields:**
+**B) `cross-validation.enricher-pairings` repeated fields:**
 Publication composite defines 34 paired fields across 4 enrichers. Most fields use the same validation method. The pattern `{ field: doi, method: exact }`, `{ field: title, method: fuzzy, threshold: 0.8 }`, `{ field: volume, method: exact }`, etc. is repeated for each enricher with minimal variation.
 
-**C) `exclude_fields` lists are long and manually maintained:**
-Publication composite lists 60 exclude_fields. These could be computed from the `preserve_all_sources` flag and a "common fields" definition.
+**C) `exclude-fields` lists are long and manually maintained:**
+Publication composite lists 60 exclude-fields. These could be computed from the `preserve-all-sources` flag and a "common fields" definition.
 
 ### 1.2 DQ/Filter Hierarchical Config: 4-Level Merge
 
 DQ rules resolve through 4 levels:
 ```
-_defaults.yaml -> providers/{provider}.yaml -> entities/{provider}/{entity}.yaml -> pipeline dq_overrides
+-defaults.yaml -> providers/{provider}.yaml -> entities/{provider}/{entity}.yaml -> pipeline dq-overrides
 ```
 
 While the merge is correct, the intermediate `providers/{provider}.yaml` level is very thin:
@@ -79,23 +79,23 @@ Same pattern exists for filter providers (168 lines across 7 files with even les
 
 The 22 regular pipeline configs contain:
 - **Boilerplate comments** about DQ hierarchy (lines 17-23 in each) -- repeated ~15 times
-- **`primary_keys`, `silver_table`, `gold_table`** that follow predictable conventions (`{provider}_{entity}`) -- 22 files x 3 fields = 66 redundant declarations
-- **`partition_by: []`** (empty) in most configs -- inherited from _base.yaml but re-declared
+- **`primary-keys`, `silver-table`, `gold-table`** that follow predictable conventions (`{provider}-{entity}`) -- 22 files x 3 fields = 66 redundant declarations
+- **`partition-by: []`** (empty) in most configs -- inherited from -base.yaml but re-declared
 
 ### 1.4 Schema Configs: Bimodal Distribution
 
 | Type | Files | Lines | Note |
 |------|-------|-------|------|
-| Empty/minimal (`column_groups: []`) | 14 | 14 | 1 line each |
+| Empty/minimal (`column-groups: []`) | 14 | 14 | 1 line each |
 | Publication schemas | 7 | 1,200+ | Detailed column definitions |
 | Composite schemas | 3 | 864 | Column ordering |
 | Other | 1 | 86 | Example file |
 
-**14 files with `column_groups: []` could be eliminated if the loader defaults to empty.**
+**14 files with `column-groups: []` could be eliminated if the loader defaults to empty.**
 
-### 1.5 `_base.yaml`: Good but Has Dead Placeholders
+### 1.5 `-base.yaml`: Good but Has Dead Placeholders
 
-The 113-line `_base.yaml` contains `<provider>`, `<version>`, `<entity>`, `<pipeline>` placeholders in metadata that are never substituted at runtime. These are documentation artifacts, not functional config.
+The 113-line `-base.yaml` contains `<provider>`, `<version>`, `<entity>`, `<pipeline>` placeholders in metadata that are never substituted at runtime. These are documentation artifacts, not functional config.
 
 ---
 
@@ -196,20 +196,20 @@ Both `detect-secrets` and `gitleaks` run as pre-commit hooks for secret scanning
 #### S1.1: Extract Shared Composite Column Groups
 
 **Current**: Each composite duplicates `system`, `date`, `citations` column groups.
-**Proposed**: Create `configs/schemas/composite/_shared_column_groups.yaml` with common groups. Reference from composite configs.
+**Proposed**: Create `configs/schemas/composite/-shared-column-groups.yaml` with common groups. Reference from composite configs.
 
 **Savings**: ~200 lines across 5 composites.
 
-**Implementation**: Add support for `!include` or `$ref` in config_loader, OR move column_groups to a shared schema file referenced by the composite data_schema_file mechanism that already exists.
+**Implementation**: Add support for `!include` or `$ref` in config-loader, OR move column-groups to a shared schema file referenced by the composite data-schema-file mechanism that already exists.
 
 #### S1.2: Eliminate Empty Schema Files
 
-**Current**: 14 files containing only `column_groups: []`.
-**Proposed**: Make `column_groups: []` the default in config_loader when no schema file exists.
+**Current**: 14 files containing only `column-groups: []`.
+**Proposed**: Make `column-groups: []` the default in config-loader when no schema file exists.
 
 **Savings**: 14 files deleted.
 
-**Implementation**: One-line change in `config_loader.py` -- check file existence before loading.
+**Implementation**: One-line change in `config-loader.py` -- check file existence before loading.
 
 #### ~~S1.3: Remove Duplicate Mermaid Workflow~~ (RETRACTED)
 
@@ -240,7 +240,7 @@ After review: `docs.yml` validates Mermaid **diagram syntax** (renders `.mermaid
 
 **Savings**: 14 files deleted (7 quality + 7 filter provider files), ~400 lines.
 
-**Risk**: Requires updating `_merge_dq_config()` and `_merge_filter_config()` in config_loader.
+**Risk**: Requires updating `-merge-dq-config()` and `-merge-filter-config()` in config-loader.
 
 #### S2.2: Create Composite Action for CI Python Setup
 
@@ -261,7 +261,7 @@ After review: `docs.yml` validates Mermaid **diagram syntax** (renders `.mermaid
 **Current**: Mixed explicit/convention styles across ChEMBL configs.
 **Proposed**: Migrate all to convention-minimal style (ADR-029).
 
-**Savings**: ~200 lines across 14 ChEMBL configs (remove redundant path declarations, silver_table, gold_table).
+**Savings**: ~200 lines across 14 ChEMBL configs (remove redundant path declarations, silver-table, gold-table).
 
 #### S2.5: Deduplicate pyproject.toml Dependencies
 
@@ -274,17 +274,17 @@ After review: `docs.yml` validates Mermaid **diagram syntax** (renders `.mermaid
 
 ### Phase 3: Higher-Risk, Structural (requires code changes)
 
-#### S3.1: Compute `exclude_fields` from Metadata
+#### S3.1: Compute `exclude-fields` from Metadata
 
-**Current**: Manually maintained lists of 60+ exclude_fields in composite configs.
-**Proposed**: Auto-compute from `preserve_all_sources` flag + "common fields" definition. Only list explicit additions/removals.
+**Current**: Manually maintained lists of 60+ exclude-fields in composite configs.
+**Proposed**: Auto-compute from `preserve-all-sources` flag + "common fields" definition. Only list explicit additions/removals.
 
 **Savings**: ~200 lines across composite configs.
 
 #### S3.2: Extract Cross-Validation Field Patterns
 
 **Current**: Each enricher pairing repeats similar field lists.
-**Proposed**: Define "standard CV fields" (`doi`, `title`, `volume`, `issue`, `page_first`, `page_last`, `publication_year`) as a template. Enrichers only declare additions/overrides.
+**Proposed**: Define "standard CV fields" (`doi`, `title`, `volume`, `issue`, `page-first`, `page-last`, `publication-year`) as a template. Enrichers only declare additions/overrides.
 
 **Savings**: ~100 lines in publication composite, proportional in others.
 
@@ -334,7 +334,7 @@ After review: `docs.yml` validates Mermaid **diagram syntax** (renders `.mermaid
 
 ## 7. What NOT to Change
 
-- **`_base.yaml` structure**: The hierarchical inheritance model is sound
+- **`-base.yaml` structure**: The hierarchical inheritance model is sound
 - **ADR-029 convention system**: Working correctly, should be extended not replaced
 - **Composite pipeline semantics**: The merge/enricher/cross-validation logic is domain-specific and necessarily explicit
 - **Source configs**: 7 files, each unique, no meaningful duplication
@@ -351,10 +351,10 @@ configs/
   schemas/         25 files   1,714 lines
   quality/          8 files     255 lines (providers only; entity files not in wc glob)
   filters/          8 files     168 lines (providers only; entity files not in wc glob)
-  sources/          7 files     662 lines (includes _defaults)
-  _schema/          2 files     ~500 lines (JSON)
-  naming_exceptions  1 file     ~100 lines
-  _base.yaml        1 file     113 lines
+  sources/          7 files     662 lines (includes -defaults)
+  -schema/          2 files     ~500 lines (JSON)
+  naming-exceptions  1 file     ~100 lines
+  -base.yaml        1 file     113 lines
 
 .github/workflows/ 17 files   1,782 lines
 

@@ -8,22 +8,23 @@
 %% @uniform class width=200 height=198 max_title_len=20 max_desc_lines=9
 
 classDiagram
+    direction TB
     class LoggerPort {
-        <<Protocol>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<Protocol>>
         +bind(**kwargs) LoggerPort
         +info(msg, **fields) None
         +warning(msg, **fields) None
         +error(msg, **fields) None
         +debug(msg, **fields) None
         +exception(msg, **fields) None
-        &nbsp;
-        &nbsp;
+        
+        
     }
 
     class UnifiedLogger {
         -_logger: BoundLogger
-        -_pipeline: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        -_run_id: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        -_pipeline: str
+        -_run_id: str
         +bind(**kwargs) LoggerPort
         +info(msg, **fields) None
         +warning(msg, **fields) None
@@ -34,206 +35,206 @@ classDiagram
 
     class StructlogLogger {
         Wraps structlog directly
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class NoOpLogger {
-        <<Null Object>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<Null Object>>
         All methods are no-ops
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
+        
+        
     }
 
     class MetricsPort {
-        <<Protocol>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<Protocol>>
         +observe_histogram(name, value, labels) None
         +increment_counter(name, labels) None
         +set_gauge(name, value, labels) None
-        +close() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        +close() None
+        
+        
+        
+        
     }
 
     class MetricsCollector {
         +observe_histogram(name, value, labels) None
         +increment_counter(name, labels) None
         +set_gauge(name, value, labels) None
-        +close() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        +close() None
+        
+        
+        
+        
+        
     }
 
     class PrometheusMetrics {
         Integrates with prometheus_client
         +observe_histogram() None
         +increment_counter() None
-        +set_gauge() None&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        +set_gauge() None
+        
+        
+        
+        
+        
     }
 
     class NoOpMetrics {
-        <<Null Object>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        <<Null Object>>
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class MetricsServerAdapter {
-        +start() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +stop() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +start() None
+        +stop() None
         HTTP /metrics endpoint
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
+        
     }
 
     class TracingPort {
-        <<Protocol>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<Protocol>>
         +get_tracer(name) Tracer
-        +close() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        +close() None
+        
+        
+        
+        
+        
+        
     }
 
     class OpenTelemetryTracer {
         Integrates with OpenTelemetry SDK
         +get_tracer(name) Tracer
-        +close() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        +close() None
+        
+        
+        
+        
+        
+        
     }
 
     class NoOpTracing {
-        <<Null Object>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<Null Object>>
         +get_tracer(name) NoOpTracer
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
+        
+        
     }
 
     class AnomalyDetector {
         +detect(metrics) list~Anomaly~
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class DetectorStrategy {
-        <<ABC>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<ABC>>
         +detect(values, baseline) Anomaly | None
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
+        
+        
     }
 
     class ZScoreDetector {
-        +z_threshold: float&nbsp;
+        +z_threshold: float
         +detect(values, baseline) Anomaly | None
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
+        
+        
     }
 
     class Anomaly {
-        <<dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +type: AnomalyType&nbsp;&nbsp;
+        <<dataclass>>
+        +type: AnomalyType
         +severity: AnomalySeverity
-        +metric_name: str&nbsp;&nbsp;&nbsp;
+        +metric_name: str
         +current_value: float
         +baseline_value: float
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
     }
 
     class AnomalyType {
-        <<Enum>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        SPIKE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        DROP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        DRIFT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        <<Enum>>
+        SPIKE
+        DROP
+        DRIFT
+        
+        
+        
+        
+        
     }
 
     class AnomalySeverity {
-        <<Enum>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        LOW&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        MEDIUM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        HIGH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        CRITICAL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        <<Enum>>
+        LOW
+        MEDIUM
+        HIGH
+        CRITICAL
+        
+        
+        
+        
     }
 
     class AdapterMetrics {
         +metrics: MetricsPort
-        +provider: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +provider: str
         +measure_request() ContextManager
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
+        
     }
 
     LoggerPort <|.. UnifiedLogger
@@ -254,3 +255,23 @@ classDiagram
     AnomalyDetector --> Anomaly
     Anomaly --> AnomalyType
     Anomaly --> AnomalySeverity
+
+    style LoggerPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style MetricsPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style TracingPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style UnifiedLogger fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style StructlogLogger fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style NoOpLogger fill:#f8fafc,stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5
+    style MetricsCollector fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style PrometheusMetrics fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style NoOpMetrics fill:#f8fafc,stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5
+    style MetricsServerAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style OpenTelemetryTracer fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style NoOpTracing fill:#f8fafc,stroke:#94a3b8,stroke-width:1px,stroke-dasharray:5
+    style AnomalyDetector fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style DetectorStrategy fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style ZScoreDetector fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style Anomaly fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style AnomalyType fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style AnomalySeverity fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style AdapterMetrics fill:#eff6ff,stroke:#2563eb,stroke-width:2px

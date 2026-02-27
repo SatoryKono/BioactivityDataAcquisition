@@ -8,13 +8,13 @@
 %% @type    classDiagram
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 %% @uniform class width=184 height=198 max_title_len=18 max_desc_lines=9
 classDiagram
     direction TB
 
     class ContentHashService {
-        <<Utility>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<Utility>>
         +PRECISION: int = 10
         +EXCLUDED_PREFIXES: tuple = ("_",)
         +compute(provider: str, data: dict) ContentHash
@@ -26,39 +26,39 @@ classDiagram
     }
 
     class NormalizationRules {
-        <<Value Object>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<Value Object>>
         +nan_replacement: None
         +inf_replacement: None
         +float_precision: int = 10
         +date_format: str = "YYYY-MM-DD"
         +string_transform: str = "strip"
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
     }
 
     class ContentHash {
-        <<NewType>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +value: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +__len__() int&nbsp;&nbsp;&nbsp;&nbsp;
+        <<NewType>>
+        +value: str
+        +__len__() int
         +__eq__(other) bool
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
     }
 
     class BaseTransformer {
         #compute_content_hash(provider: str, data: dict) ContentHash
         #serialize_json(value: Any) str
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
+        
+        
     }
 
     %% Relationships
@@ -72,15 +72,15 @@ classDiagram
 
     %% Implementation flow
     class HashFlow {
-        <<flowchart>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<flowchart>>
         1_Input: provider + raw_data
         2_Filter: remove underscore prefixed keys
         3_Normalize: apply value rules
         4_Serialize: canonical JSON
-        5_Hash: SHA256&nbsp;&nbsp;&nbsp;&nbsp;
+        5_Hash: SHA256
         6_Output: ContentHash 64 hex chars
-        &nbsp;
-        &nbsp;
+        
+        
     }
 
     ContentHashService --> HashFlow : implements

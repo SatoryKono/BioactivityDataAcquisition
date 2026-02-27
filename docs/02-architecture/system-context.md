@@ -122,5 +122,5 @@ BioETL использует **Ports & Adapters** (Hexagonal Architecture):
 ## Related Documents
 
 - **Data Flow**: [data-flow.md](data-flow.md)
-- **Architecture Diagrams**: [diagrams/00-diagramming-policy.md](diagrams/00-diagramming-policy.md)
+- **Architecture Diagrams**: [00-diagramming-policy.md](mmd-diagrams/docs/00-diagramming-policy.md)
 - **Local-Only ADR**: [ADR-010](decisions/ADR-010-local-only-deployment.md)

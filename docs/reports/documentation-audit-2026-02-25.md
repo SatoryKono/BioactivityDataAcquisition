@@ -48,7 +48,7 @@ BioETL documentation is **mature and comprehensive** with strong governance foun
 ### CRITICAL (7 issues)
 
 **C-01. RULES.md version conflict (v5.21 vs v5.22)**
-- `PROJECT_CONTEXT.md` и `agent-memory.md` ссылаются на v5.22 (2026-02-24)
+- `PROJECT-CONTEXT.md` и `agent-memory.md` ссылаются на v5.22 (2026-02-24)
 - `RULES.md`, `README.md`, `TOOLS.md`, `rules-summary.md` — все на v5.21 (2026-02-21)
 - Нет единого источника истины по актуальной версии
 - **Impact:** Агенты и docs могут конфликтовать по правилам
@@ -74,7 +74,7 @@ BioETL documentation is **mature and comprehensive** with strong governance foun
 - **Impact:** 5 новейших ADR невидимы через Project Navigator
 
 **C-05. Deployment guide contradicts ADR-010 (Local-Only)**
-- `docs/05-operations/deployment/DEPLOYMENT_GUIDE.md` — K8s/EKS/GKE deployment
+- `docs/05-operations/deployment/DEPLOYMENT-GUIDE.md` — K8s/EKS/GKE deployment
 - ADR-010 — Local-Only deployment philosophy
 - Neo4j memory docs present but Neo4j not in architecture
 - **Impact:** Новые пользователи могут выбрать неправильную стратегию развёртывания
@@ -118,8 +118,8 @@ BioETL documentation is **mature and comprehensive** with strong governance foun
 **M-08.** docs/plans/ and docs/reports/ lack README with status
 **M-09.** Duplicate report: `codex-branches-summary-2026-02-24T13.md`
 **M-10.** `.docx` file in archive (binary, not version-control friendly)
-**M-11.** Legacy dashboard docs not fully archived (BIOETL_DATA_EXTRACTION_AND_DASHBOARDS.md in main)
-**M-12.** MONITORING_INDEX.md empty stub
+**M-11.** Legacy dashboard docs not fully archived (BIOETL-DATA-EXTRACTION-AND-DASHBOARDS.md in main)
+**M-12.** MONITORING-INDEX.md empty stub
 **M-13.** Data model docs (docs/03-data-model/) — unclear if completed work or WIP
 **M-14.** .claude/prompts/ lacks README explaining purpose/status
 **M-15.** Docstring style inconsistency (Google 57%, Mixed 30%, Sphinx 10%)
@@ -132,7 +132,7 @@ BioETL documentation is **mature and comprehensive** with strong governance foun
 **L-04.** Diagram rendering timestamp missing from mmd-diagrams/README.md
 **L-05.** No automated documentation sync mechanism documented
 **L-06.** Provider entity count discrepancy in index.md vs README.md
-**L-07.** 6 `__init__.py` files missing `__all__` exports
+**L-07.** 6 `--init--.py` files missing `--all--` exports
 **L-08.** CONTRIBUTING.md broken link to `../AGENTS.md`
 
 ---
@@ -143,11 +143,11 @@ BioETL documentation is **mature and comprehensive** with strong governance foun
 
 | # | Action | Files | Effort |
 |---|--------|-------|--------|
-| 1.1 | Resolve RULES.md version (determine v5.21 or v5.22, sync all dependent docs) | RULES.md, PROJECT_CONTEXT.md, agent-memory.md, TOOLS.md, rules-summary.md, 00-map.md | 1h |
+| 1.1 | Resolve RULES.md version (determine v5.21 or v5.22, sync all dependent docs) | RULES.md, PROJECT-CONTEXT.md, agent-memory.md, TOOLS.md, rules-summary.md, 00-map.md | 1h |
 | 1.2 | Update 00-map.md ADR count to 39, add ADR-035..039 references | 00-map.md | 30m |
 | 1.3 | Deprecate `docs/.../orchestration/ORCHESTRATION.md` with pointer to `.claude/agents/` | ORCHESTRATION.md (docs/) | 15m |
 | 1.4 | Archive CONFIG-GUIDE.md to 99-archive/, update internal links | CONFIG-GUIDE.md, mkdocs.yml | 30m |
-| 1.5 | Add deployment disclaimer re: ADR-010 Local-Only as primary | DEPLOYMENT_GUIDE.md | 15m |
+| 1.5 | Add deployment disclaimer re: ADR-010 Local-Only as primary | DEPLOYMENT-GUIDE.md | 15m |
 | 1.6 | Fix ADR-003 status (align header with README relationship graph) | ADR-003, decisions/README.md | 15m |
 | 1.7 | Fix ADR-030 archive (add explicit supersession headers) | 99-archive/decisions/ADR-030-*.md | 30m |
 
@@ -174,8 +174,8 @@ BioETL documentation is **mature and comprehensive** with strong governance foun
 | 3.4 | Fix `--init--` syntax in add-new-source.md and add-pipeline-existing-source.md | 2 files | 30m |
 | 3.5 | Complete or remove migration-schema-artifacts.md stub | 1 file | 15m |
 | 3.6 | Add dates/versions to 121 undated documents | bulk | 4h |
-| 3.7 | Move BIOETL_DATA_EXTRACTION_AND_DASHBOARDS.md to legacy | 1 file | 15m |
-| 3.8 | Create MONITORING_INDEX.md content | 1 file | 1h |
+| 3.7 | Move BIOETL-DATA-EXTRACTION-AND-DASHBOARDS.md to legacy | 1 file | 15m |
+| 3.8 | Create MONITORING-INDEX.md content | 1 file | 1h |
 
 ### Phase 4: Agent Docs Consolidation (P2, 1-2 days)
 
@@ -216,7 +216,7 @@ BioETL documentation is **mature and comprehensive** with strong governance foun
 
 | # | Decision | Options | Recommendation |
 |---|----------|---------|----------------|
-| D-01 | Текущая версия RULES.md — v5.21 или v5.22? | (a) v5.21 + откатить PROJECT_CONTEXT; (b) v5.22 + обновить все docs | Определить и синхронизировать |
+| D-01 | Текущая версия RULES.md — v5.21 или v5.22? | (a) v5.21 + откатить PROJECT-CONTEXT; (b) v5.22 + обновить все docs | Определить и синхронизировать |
 | D-02 | Kubernetes deployment — поддерживается или deprecated? | (a) Пометить deprecated с ADR-010; (b) Документировать как optional advanced | (a) Deprecated + disclaimer |
 | D-03 | ADR-003 — Accepted (Revised) или Superseded by ADR-010? | (a) Revised in-place; (b) Superseded | (a) Accepted (Revised) + clear note |
 | D-04 | Data model docs (03-data-model/) — WIP или completed? | (a) Archive completed; (b) Keep as living docs | Уточнить статус каждого файла |

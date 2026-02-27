@@ -724,6 +724,70 @@ class TestSilverWriterErrorHandling:
                     schema=schema,
                 )
 
+    @pytest.mark.asyncio
+    async def test_write_silver_merge_timeout_raises_delta_transaction_error(
+        self, valid_records, noop_logger
+    ):
+        """Test merge timeout is surfaced as DeltaTransactionError."""
+        import asyncio
+        from unittest.mock import MagicMock, patch
+
+        import pyarrow as pa
+        from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
+
+        from bioetl.domain.exceptions import DeltaTransactionError
+        from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+        schema = pa.schema(
+            [
+                pa.field("entity_id", pa.string()),
+                pa.field("value", pa.float64()),
+                pa.field("_run_id", pa.string()),
+                pa.field("_run_type", pa.string()),
+                pa.field("_source_batch_id", pa.string()),
+                pa.field("_ingestion_ts", pa.string()),
+            ]
+        )
+
+        mock_table = MagicMock()
+        mock_merge = MagicMock()
+        mock_table.merge.return_value = mock_merge
+        mock_merge.when_matched_update_all.return_value = mock_merge
+        mock_merge.when_not_matched_insert_all.return_value = mock_merge
+
+        # First call (schema check) -> table absent
+        # Second call (merge path) -> existing table object
+        delta_table_mock = MagicMock(
+            side_effect=[
+                DeltaTableNotFoundError("Not found"),
+                mock_table,
+            ]
+        )
+
+        with (
+            patch(
+                "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
+                delta_table_mock,
+            ),
+            patch(
+                "bioetl.infrastructure.storage.silver_writer.DeltaTable",
+                delta_table_mock,
+            ),
+            patch(
+                "bioetl.infrastructure.storage.silver_writer.asyncio.wait_for",
+                side_effect=asyncio.TimeoutError,
+            ),
+        ):
+            writer = SilverWriter(base_path="s3://bucket/silver", logger=noop_logger)
+
+            with pytest.raises(DeltaTransactionError, match="timed out"):
+                await writer.write_silver(
+                    table_name="test.table",
+                    records=valid_records,
+                    primary_keys=["entity_id"],
+                    schema=schema,
+                )
+
 
 @pytest.mark.unit
 class TestSilverWriterSchemaDrift:

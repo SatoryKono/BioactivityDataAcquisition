@@ -31,17 +31,17 @@ configs/
 │   ├── chembl/                  # 14 entity configs
 │   │   ├── activity.yaml
 │   │   ├── assay.yaml
-│   │   ├── assay_parameters.yaml
-│   │   ├── cell_line.yaml
-│   │   ├── compound_record.yaml
+│   │   ├── assay-parameters.yaml
+│   │   ├── cell-line.yaml
+│   │   ├── compound-record.yaml
 │   │   ├── molecule.yaml
-│   │   ├── protein_class.yaml
+│   │   ├── protein-class.yaml
 │   │   ├── publication.yaml
-│   │   ├── publication_similarity.yaml
-│   │   ├── publication_term.yaml
-│   │   ├── subcellular_fraction.yaml
+│   │   ├── publication-similarity.yaml
+│   │   ├── publication-term.yaml
+│   │   ├── subcellular-fraction.yaml
 │   │   ├── target.yaml
-│   │   ├── target_component.yaml
+│   │   ├── target-component.yaml
 │   │   └── tissue.yaml
 │   ├── pubchem/                 # 1 entity config
 │   │   └── compound.yaml
@@ -144,10 +144,10 @@ provider: chembl
 entity: activity
 
 pipeline:
-  pipeline_name: chembl_activity
+  pipeline-name: chembl_activity
   provider: chembl
-  entity_type: activity
-  business_primary_keys: [activity_id]
+  entity-type: activity
+  business-primary-keys: [activity-id]
 ```
 
 ### Полная структура конфига
@@ -172,14 +172,14 @@ provider: chembl
 entity: activity
 
 pipeline:
-  pipeline_name: chembl_activity
+  pipeline-name: chembl_activity
   provider: chembl
-  entity_type: activity
-  business_primary_keys: [activity_id]
-  batch_size: 500
-  dq_overrides:
-    field_validations:
-      - field: standard_value
+  entity-type: activity
+  business-primary-keys: [activity-id]
+  batch-size: 500
+  dq-overrides:
+    field-validations:
+      - field: standard-value
         type: range
         min: 0
         nullable: true
@@ -229,7 +229,7 @@ composite:
 | `composite_assay`       | `chembl_assay`       | enrichers                                                           | Обогащённые данные анализов   |
 | `composite_molecule`    | `chembl_molecule`    | pubchem_compound, enrichers                                         | Обогащённые молекулы          |
 | `composite_publication` | `chembl_publication` | crossref, openalex, pubmed, semanticscholar                         | Обогащённые публикации        |
-| `composite_target`      | `chembl_target`      | target_component, protein_class, uniprot_idmapping, uniprot_protein | Обогащённые targets           |
+| `composite_target`      | `chembl_target`      | target-component, protein-class, uniprot_idmapping, uniprot_protein | Обогащённые targets           |
 
 ### Отличия от Regular Pipelines
 
@@ -759,8 +759,8 @@ bioetl config validate chembl_activity
 - [Running Pipelines](running-pipelines.md) — запуск пайплайнов
 - [CLI Reference](../04-reference/cli.md) — команды CLI
 - [DQ Configuration](dq-configuration.md) — детальная настройка DQ
-- [ADR-014: Deterministic Writes](../02-architecture/decisions/ADR-014-deterministic-writes.md) — sort-by requirement
-- [ADR-025: Pipeline Config Unification](../02-architecture/decisions/ADR-025-pipeline-config-unification.md) — иерархия конфигов
+- [ADR-014: Deterministic Writes](../../02-architecture/decisions/ADR-014-deterministic-writes.md) — sort-by requirement
+- [ADR-025: Pipeline Config Unification](../../02-architecture/decisions/ADR-025-pipeline-config-unification.md) — иерархия конфигов
 - [ADR-026: Composite Pipeline Pattern](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) — multi-provider pipelines
 - [ADR-027: DQ Rules Externalization](../02-architecture/decisions/ADR-027-dq-rules-externalization.md) — иерархическая DQ загрузка
 - [ADR-028: Filter Rules Externalization](../02-architecture/decisions/ADR-028-filter-rules-externalization.md) — иерархическая Filter загрузка

@@ -61,7 +61,7 @@ submit-url = "https://rest.uniprot.org/idmapping/run"
 job-response = await client.post(submit-url, data={
     "from": "ChEMBL",
     "to": "UniProtKB",
-    "ids": ",".join(chembl_target_ids)  # Max 100,000 IDs
+    "ids": ",".join(chembl_target-ids)  # Max 100,000 IDs
 })
 job-id = job-response.json()["jobId"]
 
@@ -259,7 +259,7 @@ Mode: Overwrite
 ## 7. Pipeline Configuration
 
 ```yaml
-# configs/pipelines/uniprot/idmapping.yaml
+# configs/entities/uniprot/idmapping.yaml
 
 pipeline-name: uniprot_idmapping
 provider: uniprot

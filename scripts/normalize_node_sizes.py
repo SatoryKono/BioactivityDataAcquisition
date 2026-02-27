@@ -35,7 +35,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_DIRS = [
     REPO_ROOT / "docs/02-architecture/mmd-diagrams",
-    REPO_ROOT / "docs/02-architecture/diagrams/mermaid",
+    REPO_ROOT / "docs/02-architecture/mmd-diagrams/views",
 ]
 SUPPORTED_SUFFIXES = {".mmd", ".mermaid"}
 
@@ -59,7 +59,7 @@ _SKIP_DECL_RE = re.compile(
 )
 _EDGE_HINT_RE = re.compile(r"(--|->|==>|-.->|~~~|<--|--x|--o)")
 _KEEP_SIZE_RE = re.compile(r"%%\s*keep-size\s*:\s*(.*)")
-_UNIFORM_META_RE = re.compile(r"^\s*%%\s*@uniform\b")
+_UNIFORM_META_RE = re.compile(r"^\s*%%\s*@uniform\b(?!-(group|stats))")
 _LINE_BREAK_RE = re.compile(r"(?i)<br\s*/?>|\\n")
 _NBSP_TAIL_RE = re.compile(r"(?:&nbsp;|\u00A0)+$")
 _CLASS_BLOCK_START_RE = re.compile(
@@ -489,6 +489,13 @@ def process_file(path: Path, fix: bool) -> FileResult:
         )
         return result
 
+    # Skip files managed by uniform_diagram_sizes.py groupwise sizing
+    if any(
+        re.match(r"^\s*%%\s*@uniform-group\b", ln) for ln in lines
+    ):
+        result.skipped_reason = "has-uniform-groups"
+        return result
+
     keep_ids = parse_keep_size(lines)
     changed = False
 
@@ -613,7 +620,7 @@ def main() -> int:
         help=(
             "Optional files/directories. Defaults: "
             "docs/02-architecture/mmd-diagrams and "
-            "docs/02-architecture/diagrams/mermaid"
+            "docs/02-architecture/mmd-diagrams/views"
         ),
     )
     args = parser.parse_args()

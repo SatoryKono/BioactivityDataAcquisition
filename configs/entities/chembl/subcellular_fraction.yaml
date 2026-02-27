@@ -65,8 +65,8 @@ quality:
     nullable: false
     error_message: subcellular_fraction is required and must not exceed 200 chars
   - field: assay_count
-    type: numeric_range
-    min_value: 0
+    type: range
+    min: 0
     nullable: true
     error_message: assay_count must be non-negative
   - field: example_assay_id
@@ -106,5 +106,5 @@ contracts:
   - _ingestion_ts
   - _run_id
   - _run_type
-  - _dq_errors
-  - _dq_status
+  - _dq_error
+  - _dq_warn

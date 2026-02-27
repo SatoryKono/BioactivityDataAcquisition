@@ -6,7 +6,6 @@ description: |
   параллельные суб-агенты для исчерпывающего документирования,
   поиска расхождений кода и документации, проверки соответствия,
   идентификации недокументированных решений и автоматического исправления.
-
   Триггеры:
   - Полный аудит документации проекта
   - Каскадное документирование после крупного рефакторинга
@@ -30,7 +29,7 @@ description: |
 
 ### Принцип работы
 
-```
+```text
 ORCHESTRATOR (главный агент)
 │
 ├──→ [Phase 1: Reconnaissance]
@@ -69,14 +68,47 @@ ORCHESTRATOR (главный агент)
 
 ---
 
-## 2. Роли агентов
+## 2. Использование
 
-### 2.1 Оркестратор (главный агент)
+```
+/documentation-cascade-audit [mode] [scope]
+```
+
+**Режимы:**
+- `full` — полный каскадный аудит всего проекта (по умолчанию)
+- `layers` — только аудит слоёв (docstrings + layer docs)
+- `providers` — только аудит провайдеров (сквозная проверка)
+- `architecture` — только архитектурная документация (ADR + arch docs)
+- `governance` — только governance (RULES, glossary, CHANGELOG, nav)
+- `crossref` — только перекрёстные ссылки и навигация
+- `fix-only` — только исправления по предыдущему отчёту
+
+**Scope (опционально):**
+- `domain`, `application`, `infrastructure`, `composition`, `interfaces` — конкретный слой
+- `chembl`, `pubmed`, `crossref`, `openalex`, `pubchem`, `uniprot`, `semanticscholar` — конкретный провайдер
+- Без scope — весь проект
+
+**Примеры:**
+```
+/documentation-cascade-audit                        # полный аудит
+/documentation-cascade-audit layers domain          # только domain docstrings
+/documentation-cascade-audit providers chembl        # только ChEMBL docs
+/documentation-cascade-audit architecture            # только ADR + arch docs
+/documentation-cascade-audit governance              # RULES, glossary, nav
+/documentation-cascade-audit crossref                # broken links, orphans
+/documentation-cascade-audit fix-only                # применить fixes из отчёта
+```
+
+---
+
+## 3. Роли агентов
+
+### 3.1 Оркестратор (главный агент)
 
 **Ответственность:**
 - Формирование полного inventory кодовой базы и документации
 - Декомпозиция на сегменты и назначение суб-агентов
-- Контроль параллельного выполнения (run_in_background)
+- Контроль параллельного выполнения (`run_in_background`)
 - Консолидация результатов и дедупликация findings
 - Приоритизация исправлений и запуск Fix-агентов
 - Генерация финального сводного отчёта
@@ -86,7 +118,7 @@ ORCHESTRATOR (главный агент)
 - Не вносит правки в код/docs (делегирует Fix-агентам)
 - Не дублирует работу суб-агентов
 
-### 2.2 Layer Auditor (×5 — по одному на слой)
+### 3.2 Layer Auditor (×5 — по одному на слой)
 
 **Scope:** Один архитектурный слой (`domain/`, `application/`, `infrastructure/`,
 `composition/`, `interfaces/`).
@@ -112,7 +144,7 @@ ORCHESTRATOR (главный агент)
 | `composition` | docstrings, factory docs, bootstrap docs, DI assembly docs, provider registration |
 | `interfaces` | docstrings, CLI command reference, exit codes, HTTP endpoints, formatter docs |
 
-### 2.3 Provider Auditor (×7 — по одному на провайдера)
+### 3.3 Provider Auditor (×7 — по одному на провайдера)
 
 **Scope:** Все файлы одного провайдера через все слои:
 - `src/bioetl/domain/entities/{provider}.py`
@@ -136,7 +168,7 @@ ORCHESTRATOR (главный агент)
 6. Docstrings в transformer описывают бизнес-логику преобразований?
 7. Config примеры в docs соответствуют реальным configs/?
 
-### 2.4 Architecture Auditor (×1)
+### 3.4 Architecture Auditor (×1)
 
 **Scope:** Архитектурные документы и их соответствие коду.
 
@@ -148,7 +180,7 @@ ORCHESTRATOR (главный агент)
 5. Решения, принятые в коде, но не задокументированные как ADR
 6. Устаревшие архитектурные описания (упоминание удалённых модулей/классов)
 
-### 2.5 Governance Auditor (×1)
+### 3.5 Governance Auditor (×1)
 
 **Scope:** Governance-документы и их синхронизация.
 
@@ -161,7 +193,7 @@ ORCHESTRATOR (главный агент)
 6. File policy: структура директорий соответствует политике?
 7. GitHub policy: PR template, issue templates актуальны?
 
-### 2.6 Cross-Reference Auditor (×1)
+### 3.6 Cross-Reference Auditor (×1)
 
 **Scope:** Перекрёстные ссылки и навигация.
 
@@ -176,7 +208,7 @@ ORCHESTRATOR (главный агент)
 
 ---
 
-## 3. Протокол оркестрации
+## 4. Протокол оркестрации
 
 ### Phase 1: Reconnaissance (оркестратор)
 
@@ -204,7 +236,7 @@ ORCHESTRATOR (главный агент)
 
 ### Phase 2: Decomposition (оркестратор)
 
-Оркестратор формирует JSON-манифест сегментов:
+Оркестратор формирует манифест сегментов:
 
 ```yaml
 segments:
@@ -212,64 +244,40 @@ segments:
   - id: "LA-DOMAIN"
     agent_type: "layer_auditor"
     scope: "src/bioetl/domain/"
-    doc_types:
-      - docstrings
-      - port_contracts
-      - entity_reference
-      - value_object_docs
-      - schema_documentation
-      - exception_hierarchy
-      - validation_rules
+    doc_types: [docstrings, port_contracts, entity_reference, value_object_docs,
+                schema_documentation, exception_hierarchy, validation_rules]
     priority: 1
     estimated_files: 170
 
   - id: "LA-APPLICATION"
     agent_type: "layer_auditor"
     scope: "src/bioetl/application/"
-    doc_types:
-      - docstrings
-      - pipeline_documentation
-      - transformer_docs
-      - service_descriptions
-      - use_case_docs
-      - extractor_docs
+    doc_types: [docstrings, pipeline_documentation, transformer_docs,
+                service_descriptions, use_case_docs, extractor_docs]
     priority: 1
     estimated_files: 116
 
   - id: "LA-INFRASTRUCTURE"
     agent_type: "layer_auditor"
     scope: "src/bioetl/infrastructure/"
-    doc_types:
-      - docstrings
-      - adapter_api_reference
-      - storage_documentation
-      - config_loader_docs
-      - health_check_docs
-      - rate_limiting_docs
+    doc_types: [docstrings, adapter_api_reference, storage_documentation,
+                config_loader_docs, health_check_docs, rate_limiting_docs]
     priority: 1
     estimated_files: 112
 
   - id: "LA-COMPOSITION"
     agent_type: "layer_auditor"
     scope: "src/bioetl/composition/"
-    doc_types:
-      - docstrings
-      - factory_documentation
-      - bootstrap_docs
-      - di_assembly_docs
-      - provider_registration
+    doc_types: [docstrings, factory_documentation, bootstrap_docs,
+                di_assembly_docs, provider_registration]
     priority: 1
     estimated_files: 45
 
   - id: "LA-INTERFACES"
     agent_type: "layer_auditor"
     scope: "src/bioetl/interfaces/"
-    doc_types:
-      - docstrings
-      - cli_command_reference
-      - exit_codes
-      - http_endpoints
-      - formatter_docs
+    doc_types: [docstrings, cli_command_reference, exit_codes,
+                http_endpoints, formatter_docs]
     priority: 1
     estimated_files: 24
 
@@ -311,36 +319,42 @@ segments:
 ### Phase 3: Parallel Audit (оркестратор запускает суб-агентов)
 
 **Batch 1** (Layer Auditors — 5 параллельно):
-
-```
-Task(subagent_type="general-purpose", run_in_background=true,
+```python
+Task(subagent_type="general-purpose", run_in_background=True,
+     description="LA-DOMAIN doc audit",
      prompt="<LAYER_AUDITOR_PROMPT для domain>")
-Task(subagent_type="general-purpose", run_in_background=true,
+Task(subagent_type="general-purpose", run_in_background=True,
+     description="LA-APPLICATION doc audit",
      prompt="<LAYER_AUDITOR_PROMPT для application>")
-Task(subagent_type="general-purpose", run_in_background=true,
+Task(subagent_type="general-purpose", run_in_background=True,
+     description="LA-INFRASTRUCTURE doc audit",
      prompt="<LAYER_AUDITOR_PROMPT для infrastructure>")
-Task(subagent_type="general-purpose", run_in_background=true,
+Task(subagent_type="general-purpose", run_in_background=True,
+     description="LA-COMPOSITION doc audit",
      prompt="<LAYER_AUDITOR_PROMPT для composition>")
-Task(subagent_type="general-purpose", run_in_background=true,
+Task(subagent_type="general-purpose", run_in_background=True,
+     description="LA-INTERFACES doc audit",
      prompt="<LAYER_AUDITOR_PROMPT для interfaces>")
 ```
 
 **Batch 2** (Provider Auditors — 7 параллельно, после завершения Batch 1):
-
-```
-Task(subagent_type="general-purpose", run_in_background=true,
+```python
+Task(subagent_type="general-purpose", run_in_background=True,
+     description="PA-CHEMBL doc audit",
      prompt="<PROVIDER_AUDITOR_PROMPT для chembl>")
-... (×7 провайдеров)
+# ... (×7 провайдеров)
 ```
 
 **Batch 3** (Specialized Auditors — 3 параллельно):
-
-```
-Task(subagent_type="general-purpose", run_in_background=true,
+```python
+Task(subagent_type="general-purpose", run_in_background=True,
+     description="ARCH doc audit",
      prompt="<ARCHITECTURE_AUDITOR_PROMPT>")
-Task(subagent_type="general-purpose", run_in_background=true,
+Task(subagent_type="general-purpose", run_in_background=True,
+     description="GOV doc audit",
      prompt="<GOVERNANCE_AUDITOR_PROMPT>")
-Task(subagent_type="general-purpose", run_in_background=true,
+Task(subagent_type="general-purpose", run_in_background=True,
+     description="XREF doc audit",
      prompt="<CROSS_REFERENCE_AUDITOR_PROMPT>")
 ```
 
@@ -386,9 +400,9 @@ Fix Batch 4 (Low — parallel):
 
 ---
 
-## 4. Промпт-шаблоны суб-агентов
+## 5. Промпт-шаблоны суб-агентов
 
-### 4.1 Layer Auditor Prompt Template
+### 5.1 Layer Auditor Prompt Template
 
 ```markdown
 # Layer Documentation Auditor: {LAYER_NAME}
@@ -471,7 +485,6 @@ layer_audit:
   layer: "{layer_name}"
   date: "YYYY-MM-DD"
   scope: "{layer_path}"
-
   inventory:
     total_files: N
     total_classes: N
@@ -480,7 +493,6 @@ layer_audit:
     class_docstring_coverage: "N%"
     function_docstring_coverage: "N%"
     google_style_compliance: "N%"
-
   findings:
     - id: "LA-{LAYER}-001"
       type: "missing_docstring|stale_docstring|phantom_param|
@@ -492,7 +504,6 @@ layer_audit:
       description: "Краткое описание проблемы"
       evidence: "Фрагмент кода или команда верификации"
       recommendation: "Предложение по исправлению"
-
   summary:
     critical: N
     high: N
@@ -508,7 +519,7 @@ layer_audit:
 - **LOW**: Отсутствует See Also; minor formatting; private без docstring
 ```
 
-### 4.2 Provider Auditor Prompt Template
+### 5.2 Provider Auditor Prompt Template
 
 ```markdown
 # Provider Documentation Auditor: {PROVIDER_NAME}
@@ -575,20 +586,17 @@ layer_audit:
 provider_audit:
   provider: "{provider}"
   date: "YYYY-MM-DD"
-
   entity_coverage:
     entities_in_code: ["entity1", "entity2"]
     entities_in_docs: ["entity1"]
     missing_in_docs: ["entity2"]
     coverage: "N%"
-
   field_matrix:
     total_entity_fields: N
     documented_fields: N
     undocumented_fields: N
     phantom_doc_fields: N  # в docs, но не в коде
     coverage: "N%"
-
   findings:
     - id: "PA-{PROVIDER}-001"
       type: "missing_entity_doc|stale_pipeline_spec|field_mismatch|
@@ -598,15 +606,15 @@ provider_audit:
       description: "..."
       evidence: "..."
       recommendation: "..."
-
   summary:
     critical: N
     high: N
     medium: N
     low: N
 ```
+```
 
-### 4.3 Architecture Auditor Prompt Template
+### 5.3 Architecture Auditor Prompt Template
 
 ```markdown
 # Architecture Documentation Auditor
@@ -659,7 +667,6 @@ architecture_audit:
     partially_aligned: N
     misaligned: N
     missing_adr_candidates: N
-
   findings:
     - id: "ARCH-DOC-001"
       type: "adr_misaligned|adr_status_wrong|adr_conflict|
@@ -671,8 +678,9 @@ architecture_audit:
       evidence: "..."
       recommendation: "..."
 ```
+```
 
-### 4.4 Governance Auditor Prompt Template
+### 5.4 Governance Auditor Prompt Template
 
 ```markdown
 # Governance Documentation Auditor
@@ -730,7 +738,6 @@ governance_audit:
   changelog_status: "current|stale"
   mkdocs_orphan_rate: "N%"
   map_accuracy: "N%"
-
   findings:
     - id: "GOV-001"
       type: "version_desync|missing_glossary_term|stale_changelog|
@@ -740,8 +747,9 @@ governance_audit:
       evidence: "..."
       recommendation: "..."
 ```
+```
 
-### 4.5 Cross-Reference Auditor Prompt Template
+### 5.5 Cross-Reference Auditor Prompt Template
 
 ```markdown
 # Cross-Reference Documentation Auditor
@@ -794,7 +802,6 @@ crossref_audit:
   invalid_adr_refs: N
   orphan_docs: N
   missing_readmes: N
-
   findings:
     - id: "XREF-001"
       type: "broken_link|invalid_adr_ref|stale_rules_ref|
@@ -805,12 +812,13 @@ crossref_audit:
       description: "..."
       recommendation: "..."
 ```
+```
 
 ---
 
-## 5. Fix-агенты (Phase 5)
+## 6. Fix-агенты (Phase 5)
 
-### 5.1 Docstring Fix Agent
+### 6.1 Docstring Fix Agent
 
 ```markdown
 # Docstring Fix Agent: {LAYER_NAME}
@@ -825,6 +833,7 @@ crossref_audit:
 ## Правила исправления
 
 ### Формат: Google style (ОБЯЗАТЕЛЬНО)
+
 ```python
 def method_name(self, param1: Type1, param2: Type2) -> ReturnType:
     """Brief one-line summary.
@@ -866,7 +875,7 @@ def method_name(self, param1: Type1, param2: Type2) -> ReturnType:
 - [ ] Нет фантомных параметров
 ```
 
-### 5.2 Documentation File Fix Agent
+### 6.2 Documentation File Fix Agent
 
 ```markdown
 # Documentation Fix Agent: {DOC_SCOPE}
@@ -895,10 +904,11 @@ def method_name(self, param1: Type1, param2: Type2) -> ReturnType:
 - `add_to_nav`: Добавить в mkdocs.yml navigation
 - `archive`: Переместить устаревший документ в 99-archive/
 ```
+```
 
 ---
 
-## 6. Scoring и отчётность
+## 7. Scoring и отчётность
 
 ### Consolidated Report Template
 
@@ -913,7 +923,7 @@ def method_name(self, param1: Type1, param2: Type2) -> ReturnType:
 ## Executive Summary
 
 | Dimension | Score | Status |
-|-----------|-------|--------|
+|-----------|:-----:|:------:|
 | Docstring Coverage | N/10 | PASS/WARN/FAIL |
 | Docstring Quality | N/10 | PASS/WARN/FAIL |
 | Code-Doc Alignment | N/10 | PASS/WARN/FAIL |
@@ -926,7 +936,7 @@ def method_name(self, param1: Type1, param2: Type2) -> ReturnType:
 ## Metrics
 
 | Metric | Before | After | Delta |
-|--------|--------|-------|-------|
+|--------|:------:|:-----:|:-----:|
 | Module docstring coverage | N% | N% | +N% |
 | Class docstring coverage | N% | N% | +N% |
 | Function docstring coverage | N% | N% | +N% |
@@ -939,7 +949,7 @@ def method_name(self, param1: Type1, param2: Type2) -> ReturnType:
 ## Findings Summary (by source agent)
 
 | Agent | Critical | High | Medium | Low | Total |
-|-------|----------|------|--------|-----|-------|
+|-------|:--------:|:----:|:------:|:---:|:-----:|
 | LA-DOMAIN | N | N | N | N | N |
 | LA-APPLICATION | N | N | N | N | N |
 | LA-INFRASTRUCTURE | N | N | N | N | N |
@@ -970,13 +980,13 @@ def method_name(self, param1: Type1, param2: Type2) -> ReturnType:
 ## Fixes Applied
 
 | Fix ID | Finding | File | Action | Status |
-|--------|---------|------|--------|--------|
+|--------|---------|------|--------|:------:|
 | FIX-001 | CDOC-001 | path | description | done/pending |
 
 ## Remaining Items (require user decision)
 
 | # | Item | Options | Recommendation |
-|---|------|---------|----------------|
+|:-:|------|---------|----------------|
 
 ## Verification Commands
 
@@ -1001,7 +1011,7 @@ pytest tests/architecture/ -v --tb=short
 ### Scoring Rules
 
 | Dimension | Weight | Scoring |
-|-----------|--------|---------|
+|-----------|:------:|---------|
 | Docstring Coverage | 20% | 100%=10, 95%=9, 90%=8, 85%=7, <80%=5 |
 | Docstring Quality | 15% | Google compliance %, factual accuracy |
 | Code-Doc Alignment | 25% | 0 false claims=10, per false claim -2 |
@@ -1011,14 +1021,14 @@ pytest tests/architecture/ -v --tb=short
 | Cross-References | 5% | Broken link count inverse |
 
 | Score | Status |
-|-------|--------|
+|:-----:|:------:|
 | ≥ 8.0 | PASS |
 | 6.0 - 7.9 | WARN |
 | < 6.0 | FAIL |
 
 ---
 
-## 7. Автомасштабирование
+## 8. Автомасштабирование
 
 ### Правила дробления сегментов
 
@@ -1043,7 +1053,7 @@ pytest tests/architecture/ -v --tb=short
 
 ---
 
-## 8. Ограничения и гарантии
+## 9. Ограничения и гарантии
 
 ### Гарантии
 1. **Полнота**: каждый `.py` файл в `src/bioetl/` проверен хотя бы одним агентом
@@ -1059,6 +1069,7 @@ pytest tests/architecture/ -v --tb=short
 4. **Требует user approval** для: удаление docs, изменение ADR status, архивация
 
 ### Зоны записи
+
 | Агент | Зона записи |
 |-------|-------------|
 | Layer Auditor | read-only |
@@ -1071,14 +1082,13 @@ pytest tests/architecture/ -v --tb=short
 
 ---
 
-## 9. Интеграция с существующей системой
+## 10. Интеграция с существующей системой
 
 ### Совместимость с ORCHESTRATION.md v3.0
 
 Documentation Cascade Audit может использоваться как:
-
 1. **Standalone** — полный аудит документации по запросу пользователя
-2. **В составе workflow** — замена шага ⑥ (`py-doc-bot`) для масштабных задач
+2. **В составе workflow** — замена шага 6 (`py-doc-bot`) для масштабных задач
 3. **Pre-release** — documentation freeze audit перед релизом
 
 ### ID-система
@@ -1095,7 +1105,7 @@ Documentation Cascade Audit может использоваться как:
 
 ### Артефакты
 
-```
+```text
 reports/plans/<task_id>/
 ├── cascade-audit-manifest.yaml   ← Оркестратор (сегменты)
 ├── cascade-audit-LA-DOMAIN.yaml  ← Layer Auditor (domain)
@@ -1115,63 +1125,41 @@ reports/plans/<task_id>/
 
 ---
 
-## 10. Быстрый старт (инструкция для оркестратора)
+## 11. Быстрый старт
 
 ### Полный аудит
-
 ```
-Ты — оркестратор Documentation Cascade Audit для проекта BioETL.
-
-Прочитай спецификацию: `.claude/skills/documentation-cascade-audit.skill.md`
-Прочитай контекст: `.claude/PROJECT_CONTEXT.md`
-Прочитай memory: `.ai/memory/agent-memory.md`
-
-Выполни ПОЛНЫЙ каскадный аудит документации:
-
-1. Phase 1 (Reconnaissance): собери метрики кодовой базы
-2. Phase 2 (Decomposition): сформируй сегменты
-3. Phase 3 (Parallel Audit): запусти суб-агентов параллельно через Task tool
-   - 5 Layer Auditors (run_in_background=true)
-   - 7 Provider Auditors (run_in_background=true)
-   - 3 Specialized Auditors (run_in_background=true)
-4. Phase 4 (Consolidation): собери и дедуплицируй findings
-5. Phase 5 (Fix Execution): исправь найденные проблемы по приоритету
-
-Сохрани отчёт в `reports/plans/<task_id>/cascade-audit-report.md`
+/documentation-cascade-audit full
 ```
 
 ### Targeted аудит (один слой)
-
 ```
-Выполни Documentation Cascade Audit для слоя `application`:
-
-Scope: src/bioetl/application/
-Doc types: docstrings, pipeline_documentation, transformer_docs, service_descriptions
-
-Запусти:
-- 1 Layer Auditor для application/
-- Provider Auditors для провайдеров, имеющих pipelines в application/
-- Cross-Reference Auditor (scope: application-related docs)
+/documentation-cascade-audit layers application
 ```
 
 ### Targeted аудит (один провайдер)
-
 ```
-Выполни Documentation Cascade Audit для провайдера `chembl`:
+/documentation-cascade-audit providers chembl
+```
 
-Запусти:
-- 1 Provider Auditor для chembl (сквозной через все слои)
-- Cross-Reference Auditor (scope: chembl-related docs and code)
+### Только governance
+```
+/documentation-cascade-audit governance
+```
+
+### Только перекрёстные ссылки
+```
+/documentation-cascade-audit crossref
 ```
 
 ---
 
-## 11. Changelog
+## 12. Changelog
 
 ### v1.0.0 (2026-02-26)
 - **NEW**: Initial release — hierarchical documentation audit system
 - **NEW**: 5 Layer Auditor templates (domain, application, infrastructure, composition, interfaces)
-- **NEW**: Provider Auditor template (×7 providers)
+- **NEW**: Provider Auditor template (x7 providers)
 - **NEW**: Architecture, Governance, Cross-Reference Auditor templates
 - **NEW**: Docstring Fix Agent and Documentation Fix Agent templates
 - **NEW**: Consolidated report template with scoring matrix

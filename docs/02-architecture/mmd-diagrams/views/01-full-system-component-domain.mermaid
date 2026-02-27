@@ -1,0 +1,57 @@
+%% View: Domain-Focus | Parent: 01-full-system-component-full.mermaid
+%% @uniform width=192 height=56 max_title_len=19 max_desc_lines=0
+flowchart TB
+%% keep-orphan: N12, N13, N14, N15, N16, N17, N18, N19, N20
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        N9["DataSourcePort"]
+        N10["StoragePort"]
+        N11["LockPort"]
+        N14["CheckpointPort"]
+        N15["QuarantinePort"]
+        N16["MetricsPort"]
+        N17["TracingPort"]
+        N18["LoggerPort"]
+        N19["Publication"]
+        N20["PipelineConfig"]
+    end
+
+    subgraph Application["Application Layer"]
+        direction TB
+        N1["PipelineRunner"]
+        N2["BatchTransformer"]
+        N3["PipelineExecutor"]
+        N4["RecordProcessor"]
+        N5["PreflightService"]
+        N6["PostrunService"]
+        N7["ActivityTransformer"]
+        N8["MoleculeTransformer"]
+        N12["AssayTransformer"]
+        N13["TargetTransformer"]
+    end
+
+    N1 --> N3
+    N1 --> N5
+    N1 --> N6
+    N3 --> N4
+    N4 --> N2
+    N2 --> N7
+    N2 --> N8
+    N1 --> N9
+    N1 --> N10
+    N1 --> N11
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+
+    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 8 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5

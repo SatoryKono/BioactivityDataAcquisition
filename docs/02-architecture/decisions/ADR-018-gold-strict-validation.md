@@ -108,7 +108,7 @@ Feature flag `strict-gold-validation` позволяет:
 ### 5. Конфигурация пайплайна
 
 ```yaml
-# configs/pipelines/chembl/activity.yaml
+# configs/entities/chembl/activity.yaml
 pipeline:
   name: chembl_activity
   provider: chembl

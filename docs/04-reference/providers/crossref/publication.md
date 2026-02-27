@@ -2,10 +2,10 @@
 
 **Имя пайплайна:** `crossref_publication`
 **Провайдер:** `crossref`
-**Сущность:** `publication` (CrossRef API использует термин `work`, но `entity_type` в конфигурации — `publication`, унифицирован с другими провайдерами)
+**Сущность:** `publication` (CrossRef API использует термин `work`, но `entity-type` в конфигурации — `publication`, унифицирован с другими провайдерами)
 **Версия схемы:** 1.2.0
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 1. Описание
 
@@ -14,10 +14,10 @@ ______________________________________________________________________
 ### Основные сценарии использования
 
 1. **Обогащение документов ChEMBL** — добавление цитирований к публикациям из ChEMBL Documents
-1. **Обогащение PubMed публикаций** — дополнительные метаданные (citation_count, reference_count)
+1. **Обогащение PubMed публикаций** — дополнительные метаданные (citation-count, reference-count)
 1. **Резолюция DOI** — получение полных метаданных по списку DOI
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 2. Ключевые поля
 
@@ -43,30 +43,30 @@ ______________________________________________________________________
 | ------------------ | ------------- | ------------------------------ |
 | `volume`           | `str \| None` | Том                            |
 | `issue`            | `str \| None` | Выпуск                         |
-| `page_first`       | `str \| None` | Первая страница                |
-| `page_last`        | `str \| None` | Последняя страница             |
-| `publication_year` | `int \| None` | Год публикации                 |
-| `published_print`  | `str \| None` | Дата печатной публикации (ISO) |
-| `published_online` | `str \| None` | Дата онлайн-публикации (ISO)   |
+| `page-first`       | `str \| None` | Первая страница                |
+| `page-last`        | `str \| None` | Последняя страница             |
+| `publication-year` | `int \| None` | Год публикации                 |
+| `published-print`  | `str \| None` | Дата печатной публикации (ISO) |
+| `published-online` | `str \| None` | Дата онлайн-публикации (ISO)   |
 
 ### Метрики цитирования
 
 | Поле              | Тип           | Описание                                        |
 | ----------------- | ------------- | ----------------------------------------------- |
-| `citations_received` | `int \| None` | Количество цитирований (is-referenced-by-count) |
-| `citations_made`     | `int \| None` | Количество ссылок в публикации                  |
+| `citations-received` | `int \| None` | Количество цитирований (is-referenced-by-count) |
+| `citations-made`     | `int \| None` | Количество ссылок в публикации                  |
 
 ### Классификация
 
 | Поле          | Тип           | Описание                                    |
 | ------------- | ------------- | ------------------------------------------- |
-| `doc_type`    | `str`         | Тип документа: `PUBLICATION` или `PREPRINT` |
+| `doc-type`    | `str`         | Тип документа: `PUBLICATION` или `PREPRINT` |
 | `issn`        | `list[str]`   | Список ISSN журнала                         |
 | `language`    | `str \| None` | Код языка публикации                        |
-| `license_url` | `str \| None` | URL лицензии                                |
+| `license-url` | `str \| None` | URL лицензии                                |
 | `subjects`    | `list[str]`   | Предметные области                          |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 3. Трансформация
 
@@ -76,7 +76,7 @@ ______________________________________________________________________
 
 ```python
 # DOI нормализуется в lowercase и stripped
-doi = normalize_doi("10.1234/ABC.DEF")  # → "10.1234/abc.def"
+doi = normalize-doi("10.1234/ABC.DEF")  # → "10.1234/abc.def"
 ```
 
 ### Маппинг типов документов
@@ -92,18 +92,18 @@ doi = normalize_doi("10.1234/ABC.DEF")  # → "10.1234/abc.def"
 ### Entity ID
 
 ```python
-# Формат entity_id
-entity_id = f"crossref:{normalized_doi}"
+# Формат entity-id
+entity-id = f"crossref:{normalized-doi}"
 ```
 
 ### Content Hash
 
 Вычисляется по бизнес-полям публикации для дедупликации:
 
-- Исключаются lineage поля (`_run_id`, `_ingestion_ts`, etc.)
+- Исключаются lineage поля (`-run-id`, `-ingestion-ts`, etc.)
 - None-значения исключаются из хэша
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 4. Особенности
 
@@ -127,23 +127,23 @@ CrossRef API предоставляет "polite pool" с повышенными 
 
 При получении 404 для DOI:
 
-1. Если в `fallback_mapping` есть заголовок для DOI
+1. Если в `fallback-mapping` есть заголовок для DOI
 1. Выполняется поиск по заголовку: `title:"Publication Title"`
 1. Проверяется релевантность найденного результата
 
 ### Конфигурация Input Filter
 
 ```yaml
-input_filter:
+input-filter:
   enabled: true
-  source_path: "data/input/dois.csv"
-  column_name: "doi"
-  filter_field: "doi"
-  batch_size: 50
-  fallback_column: "title"  # Поиск по заголовку при 404
+  source-path: "data/input/dois.csv"
+  column-name: "doi"
+  filter-field: "doi"
+  batch-size: 50
+  fallback-column: "title"  # Поиск по заголовку при 404
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 5. Использование CLI
 
@@ -171,7 +171,7 @@ doi,title
 10.1016/j.cell.2019.03.025,Structure of the human receptor
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 6. Health Check
 
@@ -183,7 +183,7 @@ CrossRef adapter реализует health check через `/works?rows=1`:
 | `DEGRADED`  | Ответ 200 за > 5 сек     |
 | `UNHEALTHY` | Ошибка или не-200 статус |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 7. Error Handling
 
@@ -208,13 +208,13 @@ ______________________________________________________________________
 | Missing DOI        | Skip record (log warning) |
 | Invalid DOI format | Skip record               |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 8. Gold Filters
 
 ```yaml
-gold_filters:
-  required_fields:
+gold-filters:
+  required-fields:
     - doi
     - title
   ranges:
@@ -223,21 +223,21 @@ gold_filters:
       max: 2100
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 9. Связанные файлы
 
 | Компонент              | Путь                                                       |
 | ---------------------- | ---------------------------------------------------------- |
-| Конфигурация пайплайна | `configs/pipelines/crossref/publication.yaml`              |
-| Конфигурация источника | `configs/sources/crossref.yaml`                            |
+| Конфигурация пайплайна | `configs/entities/crossref/publication.yaml`              |
+| Конфигурация источника | `configs/providers/crossref.yaml`                            |
 | Трансформер            | `src/bioetl/application/pipelines/crossref/transformer.py` |
 | Адаптер                | `src/bioetl/infrastructure/adapters/crossref/client.py`    |
 | Batch Processor        | `src/bioetl/infrastructure/adapters/crossref/batch.py`     |
 | Fallback Handler       | `src/bioetl/infrastructure/adapters/crossref/fallback.py`  |
 | Domain Entity          | `src/bioetl/domain/entities/crossref.py`                   |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 10. Примеры данных
 
@@ -268,18 +268,18 @@ ______________________________________________________________________
   "authors": ["John Doe", "Jane Smith"],
   "journal": "Nature",
   "publisher": "Springer Nature",
-  "publication_year": 2013,
-  "published_print": "2013-07-25",
-  "citations_received": 1500,
-  "doc_type": "PUBLICATION",
+  "publication-year": 2013,
+  "published-print": "2013-07-25",
+  "citations-received": 1500,
+  "doc-type": "PUBLICATION",
   "source": "crossref",
-  "_run_id": "...",
-  "_run_type": "incremental",
-  "_ingestion_ts": "2025-01-05T12:00:00Z",
-  "content_hash": "sha256:..."
+  "-run-id": "...",
+  "-run-type": "incremental",
+  "-ingestion-ts": "2025-01-05T12:00:00Z",
+  "content-hash": "sha256:..."
 }
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 *Последнее обновление: 2026-02-15*
