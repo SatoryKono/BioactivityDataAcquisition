@@ -1,6 +1,6 @@
-"""Декораторы для регистрации провайдеров.
+"""Decorators for provider registration.
 
-Предоставляет декларативный API для регистрации адаптеров провайдеров.
+Provides a declarative API for registering provider adapters.
 """
 
 from __future__ import annotations
@@ -33,24 +33,24 @@ def register_provider(
     custom_creator: AdapterCreator | None = None,
     **default_kwargs: Any,  # Any: adapter-specific defau...
 ) -> Callable[[type[T]], type[T]]:
-    """Декоратор для регистрации провайдера данных.
+    """Decorator for registering a data provider.
 
-    Регистрирует класс адаптера в ProviderRegistry при импорте модуля.
+    Registers the adapter class in ProviderRegistry at module import time.
 
     Args:
-        name: Уникальное имя провайдера (например, "chembl", "pubchem")
-        http_rate: Rate limit для HTTP клиента (requests/second)
-        http_capacity: Ёмкость token bucket
-        requires_http_client: Нужен ли HTTP клиент для инициализации
-        requires_logger: Нужен ли логгер для инициализации
-        rate_overrides: Условные переопределения rate limit.
-            Ключ — имя атрибута Settings, значение — новый rate.
-        custom_creator: Кастомная функция создания адаптера.
-            Если указана, используется вместо стандартной логики.
-        **default_kwargs: Дефолтные kwargs для конструктора адаптера
+        name: Unique provider name (e.g., "chembl", "pubchem").
+        http_rate: Rate limit for the HTTP client (requests/second).
+        http_capacity: Token bucket capacity.
+        requires_http_client: Whether an HTTP client is needed for initialization.
+        requires_logger: Whether a logger is needed for initialization.
+        rate_overrides: Conditional rate limit overrides.
+            Key is a Settings attribute name, value is the new rate.
+        custom_creator: Custom adapter creation function.
+            If specified, used instead of the standard logic.
+        **default_kwargs: Default kwargs for the adapter constructor.
 
     Returns:
-        Декоратор класса
+        Class decorator.
 
     Example:
         >>> @register_provider(
@@ -62,7 +62,7 @@ def register_provider(
         ...     def __init__(self, http_client, logger=None):
         ...         ...
 
-        >>> # Для провайдеров со сложной логикой инициализации:
+        >>> # For providers with complex initialization logic:
         >>> def create_pubmed(http_client, logger, settings, **kwargs):
         ...     api_key = kwargs.get("api_key") or settings.pubmed_api_key
         ...     return PubMedAdapter(http_client, logger, api_key=api_key)
@@ -94,7 +94,7 @@ def register_provider(
             - Registers provider in ProviderRegistry with captured config
             - Adds __provider_name__ attribute to the class
         """
-        # Создаём HTTP конфигурацию
+        # Create HTTP configuration
         http_config: HttpConfig | None = None
         if requires_http_client:
             http_config = HttpConfig(
@@ -103,7 +103,7 @@ def register_provider(
                 rate_overrides=rate_overrides or {},
             )
 
-        # Создаём конфигурацию провайдера
+        # Create provider configuration
         config = ProviderConfig(
             adapter_class=cls,
             http_config=http_config,
@@ -113,10 +113,10 @@ def register_provider(
             custom_creator=custom_creator,
         )
 
-        # Регистрируем провайдера
+        # Register the provider
         ProviderRegistry.register(name, config)
 
-        # Сохраняем имя провайдера в классе для интроспекции
+        # Store the provider name on the class for introspection
         cls.__provider_name__ = name  # type: ignore[attr-defined]
 
         return cls

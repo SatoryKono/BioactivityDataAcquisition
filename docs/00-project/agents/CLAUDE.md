@@ -132,7 +132,7 @@ ls tests/architecture/test-*.py
 | **Python-файлов**         | ~1,114 (534 src + 580 tests)                        |
 | **Строк кода**            | ~115,656 (src/bioetl/)                              |
 | **Тестов**                | ~11,985 (функций test-)                             |
-| **ADR**                   | ADR-001..ADR-038                                    |
+| **ADR**                   | ADR-001..ADR-040                                    |
 | **Провайдеров**           | 7                                                   |
 | **Pipeline-конфигураций** | 27                                                  |
 | **Конфиг-файлов всего**   | 123 (pipelines, quality, filters, sources, schemas) |
@@ -354,7 +354,7 @@ cat docs/archived/refactoring-plan.md | head -60
 
 **Circuit Breaker**: 5 consecutive errors → Open 5 мин (см. [ADR-007](../../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md))
 
-**Актуальный набор ADR (ADR-001..ADR-038)** определяет архитектурные решения: `docs/02-architecture/decisions/ADR-{NNN}-*.md`
+**Актуальный набор ADR (ADR-001..ADR-040)** определяет архитектурные решения: `docs/02-architecture/decisions/ADR-{NNN}-*.md`
 (полный реестр в `docs/00-project/RULES.md` Приложение F)
 
 ----------------------------------------------------------------------

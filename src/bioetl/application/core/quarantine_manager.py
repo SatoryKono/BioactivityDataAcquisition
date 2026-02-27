@@ -1,6 +1,6 @@
 """Quarantine Manager for ETL Pipelines.
 
-Refactored per ADR-0005 to accept explicit dependencies instead of full pipeline.
+Refactored per ADR-005 to accept explicit dependencies instead of full pipeline.
 """
 
 from __future__ import annotations

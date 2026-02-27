@@ -22,7 +22,7 @@ Usage:
     >>> from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 These schemas ensure type safety and validation when loading
-YAML configuration files from configs/pipelines/.
+YAML configuration files from configs/entities/.
 """
 
 from bioetl.infrastructure.schemas.base_schemas import (

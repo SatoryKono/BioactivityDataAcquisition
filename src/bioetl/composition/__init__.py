@@ -16,5 +16,5 @@ The composition layer is the only layer allowed to import from
 infrastructure and wire concrete implementations to domain ports.
 
 See Also:
-    docs/02-architecture/decisions/ADR-005-composition-layer.md
+    docs/02-architecture/decisions/ADR-005-composition-layer-separation.md
 """

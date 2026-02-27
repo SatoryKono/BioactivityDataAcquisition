@@ -1,6 +1,6 @@
 """Explicit provider registration for Composition layer.
 
-Loads config from configs/sources/*.yaml. HttpConfig serves as fallback.
+Loads config from configs/providers/*.yaml. HttpConfig serves as fallback.
 Config helpers extracted to _config_helpers.py per audit-package-structure-2026-02-07.
 """
 
@@ -76,7 +76,7 @@ def _create_chembl_data_source(
 ) -> DataSourcePort:
     """Create ChEMBL data source with optional CSV filtering.
 
-    Configuration is loaded from configs/sources/chembl.yaml via AdapterConfig.
+    Configuration is loaded from configs/providers/chembl.yaml via AdapterConfig.
     This ensures YAML is the single source of truth (RULES.md §12.1.2).
 
     For document_term entity type, wraps the adapter with PublicationTermDataSource
@@ -469,17 +469,17 @@ def register_all_providers() -> None:
     Idempotent - safe to call multiple times.
 
     Configuration Priority:
-    1. configs/sources/{provider}.yaml - PRIMARY (rate limits, circuit breaker, batch_size)
+    1. configs/providers/{provider}.yaml - PRIMARY (rate limits, circuit breaker, batch_size)
     2. HttpConfig in ProviderConfig - FALLBACK only
 
     Provider configurations are now loaded from YAML files:
-    - ChEMBL: configs/sources/chembl.yaml
-    - PubChem: configs/sources/pubchem.yaml
-    - UniProt: configs/sources/uniprot.yaml
-    - PubMed: configs/sources/pubmed.yaml
-    - CrossRef: configs/sources/crossref.yaml
-    - OpenAlex: configs/sources/openalex.yaml
-    - Semantic Scholar: configs/sources/semanticscholar.yaml
+    - ChEMBL: configs/providers/chembl.yaml
+    - PubChem: configs/providers/pubchem.yaml
+    - UniProt: configs/providers/uniprot.yaml
+    - PubMed: configs/providers/pubmed.yaml
+    - CrossRef: configs/providers/crossref.yaml
+    - OpenAlex: configs/providers/openalex.yaml
+    - Semantic Scholar: configs/providers/semanticscholar.yaml
 
     Each provider includes a data_source_creator for unified registry access.
     """

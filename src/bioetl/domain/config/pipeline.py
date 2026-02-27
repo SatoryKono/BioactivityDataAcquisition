@@ -111,10 +111,10 @@ class PipelineConfig:
 
     @property
     def effective_silver_table(self) -> str:
-        """Имя Silver-таблицы с fallback на provider.entity."""
+        """Silver table name with fallback to provider.entity."""
         return self.table.silver_table or f"{self.provider}.{self.entity_type}"
 
     @property
     def effective_gold_table(self) -> str:
-        """Имя Gold-таблицы с fallback на provider.entity."""
+        """Gold table name with fallback to provider.entity."""
         return self.table.gold_table or f"{self.provider}.{self.entity_type}"

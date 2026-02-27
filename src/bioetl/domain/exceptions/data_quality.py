@@ -4,9 +4,9 @@ These errors indicate problems with data quality at the batch or pipeline level,
 as opposed to individual record validation errors. DataQualityErrors typically
 affect processing decisions for entire batches or trigger quarantine mechanisms.
 
-Категория: DataQualityErrors - ошибки качества данных на уровне содержательной
-целостности (нарушение инвариантов, аномалии в данных, превышение порогов,
-случаи помещения данных в карантин).
+Category: DataQualityErrors - data quality errors at the content integrity level
+(invariant violations, data anomalies, threshold exceedances,
+data quarantine cases).
 
 Note:
     Individual record validation errors (SchemaViolationError, MissingRequiredFieldError,
