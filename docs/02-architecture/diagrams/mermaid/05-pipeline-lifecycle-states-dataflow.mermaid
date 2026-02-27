@@ -5,26 +5,26 @@ flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N8["ValidateLock&nbsp;&nbsp;&nbsp;"]
+        N8["ValidateLock"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N2["TRANSFORMING&nbsp;&nbsp;&nbsp;"]
-        N3["FetchBatch&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N11["FailBatch&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["TRANSFORMING"]
+        N3["FetchBatch"]
+        N11["FailBatch"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N1["EXTRACTING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N4["WriteBronze&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N5["PassRecords&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N6["WarnRecords&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N1["EXTRACTING"]
+        N4["WriteBronze"]
+        N5["PassRecords"]
+        N6["WarnRecords"]
         N7["RouteQuarantine"]
-        N9["MergeSilver&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N10["WriteGold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N12["PostWriteCheck&nbsp;"]
+        N9["MergeSilver"]
+        N10["WriteGold"]
+        N12["PostWriteCheck"]
     end
 
     N3 --> N4

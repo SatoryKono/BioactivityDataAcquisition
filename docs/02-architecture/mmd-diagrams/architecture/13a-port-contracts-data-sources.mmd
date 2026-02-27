@@ -13,15 +13,18 @@
 graph LR
 %% keep-orphan: FDSP
     subgraph Domain["Domain Layer"]
-        DSP["DataSourcePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        DSP["DataSourcePort"]
         FDSP["FilterableDataSourcePort"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        CA["ChemblAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        CA["ChemblAdapter"]
     end
 
     DSP --- CA & PA & UA & CRA & OAA & SSA & PCA
 
-    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    classDef domain fill:#f3e5f5,stroke:#6a1b9a
+    classDef infra fill:#ffcdd2,stroke:#c62828
+
+    class DSP,FDSP domain
+    class CA,PA,UA,CRA,OAA,SSA,PCA infra

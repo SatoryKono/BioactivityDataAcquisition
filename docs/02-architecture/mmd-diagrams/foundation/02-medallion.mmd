@@ -8,7 +8,7 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 %% @uniform width=224 height=56 max_title_len=23 max_desc_lines=1
 flowchart LR
     subgraph Bronze["Bronze Layer"]
@@ -34,10 +34,10 @@ flowchart LR
     Quarantine -.->|"Replay"| Bronze
 
     %% Styling — Medallion colors per policy §4.3
-    classDef bronze fill:#fff8e1,stroke:#FFA500,color:#e65100
-    classDef silver fill:#eceff1,stroke:#607d8b,color:#263238
-    classDef gold fill:#fffde7,stroke:#FFD700,color:#f57f17
-    classDef quarantine fill:#ffebee,stroke:#FF6B6B,color:#b71c1c
+    classDef bronze fill:#fff3e0,stroke:#e65100,color:#212121
+    classDef silver fill:#eceff1,stroke:#607d8b,color:#212121
+    classDef gold fill:#fff8e1,stroke:#f9a825,color:#212121
+    classDef quarantine fill:#ffebee,stroke:#c62828,color:#212121
 
     class B1,B2,B3,B4 bronze
     class S1,S2,S3,S4 silver

@@ -12,15 +12,15 @@
 flowchart LR
 %% keep-orphan: B, G, S
     subgraph Sources["External Sources"]
-        ChEMBL[(ChEMBL API<br/><br/>)]
-        PubChem[(PubChem API<br/><br/>)]
-        UniProt[(UniProt API<br/><br/>)]
-        PubMed[(PubMed API<br/><br/>)]
+        ChEMBL[(ChEMBL API<br/>)]
+        PubChem[(PubChem API<br/>)]
+        UniProt[(UniProt API<br/>)]
+        PubMed[(PubMed API<br/>)]
     end
 
     subgraph Bronze["Bronze Layer"]
         direction TB
-        BronzeWriter[BronzeWriter<br/><br/>]
+        BronzeWriter[BronzeWriter<br/>]
         BronzeData[("JSONL + zstd<br/>Append-only<br/>90d retention")]
 
         BronzeWriter --> BronzeData
@@ -28,7 +28,7 @@ flowchart LR
 
     subgraph Silver["Silver Layer"]
         direction TB
-        SilverWriter[SilverWriter<br/><br/>]
+        SilverWriter[SilverWriter<br/>]
         SilverData[("Delta Lake<br/>Merge/Upsert<br/>ACID transactions")]
 
         SilverWriter --> SilverData
@@ -36,7 +36,7 @@ flowchart LR
 
     subgraph Gold["Gold Layer"]
         direction TB
-        GoldWriter[GoldWriter<br/><br/>]
+        GoldWriter[GoldWriter<br/>]
         GoldData[("Delta Lake<br/>SCD Type 2<br/>Analytics-ready")]
 
         GoldWriter --> GoldData
@@ -53,16 +53,16 @@ flowchart LR
 
     %% Annotations
     subgraph Legend["Data Characteristics"]
-        B["Bronze: Raw, immutable<br/><br/>"]
-        S["Silver: Normalized, deduplicated<br/><br/>"]
-        G["Gold: Validated, flattened<br/><br/>"]
+        B["Bronze: Raw, immutable<br/>"]
+        S["Silver: Normalized, deduplicated<br/>"]
+        G["Gold: Validated, flattened<br/>"]
     end
 
     %% Styling
-    classDef source fill:#e3f2fd,stroke:#1976d2
-    classDef bronze fill:#fff8e1,stroke:#ffa000
-    classDef silver fill:#e8eaf6,stroke:#3f51b5
-    classDef gold fill:#fff3e0,stroke:#ff9800
+    classDef source fill:#e3f2fd,stroke:#1565c0
+    classDef bronze fill:#fff3e0,stroke:#e65100
+    classDef silver fill:#eceff1,stroke:#607d8b
+    classDef gold fill:#fff8e1,stroke:#f9a825
 
     class ChEMBL,PubChem,UniProt,PubMed source
     class BronzeWriter,BronzeData bronze

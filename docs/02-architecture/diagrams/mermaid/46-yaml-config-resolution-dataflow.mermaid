@@ -5,26 +5,26 @@ flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N2["PIPELINE_CONFIG&nbsp;&nbsp;"]
-        N8["TABLE_CONFIG&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N9["dq_config_file&nbsp;&nbsp;&nbsp;"]
-        N12["override&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["PIPELINE_CONFIG"]
+        N8["TABLE_CONFIG"]
+        N9["dq_config_file"]
+        N12["override"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N1["PIPELINE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N1["PIPELINE"]
         N6["PIPELINE_YAML_CFG"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N3["SOURCE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N4["SILVER_FILTER&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N5["GOLD_FILTER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N7["SOURCE_YAML_CFG&nbsp;&nbsp;"]
-        N10["br&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N11["YAML_LOADER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N3["SOURCE"]
+        N4["SILVER_FILTER"]
+        N5["GOLD_FILTER"]
+        N7["SOURCE_YAML_CFG"]
+        N10["br"]
+        N11["YAML_LOADER"]
     end
 
     N11 --> N12

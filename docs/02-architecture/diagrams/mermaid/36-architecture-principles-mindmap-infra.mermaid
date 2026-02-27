@@ -5,34 +5,34 @@ flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N4["StoragePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N5["LockPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N6["MetricsPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N7["LoggerPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N8["TracingPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N4["StoragePort"]
+        N5["LockPort"]
+        N6["MetricsPort"]
+        N7["LoggerPort"]
+        N8["TracingPort"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
         N1["Infrastructure Adapters"]
-        N2["Local Only Deployment&nbsp;&nbsp;"]
-        N3["QuarantineEntry&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N10["Storage Writers&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N11["MemoryLock&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N12["PrometheusMetrics&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N14["HTTP Adapters&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N15["Storage&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N16["Delta Lake&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N17["Delta Parquet&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N20["MemoryLock in-process&nbsp;&nbsp;"]
+        N2["Local Only Deployment"]
+        N3["QuarantineEntry"]
+        N10["Storage Writers"]
+        N11["MemoryLock"]
+        N12["PrometheusMetrics"]
+        N14["HTTP Adapters"]
+        N15["Storage"]
+        N16["Delta Lake"]
+        N17["Delta Parquet"]
+        N20["MemoryLock in-process"]
     end
 
     subgraph Composition["Composition Layer"]
         direction TB
-        N13["PipelineRegistry&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N18["GenericPipelineFactory&nbsp;"]
-        N19["RunnerFactory&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N9["7 Provider Adapters&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N13["PipelineRegistry"]
+        N18["GenericPipelineFactory"]
+        N19["RunnerFactory"]
+        N9["7 Provider Adapters"]
     end
 
     N1 --> N9

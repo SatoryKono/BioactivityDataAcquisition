@@ -4,22 +4,22 @@ flowchart TB
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N1["Bronze&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N2["Silver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N3["Gold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N5["chembl_activity&nbsp;"]
+        N1["Bronze"]
+        N2["Silver"]
+        N3["Gold"]
+        N5["chembl_activity"]
         N7["pubchem_compound"]
-        N8["uniprot_protein&nbsp;"]
-        N9["ChEMBL_API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N10["PubChem_API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N11["UniProt_API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N12["PubMed_API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N4["Quarantine&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["uniprot_protein"]
+        N9["ChEMBL_API"]
+        N10["PubChem_API"]
+        N11["UniProt_API"]
+        N12["PubMed_API"]
+        N4["Quarantine"]
     end
 
     subgraph Interfaces["Interfaces Layer"]
         direction TB
-        N6["CLI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["CLI"]
     end
 
     N9 --> N5

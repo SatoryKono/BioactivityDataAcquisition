@@ -36,13 +36,19 @@ svg {
 }
 
 .cluster text {
-    font-weight: 600;
-    font-size: 15px;
+    font-size: 18px;
+}
+
+/* Layer/subgraph labels rendered via foreignObject/span.nodeLabel */
+.cluster-label .nodeLabel,
+.cluster-label span,
+.cluster-label p {
+    font-size: 18px !important;
 }
 
 /* ── Edges / links ──────────────────────────────────── */
 .edgePath .path {
-    stroke-width: 2.5px;
+    stroke-width: 2.0px;
     stroke-linejoin: round;
     stroke-linecap: round;
 }
@@ -58,32 +64,37 @@ svg {
     stroke-linecap: round;
 }
 
-/* State diagram transitions — match edge stroke for consistent rounding */
+/* State diagram transitions — unified edge stroke */
 .transition path {
-    stroke-width: 2.5px;
+    stroke-width: 2.0px;
 }
 
 .edgeLabel {
-    font-size: 13px;
-    background-color: #ffffff;
-    padding: 2px 6px;
-    border-radius: 3px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #0f172a !important;
+    background-color: transparent;
+    padding: 3px 8px;
 }
 
-/* Force opaque background on edge labels — Mermaid generates
-   #id .edgeLabel rect { opacity: .5 } and
-   #id .labelBkg { background-color: rgba(255,255,255,.5) }
-   with ID-scoped selectors, making labels invisible on white/transparent BG. */
+.edgeLabel span,
+.edgeLabel p {
+    color: #0f172a !important;
+    fill: #0f172a !important;
+}
+
+/* Remove white background from edge labels */
 .edgeLabel .labelBkg,
 .labelBkg {
-    background-color: #ffffff !important;
-    opacity: 1 !important;
+    background-color: transparent !important;
+    opacity: 0 !important;
 }
 
-/* SVG rect behind edge label text — override Mermaid's 50% opacity */
+/* SVG rect behind edge label text — make transparent */
 .edgeLabel rect {
-    opacity: 1 !important;
-    fill: #ffffff !important;
+    opacity: 0 !important;
+    fill: none !important;
+    stroke: none !important;
 }
 
 /* ── Sequence diagram ───────────────────────────────── */
@@ -95,11 +106,11 @@ svg {
 
 .messageLine0,
 .messageLine1 {
-    stroke-width: 1.6px;
+    stroke-width: 2.0px;
 }
 
 .messageText {
-    font-size: 13px;
+    font-size: 14px;
 }
 
 .activation0 {
@@ -110,7 +121,7 @@ svg {
     rx: 4;
     ry: 4;
     stroke-width: 1px;
-    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.08));
 }
 
 /* ── Class diagram ──────────────────────────────────── */
@@ -122,7 +133,7 @@ g.classGroup rect {
 }
 
 g.classGroup text {
-    font-size: 13px;
+    font-size: 16px;
 }
 
 g.classGroup line {
@@ -130,7 +141,7 @@ g.classGroup line {
 }
 
 .relation {
-    stroke-width: 2.5px;
+    stroke-width: 2.0px;
 }
 
 /*
@@ -147,14 +158,14 @@ g.classGroup line {
 
 /* Class name — larger and bold */
 g.label-group .nodeLabel {
-    font-size: 15px !important;
+    font-size: 19px !important;
     font-weight: 700 !important;
-    letter-spacing: 0.01em;
+    letter-spacing: 0.02em;
 }
 
 /* Stereotype annotation — small italic */
 g.annotation-group .nodeLabel {
-    font-size: 11px !important;
+    font-size: 12px !important;
     font-style: italic !important;
     opacity: 0.8;
 }
@@ -162,7 +173,7 @@ g.annotation-group .nodeLabel {
 /* Attributes and methods — compact, keep readable */
 g.members-group .nodeLabel,
 g.methods-group .nodeLabel {
-    font-size: 12px !important;
+    font-size: 15px !important;
     font-weight: 400 !important;
 }
 
@@ -215,6 +226,16 @@ g.stateGroup rect {
     filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
 }
 
+/* T2 Body for state labels */
+.statediagram-state .state-title {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.statediagram-state text {
+    font-size: 16px;
+}
+
 /* ── ER diagram ─────────────────────────────────────── */
 .er.entityBox {
     stroke-width: 1.5px;
@@ -223,70 +244,181 @@ g.stateGroup rect {
     filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
 }
 
+/* T1 Title for entity names */
+.er.entityLabel {
+    font-size: 16px;
+    font-weight: 700;
+}
+
 /* ── Mindmap ────────────────────────────────────────── */
 .mindmap-node rect,
 .mindmap-node circle {
     stroke-width: 1.5px;
-    filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.1));
+    filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.08));
+}
+
+/* T2 Body for mindmap nodes */
+.mindmap-node text {
+    font-size: 16px;
 }
 
 /* ── Markers / arrowheads ───────────────────────────── */
 marker path {
-    fill: #546e7a;
+    fill: #475569;
 }
 
-/* ── BioETL-specific layer colours ──────────────────── */
-/* Use classDef in .mmd files for best results.
-   These selectors are fallback targets for
-   subgraphs whose id starts with a known prefix. */
+/* ── Cross-diagram link harmonization (ADR-040 D9) ─── */
+/*
+ * Unified semantic link colours across all diagram types.
+ * flowchart uses linkStyle directives (inline); other diagram types
+ * rely on these CSS rules applied during SVG render.
+ *
+ * Palette:
+ *   data flow:     #1E293B  2px   solid
+ *   orchestration: #2e7d32  2px   solid
+ *   DI/implements: #6a1b9a  1.5px dashed (5)
+ *   observability: #94A3B8  1px   solid
+ *   error:         #c62828  2px   dashed (4)
+ *   baseline:      #475569  2px   solid
+ */
 
-[id*="Domain"] > rect {
-    fill: #f3e5f5 !important;
+/* Sequence diagram — sync calls use baseline link colour */
+.messageLine0 {
+    stroke: #475569 !important;
+    stroke-width: 2px !important;
+}
+
+/* Sequence diagram — return/response lines are lighter */
+.messageLine1 {
+    stroke: #94A3B8 !important;
+    stroke-width: 1.5px !important;
+    stroke-dasharray: 6 4 !important;
+}
+
+/* Class diagram — relations inherit baseline colour */
+.relation {
+    stroke: #475569 !important;
+}
+
+/* Class diagram — composition/aggregation diamond markers */
+.relation .composition,
+#compositionStart path,
+#compositionEnd path {
+    fill: #475569 !important;
+    stroke: #475569 !important;
+}
+
+/* Class diagram — inheritance/extension arrows → DI purple */
+#extensionStart path,
+#extensionEnd path {
+    fill: #6a1b9a !important;
     stroke: #6a1b9a !important;
 }
 
-[id*="Application"] > rect {
-    fill: #e8f5e9 !important;
+/* Class diagram — dashed dependency lines → DI purple */
+.relation.dashed-line {
+    stroke: #6a1b9a !important;
+    stroke-dasharray: 5 !important;
+}
+
+/* State diagram — transitions use orchestration green */
+.statediagram-state .transition path,
+.transition path {
     stroke: #2e7d32 !important;
+    stroke-width: 2px !important;
 }
 
-[id*="Infrastructure"] > rect {
-    fill: #ffcdd2 !important;
+/* State diagram — transition arrowheads */
+.transition marker path {
+    fill: #2e7d32 !important;
+}
+
+/* ER diagram — relationship lines use data flow colour */
+.er.relationshipLine {
+    stroke: #1E293B !important;
+    stroke-width: 2px !important;
+}
+
+/* ER diagram — dashed relationships (M:N cross-provider) → DI purple */
+.er.relationshipLine[stroke-dasharray] {
+    stroke: #6a1b9a !important;
+}
+
+/* ── BioETL-specific layer colours ──────────────────── */
+/*
+ * Layer containers: neutral background so layers don't visually merge
+ * with same-colour nodes. Keep semantic colour on border only.
+ * Include both rect and path because some render/optimize passes
+ * convert cluster rectangles into path geometry.
+ */
+
+[id*="Domain"] > rect,
+[id*="Domain"] > path {
+    fill: #f8fafc !important;
+    stroke: #6a1b9a !important;
+    stroke-width: 2px !important;
+}
+
+[id*="Application"] > rect,
+[id*="Application"] > path {
+    fill: #f8fafc !important;
+    stroke: #2e7d32 !important;
+    stroke-width: 2px !important;
+}
+
+[id*="Infrastructure"] > rect,
+[id*="Infrastructure"] > path {
+    fill: #f8fafc !important;
     stroke: #c62828 !important;
+    stroke-width: 2px !important;
 }
 
-[id*="Composition"] > rect {
-    fill: #fff3e0 !important;
+[id*="Composition"] > rect,
+[id*="Composition"] > path {
+    fill: #f8fafc !important;
     stroke: #e65100 !important;
+    stroke-width: 2px !important;
 }
 
-[id*="Interfaces"] > rect {
-    fill: #e3f2fd !important;
+[id*="Interfaces"] > rect,
+[id*="Interfaces"] > path {
+    fill: #f8fafc !important;
     stroke: #1565c0 !important;
+    stroke-width: 2px !important;
 }
 
-[id*="External"] > rect {
-    fill: #eceff1 !important;
+[id*="External"] > rect,
+[id*="External"] > path {
+    fill: #f8fafc !important;
     stroke: #455a64 !important;
+    stroke-width: 1.5px !important;
 }
 
-/* Medallion colours for data-flow diagrams */
-[id*="Bronze"] > rect {
-    fill: #fff3e0 !important;
+/* Medallion container groups */
+[id*="Bronze"] > rect,
+[id*="Bronze"] > path {
+    fill: #f8fafc !important;
     stroke: #e65100 !important;
+    stroke-width: 2px !important;
 }
 
-[id*="Silver"] > rect {
-    fill: #eceff1 !important;
+[id*="Silver"] > rect,
+[id*="Silver"] > path {
+    fill: #f8fafc !important;
     stroke: #607d8b !important;
+    stroke-width: 2px !important;
 }
 
-[id*="Gold"] > rect {
-    fill: #fff8e1 !important;
+[id*="Gold"] > rect,
+[id*="Gold"] > path {
+    fill: #f8fafc !important;
     stroke: #f9a825 !important;
+    stroke-width: 2px !important;
 }
 
-[id*="Quarantine"] > rect {
-    fill: #ffebee !important;
+[id*="Quarantine"] > rect,
+[id*="Quarantine"] > path {
+    fill: #f8fafc !important;
     stroke: #c62828 !important;
+    stroke-width: 2px !important;
 }

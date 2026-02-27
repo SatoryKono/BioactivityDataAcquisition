@@ -8,53 +8,53 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 %% @uniform width=272 height=126 max_title_len=29 max_desc_lines=5
 flowchart TB
 %% keep-orphan: OB
     subgraph Entry["Entry Point"]
-        CLI["CLI run command<br/><br/><br/><br/><br/>"]
-        BOOT["bootstrap/runtime/assembly.py<br/><br/><br/><br/><br/>"]
+        CLI["CLI run command<br/>"]
+        BOOT["bootstrap/runtime/assembly.py<br/>"]
     end
 
     subgraph Factories["Composition Factories"]
         direction TB
 
         subgraph LoggerFactories["Logger & Observability"]
-            BL["BootstrapLogger<br/>• configure structlog<br/><br/><br/><br/>"]
-            DQF["DQServicesFactory<br/>• create()<br/>→ DQ analyzers + monitor<br/><br/><br/>"]
+            BL["BootstrapLogger<br/>• configure structlog<br/>"]
+            DQF["DQServicesFactory<br/>• create()<br/>→ DQ analyzers + monitor<br/>"]
         end
 
         subgraph ClientFactories["Client & Data Source"]
-            HCF["HttpClientFactory<br/>• create(provider)<br/>→ UnifiedHTTPClient<br/><br/><br/>"]
-            DSF["DataSourceFactory<br/>• create(provider, config)<br/>→ DataSourcePort impl<br/><br/><br/>"]
+            HCF["HttpClientFactory<br/>• create(provider)<br/>→ UnifiedHTTPClient<br/>"]
+            DSF["DataSourceFactory<br/>• create(provider, config)<br/>→ DataSourcePort impl<br/>"]
         end
 
         subgraph StorageFactories["Storage & Services"]
-            STF["StorageFactory<br/>• create(config)<br/>→ BronzeWriter + SilverWriter<br/>+ GoldWriter<br/><br/>"]
-            STA["StorageAdapter<br/>• create_bronze()<br/>• create_silver()<br/>• create_gold()<br/><br/>"]
+            STF["StorageFactory<br/>• create(config)<br/>→ BronzeWriter + SilverWriter<br/>+ GoldWriter<br/>"]
+            STA["StorageAdapter<br/>• create_bronze()<br/>• create_silver()<br/>• create_gold()<br/>"]
             SB["ServicesBuilder<br/>• with_storage()<br/>• with_lock()<br/>• with_logger()<br/>• with_metrics()<br/>• build() → PipelineServices"]
         end
 
         subgraph PipelineFactories["Pipeline Construction"]
-            RF["RunnerFactory<br/>• create_runner()<br/>→ PipelineRunner<br/><br/><br/>"]
-            GPF["GenericPipelineFactory<br/>• _pipeline_class<br/>• _transformer_class<br/>• _gold_schema<br/><br/>"]
+            RF["RunnerFactory<br/>• create_runner()<br/>→ PipelineRunner<br/>"]
+            GPF["GenericPipelineFactory<br/>• _pipeline_class<br/>• _transformer_class<br/>• _gold_schema<br/>"]
         end
     end
 
     subgraph Registry["Registration"]
-        PR["ProviderRegistry<br/>• 8 providers registered<br/><br/><br/><br/>"]
-        OB["ObservabilityBundle<br/>• logger + metrics + tracing<br/><br/><br/><br/>"]
+        PR["ProviderRegistry<br/>• 8 providers registered<br/>"]
+        OB["ObservabilityBundle<br/>• logger + metrics + tracing<br/>"]
     end
 
     subgraph Created["Created Instances"]
         direction TB
-        UHC["UnifiedHTTPClient<br/>+ TokenBucket<br/>+ CircuitBreaker<br/><br/><br/>"]
-        ADP["Provider Adapter<br/>(ChemblAdapter, etc.)<br/><br/><br/><br/>"]
-        BW["BronzeWriter<br/><br/><br/><br/><br/>"]
-        SLL["StructlogLogger<br/><br/><br/><br/><br/>"]
-        PS["PipelineServices<br/>(frozen bundle)<br/><br/><br/><br/>"]
-        RUN["PipelineRunner<br/>(fully assembled)<br/><br/><br/><br/>"]
+        UHC["UnifiedHTTPClient<br/>+ TokenBucket<br/>+ CircuitBreaker<br/>"]
+        ADP["Provider Adapter<br/>(ChemblAdapter, etc.)<br/>"]
+        BW["BronzeWriter<br/>"]
+        SLL["StructlogLogger<br/>"]
+        PS["PipelineServices<br/>(frozen bundle)<br/>"]
+        RUN["PipelineRunner<br/>(fully assembled)<br/>"]
     end
 
     %% Bootstrap flow
@@ -95,7 +95,7 @@ flowchart TB
     style Registry fill:#fff3e0,stroke:#e65100
     style Created fill:#e8f5e9,stroke:#2e7d32
 
-    style LoggerFactories fill:#fffde7,stroke:#fbc02d,stroke-dasharray: 5 5
+    style LoggerFactories fill:#fff8e1,stroke:#f9a825,stroke-dasharray: 5 5
     style ClientFactories fill:#e3f2fd,stroke:#2196f3,stroke-dasharray: 5 5
     style StorageFactories fill:#f3e5f5,stroke:#9c27b0,stroke-dasharray: 5 5
     style PipelineFactories fill:#e0f2f1,stroke:#009688,stroke-dasharray: 5 5

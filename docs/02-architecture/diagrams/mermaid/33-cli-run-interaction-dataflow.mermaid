@@ -1,5 +1,6 @@
 %% View: Data-Flow | Parent: 33-cli-run-interaction-full.mermaid
 %% @uniform width=140 height=56 max_title_len=6 max_desc_lines=0
+%%{init: {'theme': 'neutral', 'flowchart': {'defaultRenderer': 'elk'}}}%%
 flowchart TB
 
     subgraph Application["Application Layer"]
@@ -9,21 +10,21 @@ flowchart TB
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N2["PRS&nbsp;&nbsp;&nbsp;"]
-        N4["Boot&nbsp;&nbsp;"]
-        N5["PF&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N6["LM&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N7["BE&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N8["Post&nbsp;&nbsp;"]
-        N10["SB&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N11["RF&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N12["Obs&nbsp;&nbsp;&nbsp;"]
+        N2["PRS"]
+        N4["Boot"]
+        N5["PF"]
+        N6["LM"]
+        N7["BE"]
+        N8["Post"]
+        N10["SB"]
+        N11["RF"]
+        N12["Obs"]
     end
 
     subgraph Interfaces["Interfaces Layer"]
         direction TB
-        N3["CLI&nbsp;&nbsp;&nbsp;"]
-        N9["User&nbsp;&nbsp;"]
+        N3["CLI"]
+        N9["User"]
     end
 
     N9 --> N3
@@ -51,23 +52,7 @@ flowchart TB
     style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
     style Interfaces fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
 
-    linkStyle 0 stroke:#1E293B,stroke-width:4px
-    linkStyle 1 stroke:#1E293B,stroke-width:4px
-    linkStyle 2 stroke:#1E293B,stroke-width:4px
-    linkStyle 3 stroke:#1E293B,stroke-width:4px
-    linkStyle 4 stroke:#1E293B,stroke-width:4px
-    linkStyle 5 stroke:#1E293B,stroke-width:4px
-    linkStyle 6 stroke:#1E293B,stroke-width:4px
-    linkStyle 7 stroke:#1E293B,stroke-width:4px
-    linkStyle 8 stroke:#1E293B,stroke-width:4px
-    linkStyle 9 stroke:#1E293B,stroke-width:4px
-    linkStyle 10 stroke:#1E293B,stroke-width:4px
-    linkStyle 11 stroke:#1E293B,stroke-width:4px
-    linkStyle 12 stroke:#1E293B,stroke-width:4px
-    linkStyle 13 stroke:#1E293B,stroke-width:4px
-    linkStyle 14 stroke:#1E293B,stroke-width:4px
-    linkStyle 15 stroke:#1E293B,stroke-width:4px
-    linkStyle 16 stroke:#1E293B,stroke-width:4px
-    linkStyle 17 stroke:#1E293B,stroke-width:4px
-    linkStyle 18 stroke:#1E293B,stroke-width:4px
-    linkStyle 19 stroke:#1E293B,stroke-width:4px
+    %% linkStyle: orchestration 0,19 | di 3-7 | primary 1-2,8-18
+    linkStyle 0,19 stroke:#2e7d32,stroke-width:2px
+    linkStyle 3,4,5,6,7 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 1,2,8,9,10,11,12,13,14,15,16,17,18 stroke:#1E293B,stroke-width:3px

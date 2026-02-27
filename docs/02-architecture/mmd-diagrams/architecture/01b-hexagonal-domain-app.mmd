@@ -39,5 +39,8 @@ graph TB
     PIPELINES --> ENTITIES
     PIPELINES --> DOM_SVC
 
-    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-    style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef domain fill:#f3e5f5,stroke:#6a1b9a
+    classDef app fill:#e8f5e9,stroke:#2e7d32
+
+    class PORTS,ENTITIES,VO,CFG,DOM_SVC,TYPES,EXCEPTIONS,SCHEMAS domain
+    class CORE,SERVICES,COMPOSITE,PIPELINES,OBSERVER app

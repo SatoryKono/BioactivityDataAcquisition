@@ -7,7 +7,7 @@ __pycache__/
 
 # Cygwin/MSYS crash dumps
 *.stackdump
-
+.chrome-headless-shell/
 # Virtual environments
 .venv/
 venv/
@@ -82,6 +82,12 @@ log_test.txt
 .ai/
 .aiassistant/
 .codex/
+!.codex/
+.codex/*
+!.codex/skills/
+.codex/skills/*
+!.codex/skills/py-review-orchestrator/
+!.codex/skills/py-review-orchestrator/**
 .gemini/
 .jules/
 .junie/
@@ -175,3 +181,4 @@ data/.idea/
 *.pak
 *.json
 /CUsersFedor/.cache/puppeteer
+/chrome-headless-shell

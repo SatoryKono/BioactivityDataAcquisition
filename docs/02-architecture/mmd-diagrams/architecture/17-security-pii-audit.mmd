@@ -8,41 +8,42 @@
 %% @nodes   16
 %% @uniform width=288 height=198 max_title_len=31 max_desc_lines=9
 
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'NETWORK_SIMPLEX', 'edgeRouting': 'POLYLINE'}}}%%
 graph TB
     subgraph Ports["Domain Ports"]
-        PHP["PiiHasherPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ hash(value: str) → str<br/><br/><br/><br/><br/><br/>"]
-        AP["AuditPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ log_write(entry: AuditEntry)<br/>+ get_entries(filters) → list<br/><br/><br/><br/><br/>"]
+        PHP["PiiHasherPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ hash(value: str) → str<br/>"]
+        AP["AuditPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ log_write(entry: AuditEntry)<br/>+ get_entries(filters) → list<br/>"]
     end
 
     subgraph DomainTypes["Domain Types"]
         AE["AuditEntry<br/>(frozen dataclass)<br/>━━━━━━━━━━━━━━━━━<br/>run_id: RunID<br/>timestamp: datetime<br/>layer: AuditLayer<br/>table_name: str<br/>operation: AuditOperation<br/>records_count: int<br/>metadata: dict"]
-        AL["AuditLayer (StrEnum)<br/>━━━━━━━━━━━━━━━━━<br/>BRONZE<br/>SILVER<br/>GOLD<br/><br/><br/><br/><br/>"]
-        AO["AuditOperation (StrEnum)<br/>━━━━━━━━━━━━━━━━━<br/>WRITE<br/>MERGE<br/>APPEND<br/>DELETE<br/>OVERWRITE<br/><br/><br/>"]
+        AL["AuditLayer (StrEnum)<br/>━━━━━━━━━━━━━━━━━<br/>BRONZE<br/>SILVER<br/>GOLD<br/>"]
+        AO["AuditOperation (StrEnum)<br/>━━━━━━━━━━━━━━━━━<br/>WRITE<br/>MERGE<br/>APPEND<br/>DELETE<br/>OVERWRITE<br/>"]
     end
 
     subgraph PIIFlow["PII Hashing Flow"]
-        RAW_PII["Raw PII Data<br/>(author names, emails,<br/>affiliations)<br/><br/><br/><br/><br/><br/><br/>"]
-        HASH_FN["SHA256(lowercase(value) + salt)<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]
+        RAW_PII["Raw PII Data<br/>(author names, emails,<br/>affiliations)<br/>"]
+        HASH_FN["SHA256(lowercase(value) + salt)<br/>"]
 
         RAW_PII --> HASH_FN --> HASHED
     end
 
     subgraph InfraPII["Infrastructure: PII Hasher"]
-        SPH["Sha256PiiHasher<br/>━━━━━━━━━━━━━━━━━<br/>+ hash(value) → str<br/><br/><br/><br/><br/><br/><br/>"]
+        SPH["Sha256PiiHasher<br/>━━━━━━━━━━━━━━━━━<br/>+ hash(value) → str<br/>"]
         SC["SaltConfig<br/>(frozen dataclass)<br/>━━━━━━━━━━━━━━━━━<br/>current_salt: str<br/>next_salt: str | None<br/>rotation_active: bool<br/>━━━━━━━━━━━━━━━━━<br/>+ from_settings()<br/>+ from_env()<br/>"]
     end
 
     subgraph InfraAudit["Infrastructure: Audit"]
-        FAA["FileAuditAdapter<br/>━━━━━━━━━━━━━━━━━<br/>base_path: Path<br/>logger: LoggerPort<br/>━━━━━━━━━━━━━━━━━<br/>+ log_write(entry)<br/>+ get_entries(filters)<br/>+ aclose()<br/><br/>"]
-        JSONL["audit_YYYY-MM-DD.jsonl<br/>(one file per day,<br/>append-only)<br/><br/><br/><br/><br/><br/><br/>"]
+        FAA["FileAuditAdapter<br/>━━━━━━━━━━━━━━━━━<br/>base_path: Path<br/>logger: LoggerPort<br/>━━━━━━━━━━━━━━━━━<br/>+ log_write(entry)<br/>+ get_entries(filters)<br/>+ aclose()<br/>"]
+        JSONL["audit_YYYY-MM-DD.jsonl<br/>(one file per day,<br/>append-only)<br/>"]
     end
 
     subgraph Usage["Usage in Transformers"]
-        BT["BaseTransformer<br/>━━━━━━━━━━━━━━━━━<br/>+ hash_pii_value(value) → str<br/>+ hash_pii_list(values) → list[str]<br/><br/><br/><br/><br/><br/>"]
+        BT["BaseTransformer<br/>━━━━━━━━━━━━━━━━━<br/>+ hash_pii_value(value) → str<br/>+ hash_pii_list(values) → list[str]<br/>"]
     end
 
     subgraph StorageAudit["Storage Audit Integration"]
-        GW["GoldWriter<br/>━━━━━━━━━━━━━━━━━<br/>audit: AuditPort<br/>logs writes<br/><br/><br/><br/><br/><br/>"]
+        GW["GoldWriter<br/>━━━━━━━━━━━━━━━━━<br/>audit: AuditPort<br/>logs writes<br/>"]
     end
 
     %% Port implementations

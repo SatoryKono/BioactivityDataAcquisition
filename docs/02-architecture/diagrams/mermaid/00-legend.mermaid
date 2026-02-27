@@ -65,4 +65,15 @@ flowchart TB
         K39["K39 = DATA_QUALITY"]
     end
 
+    subgraph CrossDiagram["Cross-Diagram Semantic Mapping (ADR-040 D9)"]
+        direction TB
+        CM1["flowchart:  -->  = data flow"]
+        CM2["sequence:   ->>  = sync call (data)"]
+        CM3["class:      <|-- = inheritance (DI)"]
+        CM4["state:      -->  = transition (orch)"]
+        CM5["ER:         ||--o{ = relationship (data)"]
+        CM6["Label prefixes: DATA, DI, ORCH, OBS, ERR"]
+    end
+
     style Legend fill:#F8FAFC,stroke:#94A3B8,stroke-width:2px
+    style CrossDiagram fill:#F1F5F9,stroke:#94A3B8,stroke-width:1px

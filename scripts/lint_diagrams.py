@@ -8,6 +8,7 @@ Checks performed:
 - Presence of structured metadata headers (format-aware)
 - Naming convention compliance (NN-topic.{mmd|mermaid})
 - No placeholder/stub content
+- No manual HTML spacing entities (&nbsp;)
 - Staleness detection based on %% Updated: or %% @date
 - Deprecated palette detection in style/classDef lines
 - Emoji detection in subgraph labels
@@ -71,6 +72,7 @@ PLACEHOLDER_PATTERNS = {
     marker: re.compile(rf"\b{re.escape(marker)}\b", re.IGNORECASE)
     for marker in PLACEHOLDER_MARKERS
 }
+NBSP_RE = re.compile(r"&nbsp;", re.IGNORECASE)
 DEFAULT_STALE_DAYS = 90
 WARNING_STALE_DAYS = 180
 DISALLOWED_SUBGRAPH_EMOJI = ("🟡", "🟢", "🔵", "🟣", "⚪")
@@ -239,6 +241,29 @@ def check_placeholder_content(path: Path, lines: list[str]) -> list[Issue]:
             )
         )
 
+    return issues
+
+
+def check_manual_spacing_entities(path: Path, lines: list[str]) -> list[Issue]:
+    """Disallow manual HTML spacing entities in diagram sources (NBSP-001)."""
+    issues: list[Issue] = []
+    fname = str(path)
+
+    hits = sum(len(NBSP_RE.findall(line)) for line in lines)
+    if hits == 0:
+        return issues
+
+    issues.append(
+        Issue(
+            file=fname,
+            severity="ERROR",
+            rule="NBSP-001",
+            message=(
+                f"Found {hits} manual '&nbsp;' spacing entity references; "
+                "use structural layout/styling instead"
+            ),
+        )
+    )
     return issues
 
 
@@ -554,6 +579,7 @@ def lint_file(path: Path, stale_days: int) -> list[Issue]:
     issues.extend(check_metadata_headers(path, lines))
     issues.extend(check_naming_convention(path))
     issues.extend(check_placeholder_content(path, lines))
+    issues.extend(check_manual_spacing_entities(path, lines))
     issues.extend(check_staleness(path, lines, stale_days))
     issues.extend(check_colour_policy(path, lines))
     issues.extend(check_subgraph_emoji(path, lines))

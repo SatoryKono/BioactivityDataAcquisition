@@ -1,0 +1,35 @@
+# Diagram visual smoke baseline set (relative to repository root).
+# These SVGs are checked for render drift in CI after render.sh runs.
+
+# foundation/
+docs/02-architecture/mmd-diagrams/foundation/svg/01-full-system-component.svg
+docs/02-architecture/mmd-diagrams/foundation/svg/07-medallion-flow.svg
+docs/02-architecture/mmd-diagrams/foundation/svg/08-complete-etl-workflow.svg
+docs/02-architecture/mmd-diagrams/foundation/svg/12-local-deployment-architecture.svg
+docs/02-architecture/mmd-diagrams/foundation/svg/15-dq-check-workflow.svg
+docs/02-architecture/mmd-diagrams/foundation/svg/21-activity-entity-data-flow.svg
+docs/02-architecture/mmd-diagrams/foundation/svg/26-hexagonal-ports-adapters.svg
+docs/02-architecture/mmd-diagrams/foundation/svg/28-composition-root-di-graph.svg
+docs/02-architecture/mmd-diagrams/foundation/svg/29-composite-pipeline-workflow.svg
+docs/02-architecture/mmd-diagrams/foundation/svg/30-port-adapter-mapping.svg
+docs/02-architecture/mmd-diagrams/foundation/svg/31-pipeline-run-lifecycle.svg
+docs/02-architecture/mmd-diagrams/foundation/svg/32-single-record-journey.svg
+docs/02-architecture/mmd-diagrams/foundation/svg/33-cli-run-interaction.svg
+docs/02-architecture/mmd-diagrams/foundation/svg/34-batch-processing-flow.svg
+docs/02-architecture/mmd-diagrams/foundation/svg/39-medallion-invariants.svg
+docs/02-architecture/mmd-diagrams/foundation/svg/41-error-classification-tree.svg
+docs/02-architecture/mmd-diagrams/foundation/svg/44-cross-provider-enrichment.svg
+docs/02-architecture/mmd-diagrams/foundation/svg/46-yaml-config-resolution.svg
+docs/02-architecture/mmd-diagrams/foundation/svg/50-exception-hierarchy.svg
+
+# architecture/
+docs/02-architecture/mmd-diagrams/architecture/svg/03-medallion-data-flow.svg
+docs/02-architecture/mmd-diagrams/architecture/svg/11-configuration-system.svg
+docs/02-architecture/mmd-diagrams/architecture/svg/12-bootstrap-di-container.svg
+docs/02-architecture/mmd-diagrams/architecture/svg/13-port-protocol-contracts.svg
+docs/02-architecture/mmd-diagrams/architecture/svg/18-lock-checkpoint-shutdown.svg
+
+# class-diagrams/
+docs/02-architecture/mmd-diagrams/class-diagrams/svg/10-adapters.svg
+docs/02-architecture/mmd-diagrams/class-diagrams/svg/13-domain-services.svg
+docs/02-architecture/mmd-diagrams/class-diagrams/svg/16-factories-bootstrap.svg

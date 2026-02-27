@@ -203,6 +203,40 @@ python src/tools/differentiate_linkstyle.py --dry-run   # Предпросмот
 python src/tools/differentiate_linkstyle.py              # Применить
 ```
 
+### 5.4. Cross-Diagram Harmonization (ADR-040 D9)
+
+Для не-flowchart диаграмм (sequence, class, state, ER) семантические стили связей применяются через два механизма:
+
+**L2 — CSS (`theme/custom.css`):** автоматически при SVG-рендере через `mmdc --cssFile`:
+
+| Тип диаграммы | CSS-класс | Применяемый стиль |
+|--------------|-----------|-------------------|
+| sequenceDiagram | `.messageLine0` | baseline `#475569` 2px |
+| sequenceDiagram | `.messageLine1` | observability `#94A3B8` 1.5px dashed |
+| classDiagram | `.relation` | baseline `#475569` 2px |
+| classDiagram | `.relation.dashed-line` | DI `#6a1b9a` dashed |
+| stateDiagram | `.transition path` | orchestration `#2e7d32` 2px |
+| erDiagram | `.er.relationshipLine` | data `#1E293B` 2px |
+| erDiagram | `.er.relationshipLine[dashed]` | DI `#6a1b9a` |
+
+**L4 — SVG post-processing (`harmonize_link_styles.py`):** дополнительная обработка rendered SVG:
+
+```bash
+python src/tools/harmonize_link_styles.py --dry-run   # Предпросмотр
+python src/tools/harmonize_link_styles.py              # Применить ко всем SVG
+```
+
+**L3 — Семантические метки** для диаграмм с >10 рёбрами:
+
+```
+# В sequenceDiagram:
+Executor->>Adapter: [DATA] fetch records
+Adapter-->>Executor: [ERR] raise RetryExhaustedError
+
+# В classDiagram:
+ServiceA ..> PortB : [DI] injects
+```
+
 ---
 
 ## 6. Lint-проверки и CI
@@ -322,7 +356,8 @@ pwsh docs/02-architecture/mmd-diagrams/render-windows.ps1
 | Инструмент | Расположение | Назначение |
 |------------|-------------|------------|
 | apply_elk_layout.py | `src/tools/` | Добавление ELK init к flowchart с >20 нод |
-| differentiate_linkstyle.py | `src/tools/` | Семантическая стилизация рёбер |
+| differentiate_linkstyle.py | `src/tools/` | Семантическая стилизация рёбер (flowchart) |
+| harmonize_link_styles.py | `src/tools/` | Cross-diagram harmonization SVG (D9) |
 | lint_diagrams.py | `scripts/` | Lint-проверка по 14 правилам |
 | prune_orphan_nodes.py | `scripts/` | Детекция и удаление orphan-нод |
 | render.sh | `mmd-diagrams/` | Рендеринг SVG + PNG (300 DPI) |

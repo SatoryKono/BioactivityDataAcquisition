@@ -8,50 +8,50 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 %% @uniform width=304 height=108 max_title_len=33 max_desc_lines=4
 flowchart TB
     subgraph Source["1. External API"]
-        API["REST API Response<br/>(e.g., ChEMBL /activity)<br/><br/><br/>"]
+        API["REST API Response<br/>(e.g., ChEMBL /activity)<br/>"]
     end
 
     subgraph Bronze["2. Bronze Layer"]
         BW["BronzeWriter.write_bronze()<br/>• JSONL serialization<br/>• zstd compression<br/>• atomic rename<br/>• _manifest.json"]
-        BF[("Bronze File<br/>bronze/chembl/activity/<br/>2026-02-17/batch_001.jsonl.zst"<br/><br/>)]
+        BF[("Bronze File<br/>bronze/chembl/activity/<br/>2026-02-17/batch_001.jsonl.zst"<br/>)]
     end
 
     subgraph Transform["3. Transform (RecordProcessor)"]
-        BT["BatchTransformer.transform()<br/><br/><br/><br/>"]
-        TI["BaseTransformer._transform_impl()<br/>(e.g., ActivityTransformer)<br/><br/><br/>"]
+        BT["BatchTransformer.transform()<br/>"]
+        TI["BaseTransformer._transform_impl()<br/>(e.g., ActivityTransformer)<br/>"]
         NORM["Data Normalization<br/>• NaN → null<br/>• strip strings<br/>• dates → ISO<br/>• floats → round(10)"]
         META["Add Metadata<br/>• _run_id (UUID)<br/>• _run_type (incremental/backfill)<br/>• _source_batch_id (FK)<br/>• _ingestion_ts (UTC now)"]
         HASH["Compute _content_hash<br/>• exclude META_FIELDS<br/>• canonical JSON (sort_keys)<br/>• sha256 digest<br/>"]
     end
 
     subgraph Validate["4. Validate"]
-        PSV["PanderaSilverValidator.validate()<br/>ActivitySchema (soft mode)<br/><br/><br/>"]
-        DQ{{"DQ Error Rate?<br/><br/><br/><br/>"}}
+        PSV["PanderaSilverValidator.validate()<br/>ActivitySchema (soft mode)<br/>"]
+        DQ{{"DQ Error Rate?<br/>"}}
     end
 
     subgraph Route["5. Route Decision"]
-        CLEAN["✅ Clean Record<br/>_dq_warn = false<br/><br/><br/>"]
-        WARN["⚠️ Warning Record<br/>_dq_warn = true<br/>(error rate < 5%)<br/><br/>"]
-        QUAR["❌ Quarantine Record<br/>QuarantineManager.route()<br/>QuarantineEntry created<br/><br/>"]
+        CLEAN["✅ Clean Record<br/>_dq_warn = false<br/>"]
+        WARN["⚠️ Warning Record<br/>_dq_warn = true<br/>(error rate < 5%)<br/>"]
+        QUAR["❌ Quarantine Record<br/>QuarantineManager.route()<br/>QuarantineEntry created<br/>"]
     end
 
     subgraph Silver["6. Silver Layer"]
         SW["SilverWriter.write_silver()<br/>• merge/upsert by PK<br/>• content_hash dedup<br/>• Delta Lake transaction<br/>"]
-        ST[("Silver Table<br/>silver/chembl/activity/<br/>_delta_log/"<br/><br/>)]
+        ST[("Silver Table<br/>silver/chembl/activity/<br/>_delta_log/"<br/>)]
     end
 
     subgraph GoldLayer["7. Gold Layer"]
         TFG["transform_for_gold()<br/>• exclude JSON fields<br/>(molecule_properties,<br/>molecule_structures, etc.)<br/>"]
-        GV["PanderaGoldValidator.validate()<br/>ChEMBLActivityGoldSchema<br/>(strict mode)<br/><br/>"]
-        GW["GoldWriter.write_gold()<br/><br/><br/><br/>"]
+        GV["PanderaGoldValidator.validate()<br/>ChEMBLActivityGoldSchema<br/>(strict mode)<br/>"]
+        GW["GoldWriter.write_gold()<br/>"]
     end
 
     subgraph QuarDB["Quarantine Storage"]
-        QT[("Quarantine Table<br/>quarantine/chembl/activity/"<br/><br/><br/>)]
+        QT[("Quarantine Table<br/>quarantine/chembl/activity/"<br/>)]
     end
 
     %% Flow
@@ -72,7 +72,7 @@ flowchart TB
     QUAR --> QT
 
     %% Styling
-    style Bronze fill:#FFA500,stroke:#cc8400,color:#000
-    style Silver fill:#C0C0C0,stroke:#808080,color:#000
-    style GoldLayer fill:#FFD700,stroke:#ccac00,color:#000
-    style QuarDB fill:#FF6B6B,stroke:#cc4444,color:#000
+    style Bronze fill:#fff3e0,stroke:#e65100,color:#212121
+    style Silver fill:#eceff1,stroke:#607d8b,color:#212121
+    style GoldLayer fill:#fff8e1,stroke:#f9a825,color:#212121
+    style QuarDB fill:#ffebee,stroke:#c62828,color:#212121

@@ -15,7 +15,7 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% @uniform width=152 height=90 max_title_len=14 max_desc_lines=3
 flowchart TB
-    ERROR["Error Occurred<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+    ERROR["Error Occurred<br/><br/><br/>"]
 
     ERROR --> HTTP{{"HTTP Status Code?"}}
     ERROR --> DOMAIN{{"Domain Error?"}}
@@ -42,10 +42,10 @@ flowchart TB
 
     %% Actions
     subgraph Actions["Error Actions"]
-        RETRY["🔄 RETRY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• max_attempts: 3<br/>• multiplier: 2.0<br/>• jitter: MD5-based"]
-        QUARANTINE2["🔒 QUARANTINE&nbsp;&nbsp;<br/>• QuarantineEntry created<br/>• payload truncated 64KB<br/>• payload_hash computed"]
-        FAIL_FAST["💥 FAIL FAST&nbsp;&nbsp;&nbsp;<br/>• No retry<br/>• Pipeline terminates<br/>• ExitCode.PIPELINE_ERROR"]
-        BATCH_FAIL["🚫 BATCH FAIL&nbsp;&nbsp;<br/>• error_rate > 20%<br/>• Entire batch rejected<br/>• Checkpoint NOT saved"]
+        RETRY["🔄 RETRY<br/>• max_attempts: 3<br/>• multiplier: 2.0<br/>• jitter: MD5-based"]
+        QUARANTINE2["🔒 QUARANTINE<br/>• QuarantineEntry created<br/>• payload truncated 64KB<br/>• payload_hash computed"]
+        FAIL_FAST["💥 FAIL FAST<br/>• No retry<br/>• Pipeline terminates<br/>• ExitCode.PIPELINE_ERROR"]
+        BATCH_FAIL["🚫 BATCH FAIL<br/>• error_rate > 20%<br/>• Entire batch rejected<br/>• Checkpoint NOT saved"]
     end
 
     AUTH --> FAIL_FAST

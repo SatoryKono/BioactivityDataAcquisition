@@ -5,38 +5,38 @@ flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N1["dq_config_file&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N2["DQ_CONFIG_FILE&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N1["dq_config_file"]
+        N2["DQ_CONFIG_FILE"]
         N3["FILTER_CONFIG_FILE"]
-        N7["override&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N8["PIPELINE_CONFIG&nbsp;&nbsp;&nbsp;"]
-        N9["TABLE_CONFIG&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N15["DQ_ENTITY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N19["FILTER_ENTITY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["override"]
+        N8["PIPELINE_CONFIG"]
+        N9["TABLE_CONFIG"]
+        N15["DQ_ENTITY"]
+        N19["FILTER_ENTITY"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N4["PIPELINE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N4["PIPELINE"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N5["br&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N6["YAML_LOADER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N10["BASE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N12["SOURCE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N13["DQ_DEFAULTS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N16["DQ_INLINE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N17["FILTER_DEFAULTS&nbsp;&nbsp;&nbsp;"]
-        N20["FILTER_INLINE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["br"]
+        N6["YAML_LOADER"]
+        N10["BASE"]
+        N12["SOURCE"]
+        N13["DQ_DEFAULTS"]
+        N16["DQ_INLINE"]
+        N17["FILTER_DEFAULTS"]
+        N20["FILTER_INLINE"]
     end
 
     subgraph Composition["Composition Layer"]
         direction TB
-        N11["PROVIDER_BASE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N14["DQ_PROVIDER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N18["FILTER_PROVIDER&nbsp;&nbsp;&nbsp;"]
+        N11["PROVIDER_BASE"]
+        N14["DQ_PROVIDER"]
+        N18["FILTER_PROVIDER"]
     end
 
     N6 --> N7

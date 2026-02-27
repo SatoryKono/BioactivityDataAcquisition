@@ -12,19 +12,19 @@
 
 graph LR
     subgraph Domain["Domain Layer"]
-        LGP["LoggerPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        MTP["MetricsPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        TRP["TracingPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        CBP["CircuitBreakerPort&nbsp;"]
-        RLP["RateLimiterPort&nbsp;&nbsp;&nbsp;&nbsp;"]
+        LGP["LoggerPort"]
+        MTP["MetricsPort"]
+        TRP["TracingPort"]
+        CBP["CircuitBreakerPort"]
+        RLP["RateLimiterPort"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        UL["UnifiedLogger&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        MCO["MetricsCollector&nbsp;&nbsp;&nbsp;"]
+        UL["UnifiedLogger"]
+        MCO["MetricsCollector"]
         OTT["OpenTelemetryTracer"]
-        CB["CircuitBreaker&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        TB_I["TokenBucket&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        CB["CircuitBreaker"]
+        TB_I["TokenBucket"]
     end
 
     LGP --- UL & SLG & NOL
@@ -33,5 +33,8 @@ graph LR
     CBP --- CB
     RLP --- TB_I
 
-    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    classDef domain fill:#f3e5f5,stroke:#6a1b9a
+    classDef infra fill:#ffcdd2,stroke:#c62828
+
+    class LGP,MTP,TRP,CBP,RLP domain
+    class UL,SLG,NOL,MCO,PME,NOM,OTT,NOT_T,CB,TB_I infra

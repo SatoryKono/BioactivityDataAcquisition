@@ -1,27 +1,28 @@
 %% View: Infrastructure-Mapping | Parent: 32-single-record-journey-full.mermaid
 %% @uniform width=140 height=56 max_title_len=5 max_desc_lines=0
+%%{init: {'theme': 'neutral', 'flowchart': {'defaultRenderer': 'elk'}}}%%
 flowchart TB
 
-    N1["SW&nbsp;&nbsp;&nbsp;"]
-    N2["ST&nbsp;&nbsp;&nbsp;"]
-    N3["TFG&nbsp;&nbsp;"]
-    N4["GV&nbsp;&nbsp;&nbsp;"]
-    N5["GW&nbsp;&nbsp;&nbsp;"]
+    N1["SW"]
+    N2["ST"]
+    N3["TFG"]
+    N4["GV"]
+    N5["GW"]
     N6["CLEAN"]
-    N7["WARN&nbsp;"]
-    N8["GT&nbsp;&nbsp;&nbsp;"]
-    N9["BW&nbsp;&nbsp;&nbsp;"]
-    N10["BF&nbsp;&nbsp;&nbsp;"]
-    N11["BT&nbsp;&nbsp;&nbsp;"]
-    N12["TI&nbsp;&nbsp;&nbsp;"]
-    N13["NORM&nbsp;"]
-    N14["META&nbsp;"]
-    N15["HASH&nbsp;"]
-    N16["PSV&nbsp;&nbsp;"]
-    N17["API&nbsp;&nbsp;"]
-    N18["DQ&nbsp;&nbsp;&nbsp;"]
-    N19["QUAR&nbsp;"]
-    N20["QT&nbsp;&nbsp;&nbsp;"]
+    N7["WARN"]
+    N8["GT"]
+    N9["BW"]
+    N10["BF"]
+    N11["BT"]
+    N12["TI"]
+    N13["NORM"]
+    N14["META"]
+    N15["HASH"]
+    N16["PSV"]
+    N17["API"]
+    N18["DQ"]
+    N19["QUAR"]
+    N20["QT"]
 
     N17 --> N9
     N9 --> N10
@@ -41,20 +42,7 @@ flowchart TB
     N5 --> N8
     N19 --> N20
 
-    linkStyle 0 stroke:#1E293B,stroke-width:4px
-    linkStyle 1 stroke:#1E293B,stroke-width:4px
-    linkStyle 2 stroke:#1E293B,stroke-width:4px
-    linkStyle 3 stroke:#1E293B,stroke-width:4px
-    linkStyle 4 stroke:#1E293B,stroke-width:4px
-    linkStyle 5 stroke:#1E293B,stroke-width:4px
-    linkStyle 6 stroke:#1E293B,stroke-width:4px
-    linkStyle 7 stroke:#1E293B,stroke-width:4px
-    linkStyle 8 stroke:#1E293B,stroke-width:4px
-    linkStyle 9 stroke:#1E293B,stroke-width:4px
-    linkStyle 10 stroke:#1E293B,stroke-width:4px
-    linkStyle 11 stroke:#1E293B,stroke-width:4px
-    linkStyle 12 stroke:#1E293B,stroke-width:4px
-    linkStyle 13 stroke:#1E293B,stroke-width:4px
-    linkStyle 14 stroke:#1E293B,stroke-width:4px
-    linkStyle 15 stroke:#1E293B,stroke-width:4px
-    linkStyle 16 stroke:#1E293B,stroke-width:4px
+    %% linkStyle: primary 0-8,11-15 | routing 9-10 | quarantine 16
+    linkStyle 0,1,2,3,4,5,6,7,8,11,12,13,14,15 stroke:#1E293B,stroke-width:3px
+    linkStyle 9,10 stroke:#2e7d32,stroke-width:2px
+    linkStyle 16 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4

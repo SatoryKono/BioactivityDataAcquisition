@@ -516,4 +516,5 @@ dev = [
     "vulture>=2.11",
     "pydocstyle>=6.3",
     "autoflake>=2.3.1",
+    "pre-commit>=4.5.1",
 ]

@@ -8,7 +8,7 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 %% @uniform width=232 height=90 max_title_len=24 max_desc_lines=3
 flowchart TB
 %% keep-orphan: CBP, FDSP, HCP, INP, MCP2, RLMP, SHP, SRLP
@@ -17,7 +17,7 @@ flowchart TB
 
         subgraph DataPorts["Data Ports"]
             DSP["DataSourcePort<br/>• fetch() → AsyncIterator<br/>• health_check() → HealthStatus<br/>"]
-            FDSP["FilterableDataSourcePort<br/>• fetch_filtered()<br/><br/>"]
+            FDSP["FilterableDataSourcePort<br/>• fetch_filtered()<br/>"]
             SP["StoragePort<br/>• write_bronze()<br/>• write_silver()<br/>• write_gold()"]
             DRP["DeltaReaderPort<br/>• read_table()<br/>• get_schema()<br/>"]
         end
@@ -32,29 +32,29 @@ flowchart TB
             LGP["LoggerPort<br/>• info() / warning()<br/>• error() / debug()<br/>• bind()"]
             MP["MetricsPort<br/>• increment_counter()<br/>• observe_histogram()<br/>• set_gauge()"]
             TP["TracingPort<br/>• get_tracer()<br/>• start_span()<br/>"]
-            DQM["DQMonitorPort<br/>• record_metrics()<br/><br/>"]
+            DQM["DQMonitorPort<br/>• record_metrics()<br/>"]
         end
 
         subgraph QualityPorts["Quality & Security Ports"]
-            SVP["SilverValidatorPort<br/>• validate()<br/><br/>"]
-            GVP["GoldValidatorPort<br/>• validate()<br/><br/>"]
-            PIIP["PiiHasherPort<br/>• hash_field()<br/><br/>"]
-            INP["InputFilterPort<br/>• filter()<br/><br/>"]
+            SVP["SilverValidatorPort<br/>• validate()<br/>"]
+            GVP["GoldValidatorPort<br/>• validate()<br/>"]
+            PIIP["PiiHasherPort<br/>• hash_field()<br/>"]
+            INP["InputFilterPort<br/>• filter()<br/>"]
         end
 
         subgraph MetaPorts["Metadata & Config Ports"]
-            MWP["MetadataWriterPort<br/>• write()<br/><br/>"]
-            MCP2["MetadataCoordinatorPort<br/>• coordinate()<br/><br/>"]
-            SRLP["JsonEncoderPort<br/>• encode() / decode()<br/><br/>"]
-            MMP["MemoryMonitorPort<br/>• get_stats()<br/><br/>"]
+            MWP["MetadataWriterPort<br/>• write()<br/>"]
+            MCP2["MetadataCoordinatorPort<br/>• coordinate()<br/>"]
+            SRLP["JsonEncoderPort<br/>• encode() / decode()<br/>"]
+            MMP["MemoryMonitorPort<br/>• get_stats()<br/>"]
         end
 
         subgraph LifecyclePorts["Lifecycle Ports"]
-            SHP["ShutdownPort<br/>• is_shutting_down()<br/><br/>"]
-            AP["AuditPort<br/>• log_operation()<br/><br/>"]
-            HCP["HealthCheckPort<br/>• check_health()<br/><br/>"]
-            RLMP["RateLimiterPort<br/>• acquire()<br/><br/>"]
-            CBP["CircuitBreakerPort<br/>• call()<br/><br/>"]
+            SHP["ShutdownPort<br/>• is_shutting_down()<br/>"]
+            AP["AuditPort<br/>• log_operation()<br/>"]
+            HCP["HealthCheckPort<br/>• check_health()<br/>"]
+            RLMP["RateLimiterPort<br/>• acquire()<br/>"]
+            CBP["CircuitBreakerPort<br/>• call()<br/>"]
         end
     end
 
@@ -62,34 +62,34 @@ flowchart TB
         direction TB
 
         subgraph DataAdapters["Data Source Adapters"]
-            CA["ChemblAdapter<br/><br/><br/>"]
+            CA["ChemblAdapter<br/>"]
         end
 
         subgraph StorageAdapters["Storage Adapters"]
-            BW["BronzeWriter<br/><br/><br/>"]
-            DR["DeltaReader<br/><br/><br/>"]
+            BW["BronzeWriter<br/>"]
+            DR["DeltaReader<br/>"]
         end
 
         subgraph CoordAdapters["Coordination Adapters"]
-            ML["MemoryLock<br/><br/><br/>"]
-            LC["LocalCheckpoint<br/><br/><br/>"]
-            UQ["UnifiedQuarantine<br/><br/><br/>"]
+            ML["MemoryLock<br/>"]
+            LC["LocalCheckpoint<br/>"]
+            UQ["UnifiedQuarantine<br/>"]
         end
 
         subgraph ObsAdapters["Observability Adapters"]
-            SL["StructlogLogger<br/><br/><br/>"]
-            PM["PrometheusMetrics<br/><br/><br/>"]
-            NOT["NoOpTracing<br/><br/><br/>"]
-            DQMon["DataQualityMonitor<br/><br/><br/>"]
+            SL["StructlogLogger<br/>"]
+            PM["PrometheusMetrics<br/>"]
+            NOT["NoOpTracing<br/>"]
+            DQMon["DataQualityMonitor<br/>"]
         end
 
         subgraph QualAdapters["Quality & Other Adapters"]
-            PSV["PanderaSilverValidator<br/><br/><br/>"]
-            PGV["PanderaGoldValidator<br/><br/><br/>"]
-            PIH["Sha256PiiHasher<br/><br/><br/>"]
-            MW["MetadataWriter<br/><br/><br/>"]
-            FAA["FileAuditAdapter<br/><br/><br/>"]
-            MM["MemoryMonitor<br/><br/><br/>"]
+            PSV["PanderaSilverValidator<br/>"]
+            PGV["PanderaGoldValidator<br/>"]
+            PIH["Sha256PiiHasher<br/>"]
+            MW["MetadataWriter<br/>"]
+            FAA["FileAuditAdapter<br/>"]
+            MM["MemoryMonitor<br/>"]
         end
     end
 

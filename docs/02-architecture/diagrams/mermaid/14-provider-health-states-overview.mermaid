@@ -4,24 +4,24 @@ flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N2["WatchingErrors&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N11["ErrorAccumulating&nbsp;&nbsp;"]
-        N15["MinorError&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["WatchingErrors"]
+        N11["ErrorAccumulating"]
+        N15["MinorError"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N1["*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N3["ProcessingRequest&nbsp;&nbsp;"]
-        N4["HEALTHY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N5["WaitingForProbe&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N6["NormalOperation&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N7["ReducedCapacity&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N8["Paused&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N10["DEGRADED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N12["RecoveryProgress&nbsp;&nbsp;&nbsp;"]
-        N13["RequestSuccess&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N14["UNHEALTHY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N1["*"]
+        N3["ProcessingRequest"]
+        N4["HEALTHY"]
+        N5["WaitingForProbe"]
+        N6["NormalOperation"]
+        N7["ReducedCapacity"]
+        N8["Paused"]
+        N10["DEGRADED"]
+        N12["RecoveryProgress"]
+        N13["RequestSuccess"]
+        N14["UNHEALTHY"]
     end
 
     subgraph Composition["Composition Layer"]
