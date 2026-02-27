@@ -252,6 +252,12 @@ def _estimate_node_size(
     elif diagram_type == "stateDiagram":
         padding = theme.state_padding
         font_size = theme.global_font_size
+    elif diagram_type == "erDiagram":
+        padding = 12
+        font_size = theme.er_font_size
+    elif diagram_type == "mindmap":
+        padding = theme.mindmap_padding
+        font_size = theme.global_font_size
     else:  # flowchart / graph
         padding = theme.flowchart_padding
         font_size = theme.node_text_font_size
@@ -359,11 +365,17 @@ _FLOW_EDGE_RE = re.compile(
     r"\s*"
     r"([A-Za-z_][A-Za-z0-9_]*)"
 )
-_MULTI_EDGE_RE = re.compile(
+_MULTI_SOURCE_RE = re.compile(
     r"([A-Za-z_][A-Za-z0-9_]*(?:\s*&\s*[A-Za-z_][A-Za-z0-9_]*)+)"
     r"\s*(-->|-.->|==>)"
     r'(?:\s*\|"?([^"|]*?)"?\|)?'
     r"\s*([A-Za-z_][A-Za-z0-9_]*)"
+)
+_MULTI_TARGET_RE = re.compile(
+    r"([A-Za-z_][A-Za-z0-9_]*)"
+    r"\s*(---->|--->|-->|-.->|==>)"
+    r'(?:\s*\|"?([^"|]*?)"?\|)?'
+    r"\s*([A-Za-z_][A-Za-z0-9_]*(?:\s*&\s*[A-Za-z_][A-Za-z0-9_]*)+)"
 )
 
 # classDef / class / style / linkStyle
@@ -377,7 +389,7 @@ _CD_CLASS_RE = re.compile(r"^\s*class\s+([A-Za-z_]\w*)\s*\{")
 _CD_MEMBER_RE = re.compile(r"^\s*([+\-#~])\s*(.+)$")
 _CD_RELATION_RE = re.compile(
     r"^\s*([A-Za-z_]\w*)\s*"
-    r"(<\|--|<\|\.\.|\.\.|--|-->|\.\.>|--\*|--o|<\|--|\*--|o--)"
+    r"(<\|--|<\|\.\.|\.\.\|>|--\|>|\.\.|--|-->|\.\.>|--\*|--o|\*--|o--)"
     r"\s*([A-Za-z_]\w*)"
     r"(?:\s*:\s*(.+))?$"
 )
@@ -387,7 +399,7 @@ _SEQ_PARTICIPANT_RE = re.compile(
     r"^\s*(?:participant|actor)\s+(\S+)(?:\s+as\s+(.+))?$"
 )
 _SEQ_MESSAGE_RE = re.compile(
-    r"^\s*(\S+)\s*(->>|-->>|-\)|--\)|->|-->)\s*(\S+)\s*:\s*(.*)$"
+    r"^\s*([A-Za-z_]\w*)\s*(-->>|->>|--\)|-\)|-->|->)\s*([A-Za-z_]\w*)\s*:\s*(.*)$"
 )
 
 # stateDiagram
@@ -716,6 +728,65 @@ def _parse_uniform(uniform_str: str) -> tuple[int | None, int | None]:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# Helpers for flowchart parsing
+# ══════════════════════════════════════════════════════════════════════════════
+
+# Regex to match inline node definitions: ID["..."], ID(...), ID{...}, etc.
+_INLINE_NODE_DEF_RE = re.compile(
+    r"""([A-Za-z_][A-Za-z0-9_]*)           # node ID
+        \s*
+        (\[\("|\(\["|\(\("|\{\{"|\[\[|     # multi-char openers
+         \["|>"|                            # 2-char openers
+         \("|\{"|                           # 2-char openers
+         [({\[>])                           # single-char openers
+    """,
+    re.VERBOSE,
+)
+
+
+def _strip_inline_node_defs(line: str) -> str:
+    """Strip inline node definitions from a line, leaving just node IDs.
+
+    Converts ``LW1[" "] -->|"label"| LW2[" "]`` to ``LW1 -->|"label"| LW2``.
+    Also handles ``ID:::class`` annotations and ``ID("...")`` etc.
+    """
+    result = line
+    safety = 0
+    while safety < 50:
+        safety += 1
+        m = _INLINE_NODE_DEF_RE.search(result)
+        if not m:
+            break
+        nid = m.group(1)
+        bracket = m.group(2)
+        # Find the closing bracket
+        closer_map = {
+            '["': '"]', "[[": "]]", '[("': '")]', '(["': '"])',
+            '(("': '"))', "((": "))", '{{"': '"}}', "{{": "}}",
+            '("': '")', "(": ")", '{"': '"}', "{": "}",
+            '>"': '"]', ">": "]", "[": "]",
+        }
+        closer = closer_map.get(bracket, "]")
+        start_pos = m.start(2)
+        # Find closer accounting for nesting
+        idx = result.find(closer, start_pos + len(bracket))
+        if idx == -1:
+            # Try simpler closers
+            for c in ("]", ")", "}"):
+                idx = result.find(c, start_pos + len(bracket))
+                if idx != -1:
+                    break
+        if idx == -1:
+            break
+        end_pos = idx + len(closer)
+        # Replace the bracket+content+closer with empty, keeping the ID
+        result = result[:start_pos] + result[end_pos:]
+    # Also strip :::class annotations for edge matching
+    result = re.sub(r":::[A-Za-z_][A-Za-z0-9_-]*", "", result)
+    return result
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # Flowchart parser
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -786,13 +857,17 @@ def _parse_flowchart(
                 sg_stack.pop()
             continue
 
-        # Edges — multi-target first
-        mm = _MULTI_EDGE_RE.search(s)
-        if mm:
-            sources = [x.strip() for x in mm.group(1).split("&")]
-            arrow = mm.group(2)
-            label = mm.group(3) or ""
-            target = mm.group(4)
+        # Strip inline node definitions for edge matching
+        # e.g. LW1[" "] -->|"label"| LW2[" "] → LW1 -->|"label"| LW2
+        clean = _strip_inline_node_defs(s)
+
+        # Edges — multi-source first: A & B & C --> D
+        ms_match = _MULTI_SOURCE_RE.search(clean)
+        if ms_match:
+            sources = [x.strip() for x in ms_match.group(1).split("&")]
+            arrow = ms_match.group(2)
+            label = ms_match.group(3) or ""
+            target = ms_match.group(4)
             for src in sources:
                 e = EdgeInfo(
                     index=edge_idx, source=src, target=target,
@@ -804,40 +879,73 @@ def _parse_flowchart(
                 edge_idx += 1
                 # auto-create stub nodes for edge-only references
                 for nid in (src, target):
-                    if nid not in nodes_map and nid not in reserved:
+                    if nid not in nodes_map and nid not in reserved and nid not in subgraphs:
                         nodes_map[nid] = NodeInfo(id=nid, label=nid, subgraph=sg_stack[-1] if sg_stack else "")
                         if sg_stack and sg_stack[-1] in subgraphs:
                             subgraphs[sg_stack[-1]].child_nodes.append(nid)
-            continue
-
-        # Single edges
-        found_edges = list(_FLOW_EDGE_RE.finditer(s))
-        if found_edges:
-            for em in found_edges:
-                src, arrow, label, tgt = em.group(1), em.group(2), em.group(3) or "", em.group(4)
-                e = EdgeInfo(
-                    index=edge_idx, source=src, target=tgt,
-                    arrow_type=arrow, label=label.strip(),
-                    semantic_type=_arrow_semantic(arrow, label),
-                )
-                _apply_linkstyle(e, edge_idx, linkstyle_map, linkstyle_default)
-                edges.append(e)
-                edge_idx += 1
-                # auto-create stub nodes
-                for nid in (src, tgt):
-                    if nid not in nodes_map and nid not in reserved:
-                        nodes_map[nid] = NodeInfo(id=nid, label=nid, subgraph=sg_stack[-1] if sg_stack else "")
-                        if sg_stack and sg_stack[-1] in subgraphs:
-                            subgraphs[sg_stack[-1]].child_nodes.append(nid)
+            # Fall through to node defs (don't continue — same line may have node defs)
+        else:
+            # Multi-target: A --> B & C & D
+            mt_match = _MULTI_TARGET_RE.search(clean)
+            if mt_match:
+                src = mt_match.group(1)
+                arrow = mt_match.group(2)
+                label = mt_match.group(3) or ""
+                targets = [x.strip() for x in mt_match.group(4).split("&")]
+                for tgt in targets:
+                    e = EdgeInfo(
+                        index=edge_idx, source=src, target=tgt,
+                        arrow_type=arrow, label=label.strip(),
+                        semantic_type=_arrow_semantic(arrow, label),
+                    )
+                    _apply_linkstyle(e, edge_idx, linkstyle_map, linkstyle_default)
+                    edges.append(e)
+                    edge_idx += 1
+                    for nid in (src, tgt):
+                        if nid not in nodes_map and nid not in reserved and nid not in subgraphs:
+                            nodes_map[nid] = NodeInfo(id=nid, label=nid, subgraph=sg_stack[-1] if sg_stack else "")
+                            if sg_stack and sg_stack[-1] in subgraphs:
+                                subgraphs[sg_stack[-1]].child_nodes.append(nid)
+            else:
+                # Chain edge matching: A --> B --> C produces edges A→B and B→C
+                pos = 0
+                found_any_edge = False
+                while pos < len(clean):
+                    em = _FLOW_EDGE_RE.search(clean, pos)
+                    if not em:
+                        break
+                    found_any_edge = True
+                    src, arrow, label, tgt = em.group(1), em.group(2), em.group(3) or "", em.group(4)
+                    e = EdgeInfo(
+                        index=edge_idx, source=src, target=tgt,
+                        arrow_type=arrow, label=label.strip(),
+                        semantic_type=_arrow_semantic(arrow, label),
+                    )
+                    _apply_linkstyle(e, edge_idx, linkstyle_map, linkstyle_default)
+                    edges.append(e)
+                    edge_idx += 1
+                    # auto-create stub nodes
+                    for nid in (src, tgt):
+                        if nid not in nodes_map and nid not in reserved and nid not in subgraphs:
+                            nodes_map[nid] = NodeInfo(id=nid, label=nid, subgraph=sg_stack[-1] if sg_stack else "")
+                            if sg_stack and sg_stack[-1] in subgraphs:
+                                subgraphs[sg_stack[-1]].child_nodes.append(nid)
+                    # Advance to target start (not end) to enable chain matching
+                    pos = em.start(4)
 
         # Node definitions — look for ID["..."] / ID(["..."]) / etc. patterns
+        # Track consumed regions to avoid phantom nodes from label content
         _node_opener_re = re.compile(
             r'([A-Za-z_][A-Za-z0-9_]*)\s*'
             r'(\[\("|\(\["|\(\("|\{\{"|\[\[|'
             r'\["|>"|' r'\("|\{"|'
             r'[(\[{>])',
         )
+        consumed_end = -1  # track end of last processed node definition
         for nm in _node_opener_re.finditer(s):
+            # Skip matches that fall inside a previously consumed label region
+            if nm.start() < consumed_end:
+                continue
             nid = nm.group(1)
             bracket = nm.group(2)
             if nid in reserved:
@@ -845,6 +953,26 @@ def _parse_flowchart(
 
             shape = _detect_shape_from_bracket(bracket)
             raw_label = _extract_label(s, nm.start(2), bracket)
+
+            # Calculate the end position of this node definition (bracket + label + closer)
+            closer_map = {
+                '["': '"]', "[[": "]]", '[("': '")]', '(["': '"])',
+                '(("': '"))', "((": "))", '{{"': '"}}', "{{": "}}",
+                '("': '")', "(": ")", '{"': '"}', "{": "}",
+                '>"': '"]', ">": "]", "[": "]",
+            }
+            closer = closer_map.get(bracket, "]")
+            start_pos = nm.start(2) + len(bracket)
+            idx = s.find(closer, start_pos)
+            if idx == -1:
+                for c in ("]", ")", "}"):
+                    idx = s.find(c, start_pos)
+                    if idx != -1:
+                        break
+            if idx != -1:
+                consumed_end = idx + len(closer)
+            else:
+                consumed_end = len(s)
 
             title, body = _split_br_label(raw_label)
             tail = s[nm.start():]
@@ -880,11 +1008,11 @@ def _parse_flowchart(
                 if sg_stack and sg_stack[-1] in subgraphs and nid not in subgraphs[sg_stack[-1]].child_nodes:
                     subgraphs[sg_stack[-1]].child_nodes.append(nid)
 
-    # Apply class assignments & styles
+    # Apply class assignments & styles (skip subgraph IDs to avoid phantom nodes)
     for nid, cls_name in node_class_map.items():
         if nid in nodes_map and not nodes_map[nid].class_def:
             nodes_map[nid].class_def = cls_name
-        elif nid not in nodes_map:
+        elif nid not in nodes_map and nid not in subgraphs:
             nodes_map[nid] = NodeInfo(id=nid, class_def=cls_name)
 
     for nid, node in nodes_map.items():
@@ -1078,7 +1206,14 @@ def _parse_class_diagram(
             e = EdgeInfo(
                 index=edge_idx, source=src, target=tgt,
                 arrow_type=arrow, label=label.strip(),
-                semantic_type="inheritance" if "<|" in arrow else "association",
+                semantic_type=(
+                    "inheritance" if "<|--" in arrow or "--|>" in arrow
+                    else "realization" if "<|.." in arrow or "..|>" in arrow
+                    else "composition" if "*" in arrow
+                    else "aggregation" if "o" in arrow and ".." not in arrow
+                    else "dependency" if "..>" in arrow
+                    else "association"
+                ),
             )
             edges.append(e)
             edge_idx += 1
@@ -1124,6 +1259,11 @@ def _parse_sequence_diagram(
     edges: list[EdgeInfo] = []
     edge_idx = 0
 
+    # Apply @uniform override for participant sizing
+    uniform_w, uniform_h = _parse_uniform(rpt.uniform) if rpt.uniform else (None, None)
+    actor_w = uniform_w if uniform_w is not None else theme.seq_actor_width
+    actor_h = uniform_h if uniform_h is not None else theme.seq_actor_height
+
     for line in lines:
         s = line.strip()
         if s.startswith("%%") or not s:
@@ -1135,8 +1275,8 @@ def _parse_sequence_diagram(
             alias = pm.group(2) or pid
             nodes_map[pid] = NodeInfo(
                 id=pid, label=alias, shape="actor",
-                est_width=theme.seq_actor_width,
-                est_height=theme.seq_actor_height,
+                est_width=actor_w,
+                est_height=actor_h,
                 title_font_size=theme.global_font_size,
                 body_font_size=theme.seq_message_font_size,
                 text_color=theme.seq_actor_text_color,
@@ -1158,8 +1298,8 @@ def _parse_sequence_diagram(
                 if p not in nodes_map:
                     nodes_map[p] = NodeInfo(
                         id=p, label=p, shape="actor",
-                        est_width=theme.seq_actor_width,
-                        est_height=theme.seq_actor_height,
+                        est_width=actor_w,
+                        est_height=actor_h,
                         title_font_size=theme.global_font_size,
                         body_font_size=theme.seq_message_font_size,
                         text_color=theme.seq_actor_text_color,
@@ -1257,6 +1397,215 @@ def _parse_state_diagram(
         node.est_height = h
 
     rpt.nodes = [asdict(n) for n in states.values()]
+    rpt.edges = [asdict(e) for e in edges]
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ER diagram parser
+# ══════════════════════════════════════════════════════════════════════════════
+
+_ER_RELATION_RE = re.compile(
+    r"^\s*([A-Za-z_]\w*)"
+    r"\s*(\|\|--o\{|\|\|--\|\{|o\|--o\{|\|o\.\.o\||"
+    r"\|\|--o\||\|\|--\|\||o\{--o\{|"
+    r"\}o--\|\||o\|--\|\||"
+    r"[|o}{]+[-.][-.][-.]?[|o}{]+|[|o}{]+--[-.]?[|o}{]+)"
+    r"\s*([A-Za-z_]\w*)"
+    r'\s*:\s*"([^"]*)"'
+)
+_ER_ENTITY_RE = re.compile(r"^\s*([A-Za-z_]\w*)\s*\{")
+_ER_ATTR_RE = re.compile(
+    r"^\s+(\w+)\s+(\w+)(?:\s+(PK|FK))?(?:\s+\"([^\"]*)\")?\s*$"
+)
+
+
+def _parse_er_diagram(
+    rpt: DiagramReport,
+    lines: list[str],
+    theme: ThemeParams,
+) -> None:
+    """Parse erDiagram: entities, relationships, attributes."""
+    entities: dict[str, NodeInfo] = {}
+    edges: list[EdgeInfo] = []
+    edge_idx = 0
+
+    current_entity: str | None = None
+    current_attrs: list[str] = []
+
+    for line in lines:
+        s = line.strip()
+        if s.startswith("%%") or not s or s == "erDiagram":
+            continue
+
+        # Check for entity opening: EntityName {
+        em = _ER_ENTITY_RE.match(s)
+        if em:
+            current_entity = em.group(1)
+            current_attrs = []
+            continue
+
+        if current_entity:
+            if s == "}":
+                # Finish entity
+                body = "\n".join(current_attrs)
+                est_label = current_entity + "<br/>" + "<br/>".join(current_attrs)
+                w, h = _estimate_node_size(
+                    est_label, "rect", "", None, None, "erDiagram", theme,
+                )
+                entities[current_entity] = NodeInfo(
+                    id=current_entity, label=current_entity, shape="er_entity",
+                    title_text=current_entity, body_text=body,
+                    attributes=list(current_attrs),
+                    est_width=w, est_height=h,
+                    title_font_size=theme.er_font_size,
+                    body_font_size=theme.er_font_size,
+                    text_color=theme.node_text_color,
+                    text_align="left",
+                )
+                current_entity = None
+                continue
+
+            # Parse attribute line
+            am = _ER_ATTR_RE.match(line)
+            if am:
+                attr_type = am.group(1)
+                attr_name = am.group(2)
+                attr_key = am.group(3) or ""
+                attr_comment = am.group(4) or ""
+                attr_str = f"{attr_type} {attr_name}"
+                if attr_key:
+                    attr_str += f" {attr_key}"
+                if attr_comment:
+                    attr_str += f' "{attr_comment}"'
+                current_attrs.append(attr_str)
+            continue
+
+        # Relationship line
+        rm = _ER_RELATION_RE.match(s)
+        if rm:
+            src = rm.group(1)
+            rel_type = rm.group(2)
+            tgt = rm.group(3)
+            label = rm.group(4)
+            e = EdgeInfo(
+                index=edge_idx, source=src, target=tgt,
+                arrow_type=rel_type, label=label,
+                semantic_type="er_relationship",
+            )
+            edges.append(e)
+            edge_idx += 1
+            # Auto-create entities from relationships if not defined with { }
+            for eid in (src, tgt):
+                if eid not in entities:
+                    entities[eid] = NodeInfo(
+                        id=eid, label=eid, shape="er_entity",
+                        title_text=eid,
+                        title_font_size=theme.er_font_size,
+                        body_font_size=theme.er_font_size,
+                        text_color=theme.node_text_color,
+                        text_align="left",
+                    )
+
+    rpt.nodes = [asdict(n) for n in entities.values()]
+    rpt.edges = [asdict(e) for e in edges]
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Mindmap parser
+# ══════════════════════════════════════════════════════════════════════════════
+
+_MINDMAP_ROOT_RE = re.compile(r"^\s+(\S.*)\s*$")
+_MINDMAP_SHAPE_RE = re.compile(
+    r"^(?:\(\((.+?)\)\)|\((.+?)\)|\[(.+?)\]|\{\{(.+?)\}\})$"
+)
+
+
+def _parse_mindmap(
+    rpt: DiagramReport,
+    lines: list[str],
+    theme: ThemeParams,
+) -> None:
+    """Parse mindmap: indentation-based tree of nodes."""
+    nodes: list[NodeInfo] = []
+    edges: list[EdgeInfo] = []
+    edge_idx = 0
+    # Stack of (indent_level, node_id)
+    stack: list[tuple[int, str]] = []
+    node_counter = 0
+
+    started = False
+    for line in lines:
+        # Skip comments and empty lines
+        if line.strip().startswith("%%") or not line.strip():
+            continue
+        if line.strip().lower() == "mindmap":
+            started = True
+            continue
+        if not started:
+            continue
+
+        # Determine indent level (count leading spaces)
+        stripped = line.rstrip()
+        indent = len(stripped) - len(stripped.lstrip())
+        text = stripped.strip()
+        if not text:
+            continue
+
+        # Determine shape from syntax
+        shape = "rect"
+        label = text
+        sm = _MINDMAP_SHAPE_RE.match(text)
+        if sm:
+            if sm.group(1) is not None:
+                shape = "circle"
+                label = sm.group(1)
+            elif sm.group(2) is not None:
+                shape = "rounded"
+                label = sm.group(2)
+            elif sm.group(3) is not None:
+                shape = "rect"
+                label = sm.group(3)
+            elif sm.group(4) is not None:
+                shape = "hexagon"
+                label = sm.group(4)
+
+        # Clean label of HTML tags
+        clean_label = re.sub(r"<[^>]+>", " ", label).strip()
+
+        node_id = f"mm_{node_counter}"
+        node_counter += 1
+
+        w, h = _estimate_node_size(
+            clean_label, shape, "", None, None, "mindmap", theme,
+        )
+        node = NodeInfo(
+            id=node_id, label=clean_label, shape=shape,
+            title_text=clean_label,
+            est_width=w, est_height=h,
+            title_font_size=theme.global_font_size,
+            body_font_size=theme.global_font_size,
+            text_color=theme.node_text_color,
+            text_align="center",
+        )
+        nodes.append(node)
+
+        # Find parent: pop stack until we find a node with lower indent
+        while stack and stack[-1][0] >= indent:
+            stack.pop()
+
+        if stack:
+            parent_id = stack[-1][1]
+            e = EdgeInfo(
+                index=edge_idx, source=parent_id, target=node_id,
+                arrow_type="--", label="",
+                semantic_type="parent_child",
+            )
+            edges.append(e)
+            edge_idx += 1
+
+        stack.append((indent, node_id))
+
+    rpt.nodes = [asdict(n) for n in nodes]
     rpt.edges = [asdict(e) for e in edges]
 
 
@@ -1421,6 +1770,10 @@ def parse_diagram(path: Path, theme: ThemeParams) -> DiagramReport:
         _parse_sequence_diagram(rpt, lines, theme)
     elif dtype == "stateDiagram":
         _parse_state_diagram(rpt, lines, theme)
+    elif dtype == "erDiagram":
+        _parse_er_diagram(rpt, lines, theme)
+    elif dtype == "mindmap":
+        _parse_mindmap(rpt, lines, theme)
     else:
         _parse_flowchart(
             rpt, lines, class_defs, node_class_map,
