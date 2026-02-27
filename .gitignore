@@ -185,3 +185,6 @@ data/.idea/
 *.json
 /CUsersFedor/.cache/puppeteer
 /chrome-headless-shell
+/chrome-headless-shell
+*.mermaid
+/docs/02-architecture/diagrams/mermaid
