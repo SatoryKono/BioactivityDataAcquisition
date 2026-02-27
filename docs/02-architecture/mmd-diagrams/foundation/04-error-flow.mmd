@@ -16,7 +16,7 @@ flowchart TD
 
         C --> D{Silver DQ<br/>Validation}
         D -->|Pass| E[SilverWriter<br/>Delta merge]
-        D -->|Fail| Classify
+        D ==>|Fail| Classify
 
         E --> F{Gold DQ<br/>Validation}
         F -->|Pass| G[GoldWriter<br/>SCD2 write]

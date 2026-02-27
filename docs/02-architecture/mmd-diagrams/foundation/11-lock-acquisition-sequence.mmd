@@ -88,5 +88,5 @@ sequenceDiagram
         Note over WorkerB,Lock: Worker B can now acquire
         WorkerB->>Lock: acquire(key, owner_id, ttl=90s, wait=False)
         Lock->>Lock: Key expired/deleted
-        Lock-->>WorkerB: True (acquired)
+        Lock==>>WorkerB: True (acquired)
     end
