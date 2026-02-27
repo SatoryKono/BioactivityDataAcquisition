@@ -74,20 +74,11 @@ PLACEHOLDER_PATTERNS = {
 DEFAULT_STALE_DAYS = 90
 WARNING_STALE_DAYS = 180
 DISALLOWED_SUBGRAPH_EMOJI = ("🟡", "🟢", "🔵", "🟣", "⚪")
-# ADR-040 pre-harmonization palette (blocked in style/classDef rules).
+# Legacy palette values blocked in style/classDef rules.
 DEPRECATED_PALETTE = {
-    # Pre-ADR-040 Material Design palette (now replaced by Tailwind Slate)
-    "#fff7ed",
-    "#f59e0b",
+    # Material palette (superseded by muted 2026 palette).
     "#ecfdf5",
     "#10b981",
-    "#eff6ff",
-    "#2563eb",
-    "#f5f3ff",
-    "#7c3aed",
-    "#f1f5f9",
-    "#64748b",
-    # Material 500-level fills (replaced by ADR-040 canonical fills)
     "#f3e5f5",
     "#e8f5e9",
     "#ffcdd2",

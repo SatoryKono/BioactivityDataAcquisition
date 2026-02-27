@@ -1,6 +1,6 @@
 # BioETL Diagrams — PNG Index
 
-_Generated: 2026-02-27T14:58:28+03:00_
+_Generated: 2026-02-27T17:20:52+03:00_
 
 ## Full System Component
 
@@ -209,6 +209,12 @@ _Generated: 2026-02-27T14:58:28+03:00_
 ## Composite Pipeline Workflow
 
 ![29-composite-pipeline-workflow](./29-composite-pipeline-workflow.png)
+
+---
+
+## Port Adapter Mapping
+
+![30-port-adapter-mapping](./30-port-adapter-mapping.png)
 
 ---
 

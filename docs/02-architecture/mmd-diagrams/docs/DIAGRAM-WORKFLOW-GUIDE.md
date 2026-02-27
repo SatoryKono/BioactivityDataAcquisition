@@ -85,21 +85,21 @@
 
 | Слой | Fill | Stroke | Семантика |
 |------|------|--------|-----------|
-| Domain | `#f3e5f5` | `#6a1b9a` (Purple) | Бизнес-логика, entities, value objects |
-| Application | `#e8f5e9` | `#2e7d32` (Green) | Сервисы, оркестрация, use cases |
-| Infrastructure | `#ffcdd2` | `#c62828` (Red) | Адаптеры, клиенты, хранилище |
-| Composition | `#fff3e0` | `#e65100` (Orange) | Фабрики, DI, сборка |
-| Interfaces | `#e3f2fd` | `#1565c0` (Blue) | CLI, API, внешние интерфейсы |
-| External | `#eceff1` | `#455a64` (Gray) | Сторонние системы |
+| Domain | `#f5f3ff` | `#7c3aed` (Purple) | Бизнес-логика, entities, value objects |
+| Application | `#f0fdf4` | `#16a34a` (Green) | Сервисы, оркестрация, use cases |
+| Infrastructure | `#fff1f2` | `#dc2626` (Red) | Адаптеры, клиенты, хранилище |
+| Composition | `#fff7ed` | `#f59e0b` (Orange) | Фабрики, DI, сборка |
+| Interfaces | `#eff6ff` | `#2563eb` (Blue) | CLI, API, внешние интерфейсы |
+| External | `#f1f5f9` | `#64748b` (Gray) | Сторонние системы |
 
 ### 3.2. Цвета Medallion
 
 | Слой | Fill | Stroke |
 |------|------|--------|
-| Bronze | `#fff3e0` | `#e65100` (Orange) |
-| Silver | `#eceff1` | `#607d8b` (Slate) |
-| Gold | `#fff8e1` | `#f9a825` (Amber) |
-| Quarantine | `#ffebee` | `#d32f2f` (Red) |
+| Bronze | `#fff7ed` | `#f59e0b` (Orange) |
+| Silver | `#f8fafc` | `#475569` (Slate) |
+| Gold | `#fefce8` | `#ca8a04` (Amber) |
+| Quarantine | `#ffe4e6` | `#e11d48` (Red) |
 
 ### 3.3. Тема Mermaid
 
@@ -128,7 +128,7 @@ ELK применяется **только** к `flowchart`/`graph`. Для `clas
 Директива вставляется **перед** объявлением `graph` или `flowchart`:
 
 ```
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'direction': 'RIGHT', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'ORTHOGONAL'}}}%%
 flowchart TB
 ```
 
@@ -136,8 +136,12 @@ flowchart TB
 
 | Параметр | Значение | Эффект |
 |----------|----------|--------|
-| `mergeEdges` | `false` | Параллельные рёбра не сливаются в одно |
-| `nodePlacementStrategy` | `'SIMPLE'` | Быстрое размещение нод |
+| `mergeEdges` | `true` | Сливает параллельные рёбра и снижает визуальный шум |
+| `nodePlacementStrategy` | `'BRANDES_KOEPF'` | Более чистое layered-расположение |
+| `cycleBreakingStrategy` | `'GREEDY'` | Стабильнее разрывает циклы в плотных графах |
+| `spacing.nodeNode` | `40` | Добавляет отступы между нодами |
+| `spacing.edgeNode` | `30` | Разводит рёбра и ноды |
+| `spacing.edgeEdge` | `20` | Уменьшает пересечения рёбер |
 | `edgeRouting` | `'ORTHOGONAL'` | Рёбра проходят строго под углами 90° (Manhattan routing) |
 
 Параметр `edgeRouting: 'ORTHOGONAL'` — ключевой для получения аккуратных прямоугольных стрелок. Без него ELK использует режим `POLYLINE` или `SPLINES`, и стрелки по-прежнему могут быть диагональными.
@@ -180,10 +184,10 @@ python src/tools/apply_elk_layout.py --threshold 15
 | Тип | Стиль | Семантика |
 |-----|-------|-----------|
 | **data** | `stroke:#1E293B, width:2px` | Поток данных, чтение/запись |
-| **orchestration** | `stroke:#2e7d32, width:2px` | Вызовы сервисов, управление |
-| **DI/implements** | `stroke:#6a1b9a, width:1.5px, dashed` | Dependency injection, реализация протокола |
+| **orchestration** | `stroke:#16a34a, width:2px` | Вызовы сервисов, управление |
+| **DI/implements** | `stroke:#7c3aed, width:1.5px, dashed` | Dependency injection, реализация протокола |
 | **observability** | `stroke:#94A3B8, width:1px` | Логирование, метрики, трейсинг |
-| **error/quarantine** | `stroke:#c62828, width:2px, dashed` | Обработка ошибок, карантин |
+| **error/quarantine** | `stroke:#dc2626, width:2px, dashed` | Обработка ошибок, карантин |
 | **generic** | `stroke:#475569, width:2px, dashed` | Неопределённые связи |
 
 ### 5.2. Когда применяется

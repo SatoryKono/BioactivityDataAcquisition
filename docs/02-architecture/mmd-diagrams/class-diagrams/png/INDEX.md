@@ -1,10 +1,16 @@
 # BioETL Diagrams — PNG Index
 
-_Generated: 2026-02-27T14:58:25+03:00_
+_Generated: 2026-02-27T17:20:45+03:00_
 
 ## Domain Ports
 
 ![01-domain-ports](./01-domain-ports.png)
+
+---
+
+## Entities Aggregates
+
+![02-entities-aggregates](./02-entities-aggregates.png)
 
 ---
 
@@ -59,6 +65,12 @@ _Generated: 2026-02-27T14:58:25+03:00_
 ## Storage
 
 ![11-storage](./11-storage.png)
+
+---
+
+## Composite Pipeline
+
+![12-composite-pipeline](./12-composite-pipeline.png)
 
 ---
 

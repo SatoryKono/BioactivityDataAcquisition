@@ -152,9 +152,9 @@ Recommended color scheme:
 | Bronze Layer     | Orange | #FFA500 |
 | Silver Layer     | Silver | #C0C0C0 |
 | Gold Layer       | Gold   | #FFD700 |
-| Error/Quarantine | Red    | #FF6B6B |
+| Error/Quarantine | Red    | #e11d48 |
 | Success          | Green  | #4CAF50 |
-| External         | Blue   | #2196F3 |
+| External         | Blue   | #2563eb |
 
 ----------------------------------------------------------------------
 

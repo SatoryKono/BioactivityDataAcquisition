@@ -30,7 +30,14 @@ ARCH_DIR = REPO_ROOT / "docs/02-architecture/mmd-diagrams/architecture"
 
 NODE_THRESHOLD = 20
 
-ELK_INIT = "%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%"
+ELK_INIT = (
+    "%%{init: {'layout': 'elk', 'theme': 'base', "
+    "'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, "
+    "'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', "
+    "'cycleBreakingStrategy': 'GREEDY', 'direction': 'RIGHT', "
+    "'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, "
+    "'edgeRouting': 'ORTHOGONAL'}}}%%"
+)
 
 # Diagrams whose content is a linear pipeline chain — better rendered LR.
 # Pattern matched against stem (filename without extension).

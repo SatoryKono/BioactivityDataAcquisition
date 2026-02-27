@@ -333,7 +333,7 @@ src/bioetl/interfaces/http/health-server.py
   ```
   %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
   ```
-- **Цвета**: Bronze=#FFA500, Silver=#C0C0C0, Gold=#FFD700, Error=#FF6B6B, Success=#4CAF50, External=#2196F3
+- **Цвета**: Bronze=#FFA500, Silver=#C0C0C0, Gold=#FFD700, Error=#e11d48, Success=#4CAF50, External=#2563eb
 - **Каждая диаграмма MUST** содержать: Title (как comment), Legend (если нужна), RULES.md reference
 
 ----------------------------------------------------------------------
