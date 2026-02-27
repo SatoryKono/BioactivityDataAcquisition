@@ -1,108 +1,110 @@
-%% BioETL — High-Level Hexagonal Architecture
-%% Shows the Ports & Adapters (Hexagonal) pattern across all layers.
+%% BioETL -- High-Level Hexagonal Architecture (LR)
+%% Ports & Adapters: driving adapters -> core -> driven adapters
+%% Layout (left -> right):
+%%   Driving:  Users -> CLI -> Composition
+%%   Center:   Application -> Domain (Ports, Entities, Services)
+%%   Driven:   Infrastructure (implements Ports) -> External APIs / Storage
 
-%% @version 1.1.0
-%% @date    2026-02-24
+%% @version 2.0.0
+%% @date    2026-02-26
 %% @type    flowchart
 %% @level   System / Component
-%% @nodes   39
+%% @nodes   23
 
-%%{init: {'theme': 'base'}}%%
-%% @uniform width=208 height=72 max_title_len=21 max_desc_lines=2
-graph TB
-%% keep-orphan: CFG, EXCEPTIONS, OBSERVER, PROVIDERS, SCHEMAS, TYPES, VALIDATION
-    subgraph External["External Systems"]
-        subgraph ExternalAPIs["External APIs"]
+%%{init: {'theme': 'base', 'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'NETWORK_SIMPLEX', 'edgeRouting': 'POLYLINE'}}}%%
+graph LR
+
+    %% == DRIVING SIDE (Left) ============================
+
+    subgraph External_In["External (Driving)"]
+        USERS["Users / CI"]
+    end
+
+    subgraph Interfaces["Interfaces"]
+        CLI["CLI (Click)"]
+        ORCH["Orchestration"]
+    end
+
+    subgraph Composition["Composition Root"]
+        BOOTSTRAP["Bootstrap & Factories"]
+    end
+
+    %% == APPLICATION (Center-Left) ======================
+
+    subgraph Application["Application"]
+        subgraph BizLogic["Business Logic"]
+            CORE["Core Services"]
+            COMPOSITE["Composite Pipeline"]
         end
-        FS["File System&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Delta Lake / Parquet / JSONL)<br/>&nbsp;"]
-        PROM["Prometheus&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        OTEL["OpenTelemetry&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        SERVICES["Support Services"]
+        PIPELINES["Transformers"]
     end
 
-    subgraph Interfaces["interfaces layer"]
-        CLI["CLI Commands&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Click)<br/>&nbsp;"]
-        HTTP_IF["HTTP Interface&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        ORCH["Orchestration&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+    %% == DOMAIN -- the hexagon core (Center) ============
+
+    subgraph Domain["Domain (pure, no I/O)"]
+        PORTS["Port Protocols"]
+        ENTITIES["Entities & Value Objects"]
+        DOM_SVC["Domain Services & Config"]
     end
 
-    subgraph Composition["composition layer"]
-        BOOTSTRAP["Bootstrap / Assembly&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        FACTORIES["Factories&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        PROVIDERS["Provider Registry&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        RT_BUILDERS["Runtime Builders&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+    %% == DRIVEN SIDE (Right) ============================
+
+    subgraph Infrastructure["Infrastructure (implements Ports)"]
+        ADAPTERS["Provider Adapters"]
+        STORAGE["Storage (Delta Lake)"]
+        INFRA_SUPPORT["Observability / Resilience / Security"]
     end
 
-    subgraph Application["application layer"]
-        CORE["Core&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Runner, BatchExecutor,<br/>Transformer, Writer)"]
-        SERVICES["Services&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(DQ, Export, Health,<br/>Medallion Lifecycle)"]
-        COMPOSITE["Composite Pipeline&nbsp;&nbsp;&nbsp;<br/>(Coordinator, Merger,<br/>FSM)"]
-        PIPELINES["Pipeline Transformers<br/>(per provider)<br/>&nbsp;"]
-        OBSERVER["Observability&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(PipelineObserver)<br/>&nbsp;"]
+    subgraph External_Out["External (Driven)"]
+        EXT_APIS["External APIs"]
+        FS["File System"]
+        OBS_EXT["Prometheus / OTel"]
     end
 
-    subgraph Domain["domain layer (pure, no I/O)"]
-        PORTS["Port Protocols&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(DataSourcePort, StoragePort,<br/>LockPort, MetricsPort, ...)"]
-        ENTITIES["Entities & Aggregates<br/>(Batch, PipelineRun,<br/>BaseEntity)"]
-        VO["Value Objects&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(BronzeWriteResult,<br/>SilverWriteResult, ...)"]
-        CFG["Configuration&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(PipelineConfig,<br/>RuntimeConfig, DQConfig)"]
-        DOM_SVC["Domain Services&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Identity, Normalization,<br/>UnitConverter)"]
-        TYPES["Types & Enums&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(RunType, HealthStatus,<br/>PublicationType)"]
-        EXCEPTIONS["Exception Hierarchy&nbsp;&nbsp;<br/>(BioETLError tree)<br/>&nbsp;"]
-        SCHEMAS["Schemas&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Pandera DataFrameModel)<br/>&nbsp;"]
+    %% == LEGEND =========================================
+
+    subgraph Legend["Legend"]
+        L1["Domain"]:::domain
+        L2["Application"]:::app
+        L3["Composition"]:::comp
+        L4["Interfaces"]:::iface
+        L5["Infrastructure"]:::infra
+        L6["External"]:::ext
+        L1 --- L2 --- L3 --- L4 --- L5 --- L6
     end
 
-    subgraph Infrastructure["infrastructure layer"]
-        ADAPTERS["HTTP Adapters&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(ChEMBL, PubMed, UniProt,<br/>CrossRef, OpenAlex, S2, PubChem)"]
-        STORAGE["Storage&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(BronzeWriter, SilverWriter,<br/>GoldWriter, DeltaReader)"]
-        OBS_INFRA["Observability Infra&nbsp;&nbsp;<br/>(UnifiedLogger, Metrics,<br/>Tracing)"]
-        RESILIENCE["Resilience&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(CircuitBreaker,<br/>TokenBucket, Retry)"]
-        SECURITY["Security&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(PII Hasher)<br/>&nbsp;"]
-        CHECKPOINT["Checkpoint&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(LocalCheckpoint)<br/>&nbsp;"]
-        LOCKING["Locking&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(MemoryLock)<br/>&nbsp;"]
-        AUDIT["Audit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(FileAuditAdapter)<br/>&nbsp;"]
-        VALIDATION["Validation&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Pandera Validators)<br/>&nbsp;"]
-    end
+    %% -- Layout hint: anchor legend near bottom-center --
+    BOOTSTRAP ~~~ L1
 
-    %% External → Infrastructure
-    ExternalAPIs -.-> ADAPTERS
-    FS -.-> STORAGE
-    PROM -.-> OBS_INFRA
-    OTEL -.-> OBS_INFRA
-
-    %% Interfaces → Composition
+    %% -- Driving flow (left -> right) -------------------
+    USERS -.-> CLI
+    USERS -.-> ORCH
     CLI --> BOOTSTRAP
-    HTTP_IF --> BOOTSTRAP
     ORCH --> BOOTSTRAP
+    BOOTSTRAP -->|"builds & injects"| CORE
 
-    %% Composition → Application
-    BOOTSTRAP --> CORE
-    FACTORIES --> CORE
-    FACTORIES --> PIPELINES
-    RT_BUILDERS --> CORE
-
-    %% Composition → Infrastructure
+    %% -- Composition wires Infrastructure ---------------
     BOOTSTRAP --> ADAPTERS
     BOOTSTRAP --> STORAGE
-    BOOTSTRAP --> OBS_INFRA
+    BOOTSTRAP --> INFRA_SUPPORT
 
-    %% Application → Domain
+    %% -- Application uses Domain ------------------------
     CORE --> PORTS
     CORE --> ENTITIES
-    CORE --> VO
     SERVICES --> PORTS
     COMPOSITE --> PORTS
-    PIPELINES --> ENTITIES
     PIPELINES --> DOM_SVC
 
-    %% Infrastructure → Domain (implements Ports)
-    ADAPTERS -->|implements| PORTS
-    STORAGE -->|implements| PORTS
-    OBS_INFRA -->|implements| PORTS
-    RESILIENCE -->|implements| PORTS
-    CHECKPOINT -->|implements| PORTS
-    LOCKING -->|implements| PORTS
-    AUDIT -->|implements| PORTS
-    SECURITY -->|implements| PORTS
+    %% -- Ports resolved to Adapters (DI) ----------------
+    PORTS ==>|"resolves to"| ADAPTERS
+
+    %% -- Infrastructure calls External ------------------
+    ADAPTERS -.-> EXT_APIS
+    STORAGE -.-> FS
+    INFRA_SUPPORT -.-> OBS_EXT
+
+    %% == STYLES =========================================
 
     classDef domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
     classDef app fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
@@ -111,13 +113,16 @@ graph TB
     classDef iface fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
     classDef ext fill:#eceff1,stroke:#455a64,stroke-width:1px
 
-    class PORTS,ENTITIES,VO,CFG,DOM_SVC,TYPES,EXCEPTIONS,SCHEMAS domain
-    class CORE,SERVICES,COMPOSITE,PIPELINES,OBSERVER app
-    class ADAPTERS,STORAGE,OBS_INFRA,RESILIENCE,SECURITY,CHECKPOINT,LOCKING,AUDIT,VALIDATION infra
-    class BOOTSTRAP,FACTORIES,PROVIDERS,RT_BUILDERS comp
-    class CLI,HTTP_IF,ORCH iface
-    class CHEMBL_API,PUBMED_API,UNIPROT_API,PUBCHEM_API,CROSSREF_API,OPENALEX_API,SEMSCHOLAR_API,FS,PROM,OTEL ext
+    class PORTS,ENTITIES,DOM_SVC domain
+    class CORE,SERVICES,COMPOSITE,PIPELINES app
+    class ADAPTERS,STORAGE,INFRA_SUPPORT infra
+    class BOOTSTRAP comp
+    class CLI,ORCH iface
+    class USERS,EXT_APIS,FS,OBS_EXT ext
 
-    linkStyle default stroke:#666,stroke-width:1px,color:#666
-    linkStyle 1,2,3,4 stroke-dasharray: 5 5
-    linkStyle 19,20,21,22,23,24,25,26 stroke:#c62828,stroke-width:2px
+    linkStyle default stroke:#475569,stroke-width:1.5px
+    linkStyle 0,1,2,3,4,5 stroke-width:0px
+    linkStyle 10 stroke:#e65100,stroke-width:2px
+    linkStyle 11,12,13 stroke:#e65100,stroke-width:1.5px
+    linkStyle 14,15,16,17,18 stroke:#2e7d32,stroke-width:1.5px
+    linkStyle 19 stroke:#c62828,stroke-width:3px

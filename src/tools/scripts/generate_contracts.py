@@ -31,6 +31,17 @@ DIFF_REPORT_PATH = (
     / "gold-contracts-export-diff-2026-02-17.json"
 )
 
+ENTITY_NAME_OVERRIDES: dict[str, str] = {
+    "chembl_document": "chembl_publication",
+    "chembl_document_similarity": "chembl_publication_similarity",
+    "chembl_document_term": "chembl_publication_term",
+}
+LEGACY_CONTRACT_FILENAMES: tuple[str, ...] = (
+    "chembl_document_v1.0.json",
+    "chembl_document_similarity_v1.0.json",
+    "chembl_document_term_v1.0.json",
+)
+
 
 def _camel_to_snake(name: str) -> str:
     first_pass = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", name)
@@ -49,7 +60,8 @@ def _class_to_entity(schema_name: str) -> str:
         .replace("CrossRef", "Crossref")
         .replace("SemanticScholar", "Semanticscholar")
     )
-    return _camel_to_snake(normalized)
+    entity = _camel_to_snake(normalized)
+    return ENTITY_NAME_OVERRIDES.get(entity, entity)
 
 
 def _filename_from_version(entity: str, version: str) -> str:
@@ -163,9 +175,18 @@ def _compute_diff(previous: dict[str, Any], current: dict[str, Any]) -> dict[str
     }
 
 
+def _remove_legacy_contracts() -> None:
+    for legacy_filename in LEGACY_CONTRACT_FILENAMES:
+        legacy_path = CONTRACTS_DIR / legacy_filename
+        if legacy_path.exists():
+            legacy_path.unlink()
+            print(f"Removed legacy contract {legacy_path}")
+
+
 def generate_contracts() -> None:
     CONTRACTS_DIR.mkdir(parents=True, exist_ok=True)
     DIFF_REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    _remove_legacy_contracts()
 
     schema_classes: list[type[Any]] = []
     for export_name in gold_contracts.__all__:

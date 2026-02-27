@@ -5,38 +5,38 @@ flowchart TB
 
     subgraph Application["Application Layer"]
         direction TB
-        N5["Executor&nbsp;&nbsp;"]
-        N7["Runner&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["Executor"]
+        N7["Runner"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N1["Storage&nbsp;&nbsp;&nbsp;"]
-        N3["Adapters&nbsp;&nbsp;"]
+        N1["Storage"]
+        N3["Adapters"]
         N4["Quarantine"]
-        N6["Boot&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N8["Trans&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N9["Sources&nbsp;&nbsp;&nbsp;"]
-        N11["Bronze&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N12["Silver&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N13["Gold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N14["A1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N15["A2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N16["A3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N17["A4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N18["A5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N19["A6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N20["A7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["Boot"]
+        N8["Trans"]
+        N9["Sources"]
+        N11["Bronze"]
+        N12["Silver"]
+        N13["Gold"]
+        N14["A1"]
+        N15["A2"]
+        N16["A3"]
+        N17["A4"]
+        N18["A5"]
+        N19["A6"]
+        N20["A7"]
     end
 
     subgraph Composition["Composition Layer"]
         direction TB
-        N2["Factory&nbsp;&nbsp;&nbsp;"]
+        N2["Factory"]
     end
 
     subgraph Interfaces["Interfaces Layer"]
         direction TB
-        N10["CLI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["CLI"]
     end
 
     N9 --> N3

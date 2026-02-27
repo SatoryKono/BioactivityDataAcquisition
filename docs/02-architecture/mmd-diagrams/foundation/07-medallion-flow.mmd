@@ -12,32 +12,32 @@
 flowchart LR
 %% keep-orphan: B, G, S
     subgraph Sources["External Sources"]
-        ChEMBL[(ChEMBL API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;)]
-        PubChem[(PubChem API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;)]
-        UniProt[(UniProt API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;)]
-        PubMed[(PubMed API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;)]
+        ChEMBL[(ChEMBL API<br/>)]
+        PubChem[(PubChem API<br/>)]
+        UniProt[(UniProt API<br/>)]
+        PubMed[(PubMed API<br/>)]
     end
 
     subgraph Bronze["Bronze Layer"]
         direction TB
-        BronzeWriter[BronzeWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;]
-        BronzeData[("JSONL + zstd&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Append-only<br/>90d retention")]
+        BronzeWriter[BronzeWriter<br/>]
+        BronzeData[("JSONL + zstd<br/>Append-only<br/>90d retention")]
 
         BronzeWriter --> BronzeData
     end
 
     subgraph Silver["Silver Layer"]
         direction TB
-        SilverWriter[SilverWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;]
-        SilverData[("Delta Lake&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Merge/Upsert<br/>ACID transactions")]
+        SilverWriter[SilverWriter<br/>]
+        SilverData[("Delta Lake<br/>Merge/Upsert<br/>ACID transactions")]
 
         SilverWriter --> SilverData
     end
 
     subgraph Gold["Gold Layer"]
         direction TB
-        GoldWriter[GoldWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;]
-        GoldData[("Delta Lake&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>SCD Type 2<br/>Analytics-ready")]
+        GoldWriter[GoldWriter<br/>]
+        GoldData[("Delta Lake<br/>SCD Type 2<br/>Analytics-ready")]
 
         GoldWriter --> GoldData
     end
@@ -53,16 +53,16 @@ flowchart LR
 
     %% Annotations
     subgraph Legend["Data Characteristics"]
-        B["Bronze: Raw, immutable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        S["Silver: Normalized, deduplicated<br/>&nbsp;<br/>&nbsp;"]
-        G["Gold: Validated, flattened&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        B["Bronze: Raw, immutable<br/>"]
+        S["Silver: Normalized, deduplicated<br/>"]
+        G["Gold: Validated, flattened<br/>"]
     end
 
     %% Styling
-    classDef source fill:#e3f2fd,stroke:#1976d2
-    classDef bronze fill:#fff8e1,stroke:#ffa000
-    classDef silver fill:#e8eaf6,stroke:#3f51b5
-    classDef gold fill:#fff3e0,stroke:#ff9800
+    classDef source fill:#e3f2fd,stroke:#1565c0
+    classDef bronze fill:#fff3e0,stroke:#e65100
+    classDef silver fill:#eceff1,stroke:#607d8b
+    classDef gold fill:#fff8e1,stroke:#f9a825
 
     class ChEMBL,PubChem,UniProt,PubMed source
     class BronzeWriter,BronzeData bronze

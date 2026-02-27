@@ -4,29 +4,29 @@ flowchart TB
 
     subgraph Application["Application Layer"]
         direction TB
-        N2["chembl_activity&nbsp;"]
-        N3["ChEMBL_API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N4["PubMed_API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N10["Lineage&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N11["Logs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["chembl_activity"]
+        N3["ChEMBL_API"]
+        N4["PubMed_API"]
+        N10["Lineage"]
+        N11["Logs"]
         N13["pubchem_compound"]
-        N14["uniprot_protein&nbsp;"]
-        N15["chembl_assay&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N14["uniprot_protein"]
+        N15["chembl_assay"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N9["Checkpoints&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N5["Bronze&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N6["Silver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N7["Gold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N8["Quarantine&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N12["Metrics&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["Checkpoints"]
+        N5["Bronze"]
+        N6["Silver"]
+        N7["Gold"]
+        N8["Quarantine"]
+        N12["Metrics"]
     end
 
     subgraph Interfaces["Interfaces Layer"]
         direction TB
-        N1["CLI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N1["CLI"]
     end
 
     N3 --> N2

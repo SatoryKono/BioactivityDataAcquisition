@@ -8,43 +8,43 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 %% @uniform width=336 height=108 max_title_len=37 max_desc_lines=4
 flowchart TB
     subgraph Seed["Seed Pipeline Result"]
-        SS[("Seed Silver Table&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(e.g., chembl/publication<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;)")]
+        SS[("Seed Silver Table<br/>(e.g., chembl/publication<br/>)")]
     end
 
     subgraph Extract["Key Extraction"]
-        KE["KeyExtractorService.extract_keys()&nbsp;&nbsp;&nbsp;<br/>• read seed Silver via DeltaReader<br/>• select join_key columns (doi, pmid)<br/>• deduplicate → unique key list<br/>&nbsp;"]
-        DOIS["DOI Keys&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(~50,000 unique)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        PMIDS["PMID Keys&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(~30,000 unique)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        KE["KeyExtractorService.extract_keys()<br/>• read seed Silver via DeltaReader<br/>• select join_key columns (doi, pmid)<br/>• deduplicate → unique key list<br/>"]
+        DOIS["DOI Keys<br/>(~50,000 unique)<br/>"]
+        PMIDS["PMID Keys<br/>(~30,000 unique)<br/>"]
     end
 
     subgraph FanOut["Fan-Out (EnrichmentCoordinator)"]
-        EC["EnrichmentCoordinator.run_enrichers()<br/>• asyncio.gather(*tasks,<br/>return_exceptions=True)<br/>• timeout per enricher<br/>&nbsp;"]
-        E1["CrossRef Enricher&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>filter_ids = DOIs<br/>required = true<br/>timeout = 3600s<br/>&nbsp;"]
-        E2["PubMed Enricher&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>filter_ids = PMIDs<br/>required = true<br/>timeout = 3600s<br/>&nbsp;"]
-        E3["OpenAlex Enricher&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>filter_ids = DOIs<br/>required = false<br/>timeout = 1800s<br/>&nbsp;"]
-        E4["SemanticScholar Enricher&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>filter_ids = DOIs<br/>required = false<br/>timeout = 1800s<br/>&nbsp;"]
+        EC["EnrichmentCoordinator.run_enrichers()<br/>• asyncio.gather(*tasks,<br/>return_exceptions=True)<br/>• timeout per enricher<br/>"]
+        E1["CrossRef Enricher<br/>filter_ids = DOIs<br/>required = true<br/>timeout = 3600s<br/>"]
+        E2["PubMed Enricher<br/>filter_ids = PMIDs<br/>required = true<br/>timeout = 3600s<br/>"]
+        E3["OpenAlex Enricher<br/>filter_ids = DOIs<br/>required = false<br/>timeout = 1800s<br/>"]
+        E4["SemanticScholar Enricher<br/>filter_ids = DOIs<br/>required = false<br/>timeout = 1800s<br/>"]
     end
 
     subgraph Results["Enricher Silver Tables"]
-        R1[("crossref/publication/"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;)]
-        R2[("pubmed/publication/"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;)]
-        R3[("openalex/publication/"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;)]
-        R4[("semanticscholar/publication/"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;)]
+        R1[("crossref/publication/"<br/>)]
+        R2[("pubmed/publication/"<br/>)]
+        R3[("openalex/publication/"<br/>)]
+        R4[("semanticscholar/publication/"<br/>)]
     end
 
     subgraph FanIn["Fan-In (MergeService)"]
-        DD["EnricherDeduplicator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• remove duplicates<br/>across enrichers<br/>&nbsp;<br/>&nbsp;"]
-        MS["MergeService.merge()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• LEFT OUTER JOIN<br/>seed ⟕ enrichers<br/>• ConflictResolution<br/>(coalesce: first non-null)"]
-        CO["ColumnOrderer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• FieldGroup priority<br/>• exclude TRASH group<br/>&nbsp;<br/>&nbsp;"]
+        DD["EnricherDeduplicator<br/>• remove duplicates<br/>across enrichers<br/>"]
+        MS["MergeService.merge()<br/>• LEFT OUTER JOIN<br/>seed ⟕ enrichers<br/>• ConflictResolution<br/>(coalesce: first non-null)"]
+        CO["ColumnOrderer<br/>• FieldGroup priority<br/>• exclude TRASH group<br/>"]
     end
 
     subgraph Output["Gold Output"]
-        GW["GoldWriter.write_gold()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>CompositePublicationGoldSchema<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        GT[("gold/composite/publication/"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;)]
+        GW["GoldWriter.write_gold()<br/>CompositePublicationGoldSchema<br/>"]
+        GT[("gold/composite/publication/"<br/>)]
     end
 
     %% Flow
@@ -72,4 +72,4 @@ flowchart TB
     %% Styling
     style FanOut fill:#e3f2fd,stroke:#1565c0
     style FanIn fill:#fce4ec,stroke:#c62828
-    style Output fill:#FFD700,stroke:#ccac00,color:#000
+    style Output fill:#fff8e1,stroke:#f9a825,color:#212121

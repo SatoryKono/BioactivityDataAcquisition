@@ -4,25 +4,25 @@ flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N7["DataSourcePort&nbsp;&nbsp;"]
+        N7["DataSourcePort"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N5["Batch&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N4["PipelineRun&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N10["PipelineRunner&nbsp;&nbsp;"]
-        N11["BatchExecutor&nbsp;&nbsp;&nbsp;"]
-        N12["23 Transformers&nbsp;"]
+        N5["Batch"]
+        N4["PipelineRun"]
+        N10["PipelineRunner"]
+        N11["BatchExecutor"]
+        N12["23 Transformers"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N1["Bronze&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N2["Silver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N3["Gold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N6["QuarantineEntry&nbsp;"]
-        N8["Storage Writers&nbsp;"]
+        N1["Bronze"]
+        N2["Silver"]
+        N3["Gold"]
+        N6["QuarantineEntry"]
+        N8["Storage Writers"]
     end
 
     subgraph Composition["Composition Layer"]

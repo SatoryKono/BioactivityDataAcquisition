@@ -7,56 +7,56 @@
 %% @level   System / Component
 %% @nodes   22
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE'}}}%%
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'NETWORK_SIMPLEX', 'edgeRouting': 'POLYLINE'}}}%%
 %% @uniform width=264 height=216 max_title_len=28 max_desc_lines=10
 graph TB
 %% keep-orphan: LNHE, SHP
     subgraph Ports["Domain Ports"]
-        LKP["LockPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ acquire(key, owner, ttl)<br/>+ release(key, owner)<br/>+ heartbeat(key, owner)<br/>+ validate_owner(key, owner)<br/>+ validate_fencing_token(token)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        CKP["CheckpointPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ save(key, data)<br/>+ load(key) → dict | None<br/>+ list_all() → list<br/>+ delete(key)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        SHP["ShutdownPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Protocol)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        LKP["LockPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ acquire(key, owner, ttl)<br/>+ release(key, owner)<br/>+ heartbeat(key, owner)<br/>+ validate_owner(key, owner)<br/>+ validate_fencing_token(token)<br/>"]
+        CKP["CheckpointPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ save(key, data)<br/>+ load(key) → dict | None<br/>+ list_all() → list<br/>+ delete(key)<br/>"]
+        SHP["ShutdownPort<br/>(Protocol)<br/>"]
     end
 
     subgraph DomainLock["Domain Lock Types"]
-        FT["FencingToken&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(frozen dataclass)<br/>━━━━━━━━━━━━━━━━━<br/>sequence: int<br/>key: str<br/>owner_id: RunID<br/>issued_at: float<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        LNHE["LockNotHeldError&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        FT["FencingToken<br/>(frozen dataclass)<br/>━━━━━━━━━━━━━━━━━<br/>sequence: int<br/>key: str<br/>owner_id: RunID<br/>issued_at: float<br/>"]
+        LNHE["LockNotHeldError<br/>"]
     end
 
     subgraph AppLock["Application: LockManager"]
-        LM["LockManager&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>_lock: LockPort<br/>_run_id: RunID<br/>_config: LockConfig<br/>_shutdown_signal: ShutdownSignal<br/>━━━━━━━━━━━━━━━━━<br/>+ acquire(timeout) → FencingToken<br/>+ release()<br/>+ validate() → bool<br/>&nbsp;"]
-        HB["HeartbeatTask&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>Background async task<br/>periodically calls<br/>lock.heartbeat()<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        LM["LockManager<br/>━━━━━━━━━━━━━━━━━<br/>_lock: LockPort<br/>_run_id: RunID<br/>_config: LockConfig<br/>_shutdown_signal: ShutdownSignal<br/>━━━━━━━━━━━━━━━━━<br/>+ acquire(timeout) → FencingToken<br/>+ release()<br/>+ validate() → bool<br/>"]
+        HB["HeartbeatTask<br/>━━━━━━━━━━━━━━━━━<br/>Background async task<br/>periodically calls<br/>lock.heartbeat()<br/>"]
     end
 
     subgraph AppCheckpoint["Application: CheckpointManager"]
-        CM["CheckpointManager&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>_checkpoint: CheckpointPort<br/>_pipeline_name: str<br/>_run_id: RunID<br/>_resume: bool<br/>━━━━━━━━━━━━━━━━━<br/>+ load_checkpoint() → dict | None<br/>+ save_checkpoint(offset)<br/>+ delete_checkpoint()<br/>&nbsp;"]
+        CM["CheckpointManager<br/>━━━━━━━━━━━━━━━━━<br/>_checkpoint: CheckpointPort<br/>_pipeline_name: str<br/>_run_id: RunID<br/>_resume: bool<br/>━━━━━━━━━━━━━━━━━<br/>+ load_checkpoint() → dict | None<br/>+ save_checkpoint(offset)<br/>+ delete_checkpoint()<br/>"]
     end
 
     subgraph AppShutdown["Application: Shutdown"]
-        SS["ShutdownSignal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>is_requested: bool<br/>reason: ShutdownReason | None<br/>━━━━━━━━━━━━━━━━━<br/>+ request(reason)<br/>+ reset()<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        SR["ShutdownReason&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>SIGINT<br/>SIGTERM<br/>LOCK_LOST<br/>MEMORY_PRESSURE<br/>DQ_THRESHOLD<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        SS["ShutdownSignal<br/>━━━━━━━━━━━━━━━━━<br/>is_requested: bool<br/>reason: ShutdownReason | None<br/>━━━━━━━━━━━━━━━━━<br/>+ request(reason)<br/>+ reset()<br/>"]
+        SR["ShutdownReason<br/>━━━━━━━━━━━━━━━━━<br/>SIGINT<br/>SIGTERM<br/>LOCK_LOST<br/>MEMORY_PRESSURE<br/>DQ_THRESHOLD<br/>"]
     end
 
     subgraph InfraLock["Infrastructure: MemoryLock"]
-        ML["MemoryLock&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>_locks: dict<br/>_global_lock: asyncio.Lock<br/>_ttl_check_interval: float<br/>━━━━━━━━━━━━━━━━━<br/>+ acquire() → FencingToken<br/>+ release()<br/>+ heartbeat() — extend TTL<br/>+ validate_owner()<br/>+ validate_fencing_token()"]
+        ML["MemoryLock<br/>━━━━━━━━━━━━━━━━━<br/>_locks: dict<br/>_global_lock: asyncio.Lock<br/>_ttl_check_interval: float<br/>━━━━━━━━━━━━━━━━━<br/>+ acquire() → FencingToken<br/>+ release()<br/>+ heartbeat() — extend TTL<br/>+ validate_owner()<br/>+ validate_fencing_token()"]
     end
 
     subgraph InfraCheckpoint["Infrastructure: LocalCheckpoint"]
-        LCP["LocalCheckpoint&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>base_path: Path<br/>━━━━━━━━━━━━━━━━━<br/>+ save() — atomic (tmp + rename)<br/>+ load() → dict<br/>+ exists() → bool<br/>+ delete()<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        LCP["LocalCheckpoint<br/>━━━━━━━━━━━━━━━━━<br/>base_path: Path<br/>━━━━━━━━━━━━━━━━━<br/>+ save() — atomic (tmp + rename)<br/>+ load() → dict<br/>+ exists() → bool<br/>+ delete()<br/>"]
     end
 
     subgraph SafetyGuard["Safety Guard Pattern"]
-        SG["BatchWriter._validate_lock()<br/>━━━━━━━━━━━━━━━━━<br/>Before each Silver/Gold write:<br/>1. validate lock still held<br/>2. validate fencing token<br/>3. raise LockNotHeldError if invalid<br/>Prevents split-brain writes<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        SG["BatchWriter._validate_lock()<br/>━━━━━━━━━━━━━━━━━<br/>Before each Silver/Gold write:<br/>1. validate lock still held<br/>2. validate fencing token<br/>3. raise LockNotHeldError if invalid<br/>Prevents split-brain writes<br/>"]
     end
 
     subgraph Lifecycle["Pipeline Lifecycle Integration"]
         direction LR
-        START["Pipeline Start&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        ACQ["Acquire Lock&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>+ start heartbeat<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        EXEC["Execute Batches&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>+ save checkpoints<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        SIG["Signal received?&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        GRACEFUL["Graceful shutdown:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>finish current batch,<br/>save checkpoint,<br/>release lock<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        REL["Release Lock&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>+ delete checkpoint<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        END["Pipeline End&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        START["Pipeline Start<br/>"]
+        ACQ["Acquire Lock<br/>+ start heartbeat<br/>"]
+        EXEC["Execute Batches<br/>+ save checkpoints<br/>"]
+        SIG["Signal received?<br/>"]
+        GRACEFUL["Graceful shutdown:<br/>finish current batch,<br/>save checkpoint,<br/>release lock<br/>"]
+        REL["Release Lock<br/>+ delete checkpoint<br/>"]
+        END["Pipeline End<br/>"]
 
         START --> ACQ --> EXEC --> SIG
         SIG -->|"yes"| GRACEFUL --> END

@@ -4,25 +4,25 @@ flowchart TB
 
     subgraph Application["Application Layer"]
         direction TB
-        N1["PipelineRunner&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N2["RunnerServices&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N1["PipelineRunner"]
+        N2["RunnerServices"]
         N3["BaseChemblTransformer"]
-        N4["BaseTransformer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N6["PreflightService&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N7["PostrunService&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N4["BaseTransformer"]
+        N6["PreflightService"]
+        N7["PostrunService"]
         N8["LifecycleOrchestrator"]
-        N9["PipelineObserver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N10["ActivityTransformer&nbsp;&nbsp;"]
-        N11["MoleculeTransformer&nbsp;&nbsp;"]
-        N12["AssayTransformer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N13["TargetTransformer&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N14["PipelineExecutor&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N15["RecordProcessor&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["PipelineObserver"]
+        N10["ActivityTransformer"]
+        N11["MoleculeTransformer"]
+        N12["AssayTransformer"]
+        N13["TargetTransformer"]
+        N14["PipelineExecutor"]
+        N15["RecordProcessor"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N5["LockManager&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["LockManager"]
     end
 
     N3 --> N4

@@ -5,30 +5,30 @@ flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N9["DataSourcePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N10["StoragePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N11["LockPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N14["CheckpointPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N15["QuarantinePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N16["MetricsPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N17["TracingPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N18["LoggerPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N19["Publication&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N20["PipelineConfig&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["DataSourcePort"]
+        N10["StoragePort"]
+        N11["LockPort"]
+        N14["CheckpointPort"]
+        N15["QuarantinePort"]
+        N16["MetricsPort"]
+        N17["TracingPort"]
+        N18["LoggerPort"]
+        N19["Publication"]
+        N20["PipelineConfig"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N1["PipelineRunner&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N2["BatchTransformer&nbsp;&nbsp;&nbsp;"]
-        N3["PipelineExecutor&nbsp;&nbsp;&nbsp;"]
-        N4["RecordProcessor&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N5["PreflightService&nbsp;&nbsp;&nbsp;"]
-        N6["PostrunService&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N1["PipelineRunner"]
+        N2["BatchTransformer"]
+        N3["PipelineExecutor"]
+        N4["RecordProcessor"]
+        N5["PreflightService"]
+        N6["PostrunService"]
         N7["ActivityTransformer"]
         N8["MoleculeTransformer"]
-        N12["AssayTransformer&nbsp;&nbsp;&nbsp;"]
-        N13["TargetTransformer&nbsp;&nbsp;"]
+        N12["AssayTransformer"]
+        N13["TargetTransformer"]
     end
 
     N1 --> N3

@@ -7,15 +7,15 @@
 %% @level   System / Component
 %% @nodes   24
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE'}}}%%
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'NETWORK_SIMPLEX', 'edgeRouting': 'POLYLINE'}}}%%
 %% @uniform width=248 height=72 max_title_len=26 max_desc_lines=2
 graph LR
     subgraph User["User"]
-        TERM["Terminal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        TERM["Terminal<br/>"]
     end
 
     subgraph CLI["CLI Interface (Click)"]
-        MAIN["bioetl&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(main group)<br/>&nbsp;"]
+        MAIN["bioetl<br/>(main group)<br/>"]
 
         subgraph RunCmds["Run Commands"]
             RUN["bioetl run<br/>━━━━━━━━━━━━━━━━━<br/>--provider<br/>--entity<br/>--run-type<br/>--limit<br/>--resume<br/>--dry-run"]
@@ -28,8 +28,8 @@ graph LR
 
         subgraph DataCmds["Data Commands"]
             EXPORT["bioetl export<br/>━━━━━━━━━━━━━━━━━<br/>--table<br/>--format csv"]
-            QUARANTINE["bioetl quarantine&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>inspect / replay / purge"]
-            CHECKPOINT["bioetl checkpoint&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>list / delete"]
+            QUARANTINE["bioetl quarantine<br/>━━━━━━━━━━━━━━━━━<br/>inspect / replay / purge"]
+            CHECKPOINT["bioetl checkpoint<br/>━━━━━━━━━━━━━━━━━<br/>list / delete"]
         end
 
         subgraph MaintenanceCmds["Maintenance Commands"]
@@ -38,25 +38,25 @@ graph LR
         end
 
         subgraph ConfigCmds["Config Commands"]
-            CONFIG["bioetl config&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━━━<br/>list / show"]
+            CONFIG["bioetl config<br/>━━━━━━━━━━━━━━━━━<br/>list / show"]
         end
     end
 
     subgraph Composition["Composition Layer"]
-        BOOT["Bootstrap Assembly&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        RF["RunnerFactory&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        DSR["DataSourceRegistry&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        TF["TransformerFactory&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        BOOT["Bootstrap Assembly<br/>"]
+        RF["RunnerFactory<br/>"]
+        DSR["DataSourceRegistry<br/>"]
+        TF["TransformerFactory<br/>"]
     end
 
     subgraph Application["Application Layer"]
-        CPR["CompositePipelineRunner&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        HS["HealthService&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        ES["ExportService&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        QS["QuarantineService&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        CS["CheckpointService&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        VS["VacuumService&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        CFGS["ConfigService&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        CPR["CompositePipelineRunner<br/>"]
+        HS["HealthService<br/>"]
+        ES["ExportService<br/>"]
+        QS["QuarantineService<br/>"]
+        CS["CheckpointService<br/>"]
+        VS["VacuumService<br/>"]
+        CFGS["ConfigService<br/>"]
     end
 
     %% CLI routing

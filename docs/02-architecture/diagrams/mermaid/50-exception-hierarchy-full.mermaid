@@ -1,3 +1,4 @@
+%% View: Full | Parent: (root)
 %% Parent source: docs/02-architecture/mmd-diagrams/foundation/50-exception-hierarchy.mmd
 %% Full reference diagram retained after decomposition.
 %% Title: Exception Hierarchy — Full Tree
@@ -14,9 +15,9 @@
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% @uniform width=192 height=90 max_title_len=19 max_desc_lines=3
 flowchart TD
-    ROOT["Exception&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Python built-in)<br/>&nbsp;<br/>&nbsp;"]
+    ROOT["Exception<br/>(Python built-in)<br/><br/>"]
 
-    BIOETL["BioETLError&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>domain/exceptions/base.py<br/>error_type: ErrorType<br/>context: dict"]
+    BIOETL["BioETLError<br/>domain/exceptions/base.py<br/>error_type: ErrorType<br/>context: dict"]
 
     ROOT --> BIOETL
 
@@ -75,7 +76,7 @@ flowchart TD
     BIOETL --> DQ_THRESHOLD["DataQualityThresholdError<br/>pipeline, ratio, threshold"]
 
     %% ── ErrorClassifier ──
-    CLASSIFIER["ErrorClassifier&nbsp;&nbsp;&nbsp;&nbsp;<br/>domain/error_classifier.py<br/>.classify(error) → ErrorType<br/>&nbsp;"]
+    CLASSIFIER["ErrorClassifier<br/>domain/error_classifier.py<br/>.classify(error) → ErrorType<br/>"]
     CLASSIFIER -.->|"CRITICAL"| CRITICAL
     CLASSIFIER -.->|K38| RECOVERABLE
     CLASSIFIER -.->|K39| DQ_ERROR
@@ -86,9 +87,9 @@ flowchart TD
     CLASSIFIER --> ERROR_TYPE
 
     %% ── Action outcomes ──
-    ACTION_ABORT["Action: ABORT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Pipeline stops immediately<br/>PipelineRunState → FAILED<br/>&nbsp;"]
-    ACTION_RETRY["Action: RETRY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Exponential backoff<br/>Max retries from AdapterConfig<br/>&nbsp;"]
-    ACTION_QUARANTINE["Action: QUARANTINE&nbsp;<br/>Record → QuarantineEntry<br/>Pipeline continues<br/>&nbsp;"]
+    ACTION_ABORT["Action: ABORT<br/>Pipeline stops immediately<br/>PipelineRunState → FAILED<br/>"]
+    ACTION_RETRY["Action: RETRY<br/>Exponential backoff<br/>Max retries from AdapterConfig<br/>"]
+    ACTION_QUARANTINE["Action: QUARANTINE<br/>Record → QuarantineEntry<br/>Pipeline continues<br/>"]
 
     CRITICAL -.->|"triggers"| ACTION_ABORT
     RECOVERABLE -.->|"triggers"| ACTION_RETRY

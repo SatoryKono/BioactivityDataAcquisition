@@ -8,42 +8,42 @@
 %% @type    classDiagram
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% @uniform class width=248 height=240 max_title_len=26 max_desc_lines=22
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 classDiagram
     direction TB
 
     class BaseEntity {
-        <<abstract>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +entity_id: EntityID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<abstract>>
+        +entity_id: EntityID
         +content_hash: ContentHash
-        +run_id: RunID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +run_type: RunType&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +ingestion_ts: datetime&nbsp;&nbsp;&nbsp;
-        +source_batch_id: BatchID&nbsp;
-        +dq_warn: bool = False&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        +run_id: RunID
+        +run_type: RunType
+        +ingestion_ts: datetime
+        +source_batch_id: BatchID
+        +dq_warn: bool = False
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class Activity {
-        +activity_id: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +assay_id: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +molecule_id: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +target_id: str | None&nbsp;&nbsp;&nbsp;&nbsp;
-        +standard_type: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +activity_id: str
+        +assay_id: str
+        +molecule_id: str
+        +target_id: str | None
+        +standard_type: str
         +standard_value: float | None
         +standard_units: str | None
         +standard_relation: str | None
@@ -51,341 +51,235 @@ classDiagram
         +data_validity_comment: str | None
         +activity_comment: str | None
         +potential_duplicate: bool | None
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class Assay {
-        +assay_id: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +assay_type: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +description: str | None&nbsp;&nbsp;
+        +assay_id: str
+        +assay_type: str
+        +description: str | None
         +assay_organism: str | None
-        +assay_strain: str | None&nbsp;
+        +assay_strain: str | None
         +assay_cell_type: str | None
         +assay_subcellular_fraction: str | None
-        +target_id: str | None&nbsp;&nbsp;&nbsp;&nbsp;
-        +document_id: str | None&nbsp;&nbsp;
-        +src_id: int | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +target_id: str | None
+        +document_id: str | None
+        +src_id: int | None
         +confidence_score: int | None
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class Target {
-        +target_id: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +target_type: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +pref_name: str | None&nbsp;&nbsp;&nbsp;&nbsp;
-        +organism: str | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +tax_id: int | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +target_id: str
+        +target_type: str
+        +pref_name: str | None
+        +organism: str | None
+        +tax_id: int | None
         +uniprot_accessions: list~str~ | None
         +gene_names: list~str~ | None
         +target_components: list~str~ | None
         +species_group_flag: bool | None
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class Molecule {
-        +molecule_id: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +pref_name: str | None&nbsp;&nbsp;&nbsp;&nbsp;
-        +molecule_type: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +max_phase: int | None&nbsp;&nbsp;&nbsp;&nbsp;
+        +molecule_id: str
+        +pref_name: str | None
+        +molecule_type: str
+        +max_phase: int | None
         +therapeutic_flag: bool | None
         +dosed_ingredient: bool | None
         +canonical_smiles: str | None
         +standard_inchi: str | None
-        +inchi_key: str | None&nbsp;&nbsp;&nbsp;&nbsp;
+        +inchi_key: str | None
         +molecular_formula: str | None
         +molecular_weight: float | None
-        +alogp: float | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +psa: float | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +hba: int | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +hbd: int | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +alogp: float | None
+        +psa: float | None
+        +hba: int | None
+        +hbd: int | None
         +num_ro5_violations: int | None
         +parent_molecule_id: str | None
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
     }
 
     class PublicationEntityBase {
-        <<abstract>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +doi: str | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +pmid: str | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +pmc_id: str | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +title: str | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +abstract: str | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +authors: str | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<abstract>>
+        +doi: str | None
+        +pmid: str | None
+        +pmc_id: str | None
+        +title: str | None
+        +abstract: str | None
+        +authors: str | None
         +affiliation_list: str | None
         +author_orcids: str | None
-        +journal: str | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +journal: str | None
         +publication_year: int | None
         +publication_date: str | None
-        +publication_type: str&nbsp;&nbsp;&nbsp;&nbsp;
-        +language: str | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +page_first: str | None&nbsp;&nbsp;&nbsp;
-        +page_last: str | None&nbsp;&nbsp;&nbsp;&nbsp;
+        +publication_type: str
+        +language: str | None
+        +page_first: str | None
+        +page_last: str | None
         +citations_received: int | None
         +citations_made: int | None
-        +is_oa: bool | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +_lookup_method: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +_original_id: str | None&nbsp;
-        +_source: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +is_oa: bool | None
+        +_lookup_method: str
+        +_original_id: str | None
+        +_source: str
     }
 
     class ChemblPublication {
-        +document_chembl_id: str&nbsp;&nbsp;
-        +volume: str | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +issue: str | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +src_id: int | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +document_chembl_id: str
+        +volume: str | None
+        +issue: str | None
+        +src_id: int | None
         +chembl_release: str | None
         +creation_date: str | None
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
     }
 
     class PubMedPublication {
-        +pmid: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +pmc_id: str | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +pmid: str
+        +pmc_id: str | None
         +journal_name_short: str | None
-        +issn: str | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +subject_mesh: list~str~&nbsp;&nbsp;
+        +issn: str | None
+        +subject_mesh: list~str~
         +subject_keywords: list~str~
         +publication_types: list~str~
-        +author_count: int | None&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        +author_count: int | None
     }
 
     class CrossRefPublication {
-        +doi: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +publisher: str | None&nbsp;&nbsp;&nbsp;&nbsp;
-        +issn: str | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +license_url: str | None&nbsp;&nbsp;
+        +doi: str
+        +publisher: str | None
+        +issn: str | None
+        +license_url: str | None
         +subject_keywords: list~str~
         +author_details: str | None
-        +references: str | None&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        +references: str | None
+        
     }
 
     class OpenAlexPublication {
-        +openalex_id: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +mag_id: str | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +fwci: float | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +is_retracted: bool&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +openalex_id: str
+        +mag_id: str | None
+        +fwci: float | None
+        +is_retracted: bool
         +subject_topics: list | None
         +primary_topic: dict | None
         +author_openalex_ids: str | None
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
     }
 
     class SemanticScholarPublication {
-        +paper_id: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +corpus_id: int | None&nbsp;&nbsp;&nbsp;&nbsp;
-        +dblp_id: str | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +tldr: str | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +paper_id: str
+        +corpus_id: int | None
+        +dblp_id: str | None
+        +tldr: str | None
         +influential_citation_count: int | None
         +author_s2_ids: str | None
         +author_h_indices: str | None
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
     }
 
     class UniprotTarget {
-        +target_accession: str&nbsp;&nbsp;&nbsp;&nbsp;
-        +entry_name: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +protein_name: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +organism: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +tax_id: int&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +sequence: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +sequence_length: int&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +target_accession: str
+        +entry_name: str
+        +protein_name: str
+        +organism: str
+        +tax_id: int
+        +sequence: str
+        +sequence_length: int
         +gene_names: list~str~ | None
         +go_terms: list~str~ | None
-        +features: dict | None&nbsp;&nbsp;&nbsp;&nbsp;
+        +features: dict | None
         +subcellular_locations: list~str~ | None
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
+        
+        
+        
     }
 
     class PubchemMolecule {
-        +molecule_cid: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +iupac_name: str | None&nbsp;&nbsp;&nbsp;
-        +canonical_smiles: str&nbsp;&nbsp;&nbsp;&nbsp;
+        +molecule_cid: str
+        +iupac_name: str | None
+        +canonical_smiles: str
         +isomeric_smiles: str | None
-        +inchi: str | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +inchikey: str | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +molecular_weight: float&nbsp;&nbsp;
-        +molecular_formula: str&nbsp;&nbsp;&nbsp;
-        +xlogp: float | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +exact_mass: float | None&nbsp;
+        +inchi: str | None
+        +inchikey: str | None
+        +molecular_weight: float
+        +molecular_formula: str
+        +xlogp: float | None
+        +exact_mass: float | None
         +monoisotopic_mass: float | None
-        +tpsa: float | None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +complexity: float | None&nbsp;
-        +h_bond_donor_count: int&nbsp;&nbsp;
+        +tpsa: float | None
+        +complexity: float | None
+        +h_bond_donor_count: int
         +h_bond_acceptor_count: int
         +rotatable_bond_count: int | None
         +heavy_atom_count: int | None
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
     }
 
     class QuarantineRecord {
-        +ingestion_ts: datetime&nbsp;&nbsp;&nbsp;
-        +pipeline: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +error_code: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +error_message: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +payload: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +payload_hash: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +bronze_batch_id: BatchID&nbsp;
-        +bronze_file_uri: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +dq_status: str = "NEW"&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        +ingestion_ts: datetime
+        +pipeline: str
+        +error_code: str
+        +error_message: str
+        +payload: str
+        +payload_hash: str
+        +bronze_batch_id: BatchID
+        +bronze_file_uri: str
+        +dq_status: str = "NEW"
     }
 
     class LineageLogEntry {
-        +batch_id: BatchID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +pipeline: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +bronze_paths: list~str~&nbsp;&nbsp;
-        +transform_version: str&nbsp;&nbsp;&nbsp;
-        +run_params: dict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +created_at: datetime&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        +batch_id: BatchID
+        +pipeline: str
+        +bronze_paths: list~str~
+        +transform_version: str
+        +run_params: dict
+        +created_at: datetime
+        
+        
+        
     }
 
     %% Inheritance from BaseEntity

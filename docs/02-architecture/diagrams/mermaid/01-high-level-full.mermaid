@@ -1,3 +1,4 @@
+%% View: Full | Parent: (root)
 %% Parent source: docs/02-architecture/mmd-diagrams/foundation/01-high-level.mmd
 %% Full reference diagram retained after decomposition.
 %% Title: High-Level System Architecture
@@ -14,40 +15,40 @@
 %% @uniform width=200 height=56 max_title_len=20 max_desc_lines=1
 flowchart TD
     subgraph Sources["External Data Sources"]
-        A1[ChEMBL API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;]
-        A2[PubChem API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;]
-        A3[UniProt API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;]
-        A4[PubMed API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;]
-        A5[CrossRef API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;]
-        A6[OpenAlex API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;]
-        A7[Semantic Scholar API<br/>&nbsp;]
+        A1[ChEMBL API<br/>]
+        A2[PubChem API<br/>]
+        A3[UniProt API<br/>]
+        A4[PubMed API<br/>]
+        A5[CrossRef API<br/>]
+        A6[OpenAlex API<br/>]
+        A7[Semantic Scholar API<br/>]
     end
 
     subgraph Interfaces["Interfaces Layer"]
-        CLI["CLI (Click)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        CLI["CLI (Click)<br/>"]
     end
 
     subgraph Composition["Composition Layer"]
-        Boot[bootstrap_pipeline&nbsp;&nbsp;<br/>&nbsp;]
-        Factory[PipelineFactory&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;]
+        Boot[bootstrap_pipeline<br/>]
+        Factory[PipelineFactory<br/>]
     end
 
     subgraph Application["Application Layer"]
-        Runner[PipelineRunner&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;]
-        Executor[PipelineExecutor&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;]
-        Trans[BaseTransformer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;]
+        Runner[PipelineRunner<br/>]
+        Executor[PipelineExecutor<br/>]
+        Trans[BaseTransformer<br/>]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        Adapters[HTTP Adapters&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>7 providers]
-        Storage[Storage Writers&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;]
+        Adapters[HTTP Adapters<br/>7 providers]
+        Storage[Storage Writers<br/>]
     end
 
     subgraph Lake["Data Lake — Local Storage"]
-        Bronze["Bronze Layer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(JSONL + zstd)"]
-        Silver["Silver Layer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Delta Lake)"]
-        Gold["Gold Layer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Delta Lake)"]
-        Quarantine["Quarantine&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(failed records)"]
+        Bronze["Bronze Layer<br/>(JSONL + zstd)"]
+        Silver["Silver Layer<br/>(Delta Lake)"]
+        Gold["Gold Layer<br/>(Delta Lake)"]
+        Quarantine["Quarantine<br/>(failed records)"]
     end
 
     Sources --> Adapters

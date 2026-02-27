@@ -12,32 +12,32 @@
 
 graph TB
     subgraph Interfaces["Interfaces Layer"]
-        CLI["CLI Commands (Click)&nbsp;&nbsp;&nbsp;&nbsp;"]
-        ORCH["Orchestration&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        CLI["CLI Commands (Click)"]
+        ORCH["Orchestration"]
     end
 
     subgraph Composition["Composition Layer"]
-        BOOTSTRAP["Bootstrap / Assembly&nbsp;&nbsp;&nbsp;&nbsp;"]
+        BOOTSTRAP["Bootstrap / Assembly"]
     end
 
     subgraph Application["Application Layer"]
-        CORE["Application Core&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        CORE["Application Core"]
     end
 
     subgraph Domain["Domain Layer"]
-        PORTS["Port Protocols&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        PORTS["Port Protocols"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        ADAPTERS["Provider Adapters&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        ADAPTERS["Provider Adapters"]
         STORAGE["Storage Writers / Reader"]
-        OBS_INFRA["Observability Infra&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        OBS_INFRA["Observability Infra"]
     end
 
-    ExternalAPIs["External APIs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-    FS["File System&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-    PROM["Prometheus&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-    OTEL["OpenTelemetry&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+    ExternalAPIs["External APIs"]
+    FS["File System"]
+    PROM["Prometheus"]
+    OTEL["OpenTelemetry"]
 
     ExternalAPIs -.-> ADAPTERS
     FS -.-> STORAGE
@@ -54,8 +54,16 @@ graph TB
     STORAGE -->|implements| PORTS
     OBS_INFRA -->|implements| PORTS
 
-    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-    style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-    style Composition fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    style Interfaces fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef domain fill:#f3e5f5,stroke:#6a1b9a
+    classDef app fill:#e8f5e9,stroke:#2e7d32
+    classDef infra fill:#ffcdd2,stroke:#c62828
+    classDef comp fill:#fff3e0,stroke:#e65100
+    classDef iface fill:#e3f2fd,stroke:#1565c0
+    classDef ext fill:#eceff1,stroke:#455a64
+
+    class CLI,ORCH iface
+    class BOOTSTRAP comp
+    class CORE app
+    class PORTS domain
+    class ADAPTERS,STORAGE,OBS_INFRA infra
+    class ExternalAPIs,FS,PROM,OTEL ext

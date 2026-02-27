@@ -23,9 +23,9 @@ REQUIRED_SCHEMAS = (
     "chembl_assay_parameters_v1.0.json",
     "chembl_cell_line_v1.0.json",
     "chembl_compound_record_v1.0.json",
-    "chembl_document_v1.0.json",
-    "chembl_document_similarity_v1.0.json",
-    "chembl_document_term_v1.0.json",
+    "chembl_publication_v1.0.json",
+    "chembl_publication_similarity_v1.0.json",
+    "chembl_publication_term_v1.0.json",
     "chembl_molecule_v1.0.json",
     "chembl_protein_class_v1.0.json",
     "chembl_subcellular_fraction_v1.0.json",
@@ -41,6 +41,11 @@ REQUIRED_SCHEMAS = (
     "semanticscholar_publication_v1.0.json",
     "uniprot_idmapping_v1.0.json",
     "uniprot_protein_v1.0.json",
+)
+LEGACY_SCHEMAS = (
+    "chembl_document_v1.0.json",
+    "chembl_document_similarity_v1.0.json",
+    "chembl_document_term_v1.0.json",
 )
 
 # Required JSON Schema properties
@@ -201,4 +206,15 @@ class TestGoldSchemaContracts:
             "Unversioned schema files found:\n"
             + "\n".join(f"  - {s}" for s in sorted(unversioned))
             + "\n\nAll Gold contracts must include version (e.g., entity_v1.0.json)."
+        )
+
+    def test_legacy_chembl_document_contracts_removed(
+        self, schema_files: dict[str, Path]
+    ) -> None:
+        """Legacy document-named ChEMBL contracts MUST NOT exist."""
+        present_legacy = sorted(set(LEGACY_SCHEMAS) & set(schema_files.keys()))
+        assert not present_legacy, (
+            "Legacy ChEMBL document contracts must be removed:\n"
+            + "\n".join(f"  - {name}" for name in present_legacy)
+            + "\n\nUse canonical chembl_publication* contract names."
         )

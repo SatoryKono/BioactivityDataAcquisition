@@ -5,34 +5,34 @@ flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N2["PIPELINE_CONFIG&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N3["TABLE_CONFIG&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N4["dq_config_file&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N5["DQ_DEFAULTS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N7["DQ_ENTITY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N8["DQ_INLINE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N9["FILTER_ENTITY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N10["CONFIG_LOADER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N11["BASE_CONFIG_LOADER&nbsp;&nbsp;"]
-        N12["DQ_CONFIG_LOADER&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["PIPELINE_CONFIG"]
+        N3["TABLE_CONFIG"]
+        N4["dq_config_file"]
+        N5["DQ_DEFAULTS"]
+        N7["DQ_ENTITY"]
+        N8["DQ_INLINE"]
+        N9["FILTER_ENTITY"]
+        N10["CONFIG_LOADER"]
+        N11["BASE_CONFIG_LOADER"]
+        N12["DQ_CONFIG_LOADER"]
         N13["FILTER_CONFIG_LOADER"]
-        N14["DQ_CONFIG&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N16["DQ_CONFIG_FILE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N17["FILTER_CONFIG_FILE&nbsp;&nbsp;"]
-        N18["br&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N19["YAML_LOADER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N20["override&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N14["DQ_CONFIG"]
+        N16["DQ_CONFIG_FILE"]
+        N17["FILTER_CONFIG_FILE"]
+        N18["br"]
+        N19["YAML_LOADER"]
+        N20["override"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N15["PIPELINE_YAML_CFG&nbsp;&nbsp;&nbsp;"]
-        N1["PIPELINE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N15["PIPELINE_YAML_CFG"]
+        N1["PIPELINE"]
     end
 
     subgraph Composition["Composition Layer"]
         direction TB
-        N6["DQ_PROVIDER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N6["DQ_PROVIDER"]
     end
 
     N19 --> N20

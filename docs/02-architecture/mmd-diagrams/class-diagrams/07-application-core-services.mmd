@@ -1,13 +1,25 @@
 %% BioETL — Class Diagram: Application Core Services
 %% PipelineRunner, BatchExecutor, and their composition.
 
-%% @version 1.0.0
-%% @date    2026-02-24
+%% @version 1.1.0
+%% @date    2026-02-26
 %% @type    classDiagram
 %% @level   Class / Interface
-%% @uniform class width=200 height=240 max_title_len=20 max_desc_lines=15
+%% @uniform-group core    nodes=PipelineRunner,PipelineServices,BatchExecutor
+%% @uniform-group batch   nodes=BatchTransformer,BatchWriter
+%% @uniform-group infra   nodes=BatchMemoryManager,BatchMetricsRecorder,BatchTracingManager
+%% @uniform-group manager nodes=CheckpointManager,LockManager
+%% @uniform-group support nodes=PreflightService,PostrunService,QuarantineManager,ShutdownSignal,HeartbeatTask,ErrorClassifier
 
+%% @uniform-width group
+%% @uniform class width=592 groups=5 width_strategy=group
+%% @uniform-stats core         width=376 height=312 max_desc_lines=15
+%% @uniform-stats batch        width=592 height=256 max_desc_lines=12
+%% @uniform-stats infra        width=376 height=168 max_desc_lines=7
+%% @uniform-stats manager      width=256 height=200 max_desc_lines=9
+%% @uniform-stats support      width=552 height=112 max_desc_lines=4
 classDiagram
+    direction TB
     class PipelineRunner {
         -_config: PipelineConfig
         -_runtime: RuntimeConfig
@@ -22,26 +34,26 @@ classDiagram
         -_postrun_service: PostrunService
         -_lifecycle_service: MedallionLifecycleService
         -_observer: PipelineObserver
-        +run() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
+        +run() None
+        
     }
 
     class PipelineServices {
-        <<frozen dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<frozen dataclass>>
         +data_source: DataSourcePort
         +storage: StoragePort
-        +lock: LockPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +lock: LockPort
         +checkpoint: CheckpointPort
         +quarantine: QuarantinePort
         +metrics: MetricsPort
         +tracing: TracingPort | None
-        +logger: LoggerPort&nbsp;
+        +logger: LoggerPort
         +dq_monitor: DQMonitorPort | None
         +metadata_coordinator: MetadataCoordinatorPort | None
         +metadata_writer: MetadataWriterPort | None
         +dq_report_writer: DQReportWriterPort | None
         +dq_report_service: DQReportService | None
-        &nbsp;
+        
     }
 
     class BatchExecutor {
@@ -49,12 +61,12 @@ classDiagram
         -_context: PipelineContext
         -_config: RecordProcessorConfig
         -_checkpoint_manager: CheckpointManager
-        +batch_size: int&nbsp;&nbsp;&nbsp;&nbsp;
+        +batch_size: int
         +checkpoint_interval: int
         +records_fetched: int
         +records_bronze: int
         +records_silver: int
-        +records_gold: int&nbsp;&nbsp;
+        +records_gold: int
         +records_quarantined: int
         +execute(limit, query, offset) None
         +process(records, start_index) BatchResult
@@ -74,10 +86,7 @@ classDiagram
         +transform_batch(records, batch_id, start_index) TransformResult
         +transform_single(raw_record, batch_id, index) TransformedRecord
         +_check_dq_thresholds(records, quarantined_count) None
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
     }
 
     class BatchWriter {
@@ -93,27 +102,16 @@ classDiagram
         +write_silver(records, batch_id, ingestion_ts, bronze_refs) SilverWriteResult | None
         +write_gold(records, silver_refs) None
         +_validate_lock(operation) None
-        &nbsp;
-        &nbsp;
-        &nbsp;
     }
 
     class BatchMemoryManager {
         -_memory_monitor: MemoryMonitorPort | None
         -_memory_config: MemoryConfig | None
         -_initial_batch_size: int
-        +enabled: bool&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +enabled: bool
         +batch_size_reductions: int
         +check_pressure(current_size, interval, fetched) int
         +maybe_recover(current_size) int
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
     }
 
     class BatchMetricsRecorder {
@@ -124,176 +122,82 @@ classDiagram
         +track_processed_records(stage, count) None
         +track_error(stage, error_type) None
         +track_quarantined_records(error_type, count) None
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
     }
 
     class BatchTracingManager {
         -_tracer: TracingPort
         -_context: PipelineContext
-        +TRACER_NAME: str&nbsp;&nbsp;&nbsp;
+        +TRACER_NAME: str
         +start_execution_span() Span | None
         +start_batch_span(batch_id, count, start) Span | None
         +start_layer_span(name, batch_id, count) Span | None
         +end_span(span, error) None
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
     }
 
     class CheckpointManager {
         -_checkpoint: CheckpointPort
         -_logger: LoggerPort
         -_pipeline_name: str
-        -_run_id: RunID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        -_resume: bool&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        -_run_id: RunID
+        -_resume: bool
         +load_checkpoint() dict | None
         +save_checkpoint(offset) None
         +delete_checkpoint() None
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
     }
 
     class LockManager {
-        -_lock: LockPort&nbsp;&nbsp;&nbsp;&nbsp;
-        -_run_id: RunID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        -_lock: LockPort
+        -_run_id: RunID
         -_config: LockConfig
         -_shutdown_signal: ShutdownSignal
         -_heartbeat: HeartbeatTask | None
         -_fencing_token: FencingToken | None
         +acquire(timeout) FencingToken
-        +release() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +validate() bool&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        +release() None
+        +validate() bool
     }
 
     class PreflightService {
         +execute(config, runtime, services, context, observer) PreflightReport
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
     }
 
     class PostrunService {
         +execute(config, runtime, context, executor, metadata, observer) PostrunResult
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
     }
 
     class QuarantineManager {
         -_quarantine: QuarantinePort
         +quarantine_record(raw, error_type, batch_id, msg, ts) None
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
     }
 
     class ShutdownSignal {
-        +is_requested: bool&nbsp;
+        +is_requested: bool
         +reason: ShutdownReason | None
         +request(reason) None
-        +reset() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        +reset() None
     }
 
     class HeartbeatTask {
         Background async task
-        +start() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +stop() None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        +start() None
+        +stop() None
+        
     }
 
     class ErrorClassifier {
         +classify(error) ErrorCategory
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        
+        
+        
     }
 
     PipelineRunner *-- BatchExecutor

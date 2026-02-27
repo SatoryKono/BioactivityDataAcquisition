@@ -5,29 +5,29 @@ flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N2["dq_config_file&nbsp;"]
-        N5["override&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["dq_config_file"]
+        N5["override"]
         N6["PIPELINE_CONFIG"]
-        N7["TABLE_CONFIG&nbsp;&nbsp;&nbsp;"]
-        N13["DQ_ENTITY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["TABLE_CONFIG"]
+        N13["DQ_ENTITY"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N1["PIPELINE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N3["br&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N4["YAML_LOADER&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N8["BASE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N10["SOURCE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N11["DQ_DEFAULTS&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N14["DQ_INLINE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N1["PIPELINE"]
+        N3["br"]
+        N4["YAML_LOADER"]
+        N8["BASE"]
+        N10["SOURCE"]
+        N11["DQ_DEFAULTS"]
+        N14["DQ_INLINE"]
         N15["FILTER_DEFAULTS"]
     end
 
     subgraph Composition["Composition Layer"]
         direction TB
-        N9["PROVIDER_BASE&nbsp;&nbsp;"]
-        N12["DQ_PROVIDER&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["PROVIDER_BASE"]
+        N12["DQ_PROVIDER"]
     end
 
     N4 --> N5

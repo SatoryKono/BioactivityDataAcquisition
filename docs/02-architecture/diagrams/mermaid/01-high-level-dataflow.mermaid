@@ -5,26 +5,26 @@ flowchart TB
 
     subgraph Application["Application Layer"]
         direction TB
-        N7["Executor&nbsp;&nbsp;"]
-        N9["Runner&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["Executor"]
+        N9["Runner"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N1["Bronze&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N2["Silver&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N3["Gold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N4["Sources&nbsp;&nbsp;&nbsp;"]
-        N8["Adapters&nbsp;&nbsp;"]
-        N11["Boot&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N12["Trans&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N1["Bronze"]
+        N2["Silver"]
+        N3["Gold"]
+        N4["Sources"]
+        N8["Adapters"]
+        N11["Boot"]
+        N12["Trans"]
         N5["Quarantine"]
-        N6["Storage&nbsp;&nbsp;&nbsp;"]
+        N6["Storage"]
     end
 
     subgraph Composition["Composition Layer"]
         direction TB
-        N10["Factory&nbsp;&nbsp;&nbsp;"]
+        N10["Factory"]
     end
 
     N4 --> N8

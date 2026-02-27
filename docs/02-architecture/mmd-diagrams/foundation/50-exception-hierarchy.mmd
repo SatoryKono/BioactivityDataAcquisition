@@ -8,12 +8,12 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 %% @uniform width=192 height=90 max_title_len=19 max_desc_lines=3
 flowchart TD
-    ROOT["Exception&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Python built-in)<br/>&nbsp;<br/>&nbsp;"]
+    ROOT["Exception<br/>(Python built-in)<br/>"]
 
-    BIOETL["BioETLError&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>domain/exceptions/base.py<br/>error_type: ErrorType<br/>context: dict"]
+    BIOETL["BioETLError<br/>domain/exceptions/base.py<br/>error_type: ErrorType<br/>context: dict"]
 
     ROOT --> BIOETL
 
@@ -72,7 +72,7 @@ flowchart TD
     BIOETL --> DQ_THRESHOLD["DataQualityThresholdError<br/>pipeline, ratio, threshold"]
 
     %% ── ErrorClassifier ──
-    CLASSIFIER["ErrorClassifier&nbsp;&nbsp;&nbsp;&nbsp;<br/>domain/error_classifier.py<br/>.classify(error) → ErrorType<br/>&nbsp;"]
+    CLASSIFIER["ErrorClassifier<br/>domain/error_classifier.py<br/>.classify(error) → ErrorType<br/>"]
     CLASSIFIER -.->|"CRITICAL"| CRITICAL
     CLASSIFIER -.->|"RECOVERABLE"| RECOVERABLE
     CLASSIFIER -.->|"DATA_QUALITY"| DQ_ERROR
@@ -96,6 +96,6 @@ flowchart TD
     style DQ_ERROR fill:#E1BEE7,stroke:#6A1B9A,stroke-width:2px
     style CLASSIFIER fill:#E3F2FD,stroke:#1565C0,stroke-width:2px
     style ERROR_TYPE fill:#E8F5E9,stroke:#2E7D32
-    style ACTION_ABORT fill:#FF6B6B,stroke:#C62828
-    style ACTION_RETRY fill:#FFA500,stroke:#E65100
+    style ACTION_ABORT fill:#ffebee,stroke:#C62828
+    style ACTION_RETRY fill:#fff3e0,stroke:#E65100
     style ACTION_QUARANTINE fill:#CE93D8,stroke:#6A1B9A

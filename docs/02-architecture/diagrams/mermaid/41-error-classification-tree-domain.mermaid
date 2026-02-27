@@ -4,21 +4,21 @@ flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N1["ERROR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N2["DOMAIN&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N4["DQTHRESH&nbsp;&nbsp;"]
-        N6["INFRA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N7["no&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N8["classify&nbsp;&nbsp;"]
-        N10["another&nbsp;&nbsp;&nbsp;"]
-        N12["RATE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N13["SERVER&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N14["STORE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N15["CB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N16["FAIL_FAST&nbsp;"]
-        N17["AUTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N20["EXHAUST&nbsp;&nbsp;&nbsp;"]
-        N5["HTTP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N1["ERROR"]
+        N2["DOMAIN"]
+        N4["DQTHRESH"]
+        N6["INFRA"]
+        N7["no"]
+        N8["classify"]
+        N10["another"]
+        N12["RATE"]
+        N13["SERVER"]
+        N14["STORE"]
+        N15["CB"]
+        N16["FAIL_FAST"]
+        N17["AUTH"]
+        N20["EXHAUST"]
+        N5["HTTP"]
     end
 
     subgraph Application["Application Layer"]
@@ -28,10 +28,10 @@ flowchart TB
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N19["LOCKACQ&nbsp;&nbsp;&nbsp;"]
-        N9["retry&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N11["RETRY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N18["LOCK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N19["LOCKACQ"]
+        N9["retry"]
+        N11["RETRY"]
+        N18["LOCK"]
     end
 
     N1 --> N5

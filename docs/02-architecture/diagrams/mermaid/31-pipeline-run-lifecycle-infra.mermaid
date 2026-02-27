@@ -1,37 +1,38 @@
 %% View: Infrastructure-Mapping | Parent: 31-pipeline-run-lifecycle-full.mermaid
 %% @uniform width=168 height=56 max_title_len=16 max_desc_lines=0
+%%{init: {'theme': 'neutral', 'flowchart': {'defaultRenderer': 'elk'}}}%%
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N11["VALIDATING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["VALIDATING"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N8["PREFLIGHT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N19["POSTRUN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["PREFLIGHT"]
+        N19["POSTRUN"]
         N9["PREFLIGHT_PASSED"]
-        N10["TRANSFORMING&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N18["BATCH_DONE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["TRANSFORMING"]
+        N18["BATCH_DONE"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N1["LOCKING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N2["CHECKPOINTING&nbsp;&nbsp;&nbsp;"]
-        N3["LOCKED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N1["LOCKING"]
+        N2["CHECKPOINTING"]
+        N3["LOCKED"]
         N4["CHECKPOINT_SAVED"]
-        N5["EXTRACTING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N6["FAILED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N7["WRITING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N12["DRAINING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N13["RELEASING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N14["*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N15["PENDING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N16["CLEARING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N17["QUARANTINING&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N20["COMPLETED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N5["EXTRACTING"]
+        N6["FAILED"]
+        N7["WRITING"]
+        N12["DRAINING"]
+        N13["RELEASING"]
+        N14["*"]
+        N15["PENDING"]
+        N16["CLEARING"]
+        N17["QUARANTINING"]
+        N20["COMPLETED"]
     end
 
     N14 --> N15
@@ -67,31 +68,8 @@ flowchart TB
     style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
     style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
 
-    linkStyle 0 stroke:#1E293B,stroke-width:4px
-    linkStyle 1 stroke:#1E293B,stroke-width:4px
-    linkStyle 2 stroke:#1E293B,stroke-width:4px
-    linkStyle 3 stroke:#1E293B,stroke-width:4px
-    linkStyle 4 stroke:#1E293B,stroke-width:4px
-    linkStyle 5 stroke:#1E293B,stroke-width:4px
-    linkStyle 6 stroke:#1E293B,stroke-width:4px
-    linkStyle 7 stroke:#1E293B,stroke-width:4px
-    linkStyle 8 stroke:#1E293B,stroke-width:4px
-    linkStyle 9 stroke:#1E293B,stroke-width:4px
-    linkStyle 10 stroke:#1E293B,stroke-width:4px
-    linkStyle 11 stroke:#1E293B,stroke-width:4px
-    linkStyle 12 stroke:#1E293B,stroke-width:4px
-    linkStyle 13 stroke:#1E293B,stroke-width:4px
-    linkStyle 14 stroke:#1E293B,stroke-width:4px
-    linkStyle 15 stroke:#1E293B,stroke-width:4px
-    linkStyle 16 stroke:#1E293B,stroke-width:4px
-    linkStyle 17 stroke:#1E293B,stroke-width:4px
-    linkStyle 18 stroke:#1E293B,stroke-width:4px
-    linkStyle 19 stroke:#1E293B,stroke-width:4px
-    linkStyle 20 stroke:#1E293B,stroke-width:4px
-    linkStyle 21 stroke:#1E293B,stroke-width:4px
-    linkStyle 22 stroke:#1E293B,stroke-width:4px
-    linkStyle 23 stroke:#1E293B,stroke-width:4px
-    linkStyle 24 stroke:#1E293B,stroke-width:4px
-    linkStyle 25 stroke:#1E293B,stroke-width:4px
-    linkStyle 26 stroke:#1E293B,stroke-width:4px
-    linkStyle 27 stroke:#1E293B,stroke-width:4px
+    %% linkStyle: primary 0-2,4-12,15-19,25,27 | quarantine 13-14 | shutdown 20-22 | failure 3,6,23-24,26
+    linkStyle 0,1,2,4,5,7,8,9,10,11,12,15,16,17,18,19,25,27 stroke:#1E293B,stroke-width:3px
+    linkStyle 13,14 stroke:#6a1b9a,stroke-width:2px,stroke-dasharray:5
+    linkStyle 20,21,22 stroke:#d97706,stroke-width:2px,stroke-dasharray:6
+    linkStyle 3,6,23,24,26 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4

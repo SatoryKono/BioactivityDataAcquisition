@@ -197,7 +197,25 @@
       "Bash(npm install:*)",
       "Bash(do echo:*)",
       "Bash(do:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(cygpath:*)",
+      "WebFetch(domain:mermaid.js.org)",
+      "WebFetch(domain:mermaid.ai)",
+      "Bash(npx mmdc:*)",
+      "Bash(PYTHONIOENCODING=utf-8 python:*)",
+      "Bash(svgo:*)",
+      "mcp__claude_ai_Mermaid_Chart__validate_and_render_mermaid_diagram",
+      "Bash(__NEW_LINE_86a177468d5e0eb7__ for:*)",
+      "Bash(__NEW_LINE_051ebfc2049cf238__ for:*)",
+      "Bash(__NEW_LINE_46088dbc2e0c8d2c__ for:*)",
+      "Bash(__NEW_LINE_a82a67d7db100db8__ for:*)",
+      "Bash(__NEW_LINE_6f3d58c2d62d5327__:*)",
+      "Bash(/tmp/test-features.mmd:*)",
+      "Bash(/tmp/test-thick.mmd:*)",
+      "Bash(/tmp/test-invisible.mmd:*)",
+      "Bash(/tmp/test-inline-class.mmd:*)",
+      "Bash(/tmp/test-comment.mmd:*)",
+      "Bash(/tmp/test-multi-comment.mmd:*)"
     ]
   },
   "enabledPlugins": {
