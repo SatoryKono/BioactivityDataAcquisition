@@ -107,7 +107,7 @@ is provided but deprecated.
 - `src/bioetl/domain/entities/chembl-structures.py` — `Document` → `ChemblPublication`
 - `src/bioetl/domain/entities/pubchem.py` — `Compound` → `PubchemMolecule`
 - `src/bioetl/domain/entities/uniprot.py` — `Protein` → `UniprotTarget`
-- `src/bioetl/domain/entities/--init--.py` — exports обновлены
+- `src/bioetl/domain/entities/__init__.py` — exports обновлены
 
 **Pandera Schemas:**
 
@@ -261,7 +261,7 @@ Introduced a centralized **Publication Mapping Registry** in domain layer:
 
 **New Files:**
 
-- `src/bioetl/domain/registry/--init--.py` — Registry exports
+- `src/bioetl/domain/registry/__init__.py` — Registry exports
 - `src/bioetl/domain/registry/publication.py` — Single source of truth for publication mappings
 
 **Registry Structure:**

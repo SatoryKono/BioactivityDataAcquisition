@@ -16,8 +16,8 @@
 |--------|----------|
 | Архитектура | Hexagonal (Ports & Adapters) + Medallion (Bronze→Silver→Gold) + DDD |
 | Deployment | Local-Only (ADR-010) — без Docker/Redis в runtime |
-| Провайдеры | ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar, IUPHAR, Open Targets |
-| ADR | 39 штук (ADR-001..ADR-039), все Accepted |
+| Провайдеры | ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar (7 шт.) |
+| ADR | 40 штук (ADR-001..ADR-040), все Accepted кроме ADR-008 (Superseded) |
 | Coverage target | ≥85% overall, ≥90% domain |
 | RULES.md | v5.22 (2026-02-24) |
 
@@ -45,7 +45,7 @@
 ```bash
 make lint          # ruff + mypy
 make test          # Все тесты
-make arch-test     # Архитектурные тесты (43 шт.)
+make arch-test     # Архитектурные тесты (1392 collected)
 make install       # Установка зависимостей
 make run-local     # Запуск на фикстурах
 ```
@@ -242,7 +242,7 @@ reports/plans/<task_id>/
 | documentation-audit | `.claude/skills/documentation-audit.skill.md` | Полный аудит документации | Прочитать → follow Workflow |
 | new-pipeline | `.claude/skills/new-pipeline.md` | Scaffolding нового ETL pipeline (7 файлов) | Прочитать → генерировать по шаблонам |
 | vcr-record | `.claude/skills/vcr-record.md` | VCR cassettes management | Прочитать → выполнить команды |
-| verify-architecture | `.claude/skills/verify-architecture.md` | Pre-commit/PR arch check (43 теста) | Прочитать → `pytest tests/architecture/ -v` |
+| verify-architecture | `.claude/skills/verify-architecture.md` | Pre-commit/PR arch check (1392 теста) | Прочитать → `pytest tests/architecture/ -v` |
 
 ---
 

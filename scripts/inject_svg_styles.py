@@ -69,7 +69,10 @@ def _build_css_rules(svg_id: str) -> str:
         f"#{svg_id} .edgeLabel rect{{opacity:1!important;fill:#ffffff!important}}"
         f"#{svg_id} .labelBkg{{background-color:#ffffff!important;opacity:1!important}}"
         f"#{svg_id} .edgeLabel .labelBkg{{background-color:#ffffff!important;opacity:1!important}}"
-        f"#{svg_id} .edgeLabel{{font-size:13px}}"
+        f"#{svg_id} .edgeLabel{{font-size:12px;line-height:1.1;padding:1px 3px}}"
+        f"#{svg_id} .edgeLabel span{{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}}"
+        f"#{svg_id} .edgeLabel p{{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}}"
+        f"#{svg_id} text.fo-fallback{{color:#111827!important;fill:#111827!important;opacity:1!important}}"
     )
 
 

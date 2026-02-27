@@ -117,7 +117,7 @@ interfaces/
 ├── cli.py
 ├── orchestration/
 └── bootstrap/        # Moved here
-    ├── --init--.py
+    ├── __init__.py
     └── factories/
 ```
 

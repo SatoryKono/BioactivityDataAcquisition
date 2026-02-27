@@ -17,10 +17,10 @@
 flowchart TD
 %% keep-orphan: SOURCE_YAML_CFG
     subgraph YAML_FILES["YAML File Hierarchy"]
-        BASE["configs/pipelines/_base.yaml&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(global defaults)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        PROVIDER_BASE["configs/pipelines/{provider}/_base.yaml&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(provider defaults)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        PIPELINE["configs/pipelines/{provider}/{entity}.yaml&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(pipeline config)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        SOURCE["configs/sources/{provider}.yaml&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(source config)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        BASE["configs/base/pipeline.yaml&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(global defaults)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        PROVIDER_BASE["configs/providers/{provider}.yaml&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(provider defaults)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        PIPELINE["configs/entities/{provider}/{entity}.yaml&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(pipeline config)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        SOURCE["configs/providers/{provider}.yaml&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(source config)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph DQ_HIERARCHY["DQ Config Hierarchy (DQConfigLoader)"]

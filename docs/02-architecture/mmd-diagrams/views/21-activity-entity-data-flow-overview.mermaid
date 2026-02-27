@@ -1,22 +1,22 @@
 %% View: Overview | Parent: 21-activity-entity-data-flow-full.mermaid
-%% @uniform width=140 height=56 max_title_len=3 max_desc_lines=0
+%% @uniform width=236 height=64 max_title_len=28 max_desc_lines=1
 flowchart TB
 
-    N1["E1"]
-    N2["E2"]
-    N3["E3"]
-    N4["E4"]
-    N5["T1"]
-    N6["T2"]
-    N7["T3"]
-    N8["T4"]
-    N9["V1"]
-    N10["V2"]
-    N11["V3"]
-    N12["API"]
-    N13["V4"]
-    N14["L1"]
-    N15["L2"]
+    N1["Fetch Activity Batch"]
+    N2["Fetch Related IDs"]
+    N3["Write Bronze"]
+    N4["Record Lineage"]
+    N5["Normalize Units"]
+    N6["Add Metadata"]
+    N7["Compute content_hash"]
+    N8["Create Activity Entity"]
+    N9["Activity Schema"]
+    N10["Value Range Check"]
+    N11["Validate SMILES"]
+    N12["ChEMBL API"]
+    N13["Error Rate Gate"]
+    N14["Silver Activity"]
+    N15["Gold by Target"]
 
     N12 --> N1
     N1 --> N2
@@ -32,16 +32,8 @@ flowchart TB
     N11 --> N13
     N14 --> N15
 
-    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 8 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 10 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 11 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 12 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    classDef process fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    classDef service fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+
+    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 12 stroke:#475569,stroke-width:2px,stroke-dasharray:5,opacity:0.85

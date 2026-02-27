@@ -105,7 +105,7 @@ bioetl run chembl_tissue --run-type rebuild
 | Component | Path |
 |-----------|------|
 | Config | `configs/entities/chembl/tissue.yaml` |
-| DQ Rules | `configs/quality/entities/chembl/tissue.yaml` |
+| DQ Rules | `configs/entities/chembl/tissue.yaml#quality` |
 | Schema | `configs/schemas/chembl/tissue.yaml` |
 | Transformer | `src/bioetl/application/pipelines/chembl/tissue-transformer.py` |
 

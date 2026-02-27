@@ -11,7 +11,7 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'},'layout':'elk','flowchart':{'curve':'linear'},'elk':{'nodePlacementStrategy':'BRANDES_KOEPF','mergeEdges':true,'edgeRouting':'ORTHOGONAL'}}}%%
 %% @uniform width=328 height=56 max_title_len=36 max_desc_lines=1
 flowchart TB
     subgraph Step1["Step 1: Logger"]
@@ -89,7 +89,7 @@ flowchart TB
     S4C --> S4F
     S4D & S4E & S4F --> S5A
     S5A --> S5B
-    S5B --- S5C & S5D
+    S5B --> S5C & S5D
     S5B --> S6A
     S6A --> S6B --> S6C
     S6C --> S7A & S7B & S7C
@@ -102,22 +102,5 @@ flowchart TB
     style Step8 fill:#ffe4e6,stroke:#dc2626
     style Step9 fill:#f0fdf4,stroke:#16a34a
 
-    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 8 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 10 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 11 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 12 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 13 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 14 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 15 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 16 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 17 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 18 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 18 stroke:#475569,stroke-width:2px,stroke-dasharray:5,opacity:0.85

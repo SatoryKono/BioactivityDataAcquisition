@@ -148,13 +148,13 @@ class Measurement:
 ```
 src/bioetl/domain/
 ├── aggregates/           # DDD Aggregates
-│   ├── --init--.py
+│   ├── __init__.py
 │   ├── batch.py          # Batch Aggregate (536 LOC)
 │   ├── pipeline-run.py   # PipelineRun Aggregate (574 LOC)
 │   ├── quarantine-entry.py # QuarantineEntry Aggregate (517 LOC)
 │   └── events.py         # Domain Events (197 LOC)
 ├── value-objects/        # Value Objects
-│   ├── --init--.py
+│   ├── __init__.py
 │   ├── identifiers.py    # RunID, BatchID, EntityID, ContentHash
 │   └── measurements.py   # Measurement, IC50, etc.
 ├── entities/             # Domain Entities (per provider)
