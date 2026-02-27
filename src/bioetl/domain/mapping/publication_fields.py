@@ -4,7 +4,7 @@ Provides bidirectional mapping between provider-specific field names
 and unified canonical names for publication entities across ChEMBL,
 CrossRef, OpenAlex, PubMed, and SemanticScholar.
 
-Rationale (ADR-TBD: Cross-Provider Field Unification):
+Rationale (ADR-029: Output Metadata Unification):
 - Eliminates semantic duplication (doc_type vs source_type, year vs publication_year)
 - Enables seamless composite pipeline aggregation
 - Maintains backward compatibility via field_aliases in YAML configs

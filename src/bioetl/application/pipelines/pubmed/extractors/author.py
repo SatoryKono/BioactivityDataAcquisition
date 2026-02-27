@@ -70,7 +70,7 @@ class AuthorExtractor(BaseFieldExtractor):
     """
 
     def extract(self, element: Element | None) -> list[RawAuthor] | None:
-        """Извлечь сырые данные об авторах из XML.
+        """Extract raw author data from XML.
 
         Args:
             element: The Article element containing AuthorList.
@@ -192,8 +192,7 @@ class AuthorExtractor(BaseFieldExtractor):
         return match.group(0) if match else None
 
     def normalize(self, raw_value: list[RawAuthor]) -> list[str]:
-        """Нормализовать список авторов в формат 'LastName, Initials'.
-
+        """Normalize author list into 'LastName, Initials' format.
 
         Args:
             raw_value: List of raw author dicts.
@@ -229,7 +228,7 @@ class AuthorExtractor(BaseFieldExtractor):
         """Template method: extract → normalize.
 
         Args:
-            element: XML элемент для обработки.
+            element: XML element to process.
 
         Returns:
             List of formatted author names (empty list if no authors).

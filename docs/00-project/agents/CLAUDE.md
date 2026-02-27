@@ -132,7 +132,7 @@ ls tests/architecture/test-*.py
 | **Python-файлов**         | ~1,114 (534 src + 580 tests)                        |
 | **Строк кода**            | ~115,656 (src/bioetl/)                              |
 | **Тестов**                | ~11,985 (функций test-)                             |
-| **ADR**                   | ADR-001..ADR-038                                    |
+| **ADR**                   | ADR-001..ADR-040                                    |
 | **Провайдеров**           | 7                                                   |
 | **Pipeline-конфигураций** | 27                                                  |
 | **Конфиг-файлов всего**   | 123 (pipelines, quality, filters, sources, schemas) |
@@ -354,7 +354,7 @@ cat docs/99-archive/refactoring-plan.md | head -60
 
 **Circuit Breaker**: 5 consecutive errors → Open 5 мин (см. [ADR-007](../../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md))
 
-**Актуальный набор ADR (ADR-001..ADR-038)** определяет архитектурные решения: `docs/02-architecture/decisions/ADR-{NNN}-*.md`
+**Актуальный набор ADR (ADR-001..ADR-040)** определяет архитектурные решения: `docs/02-architecture/decisions/ADR-{NNN}-*.md`
 (полный реестр в `docs/00-project/RULES.md` Приложение F)
 
 ----------------------------------------------------------------------
@@ -513,7 +513,7 @@ pytest tests/e2e/ -v -m e2e  # E2E тесты
 | `docs/00-project/RULES.md`             | **Конституция проекта** — единственный источник истины для архитектурных правил |
 | `docs/00-project/agents/AGENT.md`      | Инструкции для агента (персона, workflow, специфика работы)                     |
 | `.claude/PROJECT_CONTEXT.md`           | Компактный контекст для быстрой справки                                         |
-| `docs/02-architecture/decisions/`      | ADR (001-038) — архитектурные решения                                           |
+| `docs/02-architecture/decisions/`      | ADR (001-040) — архитектурные решения                                           |
 | `docs/01-requirements/REQUIREMENTS.md` | 127 тестируемых требований                                                      |
 
 > **Иерархия документации**: При противоречиях приоритет имеет `docs/00-project/RULES.md`.

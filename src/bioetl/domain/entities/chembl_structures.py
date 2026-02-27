@@ -18,8 +18,8 @@ class ChemblPublication(PublicationEntityBase):
 
     Maps to ChEMBL API endpoint: /document
 
-    Содержит только поля ChEMBL; общие поля публикации наследуются
-    из PublicationEntityBase.
+    Contains only ChEMBL-specific fields; common publication fields are inherited
+    from PublicationEntityBase.
     See: https://www.ebi.ac.uk/chembl/api/data/document
     """
 

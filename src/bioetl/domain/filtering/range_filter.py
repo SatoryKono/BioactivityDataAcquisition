@@ -10,14 +10,14 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True, slots=True)
 class GoldRangeFilter:
-    """Фильтр числового диапазона для колонки.
+    """Numeric range filter for a column.
 
     Attributes:
-        column: Имя колонки.
-        min_value: Минимальное значение.
-        max_value: Максимальное значение.
-        include_min: Включать ли минимум (>=). Default: True.
-        include_max: Включать ли максимум (<=). Default: True.
+        column: Column name.
+        min_value: Minimum value.
+        max_value: Maximum value.
+        include_min: Whether to include the minimum (>=). Default: True.
+        include_max: Whether to include the maximum (<=). Default: True.
     """
 
     column: str

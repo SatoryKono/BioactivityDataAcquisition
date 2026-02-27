@@ -1,6 +1,6 @@
 """Explicit provider registration for Composition layer.
 
-Loads config from configs/sources/*.yaml. HttpConfig serves as fallback.
+Loads config from configs/providers/*.yaml. HttpConfig serves as fallback.
 Config helpers extracted to _config_helpers.py per audit-package-structure-2026-02-07.
 """
 
@@ -76,7 +76,7 @@ def _create_chembl_data_source(
 ) -> DataSourcePort:
     """Create ChEMBL data source with optional CSV filtering.
 
-    Configuration is loaded from configs/sources/chembl.yaml via AdapterConfig.
+    Configuration is loaded from configs/providers/chembl.yaml via AdapterConfig.
     This ensures YAML is the single source of truth (RULES.md §12.1.2).
 
     For document_term entity type, wraps the adapter with PublicationTermDataSource
@@ -163,7 +163,25 @@ def _create_pubchem_data_source(
     metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
 ) -> DataSourcePort:
-    """Create PubChem data source with optional CSV filtering."""
+    """Create PubChem data source with optional CSV filtering.
+
+    PubChem uses a synchronous adapter with its own ThreadPoolExecutor for
+    concurrent compound lookups. Dependencies (TokenBucket, CircuitBreaker,
+    ThreadPoolExecutor) are assembled in ``_create_pubchem_adapter`` following
+    the Composition Root pattern instead of the generic DataSourceFactory path.
+
+    Args:
+        settings: Application settings (used for strict_error_handling flag).
+        pipeline_config: Pipeline configuration from YAML.
+        logger: LoggerPort for structured logging.
+        filter_config: Optional filter configuration for CSV-based CID filtering.
+        metrics: Optional MetricsPort for recording adapter metrics.
+        pipeline_name: Pipeline name for metrics labels.
+
+    Returns:
+        Configured DataSourcePort with optional filtering wrapper.
+
+    """
     data_source = _create_pubchem_adapter(
         logger=logger,
         settings=settings,
@@ -181,7 +199,28 @@ def _create_uniprot_data_source(
     metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
 ) -> DataSourcePort:
-    """Create UniProt data source with optional CSV filtering."""
+    """Create UniProt data source with optional CSV filtering.
+
+    UniProt uses the generic DataSourceFactory path with a UnifiedHTTPClient.
+    The base URL defaults to ``https://rest.uniprot.org`` but can be overridden
+    via ``pipeline_config.source.api.base_url`` for testing or alternative
+    deployments.
+
+    Args:
+        settings: Application settings (used for HTTP client and
+            strict_error_handling flag).
+        pipeline_config: Pipeline configuration from YAML; its
+            ``source.api.base_url`` overrides the default UniProt REST endpoint.
+        logger: LoggerPort for structured logging.
+        filter_config: Optional filter configuration for CSV-based accession
+            filtering.
+        metrics: Optional MetricsPort for recording adapter metrics.
+        pipeline_name: Pipeline name for metrics labels.
+
+    Returns:
+        Configured DataSourcePort with optional filtering wrapper.
+
+    """
     DataSourceFactory, HttpClientFactory = _get_factories(
         get_data_source_factory, get_http_client_factory
     )
@@ -206,7 +245,34 @@ def _create_pubmed_data_source(
     metrics: MetricsPort | None = None,
     pipeline_name: str = "unknown",
 ) -> DataSourcePort:
-    """Create PubMed data source with optional CSV filtering."""
+    """Create PubMed data source with optional CSV filtering.
+
+    PubMed requires an email address and optionally an API key for higher rate
+    limits (10 req/sec with key vs 3 req/sec without). The API key is resolved
+    with the following priority:
+
+    1. ``pipeline_config.source.api_key`` -- per-pipeline override (highest).
+    2. ``settings.pubmed_api_key`` -- application-wide setting from
+       ``BIOETL_PUBMED_API_KEY`` env var (fallback).
+    3. ``None`` -- unauthenticated access with lower rate limits.
+
+    Email follows a similar resolution: ``pipeline_config.source.email`` takes
+    precedence over ``settings.default_email``.
+
+    Args:
+        settings: Application settings (provides fallback API key and email).
+        pipeline_config: Pipeline configuration from YAML; may contain
+            per-pipeline ``api_key`` and ``email`` overrides.
+        logger: LoggerPort for structured logging.
+        filter_config: Optional filter configuration for CSV-based PMID
+            filtering.
+        metrics: Optional MetricsPort for recording adapter metrics.
+        pipeline_name: Pipeline name for metrics labels.
+
+    Returns:
+        Configured DataSourcePort with optional filtering wrapper.
+
+    """
     _, HttpClientFactory = _get_factories(
         get_data_source_factory, get_http_client_factory
     )
@@ -469,17 +535,17 @@ def register_all_providers() -> None:
     Idempotent - safe to call multiple times.
 
     Configuration Priority:
-    1. configs/sources/{provider}.yaml - PRIMARY (rate limits, circuit breaker, batch_size)
+    1. configs/providers/{provider}.yaml - PRIMARY (rate limits, circuit breaker, batch_size)
     2. HttpConfig in ProviderConfig - FALLBACK only
 
     Provider configurations are now loaded from YAML files:
-    - ChEMBL: configs/sources/chembl.yaml
-    - PubChem: configs/sources/pubchem.yaml
-    - UniProt: configs/sources/uniprot.yaml
-    - PubMed: configs/sources/pubmed.yaml
-    - CrossRef: configs/sources/crossref.yaml
-    - OpenAlex: configs/sources/openalex.yaml
-    - Semantic Scholar: configs/sources/semanticscholar.yaml
+    - ChEMBL: configs/providers/chembl.yaml
+    - PubChem: configs/providers/pubchem.yaml
+    - UniProt: configs/providers/uniprot.yaml
+    - PubMed: configs/providers/pubmed.yaml
+    - CrossRef: configs/providers/crossref.yaml
+    - OpenAlex: configs/providers/openalex.yaml
+    - Semantic Scholar: configs/providers/semanticscholar.yaml
 
     Each provider includes a data_source_creator for unified registry access.
     """

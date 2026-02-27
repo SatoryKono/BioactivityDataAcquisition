@@ -11,10 +11,10 @@ from xml.etree.ElementTree import Element
 
 
 class BaseFieldExtractor(ABC):
-    """Template Method для извлечения полей из PubMed XML.
+    """Template Method for extracting fields from PubMed XML.
 
-    Наследники реализуют extract() и normalize() для конкретных полей.
-    Метод process() объединяет их в единый процесс обработки.
+    Subclasses implement extract() and normalize() for specific fields.
+    The process() method combines them into a single processing workflow.
 
     Example:
         >>> class MyExtractor(BaseFieldExtractor):
@@ -28,38 +28,38 @@ class BaseFieldExtractor(ABC):
 
     @abstractmethod
     def extract(self, element: Element | None) -> Any:  # Any: XML-derived dict values
-        """Извлечь сырые данные из XML элемента.
+        """Extract raw data from an XML element.
 
         Args:
-            element: XML элемент для извлечения данных.
+            element: XML element to extract data from.
 
         Returns:
-            Сырые данные (могут быть None, строкой, списком и т.д.).
+            Raw data (may be None, a string, a list, etc.).
         """
         ...
 
     @abstractmethod
     def normalize(self, raw_value: Any) -> Any:  # Any: XML-derived dict values
-        """Нормализовать извлечённое значение.
+        """Normalize an extracted value.
 
         Args:
-            raw_value: Сырое значение из extract().
+            raw_value: Raw value from extract().
 
         Returns:
-            Нормализованное значение.
+            Normalized value.
         """
         ...
 
     def process(self, element: Element | None) -> Any:  # Any: XML-derived dict values
         """Template method: extract → normalize.
 
-        Выполняет полный цикл извлечения и нормализации данных.
+        Performs the full extraction and normalization cycle.
 
         Args:
-            element: XML элемент для обработки.
+            element: XML element to process.
 
         Returns:
-            Нормализованное значение или None.
+            Normalized value, or None.
         """
         raw = self.extract(element)
         return self.normalize(raw) if raw is not None else None

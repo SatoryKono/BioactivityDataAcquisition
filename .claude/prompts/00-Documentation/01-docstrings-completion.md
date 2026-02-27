@@ -1,7 +1,7 @@
 # Задача: Дополнение пропущенных docstrings в проекте BioETL
 
 ## Контекст
-Проект BioETL следует RULES.md v5.14. Согласно §10.3:
+Проект BioETL следует RULES.md v5.22. Согласно §10.3:
 - Публичные классы/функции **MUST** иметь docstring
 - Язык docstrings — английский
 - Стиль — Google-style docstrings

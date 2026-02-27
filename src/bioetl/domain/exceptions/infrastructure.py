@@ -4,8 +4,8 @@ These errors involve I/O operations with storage systems (Delta Lake, local file
 configuration issues, and resource exhaustion. Infrastructure errors are typically
 critical and require immediate attention.
 
-Категория: InfrastructureErrors - ошибки инфраструктуры и окружения (сбой файловой
-системы, недоступность хранилища или БД, проблемы конфигурации и др.).
+Category: InfrastructureErrors - infrastructure and environment errors (filesystem
+failures, storage or database unavailability, configuration issues, etc.).
 
 See ADR-016 for error handling strategy.
 """

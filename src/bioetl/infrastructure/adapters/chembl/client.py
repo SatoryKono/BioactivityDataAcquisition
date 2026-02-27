@@ -50,10 +50,37 @@ if TYPE_CHECKING:
 
 @dataclass
 class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
-    """ChEMBL data source adapter implementing DataSourcePort.
+    """ChEMBL REST API adapter implementing DataSourcePort.
 
-    Configuration: Load from configs/sources/chembl.yaml via AdapterConfig.
-    Health-aware: HEALTHY=full batch, DEGRADED=batch/2, UNHEALTHY=CriticalError.
+    Fetches bioactivity data from the EBI ChEMBL API at
+    ``https://www.ebi.ac.uk/chembl/api/data``.
+
+    Rate limiting:
+        Token-bucket algorithm (3 req/s, burst 10) enforced by the
+        injected ``UnifiedHTTPClient`` and its ``RateLimiterPort``.
+
+    Pagination:
+        Offset-based (``limit``/``offset`` query params, default page size
+        1000). Entities listed in ``_NO_PAGINATION_ENTITIES`` (target,
+        target_component, protein_class) are fetched in a single request.
+        For filtered queries, IDs are batched (default batch size 20) with
+        ``__in`` filter syntax; URL length is capped at 1000 characters.
+
+    Health-aware batch sizing (see ``ChemblHealthMixin``):
+        * HEALTHY -- full ``page_size`` (default 1000).
+        * DEGRADED -- ``max(100, page_size // 2)`` (halved, floor 100).
+        * UNHEALTHY -- raises ``CriticalError`` immediately (fail-fast).
+
+    Resilience:
+        On ``RetryExhaustedError`` during filtered fetches the adapter
+        splits the failing batch in half and retries each part recursively.
+        Single-ID failures fall back to the direct-record endpoint
+        (``/entity/CHEMBLID``) before logging a skip.
+
+    Configuration (``configs/providers/chembl.yaml`` via ``AdapterConfig``):
+        ``page_size`` (1000), ``batch_size`` (20), ``timeout_sec`` (60),
+        ``max_retries`` (3), ``circuit_breaker.failure_threshold`` (5),
+        ``circuit_breaker.recovery_timeout`` (300 s).
     """
 
     http_client: UnifiedHTTPClient

@@ -213,6 +213,7 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | **Adapter** | Implementation of a Port for external systems | `Client` (as standalone), `Connector` |
 | **Writer** | Persists data to a Medallion layer | `Saver`, `Persister` |
 | **Port** | Protocol interface defining capabilities | `Interface` (Python reserved) |
+| **DataSourcePort** | Core domain port (Protocol) defining the contract for data fetching from external providers. Implemented by provider-specific adapters. | `DataClient`, `FetcherInterface` |
 
 ### Naming Patterns
 

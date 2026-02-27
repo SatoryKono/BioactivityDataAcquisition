@@ -1,6 +1,6 @@
 """Pipeline services - injected dependencies.
 
-Part of BasePipeline decomposition (ADR-0005).
+Part of BasePipeline decomposition (ADR-005).
 Separates I/O port dependencies from pipeline logic.
 
 Logger and Metrics are formalized as ports (ADR-005).

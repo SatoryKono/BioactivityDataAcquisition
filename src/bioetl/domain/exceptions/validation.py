@@ -4,8 +4,8 @@ These errors indicate that data does not conform to expected schemas or formats.
 ValidationErrors are typically recoverable at the record level - individual invalid
 records can be logged and skipped while processing continues for other records.
 
-Категория: ValidationErrors - ошибки валидации данных и схем (нарушение формата,
-отсутствующие поля и т.п.).
+Category: ValidationErrors - data and schema validation errors (format violations,
+missing fields, etc.).
 """
 
 from __future__ import annotations

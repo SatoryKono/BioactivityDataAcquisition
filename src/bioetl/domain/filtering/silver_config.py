@@ -9,4 +9,4 @@ from bioetl.domain.filtering._base_filter_config import BaseFilterConfig
 
 @dataclass(frozen=True, slots=True)
 class SilverFilterConfig(BaseFilterConfig):
-    """Конфигурация фильтров для Silver слоя."""
+    """Filter configuration for the Silver layer."""
