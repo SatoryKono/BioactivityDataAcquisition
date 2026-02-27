@@ -25,7 +25,7 @@ To build a robust, scalable, and maintainable data pipeline for acquiring and pr
 | **Local-Only Deployment**  | File-based storage, no Docker/Redis required         | [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md)          |
 | **Graceful Shutdown**      | SIGTERM/SIGINT handling with checkpoint save         | [ADR-008](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)     |
 | **Circuit Breaker**        | Fault tolerance for API failures                     | [ADR-007](../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md) |
-| **Deterministic Writes**   | Reproducible SCD2 with ingestion-ts                  | [ADR-014](../../02-architecture/decisions/ADR-014-deterministic-writes.md)           |
+| **Deterministic Writes**   | Reproducible SCD2 with ingestion-ts                  | [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md)           |
 | **Gold Validation**        | Pandera strict schema validation                     | [ADR-018](../02-architecture/decisions/ADR-018-gold-strict-validation.md)         |
 | **Composite Pipeline**     | Multi-source data enrichment (seed → enrich → merge) | [ADR-026](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)     |
 

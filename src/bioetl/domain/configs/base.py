@@ -1,7 +1,7 @@
 """Base configuration classes for domain layer.
 
 Consolidates duplicate DTOs by providing base classes with common fields.
-Per RULES.md §12.1.6 - "Дублирующие DTO с пересекающимися полями MUST NOT".
+Per RULES.md §12.1.6 - "Duplicate DTOs with overlapping fields MUST NOT exist".
 
 This module provides:
 - RateLimitConfig: Unified rate limiting configuration

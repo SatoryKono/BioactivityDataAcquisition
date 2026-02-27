@@ -4,7 +4,7 @@
 
 > **Documentation Update:** 2026-02-25
 > - Codebase metrics updated: 1,120 Python files (534 src + 586 tests), ~116,120 src LOC
-> - ADR count: 39 ADRs (ADR-001 through ADR-039)
+> - ADR count: 40 ADRs (ADR-001 through ADR-040)
 > - Pipeline configs: 26 configurations (21 single-source + 5 composite)
 > - YAML configs total: 121 (26 pipelines + 35 DQ + 34 filters + 26 schemas)
 > - Documentation files: 366 markdown files
@@ -119,7 +119,7 @@ docs/
 | [ADR-011: Watermark Removal](../02-architecture/decisions/ADR-011-remove-watermark-mechanism.md) | Simplified checkpoint model             | §2.4     |
 | [ADR-012: Storage Clear Contract](../02-architecture/decisions/ADR-012-storage-clear-contract-and-run-id.md) | Storage clear API, run-id injection | §2.1     |
 | [ADR-013: Async Storage Cleanup](../02-architecture/decisions/ADR-013-async-storage-cleanup.md) | MedallionLifecycleService pattern        | §2.1     |
-| [ADR-014: Deterministic Writes](../../02-architecture/decisions/ADR-014-deterministic-writes.md)   | SCD2 ingestion-ts, reproducible writes   | §2.1     |
+| [ADR-014: Deterministic Writes](../02-architecture/decisions/ADR-014-deterministic-writes.md)   | SCD2 ingestion-ts, reproducible writes   | §2.1     |
 | [ADR-015: Pipeline Services Lifecycle](../02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md) | Port lifecycle contracts       | §1.1     |
 | [ADR-016: Error Handling Strategy](../02-architecture/decisions/ADR-016-error-handling-strategy.md) | Unified error classification          | §3.1     |
 | [ADR-017: Observability Architecture](../02-architecture/decisions/ADR-017-observability-architecture.md) | Metrics, tracing, logging ports    | §5.1     |
@@ -130,7 +130,7 @@ docs/
 | [ADR-022: Tracing NoOp](../02-architecture/decisions/ADR-022-tracing-noop.md) | NoOp for tracing              | -        |
 | [ADR-023: Entity Type Patterns](../02-architecture/decisions/ADR-023-entity-type-patterns.md) | Entity type patterns          | -        |
 | [ADR-024: Entity Naming Unification](../02-architecture/decisions/ADR-024-entity-naming-unification.md) | Entity naming unification     | -        |
-| [ADR-025: Pipeline Config Unification](../../02-architecture/decisions/ADR-025-pipeline-config-unification.md) | Pipeline config unification   | -        |
+| [ADR-025: Pipeline Config Unification](../02-architecture/decisions/ADR-025-pipeline-config-unification.md) | Pipeline config unification   | -        |
 | [ADR-026: Composite Pipeline Pattern](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) | Composite pipeline pattern    | -        |
 | [ADR-027: DQ Rules Externalization](../02-architecture/decisions/ADR-027-dq-rules-externalization.md) | Hierarchical DQ configuration | §3.1.2   |
 | [ADR-028: Filter Rules Externalization](../02-architecture/decisions/ADR-028-filter-rules-externalization.md) | Hierarchical filter configuration | App D   |
@@ -182,7 +182,7 @@ docs/
 
 | Topic            | Document                                                                                        | RULES.md |
 |------------------|-------------------------------------------------------------------------------------------------|----------|
-| Adding Providers | [add-new-source.md](../../03-guides/add-new-source.md)                                                | App D    |
+| Adding Providers | [add-new-source.md](../03-guides/add-new-source.md)                                                | App D    |
 | Adding Pipelines | [add-pipeline-existing-source.md](../03-guides/add-pipeline-existing-source.md)                    | App D    |
 | Pipeline Review  | [pipeline-review-checklist.md](../04-reference/templates/pipeline-review-checklist.md)                          | §4.2     |
 | Testing          | [testing.md](../03-guides/testing.md)                                                              | §4.2     |

@@ -36,7 +36,7 @@ class GenericPipeline(BasePipeline):
     This class provides a concrete implementation of BasePipeline that works
     with any data source. All entity-specific logic is encapsulated in:
 
-    - **Configuration**: YAML configs in `configs/pipelines/{provider}/{entity}.yaml`
+    - **Configuration**: YAML configs in `configs/entities/{provider}/{entity}.yaml`
     - **Transformation**: Transformer classes injected via DI
     - **Schemas**: Silver/Gold schemas for validation
 

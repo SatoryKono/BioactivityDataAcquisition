@@ -100,7 +100,7 @@ Ranked by architectural importance (Priority score). PNG renderings in `png/` su
 
 - Historical filename: `12-full-aws-deployment.mermaid` (deprecated naming).
 - Active diagram: `12-local-deployment-architecture.mermaid` in `mermaid/`.
-- Context source: [ADR-010 Local-Only Deployment](../decisions/ADR-010-local-only-deployment.md).
+- Context source: [ADR-010 Local-Only Deployment](../../decisions/ADR-010-local-only-deployment.md).
 
 ## Definition of Done для новой диаграммы
 

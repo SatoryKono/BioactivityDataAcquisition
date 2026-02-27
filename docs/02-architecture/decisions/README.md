@@ -13,7 +13,7 @@ This directory contains Architecture Decision Records documenting significant ar
 | [ADR-005](ADR-005-composition-layer-separation.md)      | Composition Layer Separation               | Accepted           | Architecture    | 2025-12-15 |
 | [ADR-006](ADR-006-logger-metrics-ports.md)              | Logger and Metrics Ports                   | Accepted           | Observability   | 2025-12-18 |
 | [ADR-007](ADR-007-circuit-breaker-implementation.md)    | Circuit Breaker Implementation             | Accepted           | Resilience      | 2025-12-22 |
-| [ADR-008](ADR-008-graceful-shutdown-strategy.md)        | Graceful Shutdown Strategy                 | Accepted           | Lifecycle       | 2025-12-22 |
+| [ADR-008](ADR-008-graceful-shutdown-strategy.md)        | Graceful Shutdown Strategy                 | Superseded         | Lifecycle       | 2025-12-22 |
 | [ADR-009](ADR-009-paginated-fetcher-mixin.md)           | PaginatedFetcherMixin Design               | Accepted           | Data Fetching   | 2025-12-22 |
 | [ADR-010](ADR-010-local-only-deployment.md)             | Local-Only Deployment                      | Accepted           | Deployment      | 2025-12-23 |
 | [ADR-011](ADR-011-remove-watermark-mechanism.md)        | Remove Watermark Mechanism                 | Accepted           | Data Loading    | 2025-12-23 |

@@ -131,7 +131,8 @@ def validate_publication_year(
     """Validate publication year and return (year, is_warning).
 
     Preserves the original value; flags as warning when outside valid range.
-    Uses ValidationConfig range (default 1500-2100).
+    Uses ValidationConfig range (default min_publication_year=1500,
+    max_publication_year=2100 from DEFAULT_VALIDATION_CONFIG).
 
     Args:
         year: Year to validate.
@@ -163,12 +164,13 @@ def validate_year_range(
 ) -> bool:
     """Validate year is within a reasonable range.
 
-    Default range [1950, CURRENT_YEAR+1] covers scientific publications.
+    Default range [1950, 2050] covers scientific publications.
+    Bounds come from MIN_PUBLICATION_YEAR and MAX_PUBLICATION_YEAR constants.
 
     Args:
         year: Year to validate.
-        min_year: Minimum valid year (inclusive). Default 1950.
-        max_year: Maximum valid year (inclusive). Default CURRENT_YEAR + 1.
+        min_year: Minimum valid year (inclusive). Default MIN_PUBLICATION_YEAR (1950).
+        max_year: Maximum valid year (inclusive). Default MAX_PUBLICATION_YEAR (2050).
 
     Returns:
         True if year is within range.

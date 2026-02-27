@@ -655,7 +655,7 @@ content-hash → content-version → version-hash
 - **Max Attempts**: 3
 - **Multiplier**: 2.0 (wait 1s, 2s, 4s...)
 - **Jitter**: Random(0.1s, 0.5s). Jitter **SHOULD** применяться для избежания thundering herd.
-- **Deterministic Mode**: При `RetryConfig(deterministic=True)` jitter **MUST** вычисляться через hash вместо random для воспроизводимости. См. [ADR-014](../../02-architecture/decisions/ADR-014-deterministic-writes.md).
+- **Deterministic Mode**: При `RetryConfig(deterministic=True)` jitter **MUST** вычисляться через hash вместо random для воспроизводимости. См. [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md).
 
 ### 3.1.4. Circuit Breaker (Размыкатель цепи)
 
@@ -905,7 +905,7 @@ pip install -e ".[tests]"
 
 ### 4.3. Детерминизм и Воспроизводимость
 
-См. [ADR-014](../../02-architecture/decisions/ADR-014-deterministic-writes.md).
+См. [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md).
 
 #### MUST (Обязательно)
 
@@ -1116,7 +1116,7 @@ async with services:  # --aenter-- инициализирует ресурсы
 
 ## 6.1. Детерминизм и Воспроизводимость
 
-> См. [ADR-014](../../02-architecture/decisions/ADR-014-deterministic-writes.md) для полного обоснования.
+> См. [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md) для полного обоснования.
 
 **Детерминизм** — это гарантия того, что при одинаковых входных данных (source data, config) пайплайн всегда произведет идентичные выходные данные и побочные эффекты.
 
@@ -1501,7 +1501,7 @@ URL-адреса для ChEMBL формируются в `infrastructure/adapter
 
 ## Приложение D: Схема Конфигурации Пайплайна
 
-См. [ADR-039](../02-architecture/decisions/ADR-039-unified-entity-config-format.md) для unified entity config format, [ADR-025](../../02-architecture/decisions/ADR-025-pipeline-config-unification.md) для исходной унификации конфигурации, [ADR-027](../02-architecture/decisions/ADR-027-dq-rules-externalization.md) для DQ rules и [ADR-028](../02-architecture/decisions/ADR-028-filter-rules-externalization.md) для filter rules.
+См. [ADR-039](../02-architecture/decisions/ADR-039-unified-entity-config-format.md) для unified entity config format, [ADR-025](../02-architecture/decisions/ADR-025-pipeline-config-unification.md) для исходной унификации конфигурации, [ADR-027](../02-architecture/decisions/ADR-027-dq-rules-externalization.md) для DQ rules и [ADR-028](../02-architecture/decisions/ADR-028-filter-rules-externalization.md) для filter rules.
 
 Начиная с 2026-02-24, все 21 стандартных pipeline используют **unified entity config** формат:
 
@@ -1651,7 +1651,7 @@ fields:
 | [ADR-011](../02-architecture/decisions/ADR-011-remove-watermark-mechanism.md)        | Remove Watermark Mechanism                 | Accepted           | 2025-12-23 |
 | [ADR-012](../02-architecture/decisions/ADR-012-storage-clear-contract-and-run-id.md) | Storage Clear Contract and Run ID          | Accepted           | 2025-12-23 |
 | [ADR-013](../02-architecture/decisions/ADR-013-async-storage-cleanup.md)             | Async Storage Cleanup                      | Accepted           | 2025-12-24 |
-| [ADR-014](../../02-architecture/decisions/ADR-014-deterministic-writes.md)              | Deterministic Writes and Retries           | Accepted           | 2025-12-24 |
+| [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md)              | Deterministic Writes and Retries           | Accepted           | 2025-12-24 |
 | [ADR-015](../02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md)       | Pipeline Services Lifecycle                | Accepted           | 2025-12-24 |
 | [ADR-016](../02-architecture/decisions/ADR-016-error-handling-strategy.md)           | Error Handling Strategy                    | Accepted           | 2025-12-26 |
 | [ADR-017](../02-architecture/decisions/ADR-017-observability-architecture.md)        | Observability Architecture                 | Accepted           | 2025-12-26 |
@@ -1662,7 +1662,7 @@ fields:
 | [ADR-022](../02-architecture/decisions/ADR-022-tracing-noop.md)                      | NoOp Tracing for Local-Only                | Accepted           | 2025-12-30 |
 | [ADR-023](../02-architecture/decisions/ADR-023-entity-type-patterns.md)              | Entity Type Patterns                       | Accepted           | 2026-01-06 |
 | [ADR-024](../02-architecture/decisions/ADR-024-entity-naming-unification.md)         | Entity Naming Unification                  | Accepted           | 2026-01-06 |
-| [ADR-025](../../02-architecture/decisions/ADR-025-pipeline-config-unification.md)       | Pipeline Config Unification                | Accepted           | 2026-01-19 |
+| [ADR-025](../02-architecture/decisions/ADR-025-pipeline-config-unification.md)       | Pipeline Config Unification                | Accepted           | 2026-01-19 |
 | [ADR-026](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)        | Composite Pipeline Pattern                 | Accepted           | 2026-01-15 |
 | [ADR-027](../02-architecture/decisions/ADR-027-dq-rules-externalization.md)          | DQ Rules Externalization                   | Accepted           | 2026-01-19 |
 | [ADR-028](../02-architecture/decisions/ADR-028-filter-rules-externalization.md)      | Filter Rules Externalization               | Accepted           | 2026-01-20 |
