@@ -11,7 +11,7 @@ Builds a composite target table by chaining ChEMBL target data with dependent pi
 
 | Field       | Value                                     |
 | ----------- | ----------------------------------------- |
-| Pipeline ID | `composite-target`                        |
+| Pipeline ID | `composite_target`                        |
 | Provider    | `composite`                               |
 | Entity      | `target`                                  |
 | Version     | `1.2.0`                                   |
@@ -19,12 +19,12 @@ Builds a composite target table by chaining ChEMBL target data with dependent pi
 
 ## Seed and Dependencies
 
-- **Seed**: `chembl-target`
+- **Seed**: `chembl_target`
 - **Dependencies**:
-  - `chembl-target-component` (join on `component-id`)
-  - `chembl-protein-class` (chained via `key-source=chembl-target-component`)
-  - `uniprot-idmapping` (join on `target-id`)
-  - `uniprot-protein` (chained via `key-source=uniprot-idmapping`)
+  - `chembl_target_component` (join on `component-id`)
+  - `chembl_protein_class` (chained via `key-source=chembl_target_component`)
+  - `uniprot_idmapping` (join on `target-id`)
+  - `uniprot_protein` (chained via `key-source=uniprot_idmapping`)
 - **Enrichers**: none
 
 ## Outputs

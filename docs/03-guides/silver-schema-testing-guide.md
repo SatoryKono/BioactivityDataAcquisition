@@ -28,8 +28,8 @@ tests/contract/silver-schemas/
 ├── test-validations.py            # Validation rules tests (~40 tests)
 ├── test-naming-conventions.py     # Naming consistency tests (~35 tests)
 ├── snapshots/                     # JSON snapshots (auto-generated)
-│   ├── chembl-activity-schema.json
-│   ├── chembl-molecule-schema.json
+│   ├── chembl_activity-schema.json
+│   ├── chembl_molecule-schema.json
 │   └── ...
 └── README.md                      # Detailed test documentation
 ```
@@ -50,7 +50,7 @@ pytest tests/contract/silver-schemas/ -v
 pytest tests/contract/silver-schemas/ --cov=src/bioetl/domain/schemas
 
 # Run for specific schema
-pytest tests/contract/silver-schemas/ -k chembl-activity
+pytest tests/contract/silver-schemas/ -k chembl_activity
 ```
 
 ### By Test Category
@@ -213,10 +213,10 @@ class ActivitySchema(ETLRecordSchema):
 ### Step 3: Run Tests (They WILL Fail)
 
 ```bash
-pytest tests/contract/silver-schemas/test-schema-stability.py -k chembl-activity
+pytest tests/contract/silver-schemas/test-schema-stability.py -k chembl_activity
 
 # Example failure:
-# FAILED: chembl-activity: New fields detected: ['data-source-version']
+# FAILED: chembl_activity: New fields detected: ['data-source-version']
 # If intentional, run: UPDATE-SNAPSHOTS=1 pytest ...
 ```
 
@@ -240,17 +240,17 @@ If breaking change:
 
 ```bash
 # After confirming change is intentional
-UPDATE-SNAPSHOTS=1 pytest tests/contract/silver-schemas/test-schema-stability.py -k chembl-activity
+UPDATE-SNAPSHOTS=1 pytest tests/contract/silver-schemas/test-schema-stability.py -k chembl_activity
 
 # Verify snapshot updated
-git diff tests/contract/silver-schemas/snapshots/chembl-activity-schema.json
+git diff tests/contract/silver-schemas/snapshots/chembl_activity-schema.json
 ```
 
 ### Step 7: Commit with Context
 
 ```bash
 git add src/bioetl/domain/schemas/chembl/activity.py
-git add tests/contract/silver-schemas/snapshots/chembl-activity-schema.json
+git add tests/contract/silver-schemas/snapshots/chembl_activity-schema.json
 git commit -m "feat(schemas): add data-source-version to ActivitySchema
 
 - Added optional field for API version tracking

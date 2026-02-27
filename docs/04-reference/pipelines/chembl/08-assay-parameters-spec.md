@@ -8,7 +8,7 @@
 
 | Parameter        | Value                                                  |
 | ---------------- | ------------------------------------------------------ |
-| **Pipeline ID**  | `chembl-assay-parameters`                              |
+| **Pipeline ID**  | `chembl_assay_parameters`                              |
 | **Provider**     | ChEMBL (EBI)                                           |
 | **Entity**       | assay-parameters                                       |
 | **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/assay` (nested) |
@@ -119,14 +119,14 @@ class AssayParametersSchema(ETLRecordSchema):
 ## 5. Pipeline Configuration
 
 ```yaml
-pipeline-name: chembl-assay-parameters
+pipeline-name: chembl_assay_parameters
 provider: chembl
 entity-type: assay-parameters
 version: "1.2.0"
 
 primary-keys: ["assay-param-id"]
-silver-table: "chembl-assay-parameters"
-gold-table: "chembl-assay-parameters"
+silver-table: "chembl_assay_parameters"
+gold-table: "chembl_assay_parameters"
 
 gold-filters:
   required-fields:

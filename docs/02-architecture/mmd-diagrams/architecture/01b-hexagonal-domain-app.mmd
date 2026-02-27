@@ -14,22 +14,22 @@
 graph TB
 %% keep-orphan: CFG, EXCEPTIONS, OBSERVER, SCHEMAS, TYPES
     subgraph Application["Application Layer"]
-        CORE["Core (Runner, BatchExecutor, Transformer, Writer)"]
-        SERVICES["Services (DQ, Export, Health, Medallion Lifecycle)"]
-        COMPOSITE["Composite Pipeline (Coordinator, Merger, FSM)"]
-        PIPELINES["Pipeline Transformers (per provider)"]
-        OBSERVER["PipelineObserver"]
+        CORE["Core (Runner, BatchExecutor, Transformer, Writer)"]:::size-sm
+        SERVICES["Services (DQ, Export, Health, Medallion Lifecycle)"]:::size-sm
+        COMPOSITE["Composite Pipeline (Coordinator, Merger, FSM)"]:::size-sm
+        PIPELINES["Pipeline Transformers (per provider)"]:::size-sm
+        OBSERVER["PipelineObserver"]:::size-sm
     end
 
     subgraph Domain["Domain Layer"]
-        PORTS["Port Protocols"]
-        ENTITIES["Entities and Aggregates"]
-        VO["Value Objects"]
-        CFG["Configuration"]
-        DOM_SVC["Domain Services"]
-        TYPES["Types and Enums"]
-        EXCEPTIONS["Exception Hierarchy"]
-        SCHEMAS["Schemas"]
+        PORTS["Port Protocols"]:::size-sm
+        ENTITIES["Entities and Aggregates"]:::size-sm
+        VO["Value Objects"]:::size-sm
+        CFG["Configuration"]:::size-sm
+        DOM_SVC["Domain Services"]:::size-sm
+        TYPES["Types and Enums"]:::size-sm
+        EXCEPTIONS["Exception Hierarchy"]:::size-sm
+        SCHEMAS["Schemas"]:::size-sm
     end
 
     CORE --> PORTS

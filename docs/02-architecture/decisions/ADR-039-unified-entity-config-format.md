@@ -52,7 +52,7 @@ provider: chembl
 entity: activity
 
 pipeline:
-  pipeline-name: chembl-activity
+  pipeline-name: chembl_activity
   provider: chembl
   entity-type: activity
   description: Extract biological activity records from ChEMBL API

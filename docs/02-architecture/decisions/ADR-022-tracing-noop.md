@@ -81,7 +81,7 @@ All structured logs include `run-id`:
   "ts": "2025-12-30T10:00:00Z",
   "level": "INFO",
   "run-id": "550e8400-e29b-41d4-a716-446655440000",
-  "pipeline": "chembl-activity",
+  "pipeline": "chembl_activity",
   "stage": "transform",
   "record-count": 1000
 }

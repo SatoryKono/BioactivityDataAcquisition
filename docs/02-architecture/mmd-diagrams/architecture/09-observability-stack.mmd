@@ -12,51 +12,48 @@
 graph TB
 %% keep-orphan: DQMP
     subgraph Ports["Domain Ports"]
-        LP["LoggerPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ bind(**kwargs)<br/>+ info(msg, **fields)<br/>+ warning(msg, **fields)<br/>+ error(msg, **fields)<br/>+ debug(msg, **fields)<br/>+ exception(msg, **fields)<br/>"]
-        MP["MetricsPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ observe_histogram(name, value, labels)<br/>+ increment_counter(name, labels)<br/>+ set_gauge(name, value, labels)<br/>+ close()<br/><br/><br/>"]
-        TP["TracingPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ get_tracer(name) → Tracer<br/>+ close()<br/><br/><br/><br/><br/>"]
-        DQMP["DQMonitorPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ add_metric(name, value)<br/>+ check_quality()<br/>+ update_baseline_from_metrics()<br/><br/><br/><br/>"]
+        LP["LoggerPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ bind(**kwargs)<br/>+ info(msg, **fields)<br/>+ warning(msg, **fields)<br/>+ error(msg, **fields)<br/>+ debug(msg, **fields)<br/>+ exception(msg, **fields)<br/>"]:::size-lg
+        MP["MetricsPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ observe_histogram(name, value, labels)<br/>+ increment_counter(name, labels)<br/>+ set_gauge(name, value, labels)<br/>+ close()<br/><br/><br/>"]:::size-lg
+        TP["TracingPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ get_tracer(name) → Tracer<br/>+ close()<br/><br/><br/><br/><br/>"]:::size-lg
+        DQMP["DQMonitorPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ add_metric(name, value)<br/>+ check_quality()<br/>+ update_baseline_from_metrics()<br/><br/><br/><br/>"]:::size-lg
     end
 
     subgraph AppObserver["Application Observability"]
-        PO["PipelineObserver<br/>━━━━━━━━━━━━━━━━━<br/>_metrics: MetricsPort<br/>_logger: LoggerPort<br/>_tracer: TracingPort<br/>━━━━━━━━━━━━━━━━━<br/>+ emit_event(event)<br/>+ on_preflight()<br/>+ on_execution()<br/>+ on_postrun()"]
-
-        BMR["BatchMetricsRecorder<br/>━━━━━━━━━━━━━━━━━<br/>+ track_batch_size()<br/>+ track_processed_records()<br/>+ track_error()<br/>+ track_quarantined_records()<br/><br/><br/><br/>"]
-
-        BTM["BatchTracingManager<br/>━━━━━━━━━━━━━━━━━<br/>+ start_execution_span()<br/>+ start_batch_span()<br/>+ start_layer_span()<br/>+ end_span()<br/><br/><br/><br/>"]
+        PO["PipelineObserver<br/>━━━━━━━━━━━━━━━━━<br/>_metrics: MetricsPort<br/>_logger: LoggerPort<br/>_tracer: TracingPort<br/>━━━━━━━━━━━━━━━━━<br/>+ emit_event(event)<br/>+ on_preflight()<br/>+ on_execution()<br/>+ on_postrun()"]:::size-lg
+        BMR["BatchMetricsRecorder<br/>━━━━━━━━━━━━━━━━━<br/>+ track_batch_size()<br/>+ track_processed_records()<br/>+ track_error()<br/>+ track_quarantined_records()<br/><br/><br/><br/>"]:::size-lg
+        BTM["BatchTracingManager<br/>━━━━━━━━━━━━━━━━━<br/>+ start_execution_span()<br/>+ start_batch_span()<br/>+ start_layer_span()<br/>+ end_span()<br/><br/><br/><br/>"]:::size-lg
     end
 
     subgraph InfraLogging["Infrastructure: Logging"]
-        UL["UnifiedLogger<br/>(implements LoggerPort)<br/>━━━━━━━━━━━━━━━━━<br/>Structured JSON output<br/>Log Schema enforcement<br/>Secret filtering<br/><br/><br/><br/>"]
+        UL["UnifiedLogger<br/>(implements LoggerPort)<br/>━━━━━━━━━━━━━━━━━<br/>Structured JSON output<br/>Log Schema enforcement<br/>Secret filtering<br/><br/><br/><br/>"]:::size-lg
     end
 
     subgraph InfraMetrics["Infrastructure: Metrics"]
-        MC["MetricsCollector<br/>(implements MetricsPort)<br/><br/><br/><br/><br/><br/><br/><br/>"]
-        PM["PrometheusMetrics<br/>(implements MetricsPort)<br/>━━━━━━━━━━━━━━━━━<br/>Histograms, Counters,<br/>Gauges for Prometheus<br/><br/><br/><br/><br/>"]
-        MSA["MetricsServerAdapter<br/>━━━━━━━━━━━━━━━━━<br/>HTTP server for<br/>/metrics endpoint<br/><br/><br/><br/><br/><br/>"]
+        MC["MetricsCollector<br/>(implements MetricsPort)<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        PM["PrometheusMetrics<br/>(implements MetricsPort)<br/>━━━━━━━━━━━━━━━━━<br/>Histograms, Counters,<br/>Gauges for Prometheus<br/><br/><br/><br/><br/>"]:::size-lg
+        MSA["MetricsServerAdapter<br/>━━━━━━━━━━━━━━━━━<br/>HTTP server for<br/>/metrics endpoint<br/><br/><br/><br/><br/><br/>"]:::size-lg
     end
 
     subgraph InfraTracing["Infrastructure: Tracing"]
-        OTT["OpenTelemetryTracer<br/>(implements TracingPort)<br/>━━━━━━━━━━━━━━━━━<br/>OTLP export<br/>Span management<br/><br/><br/><br/><br/>"]
+        OTT["OpenTelemetryTracer<br/>(implements TracingPort)<br/>━━━━━━━━━━━━━━━━━<br/>OTLP export<br/>Span management<br/><br/><br/><br/><br/>"]:::size-lg
     end
 
     subgraph InfraAnomaly["Infrastructure: Anomaly Detection"]
-        AD["AnomalyDetector<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]
-        DS["DetectorStrategy (ABC)<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]
-        ZSD["ZScoreDetector<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]
-
+        AD["AnomalyDetector<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        DS["DetectorStrategy (ABC)<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        ZSD["ZScoreDetector<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
         DS --> ZSD
         AD --> DS
     end
 
     subgraph AdapterMetrics["Adapter-Level Metrics"]
-        AM["AdapterMetrics<br/>━━━━━━━━━━━━━━━━━<br/>provider: str<br/>━━━━━━━━━━━━━━━━━<br/>+ measure_request()<br/>(context manager)<br/>Metrics:<br/>adapter_request_duration_seconds<br/>adapter_requests_total<br/>"]
+        AM["AdapterMetrics<br/>━━━━━━━━━━━━━━━━━<br/>provider: str<br/>━━━━━━━━━━━━━━━━━<br/>+ measure_request()<br/>(context manager)<br/>Metrics:<br/>adapter_request_duration_seconds<br/>adapter_requests_total<br/>"]:::size-lg
     end
 
     subgraph External["External Systems"]
-        PROM["Prometheus Server<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]
-        GRAFANA["Grafana Dashboards<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]
-        OTEL_COL["OpenTelemetry Collector<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]
+        PROM["Prometheus Server<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        GRAFANA["Grafana Dashboards<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        OTEL_COL["OpenTelemetry Collector<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
     end
 
     %% Port implementations

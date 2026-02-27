@@ -58,7 +58,7 @@ class PubMedAdapter:
 
 ```yaml
 pipeline:
-    name: pubmed-publication
+    name: pubmed_publication
     provider: pubmed
     entity: publication
 
@@ -75,7 +75,7 @@ sink:
 
 ## Шаг 3: Реализация пайплайна (Application Layer)
 
-Создайте `src/bioetl/application/pipelines/pubmed-publication.py`.
+Создайте `src/bioetl/application/pipelines/pubmed_publication.py`.
 
 ```python
 from bioetl.application.core.base import BasePipeline
@@ -117,7 +117,7 @@ ProviderRegistry.register(
     ProviderConfig(
         data-source-creator=-create-pubmed-data-source,
         transformers={"publication": PubMedPublicationTransformer},
-        pipelines=["pubmed-publication"],
+        pipelines=["pubmed_publication"],
     ),
 )
 ```
@@ -151,8 +151,8 @@ from bioetl.application.pipelines.pubmed.publication import PubMedPublicationPip
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.infrastructure.schemas.gold import PubMedPublicationGoldSchema
 
-pubmed-publication-factory = GenericPipelineFactory(
-    pipeline-name="pubmed-publication",
+pubmed_publication-factory = GenericPipelineFactory(
+    pipeline-name="pubmed_publication",
     pipeline-class=PubMedPublicationPipeline,
     provider="pubmed",
     transformer-class=PubMedPublicationTransformer,  # DI через GenericPipelineFactory
@@ -161,10 +161,10 @@ pubmed-publication-factory = GenericPipelineFactory(
 
 def register-all-pipelines() -> None:
     # ...
-    PipelineRegistry.register-factory(pubmed-publication-factory)
+    PipelineRegistry.register-factory(pubmed_publication-factory)
 ```
 
-Теперь ваш пайплайн автоматически доступен через CLI по имени `pubmed-publication`.
+Теперь ваш пайплайн автоматически доступен через CLI по имени `pubmed_publication`.
 
 ## Чек-лист
 

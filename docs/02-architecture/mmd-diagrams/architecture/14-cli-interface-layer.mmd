@@ -11,52 +11,51 @@
 %% @uniform width=248 height=72 max_title_len=26 max_desc_lines=2
 graph LR
     subgraph User["User"]
-        TERM["Terminal<br/><br/>"]
+        TERM["Terminal<br/><br/>"]:::size-md
     end
 
     subgraph CLI["CLI Interface (Click)"]
-        MAIN["bioetl<br/>(main group)<br/>"]
-
+        MAIN["bioetl<br/>(main group)<br/>"]:::size-md
         subgraph RunCmds["Run Commands"]
-            RUN["bioetl run<br/>━━━━━━━━━━━━━━━━━<br/>--provider<br/>--entity<br/>--run-type<br/>--limit<br/>--resume<br/>--dry-run"]
-            RUN_COMP["bioetl run-composite<br/>━━━━━━━━━━━━━━━━━<br/>--config<br/>--run-type<br/>--resume"]
+            RUN["bioetl run<br/>━━━━━━━━━━━━━━━━━<br/>--provider<br/>--entity<br/>--run-type<br/>--limit<br/>--resume<br/>--dry-run"]:::size-lg
+            RUN_COMP["bioetl run-composite<br/>━━━━━━━━━━━━━━━━━<br/>--config<br/>--run-type<br/>--resume"]:::size-md
         end
 
         subgraph HealthCmds["Health Commands"]
-            HEALTH["bioetl health<br/>━━━━━━━━━━━━━━━━━<br/>--provider<br/>Check API health"]
+            HEALTH["bioetl health<br/>━━━━━━━━━━━━━━━━━<br/>--provider<br/>Check API health"]:::size-md
         end
 
         subgraph DataCmds["Data Commands"]
-            EXPORT["bioetl export<br/>━━━━━━━━━━━━━━━━━<br/>--table<br/>--format csv"]
-            QUARANTINE["bioetl quarantine<br/>━━━━━━━━━━━━━━━━━<br/>inspect / replay / purge"]
-            CHECKPOINT["bioetl checkpoint<br/>━━━━━━━━━━━━━━━━━<br/>list / delete"]
+            EXPORT["bioetl export<br/>━━━━━━━━━━━━━━━━━<br/>--table<br/>--format csv"]:::size-md
+            QUARANTINE["bioetl quarantine<br/>━━━━━━━━━━━━━━━━━<br/>inspect / replay / purge"]:::size-md
+            CHECKPOINT["bioetl checkpoint<br/>━━━━━━━━━━━━━━━━━<br/>list / delete"]:::size-md
         end
 
         subgraph MaintenanceCmds["Maintenance Commands"]
-            VACUUM["bioetl maintenance vacuum<br/>━━━━━━━━━━━━━━━━━<br/>--table / --all"]
-            ARCHIVE["bioetl maintenance archive<br/>━━━━━━━━━━━━━━━━━<br/>Archive old data"]
+            VACUUM["bioetl maintenance vacuum<br/>━━━━━━━━━━━━━━━━━<br/>--table / --all"]:::size-md
+            ARCHIVE["bioetl maintenance archive<br/>━━━━━━━━━━━━━━━━━<br/>Archive old data"]:::size-md
         end
 
         subgraph ConfigCmds["Config Commands"]
-            CONFIG["bioetl config<br/>━━━━━━━━━━━━━━━━━<br/>list / show"]
+            CONFIG["bioetl config<br/>━━━━━━━━━━━━━━━━━<br/>list / show"]:::size-md
         end
     end
 
     subgraph Composition["Composition Layer"]
-        BOOT["Bootstrap Assembly<br/><br/>"]
-        RF["RunnerFactory<br/><br/>"]
-        DSR["DataSourceRegistry<br/><br/>"]
-        TF["TransformerFactory<br/><br/>"]
+        BOOT["Bootstrap Assembly<br/><br/>"]:::size-md
+        RF["RunnerFactory<br/><br/>"]:::size-md
+        DSR["DataSourceRegistry<br/><br/>"]:::size-md
+        TF["TransformerFactory<br/><br/>"]:::size-md
     end
 
     subgraph Application["Application Layer"]
-        CPR["CompositePipelineRunner<br/><br/>"]
-        HS["HealthService<br/><br/>"]
-        ES["ExportService<br/><br/>"]
-        QS["QuarantineService<br/><br/>"]
-        CS["CheckpointService<br/><br/>"]
-        VS["VacuumService<br/><br/>"]
-        CFGS["ConfigService<br/><br/>"]
+        CPR["CompositePipelineRunner<br/><br/>"]:::size-md
+        HS["HealthService<br/><br/>"]:::size-md
+        ES["ExportService<br/><br/>"]:::size-md
+        QS["QuarantineService<br/><br/>"]:::size-md
+        CS["CheckpointService<br/><br/>"]:::size-md
+        VS["VacuumService<br/><br/>"]:::size-md
+        CFGS["ConfigService<br/><br/>"]:::size-md
     end
 
     %% CLI routing

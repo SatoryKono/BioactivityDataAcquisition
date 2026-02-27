@@ -12,64 +12,64 @@
 graph LR
 %% keep-orphan: DNP, DQMP, FDSP, HCP, MCP, SHP
     subgraph Domain["Domain Ports (Protocols)"]
-        DSP["DataSourcePort"]
-        FDSP["FilterableDataSourcePort"]
-        STP["StoragePort"]
-        LKP["LockPort"]
-        CKP["CheckpointPort"]
-        QRP["QuarantinePort"]
-        ADP["AuditPort"]
-        LGP["LoggerPort"]
-        MTP["MetricsPort"]
-        TRP["TracingPort"]
-        CBP["CircuitBreakerPort"]
-        RLP["RateLimiterPort"]
-        SVP["SilverValidatorPort"]
-        GVP["GoldValidatorPort"]
-        HCP["HealthCheckPort"]
-        PIIP["PiiHasherPort"]
-        MWP["MetadataWriterPort"]
-        MCP["MetadataCoordinatorPort"]
-        DNP["DataNormalizationPort"]
-        DRP["DeltaReaderPort"]
-        IFP["InputFilterPort"]
-        DQMP["DQMonitorPort"]
-        BDQP["BronzeDQAnalyzerPort"]
-        SDQP["SilverDQAnalyzerPort"]
-        GDQP["GoldDQAnalyzerPort"]
-        DQRWP["DQReportWriterPort"]
-        JEP["JsonEncoderPort"]
-        MMP["MemoryMonitorPort"]
-        SHP["ShutdownPort"]
+        DSP["DataSourcePort"]:::size-sm
+        FDSP["FilterableDataSourcePort"]:::size-sm
+        STP["StoragePort"]:::size-sm
+        LKP["LockPort"]:::size-sm
+        CKP["CheckpointPort"]:::size-sm
+        QRP["QuarantinePort"]:::size-sm
+        ADP["AuditPort"]:::size-sm
+        LGP["LoggerPort"]:::size-sm
+        MTP["MetricsPort"]:::size-sm
+        TRP["TracingPort"]:::size-sm
+        CBP["CircuitBreakerPort"]:::size-sm
+        RLP["RateLimiterPort"]:::size-sm
+        SVP["SilverValidatorPort"]:::size-sm
+        GVP["GoldValidatorPort"]:::size-sm
+        HCP["HealthCheckPort"]:::size-sm
+        PIIP["PiiHasherPort"]:::size-sm
+        MWP["MetadataWriterPort"]:::size-sm
+        MCP["MetadataCoordinatorPort"]:::size-sm
+        DNP["DataNormalizationPort"]:::size-sm
+        DRP["DeltaReaderPort"]:::size-sm
+        IFP["InputFilterPort"]:::size-sm
+        DQMP["DQMonitorPort"]:::size-sm
+        BDQP["BronzeDQAnalyzerPort"]:::size-sm
+        SDQP["SilverDQAnalyzerPort"]:::size-sm
+        GDQP["GoldDQAnalyzerPort"]:::size-sm
+        DQRWP["DQReportWriterPort"]:::size-sm
+        JEP["JsonEncoderPort"]:::size-sm
+        MMP["MemoryMonitorPort"]:::size-sm
+        SHP["ShutdownPort"]:::size-sm
     end
 
     subgraph Infrastructure["Infrastructure Implementations"]
-        CA["ChemblAdapter"]
-        BW["BronzeWriter"]
-        ML["MemoryLock"]
-        LC["LocalCheckpoint"]
-        UQ["UnifiedQuarantine"]
-        FA["FileAuditAdapter"]
-        UL["UnifiedLogger"]
-        MCO["MetricsCollector"]
-        OTT["OpenTelemetryTracer"]
-        CB["CircuitBreaker"]
-        TB_I["TokenBucket"]
-        PSV["PanderaSilverValidator"]
-        PGV["PanderaGoldValidator"]
-        SPH["Sha256PiiHasher"]
-        MW_I["MetadataWriter"]
-        DR_I["DeltaReader"]
-        CSVR["CsvFilterReader"]
-        DQRW_I["DQReportWriter"]
-        SJE["StdLibJsonEncoder"]
-        MMGR["MemoryMonitor"]
+        CA["ChemblAdapter"]:::size-sm
+        BW["BronzeWriter"]:::size-sm
+        ML["MemoryLock"]:::size-sm
+        LC["LocalCheckpoint"]:::size-sm
+        UQ["UnifiedQuarantine"]:::size-sm
+        FA["FileAuditAdapter"]:::size-sm
+        UL["UnifiedLogger"]:::size-sm
+        MCO["MetricsCollector"]:::size-sm
+        OTT["OpenTelemetryTracer"]:::size-sm
+        CB["CircuitBreaker"]:::size-sm
+        TB_I["TokenBucket"]:::size-sm
+        PSV["PanderaSilverValidator"]:::size-sm
+        PGV["PanderaGoldValidator"]:::size-sm
+        SPH["Sha256PiiHasher"]:::size-sm
+        MW_I["MetadataWriter"]:::size-sm
+        DR_I["DeltaReader"]:::size-sm
+        CSVR["CsvFilterReader"]:::size-sm
+        DQRW_I["DQReportWriter"]:::size-sm
+        SJE["StdLibJsonEncoder"]:::size-sm
+        MMGR["MemoryMonitor"]:::size-sm
     end
 
     subgraph Application["Application Implementations"]
-        BDA["BronzeDQAnalyzer"]
-        SDA["SilverDQAnalyzer"]
-        GDA["GoldDQAnalyzer"]
+        BDA["BronzeDQAnalyzer"]:::size-sm
+        SDA["SilverDQAnalyzer"]:::size-sm
+        GDA["GoldDQAnalyzer"]:::size-sm
     end
 
     %% DataSource implementations

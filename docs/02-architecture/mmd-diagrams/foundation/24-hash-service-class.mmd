@@ -9,7 +9,7 @@
 %% @level   Mixed (System / Component / Class)
 
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
-%% @uniform class width=480 height=200 max_title_len=18 max_desc_lines=9
+%% @uniform class width=184 height=198 max_title_len=18 max_desc_lines=9
 classDiagram
     direction TB
 
@@ -32,6 +32,9 @@ classDiagram
         +float_precision: int = 10
         +date_format: str = "YYYY-MM-DD"
         +string_transform: str = "strip"
+        
+        
+        
     }
 
     class ContentHash {
@@ -39,11 +42,23 @@ classDiagram
         +value: str
         +__len__() int
         +__eq__(other) bool
+        
+        
+        
+        
+        
     }
 
     class BaseTransformer {
         #compute_content_hash(provider: str, data: dict) ContentHash
         #serialize_json(value: Any) str
+        
+        
+        
+        
+        
+        
+        
     }
 
     %% Relationships
@@ -64,6 +79,8 @@ classDiagram
         4_Serialize: canonical JSON
         5_Hash: SHA256
         6_Output: ContentHash 64 hex chars
+        
+        
     }
 
     ContentHashService --> HashFlow : implements

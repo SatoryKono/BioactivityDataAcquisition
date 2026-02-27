@@ -8,7 +8,7 @@
 
 | Parameter | Value |
 |-----------|-------|
-| **Pipeline ID** | `chembl-tissue` |
+| **Pipeline ID** | `chembl_tissue` |
 | **Provider** | ChEMBL (EBI) |
 | **Entity** | tissue |
 | **Source API** | ChEMBL REST API (`/tissue`) |
@@ -28,7 +28,7 @@ Tissues represent anatomical locations and biological samples used in ChEMBL ass
 ### 2.2. Use Cases
 
 1. **Tissue-Specific Analysis**: Filter activities and assays by tissue type (e.g., liver, brain).
-2. **Composite Assay Enrichment**: Enriches composite-assay pipeline with tissue metadata via `tissue-id` FK.
+2. **Composite Assay Enrichment**: Enriches composite_assay pipeline with tissue metadata via `tissue-id` FK.
 3. **Ontology Mapping**: Cross-reference tissues with external ontologies (UBERON, BTO, EFO).
 
 ---
@@ -73,14 +73,14 @@ Tissues represent anatomical locations and biological samples used in ChEMBL ass
 ## 5. Pipeline Configuration
 
 ```yaml
-pipeline-name: chembl-tissue
+pipeline-name: chembl_tissue
 provider: chembl
 entity-type: tissue
 version: "1.0.0"
 
 primary-keys: ["tissue-id"]
-silver-table: "chembl-tissue"
-gold-table: "chembl-tissue"
+silver-table: "chembl_tissue"
+gold-table: "chembl_tissue"
 ```
 
 ---
@@ -89,13 +89,13 @@ gold-table: "chembl-tissue"
 
 ```bash
 # Incremental load
-bioetl run chembl-tissue
+bioetl run chembl_tissue
 
 # With record limit
-bioetl run chembl-tissue --limit 500
+bioetl run chembl_tissue --limit 500
 
 # Full rebuild
-bioetl run chembl-tissue --run-type rebuild
+bioetl run chembl_tissue --run-type rebuild
 ```
 
 ---

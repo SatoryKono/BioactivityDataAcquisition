@@ -28,7 +28,7 @@
 
 **Связанные ADR:**
 - [ADR-002](../02-architecture/decisions/ADR-002-medallion-architecture.md) — Hexagonal Architecture (validation services в application layer)
-- [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md) — Medallion Architecture (Bronze → Silver → Gold)
+- [ADR-014](../../02-architecture/decisions/ADR-014-deterministic-writes.md) — Medallion Architecture (Bronze → Silver → Gold)
 - [ADR-027](../02-architecture/decisions/ADR-027-dq-rules-externalization.md) — Silver Layer DQ Framework (`-dq-warn`, `-dq-error`)
 
 ---

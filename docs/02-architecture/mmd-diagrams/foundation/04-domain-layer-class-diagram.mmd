@@ -8,7 +8,7 @@
 %% @type    classDiagram
 %% @level   Mixed (System / Component / Class)
 
-%% @uniform class width=464 groups=4 width_strategy=group
+%% @uniform class width=232 height=198 max_title_len=24 max_desc_lines=9
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 classDiagram
     direction TB
@@ -242,6 +242,8 @@ classDiagram
             +dq_config: DQConfig
             
             
+            
+            
         }
 
         class RuntimeConfig {
@@ -252,6 +254,8 @@ classDiagram
             +dry_run: bool
             +filters: FilterConfig?
             
+            
+            
         }
 
         class DQConfig {
@@ -259,6 +263,8 @@ classDiagram
             +soft_fail_threshold: float = 0.05
             +hard_fail_threshold: float = 0.20
             +strict_validation: bool = False
+            
+            
             
             
             
@@ -272,6 +278,8 @@ classDiagram
             +silver_write_mode: SilverWriteMode
             +gold_write_mode: GoldWriteMode
             +partition_cols: tuple~str~
+            
+            
         }
     }
 
@@ -281,6 +289,11 @@ classDiagram
             INCREMENTAL
             BACKFILL
             REBUILD
+            
+            
+            
+            
+            
         }
 
         class SilverWriteMode {
@@ -288,6 +301,11 @@ classDiagram
             MERGE
             APPEND
             DELETE
+            
+            
+            
+            
+            
         }
 
         class GoldWriteMode {
@@ -295,6 +313,11 @@ classDiagram
             APPEND
             OVERWRITE
             SCD2
+            
+            
+            
+            
+            
         }
 
         class CircuitState {
@@ -302,6 +325,11 @@ classDiagram
             CLOSED = 0
             HALF_OPEN = 1
             OPEN = 2
+            
+            
+            
+            
+            
         }
     }
 

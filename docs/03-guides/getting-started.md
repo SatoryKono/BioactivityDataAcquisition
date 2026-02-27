@@ -94,7 +94,7 @@ source .venv/bin/activate  # Linux/macOS
 # .venv\Scripts\activate   # Windows
 
 # Run the pipeline
-bioetl run --pipeline chembl-activity --limit 100
+bioetl run --pipeline chembl_activity --limit 100
 ```
 
 This command will:
@@ -121,7 +121,7 @@ data/
     │   └── chembl/activity/
     │       └── -delta-log/
     ├── checkpoints/
-    │   └── chembl-activity.json
+    │   └── chembl_activity.json
     └── quarantine/
         └── chembl/activity/
 ```

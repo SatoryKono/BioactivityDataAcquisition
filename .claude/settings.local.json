@@ -210,7 +210,8 @@
       "Bash(__NEW_LINE_46088dbc2e0c8d2c__ for:*)",
       "Bash(__NEW_LINE_a82a67d7db100db8__ for:*)",
       "Bash(__NEW_LINE_6f3d58c2d62d5327__:*)",
-      "Bash(npx:*)"
+      "Bash(npx:*)",
+      "Bash(mkdir:*)"
     ]
   },
   "enabledPlugins": {

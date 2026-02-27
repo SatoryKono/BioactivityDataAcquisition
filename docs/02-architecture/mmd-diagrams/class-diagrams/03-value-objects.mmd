@@ -5,7 +5,7 @@
 %% @date    2026-02-24
 %% @type    classDiagram
 %% @level   Class / Interface
-%% @uniform class width=248 height=272 max_title_len=17 max_desc_lines=13
+%% @uniform class width=176 height=240 max_title_len=17 max_desc_lines=13
 
 classDiagram
     direction TB
@@ -20,6 +20,9 @@ classDiagram
         +checksum_blake2: str
         +compression_ratio: float
         +exists() bool
+        
+        
+        
     }
 
     class SilverWriteResult {
@@ -28,6 +31,14 @@ classDiagram
         +table_path: str
         +delta_version: int
         +record_count: int
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class RunContext {
@@ -36,6 +47,14 @@ classDiagram
         +run_type: RunType
         +started_at: datetime
         +checkpoint_offset: int | None
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class HealthCheckResult {
@@ -47,6 +66,11 @@ classDiagram
         +last_error: str | None
         +consecutive_failures: int
         +checked_at: datetime
+        
+        
+        
+        
+        
     }
 
     class FencingToken {
@@ -55,6 +79,14 @@ classDiagram
         +key: str
         +owner_id: RunID
         +issued_at: float
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class LockContext {
@@ -67,6 +99,10 @@ classDiagram
         +create() LockContext
         +is_valid() bool
         +matches_table(table) bool
+        
+        
+        
+        
     }
 
     class AuditEntry {
@@ -78,6 +114,11 @@ classDiagram
         +operation: AuditOperation
         +records_count: int
         +metadata: dict
+        
+        
+        
+        
+        
     }
 
     class FilterLoadResult {
@@ -90,6 +131,10 @@ classDiagram
         +column_ids: dict
         +valid_combinations: frozenset
         +filter_fields: list~str~
+        
+        
+        
+        
     }
 
     class MemoryStats {
@@ -97,6 +142,15 @@ classDiagram
         +rss_bytes: int
         +vms_bytes: int
         +percent: float
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class SourceMetadata {
@@ -104,6 +158,15 @@ classDiagram
         +type: str
         +api_endpoint: str | None
         +request_details: dict | None
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class DQMetrics {
@@ -112,6 +175,14 @@ classDiagram
         +duplicate_rate: float
         +schema_violations: int
         +custom_metrics: dict
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class DQResult {
@@ -120,6 +191,14 @@ classDiagram
         +error_rate: float
         +metrics: DQMetrics
         +anomalies: list
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class EnrichmentResult {
@@ -164,6 +243,15 @@ classDiagram
         BRONZE
         SILVER
         GOLD
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
     class AuditOperation {
         <<StrEnum>>
@@ -172,12 +260,28 @@ classDiagram
         APPEND
         DELETE
         OVERWRITE
+        
+        
+        
+        
+        
+        
+        
     }
     class HealthStatus {
         <<StrEnum>>
         HEALTHY
         DEGRADED
         UNHEALTHY
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
     class EnrichmentStatus {
         <<StrEnum>>
@@ -187,4 +291,10 @@ classDiagram
         SKIPPED
         NOT_RUN
         TIMEOUT
+        
+        
+        
+        
+        
+        
     }

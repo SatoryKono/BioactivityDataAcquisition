@@ -1,6 +1,6 @@
 # Пайплайн: ChEMBL Target
 
-**Имя пайплайна:** `chembl-target`
+**Имя пайплайна:** `chembl_target`
 **Провайдер:** `chembl`
 **Сущность:** `target`
 **Версия схемы:** 1.2.0
@@ -87,13 +87,13 @@ entity-id = f"chembl:{target-chembl-id}"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl-target
+bioetl run chembl_target
 
 # С ограничением
-bioetl run chembl-target --limit 500
+bioetl run chembl_target --limit 500
 
 # Полная перезагрузка
-bioetl run chembl-target --run-type rebuild
+bioetl run chembl_target --run-type rebuild
 ```
 
 ---

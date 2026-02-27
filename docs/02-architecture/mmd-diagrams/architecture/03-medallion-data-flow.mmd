@@ -11,59 +11,59 @@
 %% @uniform width=200 height=56 max_title_len=20 max_desc_lines=1
 graph LR
     subgraph Sources["External Data Sources"]
-        API7["Semantic Scholar API<br/>"]
+        API7["Semantic Scholar API<br/>"]:::size-sm
     end
 
     subgraph Ingestion["Data Ingestion"]
-        DS["DataSourcePort<br/>fetch() / fetch_filtered()"]
-        RL["RateLimiter<br/>(TokenBucket)"]
-        CB["CircuitBreaker<br/>"]
-        RETRY["Retry Logic<br/>"]
+        DS["DataSourcePort<br/>fetch() / fetch_filtered()"]:::size-sm
+        RL["RateLimiter<br/>(TokenBucket)"]:::size-sm
+        CB["CircuitBreaker<br/>"]:::size-sm
+        RETRY["Retry Logic<br/>"]:::size-sm
     end
 
     subgraph Bronze["Bronze Layer (Raw)"]
-        BW["BronzeWriter<br/>"]
-        BJSONL["JSONL + zstd<br/>compressed files"]
-        BMETA["_metadata.yaml<br/>sidecar"]
-        BAUDIT["Audit Log<br/>"]
+        BW["BronzeWriter<br/>"]:::size-sm
+        BJSONL["JSONL + zstd<br/>compressed files"]:::size-sm
+        BMETA["_metadata.yaml<br/>sidecar"]:::size-sm
+        BAUDIT["Audit Log<br/>"]:::size-sm
     end
 
     subgraph Transform["Transformation"]
-        BT["BaseTransformer<br/>(Template Method)"]
-        NORM["Normalization<br/>(text, units, dates)"]
-        HASH["Identity Service<br/>(entity_id + content_hash)"]
-        PII["PII Hasher<br/>(SHA256 + salt)"]
-        DQ_CHECK["DQ Thresholds<br/>Check"]
+        BT["BaseTransformer<br/>(Template Method)"]:::size-sm
+        NORM["Normalization<br/>(text, units, dates)"]:::size-sm
+        HASH["Identity Service<br/>(entity_id + content_hash)"]:::size-sm
+        PII["PII Hasher<br/>(SHA256 + salt)"]:::size-sm
+        DQ_CHECK["DQ Thresholds<br/>Check"]:::size-sm
     end
 
     subgraph Silver["Silver Layer (Normalized)"]
-        SW["SilverWriter<br/>(Delta Lake)"]
-        DELTA_S["Delta Table<br/>(merge/upsert)"]
-        SV["Silver Validator<br/>(Pandera)"]
-        SMETA["_metadata.yaml<br/>"]
+        SW["SilverWriter<br/>(Delta Lake)"]:::size-sm
+        DELTA_S["Delta Table<br/>(merge/upsert)"]:::size-sm
+        SV["Silver Validator<br/>(Pandera)"]:::size-sm
+        SMETA["_metadata.yaml<br/>"]:::size-sm
     end
 
     subgraph GoldTransform["Gold Transformation"]
-        GFILT["Gold Filters<br/>"]
-        GMAP["Field Mapping<br/>(exclude fields)"]
-        GV["Gold Validator<br/>(Pandera strict)"]
+        GFILT["Gold Filters<br/>"]:::size-sm
+        GMAP["Field Mapping<br/>(exclude fields)"]:::size-sm
+        GV["Gold Validator<br/>(Pandera strict)"]:::size-sm
     end
 
     subgraph Gold["Gold Layer (Business-Ready)"]
-        GW["GoldWriter<br/>(Delta Lake)"]
-        DELTA_G["Delta Table<br/>(validated, typed)"]
-        GMETA["_metadata.yaml<br/>"]
+        GW["GoldWriter<br/>(Delta Lake)"]:::size-sm
+        DELTA_G["Delta Table<br/>(validated, typed)"]:::size-sm
+        GMETA["_metadata.yaml<br/>"]:::size-sm
     end
 
     subgraph Quarantine["Quarantine"]
-        QM["QuarantineManager<br/>"]
-        QS["Quarantine Store<br/>"]
+        QM["QuarantineManager<br/>"]:::size-sm
+        QS["Quarantine Store<br/>"]:::size-sm
     end
 
     subgraph DQ["Data Quality Reports"]
-        DQ_B["Bronze DQ<br/>Analyzer"]
-        DQ_S["Silver DQ<br/>Analyzer"]
-        DQ_G["Gold DQ<br/>Analyzer"]
+        DQ_B["Bronze DQ<br/>Analyzer"]:::size-sm
+        DQ_S["Silver DQ<br/>Analyzer"]:::size-sm
+        DQ_G["Gold DQ<br/>Analyzer"]:::size-sm
     end
 
     %% Flow

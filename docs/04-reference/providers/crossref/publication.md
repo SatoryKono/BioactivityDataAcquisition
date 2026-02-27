@@ -1,6 +1,6 @@
 # Пайплайн: CrossRef Publication
 
-**Имя пайплайна:** `crossref-publication`
+**Имя пайплайна:** `crossref_publication`
 **Провайдер:** `crossref`
 **Сущность:** `publication` (CrossRef API использует термин `work`, но `entity-type` в конфигурации — `publication`, унифицирован с другими провайдерами)
 **Версия схемы:** 1.2.0
@@ -149,16 +149,16 @@ input-filter:
 
 ```bash
 # Базовый запуск с файлом DOI
-bioetl run crossref-publication
+bioetl run crossref_publication
 
 # С ограничением количества записей
-bioetl run crossref-publication --limit 100
+bioetl run crossref_publication --limit 100
 
 # Проверка конфигурации без выполнения
-bioetl run crossref-publication --dry-run
+bioetl run crossref_publication --dry-run
 
 # Полная перезагрузка
-bioetl run crossref-publication --run-type rebuild
+bioetl run crossref_publication --run-type rebuild
 ```
 
 ### Подготовка входных данных

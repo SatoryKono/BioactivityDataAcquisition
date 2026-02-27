@@ -29,7 +29,7 @@ security scanning, release process, and issue/PR workflows.
 **Types:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `ci`
 
 **Examples:**
-- `feat/pubchem-compound-pipeline`
+- `feat/pubchem_compound-pipeline`
 - `fix/chembl-rate-limit-429`
 - `refactor/storage-clear-contract`
 

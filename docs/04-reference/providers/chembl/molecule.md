@@ -1,6 +1,6 @@
 # Пайплайн: ChEMBL Molecule
 
-**Имя пайплайна:** `chembl-molecule`
+**Имя пайплайна:** `chembl_molecule`
 **Провайдер:** `chembl`
 **Сущность:** `molecule`
 **Версия схемы:** 1.2.0
@@ -96,13 +96,13 @@ entity-id = f"chembl:{molecule-chembl-id}"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl-molecule
+bioetl run chembl_molecule
 
 # С ограничением
-bioetl run chembl-molecule --limit 1000
+bioetl run chembl_molecule --limit 1000
 
 # Полная перезагрузка
-bioetl run chembl-molecule --run-type rebuild
+bioetl run chembl_molecule --run-type rebuild
 ```
 
 ---

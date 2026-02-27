@@ -214,7 +214,7 @@ For unfixable records, quarantine is the correct behavior:
 
 ```bash
 # View quarantine statistics
-bioetl quarantine stats --pipeline chembl-activity
+bioetl quarantine stats --pipeline chembl_activity
 
 # Purge old quarantine (> 30 days)
 bioetl quarantine purge --pipeline <pipeline-name> --older-than-days 30

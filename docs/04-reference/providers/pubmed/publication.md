@@ -1,6 +1,6 @@
 # Пайплайн: PubMed Publication
 
-**Имя пайплайна:** `pubmed-publication`
+**Имя пайплайна:** `pubmed_publication`
 **Провайдер:** `pubmed`
 **Сущность:** `publication`
 **Версия схемы:** 1.0.0
@@ -94,13 +94,13 @@ PubMed API имеет строгие лимиты:
 
 ```bash
 # Инкрементальная загрузка
-bioetl run pubmed-publication
+bioetl run pubmed_publication
 
 # С ограничением
-bioetl run pubmed-publication --limit 100
+bioetl run pubmed_publication --limit 100
 
 # Полная перезагрузка
-bioetl run pubmed-publication --run-type rebuild
+bioetl run pubmed_publication --run-type rebuild
 ```
 
 ---

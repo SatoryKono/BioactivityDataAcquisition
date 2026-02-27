@@ -11,54 +11,54 @@
 %% @uniform width=192 height=108 max_title_len=19 max_desc_lines=4
 graph TB
     subgraph Entry["Entry Points"]
-        CLI["CLI Commands<br/>(Click)<br/><br/><br/>"]
-        HTTP["HTTP Interface<br/><br/><br/><br/>"]
+        CLI["CLI Commands<br/>(Click)<br/><br/><br/>"]:::size-md
+        HTTP["HTTP Interface<br/><br/><br/><br/>"]:::size-md
     end
 
     subgraph Composition["composition layer"]
         subgraph Bootstrap["Bootstrap Assembly"]
-            RA["RuntimeAssembly<br/>━━━━━━━━━━━━━━━━━<br/>Central DI wiring point.<br/>Creates all infrastructure<br/>and application components."]
-            RBA["RunnerBootstrap<br/>━━━━━━━━━━━━━━━━━<br/>+ assemble_runner()<br/><br/>"]
-            SBA["StorageBootstrap<br/>━━━━━━━━━━━━━━━━━<br/>+ assemble_storage()<br/><br/>"]
-            HBA["HealthBootstrap<br/>━━━━━━━━━━━━━━━━━<br/>+ assemble_health()<br/><br/>"]
-            CBA["CheckpointBootstrap<br/>━━━━━━━━━━━━━━━━━<br/>+ assemble_checkpoint()<br/><br/>"]
-            LBA["LockBootstrap<br/>━━━━━━━━━━━━━━━━━<br/>+ assemble_lock()<br/><br/>"]
+            RA["RuntimeAssembly<br/>━━━━━━━━━━━━━━━━━<br/>Central DI wiring point.<br/>Creates all infrastructure<br/>and application components."]:::size-md
+            RBA["RunnerBootstrap<br/>━━━━━━━━━━━━━━━━━<br/>+ assemble_runner()<br/><br/>"]:::size-md
+            SBA["StorageBootstrap<br/>━━━━━━━━━━━━━━━━━<br/>+ assemble_storage()<br/><br/>"]:::size-md
+            HBA["HealthBootstrap<br/>━━━━━━━━━━━━━━━━━<br/>+ assemble_health()<br/><br/>"]:::size-md
+            CBA["CheckpointBootstrap<br/>━━━━━━━━━━━━━━━━━<br/>+ assemble_checkpoint()<br/><br/>"]:::size-md
+            LBA["LockBootstrap<br/>━━━━━━━━━━━━━━━━━<br/>+ assemble_lock()<br/><br/>"]:::size-md
         end
 
         subgraph Factories["Factories"]
-            DSR["DataSourceRegistry<br/>━━━━━━━━━━━━━━━━━<br/>Maps provider+entity →<br/>DataSourcePort factory<br/>"]
-            TF["TransformerFactory<br/>━━━━━━━━━━━━━━━━━<br/>Maps provider+entity →<br/>BaseTransformer factory<br/>"]
-            RF["RunnerFactory<br/>━━━━━━━━━━━━━━━━━<br/>+ create_runner()<br/><br/>"]
-            DQF["DQFactory<br/>━━━━━━━━━━━━━━━━━<br/>+ create_dq_analyzers()<br/><br/>"]
+            DSR["DataSourceRegistry<br/>━━━━━━━━━━━━━━━━━<br/>Maps provider+entity →<br/>DataSourcePort factory<br/>"]:::size-md
+            TF["TransformerFactory<br/>━━━━━━━━━━━━━━━━━<br/>Maps provider+entity →<br/>BaseTransformer factory<br/>"]:::size-md
+            RF["RunnerFactory<br/>━━━━━━━━━━━━━━━━━<br/>+ create_runner()<br/><br/>"]:::size-md
+            DQF["DQFactory<br/>━━━━━━━━━━━━━━━━━<br/>+ create_dq_analyzers()<br/><br/>"]:::size-md
         end
 
         subgraph Providers["Provider Registry"]
-            PR["ProviderRegistry<br/>━━━━━━━━━━━━━━━━━<br/>Registers all provider<br/>pipelines and their<br/>extraction params"]
-            EP["ExtractionParams<br/>Registration<br/><br/><br/>"]
+            PR["ProviderRegistry<br/>━━━━━━━━━━━━━━━━━<br/>Registers all provider<br/>pipelines and their<br/>extraction params"]:::size-md
+            EP["ExtractionParams<br/>Registration<br/><br/><br/>"]:::size-md
         end
 
         subgraph Builders["Runtime Builders"]
-            RB["RunnerBuilder<br/>━━━━━━━━━━━━━━━━━<br/>Fluent builder for<br/>PipelineRunner creation<br/>"]
+            RB["RunnerBuilder<br/>━━━━━━━━━━━━━━━━━<br/>Fluent builder for<br/>PipelineRunner creation<br/>"]:::size-md
         end
     end
 
     subgraph Created["Created Components"]
         subgraph InfraCreated["Infrastructure"]
-            ADAPTER["Provider Adapter<br/>(DataSourcePort)<br/><br/><br/>"]
-            STORAGE["BronzeWriter +<br/>SilverWriter +<br/>GoldWriter<br/><br/>"]
-            LOGGER["UnifiedLogger<br/>(LoggerPort)<br/><br/><br/>"]
-            METRICS["PrometheusMetrics<br/>(MetricsPort)<br/><br/><br/>"]
-            TRACER["OpenTelemetryTracer<br/>(TracingPort)<br/><br/><br/>"]
-            LOCK["MemoryLock<br/>(LockPort)<br/><br/><br/>"]
-            CHKPT["LocalCheckpoint<br/>(CheckpointPort)<br/><br/><br/>"]
-            QUAR["UnifiedQuarantine<br/>(QuarantinePort)<br/><br/><br/>"]
+            ADAPTER["Provider Adapter<br/>(DataSourcePort)<br/><br/><br/>"]:::size-md
+            STORAGE["BronzeWriter +<br/>SilverWriter +<br/>GoldWriter<br/><br/>"]:::size-md
+            LOGGER["UnifiedLogger<br/>(LoggerPort)<br/><br/><br/>"]:::size-md
+            METRICS["PrometheusMetrics<br/>(MetricsPort)<br/><br/><br/>"]:::size-md
+            TRACER["OpenTelemetryTracer<br/>(TracingPort)<br/><br/><br/>"]:::size-md
+            LOCK["MemoryLock<br/>(LockPort)<br/><br/><br/>"]:::size-md
+            CHKPT["LocalCheckpoint<br/>(CheckpointPort)<br/><br/><br/>"]:::size-md
+            QUAR["UnifiedQuarantine<br/>(QuarantinePort)<br/><br/><br/>"]:::size-md
         end
 
         subgraph AppCreated["Application"]
-            PS["PipelineServices<br/>(frozen dataclass<br/>with all injected ports)<br/><br/>"]
-            RUNNER["PipelineRunner<br/><br/><br/><br/>"]
-            TRANSFORMER["BaseTransformer<br/>(provider-specific)<br/><br/><br/>"]
-            OBSERVER["PipelineObserver<br/><br/><br/><br/>"]
+            PS["PipelineServices<br/>(frozen dataclass<br/>with all injected ports)<br/><br/>"]:::size-md
+            RUNNER["PipelineRunner<br/><br/><br/><br/>"]:::size-md
+            TRANSFORMER["BaseTransformer<br/>(provider-specific)<br/><br/><br/>"]:::size-md
+            OBSERVER["PipelineObserver<br/><br/><br/><br/>"]:::size-md
         end
     end
 

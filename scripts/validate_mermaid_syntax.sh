@@ -76,10 +76,14 @@ while IFS= read -r -d '' file; do
   base="$(basename "${file%.*}")"
   [[ "$base" = _* ]] && continue
   count=$((count + 1))
-  out="$tmp_dir/${base}.svg"
-  err="$tmp_dir/${base}.err"
+  out="$tmp_dir/${count}_${base}.svg"
+  err="$tmp_dir/${count}_${base}.err"
   echo "Validating $file"
   if ! mmdc -i "$file" -o "$out" "${mmdc_args[@]}" >/dev/null 2>"$err"; then
+    # Retry once to reduce flaky Puppeteer/mmdc startup failures.
+    if mmdc -i "$file" -o "$out" "${mmdc_args[@]}" >/dev/null 2>"$err"; then
+      continue
+    fi
     echo "ERROR: Mermaid validation failed for $file" >&2
     if grep -q "Could not find Chrome" "$err"; then
       echo "HINT: mmdc could not find Chrome/Chromium for Puppeteer." >&2

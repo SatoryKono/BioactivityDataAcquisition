@@ -10,7 +10,7 @@ Merges publication data from multiple providers into a unified composite publica
 
 | Field | Value |
 |-------|-------|
-| Pipeline ID | `composite-publication` |
+| Pipeline ID | `composite_publication` |
 | Provider | `composite` |
 | Entity | `publication` |
 | Version | `1.2.0` |
@@ -18,8 +18,8 @@ Merges publication data from multiple providers into a unified composite publica
 
 ## Seed and Enrichers
 
-- **Seed**: `chembl-publication`
-- **Enrichers**: `crossref-publication`, `openalex-publication`, `pubmed-publication`, `semanticscholar-publication`
+- **Seed**: `chembl_publication`
+- **Enrichers**: `crossref_publication`, `openalex_publication`, `pubmed_publication`, `semanticscholar_publication`
 - **Dependencies**: none
 
 ## Outputs

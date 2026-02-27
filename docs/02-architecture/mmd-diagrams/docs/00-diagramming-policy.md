@@ -106,7 +106,7 @@ Use for:
 actor User
 participant CLI
 participant Pipeline
-User -> CLI: run --pipeline chembl-activity
+User -> CLI: run --pipeline chembl_activity
 CLI -> Pipeline: execute()
 @enduml
 ```
@@ -250,7 +250,7 @@ participant Worker
 participant MemoryLock
 participant DeltaLake
 
-Worker -> MemoryLock: acquire lock:chembl-activity (TTL 90s)
+Worker -> MemoryLock: acquire lock:chembl_activity (TTL 90s)
 MemoryLock --> Worker: OK
 
 loop Every 30s (heartbeat)

@@ -67,7 +67,7 @@ composition/bootstrap/
 
 **Расположение:** `src/bioetl/composition/factories/data-source-factory.py:100` (DataSourceRegistry) и `src/bioetl/composition/providers/` (ProviderRegistry).
 
-Централизованная регистрация всех провайдеров данных (8 провайдеров, включая `uniprot-idmapping`):
+Централизованная регистрация всех провайдеров данных (8 провайдеров, включая `uniprot_idmapping`):
 
 - **`ProviderRegistry`**: Главный реестр провайдеров. Хранит конфигурацию каждого провайдера (data source creator, transformer class, pipelines).
 - **`DataSourceRegistry`**: Фасад для backward compatibility. Делегирует создание в `ProviderRegistry`.
@@ -83,14 +83,14 @@ data-source = creator(settings, config, logger)
 data-source = ProviderRegistry.create-data-source("chembl", settings, config, logger)
 ```
 
-**Зарегистрированные провайдеры (8 шт, включая uniprot-idmapping):**
+**Зарегистрированные провайдеры (8 шт, включая uniprot_idmapping):**
 
 | Provider          | Data Sources           | Pipelines                                                                                                                                                                                                  | Rate Limit   |
 | ----------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
 | chembl            | ChemblAdapter          | activity, assay, assay-parameters, cell-line, compound-record, molecule, target, target-component, protein-class, publication, publication-similarity, publication-term, tissue, subcellular-fraction (14) | None         |
 | pubchem           | PubChemAdapter         | compound                                                                                                                                                                                                   | 5 req/sec    |
 | uniprot           | UniProtAdapter         | protein                                                                                                                                                                                                    | 100 req/sec  |
-| uniprot-idmapping | IDMappingDataSource    | id-mapping                                                                                                                                                                                                 | —            |
+| uniprot_idmapping | IDMappingDataSource    | id-mapping                                                                                                                                                                                                 | —            |
 | pubmed            | PubMedAdapter          | publications                                                                                                                                                                                               | 3 req/sec    |
 | crossref          | CrossRefAdapter        | publication                                                                                                                                                                                                | Polite pool  |
 | openalex          | OpenAlexAdapter        | publication                                                                                                                                                                                                | 10 req/sec   |
@@ -98,7 +98,7 @@ data-source = ProviderRegistry.create-data-source("chembl", settings, config, lo
 
 ### 2.3. `registry.py` — Реестр пайплайнов
 
-Предоставляет механизмы для динамического поиска и регистрации пайплайнов. Это позволяет CLI находить доступные пайплайны по их именам (например, `chembl-activity`).
+Предоставляет механизмы для динамического поиска и регистрации пайплайнов. Это позволяет CLI находить доступные пайплайны по их именам (например, `chembl_activity`).
 
 ## 3. Принципы Работы
 

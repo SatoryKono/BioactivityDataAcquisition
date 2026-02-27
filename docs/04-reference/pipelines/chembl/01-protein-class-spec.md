@@ -8,7 +8,7 @@
 
 | Parameter        | Value                                                 |
 | ---------------- | ----------------------------------------------------- |
-| **Pipeline ID**  | `chembl-protein-class`                                |
+| **Pipeline ID**  | `chembl_protein_class`                                |
 | **Provider**     | ChEMBL (EBI)                                          |
 | **Entity**       | protein-class                                         |
 | **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/protein-class` |
@@ -353,8 +353,8 @@ Mode: Overwrite (reference table)
 
 | Consumer                  | Impact                                   |
 | ------------------------- | ---------------------------------------- |
-| `chembl-target-component` | FK reference for protein classifications |
-| `chembl-target`           | Enrichment with protein class hierarchy  |
+| `chembl_target_component` | FK reference for protein classifications |
+| `chembl_target`           | Enrichment with protein class hierarchy  |
 | Analytics dashboards      | Target class distribution reports        |
 
 ----------------------------------------------------------------------
@@ -364,15 +364,15 @@ Mode: Overwrite (reference table)
 ```yaml
 # configs/entities/chembl/protein-class.yaml
 
-pipeline-name: chembl-protein-class
+pipeline-name: chembl_protein_class
 provider: chembl
 entity-type: protein-class
 version: "1.2.0"
 description: "ChEMBL Protein Classification hierarchy"
 
 primary-keys: ["protein-class-id"]
-silver-table: chembl-protein-class
-gold-table: chembl-protein-class
+silver-table: chembl_protein_class
+gold-table: chembl_protein_class
 
 source-file: ../../sources/chembl.yaml
 batch-size: 500

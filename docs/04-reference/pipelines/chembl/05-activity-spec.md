@@ -8,7 +8,7 @@
 
 | Parameter        | Value                                            |
 | ---------------- | ------------------------------------------------ |
-| **Pipeline ID**  | `chembl-activity`                                |
+| **Pipeline ID**  | `chembl_activity`                                |
 | **Provider**     | ChEMBL (EBI)                                     |
 | **Entity**       | activity                                         |
 | **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/activity` |
@@ -399,9 +399,9 @@ Mode: Overwrite
 | Dependency        | Type     | Required    |
 | ----------------- | -------- | ----------- |
 | ChEMBL API        | API      | Yes         |
-| `chembl-assay`    | Pipeline | Recommended |
-| `chembl-molecule` | Pipeline | Recommended |
-| `chembl-target`   | Pipeline | Recommended |
+| `chembl_assay`    | Pipeline | Recommended |
+| `chembl_molecule` | Pipeline | Recommended |
+| `chembl_target`   | Pipeline | Recommended |
 
 ### 7.2. Downstream
 
@@ -418,14 +418,14 @@ Mode: Overwrite
 ```yaml
 # configs/entities/chembl/activity.yaml
 
-pipeline-name: chembl-activity
+pipeline-name: chembl_activity
 provider: chembl
 entity-type: activity
 version: "1.2.0"
 
 primary-keys: ["activity-id"]
-silver-table: "chembl-activity"
-gold-table: "chembl-activity"
+silver-table: "chembl_activity"
+gold-table: "chembl_activity"
 
 gold-filters:
   columns:

@@ -14,22 +14,22 @@
 graph TB
 %% keep-orphan: FACTORIES, PROVIDERS, RT_BUILDERS, VALIDATION
     subgraph Composition["Composition Layer"]
-        BOOTSTRAP["Bootstrap / Assembly"]
-        FACTORIES["Factories"]
-        PROVIDERS["Provider Registry"]
-        RT_BUILDERS["Runtime Builders"]
+        BOOTSTRAP["Bootstrap / Assembly"]:::size-sm
+        FACTORIES["Factories"]:::size-sm
+        PROVIDERS["Provider Registry"]:::size-sm
+        RT_BUILDERS["Runtime Builders"]:::size-sm
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        ADAPTERS["HTTP Adapters"]
-        STORAGE["Storage"]
-        OBS_INFRA["Observability Infra"]
-        RESILIENCE["Resilience"]
-        SECURITY["Security"]
-        CHECKPOINT["Checkpoint"]
-        LOCKING["Locking"]
-        AUDIT["Audit"]
-        VALIDATION["Validation"]
+        ADAPTERS["HTTP Adapters"]:::size-sm
+        STORAGE["Storage"]:::size-sm
+        OBS_INFRA["Observability Infra"]:::size-sm
+        RESILIENCE["Resilience"]:::size-sm
+        SECURITY["Security"]:::size-sm
+        CHECKPOINT["Checkpoint"]:::size-sm
+        LOCKING["Locking"]:::size-sm
+        AUDIT["Audit"]:::size-sm
+        VALIDATION["Validation"]:::size-sm
     end
 
     subgraph Domain["Domain Layer"]

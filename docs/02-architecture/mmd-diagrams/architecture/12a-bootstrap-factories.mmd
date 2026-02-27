@@ -12,19 +12,19 @@
 
 graph TB
     subgraph Interfaces["Interfaces Layer"]
-        CLI["CLI Commands (Click)"]
-        HTTP["HTTP Interface"]
+        CLI["CLI Commands (Click)"]:::size-sm
+        HTTP["HTTP Interface"]:::size-sm
     end
 
     subgraph Composition["Composition Layer"]
-        RA["bootstrap_pipeline_runner"]
-        DSR["DataSourceRegistry"]
-        TF["GenericPipelineFactory"]
-        RF["RunnerFactory"]
-        DQF["DQServicesFactory"]
-        PR["ProviderRegistry"]
-        EP["ExtractionParams Registration"]
-        RB["ServicesBuilder"]
+        RA["bootstrap_pipeline_runner"]:::size-sm
+        DSR["DataSourceRegistry"]:::size-sm
+        TF["GenericPipelineFactory"]:::size-sm
+        RF["RunnerFactory"]:::size-sm
+        DQF["DQServicesFactory"]:::size-sm
+        PR["ProviderRegistry"]:::size-sm
+        EP["ExtractionParams Registration"]:::size-sm
+        RB["ServicesBuilder"]:::size-sm
     end
 
     CLI --> RA

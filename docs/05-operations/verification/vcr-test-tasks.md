@@ -32,25 +32,25 @@
 | Cassette | Used By | Status |
 |----------|---------|--------|
 | `TestChEMBLIntegration.test-chembl-extract-transform-load.yaml` | E2E `test-full-pipeline.py` | OK |
-| `TestChEMBLPipelineE2E.test-chembl-activity-full-run.yaml` | E2E `test-chembl-activity-e2e.py` | OK |
-| `TestChemblActivityPipeline.test-chembl-activity-error-handling.yaml` | Integration `test-chembl-activity.py` | OK |
+| `TestChEMBLPipelineE2E.test-chembl_activity-full-run.yaml` | E2E `test-chembl_activity-e2e.py` | OK |
+| `TestChemblActivityPipeline.test-chembl_activity-error-handling.yaml` | Integration `test-chembl_activity.py` | OK |
 | `TestChemblAdapter.test-fetch-activities.yaml` | Integration `test-chembl.py` | OK |
 | `TestChemblAdapter.test-get-entity-count.yaml` | Integration `test-chembl.py` | OK |
 | `TestChemblAdapter.test-health-check.yaml` | Integration `test-chembl.py` | OK |
-| `TestChemblCellLinePipeline.test-chembl-cell-line-happy-path.yaml` | Integration `test-chembl-cell-line.py` | OK |
-| `TestChemblCellLinePipeline.test-chembl-cell-line-source-fields.yaml` | Integration `test-chembl-cell-line.py` | OK |
-| `TestChemblCompoundRecordPipeline.test-chembl-compound-record-error-handling.yaml` | Integration `test-chembl-compound-record.py` | OK |
-| `TestChemblCompoundRecordPipeline.test-chembl-compound-record-happy-path.yaml` | Integration `test-chembl-compound-record.py` | OK |
-| `TestChemblTargetComponentPipeline.test-chembl-target-component-happy-path.yaml` | Integration `test-chembl-target-component.py` | OK |
-| `test-chembl-assay-confidence-score.yaml` | E2E `test-chembl-assay-e2e.py` | OK |
-| `test-chembl-assay-full-cycle.yaml` | E2E `test-chembl-assay-e2e.py` | OK |
-| `test-chembl-assay-metadata-fields.yaml` | E2E `test-chembl-assay-e2e.py` | OK |
-| `test-chembl-molecule-full-cycle.yaml` | E2E `test-chembl-molecule-e2e.py` | OK |
-| `test-chembl-molecule-structural-fields.yaml` | E2E `test-chembl-molecule-e2e.py` | OK |
-| `test-chembl-publication-full-cycle.yaml` | E2E `test-chembl-publication-e2e.py` | OK |
-| `test-chembl-publication-metadata-fields.yaml` | E2E `test-chembl-publication-e2e.py` | OK |
-| `test-chembl-target-cross-references.yaml` | E2E `test-chembl-target-e2e.py` | OK |
-| `test-chembl-target-full-cycle.yaml` | E2E `test-chembl-target-e2e.py` | OK |
+| `TestChemblCellLinePipeline.test-chembl_cell_line-happy-path.yaml` | Integration `test-chembl_cell_line.py` | OK |
+| `TestChemblCellLinePipeline.test-chembl_cell_line-source-fields.yaml` | Integration `test-chembl_cell_line.py` | OK |
+| `TestChemblCompoundRecordPipeline.test-chembl_compound_record-error-handling.yaml` | Integration `test-chembl_compound_record.py` | OK |
+| `TestChemblCompoundRecordPipeline.test-chembl_compound_record-happy-path.yaml` | Integration `test-chembl_compound_record.py` | OK |
+| `TestChemblTargetComponentPipeline.test-chembl_target_component-happy-path.yaml` | Integration `test-chembl_target_component.py` | OK |
+| `test-chembl_assay-confidence-score.yaml` | E2E `test-chembl_assay-e2e.py` | OK |
+| `test-chembl_assay-full-cycle.yaml` | E2E `test-chembl_assay-e2e.py` | OK |
+| `test-chembl_assay-metadata-fields.yaml` | E2E `test-chembl_assay-e2e.py` | OK |
+| `test-chembl_molecule-full-cycle.yaml` | E2E `test-chembl_molecule-e2e.py` | OK |
+| `test-chembl_molecule-structural-fields.yaml` | E2E `test-chembl_molecule-e2e.py` | OK |
+| `test-chembl_publication-full-cycle.yaml` | E2E `test-chembl_publication-e2e.py` | OK |
+| `test-chembl_publication-metadata-fields.yaml` | E2E `test-chembl_publication-e2e.py` | OK |
+| `test-chembl_target-cross-references.yaml` | E2E `test-chembl_target-e2e.py` | OK |
+| `test-chembl_target-full-cycle.yaml` | E2E `test-chembl_target-e2e.py` | OK |
 | `test-parallel-independent-pipelines.yaml` | E2E `test-advanced-scenarios-e2e.py` | OK |
 | `test-pipeline-isolation.yaml` | E2E `test-advanced-scenarios-e2e.py` | OK |
 | `test-rerun-same-pipeline-twice.yaml` | E2E `test-advanced-scenarios-e2e.py` | OK |
@@ -59,22 +59,22 @@
 
 | Cassette | Used By | Status |
 |----------|---------|--------|
-| `test-pubchem-compound-full-cycle.yaml` | E2E `test-pubchem-compound-e2e.py` | OK |
-| `test-pubchem-compound-pipeline.yaml` | E2E `test-pubchem-compound-e2e.py` / root-level dup | VERIFY - duplicate at root |
-| `test-pubchem-compound-query-filter.yaml` | E2E `test-pubchem-compound-e2e.py` | OK |
-| `test-pubchem-compound-structural-fields.yaml` | E2E `test-pubchem-compound-e2e.py` | VERIFY - uses `cid` field in API body |
+| `test-pubchem_compound-full-cycle.yaml` | E2E `test-pubchem_compound-e2e.py` | OK |
+| `test-pubchem_compound-pipeline.yaml` | E2E `test-pubchem_compound-e2e.py` / root-level dup | VERIFY - duplicate at root |
+| `test-pubchem_compound-query-filter.yaml` | E2E `test-pubchem_compound-e2e.py` | OK |
+| `test-pubchem_compound-structural-fields.yaml` | E2E `test-pubchem_compound-e2e.py` | VERIFY - uses `cid` field in API body |
 
 ### pubmed/ (5 cassettes)
 
 | Cassette | Used By | Status |
 |----------|---------|--------|
-| `test-fetch-publications.yaml` | E2E `test-pubmed-publication-e2e.py` | OK |
-| `test-health-check.yaml` | E2E `test-pubmed-publication-e2e.py` / root-level dup | VERIFY - duplicate at root |
-| `test-pubmed-publication-classification-fields.yaml` | E2E `test-pubmed-publication-e2e.py` | OK |
-| `test-pubmed-publication-date-fields.yaml` | E2E `test-pubmed-publication-e2e.py` | OK |
-| `test-pubmed-publication-full-cycle.yaml` | E2E `test-pubmed-publication-e2e.py` | OK |
-| `test-pubmed-publication-identifier-fields.yaml` | E2E `test-pubmed-publication-e2e.py` | OK |
-| `test-pubmed-publication-journal-fields.yaml` | E2E `test-pubmed-publication-e2e.py` | OK |
+| `test-fetch-publications.yaml` | E2E `test-pubmed_publication-e2e.py` | OK |
+| `test-health-check.yaml` | E2E `test-pubmed_publication-e2e.py` / root-level dup | VERIFY - duplicate at root |
+| `test-pubmed_publication-classification-fields.yaml` | E2E `test-pubmed_publication-e2e.py` | OK |
+| `test-pubmed_publication-date-fields.yaml` | E2E `test-pubmed_publication-e2e.py` | OK |
+| `test-pubmed_publication-full-cycle.yaml` | E2E `test-pubmed_publication-e2e.py` | OK |
+| `test-pubmed_publication-identifier-fields.yaml` | E2E `test-pubmed_publication-e2e.py` | OK |
+| `test-pubmed_publication-journal-fields.yaml` | E2E `test-pubmed_publication-e2e.py` | OK |
 
 ### crossref/ (5 cassettes)
 
@@ -119,14 +119,14 @@
 | `TestUniProtAdapterIntegration.test-health-check.yaml` | Integration `test-uniprot.py` | OK |
 | `TestUniProtClientIntegration.test-fetch-proteins.yaml` | **ORPHAN** - no matching test class | ORPHAN |
 | `TestUniProtClientIntegration.test-health-check.yaml` | **ORPHAN** - no matching test class | ORPHAN |
-| `TestUniProtIDMappingIntegration.test-health-check.yaml` | Integration `test-uniprot-idmapping.py` | OK |
-| `TestUniProtIDMappingIntegration.test-map-mixed-results.yaml` | Integration `test-uniprot-idmapping.py` | OK |
-| `TestUniProtIDMappingIntegration.test-map-multiple-ids.yaml` | Integration `test-uniprot-idmapping.py` | OK |
-| `TestUniProtIDMappingIntegration.test-map-not-found-id.yaml` | Integration `test-uniprot-idmapping.py` | OK |
-| `TestUniProtIDMappingIntegration.test-map-single-id.yaml` | Integration `test-uniprot-idmapping.py` | OK |
-| `test-uniprot-protein-full-cycle.yaml` | E2E `test-uniprot-protein-e2e.py` | OK |
-| `test-uniprot-protein-metadata-fields.yaml` | E2E `test-uniprot-protein-e2e.py` | OK |
-| `test-uniprot-protein-sequence-fields.yaml` | E2E `test-uniprot-protein-e2e.py` | OK |
+| `TestUniProtIDMappingIntegration.test-health-check.yaml` | Integration `test-uniprot_idmapping.py` | OK |
+| `TestUniProtIDMappingIntegration.test-map-mixed-results.yaml` | Integration `test-uniprot_idmapping.py` | OK |
+| `TestUniProtIDMappingIntegration.test-map-multiple-ids.yaml` | Integration `test-uniprot_idmapping.py` | OK |
+| `TestUniProtIDMappingIntegration.test-map-not-found-id.yaml` | Integration `test-uniprot_idmapping.py` | OK |
+| `TestUniProtIDMappingIntegration.test-map-single-id.yaml` | Integration `test-uniprot_idmapping.py` | OK |
+| `test-uniprot_protein-full-cycle.yaml` | E2E `test-uniprot_protein-e2e.py` | OK |
+| `test-uniprot_protein-metadata-fields.yaml` | E2E `test-uniprot_protein-e2e.py` | OK |
+| `test-uniprot_protein-sequence-fields.yaml` | E2E `test-uniprot_protein-e2e.py` | OK |
 
 ### multi-provider/ (1 cassette)
 
@@ -140,7 +140,7 @@
 |----------|---------|--------|
 | `test-chembl-and-uniprot-sequential-run.yaml` | **DUPLICATE** of `multi-provider/` version | ORPHAN/DUPLICATE |
 | `test-health-check.yaml` | **DUPLICATE** of `pubmed/` version | ORPHAN/DUPLICATE |
-| `test-pubchem-compound-pipeline.yaml` | **DUPLICATE** of `pubchem/` version | ORPHAN/DUPLICATE |
+| `test-pubchem_compound-pipeline.yaml` | **DUPLICATE** of `pubchem/` version | ORPHAN/DUPLICATE |
 
 ---
 
@@ -160,8 +160,8 @@ Pipeline configs exist for 15 ChEMBL entities but only 4 have dedicated integrat
 
 #### ChEMBL - Skipped VCR tests needing cassettes
 
-- [ ] `chembl/chembl-activity-filtered.yaml` -- `test-activity-extraction-params.py::test-filtered-api-request` is `@pytest.mark.skip` pending cassette recording
-- [ ] `chembl/chembl-assay-filtered.yaml` -- `test-assay-extraction-params.py::test-assay-filtered-api-request` is `@pytest.mark.skip` pending cassette recording
+- [ ] `chembl/chembl_activity-filtered.yaml` -- `test-activity-extraction-params.py::test-filtered-api-request` is `@pytest.mark.skip` pending cassette recording
+- [ ] `chembl/chembl_assay-filtered.yaml` -- `test-assay-extraction-params.py::test-assay-filtered-api-request` is `@pytest.mark.skip` pending cassette recording
 
 #### CrossRef - No VCR-backed tests at all
 
@@ -195,22 +195,22 @@ if cid is None:
 
 The `entity-mapper.py` emits both `"molecule-id"` and `"cid"` fields in the output dict. Existing cassettes use raw PubChem API responses which return `cid` at the REST API level. **No cassette update is needed** for the rename itself because the adapter handles the mapping internally. However:
 
-- [ ] `pubchem/test-pubchem-compound-pipeline.yaml` -- Verify cassette still works with current entity-mapper that produces `molecule-id` as primary key. Consider re-recording if test assertions reference `cid` instead of `molecule-id`.
-- [ ] `pubchem/test-pubchem-compound-structural-fields.yaml` -- Same verification needed for `molecule-id` field mapping.
+- [ ] `pubchem/test-pubchem_compound-pipeline.yaml` -- Verify cassette still works with current entity-mapper that produces `molecule-id` as primary key. Consider re-recording if test assertions reference `cid` instead of `molecule-id`.
+- [ ] `pubchem/test-pubchem_compound-structural-fields.yaml` -- Same verification needed for `molecule-id` field mapping.
 
 #### PubChem: Extended physicochemical properties
 
 The PubChem transformer now extracts 30+ additional fields (computed descriptors, stereochemistry counts, 3D properties) that were not in earlier versions. Cassettes may not have response data for all these fields.
 
-- [ ] `pubchem/test-pubchem-compound-full-cycle.yaml` -- Verify cassette responses include data for new physicochemical property fields (xlogp, tpsa, complexity, stereo counts, 3D properties). Re-record if extended coverage is desired.
+- [ ] `pubchem/test-pubchem_compound-full-cycle.yaml` -- Verify cassette responses include data for new physicochemical property fields (xlogp, tpsa, complexity, stereo counts, 3D properties). Re-record if extended coverage is desired.
 
 #### UniProt: Extended extraction fields
 
 The UniProt transformer now extracts taxonomy lineage, GO annotations, PTM features, isoform data, and reaction data (visible in `test-uniprot-pipeline.py::test-transform-extracts-new-fields`). E2E cassettes may need updating.
 
-- [ ] `uniprot/test-uniprot-protein-full-cycle.yaml` -- Verify cassette contains records with GO terms, PTM features, isoforms, and reactions. Re-record with a protein that has rich annotation (e.g., P00533/EGFR).
-- [ ] `uniprot/test-uniprot-protein-metadata-fields.yaml` -- Verify new taxonomy fields (superkingdom, phylum, genus) are present in cassette response.
-- [ ] `uniprot/test-uniprot-protein-sequence-fields.yaml` -- Check if structural feature fields (topology, transmembrane, signal-peptide) are in cassette response.
+- [ ] `uniprot/test-uniprot_protein-full-cycle.yaml` -- Verify cassette contains records with GO terms, PTM features, isoforms, and reactions. Re-record with a protein that has rich annotation (e.g., P00533/EGFR).
+- [ ] `uniprot/test-uniprot_protein-metadata-fields.yaml` -- Verify new taxonomy fields (superkingdom, phylum, genus) are present in cassette response.
+- [ ] `uniprot/test-uniprot_protein-sequence-fields.yaml` -- Check if structural feature fields (topology, transmembrane, signal-peptide) are in cassette response.
 
 #### CrossRef: Author ORCID field name anomaly
 
@@ -229,7 +229,7 @@ Similar corruption found in `openalex/extractors.py` (line 431-439) and `semanti
 
 ### [VERIFY] Cassettes to validate
 
-- [ ] `pubchem/test-pubchem-compound-pipeline.yaml` -- Duplicate exists at root level (`tests/fixtures/vcr/test-pubchem-compound-pipeline.yaml`). Verify which one is actually loaded and remove the unused duplicate.
+- [ ] `pubchem/test-pubchem_compound-pipeline.yaml` -- Duplicate exists at root level (`tests/fixtures/vcr/test-pubchem_compound-pipeline.yaml`). Verify which one is actually loaded and remove the unused duplicate.
 - [ ] `pubmed/test-health-check.yaml` -- Duplicate exists at root level. Verify which is used.
 - [ ] `multi-provider/test-chembl-and-uniprot-sequential-run.yaml` -- Duplicate exists at root level. E2E conftest maps to `multi-provider/` dir.
 - [ ] `uniprot/TestUniProtClientIntegration.test-fetch-proteins.yaml` -- Orphan cassette. No test class named `TestUniProtClientIntegration` found in current tests (class was likely renamed to `TestUniProtAdapterIntegration`).
@@ -272,7 +272,7 @@ Similar corruption found in `openalex/extractors.py` (line 431-439) and `semanti
 | uniprot | `TestUniProtClientIntegration.test-health-check.yaml` | Class renamed to TestUniProtAdapterIntegration |
 | root | `test-chembl-and-uniprot-sequential-run.yaml` | Duplicate of `multi-provider/` version |
 | root | `test-health-check.yaml` | Duplicate of `pubmed/` version |
-| root | `test-pubchem-compound-pipeline.yaml` | Duplicate of `pubchem/` version |
+| root | `test-pubchem_compound-pipeline.yaml` | Duplicate of `pubchem/` version |
 
 ---
 

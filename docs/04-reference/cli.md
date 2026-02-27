@@ -67,28 +67,28 @@ bioetl run --pipeline <NAME> [OPTIONS]
 
 ```bash
 # Инкрементальный запуск (по умолчанию)
-bioetl run --pipeline chembl-activity
+bioetl run --pipeline chembl_activity
 
 # С ограничением записей (для тестирования)
-bioetl run --pipeline chembl-activity --limit 100
+bioetl run --pipeline chembl_activity --limit 100
 
 # Полная перезагрузка данных
-bioetl run --pipeline chembl-activity --run-type rebuild --yes
+bioetl run --pipeline chembl_activity --run-type rebuild --yes
 
 # Предпросмотр очистки без выполнения
-bioetl run --pipeline chembl-activity --run-type rebuild --dry-run
+bioetl run --pipeline chembl_activity --run-type rebuild --dry-run
 
 # Продолжить прерванный запуск
-bioetl run --pipeline chembl-activity --resume
+bioetl run --pipeline chembl_activity --resume
 
 # С фильтрацией по CSV
-bioetl run --pipeline chembl-activity \
+bioetl run --pipeline chembl_activity \
     --input-csv data/filter-ids.csv \
     --filter-column molecule-id \
     --filter-field molecule-chembl-id
 
 # С DEBUG логированием
-bioetl run --pipeline chembl-activity --debug
+bioetl run --pipeline chembl_activity --debug
 ```
 
 **Типы запуска:**
@@ -261,8 +261,8 @@ bioetl config show <PIPELINE> [--format yaml|json]
 **Примеры:**
 
 ```bash
-bioetl config show chembl-activity
-bioetl config show chembl-activity --format json
+bioetl config show chembl_activity
+bioetl config show chembl_activity --format json
 ```
 
 #### `config validate` — Валидация конфигурации
@@ -308,8 +308,8 @@ bioetl quarantine inspect --pipeline <NAME> [OPTIONS]
 **Примеры:**
 
 ```bash
-bioetl quarantine inspect --pipeline chembl-activity
-bioetl quarantine inspect --pipeline chembl-activity --error-code DQ-MISSING-FIELD
+bioetl quarantine inspect --pipeline chembl_activity
+bioetl quarantine inspect --pipeline chembl_activity --error-code DQ-MISSING-FIELD
 ```
 
 #### `quarantine stats` — Статистика
@@ -493,29 +493,29 @@ bioetl maintenance bronze-cleanup [OPTIONS]
 |-----|--------------------|---------------------------------------|
 | 0   | OK                 | Успешное выполнение                   |
 | 1   | FAIL               | Неспецифицированная ошибка            |
-| 64  | EX-USAGE           | Ошибка использования командной строки |
-| 65  | EX-DATAERR         | Ошибка формата данных                 |
-| 66  | EX-NOINPUT         | Не удалось открыть входные данные     |
-| 67  | EX-NOUSER          | Адресат неизвестен                    |
-| 68  | EX-NOHOST          | Имя хоста неизвестно                  |
-| 69  | EX-UNAVAILABLE     | Сервис недоступен                     |
-| 70  | EX-SOFTWARE        | Внутренняя ошибка ПО                  |
-| 71  | EX-OSERR           | Ошибка ОС                             |
-| 72  | EX-OSFILE          | Отсутствует критический файл ОС       |
-| 73  | EX-CANTCREAT       | Не удалось создать выходной файл      |
-| 74  | EX-IOERR           | Ошибка ввода-вывода                   |
-| 75  | EX-TEMPFAIL        | Временная ошибка                      |
-| 76  | EX-PROTOCOL        | Ошибка протокола                      |
-| 77  | EX-NOPERM          | Отказано в доступе                    |
-| 78  | EX-CONFIG          | Ошибка конфигурации                   |
-| 80  | CONFIG-ERROR       | Ошибка конфигурации пайплайна         |
-| 81  | INIT-ERROR         | Ошибка инициализации                  |
-| 82  | PIPELINE-ERROR     | Ошибка выполнения пайплайна           |
-| 83  | DATA-QUALITY-ERROR | Превышен DQ порог                     |
-| 84  | LOCK-ERROR         | Ошибка блокировки                     |
-| 85  | STORAGE-ERROR      | Ошибка хранилища                      |
-| 86  | NETWORK-ERROR      | Сетевая ошибка                        |
-| 87  | CHECKPOINT-ERROR   | Ошибка checkpoint                     |
+| 64  | EX_USAGE           | Ошибка использования командной строки |
+| 65  | EX_DATAERR         | Ошибка формата данных                 |
+| 66  | EX_NOINPUT         | Не удалось открыть входные данные     |
+| 67  | EX_NOUSER          | Адресат неизвестен                    |
+| 68  | EX_NOHOST          | Имя хоста неизвестно                  |
+| 69  | EX_UNAVAILABLE     | Сервис недоступен                     |
+| 70  | EX_SOFTWARE        | Внутренняя ошибка ПО                  |
+| 71  | EX_OSERR           | Ошибка ОС                             |
+| 72  | EX_OSFILE          | Отсутствует критический файл ОС       |
+| 73  | EX_CANTCREAT       | Не удалось создать выходной файл      |
+| 74  | EX_IOERR           | Ошибка ввода-вывода                   |
+| 75  | EX_TEMPFAIL        | Временная ошибка                      |
+| 76  | EX_PROTOCOL        | Ошибка протокола                      |
+| 77  | EX_NOPERM          | Отказано в доступе                    |
+| 78  | EX_CONFIG          | Ошибка конфигурации                   |
+| 80  | CONFIG_ERROR       | Ошибка конфигурации пайплайна         |
+| 81  | INIT_ERROR         | Ошибка инициализации                  |
+| 82  | PIPELINE_ERROR     | Ошибка выполнения пайплайна           |
+| 83  | DATA_QUALITY_ERROR | Превышен DQ порог                     |
+| 84  | LOCK_ERROR         | Ошибка блокировки                     |
+| 85  | STORAGE_ERROR      | Ошибка хранилища                      |
+| 86  | NETWORK_ERROR      | Сетевая ошибка                        |
+| 87  | CHECKPOINT_ERROR   | Ошибка checkpoint                     |
 | 130 | SIGINT             | Прервано Ctrl+C                       |
 | 143 | SIGTERM            | Завершено SIGTERM                     |
 

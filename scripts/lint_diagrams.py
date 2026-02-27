@@ -94,6 +94,8 @@ DEPRECATED_PALETTE = {
     "#1565c0",
     "#0d47a1",
     "#b71c1c",
+    # Legacy Tailwind orange stroke (superseded in policy docs).
+    "#f59e0b",
     "#00838f",
     "#4e342e",
     "#546e7a",
