@@ -6,10 +6,10 @@
 > - Codebase metrics updated: 1,120 Python files (534 src + 586 tests), ~116,120 src LOC
 > - ADR count: 40 ADRs (ADR-001 through ADR-040)
 > - Pipeline configs: 26 configurations (21 single-source + 5 composite)
-> - YAML configs total: 121 (26 pipelines + 35 DQ + 34 filters + 26 schemas)
-> - Documentation files: 366 markdown files
+> - YAML configs total: 38 (21 entities + 7 providers + 6 composites + 2 base + 1 enum + 1 schema)
+> - Documentation files: 331 markdown files
 > - Adapter listing completed (all 7 providers)
-> - Diagrams: 50+ Mermaid source files
+> - Diagrams: 271 Mermaid source files (103 .mmd + 168 .mermaid)
 
 ## Quick Links
 
@@ -59,7 +59,7 @@ docs/
 │
 ├── 02-architecture/             # Architecture & Decisions
 │   ├── 00-overview.md           # Architecture overview
-│   ├── decisions/               # ADRs (ADR-001..039)
+│   ├── decisions/               # ADRs (ADR-001..040)
 │   ├── diagrams/                # System diagrams
 │   │   └── mermaid/             # Mermaid source files
 │   └── ... (Layer docs: 01-domain, 02-application, etc.)
@@ -376,7 +376,7 @@ graph TD
 | TOOLS.md                 | 2026-02-24   | v2.2 Synced with RULES v5.22 |
 | 03-guides/               | 2026-01-20   | Consolidated (16 guides)     |
 | 03-development/          | 2026-01-26   | Config schema guidelines     |
-| ADR-001..039             | 2026-02-24   | All 39 ADRs documented       |
+| ADR-001..040             | 2026-02-24   | All 40 ADRs documented       |
 | 05-operations/runbooks/  | 2026-01-04   | 16 active runbooks           |
 | domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
 | audits/                  | 2026-02-17   | Consolidated (audit/ merged) |

@@ -201,7 +201,7 @@ class DateExtractor(BaseFieldExtractor):
         return cls._instance
 
     def extract(self, element: Element | None) -> RawDate | None:
-        """Извлечь сырые компоненты даты из XML элемента.
+        """Extract raw date components from an XML element.
 
         Supports both structured dates (Year/Month/Day elements) and
         free-text MedlineDate format ("2023 Jan-Feb", "2023 Spring", etc.).
@@ -232,7 +232,7 @@ class DateExtractor(BaseFieldExtractor):
         return None
 
     def normalize(self, raw_value: RawDate) -> NormalizedDate:
-        """Нормализовать компоненты даты в ISO формат.
+        """Normalize date components into ISO format.
 
         Args:
             raw_value: Raw date components dict.

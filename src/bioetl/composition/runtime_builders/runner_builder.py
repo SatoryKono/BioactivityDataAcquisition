@@ -60,6 +60,19 @@ def _assemble_vacuum_settings(
     cli_vacuum: VacuumConfig,
     yaml_maintenance: MaintenanceConfig,
 ) -> VacuumSettings:
+    """Merge CLI and YAML vacuum configuration into resolved settings.
+
+    CLI flags take precedence when explicitly provided; otherwise the
+    values fall back to the YAML maintenance section.
+
+    Args:
+        cli_vacuum: Vacuum options supplied via CLI flags.
+        yaml_maintenance: Maintenance block from the pipeline YAML config.
+
+    Returns:
+        Resolved ``VacuumSettings`` with ``enabled`` flag and
+        ``retention_days``.
+    """
     if cli_vacuum.enabled is not None:
         return VacuumSettings(
             enabled=cli_vacuum.enabled,
@@ -78,6 +91,23 @@ def _assemble_runtime_config(
     heartbeat_interval: int,
     vacuum: VacuumSettings,
 ) -> RuntimeConfig:
+    """Build a ``RuntimeConfig`` from the pipeline run context.
+
+    Extracts execution parameters (run type, resume, limits, dry-run,
+    etc.) from ``ctx`` and combines them with the heartbeat interval
+    from global settings and the resolved vacuum settings.
+
+    Args:
+        ctx: Current pipeline run context carrying CLI/API inputs.
+        heartbeat_interval: Seconds between heartbeat log entries,
+            sourced from global ``Settings``.
+        vacuum: Pre-resolved vacuum settings produced by
+            ``_assemble_vacuum_settings``.
+
+    Returns:
+        A fully populated ``RuntimeConfig`` ready for the pipeline
+        runner.
+    """
     return RuntimeConfig(
         run_type=ctx.run_type,
         resume=ctx.resume,
@@ -98,6 +128,25 @@ def _assemble_filter_config(
     ctx: PipelineRunContext,
     test_mode: bool,
 ) -> InputFilterConfig | None:
+    """Build an ``InputFilterConfig`` from YAML and CLI filter sources.
+
+    Delegates to ``FilterConfigBuilder.build``, forwarding the YAML
+    filter block, any CLI-supplied CSV path / column / field overrides,
+    direct filter ID lists, and the effective test-mode flag (which
+    also accounts for ``ctx.ignore_yaml_filter``).
+
+    Args:
+        yaml_filter: Input-filter section from the pipeline YAML config.
+        ctx: Current pipeline run context carrying CLI filter overrides
+            and direct filter ID collections.
+        test_mode: Global test-mode flag from ``Settings``; combined
+            with ``ctx.ignore_yaml_filter`` to decide whether to skip
+            the YAML filter.
+
+    Returns:
+        A populated ``InputFilterConfig`` when filtering is active,
+        or ``None`` when no filter applies.
+    """
     return FilterConfigBuilder.build(
         yaml_filter=yaml_filter,
         cli_csv=ctx.input_filter.source_path if ctx.input_filter.enabled else None,

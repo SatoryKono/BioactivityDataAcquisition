@@ -10,12 +10,12 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True, slots=True)
 class GoldListLengthFilter:
-    """Фильтр по длине списка в колонке.
+    """Filter by list length in a column.
 
     Attributes:
-        column: Имя колонки (должна содержать список).
-        min_length: Минимальная длина.
-        max_length: Максимальная длина.
+        column: Column name (must contain a list).
+        min_length: Minimum length.
+        max_length: Maximum length.
     """
 
     column: str
@@ -34,12 +34,12 @@ class GoldListLengthFilter:
 
 @dataclass(frozen=True, slots=True)
 class GoldListContainsFilter:
-    """Фильтр на содержание значений в списке (subset).
+    """Filter for list value containment (subset check).
 
     Attributes:
-        column: Имя колонки (список).
-        values: Допустимые значения.
-        mode: 'all' (все элементы списка должны быть в values) или 'any' (хотя бы один).
+        column: Column name (list).
+        values: Allowed values.
+        mode: 'all' (all list elements must be in values) or 'any' (at least one).
     """
 
     column: str

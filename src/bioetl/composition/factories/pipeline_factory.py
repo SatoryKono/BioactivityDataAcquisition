@@ -125,8 +125,22 @@ class GenericPipelineFactory(Generic[TPipeline]):
     ) -> None:
         """Initialize the factory.
 
+        Args:
+            pipeline_name: Unique name for the pipeline (e.g., "chembl_activity").
+            pipeline_class: The pipeline class to instantiate.
+            provider: Data provider name (e.g., "chembl", "pubmed").
+            silver_schema: Optional PyArrow schema for Silver layer validation.
+            gold_schema: Pandera DataFrameModel class for Gold layer validation.
+            pandera_silver_schema: Optional Pandera DataFrameModel class for Silver
+                validation. If provided, PanderaSilverValidator is created and
+                injected into SilverWriter.
+            data_source_creator: Optional custom data source creator function.
+                If None, looked up from DataSourceRegistry by provider.
+            transformer_class: Optional transformer class for Bronze-to-Silver
+                and Silver-to-Gold transformations.
+
         Raises:
-            ValueError: If gold_schema is not provided
+            ValueError: If gold_schema is not provided.
         """
         if gold_schema is None:
             raise ValueError(
@@ -189,7 +203,18 @@ class GenericPipelineFactory(Generic[TPipeline]):
         logger: LoggerPort,
         filter_config: InputFilterConfig | None = None,
     ) -> DataSourcePort:
-        """Create data source using the configured creator."""
+        """Create data source using the configured creator.
+
+        Args:
+            settings: Application settings with provider credentials and paths.
+            pipeline_config: Pipeline YAML configuration with source settings.
+            logger: Structured logger for observability.
+            filter_config: Optional input filter configuration for restricting
+                which records are fetched from the data source.
+
+        Returns:
+            Configured DataSourcePort implementation for the pipeline's provider.
+        """
         return self._create_data_source(
             settings,
             pipeline_config,
@@ -207,7 +232,24 @@ class GenericPipelineFactory(Generic[TPipeline]):
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,
     ) -> PipelineServices:
-        """Build PipelineServices from settings."""
+        """Build PipelineServices from settings.
+
+        Delegates to the module-level ``build_pipeline_services`` function,
+        injecting the factory's pipeline name and data source creator.
+
+        Args:
+            settings: Application settings with data paths and credentials.
+            logger: Structured logger for observability.
+            config: Pre-loaded pipeline YAML config. If None, loaded from disk
+                by pipeline name.
+            filter_config: Optional input filter configuration for the data source.
+            tracer: Optional TracingPort for distributed tracing.
+            dq_monitor: Optional data quality monitor for anomaly detection.
+
+        Returns:
+            Configured PipelineServices instance with data source, storage,
+            metrics, and other shared services.
+        """
         return build_pipeline_services(
             pipeline_name=self.pipeline_name,
             create_data_source_fn=self._create_data_source,
@@ -232,7 +274,29 @@ class GenericPipelineFactory(Generic[TPipeline]):
         metrics: MetricsPort | None = None,
         cached_bronze: CachedBronzeContext | None = None,
     ) -> TPipeline:
-        """Create pipeline instance with services and optional transformer."""
+        """Create pipeline instance with services and optional transformer.
+
+        Loads configuration once and reuses it for both services and the pipeline.
+        If a transformer_class is configured on the factory, creates and injects
+        the transformer via DI.
+
+        Args:
+            run_id: Unique identifier for this pipeline run.
+            runtime: Pipeline runtime configuration (run_type, resume, limits).
+            settings: Application settings with data paths and credentials.
+            logger: Structured logger for observability.
+            config: Pre-loaded pipeline YAML config. If None, loaded from disk.
+            filter_config: Optional input filter configuration for the data source.
+            tracer: Optional TracingPort for distributed tracing.
+            dq_monitor: Optional data quality monitor for anomaly detection.
+            metrics: Optional MetricsPort for transformer observability.
+            cached_bronze: Optional CachedBronzeContext for reading from Bronze
+                cache instead of making API calls.
+
+        Returns:
+            Fully configured pipeline instance of type TPipeline, ready for
+            execution via a PipelineRunner.
+        """
         return cast(
             TPipeline,
             create_pipeline_with_services(
@@ -265,7 +329,39 @@ class GenericPipelineFactory(Generic[TPipeline]):
         config: PipelineYamlConfig | None = None,
         cached_bronze: CachedBronzeContext | None = None,
     ) -> PipelineRunner:
-        """Create a fully configured PipelineRunner with all components."""
+        """Create a fully configured PipelineRunner with all components.
+
+        This is the primary factory method that assembles the full execution
+        graph. It creates the pipeline instance via ``create_with_services``,
+        then delegates to ``assemble_runner`` which constructs:
+
+        - **BatchExecutor**: Unified batch processing (Bronze/Silver/Gold writes).
+        - **CheckpointManager**: Resume support for interrupted runs.
+        - **LockManager**: Distributed locking with heartbeat and TTL.
+        - **PreflightService**: Pre-run validation checks.
+        - **PostrunService**: Post-run cleanup, DQ evaluation, and metadata.
+        - **MedallionLifecycleService**: Silver/Gold layer lifecycle management.
+        - **PipelineObserver**: Metrics and tracing for the run lifecycle.
+        - **DataQualityService**: DQ rule evaluation and anomaly detection.
+
+        Args:
+            run_id: Unique identifier for this pipeline run.
+            runtime: Pipeline runtime configuration (run_type, resume, limits,
+                lock TTL, strict_gold_validation).
+            settings: Application settings with data paths, credentials, and
+                environment info.
+            observability: Unified ObservabilityBundle providing logger, tracer,
+                metrics, and dq_monitor.
+            filter_config: Optional input filter configuration for restricting
+                which records are fetched from the data source.
+            config: Pre-loaded pipeline YAML config. If None, loaded from disk
+                by pipeline name.
+            cached_bronze: Optional CachedBronzeContext for reading from Bronze
+                cache instead of making API calls.
+
+        Returns:
+            Fully initialized PipelineRunner ready for ``runner.run()`` execution.
+        """
         # Load config once if not provided
         yaml_config = config or load_pipeline_config(self.pipeline_name)
 
