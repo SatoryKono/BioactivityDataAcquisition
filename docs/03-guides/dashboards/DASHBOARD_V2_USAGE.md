@@ -9,7 +9,7 @@
 |---|---|---|
 | Data Quality v2 | `bioetl-dq-v2` | Качество данных, карантин, аномалии, freshness |
 | Overview v2 | `bioetl-overview-v2` | Общее состояние пайплайна по стадиям |
-| Provider Health v2 | `bioetl-provider-health-v2` | Latency/успехи health-check провайдеров |
+| Provider Health v2 | `bioetl-provider-health-v2` | Latency/успехи health_check провайдеров |
 | Simple | `bioetl-simple` | Быстрый срез bronze/silver/gold + quality ratio |
 
 ## Фильтрация
@@ -43,7 +43,7 @@ p95 latency по провайдерам.
 1. `No data`:
 проверьте `http://localhost:8000/metrics`, затем `http://localhost:9090/targets`.
 2. Пустой `$provider`:
-нет серии `bioetl-health-check-latency-ms-bucket` в metrics endpoint.
+нет серии `bioetl-health_check-latency-ms-bucket` в metrics endpoint.
 3. Пустой `$run-type`:
 нет метрик `bioetl-records-processed-total` для выбранного `$pipeline`.
 

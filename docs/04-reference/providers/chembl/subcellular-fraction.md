@@ -2,16 +2,18 @@
 
 **Имя пайплайна:** `chembl_subcellular_fraction`
 **Провайдер:** `chembl`
-**Сущность:** `subcellular_fraction`
+**Сущность:** `subcellular-fraction`
 **Версия схемы:** 1.0.0
 
 ---
 
 ## 1. Описание
 
-Пайплайн извлекает данные о субклеточных фракциях из API ChEMBL. Субклеточные фракции описывают клеточные компартменты или препараты, используемые в биоанализах (например, "Microsomes", "Cytosol", "Mitochondria"). Это производная (derived) сущность — данные извлекаются из ответов Assay API и дедуплицируются.
+Пайплайн извлекает данные о субклеточных фракциях из API ChEMBL. Субклеточные фракции представляют собой специфические клеточные компартменты (митохондрии, ядро, микросомы и т.д.), используемые в экспериментах.
 
-**Источник данных:** ChEMBL REST API, эндпоинт `/assay` (извлечение уникальных subcellular_fraction)
+Это **производная сущность** (derived entity), извлекаемая из поля `assay-subcellular-fraction` записей `chembl_assay`.
+
+**Источник данных:** ChEMBL REST API, производная таблица из `assay`
 
 ---
 
@@ -21,15 +23,14 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `entity_id` | `str` | SHA256 хэш нормализованного названия фракции (PK) |
-| `subcellular_fraction` | `str` | Название субклеточной фракции |
+| `subcellular-fraction` | `str` | Название фракции (PK, нормализованное) |
 
-### Метаданные
+### Статистика
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `content_hash` | `str` | SHA256 content hash для дедупликации |
-| `ingestion_ts` | `datetime` | Время загрузки записи |
+| `assay-count` | `int` | Количество ассеев, использующих данную фракцию |
+| `example-assay-id` | `str` | Ссылка на пример ассея |
 
 ---
 
@@ -37,70 +38,33 @@
 
 **Файл:** `src/bioetl/application/pipelines/chembl/subcellular_fraction_transformer.py`
 
-### Нормализация данных
+### Основные операции
 
-- **subcellular_fraction:** Строка нормализуется (strip whitespace, lowercase)
-- **entity_id:** Вычисляется как SHA256 хэш нормализованного имени фракции
-- **Дедупликация:** На уровне `SubcellularFractionDataSource` (до трансформации)
-
-### Entity ID
-
-```python
-entity_id = sha256(normalize(subcellular_fraction))
-```
+1. Извлечение уникальных значений `assay-subcellular-fraction` из данных ассеев
+2. Подсчёт количества ассеев для каждой фракции
+3. Выбор примера ассея для каждой фракции
 
 ---
 
-## 4. Валидация
+## 4. Конфигурация
 
-### DQ-правила
-
-1. **`subcellular_fraction`** — обязательное, непустая строка
-2. **`entity_id`** — обязательное, формат SHA256
-
-### Пороги ошибок
-
-| Порог | Условие | Действие |
-|-------|---------|----------|
-| Soft | > 5% ошибок | WARNING |
-| Hard | > 20% ошибок | FAIL BATCH |
+| Параметр | Путь |
+|----------|------|
+| Entity config | `configs/entities/chembl/subcellular_fraction.yaml` |
+| Pipeline spec | `docs/04-reference/pipelines/chembl/14-subcellular-fraction-spec.md` |
 
 ---
 
-## 5. Использование CLI
+## 5. Применение
 
-```bash
-# Инкрементальная загрузка
-bioetl run chembl_subcellular_fraction
-
-# С ограничением количества записей
-bioetl run chembl_subcellular_fraction --limit 500
-
-# Полная перезагрузка
-bioetl run chembl_subcellular_fraction --run-type rebuild
-```
+- **Компартментный анализ**: Изучение эффектов лекарств на митохондриальные или микросомальные ферменты
+- **Обогащение ассеев**: Группировка ассеев по используемой субклеточной фракции
+- **Справочная таблица**: Уникальный список фракций для фильтрации и анализа
 
 ---
 
-## 6. Связанные файлы
+## 6. Связи
 
-| Компонент | Путь |
-|-----------|------|
-| Конфигурация | `configs/entities/chembl/subcellular_fraction.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/subcellular_fraction_transformer.py` |
-| Data Source | `src/bioetl/application/core/subcellular_fraction_data_source.py` |
-| Pipeline Spec | `docs/04-reference/pipelines/chembl/14-subcellular-fraction-spec.md` |
-
----
-
-## 7. Связи с другими сущностями
-
-```
-Subcellular Fraction (entity_id)
-    └── Assay (assay_subcellular_fraction) [N:1 lookup]
-        └── Activity [1:N]
-```
-
----
-
-*Последнее обновление: 2026-02-27*
+| Связь | Сущность | Описание |
+|-------|----------|----------|
+| Источник | `chembl_assay` | Фракции извлекаются из записей ассеев |

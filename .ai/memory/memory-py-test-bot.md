@@ -22,7 +22,7 @@
 tests/
 ├── unit/              # Fast, in-memory fakes
 ├── integration/       # VCR.py for HTTP
-├── architecture/      # Layer boundaries (43 tests)
+├── architecture/      # Layer boundaries (1392 collected tests)
 ├── contract/          # API contract tests
 ├── e2e/               # End-to-end tests
 ├── benchmarks/        # Performance benchmarks
@@ -170,7 +170,7 @@ pytest tests/integration/ --vcr-record=none -v
 
 ### Architecture Tests
 - Verify import boundaries
-- 43 standard tests in `tests/architecture/`
+- 1392 collected tests in `tests/architecture/`
 - Run after any layer boundary changes
 
 ---

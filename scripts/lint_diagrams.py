@@ -56,6 +56,10 @@ PLACEHOLDER_MARKERS = ["placeholder", "TODO", "FIXME", "stub"]
 _NODES_RE = re.compile(r"%%\s*@nodes\s+(\d+)")
 _GRAPH_LINE_RE = re.compile(r"^(graph|flowchart)\b", re.IGNORECASE)
 _ELK_RE = re.compile(r"%%\{init.*layout.*elk", re.IGNORECASE)
+_EDGE_ROUTING_VALUE_RE = re.compile(
+    r"(?:['\"])?edgeRouting(?:['\"])?\s*:\s*['\"]([A-Za-z_]+)['\"]",
+    re.IGNORECASE,
+)
 _NON_FLOW_RE = re.compile(
     r"^(classDiagram|sequenceDiagram|stateDiagram|erDiagram|mindmap|gantt|pie)",
     re.IGNORECASE,
@@ -63,6 +67,8 @@ _NON_FLOW_RE = re.compile(
 _STYLE_OR_CLASSDEF_RE = re.compile(r"^\s*(style|classDef)\b")
 _HEX_COLOR_RE = re.compile(r"#[0-9a-fA-F]{6}\b")
 _SUBGRAPH_RE = re.compile(r"^\s*subgraph\b", re.IGNORECASE)
+_LINK_STYLE_RE = re.compile(r"^\s*linkStyle\s+([^\s]+)")
+_LINK_STYLE_FULL_RE = re.compile(r"^\s*linkStyle\s+([^\s]+)\s+(.+)$")
 ELK_WARN_THRESHOLD = 20
 ELK_ERROR_THRESHOLD = 40
 SIZE_WARN_THRESHOLD = 20
@@ -74,6 +80,18 @@ PLACEHOLDER_PATTERNS = {
 DEFAULT_STALE_DAYS = 90
 WARNING_STALE_DAYS = 180
 DISALLOWED_SUBGRAPH_EMOJI = ("🟡", "🟢", "🔵", "🟣", "⚪")
+# Canonical ADR-040 palette values that must not be flagged by COLOUR-001.
+CANONICAL_PALETTE = {
+    "#f5f3ff", "#7c3aed",  # Domain
+    "#f0fdf4", "#16a34a",  # Application
+    "#fff1f2", "#dc2626",  # Infrastructure
+    "#fff7ed", "#f59e0b",  # Composition / Bronze
+    "#eff6ff", "#2563eb",  # Interfaces
+    "#f1f5f9", "#64748b",  # External
+    "#f8fafc", "#475569",  # Silver
+    "#fefce8", "#ca8a04",  # Gold
+    "#ffe4e6", "#e11d48",  # Quarantine
+}
 # Legacy palette values blocked in style/classDef rules.
 DEPRECATED_PALETTE = {
     # Material palette (superseded by muted 2026 palette).
@@ -94,8 +112,6 @@ DEPRECATED_PALETTE = {
     "#1565c0",
     "#0d47a1",
     "#b71c1c",
-    # Legacy Tailwind orange stroke (superseded in policy docs).
-    "#f59e0b",
     "#00838f",
     "#4e342e",
     "#546e7a",
@@ -131,6 +147,36 @@ class LintResult:
     @property
     def has_errors(self) -> bool:
         return any(i.severity == "ERROR" for i in self.issues)
+
+
+def _is_flowchart(lines: list[str]) -> bool:
+    """Detect whether diagram body is flowchart/graph (vs class/sequence/state)."""
+    for ln in lines:
+        s = ln.strip()
+        if not s:
+            continue
+        if s.startswith("%%"):
+            continue
+        if _GRAPH_LINE_RE.match(s):
+            return True
+        if _NON_FLOW_RE.match(s):
+            return False
+        return False
+    return False
+
+
+def _iter_edge_lines(lines: list[str]) -> list[str]:
+    """Return non-comment flow edges containing Mermaid arrow tokens."""
+    edges: list[str] = []
+    for ln in lines:
+        s = ln.strip()
+        if not s or s.startswith("%%"):
+            continue
+        if s.startswith("linkStyle"):
+            continue
+        if "-->" in s or "-.->" in s or "==>" in s:
+            edges.append(s)
+    return edges
 
 
 def find_diagram_files(base: Path) -> list[Path]:
@@ -339,7 +385,10 @@ def check_colour_policy(path: Path, lines: list[str]) -> list[Issue]:
             continue
         for color in _HEX_COLOR_RE.findall(line):
             normalized = color.lower()
-            if normalized in DEPRECATED_PALETTE:
+            if (
+                normalized in DEPRECATED_PALETTE
+                and normalized not in CANONICAL_PALETTE
+            ):
                 found.add(normalized)
 
     if found:
@@ -408,7 +457,28 @@ def check_node_count_policy(path: Path, lines: list[str]) -> list[Issue]:
     if nodes is None:
         return issues
 
+    # Canonical full .mmd may stay above hard limit when decomposed siblings
+    # (e.g. 01a/01b/01c) already exist as focused views.
+    has_decomposed_siblings = False
+    if path.suffix == ".mmd":
+        prefix = path.stem.split("-", 1)[0]
+        sibling_pattern = f"{prefix}[a-z]-*.mmd"
+        has_decomposed_siblings = any(path.parent.glob(sibling_pattern))
+
     if nodes > SIZE_ERROR_THRESHOLD:
+        if has_decomposed_siblings:
+            issues.append(
+                Issue(
+                    file=fname,
+                    severity="WARNING",
+                    rule="SIZE-003",
+                    message=(
+                        f"@nodes={nodes} > {SIZE_ERROR_THRESHOLD}, "
+                        "but decomposed sibling views are present (01a/01b/... pattern)"
+                    ),
+                )
+            )
+            return issues
         issues.append(
             Issue(
                 file=fname,
@@ -435,6 +505,7 @@ def check_layout_policy(path: Path, lines: list[str]) -> list[Issue]:
 
     LAYOUT-001: flowchart/graph with @nodes > 20 and no ELK init → WARNING
     LAYOUT-002: flowchart/graph with @nodes > 40 and no ELK init → ERROR
+    LAYOUT-003: ELK flowchart with edgeRouting=POLYLINE (no override marker) → WARNING
     """
     issues: list[Issue] = []
     fname = str(path)
@@ -475,6 +546,16 @@ def check_layout_policy(path: Path, lines: list[str]) -> list[Issue]:
 
     # Check ELK presence
     has_elk = any(_ELK_RE.search(ln) for ln in lines)
+    edge_routing: str | None = None
+    for ln in lines:
+        match = _EDGE_ROUTING_VALUE_RE.search(ln)
+        if match:
+            edge_routing = match.group(1).upper()
+            break
+    allow_polyline = any(
+        "@allow-polyline-routing" in ln or "@allow-polyline" in ln
+        for ln in lines
+    )
 
     if not has_elk and nodes > ELK_ERROR_THRESHOLD:
         issues.append(
@@ -500,7 +581,126 @@ def check_layout_policy(path: Path, lines: list[str]) -> list[Issue]:
                 ),
             )
         )
+    elif has_elk and edge_routing == "POLYLINE" and not allow_polyline:
+        issues.append(
+            Issue(
+                file=fname,
+                severity="WARNING",
+                rule="LAYOUT-003",
+                message=(
+                    "ELK flowchart uses edgeRouting=POLYLINE; prefer ORTHOGONAL for "
+                    "consistent link geometry (add %% @allow-polyline-routing to opt out)"
+                ),
+            )
+        )
 
+    return issues
+
+
+def check_link_semantics(path: Path, lines: list[str]) -> list[Issue]:
+    """Check semantic arrow diversity in dense flowcharts — LINK-001 (WARNING).
+
+    For flowcharts with enough edges, using only one arrow style makes
+    interaction semantics hard to read.
+    """
+    issues: list[Issue] = []
+    fname = str(path)
+
+    if not _is_flowchart(lines):
+        return issues
+    if path.name.startswith("00-legend"):
+        return issues
+
+    edges = _iter_edge_lines(lines)
+    if len(edges) < 8:
+        return issues
+
+    has_solid = any("-->" in e for e in edges)
+    has_dashed = any("-.->" in e for e in edges)
+    has_thick = any("==>" in e for e in edges)
+    style_count = sum([has_solid, has_dashed, has_thick])
+
+    if style_count < 2:
+        # Some diagrams intentionally keep one arrow token and encode semantics
+        # via differentiated linkStyle groups. Treat that as semantically valid.
+        linkstyle_styles: set[str] = set()
+        for ln in lines:
+            m = _LINK_STYLE_FULL_RE.match(ln)
+            if not m:
+                continue
+            if m.group(1) == "default":
+                continue
+            linkstyle_styles.add(" ".join(m.group(2).split()))
+        if len(linkstyle_styles) >= 2:
+            return issues
+
+        issues.append(
+            Issue(
+                file=fname,
+                severity="WARNING",
+                rule="LINK-001",
+                message=(
+                    f"Flowchart has {len(edges)} edge(s) but only one arrow semantic style. "
+                    "Use a semantic mix (--> runtime, -.-> DI/implements, ==> critical data path)."
+                ),
+            )
+        )
+    return issues
+
+
+def check_linkstyle_index_fragility(path: Path, lines: list[str]) -> list[Issue]:
+    """Check brittle linkStyle index usage — LINK-002 (WARNING).
+
+    Long index lists in linkStyle are fragile: inserting one edge shifts indices.
+    """
+    issues: list[Issue] = []
+    fname = str(path)
+
+    if not _is_flowchart(lines):
+        return issues
+
+    groups: list[int] = []
+    styles: list[str] = []
+    for ln in lines:
+        m = _LINK_STYLE_FULL_RE.match(ln)
+        if not m:
+            continue
+        target = m.group(1)
+        style_payload = " ".join(m.group(2).split())
+        if target == "default":
+            continue
+        if re.fullmatch(r"\d+(,\d+)*", target):
+            groups.append(len(target.split(",")))
+            styles.append(style_payload)
+
+    if not groups:
+        return issues
+
+    singleton_count = sum(1 for g in groups if g == 1)
+    singleton_ratio = singleton_count / len(groups)
+    unique_styles = len(set(styles))
+
+    # Warn on brittle patterns only:
+    # - many singleton linkStyle lines (index-by-index mapping), or
+    # - many style lines with very low style diversity (typically repetitive copy-paste).
+    if (
+        len(groups) >= 20 and singleton_ratio >= 0.85 and unique_styles <= 3
+    ) or (
+        len(groups) >= 12 and singleton_ratio == 1.0 and unique_styles == 1
+    ):
+        issues.append(
+            Issue(
+                file=fname,
+                severity="WARNING",
+                rule="LINK-002",
+                message=(
+                    "Fragile linkStyle singleton-index pattern detected "
+                    f"(groups={groups}, singleton={singleton_count}/{len(groups)}, "
+                    f"styles={unique_styles}). "
+                    "Prefer grouped mappings and semantic arrow types."
+                ),
+            )
+        )
     return issues
 
 
@@ -605,6 +805,8 @@ def lint_file(path: Path, stale_days: int) -> list[Issue]:
     issues.extend(check_subgraph_emoji(path, lines))
     issues.extend(check_node_count_policy(path, lines))
     issues.extend(check_layout_policy(path, lines))
+    issues.extend(check_link_semantics(path, lines))
+    issues.extend(check_linkstyle_index_fragility(path, lines))
     issues.extend(check_nbsp_padding(path, lines))
     issues.extend(check_orphan_nodes(path, lines))
 
@@ -743,18 +945,24 @@ def main() -> int:
     args = parser.parse_args()
     targets = [Path(p) for p in args.paths] if args.paths else DIAGRAM_DIRS
 
+    def _out(message: str) -> None:
+        sys.stdout.write(f"{message}\n")
+
+    def _err(message: str) -> None:
+        sys.stderr.write(f"{message}\n")
+
     missing_targets = [t for t in targets if not t.exists()]
     if missing_targets:
         for target in missing_targets:
-            print(f"Error: {target} does not exist", file=sys.stderr)
+            _err(f"Error: {target} does not exist")
         return 2
 
     result = lint_paths(targets, args.stale_days)
 
     if args.json_output:
-        print(format_json(result))
+        _out(format_json(result))
     else:
-        print(format_text(result))
+        _out(format_text(result))
 
     return 1 if result.has_errors else 0
 

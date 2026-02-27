@@ -1379,6 +1379,7 @@ class MergeService:
 
             # Sort: seed columns first, then enrichers
             def sort_key(c: str) -> int:
+                """Return 0 for seed columns, 1 for enrichers."""
                 if seed_prefix and c.startswith(seed_prefix):
                     return 0  # Seed first
                 return 1  # Enrichers after
@@ -1450,6 +1451,7 @@ class MergeService:
 
             # Sort: enrichers first, seed last
             def sort_key(c: str) -> int:
+                """Return 1 for seed columns, 0 for enrichers."""
                 if seed_prefix and c.startswith(seed_prefix):
                     return 1  # Seed last
                 return 0  # Enrichers first

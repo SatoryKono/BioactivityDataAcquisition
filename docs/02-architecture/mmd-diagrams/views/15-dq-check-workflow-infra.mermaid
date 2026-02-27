@@ -1,33 +1,33 @@
 %% View: Infrastructure-Mapping | Parent: 15-dq-check-workflow-full.mermaid
-%% @uniform width=140 height=56 max_title_len=2 max_desc_lines=0
+%% @uniform width=220 height=64 max_title_len=24 max_desc_lines=1
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N9["P"]
+        N9["record_error_rate"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N1["B"]
-        N2["B1"]
-        N3["C"]
-        N4["B2"]
-        N5["B3"]
-        N6["B4"]
-        N7["A"]
-        N8["O"]
-        N10["Q"]
-        N11["J"]
-        N12["M"]
-        N13["I"]
-        N14["L"]
-        N15["K"]
-        N16["H"]
-        N17["D"]
-        N18["E"]
-        N19["F"]
-        N20["G"]
+        N1["Schema Validation"]
+        N2["Required Fields"]
+        N3["Error Rate"]
+        N4["Type Checks"]
+        N5["Value Rules"]
+        N6["Relation Checks"]
+        N7["Input Records"]
+        N8["dq_validation_score"]
+        N10["dq_duration_ms"]
+        N11["Pass + Warnings"]
+        N12["Quarantine"]
+        N13["Pass + Quarantine"]
+        N14["Silver Layer"]
+        N15["Fail Batch"]
+        N16["All Pass"]
+        N17["0% Errors"]
+        N18["<5% Errors"]
+        N19["5-20% Errors"]
+        N20[">20% Errors"]
     end
 
     N1 --> N2
@@ -56,25 +56,8 @@ flowchart TB
     style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
     style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
 
-    linkStyle 0 stroke:#1E293B,stroke-width:4px
-    linkStyle 1 stroke:#1E293B,stroke-width:4px
-    linkStyle 2 stroke:#1E293B,stroke-width:4px
-    linkStyle 3 stroke:#1E293B,stroke-width:4px
-    linkStyle 4 stroke:#1E293B,stroke-width:4px
-    linkStyle 5 stroke:#1E293B,stroke-width:4px
-    linkStyle 6 stroke:#1E293B,stroke-width:4px
-    linkStyle 7 stroke:#1E293B,stroke-width:4px
-    linkStyle 8 stroke:#1E293B,stroke-width:4px
-    linkStyle 9 stroke:#1E293B,stroke-width:4px
-    linkStyle 10 stroke:#1E293B,stroke-width:4px
-    linkStyle 11 stroke:#1E293B,stroke-width:4px
-    linkStyle 12 stroke:#1E293B,stroke-width:4px
-    linkStyle 13 stroke:#1E293B,stroke-width:4px
-    linkStyle 14 stroke:#1E293B,stroke-width:4px
-    linkStyle 15 stroke:#1E293B,stroke-width:4px
-    linkStyle 16 stroke:#1E293B,stroke-width:4px
-    linkStyle 17 stroke:#1E293B,stroke-width:4px
-    linkStyle 18 stroke:#1E293B,stroke-width:4px
-    linkStyle 19 stroke:#1E293B,stroke-width:4px
-    linkStyle 20 stroke:#1E293B,stroke-width:4px
-    linkStyle 21 stroke:#1E293B,stroke-width:4px
+    classDef process fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    classDef service fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+
+    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20 stroke:#1E293B,stroke-width:4px
+    linkStyle 21 stroke:#1E293B,stroke-width:4px,opacity:0.85

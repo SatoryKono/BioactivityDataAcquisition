@@ -43,7 +43,7 @@ src/bioetl/
 
 ## 2. Medallion Architecture
 
-> **Полная документация**: См. `docs/RULES.md` §2
+> **Полная документация**: См. `docs/00-project/RULES.md` §2
 
 - **Bronze**: JSONL + zstd, append-only, 90d retention
 - **Silver**: Delta Lake, merge/upsert по `content_hash`, ACID
@@ -56,7 +56,7 @@ src/bioetl/
 
 ## 3. Обработка Ошибок и Блокировки
 
-> **Полная документация**: См. `docs/RULES.md` §3
+> **Полная документация**: См. `docs/00-project/RULES.md` §3
 
 | Тип | Поведение |
 |-----|-----------|
@@ -71,7 +71,7 @@ src/bioetl/
 
 ## 4. Тестирование
 
-> **Полная документация**: См. `docs/RULES.md` §4.2
+> **Полная документация**: См. `docs/00-project/RULES.md` §4.2
 
 | Уровень | Директория |
 |---------|------------|

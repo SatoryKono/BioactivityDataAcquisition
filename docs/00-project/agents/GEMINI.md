@@ -29,7 +29,7 @@ Dependencies flows **inwards**.
 5.  **Interfaces** (`src/bioetl/interfaces`): CLI, Entrypoints. Depends on Application/Composition.
 
 ### strict Rules
-*   **Dependency Injection:** All dependencies MUST be injected via `--init--`.
+*   **Dependency Injection:** All dependencies MUST be injected via `__init__`.
 *   **No Global State:** Do not create dependencies inside classes.
 *   **Error Handling:**
     *   **Critical:** Fail pipeline (e.g., Auth failure).

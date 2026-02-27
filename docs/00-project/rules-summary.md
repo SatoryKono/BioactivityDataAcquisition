@@ -83,7 +83,7 @@
 ### Secrets
 
 - Источник: `os.environ`
-- Формат: `BIOETL-{PROVIDER}-{KEY}`
+- Формат: `BIOETL_{PROVIDER}_{KEY}`
 - **Хардкод MUST NOT. Файлы .env в git MUST NOT.**
 
 ### Disaster Recovery

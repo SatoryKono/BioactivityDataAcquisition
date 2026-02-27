@@ -35,7 +35,7 @@ if hasattr(storage, "clear-csv"):
 
 ### 1. Единый run-id от CLI до метаполей
 
-- `BasePipeline.--init--()` принимает `run-id` как обязательный параметр
+- `BasePipeline.__init__()` принимает `run-id` как обязательный параметр
 - `run-id` генерируется **только** в CLI (`cli.py:86`)
 - Все компоненты (logger, context, checkpoints, locks) используют один `run-id`
 
@@ -43,7 +43,7 @@ if hasattr(storage, "clear-csv"):
 
 ```python
 class BasePipeline(ABC):
-    def --init--(
+    def __init__(
         self,
         config: PipelineConfig,
         runtime: RuntimeConfig,
@@ -93,7 +93,7 @@ should-clear = self.-runtime.run-type in (RunType.REBUILD, RunType.BACKFILL)
 
 ### Negative
 
-- **Breaking Change**: Сигнатура `BasePipeline.--init--()` изменилась (4 параметра вместо 3)
+- **Breaking Change**: Сигнатура `BasePipeline.__init__()` изменилась (4 параметра вместо 3)
 - **Миграция тестов**: Все тесты, создающие pipeline напрямую, требуют обновления
 
 ### Risks

@@ -44,7 +44,7 @@
 **Создаёт:**
 ```
 src/bioetl/application/pipelines/{provider}/{entity}/
-├── --init--.py
+├── __init__.py
 ├── pipeline.py      # {Provider}{Entity}Pipeline
 ├── transformer.py   # {Provider}{Entity}Transformer
 └── config.py        # Config model
@@ -451,7 +451,7 @@ new-pipeline:
 Ссылки:
     - RULES.md §X.Y: {описание правила}
 """
-from --future-- import annotations
+from __future__ import annotations
 
 import argparse
 from pathlib import Path
@@ -491,7 +491,7 @@ Standalone скрипт (НЕ импортирует bioetl).
 Ссылки:
     - RULES.md §X.Y: {описание правила}
 """
-from --future-- import annotations
+from __future__ import annotations
 
 import argparse
 import logging

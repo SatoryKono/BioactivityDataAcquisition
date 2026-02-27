@@ -7,9 +7,12 @@ for .mmd files where:
   - ELK init directive is not already present
 
 Optionally overrides layout direction (TB → LR) for pipeline-style diagrams.
+Can also enforce a unified ELK edge routing mode for diagrams that already
+have ELK init directives.
 
 Usage:
     python src/tools/apply_elk_layout.py [--dry-run] [--threshold N] [--no-direction]
+    python src/tools/apply_elk_layout.py --enforce-routing ORTHOGONAL
 """
 
 from __future__ import annotations
@@ -30,13 +33,15 @@ ARCH_DIR = REPO_ROOT / "docs/02-architecture/mmd-diagrams/architecture"
 
 NODE_THRESHOLD = 20
 
-ELK_INIT = (
+DEFAULT_EDGE_ROUTING = "ORTHOGONAL"
+ROUTING_CHOICES = ("ORTHOGONAL", "POLYLINE")
+ELK_INIT_TEMPLATE = (
     "%%{init: {'layout': 'elk', 'theme': 'base', "
     "'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, "
     "'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', "
     "'cycleBreakingStrategy': 'GREEDY', 'direction': 'RIGHT', "
     "'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, "
-    "'edgeRouting': 'ORTHOGONAL'}}}%%"
+    "'edgeRouting': '__EDGE_ROUTING__'}}}%%"
 )
 
 # Diagrams whose content is a linear pipeline chain — better rendered LR.
@@ -55,7 +60,11 @@ _LR_RE = re.compile("|".join(LR_PATTERNS), re.IGNORECASE)
 
 _NODES_RE = re.compile(r"%%\s*@nodes\s+(\d+)")
 _GRAPH_LINE_RE = re.compile(r"^(graph|flowchart)\s+(TB|LR|BT|RL|TD)?", re.IGNORECASE)
-_ELK_ALREADY_RE = re.compile(r"%%\{init.*layout.*elk", re.IGNORECASE)
+_ELK_ALREADY_RE = re.compile(r"%%\{init:.*layout.*elk", re.IGNORECASE | re.DOTALL)
+_EDGE_ROUTING_RE = re.compile(
+    r"((?:['\"])?edgeRouting(?:['\"])?\s*:\s*['\"])([A-Za-z_]+)(['\"])",
+    re.IGNORECASE,
+)
 _DIAGRAM_TYPE_RE = re.compile(
     r"^(classDiagram|sequenceDiagram|stateDiagram|erDiagram|mindmap|gantt|pie|xychart)",
     re.IGNORECASE,
@@ -86,7 +95,7 @@ def is_flowchart(lines: list[str]) -> bool:
 
 
 def has_elk_init(lines: list[str]) -> bool:
-    return any(_ELK_ALREADY_RE.search(ln) for ln in lines)
+    return bool(_ELK_ALREADY_RE.search("\n".join(lines)))
 
 
 def find_graph_line_index(lines: list[str]) -> int | None:
@@ -101,15 +110,67 @@ def should_use_lr(stem: str) -> bool:
     return bool(_LR_RE.search(stem))
 
 
+def build_elk_init(edge_routing: str) -> str:
+    return ELK_INIT_TEMPLATE.replace("__EDGE_ROUTING__", edge_routing)
+
+
+def enforce_edge_routing(lines: list[str], edge_routing: str) -> tuple[list[str], bool, bool]:
+    """Replace ELK edgeRouting value in existing init block(s).
+
+    Returns: (new_lines, changed, found_edge_routing_field)
+    """
+    new_lines: list[str] = []
+    changed = False
+    found = False
+    target = edge_routing.upper()
+
+    for ln in lines:
+        if "edgeRouting" not in ln:
+            new_lines.append(ln)
+            continue
+
+        def _replace(match: re.Match[str]) -> str:
+            nonlocal changed, found
+            found = True
+            current = match.group(2).upper()
+            if current != target:
+                changed = True
+            return f"{match.group(1)}{target}{match.group(3)}"
+
+        new_lines.append(_EDGE_ROUTING_RE.sub(_replace, ln))
+
+    return new_lines, changed, found
+
+
 def apply_elk(
     fpath: Path,
     threshold: int,
     auto_direction: bool,
+    edge_routing: str | None,
     dry_run: bool,
 ) -> tuple[bool, str]:
     """Process one file. Returns (modified, reason)."""
     content = fpath.read_text(encoding="utf-8")
     lines = content.splitlines()
+
+    if not is_flowchart(lines):
+        return False, "not a flowchart/graph diagram"
+
+    changes: list[str] = []
+
+    if has_elk_init(lines):
+        if edge_routing is not None:
+            lines, changed, found = enforce_edge_routing(lines, edge_routing=edge_routing)
+            if changed:
+                changes.append(f"edgeRouting->{edge_routing}")
+            elif not found:
+                return False, "ELK init present but edgeRouting field not found"
+        if not changes:
+            return False, "ELK init already present"
+        new_content = "\n".join(lines).rstrip("\n") + "\n"
+        if not dry_run:
+            fpath.write_text(new_content, encoding="utf-8")
+        return True, f"changes=[{', '.join(changes)}]"
 
     nodes = parse_nodes(lines)
     if nodes is None:
@@ -118,20 +179,13 @@ def apply_elk(
     if nodes <= threshold:
         return False, f"@nodes={nodes} <= threshold {threshold}"
 
-    if not is_flowchart(lines):
-        return False, "not a flowchart/graph diagram"
-
-    if has_elk_init(lines):
-        return False, "ELK init already present"
-
     graph_idx = find_graph_line_index(lines)
     if graph_idx is None:
         return False, "graph declaration not found"
 
-    changes: list[str] = []
-
     # ── Insert ELK init directive before graph declaration ────────────────────
-    new_lines = lines[:graph_idx] + [ELK_INIT] + lines[graph_idx:]
+    selected_routing = edge_routing or DEFAULT_EDGE_ROUTING
+    new_lines = lines[:graph_idx] + [build_elk_init(selected_routing)] + lines[graph_idx:]
     changes.append("elk_init")
 
     # ── Optionally override direction ─────────────────────────────────────────
@@ -182,6 +236,15 @@ def main() -> None:
         default=ARCH_DIR,
         help=f"Source directory (default: {ARCH_DIR})",
     )
+    parser.add_argument(
+        "--enforce-routing",
+        choices=ROUTING_CHOICES,
+        default=None,
+        help=(
+            "Enforce ELK edge routing for flowcharts with existing ELK init "
+            "(e.g. ORTHOGONAL for consistent Manhattan-style links)"
+        ),
+    )
     args = parser.parse_args()
 
     files = sorted(args.dir.glob("*.mmd"))
@@ -191,14 +254,21 @@ def main() -> None:
     print(
         f"ELK LAYOUT {'(DRY RUN) ' if args.dry_run else ''}| "
         f"threshold=@nodes>{args.threshold} | "
-        f"direction_opt={'on' if auto_direction else 'off'}"
+        f"direction_opt={'on' if auto_direction else 'off'} | "
+        f"routing={'keep' if args.enforce_routing is None else args.enforce_routing}"
     )
     print("=" * 65)
 
     modified = skipped_threshold = skipped_elk = skipped_other = 0
 
     for f in files:
-        ok, reason = apply_elk(f, args.threshold, auto_direction, args.dry_run)
+        ok, reason = apply_elk(
+            f,
+            args.threshold,
+            auto_direction,
+            args.enforce_routing,
+            args.dry_run,
+        )
         if ok:
             modified += 1
             print(f"  [OK]   {f.name}  ({reason})")

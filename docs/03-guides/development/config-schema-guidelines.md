@@ -27,8 +27,8 @@ src/bioetl/infrastructure/schemas/
 ├── base-schemas.py      # Базовые классы (Single Source of Truth)
 ├── pipeline-config.py   # Расширенные классы для pipeline YAML
 ├── source-config.py     # Классы для configs/providers/*.yaml
-├── filter-config.py     # Классы для configs/filters/*.yaml
-├── dq-config.py         # Классы для configs/quality/*.yaml
+├── filter-config.py     # Классы для секций filters в configs/base|providers|entities
+├── dq-config.py         # Классы для секций quality в configs/base|providers|entities
 └── composite-config.py  # Классы для composite pipelines
 ```
 

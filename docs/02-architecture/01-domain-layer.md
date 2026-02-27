@@ -94,7 +94,7 @@ from bioetl.domain.ports.storage import StoragePort  # Запрещено!
 
 ```text
 src/bioetl/domain/aggregates/
-├── --init--.py
+├── __init__.py
 ├── batch.py             # Batch Aggregate (536 LOC)
 ├── pipeline-run.py      # PipelineRun Aggregate (574 LOC)
 ├── quarantine-entry.py  # QuarantineEntry Aggregate (517 LOC)

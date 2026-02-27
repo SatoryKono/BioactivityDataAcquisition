@@ -12,12 +12,12 @@
 BioETL содержит два каталога диаграмм с разными форматами и назначением:
 
 **Canonical sources** (`docs/02-architecture/mmd-diagrams/`):
-- `architecture/` — 18 canonical + 11 subdomain-decomposed = 29 `.mmd` файлов
+- `architecture/` — 32 `.mmd` файла (18 core + decomposed subdomain files)
 - `class-diagrams/` — 16 `.mmd` файлов (class diagram families)
-- `foundation/` — 59 `.mmd` файлов (historical + TOP-25)
-- Итого: **104 `.mmd` файла** (93 canonical по README)
+- `foundation/` — 54 `.mmd` файла (historical + TOP-25)
+- Итого: **103 `.mmd` файлов** (включая `_template.mmd`)
 
-**Decomposed views** (`docs/02-architecture/diagrams/mermaid/`):
+**Decomposed views** (`docs/02-architecture/mmd-diagrams/views/`):
 - 31 parent diagram × 5 views (`-full`, `-overview`, `-domain`, `-infra`, `-dataflow`)
 - + `00-legend.mermaid`
 - Итого: **156 `.mermaid` файлов**
@@ -76,18 +76,18 @@ mmd-diagrams/          ← canonical .mmd (rendered via render.sh)
   architecture/        ← system/component-level diagrams
   class-diagrams/      ← class structure diagrams
   foundation/          ← historical reference + TOP-25
+  views/               ← decomposed .mermaid views (foundation)
+    *-full.mermaid       ← полные reference копии
+    *-overview.mermaid   ← cross-layer overview
+    *-domain.mermaid     ← domain-layer focus
+    *-infra.mermaid      ← infrastructure-mapping focus
+    *-dataflow.mermaid   ← data flow focus
+    00-legend.mermaid    ← link types + code glossary
   _template.mmd        ← шаблон для новых диаграмм
-diagrams/mermaid/      ← decomposed .mermaid views (foundation)
-  *-full.mermaid       ← полные reference копии
-  *-overview.mermaid   ← cross-layer overview
-  *-domain.mermaid     ← domain-layer focus
-  *-infra.mermaid      ← infrastructure-mapping focus
-  *-dataflow.mermaid   ← data flow focus
-  00-legend.mermaid    ← link types + code glossary
 ```
 
 Новые **architecture views** создаются как `.mmd` в `mmd-diagrams/architecture/`.
-Foundation views создаются как `.mermaid` в `diagrams/mermaid/`.
+Foundation views создаются как `.mermaid` в `mmd-diagrams/views/`.
 
 ### D3: View-based Decomposition Rules
 
@@ -158,11 +158,12 @@ View-файлы с ≥3 типами связей и >5 соединениями
 |------|-------------|
 | SIZE-001 | Node count > 35 → ERROR |
 | SIZE-002 | Node count > 20 → WARN |
-| META-001 | Отсутствие `@version`/`@date`/`@type`/`@level` в `.mmd` → WARN |
-| META-002 | Отсутствие `%% View:` в `.mermaid` view-файле → WARN |
+| META-001 | Отсутствие structured metadata (`@...` для `.mmd`, `%% View:` для `.mermaid`) → WARN |
+| META-002 | Некорректный формат даты в `%% Updated:`/`%% @date` → ERROR |
 | COLOUR-001 | Использование deprecated pre-ADR-040 палитры в `style`/`classDef` → ERROR |
 | COLOUR-002 | Emoji в subgraph labels → ERROR |
 | GRAPH-001 | Orphan nodes (defined but not in any edge) в `flowchart`/`sequenceDiagram` → WARN |
+| NBSP-001 | Использование `&nbsp;`-padding в исходнике → ERROR |
 
 Примечание по реализации `SIZE-*`:
 - `*-full.mermaid` reference views исключены из `SIZE-001`/`SIZE-002`.
@@ -248,7 +249,7 @@ ELK (Eclipse Layout Kernel) SHOULD использоваться для `flowchar
 
 ### Positive
 
-- Единая палитра — нет визуальных конфликтов между `mmd-diagrams/` и `diagrams/mermaid/`
+- Единая палитра — нет визуальных конфликтов между canonical и decomposed наборами
 - linkStyle дифференциация даёт семантическое разделение (data / DI / orchestration)
 - CI предотвращает деградацию при добавлении новых диаграмм
 - `_template.mmd` стандартизирует создание новых диаграмм
@@ -257,14 +258,14 @@ ELK (Eclipse Layout Kernel) SHOULD использоваться для `flowchar
 ### Negative
 
 - Два каталога + два расширения — когнитивная нагрузка при навигации
-- Синхронизация `foundation/*.mmd` ↔ `diagrams/mermaid/*-full.mermaid` ручная
+- Синхронизация `foundation/*.mmd` ↔ `mmd-diagrams/views/*-full.mermaid` ручная
 - linkStyle индексы хрупкие: любое добавление/удаление связи требует пересчёта
 
 ### Risks
 
 - **linkStyle fragility**: изменение порядка связей ломает индексацию. Митигация: комментарий `%% linkStyle: ...` как проверочная документация
 - **Эвристика `@nodes`**: подсчёт узлов ±20% от реального (subgraph границы). Митигация: lint проверяет только >35 threshold
-- **Расхождение `-full.mermaid` с источником**: `foundation/*.mmd` и `diagrams/mermaid/*-full.mermaid` могут разойтись. Митигация: CI drift check (планируется)
+- **Расхождение `-full.mermaid` с источником**: `foundation/*.mmd` и `mmd-diagrams/views/*-full.mermaid` могут разойтись. Митигация: CI drift check (планируется)
 
 ---
 

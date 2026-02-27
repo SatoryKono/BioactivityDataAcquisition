@@ -1,7 +1,7 @@
 # BioETL Makefile
 # Production-ready ETL system for bioactivity data
 
-.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-preflight clean-all diagram-preflight lint-diagrams validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png diagrams-all report-diagram-padding
+.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png check-diagrams-visibility diagrams-all report-diagram-padding
 .DEFAULT_GOAL := help
 
 # Detect uv availability (preferred package manager)
@@ -191,6 +191,11 @@ lint-diagrams: ## Lint all Mermaid source files in docs/ (excluding docs/99-arch
 	@echo "$(BLUE)Linting diagram policies...$(NC)"
 	$(PY_RUN) scripts/lint_diagrams.py docs
 
+report-diagrams-policy: ## Generate non-blocking diagram lint summary report
+	@echo "$(BLUE)Generating diagram lint summary report...$(NC)"
+	$(PY_RUN) scripts/lint_diagrams.py docs/02-architecture/mmd-diagrams --json > /tmp/diagram-lint.json || true
+	$(PY_RUN) scripts/summarize_diagram_lint.py /tmp/diagram-lint.json
+
 validate-diagrams-syntax: diagram-preflight ## Validate Mermaid syntax for docs/**/*.mmd|*.mermaid
 	@echo "$(BLUE)Validating Mermaid syntax...$(NC)"
 	bash scripts/validate_mermaid_syntax.sh
@@ -209,7 +214,11 @@ render-diagrams-png: diagram-preflight ## Render all docs diagrams to PNG only
 	@echo "$(BLUE)Rendering all diagrams (PNG only)...$(NC)"
 	bash docs/02-architecture/mmd-diagrams/render.sh --png-only
 
-diagrams-all: lint-diagrams validate-diagrams-syntax render-diagrams-all ## Full diagram pipeline (lint + validate + render)
+check-diagrams-visibility: ## Check text visibility in baseline SVG smoke set
+	@echo "$(BLUE)Checking SVG text visibility (smoke manifest)...$(NC)"
+	$(PY_RUN) scripts/check_svg_text_visibility.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
+
+diagrams-all: lint-diagrams validate-diagrams-syntax render-diagrams-all check-diagrams-visibility ## Full diagram pipeline (lint + validate + render + visibility check)
 	@echo "$(GREEN)Diagram pipeline complete.$(NC)"
 
 report-diagram-padding: ## Report top files by &nbsp; usage in Mermaid sources

@@ -14,7 +14,7 @@ To build a robust, scalable, and maintainable data pipeline for acquiring and pr
 - [**Project Rules**](RULES.md): The constitution of our project (SSOT). All contributions **MUST** adhere to these rules.
 - [**Quick Start Guide**](../03-guides/quick-start.md): Get your local development environment up and running in minutes.
 - [**Architecture Overview**](../02-architecture/system-context.md): Understand the high-level design and data flow.
-- [**How-To Guides**](../03-guides/): Guides for common tasks (adding sources, pipelines, troubleshooting).
+- [**How-To Guides**](../03-guides/getting-started.md): Guides for common tasks (adding sources, pipelines, troubleshooting).
 
 ## Key Features
 

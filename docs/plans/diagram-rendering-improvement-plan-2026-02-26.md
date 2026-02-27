@@ -4,6 +4,10 @@ Updated: 2026-02-26
 Owner: Docs/Architecture tooling
 Scope: Mermaid diagram workflow in `docs/**`
 
+## Related Consolidated Plan
+
+- Detailed consolidated workflow plan (10000+ words): `docs/plans/diagram-workflow-corrective-master-plan-2026-02-27.md`
+
 ## Goal
 
 Bring diagram rendering and visual quality workflow to a single, enforceable, CI-stable pipeline aligned with ADR-040.

@@ -1,20 +1,21 @@
 %% View: Domain-Focus | Parent: 34-batch-processing-flow-full.mermaid
-%% @uniform width=144 height=56 max_title_len=13 max_desc_lines=0
+%% @uniform width=232 height=64 max_title_len=28 max_desc_lines=1
+%%{init: {'theme':'base','layout':'elk','flowchart':{'curve':'linear'},'elk':{'nodePlacementStrategy':'BRANDES_KOEPF','mergeEdges':true,'edgeRouting':'ORTHOGONAL'}}}%%
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
         N2["errors"]
         N3["error_count"]
-        N5["BE"]
-        N6["BT"]
-        N8["BTM"]
-        N9["DS"]
-        N10["Trans"]
-        N11["br"]
+        N5["BatchExecutor"]
+        N6["BatchTransformer"]
+        N8["BatchTracingManager"]
+        N9["DataSourcePort"]
+        N10["BaseTransformer"]
+        N11["BronzeWriter"]
         N12["filter_ids"]
-        N13["strip"]
-        N14["dates"]
+        N13["strip_values"]
+        N14["normalize_dates"]
         N15["_run_type"]
         N16["_ingestion_ts"]
         N19["primary_keys"]
@@ -23,15 +24,15 @@ flowchart TB
     subgraph Application["Application Layer"]
         direction TB
         N4["batch_num"]
-        N1["Runner"]
+        N1["PipelineRunner"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N7["BW"]
-        N17["Bronze"]
-        N18["Silver"]
-        N20["Gold"]
+        N7["BatchWriter"]
+        N17["Bronze Layer"]
+        N18["Silver Layer"]
+        N20["Gold Layer"]
     end
 
     N1 --> N5
@@ -64,28 +65,5 @@ flowchart TB
     style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
     style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
 
-    linkStyle 0 stroke:#1E293B,stroke-width:4px
-    linkStyle 1 stroke:#1E293B,stroke-width:4px
-    linkStyle 2 stroke:#1E293B,stroke-width:4px
-    linkStyle 3 stroke:#1E293B,stroke-width:4px
-    linkStyle 4 stroke:#1E293B,stroke-width:4px
-    linkStyle 5 stroke:#1E293B,stroke-width:4px
-    linkStyle 6 stroke:#1E293B,stroke-width:4px
-    linkStyle 7 stroke:#1E293B,stroke-width:4px
-    linkStyle 8 stroke:#1E293B,stroke-width:4px
-    linkStyle 9 stroke:#1E293B,stroke-width:4px
-    linkStyle 10 stroke:#1E293B,stroke-width:4px
-    linkStyle 11 stroke:#1E293B,stroke-width:4px
-    linkStyle 12 stroke:#1E293B,stroke-width:4px
-    linkStyle 13 stroke:#1E293B,stroke-width:4px
-    linkStyle 14 stroke:#1E293B,stroke-width:4px
-    linkStyle 15 stroke:#1E293B,stroke-width:4px
-    linkStyle 16 stroke:#1E293B,stroke-width:4px
-    linkStyle 17 stroke:#1E293B,stroke-width:4px
-    linkStyle 18 stroke:#1E293B,stroke-width:4px
-    linkStyle 19 stroke:#1E293B,stroke-width:4px
-    linkStyle 20 stroke:#1E293B,stroke-width:4px
-    linkStyle 21 stroke:#1E293B,stroke-width:4px
-    linkStyle 22 stroke:#1E293B,stroke-width:4px
-    linkStyle 23 stroke:#1E293B,stroke-width:4px
-    linkStyle 24 stroke:#1E293B,stroke-width:4px
+    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 stroke:#1E293B,stroke-width:4px
+    linkStyle 24 stroke:#1E293B,stroke-width:4px,opacity:0.85

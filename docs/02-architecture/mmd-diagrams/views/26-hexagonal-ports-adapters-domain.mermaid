@@ -1,33 +1,33 @@
 %% View: Domain-Focus | Parent: 26-hexagonal-ports-adapters-full.mermaid
-%% @uniform width=140 height=56 max_title_len=5 max_desc_lines=0
+%% @uniform width=232 height=64 max_title_len=24 max_desc_lines=1
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N1["DQM"]
-        N3["DSP"]
-        N11["SP"]
-        N15["DRP"]
-        N17["LP"]
-        N19["CPP"]
+        N1["DQMonitorPort"]
+        N3["DataSourcePort"]
+        N11["StoragePort"]
+        N15["DeltaReaderPort"]
+        N17["LockPort"]
+        N19["CheckpointPort"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N2["DQMon"]
-        N4["CA"]
-        N5["PCA"]
-        N6["UA"]
-        N7["PMA"]
-        N8["CRA"]
-        N9["OAA"]
-        N10["SSA"]
-        N12["BW"]
-        N13["SW"]
-        N14["GW"]
-        N16["DR"]
-        N18["ML"]
-        N20["LC"]
+        N2["DataQualityMonitor"]
+        N4["ChemblAdapter"]
+        N5["PubchemAdapter"]
+        N6["UniprotAdapter"]
+        N7["PubmedAdapter"]
+        N8["CrossRefAdapter"]
+        N9["OpenAlexAdapter"]
+        N10["SemanticScholarAdapter"]
+        N12["BronzeWriter"]
+        N13["SilverWriter"]
+        N14["GoldWriter"]
+        N16["DeltaReader"]
+        N18["MemoryLock"]
+        N20["LocalCheckpoint"]
     end
 
     N3 --> N4
@@ -48,17 +48,8 @@ flowchart TB
     style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
     style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
 
-    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 8 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 10 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 11 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 12 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 13 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    classDef process fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    classDef service fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+
+    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 13 stroke:#475569,stroke-width:2px,stroke-dasharray:5,opacity:0.85

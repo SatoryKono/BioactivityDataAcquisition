@@ -128,7 +128,7 @@ Use this checklist when reviewing new or modified pipelines.
 ## 12. Security (RULES.md §5.2, §5.4)
 
 - [ ] No hardcoded secrets
-- [ ] Secrets via environment variables (`BIOETL-{PROVIDER}-{KEY}`)
+- [ ] Secrets via environment variables (`BIOETL_{PROVIDER}_{KEY}`)
 - [ ] PII fields salted in Silver: `sha256(lowercase(value) + SALT)`
 - [ ] PII excluded or aggregated in Gold
 - [ ] No secrets in logs

@@ -12,7 +12,7 @@ A complete, production-ready Model Context Protocol server for Neo4j memory mana
 ```
 .ai/mcp/neo4j-memory/
 ├── src/mcp-neo4j-memory/              ← Main Python Package
-│   ├── --init--.py                    (Package exports)
+│   ├── __init__.py                    (Package exports)
 │   ├── main.py                        (CLI entry point: mcp-neo4j-memory)
 │   ├── server.py                      (12 MCP tools implementation)
 │   ├── neo4j-connection.py             (Neo4j driver wrapper with health checks)
@@ -35,7 +35,7 @@ A complete, production-ready Model Context Protocol server for Neo4j memory mana
 │   ├── examples.py                    (Python usage examples)
 │   ├── server.js                      (Node.js alternative)
 │   ├── memory.json                    (Configuration storage)
-│   └── --init--.py                    (Legacy package marker)
+│   └── __init__.py                    (Legacy package marker)
 ```
 
 ---

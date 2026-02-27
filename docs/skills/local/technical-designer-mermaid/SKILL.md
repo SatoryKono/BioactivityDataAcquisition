@@ -61,7 +61,7 @@ Otherwise use generic Mermaid mode.
 - View decomposition outputs go to `mmd-diagrams/views/` as `-full/-overview/-domain/-infra/-dataflow`.
 
 3. Enforce metadata contract.
-- For `.mermaid`, include:
+- For `.mmd`, include:
   - `%% @version`
   - `%% @date` in `YYYY-MM-DD`
   - `%% @type`
@@ -89,14 +89,14 @@ Otherwise use generic Mermaid mode.
 - Preserve or improve label readability and avoid unnecessary crossing.
 
 7. Run project quality gate after edits.
-- `python scripts/lint-diagrams.py docs`
-- `bash scripts/validate-mermaid-syntax.sh`
+- `python scripts/lint_diagrams.py docs`
+- `bash scripts/validate_mermaid_syntax.sh`
 - `bash docs/02-architecture/mmd-diagrams/render.sh` (or targeted render command)
 - Optional smoke check:
-  - `python scripts/check-diagram-visual-smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`
+  - `python scripts/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`
 
 8. Respect repository delivery rules.
-- If source `.mermaid/.mermaid` changed, ensure rendered `svg/png` outputs are updated in commit.
+- If source `.mmd/.mermaid` changed, ensure rendered `svg/png` outputs are updated in commit.
 - Resolve or explicitly justify orphan nodes (`GRAPH-001`) using `%% keep-orphan: ...` only when intentional.
 
 ## Output Rules

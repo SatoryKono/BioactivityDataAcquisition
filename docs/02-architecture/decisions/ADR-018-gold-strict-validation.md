@@ -151,8 +151,8 @@ class SchemaValidationError(BioETLError):
     - Отсутствии обязательных полей
     """
 
-    def --init--(self, message: str, field: str | None = None):
-        super().--init--(message)
+    def __init__(self, message: str, field: str | None = None):
+        super().__init__(message)
         self.field = field
 
 ### 7. Политика историчности Gold (SCD2)
@@ -267,7 +267,7 @@ import pandera as pa
 class GoldValidator:
     """Валидатор Gold-схем на основе Pandera."""
 
-    def --init--(self, schema: GoldSchema):
+    def __init__(self, schema: GoldSchema):
         self.-pandera-schema = self.-build-pandera-schema(schema)
 
     def validate(self, df: pl.DataFrame) -> ValidationResult:

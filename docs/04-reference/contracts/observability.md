@@ -216,7 +216,7 @@
 
 ## Health Check Metrics (MAY)
 
-### bioetl-health-check-duration-seconds
+### bioetl-health_check-duration-seconds
 
 | Свойство | Значение |
 |----------|----------|
@@ -224,7 +224,7 @@
 | Описание | Длительность health check адаптеров |
 | Labels | `adapter` |
 
-### bioetl-health-check-status
+### bioetl-health_check-status
 
 | Свойство | Значение |
 |----------|----------|
