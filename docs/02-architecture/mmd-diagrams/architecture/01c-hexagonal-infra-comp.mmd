@@ -6,7 +6,7 @@
 %% @type    flowchart
 %% @level   System / Component
 %% @view    infra-comp
-%% @parent  01-high-level-hexagonal.mmd
+%% @parent  01-high-level-hexagonal-full.mmd
 %% @nodes   14
 %% @uniform width=200 height=56 max_title_len=20 max_desc_lines=1
 
@@ -48,7 +48,7 @@ graph TB
     AUDIT -->|implements| PORTS
 
     classDef infra fill:#fff1f2,stroke:#dc2626
-    classDef comp fill:#fff7ed,stroke:#f59e0b
+    classDef comp fill:#fff7ed,stroke:#ea580c
 
     class BOOTSTRAP,FACTORIES,PROVIDERS,RT_BUILDERS comp
     class ADAPTERS,STORAGE,OBS_INFRA,RESILIENCE,SECURITY,CHECKPOINT,LOCKING,AUDIT,VALIDATION infra

@@ -2,11 +2,11 @@
 
 ## High-Level Architecture
 
-> **Diagram:** See [`01-high-level-hexagonal.mmd`](mmd-diagrams/architecture/01-high-level-hexagonal.mmd)
+> **Diagram:** See [`01-high-level-hexagonal-full.mmd`](mmd-diagrams/architecture/01-high-level-hexagonal-full.mmd)
 
 ## Medallion Architecture
 
-> **Diagram:** See [`03-medallion-data-flow.mmd`](mmd-diagrams/architecture/03-medallion-data-flow.mmd)
+> **Diagram:** See [`03-medallion-data-flow-full.mmd`](mmd-diagrams/architecture/03-medallion-data-flow-full.mmd)
 
 ## Class Diagram
 
@@ -28,7 +28,7 @@ Shows the complete execution flow from CLI to data storage:
 
 Shows data transformation through Bronze → Silver → Gold layers:
 
-> **Diagram:** See [`03-medallion-data-flow.mmd`](mmd-diagrams/architecture/03-medallion-data-flow.mmd)
+> **Diagram:** See [`03-medallion-data-flow-full.mmd`](mmd-diagrams/architecture/03-medallion-data-flow-full.mmd)
 > *(detailed version with DQ and quarantine)*
 
 ## Domain Layer (DDD)

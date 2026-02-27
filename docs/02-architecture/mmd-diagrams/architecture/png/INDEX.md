@@ -4,7 +4,7 @@ _Generated: 2026-02-27T18:43:48+03:00_
 
 ## High Level Hexagonal
 
-![01-high-level-hexagonal](./01-high-level-hexagonal.png)
+![01-high-level-hexagonal](./01-high-level-hexagonal-full.png)
 
 ---
 
@@ -34,7 +34,7 @@ _Generated: 2026-02-27T18:43:48+03:00_
 
 ## Medallion Data Flow
 
-![03-medallion-data-flow](./03-medallion-data-flow.png)
+![03-medallion-data-flow](./03-medallion-data-flow-full.png)
 
 ---
 
@@ -118,7 +118,7 @@ _Generated: 2026-02-27T18:43:48+03:00_
 
 ## Port Protocol Contracts
 
-![13-port-protocol-contracts](./13-port-protocol-contracts.png)
+![13-port-protocol-contracts](./13-port-protocol-contracts-full.png)
 
 ---
 

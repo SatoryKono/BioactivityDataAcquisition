@@ -2,7 +2,7 @@
 
 Эта диаграмма детализирует "Систему BioETL", представленную на диаграмме контекста. Она показывает основные контейнеры (приложения и хранилища данных), которые составляют систему BioETL, и их взаимодействие.
 
-> **Diagram:** See [`01-high-level-hexagonal.mmd`](mmd-diagrams/architecture/01-high-level-hexagonal.mmd)
+> **Diagram:** See [`01-high-level-hexagonal-full.mmd`](mmd-diagrams/architecture/01-high-level-hexagonal-full.mmd)
 > *(rendered не публикуются; используй source `.mmd`)*
 
 ## Компоненты

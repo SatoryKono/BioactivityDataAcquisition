@@ -143,7 +143,7 @@ Ports & Adapters паттерн - ключевой архитектурный п
 
 ### 1.4 Medallion Architecture Overview
 
-> **Diagram:** See [`03-medallion-data-flow.mermaid`](mmd-diagrams/architecture/03-medallion-data-flow.mmd)
+> **Diagram:** See [`03-medallion-data-flow.mermaid`](mmd-diagrams/architecture/03-medallion-data-flow-full.mmd)
 
 **Приоритет:** 9.38 | **Тип:** Flowchart
 
@@ -184,7 +184,7 @@ Bronze → Silver → Gold уровни хранения данных.
 - Delta Time Travel (7-day history)
 - VACUUM cleanup (weekly)
 
-**Файл:** [`docs/02-architecture/mmd-diagrams/architecture/03-medallion-data-flow.mermaid`](mmd-diagrams/architecture/03-medallion-data-flow.mmd)
+**Файл:** [`docs/02-architecture/mmd-diagrams/architecture/03-medallion-data-flow.mermaid`](mmd-diagrams/architecture/03-medallion-data-flow-full.mmd)
 
 ----------------------------------------------------------------------
 

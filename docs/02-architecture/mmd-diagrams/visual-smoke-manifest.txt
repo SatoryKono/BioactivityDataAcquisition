@@ -23,10 +23,10 @@ docs/02-architecture/mmd-diagrams/foundation/svg/46-yaml-config-resolution.svg
 docs/02-architecture/mmd-diagrams/foundation/svg/50-exception-hierarchy.svg
 
 # architecture/
-docs/02-architecture/mmd-diagrams/architecture/svg/03-medallion-data-flow.svg
+docs/02-architecture/mmd-diagrams/architecture/svg/03-medallion-data-flow-full.svg
 docs/02-architecture/mmd-diagrams/architecture/svg/11-configuration-system.svg
 docs/02-architecture/mmd-diagrams/architecture/svg/12-bootstrap-di-container.svg
-docs/02-architecture/mmd-diagrams/architecture/svg/13-port-protocol-contracts.svg
+docs/02-architecture/mmd-diagrams/architecture/svg/13-port-protocol-contracts-full.svg
 docs/02-architecture/mmd-diagrams/architecture/svg/18-lock-checkpoint-shutdown.svg
 
 # class-diagrams/

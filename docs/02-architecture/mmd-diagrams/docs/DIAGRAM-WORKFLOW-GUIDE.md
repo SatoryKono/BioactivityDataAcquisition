@@ -88,7 +88,7 @@
 | Domain | `#f5f3ff` | `#7c3aed` (Purple) | Бизнес-логика, entities, value objects |
 | Application | `#f0fdf4` | `#16a34a` (Green) | Сервисы, оркестрация, use cases |
 | Infrastructure | `#fff1f2` | `#dc2626` (Red) | Адаптеры, клиенты, хранилище |
-| Composition | `#fff7ed` | `#f59e0b` (Orange) | Фабрики, DI, сборка |
+| Composition | `#fff7ed` | `#ea580c` (Orange) | Фабрики, DI, сборка |
 | Interfaces | `#eff6ff` | `#2563eb` (Blue) | CLI, API, внешние интерфейсы |
 | External | `#f1f5f9` | `#64748b` (Gray) | Сторонние системы |
 
@@ -96,7 +96,7 @@
 
 | Слой | Fill | Stroke |
 |------|------|--------|
-| Bronze | `#fff7ed` | `#f59e0b` (Orange) |
+| Bronze | `#fff7ed` | `#ea580c` (Orange) |
 | Silver | `#f8fafc` | `#475569` (Slate) |
 | Gold | `#fefce8` | `#ca8a04` (Amber) |
 | Quarantine | `#ffe4e6` | `#e11d48` (Red) |
@@ -280,7 +280,7 @@ python scripts/prune_orphan_nodes.py --grandfather   # Пометить все �
 При превышении 35 нод диаграмма разбивается на субдоменные файлы с суффиксами `a`, `b`, `c`, `d`. Пример:
 
 ```
-13-port-protocol-contracts.mmd      → основной (до 35 нод)
+13-port-protocol-contracts-full.mmd      → основной (до 35 нод)
 13a-port-contracts-data-sources.mmd → фокус на data source ports
 13b-port-contracts-storage.mmd      → фокус на storage ports
 13c-port-contracts-observability.mmd → фокус на observability

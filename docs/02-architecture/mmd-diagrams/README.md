@@ -14,9 +14,9 @@ Render them with any Mermaid-compatible viewer, IDE plugin, or the [Mermaid Live
 
 | # | Diagram | File | Description |
 |---|---------|------|-------------|
-| 1 | High-Level Hexagonal Architecture | `architecture/01-high-level-hexagonal.mmd` | Full system overview: layers, external systems, dependency directions |
+| 1 | High-Level Hexagonal Architecture | `architecture/01-high-level-hexagonal-full.mmd` | Full system overview: layers, external systems, dependency directions |
 | 2 | Layer Dependency Matrix | `architecture/02-layer-dependency-matrix.mmd` | ARCH-001 import boundary enforcement |
-| 3 | Medallion Data Flow | `architecture/03-medallion-data-flow.mmd` | Bronze → Silver → Gold pipeline with DQ and quarantine |
+| 3 | Medallion Data Flow | `architecture/03-medallion-data-flow-full.mmd` | Bronze → Silver → Gold pipeline with DQ and quarantine |
 | 4 | Pipeline Execution Flow | `architecture/04-pipeline-execution-flow.mmd` | Sequence diagram: preflight → lock → execute → postrun → cleanup |
 | 5 | Provider Adapter Hierarchy | `architecture/05-provider-adapter-hierarchy.mmd` | All 7 provider adapters, base classes, mixins, decorators |
 | 6 | Storage Layer | `architecture/06-storage-layer.mmd` | Bronze/Silver/Gold writers, Delta Lake, metadata, validation |
@@ -26,7 +26,7 @@ Render them with any Mermaid-compatible viewer, IDE plugin, or the [Mermaid Live
 | 10 | Resilience Patterns | `architecture/10-resilience-patterns.mmd` | Circuit breaker, rate limiter, retry, health checks |
 | 11 | Configuration System | `architecture/11-configuration-system.mmd` | YAML configs → loaders → Pydantic schemas → domain config |
 | 12 | Bootstrap / DI Container | `architecture/12-bootstrap-di-container.mmd` | Composition root: factories, assembly, wiring |
-| 13 | Port/Protocol Contracts | `architecture/13-port-protocol-contracts.mmd` | All 29 domain ports mapped to their implementations |
+| 13 | Port/Protocol Contracts | `architecture/13-port-protocol-contracts-full.mmd` | All 29 domain ports mapped to their implementations |
 | 14 | CLI / Interface Layer | `architecture/14-cli-interface-layer.mmd` | CLI commands, routing to application services |
 | 15 | BatchExecutor Internals | `architecture/15-batch-executor-internals.mmd` | Executor composition: transformer, writer, memory, metrics |
 | 16 | Transformer Hierarchy | `architecture/16-transformer-hierarchy.mmd` | Template Method pattern, all provider transformers, extractors |
@@ -39,10 +39,10 @@ Parent diagrams remain canonical references. Sub-files provide focused, low-dens
 
 | Parent (canonical) | Decomposed sub-files |
 |---|---|
-| `architecture/01-high-level-hexagonal.mmd` | `architecture/01a-hexagonal-overview.mmd`, `architecture/01b-hexagonal-domain-app.mmd`, `architecture/01c-hexagonal-infra-comp.mmd` |
+| `architecture/01-high-level-hexagonal-full.mmd` | `architecture/01a-hexagonal-overview.mmd`, `architecture/01b-hexagonal-domain-app.mmd`, `architecture/01c-hexagonal-infra-comp.mmd` |
 | `architecture/05-provider-adapter-hierarchy.mmd` | `architecture/05a-adapter-hierarchy-base.mmd`, `architecture/05b-adapter-hierarchy-providers.mmd` |
 | `architecture/12-bootstrap-di-container.mmd` | `architecture/12a-bootstrap-factories.mmd`, `architecture/12b-bootstrap-wiring.mmd` |
-| `architecture/13-port-protocol-contracts.mmd` | `architecture/13a-port-contracts-data-sources.mmd`, `architecture/13b-port-contracts-storage.mmd`, `architecture/13c-port-contracts-observability.mmd`, `architecture/13d-port-contracts-services.mmd` |
+| `architecture/13-port-protocol-contracts-full.mmd` | `architecture/13a-port-contracts-data-sources.mmd`, `architecture/13b-port-contracts-storage.mmd`, `architecture/13c-port-contracts-observability.mmd`, `architecture/13d-port-contracts-services.mmd` |
 
 ## Class Diagrams (16 families)
 
@@ -148,14 +148,14 @@ Historical/foundational diagrams consolidated from `docs/02-architecture/diagram
 | Application    | Green  | `#f0fdf4` | `#16a34a` |
 | Infrastructure | Red    | `#fff1f2` | `#dc2626` |
 | Interfaces     | Blue   | `#eff6ff` | `#2563eb` |
-| Composition    | Orange | `#fff7ed` | `#f59e0b` |
+| Composition    | Orange | `#fff7ed` | `#ea580c` |
 | External       | Gray   | `#f1f5f9` | `#64748b` |
 
 ### Medallion Layers
 
 | Layer      | Fill      | Border    |
 |------------|-----------|-----------|
-| Bronze     | `#fff7ed` | `#f59e0b` |
+| Bronze     | `#fff7ed` | `#ea580c` |
 | Silver     | `#f8fafc` | `#475569` |
 | Gold       | `#fefce8` | `#ca8a04` |
 | Quarantine | `#ffe4e6` | `#e11d48` |
@@ -196,7 +196,7 @@ make render-diagrams-svg
 bash docs/02-architecture/mmd-diagrams/render.sh
 
 # Single diagram with theme
-mmdc -i docs/02-architecture/mmd-diagrams/architecture/01-high-level-hexagonal.mmd \
+mmdc -i docs/02-architecture/mmd-diagrams/architecture/01-high-level-hexagonal-full.mmd \
      -o output.svg \
      -c docs/02-architecture/mmd-diagrams/theme/mermaid-config.json \
      --cssFile docs/02-architecture/mmd-diagrams/theme/custom.css

@@ -393,7 +393,7 @@ def check_node_count_policy(path: Path, lines: list[str]) -> list[Issue]:
     fname = str(path)
 
     # Keep full reference views exempt from density limits.
-    if path.name.endswith("-full.mermaid"):
+    if path.name.endswith("-full.mermaid") or path.name.endswith("-full.mmd"):
         return issues
     if path.name.startswith("00-legend"):
         return issues

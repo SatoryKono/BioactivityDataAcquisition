@@ -10,7 +10,7 @@ Medallion Architecture — трёхслойная модель хранения 
 
 ## Medallion Architecture Diagram
 
-> **Diagram:** See [`03-medallion-data-flow.mmd`](mmd-diagrams/architecture/03-medallion-data-flow.mmd)
+> **Diagram:** See [`03-medallion-data-flow-full.mmd`](mmd-diagrams/architecture/03-medallion-data-flow-full.mmd)
 > *(rendered не публикуются; используй source `.mmd`)*
 
 ----------------------------------------------------------------------

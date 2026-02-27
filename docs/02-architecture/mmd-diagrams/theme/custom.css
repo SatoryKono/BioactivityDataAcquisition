@@ -254,7 +254,7 @@ marker path {
 
 [id*="Composition"] > rect {
     fill: #fff7ed !important;
-    stroke: #f59e0b !important;
+    stroke: #ea580c !important;
 }
 
 [id*="Interfaces"] > rect {
@@ -270,7 +270,7 @@ marker path {
 /* Medallion colours for data-flow diagrams */
 [id*="Bronze"] > rect {
     fill: #fff7ed !important;
-    stroke: #f59e0b !important;
+    stroke: #ea580c !important;
 }
 
 [id*="Silver"] > rect {
