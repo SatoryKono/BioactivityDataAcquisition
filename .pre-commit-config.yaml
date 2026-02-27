@@ -121,6 +121,13 @@ repos:
         language: python
         files: ^docs/02-architecture/(mmd-diagrams/.*\.mmd|diagrams/mermaid/.*\.mermaid)$
 
+      - id: validate-diagrams
+        name: Validate diagrams (source + metadata policy)
+        entry: bash scripts/validate_diagrams.sh
+        language: system
+        files: '\.(mermaid|mmd|png|svg)$'
+        pass_filenames: false
+
       - id: prune-orphan-diagram-nodes
         name: Check for orphan nodes in Mermaid diagrams (GRAPH-001)
         entry: python scripts/prune_orphan_nodes.py --check
