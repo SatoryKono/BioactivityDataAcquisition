@@ -6,6 +6,13 @@ For each diagram file, determines the maximum width (by longest visible text
 line) and maximum height (by most content lines) across all objects, then
 pads every object to those dimensions using &nbsp; characters.
 
+Supports groupwise sizing: when @uniform-group tags are present, objects
+within each group are normalized to their group's max height rather than
+the global max. Width strategy can be controlled via:
+  %% @uniform-width global   (default, globally uniform width)
+  %% @uniform-width group    (group-local width)
+Objects not assigned to any group go into an implicit "default" group.
+
 Supports two diagram types:
   - classDiagram:  class Name { ... } blocks
   - flowchart/graph:  ID["Label<br/>line2<br/>..."] nodes
@@ -25,6 +32,10 @@ Usage:
 
     # Process specific directory
     python scripts/uniform_diagram_sizes.py --fix --dir docs/.../class-diagrams
+
+Groupwise sizing (add to .mmd file header):
+    %% @uniform-group base    nodes=BaseHttpAdapter,BaseSyncAdapter
+    %% @uniform-group adapter nodes=ChemblAdapter,PubMedAdapter,...
 """
 from __future__ import annotations
 
@@ -59,8 +70,14 @@ _CLASS_DIAGRAM_RE = re.compile(r"^\s*classDiagram\b", re.IGNORECASE)
 _FLOWCHART_RE = re.compile(r"^\s*(graph|flowchart)\b", re.IGNORECASE)
 _CLASS_BLOCK_START_RE = re.compile(r"^\s+class\s+(\w+)\s*\{")
 _CLASS_BLOCK_END_RE = re.compile(r"^\s+\}")
-_UNIFORM_TAG_RE = re.compile(
-    r"^(%% @uniform\b).*$"
+_UNIFORM_TAG_RE = re.compile(r"^%% @uniform(?:\s|$).*$")
+_UNIFORM_STATS_RE = re.compile(r"^%% @uniform-stats\b.*$")
+_UNIFORM_GROUP_RE = re.compile(
+    r"^%%\s*@uniform-group\s+(\S+)\s+nodes=(.+)$"
+)
+_UNIFORM_WIDTH_RE = re.compile(
+    r"^%%\s*@uniform-width\s+(global|group|grouped)\s*$",
+    re.IGNORECASE,
 )
 _NBSP = "&nbsp;"
 
@@ -118,6 +135,77 @@ class UniformStats:
     max_visible_width: int  # in characters (longest line across all objects)
     max_total_body: int  # total body lines (stereotype + content) max
     max_title_len: int  # longest class/node name
+
+
+@dataclass
+class UniformGroup:
+    """A named group of objects that share uniform height."""
+
+    name: str
+    node_names: set[str]
+
+
+# ── Group parsing ──────────────────────────────────────────────────────────
+
+
+def _parse_uniform_groups(lines: list[str]) -> list[UniformGroup]:
+    """Parse all @uniform-group tags from file header comments."""
+    groups: list[UniformGroup] = []
+    for line in lines:
+        m = _UNIFORM_GROUP_RE.match(line.strip())
+        if m:
+            group_name = m.group(1)
+            node_names = {n.strip() for n in m.group(2).split(",") if n.strip()}
+            groups.append(UniformGroup(name=group_name, node_names=node_names))
+    return groups
+
+
+def _parse_uniform_width_strategy(lines: list[str]) -> str:
+    """Parse optional @uniform-width strategy; default is 'global'."""
+    for line in lines:
+        match = _UNIFORM_WIDTH_RE.match(line.strip())
+        if not match:
+            continue
+        raw = match.group(1).lower()
+        return "group" if raw in {"group", "grouped"} else "global"
+    return "global"
+
+
+def _assign_groups(
+    object_names: list[str],
+    groups: list[UniformGroup],
+) -> dict[str, str]:
+    """Return mapping of object_name -> group_name.
+
+    Unassigned objects go into the 'default' group.
+    Raises ValueError if a name appears in multiple groups.
+    """
+    assignment: dict[str, str] = {}
+    for g in groups:
+        for name in g.node_names:
+            if name in assignment:
+                raise ValueError(
+                    f"Node '{name}' assigned to multiple groups: "
+                    f"'{assignment[name]}' and '{g.name}'"
+                )
+            assignment[name] = g.name
+    for name in object_names:
+        if name not in assignment:
+            assignment[name] = "default"
+    return assignment
+
+
+def _partition_by_group(
+    items: list[ClassBlock] | list[FlowchartNode],
+    assignment: dict[str, str],
+) -> dict[str, list]:
+    """Partition items into groups based on assignment map."""
+    groups: dict[str, list] = {}
+    for item in items:
+        name = item.name if isinstance(item, ClassBlock) else item.node_id
+        g = assignment.get(name, "default")
+        groups.setdefault(g, []).append(item)
+    return groups
 
 
 # ── Helpers ─────────────────────────────────────────────────────────────────
@@ -303,12 +391,61 @@ def _rebuild_class_block(
 
 
 def _normalize_class_diagram(lines: list[str]) -> list[str]:
-    """Normalize all class blocks in a classDiagram to uniform sizes."""
+    """Normalize all class blocks in a classDiagram to uniform sizes.
+
+    When @uniform-group tags are present, height is normalized per-group
+    while width stays globally uniform.  Without groups, all blocks share
+    a single global uniform (backward compatible).
+    """
     blocks = _parse_class_blocks(lines)
     if not blocks:
         return lines
 
-    stats = _compute_class_uniform(blocks)
+    groups = _parse_uniform_groups(lines)
+    width_strategy = _parse_uniform_width_strategy(lines)
+
+    if not groups:
+        # Backward compatible: single global uniform
+        stats = _compute_class_uniform(blocks)
+        stats_map: dict[str, UniformStats] = {b.name: stats for b in blocks}
+        group_stats: dict[str, UniformStats] | None = None
+    else:
+        # Group-aware normalization
+        assignment = _assign_groups([b.name for b in blocks], groups)
+        grouped_blocks = _partition_by_group(blocks, assignment)
+
+        # Per-group stats (height always per-group, width by strategy)
+        group_stats_raw: dict[str, UniformStats] = {}
+        for gname, gblocks in grouped_blocks.items():
+            gs = _compute_class_uniform(gblocks)
+            group_stats_raw[gname] = gs
+
+        group_stats = {}
+        if width_strategy == "global":
+            global_max_width = 0
+            global_max_title = 0
+            for gs in group_stats_raw.values():
+                global_max_width = max(global_max_width, gs.max_visible_width)
+                global_max_title = max(global_max_title, gs.max_title_len)
+
+            # Override width to global max for visual consistency
+            for gname, gs in group_stats_raw.items():
+                group_stats[gname] = UniformStats(
+                    max_visible_width=global_max_width,
+                    max_total_body=gs.max_total_body,
+                    max_title_len=global_max_title,
+                )
+        else:
+            for gname, gs in group_stats_raw.items():
+                group_stats[gname] = UniformStats(
+                    max_visible_width=gs.max_visible_width,
+                    max_total_body=gs.max_total_body,
+                    max_title_len=gs.max_title_len,
+                )
+
+        stats_map = {
+            b.name: group_stats[assignment[b.name]] for b in blocks
+        }
 
     # Rebuild file, replacing block bodies
     result: list[str] = []
@@ -323,18 +460,24 @@ def _normalize_class_diagram(lines: list[str]) -> list[str]:
 
         if i in block_map:
             b = block_map[i]
-            # Write the class header line
             result.append(line)
-            # Write rebuilt body
-            result.extend(_rebuild_class_block(b, stats))
-            # Write closing brace
+            result.extend(_rebuild_class_block(b, stats_map[b.name]))
             result.append(lines[b.end_line])
             skip_until = b.end_line
         else:
             result.append(line)
 
-    # Update @uniform tag
-    result = _update_uniform_tag(result, stats, "class")
+    # Update @uniform tag(s)
+    if group_stats is not None:
+        result = _update_uniform_tag_grouped(
+            result,
+            group_stats,
+            groups,
+            "class",
+            width_strategy=width_strategy,
+        )
+    else:
+        result = _update_uniform_tag(result, stats, "class")
 
     return result
 
@@ -424,17 +567,60 @@ def _rebuild_flowchart_node(
 
 
 def _normalize_flowchart(lines: list[str]) -> list[str]:
-    """Normalize all flowchart nodes to uniform sizes."""
+    """Normalize all flowchart nodes to uniform sizes.
+
+    When @uniform-group tags are present, height is normalized per-group
+    while width stays globally uniform.
+    """
     nodes = _parse_flowchart_nodes(lines)
     if not nodes:
         return lines
 
-    stats = _compute_flowchart_uniform(nodes)
+    groups = _parse_uniform_groups(lines)
+    width_strategy = _parse_uniform_width_strategy(lines)
+
+    if not groups:
+        stats = _compute_flowchart_uniform(nodes)
+        stats_map: dict[str, UniformStats] = {n.node_id: stats for n in nodes}
+        group_stats: dict[str, UniformStats] | None = None
+    else:
+        assignment = _assign_groups([n.node_id for n in nodes], groups)
+        grouped_nodes = _partition_by_group(nodes, assignment)
+
+        group_stats_raw: dict[str, UniformStats] = {}
+        for gname, gnodes in grouped_nodes.items():
+            gs = _compute_flowchart_uniform(gnodes)
+            group_stats_raw[gname] = gs
+
+        group_stats = {}
+        if width_strategy == "global":
+            global_max_width = 0
+            global_max_title = 0
+            for gs in group_stats_raw.values():
+                global_max_width = max(global_max_width, gs.max_visible_width)
+                global_max_title = max(global_max_title, gs.max_title_len)
+            for gname, gs in group_stats_raw.items():
+                group_stats[gname] = UniformStats(
+                    max_visible_width=global_max_width,
+                    max_total_body=gs.max_total_body,
+                    max_title_len=global_max_title,
+                )
+        else:
+            for gname, gs in group_stats_raw.items():
+                group_stats[gname] = UniformStats(
+                    max_visible_width=gs.max_visible_width,
+                    max_total_body=gs.max_total_body,
+                    max_title_len=gs.max_title_len,
+                )
+
+        stats_map = {
+            n.node_id: group_stats[assignment[n.node_id]] for n in nodes
+        }
 
     # Build index of lines to replace
     replacements: dict[int, str] = {}
     for n in nodes:
-        replacements[n.line_index] = _rebuild_flowchart_node(n, stats)
+        replacements[n.line_index] = _rebuild_flowchart_node(n, stats_map[n.node_id])
 
     result: list[str] = []
     for i, line in enumerate(lines):
@@ -443,40 +629,128 @@ def _normalize_flowchart(lines: list[str]) -> list[str]:
         else:
             result.append(line)
 
-    result = _update_uniform_tag(result, stats, "flowchart")
+    if group_stats is not None:
+        result = _update_uniform_tag_grouped(
+            result,
+            group_stats,
+            groups,
+            "flowchart",
+            width_strategy=width_strategy,
+        )
+    else:
+        result = _update_uniform_tag(result, stats, "flowchart")
 
     return result
 
 
 # ── @uniform tag management ─────────────────────────────────────────────────
 
-def _update_uniform_tag(
-    lines: list[str],
-    stats: UniformStats,
-    diagram_type: str,
-) -> list[str]:
-    """Update or insert the @uniform metadata tag.
 
-    Pixel estimates use heuristics calibrated to existing diagrams:
-      Class name rendered at 15px bold ≈ 10px/char.
-      Body text rendered at 12-13px ≈ 7px/char.
-      Box width = max(title_width, body_width).
-      height ≈ max_total_body * 18 + 36 (18px per line + 36px header).
+def _estimate_pixel_dims(
+    stats: UniformStats,
+) -> tuple[int, int]:
+    """Estimate pixel width and height for a UniformStats.
+
+    Returns (est_width, est_height) rounded to nearest 8px.
     """
     title_char_px = 10  # 15px bold font
     body_char_px = 7  # 12-13px regular font
     line_px = 18
     header_px = 36  # class name header height
 
-    # Box width is max of title and body widths
     title_px = stats.max_title_len * title_char_px
     body_px = stats.max_visible_width * body_char_px
     est_width = max(title_px, body_px)
     est_height = stats.max_total_body * line_px + header_px
 
-    # Round to nearest 8px for clean values
     est_width = ((est_width + 7) // 8) * 8
     est_height = ((est_height + 7) // 8) * 8
+    return est_width, est_height
+
+
+def _update_uniform_tag_grouped(
+    lines: list[str],
+    group_stats: dict[str, UniformStats],
+    groups: list[UniformGroup],
+    diagram_type: str,
+    width_strategy: str = "global",
+) -> list[str]:
+    """Update @uniform + @uniform-stats tags for grouped normalization.
+
+    Generates:
+      %% @uniform class width=304 groups=3
+      %% @uniform-stats base    height=180 max_desc_lines=8  nodes=3
+      %% @uniform-stats adapter height=126 max_desc_lines=5  nodes=7
+    """
+    # Compute global width from all groups
+    global_width = 0
+    for gs in group_stats.values():
+        w, _ = _estimate_pixel_dims(gs)
+        global_width = max(global_width, w)
+
+    num_groups = len(group_stats)
+    type_prefix = f"{diagram_type} " if diagram_type == "class" else ""
+    main_tag = (
+        f"%% @uniform {type_prefix}width={global_width} "
+        f"groups={num_groups} width_strategy={width_strategy}"
+    )
+
+    # Build stats lines in group definition order, then default last
+    stats_lines: list[str] = []
+    # Ordered group names: explicit groups first, then 'default' if present
+    ordered_names: list[str] = [g.name for g in groups]
+    if "default" in group_stats and "default" not in ordered_names:
+        ordered_names.append("default")
+
+    for gname in ordered_names:
+        if gname not in group_stats:
+            continue
+        gs = group_stats[gname]
+        est_w, est_h = _estimate_pixel_dims(gs)
+        stats_lines.append(
+            f"%% @uniform-stats {gname:<12s} "
+            f"width={est_w} "
+            f"height={est_h} "
+            f"max_desc_lines={gs.max_total_body}"
+        )
+
+    # Remove existing @uniform and @uniform-stats lines
+    cleaned: list[str] = []
+    for line in lines:
+        stripped = line.strip()
+        if _UNIFORM_TAG_RE.match(stripped) or _UNIFORM_STATS_RE.match(stripped):
+            continue
+        cleaned.append(line)
+
+    # Find insertion point: before diagram declaration or %%{init
+    insert_at: int | None = None
+    for i, line in enumerate(cleaned):
+        stripped = line.strip()
+        if (
+            _CLASS_DIAGRAM_RE.match(stripped)
+            or _FLOWCHART_RE.match(stripped)
+            or stripped.startswith("%%{init")
+        ):
+            insert_at = i
+            break
+
+    if insert_at is not None:
+        for j, tag_line in enumerate([main_tag, *stats_lines]):
+            cleaned.insert(insert_at + j, tag_line)
+    else:
+        cleaned.append(main_tag)
+        cleaned.extend(stats_lines)
+
+    return cleaned
+
+
+def _update_uniform_tag(
+    lines: list[str],
+    stats: UniformStats,
+    diagram_type: str,
+) -> list[str]:
+    """Update or insert the @uniform metadata tag (non-grouped mode)."""
+    est_width, est_height = _estimate_pixel_dims(stats)
 
     if diagram_type == "class":
         tag = (
@@ -492,6 +766,12 @@ def _update_uniform_tag(
             f"max_title_len={stats.max_title_len} "
             f"max_desc_lines={stats.max_total_body}"
         )
+
+    # Remove any stale @uniform-stats lines (leftover from grouped mode)
+    lines = [
+        line for line in lines
+        if not _UNIFORM_STATS_RE.match(line.strip())
+    ]
 
     # Find and replace existing @uniform, or insert before diagram declaration
     for i, line in enumerate(lines):

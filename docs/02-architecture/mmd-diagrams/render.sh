@@ -4,7 +4,7 @@
 # Renders Mermaid (.mermaid / .mmd) diagrams to SVG + PNG.
 #
 # Usage:
-#   ./render.sh                        # render all diagrams
+#   ./render.sh                        # render all docs diagrams (except docs/99-archive/**)
 #   ./render.sh --svg-only             # SVG only (fast)
 #   ./render.sh --png-only             # PNG only
 #   ./render.sh --filter "01-*"        # glob filter on filename
@@ -30,12 +30,11 @@ EXTRA_DIRS=()
 PUPPETEER_CFG=""
 JOBS=4           # parallel jobs
 FIT=1            # adaptive sizing by default
+EXCLUDE_PATHS=("docs/99-archive")
 
 # ── Diagram source directories ──────────────────────────────
 DEFAULT_DIRS=(
-  "$REPO_ROOT/docs/02-architecture/mmd-diagrams/architecture"
-  "$REPO_ROOT/docs/02-architecture/mmd-diagrams/class-diagrams"
-  "$REPO_ROOT/docs/02-architecture/mmd-diagrams/foundation"
+  "$REPO_ROOT/docs"
 )
 
 # ── Colours ─────────────────────────────────────────────────
@@ -70,6 +69,8 @@ Options:
   --bg COLOR          Background colour       (default: $BG)
   --filter GLOB       Only render matching    (default: "$FILTER")
   --dir DIR           Add extra source dir    (repeatable)
+  --exclude PATH      Exclude path (repeatable, relative to repo root
+                      or absolute path; default: docs/99-archive)
   --jobs N            Parallel render jobs    (default: $JOBS)
   --puppeteer FILE    Puppeteer config JSON   (CI sandboxing)
   -h, --help          Show this help
@@ -102,6 +103,7 @@ while [[ $# -gt 0 ]]; do
     --bg)           require_option_value "$1" "$#"; BG="$2";            shift 2 ;;
     --filter)       require_option_value "$1" "$#"; FILTER="$2";        shift 2 ;;
     --dir)          require_option_value "$1" "$#"; EXTRA_DIRS+=("$2"); shift 2 ;;
+    --exclude)      require_option_value "$1" "$#"; EXCLUDE_PATHS+=("$2"); shift 2 ;;
     --jobs)         require_option_value "$1" "$#"; JOBS="$2";          shift 2 ;;
     --no-fit)       FIT=0;                                                shift ;;
     --puppeteer)    require_option_value "$1" "$#"; PUPPETEER_CFG="$2"; shift 2 ;;
@@ -190,17 +192,46 @@ echo ""
 
 # ── Collect diagram files ──────────────────────────────────
 files=()
+exclude_abs=()
+
+for ex in "${EXCLUDE_PATHS[@]}"; do
+  if [[ "$ex" = /* ]]; then
+    exclude_abs+=("$ex")
+  else
+    exclude_abs+=("$REPO_ROOT/$ex")
+  fi
+done
+
 for dir in "${DIRS[@]}"; do
+  if [[ "$dir" != /* ]]; then
+    dir="$REPO_ROOT/$dir"
+  fi
   if [[ ! -d "$dir" ]]; then
     log_warn "Directory not found, skipping: $dir"
     continue
   fi
-  shopt -s nullglob
-  for f in "$dir"/$FILTER.mermaid "$dir"/$FILTER.mmd; do
-    [[ -f "$f" ]] && files+=("$f")
-  done
-  shopt -u nullglob
+  while IFS= read -r -d '' f; do
+    base_name="$(basename "$f")"
+    stem="${base_name%.*}"
+    [[ "$base_name" = _* ]] && continue
+    [[ "$stem" == $FILTER ]] || continue
+
+    is_excluded=0
+    for ex in "${exclude_abs[@]}"; do
+      if [[ "$f" == "$ex"/* ]]; then
+        is_excluded=1
+        break
+      fi
+    done
+    [[ $is_excluded -eq 1 ]] && continue
+
+    files+=("$f")
+  done < <(find "$dir" -type f \( -name "*.mermaid" -o -name "*.mmd" \) -print0)
 done
+
+if [[ ${#files[@]} -gt 0 ]]; then
+  mapfile -t files < <(printf '%s\n' "${files[@]}" | sort -u)
+fi
 
 TOTAL=${#files[@]}
 if [[ $TOTAL -eq 0 ]]; then
@@ -208,7 +239,7 @@ if [[ $TOTAL -eq 0 ]]; then
   exit 0
 fi
 
-log_info "Found ${BOLD}$TOTAL${NC} diagrams across ${#DIRS[@]} directories"
+log_info "Found ${BOLD}$TOTAL${NC} diagrams across ${#DIRS[@]} root directory(ies)"
 echo ""
 
 # ── Build mmdc base args ───────────────────────────────────
@@ -246,6 +277,8 @@ render_one() {
       if [[ $HAS_SVGO -eq 1 ]]; then
         svgo --quiet --config "$THEME_DIR/../svgo.config.js" "$svg_out" -o "$svg_out" 2>/dev/null || true
       fi
+      # Inject CSS overrides for edge label readability
+      python "$REPO_ROOT/scripts/inject_svg_styles.py" --fix -f "$svg_out" >/dev/null 2>&1 || true
       echo -e "  ${GREEN}✓${NC} SVG  [$idx/$TOTAL]  $base"
     else
       echo -e "  ${RED}✗${NC} SVG  [$idx/$TOTAL]  $base"
@@ -362,7 +395,14 @@ fi
 log_step "Generating index files..."
 echo ""
 
-for dir in "${DIRS[@]}"; do
+declare -A source_dirs_map=()
+for src in "${files[@]}"; do
+  src_dir="$(dirname "$src")"
+  source_dirs_map["$src_dir"]=1
+done
+mapfile -t source_dirs < <(printf '%s\n' "${!source_dirs_map[@]}" | sort)
+
+for dir in "${source_dirs[@]}"; do
   for sub in svg png; do
     out_dir="$dir/$sub"
     [[ ! -d "$out_dir" ]] && continue

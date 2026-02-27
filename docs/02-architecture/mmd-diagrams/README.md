@@ -170,6 +170,9 @@ Historical/foundational diagrams consolidated from `docs/02-architecture/diagram
 # Mermaid CLI (required)
 npm install -g @mermaid-js/mermaid-cli
 
+# Browser runtime for mmdc (required by Puppeteer in local validation)
+npx puppeteer browsers install chrome-headless-shell
+
 # svgo — SVG optimization (recommended)
 npm install -g svgo
 
@@ -213,6 +216,9 @@ bash docs/02-architecture/mmd-diagrams/render.sh --scale 4 --width 3200 --height
 
 # CI mode (Puppeteer sandbox disabled)
 bash docs/02-architecture/mmd-diagrams/render.sh --puppeteer /tmp/puppeteer-config.json
+
+# Syntax validation (shows explicit hint if Chrome runtime is missing)
+bash scripts/validate_mermaid_syntax.sh --puppeteer /tmp/puppeteer-config.json
 ```
 
 ### Output layout
@@ -246,6 +252,25 @@ A drift check warns when `.mmd` sources change without re-rendering.
 
 ---
 
+## Size Normalization
+
+Use `scripts/uniform_diagram_sizes.py` to normalize class/flowchart object sizes:
+
+```bash
+# Check normalization drift
+python3 scripts/uniform_diagram_sizes.py --check
+
+# Fix specific files
+python3 scripts/uniform_diagram_sizes.py --fix -f docs/02-architecture/mmd-diagrams/class-diagrams/07-application-core-services.mmd
+```
+
+Grouped diagrams support width strategy override:
+
+- `%% @uniform-width global` (default): one shared width across groups.
+- `%% @uniform-width group`: group-local widths to reduce excessive `&nbsp;` padding.
+
+---
+
 ## Validation Rules
 
 `scripts/lint_diagrams.py` enforces:
@@ -254,13 +279,17 @@ A drift check warns when `.mmd` sources change without re-rendering.
 |------|-------------|----------|
 | META-001 | Missing `@version`/`@date`/`@type`/`@level` in `.mmd` | WARN |
 | META-002 | Missing `%% View:` in `.mermaid` view-file | WARN |
-| COLOUR-001 | Non-canonical palette in `style`/`classDef` | ERROR |
+| COLOUR-001 | Deprecated pre-ADR palette in `style`/`classDef` | ERROR |
 | COLOUR-002 | Emoji in subgraph labels | ERROR |
 | SIZE-001 | `@nodes > 35` | ERROR |
 | SIZE-002 | `@nodes > 20` | WARN |
 | LAYOUT-001 | `flowchart/graph` with `@nodes > 20` without ELK init | WARN |
 | LAYOUT-002 | `flowchart/graph` with `@nodes > 40` without ELK init | ERROR |
 | GRAPH-001 | Orphan nodes (defined but not in any edge) | WARN |
+
+Node-size exceptions in current lint implementation:
+- `*-full.mermaid` reference views are exempt from `SIZE-001`/`SIZE-002`.
+- `00-legend*` files are exempt from `SIZE-001`/`SIZE-002`.
 
 ### Orphan Node Detection (GRAPH-001)
 

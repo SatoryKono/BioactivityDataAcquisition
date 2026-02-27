@@ -2,6 +2,12 @@
 """
 Render Mermaid diagrams to PNG.
 
+DEPRECATED:
+    This script is legacy compatibility only.
+    Canonical diagram rendering pipeline is:
+      - docs/02-architecture/mmd-diagrams/render.sh
+      - .github/workflows/docs.yml
+
 This script provides multiple rendering methods:
 1. mermaid-cli (mmdc) - Recommended, requires npm installation
 2. mermaid.ink API - Online service, no installation required
@@ -135,6 +141,11 @@ def check_mmdc_available() -> str | None:
 
 
 def main() -> None:
+    print(
+        "WARNING: scripts/render_diagrams.py is deprecated. "
+        "Use docs/02-architecture/mmd-diagrams/render.sh instead.",
+        file=sys.stderr,
+    )
     parser = argparse.ArgumentParser(description="Render Mermaid diagrams to PNG")
     parser.add_argument(
         "--method",
