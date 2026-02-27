@@ -175,3 +175,7 @@ data/.idea/
 *.pak
 *.json
 /CUsersFedor/.cache/puppeteer
+
+# Exclude generated reports while keeping the directory
+reports/
+!reports/.gitkeep
