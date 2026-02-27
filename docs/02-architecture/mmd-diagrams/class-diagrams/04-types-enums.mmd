@@ -18,201 +18,221 @@ classDiagram
     direction TB
     class RunID {
         <<NewType>>
-        UUID
+        UUID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     }
 
     class EntityID {
         <<NewType>>
-        str
+        str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     }
 
     class ContentHash {
         <<NewType>>
-        str
+        str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     }
 
     class BatchID {
         <<NewType>>
-        UUID
+        UUID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     }
 
     class RunType {
-        <<StrEnum>>
-        INCREMENTAL
-        BACKFILL
-        REBUILD
-        
-        
-        
-        
+        <<StrEnum>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        INCREMENTAL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        BACKFILL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        REBUILD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class PublicationType {
-        <<StrEnum>>
-        JOURNAL_ARTICLE
-        BOOK
-        DATASET
-        PATENT
-        REVIEW
-        LETTER
-        EDITORIAL
-        CLINICAL_TRIAL
-        META_ANALYSIS
-        CASE_REPORTS
-        COMPARATIVE_STUDY
-        EVALUATION_STUDY
-        BOOK_CHAPTER
+        <<StrEnum>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        JOURNAL_ARTICLE&nbsp;&nbsp;&nbsp;&nbsp;
+        BOOK&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        DATASET&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        PATENT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        REVIEW&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        LETTER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        EDITORIAL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        CLINICAL_TRIAL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        META_ANALYSIS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        CASE_REPORTS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        COMPARATIVE_STUDY&nbsp;&nbsp;
+        EVALUATION_STUDY&nbsp;&nbsp;&nbsp;
+        BOOK_CHAPTER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         PROCEEDINGS_ARTICLE
-        POSTED_CONTENT
-        REPORT
-        STANDARD
-        DISSERTATION
-        PREPRINT
-        OTHER
+        POSTED_CONTENT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        REPORT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        STANDARD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        DISSERTATION&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        PREPRINT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        OTHER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     }
 
     class HealthStatus {
-        <<StrEnum>>
-        HEALTHY
-        DEGRADED
-        UNHEALTHY
-        
-        
-        
-        
+        <<StrEnum>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        HEALTHY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        DEGRADED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        UNHEALTHY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class CircuitBreakerState {
-        <<StrEnum>>
-        CLOSED
-        OPEN
-        HALF_OPEN
-        
-        
-        
-        
+        <<StrEnum>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        CLOSED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        OPEN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        HALF_OPEN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class ExecutionContext {
-        <<StrEnum>>
-        ISOLATED
-        ENRICHER
-        DEPENDENCY
-        
-        
-        
-        
+        <<StrEnum>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        ISOLATED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        ENRICHER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        DEPENDENCY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class DriftLevel {
-        <<StrEnum>>
-        INFO
-        CRITICAL
-        
-        
-        
-        
-        
+        <<StrEnum>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        INFO&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        CRITICAL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class MedallionLayer {
-        <<StrEnum>>
-        BRONZE
-        SILVER
-        GOLD
-        
-        
-        
-        
+        <<StrEnum>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        BRONZE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        SILVER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        GOLD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class LoadingStrategy {
-        <<StrEnum>>
-        FULL_SCAN_ONLY
-        
-        
-        
-        
-        
-        
+        <<StrEnum>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        FULL_SCAN_ONLY&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class QuarantineRecordStatus {
-        <<Enum>>
-        QUARANTINED
-        REPLAYED
-        PURGED
-        
-        
-        
-        
+        <<Enum>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        QUARANTINED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        REPLAYED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        PURGED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class ShutdownReason {
-        <<StrEnum>>
-        SIGINT
-        SIGTERM
-        LOCK_LOST
-        MEMORY_PRESSURE
-        DQ_THRESHOLD
-        
-        
+        <<StrEnum>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        SIGINT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        SIGTERM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        LOCK_LOST&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        MEMORY_PRESSURE&nbsp;&nbsp;
+        DQ_THRESHOLD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class AggregationFunction {
-        <<StrEnum>>
-        FIRST
-        LAST
-        COLLECT
-        COUNT
-        
-        
-        
+        <<StrEnum>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        FIRST&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        LAST&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        COLLECT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        COUNT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class EnricherCardinality {
-        <<StrEnum>>
-        ONE_TO_ONE
-        ONE_TO_MANY
-        
-        
-        
-        
-        
+        <<StrEnum>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        ONE_TO_ONE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        ONE_TO_MANY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class MergeStrategy {
-        <<StrEnum>>
-        LEFT_JOIN
-        OUTER_JOIN
-        
-        
-        
-        
-        
+        <<StrEnum>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        LEFT_JOIN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        OUTER_JOIN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class ConflictResolution {
-        <<StrEnum>>
-        SEED_WINS
-        ENRICHER_WINS
-        LATEST_WINS
-        
-        
-        
-        
+        <<StrEnum>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        SEED_WINS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        ENRICHER_WINS&nbsp;&nbsp;&nbsp;&nbsp;
+        LATEST_WINS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
+        &nbsp;
     }
 
     class CompositeState {
-        <<StrEnum>>
-        INIT
-        SEED_RUNNING
-        DEPS_RUNNING
+        <<StrEnum>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        INIT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        SEED_RUNNING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        DEPS_RUNNING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         ENRICHERS_RUNNING
-        MERGING
-        COMPLETED
-        FAILED
+        MERGING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        COMPLETED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        FAILED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     }
+
+    style RunID fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style EntityID fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style ContentHash fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style BatchID fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style RunType fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style PublicationType fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style HealthStatus fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style CircuitBreakerState fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style ExecutionContext fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style DriftLevel fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style MedallionLayer fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style LoadingStrategy fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style QuarantineRecordStatus fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style ShutdownReason fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style AggregationFunction fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style EnricherCardinality fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style MergeStrategy fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style ConflictResolution fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style CompositeState fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
 
     note for RunID "Pipeline run identifier"
     note for EntityID "Business key for entities"

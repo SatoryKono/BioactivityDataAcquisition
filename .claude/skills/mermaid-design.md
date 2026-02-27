@@ -146,17 +146,27 @@ A ~~~ B  %% forces A and B to same rank
 **Правило:** Использовать ONLY когда layout engine не справляется. Документировать
 причину комментарием `%% alignment hint: ...`.
 
-### LBP-003: Ортогональная маршрутизация для сложных графов
+### LBP-003: Edge Routing Policy
 
-Для диаграмм с `@nodes > 30` форсировать `edgeRouting: 'ORTHOGONAL'` в ELK:
+Выбор маршрутизации рёбер зависит от количества нод:
+
+| Nodes | Edge Routing | Требование |
+|:-----:|:------------|:----------:|
+| ≤10 | Default (auto) | — |
+| 11-30 | `POLYLINE` | SHOULD |
+| >30 | `ORTHOGONAL` | MUST |
 
 ```mermaid
-%%{init: {"flowchart": {"defaultRenderer": "elk"}, "elk": {"edgeRouting": "ORTHOGONAL"}}}%%
+%% Для 11-30 нод:
+%%{init: {'layout': 'elk', 'elk': {'edgeRouting': 'POLYLINE'}}}%%
+
+%% Для >30 нод:
+%%{init: {'layout': 'elk', 'elk': {'edgeRouting': 'ORTHOGONAL'}}}%%
 ```
 
-**Правило:** `@nodes > 30` → MUST использовать ORTHOGONAL routing.
-`@nodes 20-30` → SHOULD использовать. Это заменяет диагональные линии на
-аккуратные «манхэттенские» углы (90°).
+**Правило:** `@nodes > 30` → MUST использовать ORTHOGONAL routing (манхэттенские углы 90°).
+`@nodes 11-30` → SHOULD использовать POLYLINE (прямые сегменты с изломами).
+`@nodes ≤ 10` → Default auto routing достаточен.
 
 ### LBP-004: Порты входа/выхода (Edge Ports)
 
@@ -181,16 +191,18 @@ end
 
 Различай связи толщиной (`stroke-width`) в зависимости от значимости:
 
-| Тип связи | Толщина | Назначение |
-|-----------|:-------:|-----------|
-| Medallion Data Flow | `3px` | Основной поток данных (Bronze→Silver→Gold) |
-| Orchestration/Control | `2px` | Управляющие сигналы, DI wiring |
-| Observability/Metrics | `1px` | Логирование, метрики, tracing |
+| Тип связи | Толщина | Цвет | Назначение |
+|-----------|:-------:|:----:|-----------|
+| Medallion Data Flow | `3px` | `#1E293B` | Основной поток данных (Bronze→Silver→Gold) |
+| Orchestration/Control | `2px` | `#2e7d32` | Управляющие сигналы, DI wiring |
+| DI/Implements | `1.5px` dashed | `#6a1b9a` | Dependency injection, interface impl |
+| Observability/Metrics | `1px` | `#94A3B8` | Логирование, метрики, tracing |
 
 ```mermaid
-linkStyle 0 stroke:#2196F3,stroke-width:3px
-linkStyle 1 stroke:#FF9800,stroke-width:2px
-linkStyle 2 stroke:#9E9E9E,stroke-width:1px
+linkStyle 0 stroke:#1E293B,stroke-width:3px
+linkStyle 1 stroke:#2e7d32,stroke-width:2px
+linkStyle 2 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+linkStyle 3 stroke:#94A3B8,stroke-width:1px
 ```
 
 **Правило:** MUST применять для диаграмм с >10 связями разных типов.
@@ -300,7 +312,7 @@ SHOULD иметь одинаковую `min-width`. Определять в `mmd
 **Layout Best Practices:**
 - [ ] LBP-001: Взаимосвязанные ноды в одном кластере
 - [ ] LBP-002: Invisible links задокументированы (если есть)
-- [ ] LBP-003: ORTHOGONAL routing при @nodes > 30
+- [ ] LBP-003: Edge routing (≤10 auto, 11-30 POLYLINE, >30 ORTHOGONAL)
 - [ ] LBP-004: Входящие сверху, исходящие снизу
 - [ ] LBP-005: Толщина связей семантична
 - [ ] LBP-006: Метки ≤15 символов

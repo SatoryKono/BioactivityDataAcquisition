@@ -20,7 +20,7 @@ Usage:
 
     # Check specific paths (files and/or directories)
     python scripts/lint_diagrams.py docs/02-architecture/mmd-diagrams/
-    python scripts/lint_diagrams.py docs/02-architecture/diagrams/mermaid/01-high-level.mermaid
+    python scripts/lint_diagrams.py docs/02-architecture/mmd-diagrams/views/01-high-level-overview.mermaid
 
     # Output JSON format
     python scripts/lint_diagrams.py --json
@@ -77,17 +77,11 @@ DEFAULT_STALE_DAYS = 90
 WARNING_STALE_DAYS = 180
 DISALLOWED_SUBGRAPH_EMOJI = ("🟡", "🟢", "🔵", "🟣", "⚪")
 # ADR-040 pre-harmonization palette (blocked in style/classDef rules).
+# Colors promoted to canonical palette (2026-02-27) are NOT listed here.
 DEPRECATED_PALETTE = {
-    "#fff7ed",
     "#f59e0b",
     "#ecfdf5",
     "#10b981",
-    "#eff6ff",
-    "#2563eb",
-    "#f5f3ff",
-    "#7c3aed",
-    "#f1f5f9",
-    "#64748b",
 }
 
 
@@ -245,7 +239,11 @@ def check_placeholder_content(path: Path, lines: list[str]) -> list[Issue]:
 
 
 def check_manual_spacing_entities(path: Path, lines: list[str]) -> list[Issue]:
-    """Disallow manual HTML spacing entities in diagram sources (NBSP-001)."""
+    """Disallow manual HTML spacing entities in diagram sources (NBSP-001).
+
+    classDiagram files legitimately use &nbsp; for uniform column widths
+    (the @uniform directive produces them), so they get WARNING severity.
+    """
     issues: list[Issue] = []
     fname = str(path)
 
@@ -253,10 +251,20 @@ def check_manual_spacing_entities(path: Path, lines: list[str]) -> list[Issue]:
     if hits == 0:
         return issues
 
+    # Files using @uniform or classDiagram legitimately use &nbsp; for
+    # uniform-width boxes — downgrade to WARNING.
+    has_uniform = any("@uniform" in line for line in lines)
+    is_class_diagram = any(
+        _NON_FLOW_RE.match(line.strip())
+        for line in lines
+        if line.strip().startswith("class")
+    )
+    severity = "WARNING" if (has_uniform or is_class_diagram) else "ERROR"
+
     issues.append(
         Issue(
             file=fname,
-            severity="ERROR",
+            severity=severity,
             rule="NBSP-001",
             message=(
                 f"Found {hits} manual '&nbsp;' spacing entity references; "

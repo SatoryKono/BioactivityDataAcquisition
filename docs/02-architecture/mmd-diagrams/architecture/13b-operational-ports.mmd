@@ -1,22 +1,40 @@
 %% BioETL — Operational and Observability Ports
+%% Monitoring, logging, and operational control ports.
+
 %% @version 1.0.0
 %% @date    2026-02-27
 %% @type    flowchart
 %% @level   System / Component
 %% @nodes   25
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'NETWORK_SIMPLEX', 'edgeRouting': 'POLYLINE'}}}%%
+%%{init: {
+  'layout': 'elk',
+  'theme': 'base',
+  'themeVariables': { 'fontFamily': 'Inter, system-ui, sans-serif' },
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'cycleBreakingStrategy': 'GREEDY',
+    'direction': 'RIGHT',
+    'spacing.nodeNode': 40,
+    'spacing.edgeNode': 30,
+    'spacing.edgeEdge': 20,
+    'edgeRouting': 'POLYLINE'
+  }
+}}%%
+
+%% @uniform width=232 height=56 max_title_len=24 max_desc_lines=0
 graph LR
 %% keep-orphan: SHP
     subgraph Domain["Domain Ports"]
-        LKP["LockPort"]
-        CKP["CheckpointPort"]
-        LGP["LoggerPort"]
-        MTP["MetricsPort"]
-        TRP["TracingPort"]
-        CBP["CircuitBreakerPort"]
-        MMP["MemoryMonitorPort"]
-        SHP["ShutdownPort"]
+        LKP["fa:fa-lock LockPort"]
+        CKP["fa:fa-flag CheckpointPort"]
+        LGP["fa:fa-list LoggerPort"]
+        MTP["fa:fa-chart-line MetricsPort"]
+        TRP["fa:fa-wave-square TracingPort"]
+        CBP["fa:fa-bolt CircuitBreakerPort"]
+        MMP["fa:fa-microchip MemoryMonitorPort"]
+        SHP["fa:fa-power-off ShutdownPort"]
     end
 
     subgraph Infrastructure["Implementations"]
@@ -37,7 +55,8 @@ graph LR
     CBP --- CB
     MMP --- MMGR
 
-    classDef port fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-    classDef infra fill:#ffcdd2,stroke:#c62828
-    class LKP,CKP,LGP,MTP,TRP,CBP,MMP,SHP port
+    classDef domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef infra  fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+
+    class LKP,CKP,LGP,MTP,TRP,CBP,MMP,SHP domain
     class ML,LC,UL,MCO,OTT,CB,MMGR infra

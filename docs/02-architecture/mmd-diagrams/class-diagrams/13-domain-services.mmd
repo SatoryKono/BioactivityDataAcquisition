@@ -5,60 +5,71 @@
 %% @date    2026-02-24
 %% @type    classDiagram
 %% @level   Class / Interface
-%% @uniform class width=248 height=72 max_title_len=26 max_desc_lines=2
+%% @uniform class width=488 height=72 max_title_len=26 max_desc_lines=2
 
 classDiagram
     direction TB
     class IdentityService {
         +compute_entity_id(provider, entity_type, source_id, record) EntityID
-        +compute_content_hash(provider, record) ContentHash
+        +compute_content_hash(provider, record) ContentHash&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     }
 
     class NormalizationService {
-        +normalize_text(text) str
-        +normalize_values(values) dict
+        +normalize_text(text) str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +normalize_values(values) dict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     }
 
     class DataNormalizationService {
-        +normalize_field(value, field_type) Any
-        
+        +normalize_field(value, field_type) Any&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
     }
 
     class AuthorNormalizationService {
-        +normalize_author_name(name) str
-        +normalize_author_list(authors) list~str~
+        +normalize_author_name(name) str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +normalize_author_list(authors) list~str~&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     }
 
     class ActivityAggregator {
-        +aggregate(activities) AggregatedActivity
-        
+        +aggregate(activities) AggregatedActivity&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
     }
 
     class UnitConverter {
-        +convert(value, from_unit, to_unit) float
-        +normalize_unit(unit) str
+        +convert(value, from_unit, to_unit) float&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +normalize_unit(unit) str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     }
 
     class ValueValidator {
-        +validate(value, constraints) ValidationResult
-        
+        +validate(value, constraints) ValidationResult&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
     }
 
     class TextSimilarity {
-        +similarity_score(text1, text2) float
-        +is_similar(text1, text2, threshold) bool
+        +similarity_score(text1, text2) float&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +is_similar(text1, text2, threshold) bool&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     }
 
     class DQMetricsCalculator {
-        +calculate(records, config) DQMetrics
-        
+        +calculate(records, config) DQMetrics&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;
     }
 
     class DQSerializer {
-        +serialize(metrics) dict
-        +deserialize(data) DQMetrics
+        +serialize(metrics) dict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +deserialize(data) DQMetrics&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     }
 
     note for IdentityService "Deterministic hashing:\nEntityID = SHA256(provider:entity_type:source_id)\nContentHash = SHA256(sorted business fields)"
     note for UnitConverter "Handles bioactivity unit\nconversions (nM, uM, etc.)"
     note for TextSimilarity "Used for title matching\nin publication enrichment"
+
+    style IdentityService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style NormalizationService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style DataNormalizationService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style AuthorNormalizationService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style ActivityAggregator fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style UnitConverter fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style ValueValidator fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style TextSimilarity fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style DQMetricsCalculator fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style DQSerializer fill:#eff6ff,stroke:#2563eb,stroke-width:2px

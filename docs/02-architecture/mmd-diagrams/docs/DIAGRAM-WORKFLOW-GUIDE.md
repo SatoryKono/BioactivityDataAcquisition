@@ -18,7 +18,7 @@
 | `class-diagrams/` | 16 | UML-классы: порты, сущности, агрегаты, конфиги |
 | `foundation/` | 59 | Исторические эталонные диаграммы, TOP-25 архитектурных |
 
-**Декомпозированные представления** — `docs/02-architecture/diagrams/mermaid/` (156 файлов):
+**Декомпозированные представления** — `docs/02-architecture/mmd-diagrams/views/` (156 файлов):
 
 Каждая родительская диаграмма из `foundation/` разбивается на **5 представлений (views)**:
 
@@ -337,8 +337,8 @@ pwsh docs/02-architecture/mmd-diagrams/render-windows.ps1
 
 - `docs/02-architecture/mmd-diagrams/**/svg/*.svg`
 - `docs/02-architecture/mmd-diagrams/**/png/*.png`
-- `docs/02-architecture/diagrams/mermaid/svg/*.svg`
-- `docs/02-architecture/diagrams/mermaid/png/*.png`
+- `docs/02-architecture/mmd-diagrams/views/svg/*.svg (gitignored)`
+- `docs/02-architecture/mmd-diagrams/views/png/*.png (gitignored)`
 
 ### 8.2. Короткий чеклист (локально → PR)
 

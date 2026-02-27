@@ -1,19 +1,38 @@
 %% BioETL — Validation and Data Quality Ports
+%% Ports for ensuring data correctness and quality reporting.
+
 %% @version 1.0.0
 %% @date    2026-02-27
 %% @type    flowchart
 %% @level   System / Component
 %% @nodes   20
 
+%%{init: {
+  'layout': 'elk',
+  'theme': 'base',
+  'themeVariables': { 'fontFamily': 'Inter, system-ui, sans-serif' },
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'cycleBreakingStrategy': 'GREEDY',
+    'direction': 'RIGHT',
+    'spacing.nodeNode': 40,
+    'spacing.edgeNode': 30,
+    'spacing.edgeEdge': 20,
+    'edgeRouting': 'POLYLINE'
+  }
+}}%%
+
+%% @uniform width=232 height=56 max_title_len=24 max_desc_lines=0
 graph LR
     subgraph Domain["Domain Ports"]
-        SVP["SilverValidatorPort"]
-        GVP["GoldValidatorPort"]
-        BDQP["BronzeDQAnalyzerPort"]
-        SDQP["SilverDQAnalyzerPort"]
-        GDQP["GoldDQAnalyzerPort"]
-        DQRWP["DQReportWriterPort"]
-        QRP["QuarantinePort"]
+        SVP["fa:fa-check-double SilverValidatorPort"]
+        GVP["fa:fa-shield-check GoldValidatorPort"]
+        BDQP["fa:fa-magnifying-glass BronzeDQAnalyzerPort"]
+        SDQP["fa:fa-magnifying-glass-plus SilverDQAnalyzerPort"]
+        GDQP["fa:fa-magnifying-glass-chart GoldDQAnalyzerPort"]
+        DQRWP["fa:fa-file-contract DQReportWriterPort"]
+        QRP["fa:fa-biohazard QuarantinePort"]
     end
 
     subgraph Infrastructure["Infrastructure"]
@@ -37,9 +56,10 @@ graph LR
     DQRWP --- DQRW_I
     QRP --- UQ
 
-    classDef port fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-    classDef infra fill:#ffcdd2,stroke:#c62828
-    classDef app fill:#e8f5e9,stroke:#2e7d32
-    class SVP,GVP,BDQP,SDQP,GDQP,DQRWP,QRP port
+    classDef domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef infra  fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    classDef app    fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+
+    class SVP,GVP,BDQP,SDQP,GDQP,DQRWP,QRP domain
     class PSV,PGV,DQRW_I,UQ infra
     class BDA,SDA,GDA app

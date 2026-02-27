@@ -9,13 +9,13 @@
 %% @level   Mixed (System / Component / Class)
 
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
-%% @uniform width=200 height=56 max_title_len=20 max_desc_lines=1
+%% @uniform width=120 height=72 max_title_len=12 max_desc_lines=2
 flowchart TD
     subgraph Sources["External Data Sources"]
     end
 
     subgraph Interfaces["Interfaces Layer"]
-        CLI["CLI (Click)<br/>"]
+        CLI["CLI (Click)&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Composition["Composition Layer"]
@@ -35,9 +35,9 @@ flowchart TD
     end
 
     subgraph Lake["Data Lake — Local Storage"]
-        Bronze["Bronze Layer<br/>(JSONL + zstd)"]
-        Silver["Silver Layer<br/>(Delta Lake)"]
-        Gold["Gold Layer<br/>(Delta Lake)"]
+        Bronze["Bronze Layer&nbsp;&nbsp;<br/>(JSONL + zstd)"]
+        Silver["Silver Layer&nbsp;&nbsp;<br/>(Delta Lake)&nbsp;&nbsp;"]
+        Gold["Gold Layer&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Delta Lake)&nbsp;&nbsp;"]
     end
 
     Sources --> Adapters

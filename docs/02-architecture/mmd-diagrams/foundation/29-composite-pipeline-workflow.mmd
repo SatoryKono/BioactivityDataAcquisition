@@ -9,36 +9,36 @@
 %% @level   Mixed (System / Component / Class)
 
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
-%% @uniform width=288 height=90 max_title_len=31 max_desc_lines=3
+%% @uniform width=280 height=112 max_title_len=28 max_desc_lines=4
 flowchart TB
     subgraph Init["Phase 1: Initialization"]
-        CFG["Load CompositeConfig<br/>from YAML<br/>"]
-        PFV["CompositePreflightValidator<br/>• validate seed<br/>• validate enrichers<br/>• check silver tables"]
-        BOOT["bootstrap_composite_runner()<br/>→ CompositePipelineRunner<br/>"]
+        CFG["Load CompositeConfig&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>from YAML&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        PFV["CompositePreflightValidator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• validate seed&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• validate enrichers&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• check silver tables&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        BOOT["bootstrap_composite_runner()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>→ CompositePipelineRunner&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Seed["Phase 2: Seed Pipeline"]
-        SP["Run Seed Pipeline<br/>(e.g., chembl_publication)<br/>"]
+        SP["Run Seed Pipeline&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(e.g., chembl_publication)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
         SB[("Seed Silver Table<br/>silver/chembl/publication/"<br/>)]
     end
 
     subgraph Deps["Phase 3: Dependencies"]
-        DC["DependencyCoordinator<br/>• run_dependencies()<br/>"]
-        DEP1["Dependency 1<br/>(e.g., uniprot_protein)<br/>"]
-        DEP2["Dependency 2<br/>(optional)<br/>"]
+        DC["DependencyCoordinator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• run_dependencies()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        DEP1["Dependency 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(e.g., uniprot_protein)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        DEP2["Dependency 2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(optional)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Keys["Phase 3.5: Key Extraction"]
-        KE["KeyExtractorService<br/>• extract_keys(seed_silver,<br/>join_keys=[doi, pmid])<br/>"]
-        KEYS["Filter Keys<br/>(DOIs, PMIDs)<br/>"]
+        KE["KeyExtractorService&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• extract_keys(seed_silver,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>join_keys=[doi, pmid])&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        KEYS["Filter Keys&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(DOIs, PMIDs)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Enrich["Phase 4: Fan-Out Enrichment"]
-        EC["EnrichmentCoordinator<br/>• asyncio.gather(*enrichers,<br/>return_exceptions=True)<br/>"]
-        E1["CrossRef Enricher<br/>filter_ids=DOIs<br/>"]
-        E2["PubMed Enricher<br/>filter_ids=PMIDs<br/>"]
-        E3["OpenAlex Enricher<br/>filter_ids=DOIs<br/>"]
-        E4["SemanticScholar Enricher<br/>filter_ids=DOIs<br/>"]
+        EC["EnrichmentCoordinator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• asyncio.gather(*enrichers,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>return_exceptions=True)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        E1["CrossRef Enricher&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>filter_ids=DOIs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        E2["PubMed Enricher&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>filter_ids=PMIDs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        E3["OpenAlex Enricher&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>filter_ids=DOIs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        E4["SemanticScholar Enricher&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>filter_ids=DOIs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
         ES1[("crossref/publication/"<br/>)]
         ES2[("pubmed/publication/"<br/>)]
         ES3[("openalex/publication/"<br/>)]
@@ -46,20 +46,20 @@ flowchart TB
     end
 
     subgraph Merge["Phase 5: Merge"]
-        DD["EnricherDeduplicator<br/>• deduplicate across sources<br/>"]
-        MS["MergeService<br/>• LEFT OUTER JOIN<br/>• conflict_resolution<br/>• column_ordering"]
-        CO["ColumnOrderer<br/>• FieldGroup priority<br/>• exclude TRASH group<br/>"]
-        CR["ColumnRenamer<br/>• qualified names<br/>• e.g., crossref.publication.title<br/>"]
+        DD["EnricherDeduplicator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• deduplicate across sources&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        MS["MergeService&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• LEFT OUTER JOIN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• conflict_resolution&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• column_ordering&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        CO["ColumnOrderer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• FieldGroup priority&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• exclude TRASH group&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        CR["ColumnRenamer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• qualified names&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• e.g., crossref.publication.title<br/>&nbsp;"]
     end
 
     subgraph Gold["Phase 6: Gold Write"]
-        XV["EnrichmentCrossValidator<br/>• check join coverage<br/>• detect orphans<br/>"]
-        GW["GoldWriter.write_gold()<br/>CompositePublicationGoldSchema<br/>(Pandera strict validation)<br/>"]
+        XV["EnrichmentCrossValidator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• check join coverage&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• detect orphans&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        GW["GoldWriter.write_gold()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>CompositePublicationGoldSchema&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Pandera strict validation)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
         GT[("Gold Table<br/>gold/composite/publication/"<br/>)]
     end
 
     subgraph CKP["Checkpointing (each phase)"]
-        CCM["CompositeCheckpointManager<br/>• save after each phase<br/>• resume from any phase<br/>"]
+        CCM["CompositeCheckpointManager&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• save after each phase&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• resume from any phase&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
     end
 
     %% Flow

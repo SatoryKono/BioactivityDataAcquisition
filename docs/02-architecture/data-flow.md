@@ -11,7 +11,7 @@ Medallion Architecture — трёхслойная модель хранения 
 ## Medallion Architecture Diagram
 
 > **Diagram:** See [`03-medallion-data-flow.mmd`](mmd-diagrams/architecture/03-medallion-data-flow.mmd)
-> *(rendered: [overview](diagrams/rendered/03-medallion-data-flow-overview.png))*
+> *(rendered не публикуются; используй source `.mmd`)*
 
 ----------------------------------------------------------------------
 
@@ -63,7 +63,7 @@ See `configs/entities/{provider}/{entity}.yaml` for specific configurations.
 ## Pipeline Execution Flow
 
 > **Diagram:** See [`04-pipeline-execution-flow.mmd`](mmd-diagrams/architecture/04-pipeline-execution-flow.mmd)
-> *(rendered: [overview](diagrams/rendered/04-pipeline-execution-flow-overview.png))*
+> *(rendered не публикуются; используй source `.mmd`)*
 
 ----------------------------------------------------------------------
 
@@ -128,4 +128,4 @@ flowchart TD
 ## Related Documents
 
 - **System Context**: [system-context.md](system-context.md)
-- **Architecture Diagrams**: [diagrams/00-diagramming-policy.md](diagrams/00-diagramming-policy.md)
+- **Architecture Diagrams**: [00-diagramming-policy.md](mmd-diagrams/docs/00-diagramming-policy.md)

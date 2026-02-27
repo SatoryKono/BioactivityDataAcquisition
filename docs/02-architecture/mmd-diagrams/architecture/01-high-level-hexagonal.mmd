@@ -11,55 +11,56 @@
 %% @level   System / Component
 %% @nodes   23
 
+%% @uniform width=376 height=56 max_title_len=37 max_desc_lines=1
 %%{init: {'theme': 'base', 'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'NETWORK_SIMPLEX', 'edgeRouting': 'POLYLINE'}}}%%
 graph LR
 
     %% == DRIVING SIDE (Left) ============================
 
     subgraph External_In["External (Driving)"]
-        USERS["Users / CI"]
+        USERS["Users / CI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Interfaces["Interfaces"]
-        CLI["CLI (Click)"]
-        ORCH["Orchestration"]
+        CLI["CLI (Click)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        ORCH["Orchestration&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Composition["Composition Root"]
-        BOOTSTRAP["Bootstrap & Factories"]
+        BOOTSTRAP["Bootstrap & Factories&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     %% == APPLICATION (Center-Left) ======================
 
     subgraph Application["Application"]
         subgraph BizLogic["Business Logic"]
-            CORE["Core Services"]
-            COMPOSITE["Composite Pipeline"]
+            CORE["Core Services&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+            COMPOSITE["Composite Pipeline&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         end
-        SERVICES["Support Services"]
-        PIPELINES["Transformers"]
+        SERVICES["Support Services&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        PIPELINES["Transformers&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     %% == DOMAIN -- the hexagon core (Center) ============
 
     subgraph Domain["Domain (pure, no I/O)"]
-        PORTS["Port Protocols"]
-        ENTITIES["Entities & Value Objects"]
-        DOM_SVC["Domain Services & Config"]
+        PORTS["Port Protocols&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        ENTITIES["Entities & Value Objects&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        DOM_SVC["Domain Services & Config&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     %% == DRIVEN SIDE (Right) ============================
 
     subgraph Infrastructure["Infrastructure (implements Ports)"]
-        ADAPTERS["Provider Adapters"]
-        STORAGE["Storage (Delta Lake)"]
+        ADAPTERS["Provider Adapters&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        STORAGE["Storage (Delta Lake)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         INFRA_SUPPORT["Observability / Resilience / Security"]
     end
 
     subgraph External_Out["External (Driven)"]
-        EXT_APIS["External APIs"]
-        FS["File System"]
-        OBS_EXT["Prometheus / OTel"]
+        EXT_APIS["External APIs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        FS["File System&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        OBS_EXT["Prometheus / OTel&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     %% == LEGEND =========================================

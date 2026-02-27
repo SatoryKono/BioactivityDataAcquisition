@@ -14,7 +14,7 @@
 ## 1. Чек-лист создания нового Pipeline
 
 - [ ] Создать entity config в `configs/entities/<provider>/<entity>.yaml`
-- [ ] Валидировать через `configs/-schema/pipeline.json` и `scripts/validate-pipeline-configs.py`
+- [ ] Валидировать через `configs/-schema/pipeline.json` и `scripts/validate_pipeline_configs.py`
 - [ ] Выбрать каноническое имя согласно [02-naming-policy.md](02-naming-policy.md)
 - [ ] Создать трансформер в `src/bioetl/application/pipelines/`
 - [ ] Зарегистрировать в `PipelineRegistry`
@@ -90,7 +90,7 @@ sink:
   hooks:
     - id: validate-pipeline-configs
       name: Validate pipeline configs
-      entry: python scripts/validate-pipeline-configs.py
+      entry: python scripts/validate_pipeline_configs.py
       language: python
       files: ^configs/entities/.+\.yaml$
       exclude: ^configs/entities/.*/-
@@ -100,13 +100,13 @@ sink:
 
 ```bash
 # Валидация всех entity/composite конфигов
-python scripts/validate-pipeline-configs.py --verbose
+python scripts/validate_pipeline_configs.py --verbose
 
 # Валидация всех конфигов
-python scripts/validate-pipeline-configs.py
+python scripts/validate_pipeline_configs.py
 
 # Строгий режим (warnings как errors)
-python scripts/validate-pipeline-configs.py --strict
+python scripts/validate_pipeline_configs.py --strict
 ```
 
 ### 3.3. Структура JSON Schema
@@ -305,7 +305,7 @@ input-filter:
 
 ```bash
 # Проверить соответствие схемам
-python scripts/validate-pipeline-configs.py --verbose
+python scripts/validate_pipeline_configs.py --verbose
 ```
 
 ----------------------------------------------------------------------

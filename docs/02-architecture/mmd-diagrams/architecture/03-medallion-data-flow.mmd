@@ -1,110 +1,84 @@
 %% BioETL — Medallion Architecture Data Flow (Bronze → Silver → Gold)
 %% Shows how data flows through the three medallion layers.
 
-%% @version 1.0.0
-%% @date    2026-02-24
+%% @version 1.1.0
+%% @date    2026-02-27
 %% @type    flowchart
 %% @level   System / Component
-%% @nodes   26
+%% @nodes   25
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'NETWORK_SIMPLEX', 'edgeRouting': 'POLYLINE'}}}%%
-%% @uniform width=224 height=72 max_title_len=16 max_desc_lines=2
+%%{init: {
+  'layout': 'elk',
+  'theme': 'base',
+  'themeVariables': { 'fontFamily': 'Inter, system-ui, sans-serif' },
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'cycleBreakingStrategy': 'GREEDY',
+    'direction': 'RIGHT',
+    'spacing.nodeNode': 45,
+    'spacing.edgeNode': 35,
+    'spacing.edgeEdge': 25
+  }
+}}%%
+
+%% @uniform width=232 height=56 max_title_len=24 max_desc_lines=1
 graph LR
     subgraph Sources["External Data Sources"]
-        APIS["Public APIs<br/>(ChEMBL, UniProt, PubMed, etc.)"]
+        APIS["fa:fa-cloud Public APIs<br/>(ChEMBL, UniProt, etc.)"]
     end
 
     subgraph Ingestion["Data Ingestion"]
-        DS["DataSourcePort<br/>fetch() / fetch_filtered()"]
-        RL["RateLimiter<br/>(TokenBucket)"]
-        CB["CircuitBreaker<br/>"]
-        RETRY["Retry Logic<br/>"]
+        DS["fa:fa-plug DataSourcePort"]
+        INGEST_P["Ingestion Pipeline<br/>(RateLimit, CB, Retry)"]
     end
 
     subgraph Bronze["Bronze Layer (Raw)"]
-        BW["BronzeWriter<br/>"]
-        BJSONL["JSONL + zstd<br/>compressed files"]
-        BMETA["_metadata.yaml<br/>sidecar"]
-        BAUDIT["Audit Log<br/>"]
+        BW["fa:fa-file-arrow-down BronzeWriter"]
+        BSTORE["fa:fa-file-zipper JSONL + zstd"]
     end
 
     subgraph Transform["Transformation"]
-        BT["BaseTransformer<br/>(Template Method)"]
-        NORM["Normalization<br/>(text, units, dates)"]
-        HASH["Identity Service<br/>(entity_id + content_hash)"]
-        PII["PII Hasher<br/>(SHA256 + salt)"]
-        DQ_CHECK["DQ Thresholds<br/>Check"]
+        BT["fa:fa-gear BaseTransformer"]
+        DQ_CHECK["fa:fa-vial DQ Thresholds"]
     end
 
-    subgraph Silver["Silver Layer (Normalized)"]
-        SW["SilverWriter<br/>(Delta Lake)"]
-        DELTA_S["Delta Table<br/>(merge/upsert)"]
-        SV["Silver Validator<br/>(Pandera)"]
-        SMETA["_metadata.yaml<br/>"]
+    subgraph Silver["Silver Layer (Cleaned)"]
+        SW["fa:fa-database SilverWriter<br/>(Delta Lake)"]
+        SV["fa:fa-check-double Silver Validator"]
     end
 
-    subgraph GoldTransform["Gold Transformation"]
-        GFILT["Gold Filters<br/>"]
-        GMAP["Field Mapping<br/>(exclude fields)"]
-        GV["Gold Validator<br/>(Pandera strict)"]
-    end
-
-    subgraph Gold["Gold Layer (Business-Ready)"]
-        GW["GoldWriter<br/>(Delta Lake)"]
-        DELTA_G["Delta Table<br/>(validated, typed)"]
-        GMETA["_metadata.yaml<br/>"]
+    subgraph Gold["Gold Layer (Aggregated)"]
+        GW["fa:fa-table GoldWriter<br/>(Delta Lake)"]
+        GV["fa:fa-shield-check Gold Validator"]
     end
 
     subgraph Quarantine["Quarantine"]
-        QS["Quarantine Store<br/>(Invalid Records)"]
-    end
-
-    subgraph DQ["Data Quality Reports"]
-        DQ_B["Bronze DQ<br/>Analyzer"]
-        DQ_S["Silver DQ<br/>Analyzer"]
-        DQ_G["Gold DQ<br/>Analyzer"]
-        DQ_RPT["DQ Report<br/>Writer"]
+        QS["fa:fa-biohazard Quarantine Store"]
     end
 
     %% Flow
     APIS --> DS
-    DS --> RL --> CB --> RETRY
-
-    RETRY --> BW
-    BW --> BJSONL
-    BW --> BMETA
-    BW --> BAUDIT
-
-    BJSONL --> BT
-    BT --> NORM --> HASH --> PII
-    PII --> DQ_CHECK
-
+    DS --> INGEST_P --> BW
+    BW --> BSTORE
+    BSTORE --> BT
+    BT --> DQ_CHECK
+    
     DQ_CHECK -->|"pass"| SW
     DQ_CHECK -->|"fail"| QS
+    
+    SW --> SV --> GW
+    GW --> GV
 
-    SW --> SV --> DELTA_S
-    SW --> SMETA
+    %% Styles
+    classDef domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef app    fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    classDef infra  fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    classDef data   fill:#f8fafc,stroke:#475569,stroke-width:2px
+    classDef ext    fill:#eceff1,stroke:#455a64,stroke-width:1px
 
-    DELTA_S --> GFILT --> GMAP --> GV
-    GV --> GW --> DELTA_G
-    GW --> GMETA
-
-    BJSONL --> DQ_B --> DQ_RPT
-    DELTA_S --> DQ_S --> DQ_RPT
-    DELTA_G --> DQ_G --> DQ_RPT
-
-    classDef bronze fill:#ff8a65,stroke:#bf360c,stroke-width:2px
-    classDef silver fill:#90caf9,stroke:#0d47a1,stroke-width:2px
-    classDef gold fill:#ffd54f,stroke:#f57f17,stroke-width:2px
-    classDef source fill:#eceff1,stroke:#455a64
-    classDef process fill:#c8e6c9,stroke:#2e7d32
-    classDef quarantine fill:#ffcdd2,stroke:#c62828
-    classDef dq fill:#e1bee7,stroke:#6a1b9a
-
-    class BW,BJSONL,BMETA,BAUDIT bronze
-    class SW,DELTA_S,SV,SMETA silver
-    class GW,DELTA_G,GV,GMETA gold
-    class APIS source
-    class DS,RL,CB,RETRY,BT,NORM,HASH,PII,DQ_CHECK,GFILT,GMAP process
-    class QS quarantine
-    class DQ_B,DQ_S,DQ_G,DQ_RPT dq
+    class DS,BT,DQ_CHECK,SV,GV domain
+    class INGEST_P app
+    class BW,SW,GW infra
+    class BSTORE,QS data
+    class APIS ext

@@ -28,9 +28,9 @@ BioETL follows a **Hexagonal Architecture** (Ports & Adapters) pattern with **Me
 
 ### Diagrams
 
-- [diagrams/](diagrams/) — Mermaid source files
-- [diagrams/mermaid/png/](diagrams/mermaid/png/) — Rendered PNG files
-- [diagrams/diagrams-index.md](diagrams/diagrams-index.md) — Full diagram index
+- [mmd-diagrams/](mmd-diagrams/README.md) — Canonical Mermaid source files (`.mmd`)
+- [mmd-diagrams/views/](mmd-diagrams/views/) — Decomposed views (`.mermaid`)
+- [mmd-diagrams/docs/diagrams-index.md](mmd-diagrams/docs/diagrams-index.md) — Full diagram index
 - [diagrams.md](diagrams.md) — Inline diagram collection
 
 ### Architecture Decision Records (ADRs)

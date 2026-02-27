@@ -11,7 +11,7 @@
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 %% @uniform width=168 height=112 max_title_len=14 max_desc_lines=4
 flowchart TB
-    ERROR["Error Occurred<br/><br/><br/>"]
+    ERROR["Error Occurred&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
 
     ERROR --> HTTP{{"HTTP Status Code?"}}
     ERROR --> DOMAIN{{"Domain Error?"}}
@@ -38,10 +38,10 @@ flowchart TB
 
     %% Actions
     subgraph Actions["Error Actions"]
-        ACT_RETRY["RETRY<br/>max_attempts: 3<br/>multiplier: 2.0<br/>jitter: MD5-based"]
-        ACT_QUARANTINE["QUARANTINE<br/>QuarantineEntry created<br/>payload truncated 64KB<br/>payload_hash computed"]
-        FAIL_FAST["FAIL FAST<br/>No retry<br/>Pipeline terminates<br/>ExitCode.PIPELINE_ERROR"]
-        BATCH_FAIL["BATCH FAIL<br/>error_rate > 20%<br/>Entire batch rejected<br/>Checkpoint NOT saved"]
+        ACT_RETRY["RETRY&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>max_attempts: 3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>multiplier: 2.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>jitter: MD5-based&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        ACT_QUARANTINE["QUARANTINE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>QuarantineEntry created<br/>payload truncated 64KB&nbsp;<br/>payload_hash computed&nbsp;&nbsp;"]
+        FAIL_FAST["FAIL FAST&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>No retry&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Pipeline terminates&nbsp;&nbsp;&nbsp;&nbsp;<br/>ExitCode.PIPELINE_ERROR"]
+        BATCH_FAIL["BATCH FAIL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>error_rate > 20%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Entire batch rejected&nbsp;&nbsp;<br/>Checkpoint NOT saved&nbsp;&nbsp;&nbsp;"]
     end
 
     AUTH --> FAIL_FAST

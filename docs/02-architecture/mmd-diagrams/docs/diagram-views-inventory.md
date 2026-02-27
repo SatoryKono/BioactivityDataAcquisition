@@ -1,6 +1,6 @@
 # Diagram Inventory (.mermaid/.puml)
 
-Source scope: `docs/02-architecture/mmd-diagrams/foundation/*.mermaid` (canonical Mermaid sources) mapped to `.mermaid` naming for decomposition tracking.
+Source scope: `docs/02-architecture/mmd-diagrams/foundation/*.mmd` (canonical Mermaid sources). Decomposed views in `views/*.mermaid`.
 
 | File | Type | Nodes | Edges | Status |
 |---|---|---:|---:|---|

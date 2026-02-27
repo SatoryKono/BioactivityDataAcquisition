@@ -5,70 +5,70 @@
 %% @date    2026-02-24
 %% @type    classDiagram
 %% @level   Class / Interface
-%% @uniform class width=224 height=72 max_title_len=23 max_desc_lines=2
+%% @uniform class width=232 height=72 max_title_len=23 max_desc_lines=2
 
 classDiagram
     direction TB
     class BaseFieldExtractor {
-        <<ABC>>
-        +extract(record: dict) dict*
+        <<ABC>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +extract(record: dict) dict*&nbsp;&nbsp;&nbsp;
     }
 
     note for BaseFieldExtractor "Strategy pattern for\nextracting fields from\nraw API records"
 
     class AbstractExtractor {
-        PubMed abstract text
-        +extract(record) dict
+        PubMed abstract text&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +extract(record) dict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     }
 
     class AuthorExtractor {
-        Author name normalization
-        +extract(record) dict
+        Author name normalization&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +extract(record) dict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     }
 
     class DateExtractor {
-        Publication date parsing
-        +extract(record) dict
+        Publication date parsing&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +extract(record) dict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     }
 
     class ClassificationExtractor {
         Publication type classification
-        +extract(record) dict
+        +extract(record) dict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     }
 
     class IdentifierExtractor {
-        DOI, PMID, etc.
-        +extract(record) dict
+        DOI, PMID, etc.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +extract(record) dict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     }
 
     class TaxonomyExtractor {
-        UniProt organism/taxonomy
-        +extract(record) dict
+        UniProt organism/taxonomy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +extract(record) dict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     }
 
     class GeneExtractor {
-        UniProt gene information
-        +extract(record) dict
+        UniProt gene information&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +extract(record) dict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     }
 
     class FeatureExtractor {
-        UniProt protein features
-        +extract(record) dict
+        UniProt protein features&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +extract(record) dict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     }
 
     class CrossRefExtractor {
-        UniProt cross-references
-        +extract(record) dict
+        UniProt cross-references&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +extract(record) dict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     }
 
     class CommentExtractor {
-        UniProt protein comments
-        +extract(record) dict
+        UniProt protein comments&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        +extract(record) dict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     }
 
     class MedlineDateParser {
-        Parses various date formats
-        +parse(date_str) date | None
+        Parses various date formats&nbsp;&nbsp;&nbsp;&nbsp;
+        +parse(date_str) date | None&nbsp;&nbsp;&nbsp;
     }
 
     BaseFieldExtractor <|-- AbstractExtractor
@@ -99,3 +99,16 @@ classDiagram
         class CrossRefExtractor
         class CommentExtractor
     }
+
+    style BaseFieldExtractor fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style AbstractExtractor fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style AuthorExtractor fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style DateExtractor fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style ClassificationExtractor fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style IdentifierExtractor fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style TaxonomyExtractor fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style GeneExtractor fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style FeatureExtractor fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style CrossRefExtractor fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style CommentExtractor fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style MedlineDateParser fill:#eff6ff,stroke:#2563eb,stroke-width:2px

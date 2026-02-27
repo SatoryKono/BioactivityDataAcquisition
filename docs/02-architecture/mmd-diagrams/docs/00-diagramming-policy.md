@@ -3,9 +3,9 @@
 *Synced with RULES.md v5.22 (2026-02-24)*
 
 > **Canonical policy:** [`docs/02-architecture/06-diagram-policy.md`](../06-diagram-policy.md) (POL-LLM-DIAGRAMS-001).
-> **Canonical diagrams:** [`docs/02-architecture/mmd-diagrams/`](../mmd-diagrams/README.md).
+> **Canonical diagrams:** [`docs/02-architecture/mmd-diagrams/`](../README.md).
 > This file is kept for historical reference. All new diagram work should follow the canonical policy.
-> **Historical note:** examples below are preserved for context; prefer canonical `.mmd` paths and render outputs from `mmd-diagrams/` or `diagrams/mermaid/png/`.
+> **Historical note:** examples below are preserved for context; prefer canonical `.mmd` paths from `mmd-diagrams/`.
 
 ## Overview
 
@@ -19,7 +19,7 @@ This document defines standards for creating, maintaining, and versioning archit
 
 - **Primary format**: Mermaid or PlantUML (text-based)
 - **Rationale**: Version control friendly, diff-able, reviewable in PRs
-- **Binary images**: Generated artifacts in `docs/02-architecture/diagrams/mermaid/png/` and `docs/02-architecture/mmd-diagrams/**/png/` (updated together with source diagrams when needed)
+- **Binary images**: Rendered via `render.sh`, gitignored (regenerated on demand)
 
 ### 1.2 Single Responsibility (MUST)
 
@@ -40,20 +40,18 @@ This document defines standards for creating, maintaining, and versioning archit
 ### 2.1 Directory Structure
 
 ```
-docs/02-architecture/diagrams/
-├── 00-diagramming-policy.md     # This file
-├── diagrams-index.md            # Index of all diagrams
-├── top-50-diagrams.md           # Prioritized backlog
-├── mermaid/                     # Historical source diagrams (.mermaid)
-│   ├── 01-high-level.mermaid
+docs/02-architecture/mmd-diagrams/     # Единый корень диаграмм
+├── architecture/*.mmd                 # System/component diagrams
+├── class-diagrams/*.mmd               # Class structure diagrams
+├── foundation/*.mmd                   # Historical + TOP-25
+├── views/*.mermaid                    # Decomposed views (156 файлов)
+├── docs/                              # Diagram documentation
+│   ├── 00-diagramming-policy.md       # This file
+│   ├── diagrams-index.md              # Index of all diagrams
 │   └── ...
-├── mermaid/png/                 # Rendered historical diagrams (.png)
-│   ├── 01-high-level.png
-│   └── ...
-└── ../mmd-diagrams/             # Canonical diagram sources (.mmd) and renders
-    ├── architecture/*.mmd
-    ├── class-diagrams/*.mmd
-    └── foundation/*.mmd
+├── theme/                             # Render theme (CSS + config)
+├── render.sh                          # Unified render script
+└── README.md                          # Main diagram catalog
 ```
 
 ### 2.2 Naming Convention (MUST)
@@ -70,9 +68,9 @@ docs/02-architecture/diagrams/
 
 Новая или обновлённая диаграмма считается готовой только когда:
 
-- есть исходник `.mmd` в `../mmd-diagrams/` (или `.mermaid` только для исторического набора);
-- есть `.png` в `../mmd-diagrams/**/png/` или `mermaid/png/`;
-- есть запись в `diagrams-index.md`;
+- есть исходник `.mmd` в `mmd-diagrams/` (или `.mermaid` в `views/` для decomposed);
+- rendered PNG/SVG генерируются через `render.sh` (gitignored);
+- есть запись в `diagrams-index.md` или `README.md`;
 - есть контекстный абзац со ссылкой в `docs/02-architecture/*.md`.
 
 ----------------------------------------------------------------------
