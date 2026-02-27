@@ -1,6 +1,6 @@
 """Fix &nbsp; in sequence diagram participant/actor lines."""
-import re
 import glob
+import re
 
 
 def fix_file(filepath: str) -> bool:
