@@ -1,6 +1,8 @@
 %% View: Full | Parent: (root)
 %% Parent source: docs/02-architecture/mmd-diagrams/foundation/01-full-system-component.mmd
 %% Full reference diagram retained after decomposition.
+%% Synced: 2026-02-27
+
 %% Title: Full System Component Diagram
 %% Covers: RULES.md §1.1 (Five-Layer Architecture), §1.2 (Ports & Adapters)
 %% Updated: 2026-02-27
@@ -47,30 +49,36 @@ flowchart TB
 
     subgraph External["External Systems"]
         direction LR
-        ChEMBL_API["ChEMBL API"]
-        PubChem_API["PubChem API"]
-        UniProt_API["UniProt API"]
-        PubMed_API["PubMed API"]
-        CrossRef_API["CrossRef API"]
-        OpenAlex_API["OpenAlex API"]
-        S2_API["Semantic Scholar API"]
+        subgraph BioactivityAPIs["Bioactivity Sources"]
+            direction TB
+            ChEMBL_API["ChEMBL API"]
+            PubChem_API["PubChem API"]
+            UniProt_API["UniProt API"]
+        end
+        subgraph PublicationAPIs["Publication Sources"]
+            direction TB
+            PubMed_API["PubMed API"]
+            CrossRef_API["CrossRef API"]
+            OpenAlex_API["OpenAlex API"]
+            S2_API["Semantic Scholar API"]
+        end
     end
 
     subgraph Interfaces["Interfaces Layer"]
-        direction LR
+        direction TB
         CLI["CLI"]
         Orchestration["Signal Orchestration"]
     end
 
     subgraph Composition["Composition Layer"]
-        direction LR
+        direction TB
         Bootstrap["bootstrap_pipeline()"]
         Factories["Factories"]
         Registry["PipelineRegistry"]
     end
 
     subgraph Application["Application Layer"]
-        direction LR
+        direction TB
         subgraph Core["Core"]
             direction TB
             PipelineRunner["PipelineRunner"]
@@ -96,17 +104,17 @@ flowchart TB
     end
 
     subgraph Domain["Domain Layer"]
-        direction LR
+        direction TB
         subgraph Ports["Ports (Protocols)"]
             direction TB
-            DataSourcePort["DataSourcePort"]
-            StoragePort["StoragePort"]
-            LockPort["LockPort"]
-            CheckpointPort["CheckpointPort"]
-            QuarantinePort["QuarantinePort"]
-            MetricsPort["MetricsPort"]
-            TracingPort["TracingPort"]
-            LoggerPort["LoggerPort"]
+            DataSourcePort["[P] DataSourcePort"]
+            StoragePort["[P] StoragePort"]
+            LockPort["[P] LockPort"]
+            CheckpointPort["[P] CheckpointPort"]
+            QuarantinePort["[P] QuarantinePort"]
+            MetricsPort["[P] MetricsPort"]
+            TracingPort["[P] TracingPort"]
+            LoggerPort["[P] LoggerPort"]
         end
         subgraph Entities["Entities"]
             direction TB
@@ -131,16 +139,16 @@ flowchart TB
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        direction LR
+        direction TB
         subgraph Adapters["Data Source Adapters"]
             direction TB
-            ChemblAdapter["ChemblAdapter"]
-            PubchemAdapter["PubchemAdapter"]
-            UniprotAdapter["UniprotAdapter"]
-            PubmedAdapter["PubmedAdapter"]
-            CrossRefAdapter["CrossRefAdapter"]
-            OpenAlexAdapter["OpenAlexAdapter"]
-            S2Adapter["SemanticScholarAdapter"]
+            ChemblAdapter["[A] ChemblAdapter"]
+            PubchemAdapter["[A] PubchemAdapter"]
+            UniprotAdapter["[A] UniprotAdapter"]
+            PubmedAdapter["[A] PubmedAdapter"]
+            CrossRefAdapter["[A] CrossRefAdapter"]
+            OpenAlexAdapter["[A] OpenAlexAdapter"]
+            S2Adapter["[A] SemanticScholarAdapter"]
         end
         subgraph HTTP["HTTP Infrastructure"]
             direction TB
@@ -151,29 +159,35 @@ flowchart TB
         end
         subgraph Storage["Storage Writers"]
             direction TB
-            BronzeWriter["BronzeWriter"]
-            SilverWriter["SilverWriter"]
-            GoldWriter["GoldWriter"]
+            BronzeWriter["[A] BronzeWriter"]
+            SilverWriter["[A] SilverWriter"]
+            GoldWriter["[A] GoldWriter"]
         end
         subgraph Locking["Locking"]
             direction TB
-            MemoryLock["MemoryLock"]
+            MemoryLock["[A] MemoryLock"]
         end
     end
 
     subgraph DataLake["Data Lake (Local FS)"]
         direction LR
-        Bronze[("Bronze<br/>JSONL + zstd")]
-        Silver[("Silver<br/>Delta Lake")]
-        Gold[("Gold<br/>Delta output")]
-        Quarantine[("Quarantine")]
-        Checkpoints[("Checkpoints")]
+        subgraph MedallionStore["Medallion Layers"]
+            direction LR
+            Bronze[("Bronze<br/>JSONL + zstd")]
+            Silver[("Silver<br/>Delta Lake")]
+            Gold[("Gold<br/>Delta output")]
+        end
+        subgraph ControlPlaneStore["Control Plane State"]
+            direction TB
+            Quarantine[("Quarantine")]
+            Checkpoints[("Checkpoints")]
+        end
     end
 
     subgraph Legend["Legend"]
         direction TB
         L1["Action"] --> L2["Action"]
-        L3["Port"] -.-> L4["Adapter"]
+        L3["[P] Port"] -.-> L4["[A] Adapter"]
         L5["Critical Path"] ==> L6["Primary Flow"]
     end
 
@@ -185,6 +199,9 @@ flowchart TB
     CrossRef_API --> CrossRefAdapter
     OpenAlex_API --> OpenAlexAdapter
     S2_API --> S2Adapter
+
+    %% Layout constraints
+    ChEMBL_API ~~~ PubChem_API ~~~ UniProt_API ~~~ PubMed_API ~~~ CrossRef_API ~~~ OpenAlex_API ~~~ S2_API
 
     %% Interface to runtime
     CLI ==> Bootstrap
@@ -217,6 +234,7 @@ flowchart TB
     PipelineRunner -.-> LoggerPort
     PipelineRunner -.-> MetricsPort
     PipelineRunner -.-> TracingPort
+    DataSourcePort ~~~ StoragePort ~~~ LockPort ~~~ CheckpointPort ~~~ QuarantinePort ~~~ LoggerPort ~~~ MetricsPort ~~~ TracingPort
 
     %% Infrastructure implements ports
     ChemblAdapter -.->|implements| DataSourcePort
@@ -246,6 +264,7 @@ flowchart TB
     HTTPBus --> UnifiedHTTPClient
     UnifiedHTTPClient --> CircuitBreaker
     UnifiedHTTPClient --> TokenBucket
+    CircuitBreaker ~~~ TokenBucket
 
     %% Storage + control plane
     BronzeWriter ==> Bronze
@@ -253,6 +272,7 @@ flowchart TB
     GoldWriter ==> Gold
     SilverWriter -.-> Quarantine
     CheckpointManager --> Checkpoints
+    Bronze ~~~ Silver ~~~ Gold ~~~ Quarantine ~~~ Checkpoints
 
     %% Styling classes
     classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px;

@@ -80,8 +80,8 @@ flowchart TB
         direction TB
         subgraph RuntimeInfra["Infra Instances"]
             direction TB
-            UHC["UnifiedHTTPClient<br/>+ TokenBucket<br/>+ CircuitBreaker<br/><br/><br/>"]
-            ADP["Provider Adapter<br/>(ChemblAdapter, etc.)<br/><br/><br/><br/>"]
+            UHC["[A] UnifiedHTTPClient<br/>+ TokenBucket<br/>+ CircuitBreaker<br/><br/><br/>"]
+            ADP["[A] Provider Adapter<br/>(ChemblAdapter, etc.)<br/><br/><br/><br/>"]
             BW["BronzeWriter<br/><br/><br/><br/><br/>"]
             SLL["StructlogLogger<br/><br/><br/><br/><br/>"]
         end

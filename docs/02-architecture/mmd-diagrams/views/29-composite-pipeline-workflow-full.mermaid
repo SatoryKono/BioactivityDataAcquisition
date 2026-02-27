@@ -1,6 +1,8 @@
 %% View: Full | Parent: (root)
 %% Parent source: docs/02-architecture/mmd-diagrams/foundation/29-composite-pipeline-workflow.mmd
 %% Full reference diagram retained after decomposition.
+%% Synced: 2026-02-27
+
 %% Title: Composite Pipeline Full Workflow — Seed to Gold (ADR-026)
 %% Covers: RULES.md §2.10 (Composite Pipelines), ADR-026
 %% Rank: 4 (Score 8.88) — Most complex architectural feature
@@ -10,112 +12,157 @@
 %% @date    2026-02-24
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
+%% @uniform-group init   nodes=CFG,PFV,BOOT
+%% @uniform-group seed   nodes=SP,SB
+%% @uniform-group deps   nodes=DC,DEP1,DEP2
+%% @uniform-group keys   nodes=KE,KEYS
+%% @uniform-group enrich nodes=EC,E1,E2,E3,E4,ES1,ES2,ES3,ES4
+%% @uniform-group merge  nodes=DD,MS,CO,CR
+%% @uniform-group gold   nodes=XV,GW,GT
+%% @uniform-group ckp    nodes=CCM
+%% @uniform-width group
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'},'layout':'elk','flowchart':{'curve':'linear'},'elk':{'nodePlacementStrategy':'BRANDES_KOEPF','mergeEdges':true,'edgeRouting':'ORTHOGONAL'}}}%%
-%% @uniform width=288 height=90 max_title_len=31 max_desc_lines=3
+%% @uniform width=280 groups=8 width_strategy=group
+%% @uniform-stats init         width=280 height=112 max_desc_lines=4
+%% @uniform-stats seed         width=184 height=96 max_desc_lines=3
+%% @uniform-stats deps         width=216 height=96 max_desc_lines=3
+%% @uniform-stats keys         width=192 height=112 max_desc_lines=4
+%% @uniform-stats enrich       width=240 height=112 max_desc_lines=4
+%% @uniform-stats merge        width=240 height=112 max_desc_lines=4
+%% @uniform-stats gold         width=240 height=112 max_desc_lines=4
+%% @uniform-stats ckp          width=264 height=112 max_desc_lines=4
+%%{init: {
+%%  'layout': 'elk',
+%%  'theme': 'base',
+%%  'themeVariables': {'lineWidth': '2'},
+%%  'flowchart': {
+%%    'nodeSpacing': 64,
+%%    'rankSpacing': 80,
+%%    'padding': 24,
+%%    'curve': 'linear'
+%%  },
+%%  'elk': {
+%%    'mergeEdges': true,
+%%    'nodePlacementStrategy': 'BRANDES_KOEPF',
+%%    'cycleBreakingStrategy': 'GREEDY',
+%%    'direction': 'DOWN',
+%%    'spacing.nodeNode': 52,
+%%    'spacing.edgeNode': 36,
+%%    'spacing.edgeEdge': 24,
+%%    'edgeRouting': 'ORTHOGONAL'
+%%  }
+%%}}%%
 flowchart TB
     subgraph Init["Phase 1: Initialization"]
-        CFG["Load CompositeConfig<br/>from YAML<br/>"]
-        PFV["CompositePreflightValidator<br/>• validate seed<br/>• validate enrichers<br/>• check silver tables"]
-        BOOT["bootstrap_composite_runner()<br/>→ CompositePipelineRunner<br/>"]
+        CFG["[S] Load CompositeConfig<br/>from YAML<br/><br/>"]
+        PFV["[S] CompositePreflightValidator<br/>• validate seed<br/>• validate enrichers<br/>• check silver tables"]
+        BOOT["[S] bootstrap_composite_runner()<br/>→ CompositePipelineRunner<br/><br/>"]
     end
 
     subgraph Seed["Phase 2: Seed Pipeline"]
-        SP["Run Seed Pipeline<br/>(e.g., chembl_publication)<br/>"]
-        SB[("Seed Silver Table<br/>silver/chembl/publication/"<br/>)]
+        SP["[S] Run Seed Pipeline<br/>(e.g., chembl_publication)<br/>"]
+        SB[("[D] Seed Silver Table<br/>silver/chembl/publication/"<br/>)]
     end
 
     subgraph Deps["Phase 3: Dependencies"]
-        DC["DependencyCoordinator<br/>• run_dependencies()<br/>"]
-        DEP1["Dependency 1<br/>(e.g., uniprot_protein)<br/>"]
-        DEP2["Dependency 2<br/>(optional)<br/>"]
-        DS1[("Dep 1 Silver Table"<br/>)]
-        DS2[("Dep 2 Silver Table"<br/>)]
+        direction LR
+        DC["[S] DependencyCoordinator<br/>• run_dependencies()<br/>"]
+        DEP1["[S] Dependency 1<br/>(e.g., uniprot_protein)<br/>"]
+        DEP2["[S] Dependency 2<br/>(optional)<br/>"]
     end
 
     subgraph Keys["Phase 3.5: Key Extraction"]
-        KE["KeyExtractorService<br/>• extract_keys(seed_silver,<br/>join_keys=[doi, pmid])<br/>"]
-        KEYS["Filter Keys<br/>(DOIs, PMIDs)<br/>"]
+        KE["[S] KeyExtractorService<br/>• extract_keys(seed_silver,<br/>join_keys=[doi, pmid])<br/>"]
+        KEYS["[D] Filter Keys<br/>(DOIs, PMIDs)<br/><br/>"]
     end
 
     subgraph Enrich["Phase 4: Fan-Out Enrichment"]
-        EC["EnrichmentCoordinator<br/>• asyncio.gather(*enrichers,<br/>return_exceptions=True)<br/>"]
-        E1["CrossRef Enricher<br/>filter_ids=DOIs<br/>"]
-        E2["PubMed Enricher<br/>filter_ids=PMIDs<br/>"]
-        E3["OpenAlex Enricher<br/>filter_ids=DOIs<br/>"]
-        E4["SemanticScholar Enricher<br/>filter_ids=DOIs<br/>"]
-        ES1[("crossref/publication/"<br/>)]
-        ES2[("pubmed/publication/"<br/>)]
-        ES3[("openalex/publication/"<br/>)]
-        ES4[("semanticscholar/publication/"<br/>)]
+        direction LR
+        EC["[S] EnrichmentCoordinator<br/>• asyncio.gather(*enrichers,<br/>return_exceptions=True)<br/>"]
+        subgraph EnricherWorkers["Enricher Workers"]
+            direction TB
+            E1["[S] CrossRef Enricher<br/>filter_ids=DOIs<br/><br/>"]
+            E2["[S] PubMed Enricher<br/>filter_ids=PMIDs<br/><br/>"]
+            E3["[S] OpenAlex Enricher<br/>filter_ids=DOIs<br/><br/>"]
+            E4["[S] SemanticScholar Enricher<br/>filter_ids=DOIs<br/><br/>"]
+        end
+        subgraph EnricherOutputs["Enriched Silver Outputs"]
+            direction TB
+            ES1[("[D] crossref/publication/"<br/>)]
+            ES2[("[D] pubmed/publication/"<br/>)]
+            ES3[("[D] openalex/publication/"<br/>)]
+            ES4[("[D] semanticscholar/publication/"<br/>)]
+        end
     end
 
     subgraph Merge["Phase 5: Merge"]
-        DD["EnricherDeduplicator<br/>• deduplicate across sources<br/>"]
-        MS["MergeService<br/>• LEFT OUTER JOIN<br/>• conflict_resolution<br/>• column_ordering"]
-        CO["ColumnOrderer<br/>• FieldGroup priority<br/>• exclude TRASH group<br/>"]
-        CR["ColumnRenamer<br/>• qualified names<br/>• e.g., crossref.publication.title<br/>"]
+        direction LR
+        DD["[S] EnricherDeduplicator<br/>• deduplicate across sources<br/><br/>"]
+        MS["[S] MergeService<br/>• LEFT OUTER JOIN<br/>• conflict_resolution<br/>• column_ordering"]
+        CO["[S] ColumnOrderer<br/>• FieldGroup priority<br/>• exclude TRASH group<br/>"]
+        CR["[S] ColumnRenamer<br/>• qualified names<br/>• e.g., crossref.publication.title<br/>"]
     end
 
     subgraph Gold["Phase 6: Gold Write"]
-        XV["EnrichmentCrossValidator<br/>• check join coverage<br/>• detect orphans<br/>"]
-        GW["GoldWriter.write_gold()<br/>CompositePublicationGoldSchema<br/>(Pandera strict validation)<br/>"]
-        GT[("Gold Table<br/>gold/composite/publication/"<br/>)]
+        direction LR
+        XV["[S] EnrichmentCrossValidator<br/>• check join coverage<br/>• detect orphans<br/>"]
+        GW["[S] GoldWriter.write_gold()<br/>CompositePublicationGoldSchema<br/>(Pandera strict validation)<br/>"]
+        GT[("[D] Gold Table<br/>gold/composite/publication/"<br/>)]
     end
 
     subgraph CKP["Checkpointing (each phase)"]
-        CCM["CompositeCheckpointManager<br/>• save after each phase<br/>• resume from any phase<br/>"]
+        CCM["[S] CompositeCheckpointManager<br/>• save after each phase<br/>• resume from any phase<br/>"]
     end
 
     %% Flow
-    CFG --> PFV --> BOOT
-    BOOT --> SP --> SB
+    CFG ==> PFV ==> BOOT
+    BOOT ==> SP ==> SB
 
-    SB --> DC
-    DC --> DEP1 --> DS1
-    DC --> DEP2 --> DS2
+    SB -.-> DC
+    DC -.-> DEP1 --> DS1
+    DC -.-> DEP2 --> DS2
 
-    SB --> KE
-    KE --> KEYS
+    SB ==> KE
+    KE ==> KEYS
 
-    KEYS --> EC
-    EC --> E1 & E2 & E3 & E4
-    E1 --> ES1
-    E2 --> ES2
-    E3 --> ES3
-    E4 --> ES4
+    KEYS ==> EC
+    EC ==> E1 & E2 & E3 & E4
+    E1 ==> ES1
+    E2 ==> ES2
+    E3 ==> ES3
+    E4 ==> ES4
 
-    ES1 & ES2 & ES3 & ES4 --> DD
-    DD --> MS
-    SB -->|"seed data"| MS
-    MS --> CO --> CR
+    ES1 & ES2 & ES3 & ES4 ==> DD
+    DD ==> MS
+    SB -.->|"seeds"| MS
+    MS ==> CO ==> CR
 
-    CR --> XV --> GW --> GT
+    CR ==> XV ==> GW ==> GT
 
-    CCM -.->|"checkpoint"| Seed & Deps & Enrich & Merge & Gold
+    CCM -.->|"save"| Seed & Deps & Enrich & Merge & Gold
+
+    %% Layout constraints
+    Init ~~~ Seed ~~~ Deps ~~~ Keys ~~~ Enrich ~~~ Merge ~~~ Gold ~~~ CKP
+    DEP1 ~~~ DEP2
+    E1 ~~~ E2 ~~~ E3 ~~~ E4
+    ES1 ~~~ ES2 ~~~ ES3 ~~~ ES4
 
     %% Styling
-    style Seed fill:#FFA500,stroke:#cc8400
-    style Enrich fill:#C0C0C0,stroke:#808080
-    style Gold fill:#FFD700,stroke:#ccac00
+    style Seed fill:#fff7ed,stroke:#f59e0b
+    style Enrich fill:#f1f5f9,stroke:#475569
+    style Gold fill:#fefce8,stroke:#ca8a04
     style Merge fill:#eff6ff,stroke:#2563eb
 
-    linkStyle 0 stroke:#1E293B,stroke-width:4px
-    linkStyle 1 stroke:#1E293B,stroke-width:4px
-    linkStyle 2 stroke:#1E293B,stroke-width:4px
-    linkStyle 3 stroke:#1E293B,stroke-width:4px
-    linkStyle 4 stroke:#1E293B,stroke-width:4px
-    linkStyle 5 stroke:#1E293B,stroke-width:4px
-    linkStyle 6 stroke:#1E293B,stroke-width:4px
-    linkStyle 7 stroke:#1E293B,stroke-width:4px
-    linkStyle 8 stroke:#1E293B,stroke-width:4px
-    linkStyle 9 stroke:#1E293B,stroke-width:4px
-    linkStyle 10 stroke:#1E293B,stroke-width:4px
-    linkStyle 11 stroke:#1E293B,stroke-width:4px
-    linkStyle 12 stroke:#1E293B,stroke-width:4px
-    linkStyle 13 stroke:#1E293B,stroke-width:4px
-    linkStyle 14 stroke:#1E293B,stroke-width:4px
-    linkStyle 15 stroke:#1E293B,stroke-width:4px
-    linkStyle 16 stroke:#1E293B,stroke-width:4px
-    linkStyle 17 stroke:#1E293B,stroke-width:4px
-    linkStyle 18 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    %% Layer palette (semantic)
+    classDef layer_domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:1.8px;
+    classDef layer_application fill:#f0fdf4,stroke:#16a34a,stroke-width:1.8px;
+    classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
+    classDef layer_composition fill:#fff7ed,stroke:#d97706,stroke-width:1.8px;
+
+    class CFG,PFV,BOOT,SP,DC,DEP1,DEP2,KE,KEYS,EC,E1,E2,E3,E4,DD,MS,CO,CR,XV,CCM layer_application;
+    class SB,DS1,DS2,ES1,ES2,ES3,ES4,GW,GT layer_infrastructure;
+
+    %% Click tooltips
+    click CCM "../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md" "Saves per-phase checkpoints and supports resume"
+    click MS "../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md" "Merges seed + enricher outputs with conflict resolution"
+    click KE "../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md" "Extracts join keys from seed silver for fan-out enrichment"
