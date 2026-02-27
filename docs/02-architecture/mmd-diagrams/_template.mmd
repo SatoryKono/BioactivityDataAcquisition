@@ -62,6 +62,7 @@
 %%   Rules: use camelCase, NO *Style suffix (use `domain` not `domainStyle`)
 
 %% Layout (uncomment if @nodes > 20 — enables ELK smart edge routing):
+%% NOTE: `direction` in subgraph blocks is an optional hint only; renderer may ignore it.
 %% %%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'direction': 'RIGHT', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'ORTHOGONAL'}}}%%
 %%
 %% Direction guide:
@@ -78,11 +79,13 @@ flowchart TD
     %%   N4[("Label")]        — cylinder (storage)
     %%   N5(("Label"))        — circle
     %%
-    %% Example subgraph:
-    %%   subgraph Domain["Domain Layer"]
-    %%       direction TB
-    %%       N1["DataSourcePort"]
-    %%   end
+%% Example subgraph:
+%%   subgraph Domain["Domain Layer"]
+%%       direction TB %% optional hint, not guaranteed
+%%       N1["DataSourcePort"]
+%%   end
+%% Fallback for hard layouts: decompose views -> tune ELK/layout config ->
+%% minimal layout hacks -> switch to PlantUML/D2.
 
     %% === LINKS ===
     %%

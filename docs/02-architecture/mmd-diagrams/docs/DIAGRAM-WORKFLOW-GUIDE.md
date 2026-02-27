@@ -2,7 +2,7 @@
 
 *Версия: 1.1.0 | Дата: 2026-02-27 | Основано на ADR-040 v3.0*
 
----
+______________________________________________________________________
 
 ## 1. Обзор системы диаграмм
 
@@ -12,11 +12,11 @@
 
 **Канонические исходники** — `docs/02-architecture/mmd-diagrams/`:
 
-| Каталог | Файлов | Назначение |
-|---------|--------|------------|
-| `architecture/` | 32 | Системные и компонентные диаграммы уровня архитектуры |
-| `class-diagrams/` | 16 | UML-классы: порты, сущности, агрегаты, конфиги |
-| `foundation/` | 54 | Исторические эталонные диаграммы, TOP-25 архитектурных |
+| Каталог           | Файлов | Назначение                                             |
+| ----------------- | ------ | ------------------------------------------------------ |
+| `architecture/`   | 32     | Системные и компонентные диаграммы уровня архитектуры  |
+| `class-diagrams/` | 16     | UML-классы: порты, сущности, агрегаты, конфиги         |
+| `foundation/`     | 54     | Исторические эталонные диаграммы, TOP-25 архитектурных |
 
 **Декомпозированные представления** — `docs/02-architecture/mmd-diagrams/views/` (156 файлов):
 
@@ -32,16 +32,16 @@
 
 ### 1.2. Поддерживаемые типы диаграмм
 
-| Тип | Где применяется | Примеры |
-|-----|----------------|---------|
-| `flowchart` | ETL-пайплайны, потоки управления, архитектурные слои | medallion-data-flow, pipeline-execution |
-| `sequenceDiagram` | Временные взаимодействия, протоколы | lock-acquisition, client-api-request |
-| `classDiagram` | Иерархии классов, порты, адаптеры | domain-ports, entities-aggregates |
-| `stateDiagram` | Конечные автоматы | pipeline-lifecycle-states, circuit-breaker |
-| `erDiagram` | Связи между сущностями | full-er-diagram |
-| `mindmap` | Иерархическое мышление | architecture-principles-mindmap |
+| Тип               | Где применяется                                      | Примеры                                    |
+| ----------------- | ---------------------------------------------------- | ------------------------------------------ |
+| `flowchart`       | ETL-пайплайны, потоки управления, архитектурные слои | medallion-data-flow, pipeline-execution    |
+| `sequenceDiagram` | Временные взаимодействия, протоколы                  | lock-acquisition, client-api-request       |
+| `classDiagram`    | Иерархии классов, порты, адаптеры                    | domain-ports, entities-aggregates          |
+| `stateDiagram`    | Конечные автоматы                                    | pipeline-lifecycle-states, circuit-breaker |
+| `erDiagram`       | Связи между сущностями                               | full-er-diagram                            |
+| `mindmap`         | Иерархическое мышление                               | architecture-principles-mindmap            |
 
----
+______________________________________________________________________
 
 ## 2. Метаданные и шаблон
 
@@ -75,7 +75,7 @@
 
 Файл `mmd-diagrams/_template.mmd` содержит эталонные секции: все метаданные с пояснениями, copy-paste палитру цветов, примеры фигур нод, типы связей, стилизацию subgraph, инструкции по ELK layout и выбору направления.
 
----
+______________________________________________________________________
 
 ## 3. Цветовая схема
 
@@ -83,29 +83,29 @@
 
 Каноническая палитра определена в `theme/custom.css` и строго обязательна. Произвольные hex-цвета запрещены — используются только канонические значения.
 
-| Слой | Fill | Stroke | Семантика |
-|------|------|--------|-----------|
-| Domain | `#f5f3ff` | `#7c3aed` (Purple) | Бизнес-логика, entities, value objects |
-| Application | `#f0fdf4` | `#16a34a` (Green) | Сервисы, оркестрация, use cases |
-| Infrastructure | `#fff1f2` | `#dc2626` (Red) | Адаптеры, клиенты, хранилище |
-| Composition | `#fff7ed` | `#f59e0b` (Orange) | Фабрики, DI, сборка |
-| Interfaces | `#eff6ff` | `#2563eb` (Blue) | CLI, API, внешние интерфейсы |
-| External | `#f1f5f9` | `#64748b` (Gray) | Сторонние системы |
+| Слой           | Fill      | Stroke             | Семантика                              |
+| -------------- | --------- | ------------------ | -------------------------------------- |
+| Domain         | `#f5f3ff` | `#7c3aed` (Purple) | Бизнес-логика, entities, value objects |
+| Application    | `#f0fdf4` | `#16a34a` (Green)  | Сервисы, оркестрация, use cases        |
+| Infrastructure | `#fff1f2` | `#dc2626` (Red)    | Адаптеры, клиенты, хранилище           |
+| Composition    | `#fff7ed` | `#f59e0b` (Orange) | Фабрики, DI, сборка                    |
+| Interfaces     | `#eff6ff` | `#2563eb` (Blue)   | CLI, API, внешние интерфейсы           |
+| External       | `#f1f5f9` | `#64748b` (Gray)   | Сторонние системы                      |
 
 ### 3.2. Цвета Medallion
 
-| Слой | Fill | Stroke |
-|------|------|--------|
-| Bronze | `#fff7ed` | `#f59e0b` (Orange) |
-| Silver | `#f8fafc` | `#475569` (Slate) |
-| Gold | `#fefce8` | `#ca8a04` (Amber) |
-| Quarantine | `#ffe4e6` | `#e11d48` (Red) |
+| Слой       | Fill      | Stroke             |
+| ---------- | --------- | ------------------ |
+| Bronze     | `#fff7ed` | `#f59e0b` (Orange) |
+| Silver     | `#f8fafc` | `#475569` (Slate)  |
+| Gold       | `#fefce8` | `#ca8a04` (Amber)  |
+| Quarantine | `#ffe4e6` | `#e11d48` (Red)    |
 
 ### 3.3. Тема Mermaid
 
 Конфигурация рендеринга: `theme/mermaid-config.json` (131 строка) — полная инициализация Mermaid. CSS-стили: `theme/custom.css` (152 строки) — цвета слоёв, стилизация subgraph.
 
----
+______________________________________________________________________
 
 ## 4. ELK Layout и edgeRouting
 
@@ -115,11 +115,11 @@
 
 ### 4.2. Когда применять
 
-| Число нод | Движок | Lint-правило |
-|-----------|--------|--------------|
-| 1–20 | Dagre (по умолчанию) | Нет |
-| 21–40 | ELK (рекомендуется) | LAYOUT-001 (WARN) |
-| >40 | ELK (обязательно) | LAYOUT-002 (ERROR) |
+| Число нод | Движок               | Lint-правило       |
+| --------- | -------------------- | ------------------ |
+| 1–20      | Dagre (по умолчанию) | Нет                |
+| 21–40     | ELK (рекомендуется)  | LAYOUT-001 (WARN)  |
+| >40       | ELK (обязательно)    | LAYOUT-002 (ERROR) |
 
 ELK применяется **только** к `flowchart`/`graph`. Для `classDiagram`, `sequenceDiagram`, `stateDiagram`, `erDiagram` и `mindmap` он не поддерживается — эти типы используют собственные layout-движки.
 
@@ -134,24 +134,35 @@ flowchart TB
 
 **Параметры ELK:**
 
-| Параметр | Значение | Эффект |
-|----------|----------|--------|
-| `mergeEdges` | `true` | Сливает параллельные рёбра и снижает визуальный шум |
-| `nodePlacementStrategy` | `'BRANDES_KOEPF'` | Более чистое layered-расположение |
-| `cycleBreakingStrategy` | `'GREEDY'` | Стабильнее разрывает циклы в плотных графах |
-| `spacing.nodeNode` | `40` | Добавляет отступы между нодами |
-| `spacing.edgeNode` | `30` | Разводит рёбра и ноды |
-| `spacing.edgeEdge` | `20` | Уменьшает пересечения рёбер |
-| `edgeRouting` | `'ORTHOGONAL'` | Рёбра проходят строго под углами 90° (Manhattan routing) |
+| Параметр                | Значение          | Эффект                                                   |
+| ----------------------- | ----------------- | -------------------------------------------------------- |
+| `mergeEdges`            | `true`            | Сливает параллельные рёбра и снижает визуальный шум      |
+| `nodePlacementStrategy` | `'BRANDES_KOEPF'` | Более чистое layered-расположение                        |
+| `cycleBreakingStrategy` | `'GREEDY'`        | Стабильнее разрывает циклы в плотных графах              |
+| `spacing.nodeNode`      | `40`              | Добавляет отступы между нодами                           |
+| `spacing.edgeNode`      | `30`              | Разводит рёбра и ноды                                    |
+| `spacing.edgeEdge`      | `20`              | Уменьшает пересечения рёбер                              |
+| `edgeRouting`           | `'ORTHOGONAL'`    | Рёбра проходят строго под углами 90° (Manhattan routing) |
 
 Параметр `edgeRouting: 'ORTHOGONAL'` — ключевой для получения аккуратных прямоугольных стрелок. Без него ELK использует режим `POLYLINE` или `SPLINES`, и стрелки по-прежнему могут быть диагональными.
 
 ### 4.4. Выбор направления
 
-| Паттерн диаграммы | Direction | Обоснование |
-|-------------------|-----------|-------------|
-| Иерархия, DI-граф, port-map | `TB` (top-down) | Вертикаль подчёркивает слои |
+| Паттерн диаграммы                 | Direction         | Обоснование                                 |
+| --------------------------------- | ----------------- | ------------------------------------------- |
+| Иерархия, DI-граф, port-map       | `TB` (top-down)   | Вертикаль подчёркивает слои                 |
 | Pipeline, data flow, config chain | `LR` (left-right) | Горизонталь подчёркивает последовательность |
+
+`direction` внутри `subgraph` трактуйте только как hint: Mermaid/ELK может переупорядочить узлы вопреки локальной директиве при оптимизации графа.
+
+### 4.6. Layout fallback order
+
+Если layout остаётся нечитаемым, применяйте шаги по порядку (от наименее рискованного к более тяжёлым):
+
+1. **Декомпозиция** — разбить диаграмму на focused views (`NNa/NNb/...`) и уменьшить локальную плотность.
+1. **ELK config tuning** — подправить `spacing.*`, `edgeRouting`, `direction` в init-блоке и проверить рендер.
+1. **Минимальные layout-hacks** — точечные приёмы (ограниченно), без массового `direction` в subgraph и без `&nbsp;`.
+1. **Tool switch** — при систематических ограничениях Mermaid перейти на PlantUML или D2 для конкретного сложного view.
 
 ### 4.5. Автоматизация: apply_elk_layout.py
 
@@ -182,7 +193,7 @@ python src/tools/apply_elk_layout.py --enforce-routing ORTHOGONAL
 %% @allow-polyline-routing
 ```
 
----
+______________________________________________________________________
 
 ## 5. Семантические стили связей (linkStyle)
 
@@ -190,18 +201,19 @@ python src/tools/apply_elk_layout.py --enforce-routing ORTHOGONAL
 
 Инструмент `src/tools/differentiate_linkstyle.py` классифицирует связи по 6 семантическим типам:
 
-| Тип | Стиль | Семантика |
-|-----|-------|-----------|
-| **data** | `stroke:#1E293B, width:2px` | Поток данных, чтение/запись |
-| **orchestration** | `stroke:#16a34a, width:2px` | Вызовы сервисов, управление |
-| **DI/implements** | `stroke:#7c3aed, width:1.5px, dashed` | Dependency injection, реализация протокола |
-| **observability** | `stroke:#94A3B8, width:1px` | Логирование, метрики, трейсинг |
-| **error/quarantine** | `stroke:#dc2626, width:2px, dashed` | Обработка ошибок, карантин |
-| **generic** | `stroke:#475569, width:2px, dashed` | Неопределённые связи |
+| Тип                  | Стиль                                 | Семантика                                  |
+| -------------------- | ------------------------------------- | ------------------------------------------ |
+| **data**             | `stroke:#1E293B, width:2px`           | Поток данных, чтение/запись                |
+| **orchestration**    | `stroke:#16a34a, width:2px`           | Вызовы сервисов, управление                |
+| **DI/implements**    | `stroke:#7c3aed, width:1.5px, dashed` | Dependency injection, реализация протокола |
+| **observability**    | `stroke:#94A3B8, width:1px`           | Логирование, метрики, трейсинг             |
+| **error/quarantine** | `stroke:#dc2626, width:2px, dashed`   | Обработка ошибок, карантин                 |
+| **generic**          | `stroke:#475569, width:2px, dashed`   | Неопределённые связи                       |
 
 ### 5.2. Когда применяется
 
 Инструмент активируется, если диаграмма:
+
 - Тип `flowchart`
 - Все существующие `linkStyle` однородны (одинаковый стиль)
 - Более 5 связей
@@ -216,31 +228,32 @@ python src/tools/differentiate_linkstyle.py --dry-run   # Предпросмот
 python src/tools/differentiate_linkstyle.py              # Применить
 ```
 
----
+______________________________________________________________________
 
 ## 6. Lint-проверки и CI
 
 ### 6.1. Правила lint_diagrams.py
 
-| Правило | Severity | Условие |
-|---------|----------|---------|
-| SIZE-001 | ERROR | @nodes > 35 |
-| SIZE-002 | WARN | @nodes > 20 |
-| SIZE-003 | WARN | @nodes > 35, но есть декомпозированные sibling-файлы (`01a/01b/...`) |
-| META-001 | WARN | Нет `@version`/`@date`/`@type`/`@level` в `.mmd` |
-| META-002 | ERROR | Некорректный формат даты в `%% Updated:`/`%% @date` |
-| CONTENT-001 | ERROR | Содержит placeholder/TODO/FIXME/stub |
-| CONTENT-002 | ERROR | Менее 3 непустых строк |
-| STALE-001 | ERROR | `@date` старше 180 дней |
-| STALE-002 | WARN | `@date` старше 90 дней |
-| COLOUR-001 | ERROR | Deprecated палитра Tailwind в `style`/`classDef` |
-| COLOUR-002 | ERROR | Emoji в subgraph labels |
-| LAYOUT-001 | WARN | flowchart/@nodes > 20 без ELK init |
-| LAYOUT-002 | ERROR | flowchart/@nodes > 40 без ELK init |
-| LINK-001 | WARN | Плотный flowchart использует только один тип стрелок |
-| LINK-002 | WARN | Хрупкий singleton-паттерн в `linkStyle` (много индексных строк `1:1`) |
-| GRAPH-001 | WARN | Orphan-ноды (определены, но не в рёбрах) |
-| NBSP-001 | ERROR | Используется `&nbsp;`-padding в исходнике |
+| Правило     | Severity | Условие                                                                   |
+| ----------- | -------- | ------------------------------------------------------------------------- |
+| SIZE-001    | ERROR    | @nodes > 35                                                               |
+| SIZE-002    | WARN     | @nodes > 20                                                               |
+| SIZE-003    | WARN     | @nodes > 35, но есть декомпозированные sibling-файлы (`01a/01b/...`)      |
+| META-001    | WARN     | Нет `@version`/`@date`/`@type`/`@level` в `.mmd`                          |
+| META-002    | ERROR    | Некорректный формат даты в `%% Updated:`/`%% @date`                       |
+| CONTENT-001 | ERROR    | Содержит placeholder/TODO/FIXME/stub                                      |
+| CONTENT-002 | ERROR    | Менее 3 непустых строк                                                    |
+| STALE-001   | ERROR    | `@date` старше 180 дней                                                   |
+| STALE-002   | WARN     | `@date` старше 90 дней                                                    |
+| COLOUR-001  | ERROR    | Deprecated палитра Tailwind в `style`/`classDef`                          |
+| COLOUR-002  | ERROR    | Emoji в subgraph labels                                                   |
+| LAYOUT-001  | WARN     | flowchart/@nodes > 20 без ELK init                                        |
+| LAYOUT-002  | ERROR    | flowchart/@nodes > 40 без ELK init                                        |
+| LAYOUT-004  | WARN     | Комбинация «много subgraph + много direction» (риск нестабильного layout) |
+| LINK-001    | WARN     | Плотный flowchart использует только один тип стрелок                      |
+| LINK-002    | WARN     | Хрупкий singleton-паттерн в `linkStyle` (много индексных строк `1:1`)     |
+| GRAPH-001   | WARN     | Orphan-ноды (определены, но не в рёбрах)                                  |
+| NBSP-001    | ERROR    | Используется `&nbsp;`-padding в исходнике                                 |
 
 Исключения: `-full.mermaid` reference views и `00-legend*` освобождены от SIZE-001/SIZE-002.
 
@@ -262,6 +275,7 @@ python scripts/prune_orphan_nodes.py --grandfather   # Пометить все �
 ```
 
 Нода **не считается orphan**, если:
+
 - Помечена аннотацией `%% keep-orphan: NodeId`
 - Находится в subgraph, родитель которого участвует в рёбрах
 - Файл — `00-legend*`
@@ -270,10 +284,10 @@ python scripts/prune_orphan_nodes.py --grandfather   # Пометить все �
 
 Два хука в `.pre-commit-config.yaml`:
 
-| Хук | Скрипт | Назначение |
-|-----|--------|------------|
-| `lint-diagrams` | `scripts/lint_diagrams.py` | Валидация всех правил |
-| `prune-orphan-diagram-nodes` | `scripts/prune_orphan_nodes.py --check` | Детекция orphan-нод |
+| Хук                          | Скрипт                                  | Назначение            |
+| ---------------------------- | --------------------------------------- | --------------------- |
+| `lint-diagrams`              | `scripts/lint_diagrams.py`              | Валидация всех правил |
+| `prune-orphan-diagram-nodes` | `scripts/prune_orphan_nodes.py --check` | Детекция orphan-нод   |
 
 ### 6.4. Проверка видимости текста в SVG
 
@@ -291,18 +305,18 @@ python scripts/check_svg_text_visibility.py --manifest docs/02-architecture/mmd-
 python scripts/check_svg_text_visibility.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt --json
 ```
 
----
+______________________________________________________________________
 
 ## 7. Плотность нод и декомпозиция
 
 ### 7.1. Пороги
 
-| Число нод | Статус | Действие |
-|-----------|--------|----------|
-| 1–15 | Оптимально | Диаграмма самодостаточна |
-| 16–20 | Мягкий лимит | Рассмотреть декомпозицию |
-| 21–35 | WARN | Декомпозиция рекомендована |
-| >35 | CRITICAL | Декомпозиция обязательна |
+| Число нод | Статус       | Действие                   |
+| --------- | ------------ | -------------------------- |
+| 1–15      | Оптимально   | Диаграмма самодостаточна   |
+| 16–20     | Мягкий лимит | Рассмотреть декомпозицию   |
+| 21–35     | WARN         | Декомпозиция рекомендована |
+| >35       | CRITICAL     | Декомпозиция обязательна   |
 
 ### 7.2. Стратегия декомпозиции
 
@@ -316,7 +330,7 @@ python scripts/check_svg_text_visibility.py --manifest docs/02-architecture/mmd-
 13d-port-contracts-services.mmd     → фокус на service ports
 ```
 
----
+______________________________________________________________________
 
 ## 8. Рендеринг
 
@@ -341,43 +355,43 @@ pwsh docs/02-architecture/mmd-diagrams/render-windows.ps1
 
 Результат записывается в `<source-dir>/svg/` и `<source-dir>/png/` рядом с исходником диаграммы.
 
----
+______________________________________________________________________
 
 ## 9. Типичный workflow создания диаграммы
 
 1. **Скопировать шаблон:** `cp _template.mmd architecture/NN-topic.mmd`
-2. **Заполнить метаданные:** `@version`, `@date`, `@type`, `@level`, `@nodes`
-3. **Нарисовать диаграмму:** использовать каноническую палитру цветов
-4. **Проверить lint:** `python scripts/lint_diagrams.py`
-5. **Применить ELK** (если @nodes > 20): `python src/tools/apply_elk_layout.py`
-6. **Применить linkStyle** (если flowchart с 5+ связями): `python src/tools/differentiate_linkstyle.py`
-7. **Проверить orphan-ноды:** `python scripts/prune_orphan_nodes.py --check`
-8. **Отрендерить:** `render.sh` или `render-windows.ps1`
+1. **Заполнить метаданные:** `@version`, `@date`, `@type`, `@level`, `@nodes`
+1. **Нарисовать диаграмму:** использовать каноническую палитру цветов
+1. **Проверить lint:** `python scripts/lint_diagrams.py`
+1. **Применить ELK** (если @nodes > 20): `python src/tools/apply_elk_layout.py`
+1. **Применить linkStyle** (если flowchart с 5+ связями): `python src/tools/differentiate_linkstyle.py`
+1. **Проверить orphan-ноды:** `python scripts/prune_orphan_nodes.py --check`
+1. **Отрендерить:** `render.sh` или `render-windows.ps1`
    Для усиленного рендера больших схем можно задать: `--large-threshold`, `--large-scale`, `--large-png-dpi`.
-9. **Проверить артефакты SVG/PNG:** `python scripts/check_diagram_artifacts.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`
-10. **Проверить видимость текста в SVG:** `python scripts/check_svg_text_visibility.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`
-11. **Прогнать quality-gates:** `python scripts/check_diagram_quality_gates.py --manifest docs/02-architecture/mmd-diagrams/quality-gate-manifest.txt`
-12. **Добавить в индекс:** обновить `README.md` каталога
+1. **Проверить артефакты SVG/PNG:** `python scripts/check_diagram_artifacts.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`
+1. **Проверить видимость текста в SVG:** `python scripts/check_svg_text_visibility.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`
+1. **Прогнать quality-gates:** `python scripts/check_diagram_quality_gates.py --manifest docs/02-architecture/mmd-diagrams/quality-gate-manifest.txt`
+1. **Добавить в индекс:** обновить `README.md` каталога
 
----
+______________________________________________________________________
 
 ## 10. Сводная таблица инструментов
 
-| Инструмент | Расположение | Назначение |
-|------------|-------------|------------|
-| run_diagram_checks.sh | `scripts/` | Единый запуск профилей проверок (`pr`/`nightly`/`quick`) |
-| apply_elk_layout.py | `src/tools/` | Добавление ELK init к flowchart с >20 нод |
-| differentiate_linkstyle.py | `src/tools/` | Семантическая стилизация рёбер |
-| lint_diagrams.py | `scripts/` | Lint-проверка по 14 правилам |
-| prune_orphan_nodes.py | `scripts/` | Детекция и удаление orphan-нод |
-| check_diagram_artifacts.py | `scripts/` | DIAG-T010..T012 (наличие/непустота SVG+PNG) |
-| check_svg_text_visibility.py | `scripts/` | Smoke-проверка видимости текста в SVG |
-| check_diagram_quality_gates.py | `scripts/` | DIAG-T018..T023 (style/classDef/decomposition/legend/labels) |
-| run_diagram_nightly_suite.py | `scripts/` | DIAG-T024..T029 nightly heuristics (interactivity/chaos/growth/theme) |
-| render.sh | `mmd-diagrams/` | Рендеринг SVG + PNG (300 DPI, auto-hires + `@png-scale/@png-dpi`) |
-| render-windows.ps1 | `mmd-diagrams/` | Windows-версия рендеринга |
+| Инструмент                     | Расположение    | Назначение                                                            |
+| ------------------------------ | --------------- | --------------------------------------------------------------------- |
+| run_diagram_checks.sh          | `scripts/`      | Единый запуск профилей проверок (`pr`/`nightly`/`quick`)              |
+| apply_elk_layout.py            | `src/tools/`    | Добавление ELK init к flowchart с >20 нод                             |
+| differentiate_linkstyle.py     | `src/tools/`    | Семантическая стилизация рёбер                                        |
+| lint_diagrams.py               | `scripts/`      | Lint-проверка по 14 правилам                                          |
+| prune_orphan_nodes.py          | `scripts/`      | Детекция и удаление orphan-нод                                        |
+| check_diagram_artifacts.py     | `scripts/`      | DIAG-T010..T012 (наличие/непустота SVG+PNG)                           |
+| check_svg_text_visibility.py   | `scripts/`      | Smoke-проверка видимости текста в SVG                                 |
+| check_diagram_quality_gates.py | `scripts/`      | DIAG-T018..T023 (style/classDef/decomposition/legend/labels)          |
+| run_diagram_nightly_suite.py   | `scripts/`      | DIAG-T024..T029 nightly heuristics (interactivity/chaos/growth/theme) |
+| render.sh                      | `mmd-diagrams/` | Рендеринг SVG + PNG (300 DPI, auto-hires + `@png-scale/@png-dpi`)     |
+| render-windows.ps1             | `mmd-diagrams/` | Windows-версия рендеринга                                             |
 
----
+______________________________________________________________________
 
 ## 11. Единый запуск проверок
 
@@ -390,15 +404,15 @@ scripts/run_diagram_checks.sh --profile pr
 Доступные профили:
 
 1. `pr` — полный pre-merge набор (syntax, lint, render, artifacts, smoke, quality-gates).
-2. `nightly` — `pr` + DIAG-T024..T029 (`run_diagram_nightly_suite.py`).
-3. `quick` — облегчённый локальный цикл без рендера и тяжёлых chaos/growth/theme проверок.
+1. `nightly` — `pr` + DIAG-T024..T029 (`run_diagram_nightly_suite.py`).
+1. `quick` — облегчённый локальный цикл без рендера и тяжёлых chaos/growth/theme проверок.
 
 Полезные флаги:
 
 1. `--strict-nightly` — nightly падает не только на error, но и на warning.
-2. `--skip-render` — пропускает render-шаг в `pr`/`nightly`.
-3. `--puppeteer /tmp/puppeteer-config.json` — переопределение пути к Puppeteer config.
-4. `--diagram docs/02-architecture/mmd-diagrams/foundation/30-port-adapter-mapping.mmd` — запуск проверок только для одной диаграммы.
+1. `--skip-render` — пропускает render-шаг в `pr`/`nightly`.
+1. `--puppeteer /tmp/puppeteer-config.json` — переопределение пути к Puppeteer config.
+1. `--diagram docs/02-architecture/mmd-diagrams/foundation/30-port-adapter-mapping.mmd` — запуск проверок только для одной диаграммы.
 
 Пример single-file запуска:
 
@@ -407,6 +421,6 @@ scripts/run_diagram_checks.sh --profile pr \
   --diagram docs/02-architecture/mmd-diagrams/foundation/30-port-adapter-mapping.mmd
 ```
 
----
+______________________________________________________________________
 
 *Документ основан на ADR-040-diagram-governance.md, 00-diagramming-policy.md и исходном коде инструментов проекта.*

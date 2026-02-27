@@ -32,6 +32,7 @@ References:
     - docs/**/*.mermaid
     - excludes docs/99-archive/**
 """
+
 from __future__ import annotations
 
 import argparse
@@ -47,9 +48,7 @@ DIAGRAM_DIRS = [
 ]
 SUPPORTED_SUFFIXES = {".mmd", ".mermaid"}
 EXCLUDED_PATH_PARTS = {"99-archive"}
-NAMING_PATTERN = re.compile(
-    r"^\d{2}[a-z]?-[a-z0-9]+(?:-[a-z0-9]+)*\.(?:mmd|mermaid)$"
-)
+NAMING_PATTERN = re.compile(r"^\d{2}[a-z]?-[a-z0-9]+(?:-[a-z0-9]+)*\.(?:mmd|mermaid)$")
 PLACEHOLDER_MARKERS = ["placeholder", "TODO", "FIXME", "stub"]
 
 # ── Layout rules (ADR-040 adaptive layout) ────────────────────────────────────
@@ -67,12 +66,15 @@ _NON_FLOW_RE = re.compile(
 _STYLE_OR_CLASSDEF_RE = re.compile(r"^\s*(style|classDef)\b")
 _HEX_COLOR_RE = re.compile(r"#[0-9a-fA-F]{6}\b")
 _SUBGRAPH_RE = re.compile(r"^\s*subgraph\b", re.IGNORECASE)
+_DIRECTION_RE = re.compile(r"^\s*direction\s+(?:TB|BT|LR|RL)\b", re.IGNORECASE)
 _LINK_STYLE_RE = re.compile(r"^\s*linkStyle\s+([^\s]+)")
 _LINK_STYLE_FULL_RE = re.compile(r"^\s*linkStyle\s+([^\s]+)\s+(.+)$")
 ELK_WARN_THRESHOLD = 20
 ELK_ERROR_THRESHOLD = 40
 SIZE_WARN_THRESHOLD = 20
 SIZE_ERROR_THRESHOLD = 35
+LAYOUT_RISK_SUBGRAPH_THRESHOLD = 4
+LAYOUT_RISK_DIRECTION_THRESHOLD = 4
 PLACEHOLDER_PATTERNS = {
     marker: re.compile(rf"\b{re.escape(marker)}\b", re.IGNORECASE)
     for marker in PLACEHOLDER_MARKERS
@@ -82,15 +84,24 @@ WARNING_STALE_DAYS = 180
 DISALLOWED_SUBGRAPH_EMOJI = ("🟡", "🟢", "🔵", "🟣", "⚪")
 # Canonical ADR-040 palette values that must not be flagged by COLOUR-001.
 CANONICAL_PALETTE = {
-    "#f5f3ff", "#7c3aed",  # Domain
-    "#f0fdf4", "#16a34a",  # Application
-    "#fff1f2", "#dc2626",  # Infrastructure
-    "#fff7ed", "#f59e0b",  # Composition / Bronze
-    "#eff6ff", "#2563eb",  # Interfaces
-    "#f1f5f9", "#64748b",  # External
-    "#f8fafc", "#475569",  # Silver
-    "#fefce8", "#ca8a04",  # Gold
-    "#ffe4e6", "#e11d48",  # Quarantine
+    "#f5f3ff",
+    "#7c3aed",  # Domain
+    "#f0fdf4",
+    "#16a34a",  # Application
+    "#fff1f2",
+    "#dc2626",  # Infrastructure
+    "#fff7ed",
+    "#f59e0b",  # Composition / Bronze
+    "#eff6ff",
+    "#2563eb",  # Interfaces
+    "#f1f5f9",
+    "#64748b",  # External
+    "#f8fafc",
+    "#475569",  # Silver
+    "#fefce8",
+    "#ca8a04",  # Gold
+    "#ffe4e6",
+    "#e11d48",  # Quarantine
 }
 # Legacy palette values blocked in style/classDef rules.
 DEPRECATED_PALETTE = {
@@ -198,8 +209,7 @@ def find_diagram_files(base: Path) -> list[Path]:
         f
         for f in list(base.rglob("*.mmd")) + list(base.rglob("*.mermaid"))
         if (
-            not f.name.startswith("_")
-            and not EXCLUDED_PATH_PARTS.intersection(f.parts)
+            not f.name.startswith("_") and not EXCLUDED_PATH_PARTS.intersection(f.parts)
         )
     )
 
@@ -230,8 +240,7 @@ def check_metadata_headers(path: Path, lines: list[str]) -> list[Issue]:
             )
     else:
         has_view = any(
-            line.strip().startswith("%% View:")
-            or line.strip().startswith("%% @view")
+            line.strip().startswith("%% View:") or line.strip().startswith("%% @view")
             for line in lines
         )
         if not has_view:
@@ -288,9 +297,7 @@ def check_placeholder_content(path: Path, lines: list[str]) -> list[Issue]:
 
     # Check for files that are too short to be real diagrams
     non_comment_lines = [
-        line
-        for line in lines
-        if line.strip() and not line.strip().startswith("%%")
+        line for line in lines if line.strip() and not line.strip().startswith("%%")
     ]
     if len(non_comment_lines) < 3:
         issues.append(
@@ -385,10 +392,7 @@ def check_colour_policy(path: Path, lines: list[str]) -> list[Issue]:
             continue
         for color in _HEX_COLOR_RE.findall(line):
             normalized = color.lower()
-            if (
-                normalized in DEPRECATED_PALETTE
-                and normalized not in CANONICAL_PALETTE
-            ):
+            if normalized in DEPRECATED_PALETTE and normalized not in CANONICAL_PALETTE:
                 found.add(normalized)
 
     if found:
@@ -506,6 +510,7 @@ def check_layout_policy(path: Path, lines: list[str]) -> list[Issue]:
     LAYOUT-001: flowchart/graph with @nodes > 20 and no ELK init → WARNING
     LAYOUT-002: flowchart/graph with @nodes > 40 and no ELK init → ERROR
     LAYOUT-003: ELK flowchart with edgeRouting=POLYLINE (no override marker) → WARNING
+    LAYOUT-004: many subgraph + many direction directives (layout fragility risk) → WARNING
     """
     issues: list[Issue] = []
     fname = str(path)
@@ -553,8 +558,7 @@ def check_layout_policy(path: Path, lines: list[str]) -> list[Issue]:
             edge_routing = match.group(1).upper()
             break
     allow_polyline = any(
-        "@allow-polyline-routing" in ln or "@allow-polyline" in ln
-        for ln in lines
+        "@allow-polyline-routing" in ln or "@allow-polyline" in ln for ln in lines
     )
 
     if not has_elk and nodes > ELK_ERROR_THRESHOLD:
@@ -590,6 +594,26 @@ def check_layout_policy(path: Path, lines: list[str]) -> list[Issue]:
                 message=(
                     "ELK flowchart uses edgeRouting=POLYLINE; prefer ORTHOGONAL for "
                     "consistent link geometry (add %% @allow-polyline-routing to opt out)"
+                ),
+            )
+        )
+
+    subgraph_count = sum(1 for ln in lines if _SUBGRAPH_RE.match(ln))
+    direction_count = sum(1 for ln in lines if _DIRECTION_RE.match(ln))
+    if (
+        subgraph_count >= LAYOUT_RISK_SUBGRAPH_THRESHOLD
+        and direction_count >= LAYOUT_RISK_DIRECTION_THRESHOLD
+    ):
+        issues.append(
+            Issue(
+                file=fname,
+                severity="WARNING",
+                rule="LAYOUT-004",
+                message=(
+                    "Layout fragility risk: detected many subgraph blocks "
+                    f"(count={subgraph_count}) and many direction directives "
+                    f"(count={direction_count}). Treat subgraph direction as a hint only; "
+                    "prefer decomposition and ELK tuning first."
                 ),
             )
         )
@@ -683,9 +707,7 @@ def check_linkstyle_index_fragility(path: Path, lines: list[str]) -> list[Issue]
     # Warn on brittle patterns only:
     # - many singleton linkStyle lines (index-by-index mapping), or
     # - many style lines with very low style diversity (typically repetitive copy-paste).
-    if (
-        len(groups) >= 20 and singleton_ratio >= 0.85 and unique_styles <= 3
-    ) or (
+    if (len(groups) >= 20 and singleton_ratio >= 0.85 and unique_styles <= 3) or (
         len(groups) >= 12 and singleton_ratio == 1.0 and unique_styles == 1
     ):
         issues.append(
@@ -737,6 +759,7 @@ def check_orphan_nodes(path: Path, lines: list[str]) -> list[Issue]:
     sequenceDiagram files only.  classDiagram and other types are skipped.
     """
     import sys as _sys
+
     _sys.path.insert(0, str(Path(__file__).parent))
     try:
         from prune_orphan_nodes import (
@@ -877,12 +900,8 @@ def format_text(result: LintResult) -> str:
         for file, issues in sorted(by_file.items()):
             lines.append(f"  {file}")
             for issue in issues:
-                marker = {"ERROR": "E", "WARNING": "W", "INFO": "I"}[
-                    issue.severity
-                ]
-                lines.append(
-                    f"    [{marker}] {issue.rule}: {issue.message}"
-                )
+                marker = {"ERROR": "E", "WARNING": "W", "INFO": "I"}[issue.severity]
+                lines.append(f"    [{marker}] {issue.rule}: {issue.message}")
             lines.append("")
 
     lines.append(f"Files checked: {result.files_checked}")
