@@ -5,6 +5,7 @@
 > **Canonical policy:** [`docs/02-architecture/06-diagram-policy.md`](../06-diagram-policy.md) (POL-LLM-DIAGRAMS-001).
 > **Canonical diagrams:** [`docs/02-architecture/mmd-diagrams/`](../mmd-diagrams/README.md).
 > This file is kept for historical reference. All new diagram work should follow the canonical policy.
+> **Historical note:** examples below are preserved for context; prefer canonical `.mmd` paths and render outputs from `mmd-diagrams/` or `diagrams/mermaid/png/`.
 
 ## Overview
 
@@ -18,7 +19,7 @@ This document defines standards for creating, maintaining, and versioning archit
 
 - **Primary format**: Mermaid or PlantUML (text-based)
 - **Rationale**: Version control friendly, diff-able, reviewable in PRs
-- **Binary images**: Generated artifacts in `docs/02-architecture/diagrams/png/` (updated together with source diagrams when needed)
+- **Binary images**: Generated artifacts in `docs/02-architecture/diagrams/mermaid/png/` and `docs/02-architecture/mmd-diagrams/**/png/` (updated together with source diagrams when needed)
 
 ### 1.2 Single Responsibility (MUST)
 
@@ -43,30 +44,34 @@ docs/02-architecture/diagrams/
 ├── 00-diagramming-policy.md     # This file
 ├── diagrams-index.md            # Index of all diagrams
 ├── top-50-diagrams.md           # Prioritized backlog
-├── mermaid/                     # Source diagrams (.mermaid)
+├── mermaid/                     # Historical source diagrams (.mermaid)
 │   ├── 01-high-level.mermaid
 │   └── ...
-└── png/                         # Rendered diagrams (.png)
-    ├── 01-high-level.png
-    └── ...
+├── mermaid/png/                 # Rendered historical diagrams (.png)
+│   ├── 01-high-level.png
+│   └── ...
+└── ../mmd-diagrams/             # Canonical diagram sources (.mmd) and renders
+    ├── architecture/*.mmd
+    ├── class-diagrams/*.mmd
+    └── foundation/*.mmd
 ```
 
 ### 2.2 Naming Convention (MUST)
 
-- Format: `NN-<topic>.mermaid`
+- Format: `NN-<topic>.mmd` (canonical) or `NN-<topic>.mermaid` (historical)
 - Examples:
-  - `01-high-level.mermaid`
-  - `03-pipeline-execution-happy-path.mermaid`
+  - `01-high-level.mmd`
+  - `03-pipeline-execution-happy-path.mmd`
 - Prefix `NN-` for ordering
 - Topic in kebab-case
-- Extension: `.mermaid` (standardized)
+- Extension: `.mmd` (canonical standardized extension)
 
 ### 2.3 Diagram Definition of Done (MUST)
 
 Новая или обновлённая диаграмма считается готовой только когда:
 
-- есть исходник `.mermaid` в `mermaid/`;
-- есть `.png` в `png/`;
+- есть исходник `.mmd` в `../mmd-diagrams/` (или `.mermaid` только для исторического набора);
+- есть `.png` в `../mmd-diagrams/**/png/` или `mermaid/png/`;
 - есть запись в `diagrams-index.md`;
 - есть контекстный абзац со ссылкой в `docs/02-architecture/*.md`.
 
@@ -196,7 +201,7 @@ Update diagrams when:
 ```yaml
 # .github/workflows/docs.yml
 - name: Validate Mermaid
-  run: npx @mermaid-js/mermaid-cli -i docs/**/*.mermaid
+  run: npx @mermaid-js/mermaid-cli -i docs/**/*.mmd
 ```
 
 ----------------------------------------------------------------------

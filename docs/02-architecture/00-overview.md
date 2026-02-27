@@ -29,7 +29,7 @@ BioETL follows a **Hexagonal Architecture** (Ports & Adapters) pattern with **Me
 ### Diagrams
 
 - [diagrams/](diagrams/) — Mermaid source files
-- [diagrams/png/](diagrams/png/) — Rendered PNG files
+- [diagrams/mermaid/png/](diagrams/mermaid/png/) — Rendered PNG files
 - [diagrams/diagrams-index.md](diagrams/diagrams-index.md) — Full diagram index
 - [diagrams.md](diagrams.md) — Inline diagram collection
 
@@ -104,12 +104,12 @@ See [decisions/README.md](decisions/README.md) for full index with categories.
 
 | Diagram                 | Description                                    | File                                                                                                          |
 | ----------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| Five Layer Architecture | Complete system architecture with all 5 layers | [01-high-level.mermaid](mmd-diagrams/foundation/01-high-level.mermaid)                                                       |
-| Layers Interaction      | How layers communicate                         | [05-layers-interaction.mermaid](mmd-diagrams/foundation/05-layers-interaction.mermaid)                                |
-| Composite Pipeline      | ADR-026 workflow: seed → enrich → merge        | [29-composite-pipeline-workflow.mermaid](mmd-diagrams/foundation/29-composite-pipeline-workflow.mermaid)                      |
-| Provider Adapters       | 7 providers with rate limits                   | [30-port-adapter-mapping.mermaid](mmd-diagrams/foundation/30-port-adapter-mapping.mermaid)                                    |
-| Pipeline Hierarchy      | Pipeline/Transformer inheritance               | [17-pipeline-hierarchy.mermaid](mmd-diagrams/foundation/17-pipeline-hierarchy.mermaid)                                |
-| Local Deployment        | ADR-010 local-only runtime architecture        | [12-local-deployment-architecture.mermaid](mmd-diagrams/foundation/12-local-deployment-architecture.mermaid)          |
+| Five Layer Architecture | Complete system architecture with all 5 layers | [01-high-level.mmd](mmd-diagrams/foundation/01-high-level.mmd)                                                       |
+| Layers Interaction      | How layers communicate                         | [05-layers-interaction.mmd](mmd-diagrams/foundation/05-layers-interaction.mmd)                                |
+| Composite Pipeline      | ADR-026 workflow: seed → enrich → merge        | [29-composite-pipeline-workflow.mmd](mmd-diagrams/foundation/29-composite-pipeline-workflow.mmd)                      |
+| Provider Adapters       | 7 providers with rate limits                   | [05-provider-adapter-hierarchy.mmd](mmd-diagrams/architecture/05-provider-adapter-hierarchy.mmd)                                    |
+| Pipeline Hierarchy      | Pipeline/Transformer inheritance               | [17-pipeline-hierarchy.mmd](mmd-diagrams/foundation/17-pipeline-hierarchy.mmd)                                |
+| Local Deployment        | ADR-010 local-only runtime architecture        | [12-local-deployment-architecture.mmd](mmd-diagrams/foundation/12-local-deployment-architecture.mmd)          |
 
 ----------------------------------------------------------------------
 
