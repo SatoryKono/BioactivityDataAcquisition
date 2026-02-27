@@ -1,0 +1,98 @@
+%% View: Full | Parent: (root)
+%% Parent source: docs/02-architecture/mmd-diagrams/foundation/39-medallion-invariants.mmd
+%% Full reference diagram retained after decomposition.
+%% Title: Medallion Architecture Invariants (ARCH-007)
+%% Covers: RULES.md §2.1 (Medallion), ARCH-007 clear policy
+%% Rank: 14 (Score 8.19) — Critical data safety rules
+%% Updated: 2026-02-17
+%% Legend: see 00-legend.mermaid
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   Mixed (System / Component / Class)
+
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% @uniform width=256 height=90 max_title_len=27 max_desc_lines=3
+flowchart TB
+%% keep-orphan: E3, E4
+    subgraph RunTypes["RunType Enum (domain/types.py)"]
+        INC["RunType.INCREMENTAL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>'Fetch new data since last run'<br/>&nbsp;<br/>&nbsp;"]
+        BF["RunType.BACKFILL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>'Re-fetch a date range'<br/>&nbsp;<br/>&nbsp;"]
+        RB["RunType.REBUILD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>'Full clean rebuild'<br/>&nbsp;<br/>&nbsp;"]
+    end
+
+    subgraph Policy["MedallionLifecycleService\n(application/services/medallion_lifecycle.py)"]
+        CHECK{{"Check RunType&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"}}
+    end
+
+    subgraph IncPath["INCREMENTAL Path"]
+        I1["❌ DO NOT clear Silver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        I2["❌ DO NOT clear Gold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        I3["Silver: merge/upsert&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(content_hash dedup)<br/>&nbsp;<br/>&nbsp;"]
+        I4["Gold: merge/append&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+    end
+
+    subgraph BFPath["BACKFILL Path"]
+        B1["✅ MUST clear Silver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>SilverWriter.clear()<br/>&nbsp;<br/>&nbsp;"]
+        B2["✅ MUST clear Gold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>GoldWriter.clear()<br/>&nbsp;<br/>&nbsp;"]
+        B3["Silver: full reload&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        B4["Gold: full reload&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+    end
+
+    subgraph RBPath["REBUILD Path"]
+        R1["✅ MUST clear Silver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>SilverWriter.clear()<br/>&nbsp;<br/>&nbsp;"]
+        R2["✅ MUST clear Gold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>GoldWriter.clear()<br/>&nbsp;<br/>&nbsp;"]
+        R3["Silver: full rebuild&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>from Bronze/API<br/>&nbsp;<br/>&nbsp;"]
+        R4["Gold: full rebuild&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>from Silver<br/>&nbsp;<br/>&nbsp;"]
+    end
+
+    subgraph Enforcement["Enforcement"]
+        E1["PipelineRunner checks&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>run_type before execution<br/>&nbsp;<br/>&nbsp;"]
+        E2["MedallionLifecycleService&nbsp;&nbsp;<br/>enforces clear policy<br/>&nbsp;<br/>&nbsp;"]
+        E3["ClearResult tracks&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>what was cleared<br/>&nbsp;<br/>&nbsp;"]
+        E4["Tests verify:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>INCREMENTAL never clears<br/>&nbsp;<br/>&nbsp;"]
+    end
+
+    subgraph Bronze["Bronze Layer (Always Append)"]
+        BZ["BronzeWriter.write_bronze()<br/>• ALWAYS append-only<br/>• Never cleared by run_type<br/>• 90-day retention policy"]
+    end
+
+    %% Flow
+    INC --> CHECK
+    BF --> CHECK
+    RB --> CHECK
+
+    CHECK -->|K17| I1
+    I1 --> I2 --> I3 --> I4
+
+    CHECK -->|"BACKFILL"| B1
+    B1 --> B2 --> B3 --> B4
+
+    CHECK -->|"REBUILD"| R1
+    R1 --> R2 --> R3 --> R4
+
+    E1 -.-> CHECK
+    E2 -.-> Policy
+
+    BZ -.->|K18| Bronze
+
+    %% Styling
+    style IncPath fill:#e8f5e9,stroke:#2e7d32
+    style BFPath fill:#fff3e0,stroke:#e65100
+    style RBPath fill:#ffebee,stroke:#c62828
+    style Bronze fill:#FFA500,stroke:#cc8400,color:#000
+    style Policy fill:#e3f2fd,stroke:#1565c0
+
+    linkStyle 0 stroke:#1E293B,stroke-width:4px
+    linkStyle 1 stroke:#1E293B,stroke-width:4px
+    linkStyle 2 stroke:#1E293B,stroke-width:4px
+    linkStyle 3 stroke:#1E293B,stroke-width:4px
+    linkStyle 4 stroke:#1E293B,stroke-width:4px
+    linkStyle 5 stroke:#1E293B,stroke-width:4px
+    linkStyle 6 stroke:#1E293B,stroke-width:4px
+    linkStyle 7 stroke:#1E293B,stroke-width:4px
+    linkStyle 8 stroke:#1E293B,stroke-width:4px
+    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 10 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 11 stroke:#475569,stroke-width:2px,stroke-dasharray:5

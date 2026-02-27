@@ -1,7 +1,7 @@
 # BioETL Makefile
 # Production-ready ETL system for bioactivity data
 
-.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint docs-legacy-check run-local docker-up docker-down docker-reset seed-local clean clean-preflight clean-all mcp-preflight diagram-preflight lint-diagrams validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png diagrams-all report-diagram-padding
+.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-preflight clean-all diagram-preflight lint-diagrams validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png diagrams-all report-diagram-padding
 .DEFAULT_GOAL := help
 
 # Detect uv availability (preferred package manager)
@@ -63,7 +63,7 @@ install-pip: ## Install dependencies using pip (fallback)
 	$(VENV_PIP) install -e ".[dev,tracing]"
 	@echo "$(GREEN)Installation complete! Activate venv with: source $(VENV_BIN)/activate$(NC)"
 
-setup-dev: install test-deps-dev mcp-preflight ## Full development environment setup and verification
+setup-dev: install test-deps-dev ## Full development environment setup and verification
 	@echo "$(GREEN)Development environment setup and verified!$(NC)"
 
 setup-plugins: ## Configure pytest/pre-commit plugins for local development
@@ -175,24 +175,10 @@ lint: ## Run ruff and mypy
 	@echo "$(BLUE)Running mypy...$(NC)"
 	$(RUN) mypy src/bioetl
 
-docs-legacy-check: ## Fail if legacy config/script tokens appear in mkdocs nav docs
-	@echo "$(BLUE)Checking docs for legacy config/script tokens...$(NC)"
-	$(PY_RUN) scripts/check_doc_links.py --legacy-paths
-
 lint-fix: ## Auto-fix linting issues
 	@echo "$(BLUE)Auto-fixing with ruff...$(NC)"
 	$(RUN) ruff check --fix src/ tests/
 	$(RUN) ruff format src/ tests/
-
-mcp-preflight: ## Validate local Codex MCP setup (optional, non-blocking)
-	@echo "$(BLUE)Checking Codex MCP setup...$(NC)"
-	@if [[ ! -x "scripts/check_mcp.sh" ]]; then \
-		echo "$(YELLOW)scripts/check_mcp.sh not found/executable; skipping MCP preflight.$(NC)"; \
-	elif ! command -v codex >/dev/null 2>&1; then \
-		echo "$(YELLOW)codex CLI not found; skipping MCP preflight.$(NC)"; \
-	else \
-		bash scripts/check_mcp.sh || echo "$(YELLOW)MCP preflight reported issues. See output above.$(NC)"; \
-	fi
 
 diagram-preflight: ## Check Mermaid render dependencies (mmdc required, svgo/rsvg optional)
 	@echo "$(BLUE)Checking diagram toolchain...$(NC)"

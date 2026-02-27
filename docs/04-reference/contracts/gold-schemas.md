@@ -87,7 +87,7 @@ Gold-фильтры определяются в YAML-конфигах пайпл
 ### Пример конфигурации
 
 ```yaml
-# configs/entities/chembl/activity.yaml
+# configs/pipelines/chembl/activity.yaml
 gold-filters:
   columns:
     standard-type: [IC50, Ki]
@@ -109,7 +109,7 @@ gold-filters:
 
 ### ChEMBL
 
-#### chembl-activity
+#### chembl_activity
 
 **Primary Key**: `activity-id`
 **Назначение**: Биоактивность соединений (IC50, Ki, EC50)
@@ -152,7 +152,7 @@ gold-filters:
 
 ---
 
-#### chembl-molecule
+#### chembl_molecule
 
 **Primary Key**: `molecule-chembl-id`
 **Назначение**: Химические соединения и их свойства
@@ -191,7 +191,7 @@ gold-filters:
 
 ---
 
-#### chembl-assay
+#### chembl_assay
 
 **Primary Key**: `assay-chembl-id`
 **Назначение**: Биологические эксперименты
@@ -218,7 +218,7 @@ gold-filters:
 
 ---
 
-#### chembl-target
+#### chembl_target
 
 **Primary Key**: `target-chembl-id`
 **Назначение**: Биологические мишени (белки)
@@ -244,7 +244,7 @@ gold-filters:
 
 ---
 
-#### chembl-target-component
+#### chembl_target_component
 
 **Primary Key**: `component-id`
 **Назначение**: Компоненты мишеней (белковые последовательности)
@@ -268,10 +268,10 @@ gold-filters:
 
 ---
 
-#### chembl-publication
+#### chembl_publication
 
 **Primary Key**: `document-chembl-id`
-**Назначение**: Научные публикации из ChEMBL API (silver-table/gold-table: `chembl-publication`)
+**Назначение**: Научные публикации из ChEMBL API (silver-table/gold-table: `chembl_publication`)
 
 ##### Gold-фильтры
 
@@ -295,7 +295,7 @@ gold-filters:
 
 ---
 
-#### chembl-compound-record
+#### chembl_compound_record
 
 **Primary Key**: `record-id`
 **Назначение**: Связь молекула-документ
@@ -318,7 +318,7 @@ gold-filters:
 
 ---
 
-#### chembl-cell-line
+#### chembl_cell_line
 
 **Primary Key**: `cell-chembl-id`
 **Назначение**: Клеточные линии
@@ -344,7 +344,7 @@ gold-filters:
 
 ### PubChem
 
-#### pubchem-compound
+#### pubchem_compound
 
 **Primary Key**: `cid`
 **Назначение**: Химические соединения PubChem
@@ -373,7 +373,7 @@ gold-filters:
 
 ### UniProt
 
-#### uniprot-protein
+#### uniprot_protein
 
 **Primary Key**: `accession`
 **Назначение**: Белки UniProt
@@ -401,7 +401,7 @@ gold-filters:
 
 ### PubMed
 
-#### pubmed-publication
+#### pubmed_publication
 
 **Primary Key**: `pmid`
 **Назначение**: Публикации PubMed
@@ -490,7 +490,7 @@ import polars as pl
 from deltalake import DeltaTable
 
 # Загрузка Gold-таблицы
-dt = DeltaTable("data/output/gold/chembl-activity")
+dt = DeltaTable("data/output/gold/chembl_activity")
 df = pl.from-arrow(dt.to-pyarrow-table())
 
 # Фильтрация активных IC50 для конкретной мишени
@@ -519,7 +519,7 @@ SELECT
     standard-value,
     pchembl-value,
     canonical-smiles
-FROM delta-scan('data/output/gold/chembl-activity')
+FROM delta-scan('data/output/gold/chembl_activity')
 WHERE target-chembl-id = 'CHEMBL1234'
   AND standard-type = 'IC50'
 ORDER BY standard-value ASC
@@ -537,8 +537,8 @@ SELECT
     m.property-alogp,
     m.property-mw-freebase AS mw,
     m.structure-canonical-smiles
-FROM delta-scan('data/output/gold/chembl-activity') a
-JOIN delta-scan('data/output/gold/chembl-molecule') m
+FROM delta-scan('data/output/gold/chembl_activity') a
+JOIN delta-scan('data/output/gold/chembl_molecule') m
   ON a.molecule-chembl-id = m.molecule-chembl-id
 WHERE a.standard-type = 'IC50'
   AND a.standard-value < 100;
@@ -554,8 +554,8 @@ SELECT
     COUNT(*) AS activity-count,
     AVG(a.pchembl-value) AS avg-pchembl,
     MIN(a.standard-value) AS best-ic50-nm
-FROM delta-scan('data/output/gold/chembl-activity') a
-JOIN delta-scan('data/output/gold/chembl-target') t
+FROM delta-scan('data/output/gold/chembl_activity') a
+JOIN delta-scan('data/output/gold/chembl_target') t
   ON a.target-chembl-id = t.target-chembl-id
 WHERE a.standard-type = 'IC50'
 GROUP BY t.pref-name, t.organism
@@ -569,7 +569,7 @@ LIMIT 20;
 from deltalake import DeltaTable
 
 # Версия на определённый timestamp
-dt = DeltaTable("data/output/gold/chembl-activity")
+dt = DeltaTable("data/output/gold/chembl_activity")
 df-historical = pl.from-arrow(
     dt.load-as-version(datetime(2025, 1, 1)).to-pyarrow-table()
 )
@@ -607,7 +607,7 @@ from bioetl.infrastructure.schemas.gold import ChEMBLActivityGoldSchema
 import polars as pl
 
 # Загрузка и валидация
-df = pl.read-delta("data/output/gold/chembl-activity")
+df = pl.read-delta("data/output/gold/chembl_activity")
 validated = ChEMBLActivityGoldSchema.validate(df.to-pandas())
 ```
 
@@ -633,25 +633,25 @@ Gold-схемы реализованы как **Python Pandera DataFrameModel** 
 
 JSON exports для Gold-схем хранятся в `docs/04-reference/contracts/gold/`:
 
-- `chembl-activity-v1.0.json`
-- `chembl-assay-parameters-v1.0.json`
-- `chembl-assay-v1.0.json`
-- `chembl-cell-line-v1.0.json`
-- `chembl-compound-record-v1.0.json`
-- `chembl-publication-similarity-v1.0.json`
-- `chembl-publication-term-v1.0.json`
-- `chembl-publication-v1.0.json`
-- `chembl-molecule-v1.0.json`
-- `chembl-protein-class-v1.0.json`
-- `chembl-target-component-v1.0.json`
-- `chembl-target-v1.0.json`
-- `composite-publication-v1.0.json`
-- `crossref-publication-v1.0.json`
-- `openalex-publication-v1.0.json`
-- `pubchem-compound-v1.0.json`
-- `pubmed-publication-v1.0.json`
-- `semanticscholar-publication-v1.0.json`
-- `uniprot-idmapping-v1.0.json`
+- `chembl_activity_v1.0.json`
+- `chembl_assay_parameters_v1.0.json`
+- `chembl_assay_v1.0.json`
+- `chembl_cell_line_v1.0.json`
+- `chembl_compound_record_v1.0.json`
+- `chembl_publication_similarity_v1.0.json`
+- `chembl_publication_term_v1.0.json`
+- `chembl_publication_v1.0.json`
+- `chembl_molecule_v1.0.json`
+- `chembl_protein_class_v1.0.json`
+- `chembl_target_component_v1.0.json`
+- `chembl_target_v1.0.json`
+- `composite_publication_v1.0.json`
+- `crossref_publication_v1.0.json`
+- `openalex_publication_v1.0.json`
+- `pubchem_compound_v1.0.json`
+- `pubmed_publication_v1.0.json`
+- `semanticscholar_publication_v1.0.json`
+- `uniprot_idmapping_v1.0.json`
 
 ## Связанные документы
 

@@ -6,7 +6,7 @@
 
 ## 1. Обзор системы диаграмм
 
-Проект BioETL поддерживает **260+ диаграмм**, организованных в двухуровневую архитектуру: канонические исходники (`.mermaid`) и декомпозированные представления (`.mermaid`). Вся система подчинена ADR-040 — решению об управлении диаграммами, которое определяет цветовую палитру, метаданные, правила lint-проверки и стратегии компоновки.
+Проект BioETL поддерживает **260+ диаграмм**, организованных в двухуровневую архитектуру: канонические исходники (`.mmd`) и декомпозированные представления (`.mermaid`). Вся система подчинена ADR-040 — решению об управлении диаграммами, которое определяет цветовую палитру, метаданные, правила lint-проверки и стратегии компоновки.
 
 ### 1.1. Двойная структура хранения
 
@@ -18,7 +18,7 @@
 | `class-diagrams/` | 16 | UML-классы: порты, сущности, агрегаты, конфиги |
 | `foundation/` | 59 | Исторические эталонные диаграммы, TOP-25 архитектурных |
 
-**Декомпозированные представления** — `docs/02-architecture/mmd-diagrams/views/` (156 файлов):
+**Декомпозированные представления** — `docs/02-architecture/diagrams/mermaid/` (156 файлов):
 
 Каждая родительская диаграмма из `foundation/` разбивается на **5 представлений (views)**:
 
@@ -45,9 +45,9 @@
 
 ## 2. Метаданные и шаблон
 
-### 2.1. Обязательные заголовки `.mermaid`
+### 2.1. Обязательные заголовки `.mmd`
 
-Каждый канонический `.mermaid`-файл обязан содержать метаданные:
+Каждый канонический `.mmd`-файл обязан содержать метаданные:
 
 ```
 %% BioETL — <заголовок>
@@ -73,7 +73,7 @@
 
 ### 2.3. Шаблон
 
-Файл `mmd-diagrams/-template.mermaid` содержит эталонные секции: все метаданные с пояснениями, copy-paste палитру цветов, примеры фигур нод, типы связей, стилизацию subgraph, инструкции по ELK layout и выбору направления.
+Файл `mmd-diagrams/_template.mmd` содержит эталонные секции: все метаданные с пояснениями, copy-paste палитру цветов, примеры фигур нод, типы связей, стилизацию subgraph, инструкции по ELK layout и выбору направления.
 
 ---
 
@@ -149,22 +149,22 @@ flowchart TB
 | Иерархия, DI-граф, port-map | `TB` (top-down) | Вертикаль подчёркивает слои |
 | Pipeline, data flow, config chain | `LR` (left-right) | Горизонталь подчёркивает последовательность |
 
-### 4.5. Автоматизация: apply-elk-layout.py
+### 4.5. Автоматизация: apply_elk_layout.py
 
-Утилита `src/tools/apply-elk-layout.py` автоматически добавляет ELK init к диаграммам, превышающим порог нод:
+Утилита `src/tools/apply_elk_layout.py` автоматически добавляет ELK init к диаграммам, превышающим порог нод:
 
 ```bash
 # Предварительный просмотр (без записи)
-python src/tools/apply-elk-layout.py --dry-run
+python src/tools/apply_elk_layout.py --dry-run
 
 # Применить к architecture/ (по умолчанию)
-python src/tools/apply-elk-layout.py
+python src/tools/apply_elk_layout.py
 
-# Применить ко всем .mermaid в foundation/
-python src/tools/apply-elk-layout.py --dir docs/02-architecture/mmd-diagrams/foundation
+# Применить ко всем .mmd в foundation/
+python src/tools/apply_elk_layout.py --dir docs/02-architecture/mmd-diagrams/foundation
 
 # Свой порог (по умолчанию 20)
-python src/tools/apply-elk-layout.py --threshold 15
+python src/tools/apply_elk_layout.py --threshold 15
 ```
 
 Скрипт парсит `@nodes`, проверяет тип диаграммы, пропускает файлы с уже установленной директивой, и опционально меняет направление TB→LR для pipeline-паттернов (medallion, data-flow, storage-layer, config, cli-interface).
@@ -175,7 +175,7 @@ python src/tools/apply-elk-layout.py --threshold 15
 
 ### 5.1. Классификация рёбер
 
-Инструмент `src/tools/differentiate-linkstyle.py` классифицирует связи по 6 семантическим типам:
+Инструмент `src/tools/differentiate_linkstyle.py` классифицирует связи по 6 семантическим типам:
 
 | Тип | Стиль | Семантика |
 |-----|-------|-----------|
@@ -199,55 +199,21 @@ python src/tools/apply-elk-layout.py --threshold 15
 Рёбра классифицируются по: типу стрелки (`.` = dashed → DI), ключевым словам в метках (implement, inject → DI), принадлежности целевой ноды к domain-subgraph (→ DI), ключевым словам observability в ID нод, целям quarantine/error, кросс-слойным связям с Infrastructure (→ data).
 
 ```bash
-python src/tools/differentiate-linkstyle.py --dry-run   # Предпросмотр
-python src/tools/differentiate-linkstyle.py              # Применить
-```
-
-### 5.4. Cross-Diagram Harmonization (ADR-040 D9)
-
-Для не-flowchart диаграмм (sequence, class, state, ER) семантические стили связей применяются через два механизма:
-
-**L2 — CSS (`theme/custom.css`):** автоматически при SVG-рендере через `mmdc --cssFile`:
-
-| Тип диаграммы | CSS-класс | Применяемый стиль |
-|--------------|-----------|-------------------|
-| sequenceDiagram | `.messageLine0` | baseline `#475569` 2px |
-| sequenceDiagram | `.messageLine1` | observability `#94A3B8` 1.5px dashed |
-| classDiagram | `.relation` | baseline `#475569` 2px |
-| classDiagram | `.relation.dashed-line` | DI `#6a1b9a` dashed |
-| stateDiagram | `.transition path` | orchestration `#2e7d32` 2px |
-| erDiagram | `.er.relationshipLine` | data `#1E293B` 2px |
-| erDiagram | `.er.relationshipLine[dashed]` | DI `#6a1b9a` |
-
-**L4 — SVG post-processing (`harmonize-link-styles.py`):** дополнительная обработка rendered SVG:
-
-```bash
-python src/tools/harmonize-link-styles.py --dry-run   # Предпросмотр
-python src/tools/harmonize-link-styles.py              # Применить ко всем SVG
-```
-
-**L3 — Семантические метки** для диаграмм с >10 рёбрами:
-
-```
-# В sequenceDiagram:
-Executor->>Adapter: [DATA] fetch records
-Adapter-->>Executor: [ERR] raise RetryExhaustedError
-
-# В classDiagram:
-ServiceA ..> PortB : [DI] injects
+python src/tools/differentiate_linkstyle.py --dry-run   # Предпросмотр
+python src/tools/differentiate_linkstyle.py              # Применить
 ```
 
 ---
 
 ## 6. Lint-проверки и CI
 
-### 6.1. Правила lint-diagrams.py
+### 6.1. Правила lint_diagrams.py
 
 | Правило | Severity | Условие |
 |---------|----------|---------|
 | SIZE-001 | ERROR | @nodes > 35 |
 | SIZE-002 | WARN | @nodes > 20 |
-| META-001 | WARN | Нет `@version`/`@date`/`@type`/`@level` в `.mermaid` |
+| META-001 | WARN | Нет `@version`/`@date`/`@type`/`@level` в `.mmd` |
 | META-002 | WARN | Нет `%% View:` в `.mermaid` |
 | CONTENT-001 | ERROR | Содержит placeholder/TODO/FIXME/stub |
 | CONTENT-002 | ERROR | Менее 3 непустых строк |
@@ -262,20 +228,20 @@ ServiceA ..> PortB : [DI] injects
 Исключения: `-full.mermaid` reference views и `00-legend*` освобождены от SIZE-001/SIZE-002.
 
 ```bash
-python scripts/lint-diagrams.py                  # Проверить всё
-python scripts/lint-diagrams.py --json           # JSON-вывод для CI
-python scripts/lint-diagrams.py --stale-days 120 # Свой порог
+python scripts/lint_diagrams.py                  # Проверить всё
+python scripts/lint_diagrams.py --json           # JSON-вывод для CI
+python scripts/lint_diagrams.py --stale-days 120 # Свой порог
 ```
 
 ### 6.2. Управление orphan-нодами
 
-Скрипт `scripts/prune-orphan-nodes.py` находит ноды, определённые в диаграмме, но не участвующие ни в одном ребре.
+Скрипт `scripts/prune_orphan_nodes.py` находит ноды, определённые в диаграмме, но не участвующие ни в одном ребре.
 
 ```bash
-python scripts/prune-orphan-nodes.py --check        # Отчёт (exit 1 при нахождении)
-python scripts/prune-orphan-nodes.py --check --json  # JSON для CI
-python scripts/prune-orphan-nodes.py --fix           # Удалить orphan-ноды
-python scripts/prune-orphan-nodes.py --grandfather   # Пометить все текущие как допустимые
+python scripts/prune_orphan_nodes.py --check        # Отчёт (exit 1 при нахождении)
+python scripts/prune_orphan_nodes.py --check --json  # JSON для CI
+python scripts/prune_orphan_nodes.py --fix           # Удалить orphan-ноды
+python scripts/prune_orphan_nodes.py --grandfather   # Пометить все текущие как допустимые
 ```
 
 Нода **не считается orphan**, если:
@@ -289,8 +255,8 @@ python scripts/prune-orphan-nodes.py --grandfather   # Пометить все �
 
 | Хук | Скрипт | Назначение |
 |-----|--------|------------|
-| `lint-diagrams` | `scripts/lint-diagrams.py` | Валидация всех правил |
-| `prune-orphan-diagram-nodes` | `scripts/prune-orphan-nodes.py --check` | Детекция orphan-нод |
+| `lint-diagrams` | `scripts/lint_diagrams.py` | Валидация всех правил |
+| `prune-orphan-diagram-nodes` | `scripts/prune_orphan_nodes.py --check` | Детекция orphan-нод |
 
 ---
 
@@ -310,11 +276,11 @@ python scripts/prune-orphan-nodes.py --grandfather   # Пометить все �
 При превышении 35 нод диаграмма разбивается на субдоменные файлы с суффиксами `a`, `b`, `c`, `d`. Пример:
 
 ```
-13-port-protocol-contracts.mermaid      → основной (до 35 нод)
-13a-port-contracts-data-sources.mermaid → фокус на data source ports
-13b-port-contracts-storage.mermaid      → фокус на storage ports
-13c-port-contracts-observability.mermaid → фокус на observability
-13d-port-contracts-services.mermaid     → фокус на service ports
+13-port-protocol-contracts.mmd      → основной (до 35 нод)
+13a-port-contracts-data-sources.mmd → фокус на data source ports
+13b-port-contracts-storage.mmd      → фокус на storage ports
+13c-port-contracts-observability.mmd → фокус на observability
+13d-port-contracts-services.mmd     → фокус на service ports
 ```
 
 ---
@@ -324,54 +290,29 @@ python scripts/prune-orphan-nodes.py --grandfather   # Пометить все �
 ### 8.1. Конвейер рендеринга
 
 ```bash
+# Linux/WSL
 bash docs/02-architecture/mmd-diagrams/render.sh
+
+# Windows (PowerShell)
+pwsh docs/02-architecture/mmd-diagrams/render-windows.ps1
 ```
 
 Формат вывода: SVG + PNG (300 DPI). Применяется тема из `theme/mermaid-config.json` и `theme/custom.css`. SVG-файлы дополнительно оптимизируются через SVGO (`svgo.config.js`).
 
-Результат записывается рядом с исходниками, в подпапки `svg/` и `png/`:
-
-- `docs/02-architecture/mmd-diagrams/**/svg/*.svg`
-- `docs/02-architecture/mmd-diagrams/**/png/*.png`
-- `docs/02-architecture/mmd-diagrams/views/svg/*.svg (gitignored)`
-- `docs/02-architecture/mmd-diagrams/views/png/*.png (gitignored)`
-
-### 8.2. Короткий чеклист (локально → PR)
-
-```bash
-# 1) Политический lint диаграмм (ADR-040 rules)
-python scripts/lint-diagrams.py docs
-
-# 2) Синтаксическая валидация Mermaid через mmdc
-bash scripts/validate-mermaid-syntax.sh
-
-# 3) Рендер SVG+PNG
-bash docs/02-architecture/mmd-diagrams/render.sh
-
-# 4) (Опционально, как в CI) smoke-проверка baseline SVG
-python scripts/check-diagram-visual-smoke.py \
-  --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
-```
-
-Минимум для PR:
-
-1. Если изменены `*.mermaid`/`*.mermaid`, в коммите должны быть соответствующие изменения в `svg/*.svg` и/или `png/*.png`.
-2. Не должно быть ошибок `lint-diagrams.py` и `validate-mermaid-syntax.sh`.
-3. Для flowchart/sequence диаграмм не оставлять неожиданные orphan-ноды (`GRAPH-001`), либо явно помечать исключения через `%% keep-orphan: ...`.
-4. Проверить, что изменения не затронули `docs/99-archive/**` без отдельной причины.
+Результат записывается в `mmd-diagrams/rendered/`.
 
 ---
 
 ## 9. Типичный workflow создания диаграммы
 
-1. **Скопировать шаблон:** `cp -template.mermaid architecture/NN-topic.mermaid`
+1. **Скопировать шаблон:** `cp _template.mmd architecture/NN-topic.mmd`
 2. **Заполнить метаданные:** `@version`, `@date`, `@type`, `@level`, `@nodes`
 3. **Нарисовать диаграмму:** использовать каноническую палитру цветов
-4. **Проверить lint:** `python scripts/lint-diagrams.py`
-5. **Применить ELK** (если @nodes > 20): `python src/tools/apply-elk-layout.py`
-6. **Применить linkStyle** (если flowchart с 5+ связями): `python src/tools/differentiate-linkstyle.py`
-7. **Проверить orphan-ноды:** `python scripts/prune-orphan-nodes.py --check`
-8. **Отрендерить:** `render.sh`
+4. **Проверить lint:** `python scripts/lint_diagrams.py`
+5. **Применить ELK** (если @nodes > 20): `python src/tools/apply_elk_layout.py`
+6. **Применить linkStyle** (если flowchart с 5+ связями): `python src/tools/differentiate_linkstyle.py`
+7. **Проверить orphan-ноды:** `python scripts/prune_orphan_nodes.py --check`
+8. **Отрендерить:** `render.sh` или `render-windows.ps1`
 9. **Добавить в индекс:** обновить `README.md` каталога
 
 ---
@@ -380,12 +321,12 @@ python scripts/check-diagram-visual-smoke.py \
 
 | Инструмент | Расположение | Назначение |
 |------------|-------------|------------|
-| apply-elk-layout.py | `src/tools/` | Добавление ELK init к flowchart с >20 нод |
-| differentiate-linkstyle.py | `src/tools/` | Семантическая стилизация рёбер (flowchart) |
-| harmonize-link-styles.py | `src/tools/` | Cross-diagram harmonization SVG (D9) |
-| lint-diagrams.py | `scripts/` | Lint-проверка по 14 правилам |
-| prune-orphan-nodes.py | `scripts/` | Детекция и удаление orphan-нод |
+| apply_elk_layout.py | `src/tools/` | Добавление ELK init к flowchart с >20 нод |
+| differentiate_linkstyle.py | `src/tools/` | Семантическая стилизация рёбер |
+| lint_diagrams.py | `scripts/` | Lint-проверка по 14 правилам |
+| prune_orphan_nodes.py | `scripts/` | Детекция и удаление orphan-нод |
 | render.sh | `mmd-diagrams/` | Рендеринг SVG + PNG (300 DPI) |
+| render-windows.ps1 | `mmd-diagrams/` | Windows-версия рендеринга |
 
 ---
 

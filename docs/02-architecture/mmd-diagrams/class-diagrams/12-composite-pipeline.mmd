@@ -1,0 +1,105 @@
+%% BioETL — Class Diagram: Composite Pipeline Components
+%% Runner, coordinators, merge service, and FSM.
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    classDiagram
+%% @level   Class / Interface
+
+classDiagram
+    direction TB
+    class CompositePipelineRunner {
+        -_config: CompositeConfig
+        -_runtime: CompositeRuntimeConfig
+        -_seed_runner: PipelineRunner
+        -_enrichment_coordinator: EnrichmentCoordinator
+        -_dependency_coordinator: DependencyCoordinator
+        -_merge_service: MergeService
+        -_checkpoint_manager: CompositeCheckpointManager
+        -_preflight_validator: CompositePreflightValidator
+        +run() CompositeResult
+    }
+
+    class CompositeRuntimeConfig {
+        <<dataclass>>
+        +resume: bool
+        +dry_run: bool
+        +enrich_only: bool
+        +cached_bronze: bool
+    }
+
+    class EnrichmentCoordinator {
+        +logger: LoggerPort
+        +dq_config: CompositeDQConfig
+        +max_concurrency: int
+        +run_enrichers(keys, enrichers, factory) dict~str, EnrichmentResult~
+    }
+
+    class DependencyCoordinator {
+        -_logger: LoggerPort
+        -_delta_reader: DeltaReaderPort | None
+        +run_dependencies(keys, deps, completed, factory) dict~str, DependencyResult~
+    }
+
+    class MergeService {
+        -_deduplicator: EnricherDeduplicator
+        -_aggregator: EnricherAggregator
+        -_renamer: ColumnRenamer
+        -_orderer: ColumnOrderer
+        +merge(seed_table, enrichers, results, ...) MergeResult
+    }
+
+    class EnricherAggregator {
+        +aggregate(df, config, enricher_name) DataFrame
+    }
+
+    class EnricherDeduplicator {
+        +deduplicate(df, config) DataFrame
+    }
+
+    class ColumnRenamer {
+        +rename_columns(df, rename_map) DataFrame
+    }
+
+    class ColumnOrderer {
+        +order_column_names(columns) list~str~
+    }
+
+    class KeyExtractorService {
+        +extract_keys(df, key_column) DataFrame
+    }
+
+    class CompositeCheckpointManager {
+        +save_state(stage, data) None
+        +load_state() dict | None
+        +get_completed_stages() set~str~
+    }
+
+    class CompositePreflightValidator {
+        +validate(config) list~str~
+    }
+
+    class FSMStateHelper {
+        +transition(current, event) CompositeState
+        +is_terminal(state) bool
+    }
+
+    class EnrichmentCrossValidator {
+        +validate(results) CrossValidationStats
+    }
+
+    CompositePipelineRunner *-- EnrichmentCoordinator
+    CompositePipelineRunner *-- DependencyCoordinator
+    CompositePipelineRunner *-- MergeService
+    CompositePipelineRunner *-- CompositeCheckpointManager
+    CompositePipelineRunner *-- CompositePreflightValidator
+    CompositePipelineRunner o-- CompositeRuntimeConfig
+
+    MergeService *-- EnricherDeduplicator
+    MergeService *-- EnricherAggregator
+    MergeService *-- ColumnRenamer
+    MergeService *-- ColumnOrderer
+
+    CompositePipelineRunner --> FSMStateHelper
+    CompositePipelineRunner --> EnrichmentCrossValidator
+    CompositePipelineRunner --> KeyExtractorService

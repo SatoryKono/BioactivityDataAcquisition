@@ -7,7 +7,7 @@ __pycache__/
 
 # Cygwin/MSYS crash dumps
 *.stackdump
-.chrome-headless-shell/
+
 # Virtual environments
 .venv/
 venv/
@@ -65,8 +65,7 @@ project_rules_failures.txt
 git_commit_*.txt
 *_gitshow_err.txt
 log_test.txt
-/reports/*
-!/reports/.gitkeep
+/reports/
 
 # IDE / Editors
 .idea/
@@ -83,14 +82,6 @@ log_test.txt
 .ai/
 .aiassistant/
 .codex/
-!.codex/
-.codex/*
-!.codex/skills/
-.codex/skills/*
-!.codex/skills/py-review-orchestrator/
-!.codex/skills/py-review-orchestrator/**
-!.codex/skills/py-test-swarm/
-!.codex/skills/py-test-swarm/**
 .gemini/
 .jules/
 .junie/
@@ -184,9 +175,4 @@ data/.idea/
 *.pak
 *.json
 /CUsersFedor/.cache/puppeteer
-/chrome-headless-shell
-/chrome-headless-shell
-*.mermaid
-/docs/02-architecture/diagrams/mermaid
-unnamed.patch
 /chrome-headless-shell
