@@ -7,50 +7,50 @@
 %% @level   System / Component
 %% @nodes   22
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'NETWORK_SIMPLEX', 'edgeRouting': 'POLYLINE'}}}%%
 %% @uniform width=200 height=144 max_title_len=20 max_desc_lines=6
 graph TB
     subgraph Ports["Domain Ports"]
-        DQM["DQMonitorPort<br/>(Protocol)<br/><br/><br/><br/><br/>"]
-        BDQAP["BronzeDQAnalyzerPort<br/><br/><br/><br/><br/><br/>"]
-        SDQAP["SilverDQAnalyzerPort<br/><br/><br/><br/><br/><br/>"]
-        GDQAP["GoldDQAnalyzerPort<br/><br/><br/><br/><br/><br/>"]
-        DQRWP["DQReportWriterPort<br/><br/><br/><br/><br/><br/>"]
+        DQM["DQMonitorPort<br/>(Protocol)<br/>"]
+        BDQAP["BronzeDQAnalyzerPort<br/>"]
+        SDQAP["SilverDQAnalyzerPort<br/>"]
+        GDQAP["GoldDQAnalyzerPort<br/>"]
+        DQRWP["DQReportWriterPort<br/>"]
     end
 
     subgraph DomainTypes["Domain Value Objects"]
         DQMetrics["DQMetrics<br/>━━━━━━━━━━━━━━━━━<br/>null_rate: float<br/>duplicate_rate: float<br/>schema_violations: int<br/>custom_metrics: dict<br/>"]
         DQResult["DQResult<br/>━━━━━━━━━━━━━━━━━<br/>passed: bool<br/>error_rate: float<br/>metrics: DQMetrics<br/>anomalies: list<br/>"]
-        DQReport["DQReport<br/>━━━━━━━━━━━━━━━━━<br/>layer: MedallionLayer<br/>table_name: str<br/>results: DQResult<br/><br/>"]
-        DQConfig["DQConfig<br/>━━━━━━━━━━━━━━━━━<br/>soft_error_threshold: float<br/>hard_error_threshold: float<br/><br/><br/>"]
+        DQReport["DQReport<br/>━━━━━━━━━━━━━━━━━<br/>layer: MedallionLayer<br/>table_name: str<br/>results: DQResult<br/>"]
+        DQConfig["DQConfig<br/>━━━━━━━━━━━━━━━━━<br/>soft_error_threshold: float<br/>hard_error_threshold: float<br/>"]
     end
 
     subgraph AppServices["Application Services"]
         DQS["DataQualityService<br/>━━━━━━━━━━━━━━━━━<br/>_dq_monitor: DQMonitorPort<br/>_config: DQConfig<br/>━━━━━━━━━━━━━━━━━<br/>+ evaluate(context, executor)<br/>"]
-        DQRS["DQReportService<br/>━━━━━━━━━━━━━━━━━<br/>+ generate_reports(context)<br/><br/><br/><br/>"]
+        DQRS["DQReportService<br/>━━━━━━━━━━━━━━━━━<br/>+ generate_reports(context)<br/>"]
     end
 
     subgraph AppDQ["Application DQ Analyzers"]
-        BDA["BronzeDQAnalyzer<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(records)<br/>+ check_completeness()<br/>+ check_format()<br/><br/>"]
-        SDA["SilverDQAnalyzer<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(delta_table)<br/>+ check_nullability()<br/>+ check_schema()<br/><br/>"]
-        GDA["GoldDQAnalyzer<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(delta_table)<br/>+ check_pk_uniqueness()<br/>+ validate_schema()<br/><br/>"]
+        BDA["BronzeDQAnalyzer<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(records)<br/>+ check_completeness()<br/>+ check_format()<br/>"]
+        SDA["SilverDQAnalyzer<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(delta_table)<br/>+ check_nullability()<br/>+ check_schema()<br/>"]
+        GDA["GoldDQAnalyzer<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(delta_table)<br/>+ check_pk_uniqueness()<br/>+ validate_schema()<br/>"]
     end
 
     subgraph Anomaly["Anomaly Detection"]
-        AD["AnomalyDetector<br/><br/><br/><br/><br/><br/>"]
-        ZSD["ZScoreDetector<br/>(DetectorStrategy)<br/><br/><br/><br/><br/>"]
+        AD["AnomalyDetector<br/>"]
+        ZSD["ZScoreDetector<br/>(DetectorStrategy)<br/>"]
         AN["Anomaly<br/>━━━━━━━━━━━━━━━━━<br/>type: AnomalyType<br/>severity: AnomalySeverity<br/>metric_name: str<br/>current_value: float<br/>baseline_value: float"]
     end
 
     subgraph InfraImpl["Infrastructure Implementations"]
-        DQCL["DQConfigLoader<br/>(YAML → DQConfig)<br/><br/><br/><br/><br/>"]
-        DQRW["DQReportWriter<br/>(JSON reports)<br/><br/><br/><br/><br/>"]
+        DQCL["DQConfigLoader<br/>(YAML → DQConfig)<br/>"]
+        DQRW["DQReportWriter<br/>(JSON reports)<br/>"]
     end
 
     subgraph Pipeline["Pipeline Integration"]
-        QM["QuarantineManager<br/>━━━━━━━━━━━━━━━━━<br/>Quarantines records<br/>that fail DQ checks<br/><br/><br/>"]
-        EC["ErrorClassifier<br/>━━━━━━━━━━━━━━━━━<br/>Classifies errors as<br/>recoverable vs fatal<br/><br/><br/>"]
-        BT["BatchTransformer<br/>━━━━━━━━━━━━━━━━━<br/>_check_dq_thresholds()<br/>stops batch on threshold breach<br/><br/><br/>"]
+        QM["QuarantineManager<br/>━━━━━━━━━━━━━━━━━<br/>Quarantines records<br/>that fail DQ checks<br/>"]
+        EC["ErrorClassifier<br/>━━━━━━━━━━━━━━━━━<br/>Classifies errors as<br/>recoverable vs fatal<br/>"]
+        BT["BatchTransformer<br/>━━━━━━━━━━━━━━━━━<br/>_check_dq_thresholds()<br/>stops batch on threshold breach<br/>"]
     end
 
     %% Port implementations

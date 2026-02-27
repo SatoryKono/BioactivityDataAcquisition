@@ -8,17 +8,17 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 %% @uniform width=336 height=108 max_title_len=37 max_desc_lines=4
 flowchart TB
     subgraph Seed["Seed Pipeline Result"]
-        SS[("Seed Silver Table<br/>(e.g., chembl/publication<br/><br/><br/>)")]
+        SS[("Seed Silver Table<br/>(e.g., chembl/publication<br/>)")]
     end
 
     subgraph Extract["Key Extraction"]
         KE["KeyExtractorService.extract_keys()<br/>• read seed Silver via DeltaReader<br/>• select join_key columns (doi, pmid)<br/>• deduplicate → unique key list<br/>"]
-        DOIS["DOI Keys<br/>(~50,000 unique)<br/><br/><br/>"]
-        PMIDS["PMID Keys<br/>(~30,000 unique)<br/><br/><br/>"]
+        DOIS["DOI Keys<br/>(~50,000 unique)<br/>"]
+        PMIDS["PMID Keys<br/>(~30,000 unique)<br/>"]
     end
 
     subgraph FanOut["Fan-Out (EnrichmentCoordinator)"]
@@ -30,21 +30,21 @@ flowchart TB
     end
 
     subgraph Results["Enricher Silver Tables"]
-        R1[("crossref/publication/"<br/><br/><br/><br/>)]
-        R2[("pubmed/publication/"<br/><br/><br/><br/>)]
-        R3[("openalex/publication/"<br/><br/><br/><br/>)]
-        R4[("semanticscholar/publication/"<br/><br/><br/><br/>)]
+        R1[("crossref/publication/"<br/>)]
+        R2[("pubmed/publication/"<br/>)]
+        R3[("openalex/publication/"<br/>)]
+        R4[("semanticscholar/publication/"<br/>)]
     end
 
     subgraph FanIn["Fan-In (MergeService)"]
-        DD["EnricherDeduplicator<br/>• remove duplicates<br/>across enrichers<br/><br/>"]
+        DD["EnricherDeduplicator<br/>• remove duplicates<br/>across enrichers<br/>"]
         MS["MergeService.merge()<br/>• LEFT OUTER JOIN<br/>seed ⟕ enrichers<br/>• ConflictResolution<br/>(coalesce: first non-null)"]
-        CO["ColumnOrderer<br/>• FieldGroup priority<br/>• exclude TRASH group<br/><br/>"]
+        CO["ColumnOrderer<br/>• FieldGroup priority<br/>• exclude TRASH group<br/>"]
     end
 
     subgraph Output["Gold Output"]
-        GW["GoldWriter.write_gold()<br/>CompositePublicationGoldSchema<br/><br/><br/>"]
-        GT[("gold/composite/publication/"<br/><br/><br/><br/>)]
+        GW["GoldWriter.write_gold()<br/>CompositePublicationGoldSchema<br/>"]
+        GT[("gold/composite/publication/"<br/>)]
     end
 
     %% Flow
@@ -72,4 +72,4 @@ flowchart TB
     %% Styling
     style FanOut fill:#e3f2fd,stroke:#1565c0
     style FanIn fill:#fce4ec,stroke:#c62828
-    style Output fill:#FFD700,stroke:#ccac00,color:#000
+    style Output fill:#fff8e1,stroke:#f9a825,color:#212121

@@ -34,13 +34,55 @@
 %%   DI/implements:  stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
 %%   observability:  stroke:#94A3B8,stroke-width:1px
 %%   error/quarant:  stroke:#c62828,stroke-width:2px,stroke-dasharray:4
-
-%% Layout (uncomment if @nodes > 20 — enables ELK smart edge routing):
-%% %%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
+%%
+%% ═══════════════════════════════════════════════════════════════
+%% Per-type %%{init} presets (uncomment the one matching @type):
+%% ═══════════════════════════════════════════════════════════════
+%%
+%% ── flowchart — recommended preset: ELK + POLYLINE ──
+%% default for all node counts: POLYLINE routing (smoother and readable)
+%% %%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'NETWORK_SIMPLEX', 'edgeRouting': 'POLYLINE'}}}%%
+%% optional for very dense (>60) diagrams: ORTHOGONAL routing (Manhattan grid)
+%% %%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'NETWORK_SIMPLEX', 'edgeRouting': 'ORTHOGONAL'}}}%%
+%%
+%% ── sequenceDiagram: ──
+%% %%{init: {'theme': 'base', 'themeVariables': {'signalColor': '#475569', 'actorLineColor': '#475569'}}}%%
+%%
+%% ── classDiagram: ──
+%% %%{init: {'theme': 'base', 'themeVariables': {'lineColor': '#475569'}}}%%
+%%
+%% ── stateDiagram: ──
+%% %%{init: {'theme': 'base', 'themeVariables': {'lineColor': '#2e7d32'}}}%%
+%%
+%% ── erDiagram: ──
+%% %%{init: {'theme': 'base', 'themeVariables': {'lineColor': '#1E293B'}}}%%
 %%
 %% Direction guide:
 %%   TB — layered/hierarchical diagrams (DI graph, port maps, class hierarchies)
 %%   LR — pipeline/dataflow diagrams (medallion, config chain, CLI flow)
+%%
+%% ═══════════════════════════════════════════════════════════════
+%% Cross-diagram semantic conventions (ADR-040 D9)
+%% ═══════════════════════════════════════════════════════════════
+%%
+%% Use consistent arrow types and labels across all diagram types
+%% to convey the same semantics. CSS in custom.css handles colours.
+%%
+%%   Semantic       | flowchart       | sequenceDiagram  | classDiagram     | stateDiagram
+%%   ───────────────┼─────────────────┼──────────────────┼──────────────────┼─────────────
+%%   Data flow      | -->             | ->>              | -->              | --> : data
+%%   DI/implements  | -.->            | (N/A)            | <|-- / ..>       | (N/A)
+%%   Orchestration  | --> (green)     | ->> : [ORCH]     | --> : delegates  | --> : trigger
+%%   Observability  | --> (gray)      | -->> : [OBS]     | ..> : observes   | (N/A)
+%%   Error path     | --> (red dash)  | -->> : [ERR]     | (N/A)            | --> : error
+%%   Return/resp    | (N/A)           | -->>             | (N/A)            | (N/A)
+%%
+%% Label prefixes for non-flowchart diagrams (SHOULD use when >10 edges):
+%%   [DATA]  — data flow operations
+%%   [DI]    — dependency injection / port implementation
+%%   [ORCH]  — orchestration / service call
+%%   [OBS]   — observability (logging, metrics, tracing)
+%%   [ERR]   — error handling / quarantine path
 
 flowchart TD
     %% === NODES ===

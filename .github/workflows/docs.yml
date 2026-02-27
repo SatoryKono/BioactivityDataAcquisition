@@ -95,6 +95,15 @@ jobs:
           bash docs/02-architecture/mmd-diagrams/render.sh \
             --puppeteer /tmp/puppeteer-config.json
 
+      - name: Visual smoke regression (selected SVG baselines)
+        run: |
+          python3 scripts/check_diagram_visual_smoke.py \
+            --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
+
+      - name: Validate link harmonization post-processor
+        run: |
+          python3 src/tools/harmonize_link_styles.py --dry-run --fail-on-errors
+
       - name: Upload SVG artifacts
         uses: actions/upload-artifact@v4
         with:

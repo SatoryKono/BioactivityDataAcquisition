@@ -4,26 +4,26 @@ flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N1["DataSourcePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N1["DataSourcePort"]
         N6["FilterableDataSourcePort"]
-        N7["QuarantinePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N10["StoragePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N7["QuarantinePort"]
+        N10["StoragePort"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N2["SilverWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N3["GoldWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N4["BronzeWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N5["QuarantineWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N8["ChemblAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N11["PubchemAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N12["UniprotAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["SilverWriter"]
+        N3["GoldWriter"]
+        N4["BronzeWriter"]
+        N5["QuarantineWriter"]
+        N8["ChemblAdapter"]
+        N11["PubchemAdapter"]
+        N12["UniprotAdapter"]
     end
 
     subgraph Interfaces["Interfaces Layer"]
         direction TB
-        N9["UnifiedHTTPClient&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N9["UnifiedHTTPClient"]
     end
 
     N8 --> N1

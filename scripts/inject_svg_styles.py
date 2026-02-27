@@ -58,6 +58,10 @@ SENTINEL = "/* bioetl-inject */"
 
 _SVG_ID_RE = re.compile(r'<svg[^>]+\bid="([^"]+)"')
 _STYLE_CLOSE_RE = re.compile(r"(\]\]></style>|</style>)")
+_INJECT_BLOCK_RE = re.compile(
+    re.escape(SENTINEL) + r".*?(?=(\]\]></style>|</style>))",
+    re.DOTALL,
+)
 
 
 # ── CSS rules to inject ────────────────────────────────────────────────────
@@ -66,10 +70,11 @@ def _build_css_rules(svg_id: str) -> str:
     """Build ID-scoped CSS override rules for edge label readability."""
     return (
         f"{SENTINEL}"
-        f"#{svg_id} .edgeLabel rect{{opacity:1!important;fill:#ffffff!important}}"
+        f"#{svg_id} .edgeLabel rect{{opacity:1!important;fill:#ffffff!important;stroke:#cbd5e1!important;stroke-width:1px!important}}"
         f"#{svg_id} .labelBkg{{background-color:#ffffff!important;opacity:1!important}}"
         f"#{svg_id} .edgeLabel .labelBkg{{background-color:#ffffff!important;opacity:1!important}}"
-        f"#{svg_id} .edgeLabel{{font-size:13px}}"
+        f"#{svg_id} .edgeLabel{{font-size:16px!important;font-weight:700!important;color:#0f172a!important;fill:#0f172a!important}}"
+        f"#{svg_id} .edgeLabel span,#{svg_id} .edgeLabel p{{color:#0f172a!important;fill:#0f172a!important}}"
     )
 
 
@@ -85,23 +90,24 @@ def inject_styles(content: str) -> str | None:
 
     Returns modified content, or None if no changes needed.
     """
-    if not needs_injection(content):
-        return None
-
     # Extract SVG id
     id_match = _SVG_ID_RE.search(content)
     if not id_match:
         return None
     svg_id = id_match.group(1)
 
-    # Find style closing tag
-    close_match = _STYLE_CLOSE_RE.search(content)
+    # Replace existing injected block (if present) to keep styles current.
+    normalized = _INJECT_BLOCK_RE.sub("", content)
+    close_match = _STYLE_CLOSE_RE.search(normalized)
     if not close_match:
         return None
 
     css_rules = _build_css_rules(svg_id)
     insert_pos = close_match.start()
-    return content[:insert_pos] + css_rules + content[insert_pos:]
+    updated = normalized[:insert_pos] + css_rules + normalized[insert_pos:]
+    if updated == content:
+        return None
+    return updated
 
 
 # ── File processing ─────────────────────────────────────────────────────────

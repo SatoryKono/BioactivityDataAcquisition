@@ -7,11 +7,11 @@
 %% @level   System / Component
 %% @nodes   24
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'NETWORK_SIMPLEX', 'edgeRouting': 'POLYLINE'}}}%%
 %% @uniform width=248 height=72 max_title_len=26 max_desc_lines=2
 graph LR
     subgraph User["User"]
-        TERM["Terminal<br/><br/>"]
+        TERM["Terminal<br/>"]
     end
 
     subgraph CLI["CLI Interface (Click)"]
@@ -43,20 +43,20 @@ graph LR
     end
 
     subgraph Composition["Composition Layer"]
-        BOOT["Bootstrap Assembly<br/><br/>"]
-        RF["RunnerFactory<br/><br/>"]
-        DSR["DataSourceRegistry<br/><br/>"]
-        TF["TransformerFactory<br/><br/>"]
+        BOOT["Bootstrap Assembly<br/>"]
+        RF["RunnerFactory<br/>"]
+        DSR["DataSourceRegistry<br/>"]
+        TF["TransformerFactory<br/>"]
     end
 
     subgraph Application["Application Layer"]
-        CPR["CompositePipelineRunner<br/><br/>"]
-        HS["HealthService<br/><br/>"]
-        ES["ExportService<br/><br/>"]
-        QS["QuarantineService<br/><br/>"]
-        CS["CheckpointService<br/><br/>"]
-        VS["VacuumService<br/><br/>"]
-        CFGS["ConfigService<br/><br/>"]
+        CPR["CompositePipelineRunner<br/>"]
+        HS["HealthService<br/>"]
+        ES["ExportService<br/>"]
+        QS["QuarantineService<br/>"]
+        CS["CheckpointService<br/>"]
+        VS["VacuumService<br/>"]
+        CFGS["ConfigService<br/>"]
     end
 
     %% CLI routing

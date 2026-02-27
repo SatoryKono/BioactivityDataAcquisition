@@ -7,34 +7,34 @@
 %% @level   System / Component
 %% @nodes   29
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'NETWORK_SIMPLEX', 'edgeRouting': 'POLYLINE'}}}%%
 %% @uniform width=216 height=198 max_title_len=22 max_desc_lines=9
 graph LR
 %% keep-orphan: APC, CBC, CCFG, OBS_SET, PCP, PIPE_SET, SETTINGS, SRC
     subgraph YAML["YAML Config Files"]
-        PC_YAML["configs/pipelines/<br/>*.yaml<br/>(pipeline configs)<br/><br/><br/><br/><br/><br/><br/>"]
-        DQ_YAML["configs/quality/<br/>*.yaml<br/>(DQ rules)<br/><br/><br/><br/><br/><br/><br/>"]
-        FILT_YAML["configs/filters/<br/>*.yaml<br/>(filter configs)<br/><br/><br/><br/><br/><br/><br/>"]
-        COMP_YAML["configs/composite/<br/>*.yaml<br/>(composite pipeline configs)<br/><br/><br/><br/><br/><br/><br/>"]
-        FG_YAML["configs/field_groups/<br/>*.yaml<br/>(field group definitions)<br/><br/><br/><br/><br/><br/><br/>"]
+        PC_YAML["configs/pipelines/<br/>*.yaml<br/>(pipeline configs)<br/>"]
+        DQ_YAML["configs/quality/<br/>*.yaml<br/>(DQ rules)<br/>"]
+        FILT_YAML["configs/filters/<br/>*.yaml<br/>(filter configs)<br/>"]
+        COMP_YAML["configs/composite/<br/>*.yaml<br/>(composite pipeline configs)<br/>"]
+        FG_YAML["configs/field_groups/<br/>*.yaml<br/>(field group definitions)<br/>"]
     end
 
     subgraph Loaders["Infrastructure Config Loaders"]
-        PCL["PipelineConfigLoader<br/>━━━━━━━━━━━━━━━━━<br/>+ load(path) → PipelineConfig<br/><br/><br/><br/><br/><br/><br/>"]
-        DQCL["DQConfigLoader<br/>━━━━━━━━━━━━━━━━━<br/>+ load(path) → DQConfig<br/><br/><br/><br/><br/><br/><br/>"]
-        FCL["FilterConfigLoader<br/>━━━━━━━━━━━━━━━━━<br/>+ load(path) → FilterConfig<br/><br/><br/><br/><br/><br/><br/>"]
-        FGL["FieldGroupLoader<br/>━━━━━━━━━━━━━━━━━<br/>+ load(path) → FieldGroupConfig<br/><br/><br/><br/><br/><br/><br/>"]
-        BCL["BaseConfigLoader<br/>(ABC, Generic[T])<br/>━━━━━━━━━━━━━━━━━<br/>+ load() → T<br/>+ _validate() → T<br/><br/><br/><br/><br/>"]
+        PCL["PipelineConfigLoader<br/>━━━━━━━━━━━━━━━━━<br/>+ load(path) → PipelineConfig<br/>"]
+        DQCL["DQConfigLoader<br/>━━━━━━━━━━━━━━━━━<br/>+ load(path) → DQConfig<br/>"]
+        FCL["FilterConfigLoader<br/>━━━━━━━━━━━━━━━━━<br/>+ load(path) → FilterConfig<br/>"]
+        FGL["FieldGroupLoader<br/>━━━━━━━━━━━━━━━━━<br/>+ load(path) → FieldGroupConfig<br/>"]
+        BCL["BaseConfigLoader<br/>(ABC, Generic[T])<br/>━━━━━━━━━━━━━━━━━<br/>+ load() → T<br/>+ _validate() → T<br/>"]
     end
 
     subgraph InfraSchemas["Infrastructure Schemas (Pydantic)"]
-        PYC["PipelineYamlConfig<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]
-        APC["ApiConfig<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]
-        SRC["SourceConfig<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]
-        CBC["CircuitBreakerConfig<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]
-        DQF["DQConfigFile<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]
-        FFG["FilterConfigFile<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]
-        PCP["PipelineContractPolicy<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]
+        PYC["PipelineYamlConfig<br/>"]
+        APC["ApiConfig<br/>"]
+        SRC["SourceConfig<br/>"]
+        CBC["CircuitBreakerConfig<br/>"]
+        DQF["DQConfigFile<br/>"]
+        FFG["FilterConfigFile<br/>"]
+        PCP["PipelineContractPolicy<br/>"]
     end
 
     subgraph DomainConfig["Domain Configuration"]
@@ -42,28 +42,28 @@ graph LR
 
         PIPE["PipelineConfig<br/>━━━━━━━━━━━━━━━━━<br/>pipeline_name: str<br/>provider: str<br/>entity_type: str<br/>table: TableConfig<br/>batch_size: int<br/>checkpoint_interval: int<br/>dq: DQConfig<br/>loading_strategy: LoadingStrategy"]
 
-        TC["TableConfig<br/>━━━━━━━━━━━━━━━━━<br/>silver_table: str<br/>gold_table: str<br/><br/><br/><br/><br/><br/>"]
+        TC["TableConfig<br/>━━━━━━━━━━━━━━━━━<br/>silver_table: str<br/>gold_table: str<br/>"]
 
-        DQC["DQConfig<br/>━━━━━━━━━━━━━━━━━<br/>soft_error_threshold: float<br/>hard_error_threshold: float<br/><br/><br/><br/><br/><br/>"]
+        DQC["DQConfig<br/>━━━━━━━━━━━━━━━━━<br/>soft_error_threshold: float<br/>hard_error_threshold: float<br/>"]
 
-        SFC["SilverFilterConfig<br/>━━━━━━━━━━━━━━━━━<br/>source_path: str<br/>column_name: str<br/><br/><br/><br/><br/><br/>"]
+        SFC["SilverFilterConfig<br/>━━━━━━━━━━━━━━━━━<br/>source_path: str<br/>column_name: str<br/>"]
 
-        GFC["GoldFilterConfig<br/>━━━━━━━━━━━━━━━━━<br/>source_path: str<br/>column_name: str<br/><br/><br/><br/><br/><br/>"]
+        GFC["GoldFilterConfig<br/>━━━━━━━━━━━━━━━━━<br/>source_path: str<br/>column_name: str<br/>"]
     end
 
     subgraph CompositeConfig["Composite Domain Config"]
-        CCFG["CompositeConfig<br/>━━━━━━━━━━━━━━━━━<br/>name: str<br/>seed: SeedConfig<br/>dependencies: DependencyConfig[]<br/>enrichers: EnricherConfig[]<br/>merge: MergeConfig<br/><br/><br/>"]
+        CCFG["CompositeConfig<br/>━━━━━━━━━━━━━━━━━<br/>name: str<br/>seed: SeedConfig<br/>dependencies: DependencyConfig[]<br/>enrichers: EnricherConfig[]<br/>merge: MergeConfig<br/>"]
     end
 
     subgraph AppConfig["Application Config"]
-        RPC["RecordProcessorConfig<br/>━━━━━━━━━━━━━━━━━<br/>table_config: TableConfig<br/>silver_schema<br/>gold_schema<br/>dq_config: DQConfig<br/><br/><br/><br/>"]
-        LC["LockConfig<br/>━━━━━━━━━━━━━━━━━<br/>timeout: float<br/>heartbeat_interval: int<br/>max_retries: int<br/><br/><br/><br/><br/>"]
+        RPC["RecordProcessorConfig<br/>━━━━━━━━━━━━━━━━━<br/>table_config: TableConfig<br/>silver_schema<br/>gold_schema<br/>dq_config: DQConfig<br/>"]
+        LC["LockConfig<br/>━━━━━━━━━━━━━━━━━<br/>timeout: float<br/>heartbeat_interval: int<br/>max_retries: int<br/>"]
     end
 
     subgraph InfraSettings["Infrastructure Settings"]
-        SETTINGS["Settings<br/>(pydantic BaseSettings)<br/>━━━━━━━━━━━━━━━━━<br/>data_dir: Path<br/>log_level: str<br/>providers: dict<br/>+ from YAML + ENV<br/><br/><br/>"]
-        OBS_SET["ObservabilitySettings<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]
-        PIPE_SET["PipelineSettings<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]
+        SETTINGS["Settings<br/>(pydantic BaseSettings)<br/>━━━━━━━━━━━━━━━━━<br/>data_dir: Path<br/>log_level: str<br/>providers: dict<br/>+ from YAML + ENV<br/>"]
+        OBS_SET["ObservabilitySettings<br/>"]
+        PIPE_SET["PipelineSettings<br/>"]
     end
 
     %% YAML → Loaders

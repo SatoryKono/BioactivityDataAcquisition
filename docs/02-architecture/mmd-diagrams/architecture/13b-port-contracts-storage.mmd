@@ -12,20 +12,23 @@
 
 graph LR
     subgraph Domain["Domain Layer"]
-        STP["StoragePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        DRP["DeltaReaderPort&nbsp;&nbsp;&nbsp;"]
+        STP["StoragePort"]
+        DRP["DeltaReaderPort"]
         MWP["MetadataWriterPort"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        BW["BronzeWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        DR_I["DeltaReader&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        MW_I["MetadataWriter&nbsp;&nbsp;&nbsp;&nbsp;"]
+        BW["BronzeWriter"]
+        DR_I["DeltaReader"]
+        MW_I["MetadataWriter"]
     end
 
     STP --- BW & SW & GW
     DRP --- DR_I
     MWP --- MW_I & NOMW
 
-    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    classDef domain fill:#f3e5f5,stroke:#6a1b9a
+    classDef infra fill:#ffcdd2,stroke:#c62828
+
+    class STP,DRP,MWP domain
+    class BW,SW,GW,DR_I,MW_I,NOMW infra

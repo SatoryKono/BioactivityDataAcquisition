@@ -58,6 +58,10 @@ graph TB
     RBA --> RUNNER
     PS --> RUNNER
 
-    style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-    style Composition fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef app fill:#e8f5e9,stroke:#2e7d32
+    classDef infra fill:#ffcdd2,stroke:#c62828
+    classDef comp fill:#fff3e0,stroke:#e65100
+
+    class RA,RBA,SBA,CBA,LBA comp
+    class ADAPTER,STORAGE,LOGGER,METRICS,TRACER,LOCK,CHKPT,QUAR infra
+    class PS,RUNNER app

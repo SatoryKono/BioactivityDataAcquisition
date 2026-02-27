@@ -5,42 +5,42 @@ flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N6["Ports&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N7["Exceptions&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N8["Domain&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N9["Factories&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N12["Coordinator&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N15["Application&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N16["Types&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N17["Entities&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N20["Observability&nbsp;&nbsp;"]
+        N6["Ports"]
+        N7["Exceptions"]
+        N8["Domain"]
+        N9["Factories"]
+        N12["Coordinator"]
+        N15["Application"]
+        N16["Types"]
+        N17["Entities"]
+        N20["Observability"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N2["BatchExec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N2["BatchExec"]
         N3["CompositeRunner"]
-        N4["Transformer&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N5["Services&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N13["Merger&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N1["Runner&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N4["Transformer"]
+        N5["Services"]
+        N13["Merger"]
+        N1["Runner"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N18["Adapters&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N19["Storage&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N18["Adapters"]
+        N19["Storage"]
     end
 
     subgraph Composition["Composition Layer"]
         direction TB
-        N10["Bootstrap&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N11["Registry&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["Bootstrap"]
+        N11["Registry"]
     end
 
     subgraph Interfaces["Interfaces Layer"]
         direction TB
-        N14["CLI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N14["CLI"]
     end
 
     N10 --> N11

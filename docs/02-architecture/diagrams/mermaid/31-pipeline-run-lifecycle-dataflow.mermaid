@@ -5,26 +5,26 @@ flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N10["VALIDATING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N10["VALIDATING"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N8["PREFLIGHT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N2["TRANSFORMING&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N3["BATCH_DONE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N4["BatchLoop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N8["PREFLIGHT"]
+        N2["TRANSFORMING"]
+        N3["BATCH_DONE"]
+        N4["BatchLoop"]
         N9["PREFLIGHT_PASSED"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N1["EXTRACTING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N5["FAILED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N6["WRITING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N7["LOCKING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N11["CHECKPOINTING&nbsp;&nbsp;&nbsp;"]
-        N12["DRAINING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N1["EXTRACTING"]
+        N5["FAILED"]
+        N6["WRITING"]
+        N7["LOCKING"]
+        N11["CHECKPOINTING"]
+        N12["DRAINING"]
     end
 
     N7 --> N5

@@ -4,26 +4,26 @@ flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N11["SP&nbsp;&nbsp;&nbsp;&nbsp;"]
+        N11["SP"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N1["Merge&nbsp;"]
+        N1["Merge"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N2["Gold&nbsp;&nbsp;"]
-        N3["CCM&nbsp;&nbsp;&nbsp;"]
-        N4["Deps&nbsp;&nbsp;"]
+        N2["Gold"]
+        N3["CCM"]
+        N4["Deps"]
         N5["Enrich"]
-        N6["EC&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N7["KEYS&nbsp;&nbsp;"]
-        N8["KE&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N9["SB&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N10["DC&nbsp;&nbsp;&nbsp;&nbsp;"]
-        N12["BOOT&nbsp;&nbsp;"]
+        N6["EC"]
+        N7["KEYS"]
+        N8["KE"]
+        N9["SB"]
+        N10["DC"]
+        N12["BOOT"]
     end
 
     N12 --> N11

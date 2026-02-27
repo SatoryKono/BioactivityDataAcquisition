@@ -7,24 +7,24 @@
 %% @level   System / Component
 %% @nodes   27
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'NETWORK_SIMPLEX', 'edgeRouting': 'POLYLINE'}}}%%
 %% @uniform width=304 height=180 max_title_len=33 max_desc_lines=8
 graph TB
 %% keep-orphan: DFM, HCP, UIDM
     subgraph Ports["Domain Ports"]
-        DSP["DataSourcePort<br/>(Protocol)<br/><br/><br/><br/><br/><br/><br/>"]
-        HCP["HealthCheckPort<br/>(Protocol)<br/><br/><br/><br/><br/><br/><br/>"]
+        DSP["DataSourcePort<br/>(Protocol)<br/>"]
+        HCP["HealthCheckPort<br/>(Protocol)<br/>"]
     end
 
     DSP -->|extends| FDSP
 
     subgraph Mixins["Mixins"]
-        HCM["HealthCheckMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]
-        HCPM["HealthCheckProviderMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]
-        NSMF["NotSupportedMultiFilterMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]
-        DFM["DelegatingFallbackMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]
-        FSM["FilterableStubMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]
-        PFM["PaginatedFetcherMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]
+        HCM["HealthCheckMixin<br/>"]
+        HCPM["HealthCheckProviderMixin<br/>"]
+        NSMF["NotSupportedMultiFilterMixin<br/>"]
+        DFM["DelegatingFallbackMixin<br/>"]
+        FSM["FilterableStubMixin<br/>"]
+        PFM["PaginatedFetcherMixin<br/>"]
     end
 
     HCM --> HCPM
@@ -40,9 +40,9 @@ graph TB
     DSP -.->|implements| BSA
 
     subgraph ChEMBL["ChEMBL"]
-        CHM["ChemblHealthMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]
-        CMM["ChemblMetadataMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]
-        CA["ChemblAdapter<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_multi_filtered()<br/>+ fetch_filtered_with_fallback()<br/>+ fetch_as_models()<br/><br/>"]
+        CHM["ChemblHealthMixin<br/>"]
+        CMM["ChemblMetadataMixin<br/>"]
+        CA["ChemblAdapter<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_multi_filtered()<br/>+ fetch_filtered_with_fallback()<br/>+ fetch_as_models()<br/>"]
     end
 
     BHA --> CA
@@ -50,9 +50,9 @@ graph TB
     CMM --> CA
 
     subgraph PubMed["PubMed"]
-        PSM["PubMedSearchMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]
-        PFetchM["PubMedFetchMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]
-        PHM["PubMedHealthMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]
+        PSM["PubMedSearchMixin<br/>"]
+        PFetchM["PubMedFetchMixin<br/>"]
+        PHM["PubMedHealthMixin<br/>"]
         PA["PubMedAdapter<br/>━━━━━━━━━━━━━━━━━<br/>email: str<br/>api_key: str | None<br/>batch_size: int<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()"]
     end
 
@@ -64,7 +64,7 @@ graph TB
 
     subgraph UniProt["UniProt"]
         UA["UniProtAdapter<br/>━━━━━━━━━━━━━━━━━<br/>api_key: str | None<br/>base_url: str<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_multi_filtered()<br/>"]
-        UIDM["UniProtIDMappingClient<br/><br/><br/><br/><br/><br/><br/><br/>"]
+        UIDM["UniProtIDMappingClient<br/>"]
     end
 
     BHA --> UA
@@ -89,7 +89,7 @@ graph TB
     BHA --> SSA
 
     subgraph PubChem["PubChem"]
-        PCA["PubChemAdapter<br/>━━━━━━━━━━━━━━━━━<br/>(sync via ThreadPoolExecutor)<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_as_models()<br/><br/>"]
+        PCA["PubChemAdapter<br/>━━━━━━━━━━━━━━━━━<br/>(sync via ThreadPoolExecutor)<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_as_models()<br/>"]
     end
 
     BSA --> PCA

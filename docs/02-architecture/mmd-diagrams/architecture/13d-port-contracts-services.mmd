@@ -10,36 +10,37 @@
 %% @nodes   20
 %% @uniform width=200 height=56 max_title_len=20 max_desc_lines=0
 
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'NETWORK_SIMPLEX', 'edgeRouting': 'POLYLINE'}}}%%
 graph LR
 %% keep-orphan: DQMP
     subgraph Domain["Domain Layer"]
-        LKP["LockPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        CKP["CheckpointPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        QRP["QuarantinePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        ADP["AuditPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        PIIP["PiiHasherPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        IFP["InputFilterPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        DQMP["DQMonitorPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        LKP["LockPort"]
+        CKP["CheckpointPort"]
+        QRP["QuarantinePort"]
+        ADP["AuditPort"]
+        PIIP["PiiHasherPort"]
+        IFP["InputFilterPort"]
+        DQMP["DQMonitorPort"]
         BDQP["BronzeDQAnalyzerPort"]
         SDQP["SilverDQAnalyzerPort"]
-        GDQP["GoldDQAnalyzerPort&nbsp;&nbsp;"]
-        DQRWP["DQReportWriterPort&nbsp;&nbsp;"]
+        GDQP["GoldDQAnalyzerPort"]
+        DQRWP["DQReportWriterPort"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        ML["MemoryLock&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        LC["LocalCheckpoint&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        UQ["UnifiedQuarantine&nbsp;&nbsp;&nbsp;"]
-        FA["FileAuditAdapter&nbsp;&nbsp;&nbsp;&nbsp;"]
-        SPH["Sha256PiiHasher&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        CSVR["CsvFilterReader&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        DQRW_I["DQReportWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        ML["MemoryLock"]
+        LC["LocalCheckpoint"]
+        UQ["UnifiedQuarantine"]
+        FA["FileAuditAdapter"]
+        SPH["Sha256PiiHasher"]
+        CSVR["CsvFilterReader"]
+        DQRW_I["DQReportWriter"]
     end
 
     subgraph Application["Application Layer"]
-        BDA["BronzeDQAnalyzer&nbsp;&nbsp;&nbsp;&nbsp;"]
-        SDA["SilverDQAnalyzer&nbsp;&nbsp;&nbsp;&nbsp;"]
-        GDA["GoldDQAnalyzer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        BDA["BronzeDQAnalyzer"]
+        SDA["SilverDQAnalyzer"]
+        GDA["GoldDQAnalyzer"]
     end
 
     LKP --- ML
@@ -53,6 +54,10 @@ graph LR
     GDQP --- GDA
     DQRWP --- DQRW_I
 
-    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-    style Application fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    classDef domain fill:#f3e5f5,stroke:#6a1b9a
+    classDef app fill:#e8f5e9,stroke:#2e7d32
+    classDef infra fill:#ffcdd2,stroke:#c62828
+
+    class LKP,CKP,QRP,ADP,PIIP,IFP,DQMP,BDQP,SDQP,GDQP,DQRWP domain
+    class BDA,SDA,GDA app
+    class ML,LC,UQ,FA,SPH,CSVR,DQRW_I infra

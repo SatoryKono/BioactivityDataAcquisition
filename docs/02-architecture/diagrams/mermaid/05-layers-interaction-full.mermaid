@@ -15,28 +15,28 @@
 flowchart TB
 %% keep-orphan: Entities, Exceptions, Locking, Types
     subgraph Interfaces["Interfaces Layer"]
-        CLI[CLI Entry Point&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+        CLI[CLI Entry Point]
     end
 
     subgraph Composition["Composition Layer"]
-        Bootstrap[bootstrap_pipeline&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
-        Registry[PipelineRegistry&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
-        Factories[Factories&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+        Bootstrap[bootstrap_pipeline]
+        Registry[PipelineRegistry]
+        Factories[Factories]
 
         Bootstrap --> Registry
         Bootstrap --> Factories
     end
 
     subgraph Application["Application Layer"]
-        Runner[PipelineRunner&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
-        BatchExec[BatchExecutor&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
-        Transformer[BaseTransformer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
-        Services[PipelineServices&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+        Runner[PipelineRunner]
+        BatchExec[BatchExecutor]
+        Transformer[BaseTransformer]
+        Services[PipelineServices]
 
         subgraph Composite["Composite Pipeline (ADR-026)"]
             CompositeRunner[CompositePipelineRunner]
-            Coordinator[EnrichmentCoordinator&nbsp;&nbsp;]
-            Merger[MergeService&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+            Coordinator[EnrichmentCoordinator]
+            Merger[MergeService]
         end
 
         Runner --> BatchExec
@@ -48,17 +48,17 @@ flowchart TB
     end
 
     subgraph Domain["Domain Layer"]
-        Ports[Port Interfaces&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
-        Types[Core Types&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
-        Entities[Domain Entities&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
-        Exceptions[Exception Hierarchy&nbsp;&nbsp;&nbsp;&nbsp;]
+        Ports[Port Interfaces]
+        Types[Core Types]
+        Entities[Domain Entities]
+        Exceptions[Exception Hierarchy]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        Adapters[Data Source Adapters&nbsp;&nbsp;&nbsp;]
-        Storage[Storage Writers&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
-        Observability[Metrics & Tracing&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
-        Locking[Locks & Checkpoints&nbsp;&nbsp;&nbsp;&nbsp;]
+        Adapters[Data Source Adapters]
+        Storage[Storage Writers]
+        Observability[Metrics & Tracing]
+        Locking[Locks & Checkpoints]
     end
 
     %% Layer Dependencies

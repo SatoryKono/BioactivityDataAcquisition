@@ -7,15 +7,15 @@
 %% @level   System / Component
 %% @nodes   33
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'NETWORK_SIMPLEX', 'edgeRouting': 'POLYLINE'}}}%%
 %% @uniform width=256 height=126 max_title_len=27 max_desc_lines=5
 graph TB
     subgraph Config["Composite Configuration"]
-        CC["CompositeConfig<br/><br/><br/><br/><br/>"]
-        SC["SeedConfig<br/><br/><br/><br/><br/>"]
-        DC["DependencyConfig<br/><br/><br/><br/><br/>"]
-        EC["EnricherConfig<br/><br/><br/><br/><br/>"]
-        MC["MergeConfig<br/><br/><br/><br/><br/>"]
+        CC["CompositeConfig<br/>"]
+        SC["SeedConfig<br/>"]
+        DC["DependencyConfig<br/>"]
+        EC["EnricherConfig<br/>"]
+        MC["MergeConfig<br/>"]
 
         NoteConfig["Config Details:<br/>• name: str<br/>• seed: SeedConfig<br/>• dependencies: DependencyConfig[]<br/>• enrichers: EnricherConfig[]<br/>• merge: MergeConfig"]
         CC -.- NoteConfig
@@ -27,19 +27,19 @@ graph TB
     CC --> MC
 
     subgraph Runner["CompositePipelineRunner"]
-        CPR["CompositePipelineRunner<br/><br/><br/><br/><br/>"]
-        NoteRunner["Orchestrates full<br/>composite execution<br/><br/><br/><br/>"]
+        CPR["CompositePipelineRunner<br/>"]
+        NoteRunner["Orchestrates full<br/>composite execution<br/>"]
         CPR -.- NoteRunner
     end
 
     subgraph FSM["State Machine"]
-        INIT["INIT<br/><br/><br/><br/><br/>"]
-        SEED_RUN["SEED_RUNNING<br/><br/><br/><br/><br/>"]
-        DEP_RUN["DEPS_RUNNING<br/><br/><br/><br/><br/>"]
-        ENR_RUN["ENRICHERS_RUNNING<br/><br/><br/><br/><br/>"]
-        MERGE_RUN["MERGING<br/><br/><br/><br/><br/>"]
-        DONE["COMPLETED<br/><br/><br/><br/><br/>"]
-        FAILED["FAILED<br/><br/><br/><br/><br/>"]
+        INIT["INIT<br/>"]
+        SEED_RUN["SEED_RUNNING<br/>"]
+        DEP_RUN["DEPS_RUNNING<br/>"]
+        ENR_RUN["ENRICHERS_RUNNING<br/>"]
+        MERGE_RUN["MERGING<br/>"]
+        DONE["COMPLETED<br/>"]
+        FAILED["FAILED<br/>"]
 
         INIT --> SEED_RUN
         SEED_RUN --> DEP_RUN
@@ -53,45 +53,45 @@ graph TB
     end
 
     subgraph Execution["Execution Components"]
-        SEED["Seed Pipeline<br/><br/><br/><br/><br/>"]
+        SEED["Seed Pipeline<br/>"]
 
         subgraph DepsBlock["Dependencies (Sequential)"]
-            DEP_COORD["DependencyCoordinator<br/><br/><br/><br/><br/>"]
-            DEP1["Dependency 1<br/><br/><br/><br/><br/>"]
+            DEP_COORD["DependencyCoordinator<br/>"]
+            DEP1["Dependency 1<br/>"]
         end
 
         subgraph EnrichBlock["Enrichers (Parallel Fan-Out)"]
-            ENR_COORD["EnrichmentCoordinator<br/><br/><br/><br/><br/>"]
-            ENR1["Enricher 1<br/><br/><br/><br/><br/>"]
-            ENR2["Enricher 2<br/><br/><br/><br/><br/>"]
-            ENR3["Enricher 3<br/><br/><br/><br/><br/>"]
-            ENR4["Enricher 4<br/><br/><br/><br/><br/>"]
+            ENR_COORD["EnrichmentCoordinator<br/>"]
+            ENR1["Enricher 1<br/>"]
+            ENR2["Enricher 2<br/>"]
+            ENR3["Enricher 3<br/>"]
+            ENR4["Enricher 4<br/>"]
         end
 
         subgraph MergeBlock["Merge Phase"]
-            MS["MergeService<br/><br/><br/><br/><br/>"]
-            DEDUP["EnricherDeduplicator<br/><br/><br/><br/><br/>"]
-            AGG["EnricherAggregator<br/><br/><br/><br/><br/>"]
-            REN["ColumnRenamer<br/><br/><br/><br/><br/>"]
+            MS["MergeService<br/>"]
+            DEDUP["EnricherDeduplicator<br/>"]
+            AGG["EnricherAggregator<br/>"]
+            REN["ColumnRenamer<br/>"]
         end
     end
 
     subgraph CrossVal["Cross-Validation"]
-        CV["EnrichmentCrossValidator<br/><br/><br/><br/><br/>"]
+        CV["EnrichmentCrossValidator<br/>"]
     end
 
     subgraph Checkpoint["Checkpoint"]
-        CCM["CompositeCheckpointManager<br/><br/><br/><br/><br/>"]
+        CCM["CompositeCheckpointManager<br/>"]
     end
 
     subgraph Preflight["Preflight"]
-        CPV["CompositePreflightValidator<br/><br/><br/><br/><br/>"]
+        CPV["CompositePreflightValidator<br/>"]
     end
 
     subgraph Results["Results"]
-        ER["EnrichmentResult<br/><br/><br/><br/><br/>"]
-        MR["MergeResult<br/><br/><br/><br/><br/>"]
-        CR["CompositeResult<br/><br/><br/><br/><br/>"]
+        ER["EnrichmentResult<br/>"]
+        MR["MergeResult<br/>"]
+        CR["CompositeResult<br/>"]
     end
 
     %% Flow

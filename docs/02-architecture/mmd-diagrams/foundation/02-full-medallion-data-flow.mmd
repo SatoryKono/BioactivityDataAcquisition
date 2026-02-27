@@ -8,39 +8,39 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 %% @uniform width=200 height=144 max_title_len=20 max_desc_lines=6
 flowchart LR
     subgraph Sources["External Sources"]
-        ChEMBL["ChEMBL API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        PubChem["PubChem API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        UniProt["UniProt API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        PubMed["PubMed API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        CrossRef["CrossRef API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        OpenAlex["OpenAlex API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        S2["Semantic Scholar API<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        ChEMBL["ChEMBL API<br/>"]
+        PubChem["PubChem API<br/>"]
+        UniProt["UniProt API<br/>"]
+        PubMed["PubMed API<br/>"]
+        CrossRef["CrossRef API<br/>"]
+        OpenAlex["OpenAlex API<br/>"]
+        S2["Semantic Scholar API<br/>"]
     end
 
     subgraph Bronze_Layer["Bronze Layer"]
         direction TB
-        BronzeWriter["BronzeWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        Bronze[("Bronze Storage&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━<br/>📁 Format: JSONL + zstd<br/>⏱️ Retention: 90 days<br/>✅ Validation: None<br/>📍 Path: bronze/v1/<br/>{provider}/{entity}/{date}/")]
+        BronzeWriter["BronzeWriter<br/>"]
+        Bronze[("Bronze Storage<br/>━━━━━━━━━━━━━━━<br/>📁 Format: JSONL + zstd<br/>⏱️ Retention: 90 days<br/>✅ Validation: None<br/>📍 Path: bronze/v1/<br/>{provider}/{entity}/{date}/")]
     end
 
     subgraph Silver_Layer["Silver Layer"]
         direction TB
-        SilverWriter["SilverWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        Silver[("Silver Storage&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━<br/>📁 Format: Delta Lake<br/>⏱️ Retention: Permanent<br/>✅ Validation: Pandera (soft<br/>&nbsp;<br/>&nbsp;)\n🔄 Strategy: Merge/Upsert\n🔑 Key: content_hash")]
+        SilverWriter["SilverWriter<br/>"]
+        Silver[("Silver Storage<br/>━━━━━━━━━━━━━━━<br/>📁 Format: Delta Lake<br/>⏱️ Retention: Permanent<br/>✅ Validation: Pandera (soft<br/>)\n🔄 Strategy: Merge/Upsert\n🔑 Key: content_hash")]
     end
 
     subgraph Gold_Layer["Gold Layer"]
         direction TB
-        GoldWriter["GoldWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        Gold[("Gold Storage&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━<br/>📁 Format: Delta/Parquet<br/>⏱️ Retention: Permanent<br/>✅ Validation: Pandera (strict<br/>&nbsp;<br/>&nbsp;)\n🔄 Strategy: SCD2/Append")]
+        GoldWriter["GoldWriter<br/>"]
+        Gold[("Gold Storage<br/>━━━━━━━━━━━━━━━<br/>📁 Format: Delta/Parquet<br/>⏱️ Retention: Permanent<br/>✅ Validation: Pandera (strict<br/>)\n🔄 Strategy: SCD2/Append")]
     end
 
     subgraph DQ_Branch["Data Quality Branch"]
-        DQValidator["DQ Validator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>━━━━━━━━━━━━━━━<br/>⚠️ Soft: >5% errors<br/>❌ Hard: >20% errors<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        DQValidator["DQ Validator<br/>━━━━━━━━━━━━━━━<br/>⚠️ Soft: >5% errors<br/>❌ Hard: >20% errors<br/>"]
     end
 
     subgraph Lineage["Lineage Tracking"]
@@ -70,8 +70,8 @@ flowchart LR
     Silver -.->|"transform_version"| LineageLog
 
     %% Styling
-    style Bronze fill:#CD7F32,color:#fff
-    style Silver fill:#C0C0C0,color:#000
-    style Gold fill:#FFD700,color:#000
-    style Quarantine fill:#FF6B6B,color:#fff
-    style LineageLog fill:#87CEEB,color:#000
+    style Bronze fill:#fff3e0,stroke:#e65100,color:#212121
+    style Silver fill:#eceff1,stroke:#607d8b,color:#212121
+    style Gold fill:#fff8e1,stroke:#f9a825,color:#212121
+    style Quarantine fill:#ffebee,stroke:#c62828,color:#212121
+    style LineageLog fill:#e3f2fd,stroke:#1565c0,color:#212121
