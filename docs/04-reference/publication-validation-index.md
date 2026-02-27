@@ -56,8 +56,8 @@
 
 | Документ | Описание | Покрытие |
 |----------|----------|----------|
-| **[Contract Tests README](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/tests/contract/silver_schemas/README.md)** | Описание контрактных тестов и snapshot-процесса | Contract tests |
-| **[Publication Schema Contracts](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/tests/contract/test_publication_schema_contracts.py)** | Тесты валидации схем публикаций | Contract tests |
+| **[Contract Tests README](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/tests/contract/silver-schemas/README.md)** | Описание контрактных тестов и snapshot-процесса | Contract tests |
+| **[Publication Schema Contracts](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/tests/contract/test-publication-schema-contracts.py)** | Тесты валидации схем публикаций | Contract tests |
 
 **Test Organization:**
 ```
@@ -100,7 +100,7 @@ open docs/03-guides/publication-validation-guide.md
 open docs/04-reference/publication-fields-reference.md
 
     # Или поискать в валидационной схеме
-    grep "pmid" docs/04-reference/schemas/publication_validation_schema_v3.csv
+    grep "pmid" docs/04-reference/schemas/publication-validation-schema-v3.csv
 ```
 
 **Пример записи:**
@@ -220,8 +220,8 @@ cat /var/log/bioetl/pipeline.log | \
 ### QA / Test Engineer (Тестирование)
 
 1. **Изучить тесты:**
-    - [Contract Tests README](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/tests/contract/silver_schemas/README.md)
-    - [Publication Schema Contracts](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/tests/contract/test_publication_schema_contracts.py)
+    - [Contract Tests README](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/tests/contract/silver-schemas/README.md)
+    - [Publication Schema Contracts](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/tests/contract/test-publication-schema-contracts.py)
 
 2. **Расширить покрытие:**
    - Base Validation: добавить edge cases для string fields (empty, whitespace, very long)
@@ -242,7 +242,7 @@ cat /var/log/bioetl/pipeline.log | \
 ### Добавление нового провайдера
 
 1. Определить поля в Pandera schema (`src/bioetl/domain/schemas/{provider}/publication.py`)
-2. Добавить правила в `publication_validation_schema_v3.xlsx`
+2. Добавить правила в `publication-validation-schema-v3.xlsx`
 3. Сгенерировать тесты из XLSX (скрипт: `scratchpad/generate-tests.py`)
 4. Обновить [Field Reference](publication-fields-reference.md)
 5. Добавить провайдера в конфигурацию External Verification

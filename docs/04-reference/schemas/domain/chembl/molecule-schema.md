@@ -320,7 +320,7 @@ def -validate-invariants(self) -> None:
 |----------|------|
 | Pandera Schema | `src/bioetl/domain/schemas/chembl/molecule.py` |
 | Domain Entity | `src/bioetl/domain/entities/chembl-structures.py` |
-| Pipeline Config | `configs/pipelines/chembl/molecule.yaml` |
+| Pipeline Config | `configs/entities/chembl/molecule.yaml` |
 
 ---
 

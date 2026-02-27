@@ -349,6 +349,7 @@ class ColumnOrderer:
         """
 
         def sort_key(col: str) -> tuple[int, str]:
+            """Return (provider_index, name) placing seed columns first."""
             # Seed columns (no dot or single dot like 'field.A') come first
             parts = col.split(".")
             if len(parts) < 3:

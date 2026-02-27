@@ -8,43 +8,42 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%% @uniform width=336 height=168 max_title_len=20 max_desc_lines=7
 flowchart LR
     subgraph Sources["External Sources"]
-        ChEMBL["ChEMBL API"]
-        PubChem["PubChem API"]
-        UniProt["UniProt API"]
-        PubMed["PubMed API"]
-        CrossRef["CrossRef API"]
-        OpenAlex["OpenAlex API"]
-        S2["Semantic Scholar API"]
+        ChEMBL["ChEMBL API<br/><br/><br/><br/><br/><br/>"]
+        PubChem["PubChem API<br/><br/><br/><br/><br/><br/>"]
+        UniProt["UniProt API<br/><br/><br/><br/><br/><br/>"]
+        PubMed["PubMed API<br/><br/><br/><br/><br/><br/>"]
+        CrossRef["CrossRef API<br/><br/><br/><br/><br/><br/>"]
+        OpenAlex["OpenAlex API<br/><br/><br/><br/><br/><br/>"]
+        S2["Semantic Scholar API<br/><br/><br/><br/><br/><br/>"]
     end
 
     subgraph Bronze_Layer["Bronze Layer"]
         direction TB
-        BronzeWriter["BronzeWriter"]
-        Bronze[("Bronze Storage\n━━━━━━━━━━━━━━━\n📁 Format: JSONL + zstd\n⏱️ Retention: 90 days\n✅ Validation: None\n📍 Path: bronze/v1/\n    {provider}/{entity}/{date}/")]
+        BronzeWriter["BronzeWriter<br/><br/><br/><br/><br/><br/>"]
+        Bronze[("Bronze Storage<br/>━━━━━━━━━━━━━━━<br/>📁 Format: JSONL + zstd<br/>⏱️ Retention: 90 days<br/>✅ Validation: None<br/>📍 Path: bronze/v1/<br/>{provider}/{entity}/{date}/")]
     end
 
     subgraph Silver_Layer["Silver Layer"]
         direction TB
-        SilverWriter["SilverWriter"]
-        Silver[("Silver Storage\n━━━━━━━━━━━━━━━\n📁 Format: Delta Lake\n⏱️ Retention: Permanent\n✅ Validation: Pandera (soft)\n🔄 Strategy: Merge/Upsert\n🔑 Key: content_hash")]
+        SilverWriter["SilverWriter<br/><br/><br/><br/><br/><br/>"]
+        Silver[("Silver Storage<br/>━━━━━━━━━━━━━━━<br/>📁 Format: Delta Lake<br/>⏱️ Retention: Permanent<br/>✅ Validation: Pandera (soft<br/>)\n🔄 Strategy: Merge/Upsert\n🔑 Key: content_hash<br/>")]
     end
 
     subgraph Gold_Layer["Gold Layer"]
         direction TB
-        GoldWriter["GoldWriter"]
-        Gold[("Gold Storage\n━━━━━━━━━━━━━━━\n📁 Format: Delta/Parquet\n⏱️ Retention: Permanent\n✅ Validation: Pandera (strict)\n🔄 Strategy: SCD2/Append")]
+        GoldWriter["GoldWriter<br/><br/><br/><br/><br/><br/>"]
+        Gold[("Gold Storage<br/>━━━━━━━━━━━━━━━<br/>📁 Format: Delta/Parquet<br/>⏱️ Retention: Permanent<br/>✅ Validation: Pandera (strict<br/>)\n🔄 Strategy: SCD2/Append<br/>")]
     end
 
     subgraph DQ_Branch["Data Quality Branch"]
-        DQValidator["DQ Validator\n━━━━━━━━━━━━━━━\n⚠️ Soft: >5% errors\n❌ Hard: >20% errors"]
-        Quarantine[("Quarantine\n━━━━━━━━━━━━━━━\n📁 Format: Parquet\n⏱️ Retention: 30 days\n📊 States: NEW→IGNORED\n           →REPROCESSED")]
+        DQValidator["DQ Validator<br/>━━━━━━━━━━━━━━━<br/>⚠️ Soft: >5% errors<br/>❌ Hard: >20% errors<br/><br/><br/>"]
     end
 
     subgraph Lineage["Lineage Tracking"]
-        LineageLog[("Lineage Log\n━━━━━━━━━━━━━━━\nbatch_id\nbronze_paths\ntransform_version\nrun_params")]
     end
 
     %% Main flow
@@ -71,8 +70,8 @@ flowchart LR
     Silver -.->|"transform_version"| LineageLog
 
     %% Styling
-    style Bronze fill:#CD7F32,color:#fff
-    style Silver fill:#C0C0C0,color:#000
-    style Gold fill:#FFD700,color:#000
-    style Quarantine fill:#FF6B6B,color:#fff
-    style LineageLog fill:#87CEEB,color:#000
+    style Bronze fill:#fff7ed,stroke:#f59e0b,color:#212121
+    style Silver fill:#f1f5f9,stroke:#475569,color:#212121
+    style Gold fill:#fefce8,stroke:#ca8a04,color:#212121
+    style Quarantine fill:#ffe4e6,stroke:#dc2626,color:#212121
+    style LineageLog fill:#eff6ff,stroke:#2563eb,color:#212121

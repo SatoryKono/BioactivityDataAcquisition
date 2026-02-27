@@ -111,12 +111,12 @@ bioetl run chembl_cell_line --input-filter data/input/cell.csv
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/cell-line.yaml` |
+| Конфигурация | `configs/entities/chembl/cell-line.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/chembl/cell-line-transformer.py` |
 | Пайплайн | `src/bioetl/application/pipelines/chembl/cell-line.py` |
 | Схема | `src/bioetl/domain/schemas/chembl/cell-line.py` |
 | Сущность | `src/bioetl/domain/entities.py` |
-| Фабрика | `src/bioetl/composition/factories/pipeline_factories.py` |
+| Фабрика | `src/bioetl/composition/factories/pipeline-factories.py` |
 
 ---
 

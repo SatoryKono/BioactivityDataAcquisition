@@ -15,7 +15,7 @@ Builds a composite target table by chaining ChEMBL target data with dependent pi
 | Provider    | `composite`                               |
 | Entity      | `target`                                  |
 | Version     | `1.2.0`                                   |
-| Config      | `configs/pipelines/composite/target.yaml` |
+| Config      | `configs/composites/target.yaml` |
 
 ## Seed and Dependencies
 
@@ -36,7 +36,7 @@ Builds a composite target table by chaining ChEMBL target data with dependent pi
 
 ## Related Configs
 
-- Filters: `configs/filters/entities/composite/target.yaml`
+- Filters: `configs/composites/target.yaml#filters`
 
 ## Related ADRs
 

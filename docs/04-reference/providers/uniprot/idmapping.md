@@ -57,7 +57,7 @@
 
 ## 3. Конфигурация
 
-**Источник:** `configs/pipelines/uniprot/idmapping.yaml`
+**Источник:** `configs/entities/uniprot/idmapping.yaml`
 
 ```yaml
 pipeline-name: uniprot_idmapping
@@ -163,7 +163,7 @@ gold-filters:
 
 ```python
 # Endpoint: GET /configure/idmapping/fields
-await client.health-check()  # Returns HealthStatus.HEALTHY
+await client.health_check()  # Returns HealthStatus.HEALTHY
 ```
 
 ---
@@ -210,7 +210,7 @@ CHEMBL9999999
 
 | Компонент | Путь |
 |-----------|------|
-| **Config** | `configs/pipelines/uniprot/idmapping.yaml` |
+| **Config** | `configs/entities/uniprot/idmapping.yaml` |
 | **Transformer** | `src/bioetl/application/pipelines/uniprot/idmapping-transformer.py` |
 | **Client** | `src/bioetl/infrastructure/adapters/uniprot/idmapping-client.py` |
 | **Silver Schema** | `src/bioetl/infrastructure/schemas/silver.py:134-154` |

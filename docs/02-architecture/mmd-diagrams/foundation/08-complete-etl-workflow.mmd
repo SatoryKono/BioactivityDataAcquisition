@@ -8,10 +8,11 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'},'layout':'elk','flowchart':{'curve':'linear'},'elk':{'nodePlacementStrategy':'BRANDES_KOEPF','mergeEdges':true,'edgeRouting':'ORTHOGONAL'}}}%%
+%% @uniform width=392 height=72 max_title_len=39 max_desc_lines=2
 flowchart TD
+%% keep-orphan: M1, M2, M3, M4, N1, N2, N3, N4, P1, P2
     subgraph Prepare["Phase 1: Prepare"]
-        A1[Load YAML Config] --> A2[Validate Parameters]
         A2 --> A3{Resume Mode?}
         A3 -->|Yes| A4[Load Checkpoint]
         A3 -->|No| A5[Fresh Start]
@@ -40,23 +41,22 @@ flowchart TD
     end
 
     subgraph Transform["Phase 3: Transform"]
-        C1[Load Bronze Records] --> C2[Normalize Values]
         C2 --> C3[Add Metadata]
         C3 --> C4[Compute content_hash]
         C4 --> C5[Create Entity Objects]
 
         subgraph Normalize["Normalization Rules"]
-            N1["NaN/Inf → null"]
-            N2["Floats → round(10)"]
-            N3["Dates → ISO YYYY-MM-DD"]
-            N4["Strings → strip()"]
+            N1["NaN/Inf → null<br/>"]
+            N2["Floats → round(10)<br/>"]
+            N3["Dates → ISO YYYY-MM-DD<br/>"]
+            N4["Strings → strip()<br/>"]
         end
 
         subgraph Metadata["Metadata Fields"]
-            M1["_run_id: UUID"]
-            M2["_run_type: INCREMENTAL|BACKFILL|REBUILD"]
-            M3["_ingestion_ts: datetime"]
-            M4["_source_batch_id: UUID"]
+            M1["_run_id: UUID<br/>"]
+            M2["_run_type: INCREMENTAL|BACKFILL|REBUILD<br/>"]
+            M3["_ingestion_ts: datetime<br/>"]
+            M4["_source_batch_id: UUID<br/>"]
         end
     end
 
@@ -96,8 +96,8 @@ flowchart TD
 
     subgraph Parallel["Parallel Processes"]
         direction LR
-        P1["⏱️ Heartbeat Thread\nEvery 30s: refresh TTL"]
-        P2["📊 Metrics Export\nPrometheus/CloudWatch"]
+        P1["⏱️ Heartbeat Thread<br/>Every 30s: refresh TTL"]
+        P2["📊 Metrics Export<br/>Prometheus/CloudWatch"]
     end
 
     %% Flow connections
@@ -110,10 +110,13 @@ flowchart TD
     E_ERR2 --> E_ERR
 
     %% Styling
-    style Prepare fill:#E8F5E9
-    style Extract fill:#E3F2FD
-    style Transform fill:#FFF3E0
-    style Validate fill:#FCE4EC
-    style Load fill:#F3E5F5
-    style Finalize fill:#E0F7FA
-    style Parallel fill:#FFFDE7
+    style Prepare fill:#f0fdf4
+    style Extract fill:#eff6ff
+    style Transform fill:#fff7ed
+    style Validate fill:#ffe4e6
+    style Load fill:#f5f3ff
+    style Finalize fill:#ecfeff
+    style Parallel fill:#fefce8
+
+    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53 stroke:#475569,stroke-width:2px
+    linkStyle 54 stroke:#475569,stroke-width:2px,opacity:0.85

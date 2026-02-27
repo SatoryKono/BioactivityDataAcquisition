@@ -28,12 +28,12 @@ from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 class PubMedAdapter:
     """Адаптер для PubMed API."""
-    def __init__(self, http_client: UnifiedHTTPClient, api_key: str | None = None):
-        self.http_client = http_client
-        self.base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
-        self.api_key = api_key
+    def __init__(self, http-client: UnifiedHTTPClient, api-key: str | None = None):
+        self.http-client = http-client
+        self.base-url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
+        self.api-key = api-key
 
-    async def fetch_publications(self, query: str, retmax: int = 100):
+    async def fetch-publications(self, query: str, retmax: int = 100):
         """Получение публикаций."""
         params = {
             "db": "pubmed",
@@ -54,7 +54,7 @@ class PubMedAdapter:
 Убедитесь, что настройки (например, API ключи) доступны через `src/bioetl/infrastructure/config.py`.
 
 ### 2.2 Конфиг пайплайна
-Создайте `configs/pipelines/pubmed/publication.yaml`.
+Создайте `configs/entities/pubmed/publication.yaml`.
 
 ```yaml
 pipeline:
@@ -144,14 +144,14 @@ class PubMedPublicationTransformer(BaseTransformer):
 
 ### 4.3 Регистрация пайплайна
 
-Добавьте фабрику пайплайна в `src/bioetl/composition/factories/pipeline_factories.py`:
+Добавьте фабрику пайплайна в `src/bioetl/composition/factories/pipeline-factories.py`:
 
 ```python
 from bioetl.application.pipelines.pubmed.publication import PubMedPublicationPipeline
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.infrastructure.schemas.gold import PubMedPublicationGoldSchema
 
-pubmed_publication_factory = GenericPipelineFactory(
+pubmed_publication-factory = GenericPipelineFactory(
     pipeline-name="pubmed_publication",
     pipeline-class=PubMedPublicationPipeline,
     provider="pubmed",
@@ -161,7 +161,7 @@ pubmed_publication_factory = GenericPipelineFactory(
 
 def register-all-pipelines() -> None:
     # ...
-    PipelineRegistry.register_factory(pubmed_publication_factory)
+    PipelineRegistry.register-factory(pubmed_publication-factory)
 ```
 
 Теперь ваш пайплайн автоматически доступен через CLI по имени `pubmed_publication`.
@@ -169,10 +169,10 @@ def register-all-pipelines() -> None:
 ## Чек-лист
 
 - [ ] Адаптер провайдера реализован (`infrastructure/adapters/pubmed/`)
-- [ ] Конфиг YAML создан (`configs/pipelines/pubmed/publication.yaml`)
+- [ ] Конфиг YAML создан (`configs/entities/pubmed/publication.yaml`)
 - [ ] Трансформер реализован с наследованием от `BaseTransformer`
 - [ ] Пайплайн реализован с наследованием от `BasePipeline`
 - [ ] Провайдер зарегистрирован в `ProviderRegistry` (`registration.py`)
-- [ ] Пайплайн зарегистрирован в `pipeline_factories.py` с `transformer-class`
+- [ ] Пайплайн зарегистрирован в `pipeline-factories.py` с `transformer-class`
 - [ ] Unit-тесты с инъекцией трансформера
 - [ ] Integration-тесты с VCR-кассетами

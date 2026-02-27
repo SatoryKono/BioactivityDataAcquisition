@@ -1,9 +1,34 @@
 import os
+import enum
 from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qsl, urlparse
 
 import pytest
+
+
+def pytest_cmdline_main(config):
+    # Workaround for xdist serialization error with enums (like syrupy DiffMode)
+    # This must run early in pytest_cmdline_main before xdist plugins serialize the config
+    if hasattr(config, "option"):
+        for attr in dir(config.option):
+            if attr.startswith("_"):
+                continue
+            try:
+                val = getattr(config.option, attr)
+                if isinstance(val, enum.Enum):
+                    setattr(config.option, attr, val.value)
+            except Exception:
+                pass
+
+
+def pytest_configure(config):
+    # Keep it here as well just in case
+    if hasattr(config.option, "diff_mode") and isinstance(
+        config.option.diff_mode, enum.Enum
+    ):
+        config.option.diff_mode = config.option.diff_mode.value
+
 
 # Heavy deps are guarded so that minimal CI environments (e.g. detect-secrets
 # workflow, which only installs pytest) can still collect tests without
@@ -28,6 +53,26 @@ try:
     import vcr as vcrpy
 except ImportError:  # pragma: no cover
     vcrpy = None  # type: ignore[assignment]
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _sanitize_bioetl_env_vars() -> None:
+    """Strip inline comments from BIOETL_ env vars.
+
+    Some CI environments load .env.example with inline comments
+    (e.g. ``100  # 1-10000``), which Pydantic interprets as invalid
+    string values. This fixture strips everything after ``#`` for
+    all BIOETL_ variables so Settings() can parse them correctly.
+    """
+    import re
+
+    inline_comment_re = re.compile(r"\s+#\s.*$")
+    for key in list(os.environ):
+        if key.startswith("BIOETL_"):
+            val = os.environ[key]
+            cleaned = inline_comment_re.sub("", val)
+            if cleaned != val:
+                os.environ[key] = cleaned
 
 
 @pytest.fixture(scope="session", autouse=True)

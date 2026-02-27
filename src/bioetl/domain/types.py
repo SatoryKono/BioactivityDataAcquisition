@@ -49,6 +49,20 @@ class SilverRecord(TypedDict, total=False):
     # Other fields are dynamic based on entity type
 
 
+class CellularityType(StrEnum):
+    """Organism cellularity classification for assay context.
+
+    Classifies organisms into three categories based on cellular organization:
+    - ACELLULAR: viruses, phages (no cellular structure)
+    - UNICELLULAR: bacteria, archaea, protists, yeasts
+    - MULTICELLULAR: animals, plants, filamentous fungi
+    """
+
+    ACELLULAR = "acellular"
+    UNICELLULAR = "unicellular"
+    MULTICELLULAR = "multicellular"
+
+
 class PublicationType(StrEnum):
     """Canonical publication type (kebab-case). See PUBLICATION_TYPE_MAPPING."""
 

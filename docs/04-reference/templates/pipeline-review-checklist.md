@@ -4,7 +4,7 @@
 
 Use this checklist when reviewing new or modified pipelines.
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 1. Architecture & Structure (RULES.md §1)
 
@@ -18,8 +18,8 @@ ______________________________________________________________________
 
 - [ ] Pipeline config exists at `configs/entities/{provider}/{entity}.yaml`
 - [ ] Unified config includes required sections: `pipeline`, `schema`, `quality`, `filters`, `contracts`
-- [ ] Provider config exists at `configs/providers/{provider}.yaml` (source, rate_limit, circuit_breaker)
-- [ ] `loading_strategy` specified (`full_scan_only` | `null`)
+- [ ] Provider config exists at `configs/providers/{provider}.yaml` (source, rate-limit, circuit-breaker)
+- [ ] `loading-strategy` specified (`full-scan-only` | `null`)
 - [ ] `forensic-retention` flag set for Critical tables if needed
 
 ## 3. Data Flow - Medallion Architecture (RULES.md §2.1)
@@ -128,7 +128,7 @@ ______________________________________________________________________
 ## 12. Security (RULES.md §5.2, §5.4)
 
 - [ ] No hardcoded secrets
-- [ ] Secrets via environment variables (`BIOETL-{PROVIDER}-{KEY}`)
+- [ ] Secrets via environment variables (`BIOETL_{PROVIDER}_{KEY}`)
 - [ ] PII fields salted in Silver: `sha256(lowercase(value) + SALT)`
 - [ ] PII excluded or aggregated in Gold
 - [ ] No secrets in logs
@@ -168,11 +168,11 @@ ______________________________________________________________________
 
 ## 17. Pre-flight Repository Hygiene
 
-- [ ] `uv run python scripts/validate_data_dir.py` проходит без ошибок
+- [ ] `uv run python scripts/validate-data-dir.py` проходит без ошибок
 - [ ] Тяжёлые/временные локальные артефакты вынесены в `data/local/` или `tmp/`
 - [ ] В релиз не попадают локальные артефакты (`data/local/**`, `tmp/**`)
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Sign-off
 
@@ -182,7 +182,7 @@ ______________________________________________________________________
 | Reviewer      |      |      | [ ]      |
 | Data Engineer |      |      | [ ]      |
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Notes
 

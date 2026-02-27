@@ -422,7 +422,7 @@ Mode: Overwrite
 ## 8. Pipeline Configuration
 
 ```yaml
-# configs/pipelines/chembl/molecule.yaml
+# configs/entities/chembl/molecule.yaml
 
 pipeline-name: chembl_molecule
 provider: chembl

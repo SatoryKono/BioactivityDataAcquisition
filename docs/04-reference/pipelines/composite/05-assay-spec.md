@@ -14,7 +14,7 @@ Enriches ChEMBL assay data with cell line and tissue metadata from pre-populated
 | Provider | `composite` |
 | Entity | `assay` |
 | Version | `1.0.0` |
-| Config | `configs/pipelines/composite/assay.yaml` |
+| Config | `configs/composites/assay.yaml` |
 
 ## Seed and Enrichers
 
@@ -77,8 +77,8 @@ Uses **enrichers** (not dependencies) because cell-line and tissue are reference
 
 ## Related Configs
 
-- DQ rules: `configs/quality/entities/composite/assay.yaml`
-- Filters: `configs/filters/entities/composite/assay.yaml`
+- DQ rules: `configs/composites/assay.yaml#quality`
+- Filters: `configs/composites/assay.yaml#filters`
 
 ## Related ADRs
 

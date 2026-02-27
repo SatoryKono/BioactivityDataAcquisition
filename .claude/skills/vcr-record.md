@@ -52,16 +52,10 @@ grep -r "def test_target_name" tests/ --include="*.py" -l
 
 **Шаг 3: Записать кассету**
 ```bash
-cd "E:\google_drive\05_AI\github\BioactivityDataAcquisition2"
+cd "E:\g-drive\05_AI\github\BioactivityDataAcquisition2"
 
-# Установить режим записи
-$env:VCR_RECORD_MODE = "new_episodes"
-
-# Запустить тест (запишет кассету)
-uv run pytest tests/path/to/test_file.py::TestClass::test_method -v -s
-
-# Вернуть режим
-$env:VCR_RECORD_MODE = "none"
+# Запустить тест с режимом записи (bash syntax)
+VCR_RECORD_MODE=new_episodes uv run pytest tests/path/to/test_file.py::TestClass::test_method -v -s
 ```
 
 **Шаг 4: Валидация кассеты**
@@ -165,10 +159,8 @@ grep -r -E "\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b" tests/fixtures/vcr/ --includ
 # Удалить старую кассету
 rm tests/fixtures/vcr/{provider}/test_name.yaml
 
-# Записать новую
-$env:VCR_RECORD_MODE = "new_episodes"
-uv run pytest tests/path/to/test.py::test_name -v -s
-$env:VCR_RECORD_MODE = "none"
+# Записать новую (bash syntax)
+VCR_RECORD_MODE=new_episodes uv run pytest tests/path/to/test.py::test_name -v -s
 
 # Проверить
 ls -la tests/fixtures/vcr/{provider}/test_name.yaml
@@ -218,7 +210,7 @@ tests/fixtures/vcr/
 
 ## Конфигурация VCR
 
-**Файл:** `tests/conftest.py:223-386`
+**Файл:** `tests/conftest.py` (секция `VCR Configuration`, ~строка 130+)
 
 ### Автоматическая санитизация
 

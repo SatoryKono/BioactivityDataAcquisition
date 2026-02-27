@@ -1,18 +1,33 @@
 %% BioETL — Class Diagram: Infrastructure Adapters
 %% HTTP adapter class hierarchy with mixins.
 
-%% @version 1.0.0
-%% @date    2026-02-24
+%% @version 1.1.0
+%% @date    2026-02-26
 %% @type    classDiagram
 %% @level   Class / Interface
 %% @nodes   18
+%% @uniform-group mixin     nodes=HealthCheckMixin,HealthCheckProviderMixin
+%% @uniform-group base      nodes=BaseHttpAdapter,BaseSyncAdapter,UnifiedHTTPClient
+%% @uniform-group adapter   nodes=ChemblAdapter,PubMedAdapter,UniProtAdapter,CrossRefAdapter,OpenAlexAdapter,SemanticScholarAdapter,PubChemAdapter
+%% @uniform-group util      nodes=CircuitBreaker,TokenBucket,AdapterMetrics
+%% @uniform-group decorator nodes=CircuitBreakerDataSourceDecorator,RetryingDataSourceDecorator,CachedBronzeDataSource
 
+%% @uniform-width group
+%% @uniform class width=416 groups=5 width_strategy=group
+%% @uniform-stats mixin        width=416 height=144 max_desc_lines=6
+%% @uniform-stats base         width=256 height=288 max_desc_lines=14
+%% @uniform-stats adapter      width=360 height=128 max_desc_lines=5
+%% @uniform-stats util         width=232 height=200 max_desc_lines=9
+%% @uniform-stats decorator    width=336 height=72 max_desc_lines=2
 classDiagram
+    direction TB
     class HealthCheckMixin {
         <<Mixin>>
         #_start_health_check(provider, endpoint) HealthCheckContext
         #_handle_health_check_success(ctx, status) None
         #_handle_health_check_failure(ctx, error) None
+        
+        
     }
 
     class HealthCheckProviderMixin {
@@ -33,6 +48,12 @@ classDiagram
         +__aenter__() Self
         +__aexit__(...) None
         +aclose() None
+        
+        
+        
+        
+        
+        
     }
 
     class BaseSyncAdapter {
@@ -41,6 +62,15 @@ classDiagram
         +rate_limiter: TokenBucket
         +circuit_breaker: CircuitBreaker
         +thread_pool: ThreadPoolExecutor
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class UnifiedHTTPClient {
@@ -72,32 +102,48 @@ classDiagram
         +email: str
         +api_key: str | None
         +batch_size: int
+        
+        
     }
 
     class UniProtAdapter {
         +api_key: str | None
         +base_url: str
+        
+        
+        
     }
 
     class CrossRefAdapter {
         +mailto: str
         +batch_size: int
+        
+        
+        
     }
 
     class OpenAlexAdapter {
         +mailto: str
         +batch_size: int
+        
+        
+        
     }
 
     class SemanticScholarAdapter {
         +api_key: str
         +batch_size: int
         +fields: str
+        
+        
     }
 
     class PubChemAdapter {
         Uses pubchempy (sync)
         ThreadPoolExecutor wrapper
+        
+        
+        
     }
 
     class CircuitBreaker {
@@ -121,12 +167,19 @@ classDiagram
         +acquire(tokens) None
         +try_acquire() bool
         +available_tokens() int
+        
     }
 
     class AdapterMetrics {
         +metrics: MetricsPort
         +provider: str
         +measure_request() ContextManager
+        
+        
+        
+        
+        
+        
     }
 
     class CircuitBreakerDataSourceDecorator {
@@ -161,3 +214,22 @@ classDiagram
     UnifiedHTTPClient o-- CircuitBreaker
     UnifiedHTTPClient o-- TokenBucket
     BaseHttpAdapter o-- AdapterMetrics
+
+    style HealthCheckMixin fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style HealthCheckProviderMixin fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style BaseHttpAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style BaseSyncAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style UnifiedHTTPClient fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style ChemblAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style PubMedAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style UniProtAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style CrossRefAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style OpenAlexAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style SemanticScholarAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style PubChemAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style CircuitBreaker fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style TokenBucket fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style AdapterMetrics fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style CircuitBreakerDataSourceDecorator fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style RetryingDataSourceDecorator fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style CachedBronzeDataSource fill:#fff1f2,stroke:#dc2626,stroke-width:2px

@@ -112,7 +112,7 @@ sink:
 
 ```bash
 # Валидация всех конфигов
-python scripts/validate-pipeline-configs.py
+python scripts/validate_pipeline_configs.py
 ```
 
 Schema проверяет:
@@ -129,16 +129,16 @@ Schema проверяет:
 | `pipeline-name` | `<provider>-<entity>` | `chembl_activity` |
 | `silver-table` | `<provider>-<entity>` | `chembl_activity` |
 | `gold-table` | `<provider>-<entity>` | `chembl_activity` |
-| Config path | `configs/pipelines/<provider>/<entity>.yaml` | `configs/pipelines/chembl/activity.yaml` |
+| Config path | `configs/entities/<provider>/<entity>.yaml` | `configs/entities/chembl/activity.yaml` |
 
 **Статус**: Консистентность по всем 21 entity configs + 5 composite (верифицировано 2026-02-17).
 
 ### 6. Source Config Separation
 
-Provider-level API settings вынесены в `configs/sources/<provider>.yaml`:
+Provider-level API settings вынесены в `configs/providers/<provider>.yaml`:
 
 ```yaml
-# configs/sources/chembl.yaml
+# configs/providers/chembl.yaml
 source:
   type: api
   load-strategy: full
@@ -156,8 +156,8 @@ source:
 
 Entity configs ссылаются через `source-file`:
 ```yaml
-# configs/pipelines/chembl/activity.yaml
-source-file: ../../sources/chembl.yaml
+# configs/entities/chembl/activity.yaml
+source-file: ../../providers/chembl.yaml
 ```
 
 **Провайдеры с source configs**: chembl, pubchem, uniprot, pubmed, crossref, openalex, semanticscholar (7 файлов).
@@ -167,20 +167,20 @@ source-file: ../../sources/chembl.yaml
 DQ-правила загружаются иерархически через `DQConfigLoader`:
 
 ```
-configs/quality/
-├── -defaults.yaml                    # Global defaults
-├── providers/<provider>.yaml         # Provider-level rules
-└── entities/<provider>/<entity>.yaml # Entity-level rules
+configs/
+├── base/quality.yaml                      # Global defaults
+├── providers/<provider>.yaml#quality      # Provider-level rules
+└── entities/<provider>/<entity>.yaml#quality # Entity-level rules
 ```
 
 Entity configs могут:
-1. Ссылаться на DQ файл: `dq-config-file: ../../quality/entities/chembl/activity.yaml`
+1. Ссылаться на DQ файл: `dq-config-file: ../../entities/chembl/activity.yaml`
 2. Определять inline правила в `dq-overrides:`
 3. Комбинировать оба подхода (inline overrides поверх файла)
 
 ```yaml
-# configs/pipelines/chembl/activity.yaml
-dq-config-file: ../../quality/entities/chembl/activity.yaml
+# configs/entities/chembl/activity.yaml
+dq-config-file: ../../entities/chembl/activity.yaml
 
 dq-overrides:
   field-validations:
@@ -199,7 +199,7 @@ dq-overrides:
 3. **Автоматическая валидация**: Pydantic schemas валидируют структуру
 4. **Консистентные пути**: `{layer}/{provider}/{entity}` упрощает навигацию
 5. **Provider knowledge captured**: API limits, auth requirements в source configs
-6. **Иерархические DQ правила**: Централизация через `configs/quality/` (ADR-027)
+6. **Иерархические DQ правила**: Централизация через unified hierarchy (`configs/base|providers|entities`) (ADR-027)
 7. **Separation of concerns**: Source configs отделены от pipeline configs
 
 ### Negative
@@ -234,13 +234,13 @@ pipeline-name: chembl_activity
 
 Все DQ правила только в pipeline configs, без иерархической системы.
 
-**Rejected**: Дублирование provider-level правил (например, CHEMBL ID pattern) между entity configs. Иерархическая система (`configs/quality/`) позволяет DRY.
+**Rejected**: Дублирование provider-level правил (например, CHEMBL ID pattern) между entity configs. Иерархическая система unified DQ-секций позволяет DRY.
 
 ### D. Provider configs внутри pipelines/
 
-Хранить source configs в `configs/pipelines/-providers/`.
+Хранить source configs в `configs/entities/-providers/`.
 
-**Rejected**: Смешивание concerns. `configs/sources/` явно отделяет API settings от pipeline логики.
+**Rejected**: Смешивание concerns. `configs/providers/` явно отделяет API settings от pipeline логики.
 
 ## Compliance
 
@@ -264,8 +264,8 @@ pipeline-name: chembl_activity
 - [ADR-027: DQ Rules Externalization](ADR-027-dq-rules-externalization.md) - Hierarchical DQ config
 - [03-file-policy.md](../../00-project/governance/03-file-policy.md) - File structure documentation
 - [04-extending-bioetl.md](../../00-project/governance/04-extending-bioetl.md) - Entity config template
-- [configs/pipelines/_base.yaml](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/configs/pipelines/_base.yaml) - Unified Base Schema v2.0.0
-- [Pipeline Pydantic Schema](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/src/bioetl/infrastructure/schemas/pipeline_config.py) - Pydantic validation schema
+- [configs/base/pipeline.yaml](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/configs/base/pipeline.yaml) - Unified Base Schema v2.0.0
+- [Pipeline Pydantic Schema](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/src/bioetl/infrastructure/schemas/pipeline-config.py) - Pydantic validation schema
 
 ## Changelog
 
@@ -276,14 +276,14 @@ pipeline-name: chembl_activity
 | 2026-01-14 | Claude Code | Added: Mandatory `sort-by` for ADR-014 compliance |
 | 2026-01-14 | Claude Code | Added: JSON Schema validation via `-schema.json` |
 | 2026-01-19 | Claude Code | Fixed: Corrected file structure (`-base.yaml` is the defaults file, not `-defaults.yaml`) |
-| 2026-01-19 | Claude Code | Added: Source config separation (`configs/sources/`) |
+| 2026-01-19 | Claude Code | Added: Source config separation (`configs/providers/`) |
 | 2026-01-19 | Claude Code | Added: Hierarchical DQ configuration reference (ADR-027) |
 | 2026-01-19 | Claude Code | Updated: Compliance matrix with verification status |
 | 2026-02-03 | Claude Code | Fixed: Config counts (19 entity + 2 composite = 21 total) |
 | 2026-02-03 | Claude Code | Added: Reference to ADR-026 for composite pipelines |
 | 2026-02-03 | Claude Code | Fixed: ChEMBL has 12 entity configs, pubmed uses publication.yaml |
 | 2026-02-17 | Claude Code | Fixed: Config counts (21 entity + 5 composite), ChEMBL has 14 entity configs |
-| 2026-02-17 | Claude Code | Fixed: DQ path `configs/dq/` → `configs/quality/` (consistent with ADR-027) |
+| 2026-02-17 | Claude Code | Fixed: DQ path `configs/dq/` migrated to hierarchical DQ configs (ADR-027) |
 | 2026-02-17 | Claude Code | Fixed: Removed `-schema.json` reference (validation via Pydantic schemas) |
 | 2026-02-17 | Claude Code | Fixed: Composite directory listing (activity, assay, molecule, publication, target) |
-| 2026-02-24 | Claude Code | Superseded (partially): Entity configs consolidated into unified format (see ADR-039). Config path `configs/pipelines/{p}/{e}.yaml` replaced by `configs/entities/{p}/{e}.yaml`. Legacy directories removed (RF-CFG-035). |
+| 2026-02-24 | Claude Code | Superseded (partially): Entity configs consolidated into unified format (see ADR-039). Config path `configs/entities/{p}/{e}.yaml` replaced by `configs/entities/{p}/{e}.yaml`. Legacy directories removed (RF-CFG-035). |

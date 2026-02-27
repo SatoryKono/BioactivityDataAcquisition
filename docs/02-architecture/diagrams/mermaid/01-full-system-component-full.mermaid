@@ -1,3 +1,4 @@
+%% View: Full | Parent: (root)
 %% Parent source: docs/02-architecture/mmd-diagrams/foundation/01-full-system-component.mmd
 %% Full reference diagram retained after decomposition.
 %% Title: Full System Component Diagram
@@ -11,106 +12,108 @@
 %% @level   Mixed (System / Component / Class)
 
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% @uniform width=216 height=56 max_title_len=22 max_desc_lines=1
 flowchart TB
+%% keep-orphan: Activity, Assay, AssayTransformer, CheckpointManager, CheckpointPort, Checkpoints, DQConfig, LifecycleOrchestrator, LoggerPort, MetricsPort, Molecule, PipelineConfig, Publication, Quarantine, QuarantinePort, RuntimeConfig, Target, TargetTransformer, TracingPort
     subgraph External["External Systems"]
-        ChEMBL_API["ChEMBL API"]
-        PubChem_API["PubChem API"]
-        UniProt_API["UniProt API"]
-        PubMed_API["PubMed API"]
-        CrossRef_API["CrossRef API"]
-        OpenAlex_API["OpenAlex API"]
-        S2_API["Semantic Scholar API"]
+        ChEMBL_API["ChEMBL API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        PubChem_API["PubChem API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        UniProt_API["UniProt API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        PubMed_API["PubMed API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        CrossRef_API["CrossRef API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        OpenAlex_API["OpenAlex API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        S2_API["Semantic Scholar API&nbsp;&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Interfaces["Interfaces Layer"]
-        CLI["CLI\n(Click)"]
-        Orchestration["Orchestration\n(Signal Handling)"]
+        CLI["CLI&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Click)"]
+        Orchestration["Orchestration&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Signal Handling)"]
     end
 
     subgraph Application["Application Layer"]
         subgraph Core["Core"]
-            PipelineRunner["PipelineRunner"]
-            PipelineExecutor["PipelineExecutor"]
-            RecordProcessor["RecordProcessor"]
-            BatchTransformer["BatchTransformer"]
+            PipelineRunner["PipelineRunner&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            PipelineExecutor["PipelineExecutor&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            RecordProcessor["RecordProcessor&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            BatchTransformer["BatchTransformer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
         end
         subgraph Services["Services"]
-            LockManager["LockManager"]
-            CheckpointManager["CheckpointManager"]
-            PreflightService["PreflightService"]
-            PostrunService["PostrunService"]
-            LifecycleOrchestrator["LifecycleOrchestrator"]
+            LockManager["LockManager&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            CheckpointManager["CheckpointManager&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            PreflightService["PreflightService&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            PostrunService["PostrunService&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            LifecycleOrchestrator["LifecycleOrchestrator&nbsp;<br/>&nbsp;"]
         end
         subgraph Transformers["Entity Transformers"]
-            ActivityTransformer["ActivityTransformer"]
-            MoleculeTransformer["MoleculeTransformer"]
-            AssayTransformer["AssayTransformer"]
-            TargetTransformer["TargetTransformer"]
+            ActivityTransformer["ActivityTransformer&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            MoleculeTransformer["MoleculeTransformer&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            AssayTransformer["AssayTransformer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            TargetTransformer["TargetTransformer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
         end
     end
 
     subgraph Domain["Domain Layer"]
         subgraph Ports["Ports (Protocols)"]
-            DataSourcePort["DataSourcePort"]
-            StoragePort["StoragePort"]
-            LockPort["LockPort"]
-            CheckpointPort["CheckpointPort"]
-            QuarantinePort["QuarantinePort"]
-            MetricsPort["MetricsPort"]
-            TracingPort["TracingPort"]
-            LoggerPort["LoggerPort"]
+            DataSourcePort["DataSourcePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            StoragePort["StoragePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            LockPort["LockPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            CheckpointPort["CheckpointPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            QuarantinePort["QuarantinePort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            MetricsPort["MetricsPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            TracingPort["TracingPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            LoggerPort["LoggerPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
         end
         subgraph Entities["Entities"]
-            Activity["Activity"]
-            Molecule["Molecule"]
-            Assay["Assay"]
-            Target["Target"]
-            Publication["Publication\n(5 providers)"]
+            Activity["Activity&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            Molecule["Molecule&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            Assay["Assay&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            Target["Target&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            Publication["Publication&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(5 providers)"]
         end
         subgraph Config["Configuration"]
-            PipelineConfig["PipelineConfig"]
-            RuntimeConfig["RuntimeConfig"]
-            DQConfig["DQConfig"]
+            PipelineConfig["PipelineConfig&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            RuntimeConfig["RuntimeConfig&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            DQConfig["DQConfig&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
         end
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         subgraph Adapters["Data Source Adapters"]
-            ChemblAdapter["ChemblAdapter"]
-            PubchemAdapter["PubchemAdapter"]
-            UniprotAdapter["UniprotAdapter"]
-            PubmedAdapter["PubmedAdapter"]
-            CrossRefAdapter["CrossRefAdapter"]
-            OpenAlexAdapter["OpenAlexAdapter"]
-            S2Adapter["SemanticScholarAdapter"]
+            ChemblAdapter["ChemblAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            PubchemAdapter["PubchemAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            UniprotAdapter["UniprotAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            PubmedAdapter["PubmedAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            CrossRefAdapter["CrossRefAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            OpenAlexAdapter["OpenAlexAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            S2Adapter["SemanticScholarAdapter<br/>&nbsp;"]
         end
         subgraph HTTP["HTTP Infrastructure"]
-            UnifiedHTTPClient["UnifiedHTTPClient"]
-            CircuitBreaker["CircuitBreaker"]
-            TokenBucket["TokenBucket\n(RateLimiter)"]
+            UnifiedHTTPClient["UnifiedHTTPClient&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            CircuitBreaker["CircuitBreaker&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            TokenBucket["TokenBucket&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(RateLimiter)"]
         end
         subgraph Storage["Storage Writers"]
-            BronzeWriter["BronzeWriter"]
-            SilverWriter["SilverWriter\n(Silver)"]
-            GoldWriter["GoldWriter"]
+            BronzeWriter["BronzeWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+            SilverWriter["SilverWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Silver)"]
+            GoldWriter["GoldWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
         end
         subgraph Locking["Locking"]
-            MemoryLock["MemoryLock"]
+            MemoryLock["MemoryLock&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
         end
     end
 
     subgraph Composition["Composition Layer"]
-        Bootstrap["bootstrap_pipeline()"]
-        Factories["Factories"]
-        Registry["PipelineRegistry"]
+        Bootstrap["bootstrap_pipeline()&nbsp;&nbsp;<br/>&nbsp;"]
+        Factories["Factories&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        Registry["PipelineRegistry&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
     end
 
     subgraph DataLake["Data Lake (Local FS)"]
-        Bronze[("Bronze\nJSONL+zstd")]
-        Silver[("Silver\nDelta Lake")]
-        Gold[("Gold\nDelta/Parquet")]
-        Quarantine[("Quarantine")]
-        Checkpoints[("Checkpoints")]
+        Bronze[("Bronze&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>JSONL+zstd")]
+        Silver[("Silver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Delta Lake")]
+        Gold[("Gold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Delta/Parquet")]
+        Quarantine[("Quarantine"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;)]
+        Checkpoints[("Checkpoints"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;)]
     end
 
     %% External connections

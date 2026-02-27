@@ -8,22 +8,23 @@
 %% @view    bootstrap-factories
 %% @parent  12-bootstrap-di-container.mmd
 %% @nodes   10
+%% @uniform width=296 height=56 max_title_len=29 max_desc_lines=1
 
 graph TB
     subgraph Interfaces["Interfaces Layer"]
-        CLI["CLI Commands (Click)"]
-        HTTP["HTTP Interface"]
+        CLI["CLI Commands (Click)"]:::size-sm
+        HTTP["HTTP Interface"]:::size-sm
     end
 
     subgraph Composition["Composition Layer"]
-        RA["bootstrap_pipeline_runner"]
-        DSR["DataSourceRegistry"]
-        TF["GenericPipelineFactory"]
-        RF["RunnerFactory"]
-        DQF["DQServicesFactory"]
-        PR["ProviderRegistry"]
-        EP["ExtractionParams Registration"]
-        RB["ServicesBuilder"]
+        RA["bootstrap_pipeline_runner"]:::size-sm
+        DSR["DataSourceRegistry"]:::size-sm
+        TF["GenericPipelineFactory"]:::size-sm
+        RF["RunnerFactory"]:::size-sm
+        DQF["DQServicesFactory"]:::size-sm
+        PR["ProviderRegistry"]:::size-sm
+        EP["ExtractionParams Registration"]:::size-sm
+        RB["ServicesBuilder"]:::size-sm
     end
 
     CLI --> RA
@@ -37,5 +38,8 @@ graph TB
     EP --> PR
     RF --> RB
 
-    style Composition fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    style Interfaces fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    classDef comp fill:#fff7ed,stroke:#f59e0b
+    classDef iface fill:#eff6ff,stroke:#2563eb
+
+    class CLI,HTTP iface
+    class RA,DSR,TF,RF,DQF,PR,EP,RB comp

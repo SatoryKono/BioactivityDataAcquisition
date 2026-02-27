@@ -1,0 +1,63 @@
+%% View: Overview | Parent: 05-layers-interaction-full.mermaid
+%% @uniform width=160 height=56 max_title_len=15 max_desc_lines=0
+flowchart TB
+%% keep-orphan: N14, N15
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        N13["Ports"]
+        N14["Types"]
+    end
+
+    subgraph Application["Application Layer"]
+        direction TB
+        N2["Factories"]
+        N3["Runner"]
+        N4["BatchExec"]
+        N6["Services"]
+        N8["Transformer"]
+        N9["CompositeRunner"]
+        N10["Coordinator"]
+        N11["Merger"]
+        N12["Application"]
+        N15["Entities"]
+    end
+
+    subgraph Composition["Composition Layer"]
+        direction TB
+        N1["Bootstrap"]
+        N5["Registry"]
+    end
+
+    subgraph Interfaces["Interfaces Layer"]
+        direction TB
+        N7["CLI"]
+    end
+
+    N1 --> N5
+    N1 --> N2
+    N3 --> N4
+    N4 --> N8
+    N3 --> N6
+    N9 --> N10
+    N9 --> N11
+    N7 --> N1
+    N2 --> N3
+    N12 --> N13
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Composition fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style Interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+
+    %% linkStyle: data 3, orch 2,4-6,8, di 0-1,7,9
+    linkStyle 0 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 1 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 2 stroke:#2e7d32,stroke-width:2px
+    linkStyle 3 stroke:#1E293B,stroke-width:3px
+    linkStyle 4 stroke:#2e7d32,stroke-width:2px
+    linkStyle 5 stroke:#2e7d32,stroke-width:2px
+    linkStyle 6 stroke:#2e7d32,stroke-width:2px
+    linkStyle 7 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 8 stroke:#2e7d32,stroke-width:2px
+    linkStyle 9 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5

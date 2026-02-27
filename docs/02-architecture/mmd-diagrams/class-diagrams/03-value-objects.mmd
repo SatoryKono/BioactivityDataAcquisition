@@ -6,8 +6,10 @@
 %% @type    classDiagram
 %% @level   Class / Interface
 %% @nodes   17
+%% @uniform class width=176 height=240 max_title_len=17 max_desc_lines=13
 
 classDiagram
+    direction TB
     class BronzeWriteResult {
         <<frozen dataclass>>
         +batch_id: BatchID
@@ -19,6 +21,9 @@ classDiagram
         +checksum_blake2: str
         +compression_ratio: float
         +exists() bool
+        
+        
+        
     }
 
     class SilverWriteResult {
@@ -27,6 +32,14 @@ classDiagram
         +table_path: str
         +delta_version: int
         +record_count: int
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class RunContext {
@@ -35,6 +48,14 @@ classDiagram
         +run_type: RunType
         +started_at: datetime
         +checkpoint_offset: int | None
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class HealthCheckResult {
@@ -46,6 +67,11 @@ classDiagram
         +last_error: str | None
         +consecutive_failures: int
         +checked_at: datetime
+        
+        
+        
+        
+        
     }
 
     class FencingToken {
@@ -54,6 +80,14 @@ classDiagram
         +key: str
         +owner_id: RunID
         +issued_at: float
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class LockContext {
@@ -66,6 +100,10 @@ classDiagram
         +create() LockContext
         +is_valid() bool
         +matches_table(table) bool
+        
+        
+        
+        
     }
 
     class AuditEntry {
@@ -77,6 +115,11 @@ classDiagram
         +operation: AuditOperation
         +records_count: int
         +metadata: dict
+        
+        
+        
+        
+        
     }
 
     class FilterLoadResult {
@@ -89,6 +132,10 @@ classDiagram
         +column_ids: dict
         +valid_combinations: frozenset
         +filter_fields: list~str~
+        
+        
+        
+        
     }
 
     class MemoryStats {
@@ -96,6 +143,15 @@ classDiagram
         +rss_bytes: int
         +vms_bytes: int
         +percent: float
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class SourceMetadata {
@@ -103,6 +159,15 @@ classDiagram
         +type: str
         +api_endpoint: str | None
         +request_details: dict | None
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class DQMetrics {
@@ -111,6 +176,14 @@ classDiagram
         +duplicate_rate: float
         +schema_violations: int
         +custom_metrics: dict
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class DQResult {
@@ -119,6 +192,14 @@ classDiagram
         +error_rate: float
         +metrics: DQMetrics
         +anomalies: list
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class EnrichmentResult {
@@ -144,11 +225,34 @@ classDiagram
     HealthCheckResult --> HealthStatus
     EnrichmentResult --> EnrichmentStatus
 
+    style BronzeWriteResult fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style SilverWriteResult fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style RunContext fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style HealthCheckResult fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style FencingToken fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style LockContext fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style AuditEntry fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style FilterLoadResult fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style MemoryStats fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style SourceMetadata fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style DQMetrics fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style DQResult fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style EnrichmentResult fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+
     class AuditLayer {
         <<StrEnum>>
         BRONZE
         SILVER
         GOLD
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
     class AuditOperation {
         <<StrEnum>>
@@ -157,12 +261,28 @@ classDiagram
         APPEND
         DELETE
         OVERWRITE
+        
+        
+        
+        
+        
+        
+        
     }
     class HealthStatus {
         <<StrEnum>>
         HEALTHY
         DEGRADED
         UNHEALTHY
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
     class EnrichmentStatus {
         <<StrEnum>>
@@ -172,4 +292,10 @@ classDiagram
         SKIPPED
         NOT_RUN
         TIMEOUT
+        
+        
+        
+        
+        
+        
     }

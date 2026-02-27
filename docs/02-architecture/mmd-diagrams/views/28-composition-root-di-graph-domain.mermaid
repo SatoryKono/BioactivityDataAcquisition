@@ -1,0 +1,81 @@
+%% View: Domain-Focus | Parent: 28-composition-root-di-graph-full.mermaid
+%% @uniform width=140 height=56 max_title_len=4 max_desc_lines=0
+flowchart TB
+%% keep-orphan: N19, N20
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        N1["DQF"]
+        N2["BOOT"]
+        N3["SB"]
+        N4["BL"]
+        N5["HCF"]
+        N6["DSF"]
+        N7["STF"]
+        N8["STA"]
+        N11["RF"]
+        N13["SLL"]
+        N14["UHC"]
+        N15["ADP"]
+        N17["PS"]
+        N18["RUN"]
+        N19["GPF"]
+        N20["PR"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N9["SW"]
+        N10["GW"]
+        N16["BW"]
+    end
+
+    subgraph Interfaces["Interfaces Layer"]
+        direction TB
+        N12["CLI"]
+    end
+
+    N12 --> N2
+    N2 --> N4
+    N4 --> N13
+    N2 --> N5
+    N5 --> N14
+    N2 --> N6
+    N6 --> N15
+    N2 --> N7
+    N7 --> N8
+    N8 --> N16
+    N8 --> N9
+    N8 --> N10
+    N2 --> N1
+    N2 --> N3
+    N3 --> N9
+    N3 --> N10
+    N3 --> N17
+    N2 --> N11
+    N11 --> N18
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style Interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+
+    %% linkStyle: data 0-18
+    linkStyle 0 stroke:#1E293B,stroke-width:3px
+    linkStyle 1 stroke:#1E293B,stroke-width:3px
+    linkStyle 2 stroke:#1E293B,stroke-width:3px
+    linkStyle 3 stroke:#1E293B,stroke-width:3px
+    linkStyle 4 stroke:#1E293B,stroke-width:3px
+    linkStyle 5 stroke:#1E293B,stroke-width:3px
+    linkStyle 6 stroke:#1E293B,stroke-width:3px
+    linkStyle 7 stroke:#1E293B,stroke-width:3px
+    linkStyle 8 stroke:#1E293B,stroke-width:3px
+    linkStyle 9 stroke:#1E293B,stroke-width:3px
+    linkStyle 10 stroke:#1E293B,stroke-width:3px
+    linkStyle 11 stroke:#1E293B,stroke-width:3px
+    linkStyle 12 stroke:#1E293B,stroke-width:3px
+    linkStyle 13 stroke:#1E293B,stroke-width:3px
+    linkStyle 14 stroke:#1E293B,stroke-width:3px
+    linkStyle 15 stroke:#1E293B,stroke-width:3px
+    linkStyle 16 stroke:#1E293B,stroke-width:3px
+    linkStyle 17 stroke:#1E293B,stroke-width:3px
+    linkStyle 18 stroke:#1E293B,stroke-width:3px

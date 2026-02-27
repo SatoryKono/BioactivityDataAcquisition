@@ -119,7 +119,7 @@ bioetl run chembl_compound_record --dry-run
 - `molecule-chembl-id`
 - `document-chembl-id`
 
-Конфигурируется в `configs/pipelines/chembl/compound-record.yaml`:
+Конфигурируется в `configs/entities/chembl/compound-record.yaml`:
 
 ```yaml
 gold-filters:
@@ -152,7 +152,7 @@ gold-filters:
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/compound-record.yaml` |
+| Конфигурация | `configs/entities/chembl/compound-record.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/chembl/compound-record-transformer.py` |
 | Пайплайн | `src/bioetl/application/pipelines/chembl/compound-record.py` |
 | Сущность | `src/bioetl/domain/entities/chembl_compound_record.py` |

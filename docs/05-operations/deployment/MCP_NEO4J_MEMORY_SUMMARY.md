@@ -32,7 +32,7 @@ MCP Neo4j Memory Management has been successfully configured for BioETL.
 - Full README with usage guide
 - Python examples demonstrating all features
 - Troubleshooting guide
-- Quick reference (NEO4J_MEMORY_SETUP.md)
+- Quick reference (NEO4J-MEMORY-SETUP.md)
 
 ---
 
@@ -47,9 +47,9 @@ MCP Neo4j Memory Management has been successfully configured for BioETL.
 ├── memory.json              # Configuration storage
 ├── examples.py              # Usage examples
 ├── README.md                # Full documentation
-└── SETUP_COMPLETE.md        # Setup summary
+└── SETUP-COMPLETE.md        # Setup summary
 
-NEO4J_MEMORY_SETUP.md         # Quick reference guide
+NEO4J-MEMORY-SETUP.md         # Quick reference guide
 ```
 
 ### Modified
@@ -76,7 +76,7 @@ docker-compose.yml            # Added neo4j service
 ### 1. Prepare Environment
 ```bash
 cp .env.example .env
-# Edit .env and change NEO4J_AUTH password
+# Edit .env and change NEO4J-AUTH password
 ```
 
 ### 2. Start Neo4j
@@ -111,25 +111,25 @@ python .ai/mcp/neo4j-memory/examples.py
 
 ### Python API
 ```python
-from .ai.mcp.neo4j_memory.server import Neo4jMemoryMCP
+from .ai.mcp.neo4j-memory.server import Neo4jMemoryMCP
 
 mcp = Neo4jMemoryMCP()
 
 # Get recommendations
-rec = mcp.recommend_configuration(8)  # 8GB RAM
+rec = mcp.recommend-configuration(8)  # 8GB RAM
 print(rec)
 
 # Switch profile
-mcp.update_memory_profile("staging")
+mcp.update-memory-profile("staging")
 
 # Export environment variables
-env = mcp.export_env_file("production")
+env = mcp.export-env-file("production")
 
 # Check health
-health = mcp.check_neo4j_health()
+health = mcp.check-neo4j-health()
 
 # Save custom config
-mcp.save_custom_configuration("custom", "4g", "16g", "8g")
+mcp.save-custom-configuration("custom", "4g", "16g", "8g")
 ```
 
 ---
@@ -138,15 +138,15 @@ mcp.save_custom_configuration("custom", "4g", "16g", "8g")
 
 | Function | Purpose |
 |----------|---------|
-| `get_memory_profile(profile)` | Get profile (dev/staging/prod) |
-| `get_current_configuration()` | Get active config |
-| `get_memory_allocation_rules()` | Get allocation rules |
-| `check_neo4j_health()` | Check container health |
-| `recommend_configuration(ram_gb)` | Get recommendations |
-| `update_memory_profile(profile)` | Switch profile |
-| `save_custom_configuration(...)` | Save custom config |
-| `export_env_file(profile)` | Export as env vars |
-| `get_troubleshooting_guide()` | Common issues & solutions |
+| `get-memory-profile(profile)` | Get profile (dev/staging/prod) |
+| `get-current-configuration()` | Get active config |
+| `get-memory-allocation-rules()` | Get allocation rules |
+| `check-neo4j-health()` | Check container health |
+| `recommend-configuration(ram-gb)` | Get recommendations |
+| `update-memory-profile(profile)` | Switch profile |
+| `save-custom-configuration(...)` | Save custom config |
+| `export-env-file(profile)` | Export as env vars |
+| `get-troubleshooting-guide()` | Common issues & solutions |
 
 ---
 
@@ -156,20 +156,20 @@ mcp.save_custom_configuration("custom", "4g", "16g", "8g")
 
 ```bash
 # Memory Settings
-NEO4J_HEAP_INITIAL=512m              # Initial JVM heap
-NEO4J_HEAP_MAX=2g                    # Max JVM heap
-NEO4J_PAGECACHE=1g                   # Graph page cache
-NEO4J_TX_MAX_SIZE=2g                 # Transaction max
-NEO4J_GLOBAL_TX_MAX=20g              # Global transaction limit
+NEO4J-HEAP-INITIAL=512m              # Initial JVM heap
+NEO4J-HEAP-MAX=2g                    # Max JVM heap
+NEO4J-PAGECACHE=1g                   # Graph page cache
+NEO4J-TX-MAX-SIZE=2g                 # Transaction max
+NEO4J-GLOBAL-TX-MAX=20g              # Global transaction limit
 
 # Server Settings
-NEO4J_AUTH=neo4j/password            # Credentials
-NEO4J_VERSION=5.15-community         # Image version
-NEO4J_HTTP_PORT=7474                 # Browser port
-NEO4J_BOLT_PORT=7687                 # Bolt port
+NEO4J-AUTH=neo4j/password            # Credentials
+NEO4J-VERSION=5.15-community         # Image version
+NEO4J-HTTP-PORT=7474                 # Browser port
+NEO4J-BOLT-PORT=7687                 # Bolt port
 
 # JVM Tuning
-NEO4J_JVM_OPTS=-XX:+UseG1GC -XX:G1HeapRegionSize=16m
+NEO4J-JVM-OPTS=-XX:+UseG1GC -XX:G1HeapRegionSize=16m
 ```
 
 ### Memory Allocation Rules
@@ -190,9 +190,9 @@ Example for 16GB host:
 ### Switch to Production
 ```bash
 # Update environment
-export NEO4J_HEAP_INITIAL=2g
-export NEO4J_HEAP_MAX=8g
-export NEO4J_PAGECACHE=6g
+export NEO4J-HEAP-INITIAL=2g
+export NEO4J-HEAP-MAX=8g
+export NEO4J-PAGECACHE=6g
 
 # Restart
 docker compose restart neo4j
@@ -224,12 +224,12 @@ docker compose exec neo4j cypher-shell -u neo4j -p <password> "MATCH (n) RETURN 
 **Out of Memory (Exit 137)**
 ```python
 mcp = Neo4jMemoryMCP()
-guide = mcp.get_troubleshooting_guide()
-print(guide['out_of_memory'])
+guide = mcp.get-troubleshooting-guide()
+print(guide['out-of-memory'])
 ```
 
 **Slow Queries**
-- Increase `NEO4J_PAGECACHE`
+- Increase `NEO4J-PAGECACHE`
 - Check page cache hit ratio in `:sysinfo`
 - Profile queries with `PROFILE` clause
 
@@ -283,7 +283,7 @@ Neo4j Container (bioetl-neo4j)
    ```
 
 2. **Update credentials**:
-   - Edit `.env` and change `NEO4J_AUTH` password
+   - Edit `.env` and change `NEO4J-AUTH` password
 
 3. **Start Neo4j**:
    ```bash

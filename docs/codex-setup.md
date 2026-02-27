@@ -21,10 +21,10 @@ cxe "задание для Codex"
 
 ```powershell
 # Интерактивный
-wsl -d Debian -- bash -lc "cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2 && codex"
+wsl -d Debian -- bash -lc "cd /mnt/e/g-drive/05-AI/github/BioactivityDataAcquisition2 && codex"
 
 # Неинтерактивный
-wsl -d Debian -- bash -lc "cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2 && codex exec --full-auto 'задание'"
+wsl -d Debian -- bash -lc "cd /mnt/e/g-drive/05-AI/github/BioactivityDataAcquisition2 && codex exec --full-auto 'задание'"
 ```
 
 ---
@@ -40,9 +40,9 @@ curl --ssl-no-revoke -L -o debian.appx "https://aka.ms/wsl-debian-gnulinux"
 
 # Переименовать и распаковать
 ren debian.appx debian.zip
-Expand-Archive debian.zip -DestinationPath debian_extracted
+Expand-Archive debian.zip -DestinationPath debian-extracted
 
-# Найти install.tar.gz (может быть вложен в DistroLauncher-Appx_*.appx)
+# Найти install.tar.gz (может быть вложен в DistroLauncher-Appx-*.appx)
 # Импортировать:
 mkdir C:\Users\%USERNAME%\WSL\Debian
 wsl --import Debian C:\Users\%USERNAME%\WSL\Debian path\to\install.tar.gz --version 2
@@ -132,22 +132,22 @@ codex login status
 mkdir -p ~/.codex
 cat > ~/.codex/config.toml << 'TOML'
 model = 'gpt-5.3-codex'
-model_provider = 'openai'
-model_reasoning_effort = 'high'
+model-provider = 'openai'
+model-reasoning-effort = 'high'
 personality = 'pragmatic'
 
-[model_providers]
-[model_providers.openai]
-api_key_env = 'OPENAI_API_KEY'
-base_url = 'https://api.openai.com/v1'
+[model-providers]
+[model-providers.openai]
+api-key-env = 'OPENAI-API-KEY'
+base-url = 'https://api.openai.com/v1'
 name = 'OpenAI'
-request_max_retries = 10
-stream_idle_timeout_ms = 600000
-stream_max_retries = 20
+request-max-retries = 10
+stream-idle-timeout-ms = 600000
+stream-max-retries = 20
 
 [projects]
-[projects.'/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2']
-trust_level = 'trusted'
+[projects.'/mnt/e/g-drive/05-AI/github/BioactivityDataAcquisition2']
+trust-level = 'trusted'
 TOML
 ```
 
@@ -162,14 +162,14 @@ TOML
 export PATH="/usr/local/bin:$PATH"
 
 # BioETL project
-export BIOETL_DIR="/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2"
-alias cdp="cd $BIOETL_DIR"
-alias cx="cd $BIOETL_DIR && codex"
-alias cxe="cd $BIOETL_DIR && codex exec --full-auto"
+export BIOETL-DIR="/mnt/e/g-drive/05-AI/github/BioactivityDataAcquisition2"
+alias cdp="cd $BIOETL-DIR"
+alias cx="cd $BIOETL-DIR && codex"
+alias cxe="cd $BIOETL-DIR && codex exec --full-auto"
 
 # Auto-fix DNS при входе
 if ! grep -q "api.openai.com" /etc/hosts 2>/dev/null; then
-  bash "$BIOETL_DIR/.setup_wsl_codex.sh" 2>/dev/null
+  bash "$BIOETL-DIR/.setup-wsl-codex.sh" 2>/dev/null
 fi
 ```
 
@@ -248,14 +248,14 @@ Resolve-DnsName auth.openai.com -Type A
 # Удалить старые записи
 sed -i '/chatgpt.com\|openai.com/d' /etc/hosts
 # Добавить новые
-echo "NEW_IP chatgpt.com" >> /etc/hosts
-echo "NEW_IP api.openai.com" >> /etc/hosts
-echo "NEW_IP auth.openai.com" >> /etc/hosts
+echo "NEW-IP chatgpt.com" >> /etc/hosts
+echo "NEW-IP api.openai.com" >> /etc/hosts
+echo "NEW-IP auth.openai.com" >> /etc/hosts
 ```
 
 Или запустить скрипт (резолвит автоматически, если DNS работает):
 ```bash
-bash /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.setup_wsl_codex.sh
+bash /mnt/e/g-drive/05-AI/github/BioactivityDataAcquisition2/.setup-wsl-codex.sh
 ```
 
 ### Обновление Codex

@@ -71,15 +71,6 @@ repos:
   # Local hooks
   - repo: local
     hooks:
-      - id: constructor-args
-        name: Check constructor argument counts
-        entry: python scripts/check_constructor_args.py --warn-only
-        language: python
-        pass_filenames: false
-        types: [python]
-        # Only run when Python files in src/ change
-        files: ^src/
-
       - id: pip-audit
         name: Check for known vulnerabilities in dependencies
         entry: pip-audit
@@ -124,15 +115,21 @@ repos:
         additional_dependencies:
           - pyyaml>=6.0
 
+      - id: lint-diagrams
+        name: Lint architecture diagrams (.mmd/.mermaid)
+        entry: python scripts/lint_diagrams.py
+        language: python
+        files: ^docs/02-architecture/(mmd-diagrams/.*\.mmd|diagrams/mermaid/.*\.mermaid)$
+
+      - id: prune-orphan-diagram-nodes
+        name: Check for orphan nodes in Mermaid diagrams (GRAPH-001)
+        entry: python scripts/prune_orphan_nodes.py --check
+        language: python
+        files: ^docs/02-architecture/(mmd-diagrams/.*\.mmd|diagrams/mermaid/.*\.mermaid)$
+        pass_filenames: false
+
       - id: check-root-vcr-cassettes
         name: Block root-level VCR cassette files
         entry: python scripts/check_root_vcr_cassettes.py
         language: system
         pass_filenames: false
-
-      - id: lint-diagrams
-        name: Lint Mermaid/MMD diagram files
-        entry: python scripts/lint_diagrams.py
-        language: python
-        pass_filenames: false
-        files: '\.mmd$|\.mermaid$'

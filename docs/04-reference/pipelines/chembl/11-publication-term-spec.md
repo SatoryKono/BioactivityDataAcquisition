@@ -16,7 +16,7 @@ Derived pipeline that extracts and flattens publication terms (MeSH, keywords) f
 | Version          | `2.1.0`                                                 |
 | Loading Strategy | `full-scan-only` (force full scan)                      |
 | Primary Keys     | `entity-id` (hash of publication-id + term-type + term) |
-| Config           | `configs/pipelines/chembl/publication-term.yaml`        |
+| Config           | `configs/entities/chembl/publication_term.yaml`        |
 
 ## Outputs
 
@@ -28,9 +28,9 @@ Derived pipeline that extracts and flattens publication terms (MeSH, keywords) f
 
 ## Related Configs
 
-- DQ: `configs/quality/entities/chembl/publication-term.yaml`
-- Filters: `configs/filters/entities/chembl/publication-term.yaml`
-- Column groups: `configs/schemas/chembl/publication-term.yaml`
+- DQ: `configs/entities/chembl/publication_term.yaml#quality`
+- Filters: `configs/entities/chembl/publication_term.yaml#filters`
+- Column groups: `configs/entities/chembl/publication_term.yaml#schema`
 
 ## Related ADRs
 

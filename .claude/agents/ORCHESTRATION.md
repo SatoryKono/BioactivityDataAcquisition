@@ -339,7 +339,7 @@ py-audit-bot (baseline, scope=seed + enricher pipelines)
 | `.claude/agents/subagents/` | Оригинальные спецификации (справочный материал) |
 | `.claude/rules/ai-selfreview-rules.md` | Правила автоматической самопроверки кода |
 | `docs/00-project/RULES.md` | Архитектурные правила проекта |
-| `docs/02-architecture/decisions/` | ADR-001..ADR-033 |
+| `docs/02-architecture/decisions/` | ADR-001..ADR-040 |
 | `docs/00-project/glossary.md` | Терминология |
 | `tests/architecture/` | Автоматические проверки инвариантов |
 | `scripts/config_gap_analysis.py` | Автоматическая проверка конфигов |

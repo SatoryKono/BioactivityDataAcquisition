@@ -1,13 +1,26 @@
 %% BioETL — Class Diagram: Application Core Services
 %% PipelineRunner, BatchExecutor, and their composition.
 
-%% @version 1.0.0
-%% @date    2026-02-24
+%% @version 1.1.0
+%% @date    2026-02-26
 %% @type    classDiagram
 %% @level   Class / Interface
 %% @nodes   16
+%% @uniform-group core    nodes=PipelineRunner,PipelineServices,BatchExecutor
+%% @uniform-group batch   nodes=BatchTransformer,BatchWriter
+%% @uniform-group infra   nodes=BatchMemoryManager,BatchMetricsRecorder,BatchTracingManager
+%% @uniform-group manager nodes=CheckpointManager,LockManager
+%% @uniform-group support nodes=PreflightService,PostrunService,QuarantineManager,ShutdownSignal,HeartbeatTask,ErrorClassifier
 
+%% @uniform-width group
+%% @uniform class width=592 groups=5 width_strategy=group
+%% @uniform-stats core         width=376 height=312 max_desc_lines=15
+%% @uniform-stats batch        width=592 height=256 max_desc_lines=12
+%% @uniform-stats infra        width=376 height=168 max_desc_lines=7
+%% @uniform-stats manager      width=256 height=200 max_desc_lines=9
+%% @uniform-stats support      width=552 height=112 max_desc_lines=4
 classDiagram
+    direction TB
     class PipelineRunner {
         -_config: PipelineConfig
         -_runtime: RuntimeConfig
@@ -23,6 +36,7 @@ classDiagram
         -_lifecycle_service: MedallionLifecycleService
         -_observer: PipelineObserver
         +run() None
+        
     }
 
     class PipelineServices {
@@ -40,6 +54,7 @@ classDiagram
         +metadata_writer: MetadataWriterPort | None
         +dq_report_writer: DQReportWriterPort | None
         +dq_report_service: DQReportService | None
+        
     }
 
     class BatchExecutor {
@@ -72,6 +87,7 @@ classDiagram
         +transform_batch(records, batch_id, start_index) TransformResult
         +transform_single(raw_record, batch_id, index) TransformedRecord
         +_check_dq_thresholds(records, quarantined_count) None
+        
     }
 
     class BatchWriter {
@@ -128,6 +144,7 @@ classDiagram
         +load_checkpoint() dict | None
         +save_checkpoint(offset) None
         +delete_checkpoint() None
+        
     }
 
     class LockManager {
@@ -144,15 +161,23 @@ classDiagram
 
     class PreflightService {
         +execute(config, runtime, services, context, observer) PreflightReport
+        
+        
+        
     }
 
     class PostrunService {
         +execute(config, runtime, context, executor, metadata, observer) PostrunResult
+        
+        
+        
     }
 
     class QuarantineManager {
         -_quarantine: QuarantinePort
         +quarantine_record(raw, error_type, batch_id, msg, ts) None
+        
+        
     }
 
     class ShutdownSignal {
@@ -166,10 +191,14 @@ classDiagram
         Background async task
         +start() None
         +stop() None
+        
     }
 
     class ErrorClassifier {
         +classify(error) ErrorCategory
+        
+        
+        
     }
 
     PipelineRunner *-- BatchExecutor
@@ -192,3 +221,20 @@ classDiagram
     BatchWriter --> ErrorClassifier
 
     LockManager *-- HeartbeatTask
+
+    style PipelineRunner fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style PipelineServices fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style BatchExecutor fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style BatchTransformer fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style BatchWriter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style BatchMemoryManager fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style BatchMetricsRecorder fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style BatchTracingManager fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style CheckpointManager fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style LockManager fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style PreflightService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style PostrunService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style QuarantineManager fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style ShutdownSignal fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style HeartbeatTask fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style ErrorClassifier fill:#eff6ff,stroke:#2563eb,stroke-width:2px

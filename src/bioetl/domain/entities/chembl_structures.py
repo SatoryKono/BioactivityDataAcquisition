@@ -18,8 +18,8 @@ class ChemblPublication(PublicationEntityBase):
 
     Maps to ChEMBL API endpoint: /document
 
-    Содержит только поля ChEMBL; общие поля публикации наследуются
-    из PublicationEntityBase.
+    Contains only ChEMBL-specific fields; common publication fields are inherited
+    from PublicationEntityBase.
     See: https://www.ebi.ac.uk/chembl/api/data/document
     """
 
@@ -105,6 +105,8 @@ class Target(BaseEntity):
     organism: str | None = None
     # Standardized to 'taxonomy_id' for NCBI consistency (was 'tax_id')
     taxonomy_id: int | None = None
+    # Organism cellularity classification (acellular/unicellular/multicellular)
+    organism_class: str | None = None
     species_group_flag: bool | None = None
     description: str | None = None
     downgraded: bool | None = None  # Flag for deprecated/downgraded records

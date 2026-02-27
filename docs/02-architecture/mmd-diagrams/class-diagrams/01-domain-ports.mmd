@@ -6,8 +6,10 @@
 %% @type    classDiagram
 %% @level   Class / Interface
 %% @nodes   19
+%% @uniform class width=232 height=216 max_title_len=24 max_desc_lines=10
 
 classDiagram
+    direction TB
     class DataSourcePort {
         <<Protocol>>
         +fetch(entity_type, limit, query, filter_ids, filter_field) AsyncIterator~dict~
@@ -15,6 +17,10 @@ classDiagram
         +aclose() None
         +__aenter__() Self
         +__aexit__(...) None
+        
+        
+        
+        
     }
 
     class FilterableDataSourcePort {
@@ -22,6 +28,12 @@ classDiagram
         +fetch_filtered(entity_type, filter_ids, filter_field, limit) AsyncIterator~dict~
         +fetch_multi_filtered(entity_type, filters, limit) AsyncIterator~dict~
         +fetch_filtered_with_fallback(entity_type, filter_ids, filter_field, limit) AsyncIterator~dict~
+        
+        
+        
+        
+        
+        
     }
 
     class StoragePort {
@@ -44,6 +56,10 @@ classDiagram
         +heartbeat(key, owner_id) None
         +validate_owner(key, owner_id) bool
         +validate_fencing_token(token) bool
+        
+        
+        
+        
     }
 
     class CheckpointPort {
@@ -52,6 +68,11 @@ classDiagram
         +load(key) dict | None
         +list_all() list
         +delete(key) None
+        
+        
+        
+        
+        
     }
 
     class QuarantinePort {
@@ -62,12 +83,22 @@ classDiagram
         +replay(pipeline, filter_fn) int
         +purge(pipeline, before) int
         +update_status(payload_hash, status) None
+        
+        
+        
     }
 
     class AuditPort {
         <<Protocol>>
         +log_write(entry: AuditEntry) None
         +get_entries(filters) list~AuditEntry~
+        
+        
+        
+        
+        
+        
+        
     }
 
     class LoggerPort {
@@ -78,6 +109,9 @@ classDiagram
         +error(msg, **fields) None
         +debug(msg, **fields) None
         +exception(msg, **fields) None
+        
+        
+        
     }
 
     class MetricsPort {
@@ -86,12 +120,24 @@ classDiagram
         +increment_counter(name, labels) None
         +set_gauge(name, value, labels) None
         +close() None
+        
+        
+        
+        
+        
     }
 
     class TracingPort {
         <<Protocol>>
         +get_tracer(name) Tracer
         +close() None
+        
+        
+        
+        
+        
+        
+        
     }
 
     class CircuitBreakerPort {
@@ -100,6 +146,11 @@ classDiagram
         +get_failure_count() int
         +call(fn) T
         +reset() None
+        
+        
+        
+        
+        
     }
 
     class RateLimiterPort {
@@ -107,16 +158,38 @@ classDiagram
         +acquire(tokens) None
         +try_acquire() bool
         +available_tokens() int
+        
+        
+        
+        
+        
+        
     }
 
     class PiiHasherPort {
         <<Protocol>>
         +hash(value: str) str
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class MetadataWriterPort {
         <<Protocol>>
         +write(path, metadata) None
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class DeltaReaderPort {
@@ -124,6 +197,12 @@ classDiagram
         +read_table(path, columns, limit) DataFrame
         +get_schema(path) Schema
         +get_row_count(path) int
+        
+        
+        
+        
+        
+        
     }
 
     class InputFilterPort {
@@ -131,6 +210,12 @@ classDiagram
         +load_filter_ids(path, column) FilterLoadResult
         +load_multi_column_filter(path, columns) FilterLoadResult
         +load_filter_with_fallback(path, column, fallback) FilterLoadResult
+        
+        
+        
+        
+        
+        
     }
 
     class DQMonitorPort {
@@ -139,17 +224,57 @@ classDiagram
         +check_quality() DQResult
         +update_baseline_from_metrics() None
         +get_baseline_stats() dict
+        
+        
+        
+        
+        
     }
 
     class JsonEncoderPort {
         <<Protocol>>
         +encode(obj) str
         +decode(s) Any
+        
+        
+        
+        
+        
+        
+        
     }
 
     class MemoryMonitorPort {
         <<Protocol>>
         +get_stats() MemoryStats
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     DataSourcePort <|-- FilterableDataSourcePort
+
+    style DataSourcePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style FilterableDataSourcePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style StoragePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style LockPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style CheckpointPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style QuarantinePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style AuditPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style LoggerPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style MetricsPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style TracingPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style CircuitBreakerPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style RateLimiterPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style PiiHasherPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style MetadataWriterPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style DeltaReaderPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style InputFilterPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style DQMonitorPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style JsonEncoderPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style MemoryMonitorPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px

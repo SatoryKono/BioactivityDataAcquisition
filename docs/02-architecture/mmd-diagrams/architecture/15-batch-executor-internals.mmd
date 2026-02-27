@@ -6,36 +6,29 @@
 %% @type    flowchart
 %% @level   System / Component
 %% @nodes   15
+%% @allow-polyline-routing
+%% @uniform width=280 height=256 max_title_len=20 max_desc_lines=12
 
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'POLYLINE'}}}%%
 graph TB
     subgraph BatchExecutor["BatchExecutor"]
-        BE["BatchExecutor<br/>━━━━━━━━━━━━━━━━━<br/>_services: PipelineServices<br/>_context: PipelineContext<br/>_config: RecordProcessorConfig<br/>batch_size: int<br/>checkpoint_interval: int<br/>━━━━━━━━━━━━━━━━━<br/>+ execute(limit, query, offset)<br/>+ process(records, start_index)<br/>+ get_dq_context()<br/>+ get_run_statistics()"]
+        BE["BatchExecutor<br/>━━━━━━━━━━━━━━━━━<br/>_services: PipelineServices<br/>_context: PipelineContext<br/>_config: RecordProcessorConfig<br/>batch_size: int<br/>checkpoint_interval: int<br/>━━━━━━━━━━━━━━━━━<br/>+ execute(limit, query, offset)<br/>+ process(records, start_index)<br/>+ get_dq_context()<br/>+ get_run_statistics()"]:::size-lg
     end
 
     subgraph Helpers["Composed Helper Components"]
-        BMM["BatchMemoryManager<br/>━━━━━━━━━━━━━━━━━<br/>_memory_monitor: MemoryMonitorPort<br/>_memory_config: MemoryConfig<br/>_initial_batch_size: int<br/>━━━━━━━━━━━━━━━━━<br/>+ check_pressure() → new_size<br/>+ maybe_recover() → new_size<br/><br/>Adaptive batch sizing:<br/>reduces under memory pressure,<br/>recovers when pressure drops"]
-
-        BMR["BatchMetricsRecorder<br/>━━━━━━━━━━━━━━━━━<br/>_metrics: MetricsPort<br/>_pipeline_label: str<br/>_run_type_label: str<br/>━━━━━━━━━━━━━━━━━<br/>+ track_batch_size(stage, size)<br/>+ track_processed_records(stage, count)<br/>+ track_error(stage, error_type)<br/>+ track_quarantined_records()"]
-
-        BTM["BatchTracingManager<br/>━━━━━━━━━━━━━━━━━<br/>_tracer: TracingPort<br/>TRACER_NAME = 'bioetl.batch_executor'<br/>━━━━━━━━━━━━━━━━━<br/>+ start_execution_span()<br/>+ start_batch_span(batch_id)<br/>+ start_layer_span(name)<br/>+ end_span(span, error)"]
-
-        BT["BatchTransformer<br/>━━━━━━━━━━━━━━━━━<br/>_transform: TransformCallback<br/>_gold_filter: GoldFilterCallback<br/>_gold_transform: GoldTransformCallback<br/>_error_classifier: ErrorClassifier<br/>━━━━━━━━━━━━━━━━━<br/>+ transform_batch(records, batch_id)<br/>+ transform_single(record)<br/>+ _check_dq_thresholds()"]
-
-        BW["BatchWriter<br/>━━━━━━━━━━━━━━━━━<br/>_storage: StoragePort<br/>_gold_validator: GoldValidatorPort<br/>_lock_validator: Callable<br/>━━━━━━━━━━━━━━━━━<br/>+ write_bronze(records, batch_id)<br/>+ write_silver(records, batch_id)<br/>+ write_gold(records)<br/>+ _validate_lock() — Safety Guard"]
-
-        QM["QuarantineManager<br/>━━━━━━━━━━━━━━━━━<br/>_quarantine: QuarantinePort<br/>━━━━━━━━━━━━━━━━━<br/>+ quarantine_record(raw, error_type,<br/>  batch_id, error_msg, ts)"]
-
-        CM["CheckpointManager<br/>━━━━━━━━━━━━━━━━━<br/>_checkpoint: CheckpointPort<br/>━━━━━━━━━━━━━━━━━<br/>+ load_checkpoint()<br/>+ save_checkpoint(offset)<br/>+ delete_checkpoint()"]
+        BMM["BatchMemoryManager<br/>━━━━━━━━━━━━━━━━━<br/>_memory_monitor: MemoryMonitorPort<br/>_memory_config: MemoryConfig<br/>_initial_batch_size: int<br/>━━━━━━━━━━━━━━━━━<br/>+ check_pressure() → new_size<br/>+ maybe_recover() → new_size<br/>Adaptive batch sizing:<br/>reduces under memory pressure,<br/>recovers when pressure drops<br/>"]:::size-lg
+        BMR["BatchMetricsRecorder<br/>━━━━━━━━━━━━━━━━━<br/>_metrics: MetricsPort<br/>_pipeline_label: str<br/>_run_type_label: str<br/>━━━━━━━━━━━━━━━━━<br/>+ track_batch_size(stage, size)<br/>+ track_processed_records(stage, count)<br/>+ track_error(stage, error_type)<br/>+ track_quarantined_records()<br/><br/>"]:::size-lg
+        BTM["BatchTracingManager<br/>━━━━━━━━━━━━━━━━━<br/>_tracer: TracingPort<br/>TRACER_NAME = 'bioetl.batch_executor'<br/>━━━━━━━━━━━━━━━━━<br/>+ start_execution_span()<br/>+ start_batch_span(batch_id)<br/>+ start_layer_span(name)<br/>+ end_span(span, error)<br/><br/><br/>"]:::size-lg
+        BT["BatchTransformer<br/>━━━━━━━━━━━━━━━━━<br/>_transform: TransformCallback<br/>_gold_filter: GoldFilterCallback<br/>_gold_transform: GoldTransformCallback<br/>_error_classifier: ErrorClassifier<br/>━━━━━━━━━━━━━━━━━<br/>+ transform_batch(records, batch_id)<br/>+ transform_single(record)<br/>+ _check_dq_thresholds()<br/><br/>"]:::size-lg
+        BW["BatchWriter<br/>━━━━━━━━━━━━━━━━━<br/>_storage: StoragePort<br/>_gold_validator: GoldValidatorPort<br/>_lock_validator: Callable<br/>━━━━━━━━━━━━━━━━━<br/>+ write_bronze(records, batch_id)<br/>+ write_silver(records, batch_id)<br/>+ write_gold(records)<br/>+ _validate_lock() — Safety Guard<br/><br/>"]:::size-lg
+        QM["QuarantineManager<br/>━━━━━━━━━━━━━━━━━<br/>_quarantine: QuarantinePort<br/>━━━━━━━━━━━━━━━━━<br/>+ quarantine_record(raw, error_type,<br/>batch_id, error_msg, ts)<br/><br/><br/><br/><br/><br/>"]:::size-lg
+        CM["CheckpointManager<br/>━━━━━━━━━━━━━━━━━<br/>_checkpoint: CheckpointPort<br/>━━━━━━━━━━━━━━━━━<br/>+ load_checkpoint()<br/>+ save_checkpoint(offset)<br/>+ delete_checkpoint()<br/><br/><br/><br/><br/>"]:::size-lg
     end
 
     subgraph DataFlow["Data Flow Through Batch"]
         direction LR
-        RAW["Raw API Records<br/>(dict[str, Any])"]
-        BRONZE["Bronze Records<br/>(JSONL + zstd)"]
-        SILVER["Silver Records<br/>(Delta Lake)"]
-        GOLD["Gold Records<br/>(Delta Lake)"]
-        QUAR["Quarantined<br/>Records"]
-
+        RAW["Raw API Records<br/>(dict[str, Any])<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        SILVER["Silver Records<br/>(Delta Lake)<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
         RAW -->|"write_bronze()"| BRONZE
         RAW -->|"transform_batch()"| SILVER
         SILVER -->|"write_gold()"| GOLD
@@ -43,11 +36,11 @@ graph TB
     end
 
     subgraph TransformResult["TransformResult"]
-        TR["TransformResult<br/>━━━━━━━━━━━━━━━━━<br/>silver_records: list[SilverRecord]<br/>gold_records: list[dict]<br/>quarantined_count: int<br/>errors: list[TransformError]"]
+        TR["TransformResult<br/>━━━━━━━━━━━━━━━━━<br/>silver_records: list[SilverRecord]<br/>gold_records: list[dict]<br/>quarantined_count: int<br/>errors: list[TransformError]<br/><br/><br/><br/><br/><br/>"]:::size-lg
     end
 
     subgraph ErrorClassification["Error Classification"]
-        ECL["ErrorClassifier<br/>━━━━━━━━━━━━━━━━━<br/>Classifies exceptions as:<br/>• QUARANTINE (data issue)<br/>• RETRY (transient)<br/>• FATAL (stop pipeline)"]
+        ECL["ErrorClassifier<br/>━━━━━━━━━━━━━━━━━<br/>Classifies exceptions as:<br/>• QUARANTINE (data issue)<br/>• RETRY (transient)<br/>• FATAL (stop pipeline)<br/><br/><br/><br/><br/><br/>"]:::size-lg
     end
 
     %% Composition
@@ -66,11 +59,11 @@ graph TB
     %% Writer uses lock validation
     BW -.->|"Safety Guard"| CM
 
-    classDef executor fill:#e3f2fd,stroke:#1565c0,stroke-width:3px
-    classDef helper fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef data fill:#c8e6c9,stroke:#2e7d32
-    classDef result fill:#f3e5f5,stroke:#6a1b9a
-    classDef error fill:#ffcdd2,stroke:#c62828
+    classDef executor fill:#eff6ff,stroke:#2563eb,stroke-width:3px
+    classDef helper fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    classDef data fill:#c8e6c9,stroke:#16a34a
+    classDef result fill:#f5f3ff,stroke:#7c3aed
+    classDef error fill:#fff1f2,stroke:#dc2626
 
     class BE executor
     class BMM,BMR,BTM,BT,BW,QM,CM helper
@@ -78,3 +71,10 @@ graph TB
     class QUAR error
     class TR result
     class ECL error
+
+    %% Link styles (LBP-005)
+    linkStyle 0,1,2,3,11 stroke:#1E293B,stroke-width:3px
+    linkStyle 4,7,8,9,10,12 stroke:#16a34a,stroke-width:2px
+    linkStyle 5 stroke:#94A3B8,stroke-width:1px
+    linkStyle 6 stroke:#94A3B8,stroke-width:1px
+    linkStyle 13 stroke:#7c3aed,stroke-width:1.5px,stroke-dasharray:5

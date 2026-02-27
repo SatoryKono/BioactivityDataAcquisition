@@ -4,7 +4,7 @@
 # Renders Mermaid (.mermaid / .mmd) diagrams to SVG + PNG.
 #
 # Usage:
-#   ./render.sh                        # render all diagrams
+#   ./render.sh                        # render all docs diagrams (except docs/99-archive/**)
 #   ./render.sh --svg-only             # SVG only (fast)
 #   ./render.sh --png-only             # PNG only
 #   ./render.sh --filter "01-*"        # glob filter on filename
@@ -20,21 +20,26 @@ CSS="$THEME_DIR/custom.css"
 
 # ── Defaults ────────────────────────────────────────────────
 SCALE=3          # 3x ≈ 300 DPI
-WIDTH=2400
-HEIGHT=1800
+LARGE_SCALE=4    # higher PNG scale for large diagrams
+LARGE_THRESHOLD=30
+PNG_DPI=300
+LARGE_PNG_DPI=450
+WIDTH=0          # 0 = adaptive (fit to content)
+HEIGHT=0         # 0 = adaptive (fit to content)
 BG="white"
 FORMAT_SVG=1
 FORMAT_PNG=1
 FILTER="*"
 EXTRA_DIRS=()
-PUPPETEER_CFG=""
+PUPPETEER_CFG="$THEME_DIR/puppeteer-config.json"
+[[ -f "$PUPPETEER_CFG" ]] || PUPPETEER_CFG=""
 JOBS=4           # parallel jobs
+FIT=1            # adaptive sizing by default
+EXCLUDE_PATHS=("docs/99-archive")
 
 # ── Diagram source directories ──────────────────────────────
 DEFAULT_DIRS=(
-  "$REPO_ROOT/docs/02-architecture/mmd-diagrams/architecture"
-  "$REPO_ROOT/docs/02-architecture/mmd-diagrams/class-diagrams"
-  "$REPO_ROOT/docs/02-architecture/mmd-diagrams/foundation"
+  "$REPO_ROOT/docs"
 )
 
 # ── Colours ─────────────────────────────────────────────────
@@ -63,13 +68,20 @@ Options:
   --svg-only          Render SVG only (skip PNG conversion)
   --png-only          Render PNG only
   --scale N           PNG scale factor        (default: $SCALE)
-  --width N           PNG width in pixels     (default: $WIDTH)
-  --height N          PNG height in pixels    (default: $HEIGHT)
+  --large-scale N     PNG scale for large diagrams (default: $LARGE_SCALE)
+  --large-threshold N @nodes threshold for large-diagram boost (default: $LARGE_THRESHOLD)
+  --png-dpi N         PNG DPI for normal diagrams when using SVG converters (default: $PNG_DPI)
+  --large-png-dpi N   PNG DPI for large diagrams when using SVG converters (default: $LARGE_PNG_DPI)
+  --width N           Viewport width (0=auto) (default: $WIDTH)
+  --height N          Viewport height (0=auto)(default: $HEIGHT)
+  --no-fit            Use fixed width/height instead of adaptive
   --bg COLOR          Background colour       (default: $BG)
   --filter GLOB       Only render matching    (default: "$FILTER")
   --dir DIR           Add extra source dir    (repeatable)
+  --exclude PATH      Exclude path (repeatable, relative to repo root
+                      or absolute path; default: docs/99-archive)
   --jobs N            Parallel render jobs    (default: $JOBS)
-  --puppeteer FILE    Puppeteer config JSON   (CI sandboxing)
+  --puppeteer FILE    Puppeteer config JSON   (CI sandboxing; defaults to theme/puppeteer-config.json if present)
   -h, --help          Show this help
 EOF
 }
@@ -79,23 +91,78 @@ log_warn()  { echo -e "${YELLOW}[WARN]${NC}  $*"; }
 log_err()   { echo -e "${RED}[ERR]${NC}   $*"; }
 log_step()  { echo -e "${CYAN}[STEP]${NC}  $*"; }
 
+require_option_value() {
+  local option_name="$1"
+  local arg_count="$2"
+  if [[ "$arg_count" -lt 2 ]]; then
+    log_err "Option $option_name requires a value"
+    usage
+    exit 1
+  fi
+}
+
 # ── Parse args ──────────────────────────────────────────────
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --svg-only)     FORMAT_SVG=1; FORMAT_PNG=0;         shift ;;
     --png-only)     FORMAT_SVG=0; FORMAT_PNG=1;         shift ;;
-    --scale)        SCALE="$2";                         shift 2 ;;
-    --width)        WIDTH="$2";                         shift 2 ;;
-    --height)       HEIGHT="$2";                        shift 2 ;;
-    --bg)           BG="$2";                            shift 2 ;;
-    --filter)       FILTER="$2";                        shift 2 ;;
-    --dir)          EXTRA_DIRS+=("$2");                 shift 2 ;;
-    --jobs)         JOBS="$2";                          shift 2 ;;
-    --puppeteer)    PUPPETEER_CFG="$2";                 shift 2 ;;
+    --scale)        require_option_value "$1" "$#"; SCALE="$2";         shift 2 ;;
+    --large-scale)  require_option_value "$1" "$#"; LARGE_SCALE="$2";   shift 2 ;;
+    --large-threshold) require_option_value "$1" "$#"; LARGE_THRESHOLD="$2"; shift 2 ;;
+    --png-dpi)      require_option_value "$1" "$#"; PNG_DPI="$2";       shift 2 ;;
+    --large-png-dpi) require_option_value "$1" "$#"; LARGE_PNG_DPI="$2"; shift 2 ;;
+    --width)        require_option_value "$1" "$#"; WIDTH="$2";         shift 2 ;;
+    --height)       require_option_value "$1" "$#"; HEIGHT="$2";        shift 2 ;;
+    --bg)           require_option_value "$1" "$#"; BG="$2";            shift 2 ;;
+    --filter)       require_option_value "$1" "$#"; FILTER="$2";        shift 2 ;;
+    --dir)          require_option_value "$1" "$#"; EXTRA_DIRS+=("$2"); shift 2 ;;
+    --exclude)      require_option_value "$1" "$#"; EXCLUDE_PATHS+=("$2"); shift 2 ;;
+    --jobs)         require_option_value "$1" "$#"; JOBS="$2";          shift 2 ;;
+    --no-fit)       FIT=0;                                                shift ;;
+    --puppeteer)    require_option_value "$1" "$#"; PUPPETEER_CFG="$2"; shift 2 ;;
     -h|--help)      usage; exit 0 ;;
     *)              log_err "Unknown option: $1"; usage; exit 1 ;;
   esac
 done
+
+if ! [[ "$SCALE" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+  log_err "--scale must be a positive number (got: $SCALE)"
+  exit 1
+fi
+if ! [[ "$LARGE_SCALE" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+  log_err "--large-scale must be a positive number (got: $LARGE_SCALE)"
+  exit 1
+fi
+if ! [[ "$LARGE_THRESHOLD" =~ ^[0-9]+$ ]]; then
+  log_err "--large-threshold must be a non-negative integer (got: $LARGE_THRESHOLD)"
+  exit 1
+fi
+if ! [[ "$PNG_DPI" =~ ^[0-9]+$ ]]; then
+  log_err "--png-dpi must be a non-negative integer (got: $PNG_DPI)"
+  exit 1
+fi
+if ! [[ "$LARGE_PNG_DPI" =~ ^[0-9]+$ ]]; then
+  log_err "--large-png-dpi must be a non-negative integer (got: $LARGE_PNG_DPI)"
+  exit 1
+fi
+if ! [[ "$WIDTH" =~ ^[0-9]+$ ]]; then
+  log_err "--width must be a non-negative integer (got: $WIDTH)"
+  exit 1
+fi
+if ! [[ "$HEIGHT" =~ ^[0-9]+$ ]]; then
+  log_err "--height must be a non-negative integer (got: $HEIGHT)"
+  exit 1
+fi
+if ! [[ "$JOBS" =~ ^[0-9]+$ ]] || [[ "$JOBS" -lt 1 ]]; then
+  log_err "--jobs must be an integer >= 1 (got: $JOBS)"
+  exit 1
+fi
+
+if [[ $FIT -eq 0 ]]; then
+  # In fixed mode, treat zero values as "use defaults".
+  [[ "$WIDTH" -eq 0 ]] && WIDTH=2400
+  [[ "$HEIGHT" -eq 0 ]] && HEIGHT=1800
+fi
 
 # ── Determine directories ──────────────────────────────────
 if [[ ${#EXTRA_DIRS[@]} -gt 0 ]]; then
@@ -120,6 +187,13 @@ if ! command -v mmdc &>/dev/null; then
   exit 1
 fi
 log_info "mmdc $(mmdc --version 2>/dev/null || echo '(version unknown)') found"
+
+PYTHON_BIN=""
+if command -v python3 &>/dev/null; then
+  PYTHON_BIN="python3"
+elif command -v python &>/dev/null; then
+  PYTHON_BIN="python"
+fi
 
 HAS_RSVG=0
 if command -v rsvg-convert &>/dev/null; then
@@ -154,17 +228,46 @@ echo ""
 
 # ── Collect diagram files ──────────────────────────────────
 files=()
+exclude_abs=()
+
+for ex in "${EXCLUDE_PATHS[@]}"; do
+  if [[ "$ex" = /* ]]; then
+    exclude_abs+=("$ex")
+  else
+    exclude_abs+=("$REPO_ROOT/$ex")
+  fi
+done
+
 for dir in "${DIRS[@]}"; do
+  if [[ "$dir" != /* ]]; then
+    dir="$REPO_ROOT/$dir"
+  fi
   if [[ ! -d "$dir" ]]; then
     log_warn "Directory not found, skipping: $dir"
     continue
   fi
-  shopt -s nullglob
-  for f in "$dir"/$FILTER.mermaid "$dir"/$FILTER.mmd; do
-    [[ -f "$f" ]] && files+=("$f")
-  done
-  shopt -u nullglob
+  while IFS= read -r -d '' f; do
+    base_name="$(basename "$f")"
+    stem="${base_name%.*}"
+    [[ "$base_name" = _* ]] && continue
+    [[ "$stem" == $FILTER ]] || continue
+
+    is_excluded=0
+    for ex in "${exclude_abs[@]}"; do
+      if [[ "$f" == "$ex"/* ]]; then
+        is_excluded=1
+        break
+      fi
+    done
+    [[ $is_excluded -eq 1 ]] && continue
+
+    files+=("$f")
+  done < <(find "$dir" -type f \( -name "*.mermaid" -o -name "*.mmd" \) -print0)
 done
+
+if [[ ${#files[@]} -gt 0 ]]; then
+  mapfile -t files < <(printf '%s\n' "${files[@]}" | sort -u)
+fi
 
 TOTAL=${#files[@]}
 if [[ $TOTAL -eq 0 ]]; then
@@ -172,7 +275,7 @@ if [[ $TOTAL -eq 0 ]]; then
   exit 0
 fi
 
-log_info "Found ${BOLD}$TOTAL${NC} diagrams across ${#DIRS[@]} directories"
+log_info "Found ${BOLD}$TOTAL${NC} diagrams across ${#DIRS[@]} root directory(ies)"
 echo ""
 
 # ── Build mmdc base args ───────────────────────────────────
@@ -193,14 +296,72 @@ render_one() {
   local svg_dir="$dir/svg"
   local png_dir="$dir/png"
 
+  # High-res boost for dense diagrams using @nodes metadata.
+  local node_count="0"
+  local edge_count="0"
+  local custom_png_scale=""
+  local custom_png_dpi=""
+  local is_large=0
+  local large_reason=""
+  local scale_for_file="$SCALE"
+  local dpi_for_file="$PNG_DPI"
+  node_count="$(sed -nE "s/^%%[[:space:]]*@nodes[[:space:]]+([0-9]+).*/\1/p" "$src" | head -n 1)"
+  if [[ -z "$node_count" ]]; then
+    node_count="0"
+  fi
+  if [[ "$node_count" =~ ^[0-9]+$ ]] && [[ "$node_count" -ge "$LARGE_THRESHOLD" ]]; then
+    is_large=1
+    large_reason="@nodes=${node_count}"
+  fi
+  # Fallback heuristic for legacy files without @nodes: dense edge count.
+  if [[ "$is_large" -eq 0 ]]; then
+    edge_count="$(grep -Ev '^[[:space:]]*%%' "$src" | grep -Ec '(-\.->|==>|-->)' || true)"
+    if [[ "$edge_count" =~ ^[0-9]+$ ]] && [[ "$edge_count" -ge "$LARGE_THRESHOLD" ]]; then
+      is_large=1
+      large_reason="edge-density=${edge_count}"
+    fi
+  fi
+  if [[ "$is_large" -eq 1 ]]; then
+    scale_for_file="$LARGE_SCALE"
+    dpi_for_file="$LARGE_PNG_DPI"
+  fi
+  # Per-diagram overrides (optional metadata comments):
+  #   %% @png-scale N
+  #   %% @png-dpi   N
+  custom_png_scale="$(sed -nE "s/^%%[[:space:]]*@png-scale[[:space:]]+([0-9]+).*/\1/p" "$src" | head -n 1)"
+  custom_png_dpi="$(sed -nE "s/^%%[[:space:]]*@png-dpi[[:space:]]+([0-9]+).*/\1/p" "$src" | head -n 1)"
+  if [[ "$custom_png_scale" =~ ^[0-9]+$ ]] && [[ "$custom_png_scale" -ge 1 ]]; then
+    scale_for_file="$custom_png_scale"
+  fi
+  if [[ "$custom_png_dpi" =~ ^[0-9]+$ ]] && [[ "$custom_png_dpi" -ge 72 ]]; then
+    dpi_for_file="$custom_png_dpi"
+  fi
+
+  # Build per-format mmdc size args
+  local size_args=()
+  if [[ $FIT -eq 0 ]]; then
+    # Fixed size mode (--no-fit)
+    size_args+=(-w "$WIDTH" -H "$HEIGHT")
+  fi
+  # In adaptive mode (FIT=1), omit -w/-H so mmdc sizes SVG to content
+
   # Render SVG
   if [[ $FORMAT_SVG -eq 1 ]]; then
     mkdir -p "$svg_dir"
     local svg_out="$svg_dir/${base}.svg"
-    if mmdc -i "$src" -o "$svg_out" "${MMDC_ARGS[@]}" -w "$WIDTH" -H "$HEIGHT" -b "$BG" 2>/dev/null; then
+    if mmdc -i "$src" -o "$svg_out" "${MMDC_ARGS[@]}" "${size_args[@]}" -b "$BG" 2>/dev/null; then
+      # Add plain SVG text fallback under foreignObject labels for renderers
+      # that do not support foreignObject.
+      if [[ -n "$PYTHON_BIN" ]]; then
+        "$PYTHON_BIN" "$REPO_ROOT/scripts/add_svg_text_fallback.py" --fix -f "$svg_out" >/dev/null 2>&1 || true
+      fi
       # Optimize SVG with svgo if available
       if [[ $HAS_SVGO -eq 1 ]]; then
-        svgo --quiet "$svg_out" -o "$svg_out" 2>/dev/null || true
+        svgo --quiet --config "$THEME_DIR/../svgo.config.js" "$svg_out" -o "$svg_out" 2>/dev/null || true
+      fi
+      # Inject CSS overrides for edge label readability
+      if [[ -n "$PYTHON_BIN" ]]; then
+        "$PYTHON_BIN" "$REPO_ROOT/scripts/inject_svg_styles.py" --fix -f "$svg_out" >/dev/null 2>&1 || true
       fi
       echo -e "  ${GREEN}✓${NC} SVG  [$idx/$TOTAL]  $base"
     else
@@ -215,22 +376,36 @@ render_one() {
     local png_out="$png_dir/${base}.png"
 
     if [[ $FORMAT_SVG -eq 1 && $HAS_RSVG -eq 1 ]]; then
-      # SVG → PNG via rsvg-convert (best quality)
-      rsvg-convert -w "$WIDTH" "$svg_dir/${base}.svg" -o "$png_out" 2>/dev/null
+      # SVG → PNG via rsvg-convert (adaptive: use SVG intrinsic size)
+      if [[ $FIT -eq 0 ]]; then
+        rsvg-convert -b "$BG" -w "$WIDTH" -h "$HEIGHT" "$svg_dir/${base}.svg" -o "$png_out" 2>/dev/null
+      else
+        rsvg-convert -b "$BG" -d "$dpi_for_file" -p "$dpi_for_file" "$svg_dir/${base}.svg" -o "$png_out" 2>/dev/null
+      fi
     elif [[ $FORMAT_SVG -eq 1 && $HAS_RSVG -eq 2 ]]; then
       # SVG → PNG via inkscape
-      inkscape "$svg_dir/${base}.svg" --export-type=png --export-dpi=300 \
-        --export-filename="$png_out" 2>/dev/null
+      if [[ $FIT -eq 0 ]]; then
+        inkscape "$svg_dir/${base}.svg" --export-type=png --export-width="$WIDTH" \
+          --export-height="$HEIGHT" --export-background="$BG" --export-background-opacity=1 \
+          --export-filename="$png_out" 2>/dev/null
+      else
+        inkscape "$svg_dir/${base}.svg" --export-type=png --export-dpi="$dpi_for_file" \
+          --export-background="$BG" --export-background-opacity=1 --export-filename="$png_out" 2>/dev/null
+      fi
     else
-      # Direct mmdc → PNG
+      # Direct mmdc → PNG (adaptive: use -s scale only)
       mmdc -i "$src" -o "$png_out" "${MMDC_ARGS[@]}" \
-        -w "$WIDTH" -H "$HEIGHT" -s "$SCALE" -b "$BG" 2>/dev/null
+        "${size_args[@]}" -s "$scale_for_file" -b "$BG" 2>/dev/null
     fi
 
     if [[ -f "$png_out" ]]; then
       local size
       size=$(du -h "$png_out" | cut -f1)
-      echo -e "  ${GREEN}✓${NC} PNG  [$idx/$TOTAL]  $base  (${size})"
+      if [[ "$is_large" -eq 1 ]]; then
+        echo -e "  ${GREEN}✓${NC} PNG  [$idx/$TOTAL]  $base  (${size}, hi-res ${large_reason})"
+      else
+        echo -e "  ${GREEN}✓${NC} PNG  [$idx/$TOTAL]  $base  (${size})"
+      fi
     else
       echo -e "  ${RED}✗${NC} PNG  [$idx/$TOTAL]  $base"
       return 1
@@ -245,37 +420,84 @@ success=0
 failed=0
 current_dir=""
 
-for i in "${!files[@]}"; do
-  src="${files[$i]}"
-  idx=$((i + 1))
-  dir="$(dirname "$src")"
+if [[ "$JOBS" -eq 1 ]]; then
+  for i in "${!files[@]}"; do
+    src="${files[$i]}"
+    idx=$((i + 1))
+    dir="$(dirname "$src")"
 
-  # Print directory header on change
-  if [[ "$dir" != "$current_dir" ]]; then
-    current_dir="$dir"
-    echo ""
-    log_step "Directory: ${dir#"$REPO_ROOT/"}"
-    echo ""
-  fi
+    # Print directory header on change
+    if [[ "$dir" != "$current_dir" ]]; then
+      current_dir="$dir"
+      echo ""
+      log_step "Directory: ${dir#"$REPO_ROOT/"}"
+      echo ""
+    fi
 
-  # Skip superseded diagrams
-  if grep -qiE '^%% @status\s+superseded' "$src"; then
-    log_info "SKIP (superseded): ${src#"$REPO_ROOT/"}"
-    continue
-  fi
+    # Skip superseded diagrams
+    if grep -qiE '^%% @status\s+superseded' "$src"; then
+      log_info "SKIP (superseded): ${src#"$REPO_ROOT/"}"
+      continue
+    fi
 
-  if render_one "$src" "$idx"; then
-    success=$((success + 1))
-  else
-    failed=$((failed + 1))
-  fi
-done
+    if render_one "$src" "$idx"; then
+      success=$((success + 1))
+    else
+      failed=$((failed + 1))
+    fi
+  done
+else
+  log_step "Rendering in parallel with $JOBS jobs..."
+  echo ""
+  result_dir="$(mktemp -d)"
+  active_jobs=0
+
+  for i in "${!files[@]}"; do
+    src="${files[$i]}"
+    idx=$((i + 1))
+    (
+      if render_one "$src" "$idx"; then
+        printf "ok\n" > "$result_dir/$idx.status"
+      else
+        printf "fail\n" > "$result_dir/$idx.status"
+      fi
+    ) &
+    active_jobs=$((active_jobs + 1))
+
+    if [[ "$active_jobs" -ge "$JOBS" ]]; then
+      wait -n || true
+      active_jobs=$((active_jobs - 1))
+    fi
+  done
+
+  while [[ "$active_jobs" -gt 0 ]]; do
+    wait -n || true
+    active_jobs=$((active_jobs - 1))
+  done
+
+  for i in "${!files[@]}"; do
+    idx=$((i + 1))
+    if [[ -f "$result_dir/$idx.status" ]] && [[ "$(cat "$result_dir/$idx.status")" == "ok" ]]; then
+      success=$((success + 1))
+    else
+      failed=$((failed + 1))
+    fi
+  done
+  rm -rf "$result_dir"
+fi
 
 # ── Generate index files per output directory ───────────────
 log_step "Generating index files..."
 echo ""
 
-for dir in "${DIRS[@]}"; do
+declare -A source_dirs_map=()
+for src in "${files[@]}"; do
+  src_dir="$(dirname "$src")"
+  source_dirs_map["$src_dir"]=1
+done
+mapfile -t source_dirs < <(printf '%s\n' "${!source_dirs_map[@]}" | sort)
+
+for dir in "${source_dirs[@]}"; do
   for sub in svg png; do
     out_dir="$dir/$sub"
     [[ ! -d "$out_dir" ]] && continue
@@ -327,6 +549,13 @@ formats=""
 [[ $FORMAT_SVG -eq 1 ]] && formats+="SVG "
 [[ $FORMAT_PNG -eq 1 ]] && formats+="PNG "
 echo -e "  Formats: ${BOLD}${formats}${NC}"
+if [[ $FIT -eq 1 ]]; then
+  echo -e "  Layout:  ${BOLD}adaptive${NC} (fit to content, ELK engine)"
+else
+  echo -e "  Layout:  ${BOLD}fixed${NC} (${WIDTH}x${HEIGHT})"
+fi
+echo -e "  PNG:     base scale=${SCALE}, large scale=${LARGE_SCALE} (@nodes>=${LARGE_THRESHOLD})"
+echo -e "           base dpi=${PNG_DPI}, large dpi=${LARGE_PNG_DPI}"
 echo ""
 
 if [[ $failed -eq 0 ]]; then

@@ -10,7 +10,7 @@ __version__ = "6.0.0"
 try:
     import typing
 
-    import typing_inspect  # type: ignore[import-untyped,import-not-found]
+    import typing_inspect  # type: ignore[import-untyped]
 
     # Fix typing_inspect.get_origin BEFORE importing pandera backends
     _orig_get_origin = typing_inspect.get_origin

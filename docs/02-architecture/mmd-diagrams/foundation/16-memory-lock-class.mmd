@@ -8,7 +8,8 @@
 %% @type    classDiagram
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%% @uniform class width=168 height=240 max_title_len=16 max_desc_lines=15
 classDiagram
     direction TB
 
@@ -19,6 +20,15 @@ classDiagram
         +heartbeat(key: str, owner_id: str, exclusive: bool) bool
         +validate_owner(key: str, owner_id: str) bool
         +aclose() None
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class MemoryLock {
@@ -27,13 +37,11 @@ classDiagram
         -_ttl_check_interval: float = 1.0
         -_ttl_task: asyncio.Task | None
         -_running: bool = True
-
         +acquire(key: str, owner_id: str, ttl: int = 90, wait: bool = False, timeout: int = 300, exclusive: bool = False) bool
         +release(key: str, owner_id: str, exclusive: bool = False) bool
         +heartbeat(key: str, owner_id: str, exclusive: bool = False) bool
         +validate_owner(key: str, owner_id: str) bool
         +aclose() None
-
         -_start_ttl_checker() None
         -_ttl_checker_loop() None
         -_cleanup_expired() None
@@ -48,6 +56,15 @@ classDiagram
         +expires_at: float
         +original_ttl: int
         +exclusive: bool = False
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class LockResult {
@@ -57,6 +74,15 @@ classDiagram
         +key: str
         +ttl: int
         +message: str | None
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class LockNotHeldError {
@@ -65,6 +91,16 @@ classDiagram
         +expected_owner: str
         +actual_owner: str | None
         +message: str
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class LockManager {
@@ -75,26 +111,32 @@ classDiagram
         -_wait_for_lock: bool = False
         -_wait_timeout: int = 300
         -_heartbeat_task: asyncio.Task | None
-
         +acquire_lock(resource: str, owner_id: str) LockResult
         +release_lock(resource: str, owner_id: str) bool
         +refresh_lock(resource: str, owner_id: str) bool
         +start_heartbeat(resource: str, owner_id: str) None
         +stop_heartbeat() None
-
         -_heartbeat_loop(resource: str, owner_id: str) None
         -_build_lock_key(resource: str) str
+        
     }
 
     class BackfillLock {
         -_lock: LockPort
         -_run_type: RunType
         -_logger: LoggerPort
-
         +acquire_exclusive(resource: str, owner_id: str, wait_timeout: int) bool
         +release_exclusive(resource: str, owner_id: str) bool
-
         +get_lock_key(provider: str, entity: str, run_type: RunType)$ str
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     %% Relationships

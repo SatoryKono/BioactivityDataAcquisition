@@ -3,7 +3,7 @@
 Defines the structure and logic of a pipeline (config, transformations, filters).
 Does NOT handle execution orchestration.
 
-Refactored per ADR-0005.
+Refactored per ADR-005.
 Updated: Transformer injection via DI (Phase 1 refactoring).
 Updated: Removed default_transformer_class fallback (REQ-ARCH-DI-007).
 """

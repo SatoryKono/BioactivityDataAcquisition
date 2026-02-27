@@ -10,7 +10,7 @@
 
 ## 2. Конфигурация
 
-**Источник конфигурации:** `configs/pipelines/uniprot/protein.yaml`
+**Источник конфигурации:** `configs/entities/uniprot/protein.yaml`
 
 | Параметр | Значение | Описание |
 |---|---|---|

@@ -83,7 +83,7 @@ bioetl run chembl_publication --limit 1000
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/publication.yaml` |
+| Конфигурация | `configs/entities/chembl/publication.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/chembl/publication-transformer.py` |
 | Пайплайн | `src/bioetl/application/pipelines/chembl/publication.py` |
 

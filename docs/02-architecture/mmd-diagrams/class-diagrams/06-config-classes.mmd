@@ -1,13 +1,22 @@
 %% BioETL — Class Diagram: Configuration Classes
 %% Domain and application configuration hierarchy.
 
-%% @version 1.0.0
-%% @date    2026-02-24
+%% @version 1.1.0
+%% @date    2026-02-26
 %% @type    classDiagram
 %% @level   Class / Interface
 %% @nodes   14
+%% @uniform-group core      nodes=RuntimeConfig,PipelineConfig
+%% @uniform-group composite nodes=CompositeConfig,SeedConfig,DependencyConfig,EnricherConfig,MergeConfig
+%% @uniform-group support   nodes=RecordProcessorConfig,TableConfig,DQConfig,SilverFilterConfig,GoldFilterConfig,LockConfig,KeyNullabilityRule
 
+%% @uniform-width group
+%% @uniform class width=296 groups=3 width_strategy=group
+%% @uniform-stats core         width=296 height=344 max_desc_lines=17
+%% @uniform-stats composite    width=296 height=144 max_desc_lines=6
+%% @uniform-stats support      width=216 height=128 max_desc_lines=5
 classDiagram
+    direction TB
     class RuntimeConfig {
         <<frozen dataclass>>
         +run_type: RunType
@@ -52,24 +61,32 @@ classDiagram
         <<dataclass>>
         +silver_table: str | None
         +gold_table: str | None
+        
+        
     }
 
     class DQConfig {
         <<dataclass>>
         +soft_error_threshold: float
         +hard_error_threshold: float
+        
+        
     }
 
     class SilverFilterConfig {
         <<dataclass>>
         +source_path: str
         +column_name: str
+        
+        
     }
 
     class GoldFilterConfig {
         <<dataclass>>
         +source_path: str
         +column_name: str
+        
+        
     }
 
     class RecordProcessorConfig {
@@ -85,6 +102,7 @@ classDiagram
         +timeout: float
         +heartbeat_interval: int
         +max_retries: int
+        
     }
 
     class CompositeConfig {
@@ -102,12 +120,16 @@ classDiagram
         +output_keys: tuple~str~
         +silver_table: str
         +limit: int | None
+        
     }
 
     class DependencyConfig {
         <<frozen dataclass>>
         +pipeline: str
         +depends_on: tuple~str~
+        
+        
+        
     }
 
     class EnricherConfig {
@@ -115,12 +137,17 @@ classDiagram
         +pipeline: str
         +primary_key: str
         +enricher_cardinality: EnricherCardinality
+        
+        
     }
 
     class MergeConfig {
         <<frozen dataclass>>
         +merge_strategy: MergeStrategy
         +conflict_resolution: ConflictResolution
+        
+        
+        
     }
 
     class KeyNullabilityRule {
@@ -128,6 +155,7 @@ classDiagram
         +table_name: str
         +key_columns: list~str~
         +allow_nulls: bool
+        
     }
 
     PipelineConfig *-- TableConfig
@@ -142,3 +170,18 @@ classDiagram
     CompositeConfig *-- DependencyConfig
     CompositeConfig *-- EnricherConfig
     CompositeConfig *-- MergeConfig
+
+    style RuntimeConfig fill:#fffbeb,stroke:#d97706,stroke-width:2px
+    style PipelineConfig fill:#fffbeb,stroke:#d97706,stroke-width:2px
+    style TableConfig fill:#fffbeb,stroke:#d97706,stroke-width:2px
+    style DQConfig fill:#fffbeb,stroke:#d97706,stroke-width:2px
+    style SilverFilterConfig fill:#fffbeb,stroke:#d97706,stroke-width:2px
+    style GoldFilterConfig fill:#fffbeb,stroke:#d97706,stroke-width:2px
+    style RecordProcessorConfig fill:#fffbeb,stroke:#d97706,stroke-width:2px
+    style LockConfig fill:#fffbeb,stroke:#d97706,stroke-width:2px
+    style CompositeConfig fill:#fffbeb,stroke:#d97706,stroke-width:2px
+    style SeedConfig fill:#fffbeb,stroke:#d97706,stroke-width:2px
+    style DependencyConfig fill:#fffbeb,stroke:#d97706,stroke-width:2px
+    style EnricherConfig fill:#fffbeb,stroke:#d97706,stroke-width:2px
+    style MergeConfig fill:#fffbeb,stroke:#d97706,stroke-width:2px
+    style KeyNullabilityRule fill:#fffbeb,stroke:#d97706,stroke-width:2px

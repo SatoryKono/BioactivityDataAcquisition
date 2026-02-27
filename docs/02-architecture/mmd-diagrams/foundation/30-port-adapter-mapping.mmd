@@ -1,87 +1,144 @@
 %% Title: Port-to-Adapter Mapping Table Diagram
 %% Covers: RULES.md §1.2 (Ports & Adapters), ARCH-008 (Single Source)
 %% Rank: 5 (Score 8.63) — Reference diagram: "where is X implemented?"
-%% Updated: 2026-02-17
+%% Updated: 2026-02-27
 
 %% @version 1.0.0
-%% @date    2026-02-24
+%% @date    2026-02-27
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
+%% @uniform-group ports    nodes=P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13,P14,P15,P16,P17,P18,P19,P20,P21,P22,P23,P24
+%% @uniform-group adapters nodes=A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20,A21,A22,A23,A24
+%% @uniform-group noop     nodes=N1,N2,N3,N4,N5,N6
+%% @uniform-width group
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% @uniform width=400 groups=2 width_strategy=group
+%% @uniform-stats ports        width=240 height=168 max_desc_lines=7
+%% @uniform-stats adapters     width=400 height=168 max_desc_lines=7
+%% Tooltip: Nodes with aggregated adapter lists (e.g. A1/A21) are summarized; see provider docs for full breakdown.
+%%{init: {
+%%  'layout': 'elk',
+%%  'theme': 'base',
+%%  'flowchart': {
+%%    'nodeSpacing': 72,
+%%    'rankSpacing': 96,
+%%    'padding': 24,
+%%    'curve': 'linear'
+%%  },
+%%  'elk': {
+%%    'mergeEdges': true,
+%%    'nodePlacementStrategy': 'BRANDES_KOEPF',
+%%    'cycleBreakingStrategy': 'GREEDY',
+%%    'direction': 'RIGHT',
+%%    'spacing.nodeNode': 56,
+%%    'spacing.edgeNode': 36,
+%%    'spacing.edgeEdge': 26,
+%%    'edgeRouting': 'ORTHOGONAL'
+%%  }
+%%}}%%
 flowchart LR
     subgraph Ports["Domain Ports (domain/ports/)"]
         direction TB
-        P1["DataSourcePort"]
-        P2["FilterableDataSourcePort"]
-        P3["StoragePort"]
-        P4["LockPort"]
-        P5["CheckpointPort"]
-        P6["QuarantinePort"]
-        P7["LoggerPort"]
-        P8["MetricsPort"]
-        P9["TracingPort"]
-        P10["DQMonitorPort"]
-        P11["SilverValidatorPort"]
-        P12["GoldValidatorPort"]
-        P13["PiiHasherPort"]
-        P14["MetadataWriterPort"]
-        P15["MetadataCoordinatorPort"]
-        P16["DeltaReaderPort"]
-        P17["MemoryMonitorPort"]
-        P18["ShutdownPort"]
-        P19["AuditPort"]
-        P20["HealthCheckPort"]
-        P21["JsonEncoderPort"]
-        P22["InputFilterPort"]
-        P23["RateLimiterPort"]
-        P24["CircuitBreakerPort"]
+        subgraph CoreDataPorts["Core Data & State"]
+            direction TB
+            P1["[P] DataSourcePort"]
+            P2["[P] FilterableDataSourcePort"]
+            P3["[P] StoragePort"]
+            P4["[P] LockPort"]
+            P5["[P] CheckpointPort"]
+            P6["[P] QuarantinePort"]
+            P16["[P] DeltaReaderPort"]
+        end
+        subgraph ObservabilityPorts["Observability & DQ"]
+            direction TB
+            P7["[P] LoggerPort"]
+            P8["[P] MetricsPort"]
+            P9["[P] TracingPort"]
+            P10["[P] DQMonitorPort"]
+            P17["[P] MemoryMonitorPort"]
+            P19["[P] AuditPort"]
+            P20["[P] HealthCheckPort"]
+        end
+        subgraph PolicyPorts["Validation & Policy"]
+            direction TB
+            P11["[P] SilverValidatorPort"]
+            P12["[P] GoldValidatorPort"]
+            P13["[P] PiiHasherPort"]
+            P14["[P] MetadataWriterPort"]
+            P15["[P] MetadataCoordinatorPort"]
+            P22["[P] InputFilterPort"]
+            P21["[P] JsonEncoderPort"]
+        end
+        subgraph RuntimePorts["Runtime Controls"]
+            direction TB
+            P18["[P] ShutdownPort"]
+            P23["[P] RateLimiterPort"]
+            P24["[P] CircuitBreakerPort"]
+        end
     end
 
     subgraph Adapters["Infrastructure Adapters"]
         direction TB
-        A1["ChemblAdapter\nPubChemAdapter\nUniProtAdapter\nPubMedAdapter\nCrossRefAdapter\nOpenAlexAdapter\nSemanticScholarAdapter"]
-        A2["FilteredDataSource\nCachedBronzeDataSource"]
-        A3["BronzeWriter + SilverWriter + GoldWriter"]
-        A4["MemoryLock"]
-        A5["LocalCheckpoint"]
-        A6["UnifiedQuarantine"]
-        A7["StructlogLogger\nUnifiedLogger"]
-        A8["PrometheusMetrics"]
-        A9["NoOpTracing\nOpenTelemetryTracer"]
-        A10["DataQualityMonitor"]
-        A11["PanderaSilverValidator"]
-        A12["PanderaGoldValidator"]
-        A13["Sha256PiiHasher"]
-        A14["MetadataWriter"]
-        A15["MetadataCoordinator"]
-        A16["DeltaReader"]
-        A17["MemoryMonitor"]
-        A18["ShutdownService"]
-        A19["FileAuditAdapter"]
-        A20["HealthCheckMixin"]
-        A21["StdLibJsonEncoder\nOrjsonEncoder"]
-        A22["CsvFilterReader"]
-        A23["TokenBucket"]
-        A24["CircuitBreaker"]
+        subgraph CoreDataAdapters["Core Data & Storage Adapters"]
+            direction TB
+            A1["[A] ProviderAdapters (7)"]
+            A2["[A] FilteredDataSource<br/>CachedBronzeDataSource"]
+            A3["[A] BronzeWriter + SilverWriter + GoldWriter"]
+            A4["[A] MemoryLock"]
+            A5["[A] LocalCheckpoint"]
+            A6["[A] UnifiedQuarantine"]
+            A16["[A] DeltaReader"]
+            A22["[A] CsvFilterReader"]
+        end
+        subgraph ObservabilityAdapters["Observability & DQ Adapters"]
+            direction TB
+            A7["[A] StructlogLogger<br/>UnifiedLogger"]
+            A8["[A] PrometheusMetrics"]
+            A9["[A] NoOpTracing<br/>OpenTelemetryTracer"]
+            A10["[A] DataQualityMonitor"]
+            A17["[A] MemoryMonitor"]
+            A19["[A] FileAuditAdapter"]
+            A20["[A] HealthCheckMixin"]
+        end
+        subgraph PolicyAdapters["Validation & Metadata Adapters"]
+            direction TB
+            A11["[A] PanderaSilverValidator"]
+            A12["[A] PanderaGoldValidator"]
+            A13["[A] Sha256PiiHasher"]
+            A14["[A] MetadataWriter"]
+            A15["[A] MetadataCoordinator"]
+            A21["[A] StdLibJsonEncoder<br/>OrjsonEncoder"]
+        end
+        subgraph RuntimeAdapters["Runtime Control Adapters"]
+            direction TB
+            A18["[A] ShutdownService"]
+            A23["[A] TokenBucket"]
+            A24["[A] CircuitBreaker"]
+        end
     end
 
     subgraph NoOps["NoOp Implementations (domain/ports/noop.py)"]
         direction TB
-        N1["NoOpTracing"]
-        N2["NoOpMetrics"]
-        N3["NoOpAudit"]
-        N4["NoOpPiiHasher"]
-        N5["NoOpMemoryMonitor"]
-        N6["NoOpMetadataWriter"]
+        subgraph NoOpObservability["NoOp Observability"]
+            direction TB
+            N1["[N] NoOpTracing"]
+            N2["[N] NoOpMetrics"]
+            N3["[N] NoOpAudit"]
+            N5["[N] NoOpMemoryMonitor"]
+        end
+        subgraph NoOpPolicy["NoOp Policy"]
+            direction TB
+            N4["[N] NoOpPiiHasher"]
+            N6["[N] NoOpMetadataWriter"]
+        end
     end
 
     %% Mappings
-    P1 --> A1
+    P1 ==> A1
     P2 --> A2
-    P3 --> A3
+    P3 ==> A3
     P4 --> A4
-    P5 --> A5
+    P5 ==> A5
     P6 --> A6
     P7 --> A7
     P8 --> A8
@@ -110,7 +167,33 @@ flowchart LR
     P17 -.->|"fallback"| N5
     P14 -.->|"fallback"| N6
 
+    %% Layout constraints
+    P1 ~~~ P2 ~~~ P3 ~~~ P4 ~~~ P5 ~~~ P6
+    P7 ~~~ P8 ~~~ P9 ~~~ P10 ~~~ P11 ~~~ P12
+    P13 ~~~ P14 ~~~ P15 ~~~ P16 ~~~ P17 ~~~ P18
+    P19 ~~~ P20 ~~~ P21 ~~~ P22 ~~~ P23 ~~~ P24
+    A1 ~~~ A2 ~~~ A3 ~~~ A4 ~~~ A5 ~~~ A6
+    A7 ~~~ A8 ~~~ A9 ~~~ A10 ~~~ A11 ~~~ A12
+    A13 ~~~ A14 ~~~ A15 ~~~ A16 ~~~ A17 ~~~ A18
+    A19 ~~~ A20 ~~~ A21 ~~~ A22 ~~~ A23 ~~~ A24
+    N1 ~~~ N2 ~~~ N3 ~~~ N4 ~~~ N5 ~~~ N6
+    P1 ~~~ A1
+    P9 ~~~ A9
+    P17 ~~~ A17
+    P24 ~~~ A24
+
+    %% Node semantics
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1.5px;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1.5px;
+    classDef noop fill:#eff6ff,stroke:#64748b,stroke-width:1.5px,stroke-dasharray: 4 2;
+
+    class P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13,P14,P15,P16,P17,P18,P19,P20,P21,P22,P23,P24 port;
+    class A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20,A21,A22,A23,A24 adapter;
+    class N1,N2,N3,N4,N5,N6 noop;
+
+    click A1 "../../04-reference/providers/README.md" "7 provider adapters; full list in provider reference docs"
+
     %% Styling
-    style Ports fill:#e8f5e9,stroke:#2e7d32
-    style Adapters fill:#fff3e0,stroke:#e65100
-    style NoOps fill:#f5f5f5,stroke:#9e9e9e
+    style Ports fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Adapters fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style NoOps fill:#eff6ff,stroke:#64748b,stroke-width:2px

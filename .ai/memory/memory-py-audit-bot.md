@@ -49,7 +49,7 @@ grep -rn "from bioetl.composition" src/bioetl/infrastructure/ --include="*.py"
 # infrastructure -> interfaces (VIOLATION)
 grep -rn "from bioetl.interfaces" src/bioetl/infrastructure/ --include="*.py"
 
-# Architecture tests (43 tests)
+# Architecture tests (1392 collected)
 pytest tests/architecture/ -v --tb=short
 ```
 
@@ -216,7 +216,7 @@ pytest tests/architecture/ -v --tb=short
 ```bash
 make lint                                    # ruff + mypy
 mypy --strict src/bioetl/                   # Type check
-pytest tests/architecture/ -v               # 43 architecture tests
+pytest tests/architecture/ -v               # 1392 architecture tests
 pytest --cov=src/bioetl --cov-fail-under=85 # Coverage
 make security                               # Security scan
 ```

@@ -295,6 +295,21 @@ class TestRunPipelineIntegration:
         runner._executor.records_quarantined = 5
         return runner
 
+    @pytest.fixture(autouse=True)
+    def _mock_settings(self):
+        """Mock get_settings and metrics server to avoid real config loading."""
+        mock_settings = MagicMock()
+        with (
+            patch(
+                "bioetl.composition._pipeline_execution.get_settings",
+                return_value=mock_settings,
+            ),
+            patch(
+                "bioetl.composition._pipeline_execution.maybe_start_metrics_server",
+            ),
+        ):
+            yield
+
     @pytest.mark.asyncio
     async def test_run_pipeline_success(self, mock_runner):
         """Test run_pipeline returns success result."""

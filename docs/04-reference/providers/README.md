@@ -6,9 +6,9 @@ This directory contains documentation for each data source provider integrated w
 
 | Provider | Entities | Status |
 |----------|----------|--------|
-| [ChEMBL](chembl/) | Activity, Assay, Molecule, Target, Publication, plus auxiliary entities | Active |
+| [ChEMBL](chembl/activity.md) | Activity, Assay, Molecule, Target, Publication, plus auxiliary entities | Active |
 | [PubChem](pubchem/compound.md) | Compound | Active |
-| [UniProt](uniprot/) | Protein, ID Mapping | Active |
+| [UniProt](uniprot/protein.md) | Protein, ID Mapping | Active |
 | [PubMed](pubmed/publication.md) | Publication | Active |
 | [CrossRef](crossref/publication.md) | Publication | Active |
 | [OpenAlex](openalex/publication.md) | Publication | Active |
@@ -35,10 +35,10 @@ ChEMBL provides comprehensive bioactivity data with multiple entity types:
 
 ## Provider Configuration
 
-Pipeline configurations for providers are in `configs/pipelines/{provider}/`:
+Pipeline configurations for providers are in `configs/entities/{provider}/`:
 
 ```
-configs/pipelines/
+configs/entities/
 - chembl/           # ChEMBL pipeline configs
 - pubchem/          # PubChem configs
 - uniprot/          # UniProt configs

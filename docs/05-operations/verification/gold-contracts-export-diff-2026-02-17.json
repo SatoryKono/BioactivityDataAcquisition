@@ -52,8 +52,8 @@
         "required_changed": false
       }
     },
-    "chembl_document": {
-      "file": "docs/04-reference/contracts/gold/chembl_document_v1.0.json",
+    "chembl_publication": {
+      "file": "docs/04-reference/contracts/gold/chembl_publication_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -62,8 +62,8 @@
         "required_changed": false
       }
     },
-    "chembl_document_similarity": {
-      "file": "docs/04-reference/contracts/gold/chembl_document_similarity_v1.0.json",
+    "chembl_publication_similarity": {
+      "file": "docs/04-reference/contracts/gold/chembl_publication_similarity_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],
@@ -72,8 +72,8 @@
         "required_changed": false
       }
     },
-    "chembl_document_term": {
-      "file": "docs/04-reference/contracts/gold/chembl_document_term_v1.0.json",
+    "chembl_publication_term": {
+      "file": "docs/04-reference/contracts/gold/chembl_publication_term_v1.0.json",
       "status": "updated",
       "diff": {
         "added_properties": [],

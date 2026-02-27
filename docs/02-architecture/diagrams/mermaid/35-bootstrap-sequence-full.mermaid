@@ -1,3 +1,4 @@
+%% View: Full | Parent: (root)
 %% Parent source: docs/02-architecture/mmd-diagrams/foundation/35-bootstrap-sequence.mmd
 %% Full reference diagram retained after decomposition.
 %% Title: Composition Layer Bootstrap Sequence
@@ -11,67 +12,68 @@
 %% @level   Mixed (System / Component / Class)
 
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% @uniform width=328 height=56 max_title_len=36 max_desc_lines=1
 flowchart TB
     subgraph Step1["Step 1: Logger"]
-        S1A["BootstrapLogger.configure()"]
-        S1B["StructlogLogger\n(JSON, ISO timestamps, run_id binding)"]
+        S1A["BootstrapLogger.configure()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        S1B["StructlogLogger&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(JSON, ISO timestamps, run_id binding)"]
     end
 
     subgraph Step2["Step 2: Configuration"]
-        S2A["ConfigLoader.load(pipeline_name)"]
-        S2B["PipelineYamlConfig\n(_base.yaml merged with entity.yaml)"]
-        S2C["DQConfigLoader.load()"]
-        S2D["FilterConfigLoader.load()"]
+        S2A["ConfigLoader.load(pipeline_name)&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        S2B["PipelineYamlConfig&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(_base.yaml merged with entity.yaml)"]
+        S2C["DQConfigLoader.load()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        S2D["FilterConfigLoader.load()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Step3["Step 3: Observability Bundle"]
-        S3A["ObservabilityBundle"]
-        S3B["PrometheusMetrics\n(MetricsPort)"]
-        S3C["NoOpTracing\n(TracingPort, ADR-022)"]
+        S3A["ObservabilityBundle&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        S3B["PrometheusMetrics&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(MetricsPort)"]
+        S3C["NoOpTracing&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(TracingPort, ADR-022)"]
     end
 
     subgraph Step4["Step 4: Storage"]
-        S4A["StorageAdapter.create_bronze()"]
-        S4B["StorageAdapter.create_silver()"]
-        S4C["StorageAdapter.create_gold()"]
-        S4D["BronzeWriter\n(JSONL + zstd)"]
-        S4E["SilverWriter\n(Delta Lake)"]
-        S4F["GoldWriter\n(Delta / Parquet)"]
+        S4A["StorageAdapter.create_bronze()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        S4B["StorageAdapter.create_silver()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        S4C["StorageAdapter.create_gold()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        S4D["BronzeWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(JSONL + zstd)"]
+        S4E["SilverWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Delta Lake)"]
+        S4F["GoldWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Delta / Parquet)"]
     end
 
     subgraph Step5["Step 5: HTTP Client"]
-        S5A["HttpClientFactory.create(provider)"]
-        S5B["UnifiedHTTPClient"]
-        S5C["TokenBucket\n(rate limiter)"]
-        S5D["CircuitBreaker\n(threshold=5, timeout=300s)"]
+        S5A["HttpClientFactory.create(provider)&nbsp;&nbsp;<br/>&nbsp;"]
+        S5B["UnifiedHTTPClient&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        S5C["TokenBucket&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(rate limiter)"]
+        S5D["CircuitBreaker&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(threshold=5, timeout=300s)"]
     end
 
     subgraph Step6["Step 6: Data Source"]
-        S6A["DataSourceFactory.create(provider)"]
-        S6B["ProviderRegistry.get(provider)"]
-        S6C["Provider Adapter\n(e.g., ChemblAdapter)"]
+        S6A["DataSourceFactory.create(provider)&nbsp;&nbsp;<br/>&nbsp;"]
+        S6B["ProviderRegistry.get(provider)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        S6C["Provider Adapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(e.g., ChemblAdapter)"]
     end
 
     subgraph Step7["Step 7: Coordination"]
-        S7A["MemoryLock\n(LockPort, TTL=90s)"]
-        S7B["LocalCheckpoint\n(CheckpointPort)"]
-        S7C["UnifiedQuarantine\n(QuarantinePort)"]
+        S7A["MemoryLock&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(LockPort, TTL=90s)"]
+        S7B["LocalCheckpoint&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(CheckpointPort)"]
+        S7C["UnifiedQuarantine&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(QuarantinePort)"]
     end
 
     subgraph Step8["Step 8: Services Bundle"]
-        S8A["ServicesBuilder"]
-        S8B[".with_storage(bronze, silver, gold)"]
-        S8C[".with_lock(memory_lock)"]
-        S8D[".with_checkpoint(local_checkpoint)"]
-        S8E[".with_quarantine(unified_quarantine)"]
-        S8F[".with_logger(structlog_logger)"]
-        S8G[".with_metrics(prometheus_metrics)"]
-        S8H[".build() → PipelineServices (frozen)"]
+        S8A["ServicesBuilder&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        S8B[".with_storage(bronze, silver, gold)&nbsp;<br/>&nbsp;"]
+        S8C[".with_lock(memory_lock)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        S8D[".with_checkpoint(local_checkpoint)&nbsp;&nbsp;<br/>&nbsp;"]
+        S8E[".with_quarantine(unified_quarantine)<br/>&nbsp;"]
+        S8F[".with_logger(structlog_logger)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        S8G[".with_metrics(prometheus_metrics)&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        S8H[".build() → PipelineServices (frozen)<br/>&nbsp;"]
     end
 
     subgraph Step9["Step 9: Runner Assembly"]
-        S9A["RunnerFactory.create_runner()"]
-        S9B["PipelineRunner\n(fully assembled, ready to run)"]
+        S9A["RunnerFactory.create_runner()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        S9B["PipelineRunner&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(fully assembled, ready to run)"]
     end
 
     %% Flow

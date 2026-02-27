@@ -245,7 +245,7 @@ Every Gold record includes:
 src/bioetl/
 ├── domain/
 │   ├── composite/
-│   │   ├── --init--.py
+│   │   ├── __init__.py
 │   │   ├── config.py           # CompositeConfig, EnricherConfig
 │   │   ├── result.py           # EnrichmentResult, MergeResult
 │   │   ├── state.py            # CompositePipelineState FSM enum
@@ -256,7 +256,7 @@ src/bioetl/
 │
 ├── application/
 │   ├── composite/
-│   │   ├── --init--.py
+│   │   ├── __init__.py
 │   │   ├── runner.py           # CompositePipelineRunner
 │   │   ├── coordinator.py      # EnrichmentCoordinator (fan-out logic)
 │   │   ├── merger.py           # MergeService (join + conflict resolution)
@@ -267,7 +267,7 @@ src/bioetl/
 │
 ├── composition/
 │   ├── composite/
-│   │   ├── --init--.py
+│   │   ├── __init__.py
 │   │   ├── bootstrap.py        # bootstrap-composite-pipeline()
 │   │   └── factory.py          # CompositePipelineFactory
 │   └── factories/              # Existing factories (unchanged)
@@ -601,7 +601,7 @@ Add `preserve-all-sources: bool = False` to `MergeConfig`. When enabled:
 ### Configuration
 
 ```yaml
-# configs/pipelines/composite/publication.yaml
+# configs/composites/publication.yaml
 merge:
   strategy: left-outer
   conflict-resolution: seed-priority  # Used when preserve-all-sources=false
@@ -672,7 +672,7 @@ FieldGroupRegistry           — central registry with lookup indices
 
 ### YAML Configuration
 
-Field groups are defined in `configs/composite/field-groups/publication.yaml`:
+Field groups are defined in `configs/composites/field_groups/publication.yaml`:
 
 ```yaml
 version: "1.0"
@@ -717,7 +717,7 @@ If no YAML config exists for a composite pipeline, bootstrap continues without t
 |-------|------|-------------|
 | Domain | `domain/composite/field-groups.py` | Models: FieldMapping, FieldGroupDefinition, FieldGroupRegistry |
 | Infrastructure | `infrastructure/config/field-group-loader.py` | YAML → domain object loader |
-| Config | `configs/composite/field-groups/publication.yaml` | 8 groups, 94 fields |
+| Config | `configs/composites/field_groups/publication.yaml` | 8 groups, 94 fields |
 | Composition | `composition/bootstrap/runtime/composite.py` | Bootstrap integration |
 | Application | `application/composite/merger.py` | Gold filtering integration |
 
@@ -733,12 +733,12 @@ class CompositePipelineRunner:
     Delegates to existing PipelineRunner for individual pipelines.
     """
 
-    def --init--(
+    def __init__(
         self,
         config: CompositeConfig,
         runtime: CompositeRuntimeConfig,
-        seed-runner_factory: Callable[[], PipelineRunner],  # skip-gold=True
-        enricher-runner_factory: Callable[[str], PipelineRunner],  # skip-gold=True
+        seed-runner-factory: Callable[[], PipelineRunner],  # skip-gold=True
+        enricher-runner-factory: Callable[[str], PipelineRunner],  # skip-gold=True
         key-extractor: KeyExtractorService,
         coordinator: EnrichmentCoordinator,
         merger: MergeService,
@@ -841,7 +841,7 @@ class EnrichmentCoordinator:
         """Run a single enricher with timeout and error handling."""
         try:
             async with asyncio.timeout(enricher.timeout-seconds):
-                runner = self.-runner_factory(enricher.pipeline)
+                runner = self.-runner-factory(enricher.pipeline)
                 # Pass keys via input filter mechanism
                 await runner.run()
                 return self.-build-success-result(enricher)
@@ -937,7 +937,7 @@ class MergeService:
 ### YAML Configuration
 
 ```yaml
-# configs/pipelines/composite/publication.yaml
+# configs/composites/publication.yaml
 schema-version: "2.0.0"
 
 composite:

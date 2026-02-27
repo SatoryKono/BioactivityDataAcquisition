@@ -111,7 +111,7 @@ Gold-таблица сортируется по `class-level`, `sort-order`, `pr
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/protein-class.yaml` |
+| Конфигурация | `configs/entities/chembl/protein-class.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/chembl/protein-class-transformer.py` |
 | Пайплайн | `src/bioetl/application/pipelines/chembl/protein-class.py` |
 

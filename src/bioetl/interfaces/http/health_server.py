@@ -1,6 +1,6 @@
 """HTTP Health Server for BioETL.
 
-Provides Kubernetes-compatible liveness and readiness probes.
+Provides Standard liveness and readiness probes.
 """
 
 from __future__ import annotations
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 class HealthServer:
     """Async HTTP server for health check endpoints.
 
-    Provides Kubernetes-compatible health probes.
+    Provides Standard health probes.
     """
 
     def __init__(
@@ -186,7 +186,7 @@ class HealthServer:
         )
 
     async def _handle_liveness(self) -> HealthResponse:
-        """Handle /health/live - Kubernetes liveness probe."""
+        """Handle /health/live - Liveness probe."""
         return HealthResponse(
             status="healthy",
             timestamp=datetime.now(tz=UTC).isoformat(),
@@ -199,7 +199,7 @@ class HealthServer:
         )
 
     async def _handle_readiness(self) -> HealthResponse:
-        """Handle /health/ready - Kubernetes readiness probe."""
+        """Handle /health/ready - Readiness probe."""
         if not self._health_monitor:
             return HealthResponse(
                 status="healthy",

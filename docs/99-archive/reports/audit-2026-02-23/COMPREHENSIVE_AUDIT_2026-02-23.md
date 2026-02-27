@@ -32,7 +32,7 @@ validated, deduplicated, analytics-ready Delta Lake tables.
 
 The codebase demonstrates mature engineering practices:
 - Strict 5-layer architecture (domain, application, infrastructure, composition, interfaces)
-- 38 Protocol-based ports with 100% `@runtime_checkable` coverage
+- 38 Protocol-based ports with 100% `@runtime-checkable` coverage
 - Zero import boundary violations
 - 119K+ LOC across 542 source files
 - 497 test files across 6 test categories
@@ -84,22 +84,22 @@ No I/O, no external dependencies.
 |------------|-------|---------|
 | `domain/ports/` | ~25 | Protocol definitions for all system contracts |
 | `domain/types.py` | 1 | NewType aliases, enums (RunType, HealthStatus, ErrorType, etc.) |
-| `domain/constants.py` | 1 | META_FIELDS frozenset, shared constants |
-| `domain/exceptions/` | 5 | 35+ custom exceptions in hierarchy (base, data_quality, infrastructure, internal, network, validation) |
+| `domain/constants.py` | 1 | META-FIELDS frozenset, shared constants |
+| `domain/exceptions/` | 5 | 35+ custom exceptions in hierarchy (base, data-quality, infrastructure, internal, network, validation) |
 | `domain/aggregates/` | 4 | Batch, PipelineRun, QuarantineEntry, Events |
-| `domain/value_objects/` | 20+ | Immutable data carriers (Activity, CompoundIDs, DQMetrics, InChI, etc.) |
+| `domain/value-objects/` | 20+ | Immutable data carriers (Activity, CompoundIDs, DQMetrics, InChI, etc.) |
 | `domain/config/` | 6+ | PipelineConfig, RuntimeConfig, MemoryConfig, DQConfig, ValidationConfig |
 | `domain/context.py` | 1 | PipelineContext, CachedBronzeContext, VacuumConfig |
 | `domain/schemas/` | 50+ | Pandera DataFrameModel schemas for all provider/entity Gold layers |
 | `domain/services/` | 10 | Pure domain services (normalization, DQ metrics, text similarity, unit conversion) |
-| `domain/composite/` | 8 | Composite pipeline models (aggregation, config, cross_validation, lineage, state, strategy) |
+| `domain/composite/` | 8 | Composite pipeline models (aggregation, config, cross-validation, lineage, state, strategy) |
 | `domain/mapping/` | 4 | Field mapping definitions |
 | `domain/registry/` | 2 | Field aliases, publication registry |
 | `domain/filtering/` | 4+ | Filter specifications (InputFilter, RangeFilter, ListFilter) |
 | `domain/medallion.py` | 1 | Layer, WriteMode, SilverWriteMode, GoldWriteMode enums |
 | `domain/resilience.py` | 1 | RetryConfig with delay calculation |
 | `domain/locking.py` | 1 | FencingToken, LockContext, LockContextHolder |
-| `domain/error_classifier.py` | 1 | ErrorClassifier for exception categorization |
+| `domain/error-classifier.py` | 1 | ErrorClassifier for exception categorization |
 | `domain/transformations.py` | 1 | Pure hashing and DQ transformations |
 | `domain/validation.py` | 1 | Pure validation functions |
 | `domain/version.py` | 1 | Package version utility |
@@ -107,8 +107,8 @@ No I/O, no external dependencies.
 **Key types and enums**:
 - `RunType`: INCREMENTAL, BACKFILL, REBUILD
 - `HealthStatus`: HEALTHY, DEGRADED, UNHEALTHY
-- `ErrorType`: 12 variants (AUTH_FAILURE, RATE_LIMIT, TIMEOUT, etc.)
-- `CircuitBreakerState`: CLOSED, OPEN, HALF_OPEN
+- `ErrorType`: 12 variants (AUTH-FAILURE, RATE-LIMIT, TIMEOUT, etc.)
+- `CircuitBreakerState`: CLOSED, OPEN, HALF-OPEN
 - `DriftLevel`: INFO, CRITICAL
 - `PublicationType`: 20 variants for publication classification
 - `ExecutionContext`: ISOLATED, ENRICHER, DEPENDENCY
@@ -138,7 +138,7 @@ Depends only on domain ports, never on infrastructure.
 | `application/pipelines/common/` | 2 | Base publication transformer, shared extractors |
 | `application/pipelines/generic.py` | 1 | Generic pipeline for simple entities |
 | `application/composite/` | 14 | Composite pipeline runner, merger, aggregator, cross-validator, deduplication |
-| `application/services/` | 15 | Domain services (DQ, health, lock, medallion lifecycle, quarantine, vacuum, export, config, metrics, pipeline_runner, shutdown) |
+| `application/services/` | 15 | Domain services (DQ, health, lock, medallion lifecycle, quarantine, vacuum, export, config, metrics, pipeline-runner, shutdown) |
 | `application/services/dq/` | 6 | DQ analyzers (bronze, silver, gold), check modules (basic, business, integrity, statistical) |
 | `application/observability/` | 2 | Observer, span helpers |
 
@@ -237,7 +237,7 @@ This is the "wiring" layer that connects ports to adapters.
 | `composition/factories/` | 11 | DataSourceFactory, DQFactory, HttpClientFactory, PipelineFactory, RunnerFactory, StorageFactory, TransformerFactory, ServicesFactory |
 | `composition/bootstrap/` | 14 | Assembly (checkpoint, storage), CLI bootstrap (config, health, lock, metrics, storage), Runtime assembly (pipeline, runner, composite, observability) |
 | `composition/providers/` | 5 | ProviderRegistry, factory loader, registration decorators |
-| `composition/runtime_builders/` | 2 | RunnerBuilder |
+| `composition/runtime-builders/` | 2 | RunnerBuilder |
 | `composition/services/` | 2 | MetadataCoordinator, Versioning |
 | `composition/entrypoints.py` | 1 | Main entry points for pipeline execution |
 | `composition/builders.py` | 1 | High-level builder functions |
@@ -269,7 +269,7 @@ This is the "wiring" layer that connects ports to adapters.
 
 | Sub-module | Files | Purpose |
 |------------|-------|---------|
-| `interfaces/cli/commands/` | 15 | CLI commands: run, run_all, run_composite, health, checkpoint, cleanup, config, export, lock, maintenance, metrics_server, quarantine, vacuum, archive |
+| `interfaces/cli/commands/` | 15 | CLI commands: run, run-all, run-composite, health, checkpoint, cleanup, config, export, lock, maintenance, metrics-server, quarantine, vacuum, archive |
 | `interfaces/cli/` | 4 | Main CLI entry point, exit codes, formatters |
 | `interfaces/http/` | 2 | Health server (HTTP endpoint for liveness/readiness probes) |
 | `interfaces/orchestration/` | 1 | Pipeline orchestration interface |
@@ -301,17 +301,17 @@ This is the "wiring" layer that connects ports to adapters.
 |----------|--------|-----------------|-------------|-------------|----------|--------------|
 | **ChEMBL** | activity | `chembl/activity.yaml` | `ActivityTransformer` | `ChemblActivityGoldSchema` | `quality/entities/chembl/activity.yaml` | `filters/entities/chembl/activity.yaml` |
 | **ChEMBL** | assay | `chembl/assay.yaml` | `AssayTransformer` | `ChemblAssayGoldSchema` | `quality/entities/chembl/assay.yaml` | `filters/entities/chembl/assay.yaml` |
-| **ChEMBL** | assay_parameters | `chembl/assay_parameters.yaml` | `AssayParametersTransformer` | `ChemblAssayParametersGoldSchema` | `quality/entities/chembl/assay_parameters.yaml` | `filters/entities/chembl/assay_parameters.yaml` |
-| **ChEMBL** | cell_line | `chembl/cell_line.yaml` | `CellLineTransformer` | `ChemblCellLineGoldSchema` | `quality/entities/chembl/cell_line.yaml` | `filters/entities/chembl/cell_line.yaml` |
-| **ChEMBL** | compound_record | `chembl/compound_record.yaml` | `CompoundRecordTransformer` | `ChemblCompoundRecordGoldSchema` | `quality/entities/chembl/compound_record.yaml` | `filters/entities/chembl/compound_record.yaml` |
+| **ChEMBL** | assay-parameters | `chembl/assay-parameters.yaml` | `AssayParametersTransformer` | `ChemblAssayParametersGoldSchema` | `quality/entities/chembl/assay-parameters.yaml` | `filters/entities/chembl/assay-parameters.yaml` |
+| **ChEMBL** | cell-line | `chembl/cell-line.yaml` | `CellLineTransformer` | `ChemblCellLineGoldSchema` | `quality/entities/chembl/cell-line.yaml` | `filters/entities/chembl/cell-line.yaml` |
+| **ChEMBL** | compound-record | `chembl/compound-record.yaml` | `CompoundRecordTransformer` | `ChemblCompoundRecordGoldSchema` | `quality/entities/chembl/compound-record.yaml` | `filters/entities/chembl/compound-record.yaml` |
 | **ChEMBL** | molecule | `chembl/molecule.yaml` | `MoleculeTransformer` | `ChemblMoleculeGoldSchema` | `quality/entities/chembl/molecule.yaml` | `filters/entities/chembl/molecule.yaml` |
-| **ChEMBL** | protein_class | `chembl/protein_class.yaml` | `ProteinClassTransformer` | `ChemblProteinClassGoldSchema` | `quality/entities/chembl/protein_class.yaml` | `filters/entities/chembl/protein_class.yaml` |
+| **ChEMBL** | protein-class | `chembl/protein-class.yaml` | `ProteinClassTransformer` | `ChemblProteinClassGoldSchema` | `quality/entities/chembl/protein-class.yaml` | `filters/entities/chembl/protein-class.yaml` |
 | **ChEMBL** | publication | `chembl/publication.yaml` | `PublicationTransformer` | `ChemblPublicationGoldSchema` | `quality/entities/chembl/publication.yaml` | `filters/entities/chembl/publication.yaml` |
-| **ChEMBL** | publication_similarity | `chembl/publication_similarity.yaml` | `PublicationSimilarityTransformer` | `ChemblPublicationSimilarityGoldSchema` | `quality/entities/chembl/publication_similarity.yaml` | `filters/entities/chembl/publication_similarity.yaml` |
-| **ChEMBL** | publication_term | `chembl/publication_term.yaml` | `PublicationTermTransformer` | `ChemblPublicationTermGoldSchema` | `quality/entities/chembl/publication_term.yaml` | `filters/entities/chembl/publication_term.yaml` |
-| **ChEMBL** | subcellular_fraction | `chembl/subcellular_fraction.yaml` | `SubcellularFractionTransformer` | `ChemblSubcellularFractionGoldSchema` | `quality/entities/chembl/subcellular_fraction.yaml` | `filters/entities/chembl/subcellular_fraction.yaml` |
+| **ChEMBL** | publication-similarity | `chembl/publication-similarity.yaml` | `PublicationSimilarityTransformer` | `ChemblPublicationSimilarityGoldSchema` | `quality/entities/chembl/publication-similarity.yaml` | `filters/entities/chembl/publication-similarity.yaml` |
+| **ChEMBL** | publication-term | `chembl/publication-term.yaml` | `PublicationTermTransformer` | `ChemblPublicationTermGoldSchema` | `quality/entities/chembl/publication-term.yaml` | `filters/entities/chembl/publication-term.yaml` |
+| **ChEMBL** | subcellular-fraction | `chembl/subcellular-fraction.yaml` | `SubcellularFractionTransformer` | `ChemblSubcellularFractionGoldSchema` | `quality/entities/chembl/subcellular-fraction.yaml` | `filters/entities/chembl/subcellular-fraction.yaml` |
 | **ChEMBL** | target | `chembl/target.yaml` | `TargetTransformer` | `ChemblTargetGoldSchema` | `quality/entities/chembl/target.yaml` | `filters/entities/chembl/target.yaml` |
-| **ChEMBL** | target_component | `chembl/target_component.yaml` | `TargetComponentTransformer` | `ChemblTargetComponentGoldSchema` | `quality/entities/chembl/target_component.yaml` | `filters/entities/chembl/target_component.yaml` |
+| **ChEMBL** | target-component | `chembl/target-component.yaml` | `TargetComponentTransformer` | `ChemblTargetComponentGoldSchema` | `quality/entities/chembl/target-component.yaml` | `filters/entities/chembl/target-component.yaml` |
 | **ChEMBL** | tissue | `chembl/tissue.yaml` | `TissueTransformer` | `ChemblTissueGoldSchema` | `quality/entities/chembl/tissue.yaml` | `filters/entities/chembl/tissue.yaml` |
 | **PubChem** | compound | `pubchem/compound.yaml` | `PubChemCompoundTransformer` | `PubchemCompoundGoldSchema` | `quality/entities/pubchem/compound.yaml` | `filters/entities/pubchem/compound.yaml` |
 | **UniProt** | protein | `uniprot/protein.yaml` | `UniProtProteinTransformer` | `UniprotProteinGoldSchema` | `quality/entities/uniprot/protein.yaml` | `filters/entities/uniprot/protein.yaml` |
@@ -335,7 +335,7 @@ This is the "wiring" layer that connects ports to adapters.
                                      ↓
                               Transformer (dict → dict)
                                      ↓
-                              Silver Writer (Delta Lake, dedup via content_hash)
+                              Silver Writer (Delta Lake, dedup via content-hash)
                                      ↓
                               Gold Validator (Pandera schema)
                                      ↓
@@ -422,7 +422,7 @@ All providers share:
 | Agent Config (Claude) | `docs/00-project/agents/CLAUDE.md` | Current |
 | Agent Config (Gemini) | `docs/00-project/agents/GEMINI.md` | Current |
 | Architecture Index | `docs/00-project/architecture-index.md` | Current |
-| Previous Audits | `docs/00-project/ARCHITECTURE_AUDIT_2026-02-*.md` | 3 audit reports |
+| Previous Audits | `docs/00-project/ARCHITECTURE-AUDIT-2026-02-*.md` | 3 audit reports |
 
 ### 6.3 ADR Coverage
 
@@ -434,7 +434,7 @@ config externalization, and more.
 
 1. No dedicated REST API reference doc per provider endpoint (addressed partially in source configs)
 2. Composite pipeline documentation could benefit from a visual architecture diagram
-3. Some newer entities (publication_similarity, publication_term) have lighter documentation
+3. Some newer entities (publication-similarity, publication-term) have lighter documentation
 
 ---
 
@@ -456,26 +456,26 @@ config externalization, and more.
 
 | Test | What it Validates |
 |------|-------------------|
-| `test_layer_dependencies` | Import matrix compliance (ARCH-001) |
-| `test_domain_purity` | No I/O in domain (ARCH-002) |
-| `test_port_contracts` | All ports are Protocols with `*Port` suffix (ARCH-003) |
-| `test_adapter_contracts` | All adapters implement health_check (ARCH-004) |
-| `test_di_compliance` | No hard-coded constructors (DI-001) |
-| `test_di_constructors` | Constructor injection pattern (DI-002) |
-| `test_di_discipline` | No service locator (DI-003) |
-| `test_naming_conventions` | Class suffix enforcement (NAME-001) |
-| `test_antipatterns` | Sentinel values, print statements (AP-004, AP-006) |
-| `test_forbidden_imports` | No structlog in application/interfaces (AP-002) |
-| `test_medallion_invariants` | Medallion clear policy (ARCH-007) |
-| `test_config_ci_invariants` | Config file completeness |
-| `test_gold_schema_contracts` | Gold schema field validation |
-| `test_composite_schema_contract_coverage` | Composite schema completeness |
+| `test-layer-dependencies` | Import matrix compliance (ARCH-001) |
+| `test-domain-purity` | No I/O in domain (ARCH-002) |
+| `test-port-contracts` | All ports are Protocols with `*Port` suffix (ARCH-003) |
+| `test-adapter-contracts` | All adapters implement health-check (ARCH-004) |
+| `test-di-compliance` | No hard-coded constructors (DI-001) |
+| `test-di-constructors` | Constructor injection pattern (DI-002) |
+| `test-di-discipline` | No service locator (DI-003) |
+| `test-naming-conventions` | Class suffix enforcement (NAME-001) |
+| `test-antipatterns` | Sentinel values, print statements (AP-004, AP-006) |
+| `test-forbidden-imports` | No structlog in application/interfaces (AP-002) |
+| `test-medallion-invariants` | Medallion clear policy (ARCH-007) |
+| `test-config-ci-invariants` | Config file completeness |
+| `test-gold-schema-contracts` | Gold schema field validation |
+| `test-composite-schema-contract-coverage` | Composite schema completeness |
 
 ### 7.3 E2E Test Coverage per Provider
 
 | Provider | E2E Tests |
 |----------|-----------|
-| ChEMBL | activity, assay, molecule, publication, publication_term, target |
+| ChEMBL | activity, assay, molecule, publication, publication-term, target |
 | PubChem | compound |
 | UniProt | protein |
 | PubMed | publication |
@@ -485,7 +485,7 @@ config externalization, and more.
 
 - **VCR Cassettes**: 147 files in `tests/fixtures/vcr/` — recorded HTTP responses for deterministic testing
 - **Conftest fixtures**: Shared across layers with proper fixture isolation
-- **Hypothesis**: Property-based testing for port contracts (`test_port_contracts_hypothesis`)
+- **Hypothesis**: Property-based testing for port contracts (`test-port-contracts-hypothesis`)
 
 ---
 
@@ -528,7 +528,7 @@ Objects:
 - `MetadataWriter` — Table metadata persistence
 - `MetadataBuilder` — Metadata record construction
 - `RetentionManager` — Data retention and cleanup
-- `AtomicWriter` — Atomic write operations (`_atomic.py`)
+- `AtomicWriter` — Atomic write operations (`-atomic.py`)
 
 ### Component 3: Data Transformation (ETL)
 
@@ -660,7 +660,7 @@ Objects:
 **Responsibility**: Fault tolerance for external API communication.
 
 Objects:
-- `CircuitBreaker` — Circuit breaker state machine (CLOSED → OPEN → HALF_OPEN)
+- `CircuitBreaker` — Circuit breaker state machine (CLOSED → OPEN → HALF-OPEN)
 - `TokenBucketRateLimiter` — Token bucket rate limiting
 - `RetryDecorator` — Exponential backoff retry with jitter
 - `CircuitBreakerDecorator` — Decorator for circuit breaker integration

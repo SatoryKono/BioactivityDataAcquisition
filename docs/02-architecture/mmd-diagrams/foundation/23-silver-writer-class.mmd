@@ -8,7 +8,8 @@
 %% @type    classDiagram
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%% @uniform class width=168 height=240 max_title_len=16 max_desc_lines=24
 classDiagram
     direction TB
 
@@ -25,6 +26,18 @@ classDiagram
         +vacuum(table, retention_days) None
         +archive(source, dest) None
         +health_check() HealthStatus
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class SilverWriter {
@@ -37,14 +50,12 @@ classDiagram
         -_require_lock: bool = True
         -_writer_version: str = "2"
         -_reader_version: str = "1"
-
         +merge(records: list~dict~, table: str, primary_key: list~str~) WriteResult
         +append(records: list~dict~, table: str) WriteResult
         +overwrite(records: list~dict~, table: str) WriteResult
         +clear_data(table: str) int
         +vacuum(table: str, retention_days: int = 7) None
         +get_table_version(table: str) int
-
         -_validate_lock_before_write() bool
         -_validate_lock_after_write() bool
         -_to_arrow_table(records: list~dict~) pa.Table
@@ -64,6 +75,23 @@ classDiagram
         +files_added: list~str~
         +duration_ms: float
         +error_message: str | None
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class MergeResult {
@@ -74,6 +102,23 @@ classDiagram
         +rows_updated: int
         +rows_deleted: int
         +source_rows_total: int
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class SilverWriteMode {
@@ -81,6 +126,26 @@ classDiagram
         MERGE = "merge"
         APPEND = "append"
         DELETE = "delete"
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class WriteModePolicy {
@@ -88,16 +153,53 @@ classDiagram
         +default_mode: SilverWriteMode = MERGE
         +backfill_mode: SilverWriteMode = MERGE
         +rebuild_mode: SilverWriteMode = DELETE
-
         +get_mode_for_run_type(run_type: RunType) SilverWriteMode
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class CsvExporter {
         -_base_path: str
         -_logger: LoggerPort
-
         +export(df: pl.DataFrame, path: str) str
         +export_from_records(records: list~dict~, path: str) str
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class LockNotHeldError {
@@ -105,6 +207,26 @@ classDiagram
         +key: str
         +owner_id: str
         +message: str
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     %% Relationships

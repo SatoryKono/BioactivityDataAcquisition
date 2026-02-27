@@ -1,15 +1,15 @@
 """Common transformation utilities for all pipelines.
 
-Реализует общие паттерны трансформации для уменьшения дублирования
-в ChEMBL и других трансформерах.
+Implements shared transformation patterns to reduce duplication
+across ChEMBL and other transformers.
 
-Функции:
-- flatten_nested_dict: Разворачивание вложенных словарей с префиксом
-- extract_list_field: Извлечение поля из списка словарей
-- aggregate_nested_lists: Агрегация вложенных списков
-- normalize_string: Нормализация строковых полей (delegated to domain)
-- parse_date_field: Парсинг даты с обработкой ошибок (delegated to domain)
-- validate_smiles: Валидация SMILES строки (delegated to domain)
+Functions:
+- flatten_nested_dict: Flatten nested dicts with a key prefix
+- extract_list_field: Extract a field from a list of dicts
+- aggregate_nested_lists: Aggregate nested lists
+- normalize_string: Normalize string fields (delegated to domain)
+- parse_date_field: Parse date with error handling (delegated to domain)
+- validate_smiles: Validate a SMILES string (delegated to domain)
 
 Note: Business logic functions are delegated to domain layer per REFACTOR-004.
 """
@@ -36,22 +36,22 @@ def flatten_nested_dict(
     ],  # Any: heterogeneous record values
     renames: dict[str, str] | None = None,
 ) -> dict[str, Any]:
-    """Разворачивает вложенный словарь в плоскую структуру с префиксом.
+    """Flatten a nested dict into a flat structure with a key prefix.
 
-    Используется для извлечения полей из вложенных структур API
-    (molecule_properties, molecule_hierarchy, ligand_efficiency и т.д.).
+    Used to extract fields from nested API structures
+    (molecule_properties, molecule_hierarchy, ligand_efficiency, etc.).
 
     Args:
-        data: Вложенный словарь для разворачивания. Если None, возвращает
-              словарь с None значениями для всех ключей.
-        prefix: Префикс для результирующих ключей (e.g., "property_", "hierarchy_").
-        field_mapping: Словарь {исходный_ключ: конвертер}.
-                       Конвертер может быть safe_float, safe_int или None (без конвертация).
-        renames: Опциональный словарь {старый_ключ: новый_ключ} для переименования
-                 полей после разворачивания. Ключи должны включать префикс.
+        data: Nested dict to flatten. If None, returns a dict with None
+              values for all keys.
+        prefix: Prefix for resulting keys (e.g., "property_", "hierarchy_").
+        field_mapping: Dict of {source_key: converter}.
+                       Converter can be safe_float, safe_int, or None (no conversion).
+        renames: Optional dict of {old_key: new_key} for renaming fields
+                 after flattening. Keys must include the prefix.
 
     Returns:
-        Плоский словарь с префиксами и сконвертированными значениями.
+        Flat dict with prefixed and converted values.
 
     Example:
         >>> data = {"alogp": "3.5", "hba": 2}
@@ -70,22 +70,28 @@ def flatten_nested_dict(
         {'hierarchy_child_chembl_id': 'CHEMBL25'}
 
     """
-    if not data or not isinstance(data, dict):
-        result = {f"{prefix}{key}": None for key in field_mapping}
-    else:
-        result = {}
-        for source_key, converter in field_mapping.items():
-            value = data.get(source_key)
-            if converter is not None and value is not None:
-                result[f"{prefix}{source_key}"] = converter(value)
-            else:
-                result[f"{prefix}{source_key}"] = value
+    # Optimized for speed: Single-pass iteration merging prefixing and renaming.
+    # Uses explicit type annotation for mypy strict mode.
+    result: dict[str, Any] = {}
 
-    # Apply renames if provided
-    if renames:
-        for old_key, new_key in renames.items():
-            if old_key in result:
-                result[new_key] = result.pop(old_key)
+    if not data or not isinstance(data, dict):
+        for key in field_mapping:
+            full_key = f"{prefix}{key}"
+            final_key = renames.get(full_key, full_key) if renames else full_key
+            result[final_key] = None
+        return result
+
+    for source_key, converter in field_mapping.items():
+        # Construct the full key once
+        full_key = f"{prefix}{source_key}"
+        # Determine the final key (handle rename immediately)
+        final_key = renames.get(full_key, full_key) if renames else full_key
+
+        value = data.get(source_key)
+        if converter is not None and value is not None:
+            result[final_key] = converter(value)
+        else:
+            result[final_key] = value
 
     return result
 
@@ -95,18 +101,18 @@ def extract_list_field(
     field: str,
     converter: Callable[[Any], T] | None = None,
 ) -> list[T] | None:
-    """Извлекает значения поля из списка словарей.
+    """Extract field values from a list of dicts.
 
-    Используется для агрегации полей из компонентов, классификаций и т.д.
+    Used to aggregate fields from components, classifications, etc.
 
     Args:
-        items: Список словарей для обработки.
-        field: Имя поля для извлечения.
-        converter: Опциональный конвертер (safe_int, safe_float и т.д.).
-                   Если None, значения возвращаются как есть.
+        items: List of dicts to process.
+        field: Name of the field to extract.
+        converter: Optional converter (safe_int, safe_float, etc.).
+                   If None, values are returned as-is.
 
     Returns:
-        Список значений или None, если результат пустой.
+        List of values, or None if the result is empty.
 
     Example:
         >>> items = [{"id": "1"}, {"id": "2"}, {"id": None}]
@@ -154,18 +160,18 @@ def aggregate_nested_lists(
     field: str,
     deduplicate: bool = True,
 ) -> list[Any] | None:
-    """Агрегирует вложенные списки из списка словарей.
+    """Aggregate nested lists from a list of dicts.
 
-    Используется для сбора synonyms, xrefs и других вложенных списков
-    из множества компонентов в один плоский список.
+    Used to collect synonyms, xrefs, and other nested lists
+    from multiple components into a single flat list.
 
     Args:
-        items: Список словарей, каждый из которых может содержать вложенный список.
-        field: Имя поля со вложенным списком.
-        deduplicate: Если True, удаляет дубликаты из результирующего списка (по умолчанию True).
+        items: List of dicts, each of which may contain a nested list.
+        field: Name of the field containing the nested list.
+        deduplicate: If True, removes duplicates from the resulting list (default True).
 
     Returns:
-        Объединённый список или None, если результат пустой.
+        Merged list, or None if the result is empty.
 
     Example:
         >>> items = [
@@ -198,17 +204,17 @@ def aggregate_nested_lists(
 
 
 def normalize_string(value: str | None) -> str | None:
-    """Нормализует строковое поле.
+    """Normalize a string field.
 
-    Удаляет пробельные символы по краям и возвращает None для пустых строк.
+    Strips leading/trailing whitespace and returns None for empty strings.
 
     Note: Delegated to domain.normalization.normalize_string per REFACTOR-004.
 
     Args:
-        value: Строка для нормализации.
+        value: String to normalize.
 
     Returns:
-        Нормализованная строка или None.
+        Normalized string, or None.
 
     Example:
         >>> normalize_string("  hello world  ")
@@ -226,18 +232,18 @@ def parse_date_field(
     value: str | None,
     fmt: str = "%Y-%m-%d",
 ) -> date | None:
-    """Парсит строку даты в объект date.
+    """Parse a date string into a date object.
 
-    Безопасный парсинг с обработкой ошибок и невалидных форматов.
+    Safe parsing with error handling for invalid formats.
 
     Note: Delegated to domain.normalization.parse_date_field per REFACTOR-004.
 
     Args:
-        value: Строка с датой или None.
-        fmt: Формат даты (по умолчанию ISO: YYYY-MM-DD).
+        value: Date string, or None.
+        fmt: Date format (default ISO: YYYY-MM-DD).
 
     Returns:
-        Объект date или None при ошибке парсинга.
+        A date object, or None on parsing failure.
 
     Example:
         >>> parse_date_field("2024-01-15")
@@ -252,18 +258,18 @@ def parse_date_field(
 
 
 def validate_smiles(smiles: str | None) -> bool:
-    """Проверяет валидность SMILES строки.
+    """Validate a SMILES string.
 
-    Выполняет базовую синтаксическую проверку без полного парсинга молекулы.
-    Для полной валидации используйте RDKit или другую химическую библиотеку.
+    Performs basic syntax validation without full molecule parsing.
+    For full validation, use RDKit or another chemistry library.
 
     Note: Delegated to domain.validation.validate_smiles per REFACTOR-004.
 
     Args:
-        smiles: SMILES строка для проверки.
+        smiles: SMILES string to validate.
 
     Returns:
-        True если строка соответствует базовому синтаксису SMILES.
+        True if the string matches basic SMILES syntax.
 
     Example:
         >>> validate_smiles("CCO")  # Ethanol
@@ -286,18 +292,18 @@ def safe_extract(
     key: str,
     default: T | None = None,
 ) -> T | Any | None:  # Any: dict value type unknown at extraction time
-    """Безопасно извлекает значение из словаря с логированием.
+    """Safely extract a value from a dict with logging support.
 
-    Обёртка над dict.get() для унифицированного извлечения полей.
-    Для использования с логированием используйте в связке с контекстом.
+    Wrapper around dict.get() for unified field extraction.
+    For logging, use in combination with a pipeline context.
 
     Args:
-        record: Словарь для извлечения.
-        key: Ключ для поиска.
-        default: Значение по умолчанию (None).
+        record: Dict to extract from.
+        key: Key to look up.
+        default: Default value (None).
 
     Returns:
-        Значение по ключу или default.
+        Value for the key, or default.
 
     Example:
         >>> record = {"name": "test", "value": 42}

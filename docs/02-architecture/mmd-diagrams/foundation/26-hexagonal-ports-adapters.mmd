@@ -8,51 +8,53 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%% @uniform width=240 height=112 max_title_len=24 max_desc_lines=4
 flowchart TB
+%% keep-orphan: CBP, FDSP, HCP, INP, MCP2, RLMP, SHP, SRLP
     subgraph Hexagon["Domain Layer — Ports (Protocol)"]
         direction TB
 
         subgraph DataPorts["Data Ports"]
-            DSP["DataSourcePort\n• fetch() → AsyncIterator\n• health_check() → HealthStatus"]
-            FDSP["FilterableDataSourcePort\n• fetch_filtered()"]
-            SP["StoragePort\n• write_bronze()\n• write_silver()\n• write_gold()"]
-            DRP["DeltaReaderPort\n• read_table()\n• get_schema()"]
+            DSP["DataSourcePort<br/>• fetch() → AsyncIterator<br/>• health_check() → HealthStatus<br/>"]
+            FDSP["FilterableDataSourcePort<br/>• fetch_filtered()<br/><br/>"]
+            SP["StoragePort<br/>• write_bronze()<br/>• write_silver()<br/>• write_gold()"]
+            DRP["DeltaReaderPort<br/>• read_table()<br/>• get_schema()<br/>"]
         end
 
         subgraph CoordPorts["Coordination Ports"]
-            LP["LockPort\n• acquire()\n• release()\n• renew()"]
-            CPP["CheckpointPort\n• save()\n• load()\n• delete()"]
-            QP["QuarantinePort\n• write()\n• read_sample()\n• purge()"]
+            LP["LockPort<br/>• acquire()<br/>• release()<br/>• renew()"]
+            CPP["CheckpointPort<br/>• save()<br/>• load()<br/>• delete()"]
+            QP["QuarantinePort<br/>• write()<br/>• read_sample()<br/>• purge()"]
         end
 
         subgraph ObsPorts["Observability Ports"]
-            LGP["LoggerPort\n• info() / warning()\n• error() / debug()\n• bind()"]
-            MP["MetricsPort\n• increment_counter()\n• observe_histogram()\n• set_gauge()"]
-            TP["TracingPort\n• get_tracer()\n• start_span()"]
-            DQM["DQMonitorPort\n• record_metrics()"]
+            LGP["LoggerPort<br/>• info() / warning()<br/>• error() / debug()<br/>• bind()"]
+            MP["MetricsPort<br/>• increment_counter()<br/>• observe_histogram()<br/>• set_gauge()"]
+            TP["TracingPort<br/>• get_tracer()<br/>• start_span()<br/>"]
+            DQM["DQMonitorPort<br/>• record_metrics()<br/><br/>"]
         end
 
         subgraph QualityPorts["Quality & Security Ports"]
-            SVP["SilverValidatorPort\n• validate()"]
-            GVP["GoldValidatorPort\n• validate()"]
-            PIIP["PiiHasherPort\n• hash_field()"]
-            INP["InputFilterPort\n• filter()"]
+            SVP["SilverValidatorPort<br/>• validate()<br/><br/>"]
+            GVP["GoldValidatorPort<br/>• validate()<br/><br/>"]
+            PIIP["PiiHasherPort<br/>• hash_field()<br/><br/>"]
+            INP["InputFilterPort<br/>• filter()<br/><br/>"]
         end
 
         subgraph MetaPorts["Metadata & Config Ports"]
-            MWP["MetadataWriterPort\n• write()"]
-            MCP2["MetadataCoordinatorPort\n• coordinate()"]
-            SRLP["JsonEncoderPort\n• encode() / decode()"]
-            MMP["MemoryMonitorPort\n• get_stats()"]
+            MWP["MetadataWriterPort<br/>• write()<br/><br/>"]
+            MCP2["MetadataCoordinatorPort<br/>• coordinate()<br/><br/>"]
+            SRLP["JsonEncoderPort<br/>• encode() / decode()<br/><br/>"]
+            MMP["MemoryMonitorPort<br/>• get_stats()<br/><br/>"]
         end
 
         subgraph LifecyclePorts["Lifecycle Ports"]
-            SHP["ShutdownPort\n• is_shutting_down()"]
-            AP["AuditPort\n• log_operation()"]
-            HCP["HealthCheckPort\n• check_health()"]
-            RLMP["RateLimiterPort\n• acquire()"]
-            CBP["CircuitBreakerPort\n• call()"]
+            SHP["ShutdownPort<br/>• is_shutting_down()<br/><br/>"]
+            AP["AuditPort<br/>• log_operation()<br/><br/>"]
+            HCP["HealthCheckPort<br/>• check_health()<br/><br/>"]
+            RLMP["RateLimiterPort<br/>• acquire()<br/><br/>"]
+            CBP["CircuitBreakerPort<br/>• call()<br/><br/>"]
         end
     end
 
@@ -60,42 +62,34 @@ flowchart TB
         direction TB
 
         subgraph DataAdapters["Data Source Adapters"]
-            CA["ChemblAdapter"]
-            PCA["PubChemAdapter"]
-            UA["UniProtAdapter"]
-            PMA["PubMedAdapter"]
-            CRA["CrossRefAdapter"]
-            OAA["OpenAlexAdapter"]
-            SSA["SemanticScholarAdapter"]
+            CA["ChemblAdapter<br/><br/><br/>"]
         end
 
         subgraph StorageAdapters["Storage Adapters"]
-            BW["BronzeWriter"]
-            SW["SilverWriter"]
-            GW["GoldWriter"]
-            DR["DeltaReader"]
+            BW["BronzeWriter<br/><br/><br/>"]
+            DR["DeltaReader<br/><br/><br/>"]
         end
 
         subgraph CoordAdapters["Coordination Adapters"]
-            ML["MemoryLock"]
-            LC["LocalCheckpoint"]
-            UQ["UnifiedQuarantine"]
+            ML["MemoryLock<br/><br/><br/>"]
+            LC["LocalCheckpoint<br/><br/><br/>"]
+            UQ["UnifiedQuarantine<br/><br/><br/>"]
         end
 
         subgraph ObsAdapters["Observability Adapters"]
-            SL["StructlogLogger"]
-            PM["PrometheusMetrics"]
-            NOT["NoOpTracing"]
-            DQMon["DataQualityMonitor"]
+            SL["StructlogLogger<br/><br/><br/>"]
+            PM["PrometheusMetrics<br/><br/><br/>"]
+            NOT["NoOpTracing<br/><br/><br/>"]
+            DQMon["DataQualityMonitor<br/><br/><br/>"]
         end
 
         subgraph QualAdapters["Quality & Other Adapters"]
-            PSV["PanderaSilverValidator"]
-            PGV["PanderaGoldValidator"]
-            PIH["Sha256PiiHasher"]
-            MW["MetadataWriter"]
-            FAA["FileAuditAdapter"]
-            MM["MemoryMonitor"]
+            PSV["PanderaSilverValidator<br/><br/><br/>"]
+            PGV["PanderaGoldValidator<br/><br/><br/>"]
+            PIH["Sha256PiiHasher<br/><br/><br/>"]
+            MW["MetadataWriter<br/><br/><br/>"]
+            FAA["FileAuditAdapter<br/><br/><br/>"]
+            MM["MemoryMonitor<br/><br/><br/>"]
         end
     end
 
@@ -121,9 +115,9 @@ flowchart TB
     style Hexagon fill:#f0f4ff,stroke:#4a6fa5,stroke-width:2px
     style Adapters fill:#f4fff0,stroke:#4a9f6a,stroke-width:2px
 
-    classDef dataPorts fill:#e3f2fd,stroke:#1e88e5,stroke-width:1px
-    classDef coordPorts fill:#f3e5f5,stroke:#8e24aa,stroke-width:1px
-    classDef obsPorts fill:#fff3e0,stroke:#fb8c00,stroke-width:1px
+    classDef dataPorts fill:#eff6ff,stroke:#2563eb,stroke-width:1px
+    classDef coordPorts fill:#f5f3ff,stroke:#8e24aa,stroke-width:1px
+    classDef obsPorts fill:#fff7ed,stroke:#fb8c00,stroke-width:1px
 
     class DSP,FDSP,SP,DRP dataPorts
     class LP,CPP,QP coordPorts

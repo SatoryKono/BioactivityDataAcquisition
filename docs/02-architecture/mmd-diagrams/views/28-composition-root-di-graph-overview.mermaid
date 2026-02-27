@@ -1,0 +1,54 @@
+%% View: Overview | Parent: 28-composition-root-di-graph-full.mermaid
+%% Decomposed overview for DI assembly path.
+%% @uniform width=220 height=64 max_title_len=22 max_desc_lines=1
+%%{init: {'layout':'elk','theme':'base','flowchart':{'nodeSpacing':50,'rankSpacing':64,'curve':'linear'},'elk':{'mergeEdges':true,'edgeRouting':'ORTHOGONAL','nodePlacementStrategy':'BRANDES_KOEPF'}}}%%
+flowchart LR
+    subgraph Entry["Entry"]
+        CLI["CLI run"]
+        BOOT["Bootstrap runtime"]
+    end
+
+    subgraph Factories["Composition Factories"]
+        direction TB
+        LOGF["LoggerFactory"]
+        HCF["HttpClientFactory"]
+        DSF["DataSourceFactory"]
+        STF["StorageFactory"]
+        SVC["ServicesBuilder"]
+        RF["RunnerFactory"]
+    end
+
+    subgraph Runtime["Created Runtime"]
+        direction TB
+        RUN["PipelineRunner"]
+        ADP["ProviderAdapter"]
+        WR["Writers"]
+        OBS["ObservabilityBundle"]
+    end
+
+    CLI --> BOOT
+    BOOT -.-> LOGF
+    BOOT -.-> HCF
+    BOOT -.-> DSF
+    BOOT -.-> STF
+    BOOT -.-> SVC
+    BOOT -.-> RF
+
+    DSF --> ADP
+    STF --> WR
+    LOGF --> OBS
+    SVC --> RUN
+    RF --> RUN
+    ADP --> RUN
+    WR --> RUN
+    OBS -.-> RUN
+
+    classDef layer_application fill:#f0fdf4,stroke:#16a34a,stroke-width:1.8px;
+    classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
+    classDef layer_composition fill:#fff7ed,stroke:#d97706,stroke-width:1.8px;
+    classDef layer_interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:1.8px;
+
+    class RUN layer_application;
+    class ADP,WR,OBS layer_infrastructure;
+    class BOOT,LOGF,HCF,DSF,STF,SVC,RF layer_composition;
+    class CLI layer_interfaces;

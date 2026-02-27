@@ -347,6 +347,7 @@ PIPELINE_SCHEMA_EXPECTATIONS: dict[str, list[tuple[str, pa.DataType]]] = {
         ("description", pa.string()),
         ("downgraded", pa.bool_()),
         ("organism", pa.string()),
+        ("organism_class", pa.string()),
         ("pipeline_stages", pa.string()),
         ("pref_name", pa.string()),
         ("primary_component_id", pa.float64()),

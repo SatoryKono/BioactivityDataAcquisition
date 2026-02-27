@@ -68,13 +68,13 @@ export BIOETL-METRICS-ENABLED=false
   `src/bioetl/domain/ports/observability.py`.
 - В текущем проекте используется единый подход: **generic metrics API**.
   Новые метрики добавляются через стандартные методы
-  `observe_histogram()` / `increment_counter()` / `set_gauge()` с
+  `observe-histogram()` / `increment-counter()` / `set-gauge()` с
   нормализованными строковыми именами.
 - Для каждой новой метрики обязательно:
   1. определить объект метрики в
      `src/bioetl/infrastructure/observability/metrics.py`,
   2. зарегистрировать её в `HISTOGRAMS` / `COUNTERS` / `GAUGES` в
-     `src/bioetl/infrastructure/observability/prometheus_metrics.py`.
+     `src/bioetl/infrastructure/observability/prometheus-metrics.py`.
 
 > Если в будущем потребуется typed API, helper-методы добавляются в
 > `MetricsPort` в `observability.py` и синхронно реализуются в Prometheus и
@@ -165,13 +165,13 @@ curl http://localhost:8000/metrics | grep bioetl-
 
 | Метрика | Тип | Labels | Описание |
 |---------|-----|--------|----------|
-| `bioetl-health-check-status` | Gauge | component | Статус (0=unknown, 1=healthy, 2=degraded) |
-| `bioetl-pipeline-health-check-passed` | Gauge | pipeline, component | Статус компонента |
+| `bioetl-health_check-status` | Gauge | component | Статус (0=unknown, 1=healthy, 2=degraded) |
+| `bioetl-pipeline-health_check-passed` | Gauge | pipeline, component | Статус компонента |
 | `bioetl-provider-health-status` | Gauge | provider | Статус провайдера |
-| `bioetl-health-check-duration-seconds` | Histogram | pipeline | Длительность health check |
-| `bioetl-health-check-latency-seconds` | Histogram | provider | Латентность health check |
-| `bioetl-health-check-success-total` | Counter | provider | Успешные health checks |
-| `bioetl-health-check-failures-total` | Counter | provider | Неуспешные health checks |
+| `bioetl-health_check-duration-seconds` | Histogram | pipeline | Длительность health check |
+| `bioetl-health_check-latency-seconds` | Histogram | provider | Латентность health check |
+| `bioetl-health_check-success-total` | Counter | provider | Успешные health checks |
+| `bioetl-health_check-failures-total` | Counter | provider | Неуспешные health checks |
 
 #### Preflight Metrics
 
@@ -390,7 +390,7 @@ bioetl health check --json
 | `bioetl-errors-total` rate | > 10/min | Warning |
 | `bioetl-dq-records-quarantined-total` rate | > 5% of processed | Warning |
 | `bioetl-pipeline-duration-seconds` | > 95th percentile + 50% | Warning |
-| `bioetl-health-check-status == 0` | > 1 min | Critical |
+| `bioetl-health_check-status == 0` | > 1 min | Critical |
 
 ### Пример Alertmanager правил
 

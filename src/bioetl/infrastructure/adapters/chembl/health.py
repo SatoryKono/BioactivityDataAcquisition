@@ -22,7 +22,28 @@ if TYPE_CHECKING:
 
 
 class ChemblHealthMixin:
-    """Mixin for health-related logic in ChEMBL adapter."""
+    """Health-check and adaptive batch-sizing mixin for ChEMBL adapter.
+
+    Determines adapter health from the circuit breaker state machine
+    (ADR-007) and adjusts the per-request ``limit`` parameter accordingly
+    so that a degraded upstream receives smaller requests.
+
+    Health assessment (delegated to ``assess_health_from_circuit_breaker``):
+        * **HEALTHY** -- circuit CLOSED, zero consecutive failures.
+        * **DEGRADED** -- circuit CLOSED with >0 failures, or HALF_OPEN.
+        * **UNHEALTHY** -- circuit OPEN (failure_threshold reached, default 5).
+
+    Batch-size algorithm (``_get_effective_batch_size``):
+        * HEALTHY  -> ``page_size`` (default 1000).
+        * DEGRADED -> ``max(100, page_size // 2)``  (halved, floor 100).
+        * UNHEALTHY -> raises ``CriticalError`` (fail-fast).
+
+    Active probe (``_probe_health``):
+        Hits the ``/chembl/api/data/status`` endpoint. A 200 response with
+        ``{"status": "UP"}`` yields HEALTHY; 5xx or transient network errors
+        (timeout, connect, read, write) yield DEGRADED; other exceptions
+        propagate.
+    """
 
     http_client: UnifiedHTTPClient
     logger: LoggerPort
@@ -72,7 +93,19 @@ class ChemblHealthMixin:
         return assess_health_from_circuit_breaker(self.http_client.circuit_breaker)
 
     def _get_effective_batch_size(self) -> int:
-        """Get batch size adjusted for health: full if HEALTHY, half if DEGRADED."""
+        """Return the effective ``limit`` parameter for the next API request.
+
+        The value is derived from the circuit breaker state (ADR-007):
+
+        * **HEALTHY** (CLOSED, 0 failures) -- returns ``_page_size`` unchanged
+          (default 1000).
+        * **DEGRADED** (CLOSED with failures, or HALF_OPEN) -- returns
+          ``max(100, _page_size // 2)``.  The floor of 100 prevents
+          excessively small requests that would multiply round-trips.
+        * **UNHEALTHY** (OPEN) -- raises ``CriticalError`` so the pipeline
+          can checkpoint and stop immediately rather than queue doomed
+          requests.
+        """
         health_status = self._get_health_status()
         failure_count = self.http_client.circuit_breaker.get_failure_count()
 

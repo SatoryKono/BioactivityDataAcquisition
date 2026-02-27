@@ -64,6 +64,16 @@ class StorageAdapter:
         silver_writer: SilverWriter,
         gold_writer: GoldWriter,
     ):
+        """Initialize StorageAdapter with injected layer writers.
+
+        Args:
+            bronze_writer: Writer for raw data ingestion into Bronze layer
+                (zst-compressed JSONL files with optional JSON and metadata).
+            silver_writer: Writer for transformed data into Silver layer
+                (Delta Lake tables with schema enforcement and optional CSV export).
+            gold_writer: Writer for aggregated/validated data into Gold layer
+                (Delta Lake tables with Pandera validation and optional CSV export).
+        """
         self.bronze = bronze_writer
         self.silver = silver_writer
         self.gold = gold_writer

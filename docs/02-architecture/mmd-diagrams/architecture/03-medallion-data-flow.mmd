@@ -7,68 +7,63 @@
 %% @level   System / Component
 %% @nodes   36
 
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
+%% @uniform width=200 height=56 max_title_len=20 max_desc_lines=1
 graph LR
     subgraph Sources["External Data Sources"]
-        API1["ChEMBL API"]
-        API2["PubMed API"]
-        API3["UniProt API"]
-        API4["PubChem API"]
-        API5["CrossRef API"]
-        API6["OpenAlex API"]
-        API7["Semantic Scholar API"]
+        API7["Semantic Scholar API<br/>"]:::size-sm
     end
 
     subgraph Ingestion["Data Ingestion"]
-        DS["DataSourcePort<br/>fetch() / fetch_filtered()"]
-        RL["RateLimiter<br/>(TokenBucket)"]
-        CB["CircuitBreaker"]
-        RETRY["Retry Logic"]
+        DS["DataSourcePort<br/>fetch() / fetch_filtered()"]:::size-sm
+        RL["RateLimiter<br/>(TokenBucket)"]:::size-sm
+        CB["CircuitBreaker<br/>"]:::size-sm
+        RETRY["Retry Logic<br/>"]:::size-sm
     end
 
     subgraph Bronze["Bronze Layer (Raw)"]
-        BW["BronzeWriter"]
-        BJSONL["JSONL + zstd<br/>compressed files"]
-        BMETA["_metadata.yaml<br/>sidecar"]
-        BAUDIT["Audit Log"]
+        BW["BronzeWriter<br/>"]:::size-sm
+        BJSONL["JSONL + zstd<br/>compressed files"]:::size-sm
+        BMETA["_metadata.yaml<br/>sidecar"]:::size-sm
+        BAUDIT["Audit Log<br/>"]:::size-sm
     end
 
     subgraph Transform["Transformation"]
-        BT["BaseTransformer<br/>(Template Method)"]
-        NORM["Normalization<br/>(text, units, dates)"]
-        HASH["Identity Service<br/>(entity_id + content_hash)"]
-        PII["PII Hasher<br/>(SHA256 + salt)"]
-        DQ_CHECK["DQ Thresholds<br/>Check"]
+        BT["BaseTransformer<br/>(Template Method)"]:::size-sm
+        NORM["Normalization<br/>(text, units, dates)"]:::size-sm
+        HASH["Identity Service<br/>(entity_id + content_hash)"]:::size-sm
+        PII["PII Hasher<br/>(SHA256 + salt)"]:::size-sm
+        DQ_CHECK["DQ Thresholds<br/>Check"]:::size-sm
     end
 
     subgraph Silver["Silver Layer (Normalized)"]
-        SW["SilverWriter<br/>(Delta Lake)"]
-        DELTA_S["Delta Table<br/>(merge/upsert)"]
-        SV["Silver Validator<br/>(Pandera)"]
-        SMETA["_metadata.yaml"]
+        SW["SilverWriter<br/>(Delta Lake)"]:::size-sm
+        DELTA_S["Delta Table<br/>(merge/upsert)"]:::size-sm
+        SV["Silver Validator<br/>(Pandera)"]:::size-sm
+        SMETA["_metadata.yaml<br/>"]:::size-sm
     end
 
     subgraph GoldTransform["Gold Transformation"]
-        GFILT["Gold Filters"]
-        GMAP["Field Mapping<br/>(exclude fields)"]
-        GV["Gold Validator<br/>(Pandera strict)"]
+        GFILT["Gold Filters<br/>"]:::size-sm
+        GMAP["Field Mapping<br/>(exclude fields)"]:::size-sm
+        GV["Gold Validator<br/>(Pandera strict)"]:::size-sm
     end
 
     subgraph Gold["Gold Layer (Business-Ready)"]
-        GW["GoldWriter<br/>(Delta Lake)"]
-        DELTA_G["Delta Table<br/>(validated, typed)"]
-        GMETA["_metadata.yaml"]
+        GW["GoldWriter<br/>(Delta Lake)"]:::size-sm
+        DELTA_G["Delta Table<br/>(validated, typed)"]:::size-sm
+        GMETA["_metadata.yaml<br/>"]:::size-sm
     end
 
     subgraph Quarantine["Quarantine"]
-        QM["QuarantineManager"]
-        QS["Quarantine Store"]
+        QM["QuarantineManager<br/>"]:::size-sm
+        QS["Quarantine Store<br/>"]:::size-sm
     end
 
     subgraph DQ["Data Quality Reports"]
-        DQ_B["Bronze DQ<br/>Analyzer"]
-        DQ_S["Silver DQ<br/>Analyzer"]
-        DQ_G["Gold DQ<br/>Analyzer"]
-        DQ_RPT["DQ Reports<br/>(JSON)"]
+        DQ_B["Bronze DQ<br/>Analyzer"]:::size-sm
+        DQ_S["Silver DQ<br/>Analyzer"]:::size-sm
+        DQ_G["Gold DQ<br/>Analyzer"]:::size-sm
     end
 
     %% Flow
@@ -99,12 +94,12 @@ graph LR
     DELTA_G --> DQ_G --> DQ_RPT
 
     classDef bronze fill:#ff8a65,stroke:#bf360c,stroke-width:2px
-    classDef silver fill:#90caf9,stroke:#0d47a1,stroke-width:2px
+    classDef silver fill:#f8fafc,stroke:#1e40af,stroke-width:2px
     classDef gold fill:#ffd54f,stroke:#f57f17,stroke-width:2px
-    classDef source fill:#eceff1,stroke:#455a64
-    classDef process fill:#c8e6c9,stroke:#2e7d32
-    classDef quarantine fill:#ffcdd2,stroke:#c62828
-    classDef dq fill:#e1bee7,stroke:#6a1b9a
+    classDef source fill:#f1f5f9,stroke:#64748b
+    classDef process fill:#c8e6c9,stroke:#16a34a
+    classDef quarantine fill:#fff1f2,stroke:#dc2626
+    classDef dq fill:#e1bee7,stroke:#7c3aed
 
     class BW,BJSONL,BMETA,BAUDIT bronze
     class SW,DELTA_S,SV,SMETA silver

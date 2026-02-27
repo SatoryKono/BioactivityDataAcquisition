@@ -12,12 +12,12 @@
 BioETL содержит два каталога диаграмм с разными форматами и назначением:
 
 **Canonical sources** (`docs/02-architecture/mmd-diagrams/`):
-- `architecture/` — 18 canonical + 11 subdomain-decomposed = 29 `.mmd` файлов
+- `architecture/` — 32 `.mmd` файла (18 core + decomposed subdomain files)
 - `class-diagrams/` — 16 `.mmd` файлов (class diagram families)
-- `foundation/` — 59 `.mmd` файлов (historical + TOP-25)
-- Итого: **104 `.mmd` файла** (93 canonical по README)
+- `foundation/` — 54 `.mmd` файла (historical + TOP-25)
+- Итого: **103 `.mmd` файлов** (включая `_template.mmd`)
 
-**Decomposed views** (`docs/02-architecture/diagrams/mermaid/`):
+**Decomposed views** (`docs/02-architecture/mmd-diagrams/views/`):
 - 31 parent diagram × 5 views (`-full`, `-overview`, `-domain`, `-infra`, `-dataflow`)
 - + `00-legend.mermaid`
 - Итого: **156 `.mermaid` файлов**
@@ -28,11 +28,11 @@ BioETL содержит два каталога диаграмм с разным
 
 | Слой | Старая (Tailwind-based) | Новая (canonical) |
 |------|------------------------|-------------------|
-| Domain | `#FFF7ED / #F59E0B` | `#f3e5f5 / #6a1b9a` |
-| Application | `#ECFDF5 / #10B981` | `#e8f5e9 / #2e7d32` |
-| Infrastructure | `#EFF6FF / #2563EB` | `#ffcdd2 / #c62828` |
-| Composition | `#F5F3FF / #7C3AED` | `#fff3e0 / #e65100` |
-| Interfaces | `#F1F5F9 / #64748B` | `#e3f2fd / #1565c0` |
+| Domain | `#FFF7ED / #F59E0B` | `#f5f3ff / #7c3aed` |
+| Application | `#ECFDF5 / #10B981` | `#f0fdf4 / #16a34a` |
+| Infrastructure | `#EFF6FF / #2563EB` | `#fff1f2 / #dc2626` |
+| Composition | `#F5F3FF / #7C3AED` | `#fff7ed / #f59e0b` |
+| Interfaces | `#F1F5F9 / #64748B` | `#eff6ff / #2563eb` |
 
 Дополнительно: 286 emoji-префиксов в subgraph labels (`🟡 Domain Layer`) мешали CLI-рендерингу.
 Все 156 `.mermaid` view-файлов использовали uniform `linkStyle` без семантического разделения типов связей.
@@ -56,16 +56,16 @@ BioETL содержит два каталога диаграмм с разным
 
 | Слой | Fill | Stroke |
 |------|------|--------|
-| Domain | `#f3e5f5` | `#6a1b9a` |
-| Application | `#e8f5e9` | `#2e7d32` |
-| Infrastructure | `#ffcdd2` | `#c62828` |
-| Composition | `#fff3e0` | `#e65100` |
-| Interfaces | `#e3f2fd` | `#1565c0` |
-| External | `#eceff1` | `#455a64` |
-| Bronze | `#fff3e0` | `#e65100` |
-| Silver | `#eceff1` | `#607d8b` |
-| Gold | `#fff8e1` | `#f9a825` |
-| Quarantine | `#ffebee` | `#d32f2f` |
+| Domain | `#f5f3ff` | `#7c3aed` |
+| Application | `#f0fdf4` | `#16a34a` |
+| Infrastructure | `#fff1f2` | `#dc2626` |
+| Composition | `#fff7ed` | `#f59e0b` |
+| Interfaces | `#eff6ff` | `#2563eb` |
+| External | `#f1f5f9` | `#64748b` |
+| Bronze | `#fff7ed` | `#f59e0b` |
+| Silver | `#f8fafc` | `#475569` |
+| Gold | `#fefce8` | `#ca8a04` |
+| Quarantine | `#ffe4e6` | `#e11d48` |
 
 Использование произвольных цветов MUST NOT. Emoji-префиксы в subgraph labels MUST NOT.
 
@@ -76,18 +76,18 @@ mmd-diagrams/          ← canonical .mmd (rendered via render.sh)
   architecture/        ← system/component-level diagrams
   class-diagrams/      ← class structure diagrams
   foundation/          ← historical reference + TOP-25
+  views/               ← decomposed .mermaid views (foundation)
+    *-full.mermaid       ← полные reference копии
+    *-overview.mermaid   ← cross-layer overview
+    *-domain.mermaid     ← domain-layer focus
+    *-infra.mermaid      ← infrastructure-mapping focus
+    *-dataflow.mermaid   ← data flow focus
+    00-legend.mermaid    ← link types + code glossary
   _template.mmd        ← шаблон для новых диаграмм
-diagrams/mermaid/      ← decomposed .mermaid views (foundation)
-  *-full.mermaid       ← полные reference копии
-  *-overview.mermaid   ← cross-layer overview
-  *-domain.mermaid     ← domain-layer focus
-  *-infra.mermaid      ← infrastructure-mapping focus
-  *-dataflow.mermaid   ← data flow focus
-  00-legend.mermaid    ← link types + code glossary
 ```
 
 Новые **architecture views** создаются как `.mmd` в `mmd-diagrams/architecture/`.
-Foundation views создаются как `.mermaid` в `diagrams/mermaid/`.
+Foundation views создаются как `.mermaid` в `mmd-diagrams/views/`.
 
 ### D3: View-based Decomposition Rules
 
@@ -139,10 +139,10 @@ View-файлы с ≥3 типами связей и >5 соединениями
 | Тип связи | Стиль |
 |-----------|-------|
 | data flow | `stroke:#1E293B,stroke-width:2px` |
-| orchestration | `stroke:#2e7d32,stroke-width:2px` |
-| DI / implements | `stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5` |
+| orchestration | `stroke:#16a34a,stroke-width:2px` |
+| DI / implements | `stroke:#7c3aed,stroke-width:1.5px,stroke-dasharray:5` |
 | observability | `stroke:#94A3B8,stroke-width:1px` |
-| error / quarantine | `stroke:#c62828,stroke-width:2px,stroke-dasharray:4` |
+| error / quarantine | `stroke:#dc2626,stroke-width:2px,stroke-dasharray:4` |
 | generic | `stroke:#475569,stroke-width:2px,stroke-dasharray:5` |
 
 Каждый differentiated блок MUST сопровождаться комментарием:
@@ -158,20 +158,76 @@ View-файлы с ≥3 типами связей и >5 соединениями
 |------|-------------|
 | SIZE-001 | Node count > 35 → ERROR |
 | SIZE-002 | Node count > 20 → WARN |
-| META-001 | Отсутствие `@version`/`@date`/`@type`/`@level` в `.mmd` → WARN |
-| META-002 | Отсутствие `%% View:` в `.mermaid` view-файле → WARN |
-| COLOUR-001 | Использование неканонической палитры → ERROR |
+| META-001 | Отсутствие structured metadata (`@...` для `.mmd`, `%% View:` для `.mermaid`) → WARN |
+| META-002 | Некорректный формат даты в `%% Updated:`/`%% @date` → ERROR |
+| COLOUR-001 | Использование deprecated pre-ADR-040 палитры в `style`/`classDef` → ERROR |
 | COLOUR-002 | Emoji в subgraph labels → ERROR |
+| GRAPH-001 | Orphan nodes (defined but not in any edge) в `flowchart`/`sequenceDiagram` → WARN |
+| NBSP-001 | Использование `&nbsp;`-padding в исходнике → ERROR |
 
-Pre-commit hook: `lint-diagrams`.
+Примечание по реализации `SIZE-*`:
+- `*-full.mermaid` reference views исключены из `SIZE-001`/`SIZE-002`.
+- `00-legend*` исключены из `SIZE-001`/`SIZE-002`.
+
+Примечание по size-normalization (`scripts/uniform_diagram_sizes.py`):
+- `@uniform-group` задаёт групповую нормализацию высоты.
+- `@uniform-width global` (по умолчанию) использует общую ширину для всех групп.
+- `@uniform-width group` разрешает width per group для снижения `&nbsp;`-padding в перегруженных class-diagram family.
+
+Pre-commit hooks: `lint-diagrams`, `prune-orphan-diagram-nodes`.
+
+#### GRAPH-001 — Orphan Node Rule
+
+Реализован в `scripts/prune_orphan_nodes.py`. Нода считается orphan, если:
+- Определена (`NodeId["label"]` или bare `NodeId`) в diagram
+- Не участвует ни в одном edge / message в том же файле
+
+**Исключения (нода не флагируется):**
+- Аннотация `%% keep-orphan: NodeId` (inline в файле)
+- Нода внутри subgraph, чьё имя встречается в edge (lenient subgraph rule)
+- Файлы `00-legend*`
+- `classDiagram`, `stateDiagram`, `erDiagram`, `mindmap`
+
+**Инструмент:**
+```bash
+python scripts/prune_orphan_nodes.py --check      # аудит
+python scripts/prune_orphan_nodes.py --fix         # удалить garbage orphans
+python scripts/prune_orphan_nodes.py --grandfather # exemption для всех текущих
+```
 
 ### D7: Tool Selection Criteria
 
-| Условие | Инструмент |
-|---------|-----------|
-| ≤20 узлов, стандартный layout | Mermaid |
-| 20–40 узлов, сложный layout | PlantUML |
-| >40 узлов | D2 (ELK layout engine) |
+| Условие | Инструмент | Layout |
+|---------|------------|--------|
+| ≤20 узлов | Mermaid (Dagre) | TB или LR |
+| 21–40 узлов | Mermaid + ELK init | TB или LR |
+| >40 узлов | Mermaid + ELK init (preferred) или D2 (ELK engine) | TB или LR |
+
+### D8: Adaptive Layout Rules
+
+ELK (Eclipse Layout Kernel) SHOULD использоваться для `flowchart`/`graph` диаграмм с `@nodes > 20`.
+
+**Синтаксис (вставлять перед объявлением `graph`/`flowchart`):**
+
+```
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'direction': 'RIGHT', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'ORTHOGONAL'}}}%%
+```
+
+**Direction selection:**
+
+| Паттерн | Direction | Примеры |
+|---------|-----------|---------|
+| Иерархия / DI граф / port map | `TB` | `01-high-level-hexagonal`, `12-bootstrap-di-container` |
+| Pipeline / data flow / config chain | `LR` | `03-medallion-data-flow`, `11-configuration-system` |
+
+**CI Rules (lint_diagrams.py):**
+
+| Rule | Условие | Severity |
+|------|---------|----------|
+| LAYOUT-001 | `flowchart/graph` с `@nodes > 20` без ELK init | WARNING |
+| LAYOUT-002 | `flowchart/graph` с `@nodes > 40` без ELK init | ERROR |
+
+**Инструмент:** `src/tools/apply_elk_layout.py --dry-run` для аудита, без `--dry-run` для применения.
 
 ---
 
@@ -193,7 +249,7 @@ Pre-commit hook: `lint-diagrams`.
 
 ### Positive
 
-- Единая палитра — нет визуальных конфликтов между `mmd-diagrams/` и `diagrams/mermaid/`
+- Единая палитра — нет визуальных конфликтов между canonical и decomposed наборами
 - linkStyle дифференциация даёт семантическое разделение (data / DI / orchestration)
 - CI предотвращает деградацию при добавлении новых диаграмм
 - `_template.mmd` стандартизирует создание новых диаграмм
@@ -202,14 +258,14 @@ Pre-commit hook: `lint-diagrams`.
 ### Negative
 
 - Два каталога + два расширения — когнитивная нагрузка при навигации
-- Синхронизация `foundation/*.mmd` ↔ `diagrams/mermaid/*-full.mermaid` ручная
+- Синхронизация `foundation/*.mmd` ↔ `mmd-diagrams/views/*-full.mermaid` ручная
 - linkStyle индексы хрупкие: любое добавление/удаление связи требует пересчёта
 
 ### Risks
 
 - **linkStyle fragility**: изменение порядка связей ломает индексацию. Митигация: комментарий `%% linkStyle: ...` как проверочная документация
 - **Эвристика `@nodes`**: подсчёт узлов ±20% от реального (subgraph границы). Митигация: lint проверяет только >35 threshold
-- **Расхождение `-full.mermaid` с источником**: `foundation/*.mmd` и `diagrams/mermaid/*-full.mermaid` могут разойтись. Митигация: CI drift check (планируется)
+- **Расхождение `-full.mermaid` с источником**: `foundation/*.mmd` и `mmd-diagrams/views/*-full.mermaid` могут разойтись. Митигация: CI drift check (планируется)
 
 ---
 

@@ -1,21 +1,21 @@
 ---
 name: documentation-audit
-description: Full audit and update of BioETL project documentation for v5.14+. Use when asked to review docs for staleness, reconcile docs with code, sync RULES.md and REQUIREMENTS.md, update architecture/provider/contract docs, reflect ADR-010/ADR-014/ADR-017, or identify dead documentation.
+description: Full audit and update of BioETL project documentation for v5.22+. Use when asked to review docs for staleness, reconcile docs with code, sync RULES.md and REQUIREMENTS.md, update architecture/provider/contract docs, reflect ADR-010/ADR-014/ADR-017, or identify dead documentation.
 ---
 
 # Documentation Audit
 
 ## Objective
-Perform a full documentation audit of BioETL and bring docs in sync with code and ADRs (v5.14+). Produce a clear audit report, a prioritized plan, and updated documentation changes.
+Perform a full documentation audit of BioETL and bring docs in sync with code and ADRs (v5.22+). Produce a clear audit report, a prioritized plan, and updated documentation changes.
 
 ## Required inputs (before starting)
-- Load `references/audit-checklist.md` — checklist for each audit area.
-- Load `references/report-template.md` — template for the audit report.
+- Load `.claude/skills/documentation-audit.audit-checklist.md` — checklist for each audit area.
+- Load `.claude/skills/documentation-audit.report-template.md` — template for the audit report.
 
 ## Workflow
 
 ### 1. Intake and scope
-- Confirm repo root and target version (v5.14+).
+- Confirm repo root and target version (v5.22+).
 - Identify doc entry points: README.md, mkdocs.yml.
 - List files under `docs/`: `rg --files docs`.
 
@@ -56,14 +56,14 @@ rg --files docs
 ```
 
 ## Output format
-- Use `references/report-template.md` structure for the audit report.
+- Use `.claude/skills/documentation-audit.report-template.md` structure for the audit report.
 - Provide a short prioritized change list and required user decisions.
 - Do not change code unless explicitly requested; focus on documentation.
 
 ## Constraints
 
 ### MUST
-- Use report-template.md for the audit report.
+- Use `.claude/skills/documentation-audit.report-template.md` for the audit report.
 - Verify findings against actual code and configs.
 - Record severity for each finding.
 

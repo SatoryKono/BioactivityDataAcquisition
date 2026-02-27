@@ -62,7 +62,7 @@ FROM chembl.publication;
 If you have custom DQ rules referencing these fields:
 
 ```yaml
-# configs/quality/entities/chembl/publication.yaml
+# configs/entities/chembl/publication.yaml#quality
 
 # BEFORE (5.9)
 - field: citation-count
@@ -159,7 +159,7 @@ bioetl run-composite --composite activity --seed-limit 1000
 
 **Output:** `data/gold/composite_activity/`
 
-**Configuration:** `configs/pipelines/composite/activity.yaml`
+**Configuration:** `configs/composites/activity.yaml`
 
 **Documentation:** [ADR-026: Composite Pipeline Pattern](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)
 
@@ -229,14 +229,14 @@ silver-config:
 
 **Before (5.9):**
 ```yaml
-# configs/pipelines/composite/activity.yaml
+# configs/composites/activity.yaml
 output:
   gold-path: data/gold/composite_activity
 ```
 
 **After (5.14):**
 ```yaml
-# configs/pipelines/composite/activity.yaml
+# configs/composites/activity.yaml
 # output.gold-path removed — auto-computed as:
 # data/gold/composite-{pipeline-name}/
 ```
@@ -421,7 +421,7 @@ export BIOETL-VALIDATION-MODE=fast  # Base only
 **Documentation:**
 - [CHANGELOG.md](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/CHANGELOG.md) — Full release notes
 - [RULES.md](../00-project/RULES.md) — Project governance
-- [ADRs](../02-architecture/decisions/) — Architecture decisions
+- [ADRs](../02-architecture/decisions/README.md) — Architecture decisions
 
 **Support:** Create an issue with:
 - BioETL version

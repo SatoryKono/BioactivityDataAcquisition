@@ -7,8 +7,10 @@
 %% @date    2026-02-24
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
+%% @uniform width=256 height=144 max_title_len=25 max_desc_lines=6
 
 flowchart TB
+%% keep-orphan: CheckpointPort, CriticalError, DataQualityError, DataSourcePort, HealthStatus, InvalidStateError, LockPort, Measurement, MetricsPort, QuarantinePort, RecoverableError, RunType, StoragePort, TracingPort
     subgraph domain["Domain Layer (DDD)"]
         subgraph ports["ports/"]
             DataSourcePort
@@ -25,7 +27,7 @@ flowchart TB
 
             PipelineRun["PipelineRun Aggregate<br/>───────────────<br/>• start()<br/>• record_stage_success()<br/>• complete()<br/>• fail()"]
 
-            QuarantineEntry["QuarantineEntry Aggregate<br/>───────────────<br/>• mark_retrying()<br/>• mark_recovered()<br/>• mark_dead_letter()"]
+            QuarantineEntry["QuarantineEntry Aggregate<br/>───────────────<br/>• mark_retrying()<br/>• mark_recovered()<br/>• mark_dead_letter()<br/>"]
         end
 
         subgraph events["Domain Events"]
@@ -38,16 +40,16 @@ flowchart TB
         end
 
         subgraph value_objects["value_objects/"]
-            RunID["RunID (UUID)"]
-            BatchID["BatchID (UUID)"]
-            EntityID["EntityID (str)"]
-            ContentHash["ContentHash (str)"]
-            Measurement["Measurement<br/>(value, unit, relation)"]
+            RunID["RunID (UUID)<br/><br/><br/><br/><br/>"]
+            BatchID["BatchID (UUID)<br/><br/><br/><br/><br/>"]
+            EntityID["EntityID (str)<br/><br/><br/><br/><br/>"]
+            ContentHash["ContentHash (str)<br/><br/><br/><br/><br/>"]
+            Measurement["Measurement<br/>(value, unit, relation)<br/><br/><br/><br/>"]
         end
 
         subgraph types["types.py"]
-            RunType["RunType Enum<br/>(INCREMENTAL, BACKFILL, REBUILD)"]
-            HealthStatus["HealthStatus Enum<br/>(HEALTHY, DEGRADED, UNHEALTHY)"]
+            RunType["RunType Enum<br/>(INCREMENTAL, BACKFILL, REBUILD)<br/><br/><br/><br/>"]
+            HealthStatus["HealthStatus Enum<br/>(HEALTHY, DEGRADED, UNHEALTHY)<br/><br/><br/><br/>"]
         end
 
         subgraph exceptions["exceptions/"]
@@ -74,14 +76,12 @@ flowchart TB
 
     %% State machines
     subgraph batch_states["Batch State Machine"]
-        B_OPEN["OPEN"] --> B_SEALED["SEALED"]
         B_SEALED --> B_WRITING["WRITING"]
         B_WRITING --> B_COMMITTED["COMMITTED"]
         B_WRITING --> B_FAILED["FAILED"]
     end
 
     subgraph run_states["PipelineRun State Machine"]
-        R_PENDING["PENDING"] --> R_RUNNING["RUNNING"]
         R_RUNNING --> R_COMPLETED["COMPLETED"]
         R_RUNNING --> R_FAILED["FAILED"]
         R_RUNNING --> R_SHUTDOWN["SHUTDOWN"]

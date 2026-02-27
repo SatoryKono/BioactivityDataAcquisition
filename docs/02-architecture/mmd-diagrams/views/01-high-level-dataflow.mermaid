@@ -1,0 +1,55 @@
+%% View: Data-Flow | Parent: 01-high-level-full.mermaid
+%% @uniform width=140 height=56 max_title_len=10 max_desc_lines=0
+flowchart TB
+%% keep-orphan: N5
+
+    subgraph Application["Application Layer"]
+        direction TB
+        N7["Executor"]
+        N9["Runner"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N1["Bronze"]
+        N2["Silver"]
+        N3["Gold"]
+        N4["Sources"]
+        N8["Adapters"]
+        N11["Boot"]
+        N12["Trans"]
+        N5["Quarantine"]
+        N6["Storage"]
+    end
+
+    subgraph Composition["Composition Layer"]
+        direction TB
+        N10["Factory"]
+    end
+
+    N4 --> N8
+    N11 --> N10
+    N10 --> N9
+    N9 --> N7
+    N7 --> N12
+    N12 --> N8
+    N6 --> N1
+    N6 --> N2
+    N6 --> N3
+    N7 --> N6
+
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style Composition fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+
+    %% linkStyle: data 0,5-8, orch 3-4,9, di 1-2
+    linkStyle 0 stroke:#1E293B,stroke-width:3px
+    linkStyle 1 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 2 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+    linkStyle 3 stroke:#2e7d32,stroke-width:2px
+    linkStyle 4 stroke:#2e7d32,stroke-width:2px
+    linkStyle 5 stroke:#1E293B,stroke-width:3px
+    linkStyle 6 stroke:#1E293B,stroke-width:3px
+    linkStyle 7 stroke:#1E293B,stroke-width:3px
+    linkStyle 8 stroke:#1E293B,stroke-width:3px
+    linkStyle 9 stroke:#2e7d32,stroke-width:2px

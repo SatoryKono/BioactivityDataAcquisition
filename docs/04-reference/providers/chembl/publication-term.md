@@ -113,7 +113,7 @@ sink:
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/publication-term.yaml` |
+| Конфигурация | `configs/entities/chembl/publication_term.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/chembl/publication-term-transformer.py` |
 | Пайплайн | `src/bioetl/application/pipelines/chembl/publication-term.py` |
 | Сущность | `src/bioetl/domain/entities/chembl-structures.py` (PublicationTerm) |

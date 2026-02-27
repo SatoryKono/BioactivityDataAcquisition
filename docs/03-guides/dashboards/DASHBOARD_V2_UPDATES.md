@@ -12,24 +12,24 @@
 ## Подтверждено по JSON
 
 - Все 4 дашборда используют `refresh: 30s`, `time.from: now-7d`.
-- Переменные `simple/overview/dq`: `$pipeline`, `$run_type`.
+- Переменные `simple/overview/dq`: `$pipeline`, `$run-type`.
 - Переменные `provider-health-v2`: `$pipeline`, `$provider`.
-- В JSON отсутствуют `$run_id` и `execution`.
+- В JSON отсутствуют `$run-id` и `execution`.
 
 ## Исправления, внесенные в JSON
 
-1. Удалены устаревшие переменные `run_id` из всех 4 дашбордов.
+1. Удалены устаревшие переменные `run-id` из всех 4 дашбордов.
 2. Удалены вводящие в заблуждение формулировки про "Latest Run Only".
 3. Исправлен DQ panel `id=12`:
 
 ```promql
-sum(increase(bioetl_silver_validation_failures_total{table=~"$pipeline"}[24h]))
+sum(increase(bioetl-silver-validation-failures-total{table=~"$pipeline"}[24h]))
 ```
 
 4. Исправлен Provider Health panel `id=103`:
 
 ```promql
-histogram_quantile(0.95, sum by (le) (rate(bioetl_health_check_latency_ms_bucket{provider="$provider"}[5m])))
+histogram-quantile(0.95, sum by (le) (rate(bioetl-health_check-latency-ms-bucket{provider="$provider"}[5m])))
 ```
 
 ## Актуальные ключевые панели
@@ -40,4 +40,4 @@ histogram_quantile(0.95, sum by (le) (rate(bioetl_health_check_latency_ms_bucket
 
 ## Примечание по старым гайдам
 
-Документы в `docs/03-guides/dashboards/`, где фигурируют `$run_id`, `execution` или "latest run only", относятся к устаревшей версии и не описывают текущее состояние JSON.
+Документы в `docs/03-guides/dashboards/`, где фигурируют `$run-id`, `execution` или "latest run only", относятся к устаревшей версии и не описывают текущее состояние JSON.

@@ -29,7 +29,7 @@ security scanning, release process, and issue/PR workflows.
 **Types:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `ci`
 
 **Examples:**
-- `feat/pubchem_compound_pipeline`
+- `feat/pubchem_compound-pipeline`
 - `fix/chembl-rate-limit-429`
 - `refactor/storage-clear-contract`
 
@@ -68,7 +68,7 @@ BioETL uses **19 GitHub Actions workflows** organized by purpose.
 
 | Workflow | File | Key Jobs | What It Checks |
 |----------|------|----------|----------------|
-| **Block Compiled Artifacts** | `compiled-artifacts-block.yml` | `no-pyc-check` | No `*.pyc` / `__pycache__` committed |
+| **Block Compiled Artifacts** | `compiled-artifacts-block.yml` | `no-pyc-check` | No `*.pyc` / `--pycache--` committed |
 | **Root Hygiene** | `root-hygiene.yml` | `root-hygiene` | Repository root cleanliness audit |
 | **Docs & Diagrams** | `docs.yml` | `validate-mermaid`, `render-diagrams` | Mermaid syntax, diagram rendering |
 | **Validate Mermaid** | `validate-mermaid.yml` | `check-mermaid` | Vendored Mermaid asset integrity |
@@ -182,16 +182,16 @@ File: `.github/dependabot.yml`
 
 ### Issue Templates
 
-Located in `.github/ISSUE_TEMPLATE/`:
+Located in `.github/ISSUE-TEMPLATE/`:
 
 | Template | File | Labels |
 |----------|------|--------|
-| Bug Report | `bug_report.md` | `bug` |
-| Feature Request | `feature_request.md` | `enhancement` |
+| Bug Report | `bug-report.md` | `bug` |
+| Feature Request | `feature-request.md` | `enhancement` |
 
 ### Pull Request Template
 
-File: `.github/pull_request_template.md`
+File: `.github/pull-request-template.md`
 
 Every PR auto-populates with:
 - Summary section
@@ -264,7 +264,7 @@ Full security policy: [`.github/SECURITY.md`](https://github.com/SatoryKono/Bioa
 ### Key Points
 
 - Secrets: Environment variables only (`BIOETL_{PROVIDER}_{KEY}`)
-- VCR cassettes: Sanitized via `before_record` hooks
+- VCR cassettes: Sanitized via `before-record` hooks
 - Vulnerability reporting: security@example.com (72h response SLA)
 - Automated scanning: detect-secrets, pip-audit, Trivy, Dependabot
 

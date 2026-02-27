@@ -204,7 +204,28 @@ class Bioactivity(BaseEntity):
         index: int = 0,
         source_batch_id: UUID | None = None,
     ) -> Bioactivity:
-        """Create Bioactivity from raw API data. Returns entity in RAW state."""
+        """Create a Bioactivity entity from raw ChEMBL API response data.
+
+        Extracts and type-converts fields from the raw API dict, computing
+        a content hash for deduplication. The returned entity is in RAW state.
+
+        Args:
+            raw_data: Dict of ChEMBL API response fields. Required keys:
+                ``activity_id`` and ``molecule_id``; all other fields are
+                optional and safely coerced via ``_safe_*`` helpers.
+            run_id: Pipeline run identifier.
+            run_type: Type of pipeline run (default INCREMENTAL).
+            ingestion_ts: Timestamp of ingestion.
+            index: Record index within the batch (default 0).
+            source_batch_id: Optional upstream batch identifier.
+
+        Returns:
+            Bioactivity entity in ``BioactivityState.RAW`` state.
+
+        Raises:
+            ValueError: If ``activity_id`` or ``molecule_id`` is missing
+                from *raw_data*.
+        """
         import hashlib
 
         from bioetl.domain.serialization import serialize_to_json_canonical

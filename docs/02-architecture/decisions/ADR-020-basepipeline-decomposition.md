@@ -12,7 +12,7 @@
 
 ```python
 # СТАРЫЙ API (deprecated)
-def --init--(
+def __init__(
     self,
     pipeline-name: str,
     provider: str,
@@ -56,7 +56,7 @@ def --init--(
 - `tests/unit/application/test-base-pipeline.py` - тесты
 - `tests/unit/application/core/test-batch-executor.py` - тесты
 - `tests/unit/application/test-pipeline-config.py` - тесты
-- `tests/unit/application/pipelines/test_chembl_activity_unit.py` - тесты
+- `tests/unit/application/pipelines/test-chembl_activity-unit.py` - тесты
 
 ## Решение
 
@@ -126,7 +126,7 @@ class PipelineServices:
 class BasePipeline(ABC):
     """Refactored pipeline with decomposed dependencies."""
 
-    def --init--(
+    def __init__(
         self,
         config: PipelineConfig,
         runtime: RuntimeConfig,
@@ -232,7 +232,7 @@ finally:
 
 ### Фаза 3: Рефакторинг BasePipeline
 
-- [x] Новый конструктор `--init--(config, runtime, services)`
+- [x] Новый конструктор `__init__(config, runtime, services)`
 - [x] Обновление менеджеров (`from-components()`)
 - [x] Lazy initialization компонентов
 - [x] `ShutdownSignal` для graceful shutdown
@@ -246,7 +246,7 @@ finally:
 
 - [x] `test-base-pipeline.py`
 - [x] `test-batch-executor.py`
-- [x] `test_chembl_activity_unit.py`
+- [x] `test-chembl_activity-unit.py`
 
 ### Фаза 6: Удаление shim
 

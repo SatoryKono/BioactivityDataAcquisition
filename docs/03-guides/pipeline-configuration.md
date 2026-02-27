@@ -14,7 +14,7 @@ BioETL использует **YAML-файлы** для конфигурации 
 ### Ключевые особенности
 
 - **Convention over Configuration (ADR-029):** Пути и ссылки вычисляются автоматически
-- **Иерархическое наследование:** Конфиги наследуют из `-base.yaml`
+- **Иерархическое наследование:** Общие defaults загружаются из `configs/base/pipeline.yaml`
 - **Иерархические DQ/Filter правила (ADR-027/028):** 3-уровневая иерархия с merge
 - **Pydantic валидация:** Схемы проверяются при загрузке
 - **Immutable Domain Objects:** Конфиги преобразуются в frozen dataclasses
@@ -25,10 +25,20 @@ BioETL использует **YAML-файлы** для конфигурации 
 
 ```
 configs/
-├── pipelines/                    # Конфигурации пайплайнов (26 = 21 entity + 5 composite)
-│   ├── -base.yaml               # Базовая конфигурация v2.1.0 (491 строка)
-│   ├── -schema.json             # JSON Schema для валидации
-│   ├── chembl/                  # 14 entity configs
+├── base/                         # Глобальные defaults
+│   ├── pipeline.yaml            # Общие pipeline/filter defaults
+│   ├── quality.yaml             # Общие DQ defaults
+│   └── bronze_fixture_gaps.yaml # Fixture gap policy
+├── providers/                    # Provider-level source/quality/filters
+│   ├── chembl.yaml
+│   ├── crossref.yaml
+│   ├── openalex.yaml
+│   ├── pubchem.yaml
+│   ├── pubmed.yaml
+│   ├── semanticscholar.yaml
+│   └── uniprot.yaml
+├── entities/                     # Unified entity configs
+│   ├── chembl/
 │   │   ├── activity.yaml
 │   │   ├── assay.yaml
 │   │   ├── assay_parameters.yaml
@@ -43,80 +53,22 @@ configs/
 │   │   ├── target.yaml
 │   │   ├── target_component.yaml
 │   │   └── tissue.yaml
-│   ├── pubchem/                 # 1 entity config
-│   │   └── compound.yaml
-│   ├── uniprot/                 # 2 entity configs
-│   │   ├── idmapping.yaml
-│   │   └── protein.yaml
-│   ├── pubmed/                  # 1 entity config
-│   │   └── publication.yaml
-│   ├── crossref/                # 1 entity config
-│   │   └── publication.yaml
-│   ├── openalex/                # 1 entity config
-│   │   └── publication.yaml
-│   ├── semanticscholar/         # 1 entity config
-│   │   └── publication.yaml
-│   └── composite/               # 5 composite configs (ADR-026)
-│       ├── activity.yaml        # chembl_activity + enrichers
-│       ├── assay.yaml           # chembl_assay + enrichers
-│       ├── molecule.yaml        # chembl_molecule + enrichers
-│       ├── publication.yaml     # chembl_publication + enrichers
-│       └── target.yaml          # chembl_target + enrichers
-├── quality/                      # Data Quality правила (ADR-027, 31 файл)
-│   ├── -defaults.yaml           # Глобальные DQ defaults (soft-fail=0.05, hard-fail=0.20)
-│   ├── providers/               # 7 provider-specific DQ
-│   │   ├── chembl.yaml
-│   │   ├── crossref.yaml
-│   │   ├── openalex.yaml
-│   │   ├── pubchem.yaml
-│   │   ├── pubmed.yaml
-│   │   ├── semanticscholar.yaml
-│   │   └── uniprot.yaml
-│   └── entities/                # 23 entity-specific DQ
-│       ├── chembl/
-│       │   ├── activity.yaml
-│       │   ├── assay.yaml
-│       │   └── ...              # 14 entity DQ configs
-│       ├── crossref/
-│       │   └── publication.yaml
-│       ├── openalex/
-│       │   └── publication.yaml
-│       ├── pubchem/
-│       │   └── compound.yaml
-│       ├── pubmed/
-│       │   └── publication.yaml
-│       ├── semanticscholar/
-│       │   └── publication.yaml
-│       └── uniprot/
-│           ├── idmapping.yaml
-│           ├── protein.yaml
-│           └── target.yaml
-├── filters/                      # Фильтры данных (ADR-028, 35 файлов)
-│   ├── -defaults.yaml           # batch-size: 100
-│   ├── providers/               # Provider-specific batch-sizes
-│   │   ├── chembl.yaml
-│   │   ├── crossref.yaml
-│   │   ├── openalex.yaml
-│   │   ├── pubchem.yaml
-│   │   ├── pubmed.yaml
-│   │   ├── semanticscholar.yaml
-│   │   └── uniprot.yaml
-│   └── entities/                # 27 entity-specific filter configs
-│       ├── chembl/
-│       │   ├── activity.yaml
-│       │   └── ...              # 14 entity filter configs
-│       ├── composite/
-│       │   ├── activity.yaml
-│       │   └── ...              # 5 composite filter configs
-│       └── ...                  # Other providers
-└── sources/                      # Конфигурации источников (7 файлов)
-    ├── chembl.yaml
-    ├── crossref.yaml
-    ├── openalex.yaml
-    ├── pubchem.yaml
-    ├── pubmed.yaml
-    ├── semanticscholar.yaml
-    └── uniprot.yaml
+│   ├── crossref/publication.yaml
+│   ├── openalex/publication.yaml
+│   ├── pubchem/compound.yaml
+│   ├── pubmed/publication.yaml
+│   ├── semanticscholar/publication.yaml
+│   └── uniprot/{idmapping,protein}.yaml
+├── composites/                   # Composite pipeline configs (ADR-026)
+│   ├── activity.yaml
+│   ├── assay.yaml
+│   ├── molecule.yaml
+│   ├── publication.yaml
+│   ├── target.yaml
+│   └── field_groups/publication.yaml
+├── enums/
+│   └── chembl.yaml
+└── naming_exceptions.yaml
 ```
 
 ### Статистика конфигураций
@@ -124,10 +76,12 @@ configs/
 | Категория                     | Количество | Описание                                   |
 | ----------------------------- | ---------- | ------------------------------------------ |
 | Entity configs (unified)      | 21         | Standard ETL pipelines (`configs/entities`) |
-| Composite configs             | 5          | Multi-provider pipelines (`configs/composites`) |
+| Composite pipeline configs    | 5          | Multi-provider pipelines (`configs/composites`) |
+| Composite field-group configs | 1          | Shared field groups (`configs/composites/field_groups`) |
 | Provider configs              | 7          | Source + provider quality/filters (`configs/providers`) |
-| Base configs                  | 2          | Global defaults (`configs/base`)           |
-| **Итого файлов конфигурации** | **35**     | Все конфиги валидированы                   |
+| Base configs                  | 3          | Global defaults (`configs/base`)           |
+| Misc configs                  | 2          | Enums + naming exceptions                  |
+| **Итого файлов конфигурации** | **39**     | Все YAML-конфиги в `configs/`              |
 
 ----------------------------------------------------------------------
 
@@ -144,10 +98,10 @@ provider: chembl
 entity: activity
 
 pipeline:
-  pipeline_name: chembl_activity
+  pipeline-name: chembl_activity
   provider: chembl
-  entity_type: activity
-  business_primary_keys: [activity_id]
+  entity-type: activity
+  business-primary-keys: [activity-id]
 ```
 
 ### Полная структура конфига
@@ -172,14 +126,14 @@ provider: chembl
 entity: activity
 
 pipeline:
-  pipeline_name: chembl_activity
+  pipeline-name: chembl_activity
   provider: chembl
-  entity_type: activity
-  business_primary_keys: [activity_id]
-  batch_size: 500
-  dq_overrides:
-    field_validations:
-      - field: standard_value
+  entity-type: activity
+  business-primary-keys: [activity-id]
+  batch-size: 500
+  dq-overrides:
+    field-validations:
+      - field: standard-value
         type: range
         min: 0
         nullable: true
@@ -229,7 +183,7 @@ composite:
 | `composite_assay`       | `chembl_assay`       | enrichers                                                           | Обогащённые данные анализов   |
 | `composite_molecule`    | `chembl_molecule`    | pubchem_compound, enrichers                                         | Обогащённые молекулы          |
 | `composite_publication` | `chembl_publication` | crossref, openalex, pubmed, semanticscholar                         | Обогащённые публикации        |
-| `composite_target`      | `chembl_target`      | target_component, protein_class, uniprot_idmapping, uniprot_protein | Обогащённые targets           |
+| `composite_target`      | `chembl_target`      | target-component, protein-class, uniprot_idmapping, uniprot_protein | Обогащённые targets           |
 
 ### Отличия от Regular Pipelines
 
@@ -258,9 +212,9 @@ Pipeline YAML файлы **не должны** явно указывать эт�
 
 | Поле                 | Auto-computed значение                                 | Примечание                                |
 | -------------------- | ------------------------------------------------------ | ----------------------------------------- |
-| `source-file`        | `../../sources/{provider}.yaml`                        | Provider API settings                     |
-| `dq-config-file`     | `../../quality/entities/{provider}/{entity-type}.yaml` | Informational; loader uses full hierarchy |
-| `filter-config-file` | `../../filters/entities/{provider}/{entity-type}.yaml` | Informational; loader uses full hierarchy |
+| `source-file`        | `../../providers/{provider}.yaml`                      | Provider API settings                     |
+| `dq-config-file`     | `../../entities/{provider}/{entity-type}.yaml`         | Informational; loader uses full hierarchy |
+| `filter-config-file` | `../../entities/{provider}/{entity-type}.yaml`         | Informational; loader uses full hierarchy |
 | `sink.bronze.path`   | `data/output/bronze/{provider}/{entity-type}`          |                                           |
 | `sink.silver.path`   | `data/output/silver/{provider}/{entity-type}`          |                                           |
 | `sink.gold.path`     | `data/output/gold/{provider}/{entity-type}`            |                                           |
@@ -478,7 +432,7 @@ source:
     requests-per-second: 5
     burst: 10
 
-  health-check:
+  health_check:
     endpoint: /chembl/api/data/status
     timeout: 5
 

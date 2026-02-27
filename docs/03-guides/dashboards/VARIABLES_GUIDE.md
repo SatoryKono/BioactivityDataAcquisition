@@ -7,39 +7,39 @@
 
 | Dashboard UID | Переменные |
 |---|---|
-| `bioetl-simple` | `$pipeline`, `$run_type` |
-| `bioetl-overview-v2` | `$pipeline`, `$run_type` |
-| `bioetl-dq-v2` | `$pipeline`, `$run_type` |
+| `bioetl-simple` | `$pipeline`, `$run-type` |
+| `bioetl-overview-v2` | `$pipeline`, `$run-type` |
+| `bioetl-dq-v2` | `$pipeline`, `$run-type` |
 | `bioetl-provider-health-v2` | `$pipeline`, `$provider` |
 
 ## Определения переменных
 
 | Variable | Query | Multi | Include All | Refresh |
 |---|---|---|---|---|
-| `$pipeline` | `label_values(bioetl_records_processed_total, pipeline)` | Yes | Yes | On dashboard load (`1`) |
-| `$run_type` | `label_values(bioetl_records_processed_total{pipeline=~"$pipeline"}, run_type)` | Yes | Yes | On dashboard load (`1`) |
-| `$provider` | `label_values(bioetl_health_check_latency_ms_bucket, provider)` | Yes | Yes | On dashboard load (`1`) |
+| `$pipeline` | `label-values(bioetl-records-processed-total, pipeline)` | Yes | Yes | On dashboard load (`1`) |
+| `$run-type` | `label-values(bioetl-records-processed-total{pipeline=~"$pipeline"}, run-type)` | Yes | Yes | On dashboard load (`1`) |
+| `$provider` | `label-values(bioetl-health_check-latency-ms-bucket, provider)` | Yes | Yes | On dashboard load (`1`) |
 
 ## Важно
 
-- В актуальных JSON **нет** переменных `$run_id` и `execution`.
+- В актуальных JSON **нет** переменных `$run-id` и `execution`.
 - В `bioetl-provider-health-v2` используется и `$pipeline`, и `$provider`.
 
 ## Примеры PromQL с переменными
 
 ```promql
 # DQ/Overview/Simple
-sum(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type", stage="bronze"})
+sum(bioetl-records-processed-total{pipeline=~"$pipeline", run-type=~"$run-type", stage="bronze"})
 
 # Provider Health p95
-histogram_quantile(0.95, sum by (le, provider) (rate(bioetl_health_check_latency_ms_bucket{provider=~"$provider"}[5m])))
+histogram-quantile(0.95, sum by (le, provider) (rate(bioetl-health_check-latency-ms-bucket{provider=~"$provider"}[5m])))
 
 # Provider repeat panel (ID 103)
-histogram_quantile(0.95, sum by (le) (rate(bioetl_health_check_latency_ms_bucket{provider="$provider"}[5m])))
+histogram-quantile(0.95, sum by (le) (rate(bioetl-health_check-latency-ms-bucket{provider="$provider"}[5m])))
 ```
 
 ## Зависимости
 
-- Для `simple/overview/dq`: `$run_type` зависит от `$pipeline`.
+- Для `simple/overview/dq`: `$run-type` зависит от `$pipeline`.
 - Для `provider-health-v2`: `$provider` независим от `$pipeline`, но обе переменные участвуют в фильтрации панелей.
 

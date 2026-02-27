@@ -8,27 +8,24 @@
 %% @view    observability
 %% @parent  13-port-protocol-contracts.mmd
 %% @nodes   15
+%% @uniform width=192 height=56 max_title_len=19 max_desc_lines=1
 
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
 graph LR
     subgraph Domain["Domain Layer"]
-        LGP["LoggerPort"]
-        MTP["MetricsPort"]
-        TRP["TracingPort"]
-        CBP["CircuitBreakerPort"]
-        RLP["RateLimiterPort"]
+        LGP["LoggerPort"]:::size-sm
+        MTP["MetricsPort"]:::size-sm
+        TRP["TracingPort"]:::size-sm
+        CBP["CircuitBreakerPort"]:::size-sm
+        RLP["RateLimiterPort"]:::size-sm
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        UL["UnifiedLogger"]
-        SLG["StructlogLogger"]
-        NOL["NoOpLogger"]
-        MCO["MetricsCollector"]
-        PME["PrometheusMetrics"]
-        NOM["NoOpMetrics"]
-        OTT["OpenTelemetryTracer"]
-        NOT_T["NoOpTracing"]
-        CB["CircuitBreaker"]
-        TB_I["TokenBucket"]
+        UL["UnifiedLogger"]:::size-sm
+        MCO["MetricsCollector"]:::size-sm
+        OTT["OpenTelemetryTracer"]:::size-sm
+        CB["CircuitBreaker"]:::size-sm
+        TB_I["TokenBucket"]:::size-sm
     end
 
     LGP --- UL & SLG & NOL
@@ -37,6 +34,8 @@ graph LR
     CBP --- CB
     RLP --- TB_I
 
-    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
+    classDef domain fill:#f5f3ff,stroke:#7c3aed
+    classDef infra fill:#fff1f2,stroke:#dc2626
 
+    class LGP,MTP,TRP,CBP,RLP domain
+    class UL,SLG,NOL,MCO,PME,NOM,OTT,NOT_T,CB,TB_I infra

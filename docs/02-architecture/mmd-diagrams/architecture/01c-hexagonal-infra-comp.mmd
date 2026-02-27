@@ -8,29 +8,31 @@
 %% @view    infra-comp
 %% @parent  01-high-level-hexagonal.mmd
 %% @nodes   14
+%% @uniform width=200 height=56 max_title_len=20 max_desc_lines=1
 
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
 graph TB
+%% keep-orphan: FACTORIES, PROVIDERS, RT_BUILDERS, VALIDATION
     subgraph Composition["Composition Layer"]
-        BOOTSTRAP["Bootstrap / Assembly"]
-        FACTORIES["Factories"]
-        PROVIDERS["Provider Registry"]
-        RT_BUILDERS["Runtime Builders"]
+        BOOTSTRAP["Bootstrap / Assembly"]:::size-sm
+        FACTORIES["Factories"]:::size-sm
+        PROVIDERS["Provider Registry"]:::size-sm
+        RT_BUILDERS["Runtime Builders"]:::size-sm
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        ADAPTERS["HTTP Adapters"]
-        STORAGE["Storage"]
-        OBS_INFRA["Observability Infra"]
-        RESILIENCE["Resilience"]
-        SECURITY["Security"]
-        CHECKPOINT["Checkpoint"]
-        LOCKING["Locking"]
-        AUDIT["Audit"]
-        VALIDATION["Validation"]
+        ADAPTERS["HTTP Adapters"]:::size-sm
+        STORAGE["Storage"]:::size-sm
+        OBS_INFRA["Observability Infra"]:::size-sm
+        RESILIENCE["Resilience"]:::size-sm
+        SECURITY["Security"]:::size-sm
+        CHECKPOINT["Checkpoint"]:::size-sm
+        LOCKING["Locking"]:::size-sm
+        AUDIT["Audit"]:::size-sm
+        VALIDATION["Validation"]:::size-sm
     end
 
     subgraph Domain["Domain Layer"]
-        PORTS["Port Protocols"]
     end
 
     BOOTSTRAP --> ADAPTERS
@@ -45,7 +47,8 @@ graph TB
     LOCKING -->|implements| PORTS
     AUDIT -->|implements| PORTS
 
-    style Domain fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
-    style Infrastructure fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-    style Composition fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef infra fill:#fff1f2,stroke:#dc2626
+    classDef comp fill:#fff7ed,stroke:#f59e0b
 
+    class BOOTSTRAP,FACTORIES,PROVIDERS,RT_BUILDERS comp
+    class ADAPTERS,STORAGE,OBS_INFRA,RESILIENCE,SECURITY,CHECKPOINT,LOCKING,AUDIT,VALIDATION infra

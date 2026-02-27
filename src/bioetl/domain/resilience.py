@@ -151,7 +151,7 @@ class AdapterConfig:
     Single source of truth for batch sizes, timeouts, and page sizes.
 
     Implements RULES.md §12.1.2 - YAML MUST map to Pydantic and be validated.
-    All values are loaded from configs/sources/{provider}.yaml.
+    All values are loaded from configs/providers/{provider}.yaml.
 
     Args:
         batch_size: Number of records per request batch for filtered queries.

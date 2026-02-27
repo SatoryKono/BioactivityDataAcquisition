@@ -67,7 +67,7 @@
 
   - `DataSourcePort` — для проверки адаптеров при регистрации
   - `FilterableDataSourcePort` — для проверки расширенных адаптеров
-  - `HealthCheckPort` — для проверки health-check capability
+  - `HealthCheckPort` — для проверки health_check capability
   - `StoragePort` — для проверки storage backends
 
   Остальные порты (`LoggerPort`, `MetricsPort`, `TracingPort` и т.д.) **MAY** не иметь `@runtime-checkable`.
@@ -82,25 +82,25 @@ class DataSourcePort(Protocol):
     # Async generator, yields dict records per API page.
     def fetch(
         self,
-        entity-type: str,
+        entity_type: str,
         limit: int | None = None,
         query: str | None = None,
-        filter-ids: list[str] | None = None,
-        filter-field: str | None = None,
+        filter_ids: list[str] | None = None,
+        filter_field: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]: ...
-    async def health-check(self) -> HealthStatus: ...
+    async def health_check(self) -> HealthStatus: ...
 ```
 
 ### 1.1.2. Health Check Protocol
 
-Все адаптеры **MUST** реализовывать асинхронный метод `health-check()` возвращающий `HealthStatus` enum:
+Все адаптеры **MUST** реализовывать асинхронный метод `health_check()` возвращающий `HealthStatus` enum:
 
 ```python
 from bioetl.domain.types import HealthStatus
 
 
 class MyAdapter:
-    async def health-check(self) -> HealthStatus:
+    async def health_check(self) -> HealthStatus:
         """Проверка доступности внешнего сервиса.
 
         Returns:
@@ -183,10 +183,10 @@ sink:
 | Entity                                                                                                                                | Current Mode         | Recommended Mode     | Breaking | Migration                                                                            |
 | ------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | -------------------- | -------- | ------------------------------------------------------------------------------------ |
 | publication (chembl/pubmed/crossref/openalex/semanticscholar)                                                                         | implicit `overwrite` | `scd2`               | Yes      | Bootstrap snapshot, затем включить SCD2 и backfill интервалов валидности             |
-| reference dictionaries (chembl: assay, assay_parameters, cell_line, tissue, protein_class, subcellular_fraction)                      | implicit `overwrite` | `scd2`               | Yes      | Единоразовый rebuild + переход на versioned upsert                                   |
-| slowly evolving records (chembl: target, target_component, molecule, compound_record; uniprot: protein, idmapping; pubchem: compound) | implicit `overwrite` | `scd2`               | Yes      | Инициализировать current как version=1, дальнейшие изменения писать как новые версии |
+| reference dictionaries (chembl: assay, assay-parameters, cell-line, tissue, protein-class, subcellular-fraction)                      | implicit `overwrite` | `scd2`               | Yes      | Единоразовый rebuild + переход на versioned upsert                                   |
+| slowly evolving records (chembl: target, target-component, molecule, compound-record; uniprot: protein, idmapping; pubchem: compound) | implicit `overwrite` | `scd2`               | Yes      | Инициализировать current как version=1, дальнейшие изменения писать как новые версии |
 | high-volume facts (chembl: activity)                                                                                                  | implicit `overwrite` | `append`             | No       | Явно зафиксировать append в pipeline YAML                                            |
-| recomputed derived outputs (chembl: publication_similarity, publication_term)                                                         | implicit `overwrite` | explicit `overwrite` | No       | Оставить overwrite, но задать явно в pipeline YAML                                   |
+| recomputed derived outputs (chembl: publication-similarity, publication-term)                                                         | implicit `overwrite` | explicit `overwrite` | No       | Оставить overwrite, но задать явно в pipeline YAML                                   |
 
 ### 2.1.3. Инфраструктура Delta Lake
 
@@ -248,10 +248,10 @@ Lock key включает тип запуска:
 
 ```python
 # В MedallionLifecycleService.clear()
-if self.runtime.run - type in (RunType.REBUILD, RunType.BACKFILL):
-    await self.services.storage.clear - silver(self.config.silver - table)
-    if self.config.gold - table:
-        await self.services.storage.clear - gold(self.config.gold - table)
+if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
+    await self.services.storage.clear_silver(self.config.silver_table)
+    if self.config.gold_table:
+        await self.services.storage.clear_gold(self.config.gold_table)
 ```
 
 **Проверка:** Интеграционный тест `tests/integration/test-runner-lifecycle.py::test-incremental-skips-clear`.
@@ -310,9 +310,9 @@ if self.runtime.run - type in (RunType.REBUILD, RunType.BACKFILL):
 
 **Причина**: Pandas/Polars исторически не поддерживали nullable integers без специального типа `Int64` (с заглавной I). Float — единственный способ представить `int + NULL` без потери данных для больших значений. `NaN` используется для отсутствующих значений.
 
-<!-- Updated: was ~34, now ~88 (audit 2026-02-14) -->
+<!-- Updated: was ~34→~88→~104 (audit 2026-02-27) -->
 
-**Затронутые поля (~88 occurrences)**:
+**Затронутые поля (~104 occurrences)**:
 
 > **Примечание**: Для получения актуального числа occurrences:
 > `grep -rn "coerce=True" src/bioetl/infrastructure/schemas/ src/bioetl/domain/schemas/ --include="*.py" | grep -c "Series\[float\]"`
@@ -340,7 +340,7 @@ if self.runtime.run - type in (RunType.REBUILD, RunType.BACKFILL):
 - **MAY** конвертировать `float → int` после проверки на `NaN` (если бизнес-логика требует)
 - **MUST NOT** предполагать, что все значения — целые числа
 
-**Реализация**: `src/bioetl/infrastructure/schemas/gold.py`
+**Реализация**: `src/bioetl/domain/contracts/gold/` (`chembl.py`, `composite.py`, `publications.py`, `pubchem.py`, `uniprot.py`)
 
 #### Schema Typing Policy (JSON-like поля)
 
@@ -385,7 +385,7 @@ if self.runtime.run - type in (RunType.REBUILD, RunType.BACKFILL):
 
 ### 2.7. Стратегия Загрузки (Load Strategy)
 
-| Критерий                                  | `loading_strategy: full_scan_only` |
+| Критерий                                  | `loading-strategy: full-scan-only` |
 | ----------------------------------------- | ---------------------------------- |
 | Источник с нестабильной offset-пагинацией | ✅ Обязательно                     |
 | Checkpoint resume                         | ❌ Запрещён                        |
@@ -393,9 +393,9 @@ if self.runtime.run - type in (RunType.REBUILD, RunType.BACKFILL):
 | Типичные сущности                         | Publication family, derived sets   |
 
 - **Watermark**: Механизм удалён согласно [ADR-011](../02-architecture/decisions/ADR-011-remove-watermark-mechanism.md).
-- **Конфигурация**: `loading_strategy: full_scan_only` задаётся в `configs/entities/{provider}/{entity}.yaml` секция `pipeline:` (см. [ADR-031](../02-architecture/decisions/ADR-031-loading-strategy-formalization.md)).
-- **Default behavior**: При `loading_strategy: null` разрешён checkpoint-based resume (стандартный incremental-поток).
-- **Checkpoint policy**: Для `full_scan_only` возобновление через checkpoint **MUST NOT** использоваться.
+- **Конфигурация**: `loading-strategy: full-scan-only` задаётся в `configs/entities/{provider}/{entity}.yaml` секция `pipeline:` (см. [ADR-031](../02-architecture/decisions/ADR-031-loading-strategy-formalization.md)).
+- **Default behavior**: При `loading-strategy: null` разрешён checkpoint-based resume (стандартный incremental-поток).
+- **Checkpoint policy**: Для `full-scan-only` возобновление через checkpoint **MUST NOT** использоваться.
 
 ### 2.8. Генерация ID Сущности (Entity ID)
 
@@ -444,7 +444,7 @@ Dependencies — пайплайны, которые запускаются **п�
 dependencies:
   - pipeline: chembl_target_component
     join-keys: [component-id]       # Ключ из seed
-    silver-table: silver/chembl/target_component
+    silver-table: silver/chembl/target-component
 ```
 
 **Chained Dependencies (цепочечные зависимости):**
@@ -456,14 +456,14 @@ dependencies:
   # 1. Стандартный: ключи из seed
   - pipeline: chembl_target_component
     join-keys: [component-id]
-    silver-table: silver/chembl/target_component
+    silver-table: silver/chembl/target-component
 
   # 2. Цепочечный: ключи из предыдущего dependency
   - pipeline: chembl_protein_class
-    join-keys: [protein_classification-id]  # Колонка в source таблице
-    filter-field: protein_class-id          # Поле API (если отличается)
+    join-keys: [protein-classification-id]  # Колонка в source таблице
+    filter-field: protein-class-id          # Поле API (если отличается)
     key-source: chembl_target_component     # Читать ключи отсюда
-    silver-table: silver/chembl/protein_class
+    silver-table: silver/chembl/protein-class
 ```
 
 **Поля DependencyConfig:**
@@ -567,9 +567,9 @@ merge:
 
 <!-- Updated: was 94, now 106 (audit 2026-02-14) -->
 
-**Конфигурация:** `configs/composite/field-groups/publication.yaml` — 106 базовых полей, маппинг на провайдерские колонки.
+**Конфигурация:** `configs/composites/field_groups/publication.yaml` — 106 базовых полей, маппинг на провайдерские колонки.
 
-**Доменные модели** (`domain/composite/field-groups.py`):
+**Доменные модели** (`domain/composite/field_groups.py`):
 
 - `FieldMapping` — маппинг `base-name → provider-columns + group`
 - `FieldGroupDefinition` — определение группы с её полями
@@ -691,7 +691,7 @@ content-hash → content-version → version-hash
 
 ### 3.2.2. Prometheus Metrics
 
-**Endpoint:** `http://localhost:{BIOETL-METRICS-PORT}/metrics` (default port: 8000)
+**Endpoint:** `http://localhost:{BIOETL_METRICS_PORT}/metrics` (default port: 8000)
 
 **Запуск метрик:**
 
@@ -778,9 +778,9 @@ content-hash → content-version → version-hash
 | --------- | ------------------------------- | ------------------------- |
 | Healthy   | 0 errors за 5 мин               | Normal operation          |
 | Degraded  | 1-2 consecutive errors          | Timeout ×2, batch-size ÷2 |
-| Unhealthy | ≥3 errors или health-check fail | Pause pipeline, Alert P2  |
+| Unhealthy | ≥3 errors или health_check fail | Pause pipeline, Alert P2  |
 
-**Recovery**: Unhealthy → Degraded после 1 успешного health-check.
+**Recovery**: Unhealthy → Degraded после 1 успешного health_check.
 **Metric**: `provider-health-status{provider}` (0=Unhealthy, 1=Degraded, 2=Healthy).
 
 ## 4. Стандарты Кода и Тестирование
@@ -802,10 +802,13 @@ content-hash → content-version → version-hash
 
 | Адаптер          | Базовый класс     | HTTP-клиент              | Статус            |
 | ---------------- | ----------------- | ------------------------ | ----------------- |
-| `ChemblAdapter`  | `BaseHttpAdapter` | `UnifiedHTTPClient`      | ✅ Унифицирован   |
-| `UniProtAdapter` | `BaseHttpAdapter` | `UnifiedHTTPClient`      | ✅ Унифицирован   |
-| `PubMedAdapter`  | `@dataclass`      | `UnifiedHTTPClient`      | ✅ Унифицирован   |
-| `PubChemAdapter` | `BaseSyncAdapter` | `pubchempy` + ThreadPool | ✅ Legacy-обёртка |
+| `ChemblAdapter`          | `BaseHttpAdapter` | `UnifiedHTTPClient`      | ✅ Унифицирован   |
+| `UniProtAdapter`         | `BaseHttpAdapter` | `UnifiedHTTPClient`      | ✅ Унифицирован   |
+| `PubMedAdapter`          | Mixin-based       | `UnifiedHTTPClient`      | ✅ Унифицирован   |
+| `PubChemAdapter`         | `BaseSyncAdapter` | `pubchempy` + ThreadPool | ✅ Legacy-обёртка |
+| `CrossRefAdapter`        | `BaseHttpAdapter` | `UnifiedHTTPClient`      | ✅ Унифицирован   |
+| `OpenAlexAdapter`        | `BaseHttpAdapter` | `UnifiedHTTPClient`      | ✅ Унифицирован   |
+| `SemanticScholarAdapter` | `BaseHttpAdapter` | `UnifiedHTTPClient`      | ✅ Унифицирован   |
 
 **Компоненты `UnifiedHTTPClient`:**
 
@@ -824,36 +827,36 @@ from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 
 class NewProviderAdapter(BaseHttpAdapter):
-    def --init--(
+    def __init__(
         self,
-        http-client: UnifiedHTTPClient,
+        http_client: UnifiedHTTPClient,
         logger: LoggerPort,
     ):
-        super().--init--(http-client, logger)
-        self.provider-name = "new-provider"
+        super().__init__(http_client, logger)
+        self.provider_name = "new-provider"
 ```
 
 **Для sync-библиотек** используйте `BaseSyncAdapter` с DI:
 
 ```python
-from bioetl.infrastructure.adapters.sync-base import BaseSyncAdapter
+from bioetl.infrastructure.adapters.sync_base import BaseSyncAdapter
 
 class LegacyAdapter(BaseSyncAdapter):
-    provider-name = "legacy"
+    provider_name = "legacy"
 
-    def --init--(
+    def __init__(
         self,
         logger: LoggerPort,
-        rate-limiter: TokenBucket,
-        circuit-breaker: CircuitBreaker,
-        thread-pool: ThreadPoolExecutor,
+        rate_limiter: TokenBucket,
+        circuit_breaker: CircuitBreaker,
+        thread_pool: ThreadPoolExecutor,
     ):
         # Все зависимости инжектируются из Composition Root
-        super().--init--(logger, rate-limiter, circuit-breaker, thread-pool)
+        super().__init__(logger, rate_limiter, circuit_breaker, thread_pool)
 
     async def fetch(self, ...):
         # Sync call wrapped in executor
-        result = await self.-run-in-executor(sync-library.fetch, query)
+        result = await self._run_in_executor(sync_library.fetch, query)
 ```
 
 ### 4.2. Политика Тестирования
@@ -938,20 +941,20 @@ RetryConfig(
 При `deterministic=True` jitter вычисляется как:
 
 ```python
-hash - input = f"{attempt}:{url}:{seed}"
-jitter - factor = (hash(hash - input) % 1000) / 1000.0
+hash_input = f"{attempt}:{url}:{seed}"
+jitter_factor = (hash(hash_input) % 1000) / 1000.0
 ```
 
 #### Единый Источник Времени
 
 ```python
 # Application layer создаёт timestamp
-context = PipelineContext.create(run - id, run - type, logger)
-# context.started-at используется во всех компонентах
+context = PipelineContext.create(run_id, run_type, logger)
+# context.started_at используется во всех компонентах
 
 # Infrastructure получает timestamp как параметр
-await bronze - writer.write - bronze(..., ingestion - ts=context.started - at)
-await quarantine.write(..., ingestion - ts=context.started - at)
+await bronze_writer.write_bronze(..., ingestion_ts=context.started_at)
+await quarantine.write(..., ingestion_ts=context.started_at)
 ```
 
 ### 4.4. Python Standards
@@ -961,7 +964,7 @@ await quarantine.write(..., ingestion - ts=context.started - at)
 Все Python-файлы **MUST** начинаться с:
 
 ```python
-from --future-- import annotations
+from __future__ import annotations
 ```
 
 **Причины:**
@@ -977,17 +980,17 @@ from --future-- import annotations
 1. Shebang (если есть): `#!/usr/bin/env python`
 1. Encoding declaration (если есть): `# -*- coding: utf-8 -*-`
 1. Module docstring
-1. `from --future-- import annotations` ← сразу после docstring
+1. `from __future__ import annotations` ← сразу после docstring
 1. Другие импорты
 
-> **Исключение**: `--init--.py` файлы, содержащие только re-exports (`from ... import ...`)
-> и `--all--`, **MAY** опускать `from --future-- import annotations`, так как
+> **Исключение**: `__init__.py` файлы, содержащие только re-exports (`from ... import ...`)
+> и `__all__`, **MAY** опускать `from __future__ import annotations`, так как
 > они не содержат type annotations, требующих отложенной эвалюации.
 
 <!-- Updated: was 497/534 (93.1%), now 501/534 (93.8%); was 37, now 33 (audit 2026-02-17) -->
 
 > Текущее состояние: 501 из 534 файлов (93.8%) содержат импорт;
-> 33 файла без импорта — все `--init--.py` (re-export only).
+> 33 файла без импорта — все `__init__.py` (re-export only).
 
 #### 4.4.2. Type Hints
 
@@ -1005,7 +1008,7 @@ from --future-- import annotations
 ### 5.2. Управление Секретами
 
 - **Источник**: Переменные окружения (`os.environ`).
-- **Формат**: `BIOETL-{PROVIDER}-{KEY}` (например, `BIOETL-PUBCHEM-API-KEY`).
+- **Формат**: `BIOETL_{PROVIDER}_{KEY}` (например, `BIOETL_PUBCHEM_API_KEY`).
 - **Запрещено**: Хардкод секретов **MUST NOT**. Файлы `.env` в git **MUST NOT**.
 
 ### 5.3. Graceful Shutdown (Штатное завершение)
@@ -1142,9 +1145,9 @@ async with services:  # --aenter-- инициализирует ресурсы
 
 ```python
 # domain/resilience.py — MD5-based jitter для кросс-процессной стабильности
-hash - input = f"{attempt}:{url}:{seed}"
-digest = hashlib.md5(hash - input.encode(), usedforsecurity=False).hexdigest()
-jitter - factor = int(digest[:8], 16) / 0xFFFFFFFF
+hash_input = f"{attempt}:{url}:{seed}"
+digest = hashlib.md5(hash_input.encode(), usedforsecurity=False).hexdigest()
+jitter_factor = int(digest[:8], 16) / 0xFFFFFFFF
 ```
 
 При `RetryConfig(deterministic=False)` выдаётся `DeprecationWarning` — рекомендуется переход на детерминистичный режим.
@@ -1157,7 +1160,7 @@ jitter - factor = int(digest[:8], 16) / 0xFFFFFFFF
 > Утверждения делались без проверки фактического состояния кода.
 
 > **⚠️ ОБЯЗАТЕЛЬНО**: Перед предложением рефакторинга **MUST** выполнить верификацию согласно
-> протоколу из `CLAUDE.md` §0 и сверяться с секцией "УЖЕ РЕАЛИЗОВАНО" в `docs/archived/refactoring-plan.md`.
+> протоколу из `CLAUDE.md` §0 и сверяться с секцией "УЖЕ РЕАЛИЗОВАНО" в `docs/99-archive/refactoring-plan.md`.
 
 При проведении архитектурных обзоров **MUST** выполнять двойную верификацию каждой найденной проблемы:
 
@@ -1174,7 +1177,7 @@ grep -c "def \|async def " src/bioetl/path/to/file.py
 grep -n "self\.-.*\." src/bioetl/path/to/file.py | head -20
 
 # 3. Сверить с известными ложными утверждениями
-grep -A3 "ЛОЖНЫЕ УТВЕРЖДЕНИЯ" docs/archived/refactoring-plan.md
+grep -A3 "ЛОЖНЫЕ УТВЕРЖДЕНИЯ" docs/99-archive/refactoring-plan.md
 
 # 4. Найти существующие реализации
 grep -r "class ClassName\|def method-name" src/bioetl/
@@ -1234,12 +1237,12 @@ PipelineRunner.run() создаёт PipelineObserver напрямую вмест
 
 #### 7.1.4. Типичные Ложные Выводы
 
-<!-- Updated: ChemblAdapter was 517, now 975; GoldWriter was 593, now 946 (audit 2026-02-14) -->
+<!-- Updated: ChemblAdapter 975→992; GoldWriter 946→960 (audit 2026-02-27) -->
 
 | Паттерн                             | Почему ошибочен                                                         | Пример из кодовой базы                                                                         |
 | ----------------------------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| "500+ LOC = god object"             | Размер ≠ сложность. Когезивный сервис с единой ответственностью валиден | `ChemblAdapter` (975 LOC) делегирует через `EntityMapper`, `ErrorClassifier`, `AdapterMetrics` |
-| "Монолит требует декомпозиции"      | Файл с делегированием — НЕ монолит                                      | `GoldWriter` (946 LOC) делегирует `CsvExporter`, `AuditPort`, режимы записи когезивны          |
+| "500+ LOC = god object"             | Размер ≠ сложность. Когезивный сервис с единой ответственностью валиден | `ChemblAdapter` (992 LOC) делегирует через `EntityMapper`, `ErrorClassifier`, `AdapterMetrics` |
+| "Монолит требует декомпозиции"      | Файл с делегированием — НЕ монолит                                      | `GoldWriter` (960 LOC) делегирует `CsvExporter`, `AuditPort`, режимы записи когезивны          |
 | "NoOp default = нарушение DI"       | Null Object Pattern валиден для опциональных зависимостей               | `NoOpMetrics`, `NoOpTracing`                                                                   |
 | "Optional parameter = нарушение DI" | \`policy: Policy                                                        | None = None\` — допустимый паттерн для value objects                                           |
 | "click.echo в CLI = нарушение"      | User-facing output — законная ответственность interfaces слоя           | `cli.py` confirmation prompts                                                                  |
@@ -1272,7 +1275,7 @@ grep -o "self\.-[a-z-]*" src/bioetl/path/to/file.py | sort -u | wc -l
 grep -c "^    def \|^    async def " src/bioetl/path/to/file.py
 
 # 4. Сверить с известными ложными утверждениями
-grep "ChemblAdapter\|GoldWriter\|PreflightService" docs/archived/refactoring-plan.md
+grep "ChemblAdapter\|GoldWriter\|PreflightService" docs/99-archive/refactoring-plan.md
 ```
 
 **Критерии "монолита" (ВСЕ должны выполняться):**
@@ -1284,24 +1287,24 @@ grep "ChemblAdapter\|GoldWriter\|PreflightService" docs/archived/refactoring-pla
 
 **Контрпримеры (НЕ монолиты, несмотря на размер):**
 
-<!-- Updated: ChemblAdapter was 517→975; GoldWriter was 593→946; PreflightService was 527→818 (audit 2026-02-14) -->
+<!-- Updated: ChemblAdapter 975→992; GoldWriter 946→960; PreflightService 818→841 (audit 2026-02-27) -->
 
-- `ChemblAdapter` (975 LOC): Делегирует 4 компонентам, когезивная ответственность
-- `GoldWriter` (946 LOC): Делегирует `CsvExporter`, `AuditPort`, режимы записи когезивны
-- `PreflightService` (818 LOC): 21 метод с единой ответственностью (preflight validation)
+- `ChemblAdapter` (992 LOC): Делегирует 4 компонентам, когезивная ответственность
+- `GoldWriter` (960 LOC): Делегирует `CsvExporter`, `AuditPort`, режимы записи когезивны
+- `PreflightService` (841 LOC): 21 метод с единой ответственностью (preflight validation)
 
 ### 7.2. Обновление Документации
 
 При обнаружении ложного утверждения **MUST**:
 
-1. Добавить в `docs/archived/refactoring-plan.md` → секция "❌ ЛОЖНЫЕ УТВЕРЖДЕНИЯ"
+1. Добавить в `docs/99-archive/refactoring-plan.md` → секция "❌ ЛОЖНЫЕ УТВЕРЖДЕНИЯ"
 1. Указать причину, почему утверждение ложно
 1. Добавить ссылку на код (`файл:строка`)
 1. Закоммитить изменения
 
 При реализации задачи **MUST**:
 
-1. Переместить в `docs/archived/refactoring-plan.md` → секция "✅ УЖЕ РЕАЛИЗОВАНО"
+1. Переместить в `docs/99-archive/refactoring-plan.md` → секция "✅ УЖЕ РЕАЛИЗОВАНО"
 1. Добавить ссылку на коммит или файл
 1. Указать дату реализации
 
@@ -1322,10 +1325,10 @@ grep "^from\|^import" src/bioetl/path/to/file.py | head -20
 find tests -name "*.py" -exec grep -l "ClassName" {} \;
 
 # Проверка в списке ложных утверждений
-grep -B2 -A2 "ComponentName" docs/archived/refactoring-plan.md
+grep -B2 -A2 "ComponentName" docs/99-archive/refactoring-plan.md
 ```
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## 8. Управление Изменениями
 
@@ -1411,7 +1414,7 @@ make run-local    # запуск сэмплового пайплайна на ф
 
 - **.env.example**: Шаблон переменных окружения (без секретов).
 
-______________________________________________________________________
+----------------------------------------------------------------------
 
 ## Приложение А: Источники и Библиотеки
 
@@ -1430,7 +1433,7 @@ ______________________________________________________________________
 \* **Generic Probe**: Lightweight GET-запрос к базовому endpoint API (e.g., root или `/status`). Если API не предоставляет dedicated health endpoint, использовать минимальный запрос данных с timeout 5 секунд.
 
 > **Каноническая конфигурация rate limits** (burst, batch-size, конкретные числа) находится в
-> `configs/providers/{provider}.yaml`. Подробная таблица: [pipeline-configuration.md](../03-guides/pipeline-configuration.md#provider-rate-limits).
+> `configs/providers/{provider}.yaml`. Подробная таблица: [pipeline-configuration.md](../03-guides/pipeline-configuration.md).
 
 ### А.1. Формирование URL для ChEMBL API
 
@@ -1449,15 +1452,15 @@ URL-адреса для ChEMBL формируются в `infrastructure/adapter
 | ------------------ | ------------------------ | -------------------- |
 | `activity`         | `activity`               | `activity-id`        |
 | `assay`            | `assay`                  | `assay-chembl-id`    |
-| `assay_parameters` | `assay`                  | *(composite)*        |
-| `cell_line`        | `cell_line`              | `cell-chembl-id`     |
+| `assay-parameters` | `assay`                  | *(composite)*        |
+| `cell-line`        | `cell-line`              | `cell-chembl-id`     |
 | `compound`         | `molecule`               | `molecule-chembl-id` |
-| `compound_record`  | `compound_record`        | `record-id`          |
+| `compound-record`  | `compound-record`        | `record-id`          |
 | `molecule`         | `molecule`               | `molecule-chembl-id` |
-| `protein_class`    | `protein_classification` | `protein_class-id`   |
+| `protein-class`    | `protein-classification` | `protein-class-id`   |
 | `publication`      | `document`               | `document-chembl-id` |
 | `target`           | `target`                 | `target-chembl-id`   |
-| `target_component` | `target_component`       | `component-id`       |
+| `target-component` | `target-component`       | `component-id`       |
 | `tissue`           | `tissue`                 | `tissue-chembl-id`   |
 
 **Query parameters** (формируются в `ChemblAdapter.-build-params()`):
@@ -1514,64 +1517,64 @@ configs/entities/{provider}/{entity}.yaml
 ```yaml
 # configs/entities/chembl/activity.yaml
 # Unified entity config (ADR-039).
-# Combines pipeline, schema, quality, filters, contracts, hash_policy.
+# Combines pipeline, schema, quality, filters, contracts, hash-policy.
 version: 1.0.0
 provider: chembl
 entity: activity
 
 pipeline:
-  pipeline_name: chembl_activity
+  pipeline-name: chembl_activity
   provider: chembl
-  entity_type: activity
+  entity-type: activity
   description: Extract biological activity records from ChEMBL API
-  business_primary_keys: [activity_id]
-  batch_size: 1000
-  dq_overrides:
-    field_validations:
-      - field: standard_value
+  business-primary-keys: [activity-id]
+  batch-size: 1000
+  dq-overrides:
+    field-validations:
+      - field: standard-value
         type: range
         min: 0
         max: 1000000000
         nullable: true
 
 schema:
-  column_groups:
+  column-groups:
     - name: system
-      fields: [entity_id, content_hash, _run_id, ...]
+      fields: [entity-id, content-hash, -run-id, ...]
     - name: business
-      fields: [activity_id, assay_id, ...]
+      fields: [activity-id, assay-id, ...]
     - name: dq
-      pattern: ^_dq_
+      pattern: ^-dq-
   silver:
-    include_groups: [system, business, dq]
-    alias_policy: preserve
+    include-groups: [system, business, dq]
+    alias-policy: preserve
   gold:
-    include_groups: [system, business]
-    exclude_fields: [_dq_*, _source_batch_id]
-    alias_policy: canonical
+    include-groups: [system, business]
+    exclude-fields: [-dq-*, -source-batch-id]
+    alias-policy: canonical
 
 quality:
-  field_validations:
-    - field: activity_id
+  field-validations:
+    - field: activity-id
       type: required
       nullable: false
-  cross_field_validations: [...]
-  conditional_validations: [...]
+  cross-field-validations: [...]
+  conditional-validations: [...]
 
 filters:
-  extraction_params:
-    standard_type__in: IC50,Ki
-  silver_filters:
+  extraction-params:
+    standard-type--in: IC50,Ki
+  silver-filters:
     columns:
-      standard_type: [IC50, Ki]
-  gold_filters:
-    required_fields: [standard_value, target_id]
+      standard-type: [IC50, Ki]
+  gold-filters:
+    required-fields: [standard-value, target-id]
 
 contracts:
-  primary_key: [activity_id]
-  merge_keys: [activity_id]
-  rename_map: {run_id: _run_id}
-  hash_exclude: [_ingestion_ts, _run_id]
+  primary-key: [activity-id]
+  merge-keys: [activity-id]
+  rename-map: {run-id: -run-id}
+  hash-exclude: [-ingestion-ts, -run-id]
 ```
 
 Composite pipeline конфиги расположены в `configs/composites/{entity}.yaml`.
@@ -1645,7 +1648,7 @@ fields:
 | [ADR-005](../02-architecture/decisions/ADR-005-composition-layer-separation.md)      | Composition Layer Separation               | Accepted           | 2025-12    |
 | [ADR-006](../02-architecture/decisions/ADR-006-logger-metrics-ports.md)              | Logger and Metrics Ports                   | Accepted           | 2025-12-18 |
 | [ADR-007](../02-architecture/decisions/ADR-007-circuit-breaker-implementation.md)    | Circuit Breaker Implementation             | Accepted           | 2025-12-22 |
-| [ADR-008](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)        | Graceful Shutdown Strategy                 | Accepted           | 2025-12-22 |
+| [ADR-008](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)        | Graceful Shutdown Strategy                 | Superseded         | 2025-12-22 |
 | [ADR-009](../02-architecture/decisions/ADR-009-paginated-fetcher-mixin.md)           | PaginatedFetcherMixin Design               | Accepted           | 2025-12-22 |
 | [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md)             | Local-Only Deployment                      | Accepted           | 2025-12-23 |
 | [ADR-011](../02-architecture/decisions/ADR-011-remove-watermark-mechanism.md)        | Remove Watermark Mechanism                 | Accepted           | 2025-12-23 |
@@ -1670,24 +1673,25 @@ fields:
 | [ADR-030](../02-architecture/decisions/ADR-030-publication-pagination-strategy.md)   | Publication Pagination Strategy            | Accepted           | 2026-01-26 |
 | [ADR-031](../02-architecture/decisions/ADR-031-loading-strategy-formalization.md)    | Loading Strategy Formalization             | Accepted           | 2026-01-26 |
 | [ADR-032](../02-architecture/decisions/ADR-032-unified-http-client.md)               | Unified HTTP Client Pattern                | Accepted           | 2026-01-28 |
-| [ADR-033](../02-architecture/decisions/ADR-033-publication-validation-strategy.md)   | Publication Metadata Validation Strategy   | Added              | 2026-02-06 |
+| [ADR-033](../02-architecture/decisions/ADR-033-publication-validation-strategy.md)   | Publication Metadata Validation Strategy   | Accepted           | 2026-02-06 |
 | [ADR-034](../02-architecture/decisions/ADR-034-schema-domain-pairs.md)               | Schema↔Domain Configuration Pairs          | Accepted           | 2026-02-15 |
 | [ADR-035](../02-architecture/decisions/ADR-035-json-field-typing-policy.md)          | JSON Field Typing Policy (Silver↔Gold)     | Accepted           | 2026-02-17 |
 | [ADR-036](../02-architecture/decisions/ADR-036-gold-contract-versioning-policy.md)   | Gold Contract Versioning Policy            | Accepted           | 2026-02-18 |
 | [ADR-037](../02-architecture/decisions/ADR-037-canonical-schema-generation.md)       | Canonical Schema Source and Generation     | Accepted           | 2026-02-18 |
 | [ADR-038](../02-architecture/decisions/ADR-038-enum-externalization.md)              | ChEMBL Enum Values Externalization to YAML | Accepted           | 2026-02-16 |
 | [ADR-039](../02-architecture/decisions/ADR-039-unified-entity-config-format.md)      | Unified Entity Configuration Format        | Accepted           | 2026-02-24 |
+| [ADR-040](../02-architecture/decisions/ADR-040-diagram-governance.md)                | Diagram Governance and Layout Policy       | Accepted           | 2026-02-25 |
 
 ## История Изменений (Changelog)
 
-- **5.22** (2026-02-24): Unified Entity Config. ADR-039 добавлен — Unified Entity Config Format. 21 стандартных pipeline config переведены из `configs/pipelines/` в `configs/entities/`; composite configs перенесены в `configs/composites/`; provider source configs — в `configs/providers/`.
+- **5.22** (2026-02-24): Unified Entity Config. ADR-039 добавлен — Unified Entity Config Format. 21 стандартных pipeline config переведены из `configs/entities/` в `configs/entities/`; composite configs перенесены в `configs/composites/`; provider source configs — в `configs/providers/`.
 - **5.21** (2026-02-21): Deduplication Policy Implementation.
 - **5.20** (2026-02-17): Audit Sync. Future annotations (497→501, 93.8%). Тест-функций (`def test-`): ~9,442; параметризованных кейсов (`pytest --collect-only`): ~11,985. Python-файлов (~1,114→~1,161). Исправлен .importlinter gap (infrastructure→composition). Архивирован orphaned ADR-030. TYPE-002 `Any` justification — 21 инстанс.
 - **5.19** (2026-02-16): Documentation Sync. Файлов кода (517→534), future annotations (481→497, 93.1%). ADR-034 (Schema↔Domain Configuration Pairs) добавлен в реестр. Тестов (~7,090→~11,985). Python-файлов (~1,094→~1,114). Синхронизация 00-map.md, CLAUDE.md, 00-overview.md, decisions/README.md.
 - **5.18** (2026-02-15): Statistics Update. Обновлены числовые данные по результатам аудита 2026-02-14: файлов кода (499→517), future annotations (468→481), Int→Float coercion occurrences (~34→~88), publication field groups (94→106), LOC для ChemblAdapter (517→975), GoldWriter (593→946), PreflightService (527→818).
 - **5.17** (2026-02-03): Chained Dependencies. Добавлена секция §2.9.1 "Dependency Pipelines (Chained Dependencies)" — поддержка `key-source` и `filter-field` для цепочечных зависимостей в composite pipelines. Обновлён ADR-026.
 - **5.16** (2026-02-02): ADR Registry Update + Doc Sync. Добавлен ADR-032 в реестр (Приложение F): Unified HTTP Client Pattern. Синхронизация метрик с кодовой базой.
-- **5.15** (2026-01-29): Field Group Registry. Добавлена §2.9.4 "Field Group Registry" — семантическая группировка полей для Gold-фильтрации и сортировки колонок. Домен: `FieldGroupRegistry`, `FieldMapping`, `FieldGroupDefinition`. YAML-конфиг: `configs/composites/field_groups/publication.yaml`. Интеграция с `MergeService` для автоматической фильтрации TRASH-полей из Gold.
+- **5.15** (2026-01-29): Field Group Registry. Добавлена §2.9.4 "Field Group Registry" — семантическая группировка полей для Gold-фильтрации и сортировки колонок. Домен: `FieldGroupRegistry`, `FieldMapping`, `FieldGroupDefinition`. YAML-конфиг: `configs/composites/field-groups/publication.yaml`. Интеграция с `MergeService` для автоматической фильтрации TRASH-полей из Gold.
 - **5.14** (2026-01-28): Composite Pipeline Documentation. Добавлена секция §2.9 "Composite Pipelines" с документацией `preserve-all-sources` feature, column groups и merge strategies. Ссылка на ADR-026.
 - **5.13** (2026-01-28): ADR Registry Update. Добавлены ADR-029..031 в реестр (Приложение F): Output Metadata Unification, Publication Pagination Strategy, Loading Strategy Formalization.
 - **5.12** (2026-01-21): ADR Registry Update. Добавлены ADR-021..028 в реестр (Приложение F). Добавлены inline ссылки на новые ADR в соответствующие секции (§1.1, §2.8, §3.2, App D).

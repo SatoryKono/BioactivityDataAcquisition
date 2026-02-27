@@ -6,7 +6,7 @@
 
 ## Context
 
-Data Quality (DQ) rules were embedded directly in pipeline YAML configuration files (`configs/pipelines/{provider}/{entity}.yaml`). This caused several problems:
+Data Quality (DQ) rules were embedded directly in pipeline YAML configuration files (`configs/entities/{provider}/{entity}.yaml`). This caused several problems:
 
 1. **Duplication**: Same thresholds and validation rules repeated across pipelines
 2. **Maintenance burden**: Changing global DQ policies required editing multiple files
@@ -15,12 +15,12 @@ Data Quality (DQ) rules were embedded directly in pipeline YAML configuration fi
 
 Example of duplication:
 ```yaml
-# configs/pipelines/chembl/activity.yaml
+# configs/entities/chembl/activity.yaml
 dq-overrides:
   soft-fail-threshold: 0.05
   hard-fail-threshold: 0.20
 
-# configs/pipelines/chembl/molecule.yaml
+# configs/entities/chembl/molecule.yaml
 dq-overrides:
   soft-fail-threshold: 0.05  # Duplicated
   hard-fail-threshold: 0.20  # Duplicated
@@ -31,30 +31,27 @@ dq-overrides:
 Extract DQ rules into a hierarchical configuration structure:
 
 ```
-configs/quality/
-├── -defaults.yaml           # Global defaults (Level 1)
-├── providers/
-│   └── {provider}.yaml      # Provider overrides (Level 2)
-└── entities/
-    └── {provider}/
-        └── {entity}.yaml    # Entity-specific rules (Level 3)
+configs/
+├── base/quality.yaml            # Global defaults (Level 1)
+├── providers/{provider}.yaml    # Section quality (Level 2)
+└── entities/{provider}/{entity}.yaml  # Section quality (Level 3)
 ```
 
 **Merge priority** (later wins for scalars, concatenate for validations):
-1. `-defaults.yaml`
-2. `providers/{provider}.yaml`
-3. `entities/{provider}/{entity}.yaml`
+1. `configs/base/quality.yaml`
+2. `configs/providers/{provider}.yaml#quality`
+3. `configs/entities/{provider}/{entity}.yaml#quality`
 4. Inline `dq-overrides` in pipeline config (for exceptional cases)
 
 Pipeline configs reference DQ config via `dq-config-file`:
 ```yaml
 pipeline-name: chembl_activity
-dq-config-file: ../../quality/entities/chembl/activity.yaml
+dq-config-file: ../../entities/chembl/activity.yaml
 ```
 
 > **`dq-config-file` semantics (convention-based):**
 > This field is **auto-computed** by the pipeline config loader from `provider` and
-> `entity-type` as `../../quality/entities/{provider}/{entity-type}.yaml`. Pipeline
+> `entity-type` as `../../entities/{provider}/{entity-type}.yaml`. Pipeline
 > YAML files **SHOULD NOT** explicitly set this field — it is resolved automatically
 > via convention (ADR-029). If explicitly set, the value acts as an **override path**
 > that replaces the convention-based resolution. The `DQConfigLoader` always loads
@@ -75,16 +72,16 @@ dq-config-file: ../../quality/entities/chembl/activity.yaml
    - Thread-safe caching for performance
    - Deep merge with validation list concatenation
 
-3. **Config files**: `configs/quality/`
-   - `-defaults.yaml`: Global thresholds (0.05/0.20), common validations
-   - `providers/{provider}.yaml`: Provider-specific settings
-   - `entities/{provider}/{entity}.yaml`: Entity-specific rules
+3. **Config files**: unified hierarchy in `configs/base|providers|entities`
+   - `base/quality.yaml`: Global thresholds (0.05/0.20), common validations
+   - `providers/{provider}.yaml#quality`: Provider-specific settings
+   - `entities/{provider}/{entity}.yaml#quality`: Entity-specific rules
 
 ## Consequences
 
 ### Positive
 
-- **DRY**: Global thresholds defined once in `-defaults.yaml`
+- **DRY**: Global thresholds defined once in `configs/base/quality.yaml`
 - **Separation of Concerns**: Pipeline config focuses on orchestration
 - **Reusability**: Provider-level validations shared across entities
 - **Flexibility**: Entity-specific rules without affecting others
@@ -158,7 +155,7 @@ Store DQ rules in a database. Rejected because:
 - Domain config: `src/bioetl/domain/config.py`
 - Schema: `src/bioetl/infrastructure/schemas/dq-config.py`
 - Loader: `src/bioetl/infrastructure/config/dq-config-loader.py`
-- Config files: `configs/quality/`
+- Config files: `configs/base/quality.yaml`, `configs/providers/*.yaml#quality`, `configs/entities/*/*#quality`
 
 ## Changelog
 

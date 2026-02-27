@@ -7,56 +7,55 @@
 %% @level   System / Component
 %% @nodes   24
 
-graph TB
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
+%% @uniform width=248 height=72 max_title_len=26 max_desc_lines=2
+graph LR
     subgraph User["User"]
-        TERM["Terminal"]
+        TERM["Terminal<br/><br/>"]:::size-md
     end
 
     subgraph CLI["CLI Interface (Click)"]
-        MAIN["bioetl<br/>(main group)"]
-
+        MAIN["bioetl<br/>(main group)<br/>"]:::size-md
         subgraph RunCmds["Run Commands"]
-            RUN["bioetl run<br/>━━━━━━━━━━━━━━━━━<br/>--provider<br/>--entity<br/>--run-type<br/>--limit<br/>--resume<br/>--dry-run"]
-            RUN_COMP["bioetl run-composite<br/>━━━━━━━━━━━━━━━━━<br/>--config<br/>--run-type<br/>--resume"]
+            RUN["bioetl run<br/>━━━━━━━━━━━━━━━━━<br/>--provider<br/>--entity<br/>--run-type<br/>--limit<br/>--resume<br/>--dry-run"]:::size-lg
+            RUN_COMP["bioetl run-composite<br/>━━━━━━━━━━━━━━━━━<br/>--config<br/>--run-type<br/>--resume"]:::size-md
         end
 
         subgraph HealthCmds["Health Commands"]
-            HEALTH["bioetl health<br/>━━━━━━━━━━━━━━━━━<br/>--provider<br/>Check API health"]
+            HEALTH["bioetl health<br/>━━━━━━━━━━━━━━━━━<br/>--provider<br/>Check API health"]:::size-md
         end
 
         subgraph DataCmds["Data Commands"]
-            EXPORT["bioetl export<br/>━━━━━━━━━━━━━━━━━<br/>--table<br/>--format csv"]
-            QUARANTINE["bioetl quarantine<br/>━━━━━━━━━━━━━━━━━<br/>inspect / replay / purge"]
-            CHECKPOINT["bioetl checkpoint<br/>━━━━━━━━━━━━━━━━━<br/>list / delete"]
+            EXPORT["bioetl export<br/>━━━━━━━━━━━━━━━━━<br/>--table<br/>--format csv"]:::size-md
+            QUARANTINE["bioetl quarantine<br/>━━━━━━━━━━━━━━━━━<br/>inspect / replay / purge"]:::size-md
+            CHECKPOINT["bioetl checkpoint<br/>━━━━━━━━━━━━━━━━━<br/>list / delete"]:::size-md
         end
 
         subgraph MaintenanceCmds["Maintenance Commands"]
-            VACUUM["bioetl maintenance vacuum<br/>━━━━━━━━━━━━━━━━━<br/>--table / --all"]
-            ARCHIVE["bioetl maintenance archive<br/>━━━━━━━━━━━━━━━━━<br/>Archive old data"]
+            VACUUM["bioetl maintenance vacuum<br/>━━━━━━━━━━━━━━━━━<br/>--table / --all"]:::size-md
+            ARCHIVE["bioetl maintenance archive<br/>━━━━━━━━━━━━━━━━━<br/>Archive old data"]:::size-md
         end
 
         subgraph ConfigCmds["Config Commands"]
-            CONFIG["bioetl config<br/>━━━━━━━━━━━━━━━━━<br/>list / show"]
+            CONFIG["bioetl config<br/>━━━━━━━━━━━━━━━━━<br/>list / show"]:::size-md
         end
     end
 
     subgraph Composition["Composition Layer"]
-        BOOT["Bootstrap Assembly"]
-        RF["RunnerFactory"]
-        DSR["DataSourceRegistry"]
-        TF["TransformerFactory"]
+        BOOT["Bootstrap Assembly<br/><br/>"]:::size-md
+        RF["RunnerFactory<br/><br/>"]:::size-md
+        DSR["DataSourceRegistry<br/><br/>"]:::size-md
+        TF["TransformerFactory<br/><br/>"]:::size-md
     end
 
     subgraph Application["Application Layer"]
-        PRS["PipelineRunnerService"]
-        CPR["CompositePipelineRunner"]
-        HS["HealthService"]
-        ES["ExportService"]
-        QS["QuarantineService"]
-        CS["CheckpointService"]
-        VS["VacuumService"]
-        CFGS["ConfigService"]
-        SS["ShutdownService"]
+        CPR["CompositePipelineRunner<br/><br/>"]:::size-md
+        HS["HealthService<br/><br/>"]:::size-md
+        ES["ExportService<br/><br/>"]:::size-md
+        QS["QuarantineService<br/><br/>"]:::size-md
+        CS["CheckpointService<br/><br/>"]:::size-md
+        VS["VacuumService<br/><br/>"]:::size-md
+        CFGS["ConfigService<br/><br/>"]:::size-md
     end
 
     %% CLI routing
@@ -85,10 +84,10 @@ graph TB
     %% Shutdown
     MAIN -.->|"SIGINT/SIGTERM"| SS
 
-    classDef user fill:#eceff1,stroke:#455a64
-    classDef cli fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
-    classDef comp fill:#fff3e0,stroke:#e65100
-    classDef app fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef user fill:#f1f5f9,stroke:#64748b
+    classDef cli fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    classDef comp fill:#fff7ed,stroke:#f59e0b
+    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
 
     class TERM user
     class MAIN,RUN,RUN_COMP,HEALTH,EXPORT,QUARANTINE,CHECKPOINT,VACUUM,ARCHIVE,CONFIG cli

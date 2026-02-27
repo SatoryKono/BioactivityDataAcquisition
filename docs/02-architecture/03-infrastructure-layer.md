@@ -29,7 +29,7 @@
 - Управление HTTP-соединениями через `UnifiedHTTPClient`.
 - Обработка специфичных для API ошибок (например, `429 Rate Limit`).
 - Преобразование ответа API в стандартизированный формат (словари Python).
-- Реализация `health-check()` для проверки доступности API.
+- Реализация `health_check()` для проверки доступности API.
 
 #### 2.1.1. Унифицированный HTTP-клиент
 
@@ -147,12 +147,12 @@ Redis-адаптер без изменения domain/application слоёв.
 
 | Диаграмма              | Файл                                                                                                            | Описание                                         |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| Infrastructure Classes | [10-infrastructure-layer-class-diagram.mmd](mmd-diagrams/foundation/10-infrastructure-layer-class-diagram.mmd) | Классы слоя Infrastructure                       |
-| Provider Adapters      | [30-port-adapter-mapping.mmd](mmd-diagrams/foundation/30-port-adapter-mapping.mmd)                              | Обзор 7 провайдеров и их rate limits             |
-| HTTP Infrastructure    | [10-infrastructure-layer-class-diagram.mmd](mmd-diagrams/foundation/10-infrastructure-layer-class-diagram.mmd) | UnifiedHTTPClient, Rate Limiter, Circuit Breaker |
-| Circuit Breaker        | [07-circuit-breaker-states.mmd](mmd-diagrams/foundation/07-circuit-breaker-states.mmd)                         | Состояния Circuit Breaker                        |
-| Storage Architecture   | [19-delta-lake-write-sequence.mmd](mmd-diagrams/foundation/19-delta-lake-write-sequence.mmd)                    | Bronze, Silver, Gold writers                     |
-| MemoryLock             | [16-memory-lock-class.mmd](mmd-diagrams/foundation/16-memory-lock-class.mmd)                                   | Класс MemoryLock                                 |
+| Infrastructure Classes | [10-infrastructure-layer-class-diagram.mermaid](mmd-diagrams/foundation/10-infrastructure-layer-class-diagram.mmd) | Классы слоя Infrastructure                       |
+| Provider Adapters      | [30-port-adapter-mapping.mermaid](mmd-diagrams/foundation/30-port-adapter-mapping.mmd)                                  | Обзор 7 провайдеров и их rate limits             |
+| HTTP Infrastructure    | [10-infrastructure-layer-class-diagram.mermaid](mmd-diagrams/foundation/10-infrastructure-layer-class-diagram.mmd) | UnifiedHTTPClient, Rate Limiter, Circuit Breaker |
+| Circuit Breaker        | [07-circuit-breaker-states.mermaid](mmd-diagrams/foundation/07-circuit-breaker-states.mmd)                         | Состояния Circuit Breaker                        |
+| Storage Architecture   | [19-delta-lake-write-sequence.mermaid](mmd-diagrams/foundation/19-delta-lake-write-sequence.mmd)                    | Bronze, Silver, Gold writers                     |
+| MemoryLock             | [16-memory-lock-class.mermaid](mmd-diagrams/foundation/16-memory-lock-class.mmd)                                   | Класс MemoryLock                                 |
 
 ### Связанные ADR
 

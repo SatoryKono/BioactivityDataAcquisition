@@ -8,10 +8,11 @@
 %% @type    sequenceDiagram
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%% @uniform sequence width=248 max_title_len=26
 sequenceDiagram
     autonumber
-    participant CLI
+    participant CLI as CLI
     participant Bootstrap as bootstrap_pipeline()
     participant Runner as PipelineRunner
     participant LockMgr as LockManager

@@ -73,7 +73,7 @@ curl -s "https://www.ebi.ac.uk/chembl/api/data/status?format=json" | python3 -m 
 }
 ```
 
-**Non-paginated entities:** `target`, `target_component`, `protein_class` (all records returned in single response).
+**Non-paginated entities:** `target`, `target-component`, `protein-class` (all records returned in single response).
 
 ### Retry & Circuit Breaker
 
@@ -117,7 +117,7 @@ print('Records:', len(d.get('molecules',[])))
 - [ ] `page-meta.next` is populated when more pages exist
 - [ ] `format=json` parameter is respected
 - [ ] Filter `--in` operator works for batch ID lookups
-- [ ] Non-paginated entities (target, protein_class) return all records without limit/offset
+- [ ] Non-paginated entities (target, protein-class) return all records without limit/offset
 
 ---
 

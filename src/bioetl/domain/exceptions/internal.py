@@ -3,9 +3,9 @@
 These errors indicate serious problems that cannot be recovered from and require
 immediate attention. They typically result in pipeline termination.
 
-Категория: InternalErrors - внутренние ошибки приложения (непредвиденные сбои,
-некорректное состояние, нарушение внутренних инвариантов, сбои fallback-логики),
-как правило критические и требующие немедленной остановки процесса ETL.
+Category: InternalErrors - internal application errors (unexpected failures,
+invalid state, internal invariant violations, fallback logic failures),
+typically critical and requiring immediate ETL process termination.
 
 All exceptions in this module inherit from CriticalError, indicating that
 the pipeline should stop immediately.

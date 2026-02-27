@@ -73,7 +73,7 @@ bioetl run chembl_target_component --limit 500
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/pipelines/chembl/target-component.yaml` |
+| Конфигурация | `configs/entities/chembl/target-component.yaml` |
 | Трансформер | `src/bioetl/application/pipelines/chembl/target-component-transformer.py` |
 
 ---

@@ -8,7 +8,8 @@
 %% @type    classDiagram
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%% @uniform class width=208 height=240 max_title_len=21 max_desc_lines=27
 classDiagram
     direction TB
 
@@ -17,9 +18,29 @@ classDiagram
         CLOSED = 0
         HALF_OPEN = 1
         OPEN = 2
-
         +is_allowing_requests() bool
         +to_metric_value() int
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class CircuitBreakerPort {
@@ -28,6 +49,28 @@ classDiagram
         +get_failure_count() int
         +call(func: Callable, *args, **kwargs) T
         +reset() None
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class CircuitBreaker {
@@ -43,7 +86,6 @@ classDiagram
         -_metrics: MetricsPort | None
         -_logger: LoggerPort | None
         -_lock: asyncio.Lock
-
         +get_state() CircuitState
         +get_failure_count() int
         +call(func: Callable, *args, **kwargs) T
@@ -51,7 +93,6 @@ classDiagram
         +is_closed() bool
         +is_open() bool
         +is_half_open() bool
-
         -_record_success() None
         -_record_failure() None
         -_should_trip() bool
@@ -69,6 +110,27 @@ classDiagram
         +failures_counter: str = "circuit_breaker_failures_total"
         +calls_counter: str = "circuit_breaker_calls_total"
         +success_counter: str = "circuit_breaker_success_total"
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class CircuitBreakerConfig {
@@ -77,8 +139,28 @@ classDiagram
         +recovery_timeout: int = 300
         +half_open_max_calls: int = 1
         +excluded_exceptions: tuple = ()
-
         +from_provider(provider: str)$ CircuitBreakerConfig
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class CircuitOpenError {
@@ -87,6 +169,28 @@ classDiagram
         +state: CircuitState
         +time_until_half_open: float
         +message: str
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class ProviderHealthTracker {
@@ -94,12 +198,29 @@ classDiagram
         -_health_states: dict~str, HealthState~
         -_logger: LoggerPort
         -_metrics: MetricsPort
-
         +get_circuit_breaker(provider: str) CircuitBreaker
         +get_health_state(provider: str) HealthState
         +record_success(provider: str) None
         +record_failure(provider: str, error: Exception) None
         +is_healthy(provider: str) bool
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class HealthState {
@@ -107,6 +228,29 @@ classDiagram
         HEALTHY = 2
         DEGRADED = 1
         UNHEALTHY = 0
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     %% Relationships

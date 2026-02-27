@@ -1,6 +1,6 @@
 # vcr-tests — VCR Test Task Generator
 
-*Priority: medium | Version: 1.0 | Aligned with RULES.md v5.19*
+*Priority: medium | Version: 1.0 | Aligned with RULES.md v5.22*
 
 ______________________________________________________________________
 

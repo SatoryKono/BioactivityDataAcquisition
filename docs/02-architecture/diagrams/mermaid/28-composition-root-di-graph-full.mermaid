@@ -1,3 +1,4 @@
+%% View: Full | Parent: (root)
 %% Parent source: docs/02-architecture/mmd-diagrams/foundation/28-composition-root-di-graph.mmd
 %% Full reference diagram retained after decomposition.
 %% Title: Composition Root Wiring — Full DI Graph
@@ -12,59 +13,61 @@
 %% @level   Mixed (System / Component / Class)
 
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% @uniform width=272 height=126 max_title_len=29 max_desc_lines=5
 flowchart TB
+%% keep-orphan: OB
     subgraph Entry["Entry Point"]
-        CLI["CLI run command"]
-        BOOT["bootstrap/runtime/assembly.py"]
+        CLI["CLI run command&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        BOOT["bootstrap/runtime/assembly.py<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Factories["Composition Factories"]
         direction TB
 
         subgraph LoggerFactories["Logger & Observability"]
-            BL["BootstrapLogger\n• configure structlog"]
-            DQF["DQServicesFactory\n• create()\n→ DQ analyzers + monitor"]
+            BL["BootstrapLogger&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• configure structlog<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+            DQF["DQServicesFactory&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• create()<br/>→ DQ analyzers + monitor<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
         end
 
         subgraph ClientFactories["Client & Data Source"]
-            HCF["HttpClientFactory\n• create(provider)\n→ UnifiedHTTPClient"]
-            DSF["DataSourceFactory\n• create(provider, config)\n→ DataSourcePort impl"]
+            HCF["HttpClientFactory&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• create(provider)<br/>→ UnifiedHTTPClient<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+            DSF["DataSourceFactory&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• create(provider, config)<br/>→ DataSourcePort impl<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
         end
 
         subgraph StorageFactories["Storage & Services"]
-            STF["StorageFactory\n• create(config)\n→ BronzeWriter + SilverWriter\n  + GoldWriter"]
-            STA["StorageAdapter\n• create_bronze()\n• create_silver()\n• create_gold()"]
-            SB["ServicesBuilder\n• with_storage()\n• with_lock()\n• with_logger()\n• with_metrics()\n• build() → PipelineServices"]
+            STF["StorageFactory&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• create(config)<br/>→ BronzeWriter + SilverWriter<br/>+ GoldWriter<br/>&nbsp;<br/>&nbsp;"]
+            STA["StorageAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• create_bronze()<br/>• create_silver()<br/>• create_gold()<br/>&nbsp;<br/>&nbsp;"]
+            SB["ServicesBuilder&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• with_storage()<br/>• with_lock()<br/>• with_logger()<br/>• with_metrics()<br/>• build() → PipelineServices"]
         end
 
         subgraph PipelineFactories["Pipeline Construction"]
-            RF["RunnerFactory\n• create_runner()\n→ PipelineRunner"]
-            GPF["GenericPipelineFactory\n• _pipeline_class\n• _transformer_class\n• _gold_schema"]
+            RF["RunnerFactory&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• create_runner()<br/>→ PipelineRunner<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+            GPF["GenericPipelineFactory&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• _pipeline_class<br/>• _transformer_class<br/>• _gold_schema<br/>&nbsp;<br/>&nbsp;"]
         end
     end
 
     subgraph Registry["Registration"]
-        PR["ProviderRegistry\n• 8 providers registered"]
-        DSR["DataSourceRegistry\n• facade → ProviderRegistry"]
-        PLREG["PipelineRegistry\n• pipeline_name → factory"]
-        OB["ObservabilityBundle\n• logger + metrics + tracing"]
+        PR["ProviderRegistry&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• 8 providers registered<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        DSR["DataSourceRegistry&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• facade → ProviderRegistry<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        PLREG["PipelineRegistry&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• pipeline_name → factory<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        OB["ObservabilityBundle&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• logger + metrics + tracing<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Created["Created Instances"]
         direction TB
-        UHC["UnifiedHTTPClient\n+ TokenBucket\n+ CircuitBreaker"]
-        ADP["Provider Adapter\n(ChemblAdapter, etc.)"]
-        BW["BronzeWriter"]
-        SW["SilverWriter"]
-        GW["GoldWriter"]
-        ML["MemoryLock"]
-        LC["LocalCheckpoint"]
-        UQ["UnifiedQuarantine"]
-        SLL["StructlogLogger"]
-        PMM["PrometheusMetrics"]
-        NOT["NoOpTracing"]
-        PS["PipelineServices\n(frozen bundle)"]
-        RUN["PipelineRunner\n(fully assembled)"]
+        UHC["UnifiedHTTPClient&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>+ TokenBucket<br/>+ CircuitBreaker<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        ADP["Provider Adapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(ChemblAdapter, etc.)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        BW["BronzeWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        SW["SilverWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        GW["GoldWriter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        ML["MemoryLock&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        LC["LocalCheckpoint&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        UQ["UnifiedQuarantine&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        SLL["StructlogLogger&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        PMM["PrometheusMetrics&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        NOT["NoOpTracing&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        PS["PipelineServices&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(frozen bundle)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        RUN["PipelineRunner&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(fully assembled)<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     %% Bootstrap flow

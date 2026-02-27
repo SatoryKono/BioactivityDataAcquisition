@@ -11,12 +11,12 @@ A complete, production-ready Model Context Protocol server for Neo4j memory mana
 ### Project Root
 ```
 .ai/mcp/neo4j-memory/
-├── src/mcp_neo4j_memory/              ← Main Python Package
+├── src/mcp-neo4j-memory/              ← Main Python Package
 │   ├── __init__.py                    (Package exports)
 │   ├── main.py                        (CLI entry point: mcp-neo4j-memory)
 │   ├── server.py                      (12 MCP tools implementation)
-│   ├── neo4j_connection.py             (Neo4j driver wrapper with health checks)
-│   └── memory_manager.py               (Memory profile management)
+│   ├── neo4j-connection.py             (Neo4j driver wrapper with health checks)
+│   └── memory-manager.py               (Memory profile management)
 │
 ├── pyproject.toml                     (Build config - hatchling, entry points)
 ├── Dockerfile                         (Python 3.13.8-slim container)
@@ -25,10 +25,10 @@ A complete, production-ready Model Context Protocol server for Neo4j memory mana
 │
 ├── Documentation:
 │   ├── README.md                      (6k words - usage guide)
-│   ├── PRODUCTION_DEPLOYMENT.md       (10k words - deployment guide)
-│   ├── SETUP_PRODUCTION_COMPLETE.md   (8k words - final status)
-│   ├── QUICK_REFERENCE.txt            (1-page quick reference)
-│   ├── SETUP_COMPLETE.md              (Initial setup summary)
+│   ├── PRODUCTION-DEPLOYMENT.md       (10k words - deployment guide)
+│   ├── SETUP-PRODUCTION-COMPLETE.md   (8k words - final status)
+│   ├── QUICK-REFERENCE.txt            (1-page quick reference)
+│   ├── SETUP-COMPLETE.md              (Initial setup summary)
 │   └── This file
 │
 ├── Legacy/Examples:
@@ -42,7 +42,7 @@ A complete, production-ready Model Context Protocol server for Neo4j memory mana
 
 ## 🔧 What Was Built
 
-### 1. **Production Python Package** (`src/mcp_neo4j_memory/`)
+### 1. **Production Python Package** (`src/mcp-neo4j-memory/`)
 
 #### `main.py` - CLI Entry Point
 - Installed as `mcp-neo4j-memory` command
@@ -52,34 +52,34 @@ A complete, production-ready Model Context Protocol server for Neo4j memory mana
 #### `server.py` - MCP Server (12 Tools)
 ```
 Memory Profiles (5 tools)
-├── get_memory_profile
-├── list_memory_profiles
-├── get_current_profile
-├── set_memory_profile
-└── save_custom_profile
+├── get-memory-profile
+├── list-memory-profiles
+├── get-current-profile
+├── set-memory-profile
+└── save-custom-profile
 
 Configuration (2 tools)
-├── recommend_memory_configuration
-└── export_environment_variables
+├── recommend-memory-configuration
+└── export-environment-variables
 
 Monitoring (4 tools)
-├── check_neo4j_health
-├── get_memory_usage
-├── get_transaction_statistics
-└── get_database_statistics
+├── check-neo4j-health
+├── get-memory-usage
+├── get-transaction-statistics
+└── get-database-statistics
 
 Troubleshooting (1 tool)
-└── get_troubleshooting_guide
+└── get-troubleshooting-guide
 ```
 
-#### `neo4j_connection.py` - Neo4j Integration
+#### `neo4j-connection.py` - Neo4j Integration
 - GraphDatabase driver wrapper
 - Connection pooling & lifecycle management
-- Health checks: `test_connection()`, `get_server_info()`
-- Memory stats: `get_memory_config()`, `get_memory_usage()`
-- Database info: `get_transaction_stats()`, `get_database_stats()`
+- Health checks: `test-connection()`, `get-server-info()`
+- Memory stats: `get-memory-config()`, `get-memory-usage()`
+- Database info: `get-transaction-stats()`, `get-database-stats()`
 
-#### `memory_manager.py` - Memory Management
+#### `memory-manager.py` - Memory Management
 - 3 built-in profiles (dev/staging/prod)
 - Custom profile creation & persistence
 - Memory recommendations based on host RAM
@@ -100,7 +100,7 @@ requires-python = ">=3.11"
 dependencies = ["fastmcp>=2.0.0", "neo4j>=5.26.0", "pydantic>=2.0"]
 
 [project.scripts]
-mcp-neo4j-memory = "mcp_neo4j_memory.main:main_entry"  ← CLI command
+mcp-neo4j-memory = "mcp-neo4j-memory.main:main-entry"  ← CLI command
 ```
 
 ### 3. **Containerization**
@@ -159,7 +159,7 @@ services:
 - Docker Compose orchestration
 - Health checks (liveness & readiness)
 - Environment variable configuration
-- Kubernetes ready (see PRODUCTION_DEPLOYMENT.md)
+- Kubernetes ready (see PRODUCTION-DEPLOYMENT.md)
 
 ---
 
@@ -168,14 +168,14 @@ services:
 ### Option 1: Local Development
 ```bash
 pip install -e .ai/mcp/neo4j-memory
-export NEO4J_PASSWORD=password
+export NEO4J-PASSWORD=password
 mcp-neo4j-memory
 ```
 
 ### Option 2: Docker
 ```bash
 docker build -t bioetl-neo4j-mcp .ai/mcp/neo4j-memory
-docker run -e NEO4J_PASSWORD=password bioetl-neo4j-mcp
+docker run -e NEO4J-PASSWORD=password bioetl-neo4j-mcp
 ```
 
 ### Option 3: Docker Compose (Full Stack)
@@ -186,7 +186,7 @@ docker-compose up -d
 
 ### Option 4: Kubernetes
 ```bash
-kubectl apply -f deployment.yaml  (see PRODUCTION_DEPLOYMENT.md)
+kubectl apply -f deployment.yaml  (see PRODUCTION-DEPLOYMENT.md)
 ```
 
 ---
@@ -196,10 +196,10 @@ kubectl apply -f deployment.yaml  (see PRODUCTION_DEPLOYMENT.md)
 | File | Size | Content |
 |------|------|---------|
 | README.md | 6k | Usage guide, features, examples |
-| PRODUCTION_DEPLOYMENT.md | 10k | Deployment, config, monitoring, k8s |
-| SETUP_PRODUCTION_COMPLETE.md | 8k | Final status, architecture, next steps |
-| QUICK_REFERENCE.txt | 2k | One-page cheat sheet |
-| SETUP_COMPLETE.md | 6k | Initial setup summary |
+| PRODUCTION-DEPLOYMENT.md | 10k | Deployment, config, monitoring, k8s |
+| SETUP-PRODUCTION-COMPLETE.md | 8k | Final status, architecture, next steps |
+| QUICK-REFERENCE.txt | 2k | One-page cheat sheet |
+| SETUP-COMPLETE.md | 6k | Initial setup summary |
 
 **Total Documentation**: 32k+ words covering all aspects
 
@@ -321,7 +321,7 @@ kubectl apply -f deployment.yaml  (see PRODUCTION_DEPLOYMENT.md)
 ```bash
 cd .ai/mcp/neo4j-memory
 pip install -e .
-export NEO4J_PASSWORD=password
+export NEO4J-PASSWORD=password
 mcp-neo4j-memory
 ```
 
@@ -333,24 +333,24 @@ docker-compose up -d
 
 ### 3. Python API Example
 ```python
-from mcp_neo4j_memory.memory_manager import Neo4jMemoryManager
+from mcp-neo4j-memory.memory-manager import Neo4jMemoryManager
 
 manager = Neo4jMemoryManager()
-profiles = manager.list_profiles()
-rec = manager.recommend_configuration(8)  # For 8GB host
+profiles = manager.list-profiles()
+rec = manager.recommend-configuration(8)  # For 8GB host
 print(rec)
 ```
 
 ### 4. Call MCP Tool
 ```bash
 # List all profiles
-mcp call list_memory_profiles
+mcp call list-memory-profiles
 
 # Check Neo4j health
-mcp call check_neo4j_health
+mcp call check-neo4j-health
 
 # Get memory usage
-mcp call get_memory_usage
+mcp call get-memory-usage
 ```
 
 ---
@@ -381,8 +381,8 @@ mcp call get_memory_usage
 
 ### Documentation
 - README.md - Daily usage
-- PRODUCTION_DEPLOYMENT.md - Deployment specifics
-- QUICK_REFERENCE.txt - Quick lookup
+- PRODUCTION-DEPLOYMENT.md - Deployment specifics
+- QUICK-REFERENCE.txt - Quick lookup
 - Code comments - Implementation details
 
 ### External

@@ -1,0 +1,51 @@
+%% View: Data-Flow | Parent: 12-local-deployment-architecture-full.mermaid
+%% @uniform width=168 height=56 max_title_len=16 max_desc_lines=0
+flowchart TB
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N1["Bronze"]
+        N2["Silver"]
+        N3["Gold"]
+        N5["chembl_activity"]
+        N7["pubchem_compound"]
+        N8["uniprot_protein"]
+        N9["ChEMBL_API"]
+        N10["PubChem_API"]
+        N11["UniProt_API"]
+        N12["PubMed_API"]
+        N4["Quarantine"]
+    end
+
+    subgraph Interfaces["Interfaces Layer"]
+        direction TB
+        N6["CLI"]
+    end
+
+    N9 --> N5
+    N10 --> N7
+    N11 --> N8
+    N12 --> N5
+    N6 --> N5
+    N6 --> N7
+    N6 --> N8
+    N5 --> N1
+    N5 --> N2
+    N5 --> N3
+    N5 --> N4
+
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style Interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+
+    %% linkStyle: data 0-9, err 10
+    linkStyle 0 stroke:#1E293B,stroke-width:3px
+    linkStyle 1 stroke:#1E293B,stroke-width:3px
+    linkStyle 2 stroke:#1E293B,stroke-width:3px
+    linkStyle 3 stroke:#1E293B,stroke-width:3px
+    linkStyle 4 stroke:#1E293B,stroke-width:3px
+    linkStyle 5 stroke:#1E293B,stroke-width:3px
+    linkStyle 6 stroke:#1E293B,stroke-width:3px
+    linkStyle 7 stroke:#1E293B,stroke-width:3px
+    linkStyle 8 stroke:#1E293B,stroke-width:3px
+    linkStyle 9 stroke:#1E293B,stroke-width:3px
+    linkStyle 10 stroke:#c62828,stroke-width:2px,stroke-dasharray:4

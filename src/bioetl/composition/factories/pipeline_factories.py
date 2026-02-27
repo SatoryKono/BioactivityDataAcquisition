@@ -5,7 +5,7 @@ This module creates all pipeline factories using the GenericPipelineFactory
 pattern with GenericPipeline as the unified pipeline class.
 
 All pipeline-specific behavior is encapsulated in:
-- YAML configs (configs/pipelines/{provider}/{entity}.yaml)
+- YAML configs (configs/entities/{provider}/{entity}.yaml)
 - Transformer classes (injected via DI)
 - Silver/Gold schemas
 

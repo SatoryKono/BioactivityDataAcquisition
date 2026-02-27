@@ -416,7 +416,7 @@ Mode: Overwrite
 ## 8. Pipeline Configuration
 
 ```yaml
-# configs/pipelines/chembl/activity.yaml
+# configs/entities/chembl/activity.yaml
 
 pipeline-name: chembl_activity
 provider: chembl

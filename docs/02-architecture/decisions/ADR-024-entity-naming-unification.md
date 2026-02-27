@@ -107,7 +107,7 @@ is provided but deprecated.
 - `src/bioetl/domain/entities/chembl-structures.py` — `Document` → `ChemblPublication`
 - `src/bioetl/domain/entities/pubchem.py` — `Compound` → `PubchemMolecule`
 - `src/bioetl/domain/entities/uniprot.py` — `Protein` → `UniprotTarget`
-- `src/bioetl/domain/entities/--init--.py` — exports обновлены
+- `src/bioetl/domain/entities/__init__.py` — exports обновлены
 
 **Pandera Schemas:**
 
@@ -119,9 +119,9 @@ is provided but deprecated.
 
 **Pipeline Configs (renamed files):**
 
-- `configs/pipelines/chembl/document.yaml` → `publication.yaml`
-- `configs/pipelines/chembl/document-similarity.yaml` → `publication-similarity.yaml`
-- `configs/pipelines/chembl/document-term.yaml` → `publication-term.yaml`
+- `configs/entities/chembl/document.yaml` → `publication.yaml`
+- `configs/entities/chembl/document-similarity.yaml` → `publication-similarity.yaml`
+- `configs/entities/chembl/document-term.yaml` → `publication-term.yaml`
 - Pipeline names changed: `chembl-document` → `chembl_publication`, etc.
 
 **Pipeline Classes (renamed files):**
@@ -149,16 +149,16 @@ is provided but deprecated.
 
 **Factory Updates:**
 
-- `transformer_factory.py` — imports and registrations updated
-- `pipeline_factories.py` — imports, configs, and exports updated
+- `transformer-factory.py` — imports and registrations updated
+- `pipeline-factories.py` — imports, configs, and exports updated
 - `registration.py` — import updated
 
 **Test Files (renamed):**
 
 - `test-document-term-data-source.py` → `test-publication-term-data-source.py`
 - `test-document-similarity-transformer.py` → `test-publication-similarity-transformer.py`
-- `test-chembl-document_e2e.py` → `test-chembl_publication_e2e.py`
-- `test-chembl-document-term_e2e.py` → `test-chembl_publication_term_e2e.py`
+- `test-chembl-document-e2e.py` → `test-chembl_publication-e2e.py`
+- `test-chembl-document-term-e2e.py` → `test-chembl_publication_term-e2e.py`
 
 **Documentation:**
 
@@ -261,7 +261,7 @@ Introduced a centralized **Publication Mapping Registry** in domain layer:
 
 **New Files:**
 
-- `src/bioetl/domain/registry/--init--.py` — Registry exports
+- `src/bioetl/domain/registry/__init__.py` — Registry exports
 - `src/bioetl/domain/registry/publication.py` — Single source of truth for publication mappings
 
 **Registry Structure:**

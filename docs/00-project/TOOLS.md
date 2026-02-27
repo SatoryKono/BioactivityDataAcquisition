@@ -44,7 +44,7 @@
 **Создаёт:**
 ```
 src/bioetl/application/pipelines/{provider}/{entity}/
-├── --init--.py
+├── __init__.py
 ├── pipeline.py      # {Provider}{Entity}Pipeline
 ├── transformer.py   # {Provider}{Entity}Transformer
 └── config.py        # Config model
@@ -366,13 +366,13 @@ python scripts/config-gap-analysis.py
 
 ---
 
-### validate-pipeline-configs.py
+### validate_pipeline_configs.py
 
 **Назначение:** Валидация всех pipeline configs против JSON Schema.
 
 **Использование:**
 ```bash
-python scripts/validate-pipeline-configs.py
+python scripts/validate_pipeline_configs.py
 ```
 
 **Что проверяет:**
@@ -451,7 +451,7 @@ new-pipeline:
 Ссылки:
     - RULES.md §X.Y: {описание правила}
 """
-from --future-- import annotations
+from __future__ import annotations
 
 import argparse
 from pathlib import Path
@@ -491,7 +491,7 @@ Standalone скрипт (НЕ импортирует bioetl).
 Ссылки:
     - RULES.md §X.Y: {описание правила}
 """
-from --future-- import annotations
+from __future__ import annotations
 
 import argparse
 import logging
@@ -534,7 +534,7 @@ if --name-- == "--main--":
 | `lint-terminology.py` | scripts/ | Нет | — |
 | `render-diagrams.py` | scripts/ | Нет | — |
 | `config-gap-analysis.py` | scripts/ | Нет | — |
-| `validate-pipeline-configs.py` | scripts/ | Нет | — |
+| `validate_pipeline_configs.py` | scripts/ | Нет | — |
 
 ---
 
@@ -549,7 +549,7 @@ if --name-- == "--main--":
 | RULES.md §3.4.1 | `dq-baseline-update.py` |
 | RULES.md §5.4.1 | `salt-rotate.py` |
 | docs/glossary.md | `lint-terminology.py` |
-| 03-file-policy.md (configs) | `config-gap-analysis.py`, `validate-pipeline-configs.py` |
+| 03-file-policy.md (configs) | `config-gap-analysis.py`, `validate_pipeline_configs.py` |
 
 ---
 

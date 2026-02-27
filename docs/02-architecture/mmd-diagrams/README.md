@@ -5,12 +5,13 @@
 > **Governance:** [ADR-040 — Diagram Governance and Layout Policy](../decisions/ADR-040-diagram-governance.md)
 > Colour scheme, linkStyle differentiation, view decomposition rules, CI validation — all defined in ADR-040.
 
-All diagrams are in [Mermaid](https://mermaid.js.org/) format (`.mmd` files).
+All diagrams are in [Mermaid](https://mermaid.js.org/) format.
+Canonical sources use `.mmd`; decomposed views use `.mermaid` in `views/`.
 Render them with any Mermaid-compatible viewer, IDE plugin, or the [Mermaid Live Editor](https://mermaid.live/).
 
 ---
 
-## Architecture Diagrams (18)
+## Architecture Diagrams (18 core)
 
 | # | Diagram | File | Description |
 |---|---------|------|-------------|
@@ -40,9 +41,11 @@ Parent diagrams remain canonical references. Sub-files provide focused, low-dens
 | Parent (canonical) | Decomposed sub-files |
 |---|---|
 | `architecture/01-high-level-hexagonal.mmd` | `architecture/01a-hexagonal-overview.mmd`, `architecture/01b-hexagonal-domain-app.mmd`, `architecture/01c-hexagonal-infra-comp.mmd` |
+| `architecture/03-medallion-data-flow.mmd` | `architecture/03a-medallion-layers-overview.mmd` |
 | `architecture/05-provider-adapter-hierarchy.mmd` | `architecture/05a-adapter-hierarchy-base.mmd`, `architecture/05b-adapter-hierarchy-providers.mmd` |
 | `architecture/12-bootstrap-di-container.mmd` | `architecture/12a-bootstrap-factories.mmd`, `architecture/12b-bootstrap-wiring.mmd` |
 | `architecture/13-port-protocol-contracts.mmd` | `architecture/13a-port-contracts-data-sources.mmd`, `architecture/13b-port-contracts-storage.mmd`, `architecture/13c-port-contracts-observability.mmd`, `architecture/13d-port-contracts-services.mmd` |
+| `architecture/13-port-protocol-contracts.mmd` (alternate slices) | `architecture/13a-data-storage-ports.mmd`, `architecture/13b-operational-ports.mmd`, `architecture/13c-validation-dq-ports.mmd` |
 
 ## Class Diagrams (16 families)
 
@@ -65,7 +68,7 @@ Parent diagrams remain canonical references. Sub-files provide focused, low-dens
 | 15 | Extractors | `class-diagrams/15-extractors.mmd` | BaseFieldExtractor, PubMed & UniProt extractors |
 | 16 | Factories & Bootstrap | `class-diagrams/16-factories-bootstrap.mmd` | DataSourceRegistry, TransformerFactory, RunnerBuilder |
 
-## Foundation Diagrams (59)
+## Foundation Diagrams (54)
 
 Historical/foundational diagrams consolidated from `docs/02-architecture/diagrams/`.
 
@@ -76,13 +79,10 @@ Historical/foundational diagrams consolidated from `docs/02-architecture/diagram
 | 01a | `foundation/01-full-system-component.mmd` | Full system component diagram (C4-style) |
 | 01b | `foundation/01-high-level.mmd` | High-level system overview |
 | 02a | `foundation/02-full-medallion-data-flow.mmd` | Medallion architecture data flow (detailed) |
-| 02b | `foundation/02-medallion.mmd` | Medallion architecture (simplified) |
 | 03a | `foundation/03-pipeline-execution-happy-path.mmd` | Pipeline execution sequence (happy path) |
-| 03b | `foundation/03-pipeline-sequence.mmd` | Pipeline sequence diagram |
 | 04a | `foundation/04-domain-layer-class-diagram.mmd` | Domain layer ports, entities, config |
 | 04b | `foundation/04-error-flow.mmd` | Error handling flow |
 | 05a | `foundation/05-layers-interaction.mmd` | Layer interaction diagram |
-| 05b | `foundation/05-locking.mmd` | Locking mechanism |
 | 05c | `foundation/05-pipeline-lifecycle-states.mmd` | Pipeline state machine |
 | 06a | `foundation/06-application-layer-class-diagram.mmd` | Application layer classes |
 | 06b | `foundation/06-pipeline-execution.mmd` | Pipeline execution flow |
@@ -121,7 +121,6 @@ Historical/foundational diagrams consolidated from `docs/02-architecture/diagram
 | 32 | `foundation/32-single-record-journey.mmd` | flowchart | Single Record Journey — API→Bronze→Transform→Silver→Gold |
 | 33 | `foundation/33-cli-run-interaction.mmd` | sequence | CLI → PipelineRunnerService interaction |
 | 34 | `foundation/34-batch-processing-flow.mmd` | sequence | Batch Processing — BatchExecutor cycle |
-| 35 | `foundation/35-bootstrap-sequence.mmd` | sequence | Bootstrap 9-step Sequence |
 | 36 | `foundation/36-architecture-principles-mindmap.mmd` | mindmap | Architecture Principles Mindmap |
 | 37 | `foundation/37-cli-entry-full-chain.mmd` | sequence | CLI Entry → Exit Code full chain |
 | 38 | `foundation/38-runtime-assembly-sequence.mmd` | sequence | Runtime Assembly — phases 1–8 |
@@ -131,7 +130,6 @@ Historical/foundational diagrams consolidated from `docs/02-architecture/diagram
 | 42 | `foundation/42-pipeline-runner-class.mmd` | class | PipelineRunner Class — all 14 DI dependencies |
 | 43 | `foundation/43-fan-out-fan-in-pattern.mmd` | sequence | Fan-Out/Fan-In — asyncio.gather parallel enrichment |
 | 44 | `foundation/44-cross-provider-enrichment.mmd` | flowchart | Cross-Provider Enrichment — 5-provider publication flow |
-| 45 | `foundation/45-template-method-transformer.mmd` | class | Template Method Pattern — BaseTransformer hierarchy |
 | 46 | `foundation/46-yaml-config-resolution.mmd` | flowchart | YAML Config Resolution — hierarchical merge |
 | 47 | `foundation/47-publication-merge-sources.mmd` | sequence | Publication Composite — multi-source merge |
 | 48 | `foundation/48-composite-phase-lifecycle.mmd` | state | Composite Pipeline FSM — 10-state lifecycle |
@@ -144,21 +142,21 @@ Historical/foundational diagrams consolidated from `docs/02-architecture/diagram
 
 | Layer          | Colour | Fill      | Border    |
 |----------------|--------|-----------|-----------|
-| Domain         | Purple | `#f3e5f5` | `#6a1b9a` |
-| Application    | Green  | `#e8f5e9` | `#2e7d32` |
-| Infrastructure | Red    | `#ffcdd2` | `#c62828` |
-| Interfaces     | Blue   | `#e3f2fd` | `#1565c0` |
-| Composition    | Orange | `#fff3e0` | `#e65100` |
-| External       | Gray   | `#eceff1` | `#455a64` |
+| Domain         | Purple | `#f5f3ff` | `#7c3aed` |
+| Application    | Green  | `#f0fdf4` | `#16a34a` |
+| Infrastructure | Red    | `#fff1f2` | `#dc2626` |
+| Interfaces     | Blue   | `#eff6ff` | `#2563eb` |
+| Composition    | Orange | `#fff7ed` | `#f59e0b` |
+| External       | Gray   | `#f1f5f9` | `#64748b` |
 
 ### Medallion Layers
 
 | Layer      | Fill      | Border    |
 |------------|-----------|-----------|
-| Bronze     | `#fff3e0` | `#e65100` |
-| Silver     | `#eceff1` | `#607d8b` |
-| Gold       | `#fff8e1` | `#f9a825` |
-| Quarantine | `#ffebee` | `#d32f2f` |
+| Bronze     | `#fff7ed` | `#f59e0b` |
+| Silver     | `#f8fafc` | `#475569` |
+| Gold       | `#fefce8` | `#ca8a04` |
+| Quarantine | `#ffe4e6` | `#e11d48` |
 
 ---
 
@@ -169,6 +167,9 @@ Historical/foundational diagrams consolidated from `docs/02-architecture/diagram
 ```bash
 # Mermaid CLI (required)
 npm install -g @mermaid-js/mermaid-cli
+
+# Browser runtime for mmdc (required by Puppeteer in local validation)
+npx puppeteer browsers install chrome-headless-shell
 
 # svgo — SVG optimization (recommended)
 npm install -g svgo
@@ -189,6 +190,9 @@ make render-diagrams
 # SVG only (faster)
 make render-diagrams-svg
 
+# Smoke-check visibility for edge labels and node text in SVG baselines
+make check-diagrams-visibility
+
 # Or run the script directly
 bash docs/02-architecture/mmd-diagrams/render.sh
 
@@ -208,11 +212,25 @@ bash docs/02-architecture/mmd-diagrams/render.sh --filter "01-*"
 # Single directory only
 bash docs/02-architecture/mmd-diagrams/render.sh --dir docs/02-architecture/mmd-diagrams/architecture
 
-# Adjust PNG resolution
+# Adjust PNG resolution globally
 bash docs/02-architecture/mmd-diagrams/render.sh --scale 4 --width 3200 --height 2400
+
+# Auto-boost resolution for large diagrams by @nodes metadata
+bash docs/02-architecture/mmd-diagrams/render.sh \
+  --large-threshold 30 \
+  --large-scale 4 \
+  --large-png-dpi 450
+
+# Per-diagram PNG override via source metadata:
+#   %% @png-scale 6
+#   %% @png-dpi   600
+# (works for both .mmd and .mermaid files)
 
 # CI mode (Puppeteer sandbox disabled)
 bash docs/02-architecture/mmd-diagrams/render.sh --puppeteer /tmp/puppeteer-config.json
+
+# Syntax validation (shows explicit hint if Chrome runtime is missing)
+bash scripts/validate_mermaid_syntax.sh --puppeteer /tmp/puppeteer-config.json
 ```
 
 ### Output layout
@@ -220,7 +238,7 @@ bash docs/02-architecture/mmd-diagrams/render.sh --puppeteer /tmp/puppeteer-conf
 ```
 docs/02-architecture/mmd-diagrams/
   architecture/
-    *.mmd           # source diagrams (18)
+    *.mmd           # source diagrams (32)
     svg/*.svg       # rendered vector (scalable)
     png/*.png       # rendered raster (300 DPI)
   class-diagrams/
@@ -228,9 +246,10 @@ docs/02-architecture/mmd-diagrams/
     svg/*.svg
     png/*.png
   foundation/
-    *.mmd           # source diagrams (59)
+    *.mmd           # source diagrams (54)
     svg/*.svg
-    png/*.png
+    png/*.png       # default 300 DPI, auto high-res for large @nodes diagrams,
+                    # plus optional per-file @png-scale/@png-dpi overrides
   theme/
     mermaid-config.json   # colours, fonts, spacing
     custom.css            # fine-tuned SVG styling
@@ -242,4 +261,85 @@ docs/02-architecture/mmd-diagrams/
 
 Diagrams are validated and rendered automatically in GitHub Actions
 (`.github/workflows/docs.yml`). Rendered SVG/PNG are uploaded as build artifacts.
-A drift check warns when `.mmd` sources change without re-rendering.
+A drift check warns when `.mmd/.mermaid` sources change without re-rendering.
+The workflow also validates SVG text visibility for the smoke baseline set.
+
+---
+
+## Size Normalization
+
+Use `scripts/uniform_diagram_sizes.py` to normalize class/flowchart object sizes:
+
+```bash
+# Check normalization drift
+python3 scripts/uniform_diagram_sizes.py --check
+
+# Fix specific files
+python3 scripts/uniform_diagram_sizes.py --fix -f docs/02-architecture/mmd-diagrams/class-diagrams/07-application-core-services.mmd
+```
+
+Grouped diagrams support width strategy override:
+
+- `%% @uniform-width global` (default): one shared width across groups.
+- `%% @uniform-width group`: group-local widths to reduce excessive `&nbsp;` padding.
+
+---
+
+## Validation Rules
+
+`scripts/lint_diagrams.py` enforces:
+
+| Rule | Description | Severity |
+|------|-------------|----------|
+| META-001 | Missing structured metadata (`@...` in `.mmd`, `%% View:` in `.mermaid`) | WARN |
+| META-002 | Invalid date format in `%% Updated:`/`%% @date` | ERROR |
+| COLOUR-001 | Deprecated pre-ADR palette in `style`/`classDef` | ERROR |
+| COLOUR-002 | Emoji in subgraph labels | ERROR |
+| SIZE-001 | `@nodes > 35` | ERROR |
+| SIZE-002 | `@nodes > 20` | WARN |
+| SIZE-003 | `@nodes > 35`, but decomposed sibling `.mmd` slices exist (`01a/01b/...`) | WARN |
+| LAYOUT-001 | `flowchart/graph` with `@nodes > 20` without ELK init | WARN |
+| LAYOUT-002 | `flowchart/graph` with `@nodes > 40` without ELK init | ERROR |
+| LINK-001 | Dense flowchart uses only one arrow semantic style | WARN |
+| LINK-002 | Fragile singleton-index `linkStyle` pattern (many one-by-one index lines) | WARN |
+| GRAPH-001 | Orphan nodes (defined but not in any edge) | WARN |
+| NBSP-001 | `&nbsp;` padding detected in source | ERROR |
+
+Node-size exceptions in current lint implementation:
+- `*-full.mermaid` reference views are exempt from `SIZE-001`/`SIZE-002`.
+- `00-legend*` files are exempt from `SIZE-001`/`SIZE-002`.
+
+### Orphan Node Detection (GRAPH-001)
+
+`scripts/prune_orphan_nodes.py` detects nodes defined in a diagram but not
+participating in any edge or message.
+
+**Applies to:** `flowchart` / `graph` and `sequenceDiagram` only.
+**Skipped:** `classDiagram`, `stateDiagram`, `erDiagram`, `mindmap`, legend files.
+
+```bash
+# Report orphans (CI mode)
+python scripts/prune_orphan_nodes.py --check
+
+# Machine-readable output
+python scripts/prune_orphan_nodes.py --check --json
+
+# Remove confirmed garbage orphans (in-place)
+python scripts/prune_orphan_nodes.py --fix
+
+# Exempt all current orphans (one-time grandfathering)
+python scripts/prune_orphan_nodes.py --grandfather
+```
+
+**To keep an intentional "documentation" node that has no edges:**
+
+```
+%% keep-orphan: NodeId
+%% keep-orphan: NodeA, NodeB, NodeC
+```
+
+Insert anywhere in the file (commonly after the diagram-type declaration).
+
+**Lenient subgraph rule:** nodes inside a subgraph whose *name* appears in an
+edge (e.g. `Bronze --> Silver`) are **not** flagged — they are considered
+descriptive children of a connected subgraph container.

@@ -6,8 +6,10 @@
 %% @type    classDiagram
 %% @level   Class / Interface
 %% @nodes   13
+%% @uniform class width=192 height=126 max_title_len=19 max_desc_lines=5
 
 classDiagram
+    direction TB
     class DataSourceRegistry {
         -_registry: dict~str, Callable~
         +register(provider, entity_type, factory) None
@@ -20,46 +22,80 @@ classDiagram
         -_registry: dict~str, Callable~
         +register(provider, entity_type, factory) None
         +create(provider, entity_type, **kwargs) BaseTransformer
+        
+        
     }
 
     class RunnerFactory {
         -_data_source_registry: DataSourceRegistry
         -_transformer_factory: TransformerFactory
         +create_runner(config, runtime) PipelineRunner
+        
+        
     }
 
     class DQFactory {
         +create_dq_analyzers(config) tuple
+        
+        
+        
+        
     }
 
     class RuntimeAssembly {
         Central DI wiring
         +assemble(config, runtime) PipelineRunner
+        
+        
+        
     }
 
     class RunnerBootstrap {
         +assemble_runner(config, runtime, services) PipelineRunner
+        
+        
+        
+        
     }
 
     class StorageBootstrap {
         +assemble_storage(settings) StoragePort
+        
+        
+        
+        
     }
 
     class HealthBootstrap {
         +assemble_health(settings) HealthService
+        
+        
+        
+        
     }
 
     class CheckpointBootstrap {
         +assemble_checkpoint(settings) CheckpointPort
+        
+        
+        
+        
     }
 
     class LockBootstrap {
         +assemble_lock(settings) LockPort
+        
+        
+        
+        
     }
 
     class ProviderRegistry {
         +register_all() None
         Registers all provider pipelines
+        
+        
+        
     }
 
     class RunnerBuilder {
@@ -73,6 +109,9 @@ classDiagram
     class GenericFactory {
         <<Generic T>>
         +create(**kwargs) T
+        
+        
+        
     }
 
     RuntimeAssembly --> RunnerBootstrap
@@ -89,3 +128,17 @@ classDiagram
 
     ProviderRegistry --> DataSourceRegistry
     ProviderRegistry --> TransformerFactory
+
+    style DataSourceRegistry fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style TransformerFactory fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style RunnerFactory fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style DQFactory fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style RuntimeAssembly fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style RunnerBootstrap fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style StorageBootstrap fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style HealthBootstrap fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style CheckpointBootstrap fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style LockBootstrap fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style ProviderRegistry fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style RunnerBuilder fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style GenericFactory fill:#eff6ff,stroke:#2563eb,stroke-width:2px
