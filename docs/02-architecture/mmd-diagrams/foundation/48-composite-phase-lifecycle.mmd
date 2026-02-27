@@ -101,7 +101,7 @@ stateDiagram-v2
     }
 
     state FAILED {
-        [*] --> error
+        [*] ==> error
         error : is_terminal = True
         error : is_resumable = True (retry allowed)
         error : to_metric_value() = 9

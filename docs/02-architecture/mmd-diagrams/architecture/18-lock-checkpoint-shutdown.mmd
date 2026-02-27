@@ -6,6 +6,7 @@
 %% @type    flowchart
 %% @level   System / Component
 %% @nodes   22
+%% @reference  Decomposed into 18a-lock-system, 18b-checkpoint-shutdown
 
 %%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
 %% @uniform width=264 height=216 max_title_len=28 max_desc_lines=10
@@ -79,7 +80,7 @@ graph TB
     SG --> LM
 
     classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
-    classDef domain fill:#c8e6c9,stroke:#16a34a
+    classDef domain fill:#f5f3ff,stroke:#7c3aed
     classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
     classDef infra fill:#fff1f2,stroke:#dc2626,stroke-width:2px
     classDef safety fill:#fff1f2,stroke:#dc2626,stroke-width:2px

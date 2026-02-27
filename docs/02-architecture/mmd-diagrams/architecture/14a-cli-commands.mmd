@@ -1,0 +1,60 @@
+%% BioETL — CLI: Command Structure
+%% Terminal entry point, main group, and all CLI commands with shutdown signal.
+
+%% @version 1.0.0
+%% @date    2026-02-27
+%% @type    flowchart
+%% @level   System / Component
+%% @view    cli-commands
+%% @parent  14-cli-interface-layer.mmd
+%% @nodes   12
+
+graph LR
+    subgraph User["User"]
+        TERM["Terminal"]:::size-sm
+    end
+
+    subgraph CLI["CLI Interface (Click)"]
+        MAIN["bioetl group"]:::size-sm
+
+        subgraph RunCmds["Run Commands"]
+            RUN["bioetl run"]:::size-sm
+            RUN_COMP["bioetl run-composite"]:::size-sm
+        end
+
+        subgraph HealthCmds["Health Commands"]
+            HEALTH["bioetl health"]:::size-sm
+        end
+
+        subgraph DataCmds["Data Commands"]
+            EXPORT["bioetl export"]:::size-sm
+            QUARANTINE["bioetl quarantine"]:::size-sm
+            CHECKPOINT["bioetl checkpoint"]:::size-sm
+        end
+
+        subgraph MaintenanceCmds["Maintenance Commands"]
+            VACUUM["bioetl vacuum"]:::size-sm
+            ARCHIVE["bioetl archive"]:::size-sm
+        end
+
+        subgraph ConfigCmds["Config Commands"]
+            CONFIG["bioetl config"]:::size-sm
+        end
+    end
+
+    SS["ShutdownSignal"]:::size-sm
+
+    %% User → CLI
+    TERM --> MAIN
+    MAIN --> RUN & RUN_COMP & HEALTH & EXPORT & QUARANTINE & CHECKPOINT & VACUUM & ARCHIVE & CONFIG
+
+    %% Shutdown
+    MAIN -.->|"SIGINT/SIGTERM"| SS
+
+    classDef user fill:#f1f5f9,stroke:#64748b
+    classDef cli fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+
+    class TERM user
+    class MAIN,RUN,RUN_COMP,HEALTH,EXPORT,QUARANTINE,CHECKPOINT,VACUUM,ARCHIVE,CONFIG cli
+    class SS app

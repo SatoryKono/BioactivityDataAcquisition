@@ -57,11 +57,11 @@ flowchart LR
     OAA --> OAT --> OAS
     SSA --> SST --> S2S
 
-    CS -->|"seed (doi, pmid,\ntitle, authors)"| MS
-    CRS -->|"enriches (citations,\nfunders, references)"| MS
-    PMS -->|"enriches (abstract,\nmesh_terms, pub_type)"| MS
-    OAS -->|"enriches (concepts,\ninstitutions, cited_by)"| MS
-    S2S -->|"enriches (tldr,\nembedding, fields_of_study)"| MS
+    CS ==>|"seed"| MS
+    CRS -->|"citations"| MS
+    PMS -->|"abstract"| MS
+    OAS -->|"concepts"| MS
+    S2S -->|"tldr"| MS
 
     MS --> FIELDS
     FIELDS --> GS --> GT

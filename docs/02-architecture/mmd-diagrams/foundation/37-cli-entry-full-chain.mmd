@@ -47,7 +47,7 @@ flowchart TB
 
     %% Flow
     CMD --> PARSE --> OPTS
-    OPTS --> PRS
+    OPTS ==> PRS
     PRS --> RESOLVE
     RESOLVE --> BOOT --> ASSEMBLE
 
@@ -63,7 +63,7 @@ flowchart TB
     OBS_EXIT -->|"success"| RES_OK
     OBS_EXIT -->|"error"| RES_FAIL
 
-    LOCK -->|"LockAcquisitionError"| RES_FAIL
+    LOCK -->|"lock error"| RES_FAIL
     BATCH -->|"LockLostError"| RES_FAIL
 
     RES_OK --> EXIT_OK

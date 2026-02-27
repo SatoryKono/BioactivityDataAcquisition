@@ -30,7 +30,7 @@ graph TB
         RAW["Raw API Records<br/>(dict[str, Any])<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
         SILVER["Silver Records<br/>(Delta Lake)<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
         RAW -->|"write_bronze()"| BRONZE
-        RAW -->|"transform_batch()"| SILVER
+        RAW -->|"transform()"| SILVER
         SILVER -->|"write_gold()"| GOLD
         RAW -->|"on error"| QUAR
     end
@@ -61,7 +61,7 @@ graph TB
 
     classDef executor fill:#eff6ff,stroke:#2563eb,stroke-width:3px
     classDef helper fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
-    classDef data fill:#c8e6c9,stroke:#16a34a
+    classDef data fill:#f0fdf4,stroke:#16a34a
     classDef result fill:#f5f3ff,stroke:#7c3aed
     classDef error fill:#fff1f2,stroke:#dc2626
 
