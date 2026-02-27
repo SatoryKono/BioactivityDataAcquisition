@@ -8,23 +8,24 @@
 %% @view    observability
 %% @parent  13-port-protocol-contracts.mmd
 %% @nodes   15
-%% @uniform width=192 height=56 max_title_len=19 max_desc_lines=0
+%% @uniform width=192 height=56 max_title_len=19 max_desc_lines=1
 
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'POLYLINE'}}}%%
 graph LR
     subgraph Domain["Domain Layer"]
-        LGP["LoggerPort"]
-        MTP["MetricsPort"]
-        TRP["TracingPort"]
-        CBP["CircuitBreakerPort"]
-        RLP["RateLimiterPort"]
+        LGP["LoggerPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        MTP["MetricsPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        TRP["TracingPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        CBP["CircuitBreakerPort&nbsp;"]
+        RLP["RateLimiterPort&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        UL["UnifiedLogger"]
-        MCO["MetricsCollector"]
+        UL["UnifiedLogger&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        MCO["MetricsCollector&nbsp;&nbsp;&nbsp;"]
         OTT["OpenTelemetryTracer"]
-        CB["CircuitBreaker"]
-        TB_I["TokenBucket"]
+        CB["CircuitBreaker&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        TB_I["TokenBucket&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     LGP --- UL & SLG & NOL

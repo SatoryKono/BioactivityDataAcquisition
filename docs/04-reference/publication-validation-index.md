@@ -38,7 +38,7 @@
 | Документ | Описание | Охват |
 |----------|----------|-------|
 | **[Publication Fields Reference](publication-fields-reference.md)** | Полный справочник всех 191 полей с типами, regex, PK, категориями | 191 поле |
-| **[Validation Schema v3](schemas/publication-validation-schema-v3.xlsx)** | Структурированная таблица правил валидации (XLSX + CSV) | 191 правило × 5 уровней |
+| **[Validation Schema v3](schemas/publication_validation_schema_v3.xlsx)** | Структурированная таблица правил валидации (XLSX + CSV) | 191 правило × 5 уровней |
 | **[Glossary v2.5](../00-project/glossary.md)** | Ubiquitous Language: термины валидации, DQ-флаги, режимы | 12 новых терминов |
 
 ---
@@ -194,7 +194,7 @@ cat /var/log/bioetl/pipeline.log | \
 
 4. **Документировать:**
    - Обновить [Field Reference](publication-fields-reference.md) при добавлении полей
-    - Добавить правила в [Validation Schema](schemas/publication-validation-schema-v3.xlsx)
+    - Добавить правила в [Validation Schema](schemas/publication_validation_schema_v3.xlsx)
 
 ---
 

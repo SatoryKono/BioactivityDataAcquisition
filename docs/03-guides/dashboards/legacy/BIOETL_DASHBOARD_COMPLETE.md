@@ -13,10 +13,10 @@
 | Документ | Размер | Аудитория | Содержание |
 |----------|--------|----------|-----------|
 | **BIOETL-DASHBOARD-README.md** | 264 строк | 🗺️ Все | Навигация и индекс |
-| **BIOETL-DASHBOARD-QUICKSTART.md** | 148 строк | 🚀 Разработчики | За 5 минут на вход |
-| **BIOETL-DASHBOARD-SETUP.md** | 572 строк | 📖 Полная инструкция | Все детали (60 минут) |
-| **BIOETL-DASHBOARD-VISUAL-GUIDE.md** | 278 строк | 👁️ Визуалы | Диаграммы и примеры |
-| **BIOETL-DASHBOARD-EXAMPLES.md** | 529 строк | 💡 Кастомизация | Примеры и расширение |
+| **BIOETL_DASHBOARD_QUICKSTART.md** | 148 строк | 🚀 Разработчики | За 5 минут на вход |
+| **BIOETL_DASHBOARD_SETUP.md** | 572 строк | 📖 Полная инструкция | Все детали (60 минут) |
+| **BIOETL_DASHBOARD_VISUAL_GUIDE.md** | 278 строк | 👁️ Визуалы | Диаграммы и примеры |
+| **BIOETL_DASHBOARD_EXAMPLES.md** | 529 строк | 💡 Кастомизация | Примеры и расширение |
 
 **Итого:** ~1,800 строк документации
 
@@ -87,7 +87,7 @@
 ### Шаг 1: Быстрый старт (5 минут)
 ```bash
 # Прочитать
-cat BIOETL-DASHBOARD-QUICKSTART.md
+cat BIOETL_DASHBOARD_QUICKSTART.md
 
 # Запустить контейнеры
 docker compose -f docker-compose.monitoring.yml up -d
@@ -261,11 +261,11 @@ histogram-quantile(0.95, bioetl-health-check-latency-ms-bucket{provider="chembl"
 ## 📞 Справка
 
 ### Основные файлы
-- `BIOETL-DASHBOARD-QUICKSTART.md` — Начните отсюда ⭐
+- `BIOETL_DASHBOARD_QUICKSTART.md` — Начните отсюда ⭐
 - `BIOETL-DASHBOARD-README.md` — Индекс всей документации
-- `BIOETL-DASHBOARD-SETUP.md` — Полная инструкция
-- `BIOETL-DASHBOARD-VISUAL-GUIDE.md` — Диаграммы и примеры
-- `BIOETL-DASHBOARD-EXAMPLES.md` — Кастомизация
+- `BIOETL_DASHBOARD_SETUP.md` — Полная инструкция
+- `BIOETL_DASHBOARD_VISUAL_GUIDE.md` — Диаграммы и примеры
+- `BIOETL_DASHBOARD_EXAMPLES.md` — Кастомизация
 
 ### Основные URL
 - Grafana: http://localhost:3000
@@ -332,7 +332,7 @@ curl http://localhost:8000/metrics
 
 **Вариант 1: Быстрый старт (5 минут)**
 ```bash
-cat BIOETL-DASHBOARD-QUICKSTART.md
+cat BIOETL_DASHBOARD_QUICKSTART.md
 docker compose -f docker-compose.monitoring.yml up -d
 python ./metrics-server.py &
 open http://localhost:3000
@@ -340,8 +340,8 @@ open http://localhost:3000
 
 **Вариант 2: Полная подготовка (2 часа)**
 ```bash
-cat BIOETL-DASHBOARD-SETUP.md          # 60 минут
-cat BIOETL-DASHBOARD-VISUAL-GUIDE.md   # 20 минут
+cat BIOETL_DASHBOARD_SETUP.md          # 60 минут
+cat BIOETL_DASHBOARD_VISUAL_GUIDE.md   # 20 минут
 # Следовать инструкциям                # 40 минут
 open http://localhost:3000/d/bioetl-simple
 ```
@@ -364,4 +364,4 @@ open http://localhost:3000/d/bioetl-simple
 
 🎊 **Спасибо за использование BioETL Dashboard!** 🎊
 
-Начните с [BIOETL-DASHBOARD-QUICKSTART.md](./BIOETL-DASHBOARD-QUICKSTART.md) прямо сейчас! ⏱️
+Начните с [BIOETL_DASHBOARD_QUICKSTART.md](./BIOETL_DASHBOARD_QUICKSTART.md) прямо сейчас! ⏱️

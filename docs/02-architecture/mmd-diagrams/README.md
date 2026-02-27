@@ -63,9 +63,58 @@ Parent diagrams remain canonical references. Sub-files provide focused, low-dens
 | 15 | Extractors | `class-diagrams/15-extractors.mmd` | BaseFieldExtractor, PubMed & UniProt extractors |
 | 16 | Factories & Bootstrap | `class-diagrams/16-factories-bootstrap.mmd` | DataSourceRegistry, TransformerFactory, RunnerBuilder |
 
+## Decomposed Views (156 .mermaid files)
+
+Decomposed views of complex diagrams — 5 views per parent: `-overview`, `-domain`, `-infra`, `-dataflow`, `-full`.
+Located in [`views/`](views/).
+
+| Parent | Overview | Domain-Focus | Infrastructure-Mapping | Data-Flow | Full |
+|---|---|---|---|---|---|
+| `01-full-system-component` | [overview](views/01-full-system-component-overview.mermaid) | [domain](views/01-full-system-component-domain.mermaid) | [infra](views/01-full-system-component-infra.mermaid) | [dataflow](views/01-full-system-component-dataflow.mermaid) | [full](views/01-full-system-component-full.mermaid) |
+| `01-high-level` | [overview](views/01-high-level-overview.mermaid) | [domain](views/01-high-level-domain.mermaid) | [infra](views/01-high-level-infra.mermaid) | [dataflow](views/01-high-level-dataflow.mermaid) | [full](views/01-high-level-full.mermaid) |
+| `02-medallion` | [overview](views/02-medallion-overview.mermaid) | [domain](views/02-medallion-domain.mermaid) | [infra](views/02-medallion-infra.mermaid) | [dataflow](views/02-medallion-dataflow.mermaid) | [full](views/02-medallion-full.mermaid) |
+| `04-domain-layer-class-diagram` | [overview](views/04-domain-layer-class-diagram-overview.mermaid) | [domain](views/04-domain-layer-class-diagram-domain.mermaid) | [infra](views/04-domain-layer-class-diagram-infra.mermaid) | [dataflow](views/04-domain-layer-class-diagram-dataflow.mermaid) | [full](views/04-domain-layer-class-diagram-full.mermaid) |
+| `05-layers-interaction` | [overview](views/05-layers-interaction-overview.mermaid) | [domain](views/05-layers-interaction-domain.mermaid) | [infra](views/05-layers-interaction-infra.mermaid) | [dataflow](views/05-layers-interaction-dataflow.mermaid) | [full](views/05-layers-interaction-full.mermaid) |
+| `05-pipeline-lifecycle-states` | [overview](views/05-pipeline-lifecycle-states-overview.mermaid) | [domain](views/05-pipeline-lifecycle-states-domain.mermaid) | [infra](views/05-pipeline-lifecycle-states-infra.mermaid) | [dataflow](views/05-pipeline-lifecycle-states-dataflow.mermaid) | [full](views/05-pipeline-lifecycle-states-full.mermaid) |
+| `06-application-layer-class-diagram` | [overview](views/06-application-layer-class-diagram-overview.mermaid) | [domain](views/06-application-layer-class-diagram-domain.mermaid) | [infra](views/06-application-layer-class-diagram-infra.mermaid) | [dataflow](views/06-application-layer-class-diagram-dataflow.mermaid) | [full](views/06-application-layer-class-diagram-full.mermaid) |
+| `07-circuit-breaker-states` | [overview](views/07-circuit-breaker-states-overview.mermaid) | [domain](views/07-circuit-breaker-states-domain.mermaid) | [infra](views/07-circuit-breaker-states-infra.mermaid) | [dataflow](views/07-circuit-breaker-states-dataflow.mermaid) | [full](views/07-circuit-breaker-states-full.mermaid) |
+| `08-complete-etl-workflow` | [overview](views/08-complete-etl-workflow-overview.mermaid) | [domain](views/08-complete-etl-workflow-domain.mermaid) | [infra](views/08-complete-etl-workflow-infra.mermaid) | [dataflow](views/08-complete-etl-workflow-dataflow.mermaid) | [full](views/08-complete-etl-workflow-full.mermaid) |
+| `08-domain-ddd` | [overview](views/08-domain-ddd-overview.mermaid) | [domain](views/08-domain-ddd-domain.mermaid) | [infra](views/08-domain-ddd-infra.mermaid) | [dataflow](views/08-domain-ddd-dataflow.mermaid) | [full](views/08-domain-ddd-full.mermaid) |
+| `10-infrastructure-layer-class-diagram` | [overview](views/10-infrastructure-layer-class-diagram-overview.mermaid) | [domain](views/10-infrastructure-layer-class-diagram-domain.mermaid) | [infra](views/10-infrastructure-layer-class-diagram-infra.mermaid) | [dataflow](views/10-infrastructure-layer-class-diagram-dataflow.mermaid) | [full](views/10-infrastructure-layer-class-diagram-full.mermaid) |
+| `12-local-deployment-architecture` | [overview](views/12-local-deployment-architecture-overview.mermaid) | [domain](views/12-local-deployment-architecture-domain.mermaid) | [infra](views/12-local-deployment-architecture-infra.mermaid) | [dataflow](views/12-local-deployment-architecture-dataflow.mermaid) | [full](views/12-local-deployment-architecture-full.mermaid) |
+| `14-provider-health-states` | [overview](views/14-provider-health-states-overview.mermaid) | [domain](views/14-provider-health-states-domain.mermaid) | [infra](views/14-provider-health-states-infra.mermaid) | [dataflow](views/14-provider-health-states-dataflow.mermaid) | [full](views/14-provider-health-states-full.mermaid) |
+| `15-dq-check-workflow` | [overview](views/15-dq-check-workflow-overview.mermaid) | [domain](views/15-dq-check-workflow-domain.mermaid) | [infra](views/15-dq-check-workflow-infra.mermaid) | [dataflow](views/15-dq-check-workflow-dataflow.mermaid) | [full](views/15-dq-check-workflow-full.mermaid) |
+| `21-activity-entity-data-flow` | [overview](views/21-activity-entity-data-flow-overview.mermaid) | [domain](views/21-activity-entity-data-flow-domain.mermaid) | [infra](views/21-activity-entity-data-flow-infra.mermaid) | [dataflow](views/21-activity-entity-data-flow-dataflow.mermaid) | [full](views/21-activity-entity-data-flow-full.mermaid) |
+| `26-hexagonal-ports-adapters` | [overview](views/26-hexagonal-ports-adapters-overview.mermaid) | [domain](views/26-hexagonal-ports-adapters-domain.mermaid) | [infra](views/26-hexagonal-ports-adapters-infra.mermaid) | [dataflow](views/26-hexagonal-ports-adapters-dataflow.mermaid) | [full](views/26-hexagonal-ports-adapters-full.mermaid) |
+| `28-composition-root-di-graph` | [overview](views/28-composition-root-di-graph-overview.mermaid) | [domain](views/28-composition-root-di-graph-domain.mermaid) | [infra](views/28-composition-root-di-graph-infra.mermaid) | [dataflow](views/28-composition-root-di-graph-dataflow.mermaid) | [full](views/28-composition-root-di-graph-full.mermaid) |
+| `29-composite-pipeline-workflow` | [overview](views/29-composite-pipeline-workflow-overview.mermaid) | [domain](views/29-composite-pipeline-workflow-domain.mermaid) | [infra](views/29-composite-pipeline-workflow-infra.mermaid) | [dataflow](views/29-composite-pipeline-workflow-dataflow.mermaid) | [full](views/29-composite-pipeline-workflow-full.mermaid) |
+| `30-port-adapter-mapping` | [overview](views/30-port-adapter-mapping-overview.mermaid) | [domain](views/30-port-adapter-mapping-domain.mermaid) | [infra](views/30-port-adapter-mapping-infra.mermaid) | [dataflow](views/30-port-adapter-mapping-dataflow.mermaid) | [full](views/30-port-adapter-mapping-full.mermaid) |
+| `31-pipeline-run-lifecycle` | [overview](views/31-pipeline-run-lifecycle-overview.mermaid) | [domain](views/31-pipeline-run-lifecycle-domain.mermaid) | [infra](views/31-pipeline-run-lifecycle-infra.mermaid) | [dataflow](views/31-pipeline-run-lifecycle-dataflow.mermaid) | [full](views/31-pipeline-run-lifecycle-full.mermaid) |
+| `32-single-record-journey` | [overview](views/32-single-record-journey-overview.mermaid) | [domain](views/32-single-record-journey-domain.mermaid) | [infra](views/32-single-record-journey-infra.mermaid) | [dataflow](views/32-single-record-journey-dataflow.mermaid) | [full](views/32-single-record-journey-full.mermaid) |
+| `33-cli-run-interaction` | [overview](views/33-cli-run-interaction-overview.mermaid) | [domain](views/33-cli-run-interaction-domain.mermaid) | [infra](views/33-cli-run-interaction-infra.mermaid) | [dataflow](views/33-cli-run-interaction-dataflow.mermaid) | [full](views/33-cli-run-interaction-full.mermaid) |
+| `34-batch-processing-flow` | [overview](views/34-batch-processing-flow-overview.mermaid) | [domain](views/34-batch-processing-flow-domain.mermaid) | [infra](views/34-batch-processing-flow-infra.mermaid) | [dataflow](views/34-batch-processing-flow-dataflow.mermaid) | [full](views/34-batch-processing-flow-full.mermaid) |
+| `35-bootstrap-sequence` | [overview](views/35-bootstrap-sequence-overview.mermaid) | [domain](views/35-bootstrap-sequence-domain.mermaid) | [infra](views/35-bootstrap-sequence-infra.mermaid) | [dataflow](views/35-bootstrap-sequence-dataflow.mermaid) | [full](views/35-bootstrap-sequence-full.mermaid) |
+| `36-architecture-principles-mindmap` | [overview](views/36-architecture-principles-mindmap-overview.mermaid) | [domain](views/36-architecture-principles-mindmap-domain.mermaid) | [infra](views/36-architecture-principles-mindmap-infra.mermaid) | [dataflow](views/36-architecture-principles-mindmap-dataflow.mermaid) | [full](views/36-architecture-principles-mindmap-full.mermaid) |
+| `39-medallion-invariants` | [overview](views/39-medallion-invariants-overview.mermaid) | [domain](views/39-medallion-invariants-domain.mermaid) | [infra](views/39-medallion-invariants-infra.mermaid) | [dataflow](views/39-medallion-invariants-dataflow.mermaid) | [full](views/39-medallion-invariants-full.mermaid) |
+| `41-error-classification-tree` | [overview](views/41-error-classification-tree-overview.mermaid) | [domain](views/41-error-classification-tree-domain.mermaid) | [infra](views/41-error-classification-tree-infra.mermaid) | [dataflow](views/41-error-classification-tree-dataflow.mermaid) | [full](views/41-error-classification-tree-full.mermaid) |
+| `44-cross-provider-enrichment` | [overview](views/44-cross-provider-enrichment-overview.mermaid) | [domain](views/44-cross-provider-enrichment-domain.mermaid) | [infra](views/44-cross-provider-enrichment-infra.mermaid) | [dataflow](views/44-cross-provider-enrichment-dataflow.mermaid) | [full](views/44-cross-provider-enrichment-full.mermaid) |
+| `46-yaml-config-resolution` | [overview](views/46-yaml-config-resolution-overview.mermaid) | [domain](views/46-yaml-config-resolution-domain.mermaid) | [infra](views/46-yaml-config-resolution-infra.mermaid) | [dataflow](views/46-yaml-config-resolution-dataflow.mermaid) | [full](views/46-yaml-config-resolution-full.mermaid) |
+| `48-composite-phase-lifecycle` | [overview](views/48-composite-phase-lifecycle-overview.mermaid) | [domain](views/48-composite-phase-lifecycle-domain.mermaid) | [infra](views/48-composite-phase-lifecycle-infra.mermaid) | [dataflow](views/48-composite-phase-lifecycle-dataflow.mermaid) | [full](views/48-composite-phase-lifecycle-full.mermaid) |
+| `50-exception-hierarchy` | [overview](views/50-exception-hierarchy-overview.mermaid) | [domain](views/50-exception-hierarchy-domain.mermaid) | [infra](views/50-exception-hierarchy-infra.mermaid) | [dataflow](views/50-exception-hierarchy-dataflow.mermaid) | [full](views/50-exception-hierarchy-full.mermaid) |
+
+### Onboarding Order
+
+1. System overview: `01-full-system-component-overview`, `01-high-level-overview`, `05-layers-interaction-overview`
+2. Core domain: `04-domain-layer-class-diagram-domain`, `06-application-layer-class-diagram-domain`, `31-pipeline-run-lifecycle-domain`
+3. Infrastructure: `26-hexagonal-ports-adapters-infra`, `10-infrastructure-layer-class-diagram-infra`
+4. Data movement: `02-medallion-dataflow`, `08-complete-etl-workflow-dataflow`, `21-activity-entity-data-flow-dataflow`
+5. Reference deep dives: any `*-full` diagram
+
+---
+
 ## Foundation Diagrams (55)
 
-Historical/foundational diagrams consolidated from `docs/02-architecture/diagrams/`.
+Historical/foundational diagrams — `foundation/`.
 
 ### Foundation 01–25
 
@@ -219,22 +268,22 @@ bash scripts/validate_mermaid_syntax.sh --puppeteer /tmp/puppeteer-config.json
 docs/02-architecture/mmd-diagrams/
   architecture/
     *.mmd           # source diagrams (18)
-    svg/*.svg       # rendered vector (scalable)
-    png/*.png       # rendered raster (300 DPI)
   class-diagrams/
-    *.mmd           # source diagrams (16)
-    svg/*.svg
-    png/*.png
+    *.mmd           # source diagrams (14)
   foundation/
-    *.mmd           # source diagrams (59)
-    svg/*.svg
-    png/*.png
+    *.mmd           # source diagrams (55)
+  views/
+    *.mermaid       # decomposed views (156)
+  docs/
+    *.md            # diagram documentation
   theme/
     mermaid-config.json   # colours, fonts, spacing
     custom.css            # fine-tuned SVG styling
   render.sh               # unified render script
   README.md               # this file
 ```
+
+Rendered SVG/PNG are gitignored and regenerated via `render.sh`.
 
 ### CI/CD
 
@@ -246,13 +295,15 @@ A drift check warns when `.mmd` sources change without re-rendering.
 
 ## Size Normalization
 
-Use `scripts/uniform_diagram_sizes.py` to normalize class/flowchart object sizes:
+`scripts/uniform_diagram_sizes.py` is optional and should be used only with
+manual review, because its padding strategy can conflict with `NBSP-001` in
+`scripts/lint_diagrams.py`.
 
 ```bash
-# Check normalization drift
+# Check normalization drift (optional)
 python3 scripts/uniform_diagram_sizes.py --check
 
-# Fix specific files
+# Fix specific files (manual review required)
 python3 scripts/uniform_diagram_sizes.py --fix -f docs/02-architecture/mmd-diagrams/class-diagrams/07-application-core-services.mmd
 ```
 

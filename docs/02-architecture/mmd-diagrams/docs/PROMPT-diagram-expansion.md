@@ -84,7 +84,7 @@ docs/02-architecture/decisions/ADR-038-enum-externalization.md
 
 ### 0.3 Существующие диаграммы (НЕ дублировать!)
 
-В проекте уже есть **34 mermaid-диаграммы** в `docs/02-architecture/diagrams/*.mermaid`.
+В проекте уже есть **34 mermaid-диаграммы** в `docs/02-architecture/mmd-diagrams/*.mermaid`.
 Прочитай **каждую** из них, чтобы не создавать дубликатов:
 
 ```
@@ -325,7 +325,7 @@ src/bioetl/interfaces/http/health-server.py
 
 ### 0.5 Diagramming Policy (стандарты)
 
-Прочитай `docs/02-architecture/diagrams/00-diagramming-policy.md`. Ключевые правила:
+Прочитай `docs/02-architecture/mmd-diagrams/00-diagramming-policy.md`. Ключевые правила:
 
 - **Формат**: Mermaid (`.mermaid` расширение)
 - **Naming**: `NN-topic-name.mermaid` (kebab-case, NN-prefix для сортировки)
@@ -440,7 +440,7 @@ src/bioetl/interfaces/http/health-server.py
 
 ### 4.1 Создание Mermaid-файла
 
-- Создай файл в `docs/02-architecture/diagrams/`
+- Создай файл в `docs/02-architecture/mmd-diagrams/`
 - Формат именования: `NN-topic-name.mermaid` (NN = следующий свободный номер, начиная с 26)
 - Каждый файл начинается с:
   ```
@@ -472,13 +472,13 @@ EOF
 # Рендер каждой диаграммы
 # Используй scale=3 для ~300 DPI (base 96 DPI × 3 = 288 DPI)
 # Для сложных диаграмм с мелким текстом — scale=4 (384 DPI)
-for f in docs/02-architecture/diagrams/2[6-9]-*.mermaid \
-         docs/02-architecture/diagrams/3[0-9]-*.mermaid \
-         docs/02-architecture/diagrams/4[0-9]-*.mermaid \
-         docs/02-architecture/diagrams/50-*.mermaid; do
+for f in docs/02-architecture/mmd-diagrams/2[6-9]-*.mermaid \
+         docs/02-architecture/mmd-diagrams/3[0-9]-*.mermaid \
+         docs/02-architecture/mmd-diagrams/4[0-9]-*.mermaid \
+         docs/02-architecture/mmd-diagrams/50-*.mermaid; do
     base=$(basename "$f" .mermaid)
     mmdc -i "$f" \
-         -o "docs/02-architecture/diagrams/png/${base}.png" \
+         -o "docs/02-architecture/mmd-diagrams/png/${base}.png" \
          -s 3 \
          -w 2400 \
          -b white \
@@ -497,8 +497,8 @@ done
 
 После создания всех файлов обнови:
 
-1. `docs/02-architecture/diagrams/diagrams-index.md` — добавь новые диаграммы
-1. Создай директорию `docs/02-architecture/diagrams/png/` если не существует
+1. `docs/02-architecture/mmd-diagrams/diagrams-index.md` — добавь новые диаграммы
+1. Создай директорию `docs/02-architecture/mmd-diagrams/png/` если не существует
 
 ----------------------------------------------------------------------
 
@@ -530,7 +530,7 @@ grep -rn "class ИмяКласса" src/bioetl/ --include="*.py"
 
 ### 5.4 Рендер
 
-- Все 25 PNG файлов существуют в `docs/02-architecture/diagrams/png/`
+- Все 25 PNG файлов существуют в `docs/02-architecture/mmd-diagrams/png/`
 - Каждый PNG весит > 50KB (не пустой/битый)
 - Текст на каждой диаграмме читаем при 100% масштабе
 

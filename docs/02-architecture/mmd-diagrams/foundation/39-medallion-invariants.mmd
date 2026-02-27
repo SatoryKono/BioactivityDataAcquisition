@@ -9,49 +9,49 @@
 %% @level   Mixed (System / Component / Class)
 
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
-%% @uniform width=256 height=90 max_title_len=27 max_desc_lines=3
+%% @uniform width=272 height=112 max_title_len=27 max_desc_lines=4
 flowchart TB
 %% keep-orphan: E3, E4
     subgraph RunTypes["RunType Enum (domain/types.py)"]
-        INC["RunType.INCREMENTAL<br/>'Fetch new data since last run'<br/>"]
-        BF["RunType.BACKFILL<br/>'Re-fetch a date range'<br/>"]
-        RB["RunType.REBUILD<br/>'Full clean rebuild'<br/>"]
+        INC["RunType.INCREMENTAL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>'Fetch new data since last run'<br/>&nbsp;<br/>&nbsp;"]
+        BF["RunType.BACKFILL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>'Re-fetch a date range'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        RB["RunType.REBUILD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>'Full clean rebuild'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Policy["MedallionLifecycleService\n(application/services/medallion_lifecycle.py)"]
-        CHECK{{"Check RunType<br/>"}}
+        CHECK{{"Check RunType&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"}}
     end
 
     subgraph IncPath["INCREMENTAL Path"]
-        I1["❌ DO NOT clear Silver<br/>"]
-        I2["❌ DO NOT clear Gold<br/>"]
-        I3["Silver: merge/upsert<br/>(content_hash dedup)<br/>"]
-        I4["Gold: merge/append<br/>"]
+        I1["❌ DO NOT clear Silver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        I2["❌ DO NOT clear Gold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        I3["Silver: merge/upsert&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(content_hash dedup)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        I4["Gold: merge/append&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph BFPath["BACKFILL Path"]
-        B1["✅ MUST clear Silver<br/>SilverWriter.clear()<br/>"]
-        B2["✅ MUST clear Gold<br/>GoldWriter.clear()<br/>"]
-        B3["Silver: full reload<br/>"]
-        B4["Gold: full reload<br/>"]
+        B1["✅ MUST clear Silver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>SilverWriter.clear()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        B2["✅ MUST clear Gold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>GoldWriter.clear()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        B3["Silver: full reload&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        B4["Gold: full reload&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph RBPath["REBUILD Path"]
-        R1["✅ MUST clear Silver<br/>SilverWriter.clear()<br/>"]
-        R2["✅ MUST clear Gold<br/>GoldWriter.clear()<br/>"]
-        R3["Silver: full rebuild<br/>from Bronze/API<br/>"]
-        R4["Gold: full rebuild<br/>from Silver<br/>"]
+        R1["✅ MUST clear Silver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>SilverWriter.clear()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        R2["✅ MUST clear Gold&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>GoldWriter.clear()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        R3["Silver: full rebuild&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>from Bronze/API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        R4["Gold: full rebuild&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>from Silver&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Enforcement["Enforcement"]
-        E1["PipelineRunner checks<br/>run_type before execution<br/>"]
-        E2["MedallionLifecycleService<br/>enforces clear policy<br/>"]
-        E3["ClearResult tracks<br/>what was cleared<br/>"]
-        E4["Tests verify:<br/>INCREMENTAL never clears<br/>"]
+        E1["PipelineRunner checks&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>run_type before execution&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        E2["MedallionLifecycleService&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>enforces clear policy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        E3["ClearResult tracks&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>what was cleared&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        E4["Tests verify:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>INCREMENTAL never clears&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
     end
 
     subgraph Bronze["Bronze Layer (Always Append)"]
-        BZ["BronzeWriter.write_bronze()<br/>• ALWAYS append-only<br/>• Never cleared by run_type<br/>• 90-day retention policy"]
+        BZ["BronzeWriter.write_bronze()&nbsp;&nbsp;&nbsp;&nbsp;<br/>• ALWAYS append-only&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>• Never cleared by run_type&nbsp;&nbsp;&nbsp;&nbsp;<br/>• 90-day retention policy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
     end
 
     %% Flow

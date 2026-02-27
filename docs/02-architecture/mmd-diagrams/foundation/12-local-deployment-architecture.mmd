@@ -9,45 +9,45 @@
 %% @level   Mixed (System / Component / Class)
 
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
-%% @uniform width=200 height=56 max_title_len=20 max_desc_lines=1
+%% @uniform width=200 height=72 max_title_len=20 max_desc_lines=2
 flowchart TB
     subgraph External["External APIs"]
-        ChEMBL_API["🌐 ChEMBL API<br/>ebi.ac.uk/chembl"]
-        PubChem_API["🌐 PubChem API<br/>pubchem.ncbi.nlm.nih.gov"]
-        UniProt_API["🌐 UniProt API<br/>uniprot.org"]
-        PubMed_API["🌐 PubMed API<br/>eutils.ncbi.nlm.nih.gov"]
+        ChEMBL_API["🌐 ChEMBL API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>ebi.ac.uk/chembl&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        PubChem_API["🌐 PubChem API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>pubchem.ncbi.nlm.nih.gov"]
+        UniProt_API["🌐 UniProt API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>uniprot.org&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        PubMed_API["🌐 PubMed API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>eutils.ncbi.nlm.nih.gov&nbsp;"]
     end
 
     subgraph Local["Local Machine (Single Instance)"]
         subgraph Orchestration["CLI Execution"]
-            CLI["🖥️ CLI / Manual run<br/>PipelineRunner"]
-            Schedule["⏰ Local scheduler<br/>(cron/systemd)"]
+            CLI["🖥️ CLI / Manual run&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>PipelineRunner&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+            Schedule["⏰ Local scheduler&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(cron/systemd)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         end
 
         subgraph Runtime["Local Pipeline Workers"]
-            chembl_activity["📦 chembl_activity<br/>local pipeline"]
-            chembl_assay["📦 chembl_assay<br/>local pipeline"]
-            chembl_target["📦 chembl_target<br/>local pipeline"]
-            chembl_molecule["📦 chembl_molecule<br/>local pipeline"]
-            pubchem_compound["📦 pubchem_compound<br/>local pipeline"]
-            uniprot_protein["📦 uniprot_protein<br/>local pipeline"]
+            chembl_activity["📦 chembl_activity&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>local pipeline&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+            chembl_assay["📦 chembl_assay&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>local pipeline&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+            chembl_target["📦 chembl_target&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>local pipeline&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+            chembl_molecule["📦 chembl_molecule&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>local pipeline&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+            pubchem_compound["📦 pubchem_compound&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>local pipeline&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+            uniprot_protein["📦 uniprot_protein&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>local pipeline&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
         end
 
         subgraph Locking["In-Process Locking"]
         end
 
         subgraph Data["Local filesystem (data/)"]
-            Bronze[("📁 bronze/<br/>JSONL+zstd")]
-            Silver[("📁 silver/<br/>Delta Lake")]
-            Gold[("📁 gold/<br/>Delta/Parquet")]
-            Quarantine[("📁 quarantine/<br/>Parquet")]
-            Checkpoints[("📁 checkpoints/<br/>JSON")]
-            Lineage[("📁 lineage/<br/>Parquet")]
+            Bronze[("📁 bronze/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>JSONL+zstd&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")]
+            Silver[("📁 silver/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Delta Lake&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")]
+            Gold[("📁 gold/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Delta/Parquet&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")]
+            Quarantine[("📁 quarantine/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Parquet&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")]
+            Checkpoints[("📁 checkpoints/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>JSON&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")]
+            Lineage[("📁 lineage/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Parquet&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")]
         end
 
         subgraph Observability["Local Observability"]
-            Logs["📋 Local logs<br/>stdout/file"]
-            Metrics["📊 In-process metrics<br/>"]
+            Logs["📋 Local logs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>stdout/file&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+            Metrics["📊 In-process metrics&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
         end
     end
 

@@ -150,9 +150,9 @@ Extract text with pdfplumber:
 
 ## Advanced features
 
-- **Form filling**: See [FORMS.md](FORMS.md) for complete guide
-- **API reference**: See [REFERENCE.md](REFERENCE.md) for all methods
-- **Examples**: See [EXAMPLES.md](EXAMPLES.md) for common patterns
+- **Form filling**: See `FORMS.md` for complete guide
+- **API reference**: See `REFERENCE.md` for all methods
+- **Examples**: See `EXAMPLES.md` for common patterns
 ```
 
 Codex loads FORMS.md, REFERENCE.md, or EXAMPLES.md only when needed.
@@ -195,14 +195,14 @@ Show basic content, link to advanced content:
 
 ## Creating documents
 
-Use docx-js for new documents. See [DOCX-JS.md](DOCX-JS.md).
+Use docx-js for new documents. See `DOCX-JS.md`.
 
 ## Editing documents
 
 For simple edits, modify the XML directly.
 
-**For tracked changes**: See [REDLINING.md](REDLINING.md)
-**For OOXML details**: See [OOXML.md](OOXML.md)
+**For tracked changes**: See `REDLINING.md`
+**For OOXML details**: See `OOXML.md`
 ```
 
 Codex reads REDLINING.md or OOXML.md only when the user needs those features.

@@ -50,15 +50,15 @@ Otherwise use generic Mermaid mode.
 ## BioETL Project Mode Workflow
 
 1. Choose target file family first.
-- Canonical source diagrams: `docs/02-architecture/mmd-diagrams/**.mermaid`.
-- Decomposed views: `docs/02-architecture/diagrams/mermaid/**.mermaid`.
+- Canonical source diagrams: `docs/02-architecture/mmd-diagrams/**/*.mmd`.
+- Decomposed views: `docs/02-architecture/mmd-diagrams/views/*.mermaid`.
 - Do not create new diagram files under `docs/99-archive/**`.
 
 2. Enforce file purpose and placement.
 - New architecture-level canonical work goes to `mmd-diagrams/architecture/`.
 - Class families go to `mmd-diagrams/class-diagrams/`.
 - Foundation canonical updates go to `mmd-diagrams/foundation/`.
-- View decomposition outputs go to `diagrams/mermaid/` as `-full/-overview/-domain/-infra/-dataflow`.
+- View decomposition outputs go to `mmd-diagrams/views/` as `-full/-overview/-domain/-infra/-dataflow`.
 
 3. Enforce metadata contract.
 - For `.mermaid`, include:

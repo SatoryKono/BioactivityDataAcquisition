@@ -11,7 +11,7 @@ docs/02-architecture/mmd-diagrams/foundation/svg/21-activity-entity-data-flow.sv
 docs/02-architecture/mmd-diagrams/foundation/svg/26-hexagonal-ports-adapters.svg
 docs/02-architecture/mmd-diagrams/foundation/svg/28-composition-root-di-graph.svg
 docs/02-architecture/mmd-diagrams/foundation/svg/29-composite-pipeline-workflow.svg
-docs/02-architecture/mmd-diagrams/foundation/svg/30-port-adapter-mapping.svg
+docs/02-architecture/mmd-diagrams/architecture/svg/05-provider-adapter-hierarchy.svg
 docs/02-architecture/mmd-diagrams/foundation/svg/31-pipeline-run-lifecycle.svg
 docs/02-architecture/mmd-diagrams/foundation/svg/32-single-record-journey.svg
 docs/02-architecture/mmd-diagrams/foundation/svg/33-cli-run-interaction.svg

@@ -2,10 +2,10 @@
 
 *Updated: 2026-02-25*
 
-> **Note:** Canonical diagram sources have been consolidated into
-> [`docs/02-architecture/mmd-diagrams/`](../mmd-diagrams/README.md).
-> The `.mermaid` files in this directory are kept for historical reference.
-> All new diagrams should be added as `.mermaid` files in the `mmd-diagrams/` directory.
+> **Note:** All diagram sources live in [`docs/02-architecture/mmd-diagrams/`](../README.md).
+> Canonical sources: `architecture/`, `class-diagrams/`, `foundation/` (`.mmd`).
+> Decomposed views: `views/` (`.mermaid`).
+> All new diagrams should be added as `.mmd` files.
 
 В каталоге 59 исходных файлов диаграмм Mermaid, документирующих архитектуру BioETL.
 Диаграммы 26–50 созданы на основе TOP-25 из 500 архитектурных предложений (см. `top-50-diagram-selection.md`).
@@ -104,9 +104,9 @@ Ranked by architectural importance (Priority score). PNG renderings in `png/` su
 
 ## Definition of Done для новой диаграммы
 
-- [ ] Добавлен исходник `.mermaid` в `docs/02-architecture/diagrams/`.
-- [ ] Сгенерирован `.png` в `docs/02-architecture/diagrams/png/`.
-- [ ] Добавлена строка в этот индекс (`diagrams-index.md`).
+- [ ] Добавлен исходник `.mmd` в `docs/02-architecture/mmd-diagrams/`.
+- [ ] PNG/SVG генерируются через `render.sh` (gitignored).
+- [ ] Добавлена строка в `README.md` или этот индекс.
 - [ ] На архитектурной странице `docs/02-architecture/*.md` есть контекстный абзац со ссылкой на диаграмму.
 
 ## Правило поддержки актуальности индекса

@@ -4,10 +4,10 @@
 
 | Файл | Размер | Для кого | Читать |
 |------|--------|---------|--------|
-| **BIOETL-DASHBOARD-QUICKSTART.md** | 6.5 KB | 🚀 Разработчиков (за 5 минут) | [→](./BIOETL-DASHBOARD-QUICKSTART.md) |
-| **BIOETL-DASHBOARD-SETUP.md** | 23 KB | 📖 Полная инструкция (60 минут) | [→](./BIOETL-DASHBOARD-SETUP.md) |
-| **BIOETL-DASHBOARD-VISUAL-GUIDE.md** | 17 KB | 👁️ Визуальный гайд (20 минут) | [→](./BIOETL-DASHBOARD-VISUAL-GUIDE.md) |
-| **BIOETL-DASHBOARD-EXAMPLES.md** | 15 KB | 💡 Примеры кастомизации (30 минут) | [→](./BIOETL-DASHBOARD-EXAMPLES.md) |
+| **BIOETL_DASHBOARD_QUICKSTART.md** | 6.5 KB | 🚀 Разработчиков (за 5 минут) | [→](./BIOETL_DASHBOARD_QUICKSTART.md) |
+| **BIOETL_DASHBOARD_SETUP.md** | 23 KB | 📖 Полная инструкция (60 минут) | [→](./BIOETL_DASHBOARD_SETUP.md) |
+| **BIOETL_DASHBOARD_VISUAL_GUIDE.md** | 17 KB | 👁️ Визуальный гайд (20 минут) | [→](./BIOETL_DASHBOARD_VISUAL_GUIDE.md) |
+| **BIOETL_DASHBOARD_EXAMPLES.md** | 15 KB | 💡 Примеры кастомизации (30 минут) | [→](./BIOETL_DASHBOARD_EXAMPLES.md) |
 | **Этот файл** | 10 KB | 🗺️ Карта и навигация | - |
 
 ---
@@ -15,26 +15,26 @@
 ## 🎯 С чего начать?
 
 ### Если у вас есть 5 минут ⏱️
-→ Прочитайте [BIOETL-DASHBOARD-QUICKSTART.md](./BIOETL-DASHBOARD-QUICKSTART.md)
+→ Прочитайте [BIOETL_DASHBOARD_QUICKSTART.md](./BIOETL_DASHBOARD_QUICKSTART.md)
 - ✅ Чек-лист установки
 - ✅ 6 простых шагов
 - ✅ Быстрая диагностика
 
 ### Если у вас есть 1 час 📚
-→ Прочитайте [BIOETL-DASHBOARD-SETUP.md](./BIOETL-DASHBOARD-SETUP.md)
+→ Прочитайте [BIOETL_DASHBOARD_SETUP.md](./BIOETL_DASHBOARD_SETUP.md)
 - ✅ Полная архитектура
 - ✅ Пошаговая установка
 - ✅ Конфигурация каждого компонента
 - ✅ Troubleshooting гайд
 
 ### Если вы визуал 👁️
-→ Посмотрите [BIOETL-DASHBOARD-VISUAL-GUIDE.md](./BIOETL-DASHBOARD-VISUAL-GUIDE.md)
+→ Посмотрите [BIOETL_DASHBOARD_VISUAL_GUIDE.md](./BIOETL_DASHBOARD_VISUAL_GUIDE.md)
 - ✅ Диаграммы и схемы
 - ✅ Как читать дашборды
 - ✅ Примеры графиков
 
 ### Если вы хотите кастомизировать 💡
-→ Изучите [BIOETL-DASHBOARD-EXAMPLES.md](./BIOETL-DASHBOARD-EXAMPLES.md)
+→ Изучите [BIOETL_DASHBOARD_EXAMPLES.md](./BIOETL_DASHBOARD_EXAMPLES.md)
 - ✅ Добавить метрики
 - ✅ Создать дашборды
 - ✅ Настроить алерты
@@ -280,7 +280,7 @@ curl http://localhost:8000/health
 
 1. **Проверить Troubleshooting**: SETUP.md
 2. **Посмотреть логи**: `docker logs bioetl-prometheus`
-3. **Диагностировать**: [SETUP.md - Troubleshooting](./BIOETL-DASHBOARD-SETUP.md#troubleshooting)
+3. **Диагностировать**: [SETUP.md - Troubleshooting](./BIOETL_DASHBOARD_SETUP.md#troubleshooting)
 4. **Проверить архитектуру**: VISUAL-GUIDE.md
 
 ---
@@ -289,10 +289,10 @@ curl http://localhost:8000/health
 
 ```
 📂 Документация
-├── 📄 BIOETL-DASHBOARD-QUICKSTART.md      (5 минут)
-├── 📄 BIOETL-DASHBOARD-SETUP.md           (60 минут)
-├── 📄 BIOETL-DASHBOARD-VISUAL-GUIDE.md    (20 минут)
-├── 📄 BIOETL-DASHBOARD-EXAMPLES.md        (30 минут)
+├── 📄 BIOETL_DASHBOARD_QUICKSTART.md      (5 минут)
+├── 📄 BIOETL_DASHBOARD_SETUP.md           (60 минут)
+├── 📄 BIOETL_DASHBOARD_VISUAL_GUIDE.md    (20 минут)
+├── 📄 BIOETL_DASHBOARD_EXAMPLES.md        (30 минут)
 └── 📄 README.md (этот файл)
 
 📂 Конфигурация
@@ -342,4 +342,4 @@ curl http://localhost:8000/health
 **Версия:** 1.0  
 **Статус:** ✅ Готово к использованию
 
-Начните с [BIOETL-DASHBOARD-QUICKSTART.md](./BIOETL-DASHBOARD-QUICKSTART.md) — займет 5 минут! ⏱️
+Начните с [BIOETL_DASHBOARD_QUICKSTART.md](./BIOETL_DASHBOARD_QUICKSTART.md) — займет 5 минут! ⏱️
