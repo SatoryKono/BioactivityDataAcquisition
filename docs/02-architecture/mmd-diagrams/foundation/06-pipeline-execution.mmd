@@ -77,5 +77,5 @@ sequenceDiagram
 
     %% Cleanup
     Runner->>Runner: release_lock()
-    Runner-->>CLI: pipeline_result
+    Runner==>>CLI: pipeline_result
     deactivate Runner

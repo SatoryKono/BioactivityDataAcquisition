@@ -68,7 +68,7 @@ flowchart TB
     PipelineRun --> RunStarted
     PipelineRun --> RunCompleted
 
-    Batch --> RunID
+    Batch ==> RunID
     Batch --> BatchID
     PipelineRun --> RunID
     QuarantineEntry --> EntityID

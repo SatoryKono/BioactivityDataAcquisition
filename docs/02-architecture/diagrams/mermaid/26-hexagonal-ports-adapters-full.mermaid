@@ -105,7 +105,7 @@ flowchart TB
     end
 
     %% Port-to-Adapter mappings
-    DSP --> CA & PCA & UA & PMA & CRA & OAA & SSA
+    DSP -.-> CA & PCA & UA & PMA & CRA & OAA & SSA
     SP --> BW & SW & GW
     DRP --> DR
     LP --> ML
@@ -123,30 +123,15 @@ flowchart TB
     MMP --> MM
 
     %% Styling
-    style Hexagon fill:#f0f4ff,stroke:#4a6fa5,stroke-width:2px
-    style Adapters fill:#f4fff0,stroke:#4a9f6a,stroke-width:2px
+    style Hexagon fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Adapters fill:#fff1f2,stroke:#dc2626,stroke-width:2px
 
-    classDef dataPorts fill:#e3f2fd,stroke:#1e88e5,stroke-width:1px
-    classDef coordPorts fill:#f3e5f5,stroke:#8e24aa,stroke-width:1px
-    classDef obsPorts fill:#fff3e0,stroke:#fb8c00,stroke-width:1px
+    classDef dataPorts fill:#eff6ff,stroke:#2563eb,stroke-width:1px
+    classDef coordPorts fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px
+    classDef obsPorts fill:#fff7ed,stroke:#f59e0b,stroke-width:1px
 
     class DSP,FDSP,SP,DRP dataPorts
     class LP,CPP,QP coordPorts
     class LGP,MP,TP,DQM obsPorts
 
-    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 8 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 10 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 11 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 12 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 13 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 14 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 15 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 stroke:#475569,stroke-width:2px,stroke-dasharray:5

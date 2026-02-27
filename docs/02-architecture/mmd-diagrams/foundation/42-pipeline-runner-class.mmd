@@ -171,4 +171,4 @@ classDiagram
     PipelineRunner --> PostrunService : _postrun
     PipelineRunner --> CheckpointManager : _checkpoint_manager
     PipelineRunner --> HeartbeatTask : _heartbeat
-    PipelineRunner --> PipelineObserver : _observer
+    PipelineRunner ==> PipelineObserver : _observer

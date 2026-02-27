@@ -91,4 +91,4 @@ sequenceDiagram
         LockMgr-->>Runner: released
     end
 
-    Runner-->>CLI: RunResult(success=true, metrics)
+    Runner==>>CLI: RunResult(success=true, metrics)

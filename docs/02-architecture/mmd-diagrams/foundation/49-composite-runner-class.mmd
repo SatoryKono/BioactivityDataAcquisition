@@ -347,7 +347,7 @@ classDiagram
     CompositePipelineRunner --> CompositeCheckpointManager : checkpoint/resume
     CompositePipelineRunner --> CompositePreflightValidator : pre-run validation
     CompositePipelineRunner ..> CompositeResult : produces
-    FSMStateHelper --> CompositePipelineState : manages
+    FSMStateHelper ==> CompositePipelineState : manages
     MergeService ..> EnrichmentCrossValidator : optional validation
 
     note for CompositePipelineRunner "Application Service (ADR-026)\nNo business logic — delegates to\nspecialized services.\nAll deps injected via constructor."

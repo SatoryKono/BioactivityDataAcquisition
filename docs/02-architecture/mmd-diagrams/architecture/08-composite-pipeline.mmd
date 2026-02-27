@@ -6,6 +6,7 @@
 %% @type    flowchart
 %% @level   System / Component
 %% @nodes   33
+%% @reference  Decomposed into 08a-composite-config, 08b-composite-execution
 
 %%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
 %% @uniform width=256 height=126 max_title_len=27 max_desc_lines=5
@@ -92,7 +93,7 @@ graph TB
     end
 
     %% Flow
-    CPR --> CPV
+    CPR ==> CPV
     CPR --> SEED
     CPR --> DEP_COORD
     CPR --> ENR_COORD
@@ -119,7 +120,7 @@ graph TB
     classDef runner fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
     classDef exec fill:#fff7ed,stroke:#f59e0b
     classDef merge fill:#f5f3ff,stroke:#7c3aed
-    classDef result fill:#c8e6c9,stroke:#16a34a
+    classDef result fill:#f0fdf4,stroke:#16a34a
     classDef fsm fill:#f1f5f9,stroke:#64748b
     classDef check fill:#ffe4e6,stroke:#dc2626
 

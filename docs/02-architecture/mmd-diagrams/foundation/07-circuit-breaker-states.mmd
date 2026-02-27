@@ -61,7 +61,7 @@ stateDiagram-v2
     }
 
     HALF_OPEN --> CLOSED: Probe success\nfailure_count = 0
-    HALF_OPEN --> OPEN: Probe failure\nRestart recovery_timeout
+    HALF_OPEN ==> OPEN: Probe failure\nRestart recovery_timeout
 
     note right of CLOSED
         Parameters (from CircuitBreaker):

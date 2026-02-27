@@ -94,7 +94,7 @@ sequenceDiagram
     Writer->>Metrics: increment_counter("silver_records_written", count)
     Writer->>Metrics: set_gauge("silver_table_version", version)
 
-    Writer-->>Processor: WriteResult
+    Writer==>>Processor: WriteResult
     deactivate Writer
 
     Note over Processor: WriteResult contains:<br/>• success: bool<br/>• records_written: int<br/>• version: int<br/>• files_added: list[str]<br/>• merge_stats: MergeStats
