@@ -333,7 +333,36 @@ pwsh docs/02-architecture/mmd-diagrams/render-windows.ps1
 
 Формат вывода: SVG + PNG (300 DPI). Применяется тема из `theme/mermaid-config.json` и `theme/custom.css`. SVG-файлы дополнительно оптимизируются через SVGO (`svgo.config.js`).
 
-Результат записывается в `mmd-diagrams/rendered/`.
+Результат записывается рядом с исходниками, в подпапки `svg/` и `png/`:
+
+- `docs/02-architecture/mmd-diagrams/**/svg/*.svg`
+- `docs/02-architecture/mmd-diagrams/**/png/*.png`
+- `docs/02-architecture/diagrams/mermaid/svg/*.svg`
+- `docs/02-architecture/diagrams/mermaid/png/*.png`
+
+### 8.2. Короткий чеклист (локально → PR)
+
+```bash
+# 1) Политический lint диаграмм (ADR-040 rules)
+python scripts/lint_diagrams.py docs
+
+# 2) Синтаксическая валидация Mermaid через mmdc
+bash scripts/validate_mermaid_syntax.sh
+
+# 3) Рендер SVG+PNG
+bash docs/02-architecture/mmd-diagrams/render.sh
+
+# 4) (Опционально, как в CI) smoke-проверка baseline SVG
+python scripts/check_diagram_visual_smoke.py \
+  --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
+```
+
+Минимум для PR:
+
+1. Если изменены `*.mmd`/`*.mermaid`, в коммите должны быть соответствующие изменения в `svg/*.svg` и/или `png/*.png`.
+2. Не должно быть ошибок `lint_diagrams.py` и `validate_mermaid_syntax.sh`.
+3. Для flowchart/sequence диаграмм не оставлять неожиданные orphan-ноды (`GRAPH-001`), либо явно помечать исключения через `%% keep-orphan: ...`.
+4. Проверить, что изменения не затронули `docs/99-archive/**` без отдельной причины.
 
 ---
 

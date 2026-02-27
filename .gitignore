@@ -88,6 +88,8 @@ log_test.txt
 .codex/skills/*
 !.codex/skills/py-review-orchestrator/
 !.codex/skills/py-review-orchestrator/**
+!.codex/skills/py-test-swarm/
+!.codex/skills/py-test-swarm/**
 .gemini/
 .jules/
 .junie/

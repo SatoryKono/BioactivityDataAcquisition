@@ -38,9 +38,9 @@ def test_emoji_rule_flags_subgraph_prefix_icons() -> None:
     """COLOUR-002 must reject emoji prefixes in subgraph labels."""
     lint = _load_lint_module()
     lines = [
-        'flowchart TB',
+        "flowchart TB",
         'subgraph Domain["🟡 Domain Layer"]',
-        'end',
+        "end",
     ]
 
     issues = lint.check_subgraph_emoji(Path("docs/02-architecture/demo.mmd"), lines)
