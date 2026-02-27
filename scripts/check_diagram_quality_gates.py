@@ -22,6 +22,7 @@ SUPPORTED_SUFFIXES = {".mmd", ".mermaid"}
 EXPECTED_CLASSDEFS = {"port", "adapter", "service", "process", "storage"}
 ALLOWED_EDGE_MARKERS = ("-->", "-.->", "==>")
 FORBIDDEN_EDGE_TOKENS = ("---", "--x", "x--", "<--", "<==>")
+PARENT_SOURCE_RE = re.compile(r"^%%\s*Parent source:\s*(.+?)\s*$")
 NODES_RE = re.compile(r"%%\s*@nodes\s+(\d+)")
 CLASSDEF_RE = re.compile(r"^\s*classDef\s+([A-Za-z0-9_-]+)")
 QUOTED_RE = re.compile(r'"([^"\\]*(?:\\.[^"\\]*)*)"')
@@ -130,7 +131,13 @@ def is_flowchart(lines: list[str]) -> bool:
 def has_edge_syntax(line: str) -> bool:
     if "linkStyle" in line or line.strip().startswith("classDef"):
         return False
-    return "-->" in line or "-.->" in line or "==>" in line or "---" in line or "--x" in line
+    return (
+        "-->" in line
+        or "-.->" in line
+        or "==>" in line
+        or "---" in line
+        or "--x" in line
+    )
 
 
 def normalize_label(raw: str) -> str:
@@ -165,7 +172,9 @@ def check_line_style_guide(path: Path, lines: list[str]) -> list[Violation]:
             )
             continue
 
-        if "--" in stripped and not any(marker in stripped for marker in ALLOWED_EDGE_MARKERS):
+        if "--" in stripped and not any(
+            marker in stripped for marker in ALLOWED_EDGE_MARKERS
+        ):
             violations.append(
                 Violation(
                     file=str(path),
@@ -228,7 +237,9 @@ def sibling_views_for(path: Path) -> list[Path]:
     return sorted(views_dir.glob(f"{parent}-*.mermaid"))
 
 
-def check_large_diagram_decomposition(path: Path, lines: list[str], threshold: int) -> list[Violation]:
+def check_large_diagram_decomposition(
+    path: Path, lines: list[str], threshold: int
+) -> list[Violation]:
     violations: list[Violation] = []
     nodes = parse_node_count(lines)
     if nodes is None or nodes < threshold or path.suffix != ".mmd":
@@ -237,7 +248,10 @@ def check_large_diagram_decomposition(path: Path, lines: list[str], threshold: i
     views = sibling_views_for(path)
     has_full = any(view.name.endswith("-full.mermaid") for view in views)
     has_detail = any(
-        any(token in view.name for token in ("-overview", "-domain", "-infra", "-dataflow"))
+        any(
+            token in view.name
+            for token in ("-overview", "-domain", "-infra", "-dataflow")
+        )
         for view in views
     )
 
@@ -256,7 +270,9 @@ def check_large_diagram_decomposition(path: Path, lines: list[str], threshold: i
     return violations
 
 
-def check_large_diagram_legend(path: Path, lines: list[str], threshold: int) -> list[Violation]:
+def check_large_diagram_legend(
+    path: Path, lines: list[str], threshold: int
+) -> list[Violation]:
     violations: list[Violation] = []
     nodes = parse_node_count(lines)
     if nodes is None or nodes < threshold:
@@ -264,7 +280,9 @@ def check_large_diagram_legend(path: Path, lines: list[str], threshold: int) -> 
 
     content = "\n".join(lines)
     has_legend = (
-        re.search(r"^\s*subgraph\s+Legend\b", content, flags=re.IGNORECASE | re.MULTILINE)
+        re.search(
+            r"^\s*subgraph\s+Legend\b", content, flags=re.IGNORECASE | re.MULTILINE
+        )
         is not None
         or "%% Legend:" in content
         or "00-legend.mermaid" in content
@@ -281,7 +299,9 @@ def check_large_diagram_legend(path: Path, lines: list[str], threshold: int) -> 
     return violations
 
 
-def check_label_quality(path: Path, lines: list[str], max_label_length: int, max_br: int) -> list[Violation]:
+def check_label_quality(
+    path: Path, lines: list[str], max_label_length: int, max_br: int
+) -> list[Violation]:
     violations: list[Violation] = []
 
     for idx, line in enumerate(lines, start=1):
@@ -322,7 +342,49 @@ def check_label_quality(path: Path, lines: list[str], max_label_length: int, max
     return violations
 
 
-def evaluate_file(path: Path, *, large_threshold: int, max_label_length: int, max_br: int) -> list[Violation]:
+def check_parent_source_exists(path: Path, lines: list[str]) -> list[Violation]:
+    violations: list[Violation] = []
+
+    for idx, line in enumerate(lines, start=1):
+        match = PARENT_SOURCE_RE.match(line.strip())
+        if not match:
+            continue
+
+        parent_source = match.group(1).strip()
+        if not parent_source:
+            violations.append(
+                Violation(
+                    file=str(path),
+                    rule_id="DIAG-T024",
+                    severity="ERROR",
+                    message=f"line {idx}: Parent source metadata is empty",
+                )
+            )
+            continue
+
+        parent_path = (
+            Path(parent_source)
+            if Path(parent_source).is_absolute()
+            else (REPO_ROOT / parent_source)
+        )
+        if not parent_path.exists():
+            violations.append(
+                Violation(
+                    file=str(path),
+                    rule_id="DIAG-T024",
+                    severity="ERROR",
+                    message=(
+                        f"line {idx}: Parent source does not exist: {parent_source}"
+                    ),
+                )
+            )
+
+    return violations
+
+
+def evaluate_file(
+    path: Path, *, large_threshold: int, max_label_length: int, max_br: int
+) -> list[Violation]:
     try:
         lines = path.read_text(encoding="utf-8").splitlines()
     except OSError as exc:
@@ -338,15 +400,32 @@ def evaluate_file(path: Path, *, large_threshold: int, max_label_length: int, ma
     violations: list[Violation] = []
     violations.extend(check_line_style_guide(path, lines))
     violations.extend(check_classdef_coverage(path, lines))
-    violations.extend(check_large_diagram_decomposition(path, lines, threshold=large_threshold))
-    violations.extend(check_large_diagram_legend(path, lines, threshold=large_threshold))
-    violations.extend(check_label_quality(path, lines, max_label_length=max_label_length, max_br=max_br))
+    violations.extend(
+        check_large_diagram_decomposition(path, lines, threshold=large_threshold)
+    )
+    violations.extend(
+        check_large_diagram_legend(path, lines, threshold=large_threshold)
+    )
+    violations.extend(
+        check_label_quality(
+            path, lines, max_label_length=max_label_length, max_br=max_br
+        )
+    )
+    violations.extend(check_parent_source_exists(path, lines))
     return violations
 
 
 def summarize(violations: list[Violation]) -> list[RuleSummary]:
-    hard_rules = {"DIAG-T018", "DIAG-T020", "DIAG-T021"}
-    all_rules = ["DIAG-T018", "DIAG-T019", "DIAG-T020", "DIAG-T021", "DIAG-T022", "DIAG-T023"]
+    hard_rules = {"DIAG-T018", "DIAG-T020", "DIAG-T021", "DIAG-T024"}
+    all_rules = [
+        "DIAG-T018",
+        "DIAG-T019",
+        "DIAG-T020",
+        "DIAG-T021",
+        "DIAG-T022",
+        "DIAG-T023",
+        "DIAG-T024",
+    ]
     by_rule: dict[str, list[Violation]] = {rule: [] for rule in all_rules}
 
     for violation in violations:
@@ -456,10 +535,16 @@ def main() -> int:
 
     try:
         if not args.no_manifest:
-            manifest = args.manifest if args.manifest.is_absolute() else (REPO_ROOT / args.manifest)
+            manifest = (
+                args.manifest
+                if args.manifest.is_absolute()
+                else (REPO_ROOT / args.manifest)
+            )
             files = load_manifest(manifest)
         else:
-            targets = [Path(path) for path in args.paths] if args.paths else [DEFAULT_TARGET]
+            targets = (
+                [Path(path) for path in args.paths] if args.paths else [DEFAULT_TARGET]
+            )
             files = discover_files(targets)
     except (FileNotFoundError, ValueError) as exc:
         _err(f"[ERROR] {exc}")
@@ -484,7 +569,7 @@ def main() -> int:
     hard_failures = sum(
         1
         for violation in violations
-        if violation.rule_id in {"DIAG-T018", "DIAG-T020", "DIAG-T021"}
+        if violation.rule_id in {"DIAG-T018", "DIAG-T020", "DIAG-T021", "DIAG-T024"}
     )
     warning_failures = len(violations) - hard_failures
 
@@ -497,7 +582,11 @@ def main() -> int:
     )
 
     if args.json_out is not None:
-        out = args.json_out if args.json_out.is_absolute() else (REPO_ROOT / args.json_out)
+        out = (
+            args.json_out
+            if args.json_out.is_absolute()
+            else (REPO_ROOT / args.json_out)
+        )
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(
             json.dumps(
@@ -516,7 +605,11 @@ def main() -> int:
         )
 
     if args.markdown_out is not None:
-        out = args.markdown_out if args.markdown_out.is_absolute() else (REPO_ROOT / args.markdown_out)
+        out = (
+            args.markdown_out
+            if args.markdown_out.is_absolute()
+            else (REPO_ROOT / args.markdown_out)
+        )
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(render_markdown(report), encoding="utf-8")
 

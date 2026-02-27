@@ -1,4 +1,4 @@
-"""Architecture tests for diagram regression quality gates (DIAG-T018..T023)."""
+"""Architecture tests for diagram regression quality gates (DIAG-T018..T024)."""
 
 from __future__ import annotations
 
@@ -86,3 +86,18 @@ def test_classdef_coverage_warns_when_missing() -> None:
     issues = module.check_classdef_coverage(Path("docs/sample.mmd"), lines)
 
     assert any(issue.rule_id == "DIAG-T019" for issue in issues)
+
+
+def test_parent_source_must_exist(tmp_path: Path) -> None:
+    module = _load_module()
+    missing_parent = "docs/02-architecture/mmd-diagrams/foundation/missing-source.mmd"
+    lines = [
+        "%% View: Full | Parent: (root)",
+        f"%% Parent source: {missing_parent}",
+        "flowchart TB",
+        "A --> B",
+    ]
+
+    issues = module.check_parent_source_exists(tmp_path / "sample.mermaid", lines)
+
+    assert any(issue.rule_id == "DIAG-T024" for issue in issues)
