@@ -1,28 +1,28 @@
 %% View: Overview | Parent: 15-dq-check-workflow-full.mermaid
-%% @uniform width=140 height=56 max_title_len=2 max_desc_lines=0
+%% @uniform width=220 height=64 max_title_len=24 max_desc_lines=1
 flowchart TB
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N8["P"]
+        N8["record_error_rate"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N1["B"]
-        N2["B1"]
-        N3["B2"]
-        N4["B3"]
-        N5["B4"]
-        N6["A"]
-        N7["O"]
-        N9["Q"]
-        N10["J"]
-        N11["M"]
-        N12["I"]
-        N13["L"]
-        N14["K"]
-        N15["C"]
+        N1["Schema Validation"]
+        N2["Required Fields"]
+        N3["Type Checks"]
+        N4["Value Rules"]
+        N5["Relation Checks"]
+        N6["Input Records"]
+        N7["dq_validation_score"]
+        N9["dq_duration_ms"]
+        N10["Pass + Warnings"]
+        N11["Quarantine"]
+        N12["Pass + Quarantine"]
+        N13["Silver Layer"]
+        N14["Fail Batch"]
+        N15["Error Rate"]
     end
 
     N1 --> N2
@@ -46,20 +46,8 @@ flowchart TB
     style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
     style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
 
-    linkStyle 0 stroke:#1E293B,stroke-width:4px
-    linkStyle 1 stroke:#1E293B,stroke-width:4px
-    linkStyle 2 stroke:#1E293B,stroke-width:4px
-    linkStyle 3 stroke:#1E293B,stroke-width:4px
-    linkStyle 4 stroke:#1E293B,stroke-width:4px
-    linkStyle 5 stroke:#1E293B,stroke-width:4px
-    linkStyle 6 stroke:#1E293B,stroke-width:4px
-    linkStyle 7 stroke:#1E293B,stroke-width:4px
-    linkStyle 8 stroke:#1E293B,stroke-width:4px
-    linkStyle 9 stroke:#1E293B,stroke-width:4px
-    linkStyle 10 stroke:#1E293B,stroke-width:4px
-    linkStyle 11 stroke:#1E293B,stroke-width:4px
-    linkStyle 12 stroke:#1E293B,stroke-width:4px
-    linkStyle 13 stroke:#1E293B,stroke-width:4px
-    linkStyle 14 stroke:#1E293B,stroke-width:4px
-    linkStyle 15 stroke:#1E293B,stroke-width:4px
-    linkStyle 16 stroke:#1E293B,stroke-width:4px
+    classDef process fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    classDef service fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+
+    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 stroke:#1E293B,stroke-width:4px
+    linkStyle 16 stroke:#1E293B,stroke-width:4px,opacity:0.85

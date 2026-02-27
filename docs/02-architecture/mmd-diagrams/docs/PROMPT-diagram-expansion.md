@@ -137,7 +137,7 @@ src/bioetl/domain/aggregates/quarantine-entry.py
 src/bioetl/domain/aggregates/events.py
 
 # Domain Layer — Ports (все 24 порта)
-src/bioetl/domain/ports/--init--.py
+src/bioetl/domain/ports/__init__.py
 src/bioetl/domain/ports/data-source.py
 src/bioetl/domain/ports/storage.py
 src/bioetl/domain/ports/locking.py
@@ -145,7 +145,7 @@ src/bioetl/domain/ports/checkpoint.py
 src/bioetl/domain/ports/quarantine.py
 src/bioetl/domain/ports/observability.py
 src/bioetl/domain/ports/resilience.py
-src/bioetl/domain/ports/health-check.py
+src/bioetl/domain/ports/health_check.py
 src/bioetl/domain/ports/validation.py
 src/bioetl/domain/ports/audit.py
 src/bioetl/domain/ports/metadata.py
@@ -183,7 +183,7 @@ src/bioetl/domain/services/value-validator.py
 src/bioetl/domain/services/dq-serializer.py
 
 # Domain Layer — Exceptions & Types
-src/bioetl/domain/exceptions/--init--.py
+src/bioetl/domain/exceptions/__init__.py
 src/bioetl/domain/exceptions/base.py
 src/bioetl/domain/exceptions/network.py
 src/bioetl/domain/exceptions/data-quality.py

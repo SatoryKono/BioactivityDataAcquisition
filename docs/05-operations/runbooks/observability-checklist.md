@@ -11,7 +11,7 @@ Every adapter in `src/bioetl/infrastructure/adapters/` **MUST** implement:
 ### 1. Health Check Method
 
 ```python
-async def health-check(self) -> HealthStatus:
+async def health_check(self) -> HealthStatus:
     """Check if the external service is reachable.
 
     Returns:
@@ -95,7 +95,7 @@ curl http://localhost:8000/metrics | grep bioetl-
 
 ```bash
 # Run architecture test
-pytest tests/architecture/test-layer-dependencies.py::test-adapters-have-health-check -v
+pytest tests/architecture/test-layer-dependencies.py::test-adapters-have-health_check -v
 ```
 
 ### Validate Log Schema
@@ -109,7 +109,7 @@ cat logs/bioetl.log | jq 'select(.run-id and .pipeline and .stage)'
 
 When creating a new adapter:
 
-1. [ ] Implement `health-check()` method
+1. [ ] Implement `health_check()` method
 1. [ ] Use `LoggerPort` (injected via DI) for all logging
 1. [ ] Include `run-id`, `pipeline`, `stage` in all log messages (Log Schema §3.2.1)
 1. [ ] Add rate limiting (TokenBucket)
@@ -118,12 +118,12 @@ When creating a new adapter:
 
 ## Architecture Test
 
-The following test enforces health-check presence:
+The following test enforces health_check presence:
 
 ```python
 # tests/architecture/test-layer-dependencies.py
-def test-adapters-have-health-check(src-dir: Path) -> None:
-    """REQ-OBS-001: All adapters MUST implement health-check()."""
+def test-adapters-have-health_check(src-dir: Path) -> None:
+    """REQ-OBS-001: All adapters MUST implement health_check()."""
     ...
 ```
 

@@ -2,7 +2,7 @@
 
 *Synced with RULES.md v5.22 (2026-02-24)*
 
-> **Canonical policy:** [`docs/02-architecture/06-diagram-policy.md`](../06-diagram-policy.md) (POL-LLM-DIAGRAMS-001).
+> **Canonical policy:** [`docs/02-architecture/06-diagram-policy.md`](../../06-diagram-policy.md) (POL-LLM-DIAGRAMS-001).
 > **Canonical diagrams:** [`docs/02-architecture/mmd-diagrams/`](../README.md).
 > This file is kept for historical reference. All new diagram work should follow the canonical policy.
 > **Historical note:** examples below are preserved for context; prefer canonical `.mmd` paths from `mmd-diagrams/`.
@@ -270,5 +270,5 @@ Worker -> MemoryLock: release lock
 
 ## Related Documents
 
-- [RULES.md](../../00-project/RULES.md) - Project rules
-- [00-map.md](../../00-project/00-map.md) - Project navigator
+- [RULES.md](../../../00-project/RULES.md) - Project rules
+- [00-map.md](../../../00-project/00-map.md) - Project navigator

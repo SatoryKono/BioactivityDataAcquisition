@@ -44,7 +44,7 @@ Workflow следует принципу "Safe-by-Design":
 - **Линтинг**: `make lint` (ruff + mypy).
 - **Тесты**: `make test-unit`, `make test-integration` (VCR).
 - **Архитектура**: `pytest tests/architecture/`.
-- **Конфиги**: `python scripts/validate-pipeline-configs.py`, `python scripts/config-gap-analysis.py`.
+- **Конфиги**: `python scripts/validate_pipeline_configs.py`, `python scripts/config-gap-analysis.py`.
 - **Терминология**: `python scripts/lint-terminology.py`.
 
 ----------------------------------------------------------------------

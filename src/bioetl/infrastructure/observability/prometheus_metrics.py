@@ -189,20 +189,24 @@ class PrometheusMetrics(MetricsPort):
     def observe_histogram(
         self, name: str, value: float, labels: dict[str, str]
     ) -> None:
+        """Record a histogram observation for the named metric."""
         if name in HISTOGRAMS:
             HISTOGRAMS[name].labels(**labels).observe(value)
 
     def increment_counter(self, name: str, value: int, labels: dict[str, str]) -> None:
+        """Increment a counter metric by the given value."""
         if name in COUNTERS:
             COUNTERS[name].labels(**labels).inc(value)
 
     def set_gauge(self, name: str, value: float, labels: dict[str, str]) -> None:
+        """Set a gauge metric to the given value."""
         if name in GAUGES:
             GAUGES[name].labels(**labels).set(value)
 
     def inc_quarantine_records(
         self, pipeline: str, reason: str, count: int = 1
     ) -> None:
+        """Increment quarantine record counter with normalized reason label."""
         bounded_reason = _normalize_label(reason, _ALLOWED_REASON_LABELS)
         self.increment_counter(
             "quarantine_records_total",
@@ -217,6 +221,7 @@ class PrometheusMetrics(MetricsPort):
         severity: str,
         count: int = 1,
     ) -> None:
+        """Increment DQ validation failure counter with normalized labels."""
         bounded_stage = _normalize_label(stage, _ALLOWED_STAGE_LABELS)
         bounded_severity = _normalize_label(severity, _ALLOWED_SEVERITY_LABELS)
         self.increment_counter(
@@ -230,6 +235,7 @@ class PrometheusMetrics(MetricsPort):
         )
 
     def close(self) -> None:
+        """Mark the metrics adapter as closed (idempotent)."""
         if self._closed:
             return
         self._closed = True

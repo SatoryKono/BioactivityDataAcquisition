@@ -77,8 +77,8 @@ Uses **enrichers** (not dependencies) because cell-line and tissue are reference
 
 ## Related Configs
 
-- DQ rules: `configs/quality/entities/composite/assay.yaml`
-- Filters: `configs/filters/entities/composite/assay.yaml`
+- DQ rules: `configs/composites/assay.yaml#quality`
+- Filters: `configs/composites/assay.yaml#filters`
 
 ## Related ADRs
 

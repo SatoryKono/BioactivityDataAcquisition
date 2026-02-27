@@ -32,7 +32,7 @@
 - **PROMPT 2.1 (RF-DUP-001)** — актуален.
   - `-load-yaml` в `BaseConfigLoader` и `DQConfigLoader` идентичен.
 - **PROMPT 2.2 (RF-DUP-002)** — актуален.
-  - `SilverMetadataBuilder.--init--` и `GoldMetadataBuilder.--init--` идентичны.
+  - `SilverMetadataBuilder.__init__` и `GoldMetadataBuilder.__init__` идентичны.
 - **PROMPT 2.3 (RF-DUP-003)** — актуален.
   - `get-source-metadata` идентичен в 3 классах.
 - **PROMPT 2.4 (RF-NAME-003)** — актуален.
@@ -100,7 +100,7 @@
 
 - **Scope**:
   - `src/bioetl/application/services/bronze-cleanup-service.py`
-  - `src/bioetl/application/services/--init--.py`
+  - `src/bioetl/application/services/__init__.py`
   - все импорты `CleanupResult` из bronze-сервиса в `src/bioetl/` и `tests/`.
 - **Rules**:
   - не менять `application/core/cleanup-service.py`.
@@ -123,7 +123,7 @@
 
 - **Scope**:
   - `src/bioetl/domain/composite/lineage.py`
-  - `src/bioetl/domain/composite/--init--.py`
+  - `src/bioetl/domain/composite/__init__.py`
   - импорты в `src/bioetl/` и `tests/`.
 - **Rules**:
   - не менять `domain/models/metadata.py`.
@@ -166,7 +166,7 @@
   - `src/bioetl/domain/version.py` (new)
   - `src/bioetl/infrastructure/storage/metadata-builder.py`
   - `src/bioetl/composition/services/metadata-coordinator.py`
-  - `src/bioetl/domain/--init--.py` (если нужен публичный re-export).
+  - `src/bioetl/domain/__init__.py` (если нужен публичный re-export).
 - **DoD**:
   - единый `get-version()` в domain.
   - локальные `-get-bioetl-version` удалены/заменены алиасом.

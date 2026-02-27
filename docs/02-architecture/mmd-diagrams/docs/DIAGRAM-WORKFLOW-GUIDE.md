@@ -1,12 +1,12 @@
 # Руководство по работе с диаграммами BioETL
 
-*Версия: 1.0.0 | Дата: 2026-02-26 | Основано на ADR-040 v3.0*
+*Версия: 1.1.0 | Дата: 2026-02-27 | Основано на ADR-040 v3.0*
 
 ---
 
 ## 1. Обзор системы диаграмм
 
-Проект BioETL поддерживает **260+ диаграмм**, организованных в двухуровневую архитектуру: канонические исходники (`.mmd`) и декомпозированные представления (`.mermaid`). Вся система подчинена ADR-040 — решению об управлении диаграммами, которое определяет цветовую палитру, метаданные, правила lint-проверки и стратегии компоновки.
+Проект BioETL поддерживает **250+ диаграмм**, организованных в двухуровневую архитектуру: канонические исходники (`.mmd`) и декомпозированные представления (`.mermaid`). Вся система подчинена ADR-040 — решению об управлении диаграммами, которое определяет цветовую палитру, метаданные, правила lint-проверки и стратегии компоновки.
 
 ### 1.1. Двойная структура хранения
 
@@ -14,11 +14,11 @@
 
 | Каталог | Файлов | Назначение |
 |---------|--------|------------|
-| `architecture/` | 29 | Системные и компонентные диаграммы уровня архитектуры |
+| `architecture/` | 32 | Системные и компонентные диаграммы уровня архитектуры |
 | `class-diagrams/` | 16 | UML-классы: порты, сущности, агрегаты, конфиги |
-| `foundation/` | 59 | Исторические эталонные диаграммы, TOP-25 архитектурных |
+| `foundation/` | 54 | Исторические эталонные диаграммы, TOP-25 архитектурных |
 
-**Декомпозированные представления** — `docs/02-architecture/diagrams/mermaid/` (156 файлов):
+**Декомпозированные представления** — `docs/02-architecture/mmd-diagrams/views/` (156 файлов):
 
 Каждая родительская диаграмма из `foundation/` разбивается на **5 представлений (views)**:
 
@@ -169,9 +169,18 @@ python src/tools/apply_elk_layout.py --dir docs/02-architecture/mmd-diagrams/fou
 
 # Свой порог (по умолчанию 20)
 python src/tools/apply_elk_layout.py --threshold 15
+
+# Принудительно выровнять routing у уже существующих ELK-диаграмм
+python src/tools/apply_elk_layout.py --enforce-routing ORTHOGONAL
 ```
 
 Скрипт парсит `@nodes`, проверяет тип диаграммы, пропускает файлы с уже установленной директивой, и опционально меняет направление TB→LR для pipeline-паттернов (medallion, data-flow, storage-layer, config, cli-interface).
+
+Если для конкретной диаграммы осознанно нужен `POLYLINE`, добавьте маркер-комментарий:
+
+```mermaid
+%% @allow-polyline-routing
+```
 
 ---
 
@@ -217,8 +226,9 @@ python src/tools/differentiate_linkstyle.py              # Применить
 |---------|----------|---------|
 | SIZE-001 | ERROR | @nodes > 35 |
 | SIZE-002 | WARN | @nodes > 20 |
+| SIZE-003 | WARN | @nodes > 35, но есть декомпозированные sibling-файлы (`01a/01b/...`) |
 | META-001 | WARN | Нет `@version`/`@date`/`@type`/`@level` в `.mmd` |
-| META-002 | WARN | Нет `%% View:` в `.mermaid` |
+| META-002 | ERROR | Некорректный формат даты в `%% Updated:`/`%% @date` |
 | CONTENT-001 | ERROR | Содержит placeholder/TODO/FIXME/stub |
 | CONTENT-002 | ERROR | Менее 3 непустых строк |
 | STALE-001 | ERROR | `@date` старше 180 дней |
@@ -227,7 +237,10 @@ python src/tools/differentiate_linkstyle.py              # Применить
 | COLOUR-002 | ERROR | Emoji в subgraph labels |
 | LAYOUT-001 | WARN | flowchart/@nodes > 20 без ELK init |
 | LAYOUT-002 | ERROR | flowchart/@nodes > 40 без ELK init |
+| LINK-001 | WARN | Плотный flowchart использует только один тип стрелок |
+| LINK-002 | WARN | Хрупкий singleton-паттерн в `linkStyle` (много индексных строк `1:1`) |
 | GRAPH-001 | WARN | Orphan-ноды (определены, но не в рёбрах) |
+| NBSP-001 | ERROR | Используется `&nbsp;`-padding в исходнике |
 
 Исключения: `-full.mermaid` reference views и `00-legend*` освобождены от SIZE-001/SIZE-002.
 
@@ -261,6 +274,22 @@ python scripts/prune_orphan_nodes.py --grandfather   # Пометить все �
 |-----|--------|------------|
 | `lint-diagrams` | `scripts/lint_diagrams.py` | Валидация всех правил |
 | `prune-orphan-diagram-nodes` | `scripts/prune_orphan_nodes.py --check` | Детекция orphan-нод |
+
+### 6.4. Проверка видимости текста в SVG
+
+Скрипт `scripts/check_svg_text_visibility.py` валидирует smoke-набор SVG на предмет
+типичного регресса: edge-label отображается как белый прямоугольник без видимого текста.
+
+Проверки скрипта:
+
+- наличие `fo-fallback` текстовых узлов при `foreignObject`-лейблах;
+- наличие читаемого текста в `g.edgeLabel`;
+- наличие инжектированных CSS-правил для `.edgeLabel span` и `text.fo-fallback`.
+
+```bash
+python scripts/check_svg_text_visibility.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
+python scripts/check_svg_text_visibility.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt --json
+```
 
 ---
 
@@ -301,9 +330,16 @@ bash docs/02-architecture/mmd-diagrams/render.sh
 pwsh docs/02-architecture/mmd-diagrams/render-windows.ps1
 ```
 
-Формат вывода: SVG + PNG (300 DPI). Применяется тема из `theme/mermaid-config.json` и `theme/custom.css`. SVG-файлы дополнительно оптимизируются через SVGO (`svgo.config.js`).
+Формат вывода: SVG + PNG (base 300 DPI). Применяется тема из `theme/mermaid-config.json` и `theme/custom.css`. SVG-файлы дополнительно оптимизируются через SVGO (`svgo.config.js`).
+Для больших диаграмм рендерер автоматически повышает разрешение PNG по `@nodes` (по умолчанию `@nodes >= 30`): `scale=4`, `DPI=450`.
+Также поддерживаются per-file overrides в исходнике диаграммы:
 
-Результат записывается в `mmd-diagrams/rendered/`.
+```text
+%% @png-scale 6
+%% @png-dpi   600
+```
+
+Результат записывается в `<source-dir>/svg/` и `<source-dir>/png/` рядом с исходником диаграммы.
 
 ---
 
@@ -317,7 +353,11 @@ pwsh docs/02-architecture/mmd-diagrams/render-windows.ps1
 6. **Применить linkStyle** (если flowchart с 5+ связями): `python src/tools/differentiate_linkstyle.py`
 7. **Проверить orphan-ноды:** `python scripts/prune_orphan_nodes.py --check`
 8. **Отрендерить:** `render.sh` или `render-windows.ps1`
-9. **Добавить в индекс:** обновить `README.md` каталога
+   Для усиленного рендера больших схем можно задать: `--large-threshold`, `--large-scale`, `--large-png-dpi`.
+9. **Проверить артефакты SVG/PNG:** `python scripts/check_diagram_artifacts.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`
+10. **Проверить видимость текста в SVG:** `python scripts/check_svg_text_visibility.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`
+11. **Прогнать quality-gates:** `python scripts/check_diagram_quality_gates.py --manifest docs/02-architecture/mmd-diagrams/quality-gate-manifest.txt`
+12. **Добавить в индекс:** обновить `README.md` каталога
 
 ---
 
@@ -325,12 +365,47 @@ pwsh docs/02-architecture/mmd-diagrams/render-windows.ps1
 
 | Инструмент | Расположение | Назначение |
 |------------|-------------|------------|
+| run_diagram_checks.sh | `scripts/` | Единый запуск профилей проверок (`pr`/`nightly`/`quick`) |
 | apply_elk_layout.py | `src/tools/` | Добавление ELK init к flowchart с >20 нод |
 | differentiate_linkstyle.py | `src/tools/` | Семантическая стилизация рёбер |
 | lint_diagrams.py | `scripts/` | Lint-проверка по 14 правилам |
 | prune_orphan_nodes.py | `scripts/` | Детекция и удаление orphan-нод |
-| render.sh | `mmd-diagrams/` | Рендеринг SVG + PNG (300 DPI) |
+| check_diagram_artifacts.py | `scripts/` | DIAG-T010..T012 (наличие/непустота SVG+PNG) |
+| check_svg_text_visibility.py | `scripts/` | Smoke-проверка видимости текста в SVG |
+| check_diagram_quality_gates.py | `scripts/` | DIAG-T018..T023 (style/classDef/decomposition/legend/labels) |
+| run_diagram_nightly_suite.py | `scripts/` | DIAG-T024..T029 nightly heuristics (interactivity/chaos/growth/theme) |
+| render.sh | `mmd-diagrams/` | Рендеринг SVG + PNG (300 DPI, auto-hires + `@png-scale/@png-dpi`) |
 | render-windows.ps1 | `mmd-diagrams/` | Windows-версия рендеринга |
+
+---
+
+## 11. Единый запуск проверок
+
+Для локального и CI-совместимого запуска используйте единый раннер:
+
+```bash
+scripts/run_diagram_checks.sh --profile pr
+```
+
+Доступные профили:
+
+1. `pr` — полный pre-merge набор (syntax, lint, render, artifacts, smoke, quality-gates).
+2. `nightly` — `pr` + DIAG-T024..T029 (`run_diagram_nightly_suite.py`).
+3. `quick` — облегчённый локальный цикл без рендера и тяжёлых chaos/growth/theme проверок.
+
+Полезные флаги:
+
+1. `--strict-nightly` — nightly падает не только на error, но и на warning.
+2. `--skip-render` — пропускает render-шаг в `pr`/`nightly`.
+3. `--puppeteer /tmp/puppeteer-config.json` — переопределение пути к Puppeteer config.
+4. `--diagram docs/02-architecture/mmd-diagrams/foundation/30-port-adapter-mapping.mmd` — запуск проверок только для одной диаграммы.
+
+Пример single-file запуска:
+
+```bash
+scripts/run_diagram_checks.sh --profile pr \
+  --diagram docs/02-architecture/mmd-diagrams/foundation/30-port-adapter-mapping.mmd
+```
 
 ---
 

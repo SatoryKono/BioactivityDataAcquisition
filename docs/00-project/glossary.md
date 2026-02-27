@@ -98,6 +98,31 @@ This glossary defines the canonical terminology used throughout BioETL. Followin
 | **Provider Source Config** | Provider-level API settings in `configs/providers/{provider}.yaml` (ADR-039) | `source config` |
 | **Composite Config** | Multi-source pipeline config in `configs/composites/{entity}.yaml` (ADR-039) | `composite pipeline config` |
 
+### Pipeline Execution Enums
+
+| Canonical Term | Definition | Values | Avoid |
+|----------------|------------|--------|-------|
+| **RunType** | Enum controlling pipeline execution mode and clear policy | `INCREMENTAL`, `BACKFILL`, `REBUILD` | `mode` (as enum name) |
+| **SilverWriteMode** | Enum controlling Silver layer write strategy | `MERGE`, `OVERWRITE` | `write mode` (generic) |
+| **GoldWriteMode** | Enum controlling Gold layer write strategy | `MERGE`, `OVERWRITE`, `SCD2` | `write mode` (generic) |
+| **HealthStatus** | Enum representing component availability | `HEALTHY`, `DEGRADED`, `UNHEALTHY` | `status` (generic) |
+| **FSMState** | Enum representing pipeline finite-state-machine states | `IDLE`, `RUNNING`, `PAUSED`, `FAILED`, `COMPLETED` | `state` (generic) |
+
+### Pipeline Context & Identity
+
+| Canonical Term | Definition | Avoid |
+|----------------|------------|-------|
+| **BatchID** | UUID uniquely identifying a batch within a pipeline run | `chunk-id`, `batch number` |
+| **ContentHash** | SHA-256 hash for record deduplication: `sha256(provider + canonical_json(record))` | `checksum`, `fingerprint` |
+| **PipelineContext** | Immutable value object carrying run-id, provider, entity, run-type, and config through the pipeline | `execution context`, `run state` |
+
+### Composite Pipeline Services
+
+| Canonical Term | Definition | Avoid |
+|----------------|------------|-------|
+| **CompositeRunner** | Application service orchestrating seed + enricher pipelines and merge into unified Gold | `composite executor`, `merge runner` |
+| **MedallionLifecycleService** | Application service managing Bronze→Silver→Gold lifecycle transitions with clear/write policies | `lifecycle manager`, `layer service` |
+
 ### Batch Processing
 
 | Canonical Term | Definition | Avoid |

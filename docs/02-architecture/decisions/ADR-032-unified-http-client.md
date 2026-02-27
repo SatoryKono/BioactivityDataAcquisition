@@ -66,12 +66,12 @@ We have implemented **`UnifiedHTTPClient`** in `infrastructure/adapters/http/cli
 ```python
 # Before: Each adapter configured independently
 class ChEMBLAdapter:
-    def --init--(self):
+    def __init__(self):
         self.-rate-limit = 10  # Hardcoded
         self.-timeout = 30     # Duplicated
 
 class PubChemAdapter:
-    def --init--(self):
+    def __init__(self):
         self.-rate-limit = 5   # Different value
         self.-timeout = 30     # Duplicated
 ```

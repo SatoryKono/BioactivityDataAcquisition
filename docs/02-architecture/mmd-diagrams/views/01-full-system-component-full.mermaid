@@ -1,119 +1,194 @@
 %% View: Full | Parent: (root)
 %% Parent source: docs/02-architecture/mmd-diagrams/foundation/01-full-system-component.mmd
 %% Full reference diagram retained after decomposition.
+%% Synced: 2026-02-27
+
 %% Title: Full System Component Diagram
 %% Covers: RULES.md §1.1 (Five-Layer Architecture), §1.2 (Ports & Adapters)
-%% Updated: 2026-02-17
+%% Updated: 2026-02-27
 %% Components: CLI, Bootstrap, PipelineRunner, DataSourcePort, StoragePort, BronzeWriter, SilverWriter, GoldWriter
 
-%% @version 1.0.0
-%% @date    2026-02-24
+%% @version 1.1.0
+%% @date    2026-02-27
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
+%% @png-scale 6
+%% @png-dpi   600
+%% @adr     ADR-040
+%% @uniform-group ports      nodes=DataSourcePort,StoragePort,LockPort,CheckpointPort,QuarantinePort,MetricsPort,TracingPort,LoggerPort
+%% @uniform-group adapters   nodes=ChemblAdapter,PubchemAdapter,UniprotAdapter,PubmedAdapter,CrossRefAdapter,OpenAlexAdapter,S2Adapter,BronzeWriter,SilverWriter,GoldWriter,MemoryLock
+%% @uniform-group app        nodes=PipelineRunner,PipelineExecutor,RecordProcessor,BatchTransformer,LockManager,CheckpointManager,PreflightService,PostrunService,LifecycleOrchestrator,ActivityTransformer,MoleculeTransformer,AssayTransformer,TargetTransformer
+%% @uniform-group entities   nodes=Activity,Molecule,Assay,Target,Publication,PipelineConfig,RuntimeConfig,DQConfig
+%% @uniform-group stores     nodes=Bronze,Silver,Gold,Quarantine,Checkpoints
+%% @uniform-group infra_http nodes=HTTPBus,UnifiedHTTPClient,CircuitBreaker,TokenBucket
+%% @uniform-width group
+%% @uniform width=272 groups=6 width_strategy=group
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
-%% @uniform width=216 height=56 max_title_len=22 max_desc_lines=1
+%%{init: {
+%%  'layout': 'elk',
+%%  'theme': 'base',
+%%  'flowchart': {
+%%    'nodeSpacing': 64,
+%%    'rankSpacing': 72,
+%%    'padding': 24,
+%%    'curve': 'linear'
+%%  },
+%%  'elk': {
+%%    'mergeEdges': true,
+%%    'nodePlacementStrategy': 'BRANDES_KOEPF',
+%%    'cycleBreakingStrategy': 'GREEDY',
+%%    'direction': 'DOWN',
+%%    'spacing.nodeNode': 48,
+%%    'spacing.edgeNode': 36,
+%%    'spacing.edgeEdge': 24,
+%%    'edgeRouting': 'ORTHOGONAL'
+%%  }
+%%}}%%
 flowchart TB
-%% keep-orphan: Activity, Assay, AssayTransformer, CheckpointManager, CheckpointPort, Checkpoints, DQConfig, LifecycleOrchestrator, LoggerPort, MetricsPort, Molecule, PipelineConfig, Publication, Quarantine, QuarantinePort, RuntimeConfig, Target, TargetTransformer, TracingPort
+%% keep-orphan: DQConfig, PipelineConfig, Publication, RuntimeConfig
+
     subgraph External["External Systems"]
-        ChEMBL_API["ChEMBL API<br/>"]
-        PubChem_API["PubChem API<br/>"]
-        UniProt_API["UniProt API<br/>"]
-        PubMed_API["PubMed API<br/>"]
-        CrossRef_API["CrossRef API<br/>"]
-        OpenAlex_API["OpenAlex API<br/>"]
-        S2_API["Semantic Scholar API<br/>"]
+        direction LR
+        subgraph BioactivityAPIs["Bioactivity Sources"]
+            direction TB
+            ChEMBL_API["ChEMBL API"]
+            PubChem_API["PubChem API"]
+            UniProt_API["UniProt API"]
+        end
+        subgraph PublicationAPIs["Publication Sources"]
+            direction TB
+            PubMed_API["PubMed API"]
+            CrossRef_API["CrossRef API"]
+            OpenAlex_API["OpenAlex API"]
+            S2_API["Semantic Scholar API"]
+        end
     end
 
     subgraph Interfaces["Interfaces Layer"]
-        CLI["CLI<br/>(Click)"]
-        Orchestration["Orchestration<br/>(Signal Handling)"]
+        direction TB
+        CLI["CLI"]
+        Orchestration["Signal Orchestration"]
+    end
+
+    subgraph Composition["Composition Layer"]
+        direction TB
+        Bootstrap["bootstrap_pipeline()"]
+        Factories["Factories"]
+        Registry["PipelineRegistry"]
     end
 
     subgraph Application["Application Layer"]
+        direction TB
         subgraph Core["Core"]
-            PipelineRunner["PipelineRunner<br/>"]
-            PipelineExecutor["PipelineExecutor<br/>"]
-            RecordProcessor["RecordProcessor<br/>"]
-            BatchTransformer["BatchTransformer<br/>"]
+            direction TB
+            PipelineRunner["PipelineRunner"]
+            PipelineExecutor["PipelineExecutor"]
+            RecordProcessor["RecordProcessor"]
+            BatchTransformer["BatchTransformer"]
         end
         subgraph Services["Services"]
-            LockManager["LockManager<br/>"]
-            CheckpointManager["CheckpointManager<br/>"]
-            PreflightService["PreflightService<br/>"]
-            PostrunService["PostrunService<br/>"]
-            LifecycleOrchestrator["LifecycleOrchestrator<br/>"]
+            direction TB
+            LockManager["LockManager"]
+            CheckpointManager["CheckpointManager"]
+            PreflightService["PreflightService"]
+            PostrunService["PostrunService"]
+            LifecycleOrchestrator["LifecycleOrchestrator"]
         end
         subgraph Transformers["Entity Transformers"]
-            ActivityTransformer["ActivityTransformer<br/>"]
-            MoleculeTransformer["MoleculeTransformer<br/>"]
-            AssayTransformer["AssayTransformer<br/>"]
-            TargetTransformer["TargetTransformer<br/>"]
+            direction TB
+            ActivityTransformer["ActivityTransformer"]
+            MoleculeTransformer["MoleculeTransformer"]
+            AssayTransformer["AssayTransformer"]
+            TargetTransformer["TargetTransformer"]
         end
     end
 
     subgraph Domain["Domain Layer"]
+        direction TB
         subgraph Ports["Ports (Protocols)"]
-            DataSourcePort["DataSourcePort<br/>"]
-            StoragePort["StoragePort<br/>"]
-            LockPort["LockPort<br/>"]
-            CheckpointPort["CheckpointPort<br/>"]
-            QuarantinePort["QuarantinePort<br/>"]
-            MetricsPort["MetricsPort<br/>"]
-            TracingPort["TracingPort<br/>"]
-            LoggerPort["LoggerPort<br/>"]
+            direction TB
+            DataSourcePort["[P] DataSourcePort"]
+            StoragePort["[P] StoragePort"]
+            LockPort["[P] LockPort"]
+            CheckpointPort["[P] CheckpointPort"]
+            QuarantinePort["[P] QuarantinePort"]
+            MetricsPort["[P] MetricsPort"]
+            TracingPort["[P] TracingPort"]
+            LoggerPort["[P] LoggerPort"]
         end
         subgraph Entities["Entities"]
-            Activity["Activity<br/>"]
-            Molecule["Molecule<br/>"]
-            Assay["Assay<br/>"]
-            Target["Target<br/>"]
-            Publication["Publication<br/>(5 providers)"]
+            direction TB
+            subgraph Bioactivity["Bioactivity"]
+                direction LR
+                Activity["Activity"]
+                Molecule["Molecule"]
+                Assay["Assay"]
+                Target["Target"]
+            end
+            subgraph Metadata["Metadata"]
+                direction LR
+                Publication["Publication"]
+            end
         end
         subgraph Config["Configuration"]
-            PipelineConfig["PipelineConfig<br/>"]
-            RuntimeConfig["RuntimeConfig<br/>"]
-            DQConfig["DQConfig<br/>"]
+            direction TB
+            PipelineConfig["PipelineConfig"]
+            RuntimeConfig["RuntimeConfig"]
+            DQConfig["DQConfig"]
         end
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
         subgraph Adapters["Data Source Adapters"]
-            ChemblAdapter["ChemblAdapter<br/>"]
-            PubchemAdapter["PubchemAdapter<br/>"]
-            UniprotAdapter["UniprotAdapter<br/>"]
-            PubmedAdapter["PubmedAdapter<br/>"]
-            CrossRefAdapter["CrossRefAdapter<br/>"]
-            OpenAlexAdapter["OpenAlexAdapter<br/>"]
-            S2Adapter["SemanticScholarAdapter<br/>"]
+            direction TB
+            ChemblAdapter["[A] ChemblAdapter"]
+            PubchemAdapter["[A] PubchemAdapter"]
+            UniprotAdapter["[A] UniprotAdapter"]
+            PubmedAdapter["[A] PubmedAdapter"]
+            CrossRefAdapter["[A] CrossRefAdapter"]
+            OpenAlexAdapter["[A] OpenAlexAdapter"]
+            S2Adapter["[A] SemanticScholarAdapter"]
         end
         subgraph HTTP["HTTP Infrastructure"]
-            UnifiedHTTPClient["UnifiedHTTPClient<br/>"]
-            CircuitBreaker["CircuitBreaker<br/>"]
-            TokenBucket["TokenBucket<br/>(RateLimiter)"]
+            direction TB
+            HTTPBus["HTTP_Bus"]
+            UnifiedHTTPClient["UnifiedHTTPClient"]
+            CircuitBreaker["CircuitBreaker"]
+            TokenBucket["TokenBucket"]
         end
         subgraph Storage["Storage Writers"]
-            BronzeWriter["BronzeWriter<br/>"]
-            SilverWriter["SilverWriter<br/>(Silver)"]
-            GoldWriter["GoldWriter<br/>"]
+            direction TB
+            BronzeWriter["[A] BronzeWriter"]
+            SilverWriter["[A] SilverWriter"]
+            GoldWriter["[A] GoldWriter"]
         end
         subgraph Locking["Locking"]
-            MemoryLock["MemoryLock<br/>"]
+            direction TB
+            MemoryLock["[A] MemoryLock"]
         end
-    end
-
-    subgraph Composition["Composition Layer"]
-        Bootstrap["bootstrap_pipeline()<br/>"]
-        Factories["Factories<br/>"]
-        Registry["PipelineRegistry<br/>"]
     end
 
     subgraph DataLake["Data Lake (Local FS)"]
-        Bronze[("Bronze<br/>JSONL+zstd")]
-        Silver[("Silver<br/>Delta Lake")]
-        Gold[("Gold<br/>Delta/Parquet")]
-        Quarantine[("Quarantine"<br/>)]
-        Checkpoints[("Checkpoints"<br/>)]
+        direction LR
+        subgraph MedallionStore["Medallion Layers"]
+            direction LR
+            Bronze[("Bronze<br/>JSONL + zstd")]
+            Silver[("Silver<br/>Delta Lake")]
+            Gold[("Gold<br/>Delta output")]
+        end
+        subgraph ControlPlaneStore["Control Plane State"]
+            direction TB
+            Quarantine[("Quarantine")]
+            Checkpoints[("Checkpoints")]
+        end
+    end
+
+    subgraph Legend["Legend"]
+        direction TB
+        L1["Action"] --> L2["Action"]
+        L3["[P] Port"] -.-> L4["[A] Adapter"]
+        L5["Critical Path"] ==> L6["Primary Flow"]
     end
 
     %% External connections
@@ -125,80 +200,105 @@ flowchart TB
     OpenAlex_API --> OpenAlexAdapter
     S2_API --> S2Adapter
 
-    %% Interface to Application
-    CLI --> Bootstrap
+    %% Layout constraints
+    ChEMBL_API ~~~ PubChem_API ~~~ UniProt_API ~~~ PubMed_API ~~~ CrossRef_API ~~~ OpenAlex_API ~~~ S2_API
+
+    %% Interface to runtime
+    CLI ==> Bootstrap
     Orchestration --> PipelineRunner
 
     %% Composition wiring
     Bootstrap --> Factories
     Factories --> Registry
-    Bootstrap --> PipelineRunner
+    Bootstrap ==> PipelineRunner
 
-    %% Application internal
-    PipelineRunner --> PipelineExecutor
+    %% Application critical path
+    PipelineRunner ==> PipelineExecutor
     PipelineRunner --> LockManager
     PipelineRunner --> PreflightService
     PipelineRunner --> PostrunService
-    PipelineExecutor --> RecordProcessor
-    RecordProcessor --> BatchTransformer
-    BatchTransformer --> ActivityTransformer
-    BatchTransformer --> MoleculeTransformer
+    PipelineExecutor ==> RecordProcessor
+    RecordProcessor ==> BatchTransformer
 
-    %% Domain dependencies (interfaces)
+    %% Transformer to domain entities
+    ActivityTransformer -.-> Activity
+    MoleculeTransformer -.-> Molecule
+    AssayTransformer -.-> Assay
+    TargetTransformer -.-> Target
+
+    %% Domain contracts consumed by application
     PipelineRunner -.-> DataSourcePort
     PipelineRunner -.-> StoragePort
     PipelineRunner -.-> LockPort
+    PipelineRunner -.-> CheckpointPort
+    PipelineRunner -.-> LoggerPort
+    PipelineRunner -.-> MetricsPort
+    PipelineRunner -.-> TracingPort
+    DataSourcePort ~~~ StoragePort ~~~ LockPort ~~~ CheckpointPort ~~~ QuarantinePort ~~~ LoggerPort ~~~ MetricsPort ~~~ TracingPort
 
-    %% Infrastructure implements Ports
+    %% Infrastructure implements ports
     ChemblAdapter -.->|implements| DataSourcePort
+    PubchemAdapter -.->|implements| DataSourcePort
+    UniprotAdapter -.->|implements| DataSourcePort
+    PubmedAdapter -.->|implements| DataSourcePort
+    CrossRefAdapter -.->|implements| DataSourcePort
+    OpenAlexAdapter -.->|implements| DataSourcePort
+    S2Adapter -.->|implements| DataSourcePort
+
     BronzeWriter -.->|implements| StoragePort
+    SilverWriter -.->|implements| StoragePort
+    GoldWriter -.->|implements| StoragePort
     MemoryLock -.->|implements| LockPort
 
-    %% HTTP infrastructure
-    ChemblAdapter --> UnifiedHTTPClient
+    CheckpointManager -.->|implements| CheckpointPort
+    LifecycleOrchestrator -.->|uses| QuarantinePort
+
+    %% HTTP infrastructure through proxy bus
+    ChemblAdapter --> HTTPBus
+    PubchemAdapter --> HTTPBus
+    UniprotAdapter --> HTTPBus
+    PubmedAdapter --> HTTPBus
+    CrossRefAdapter --> HTTPBus
+    OpenAlexAdapter --> HTTPBus
+    S2Adapter --> HTTPBus
+    HTTPBus --> UnifiedHTTPClient
     UnifiedHTTPClient --> CircuitBreaker
     UnifiedHTTPClient --> TokenBucket
+    CircuitBreaker ~~~ TokenBucket
 
-    %% Storage writes
-    BronzeWriter --> Bronze
-    SilverWriter --> Silver
-    GoldWriter --> Gold
+    %% Storage + control plane
+    BronzeWriter ==> Bronze
+    SilverWriter ==> Silver
+    GoldWriter ==> Gold
+    SilverWriter -.-> Quarantine
+    CheckpointManager --> Checkpoints
+    Bronze ~~~ Silver ~~~ Gold ~~~ Quarantine ~~~ Checkpoints
 
+    %% Styling classes
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px;
+    classDef entity fill:#f1f5f9,stroke:#64748b,stroke-width:1.5px;
+    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px;
+    classDef store fill:#fefce8,stroke:#ca8a04,stroke-width:2px;
+    classDef proxy fill:#eff6ff,stroke:#2563eb,stroke-width:2px,stroke-dasharray: 5 3;
+
+    class DataSourcePort,StoragePort,LockPort,CheckpointPort,QuarantinePort,MetricsPort,TracingPort,LoggerPort port;
+    class ChemblAdapter,PubchemAdapter,UniprotAdapter,PubmedAdapter,CrossRefAdapter,OpenAlexAdapter,S2Adapter,BronzeWriter,SilverWriter,GoldWriter,MemoryLock adapter;
+    class Activity,Molecule,Assay,Target,Publication,PipelineConfig,RuntimeConfig,DQConfig entity;
+    class PipelineRunner,PipelineExecutor,RecordProcessor,BatchTransformer,LockManager,CheckpointManager,PreflightService,PostrunService,LifecycleOrchestrator,ActivityTransformer,MoleculeTransformer,AssayTransformer,TargetTransformer app;
+    class Bronze,Silver,Gold,Quarantine,Checkpoints store;
+    class HTTPBus proxy;
+
+    %% Layer styles
     style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
     style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
     style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
-    style Composition fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style Composition fill:#fff7ed,stroke:#d97706,stroke-width:2px
     style Interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style External fill:#f1f5f9,stroke:#64748b,stroke-width:2px
 
-    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 8 stroke:#1E293B,stroke-width:4px
-    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 10 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 11 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 12 stroke:#1E293B,stroke-width:4px
-    linkStyle 13 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 14 stroke:#1E293B,stroke-width:4px
-    linkStyle 15 stroke:#1E293B,stroke-width:4px
-    linkStyle 16 stroke:#1E293B,stroke-width:4px
-    linkStyle 17 stroke:#1E293B,stroke-width:4px
-    linkStyle 18 stroke:#1E293B,stroke-width:4px
-    linkStyle 19 stroke:#1E293B,stroke-width:4px
-    linkStyle 20 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 21 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 22 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 23 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 24 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 25 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 26 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 27 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 28 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 29 stroke:#1E293B,stroke-width:4px
-    linkStyle 30 stroke:#1E293B,stroke-width:4px
-    linkStyle 31 stroke:#1E293B,stroke-width:4px
+    %% Click tooltips
+    click Publication "../../04-reference/publication-validation-index.md" "Merged publication model (5 providers)"
+    click DataSourcePort "../../00-project/RULES.md" "Port contract consumed by Application"
+    click UnifiedHTTPClient "https://www.python-httpx.org/" "Shared HTTP client for all provider adapters"
+    click CLI "../../03-guides/pipeline-configuration.md" "CLI entrypoint and options"

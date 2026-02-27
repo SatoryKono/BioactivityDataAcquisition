@@ -125,6 +125,7 @@ class FsAdrService(AdrServicePort):
         return Path(self.base_path)
 
     def list_adrs(self) -> list[AdrInfo]:
+        """Return all ADR documents sorted by number."""
         items: list[AdrInfo] = []
         for p in _iter_adr_files(self._base):
             m = ADR_FILENAME_RE.match(p.name)
@@ -143,6 +144,7 @@ class FsAdrService(AdrServicePort):
         return items
 
     def get_adr(self, number: int) -> AdrDocument:
+        """Read and parse a single ADR by its number."""
         pattern = f"ADR-{number:03d}-*.md"
         matches = list(self._base.glob(pattern))
         if not matches:
@@ -162,6 +164,7 @@ class FsAdrService(AdrServicePort):
         )
 
     def validate(self) -> AdrValidationReport:
+        """Validate all ADR files for naming, numbering and metadata consistency."""
         issues: list[AdrValidationIssue] = []
         files = list(_iter_adr_files(self._base))
         seen_numbers: set[int] = set()

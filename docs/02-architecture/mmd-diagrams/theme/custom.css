@@ -23,13 +23,16 @@ svg {
 }
 
 /* ── Subgraph / cluster ─────────────────────────────── */
-.cluster rect {
+.cluster rect,
+.cluster path {
     rx: 10;
     ry: 10;
+    fill: #f8fafc;
+    stroke: #94a3b8;
     stroke-width: 1.5px;
     stroke-dasharray: none;
-    fill-opacity: 0.03;
-    filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.05));
+    fill-opacity: 1;
+    filter: none;
 }
 
 .cluster text {
@@ -61,10 +64,22 @@ svg {
 }
 
 .edgeLabel {
-    font-size: 13px;
+    font-size: 12px;
+    line-height: 1.1;
     background-color: #ffffff;
-    padding: 2px 6px;
-    border-radius: 3px;
+    padding: 1px 3px;
+    border-radius: 2px;
+}
+
+.edgeLabel span,
+.edgeLabel p,
+text.fo-fallback {
+    fill: #111827 !important;
+    color: #111827 !important;
+    opacity: 1 !important;
+    line-height: 1.1;
+    margin: 0;
+    padding: 0;
 }
 
 /* Force opaque background on edge labels — Mermaid generates
@@ -237,53 +252,63 @@ marker path {
    These selectors are fallback targets for
    subgraphs whose id starts with a known prefix. */
 
-[id*="Domain"] > rect {
+[id*="Domain"] > rect,
+[id*="Domain"] > path {
     fill: #f5f3ff !important;
     stroke: #7c3aed !important;
 }
 
-[id*="Application"] > rect {
+[id*="Application"] > rect,
+[id*="Application"] > path {
     fill: #f0fdf4 !important;
     stroke: #16a34a !important;
 }
 
-[id*="Infrastructure"] > rect {
+[id*="Infrastructure"] > rect,
+[id*="Infrastructure"] > path {
     fill: #fff1f2 !important;
     stroke: #dc2626 !important;
 }
 
-[id*="Composition"] > rect {
+[id*="Composition"] > rect,
+[id*="Composition"] > path {
     fill: #fff7ed !important;
     stroke: #f59e0b !important;
 }
 
-[id*="Interfaces"] > rect {
+[id*="Interfaces"] > rect,
+[id*="Interfaces"] > path {
     fill: #eff6ff !important;
     stroke: #2563eb !important;
 }
 
-[id*="External"] > rect {
+[id*="External"] > rect,
+[id*="External"] > path {
     fill: #f1f5f9 !important;
     stroke: #64748b !important;
 }
 
 /* Medallion colours for data-flow diagrams */
-[id*="Bronze"] > rect {
+[id*="Bronze"] > rect,
+[id*="Bronze"] > path {
     fill: #fff7ed !important;
     stroke: #f59e0b !important;
 }
 
-[id*="Silver"] > rect {
+[id*="Silver"] > rect,
+[id*="Silver"] > path {
     fill: #f8fafc !important;
     stroke: #475569 !important;
 }
 
-[id*="Gold"] > rect {
+[id*="Gold"] > rect,
+[id*="Gold"] > path {
     fill: #fefce8 !important;
     stroke: #ca8a04 !important;
 }
 
-[id*="Quarantine"] > rect {
+[id*="Quarantine"] > rect,
+[id*="Quarantine"] > path {
     fill: #ffe4e6 !important;
     stroke: #e11d48 !important;
 }

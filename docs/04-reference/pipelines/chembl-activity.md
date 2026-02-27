@@ -9,7 +9,7 @@
 | **Pipeline Name**  | `chembl_activity`                        |
 | **Provider**       | ChEMBL                                   |
 | **Entity**         | Activity                                 |
-| **Configuration**  | `configs/pipelines/chembl/activity.yaml` |
+| **Configuration**  | `configs/entities/chembl/activity.yaml` |
 | **Primary Key**    | `activity-id`                            |
 | **Config Version** | 1.2.0                                    |
 
@@ -90,11 +90,11 @@ bioetl run --pipeline chembl_activity --run-type rebuild
 
 | Component         | Path                                                              |
 | ----------------- | ----------------------------------------------------------------- |
-| Configuration     | `configs/pipelines/chembl/activity.yaml`                          |
+| Configuration     | `configs/entities/chembl/activity.yaml`                          |
 | Entity Definition | `src/bioetl/domain/entities/bioactivity.py`                       |
 | Transformer       | `src/bioetl/application/pipelines/chembl/activity-transformer.py` |
-| Gold Filter       | `configs/filters/entities/chembl/activity.yaml`                   |
-| Data Quality      | `configs/quality/entities/chembl/activity.yaml`                   |
+| Gold Filter       | `configs/entities/chembl/activity.yaml#filters`                   |
+| Data Quality      | `configs/entities/chembl/activity.yaml#quality`                   |
 | Silver Schema     | `src/bioetl/infrastructure/schemas/silver.py`                     |
 
 ----------------------------------------------------------------------
