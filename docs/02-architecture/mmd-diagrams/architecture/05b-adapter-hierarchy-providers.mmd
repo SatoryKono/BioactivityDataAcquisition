@@ -14,21 +14,21 @@
 graph TB
 %% keep-orphan: UIDM
     subgraph Infrastructure["Infrastructure Layer"]
-        BHA["BaseHttpAdapter"]
-        BSA["BaseSyncAdapter"]
-        CA["ChemblAdapter"]
-        PA["PubMedAdapter"]
-        UA["UniProtAdapter"]
-        CRA["CrossRefAdapter"]
-        OAA["OpenAlexAdapter"]
-        SSA["SemanticScholarAdapter"]
-        PCA["PubChemAdapter"]
-        UIDM["UniProtIDMappingClient"]
-        CHM["ChemblHealthMixin"]
-        CMM["ChemblMetadataMixin"]
-        PSM["PubMedSearchMixin"]
-        PFetchM["PubMedFetchMixin"]
-        PHM["PubMedHealthMixin"]
+        BHA["BaseHttpAdapter"]:::size-sm
+        BSA["BaseSyncAdapter"]:::size-sm
+        CA["ChemblAdapter"]:::size-sm
+        PA["PubMedAdapter"]:::size-sm
+        UA["UniProtAdapter"]:::size-sm
+        CRA["CrossRefAdapter"]:::size-sm
+        OAA["OpenAlexAdapter"]:::size-sm
+        SSA["SemanticScholarAdapter"]:::size-sm
+        PCA["PubChemAdapter"]:::size-sm
+        UIDM["UniProtIDMappingClient"]:::size-sm
+        CHM["ChemblHealthMixin"]:::size-sm
+        CMM["ChemblMetadataMixin"]:::size-sm
+        PSM["PubMedSearchMixin"]:::size-sm
+        PFetchM["PubMedFetchMixin"]:::size-sm
+        PHM["PubMedHealthMixin"]:::size-sm
     end
 
     BHA --> CA

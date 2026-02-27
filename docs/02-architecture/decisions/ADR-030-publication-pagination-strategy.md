@@ -31,13 +31,13 @@ Run 2 (resume): Fetch records 1000-2000
 
 | Pipeline | Provider | Entity Type | Primary Key |
 |----------|----------|-------------|-------------|
-| `chembl-publication` | ChEMBL | publication | document-chembl-id |
-| `chembl-publication-term` | ChEMBL | publication-term | entity-id |
-| `chembl-publication-similarity` | ChEMBL | publication-similarity | sim-id |
-| `pubmed-publication` | PubMed | publication | pmid |
-| `crossref-publication` | CrossRef | work | doi |
-| `openalex-publication` | OpenAlex | publication | openalex-id |
-| `semanticscholar-publication` | SemanticScholar | publication | paper-id |
+| `chembl_publication` | ChEMBL | publication | document-chembl-id |
+| `chembl_publication_term` | ChEMBL | publication-term | entity-id |
+| `chembl_publication_similarity` | ChEMBL | publication-similarity | sim-id |
+| `pubmed_publication` | PubMed | publication | pmid |
+| `crossref_publication` | CrossRef | work | doi |
+| `openalex_publication` | OpenAlex | publication | openalex-id |
+| `semanticscholar_publication` | SemanticScholar | publication | paper-id |
 
 ## Decision
 
@@ -64,7 +64,7 @@ class PipelineConfig:
 
 ```yaml
 # configs/entities/chembl/publication.yaml
-pipeline-name: chembl-publication
+pipeline-name: chembl_publication
 provider: chembl
 entity-type: publication
 

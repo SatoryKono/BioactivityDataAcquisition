@@ -27,22 +27,22 @@
 graph LR
 %% keep-orphan: FDSP
     subgraph Domain["Domain Ports"]
-        DSP["fa:fa-plug DataSourcePort"]
-        FDSP["fa:fa-filter FilterableDataSourcePort"]
-        STP["fa:fa-database StoragePort"]
-        DRP["fa:fa-book-open DeltaReaderPort"]
-        IFP["fa:fa-file-import InputFilterPort"]
+        DSP["fa:fa-plug DataSourcePort"]:::size-sm
+        FDSP["fa:fa-filter FilterableDataSourcePort"]:::size-sm
+        STP["fa:fa-database StoragePort"]:::size-sm
+        DRP["fa:fa-book-open DeltaReaderPort"]:::size-sm
+        IFP["fa:fa-file-import InputFilterPort"]:::size-sm
     end
 
     subgraph Infrastructure["Implementations"]
-        CA["ChemblAdapter"]
-        PA["PubchemAdapter"]
-        UA["UniprotAdapter"]
-        BW["BronzeWriter"]
-        SW["SilverWriter"]
-        GW["GoldWriter"]
-        DR_I["DeltaReader"]
-        CSVR["CsvFilterReader"]
+        CA["ChemblAdapter"]:::size-sm
+        PA["PubchemAdapter"]:::size-sm
+        UA["UniprotAdapter"]:::size-sm
+        BW["BronzeWriter"]:::size-sm
+        SW["SilverWriter"]:::size-sm
+        GW["GoldWriter"]:::size-sm
+        DR_I["DeltaReader"]:::size-sm
+        CSVR["CsvFilterReader"]:::size-sm
     end
 
     DSP --- CA & PA & UA

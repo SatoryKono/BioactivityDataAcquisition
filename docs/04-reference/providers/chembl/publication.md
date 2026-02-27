@@ -1,6 +1,6 @@
 # Пайплайн: ChEMBL Publication
 
-**Имя пайплайна:** `chembl-publication`
+**Имя пайплайна:** `chembl_publication`
 **Провайдер:** `chembl`
 **Сущность:** `publication`
 **Версия схемы:** 1.2.0
@@ -71,10 +71,10 @@ entity-id = f"chembl:{document-chembl-id}"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl-publication
+bioetl run chembl_publication
 
 # С ограничением
-bioetl run chembl-publication --limit 1000
+bioetl run chembl_publication --limit 1000
 ```
 
 ---

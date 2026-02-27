@@ -14,17 +14,17 @@
 graph TB
 %% keep-orphan: FSM, HCP, NSMF, PFM
     subgraph Domain["Domain Layer"]
-        DSP["DataSourcePort"]
-        HCP["HealthCheckPort"]
+        DSP["DataSourcePort"]:::size-sm
+        HCP["HealthCheckPort"]:::size-sm
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        HCPM["HealthCheckProviderMixin"]
-        NSMF["NotSupportedMultiFilterMixin"]
-        FSM["FilterableStubMixin"]
-        PFM["PaginatedFetcherMixin"]
-        BHA["BaseHttpAdapter"]
-        BSA["BaseSyncAdapter"]
+        HCPM["HealthCheckProviderMixin"]:::size-sm
+        NSMF["NotSupportedMultiFilterMixin"]:::size-sm
+        FSM["FilterableStubMixin"]:::size-sm
+        PFM["PaginatedFetcherMixin"]:::size-sm
+        BHA["BaseHttpAdapter"]:::size-sm
+        BSA["BaseSyncAdapter"]:::size-sm
     end
 
     DSP -->|extends| FDSP

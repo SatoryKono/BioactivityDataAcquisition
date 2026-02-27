@@ -119,7 +119,7 @@ contracts:
     ingestion_ts: _ingestion_ts
     source: _source
   hash_include: []
-  hash_exclude: [_ingestion_ts, _run_id, _run_type, _dq_errors, _dq_status]
+  hash_exclude: [_ingestion_ts, _run_id, _run_type, _dq_error, _dq_warn]
 """
 
 

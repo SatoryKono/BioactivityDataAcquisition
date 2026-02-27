@@ -1,6 +1,12 @@
 # BioETL Diagrams — PNG Index
 
-_Generated: 2026-02-27T17:40:37+03:00_
+_Generated: 2026-02-27T18:43:48+03:00_
+
+## High Level Hexagonal
+
+![01-high-level-hexagonal](./01-high-level-hexagonal.png)
+
+---
 
 ## 01ahexagonal Overview
 

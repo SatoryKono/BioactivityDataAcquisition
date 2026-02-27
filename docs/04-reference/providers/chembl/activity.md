@@ -1,6 +1,6 @@
 # Пайплайн: ChEMBL Activity
 
-**Имя пайплайна:** `chembl-activity`
+**Имя пайплайна:** `chembl_activity`
 **Провайдер:** `chembl`
 **Сущность:** `activity`
 **Версия схемы:** 1.2.0
@@ -18,12 +18,12 @@
 **Файл:** `configs/entities/chembl/activity.yaml`
 
 ```yaml
-pipeline-name: chembl-activity
+pipeline-name: chembl_activity
 provider: chembl
 entity-type: activity
 version: "1.2.0"
 primary-keys: ["activity-id"]
-silver-table: "chembl-activity"
+silver-table: "chembl_activity"
 
 gold-filter-types:
     - IC50
@@ -415,7 +415,7 @@ def should-include(self, context, record) -> bool:
 
 #### Data Contract
 
-**Файл:** `docs/04-reference/contracts/gold/chembl-activity-v1.0.json`
+**Файл:** `docs/04-reference/contracts/gold/chembl_activity-v1.0.json`
 
 ```json
 {
@@ -524,7 +524,7 @@ def extract(self, context, record) -> Watermark:
 | Bronze Writer | `src/bioetl/infrastructure/storage/bronze-writer.py`              |
 | Delta Writer  | `src/bioetl/infrastructure/storage/delta-writer.py`               |
 | Gold Writer   | `src/bioetl/infrastructure/storage/gold-writer.py`                |
-| Data Contract | `docs/04-reference/contracts/gold/chembl-activity-v1.0.json`                               |
+| Data Contract | `docs/04-reference/contracts/gold/chembl_activity-v1.0.json`                               |
 
 ----------------------------------------------------------------------
 
@@ -532,16 +532,16 @@ def extract(self, context, record) -> Watermark:
 
 ```bash
 # Инкрементальная загрузка (по умолчанию)
-bioetl run chembl-activity
+bioetl run chembl_activity
 
 # С ограничением количества записей
-bioetl run chembl-activity --limit 1000
+bioetl run chembl_activity --limit 1000
 
 # Backfill за период
-bioetl run chembl-activity --run-type backfill --start-date 2024-01-01
+bioetl run chembl_activity --run-type backfill --start-date 2024-01-01
 
 # Полная перезагрузка
-bioetl run chembl-activity --run-type rebuild
+bioetl run chembl_activity --run-type rebuild
 ```
 
 ----------------------------------------------------------------------

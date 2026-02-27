@@ -12,23 +12,22 @@
 graph LR
 %% keep-orphan: DQW, NOV
     subgraph Port["Domain Port"]
-        SP["StoragePort<br/>(Protocol)<br/><br/><br/><br/><br/><br/><br/><br/>"]
+        SP["StoragePort<br/>(Protocol)<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
     end
 
     subgraph Writers["Storage Writers"]
         subgraph BronzeStorage["Bronze Storage"]
-            BW["BronzeWriter<br/>━━━━━━━━━━━━━━━━━<br/>base_path: Path<br/>logger: LoggerPort<br/>metrics: MetricsPort<br/>save_json: bool<br/>validate_json: bool<br/>━━━━━━━━━━━━━━━━━<br/>+ write_bronze()<br/>+ aclose()"]
-            AWG["AtomicWriteGroup<br/>━━━━━━━━━━━━━━━━━<br/>Atomic multi-file writes<br/>with rollback<br/><br/><br/><br/><br/><br/>"]
+            BW["BronzeWriter<br/>━━━━━━━━━━━━━━━━━<br/>base_path: Path<br/>logger: LoggerPort<br/>metrics: MetricsPort<br/>save_json: bool<br/>validate_json: bool<br/>━━━━━━━━━━━━━━━━━<br/>+ write_bronze()<br/>+ aclose()"]:::size-lg
+            AWG["AtomicWriteGroup<br/>━━━━━━━━━━━━━━━━━<br/>Atomic multi-file writes<br/>with rollback<br/><br/><br/><br/><br/><br/>"]:::size-lg
         end
 
         subgraph SilverStorage["Silver Storage"]
-            BDW["BaseDeltaWriter<br/>━━━━━━━━━━━━━━━━━<br/>base_path: Path<br/>logger: LoggerPort<br/>_retention_manager<br/>━━━━━━━━━━━━━━━━━<br/>+ get_table_path()<br/>+ clear()<br/>+ _prepare_arrow_data()<br/>"]
-
-            SWR["SilverWriter<br/>━━━━━━━━━━━━━━━━━<br/>csv_exporter: CsvExporter<br/>write_policy: WriteModePolicy<br/>silver_validator: SilverValidatorPort<br/>━━━━━━━━━━━━━━━━━<br/>+ write_silver()<br/>+ merge_silver()<br/>+ clear_silver()<br/>"]
+            BDW["BaseDeltaWriter<br/>━━━━━━━━━━━━━━━━━<br/>base_path: Path<br/>logger: LoggerPort<br/>_retention_manager<br/>━━━━━━━━━━━━━━━━━<br/>+ get_table_path()<br/>+ clear()<br/>+ _prepare_arrow_data()<br/>"]:::size-lg
+            SWR["SilverWriter<br/>━━━━━━━━━━━━━━━━━<br/>csv_exporter: CsvExporter<br/>write_policy: WriteModePolicy<br/>silver_validator: SilverValidatorPort<br/>━━━━━━━━━━━━━━━━━<br/>+ write_silver()<br/>+ merge_silver()<br/>+ clear_silver()<br/>"]:::size-lg
         end
 
         subgraph GoldStorage["Gold Storage"]
-            GWR["GoldWriter<br/>━━━━━━━━━━━━━━━━━<br/>csv_exporter: CsvExporter<br/>audit: AuditPort<br/>metadata_writer: MetadataWriterPort<br/>━━━━━━━━━━━━━━━━━<br/>+ write_gold()<br/>+ clear_gold()<br/><br/>"]
+            GWR["GoldWriter<br/>━━━━━━━━━━━━━━━━━<br/>csv_exporter: CsvExporter<br/>audit: AuditPort<br/>metadata_writer: MetadataWriterPort<br/>━━━━━━━━━━━━━━━━━<br/>+ write_gold()<br/>+ clear_gold()<br/><br/>"]:::size-lg
         end
 
         subgraph Reader["Delta Reader"]
@@ -36,23 +35,23 @@ graph LR
     end
 
     subgraph Support["Support Components"]
-        AC["ArrowDataConverter<br/>(records → PyArrow)<br/><br/><br/><br/><br/><br/><br/><br/>"]
-        RM["RetentionManager<br/>(vacuum/retention)<br/><br/><br/><br/><br/><br/><br/><br/>"]
-        MW["MetadataWriter<br/>(_metadata.yaml)<br/><br/><br/><br/><br/><br/><br/><br/>"]
-        CSV["CsvExporter<br/>(Delta → CSV export)<br/><br/><br/><br/><br/><br/><br/><br/>"]
-        DQW["DQReportWriter<br/>(DQ reports JSON)<br/><br/><br/><br/><br/><br/><br/><br/>"]
+        AC["ArrowDataConverter<br/>(records → PyArrow)<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        RM["RetentionManager<br/>(vacuum/retention)<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        MW["MetadataWriter<br/>(_metadata.yaml)<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        CSV["CsvExporter<br/>(Delta → CSV export)<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        DQW["DQReportWriter<br/>(DQ reports JSON)<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
     end
 
     subgraph Validation["Validation"]
-        PSV["PanderaSilverValidator<br/>(SilverValidatorPort)<br/><br/><br/><br/><br/><br/><br/><br/>"]
-        PGV["PanderaGoldValidator<br/>(GoldValidatorPort)<br/><br/><br/><br/><br/><br/><br/><br/>"]
-        NOV["NoOpValidator<br/>(Null Object)<br/><br/><br/><br/><br/><br/><br/><br/>"]
+        PSV["PanderaSilverValidator<br/>(SilverValidatorPort)<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        PGV["PanderaGoldValidator<br/>(GoldValidatorPort)<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        NOV["NoOpValidator<br/>(Null Object)<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
     end
 
     subgraph FileSystem["File System Layout"]
-        FS_B["data/<br/>├── bronze/<br/>│   └── {provider}/{entity}/{date}/<br/>│       ├── batch_*.jsonl.zst<br/>│       └── _metadata.yaml<br/><br/><br/><br/><br/>"]
-        FS_S["├── silver/<br/>│   └── {provider}_{entity}/<br/>│       ├── _delta_log/<br/>│       ├── part-*.parquet<br/>│       └── _metadata.yaml<br/><br/><br/><br/><br/>"]
-        FS_G["└── gold/<br/>└── {provider}_{entity}/<br/>├── _delta_log/<br/>├── part-*.parquet<br/>└── _metadata.yaml<br/><br/><br/><br/><br/>"]
+        FS_B["data/<br/>├── bronze/<br/>│   └── {provider}/{entity}/{date}/<br/>│       ├── batch_*.jsonl.zst<br/>│       └── _metadata.yaml<br/><br/><br/><br/><br/>"]:::size-lg
+        FS_S["├── silver/<br/>│   └── {provider}_{entity}/<br/>│       ├── _delta_log/<br/>│       ├── part-*.parquet<br/>│       └── _metadata.yaml<br/><br/><br/><br/><br/>"]:::size-lg
+        FS_G["└── gold/<br/>└── {provider}_{entity}/<br/>├── _delta_log/<br/>├── part-*.parquet<br/>└── _metadata.yaml<br/><br/><br/><br/><br/>"]:::size-lg
     end
 
     %% Inheritance
@@ -84,9 +83,9 @@ graph LR
     GWR -.-> FS_G
 
     subgraph Metadata["Metadata Builders"]
-        BMB["BronzeMetadataBuilder<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]
-        SMB["SilverMetadataBuilder<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]
-        GMB["GoldMetadataBuilder<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]
+        BMB["BronzeMetadataBuilder<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        SMB["SilverMetadataBuilder<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        GMB["GoldMetadataBuilder<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
     end
 
     BW --> BMB

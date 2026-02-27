@@ -25,6 +25,8 @@ classDiagram
         #_start_health_check(provider, endpoint) HealthCheckContext
         #_handle_health_check_success(ctx, status) None
         #_handle_health_check_failure(ctx, error) None
+        
+        
     }
 
     class HealthCheckProviderMixin {
@@ -45,6 +47,12 @@ classDiagram
         +__aenter__() Self
         +__aexit__(...) None
         +aclose() None
+        
+        
+        
+        
+        
+        
     }
 
     class BaseSyncAdapter {
@@ -53,6 +61,15 @@ classDiagram
         +rate_limiter: TokenBucket
         +circuit_breaker: CircuitBreaker
         +thread_pool: ThreadPoolExecutor
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class UnifiedHTTPClient {
@@ -84,32 +101,48 @@ classDiagram
         +email: str
         +api_key: str | None
         +batch_size: int
+        
+        
     }
 
     class UniProtAdapter {
         +api_key: str | None
         +base_url: str
+        
+        
+        
     }
 
     class CrossRefAdapter {
         +mailto: str
         +batch_size: int
+        
+        
+        
     }
 
     class OpenAlexAdapter {
         +mailto: str
         +batch_size: int
+        
+        
+        
     }
 
     class SemanticScholarAdapter {
         +api_key: str
         +batch_size: int
         +fields: str
+        
+        
     }
 
     class PubChemAdapter {
         Uses pubchempy (sync)
         ThreadPoolExecutor wrapper
+        
+        
+        
     }
 
     class CircuitBreaker {
@@ -133,12 +166,19 @@ classDiagram
         +acquire(tokens) None
         +try_acquire() bool
         +available_tokens() int
+        
     }
 
     class AdapterMetrics {
         +metrics: MetricsPort
         +provider: str
         +measure_request() ContextManager
+        
+        
+        
+        
+        
+        
     }
 
     class CircuitBreakerDataSourceDecorator {

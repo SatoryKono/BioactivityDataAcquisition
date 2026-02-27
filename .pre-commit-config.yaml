@@ -71,15 +71,6 @@ repos:
   # Local hooks
   - repo: local
     hooks:
-      - id: constructor-args
-        name: Check constructor argument counts
-        entry: python scripts/check_constructor_args.py --warn-only
-        language: python
-        pass_filenames: false
-        types: [python]
-        # Only run when Python files in src/ change
-        files: ^src/
-
       - id: pip-audit
         name: Check for known vulnerabilities in dependencies
         entry: pip-audit

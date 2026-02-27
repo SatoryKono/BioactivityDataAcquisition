@@ -1,4 +1,4 @@
-# Политика файлов и директорий
+1# Политика файлов и директорий
 
 *Синхронизировано с RULES.md v5.22 | Последнее обновление: 2026-02-21*
 
@@ -46,13 +46,13 @@ configs/
 
 | Поле                    | Описание                                       | Пример            |
 | ----------------------- | ---------------------------------------------- | ----------------- |
-| `pipeline-name`         | Уникальный идентификатор `{provider}-{entity}` | `chembl-activity` |
+| `pipeline-name`         | Уникальный идентификатор `{provider}-{entity}` | `chembl_activity` |
 | `provider`              | Имя провайдера                                 | `chembl`          |
 | `entity-type`           | Тип сущности                                   | `activity`        |
 | `version`               | Семантическая версия                           | `"1.1.0"`         |
 | `business-primary-keys` | Первичный ключ                                 | `["activity-id"]` |
-| `silver-table`          | Имя Silver-таблицы                             | `chembl-activity` |
-| `gold-table`            | Имя Gold-таблицы                               | `chembl-activity` |
+| `silver-table`          | Имя Silver-таблицы                             | `chembl_activity` |
+| `gold-table`            | Имя Gold-таблицы                               | `chembl_activity` |
 | `sink`                  | Пути к слоям с `sort-by`                       | См. ниже          |
 
 ### 1.4. Валидация конфигураций
@@ -154,8 +154,8 @@ uv run python scripts/validate-data-dir.py
 
 | Паттерн                         | Описание           | Пример                    |
 | ------------------------------- | ------------------ | ------------------------- |
-| `{provider}-{entity}`           | Стандартный формат | `chembl-activity`         |
-| `{provider}-{entity}-{variant}` | С вариантом        | `chembl-publication-term` |
+| `{provider}-{entity}`           | Стандартный формат | `chembl_activity`         |
+| `{provider}-{entity}-{variant}` | С вариантом        | `chembl_publication_term` |
 
 **НЕ используется**: `{entity}-{provider}` (например, `activity-chembl`)
 
@@ -164,8 +164,8 @@ uv run python scripts/validate-data-dir.py
 Silver и Gold таблицы используют тот же паттерн:
 
 ```yaml
-silver-table: "chembl-activity"
-gold-table: "chembl-activity"
+silver-table: "chembl_activity"
+gold-table: "chembl_activity"
 ```
 
 ----------------------------------------------------------------------

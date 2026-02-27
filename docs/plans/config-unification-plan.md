@@ -39,7 +39,7 @@
 
 ### 1.2 Файлы, Загружаемые для Одного Pipeline
 
-Пример: `chembl-activity` — **11 файлов**:
+Пример: `chembl_activity` — **11 файлов**:
 
 | # | Файл | Тип | Роль |
 |---|------|-----|------|
@@ -126,7 +126,7 @@ gold-filters:
 
 #### P-006: Неконсистентные Параметры Между Pipeline Configs (MEDIUM)
 
-| Параметр | chembl-activity | chembl-molecule | pubmed-publication | crossref-publication |
+| Параметр | chembl_activity | chembl_molecule | pubmed_publication | crossref_publication |
 |----------|----------------|-----------------|--------------------|-----------------------|
 | `batch-size` | 1000 (в pipeline) | - (default 100) | - (default 100) | - (default 100) |
 | `loading-strategy` | - | - | full-scan-only | full-scan-only |
@@ -496,7 +496,7 @@ entity: molecule
 
 # --- Pipeline (previously pipelines/chembl/molecule.yaml) ---
 pipeline:
-  name: chembl-molecule
+  name: chembl_molecule
   description: "Extract molecules/compounds from ChEMBL API"
   business-primary-keys: [molecule-id]
   sink:
@@ -700,7 +700,7 @@ Phase 4 (validation + docs)  → 1 день  │ golden master + ADR
 
 ### 5.3 `dq-overrides` — дубликаты с entity DQ config
 
-`chembl-activity` — единственный pipeline с inline `dq-overrides`.
+`chembl_activity` — единственный pipeline с inline `dq-overrides`.
 Ранее 5 из 6 правил были идентичны `quality/entities/chembl/activity.yaml`; дубли уже удалены.
 **Текущий остаток (валидный):** только narrowing overrides для `standard-type` и `standard-units`.
 

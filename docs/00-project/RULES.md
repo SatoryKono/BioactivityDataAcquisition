@@ -67,7 +67,7 @@
 
   - `DataSourcePort` — для проверки адаптеров при регистрации
   - `FilterableDataSourcePort` — для проверки расширенных адаптеров
-  - `HealthCheckPort` — для проверки health-check capability
+  - `HealthCheckPort` — для проверки health_check capability
   - `StoragePort` — для проверки storage backends
 
   Остальные порты (`LoggerPort`, `MetricsPort`, `TracingPort` и т.д.) **MAY** не иметь `@runtime-checkable`.
@@ -82,25 +82,25 @@ class DataSourcePort(Protocol):
     # Async generator, yields dict records per API page.
     def fetch(
         self,
-        entity-type: str,
+        entity_type: str,
         limit: int | None = None,
         query: str | None = None,
-        filter-ids: list[str] | None = None,
-        filter-field: str | None = None,
+        filter_ids: list[str] | None = None,
+        filter_field: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]: ...
-    async def health-check(self) -> HealthStatus: ...
+    async def health_check(self) -> HealthStatus: ...
 ```
 
 ### 1.1.2. Health Check Protocol
 
-Все адаптеры **MUST** реализовывать асинхронный метод `health-check()` возвращающий `HealthStatus` enum:
+Все адаптеры **MUST** реализовывать асинхронный метод `health_check()` возвращающий `HealthStatus` enum:
 
 ```python
 from bioetl.domain.types import HealthStatus
 
 
 class MyAdapter:
-    async def health-check(self) -> HealthStatus:
+    async def health_check(self) -> HealthStatus:
         """Проверка доступности внешнего сервиса.
 
         Returns:
@@ -282,7 +282,7 @@ if self.runtime.run - type in (RunType.REBUILD, RunType.BACKFILL):
 
 - `ingestion-ts` (Timestamp): Время инцидента. \[Код: `QuarantineEntry.-created-at`\]
 
-- `pipeline` (String): Имя пайплайна (напр., `chembl-activity`). \[Код: `QuarantineEntry.-pipeline-name`\]
+- `pipeline` (String): Имя пайплайна (напр., `chembl_activity`). \[Код: `QuarantineEntry.-pipeline-name`\]
 
 - `error-code` (String): Тип ошибки (напр., `SCHEMA-VIOLATION`). \[Код: `QuarantineEntry.-error-code`\]
 
@@ -442,7 +442,7 @@ Dependencies — пайплайны, которые запускаются **п�
 
 ```yaml
 dependencies:
-  - pipeline: chembl-target-component
+  - pipeline: chembl_target_component
     join-keys: [component-id]       # Ключ из seed
     silver-table: silver/chembl/target-component
 ```
@@ -454,15 +454,15 @@ dependencies:
 ```yaml
 dependencies:
   # 1. Стандартный: ключи из seed
-  - pipeline: chembl-target-component
+  - pipeline: chembl_target_component
     join-keys: [component-id]
     silver-table: silver/chembl/target-component
 
   # 2. Цепочечный: ключи из предыдущего dependency
-  - pipeline: chembl-protein-class
+  - pipeline: chembl_protein_class
     join-keys: [protein-classification-id]  # Колонка в source таблице
     filter-field: protein-class-id          # Поле API (если отличается)
-    key-source: chembl-target-component     # Читать ключи отсюда
+    key-source: chembl_target_component     # Читать ключи отсюда
     silver-table: silver/chembl/protein-class
 ```
 
@@ -655,7 +655,7 @@ content-hash → content-version → version-hash
 - **Max Attempts**: 3
 - **Multiplier**: 2.0 (wait 1s, 2s, 4s...)
 - **Jitter**: Random(0.1s, 0.5s). Jitter **SHOULD** применяться для избежания thundering herd.
-- **Deterministic Mode**: При `RetryConfig(deterministic=True)` jitter **MUST** вычисляться через hash вместо random для воспроизводимости. См. [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md).
+- **Deterministic Mode**: При `RetryConfig(deterministic=True)` jitter **MUST** вычисляться через hash вместо random для воспроизводимости. См. [ADR-014](../../02-architecture/decisions/ADR-014-deterministic-writes.md).
 
 ### 3.1.4. Circuit Breaker (Размыкатель цепи)
 
@@ -683,7 +683,7 @@ content-hash → content-version → version-hash
 | timestamp    | MUST           | `2025-12-15T10:00:00Z`         |
 | level        | MUST           | `INFO`, `ERROR`                |
 | run-id       | MUST           | UUID                           |
-| pipeline     | MUST           | `chembl-activity`              |
+| pipeline     | MUST           | `chembl_activity`              |
 | stage        | MUST           | `extract`, `transform`, `load` |
 | dataset      | SHOULD         | `chembl/activity`              |
 | record-count | SHOULD         | 1000                           |
@@ -778,9 +778,9 @@ content-hash → content-version → version-hash
 | --------- | ------------------------------- | ------------------------- |
 | Healthy   | 0 errors за 5 мин               | Normal operation          |
 | Degraded  | 1-2 consecutive errors          | Timeout ×2, batch-size ÷2 |
-| Unhealthy | ≥3 errors или health-check fail | Pause pipeline, Alert P2  |
+| Unhealthy | ≥3 errors или health_check fail | Pause pipeline, Alert P2  |
 
-**Recovery**: Unhealthy → Degraded после 1 успешного health-check.
+**Recovery**: Unhealthy → Degraded после 1 успешного health_check.
 **Metric**: `provider-health-status{provider}` (0=Unhealthy, 1=Degraded, 2=Healthy).
 
 ## 4. Стандарты Кода и Тестирование
@@ -905,7 +905,7 @@ pip install -e ".[tests]"
 
 ### 4.3. Детерминизм и Воспроизводимость
 
-См. [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md).
+См. [ADR-014](../../02-architecture/decisions/ADR-014-deterministic-writes.md).
 
 #### MUST (Обязательно)
 
@@ -1116,7 +1116,7 @@ async with services:  # --aenter-- инициализирует ресурсы
 
 ## 6.1. Детерминизм и Воспроизводимость
 
-> См. [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md) для полного обоснования.
+> См. [ADR-014](../../02-architecture/decisions/ADR-014-deterministic-writes.md) для полного обоснования.
 
 **Детерминизм** — это гарантия того, что при одинаковых входных данных (source data, config) пайплайн всегда произведет идентичные выходные данные и побочные эффекты.
 
@@ -1501,7 +1501,7 @@ URL-адреса для ChEMBL формируются в `infrastructure/adapter
 
 ## Приложение D: Схема Конфигурации Пайплайна
 
-См. [ADR-039](../02-architecture/decisions/ADR-039-unified-entity-config-format.md) для unified entity config format, [ADR-025](../02-architecture/decisions/ADR-025-pipeline-config-unification.md) для исходной унификации конфигурации, [ADR-027](../02-architecture/decisions/ADR-027-dq-rules-externalization.md) для DQ rules и [ADR-028](../02-architecture/decisions/ADR-028-filter-rules-externalization.md) для filter rules.
+См. [ADR-039](../02-architecture/decisions/ADR-039-unified-entity-config-format.md) для unified entity config format, [ADR-025](../../02-architecture/decisions/ADR-025-pipeline-config-unification.md) для исходной унификации конфигурации, [ADR-027](../02-architecture/decisions/ADR-027-dq-rules-externalization.md) для DQ rules и [ADR-028](../02-architecture/decisions/ADR-028-filter-rules-externalization.md) для filter rules.
 
 Начиная с 2026-02-24, все 21 стандартных pipeline используют **unified entity config** формат:
 
@@ -1520,7 +1520,7 @@ provider: chembl
 entity: activity
 
 pipeline:
-  pipeline-name: chembl-activity
+  pipeline-name: chembl_activity
   provider: chembl
   entity-type: activity
   description: Extract biological activity records from ChEMBL API
@@ -1651,7 +1651,7 @@ fields:
 | [ADR-011](../02-architecture/decisions/ADR-011-remove-watermark-mechanism.md)        | Remove Watermark Mechanism                 | Accepted           | 2025-12-23 |
 | [ADR-012](../02-architecture/decisions/ADR-012-storage-clear-contract-and-run-id.md) | Storage Clear Contract and Run ID          | Accepted           | 2025-12-23 |
 | [ADR-013](../02-architecture/decisions/ADR-013-async-storage-cleanup.md)             | Async Storage Cleanup                      | Accepted           | 2025-12-24 |
-| [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md)              | Deterministic Writes and Retries           | Accepted           | 2025-12-24 |
+| [ADR-014](../../02-architecture/decisions/ADR-014-deterministic-writes.md)              | Deterministic Writes and Retries           | Accepted           | 2025-12-24 |
 | [ADR-015](../02-architecture/decisions/ADR-015-pipeline-services-lifecycle.md)       | Pipeline Services Lifecycle                | Accepted           | 2025-12-24 |
 | [ADR-016](../02-architecture/decisions/ADR-016-error-handling-strategy.md)           | Error Handling Strategy                    | Accepted           | 2025-12-26 |
 | [ADR-017](../02-architecture/decisions/ADR-017-observability-architecture.md)        | Observability Architecture                 | Accepted           | 2025-12-26 |
@@ -1662,7 +1662,7 @@ fields:
 | [ADR-022](../02-architecture/decisions/ADR-022-tracing-noop.md)                      | NoOp Tracing for Local-Only                | Accepted           | 2025-12-30 |
 | [ADR-023](../02-architecture/decisions/ADR-023-entity-type-patterns.md)              | Entity Type Patterns                       | Accepted           | 2026-01-06 |
 | [ADR-024](../02-architecture/decisions/ADR-024-entity-naming-unification.md)         | Entity Naming Unification                  | Accepted           | 2026-01-06 |
-| [ADR-025](../02-architecture/decisions/ADR-025-pipeline-config-unification.md)       | Pipeline Config Unification                | Accepted           | 2026-01-19 |
+| [ADR-025](../../02-architecture/decisions/ADR-025-pipeline-config-unification.md)       | Pipeline Config Unification                | Accepted           | 2026-01-19 |
 | [ADR-026](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md)        | Composite Pipeline Pattern                 | Accepted           | 2026-01-15 |
 | [ADR-027](../02-architecture/decisions/ADR-027-dq-rules-externalization.md)          | DQ Rules Externalization                   | Accepted           | 2026-01-19 |
 | [ADR-028](../02-architecture/decisions/ADR-028-filter-rules-externalization.md)      | Filter Rules Externalization               | Accepted           | 2026-01-20 |

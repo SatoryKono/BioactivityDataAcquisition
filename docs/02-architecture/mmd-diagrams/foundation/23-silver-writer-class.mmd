@@ -9,7 +9,7 @@
 %% @level   Mixed (System / Component / Class)
 
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
-%% @uniform class width=952 height=472 max_title_len=16 max_desc_lines=24
+%% @uniform class width=168 height=240 max_title_len=16 max_desc_lines=24
 classDiagram
     direction TB
 
@@ -26,6 +26,18 @@ classDiagram
         +vacuum(table, retention_days) None
         +archive(source, dest) None
         +health_check() HealthStatus
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class SilverWriter {
@@ -63,6 +75,23 @@ classDiagram
         +files_added: list~str~
         +duration_ms: float
         +error_message: str | None
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class MergeResult {
@@ -73,6 +102,23 @@ classDiagram
         +rows_updated: int
         +rows_deleted: int
         +source_rows_total: int
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class SilverWriteMode {
@@ -80,6 +126,26 @@ classDiagram
         MERGE = "merge"
         APPEND = "append"
         DELETE = "delete"
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class WriteModePolicy {
@@ -88,6 +154,25 @@ classDiagram
         +backfill_mode: SilverWriteMode = MERGE
         +rebuild_mode: SilverWriteMode = DELETE
         +get_mode_for_run_type(run_type: RunType) SilverWriteMode
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class CsvExporter {
@@ -95,6 +180,26 @@ classDiagram
         -_logger: LoggerPort
         +export(df: pl.DataFrame, path: str) str
         +export_from_records(records: list~dict~, path: str) str
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class LockNotHeldError {
@@ -102,6 +207,26 @@ classDiagram
         +key: str
         +owner_id: str
         +message: str
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     %% Relationships

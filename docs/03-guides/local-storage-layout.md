@@ -32,7 +32,7 @@ data/
     │           ├── {provider}-{entity}-metadata.yaml
     │           └── gold-{provider}-{entity}-dq-report.json
     ├── checkpoints/
-    │   ├── {pipeline-name}.json         # Flat structure (e.g., chembl-activity.json)
+    │   ├── {pipeline-name}.json         # Flat structure (e.g., chembl_activity.json)
     │   └── composite/
     │       └── composite-{name}-{run-id}.json
     ├── quarantine/
@@ -128,17 +128,17 @@ df = pl.read-delta("data/output/silver/chembl/activity", version=5)
 **Flat structure** (not nested):
 ```
 data/output/checkpoints/
-├── chembl-activity.json
-├── chembl-molecule.json
-├── pubchem-compound.json
+├── chembl_activity.json
+├── chembl_molecule.json
+├── pubchem_compound.json
 └── composite/
-    └── composite-publication-enrichment-abc123.json
+    └── composite_publication-enrichment-abc123.json
 ```
 
 **Checkpoint structure:**
 ```json
 {
-  "pipeline": "chembl-activity",
+  "pipeline": "chembl_activity",
   "run-id": "550e8400-e29b-41d4-a716-446655440000",
   "metadata": {
     "last-processed-id": "CHEMBL12345",
@@ -186,7 +186,7 @@ rm data/output/checkpoints/{pipeline-name}.json
 ### Quarantine Purge
 
 ```bash
-make quarantine-purge PIPELINE=chembl-activity
+make quarantine-purge PIPELINE=chembl_activity
 ```
 
 ## Configuration

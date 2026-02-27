@@ -9,7 +9,7 @@
 %% @level   Mixed (System / Component / Class)
 
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
-%% @uniform class width=400 height=272 max_title_len=21 max_desc_lines=13
+%% @uniform class width=208 height=240 max_title_len=21 max_desc_lines=13
 classDiagram
     direction TB
 
@@ -23,6 +23,11 @@ classDiagram
             +pipeline_name() str
             +provider() str
             +run_id() RunID
+            
+            
+            
+            
+            
         }
 
         class PipelineRunner {
@@ -35,6 +40,10 @@ classDiagram
             -_execute() ExecutionResult
             -_run_postrun() PostrunResult
             -_release_lock() None
+            
+            
+            
+            
         }
 
         class PipelineExecutor {
@@ -45,6 +54,12 @@ classDiagram
             +execute() ExecutionResult
             -_fetch_and_process() AsyncIterator~BatchResult~
             -_adaptive_batch_size() int
+            
+            
+            
+            
+            
+            
         }
 
         class RecordProcessor {
@@ -54,6 +69,13 @@ classDiagram
             -_metrics: BatchMetricsRecorder
             +process_batch(records) BatchResult
             +process_stream(records) AsyncIterator~BatchResult~
+            
+            
+            
+            
+            
+            
+            
         }
 
         class BatchTransformer {
@@ -61,6 +83,15 @@ classDiagram
             -_logger: LoggerPort
             +transform_batch(records) TransformResult
             +transform_stream(records) AsyncIterator~TransformResult~
+            
+            
+            
+            
+            
+            
+            
+            
+            
         }
 
         class PipelineServices {
@@ -74,6 +105,9 @@ classDiagram
             +tracing: TracingPort
             +logger: LoggerPort
             +dq_monitor: DQMonitorPort?
+            
+            
+            
         }
 
         class RunnerServices {
@@ -84,6 +118,12 @@ classDiagram
             +lifecycle_orch: LifecycleOrchestrator
             +observer: PipelineObserver
             +context_holder: LockContextHolder?
+            
+            
+            
+            
+            
+            
         }
     }
 
@@ -96,6 +136,12 @@ classDiagram
             +acquire_lock(resource, owner_id) LockResult
             +release_lock(resource, owner_id) bool
             +refresh_lock(resource, owner_id) bool
+            
+            
+            
+            
+            
+            
         }
 
         class CheckpointManager {
@@ -104,6 +150,14 @@ classDiagram
             +load_checkpoint(key) CheckpointState?
             +save_checkpoint(key, state) None
             +delete_checkpoint(key) None
+            
+            
+            
+            
+            
+            
+            
+            
         }
 
         class QuarantineManager {
@@ -111,6 +165,15 @@ classDiagram
             -_logger: LoggerPort
             +quarantine_record(record, error) None
             +quarantine_batch(records, errors) int
+            
+            
+            
+            
+            
+            
+            
+            
+            
         }
 
         class PreflightService {
@@ -120,6 +183,13 @@ classDiagram
             +run_checks() PreflightResult
             -_check_data_source_health() HealthStatus
             -_check_storage_health() bool
+            
+            
+            
+            
+            
+            
+            
         }
 
         class PostrunService {
@@ -130,6 +200,12 @@ classDiagram
             +run_checks(execution_metrics) PostrunResult
             -_check_dq_thresholds() DQCheckResult
             -_emit_dq_metrics() None
+            
+            
+            
+            
+            
+            
         }
 
         class LifecycleOrchestrator {
@@ -137,6 +213,15 @@ classDiagram
             -_policy: MedallionPolicy
             -_logger: LoggerPort
             +clear_for_run(run_type, tables) ClearResult
+            
+            
+            
+            
+            
+            
+            
+            
+            
         }
 
         class PipelineObserver {
@@ -146,6 +231,13 @@ classDiagram
             +observe_batch(batch_id, records) Span
             +record_duration(stage, duration) None
             +record_error(error_type) None
+            
+            
+            
+            
+            
+            
+            
         }
 
         class MemoryMonitor {
@@ -154,6 +246,14 @@ classDiagram
             +get_memory_stats() MemoryStats
             +should_reduce_batch() bool
             -_get_stats_estimate() MemoryStats
+            
+            
+            
+            
+            
+            
+            
+            
         }
 
         class BatchMetricsRecorder {
@@ -161,6 +261,15 @@ classDiagram
             +record_fetch(count, duration) None
             +record_transform(count, duration) None
             +record_write(count, duration, layer) None
+            
+            
+            
+            
+            
+            
+            
+            
+            
         }
     }
 
@@ -185,26 +294,80 @@ classDiagram
             <<abstract>>
             #_normalize_chembl_id(id) str
             #_normalize_units(value, units) tuple
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
         }
 
         class ActivityTransformer {
             +entity: str = "activity"
             #_transform_impl(record) SilverRecord
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
         }
 
         class MoleculeTransformer {
             +entity: str = "molecule"
             #_transform_impl(record) SilverRecord
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
         }
 
         class AssayTransformer {
             +entity: str = "assay"
             #_transform_impl(record) SilverRecord
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
         }
 
         class TargetTransformer {
             +entity: str = "target"
             #_transform_impl(record) SilverRecord
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
         }
     }
 

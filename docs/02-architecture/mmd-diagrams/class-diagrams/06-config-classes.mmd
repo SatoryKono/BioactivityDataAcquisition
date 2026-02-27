@@ -60,24 +60,32 @@ classDiagram
         <<dataclass>>
         +silver_table: str | None
         +gold_table: str | None
+        
+        
     }
 
     class DQConfig {
         <<dataclass>>
         +soft_error_threshold: float
         +hard_error_threshold: float
+        
+        
     }
 
     class SilverFilterConfig {
         <<dataclass>>
         +source_path: str
         +column_name: str
+        
+        
     }
 
     class GoldFilterConfig {
         <<dataclass>>
         +source_path: str
         +column_name: str
+        
+        
     }
 
     class RecordProcessorConfig {
@@ -93,6 +101,7 @@ classDiagram
         +timeout: float
         +heartbeat_interval: int
         +max_retries: int
+        
     }
 
     class CompositeConfig {
@@ -110,12 +119,16 @@ classDiagram
         +output_keys: tuple~str~
         +silver_table: str
         +limit: int | None
+        
     }
 
     class DependencyConfig {
         <<frozen dataclass>>
         +pipeline: str
         +depends_on: tuple~str~
+        
+        
+        
     }
 
     class EnricherConfig {
@@ -123,12 +136,17 @@ classDiagram
         +pipeline: str
         +primary_key: str
         +enricher_cardinality: EnricherCardinality
+        
+        
     }
 
     class MergeConfig {
         <<frozen dataclass>>
         +merge_strategy: MergeStrategy
         +conflict_resolution: ConflictResolution
+        
+        
+        
     }
 
     class KeyNullabilityRule {
@@ -136,6 +154,7 @@ classDiagram
         +table_name: str
         +key_columns: list~str~
         +allow_nulls: bool
+        
     }
 
     PipelineConfig *-- TableConfig

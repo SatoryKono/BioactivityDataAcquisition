@@ -5,7 +5,7 @@
 %% @date    2026-02-24
 %% @type    classDiagram
 %% @level   Class / Interface
-%% @uniform class width=408 height=128 max_title_len=19 max_desc_lines=5
+%% @uniform class width=192 height=126 max_title_len=19 max_desc_lines=5
 
 classDiagram
     direction TB
@@ -21,46 +21,80 @@ classDiagram
         -_registry: dict~str, Callable~
         +register(provider, entity_type, factory) None
         +create(provider, entity_type, **kwargs) BaseTransformer
+        
+        
     }
 
     class RunnerFactory {
         -_data_source_registry: DataSourceRegistry
         -_transformer_factory: TransformerFactory
         +create_runner(config, runtime) PipelineRunner
+        
+        
     }
 
     class DQFactory {
         +create_dq_analyzers(config) tuple
+        
+        
+        
+        
     }
 
     class RuntimeAssembly {
         Central DI wiring
         +assemble(config, runtime) PipelineRunner
+        
+        
+        
     }
 
     class RunnerBootstrap {
         +assemble_runner(config, runtime, services) PipelineRunner
+        
+        
+        
+        
     }
 
     class StorageBootstrap {
         +assemble_storage(settings) StoragePort
+        
+        
+        
+        
     }
 
     class HealthBootstrap {
         +assemble_health(settings) HealthService
+        
+        
+        
+        
     }
 
     class CheckpointBootstrap {
         +assemble_checkpoint(settings) CheckpointPort
+        
+        
+        
+        
     }
 
     class LockBootstrap {
         +assemble_lock(settings) LockPort
+        
+        
+        
+        
     }
 
     class ProviderRegistry {
         +register_all() None
         Registers all provider pipelines
+        
+        
+        
     }
 
     class RunnerBuilder {
@@ -74,6 +108,9 @@ classDiagram
     class GenericFactory {
         <<Generic T>>
         +create(**kwargs) T
+        
+        
+        
     }
 
     RuntimeAssembly --> RunnerBootstrap

@@ -254,21 +254,21 @@ def test-<provider>-<entity>-has-sort-by():
 
 ----------------------------------------------------------------------
 
-## 7. Пример: Добавление chembl-target-component
+## 7. Пример: Добавление chembl_target_component
 
 ### 7.1. Config
 
 ```yaml
 # configs/entities/chembl/target-component.yaml
-pipeline-name: chembl-target-component
+pipeline-name: chembl_target_component
 provider: chembl
 entity-type: target-component
 version: "1.0.0"
 description: "Extract target component records from ChEMBL API"
 
 business-primary-keys: ["component-id"]
-silver-table: "chembl-target-component"
-gold-table: "chembl-target-component"
+silver-table: "chembl_target_component"
+gold-table: "chembl_target_component"
 
 source-file: ../../sources/chembl.yaml
 

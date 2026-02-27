@@ -1,6 +1,6 @@
 # Пайплайн: Semantic Scholar Publication
 
-**Имя пайплайна:** `semanticscholar-publication`
+**Имя пайплайна:** `semanticscholar_publication`
 **Провайдер:** `semanticscholar`
 **Сущность:** `publication`
 **Версия схемы:** 1.0.0
@@ -174,16 +174,16 @@ input-filter:
 
 ```bash
 # Базовый запуск с файлом DOI
-bioetl run semanticscholar-publication
+bioetl run semanticscholar_publication
 
 # С ограничением количества записей
-bioetl run semanticscholar-publication --limit 100
+bioetl run semanticscholar_publication --limit 100
 
 # Проверка конфигурации без выполнения
-bioetl run semanticscholar-publication --dry-run
+bioetl run semanticscholar_publication --dry-run
 
 # Полная перезагрузка
-bioetl run semanticscholar-publication --run-type rebuild
+bioetl run semanticscholar_publication --run-type rebuild
 ```
 
 ### Подготовка входных данных

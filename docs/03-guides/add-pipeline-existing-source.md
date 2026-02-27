@@ -24,15 +24,15 @@
 
 ```yaml
 # Inherits defaults from ../-base.yaml
-pipeline-name: chembl-target
+pipeline-name: chembl_target
 provider: chembl
 entity-type: target
 version: "1.2.0"
 description: "Extract biological targets from ChEMBL API"
 
 business-primary-keys: ["target-chembl-id"]
-silver-table: "chembl-target"
-gold-table: "chembl-target"
+silver-table: "chembl_target"
+gold-table: "chembl_target"
 
 source-file: ../../sources/chembl.yaml
 
@@ -112,8 +112,8 @@ from bioetl.application.pipelines.generic import GenericPipeline
 from bioetl.infrastructure.schemas.silver import CHEMBL-TARGET-SCHEMA
 
 # Определение фабрики
-chembl-target-factory = GenericPipelineFactory(
-    pipeline-name="chembl-target",
+chembl_target-factory = GenericPipelineFactory(
+    pipeline-name="chembl_target",
     pipeline-class=GenericPipeline,
     provider="chembl",
     silver-schema=CHEMBL-TARGET-SCHEMA,
@@ -123,13 +123,13 @@ chembl-target-factory = GenericPipelineFactory(
 
 def register-all-pipelines() -> None:
     # ...
-    PipelineRegistry.register-factory(chembl-target-factory)
+    PipelineRegistry.register-factory(chembl_target-factory)
 ```
 
 Теперь пайплайн доступен для запуска:
 
 ```bash
-python -m bioetl run --pipeline chembl-target
+python -m bioetl run --pipeline chembl_target
 ```
 
 ## Чек-лист

@@ -151,13 +151,13 @@ make vacuum-silver RETENTION-DAYS=7
 
 ```bash
 # Inspect quarantine errors
-make quarantine-inspect PIPELINE=chembl-activity
+make quarantine-inspect PIPELINE=chembl_activity
 
 # Replay corrected records
-make quarantine-replay PIPELINE=chembl-activity
+make quarantine-replay PIPELINE=chembl_activity
 
 # Purge old quarantine data
-make quarantine-purge PIPELINE=chembl-activity
+make quarantine-purge PIPELINE=chembl_activity
 ```
 
 ## 5. Verification (MUST)
@@ -211,10 +211,10 @@ make vacuum-table TABLE=silver/chembl/activity
 make quarantine-triage
 
 # Inspect specific pipeline
-make quarantine-inspect PIPELINE=chembl-activity
+make quarantine-inspect PIPELINE=chembl_activity
 
 # Replay after fix
-make quarantine-replay PIPELINE=chembl-activity BATCH-ID=...
+make quarantine-replay PIPELINE=chembl_activity BATCH-ID=...
 
 # Purge old records
 make quarantine-purge DAYS=30
@@ -272,7 +272,7 @@ make cleanup-checkpoints
 make quarantine-reset
 
 # 4. Rebuild Silver (if needed)
-make full-rebuild PIPELINE=chembl-activity
+make full-rebuild PIPELINE=chembl_activity
 ```
 
 ### 8.2. Checkpoint Cleanup

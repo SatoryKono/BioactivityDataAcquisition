@@ -1,65 +1,69 @@
 %% BioETL — Data Quality (DQ) System
 %% Shows DQ monitoring, analysis, and reporting across all medallion layers.
 
-%% @version 1.0.0
-%% @date    2026-02-24
+%% @version 1.1.0
+%% @date    2026-02-27
 %% @type    flowchart
 %% @level   System / Component
 %% @nodes   22
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
-%% @uniform width=200 height=144 max_title_len=20 max_desc_lines=6
+%% @uniform width=208 height=128 max_title_len=20 max_desc_lines=5
+%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '16px', 'edgeLabelBackground': '#ffffffee'}, 'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'POLYLINE', 'spacing.nodeNode': 40, 'spacing.edgeNode': 25, 'spacing.rankRank': 60}}}%%
 graph TB
+%% keep-orphan: DQConfig
+    %% ── Domain Ports (contracts) ──────────────────────────
     subgraph Ports["Domain Ports"]
-        DQM["DQMonitorPort<br/>(Protocol)<br/><br/><br/><br/><br/>"]
-        BDQAP["BronzeDQAnalyzerPort<br/><br/><br/><br/><br/><br/>"]
-        SDQAP["SilverDQAnalyzerPort<br/><br/><br/><br/><br/><br/>"]
-        GDQAP["GoldDQAnalyzerPort<br/><br/><br/><br/><br/><br/>"]
-        DQRWP["DQReportWriterPort<br/><br/><br/><br/><br/><br/>"]
+        DQM["DQMonitorPort<br/><br/><br/><br/>"]
+        BDQAP["BronzeDQAnalyzerPort<br/><br/><br/><br/>"]
+        SDQAP["SilverDQAnalyzerPort<br/><br/><br/><br/>"]
+        GDQAP["GoldDQAnalyzerPort<br/><br/><br/><br/>"]
+        DQRWP["DQReportWriterPort<br/><br/><br/><br/>"]
     end
 
-    subgraph DomainTypes["Domain Value Objects"]
-        DQMetrics["DQMetrics<br/>━━━━━━━━━━━━━━━━━<br/>null_rate: float<br/>duplicate_rate: float<br/>schema_violations: int<br/>custom_metrics: dict<br/>"]
-        DQResult["DQResult<br/>━━━━━━━━━━━━━━━━━<br/>passed: bool<br/>error_rate: float<br/>metrics: DQMetrics<br/>anomalies: list<br/>"]
-        DQReport["DQReport<br/>━━━━━━━━━━━━━━━━━<br/>layer: MedallionLayer<br/>table_name: str<br/>results: DQResult<br/><br/>"]
-        DQConfig["DQConfig<br/>━━━━━━━━━━━━━━━━━<br/>soft_error_threshold: float<br/>hard_error_threshold: float<br/><br/><br/>"]
-    end
-
+    %% ── Application Services ──────────────────────────────
     subgraph AppServices["Application Services"]
-        DQS["DataQualityService<br/>━━━━━━━━━━━━━━━━━<br/>_dq_monitor: DQMonitorPort<br/>_config: DQConfig<br/>━━━━━━━━━━━━━━━━━<br/>+ evaluate(context, executor)<br/>"]
-        DQRS["DQReportService<br/>━━━━━━━━━━━━━━━━━<br/>+ generate_reports(context)<br/><br/><br/><br/>"]
+        DQS["DataQualityService<br/>━━━━━━━━━━━━━━━━━<br/>+ evaluate(context, executor)<br/><br/>"]
+        DQRS["DQReportService<br/>━━━━━━━━━━━━━━━━━<br/>+ generate_reports(context)<br/><br/>"]
     end
 
-    subgraph AppDQ["Application DQ Analyzers"]
-        BDA["BronzeDQAnalyzer<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(records)<br/>+ check_completeness()<br/>+ check_format()<br/><br/>"]
-        SDA["SilverDQAnalyzer<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(delta_table)<br/>+ check_nullability()<br/>+ check_schema()<br/><br/>"]
-        GDA["GoldDQAnalyzer<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(delta_table)<br/>+ check_pk_uniqueness()<br/>+ validate_schema()<br/><br/>"]
+    %% ── Application DQ Analyzers + Anomaly ────────────────
+    subgraph AppDQ["Application DQ Analysis"]
+        BDA["BronzeDQAnalyzer<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(records)<br/>+ check_completeness()<br/>+ check_format()"]
+        SDA["SilverDQAnalyzer<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(delta_table)<br/>+ check_nullability()<br/>+ check_schema()"]
+        GDA["GoldDQAnalyzer<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(delta_table)<br/>+ check_pk_uniqueness()<br/>+ validate_schema()"]
+        AD["AnomalyDetector<br/><br/><br/><br/>"]
+        ZSD["ZScoreDetector<br/>(DetectorStrategy)<br/><br/><br/>"]
+        AN["Anomaly<br/>━━━━━━━━━━━━━━━━━<br/>type: AnomalyType<br/>severity: AnomalySeverity<br/>metric_name: str"]
     end
 
-    subgraph Anomaly["Anomaly Detection"]
-        AD["AnomalyDetector<br/><br/><br/><br/><br/><br/>"]
-        ZSD["ZScoreDetector<br/>(DetectorStrategy)<br/><br/><br/><br/><br/>"]
-        AN["Anomaly<br/>━━━━━━━━━━━━━━━━━<br/>type: AnomalyType<br/>severity: AnomalySeverity<br/>metric_name: str<br/>current_value: float<br/>baseline_value: float"]
-    end
-
-    subgraph InfraImpl["Infrastructure Implementations"]
-        DQCL["DQConfigLoader<br/>(YAML → DQConfig)<br/><br/><br/><br/><br/>"]
-        DQRW["DQReportWriter<br/>(JSON reports)<br/><br/><br/><br/><br/>"]
-    end
-
+    %% ── Pipeline Integration (application layer) ──────────
     subgraph Pipeline["Pipeline Integration"]
-        QM["QuarantineManager<br/>━━━━━━━━━━━━━━━━━<br/>Quarantines records<br/>that fail DQ checks<br/><br/><br/>"]
-        EC["ErrorClassifier<br/>━━━━━━━━━━━━━━━━━<br/>Classifies errors as<br/>recoverable vs fatal<br/><br/><br/>"]
-        BT["BatchTransformer<br/>━━━━━━━━━━━━━━━━━<br/>_check_dq_thresholds()<br/>stops batch on threshold breach<br/><br/><br/>"]
+        BT["BatchTransformer<br/>━━━━━━━━━━━━━━━━━<br/>_check_dq_thresholds()<br/><br/>"]
+        QM["QuarantineManager<br/>━━━━━━━━━━━━━━━━━<br/>Quarantines failed records<br/><br/>"]
+        EC["ErrorClassifier<br/>━━━━━━━━━━━━━━━━━<br/>recoverable vs fatal<br/><br/>"]
     end
 
-    %% Port implementations
+    %% ── Domain Value Objects ──────────────────────────────
+    subgraph DomainTypes["Domain Value Objects"]
+        DQMetrics["DQMetrics<br/>━━━━━━━━━━━━━━━━━<br/>null_rate: float<br/>duplicate_rate: float<br/>schema_violations: int"]
+        DQResult["DQResult<br/>━━━━━━━━━━━━━━━━━<br/>passed: bool<br/>error_rate: float<br/>metrics: DQMetrics"]
+        DQReport["DQReport<br/>━━━━━━━━━━━━━━━━━<br/>layer: MedallionLayer<br/>table_name: str<br/>results: DQResult"]
+        DQConfig["DQConfig<br/>━━━━━━━━━━━━━━━━━<br/>soft_error_threshold: float<br/>hard_error_threshold: float<br/>"]
+    end
+
+    %% ── Infrastructure Implementations ────────────────────
+    subgraph InfraImpl["Infrastructure Implementations"]
+        DQCL["DQConfigLoader<br/>(YAML → DQConfig)<br/><br/><br/>"]
+        DQRW["DQReportWriter<br/>(JSON reports)<br/><br/><br/>"]
+    end
+
+    %% ── Port implementations (DI / implements) ────────────
     BDQAP -.-> BDA
     SDQAP -.-> SDA
     GDQAP -.-> GDA
     DQRWP -.-> DQRW
 
-    %% Service composition
+    %% ── Service composition (orchestration) ───────────────
     DQS --> DQM
     DQS --> DQConfig
     DQRS --> BDA
@@ -67,36 +71,45 @@ graph TB
     DQRS --> GDA
     DQRS --> DQRW
 
-    %% Anomaly detection
+    %% ── Anomaly detection ─────────────────────────────────
     DQS --> AD
     AD --> ZSD
     AD --> AN
 
-    %% Pipeline integration
+    %% ── Pipeline integration ──────────────────────────────
     BT --> QM
     BT --> EC
-    BT -->|threshold check| DQConfig
+    BT --> DQConfig
 
-    %% Config loading
+    %% ── Config loading ────────────────────────────────────
     DQCL --> DQConfig
 
-    %% Reports
+    %% ── Reports and metrics (data flow) ───────────────────
     DQRS --> DQReport
     DQS --> DQResult
     BDA --> DQMetrics
     SDA --> DQMetrics
     GDA --> DQMetrics
 
+    %% alignment hint: medallion layer order
+    BDA ~~~ SDA ~~~ GDA
+
+    %% ── Styles: canonical ADR-040 palette by layer ────────
     classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
-    classDef domain fill:#c8e6c9,stroke:#16a34a
+    classDef domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
     classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
-    classDef infra fill:#fff1f2,stroke:#dc2626
-    classDef anomaly fill:#fff1f2,stroke:#dc2626
-    classDef pipeline fill:#f5f3ff,stroke:#7c3aed
+    classDef infra fill:#fff1f2,stroke:#dc2626,stroke-width:2px
 
     class DQM,BDQAP,SDQAP,GDQAP,DQRWP port
     class DQMetrics,DQResult,DQReport,DQConfig domain
-    class DQS,DQRS,BDA,SDA,GDA app
+    class DQS,DQRS,BDA,SDA,GDA,AD,ZSD,AN app
+    class QM,EC,BT app
     class DQCL,DQRW infra
-    class AD,ZSD,AN anomaly
-    class QM,EC,BT pipeline
+
+    %% ── linkStyle: semantic thickness (LBP-005) ──────────
+    %% DI/implements (0-3): dashed purple, dark label
+    linkStyle 0,1,2,3 stroke:#7c3aed,stroke-width:1.5px,stroke-dasharray:5,color:#1e1b4b
+    %% Orchestration (4-15): green, dark label
+    linkStyle 4,5,6,7,8,9,10,11,12,13,14,15,16 stroke:#16a34a,stroke-width:2px,color:#14532d
+    %% Data flow — reports/metrics (17-21): dark, dark label
+    linkStyle 17,18,19,20,21 stroke:#1E293B,stroke-width:3px,color:#0f172a

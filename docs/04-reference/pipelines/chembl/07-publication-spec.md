@@ -8,7 +8,7 @@
 
 | Parameter        | Value                                            |
 | ---------------- | ------------------------------------------------ |
-| **Pipeline ID**  | `chembl-publication`                             |
+| **Pipeline ID**  | `chembl_publication`                             |
 | **Provider**     | ChEMBL (EBI)                                     |
 | **Entity**       | document                                         |
 | **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/document` |
@@ -144,14 +144,14 @@ class ChemblPublicationSchema(ETLRecordSchema):
 ## 6. Pipeline Configuration
 
 ```yaml
-pipeline-name: chembl-publication
+pipeline-name: chembl_publication
 provider: chembl
 entity-type: document
 version: "1.2.0"
 
 primary-keys: ["publication-id"]
-silver-table: "chembl-publication"
-gold-table: "chembl-publication"
+silver-table: "chembl_publication"
+gold-table: "chembl_publication"
 
 gold-filters:
   required-fields:

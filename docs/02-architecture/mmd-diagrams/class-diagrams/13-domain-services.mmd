@@ -5,7 +5,7 @@
 %% @date    2026-02-24
 %% @type    classDiagram
 %% @level   Class / Interface
-%% @uniform class width=488 height=72 max_title_len=26 max_desc_lines=2
+%% @uniform class width=248 height=72 max_title_len=26 max_desc_lines=2
 
 classDiagram
     direction TB
@@ -21,6 +21,7 @@ classDiagram
 
     class DataNormalizationService {
         +normalize_field(value, field_type) Any
+        
     }
 
     class AuthorNormalizationService {
@@ -30,6 +31,7 @@ classDiagram
 
     class ActivityAggregator {
         +aggregate(activities) AggregatedActivity
+        
     }
 
     class UnitConverter {
@@ -39,6 +41,7 @@ classDiagram
 
     class ValueValidator {
         +validate(value, constraints) ValidationResult
+        
     }
 
     class TextSimilarity {
@@ -48,6 +51,7 @@ classDiagram
 
     class DQMetricsCalculator {
         +calculate(records, config) DQMetrics
+        
     }
 
     class DQSerializer {

@@ -9,7 +9,7 @@
 %% @level   Mixed (System / Component / Class)
 
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
-%% @uniform class width=280 height=288 max_title_len=17 max_desc_lines=14
+%% @uniform class width=176 height=240 max_title_len=17 max_desc_lines=14
 classDiagram
     class PipelineRunner {
         -_services: PipelineServices
@@ -24,6 +24,8 @@ classDiagram
         -_observer: PipelineObserver
         -_shutdown: ShutdownService
         +run() PipelineRunState
+        
+        
     }
 
     class PipelineServices {
@@ -49,12 +51,32 @@ classDiagram
         +acquire(key, owner_id, ttl) bool
         +release(key, owner_id) bool
         +validate_ownership() bool
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class PreflightService {
         -_services: PipelineServices
         -_config: PipelineYamlConfig
         +run() PreflightReport
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class BatchExecutor {
@@ -63,11 +85,32 @@ classDiagram
         -_metrics: BatchMetricsRecorder
         -_tracing: BatchTracingManager
         +execute_batch(batch_num) BatchResult
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class PostrunService {
         -_services: PipelineServices
         +run() PostrunResult
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class CheckpointManager {
@@ -75,6 +118,16 @@ classDiagram
         +save(last_id, batch_num) void
         +load() CheckpointState
         +delete() void
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class HeartbeatTask {
@@ -83,6 +136,15 @@ classDiagram
         -_running: bool
         +start() void
         +stop() void
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class PipelineObserver {
@@ -90,6 +152,16 @@ classDiagram
         -_logger: LoggerPort
         +__enter__() PipelineObserver
         +__exit__(exc_type, exc_val, tb) void
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     PipelineRunner --> PipelineServices : uses

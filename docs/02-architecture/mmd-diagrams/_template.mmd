@@ -35,6 +35,32 @@
 %%   observability:  stroke:#94A3B8,stroke-width:1px
 %%   error/quarant:  stroke:#dc2626,stroke-width:2px,stroke-dasharray:4
 
+%% classDef naming convention:
+%%
+%%   Tier 1 — Layer palette (flowchart with architecture layers):
+%%     classDef domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+%%     classDef app    fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+%%     classDef infra  fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+%%     classDef comp   fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+%%     classDef iface  fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+%%     classDef ext    fill:#f1f5f9,stroke:#64748b,stroke-width:1.5px
+%%
+%%   Tier 2 — Medallion palette (data-flow diagrams):
+%%     classDef bronze     fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+%%     classDef silver     fill:#f8fafc,stroke:#475569,stroke-width:2px
+%%     classDef gold       fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+%%     classDef quarantine fill:#ffe4e6,stroke:#e11d48,stroke-width:2px
+%%
+%%   Tier 3 — Semantic (free naming; colours MUST come from Tier 1/2):
+%%     e.g. port, base, adapter, mixin, decorator, pipeline, factory
+%%
+%%   Size tiers (CSS-driven, see theme/custom.css):
+%%     :::size-sm — 1 line label (min 80x180)
+%%     :::size-md — 2-4 <br/> (min 140x260)
+%%     :::size-lg — 5+ <br/> or rich content (min 200x340)
+%%
+%%   Rules: use camelCase, NO *Style suffix (use `domain` not `domainStyle`)
+
 %% Layout (uncomment if @nodes > 20 — enables ELK smart edge routing):
 %% %%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'direction': 'RIGHT', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'ORTHOGONAL'}}}%%
 %%

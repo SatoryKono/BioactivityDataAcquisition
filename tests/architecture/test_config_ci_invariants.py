@@ -22,6 +22,8 @@ from typing import Any
 import pytest
 import yaml
 
+from bioetl.domain.constants import META_FIELDS
+
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
@@ -30,6 +32,8 @@ CONFIGS_DIR = PROJECT_ROOT / "configs"
 ENTITIES_DIR = CONFIGS_DIR / "entities"
 COMPOSITES_DIR = CONFIGS_DIR / "composites"
 PROVIDERS_DIR = CONFIGS_DIR / "providers"
+BRONZE_INPUT_DIR = PROJECT_ROOT / "data" / "input" / "bronze"
+BRONZE_FIXTURE_GAPS_PATH = CONFIGS_DIR / "base" / "bronze_fixture_gaps.yaml"
 
 # ---------------------------------------------------------------------------
 # Known providers and canonical data
@@ -175,6 +179,40 @@ def _deep_string_search(obj: Any, fragment: str) -> bool:
     if isinstance(obj, list):
         return any(_deep_string_search(item, fragment) for item in obj)
     return False
+
+
+def _collect_input_jsonl_files(provider: str, entity: str) -> list[Path]:
+    fixture_dir = BRONZE_INPUT_DIR / provider / entity
+    if not fixture_dir.exists() or not fixture_dir.is_dir():
+        return []
+    return sorted(fixture_dir.rglob("*.jsonl"))
+
+
+def _count_jsonl_lines(files: list[Path], stop_after: int | None = None) -> int:
+    total = 0
+    for path in files:
+        with path.open("r", encoding="utf-8") as handle:
+            for _ in handle:
+                total += 1
+                if stop_after is not None and total >= stop_after:
+                    return total
+    return total
+
+
+def _load_bronze_fixture_gaps() -> dict[str, dict[str, Any]]:
+    data = _load_yaml(BRONZE_FIXTURE_GAPS_PATH)
+    raw_gaps = data.get("gaps")
+    if not isinstance(raw_gaps, dict):
+        return {}
+
+    result: dict[str, dict[str, Any]] = {}
+    for key, value in raw_gaps.items():
+        if not isinstance(key, str):
+            continue
+        if not isinstance(value, dict):
+            continue
+        result[key] = value
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -413,3 +451,148 @@ class TestPipelineNameConvention:
             f"{_rel(config_path)}: pipeline_name={name!r} does not match "
             f"expected {expected!r} ({provider=}, {entity=})"
         )
+
+
+# ---------------------------------------------------------------------------
+# INV-CFG-007: Contract hash_exclude alignment with META_FIELDS
+# ---------------------------------------------------------------------------
+class TestContractHashExcludeInvariants:
+    """INV-CFG-007: contracts.hash_exclude must use canonical metadata fields."""
+
+    _REQUIRED_EXCLUDES: set[str] = {
+        "_ingestion_ts",
+        "_run_id",
+        "_run_type",
+        "_dq_error",
+        "_dq_warn",
+    }
+    _LEGACY_EXCLUDES: set[str] = {"_dq_errors", "_dq_status"}
+
+    def test_base_contract_defaults_hash_exclude(self) -> None:
+        """Base contract defaults must be canonical and META_FIELDS-aligned."""
+        base_path = CONFIGS_DIR / "base" / "pipeline.yaml"
+        data = _load_yaml(base_path)
+        defaults = data.get("contract_defaults")
+        if not isinstance(defaults, dict):
+            pytest.fail(f"{_rel(base_path)}: missing contract_defaults section")
+
+        hash_exclude = defaults.get("hash_exclude")
+        if not isinstance(hash_exclude, list):
+            pytest.fail(
+                f"{_rel(base_path)}: contract_defaults.hash_exclude must be list"
+            )
+
+        exclude_set = {str(x) for x in hash_exclude}
+        missing = self._REQUIRED_EXCLUDES - exclude_set
+        legacy = self._LEGACY_EXCLUDES & exclude_set
+        non_meta = exclude_set - META_FIELDS
+
+        assert not missing, (
+            f"{_rel(base_path)}: contract_defaults.hash_exclude missing {sorted(missing)}"
+        )
+        assert not legacy, (
+            f"{_rel(base_path)}: contract_defaults.hash_exclude uses legacy keys "
+            f"{sorted(legacy)}"
+        )
+        assert not non_meta, (
+            f"{_rel(base_path)}: contract_defaults.hash_exclude has non-meta keys "
+            f"{sorted(non_meta)} (expected subset of META_FIELDS)"
+        )
+
+    @pytest.mark.parametrize("config_path", _collect_pipeline_configs(), ids=_rel)
+    def test_entity_contract_hash_exclude(self, config_path: Path) -> None:
+        """Each entity contracts.hash_exclude must be canonical and META_FIELDS-aligned."""
+        data = _load_yaml(config_path)
+        contracts = data.get("contracts")
+        if not isinstance(contracts, dict):
+            pytest.fail(f"{_rel(config_path)}: missing contracts section")
+
+        hash_exclude = contracts.get("hash_exclude")
+        if not isinstance(hash_exclude, list):
+            pytest.fail(f"{_rel(config_path)}: contracts.hash_exclude must be list")
+
+        exclude_set = {str(x) for x in hash_exclude}
+        missing = self._REQUIRED_EXCLUDES - exclude_set
+        legacy = self._LEGACY_EXCLUDES & exclude_set
+        non_meta = exclude_set - META_FIELDS
+
+        assert not missing, (
+            f"{_rel(config_path)}: contracts.hash_exclude missing {sorted(missing)}"
+        )
+        assert not legacy, (
+            f"{_rel(config_path)}: contracts.hash_exclude uses legacy keys "
+            f"{sorted(legacy)}"
+        )
+        assert not non_meta, (
+            f"{_rel(config_path)}: contracts.hash_exclude has non-meta keys "
+            f"{sorted(non_meta)} (expected subset of META_FIELDS)"
+        )
+
+
+# ---------------------------------------------------------------------------
+# INV-CFG-008: Bronze fixture coverage (input fixture or explicit GAP)
+# ---------------------------------------------------------------------------
+class TestBronzeFixtureCoverage:
+    """INV-CFG-008: each pipeline must have Bronze input fixture or explicit GAP."""
+
+    _MIN_RECOMMENDED_RECORDS = 200
+
+    def test_bronze_fixture_gap_registry_exists(self) -> None:
+        assert BRONZE_FIXTURE_GAPS_PATH.exists(), (
+            f"Missing gap registry: {_rel(BRONZE_FIXTURE_GAPS_PATH)}"
+        )
+
+    def test_bronze_fixture_coverage(self) -> None:
+        gaps = _load_bronze_fixture_gaps()
+
+        pipeline_keys: set[str] = set()
+        missing_fixture: list[str] = []
+        insufficient_fixture: list[str] = []
+        invalid_gap_entries: list[str] = []
+
+        for config_path in _collect_pipeline_configs():
+            data = _load_yaml(config_path)
+            provider = str(data.get("provider", config_path.parent.name))
+            entity = str(data.get("entity", config_path.stem))
+            key = f"{provider}/{entity}"
+            pipeline_keys.add(key)
+
+            fixture_files = _collect_input_jsonl_files(provider, entity)
+            fixture_lines = _count_jsonl_lines(
+                fixture_files, stop_after=self._MIN_RECOMMENDED_RECORDS
+            )
+            has_gap = key in gaps
+
+            if not fixture_files:
+                if not has_gap:
+                    missing_fixture.append(
+                        f"{key}: no data/input/bronze fixture and no GAP entry"
+                    )
+            else:
+                if fixture_lines < self._MIN_RECOMMENDED_RECORDS and not has_gap:
+                    insufficient_fixture.append(
+                        f"{key}: fixture has < {self._MIN_RECOMMENDED_RECORDS} records "
+                        f"(declare GAP or add records)"
+                    )
+
+            if has_gap:
+                gap = gaps[key]
+                if not isinstance(gap.get("reason"), str) or not gap.get("reason"):
+                    invalid_gap_entries.append(f"{key}: gap.reason is required")
+                if not isinstance(gap.get("owner"), str) or not gap.get("owner"):
+                    invalid_gap_entries.append(f"{key}: gap.owner is required")
+                if not isinstance(gap.get("resolution_plan"), str) or not gap.get(
+                    "resolution_plan"
+                ):
+                    invalid_gap_entries.append(
+                        f"{key}: gap.resolution_plan is required"
+                    )
+
+        unknown_gap_keys = sorted(set(gaps) - pipeline_keys)
+        assert not unknown_gap_keys, (
+            f"{_rel(BRONZE_FIXTURE_GAPS_PATH)} contains unknown pipeline keys: "
+            f"{unknown_gap_keys}"
+        )
+        assert not missing_fixture, "\n".join(missing_fixture)
+        assert not insufficient_fixture, "\n".join(insufficient_fixture)
+        assert not invalid_gap_entries, "\n".join(invalid_gap_entries)

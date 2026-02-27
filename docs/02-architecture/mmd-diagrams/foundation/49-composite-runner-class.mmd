@@ -9,7 +9,7 @@
 %% @level   Mixed (System / Component / Class)
 
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
-%% @uniform class width=512 height=432 max_title_len=27 max_desc_lines=22
+%% @uniform class width=256 height=240 max_title_len=27 max_desc_lines=22
 classDiagram
     class CompositePipelineRunner {
         -_config: CompositeConfig
@@ -46,6 +46,19 @@ classDiagram
         +lineage: LineageConfig
         +cross_validation: CrossValidationConfig
         +dq: CompositeDQConfig
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class CompositeRuntimeConfig {
@@ -56,6 +69,21 @@ classDiagram
         +force_enricher: str | None
         +seed_limit: int | None
         +use_cached_bronze: bool
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class FSMStateHelper {
@@ -66,18 +94,71 @@ classDiagram
         +transition(target) None
         +validate_transition(target) None
         +current_state CompositePipelineState
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class KeyExtractorService {
         -_delta_reader: DeltaReaderPort
         -_logger: LoggerPort
         +extract_keys(silver_path, join_keys) DataFrame
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class DependencyCoordinator {
         -_logger: LoggerPort
         -_config: CompositeConfig
         +run(keys_df, runner_factory) list~DependencyResult~
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class EnrichmentCoordinator {
@@ -85,6 +166,24 @@ classDiagram
         -_config: CompositeConfig
         +run_enrichers(keys_df, runner_factory) list~EnrichmentResult~
         -_filter_enrichers(enrichers) list~EnricherConfig~
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class MergeService {
@@ -97,6 +196,19 @@ classDiagram
         -_resolve_composite_join_keys() list~str~
         -_resolve_conflicts(merged_df) DataFrame
         -_resolve_join_key_names() list~str~
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class CompositeCheckpointManager {
@@ -105,18 +217,73 @@ classDiagram
         +save(state) None
         +load() CompositeCheckpointState
         +clear() None
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class CompositePreflightValidator {
         -_delta_reader: DeltaReaderPort
         -_logger: LoggerPort
         +validate(config) list~str~
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class EnrichmentCrossValidator {
         -_logger: LoggerPort
         -_config: CrossValidationConfig
         +validate(merged_df) CrossValidationReport
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class CompositePipelineState {
@@ -135,6 +302,13 @@ classDiagram
         +is_active bool
         +is_resumable bool
         +can_transition_to(target) bool
+        
+        
+        
+        
+        
+        
+        
     }
 
     class CompositeResult {
@@ -147,6 +321,19 @@ classDiagram
         +started_at: datetime
         +finished_at: datetime
         +had_warnings: bool
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     %% Relationships

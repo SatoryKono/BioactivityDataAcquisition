@@ -57,11 +57,11 @@ configs/
 │   ├── semanticscholar/         # 1 entity config
 │   │   └── publication.yaml
 │   └── composite/               # 5 composite configs (ADR-026)
-│       ├── activity.yaml        # chembl-activity + enrichers
-│       ├── assay.yaml           # chembl-assay + enrichers
-│       ├── molecule.yaml        # chembl-molecule + enrichers
-│       ├── publication.yaml     # chembl-publication + enrichers
-│       └── target.yaml          # chembl-target + enrichers
+│       ├── activity.yaml        # chembl_activity + enrichers
+│       ├── assay.yaml           # chembl_assay + enrichers
+│       ├── molecule.yaml        # chembl_molecule + enrichers
+│       ├── publication.yaml     # chembl_publication + enrichers
+│       └── target.yaml          # chembl_target + enrichers
 ├── quality/                      # Data Quality правила (ADR-027, 31 файл)
 │   ├── -defaults.yaml           # Глобальные DQ defaults (soft-fail=0.05, hard-fail=0.20)
 │   ├── providers/               # 7 provider-specific DQ
@@ -144,7 +144,7 @@ provider: chembl
 entity: activity
 
 pipeline:
-  pipeline-name: chembl-activity
+  pipeline-name: chembl_activity
   provider: chembl
   entity-type: activity
   business-primary-keys: [activity-id]
@@ -172,7 +172,7 @@ provider: chembl
 entity: activity
 
 pipeline:
-  pipeline-name: chembl-activity
+  pipeline-name: chembl_activity
   provider: chembl
   entity-type: activity
   business-primary-keys: [activity-id]
@@ -196,23 +196,23 @@ Composite pipelines объединяют данные из нескольких 
 ```yaml
 # configs/composites/publication.yaml
 composite:
-  name: composite-publication
+  name: composite_publication
   version: "1.1.0"
 
   seed:
-    pipeline: chembl-publication     # Базовый пайплайн (источник ID)
+    pipeline: chembl_publication     # Базовый пайплайн (источник ID)
 
   enrichers:                          # Обогащение из других провайдеров
-    - pipeline: crossref-publication
+    - pipeline: crossref_publication
       join-key: doi
       optional: true
-    - pipeline: openalex-publication
+    - pipeline: openalex_publication
       join-key: doi
       optional: true
-    - pipeline: pubmed-publication
+    - pipeline: pubmed_publication
       join-key: pmid
       optional: true
-    - pipeline: semanticscholar-publication
+    - pipeline: semanticscholar_publication
       join-key: doi
       optional: true
 
@@ -225,11 +225,11 @@ composite:
 
 | Composite               | Seed                 | Enrichers                                                           | Описание                      |
 | ----------------------- | -------------------- | ------------------------------------------------------------------- | ----------------------------- |
-| `composite-activity`    | `chembl-activity`    | enrichers                                                           | Обогащённые данные активности |
-| `composite-assay`       | `chembl-assay`       | enrichers                                                           | Обогащённые данные анализов   |
-| `composite-molecule`    | `chembl-molecule`    | pubchem-compound, enrichers                                         | Обогащённые молекулы          |
-| `composite-publication` | `chembl-publication` | crossref, openalex, pubmed, semanticscholar                         | Обогащённые публикации        |
-| `composite-target`      | `chembl-target`      | target-component, protein-class, uniprot-idmapping, uniprot-protein | Обогащённые targets           |
+| `composite_activity`    | `chembl_activity`    | enrichers                                                           | Обогащённые данные активности |
+| `composite_assay`       | `chembl_assay`       | enrichers                                                           | Обогащённые данные анализов   |
+| `composite_molecule`    | `chembl_molecule`    | pubchem_compound, enrichers                                         | Обогащённые молекулы          |
+| `composite_publication` | `chembl_publication` | crossref, openalex, pubmed, semanticscholar                         | Обогащённые публикации        |
+| `composite_target`      | `chembl_target`      | target-component, protein-class, uniprot_idmapping, uniprot_protein | Обогащённые targets           |
 
 ### Отличия от Regular Pipelines
 
@@ -282,7 +282,7 @@ if "sort-by" not in sink-silver:
 
 ```yaml
 # НЕ нужно указывать sort-by — он auto-computed!
-pipeline-name: chembl-activity
+pipeline-name: chembl_activity
 business-primary-keys: ["activity-id"]  # → sort-by.columns = ["activity-id"]
 ```
 
@@ -601,10 +601,10 @@ maintenance:
 
 ```bash
 # Показать конфигурацию
-bioetl config show chembl-activity
+bioetl config show chembl_activity
 
 # Валидация
-bioetl config validate chembl-activity
+bioetl config validate chembl_activity
 
 # Показать глобальные настройки
 bioetl config show-settings
@@ -632,25 +632,25 @@ bioetl config list-pipelines
 ### Минимальный конфиг
 
 ```yaml
-pipeline-name: chembl-activity
+pipeline-name: chembl_activity
 provider: chembl
 entity-type: activity
 version: "1.2.0"
 business-primary-keys: ["activity-id"]
-silver-table: "chembl-activity"
-gold-table: "chembl-activity"
+silver-table: "chembl_activity"
+gold-table: "chembl_activity"
 ```
 
 ### С DQ переопределениями
 
 ```yaml
-pipeline-name: chembl-activity
+pipeline-name: chembl_activity
 provider: chembl
 entity-type: activity
 version: "1.2.0"
 business-primary-keys: ["activity-id"]
-silver-table: "chembl-activity"
-gold-table: "chembl-activity"
+silver-table: "chembl_activity"
+gold-table: "chembl_activity"
 
 dq-overrides:
   thresholds:
@@ -668,13 +668,13 @@ dq-overrides:
 ### С кастомными sink путями
 
 ```yaml
-pipeline-name: chembl-activity
+pipeline-name: chembl_activity
 provider: chembl
 entity-type: activity
 version: "1.2.0"
 business-primary-keys: ["activity-id"]
-silver-table: "chembl-activity"
-gold-table: "chembl-activity"
+silver-table: "chembl_activity"
+gold-table: "chembl_activity"
 
 sink:
   bronze:
@@ -699,7 +699,7 @@ sink:
 
 ```json
 {
-  "pipeline-name": "chembl-activity",
+  "pipeline-name": "chembl_activity",
   "provider": "chembl",
   "entity-type": "activity",
   "batch-size": 100
@@ -709,7 +709,7 @@ sink:
 **Стало (YAML):**
 
 ```yaml
-pipeline-name: chembl-activity
+pipeline-name: chembl_activity
 provider: chembl
 entity-type: activity
 batch-size: 100
@@ -724,7 +724,7 @@ batch-size: 100
 ### Ошибка валидации конфига
 
 ```bash
-bioetl config validate chembl-activity
+bioetl config validate chembl_activity
 ```
 
 **Распространённые ошибки:**
@@ -749,7 +749,7 @@ bioetl config validate chembl-activity
 1. Использовать CLI для просмотра resolved конфига:
 
    ```bash
-   bioetl config show chembl-activity --format json
+   bioetl config show chembl_activity --format json
    ```
 
 ----------------------------------------------------------------------
@@ -759,8 +759,8 @@ bioetl config validate chembl-activity
 - [Running Pipelines](running-pipelines.md) — запуск пайплайнов
 - [CLI Reference](../04-reference/cli.md) — команды CLI
 - [DQ Configuration](dq-configuration.md) — детальная настройка DQ
-- [ADR-014: Deterministic Writes](../02-architecture/decisions/ADR-014-deterministic-writes.md) — sort-by requirement
-- [ADR-025: Pipeline Config Unification](../02-architecture/decisions/ADR-025-pipeline-config-unification.md) — иерархия конфигов
+- [ADR-014: Deterministic Writes](../../02-architecture/decisions/ADR-014-deterministic-writes.md) — sort-by requirement
+- [ADR-025: Pipeline Config Unification](../../02-architecture/decisions/ADR-025-pipeline-config-unification.md) — иерархия конфигов
 - [ADR-026: Composite Pipeline Pattern](../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md) — multi-provider pipelines
 - [ADR-027: DQ Rules Externalization](../02-architecture/decisions/ADR-027-dq-rules-externalization.md) — иерархическая DQ загрузка
 - [ADR-028: Filter Rules Externalization](../02-architecture/decisions/ADR-028-filter-rules-externalization.md) — иерархическая Filter загрузка

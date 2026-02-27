@@ -79,11 +79,11 @@ If you have custom DQ rules referencing these fields:
 
 ```bash
 # Rebuild all publication pipelines
-bioetl run --pipeline chembl-publication --run-type rebuild --yes
-bioetl run --pipeline pubmed-publication --run-type rebuild --yes
-bioetl run --pipeline crossref-publication --run-type rebuild --yes
-bioetl run --pipeline openalex-publication --run-type rebuild --yes
-bioetl run --pipeline semanticscholar-publication --run-type rebuild --yes
+bioetl run --pipeline chembl_publication --run-type rebuild --yes
+bioetl run --pipeline pubmed_publication --run-type rebuild --yes
+bioetl run --pipeline crossref_publication --run-type rebuild --yes
+bioetl run --pipeline openalex_publication --run-type rebuild --yes
+bioetl run --pipeline semanticscholar_publication --run-type rebuild --yes
 ```
 
 **Automation:**
@@ -118,13 +118,13 @@ done
 
 ```bash
 # Balanced mode (default) - Base + Structural + Logical
-bioetl run --pipeline pubmed-publication
+bioetl run --pipeline pubmed_publication
 
 # Strict mode - All 5 levels
-bioetl run --pipeline pubmed-publication --validation-mode strict
+bioetl run --pipeline pubmed_publication --validation-mode strict
 
 # Fast mode - Base only
-bioetl run --pipeline pubmed-publication --validation-mode fast
+bioetl run --pipeline pubmed_publication --validation-mode fast
 ```
 
 **DQ flags in Silver:**
@@ -143,8 +143,8 @@ bioetl run --pipeline pubmed-publication --validation-mode fast
 **Purpose:** Combine ChEMBL activity data with compound record metadata in a single Gold table.
 
 **Structure:**
-- **Seed:** `chembl-activity` (bioactivity measurements)
-- **Dependency:** `chembl-compound-record` (compound metadata, optional)
+- **Seed:** `chembl_activity` (bioactivity measurements)
+- **Dependency:** `chembl_compound_record` (compound metadata, optional)
 - **Join:** LEFT OUTER join on `molecule-chembl-id`
 
 **Usage:**
@@ -157,7 +157,7 @@ bioetl run-composite --composite activity
 bioetl run-composite --composite activity --seed-limit 1000
 ```
 
-**Output:** `data/gold/composite-activity/`
+**Output:** `data/gold/composite_activity/`
 
 **Configuration:** `configs/composites/activity.yaml`
 
@@ -192,7 +192,7 @@ bioetl run-composite --composite activity --seed-limit 1000
 
 ```bash
 # Rebuild UniProt to get new fields
-bioetl run --pipeline uniprot-protein --run-type rebuild --yes
+bioetl run --pipeline uniprot_protein --run-type rebuild --yes
 ```
 
 **Data availability:** Fields populated only for entries with relevant data (nullable).
@@ -231,7 +231,7 @@ silver-config:
 ```yaml
 # configs/composites/activity.yaml
 output:
-  gold-path: data/gold/composite-activity
+  gold-path: data/gold/composite_activity
 ```
 
 **After (5.14):**
@@ -289,16 +289,16 @@ ISSN-PATTERN = r"^\d{4}-\d{3}[\dX]$"
 
 **Old (5.9):**
 ```bash
-python -m bioetl.main run --pipeline chembl-activity
+python -m bioetl.main run --pipeline chembl_activity
 ```
 
 **New (5.14):**
 ```bash
 # Preferred (via setuptools entry point)
-bioetl run --pipeline chembl-activity
+bioetl run --pipeline chembl_activity
 
 # Or development mode
-python -m bioetl.interfaces.cli run --pipeline chembl-activity
+python -m bioetl.interfaces.cli run --pipeline chembl_activity
 ```
 
 **Note:** Old entry point still works but is considered legacy.
@@ -311,7 +311,7 @@ python -m bioetl.interfaces.cli run --pipeline chembl-activity
 
 ```bash
 # Enable all 5 validation levels
-bioetl run --pipeline pubmed-publication --validation-mode strict
+bioetl run --pipeline pubmed_publication --validation-mode strict
 ```
 
 ---

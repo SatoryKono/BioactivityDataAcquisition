@@ -8,7 +8,7 @@
 
 | Parameter        | Value                                                   |
 | ---------------- | ------------------------------------------------------- |
-| **Pipeline ID**  | `chembl-compound-record`                                |
+| **Pipeline ID**  | `chembl_compound_record`                                |
 | **Provider**     | ChEMBL (EBI)                                            |
 | **Entity**       | compound-record                                         |
 | **API Endpoint** | `https://www.ebi.ac.uk/chembl/api/data/compound-record` |
@@ -113,14 +113,14 @@ class CompoundRecordSchema(ETLRecordSchema):
 ## 5. Pipeline Configuration
 
 ```yaml
-pipeline-name: chembl-compound-record
+pipeline-name: chembl_compound_record
 provider: chembl
 entity-type: compound-record
 version: "1.2.0"
 
 primary-keys: ["record-id"]
-silver-table: "chembl-compound-record"
-gold-table: "chembl-compound-record"
+silver-table: "chembl_compound_record"
+gold-table: "chembl_compound_record"
 
 gold-filters:
   required-fields:
@@ -144,12 +144,12 @@ input-filter:
 | Dependency           | Type     | Required    |
 | -------------------- | -------- | ----------- |
 | ChEMBL API           | API      | Yes         |
-| `chembl-molecule`    | Pipeline | Recommended |
-| `chembl-publication` | Pipeline | Recommended |
+| `chembl_molecule`    | Pipeline | Recommended |
+| `chembl_publication` | Pipeline | Recommended |
 
 ### 6.2. Downstream
 
 | Consumer                     | Impact                   |
 | ---------------------------- | ------------------------ |
-| `chembl-activity`            | FK reference (record-id) |
+| `chembl_activity`            | FK reference (record-id) |
 | Compound-literature analysis | Provenance tracking      |

@@ -68,7 +68,7 @@ class PipelineConfig:
 
 ```yaml
 # configs/entities/chembl/publication.yaml
-pipeline-name: chembl-publication
+pipeline-name: chembl_publication
 provider: chembl
 entity-type: publication
 

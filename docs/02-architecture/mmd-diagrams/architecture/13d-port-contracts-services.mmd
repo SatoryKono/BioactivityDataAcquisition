@@ -18,42 +18,42 @@ graph LR
 %% keep-orphan: NMM
 %% keep-orphan: NMW
     subgraph Domain["Domain Layer"]
-        LKP["LockPort"]
-        CKP["CheckpointPort"]
-        QRP["QuarantinePort"]
-        ADP["AuditPort"]
-        PIIP["PiiHasherPort"]
-        IFP["InputFilterPort"]
-        DQMP["DQMonitorPort"]
-        BDQP["BronzeDQAnalyzerPort"]
-        SDQP["SilverDQAnalyzerPort"]
-        GDQP["GoldDQAnalyzerPort"]
-        DQRWP["DQReportWriterPort"]
+        LKP["LockPort"]:::size-sm
+        CKP["CheckpointPort"]:::size-sm
+        QRP["QuarantinePort"]:::size-sm
+        ADP["AuditPort"]:::size-sm
+        PIIP["PiiHasherPort"]:::size-sm
+        IFP["InputFilterPort"]:::size-sm
+        DQMP["DQMonitorPort"]:::size-sm
+        BDQP["BronzeDQAnalyzerPort"]:::size-sm
+        SDQP["SilverDQAnalyzerPort"]:::size-sm
+        GDQP["GoldDQAnalyzerPort"]:::size-sm
+        DQRWP["DQReportWriterPort"]:::size-sm
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        ML["MemoryLock"]
-        LC["LocalCheckpoint"]
-        UQ["UnifiedQuarantine"]
-        FA["FileAuditAdapter"]
-        SPH["Sha256PiiHasher"]
-        CSVR["CsvFilterReader"]
-        DQRW_I["DQReportWriter"]
+        ML["MemoryLock"]:::size-sm
+        LC["LocalCheckpoint"]:::size-sm
+        UQ["UnifiedQuarantine"]:::size-sm
+        FA["FileAuditAdapter"]:::size-sm
+        SPH["Sha256PiiHasher"]:::size-sm
+        CSVR["CsvFilterReader"]:::size-sm
+        DQRW_I["DQReportWriter"]:::size-sm
     end
 
     subgraph Application["Application Layer"]
-        BDA["BronzeDQAnalyzer"]
-        SDA["SilverDQAnalyzer"]
-        GDA["GoldDQAnalyzer"]
+        BDA["BronzeDQAnalyzer"]:::size-sm
+        SDA["SilverDQAnalyzer"]:::size-sm
+        GDA["GoldDQAnalyzer"]:::size-sm
     end
 
     subgraph NoOps["NoOp Implementations (fallback defaults)"]
-        NTP["NoOpTracing"]
-        NMP["NoOpMetrics"]
-        NAP["NoOpAudit"]
-        NPH["NoOpPiiHasher"]
-        NMM["NoOpMemoryMonitor"]
-        NMW["NoOpMetadataWriter"]
+        NTP["NoOpTracing"]:::size-sm
+        NMP["NoOpMetrics"]:::size-sm
+        NAP["NoOpAudit"]:::size-sm
+        NPH["NoOpPiiHasher"]:::size-sm
+        NMM["NoOpMemoryMonitor"]:::size-sm
+        NMW["NoOpMetadataWriter"]:::size-sm
     end
 
     LKP --- ML

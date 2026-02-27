@@ -9,7 +9,7 @@
 %% @level   Mixed (System / Component / Class)
 
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
-%% @uniform class width=432 height=528 max_title_len=21 max_desc_lines=27
+%% @uniform class width=208 height=240 max_title_len=21 max_desc_lines=27
 classDiagram
     direction TB
 
@@ -20,6 +20,27 @@ classDiagram
         OPEN = 2
         +is_allowing_requests() bool
         +to_metric_value() int
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class CircuitBreakerPort {
@@ -28,6 +49,28 @@ classDiagram
         +get_failure_count() int
         +call(func: Callable, *args, **kwargs) T
         +reset() None
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class CircuitBreaker {
@@ -67,6 +110,27 @@ classDiagram
         +failures_counter: str = "circuit_breaker_failures_total"
         +calls_counter: str = "circuit_breaker_calls_total"
         +success_counter: str = "circuit_breaker_success_total"
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class CircuitBreakerConfig {
@@ -76,6 +140,27 @@ classDiagram
         +half_open_max_calls: int = 1
         +excluded_exceptions: tuple = ()
         +from_provider(provider: str)$ CircuitBreakerConfig
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class CircuitOpenError {
@@ -84,6 +169,28 @@ classDiagram
         +state: CircuitState
         +time_until_half_open: float
         +message: str
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class ProviderHealthTracker {
@@ -96,6 +203,24 @@ classDiagram
         +record_success(provider: str) None
         +record_failure(provider: str, error: Exception) None
         +is_healthy(provider: str) bool
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     class HealthState {
@@ -103,6 +228,29 @@ classDiagram
         HEALTHY = 2
         DEGRADED = 1
         UNHEALTHY = 0
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     %% Relationships

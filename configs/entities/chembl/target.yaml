@@ -177,5 +177,5 @@ contracts:
         - _ingestion_ts
         - _run_id
         - _run_type
-        - _dq_errors
-        - _dq_status
+        - _dq_error
+        - _dq_warn

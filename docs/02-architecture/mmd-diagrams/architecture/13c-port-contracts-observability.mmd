@@ -13,19 +13,19 @@
 %%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'POLYLINE'}}}%%
 graph LR
     subgraph Domain["Domain Layer"]
-        LGP["LoggerPort"]
-        MTP["MetricsPort"]
-        TRP["TracingPort"]
-        CBP["CircuitBreakerPort"]
-        RLP["RateLimiterPort"]
+        LGP["LoggerPort"]:::size-sm
+        MTP["MetricsPort"]:::size-sm
+        TRP["TracingPort"]:::size-sm
+        CBP["CircuitBreakerPort"]:::size-sm
+        RLP["RateLimiterPort"]:::size-sm
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        UL["UnifiedLogger"]
-        MCO["MetricsCollector"]
-        OTT["OpenTelemetryTracer"]
-        CB["CircuitBreaker"]
-        TB_I["TokenBucket"]
+        UL["UnifiedLogger"]:::size-sm
+        MCO["MetricsCollector"]:::size-sm
+        OTT["OpenTelemetryTracer"]:::size-sm
+        CB["CircuitBreaker"]:::size-sm
+        TB_I["TokenBucket"]:::size-sm
     end
 
     LGP --- UL & SLG & NOL
