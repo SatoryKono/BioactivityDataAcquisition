@@ -21,7 +21,7 @@ flowchart LR
     subgraph Bronze["Bronze Layer"]
         direction TB
         BronzeWriter[BronzeWriter<br/>]
-        BronzeData[("JSONL + zstd<br/>Append-only<br/>90d retention&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")]
+        BronzeData[("JSONL + zstd<br/>Append-only<br/>90d retention")]
 
         BronzeWriter --> BronzeData
     end
@@ -29,7 +29,7 @@ flowchart LR
     subgraph Silver["Silver Layer"]
         direction TB
         SilverWriter[SilverWriter<br/>]
-        SilverData[("Delta Lake<br/>Merge/Upsert<br/>ACID transactions&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")]
+        SilverData[("Delta Lake<br/>Merge/Upsert<br/>ACID transactions")]
 
         SilverWriter --> SilverData
     end
@@ -37,7 +37,7 @@ flowchart LR
     subgraph Gold["Gold Layer"]
         direction TB
         GoldWriter[GoldWriter<br/>]
-        GoldData[("Delta Lake<br/>SCD Type 2<br/>Analytics-ready&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")]
+        GoldData[("Delta Lake<br/>SCD Type 2<br/>Analytics-ready")]
 
         GoldWriter --> GoldData
     end
