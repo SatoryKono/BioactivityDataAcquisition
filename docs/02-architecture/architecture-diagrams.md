@@ -705,8 +705,8 @@ Complete pipeline configuration с 100+ полями.
 
 **Loading:**
 
-- YAML: `configs/pipelines/{provider}/{entity}.yaml`
-- Example: `configs/pipelines/chembl/activity.yaml`
+- YAML: `configs/entities/{provider}/{entity}.yaml`
+- Example: `configs/entities/chembl/activity.yaml`
 
 **CLI:**
 

@@ -201,26 +201,23 @@ configs/
 │   ├── publication.yaml
 │   └── target.yaml
 ├── providers/
-│   └── {provider}.yaml              # Provider API settings (unified)
-├── sources/
-│   └── {provider}.yaml              # Legacy provider API settings (fallback)
-├── quality/
-│   ├── -defaults.yaml               # Global DQ defaults
-│   └── providers/{provider}.yaml    # Provider-level DQ rules
-├── filters/
-│   ├── -defaults.yaml               # Global filter defaults
-│   └── providers/{provider}.yaml    # Provider-level filter rules
+│   └── {provider}.yaml              # Provider API + quality + filters (unified)
+├── base/
+│   ├── pipeline.yaml                # Global pipeline/filter defaults
+│   └── quality.yaml                 # Global DQ defaults
 ├── enums/
-│   └── {provider}/{entity}.yaml     # Enum values (ADR-038)
-└── hash-policy/
-    └── {provider}/                  # Hash policy configs (provider-level)
+│   └── chembl.yaml                  # Enum values (ADR-038)
+├── composites/
+│   ├── {entity}.yaml                # Composite pipeline configs (ADR-026)
+│   └── field_groups/publication.yaml
+└── naming_exceptions.yaml
 ```
 
 **Удалённые директории** (RF-CFG-035):
 - legacy provider/entity pipeline directory — перенесено в `configs/entities/`
 - `configs/schemas/{providers}/` — поглощено в `configs/entities/{p}/{e}.yaml#schema`
-- `configs/quality/entities/` — поглощено в `configs/entities/{p}/{e}.yaml#quality`
-- `configs/filters/entities/` — поглощено в `configs/entities/{p}/{e}.yaml#filters`
+- legacy `quality/entities` directory — поглощено в `configs/entities/{p}/{e}.yaml#quality`
+- legacy `filters/entities` directory — поглощено в `configs/entities/{p}/{e}.yaml#filters`
 - `configs/contracts/` — поглощено в `configs/entities/{p}/{e}.yaml#contracts`
 
 ### 6. Test Guard (`test-pipeline-external-schema-non-empty.py`)
@@ -312,8 +309,8 @@ includes:
 
 - legacy provider/entity pipeline directory (21 файлов)
 - `configs/schemas/{providers}/` (21 файлов)
-- `configs/quality/entities/` (21 файлов)
-- `configs/filters/entities/` (21 файлов)
+- legacy `quality/entities` directory (21 файлов)
+- legacy `filters/entities` directory (21 файлов)
 - `configs/contracts/` (21 файлов)
 
 ## Migration Guide

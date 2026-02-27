@@ -106,8 +106,8 @@ Composite pipelines keep merge schema in `configs/composites/{entity}.yaml`
 | `configs/entities/chembl/molecule.yaml`               | `schema` section in same file                        |
 | `configs/entities/chembl/protein-class.yaml`          | `schema` section in same file                        |
 | `configs/entities/chembl/publication.yaml`            | `schema` section in same file                        |
-| `configs/entities/chembl/publication-similarity.yaml` | `schema` section in same file                        |
-| `configs/entities/chembl/publication-term.yaml`       | `schema` section in same file                        |
+| `configs/entities/chembl/publication_similarity.yaml` | `schema` section in same file                        |
+| `configs/entities/chembl/publication_term.yaml`       | `schema` section in same file                        |
 | `configs/entities/chembl/subcellular-fraction.yaml`   | `schema` section in same file                        |
 | `configs/entities/chembl/target.yaml`                 | `schema` section in same file                        |
 | `configs/entities/chembl/target-component.yaml`       | `schema` section in same file                        |

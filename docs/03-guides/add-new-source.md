@@ -28,7 +28,7 @@ from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 class PubMedAdapter:
     """Адаптер для PubMed API."""
-    def --init--(self, http-client: UnifiedHTTPClient, api-key: str | None = None):
+    def __init__(self, http-client: UnifiedHTTPClient, api-key: str | None = None):
         self.http-client = http-client
         self.base-url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
         self.api-key = api-key

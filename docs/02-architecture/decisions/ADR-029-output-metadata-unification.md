@@ -97,13 +97,13 @@ class OutputMetadata(BaseModel):
         Will be removed in v6.0.
     """
 
-    def --init--(self, **data: object) -> None:
+    def __init__(self, **data: object) -> None:
         warnings.warn(
             "OutputMetadata is deprecated, use BaseOutputMetadata + BronzeOutputExt...",
             DeprecationWarning,
             stacklevel=2,
         )
-        super().--init--(**data)
+        super().__init__(**data)
 ```
 
 ## Consequences

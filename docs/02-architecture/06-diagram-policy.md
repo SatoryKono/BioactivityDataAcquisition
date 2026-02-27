@@ -21,7 +21,7 @@
 ## 3. Форматы и именование
 
 1. Обязательный формат для новых диаграмм: Mermaid (`.mmd`).
-2. Расширение `.mermaid` допускается только в историческом наборе.
+2. Расширение `.mermaid` допускается для decomposed views (`mmd-diagrams/views/`) и legacy-набора.
 3. Именование: `NN-topic-name.mmd` (порядковый номер + kebab-case).
 4. Одна диаграмма = один файл = одна основная архитектурная идея.
 
@@ -51,18 +51,18 @@
 | Domain | `#F5F3FF` | `#7C3AED` |
 | Application | `#F0FDF4` | `#16A34A` |
 | Infrastructure | `#FFF1F2` | `#DC2626` |
-| Composition | `#FFF7ED` | `#EA580C` |
+| Composition | `#FFF7ED` | `#F59E0B` |
 | Interfaces | `#EFF6FF` | `#2563EB` |
-| External | `#F8FAFC` | `#475569` |
+| External | `#F1F5F9` | `#64748B` |
 
 ### 6.2 Medallion palette
 
 | Layer | Fill | Stroke |
 |---|---|---|
-| Bronze | `#FFF7ED` | `#EA580C` |
+| Bronze | `#FFF7ED` | `#F59E0B` |
 | Silver | `#F8FAFC` | `#475569` |
 | Gold | `#FEFCE8` | `#CA8A04` |
-| Quarantine | `#FFF1F2` | `#DC2626` |
+| Quarantine | `#FFE4E6` | `#E11D48` |
 
 ### 6.3 Линии и семантика
 

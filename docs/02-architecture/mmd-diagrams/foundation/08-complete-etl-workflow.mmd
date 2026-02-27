@@ -8,7 +8,7 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'},'layout':'elk','flowchart':{'curve':'linear'},'elk':{'nodePlacementStrategy':'BRANDES_KOEPF','mergeEdges':true,'edgeRouting':'ORTHOGONAL'}}}%%
 %% @uniform width=392 height=72 max_title_len=39 max_desc_lines=2
 flowchart TD
 %% keep-orphan: M1, M2, M3, M4, N1, N2, N3, N4, P1, P2
@@ -117,3 +117,6 @@ flowchart TD
     style Load fill:#f5f3ff
     style Finalize fill:#f8fafc
     style Parallel fill:#fefce8
+
+    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53 stroke:#475569,stroke-width:2px
+    linkStyle 54 stroke:#475569,stroke-width:2px,opacity:0.85

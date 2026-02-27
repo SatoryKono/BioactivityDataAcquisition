@@ -311,6 +311,7 @@ class FieldGroupRegistry:
         group_order = list(FieldGroupId)
 
         def sort_key(column: str) -> tuple[int, int, str]:
+            """Return (group_index, provider_rank, field) for ordering."""
             group = self.get_group(column)
             try:
                 group_idx = group_order.index(group)

@@ -16,7 +16,7 @@ Extracts publication similarity data (Tanimoto coefficients) from the ChEMBL `/d
 | Version | `2.1.0` |
 | Loading Strategy | `full-scan-only` (force full scan) |
 | Primary Keys | `sim-id` |
-| Config | `configs/entities/chembl/publication-similarity.yaml` |
+| Config | `configs/entities/chembl/publication_similarity.yaml` |
 
 ## Outputs
 
@@ -28,9 +28,9 @@ Extracts publication similarity data (Tanimoto coefficients) from the ChEMBL `/d
 
 ## Related Configs
 
-- DQ: `configs/quality/entities/chembl/publication-similarity.yaml`
-- Filters: `configs/filters/entities/chembl/publication-similarity.yaml`
-- Column groups: `configs/schemas/chembl/publication-similarity.yaml`
+- DQ: `configs/entities/chembl/publication_similarity.yaml#quality`
+- Filters: `configs/entities/chembl/publication_similarity.yaml#filters`
+- Column groups: `configs/entities/chembl/publication_similarity.yaml#schema`
 
 ## Related ADRs
 

@@ -29,12 +29,12 @@ make lint && make test
 **Главные ресурсы:**
 
 1. `docs/00-project/RULES.md` — Конституция проекта (RFC 2119 keywords)
-1. `.claude/PROJECT-CONTEXT.md` — Компактный контекст
+1. `.claude/PROJECT_CONTEXT.md` — Компактный контекст
 1. `AGENT.md` — Детальные инструкции для агента
-1. `docs/archived/refactoring-plan.md` — Архив плана рефакторинга (исторический справочник)
+1. `docs/99-archive/refactoring-plan.md` — Архив плана рефакторинга (исторический справочник)
 
 > ⚠️ **ОБЯЗАТЕЛЬНО**: Перед предложением задач рефакторинга сверься с секцией
-> "ВЕРИФИЦИРОВАННЫЙ СТАТУС РЕАЛИЗАЦИИ" в `docs/archived/refactoring-plan.md`!
+> "ВЕРИФИЦИРОВАННЫЙ СТАТУС РЕАЛИЗАЦИИ" в `docs/99-archive/refactoring-plan.md`!
 
 ----------------------------------------------------------------------
 
@@ -206,7 +206,7 @@ src/bioetl/
    - Ответственность interfaces слоя
    - Другие интерфейсы имеют свои механизмы
 
-1. **Backward-compatibility shims** (`from module import X; --all-- = ["X"]`):
+1. **Backward-compatibility shims** (`from module import X; __all__ = ["X"]`):
 
    - Re-export для совместимости — НЕ дублирование
    - Пример: `application/core/medallion-policy.py` (19 строк)
@@ -301,7 +301,7 @@ grep -r "SilverWriteMode\|GoldWriteMode" src/bioetl/
 ls tests/architecture/
 
 # 4. Сверить с archived/refactoring-plan.md
-cat docs/archived/refactoring-plan.md | head -60
+cat docs/99-archive/refactoring-plan.md | head -60
 ```
 
 **Чек-лист перед утверждением:**
@@ -315,7 +315,7 @@ cat docs/archived/refactoring-plan.md | head -60
 
 **При обнаружении расхождения:**
 
-1. Обновить `docs/archived/refactoring-plan.md` → секция "ЛОЖНЫЕ УТВЕРЖДЕНИЯ"
+1. Обновить `docs/99-archive/refactoring-plan.md` → секция "ЛОЖНЫЕ УТВЕРЖДЕНИЯ"
 1. Обновить `CLAUDE.md` → секция 2.3 "Архитектурные Пояснения"
 
 ### 2.5. DDD Aggregates (ADR-021)
@@ -458,7 +458,7 @@ pytest tests/e2e/ -v -m e2e  # E2E тесты
 | Pipelines    | `src/bioetl/application/pipelines/`              |
 | Bootstrap    | `src/bioetl/composition/bootstrap/`              |
 | CLI          | `src/bioetl/interfaces/cli/`                     |
-| Configs      | `configs/pipelines/{provider}/{entity}.yaml`     |
+| Configs      | `configs/entities/{provider}/{entity}.yaml`     |
 | Tests        | `tests/`                                         |
 | ADR          | `docs/02-architecture/decisions/`                |
 
@@ -489,7 +489,7 @@ pytest tests/e2e/ -v -m e2e  # E2E тесты
 
 - Типы: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`
 
-**Новый адаптер:** `domain/ports/` Protocol → `infrastructure/adapters/{provider}/` → `health-check()` + DI
+**Новый адаптер:** `domain/ports/` Protocol → `infrastructure/adapters/{provider}/` → `health_check()` + DI
 
 **Новый пайплайн:** Config YAML → `BaseTransformer` → Pipeline → Factory → `@register` → Tests
 
@@ -512,7 +512,7 @@ pytest tests/e2e/ -v -m e2e  # E2E тесты
 | -------------------------------------- | ------------------------------------------------------------------------------- |
 | `docs/00-project/RULES.md`             | **Конституция проекта** — единственный источник истины для архитектурных правил |
 | `docs/00-project/agents/AGENT.md`      | Инструкции для агента (персона, workflow, специфика работы)                     |
-| `.claude/PROJECT-CONTEXT.md`           | Компактный контекст для быстрой справки                                         |
+| `.claude/PROJECT_CONTEXT.md`           | Компактный контекст для быстрой справки                                         |
 | `docs/02-architecture/decisions/`      | ADR (001-038) — архитектурные решения                                           |
 | `docs/01-requirements/REQUIREMENTS.md` | 127 тестируемых требований                                                      |
 

@@ -384,6 +384,7 @@ class FieldGroupConfig:
         """
 
         def sort_key(column: str) -> tuple[int, int, str]:
+            """Return (group_index, provider_rank, field) for ordering."""
             group = self.get_group(column)
             provider_rank = self.get_provider_rank(column)
             field_name = self._extract_field(column)

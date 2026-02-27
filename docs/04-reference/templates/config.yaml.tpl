@@ -1,5 +1,5 @@
 # Template for Pipeline Configuration
-# Location: configs/pipelines/<provider>/<entity>.yaml
+# Location: configs/entities/<provider>/<entity>.yaml
 
 pipeline:
     name: {{provider}}_{{entity}}

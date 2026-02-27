@@ -29,7 +29,7 @@ docs/
 ├── 00-map.md                       # Navigation hub
 ├── 01-getting-started/             # Onboarding guides
 ├── 02-architecture/
-│   ├── decisions/                  # ADRs (ADR-001 through ADR-033)
+│   ├── decisions/                  # ADRs (ADR-001 through ADR-040)
 │   └── diagrams/                   # Mermaid diagrams
 ├── 03-guides/                      # Development guides
 ├── 04-reference/                   # API documentation
@@ -50,8 +50,8 @@ docs/
 ## 3. ADR Management
 
 ### Current State
-- 39 ADRs: ADR-001 through ADR-039 (all present, verified 2026-02-24)
-- All in status: Accepted
+- 40 ADRs: ADR-001 through ADR-040 (all present, verified 2026-02-27)
+- All in status: Accepted (except ADR-008: Superseded)
 - Location: `docs/02-architecture/decisions/`
 
 ### ADR Template
@@ -92,9 +92,10 @@ Accepted | Proposed | Deprecated | Superseded by ADR-0YY
 | ADR-028 | Filter Rules Externalization |
 | ADR-029 | Convention-based Config |
 | ADR-033 | Publication Validation Strategy |
-| ADR-037 | config_merge() Unification |
+| ADR-037 | Canonical Schema Source and Generated Artifacts |
 | ADR-038 | Enum Externalization to YAML |
-| ADR-039 | Unified Entity Config Format (Latest) |
+| ADR-039 | Unified Entity Config Format |
+| ADR-040 | Diagram Governance |
 
 ---
 

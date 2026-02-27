@@ -148,7 +148,7 @@ def my-function(logger: LoggerPort) -> None:
 import structlog
 
 class StructlogAdapter:
-    def --init--(self):
+    def __init__(self):
         self.-logger = structlog.get-logger()
 ```
 

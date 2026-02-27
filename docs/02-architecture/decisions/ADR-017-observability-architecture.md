@@ -213,7 +213,7 @@ def bootstrap-tracer-port(settings: Settings, service-name: str = "bioetl") -> T
 ```python
 # Application layer uses ports only
 class PipelineRunner:
-    def --init--(
+    def __init__(
         self,
         logger: LoggerPort,
         metrics: MetricsPort,

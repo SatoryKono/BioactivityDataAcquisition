@@ -9,7 +9,7 @@
 | **Pipeline Name**  | `chembl_assay`                        |
 | **Provider**       | ChEMBL                                |
 | **Entity**         | Assay                                 |
-| **Configuration**  | `configs/pipelines/chembl/assay.yaml` |
+| **Configuration**  | `configs/entities/chembl/assay.yaml` |
 | **Primary Key**    | `assay-id`                            |
 | **Config Version** | 1.2.0                                 |
 
@@ -92,9 +92,9 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 
 | Component      | Path                                                           |
 | -------------- | -------------------------------------------------------------- |
-| Configuration  | `configs/pipelines/chembl/assay.yaml`                          |
+| Configuration  | `configs/entities/chembl/assay.yaml`                          |
 | Pipeline Logic | `src/bioetl/application/pipelines/chembl/assay.py`             |
 | Transformer    | `src/bioetl/application/pipelines/chembl/assay-transformer.py` |
-| Gold Filter    | `configs/filters/entities/chembl/assay.yaml`                   |
-| Data Quality   | `configs/quality/entities/chembl/assay.yaml`                   |
+| Gold Filter    | `configs/entities/chembl/assay.yaml#filters`                   |
+| Data Quality   | `configs/entities/chembl/assay.yaml#quality`                   |
 | Silver Schema  | `src/bioetl/infrastructure/schemas/silver.py`                  |

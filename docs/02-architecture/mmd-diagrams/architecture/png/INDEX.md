@@ -1,6 +1,6 @@
 # BioETL Diagrams — PNG Index
 
-_Generated: 2026-02-27T18:43:48+03:00_
+_Generated: 2026-02-27T22:34:34+03:00_
 
 ## High Level Hexagonal
 
@@ -35,6 +35,12 @@ _Generated: 2026-02-27T18:43:48+03:00_
 ## Medallion Data Flow
 
 ![03-medallion-data-flow](./03-medallion-data-flow.png)
+
+---
+
+## 03amedallion Layers Overview
+
+![03a-medallion-layers-overview](./03a-medallion-layers-overview.png)
 
 ---
 

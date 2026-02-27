@@ -157,7 +157,7 @@ source:
 Entity configs ссылаются через `source-file`:
 ```yaml
 # configs/entities/chembl/activity.yaml
-source-file: ../../sources/chembl.yaml
+source-file: ../../providers/chembl.yaml
 ```
 
 **Провайдеры с source configs**: chembl, pubchem, uniprot, pubmed, crossref, openalex, semanticscholar (7 файлов).
@@ -167,20 +167,20 @@ source-file: ../../sources/chembl.yaml
 DQ-правила загружаются иерархически через `DQConfigLoader`:
 
 ```
-configs/quality/
-├── -defaults.yaml                    # Global defaults
-├── providers/<provider>.yaml         # Provider-level rules
-└── entities/<provider>/<entity>.yaml # Entity-level rules
+configs/
+├── base/quality.yaml                      # Global defaults
+├── providers/<provider>.yaml#quality      # Provider-level rules
+└── entities/<provider>/<entity>.yaml#quality # Entity-level rules
 ```
 
 Entity configs могут:
-1. Ссылаться на DQ файл: `dq-config-file: ../../quality/entities/chembl/activity.yaml`
+1. Ссылаться на DQ файл: `dq-config-file: ../../entities/chembl/activity.yaml`
 2. Определять inline правила в `dq-overrides:`
 3. Комбинировать оба подхода (inline overrides поверх файла)
 
 ```yaml
 # configs/entities/chembl/activity.yaml
-dq-config-file: ../../quality/entities/chembl/activity.yaml
+dq-config-file: ../../entities/chembl/activity.yaml
 
 dq-overrides:
   field-validations:
@@ -199,7 +199,7 @@ dq-overrides:
 3. **Автоматическая валидация**: Pydantic schemas валидируют структуру
 4. **Консистентные пути**: `{layer}/{provider}/{entity}` упрощает навигацию
 5. **Provider knowledge captured**: API limits, auth requirements в source configs
-6. **Иерархические DQ правила**: Централизация через `configs/quality/` (ADR-027)
+6. **Иерархические DQ правила**: Централизация через unified hierarchy (`configs/base|providers|entities`) (ADR-027)
 7. **Separation of concerns**: Source configs отделены от pipeline configs
 
 ### Negative
@@ -234,7 +234,7 @@ pipeline-name: chembl_activity
 
 Все DQ правила только в pipeline configs, без иерархической системы.
 
-**Rejected**: Дублирование provider-level правил (например, CHEMBL ID pattern) между entity configs. Иерархическая система (`configs/quality/`) позволяет DRY.
+**Rejected**: Дублирование provider-level правил (например, CHEMBL ID pattern) между entity configs. Иерархическая система unified DQ-секций позволяет DRY.
 
 ### D. Provider configs внутри pipelines/
 
@@ -283,7 +283,7 @@ pipeline-name: chembl_activity
 | 2026-02-03 | Claude Code | Added: Reference to ADR-026 for composite pipelines |
 | 2026-02-03 | Claude Code | Fixed: ChEMBL has 12 entity configs, pubmed uses publication.yaml |
 | 2026-02-17 | Claude Code | Fixed: Config counts (21 entity + 5 composite), ChEMBL has 14 entity configs |
-| 2026-02-17 | Claude Code | Fixed: DQ path `configs/dq/` → `configs/quality/` (consistent with ADR-027) |
+| 2026-02-17 | Claude Code | Fixed: DQ path `configs/dq/` migrated to hierarchical DQ configs (ADR-027) |
 | 2026-02-17 | Claude Code | Fixed: Removed `-schema.json` reference (validation via Pydantic schemas) |
 | 2026-02-17 | Claude Code | Fixed: Composite directory listing (activity, assay, molecule, publication, target) |
 | 2026-02-24 | Claude Code | Superseded (partially): Entity configs consolidated into unified format (see ADR-039). Config path `configs/entities/{p}/{e}.yaml` replaced by `configs/entities/{p}/{e}.yaml`. Legacy directories removed (RF-CFG-035). |

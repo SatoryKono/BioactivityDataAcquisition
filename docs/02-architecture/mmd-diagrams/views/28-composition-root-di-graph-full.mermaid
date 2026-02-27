@@ -1,19 +1,49 @@
 %% View: Full | Parent: (root)
 %% Parent source: docs/02-architecture/mmd-diagrams/foundation/28-composition-root-di-graph.mmd
 %% Full reference diagram retained after decomposition.
+%% Synced: 2026-02-27
+
 %% Title: Composition Root Wiring — Full DI Graph
 %% Covers: RULES.md §1.1 (Composition Layer), ADR-005
 %% Rank: 3 (Score 9.00) — Complete dependency injection assembly
 %% Updated: 2026-02-17
-%% Legend: see 00-legend.mermaid
 
 %% @version 1.1.0
 %% @date    2026-02-24
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
+%% @uniform-group entry     nodes=CLI,BOOT
+%% @uniform-group factories nodes=BL,DQF,HCF,DSF,STF,STA,SB,RF,GPF
+%% @uniform-group registry  nodes=PR,OB
+%% @uniform-group created   nodes=UHC,ADP,BW,SLL,PS,RUN
+%% @uniform-width group
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
-%% @uniform width=272 height=126 max_title_len=29 max_desc_lines=5
+%% @uniform width=296 groups=4 width_strategy=group
+%% @uniform-stats entry        width=296 height=144 max_desc_lines=6
+%% @uniform-stats factories    width=224 height=144 max_desc_lines=6
+%% @uniform-stats registry     width=200 height=144 max_desc_lines=6
+%% @uniform-stats created      width=176 height=144 max_desc_lines=6
+%%{init: {
+%%  'layout': 'elk',
+%%  'theme': 'base',
+%%  'themeVariables': {'lineWidth': '2'},
+%%  'flowchart': {
+%%    'nodeSpacing': 64,
+%%    'rankSpacing': 80,
+%%    'padding': 24,
+%%    'curve': 'linear'
+%%  },
+%%  'elk': {
+%%    'mergeEdges': true,
+%%    'nodePlacementStrategy': 'BRANDES_KOEPF',
+%%    'cycleBreakingStrategy': 'GREEDY',
+%%    'direction': 'DOWN',
+%%    'spacing.nodeNode': 52,
+%%    'spacing.edgeNode': 36,
+%%    'spacing.edgeEdge': 24,
+%%    'edgeRouting': 'ORTHOGONAL'
+%%  }
+%%}}%%
 flowchart TB
 %% keep-orphan: OB
     subgraph Entry["Entry Point"]
@@ -22,7 +52,7 @@ flowchart TB
     end
 
     subgraph Factories["Composition Factories"]
-        direction TB
+        direction LR
 
         subgraph LoggerFactories["Logger & Observability"]
             BL["BootstrapLogger<br/>• configure structlog<br/><br/><br/><br/>"]
@@ -48,59 +78,61 @@ flowchart TB
 
     subgraph Registry["Registration"]
         PR["ProviderRegistry<br/>• 8 providers registered<br/><br/><br/><br/>"]
-        DSR["DataSourceRegistry<br/>• facade → ProviderRegistry<br/><br/><br/><br/>"]
-        PLREG["PipelineRegistry<br/>• pipeline_name → factory<br/><br/><br/><br/>"]
         OB["ObservabilityBundle<br/>• logger + metrics + tracing<br/><br/><br/><br/>"]
     end
 
     subgraph Created["Created Instances"]
         direction TB
-        UHC["UnifiedHTTPClient<br/>+ TokenBucket<br/>+ CircuitBreaker<br/><br/><br/>"]
-        ADP["Provider Adapter<br/>(ChemblAdapter, etc.)<br/><br/><br/><br/>"]
-        BW["BronzeWriter<br/><br/><br/><br/><br/>"]
-        SW["SilverWriter<br/><br/><br/><br/><br/>"]
-        GW["GoldWriter<br/><br/><br/><br/><br/>"]
-        ML["MemoryLock<br/><br/><br/><br/><br/>"]
-        LC["LocalCheckpoint<br/><br/><br/><br/><br/>"]
-        UQ["UnifiedQuarantine<br/><br/><br/><br/><br/>"]
-        SLL["StructlogLogger<br/><br/><br/><br/><br/>"]
-        PMM["PrometheusMetrics<br/><br/><br/><br/><br/>"]
-        NOT["NoOpTracing<br/><br/><br/><br/><br/>"]
-        PS["PipelineServices<br/>(frozen bundle)<br/><br/><br/><br/>"]
-        RUN["PipelineRunner<br/>(fully assembled)<br/><br/><br/><br/>"]
+        subgraph RuntimeInfra["Infra Instances"]
+            direction TB
+            UHC["[A] UnifiedHTTPClient<br/>+ TokenBucket<br/>+ CircuitBreaker<br/><br/><br/>"]
+            ADP["[A] Provider Adapter<br/>(ChemblAdapter, etc.)<br/><br/><br/><br/>"]
+            BW["BronzeWriter<br/><br/><br/><br/><br/>"]
+            SLL["StructlogLogger<br/><br/><br/><br/><br/>"]
+        end
+        subgraph RuntimeCore["Application Instances"]
+            direction TB
+            PS["PipelineServices<br/>(frozen bundle)<br/><br/><br/><br/>"]
+            RUN["PipelineRunner<br/>(fully assembled)<br/><br/><br/><br/>"]
+        end
     end
 
     %% Bootstrap flow
-    CLI --> BOOT
-    BOOT --> BL
+    CLI ==> BOOT
+    BOOT -.-> BL
     BL --> SLL
-    BOOT --> HCF
-    HCF --> UHC
-    BOOT --> DSF
-    DSF -->|"uses"| PR
-    DSF -->|"uses"| UHC
+    BOOT -.-> HCF
+    HCF -.-> UHC
+    BOOT -.-> DSF
+    DSF -.->|"uses"| PR
+    DSF -.->|"uses"| UHC
     DSF --> ADP
-    BOOT --> STF
-    STF --> STA
-    STA --> BW & SW & GW
-    BOOT --> DQF
-    BOOT --> SB
-    SB -->|K06| BW & SW & GW
-    SB -->|K07| ML
-    SB -->|K08| LC
-    SB -->|K09| UQ
-    SB -->|K10| SLL
-    SB -->|K11| PMM
-    SB -->|K12| NOT
-    SB --> PS
-    BOOT --> RF
-    RF -->|"uses"| PS
-    RF -->|"uses"| ADP
-    RF --> RUN
+    BOOT -.-> STF
+    STF -.-> STA
+    STA ==> BW & SW & GW
+    BOOT -.-> DQF
+    BOOT ==> SB
+    SB -.->|"injects"| BW & SW & GW
+    SB -.->|"injects"| ML
+    SB -.->|"injects"| LC
+    SB -.->|"injects"| UQ
+    SB -.->|"injects"| SLL
+    SB -.->|"injects"| PMM
+    SB -.->|"injects"| NOT
+    SB ==> PS
+    BOOT ==> RF
+    RF -.->|"uses"| PS
+    RF -.->|"uses"| ADP
+    RF ==> RUN
 
     %% Registry connections
-    GPF -->|K13| PLREG
-    PR -->|"contains"| DSR
+    GPF -.->|"registers"| PLREG
+    PR -.->|"maps"| DSR
+
+    %% Layout constraints
+    CLI ~~~ BOOT
+    PR ~~~ OB
+    UHC ~~~ ADP ~~~ BW ~~~ SLL ~~~ PS ~~~ RUN
 
     %% Styling
     style Entry fill:#f5f3ff,stroke:#7c3aed
@@ -113,31 +145,19 @@ flowchart TB
     style StorageFactories fill:#f5f3ff,stroke:#7c3aed,stroke-dasharray: 5 5
     style PipelineFactories fill:#fff7ed,stroke:#f59e0b,stroke-dasharray: 5 5
 
-    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 8 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 10 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 11 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 12 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 13 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 14 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 15 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 16 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 17 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
-    linkStyle 18 stroke:#94A3B8,stroke-width:1px
-    linkStyle 19 stroke:#94A3B8,stroke-width:1px
-    linkStyle 20 stroke:#94A3B8,stroke-width:1px
-    linkStyle 21 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 22 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 23 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 24 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 25 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 26 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 27 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    %% Layer palette (semantic)
+    classDef layer_domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:1.8px;
+    classDef layer_application fill:#f0fdf4,stroke:#16a34a,stroke-width:1.8px;
+    classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
+    classDef layer_composition fill:#fff7ed,stroke:#d97706,stroke-width:1.8px;
+    classDef layer_interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:1.8px;
+
+    class CLI layer_interfaces;
+    class BOOT,BL,DQF,HCF,DSF,STF,STA,SB,RF,GPF,PR,OB layer_composition;
+    class PS,RUN layer_application;
+    class UHC,ADP,BW,SLL layer_infrastructure;
+
+    %% Click tooltips
+    click SB "../../02-architecture/decisions/ADR-005-composition-layer-separation.md" "Injects storage, lock, checkpoint, quarantine, logger, metrics, tracing"
+    click DSF "../../00-project/RULES.md" "Resolves provider registry and shared HTTP client"
+    click RF "../../00-project/RULES.md" "Builds PipelineRunner from composed services and adapter"
