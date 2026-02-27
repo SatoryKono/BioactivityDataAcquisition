@@ -221,8 +221,8 @@ class PublicationTransformer(BaseChemblTransformer):
         )
 
         # Normalize text fields using DataNormalizationService
-        # Уровень A: Bronze → Silver базовая нормализация
-        # - HTML-очистка, whitespace, unicode NFC, trim
+        # Level A: Bronze → Silver basic normalization
+        # - HTML cleanup, whitespace, unicode NFC, trim
         normalizer = self._data_normalizer
         data["title"] = normalizer.normalize_title(data.get("title"))
         data["abstract"] = normalizer.normalize_abstract(data.get("abstract"))
@@ -265,7 +265,7 @@ class PublicationTransformer(BaseChemblTransformer):
         # System field: data source identifier
         data["_source"] = "chembl"
 
-        # Унифицированные поля публикации (в ChEMBL есть только citation_count)
+        # Unified publication fields (ChEMBL only provides citation_count)
         citation_count = record.get("citation_count")
         if citation_count is not None:
             try:

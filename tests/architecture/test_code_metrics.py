@@ -60,6 +60,7 @@ class TestFileSizeLimits:
         "internal.py": 380,  # 369 LOC - InternalErrors (critical application errors)
         "network.py": 450,  # 434 LOC - NetworkErrors (connectivity, external services)
         # Domain value objects (rich domain models with validation)
+        "bioactivity.py": 330,  # 324 LOC - Bioactivity domain entity with expanded Google-style docstrings
         "batch.py": 550,  # 531 LOC - Batch aggregate with lifecycle methods
         "pipeline_run.py": 600,  # 581 LOC - PipelineRun aggregate with state machine
         "quarantine_entry.py": 520,  # 501 LOC - QuarantineEntry with detailed error info
@@ -101,10 +102,10 @@ class TestFileSizeLimits:
         "bootstrap.py": 450,  # 420 LOC - main DI wiring
         "composite.py": 700,  # 672 LOC - Composite pipeline bootstrap with runner factories + execution_context + field group registry loading + DQ report service + cross-validation + quarantine wiring + composite schemas
         "entrypoints.py": 110,  # 102 LOC - Re-export facade (split to _pipeline_execution, _resource_management, _services)
-        "registration.py": 655,  # 651 LOC - provider registration (config helpers extracted to _config_helpers.py) + extraction_params overlap validation (ADR-028 §3)
-        "storage_adapter.py": 690,  # 683 LOC - storage adapter with Bronze/Silver/Gold writers + BronzeWriteResult + SilverWriteResult + SourceMetadata param + Silver lineage + composite schemas + key nullability
+        "registration.py": 710,  # 704 LOC - provider registration (config helpers extracted to _config_helpers.py) + extraction_params overlap validation (ADR-028 §3) + expanded docstrings
+        "storage_adapter.py": 695,  # 692 LOC - storage adapter with Bronze/Silver/Gold writers + BronzeWriteResult + SilverWriteResult + SourceMetadata param + Silver lineage + composite schemas + key nullability + expanded docstrings
         # Consolidated factory files (v5.2)
-        "pipeline_factory.py": 885,  # 879 LOC - merged generic_factory + runner_assembly + contract policy DI + MetadataCoordinator creation + Pandera Silver schema DI + DQ output paths
+        "pipeline_factory.py": 975,  # 973 LOC - merged generic_factory + runner_assembly + contract policy DI + MetadataCoordinator creation + Pandera Silver schema DI + DQ output paths + expanded docstrings
         "pipeline_factories.py": 680,  # 674 LOC - pipeline factory configurations + contract policy validation + composite schema registry
         "services_factory.py": 710,  # 701 LOC - merged base_services + services_builder + runner_services + LockContextHolder + BatchExecutor factory + flat_structure + MetadataCoordinator param + PipelineCallbacksContext + loading_strategy (ADR-031) + silver_validator param
         # Infrastructure layer exemptions
@@ -606,7 +607,7 @@ class TestClassSize:
         "UnifiedHTTPClient": 450,  # 427 lines - HTTP client with retry/circuit breaker
         "PipelineObserver": 350,  # 319 lines - unified observability with lifecycle events
         # Baseline exemptions for existing classes
-        "StorageAdapter": 640,  # 633 lines - storage adapter with writers + BronzeWriteResult + SilverWriteResult + composite schemas
+        "StorageAdapter": 655,  # 649 lines - storage adapter with writers + BronzeWriteResult + SilverWriteResult + composite schemas + expanded docstrings
         "BaseTransformer": 770,  # 763 lines - Template Method with silver_filters + contract policy + content hash identity
         "SilverWriter": 1160,  # 1148 lines - schema drift detection (metadata builder extracted) + column_order
         "GoldWriter": 920,  # 917 lines - SCD Type 2 (metadata/arrow logic extracted) + column_order
@@ -693,6 +694,8 @@ class TestClassSize:
         # Derived entity data source wrappers
         "SubcellularFractionDataSource": 490,  # 479 lines - Wrapper with FilterableDataSourcePort delegation (like PublicationTermDataSource)
         "DQConfigLoader": 330,  # 322 LOC - Layered DQ config resolver during Config Unification migration
+        # Storage factory (extracted from storage.py, expanded docstrings)
+        "StorageFactory": 340,  # 336 lines - Storage factory with multi-layer config extraction + expanded docstrings
     }
 
     def test_classes_under_300_lines(self, src_dir: Path) -> None:
@@ -861,6 +864,7 @@ class TestGodObjectDetection:
         "DQReportSerializer": "Cohesive serializer - all methods relate to DQ report serialization formats",
         "CompositeCheckpointState": "Immutable dataclass - state transitions via with_* methods, serialization helpers are cohesive",
         "DQConfigLoader": "Cohesive resolver - layered precedence merge (base/provider/entity/pipeline) for DQ configs",
+        "StorageFactory": "Factory class - creates storage adapters with Bronze/Silver/Gold writers configuration",
     }
 
     def test_large_classes_have_delegation(self, src_dir: Path) -> None:

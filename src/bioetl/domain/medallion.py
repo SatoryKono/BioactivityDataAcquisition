@@ -231,13 +231,13 @@ class ClearPolicy(StrEnum):
     """
 
     NEVER = "never"
-    """Инкрементальные запуски - merge/upsert без очистки."""
+    """Incremental runs - merge/upsert without clearing."""
 
     SILVER_ONLY = "silver"
-    """Очистить только Silver, сохранить Gold."""
+    """Clear Silver only, preserve Gold."""
 
     SILVER_AND_GOLD = "both"
-    """Полная очистка для rebuild/backfill."""
+    """Full clear for rebuild/backfill."""
 
 
 @dataclass(frozen=True, slots=True)

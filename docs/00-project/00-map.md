@@ -9,7 +9,7 @@
 > - YAML configs total: 39 (`configs/` tree)
 > - Documentation files: 353 markdown files
 > - Adapter listing completed (all 7 providers)
-> - Diagrams: 50+ Mermaid source files
+> - Diagrams: 271 Mermaid source files (103 .mmd + 168 .mermaid)
 
 ## Quick Links
 

@@ -1,10 +1,10 @@
-"""Provider Registry - единый реестр провайдеров данных.
+"""Provider Registry - unified data provider registry.
 
-Централизует регистрацию провайдеров, устраняя необходимость
-изменять несколько файлов при добавлении нового провайдера.
+Centralizes provider registration, eliminating the need
+to modify multiple files when adding a new provider.
 
-После унификации с DataSourceRegistry, этот модуль также отвечает за
-высокоуровневое создание data sources с поддержкой фильтрации.
+After unification with DataSourceRegistry, this module is also responsible for
+high-level data source creation with filtering support.
 """
 
 from __future__ import annotations
@@ -23,14 +23,14 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True)
 class HttpConfig:
-    """Конфигурация HTTP клиента для провайдера.
+    """HTTP client configuration for a provider.
 
     Attributes:
-        rate: Базовый rate limit (requests/second)
-        capacity: Ёмкость token bucket
-        rate_overrides: Условные переопределения rate limit.
-            Ключ — имя атрибута Settings (например, "pubmed_api_key"),
-            значение — новый rate при наличии этого атрибута.
+        rate: Base rate limit (requests/second).
+        capacity: Token bucket capacity.
+        rate_overrides: Conditional rate limit overrides.
+            Key is a Settings attribute name (e.g., "pubmed_api_key"),
+            value is the new rate when that attribute is present.
     """
 
     rate: float = 5.0
@@ -38,7 +38,7 @@ class HttpConfig:
     rate_overrides: dict[str, float] = field(default_factory=dict)
 
 
-# Type alias для low-level adapter creator
+# Type alias for low-level adapter creator
 AdapterCreator = Callable[..., "DataSourcePort"]
 
 
@@ -75,20 +75,20 @@ class DataSourceCreator(Protocol):
 
 @dataclass(frozen=True)
 class ProviderConfig:
-    """Полная конфигурация провайдера.
+    """Complete provider configuration.
 
     Attributes:
-        adapter_class: Класс адаптера, реализующий DataSourcePort
-        http_config: Конфигурация HTTP клиента (None если провайдер
-            управляет своим клиентом самостоятельно)
-        requires_http_client: Нужен ли HTTP клиент для инициализации
-        requires_logger: Нужен ли логгер для инициализации
-        default_kwargs: Дополнительные kwargs для конструктора адаптера
-        custom_creator: Кастомная функция создания адаптера для
-            сложных случаев (например, PubMed с API key логикой)
-        data_source_creator: Высокоуровневая функция создания data source
-            с поддержкой фильтрации. Если указана, используется вместо
-            стандартной логики в create_data_source().
+        adapter_class: Adapter class implementing DataSourcePort.
+        http_config: HTTP client configuration (None if the provider
+            manages its own client independently).
+        requires_http_client: Whether an HTTP client is needed for initialization.
+        requires_logger: Whether a logger is needed for initialization.
+        default_kwargs: Additional kwargs for the adapter constructor.
+        custom_creator: Custom adapter creation function for
+            complex cases (e.g., PubMed with API key logic).
+        data_source_creator: High-level data source creation function
+            with filtering support. If specified, used instead of
+            the standard logic in create_data_source().
     """
 
     adapter_class: type[DataSourcePort]
@@ -101,12 +101,12 @@ class ProviderConfig:
 
 
 class ProviderRegistry:
-    """Единый реестр провайдеров данных.
+    """Unified data provider registry.
 
-    Централизует:
-    - Регистрацию адаптеров провайдеров
-    - Конфигурацию HTTP клиентов
-    - Создание экземпляров адаптеров
+    Centralizes:
+    - Provider adapter registration
+    - HTTP client configuration
+    - Adapter instance creation
 
     Example:
         >>> from bioetl.composition.providers import ProviderRegistry, register_provider
@@ -122,29 +122,29 @@ class ProviderRegistry:
 
     @classmethod
     def register(cls, name: str, config: ProviderConfig) -> None:
-        """Регистрирует провайдера.
+        """Register a provider.
 
-        При повторной регистрации того же провайдера конфигурация перезаписывается.
-        Это позволяет корректно работать при reload модулей.
+        Re-registering the same provider overwrites the configuration.
+        This allows correct behavior during module reloads.
 
         Args:
-            name: Уникальное имя провайдера (например, "chembl", "pubchem")
-            config: Конфигурация провайдера
+            name: Unique provider name (e.g., "chembl", "pubchem").
+            config: Provider configuration.
         """
         cls._providers[name] = config
 
     @classmethod
     def get(cls, name: str) -> ProviderConfig:
-        """Возвращает конфигурацию провайдера.
+        """Return provider configuration.
 
         Args:
-            name: Имя провайдера
+            name: Provider name.
 
         Returns:
-            Конфигурация провайдера
+            Provider configuration.
 
         Raises:
-            KeyError: Если провайдер не зарегистрирован
+            KeyError: If the provider is not registered.
         """
         if name not in cls._providers:
             available = ", ".join(sorted(cls._providers.keys()))
@@ -153,13 +153,13 @@ class ProviderRegistry:
 
     @classmethod
     def is_registered(cls, name: str) -> bool:
-        """Проверяет, зарегистрирован ли провайдер.
+        """Check whether a provider is registered.
 
         Args:
-            name: Имя провайдера
+            name: Provider name.
 
         Returns:
-            True если провайдер зарегистрирован
+            True if the provider is registered.
         """
         return name in cls._providers
 
@@ -172,21 +172,22 @@ class ProviderRegistry:
         settings: Settings | None = None,
         **kwargs: Any,  # Any: forwarded adapter cons...
     ) -> DataSourcePort:
-        """Создаёт экземпляр адаптера провайдера.
+        """Create a provider adapter instance.
 
         Args:
-            name: Имя провайдера
-            http_client: HTTP клиент (требуется для провайдеров с requires_http_client=True)
-            logger: Логгер (требуется для провайдеров с requires_logger=True)
-            settings: Настройки приложения (для кастомных creators)
-            **kwargs: Дополнительные аргументы для конструктора
+            name: Provider name.
+            http_client: HTTP client (required for providers with
+                requires_http_client=True).
+            logger: Logger (required for providers with requires_logger=True).
+            settings: Application settings (for custom creators).
+            **kwargs: Additional arguments for the constructor.
 
         Returns:
-            Экземпляр адаптера, реализующий DataSourcePort
+            Adapter instance implementing DataSourcePort.
 
         Raises:
-            KeyError: Если провайдер не зарегистрирован
-            ValueError: Если требуемый http_client или logger не передан
+            KeyError: If the provider is not registered.
+            ValueError: If a required http_client or logger is not provided.
         """
         config = cls.get(name)
 
@@ -222,13 +223,13 @@ class ProviderRegistry:
 
     @classmethod
     def get_http_config(cls, name: str) -> HttpConfig | None:
-        """Возвращает HTTP конфигурацию провайдера.
+        """Return the HTTP configuration for a provider.
 
         Args:
-            name: Имя провайдера
+            name: Provider name.
 
         Returns:
-            HttpConfig или None если провайдер не использует общий HTTP клиент
+            HttpConfig or None if the provider does not use a shared HTTP client.
         """
         config = cls.get(name)
         return config.http_config
@@ -244,27 +245,27 @@ class ProviderRegistry:
         metrics: MetricsPort | None = None,
         pipeline_name: str = "unknown",
     ) -> DataSourcePort:
-        """Создаёт полностью настроенный data source с поддержкой фильтрации.
+        """Create a fully configured data source with filtering support.
 
-        Высокоуровневый метод, объединяющий функциональность ProviderRegistry
-        и бывшего DataSourceRegistry. Использует data_source_creator из
-        конфигурации провайдера, если он указан.
+        High-level method combining the functionality of ProviderRegistry
+        and the former DataSourceRegistry. Uses data_source_creator from
+        the provider configuration if one is specified.
 
         Args:
-            name: Имя провайдера
-            settings: Настройки приложения
-            pipeline_config: Конфигурация пайплайна из YAML
-            logger: LoggerPort для структурированного логирования
-            filter_config: Опциональная конфигурация фильтрации
-            metrics: Опциональный MetricsPort для статистики
-            pipeline_name: Имя пайплайна для меток метрик
+            name: Provider name.
+            settings: Application settings.
+            pipeline_config: Pipeline configuration from YAML.
+            logger: LoggerPort instance for structured logging.
+            filter_config: Optional filter configuration.
+            metrics: Optional MetricsPort for statistics.
+            pipeline_name: Pipeline name for metric labels.
 
         Returns:
-            Настроенный DataSourcePort с поддержкой фильтрации
+            Configured DataSourcePort with filtering support.
 
         Raises:
-            KeyError: Если провайдер не зарегистрирован
-            ValueError: Если data_source_creator не задан для провайдера
+            KeyError: If the provider is not registered.
+            ValueError: If data_source_creator is not set for the provider.
         """
         config = cls.get(name)
 
@@ -285,13 +286,13 @@ class ProviderRegistry:
 
     @classmethod
     def has_data_source_creator(cls, name: str) -> bool:
-        """Проверяет, есть ли у провайдера data_source_creator.
+        """Check whether a provider has a data_source_creator.
 
         Args:
-            name: Имя провайдера
+            name: Provider name.
 
         Returns:
-            True если провайдер имеет data_source_creator
+            True if the provider has a data_source_creator.
         """
         if not cls.is_registered(name):
             return False
@@ -300,14 +301,14 @@ class ProviderRegistry:
 
     @classmethod
     def list_providers(cls) -> list[str]:
-        """Список всех зарегистрированных провайдеров.
+        """List all registered providers.
 
         Returns:
-            Отсортированный список имён провайдеров
+            Sorted list of provider names.
         """
         return sorted(cls._providers.keys())
 
     @classmethod
     def clear(cls) -> None:
-        """Очищает реестр. Используется для тестов."""
+        """Clear the registry. Used for testing."""
         cls._providers.clear()

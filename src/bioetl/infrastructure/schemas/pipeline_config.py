@@ -370,7 +370,7 @@ class ApiConfig(BaseModel):
 class RateLimitSourceConfig(BaseModel):
     """Rate limit configuration from source YAML.
 
-    Pydantic model for parsing rate_limit section from configs/sources/*.yaml.
+    Pydantic model for parsing rate_limit section from configs/providers/*.yaml.
     """
 
     requests_per_second: float = Field(default=5.0, ge=0.1, le=100.0)
@@ -387,7 +387,7 @@ class ClientSourceConfig(BaseModel):
 class ProviderSourceConfig(BaseModel):
     """Provider-specific configuration from source YAML.
 
-    Pydantic model for parsing provider_config section from configs/sources/*.yaml.
+    Pydantic model for parsing provider_config section from configs/providers/*.yaml.
     """
 
     provider: str | None = None
@@ -403,7 +403,7 @@ class ProviderSourceConfig(BaseModel):
 class SourceConfig(BaseModel):
     """Configuration for the data source.
 
-    Parses both pipeline source settings and configs/sources/*.yaml structure.
+    Parses both pipeline source settings and configs/providers/*.yaml structure.
     The `rate_limit`, `circuit_breaker`, and `provider_config` fields capture
     settings from source configuration files.
     """
@@ -416,7 +416,7 @@ class SourceConfig(BaseModel):
     fields: list[dict[str, str]] = Field(default_factory=list)
     api: ApiConfig = Field(default_factory=ApiConfig)
 
-    # Source file fields (from configs/sources/*.yaml)
+    # Source file fields (from configs/providers/*.yaml)
     batch_size: int = Field(default=100, ge=1, le=5000)
     rate_limit: RateLimitSourceConfig = Field(default_factory=RateLimitSourceConfig)
     circuit_breaker: CircuitBreakerConfig = Field(default_factory=CircuitBreakerConfig)

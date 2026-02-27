@@ -6,9 +6,9 @@ These errors are typically transient and may succeed on retry. They cover:
 - Circuit breaker protection
 - External API errors
 
-Категория: NetworkErrors - ошибки сетевого взаимодействия и внешних сервисов
-(проблемы соединения, таймауты, превышение лимитов, открытие circuit breaker
-и истощение ретраев).
+Category: NetworkErrors - network communication and external service errors
+(connection issues, timeouts, rate limit exceedances, circuit breaker opening,
+and retry exhaustion).
 
 All exceptions in this module inherit from RecoverableError, indicating that
 retry with exponential backoff is appropriate (per RULES.md §3.1.3).

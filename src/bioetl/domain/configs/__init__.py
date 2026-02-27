@@ -1,8 +1,8 @@
 """Domain configuration base classes.
 
 This module provides base configuration classes for common configuration patterns.
-It consolidates duplicate DTOs per RULES.md §12.1.6 - "Дублирующие DTO с
-пересекающимися полями MUST NOT".
+It consolidates duplicate DTOs per RULES.md §12.1.6 - "Duplicate DTOs with
+overlapping fields MUST NOT exist".
 
 Consolidated Classes:
 - RateLimitConfig: Rate limiting configuration (requests/second, burst)
