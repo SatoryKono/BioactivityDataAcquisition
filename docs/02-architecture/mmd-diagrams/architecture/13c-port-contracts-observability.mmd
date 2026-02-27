@@ -13,19 +13,19 @@
 %%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'POLYLINE'}}}%%
 graph LR
     subgraph Domain["Domain Layer"]
-        LGP["LoggerPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        MTP["MetricsPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        TRP["TracingPort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        CBP["CircuitBreakerPort&nbsp;"]
-        RLP["RateLimiterPort&nbsp;&nbsp;&nbsp;&nbsp;"]
+        LGP["LoggerPort"]
+        MTP["MetricsPort"]
+        TRP["TracingPort"]
+        CBP["CircuitBreakerPort"]
+        RLP["RateLimiterPort"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        UL["UnifiedLogger&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        MCO["MetricsCollector&nbsp;&nbsp;&nbsp;"]
+        UL["UnifiedLogger"]
+        MCO["MetricsCollector"]
         OTT["OpenTelemetryTracer"]
-        CB["CircuitBreaker&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        TB_I["TokenBucket&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        CB["CircuitBreaker"]
+        TB_I["TokenBucket"]
     end
 
     LGP --- UL & SLG & NOL

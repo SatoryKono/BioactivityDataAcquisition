@@ -10,24 +10,21 @@
 classDiagram
     direction TB
     class BaseEntity {
-        <<frozen dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<frozen dataclass>>
         +entity_id: EntityID
         +content_hash: ContentHash
-        +run_id: RunID&nbsp;&nbsp;
+        +run_id: RunID
         +run_type: RunType
         +ingestion_ts: datetime
-        +_index: int&nbsp;&nbsp;&nbsp;&nbsp;
+        +_index: int
         +source_batch_id: BatchID | None
-        +_dq_warn: bool&nbsp;
+        +_dq_warn: bool
         +_dq_error: bool
         +__post_init__()
-        &nbsp;
-        &nbsp;
-        &nbsp;
     }
 
     class Bioactivity {
-        <<frozen dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<frozen dataclass>>
         +activity_id: str
         +molecule_id: str
         +target_id: str | None
@@ -44,24 +41,14 @@ classDiagram
     }
 
     class BioactivityState {
-        <<StrEnum>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        RAW&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        NORMALIZED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        VALIDATED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        <<StrEnum>>
+        RAW
+        NORMALIZED
+        VALIDATED
     }
 
     class PublicationBase {
-        <<frozen dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<frozen dataclass>>
         +doi: str | None
         +pmid: str | None
         +title: str | None
@@ -70,164 +57,94 @@ classDiagram
         +year: int | None
         +publication_type: PublicationType
         +abstract_text: str | None
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
     }
 
     class Batch {
-        <<Aggregate Root>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<Aggregate Root>>
         -_batch_id: BatchID
         -_status: BatchStatus
         -_records: list~BatchRecord~
         -_invalid_records: list~BatchRecord~
         +create(batch_id) Batch
         +add_record(record) None
-        +seal() None&nbsp;&nbsp;&nbsp;&nbsp;
+        +seal() None
         +collect_events() list~DomainEvent~
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
     }
 
     class BatchRecord {
-        <<frozen dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +index: int&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<frozen dataclass>>
+        +index: int
         +entity_id: EntityID | None
         +content_hash: ContentHash | None
-        +data: dict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +is_valid: bool&nbsp;
+        +data: dict
+        +is_valid: bool
         +error: str | None
         +error_code: str | None
         +with_validation_error(msg, code) BatchRecord
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
     }
 
     class BatchStatus {
-        <<StrEnum>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        OPEN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        SEALED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        WRITING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        COMMITTED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        FAILED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        <<StrEnum>>
+        OPEN
+        SEALED
+        WRITING
+        COMMITTED
+        FAILED
     }
 
     class PipelineRun {
-        <<Aggregate Root>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        -_run_id: RunID&nbsp;
+        <<Aggregate Root>>
+        -_run_id: RunID
         -_state: PipelineRunState
         -_stages: dict~str, StageResult~
         +start_stage(name) None
         +complete_stage(name, result) None
         +fail_stage(name, error) None
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
     }
 
     class StageResult {
-        <<frozen dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +stage: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<frozen dataclass>>
+        +stage: str
         +status: StageStatus
         +started_at: datetime
         +completed_at: datetime | None
-        +result: Any&nbsp;&nbsp;&nbsp;&nbsp;
+        +result: Any
         +error: str | None
         +records_processed: int
         +duration_seconds: float
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
     }
 
     class PipelineRunState {
-        <<StrEnum>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        PENDING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        RUNNING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        COMPLETED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        FAILED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        SHUTDOWN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        <<StrEnum>>
+        PENDING
+        RUNNING
+        COMPLETED
+        FAILED
+        SHUTDOWN
     }
 
     class StageStatus {
-        <<StrEnum>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        PENDING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        RUNNING&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        SUCCESS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        FAILED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        SKIPPED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
+        <<StrEnum>>
+        PENDING
+        RUNNING
+        SUCCESS
+        FAILED
+        SKIPPED
     }
 
     class QuarantineEntry {
-        <<dataclass>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <<dataclass>>
         +payload_hash: str
-        +pipeline: str&nbsp;&nbsp;
+        +pipeline: str
         +error_code: str
         +created_at: datetime
         +status: QuarantineRecordStatus
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
     }
 
     class DomainEvent {
-        <<base class>>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        +event_id: UUID&nbsp;
+        <<base class>>
+        +event_id: UUID
         +occurred_at: datetime
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
-        &nbsp;
     }
 
     BaseEntity <|-- Bioactivity

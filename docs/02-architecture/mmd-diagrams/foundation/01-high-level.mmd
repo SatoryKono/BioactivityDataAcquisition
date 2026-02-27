@@ -15,7 +15,7 @@ flowchart TD
     end
 
     subgraph Interfaces["Interfaces Layer"]
-        CLI["CLI (Click)&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
+        CLI["CLI (Click)<br/>"]
     end
 
     subgraph Composition["Composition Layer"]
@@ -35,9 +35,9 @@ flowchart TD
     end
 
     subgraph Lake["Data Lake — Local Storage"]
-        Bronze["Bronze Layer&nbsp;&nbsp;<br/>(JSONL + zstd)"]
-        Silver["Silver Layer&nbsp;&nbsp;<br/>(Delta Lake)&nbsp;&nbsp;"]
-        Gold["Gold Layer&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Delta Lake)&nbsp;&nbsp;"]
+        Bronze["Bronze Layer<br/>(JSONL + zstd)"]
+        Silver["Silver Layer<br/>(Delta Lake)"]
+        Gold["Gold Layer<br/>(Delta Lake)"]
     end
 
     Sources --> Adapters

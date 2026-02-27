@@ -13,32 +13,32 @@
 %%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'POLYLINE'}}}%%
 graph TB
     subgraph Interfaces["Interfaces Layer"]
-        CLI["CLI Commands (Click)&nbsp;&nbsp;&nbsp;&nbsp;"]
-        ORCH["Orchestration&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        CLI["CLI Commands (Click)"]
+        ORCH["Orchestration"]
     end
 
     subgraph Composition["Composition Layer"]
-        BOOTSTRAP["Bootstrap / Assembly&nbsp;&nbsp;&nbsp;&nbsp;"]
+        BOOTSTRAP["Bootstrap / Assembly"]
     end
 
     subgraph Application["Application Layer"]
-        CORE["Application Core&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        CORE["Application Core"]
     end
 
     subgraph Domain["Domain Layer"]
-        PORTS["Port Protocols&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        PORTS["Port Protocols"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
-        ADAPTERS["Provider Adapters&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        ADAPTERS["Provider Adapters"]
         STORAGE["Storage Writers / Reader"]
-        OBS_INFRA["Observability Infra&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        OBS_INFRA["Observability Infra"]
     end
 
-    ExternalAPIs["External APIs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-    FS["File System&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-    PROM["Prometheus&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-    OTEL["OpenTelemetry&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+    ExternalAPIs["External APIs"]
+    FS["File System"]
+    PROM["Prometheus"]
+    OTEL["OpenTelemetry"]
 
     ExternalAPIs -.-> ADAPTERS
     FS -.-> STORAGE

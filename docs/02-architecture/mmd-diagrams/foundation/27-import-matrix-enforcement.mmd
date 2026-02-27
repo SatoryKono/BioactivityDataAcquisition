@@ -14,16 +14,16 @@ flowchart TB
 %% keep-orphan: BLOCK, OK, SR
     subgraph Legend["Legend"]
         direction LR
-        OK["✅ Allowed Import&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        BLOCK["❌ Forbidden Import&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        OK["✅ Allowed Import<br/><br/><br/><br/>"]
+        BLOCK["❌ Forbidden Import<br/><br/><br/><br/>"]
     end
 
     subgraph Layers["BioETL Five-Layer Architecture"]
-        INT["<b>Interfaces Layer</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>CLI (Click), HealthServer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/><i>src/bioetl/interfaces/</i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        COMP["<b>Composition Layer</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>GenericPipelineFactory, RunnerFactory<br/>ServicesBuilder, PipelineRegistry&nbsp;&nbsp;&nbsp;&nbsp;<br/><i>src/bioetl/composition/</i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;"]
-        APP["<b>Application Layer</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>PipelineRunner, BatchExecutor&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>PreflightService, PostrunService&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>23 Transformers&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/><i>src/bioetl/application/</i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
-        INFRA["<b>Infrastructure Layer</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>ChemblAdapter, PubChemAdapter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>SilverWriter, MemoryLock&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>UnifiedHTTPClient, PrometheusMetrics&nbsp;<br/><i>src/bioetl/infrastructure/</i>&nbsp;&nbsp;&nbsp;&nbsp;"]
-        DOM["<b>Domain Layer</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>24 Ports (Protocol)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Entities, Aggregates, Schemas&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Config, Types, Exceptions&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/><i>src/bioetl/domain/</i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"]
+        INT["<b>Interfaces Layer</b><br/>CLI (Click), HealthServer<br/><i>src/bioetl/interfaces/</i><br/><br/>"]
+        COMP["<b>Composition Layer</b><br/>GenericPipelineFactory, RunnerFactory<br/>ServicesBuilder, PipelineRegistry<br/><i>src/bioetl/composition/</i><br/>"]
+        APP["<b>Application Layer</b><br/>PipelineRunner, BatchExecutor<br/>PreflightService, PostrunService<br/>23 Transformers<br/><i>src/bioetl/application/</i>"]
+        INFRA["<b>Infrastructure Layer</b><br/>ChemblAdapter, PubChemAdapter<br/>SilverWriter, MemoryLock<br/>UnifiedHTTPClient, PrometheusMetrics<br/><i>src/bioetl/infrastructure/</i>"]
+        DOM["<b>Domain Layer</b><br/>24 Ports (Protocol)<br/>Entities, Aggregates, Schemas<br/>Config, Types, Exceptions<br/><i>src/bioetl/domain/</i>"]
     end
 
     %% Allowed imports (solid green arrows)
@@ -57,9 +57,9 @@ flowchart TB
     COMP -.-x|"❌ FORBIDDEN"| INT
 
     subgraph Enforcement["Enforcement Mechanism"]
-        IL["import-linter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>Blocks PR on violation&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        AT["tests/architecture/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>pytest architecture tests&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        SR["ai-selfreview-rules.md&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>ARCH-001 detection scripts&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+        IL["import-linter<br/>Blocks PR on violation<br/><br/><br/>"]
+        AT["tests/architecture/<br/>pytest architecture tests<br/><br/><br/>"]
+        SR["ai-selfreview-rules.md<br/>ARCH-001 detection scripts<br/><br/><br/>"]
     end
 
     IL -.-> Layers
