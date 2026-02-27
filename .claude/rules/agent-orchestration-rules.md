@@ -20,6 +20,7 @@
 | `py-config-bot` | sonnet | YAML configs (pipeline/DQ/filter) | `configs/` |
 | `py-debug-bot` | opus | RCA падений тестов, исправление ошибок | `src/bioetl/`, `tests/` |
 | `py-doc-bot` | sonnet | Документация, ADR, CHANGELOG, docstrings | `docs/`, docstrings |
+| `py-test-swarm` | opus | Иерархическое тестирование (L1→L2→L3), flakiness, coverage | `tests/`, `reports/` |
 
 > **py-code-bot** не зарегистрирован как subagent_type — production-код пишем напрямую.
 
@@ -33,6 +34,9 @@
 | Создать pipeline config | `py-config-bot` | `task_id=X, mode=create, provider=chembl, entity=mechanism` |
 | Разобрать падение теста | `py-debug-bot` | `task_id=X, phase=post_refactor, failing_test_report="...", stack_traces="..."` |
 | Обновить docs после рефакторинга | `py-doc-bot` | `task_id=X, rf_ids=[RF-001, RF-002]` |
+| Полный аудит тестирования | `py-test-swarm` | `task_id=SWARM-001, mode=full_audit` |
+| Починить падающие тесты (массово) | `py-test-swarm` | `task_id=SWARM-002, mode=fix_failures, scope=domain` |
+| Сканирование flaky тестов | `py-test-swarm` | `task_id=SWARM-003, mode=flakiness_scan, flakiness_runs=10` |
 
 ## Стандартный workflow
 
@@ -59,6 +63,8 @@
 | vcr-record | `.claude/skills/vcr-record.md` | Управление VCR cassettes |
 | verify-architecture | `.claude/skills/verify-architecture.md` | Pre-commit проверка (43 теста) |
 | documentation-audit | `.claude/skills/documentation-audit.skill.md` | Аудит документации |
+| test-swarm | `.claude/skills/test-swarm.md` | Иерархическое тестирование (L1→L2→L3) |
+| documentation-cascade-audit | `.claude/skills/documentation-cascade-audit.skill.md` | Каскадный аудит документации |
 
 ## Полный контекст
 

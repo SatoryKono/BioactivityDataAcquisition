@@ -215,7 +215,11 @@
       "Bash(/tmp/test-invisible.mmd:*)",
       "Bash(/tmp/test-inline-class.mmd:*)",
       "Bash(/tmp/test-comment.mmd:*)",
-      "Bash(/tmp/test-multi-comment.mmd:*)"
+      "Bash(/tmp/test-multi-comment.mmd:*)",
+      "Bash(chmod +x:*)",
+      "Bash(py:*)",
+      "Bash(npx:*)",
+      "Bash(claude mcp:*)"
     ]
   },
   "enabledPlugins": {

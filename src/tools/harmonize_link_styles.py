@@ -28,12 +28,12 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 # ── Canonical semantic palette ────────────────────────────────────────────────
 
 PALETTE = {
-    "data":          {"stroke": "#1E293B", "width": "2",   "dash": None},
-    "orchestration": {"stroke": "#2e7d32", "width": "2",   "dash": None},
-    "di":            {"stroke": "#6a1b9a", "width": "1.5", "dash": "5"},
-    "observability": {"stroke": "#94A3B8", "width": "1",   "dash": None},
-    "error":         {"stroke": "#c62828", "width": "2",   "dash": "4 3"},
-    "baseline":      {"stroke": "#475569", "width": "2",   "dash": None},
+    "data": {"stroke": "#1E293B", "width": "2", "dash": None},
+    "orchestration": {"stroke": "#2e7d32", "width": "2", "dash": None},
+    "di": {"stroke": "#6a1b9a", "width": "1.5", "dash": "5"},
+    "observability": {"stroke": "#94A3B8", "width": "1", "dash": None},
+    "error": {"stroke": "#c62828", "width": "2", "dash": "4 3"},
+    "baseline": {"stroke": "#475569", "width": "2", "dash": None},
 }
 
 # SVG namespace
@@ -189,9 +189,9 @@ def harmonize_er(root: ET.Element) -> int:
 
 HARMONIZERS = {
     "sequence": harmonize_sequence,
-    "class":    harmonize_class,
-    "state":    harmonize_state,
-    "er":       harmonize_er,
+    "class": harmonize_class,
+    "state": harmonize_state,
+    "er": harmonize_er,
 }
 
 

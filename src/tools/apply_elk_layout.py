@@ -53,6 +53,7 @@ def get_elk_init(node_count: int, dense_orthogonal_from: int | None) -> tuple[st
         return ELK_ORTHOGONAL, "ORTHOGONAL"
     return ELK_POLYLINE, "POLYLINE"
 
+
 # Diagrams whose content is a linear pipeline chain — better rendered LR.
 # Pattern matched against stem (filename without extension).
 LR_PATTERNS: list[str] = [

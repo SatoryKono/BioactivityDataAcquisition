@@ -26,6 +26,7 @@ from deltalake.exceptions import (
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
 from bioetl.domain.exceptions import (
+    DeltaTransactionError,
     MergeConflictError,
     PolicyViolationError,
     SchemaEvolutionError,
@@ -231,6 +232,7 @@ class SilverWriter(BaseDeltaWriter):
 
     _MERGE_MAX_RETRIES = 3
     _MERGE_RETRY_DELAY = 0.5  # seconds, doubles each attempt
+    _MERGE_EXEC_TIMEOUT_SECONDS = 45.0
 
     async def _write_merge(
         self,
@@ -247,7 +249,7 @@ class SilverWriter(BaseDeltaWriter):
                     None,
                     lambda: DeltaTable(table_path),
                 )
-                await self._merge_records(dt, data, primary_keys)
+                await self._merge_records(dt, data, primary_keys, table_path)
                 return
             except DeltaTableNotFoundError:
                 await self._write_append(table_path, data, partition_cols)
@@ -908,13 +910,14 @@ class SilverWriter(BaseDeltaWriter):
         dt: DeltaTable,
         records: pa.Table | pa.RecordBatchReader,
         primary_keys: list[str],
+        table_path: str,
     ) -> None:
         """Merge records into existing Delta table."""
         merge_condition = " AND ".join(
             f"target.{key} = source.{key}" for key in primary_keys
         )
         loop = asyncio.get_running_loop()
-        await loop.run_in_executor(
+        merge_future = loop.run_in_executor(
             None,
             lambda: (
                 dt.merge(
@@ -939,6 +942,25 @@ class SilverWriter(BaseDeltaWriter):
                 .execute()
             ),
         )
+        try:
+            await asyncio.wait_for(
+                merge_future,
+                timeout=self._MERGE_EXEC_TIMEOUT_SECONDS,
+            )
+        except asyncio.TimeoutError as exc:
+            self.logger.error(
+                "silver_merge_timeout",
+                table_path=table_path,
+                timeout_seconds=self._MERGE_EXEC_TIMEOUT_SECONDS,
+                primary_keys=primary_keys,
+            )
+            raise DeltaTransactionError(
+                table_path=table_path,
+                reason=(
+                    "Delta merge_execute timed out after "
+                    f"{self._MERGE_EXEC_TIMEOUT_SECONDS} seconds"
+                ),
+            ) from exc
 
     # NOTE: get_table_path() and clear() are inherited from BaseDeltaWriter
 
