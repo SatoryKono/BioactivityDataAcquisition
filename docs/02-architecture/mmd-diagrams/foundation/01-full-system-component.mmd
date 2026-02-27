@@ -102,14 +102,14 @@ flowchart TB
         direction TB
         subgraph Ports["Ports (Protocols)"]
             direction TB
-            DataSourcePort["DataSourcePort"]
-            StoragePort["StoragePort"]
-            LockPort["LockPort"]
-            CheckpointPort["CheckpointPort"]
-            QuarantinePort["QuarantinePort"]
-            MetricsPort["MetricsPort"]
-            TracingPort["TracingPort"]
-            LoggerPort["LoggerPort"]
+            DataSourcePort["[P] DataSourcePort"]
+            StoragePort["[P] StoragePort"]
+            LockPort["[P] LockPort"]
+            CheckpointPort["[P] CheckpointPort"]
+            QuarantinePort["[P] QuarantinePort"]
+            MetricsPort["[P] MetricsPort"]
+            TracingPort["[P] TracingPort"]
+            LoggerPort["[P] LoggerPort"]
         end
         subgraph Entities["Entities"]
             direction TB
@@ -137,13 +137,13 @@ flowchart TB
         direction TB
         subgraph Adapters["Data Source Adapters"]
             direction TB
-            ChemblAdapter["ChemblAdapter"]
-            PubchemAdapter["PubchemAdapter"]
-            UniprotAdapter["UniprotAdapter"]
-            PubmedAdapter["PubmedAdapter"]
-            CrossRefAdapter["CrossRefAdapter"]
-            OpenAlexAdapter["OpenAlexAdapter"]
-            S2Adapter["SemanticScholarAdapter"]
+            ChemblAdapter["[A] ChemblAdapter"]
+            PubchemAdapter["[A] PubchemAdapter"]
+            UniprotAdapter["[A] UniprotAdapter"]
+            PubmedAdapter["[A] PubmedAdapter"]
+            CrossRefAdapter["[A] CrossRefAdapter"]
+            OpenAlexAdapter["[A] OpenAlexAdapter"]
+            S2Adapter["[A] SemanticScholarAdapter"]
         end
         subgraph HTTP["HTTP Infrastructure"]
             direction TB
@@ -154,13 +154,13 @@ flowchart TB
         end
         subgraph Storage["Storage Writers"]
             direction TB
-            BronzeWriter["BronzeWriter"]
-            SilverWriter["SilverWriter"]
-            GoldWriter["GoldWriter"]
+            BronzeWriter["[A] BronzeWriter"]
+            SilverWriter["[A] SilverWriter"]
+            GoldWriter["[A] GoldWriter"]
         end
         subgraph Locking["Locking"]
             direction TB
-            MemoryLock["MemoryLock"]
+            MemoryLock["[A] MemoryLock"]
         end
     end
 
@@ -182,7 +182,7 @@ flowchart TB
     subgraph Legend["Legend"]
         direction TB
         L1["Action"] --> L2["Action"]
-        L3["Port"] -.-> L4["Adapter"]
+        L3["[P] Port"] -.-> L4["[A] Adapter"]
         L5["Critical Path"] ==> L6["Primary Flow"]
     end
 

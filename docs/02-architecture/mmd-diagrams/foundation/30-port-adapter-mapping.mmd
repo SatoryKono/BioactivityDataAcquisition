@@ -41,39 +41,39 @@ flowchart LR
         direction TB
         subgraph CoreDataPorts["Core Data & State"]
             direction TB
-            P1["DataSourcePort"]
-            P2["FilterableDataSourcePort"]
-            P3["StoragePort"]
-            P4["LockPort"]
-            P5["CheckpointPort"]
-            P6["QuarantinePort"]
-            P16["DeltaReaderPort"]
+            P1["[P] DataSourcePort"]
+            P2["[P] FilterableDataSourcePort"]
+            P3["[P] StoragePort"]
+            P4["[P] LockPort"]
+            P5["[P] CheckpointPort"]
+            P6["[P] QuarantinePort"]
+            P16["[P] DeltaReaderPort"]
         end
         subgraph ObservabilityPorts["Observability & DQ"]
             direction TB
-            P7["LoggerPort"]
-            P8["MetricsPort"]
-            P9["TracingPort"]
-            P10["DQMonitorPort"]
-            P17["MemoryMonitorPort"]
-            P19["AuditPort"]
-            P20["HealthCheckPort"]
+            P7["[P] LoggerPort"]
+            P8["[P] MetricsPort"]
+            P9["[P] TracingPort"]
+            P10["[P] DQMonitorPort"]
+            P17["[P] MemoryMonitorPort"]
+            P19["[P] AuditPort"]
+            P20["[P] HealthCheckPort"]
         end
         subgraph PolicyPorts["Validation & Policy"]
             direction TB
-            P11["SilverValidatorPort"]
-            P12["GoldValidatorPort"]
-            P13["PiiHasherPort"]
-            P14["MetadataWriterPort"]
-            P15["MetadataCoordinatorPort"]
-            P22["InputFilterPort"]
-            P21["JsonEncoderPort"]
+            P11["[P] SilverValidatorPort"]
+            P12["[P] GoldValidatorPort"]
+            P13["[P] PiiHasherPort"]
+            P14["[P] MetadataWriterPort"]
+            P15["[P] MetadataCoordinatorPort"]
+            P22["[P] InputFilterPort"]
+            P21["[P] JsonEncoderPort"]
         end
         subgraph RuntimePorts["Runtime Controls"]
             direction TB
-            P18["ShutdownPort"]
-            P23["RateLimiterPort"]
-            P24["CircuitBreakerPort"]
+            P18["[P] ShutdownPort"]
+            P23["[P] RateLimiterPort"]
+            P24["[P] CircuitBreakerPort"]
         end
     end
 
@@ -81,39 +81,39 @@ flowchart LR
         direction TB
         subgraph CoreDataAdapters["Core Data & Storage Adapters"]
             direction TB
-            A1["ProviderAdapters (7)"]
-            A2["FilteredDataSource<br/>CachedBronzeDataSource"]
-            A3["BronzeWriter + SilverWriter + GoldWriter"]
-            A4["MemoryLock"]
-            A5["LocalCheckpoint"]
-            A6["UnifiedQuarantine"]
-            A16["DeltaReader"]
-            A22["CsvFilterReader"]
+            A1["[A] ProviderAdapters (7)"]
+            A2["[A] FilteredDataSource<br/>CachedBronzeDataSource"]
+            A3["[A] BronzeWriter + SilverWriter + GoldWriter"]
+            A4["[A] MemoryLock"]
+            A5["[A] LocalCheckpoint"]
+            A6["[A] UnifiedQuarantine"]
+            A16["[A] DeltaReader"]
+            A22["[A] CsvFilterReader"]
         end
         subgraph ObservabilityAdapters["Observability & DQ Adapters"]
             direction TB
-            A7["StructlogLogger<br/>UnifiedLogger"]
-            A8["PrometheusMetrics"]
-            A9["NoOpTracing<br/>OpenTelemetryTracer"]
-            A10["DataQualityMonitor"]
-            A17["MemoryMonitor"]
-            A19["FileAuditAdapter"]
-            A20["HealthCheckMixin"]
+            A7["[A] StructlogLogger<br/>UnifiedLogger"]
+            A8["[A] PrometheusMetrics"]
+            A9["[A] NoOpTracing<br/>OpenTelemetryTracer"]
+            A10["[A] DataQualityMonitor"]
+            A17["[A] MemoryMonitor"]
+            A19["[A] FileAuditAdapter"]
+            A20["[A] HealthCheckMixin"]
         end
         subgraph PolicyAdapters["Validation & Metadata Adapters"]
             direction TB
-            A11["PanderaSilverValidator"]
-            A12["PanderaGoldValidator"]
-            A13["Sha256PiiHasher"]
-            A14["MetadataWriter"]
-            A15["MetadataCoordinator"]
-            A21["StdLibJsonEncoder<br/>OrjsonEncoder"]
+            A11["[A] PanderaSilverValidator"]
+            A12["[A] PanderaGoldValidator"]
+            A13["[A] Sha256PiiHasher"]
+            A14["[A] MetadataWriter"]
+            A15["[A] MetadataCoordinator"]
+            A21["[A] StdLibJsonEncoder<br/>OrjsonEncoder"]
         end
         subgraph RuntimeAdapters["Runtime Control Adapters"]
             direction TB
-            A18["ShutdownService"]
-            A23["TokenBucket"]
-            A24["CircuitBreaker"]
+            A18["[A] ShutdownService"]
+            A23["[A] TokenBucket"]
+            A24["[A] CircuitBreaker"]
         end
     end
 
@@ -121,15 +121,15 @@ flowchart LR
         direction TB
         subgraph NoOpObservability["NoOp Observability"]
             direction TB
-            N1["NoOpTracing"]
-            N2["NoOpMetrics"]
-            N3["NoOpAudit"]
-            N5["NoOpMemoryMonitor"]
+            N1["[N] NoOpTracing"]
+            N2["[N] NoOpMetrics"]
+            N3["[N] NoOpAudit"]
+            N5["[N] NoOpMemoryMonitor"]
         end
         subgraph NoOpPolicy["NoOp Policy"]
             direction TB
-            N4["NoOpPiiHasher"]
-            N6["NoOpMetadataWriter"]
+            N4["[N] NoOpPiiHasher"]
+            N6["[N] NoOpMetadataWriter"]
         end
     end
 

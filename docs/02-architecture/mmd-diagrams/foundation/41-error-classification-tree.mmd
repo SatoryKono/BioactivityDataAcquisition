@@ -48,23 +48,23 @@ flowchart TB
     ERROR --> INFRA{{"Infrastructure Error?"}}
 
     %% HTTP errors
-    HTTP -->|"auth"| AUTH["ServiceAuthenticationError\n(CriticalError)\n→ FAIL FAST, no retry\n→ Check API key config"]
-    HTTP -->|"404"| NOTFOUND["ApiError\n(RecoverableError)\n→ Log warning\n→ Skip entity"]
-    HTTP -->|"429"| RATE["RateLimitExceededError\n(RecoverableError)\n→ Check Retry-After header\n→ Exponential backoff"]
-    HTTP -->|"5xx"| SERVER["ServiceUnavailableError\n(RecoverableError)\n→ Retry with backoff\n→ Max 3 attempts"]
-    HTTP -.->|"other"| UNKNOWN_HTTP["ExternalServiceError\n→ Log, classify, retry"]
+    HTTP -->|"auth"| AUTH["[E] ServiceAuthenticationError\n(CriticalError)\n→ FAIL FAST, no retry\n→ Check API key config"]
+    HTTP -->|"404"| NOTFOUND["[E] ApiError\n(RecoverableError)\n→ Log warning\n→ Skip entity"]
+    HTTP -->|"429"| RATE["[E] RateLimitExceededError\n(RecoverableError)\n→ Check Retry-After header\n→ Exponential backoff"]
+    HTTP -->|"5xx"| SERVER["[E] ServiceUnavailableError\n(RecoverableError)\n→ Retry with backoff\n→ Max 3 attempts"]
+    HTTP -.->|"other"| UNKNOWN_HTTP["[E] ExternalServiceError\n→ Log, classify, retry"]
 
     %% Domain errors
-    DOMAIN -->|"schema"| SCHEMA["SchemaViolationError\n(DataQualityError → ValidationError)\n→ Route to Quarantine"]
-    DOMAIN -->|"missing"| MISSING["MissingRequiredFieldError\n(ValidationError)\n→ Route to Quarantine"]
-    DOMAIN -->|"format"| FORMAT["InvalidDataFormatError\n(ValidationError)\n→ Route to Quarantine"]
-    DOMAIN -->|"dq"| DQTHRESH["DataQualityThresholdError\n→ error_rate > 20%\n→ FAIL entire batch"]
+    DOMAIN -->|"schema"| SCHEMA["[E] SchemaViolationError\n(DataQualityError → ValidationError)\n→ Route to Quarantine"]
+    DOMAIN -->|"missing"| MISSING["[E] MissingRequiredFieldError\n(ValidationError)\n→ Route to Quarantine"]
+    DOMAIN -->|"format"| FORMAT["[E] InvalidDataFormatError\n(ValidationError)\n→ Route to Quarantine"]
+    DOMAIN -->|"dq"| DQTHRESH["[E] DataQualityThresholdError\n→ error_rate > 20%\n→ FAIL entire batch"]
 
     %% Infrastructure errors
-    INFRA -->|"lock-lost"| LOCK["LockLostError\n(CriticalError)\n→ ABORT immediately\n→ No partial write"]
-    INFRA -->|"lock-timeout"| LOCKACQ["LockAcquisitionError\n(CriticalError)\n→ FAIL, another instance running"]
-    INFRA -->|"storage"| STORE["StorageError\n(RecoverableError)\n→ Retry Delta write"]
-    INFRA -->|"cb-open"| CB["CircuitBreakerOpenError\n(RecoverableError)\n→ Wait recovery_timeout (300s)\n→ HALF_OPEN probe"]
+    INFRA -->|"lock-lost"| LOCK["[E] LockLostError\n(CriticalError)\n→ ABORT immediately\n→ No partial write"]
+    INFRA -->|"lock-timeout"| LOCKACQ["[E] LockAcquisitionError\n(CriticalError)\n→ FAIL, another instance running"]
+    INFRA -->|"storage"| STORE["[E] StorageError\n(RecoverableError)\n→ Retry Delta write"]
+    INFRA -->|"cb-open"| CB["[E] CircuitBreakerOpenError\n(RecoverableError)\n→ Wait recovery_timeout (300s)\n→ HALF_OPEN probe"]
 
     %% Branch groups
     subgraph HTTPBranch["HTTP Branch Outcomes"]
@@ -93,10 +93,10 @@ flowchart TB
     %% Actions
     subgraph Actions["Error Actions"]
         direction LR
-        ACT_RETRY["RETRY<br/>max_attempts: 3<br/>multiplier: 2.0<br/>jitter: MD5-based"]
-        ACT_QUARANTINE["QUARANTINE<br/>QuarantineEntry created<br/>payload truncated 64KB<br/>payload_hash computed"]
-        FAIL_FAST["FAIL FAST<br/>No retry<br/>Pipeline terminates<br/>ExitCode.PIPELINE_ERROR"]
-        BATCH_FAIL["BATCH FAIL<br/>error_rate > 20%<br/>Entire batch rejected<br/>Checkpoint NOT saved"]
+        ACT_RETRY["[A] RETRY<br/>max_attempts: 3<br/>multiplier: 2.0<br/>jitter: MD5-based"]
+        ACT_QUARANTINE["[A] QUARANTINE<br/>QuarantineEntry created<br/>payload truncated 64KB<br/>payload_hash computed"]
+        FAIL_FAST["[A] FAIL FAST<br/>No retry<br/>Pipeline terminates<br/>ExitCode.PIPELINE_ERROR"]
+        BATCH_FAIL["[A] BATCH FAIL<br/>error_rate > 20%<br/>Entire batch rejected<br/>Checkpoint NOT saved"]
     end
 
     AUTH ==> FAIL_FAST
@@ -112,7 +112,7 @@ flowchart TB
     CB --> ACT_RETRY
 
     %% Retry exhaustion
-    ACT_RETRY -.->|"exhausted"| EXHAUST["RetryExhaustedError<br/>Record CB failure<br/>Circuit may trip"]
+    ACT_RETRY -.->|"exhausted"| EXHAUST["[E] RetryExhaustedError<br/>Record CB failure<br/>Circuit may trip"]
     EXHAUST ==> FAIL_FAST
 
     %% Layout constraints
