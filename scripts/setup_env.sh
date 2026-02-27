@@ -7,6 +7,15 @@ BLUE='\033[0;34m'
 YELLOW='\033[0;33m'
 NC='\033[0m' # No Color
 
+# Ensure we are running from the repository root
+REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || true)
+
+if [ -z "$REPO_ROOT" ]; then
+    echo -e "${YELLOW}Warning: Could not determine repository root with git. Assuming current directory.${NC}"
+else
+    cd "$REPO_ROOT"
+fi
+
 echo -e "${BLUE}Starting BioETL environment setup...${NC}"
 
 # 1. Check for uv
