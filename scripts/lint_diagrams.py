@@ -107,6 +107,29 @@ DEPRECATED_PALETTE = {
     "#1976d2",
 }
 
+# ADR-040 D1 canonical palette — the ONLY allowed colours in style/classDef.
+# Colours NOT in this set (and not in _CANONICAL_TEXT_COLORS) trigger COLOUR-003.
+CANONICAL_PALETTE = {
+    # Layer fills
+    "#f5f3ff", "#f0fdf4", "#fff1f2", "#fff7ed", "#eff6ff",
+    "#f1f5f9", "#f8fafc", "#fefce8", "#ffe4e6",
+    # Layer strokes
+    "#7c3aed", "#16a34a", "#dc2626", "#f59e0b", "#2563eb",
+    "#64748b", "#475569", "#ca8a04", "#e11d48",
+    # linkStyle semantic colours (ADR-040 D5)
+    "#1e293b", "#94a3b8",
+}
+
+# Colours allowed in the ``color:`` attribute (text colours).
+_CANONICAL_TEXT_COLORS = {
+    "#212121", "#000000", "#ffffff", "#1b5e20", "#1e40af", "#bf360c",
+}
+
+# Short-hex helpers — ``#000`` and ``#fff`` are handled outside hex-6 matching.
+_HEX_COLOR_ATTR_RE = re.compile(
+    r"(?:fill|stroke|color)\s*:\s*#([0-9a-fA-F]{3,6})\b"
+)
+
 
 @dataclass
 class Issue:
@@ -386,6 +409,43 @@ def check_subgraph_emoji(path: Path, lines: list[str]) -> list[Issue]:
     return issues
 
 
+def check_canonical_palette(path: Path, lines: list[str]) -> list[Issue]:
+    """Check that ALL style/classDef colours are from ADR-040 canonical palette (COLOUR-003)."""
+    issues: list[Issue] = []
+    fname = str(path)
+    allowed = CANONICAL_PALETTE | _CANONICAL_TEXT_COLORS
+
+    non_canonical: set[str] = set()
+    for line in lines:
+        if not _STYLE_OR_CLASSDEF_RE.match(line):
+            continue
+        for m in _HEX_COLOR_ATTR_RE.finditer(line):
+            raw = m.group(1)
+            if len(raw) == 3:
+                # Expand short hex: #abc → #aabbcc
+                normalized = "#" + "".join(c * 2 for c in raw.lower())
+            else:
+                normalized = "#" + raw.lower()
+            if normalized not in allowed:
+                non_canonical.add(normalized)
+
+    if non_canonical:
+        issues.append(
+            Issue(
+                file=fname,
+                severity="ERROR",
+                rule="COLOUR-003",
+                message=(
+                    "Non-canonical palette color(s) in style/classDef: "
+                    f"{', '.join(sorted(non_canonical))}. "
+                    "Only ADR-040 D1 colours are allowed."
+                ),
+            )
+        )
+
+    return issues
+
+
 def check_node_count_policy(path: Path, lines: list[str]) -> list[Issue]:
     """Check ADR-040 node-count thresholds (SIZE-001/SIZE-002)."""
     issues: list[Issue] = []
@@ -611,6 +671,7 @@ def lint_file(path: Path, stale_days: int) -> list[Issue]:
     issues.extend(check_placeholder_content(path, lines))
     issues.extend(check_staleness(path, lines, stale_days))
     issues.extend(check_colour_policy(path, lines))
+    issues.extend(check_canonical_palette(path, lines))
     issues.extend(check_subgraph_emoji(path, lines))
     issues.extend(check_node_count_policy(path, lines))
     issues.extend(check_layout_policy(path, lines))

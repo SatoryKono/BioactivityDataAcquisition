@@ -61,7 +61,7 @@ flowchart TB
 
     DQ -->|"0% errors"| CLEAN
     DQ -->|"< 5% errors"| WARN
-    DQ -->|"per-record error"| QUAR
+    DQ -->|"record error"| QUAR
     DQ -->|"> 20% errors"| FAIL
 
     CLEAN --> SW

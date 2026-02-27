@@ -23,8 +23,8 @@ graph TB
             CLOSED["CLOSED<br/>(normal operation)<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
             OPEN["OPEN<br/>(fail fast,<br/>no requests)<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
             HALF["HALF_OPEN<br/>(probe with<br/>single request)<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-            CLOSED -->|"failures ≥ threshold"| OPEN
-            OPEN -->|"recovery_timeout elapsed"| HALF
+            CLOSED -->|"failures ≥ N"| OPEN
+            OPEN -->|"timeout elapsed"| HALF
             HALF -->|"success"| CLOSED
             HALF -->|"failure"| OPEN
         end
