@@ -128,6 +128,13 @@ repos:
         files: ^docs/02-architecture/(mmd-diagrams/.*\.mmd|diagrams/mermaid/.*\.mermaid)$
         pass_filenames: false
 
+
+      - id: validate-diagrams
+        name: Validate diagram source policy (init/view/source)
+        entry: bash scripts/validate_diagrams.sh
+        language: system
+        files: ^docs/.*\.(mermaid|mmd|png|svg)$
+        pass_filenames: false
       - id: check-root-vcr-cassettes
         name: Block root-level VCR cassette files
         entry: python scripts/check_root_vcr_cassettes.py

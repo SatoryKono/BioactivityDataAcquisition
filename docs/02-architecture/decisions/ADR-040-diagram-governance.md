@@ -5,34 +5,36 @@
 **Decision makers:** @BioETL-Team
 **Related:** ADR-005 (Layered Architecture), ADR-020 (Composition Layer)
 
----
+______________________________________________________________________
 
 ## Context
 
 BioETL содержит два каталога диаграмм с разными форматами и назначением:
 
 **Canonical sources** (`docs/02-architecture/mmd-diagrams/`):
+
 - `architecture/` — 18 canonical + 11 subdomain-decomposed = 29 `.mmd` файлов
 - `class-diagrams/` — 16 `.mmd` файлов (class diagram families)
 - `foundation/` — 59 `.mmd` файлов (historical + TOP-25)
 - Итого: **104 `.mmd` файла** (93 canonical по README)
 
 **Decomposed views** (`docs/02-architecture/diagrams/mermaid/`):
+
 - 31 parent diagram × 5 views (`-full`, `-overview`, `-domain`, `-infra`, `-dataflow`)
-- + `00-legend.mermaid`
+- - `00-legend.mermaid`
 - Итого: **156 `.mermaid` файлов**
 
 ### Проблемы до ADR-040
 
 До принятия данного ADR в проекте сосуществовали **две несовместимые цветовые схемы**:
 
-| Слой | Старая (Tailwind-based) | Новая (canonical) |
-|------|------------------------|-------------------|
-| Domain | `#FFF7ED / #F59E0B` | `#f5f3ff / #7c3aed` |
-| Application | `#ECFDF5 / #10B981` | `#f0fdf4 / #16a34a` |
-| Infrastructure | `#EFF6FF / #2563EB` | `#fff1f2 / #dc2626` |
-| Composition | `#F5F3FF / #7C3AED` | `#fff7ed / #f59e0b` |
-| Interfaces | `#F1F5F9 / #64748B` | `#eff6ff / #2563eb` |
+| Слой           | Старая (Tailwind-based) | Новая (canonical)   |
+| -------------- | ----------------------- | ------------------- |
+| Domain         | `#FFF7ED / #F59E0B`     | `#f5f3ff / #7c3aed` |
+| Application    | `#ECFDF5 / #10B981`     | `#f0fdf4 / #16a34a` |
+| Infrastructure | `#EFF6FF / #2563EB`     | `#fff1f2 / #dc2626` |
+| Composition    | `#F5F3FF / #7C3AED`     | `#fff7ed / #f59e0b` |
+| Interfaces     | `#F1F5F9 / #64748B`     | `#eff6ff / #2563eb` |
 
 Дополнительно: 286 emoji-префиксов в subgraph labels (`🟡 Domain Layer`) мешали CLI-рендерингу.
 Все 156 `.mermaid` view-файлов использовали uniform `linkStyle` без семантического разделения типов связей.
@@ -45,7 +47,7 @@ BioETL содержит два каталога диаграмм с разным
 - Шаблон: `mmd-diagrams/_template.mmd`
 - Политика LLM: `docs/02-architecture/06-diagram-policy.md` (POL-LLM-DIAGRAMS-001)
 
----
+______________________________________________________________________
 
 ## Decision
 
@@ -54,18 +56,18 @@ BioETL содержит два каталога диаграмм с разным
 Единственным источником палитры является **`theme/custom.css` строки 140–151**.
 Все inline `style` директивы в `.mermaid` и `.mmd` файлах MUST соответствовать этой схеме.
 
-| Слой | Fill | Stroke |
-|------|------|--------|
-| Domain | `#f5f3ff` | `#7c3aed` |
-| Application | `#f0fdf4` | `#16a34a` |
+| Слой           | Fill      | Stroke    |
+| -------------- | --------- | --------- |
+| Domain         | `#f5f3ff` | `#7c3aed` |
+| Application    | `#f0fdf4` | `#16a34a` |
 | Infrastructure | `#fff1f2` | `#dc2626` |
-| Composition | `#fff7ed` | `#f59e0b` |
-| Interfaces | `#eff6ff` | `#2563eb` |
-| External | `#f1f5f9` | `#64748b` |
-| Bronze | `#fff7ed` | `#f59e0b` |
-| Silver | `#f8fafc` | `#475569` |
-| Gold | `#fefce8` | `#ca8a04` |
-| Quarantine | `#ffe4e6` | `#e11d48` |
+| Composition    | `#fff7ed` | `#f59e0b` |
+| Interfaces     | `#eff6ff` | `#2563eb` |
+| External       | `#f1f5f9` | `#64748b` |
+| Bronze         | `#fff7ed` | `#f59e0b` |
+| Silver         | `#f8fafc` | `#475569` |
+| Gold           | `#fefce8` | `#ca8a04` |
+| Quarantine     | `#ffe4e6` | `#e11d48` |
 
 Использование произвольных цветов MUST NOT. Emoji-префиксы в subgraph labels MUST NOT.
 
@@ -91,14 +93,15 @@ Foundation views создаются как `.mermaid` в `diagrams/mermaid/`.
 
 ### D3: View-based Decomposition Rules
 
-| Threshold | Action |
-|-----------|--------|
-| ≤15 узлов | Рекомендуемый предел, без декомпозиции |
-| 16–20 узлов | Soft limit — рассмотреть декомпозицию |
-| 21–35 узлов | WARN — декомпозиция рекомендуется |
-| >35 узлов | CRITICAL — декомпозиция обязательна |
+| Threshold   | Action                                 |
+| ----------- | -------------------------------------- |
+| ≤15 узлов   | Рекомендуемый предел, без декомпозиции |
+| 16–20 узлов | Soft limit — рассмотреть декомпозицию  |
+| 21–35 узлов | WARN — декомпозиция рекомендуется      |
+| >35 узлов   | CRITICAL — декомпозиция обязательна    |
 
 Стандартные view-типы для **foundation/**:
+
 - `-full` — полный reference (сохраняется обязательно)
 - `-overview` — cross-layer (≤15 узлов)
 - `-domain` — domain-layer focus (≤15 узлов)
@@ -113,6 +116,7 @@ Foundation views создаются как `.mermaid` в `diagrams/mermaid/`.
 ### D4: Metadata Formats
 
 **`.mmd` файлы** (canonical):
+
 ```
 %% BioETL — <Title>
 %% <Covers>
@@ -126,6 +130,7 @@ Foundation views создаются как `.mermaid` в `diagrams/mermaid/`.
 ```
 
 **`.mermaid` view-файлы** (decomposed):
+
 ```
 %% View: <Overview|Domain|Infrastructure|Dataflow|Full> | Parent: <file.mermaid>
 flowchart TB
@@ -136,16 +141,17 @@ flowchart TB
 View-файлы с ≥3 типами связей и >5 соединениями SHOULD использовать дифференцированный `linkStyle`.
 Классификация выполняется по принадлежности узлов к subgraph-слою (Domain → DI, Infrastructure → data и т.д.).
 
-| Тип связи | Стиль |
-|-----------|-------|
-| data flow | `stroke:#1E293B,stroke-width:2px` |
-| orchestration | `stroke:#16a34a,stroke-width:2px` |
-| DI / implements | `stroke:#7c3aed,stroke-width:1.5px,stroke-dasharray:5` |
-| observability | `stroke:#94A3B8,stroke-width:1px` |
-| error / quarantine | `stroke:#dc2626,stroke-width:2px,stroke-dasharray:4` |
-| generic | `stroke:#475569,stroke-width:2px,stroke-dasharray:5` |
+| Тип связи          | Стиль                                                  |
+| ------------------ | ------------------------------------------------------ |
+| data flow          | `stroke:#1E293B,stroke-width:2px`                      |
+| orchestration      | `stroke:#16a34a,stroke-width:2px`                      |
+| DI / implements    | `stroke:#7c3aed,stroke-width:1.5px,stroke-dasharray:5` |
+| observability      | `stroke:#94A3B8,stroke-width:1px`                      |
+| error / quarantine | `stroke:#dc2626,stroke-width:2px,stroke-dasharray:4`   |
+| generic            | `stroke:#475569,stroke-width:2px,stroke-dasharray:5`   |
 
 Каждый differentiated блок MUST сопровождаться комментарием:
+
 ```
 %% linkStyle: data 0-3 | orchestration 4-8 | di 9-11
 ```
@@ -154,21 +160,23 @@ View-файлы с ≥3 типами связей и >5 соединениями
 
 `scripts/lint_diagrams.py` проверяет оба каталога:
 
-| Rule | Description |
-|------|-------------|
-| SIZE-001 | Node count > 35 → ERROR |
-| SIZE-002 | Node count > 20 → WARN |
-| META-001 | Отсутствие `@version`/`@date`/`@type`/`@level` в `.mmd` → WARN |
-| META-002 | Отсутствие `%% View:` в `.mermaid` view-файле → WARN |
-| COLOUR-001 | Использование deprecated pre-ADR-040 палитры в `style`/`classDef` → ERROR |
-| COLOUR-002 | Emoji в subgraph labels → ERROR |
-| GRAPH-001 | Orphan nodes (defined but not in any edge) в `flowchart`/`sequenceDiagram` → WARN |
+| Rule       | Description                                                                       |
+| ---------- | --------------------------------------------------------------------------------- |
+| SIZE-001   | Node count > 35 → ERROR                                                           |
+| SIZE-002   | Node count > 20 → WARN                                                            |
+| META-001   | Отсутствие `@version`/`@date`/`@type`/`@level` в `.mmd` → WARN                    |
+| META-002   | Отсутствие `%% View:` в `.mermaid` view-файле → WARN                              |
+| COLOUR-001 | Использование deprecated pre-ADR-040 палитры в `style`/`classDef` → ERROR         |
+| COLOUR-002 | Emoji в subgraph labels → ERROR                                                   |
+| GRAPH-001  | Orphan nodes (defined but not in any edge) в `flowchart`/`sequenceDiagram` → WARN |
 
 Примечание по реализации `SIZE-*`:
+
 - `*-full.mermaid` reference views исключены из `SIZE-001`/`SIZE-002`.
 - `00-legend*` исключены из `SIZE-001`/`SIZE-002`.
 
 Примечание по size-normalization (`scripts/uniform_diagram_sizes.py`):
+
 - `@uniform-group` задаёт групповую нормализацию высоты.
 - `@uniform-width global` (по умолчанию) использует общую ширину для всех групп.
 - `@uniform-width group` разрешает width per group для снижения `&nbsp;`-padding в перегруженных class-diagram family.
@@ -178,16 +186,19 @@ Pre-commit hooks: `lint-diagrams`, `prune-orphan-diagram-nodes`.
 #### GRAPH-001 — Orphan Node Rule
 
 Реализован в `scripts/prune_orphan_nodes.py`. Нода считается orphan, если:
+
 - Определена (`NodeId["label"]` или bare `NodeId`) в diagram
 - Не участвует ни в одном edge / message в том же файле
 
 **Исключения (нода не флагируется):**
+
 - Аннотация `%% keep-orphan: NodeId` (inline в файле)
 - Нода внутри subgraph, чьё имя встречается в edge (lenient subgraph rule)
 - Файлы `00-legend*`
 - `classDiagram`, `stateDiagram`, `erDiagram`, `mindmap`
 
 **Инструмент:**
+
 ```bash
 python scripts/prune_orphan_nodes.py --check      # аудит
 python scripts/prune_orphan_nodes.py --fix         # удалить garbage orphans
@@ -196,11 +207,11 @@ python scripts/prune_orphan_nodes.py --grandfather # exemption для всех �
 
 ### D7: Tool Selection Criteria
 
-| Условие | Инструмент | Layout |
-|---------|------------|--------|
-| ≤20 узлов | Mermaid (Dagre) | TB или LR |
-| 21–40 узлов | Mermaid + ELK init | TB или LR |
-| >40 узлов | Mermaid + ELK init (preferred) или D2 (ELK engine) | TB или LR |
+| Условие     | Инструмент                                         | Layout    |
+| ----------- | -------------------------------------------------- | --------- |
+| ≤20 узлов   | Mermaid (Dagre)                                    | TB или LR |
+| 21–40 узлов | Mermaid + ELK init                                 | TB или LR |
+| >40 узлов   | Mermaid + ELK init (preferred) или D2 (ELK engine) | TB или LR |
 
 ### D8: Adaptive Layout Rules
 
@@ -214,35 +225,35 @@ ELK (Eclipse Layout Kernel) SHOULD использоваться для `flowchar
 
 **Direction selection:**
 
-| Паттерн | Direction | Примеры |
-|---------|-----------|---------|
-| Иерархия / DI граф / port map | `TB` | `01-high-level-hexagonal`, `12-bootstrap-di-container` |
-| Pipeline / data flow / config chain | `LR` | `03-medallion-data-flow`, `11-configuration-system` |
+| Паттерн                             | Direction | Примеры                                                |
+| ----------------------------------- | --------- | ------------------------------------------------------ |
+| Иерархия / DI граф / port map       | `TB`      | `01-high-level-hexagonal`, `12-bootstrap-di-container` |
+| Pipeline / data flow / config chain | `LR`      | `03-medallion-data-flow`, `11-configuration-system`    |
 
 **CI Rules (lint_diagrams.py):**
 
-| Rule | Условие | Severity |
-|------|---------|----------|
-| LAYOUT-001 | `flowchart/graph` с `@nodes > 20` без ELK init | WARNING |
-| LAYOUT-002 | `flowchart/graph` с `@nodes > 40` без ELK init | ERROR |
+| Rule       | Условие                                        | Severity |
+| ---------- | ---------------------------------------------- | -------- |
+| LAYOUT-001 | `flowchart/graph` с `@nodes > 20` без ELK init | WARNING  |
+| LAYOUT-002 | `flowchart/graph` с `@nodes > 40` без ELK init | ERROR    |
 
 **Инструмент:** `src/tools/apply_elk_layout.py --dry-run` для аудита, без `--dry-run` для применения.
 
----
+______________________________________________________________________
 
 ## Implementation
 
 Выполнено в рамках принятия ADR-040 (2026-02-25):
 
-| Действие | Scope | Результат |
-|----------|-------|-----------|
-| Гармонизация цветовой схемы | 106 `.mermaid` файлов | 300 замен, старая Tailwind-палитра удалена |
-| Удаление emoji из subgraph labels | 106 файлов | 286 emoji убрано |
-| linkStyle дифференциация | 16 flowchart файлов | 5 типов связей |
-| Создание `_template.mmd` | `mmd-diagrams/` | Единый шаблон для новых диаграмм |
-| `@nodes` в architecture/ | 29 файлов | Уже присутствовали |
+| Действие                          | Scope                 | Результат                                  |
+| --------------------------------- | --------------------- | ------------------------------------------ |
+| Гармонизация цветовой схемы       | 106 `.mermaid` файлов | 300 замен, старая Tailwind-палитра удалена |
+| Удаление emoji из subgraph labels | 106 файлов            | 286 emoji убрано                           |
+| linkStyle дифференциация          | 16 flowchart файлов   | 5 типов связей                             |
+| Создание `_template.mmd`          | `mmd-diagrams/`       | Единый шаблон для новых диаграмм           |
+| `@nodes` в architecture/          | 29 файлов             | Уже присутствовали                         |
 
----
+______________________________________________________________________
 
 ## Consequences
 
@@ -266,10 +277,28 @@ ELK (Eclipse Layout Kernel) SHOULD использоваться для `flowchar
 - **Эвристика `@nodes`**: подсчёт узлов ±20% от реального (subgraph границы). Митигация: lint проверяет только >35 threshold
 - **Расхождение `-full.mermaid` с источником**: `foundation/*.mmd` и `diagrams/mermaid/*-full.mermaid` могут разойтись. Митигация: CI drift check (планируется)
 
----
+______________________________________________________________________
 
 ## Related ADRs
 
 - **ADR-005** — Layered Architecture (Hexagonal / Ports & Adapters)
 - **ADR-020** — Composition Layer isolation
 - **POL-LLM-DIAGRAMS-001** — `docs/02-architecture/06-diagram-policy.md`
+
+## Addendum (2026-02-26): Optimization Strategy Clarifications
+
+The team recorded the following clarifications after practical validation of Mermaid rendering behavior and toolchain constraints:
+
+1. **Subgraph direction is non-authoritative**: `direction` inside `subgraph` MUST NOT be treated as a reliable layout control mechanism in Mermaid. For strict mixed-direction requirements, prefer decomposition or alternative renderers.
+1. **`linkStyle` is fragile by index**: because Mermaid applies `linkStyle` by edge order, usage SHOULD be minimal and focused on a small number of critical links.
+1. **`%%{init: ...}%%` is mandatory baseline** for Mermaid source files used in user-facing docs.
+1. **Render pipeline standardization**:
+   - Mermaid CLI (`mmdc`) with `--configFile` and SVG/PNG/PDF outputs,
+   - PlantUML with `-tsvg`,
+   - D2 with explicit `--layout` (`dagre` or `elk`).
+
+Operational KPI targets for CI gates:
+
+- `0` `.png/.svg` files without corresponding source/metadata.
+- `0` user-facing diagrams with `OVERLOADED`/`CRITICAL` status.
+- `100%` Mermaid sources contain both `%%{init: ...}%%` and `%% View:` metadata.

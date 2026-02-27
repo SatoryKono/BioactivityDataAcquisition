@@ -1,0 +1,10 @@
+%%{init: {"theme": "base"}}%%
+%% View: legend | scope: conventions | max_nodes: 12 %%
+flowchart LR
+  L1[Blue border = Port/Contract]
+  L2[Rounded node = Service or Use Case]
+  L3[Gray edge = Data flow]
+  L4[Dashed edge = Optional interaction]
+  L1 --> L2
+  L2 --> L3
+  L3 -.-> L4
