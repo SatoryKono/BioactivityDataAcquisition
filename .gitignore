@@ -175,3 +175,4 @@ data/.idea/
 *.pak
 *.json
 /CUsersFedor/.cache/puppeteer
+/chrome-headless-shell

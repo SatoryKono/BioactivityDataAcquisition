@@ -59,7 +59,7 @@ _SKIP_DECL_RE = re.compile(
 )
 _EDGE_HINT_RE = re.compile(r"(--|->|==>|-.->|~~~|<--|--x|--o)")
 _KEEP_SIZE_RE = re.compile(r"%%\s*keep-size\s*:\s*(.*)")
-_UNIFORM_META_RE = re.compile(r"^\s*%%\s*@uniform\b")
+_UNIFORM_META_RE = re.compile(r"^\s*%%\s*@uniform\b(?!-(group|stats))")
 _LINE_BREAK_RE = re.compile(r"(?i)<br\s*/?>|\\n")
 _NBSP_TAIL_RE = re.compile(r"(?:&nbsp;|\u00A0)+$")
 _CLASS_BLOCK_START_RE = re.compile(
@@ -487,6 +487,13 @@ def process_file(path: Path, fix: bool) -> FileResult:
             if diagram_type in {"skip", "unknown"}
             else "not-target-diagram-type"
         )
+        return result
+
+    # Skip files managed by uniform_diagram_sizes.py groupwise sizing
+    if any(
+        re.match(r"^\s*%%\s*@uniform-group\b", ln) for ln in lines
+    ):
+        result.skipped_reason = "has-uniform-groups"
         return result
 
     keep_ids = parse_keep_size(lines)

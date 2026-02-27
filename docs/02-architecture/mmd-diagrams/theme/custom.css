@@ -71,12 +71,19 @@ svg {
 }
 
 /* Force opaque background on edge labels — Mermaid generates
-   .labelBkg { background-color: rgba(255,255,255,.5) } with
-   ID-scoped selector, making labels invisible on transparent PNGs. */
+   #id .edgeLabel rect { opacity: .5 } and
+   #id .labelBkg { background-color: rgba(255,255,255,.5) }
+   with ID-scoped selectors, making labels invisible on white/transparent BG. */
 .edgeLabel .labelBkg,
 .labelBkg {
     background-color: #ffffff !important;
     opacity: 1 !important;
+}
+
+/* SVG rect behind edge label text — override Mermaid's 50% opacity */
+.edgeLabel rect {
+    opacity: 1 !important;
+    fill: #ffffff !important;
 }
 
 /* ── Sequence diagram ───────────────────────────────── */
@@ -158,6 +165,42 @@ g.methods-group .nodeLabel {
     font-size: 12px !important;
     font-weight: 400 !important;
 }
+
+/*
+ * CSS-based minimum sizing (P1: replaces &nbsp; padding).
+ *
+ * SVG <rect> does NOT support min-width/min-height (CSS Box Model).
+ * Instead, we target the HTML <div> inside <foreignObject> — Mermaid
+ * measures this content during rendering, so CSS min-* dimensions
+ * expand the foreignObject → rect is sized accordingly.
+ *
+ * Requires htmlLabels: true (set in mermaid-config.json).
+ *
+ * Usage in .mmd classDiagram:
+ *   classDef size-sm fill:#e3f2fd,stroke:#1565c0
+ *   class MySmallClass size-sm
+ *
+ * The classDef applies fill/stroke to the rect; the CSS below provides
+ * the minimum dimension via the HTML label content path.
+ */
+
+/* Baseline: all class member groups get consistent min-height */
+g.members-group foreignObject,
+g.methods-group foreignObject {
+    min-height: 40px;
+}
+
+/* Size tiers — target the foreignObject HTML content divs */
+/* Small: compact protocols, simple value objects */
+.node foreignObject > div,
+g.classGroup foreignObject > div {
+    box-sizing: border-box;
+}
+
+/* Flowchart node sizing tiers */
+.node.size-sm foreignObject > div { min-height: 80px; min-width: 180px; }
+.node.size-md foreignObject > div { min-height: 140px; min-width: 260px; }
+.node.size-lg foreignObject > div { min-height: 200px; min-width: 340px; }
 
 /* ── State diagram ──────────────────────────────────── */
 g.stateGroup rect {

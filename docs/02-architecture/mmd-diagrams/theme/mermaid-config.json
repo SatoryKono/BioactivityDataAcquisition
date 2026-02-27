@@ -73,11 +73,11 @@
     "cScale7": "#1976d2"
   },
   "flowchart": {
-    "curve": "basis",
+    "curve": "step",
     "padding": 24,
     "nodeSpacing": 50,
-    "rankSpacing": 60,
-    "htmlLabels": false,
+    "rankSpacing": 45,
+    "htmlLabels": true,
     "useMaxWidth": true,
     "diagramPadding": 16,
     "wrappingWidth": 200
@@ -95,12 +95,18 @@
     "diagramMarginX": 50,
     "diagramMarginY": 16,
     "useMaxWidth": true,
-    "rightAngles": false,
+    "rightAngles": true,
     "showSequenceNumbers": false
+  },
+  "elk": {
+    "mergeEdges": false,
+    "nodePlacementStrategy": "NETWORK_SIMPLEX"
   },
   "class": {
     "defaultRenderer": "elk",
-    "useMaxWidth": true
+    "useMaxWidth": true,
+    "padding": 16,
+    "htmlLabels": true
   },
   "state": {
     "useMaxWidth": true,

@@ -8,6 +8,7 @@
 %% @uniform class width=248 height=72 max_title_len=26 max_desc_lines=2
 
 classDiagram
+    direction TB
     class IdentityService {
         +compute_entity_id(provider, entity_type, source_id, record) EntityID
         +compute_content_hash(provider, record) ContentHash

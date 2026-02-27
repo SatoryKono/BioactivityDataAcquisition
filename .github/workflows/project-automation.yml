@@ -54,19 +54,13 @@ jobs:
                     uv run pytest tests -m "not e2e and not benchmark" --ignore=tests/e2e --ignore=tests/contract \
                       --cov=src/bioetl --cov-report=term-missing --cov-fail-under=85
 
-            # /render-diagrams command
-            # Note: continue-on-error because mermaid.ink API may be unavailable
-            # and mmdc is not installed in CI.  Diagram consistency is best-effort.
-            -   name: Render Diagrams & Check Consistency
-                continue-on-error: true
+            # Diagram rendering is handled by .github/workflows/docs.yml
+            # via docs/02-architecture/mmd-diagrams/render.sh.
+            # Keep this workflow focused on code/test automation only.
+            -   name: Diagram Render Check (Deprecated Here)
                 run: |
-                    uv run python scripts/render_diagrams.py
-                    # Fail if diagrams were modified by the script (meaning they were out of sync)
-                    if [[ -n $(git status --porcelain docs/) ]]; then
-                      echo "Error: Diagrams are out of sync. Please run 'python scripts/render_diagrams.py' locally and commit the changes."
-                      git diff
-                      exit 1
-                    fi
+                    echo "Diagram rendering check skipped in project-automation.yml."
+                    echo "Canonical pipeline: docs.yml + mmd-diagrams/render.sh."
 
             # Architecture checks (implied by project rules)
             -   name: Architecture Linting
