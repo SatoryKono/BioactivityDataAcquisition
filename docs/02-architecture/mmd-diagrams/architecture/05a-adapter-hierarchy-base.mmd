@@ -7,7 +7,7 @@
 %% @level System / Component
 %% @view hierarchy-base
 %% @parent 05-provider-adapter-hierarchy.mmd
-%% @nodes 12
+%% @nodes 8
 %% @uniform width=280 height=56 max_title_len=28 max_desc_lines=1
 
 %%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
@@ -41,3 +41,6 @@ graph TB
 
  class DSP,HCP domain
  class HCPM,NSMF,FSM,PFM,BHA,BSA infra
+
+ %% linkStyle: default for all edges
+ linkStyle default stroke:#1e293b,stroke-width:1.5px

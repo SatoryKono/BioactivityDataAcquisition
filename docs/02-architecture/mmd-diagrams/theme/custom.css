@@ -27,7 +27,7 @@ svg {
 .cluster path {
     rx: 12;
     ry: 12;
-    fill: #f8fafc;
+    fill: #f1f5f9;
     stroke: #94a3b8;
     stroke-width: 2px;
     stroke-dasharray: none;
@@ -299,8 +299,9 @@ marker path {
 
 [id*="Silver"] > rect,
 [id*="Silver"] > path {
-    fill: #f8fafc !important;
+    fill: #e2e8f0 !important;
     stroke: #475569 !important;
+    stroke-width: 2px !important;
 }
 
 [id*="Gold"] > rect,
@@ -313,17 +314,6 @@ marker path {
 [id*="Quarantine"] > path {
     fill: #ffe4e6 !important;
     stroke: #e11d48 !important;
-}
-
-/* ── Contrast enhancements ─────────────────────────── */
-
-/* Silver layer is nearly white (#f8fafc) — add visible inner border
-   via box-shadow on the subgraph to distinguish from white BG */
-[id*="Silver"] > rect,
-[id*="Silver"] > path {
-    fill: #f1f5f9 !important;
-    stroke: #475569 !important;
-    stroke-width: 2px !important;
 }
 
 /* ── Node label readability ────────────────────────── */

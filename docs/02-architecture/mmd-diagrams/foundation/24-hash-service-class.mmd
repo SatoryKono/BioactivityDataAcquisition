@@ -66,7 +66,7 @@ classDiagram
  ContentHashService --> ContentHash : returns
  BaseTransformer --> ContentHashService : delegates to
 
- note for ContentHashService "Content Hash Algorithm (RULES.md §2.8.1)\n--------------------------------------\n\nStep 1: Filter Hashable Fields\n────────────────────────────────\nExclude keys starting with '_' prefix:\n• _run_id\n• _run_type\n• _ingestion_ts\n• _source_batch_id\n• _dq_warn\n• _content_hash (self)\n\nStep 2: Normalize Values\n────────────────────────────────\n• NaN / Inf → null\n• Floats → round(value, 10)\n• Dates → ISO 'YYYY-MM-DD'\n• Strings → strip()\n• Nested dicts → recursive normalize\n• Lists → normalize each element\n\nStep 3: Canonical JSON\n────────────────────────────────\njson.dumps(\n data,\n sort_keys=True,\n separators=(',', ':')\n)\n\nStep 4: Compute Hash\n────────────────────────────────\nsha256(provider + canonical_json).hexdigest()"
+ note for ContentHashService "Content Hash Algorithm (RULES.md §2.8.1)\n-----------------\n\nStep 1: Filter Hashable Fields\n────────────────────────────────\nExclude keys starting with '_' prefix:\n• _run_id\n• _run_type\n• _ingestion_ts\n• _source_batch_id\n• _dq_warn\n• _content_hash (self)\n\nStep 2: Normalize Values\n────────────────────────────────\n• NaN / Inf → null\n• Floats → round(value, 10)\n• Dates → ISO 'YYYY-MM-DD'\n• Strings → strip()\n• Nested dicts → recursive normalize\n• Lists → normalize each element\n\nStep 3: Canonical JSON\n────────────────────────────────\njson.dumps(\n data,\n sort_keys=True,\n separators=(',', ':')\n)\n\nStep 4: Compute Hash\n────────────────────────────────\nsha256(provider + canonical_json).hexdigest()"
 
  note for NormalizationRules "Normalization ensures deterministic hashing.\n\nExample transformations:\n• 3.14159265358979 → 3.1415926536\n• float('nan') → null\n• ' hello ' → 'hello'\n• datetime(2024,1,15) → '2024-01-15'"
 
@@ -84,3 +84,6 @@ classDiagram
  }
 
  ContentHashService --> HashFlow : implements
+
+ %% linkStyle: default for all edges
+ linkStyle default stroke:#1e293b,stroke-width:1.5px

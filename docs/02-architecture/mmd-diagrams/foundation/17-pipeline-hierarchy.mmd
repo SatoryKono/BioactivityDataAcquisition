@@ -259,6 +259,6 @@ classDiagram
  %% Notes
  note for BasePipeline "Container for configuration\nand injected services.\n\nDoes NOT orchestrate execution\n(that's PipelineRunner's job)"
 
- note for BaseTransformer "Template Method Pattern\n----------------------\n• transform() - public API\n• _transform_impl() - override point\n\nProvides:\n• Content hash computation\n• JSON serialization\n• Field extraction utilities"
+ note for BaseTransformer "Template Method Pattern\n-----------------\n• transform() - public API\n• _transform_impl() - override point\n\nProvides:\n• Content hash computation\n• JSON serialization\n• Field extraction utilities"
 
  note for BaseChemblTransformer "ChEMBL-specific normalization:\n• ID formatting (CHEMBL123)\n• Unit conversion (nM → μM)\n• Date parsing"

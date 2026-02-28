@@ -5,7 +5,7 @@
 %% @date 2026-02-24
 %% @type flowchart
 %% @level System / Component
-%% @nodes 24
+%% @nodes 19
 %% @reference Decomposed into 09a-observability-app, 09b-observability-infra
 
 %%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
@@ -89,3 +89,6 @@ graph TB
  class OTT,NOT tracing
  class AD,DS,ZSD anomaly
  class PROM,GRAFANA,OTEL_COL,JAEGER ext
+
+ %% linkStyle: default for all edges
+ linkStyle default stroke:#1e293b,stroke-width:1.5px

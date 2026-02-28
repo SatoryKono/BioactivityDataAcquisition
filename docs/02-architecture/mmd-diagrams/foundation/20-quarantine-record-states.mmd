@@ -73,7 +73,7 @@ stateDiagram-v2
 
  note right of NEW
  Quarantine Record Structure
- ------------------------
+ -----------------
  • Retention: 30 days
  • Format: Parquet
  • Path: quarantine/{pipeline}/{date}/
@@ -84,7 +84,7 @@ stateDiagram-v2
 
  note left of IGNORED
  Triage Workflow
- ------------------------
+ -----------------
  1. make quarantine-inspect
  2. Review error patterns
  3. Decide IGNORE or FIX
@@ -95,7 +95,7 @@ stateDiagram-v2
 
  note right of REPROCESSED
  Replay Process
- ------------------------
+ -----------------
  1. Load original Bronze record
  2. Apply updated transformer
  3. Validate with new schema
@@ -126,3 +126,6 @@ stateDiagram-v2
  M4: reprocess_success_rate
  }
  }
+
+ %% linkStyle: default for all edges
+ linkStyle default stroke:#1e293b,stroke-width:1.5px

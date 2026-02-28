@@ -149,10 +149,10 @@ flowchart TB
  style Merge fill:#eff6ff,stroke:#2563eb
 
  %% Layer palette (semantic)
- classDef layer_domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:1.8px;
- classDef layer_application fill:#f0fdf4,stroke:#16a34a,stroke-width:1.8px;
- classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
- classDef layer_composition fill:#fff7ed,stroke:#f59e0b,stroke-width:1.8px;
+ classDef layer_domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:1.5px;
+ classDef layer_application fill:#f0fdf4,stroke:#16a34a,stroke-width:1.5px;
+ classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:1.5px;
+ classDef layer_composition fill:#fff7ed,stroke:#f59e0b,stroke-width:1.5px;
 
  class CFG,PFV,BOOT,SP,DC,DEP1,DEP2,KE,KEYS,EC,E1,E2,E3,E4,DD,MS,CO,CR,XV,CCM layer_application;
  class SB,DS1,DS2,ES1,ES2,ES3,ES4,GW,GT layer_infrastructure;
@@ -161,3 +161,6 @@ flowchart TB
  click CCM "../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md" "Saves per-phase checkpoints and supports resume"
  click MS "../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md" "Merges seed + enricher outputs with conflict resolution"
  click KE "../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md" "Extracts join keys from seed silver for fan-out enrichment"
+
+ %% linkStyle: default for all edges
+ linkStyle default stroke:#1e293b,stroke-width:1.5px

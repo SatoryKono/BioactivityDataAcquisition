@@ -5,7 +5,7 @@
 %% @date 2026-02-28
 %% @type flowchart
 %% @level System / Component
-%% @nodes 42
+%% @nodes 36
 %% @reference Canonical medallion flow — at threshold boundary
 
 %%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
@@ -102,11 +102,11 @@ graph LR
  DELTA_G --> DQ_G --> DQ_RPT
 
  classDef bronze fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
- classDef silver fill:#f1f5f9,stroke:#475569,stroke-width:2px
+ classDef silver fill:#e2e8f0,stroke:#475569,stroke-width:2px
  classDef gold fill:#fefce8,stroke:#ca8a04,stroke-width:2px
  classDef source fill:#f1f5f9,stroke:#64748b
  classDef process fill:#f0fdf4,stroke:#16a34a
- classDef quarantine fill:#fff1f2,stroke:#dc2626
+ classDef quarantine fill:#ffe4e6,stroke:#e11d48,stroke-width:2px
  classDef dq fill:#f5f3ff,stroke:#7c3aed
 
  class BW,BJSONL,BMETA,BAUDIT bronze
@@ -121,7 +121,7 @@ graph LR
  %% linkStyle: dq-pass 12 | error/quarantine 13-14 | silver-write 15-17 | gold-xform 18-19
  %% linkStyle: gold-write 20-21 | dq-reports 22-27
  linkStyle 0 stroke:#64748b,stroke-width:1.5px,stroke-dasharray:5
- linkStyle 1,2,3 stroke:#1E293B,stroke-width:2.5px
+ linkStyle 1,2,3 stroke:#1e293b,stroke-width:2.5px
  linkStyle 4,5,6,7 stroke:#f59e0b,stroke-width:2px
  linkStyle 8,9,10,11 stroke:#16a34a,stroke-width:2px
  linkStyle 12 stroke:#16a34a,stroke-width:2.5px

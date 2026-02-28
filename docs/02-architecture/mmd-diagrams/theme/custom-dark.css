@@ -231,14 +231,14 @@ marker path {
 
 [id*="Silver"] > rect,
 [id*="Silver"] > path {
-    fill: #1e293b !important;
+    fill: #283548 !important;
     stroke: #94a3b8 !important;
 }
 
 [id*="Gold"] > rect,
 [id*="Gold"] > path {
-    fill: #422006 !important;
-    stroke: #fbbf24 !important;
+    fill: #3f2a0f !important;
+    stroke: #f59e0b !important;
 }
 
 [id*="Quarantine"] > rect,

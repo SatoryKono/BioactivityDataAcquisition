@@ -141,11 +141,11 @@ flowchart TB
  style PipelineFactories fill:#fff7ed,stroke:#f59e0b,stroke-dasharray: 5 5
 
  %% Layer palette (semantic)
- classDef layer_domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:1.8px;
- classDef layer_application fill:#f0fdf4,stroke:#16a34a,stroke-width:1.8px;
- classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
- classDef layer_composition fill:#fff7ed,stroke:#f59e0b,stroke-width:1.8px;
- classDef layer_interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:1.8px;
+ classDef layer_domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:1.5px;
+ classDef layer_application fill:#f0fdf4,stroke:#16a34a,stroke-width:1.5px;
+ classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:1.5px;
+ classDef layer_composition fill:#fff7ed,stroke:#f59e0b,stroke-width:1.5px;
+ classDef layer_interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:1.5px;
 
  class CLI layer_interfaces;
  class BOOT,BL,DQF,HCF,DSF,STF,STA,SB,RF,GPF,PR,OB layer_composition;
@@ -156,3 +156,6 @@ flowchart TB
  click SB "../../02-architecture/decisions/ADR-005-composition-layer-separation.md" "Injects storage, lock, checkpoint, quarantine, logger, metrics, tracing"
  click DSF "../../00-project/RULES.md" "Resolves provider registry and shared HTTP client"
  click RF "../../00-project/RULES.md" "Builds PipelineRunner from composed services and adapter"
+
+ %% linkStyle: default for all edges
+ linkStyle default stroke:#1e293b,stroke-width:1.5px

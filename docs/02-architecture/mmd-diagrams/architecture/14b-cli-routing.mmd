@@ -7,7 +7,7 @@
 %% @level System / Component
 %% @view cli-routing
 %% @parent 14-cli-interface-layer.mmd
-%% @nodes 12
+%% @nodes 17
 
 graph TB
  RUN["bioetl run"]:::size-sm
@@ -60,3 +60,6 @@ graph TB
  class RUN,RUN_COMP,HEALTH,EXPORT,QUARANTINE,CHECKPOINT,VACUUM cli
  class BOOT,RF,DSR,TF comp
  class CPR,HS,ES,QS,CS,VS app
+
+ %% linkStyle: default for all edges
+ linkStyle default stroke:#1e293b,stroke-width:1.5px

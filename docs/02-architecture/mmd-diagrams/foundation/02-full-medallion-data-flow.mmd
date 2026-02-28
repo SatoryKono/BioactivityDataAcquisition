@@ -24,23 +24,23 @@ flowchart LR
  subgraph Bronze_Layer["Bronze Layer"]
  direction TB
  BronzeWriter["BronzeWriter"\]
- Bronze[("Bronze Storage<br/>---------------<br/> Format: JSONL + zstd<br/>⏱️ Retention: 90 days<br/>[OK] Validation: None<br/>📍 Path: bronze/v1/<br/>{provider}/{entity}/{date}/")]
+ Bronze[("Bronze Storage<br/>-----------------<br/> Format: JSONL + zstd<br/>⏱️ Retention: 90 days<br/>[OK] Validation: None<br/>📍 Path: bronze/v1/<br/>{provider}/{entity}/{date}/")]
  end
 
  subgraph Silver_Layer["Silver Layer"]
  direction TB
  SilverWriter["SilverWriter"\]
- Silver[("Silver Storage<br/>---------------<br/> Format: Delta Lake<br/>⏱️ Retention: Permanent<br/>[OK] Validation: Pandera (soft<br/>)\n🔄 Strategy: Merge/Upsert\n🔑 Key: content_hash<br/>")]
+ Silver[("Silver Storage<br/>-----------------<br/> Format: Delta Lake<br/>⏱️ Retention: Permanent<br/>[OK] Validation: Pandera (soft<br/>)\n🔄 Strategy: Merge/Upsert\n🔑 Key: content_hash<br/>")]
  end
 
  subgraph Gold_Layer["Gold Layer"]
  direction TB
  GoldWriter["GoldWriter"\]
- Gold[("Gold Storage<br/>---------------<br/> Format: Delta/Parquet<br/>⏱️ Retention: Permanent<br/>[OK] Validation: Pandera (strict<br/>)\n🔄 Strategy: SCD2/Append<br/>")]
+ Gold[("Gold Storage<br/>-----------------<br/> Format: Delta/Parquet<br/>⏱️ Retention: Permanent<br/>[OK] Validation: Pandera (strict<br/>)\n🔄 Strategy: SCD2/Append<br/>")]
  end
 
  subgraph DQ_Branch["Data Quality Branch"]
- DQValidator["DQ Validator<br/>---------------<br/>[!] Soft: >5% errors<br/>[X] Hard: >20% errors"\]
+ DQValidator["DQ Validator<br/>-----------------<br/>[!] Soft: >5% errors<br/>[X] Hard: >20% errors"\]
  end
 
  subgraph Lineage["Lineage Tracking"]
@@ -75,3 +75,6 @@ flowchart LR
  style Gold fill:#fefce8,stroke:#ca8a04,color:#212121
  style Quarantine fill:#ffe4e6,stroke:#dc2626,color:#212121
  style LineageLog fill:#eff6ff,stroke:#2563eb,color:#212121
+
+ %% linkStyle: default for all edges
+ linkStyle default stroke:#1e293b,stroke-width:1.5px

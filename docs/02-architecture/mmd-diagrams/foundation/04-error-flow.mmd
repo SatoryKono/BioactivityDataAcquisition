@@ -44,10 +44,13 @@ flowchart TD
  %% Styling
  classDef success fill:#f0fdf4,stroke:#16a34a,color:#212121
  classDef error fill:#ffe4e6,stroke:#dc2626,color:#212121
- classDef quarantine fill:#fff7ed,stroke:#f59e0b,color:#212121
+ classDef quarantine fill:#ffe4e6,stroke:#e11d48,stroke-width:2px
  classDef classify fill:#eff6ff,stroke:#2563eb,color:#212121
 
  class H,G success
  class Critical,LogCritical error
  class QWrite,QMeta,QLog,DQ quarantine
  class Classify classify
+
+ %% linkStyle: default for all edges
+ linkStyle default stroke:#1e293b,stroke-width:1.5px

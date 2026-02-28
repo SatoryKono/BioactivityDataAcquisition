@@ -129,10 +129,10 @@ flowchart TB
  style ACT_RETRY fill:#f0fdf4,stroke:#16a34a
 
  %% Layer palette (semantic)
- classDef layer_domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:1.8px;
- classDef layer_application fill:#f0fdf4,stroke:#16a34a,stroke-width:1.8px;
- classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
- classDef layer_external fill:#eff6ff,stroke:#2563eb,stroke-width:1.8px;
+ classDef layer_domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:1.5px;
+ classDef layer_application fill:#f0fdf4,stroke:#16a34a,stroke-width:1.5px;
+ classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:1.5px;
+ classDef layer_external fill:#eff6ff,stroke:#2563eb,stroke-width:1.5px;
 
  class DOMAIN,SCHEMA,MISSING,FORMAT,DQTHRESH layer_domain;
  class INFRA,LOCK,LOCKACQ,STORE,CB layer_infrastructure;
@@ -143,3 +143,6 @@ flowchart TB
  click HTTP "../../00-project/RULES.md" "HTTP status routing: auth, 404, 429, 5xx, other"
  click DOMAIN "../../00-project/RULES.md" "Domain validation routing: schema, missing, format, dq"
  click INFRA "../../00-project/RULES.md" "Infrastructure routing: lock, storage, circuit-breaker failures"
+
+ %% linkStyle: default for all edges
+ linkStyle default stroke:#1e293b,stroke-width:1.5px
