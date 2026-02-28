@@ -10,7 +10,7 @@
 %% @nodes   15
 %% @uniform width=224 height=56 max_title_len=22 max_desc_lines=1
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'POLYLINE'}}}%%
 graph TB
 %% keep-orphan: UIDM
     subgraph Infrastructure["Infrastructure Layer"]

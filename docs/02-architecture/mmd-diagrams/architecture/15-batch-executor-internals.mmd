@@ -9,7 +9,7 @@
 %% @allow-polyline-routing
 %% @uniform width=280 height=256 max_title_len=20 max_desc_lines=12
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'POLYLINE'}}}%%
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'POLYLINE'}}}%%
 graph TB
     subgraph BatchExecutor["BatchExecutor"]
         BE["BatchExecutor<br/>━━━━━━━━━━━━━━━━━<br/>_services: PipelineServices<br/>_context: PipelineContext<br/>_config: RecordProcessorConfig<br/>batch_size: int<br/>checkpoint_interval: int<br/>━━━━━━━━━━━━━━━━━<br/>+ execute(limit, query, offset)<br/>+ process(records, start_index)<br/>+ get_dq_context()<br/>+ get_run_statistics()"]:::size-lg

@@ -7,8 +7,8 @@
 %% @level   System / Component
 %% @nodes   46
 
-%%{init: {'theme': 'base', 'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
 %% @uniform width=208 height=72 max_title_len=21 max_desc_lines=2
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'ORTHOGONAL'}}}%%
 graph TB
 %% keep-orphan: CFG, EXCEPTIONS, OBSERVER, PROVIDERS, SCHEMAS, TYPES, VALIDATION
     subgraph External["External Systems"]

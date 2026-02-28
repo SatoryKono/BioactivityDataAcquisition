@@ -8,8 +8,9 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%% @nodes   29
 %% @uniform width=256 height=144 max_title_len=25 max_desc_lines=6
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'POLYLINE'}}}%%
 flowchart TB
     subgraph Runner["PipelineRunner (application/core/runner.py)"]
         RUN["run() — main orchestrator<br/><br/><br/><br/><br/>"]

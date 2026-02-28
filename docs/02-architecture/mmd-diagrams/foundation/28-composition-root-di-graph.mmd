@@ -7,6 +7,7 @@
 %% @date    2026-02-24
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
+%% @nodes   37
 %% @uniform-group entry     nodes=CLI,BOOT
 %% @uniform-group factories nodes=BL,DQF,HCF,DSF,STF,STA,SB,RF,GPF
 %% @uniform-group registry  nodes=PR,OB
@@ -18,27 +19,7 @@
 %% @uniform-stats factories    width=224 height=144 max_desc_lines=6
 %% @uniform-stats registry     width=200 height=144 max_desc_lines=6
 %% @uniform-stats created      width=176 height=144 max_desc_lines=6
-%%{init: {
-%%  'layout': 'elk',
-%%  'theme': 'base',
-%%  'themeVariables': {'lineWidth': '2'},
-%%  'flowchart': {
-%%    'nodeSpacing': 64,
-%%    'rankSpacing': 80,
-%%    'padding': 24,
-%%    'curve': 'linear'
-%%  },
-%%  'elk': {
-%%    'mergeEdges': true,
-%%    'nodePlacementStrategy': 'BRANDES_KOEPF',
-%%    'cycleBreakingStrategy': 'GREEDY',
-%%    'direction': 'DOWN',
-%%    'spacing.nodeNode': 52,
-%%    'spacing.edgeNode': 36,
-%%    'spacing.edgeEdge': 24,
-%%    'edgeRouting': 'ORTHOGONAL'
-%%  }
-%%}}%%
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'ORTHOGONAL'}}}%%
 flowchart TB
 %% keep-orphan: OB
     subgraph Entry["Entry Point"]

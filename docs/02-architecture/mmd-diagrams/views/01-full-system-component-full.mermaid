@@ -15,6 +15,7 @@
 %% @png-scale 6
 %% @png-dpi   600
 %% @adr     ADR-040
+%% @nodes   93
 %% @uniform-group ports      nodes=DataSourcePort,StoragePort,LockPort,CheckpointPort,QuarantinePort,MetricsPort,TracingPort,LoggerPort
 %% @uniform-group adapters   nodes=ChemblAdapter,PubchemAdapter,UniprotAdapter,PubmedAdapter,CrossRefAdapter,OpenAlexAdapter,S2Adapter,BronzeWriter,SilverWriter,GoldWriter,MemoryLock
 %% @uniform-group app        nodes=PipelineRunner,PipelineExecutor,RecordProcessor,BatchTransformer,LockManager,CheckpointManager,PreflightService,PostrunService,LifecycleOrchestrator,ActivityTransformer,MoleculeTransformer,AssayTransformer,TargetTransformer
@@ -24,26 +25,7 @@
 %% @uniform-width group
 %% @uniform width=272 groups=6 width_strategy=group
 
-%%{init: {
-%%  'layout': 'elk',
-%%  'theme': 'base',
-%%  'flowchart': {
-%%    'nodeSpacing': 64,
-%%    'rankSpacing': 72,
-%%    'padding': 24,
-%%    'curve': 'linear'
-%%  },
-%%  'elk': {
-%%    'mergeEdges': true,
-%%    'nodePlacementStrategy': 'BRANDES_KOEPF',
-%%    'cycleBreakingStrategy': 'GREEDY',
-%%    'direction': 'DOWN',
-%%    'spacing.nodeNode': 48,
-%%    'spacing.edgeNode': 36,
-%%    'spacing.edgeEdge': 24,
-%%    'edgeRouting': 'ORTHOGONAL'
-%%  }
-%%}}%%
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'ORTHOGONAL'}}}%%
 flowchart TB
 %% keep-orphan: DQConfig, PipelineConfig, Publication, RuntimeConfig
 

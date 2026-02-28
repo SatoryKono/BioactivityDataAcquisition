@@ -1,26 +1,7 @@
 %% View: Infrastructure-Mapping | Parent: 31-pipeline-run-lifecycle-full.mermaid
+%% @nodes   23
 %% @uniform width=168 height=56 max_title_len=16 max_desc_lines=0
-%%{init: {
-%%  'layout': 'elk',
-%%  'theme': 'base',
-%%  'flowchart': {
-%%    'defaultRenderer': 'elk',
-%%    'nodeSpacing': 64,
-%%    'rankSpacing': 84,
-%%    'padding': 20,
-%%    'curve': 'linear'
-%%  },
-%%  'elk': {
-%%    'mergeEdges': true,
-%%    'nodePlacementStrategy': 'BRANDES_KOEPF',
-%%    'cycleBreakingStrategy': 'GREEDY',
-%%    'direction': 'DOWN',
-%%    'spacing.nodeNode': 44,
-%%    'spacing.edgeNode': 34,
-%%    'spacing.edgeEdge': 24,
-%%    'edgeRouting': 'ORTHOGONAL'
-%%  }
-%%}}%%
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'POLYLINE'}}}%%
 flowchart TB
 
     subgraph Domain["Domain Layer"]

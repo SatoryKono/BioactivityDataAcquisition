@@ -10,8 +10,10 @@
 %% @date    2026-02-24
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
+%% @nodes   36
 %% @uniform width=240 height=126 max_title_len=25 max_desc_lines=5
 
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'ORTHOGONAL'}}}%%
 flowchart TB
 %% keep-orphan: CheckpointPort, CriticalError, DataQualityError, DataSourcePort, HealthStatus, InvalidStateError, LockPort, Measurement, MetricsPort, QuarantinePort, RecoverableError, RunType, StoragePort, TracingPort
     subgraph domain["Domain Layer (DDD)"]

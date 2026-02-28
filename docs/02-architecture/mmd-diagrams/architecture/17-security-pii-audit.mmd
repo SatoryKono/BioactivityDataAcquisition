@@ -9,7 +9,7 @@
 %% @allow-polyline-routing
 %% @uniform width=312 height=216 max_title_len=31 max_desc_lines=10
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'NETWORK_SIMPLEX', 'edgeRouting': 'POLYLINE'}}}%%
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'POLYLINE'}}}%%
 graph TB
     subgraph Ports["Domain Ports"]
         PHP["PiiHasherPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ hash(value: str) → str<br/><br/><br/><br/><br/><br/>"]:::size-lg

@@ -11,8 +11,9 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'},'layout':'elk','flowchart':{'curve':'linear'},'elk':{'nodePlacementStrategy':'BRANDES_KOEPF','mergeEdges':true,'edgeRouting':'ORTHOGONAL'}}}%%
+%% @nodes   54
 %% @uniform width=328 height=56 max_title_len=36 max_desc_lines=1
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'ORTHOGONAL'}}}%%
 flowchart TB
     subgraph Step1["Step 1: Logger"]
         S1A["BootstrapLogger.configure()<br/>"]

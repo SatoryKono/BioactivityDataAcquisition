@@ -9,6 +9,7 @@
 %% @level   Mixed (System / Component / Class)
 %% @png-scale 6
 %% @png-dpi   600
+%% @nodes   29
 %% @uniform-group root    nodes=ERROR,HTTP,DOMAIN,INFRA
 %% @uniform-group http    nodes=AUTH,NOTFOUND,RATE,SERVER,UNKNOWN_HTTP
 %% @uniform-group domain  nodes=SCHEMA,MISSING,FORMAT,DQTHRESH
@@ -19,27 +20,7 @@
 %% @uniform width=168 groups=2 width_strategy=group
 %% @uniform-stats root         width=144 height=112 max_desc_lines=4
 %% @uniform-stats actions      width=168 height=112 max_desc_lines=4
-%%{init: {
-%%  'layout': 'elk',
-%%  'theme': 'base',
-%%  'themeVariables': {'lineWidth': '2'},
-%%  'flowchart': {
-%%    'nodeSpacing': 60,
-%%    'rankSpacing': 76,
-%%    'padding': 24,
-%%    'curve': 'linear'
-%%  },
-%%  'elk': {
-%%    'mergeEdges': true,
-%%    'nodePlacementStrategy': 'BRANDES_KOEPF',
-%%    'cycleBreakingStrategy': 'GREEDY',
-%%    'direction': 'DOWN',
-%%    'spacing.nodeNode': 48,
-%%    'spacing.edgeNode': 34,
-%%    'spacing.edgeEdge': 22,
-%%    'edgeRouting': 'ORTHOGONAL'
-%%  }
-%%}}%%
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'POLYLINE'}}}%%
 flowchart TB
     ERROR["Error Occurred<br/><br/><br/>"]
 

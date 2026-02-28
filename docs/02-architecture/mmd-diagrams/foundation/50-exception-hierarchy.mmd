@@ -10,8 +10,9 @@
 %% @png-scale 6
 %% @png-dpi   600
 
-%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'},'layout':'elk','flowchart':{'curve':'linear'},'elk':{'nodePlacementStrategy':'BRANDES_KOEPF','mergeEdges':true,'edgeRouting':'ORTHOGONAL'}}}%%
+%% @nodes   50
 %% @uniform width=200 height=112 max_title_len=19 max_desc_lines=4
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'ORTHOGONAL'}}}%%
 flowchart TD
     ROOT["Exception<br/>(Python built-in)<br/><br/>"]
 

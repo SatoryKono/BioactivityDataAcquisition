@@ -1,7 +1,8 @@
 %% View: Overview | Parent: 29-composite-pipeline-workflow-full.mermaid
 %% Decomposed overview for composite pipeline happy-path.
+%% @nodes   12
 %% @uniform width=228 height=64 max_title_len=24 max_desc_lines=1
-%%{init: {'layout':'elk','theme':'base','flowchart':{'nodeSpacing':52,'rankSpacing':66,'curve':'linear'},'elk':{'mergeEdges':true,'edgeRouting':'ORTHOGONAL','nodePlacementStrategy':'BRANDES_KOEPF'}}}%%
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'POLYLINE'}}}%%
 flowchart LR
     CFG["[S] CompositeConfig"] --> PFV["[S] Preflight"]
     PFV --> SEED["[S] Seed Pipeline"]

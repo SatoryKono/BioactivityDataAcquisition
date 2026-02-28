@@ -8,8 +8,9 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%% @nodes   31
 %% @uniform width=272 height=112 max_title_len=27 max_desc_lines=4
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'ORTHOGONAL'}}}%%
 flowchart TB
 %% keep-orphan: E3, E4
     subgraph RunTypes["RunType Enum (domain/types.py)"]

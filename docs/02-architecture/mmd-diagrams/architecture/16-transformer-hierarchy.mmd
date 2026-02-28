@@ -7,8 +7,8 @@
 %% @level   System / Component
 %% @nodes   35
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
 %% @uniform width=336 height=240 max_title_len=37 max_desc_lines=18
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'ORTHOGONAL'}}}%%
 graph TB
     subgraph TemplateMethod["Template Method Pattern"]
         BT["BaseTransformer (ABC)<br/>━━━━━━━━━━━━━━━━━<br/>provider: str<br/>entity_type: str<br/>_tracer: TracingPort<br/>_metrics: MetricsPort<br/>_identity: IdentityService<br/>_pii_hasher: PiiHasherPort<br/>_data_normalizer: DataNormalizationPort<br/>━━━━━━━━━━━━━━━━━<br/>+ transform(ctx, record, idx) → SilverRecord<br/>├ _transform_impl()    ← ABSTRACT HOOK<br/>├ compute_entity_id()<br/>├ compute_content_hash()<br/>└ should_write_silver/gold()<br/>+ transform_for_gold(ctx, silver) → dict<br/>+ entity_to_silver_record(entity) → dict<br/>+ hash_pii_value() / hash_pii_list()<br/>+ validate_value_object()"]:::size-lg

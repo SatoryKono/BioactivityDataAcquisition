@@ -8,8 +8,9 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%% @nodes   23
 %% @uniform width=336 height=168 max_title_len=20 max_desc_lines=7
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'POLYLINE'}}}%%
 flowchart LR
     subgraph Sources["External Sources"]
         ChEMBL["ChEMBL API<br/><br/><br/><br/><br/><br/>"]

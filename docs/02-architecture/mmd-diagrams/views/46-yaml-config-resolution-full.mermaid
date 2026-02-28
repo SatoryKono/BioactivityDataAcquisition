@@ -14,27 +14,9 @@
 %% @png-scale 6
 %% @png-dpi   600
 
-%%{init: {
-%%  'layout': 'elk',
-%%  'theme': 'base',
-%%  'flowchart': {
-%%    'nodeSpacing': 56,
-%%    'rankSpacing': 84,
-%%    'padding': 24,
-%%    'curve': 'linear'
-%%  },
-%%  'elk': {
-%%    'mergeEdges': true,
-%%    'nodePlacementStrategy': 'BRANDES_KOEPF',
-%%    'cycleBreakingStrategy': 'GREEDY',
-%%    'direction': 'DOWN',
-%%    'spacing.nodeNode': 44,
-%%    'spacing.edgeNode': 34,
-%%    'spacing.edgeEdge': 24,
-%%    'edgeRouting': 'ORTHOGONAL'
-%%  }
-%%}}%%
+%% @nodes   35
 %% @uniform width=420 height=108 max_title_len=49 max_desc_lines=4
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'ORTHOGONAL'}}}%%
 flowchart TD
 %% keep-orphan: SOURCE_YAML_CFG
     subgraph YAML_FILES["YAML File Hierarchy"]

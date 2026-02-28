@@ -1,7 +1,8 @@
 %% View: Overview | Parent: 28-composition-root-di-graph-full.mermaid
 %% Decomposed overview for DI assembly path.
+%% @nodes   15
 %% @uniform width=220 height=64 max_title_len=22 max_desc_lines=1
-%%{init: {'layout':'elk','theme':'base','flowchart':{'nodeSpacing':50,'rankSpacing':64,'curve':'linear'},'elk':{'mergeEdges':true,'edgeRouting':'ORTHOGONAL','nodePlacementStrategy':'BRANDES_KOEPF'}}}%%
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'POLYLINE'}}}%%
 flowchart LR
     subgraph Entry["Entry"]
         CLI["CLI run"]

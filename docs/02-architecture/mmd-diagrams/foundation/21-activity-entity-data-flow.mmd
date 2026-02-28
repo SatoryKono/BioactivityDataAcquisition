@@ -8,8 +8,9 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%% @nodes   43
 %% @uniform width=280 height=96 max_title_len=28 max_desc_lines=3
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'ORTHOGONAL'}}}%%
 flowchart LR
 %% keep-orphan: LocalFS, S1, S10, S11, S12, S2, S4, S5, S6, S7, S8, S9
     subgraph External["External API"]

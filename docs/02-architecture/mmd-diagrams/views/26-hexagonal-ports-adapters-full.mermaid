@@ -13,8 +13,9 @@
 %% @png-scale 6
 %% @png-dpi   600
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% @nodes   62
 %% @uniform width=232 height=90 max_title_len=24 max_desc_lines=3
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'ORTHOGONAL'}}}%%
 flowchart TB
 %% keep-orphan: CBP, FDSP, HCP, INP, MCP2, RLMP, SHP, SRLP
     subgraph Hexagon["Domain Layer — Ports (Protocol)"]

@@ -9,7 +9,7 @@
 %% @allow-polyline-routing
 %% @uniform width=336 height=240 max_title_len=33 max_desc_lines=11
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'POLYLINE'}}}%%
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'POLYLINE'}}}%%
 graph TB
 %% keep-orphan: CBDSD, RDSD, R_CR, R_OA, R_PC, R_PM, R_SS, R_UP
     subgraph Ports["Domain Ports"]

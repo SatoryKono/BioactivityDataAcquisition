@@ -12,6 +12,7 @@
 %% @date    2026-02-24
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
+%% @nodes   40
 %% @uniform-group init   nodes=CFG,PFV,BOOT
 %% @uniform-group seed   nodes=SP,SB
 %% @uniform-group deps   nodes=DC,DEP1,DEP2
@@ -31,27 +32,7 @@
 %% @uniform-stats merge        width=240 height=112 max_desc_lines=4
 %% @uniform-stats gold         width=240 height=112 max_desc_lines=4
 %% @uniform-stats ckp          width=264 height=112 max_desc_lines=4
-%%{init: {
-%%  'layout': 'elk',
-%%  'theme': 'base',
-%%  'themeVariables': {'lineWidth': '2'},
-%%  'flowchart': {
-%%    'nodeSpacing': 64,
-%%    'rankSpacing': 80,
-%%    'padding': 24,
-%%    'curve': 'linear'
-%%  },
-%%  'elk': {
-%%    'mergeEdges': true,
-%%    'nodePlacementStrategy': 'BRANDES_KOEPF',
-%%    'cycleBreakingStrategy': 'GREEDY',
-%%    'direction': 'DOWN',
-%%    'spacing.nodeNode': 52,
-%%    'spacing.edgeNode': 36,
-%%    'spacing.edgeEdge': 24,
-%%    'edgeRouting': 'ORTHOGONAL'
-%%  }
-%%}}%%
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'ORTHOGONAL'}}}%%
 flowchart TB
     subgraph Init["Phase 1: Initialization"]
         CFG["[S] Load CompositeConfig<br/>from YAML<br/><br/>"]
