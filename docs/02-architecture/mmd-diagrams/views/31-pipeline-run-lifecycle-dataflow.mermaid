@@ -3,47 +3,47 @@
 flowchart TB
 %% keep-orphan: N4
 
-    subgraph Domain["Domain Layer"]
-        direction TB
-        N10["VALIDATING"]
-    end
+ subgraph Domain["Domain Layer"]
+ direction TB
+ N10["VALIDATING"]
+ end
 
-    subgraph Application["Application Layer"]
-        direction TB
-        N8["PREFLIGHT"]
-        N2["TRANSFORMING"]
-        N3["BATCH_DONE"]
-        N4["BatchLoop"]
-        N9["PREFLIGHT_PASSED"]
-    end
+ subgraph Application["Application Layer"]
+ direction TB
+ N8["PREFLIGHT"]
+ N2["TRANSFORMING"]
+ N3["BATCH_DONE"]
+ N4["BatchLoop"]
+ N9["PREFLIGHT_PASSED"]
+ end
 
-    subgraph Infrastructure["Infrastructure Layer"]
-        direction TB
-        N1["EXTRACTING"]
-        N5["FAILED"]
-        N6["WRITING"]
-        N7["LOCKING"]
-        N11["CHECKPOINTING"]
-        N12["DRAINING"]
-    end
+ subgraph Infrastructure["Infrastructure Layer"]
+ direction TB
+ N1["EXTRACTING"]
+ N5["FAILED"]
+ N6["WRITING"]
+ N7["LOCKING"]
+ N11["CHECKPOINTING"]
+ N12["DRAINING"]
+ end
 
-    N7 --> N5
-    N8 --> N9
-    N8 ==> N5
-    N9 --> N1
-    N1 --> N2
-    N2 --> N10
-    N10 --> N6
-    N6 --> N11
-    N11 --> N1
-    N11 --> N3
-    N1 --> N12
-    N2 --> N12
-    N6 --> N5
-    N1 --> N5
+ N7 --> N5
+ N8 --> N9
+ N8 ==> N5
+ N9 --> N1
+ N1 --> N2
+ N2 --> N10
+ N10 --> N6
+ N6 --> N11
+ N11 --> N1
+ N11 --> N3
+ N1 --> N12
+ N2 --> N12
+ N6 --> N5
+ N1 --> N5
 
-    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
-    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
-    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+ style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+ style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+ style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
 
-    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13 stroke:#1E293B,stroke-width:4px
+ linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13 stroke:#1E293B,stroke-width:4px

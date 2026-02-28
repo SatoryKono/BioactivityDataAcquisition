@@ -2,185 +2,185 @@
 %% Domain and application configuration hierarchy.
 
 %% @version 1.1.0
-%% @date    2026-02-26
-%% @type    classDiagram
-%% @level   Class / Interface
-%% @uniform-group core      nodes=RuntimeConfig,PipelineConfig
+%% @date 2026-02-26
+%% @type classDiagram
+%% @level Class / Interface
+%% @uniform-group core nodes=RuntimeConfig,PipelineConfig
 %% @uniform-group composite nodes=CompositeConfig,SeedConfig,DependencyConfig,EnricherConfig,MergeConfig
-%% @uniform-group support   nodes=RecordProcessorConfig,TableConfig,DQConfig,SilverFilterConfig,GoldFilterConfig,LockConfig,KeyNullabilityRule
+%% @uniform-group support nodes=RecordProcessorConfig,TableConfig,DQConfig,SilverFilterConfig,GoldFilterConfig,LockConfig,KeyNullabilityRule
 
 %% @uniform-width group
 %% @uniform class width=296 groups=3 width_strategy=group
-%% @uniform-stats core         width=296 height=344 max_desc_lines=17
-%% @uniform-stats composite    width=296 height=144 max_desc_lines=6
-%% @uniform-stats support      width=216 height=128 max_desc_lines=5
+%% @uniform-stats core width=296 height=344 max_desc_lines=17
+%% @uniform-stats composite width=296 height=144 max_desc_lines=6
+%% @uniform-stats support width=216 height=128 max_desc_lines=5
 classDiagram
-    direction TB
-    class RuntimeConfig {
-        <<frozen dataclass>>
-        +run_type: RunType
-        +resume: bool
-        +limit: int | None
-        +heartbeat_interval: int
-        +wait_for_lock: bool
-        +lock_wait_timeout: int
-        +lock_ttl: int | None
-        +query: str | None
-        +dry_run: bool
-        +vacuum_after_run: bool
-        +vacuum_retention_days: int
-        +optimize_storage: bool
-        +strict_validation: bool
-        +strict_gold_validation: bool
-        +skip_gold: bool
-        +effective_lock_ttl: int
-    }
+ direction TB
+ class RuntimeConfig {
+ <<frozen dataclass>>
+ +run_type: RunType
+ +resume: bool
+ +limit: int | None
+ +heartbeat_interval: int
+ +wait_for_lock: bool
+ +lock_wait_timeout: int
+ +lock_ttl: int | None
+ +query: str | None
+ +dry_run: bool
+ +vacuum_after_run: bool
+ +vacuum_retention_days: int
+ +optimize_storage: bool
+ +strict_validation: bool
+ +strict_gold_validation: bool
+ +skip_gold: bool
+ +effective_lock_ttl: int
+ }
 
-    class PipelineConfig {
-        <<frozen dataclass>>
-        +pipeline_name: str
-        +provider: str
-        +entity_type: str
-        +table: TableConfig
-        +silver_filters: SilverFilterConfig | None
-        +gold_filters: GoldFilterConfig | None
-        +batch_size: int
-        +checkpoint_interval: int
-        +fields: tuple~str~
-        +column_groups: tuple~ColumnGroupConfig~
-        +dq: DQConfig
-        +transform_version: str | None
-        +transform_steps: tuple~str~
-        +loading_strategy: LoadingStrategy | None
-        +scd_config: dict | None
-        +gold_schema: Any | None
-    }
+ class PipelineConfig {
+ <<frozen dataclass>>
+ +pipeline_name: str
+ +provider: str
+ +entity_type: str
+ +table: TableConfig
+ +silver_filters: SilverFilterConfig | None
+ +gold_filters: GoldFilterConfig | None
+ +batch_size: int
+ +checkpoint_interval: int
+ +fields: tuple~str~
+ +column_groups: tuple~ColumnGroupConfig~
+ +dq: DQConfig
+ +transform_version: str | None
+ +transform_steps: tuple~str~
+ +loading_strategy: LoadingStrategy | None
+ +scd_config: dict | None
+ +gold_schema: Any | None
+ }
 
-    class TableConfig {
-        <<dataclass>>
-        +silver_table: str | None
-        +gold_table: str | None
-        
-        
-    }
+ class TableConfig {
+ <<dataclass>>
+ +silver_table: str | None
+ +gold_table: str | None
+ 
+ 
+ }
 
-    class DQConfig {
-        <<dataclass>>
-        +soft_error_threshold: float
-        +hard_error_threshold: float
-        
-        
-    }
+ class DQConfig {
+ <<dataclass>>
+ +soft_error_threshold: float
+ +hard_error_threshold: float
+ 
+ 
+ }
 
-    class SilverFilterConfig {
-        <<dataclass>>
-        +source_path: str
-        +column_name: str
-        
-        
-    }
+ class SilverFilterConfig {
+ <<dataclass>>
+ +source_path: str
+ +column_name: str
+ 
+ 
+ }
 
-    class GoldFilterConfig {
-        <<dataclass>>
-        +source_path: str
-        +column_name: str
-        
-        
-    }
+ class GoldFilterConfig {
+ <<dataclass>>
+ +source_path: str
+ +column_name: str
+ 
+ 
+ }
 
-    class RecordProcessorConfig {
-        <<dataclass>>
-        +table_config: TableConfig
-        +silver_schema: Any
-        +gold_schema: Any
-        +dq_config: DQConfig
-    }
+ class RecordProcessorConfig {
+ <<dataclass>>
+ +table_config: TableConfig
+ +silver_schema: Any
+ +gold_schema: Any
+ +dq_config: DQConfig
+ }
 
-    class LockConfig {
-        <<dataclass>>
-        +timeout: float
-        +heartbeat_interval: int
-        +max_retries: int
-        
-    }
+ class LockConfig {
+ <<dataclass>>
+ +timeout: float
+ +heartbeat_interval: int
+ +max_retries: int
+ 
+ }
 
-    class CompositeConfig {
-        <<frozen dataclass>>
-        +name: str
-        +seed: SeedConfig
-        +dependencies: tuple~DependencyConfig~
-        +enrichers: tuple~EnricherConfig~
-        +merge: MergeConfig
-    }
+ class CompositeConfig {
+ <<frozen dataclass>>
+ +name: str
+ +seed: SeedConfig
+ +dependencies: tuple~DependencyConfig~
+ +enrichers: tuple~EnricherConfig~
+ +merge: MergeConfig
+ }
 
-    class SeedConfig {
-        <<frozen dataclass>>
-        +pipeline: str
-        +output_keys: tuple~str~
-        +silver_table: str
-        +limit: int | None
-        
-    }
+ class SeedConfig {
+ <<frozen dataclass>>
+ +pipeline: str
+ +output_keys: tuple~str~
+ +silver_table: str
+ +limit: int | None
+ 
+ }
 
-    class DependencyConfig {
-        <<frozen dataclass>>
-        +pipeline: str
-        +depends_on: tuple~str~
-        
-        
-        
-    }
+ class DependencyConfig {
+ <<frozen dataclass>>
+ +pipeline: str
+ +depends_on: tuple~str~
+ 
+ 
+ 
+ }
 
-    class EnricherConfig {
-        <<frozen dataclass>>
-        +pipeline: str
-        +primary_key: str
-        +enricher_cardinality: EnricherCardinality
-        
-        
-    }
+ class EnricherConfig {
+ <<frozen dataclass>>
+ +pipeline: str
+ +primary_key: str
+ +enricher_cardinality: EnricherCardinality
+ 
+ 
+ }
 
-    class MergeConfig {
-        <<frozen dataclass>>
-        +merge_strategy: MergeStrategy
-        +conflict_resolution: ConflictResolution
-        
-        
-        
-    }
+ class MergeConfig {
+ <<frozen dataclass>>
+ +merge_strategy: MergeStrategy
+ +conflict_resolution: ConflictResolution
+ 
+ 
+ 
+ }
 
-    class KeyNullabilityRule {
-        <<dataclass>>
-        +table_name: str
-        +key_columns: list~str~
-        +allow_nulls: bool
-        
-    }
+ class KeyNullabilityRule {
+ <<dataclass>>
+ +table_name: str
+ +key_columns: list~str~
+ +allow_nulls: bool
+ 
+ }
 
-    PipelineConfig *-- TableConfig
-    PipelineConfig *-- DQConfig
-    PipelineConfig *-- SilverFilterConfig
-    PipelineConfig *-- GoldFilterConfig
+ PipelineConfig *-- TableConfig
+ PipelineConfig *-- DQConfig
+ PipelineConfig *-- SilverFilterConfig
+ PipelineConfig *-- GoldFilterConfig
 
-    RecordProcessorConfig *-- TableConfig
-    RecordProcessorConfig *-- DQConfig
+ RecordProcessorConfig *-- TableConfig
+ RecordProcessorConfig *-- DQConfig
 
-    CompositeConfig *-- SeedConfig
-    CompositeConfig *-- DependencyConfig
-    CompositeConfig *-- EnricherConfig
-    CompositeConfig *-- MergeConfig
+ CompositeConfig *-- SeedConfig
+ CompositeConfig *-- DependencyConfig
+ CompositeConfig *-- EnricherConfig
+ CompositeConfig *-- MergeConfig
 
-    style RuntimeConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
-    style PipelineConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
-    style TableConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
-    style DQConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
-    style SilverFilterConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
-    style GoldFilterConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
-    style RecordProcessorConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
-    style LockConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
-    style CompositeConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
-    style SeedConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
-    style DependencyConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
-    style EnricherConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
-    style MergeConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
-    style KeyNullabilityRule fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+ style RuntimeConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+ style PipelineConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+ style TableConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+ style DQConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+ style SilverFilterConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+ style GoldFilterConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+ style RecordProcessorConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+ style LockConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+ style CompositeConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+ style SeedConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+ style DependencyConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+ style EnricherConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+ style MergeConfig fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+ style KeyNullabilityRule fill:#fefce8,stroke:#ca8a04,stroke-width:2px

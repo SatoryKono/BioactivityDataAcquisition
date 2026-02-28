@@ -3,60 +3,60 @@
 flowchart TB
 %% keep-orphan: N12
 
-    subgraph Domain["Domain Layer"]
-        direction TB
-        N12["Ports"]
-    end
+ subgraph Domain["Domain Layer"]
+ direction TB
+ N12["Ports"]
+ end
 
-    subgraph Application["Application Layer"]
-        direction TB
-        N4["Runner"]
-        N1["BatchExec"]
-        N2["Transformer"]
-        N3["Merger"]
-        N5["CompositeRunner"]
-        N9["Services"]
-    end
+ subgraph Application["Application Layer"]
+ direction TB
+ N4["Runner"]
+ N1["BatchExec"]
+ N2["Transformer"]
+ N3["Merger"]
+ N5["CompositeRunner"]
+ N9["Services"]
+ end
 
-    subgraph Infrastructure["Infrastructure Layer"]
-        direction TB
-        N6["Factories"]
-        N10["Coordinator"]
-    end
+ subgraph Infrastructure["Infrastructure Layer"]
+ direction TB
+ N6["Factories"]
+ N10["Coordinator"]
+ end
 
-    subgraph Composition["Composition Layer"]
-        direction TB
-        N7["Bootstrap"]
-        N8["Registry"]
-    end
+ subgraph Composition["Composition Layer"]
+ direction TB
+ N7["Bootstrap"]
+ N8["Registry"]
+ end
 
-    subgraph Interfaces["Interfaces Layer"]
-        direction TB
-        N11["CLI"]
-    end
+ subgraph Interfaces["Interfaces Layer"]
+ direction TB
+ N11["CLI"]
+ end
 
-    N7 --> N8
-    N7 ==> N6
-    N4 --> N1
-    N1 --> N2
-    N4 --> N9
-    N5 --> N10
-    N5 --> N3
-    N11 --> N7
-    N6 --> N4
+ N7 --> N8
+ N7 ==> N6
+ N4 --> N1
+ N1 --> N2
+ N4 --> N9
+ N5 --> N10
+ N5 --> N3
+ N11 --> N7
+ N6 --> N4
 
-    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
-    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
-    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
-    style Composition fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
-    style Interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+ style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+ style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+ style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+ style Composition fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+ style Interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px
 
-    linkStyle 0 stroke:#1E293B,stroke-width:4px
-    linkStyle 1 stroke:#1E293B,stroke-width:4px
-    linkStyle 2 stroke:#1E293B,stroke-width:4px
-    linkStyle 3 stroke:#1E293B,stroke-width:4px
-    linkStyle 4 stroke:#1E293B,stroke-width:4px
-    linkStyle 5 stroke:#1E293B,stroke-width:4px
-    linkStyle 6 stroke:#1E293B,stroke-width:4px
-    linkStyle 7 stroke:#1E293B,stroke-width:4px
-    linkStyle 8 stroke:#1E293B,stroke-width:4px
+ linkStyle 0 stroke:#1E293B,stroke-width:4px
+ linkStyle 1 stroke:#1E293B,stroke-width:4px
+ linkStyle 2 stroke:#1E293B,stroke-width:4px
+ linkStyle 3 stroke:#1E293B,stroke-width:4px
+ linkStyle 4 stroke:#1E293B,stroke-width:4px
+ linkStyle 5 stroke:#1E293B,stroke-width:4px
+ linkStyle 6 stroke:#1E293B,stroke-width:4px
+ linkStyle 7 stroke:#1E293B,stroke-width:4px
+ linkStyle 8 stroke:#1E293B,stroke-width:4px

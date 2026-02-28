@@ -2,61 +2,61 @@
 %% How CLI commands route through composition bootstrap to application services.
 
 %% @version 1.0.0
-%% @date    2026-02-27
-%% @type    flowchart
-%% @level   System / Component
-%% @view    cli-routing
-%% @parent  14-cli-interface-layer.mmd
-%% @nodes   12
+%% @date 2026-02-27
+%% @type flowchart
+%% @level System / Component
+%% @view cli-routing
+%% @parent 14-cli-interface-layer.mmd
+%% @nodes 12
 
 graph TB
-    RUN["bioetl run"]:::size-sm
-    RUN_COMP["bioetl run-composite"]:::size-sm
-    HEALTH["bioetl health"]:::size-sm
-    EXPORT["bioetl export"]:::size-sm
-    QUARANTINE["bioetl quarantine"]:::size-sm
-    CHECKPOINT["bioetl checkpoint"]:::size-sm
-    VACUUM["bioetl vacuum"]:::size-sm
+ RUN["bioetl run"]:::size-sm
+ RUN_COMP["bioetl run-composite"]:::size-sm
+ HEALTH["bioetl health"]:::size-sm
+ EXPORT["bioetl export"]:::size-sm
+ QUARANTINE["bioetl quarantine"]:::size-sm
+ CHECKPOINT["bioetl checkpoint"]:::size-sm
+ VACUUM["bioetl vacuum"]:::size-sm
 
-    subgraph Composition["Composition Layer"]
-        BOOT["Bootstrap Assembly"]:::size-sm
-        RF["RunnerFactory"]:::size-sm
-        DSR["DataSourceRegistry"]:::size-sm
-        TF["TransformerFactory"]:::size-sm
-    end
+ subgraph Composition["Composition Layer"]
+ BOOT["Bootstrap Assembly"]:::size-sm
+ RF["RunnerFactory"]:::size-sm
+ DSR["DataSourceRegistry"]:::size-sm
+ TF["TransformerFactory"]:::size-sm
+ end
 
-    subgraph Application["Application Layer"]
-        CPR["CompositePipelineRunner"]:::size-sm
-        HS["HealthService"]:::size-sm
-        ES["ExportService"]:::size-sm
-        QS["QuarantineService"]:::size-sm
-        CS["CheckpointService"]:::size-sm
-        VS["VacuumService"]:::size-sm
-    end
+ subgraph Application["Application Layer"]
+ CPR["CompositePipelineRunner"]:::size-sm
+ HS["HealthService"]:::size-sm
+ ES["ExportService"]:::size-sm
+ QS["QuarantineService"]:::size-sm
+ CS["CheckpointService"]:::size-sm
+ VS["VacuumService"]:::size-sm
+ end
 
-    %% CLI → Composition
-    RUN --> BOOT
-    RUN_COMP --> BOOT
+ %% CLI → Composition
+ RUN --> BOOT
+ RUN_COMP --> BOOT
 
-    %% Composition wiring
-    BOOT --> RF
-    BOOT --> DSR
-    BOOT --> TF
+ %% Composition wiring
+ BOOT --> RF
+ BOOT --> DSR
+ BOOT --> TF
 
-    %% Composite routing
-    RUN_COMP --> CPR
+ %% Composite routing
+ RUN_COMP --> CPR
 
-    %% Direct CLI → Application
-    HEALTH --> HS
-    EXPORT --> ES
-    QUARANTINE --> QS
-    CHECKPOINT --> CS
-    VACUUM ==> VS
+ %% Direct CLI → Application
+ HEALTH --> HS
+ EXPORT --> ES
+ QUARANTINE --> QS
+ CHECKPOINT --> CS
+ VACUUM ==> VS
 
-    classDef cli fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    classDef comp fill:#fff7ed,stroke:#f59e0b
-    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+ classDef cli fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+ classDef comp fill:#fff7ed,stroke:#f59e0b
+ classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
 
-    class RUN,RUN_COMP,HEALTH,EXPORT,QUARANTINE,CHECKPOINT,VACUUM cli
-    class BOOT,RF,DSR,TF comp
-    class CPR,HS,ES,QS,CS,VS app
+ class RUN,RUN_COMP,HEALTH,EXPORT,QUARANTINE,CHECKPOINT,VACUUM cli
+ class BOOT,RF,DSR,TF comp
+ class CPR,HS,ES,QS,CS,VS app

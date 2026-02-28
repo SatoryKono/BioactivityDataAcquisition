@@ -2,56 +2,56 @@
 %% @uniform width=140 height=56 max_title_len=11 max_desc_lines=0
 flowchart TB
 
-    subgraph Domain["Domain Layer"]
-        direction TB
-        N14["strip"]
-        N7["errors"]
-        N9["filter_ids"]
-        N12["error_count"]
-    end
+ subgraph Domain["Domain Layer"]
+ direction TB
+ N14["strip"]
+ N7["errors"]
+ N9["filter_ids"]
+ N12["error_count"]
+ end
 
-    subgraph Application["Application Layer"]
-        direction TB
-        N1["BE"]
-        N2["BT"]
-        N4["Runner"]
-        N5["BTM"]
-        N6["DS"]
-        N8["br"]
-        N10["BMR"]
-        N11["duration"]
-        N13["Trans"]
-        N15["dates"]
-    end
+ subgraph Application["Application Layer"]
+ direction TB
+ N1["BE"]
+ N2["BT"]
+ N4["Runner"]
+ N5["BTM"]
+ N6["DS"]
+ N8["br"]
+ N10["BMR"]
+ N11["duration"]
+ N13["Trans"]
+ N15["dates"]
+ end
 
-    subgraph Infrastructure["Infrastructure Layer"]
-        direction TB
-        N3["BW"]
-    end
+ subgraph Infrastructure["Infrastructure Layer"]
+ direction TB
+ N3["BW"]
+ end
 
-    N4 --> N1
-    N1 --> N5
-    N1 --> N6
-    N1 --> N8
-    N1 ==> N9
-    N6 --> N1
-    N1 --> N2
-    N2 --> N13
-    N13 --> N2
-    N2 --> N14
-    N2 --> N15
-    N2 --> N1
-    N2 --> N7
-    N1 --> N3
-    N3 --> N1
-    N1 --> N10
-    N1 --> N11
-    N1 --> N7
-    N1 --> N4
-    N1 --> N12
+ N4 --> N1
+ N1 --> N5
+ N1 --> N6
+ N1 --> N8
+ N1 ==> N9
+ N6 --> N1
+ N1 --> N2
+ N2 --> N13
+ N13 --> N2
+ N2 --> N14
+ N2 --> N15
+ N2 --> N1
+ N2 --> N7
+ N1 --> N3
+ N3 --> N1
+ N1 --> N10
+ N1 --> N11
+ N1 --> N7
+ N1 --> N4
+ N1 --> N12
 
-    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
-    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
-    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+ style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+ style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+ style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
 
-    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19 stroke:#1E293B,stroke-width:4px
+ linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19 stroke:#1E293B,stroke-width:4px

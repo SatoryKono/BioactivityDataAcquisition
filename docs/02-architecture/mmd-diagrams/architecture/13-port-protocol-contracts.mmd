@@ -2,144 +2,144 @@
 %% All domain Ports and their infrastructure implementations.
 
 %% @version 1.0.0
-%% @date    2026-02-24
-%% @type    flowchart
-%% @level   System / Component
-%% @nodes   68
-%% @reference  Decomposed into 13a, 13b, 13c, 13d sub-diagrams
+%% @date 2026-02-24
+%% @type flowchart
+%% @level System / Component
+%% @nodes 68
+%% @reference Decomposed into 13a, 13b, 13c, 13d sub-diagrams
 
 %%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
 %% @uniform width=232 height=56 max_title_len=24 max_desc_lines=0
 graph LR
 %% keep-orphan: DNP, DQMP, FDSP, HCP, MCP, SHP
-    subgraph Domain["Domain Ports (Protocols)"]
-        DSP["DataSourcePort"]:::size-sm
-        FDSP["FilterableDataSourcePort"]:::size-sm
-        STP["StoragePort"]:::size-sm
-        LKP["LockPort"]:::size-sm
-        CKP["CheckpointPort"]:::size-sm
-        QRP["QuarantinePort"]:::size-sm
-        ADP["AuditPort"]:::size-sm
-        LGP["LoggerPort"]:::size-sm
-        MTP["MetricsPort"]:::size-sm
-        TRP["TracingPort"]:::size-sm
-        CBP["CircuitBreakerPort"]:::size-sm
-        RLP["RateLimiterPort"]:::size-sm
-        SVP["SilverValidatorPort"]:::size-sm
-        GVP["GoldValidatorPort"]:::size-sm
-        HCP["HealthCheckPort"]:::size-sm
-        PIIP["PiiHasherPort"]:::size-sm
-        MWP["MetadataWriterPort"]:::size-sm
-        MCP["MetadataCoordinatorPort"]:::size-sm
-        DNP["DataNormalizationPort"]:::size-sm
-        DRP["DeltaReaderPort"]:::size-sm
-        IFP["InputFilterPort"]:::size-sm
-        DQMP["DQMonitorPort"]:::size-sm
-        BDQP["BronzeDQAnalyzerPort"]:::size-sm
-        SDQP["SilverDQAnalyzerPort"]:::size-sm
-        GDQP["GoldDQAnalyzerPort"]:::size-sm
-        DQRWP["DQReportWriterPort"]:::size-sm
-        JEP["JsonEncoderPort"]:::size-sm
-        MMP["MemoryMonitorPort"]:::size-sm
-        SHP["ShutdownPort"]:::size-sm
-    end
+ subgraph Domain["Domain Ports (Protocols)"]
+ DSP["DataSourcePort"]:::size-sm
+ FDSP["FilterableDataSourcePort"]:::size-sm
+ STP["StoragePort"]:::size-sm
+ LKP["LockPort"]:::size-sm
+ CKP["CheckpointPort"]:::size-sm
+ QRP["QuarantinePort"]:::size-sm
+ ADP["AuditPort"]:::size-sm
+ LGP["LoggerPort"]:::size-sm
+ MTP["MetricsPort"]:::size-sm
+ TRP["TracingPort"]:::size-sm
+ CBP["CircuitBreakerPort"]:::size-sm
+ RLP["RateLimiterPort"]:::size-sm
+ SVP["SilverValidatorPort"]:::size-sm
+ GVP["GoldValidatorPort"]:::size-sm
+ HCP["HealthCheckPort"]:::size-sm
+ PIIP["PiiHasherPort"]:::size-sm
+ MWP["MetadataWriterPort"]:::size-sm
+ MCP["MetadataCoordinatorPort"]:::size-sm
+ DNP["DataNormalizationPort"]:::size-sm
+ DRP["DeltaReaderPort"]:::size-sm
+ IFP["InputFilterPort"]:::size-sm
+ DQMP["DQMonitorPort"]:::size-sm
+ BDQP["BronzeDQAnalyzerPort"]:::size-sm
+ SDQP["SilverDQAnalyzerPort"]:::size-sm
+ GDQP["GoldDQAnalyzerPort"]:::size-sm
+ DQRWP["DQReportWriterPort"]:::size-sm
+ JEP["JsonEncoderPort"]:::size-sm
+ MMP["MemoryMonitorPort"]:::size-sm
+ SHP["ShutdownPort"]:::size-sm
+ end
 
-    subgraph Infrastructure["Infrastructure Implementations"]
-        CA["ChemblAdapter"]:::size-sm
-        BW["BronzeWriter"]:::size-sm
-        ML["MemoryLock"]:::size-sm
-        LC["LocalCheckpoint"]:::size-sm
-        UQ["UnifiedQuarantine"]:::size-sm
-        FA["FileAuditAdapter"]:::size-sm
-        UL["UnifiedLogger"]:::size-sm
-        MCO["MetricsCollector"]:::size-sm
-        OTT["OpenTelemetryTracer"]:::size-sm
-        CB["CircuitBreaker"]:::size-sm
-        TB_I["TokenBucket"]:::size-sm
-        PSV["PanderaSilverValidator"]:::size-sm
-        PGV["PanderaGoldValidator"]:::size-sm
-        SPH["Sha256PiiHasher"]:::size-sm
-        MW_I["MetadataWriter"]:::size-sm
-        DR_I["DeltaReader"]:::size-sm
-        CSVR["CsvFilterReader"]:::size-sm
-        DQRW_I["DQReportWriter"]:::size-sm
-        SJE["StdLibJsonEncoder"]:::size-sm
-        MMGR["MemoryMonitor"]:::size-sm
-    end
+ subgraph Infrastructure["Infrastructure Implementations"]
+ CA["ChemblAdapter"]:::size-sm
+ BW["BronzeWriter"]:::size-sm
+ ML["MemoryLock"]:::size-sm
+ LC["LocalCheckpoint"]:::size-sm
+ UQ["UnifiedQuarantine"]:::size-sm
+ FA["FileAuditAdapter"]:::size-sm
+ UL["UnifiedLogger"]:::size-sm
+ MCO["MetricsCollector"]:::size-sm
+ OTT["OpenTelemetryTracer"]:::size-sm
+ CB["CircuitBreaker"]:::size-sm
+ TB_I["TokenBucket"]:::size-sm
+ PSV["PanderaSilverValidator"]:::size-sm
+ PGV["PanderaGoldValidator"]:::size-sm
+ SPH["Sha256PiiHasher"]:::size-sm
+ MW_I["MetadataWriter"]:::size-sm
+ DR_I["DeltaReader"]:::size-sm
+ CSVR["CsvFilterReader"]:::size-sm
+ DQRW_I["DQReportWriter"]:::size-sm
+ SJE["StdLibJsonEncoder"]:::size-sm
+ MMGR["MemoryMonitor"]:::size-sm
+ end
 
-    subgraph Application["Application Implementations"]
-        BDA["BronzeDQAnalyzer"]:::size-sm
-        SDA["SilverDQAnalyzer"]:::size-sm
-        GDA["GoldDQAnalyzer"]:::size-sm
-    end
+ subgraph Application["Application Implementations"]
+ BDA["BronzeDQAnalyzer"]:::size-sm
+ SDA["SilverDQAnalyzer"]:::size-sm
+ GDA["GoldDQAnalyzer"]:::size-sm
+ end
 
-    %% DataSource implementations
-    DSP --- CA & PA & UA & CRA & OAA & SSA & PCA
+ %% DataSource implementations
+ DSP --- CA & PA & UA & CRA & OAA & SSA & PCA
 
-    %% Storage implementations
-    STP --- BW & SW & GW
+ %% Storage implementations
+ STP --- BW & SW & GW
 
-    %% Lock
-    LKP --- ML
+ %% Lock
+ LKP --- ML
 
-    %% Checkpoint
-    CKP --- LC
+ %% Checkpoint
+ CKP --- LC
 
-    %% Quarantine
-    QRP --- UQ
+ %% Quarantine
+ QRP --- UQ
 
-    %% Audit
-    ADP --- FA
+ %% Audit
+ ADP --- FA
 
-    %% Logging
-    LGP --- UL & SLG & NOL
+ %% Logging
+ LGP --- UL & SLG & NOL
 
-    %% Metrics
-    MTP --- MCO & PME & NOM
+ %% Metrics
+ MTP --- MCO & PME & NOM
 
-    %% Tracing
-    TRP --- OTT & NOT_T
+ %% Tracing
+ TRP --- OTT & NOT_T
 
-    %% Circuit Breaker
-    CBP --- CB
+ %% Circuit Breaker
+ CBP --- CB
 
-    %% Rate Limiter
-    RLP --- TB_I
+ %% Rate Limiter
+ RLP --- TB_I
 
-    %% Validators
-    SVP --- PSV & NOV
-    GVP --- PGV
+ %% Validators
+ SVP --- PSV & NOV
+ GVP --- PGV
 
-    %% PII
-    PIIP --- SPH
+ %% PII
+ PIIP --- SPH
 
-    %% Metadata
-    MWP --- MW_I & NOMW
+ %% Metadata
+ MWP --- MW_I & NOMW
 
-    %% Delta Reader
-    DRP --- DR_I
+ %% Delta Reader
+ DRP --- DR_I
 
-    %% Input Filter
-    IFP --- CSVR
+ %% Input Filter
+ IFP --- CSVR
 
-    %% DQ
-    BDQP --- BDA
-    SDQP --- SDA
-    GDQP --- GDA
-    DQRWP --- DQRW_I
+ %% DQ
+ BDQP --- BDA
+ SDQP --- SDA
+ GDQP --- GDA
+ DQRWP --- DQRW_I
 
-    %% JSON Encoder
-    JEP --- SJE & OJE
+ %% JSON Encoder
+ JEP --- SJE & OJE
 
-    %% Memory Monitor
-    MMP --- MMGR
+ %% Memory Monitor
+ MMP --- MMGR
 
-    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
-    classDef infra fill:#fff1f2,stroke:#dc2626
-    classDef app fill:#f0fdf4,stroke:#16a34a
-    classDef noop fill:#f1f5f9,stroke:#64748b,stroke-dasharray: 5 5
+ classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+ classDef infra fill:#fff1f2,stroke:#dc2626
+ classDef app fill:#f0fdf4,stroke:#16a34a
+ classDef noop fill:#f1f5f9,stroke:#64748b,stroke-dasharray: 5 5
 
-    class DSP,FDSP,STP,LKP,CKP,QRP,ADP,LGP,MTP,TRP,CBP,RLP,SVP,GVP,HCP,PIIP,MWP,MCP,DNP,DRP,IFP,DQMP,BDQP,SDQP,GDQP,DQRWP,JEP,MMP,SHP port
-    class CA,PA,UA,CRA,OAA,SSA,PCA,BW,SW,GW,ML,LC,UQ,FA,UL,SLG,MCO,PME,OTT,CB,TB_I,PSV,PGV,SPH,MW_I,DR_I,CSVR,DQRW_I,SJE,OJE,MMGR infra
-    class BDA,SDA,GDA app
-    class NOL,NOM,NOT_T,NOV,NOMW noop
+ class DSP,FDSP,STP,LKP,CKP,QRP,ADP,LGP,MTP,TRP,CBP,RLP,SVP,GVP,HCP,PIIP,MWP,MCP,DNP,DRP,IFP,DQMP,BDQP,SDQP,GDQP,DQRWP,JEP,MMP,SHP port
+ class CA,PA,UA,CRA,OAA,SSA,PCA,BW,SW,GW,ML,LC,UQ,FA,UL,SLG,MCO,PME,OTT,CB,TB_I,PSV,PGV,SPH,MW_I,DR_I,CSVR,DQRW_I,SJE,OJE,MMGR infra
+ class BDA,SDA,GDA app
+ class NOL,NOM,NOT_T,NOV,NOMW noop

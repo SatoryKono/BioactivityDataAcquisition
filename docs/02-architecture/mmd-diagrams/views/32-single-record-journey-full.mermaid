@@ -8,80 +8,80 @@
 %% Legend: see 00-legend.mermaid
 
 %% @version 1.0.0
-%% @date    2026-02-24
-%% @type    flowchart
-%% @level   Mixed (System / Component / Class)
+%% @date 2026-02-24
+%% @type flowchart
+%% @level Mixed (System / Component / Class)
 
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% @uniform width=304 height=108 max_title_len=33 max_desc_lines=4
 flowchart TB
-    subgraph Source["1. External API"]
-        API["REST API Response<br/>(e.g., ChEMBL /activity)<br/><br/><br/>"]
-    end
+ subgraph Source["1. External API"]
+ API["REST API Response<br/>(e.g., ChEMBL /activity)"\]
+ end
 
-    subgraph Bronze["2. Bronze Layer"]
-        BW["BronzeWriter.write_bronze()<br/>• JSONL serialization<br/>• zstd compression<br/>• atomic rename<br/>• _manifest.json"]
-        BF[("Bronze File<br/>bronze/chembl/activity/<br/>2026-02-17/batch_001.jsonl.zst"<br/><br/>)]
-    end
+ subgraph Bronze["2. Bronze Layer"]
+ BW["BronzeWriter.write_bronze()<br/>• JSONL serialization<br/>• zstd compression<br/>• atomic rename<br/>• _manifest.json"]
+ BF[("Bronze File<br/>bronze/chembl/activity/<br/>2026-02-17/batch_001.jsonl.zst"<br/><br/>)]
+ end
 
-    subgraph Transform["3. Transform (RecordProcessor)"]
-        BT["BatchTransformer.transform()<br/><br/><br/><br/>"]
-        TI["BaseTransformer._transform_impl()<br/>(e.g., ActivityTransformer)<br/><br/><br/>"]
-        NORM["Data Normalization<br/>• NaN → null<br/>• strip strings<br/>• dates → ISO<br/>• floats → round(10)"]
-        META["Add Metadata<br/>• _run_id (UUID)<br/>• _run_type (incremental/backfill)<br/>• _source_batch_id (FK)<br/>• _ingestion_ts (UTC now)"]
-        HASH["Compute _content_hash<br/>• exclude META_FIELDS<br/>• canonical JSON (sort_keys)<br/>• sha256 digest<br/>"]
-    end
+ subgraph Transform["3. Transform (RecordProcessor)"]
+ BT["BatchTransformer.transform()"\]
+ TI["BaseTransformer._transform_impl()<br/>(e.g., ActivityTransformer)"\]
+ NORM["Data Normalization<br/>• NaN → null<br/>• strip strings<br/>• dates → ISO<br/>• floats → round(10)"]
+ META["Add Metadata<br/>• _run_id (UUID)<br/>• _run_type (incremental/backfill)<br/>• _source_batch_id (FK)<br/>• _ingestion_ts (UTC now)"]
+ HASH["Compute _content_hash<br/>• exclude META_FIELDS<br/>• canonical JSON (sort_keys)<br/>• sha256 digest"\]
+ end
 
-    subgraph Validate["4. Validate"]
-        PSV["PanderaSilverValidator.validate()<br/>ActivitySchema (soft mode)<br/><br/><br/>"]
-        DQ{{"DQ Error Rate?<br/><br/><br/><br/>"}}
-    end
+ subgraph Validate["4. Validate"]
+ PSV["PanderaSilverValidator.validate()<br/>ActivitySchema (soft mode)"\]
+ DQ{{"DQ Error Rate?<br/><br/><br/><br/>"}}
+ end
 
-    subgraph Route["5. Route Decision"]
-        CLEAN["✅ Clean Record<br/>_dq_warn = false<br/><br/><br/>"]
-        WARN["⚠️ Warning Record<br/>_dq_warn = true<br/>(error rate < 5%)<br/><br/>"]
-        QUAR["❌ Quarantine Record<br/>QuarantineManager.route()<br/>QuarantineEntry created<br/><br/>"]
-        FAIL["💥 Batch FAIL<br/>(error rate > 20%)<br/><br/><br/>"]
-    end
+ subgraph Route["5. Route Decision"]
+ CLEAN["[OK] Clean Record<br/>_dq_warn = false"\]
+ WARN["[!] Warning Record<br/>_dq_warn = true<br/>(error rate < 5%)"\]
+ QUAR["[X] Quarantine Record<br/>QuarantineManager.route()<br/>QuarantineEntry created"\]
+ FAIL["Batch FAIL<br/>(error rate > 20%)"\]
+ end
 
-    subgraph Silver["6. Silver Layer"]
-        SW["SilverWriter.write_silver()<br/>• merge/upsert by PK<br/>• content_hash dedup<br/>• Delta Lake transaction<br/>"]
-        ST[("Silver Table<br/>silver/chembl/activity/<br/>_delta_log/"<br/><br/>)]
-    end
+ subgraph Silver["6. Silver Layer"]
+ SW["SilverWriter.write_silver()<br/>• merge/upsert by PK<br/>• content_hash dedup<br/>• Delta Lake transaction"\]
+ ST[("Silver Table<br/>silver/chembl/activity/<br/>_delta_log/"<br/><br/>)]
+ end
 
-    subgraph GoldLayer["7. Gold Layer"]
-        TFG["transform_for_gold()<br/>• exclude JSON fields<br/>(molecule_properties,<br/>molecule_structures, etc.)<br/>"]
-        GV["PanderaGoldValidator.validate()<br/>ChEMBLActivityGoldSchema<br/>(strict mode)<br/><br/>"]
-        GW["GoldWriter.write_gold()<br/><br/><br/><br/>"]
-        GT[("Gold Table<br/>gold/chembl/activity/<br/>_delta_log/"<br/><br/>)]
-    end
+ subgraph GoldLayer["7. Gold Layer"]
+ TFG["transform_for_gold()<br/>• exclude JSON fields<br/>(molecule_properties,<br/>molecule_structures, etc.)"\]
+ GV["PanderaGoldValidator.validate()<br/>ChEMBLActivityGoldSchema<br/>(strict mode)"\]
+ GW["GoldWriter.write_gold()"\]
+ GT[("Gold Table<br/>gold/chembl/activity/<br/>_delta_log/"<br/><br/>)]
+ end
 
-    subgraph QuarDB["Quarantine Storage"]
-        QT[("Quarantine Table<br/>quarantine/chembl/activity/"<br/><br/><br/>)]
-    end
+ subgraph QuarDB["Quarantine Storage"]
+ QT[("Quarantine Table<br/>quarantine/chembl/activity/"<br/><br/><br/>)]
+ end
 
-    %% Flow
-    API --> BW --> BF
-    BF --> BT --> TI --> NORM --> META --> HASH
-    HASH --> PSV --> DQ
+ %% Flow
+ API --> BW --> BF
+ BF --> BT --> TI --> NORM --> META --> HASH
+ HASH --> PSV --> DQ
 
-    DQ -->|"0% errors"| CLEAN
-    DQ -->|K14| WARN
-    DQ -->|K15| QUAR
-    DQ -->|K16| FAIL
+ DQ -->|"0% errors"| CLEAN
+ DQ -->|K14| WARN
+ DQ -->|K15| QUAR
+ DQ -->|K16| FAIL
 
-    CLEAN --> SW
-    WARN --> SW
-    SW --> ST
-    ST --> TFG --> GV --> GW --> GT
+ CLEAN --> SW
+ WARN --> SW
+ SW --> ST
+ ST --> TFG --> GV --> GW --> GT
 
-    QUAR --> QT
+ QUAR --> QT
 
-    %% Styling
-    style Bronze fill:#fff7ed,stroke:#f59e0b,color:#000
-    style Silver fill:#f8fafc,stroke:#475569,color:#000
-    style GoldLayer fill:#fefce8,stroke:#ca8a04,color:#000
-    style QuarDB fill:#ffe4e6,stroke:#e11d48,color:#000
+ %% Styling
+ style Bronze fill:#fff7ed,stroke:#f59e0b,color:#000
+ style Silver fill:#f1f5f9,stroke:#475569,color:#000
+ style GoldLayer fill:#fefce8,stroke:#ca8a04,color:#000
+ style QuarDB fill:#ffe4e6,stroke:#e11d48,color:#000
 
-    linkStyle 0,1,2,7,8,9,10,11 stroke:#1E293B,stroke-width:4px
-    linkStyle 3,4,5,6 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+ linkStyle 0,1,2,7,8,9,10,11 stroke:#1E293B,stroke-width:4px
+ linkStyle 3,4,5,6 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4

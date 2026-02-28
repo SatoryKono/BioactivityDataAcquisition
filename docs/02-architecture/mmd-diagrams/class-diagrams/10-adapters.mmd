@@ -2,233 +2,233 @@
 %% HTTP adapter class hierarchy with mixins.
 
 %% @version 1.1.0
-%% @date    2026-02-26
-%% @type    classDiagram
-%% @level   Class / Interface
-%% @uniform-group mixin     nodes=HealthCheckMixin,HealthCheckProviderMixin
-%% @uniform-group base      nodes=BaseHttpAdapter,BaseSyncAdapter,UnifiedHTTPClient
-%% @uniform-group adapter   nodes=ChemblAdapter,PubMedAdapter,UniProtAdapter,CrossRefAdapter,OpenAlexAdapter,SemanticScholarAdapter,PubChemAdapter
-%% @uniform-group util      nodes=CircuitBreaker,TokenBucket,AdapterMetrics
+%% @date 2026-02-26
+%% @type classDiagram
+%% @level Class / Interface
+%% @uniform-group mixin nodes=HealthCheckMixin,HealthCheckProviderMixin
+%% @uniform-group base nodes=BaseHttpAdapter,BaseSyncAdapter,UnifiedHTTPClient
+%% @uniform-group adapter nodes=ChemblAdapter,PubMedAdapter,UniProtAdapter,CrossRefAdapter,OpenAlexAdapter,SemanticScholarAdapter,PubChemAdapter
+%% @uniform-group util nodes=CircuitBreaker,TokenBucket,AdapterMetrics
 %% @uniform-group decorator nodes=CircuitBreakerDataSourceDecorator,RetryingDataSourceDecorator,CachedBronzeDataSource
 
 %% @uniform-width group
 %% @uniform class width=416 groups=5 width_strategy=group
-%% @uniform-stats mixin        width=416 height=144 max_desc_lines=6
-%% @uniform-stats base         width=256 height=288 max_desc_lines=14
-%% @uniform-stats adapter      width=360 height=128 max_desc_lines=5
-%% @uniform-stats util         width=232 height=200 max_desc_lines=9
-%% @uniform-stats decorator    width=336 height=72 max_desc_lines=2
+%% @uniform-stats mixin width=416 height=144 max_desc_lines=6
+%% @uniform-stats base width=256 height=288 max_desc_lines=14
+%% @uniform-stats adapter width=360 height=128 max_desc_lines=5
+%% @uniform-stats util width=232 height=200 max_desc_lines=9
+%% @uniform-stats decorator width=336 height=72 max_desc_lines=2
 classDiagram
-    direction TB
-    class HealthCheckMixin {
-        <<Mixin>>
-        #_start_health_check(provider, endpoint) HealthCheckContext
-        #_handle_health_check_success(ctx, status) None
-        #_handle_health_check_failure(ctx, error) None
-        
-        
-    }
+ direction TB
+ class HealthCheckMixin {
+ <<Mixin>>
+ #_start_health_check(provider, endpoint) HealthCheckContext
+ #_handle_health_check_success(ctx, status) None
+ #_handle_health_check_failure(ctx, error) None
+ 
+ 
+ }
 
-    class HealthCheckProviderMixin {
-        <<Mixin>>
-        +health_check() HealthCheckResult
-        +check_health() HealthCheckResult
-        #_probe_health()* HealthCheckResult
-        #_fallback_health_status() HealthCheckResult
-        #_circuit_breaker: CircuitBreakerPort*
-    }
+ class HealthCheckProviderMixin {
+ <<Mixin>>
+ +health_check() HealthCheckResult
+ +check_health() HealthCheckResult
+ #_probe_health()* HealthCheckResult
+ #_fallback_health_status() HealthCheckResult
+ #_circuit_breaker: CircuitBreakerPort*
+ }
 
-    class BaseHttpAdapter {
-        +http_client: UnifiedHTTPClient
-        +logger: LoggerPort
-        +metrics: MetricsPort | None
-        +provider_name: str
-        #_error_handler: ErrorService
-        +__aenter__() Self
-        +__aexit__(...) None
-        +aclose() None
-        
-        
-        
-        
-        
-        
-    }
+ class BaseHttpAdapter {
+ +http_client: UnifiedHTTPClient
+ +logger: LoggerPort
+ +metrics: MetricsPort | None
+ +provider_name: str
+ #_error_handler: ErrorService
+ +__aenter__() Self
+ +__aexit__(...) None
+ +aclose() None
+ 
+ 
+ 
+ 
+ 
+ 
+ }
 
-    class BaseSyncAdapter {
-        +logger: LoggerPort
-        +metrics: MetricsPort | None
-        +rate_limiter: TokenBucket
-        +circuit_breaker: CircuitBreaker
-        +thread_pool: ThreadPoolExecutor
-        
-        
-        
-        
-        
-        
-        
-        
-        
-    }
+ class BaseSyncAdapter {
+ +logger: LoggerPort
+ +metrics: MetricsPort | None
+ +rate_limiter: TokenBucket
+ +circuit_breaker: CircuitBreaker
+ +thread_pool: ThreadPoolExecutor
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ }
 
-    class UnifiedHTTPClient {
-        <<dataclass>>
-        +rate_limiter: RateLimiterPort
-        +circuit_breaker: CircuitBreakerPort
-        +retry_config: RetryConfig
-        +timeout: float
-        +run_id: RunID | None
-        +user_agent: str
-        +provider: str
-        +tracer: TracingPort | None
-        +metrics: MetricsPort | None
-        +get(url, params, headers) Response
-        +post(url, data, headers) Response
-        +head(url) Response
-        +get_once(url) Response
-    }
+ class UnifiedHTTPClient {
+ <<dataclass>>
+ +rate_limiter: RateLimiterPort
+ +circuit_breaker: CircuitBreakerPort
+ +retry_config: RetryConfig
+ +timeout: float
+ +run_id: RunID | None
+ +user_agent: str
+ +provider: str
+ +tracer: TracingPort | None
+ +metrics: MetricsPort | None
+ +get(url, params, headers) Response
+ +post(url, data, headers) Response
+ +head(url) Response
+ +get_once(url) Response
+ }
 
-    class ChemblAdapter {
-        +fetch() AsyncIterator~dict~
-        +fetch_filtered(filter_ids) AsyncIterator~dict~
-        +fetch_multi_filtered(filters) AsyncIterator~dict~
-        +fetch_filtered_with_fallback() AsyncIterator~dict~
-        +fetch_as_models() AsyncIterator~Model~
-    }
+ class ChemblAdapter {
+ +fetch() AsyncIterator~dict~
+ +fetch_filtered(filter_ids) AsyncIterator~dict~
+ +fetch_multi_filtered(filters) AsyncIterator~dict~
+ +fetch_filtered_with_fallback() AsyncIterator~dict~
+ +fetch_as_models() AsyncIterator~Model~
+ }
 
-    class PubMedAdapter {
-        +email: str
-        +api_key: str | None
-        +batch_size: int
-        
-        
-    }
+ class PubMedAdapter {
+ +email: str
+ +api_key: str | None
+ +batch_size: int
+ 
+ 
+ }
 
-    class UniProtAdapter {
-        +api_key: str | None
-        +base_url: str
-        
-        
-        
-    }
+ class UniProtAdapter {
+ +api_key: str | None
+ +base_url: str
+ 
+ 
+ 
+ }
 
-    class CrossRefAdapter {
-        +mailto: str
-        +batch_size: int
-        
-        
-        
-    }
+ class CrossRefAdapter {
+ +mailto: str
+ +batch_size: int
+ 
+ 
+ 
+ }
 
-    class OpenAlexAdapter {
-        +mailto: str
-        +batch_size: int
-        
-        
-        
-    }
+ class OpenAlexAdapter {
+ +mailto: str
+ +batch_size: int
+ 
+ 
+ 
+ }
 
-    class SemanticScholarAdapter {
-        +api_key: str
-        +batch_size: int
-        +fields: str
-        
-        
-    }
+ class SemanticScholarAdapter {
+ +api_key: str
+ +batch_size: int
+ +fields: str
+ 
+ 
+ }
 
-    class PubChemAdapter {
-        Uses pubchempy (sync)
-        ThreadPoolExecutor wrapper
-        
-        
-        
-    }
+ class PubChemAdapter {
+ Uses pubchempy (sync)
+ ThreadPoolExecutor wrapper
+ 
+ 
+ 
+ }
 
-    class CircuitBreaker {
-        <<dataclass>>
-        +provider: str
-        +failure_threshold: int
-        +recovery_timeout: int
-        +metrics: MetricsPort | None
-        +call(fn) T
-        +get_state() CircuitBreakerState
-        +get_failure_count() int
-        +get_trips_total() int
-    }
+ class CircuitBreaker {
+ <<dataclass>>
+ +provider: str
+ +failure_threshold: int
+ +recovery_timeout: int
+ +metrics: MetricsPort | None
+ +call(fn) T
+ +get_state() CircuitBreakerState
+ +get_failure_count() int
+ +get_trips_total() int
+ }
 
-    class TokenBucket {
-        <<dataclass>>
-        +rate: float
-        +capacity: int
-        +provider: str
-        +metrics: MetricsPort | None
-        +acquire(tokens) None
-        +try_acquire() bool
-        +available_tokens() int
-        
-    }
+ class TokenBucket {
+ <<dataclass>>
+ +rate: float
+ +capacity: int
+ +provider: str
+ +metrics: MetricsPort | None
+ +acquire(tokens) None
+ +try_acquire() bool
+ +available_tokens() int
+ 
+ }
 
-    class AdapterMetrics {
-        +metrics: MetricsPort
-        +provider: str
-        +measure_request() ContextManager
-        
-        
-        
-        
-        
-        
-    }
+ class AdapterMetrics {
+ +metrics: MetricsPort
+ +provider: str
+ +measure_request() ContextManager
+ 
+ 
+ 
+ 
+ 
+ 
+ }
 
-    class CircuitBreakerDataSourceDecorator {
-        <<Decorator>>
-        wraps DataSourcePort
-    }
+ class CircuitBreakerDataSourceDecorator {
+ <<Decorator>>
+ wraps DataSourcePort
+ }
 
-    class RetryingDataSourceDecorator {
-        <<Decorator>>
-        wraps DataSourcePort
-    }
+ class RetryingDataSourceDecorator {
+ <<Decorator>>
+ wraps DataSourcePort
+ }
 
-    class CachedBronzeDataSource {
-        <<Decorator>>
-        wraps DataSourcePort
-    }
+ class CachedBronzeDataSource {
+ <<Decorator>>
+ wraps DataSourcePort
+ }
 
-    HealthCheckMixin <|-- HealthCheckProviderMixin
-    HealthCheckProviderMixin <|-- BaseHttpAdapter
-    HealthCheckProviderMixin <|-- BaseSyncAdapter
+ HealthCheckMixin <|-- HealthCheckProviderMixin
+ HealthCheckProviderMixin <|-- BaseHttpAdapter
+ HealthCheckProviderMixin <|-- BaseSyncAdapter
 
-    BaseHttpAdapter <|-- ChemblAdapter
-    BaseHttpAdapter <|-- PubMedAdapter
-    BaseHttpAdapter <|-- UniProtAdapter
-    BaseHttpAdapter <|-- CrossRefAdapter
-    BaseHttpAdapter <|-- OpenAlexAdapter
-    BaseHttpAdapter <|-- SemanticScholarAdapter
+ BaseHttpAdapter <|-- ChemblAdapter
+ BaseHttpAdapter <|-- PubMedAdapter
+ BaseHttpAdapter <|-- UniProtAdapter
+ BaseHttpAdapter <|-- CrossRefAdapter
+ BaseHttpAdapter <|-- OpenAlexAdapter
+ BaseHttpAdapter <|-- SemanticScholarAdapter
 
-    BaseSyncAdapter <|-- PubChemAdapter
+ BaseSyncAdapter <|-- PubChemAdapter
 
-    BaseHttpAdapter o-- UnifiedHTTPClient
-    UnifiedHTTPClient o-- CircuitBreaker
-    UnifiedHTTPClient o-- TokenBucket
-    BaseHttpAdapter o-- AdapterMetrics
+ BaseHttpAdapter o-- UnifiedHTTPClient
+ UnifiedHTTPClient o-- CircuitBreaker
+ UnifiedHTTPClient o-- TokenBucket
+ BaseHttpAdapter o-- AdapterMetrics
 
-    style HealthCheckMixin fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style HealthCheckProviderMixin fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style BaseHttpAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
-    style BaseSyncAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
-    style UnifiedHTTPClient fill:#fff1f2,stroke:#dc2626,stroke-width:2px
-    style ChemblAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
-    style PubMedAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
-    style UniProtAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
-    style CrossRefAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
-    style OpenAlexAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
-    style SemanticScholarAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
-    style PubChemAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
-    style CircuitBreaker fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style TokenBucket fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style AdapterMetrics fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style CircuitBreakerDataSourceDecorator fill:#fff1f2,stroke:#dc2626,stroke-width:2px
-    style RetryingDataSourceDecorator fill:#fff1f2,stroke:#dc2626,stroke-width:2px
-    style CachedBronzeDataSource fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+ style HealthCheckMixin fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+ style HealthCheckProviderMixin fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+ style BaseHttpAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+ style BaseSyncAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+ style UnifiedHTTPClient fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+ style ChemblAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+ style PubMedAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+ style UniProtAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+ style CrossRefAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+ style OpenAlexAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+ style SemanticScholarAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+ style PubChemAdapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+ style CircuitBreaker fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+ style TokenBucket fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+ style AdapterMetrics fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+ style CircuitBreakerDataSourceDecorator fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+ style RetryingDataSourceDecorator fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+ style CachedBronzeDataSource fill:#fff1f2,stroke:#dc2626,stroke-width:2px

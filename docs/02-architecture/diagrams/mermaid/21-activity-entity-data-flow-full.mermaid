@@ -8,105 +8,105 @@
 %% Legend: see 00-legend.mermaid
 
 %% @version 1.0.0
-%% @date    2026-02-24
-%% @type    flowchart
-%% @level   Mixed (System / Component / Class)
+%% @date 2026-02-24
+%% @type flowchart
+%% @level Mixed (System / Component / Class)
 
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 %% @uniform width=264 height=72 max_title_len=28 max_desc_lines=2
 flowchart LR
 %% keep-orphan: LocalFS, S1, S10, S11, S12, S2, S4, S5, S6, S7, S8, S9
-    subgraph External["External API"]
-        API["🌐 ChEMBL API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>/activities endpoint<br/>&nbsp;"]
-    end
+ subgraph External["External API"]
+ API["ChEMBL API&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>/activities endpoint<br/>&nbsp;"]
+ end
 
-    subgraph Extract["Extract Phase"]
-        E1["📥 Fetch activity_id batch&nbsp;&nbsp;&nbsp;<br/>(ChemblAdapter)<br/>&nbsp;"]
-        E2["🔗 Fetch related entities&nbsp;&nbsp;&nbsp;&nbsp;<br/>assay_id, molecule_id, target_id<br/>&nbsp;"]
-        E3["💾 Write Bronze&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>JSONL + zstd<br/>&nbsp;"]
-        E4["📊 Record Lineage&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>batch_id, paths<br/>&nbsp;"]
-    end
+ subgraph Extract["Extract Phase"]
+ E1["Fetch activity_id batch&nbsp;&nbsp;&nbsp;<br/>(ChemblAdapter)<br/>&nbsp;"]
+ E2["Fetch related entities&nbsp;&nbsp;&nbsp;&nbsp;<br/>assay_id, molecule_id, target_id<br/>&nbsp;"]
+ E3["Write Bronze&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>JSONL + zstd<br/>&nbsp;"]
+ E4["Record Lineage&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>batch_id, paths<br/>&nbsp;"]
+ end
 
-    subgraph Transform["Transform Phase"]
-        T1["🔧 Normalize units&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>nM → μM standardization<br/>&nbsp;"]
-        T2["📝 Add metadata&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>_run_id, _run_type, _ingestion_ts<br/>&nbsp;"]
-        T3["🔐 Compute content_hash&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>sha256(provider + canonical_json)<br/>&nbsp;"]
-        T4["🏗️ Create Activity entity&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-    end
+ subgraph Transform["Transform Phase"]
+ T1["Normalize units&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>nM → μM standardization<br/>&nbsp;"]
+ T2["Add metadata&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>_run_id, _run_type, _ingestion_ts<br/>&nbsp;"]
+ T3["Compute content_hash&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>sha256(provider + canonical_json)<br/>&nbsp;"]
+ T4["Create Activity entity&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+ end
 
-    subgraph Validate["Validate Phase"]
-        V1["📋 ActivityTableSchema&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Pandera)<br/>&nbsp;"]
-        V2["✅ Check standard_value range<br/>0 < value < 1e12<br/>&nbsp;"]
-        V3["🧪 Validate SMILES if present<br/>(optional field)<br/>&nbsp;"]
-        V4{{"📊 Error Rate Check&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"}}
-    end
+ subgraph Validate["Validate Phase"]
+ V1["ActivityTableSchema&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>(Pandera)<br/>&nbsp;"]
+ V2["[OK] Check standard_value range<br/>0 < value < 1e12<br/>&nbsp;"]
+ V3["Validate SMILES if present<br/>(optional field)<br/>&nbsp;"]
+ V4{{" Error Rate Check&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"}}
+ end
 
-    subgraph Load["Load Phase"]
-        L1[("🥈 Silver Layer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>silver/chembl/activity/<br/>year=/month=/")]
-        L2[("🥇 Gold Layer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>gold/activity_by_target/<br/>target_id=/")]
-    end
+ subgraph Load["Load Phase"]
+ L1[(" Silver Layer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>silver/chembl/activity/<br/>year=/month=/")]
+ L2[(" Gold Layer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>gold/activity_by_target/<br/>target_id=/")]
+ end
 
-    subgraph Related["Related Entities (Silver)"]
-        Assay[("📊 Assay&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>silver/chembl/assay/"<br/>&nbsp;)]
-        Molecule[("🧬 Molecule&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>silver/chembl/molecule/"<br/>&nbsp;)]
-        Target[("🎯 Target&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>silver/chembl/target/"<br/>&nbsp;)]
-    end
+ subgraph Related["Related Entities (Silver)"]
+ Assay[(" Assay&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>silver/chembl/assay/"<br/>&nbsp;)]
+ Molecule[("🧬 Molecule&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>silver/chembl/molecule/"<br/>&nbsp;)]
+ Target[("🎯 Target&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>silver/chembl/target/"<br/>&nbsp;)]
+ end
 
-    subgraph Quarantine["DQ Failures"]
-        Q[("🗑️ Quarantine&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>quarantine/chembl_activity/"<br/>&nbsp;)]
-    end
+ subgraph Quarantine["DQ Failures"]
+ Q[(" Quarantine&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>quarantine/chembl_activity/"<br/>&nbsp;)]
+ end
 
-    %% Extract flow
-    API --> E1
-    E1 --> E2
-    E2 --> E3
-    E3 --> E4
+ %% Extract flow
+ API --> E1
+ E1 --> E2
+ E2 --> E3
+ E3 --> E4
 
-    %% Transform flow
-    E4 --> T1
-    T1 --> T2
-    T2 --> T3
-    T3 --> T4
+ %% Transform flow
+ E4 --> T1
+ T1 --> T2
+ T2 --> T3
+ T3 --> T4
 
-    %% Validate flow
-    T4 --> V1
-    V1 --> V2
-    V2 --> V3
-    V3 --> V4
+ %% Validate flow
+ T4 --> V1
+ V1 --> V2
+ V2 --> V3
+ V3 --> V4
 
-    %% Load flow
-    V4 -->|"✅ Pass"| L1
-    V4 -->|"❌ Fail"| Q
-    L1 --> L2
+ %% Load flow
+ V4 -->|"[OK] Pass"| L1
+ V4 -->|"[X] Fail"| Q
+ L1 --> L2
 
-    %% Foreign key relationships
-    L1 -.->|K03| Assay
-    L1 -.->|K04| Molecule
-    L1 -.->|K05| Target
+ %% Foreign key relationships
+ L1 -.->|K03| Assay
+ L1 -.->|K04| Molecule
+ L1 -.->|K05| Target
 
-    %% Styling
-    style API fill:#f1f5f9
-    style E3 fill:#fff7ed,stroke:#f59e0b,color:#212121
-    style L1 fill:#f8fafc,stroke:#475569,color:#000
-    style L2 fill:#fefce8,stroke:#ca8a04,color:#000
-    style Q fill:#ffe4e6,stroke:#e11d48,color:#fff
+ %% Styling
+ style API fill:#f1f5f9
+ style E3 fill:#fff7ed,stroke:#f59e0b,color:#212121
+ style L1 fill:#f1f5f9,stroke:#475569,color:#000
+ style L2 fill:#fefce8,stroke:#ca8a04,color:#000
+ style Q fill:#ffe4e6,stroke:#e11d48,color:#fff
 
-    %% Activity Schema annotation
-    subgraph Schema["Activity Silver Schema"]
-        direction TB
-        S1["activity_id: str (PK)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        S2["assay_id: str (FK)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        LocalFS["molecule_id: str (FK)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        S4["target_id: str | None (FK)&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        S5["standard_type: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        S6["standard_value: float | None<br/>&nbsp;<br/>&nbsp;"]
-        S7["standard_units: str | None&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        S8["pchembl_value: float | None&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        S9["_content_hash: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        S10["_run_id: UUID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        S11["_run_type: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-        S12["_ingestion_ts: datetime&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
-    end
+ %% Activity Schema annotation
+ subgraph Schema["Activity Silver Schema"]
+ direction TB
+ S1["activity_id: str (PK)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+ S2["assay_id: str (FK)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+ LocalFS["molecule_id: str (FK)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+ S4["target_id: str | None (FK)&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+ S5["standard_type: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+ S6["standard_value: float | None<br/>&nbsp;<br/>&nbsp;"]
+ S7["standard_units: str | None&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+ S8["pchembl_value: float | None&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+ S9["_content_hash: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+ S10["_run_id: UUID&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+ S11["_run_type: str&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+ S12["_ingestion_ts: datetime&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;<br/>&nbsp;"]
+ end
 
-    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,14,15,16,17 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 13 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+ linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,14,15,16,17 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+ linkStyle 13 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4

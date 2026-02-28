@@ -4,89 +4,89 @@
 %% Components: CLI, MemoryLock, Data Lake directories, Observability stack
 
 %% @version 1.0.0
-%% @date    2026-02-24
-%% @type    flowchart
-%% @level   Mixed (System / Component / Class)
+%% @date 2026-02-24
+%% @type flowchart
+%% @level Mixed (System / Component / Class)
 
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 %% @uniform width=200 height=72 max_title_len=20 max_desc_lines=2
 flowchart TB
-    subgraph External["External APIs"]
-        ChEMBL_API["🌐 ChEMBL API<br/>ebi.ac.uk/chembl"]
-        PubChem_API["🌐 PubChem API<br/>pubchem.ncbi.nlm.nih.gov"]
-        UniProt_API["🌐 UniProt API<br/>uniprot.org"]
-        PubMed_API["🌐 PubMed API<br/>eutils.ncbi.nlm.nih.gov"]
-    end
+ subgraph External["External APIs"]
+ ChEMBL_API["ChEMBL API<br/>ebi.ac.uk/chembl"]
+ PubChem_API["PubChem API<br/>pubchem.ncbi.nlm.nih.gov"]
+ UniProt_API["UniProt API<br/>uniprot.org"]
+ PubMed_API["PubMed API<br/>eutils.ncbi.nlm.nih.gov"]
+ end
 
-    subgraph Local["Local Machine (Single Instance)"]
-        subgraph Orchestration["CLI Execution"]
-            CLI["🖥️ CLI / Manual run<br/>PipelineRunner"]
-            Schedule["⏰ Local scheduler<br/>(cron/systemd)"]
-        end
+ subgraph Local["Local Machine (Single Instance)"]
+ subgraph Orchestration["CLI Execution"]
+ CLI["CLI / Manual run<br/>PipelineRunner"]
+ Schedule["⏰ Local scheduler<br/>(cron/systemd)"]
+ end
 
-        subgraph Runtime["Local Pipeline Workers"]
-            chembl_activity["📦 chembl_activity<br/>local pipeline"]
-            chembl_assay["📦 chembl_assay<br/>local pipeline"]
-            chembl_target["📦 chembl_target<br/>local pipeline"]
-            chembl_molecule["📦 chembl_molecule<br/>local pipeline"]
-            pubchem_compound["📦 pubchem_compound<br/>local pipeline"]
-            uniprot_protein["📦 uniprot_protein<br/>local pipeline"]
-        end
+ subgraph Runtime["Local Pipeline Workers"]
+ chembl_activity["chembl_activity<br/>local pipeline"]
+ chembl_assay["chembl_assay<br/>local pipeline"]
+ chembl_target["chembl_target<br/>local pipeline"]
+ chembl_molecule["chembl_molecule<br/>local pipeline"]
+ pubchem_compound["pubchem_compound<br/>local pipeline"]
+ uniprot_protein["uniprot_protein<br/>local pipeline"]
+ end
 
-        subgraph Locking["In-Process Locking"]
-        end
+ subgraph Locking["In-Process Locking"]
+ end
 
-        subgraph Data["Local filesystem (data/)"]
-            Bronze[("📁 bronze/<br/>JSONL+zstd")]
-            Silver[("📁 silver/<br/>Delta Lake")]
-            Gold[("📁 gold/<br/>Delta/Parquet")]
-            Quarantine[("📁 quarantine/<br/>Parquet")]
-            Checkpoints[("📁 checkpoints/<br/>JSON")]
-            Lineage[("📁 lineage/<br/>Parquet")]
-        end
+ subgraph Data["Local filesystem (data/)"]
+ Bronze[(" bronze/<br/>JSONL+zstd")]
+ Silver[(" silver/<br/>Delta Lake")]
+ Gold[(" gold/<br/>Delta/Parquet")]
+ Quarantine[(" quarantine/<br/>Parquet")]
+ Checkpoints[(" checkpoints/<br/>JSON")]
+ Lineage[(" lineage/<br/>Parquet")]
+ end
 
-        subgraph Observability["Local Observability"]
-            Logs["📋 Local logs<br/>stdout/file"]
-            Metrics["📊 In-process metrics<br/>"]
-        end
-    end
+ subgraph Observability["Local Observability"]
+ Logs["Local logs<br/>stdout/file"]
+ Metrics["In-process metrics"\]
+ end
+ end
 
-    %% External API connections
-    ChEMBL_API --> chembl_activity
-    PubChem_API --> pubchem_compound
-    UniProt_API --> uniprot_protein
-    PubMed_API --> chembl_activity
+ %% External API connections
+ ChEMBL_API --> chembl_activity
+ PubChem_API --> pubchem_compound
+ UniProt_API --> uniprot_protein
+ PubMed_API --> chembl_activity
 
-    %% Orchestration to runtime
-    CLI --> chembl_activity
-    CLI --> chembl_assay
-    CLI --> chembl_target
-    CLI --> chembl_molecule
-    CLI --> pubchem_compound
-    CLI --> uniprot_protein
-    Schedule --> CLI
+ %% Orchestration to runtime
+ CLI --> chembl_activity
+ CLI --> chembl_assay
+ CLI --> chembl_target
+ CLI --> chembl_molecule
+ CLI --> pubchem_compound
+ CLI --> uniprot_protein
+ Schedule --> CLI
 
-    %% Runtime to MemoryLock
-    chembl_activity -.->|lock| MemoryLock
-    chembl_assay -.->|lock| MemoryLock
-    chembl_target -.->|lock| MemoryLock
-    chembl_molecule -.->|lock| MemoryLock
+ %% Runtime to MemoryLock
+ chembl_activity -.->|lock| MemoryLock
+ chembl_assay -.->|lock| MemoryLock
+ chembl_target -.->|lock| MemoryLock
+ chembl_molecule -.->|lock| MemoryLock
 
-    %% Runtime to local filesystem
-    chembl_activity --> Bronze
-    chembl_activity --> Silver
-    chembl_activity --> Gold
-    chembl_activity --> Quarantine
-    chembl_activity --> Checkpoints
-    chembl_activity --> Lineage
+ %% Runtime to local filesystem
+ chembl_activity --> Bronze
+ chembl_activity --> Silver
+ chembl_activity --> Gold
+ chembl_activity --> Quarantine
+ chembl_activity --> Checkpoints
+ chembl_activity --> Lineage
 
-    %% Runtime to local observability
-    chembl_activity --> Logs
-    chembl_activity --> Metrics
+ %% Runtime to local observability
+ chembl_activity --> Logs
+ chembl_activity --> Metrics
 
-    %% Styling
-    style Bronze fill:#fff7ed,stroke:#f59e0b,color:#212121
-    style Silver fill:#f1f5f9,stroke:#475569,color:#212121
-    style Gold fill:#fefce8,stroke:#ca8a04,color:#212121
-    style Quarantine fill:#ffe4e6,stroke:#dc2626,color:#212121
-    style MemoryLock fill:#eff6ff,stroke:#2563eb,color:#212121
+ %% Styling
+ style Bronze fill:#fff7ed,stroke:#f59e0b,color:#212121
+ style Silver fill:#f1f5f9,stroke:#475569,color:#212121
+ style Gold fill:#fefce8,stroke:#ca8a04,color:#212121
+ style Quarantine fill:#ffe4e6,stroke:#dc2626,color:#212121
+ style MemoryLock fill:#eff6ff,stroke:#2563eb,color:#212121

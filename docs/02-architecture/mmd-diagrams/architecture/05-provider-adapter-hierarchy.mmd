@@ -2,115 +2,118 @@
 %% Shows how each provider adapter inherits from base classes and implements DataSourcePort.
 
 %% @version 1.0.0
-%% @date    2026-02-24
-%% @type    flowchart
-%% @level   System / Component
-%% @nodes   27
-%% @reference  Decomposed into 05a, 05b sub-diagrams
+%% @date 2026-02-24
+%% @type flowchart
+%% @level System / Component
+%% @nodes 27
+%% @reference Decomposed into 05a, 05b sub-diagrams
 
 %%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
 %% @uniform width=304 height=180 max_title_len=33 max_desc_lines=8
 graph TB
 %% keep-orphan: DFM, HCP, UIDM
-    subgraph Ports["Domain Ports"]
-        DSP["DataSourcePort<br/>(Protocol)<br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        HCP["HealthCheckPort<br/>(Protocol)<br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-    end
+ subgraph Ports["Domain Ports"]
+ DSP["DataSourcePort<br/>(Protocol)"]:::size-lg
+ HCP["HealthCheckPort<br/>(Protocol)"]:::size-lg
+ end
 
-    DSP -->|extends| FDSP
+ DSP -->|extends| FDSP
 
-    subgraph Mixins["Mixins"]
-        HCM["HealthCheckMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        HCPM["HealthCheckProviderMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        NSMF["NotSupportedMultiFilterMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        DFM["DelegatingFallbackMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        FSM["FilterableStubMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        PFM["PaginatedFetcherMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-    end
+ subgraph Mixins["Mixins"]
+ HCM["HealthCheckMixin"]:::size-lg
+ HCPM["HealthCheckProviderMixin"]:::size-lg
+ NSMF["NotSupportedMultiFilterMixin"]:::size-lg
+ DFM["DelegatingFallbackMixin"]:::size-lg
+ FSM["FilterableStubMixin"]:::size-lg
+ PFM["PaginatedFetcherMixin"]:::size-lg
+ end
 
-    HCM --> HCPM
+ HCM --> HCPM
 
-    subgraph Base["Base Adapters"]
-        BHA["BaseHttpAdapter<br/>━━━━━━━━━━━━━━━━━<br/>http_client: UnifiedHTTPClient<br/>logger: LoggerPort<br/>metrics: MetricsPort<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ health_check()<br/>+ aclose()"]:::size-lg
-        BSA["BaseSyncAdapter<br/>━━━━━━━━━━━━━━━━━<br/>logger: LoggerPort<br/>rate_limiter: TokenBucket<br/>circuit_breaker: CircuitBreaker<br/>thread_pool: ThreadPoolExecutor<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ health_check()"]:::size-lg
-    end
+ subgraph Base["Base Adapters"]
+ BHA["BaseHttpAdapter<br/>-----------------<br/>http_client: UnifiedHTTPClient<br/>logger: LoggerPort<br/>metrics: MetricsPort<br/>-----------------<br/>+ fetch()<br/>+ health_check()<br/>+ aclose()"]:::size-lg
+ BSA["BaseSyncAdapter<br/>-----------------<br/>logger: LoggerPort<br/>rate_limiter: TokenBucket<br/>circuit_breaker: CircuitBreaker<br/>thread_pool: ThreadPoolExecutor<br/>-----------------<br/>+ fetch()<br/>+ health_check()"]:::size-lg
+ end
 
-    HCPM --> BHA
-    DSP -.->|implements| BHA
-    HCPM --> BSA
-    DSP -.->|implements| BSA
+ HCPM --> BHA
+ DSP -.->|implements| BHA
+ HCPM --> BSA
+ DSP -.->|implements| BSA
 
-    subgraph ChEMBL["ChEMBL"]
-        CHM["ChemblHealthMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        CMM["ChemblMetadataMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        CA["ChemblAdapter<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_multi_filtered()<br/>+ fetch_filtered_with_fallback()<br/>+ fetch_as_models()<br/><br/>"]:::size-lg
-    end
+ subgraph ChEMBL["ChEMBL"]
+ CHM["ChemblHealthMixin"]:::size-lg
+ CMM["ChemblMetadataMixin"]:::size-lg
+ CA["ChemblAdapter<br/>-----------------<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_multi_filtered()<br/>+ fetch_filtered_with_fallback()<br/>+ fetch_as_models()"]:::size-lg
+ end
 
-    BHA --> CA
-    CHM --> CA
-    CMM --> CA
+ BHA --> CA
+ CHM --> CA
+ CMM --> CA
 
-    subgraph PubMed["PubMed"]
-        PSM["PubMedSearchMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        PFetchM["PubMedFetchMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        PHM["PubMedHealthMixin<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        PA["PubMedAdapter<br/>━━━━━━━━━━━━━━━━━<br/>email: str<br/>api_key: str | None<br/>batch_size: int<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()"]:::size-lg
-    end
+ subgraph PubMed["PubMed"]
+ PSM["PubMedSearchMixin"]:::size-lg
+ PFetchM["PubMedFetchMixin"]:::size-lg
+ PHM["PubMedHealthMixin"]:::size-lg
+ PA["PubMedAdapter<br/>-----------------<br/>email: str<br/>api_key: str | None<br/>batch_size: int<br/>-----------------<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()"]:::size-lg
+ end
 
-    BHA --> PA
-    NSMF --> PA
-    PSM --> PA
-    PFetchM --> PA
-    PHM --> PA
+ BHA --> PA
+ NSMF --> PA
+ PSM --> PA
+ PFetchM --> PA
+ PHM --> PA
 
-    subgraph UniProt["UniProt"]
-        UA["UniProtAdapter<br/>━━━━━━━━━━━━━━━━━<br/>api_key: str | None<br/>base_url: str<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_multi_filtered()<br/>"]:::size-lg
-        UIDM["UniProtIDMappingClient<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-    end
+ subgraph UniProt["UniProt"]
+ UA["UniProtAdapter<br/>-----------------<br/>api_key: str | None<br/>base_url: str<br/>-----------------<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_multi_filtered()"]:::size-lg
+ UIDM["UniProtIDMappingClient"]:::size-lg
+ end
 
-    BHA --> UA
-    PFM --> UA
+ BHA --> UA
+ PFM --> UA
 
-    subgraph CrossRef["CrossRef"]
-        CRA["CrossRefAdapter<br/>━━━━━━━━━━━━━━━━━<br/>mailto: str<br/>batch_size: int<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()<br/>"]:::size-lg
-    end
+ subgraph CrossRef["CrossRef"]
+ CRA["CrossRefAdapter<br/>-----------------<br/>mailto: str<br/>batch_size: int<br/>-----------------<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()"]:::size-lg
+ end
 
-    BHA --> CRA
+ BHA --> CRA
 
-    subgraph OpenAlex["OpenAlex"]
-        OAA["OpenAlexAdapter<br/>━━━━━━━━━━━━━━━━━<br/>mailto: str<br/>batch_size: int<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()<br/>"]:::size-lg
-    end
+ subgraph OpenAlex["OpenAlex"]
+ OAA["OpenAlexAdapter<br/>-----------------<br/>mailto: str<br/>batch_size: int<br/>-----------------<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()"]:::size-lg
+ end
 
-    BHA --> OAA
+ BHA --> OAA
 
-    subgraph SemanticScholar["Semantic Scholar"]
-        SSA["SemanticScholarAdapter<br/>━━━━━━━━━━━━━━━━━<br/>api_key: str<br/>batch_size: int<br/>fields: str<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()"]:::size-lg
-    end
+ subgraph SemanticScholar["Semantic Scholar"]
+ SSA["SemanticScholarAdapter<br/>-----------------<br/>api_key: str<br/>batch_size: int<br/>fields: str<br/>-----------------<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()"]:::size-lg
+ end
 
-    BHA --> SSA
+ BHA --> SSA
 
-    subgraph PubChem["PubChem"]
-        PCA["PubChemAdapter<br/>━━━━━━━━━━━━━━━━━<br/>(sync via ThreadPoolExecutor)<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_as_models()<br/><br/>"]:::size-lg
-    end
+ subgraph PubChem["PubChem"]
+ PCA["PubChemAdapter<br/>-----------------<br/>(sync via ThreadPoolExecutor)<br/>-----------------<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_as_models()"]:::size-lg
+ end
 
-    BSA --> PCA
-    FSM --> PCA
+ BSA --> PCA
+ FSM --> PCA
 
-    subgraph Decorators["Adapter Decorators"]
-    end
+ subgraph Decorators["Adapter Decorators"]
+ end
 
-    DSP -.->|wraps| CBD
-    DSP -.->|wraps| RDD
-    DSP -.->|wraps| CBDS
+ DSP -.->|wraps| CBD
+ DSP -.->|wraps| RDD
+ DSP -.->|wraps| CBDS
 
-    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
-    classDef base fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
-    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
-    classDef mixin fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px
-    classDef decorator fill:#f1f5f9,stroke:#64748b,stroke-width:1px
+ classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+ classDef base fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+ classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+ classDef mixin fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px
+ classDef decorator fill:#f1f5f9,stroke:#64748b,stroke-width:1px
 
-    class DSP,FDSP,HCP port
-    class BHA,BSA base
-    class CA,PA,UA,UIDM,CRA,OAA,SSA,PCA adapter
-    class HCM,HCPM,NSMF,DFM,FSM,PFM,CHM,CMM,PSM,PFetchM,PHM mixin
-    class CBD,RDD,CBDS decorator
+ class DSP,FDSP,HCP port
+ class BHA,BSA base
+ class CA,PA,UA,UIDM,CRA,OAA,SSA,PCA adapter
+ class HCM,HCPM,NSMF,DFM,FSM,PFM,CHM,CMM,PSM,PFetchM,PHM mixin
+ class CBD,RDD,CBDS decorator
+
+ %% linkStyle: DI/implements (dashed) for port contracts, data for inheritance, orchestration for mixins
+ linkStyle default stroke:#1E293B,stroke-width:1.5px

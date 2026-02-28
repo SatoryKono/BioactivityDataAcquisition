@@ -8,3 +8,37 @@
     height: auto !important;
 }
 
+/* ── Contrast enhancements for embedded diagrams ──── */
+
+/* Match render.sh custom.css cluster improvements */
+.mermaid .cluster rect,
+.mermaid .cluster path {
+    stroke-width: 2px;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.06));
+}
+
+.mermaid .cluster text {
+    font-weight: 700;
+}
+
+/* Node shadow for depth perception */
+.mermaid .node rect,
+.mermaid .node circle,
+.mermaid .node polygon {
+    stroke-width: 2px;
+    filter: drop-shadow(1px 2px 4px rgba(0, 0, 0, 0.10));
+}
+
+/* Edge label readability */
+.mermaid .edgeLabel {
+    font-weight: 500;
+}
+
+/* Hover feedback for interactive diagrams */
+.mermaid .node:hover rect,
+.mermaid .node:hover circle,
+.mermaid .node:hover polygon {
+    filter: drop-shadow(2px 4px 8px rgba(0, 0, 0, 0.18));
+    transition: filter 0.15s ease-in-out;
+}
+

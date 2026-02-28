@@ -16,28 +16,29 @@ svg {
 .node ellipse,
 .node polygon,
 .node path {
-    stroke-width: 1.5px !important;
+    stroke-width: 2px !important;
     rx: 8;
     ry: 8;
-    filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.05));
+    filter: drop-shadow(1px 2px 4px rgba(0, 0, 0, 0.10));
 }
 
 /* ── Subgraph / cluster ─────────────────────────────── */
 .cluster rect,
 .cluster path {
-    rx: 10;
-    ry: 10;
+    rx: 12;
+    ry: 12;
     fill: #f8fafc;
     stroke: #94a3b8;
-    stroke-width: 1.5px;
+    stroke-width: 2px;
     stroke-dasharray: none;
     fill-opacity: 1;
-    filter: none;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.06));
 }
 
 .cluster text {
-    font-weight: 600;
-    font-size: 15px;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.02em;
 }
 
 /* ── Edges / links ──────────────────────────────────── */
@@ -65,10 +66,11 @@ svg {
 
 .edgeLabel {
     font-size: 12px;
+    font-weight: 500;
     line-height: 1.1;
     background-color: #ffffff;
-    padding: 1px 3px;
-    border-radius: 2px;
+    padding: 2px 6px;
+    border-radius: 3px;
 }
 
 .edgeLabel span,
@@ -311,4 +313,66 @@ marker path {
 [id*="Quarantine"] > path {
     fill: #ffe4e6 !important;
     stroke: #e11d48 !important;
+}
+
+/* ── Contrast enhancements ─────────────────────────── */
+
+/* Silver layer is nearly white (#f8fafc) — add visible inner border
+   via box-shadow on the subgraph to distinguish from white BG */
+[id*="Silver"] > rect,
+[id*="Silver"] > path {
+    fill: #f1f5f9 !important;
+    stroke: #475569 !important;
+    stroke-width: 2px !important;
+}
+
+/* ── Node label readability ────────────────────────── */
+
+/* Ensure node text is always high-contrast */
+.node .nodeLabel,
+.node foreignObject div {
+    color: #1e293b !important;
+    line-height: 1.3;
+}
+
+/* Subgraph title contrast — ensure visible against pastel BG */
+.cluster-label .nodeLabel {
+    color: #334155 !important;
+    font-weight: 700 !important;
+}
+
+/* ── Arrowhead visibility ──────────────────────────── */
+
+/* Increase arrowhead size for better visibility at small scales */
+marker {
+    overflow: visible;
+}
+
+marker path {
+    stroke-width: 0.5px;
+}
+
+/* ── Focus states for interactive viewers ──────────── */
+
+/* Hover state for nodes (MkDocs interactive view) */
+.node:hover rect,
+.node:hover circle,
+.node:hover polygon {
+    filter: drop-shadow(2px 4px 8px rgba(0, 0, 0, 0.18));
+    transition: filter 0.15s ease-in-out;
+}
+
+/* ── Print / high-DPI optimizations ────────────────── */
+
+@media print {
+    .node rect,
+    .node circle,
+    .node polygon,
+    .node path {
+        filter: none !important;
+    }
+    .cluster rect,
+    .cluster path {
+        filter: none !important;
+    }
 }

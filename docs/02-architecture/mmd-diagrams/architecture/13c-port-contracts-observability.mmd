@@ -2,40 +2,40 @@
 %% Covers Logger/Metrics/Tracing ports plus resilience control ports.
 
 %% @version 1.0.0
-%% @date    2026-02-25
-%% @type    flowchart
-%% @level   System / Component
-%% @view    observability
-%% @parent  13-port-protocol-contracts.mmd
-%% @nodes   15
+%% @date 2026-02-25
+%% @type flowchart
+%% @level System / Component
+%% @view observability
+%% @parent 13-port-protocol-contracts.mmd
+%% @nodes 15
 %% @uniform width=192 height=56 max_title_len=19 max_desc_lines=1
 
 %%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
 graph LR
-    subgraph Domain["Domain Layer"]
-        LGP["LoggerPort"]:::size-sm
-        MTP["MetricsPort"]:::size-sm
-        TRP["TracingPort"]:::size-sm
-        CBP["CircuitBreakerPort"]:::size-sm
-        RLP["RateLimiterPort"]:::size-sm
-    end
+ subgraph Domain["Domain Layer"]
+ LGP["LoggerPort"]:::size-sm
+ MTP["MetricsPort"]:::size-sm
+ TRP["TracingPort"]:::size-sm
+ CBP["CircuitBreakerPort"]:::size-sm
+ RLP["RateLimiterPort"]:::size-sm
+ end
 
-    subgraph Infrastructure["Infrastructure Layer"]
-        UL["UnifiedLogger"]:::size-sm
-        MCO["MetricsCollector"]:::size-sm
-        OTT["OpenTelemetryTracer"]:::size-sm
-        CB["CircuitBreaker"]:::size-sm
-        TB_I["TokenBucket"]:::size-sm
-    end
+ subgraph Infrastructure["Infrastructure Layer"]
+ UL["UnifiedLogger"]:::size-sm
+ MCO["MetricsCollector"]:::size-sm
+ OTT["OpenTelemetryTracer"]:::size-sm
+ CB["CircuitBreaker"]:::size-sm
+ TB_I["TokenBucket"]:::size-sm
+ end
 
-    LGP --- UL & SLG & NOL
-    MTP --- MCO & PME & NOM
-    TRP --- OTT & NOT_T
-    CBP --- CB
-    RLP --- TB_I
+ LGP --- UL & SLG & NOL
+ MTP --- MCO & PME & NOM
+ TRP --- OTT & NOT_T
+ CBP --- CB
+ RLP --- TB_I
 
-    classDef domain fill:#f5f3ff,stroke:#7c3aed
-    classDef infra fill:#fff1f2,stroke:#dc2626
+ classDef domain fill:#f5f3ff,stroke:#7c3aed
+ classDef infra fill:#fff1f2,stroke:#dc2626
 
-    class LGP,MTP,TRP,CBP,RLP domain
-    class UL,SLG,NOL,MCO,PME,NOM,OTT,NOT_T,CB,TB_I infra
+ class LGP,MTP,TRP,CBP,RLP domain
+ class UL,SLG,NOL,MCO,PME,NOM,OTT,NOT_T,CB,TB_I infra

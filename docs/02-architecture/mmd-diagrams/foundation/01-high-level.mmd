@@ -4,72 +4,72 @@
 %% Components: CLI, Bootstrap, PipelineFactory, PipelineRunner, BaseTransformer, BaseHttpAdapter, StoragePort
 
 %% @version 1.0.0
-%% @date    2026-02-24
-%% @type    flowchart
-%% @level   Mixed (System / Component / Class)
+%% @date 2026-02-24
+%% @type flowchart
+%% @level Mixed (System / Component / Class)
 
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 %% @uniform width=120 height=72 max_title_len=12 max_desc_lines=2
 flowchart TD
-    subgraph Sources["External Data Sources"]
-    end
+ subgraph Sources["External Data Sources"]
+ end
 
-    subgraph Interfaces["Interfaces Layer"]
-        CLI["CLI (Click)<br/>"]
-    end
+ subgraph Interfaces["Interfaces Layer"]
+ CLI["CLI (Click)"\]
+ end
 
-    subgraph Composition["Composition Layer"]
-        Boot[bootstrap_pipeline<br/>]
-        Factory[PipelineFactory<br/>]
-    end
+ subgraph Composition["Composition Layer"]
+ Boot[bootstrap_pipeline<br/>]
+ Factory[PipelineFactory<br/>]
+ end
 
-    subgraph Application["Application Layer"]
-        Runner[PipelineRunner<br/>]
-        Executor[PipelineExecutor<br/>]
-        Trans[BaseTransformer<br/>]
-    end
+ subgraph Application["Application Layer"]
+ Runner[PipelineRunner<br/>]
+ Executor[PipelineExecutor<br/>]
+ Trans[BaseTransformer<br/>]
+ end
 
-    subgraph Infrastructure["Infrastructure Layer"]
-        Adapters[HTTP Adapters<br/>7 providers]
-        Storage[Storage Writers<br/>]
-    end
+ subgraph Infrastructure["Infrastructure Layer"]
+ Adapters[HTTP Adapters<br/>7 providers]
+ Storage[Storage Writers<br/>]
+ end
 
-    subgraph Lake["Data Lake — Local Storage"]
-        Bronze["Bronze Layer<br/>(JSONL + zstd)"]
-        Silver["Silver Layer<br/>(Delta Lake)"]
-        Gold["Gold Layer<br/>(Delta Lake)"]
-    end
+ subgraph Lake["Data Lake — Local Storage"]
+ Bronze["Bronze Layer<br/>(JSONL + zstd)"]
+ Silver["Silver Layer<br/>(Delta Lake)"]
+ Gold["Gold Layer<br/>(Delta Lake)"]
+ end
 
-    Sources --> Adapters
-    CLI --> Boot
-    Boot --> Factory
-    Factory --> Runner
-    Runner --> Executor
-    Executor --> Trans
-    Trans --> Adapters
-    Storage --> Bronze
-    Storage --> Silver
-    Storage --> Gold
-    Trans -.->|DQ failure| Quarantine
-    Executor --> Storage
+ Sources --> Adapters
+ CLI --> Boot
+ Boot --> Factory
+ Factory --> Runner
+ Runner --> Executor
+ Executor --> Trans
+ Trans --> Adapters
+ Storage --> Bronze
+ Storage --> Silver
+ Storage --> Gold
+ Trans -.->|DQ failure| Quarantine
+ Executor --> Storage
 
-    %% Styling — Medallion color scheme per diagramming policy §4.3
-    classDef source fill:#eff6ff,stroke:#2563eb,color:#212121
-    classDef iface fill:#eff6ff,stroke:#2563eb,color:#212121
-    classDef comp fill:#fff7ed,stroke:#f59e0b,color:#212121
-    classDef app fill:#f0fdf4,stroke:#16a34a,color:#212121
-    classDef infra fill:#fff1f2,stroke:#dc2626,color:#212121
-    classDef bronze fill:#fff7ed,stroke:#f59e0b,color:#212121
-    classDef silver fill:#f1f5f9,stroke:#475569,color:#212121
-    classDef gold fill:#fefce8,stroke:#ca8a04,color:#212121
-    classDef quarantine fill:#ffe4e6,stroke:#dc2626,color:#212121
+ %% Styling — Medallion color scheme per diagramming policy §4.3
+ classDef source fill:#eff6ff,stroke:#2563eb,color:#212121
+ classDef iface fill:#eff6ff,stroke:#2563eb,color:#212121
+ classDef comp fill:#fff7ed,stroke:#f59e0b,color:#212121
+ classDef app fill:#f0fdf4,stroke:#16a34a,color:#212121
+ classDef infra fill:#fff1f2,stroke:#dc2626,color:#212121
+ classDef bronze fill:#fff7ed,stroke:#f59e0b,color:#212121
+ classDef silver fill:#f1f5f9,stroke:#475569,color:#212121
+ classDef gold fill:#fefce8,stroke:#ca8a04,color:#212121
+ classDef quarantine fill:#ffe4e6,stroke:#dc2626,color:#212121
 
-    class A1,A2,A3,A4,A5,A6,A7 source
-    class CLI iface
-    class Boot,Factory comp
-    class Runner,Executor,Trans app
-    class Adapters,Storage infra
-    class Bronze bronze
-    class Silver silver
-    class Gold gold
-    class Quarantine quarantine
+ class A1,A2,A3,A4,A5,A6,A7 source
+ class CLI iface
+ class Boot,Factory comp
+ class Runner,Executor,Trans app
+ class Adapters,Storage infra
+ class Bronze bronze
+ class Silver silver
+ class Gold gold
+ class Quarantine quarantine

@@ -2,79 +2,79 @@
 %% Shows how PII is handled and audit trail is maintained.
 
 %% @version 1.0.0
-%% @date    2026-02-24
-%% @type    flowchart
-%% @level   System / Component
-%% @nodes   16
+%% @date 2026-02-24
+%% @type flowchart
+%% @level System / Component
+%% @nodes 16
 %% @allow-polyline-routing
 %% @uniform width=312 height=216 max_title_len=31 max_desc_lines=10
 
 %%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'NETWORK_SIMPLEX', 'edgeRouting': 'POLYLINE'}}}%%
 graph TB
-    subgraph Ports["Domain Ports"]
-        PHP["PiiHasherPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ hash(value: str) → str<br/><br/><br/><br/><br/><br/>"]:::size-lg
-        AP["AuditPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ log_write(entry: AuditEntry)<br/>+ get_entries(filters) → list<br/><br/><br/><br/><br/>"]:::size-lg
-    end
+ subgraph Ports["Domain Ports"]
+ PHP["PiiHasherPort<br/>(Protocol)<br/>-----------------<br/>+ hash(value: str) → str"]:::size-lg
+ AP["AuditPort<br/>(Protocol)<br/>-----------------<br/>+ log_write(entry: AuditEntry)<br/>+ get_entries(filters) → list"]:::size-lg
+ end
 
-    subgraph DomainTypes["Domain Types"]
-        AE["AuditEntry<br/>(frozen dataclass)<br/>━━━━━━━━━━━━━━━━━<br/>run_id: RunID<br/>timestamp: datetime<br/>layer: AuditLayer<br/>table_name: str<br/>operation: AuditOperation<br/>records_count: int<br/>metadata: dict"]:::size-lg
-        AL["AuditLayer (StrEnum)<br/>━━━━━━━━━━━━━━━━━<br/>BRONZE<br/>SILVER<br/>GOLD<br/><br/><br/><br/><br/>"]:::size-lg
-        AO["AuditOperation (StrEnum)<br/>━━━━━━━━━━━━━━━━━<br/>WRITE<br/>MERGE<br/>APPEND<br/>DELETE<br/>OVERWRITE<br/><br/><br/>"]:::size-lg
-    end
+ subgraph DomainTypes["Domain Types"]
+ AE["AuditEntry<br/>(frozen dataclass)<br/>-----------------<br/>run_id: RunID<br/>timestamp: datetime<br/>layer: AuditLayer<br/>table_name: str<br/>operation: AuditOperation<br/>records_count: int<br/>metadata: dict"]:::size-lg
+ AL["AuditLayer (StrEnum)<br/>-----------------<br/>BRONZE<br/>SILVER<br/>GOLD"]:::size-lg
+ AO["AuditOperation (StrEnum)<br/>-----------------<br/>WRITE<br/>MERGE<br/>APPEND<br/>DELETE<br/>OVERWRITE"]:::size-lg
+ end
 
-    subgraph PIIFlow["PII Hashing Flow"]
-        RAW_PII["Raw PII Data<br/>(author names, emails,<br/>affiliations)<br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        HASH_FN["SHA256(lowercase(value) + salt)<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        RAW_PII --> HASH_FN --> HASHED
-    end
+ subgraph PIIFlow["PII Hashing Flow"]
+ RAW_PII["Raw PII Data<br/>(author names, emails,<br/>affiliations)"]:::size-lg
+ HASH_FN["SHA256(lowercase(value) + salt)"]:::size-lg
+ RAW_PII --> HASH_FN --> HASHED
+ end
 
-    subgraph InfraPII["Infrastructure: PII Hasher"]
-        SPH["Sha256PiiHasher<br/>━━━━━━━━━━━━━━━━━<br/>+ hash(value) → str<br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        SC["SaltConfig<br/>(frozen dataclass)<br/>━━━━━━━━━━━━━━━━━<br/>current_salt: str<br/>next_salt: str | None<br/>rotation_active: bool<br/>━━━━━━━━━━━━━━━━━<br/>+ from_settings()<br/>+ from_env()<br/>"]:::size-lg
-    end
+ subgraph InfraPII["Infrastructure: PII Hasher"]
+ SPH["Sha256PiiHasher<br/>-----------------<br/>+ hash(value) → str"]:::size-lg
+ SC["SaltConfig<br/>(frozen dataclass)<br/>-----------------<br/>current_salt: str<br/>next_salt: str | None<br/>rotation_active: bool<br/>-----------------<br/>+ from_settings()<br/>+ from_env()"]:::size-lg
+ end
 
-    subgraph InfraAudit["Infrastructure: Audit"]
-        FAA["FileAuditAdapter<br/>━━━━━━━━━━━━━━━━━<br/>base_path: Path<br/>logger: LoggerPort<br/>━━━━━━━━━━━━━━━━━<br/>+ log_write(entry)<br/>+ get_entries(filters)<br/>+ aclose()<br/><br/>"]:::size-lg
-        JSONL["audit_YYYY-MM-DD.jsonl<br/>(one file per day,<br/>append-only)<br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-    end
+ subgraph InfraAudit["Infrastructure: Audit"]
+ FAA["FileAuditAdapter<br/>-----------------<br/>base_path: Path<br/>logger: LoggerPort<br/>-----------------<br/>+ log_write(entry)<br/>+ get_entries(filters)<br/>+ aclose()"]:::size-lg
+ JSONL["audit_YYYY-MM-DD.jsonl<br/>(one file per day,<br/>append-only)"]:::size-lg
+ end
 
-    subgraph Usage["Usage in Transformers"]
-        BT["BaseTransformer<br/>━━━━━━━━━━━━━━━━━<br/>+ hash_pii_value(value) → str<br/>+ hash_pii_list(values) → list[str]<br/><br/><br/><br/><br/><br/>"]:::size-lg
-    end
+ subgraph Usage["Usage in Transformers"]
+ BT["BaseTransformer<br/>-----------------<br/>+ hash_pii_value(value) → str<br/>+ hash_pii_list(values) → list[str]"]:::size-lg
+ end
 
-    subgraph StorageAudit["Storage Audit Integration"]
-        GW["GoldWriter<br/>━━━━━━━━━━━━━━━━━<br/>audit: AuditPort<br/>logs writes<br/><br/><br/><br/><br/><br/>"]:::size-lg
-    end
+ subgraph StorageAudit["Storage Audit Integration"]
+ GW["GoldWriter<br/>-----------------<br/>audit: AuditPort<br/>logs writes"]:::size-lg
+ end
 
-    %% Port implementations
-    PHP -.-> SPH
-    AP -.-> FAA
+ %% Port implementations
+ PHP -.-> SPH
+ AP -.-> FAA
 
-    %% PII composition
-    SPH --> SC
+ %% PII composition
+ SPH --> SC
 
-    %% Audit storage
-    FAA --> JSONL
+ %% Audit storage
+ FAA --> JSONL
 
-    %% Usage
-    BT --> PHP
-    BW & SW & GW --> AP
+ %% Usage
+ BT --> PHP
+ BW & SW & GW --> AP
 
-    %% Domain types
-    FAA --> AE
-    AE --> AL
-    AE --> AO
+ %% Domain types
+ FAA --> AE
+ AE --> AL
+ AE --> AO
 
-    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
-    classDef domain fill:#f5f3ff,stroke:#7c3aed
-    classDef pii fill:#fff1f2,stroke:#dc2626,stroke-width:2px
-    classDef audit fill:#eff6ff,stroke:#2563eb
-    classDef storage fill:#fff7ed,stroke:#f59e0b
-    classDef usage fill:#f5f3ff,stroke:#7c3aed
+ classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+ classDef domain fill:#f5f3ff,stroke:#7c3aed
+ classDef pii fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+ classDef audit fill:#eff6ff,stroke:#2563eb
+ classDef storage fill:#fff7ed,stroke:#f59e0b
+ classDef usage fill:#f5f3ff,stroke:#7c3aed
 
-    class PHP,AP port
-    class AE,AL,AO domain
-    class RAW_PII,HASH_FN,HASHED,SPH,SC pii
-    class FAA,JSONL audit
-    class BW,SW,GW storage
-    class BT usage
+ class PHP,AP port
+ class AE,AL,AO domain
+ class RAW_PII,HASH_FN,HASHED,SPH,SC pii
+ class FAA,JSONL audit
+ class BW,SW,GW storage
+ class BT usage

@@ -50,7 +50,7 @@
     "fillType2": "#f0fdf4",
     "fillType3": "#f5f3ff",
     "fillType4": "#ffe4e6",
-    "fillType5": "#f8fafc",
+    "fillType5": "#f1f5f9",
     "fillType6": "#fefce8",
     "fillType7": "#f1f5f9",
 
@@ -75,8 +75,8 @@
   "flowchart": {
     "curve": "step",
     "padding": 24,
-    "nodeSpacing": 50,
-    "rankSpacing": 45,
+    "nodeSpacing": 55,
+    "rankSpacing": 50,
     "htmlLabels": true,
     "useMaxWidth": true,
     "diagramPadding": 16,
@@ -103,9 +103,9 @@
     "nodePlacementStrategy": "BRANDES_KOEPF",
     "cycleBreakingStrategy": "GREEDY",
     "direction": "RIGHT",
-    "spacing.nodeNode": 40,
-    "spacing.edgeNode": 30,
-    "spacing.edgeEdge": 20,
+    "spacing.nodeNode": 45,
+    "spacing.edgeNode": 35,
+    "spacing.edgeEdge": 25,
     "edgeRouting": "ORTHOGONAL"
   },
   "class": {

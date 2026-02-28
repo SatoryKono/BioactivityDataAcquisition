@@ -4,70 +4,70 @@
 %% Updated: 2026-02-17
 
 %% @version 1.0.0
-%% @date    2026-02-24
-%% @type    flowchart
-%% @level   Mixed (System / Component / Class)
+%% @date 2026-02-24
+%% @type flowchart
+%% @level Mixed (System / Component / Class)
 
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 %% @uniform width=272 height=128 max_title_len=27 max_desc_lines=5
 flowchart TB
 %% keep-orphan: BLOCK, OK, SR
-    subgraph Legend["Legend"]
-        direction LR
-        OK["✅ Allowed Import<br/><br/><br/><br/>"]
-        BLOCK["❌ Forbidden Import<br/><br/><br/><br/>"]
-    end
+ subgraph Legend["Legend"]
+ direction LR
+ OK["[OK] Allowed Import"\]
+ BLOCK["[X] Forbidden Import"\]
+ end
 
-    subgraph Layers["BioETL Five-Layer Architecture"]
-        INT["<b>Interfaces Layer</b><br/>CLI (Click), HealthServer<br/><i>src/bioetl/interfaces/</i><br/><br/>"]
-        COMP["<b>Composition Layer</b><br/>GenericPipelineFactory, RunnerFactory<br/>ServicesBuilder, PipelineRegistry<br/><i>src/bioetl/composition/</i><br/>"]
-        APP["<b>Application Layer</b><br/>PipelineRunner, BatchExecutor<br/>PreflightService, PostrunService<br/>23 Transformers<br/><i>src/bioetl/application/</i>"]
-        INFRA["<b>Infrastructure Layer</b><br/>ChemblAdapter, PubChemAdapter<br/>SilverWriter, MemoryLock<br/>UnifiedHTTPClient, PrometheusMetrics<br/><i>src/bioetl/infrastructure/</i>"]
-        DOM["<b>Domain Layer</b><br/>24 Ports (Protocol)<br/>Entities, Aggregates, Schemas<br/>Config, Types, Exceptions<br/><i>src/bioetl/domain/</i>"]
-    end
+ subgraph Layers["BioETL Five-Layer Architecture"]
+ INT["<b>Interfaces Layer</b><br/>CLI (Click), HealthServer<br/><i>src/bioetl/interfaces/</i>"\]
+ COMP["<b>Composition Layer</b><br/>GenericPipelineFactory, RunnerFactory<br/>ServicesBuilder, PipelineRegistry<br/><i>src/bioetl/composition/</i>"\]
+ APP["<b>Application Layer</b><br/>PipelineRunner, BatchExecutor<br/>PreflightService, PostrunService<br/>23 Transformers<br/><i>src/bioetl/application/</i>"]
+ INFRA["<b>Infrastructure Layer</b><br/>ChemblAdapter, PubChemAdapter<br/>SilverWriter, MemoryLock<br/>UnifiedHTTPClient, PrometheusMetrics<br/><i>src/bioetl/infrastructure/</i>"]
+ DOM["<b>Domain Layer</b><br/>24 Ports (Protocol)<br/>Entities, Aggregates, Schemas<br/>Config, Types, Exceptions<br/><i>src/bioetl/domain/</i>"]
+ end
 
-    %% Allowed imports (solid green arrows)
-    INT -->|"✅ imports"| COMP
-    INT -->|"✅ imports"| APP
-    INT -->|"✅ imports"| INFRA
-    INT -->|"✅ imports"| DOM
+ %% Allowed imports (solid green arrows)
+ INT -->|"[OK] imports"| COMP
+ INT -->|"[OK] imports"| APP
+ INT -->|"[OK] imports"| INFRA
+ INT -->|"[OK] imports"| DOM
 
-    COMP -->|"✅ imports"| APP
-    COMP -->|"✅ imports"| INFRA
-    COMP -->|"✅ imports"| DOM
+ COMP -->|"[OK] imports"| APP
+ COMP -->|"[OK] imports"| INFRA
+ COMP -->|"[OK] imports"| DOM
 
-    APP -->|"✅ imports"| DOM
+ APP -->|"[OK] imports"| DOM
 
-    INFRA -->|"✅ imports"| DOM
+ INFRA -->|"[OK] imports"| DOM
 
-    %% Forbidden imports (red dashed arrows)
-    DOM -.-x|"❌ FORBIDDEN"| APP
-    DOM -.-x|"❌ FORBIDDEN"| INFRA
-    DOM -.-x|"❌ FORBIDDEN"| COMP
-    DOM -.-x|"❌ FORBIDDEN"| INT
+ %% Forbidden imports (red dashed arrows)
+ DOM -.-x|"[X] FORBIDDEN"| APP
+ DOM -.-x|"[X] FORBIDDEN"| INFRA
+ DOM -.-x|"[X] FORBIDDEN"| COMP
+ DOM -.-x|"[X] FORBIDDEN"| INT
 
-    APP -.-x|"❌ FORBIDDEN"| INFRA
-    APP -.-x|"❌ FORBIDDEN"| COMP
-    APP -.-x|"❌ FORBIDDEN"| INT
+ APP -.-x|"[X] FORBIDDEN"| INFRA
+ APP -.-x|"[X] FORBIDDEN"| COMP
+ APP -.-x|"[X] FORBIDDEN"| INT
 
-    INFRA -.-x|"❌ FORBIDDEN"| APP
-    INFRA -.-x|"❌ FORBIDDEN"| COMP
-    INFRA -.-x|"❌ FORBIDDEN"| INT
+ INFRA -.-x|"[X] FORBIDDEN"| APP
+ INFRA -.-x|"[X] FORBIDDEN"| COMP
+ INFRA -.-x|"[X] FORBIDDEN"| INT
 
-    COMP -.-x|"❌ FORBIDDEN"| INT
+ COMP -.-x|"[X] FORBIDDEN"| INT
 
-    subgraph Enforcement["Enforcement Mechanism"]
-        IL["import-linter<br/>Blocks PR on violation<br/><br/><br/>"]
-        AT["tests/architecture/<br/>pytest architecture tests<br/><br/><br/>"]
-        SR["ai-selfreview-rules.md<br/>ARCH-001 detection scripts<br/><br/><br/>"]
-    end
+ subgraph Enforcement["Enforcement Mechanism"]
+ IL["import-linter<br/>Blocks PR on violation"\]
+ AT["tests/architecture/<br/>pytest architecture tests"\]
+ SR["ai-selfreview-rules.md<br/>ARCH-001 detection scripts"\]
+ end
 
-    IL -.-> Layers
-    AT -.-> Layers
+ IL -.-> Layers
+ AT -.-> Layers
 
-    %% Styling
-    style DOM fill:#f0fdf4,stroke:#16a34a,stroke-width:3px
-    style APP fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style INFRA fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
-    style COMP fill:#ffe4e6,stroke:#dc2626,stroke-width:2px
-    style INT fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+ %% Styling
+ style DOM fill:#f0fdf4,stroke:#16a34a,stroke-width:3px
+ style APP fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+ style INFRA fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+ style COMP fill:#ffe4e6,stroke:#dc2626,stroke-width:2px
+ style INT fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px

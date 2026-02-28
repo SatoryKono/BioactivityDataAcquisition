@@ -4,119 +4,119 @@
 %% Components: PreflightService, PipelineExecutor, BaseTransformer, DQMonitorPort, StoragePort, PostrunService
 
 %% @version 1.0.0
-%% @date    2026-02-24
-%% @type    flowchart
-%% @level   Mixed (System / Component / Class)
+%% @date 2026-02-24
+%% @type flowchart
+%% @level Mixed (System / Component / Class)
 
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'},'layout':'elk','flowchart':{'curve':'linear'},'elk':{'nodePlacementStrategy':'BRANDES_KOEPF','mergeEdges':true,'edgeRouting':'ORTHOGONAL'}}}%%
 %% @uniform width=392 height=72 max_title_len=39 max_desc_lines=2
 flowchart TD
 %% keep-orphan: M1, M2, M3, M4, N1, N2, N3, N4, P1, P2
-    subgraph Prepare["Phase 1: Prepare"]
-        A2 --> A3{Resume Mode?}
-        A3 -->|Yes| A4[Load Checkpoint]
-        A3 -->|No| A5[Fresh Start]
-        A4 --> A6[Acquire Lock]
-        A5 --> A6
-        A6 --> A7[Start Heartbeat Thread]
-        A7 --> A8[Run Preflight Checks]
-    end
+ subgraph Prepare["Phase 1: Prepare"]
+ A2 --> A3{Resume Mode?}
+ A3 -->|Yes| A4[Load Checkpoint]
+ A3 -->|No| A5[Fresh Start]
+ A4 --> A6[Acquire Lock]
+ A5 --> A6
+ A6 --> A7[Start Heartbeat Thread]
+ A7 --> A8[Run Preflight Checks]
+ end
 
-    subgraph Extract["Phase 2: Extract"]
-        B1[Fetch from API] --> B2{Circuit Breaker\nState?}
-        B2 -->|CLOSED| B3[Rate Limiter Acquire]
-        B2 -->|OPEN| B_ERR[CircuitOpenError]
-        B3 --> B4[HTTP Request]
-        B4 --> B5{Response OK?}
-        B5 -->|Yes| B6[Parse Response]
-        B5 -->|No| B7{Retriable?}
-        B7 -->|Yes| B8[Backoff & Retry]
-        B7 -->|No| B_ERR
-        B8 --> B4
-        B6 --> B9[Write to Bronze]
-        B9 --> B10[Record Lineage]
-        B10 --> B11{More Batches?}
-        B11 -->|Yes| B1
-        B11 -->|No| C1
-    end
+ subgraph Extract["Phase 2: Extract"]
+ B1[Fetch from API] --> B2{Circuit Breaker\nState?}
+ B2 -->|CLOSED| B3[Rate Limiter Acquire]
+ B2 -->|OPEN| B_ERR[CircuitOpenError]
+ B3 --> B4[HTTP Request]
+ B4 --> B5{Response OK?}
+ B5 -->|Yes| B6[Parse Response]
+ B5 -->|No| B7{Retriable?}
+ B7 -->|Yes| B8[Backoff & Retry]
+ B7 -->|No| B_ERR
+ B8 --> B4
+ B6 --> B9[Write to Bronze]
+ B9 --> B10[Record Lineage]
+ B10 --> B11{More Batches?}
+ B11 -->|Yes| B1
+ B11 -->|No| C1
+ end
 
-    subgraph Transform["Phase 3: Transform"]
-        C2 --> C3[Add Metadata]
-        C3 --> C4[Compute content_hash]
-        C4 --> C5[Create Entity Objects]
+ subgraph Transform["Phase 3: Transform"]
+ C2 --> C3[Add Metadata]
+ C3 --> C4[Compute content_hash]
+ C4 --> C5[Create Entity Objects]
 
-        subgraph Normalize["Normalization Rules"]
-            N1["NaN/Inf → null<br/>"]
-            N2["Floats → round(10)<br/>"]
-            N3["Dates → ISO YYYY-MM-DD<br/>"]
-            N4["Strings → strip()<br/>"]
-        end
+ subgraph Normalize["Normalization Rules"]
+ N1["NaN/Inf → null"\]
+ N2["Floats → round(10)"\]
+ N3["Dates → ISO YYYY-MM-DD"\]
+ N4["Strings → strip()"\]
+ end
 
-        subgraph Metadata["Metadata Fields"]
-            M1["_run_id: UUID<br/>"]
-            M2["_run_type: INCREMENTAL|BACKFILL|REBUILD<br/>"]
-            M3["_ingestion_ts: datetime<br/>"]
-            M4["_source_batch_id: UUID<br/>"]
-        end
-    end
+ subgraph Metadata["Metadata Fields"]
+ M1["_run_id: UUID"\]
+ M2["_run_type: INCREMENTAL|BACKFILL|REBUILD"\]
+ M3["_ingestion_ts: datetime"\]
+ M4["_source_batch_id: UUID"\]
+ end
+ end
 
-    subgraph Validate["Phase 4: Validate"]
-        D1[Pandera Schema Check] --> D2{Error Rate?}
-        D2 -->|0%| D3[All Pass]
-        D2 -->|"< 5%"| D4[Soft Threshold]
-        D2 -->|"5-20%"| D5[Warning Zone]
-        D2 -->|"> 20%"| D6[Hard Threshold]
-        D3 --> D7[Continue to Load]
-        D4 --> D8[Route Failures to Quarantine]
-        D8 --> D7
-        D5 --> D9[Set _dq_warn=true]
-        D9 --> D8
-        D6 --> D10[FAIL Batch]
-        D10 --> E_ERR[Alert & Exit]
-    end
+ subgraph Validate["Phase 4: Validate"]
+ D1[Pandera Schema Check] --> D2{Error Rate?}
+ D2 -->|0%| D3[All Pass]
+ D2 -->|"< 5%"| D4[Soft Threshold]
+ D2 -->|"5-20%"| D5[Warning Zone]
+ D2 -->|"> 20%"| D6[Hard Threshold]
+ D3 --> D7[Continue to Load]
+ D4 --> D8[Route Failures to Quarantine]
+ D8 --> D7
+ D5 --> D9[Set _dq_warn=true]
+ D9 --> D8
+ D6 --> D10[FAIL Batch]
+ D10 --> E_ERR[Alert & Exit]
+ end
 
-    subgraph Load["Phase 5: Load"]
-        E1[Validate Lock Ownership] --> E2{Lock Valid?}
-        E2 -->|No| E_ERR2[LockNotHeldError]
-        E2 -->|Yes| E3[Delta Lake Merge]
-        E3 --> E4[Upsert by content_hash]
-        E4 --> E5[Write Gold Layer]
-        E5 --> E6[Pandera Strict Validation]
-        E6 --> E7[Post-Write Lock Check]
-        E7 --> F1
-    end
+ subgraph Load["Phase 5: Load"]
+ E1[Validate Lock Ownership] --> E2{Lock Valid?}
+ E2 -->|No| E_ERR2[LockNotHeldError]
+ E2 -->|Yes| E3[Delta Lake Merge]
+ E3 --> E4[Upsert by content_hash]
+ E4 --> E5[Write Gold Layer]
+ E5 --> E6[Pandera Strict Validation]
+ E6 --> E7[Post-Write Lock Check]
+ E7 --> F1
+ end
 
-    subgraph Finalize["Phase 6: Finalize"]
-        F1[Export DQ Metrics] --> F2[Delete Checkpoint]
-        F2 --> F3[Release Lock]
-        F3 --> F4[Stop Heartbeat]
-        F4 --> F5[Publish Final Metrics]
-        F5 --> F6[Exit 0]
-    end
+ subgraph Finalize["Phase 6: Finalize"]
+ F1[Export DQ Metrics] --> F2[Delete Checkpoint]
+ F2 --> F3[Release Lock]
+ F3 --> F4[Stop Heartbeat]
+ F4 --> F5[Publish Final Metrics]
+ F5 --> F6[Exit 0]
+ end
 
-    subgraph Parallel["Parallel Processes"]
-        direction LR
-        P1["⏱️ Heartbeat Thread<br/>Every 30s: refresh TTL"]
-        P2["📊 Metrics Export<br/>Prometheus/CloudWatch"]
-    end
+ subgraph Parallel["Parallel Processes"]
+ direction LR
+ P1["⏱️ Heartbeat Thread<br/>Every 30s: refresh TTL"]
+ P2["Metrics Export<br/>Prometheus/CloudWatch"]
+ end
 
-    %% Flow connections
-    A8 --> B1
-    C5 --> D1
-    D7 --> E1
+ %% Flow connections
+ A8 --> B1
+ C5 --> D1
+ D7 --> E1
 
-    %% Error paths
-    B_ERR --> E_ERR
-    E_ERR2 --> E_ERR
+ %% Error paths
+ B_ERR --> E_ERR
+ E_ERR2 --> E_ERR
 
-    %% Styling
-    style Prepare fill:#f0fdf4
-    style Extract fill:#eff6ff
-    style Transform fill:#fff7ed
-    style Validate fill:#ffe4e6
-    style Load fill:#f5f3ff
-    style Finalize fill:#f8fafc
-    style Parallel fill:#fefce8
+ %% Styling
+ style Prepare fill:#f0fdf4
+ style Extract fill:#eff6ff
+ style Transform fill:#fff7ed
+ style Validate fill:#ffe4e6
+ style Load fill:#f5f3ff
+ style Finalize fill:#f1f5f9
+ style Parallel fill:#fefce8
 
-    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53 stroke:#475569,stroke-width:2px
-    linkStyle 54 stroke:#475569,stroke-width:2px,opacity:0.85
+ linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53 stroke:#475569,stroke-width:2px
+ linkStyle 54 stroke:#475569,stroke-width:2px,opacity:0.85

@@ -3,39 +3,39 @@
 flowchart TB
 %% keep-orphan: N10, N11, N12, N13, N14, N15, N16, N17, N18, N8
 
-    N1["BaseEntity"]
-    N2["TableConfig"]
-    N3["PublicationEntityBase"]
-    N4["PipelineConfig"]
-    N5["DataSourcePort"]
-    N6["FilterableDataSourcePort"]
-    N7["ChemblPublication"]
-    N8["RuntimeConfig"]
-    N9["DQConfig"]
-    N10["StoragePort"]
-    N11["LockPort"]
-    N12["CheckpointPort"]
-    N13["QuarantinePort"]
-    N14["MetricsPort"]
-    N15["TracingPort"]
-    N16["LoggerPort"]
-    N17["CircuitBreakerPort"]
-    N18["RateLimiterPort"]
-    N19["Activity"]
-    N20["Molecule"]
+ N1["BaseEntity"]
+ N2["TableConfig"]
+ N3["PublicationEntityBase"]
+ N4["PipelineConfig"]
+ N5["DataSourcePort"]
+ N6["FilterableDataSourcePort"]
+ N7["ChemblPublication"]
+ N8["RuntimeConfig"]
+ N9["DQConfig"]
+ N10["StoragePort"]
+ N11["LockPort"]
+ N12["CheckpointPort"]
+ N13["QuarantinePort"]
+ N14["MetricsPort"]
+ N15["TracingPort"]
+ N16["LoggerPort"]
+ N17["CircuitBreakerPort"]
+ N18["RateLimiterPort"]
+ N19["Activity"]
+ N20["Molecule"]
 
-    N1 --> N19
-    N1 --> N20
-    N1 --> N3
-    N3 --> N7
-    N6 --> N5
-    N4 --> N2
-    N4 --> N9
+ N1 --> N19
+ N1 --> N20
+ N1 --> N3
+ N3 --> N7
+ N6 --> N5
+ N4 --> N2
+ N4 --> N9
 
-    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+ linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+ linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+ linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+ linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+ linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+ linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+ linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5

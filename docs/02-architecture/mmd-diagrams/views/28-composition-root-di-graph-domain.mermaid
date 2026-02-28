@@ -3,60 +3,60 @@
 flowchart TB
 %% keep-orphan: N19, N20
 
-    subgraph Domain["Domain Layer"]
-        direction TB
-        N1["DQF"]
-        N2["BOOT"]
-        N3["SB"]
-        N4["BL"]
-        N5["HCF"]
-        N6["DSF"]
-        N7["STF"]
-        N8["STA"]
-        N11["RF"]
-        N13["SLL"]
-        N14["UHC"]
-        N15["ADP"]
-        N17["PS"]
-        N18["RUN"]
-        N19["GPF"]
-        N20["PR"]
-    end
+ subgraph Domain["Domain Layer"]
+ direction TB
+ N1["DQF"]
+ N2["BOOT"]
+ N3["SB"]
+ N4["BL"]
+ N5["HCF"]
+ N6["DSF"]
+ N7["STF"]
+ N8["STA"]
+ N11["RF"]
+ N13["SLL"]
+ N14["UHC"]
+ N15["ADP"]
+ N17["PS"]
+ N18["RUN"]
+ N19["GPF"]
+ N20["PR"]
+ end
 
-    subgraph Infrastructure["Infrastructure Layer"]
-        direction TB
-        N9["SW"]
-        N10["GW"]
-        N16["BW"]
-    end
+ subgraph Infrastructure["Infrastructure Layer"]
+ direction TB
+ N9["SW"]
+ N10["GW"]
+ N16["BW"]
+ end
 
-    subgraph Interfaces["Interfaces Layer"]
-        direction TB
-        N12["CLI"]
-    end
+ subgraph Interfaces["Interfaces Layer"]
+ direction TB
+ N12["CLI"]
+ end
 
-    N12 ==> N2
-    N2 --> N4
-    N4 --> N13
-    N2 --> N5
-    N5 --> N14
-    N2 --> N6
-    N6 --> N15
-    N2 --> N7
-    N7 --> N8
-    N8 --> N16
-    N8 --> N9
-    N8 --> N10
-    N2 --> N1
-    N2 --> N3
-    N3 --> N9
-    N3 --> N10
-    N3 --> N17
-    N2 --> N11
-    N11 --> N18
+ N12 ==> N2
+ N2 --> N4
+ N4 --> N13
+ N2 --> N5
+ N5 --> N14
+ N2 --> N6
+ N6 --> N15
+ N2 --> N7
+ N7 --> N8
+ N8 --> N16
+ N8 --> N9
+ N8 --> N10
+ N2 --> N1
+ N2 --> N3
+ N3 --> N9
+ N3 --> N10
+ N3 --> N17
+ N2 --> N11
+ N11 --> N18
 
-    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
-    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
-    style Interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+ style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+ style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+ style Interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px
 
-    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+ linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18 stroke:#475569,stroke-width:2px,stroke-dasharray:5

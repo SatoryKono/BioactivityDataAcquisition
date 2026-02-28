@@ -4,86 +4,86 @@
 %% Components: BronzeWriter, LockManager, JSONL serializer, zstd compression, LineageLog
 
 %% @version 1.0.0
-%% @date    2026-02-24
-%% @type    sequenceDiagram
-%% @level   Mixed (System / Component / Class)
+%% @date 2026-02-24
+%% @type sequenceDiagram
+%% @level Mixed (System / Component / Class)
 
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 %% @uniform sequence width=168 max_title_len=16
 sequenceDiagram
-    autonumber
-    participant Executor as PipelineExecutor
-    participant Writer as BronzeWriter
-    participant Lock as LockPort
-    participant Compressor as zstd Compressor
-    participant Storage as Local FS
-    participant Lineage as LineageLog
-    participant Metrics as MetricsPort
+ autonumber
+ participant Executor as PipelineExecutor
+ participant Writer as BronzeWriter
+ participant Lock as LockPort
+ participant Compressor as zstd Compressor
+ participant Storage as Local FS
+ participant Lineage as LineageLog
+ participant Metrics as MetricsPort
 
-    Note over Executor,Writer: Phase 1: Prepare Batch
+ Note over Executor,Writer: Phase 1: Prepare Batch
 
-    Executor->>Writer: write_batch(records, provider="chembl", entity="activity")
-    activate Writer
+ Executor->>Writer: write_batch(records, provider="chembl", entity="activity")
+ activate Writer
 
-    Writer->>Writer: Generate batch_id (UUID)
-    Writer->>Writer: Validate records (JSON parseable)
+ Writer->>Writer: Generate batch_id (UUID)
+ Writer->>Writer: Validate records (JSON parseable)
 
-    opt require_lock=True
-        Writer->>Lock: validate_owner(key, owner_id)
-        Lock-->>Writer: True (valid)
-    end
+ opt require_lock=True
+ Writer->>Lock: validate_owner(key, owner_id)
+ Lock-->>Writer: True (valid)
+ end
 
-    Note over Writer,Storage: Phase 2: Serialize & Compress
+ Note over Writer,Storage: Phase 2: Serialize & Compress
 
-    Writer->>Writer: Serialize records to JSONL
-    Note right of Writer: One JSON object per line\nUTF-8 encoding
+ Writer->>Writer: Serialize records to JSONL
+ Note right of Writer: One JSON object per line\nUTF-8 encoding
 
-    Writer->>Compressor: compress(jsonl_bytes)
-    activate Compressor
-    Note right of Compressor: zstd compression\nLevel: 3\nThreads: -1 (auto)
-    Compressor-->>Writer: compressed_bytes
-    deactivate Compressor
+ Writer->>Compressor: compress(jsonl_bytes)
+ activate Compressor
+ Note right of Compressor: zstd compression\nLevel: 3\nThreads: -1 (auto)
+ Compressor-->>Writer: compressed_bytes
+ deactivate Compressor
 
-    Note over Writer,Storage: Phase 3: Build Path & Write
+ Note over Writer,Storage: Phase 3: Build Path & Write
 
-    Writer->>Writer: Build path
-    Note right of Writer: Path: bronze/v1/{provider}/{entity}/{date}/batch_{batch_id}.jsonl.zst
+ Writer->>Writer: Build path
+ Note right of Writer: Path: bronze/v1/{provider}/{entity}/{date}/batch_{batch_id}.jsonl.zst
 
-    Writer->>Storage: write_bytes(path, compressed_bytes)
-    activate Storage
-    Storage-->>Writer: OK (file written)
-    deactivate Storage
+ Writer->>Storage: write_bytes(path, compressed_bytes)
+ activate Storage
+ Storage-->>Writer: OK (file written)
+ deactivate Storage
 
-    opt save_json=True
-        Writer->>Storage: write_bytes(path.json, uncompressed)
-        Storage-->>Writer: OK
-    end
+ opt save_json=True
+ Writer->>Storage: write_bytes(path.json, uncompressed)
+ Storage-->>Writer: OK
+ end
 
-    Note over Writer,Lineage: Phase 4: Record Lineage
+ Note over Writer,Lineage: Phase 4: Record Lineage
 
-    Writer->>Lineage: record(entry)
-    activate Lineage
-    Note right of Lineage: LineageLogEntry (batch_id, pipeline, bronze_paths, version)
-    Lineage-->>Writer: OK
-    deactivate Lineage
+ Writer->>Lineage: record(entry)
+ activate Lineage
+ Note right of Lineage: LineageLogEntry (batch_id, pipeline, bronze_paths, version)
+ Lineage-->>Writer: OK
+ deactivate Lineage
 
-    Note over Writer,Metrics: Phase 5: Emit Metrics
+ Note over Writer,Metrics: Phase 5: Emit Metrics
 
-    Writer->>Metrics: observe_histogram("bronze_write_duration_ms", duration)
-    Writer->>Metrics: increment_counter("bronze_records_written", count)
-    Writer->>Metrics: observe_histogram("bronze_batch_size_bytes", size)
+ Writer->>Metrics: observe_histogram("bronze_write_duration_ms", duration)
+ Writer->>Metrics: increment_counter("bronze_records_written", count)
+ Writer->>Metrics: observe_histogram("bronze_batch_size_bytes", size)
 
-    Writer-->>Executor: BronzeWriteResult
-    deactivate Writer
+ Writer-->>Executor: BronzeWriteResult
+ deactivate Writer
 
-    Note over Executor: BronzeWriteResult (path, batch_id, record_count, compressed_size, ratio)
+ Note over Executor: BronzeWriteResult (path, batch_id, record_count, compressed_size, ratio)
 
-    rect rgb(255, 240, 245)
-        Note over Writer,Storage: Error Handling
-        Note right of Writer: On failure: log error, raise BronzeWriteError, pipeline handles checkpoint
-    end
+ rect rgb(255, 240, 245)
+ Note over Writer,Storage: Error Handling
+ Note right of Writer: On failure: log error, raise BronzeWriteError, pipeline handles checkpoint
+ end
 
-    rect rgb(240, 255, 240)
-        Note over Writer: Atomicity Guarantee
-        Note right of Writer: Write to temp file first, then atomic rename (no partial writes)
-    end
+ rect rgb(240, 255, 240)
+ Note over Writer: Atomicity Guarantee
+ Note right of Writer: Write to temp file first, then atomic rename (no partial writes)
+ end

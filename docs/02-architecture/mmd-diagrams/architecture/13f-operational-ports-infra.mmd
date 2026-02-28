@@ -2,24 +2,24 @@
 %% Independent adapter implementations of operational ports.
 
 %% @version 1.0.0
-%% @date    2026-02-27
-%% @type    flowchart
-%% @level   System / Component
-%% @view    operational-ports-infra
-%% @parent  13b-operational-ports.mmd
-%% @nodes   7
+%% @date 2026-02-27
+%% @type flowchart
+%% @level System / Component
+%% @view operational-ports-infra
+%% @parent 13b-operational-ports.mmd
+%% @nodes 7
 
 graph TB
 %% keep-orphan: CB, LC, MCO, ML, MMGR, OTT, UL
-    subgraph Infrastructure["Infrastructure Implementations"]
-        ML["MemoryLock"]:::size-sm
-        LC["LocalCheckpoint"]:::size-sm
-        UL["UnifiedLogger"]:::size-sm
-        MCO["MetricsCollector"]:::size-sm
-        OTT["OpenTelemetryTracer"]:::size-sm
-        CB["CircuitBreaker"]:::size-sm
-        MMGR["MemoryMonitor"]:::size-sm
-    end
+ subgraph Infrastructure["Infrastructure Implementations"]
+ ML["MemoryLock"]:::size-sm
+ LC["LocalCheckpoint"]:::size-sm
+ UL["UnifiedLogger"]:::size-sm
+ MCO["MetricsCollector"]:::size-sm
+ OTT["OpenTelemetryTracer"]:::size-sm
+ CB["CircuitBreaker"]:::size-sm
+ MMGR["MemoryMonitor"]:::size-sm
+ end
 
-    classDef infra fill:#fff1f2,stroke:#dc2626,stroke-width:2px
-    class ML,LC,UL,MCO,OTT,CB,MMGR infra
+ classDef infra fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+ class ML,LC,UL,MCO,OTT,CB,MMGR infra

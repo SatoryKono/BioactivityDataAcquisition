@@ -2,70 +2,70 @@
 %% Shows the Template Method pattern and all provider-specific transformers.
 
 %% @version 1.0.0
-%% @date    2026-02-24
-%% @type    flowchart
-%% @level   System / Component
-%% @nodes   35
-%% @reference  Decomposed into 16a-transformer-base, 16b-transformer-pub-other
+%% @date 2026-02-24
+%% @type flowchart
+%% @level System / Component
+%% @nodes 35
+%% @reference Decomposed into 16a-transformer-base, 16b-transformer-pub-other
 
 %%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
 %% @uniform width=336 height=240 max_title_len=37 max_desc_lines=18
 graph TB
-    subgraph TemplateMethod["Template Method Pattern"]
-        BT["BaseTransformer (ABC)<br/>━━━━━━━━━━━━━━━━━<br/>provider: str<br/>entity_type: str<br/>_tracer: TracingPort<br/>_metrics: MetricsPort<br/>_identity: IdentityService<br/>_pii_hasher: PiiHasherPort<br/>_data_normalizer: DataNormalizationPort<br/>━━━━━━━━━━━━━━━━━<br/>+ transform(ctx, record, idx) → SilverRecord<br/>├ _transform_impl()    ← ABSTRACT HOOK<br/>├ compute_entity_id()<br/>├ compute_content_hash()<br/>└ should_write_silver/gold()<br/>+ transform_for_gold(ctx, silver) → dict<br/>+ entity_to_silver_record(entity) → dict<br/>+ hash_pii_value() / hash_pii_list()<br/>+ validate_value_object()"]:::size-lg
-    end
+ subgraph TemplateMethod["Template Method Pattern"]
+ BT["BaseTransformer (ABC)<br/>-----------------<br/>provider: str<br/>entity_type: str<br/>_tracer: TracingPort<br/>_metrics: MetricsPort<br/>_identity: IdentityService<br/>_pii_hasher: PiiHasherPort<br/>_data_normalizer: DataNormalizationPort<br/>-----------------<br/>+ transform(ctx, record, idx) → SilverRecord<br/>├ _transform_impl() ← ABSTRACT HOOK<br/>├ compute_entity_id()<br/>├ compute_content_hash()<br/>└ should_write_silver/gold()<br/>+ transform_for_gold(ctx, silver) → dict<br/>+ entity_to_silver_record(entity) → dict<br/>+ hash_pii_value() / hash_pii_list()<br/>+ validate_value_object()"]:::size-lg
+ end
 
-    subgraph ChEMBL["ChEMBL Transformers"]
-        BCT["BaseChemblTransformer<br/>━━━━━━━━━━━━━━━━━<br/>entity_class: type<br/>primary_id_field: str<br/>━━━━━━━━━━━━━━━━━<br/>+ _extract_business_data()<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        AT["ActivityTransformer<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-    end
+ subgraph ChEMBL["ChEMBL Transformers"]
+ BCT["BaseChemblTransformer<br/>-----------------<br/>entity_class: type<br/>primary_id_field: str<br/>-----------------<br/>+ _extract_business_data()"]:::size-lg
+ AT["ActivityTransformer"]:::size-lg
+ end
 
-    subgraph Publications["Publication Transformers"]
-        BPT["BasePublicationTransformer<br/>━━━━━━━━━━━━━━━━━<br/>Pre-extract validation<br/>→ extraction<br/>→ entity creation<br/>━━━━━━━━━━━━━━━━━<br/>+ _extract_fields() ← ABSTRACT<br/>+ _build_entity() ← ABSTRACT<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        PMT["PubMedPublicationTransformer<br/>uses: XML parsing,<br/>AuthorExtractor,<br/>DateExtractor, etc.<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-    end
+ subgraph Publications["Publication Transformers"]
+ BPT["BasePublicationTransformer<br/>-----------------<br/>Pre-extract validation<br/>→ extraction<br/>→ entity creation<br/>-----------------<br/>+ _extract_fields() ← ABSTRACT<br/>+ _build_entity() ← ABSTRACT"]:::size-lg
+ PMT["PubMedPublicationTransformer<br/>uses: XML parsing,<br/>AuthorExtractor,<br/>DateExtractor, etc."]:::size-lg
+ end
 
-    subgraph UniProtTrans["UniProt Transformers"]
-        UPT["UniProtProteinTransformer<br/>uses: TaxonomyExtractor,<br/>GeneExtractor,<br/>FeatureExtractor,<br/>CrossRefExtractor,<br/>CommentExtractor<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        IDMT["IDMappingTransformer<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-    end
+ subgraph UniProtTrans["UniProt Transformers"]
+ UPT["UniProtProteinTransformer<br/>uses: TaxonomyExtractor,<br/>GeneExtractor,<br/>FeatureExtractor,<br/>CrossRefExtractor,<br/>CommentExtractor"]:::size-lg
+ IDMT["IDMappingTransformer"]:::size-lg
+ end
 
-    subgraph Other["Other Transformers"]
-        PCCT["PubChemCompoundTransformer<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-    end
+ subgraph Other["Other Transformers"]
+ PCCT["PubChemCompoundTransformer"]:::size-lg
+ end
 
-    subgraph Extractors["Extractor Pattern"]
-        BFE["BaseFieldExtractor (ABC)<br/>━━━━━━━━━━━━━━━━━<br/>+ extract(record) → dict<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        AE["AbstractExtractor<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-    end
+ subgraph Extractors["Extractor Pattern"]
+ BFE["BaseFieldExtractor (ABC)<br/>-----------------<br/>+ extract(record) → dict"]:::size-lg
+ AE["AbstractExtractor"]:::size-lg
+ end
 
-    %% Inheritance
-    BT --> BCT
-    BT --> BPT
-    BT --> UPT
-    BT --> IDMT
-    BT --> PCCT
+ %% Inheritance
+ BT --> BCT
+ BT --> BPT
+ BT --> UPT
+ BT --> IDMT
+ BT --> PCCT
 
-    BCT --> AT & AST & APT & MT & TGT & TCT & PT & PTT & PST & TIT & CLT & PCT & SFT & CRT
+ BCT --> AT & AST & APT & MT & TGT & TCT & PT & PTT & PST & TIT & CLT & PCT & SFT & CRT
 
-    BPT --> PMT & CRfT & OAT & SST
+ BPT --> PMT & CRfT & OAT & SST
 
-    %% Extractors
-    BFE --> AE & AuE & DE & CE & IE & TE & GE & FE & CRE & CME
+ %% Extractors
+ BFE --> AE & AuE & DE & CE & IE & TE & GE & FE & CRE & CME
 
-    PMT -.->|uses| AuE & DE & CE & IE & AE
-    UPT -.->|uses| TE & GE & FE & CRE & CME
+ PMT -.->|uses| AuE & DE & CE & IE & AE
+ UPT -.->|uses| TE & GE & FE & CRE & CME
 
-    classDef base fill:#f0fdf4,stroke:#16a34a,stroke-width:3px
-    classDef chembl fill:#fff7ed,stroke:#f59e0b
-    classDef pub fill:#f0fdf4,stroke:#16a34a
-    classDef uniprot fill:#f5f3ff,stroke:#7c3aed
-    classDef other fill:#f1f5f9,stroke:#64748b
-    classDef extractor fill:#fefce8,stroke:#ca8a04
+ classDef base fill:#f0fdf4,stroke:#16a34a,stroke-width:3px
+ classDef chembl fill:#fff7ed,stroke:#f59e0b
+ classDef pub fill:#f0fdf4,stroke:#16a34a
+ classDef uniprot fill:#f5f3ff,stroke:#7c3aed
+ classDef other fill:#f1f5f9,stroke:#64748b
+ classDef extractor fill:#fefce8,stroke:#ca8a04
 
-    class BT,BCT,BPT base
-    class AT,AST,APT,MT,TGT,TCT,PT,PTT,PST,TIT,CLT,PCT,SFT,CRT chembl
-    class PMT,CRfT,OAT,SST pub
-    class UPT,IDMT uniprot
-    class PCCT other
-    class BFE,AE,AuE,DE,CE,IE,TE,GE,FE,CRE,CME extractor
+ class BT,BCT,BPT base
+ class AT,AST,APT,MT,TGT,TCT,PT,PTT,PST,TIT,CLT,PCT,SFT,CRT chembl
+ class PMT,CRfT,OAT,SST pub
+ class UPT,IDMT uniprot
+ class PCCT other
+ class BFE,AE,AuE,DE,CE,IE,TE,GE,FE,CRE,CME extractor

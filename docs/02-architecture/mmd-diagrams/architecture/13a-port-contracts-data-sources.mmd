@@ -2,29 +2,29 @@
 %% Covers DataSourcePort and FilterableDataSourcePort implementations per provider.
 
 %% @version 1.0.0
-%% @date    2026-02-25
-%% @type    flowchart
-%% @level   System / Component
-%% @view    data-sources
-%% @parent  13-port-protocol-contracts.mmd
-%% @nodes   9
+%% @date 2026-02-25
+%% @type flowchart
+%% @level System / Component
+%% @view data-sources
+%% @parent 13-port-protocol-contracts.mmd
+%% @nodes 9
 %% @uniform width=240 height=56 max_title_len=24 max_desc_lines=1
 
 graph LR
 %% keep-orphan: FDSP
-    subgraph Domain["Domain Layer"]
-        DSP["DataSourcePort"]:::size-sm
-        FDSP["FilterableDataSourcePort"]:::size-sm
-    end
+ subgraph Domain["Domain Layer"]
+ DSP["DataSourcePort"]:::size-sm
+ FDSP["FilterableDataSourcePort"]:::size-sm
+ end
 
-    subgraph Infrastructure["Infrastructure Layer"]
-        CA["ChemblAdapter"]:::size-sm
-    end
+ subgraph Infrastructure["Infrastructure Layer"]
+ CA["ChemblAdapter"]:::size-sm
+ end
 
-    DSP --- CA & PA & UA & CRA & OAA & SSA & PCA
+ DSP --- CA & PA & UA & CRA & OAA & SSA & PCA
 
-    classDef domain fill:#f5f3ff,stroke:#7c3aed
-    classDef infra fill:#fff1f2,stroke:#dc2626
+ classDef domain fill:#f5f3ff,stroke:#7c3aed
+ classDef infra fill:#fff1f2,stroke:#dc2626
 
-    class DSP,FDSP domain
-    class CA,PA,UA,CRA,OAA,SSA,PCA infra
+ class DSP,FDSP domain
+ class CA,PA,UA,CRA,OAA,SSA,PCA infra

@@ -2,54 +2,54 @@
 %% @uniform width=232 height=56 max_title_len=24 max_desc_lines=0
 flowchart TB
 
-    subgraph Domain["Domain Layer"]
-        direction TB
-        N1["DataSourcePort"]
-        N6["FilterableDataSourcePort"]
-        N7["QuarantinePort"]
-        N10["StoragePort"]
-    end
+ subgraph Domain["Domain Layer"]
+ direction TB
+ N1["DataSourcePort"]
+ N6["FilterableDataSourcePort"]
+ N7["QuarantinePort"]
+ N10["StoragePort"]
+ end
 
-    subgraph Infrastructure["Infrastructure Layer"]
-        direction TB
-        N2["SilverWriter"]
-        N3["GoldWriter"]
-        N4["BronzeWriter"]
-        N5["QuarantineWriter"]
-        N8["ChemblAdapter"]
-        N11["PubchemAdapter"]
-        N12["UniprotAdapter"]
-    end
+ subgraph Infrastructure["Infrastructure Layer"]
+ direction TB
+ N2["SilverWriter"]
+ N3["GoldWriter"]
+ N4["BronzeWriter"]
+ N5["QuarantineWriter"]
+ N8["ChemblAdapter"]
+ N11["PubchemAdapter"]
+ N12["UniprotAdapter"]
+ end
 
-    subgraph Interfaces["Interfaces Layer"]
-        direction TB
-        N9["UnifiedHTTPClient"]
-    end
+ subgraph Interfaces["Interfaces Layer"]
+ direction TB
+ N9["UnifiedHTTPClient"]
+ end
 
-    N8 -.-> N1
-    N8 --> N6
-    N11 --> N1
-    N12 --> N1
-    N4 --> N10
-    N2 --> N10
-    N3 --> N10
-    N5 --> N7
-    N8 --> N9
-    N11 --> N9
-    N12 --> N9
+ N8 -.-> N1
+ N8 --> N6
+ N11 --> N1
+ N12 --> N1
+ N4 --> N10
+ N2 --> N10
+ N3 --> N10
+ N5 --> N7
+ N8 --> N9
+ N11 --> N9
+ N12 --> N9
 
-    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
-    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
-    style Interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+ style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+ style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+ style Interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px
 
-    linkStyle 0 stroke:#1E293B,stroke-width:4px
-    linkStyle 1 stroke:#1E293B,stroke-width:4px
-    linkStyle 2 stroke:#1E293B,stroke-width:4px
-    linkStyle 3 stroke:#1E293B,stroke-width:4px
-    linkStyle 4 stroke:#1E293B,stroke-width:4px
-    linkStyle 5 stroke:#1E293B,stroke-width:4px
-    linkStyle 6 stroke:#1E293B,stroke-width:4px
-    linkStyle 7 stroke:#1E293B,stroke-width:4px
-    linkStyle 8 stroke:#1E293B,stroke-width:4px
-    linkStyle 9 stroke:#1E293B,stroke-width:4px
-    linkStyle 10 stroke:#1E293B,stroke-width:4px
+ linkStyle 0 stroke:#1E293B,stroke-width:4px
+ linkStyle 1 stroke:#1E293B,stroke-width:4px
+ linkStyle 2 stroke:#1E293B,stroke-width:4px
+ linkStyle 3 stroke:#1E293B,stroke-width:4px
+ linkStyle 4 stroke:#1E293B,stroke-width:4px
+ linkStyle 5 stroke:#1E293B,stroke-width:4px
+ linkStyle 6 stroke:#1E293B,stroke-width:4px
+ linkStyle 7 stroke:#1E293B,stroke-width:4px
+ linkStyle 8 stroke:#1E293B,stroke-width:4px
+ linkStyle 9 stroke:#1E293B,stroke-width:4px
+ linkStyle 10 stroke:#1E293B,stroke-width:4px

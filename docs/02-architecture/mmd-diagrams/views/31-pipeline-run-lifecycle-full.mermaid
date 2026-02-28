@@ -7,64 +7,64 @@
 %% Updated: 2026-02-17
 
 %% @version 1.0.0
-%% @date    2026-02-24
-%% @type    stateDiagram
-%% @level   Mixed (System / Component / Class)
+%% @date 2026-02-24
+%% @type stateDiagram
+%% @level Mixed (System / Component / Class)
 
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
 stateDiagram-v2
-    [*] --> PENDING: PipelineRun created
+ [*] --> PENDING: PipelineRun created
 
-    PENDING --> LOCKING: runner.run()
-    LOCKING --> LOCKED: LockManager.acquire()
-    LOCKING --> FAILED: LockAcquisitionError
+ PENDING --> LOCKING: runner.run()
+ LOCKING --> LOCKED: LockManager.acquire()
+ LOCKING --> FAILED: LockAcquisitionError
 
-    LOCKED --> PREFLIGHT: PreflightService.run()
-    PREFLIGHT --> PREFLIGHT_PASSED: all checks pass
-    PREFLIGHT --> FAILED: preflight check failed
+ LOCKED --> PREFLIGHT: PreflightService.run()
+ PREFLIGHT --> PREFLIGHT_PASSED: all checks pass
+ PREFLIGHT --> FAILED: preflight check failed
 
-    PREFLIGHT_PASSED --> CLEARING: RunType == REBUILD/BACKFILL
-    PREFLIGHT_PASSED --> EXTRACTING: RunType == INCREMENTAL
-    CLEARING --> EXTRACTING: MedallionLifecycleService\nclear_silver() + clear_gold()
+ PREFLIGHT_PASSED --> CLEARING: RunType == REBUILD/BACKFILL
+ PREFLIGHT_PASSED --> EXTRACTING: RunType == INCREMENTAL
+ CLEARING --> EXTRACTING: MedallionLifecycleService\nclear_silver() + clear_gold()
 
-    state BatchLoop {
-        EXTRACTING --> TRANSFORMING: BatchExecutor._extract()
-        TRANSFORMING --> VALIDATING: BatchTransformer.transform()
-        VALIDATING --> WRITING: PanderaSilverValidator.validate()
-        VALIDATING --> QUARANTINING: DQ error rate > threshold
-        QUARANTINING --> WRITING: QuarantineManager.route()
-        WRITING --> CHECKPOINTING: BatchWriter.write()
-        CHECKPOINTING --> EXTRACTING: CheckpointManager.save()\nmore batches
-        CHECKPOINTING --> BATCH_DONE: no more batches
-    }
+ state BatchLoop {
+ EXTRACTING --> TRANSFORMING: BatchExecutor._extract()
+ TRANSFORMING --> VALIDATING: BatchTransformer.transform()
+ VALIDATING --> WRITING: PanderaSilverValidator.validate()
+ VALIDATING --> QUARANTINING: DQ error rate > threshold
+ QUARANTINING --> WRITING: QuarantineManager.route()
+ WRITING --> CHECKPOINTING: BatchWriter.write()
+ CHECKPOINTING --> EXTRACTING: CheckpointManager.save()\nmore batches
+ CHECKPOINTING --> BATCH_DONE: no more batches
+ }
 
-    BATCH_DONE --> POSTRUN: PostrunService.run()
-    POSTRUN --> COMPLETED: vacuum + DQ report\n+ metrics publish
+ BATCH_DONE --> POSTRUN: PostrunService.run()
+ POSTRUN --> COMPLETED: vacuum + DQ report\n+ metrics publish
 
-    EXTRACTING --> DRAINING: SIGTERM received
-    TRANSFORMING --> DRAINING: ShutdownService detected
-    DRAINING --> CHECKPOINT_SAVED: finish current batch\nsave checkpoint
-    CHECKPOINT_SAVED --> CANCELLED: release lock\nexit(0)
+ EXTRACTING --> DRAINING: SIGTERM received
+ TRANSFORMING --> DRAINING: ShutdownService detected
+ DRAINING --> CHECKPOINT_SAVED: finish current batch\nsave checkpoint
+ CHECKPOINT_SAVED --> CANCELLED: release lock\nexit(0)
 
-    WRITING --> FAILED: LockLostError\n(safety guard)
-    EXTRACTING --> FAILED: CircuitBreakerOpenError\nRetryExhaustedError
+ WRITING --> FAILED: LockLostError\n(safety guard)
+ EXTRACTING --> FAILED: CircuitBreakerOpenError\nRetryExhaustedError
 
-    COMPLETED --> RELEASING: success
-    FAILED --> RELEASING: error path
-    CANCELLED --> [*]
-    RELEASING ==> [*]: LockManager.release()\nHeartbeatTask.stop()
+ COMPLETED --> RELEASING: success
+ FAILED --> RELEASING: error path
+ CANCELLED --> [*]
+ RELEASING ==> [*]: LockManager.release()\nHeartbeatTask.stop()
 
-    note right of LOCKED
-        HeartbeatTask starts
-        every 30s renews TTL (90s)
-    end note
+ note right of LOCKED
+ HeartbeatTask starts
+ every 30s renews TTL (90s)
+ end note
 
-    note right of COMPLETED
-        PipelineRunState.COMPLETED
-        PipelineObserver records duration
-    end note
+ note right of COMPLETED
+ PipelineRunState.COMPLETED
+ PipelineObserver records duration
+ end note
 
-    note right of FAILED
-        PipelineRunState.FAILED
-        StageResult captures error
-    end note
+ note right of FAILED
+ PipelineRunState.FAILED
+ StageResult captures error
+ end note

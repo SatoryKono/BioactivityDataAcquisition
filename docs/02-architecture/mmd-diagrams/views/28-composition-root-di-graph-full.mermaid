@@ -9,155 +9,155 @@
 %% Updated: 2026-02-17
 
 %% @version 1.1.0
-%% @date    2026-02-24
-%% @type    flowchart
-%% @level   Mixed (System / Component / Class)
-%% @uniform-group entry     nodes=CLI,BOOT
+%% @date 2026-02-24
+%% @type flowchart
+%% @level Mixed (System / Component / Class)
+%% @uniform-group entry nodes=CLI,BOOT
 %% @uniform-group factories nodes=BL,DQF,HCF,DSF,STF,STA,SB,RF,GPF
-%% @uniform-group registry  nodes=PR,OB
-%% @uniform-group created   nodes=UHC,ADP,BW,SLL,PS,RUN
+%% @uniform-group registry nodes=PR,OB
+%% @uniform-group created nodes=UHC,ADP,BW,SLL,PS,RUN
 %% @uniform-width group
 
 %% @uniform width=296 groups=4 width_strategy=group
-%% @uniform-stats entry        width=296 height=144 max_desc_lines=6
-%% @uniform-stats factories    width=224 height=144 max_desc_lines=6
-%% @uniform-stats registry     width=200 height=144 max_desc_lines=6
-%% @uniform-stats created      width=176 height=144 max_desc_lines=6
+%% @uniform-stats entry width=296 height=144 max_desc_lines=6
+%% @uniform-stats factories width=224 height=144 max_desc_lines=6
+%% @uniform-stats registry width=200 height=144 max_desc_lines=6
+%% @uniform-stats created width=176 height=144 max_desc_lines=6
 %%{init: {
-%%  'layout': 'elk',
-%%  'theme': 'base',
-%%  'themeVariables': {'lineWidth': '2'},
-%%  'flowchart': {
-%%    'nodeSpacing': 64,
-%%    'rankSpacing': 80,
-%%    'padding': 24,
-%%    'curve': 'linear'
-%%  },
-%%  'elk': {
-%%    'mergeEdges': true,
-%%    'nodePlacementStrategy': 'BRANDES_KOEPF',
-%%    'cycleBreakingStrategy': 'GREEDY',
-%%    'direction': 'DOWN',
-%%    'spacing.nodeNode': 52,
-%%    'spacing.edgeNode': 36,
-%%    'spacing.edgeEdge': 24,
-%%    'edgeRouting': 'ORTHOGONAL'
-%%  }
+%% 'layout': 'elk',
+%% 'theme': 'base',
+%% 'themeVariables': {'lineWidth': '2'},
+%% 'flowchart': {
+%% 'nodeSpacing': 64,
+%% 'rankSpacing': 80,
+%% 'padding': 24,
+%% 'curve': 'linear'
+%% },
+%% 'elk': {
+%% 'mergeEdges': true,
+%% 'nodePlacementStrategy': 'BRANDES_KOEPF',
+%% 'cycleBreakingStrategy': 'GREEDY',
+%% 'direction': 'DOWN',
+%% 'spacing.nodeNode': 52,
+%% 'spacing.edgeNode': 36,
+%% 'spacing.edgeEdge': 24,
+%% 'edgeRouting': 'ORTHOGONAL'
+%% }
 %%}}%%
 flowchart TB
 %% keep-orphan: OB
-    subgraph Entry["Entry Point"]
-        CLI["CLI run command<br/><br/><br/><br/><br/>"]
-        BOOT["bootstrap/runtime/assembly.py<br/><br/><br/><br/><br/>"]
-    end
+ subgraph Entry["Entry Point"]
+ CLI["CLI run command"\]
+ BOOT["bootstrap/runtime/assembly.py"\]
+ end
 
-    subgraph Factories["Composition Factories"]
-        direction LR
+ subgraph Factories["Composition Factories"]
+ direction LR
 
-        subgraph LoggerFactories["Logger & Observability"]
-            BL["BootstrapLogger<br/>• configure structlog<br/><br/><br/><br/>"]
-            DQF["DQServicesFactory<br/>• create()<br/>→ DQ analyzers + monitor<br/><br/><br/>"]
-        end
+ subgraph LoggerFactories["Logger & Observability"]
+ BL["BootstrapLogger<br/>• configure structlog"\]
+ DQF["DQServicesFactory<br/>• create()<br/>→ DQ analyzers + monitor"\]
+ end
 
-        subgraph ClientFactories["Client & Data Source"]
-            HCF["HttpClientFactory<br/>• create(provider)<br/>→ UnifiedHTTPClient<br/><br/><br/>"]
-            DSF["DataSourceFactory<br/>• create(provider, config)<br/>→ DataSourcePort impl<br/><br/><br/>"]
-        end
+ subgraph ClientFactories["Client & Data Source"]
+ HCF["HttpClientFactory<br/>• create(provider)<br/>→ UnifiedHTTPClient"\]
+ DSF["DataSourceFactory<br/>• create(provider, config)<br/>→ DataSourcePort impl"\]
+ end
 
-        subgraph StorageFactories["Storage & Services"]
-            STF["StorageFactory<br/>• create(config)<br/>→ BronzeWriter + SilverWriter<br/>+ GoldWriter<br/><br/>"]
-            STA["StorageAdapter<br/>• create_bronze()<br/>• create_silver()<br/>• create_gold()<br/><br/>"]
-            SB["ServicesBuilder<br/>• with_storage()<br/>• with_lock()<br/>• with_logger()<br/>• with_metrics()<br/>• build() → PipelineServices"]
-        end
+ subgraph StorageFactories["Storage & Services"]
+ STF["StorageFactory<br/>• create(config)<br/>→ BronzeWriter + SilverWriter<br/>+ GoldWriter"\]
+ STA["StorageAdapter<br/>• create_bronze()<br/>• create_silver()<br/>• create_gold()"\]
+ SB["ServicesBuilder<br/>• with_storage()<br/>• with_lock()<br/>• with_logger()<br/>• with_metrics()<br/>• build() → PipelineServices"]
+ end
 
-        subgraph PipelineFactories["Pipeline Construction"]
-            RF["RunnerFactory<br/>• create_runner()<br/>→ PipelineRunner<br/><br/><br/>"]
-            GPF["GenericPipelineFactory<br/>• _pipeline_class<br/>• _transformer_class<br/>• _gold_schema<br/><br/>"]
-        end
-    end
+ subgraph PipelineFactories["Pipeline Construction"]
+ RF["RunnerFactory<br/>• create_runner()<br/>→ PipelineRunner"\]
+ GPF["GenericPipelineFactory<br/>• _pipeline_class<br/>• _transformer_class<br/>• _gold_schema"\]
+ end
+ end
 
-    subgraph Registry["Registration"]
-        PR["ProviderRegistry<br/>• 8 providers registered<br/><br/><br/><br/>"]
-        OB["ObservabilityBundle<br/>• logger + metrics + tracing<br/><br/><br/><br/>"]
-    end
+ subgraph Registry["Registration"]
+ PR["ProviderRegistry<br/>• 8 providers registered"\]
+ OB["ObservabilityBundle<br/>• logger + metrics + tracing"\]
+ end
 
-    subgraph Created["Created Instances"]
-        direction TB
-        subgraph RuntimeInfra["Infra Instances"]
-            direction TB
-            UHC["[A] UnifiedHTTPClient<br/>+ TokenBucket<br/>+ CircuitBreaker<br/><br/><br/>"]
-            ADP["[A] Provider Adapter<br/>(ChemblAdapter, etc.)<br/><br/><br/><br/>"]
-            BW["BronzeWriter<br/><br/><br/><br/><br/>"]
-            SLL["StructlogLogger<br/><br/><br/><br/><br/>"]
-        end
-        subgraph RuntimeCore["Application Instances"]
-            direction TB
-            PS["PipelineServices<br/>(frozen bundle)<br/><br/><br/><br/>"]
-            RUN["PipelineRunner<br/>(fully assembled)<br/><br/><br/><br/>"]
-        end
-    end
+ subgraph Created["Created Instances"]
+ direction TB
+ subgraph RuntimeInfra["Infra Instances"]
+ direction TB
+ UHC["[A] UnifiedHTTPClient<br/>+ TokenBucket<br/>+ CircuitBreaker"\]
+ ADP["[A] Provider Adapter<br/>(ChemblAdapter, etc.)"\]
+ BW["BronzeWriter"\]
+ SLL["StructlogLogger"\]
+ end
+ subgraph RuntimeCore["Application Instances"]
+ direction TB
+ PS["PipelineServices<br/>(frozen bundle)"\]
+ RUN["PipelineRunner<br/>(fully assembled)"\]
+ end
+ end
 
-    %% Bootstrap flow
-    CLI ==> BOOT
-    BOOT -.-> BL
-    BL --> SLL
-    BOOT -.-> HCF
-    HCF -.-> UHC
-    BOOT -.-> DSF
-    DSF -.->|"uses"| PR
-    DSF -.->|"uses"| UHC
-    DSF --> ADP
-    BOOT -.-> STF
-    STF -.-> STA
-    STA ==> BW & SW & GW
-    BOOT -.-> DQF
-    BOOT ==> SB
-    SB -.->|"injects"| BW & SW & GW
-    SB -.->|"injects"| ML
-    SB -.->|"injects"| LC
-    SB -.->|"injects"| UQ
-    SB -.->|"injects"| SLL
-    SB -.->|"injects"| PMM
-    SB -.->|"injects"| NOT
-    SB ==> PS
-    BOOT ==> RF
-    RF -.->|"uses"| PS
-    RF -.->|"uses"| ADP
-    RF ==> RUN
+ %% Bootstrap flow
+ CLI ==> BOOT
+ BOOT -.-> BL
+ BL --> SLL
+ BOOT -.-> HCF
+ HCF -.-> UHC
+ BOOT -.-> DSF
+ DSF -.->|"uses"| PR
+ DSF -.->|"uses"| UHC
+ DSF --> ADP
+ BOOT -.-> STF
+ STF -.-> STA
+ STA ==> BW & SW & GW
+ BOOT -.-> DQF
+ BOOT ==> SB
+ SB -.->|"injects"| BW & SW & GW
+ SB -.->|"injects"| ML
+ SB -.->|"injects"| LC
+ SB -.->|"injects"| UQ
+ SB -.->|"injects"| SLL
+ SB -.->|"injects"| PMM
+ SB -.->|"injects"| NOT
+ SB ==> PS
+ BOOT ==> RF
+ RF -.->|"uses"| PS
+ RF -.->|"uses"| ADP
+ RF ==> RUN
 
-    %% Registry connections
-    GPF -.->|"registers"| PLREG
-    PR -.->|"maps"| DSR
+ %% Registry connections
+ GPF -.->|"registers"| PLREG
+ PR -.->|"maps"| DSR
 
-    %% Layout constraints
-    CLI ~~~ BOOT
-    PR ~~~ OB
-    UHC ~~~ ADP ~~~ BW ~~~ SLL ~~~ PS ~~~ RUN
+ %% Layout constraints
+ CLI ~~~ BOOT
+ PR ~~~ OB
+ UHC ~~~ ADP ~~~ BW ~~~ SLL ~~~ PS ~~~ RUN
 
-    %% Styling
-    style Entry fill:#f5f3ff,stroke:#7c3aed
-    style Factories fill:#ffe4e6,stroke:#dc2626
-    style Registry fill:#fff7ed,stroke:#f59e0b
-    style Created fill:#f0fdf4,stroke:#16a34a
+ %% Styling
+ style Entry fill:#f5f3ff,stroke:#7c3aed
+ style Factories fill:#ffe4e6,stroke:#dc2626
+ style Registry fill:#fff7ed,stroke:#f59e0b
+ style Created fill:#f0fdf4,stroke:#16a34a
 
-    style LoggerFactories fill:#fefce8,stroke:#ca8a04,stroke-dasharray: 5 5
-    style ClientFactories fill:#eff6ff,stroke:#2563eb,stroke-dasharray: 5 5
-    style StorageFactories fill:#f5f3ff,stroke:#7c3aed,stroke-dasharray: 5 5
-    style PipelineFactories fill:#fff7ed,stroke:#f59e0b,stroke-dasharray: 5 5
+ style LoggerFactories fill:#fefce8,stroke:#ca8a04,stroke-dasharray: 5 5
+ style ClientFactories fill:#eff6ff,stroke:#2563eb,stroke-dasharray: 5 5
+ style StorageFactories fill:#f5f3ff,stroke:#7c3aed,stroke-dasharray: 5 5
+ style PipelineFactories fill:#fff7ed,stroke:#f59e0b,stroke-dasharray: 5 5
 
-    %% Layer palette (semantic)
-    classDef layer_domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:1.8px;
-    classDef layer_application fill:#f0fdf4,stroke:#16a34a,stroke-width:1.8px;
-    classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
-    classDef layer_composition fill:#fff7ed,stroke:#f59e0b,stroke-width:1.8px;
-    classDef layer_interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:1.8px;
+ %% Layer palette (semantic)
+ classDef layer_domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:1.8px;
+ classDef layer_application fill:#f0fdf4,stroke:#16a34a,stroke-width:1.8px;
+ classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
+ classDef layer_composition fill:#fff7ed,stroke:#f59e0b,stroke-width:1.8px;
+ classDef layer_interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:1.8px;
 
-    class CLI layer_interfaces;
-    class BOOT,BL,DQF,HCF,DSF,STF,STA,SB,RF,GPF,PR,OB layer_composition;
-    class PS,RUN layer_application;
-    class UHC,ADP,BW,SLL layer_infrastructure;
+ class CLI layer_interfaces;
+ class BOOT,BL,DQF,HCF,DSF,STF,STA,SB,RF,GPF,PR,OB layer_composition;
+ class PS,RUN layer_application;
+ class UHC,ADP,BW,SLL layer_infrastructure;
 
-    %% Click tooltips
-    click SB "../../02-architecture/decisions/ADR-005-composition-layer-separation.md" "Injects storage, lock, checkpoint, quarantine, logger, metrics, tracing"
-    click DSF "../../00-project/RULES.md" "Resolves provider registry and shared HTTP client"
-    click RF "../../00-project/RULES.md" "Builds PipelineRunner from composed services and adapter"
+ %% Click tooltips
+ click SB "../../02-architecture/decisions/ADR-005-composition-layer-separation.md" "Injects storage, lock, checkpoint, quarantine, logger, metrics, tracing"
+ click DSF "../../00-project/RULES.md" "Resolves provider registry and shared HTTP client"
+ click RF "../../00-project/RULES.md" "Builds PipelineRunner from composed services and adapter"

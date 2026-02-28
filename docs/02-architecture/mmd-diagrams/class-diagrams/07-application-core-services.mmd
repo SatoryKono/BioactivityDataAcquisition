@@ -2,238 +2,238 @@
 %% PipelineRunner, BatchExecutor, and their composition.
 
 %% @version 1.1.0
-%% @date    2026-02-26
-%% @type    classDiagram
-%% @level   Class / Interface
-%% @uniform-group core    nodes=PipelineRunner,PipelineServices,BatchExecutor
-%% @uniform-group batch   nodes=BatchTransformer,BatchWriter
-%% @uniform-group infra   nodes=BatchMemoryManager,BatchMetricsRecorder,BatchTracingManager
+%% @date 2026-02-26
+%% @type classDiagram
+%% @level Class / Interface
+%% @uniform-group core nodes=PipelineRunner,PipelineServices,BatchExecutor
+%% @uniform-group batch nodes=BatchTransformer,BatchWriter
+%% @uniform-group infra nodes=BatchMemoryManager,BatchMetricsRecorder,BatchTracingManager
 %% @uniform-group manager nodes=CheckpointManager,LockManager
 %% @uniform-group support nodes=PreflightService,PostrunService,QuarantineManager,ShutdownSignal,HeartbeatTask,ErrorClassifier
 
 %% @uniform-width group
 %% @uniform class width=592 groups=5 width_strategy=group
-%% @uniform-stats core         width=376 height=312 max_desc_lines=15
-%% @uniform-stats batch        width=592 height=256 max_desc_lines=12
-%% @uniform-stats infra        width=376 height=168 max_desc_lines=7
-%% @uniform-stats manager      width=256 height=200 max_desc_lines=9
-%% @uniform-stats support      width=552 height=112 max_desc_lines=4
+%% @uniform-stats core width=376 height=312 max_desc_lines=15
+%% @uniform-stats batch width=592 height=256 max_desc_lines=12
+%% @uniform-stats infra width=376 height=168 max_desc_lines=7
+%% @uniform-stats manager width=256 height=200 max_desc_lines=9
+%% @uniform-stats support width=552 height=112 max_desc_lines=4
 classDiagram
-    direction TB
-    class PipelineRunner {
-        -_config: PipelineConfig
-        -_runtime: RuntimeConfig
-        -_services: PipelineServices
-        -_context: PipelineContext
-        -_executor: BatchExecutor
-        -_checkpoint_manager: CheckpointManager
-        -_shutdown_signal: ShutdownSignal
-        -_logger: LoggerPort
-        -_lock_manager: LockManager
-        -_preflight_service: PreflightService
-        -_postrun_service: PostrunService
-        -_lifecycle_service: MedallionLifecycleService
-        -_observer: PipelineObserver
-        +run() None
-        
-    }
+ direction TB
+ class PipelineRunner {
+ -_config: PipelineConfig
+ -_runtime: RuntimeConfig
+ -_services: PipelineServices
+ -_context: PipelineContext
+ -_executor: BatchExecutor
+ -_checkpoint_manager: CheckpointManager
+ -_shutdown_signal: ShutdownSignal
+ -_logger: LoggerPort
+ -_lock_manager: LockManager
+ -_preflight_service: PreflightService
+ -_postrun_service: PostrunService
+ -_lifecycle_service: MedallionLifecycleService
+ -_observer: PipelineObserver
+ +run() None
+ 
+ }
 
-    class PipelineServices {
-        <<frozen dataclass>>
-        +data_source: DataSourcePort
-        +storage: StoragePort
-        +lock: LockPort
-        +checkpoint: CheckpointPort
-        +quarantine: QuarantinePort
-        +metrics: MetricsPort
-        +tracing: TracingPort | None
-        +logger: LoggerPort
-        +dq_monitor: DQMonitorPort | None
-        +metadata_coordinator: MetadataCoordinatorPort | None
-        +metadata_writer: MetadataWriterPort | None
-        +dq_report_writer: DQReportWriterPort | None
-        +dq_report_service: DQReportService | None
-        
-    }
+ class PipelineServices {
+ <<frozen dataclass>>
+ +data_source: DataSourcePort
+ +storage: StoragePort
+ +lock: LockPort
+ +checkpoint: CheckpointPort
+ +quarantine: QuarantinePort
+ +metrics: MetricsPort
+ +tracing: TracingPort | None
+ +logger: LoggerPort
+ +dq_monitor: DQMonitorPort | None
+ +metadata_coordinator: MetadataCoordinatorPort | None
+ +metadata_writer: MetadataWriterPort | None
+ +dq_report_writer: DQReportWriterPort | None
+ +dq_report_service: DQReportService | None
+ 
+ }
 
-    class BatchExecutor {
-        -_services: PipelineServices
-        -_context: PipelineContext
-        -_config: RecordProcessorConfig
-        -_checkpoint_manager: CheckpointManager
-        +batch_size: int
-        +checkpoint_interval: int
-        +records_fetched: int
-        +records_bronze: int
-        +records_silver: int
-        +records_gold: int
-        +records_quarantined: int
-        +execute(limit, query, offset) None
-        +process(records, start_index) BatchResult
-        +get_dq_context() DQReportContext | None
-        +get_run_statistics() dict
-    }
+ class BatchExecutor {
+ -_services: PipelineServices
+ -_context: PipelineContext
+ -_config: RecordProcessorConfig
+ -_checkpoint_manager: CheckpointManager
+ +batch_size: int
+ +checkpoint_interval: int
+ +records_fetched: int
+ +records_bronze: int
+ +records_silver: int
+ +records_gold: int
+ +records_quarantined: int
+ +execute(limit, query, offset) None
+ +process(records, start_index) BatchResult
+ +get_dq_context() DQReportContext | None
+ +get_run_statistics() dict
+ }
 
-    class BatchTransformer {
-        -_context: PipelineContext
-        -_config: RecordProcessorConfig
-        -_error_classifier: ErrorClassifier
-        -_quarantine_manager: QuarantineManager
-        -_batch_metrics: BatchMetricsRecorder
-        -_transform: TransformCallback
-        -_gold_filter: GoldFilterCallback
-        -_gold_transform: GoldTransformCallback
-        +transform_batch(records, batch_id, start_index) TransformResult
-        +transform_single(raw_record, batch_id, index) TransformedRecord
-        +_check_dq_thresholds(records, quarantined_count) None
-        
-    }
+ class BatchTransformer {
+ -_context: PipelineContext
+ -_config: RecordProcessorConfig
+ -_error_classifier: ErrorClassifier
+ -_quarantine_manager: QuarantineManager
+ -_batch_metrics: BatchMetricsRecorder
+ -_transform: TransformCallback
+ -_gold_filter: GoldFilterCallback
+ -_gold_transform: GoldTransformCallback
+ +transform_batch(records, batch_id, start_index) TransformResult
+ +transform_single(raw_record, batch_id, index) TransformedRecord
+ +_check_dq_thresholds(records, quarantined_count) None
+ 
+ }
 
-    class BatchWriter {
-        -_storage: StoragePort
-        -_context: PipelineContext
-        -_gold_validator: GoldValidatorPort
-        -_error_classifier: ErrorClassifier
-        -_lock_validator: Callable
-        -_silver_mode: WriteMode
-        -_gold_mode: WriteMode
-        -_column_orderer: ColumnOrderer | None
-        +write_bronze(records, batch_id, ingestion_ts, metadata) BronzeWriteResult
-        +write_silver(records, batch_id, ingestion_ts, bronze_refs) SilverWriteResult | None
-        +write_gold(records, silver_refs) None
-        +_validate_lock(operation) None
-    }
+ class BatchWriter {
+ -_storage: StoragePort
+ -_context: PipelineContext
+ -_gold_validator: GoldValidatorPort
+ -_error_classifier: ErrorClassifier
+ -_lock_validator: Callable
+ -_silver_mode: WriteMode
+ -_gold_mode: WriteMode
+ -_column_orderer: ColumnOrderer | None
+ +write_bronze(records, batch_id, ingestion_ts, metadata) BronzeWriteResult
+ +write_silver(records, batch_id, ingestion_ts, bronze_refs) SilverWriteResult | None
+ +write_gold(records, silver_refs) None
+ +_validate_lock(operation) None
+ }
 
-    class BatchMemoryManager {
-        -_memory_monitor: MemoryMonitorPort | None
-        -_memory_config: MemoryConfig | None
-        -_initial_batch_size: int
-        +enabled: bool
-        +batch_size_reductions: int
-        +check_pressure(current_size, interval, fetched) int
-        +maybe_recover(current_size) int
-    }
+ class BatchMemoryManager {
+ -_memory_monitor: MemoryMonitorPort | None
+ -_memory_config: MemoryConfig | None
+ -_initial_batch_size: int
+ +enabled: bool
+ +batch_size_reductions: int
+ +check_pressure(current_size, interval, fetched) int
+ +maybe_recover(current_size) int
+ }
 
-    class BatchMetricsRecorder {
-        -_metrics: MetricsPort | None
-        -_pipeline_label: str
-        -_run_type_label: str
-        +track_batch_size(stage, size) None
-        +track_processed_records(stage, count) None
-        +track_error(stage, error_type) None
-        +track_quarantined_records(error_type, count) None
-    }
+ class BatchMetricsRecorder {
+ -_metrics: MetricsPort | None
+ -_pipeline_label: str
+ -_run_type_label: str
+ +track_batch_size(stage, size) None
+ +track_processed_records(stage, count) None
+ +track_error(stage, error_type) None
+ +track_quarantined_records(error_type, count) None
+ }
 
-    class BatchTracingManager {
-        -_tracer: TracingPort
-        -_context: PipelineContext
-        +TRACER_NAME: str
-        +start_execution_span() Span | None
-        +start_batch_span(batch_id, count, start) Span | None
-        +start_layer_span(name, batch_id, count) Span | None
-        +end_span(span, error) None
-    }
+ class BatchTracingManager {
+ -_tracer: TracingPort
+ -_context: PipelineContext
+ +TRACER_NAME: str
+ +start_execution_span() Span | None
+ +start_batch_span(batch_id, count, start) Span | None
+ +start_layer_span(name, batch_id, count) Span | None
+ +end_span(span, error) None
+ }
 
-    class CheckpointManager {
-        -_checkpoint: CheckpointPort
-        -_logger: LoggerPort
-        -_pipeline_name: str
-        -_run_id: RunID
-        -_resume: bool
-        +load_checkpoint() dict | None
-        +save_checkpoint(offset) None
-        +delete_checkpoint() None
-        
-    }
+ class CheckpointManager {
+ -_checkpoint: CheckpointPort
+ -_logger: LoggerPort
+ -_pipeline_name: str
+ -_run_id: RunID
+ -_resume: bool
+ +load_checkpoint() dict | None
+ +save_checkpoint(offset) None
+ +delete_checkpoint() None
+ 
+ }
 
-    class LockManager {
-        -_lock: LockPort
-        -_run_id: RunID
-        -_config: LockConfig
-        -_shutdown_signal: ShutdownSignal
-        -_heartbeat: HeartbeatTask | None
-        -_fencing_token: FencingToken | None
-        +acquire(timeout) FencingToken
-        +release() None
-        +validate() bool
-    }
+ class LockManager {
+ -_lock: LockPort
+ -_run_id: RunID
+ -_config: LockConfig
+ -_shutdown_signal: ShutdownSignal
+ -_heartbeat: HeartbeatTask | None
+ -_fencing_token: FencingToken | None
+ +acquire(timeout) FencingToken
+ +release() None
+ +validate() bool
+ }
 
-    class PreflightService {
-        +execute(config, runtime, services, context, observer) PreflightReport
-        
-        
-        
-    }
+ class PreflightService {
+ +execute(config, runtime, services, context, observer) PreflightReport
+ 
+ 
+ 
+ }
 
-    class PostrunService {
-        +execute(config, runtime, context, executor, metadata, observer) PostrunResult
-        
-        
-        
-    }
+ class PostrunService {
+ +execute(config, runtime, context, executor, metadata, observer) PostrunResult
+ 
+ 
+ 
+ }
 
-    class QuarantineManager {
-        -_quarantine: QuarantinePort
-        +quarantine_record(raw, error_type, batch_id, msg, ts) None
-        
-        
-    }
+ class QuarantineManager {
+ -_quarantine: QuarantinePort
+ +quarantine_record(raw, error_type, batch_id, msg, ts) None
+ 
+ 
+ }
 
-    class ShutdownSignal {
-        +is_requested: bool
-        +reason: ShutdownReason | None
-        +request(reason) None
-        +reset() None
-    }
+ class ShutdownSignal {
+ +is_requested: bool
+ +reason: ShutdownReason | None
+ +request(reason) None
+ +reset() None
+ }
 
-    class HeartbeatTask {
-        Background async task
-        +start() None
-        +stop() None
-        
-    }
+ class HeartbeatTask {
+ Background async task
+ +start() None
+ +stop() None
+ 
+ }
 
-    class ErrorClassifier {
-        +classify(error) ErrorCategory
-        
-        
-        
-    }
+ class ErrorClassifier {
+ +classify(error) ErrorCategory
+ 
+ 
+ 
+ }
 
-    PipelineRunner *-- BatchExecutor
-    PipelineRunner *-- LockManager
-    PipelineRunner *-- CheckpointManager
-    PipelineRunner *-- PreflightService
-    PipelineRunner *-- PostrunService
-    PipelineRunner *-- ShutdownSignal
-    PipelineRunner o-- PipelineServices
+ PipelineRunner *-- BatchExecutor
+ PipelineRunner *-- LockManager
+ PipelineRunner *-- CheckpointManager
+ PipelineRunner *-- PreflightService
+ PipelineRunner *-- PostrunService
+ PipelineRunner *-- ShutdownSignal
+ PipelineRunner o-- PipelineServices
 
-    BatchExecutor *-- BatchTransformer
-    BatchExecutor *-- BatchWriter
-    BatchExecutor *-- BatchMemoryManager
-    BatchExecutor *-- BatchMetricsRecorder
-    BatchExecutor *-- BatchTracingManager
-    BatchExecutor *-- QuarantineManager
-    BatchExecutor *-- CheckpointManager
+ BatchExecutor *-- BatchTransformer
+ BatchExecutor *-- BatchWriter
+ BatchExecutor *-- BatchMemoryManager
+ BatchExecutor *-- BatchMetricsRecorder
+ BatchExecutor *-- BatchTracingManager
+ BatchExecutor *-- QuarantineManager
+ BatchExecutor *-- CheckpointManager
 
-    BatchTransformer --> ErrorClassifier
-    BatchWriter --> ErrorClassifier
+ BatchTransformer --> ErrorClassifier
+ BatchWriter --> ErrorClassifier
 
-    LockManager *-- HeartbeatTask
+ LockManager *-- HeartbeatTask
 
-    style PipelineRunner fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style PipelineServices fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style BatchExecutor fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style BatchTransformer fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style BatchWriter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
-    style BatchMemoryManager fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style BatchMetricsRecorder fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style BatchTracingManager fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style CheckpointManager fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style LockManager fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style PreflightService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style PostrunService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style QuarantineManager fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style ShutdownSignal fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style HeartbeatTask fill:#eff6ff,stroke:#2563eb,stroke-width:2px
-    style ErrorClassifier fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+ style PipelineRunner fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+ style PipelineServices fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+ style BatchExecutor fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+ style BatchTransformer fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+ style BatchWriter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+ style BatchMemoryManager fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+ style BatchMetricsRecorder fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+ style BatchTracingManager fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+ style CheckpointManager fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+ style LockManager fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+ style PreflightService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+ style PostrunService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+ style QuarantineManager fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+ style ShutdownSignal fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+ style HeartbeatTask fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+ style ErrorClassifier fill:#eff6ff,stroke:#2563eb,stroke-width:2px

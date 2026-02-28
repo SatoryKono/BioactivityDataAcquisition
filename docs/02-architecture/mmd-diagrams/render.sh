@@ -35,6 +35,7 @@ PUPPETEER_CFG="$THEME_DIR/puppeteer-config.json"
 [[ -f "$PUPPETEER_CFG" ]] || PUPPETEER_CFG=""
 JOBS=4           # parallel jobs
 FIT=1            # adaptive sizing by default
+DARK_MODE=0      # dark mode rendering
 EXCLUDE_PATHS=("docs/99-archive")
 
 # ── Diagram source directories ──────────────────────────────
@@ -75,6 +76,7 @@ Options:
   --width N           Viewport width (0=auto) (default: $WIDTH)
   --height N          Viewport height (0=auto)(default: $HEIGHT)
   --no-fit            Use fixed width/height instead of adaptive
+  --dark              Render with dark mode theme (outputs to svg-dark/ png-dark/)
   --bg COLOR          Background colour       (default: $BG)
   --filter GLOB       Only render matching    (default: "$FILTER")
   --dir DIR           Add extra source dir    (repeatable)
@@ -119,6 +121,7 @@ while [[ $# -gt 0 ]]; do
     --exclude)      require_option_value "$1" "$#"; EXCLUDE_PATHS+=("$2"); shift 2 ;;
     --jobs)         require_option_value "$1" "$#"; JOBS="$2";          shift 2 ;;
     --no-fit)       FIT=0;                                                shift ;;
+    --dark)         DARK_MODE=1; BG="#0f172a";                            shift ;;
     --puppeteer)    require_option_value "$1" "$#"; PUPPETEER_CFG="$2"; shift 2 ;;
     -h|--help)      usage; exit 0 ;;
     *)              log_err "Unknown option: $1"; usage; exit 1 ;;
@@ -162,6 +165,20 @@ if [[ $FIT -eq 0 ]]; then
   # In fixed mode, treat zero values as "use defaults".
   [[ "$WIDTH" -eq 0 ]] && WIDTH=2400
   [[ "$HEIGHT" -eq 0 ]] && HEIGHT=1800
+fi
+
+# ── Dark mode theme switch ─────────────────────────────────
+if [[ $DARK_MODE -eq 1 ]]; then
+  DARK_CONFIG="$THEME_DIR/mermaid-config-dark.json"
+  DARK_CSS="$THEME_DIR/custom-dark.css"
+  if [[ -f "$DARK_CONFIG" ]]; then
+    CONFIG="$DARK_CONFIG"
+    log_info "Dark mode: using $DARK_CONFIG"
+  fi
+  if [[ -f "$DARK_CSS" ]]; then
+    CSS="$DARK_CSS"
+    log_info "Dark mode: using $DARK_CSS"
+  fi
 fi
 
 # ── Determine directories ──────────────────────────────────
@@ -295,6 +312,10 @@ render_one() {
 
   local svg_dir="$dir/svg"
   local png_dir="$dir/png"
+  if [[ $DARK_MODE -eq 1 ]]; then
+    svg_dir="$dir/svg-dark"
+    png_dir="$dir/png-dark"
+  fi
 
   # High-res boost for dense diagrams using @nodes metadata.
   local node_count="0"
