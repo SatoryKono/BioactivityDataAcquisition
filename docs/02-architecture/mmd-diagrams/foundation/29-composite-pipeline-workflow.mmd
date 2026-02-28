@@ -86,9 +86,7 @@ flowchart TB
         GT[("[D] Gold Table<br/>gold/composite/publication/"<br/>)]
     end
 
-    subgraph CKP["Checkpointing (each phase)"]
         CCM["[S] CompositeCheckpointManager<br/>• save after each phase<br/>• resume from any phase<br/>"]
-    end
 
     %% Flow
     CFG ==> PFV ==> BOOT
@@ -118,7 +116,7 @@ flowchart TB
     CCM -.->|"save"| Seed & Deps & Enrich & Merge & Gold
 
     %% Layout constraints
-    Init ~~~ Seed ~~~ Deps ~~~ Keys ~~~ Enrich ~~~ Merge ~~~ Gold ~~~ CKP
+    Init ~~~ Seed ~~~ Deps ~~~ Keys ~~~ Enrich ~~~ Merge ~~~ Gold ~~~ CCM
     DEP1 ~~~ DEP2
     E1 ~~~ E2 ~~~ E3 ~~~ E4
     ES1 ~~~ ES2 ~~~ ES3 ~~~ ES4

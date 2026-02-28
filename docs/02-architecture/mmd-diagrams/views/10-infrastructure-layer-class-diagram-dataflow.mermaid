@@ -23,10 +23,7 @@ flowchart TB
         N12["UniprotAdapter"]
     end
 
-    subgraph Interfaces["Interfaces Layer"]
-        direction TB
         N9["UnifiedHTTPClient"]
-    end
 
     N8 --> N1
     N8 --> N6
@@ -42,7 +39,7 @@ flowchart TB
 
     style Domain fill:#ffffff,stroke:#7c3aed,stroke-width:2px
     style Infrastructure fill:#ffffff,stroke:#dc2626,stroke-width:2px
-    style Interfaces fill:#ffffff,stroke:#2563eb,stroke-width:2px
+    style N9 fill:#ffffff,stroke:#2563eb,stroke-width:2px
 
     linkStyle 0 stroke:#1E293B,stroke-width:2px
     linkStyle 1 stroke:#1E293B,stroke-width:2px

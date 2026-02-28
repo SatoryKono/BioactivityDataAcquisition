@@ -32,10 +32,7 @@ flowchart TB
         N20["UH"]
     end
 
-    subgraph Composition["Composition Layer"]
-        direction TB
         N17["ConfiguredProviders"]
-    end
 
     N1 --> N4
     N1 --> N12
@@ -61,7 +58,7 @@ flowchart TB
 
     style Domain fill:#ffffff,stroke:#7c3aed,stroke-width:2px
     style Infrastructure fill:#ffffff,stroke:#dc2626,stroke-width:2px
-    style Composition fill:#ffffff,stroke:#f59e0b,stroke-width:2px
+    style N17 fill:#ffffff,stroke:#f59e0b,stroke-width:2px
 
     %% linkStyle: primary=19 edge(s) | secondary=2 edge(s)
     linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18 stroke:#475569,stroke-width:2px,stroke-dasharray:5

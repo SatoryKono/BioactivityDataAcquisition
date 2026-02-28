@@ -24,10 +24,7 @@ flowchart TB
         N14["Infrastructure<br/>"]
     end
 
-    subgraph Infrastructure["Infrastructure Layer"]
-        direction TB
         N15["Infrastructure Adapters<br/>"]
-    end
 
     subgraph Composition["Composition Layer"]
         direction TB
@@ -52,7 +49,7 @@ flowchart TB
 
     style Domain fill:#ffffff,stroke:#7c3aed,stroke-width:2px
     style Application fill:#ffffff,stroke:#16a34a,stroke-width:2px
-    style Infrastructure fill:#ffffff,stroke:#dc2626,stroke-width:2px
+    style N15 fill:#ffffff,stroke:#dc2626,stroke-width:2px
     style Composition fill:#ffffff,stroke:#f59e0b,stroke-width:2px
 
     %% linkStyle: data 2 | orchestration 0,3,5-8,11-13 | di 1,9 | generic 4,10

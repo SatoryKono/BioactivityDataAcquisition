@@ -12,13 +12,9 @@
 %% @uniform width=256 height=144 max_title_len=25 max_desc_lines=6
 %%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'POLYLINE'}}}%%
 flowchart TB
-    subgraph Runner["PipelineRunner (application/core/runner.py)"]
         RUN["run() — main orchestrator<br/><br/><br/><br/><br/>"]
-    end
 
-    subgraph Lifecycle["Lifecycle Services"]
         LM["LockManager<br/>• acquire(key, owner, ttl=90s)<br/>• release(key, owner)<br/>• validate_ownership()<br/><br/>"]
-    end
 
     subgraph Validation["Pre/Post Services"]
     end
@@ -36,9 +32,7 @@ flowchart TB
         BTM["BatchTracingManager<br/>• start_span()<br/>• end_span()<br/><br/><br/>"]
     end
 
-    subgraph Bundle["PipelineServices (frozen dataclass)"]
         PS["All ports injected:<br/>• storage (bronze+silver+gold)<br/>• lock, checkpoint<br/>• quarantine<br/>• logger, metrics, tracing<br/>• validators, pii_hasher"]
-    end
 
     %% Runner orchestration
     RUN -->|"1. lock"| LM
@@ -59,8 +53,8 @@ flowchart TB
     BTM -.->|"traces"| BE
 
     %% All use PipelineServices
-    PS -.->|"provides ports to"| Runner & Lifecycle & Validation & Execution
+    PS -.->|"provides ports to"| RUN & LM & Validation & Execution
 
     %% Styling
-    style Runner fill:#ffffff,stroke:#2563eb,stroke-width:2px
-    style Bundle fill:#ffffff,stroke:#64748b,stroke-width:1.5px
+    style RUN fill:#ffffff,stroke:#2563eb,stroke-width:2px
+    style PS fill:#ffffff,stroke:#64748b,stroke-width:1.5px

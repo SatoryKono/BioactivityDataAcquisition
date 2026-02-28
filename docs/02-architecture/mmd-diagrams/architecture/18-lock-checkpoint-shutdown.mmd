@@ -27,26 +27,18 @@ graph TB
         HB["HeartbeatTask<br/>━━━━━━━━━━━━━━━━━<br/>Background async task<br/>periodically calls<br/>lock.heartbeat()<br/><br/><br/><br/><br/><br/>"]:::size-lg
     end
 
-    subgraph AppCheckpoint["Application: CheckpointManager"]
         CM["CheckpointManager<br/>━━━━━━━━━━━━━━━━━<br/>_checkpoint: CheckpointPort<br/>_pipeline_name: str<br/>_run_id: RunID<br/>_resume: bool<br/>━━━━━━━━━━━━━━━━━<br/>+ load_checkpoint() → dict | None<br/>+ save_checkpoint(offset)<br/>+ delete_checkpoint()<br/>"]:::size-lg
-    end
 
     subgraph AppShutdown["Application: Shutdown"]
         SS["ShutdownSignal<br/>━━━━━━━━━━━━━━━━━<br/>is_requested: bool<br/>reason: ShutdownReason | None<br/>━━━━━━━━━━━━━━━━━<br/>+ request(reason)<br/>+ reset()<br/><br/><br/><br/>"]:::size-lg
         SR["ShutdownReason<br/>━━━━━━━━━━━━━━━━━<br/>SIGINT<br/>SIGTERM<br/>LOCK_LOST<br/>MEMORY_PRESSURE<br/>DQ_THRESHOLD<br/><br/><br/><br/>"]:::size-lg
     end
 
-    subgraph InfraLock["Infrastructure: MemoryLock"]
         ML["MemoryLock<br/>━━━━━━━━━━━━━━━━━<br/>_locks: dict<br/>_global_lock: asyncio.Lock<br/>_ttl_check_interval: float<br/>━━━━━━━━━━━━━━━━━<br/>+ acquire() → FencingToken<br/>+ release()<br/>+ heartbeat() — extend TTL<br/>+ validate_owner()<br/>+ validate_fencing_token()"]:::size-lg
-    end
 
-    subgraph InfraCheckpoint["Infrastructure: LocalCheckpoint"]
         LCP["LocalCheckpoint<br/>━━━━━━━━━━━━━━━━━<br/>base_path: Path<br/>━━━━━━━━━━━━━━━━━<br/>+ save() — atomic (tmp + rename)<br/>+ load() → dict<br/>+ exists() → bool<br/>+ delete()<br/><br/><br/>"]:::size-lg
-    end
 
-    subgraph SafetyGuard["Safety Guard Pattern"]
         SG["BatchWriter._validate_lock()<br/>━━━━━━━━━━━━━━━━━<br/>Before each Silver/Gold write:<br/>1. validate lock still held<br/>2. validate fencing token<br/>3. raise LockNotHeldError if invalid<br/>Prevents split-brain writes<br/><br/><br/><br/>"]:::size-lg
-    end
 
     subgraph Lifecycle["Pipeline Lifecycle Integration"]
         direction LR

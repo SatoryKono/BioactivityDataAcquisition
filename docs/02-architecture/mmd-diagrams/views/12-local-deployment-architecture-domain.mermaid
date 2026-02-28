@@ -31,10 +31,7 @@ flowchart TB
         N20["Metrics"]
     end
 
-    subgraph Interfaces["Interfaces Layer"]
-        direction TB
         N2["CLI"]
-    end
 
     N5 --> N1
     N6 --> N3
@@ -58,7 +55,7 @@ flowchart TB
 
     style Domain fill:#ffffff,stroke:#7c3aed,stroke-width:2px
     style Infrastructure fill:#ffffff,stroke:#dc2626,stroke-width:2px
-    style Interfaces fill:#ffffff,stroke:#2563eb,stroke-width:2px
+    style N2 fill:#ffffff,stroke:#2563eb,stroke-width:2px
 
     %% linkStyle: data 11-15,18 | di 0-9,16-17 | generic 10
     linkStyle 0 stroke:#7c3aed,stroke-width:1.5px,stroke-dasharray:5

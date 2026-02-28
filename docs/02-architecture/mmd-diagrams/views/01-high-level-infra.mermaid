@@ -31,15 +31,9 @@ flowchart TB
         N20["A7"]
     end
 
-    subgraph Composition["Composition Layer"]
-        direction TB
         N2["Factory"]
-    end
 
-    subgraph Interfaces["Interfaces Layer"]
-        direction TB
         N10["CLI"]
-    end
 
     N9 --> N3
     N10 --> N6
@@ -55,8 +49,8 @@ flowchart TB
 
     style Application fill:#ffffff,stroke:#16a34a,stroke-width:2px
     style Infrastructure fill:#ffffff,stroke:#dc2626,stroke-width:2px
-    style Composition fill:#ffffff,stroke:#f59e0b,stroke-width:2px
-    style Interfaces fill:#ffffff,stroke:#2563eb,stroke-width:2px
+    style N2 fill:#ffffff,stroke:#f59e0b,stroke-width:2px
+    style N10 fill:#ffffff,stroke:#2563eb,stroke-width:2px
 
     linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
     linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5

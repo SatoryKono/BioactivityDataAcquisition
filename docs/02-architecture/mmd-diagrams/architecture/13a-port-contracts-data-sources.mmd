@@ -18,9 +18,7 @@ graph LR
         FDSP["FilterableDataSourcePort"]:::size-sm
     end
 
-    subgraph Infrastructure["Infrastructure Layer"]
         CA["ChemblAdapter"]:::size-sm
-    end
 
     DSP --- CA & PA & UA & CRA & OAA & SSA & PCA
 

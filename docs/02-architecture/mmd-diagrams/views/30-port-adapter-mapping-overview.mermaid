@@ -21,10 +21,7 @@ flowchart LR
         ARUN["[A] Runtime Adapters"]
     end
 
-    subgraph NoOps["Fallbacks"]
-        direction TB
         NOOP["[N] NoOp Adapters"]
-    end
 
     PCORE ==> APROV
     PCORE ==> ASTORE

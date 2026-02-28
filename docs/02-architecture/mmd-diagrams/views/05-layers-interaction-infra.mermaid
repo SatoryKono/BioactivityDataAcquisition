@@ -40,10 +40,7 @@ flowchart TB
         N5["Bootstrap"]
     end
 
-    subgraph Interfaces["Interfaces Layer"]
-        direction TB
         N11["CLI"]
-    end
 
     N5 --> N1
     N5 --> N6
@@ -60,7 +57,7 @@ flowchart TB
     style Application fill:#ffffff,stroke:#16a34a,stroke-width:2px
     style Infrastructure fill:#ffffff,stroke:#dc2626,stroke-width:2px
     style Composition fill:#ffffff,stroke:#f59e0b,stroke-width:2px
-    style Interfaces fill:#ffffff,stroke:#2563eb,stroke-width:2px
+    style N11 fill:#ffffff,stroke:#2563eb,stroke-width:2px
 
     %% linkStyle: data 1,5,8 | orchestration 0,2-4,6-7 | di 9
     linkStyle 0 stroke:#16a34a,stroke-width:2px

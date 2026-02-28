@@ -8,7 +8,7 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%% @nodes   31
+%% @nodes   30
 %% @uniform width=272 height=112 max_title_len=27 max_desc_lines=4
 %%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'ORTHOGONAL'}}}%%
 flowchart TB
@@ -19,9 +19,7 @@ flowchart TB
         RB["RunType.REBUILD<br/>'Full clean rebuild'<br/><br/>"]
     end
 
-    subgraph Policy["MedallionLifecycleService\n(application/services/medallion_lifecycle.py)"]
         CHECK{{"Check RunType<br/><br/><br/>"}}
-    end
 
     subgraph IncPath["INCREMENTAL Path"]
         I1["❌ DO NOT clear Silver<br/><br/><br/>"]
@@ -51,10 +49,6 @@ flowchart TB
         E4["Tests verify:<br/>INCREMENTAL never clears<br/><br/>"]
     end
 
-    subgraph Bronze["Bronze Layer (Always Append)"]
-        BZ["BronzeWriter.write_bronze()<br/>• ALWAYS append-only<br/>• Never cleared by run_type<br/>• 90-day retention policy"]
-    end
-
     %% Flow
     INC --> CHECK
     BF --> CHECK
@@ -70,13 +64,10 @@ flowchart TB
     R1 --> R2 --> R3 --> R4
 
     E1 -.-> CHECK
-    E2 -.-> Policy
-
-    BZ -.->|"unaffected by run_type"| Bronze
+    E2 -.-> CHECK
 
     %% Styling
     style IncPath fill:#ffffff,stroke:#16a34a,stroke-width:2px
     style BFPath fill:#ffffff,stroke:#f59e0b,stroke-width:2px
     style RBPath fill:#ffffff,stroke:#dc2626,stroke-width:2px
-    style Bronze fill:#ffffff,stroke:#f59e0b,stroke-width:2px
-    style Policy fill:#ffffff,stroke:#2563eb,stroke-width:2px
+    style CHECK fill:#ffffff,stroke:#2563eb,stroke-width:2px

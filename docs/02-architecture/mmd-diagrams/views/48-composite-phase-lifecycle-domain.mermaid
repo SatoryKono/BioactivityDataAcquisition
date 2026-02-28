@@ -27,10 +27,7 @@ flowchart TB
         N19["enrichers_done"]
     end
 
-    subgraph Application["Application Layer"]
-        direction TB
         N20["merge_active"]
-    end
 
     N2 --> N9
     N9 --> N5
@@ -59,7 +56,7 @@ flowchart TB
     N2 --> N1
 
     style Domain fill:#ffffff,stroke:#7c3aed,stroke-width:2px
-    style Application fill:#ffffff,stroke:#16a34a,stroke-width:2px
+    style N20 fill:#ffffff,stroke:#16a34a,stroke-width:2px
 
     linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 stroke:#475569,stroke-width:2px,stroke-dasharray:5
     linkStyle 24 stroke:#475569,stroke-width:2px,stroke-dasharray:5,opacity:0.85

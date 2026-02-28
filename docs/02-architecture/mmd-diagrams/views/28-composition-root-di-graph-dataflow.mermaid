@@ -19,10 +19,7 @@ flowchart TB
         N12["SLL"]
     end
 
-    subgraph Interfaces["Interfaces Layer"]
-        direction TB
         N11["CLI"]
-    end
 
     N11 --> N1
     N1 --> N3
@@ -39,7 +36,7 @@ flowchart TB
     N1 --> N10
 
     style Infrastructure fill:#ffffff,stroke:#dc2626,stroke-width:2px
-    style Interfaces fill:#ffffff,stroke:#2563eb,stroke-width:2px
+    style N11 fill:#ffffff,stroke:#2563eb,stroke-width:2px
 
     linkStyle 0 stroke:#1E293B,stroke-width:2px
     linkStyle 1 stroke:#1E293B,stroke-width:2px

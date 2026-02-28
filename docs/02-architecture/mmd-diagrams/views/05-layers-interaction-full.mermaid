@@ -16,9 +16,7 @@
 %%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'POLYLINE'}}}%%
 flowchart TB
 %% keep-orphan: Entities, Exceptions, Locking, Types
-    subgraph Interfaces["Interfaces Layer"]
         CLI[CLI Entry Point]
-    end
 
     subgraph Composition["Composition Layer"]
         Bootstrap[bootstrap_pipeline]
@@ -88,7 +86,7 @@ flowchart TB
     style Application fill:#ffffff,stroke:#16a34a,stroke-width:2px
     style Infrastructure fill:#ffffff,stroke:#dc2626,stroke-width:2px
     style Composition fill:#ffffff,stroke:#f59e0b,stroke-width:2px
-    style Interfaces fill:#ffffff,stroke:#2563eb,stroke-width:2px
+    style CLI fill:#ffffff,stroke:#2563eb,stroke-width:2px
 
     linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
     linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5

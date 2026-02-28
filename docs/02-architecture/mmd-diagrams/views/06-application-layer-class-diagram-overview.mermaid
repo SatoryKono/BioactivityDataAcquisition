@@ -22,10 +22,7 @@ flowchart TB
         N15["RecordProcessor"]
     end
 
-    subgraph Infrastructure["Infrastructure Layer"]
-        direction TB
         N5["LockManager"]
-    end
 
     N3 --> N4
     N10 --> N3
@@ -41,7 +38,7 @@ flowchart TB
     N2 --> N9
 
     style Application fill:#ffffff,stroke:#16a34a,stroke-width:2px
-    style Infrastructure fill:#ffffff,stroke:#dc2626,stroke-width:2px
+    style N5 fill:#ffffff,stroke:#dc2626,stroke-width:2px
 
     %% linkStyle: primary=10 edge(s) | secondary=2 edge(s)
     linkStyle 0,1,2,3,4,5,6,7,8,9 stroke:#475569,stroke-width:2px,stroke-dasharray:5

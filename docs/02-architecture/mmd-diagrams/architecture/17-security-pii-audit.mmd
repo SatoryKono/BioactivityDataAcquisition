@@ -42,9 +42,7 @@ graph TB
         BT["BaseTransformer<br/>━━━━━━━━━━━━━━━━━<br/>+ hash_pii_value(value) → str<br/>+ hash_pii_list(values) → list[str]<br/><br/><br/><br/><br/><br/>"]:::size-lg
     end
 
-    subgraph StorageAudit["Storage Audit Integration"]
         GW["GoldWriter<br/>━━━━━━━━━━━━━━━━━<br/>audit: AuditPort<br/>logs writes<br/><br/><br/><br/><br/><br/>"]:::size-lg
-    end
 
     %% Port implementations
     PHP -.-> SPH

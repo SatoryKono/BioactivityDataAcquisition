@@ -13,9 +13,7 @@
 %%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'ORTHOGONAL'}}}%%
 flowchart LR
 %% keep-orphan: LocalFS, S1, S10, S11, S12, S2, S4, S5, S6, S7, S8, S9
-    subgraph External["External API"]
         API["🌐 ChEMBL API<br/>/activities endpoint<br/>"]
-    end
 
     subgraph Extract["Extract Phase"]
         E1["📥 Fetch activity_id batch<br/>(ChemblAdapter)<br/>"]
@@ -41,12 +39,6 @@ flowchart LR
     subgraph Load["Load Phase"]
         L1[("🥈 Silver Layer<br/>silver/chembl/activity/<br/>year=/month=/")]
         L2[("🥇 Gold Layer<br/>gold/activity_by_target/<br/>target_id=/")]
-    end
-
-    subgraph Related["Related Entities (Silver)"]
-    end
-
-    subgraph Quarantine["DQ Failures"]
     end
 
     %% Extract flow

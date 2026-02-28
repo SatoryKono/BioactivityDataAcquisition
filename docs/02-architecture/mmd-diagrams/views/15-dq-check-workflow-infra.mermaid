@@ -4,10 +4,7 @@
 %%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'POLYLINE'}}}%%
 flowchart TB
 
-    subgraph Domain["Domain Layer"]
-        direction TB
         N9["record_error_rate"]
-    end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
@@ -55,7 +52,7 @@ flowchart TB
     N1 --> N9
     N1 --> N10
 
-    style Domain fill:#ffffff,stroke:#7c3aed,stroke-width:2px
+    style N9 fill:#ffffff,stroke:#7c3aed,stroke-width:2px
     style Infrastructure fill:#ffffff,stroke:#dc2626,stroke-width:2px
 
     classDef process fill:#eff6ff,stroke:#2563eb,stroke-width:2px

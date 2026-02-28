@@ -12,9 +12,7 @@
 %% @uniform width=376 height=128 max_title_len=37 max_desc_lines=5
 %%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'POLYLINE'}}}%%
 flowchart TB
-    subgraph Seed["Seed Pipeline Result"]
         SS[("Seed Silver Table<br/>(e.g., chembl/publication<br/>)<br/><br/>")]
-    end
 
     subgraph Extract["Key Extraction"]
         KE["KeyExtractorService.extract_keys()<br/>• read seed Silver via DeltaReader<br/>• select join_key columns (doi, pmid)<br/>• deduplicate → unique key list<br/>"]

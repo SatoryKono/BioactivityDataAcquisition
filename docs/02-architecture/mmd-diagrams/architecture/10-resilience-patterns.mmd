@@ -43,9 +43,7 @@ graph TB
         end
     end
 
-    subgraph Retry["Retry Logic"]
         RP["Retry (in UnifiedHTTPClient)<br/>━━━━━━━━━━━━━━━━━<br/>max_retries: int<br/>backoff_factor: float<br/>retry_on: set[int]<br/>━━━━━━━━━━━━━━━━━<br/>Exponential backoff<br/>with jitter<br/><br/><br/>"]:::size-lg
-    end
 
     subgraph HealthCheck["Health Check Template"]
         HCPM["HealthCheckProviderMixin<br/>━━━━━━━━━━━━━━━━━<br/>Template Method Pattern:<br/>1. _probe_health() — override<br/>2. Log success/failure<br/>3. Record metrics<br/>4. Return HealthCheckResult<br/>5. Fallback to CB state<br/><br/><br/>"]:::size-lg
@@ -53,9 +51,7 @@ graph TB
         HS["HealthStatus<br/>━━━━━━━━━━━━━━━━━<br/>HEALTHY<br/>DEGRADED<br/>UNHEALTHY<br/><br/><br/><br/><br/><br/>"]:::size-lg
     end
 
-    subgraph Client["UnifiedHTTPClient"]
         UHC["UnifiedHTTPClient<br/>━━━━━━━━━━━━━━━━━<br/>Composes all patterns:<br/>1. acquire rate limiter<br/>2. check circuit breaker<br/>3. attempt request<br/>4. retry on failure<br/>5. record metrics<br/><br/><br/>"]:::size-lg
-    end
 
     subgraph Decorators["Data Source Decorators"]
         CBDSD["CircuitBreakerDataSourceDecorator<br/>━━━━━━━━━━━━━━━━━<br/>Wraps DataSourcePort<br/>with circuit breaker<br/><br/><br/><br/><br/><br/><br/>"]:::size-lg

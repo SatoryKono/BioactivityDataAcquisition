@@ -5,10 +5,7 @@
 flowchart TB
 %% keep-orphan: N11
 
-    subgraph Domain["Domain Layer"]
-        direction TB
         N8["ValidateLock"]
-    end
 
     subgraph Application["Application Layer"]
         direction TB
@@ -38,7 +35,7 @@ flowchart TB
     N9 --> N10
     N10 --> N12
 
-    style Domain fill:#ffffff,stroke:#7c3aed,stroke-width:2px
+    style N8 fill:#ffffff,stroke:#7c3aed,stroke-width:2px
     style Application fill:#ffffff,stroke:#16a34a,stroke-width:2px
     style Infrastructure fill:#ffffff,stroke:#dc2626,stroke-width:2px
 

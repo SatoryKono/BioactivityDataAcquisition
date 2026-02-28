@@ -26,10 +26,7 @@ flowchart TB
         N14["UNHEALTHY"]
     end
 
-    subgraph Composition["Composition Layer"]
-        direction TB
         N9["ConfiguredProviders"]
-    end
 
     N1 --> N4
     N1 --> N6
@@ -53,7 +50,7 @@ flowchart TB
 
     style Domain fill:#ffffff,stroke:#7c3aed,stroke-width:2px
     style Application fill:#ffffff,stroke:#16a34a,stroke-width:2px
-    style Composition fill:#ffffff,stroke:#f59e0b,stroke-width:2px
+    style N9 fill:#ffffff,stroke:#f59e0b,stroke-width:2px
 
     %% linkStyle: orchestration 0-3,5-7,13-17 | di 4,8-9,11-12 | generic 10,18
     linkStyle 0 stroke:#16a34a,stroke-width:2px

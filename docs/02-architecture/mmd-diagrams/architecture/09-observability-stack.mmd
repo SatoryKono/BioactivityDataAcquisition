@@ -24,9 +24,7 @@ graph TB
         BTM["BatchTracingManager<br/>━━━━━━━━━━━━━━━━━<br/>+ start_execution_span()<br/>+ start_batch_span()<br/>+ start_layer_span()<br/>+ end_span()<br/><br/><br/><br/>"]:::size-lg
     end
 
-    subgraph InfraLogging["Infrastructure: Logging"]
         UL["UnifiedLogger<br/>(implements LoggerPort)<br/>━━━━━━━━━━━━━━━━━<br/>Structured JSON output<br/>Log Schema enforcement<br/>Secret filtering<br/><br/><br/><br/>"]:::size-lg
-    end
 
     subgraph InfraMetrics["Infrastructure: Metrics"]
         MC["MetricsCollector<br/>(implements MetricsPort)<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
@@ -34,9 +32,7 @@ graph TB
         MSA["MetricsServerAdapter<br/>━━━━━━━━━━━━━━━━━<br/>HTTP server for<br/>/metrics endpoint<br/><br/><br/><br/><br/><br/>"]:::size-lg
     end
 
-    subgraph InfraTracing["Infrastructure: Tracing"]
         OTT["OpenTelemetryTracer<br/>(implements TracingPort)<br/>━━━━━━━━━━━━━━━━━<br/>OTLP export<br/>Span management<br/><br/><br/><br/><br/>"]:::size-lg
-    end
 
     subgraph InfraAnomaly["Infrastructure: Anomaly Detection"]
         AD["AnomalyDetector<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
@@ -46,9 +42,7 @@ graph TB
         AD --> DS
     end
 
-    subgraph AdapterMetrics["Adapter-Level Metrics"]
         AM["AdapterMetrics<br/>━━━━━━━━━━━━━━━━━<br/>provider: str<br/>━━━━━━━━━━━━━━━━━<br/>+ measure_request()<br/>(context manager)<br/>Metrics:<br/>adapter_request_duration_seconds<br/>adapter_requests_total<br/>"]:::size-lg
-    end
 
     subgraph External["External Systems"]
         PROM["Prometheus Server<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg

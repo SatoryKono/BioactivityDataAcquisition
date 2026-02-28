@@ -5,15 +5,9 @@
 flowchart TB
 %% keep-orphan: N4
 
-    subgraph Domain["Domain Layer"]
-        direction TB
         N4["FSMStateHelper.validate_transition"]
-    end
 
-    subgraph Application["Application Layer"]
-        direction TB
         N3["merge_active"]
-    end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
@@ -43,8 +37,8 @@ flowchart TB
     N5 --> N2
     N5 --> N3
 
-    style Domain fill:#ffffff,stroke:#7c3aed,stroke-width:2px
-    style Application fill:#ffffff,stroke:#16a34a,stroke-width:2px
+    style N4 fill:#ffffff,stroke:#7c3aed,stroke-width:2px
+    style N3 fill:#ffffff,stroke:#16a34a,stroke-width:2px
     style Infrastructure fill:#ffffff,stroke:#dc2626,stroke-width:2px
 
     linkStyle 0 stroke:#1E293B,stroke-width:2px

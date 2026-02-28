@@ -31,21 +31,15 @@ flowchart TB
         N16["CheckpointManager"]
     end
 
-    subgraph Composition["Composition Layer"]
-        direction TB
         N15["Registry"]
-    end
 
-    subgraph Interfaces["Interfaces Layer"]
-        direction TB
         N1["UnifiedHTTPClient"]
-    end
 
     N2 --> N1
 
     style Domain fill:#ffffff,stroke:#7c3aed,stroke-width:2px
     style Infrastructure fill:#ffffff,stroke:#dc2626,stroke-width:2px
-    style Composition fill:#ffffff,stroke:#f59e0b,stroke-width:2px
-    style Interfaces fill:#ffffff,stroke:#2563eb,stroke-width:2px
+    style N15 fill:#ffffff,stroke:#f59e0b,stroke-width:2px
+    style N1 fill:#ffffff,stroke:#2563eb,stroke-width:2px
 
     linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5

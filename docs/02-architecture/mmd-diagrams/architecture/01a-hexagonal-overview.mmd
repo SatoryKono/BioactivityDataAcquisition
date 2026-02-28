@@ -17,17 +17,11 @@ graph TB
         ORCH["Orchestration"]:::size-sm
     end
 
-    subgraph Composition["Composition Layer"]
         BOOTSTRAP["Bootstrap / Assembly"]:::size-sm
-    end
 
-    subgraph Application["Application Layer"]
         CORE["Application Core"]:::size-sm
-    end
 
-    subgraph Domain["Domain Layer"]
         PORTS["Port Protocols"]:::size-sm
-    end
 
     subgraph Infrastructure["Infrastructure Layer"]
         ADAPTERS["Provider Adapters"]:::size-sm

@@ -73,17 +73,11 @@ graph TB
         end
     end
 
-    subgraph CrossVal["Cross-Validation"]
         CV["EnrichmentCrossValidator<br/><br/><br/><br/><br/>"]:::size-lg
-    end
 
-    subgraph Checkpoint["Checkpoint"]
         CCM["CompositeCheckpointManager<br/><br/><br/><br/><br/>"]:::size-lg
-    end
 
-    subgraph Preflight["Preflight"]
         CPV["CompositePreflightValidator<br/><br/><br/><br/><br/>"]:::size-lg
-    end
 
     subgraph Results["Results"]
         ER["EnrichmentResult<br/><br/><br/><br/><br/>"]:::size-lg

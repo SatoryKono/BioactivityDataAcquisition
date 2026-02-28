@@ -47,9 +47,7 @@ flowchart LR
         FIELDS["Field Groups:<br/>• ID_AND_STATUS<br/>• BIBLIOGRAPHY<br/>• AUTHOR<br/>• TERMS<br/>• CITATIONS<br/>• DATES<br/>• PUB_TYPES"]
     end
 
-    subgraph Gold["Gold Output"]
         GS["CompositePublicationGoldSchema<br/>(Pandera strict validation)<br/><br/><br/><br/><br/><br/>"]
-    end
 
     %% Flows
     CA --> CT --> CS
@@ -70,4 +68,4 @@ flowchart LR
     %% Styling
     style ChEMBL fill:#ffffff,stroke:#f59e0b,stroke-width:2px
     style Merge fill:#ffffff,stroke:#475569,stroke-width:2px
-    style Gold fill:#ffffff,stroke:#ca8a04,stroke-width:2px
+    style GS fill:#ffffff,stroke:#ca8a04,stroke-width:2px

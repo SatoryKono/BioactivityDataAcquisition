@@ -5,10 +5,7 @@
 flowchart TB
 %% keep-orphan: N19, N20
 
-    subgraph Domain["Domain Layer"]
-        direction TB
         N14["ADP"]
-    end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
@@ -32,10 +29,7 @@ flowchart TB
         N20["PR"]
     end
 
-    subgraph Interfaces["Interfaces Layer"]
-        direction TB
         N11["CLI"]
-    end
 
     N11 --> N1
     N1 --> N3
@@ -57,9 +51,9 @@ flowchart TB
     N1 --> N10
     N10 --> N18
 
-    style Domain fill:#ffffff,stroke:#7c3aed,stroke-width:2px
+    style N14 fill:#ffffff,stroke:#7c3aed,stroke-width:2px
     style Infrastructure fill:#ffffff,stroke:#dc2626,stroke-width:2px
-    style Interfaces fill:#ffffff,stroke:#2563eb,stroke-width:2px
+    style N11 fill:#ffffff,stroke:#2563eb,stroke-width:2px
 
     linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
     linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5

@@ -4,10 +4,7 @@
 %%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'POLYLINE'}}}%%
 flowchart TB
 
-    subgraph Domain["Domain Layer"]
-        direction TB
         N6["SP"]
-    end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
@@ -55,7 +52,7 @@ flowchart TB
     N19 --> N16
     N16 --> N20
 
-    style Domain fill:#ffffff,stroke:#7c3aed,stroke-width:2px
+    style N6 fill:#ffffff,stroke:#7c3aed,stroke-width:2px
     style Infrastructure fill:#ffffff,stroke:#dc2626,stroke-width:2px
 
     linkStyle 0 stroke:#1E293B,stroke-width:2px

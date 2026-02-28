@@ -32,9 +32,6 @@ graph TB
         VALIDATION["Validation"]:::size-sm
     end
 
-    subgraph Domain["Domain Layer"]
-    end
-
     BOOTSTRAP --> ADAPTERS
     BOOTSTRAP --> STORAGE
     BOOTSTRAP --> OBS_INFRA

@@ -13,9 +13,7 @@
 %%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'ORTHOGONAL'}}}%%
 flowchart TD
 %% keep-orphan: CFG1, CFG2, CFG3
-    subgraph Input["Input Stage"]
         A[/"📥 Input Records<br/>(from Bronze)"/]
-    end
 
     subgraph Validation["Validation Stage"]
         B["🔍 Pandera Schema Validation<br/>"]

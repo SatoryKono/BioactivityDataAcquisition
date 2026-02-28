@@ -26,10 +26,7 @@ flowchart TB
         N15["R_SHUTDOWN"]
     end
 
-    subgraph Infrastructure["Infrastructure Layer"]
-        direction TB
         N6["RecordQuarantined"]
-    end
 
     N1 --> N3
     N1 --> N4
@@ -46,7 +43,7 @@ flowchart TB
 
     style Domain fill:#ffffff,stroke:#7c3aed,stroke-width:2px
     style Application fill:#ffffff,stroke:#16a34a,stroke-width:2px
-    style Infrastructure fill:#ffffff,stroke:#dc2626,stroke-width:2px
+    style N6 fill:#ffffff,stroke:#dc2626,stroke-width:2px
 
     %% linkStyle: data 3 | orchestration 0-2,7-11 | di 4-6
     linkStyle 0 stroke:#16a34a,stroke-width:2px

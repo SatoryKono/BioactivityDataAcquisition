@@ -13,9 +13,7 @@
 %%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'POLYLINE'}}}%%
 flowchart TB
 %% keep-orphan: Entities, Exceptions, Locking, Types
-    subgraph Interfaces["Interfaces Layer"]
         CLI[CLI Entry Point]
-    end
 
     subgraph Composition["Composition Layer"]
         Bootstrap[bootstrap_pipeline]

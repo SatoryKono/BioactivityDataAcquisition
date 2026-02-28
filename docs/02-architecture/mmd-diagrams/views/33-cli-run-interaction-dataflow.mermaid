@@ -4,10 +4,7 @@
 %%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'POLYLINE'}}}%%
 flowchart TB
 
-    subgraph Application["Application Layer"]
-        direction TB
         N1["Runner"]
-    end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
@@ -49,7 +46,7 @@ flowchart TB
     N2 --> N3
     N3 --> N9
 
-    style Application fill:#ffffff,stroke:#16a34a,stroke-width:2px
+    style N1 fill:#ffffff,stroke:#16a34a,stroke-width:2px
     style Infrastructure fill:#ffffff,stroke:#dc2626,stroke-width:2px
     style Interfaces fill:#ffffff,stroke:#2563eb,stroke-width:2px
 

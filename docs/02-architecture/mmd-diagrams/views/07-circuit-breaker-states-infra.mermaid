@@ -5,10 +5,7 @@
 flowchart TB
 %% keep-orphan: N18, N19, N20
 
-    subgraph Domain["Domain Layer"]
-        direction TB
         N20["HP"]
-    end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
@@ -52,7 +49,7 @@ flowchart TB
     N6 --> N3
     N6 --> N5
 
-    style Domain fill:#ffffff,stroke:#7c3aed,stroke-width:2px
+    style N20 fill:#ffffff,stroke:#7c3aed,stroke-width:2px
     style Infrastructure fill:#ffffff,stroke:#dc2626,stroke-width:2px
 
     %% linkStyle: primary=16 edge(s) | secondary=2 edge(s)

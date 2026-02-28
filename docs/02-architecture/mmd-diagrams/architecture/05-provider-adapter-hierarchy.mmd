@@ -70,33 +70,22 @@ graph TB
     BHA --> UA
     PFM --> UA
 
-    subgraph CrossRef["CrossRef"]
         CRA["CrossRefAdapter<br/>━━━━━━━━━━━━━━━━━<br/>mailto: str<br/>batch_size: int<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()<br/>"]:::size-lg
-    end
 
     BHA --> CRA
 
-    subgraph OpenAlex["OpenAlex"]
         OAA["OpenAlexAdapter<br/>━━━━━━━━━━━━━━━━━<br/>mailto: str<br/>batch_size: int<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()<br/>"]:::size-lg
-    end
 
     BHA --> OAA
 
-    subgraph SemanticScholar["Semantic Scholar"]
         SSA["SemanticScholarAdapter<br/>━━━━━━━━━━━━━━━━━<br/>api_key: str<br/>batch_size: int<br/>fields: str<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_filtered_with_fallback()"]:::size-lg
-    end
 
     BHA --> SSA
 
-    subgraph PubChem["PubChem"]
         PCA["PubChemAdapter<br/>━━━━━━━━━━━━━━━━━<br/>(sync via ThreadPoolExecutor)<br/>━━━━━━━━━━━━━━━━━<br/>+ fetch()<br/>+ fetch_filtered()<br/>+ fetch_as_models()<br/><br/>"]:::size-lg
-    end
 
     BSA --> PCA
     FSM --> PCA
-
-    subgraph Decorators["Adapter Decorators"]
-    end
 
     DSP -.->|wraps| CBD
     DSP -.->|wraps| RDD

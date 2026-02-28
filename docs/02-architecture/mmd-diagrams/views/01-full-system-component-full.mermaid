@@ -107,10 +107,7 @@ flowchart TB
                 Assay["Assay"]
                 Target["Target"]
             end
-            subgraph Metadata["Metadata"]
-                direction LR
                 Publication["Publication"]
-            end
         end
         subgraph Config["Configuration"]
             direction TB
@@ -145,10 +142,7 @@ flowchart TB
             SilverWriter["[A] SilverWriter"]
             GoldWriter["[A] GoldWriter"]
         end
-        subgraph Locking["Locking"]
-            direction TB
             MemoryLock["[A] MemoryLock"]
-        end
     end
 
     subgraph DataLake["Data Lake (Local FS)"]

@@ -40,12 +40,7 @@ flowchart LR
         Gold[("Gold Storage<br/>━━━━━━━━━━━━━━━<br/>📁 Format: Delta/Parquet<br/>⏱️ Retention: Permanent<br/>✅ Validation: Pandera (strict<br/>)\n🔄 Strategy: SCD2/Append<br/>")]
     end
 
-    subgraph DQ_Branch["Data Quality Branch"]
         DQValidator["DQ Validator<br/>━━━━━━━━━━━━━━━<br/>⚠️ Soft: >5% errors<br/>❌ Hard: >20% errors<br/><br/><br/>"]
-    end
-
-    subgraph Lineage["Lineage Tracking"]
-    end
 
     %% Main flow
     ChEMBL --> BronzeWriter

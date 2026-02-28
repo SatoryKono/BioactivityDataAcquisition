@@ -34,9 +34,6 @@ flowchart TB
             uniprot_protein["📦 uniprot_protein<br/>local pipeline"]
         end
 
-        subgraph Locking["In-Process Locking"]
-        end
-
         subgraph Data["Local filesystem (data/)"]
             Bronze[("📁 bronze/<br/>JSONL+zstd")]
             Silver[("📁 silver/<br/>Delta Lake")]

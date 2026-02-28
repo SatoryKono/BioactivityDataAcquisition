@@ -12,9 +12,7 @@
 %% @uniform width=336 height=128 max_title_len=33 max_desc_lines=5
 %%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'ORTHOGONAL'}}}%%
 flowchart TB
-    subgraph Source["1. External API"]
         API["REST API Response<br/>(e.g., ChEMBL /activity)<br/><br/><br/>"]
-    end
 
     subgraph Bronze["2. Bronze Layer"]
         BW["BronzeWriter.write_bronze()<br/>• JSONL serialization<br/>• zstd compression<br/>• atomic rename<br/>• _manifest.json"]
@@ -51,9 +49,7 @@ flowchart TB
         GW["GoldWriter.write_gold()<br/><br/><br/><br/>"]
     end
 
-    subgraph QuarDB["Quarantine Storage"]
         QT[("Quarantine Table<br/>quarantine/chembl/activity/"<br/>)]
-    end
 
     %% Flow
     API --> BW --> BF
@@ -76,4 +72,4 @@ flowchart TB
     style Bronze fill:#ffffff,stroke:#f59e0b,stroke-width:2px
     style Silver fill:#ffffff,stroke:#475569,stroke-width:2px
     style GoldLayer fill:#ffffff,stroke:#ca8a04,stroke-width:2px
-    style QuarDB fill:#ffffff,stroke:#dc2626,stroke-width:2px
+    style QT fill:#ffffff,stroke:#dc2626,stroke-width:2px

@@ -10,9 +10,7 @@
 %% @uniform width=248 height=72 max_title_len=26 max_desc_lines=2
 %%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'POLYLINE'}}}%%
 graph LR
-    subgraph User["User"]
         TERM["Terminal<br/><br/>"]:::size-md
-    end
 
     subgraph CLI["CLI Interface (Click)"]
         MAIN["bioetl<br/>(main group)<br/>"]:::size-md
@@ -21,9 +19,7 @@ graph LR
             RUN_COMP["bioetl run-composite<br/>━━━━━━━━━━━━━━━━━<br/>--config<br/>--run-type<br/>--resume"]:::size-md
         end
 
-        subgraph HealthCmds["Health Commands"]
             HEALTH["bioetl health<br/>━━━━━━━━━━━━━━━━━<br/>--provider<br/>Check API health"]:::size-md
-        end
 
         subgraph DataCmds["Data Commands"]
             EXPORT["bioetl export<br/>━━━━━━━━━━━━━━━━━<br/>--table<br/>--format csv"]:::size-md
@@ -36,9 +32,7 @@ graph LR
             ARCHIVE["bioetl maintenance archive<br/>━━━━━━━━━━━━━━━━━<br/>Archive old data"]:::size-md
         end
 
-        subgraph ConfigCmds["Config Commands"]
             CONFIG["bioetl config<br/>━━━━━━━━━━━━━━━━━<br/>list / show"]:::size-md
-        end
     end
 
     subgraph Composition["Composition Layer"]

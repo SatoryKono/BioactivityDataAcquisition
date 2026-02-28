@@ -32,10 +32,7 @@ flowchart TB
         N16["BW"]
     end
 
-    subgraph Interfaces["Interfaces Layer"]
-        direction TB
         N12["CLI"]
-    end
 
     N12 --> N2
     N2 --> N4
@@ -59,7 +56,7 @@ flowchart TB
 
     style Domain fill:#ffffff,stroke:#7c3aed,stroke-width:2px
     style Infrastructure fill:#ffffff,stroke:#dc2626,stroke-width:2px
-    style Interfaces fill:#ffffff,stroke:#2563eb,stroke-width:2px
+    style N12 fill:#ffffff,stroke:#2563eb,stroke-width:2px
 
     linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
     linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5

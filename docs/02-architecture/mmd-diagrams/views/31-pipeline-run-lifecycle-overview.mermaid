@@ -4,10 +4,7 @@
 %%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'POLYLINE'}}}%%
 flowchart TB
 
-    subgraph Domain["Domain Layer"]
-        direction TB
         N12["VALIDATING"]
-    end
 
     subgraph Application["Application Layer"]
         direction TB
@@ -53,7 +50,7 @@ flowchart TB
     N2 --> N11
     N11 --> N14
 
-    style Domain fill:#ffffff,stroke:#7c3aed,stroke-width:2px
+    style N12 fill:#ffffff,stroke:#7c3aed,stroke-width:2px
     style Application fill:#ffffff,stroke:#16a34a,stroke-width:2px
     style Infrastructure fill:#ffffff,stroke:#dc2626,stroke-width:2px
 

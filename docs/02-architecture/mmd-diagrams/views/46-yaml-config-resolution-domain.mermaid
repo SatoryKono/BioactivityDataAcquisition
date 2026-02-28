@@ -32,10 +32,7 @@ flowchart TB
         N1["PIPELINE"]
     end
 
-    subgraph Composition["Composition Layer"]
-        direction TB
         N6["DQ_PROVIDER"]
-    end
 
     N19 --> N20
     N2 --> N3
@@ -44,7 +41,7 @@ flowchart TB
 
     style Domain fill:#ffffff,stroke:#7c3aed,stroke-width:2px
     style Application fill:#ffffff,stroke:#16a34a,stroke-width:2px
-    style Composition fill:#ffffff,stroke:#f59e0b,stroke-width:2px
+    style N6 fill:#ffffff,stroke:#f59e0b,stroke-width:2px
 
     linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
     linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5

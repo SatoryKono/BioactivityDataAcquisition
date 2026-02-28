@@ -11,9 +11,7 @@
 %%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'POLYLINE'}}}%%
 graph LR
 %% keep-orphan: DQW, NOV
-    subgraph Port["Domain Port"]
         SP["StoragePort<br/>(Protocol)<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-    end
 
     subgraph Writers["Storage Writers"]
         subgraph BronzeStorage["Bronze Storage"]
@@ -26,12 +24,8 @@ graph LR
             SWR["SilverWriter<br/>━━━━━━━━━━━━━━━━━<br/>csv_exporter: CsvExporter<br/>write_policy: WriteModePolicy<br/>silver_validator: SilverValidatorPort<br/>━━━━━━━━━━━━━━━━━<br/>+ write_silver()<br/>+ merge_silver()<br/>+ clear_silver()<br/>"]:::size-lg
         end
 
-        subgraph GoldStorage["Gold Storage"]
             GWR["GoldWriter<br/>━━━━━━━━━━━━━━━━━<br/>csv_exporter: CsvExporter<br/>audit: AuditPort<br/>metadata_writer: MetadataWriterPort<br/>━━━━━━━━━━━━━━━━━<br/>+ write_gold()<br/>+ clear_gold()<br/><br/>"]:::size-lg
-        end
 
-        subgraph Reader["Delta Reader"]
-        end
     end
 
     subgraph Support["Support Components"]
