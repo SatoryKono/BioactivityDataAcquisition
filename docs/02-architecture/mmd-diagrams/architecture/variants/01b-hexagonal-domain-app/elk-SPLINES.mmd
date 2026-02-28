@@ -1,3 +1,4 @@
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'SPLINES'}}}%%
 %% BioETL — Hexagonal Domain and Application
 %% Variant: ELK + SPLINES (curved edges)
 %% Covers domain contracts and core application services that depend on them.
@@ -11,7 +12,6 @@
 %% @nodes   13
 %% @variant engine=ELK, routing=SPLINES
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'SPLINES'}}}%%
 graph TB
 %% keep-orphan: CFG, EXCEPTIONS, OBSERVER, SCHEMAS, TYPES
     subgraph Application["Application Layer"]
