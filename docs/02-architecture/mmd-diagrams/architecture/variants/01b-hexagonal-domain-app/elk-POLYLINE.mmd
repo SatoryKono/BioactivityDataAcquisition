@@ -1,5 +1,5 @@
 %% BioETL — Hexagonal Domain and Application
-%% Variant: ELK LR + SPLINES
+%% Variant: ELK + POLYLINE (straight segments with bends)
 %% Covers domain contracts and core application services that depend on them.
 
 %% @version 1.0.0
@@ -9,10 +9,10 @@
 %% @view    domain-app
 %% @parent  01b-hexagonal-domain-app.mmd
 %% @nodes   13
-%% @variant layout=ELK, direction=LR, routing=SPLINES
+%% @variant engine=ELK, routing=POLYLINE
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'SPLINES'}}}%%
-graph LR
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'POLYLINE'}}}%%
+graph TB
 %% keep-orphan: CFG, EXCEPTIONS, OBSERVER, SCHEMAS, TYPES
     subgraph Application["Application Layer"]
         CORE["Core (Runner, BatchExecutor, Transformer, Writer)"]:::size-sm

@@ -1,5 +1,5 @@
 %% BioETL — Hexagonal Domain and Application
-%% Variant: Dagre TB (default renderer, top-to-bottom)
+%% Variant: ELK + ORTHOGONAL (Manhattan 90° angles) — matches production
 %% Covers domain contracts and core application services that depend on them.
 
 %% @version 1.0.0
@@ -9,8 +9,9 @@
 %% @view    domain-app
 %% @parent  01b-hexagonal-domain-app.mmd
 %% @nodes   13
-%% @variant layout=Dagre, direction=TB, routing=default
+%% @variant engine=ELK, routing=ORTHOGONAL
 
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
 graph TB
 %% keep-orphan: CFG, EXCEPTIONS, OBSERVER, SCHEMAS, TYPES
     subgraph Application["Application Layer"]

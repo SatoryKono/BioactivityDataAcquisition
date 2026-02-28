@@ -1,5 +1,5 @@
 %% BioETL — Hexagonal Domain and Application
-%% Variant: ELK TB + SPLINES
+%% Variant: Dagre (default Mermaid renderer, no configurable routing)
 %% Covers domain contracts and core application services that depend on them.
 
 %% @version 1.0.0
@@ -9,9 +9,8 @@
 %% @view    domain-app
 %% @parent  01b-hexagonal-domain-app.mmd
 %% @nodes   13
-%% @variant layout=ELK, direction=TB, routing=SPLINES
+%% @variant engine=Dagre, routing=default
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'SPLINES'}}}%%
 graph TB
 %% keep-orphan: CFG, EXCEPTIONS, OBSERVER, SCHEMAS, TYPES
     subgraph Application["Application Layer"]
