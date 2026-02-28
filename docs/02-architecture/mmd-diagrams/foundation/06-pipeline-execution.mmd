@@ -54,8 +54,8 @@ sequenceDiagram
         Executor->>DataSource: fetch(batch)
         DataSource-->>Executor: records[]
 
-        Executor->>Transformer: transform(records)
-        Transformer-->>Executor: silver_records[]
+        Executor->Transformer: transform(records)
+        Transformer-->Executor: silver_records[]
 
         Executor->>Storage: write_bronze(records)
         Executor->>Storage: write_silver(silver_records)
