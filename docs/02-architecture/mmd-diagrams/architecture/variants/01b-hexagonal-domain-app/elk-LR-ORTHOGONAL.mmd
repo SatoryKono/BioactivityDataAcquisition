@@ -1,0 +1,48 @@
+%% BioETL — Hexagonal Domain and Application
+%% Variant: ELK LR + ORTHOGONAL
+%% Covers domain contracts and core application services that depend on them.
+
+%% @version 1.0.0
+%% @date    2026-02-28
+%% @type    flowchart
+%% @level   System / Component
+%% @view    domain-app
+%% @parent  01b-hexagonal-domain-app.mmd
+%% @nodes   13
+%% @variant layout=ELK, direction=LR, routing=ORTHOGONAL
+
+%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
+graph LR
+%% keep-orphan: CFG, EXCEPTIONS, OBSERVER, SCHEMAS, TYPES
+    subgraph Application["Application Layer"]
+        CORE["Core (Runner, BatchExecutor, Transformer, Writer)"]:::size-sm
+        SERVICES["Services (DQ, Export, Health, Medallion Lifecycle)"]:::size-sm
+        COMPOSITE["Composite Pipeline (Coordinator, Merger, FSM)"]:::size-sm
+        PIPELINES["Pipeline Transformers (per provider)"]:::size-sm
+        OBSERVER["PipelineObserver"]:::size-sm
+    end
+
+    subgraph Domain["Domain Layer"]
+        PORTS["Port Protocols"]:::size-sm
+        ENTITIES["Entities and Aggregates"]:::size-sm
+        VO["Value Objects"]:::size-sm
+        CFG["Configuration"]:::size-sm
+        DOM_SVC["Domain Services"]:::size-sm
+        TYPES["Types and Enums"]:::size-sm
+        EXCEPTIONS["Exception Hierarchy"]:::size-sm
+        SCHEMAS["Schemas"]:::size-sm
+    end
+
+    CORE --> PORTS
+    CORE --> ENTITIES
+    CORE --> VO
+    SERVICES --> PORTS
+    COMPOSITE --> PORTS
+    PIPELINES --> ENTITIES
+    PIPELINES --> DOM_SVC
+
+    classDef domain fill:#f5f3ff,stroke:#7c3aed
+    classDef app fill:#f0fdf4,stroke:#16a34a
+
+    class PORTS,ENTITIES,VO,CFG,DOM_SVC,TYPES,EXCEPTIONS,SCHEMAS domain
+    class CORE,SERVICES,COMPOSITE,PIPELINES,OBSERVER app
