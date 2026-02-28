@@ -74,7 +74,7 @@
   },
   "flowchart": {
     "curve": "step",
-    "padding": 24,
+    "padding": 32,
     "nodeSpacing": 50,
     "rankSpacing": 45,
     "htmlLabels": true,

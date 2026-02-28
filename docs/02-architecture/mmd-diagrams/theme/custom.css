@@ -35,6 +35,15 @@ svg {
     filter: none;
 }
 
+.cluster-label {
+    padding: 8px 0;
+}
+
+.cluster-label .nodeLabel {
+    padding: 6px 12px;
+    line-height: 1.4;
+}
+
 .cluster text {
     font-weight: 600;
     font-size: 15px;
