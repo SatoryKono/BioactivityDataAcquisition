@@ -77,22 +77,11 @@
 Для flowchart по умолчанию используется ELK с профилем:
 
 ```mermaid
-%%{init: {
-%%  'layout': 'elk',
-%%  'theme': 'base',
-%%  'themeVariables': { 'fontFamily': 'Inter, Roboto, sans-serif' },
-%%  'elk': {
-%%    'mergeEdges': true,
-%%    'nodePlacementStrategy': 'BRANDES_KOEPF',
-%%    'cycleBreakingStrategy': 'GREEDY',
-%%    'direction': 'RIGHT',
-%%    'spacing.nodeNode': 40,
-%%    'spacing.edgeNode': 30,
-%%    'spacing.edgeEdge': 20,
-%%    'edgeRouting': 'ORTHOGONAL'
-%%  }
-%%}}%%
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'direction': 'RIGHT', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'ORTHOGONAL'}}}%%
 ```
+
+> **Примечание:** Директива `%%{init: ...}%%` MUST быть на одной строке в `.mmd` файлах.
+> Многострочная запись с `%%` на каждой строке будет интерпретирована как комментарии.
 
 Примечание: для очень плотных схем допускается локальное переопределение `edgeRouting`.
 
