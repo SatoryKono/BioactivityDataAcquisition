@@ -17,7 +17,9 @@
 %% @uniform-stats base         width=256 height=288 max_desc_lines=14
 %% @uniform-stats adapter      width=360 height=128 max_desc_lines=5
 %% @uniform-stats util         width=232 height=200 max_desc_lines=9
+%% @nodes   18
 %% @uniform-stats decorator    width=336 height=72 max_desc_lines=2
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'POLYLINE'}}}%%
 classDiagram
     direction TB
     class HealthCheckMixin {

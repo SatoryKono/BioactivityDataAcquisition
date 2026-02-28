@@ -13,7 +13,9 @@
 %% @uniform class width=392 groups=3 width_strategy=group
 %% @uniform-stats base         width=392 height=456 max_desc_lines=23
 %% @uniform-stats intermediate width=280 height=112 max_desc_lines=4
+%% @nodes   20
 %% @uniform-stats concrete     width=376 height=72 max_desc_lines=2
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'POLYLINE'}}}%%
 classDiagram
     direction TB
     class BaseTransformer {

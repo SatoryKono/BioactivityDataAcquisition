@@ -17,7 +17,9 @@
 %% @uniform-stats batch        width=592 height=256 max_desc_lines=12
 %% @uniform-stats infra        width=376 height=168 max_desc_lines=7
 %% @uniform-stats manager      width=256 height=200 max_desc_lines=9
+%% @nodes   16
 %% @uniform-stats support      width=552 height=112 max_desc_lines=4
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'POLYLINE'}}}%%
 classDiagram
     direction TB
     class PipelineRunner {
