@@ -146,27 +146,35 @@ A ~~~ B  %% forces A and B to same rank
 **Правило:** Использовать ONLY когда layout engine не справляется. Документировать
 причину комментарием `%% alignment hint: ...`.
 
-### LBP-003: Edge Routing Policy
+### LBP-003: Layout Engine & Edge Routing Policy
 
-Выбор маршрутизации рёбер зависит от количества нод:
+Выбор layout engine и маршрутизации рёбер зависит от количества нод:
 
-| Nodes | Edge Routing | Требование |
-|:-----:|:------------|:----------:|
-| ≤10 | Default (auto) | — |
-| 11-30 | `POLYLINE` | SHOULD |
-| >30 | `ORTHOGONAL` | MUST |
+| Nodes | Layout Engine | Edge Routing | Требование |
+|:-----:|:-------------|:------------|:----------:|
+| ≤10 | Dagre (default) | Default (auto) | — |
+| 11-30 | ELK | `POLYLINE` | SHOULD |
+| >30 | ELK | `ORTHOGONAL` | MUST |
+
+> **Примечание:** `edgeRouting` работает только с `layout: 'elk'`.
+> `sequenceDiagram` не поддерживает ELK — для них всегда используется Dagre.
 
 ```mermaid
-%% Для 11-30 нод:
-%%{init: {'layout': 'elk', 'elk': {'edgeRouting': 'POLYLINE'}}}%%
+%% Для ≤10 нод (Dagre, без ELK):
+%%{init: {'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif', 'lineWidth': '2'}}}%%
 
-%% Для >30 нод:
-%%{init: {'layout': 'elk', 'elk': {'edgeRouting': 'ORTHOGONAL'}}}%%
+%% Для 11-30 нод (ELK + POLYLINE):
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'POLYLINE'}}}%%
+
+%% Для >30 нод (ELK + ORTHOGONAL):
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'ORTHOGONAL'}}}%%
 ```
 
-**Правило:** `@nodes > 30` → MUST использовать ORTHOGONAL routing (манхэттенские углы 90°).
-`@nodes 11-30` → SHOULD использовать POLYLINE (прямые сегменты с изломами).
-`@nodes ≤ 10` → Default auto routing достаточен.
+**Правила:**
+- `@nodes > 30` → MUST использовать ELK + ORTHOGONAL routing (манхэттенские углы 90°).
+- `@nodes 11-30` → SHOULD использовать ELK + POLYLINE (прямые сегменты с изломами).
+- `@nodes ≤ 10` → Dagre (default), auto routing достаточен.
+- `sequenceDiagram` → всегда Dagre (ELK не поддерживается Mermaid).
 
 ### LBP-004: Порты входа/выхода (Edge Ports)
 

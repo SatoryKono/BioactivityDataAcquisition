@@ -199,18 +199,34 @@ python scripts/prune_orphan_nodes.py --grandfather # exemption для всех �
 
 | Условие | Инструмент | Layout |
 |---------|------------|--------|
-| ≤20 узлов | Mermaid (Dagre) | TB или LR |
-| 21–40 узлов | Mermaid + ELK init | TB или LR |
-| >40 узлов | Mermaid + ELK init (preferred) или D2 (ELK engine) | TB или LR |
+| ≤10 узлов | Mermaid (Dagre) | TB или LR |
+| 11–30 узлов | Mermaid + ELK init | TB или LR |
+| >30 узлов | Mermaid + ELK init | TB или LR |
+
+> **Примечание:** `sequenceDiagram` не поддерживает ELK — для них всегда используется Dagre.
 
 ### D8: Adaptive Layout Rules
 
-ELK (Eclipse Layout Kernel) SHOULD использоваться для `flowchart`/`graph` диаграмм с `@nodes > 20`.
+ELK (Eclipse Layout Kernel) SHOULD использоваться для диаграмм с `@nodes > 10`
+(кроме `sequenceDiagram`, где ELK не поддерживается Mermaid).
 
-**Синтаксис (вставлять перед объявлением `graph`/`flowchart`):**
+| Nodes | Layout Engine | Edge Routing | Требование |
+|:-----:|:-------------|:------------|:----------:|
+| ≤10 | Dagre (default) | Default (auto) | — |
+| 11-30 | ELK | `POLYLINE` | SHOULD |
+| >30 | ELK | `ORTHOGONAL` | MUST |
+
+**Синтаксис (вставлять перед объявлением типа диаграммы):**
 
 ```
-%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'direction': 'RIGHT', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'ORTHOGONAL'}}}%%
+%% Для ≤10 нод (Dagre):
+%%{init: {'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif', 'lineWidth': '2'}}}%%
+
+%% Для 11-30 нод (ELK + POLYLINE):
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'POLYLINE'}}}%%
+
+%% Для >30 нод (ELK + ORTHOGONAL):
+%%{init: {'layout': 'elk', 'theme': 'base', 'themeVariables': {'fontFamily': 'Inter, Roboto, sans-serif'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'spacing.nodeNode': 40, 'spacing.edgeNode': 30, 'spacing.edgeEdge': 20, 'edgeRouting': 'ORTHOGONAL'}}}%%
 ```
 
 **Direction selection:**
@@ -224,8 +240,8 @@ ELK (Eclipse Layout Kernel) SHOULD использоваться для `flowchar
 
 | Rule | Условие | Severity |
 |------|---------|----------|
-| LAYOUT-001 | `flowchart/graph` с `@nodes > 20` без ELK init | WARNING |
-| LAYOUT-002 | `flowchart/graph` с `@nodes > 40` без ELK init | ERROR |
+| LAYOUT-001 | Диаграмма (кроме sequence) с `@nodes > 10` без ELK init | WARNING |
+| LAYOUT-002 | Диаграмма (кроме sequence) с `@nodes > 30` без ELK init | ERROR |
 
 **Инструмент:** `src/tools/apply_elk_layout.py --dry-run` для аудита, без `--dry-run` для применения.
 
