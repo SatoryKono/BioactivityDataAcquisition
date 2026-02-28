@@ -15,7 +15,7 @@
 
     function readVersionFile() {
         // Try to fetch MERMAID_VERSION under assets; fall back to embedded default.
-        var defaultVersion = '10.4.0';
+        var defaultVersion = '10.6.1';
         try {
             return fetch('/assets/javascripts/MERMAID_VERSION', {cache: 'no-store'})
                 .then(function (r) {

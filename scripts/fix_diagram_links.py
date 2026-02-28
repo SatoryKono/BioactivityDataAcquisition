@@ -25,7 +25,11 @@ def fix_links() -> int:
         original_content = content
 
         # 1. Remove 'mermaid/' from diagram paths (in links only)
-        content = content.replace("diagrams/mermaid/", "diagrams/")
+        content = re.sub(
+            r"(\[[^\]]*\]\([^)]*)diagrams/mermaid/",
+            r"\1diagrams/",
+            content,
+        )
 
         # 2. Fix .mmd extension to .mermaid ONLY inside markdown links
         content = _LINK_MMD_RE.sub(r"\1.mermaid\2", content)

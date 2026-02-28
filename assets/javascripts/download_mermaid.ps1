@@ -1,7 +1,7 @@
 # Download mermaid bundle and css into assets (PowerShell)
-# Usage: .\download_mermaid.ps1 -Version 10.4.0 -Proxy 'http://proxy:8080'
+# Usage: .\download_mermaid.ps1 -Version 10.6.1 -Proxy 'http://proxy:8080'
 param(
-    [string]$Version = '10.4.0',
+    [string]$Version = '10.6.1',
     [string]$Proxy = ''
 )
 

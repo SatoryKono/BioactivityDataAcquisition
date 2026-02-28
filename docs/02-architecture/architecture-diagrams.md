@@ -407,7 +407,7 @@ Delta merge by content-hash — критическая операция для i
 - StructlogLogger → LoggerPort
 - NoOpTracing/NoOpMetrics → Null Object Pattern
 
-**Файл:** [`docs/02-architecture/mmd-diagrams/foundation/30-port-adapter-mapping.mermaid`](mmd-diagrams/foundation/26-hexagonal-ports-adapters.mmd)
+**Файл:** [`docs/02-architecture/mmd-diagrams/foundation/30-port-adapter-mapping.mmd`](mmd-diagrams/foundation/30-port-adapter-mapping.mmd)
 
 ----------------------------------------------------------------------
 

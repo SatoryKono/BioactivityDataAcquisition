@@ -26,7 +26,7 @@
 /mermaid-design lint
 /mermaid-design fix docs/02-architecture/mmd-diagrams/overview.mmd
 /mermaid-design render docs/02-architecture/mmd-diagrams/
-/mermaid-design review docs/02-architecture/diagrams/mermaid/class-diagrams/ports.mermaid
+/mermaid-design review docs/02-architecture/mmd-diagrams/class-diagrams/01-domain-ports.mmd
 ```
 
 ---
@@ -268,10 +268,10 @@ flowchart TB
 Фиксированная ширина для нод одного типа через `classDef` в шаблоне:
 
 ```mermaid
-classDef port fill:#E3F2FD,stroke:#1565C0,stroke-width:2px,min-width:160px
-classDef adapter fill:#FFF3E0,stroke:#E65100,stroke-width:2px,min-width:160px
-classDef service fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px,min-width:160px
-classDef storage fill:#F3E5F5,stroke:#6A1B9A,stroke-width:2px,min-width:160px
+classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px,min-width:160px
+classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px,min-width:160px
+classDef service fill:#f0fdf4,stroke:#16a34a,stroke-width:2px,min-width:160px
+classDef storage fill:#f8fafc,stroke:#475569,stroke-width:2px,min-width:160px
 ```
 
 **Правило:** MUST определять `classDef` для каждого типа ноды. Ноды одного типа
