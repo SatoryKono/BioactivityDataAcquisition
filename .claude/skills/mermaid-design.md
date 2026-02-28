@@ -64,7 +64,7 @@
 ```mermaid
 %% @version 1.0.0
 %% @date YYYY-MM-DD
-%% @type flowchart|sequence|class|state|er
+%% @type flowchart|classDiagram|sequenceDiagram|stateDiagram|erDiagram|mindmap
 %% @level System / Component | Class / Interface | Sequence | State
 %% @nodes N
 %% @adr ADR-NNN (если применимо)
@@ -198,12 +198,16 @@ end
 | Orchestration/Control | `2px` | `#16a34a` | Управляющие сигналы, DI wiring |
 | DI/Implements | `1.5px` dashed | `#7c3aed` | Dependency injection, interface impl |
 | Observability/Metrics | `1px` | `#94A3B8` | Логирование, метрики, tracing |
+| Error / Quarantine | `2px` dashed | `#dc2626` | Ошибки, quarantine paths |
+| Generic (default) | `2px` dashed | `#475569` | Fallback для остальных связей |
 
 ```mermaid
 linkStyle 0 stroke:#1E293B,stroke-width:2px
 linkStyle 1 stroke:#16a34a,stroke-width:2px
 linkStyle 2 stroke:#7c3aed,stroke-width:1.5px,stroke-dasharray:5
 linkStyle 3 stroke:#94A3B8,stroke-width:1px
+linkStyle 4 stroke:#dc2626,stroke-width:2px,stroke-dasharray:4
+linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
 ```
 
 **Правило:** MUST применять для диаграмм с >10 связями разных типов.
