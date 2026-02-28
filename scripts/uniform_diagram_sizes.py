@@ -93,7 +93,7 @@ _FLOWCHART_NODE_RE = re.compile(
     r'(\w+)'                        # node ID
     r'(\["|\(\["|\[\("|\(\("|\{\{")'  # opening brackets
     r'(.+?)'                        # label content (non-greedy)
-    r'("\]|"\)\]|"\)\]|"\)\)|"\}\})'  # closing brackets
+    r'("\]|"\]\)|"\)\]|"\)\)|"\}\})'  # closing brackets
     r'\s*$'                         # trailing whitespace
 )
 

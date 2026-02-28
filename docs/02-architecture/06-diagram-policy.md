@@ -89,7 +89,7 @@
 %%    'spacing.nodeNode': 40,
 %%    'spacing.edgeNode': 30,
 %%    'spacing.edgeEdge': 20,
-%%    'edgeRouting': 'POLYLINE'
+%%    'edgeRouting': 'ORTHOGONAL'
 %%  }
 %%}}%%
 ```

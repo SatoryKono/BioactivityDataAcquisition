@@ -121,8 +121,8 @@ def _build_fallback_text(fo: ET.Element) -> ET.Element | None:
     return text_elem
 
 
-def add_fallbacks(path: Path) -> int:
-    tree = ET.parse(path)
+def _process_tree(tree: ET.ElementTree) -> int:
+    """Modify tree in-memory: add fallbacks and remove empty edge labels. Returns change count."""
     root = tree.getroot()
 
     inserted = 0
@@ -151,10 +151,16 @@ def add_fallbacks(path: Path) -> int:
             parent.insert(idx, fallback)
             inserted += 1
 
-    if inserted > 0 or removed_empty_edge_labels > 0:
-        tree.write(path, encoding="utf-8", xml_declaration=False)
-
     return inserted + removed_empty_edge_labels
+
+
+def add_fallbacks(path: Path, *, write: bool = True) -> int:
+    """Add fallback text to an SVG file. Only writes to disk when write=True."""
+    tree = ET.parse(path)
+    changes = _process_tree(tree)
+    if changes > 0 and write:
+        tree.write(path, encoding="utf-8", xml_declaration=False)
+    return changes
 
 
 def collect_svg_files(files: list[Path] | None, dirs: list[Path] | None) -> list[Path]:
@@ -193,17 +199,17 @@ def main() -> int:
 
     changed = 0
     for path in files:
-        original = path.read_text(encoding="utf-8")
-        inserted = add_fallbacks(path)
+        if mode == "fix":
+            inserted = add_fallbacks(path, write=True)
+        else:
+            inserted = add_fallbacks(path, write=False)
         if inserted == 0:
             continue
         changed += 1
         if mode == "check":
             print(f"! {path} (needs fallback text, +{inserted})")
-            path.write_text(original, encoding="utf-8")
         elif mode == "dry-run":
             print(f"~ {path} (would add fallback text +{inserted})")
-            path.write_text(original, encoding="utf-8")
         else:
             print(f"+ {path} (added fallback text +{inserted})")
 

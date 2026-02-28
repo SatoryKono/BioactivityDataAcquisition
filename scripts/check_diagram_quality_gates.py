@@ -130,7 +130,11 @@ def is_flowchart(lines: list[str]) -> bool:
 def has_edge_syntax(line: str) -> bool:
     if "linkStyle" in line or line.strip().startswith("classDef"):
         return False
-    return "-->" in line or "-.->" in line or "==>" in line or "---" in line or "--x" in line
+    return (
+        "-->" in line or "-.->" in line or "==>" in line
+        or "---" in line or "--x" in line or "x--" in line
+        or "<--" in line or "<==>" in line
+    )
 
 
 def normalize_label(raw: str) -> str:
@@ -151,7 +155,9 @@ def check_line_style_guide(path: Path, lines: list[str]) -> list[Violation]:
         if not has_edge_syntax(stripped):
             continue
 
-        if any(token in stripped for token in FORBIDDEN_EDGE_TOKENS):
+        # Strip quoted labels to avoid false positives on "--" inside node text
+        no_quotes = QUOTED_RE.sub("", stripped)
+        if any(token in no_quotes for token in FORBIDDEN_EDGE_TOKENS):
             violations.append(
                 Violation(
                     file=str(path),
@@ -165,7 +171,7 @@ def check_line_style_guide(path: Path, lines: list[str]) -> list[Violation]:
             )
             continue
 
-        if "--" in stripped and not any(marker in stripped for marker in ALLOWED_EDGE_MARKERS):
+        if "--" in no_quotes and not any(marker in no_quotes for marker in ALLOWED_EDGE_MARKERS):
             violations.append(
                 Violation(
                     file=str(path),

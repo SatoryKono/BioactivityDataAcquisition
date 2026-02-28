@@ -464,7 +464,7 @@ bump-version: ## Bump version (TYPE=major|minor|patch)
 # Vendoring mermaid assets
 vendor-mermaid: ## Download mermaid assets into assets/ (PowerShell on Windows)
 	@echo "Running mermaid vendoring script..."
-	@powershell.exe -NoProfile -ExecutionPolicy Bypass -File assets\javascripts\download_mermaid.ps1 -Version "10.4.0" || (echo "PowerShell vendoring failed; try running the script manually on a machine with network access" && exit 1)
+	@powershell.exe -NoProfile -ExecutionPolicy Bypass -File assets\javascripts\download_mermaid.ps1 -Version "10.6.1" || (echo "PowerShell vendoring failed; try running the script manually on a machine with network access" && exit 1)
 
 check-mermaid: ## Check that vendored mermaid files exist (fails if missing)
 	@echo "Checking vendored mermaid files..."

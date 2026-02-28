@@ -37,7 +37,8 @@
 
 ### Шаг 0: Загрузить спецификацию
 
-Прочитай `.codex/skills/technical-designer-mermaid/SKILL.md` — полная спецификация
+Прочитай `docs/02-architecture/decisions/ADR-040-diagram-governance.md` и
+`docs/02-architecture/06-diagram-policy.md` — авторитетные документы
 с ADR-040 compliance, палитрой, метаданными и правилами плотности.
 
 ### Режим автоопределения
@@ -56,8 +57,8 @@
 
 **Шаг 2:** Выбрать размещение файла (BioETL mode):
 - Canonical: `docs/02-architecture/mmd-diagrams/{name}.mmd`
-- Decomposed views: `docs/02-architecture/diagrams/mermaid/{category}/{name}.mermaid`
-- Categories: `architecture/`, `class-diagrams/`, `foundation/`
+- Decomposed views: `docs/02-architecture/mmd-diagrams/views/{name}.mermaid`
+- Categories: `architecture/`, `class-diagrams/`, `foundation/`, `views/`
 
 **Шаг 3:** Создать диаграмму с обязательными метаданными:
 ```mermaid
@@ -74,7 +75,7 @@
 - 16-20: soft limit
 - 21-35: рекомендуется декомпозиция
 - >35: обязательная декомпозиция
-- >20 nodes: добавить `%%{init: {"flowchart": {"defaultRenderer": "elk"}}}%%`
+- >20 nodes: добавить `%%{init: {'layout': 'elk', 'elk': {'edgeRouting': 'ORTHOGONAL'}}}%%`
 
 **Шаг 5:** Использовать только каноническую палитру ADR-040 (без ad-hoc hex).
 
@@ -193,15 +194,15 @@ end
 
 | Тип связи | Толщина | Цвет | Назначение |
 |-----------|:-------:|:----:|-----------|
-| Medallion Data Flow | `3px` | `#1E293B` | Основной поток данных (Bronze→Silver→Gold) |
-| Orchestration/Control | `2px` | `#2e7d32` | Управляющие сигналы, DI wiring |
-| DI/Implements | `1.5px` dashed | `#6a1b9a` | Dependency injection, interface impl |
+| Medallion Data Flow | `2px` | `#1E293B` | Основной поток данных (Bronze→Silver→Gold) |
+| Orchestration/Control | `2px` | `#16a34a` | Управляющие сигналы, DI wiring |
+| DI/Implements | `1.5px` dashed | `#7c3aed` | Dependency injection, interface impl |
 | Observability/Metrics | `1px` | `#94A3B8` | Логирование, метрики, tracing |
 
 ```mermaid
-linkStyle 0 stroke:#1E293B,stroke-width:3px
-linkStyle 1 stroke:#2e7d32,stroke-width:2px
-linkStyle 2 stroke:#6a1b9a,stroke-width:1.5px,stroke-dasharray:5
+linkStyle 0 stroke:#1E293B,stroke-width:2px
+linkStyle 1 stroke:#16a34a,stroke-width:2px
+linkStyle 2 stroke:#7c3aed,stroke-width:1.5px,stroke-dasharray:5
 linkStyle 3 stroke:#94A3B8,stroke-width:1px
 ```
 
