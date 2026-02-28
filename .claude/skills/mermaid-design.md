@@ -65,7 +65,7 @@
 %% @version 1.0.0
 %% @date YYYY-MM-DD
 %% @type flowchart|sequence|class|state|er
-%% @level high|implementation|debug
+%% @level System / Component | Class / Interface | Sequence | State
 %% @nodes N
 %% @adr ADR-NNN (если применимо)
 ```
