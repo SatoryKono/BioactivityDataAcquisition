@@ -25,19 +25,7 @@ classDiagram
         +clear_gold(table, dry_run) int
         +vacuum(table, retention_days) None
         +archive(source, dest) None
-        +health_check() HealthStatus
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+        +health_check() HealthStatus  
     }
 
     class SilverWriter {
@@ -75,23 +63,6 @@ classDiagram
         +files_added: list~str~
         +duration_ms: float
         +error_message: str | None
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
     }
 
     class MergeResult {
@@ -102,50 +73,13 @@ classDiagram
         +rows_updated: int
         +rows_deleted: int
         +source_rows_total: int
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
     }
 
     class SilverWriteMode {
         <<enumeration>>
         MERGE = "merge"
         APPEND = "append"
-        DELETE = "delete"
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+        DELETE = "delete"   
     }
 
     class WriteModePolicy {
