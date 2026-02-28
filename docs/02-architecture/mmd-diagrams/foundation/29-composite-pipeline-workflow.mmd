@@ -124,16 +124,16 @@ flowchart TB
     ES1 ~~~ ES2 ~~~ ES3 ~~~ ES4
 
     %% Styling
-    style Seed fill:#ffffff,stroke:#f59e0b
-    style Enrich fill:#ffffff,stroke:#475569
-    style Gold fill:#ffffff,stroke:#ca8a04
-    style Merge fill:#ffffff,stroke:#2563eb
+    style Seed fill:#ffffff,stroke:#f59e0b,stroke-width:2px
+    style Enrich fill:#ffffff,stroke:#475569,stroke-width:2px
+    style Gold fill:#ffffff,stroke:#ca8a04,stroke-width:2px
+    style Merge fill:#ffffff,stroke:#2563eb,stroke-width:2px
 
     %% Layer palette (semantic)
-    classDef layer_domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:1.8px;
-    classDef layer_application fill:#f0fdf4,stroke:#16a34a,stroke-width:1.8px;
-    classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
-    classDef layer_composition fill:#fff7ed,stroke:#f59e0b,stroke-width:1.8px;
+    classDef layer_domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px;
+    classDef layer_application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px;
+    classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px;
+    classDef layer_composition fill:#fff7ed,stroke:#f59e0b,stroke-width:2px;
 
     class CFG,PFV,BOOT,SP,DC,DEP1,DEP2,KE,KEYS,EC,E1,E2,E3,E4,DD,MS,CO,CR,XV,CCM layer_application;
     class SB,DS1,DS2,ES1,ES2,ES3,ES4,GW,GT layer_infrastructure;

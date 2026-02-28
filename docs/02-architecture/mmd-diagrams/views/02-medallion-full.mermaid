@@ -54,18 +54,18 @@ flowchart LR
     Quarantine -.->|"Replay"| Bronze
 
     %% Styling — Medallion colors per policy §4.3
-    classDef bronze fill:#fff7ed,stroke:#f59e0b
-    classDef silver fill:#f8fafc,stroke:#475569
-    classDef gold fill:#fefce8,stroke:#ca8a04
-    classDef quarantine fill:#ffe4e6,stroke:#e11d48
+    classDef bronze fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    classDef silver fill:#f8fafc,stroke:#475569,stroke-width:2px
+    classDef gold fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+    classDef quarantine fill:#ffe4e6,stroke:#e11d48,stroke-width:2px
 
     class B1,B2,B3,B4 bronze
     class S1,S2,S3,S4 silver
     class G1,G2,G3,G4 gold
     class Q1,Q2,Q3 quarantine
 
-    linkStyle 0 stroke:#1E293B,stroke-width:4px
-    linkStyle 1 stroke:#1E293B,stroke-width:4px
+    linkStyle 0 stroke:#1E293B,stroke-width:2px
+    linkStyle 1 stroke:#1E293B,stroke-width:2px
     linkStyle 2 stroke:#dc2626,stroke-width:2px,stroke-dasharray:4
     linkStyle 3 stroke:#dc2626,stroke-width:2px,stroke-dasharray:4
     linkStyle 4 stroke:#dc2626,stroke-width:2px,stroke-dasharray:4

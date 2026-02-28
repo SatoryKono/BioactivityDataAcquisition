@@ -59,11 +59,11 @@ graph TB
     %% Writer uses lock validation
     BW -.->|"Safety Guard"| CM
 
-    classDef executor fill:#eff6ff,stroke:#2563eb,stroke-width:3px
+    classDef executor fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     classDef helper fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
-    classDef data fill:#f0fdf4,stroke:#16a34a
-    classDef result fill:#f5f3ff,stroke:#7c3aed
-    classDef error fill:#fff1f2,stroke:#dc2626
+    classDef data fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    classDef result fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef error fill:#fff1f2,stroke:#dc2626,stroke-width:2px
 
     class BE executor
     class BMM,BMR,BTM,BT,BW,QM,CM helper
@@ -73,7 +73,7 @@ graph TB
     class ECL error
 
     %% Link styles (LBP-005)
-    linkStyle 0,1,2,3,11 stroke:#1E293B,stroke-width:3px
+    linkStyle 0,1,2,3,11 stroke:#1E293B,stroke-width:2px
     linkStyle 4,7,8,9,10,12 stroke:#16a34a,stroke-width:2px
     linkStyle 5 stroke:#94A3B8,stroke-width:1px
     linkStyle 6 stroke:#94A3B8,stroke-width:1px

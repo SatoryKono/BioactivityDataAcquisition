@@ -104,16 +104,16 @@ flowchart TB
     ACT_RETRY ~~~ ACT_QUARANTINE ~~~ FAIL_FAST ~~~ BATCH_FAIL
 
     %% Styling
-    style Actions fill:#ffffff,stroke:#f59e0b
-    style FAIL_FAST fill:#ffe4e6,stroke:#e11d48
-    style ACT_QUARANTINE fill:#ffe4e6,stroke:#e11d48
-    style ACT_RETRY fill:#f0fdf4,stroke:#16a34a
+    style Actions fill:#ffffff,stroke:#f59e0b,stroke-width:2px
+    style FAIL_FAST fill:#ffe4e6,stroke:#e11d48,stroke-width:2px
+    style ACT_QUARANTINE fill:#ffe4e6,stroke:#e11d48,stroke-width:2px
+    style ACT_RETRY fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
 
     %% Layer palette (semantic)
-    classDef layer_domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:1.8px;
-    classDef layer_application fill:#f0fdf4,stroke:#16a34a,stroke-width:1.8px;
-    classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
-    classDef layer_external fill:#eff6ff,stroke:#2563eb,stroke-width:1.8px;
+    classDef layer_domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px;
+    classDef layer_application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px;
+    classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px;
+    classDef layer_external fill:#eff6ff,stroke:#2563eb,stroke-width:2px;
 
     class DOMAIN,SCHEMA,MISSING,FORMAT,DQTHRESH layer_domain;
     class INFRA,LOCK,LOCKACQ,STORE,CB layer_infrastructure;

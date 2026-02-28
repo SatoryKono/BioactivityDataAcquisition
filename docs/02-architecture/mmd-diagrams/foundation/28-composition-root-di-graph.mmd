@@ -111,22 +111,22 @@ flowchart TB
     UHC ~~~ ADP ~~~ BW ~~~ SLL ~~~ PS ~~~ RUN
 
     %% Styling
-    style Entry fill:#ffffff,stroke:#7c3aed
-    style Factories fill:#ffffff,stroke:#dc2626
-    style Registry fill:#ffffff,stroke:#f59e0b
-    style Created fill:#ffffff,stroke:#16a34a
+    style Entry fill:#ffffff,stroke:#7c3aed,stroke-width:2px
+    style Factories fill:#ffffff,stroke:#dc2626,stroke-width:2px
+    style Registry fill:#ffffff,stroke:#f59e0b,stroke-width:2px
+    style Created fill:#ffffff,stroke:#16a34a,stroke-width:2px
 
-    style LoggerFactories fill:#ffffff,stroke:#ca8a04,stroke-dasharray: 5 5
-    style ClientFactories fill:#ffffff,stroke:#2563eb,stroke-dasharray: 5 5
-    style StorageFactories fill:#ffffff,stroke:#7c3aed,stroke-dasharray: 5 5
-    style PipelineFactories fill:#ffffff,stroke:#16a34a,stroke-dasharray: 5 5
+    style LoggerFactories fill:#ffffff,stroke:#ca8a04,stroke-width:2px,stroke-dasharray: 5 5
+    style ClientFactories fill:#ffffff,stroke:#2563eb,stroke-width:2px,stroke-dasharray: 5 5
+    style StorageFactories fill:#ffffff,stroke:#7c3aed,stroke-width:2px,stroke-dasharray: 5 5
+    style PipelineFactories fill:#ffffff,stroke:#16a34a,stroke-width:2px,stroke-dasharray: 5 5
 
     %% Layer palette (semantic)
-    classDef layer_domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:1.8px;
-    classDef layer_application fill:#f0fdf4,stroke:#16a34a,stroke-width:1.8px;
-    classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
-    classDef layer_composition fill:#fff7ed,stroke:#f59e0b,stroke-width:1.8px;
-    classDef layer_interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:1.8px;
+    classDef layer_domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px;
+    classDef layer_application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px;
+    classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px;
+    classDef layer_composition fill:#fff7ed,stroke:#f59e0b,stroke-width:2px;
+    classDef layer_interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px;
 
     class CLI layer_interfaces;
     class BOOT,BL,DQF,HCF,DSF,STF,STA,SB,RF,GPF,PR,OB layer_composition;
