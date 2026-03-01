@@ -1,6 +1,6 @@
 # BioETL Diagrams — SVG Index
 
-_Generated: 2026-03-01T19:02:03+03:00_
+_Generated: 2026-03-01T19:33:31+03:00_
 
 ## High Level Hexagonal
 
@@ -236,9 +236,33 @@ _Generated: 2026-03-01T19:02:03+03:00_
 
 ---
 
+## 13eoperational Ports Domain
+
+![13e-operational-ports-domain](./13e-operational-ports-domain.svg)
+
+---
+
+## 13foperational Ports Infra
+
+![13f-operational-ports-infra](./13f-operational-ports-infra.svg)
+
+---
+
 ## Cli Interface Layer
 
 ![14-cli-interface-layer](./14-cli-interface-layer.svg)
+
+---
+
+## 14acli Commands
+
+![14a-cli-commands](./14a-cli-commands.svg)
+
+---
+
+## 14bcli Routing
+
+![14b-cli-routing](./14b-cli-routing.svg)
 
 ---
 
@@ -254,6 +278,18 @@ _Generated: 2026-03-01T19:02:03+03:00_
 
 ---
 
+## 16atransformer Base
+
+![16a-transformer-base](./16a-transformer-base.svg)
+
+---
+
+## 16btransformer Pub Other
+
+![16b-transformer-pub-other](./16b-transformer-pub-other.svg)
+
+---
+
 ## Security Pii Audit
 
 ![17-security-pii-audit](./17-security-pii-audit.svg)
@@ -263,6 +299,18 @@ _Generated: 2026-03-01T19:02:03+03:00_
 ## Lock Checkpoint Shutdown
 
 ![18-lock-checkpoint-shutdown](./18-lock-checkpoint-shutdown.svg)
+
+---
+
+## 18alock System
+
+![18a-lock-system](./18a-lock-system.svg)
+
+---
+
+## 18bcheckpoint Shutdown
+
+![18b-checkpoint-shutdown](./18b-checkpoint-shutdown.svg)
 
 ---
 

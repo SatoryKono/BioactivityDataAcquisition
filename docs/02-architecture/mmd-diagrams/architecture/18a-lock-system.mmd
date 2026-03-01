@@ -8,7 +8,17 @@
 %% @view    lock-system
 %% @parent  18-lock-checkpoint-shutdown.mmd
 %% @nodes   8
-
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 graph TB
 %% keep-orphan: LNHE
     subgraph Ports["Domain Port"]

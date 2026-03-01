@@ -1,6 +1,6 @@
 # BioETL Diagrams — PNG Index
 
-_Generated: 2026-03-01T18:07:54+03:00_
+_Generated: 2026-03-01T19:33:31+03:00_
 
 ## High Level Hexagonal
 
@@ -80,9 +80,33 @@ _Generated: 2026-03-01T18:07:54+03:00_
 
 ---
 
+## 06astorage Writers
+
+![06a-storage-writers](./06a-storage-writers.png)
+
+---
+
+## 06bstorage Support
+
+![06b-storage-support](./06b-storage-support.png)
+
+---
+
 ## Dq System
 
 ![07-dq-system](./07-dq-system.png)
+
+---
+
+## 07adq Analysis
+
+![07a-dq-analysis](./07a-dq-analysis.png)
+
+---
+
+## 07bdq Pipeline
+
+![07b-dq-pipeline](./07b-dq-pipeline.png)
 
 ---
 
@@ -92,9 +116,33 @@ _Generated: 2026-03-01T18:07:54+03:00_
 
 ---
 
+## 08acomposite Config
+
+![08a-composite-config](./08a-composite-config.png)
+
+---
+
+## 08bcomposite Execution
+
+![08b-composite-execution](./08b-composite-execution.png)
+
+---
+
 ## Observability Stack
 
 ![09-observability-stack](./09-observability-stack.png)
+
+---
+
+## 09aobservability App
+
+![09a-observability-app](./09a-observability-app.png)
+
+---
+
+## 09bobservability Infra
+
+![09b-observability-infra](./09b-observability-infra.png)
 
 ---
 
@@ -107,6 +155,18 @@ _Generated: 2026-03-01T18:07:54+03:00_
 ## Configuration System
 
 ![11-configuration-system](./11-configuration-system.png)
+
+---
+
+## 11aconfig Loading
+
+![11a-config-loading](./11a-config-loading.png)
+
+---
+
+## 11bconfig Domain
+
+![11b-config-domain](./11b-config-domain.png)
 
 ---
 
@@ -176,9 +236,33 @@ _Generated: 2026-03-01T18:07:54+03:00_
 
 ---
 
+## 13eoperational Ports Domain
+
+![13e-operational-ports-domain](./13e-operational-ports-domain.png)
+
+---
+
+## 13foperational Ports Infra
+
+![13f-operational-ports-infra](./13f-operational-ports-infra.png)
+
+---
+
 ## Cli Interface Layer
 
 ![14-cli-interface-layer](./14-cli-interface-layer.png)
+
+---
+
+## 14acli Commands
+
+![14a-cli-commands](./14a-cli-commands.png)
+
+---
+
+## 14bcli Routing
+
+![14b-cli-routing](./14b-cli-routing.png)
 
 ---
 
@@ -194,6 +278,18 @@ _Generated: 2026-03-01T18:07:54+03:00_
 
 ---
 
+## 16atransformer Base
+
+![16a-transformer-base](./16a-transformer-base.png)
+
+---
+
+## 16btransformer Pub Other
+
+![16b-transformer-pub-other](./16b-transformer-pub-other.png)
+
+---
+
 ## Security Pii Audit
 
 ![17-security-pii-audit](./17-security-pii-audit.png)
@@ -203,6 +299,18 @@ _Generated: 2026-03-01T18:07:54+03:00_
 ## Lock Checkpoint Shutdown
 
 ![18-lock-checkpoint-shutdown](./18-lock-checkpoint-shutdown.png)
+
+---
+
+## 18alock System
+
+![18a-lock-system](./18a-lock-system.png)
+
+---
+
+## 18bcheckpoint Shutdown
+
+![18b-checkpoint-shutdown](./18b-checkpoint-shutdown.png)
 
 ---
 

@@ -8,7 +8,17 @@
 %% @view    cli-commands
 %% @parent  14-cli-interface-layer.mmd
 %% @nodes   12
-
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 graph LR
     subgraph User["User"]
         TERM["Terminal"]:::size-sm

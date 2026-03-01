@@ -8,7 +8,17 @@
 %% @view    composite-config
 %% @parent  08-composite-pipeline.mmd
 %% @nodes   13
-
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 graph TB
     subgraph Config["Composite Configuration"]
         CC["CompositeConfig<br/>name / seed / deps / enrichers / merge"]:::size-sm
