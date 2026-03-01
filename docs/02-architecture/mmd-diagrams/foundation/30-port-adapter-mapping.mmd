@@ -17,25 +17,16 @@
 %% @uniform-stats adapters     width=400 height=168 max_desc_lines=7
 %% Tooltip: Nodes with aggregated adapter lists (e.g. A1/A21) are summarized; see provider docs for full breakdown.
 %%{init: {
-%%  'layout': 'elk',
-%%  'theme': 'base',
-%%  'flowchart': {
-%%    'nodeSpacing': 72,
-%%    'rankSpacing': 96,
-%%    'padding': 24,
-%%    'curve': 'linear'
-%%  },
-%%  'elk': {
-%%    'mergeEdges': true,
-%%    'nodePlacementStrategy': 'BRANDES_KOEPF',
-%%    'cycleBreakingStrategy': 'GREEDY',
-%%    'direction': 'RIGHT',
-%%    'spacing.nodeNode': 56,
-%%    'spacing.edgeNode': 36,
-%%    'spacing.edgeEdge': 26,
-%%    'edgeRouting': 'ORTHOGONAL'
-%%  }
-%%}}%%
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 flowchart LR
     subgraph Ports["Domain Ports (domain/ports/)"]
         direction TB

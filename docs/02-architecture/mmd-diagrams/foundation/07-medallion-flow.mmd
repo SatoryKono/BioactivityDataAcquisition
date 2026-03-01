@@ -8,6 +8,17 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 %% @uniform width=320 height=96 max_title_len=32 max_desc_lines=3
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 
 flowchart LR
 %% keep-orphan: B, G, S

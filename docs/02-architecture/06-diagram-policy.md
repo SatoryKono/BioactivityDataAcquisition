@@ -103,15 +103,15 @@
 2. Есть соответствующий рендер (`svg/png`) в ожидаемом каталоге.
 3. Есть запись в индексной странице/разделе документации.
 4. Ссылка на диаграмму не битая.
-5. `scripts/lint_diagrams.py` не даёт ошибок.
+5. `scripts/diagrams/lint_diagrams.py` не даёт ошибок.
 
 ## 8. Обязательные проверки
 
 ```bash
-python3 scripts/lint_diagrams.py docs
+python3 scripts/diagrams/lint_diagrams.py docs
 python3 scripts/check_doc_links.py --links
-python3 scripts/check_diagram_visual_smoke.py
-bash scripts/validate_mermaid_syntax.sh
+python3 scripts/diagrams/check_diagram_visual_smoke.py
+bash scripts/diagrams/validate_mermaid_syntax.sh
 ```
 
 Если runtime для `validate_mermaid_syntax.sh` не готов, это фиксируется как открытый риск до устранения.
