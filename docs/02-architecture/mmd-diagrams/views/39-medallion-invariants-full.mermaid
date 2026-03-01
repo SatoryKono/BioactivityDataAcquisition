@@ -65,7 +65,7 @@ flowchart TB
     end
 
     subgraph Bronze["Bronze Layer (Always Append)"]
-        BZ["BronzeWriter.write_bronze()<br/>• ALWAYS append-only<br/>• Never cleared by run_type<br/>• 90-day retention policy"]
+        BZ["BronzeWriter.write_bronze()<br/>append-only, never cleared by run_type<br/>90-day retention policy"]
     end
 
     %% Flow

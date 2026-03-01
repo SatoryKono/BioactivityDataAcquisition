@@ -26,43 +26,43 @@
 %% @uniform width=336 height=162 max_title_len=37 max_desc_lines=7
 flowchart LR
     subgraph ChEMBL["ChEMBL (Seed)"]
-        CA["ChemblAdapter<br/>/document endpoint<br/><br/><br/><br/><br/><br/>"]
-        CT["PublicationTransformer<br/><br/><br/><br/><br/><br/><br/>"]
-        CS[("Silver<br/>chembl/publication"<br/><br/><br/><br/><br/><br/>)]
+        CA["ChemblAdapter<br/>/document endpoint"]
+        CT["PublicationTransformer"]
+        CS[("Silver<br/>chembl/publication")]
     end
 
     subgraph CrossRef["CrossRef (Enricher)"]
-        CRA["CrossRefAdapter<br/>/works?filter=doi:...<br/><br/><br/><br/><br/><br/>"]
-        CRT["CrossRefPublicationTransformer<br/><br/><br/><br/><br/><br/><br/>"]
-        CRS[("Silver<br/>crossref/publication"<br/><br/><br/><br/><br/><br/>)]
+        CRA["CrossRefAdapter<br/>/works?filter=doi:..."]
+        CRT["CrossRefPublicationTransformer"]
+        CRS[("Silver<br/>crossref/publication")]
     end
 
     subgraph PubMed["PubMed (Enricher)"]
-        PMA["PubMedAdapter<br/>efetch(PMIDs)<br/><br/><br/><br/><br/><br/>"]
-        PMT["PubMedPublicationTransformer<br/><br/><br/><br/><br/><br/><br/>"]
-        PMS[("Silver<br/>pubmed/publication"<br/><br/><br/><br/><br/><br/>)]
+        PMA["PubMedAdapter<br/>efetch(PMIDs)"]
+        PMT["PubMedPublicationTransformer"]
+        PMS[("Silver<br/>pubmed/publication")]
     end
 
     subgraph OpenAlex["OpenAlex (Enricher)"]
-        OAA["OpenAlexAdapter<br/>/works?filter=doi:...<br/><br/><br/><br/><br/><br/>"]
-        OAT["OpenAlexPublicationTransformer<br/><br/><br/><br/><br/><br/><br/>"]
-        OAS[("Silver<br/>openalex/publication"<br/><br/><br/><br/><br/><br/>)]
+        OAA["OpenAlexAdapter<br/>/works?filter=doi:..."]
+        OAT["OpenAlexPublicationTransformer"]
+        OAS[("Silver<br/>openalex/publication")]
     end
 
     subgraph S2["Semantic Scholar (Enricher)"]
-        SSA["SemanticScholarAdapter<br/>/paper/batch<br/><br/><br/><br/><br/><br/>"]
-        SST["SemanticScholarPublicationTransformer<br/><br/><br/><br/><br/><br/><br/>"]
-        S2S[("Silver<br/>semanticscholar/publication"<br/><br/><br/><br/><br/><br/>)]
+        SSA["SemanticScholarAdapter<br/>/paper/batch"]
+        SST["SemanticScholarPublicationTransformer"]
+        S2S[("Silver<br/>semanticscholar/publication")]
     end
 
     subgraph Merge["Merge Phase"]
-        MS["MergeService<br/>LEFT OUTER JOIN<br/>conflict: coalesce<br/><br/><br/><br/><br/>"]
-        FIELDS["Field Groups:<br/>• ID_AND_STATUS<br/>• BIBLIOGRAPHY<br/>• AUTHOR<br/>• TERMS<br/>• CITATIONS<br/>• DATES<br/>• PUB_TYPES"]
+        MS["MergeService<br/>LEFT OUTER JOIN<br/>conflict: coalesce"]
+        FIELDS["Field Groups<br/>ID_STATUS, BIBLIOGRAPHY, AUTHOR<br/>TERMS, CITATIONS, DATES, PUB_TYPES"]
     end
 
     subgraph Gold["Gold Output"]
-        GS["CompositePublicationGoldSchema<br/>(Pandera strict validation)<br/><br/><br/><br/><br/><br/>"]
-        GT[("Gold<br/>composite/publication"<br/><br/><br/><br/><br/><br/>)]
+        GS["CompositePublicationGoldSchema<br/>(Pandera strict validation)"]
+        GT[("Gold<br/>composite/publication")]
     end
 
     %% Flows
