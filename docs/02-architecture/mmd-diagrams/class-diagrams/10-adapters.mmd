@@ -34,8 +34,7 @@ classDiagram
         +health_check() HealthCheckResult
         +check_health() HealthCheckResult
         #_probe_health()* HealthCheckResult
-        #_fallback_health_status() HealthCheckResult
-        #_circuit_breaker: CircuitBreakerPort*
+        +... : fallback policy
     }
 
     class BaseHttpAdapter {
@@ -43,16 +42,10 @@ classDiagram
         +logger: LoggerPort
         +metrics: MetricsPort | None
         +provider_name: str
-        #_error_handler: ErrorService
         +__aenter__() Self
         +__aexit__(...) None
         +aclose() None
-        
-        
-        
-        
-        
-        
+
     }
 
     class BaseSyncAdapter {
@@ -61,15 +54,7 @@ classDiagram
         +rate_limiter: TokenBucket
         +circuit_breaker: CircuitBreaker
         +thread_pool: ThreadPoolExecutor
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
     }
 
     class UnifiedHTTPClient {
@@ -78,23 +63,17 @@ classDiagram
         +circuit_breaker: CircuitBreakerPort
         +retry_config: RetryConfig
         +timeout: float
-        +run_id: RunID | None
         +user_agent: str
         +provider: str
-        +tracer: TracingPort | None
-        +metrics: MetricsPort | None
         +get(url, params, headers) Response
         +post(url, data, headers) Response
-        +head(url) Response
-        +get_once(url) Response
+        +... : request helpers
     }
 
     class ChemblAdapter {
         +fetch() AsyncIterator~dict~
         +fetch_filtered(filter_ids) AsyncIterator~dict~
-        +fetch_multi_filtered(filters) AsyncIterator~dict~
-        +fetch_filtered_with_fallback() AsyncIterator~dict~
-        +fetch_as_models() AsyncIterator~Model~
+        +... : extra filter variants
     }
 
     class PubMedAdapter {
@@ -153,8 +132,7 @@ classDiagram
         +metrics: MetricsPort | None
         +call(fn) T
         +get_state() CircuitBreakerState
-        +get_failure_count() int
-        +get_trips_total() int
+        +... : counters
     }
 
     class TokenBucket {
