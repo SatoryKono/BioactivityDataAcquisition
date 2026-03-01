@@ -21,19 +21,12 @@ classDiagram
         +run_type: RunType
         +resume: bool
         +limit: int | None
-        +heartbeat_interval: int
-        +wait_for_lock: bool
-        +lock_wait_timeout: int
-        +lock_ttl: int | None
-        +query: str | None
         +dry_run: bool
-        +vacuum_after_run: bool
-        +vacuum_retention_days: int
-        +optimize_storage: bool
+        +lock_ttl: int | None
         +strict_validation: bool
-        +strict_gold_validation: bool
         +skip_gold: bool
         +effective_lock_ttl: int
+        +... : Runtime flags
     }
 
     class PipelineConfig {
@@ -42,18 +35,14 @@ classDiagram
         +provider: str
         +entity_type: str
         +table: TableConfig
-        +silver_filters: SilverFilterConfig | None
-        +gold_filters: GoldFilterConfig | None
         +batch_size: int
         +checkpoint_interval: int
         +fields: tuple~str~
-        +column_groups: tuple~ColumnGroupConfig~
         +dq: DQConfig
-        +transform_version: str | None
-        +transform_steps: tuple~str~
         +loading_strategy: LoadingStrategy | None
-        +scd_config: dict | None
-        +gold_schema: Any | None
+        +silver_filters: SilverFilterConfig | None
+        +gold_filters: GoldFilterConfig | None
+        +... : Schema and transform options
     }
 
     class TableConfig {

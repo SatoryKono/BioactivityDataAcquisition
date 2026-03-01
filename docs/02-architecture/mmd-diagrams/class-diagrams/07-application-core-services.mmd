@@ -25,17 +25,14 @@ classDiagram
             -_config: PipelineConfig
             -_runtime: RuntimeConfig
             -_services: PipelineServices
-            -_context: PipelineContext
             -_executor: BatchExecutor
             -_checkpoint_manager: CheckpointManager
             -_shutdown_signal: ShutdownSignal
-            -_logger: LoggerPort
             -_lock_manager: LockManager
             -_preflight_service: PreflightService
             -_postrun_service: PostrunService
-            -_lifecycle_service: MedallionLifecycleService
-            -_observer: PipelineObserver
             +run() None
+            +... : lifecycle orchestration
         }
 
         class PipelineServices {
@@ -49,10 +46,7 @@ classDiagram
             +tracing: TracingPort | None
             +logger: LoggerPort
             +dq_monitor: DQMonitorPort | None
-            +metadata_coordinator: MetadataCoordinatorPort | None
-            +metadata_writer: MetadataWriterPort | None
-            +dq_report_writer: DQReportWriterPort | None
-            +dq_report_service: DQReportService | None
+            +... : optional reporting services
         }
 
         class BatchExecutor {
@@ -64,13 +58,11 @@ classDiagram
             +checkpoint_interval: int
             +records_fetched: int
             +records_bronze: int
-            +records_silver: int
-            +records_gold: int
             +records_quarantined: int
             +execute(limit, query, offset) None
             +process(records, start_index) BatchResult
             +get_dq_context() DQReportContext | None
-            +get_run_statistics() dict
+            +... : run statistics API
         }
     }
 
@@ -81,12 +73,9 @@ classDiagram
             -_error_classifier: ErrorClassifier
             -_quarantine_manager: QuarantineManager
             -_batch_metrics: BatchMetricsRecorder
-            -_transform: TransformCallback
-            -_gold_filter: GoldFilterCallback
-            -_gold_transform: GoldTransformCallback
             +transform_batch(records, batch_id, start_index) TransformResult
             +transform_single(raw_record, batch_id, index) TransformedRecord
-            +_check_dq_thresholds(records, quarantined_count) None
+            +... : internal transform callbacks
         }
 
         class BatchWriter {
@@ -94,14 +83,13 @@ classDiagram
             -_context: PipelineContext
             -_gold_validator: GoldValidatorPort
             -_error_classifier: ErrorClassifier
-            -_lock_validator: Callable
             -_silver_mode: WriteMode
             -_gold_mode: WriteMode
             -_column_orderer: ColumnOrderer | None
             +write_bronze(records, batch_id, ingestion_ts, metadata) BronzeWriteResult
             +write_silver(records, batch_id, ingestion_ts, bronze_refs) SilverWriteResult | None
             +write_gold(records, silver_refs) None
-            +_validate_lock(operation) None
+            +... : validation and lock checks
         }
 
         class BatchMemoryManager {
