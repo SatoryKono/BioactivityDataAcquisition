@@ -134,7 +134,8 @@ g.classGroup rect {
 }
 
 g.classGroup text {
-    font-size: 13px;
+    /* Безопасный размер для classDiagram: исключает наложение двухстрочных полей. */
+    font-size: 10px;
 }
 
 svg.classDiagram g.classGroup text,
@@ -176,14 +177,14 @@ g.classGroup line {
 
 /* Class name — larger and bold */
 g.label-group .nodeLabel {
-    font-size: 15px !important;
-    font-weight: 700 !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
     letter-spacing: 0.01em;
 }
 
 /* Stereotype annotation — small italic */
 g.annotation-group .nodeLabel {
-    font-size: 11px !important;
+    font-size: 9px !important;
     font-style: italic !important;
     opacity: 0.8;
 }
@@ -191,7 +192,7 @@ g.annotation-group .nodeLabel {
 /* Attributes and methods — compact, keep readable */
 g.members-group .nodeLabel,
 g.methods-group .nodeLabel {
-    font-size: 12px !important;
+    font-size: 10px !important;
     font-weight: 400 !important;
 }
 
