@@ -1,0 +1,762 @@
+#!/usr/bin/env python3
+"""prune_orphan_nodes.py — Detect and remove orphan nodes from Mermaid diagrams.
+
+DEFINITION
+    An orphan node is a node ID that is *defined* in the diagram but participates
+    in NO edge or message (neither incoming nor outgoing) within the same file.
+
+SUPPORTED DIAGRAM TYPES
+    - flowchart / graph   — parses node shapes + arrow connections
+    - sequenceDiagram     — parses participant/actor declarations + messages
+
+SKIPPED (by design)
+    - classDiagram, stateDiagram, erDiagram, mindmap, gantt, pie
+    - Files matching the pattern ``00-legend*``
+
+EXCEPTIONS (node never flagged as orphan)
+    - Inline annotation:  ``%% keep-orphan: NodeId``  (anywhere in file)
+    - Multi-node:         ``%% keep-orphan: A, B, C``
+
+USAGE
+    # Report only
+    python scripts/diagrams/prune_orphan_nodes.py --check
+
+    # Report specific paths
+    python scripts/diagrams/prune_orphan_nodes.py --check path/to/file.mmd another/dir/
+
+    # Machine-readable output for CI
+    python scripts/diagrams/prune_orphan_nodes.py --check --json
+
+    # Remove confirmed orphans (writes files in-place)
+    python scripts/diagrams/prune_orphan_nodes.py --fix
+
+ADR reference: ADR-040-diagram-governance.md (D6 CI Validation)
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import sys
+from dataclasses import dataclass, field
+from pathlib import Path
+
+sys.stdout.reconfigure(encoding="utf-8")
+
+# ── Paths ─────────────────────────────────────────────────────────────────────
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_DIRS = [
+    REPO_ROOT / "docs/02-architecture/mmd-diagrams",
+    REPO_ROOT / "docs/02-architecture/mmd-diagrams/views",
+]
+SUPPORTED_SUFFIXES = {".mmd", ".mermaid"}
+
+# ── Regex constants ───────────────────────────────────────────────────────────
+
+# Node ID: letters/digits/underscore, must start with letter or underscore
+_NID = r"[A-Za-z_][A-Za-z0-9_]*"
+
+# Edge arrow / connector variants (Mermaid flowchart).
+# Covers: --> -.-> -..- -.- --- --o --x <--> <-- ==> ~~~ and labelled forms.
+# IMPORTANT: longer / more-specific patterns MUST come before shorter ones
+# so that -.-  never matches the first 3 chars of  -.->  (which would leave
+# a stray  >  before the target node ID and break ID extraction).
+_ARROW_RE = re.compile(
+    r"-\.\.->"      # -..->   double-dotted forward arrow
+    r"|-\.->"       # -.->    dotted forward arrow   ← must precede  -.-
+    r"|-\.\.-"      # -..-    double-dotted undirected
+    r"|-\.-"        # -.-     dotted undirected
+    r"|<-->"        # <-->    bidirectional solid
+    r"|-->"         # -->     solid forward arrow
+    r"|<--"         # <--     solid backward arrow
+    r"|---"         # ---     solid undirected
+    r"|--[oxX]"     # --o  --x  circle / cross end
+    r"|o--o"        # o--o    circle bidirectional
+    r"|x--x"        # x--x    cross bidirectional
+    r"|==>>"        # ==>>    thick double arrow
+    r"|==>"         # ==>     thick arrow
+    r"|~~~"         # ~~~     tilde link
+)
+
+# Flowchart: subgraph open — capture the subgraph ID
+_SUBGRAPH_RE = re.compile(r"^\s*subgraph\s+(\w+)")
+
+# Flowchart: class directive — `class NodeId[,NodeId...] className`
+_CLASS_DIRECTIVE_RE = re.compile(r"^\s*class\s+([\w,\s]+)\s+\w+\s*$")
+
+# Flowchart: style directive — `style NodeId key:val`
+_STYLE_DIRECTIVE_RE = re.compile(r"^\s*style\s+(\w+)\b")
+
+# Flowchart: node shape definition (line starts with NodeId followed by shape)
+# Matches: id[".."], id(["..]), id{{"..}}, id[("..], id(("..)), id>"..], id[, id(, id{
+_NODE_SHAPE_RE = re.compile(
+    r"^\s*(\w+)\s*(?:"
+    r'\[{1,2}[^]]*\]?'          # [text], [[text]], [(text)]
+    r'|\({1,2}[^)]*\)?'          # (text), ((text)), ([text])
+    r'|\{{1,2}[^}]*\}?'          # {text}, {{text}}
+    r"|>[^]]*\]"                  # >text]
+    r"|/[^/]*/?"                  # /text/
+    r")"
+)
+
+# keep-orphan annotation
+_KEEP_ORPHAN_RE = re.compile(r"%%\s*keep-orphan\s*:\s*(.*)")
+
+# Sequence: participant/actor declaration
+_SEQ_PARTICIPANT_RE = re.compile(
+    r"^\s*(?:participant|actor)\s+(\w+)(?:\s+as\s+.+)?$",
+    re.IGNORECASE,
+)
+
+# Sequence: message line  A ->> B: msg  or  A --> B
+_SEQ_MESSAGE_RE = re.compile(
+    r"^\s*(\w+)\s*(?:->>|-->>|->|-->|-x|--x|-\)|--\)|->>\+|-->>\+|<<-|<<--)"
+    r"\s*(?:\+|-)?\s*(\w+)\s*:",
+)
+
+# Sequence: Note over A / Note over A,B / Note left of A / Note right of A
+_SEQ_NOTE_RE = re.compile(
+    r"^\s*[Nn]ote\s+(?:over|left\s+of|right\s+of)\s+([\w,\s]+)\s*:",
+)
+
+# Sequence: activate/deactivate
+_SEQ_ACTIVATE_RE = re.compile(r"^\s*(?:activate|deactivate)\s+(\w+)", re.IGNORECASE)
+
+# Sequence: box … end  (do NOT treat box names as participants)
+_SEQ_BOX_RE = re.compile(r"^\s*box\b", re.IGNORECASE)
+
+
+# ── Data classes ──────────────────────────────────────────────────────────────
+
+
+@dataclass
+class OrphanResult:
+    file: Path
+    diagram_type: str            # "flowchart" | "sequence" | "skipped"
+    orphan_ids: set[str] = field(default_factory=set)
+    skipped_reason: str = ""
+
+    @property
+    def has_orphans(self) -> bool:
+        return bool(self.orphan_ids)
+
+
+# ── Diagram type detection ────────────────────────────────────────────────────
+
+_SUPPORTED_TYPES = {"flowchart", "graph", "sequencediagram"}
+_SKIP_TYPES = {
+    "classdiagram",
+    "statediagram",
+    "statediagram-v2",
+    "erdiagram",
+    "mindmap",
+    "gantt",
+    "pie",
+    "xychart-beta",
+}
+
+
+def detect_diagram_type(lines: list[str]) -> str:
+    """Return canonical diagram type string or 'skip'/'unknown'."""
+    for ln in lines:
+        s = ln.strip().lower()
+        if not s or s.startswith("%%"):
+            continue
+        first_word = s.split()[0]
+        if first_word in _SUPPORTED_TYPES or first_word in {"graph"}:
+            return "flowchart" if first_word in {"flowchart", "graph"} else first_word
+        if first_word == "sequencediagram":
+            return "sequence"
+        if first_word in _SKIP_TYPES or any(s.startswith(t) for t in _SKIP_TYPES):
+            return "skip"
+        break
+    return "unknown"
+
+
+# ── keep-orphan annotation parsing ───────────────────────────────────────────
+
+
+def parse_keep_orphans(lines: list[str]) -> set[str]:
+    """Return set of node IDs explicitly exempted from orphan detection."""
+    kept: set[str] = set()
+    for ln in lines:
+        m = _KEEP_ORPHAN_RE.search(ln)
+        if m:
+            for nid in re.split(r"[\s,]+", m.group(1).strip()):
+                if nid:
+                    kept.add(nid)
+    return kept
+
+
+# ── Flowchart parser ──────────────────────────────────────────────────────────
+
+
+def _ids_from_edge_line(line: str) -> set[str]:
+    """Extract all node IDs from a flowchart edge line."""
+    # Strip quoted labels between pipes: |"label"| or |label|
+    cleaned = re.sub(r"\|[^|]*\|", "", line)
+    # Remove quoted strings
+    cleaned = re.sub(r'"[^"]*"', '""', cleaned)
+    # Split on any arrow variant
+    parts = _ARROW_RE.split(cleaned)
+    ids: set[str] = set()
+    for part in parts:
+        # Each part may contain NodeA & NodeB (multi-source or multi-target)
+        for chunk in part.split("&"):
+            m = re.match(rf"\s*({_NID})", chunk.strip())
+            if m:
+                ids.add(m.group(1))
+    return ids
+
+
+def parse_flowchart_orphans(
+    lines: list[str],
+    keep: set[str],
+) -> tuple[set[str], set[str], dict[str, list[int]]]:
+    """Analyse a flowchart/graph diagram.
+
+    Returns:
+        orphan_ids        — IDs defined but not connected
+        all_defined       — all node IDs with standalone definitions
+        definition_lines  — map: node_id → [line indices of standalone defs]
+
+    Lenient rule: a node whose *immediate parent subgraph* appears in any edge
+    is NOT flagged as an orphan.  Such nodes are intentional descriptive
+    children of a connected subgraph container (e.g. B1–B4 inside Bronze when
+    ``Bronze --> Silver`` exists).
+    """
+    subgraph_names: set[str] = set()
+    all_defined: set[str] = set()          # standalone node definition IDs
+    connected: set[str] = set()            # IDs appearing in edge lines
+    definition_lines: dict[str, list[int]] = {}
+    node_parent: dict[str, str] = {}       # node_id → immediate parent subgraph
+    subgraph_stack: list[str] = []         # stack of open subgraph names
+
+    for i, ln in enumerate(lines):
+        s = ln.strip()
+
+        if not s or s.startswith("%%"):
+            continue
+
+        # ── Subgraph open ────────────────────────────────────────────────────
+        if re.match(r"^subgraph\b", s, re.IGNORECASE):
+            m = _SUBGRAPH_RE.match(s)
+            sg_name = m.group(1) if m else ""
+            if sg_name:
+                subgraph_names.add(sg_name)
+            subgraph_stack.append(sg_name)
+            continue
+
+        # ── Subgraph close ───────────────────────────────────────────────────
+        if s.lower() == "end":
+            if subgraph_stack:
+                subgraph_stack.pop()
+            continue
+
+        # ── Directives to skip ───────────────────────────────────────────────
+        if re.match(
+            r"^(?:direction\b|classDef\b|linkStyle\b|%%\{|graph\b|flowchart\b)",
+            s,
+            re.IGNORECASE,
+        ):
+            continue
+
+        # ── class directive: `class NodeId className` ────────────────────────
+        if _CLASS_DIRECTIVE_RE.match(s):
+            continue
+
+        # ── style directive: `style NodeId ...` ─────────────────────────────
+        if _STYLE_DIRECTIVE_RE.match(s):
+            continue
+
+        # ── Edge line — collect all connected IDs ────────────────────────────
+        if _ARROW_RE.search(ln):
+            connected.update(_ids_from_edge_line(ln))
+            continue
+
+        # ── Standalone node definition (no arrows on this line) ──────────────
+        m = _NODE_SHAPE_RE.match(s)
+        if m:
+            nid = m.group(1)
+            if nid and re.match(rf"^{_NID}$", nid):
+                all_defined.add(nid)
+                definition_lines.setdefault(nid, []).append(i)
+                if subgraph_stack and subgraph_stack[-1]:
+                    node_parent[nid] = subgraph_stack[-1]
+            continue
+
+        # ── Bare node ID (e.g., just `NodeId` on its own line) ───────────────
+        m = re.match(rf"^\s*({_NID})\s*$", ln)
+        if m:
+            nid = m.group(1)
+            if nid.lower() not in {
+                "end", "direction", "graph", "flowchart", "sequencediagram"
+            }:
+                all_defined.add(nid)
+                definition_lines.setdefault(nid, []).append(i)
+                if subgraph_stack and subgraph_stack[-1]:
+                    node_parent[nid] = subgraph_stack[-1]
+
+    # Subgraph names that appear in edge lines (they act as connected nodes)
+    connected_subgraph_names: set[str] = connected & subgraph_names
+
+    # Remove subgraph containers from both sets — they're layout groupings,
+    # not actual diagram nodes.
+    all_defined -= subgraph_names
+    connected -= subgraph_names
+
+    # Initial candidate orphans: defined but not directly in any edge
+    raw_orphans = (all_defined - connected) - keep
+
+    # Lenient rule: a node inside a *connected* subgraph is not an orphan —
+    # it is a descriptive child of that subgraph.
+    orphans = {
+        nid for nid in raw_orphans
+        if node_parent.get(nid) not in connected_subgraph_names
+    }
+
+    return orphans, all_defined, definition_lines
+
+
+# ── Sequence parser ───────────────────────────────────────────────────────────
+
+
+def parse_sequence_orphans(
+    lines: list[str],
+    keep: set[str],
+) -> tuple[set[str], set[str], dict[str, list[int]]]:
+    """Analyse a sequenceDiagram.
+
+    Returns:
+        orphan_ids           — declared participants with no messages
+        all_declared         — all participant/actor IDs
+        declaration_lines    — map: participant_id → [line indices]
+    """
+    all_declared: set[str] = set()
+    declaration_lines: dict[str, list[int]] = {}
+    messaged: set[str] = set()
+
+    for i, ln in enumerate(lines):
+        s = ln.strip()
+        if not s or s.startswith("%%"):
+            continue
+
+        # box … end blocks — skip the box label, not a participant
+        if _SEQ_BOX_RE.match(s):
+            continue
+
+        # participant / actor declaration
+        m = _SEQ_PARTICIPANT_RE.match(s)
+        if m:
+            nid = m.group(1)
+            all_declared.add(nid)
+            declaration_lines.setdefault(nid, []).append(i)
+            continue
+
+        # message line: A ->> B: msg
+        m = _SEQ_MESSAGE_RE.match(s)
+        if m:
+            messaged.add(m.group(1))
+            messaged.add(m.group(2))
+            continue
+
+        # Note over A,B
+        m = _SEQ_NOTE_RE.match(s)
+        if m:
+            for nid in re.split(r"[\s,]+", m.group(1).strip()):
+                if nid and re.match(rf"^{_NID}$", nid):
+                    messaged.add(nid)
+            continue
+
+        # activate/deactivate A
+        m = _SEQ_ACTIVATE_RE.match(s)
+        if m:
+            messaged.add(m.group(1))
+
+    orphans = (all_declared - messaged) - keep
+    return orphans, all_declared, declaration_lines
+
+
+# ── Fix: flowchart ────────────────────────────────────────────────────────────
+
+
+def fix_flowchart_lines(
+    lines: list[str],
+    orphan_ids: set[str],
+    definition_lines: dict[str, list[int]],
+) -> list[str]:
+    """Remove standalone orphan node definitions, class refs, and style lines."""
+    remove_indices: set[int] = set()
+
+    # 1. Standalone node definition lines
+    for nid in orphan_ids:
+        for idx in definition_lines.get(nid, []):
+            remove_indices.add(idx)
+
+    # 2. `style OrphanId ...` lines
+    for i, ln in enumerate(lines):
+        m = _STYLE_DIRECTIVE_RE.match(ln.strip())
+        if m and m.group(1) in orphan_ids:
+            remove_indices.add(i)
+
+    # 3. `class OrphanId className` lines — remove or edit
+    new_lines: list[str] = []
+    for i, ln in enumerate(lines):
+        if i in remove_indices:
+            continue
+
+        m = _CLASS_DIRECTIVE_RE.match(ln.strip())
+        if m:
+            raw_ids = [nid.strip() for nid in re.split(r"[\s,]+", m.group(1).strip())]
+            surviving = [nid for nid in raw_ids if nid and nid not in orphan_ids]
+            if not surviving:
+                # Remove entire line
+                continue
+            elif len(surviving) < len(raw_ids):
+                # Rebuild line with surviving IDs
+                # Extract className (last token after all IDs)
+                class_name_m = re.search(r"\s+(\w+)\s*$", ln)
+                if class_name_m:
+                    indent = re.match(r"^(\s*)", ln).group(1)
+                    new_lines.append(
+                        f"{indent}class {','.join(surviving)} {class_name_m.group(1)}\n"
+                    )
+                    continue
+
+        new_lines.append(ln)
+
+    return new_lines
+
+
+# ── Fix: sequence ─────────────────────────────────────────────────────────────
+
+
+def fix_sequence_lines(
+    lines: list[str],
+    orphan_ids: set[str],
+    declaration_lines: dict[str, list[int]],
+) -> list[str]:
+    """Remove orphan participant/actor declaration lines."""
+    remove_indices: set[int] = set()
+    for nid in orphan_ids:
+        for idx in declaration_lines.get(nid, []):
+            remove_indices.add(idx)
+    return [ln for i, ln in enumerate(lines) if i not in remove_indices]
+
+
+# ── Per-file analysis ─────────────────────────────────────────────────────────
+
+
+def analyse_file(path: Path) -> OrphanResult:
+    """Analyse a single diagram file for orphan nodes."""
+    try:
+        content = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as e:
+        return OrphanResult(path, "error", skipped_reason=str(e))
+
+    # Skip legend files
+    if path.stem.startswith("00-legend"):
+        return OrphanResult(path, "skipped", skipped_reason="legend file")
+
+    lines = content.splitlines(keepends=True)
+    stripped = [ln.rstrip("\n") for ln in lines]
+
+    dtype = detect_diagram_type(stripped)
+    if dtype == "skip" or dtype == "unknown":
+        return OrphanResult(path, "skipped", skipped_reason=f"type={dtype}")
+
+    keep = parse_keep_orphans(stripped)
+
+    if dtype == "flowchart":
+        orphans, _, _ = parse_flowchart_orphans(stripped, keep)
+        return OrphanResult(path, "flowchart", orphan_ids=orphans)
+    elif dtype == "sequence":
+        orphans, _, _ = parse_sequence_orphans(stripped, keep)
+        return OrphanResult(path, "sequence", orphan_ids=orphans)
+
+    return OrphanResult(path, "skipped", skipped_reason=f"unsupported={dtype}")
+
+
+def fix_file(path: Path) -> tuple[bool, set[str]]:
+    """Fix orphan nodes in a single file. Returns (was_modified, removed_ids)."""
+    try:
+        content = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return False, set()
+
+    if path.stem.startswith("00-legend"):
+        return False, set()
+
+    lines = content.splitlines(keepends=True)
+    stripped = [ln.rstrip("\n") for ln in lines]
+
+    dtype = detect_diagram_type(stripped)
+    if dtype not in {"flowchart", "sequence"}:
+        return False, set()
+
+    keep = parse_keep_orphans(stripped)
+
+    if dtype == "flowchart":
+        orphans, _, def_lines = parse_flowchart_orphans(stripped, keep)
+        if not orphans:
+            return False, set()
+        new_lines = fix_flowchart_lines(lines, orphans, def_lines)
+    else:
+        orphans, _, decl_lines = parse_sequence_orphans(stripped, keep)
+        if not orphans:
+            return False, set()
+        new_lines = fix_sequence_lines(lines, orphans, decl_lines)
+
+    path.write_text("".join(new_lines), encoding="utf-8")
+    return True, orphans
+
+
+# ── File discovery ────────────────────────────────────────────────────────────
+
+
+def find_files(targets: list[Path]) -> list[Path]:
+    result: list[Path] = []
+    seen: set[Path] = set()
+    for t in targets:
+        if t.is_file():
+            if t.suffix in SUPPORTED_SUFFIXES and t not in seen:
+                seen.add(t)
+                result.append(t)
+        elif t.is_dir():
+            for p in sorted(t.rglob("*")):
+                if (
+                    p.suffix in SUPPORTED_SUFFIXES
+                    and not p.name.startswith("_")
+                    and p not in seen
+                    # Skip rendered output dirs
+                    and "svg" not in p.parts
+                    and "png" not in p.parts
+                ):
+                    seen.add(p)
+                    result.append(p)
+    return result
+
+
+# ── Output formatters ─────────────────────────────────────────────────────────
+
+
+def format_text_check(results: list[OrphanResult]) -> str:
+    lines: list[str] = ["Orphan Node Check", "=" * 60, ""]
+
+    total_files = sum(1 for r in results if r.diagram_type not in {"skipped", "error"})
+    total_orphans = sum(len(r.orphan_ids) for r in results)
+    files_with_orphans = [r for r in results if r.has_orphans]
+
+    if not files_with_orphans:
+        lines.append("  No orphan nodes found.")
+    else:
+        for r in files_with_orphans:
+            lines.append(f"  {r.file}")
+            lines.append(f"    type:    {r.diagram_type}")
+            lines.append(f"    orphans: {', '.join(sorted(r.orphan_ids))}")
+            lines.append("")
+
+    lines.append("=" * 60)
+    lines.append(f"Files analysed: {total_files}")
+    lines.append(f"Files with orphans: {len(files_with_orphans)}")
+    lines.append(f"Total orphan nodes: {total_orphans}")
+
+    if total_orphans > 0:
+        lines.append("")
+        lines.append(
+            "To remove: python scripts/diagrams/diagrams/prune_orphan_nodes.py --fix"
+        )
+        lines.append(
+            "To keep:   add  %% keep-orphan: NodeId  to the file"
+        )
+
+    return "\n".join(lines)
+
+
+def format_json_check(results: list[OrphanResult]) -> str:
+    data = {
+        "total_orphans": sum(len(r.orphan_ids) for r in results),
+        "files": [
+            {
+                "file": str(r.file),
+                "diagram_type": r.diagram_type,
+                "orphan_ids": sorted(r.orphan_ids),
+            }
+            for r in results
+            if r.has_orphans
+        ],
+    }
+    return json.dumps(data, indent=2)
+
+
+# ── Grandfather mode ──────────────────────────────────────────────────────────
+
+
+def grandfather_file(path: Path) -> tuple[bool, set[str]]:
+    """Add ``%% keep-orphan:`` annotation for every current orphan in the file.
+
+    Inserts the annotation on the line *after* the diagram-type declaration
+    (``flowchart``/``graph``/``sequenceDiagram``) so it appears near the top.
+    Returns (was_modified, grandfathered_ids).
+    """
+    try:
+        content = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return False, set()
+
+    if path.stem.startswith("00-legend"):
+        return False, set()
+
+    lines = content.splitlines(keepends=True)
+    stripped = [ln.rstrip("\n") for ln in lines]
+
+    dtype = detect_diagram_type(stripped)
+    if dtype not in {"flowchart", "sequence"}:
+        return False, set()
+
+    keep = parse_keep_orphans(stripped)
+
+    if dtype == "flowchart":
+        orphans, _, _ = parse_flowchart_orphans(stripped, keep)
+    else:
+        orphans, _, _ = parse_sequence_orphans(stripped, keep)
+
+    if not orphans:
+        return False, set()
+
+    annotation = f"%% keep-orphan: {', '.join(sorted(orphans))}\n"
+
+    # Insert after the diagram-type declaration line
+    insert_idx: int | None = None
+    decl_re = re.compile(r"^(?:flowchart|graph|sequenceDiagram)\b", re.IGNORECASE)
+    for i, ln in enumerate(stripped):
+        s = ln.strip()
+        if not s or s.startswith("%%"):
+            continue
+        if decl_re.match(s):
+            insert_idx = i + 1
+            break
+
+    if insert_idx is None:
+        # Fallback: append at end
+        new_lines = lines + [annotation]
+    else:
+        new_lines = lines[:insert_idx] + [annotation] + lines[insert_idx:]
+
+    path.write_text("".join(new_lines), encoding="utf-8")
+    return True, orphans
+
+
+# ── Main ──────────────────────────────────────────────────────────────────────
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Detect and remove orphan nodes from Mermaid diagrams.",
+    )
+    parser.add_argument(
+        "paths",
+        nargs="*",
+        help="Files and/or directories to check. Default: both diagram directories.",
+    )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Report orphans without modifying files (default mode).",
+    )
+    parser.add_argument(
+        "--fix",
+        action="store_true",
+        help="Remove orphan nodes from files in-place.",
+    )
+    parser.add_argument(
+        "--grandfather",
+        action="store_true",
+        help=(
+            "Add  %%keep-orphan:  annotation for every current orphan — "
+            "use once to exempt existing diagrams before enforcing the rule."
+        ),
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        dest="json_output",
+        help="Output results as JSON (useful for CI).",
+    )
+    args = parser.parse_args()
+
+    # Default to --check if neither flag given
+    if not args.fix and not args.grandfather:
+        args.check = True
+
+    targets = [Path(p) for p in args.paths] if args.paths else DEFAULT_DIRS
+    missing = [t for t in targets if not t.exists()]
+    if missing:
+        for t in missing:
+            print(f"Error: {t} does not exist", file=sys.stderr)
+        return 2
+
+    files = find_files(targets)
+    if not files:
+        print("No diagram files found.", file=sys.stderr)
+        return 0
+
+    if args.grandfather:
+        print(f"Grandfathering orphan nodes in {len(files)} files...")
+        print("=" * 60)
+        total_modified = 0
+        total_grandfathered: list[str] = []
+
+        for fpath in files:
+            modified, gf_ids = grandfather_file(fpath)
+            if modified:
+                total_modified += 1
+                total_grandfathered.extend(sorted(gf_ids))
+                print(
+                    f"  [GF] {fpath.name}  "
+                    f"keep-orphan: {', '.join(sorted(gf_ids))}"
+                )
+
+        print("=" * 60)
+        print(f"Modified files:        {total_modified}")
+        print(f"Grandfathered nodes:   {len(total_grandfathered)}")
+        print("")
+        print(
+            "Re-run  --check  to confirm zero orphans. "
+            "GRAPH-001 will now only flag NEW orphans added after this point."
+        )
+        return 0
+
+    if args.fix:
+        print(f"Fixing orphan nodes in {len(files)} files...")
+        print("=" * 60)
+        total_modified = 0
+        total_removed: list[str] = []
+
+        for fpath in files:
+            modified, removed = fix_file(fpath)
+            if modified:
+                total_modified += 1
+                total_removed.extend(sorted(removed))
+                print(f"  [FIXED] {fpath.name}  removed: {', '.join(sorted(removed))}")
+
+        print("=" * 60)
+        print(f"Modified files:   {total_modified}")
+        print(f"Removed nodes:    {len(total_removed)}")
+        return 0
+
+    # --check mode
+    results = [analyse_file(f) for f in files]
+
+    if args.json_output:
+        print(format_json_check(results))
+    else:
+        print(format_text_check(results))
+
+    total_orphans = sum(len(r.orphan_ids) for r in results)
+    return 1 if total_orphans > 0 else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
