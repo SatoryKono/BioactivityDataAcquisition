@@ -69,10 +69,16 @@ _HEX_COLOR_RE = re.compile(r"#[0-9a-fA-F]{6}\b")
 _SUBGRAPH_RE = re.compile(r"^\s*subgraph\b", re.IGNORECASE)
 _LINK_STYLE_RE = re.compile(r"^\s*linkStyle\s+([^\s]+)")
 _LINK_STYLE_FULL_RE = re.compile(r"^\s*linkStyle\s+([^\s]+)\s+(.+)$")
+_BR_RE = re.compile(r"<br\s*/?>", re.IGNORECASE)
+_QUOTED_LABEL_RE = re.compile(r'"([^"]+)"')
+_HTML_TAG_RE = re.compile(r"<[^>]+>")
 ELK_WARN_THRESHOLD = 20
 ELK_ERROR_THRESHOLD = 40
 SIZE_WARN_THRESHOLD = 20
 SIZE_ERROR_THRESHOLD = 35
+LABEL_WARN_LINE_CHARS = 42
+LABEL_WARN_MAX_LINES = 8
+LABEL_WARN_PADDING_BREAKS = 3
 PLACEHOLDER_PATTERNS = {
     marker: re.compile(rf"\b{re.escape(marker)}\b", re.IGNORECASE)
     for marker in PLACEHOLDER_MARKERS
@@ -730,6 +736,113 @@ def check_nbsp_padding(path: Path, lines: list[str]) -> list[Issue]:
     return issues
 
 
+def _extract_node_decl_labels(line: str) -> list[str]:
+    """Extract quoted labels from node declaration lines.
+
+    Skip edges and subgraph declarations to avoid noisy false positives from
+    relationship labels.
+    """
+    stripped = line.strip()
+    if not stripped or stripped.startswith("%%"):
+        return []
+    if _SUBGRAPH_RE.match(stripped):
+        return []
+    if "-->" in stripped or "-.->" in stripped or "==>" in stripped:
+        return []
+    return [m.group(1) for m in _QUOTED_LABEL_RE.finditer(stripped)]
+
+
+def _normalize_label_fragment(text: str) -> str:
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def check_label_readability(path: Path, lines: list[str]) -> list[Issue]:
+    """Check node-label readability heuristics — LABEL-001/002/003 (WARNING)."""
+    issues: list[Issue] = []
+    fname = str(path)
+
+    if path.suffix != ".mmd":
+        return issues
+
+    long_segments: list[str] = []
+    over_tall_labels: list[str] = []
+    padded_labels: list[int] = []
+
+    for line_no, line in enumerate(lines, start=1):
+        labels = _extract_node_decl_labels(line)
+        if not labels:
+            continue
+
+        for raw_label in labels:
+            if re.search(
+                rf"(?:<br\s*/?>\s*){{{LABEL_WARN_PADDING_BREAKS},}}",
+                raw_label,
+                flags=re.IGNORECASE,
+            ):
+                padded_labels.append(line_no)
+
+            split_parts = _BR_RE.split(raw_label)
+            normalized_parts = [
+                _normalize_label_fragment(_HTML_TAG_RE.sub("", part))
+                for part in split_parts
+            ]
+            nonempty_parts = [part for part in normalized_parts if part]
+
+            if len(nonempty_parts) > LABEL_WARN_MAX_LINES:
+                over_tall_labels.append(f"L{line_no}:{len(nonempty_parts)}")
+
+            for part in nonempty_parts:
+                if len(part) > LABEL_WARN_LINE_CHARS:
+                    sample = part[:32]
+                    if len(part) > 32:
+                        sample += "..."
+                    long_segments.append(f"L{line_no}:{len(part)}:'{sample}'")
+
+    if long_segments:
+        preview = ", ".join(long_segments[:4])
+        issues.append(
+            Issue(
+                file=fname,
+                severity="WARNING",
+                rule="LABEL-001",
+                message=(
+                    "Long node label line(s) detected "
+                    f"(>{LABEL_WARN_LINE_CHARS} chars): {preview}"
+                ),
+            )
+        )
+
+    if over_tall_labels:
+        preview = ", ".join(over_tall_labels[:4])
+        issues.append(
+            Issue(
+                file=fname,
+                severity="WARNING",
+                rule="LABEL-002",
+                message=(
+                    "Node label has too many lines "
+                    f"(>{LABEL_WARN_MAX_LINES}): {preview}"
+                ),
+            )
+        )
+
+    if padded_labels:
+        first = padded_labels[:5]
+        issues.append(
+            Issue(
+                file=fname,
+                severity="WARNING",
+                rule="LABEL-003",
+                message=(
+                    "Excessive <br/> padding detected in node labels "
+                    f"(runs >= {LABEL_WARN_PADDING_BREAKS}, lines: {first})"
+                ),
+            )
+        )
+
+    return issues
+
+
 def check_orphan_nodes(path: Path, lines: list[str]) -> list[Issue]:
     """Check for orphan nodes — GRAPH-001 (WARNING, ADR-040 D6).
 
@@ -808,6 +921,7 @@ def lint_file(path: Path, stale_days: int) -> list[Issue]:
     issues.extend(check_link_semantics(path, lines))
     issues.extend(check_linkstyle_index_fragility(path, lines))
     issues.extend(check_nbsp_padding(path, lines))
+    issues.extend(check_label_readability(path, lines))
     issues.extend(check_orphan_nodes(path, lines))
 
     return issues

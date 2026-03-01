@@ -9,41 +9,51 @@
 %% @allow-polyline-routing
 %% @uniform width=312 height=216 max_title_len=31 max_desc_lines=10
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'NETWORK_SIMPLEX', 'edgeRouting': 'POLYLINE'}}}%%
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 graph TB
     subgraph Ports["Domain Ports"]
-        PHP["PiiHasherPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ hash(value: str) → str<br/><br/><br/><br/><br/><br/>"]:::size-lg
-        AP["AuditPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ log_write(entry: AuditEntry)<br/>+ get_entries(filters) → list<br/><br/><br/><br/><br/>"]:::size-lg
+        PHP["PiiHasherPort<br/>(Protocol)<br/>--------<br/>+ hash(value: str) -> str"]:::size-md
+        AP["AuditPort<br/>(Protocol)<br/>--------<br/>+ log_write(entry)<br/>+ get_entries(filters)"]:::size-md
     end
 
     subgraph DomainTypes["Domain Types"]
-        AE["AuditEntry<br/>(frozen dataclass)<br/>━━━━━━━━━━━━━━━━━<br/>run_id: RunID<br/>timestamp: datetime<br/>layer: AuditLayer<br/>table_name: str<br/>operation: AuditOperation<br/>records_count: int<br/>metadata: dict"]:::size-lg
-        AL["AuditLayer (StrEnum)<br/>━━━━━━━━━━━━━━━━━<br/>BRONZE<br/>SILVER<br/>GOLD<br/><br/><br/><br/><br/>"]:::size-lg
-        AO["AuditOperation (StrEnum)<br/>━━━━━━━━━━━━━━━━━<br/>WRITE<br/>MERGE<br/>APPEND<br/>DELETE<br/>OVERWRITE<br/><br/><br/>"]:::size-lg
+        AE["AuditEntry<br/>(frozen dataclass)<br/>--------<br/>run_id, timestamp, layer<br/>table_name, operation<br/>records_count, metadata"]:::size-md
+        AL["AuditLayer<br/>--------<br/>BRONZE / SILVER / GOLD"]:::size-sm
+        AO["AuditOperation<br/>--------<br/>WRITE / MERGE / APPEND<br/>DELETE / OVERWRITE"]:::size-sm
     end
 
     subgraph PIIFlow["PII Hashing Flow"]
-        RAW_PII["Raw PII Data<br/>(author names, emails,<br/>affiliations)<br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        HASH_FN["SHA256(lowercase(value) + salt)<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        RAW_PII["Raw PII Data<br/>(names, emails, affiliations)"]:::size-md
+        HASH_FN["SHA256(lowercase(value) + salt)"]:::size-sm
         RAW_PII --> HASH_FN --> HASHED
     end
 
     subgraph InfraPII["Infrastructure: PII Hasher"]
-        SPH["Sha256PiiHasher<br/>━━━━━━━━━━━━━━━━━<br/>+ hash(value) → str<br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        SC["SaltConfig<br/>(frozen dataclass)<br/>━━━━━━━━━━━━━━━━━<br/>current_salt: str<br/>next_salt: str | None<br/>rotation_active: bool<br/>━━━━━━━━━━━━━━━━━<br/>+ from_settings()<br/>+ from_env()<br/>"]:::size-lg
+        SPH["Sha256PiiHasher<br/>--------<br/>+ hash(value) -> str"]:::size-md
+        SC["SaltConfig<br/>(frozen dataclass)<br/>--------<br/>current_salt<br/>next_salt<br/>rotation_active"]:::size-md
     end
 
     subgraph InfraAudit["Infrastructure: Audit"]
-        FAA["FileAuditAdapter<br/>━━━━━━━━━━━━━━━━━<br/>base_path: Path<br/>logger: LoggerPort<br/>━━━━━━━━━━━━━━━━━<br/>+ log_write(entry)<br/>+ get_entries(filters)<br/>+ aclose()<br/><br/>"]:::size-lg
-        JSONL["audit_YYYY-MM-DD.jsonl<br/>(one file per day,<br/>append-only)<br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        FAA["FileAuditAdapter<br/>--------<br/>base_path, logger<br/>+ log_write(entry)<br/>+ get_entries(filters)"]:::size-md
+        JSONL["audit_YYYY-MM-DD.jsonl<br/>(daily append-only file)"]:::size-sm
     end
 
     subgraph Usage["Usage in Transformers"]
-        BT["BaseTransformer<br/>━━━━━━━━━━━━━━━━━<br/>+ hash_pii_value(value) → str<br/>+ hash_pii_list(values) → list[str]<br/><br/><br/><br/><br/><br/>"]:::size-lg
+        BT["BaseTransformer<br/>--------<br/>+ hash_pii_value()<br/>+ hash_pii_list()"]:::size-md
     end
 
     subgraph StorageAudit["Storage Audit Integration"]
-        GW["GoldWriter<br/>━━━━━━━━━━━━━━━━━<br/>audit: AuditPort<br/>logs writes<br/><br/><br/><br/><br/><br/>"]:::size-lg
+        GW["GoldWriter<br/>--------<br/>audit: AuditPort<br/>logs writes"]:::size-md
     end
 
     %% Port implementations

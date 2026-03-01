@@ -45,4 +45,14 @@ def test_runner_renders_single_diagram_with_dir_and_filter() -> None:
     assert 'run_render_step()' in script
     assert '--dir "$REPO_ROOT/$diagram_dir"' in script
     assert '--filter "$diagram_stem"' in script
+    assert '--text-layer "$TEXT_LAYER"' in script
     assert '--puppeteer "$PUPPETEER_CFG"' in script
+
+
+def test_runner_supports_text_layer_mode() -> None:
+    script = _script_text()
+
+    assert "--text-layer <mode>" in script
+    assert "TEXT_LAYER=" in script
+    assert "--text-layer requires value" in script
+    assert "--text-layer must be one of: dual|fo-only|fallback-only" in script

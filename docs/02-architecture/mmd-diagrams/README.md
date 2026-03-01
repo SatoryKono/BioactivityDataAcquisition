@@ -229,6 +229,12 @@ bash docs/02-architecture/mmd-diagrams/render.sh \
 # CI mode (Puppeteer sandbox disabled)
 bash docs/02-architecture/mmd-diagrams/render.sh --puppeteer /tmp/puppeteer-config.json
 
+# Text-layer mode (recommended for Chrome/SVG export parity)
+# dual          : keep foreignObject + add fallback text
+# fo-only       : keep only foreignObject labels
+# fallback-only : add fallback text and strip foreignObject labels
+bash docs/02-architecture/mmd-diagrams/render.sh --text-layer fallback-only
+
 # Syntax validation (shows explicit hint if Chrome runtime is missing)
 bash scripts/validate_mermaid_syntax.sh --puppeteer /tmp/puppeteer-config.json
 ```

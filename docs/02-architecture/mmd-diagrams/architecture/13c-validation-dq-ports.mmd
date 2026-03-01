@@ -8,17 +8,13 @@
 %% @nodes   20
 
 %%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
   'layout': 'elk',
-  'theme': 'base',
-  'themeVariables': { 'fontFamily': 'Inter, system-ui, sans-serif' },
   'elk': {
     'mergeEdges': true,
     'nodePlacementStrategy': 'BRANDES_KOEPF',
-    'cycleBreakingStrategy': 'GREEDY',
-    'direction': 'RIGHT',
-    'spacing.nodeNode': 40,
-    'spacing.edgeNode': 30,
-    'spacing.edgeEdge': 20,
     'edgeRouting': 'ORTHOGONAL'
   }
 }}%%
@@ -26,26 +22,26 @@
 %% @uniform width=232 height=56 max_title_len=24 max_desc_lines=0
 graph LR
     subgraph Domain["Domain Ports"]
-        SVP["fa:fa-check-double SilverValidatorPort"]:::size-sm
-        GVP["fa:fa-shield-check GoldValidatorPort"]:::size-sm
-        BDQP["fa:fa-magnifying-glass BronzeDQAnalyzerPort"]:::size-sm
-        SDQP["fa:fa-magnifying-glass-plus SilverDQAnalyzerPort"]:::size-sm
-        GDQP["fa:fa-magnifying-glass-chart GoldDQAnalyzerPort"]:::size-sm
-        DQRWP["fa:fa-file-contract DQReportWriterPort"]:::size-sm
-        QRP["fa:fa-biohazard QuarantinePort"]:::size-sm
+        SVP["fa:fa-check-double SilverValidatorPort"]:::size-md
+        GVP["fa:fa-shield-check GoldValidatorPort"]:::size-md
+        BDQP["fa:fa-magnifying-glass BronzeDQAnalyzerPort"]:::size-md
+        SDQP["fa:fa-magnifying-glass-plus SilverDQAnalyzerPort"]:::size-md
+        GDQP["fa:fa-magnifying-glass-chart GoldDQAnalyzerPort"]:::size-md
+        DQRWP["fa:fa-file-contract DQReportWriterPort"]:::size-md
+        QRP["fa:fa-biohazard QuarantinePort"]:::size-md
     end
 
     subgraph Infrastructure["Infrastructure"]
-        PSV["PanderaSilverValidator"]:::size-sm
-        PGV["PanderaGoldValidator"]:::size-sm
-        DQRW_I["DQReportWriter"]:::size-sm
-        UQ["UnifiedQuarantine"]:::size-sm
+        PSV["PanderaSilverValidator"]:::size-md
+        PGV["PanderaGoldValidator"]:::size-md
+        DQRW_I["DQReportWriter"]:::size-md
+        UQ["UnifiedQuarantine"]:::size-md
     end
 
     subgraph Application["Application"]
-        BDA["BronzeDQAnalyzer"]:::size-sm
-        SDA["SilverDQAnalyzer"]:::size-sm
-        GDA["GoldDQAnalyzer"]:::size-sm
+        BDA["BronzeDQAnalyzer"]:::size-md
+        SDA["SilverDQAnalyzer"]:::size-md
+        GDA["GoldDQAnalyzer"]:::size-md
     end
 
     SVP --- PSV
