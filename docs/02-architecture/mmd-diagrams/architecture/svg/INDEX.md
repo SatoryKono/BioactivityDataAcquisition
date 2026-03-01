@@ -1,6 +1,6 @@
 # BioETL Diagrams — SVG Index
 
-_Generated: 2026-03-01T18:07:54+03:00_
+_Generated: 2026-03-01T19:02:03+03:00_
 
 ## High Level Hexagonal
 
@@ -80,9 +80,33 @@ _Generated: 2026-03-01T18:07:54+03:00_
 
 ---
 
+## 06astorage Writers
+
+![06a-storage-writers](./06a-storage-writers.svg)
+
+---
+
+## 06bstorage Support
+
+![06b-storage-support](./06b-storage-support.svg)
+
+---
+
 ## Dq System
 
 ![07-dq-system](./07-dq-system.svg)
+
+---
+
+## 07adq Analysis
+
+![07a-dq-analysis](./07a-dq-analysis.svg)
+
+---
+
+## 07bdq Pipeline
+
+![07b-dq-pipeline](./07b-dq-pipeline.svg)
 
 ---
 
@@ -92,9 +116,33 @@ _Generated: 2026-03-01T18:07:54+03:00_
 
 ---
 
+## 08acomposite Config
+
+![08a-composite-config](./08a-composite-config.svg)
+
+---
+
+## 08bcomposite Execution
+
+![08b-composite-execution](./08b-composite-execution.svg)
+
+---
+
 ## Observability Stack
 
 ![09-observability-stack](./09-observability-stack.svg)
+
+---
+
+## 09aobservability App
+
+![09a-observability-app](./09a-observability-app.svg)
+
+---
+
+## 09bobservability Infra
+
+![09b-observability-infra](./09b-observability-infra.svg)
 
 ---
 
@@ -107,6 +155,18 @@ _Generated: 2026-03-01T18:07:54+03:00_
 ## Configuration System
 
 ![11-configuration-system](./11-configuration-system.svg)
+
+---
+
+## 11aconfig Loading
+
+![11a-config-loading](./11a-config-loading.svg)
+
+---
+
+## 11bconfig Domain
+
+![11b-config-domain](./11b-config-domain.svg)
 
 ---
 
@@ -143,12 +203,6 @@ _Generated: 2026-03-01T18:07:54+03:00_
 ## 13aport Contracts Data Sources
 
 ![13a-port-contracts-data-sources](./13a-port-contracts-data-sources.svg)
-
----
-
-## 13a.Afterfix.Copy2 No Class Suffix
-
-![13a.after-fix.copy2-no-class-suffix](./13a.after-fix.copy2-no-class-suffix.svg)
 
 ---
 

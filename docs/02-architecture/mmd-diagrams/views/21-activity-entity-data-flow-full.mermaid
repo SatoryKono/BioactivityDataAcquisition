@@ -14,7 +14,17 @@
 %% @png-scale 6
 %% @png-dpi   600
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 %% @uniform width=264 height=72 max_title_len=28 max_desc_lines=2
 flowchart LR
 %% keep-orphan: LocalFS, S1, S10, S11, S12, S2, S4, S5, S6, S7, S8, S9
@@ -88,10 +98,10 @@ flowchart LR
 
     %% Styling
     style API fill:#eff6ff
-    style E3 fill:#fff7ed,stroke:#f59e0b,color:#212121
-    style L1 fill:#f8fafc,stroke:#475569,color:#212121
-    style L2 fill:#fefce8,stroke:#ca8a04,color:#212121
-    style Q fill:#ffe4e6,stroke:#e11d48,color:#fff
+    style E3 fill:#CD7F32,color:#fff
+    style L1 fill:#C0C0C0,color:#000
+    style L2 fill:#FFD700,color:#000
+    style Q fill:#e11d48,color:#fff
 
     %% Activity Schema annotation
     subgraph Schema["Activity Silver Schema"]
@@ -110,5 +120,27 @@ flowchart LR
         S12["_ingestion_ts: datetime<br/><br/>"]
     end
 
-    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,14,15,16,17 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 8 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 10 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 11 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 12 stroke:#475569,stroke-width:2px,stroke-dasharray:5
     linkStyle 13 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 14 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 15 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 16 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 17 stroke:#475569,stroke-width:2px,stroke-dasharray:5

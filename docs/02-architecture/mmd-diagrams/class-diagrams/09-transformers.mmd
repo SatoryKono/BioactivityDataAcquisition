@@ -15,115 +15,123 @@
 %% @uniform-stats intermediate width=280 height=112 max_desc_lines=4
 %% @uniform-stats concrete     width=376 height=72 max_desc_lines=2
 classDiagram
-    direction TB
-    class BaseTransformer {
-        <<ABC>>
-        +provider: str
-        +entity_type: str
-        #_tracer: TracingPort
-        #_metrics: MetricsPort
-        #_silver_filters: SilverFilterConfig | None
-        #_gold_filters: GoldFilterConfig | None
-        #_identity: IdentityService
-        #_pii_hasher: PiiHasherPort
-        #_data_normalizer: DataNormalizationPort
-        #_contract_policy: PipelineContractPolicy
-        +GOLD_EXCLUDE_FIELDS: frozenset~str~
-        +transform(ctx, record, idx) SilverRecord | None
-        #_transform_impl(ctx, record, idx)* SilverRecord | None
-        +should_write_silver(ctx, record) bool
-        +should_write_gold(ctx, record) bool
-        +transform_for_gold(ctx, silver_record) dict
-        +compute_content_hash(data, exclude_none) ContentHash
-        +compute_entity_id(source_id, record) EntityID
-        +entity_to_silver_record(entity) dict
-        +hash_pii_value(value) str
-        +hash_pii_list(values) list~str~
-        +validate_value_object(vo_class, value)$ str | None
+    direction LR
+    namespace Base_Layer {
+        class BaseTransformer {
+            <<ABC>>
+            +provider: str
+            +entity_type: str
+            #_tracer: TracingPort
+            #_metrics: MetricsPort
+            #_silver_filters: SilverFilterConfig | None
+            #_gold_filters: GoldFilterConfig | None
+            #_identity: IdentityService
+            #_pii_hasher: PiiHasherPort
+            #_data_normalizer: DataNormalizationPort
+            #_contract_policy: PipelineContractPolicy
+            +GOLD_EXCLUDE_FIELDS: frozenset~str~
+            +transform(ctx, record, idx) SilverRecord | None
+            #_transform_impl(ctx, record, idx)* SilverRecord | None
+            +should_write_silver(ctx, record) bool
+            +should_write_gold(ctx, record) bool
+            +transform_for_gold(ctx, silver_record) dict
+            +compute_content_hash(data, exclude_none) ContentHash
+            +compute_entity_id(source_id, record) EntityID
+            +entity_to_silver_record(entity) dict
+            +hash_pii_value(value) str
+            +hash_pii_list(values) list~str~
+            +validate_value_object(vo_class, value)$ str | None
+        }
+
+        class BaseChemblTransformer {
+            <<ABC>>
+            +entity_class: type
+            +primary_id_field: str
+            #_extract_business_data(record)* dict
+        }
+
+        class BasePublicationTransformer {
+            <<ABC>>
+            #_extract_fields(record)* dict
+            #_build_entity(fields)* PublicationBase
+        }
     }
 
-    class BaseChemblTransformer {
-        <<ABC>>
-        +entity_class: type
-        +primary_id_field: str
-        #_extract_business_data(record)* dict
+    namespace ChEMBL_Transformers {
+        class ActivityTransformer {
+            provider = "chembl"
+            entity_type = "activity"
+        }
+        class AssayTransformer {
+            provider = "chembl"
+            entity_type = "assay"
+        }
+        class MoleculeTransformer {
+            provider = "chembl"
+            entity_type = "molecule"
+        }
+        class TargetTransformer {
+            provider = "chembl"
+            entity_type = "target"
+        }
+        class TargetComponentTransformer {
+            provider = "chembl"
+            entity_type = "target_component"
+        }
+        class PublicationTransformer {
+            provider = "chembl"
+            entity_type = "publication"
+        }
+        class TissueTransformer {
+            provider = "chembl"
+            entity_type = "tissue"
+        }
+        class CellLineTransformer {
+            provider = "chembl"
+            entity_type = "cell_line"
+        }
+        class ProteinClassTransformer {
+            provider = "chembl"
+            entity_type = "protein_class"
+        }
+        class CompoundRecordTransformer {
+            provider = "chembl"
+            entity_type = "compound_record"
+        }
     }
 
-    class ActivityTransformer {
-        provider = "chembl"
-        entity_type = "activity"
-    }
-    class AssayTransformer {
-        provider = "chembl"
-        entity_type = "assay"
-    }
-    class MoleculeTransformer {
-        provider = "chembl"
-        entity_type = "molecule"
-    }
-    class TargetTransformer {
-        provider = "chembl"
-        entity_type = "target"
-    }
-    class TargetComponentTransformer {
-        provider = "chembl"
-        entity_type = "target_component"
-    }
-    class PublicationTransformer {
-        provider = "chembl"
-        entity_type = "publication"
-    }
-    class TissueTransformer {
-        provider = "chembl"
-        entity_type = "tissue"
-    }
-    class CellLineTransformer {
-        provider = "chembl"
-        entity_type = "cell_line"
-    }
-    class ProteinClassTransformer {
-        provider = "chembl"
-        entity_type = "protein_class"
-    }
-    class CompoundRecordTransformer {
-        provider = "chembl"
-        entity_type = "compound_record"
+    namespace Publication_Enrichers {
+        class PubMedPublicationTransformer {
+            provider = "pubmed"
+            entity_type = "publication"
+        }
+        class CrossRefPublicationTransformer {
+            provider = "crossref"
+            entity_type = "publication"
+        }
+        class OpenAlexPublicationTransformer {
+            provider = "openalex"
+            entity_type = "publication"
+        }
+        class SemanticScholarPublicationTransformer {
+            provider = "semanticscholar"
+            entity_type = "publication"
+        }
     }
 
-    class BasePublicationTransformer {
-        <<ABC>>
-        #_extract_fields(record)* dict
-        #_build_entity(fields)* PublicationBase
-        
-    }
-    class PubMedPublicationTransformer {
-        provider = "pubmed"
-        entity_type = "publication"
-    }
-    class CrossRefPublicationTransformer {
-        provider = "crossref"
-        entity_type = "publication"
-    }
-    class OpenAlexPublicationTransformer {
-        provider = "openalex"
-        entity_type = "publication"
-    }
-    class SemanticScholarPublicationTransformer {
-        provider = "semanticscholar"
-        entity_type = "publication"
-    }
-
-    class UniProtProteinTransformer {
-        provider = "uniprot"
-        entity_type = "protein"
-    }
-    class IDMappingTransformer {
-        provider = "uniprot"
-        entity_type = "idmapping"
-    }
-    class PubChemCompoundTransformer {
-        provider = "pubchem"
-        entity_type = "compound"
+    namespace Other_Providers {
+        class UniProtProteinTransformer {
+            provider = "uniprot"
+            entity_type = "protein"
+        }
+        class IDMappingTransformer {
+            provider = "uniprot"
+            entity_type = "idmapping"
+        }
+        class PubChemCompoundTransformer {
+            provider = "pubchem"
+            entity_type = "compound"
+        }
     }
 
     BaseTransformer <|-- BaseChemblTransformer

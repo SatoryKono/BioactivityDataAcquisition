@@ -1,69 +1,70 @@
 %% View: Infrastructure-Mapping | Parent: 48-composite-phase-lifecycle-full.mermaid
-%% @uniform width=216 height=56 max_title_len=22 max_desc_lines=0
-%%{init: {'theme':'base','layout':'elk','flowchart':{'curve':'linear'},'elk':{'nodePlacementStrategy':'BRANDES_KOEPF','mergeEdges':true,'edgeRouting':'ORTHOGONAL'}}}%%
-flowchart TB
+%% @uniform width=232 height=64 max_title_len=24 max_desc_lines=0
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL',
+    'spacing.nodeNode': 34,
+    'spacing.edgeNode': 24,
+    'spacing.edgeEdge': 12
+  }
+}}%%
+flowchart LR
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N12["idle"]
+        STATE["CompositePipelineState"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N19["merge_active"]
+        RUNNER["CompositePipelineRunner"]
+        DISPATCHER["PhaseDispatcher"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N1["*"]
-        N2["FAILED"]
-        N3["ENRICHING"]
-        N4["SEED_RUNNING"]
-        N5["SEED_COMPLETED"]
-        N6["DEPENDENCIES_RUNNING"]
-        N7["MERGING"]
-        N8["NOT_STARTED"]
-        N9["DEPENDENCIES_COMPLETED"]
-        N10["ENRICHMENT_COMPLETED"]
-        N11["COMPLETED"]
-        N13["extracting_seed"]
-        N14["keys_extracted"]
-        N15["running_deps"]
-        N16["deps_done"]
-        N17["fan_out"]
-        N18["enrichers_done"]
-        N20["success"]
+        SEED_RUNNER["PipelineRunner (seed)"]
+        DEP_COORD["DependencyCoordinator"]
+        ENRICH_COORD["EnrichmentCoordinator"]
+        MERGE_SERVICE["MergeService"]
+        CHECKPOINT["CheckpointStore"]
+        METRICS["Metrics/Tracing"]
     end
 
-    N1 --> N8
-    N8 --> N4
-    N4 --> N5
-    N4 --> N2
-    N5 --> N6
-    N5 --> N3
-    N6 --> N9
-    N6 --> N2
-    N9 --> N3
-    N3 --> N10
-    N3 --> N2
-    N10 --> N7
-    N7 --> N11
-    N7 --> N2
-    N11 --> N1
-    N2 --> N1
-    N1 --> N12
-    N1 --> N13
-    N1 --> N14
-    N1 --> N15
-    N1 --> N16
-    N1 --> N17
-    N1 --> N18
-    N1 --> N19
-    N1 --> N20
+    RUNNER --> DISPATCHER
+    DISPATCHER --> SEED_RUNNER
+    DISPATCHER --> DEP_COORD
+    DISPATCHER --> ENRICH_COORD
+    DISPATCHER --> MERGE_SERVICE
+
+    SEED_RUNNER --> CHECKPOINT
+    DEP_COORD --> CHECKPOINT
+    ENRICH_COORD --> CHECKPOINT
+    MERGE_SERVICE --> CHECKPOINT
+
+    SEED_RUNNER -. updates .-> STATE
+    DEP_COORD -. updates .-> STATE
+    ENRICH_COORD -. updates .-> STATE
+    MERGE_SERVICE -. updates .-> STATE
+
+    RUNNER -. emits .-> METRICS
+    DISPATCHER -. emits .-> METRICS
+    CHECKPOINT -. recovery state .-> RUNNER
 
     style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
     style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
     style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
 
-    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 24 stroke:#475569,stroke-width:2px,stroke-dasharray:5,opacity:0.85
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle default stroke:#475569,stroke-width:2px

@@ -10,22 +10,32 @@
 %% @allow-polyline-routing
 
 %% @uniform width=208 height=128 max_title_len=20 max_desc_lines=5
-%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '16px', 'edgeLabelBackground': '#ffffffee'}, 'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'POLYLINE', 'spacing.nodeNode': 40, 'spacing.edgeNode': 25, 'spacing.rankRank': 60}}}%%
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 graph TB
 %% keep-orphan: DQConfig
     %% ── Domain Ports (contracts) ──────────────────────────
     subgraph Ports["Domain Ports"]
-        DQM["DQMonitorPort<br/><br/><br/><br/>"]
-        BDQAP["BronzeDQAnalyzerPort<br/><br/><br/><br/>"]
-        SDQAP["SilverDQAnalyzerPort<br/><br/><br/><br/>"]
-        GDQAP["GoldDQAnalyzerPort<br/><br/><br/><br/>"]
-        DQRWP["DQReportWriterPort<br/><br/><br/><br/>"]
+        DQM["DQMonitorPort"]
+        BDQAP["BronzeDQAnalyzerPort"]
+        SDQAP["SilverDQAnalyzerPort"]
+        GDQAP["GoldDQAnalyzerPort"]
+        DQRWP["DQReportWriterPort"]
     end
 
     %% ── Application Services ──────────────────────────────
     subgraph AppServices["Application Services"]
-        DQS["DataQualityService<br/>━━━━━━━━━━━━━━━━━<br/>+ evaluate(context, executor)<br/><br/>"]
-        DQRS["DQReportService<br/>━━━━━━━━━━━━━━━━━<br/>+ generate_reports(context)<br/><br/>"]
+        DQS["DataQualityService<br/>--------<br/>+ evaluate(context, executor)"]
+        DQRS["DQReportService<br/>--------<br/>+ generate_reports(context)"]
     end
 
     %% ── Application DQ Analyzers + Anomaly ────────────────
@@ -33,16 +43,16 @@ graph TB
         BDA["BronzeDQAnalyzer<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(records)<br/>+ check_completeness()<br/>+ check_format()"]
         SDA["SilverDQAnalyzer<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(delta_table)<br/>+ check_nullability()<br/>+ check_schema()"]
         GDA["GoldDQAnalyzer<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(delta_table)<br/>+ check_pk_uniqueness()<br/>+ validate_schema()"]
-        AD["AnomalyDetector<br/><br/><br/><br/>"]
-        ZSD["ZScoreDetector<br/>(DetectorStrategy)<br/><br/><br/>"]
+        AD["AnomalyDetector"]
+        ZSD["ZScoreDetector<br/>(DetectorStrategy)"]
         AN["Anomaly<br/>━━━━━━━━━━━━━━━━━<br/>type: AnomalyType<br/>severity: AnomalySeverity<br/>metric_name: str"]
     end
 
     %% ── Pipeline Integration (application layer) ──────────
     subgraph Pipeline["Pipeline Integration"]
-        BT["BatchTransformer<br/>━━━━━━━━━━━━━━━━━<br/>_check_dq_thresholds()<br/><br/>"]
-        QM["QuarantineManager<br/>━━━━━━━━━━━━━━━━━<br/>Quarantines failed records<br/><br/>"]
-        EC["ErrorClassifier<br/>━━━━━━━━━━━━━━━━━<br/>recoverable vs fatal<br/><br/>"]
+        BT["BatchTransformer<br/>--------<br/>_check_dq_thresholds()"]
+        QM["QuarantineManager<br/>--------<br/>Quarantines failed records"]
+        EC["ErrorClassifier<br/>--------<br/>recoverable vs fatal"]
     end
 
     %% ── Domain Value Objects ──────────────────────────────
@@ -55,8 +65,8 @@ graph TB
 
     %% ── Infrastructure Implementations ────────────────────
     subgraph InfraImpl["Infrastructure Implementations"]
-        DQCL["DQConfigLoader<br/>(YAML → DQConfig)<br/><br/><br/>"]
-        DQRW["DQReportWriter<br/>(JSON reports)<br/><br/><br/>"]
+        DQCL["DQConfigLoader<br/>(YAML -> DQConfig)"]
+        DQRW["DQReportWriter<br/>(JSON reports)"]
     end
 
     %% ── Port implementations (DI / implements) ────────────

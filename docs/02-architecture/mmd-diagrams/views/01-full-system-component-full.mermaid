@@ -25,25 +25,16 @@
 %% @uniform width=272 groups=6 width_strategy=group
 
 %%{init: {
-%%  'layout': 'elk',
-%%  'theme': 'base',
-%%  'flowchart': {
-%%    'nodeSpacing': 64,
-%%    'rankSpacing': 72,
-%%    'padding': 24,
-%%    'curve': 'linear'
-%%  },
-%%  'elk': {
-%%    'mergeEdges': true,
-%%    'nodePlacementStrategy': 'BRANDES_KOEPF',
-%%    'cycleBreakingStrategy': 'GREEDY',
-%%    'direction': 'DOWN',
-%%    'spacing.nodeNode': 48,
-%%    'spacing.edgeNode': 36,
-%%    'spacing.edgeEdge': 24,
-%%    'edgeRouting': 'ORTHOGONAL'
-%%  }
-%%}}%%
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 flowchart TB
 %% keep-orphan: DQConfig, PipelineConfig, Publication, RuntimeConfig
 
