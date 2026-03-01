@@ -22,9 +22,9 @@ classDiagram
     direction TB
     class HealthCheckMixin {
         <<Mixin>>
-        #_start_health_check(provider, endpoint) HealthCheckContext
-        #_handle_health_check_success(ctx, status) None
-        #_handle_health_check_failure(ctx, error) None
+        #_start_health_check(...) HealthCheckContext
+        #_handle_health_check_success(...) None
+        #_handle_health_check_failure(...) None
         
         
     }
