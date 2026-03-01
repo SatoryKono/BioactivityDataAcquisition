@@ -8,6 +8,15 @@
 %% @nodes   12
 %% @uniform sequence width=168 max_title_len=16
 
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'elk': {
+    'mergeEdges': true
+  }
+}}%%
+
 sequenceDiagram
     participant CLI as CLI / Interfaces
     participant Boot as Bootstrap

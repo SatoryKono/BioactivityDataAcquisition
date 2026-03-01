@@ -189,16 +189,16 @@ diagram-preflight: ## Check Mermaid render dependencies (mmdc required, svgo/rsv
 
 lint-diagrams: ## Lint all Mermaid source files in docs/ (excluding docs/99-archive/**)
 	@echo "$(BLUE)Linting diagram policies...$(NC)"
-	$(PY_RUN) scripts/lint_diagrams.py docs
+	$(PY_RUN) scripts/diagrams/lint_diagrams.py docs
 
 report-diagrams-policy: ## Generate non-blocking diagram lint summary report
 	@echo "$(BLUE)Generating diagram lint summary report...$(NC)"
-	$(PY_RUN) scripts/lint_diagrams.py docs/02-architecture/mmd-diagrams --json > /tmp/diagram-lint.json || true
-	$(PY_RUN) scripts/summarize_diagram_lint.py /tmp/diagram-lint.json
+	$(PY_RUN) scripts/diagrams/lint_diagrams.py docs/02-architecture/mmd-diagrams --json > /tmp/diagram-lint.json || true
+	$(PY_RUN) scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json
 
 validate-diagrams-syntax: diagram-preflight ## Validate Mermaid syntax for docs/**/*.mmd|*.mermaid
 	@echo "$(BLUE)Validating Mermaid syntax...$(NC)"
-	bash scripts/validate_mermaid_syntax.sh
+	bash scripts/diagrams/validate_mermaid_syntax.sh
 
 render-diagrams-all: diagram-preflight ## Render all docs diagrams to SVG+PNG (excluding docs/99-archive/**)
 	@echo "$(BLUE)Rendering all diagrams (SVG+PNG)...$(NC)"
@@ -216,14 +216,14 @@ render-diagrams-png: diagram-preflight ## Render all docs diagrams to PNG only
 
 check-diagrams-visibility: ## Check text visibility in baseline SVG smoke set
 	@echo "$(BLUE)Checking SVG text visibility (smoke manifest)...$(NC)"
-	$(PY_RUN) scripts/check_svg_text_visibility.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
+	$(PY_RUN) scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
 
 diagrams-all: lint-diagrams validate-diagrams-syntax render-diagrams-all check-diagrams-visibility ## Full diagram pipeline (lint + validate + render + visibility check)
 	@echo "$(GREEN)Diagram pipeline complete.$(NC)"
 
 report-diagram-padding: ## Report top files by &nbsp; usage in Mermaid sources
 	@echo "$(BLUE)Reporting Mermaid &nbsp; usage...$(NC)"
-	$(PY_RUN) scripts/report_diagram_padding.py --top 30
+	$(PY_RUN) scripts/diagrams/report_diagram_padding.py --top 30
 
 security: ## Run security audit (osv-scanner + pip-audit)
 	@echo "$(BLUE)Running security audit...$(NC)"

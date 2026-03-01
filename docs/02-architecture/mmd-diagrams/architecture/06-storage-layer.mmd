@@ -8,7 +8,17 @@
 %% @nodes   21
 %% @reference  Decomposed into 06a-storage-writers, 06b-storage-support
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 %% @uniform width=216 height=198 max_title_len=22 max_desc_lines=9
 graph LR
 %% keep-orphan: DQW, NOV

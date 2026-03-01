@@ -8,7 +8,17 @@
 %% @nodes   33
 %% @reference  Decomposed into 08a-composite-config, 08b-composite-execution
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 %% @uniform width=256 height=126 max_title_len=27 max_desc_lines=5
 graph TB
     subgraph Config["Composite Configuration"]

@@ -11,6 +11,17 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 %% @uniform width=240 height=126 max_title_len=25 max_desc_lines=5
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 
 flowchart TB
 %% keep-orphan: CheckpointPort, CriticalError, DataQualityError, DataSourcePort, HealthStatus, InvalidStateError, LockPort, Measurement, MetricsPort, QuarantinePort, RecoverableError, RunType, StoragePort, TracingPort
@@ -26,11 +37,11 @@ flowchart TB
         end
 
         subgraph aggregates["aggregates/"]
-            Batch["Batch Aggregate<br/>───────────────<br/>• add_record()<br/>• quarantine_record()<br/>• seal()<br/>• mark_committed()"]
+            Batch["Batch Aggregate<br/>add_record(), quarantine_record()<br/>seal(), mark_committed()"]
 
-            PipelineRun["PipelineRun Aggregate<br/>───────────────<br/>• start()<br/>• record_stage_success()<br/>• complete()<br/>• fail()"]
+            PipelineRun["PipelineRun Aggregate<br/>start(), record_stage_success()<br/>complete(), fail()"]
 
-            QuarantineEntry["QuarantineEntry Aggregate<br/>───────────────<br/>• mark_retrying()<br/>• mark_recovered()<br/>• mark_dead_letter()<br/>"]
+            QuarantineEntry["QuarantineEntry Aggregate<br/>mark_retrying(), mark_recovered()<br/>mark_dead_letter()"]
         end
 
         subgraph events["Domain Events"]
@@ -43,16 +54,16 @@ flowchart TB
         end
 
         subgraph value_objects["value_objects/"]
-            RunID["RunID (UUID)<br/><br/><br/><br/><br/>"]
-            BatchID["BatchID (UUID)<br/><br/><br/><br/><br/>"]
-            EntityID["EntityID (str)<br/><br/><br/><br/><br/>"]
-            ContentHash["ContentHash (str)<br/><br/><br/><br/><br/>"]
-            Measurement["Measurement<br/>(value, unit, relation)<br/><br/><br/><br/>"]
+            RunID["RunID (UUID)<br/><br/><br/><br/>"]
+            BatchID["BatchID (UUID)<br/><br/><br/><br/>"]
+            EntityID["EntityID (str)<br/><br/><br/><br/>"]
+            ContentHash["ContentHash (str)<br/><br/><br/><br/>"]
+            Measurement["Measurement<br/>(value, unit, relation)<br/><br/><br/>"]
         end
 
         subgraph types["types.py"]
-            RunType["RunType Enum<br/>(INCREMENTAL, BACKFILL, REBUILD)<br/><br/><br/><br/>"]
-            HealthStatus["HealthStatus Enum<br/>(HEALTHY, DEGRADED, UNHEALTHY)<br/><br/><br/><br/>"]
+            RunType["RunType Enum<br/>(INCREMENTAL, BACKFILL, REBUILD)<br/><br/><br/>"]
+            HealthStatus["HealthStatus Enum<br/>(HEALTHY, DEGRADED, UNHEALTHY)<br/><br/><br/>"]
         end
 
         subgraph exceptions["exceptions/"]
@@ -92,6 +103,28 @@ flowchart TB
         R_RUNNING --> R_SHUTDOWN["SHUTDOWN"]
     end
 
-    linkStyle 0,1,2,4,5,6,7,8 stroke:#1E293B,stroke-width:4px
-    linkStyle 3,9,10,14,17 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
-    linkStyle 11,12,13,15,16,18 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle 0 stroke:#1E293B,stroke-width:4px
+    linkStyle 1 stroke:#1E293B,stroke-width:4px
+    linkStyle 2 stroke:#1E293B,stroke-width:4px
+    linkStyle 3 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 4 stroke:#1E293B,stroke-width:4px
+    linkStyle 5 stroke:#1E293B,stroke-width:4px
+    linkStyle 6 stroke:#1E293B,stroke-width:4px
+    linkStyle 7 stroke:#1E293B,stroke-width:4px
+    linkStyle 8 stroke:#1E293B,stroke-width:4px
+    linkStyle 9 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 10 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 11 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 12 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 13 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 14 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 15 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 16 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 17 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 18 stroke:#475569,stroke-width:2px,stroke-dasharray:5

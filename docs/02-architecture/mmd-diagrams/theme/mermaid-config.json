@@ -19,7 +19,7 @@
     "mainBkg": "#eff6ff",
 
     "fontFamily": "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif",
-    "fontSize": "14px",
+    "fontSize": "16px",
 
     "nodeBorder": "#2563eb",
     "clusterBkg": "#f8fafc",
@@ -80,7 +80,7 @@
     "htmlLabels": true,
     "useMaxWidth": true,
     "diagramPadding": 16,
-    "wrappingWidth": 200
+    "wrappingWidth": 240
   },
   "sequence": {
     "mirrorActors": false,

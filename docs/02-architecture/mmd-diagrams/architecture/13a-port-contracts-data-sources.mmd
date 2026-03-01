@@ -8,8 +8,19 @@
 %% @view    data-sources
 %% @parent  13-port-protocol-contracts.mmd
 %% @nodes   9
-%% @uniform width=240 height=56 max_title_len=24 max_desc_lines=1
+%% @uniform width=240 height=56 max_title_len=34 max_desc_lines=1
 
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 graph LR
 %% keep-orphan: FDSP
     subgraph Domain["Domain Layer"]

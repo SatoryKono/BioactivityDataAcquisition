@@ -12,7 +12,17 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 %% @uniform width=304 height=108 max_title_len=33 max_desc_lines=4
 flowchart TB
     subgraph Source["1. External API"]
@@ -20,7 +30,7 @@ flowchart TB
     end
 
     subgraph Bronze["2. Bronze Layer"]
-        BW["BronzeWriter.write_bronze()<br/>• JSONL serialization<br/>• zstd compression<br/>• atomic rename<br/>• _manifest.json"]
+        BW["BronzeWriter.write_bronze()<br/>JSONL + zstd + atomic rename<br/>manifest update"]
         BF[("Bronze File<br/>bronze/chembl/activity/<br/>2026-02-17/batch_001.jsonl.zst"<br/><br/>)]
     end
 
@@ -28,7 +38,7 @@ flowchart TB
         BT["BatchTransformer.transform()<br/><br/><br/><br/>"]
         TI["BaseTransformer._transform_impl()<br/>(e.g., ActivityTransformer)<br/><br/><br/>"]
         NORM["Data Normalization<br/>• NaN → null<br/>• strip strings<br/>• dates → ISO<br/>• floats → round(10)"]
-        META["Add Metadata<br/>• _run_id (UUID)<br/>• _run_type (incremental/backfill)<br/>• _source_batch_id (FK)<br/>• _ingestion_ts (UTC now)"]
+        META["Add Metadata<br/>_run_id, _run_type<br/>_source_batch_id, _ingestion_ts"]
         HASH["Compute _content_hash<br/>• exclude META_FIELDS<br/>• canonical JSON (sort_keys)<br/>• sha256 digest<br/>"]
     end
 
@@ -45,12 +55,12 @@ flowchart TB
     end
 
     subgraph Silver["6. Silver Layer"]
-        SW["SilverWriter.write_silver()<br/>• merge/upsert by PK<br/>• content_hash dedup<br/>• Delta Lake transaction<br/>"]
+        SW["SilverWriter.write_silver()<br/>merge/upsert by PK<br/>content_hash dedup + Delta tx"]
         ST[("Silver Table<br/>silver/chembl/activity/<br/>_delta_log/"<br/><br/>)]
     end
 
     subgraph GoldLayer["7. Gold Layer"]
-        TFG["transform_for_gold()<br/>• exclude JSON fields<br/>(molecule_properties,<br/>molecule_structures, etc.)<br/>"]
+        TFG["transform_for_gold()<br/>exclude bulky JSON fields<br/>for Gold contract"]
         GV["PanderaGoldValidator.validate()<br/>ChEMBLActivityGoldSchema<br/>(strict mode)<br/><br/>"]
         GW["GoldWriter.write_gold()<br/><br/><br/><br/>"]
         GT[("Gold Table<br/>gold/chembl/activity/<br/>_delta_log/"<br/><br/>)]
@@ -78,10 +88,26 @@ flowchart TB
     QUAR --> QT
 
     %% Styling
-    style Bronze fill:#fff7ed,stroke:#f59e0b,color:#000
-    style Silver fill:#f8fafc,stroke:#475569,color:#000
-    style GoldLayer fill:#fefce8,stroke:#ca8a04,color:#000
-    style QuarDB fill:#ffe4e6,stroke:#e11d48,color:#000
+    style Bronze fill:#FFA500,stroke:#cc8400,color:#000
+    style Silver fill:#C0C0C0,stroke:#808080,color:#000
+    style GoldLayer fill:#FFD700,stroke:#ccac00,color:#000
+    style QuarDB fill:#e11d48,stroke:#cc4444,color:#000
 
-    linkStyle 0,1,2,7,8,9,10,11 stroke:#1E293B,stroke-width:4px
-    linkStyle 3,4,5,6 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle 0 stroke:#1E293B,stroke-width:4px
+    linkStyle 1 stroke:#1E293B,stroke-width:4px
+    linkStyle 2 stroke:#1E293B,stroke-width:4px
+    linkStyle 3 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 4 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 5 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 6 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 7 stroke:#1E293B,stroke-width:4px
+    linkStyle 8 stroke:#1E293B,stroke-width:4px
+    linkStyle 9 stroke:#1E293B,stroke-width:4px
+    linkStyle 10 stroke:#1E293B,stroke-width:4px
+    linkStyle 11 stroke:#1E293B,stroke-width:4px

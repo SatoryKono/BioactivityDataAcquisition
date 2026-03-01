@@ -8,6 +8,17 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 %% @uniform width=256 height=144 max_title_len=25 max_desc_lines=6
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 
 flowchart TB
 %% keep-orphan: CheckpointPort, CriticalError, DataQualityError, DataSourcePort, HealthStatus, InvalidStateError, LockPort, Measurement, MetricsPort, QuarantinePort, RecoverableError, RunType, StoragePort, TracingPort
