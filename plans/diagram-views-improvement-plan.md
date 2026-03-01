@@ -5,6 +5,7 @@
 - Источники: `scripts/diagrams/lint_diagrams.py`, `scripts/diagrams/check_diagram_quality_gates.py`
 - Текущее состояние: `lint issues = 0`; quality warnings = 0.
 - В этом цикле: выровнена семантика связей в flowchart, сокращены перегруженные подписи, удалены избыточные `<br/>`.
+- Последний подтверждённый прогон: `2026-03-01 17:49` (`render.sh --png-only --dir docs/02-architecture/mmd-diagrams/views` + targeted full-view rerender).
 
 ## Таблица по каждой диаграмме
 
