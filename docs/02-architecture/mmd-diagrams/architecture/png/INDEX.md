@@ -1,6 +1,6 @@
 # BioETL Diagrams — PNG Index
 
-_Generated: 2026-03-01T16:29:08+03:00_
+_Generated: 2026-03-01T17:19:25+03:00_
 
 ## High Level Hexagonal
 
@@ -143,12 +143,6 @@ _Generated: 2026-03-01T16:29:08+03:00_
 ## 13aport Contracts Data Sources
 
 ![13a-port-contracts-data-sources](./13a-port-contracts-data-sources.png)
-
----
-
-## 13a.Afterfix.Copy2 No Class Suffix
-
-![13a.after-fix.copy2-no-class-suffix](./13a.after-fix.copy2-no-class-suffix.png)
 
 ---
 

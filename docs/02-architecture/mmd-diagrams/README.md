@@ -236,7 +236,7 @@ bash docs/02-architecture/mmd-diagrams/render.sh --puppeteer /tmp/puppeteer-conf
 bash docs/02-architecture/mmd-diagrams/render.sh --text-layer fallback-only
 
 # Syntax validation (shows explicit hint if Chrome runtime is missing)
-bash scripts/validate_mermaid_syntax.sh --puppeteer /tmp/puppeteer-config.json
+bash scripts/diagrams/validate_mermaid_syntax.sh --puppeteer /tmp/puppeteer-config.json
 ```
 
 ### Output layout
@@ -293,7 +293,7 @@ Grouped diagrams support width strategy override:
 
 ## Validation Rules
 
-`scripts/lint_diagrams.py` enforces:
+`scripts/diagrams/lint_diagrams.py` enforces:
 
 | Rule | Description | Severity |
 |------|-------------|----------|
@@ -317,7 +317,7 @@ Node-size exceptions in current lint implementation:
 
 ### Orphan Node Detection (GRAPH-001)
 
-`scripts/prune_orphan_nodes.py` detects nodes defined in a diagram but not
+`scripts/diagrams/prune_orphan_nodes.py` detects nodes defined in a diagram but not
 participating in any edge or message.
 
 **Applies to:** `flowchart` / `graph` and `sequenceDiagram` only.
@@ -325,16 +325,16 @@ participating in any edge or message.
 
 ```bash
 # Report orphans (CI mode)
-python scripts/prune_orphan_nodes.py --check
+python scripts/diagrams/prune_orphan_nodes.py --check
 
 # Machine-readable output
-python scripts/prune_orphan_nodes.py --check --json
+python scripts/diagrams/prune_orphan_nodes.py --check --json
 
 # Remove confirmed garbage orphans (in-place)
-python scripts/prune_orphan_nodes.py --fix
+python scripts/diagrams/prune_orphan_nodes.py --fix
 
 # Exempt all current orphans (one-time grandfathering)
-python scripts/prune_orphan_nodes.py --grandfather
+python scripts/diagrams/prune_orphan_nodes.py --grandfather
 ```
 
 **To keep an intentional "documentation" node that has no edges:**
