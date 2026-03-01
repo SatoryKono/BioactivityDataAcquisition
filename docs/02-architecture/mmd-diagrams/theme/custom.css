@@ -137,6 +137,23 @@ g.classGroup text {
     font-size: 13px;
 }
 
+svg.classDiagram g.classGroup text,
+svg.classDiagram .node .label .nodeLabel,
+svg.classDiagram text.fo-fallback {
+    /* Убирает обводку текста, которую могут навязать style-правила узла. */
+    stroke: none !important;
+    /* Гарантирует отсутствие толщины обводки у текста. */
+    stroke-width: 0 !important;
+    /* Рисует только заливку текста без контурного поверх fill. */
+    paint-order: fill !important;
+}
+
+svg.classDiagram .classTitle,
+svg.classDiagram .classTitleText {
+    /* Снижает избыточную жирность заголовков классов. */
+    font-weight: 500 !important;
+}
+
 g.classGroup line {
     stroke-width: 1px;
 }
