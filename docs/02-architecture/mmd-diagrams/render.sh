@@ -404,28 +404,92 @@ render_one() {
   if [[ $FORMAT_PNG -eq 1 ]]; then
     mkdir -p "$png_dir"
     local png_out="$png_dir/${base}.png"
+    local png_svg_source="$svg_dir/${base}.svg"
+    local temp_png_svg=""
+
+    # In --png-only mode with SVG converters available, render a temporary SVG first
+    # and run the same text post-processing pipeline to preserve readable labels.
+    if [[ $FORMAT_SVG -eq 0 && ( $HAS_RSVG -eq 1 || $HAS_RSVG -eq 2 ) ]]; then
+      temp_png_svg="$(mktemp "${TMPDIR:-/tmp}/bioetl-render-${base}-XXXXXX.svg")"
+      if ! mmdc -i "$src" -o "$temp_png_svg" "${MMDC_ARGS[@]}" "${size_args[@]}" -b "$BG" 2>/dev/null; then
+        echo -e "  ${RED}✗${NC} PNG  [$idx/$TOTAL]  $base"
+        rm -f "$temp_png_svg"
+        return 1
+      fi
+      case "$TEXT_LAYER" in
+        dual)
+          if [[ -n "$PYTHON_BIN" ]]; then
+            "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py" --fix -f "$temp_png_svg" >/dev/null 2>&1 || true
+          fi
+          ;;
+        fo-only)
+          :
+          ;;
+        fallback-only)
+          if [[ -n "$PYTHON_BIN" ]]; then
+            if ! "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py" --fix -f "$temp_png_svg" >/dev/null 2>&1; then
+              echo -e "  ${RED}✗${NC} PNG  [$idx/$TOTAL]  $base"
+              rm -f "$temp_png_svg"
+              return 1
+            fi
+            if ! "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/strip_svg_foreign_object.py" --fix -f "$temp_png_svg" >/dev/null 2>&1; then
+              echo -e "  ${RED}✗${NC} PNG  [$idx/$TOTAL]  $base"
+              rm -f "$temp_png_svg"
+              return 1
+            fi
+          else
+            echo -e "  ${RED}✗${NC} PNG  [$idx/$TOTAL]  $base"
+            rm -f "$temp_png_svg"
+            return 1
+          fi
+          ;;
+      esac
+      if [[ -n "$PYTHON_BIN" ]]; then
+        "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/inject_svg_styles.py" --fix -f "$temp_png_svg" >/dev/null 2>&1 || true
+      fi
+      png_svg_source="$temp_png_svg"
+    fi
 
     if [[ $FORMAT_SVG -eq 1 && $HAS_RSVG -eq 1 ]]; then
       # SVG → PNG via rsvg-convert (adaptive: use SVG intrinsic size)
       if [[ $FIT -eq 0 ]]; then
-        rsvg-convert -b "$BG" -w "$WIDTH" -h "$HEIGHT" "$svg_dir/${base}.svg" -o "$png_out" 2>/dev/null
+        rsvg-convert -b "$BG" -w "$WIDTH" -h "$HEIGHT" "$png_svg_source" -o "$png_out" 2>/dev/null
       else
-        rsvg-convert -b "$BG" -d "$dpi_for_file" -p "$dpi_for_file" "$svg_dir/${base}.svg" -o "$png_out" 2>/dev/null
+        rsvg-convert -b "$BG" -d "$dpi_for_file" -p "$dpi_for_file" "$png_svg_source" -o "$png_out" 2>/dev/null
       fi
     elif [[ $FORMAT_SVG -eq 1 && $HAS_RSVG -eq 2 ]]; then
       # SVG → PNG via inkscape
       if [[ $FIT -eq 0 ]]; then
-        inkscape "$svg_dir/${base}.svg" --export-type=png --export-width="$WIDTH" \
+        inkscape "$png_svg_source" --export-type=png --export-width="$WIDTH" \
           --export-height="$HEIGHT" --export-background="$BG" --export-background-opacity=1 \
           --export-filename="$png_out" 2>/dev/null
       else
-        inkscape "$svg_dir/${base}.svg" --export-type=png --export-dpi="$dpi_for_file" \
+        inkscape "$png_svg_source" --export-type=png --export-dpi="$dpi_for_file" \
+          --export-background="$BG" --export-background-opacity=1 --export-filename="$png_out" 2>/dev/null
+      fi
+    elif [[ $FORMAT_SVG -eq 0 && $HAS_RSVG -eq 1 ]]; then
+      if [[ $FIT -eq 0 ]]; then
+        rsvg-convert -b "$BG" -w "$WIDTH" -h "$HEIGHT" "$png_svg_source" -o "$png_out" 2>/dev/null
+      else
+        rsvg-convert -b "$BG" -d "$dpi_for_file" -p "$dpi_for_file" "$png_svg_source" -o "$png_out" 2>/dev/null
+      fi
+    elif [[ $FORMAT_SVG -eq 0 && $HAS_RSVG -eq 2 ]]; then
+      if [[ $FIT -eq 0 ]]; then
+        inkscape "$png_svg_source" --export-type=png --export-width="$WIDTH" \
+          --export-height="$HEIGHT" --export-background="$BG" --export-background-opacity=1 \
+          --export-filename="$png_out" 2>/dev/null
+      else
+        inkscape "$png_svg_source" --export-type=png --export-dpi="$dpi_for_file" \
           --export-background="$BG" --export-background-opacity=1 --export-filename="$png_out" 2>/dev/null
       fi
     else
       # Direct mmdc → PNG (adaptive: use -s scale only)
       mmdc -i "$src" -o "$png_out" "${MMDC_ARGS[@]}" \
         "${size_args[@]}" -s "$scale_for_file" -b "$BG" 2>/dev/null
+    fi
+
+    if [[ -n "$temp_png_svg" ]]; then
+      rm -f "$temp_png_svg"
     fi
 
     if [[ -f "$png_out" ]]; then

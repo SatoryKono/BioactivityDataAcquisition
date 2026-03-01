@@ -19,185 +19,177 @@
 %% @uniform-stats manager      width=256 height=200 max_desc_lines=9
 %% @uniform-stats support      width=552 height=112 max_desc_lines=4
 classDiagram
-    direction TB
-    class PipelineRunner {
-        -_config: PipelineConfig
-        -_runtime: RuntimeConfig
-        -_services: PipelineServices
-        -_context: PipelineContext
-        -_executor: BatchExecutor
-        -_checkpoint_manager: CheckpointManager
-        -_shutdown_signal: ShutdownSignal
-        -_logger: LoggerPort
-        -_lock_manager: LockManager
-        -_preflight_service: PreflightService
-        -_postrun_service: PostrunService
-        -_lifecycle_service: MedallionLifecycleService
-        -_observer: PipelineObserver
-        +run() None
-        
+    direction LR
+    namespace Runner_Core {
+        class PipelineRunner {
+            -_config: PipelineConfig
+            -_runtime: RuntimeConfig
+            -_services: PipelineServices
+            -_context: PipelineContext
+            -_executor: BatchExecutor
+            -_checkpoint_manager: CheckpointManager
+            -_shutdown_signal: ShutdownSignal
+            -_logger: LoggerPort
+            -_lock_manager: LockManager
+            -_preflight_service: PreflightService
+            -_postrun_service: PostrunService
+            -_lifecycle_service: MedallionLifecycleService
+            -_observer: PipelineObserver
+            +run() None
+        }
+
+        class PipelineServices {
+            <<frozen dataclass>>
+            +data_source: DataSourcePort
+            +storage: StoragePort
+            +lock: LockPort
+            +checkpoint: CheckpointPort
+            +quarantine: QuarantinePort
+            +metrics: MetricsPort
+            +tracing: TracingPort | None
+            +logger: LoggerPort
+            +dq_monitor: DQMonitorPort | None
+            +metadata_coordinator: MetadataCoordinatorPort | None
+            +metadata_writer: MetadataWriterPort | None
+            +dq_report_writer: DQReportWriterPort | None
+            +dq_report_service: DQReportService | None
+        }
+
+        class BatchExecutor {
+            -_services: PipelineServices
+            -_context: PipelineContext
+            -_config: RecordProcessorConfig
+            -_checkpoint_manager: CheckpointManager
+            +batch_size: int
+            +checkpoint_interval: int
+            +records_fetched: int
+            +records_bronze: int
+            +records_silver: int
+            +records_gold: int
+            +records_quarantined: int
+            +execute(limit, query, offset) None
+            +process(records, start_index) BatchResult
+            +get_dq_context() DQReportContext | None
+            +get_run_statistics() dict
+        }
     }
 
-    class PipelineServices {
-        <<frozen dataclass>>
-        +data_source: DataSourcePort
-        +storage: StoragePort
-        +lock: LockPort
-        +checkpoint: CheckpointPort
-        +quarantine: QuarantinePort
-        +metrics: MetricsPort
-        +tracing: TracingPort | None
-        +logger: LoggerPort
-        +dq_monitor: DQMonitorPort | None
-        +metadata_coordinator: MetadataCoordinatorPort | None
-        +metadata_writer: MetadataWriterPort | None
-        +dq_report_writer: DQReportWriterPort | None
-        +dq_report_service: DQReportService | None
-        
+    namespace Batch_Processing {
+        class BatchTransformer {
+            -_context: PipelineContext
+            -_config: RecordProcessorConfig
+            -_error_classifier: ErrorClassifier
+            -_quarantine_manager: QuarantineManager
+            -_batch_metrics: BatchMetricsRecorder
+            -_transform: TransformCallback
+            -_gold_filter: GoldFilterCallback
+            -_gold_transform: GoldTransformCallback
+            +transform_batch(records, batch_id, start_index) TransformResult
+            +transform_single(raw_record, batch_id, index) TransformedRecord
+            +_check_dq_thresholds(records, quarantined_count) None
+        }
+
+        class BatchWriter {
+            -_storage: StoragePort
+            -_context: PipelineContext
+            -_gold_validator: GoldValidatorPort
+            -_error_classifier: ErrorClassifier
+            -_lock_validator: Callable
+            -_silver_mode: WriteMode
+            -_gold_mode: WriteMode
+            -_column_orderer: ColumnOrderer | None
+            +write_bronze(records, batch_id, ingestion_ts, metadata) BronzeWriteResult
+            +write_silver(records, batch_id, ingestion_ts, bronze_refs) SilverWriteResult | None
+            +write_gold(records, silver_refs) None
+            +_validate_lock(operation) None
+        }
+
+        class BatchMemoryManager {
+            -_memory_monitor: MemoryMonitorPort | None
+            -_memory_config: MemoryConfig | None
+            -_initial_batch_size: int
+            +enabled: bool
+            +batch_size_reductions: int
+            +check_pressure(current_size, interval, fetched) int
+            +maybe_recover(current_size) int
+        }
+
+        class BatchMetricsRecorder {
+            -_metrics: MetricsPort | None
+            -_pipeline_label: str
+            -_run_type_label: str
+            +track_batch_size(stage, size) None
+            +track_processed_records(stage, count) None
+            +track_error(stage, error_type) None
+            +track_quarantined_records(error_type, count) None
+        }
+
+        class BatchTracingManager {
+            -_tracer: TracingPort
+            -_context: PipelineContext
+            +TRACER_NAME: str
+            +start_execution_span() Span | None
+            +start_batch_span(batch_id, count, start) Span | None
+            +start_layer_span(name, batch_id, count) Span | None
+            +end_span(span, error) None
+        }
     }
 
-    class BatchExecutor {
-        -_services: PipelineServices
-        -_context: PipelineContext
-        -_config: RecordProcessorConfig
-        -_checkpoint_manager: CheckpointManager
-        +batch_size: int
-        +checkpoint_interval: int
-        +records_fetched: int
-        +records_bronze: int
-        +records_silver: int
-        +records_gold: int
-        +records_quarantined: int
-        +execute(limit, query, offset) None
-        +process(records, start_index) BatchResult
-        +get_dq_context() DQReportContext | None
-        +get_run_statistics() dict
+    namespace Execution_Managers {
+        class CheckpointManager {
+            -_checkpoint: CheckpointPort
+            -_logger: LoggerPort
+            -_pipeline_name: str
+            -_run_id: RunID
+            -_resume: bool
+            +load_checkpoint() dict | None
+            +save_checkpoint(offset) None
+            +delete_checkpoint() None
+        }
+
+        class LockManager {
+            -_lock: LockPort
+            -_run_id: RunID
+            -_config: LockConfig
+            -_shutdown_signal: ShutdownSignal
+            -_heartbeat: HeartbeatTask | None
+            -_fencing_token: FencingToken | None
+            +acquire(timeout) FencingToken
+            +release() None
+            +validate() bool
+        }
     }
 
-    class BatchTransformer {
-        -_context: PipelineContext
-        -_config: RecordProcessorConfig
-        -_error_classifier: ErrorClassifier
-        -_quarantine_manager: QuarantineManager
-        -_batch_metrics: BatchMetricsRecorder
-        -_transform: TransformCallback
-        -_gold_filter: GoldFilterCallback
-        -_gold_transform: GoldTransformCallback
-        +transform_batch(records, batch_id, start_index) TransformResult
-        +transform_single(raw_record, batch_id, index) TransformedRecord
-        +_check_dq_thresholds(records, quarantined_count) None
-        
-    }
+    namespace Support_Services {
+        class PreflightService {
+            +execute(config, runtime, services, context, observer) PreflightReport
+        }
 
-    class BatchWriter {
-        -_storage: StoragePort
-        -_context: PipelineContext
-        -_gold_validator: GoldValidatorPort
-        -_error_classifier: ErrorClassifier
-        -_lock_validator: Callable
-        -_silver_mode: WriteMode
-        -_gold_mode: WriteMode
-        -_column_orderer: ColumnOrderer | None
-        +write_bronze(records, batch_id, ingestion_ts, metadata) BronzeWriteResult
-        +write_silver(records, batch_id, ingestion_ts, bronze_refs) SilverWriteResult | None
-        +write_gold(records, silver_refs) None
-        +_validate_lock(operation) None
-    }
+        class PostrunService {
+            +execute(config, runtime, context, executor, metadata, observer) PostrunResult
+        }
 
-    class BatchMemoryManager {
-        -_memory_monitor: MemoryMonitorPort | None
-        -_memory_config: MemoryConfig | None
-        -_initial_batch_size: int
-        +enabled: bool
-        +batch_size_reductions: int
-        +check_pressure(current_size, interval, fetched) int
-        +maybe_recover(current_size) int
-    }
+        class QuarantineManager {
+            -_quarantine: QuarantinePort
+            +quarantine_record(raw, error_type, batch_id, msg, ts) None
+        }
 
-    class BatchMetricsRecorder {
-        -_metrics: MetricsPort | None
-        -_pipeline_label: str
-        -_run_type_label: str
-        +track_batch_size(stage, size) None
-        +track_processed_records(stage, count) None
-        +track_error(stage, error_type) None
-        +track_quarantined_records(error_type, count) None
-    }
+        class ShutdownSignal {
+            +is_requested: bool
+            +reason: ShutdownReason | None
+            +request(reason) None
+            +reset() None
+        }
 
-    class BatchTracingManager {
-        -_tracer: TracingPort
-        -_context: PipelineContext
-        +TRACER_NAME: str
-        +start_execution_span() Span | None
-        +start_batch_span(batch_id, count, start) Span | None
-        +start_layer_span(name, batch_id, count) Span | None
-        +end_span(span, error) None
-    }
+        class HeartbeatTask {
+            Background async task
+            +start() None
+            +stop() None
+        }
 
-    class CheckpointManager {
-        -_checkpoint: CheckpointPort
-        -_logger: LoggerPort
-        -_pipeline_name: str
-        -_run_id: RunID
-        -_resume: bool
-        +load_checkpoint() dict | None
-        +save_checkpoint(offset) None
-        +delete_checkpoint() None
-        
-    }
-
-    class LockManager {
-        -_lock: LockPort
-        -_run_id: RunID
-        -_config: LockConfig
-        -_shutdown_signal: ShutdownSignal
-        -_heartbeat: HeartbeatTask | None
-        -_fencing_token: FencingToken | None
-        +acquire(timeout) FencingToken
-        +release() None
-        +validate() bool
-    }
-
-    class PreflightService {
-        +execute(config, runtime, services, context, observer) PreflightReport
-        
-        
-        
-    }
-
-    class PostrunService {
-        +execute(config, runtime, context, executor, metadata, observer) PostrunResult
-        
-        
-        
-    }
-
-    class QuarantineManager {
-        -_quarantine: QuarantinePort
-        +quarantine_record(raw, error_type, batch_id, msg, ts) None
-        
-        
-    }
-
-    class ShutdownSignal {
-        +is_requested: bool
-        +reason: ShutdownReason | None
-        +request(reason) None
-        +reset() None
-    }
-
-    class HeartbeatTask {
-        Background async task
-        +start() None
-        +stop() None
-        
-    }
-
-    class ErrorClassifier {
-        +classify(error) ErrorCategory
-        
-        
-        
+        class ErrorClassifier {
+            +classify(error) ErrorCategory
+        }
     }
 
     PipelineRunner *-- BatchExecutor
