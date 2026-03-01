@@ -9,32 +9,6 @@ pipeline:
     business_primary_keys:
         - activity_id
     batch_size: 1000
-    dq_overrides:
-        field_validations:
-            -   field: standard_type
-                type: enum
-                allowed:
-                    - IC50
-                    - Ki
-                    - Kd
-                    - EC50
-                    - AC50
-                    - GI50
-                    - ED50
-                    - MIC
-                    - CC50
-                nullable: true
-            -   field: standard_units
-                type: enum
-                allowed:
-                    - nM
-                    - uM
-                    - mM
-                    - pM
-                    - M
-                    - ug.mL-1
-                    - mg.kg-1
-                nullable: true
 schema:
     content_hash:
         include: [ ]

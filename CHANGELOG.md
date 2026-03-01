@@ -33,15 +33,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`config_loader.py` LOC exemption raised**: 680 → 725 LOC in `tests/architecture/test_code_metrics.py` to accommodate unified entity config support logic
   - Comment updated: `config loading with schema validation + schema_file linkage + unified entity config`
 
-### Removed
-
-- **Legacy config directories removed** (RF-CFG-035 cleanup after unified migration):
-  - `configs/pipelines/{providers}/` — replaced by `configs/entities/`
-  - `configs/schemas/{providers}/` — absorbed into `configs/entities/{p}/{e}.yaml#schema`
-  - `configs/quality/entities/` — absorbed into `configs/entities/{p}/{e}.yaml#quality`
-  - `configs/filters/entities/` — absorbed into `configs/entities/{p}/{e}.yaml#filters`
-  - `configs/contracts/` — absorbed into `configs/entities/{p}/{e}.yaml#contracts`
-
 - **End-to-End Metrics Audit**: Registered 32+ new Prometheus metrics that were previously silently dropped
   - Pipeline lifecycle: `pipeline_runs_total`, `phase_duration_seconds`
   - Transformer: `transform_duration_seconds`, `transform_errors_total`
@@ -57,6 +48,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Circuit Breaker Success/Failure Counters**: Added `circuit_breaker_success_total` and `circuit_breaker_failure_total` emissions in `_on_success()` and `_on_failure()` methods
   - File: `src/bioetl/infrastructure/adapters/http/circuit_breaker.py`
+
+### Removed
+
+- **Legacy config directories removed** (RF-CFG-035 cleanup after unified migration):
+  - `configs/pipelines/{providers}/` — replaced by `configs/entities/`
+  - `configs/schemas/{providers}/` — absorbed into `configs/entities/{p}/{e}.yaml#schema`
+  - `configs/quality/entities/` — absorbed into `configs/entities/{p}/{e}.yaml#quality`
+  - `configs/filters/entities/` — absorbed into `configs/entities/{p}/{e}.yaml#filters`
+  - `configs/contracts/` — absorbed into `configs/entities/{p}/{e}.yaml#contracts`
 
 ### Fixed
 

@@ -1,14 +1,15 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.22 | Last updated: 2026-02-27*
+*Synced with RULES.md v5.22 | Last updated: 2026-03-01*
 
-> **Documentation Update:** 2026-02-27
-> - Codebase metrics updated: 1,195 Python files (575 src + 620 tests)
+> **Documentation Update:** 2026-03-01
+> - Source Code Map rewritten to match actual codebase structure (v8.0)
+> - Codebase metrics: ~548 src files + ~622 test files
 > - ADR count: 40 ADRs (ADR-001 through ADR-040)
 > - Pipeline configs: 27 configurations (21 single-source + 6 composite)
 > - YAML configs total: 39 (`configs/` tree)
-> - Documentation files: 353 markdown files
-> - Adapter listing completed (all 7 providers)
+> - Documentation files: 350+ markdown files
+> - All 7 providers documented, all 28 domain ports listed
 > - Diagrams: 271 Mermaid source files (103 .mmd + 168 .mermaid)
 
 ## Quick Links
@@ -52,7 +53,8 @@ docs/
 │       ├── 02-naming-policy.md  # Entity naming conventions
 │       ├── 03-file-policy.md
 │       ├── 04-extending-bioetl.md
-│       └── 05-github-policy.md  # CI/CD, branch protection, reviews
+│       ├── 05-github-policy.md  # CI/CD, branch protection, reviews
+│       └── 06-doc-publication-policy.md  # Documentation publication policy
 │
 ├── 01-requirements/             # Requirements
 │   └── REQUIREMENTS.md          # 156 testable requirements
@@ -196,107 +198,220 @@ docs/
 
 ```
 src/bioetl/
-├── domain/                      # Pure logic, no I/O (§1.1)
-│   ├── ports/                   # Protocol interfaces (Ports & Adapters)
-│   │   ├── __init__.py          # Facade — single import point
-│   │   ├── data-source.py       # DataSourcePort, FilterableDataSourcePort
+├── domain/                      # Pure logic, no I/O (§1.1) — 192 files
+│   ├── ports/                   # Protocol interfaces — 28 Port protocols
+│   │   ├── __init__.py          # Facade — single import point (ARCH-008)
+│   │   ├── data_source.py       # DataSourcePort, FilterableDataSourcePort
 │   │   ├── storage.py           # StoragePort
 │   │   ├── locking.py           # LockPort
 │   │   ├── checkpoint.py        # CheckpointPort
 │   │   ├── quarantine.py        # QuarantinePort
 │   │   ├── observability.py     # MetricsPort, TracingPort, LoggerPort
 │   │   ├── validation.py        # GoldValidatorPort
-│   │   └── filtering.py         # InputFilterPort
-│   ├── config.py                # Domain config models
-│   ├── exceptions.py            # Domain exceptions hierarchy
+│   │   ├── filtering.py         # InputFilterPort
+│   │   ├── health_check.py      # HealthCheckPort
+│   │   ├── resilience.py        # CircuitBreakerPort
+│   │   ├── runner.py            # PipelineRunnerPort
+│   │   ├── shutdown.py          # ShutdownPort
+│   │   ├── memory.py            # MemoryPort
+│   │   ├── metadata.py          # MetadataPort
+│   │   ├── metadata_coordinator.py  # MetadataCoordinatorPort
+│   │   ├── delta_reader.py      # DeltaReaderPort
+│   │   ├── data_normalization.py    # DataNormalizationPort
+│   │   ├── dq_config.py         # DQConfigPort
+│   │   ├── dq_report.py         # DQReportPort
+│   │   ├── serialization.py     # SerializationPort
+│   │   ├── idmapping.py         # IdMappingPort
+│   │   ├── adr.py               # AdrPort
+│   │   ├── audit.py             # AuditPort
+│   │   ├── pii.py               # PiiPort
+│   │   └── noop.py              # NoOp implementations (Null Object Pattern)
+│   ├── config/                  # Domain config models (package)
+│   │   ├── pipeline.py          # PipelineConfig
+│   │   ├── runtime.py           # RuntimeConfig
+│   │   ├── dq.py                # DQ config models
+│   │   ├── table.py             # TableConfig
+│   │   ├── memory.py            # MemoryConfig
+│   │   └── validation.py        # ValidationConfig
+│   ├── exceptions/              # Domain exceptions hierarchy (package)
+│   │   ├── base.py              # BioETLError base
+│   │   ├── validation.py        # ValidationError
+│   │   ├── network.py           # NetworkError
+│   │   ├── infrastructure.py    # InfrastructureError
+│   │   ├── internal.py          # InternalError
+│   │   └── data_quality.py      # DataQualityError
+│   ├── aggregates/              # DDD Aggregates (ADR-021)
+│   │   ├── batch.py             # Batch aggregate
+│   │   ├── pipeline_run.py      # PipelineRun aggregate
+│   │   ├── quarantine_entry.py  # QuarantineEntry aggregate
+│   │   └── events.py            # Domain events
+│   ├── composite/               # Composite pipeline domain (ADR-026)
+│   │   ├── strategy.py          # Merge strategies
+│   │   ├── state.py             # Composite state machine
+│   │   ├── result.py            # CompositeResult
+│   │   ├── lineage.py           # Field-level lineage
+│   │   ├── cross_validation.py  # Pre-merge validation
+│   │   ├── field_groups.py      # Column ordering
+│   │   ├── config.py            # Composite config models
+│   │   └── aggregation.py       # Enricher aggregation
+│   ├── contracts/gold/          # Pandera Gold schemas
+│   │   ├── chembl.py            # ChEMBL Gold schemas
+│   │   ├── composite.py         # Composite Gold schemas
+│   │   ├── publications.py      # Publication Gold schemas
+│   │   ├── pubchem.py           # PubChem Gold schemas
+│   │   └── uniprot.py           # UniProt Gold schemas
+│   ├── entities/                # Domain entities (16+ files)
+│   ├── filtering/               # Filter domain models (ADR-028)
+│   │   ├── input_config.py      # InputFilterConfig
+│   │   ├── silver_config.py     # SilverFilterConfig
+│   │   ├── gold_config.py       # GoldFilterConfig
+│   │   └── ...                  # column_filter, range_filter, list_filters
+│   ├── mapping/                 # Field mapping definitions
+│   │   ├── publication_fields.py        # Publication field mappings
+│   │   ├── publication_type_mapping.py  # Type classification
+│   │   ├── activity_fields.py           # Activity field mappings
+│   │   └── molecule_fields.py           # Molecule field mappings
+│   ├── models/                  # Domain models
+│   ├── registry/                # Entity registries
+│   ├── schemas/                 # PyArrow Silver schemas (by provider)
+│   │   ├── common/              # Base schemas (publication_base, molecule_base)
+│   │   ├── chembl/              # 13 ChEMBL entity schemas
+│   │   ├── crossref/            # CrossRef schemas
+│   │   ├── openalex/            # OpenAlex schemas
+│   │   ├── pubchem/             # PubChem schemas
+│   │   ├── pubmed/              # PubMed schemas
+│   │   ├── semanticscholar/     # SemanticScholar schemas
+│   │   └── uniprot/             # UniProt schemas
+│   ├── services/                # Domain services (16 files)
+│   │   ├── normalization_service.py     # Data normalization
+│   │   ├── identity_service.py          # Entity ID generation
+│   │   ├── text_similarity.py           # Text similarity
+│   │   ├── dq_metrics_calculator.py     # DQ metrics
+│   │   ├── unit_converter.py            # Unit conversion
+│   │   └── ...
+│   ├── value_objects/           # Value objects (20 files)
+│   │   ├── run_context.py       # RunContext
+│   │   ├── dq_result.py         # DQResult
+│   │   ├── silver_result.py     # SilverResult
+│   │   └── ...
 │   ├── transformations.py       # Pure transformation functions
-│   └── types.py                 # Value objects (RunType, ErrorCode)
+│   └── types.py                 # Shared types (RunType, HealthStatus, ErrorCode)
 │
-├── application/                 # Pipeline orchestration (§1.1)
-│   ├── core/                    # Core pipeline infrastructure
+├── application/                 # Pipeline orchestration (§1.1) — 133 files
+│   ├── core/                    # Core pipeline infrastructure (28+ files)
 │   │   ├── base.py              # Base pipeline primitives
-│   │   ├── base-transformer.py  # Base transformer contracts
-│   │   ├── batch-executor.py    # Batch executor
-│   │   ├── pipeline-services.py # Service container
+│   │   ├── base_transformer.py  # Base transformer contracts
+│   │   ├── batch_executor.py    # Batch executor
 │   │   ├── runner.py            # PipelineRunner (Driving Adapter logic)
-│   │   └── shutdown.py          # Graceful shutdown handling
+│   │   ├── shutdown.py          # Graceful shutdown handling
+│   │   ├── record_processor.py  # Record processing
+│   │   ├── preflight_service.py # Pre-run validation
+│   │   ├── postrun_service.py   # Post-run cleanup
+│   │   ├── checkpoint_manager.py    # Checkpoint management
+│   │   ├── quarantine_manager.py    # Quarantine management
+│   │   ├── batch_memory_manager.py  # Memory management
+│   │   └── ...
 │   ├── composite/               # Composite pipeline orchestration
 │   ├── pipelines/               # Concrete pipeline implementations
 │   │   ├── common/              # Shared pipeline helpers
-│   │   ├── chembl/              # Provider namespace
-│   │   │   ├── activity.py      # ChEMBL Activity pipeline
-│   │   │   ├── assay.py         # ChEMBL Assay pipeline
-│   │   │   └── molecule.py      # ChEMBL Molecule pipeline
-│   │   ├── pubchem/             # Provider namespace
-│   │   │   └── compound.py      # PubChem Compound pipeline
-│   │   ├── pubmed/              # Provider namespace
-│   │   │   └── publication.py   # PubMed Publication pipeline
-│   │   ├── uniprot/             # Provider namespace
-│   │   │   └── protein.py       # UniProt Protein pipeline
-│   │   ├── crossref/            # Provider namespace
-│   │   │   └── transformer.py   # CrossRef transformer
-│   │   ├── openalex/            # Provider namespace
-│   │   │   └── transformer.py   # OpenAlex transformer
-│   │   ├── semanticscholar/     # Provider namespace
-│   │   │   └── transformer.py   # SemanticScholar transformer
-│   │   └── generic.py           # Generic pipeline helpers
+│   │   ├── chembl/              # 16 ChEMBL transformers
+│   │   │   ├── activity_transformer.py
+│   │   │   ├── assay_transformer.py
+│   │   │   ├── molecule_transformer.py
+│   │   │   ├── target_transformer.py
+│   │   │   ├── publication_transformer.py
+│   │   │   ├── cell_line_transformer.py
+│   │   │   ├── protein_class_transformer.py
+│   │   │   ├── compound_record_transformer.py
+│   │   │   ├── tissue_transformer.py
+│   │   │   ├── target_component_transformer.py
+│   │   │   ├── assay_parameters_transformer.py
+│   │   │   ├── publication_term_transformer.py
+│   │   │   ├── publication_similarity_transformer.py
+│   │   │   ├── subcellular_fraction_transformer.py
+│   │   │   ├── base_chembl_transformer.py
+│   │   │   └── _pipelines.py
+│   │   ├── pubchem/             # PubChem transformers
+│   │   ├── pubmed/              # PubMed transformers
+│   │   ├── uniprot/             # UniProt transformers
+│   │   ├── crossref/            # CrossRef transformers
+│   │   ├── openalex/            # OpenAlex transformers
+│   │   └── semanticscholar/     # SemanticScholar transformers
 │   ├── services/                # Application services
 │   └── observability/           # Application-level observability
 │
-├── composition/                 # Composition Root (DI container)
+├── composition/                 # Composition Root (DI container) — 54 files
 │   ├── bootstrap/               # Bootstrap helpers
-│   ├── bootstrap-contexts.py    # Bootstrap contexts
-│   ├── bootstrap-logger.py      # Bootstrap logging setup
+│   │   ├── assembly/            # Storage/checkpoint assembly
+│   │   ├── cli/                 # CLI bootstrap (adr, checkpoint, config, health, ...)
+│   │   └── runtime/             # Runtime assembly, composite, pipeline, runner
+│   ├── bootstrap_contexts.py    # Bootstrap contexts
+│   ├── bootstrap_logger.py      # Bootstrap logging setup
 │   ├── builders.py              # Composition builders
 │   ├── entrypoints.py           # CLI/runner entrypoints
 │   ├── observability.py         # Observability wiring
 │   ├── registry.py              # Pipeline discovery
-│   ├── providers/               # Provider registration
+│   ├── providers/               # Provider registration (6 files)
 │   ├── services/                # Composition services
-│   └── factories/               # Consolidated factories
-│       ├── pipeline-factory.py  # Pipeline factory
-│       ├── runner-factory.py    # Runner factory
-│       └── storage-factory.py   # Multi-layer storage factory
+│   ├── runtime_builders/        # Runtime builder helpers
+│   └── factories/               # Consolidated factories (11 files)
+│       ├── pipeline_factory.py  # Pipeline factory
+│       ├── runner_factory.py    # Runner factory
+│       ├── storage_factory.py   # Multi-layer storage factory
+│       ├── http_client_factory.py   # HTTP client factory
+│       ├── data_source_factory.py   # Data source factory
+│       ├── transformer_factory.py   # Transformer factory
+│       └── ...
 │
-├── infrastructure/              # I/O adapters (§1.1)
+├── infrastructure/              # I/O adapters (§1.1) — 140 files
 │   ├── adapters/                # External API clients
-│   │   ├── http/                # HTTP client infrastructure
-│   │   ├── chembl/              # ChEMBL API adapter
-│   │   ├── crossref/            # CrossRef API adapter
+│   │   ├── http/                # HTTP client infrastructure (rate limiter, circuit breaker)
+│   │   ├── chembl/              # ChEMBL API adapter (8 files)
+│   │   ├── crossref/            # CrossRef API adapter (6 files)
 │   │   ├── openalex/            # OpenAlex API adapter
-│   │   ├── pubchem/             # PubChem API adapter
-│   │   ├── pubmed/              # PubMed API adapter
+│   │   ├── pubchem/             # PubChem API adapter (6 files)
+│   │   ├── pubmed/              # PubMed API adapter (9 files)
 │   │   ├── semanticscholar/     # Semantic Scholar API adapter
-│   │   └── uniprot/             # UniProt API adapter
-│   ├── storage/                 # Data persistence
-│   │   ├── bronze-writer.py     # JSONL + zstd writer
-│   │   ├── base-delta-writer.py  # Delta Lake merge/upsert
-│   │   ├── silver-writer.py     # Silver layer writer
-│   │   └── gold-writer.py       # SCD Type 2 writer
+│   │   ├── uniprot/             # UniProt API adapter (5 files)
+│   │   ├── common/              # Shared adapter utilities
+│   │   ├── decorators/          # circuit_breaker, retry decorators
+│   │   └── input/               # CSV filter reader
+│   ├── storage/                 # Data persistence (12 files)
+│   │   ├── bronze_writer.py     # JSONL + zstd writer
+│   │   ├── base_delta_writer.py # Delta Lake merge/upsert
+│   │   ├── delta_writer.py      # Delta Lake writer
+│   │   ├── silver_writer.py     # Silver layer writer
+│   │   ├── gold_writer.py       # SCD Type 2 writer
+│   │   ├── delta_reader.py      # Delta table reader
+│   │   ├── metadata_writer.py   # Metadata persistence
+│   │   └── retention_manager.py # Data retention
+│   ├── config/                  # Config loaders (package, 10 files)
 │   ├── locking/                 # Distributed locking
-│   │   └── memory-lock.py       # In-memory (local-only)
+│   │   └── memory_lock.py       # In-memory (local-only, ADR-010)
 │   ├── checkpoint/              # Checkpoint persistence
 │   ├── quarantine/              # DQ failure handling
-│   ├── observability/           # Metrics, logging
-│   ├── schemas/                 # Pydantic config schemas
-│   ├── factories/               # Infrastructure factories
-│   └── config.py                # Settings (Pydantic)
+│   ├── observability/           # Metrics, logging (14+ files)
+│   ├── schemas/                 # Pydantic config schemas (10 files)
+│   ├── security/                # PII hashing
+│   ├── serialization/           # JSON encoders
+│   ├── validation/              # Pandera validator
+│   ├── config_loader.py         # Main config loader
+│   └── config_merge.py          # Config merge utility
 │
-└── interfaces/                  # External interfaces
+└── interfaces/                  # External interfaces — 29 files
     ├── cli/                     # CLI package (bioetl run/quarantine/checkpoint)
     │   ├── __init__.py          # CLI package entry
-    │   ├── --main--.py          # CLI module entrypoint
-    │   ├── exit-codes.py        # CLI exit codes
+    │   ├── __main__.py          # CLI module entrypoint
+    │   ├── exit_codes.py        # CLI exit codes
     │   ├── formatters.py        # CLI output formatting
     │   ├── main.py              # Click command group
-    │   └── commands/            # CLI subcommands
+    │   └── commands/            # 18 CLI subcommands (run, health, config, ...)
     ├── http/                    # HTTP interfaces (health server)
-    │   ├── health-server.py     # Health server
+    │   ├── health_server.py     # Health server
     │   └── types.py             # HTTP types
-    ├── orchestration/           # Orchestration helpers
-    └── observability.py         # Interface observability wiring
+    └── orchestration/           # Orchestration helpers
 
-tests/
+tests/                           # 622 test files
 ├── unit/                        # Isolated unit tests (mock I/O)
 │   ├── domain/                  # Domain logic tests
 │   ├── application/             # Pipeline/transformer tests
@@ -304,10 +419,7 @@ tests/
 ├── integration/                 # Integration tests (VCR cassettes)
 │   └── adapters/                # HTTP adapter tests
 ├── e2e/                         # E2E tests (Local-Only arch)
-│   ├── conftest.py              # E2E helpers & fixtures
-│   └── test-pipeline-e2e.py     # Full pipeline cycle tests
-├── architecture/                # Architecture validation tests
-│   └── test-layer-imports.py    # Import matrix enforcement
+├── architecture/                # Architecture validation tests (68 tests)
 └── fixtures/                    # Test fixtures
     └── vcr/                     # VCR cassettes for HTTP
 ```
@@ -341,8 +453,8 @@ graph TD
 | `CHANGELOG.md`                                     | Version history           |
 | `configs/entities/{provider}/{entity}.yaml`       | Pipeline configuration    |
 | `src/bioetl/domain/ports/`                         | Protocol interfaces (package) |
-| `src/bioetl/composition/bootstrap-contexts.py`     | Composition root          |
-| `src/bioetl/infrastructure/config.py`              | Application settings      |
+| `src/bioetl/composition/bootstrap_contexts.py`     | Composition root          |
+| `src/bioetl/infrastructure/config_loader.py`       | Config loading (unified + legacy) |
 | `docs/02-architecture/system-context.md`           | High-level system diagram |
 | `docs/04-reference/contracts/gold/{entity}.json`   | Gold data contracts       |
 
@@ -370,12 +482,12 @@ graph TD
 |--------------------------|--------------|------------------------------|
 | RULES.md                 | 2026-02-24   | v5.22 (Latest)               |
 | REQUIREMENTS.md          | 2026-02-27   | v1.6 (RULES v5.22 sync)      |
-| glossary.md              | 2026-02-06   | v2.5 (Ubiquitous Language)   |
-| 00-map.md                | 2026-02-25   | v7.4 ADR-033..039 added      |
+| glossary.md              | 2026-02-25   | v2.6 (Ubiquitous Language)   |
+| 00-map.md                | 2026-03-01   | v8.0 Source Code Map rewritten |
 | rules-summary.md         | 2026-02-24   | v5.22 Synced                 |
 | TOOLS.md                 | 2026-02-24   | v2.2 Synced with RULES v5.22 |
 | 03-guides/               | 2026-01-20   | Consolidated (16 guides)     |
-| 03-development/          | 2026-01-26   | Config schema guidelines     |
+| 03-guides/development/   | 2026-01-26   | Config schema guidelines     |
 | ADR-001..040             | 2026-02-25   | All 40 ADRs documented       |
 | 05-operations/runbooks/  | 2026-01-04   | 16 active runbooks           |
 | domain/schemas/          | 2025-12-28   | ChEMBL schemas (4 entities)  |
@@ -384,4 +496,4 @@ graph TD
 
 ---
 
-*Last updated: 2026-02-27. ADR-040 included, metrics synchronized with repository state.*
+*Last updated: 2026-03-01. Source Code Map v8.0: rewritten to match actual codebase structure. ADR-040 included.*
