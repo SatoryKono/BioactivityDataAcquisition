@@ -9,26 +9,36 @@
 %% @allow-polyline-routing
 %% @uniform width=280 height=256 max_title_len=20 max_desc_lines=12
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'POLYLINE'}}}%%
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 graph TB
     subgraph BatchExecutor["BatchExecutor"]
-        BE["BatchExecutor<br/>━━━━━━━━━━━━━━━━━<br/>_services: PipelineServices<br/>_context: PipelineContext<br/>_config: RecordProcessorConfig<br/>batch_size: int<br/>checkpoint_interval: int<br/>━━━━━━━━━━━━━━━━━<br/>+ execute(limit, query, offset)<br/>+ process(records, start_index)<br/>+ get_dq_context()<br/>+ get_run_statistics()"]:::size-lg
+        BE["BatchExecutor<br/>--------<br/>services, context, config<br/>batch_size, checkpoint_interval<br/>+ execute()<br/>+ process()"]:::size-md
     end
 
     subgraph Helpers["Composed Helper Components"]
-        BMM["BatchMemoryManager<br/>━━━━━━━━━━━━━━━━━<br/>_memory_monitor: MemoryMonitorPort<br/>_memory_config: MemoryConfig<br/>_initial_batch_size: int<br/>━━━━━━━━━━━━━━━━━<br/>+ check_pressure() → new_size<br/>+ maybe_recover() → new_size<br/>Adaptive batch sizing:<br/>reduces under memory pressure,<br/>recovers when pressure drops<br/>"]:::size-lg
-        BMR["BatchMetricsRecorder<br/>━━━━━━━━━━━━━━━━━<br/>_metrics: MetricsPort<br/>_pipeline_label: str<br/>_run_type_label: str<br/>━━━━━━━━━━━━━━━━━<br/>+ track_batch_size(stage, size)<br/>+ track_processed_records(stage, count)<br/>+ track_error(stage, error_type)<br/>+ track_quarantined_records()<br/><br/>"]:::size-lg
-        BTM["BatchTracingManager<br/>━━━━━━━━━━━━━━━━━<br/>_tracer: TracingPort<br/>TRACER_NAME = 'bioetl.batch_executor'<br/>━━━━━━━━━━━━━━━━━<br/>+ start_execution_span()<br/>+ start_batch_span(batch_id)<br/>+ start_layer_span(name)<br/>+ end_span(span, error)<br/><br/><br/>"]:::size-lg
-        BT["BatchTransformer<br/>━━━━━━━━━━━━━━━━━<br/>_transform: TransformCallback<br/>_gold_filter: GoldFilterCallback<br/>_gold_transform: GoldTransformCallback<br/>_error_classifier: ErrorClassifier<br/>━━━━━━━━━━━━━━━━━<br/>+ transform_batch(records, batch_id)<br/>+ transform_single(record)<br/>+ _check_dq_thresholds()<br/><br/>"]:::size-lg
-        BW["BatchWriter<br/>━━━━━━━━━━━━━━━━━<br/>_storage: StoragePort<br/>_gold_validator: GoldValidatorPort<br/>_lock_validator: Callable<br/>━━━━━━━━━━━━━━━━━<br/>+ write_bronze(records, batch_id)<br/>+ write_silver(records, batch_id)<br/>+ write_gold(records)<br/>+ _validate_lock() — Safety Guard<br/><br/>"]:::size-lg
-        QM["QuarantineManager<br/>━━━━━━━━━━━━━━━━━<br/>_quarantine: QuarantinePort<br/>━━━━━━━━━━━━━━━━━<br/>+ quarantine_record(raw, error_type,<br/>batch_id, error_msg, ts)<br/><br/><br/><br/><br/><br/>"]:::size-lg
-        CM["CheckpointManager<br/>━━━━━━━━━━━━━━━━━<br/>_checkpoint: CheckpointPort<br/>━━━━━━━━━━━━━━━━━<br/>+ load_checkpoint()<br/>+ save_checkpoint(offset)<br/>+ delete_checkpoint()<br/><br/><br/><br/><br/>"]:::size-lg
+        BMM["BatchMemoryManager<br/>--------<br/>adaptive batch sizing<br/>+ check_pressure()<br/>+ maybe_recover()"]:::size-md
+        BMR["BatchMetricsRecorder<br/>--------<br/>batch and error metrics<br/>+ track_batch_size()<br/>+ track_error()"]:::size-md
+        BTM["BatchTracingManager<br/>--------<br/>execution spans<br/>+ start_batch_span()<br/>+ end_span()"]:::size-md
+        BT["BatchTransformer<br/>--------<br/>transform callbacks<br/>+ transform_batch()<br/>+ _check_dq_thresholds()"]:::size-md
+        BW["BatchWriter<br/>--------<br/>bronze/silver/gold writes<br/>+ write_bronze()<br/>+ _validate_lock()"]:::size-md
+        QM["QuarantineManager<br/>--------<br/>quarantine failed records<br/>+ quarantine_record()"]:::size-md
+        CM["CheckpointManager<br/>--------<br/>offset checkpoints<br/>+ load/save/delete"]:::size-md
     end
 
     subgraph DataFlow["Data Flow Through Batch"]
         direction LR
-        RAW["Raw API Records<br/>(dict[str, Any])<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
-        SILVER["Silver Records<br/>(Delta Lake)<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        RAW["Raw API Records<br/>(dict[str, Any])"]:::size-sm
+        SILVER["Silver Records<br/>(Delta Lake)"]:::size-sm
         RAW -->|"write_bronze()"| BRONZE
         RAW -->|"transform()"| SILVER
         SILVER -->|"write_gold()"| GOLD
@@ -36,11 +46,11 @@ graph TB
     end
 
     subgraph TransformResult["TransformResult"]
-        TR["TransformResult<br/>━━━━━━━━━━━━━━━━━<br/>silver_records: list[SilverRecord]<br/>gold_records: list[dict]<br/>quarantined_count: int<br/>errors: list[TransformError]<br/><br/><br/><br/><br/><br/>"]:::size-lg
+        TR["TransformResult<br/>--------<br/>silver_records<br/>gold_records<br/>quarantined_count<br/>errors"]:::size-md
     end
 
     subgraph ErrorClassification["Error Classification"]
-        ECL["ErrorClassifier<br/>━━━━━━━━━━━━━━━━━<br/>Classifies exceptions as:<br/>• QUARANTINE (data issue)<br/>• RETRY (transient)<br/>• FATAL (stop pipeline)<br/><br/><br/><br/><br/><br/>"]:::size-lg
+        ECL["ErrorClassifier<br/>--------<br/>QUARANTINE / RETRY / FATAL"]:::size-md
     end
 
     %% Composition

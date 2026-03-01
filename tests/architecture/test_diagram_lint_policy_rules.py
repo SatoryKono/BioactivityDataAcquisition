@@ -163,3 +163,40 @@ def test_linkstyle_index_fragility_warns_for_large_index_groups() -> None:
     )
 
     assert any(issue.rule == "LINK-002" for issue in issues)
+
+
+def test_label_readability_warns_on_long_lines_and_br_padding() -> None:
+    """LABEL-001/003 should warn on overlong label lines and <br/> padding."""
+    lint = _load_lint_module()
+    lines = [
+        "flowchart TB",
+        'A["VeryLongComponentNameWithoutEnoughBreaks makes labels unreadable in PNG output"]',
+        'B["Header<br/><br/><br/>Body"]',
+    ]
+
+    issues = lint.check_label_readability(
+        Path("docs/02-architecture/mmd-diagrams/architecture/sample.mmd"),
+        lines,
+    )
+    rules = {issue.rule for issue in issues}
+
+    assert "LABEL-001" in rules
+    assert "LABEL-003" in rules
+
+
+def test_label_readability_warns_on_too_many_node_lines() -> None:
+    """LABEL-002 should warn when node label has too many logical lines."""
+    lint = _load_lint_module()
+    lines = [
+        "flowchart TB",
+        (
+            'A["H<br/>1<br/>2<br/>3<br/>4<br/>5<br/>6<br/>7<br/>8<br/>9"]'
+        ),
+    ]
+
+    issues = lint.check_label_readability(
+        Path("docs/02-architecture/mmd-diagrams/architecture/sample.mmd"),
+        lines,
+    )
+
+    assert any(issue.rule == "LABEL-002" for issue in issues)

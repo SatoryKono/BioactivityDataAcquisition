@@ -107,11 +107,11 @@ _Основание: POL-LLM-DIAGRAMS-001, ADR-040, DIAGRAM-WORKFLOW-GUIDE.md_
 ## 8. Реализация в текущем репозитории
 
 Используемые инструменты и точки интеграции:
-1. `scripts/lint_diagrams.py`
-2. `scripts/check_diagram_visual_smoke.py`
-3. `scripts/validate_mermaid_syntax.sh`
+1. `scripts/diagrams/lint_diagrams.py`
+2. `scripts/diagrams/check_diagram_visual_smoke.py`
+3. `scripts/diagrams/validate_mermaid_syntax.sh`
 4. `docs/02-architecture/mmd-diagrams/render.sh`
-5. `scripts/add_svg_text_fallback.py`
+5. `scripts/diagrams/add_svg_text_fallback.py`
 6. `.github/workflows/docs.yml`
 7. `.github/workflows/validate-mermaid.yml`
 

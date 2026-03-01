@@ -8,7 +8,17 @@
 %% @nodes   46
 %% @reference  Decomposed into 01a, 01b, 01c sub-diagrams
 
-%%{init: {'theme': 'base', 'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 %% @uniform width=208 height=72 max_title_len=21 max_desc_lines=2
 graph TB
 %% keep-orphan: CFG, EXCEPTIONS, OBSERVER, PROVIDERS, SCHEMAS, TYPES, VALIDATION

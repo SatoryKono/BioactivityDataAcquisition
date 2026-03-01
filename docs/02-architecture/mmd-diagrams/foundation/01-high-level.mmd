@@ -8,10 +8,27 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 %% @uniform width=120 height=72 max_title_len=12 max_desc_lines=2
 flowchart TD
     subgraph Sources["External Data Sources"]
+        A1["ChEMBL API"]
+        A2["PubChem API"]
+        A3["UniProt API"]
+        A4["PubMed API"]
+        A5["CrossRef API"]
+        A6["OpenAlex API"]
+        A7["Semantic Scholar API"]
     end
 
     subgraph Interfaces["Interfaces Layer"]
@@ -38,6 +55,7 @@ flowchart TD
         Bronze["Bronze Layer<br/>(JSONL + zstd)"]
         Silver["Silver Layer<br/>(Delta Lake)"]
         Gold["Gold Layer<br/>(Delta Lake)"]
+        Quarantine["Quarantine<br/>(Failed records)"]
     end
 
     Sources --> Adapters

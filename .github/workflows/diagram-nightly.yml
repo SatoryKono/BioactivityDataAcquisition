@@ -45,30 +45,30 @@ jobs:
 
       - name: Validate rendered artifacts (DIAG-T010..T012)
         run: |
-          python3 scripts/check_diagram_artifacts.py \
+          python3 scripts/diagrams/check_diagram_artifacts.py \
             --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
 
       - name: Validate SVG text visibility (DIAG-T014..T015)
         run: |
-          python3 scripts/check_svg_text_visibility.py \
+          python3 scripts/diagrams/check_svg_text_visibility.py \
             --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
 
       - name: Visual smoke baseline drift (DIAG-T026)
         run: |
-          python3 scripts/check_diagram_visual_smoke.py \
+          python3 scripts/diagrams/check_diagram_visual_smoke.py \
             --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
 
       - name: Run PR quality-gates baseline (DIAG-T018..T023)
         run: |
           mkdir -p reports/diagrams
-          python3 scripts/check_diagram_quality_gates.py \
+          python3 scripts/diagrams/check_diagram_quality_gates.py \
             --manifest docs/02-architecture/mmd-diagrams/quality-gate-manifest.txt \
             --json-out reports/diagrams/diagram-quality-report-nightly.json \
             --markdown-out reports/diagrams/diagram-quality-report-nightly.md
 
       - name: Run Phase 2 nightly suite (DIAG-T024..T029)
         run: |
-          python3 scripts/run_diagram_nightly_suite.py \
+          python3 scripts/diagrams/run_diagram_nightly_suite.py \
             --source-manifest docs/02-architecture/mmd-diagrams/quality-gate-manifest.txt \
             --render-manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt \
             --puppeteer /tmp/puppeteer-config.json \
@@ -138,7 +138,7 @@ jobs:
 
       - name: Validate Mermaid syntax
         run: |
-          bash scripts/validate_mermaid_syntax.sh \
+          bash scripts/diagrams/validate_mermaid_syntax.sh \
             --puppeteer /tmp/puppeteer-config.json
 
       - name: Canary render of reference source pool (DIAG-T030)
@@ -162,7 +162,7 @@ jobs:
         run: |
           manifest_tmp="/tmp/diagram-canary-manifest.txt"
           find /tmp/diagram-canary/svg -type f -name '*.svg' | sort > "$manifest_tmp"
-          python3 scripts/check_svg_text_visibility.py --manifest "$manifest_tmp"
+          python3 scripts/diagrams/check_svg_text_visibility.py --manifest "$manifest_tmp"
 
       - name: Upload canary report artifacts
         if: always()
