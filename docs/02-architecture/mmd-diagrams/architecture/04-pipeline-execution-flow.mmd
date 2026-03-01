@@ -102,7 +102,7 @@ sequenceDiagram
         Postrun->>Postrun: run DQ checks
         Postrun->>Postrun: generate DQ reports
         Postrun->>Storage: vacuum() [if configured]
-        Postrun==>>Runner: PostrunResult
+        Postrun-->>Runner: PostrunResult
     end
 
     rect rgb(232, 245, 233)

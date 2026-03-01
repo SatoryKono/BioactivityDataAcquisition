@@ -8,7 +8,17 @@
 %% @view    composite-execution
 %% @parent  08-composite-pipeline.mmd
 %% @nodes   20
-
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 graph TB
     subgraph Runner["CompositePipelineRunner"]
         CPR["CompositePipelineRunner<br/>orchestrates full execution"]:::size-sm

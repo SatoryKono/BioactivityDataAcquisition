@@ -8,7 +8,17 @@
 %% @view    cli-routing
 %% @parent  14-cli-interface-layer.mmd
 %% @nodes   12
-
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 graph TB
     RUN["bioetl run"]:::size-sm
     RUN_COMP["bioetl run-composite"]:::size-sm

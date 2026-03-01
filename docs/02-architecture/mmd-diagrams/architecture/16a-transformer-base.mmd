@@ -8,7 +8,17 @@
 %% @view    transformer-base-chembl
 %% @parent  16-transformer-hierarchy.mmd
 %% @nodes   17
-
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 graph TB
 %% keep-orphan: BFE
     subgraph TemplateMethod["Template Method Pattern"]

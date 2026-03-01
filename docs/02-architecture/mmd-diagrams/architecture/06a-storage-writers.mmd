@@ -8,7 +8,17 @@
 %% @view    storage-writers
 %% @parent  06-storage-layer.mmd
 %% @nodes   10
-
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 graph TB
     subgraph Port["Domain Port"]
         SP["StoragePort<br/>(Protocol)"]:::size-sm

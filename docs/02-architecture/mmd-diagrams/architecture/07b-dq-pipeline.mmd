@@ -8,7 +8,17 @@
 %% @view    dq-pipeline
 %% @parent  07-dq-system.mmd
 %% @nodes   10
-
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 graph TB
 %% keep-orphan: DQConfig, AN, DQMetrics, DQRW, DQReport, DQResult
     subgraph Pipeline["Pipeline Integration"]
