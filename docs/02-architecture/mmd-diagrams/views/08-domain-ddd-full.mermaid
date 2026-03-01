@@ -37,11 +37,11 @@ flowchart TB
         end
 
         subgraph aggregates["aggregates/"]
-            Batch["Batch Aggregate<br/>───────────────<br/>• add_record()<br/>• quarantine_record()<br/>• seal()<br/>• mark_committed()"]
+            Batch["Batch Aggregate<br/>add_record(), quarantine_record()<br/>seal(), mark_committed()"]
 
-            PipelineRun["PipelineRun Aggregate<br/>───────────────<br/>• start()<br/>• record_stage_success()<br/>• complete()<br/>• fail()"]
+            PipelineRun["PipelineRun Aggregate<br/>start(), record_stage_success()<br/>complete(), fail()"]
 
-            QuarantineEntry["QuarantineEntry Aggregate<br/>───────────────<br/>• mark_retrying()<br/>• mark_recovered()<br/>• mark_dead_letter()<br/>"]
+            QuarantineEntry["QuarantineEntry Aggregate<br/>mark_retrying(), mark_recovered()<br/>mark_dead_letter()"]
         end
 
         subgraph events["Domain Events"]
@@ -54,16 +54,16 @@ flowchart TB
         end
 
         subgraph value_objects["value_objects/"]
-            RunID["RunID (UUID)<br/><br/><br/><br/><br/>"]
-            BatchID["BatchID (UUID)<br/><br/><br/><br/><br/>"]
-            EntityID["EntityID (str)<br/><br/><br/><br/><br/>"]
-            ContentHash["ContentHash (str)<br/><br/><br/><br/><br/>"]
-            Measurement["Measurement<br/>(value, unit, relation)<br/><br/><br/><br/>"]
+            RunID["RunID (UUID)<br/><br/><br/><br/>"]
+            BatchID["BatchID (UUID)<br/><br/><br/><br/>"]
+            EntityID["EntityID (str)<br/><br/><br/><br/>"]
+            ContentHash["ContentHash (str)<br/><br/><br/><br/>"]
+            Measurement["Measurement<br/>(value, unit, relation)<br/><br/><br/>"]
         end
 
         subgraph types["types.py"]
-            RunType["RunType Enum<br/>(INCREMENTAL, BACKFILL, REBUILD)<br/><br/><br/><br/>"]
-            HealthStatus["HealthStatus Enum<br/>(HEALTHY, DEGRADED, UNHEALTHY)<br/><br/><br/><br/>"]
+            RunType["RunType Enum<br/>(INCREMENTAL, BACKFILL, REBUILD)<br/><br/><br/>"]
+            HealthStatus["HealthStatus Enum<br/>(HEALTHY, DEGRADED, UNHEALTHY)<br/><br/><br/>"]
         end
 
         subgraph exceptions["exceptions/"]
