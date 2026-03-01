@@ -18,103 +18,103 @@ classDiagram
     direction LR
     class RuntimeConfig {
         <<frozen dataclass>>
-        +run_type: RunType
-        +resume: bool
-        +limit: int | None
-        +dry_run: bool
-        +lock_ttl: int | None
-        +strict_validation: bool
-        +skip_gold: bool
-        +effective_lock_ttl: int
+        +run_type
+        +resume
+        +limit
+        +dry_run
+        +lock_ttl
+        +strict_validation
+        +skip_gold
+        +effective_lock_ttl
         +... : Runtime flags
     }
 
     class PipelineConfig {
         <<frozen dataclass>>
-        +pipeline_name: str
-        +provider: str
-        +entity_type: str
-        +table: TableConfig
-        +batch_size: int
-        +checkpoint_interval: int
-        +fields: tuple~str~
-        +dq: DQConfig
-        +loading_strategy: LoadingStrategy | None
-        +silver_filters: SilverFilterConfig | None
-        +gold_filters: GoldFilterConfig | None
+        +pipeline_name
+        +provider
+        +entity_type
+        +table
+        +batch_size
+        +checkpoint_interval
+        +fields
+        +dq
+        +loading_strategy
+        +silver_filters
+        +gold_filters
         +... : Schema and transform options
     }
 
     class TableConfig {
         <<dataclass>>
-        +silver_table: str | None
-        +gold_table: str | None
+        +silver_table
+        +gold_table
         
         
     }
 
     class DQConfig {
         <<dataclass>>
-        +soft_error_threshold: float
-        +hard_error_threshold: float
+        +soft_error_threshold
+        +hard_error_threshold
         
         
     }
 
     class SilverFilterConfig {
         <<dataclass>>
-        +source_path: str
-        +column_name: str
+        +source_path
+        +column_name
         
         
     }
 
     class GoldFilterConfig {
         <<dataclass>>
-        +source_path: str
-        +column_name: str
+        +source_path
+        +column_name
         
         
     }
 
     class RecordProcessorConfig {
         <<dataclass>>
-        +table_config: TableConfig
-        +silver_schema: Any
-        +gold_schema: Any
-        +dq_config: DQConfig
+        +table_config
+        +silver_schema
+        +gold_schema
+        +dq_config
     }
 
     class LockConfig {
         <<dataclass>>
-        +timeout: float
-        +heartbeat_interval: int
-        +max_retries: int
+        +timeout
+        +heartbeat_interval
+        +max_retries
         
     }
 
     class CompositeConfig {
         <<frozen dataclass>>
-        +name: str
-        +seed: SeedConfig
-        +dependencies: tuple~DependencyConfig~
-        +enrichers: tuple~EnricherConfig~
-        +merge: MergeConfig
+        +name
+        +seed
+        +dependencies
+        +enrichers
+        +merge
     }
 
     class SeedConfig {
         <<frozen dataclass>>
-        +pipeline: str
-        +output_keys: tuple~str~
-        +silver_table: str
-        +limit: int | None
+        +pipeline
+        +output_keys
+        +silver_table
+        +limit
         
     }
 
     class DependencyConfig {
         <<frozen dataclass>>
-        +pipeline: str
-        +depends_on: tuple~str~
+        +pipeline
+        +depends_on
         
         
         
@@ -122,17 +122,17 @@ classDiagram
 
     class EnricherConfig {
         <<frozen dataclass>>
-        +pipeline: str
-        +primary_key: str
-        +enricher_cardinality: EnricherCardinality
+        +pipeline
+        +primary_key
+        +enricher_cardinality
         
         
     }
 
     class MergeConfig {
         <<frozen dataclass>>
-        +merge_strategy: MergeStrategy
-        +conflict_resolution: ConflictResolution
+        +merge_strategy
+        +conflict_resolution
         
         
         
@@ -140,9 +140,9 @@ classDiagram
 
     class KeyNullabilityRule {
         <<dataclass>>
-        +table_name: str
-        +key_columns: list~str~
-        +allow_nulls: bool
+        +table_name
+        +key_columns
+        +allow_nulls
         
     }
 

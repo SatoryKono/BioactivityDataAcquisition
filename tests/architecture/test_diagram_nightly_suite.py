@@ -10,7 +10,7 @@ from types import ModuleType
 
 def _load_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[2]
-    module_path = repo_root / "scripts" / "run_diagram_nightly_suite.py"
+    module_path = repo_root / "scripts" / "diagrams" / "run_diagram_nightly_suite.py"
     spec = importlib.util.spec_from_file_location(
         "diagram_nightly_suite_module", module_path
     )

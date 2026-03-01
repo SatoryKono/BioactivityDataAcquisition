@@ -10,96 +10,96 @@
 classDiagram
     direction LR
     class BaseDeltaWriter {
-        +base_path: Path
-        +logger: LoggerPort
-        #_retention_manager: RetentionManager
-        #_flat_structure: bool
-        +get_table_path(provider, entity) Path
-        +clear(table_path) None
+        +base_path
+        +logger
+        #_retention_manager
+        #_flat_structure
+        +get_table_path(provider, entity)
+        +clear(table_path)
         +... : schema helpers
     }
 
     class BronzeWriter {
-        +base_path: Path
-        +logger: LoggerPort
-        +metrics: MetricsPort
-        +audit: AuditPort | None
-        +metadata_writer: MetadataWriterPort | None
-        +write_bronze(records, config) BronzeWriteResult
-        +aclose() None
+        +base_path
+        +logger
+        +metrics
+        +audit
+        +metadata_writer
+        +write_bronze(records, config)
+        +aclose()
     }
 
     class SilverWriter {
-        +csv_exporter: CsvExporter | None
-        +write_policy: WriteModePolicy | None
-        +metrics: MetricsPort | None
-        +audit: AuditPort | None
-        +silver_validator: SilverValidatorPort | None
-        +write_silver(records) SilverWriteResult
-        +merge_silver(records) SilverWriteResult
+        +csv_exporter
+        +write_policy
+        +metrics
+        +audit
+        +silver_validator
+        +write_silver(records)
+        +merge_silver(records)
     }
 
     class GoldWriter {
-        +csv_exporter: CsvExporter | None
-        +audit: AuditPort | None
-        +metadata_writer: MetadataWriterPort | None
-        +write_gold(records, config) None
-        +clear_gold(table_name) None
+        +csv_exporter
+        +audit
+        +metadata_writer
+        +write_gold(records, config)
+        +clear_gold(table_name)
     }
 
     class DeltaReader {
-        +base_path: Path
-        +logger: LoggerPort
-        +read_table(path, cols, limit) DataFrame
-        +get_schema(path) Schema
-        +get_row_count(path) int
+        +base_path
+        +logger
+        +read_table(path, cols, limit)
+        +get_schema(path)
+        +get_row_count(path)
     }
 
     class ArrowDataConverter {
-        +convert(records, schema) Table
+        +convert(records, schema)
     }
 
     class RetentionManager {
-        +manage_retention(table_path, hours) None
+        +manage_retention(table_path, hours)
     }
 
     class MetadataWriter {
-        +write(path, metadata) None
+        +write(path, metadata)
     }
 
     class BronzeMetadataBuilder {
-        +build(config, result) dict
+        +build(config, result)
     }
 
     class SilverMetadataBuilder {
-        +build(config, result) dict
+        +build(config, result)
     }
 
     class GoldMetadataBuilder {
-        +build(config, result) dict
+        +build(config, result)
     }
 
     class AtomicWriteGroup {
-        +add(path, data) None
-        +commit() None
-        +rollback() None
+        +add(path, data)
+        +commit()
+        +rollback()
     }
 
     class CsvExporter {
-        +export(table_path, output_path) None
+        +export(table_path, output_path)
     }
 
     class PanderaSilverValidator {
-        +validate(df, schema) ValidationResult
+        +validate(df, schema)
     }
 
     class PanderaGoldValidator {
-        +validate(df, schema) ValidationResult
+        +validate(df, schema)
     }
 
     class NoOpValidator {
         <<Null Object>>
-        +validate(df, schema) ValidationResult
+        +validate(df, schema)
     }
 
     BaseDeltaWriter <|-- SilverWriter

@@ -22,161 +22,161 @@ classDiagram
     direction LR
     namespace Runner_Core {
         class PipelineRunner {
-            -_config: PipelineConfig
-            -_runtime: RuntimeConfig
-            -_services: PipelineServices
-            -_executor: BatchExecutor
-            -_checkpoint_manager: CheckpointManager
-            -_shutdown_signal: ShutdownSignal
-            -_lock_manager: LockManager
-            -_preflight_service: PreflightService
-            -_postrun_service: PostrunService
-            +run() None
+            -_config
+            -_runtime
+            -_services
+            -_executor
+            -_checkpoint_manager
+            -_shutdown_signal
+            -_lock_manager
+            -_preflight_service
+            -_postrun_service
+            +run()
             +... : lifecycle orchestration
         }
 
         class PipelineServices {
             <<frozen dataclass>>
-            +data_source: DataSourcePort
-            +storage: StoragePort
-            +lock: LockPort
-            +checkpoint: CheckpointPort
-            +quarantine: QuarantinePort
-            +metrics: MetricsPort
-            +tracing: TracingPort | None
-            +logger: LoggerPort
-            +dq_monitor: DQMonitorPort | None
+            +data_source
+            +storage
+            +lock
+            +checkpoint
+            +quarantine
+            +metrics
+            +tracing
+            +logger
+            +dq_monitor
             +... : optional reporting services
         }
 
         class BatchExecutor {
-            -_services: PipelineServices
-            -_context: PipelineContext
-            -_config: RecordProcessorConfig
-            -_checkpoint_manager: CheckpointManager
-            +batch_size: int
-            +checkpoint_interval: int
-            +records_fetched: int
-            +records_bronze: int
-            +records_quarantined: int
-            +execute(limit, query, offset) None
-            +process(records, start_index) BatchResult
-            +get_dq_context() DQReportContext | None
+            -_services
+            -_context
+            -_config
+            -_checkpoint_manager
+            +batch_size
+            +checkpoint_interval
+            +records_fetched
+            +records_bronze
+            +records_quarantined
+            +execute(limit, query, offset)
+            +process(records, start_index)
+            +get_dq_context()
             +... : run statistics API
         }
     }
 
     namespace Batch_Processing {
         class BatchTransformer {
-            -_context: PipelineContext
-            -_config: RecordProcessorConfig
-            -_error_classifier: ErrorClassifier
-            -_quarantine_manager: QuarantineManager
-            -_batch_metrics: BatchMetricsRecorder
-            +transform_batch(records, batch_id, start_index) TransformResult
-            +transform_single(raw_record, batch_id, index) TransformedRecord
+            -_context
+            -_config
+            -_error_classifier
+            -_quarantine_manager
+            -_batch_metrics
+            +transform_batch(records, batch_id, start_index)
+            +transform_single(raw_record, batch_id, index)
             +... : internal transform callbacks
         }
 
         class BatchWriter {
-            -_storage: StoragePort
-            -_context: PipelineContext
-            -_gold_validator: GoldValidatorPort
-            -_error_classifier: ErrorClassifier
-            -_silver_mode: WriteMode
-            -_gold_mode: WriteMode
-            -_column_orderer: ColumnOrderer | None
-            +write_bronze(records, batch_id, ingestion_ts, metadata) BronzeWriteResult
-            +write_silver(records, batch_id, ingestion_ts, bronze_refs) SilverWriteResult | None
-            +write_gold(records, silver_refs) None
+            -_storage
+            -_context
+            -_gold_validator
+            -_error_classifier
+            -_silver_mode
+            -_gold_mode
+            -_column_orderer
+            +write_bronze(records, batch_id, ingestion_ts, metadata)
+            +write_silver(records, batch_id, ingestion_ts, bronze_refs)
+            +write_gold(records, silver_refs)
             +... : validation and lock checks
         }
 
         class BatchMemoryManager {
-            -_memory_monitor: MemoryMonitorPort | None
-            -_memory_config: MemoryConfig | None
-            -_initial_batch_size: int
-            +enabled: bool
-            +batch_size_reductions: int
-            +check_pressure(current_size, interval, fetched) int
-            +maybe_recover(current_size) int
+            -_memory_monitor
+            -_memory_config
+            -_initial_batch_size
+            +enabled
+            +batch_size_reductions
+            +check_pressure(current_size, interval, fetched)
+            +maybe_recover(current_size)
         }
 
         class BatchMetricsRecorder {
-            -_metrics: MetricsPort | None
-            -_pipeline_label: str
-            -_run_type_label: str
-            +track_batch_size(stage, size) None
-            +track_processed_records(stage, count) None
-            +track_error(stage, error_type) None
-            +track_quarantined_records(error_type, count) None
+            -_metrics
+            -_pipeline_label
+            -_run_type_label
+            +track_batch_size(stage, size)
+            +track_processed_records(stage, count)
+            +track_error(stage, error_type)
+            +track_quarantined_records(error_type, count)
         }
 
         class BatchTracingManager {
-            -_tracer: TracingPort
-            -_context: PipelineContext
-            +TRACER_NAME: str
-            +start_execution_span() Span | None
-            +start_batch_span(batch_id, count, start) Span | None
-            +start_layer_span(name, batch_id, count) Span | None
-            +end_span(span, error) None
+            -_tracer
+            -_context
+            +TRACER_NAME
+            +start_execution_span()
+            +start_batch_span(batch_id, count, start)
+            +start_layer_span(name, batch_id, count)
+            +end_span(span, error)
         }
     }
 
     namespace Execution_Managers {
         class CheckpointManager {
-            -_checkpoint: CheckpointPort
-            -_logger: LoggerPort
-            -_pipeline_name: str
-            -_run_id: RunID
-            -_resume: bool
-            +load_checkpoint() dict | None
-            +save_checkpoint(offset) None
-            +delete_checkpoint() None
+            -_checkpoint
+            -_logger
+            -_pipeline_name
+            -_run_id
+            -_resume
+            +load_checkpoint()
+            +save_checkpoint(offset)
+            +delete_checkpoint()
         }
 
         class LockManager {
-            -_lock: LockPort
-            -_run_id: RunID
-            -_config: LockConfig
-            -_shutdown_signal: ShutdownSignal
-            -_heartbeat: HeartbeatTask | None
-            -_fencing_token: FencingToken | None
-            +acquire(timeout) FencingToken
-            +release() None
-            +validate() bool
+            -_lock
+            -_run_id
+            -_config
+            -_shutdown_signal
+            -_heartbeat
+            -_fencing_token
+            +acquire(timeout)
+            +release()
+            +validate()
         }
     }
 
     namespace Support_Services {
         class PreflightService {
-            +execute(config, runtime, services, context, observer) PreflightReport
+            +execute(config, runtime, services, context, observer)
         }
 
         class PostrunService {
-            +execute(config, runtime, context, executor, metadata, observer) PostrunResult
+            +execute(config, runtime, context, executor, metadata, observer)
         }
 
         class QuarantineManager {
-            -_quarantine: QuarantinePort
-            +quarantine_record(raw, error_type, batch_id, msg, ts) None
+            -_quarantine
+            +quarantine_record(raw, error_type, batch_id, msg, ts)
         }
 
         class ShutdownSignal {
-            +is_requested: bool
-            +reason: ShutdownReason | None
-            +request(reason) None
-            +reset() None
+            +is_requested
+            +reason
+            +request(reason)
+            +reset()
         }
 
         class HeartbeatTask {
             Background async task
-            +start() None
-            +stop() None
+            +start()
+            +stop()
         }
 
         class ErrorClassifier {
-            +classify(error) ErrorCategory
+            +classify(error)
         }
     }
 

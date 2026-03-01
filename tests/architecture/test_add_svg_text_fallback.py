@@ -1,4 +1,4 @@
-"""Tests for scripts/add_svg_text_fallback.py fallback label generation."""
+"""Tests for scripts/diagrams/add_svg_text_fallback.py fallback label generation."""
 
 from __future__ import annotations
 
@@ -11,8 +11,10 @@ from types import ModuleType
 
 def _load_fallback_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[2]
-    module_path = repo_root / "scripts" / "add_svg_text_fallback.py"
-    spec = importlib.util.spec_from_file_location("add_svg_text_fallback_module", module_path)
+    module_path = repo_root / "scripts" / "diagrams" / "add_svg_text_fallback.py"
+    spec = importlib.util.spec_from_file_location(
+        "add_svg_text_fallback_module", module_path
+    )
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module

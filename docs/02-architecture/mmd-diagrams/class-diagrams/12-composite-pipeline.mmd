@@ -10,82 +10,82 @@
 classDiagram
     direction LR
     class CompositePipelineRunner {
-        -_config: CompositeConfig
-        -_runtime: CompositeRuntimeConfig
-        -_seed_runner: PipelineRunner
-        -_enrichment_coordinator: EnrichmentCoordinator
-        -_dependency_coordinator: DependencyCoordinator
-        -_merge_service: MergeService
-        +run() CompositeResult
+        -_config
+        -_runtime
+        -_seed_runner
+        -_enrichment_coordinator
+        -_dependency_coordinator
+        -_merge_service
+        +run()
         +... : checkpoint and validation flow
     }
 
     class CompositeRuntimeConfig {
         <<dataclass>>
-        +resume: bool
-        +dry_run: bool
-        +enrich_only: bool
-        +cached_bronze: bool
+        +resume
+        +dry_run
+        +enrich_only
+        +cached_bronze
     }
 
     class EnrichmentCoordinator {
-        +logger: LoggerPort
-        +dq_config: CompositeDQConfig
-        +max_concurrency: int
-        +run_enrichers(keys, enrichers) dict~str, EnrichmentResult~
+        +logger
+        +dq_config
+        +max_concurrency
+        +run_enrichers(keys, enrichers)
     }
 
     class DependencyCoordinator {
-        -_logger: LoggerPort
-        -_delta_reader: DeltaReaderPort | None
-        +run_dependencies(keys, deps) dict~str, DependencyResult~
+        -_logger
+        -_delta_reader
+        +run_dependencies(keys, deps)
     }
 
     class MergeService {
-        -_deduplicator: EnricherDeduplicator
-        -_aggregator: EnricherAggregator
-        -_renamer: ColumnRenamer
-        -_orderer: ColumnOrderer
-        +merge(seed_table, enrichers, results) MergeResult
+        -_deduplicator
+        -_aggregator
+        -_renamer
+        -_orderer
+        +merge(seed_table, enrichers, results)
     }
 
     class EnricherAggregator {
-        +aggregate(df, config, enricher_name) DataFrame
+        +aggregate(df, config, enricher_name)
     }
 
     class EnricherDeduplicator {
-        +deduplicate(df, config) DataFrame
+        +deduplicate(df, config)
     }
 
     class ColumnRenamer {
-        +rename_columns(df, rename_map) DataFrame
+        +rename_columns(df, rename_map)
     }
 
     class ColumnOrderer {
-        +order_column_names(columns) list~str~
+        +order_column_names(columns)
     }
 
     class KeyExtractorService {
-        +extract_keys(df, key_column) DataFrame
+        +extract_keys(df, key_column)
     }
 
     class CompositeCheckpointManager {
-        +save_state(stage, data) None
-        +load_state() dict | None
-        +get_completed_stages() set~str~
+        +save_state(stage, data)
+        +load_state()
+        +get_completed_stages()
     }
 
     class CompositePreflightValidator {
-        +validate(config) list~str~
+        +validate(config)
     }
 
     class FSMStateHelper {
-        +transition(current, event) CompositeState
-        +is_terminal(state) bool
+        +transition(current, event)
+        +is_terminal(state)
     }
 
     class EnrichmentCrossValidator {
-        +validate(results) CrossValidationStats
+        +validate(results)
     }
 
     CompositePipelineRunner *-- EnrichmentCoordinator
