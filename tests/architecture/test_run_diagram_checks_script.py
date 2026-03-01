@@ -6,8 +6,8 @@ from pathlib import Path
 
 
 def _script_text() -> str:
-    script_path = Path("scripts/run_diagram_checks.sh")
-    assert script_path.exists(), "scripts/run_diagram_checks.sh must exist"
+    script_path = Path("scripts/diagrams/run_diagram_checks.sh")
+    assert script_path.exists(), "scripts/diagrams/run_diagram_checks.sh must exist"
     return script_path.read_text(encoding="utf-8")
 
 

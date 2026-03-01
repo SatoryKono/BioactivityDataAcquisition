@@ -22,96 +22,96 @@ classDiagram
     direction LR
     class HealthCheckMixin {
         <<Mixin>>
-        #_start_health_check(...) HealthCheckContext
-        #_handle_health_check_success(...) None
-        #_handle_health_check_failure(...) None
+        #_start_health_check(...)
+        #_handle_health_check_success(...)
+        #_handle_health_check_failure(...)
         
         
     }
 
     class HealthCheckProviderMixin {
         <<Mixin>>
-        +health_check() HealthCheckResult
-        +check_health() HealthCheckResult
-        #_probe_health()* HealthCheckResult
+        +health_check()
+        +check_health()
+        #_probe_health()*
         +... : fallback policy
     }
 
     class BaseHttpAdapter {
-        +http_client: UnifiedHTTPClient
-        +logger: LoggerPort
-        +metrics: MetricsPort | None
-        +provider_name: str
-        +__aenter__() Self
-        +__aexit__(...) None
-        +aclose() None
+        +http_client
+        +logger
+        +metrics
+        +provider_name
+        +__aenter__()
+        +__aexit__(...)
+        +aclose()
 
     }
 
     class BaseSyncAdapter {
-        +logger: LoggerPort
-        +metrics: MetricsPort | None
-        +rate_limiter: TokenBucket
-        +circuit_breaker: CircuitBreaker
-        +thread_pool: ThreadPoolExecutor
+        +logger
+        +metrics
+        +rate_limiter
+        +circuit_breaker
+        +thread_pool
 
     }
 
     class UnifiedHTTPClient {
         <<dataclass>>
-        +rate_limiter: RateLimiterPort
-        +circuit_breaker: CircuitBreakerPort
-        +retry_config: RetryConfig
-        +timeout: float
-        +user_agent: str
-        +provider: str
-        +get(url, params, headers) Response
-        +post(url, data, headers) Response
+        +rate_limiter
+        +circuit_breaker
+        +retry_config
+        +timeout
+        +user_agent
+        +provider
+        +get(url, params, headers)
+        +post(url, data, headers)
         +... : request helpers
     }
 
     class ChemblAdapter {
-        +fetch() AsyncIterator~dict~
-        +fetch_filtered(filter_ids) AsyncIterator~dict~
+        +fetch()
+        +fetch_filtered(filter_ids)
         +... : extra filter variants
     }
 
     class PubMedAdapter {
-        +email: str
-        +api_key: str | None
-        +batch_size: int
+        +email
+        +api_key
+        +batch_size
         
         
     }
 
     class UniProtAdapter {
-        +api_key: str | None
-        +base_url: str
+        +api_key
+        +base_url
         
         
         
     }
 
     class CrossRefAdapter {
-        +mailto: str
-        +batch_size: int
+        +mailto
+        +batch_size
         
         
         
     }
 
     class OpenAlexAdapter {
-        +mailto: str
-        +batch_size: int
+        +mailto
+        +batch_size
         
         
         
     }
 
     class SemanticScholarAdapter {
-        +api_key: str
-        +batch_size: int
-        +fields: str
+        +api_key
+        +batch_size
+        +fields
         
         
     }
@@ -126,31 +126,31 @@ classDiagram
 
     class CircuitBreaker {
         <<dataclass>>
-        +provider: str
-        +failure_threshold: int
-        +recovery_timeout: int
-        +metrics: MetricsPort | None
-        +call(fn) T
-        +get_state() CircuitBreakerState
+        +provider
+        +failure_threshold
+        +recovery_timeout
+        +metrics
+        +call(fn)
+        +get_state()
         +... : counters
     }
 
     class TokenBucket {
         <<dataclass>>
-        +rate: float
-        +capacity: int
-        +provider: str
-        +metrics: MetricsPort | None
-        +acquire(tokens) None
-        +try_acquire() bool
-        +available_tokens() int
+        +rate
+        +capacity
+        +provider
+        +metrics
+        +acquire(tokens)
+        +try_acquire()
+        +available_tokens()
         
     }
 
     class AdapterMetrics {
-        +metrics: MetricsPort
-        +provider: str
-        +measure_request() ContextManager
+        +metrics
+        +provider
+        +measure_request()
         
         
         

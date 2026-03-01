@@ -196,6 +196,7 @@ g.classGroup rect {
 g.classGroup text {
     /* Базовый размер текста внутри class diagram. */
     font-size: 14px;
+    padding: 10px 10px; 
 }
 
 g.classGroup line {

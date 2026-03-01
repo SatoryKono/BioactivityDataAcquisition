@@ -1,4 +1,4 @@
-"""Tests for scripts/strip_svg_foreign_object.py."""
+"""Tests for scripts/diagrams/strip_svg_foreign_object.py."""
 
 from __future__ import annotations
 
@@ -11,8 +11,10 @@ from types import ModuleType
 
 def _load_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[2]
-    module_path = repo_root / "scripts" / "strip_svg_foreign_object.py"
-    spec = importlib.util.spec_from_file_location("strip_svg_foreign_object_module", module_path)
+    module_path = repo_root / "scripts" / "diagrams" / "strip_svg_foreign_object.py"
+    spec = importlib.util.spec_from_file_location(
+        "strip_svg_foreign_object_module", module_path
+    )
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
@@ -20,7 +22,9 @@ def _load_module() -> ModuleType:
     return module
 
 
-def test_strip_foreign_objects_removes_html_labels_and_keeps_fallback_text(tmp_path: Path) -> None:
+def test_strip_foreign_objects_removes_html_labels_and_keeps_fallback_text(
+    tmp_path: Path,
+) -> None:
     module = _load_module()
     svg_path = tmp_path / "sample.svg"
     svg_path.write_text(
@@ -41,7 +45,9 @@ def test_strip_foreign_objects_removes_html_labels_and_keeps_fallback_text(tmp_p
     assert removed == 1
 
     root = ET.parse(svg_path).getroot()
-    foreign_objects = [elem for elem in root.iter() if elem.tag.endswith("foreignObject")]
+    foreign_objects = [
+        elem for elem in root.iter() if elem.tag.endswith("foreignObject")
+    ]
     assert foreign_objects == []
 
     fallback_nodes = [

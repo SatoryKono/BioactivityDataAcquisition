@@ -9,9 +9,9 @@ from types import ModuleType
 
 
 def _load_lint_module() -> ModuleType:
-    """Load scripts/lint_diagrams.py as a module for direct function testing."""
+    """Load scripts/diagrams/lint_diagrams.py for direct function testing."""
     repo_root = Path(__file__).resolve().parents[2]
-    module_path = repo_root / "scripts" / "lint_diagrams.py"
+    module_path = repo_root / "scripts" / "diagrams" / "lint_diagrams.py"
     spec = importlib.util.spec_from_file_location("lint_diagrams_module", module_path)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
@@ -189,9 +189,7 @@ def test_label_readability_warns_on_too_many_node_lines() -> None:
     lint = _load_lint_module()
     lines = [
         "flowchart TB",
-        (
-            'A["H<br/>1<br/>2<br/>3<br/>4<br/>5<br/>6<br/>7<br/>8<br/>9"]'
-        ),
+        ('A["H<br/>1<br/>2<br/>3<br/>4<br/>5<br/>6<br/>7<br/>8<br/>9"]'),
     ]
 
     issues = lint.check_label_readability(
