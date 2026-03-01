@@ -1,60 +1,66 @@
 %% View: Data-Flow | Parent: 48-composite-phase-lifecycle-full.mermaid
-%% @uniform width=312 height=56 max_title_len=34 max_desc_lines=0
-flowchart TB
-%% keep-orphan: N4
+%% @uniform width=240 height=64 max_title_len=28 max_desc_lines=0
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL',
+    'spacing.nodeNode': 34,
+    'spacing.edgeNode': 24,
+    'spacing.edgeEdge': 12
+  }
+}}%%
+flowchart LR
 
     subgraph Domain["Domain Layer"]
         direction TB
-        N4["FSMStateHelper.validate_transition"]
+        PHASE_STATE["CompositePipelineState"]
+        FAILURE_TYPE["ErrorType (CRITICAL/RECOVERABLE/DQ)"]
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N3["merge_active"]
+        KEY_EXTRACTOR["KeyExtractorService"]
+        ENRICHMENT_PLAN["Enrichment Plan"]
+        MERGE_PLAN["Merge Plan"]
     end
 
     subgraph Infrastructure["Infrastructure Layer"]
         direction TB
-        N1["extracting_seed"]
-        N2["keys_extracted"]
-        N5["*"]
-        N6["FAILED"]
-        N7["ENRICHING"]
-        N8["SEED_RUNNING"]
-        N9["SEED_COMPLETED"]
-        N10["DEPENDENCIES_RUNNING"]
-        N11["MERGING"]
-        N12["NOT_STARTED"]
+        BRONZE_SEED["Bronze: seed dataset"]
+        SILVER_SEED["Silver: seed table"]
+        SILVER_DEPS["Silver: dependency tables"]
+        SILVER_ENRICHED["Silver: enriched fragments"]
+        GOLD_COMPOSITE["Gold: composite record"]
+        CHECKPOINT["Checkpoint snapshot"]
+        QUARANTINE["Quarantine records"]
     end
 
-    N5 --> N12
-    N12 --> N8
-    N8 --> N9
-    N8 --> N6
-    N9 --> N10
-    N9 --> N7
-    N10 --> N6
-    N7 --> N6
-    N11 --> N6
-    N6 --> N5
-    N5 --> N1
-    N5 --> N2
-    N5 --> N3
+    BRONZE_SEED --> SILVER_SEED
+    SILVER_SEED --> KEY_EXTRACTOR
+    KEY_EXTRACTOR --> ENRICHMENT_PLAN
+    ENRICHMENT_PLAN --> SILVER_DEPS
+    SILVER_DEPS --> SILVER_ENRICHED
+    SILVER_ENRICHED --> MERGE_PLAN
+    MERGE_PLAN --> GOLD_COMPOSITE
+
+    PHASE_STATE -. persisted .-> CHECKPOINT
+    CHECKPOINT -. resume context .-> ENRICHMENT_PLAN
+    FAILURE_TYPE -. routes invalid data .-> QUARANTINE
+    SILVER_ENRICHED -. dq failure .-> QUARANTINE
 
     style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
     style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
     style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
 
-    linkStyle 0 stroke:#1E293B,stroke-width:4px
-    linkStyle 1 stroke:#1E293B,stroke-width:4px
-    linkStyle 2 stroke:#1E293B,stroke-width:4px
-    linkStyle 3 stroke:#1E293B,stroke-width:4px
-    linkStyle 4 stroke:#1E293B,stroke-width:4px
-    linkStyle 5 stroke:#1E293B,stroke-width:4px
-    linkStyle 6 stroke:#1E293B,stroke-width:4px
-    linkStyle 7 stroke:#1E293B,stroke-width:4px
-    linkStyle 8 stroke:#1E293B,stroke-width:4px
-    linkStyle 9 stroke:#1E293B,stroke-width:4px
-    linkStyle 10 stroke:#1E293B,stroke-width:4px
-    linkStyle 11 stroke:#1E293B,stroke-width:4px
-    linkStyle 12 stroke:#1E293B,stroke-width:4px
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle default stroke:#475569,stroke-width:2px

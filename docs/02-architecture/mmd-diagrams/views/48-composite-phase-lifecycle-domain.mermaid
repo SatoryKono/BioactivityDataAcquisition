@@ -1,64 +1,74 @@
 %% View: Domain-Focus | Parent: 48-composite-phase-lifecycle-full.mermaid
-%% @uniform width=216 height=56 max_title_len=22 max_desc_lines=0
-%%{init: {'theme':'base','layout':'elk','flowchart':{'curve':'linear'},'elk':{'nodePlacementStrategy':'BRANDES_KOEPF','mergeEdges':true,'edgeRouting':'ORTHOGONAL'}}}%%
-flowchart TB
+%% @uniform width=232 height=64 max_title_len=26 max_desc_lines=0
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL',
+    'spacing.nodeNode': 34,
+    'spacing.edgeNode': 24,
+    'spacing.edgeEdge': 12
+  }
+}}%%
+flowchart LR
 
     subgraph Domain["Domain Layer"]
-        direction TB
-        N1["error"]
-        N2["*"]
-        N3["FAILED"]
-        N4["ENRICHING"]
-        N5["SEED_RUNNING"]
-        N6["SEED_COMPLETED"]
-        N7["DEPENDENCIES_RUNNING"]
-        N8["MERGING"]
-        N9["NOT_STARTED"]
-        N10["DEPENDENCIES_COMPLETED"]
-        N11["ENRICHMENT_COMPLETED"]
-        N12["COMPLETED"]
-        N13["idle"]
-        N14["extracting_seed"]
-        N15["keys_extracted"]
-        N16["running_deps"]
-        N17["deps_done"]
-        N18["fan_out"]
-        N19["enrichers_done"]
+        direction LR
+        NOT_STARTED["NOT_STARTED"]
+        SEED_RUNNING["SEED_RUNNING"]
+        SEED_COMPLETED["SEED_COMPLETED"]
+        DEPENDENCIES_RUNNING["DEPENDENCIES_RUNNING"]
+        DEPENDENCIES_COMPLETED["DEPENDENCIES_COMPLETED"]
+        ENRICHING["ENRICHING"]
+        ENRICHMENT_COMPLETED["ENRICHMENT_COMPLETED"]
+        MERGING["MERGING"]
+        COMPLETED["COMPLETED"]
+        FAILED["FAILED"]
+        HAS_DEPS{"has dependencies?"}
+        ENRICH_FAIL{"all enrichers failed?"}
     end
 
     subgraph Application["Application Layer"]
         direction TB
-        N20["merge_active"]
+        FSM_HELPER["FSMStateHelper.validate_transition()"]
     end
 
-    N2 --> N9
-    N9 --> N5
-    N5 --> N6
-    N5 --> N3
-    N6 --> N7
-    N6 --> N4
-    N7 --> N10
-    N7 --> N3
-    N10 --> N4
-    N4 --> N11
-    N4 --> N3
-    N11 --> N8
-    N8 --> N12
-    N8 --> N3
-    N12 --> N2
-    N3 --> N2
-    N2 --> N13
-    N2 --> N14
-    N2 --> N15
-    N2 --> N16
-    N2 --> N17
-    N2 --> N18
-    N2 --> N19
-    N2 --> N20
-    N2 --> N1
+    NOT_STARTED --> SEED_RUNNING
+    SEED_RUNNING --> SEED_COMPLETED
+    SEED_RUNNING -. seed error .-> FAILED
+
+    SEED_COMPLETED --> HAS_DEPS
+    HAS_DEPS -->|yes| DEPENDENCIES_RUNNING
+    HAS_DEPS -->|no| ENRICHING
+
+    DEPENDENCIES_RUNNING --> DEPENDENCIES_COMPLETED
+    DEPENDENCIES_RUNNING -. dep error .-> FAILED
+    DEPENDENCIES_COMPLETED --> ENRICHING
+
+    ENRICHING --> ENRICH_FAIL
+    ENRICH_FAIL -->|yes| FAILED
+    ENRICH_FAIL -->|no| ENRICHMENT_COMPLETED
+
+    ENRICHMENT_COMPLETED --> MERGING
+    MERGING --> COMPLETED
+    MERGING -. merge error .-> FAILED
+
+    FAILED -. resume .-> SEED_COMPLETED
+
+    FSM_HELPER -. validates guards .-> HAS_DEPS
+    FSM_HELPER -. validates guards .-> ENRICH_FAIL
 
     style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
     style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
 
-    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 24 stroke:#475569,stroke-width:2px,stroke-dasharray:5,opacity:0.85
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle default stroke:#475569,stroke-width:2px

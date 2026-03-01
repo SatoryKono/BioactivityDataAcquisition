@@ -363,7 +363,7 @@ render_one() {
       case "$TEXT_LAYER" in
         dual)
           if [[ -n "$PYTHON_BIN" ]]; then
-            "$PYTHON_BIN" "$REPO_ROOT/scripts/add_svg_text_fallback.py" --fix -f "$svg_out" >/dev/null 2>&1 || true
+            "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py" --fix -f "$svg_out" >/dev/null 2>&1 || true
           fi
           ;;
         fo-only)
@@ -371,11 +371,11 @@ render_one() {
           ;;
         fallback-only)
           if [[ -n "$PYTHON_BIN" ]]; then
-            if ! "$PYTHON_BIN" "$REPO_ROOT/scripts/add_svg_text_fallback.py" --fix -f "$svg_out" >/dev/null 2>&1; then
+            if ! "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py" --fix -f "$svg_out" >/dev/null 2>&1; then
               log_err "Failed to add SVG fallback text: $svg_out"
               return 1
             fi
-            if ! "$PYTHON_BIN" "$REPO_ROOT/scripts/strip_svg_foreign_object.py" --fix -f "$svg_out" >/dev/null 2>&1; then
+            if ! "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/strip_svg_foreign_object.py" --fix -f "$svg_out" >/dev/null 2>&1; then
               log_err "Failed to strip foreignObject labels: $svg_out"
               return 1
             fi
@@ -391,7 +391,7 @@ render_one() {
       fi
       # Inject CSS overrides for edge label readability
       if [[ -n "$PYTHON_BIN" ]]; then
-        "$PYTHON_BIN" "$REPO_ROOT/scripts/inject_svg_styles.py" --fix -f "$svg_out" >/dev/null 2>&1 || true
+        "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/inject_svg_styles.py" --fix -f "$svg_out" >/dev/null 2>&1 || true
       fi
       echo -e "  ${GREEN}✓${NC} SVG  [$idx/$TOTAL]  $base"
     else

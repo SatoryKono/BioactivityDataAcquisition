@@ -41,7 +41,7 @@ BioETL содержит два каталога диаграмм с разным
 
 - Тема: `theme/mermaid-config.json` + `theme/custom.css` (строки 140–151)
 - Рендер: `render.sh` (SVG + PNG, 300 DPI)
-- Lint: `scripts/lint_diagrams.py`
+- Lint: `scripts/diagrams/lint_diagrams.py`
 - Шаблон: `mmd-diagrams/_template.mmd`
 - Политика LLM: `docs/02-architecture/06-diagram-policy.md` (POL-LLM-DIAGRAMS-001)
 
@@ -152,7 +152,7 @@ View-файлы с ≥3 типами связей и >5 соединениями
 
 ### D6: CI Validation
 
-`scripts/lint_diagrams.py` проверяет оба каталога:
+`scripts/diagrams/lint_diagrams.py` проверяет оба каталога:
 
 | Rule | Description |
 |------|-------------|
@@ -178,7 +178,7 @@ Pre-commit hooks: `lint-diagrams`, `prune-orphan-diagram-nodes`.
 
 #### GRAPH-001 — Orphan Node Rule
 
-Реализован в `scripts/prune_orphan_nodes.py`. Нода считается orphan, если:
+Реализован в `scripts/diagrams/prune_orphan_nodes.py`. Нода считается orphan, если:
 - Определена (`NodeId["label"]` или bare `NodeId`) в diagram
 - Не участвует ни в одном edge / message в том же файле
 
@@ -190,9 +190,9 @@ Pre-commit hooks: `lint-diagrams`, `prune-orphan-diagram-nodes`.
 
 **Инструмент:**
 ```bash
-python scripts/prune_orphan_nodes.py --check      # аудит
-python scripts/prune_orphan_nodes.py --fix         # удалить garbage orphans
-python scripts/prune_orphan_nodes.py --grandfather # exemption для всех текущих
+python scripts/diagrams/prune_orphan_nodes.py --check      # аудит
+python scripts/diagrams/prune_orphan_nodes.py --fix         # удалить garbage orphans
+python scripts/diagrams/prune_orphan_nodes.py --grandfather # exemption для всех текущих
 ```
 
 ### D7: Tool Selection Criteria

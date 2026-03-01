@@ -8,7 +8,17 @@
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
 
-%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 %% @uniform width=256 height=144 max_title_len=25 max_desc_lines=6
 flowchart TB
     subgraph Runner["PipelineRunner (application/core/runner.py)"]
@@ -17,9 +27,14 @@ flowchart TB
 
     subgraph Lifecycle["Lifecycle Services"]
         LM["LockManager<br/>• acquire(key, owner, ttl=90s)<br/>• release(key, owner)<br/>• validate_ownership()<br/><br/>"]
+        HB["HeartbeatService<br/>• start()<br/>• stop()<br/><br/><br/>"]
+        CM["CheckpointManager<br/>• read_checkpoint()<br/>• save_checkpoint()<br/><br/><br/>"]
+        SD["ShutdownService<br/>• should_shutdown()<br/>• request_shutdown()<br/><br/><br/>"]
     end
 
     subgraph Validation["Pre/Post Services"]
+        PF["PreflightService<br/>• validate_pipeline_config()<br/>• validate_provider_health()<br/><br/><br/>"]
+        POST["PostrunService<br/>• finalize_run()<br/>• emit_summary()<br/><br/><br/>"]
     end
 
     subgraph Execution["Batch Execution"]
@@ -57,8 +72,12 @@ flowchart TB
     BMR -.->|"records"| BE
     BTM -.->|"traces"| BE
 
-    %% All use PipelineServices
-    PS -.->|"provides ports to"| Runner & Lifecycle & Validation & Execution
+    %% PipelineServices dependencies for orchestration components
+    PS -.->|"provides ports"| RUN
+    PS -.->|"provides ports"| LM
+    PS -.->|"provides ports"| PF
+    PS -.->|"provides ports"| BE
+    PS -.->|"provides ports"| BWR
 
     %% Styling
     style Runner fill:#eff6ff,stroke:#2563eb,stroke-width:3px
