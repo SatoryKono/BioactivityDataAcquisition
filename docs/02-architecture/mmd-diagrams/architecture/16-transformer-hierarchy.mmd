@@ -8,7 +8,17 @@
 %% @nodes   35
 %% @reference  Decomposed into 16a-transformer-base, 16b-transformer-pub-other
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'SIMPLE', 'edgeRouting': 'ORTHOGONAL'}}}%%
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 %% @uniform width=336 height=240 max_title_len=37 max_desc_lines=18
 graph TB
     subgraph TemplateMethod["Template Method Pattern"]

@@ -14,7 +14,21 @@
 %% @png-scale 6
 %% @png-dpi   600
 
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'},'layout':'elk','flowchart':{'curve':'linear'},'elk':{'nodePlacementStrategy':'BRANDES_KOEPF','mergeEdges':true,'edgeRouting':'ORTHOGONAL'}}}%%
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'direction': 'DOWN',
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL',
+    'spacing.nodeNode': 32,
+    'spacing.edgeNode': 22,
+    'spacing.edgeEdge': 12
+  }
+}}%%
 %% @uniform width=192 height=90 max_title_len=19 max_desc_lines=3
 flowchart TD
     ROOT["Exception<br/>(Python built-in)<br/><br/>"]
@@ -24,7 +38,7 @@ flowchart TD
     ROOT --> BIOETL
 
     %% Three main branches
-    BIOETL --> CRITICAL["CriticalError<br/>error_type = CRITICAL<br/>Action: ABORT pipeline"]
+    BIOETL ==> CRITICAL["CriticalError<br/>error_type = CRITICAL<br/>Action: ABORT pipeline"]
     BIOETL --> RECOVERABLE["RecoverableError<br/>error_type = RECOVERABLE<br/>Action: RETRY with backoff"]
     BIOETL --> DQ_ERROR["DataQualityError<br/>error_type = DATA_QUALITY<br/>Action: QUARANTINE record"]
 
@@ -93,7 +107,7 @@ flowchart TD
     ACTION_RETRY["Action: RETRY<br/>Exponential backoff<br/>Max retries from AdapterConfig<br/>"]
     ACTION_QUARANTINE["Action: QUARANTINE<br/>Record → QuarantineEntry<br/>Pipeline continues<br/>"]
 
-    CRITICAL -.->|"triggers"| ACTION_ABORT
+    CRITICAL ==>|"triggers"| ACTION_ABORT
     RECOVERABLE -.->|"triggers"| ACTION_RETRY
     DQ_ERROR -.->|"triggers"| ACTION_QUARANTINE
 
@@ -109,5 +123,10 @@ flowchart TD
     style ACTION_RETRY fill:#fff7ed,stroke:#f59e0b
     style ACTION_QUARANTINE fill:#ffe4e6,stroke:#e11d48
 
-    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48 stroke:#1E293B,stroke-width:4px
-    linkStyle 49 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle default stroke:#334155,stroke-width:2px

@@ -53,19 +53,19 @@
 ## Render And Validation
 
 ```bash
-scripts/run_diagram_checks.sh --profile pr
-scripts/run_diagram_checks.sh --profile pr --diagram docs/02-architecture/mmd-diagrams/foundation/30-port-adapter-mapping.mmd
+scripts/diagrams/run_diagram_checks.sh --profile pr
+scripts/diagrams/run_diagram_checks.sh --profile pr --diagram docs/02-architecture/mmd-diagrams/foundation/30-port-adapter-mapping.mmd
 
 # Or run checks individually:
-python3 scripts/lint_diagrams.py docs
-python3 scripts/lint_diagrams.py docs/02-architecture/mmd-diagrams --json > /tmp/diagram-lint.json || true
-python3 scripts/summarize_diagram_lint.py /tmp/diagram-lint.json
+python3 scripts/diagrams/lint_diagrams.py docs
+python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/mmd-diagrams --json > /tmp/diagram-lint.json || true
+python3 scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json
 python3 scripts/check_doc_links.py --links
-bash scripts/validate_mermaid_syntax.sh
+bash scripts/diagrams/validate_mermaid_syntax.sh
 bash docs/02-architecture/mmd-diagrams/render.sh
-python3 scripts/check_svg_text_visibility.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
-python3 scripts/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
-python3 scripts/check_diagram_quality_gates.py --manifest docs/02-architecture/mmd-diagrams/quality-gate-manifest.txt
+python3 scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
+python3 scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
+python3 scripts/diagrams/check_diagram_quality_gates.py --manifest docs/02-architecture/mmd-diagrams/quality-gate-manifest.txt
 ```
 
 ## Notes

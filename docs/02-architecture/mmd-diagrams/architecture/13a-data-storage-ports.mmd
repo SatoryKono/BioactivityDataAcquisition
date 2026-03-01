@@ -8,41 +8,36 @@
 %% @nodes   20
 
 %%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
   'layout': 'elk',
-  'theme': 'base',
-  'themeVariables': { 'fontFamily': 'Inter, system-ui, sans-serif' },
   'elk': {
     'mergeEdges': true,
     'nodePlacementStrategy': 'BRANDES_KOEPF',
-    'cycleBreakingStrategy': 'GREEDY',
-    'direction': 'RIGHT',
-    'spacing.nodeNode': 40,
-    'spacing.edgeNode': 30,
-    'spacing.edgeEdge': 20,
     'edgeRouting': 'ORTHOGONAL'
   }
 }}%%
-
-%% @uniform width=232 height=56 max_title_len=24 max_desc_lines=0
+%% @uniform width=232 height=56 max_title_len=34 max_desc_lines=0
 graph LR
 %% keep-orphan: FDSP
     subgraph Domain["Domain Ports"]
-        DSP["fa:fa-plug DataSourcePort"]:::size-sm
-        FDSP["fa:fa-filter FilterableDataSourcePort"]:::size-sm
-        STP["fa:fa-database StoragePort"]:::size-sm
-        DRP["fa:fa-book-open DeltaReaderPort"]:::size-sm
-        IFP["fa:fa-file-import InputFilterPort"]:::size-sm
+        DSP["fa:fa-plug DataSourcePort"]:::size-md
+        FDSP["fa:fa-filter FilterableDataSourcePort"]:::size-lg
+        STP["fa:fa-database StoragePort"]:::size-md
+        DRP["fa:fa-book-open DeltaReaderPort"]:::size-md
+        IFP["fa:fa-file-import InputFilterPort"]:::size-md
     end
 
     subgraph Infrastructure["Implementations"]
-        CA["ChemblAdapter"]:::size-sm
-        PA["PubchemAdapter"]:::size-sm
-        UA["UniprotAdapter"]:::size-sm
-        BW["BronzeWriter"]:::size-sm
-        SW["SilverWriter"]:::size-sm
-        GW["GoldWriter"]:::size-sm
-        DR_I["DeltaReader"]:::size-sm
-        CSVR["CsvFilterReader"]:::size-sm
+        CA["ChemblAdapter"]:::size-md
+        PA["PubchemAdapter"]:::size-md
+        UA["UniprotAdapter"]:::size-md
+        BW["BronzeWriter"]:::size-md
+        SW["SilverWriter"]:::size-md
+        GW["GoldWriter"]:::size-md
+        DR_I["DeltaReader"]:::size-md
+        CSVR["CsvFilterReader"]:::size-md
     end
 
     DSP --- CA & PA & UA

@@ -20,26 +20,16 @@
 %% @uniform-stats root         width=144 height=112 max_desc_lines=4
 %% @uniform-stats actions      width=168 height=112 max_desc_lines=4
 %%{init: {
-%%  'layout': 'elk',
-%%  'theme': 'base',
-%%  'themeVariables': {'lineWidth': '2'},
-%%  'flowchart': {
-%%    'nodeSpacing': 60,
-%%    'rankSpacing': 76,
-%%    'padding': 24,
-%%    'curve': 'linear'
-%%  },
-%%  'elk': {
-%%    'mergeEdges': true,
-%%    'nodePlacementStrategy': 'BRANDES_KOEPF',
-%%    'cycleBreakingStrategy': 'GREEDY',
-%%    'direction': 'DOWN',
-%%    'spacing.nodeNode': 48,
-%%    'spacing.edgeNode': 34,
-%%    'spacing.edgeEdge': 22,
-%%    'edgeRouting': 'ORTHOGONAL'
-%%  }
-%%}}%%
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 flowchart TB
     ERROR["Error Occurred<br/><br/><br/>"]
 

@@ -9,21 +9,16 @@
 %% @reference  Decomposed into 13e-operational-ports-domain, 13f-operational-ports-infra
 
 %%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
   'layout': 'elk',
-  'theme': 'base',
-  'themeVariables': { 'fontFamily': 'Inter, system-ui, sans-serif' },
   'elk': {
     'mergeEdges': true,
     'nodePlacementStrategy': 'BRANDES_KOEPF',
-    'cycleBreakingStrategy': 'GREEDY',
-    'direction': 'RIGHT',
-    'spacing.nodeNode': 40,
-    'spacing.edgeNode': 30,
-    'spacing.edgeEdge': 20,
     'edgeRouting': 'ORTHOGONAL'
   }
 }}%%
-
 %% @uniform width=232 height=56 max_title_len=24 max_desc_lines=0
 graph LR
 %% keep-orphan: SHP

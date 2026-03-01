@@ -15,25 +15,16 @@
 %% @png-dpi   600
 
 %%{init: {
-%%  'layout': 'elk',
-%%  'theme': 'base',
-%%  'flowchart': {
-%%    'nodeSpacing': 56,
-%%    'rankSpacing': 84,
-%%    'padding': 24,
-%%    'curve': 'linear'
-%%  },
-%%  'elk': {
-%%    'mergeEdges': true,
-%%    'nodePlacementStrategy': 'BRANDES_KOEPF',
-%%    'cycleBreakingStrategy': 'GREEDY',
-%%    'direction': 'DOWN',
-%%    'spacing.nodeNode': 44,
-%%    'spacing.edgeNode': 34,
-%%    'spacing.edgeEdge': 24,
-%%    'edgeRouting': 'ORTHOGONAL'
-%%  }
-%%}}%%
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 %% @uniform width=420 height=108 max_title_len=49 max_desc_lines=4
 flowchart TD
 %% keep-orphan: SOURCE_YAML_CFG
