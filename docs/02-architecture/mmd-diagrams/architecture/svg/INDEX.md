@@ -1,6 +1,6 @@
 # BioETL Diagrams — SVG Index
 
-_Generated: 2026-02-27T22:34:33+03:00_
+_Generated: 2026-03-01T16:29:08+03:00_
 
 ## High Level Hexagonal
 
@@ -23,6 +23,12 @@ _Generated: 2026-02-27T22:34:33+03:00_
 ## 01chexagonal Infra Comp
 
 ![01c-hexagonal-infra-comp](./01c-hexagonal-infra-comp.svg)
+
+---
+
+## 01dhexagonal Overview Rounded
+
+![01d-hexagonal-overview-rounded](./01d-hexagonal-overview-rounded.svg)
 
 ---
 
@@ -137,6 +143,12 @@ _Generated: 2026-02-27T22:34:33+03:00_
 ## 13aport Contracts Data Sources
 
 ![13a-port-contracts-data-sources](./13a-port-contracts-data-sources.svg)
+
+---
+
+## 13a.Afterfix.Copy2 No Class Suffix
+
+![13a.after-fix.copy2-no-class-suffix](./13a.after-fix.copy2-no-class-suffix.svg)
 
 ---
 

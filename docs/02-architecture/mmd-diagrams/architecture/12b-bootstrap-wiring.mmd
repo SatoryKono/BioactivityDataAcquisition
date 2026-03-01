@@ -10,7 +10,17 @@
 %% @nodes   15
 %% @uniform width=400 height=56 max_title_len=40 max_desc_lines=1
 
-%%{init: {'layout': 'elk', 'elk': {'mergeEdges': false, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 graph TB
     subgraph Composition["Composition Layer"]
         RA["bootstrap_pipeline_runner"]:::size-sm

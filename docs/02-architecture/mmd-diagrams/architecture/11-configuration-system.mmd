@@ -9,7 +9,17 @@
 %% @png-dpi   600
 %% @nodes   29
 
-%%{init: {'layout': 'elk', 'theme': 'base', 'flowchart': {'nodeSpacing': 56, 'rankSpacing': 84, 'padding': 24, 'curve': 'linear'}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'cycleBreakingStrategy': 'GREEDY', 'direction': 'RIGHT', 'spacing.nodeNode': 44, 'spacing.edgeNode': 32, 'spacing.edgeEdge': 24, 'edgeRouting': 'ORTHOGONAL'}}}%%
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 %% @uniform width=216 height=198 max_title_len=22 max_desc_lines=9
 flowchart LR
 %% keep-orphan: APC, CBC, CCFG, OBS_SET, PCP, PIPE_SET, SETTINGS, SRC

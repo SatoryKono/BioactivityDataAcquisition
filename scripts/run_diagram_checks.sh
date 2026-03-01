@@ -12,6 +12,7 @@ PUPPETEER_CFG="${PUPPETEER_CFG:-/tmp/puppeteer-config.json}"
 STRICT_NIGHTLY=0
 SKIP_RENDER=0
 DIAGRAM_PATH=""
+TEXT_LAYER="${TEXT_LAYER:-fallback-only}"
 SOURCE_MANIFEST="$REPO_ROOT/docs/02-architecture/mmd-diagrams/quality-gate-manifest.txt"
 RENDER_MANIFEST="$REPO_ROOT/docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt"
 TEMP_SOURCE_MANIFEST=""
@@ -26,6 +27,7 @@ Options:
   --profile <pr|nightly|quick>   Check profile (default: pr)
   --diagram <path>               Run checks only for one .mmd/.mermaid diagram
   --puppeteer <path>             Puppeteer config path (default: /tmp/puppeteer-config.json)
+  --text-layer <mode>            SVG text layers: dual|fo-only|fallback-only (default: fallback-only)
   --strict-nightly               Fail nightly profile on warnings
   --skip-render                  Skip render step (useful for local dry loops)
   -h, --help                     Show this help
@@ -33,6 +35,7 @@ Options:
 Examples:
   scripts/run_diagram_checks.sh --profile pr
   scripts/run_diagram_checks.sh --profile pr --diagram docs/02-architecture/mmd-diagrams/foundation/30-port-adapter-mapping.mmd
+  scripts/run_diagram_checks.sh --profile pr --text-layer fallback-only
   scripts/run_diagram_checks.sh --profile nightly --strict-nightly
   scripts/run_diagram_checks.sh --profile quick
 EOF
@@ -150,9 +153,12 @@ run_render_step() {
     bash "$REPO_ROOT/docs/02-architecture/mmd-diagrams/render.sh" \
       --dir "$REPO_ROOT/$diagram_dir" \
       --filter "$diagram_stem" \
+      --text-layer "$TEXT_LAYER" \
       --puppeteer "$PUPPETEER_CFG"
   else
-    bash "$REPO_ROOT/docs/02-architecture/mmd-diagrams/render.sh" --puppeteer "$PUPPETEER_CFG"
+    bash "$REPO_ROOT/docs/02-architecture/mmd-diagrams/render.sh" \
+      --text-layer "$TEXT_LAYER" \
+      --puppeteer "$PUPPETEER_CFG"
   fi
 }
 
@@ -242,6 +248,11 @@ while [[ $# -gt 0 ]]; do
       PUPPETEER_CFG="$2"
       shift 2
       ;;
+    --text-layer)
+      [[ $# -lt 2 ]] && { echo "--text-layer requires value" >&2; exit 2; }
+      TEXT_LAYER="$2"
+      shift 2
+      ;;
     --strict-nightly)
       STRICT_NIGHTLY=1
       shift
@@ -261,6 +272,14 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+case "$TEXT_LAYER" in
+  dual|fo-only|fallback-only) ;;
+  *)
+    echo "--text-layer must be one of: dual|fo-only|fallback-only" >&2
+    exit 2
+    ;;
+esac
 
 if [[ -n "$DIAGRAM_PATH" ]]; then
   prepare_diagram_scope "$DIAGRAM_PATH"

@@ -35,6 +35,7 @@ PUPPETEER_CFG="$THEME_DIR/puppeteer-config.json"
 [[ -f "$PUPPETEER_CFG" ]] || PUPPETEER_CFG=""
 JOBS=4           # parallel jobs
 FIT=1            # adaptive sizing by default
+TEXT_LAYER="fallback-only"   # dual | fo-only | fallback-only
 EXCLUDE_PATHS=("docs/99-archive")
 
 # ── Diagram source directories ──────────────────────────────
@@ -81,6 +82,8 @@ Options:
   --exclude PATH      Exclude path (repeatable, relative to repo root
                       or absolute path; default: docs/99-archive)
   --jobs N            Parallel render jobs    (default: $JOBS)
+  --text-layer MODE   Text layer mode: dual | fo-only | fallback-only
+                      (default: $TEXT_LAYER)
   --puppeteer FILE    Puppeteer config JSON   (CI sandboxing; defaults to theme/puppeteer-config.json if present)
   -h, --help          Show this help
 EOF
@@ -118,6 +121,7 @@ while [[ $# -gt 0 ]]; do
     --dir)          require_option_value "$1" "$#"; EXTRA_DIRS+=("$2"); shift 2 ;;
     --exclude)      require_option_value "$1" "$#"; EXCLUDE_PATHS+=("$2"); shift 2 ;;
     --jobs)         require_option_value "$1" "$#"; JOBS="$2";          shift 2 ;;
+    --text-layer)   require_option_value "$1" "$#"; TEXT_LAYER="$2";    shift 2 ;;
     --no-fit)       FIT=0;                                                shift ;;
     --puppeteer)    require_option_value "$1" "$#"; PUPPETEER_CFG="$2"; shift 2 ;;
     -h|--help)      usage; exit 0 ;;
@@ -155,6 +159,10 @@ if ! [[ "$HEIGHT" =~ ^[0-9]+$ ]]; then
 fi
 if ! [[ "$JOBS" =~ ^[0-9]+$ ]] || [[ "$JOBS" -lt 1 ]]; then
   log_err "--jobs must be an integer >= 1 (got: $JOBS)"
+  exit 1
+fi
+if [[ "$TEXT_LAYER" != "dual" && "$TEXT_LAYER" != "fo-only" && "$TEXT_LAYER" != "fallback-only" ]]; then
+  log_err "--text-layer must be one of: dual | fo-only | fallback-only (got: $TEXT_LAYER)"
   exit 1
 fi
 
@@ -350,11 +358,33 @@ render_one() {
     mkdir -p "$svg_dir"
     local svg_out="$svg_dir/${base}.svg"
     if mmdc -i "$src" -o "$svg_out" "${MMDC_ARGS[@]}" "${size_args[@]}" -b "$BG" 2>/dev/null; then
-      # Add plain SVG text fallback under foreignObject labels for renderers
-      # that do not support foreignObject.
-      if [[ -n "$PYTHON_BIN" ]]; then
-        "$PYTHON_BIN" "$REPO_ROOT/scripts/add_svg_text_fallback.py" --fix -f "$svg_out" >/dev/null 2>&1 || true
-      fi
+      # Manage text rendering layers to avoid duplicate labels in viewers
+      # that support both foreignObject and fallback text.
+      case "$TEXT_LAYER" in
+        dual)
+          if [[ -n "$PYTHON_BIN" ]]; then
+            "$PYTHON_BIN" "$REPO_ROOT/scripts/add_svg_text_fallback.py" --fix -f "$svg_out" >/dev/null 2>&1 || true
+          fi
+          ;;
+        fo-only)
+          :
+          ;;
+        fallback-only)
+          if [[ -n "$PYTHON_BIN" ]]; then
+            if ! "$PYTHON_BIN" "$REPO_ROOT/scripts/add_svg_text_fallback.py" --fix -f "$svg_out" >/dev/null 2>&1; then
+              log_err "Failed to add SVG fallback text: $svg_out"
+              return 1
+            fi
+            if ! "$PYTHON_BIN" "$REPO_ROOT/scripts/strip_svg_foreign_object.py" --fix -f "$svg_out" >/dev/null 2>&1; then
+              log_err "Failed to strip foreignObject labels: $svg_out"
+              return 1
+            fi
+          else
+            log_err "fallback-only requires python for SVG post-processing"
+            return 1
+          fi
+          ;;
+      esac
       # Optimize SVG with svgo if available
       if [[ $HAS_SVGO -eq 1 ]]; then
         svgo --quiet --config "$THEME_DIR/../svgo.config.js" "$svg_out" -o "$svg_out" 2>/dev/null || true
@@ -537,6 +567,7 @@ echo -e "  ${GREEN}Rendered OK:${NC}     $success"
 echo ""
 echo -e "  Theme:  ${CONFIG:-'(default)'}"
 echo -e "  CSS:    ${CSS:-'(none)'}"
+echo -e "  Text:   ${TEXT_LAYER}"
 echo ""
 
 formats=""

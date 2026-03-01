@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import re
 import sys
+import textwrap
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -54,7 +55,125 @@ def _normalize_text(text: str) -> str:
 
 
 def _extract_text(node: ET.Element) -> str:
+    """Extract collapsed single-line text from node tree."""
     return _normalize_text(" ".join(node.itertext()))
+
+
+def _append_raw_text(parts: list[str], raw: str | None) -> None:
+    if raw is None:
+        return
+    if raw:
+        parts.append(raw)
+
+
+def _extract_text_lines(node: ET.Element) -> list[str]:
+    """Extract semantic text lines from foreignObject HTML content.
+
+    Mermaid labels are rendered through foreignObject HTML with explicit <br/>
+    markers. We preserve these line breaks and convert to compact plain-text
+    lines for SVG fallback text.
+    """
+
+    parts: list[str] = []
+
+    def visit(elem: ET.Element) -> None:
+        _append_raw_text(parts, elem.text)
+        for child in list(elem):
+            child_name = _local_name(child.tag).lower()
+            if child_name == "br":
+                parts.append("\n")
+            else:
+                visit(child)
+                if child_name in {"p", "div", "li"}:
+                    parts.append("\n")
+            _append_raw_text(parts, child.tail)
+
+    visit(node)
+    raw = "".join(parts)
+    if not raw:
+        return []
+
+    normalized: list[str] = [_normalize_text(line) for line in raw.split("\n")]
+
+    # Collapse large blank gaps from Mermaid padding (<br/><br/>...).
+    compact: list[str] = []
+    prev_blank = False
+    for line in normalized:
+        is_blank = not line
+        if is_blank and prev_blank:
+            continue
+        compact.append(line)
+        prev_blank = is_blank
+
+    while compact and not compact[0]:
+        compact.pop(0)
+    while compact and not compact[-1]:
+        compact.pop()
+
+    return compact
+
+
+def _sanitize_label_line(line: str) -> str:
+    stripped = line.strip()
+    if not stripped:
+        return ""
+
+    # Collapse decorative separators to a short neutral divider.
+    if len(stripped) >= 6 and not any(ch.isalnum() for ch in stripped):
+        glyphs = {ch for ch in stripped if not ch.isspace()}
+        if len(glyphs) <= 3:
+            return "--------"
+
+    # Normalize slash separators for more readable fallback labels.
+    stripped = re.sub(r"\s*/\s*", " / ", stripped)
+
+    # Improve wrapping for long PascalCase/camelCase identifiers.
+    # humanized = re.sub(r"(?<=[A-Z])(?=[A-Z][a-z])", " ", stripped)
+    # humanized = re.sub(r"(?<=[a-z0-9])(?=[A-Z])", " ", humanized)
+    humanized = stripped
+    return humanized
+
+
+def _estimate_wrap_chars(width: float, font_size: float) -> int:
+    # Approximate average glyph width for sans-serif text.
+    avg_char_width = max(font_size * 0.56, 6.0)
+    usable_width = max(width * 0.88, 40.0)
+    estimate = int(usable_width / avg_char_width)
+    return max(18, min(64, estimate))
+
+
+def _wrap_label_lines(lines: list[str], max_chars: int) -> list[str]:
+    wrapped: list[str] = []
+    for raw in lines:
+        line = _sanitize_label_line(raw)
+        if not line:
+            if wrapped and wrapped[-1]:
+                wrapped.append("")
+            continue
+        chunks = textwrap.wrap(
+            line,
+            width=max_chars,
+            break_long_words=False,
+            break_on_hyphens=False,
+        )
+        if not chunks:
+            chunks = [line]
+
+        # If a token still exceeds width (no spaces), hard-wrap it.
+        for chunk in chunks:
+            if len(chunk) <= max_chars:
+                wrapped.append(chunk)
+                continue
+            start = 0
+            while start < len(chunk):
+                wrapped.append(chunk[start:start + max_chars])
+                start += max_chars
+
+    while wrapped and not wrapped[0]:
+        wrapped.pop(0)
+    while wrapped and not wrapped[-1]:
+        wrapped.pop()
+    return wrapped
 
 
 def _is_empty_edge_label_group(node: ET.Element) -> bool:
@@ -91,8 +210,8 @@ def _is_fallback_text(node: ET.Element) -> bool:
 
 
 def _build_fallback_text(fo: ET.Element) -> ET.Element | None:
-    text_value = _extract_text(fo)
-    if not text_value:
+    text_lines = _extract_text_lines(fo)
+    if not text_lines:
         return None
 
     width = _parse_float(fo.attrib.get("width"))
@@ -103,11 +222,26 @@ def _build_fallback_text(fo: ET.Element) -> ET.Element | None:
     x = _parse_float(fo.attrib.get("x"))
     y = _parse_float(fo.attrib.get("y"))
 
+    center_x = x + width / 2.0
+    font_size = 14.0
+    max_chars = _estimate_wrap_chars(width=width, font_size=font_size)
+    wrapped_lines = _wrap_label_lines(text_lines, max_chars=max_chars)
+    if not wrapped_lines:
+        return None
+
+    # Keep fallback labels compact even for oversized node descriptions.
+    max_lines = 12
+    if len(wrapped_lines) > max_lines:
+        wrapped_lines = wrapped_lines[: max_lines - 1] + ["..."]
+
+    line_height = max(font_size * 1.2, 10.0)
+    total_span = (len(wrapped_lines) - 1) * line_height
+    first_line_y = y + (height - total_span) / 2.0
+
     text_elem = ET.Element(f"{{{SVG_NS}}}text")
-    text_elem.set("x", _fmt_float(x + width / 2.0))
-    text_elem.set("y", _fmt_float(y + height / 2.0))
+    text_elem.set("x", _fmt_float(center_x))
+    text_elem.set("y", _fmt_float(first_line_y))
     text_elem.set("text-anchor", "middle")
-    text_elem.set("dominant-baseline", "middle")
     text_elem.set("xml:space", "preserve")
 
     cls = fo.attrib.get("class", "").strip()
@@ -117,7 +251,14 @@ def _build_fallback_text(fo: ET.Element) -> ET.Element | None:
     if transform:
         text_elem.set("transform", transform)
 
-    text_elem.text = text_value
+    for idx, line in enumerate(wrapped_lines):
+        tspan = ET.Element(f"{{{SVG_NS}}}tspan")
+        tspan.set("x", _fmt_float(center_x))
+        if idx > 0:
+            tspan.set("dy", _fmt_float(line_height))
+        tspan.text = line
+        text_elem.append(tspan)
+
     return text_elem
 
 
@@ -142,13 +283,15 @@ def add_fallbacks(path: Path) -> int:
                 continue
 
             if idx > 0 and _is_fallback_text(children[idx - 1]):
-                continue
+                parent.remove(children[idx - 1])
 
             fallback = _build_fallback_text(child)
             if fallback is None:
                 continue
 
-            parent.insert(idx, fallback)
+            live_children = list(parent)
+            child_index = live_children.index(child)
+            parent.insert(child_index, fallback)
             inserted += 1
 
     if inserted > 0 or removed_empty_edge_labels > 0:
@@ -161,11 +304,11 @@ def collect_svg_files(files: list[Path] | None, dirs: list[Path] | None) -> list
     if files:
         return files
     if dirs:
-        result: list[Path] = []
+        selected: list[Path] = []
         for d in dirs:
             if d.is_dir():
-                result.extend(sorted(d.glob("*.svg")))
-        return result
+                selected.extend(sorted(d.glob("*.svg")))
+        return selected
     result: list[Path] = []
     for d in SVG_DIRS:
         if d.is_dir():

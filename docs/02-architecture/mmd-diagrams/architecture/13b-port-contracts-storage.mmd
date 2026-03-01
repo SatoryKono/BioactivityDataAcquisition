@@ -10,6 +10,17 @@
 %% @nodes   9
 %% @uniform width=184 height=56 max_title_len=18 max_desc_lines=1
 
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 graph LR
     subgraph Domain["Domain Layer"]
         STP["StoragePort"]:::size-sm
