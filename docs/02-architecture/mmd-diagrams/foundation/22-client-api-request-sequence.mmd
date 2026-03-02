@@ -94,7 +94,7 @@ sequenceDiagram
                 Note right of CB: Circuit tripped! (circuit_breaker_trips_total += 1)
             end
 
-            Adapter==>>Executor: raise RetryExhaustedError
+            Adapter-->>Executor: raise RetryExhaustedError
         end
     end
 

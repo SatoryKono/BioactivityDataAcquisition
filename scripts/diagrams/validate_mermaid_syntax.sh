@@ -3,6 +3,8 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 DOCS_ROOT="$REPO_ROOT/docs"
+CANONICAL_ROOT="$REPO_ROOT/docs/02-architecture/mmd-diagrams"
+SCOPE="all"
 THEME_CONFIG="$REPO_ROOT/docs/02-architecture/mmd-diagrams/theme/mermaid-config.json"
 PUPPETEER_CFG=""
 
@@ -16,6 +18,7 @@ Validate all Mermaid source files in docs/:
 
 Options:
   --docs-root DIR     Docs root directory (default: $DOCS_ROOT)
+  --scope MODE        Validation scope: all|canonical (default: all)
   --puppeteer FILE    Puppeteer config JSON path
   -h, --help          Show this help
 EOF
@@ -26,6 +29,11 @@ while [[ $# -gt 0 ]]; do
     --docs-root)
       [[ $# -ge 2 ]] || { echo "Missing value for $1" >&2; exit 2; }
       DOCS_ROOT="$2"
+      shift 2
+      ;;
+    --scope)
+      [[ $# -ge 2 ]] || { echo "Missing value for $1" >&2; exit 2; }
+      SCOPE="$2"
       shift 2
       ;;
     --puppeteer)
@@ -45,6 +53,18 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+case "$SCOPE" in
+  all)
+    ;;
+  canonical)
+    DOCS_ROOT="$CANONICAL_ROOT"
+    ;;
+  *)
+    echo "Unsupported scope: $SCOPE (expected: all|canonical)" >&2
+    exit 2
+    ;;
+esac
+
 if ! command -v mmdc >/dev/null 2>&1; then
   echo "Error: mmdc not found. Install with: npm install -g @mermaid-js/mermaid-cli" >&2
   exit 2
@@ -55,7 +75,7 @@ if [[ "$DOCS_ROOT" != /* ]]; then
 fi
 
 if [[ ! -d "$DOCS_ROOT" ]]; then
-  echo "Error: docs root does not exist: $DOCS_ROOT" >&2
+  echo "Error: docs root does not exist for scope '$SCOPE': $DOCS_ROOT" >&2
   exit 2
 fi
 

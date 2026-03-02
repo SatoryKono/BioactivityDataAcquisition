@@ -952,10 +952,10 @@ class TestChemblAdapterExtractionParams:
         assert params["standard_type__in"] == "IC50,Ki"
         assert params["pchembl_value__isnull"] is False
 
-    def test_build_params_extraction_params_merged_with_pagination(
+    def test_build_params_extraction_params_merged_with_pagination_target(
         self, mock_http_client, mock_logger
     ):
-        """Test extraction_params merge with pagination for non-paginated entity."""
+        """Test extraction_params merge with pagination for target entity."""
         from bioetl.domain.models.filter import ExtractionParams
 
         ep = ExtractionParams(params={"standard_units": "nM"})
@@ -965,12 +965,12 @@ class TestChemblAdapterExtractionParams:
             extraction_params=ep,
         )
 
-        # "target" is in _NO_PAGINATION_ENTITIES, so no limit/offset
+        # "target" uses limit/offset pagination.
         params = adapter._build_params(offset=0, entity_type="target")
 
         assert params["format"] == "json"
-        assert "limit" not in params
-        assert "offset" not in params
+        assert params["limit"] == adapter._get_effective_batch_size()
+        assert params["offset"] == 0
         assert params["standard_units"] == "nM"
 
     def test_build_params_empty_extraction_params_no_effect(

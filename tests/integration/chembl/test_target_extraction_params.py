@@ -93,9 +93,9 @@ class TestTargetExtractionParams:
 
         # Standard format param present
         assert params["format"] == "json"
-        # target is a non-paginated entity — limit/offset must be absent
-        assert "limit" not in params
-        assert "offset" not in params
+        # target uses standard pagination for consistency with page_meta.next.
+        assert params["limit"] == 500
+        assert params["offset"] == 0
 
         # All 3 target extraction params present
         assert params["target_type"] == "SINGLE PROTEIN"

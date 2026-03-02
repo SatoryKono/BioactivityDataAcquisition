@@ -8,6 +8,7 @@ pipeline:
     description: Extract biological targets from ChEMBL API
     business_primary_keys:
         - target_id
+    batch_size: 1000
     sink:
         silver:
             partition_by:

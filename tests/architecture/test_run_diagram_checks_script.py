@@ -56,3 +56,39 @@ def test_runner_supports_text_layer_mode() -> None:
     assert "TEXT_LAYER=" in script
     assert "--text-layer requires value" in script
     assert "--text-layer must be one of: dual|fo-only|fallback-only" in script
+
+
+def test_runner_hardens_puppeteer_config_lifecycle() -> None:
+    script = _script_text()
+
+    assert "--refresh-puppeteer-config" in script
+    assert "FORCE_WRITE_PUPPETEER=0" in script
+    assert "ensure_puppeteer_config()" in script
+    assert "Using existing Puppeteer config" in script
+    assert "validate_puppeteer_config" in script
+
+
+def test_runner_has_browser_preflight_diagnostics() -> None:
+    script = _script_text()
+
+    assert "run_puppeteer_preflight()" in script
+    assert "running as root (requires --no-sandbox" in script
+    assert "executablePath not set (auto-discovery mode)" in script
+    assert "args include --no-sandbox" in script
+
+
+def test_runner_invokes_operator_guard_before_syntax_checks() -> None:
+    script = _script_text()
+
+    assert "run_operator_guard()" in script
+    assert 'python3 "$REPO_ROOT/scripts/diagrams/fix_mermaid_operators.py"' in script
+    assert '--check "$REPO_ROOT/docs/02-architecture/mmd-diagrams"' in script
+    assert '--check "$REPO_ROOT/$DIAGRAM_PATH"' in script
+    assert "DIAG-T000: Mermaid operator guard" in script
+
+
+def test_runner_uses_canonical_scope_for_full_syntax_validation() -> None:
+    script = _script_text()
+
+    assert "validate_mermaid_syntax.sh" in script
+    assert "--scope canonical" in script
