@@ -108,54 +108,7 @@
     "dq": {
       "conditional_validations": [],
       "cross_field_validations": [],
-      "field_validations": [
-        {
-          "allowed": [
-            "IC50",
-            "Ki",
-            "Kd",
-            "EC50",
-            "AC50",
-            "GI50",
-            "ED50",
-            "MIC",
-            "CC50"
-          ],
-          "error_message": null,
-          "field": "standard_type",
-          "max_length": null,
-          "max_value": null,
-          "min_value": null,
-          "nullable": true,
-          "pattern": null,
-          "severity": "error",
-          "severity_enricher": null,
-          "validation_type": "enum",
-          "validator": null
-        },
-        {
-          "allowed": [
-            "nM",
-            "uM",
-            "mM",
-            "pM",
-            "M",
-            "ug.mL-1",
-            "mg.kg-1"
-          ],
-          "error_message": null,
-          "field": "standard_units",
-          "max_length": null,
-          "max_value": null,
-          "min_value": null,
-          "nullable": true,
-          "pattern": null,
-          "severity": "error",
-          "severity_enricher": null,
-          "validation_type": "enum",
-          "validator": null
-        }
-      ],
+      "field_validations": [],
       "hard_fail_threshold": 0.2,
       "invalid_record_policy": "quarantine",
       "key_nullability_rules": [],
