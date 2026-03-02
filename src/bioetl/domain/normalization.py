@@ -97,14 +97,22 @@ def strip_html_tags(text: str | None) -> str | None:
     if not text:
         return None
 
-    # Remove HTML tags
-    clean = _HTML_TAG_PATTERN.sub("", text)
+    clean = text
 
-    # Decode HTML entities (&amp; → &, &lt; → <, etc.)
-    clean = unescape(clean)
+    # Remove HTML tags (only run regex if < is present)
+    if "<" in clean:
+        clean = _HTML_TAG_PATTERN.sub("", clean)
 
-    # Normalize whitespace (collapse multiple spaces/newlines to single space)
-    clean = _WHITESPACE_PATTERN.sub(" ", clean).strip()
+    # Decode HTML entities (only unescape if & is present)
+    if "&" in clean:
+        clean = unescape(clean)
+
+    # Fast check for empty/whitespace string
+    if not clean or clean.isspace():
+        return None
+
+    # Normalize whitespace (split/join is ~3-4x faster than regex)
+    clean = " ".join(clean.split())
 
     return clean if clean else None
 
