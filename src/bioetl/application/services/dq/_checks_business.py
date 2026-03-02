@@ -86,7 +86,15 @@ def check_business_rules(
     df: pl.DataFrame,
     rules: list[dict[str, Any]],  # Any: heterogeneous DQ rule ...
 ) -> BusinessRulesResult:
-    """Validate business rules."""
+    """Validate business rules.
+
+    Args:
+        df: Input DataFrame.
+        rules: Rules.
+
+    Returns:
+        Check result as BusinessRulesResult.
+    """
     if not rules:
         return BusinessRulesResult(
             rules_evaluated=0,

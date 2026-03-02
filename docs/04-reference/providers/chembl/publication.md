@@ -48,7 +48,7 @@
 
 ## 3. Трансформация
 
-**Файл:** `src/bioetl/application/pipelines/chembl/publication-transformer.py`
+**Файл:** `src/bioetl/application/pipelines/chembl/publication_transformer.py`
 
 ### Entity ID
 
@@ -71,10 +71,10 @@ entity-id = f"chembl:{document-chembl-id}"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_publication
+bioetl run --pipeline chembl_publication
 
 # С ограничением
-bioetl run chembl_publication --limit 1000
+bioetl run --pipeline chembl_publication --limit 1000
 ```
 
 ---
@@ -84,7 +84,7 @@ bioetl run chembl_publication --limit 1000
 | Компонент | Путь |
 |-----------|------|
 | Конфигурация | `configs/entities/chembl/publication.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/publication-transformer.py` |
+| Трансформер | `src/bioetl/application/pipelines/chembl/publication_transformer.py` |
 | Пайплайн | `src/bioetl/application/pipelines/chembl/publication.py` |
 
 ---

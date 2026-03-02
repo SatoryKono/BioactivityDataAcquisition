@@ -1,5 +1,9 @@
 # Pipeline Failure Recovery Runbook
 
+*Reference: [ADR-010](../../02-architecture/decisions/ADR-010-local-only-deployment.md)*
+
+> Runtime profile: Local-Only single-instance. Recovery steps target local run logs, checkpoints, and Delta tables.
+
 ## Overview
 
 This runbook covers diagnosing and recovering from failed BioETL pipeline runs.
@@ -131,8 +135,8 @@ For 401/403 errors:
 1. Check API key validity
 1. Verify environment variables:
    ```bash
-   echo $BIOETL-CHEMBL-API-KEY
-   echo $BIOETL-UNIPROT-API-KEY
+   echo $BIOETL_CHEMBL_API_KEY
+   echo $BIOETL_UNIPROT_API_KEY
    ```
 1. Rotate API key if expired
 1. Resume pipeline

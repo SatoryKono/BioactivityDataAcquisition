@@ -1,11 +1,11 @@
-# Record Processing Pipeline — Single Record Journey
+# Single Record Journey Full
 
 - Исходная диаграмма: `mmd-diagrams/views/32-single-record-journey-full.mermaid`
 
 ## Описание
-Диаграмма описывает: RULES.md §2.1-§2.6 (Data Flow, DQ), §2.8 (Normalization). Приоритет/контекст: 7 (Score 8.56) — Best onboarding diagram: follow one record.
+Эта views-диаграмма Single Record Journey Full представляет срез типа full для родительской схемы (root) и использует нотацию unknown. Она нужна для детального анализа выбранного аспекта архитектуры без перегрузки полного графа лишними элементами. В метке view зафиксировано назначение: Full. Такой формат облегчает трассировку связей между full-версией и специализированными представлениями overview/domain/infra/dataflow, что важно для ревью, онбординга и проверки архитектурной консистентности документации. Ключевые блоки этой версии включают: 1. External API, 2. Bronze Layer, 3. Transform (RecordProcessor), 4. Validate, 5. Route Decision. Их состав показывает, какие границы ответственности и каналы взаимодействия автор выбрал для текущего аналитического фокуса. Показательные узлы в диаграмме: 1. External API, REST API Response (e.g., ChEMBL /activity), 2. Bronze Layer, BronzeWriter.write_bronze() JSONL + zstd + atomic rename manifest update, 3. Transform (RecordProcessor), BatchTransformer.transform(). По ним можно проверить корректность терминологии, соответствие имен портов/адаптеров и логичность маршрутов данных или управляющих вызовов. Диаграмма предназначена для практического использования в технических обсуждениях, регрессионной валидации диаграмм и синхронизации с кодовой структурой проекта. Она помогает быстро обнаруживать расхождения между задуманной архитектурой и фактической реализацией компонентов.
 
 ## Метаданные
-- Тип: `flowchart`
-- Уровень: `Mixed (System / Component / Class)`
-- Дата метаданных: `2026-02-24`
+- Тип: `unknown`
+- View: `Full`
+- Parent: `(root)`

@@ -69,7 +69,7 @@
 
 ## 3. Трансформация
 
-**Файл:** `src/bioetl/application/pipelines/chembl/assay-parameters-transformer.py`
+**Файл:** `src/bioetl/application/pipelines/chembl/assay_parameters_transformer.py`
 
 ### Entity ID
 
@@ -103,13 +103,13 @@ type = param-type.upper() if param-type else "UNKNOWN"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_assay_parameters
+bioetl run --pipeline chembl_assay_parameters
 
 # С ограничением
-bioetl run chembl_assay_parameters --limit 1000
+bioetl run --pipeline chembl_assay_parameters --limit 1000
 
 # С входным фильтром
-bioetl run chembl_assay_parameters --input-filter data/input/assay-parameters.csv
+bioetl run --pipeline chembl_assay_parameters --input-csv data/input/assay-parameters.csv
 ```
 
 ---
@@ -124,9 +124,9 @@ Silver-таблица партиционируется по полю `type` дл
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/entities/chembl/assay-parameters.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/assay-parameters-transformer.py` |
-| Пайплайн | `src/bioetl/application/pipelines/chembl/assay-parameters.py` |
+| Конфигурация | `configs/entities/chembl/assay_parameters.yaml` |
+| Трансформер | `src/bioetl/application/pipelines/chembl/assay_parameters_transformer.py` |
+| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py` |
 
 ---
 

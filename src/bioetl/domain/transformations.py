@@ -116,7 +116,17 @@ def normalize_for_hash(
     include_fields: set[str] | None = None,
     exclude_fields: set[str] | None = None,
 ) -> dict[str, Any]:  # Any: heterogeneous record values
-    """Normalize record before hashing to ensure consistency."""
+    """Normalize record before hashing to ensure consistency.
+
+    Args:
+        record: Single data record.
+        exclude_none: Whether to exclude None values from the normalized result.
+        include_fields: Set of field names to include (if specified, only these fields are kept).
+        exclude_fields: Set of field names to exclude from normalization.
+
+    Returns:
+        Normalized dictionary with consistent value representations.
+    """
     return {
         key: _normalize_value(value)
         for key, value in record.items()
@@ -131,6 +141,12 @@ def canonical_json_dumps(obj: dict[str, Any]) -> str:  # Any: JSON-serializable 
 
     Delegates to domain.serialization.serialize_to_json_canonical()
     for consistent JSON serialization across the codebase.
+
+    Args:
+        obj: Dictionary to serialize as canonical JSON.
+
+    Returns:
+        Canonical JSON string with sorted keys and no extra whitespace.
     """
     return serialize_to_json_canonical(obj)
 
@@ -143,7 +159,18 @@ def generate_content_hash(
     include_fields: set[str] | None = None,
     exclude_fields: set[str] | None = None,
 ) -> ContentHash:
-    """Generate SHA256 content hash for record versioning."""
+    """Generate SHA256 content hash for record versioning.
+
+    Args:
+        record: Single data record.
+        provider: Data provider name.
+        exclude_none: Whether to exclude None values from hash computation.
+        include_fields: Set of field names to include (if specified, only these fields are hashed).
+        exclude_fields: Set of field names to exclude from hash computation.
+
+    Returns:
+        SHA256 content hash of the normalized record.
+    """
     normalized = normalize_for_hash(
         record,
         exclude_none=exclude_none,
@@ -161,7 +188,16 @@ def generate_entity_id(
     provider: str,
     id_field: str | None = None,
 ) -> EntityID:
-    """Generate stable entity ID (business key)."""
+    """Generate stable entity ID (business key).
+
+    Args:
+        record: Single data record.
+        provider: Data provider name.
+        id_field: Name of the field containing the business key (if None, uses content hash).
+
+    Returns:
+        Stable entity identifier in format 'provider:key'.
+    """
     if id_field and id_field in record:
         stable_id = str(record[id_field])
         return EntityID(f"{provider}:{stable_id}")
@@ -179,7 +215,16 @@ def detect_schema_drift(
     new_schema: set[str],
     required_fields: set[str] | None = None,
 ) -> tuple[DriftLevel, dict[str, Any]]:  # Any: JSON-serializable value
-    """Detect schema drift between two schemas."""
+    """Detect schema drift between two schemas.
+
+    Args:
+        old_schema: Set of field names in the previous schema version.
+        new_schema: Set of field names in the current schema version.
+        required_fields: Set of fields that must not be removed (triggers CRITICAL drift).
+
+    Returns:
+        Tuple of (drift_level, details_dict) with added/removed fields info.
+    """
     added = sorted(new_schema - old_schema)
     removed = sorted(old_schema - new_schema)
     missing_required = sorted((required_fields or set()) & set(removed))
@@ -205,7 +250,15 @@ def detect_schema_drift(
 
 
 def calculate_dq_score(valid_count: int, total_count: int) -> float:
-    """Calculate data quality score (0.0 to 1.0)."""
+    """Calculate data quality score (0.0 to 1.0).
+
+    Args:
+        valid_count: Number of records that passed validation.
+        total_count: Total number of records processed.
+
+    Returns:
+        Quality score ratio between 0.0 and 1.0 (1.0 if total is zero).
+    """
     if total_count == 0:
         return 1.0
     return valid_count / total_count
@@ -217,7 +270,17 @@ def exceeds_threshold(
     soft_threshold: float = 0.05,
     hard_threshold: float = 0.20,
 ) -> tuple[bool, bool]:
-    """Check if error rate exceeds thresholds."""
+    """Check if error rate exceeds thresholds.
+
+    Args:
+        error_count: Number of records with errors.
+        total_count: Total number of records processed.
+        soft_threshold: Warning threshold ratio (default 5%).
+        hard_threshold: Failure threshold ratio (default 20%).
+
+    Returns:
+        Tuple of (exceeds_soft, exceeds_hard) booleans.
+    """
     if total_count == 0:
         return False, False
     error_rate = error_count / total_count
@@ -229,7 +292,16 @@ def detect_hash_collision(
     source_record_id: str,
     existing_source_id: str | None,
 ) -> bool:
-    """Detect content hash collision."""
+    """Detect content hash collision.
+
+    Args:
+        _: Content hash (unused, kept for API compatibility).
+        source_record_id: ID of the incoming record.
+        existing_source_id: ID of the record already stored with the same hash.
+
+    Returns:
+        True if a collision is detected (same hash, different source IDs).
+    """
     return existing_source_id is not None and source_record_id != existing_source_id
 
 

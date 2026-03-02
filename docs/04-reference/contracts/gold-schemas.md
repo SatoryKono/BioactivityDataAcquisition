@@ -2,6 +2,9 @@
 
 Контракты данных для Gold-слоя BioETL.
 
+> В качестве source-of-truth используйте JSON-контракты в `docs/04-reference/contracts/gold/*.json`.
+> Ниже применяется snake_case нотация полей, синхронизированная с автогенерацией контрактов.
+
 > **Версия**: 1.1.0
 > **Последнее обновление**: 2026-02-04
 > **Связанные ADR**: [ADR-018](../../02-architecture/decisions/ADR-018-gold-strict-validation.md), [ADR-014](../../02-architecture/decisions/ADR-014-deterministic-writes.md)
@@ -40,7 +43,7 @@ Gold-слой содержит **бизнес-готовые данные** с:
 | **Strict Validation** | Все поля валидируются перед записью (REQ-DATA-009) |
 | **Business Filters** | Только качественные данные проходят в Gold |
 | **Idempotency** | Повторный запуск даёт идентичный результат |
-| **Traceability** | Каждая запись содержит `-run-id`, `content-hash` |
+| **Traceability** | Каждая запись содержит `_run_id`, `content_hash` |
 
 ---
 
@@ -77,30 +80,30 @@ Gold-фильтры определяются в YAML-конфигах пайпл
 
 | Тип фильтра | Описание | Пример |
 |-------------|----------|--------|
-| **columns** | Inclusion list (IN) | `standard-type: [IC50, Ki]` |
-| **ranges** | Числовой диапазон | `standard-value: {min: 0}` |
+| **columns** | Inclusion list (IN) | `standard_type: [IC50, Ki]` |
+| **ranges** | Числовой диапазон | `standard_value: {min: 0}` |
 | **list-lengths** | Длина списка | `component-accessions: {min: 1, max: 1}` |
 | **list-contains** | Содержимое списка | `component-types: {values: [PROTEIN]}` |
-| **required-fields** | Обязательные поля | `[target-chembl-id, standard-value]` |
+| **required-fields** | Обязательные поля | `[target_id, standard_value]` |
 | **exclude-if-present** | Исключение по наличию | `[deprecated-field]` |
 
 ### Пример конфигурации
 
 ```yaml
 # configs/entities/chembl/activity.yaml
-gold-filters:
+gold_filters:
   columns:
-    standard-type: [IC50, Ki]
-    standard-units: [nM]
-    assay-type: [B, F]
+    standard_type: [IC50, Ki]
+    standard_units: [nM]
+    assay_type: [B, F]
   ranges:
-    standard-value:
+    standard_value:
       min: 0
       include-min: false
-  required-fields:
-    - standard-type
-    - standard-value
-    - target-chembl-id
+  required_fields:
+    - standard_type
+    - standard_value
+    - target_id
 ```
 
 ---
@@ -111,35 +114,35 @@ gold-filters:
 
 #### chembl_activity
 
-**Primary Key**: `activity-id`
+**Primary Key**: `activity_id`
 **Назначение**: Биоактивность соединений (IC50, Ki, EC50)
 
 ##### Gold-фильтры (Бизнес-логика)
 
 | Фильтр | Значения | Обоснование |
 |--------|----------|-------------|
-| `standard-type` | `[IC50, Ki]` | Только стандартизированные метрики связывания |
-| `standard-units` | `[nM]` | Единый масштаб для сравнения |
-| `standard-relation` | `["="]` | Точные значения, не диапазоны |
-| `assay-type` | `[B, F]` | Binding/Functional assays |
+| `standard_type` | `[IC50, Ki]` | Только стандартизированные метрики связывания |
+| `standard_units` | `[nM]` | Единый масштаб для сравнения |
+| `standard_relation` | `["="]` | Точные значения, не диапазоны |
+| `assay_type` | `[B, F]` | Binding/Functional assays |
 | `potential-duplicate` | `["0"]` | Исключение дубликатов |
-| `standard-value` | `> 0` | Положительные значения активности |
+| `standard_value` | `> 0` | Положительные значения активности |
 
 ##### Ключевые поля
 
 | Поле | Тип | Nullable | Описание |
 |------|-----|----------|----------|
-| `entity-id` | str | No | Уникальный идентификатор |
-| `activity-id` | str | No | ChEMBL Activity ID |
-| `molecule-chembl-id` | str | No | ID молекулы |
-| `target-chembl-id` | str | Yes | ID мишени |
-| `assay-chembl-id` | str | Yes | ID эксперимента |
-| `standard-type` | str | Yes | Тип метрики (IC50, Ki) |
-| `standard-value` | float | Yes | Значение активности |
-| `standard-units` | str | Yes | Единицы измерения |
-| `pchembl-value` | float | Yes | -log10(IC50) |
+| `entity_id` | str | No | Уникальный идентификатор |
+| `activity_id` | str | No | ChEMBL Activity ID |
+| `molecule_id` | str | No | ID молекулы |
+| `target_id` | str | Yes | ID мишени |
+| `assay_id` | str | Yes | ID эксперимента |
+| `standard_type` | str | Yes | Тип метрики (IC50, Ki) |
+| `standard_value` | float | Yes | Значение активности |
+| `standard_units` | str | Yes | Единицы измерения |
+| `pchembl_value` | float | Yes | -log10(IC50) |
 | `canonical-smiles` | str | Yes | SMILES молекулы |
-| `content-hash` | str | No | SHA256 хэш записи |
+| `content_hash` | str | No | SHA256 хэш записи |
 
 ##### Лиганд-эффективность
 
@@ -154,7 +157,7 @@ gold-filters:
 
 #### chembl_molecule
 
-**Primary Key**: `molecule-chembl-id`
+**Primary Key**: `molecule_id`
 **Назначение**: Химические соединения и их свойства
 
 ##### Gold-фильтры
@@ -169,7 +172,7 @@ gold-filters:
 
 | Поле | Тип | Nullable | Описание |
 |------|-----|----------|----------|
-| `molecule-chembl-id` | str | No | ChEMBL Molecule ID |
+| `molecule_id` | str | No | ChEMBL Molecule ID |
 | `pref-name` | str | Yes | Предпочтительное название |
 | `molecule-type` | str | Yes | Тип молекулы |
 | `max-phase` | float | Yes | Фаза клинических испытаний (0-4) |
@@ -193,26 +196,26 @@ gold-filters:
 
 #### chembl_assay
 
-**Primary Key**: `assay-chembl-id`
+**Primary Key**: `assay_id`
 **Назначение**: Биологические эксперименты
 
 ##### Gold-фильтры
 
 | Фильтр | Значения | Обоснование |
 |--------|----------|-------------|
-| `assay-type` | `[B, F]` | Binding, Functional |
-| `confidence-score` | `["8", "9"]` | Высокая уверенность (шкала 0-9) |
+| `assay_type` | `[B, F]` | Binding, Functional |
+| `confidence_score` | `["8", "9"]` | Высокая уверенность (шкала 0-9) |
 | `relationship-type` | `[D]` | Direct interaction only |
 
 ##### Ключевые поля
 
 | Поле | Тип | Nullable | Описание |
 |------|-----|----------|----------|
-| `assay-chembl-id` | str | No | ChEMBL Assay ID |
-| `target-chembl-id` | str | Yes | ID мишени |
-| `assay-type` | str | Yes | Тип эксперимента |
+| `assay_id` | str | No | ChEMBL Assay ID |
+| `target_id` | str | Yes | ID мишени |
+| `assay_type` | str | Yes | Тип эксперимента |
 | `description` | str | Yes | Описание |
-| `confidence-score` | float | Yes | Уровень уверенности |
+| `confidence_score` | float | Yes | Уровень уверенности |
 | `bao-format` | str | Yes | BAO Format ID |
 | `assay-organism` | str | Yes | Организм |
 
@@ -220,7 +223,7 @@ gold-filters:
 
 #### chembl_target
 
-**Primary Key**: `target-chembl-id`
+**Primary Key**: `target_id`
 **Назначение**: Биологические мишени (белки)
 
 ##### Gold-фильтры
@@ -235,7 +238,7 @@ gold-filters:
 
 | Поле | Тип | Nullable | Описание |
 |------|-----|----------|----------|
-| `target-chembl-id` | str | No | ChEMBL Target ID |
+| `target_id` | str | No | ChEMBL Target ID |
 | `pref-name` | str | Yes | Название |
 | `target-type` | str | Yes | Тип мишени |
 | `organism` | str | Yes | Организм |
@@ -304,14 +307,14 @@ gold-filters:
 
 | Фильтр | Значения | Обоснование |
 |--------|----------|-------------|
-| required | `molecule-chembl-id, document-chembl-id` | Полнота связей |
+| required | `molecule_id, document-chembl-id` | Полнота связей |
 
 ##### Ключевые поля
 
 | Поле | Тип | Nullable | Описание |
 |------|-----|----------|----------|
 | `record-id` | float | No | Record ID |
-| `molecule-chembl-id` | str | No | ChEMBL Molecule ID |
+| `molecule_id` | str | No | ChEMBL Molecule ID |
 | `document-chembl-id` | str | No | ChEMBL Document ID |
 | `compound-key` | str | Yes | Название в публикации |
 | `compound-name` | str | Yes | Полное название |
@@ -359,7 +362,7 @@ gold-filters:
 
 | Поле | Тип | Nullable | Описание |
 |------|-----|----------|----------|
-| `entity-id` | str | No | Уникальный ID |
+| `entity_id` | str | No | Уникальный ID |
 | `cid` | str | No | PubChem Compound ID |
 | `molecular-formula` | str | Yes | Молекулярная формула |
 | `molecular-weight` | str | Yes | Молекулярная масса |
@@ -389,7 +392,7 @@ gold-filters:
 
 | Поле | Тип | Nullable | Описание |
 |------|-----|----------|----------|
-| `entity-id` | str | No | Уникальный ID |
+| `entity_id` | str | No | Уникальный ID |
 | `accession` | str | No | UniProt Accession |
 | `entry-name` | str | Yes | Entry name |
 | `protein-name` | str | Yes | Название белка |
@@ -416,7 +419,7 @@ gold-filters:
 
 | Поле | Тип | Nullable | Описание |
 |------|-----|----------|----------|
-| `entity-id` | str | No | Уникальный ID |
+| `entity_id` | str | No | Уникальный ID |
 | `pmid` | str | No | PubMed ID |
 | `doi` | str | Yes | DOI |
 | `pmc-id` | str | Yes | PubMed Central ID |
@@ -436,10 +439,10 @@ gold-filters:
 
 | Поле | Alias | Тип | Nullable | Описание |
 |------|-------|-----|----------|----------|
-| `entity-id` | — | str | No | Глобальный уникальный ID |
-| `content-hash` | — | str | No | SHA256 хэш содержимого |
-| `-run-id` | run-id | str | No | ID запуска пайплайна |
-| `-run-type` | run-type | str | No | Тип запуска (incremental/backfill) |
+| `entity_id` | — | str | No | Глобальный уникальный ID |
+| `content_hash` | — | str | No | SHA256 хэш содержимого |
+| `_run_id` | run-id | str | No | ID запуска пайплайна |
+| `_run_type` | run-type | str | No | Тип запуска (incremental/backfill) |
 | `-source-batch-id` | source-batch-id | str | Yes | ID исходного batch |
 | `-ingestion-ts` | ingestion-ts | str | No | Timestamp загрузки (ISO 8601) |
 | `-index` | index | int | No | Порядковый номер в batch |
@@ -456,7 +459,7 @@ sha256(provider + canonical-json(record))
 - Floats → `round(val, 10)`
 - Dates → ISO `YYYY-MM-DD`
 - Strings → `strip()`
-- **Исключаются**: `-ingestion-ts`, `-run-id`, `-run-type`, `-dq-*`
+- **Исключаются**: `-ingestion-ts`, `_run_id`, `_run_type`, `-dq-*`
 
 ---
 
@@ -495,13 +498,13 @@ df = pl.from-arrow(dt.to-pyarrow-table())
 
 # Фильтрация активных IC50 для конкретной мишени
 activities = df.filter(
-    (pl.col("target-chembl-id") == "CHEMBL1234") &
-    (pl.col("standard-type") == "IC50") &
-    (pl.col("standard-value") < 100)  # nM
+    (pl.col("target_id") == "CHEMBL1234") &
+    (pl.col("standard_type") == "IC50") &
+    (pl.col("standard_value") < 100)  # nM
 ).select([
-    "molecule-chembl-id",
-    "standard-value",
-    "pchembl-value",
+    "molecule_id",
+    "standard_value",
+    "pchembl_value",
     "canonical-smiles"
 ])
 ```
@@ -515,14 +518,14 @@ LOAD delta;
 
 -- Топ-10 молекул по активности для мишени
 SELECT
-    molecule-chembl-id,
-    standard-value,
-    pchembl-value,
+    molecule_id,
+    standard_value,
+    pchembl_value,
     canonical-smiles
 FROM delta-scan('data/output/gold/chembl_activity')
-WHERE target-chembl-id = 'CHEMBL1234'
-  AND standard-type = 'IC50'
-ORDER BY standard-value ASC
+WHERE target_id = 'CHEMBL1234'
+  AND standard_type = 'IC50'
+ORDER BY standard_value ASC
 LIMIT 10;
 ```
 
@@ -531,17 +534,17 @@ LIMIT 10;
 ```sql
 -- Молекулы с активностью и свойствами
 SELECT
-    a.molecule-chembl-id,
-    a.target-chembl-id,
-    a.standard-value AS ic50-nm,
+    a.molecule_id,
+    a.target_id,
+    a.standard_value AS ic50-nm,
     m.property-alogp,
     m.property-mw-freebase AS mw,
     m.structure-canonical-smiles
 FROM delta-scan('data/output/gold/chembl_activity') a
 JOIN delta-scan('data/output/gold/chembl_molecule') m
-  ON a.molecule-chembl-id = m.molecule-chembl-id
-WHERE a.standard-type = 'IC50'
-  AND a.standard-value < 100;
+  ON a.molecule_id = m.molecule_id
+WHERE a.standard_type = 'IC50'
+  AND a.standard_value < 100;
 ```
 
 ### Анализ по мишеням
@@ -552,12 +555,12 @@ SELECT
     t.pref-name AS target-name,
     t.organism,
     COUNT(*) AS activity-count,
-    AVG(a.pchembl-value) AS avg-pchembl,
-    MIN(a.standard-value) AS best-ic50-nm
+    AVG(a.pchembl_value) AS avg-pchembl,
+    MIN(a.standard_value) AS best-ic50-nm
 FROM delta-scan('data/output/gold/chembl_activity') a
 JOIN delta-scan('data/output/gold/chembl_target') t
-  ON a.target-chembl-id = t.target-chembl-id
-WHERE a.standard-type = 'IC50'
+  ON a.target_id = t.target_id
+WHERE a.standard_type = 'IC50'
 GROUP BY t.pref-name, t.organism
 ORDER BY activity-count DESC
 LIMIT 20;
@@ -591,9 +594,9 @@ print(f"Added {current-count - previous-count} records")
 
 ```python
 class ChEMBLActivityGoldSchema(pa.DataFrameModel):
-    entity-id: Series[str] = pa.Field(nullable=False)
-    activity-id: Series[str] = pa.Field(nullable=False)
-    molecule-chembl-id: Series[str] = pa.Field(nullable=False)
+    entity_id: Series[str] = pa.Field(nullable=False)
+    activity_id: Series[str] = pa.Field(nullable=False)
+    molecule_id: Series[str] = pa.Field(nullable=False)
     # ... остальные поля
 
     class Config:
@@ -667,10 +670,10 @@ JSON exports для Gold-схем хранятся в `docs/04-reference/contrac
 
 | Provider | Entity | Primary Key | Filters | Fields |
 |----------|--------|-------------|---------|--------|
-| ChEMBL | activity | `activity-id` | 5 column + 1 range | ~100 |
-| ChEMBL | molecule | `molecule-chembl-id` | 3 column | ~60 |
-| ChEMBL | assay | `assay-chembl-id` | 3 column | ~45 |
-| ChEMBL | target | `target-chembl-id` | 1 col + list filters | ~25 |
+| ChEMBL | activity | `activity_id` | 5 column + 1 range | ~100 |
+| ChEMBL | molecule | `molecule_id` | 3 column | ~60 |
+| ChEMBL | assay | `assay_id` | 3 column | ~45 |
+| ChEMBL | target | `target_id` | 1 col + list filters | ~25 |
 | ChEMBL | target-component | `component-id` | 1 column | ~13 |
 | ChEMBL | document | `document-chembl-id` | 1 col + 1 range | ~17 |
 | ChEMBL | compound-record | `record-id` | required only | ~8 |

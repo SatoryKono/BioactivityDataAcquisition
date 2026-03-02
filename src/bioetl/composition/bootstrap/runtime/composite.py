@@ -114,7 +114,14 @@ def _resolve_composite_config_path(name: str) -> Path:
 
 
 def load_composite_config(name: str) -> CompositeConfig:
-    """Load and validate composite pipeline configuration from YAML."""
+    """Load and validate composite pipeline configuration from YAML.
+
+    Args:
+        name: Identifier name.
+
+    Returns:
+        Loaded CompositeConfig.
+    """
     config_path = _resolve_composite_config_path(name)
 
     with config_path.open(encoding="utf-8") as f:
@@ -344,7 +351,11 @@ def bootstrap_composite_runner(
     )
 
     def seed_runner_factory() -> PipelineRunner:
-        """Create PipelineRunner for the seed phase."""
+        """Create PipelineRunner for the seed phase.
+
+        Returns:
+            The PipelineRunner result.
+        """
         options = RunOptions(
             run_type="incremental",
             limit=runtime.seed_limit,
@@ -360,7 +371,15 @@ def bootstrap_composite_runner(
     def enricher_runner_factory(
         pipeline_name: str, keys: pl.DataFrame
     ) -> PipelineRunner:
-        """Create PipelineRunner for an enricher phase (ADR-026)."""
+        """Create PipelineRunner for an enricher phase (ADR-026).
+
+        Args:
+            pipeline_name: Pipeline identifier.
+            keys: Keys.
+
+        Returns:
+            The PipelineRunner result.
+        """
         enricher_cfg = enricher_configs.get(pipeline_name)
         filter_ids: tuple[str, ...] | None = None
         filter_field: str | None = None

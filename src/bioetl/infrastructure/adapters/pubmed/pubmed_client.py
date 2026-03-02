@@ -87,7 +87,17 @@ class PubMedAdapter(
         filter_field: str,
         limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch PubMed records by ID list (bypass search)."""
+        """Fetch PubMed records by ID list (bypass search).
+
+        Args:
+            entity_type: Entity type identifier.
+            filter_ids: List of identifiers to filter by.
+            filter_field: Field name to apply filter on.
+            limit: Maximum number of records to process.
+
+        Returns:
+            Async iterator yielding fetched records.
+        """
         if entity_type != "publication":
             raise ValueError("PubMedAdapter only supports 'publication'")
 
@@ -108,7 +118,18 @@ class PubMedAdapter(
         fallback_mapping: dict[str, str],
         limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch with fallback to title search when primary lookup fails."""
+        """Fetch with fallback to title search when primary lookup fails.
+
+        Args:
+            entity_type: Entity type identifier.
+            filter_ids: List of identifiers to filter by.
+            filter_field: Field name to apply filter on.
+            fallback_mapping: Fallback mapping.
+            limit: Maximum number of records to process.
+
+        Returns:
+            Async iterator yielding fetched records.
+        """
         if entity_type != "publication":
             raise ValueError("PubMedAdapter only supports 'publication'")
 
@@ -170,6 +191,17 @@ class PubMedAdapter(
         Supports checkpoint resume via ``offset`` by skipping the already
         processed PMID segment before article fetch, which avoids refetching
         records from completed part of the previous run.
+
+        Args:
+            entity_type: Entity type identifier.
+            limit: Maximum number of records to process.
+            query: Search query string.
+            filter_ids: List of identifiers to filter by.
+            filter_field: Field name to apply filter on.
+            offset: Offset.
+
+        Returns:
+            Async iterator yielding fetched records.
         """
         if filter_ids:
             effective_filter_field = filter_field or "pmid"
@@ -220,7 +252,19 @@ class PubMedAdapter(
         *,
         validate: bool = True,
     ) -> AsyncIterator[BaseModel]:
-        """Fetch PubMed records as typed DTO models."""
+        """Fetch PubMed records as typed DTO models.
+
+        Args:
+            entity_type: Entity type identifier.
+            limit: Maximum number of records to process.
+            query: Search query string.
+            filter_ids: List of identifiers to filter by.
+            filter_field: Field name to apply filter on.
+            validate: Whether to validate.
+
+        Returns:
+            Async iterator yielding fetched records.
+        """
         model_class = PUBMED_DTO_MODELS.get(entity_type)
         if model_class is None:
             raise ValueError(f"No DTO model for entity_type '{entity_type}'")

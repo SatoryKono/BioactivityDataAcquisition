@@ -214,6 +214,9 @@ class RetryingDataSourceDecorator:
         Raises:
             RetryExhaustedError: If all retry attempts fail.
             CircuitBreakerOpenError: If circuit breaker is open (propagates immediately).
+
+        Returns:
+            Async iterator yielding fetched records.
         """
         last_error: Exception | None = None
         retries = 0

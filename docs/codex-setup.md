@@ -162,14 +162,14 @@ TOML
 export PATH="/usr/local/bin:$PATH"
 
 # BioETL project
-export BIOETL-DIR="/mnt/e/g-drive/05-AI/github/BioactivityDataAcquisition2"
-alias cdp="cd $BIOETL-DIR"
-alias cx="cd $BIOETL-DIR && codex"
-alias cxe="cd $BIOETL-DIR && codex exec --full-auto"
+export BIOETL_DIR="/mnt/e/g-drive/05-AI/github/BioactivityDataAcquisition2"
+alias cdp="cd $BIOETL_DIR"
+alias cx="cd $BIOETL_DIR && codex"
+alias cxe="cd $BIOETL_DIR && codex exec --full-auto"
 
 # Auto-fix DNS при входе
 if ! grep -q "api.openai.com" /etc/hosts 2>/dev/null; then
-  bash "$BIOETL-DIR/.setup-wsl-codex.sh" 2>/dev/null
+  bash "$BIOETL_DIR/.setup-wsl-codex.sh" 2>/dev/null
 fi
 ```
 

@@ -267,7 +267,25 @@ def build_pipeline_runner(
         [PipelineRunContext], CachedBronzeContext
     ] = _assemble_cached_bronze_context,
 ) -> PipelineRunner:
-    """Assemble and return a fully configured PipelineRunner."""
+    """Assemble and return a fully configured PipelineRunner.
+
+    Args:
+        ctx: Ctx.
+        registry: Registry.
+        get_default_registry_fn: Get default registry fn.
+        register_all_providers_fn: Register all providers fn.
+        register_all_pipelines_fn: Register all pipelines fn.
+        get_settings_fn: Get settings fn.
+        load_pipeline_config_fn: Load pipeline config fn.
+        build_observability_bundle_fn: Build observability bundle fn.
+        assemble_vacuum_settings_fn: Assemble vacuum settings fn.
+        assemble_runtime_config_fn: Assemble runtime config fn.
+        assemble_filter_config_fn: Assemble filter config fn.
+        assemble_cached_bronze_context_fn: Assemble cached bronze context fn.
+
+    Returns:
+        Newly created PipelineRunner instance.
+    """
     effective_registry = registry if registry is not None else get_default_registry_fn()
 
     register_all_providers_fn()

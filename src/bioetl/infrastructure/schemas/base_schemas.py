@@ -46,7 +46,11 @@ class BaseDQThresholds(BaseModel):
 
     @model_validator(mode="after")
     def validate_thresholds(self) -> BaseDQThresholds:
-        """Validate soft_fail < hard_fail."""
+        """Validate soft_fail < hard_fail.
+
+        Returns:
+            Validated BaseDQThresholds.
+        """
         DomainDQConfig.validate_thresholds(
             soft_fail_threshold=self.soft_fail_threshold,
             hard_fail_threshold=self.hard_fail_threshold,
@@ -312,7 +316,11 @@ class BaseInputFilterConfig(BaseModel):
 
     @model_validator(mode="after")
     def validate_column_config(self) -> BaseInputFilterConfig:
-        """Validate that either columns or column_name/filter_field is provided."""
+        """Validate that either columns or column_name/filter_field is provided.
+
+        Returns:
+            Validated BaseInputFilterConfig.
+        """
         if not self.enabled:
             return self
         if self.columns:
@@ -488,7 +496,11 @@ class BaseGoldColumnFilterConfig(BaseModel):
 
     @model_validator(mode="after")
     def validate_operator_values(self) -> BaseGoldColumnFilterConfig:
-        """Validate that values are provided for IN/NOT_IN operators."""
+        """Validate that values are provided for IN/NOT_IN operators.
+
+        Returns:
+            Validated BaseGoldColumnFilterConfig.
+        """
         if self.operator in ("in", "not_in") and not self.values:
             raise ValueError(f"values required for operator '{self.operator}'")
         if (

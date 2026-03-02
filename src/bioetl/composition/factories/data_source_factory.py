@@ -196,6 +196,9 @@ class DataSourceRegistry:
         """List all registered providers.
 
         Returns providers from ProviderRegistry that have data_source_creator.
+
+        Returns:
+            Collection of providers.
         """
         ensure_providers_loaded()
         # Return all providers from ProviderRegistry
@@ -207,6 +210,9 @@ class DataSourceRegistry:
         """List all registered provider names (unified API).
 
         Alias for list_providers().
+
+        Returns:
+            Collection of keys.
         """
         return cls.list_providers()
 

@@ -117,7 +117,11 @@ class TokenBucket:
         )
 
     def available_tokens(self) -> int:
-        """Return current available tokens (floor of float value)."""
+        """Return current available tokens (floor of float value).
+
+        Returns:
+            Computed integer value.
+        """
         self._refill()
         return int(self._tokens)
 

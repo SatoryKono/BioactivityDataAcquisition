@@ -2,6 +2,8 @@
 
 *Reference: [RULES.md §2.4](../../00-project/RULES.md#24-политика-backfill--replay)*
 
+> Runtime profile: Local-Only single-instance (ADR-010). Steps assume local filesystem storage and `MemoryLock` (no Redis/distributed coordinator).
+
 This runbook describes how to perform Backfill (historical load) and Rebuild (full reload) operations.
 
 ## Definitions
@@ -11,7 +13,7 @@ This runbook describes how to perform Backfill (historical load) and Rebuild (fu
 
 ## Prerequisites
 
-- **Exclusive Lock**: These operations require an exclusive lock (`lock:{provider}-{entity}:exclusive`).
+- **Exclusive Lock**: These operations require an exclusive lock in local `MemoryLock` scope.
 - **Downtime**: Incremental pipelines must be stopped or will be blocked.
 
 ## Procedure: Full Rebuild
@@ -44,7 +46,7 @@ This runbook describes how to perform Backfill (historical load) and Rebuild (fu
 
    ```bash
    # Example: Backfill for Jan 2024
-   bioetl run --pipeline {name} --run-type backfill --start-date YYYY-MM-DD --end-date YYYY-MM-DD
+   bioetl run --pipeline {name} --run-type backfill
    ```
 
 1. **Monitor Progress**:

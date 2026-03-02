@@ -1,0 +1,10 @@
+.mermaid {
+    overflow: auto;
+    max-width: 100%;
+}
+
+.mermaid svg {
+    width: 100% !important;
+    height: auto !important;
+}
+

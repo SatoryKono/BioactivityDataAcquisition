@@ -1,0 +1,70 @@
+%% View: Overview | Parent: 01-full-system-component-full.mermaid
+%% Decomposed overview for fast architectural reading.
+%% @uniform width=228 height=64 max_title_len=22 max_desc_lines=1
+%%{init: {'layout':'elk','theme':'base','flowchart':{'nodeSpacing':54,'rankSpacing':70,'curve':'linear'},'elk':{'mergeEdges':true,'edgeRouting':'ORTHOGONAL','nodePlacementStrategy':'BRANDES_KOEPF'}}}%%
+flowchart TB
+    subgraph External["External Systems"]
+        direction LR
+        EXT["Provider APIs"]
+    end
+
+    subgraph Interfaces["Interfaces"]
+        direction TB
+        CLI["CLI"]
+    end
+
+    subgraph Composition["Composition"]
+        direction TB
+        BOOT["Bootstrap"]
+        FACT["Factories"]
+    end
+
+    subgraph Application["Application"]
+        direction TB
+        RUN["PipelineRunner"]
+        EXEC["PipelineExecutor"]
+        PROC["RecordProcessor"]
+    end
+
+    subgraph Domain["Domain Ports"]
+        direction LR
+        DSP["[P] DataSourcePort"]
+        STP["[P] StoragePort"]
+    end
+
+    subgraph Infrastructure["Infrastructure"]
+        direction LR
+        ADP["[A] ProviderAdapters"]
+        HTTP["[A] UnifiedHTTPClient"]
+        WR["[A] MedallionWriters"]
+    end
+
+    CLI --> BOOT
+    BOOT --> FACT
+    FACT -.-> RUN
+    RUN ==> EXEC
+    EXEC --> PROC
+
+    RUN -.-> DSP
+    RUN -.-> STP
+    DSP -.-> ADP
+    ADP --> HTTP
+    STP -.-> WR
+    PROC ==> WR
+    EXT --> ADP
+
+    classDef layer_domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:1.8px;
+    classDef layer_application fill:#f0fdf4,stroke:#16a34a,stroke-width:1.8px;
+    classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
+    classDef layer_composition fill:#fff7ed,stroke:#f59e0b,stroke-width:1.8px;
+    classDef layer_interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:1.8px;
+    classDef layer_external fill:#f1f5f9,stroke:#64748b,stroke-width:1.8px;
+    classDef service fill:#f0fdf4,stroke:#16a34a,stroke-width:1.6px;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1.4px,stroke-dasharray:3 2;
+
+    class DSP,STP layer_domain;
+    class RUN,EXEC,PROC layer_application;
+    class ADP,HTTP,WR layer_infrastructure;
+    class BOOT,FACT layer_composition;
+    class CLI layer_interfaces;
+    class EXT layer_external;

@@ -1,0 +1,657 @@
+"""Unit tests for CompositePipelineRunner required flag handling.
+
+Tests for:
+- Optional enricher failure handling (had_warnings)
+- NOT_RUN status for skipped optional enrichers (required_only mode)
+- Mergeable enricher filtering
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from datetime import UTC, datetime
+from unittest.mock import AsyncMock, MagicMock
+from uuid import UUID, uuid4
+
+import polars as pl
+import pytest
+
+from bioetl.application.composite.checkpoint import CompositeCheckpointState
+from bioetl.application.composite.runner import (
+    CompositePipelineRunner,
+    CompositeRuntimeConfig,
+)
+from bioetl.domain.composite.result import (
+    EnrichmentResult,
+    EnrichmentStatus,
+    MergeResult,
+)
+from bioetl.domain.locking import FencingToken
+
+_MOCK_TOKEN = FencingToken(
+    sequence=1,
+    key="lock:mock",
+    owner_id=UUID("00000000-0000-0000-0000-000000000000"),
+    issued_at=0.0,
+)
+
+
+@dataclass
+class MockEnricherConfig:
+    """Mock enricher configuration."""
+
+    pipeline: str
+    join_keys: tuple[str, ...] = ("doi",)
+    required: bool = False
+    filter_condition: str | None = None
+    timeout_seconds: int = 600
+    silver_table: str | None = None
+
+
+@dataclass
+class MockCompositeConfig:
+    """Mock composite configuration for testing."""
+
+    name: str = "test_composite"
+    lock_key: str = "lock:test_composite"
+
+    @dataclass
+    class SeedConfig:
+        pipeline: str = "chembl_activity"
+        silver_table: str = "chembl_activity"
+        output_keys: tuple[str, ...] = ("chembl_id", "doi")
+
+    @dataclass
+    class MergeConfig:
+        output_silver_path: str = "silver/composite"
+        output_gold_path: str = "gold/composite"
+
+    @dataclass
+    class DQConfig:
+        soft_fail_threshold: float = 0.05
+        hard_fail_threshold: float = 0.20
+
+    seed: SeedConfig = None  # type: ignore[assignment]
+    merge: MergeConfig = None  # type: ignore[assignment]
+    dq: DQConfig = None  # type: ignore[assignment]
+    enrichers: tuple[MockEnricherConfig, ...] = ()
+    dependencies: tuple = ()
+
+    @property
+    def required_dependencies(self) -> tuple[str, ...]:
+        return tuple(
+            d.pipeline for d in self.dependencies if getattr(d, "required", False)
+        )
+
+    def __post_init__(self):
+        if self.seed is None:
+            self.seed = self.SeedConfig()
+        if self.merge is None:
+            self.merge = self.MergeConfig()
+        if self.dq is None:
+            self.dq = self.DQConfig()
+        if not self.enrichers:
+            # Default: one required, one optional enricher
+            self.enrichers = (
+                MockEnricherConfig(pipeline="crossref", required=True),
+                MockEnricherConfig(pipeline="pubmed", required=False),
+            )
+
+    @property
+    def required_enrichers(self) -> tuple[str, ...]:
+        return tuple(e.pipeline for e in self.enrichers if e.required)
+
+
+class MockPipelineRunner:
+    """Mock PipelineRunner for testing."""
+
+    def __init__(self, should_fail: bool = False, error_message: str = "Failed"):
+        self._should_fail = should_fail
+        self._error_message = error_message
+        self.run_called = False
+        self._executor = MagicMock()
+        self._executor.records_fetched = 100
+        self._executor.records_silver = 95
+
+    async def run(self):
+        self.run_called = True
+        if self._should_fail:
+            raise RuntimeError(self._error_message)
+
+
+def create_mock_logger() -> MagicMock:
+    """Create a mock logger."""
+    logger = MagicMock()
+    logger.info = MagicMock()
+    logger.error = MagicMock()
+    logger.warning = MagicMock()
+    logger.debug = MagicMock()
+    return logger
+
+
+def create_mock_lock() -> AsyncMock:
+    """Create a mock lock."""
+    lock = AsyncMock()
+    lock.acquire = AsyncMock(return_value=_MOCK_TOKEN)
+    lock.release = AsyncMock(return_value=True)
+    return lock
+
+
+def create_mock_checkpoint_manager(
+    initial_state: CompositeCheckpointState | None = None,
+) -> AsyncMock:
+    """Create a mock checkpoint manager."""
+    manager = AsyncMock()
+    if initial_state is None:
+        initial_state = CompositeCheckpointState(
+            composite_name="test_composite",
+            run_id=str(uuid4()),
+            created_at=datetime.now(tz=UTC),
+        )
+    manager.load = AsyncMock(return_value=initial_state)
+    manager.save = AsyncMock()
+    manager.delete = AsyncMock()
+    return manager
+
+
+def create_mock_key_extractor() -> AsyncMock:
+    """Create a mock key extractor."""
+    extractor = AsyncMock()
+    extractor.extract = AsyncMock(
+        return_value=pl.DataFrame({"chembl_id": ["CHEMBL123"], "doi": ["10.1234/test"]})
+    )
+    return extractor
+
+
+def create_mock_coordinator(
+    enrichment_results: dict[str, EnrichmentResult] | None = None,
+) -> AsyncMock:
+    """Create a mock enrichment coordinator."""
+    coordinator = AsyncMock()
+    if enrichment_results is None:
+        enrichment_results = {}
+    coordinator.run_enrichers = AsyncMock(return_value=enrichment_results)
+    return coordinator
+
+
+def create_mock_merger() -> AsyncMock:
+    """Create a mock merger."""
+    merger = AsyncMock()
+    merger.merge = AsyncMock(
+        return_value=MergeResult(
+            records_merged=100,
+            records_from_seed=100,
+            records_enriched=0,
+            records_fully_enriched=0,
+            duration_seconds=1.0,
+        )
+    )
+    return merger
+
+
+def create_runner(
+    config: MockCompositeConfig | None = None,
+    seed_runner: MockPipelineRunner | None = None,
+    checkpoint_manager: AsyncMock | None = None,
+    coordinator: AsyncMock | None = None,
+    merger: AsyncMock | None = None,
+    logger: MagicMock | None = None,
+    runtime: CompositeRuntimeConfig | None = None,
+) -> CompositePipelineRunner:
+    """Create a CompositePipelineRunner for testing."""
+    if config is None:
+        config = MockCompositeConfig()
+    if seed_runner is None:
+        seed_runner = MockPipelineRunner()
+    if checkpoint_manager is None:
+        checkpoint_manager = create_mock_checkpoint_manager()
+    if coordinator is None:
+        coordinator = create_mock_coordinator()
+    if merger is None:
+        merger = create_mock_merger()
+    if logger is None:
+        logger = create_mock_logger()
+    if runtime is None:
+        runtime = CompositeRuntimeConfig()
+
+    return CompositePipelineRunner(
+        config=config,
+        runtime=runtime,
+        seed_runner_factory=lambda: seed_runner,
+        enricher_runner_factory=lambda name, df: MockPipelineRunner(),
+        key_extractor=create_mock_key_extractor(),
+        coordinator=coordinator,
+        merger=merger,
+        checkpoint_manager=checkpoint_manager,
+        logger=logger,
+        lock=create_mock_lock(),
+    )
+
+
+class TestOptionalEnricherFailure:
+    """Tests for optional enricher failure handling."""
+
+    @pytest.mark.asyncio
+    async def test_optional_failure_does_not_raise(self):
+        """Pipeline should complete when optional enricher fails."""
+        # Create coordinator that returns failed optional enricher
+        enrichment_results = {
+            "crossref": EnrichmentResult.success(
+                enricher_name="crossref",
+                records_input=100,
+                records_enriched=90,
+            ),
+            "pubmed": EnrichmentResult.failed(
+                enricher_name="pubmed",
+                error_message="API error",
+            ),
+        }
+        coordinator = create_mock_coordinator(enrichment_results)
+
+        runner = create_runner(coordinator=coordinator)
+
+        # Should not raise
+        result = await runner.run()
+
+        assert result is not None
+        assert result.is_success is True
+
+    @pytest.mark.asyncio
+    async def test_optional_failure_sets_had_warnings(self):
+        """had_warnings should be True when optional enricher fails."""
+        enrichment_results = {
+            "crossref": EnrichmentResult.success(
+                enricher_name="crossref",
+                records_input=100,
+                records_enriched=90,
+            ),
+            "pubmed": EnrichmentResult.failed(
+                enricher_name="pubmed",
+                error_message="Connection timeout",
+            ),
+        }
+        coordinator = create_mock_coordinator(enrichment_results)
+
+        runner = create_runner(coordinator=coordinator)
+        result = await runner.run()
+
+        assert result.had_warnings is True
+
+    @pytest.mark.asyncio
+    async def test_no_warnings_when_all_succeed(self):
+        """had_warnings should be False when all enrichers succeed."""
+        enrichment_results = {
+            "crossref": EnrichmentResult.success(
+                enricher_name="crossref",
+                records_input=100,
+                records_enriched=90,
+            ),
+            "pubmed": EnrichmentResult.success(
+                enricher_name="pubmed",
+                records_input=100,
+                records_enriched=80,
+            ),
+        }
+        coordinator = create_mock_coordinator(enrichment_results)
+
+        runner = create_runner(coordinator=coordinator)
+        result = await runner.run()
+
+        assert result.had_warnings is False
+
+    @pytest.mark.asyncio
+    async def test_required_failure_raises(self):
+        """Pipeline should fail when required enricher fails."""
+        enrichment_results = {
+            "crossref": EnrichmentResult.failed(
+                enricher_name="crossref",
+                error_message="Critical failure",
+            ),
+            "pubmed": EnrichmentResult.success(
+                enricher_name="pubmed",
+                records_input=100,
+                records_enriched=80,
+            ),
+        }
+        coordinator = create_mock_coordinator(enrichment_results)
+
+        runner = create_runner(coordinator=coordinator)
+
+        with pytest.raises(RuntimeError, match="crossref"):
+            await runner.run()
+
+    @pytest.mark.asyncio
+    async def test_optional_timeout_sets_had_warnings(self):
+        """had_warnings should be True when optional enricher times out."""
+        enrichment_results = {
+            "crossref": EnrichmentResult.success(
+                enricher_name="crossref",
+                records_input=100,
+                records_enriched=90,
+            ),
+            "pubmed": EnrichmentResult.timeout(
+                enricher_name="pubmed",
+                timeout_seconds=600,
+                records_input=100,
+            ),
+        }
+        coordinator = create_mock_coordinator(enrichment_results)
+
+        runner = create_runner(coordinator=coordinator)
+        result = await runner.run()
+
+        assert result.had_warnings is True
+
+    @pytest.mark.asyncio
+    async def test_optional_failure_logged_as_warning(self):
+        """Optional enricher failure should be logged as warning."""
+        enrichment_results = {
+            "crossref": EnrichmentResult.success(
+                enricher_name="crossref",
+                records_input=100,
+                records_enriched=90,
+            ),
+            "pubmed": EnrichmentResult.failed(
+                enricher_name="pubmed",
+                error_message="API error",
+            ),
+        }
+        coordinator = create_mock_coordinator(enrichment_results)
+        logger = create_mock_logger()
+
+        runner = create_runner(coordinator=coordinator, logger=logger)
+        await runner.run()
+
+        # Check that warning was logged for optional failure
+        warning_calls = [
+            c
+            for c in logger.warning.call_args_list
+            if "Optional enricher failed" in str(c)
+        ]
+        assert len(warning_calls) >= 1
+
+
+class TestRequiredOnlyMode:
+    """Tests for required_only mode and NOT_RUN status."""
+
+    @pytest.mark.asyncio
+    async def test_optional_enrichers_not_run_in_required_only_mode(self):
+        """Optional enrichers should not be executed in required_only mode."""
+        # Create coordinator that returns only required enricher result
+        enrichment_results = {
+            "crossref": EnrichmentResult.success(
+                enricher_name="crossref",
+                records_input=100,
+                records_enriched=90,
+            ),
+        }
+        coordinator = create_mock_coordinator(enrichment_results)
+
+        runner = create_runner(
+            coordinator=coordinator,
+            runtime=CompositeRuntimeConfig(required_only=True),
+        )
+        result = await runner.run()
+
+        # pubmed should have NOT_RUN status
+        assert "pubmed" in result.enrichment_results
+        assert result.enrichment_results["pubmed"].status == EnrichmentStatus.NOT_RUN
+        assert (
+            "required_only" in result.enrichment_results["pubmed"].error_message.lower()
+        )
+
+    @pytest.mark.asyncio
+    async def test_not_run_enrichers_in_result(self):
+        """NOT_RUN enrichers should appear in enrichment_results."""
+        enrichment_results = {
+            "crossref": EnrichmentResult.success(
+                enricher_name="crossref",
+                records_input=100,
+                records_enriched=90,
+            ),
+        }
+        coordinator = create_mock_coordinator(enrichment_results)
+
+        runner = create_runner(
+            coordinator=coordinator,
+            runtime=CompositeRuntimeConfig(required_only=True),
+        )
+        result = await runner.run()
+
+        assert "pubmed" in result.not_run_enrichers
+
+    @pytest.mark.asyncio
+    async def test_not_run_does_not_affect_success(self):
+        """NOT_RUN enrichers should not affect pipeline success."""
+        enrichment_results = {
+            "crossref": EnrichmentResult.success(
+                enricher_name="crossref",
+                records_input=100,
+                records_enriched=90,
+            ),
+        }
+        coordinator = create_mock_coordinator(enrichment_results)
+
+        runner = create_runner(
+            coordinator=coordinator,
+            runtime=CompositeRuntimeConfig(required_only=True),
+        )
+        result = await runner.run()
+
+        assert result.is_success is True
+        assert result.had_warnings is False
+
+    @pytest.mark.asyncio
+    async def test_not_run_logged_as_info(self):
+        """NOT_RUN enrichers should be logged as info."""
+        enrichment_results = {
+            "crossref": EnrichmentResult.success(
+                enricher_name="crossref",
+                records_input=100,
+                records_enriched=90,
+            ),
+        }
+        coordinator = create_mock_coordinator(enrichment_results)
+        logger = create_mock_logger()
+
+        runner = create_runner(
+            coordinator=coordinator,
+            logger=logger,
+            runtime=CompositeRuntimeConfig(required_only=True),
+        )
+        await runner.run()
+
+        # Check that info was logged for skipped enricher
+        info_calls = [
+            c
+            for c in logger.info.call_args_list
+            if "Optional enricher not run" in str(c)
+        ]
+        assert len(info_calls) >= 1
+
+
+class TestMergeableEnrichers:
+    """Tests for mergeable enricher filtering."""
+
+    @pytest.mark.asyncio
+    async def test_not_run_enrichers_excluded_from_merge(self):
+        """NOT_RUN enrichers should not be passed to merger."""
+        enrichment_results = {
+            "crossref": EnrichmentResult.success(
+                enricher_name="crossref",
+                records_input=100,
+                records_enriched=90,
+            ),
+        }
+        coordinator = create_mock_coordinator(enrichment_results)
+        merger = create_mock_merger()
+
+        runner = create_runner(
+            coordinator=coordinator,
+            merger=merger,
+            runtime=CompositeRuntimeConfig(required_only=True),
+        )
+        await runner.run()
+
+        # Check merger.merge was called
+        merger.merge.assert_called_once()
+        call_kwargs = merger.merge.call_args
+        passed_enrichers = call_kwargs.kwargs.get("enrichers") or call_kwargs.args[1]
+
+        # Only crossref should be passed (pubmed is NOT_RUN)
+        enricher_names = [e.pipeline for e in passed_enrichers]
+        assert "crossref" in enricher_names
+        assert "pubmed" not in enricher_names
+
+    @pytest.mark.asyncio
+    async def test_skipped_enrichers_excluded_from_merge(self):
+        """SKIPPED enrichers should not be passed to merger."""
+        enrichment_results = {
+            "crossref": EnrichmentResult.success(
+                enricher_name="crossref",
+                records_input=100,
+                records_enriched=90,
+            ),
+            "pubmed": EnrichmentResult.skipped(
+                enricher_name="pubmed",
+                reason="No pmid keys",
+            ),
+        }
+        coordinator = create_mock_coordinator(enrichment_results)
+        merger = create_mock_merger()
+
+        runner = create_runner(
+            coordinator=coordinator,
+            merger=merger,
+        )
+        await runner.run()
+
+        # Check merger.merge was called
+        merger.merge.assert_called_once()
+        call_kwargs = merger.merge.call_args
+        passed_enrichers = call_kwargs.kwargs.get("enrichers") or call_kwargs.args[1]
+
+        # Only crossref should be passed (pubmed is SKIPPED)
+        enricher_names = [e.pipeline for e in passed_enrichers]
+        assert "crossref" in enricher_names
+        assert "pubmed" not in enricher_names
+
+    @pytest.mark.asyncio
+    async def test_failed_enrichers_still_passed_to_merge(self):
+        """FAILED enrichers should still be passed to merger (may have partial data)."""
+        enrichment_results = {
+            "crossref": EnrichmentResult.success(
+                enricher_name="crossref",
+                records_input=100,
+                records_enriched=90,
+            ),
+            "pubmed": EnrichmentResult.failed(
+                enricher_name="pubmed",
+                error_message="API error",
+            ),
+        }
+        coordinator = create_mock_coordinator(enrichment_results)
+        merger = create_mock_merger()
+
+        runner = create_runner(
+            coordinator=coordinator,
+            merger=merger,
+        )
+        await runner.run()
+
+        # Check merger.merge was called
+        merger.merge.assert_called_once()
+        call_kwargs = merger.merge.call_args
+        passed_enrichers = call_kwargs.kwargs.get("enrichers") or call_kwargs.args[1]
+
+        # Both should be passed (FAILED may have partial data)
+        enricher_names = [e.pipeline for e in passed_enrichers]
+        assert "crossref" in enricher_names
+        assert "pubmed" in enricher_names
+
+
+class TestCompletionLogging:
+    """Tests for completion logging with warnings."""
+
+    @pytest.mark.asyncio
+    async def test_completed_with_warnings_logged(self):
+        """Completion with warnings should be logged with status."""
+        enrichment_results = {
+            "crossref": EnrichmentResult.success(
+                enricher_name="crossref",
+                records_input=100,
+                records_enriched=90,
+            ),
+            "pubmed": EnrichmentResult.failed(
+                enricher_name="pubmed",
+                error_message="API error",
+            ),
+        }
+        coordinator = create_mock_coordinator(enrichment_results)
+        logger = create_mock_logger()
+
+        runner = create_runner(coordinator=coordinator, logger=logger)
+        await runner.run()
+
+        # Check that completion was logged with warnings status
+        complete_calls = [
+            c
+            for c in logger.info.call_args_list
+            if "completed_with_warnings" in str(c) or "had_warnings" in str(c)
+        ]
+        assert len(complete_calls) >= 1
+
+    @pytest.mark.asyncio
+    async def test_clean_completion_no_warning_status(self):
+        """Clean completion should not log warning status."""
+        enrichment_results = {
+            "crossref": EnrichmentResult.success(
+                enricher_name="crossref",
+                records_input=100,
+                records_enriched=90,
+            ),
+            "pubmed": EnrichmentResult.success(
+                enricher_name="pubmed",
+                records_input=100,
+                records_enriched=80,
+            ),
+        }
+        coordinator = create_mock_coordinator(enrichment_results)
+        logger = create_mock_logger()
+
+        runner = create_runner(coordinator=coordinator, logger=logger)
+        await runner.run()
+
+        # Check that "completed_with_warnings" is NOT in any log call
+        all_calls_str = str(logger.info.call_args_list)
+        assert "completed_with_warnings" not in all_calls_str
+
+
+class TestEnrichmentSummary:
+    """Tests for enrichment summary logging."""
+
+    @pytest.mark.asyncio
+    async def test_summary_includes_not_run_count(self):
+        """Enrichment summary should include NOT_RUN count."""
+        enrichment_results = {
+            "crossref": EnrichmentResult.success(
+                enricher_name="crossref",
+                records_input=100,
+                records_enriched=90,
+            ),
+        }
+        coordinator = create_mock_coordinator(enrichment_results)
+        logger = create_mock_logger()
+
+        runner = create_runner(
+            coordinator=coordinator,
+            logger=logger,
+            runtime=CompositeRuntimeConfig(required_only=True),
+        )
+        await runner.run()
+
+        # Check enrichment summary includes not_run count
+        # Summary may be called, check if not_run is logged somewhere
+        all_info_str = str(logger.info.call_args_list)
+        # NOT_RUN enrichers should be mentioned
+        assert "not_run" in all_info_str.lower() or "pubmed" in all_info_str

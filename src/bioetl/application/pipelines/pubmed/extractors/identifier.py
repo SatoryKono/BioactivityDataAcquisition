@@ -111,6 +111,9 @@ class IdentifierExtractor(BaseFieldExtractor):
         Returns:
             Dictionary with keys: doi, pii, pmc_id, mid, publisher_id.
             Values are normalized strings (stripped) or None.
+
+        Args:
+            root: Root.
         """
         extractor = cls()
         result: dict[str, str | None] = {

@@ -1,0 +1,86 @@
+%% Title: CLI Entry Point to Pipeline Execution Full Chain
+%% Covers: RULES.md §1.1 (Interfaces Layer), interfaces/cli/
+%% Rank: 12 (Score 8.31) — From click command to exit code
+%% Updated: 2026-02-17
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   Mixed (System / Component / Class)
+
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+%% @uniform width=712 height=184 max_title_len=71 max_desc_lines=8
+flowchart TB
+    subgraph CLI["Interfaces Layer (Click)"]
+        CMD["$ bioetl run chembl_activity\n--run-type incremental\n--batch-size 1000<br/><br/><br/><br/><br/><br/><br/>"]
+        PARSE["Parse CLI Arguments<br/>• pipeline_name<br/>• run_type (RunType enum)<br/>• batch_size, resume flag<br/><br/><br/><br/>"]
+        OPTS["Build RunOptions<br/>• pipeline_name<br/>• run_type<br/>• batch_size<br/>• resume: bool<br/><br/><br/>"]
+    end
+
+    subgraph Service["Application Service Layer"]
+        PRS["PipelineRunnerService.run()<br/>• lookup pipeline in registry<br/>• validate run options<br/><br/><br/><br/><br/>"]
+        RESOLVE["PipelineRegistry.get(name)<br/>→ PipelineFactoryPort<br/><br/><br/><br/><br/><br/>"]
+    end
+
+    subgraph Bootstrap["Composition Layer"]
+        BOOT["bootstrap_pipeline()<br/>→ assembly.py<br/><br/><br/><br/><br/><br/>"]
+        ASSEMBLE["Full Assembly Sequence<br/>1. Logger<br/>2. Config<br/>3. Storage<br/>4. HTTP Client<br/>5. Adapter<br/>6. Services<br/>7. Runner"]
+    end
+
+    subgraph Execute["Application Core"]
+        OBS_ENTER["PipelineObserver.__enter__()<br/>→ log started, inc counter<br/><br/><br/><br/><br/><br/>"]
+        RUNNER["PipelineRunner.run()<br/><br/><br/><br/><br/><br/><br/>"]
+        LOCK["LockManager.acquire()<br/>→ HeartbeatTask.start()<br/><br/><br/><br/><br/><br/>"]
+        PRE["PreflightService.run()<br/>→ PreflightReport<br/><br/><br/><br/><br/><br/>"]
+        BATCH["BatchExecutor loop<br/>→ extract/transform/validate/write<br/><br/><br/><br/><br/><br/>"]
+        POST["PostrunService.run()<br/>→ vacuum, DQ report<br/><br/><br/><br/><br/><br/>"]
+        UNLOCK["LockManager.release()<br/>→ HeartbeatTask.stop()<br/><br/><br/><br/><br/><br/>"]
+        OBS_EXIT["PipelineObserver.__exit__()<br/>→ observe duration<br/><br/><br/><br/><br/><br/>"]
+    end
+
+    subgraph Result["Result & Exit"]
+        RES_OK["RunResult(status=SUCCESS)<br/>PipelineRunResult.SUCCESS<br/><br/><br/><br/><br/><br/>"]
+        RES_FAIL["RunResult(status=FAILED)<br/>PipelineRunResult.FAILED<br/><br/><br/><br/><br/><br/>"]
+        EXIT_OK["ExitCode.SUCCESS (0)<br/><br/><br/><br/><br/><br/><br/>"]
+        EXIT_ERR["ExitCode.PIPELINE_ERROR (1)<br/>ExitCode.CONFIG_ERROR (2)<br/><br/><br/><br/><br/><br/>"]
+    end
+
+    %% Flow
+    CMD --> PARSE --> OPTS
+    OPTS ==> PRS
+    PRS --> RESOLVE
+    RESOLVE --> BOOT --> ASSEMBLE
+
+    ASSEMBLE --> OBS_ENTER
+    OBS_ENTER --> RUNNER
+    RUNNER --> LOCK --> PRE
+
+    PRE -->|"pass"| BATCH
+    PRE -->|"fail"| RES_FAIL
+
+    BATCH --> POST --> UNLOCK --> OBS_EXIT
+
+    OBS_EXIT -->|"success"| RES_OK
+    OBS_EXIT -->|"error"| RES_FAIL
+
+    LOCK -->|"lock error"| RES_FAIL
+    BATCH -->|"LockLostError"| RES_FAIL
+
+    RES_OK --> EXIT_OK
+    RES_FAIL --> EXIT_ERR
+
+    %% Styling
+    style CLI fill:#f5f3ff,stroke:#7c3aed
+    style Bootstrap fill:#ffe4e6,stroke:#dc2626
+    style Execute fill:#eff6ff,stroke:#2563eb
+    style Result fill:#f0fdf4,stroke:#16a34a

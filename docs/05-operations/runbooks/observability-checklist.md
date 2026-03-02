@@ -2,6 +2,8 @@
 
 *Reference: [RULES.md §3.2](../../00-project/RULES.md#32-наблюдаемость-observability)*
 
+> Runtime profile: Local-Only single-instance (ADR-010). Observability checks assume one local process and local log/metrics endpoints.
+
 This checklist ensures all components meet the project's observability requirements.
 
 ## Adapter Requirements

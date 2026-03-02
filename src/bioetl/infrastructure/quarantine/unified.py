@@ -136,7 +136,17 @@ class UnifiedQuarantine:
         error_code: str | None = None,
         dq_status: QuarantineRecordStatus | None = None,
     ) -> list[dict[str, Any]]:
-        """Inspect quarantine records."""
+        """Inspect quarantine records.
+
+        Args:
+            pipeline: Pipeline.
+            limit: Maximum number of records to process.
+            error_code: Error code.
+            dq_status: Dq status.
+
+        Returns:
+            Result dictionary.
+        """
         return inspect_records(
             self.base_path, None, pipeline, limit, error_code, dq_status
         )
@@ -157,6 +167,9 @@ class UnifiedQuarantine:
             max_age_days: Maximum age of records to replay (default 7).
             now: Current timestamp from application layer
                  (single source of time per ADR-014). Required.
+
+        Returns:
+            Result dictionary.
         """
         return replay_records(
             self.base_path, None, pipeline, error_code, max_age_days, now=now
@@ -185,7 +198,15 @@ class UnifiedQuarantine:
     def update_status(
         self, payload_hash: str, new_status: QuarantineRecordStatus
     ) -> bool:
-        """Update DQ status for a quarantined record."""
+        """Update DQ status for a quarantined record.
+
+        Args:
+            payload_hash: Payload hash.
+            new_status: New status.
+
+        Returns:
+            True if condition is met, False otherwise.
+        """
         try:
             dt = DeltaTable(self.base_path)
         except TableNotFoundError:
@@ -204,7 +225,14 @@ class UnifiedQuarantine:
         return True
 
     async def get_stats(self, pipeline: str) -> dict[str, Any]:
-        """Get quarantine statistics for a pipeline."""
+        """Get quarantine statistics for a pipeline.
+
+        Args:
+            pipeline: Pipeline.
+
+        Returns:
+            Stats.
+        """
         return get_statistics(self.base_path, None, pipeline)
 
     async def aclose(self) -> None:

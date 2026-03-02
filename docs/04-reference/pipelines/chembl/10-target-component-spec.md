@@ -1,6 +1,6 @@
 # ChEMBL Target Component Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.22*
+*Version 1.2.0 | Aligned with RULES.md v5.23*
 
 ----------------------------------------------------------------------
 
@@ -127,24 +127,24 @@ class TargetComponentSchema(ETLRecordSchema):
 ## 6. Pipeline Configuration
 
 ```yaml
-pipeline-name: chembl_target_component
+pipeline_name: chembl_target_component
 provider: chembl
-entity-type: target-component
+entity_type: target-component
 version: "1.2.0"
 
-primary-keys: ["targcomp-id"]
-silver-table: "chembl_target_component"
-gold-table: "chembl_target_component"
+primary_keys: ["targcomp-id"]
+silver_table: "chembl_target_component"
+gold_table: "chembl_target_component"
 
-gold-filters:
-  required-fields:
+gold_filters:
+  required_fields:
     - tid
     - component-id
 
-input-filter:
+input_filter:
   enabled: true
-  source-path: "data/input/target.csv"
-  column-name: "target-id"
-  filter-field: "target-id"
-  batch-size: 20
+  source_path: "data/input/target.csv"
+  column_name: "target-id"
+  filter_field: "target-id"
+  batch_size: 20
 ```

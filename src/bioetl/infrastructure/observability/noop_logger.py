@@ -32,25 +32,57 @@ class NoOpLogger:
     """
 
     def bind(self, **_kwargs: Any) -> Self:  # Any: LoggerPort context kwa...
-        """Bind additional context (no-op, returns self)."""
+        """Bind additional context (no-op, returns self).
+
+        Args:
+            **_kwargs: Additional keyword arguments.
+
+        Returns:
+            Logger with bound context.
+        """
         return self
 
     # Any: LoggerPort context kwa...
     def info(self, _event: str, **_kwargs: Any) -> None:
-        """Log info message (no-op)."""
+        """Log info message (no-op).
+
+        Args:
+            _event:  event.
+            **_kwargs: Additional keyword arguments.
+        """
 
     # Any: LoggerPort context kwa...
     def warning(self, _event: str, **_kwargs: Any) -> None:
-        """Log warning message (no-op)."""
+        """Log warning message (no-op).
+
+        Args:
+            _event:  event.
+            **_kwargs: Additional keyword arguments.
+        """
 
     # Any: LoggerPort context kwa...
     def error(self, _event: str, **_kwargs: Any) -> None:
-        """Log error message (no-op)."""
+        """Log error message (no-op).
+
+        Args:
+            _event:  event.
+            **_kwargs: Additional keyword arguments.
+        """
 
     # Any: LoggerPort context kwa...
     def debug(self, _event: str, **_kwargs: Any) -> None:
-        """Log debug message (no-op)."""
+        """Log debug message (no-op).
+
+        Args:
+            _event:  event.
+            **_kwargs: Additional keyword arguments.
+        """
 
     # Any: LoggerPort context kwa...
     def exception(self, _event: str, **_kwargs: Any) -> None:
-        """Log exception with traceback (no-op)."""
+        """Log exception with traceback (no-op).
+
+        Args:
+            _event:  event.
+            **_kwargs: Additional keyword arguments.
+        """

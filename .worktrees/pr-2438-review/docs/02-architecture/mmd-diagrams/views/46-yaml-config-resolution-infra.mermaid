@@ -1,0 +1,61 @@
+%% View: Infrastructure-Mapping | Parent: 46-yaml-config-resolution-full.mermaid
+%% @uniform width=184 height=56 max_title_len=18 max_desc_lines=0
+flowchart TB
+%% keep-orphan: N10, N11, N12, N13, N14, N15, N16, N17, N18, N19, N2, N20, N3
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        N1["dq_config_file"]
+        N2["DQ_CONFIG_FILE"]
+        N3["FILTER_CONFIG_FILE"]
+        N7["override"]
+        N8["PIPELINE_CONFIG"]
+        N9["TABLE_CONFIG"]
+        N15["DQ_ENTITY"]
+        N19["FILTER_ENTITY"]
+    end
+
+    subgraph Application["Application Layer"]
+        direction TB
+        N4["PIPELINE"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N5["br"]
+        N6["YAML_LOADER"]
+        N10["BASE"]
+        N12["SOURCE"]
+        N13["DQ_DEFAULTS"]
+        N16["DQ_INLINE"]
+        N17["FILTER_DEFAULTS"]
+        N20["FILTER_INLINE"]
+    end
+
+    subgraph Composition["Composition Layer"]
+        direction TB
+        N11["PROVIDER_BASE"]
+        N14["DQ_PROVIDER"]
+        N18["FILTER_PROVIDER"]
+    end
+
+    N6 --> N7
+    N8 --> N9
+    N4 --> N1
+    N4 --> N5
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style Composition fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5

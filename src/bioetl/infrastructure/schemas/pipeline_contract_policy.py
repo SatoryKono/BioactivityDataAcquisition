@@ -23,7 +23,11 @@ class PipelineContractPolicy(BaseModel):
 
     @model_validator(mode="after")
     def validate_merge_keys_subset(self) -> PipelineContractPolicy:
-        """Ensure merge_keys is not disjoint from primary key definition."""
+        """Ensure merge_keys is not disjoint from primary key definition.
+
+        Returns:
+            Validated PipelineContractPolicy.
+        """
         pk_set = set(self.primary_key)
         mk_set = set(self.merge_keys)
         if pk_set.isdisjoint(mk_set):

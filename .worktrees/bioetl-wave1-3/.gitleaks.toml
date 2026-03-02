@@ -1,0 +1,109 @@
+# Gitleaks configuration for BioETL
+# See: https://github.com/gitleaks/gitleaks#configuration
+#
+# This file configures secret scanning in CI.
+# Run locally: gitleaks detect --config .gitleaks.toml
+
+title = "BioETL Gitleaks Configuration"
+
+[extend]
+# Use default gitleaks rules as base
+useDefault = true
+
+# Global allowlist
+[allowlist]
+description = "BioETL-specific allowlist"
+
+paths = [
+    # Example environment file with placeholder values
+    '''^\.env\.example$''',
+
+    # VCR cassettes contain sanitized API responses and biological sequences
+    '''tests/fixtures/vcr/''',
+
+    # Test fixtures may contain mock data
+    '''tests/fixtures/''',
+
+    # CLI command tests contain mock API key values for testing masking
+    '''tests/unit/interfaces/test_cli_commands\.py$''',
+
+    # Logger tests contain mock secrets for testing masking functionality
+    '''tests/unit/infrastructure/observability/test_unified_logger\.py$''',
+
+    # Security documentation contains example "bad practice" code
+    '''SECURITY\.md$''',
+
+    # Secrets baseline for detect-secrets
+    '''\.secrets\.baseline$''',
+
+    # Lock files
+    '''uv\.lock$''',
+    '''poetry\.lock$''',
+
+    # Generated documentation
+    '''docs/_build/''',
+    '''site/''',
+
+    # Audit documentation (contains commit hashes, not secrets)
+    '''docs/archived/audits/''',
+
+    # Data fixtures may contain biological sequences that look like tokens
+    '''data/input/''',
+]
+
+regexTarget = "match"
+
+regexes = [
+    # Example/placeholder patterns
+    '''(?i)example[_-]?(api[_-]?)?key''',
+    '''(?i)your[_-]?api[_-]?key[_-]?here''',
+    '''<your[_-]?.*>''',
+    '''xxx+''',
+    '''(?i)placeholder''',
+
+    # Test mock values
+    '''(?i)test[_-]?secret''',
+    '''(?i)mock[_-]?token''',
+    '''(?i)fake[_-]?key''',
+    '''secret[_-]?api[_-]?key[_-]?\d+''',
+    '''test[_-]?value[_-]?for[_-]?masking''',
+
+    # Example API keys used in tests and documentation
+    '''sk-[a-zA-Z0-9]+''',
+    '''msk-[a-zA-Z0-9]+''',
+
+    # AWS example access key (from AWS documentation)
+    '''AKIAIOSFODNN7EXAMPLE''',
+
+    # Biological sequences that may match AWS token patterns
+    # Protein sequences often contain AKIA/ASIA prefixes
+    '''AKIA[A-Z]{16,}''',
+    '''ASIA[A-Z]{16,}''',
+    '''ACCA[A-Z]{16,}''',
+
+    # NCBI tool email (not PII, technical identifier)
+    '''default_email.*@.*\.com''',
+
+    # Environment variable references (not actual secrets)
+    '''os\.environ\[["'][A-Z_]+["']\]''',
+
+    # getenv calls (not actual secrets)
+    '''getenv\(["'][A-Z_]+["']''',
+
+    # Settings object references
+    '''settings\.[a-z_]+''',
+
+    # Git commit hashes (40-char hex strings in docs)
+    '''[a-f0-9]{40}''',
+]
+
+# Stopwords to ignore
+stopwords = [
+    "example",
+    "sample",
+    "test",
+    "mock",
+    "fake",
+    "placeholder",
+    "your-api-key-here",
+]

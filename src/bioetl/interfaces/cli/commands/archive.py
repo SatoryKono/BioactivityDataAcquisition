@@ -33,6 +33,11 @@ def archive_command(table: str, target_path: str, remove_source: bool) -> None:
         bioetl maintenance archive chembl.activity /archive/chembl
 
         bioetl maintenance archive chembl.activity /archive/chembl --remove-source
+
+    Args:
+        table: Table.
+        target_path: File path for target.
+        remove_source: Whether to remove source.
     """
     lifecycle = get_lifecycle_service()
 

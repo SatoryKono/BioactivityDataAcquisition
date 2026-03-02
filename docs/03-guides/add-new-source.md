@@ -28,12 +28,12 @@ from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 class PubMedAdapter:
     """Адаптер для PubMed API."""
-    def __init__(self, http-client: UnifiedHTTPClient, api-key: str | None = None):
-        self.http-client = http-client
-        self.base-url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
-        self.api-key = api-key
+    def __init__(self, http_client: UnifiedHTTPClient, api_key: str | None = None):
+        self.http_client = http_client
+        self.base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
+        self.api_key = api_key
 
-    async def fetch-publications(self, query: str, retmax: int = 100):
+    async def fetch_publications(self, query: str, retmax: int = 100):
         """Получение публикаций."""
         params = {
             "db": "pubmed",
@@ -41,11 +41,11 @@ class PubMedAdapter:
             "retmode": "json",
             "retmax": retmax
         }
-        if self.api-key:
-            params["api-key"] = self.api-key
+        if self.api_key:
+            params["api_key"] = self.api_key
 
         # Используем UnifiedHTTPClient для запросов (с метриками и повторами)
-        return await self.http-client.get(f"{self.base-url}/esearch.fcgi", params=params)
+        return await self.http_client.get(f"{self.base_url}/esearch.fcgi", params=params)
 ```
 
 ## Шаг 2: Конфигурация
@@ -64,13 +64,13 @@ pipeline:
 
 source:
     type: api
-    load-strategy: incremental
+    loading_strategy: incremental
 
 sink:
     silver:
         path: "data/output/silver/pubmed/publication"
         format: delta
-        primary-key: ["pmid"]
+        primary_key: ["pmid"]
 ```
 
 ## Шаг 3: Реализация пайплайна (Application Layer)
@@ -82,7 +82,7 @@ from bioetl.application.core.base import BasePipeline
 # ... (см. шаблоны и примеры для ChEMBL)
 
 class PubMedPublicationPipeline(BasePipeline):
-    # Реализация методов transform-bronze-to-silver и др.
+    # Реализация методов transform_bronze_to_silver и др.
     pass
 ```
 
@@ -98,24 +98,24 @@ class PubMedPublicationPipeline(BasePipeline):
 from bioetl.composition.providers import ProviderConfig, ProviderRegistry
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 
-def -create-pubmed-data-source(
+def create_pubmed_data_source(
     settings: Settings,
-    pipeline-config: PipelineYamlConfig,
+    pipeline_config: PipelineYamlConfig,
     logger: LoggerPort,
-    filter-config: InputFilterConfig | None = None,
+    filter_config: InputFilterConfig | None = None,
     metrics: MetricsPort | None = None,
-    pipeline-name: str = "unknown",
+    pipeline_name: str = "unknown",
 ) -> DataSourcePort:
     """Create PubMed data source."""
-    http-client = HttpClientFactory.create-for-provider("pubmed", settings, logger)
-    adapter = PubMedAdapter(http-client, api-key=settings.pubmed-api-key)
-    return -wrap-with-filter(adapter, filter-config, logger, pipeline-name)
+    http_client = HttpClientFactory.create-for-provider("pubmed", settings, logger)
+    adapter = PubMedAdapter(http_client, api_key=settings.pubmed-api_key)
+    return wrap_with_filter(adapter, filter_config, logger, pipeline_name)
 
-# Регистрация в -register-providers():
+# Регистрация в register_providers():
 ProviderRegistry.register(
     "pubmed",
     ProviderConfig(
-        data-source-creator=-create-pubmed-data-source,
+        data_source_creator=create_pubmed_data_source,
         transformers={"publication": PubMedPublicationTransformer},
         pipelines=["pubmed_publication"],
     ),
@@ -132,7 +132,7 @@ from bioetl.application.core.base-transformer import BaseTransformer
 class PubMedPublicationTransformer(BaseTransformer):
     """Трансформер для PubMed публикаций."""
 
-    def -extract-business-data(self, record: dict) -> dict:
+    def _extract_business_data(self, record: dict) -> dict:
         """Извлечение бизнес-данных из Bronze записи."""
         return {
             "pmid": record.get("pmid"),
@@ -144,24 +144,24 @@ class PubMedPublicationTransformer(BaseTransformer):
 
 ### 4.3 Регистрация пайплайна
 
-Добавьте фабрику пайплайна в `src/bioetl/composition/factories/pipeline-factories.py`:
+Добавьте фабрику пайплайна в `src/bioetl/composition/factories/pipeline_factories.py`:
 
 ```python
 from bioetl.application.pipelines.pubmed.publication import PubMedPublicationPipeline
 from bioetl.application.pipelines.pubmed.transformer import PubMedPublicationTransformer
 from bioetl.infrastructure.schemas.gold import PubMedPublicationGoldSchema
 
-pubmed_publication-factory = GenericPipelineFactory(
-    pipeline-name="pubmed_publication",
-    pipeline-class=PubMedPublicationPipeline,
+pubmed_publication_factory = GenericPipelineFactory(
+    pipeline_name="pubmed_publication",
+    pipeline_class=PubMedPublicationPipeline,
     provider="pubmed",
-    transformer-class=PubMedPublicationTransformer,  # DI через GenericPipelineFactory
+    transformer_class=PubMedPublicationTransformer,  # DI через GenericPipelineFactory
     gold-schema=PubMedPublicationGoldSchema,
 )
 
-def register-all-pipelines() -> None:
+def register_all_pipelines() -> None:
     # ...
-    PipelineRegistry.register-factory(pubmed_publication-factory)
+    PipelineRegistry.register_factory(pubmed_publication_factory)
 ```
 
 Теперь ваш пайплайн автоматически доступен через CLI по имени `pubmed_publication`.
@@ -173,6 +173,6 @@ def register-all-pipelines() -> None:
 - [ ] Трансформер реализован с наследованием от `BaseTransformer`
 - [ ] Пайплайн реализован с наследованием от `BasePipeline`
 - [ ] Провайдер зарегистрирован в `ProviderRegistry` (`registration.py`)
-- [ ] Пайплайн зарегистрирован в `pipeline-factories.py` с `transformer-class`
+- [ ] Пайплайн зарегистрирован в `pipeline_factories.py` с `transformer_class`
 - [ ] Unit-тесты с инъекцией трансформера
 - [ ] Integration-тесты с VCR-кассетами

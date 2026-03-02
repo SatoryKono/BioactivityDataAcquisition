@@ -58,7 +58,18 @@ class SubcellularFractionDataSource(_SourceMetadataDelegationMixin):
         filter_ids: list[str] | None = None,
         filter_field: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:  # Any: heterogeneous record values
-        """Fetch records, extracting subcellular fractions if requested."""
+        """Fetch records, extracting subcellular fractions if requested.
+
+        Args:
+            entity_type: Entity type identifier.
+            limit: Maximum number of records to process.
+            query: Search query string.
+            filter_ids: List of identifiers to filter by.
+            filter_field: Field name to apply filter on.
+
+        Returns:
+            Async iterator yielding fetched records.
+        """
         if entity_type == self.TARGET_ENTITY_TYPE:
             async for record in self._fetch_subcellular_fractions(
                 limit, query, filter_ids, filter_field
@@ -148,7 +159,11 @@ class SubcellularFractionDataSource(_SourceMetadataDelegationMixin):
         }
 
     async def health_check(self) -> HealthStatus:
-        """Delegate health check to wrapped adapter."""
+        """Delegate health check to wrapped adapter.
+
+        Returns:
+            The HealthStatus result.
+        """
         return await self._data_source.health_check()
 
     async def aclose(self) -> None:
@@ -171,7 +186,17 @@ class SubcellularFractionDataSource(_SourceMetadataDelegationMixin):
         filter_field: str,
         limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:  # Any: heterogeneous record values
-        """Fetch filtered records with subcellular fraction extraction."""
+        """Fetch filtered records with subcellular fraction extraction.
+
+        Args:
+            entity_type: Entity type identifier.
+            filter_ids: List of identifiers to filter by.
+            filter_field: Field name to apply filter on.
+            limit: Maximum number of records to process.
+
+        Returns:
+            Async iterator yielding fetched records.
+        """
         filterable = self._ensure_filterable("fetch_filtered")
 
         if entity_type == self.TARGET_ENTITY_TYPE:
@@ -200,7 +225,16 @@ class SubcellularFractionDataSource(_SourceMetadataDelegationMixin):
         filters: dict[str, list[str]],
         limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:  # Any: heterogeneous record values
-        """Fetch multi-filtered records with subcellular fraction extraction."""
+        """Fetch multi-filtered records with subcellular fraction extraction.
+
+        Args:
+            entity_type: Entity type identifier.
+            filters: Filters.
+            limit: Maximum number of records to process.
+
+        Returns:
+            Async iterator yielding fetched records.
+        """
         filterable = self._ensure_filterable("fetch_multi_filtered")
 
         if entity_type == self.TARGET_ENTITY_TYPE:
@@ -229,7 +263,18 @@ class SubcellularFractionDataSource(_SourceMetadataDelegationMixin):
         fallback_mapping: dict[str, str],
         limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:  # Any: heterogeneous record values
-        """Fetch records with fallback and subcellular fraction extraction."""
+        """Fetch records with fallback and subcellular fraction extraction.
+
+        Args:
+            entity_type: Entity type identifier.
+            filter_ids: List of identifiers to filter by.
+            filter_field: Field name to apply filter on.
+            fallback_mapping: Fallback mapping.
+            limit: Maximum number of records to process.
+
+        Returns:
+            Async iterator yielding fetched records.
+        """
         filterable = self._ensure_filterable("fetch_filtered_with_fallback")
 
         if entity_type == self.TARGET_ENTITY_TYPE:

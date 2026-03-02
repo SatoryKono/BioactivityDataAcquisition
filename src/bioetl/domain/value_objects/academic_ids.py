@@ -70,7 +70,14 @@ class OpenAlexId(ValueObject[str]):
 
     @classmethod
     def from_raw(cls, raw: str | None) -> OpenAlexId | None:
-        """Create OpenAlexId from raw string with normalization."""
+        """Create OpenAlexId from raw string with normalization.
+
+        Args:
+            raw: Raw input value.
+
+        Returns:
+            New instance constructed from the input.
+        """
         if not raw or not raw.strip():
             return None
         try:
@@ -117,7 +124,14 @@ class SemanticScholarId(ValueObject[str]):
 
     @classmethod
     def from_raw(cls, raw: str | None) -> SemanticScholarId | None:
-        """Create SemanticScholarId from raw string with normalization."""
+        """Create SemanticScholarId from raw string with normalization.
+
+        Args:
+            raw: Raw input value.
+
+        Returns:
+            New instance constructed from the input.
+        """
         if not raw or not raw.strip():
             return None
         try:
@@ -169,7 +183,14 @@ class ISSN(ValueObject[str]):
 
     @classmethod
     def from_raw(cls, raw: str | None) -> ISSN | None:
-        """Create ISSN from raw string with normalization."""
+        """Create ISSN from raw string with normalization.
+
+        Args:
+            raw: Raw input value.
+
+        Returns:
+            New instance constructed from the input.
+        """
         if not raw or not raw.strip():
             return None
         try:
@@ -245,7 +266,14 @@ class ORCID(ValueObject[str]):
 
     @classmethod
     def from_raw(cls, raw: str | None) -> ORCID | None:
-        """Create ORCID from raw string with normalization."""
+        """Create ORCID from raw string with normalization.
+
+        Args:
+            raw: Raw input value.
+
+        Returns:
+            New instance constructed from the input.
+        """
         if not raw or not raw.strip():
             return None
         try:

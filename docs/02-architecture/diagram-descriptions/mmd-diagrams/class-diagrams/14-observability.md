@@ -1,9 +1,9 @@
-# Class Diagram: Observability Components
+# Class Diagram: 14 Observability
 
 - Исходная диаграмма: `mmd-diagrams/class-diagrams/14-observability.mmd`
 
 ## Описание
-Logging, metrics, tracing implementations..
+Диаграмма Observability Components показывает архитектурную модель модуля `14-observability` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: Logging, metrics, tracing implementations. На схеме отражено примерно 19 классов и 6 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: LoggerPort, UnifiedLogger, StructlogLogger, NoOpLogger, MetricsPort, MetricsCollector.
 
 ## Метаданные
 - Тип: `classDiagram`

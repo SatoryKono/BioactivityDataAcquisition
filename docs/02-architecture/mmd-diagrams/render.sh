@@ -33,6 +33,7 @@ FILTER="*"
 EXTRA_DIRS=()
 PUPPETEER_CFG="$THEME_DIR/puppeteer-config.json"
 [[ -f "$PUPPETEER_CFG" ]] || PUPPETEER_CFG=""
+TEMP_PUPPETEER_CFG=""
 JOBS=4           # parallel jobs
 FIT=1            # adaptive sizing by default
 TEXT_LAYER="fallback-only"   # dual | fo-only | fallback-only
@@ -94,6 +95,11 @@ log_warn()  { echo -e "${YELLOW}[WARN]${NC}  $*"; }
 log_err()   { echo -e "${RED}[ERR]${NC}   $*"; }
 log_step()  { echo -e "${CYAN}[STEP]${NC}  $*"; }
 
+cleanup_temp_files() {
+  [[ -n "$TEMP_PUPPETEER_CFG" ]] && rm -f "$TEMP_PUPPETEER_CFG" || true
+}
+trap cleanup_temp_files EXIT
+
 require_option_value() {
   local option_name="$1"
   local arg_count="$2"
@@ -102,6 +108,93 @@ require_option_value() {
     usage
     exit 1
   fi
+}
+
+resolve_chrome_headless_shell() {
+  local env_exec="${PUPPETEER_EXECUTABLE_PATH:-}"
+  if [[ -n "$env_exec" ]]; then
+    if [[ -x "$env_exec" ]]; then
+      echo "$env_exec"
+      return 0
+    fi
+    log_warn "PUPPETEER_EXECUTABLE_PATH is not executable: $env_exec"
+  fi
+
+  if command -v chrome-headless-shell >/dev/null 2>&1; then
+    command -v chrome-headless-shell
+    return 0
+  fi
+
+  local cache_root="${HOME:-}/.cache/puppeteer/chrome-headless-shell"
+  if [[ -d "$cache_root" ]]; then
+    local cached_exec
+    cached_exec="$(find "$cache_root" -type f -name chrome-headless-shell 2>/dev/null | sort -V | tail -n 1 || true)"
+    if [[ -n "$cached_exec" ]] && [[ -x "$cached_exec" ]]; then
+      echo "$cached_exec"
+      return 0
+    fi
+  fi
+  return 1
+}
+
+prepare_puppeteer_cfg() {
+  local base_cfg="$1"
+  local exec_path=""
+  local out_cfg
+
+  if exec_path="$(resolve_chrome_headless_shell)"; then
+    log_info "Using chrome-headless-shell: $exec_path" >&2
+  else
+    log_warn "chrome-headless-shell not found; Puppeteer will use auto-discovery." >&2
+  fi
+
+  if [[ -z "$base_cfg" && -z "$exec_path" ]]; then
+    echo ""
+    return
+  fi
+
+  if [[ -z "$PYTHON_BIN" ]]; then
+    log_warn "python not found; using Puppeteer config as-is"
+    echo "$base_cfg"
+    return
+  fi
+
+  out_cfg="$(mktemp "${TMPDIR:-/tmp}/puppeteer-render.XXXXXX.json")"
+  "$PYTHON_BIN" - <<'PY' "$base_cfg" "$exec_path" "$out_cfg"
+import json
+import sys
+from pathlib import Path
+
+base_cfg, exec_path, out_cfg = sys.argv[1], sys.argv[2], sys.argv[3]
+cfg: dict[str, object] = {}
+
+if base_cfg and Path(base_cfg).exists():
+    raw = Path(base_cfg).read_text(encoding="utf-8").strip()
+    if raw:
+        loaded = json.loads(raw)
+        if isinstance(loaded, dict):
+            cfg = loaded
+
+args_raw = cfg.get("args")
+args = [x for x in args_raw if isinstance(x, str)] if isinstance(args_raw, list) else []
+required_args = [
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--disable-dev-shm-usage",
+    "--disable-gpu",
+]
+for item in required_args:
+    if item not in args:
+        args.append(item)
+cfg["args"] = args
+
+if exec_path:
+    cfg["executablePath"] = exec_path
+
+Path(out_cfg).write_text(json.dumps(cfg, indent=2) + "\n", encoding="utf-8")
+PY
+  TEMP_PUPPETEER_CFG="$out_cfg"
+  echo "$out_cfg"
 }
 
 # ── Parse args ──────────────────────────────────────────────
@@ -233,6 +326,14 @@ else
 fi
 
 echo ""
+
+if [[ -n "$PUPPETEER_CFG" ]] || [[ -n "${PUPPETEER_EXECUTABLE_PATH:-}" ]] || [[ "$(id -u)" -eq 0 ]]; then
+  effective_cfg="$(prepare_puppeteer_cfg "$PUPPETEER_CFG")"
+  if [[ -n "$effective_cfg" ]]; then
+    PUPPETEER_CFG="$effective_cfg"
+    log_info "Using effective Puppeteer config: $PUPPETEER_CFG"
+  fi
+fi
 
 # ── Collect diagram files ──────────────────────────────────
 files=()

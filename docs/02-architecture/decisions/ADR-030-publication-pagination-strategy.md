@@ -66,7 +66,7 @@ class PipelineConfig:
 # configs/entities/chembl/publication.yaml
 pipeline-name: chembl_publication
 provider: chembl
-entity-type: publication
+entity_type: publication
 
 # Pagination strategy (ADR-030)
 force-full-scan: true
@@ -158,20 +158,20 @@ Records with identical `content-hash` are deduplicated during merge.
 - `src/bioetl/domain/config.py` — Add `force-full-scan` field to `PipelineConfig`
 
 **Application:**
-- `src/bioetl/application/core/checkpoint-manager.py` — Block resume when `force-full-scan=True`
+- `src/bioetl/application/core/checkpoint_manager.py` — Block resume when `force-full-scan=True`
 
 **Infrastructure:**
-- `src/bioetl/infrastructure/schemas/pipeline-config.py` — Add `force-full-scan` to YAML schema
-- `src/bioetl/infrastructure/config/-base.py` — Pass `force-full-scan` in `yaml-config-to-domain`
+- `src/bioetl/infrastructure/schemas/pipeline_config.py` — Add `force-full-scan` to YAML schema
+- `src/bioetl/infrastructure/config/_base.py` — Pass `force-full-scan` in `yaml_config_to_domain`
 
 **Composition:**
-- `src/bioetl/composition/factories/services-factory.py` — Pass `force-full-scan` to `CheckpointManager`
-- `src/bioetl/composition/factories/pipeline-factory.py` — Use `config.force-full-scan`
+- `src/bioetl/composition/factories/services_factory.py` — Pass `force-full-scan` to `CheckpointManager`
+- `src/bioetl/composition/factories/pipeline_factory.py` — Use `config.force-full-scan`
 
 **Configs:**
 - `configs/entities/chembl/publication.yaml` — `force-full-scan: true`
-- `configs/entities/chembl/publication-term.yaml` — `force-full-scan: true`
-- `configs/entities/chembl/publication-similarity.yaml` — `force-full-scan: true`
+- `configs/entities/chembl/publication_term.yaml` — `force-full-scan: true`
+- `configs/entities/chembl/publication_similarity.yaml` — `force-full-scan: true`
 - `configs/entities/pubmed/publication.yaml` — `force-full-scan: true`
 - `configs/entities/crossref/publication.yaml` — `force-full-scan: true`
 - `configs/entities/openalex/publication.yaml` — `force-full-scan: true`
@@ -179,8 +179,8 @@ Records with identical `content-hash` are deduplicated during merge.
 
 ### Tests
 
-- `tests/unit/application/core/test-checkpoint-manager.py` — Test `force-full-scan` behavior
-- `tests/architecture/test-force-full-scan-configs.py` — Verify publication configs have flag set
+- `tests/unit/application/core/test_checkpoint_manager.py` — Test `force-full-scan` behavior
+- `tests/architecture/test_force_full_scan_configs.py` — Verify publication configs have flag set
 
 ## References
 

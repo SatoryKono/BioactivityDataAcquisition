@@ -1,0 +1,41 @@
+name: Block Compiled Python Artifacts
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  no-pyc-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fail if *.pyc or __pycache__ exists
+        run: |
+          set -e
+          FOUND=$(find . \( -name "*.pyc" -o -name "__pycache__" \) -print | head -n 1 || true)
+          if [ -n "$FOUND" ]; then
+            echo "Found compiled artifacts: $FOUND"
+            exit 1
+          fi
+          echo "No compiled artifacts found"
+
+      - name: Validate root-level allowlist
+        run: |
+          set -euo pipefail
+
+          allowlist_file=".github/root-allowlist.txt"
+          actual_file="$(mktemp)"
+          expected_file="$(mktemp)"
+
+          git ls-files | awk -F/ 'NF==1' | sort > "$actual_file"
+          grep -vE '^\s*($|#)' "$allowlist_file" | sort > "$expected_file"
+
+          if ! diff -u "$expected_file" "$actual_file"; then
+            echo "Root-level allowlist check failed."
+            echo "If this change is intentional, update $allowlist_file in the same PR."
+            exit 1
+          fi
+
+          echo "Root-level allowlist check passed"

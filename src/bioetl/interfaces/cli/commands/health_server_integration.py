@@ -49,6 +49,9 @@ async def health_server_context(
             # Health server is running
             await run_pipeline()
         # Health server is stopped
+
+    Returns:
+        Iterator over results.
     """
     if not enabled:
         yield None

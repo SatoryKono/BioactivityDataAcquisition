@@ -143,7 +143,16 @@ def bootstrap_logger(
     run_id: UUID | None = None,
     log_level: str = "INFO",
 ) -> LoggerPort:
-    """Deprecated: use :func:`bootstrap_logger_port` instead."""
+    """Deprecated: use :func:`bootstrap_logger_port` instead.
+
+    Args:
+        pipeline: Pipeline.
+        run_id: Pipeline run identifier.
+        log_level: Log level.
+
+    Returns:
+        The LoggerPort result.
+    """
     return bootstrap_logger_port(pipeline=pipeline, run_id=run_id, log_level=log_level)
 
 
@@ -177,7 +186,15 @@ def bootstrap_tracer(
     settings: Settings,
     service_name: str = "bioetl",
 ) -> TracingPort:
-    """Deprecated: use :func:`bootstrap_tracer_port` instead."""
+    """Deprecated: use :func:`bootstrap_tracer_port` instead.
+
+    Args:
+        settings: Settings object.
+        service_name: Name of the service.
+
+    Returns:
+        The TracingPort result.
+    """
     return bootstrap_tracer_port(settings=settings, service_name=service_name)
 
 
@@ -244,7 +261,14 @@ def maybe_start_metrics_server(settings: Settings) -> bool:
 
 
 def bootstrap_metrics(settings: Settings) -> MetricsPort:
-    """Deprecated: use :func:`bootstrap_metrics_port` instead."""
+    """Deprecated: use :func:`bootstrap_metrics_port` instead.
+
+    Args:
+        settings: Settings object.
+
+    Returns:
+        The MetricsPort result.
+    """
     return bootstrap_metrics_port(settings=settings)
 
 
@@ -299,7 +323,15 @@ def bootstrap_dq_monitor_port(
 def bootstrap_dq_monitor(
     settings: Settings, logger: LoggerPort | None = None
 ) -> DQMonitorPort | None:
-    """Deprecated: use :func:`bootstrap_dq_monitor_port` instead."""
+    """Deprecated: use :func:`bootstrap_dq_monitor_port` instead.
+
+    Args:
+        settings: Settings object.
+        logger: Logger instance.
+
+    Returns:
+        The DQMonitorPort | None result.
+    """
     return bootstrap_dq_monitor_port(settings=settings, logger=logger)
 
 
@@ -378,7 +410,17 @@ def bootstrap_observability(
     settings: Settings,
     log_level: str = "INFO",
 ) -> ObservabilityBundle:
-    """Deprecated: use :func:`bootstrap_observability_bundle` instead."""
+    """Deprecated: use :func:`bootstrap_observability_bundle` instead.
+
+    Args:
+        pipeline: Pipeline.
+        run_id: Pipeline run identifier.
+        settings: Settings object.
+        log_level: Log level.
+
+    Returns:
+        The ObservabilityBundle result.
+    """
     return bootstrap_observability_bundle(
         pipeline=pipeline, run_id=run_id, settings=settings, log_level=log_level
     )

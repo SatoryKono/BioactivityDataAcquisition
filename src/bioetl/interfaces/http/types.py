@@ -17,7 +17,11 @@ class HealthResponse:
     checks: dict[str, Any] = field(default_factory=dict)
 
     def to_json(self) -> str:
-        """Convert to JSON string."""
+        """Convert to JSON string.
+
+        Returns:
+            JSON string representation.
+        """
         return json.dumps(
             {
                 "status": self.status,

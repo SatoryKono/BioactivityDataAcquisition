@@ -5,13 +5,19 @@ Checks:
   1. Markdown relative links in docs/ resolve to existing files
   2. Pipeline specs referenced in docs/04-reference/pipelines/README.md exist
   3. Config files referenced in pipeline YAML configs exist
-  4. Legacy config/script tokens are absent in mkdocs nav docs
+  4. Doc drift guardrails are enforced in mkdocs nav docs:
+     - canonical Delta token (`_delta_log`)
+     - legacy config/script tokens
+     - outdated `bioetl run <pipeline>` syntax
+     - removed run flags (`--start-date`, `--end-date`, etc.)
+     - invalid env var style (`BIOETL-...`)
+     - invalid kebab-case Python snippets in fenced `python` blocks
 
 Usage:
     python scripts/check_doc_links.py          # Full check
     python scripts/check_doc_links.py --specs   # Only spec file check
     python scripts/check_doc_links.py --links   # Only broken link check
-    python scripts/check_doc_links.py --legacy-paths   # Only legacy token check
+    python scripts/check_doc_links.py --legacy-paths   # Only doc drift guardrails
 
 Exit code: 0 = clean, 1 = violations found
 
@@ -33,7 +39,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DOCS_DIR = PROJECT_ROOT / "docs"
 PIPELINES_DIR = DOCS_DIR / "04-reference" / "pipelines"
 
-# Directories to skip
+# Directories to skip in full-tree checks (links/specs/configs).
 SKIP_DIRS = frozenset(
     {
         ".venv",
@@ -47,16 +53,82 @@ SKIP_DIRS = frozenset(
         "build",
         "dist",
         "99-archive",
+        "reports",
+        "plans",
+        "skills",
     }
 )
 
 # Regex to match markdown relative links: [text](path) — excludes http(s)
 MD_LINK_RE = re.compile(r"\[([^\]]*)\]\((?!https?://|mailto:)([^)#]+)")
 MD_PATH_RE = re.compile(r"[A-Za-z0-9_./-]+\.md")
-LEGACY_DOC_TOKENS = (
-    "configs/pipelines/",
-    "configs/sources/",
-    "scripts/validate-pipeline-configs.py",
+PYTHON_FENCE_START_RE = re.compile(r"^\s*```(?:python|py|python3)\b", re.IGNORECASE)
+FENCE_END_RE = re.compile(r"^\s*```")
+
+# Directories to skip specifically for doc drift guardrails in nav docs.
+DRIFT_SKIP_DIRS = frozenset({"99-archive", "reports", "plans", "skills"})
+
+# Optional inline marker to allow historical legacy examples in a specific line.
+ALLOW_LEGACY_MARKER = "doc-lint: allow-legacy"
+
+
+class DriftRule:
+    """Rule definition for doc drift detection."""
+
+    def __init__(self, name: str, pattern: re.Pattern[str]) -> None:
+        """Initialize drift rule."""
+        self.name = name
+        self.pattern = pattern
+
+
+DRIFT_RULES = (
+    DriftRule(
+        name="legacy_delta_log_token",
+        pattern=re.compile(r"(?<![A-Za-z0-9_])(?:-delta-log|delta-log)(?![A-Za-z0-9_])"),
+    ),
+    DriftRule(
+        name="legacy_config_path",
+        pattern=re.compile(r"configs/(?:pipelines|sources|schemas|hash-policy)/"),
+    ),
+    DriftRule(
+        name="legacy_script_path",
+        pattern=re.compile(r"scripts/validate-pipeline-configs\.py"),
+    ),
+    DriftRule(
+        name="old_run_syntax",
+        pattern=re.compile(
+            r"\bbioetl\s+run\s+(?!--pipeline\b)([A-Za-z0-9_][A-Za-z0-9_-]*)"
+        ),
+    ),
+    DriftRule(
+        name="removed_run_flag",
+        pattern=re.compile(r"--(?:input-filter|start-date|end-date|batch-size)\b"),
+    ),
+    DriftRule(
+        name="invalid_env_style",
+        pattern=re.compile(r"\bBIOETL-[A-Z][A-Z0-9-]*\b"),
+    ),
+)
+
+PYTHON_SNIPPET_RULES = (
+    DriftRule(
+        name="python_renamed_file_token",
+        pattern=re.compile(
+            r"\b(?:config-loader|dq-config-loader|postrun-service|retention-manager|validate-pipeline-configs|fetch-strategies)\.py\b"
+        ),
+    ),
+    DriftRule(
+        name="python_invalid_from_cid_token",
+        pattern=re.compile(r"\.from-cid\b"),
+    ),
+    DriftRule(
+        name="python_invalid_get_compounds_token",
+        pattern=re.compile(r"\bget-compounds\s*\("),
+    ),
+    DriftRule(
+        name="python_invalid_run_in_executor_token",
+        pattern=re.compile(r"\._run-in-executor\b"),
+    ),
 )
 
 
@@ -66,6 +138,48 @@ def _should_skip(path: Path) -> bool:
         if part in SKIP_DIRS:
             return True
     return False
+
+
+def _should_skip_drift(path: Path) -> bool:
+    """Return True if path should be excluded from drift guardrails."""
+    for part in path.parts:
+        if part in DRIFT_SKIP_DIRS:
+            return True
+    return False
+
+
+def _iter_python_fence_lines(lines: list[str]) -> list[tuple[int, str]]:
+    """Return (line_no, line) entries for fenced python code blocks."""
+    in_python_fence = False
+    python_lines: list[tuple[int, str]] = []
+
+    for line_no, line in enumerate(lines, start=1):
+        stripped = line.strip()
+        if not in_python_fence and PYTHON_FENCE_START_RE.match(stripped):
+            in_python_fence = True
+            continue
+        if in_python_fence and FENCE_END_RE.match(stripped):
+            in_python_fence = False
+            continue
+        if in_python_fence:
+            python_lines.append((line_no, line))
+
+    return python_lines
+
+
+def _check_python_snippet_drift(lines: list[str]) -> list[tuple[int, str, str]]:
+    """Find drift violations in fenced python snippets."""
+    snippet_violations: list[tuple[int, str, str]] = []
+
+    for line_no, line in _iter_python_fence_lines(lines):
+        if ALLOW_LEGACY_MARKER in line:
+            continue
+        for rule in PYTHON_SNIPPET_RULES:
+            match = rule.pattern.search(line)
+            if match:
+                snippet_violations.append((line_no, rule.name, match.group(0)))
+
+    return snippet_violations
 
 
 def check_broken_links(root: Path) -> list[tuple[Path, int, str, str]]:
@@ -113,19 +227,30 @@ def _load_nav_docs() -> list[Path]:
     return [DOCS_DIR / rel_path for rel_path in nav_paths]
 
 
-def check_legacy_paths_in_nav_docs() -> list[tuple[Path, int, str]]:
-    """Find legacy config/script tokens in active docs (mkdocs nav)."""
-    violations: list[tuple[Path, int, str]] = []
+def check_legacy_paths_in_nav_docs() -> list[tuple[Path, int, str, str]]:
+    """Find doc drift violations in active docs (mkdocs nav)."""
+    violations: list[tuple[Path, int, str, str]] = []
 
     for md_file in _load_nav_docs():
-        if not md_file.exists() or _should_skip(md_file):
+        if (
+            not md_file.exists()
+            or _should_skip(md_file)
+            or _should_skip_drift(md_file)
+        ):
             continue
 
         lines = md_file.read_text(encoding="utf-8", errors="replace").splitlines()
         for line_no, line in enumerate(lines, start=1):
-            for token in LEGACY_DOC_TOKENS:
-                if token in line:
-                    violations.append((md_file, line_no, token))
+            if ALLOW_LEGACY_MARKER in line:
+                continue
+            for rule in DRIFT_RULES:
+                match = rule.pattern.search(line)
+                if match:
+                    matched_text = match.group(0)
+                    violations.append((md_file, line_no, rule.name, matched_text))
+
+        for line_no, rule_name, matched_text in _check_python_snippet_drift(lines):
+            violations.append((md_file, line_no, rule_name, matched_text))
 
     return violations
 
@@ -205,7 +330,7 @@ def main() -> int:
     parser.add_argument(
         "--legacy-paths",
         action="store_true",
-        help="Only check legacy path tokens in mkdocs nav docs",
+        help="Only check doc drift guardrails in mkdocs nav docs",
     )
     args = parser.parse_args()
 
@@ -254,14 +379,16 @@ def main() -> int:
         legacy_hits = check_legacy_paths_in_nav_docs()
         if legacy_hits:
             print(f"\n{'='*60}")
-            print(f"LEGACY PATH TOKENS ({len(legacy_hits)} found)")
+            print(f"DOC DRIFT VIOLATIONS ({len(legacy_hits)} found)")
             print(f"{'='*60}")
-            for filepath, line_no, token in legacy_hits:
+            for filepath, line_no, rule_name, matched_text in legacy_hits:
                 rel = filepath.relative_to(PROJECT_ROOT)
-                print(f"  {rel}:{line_no}: contains '{token}'")
+                print(
+                    f"  {rel}:{line_no}: [{rule_name}] contains '{matched_text}'"
+                )
             violations += len(legacy_hits)
         else:
-            print("Legacy paths: OK (no legacy tokens in mkdocs nav docs)")
+            print("Doc drift: OK (no guardrail violations in mkdocs nav docs)")
 
     if violations:
         print(f"\nTotal violations: {violations}")

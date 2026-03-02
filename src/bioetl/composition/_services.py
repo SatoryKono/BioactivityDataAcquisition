@@ -256,6 +256,9 @@ def get_health_server_dependencies() -> HealthServerDependencies:
 
     Returns HealthServerDependencies with PrometheusMetrics and
     ProviderHealthMonitor. HealthServer is created in interfaces layer.
+
+    Returns:
+        Health server dependencies.
     """
     _ensure_registrations()
     return bootstrap_health_server_dependencies()

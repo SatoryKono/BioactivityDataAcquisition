@@ -58,6 +58,16 @@ def config_merge(
       3) override wins
 
     Returns a new object; inputs are never mutated.
+
+    Args:
+        base: Base.
+        override: Override.
+        list_concat_keys: List concat keys.
+        concat_list_merger: Concat list merger.
+        list_merger_resolver: List merger resolver.
+
+    Returns:
+        Result dictionary.
     """
     result = copy.deepcopy(dict(base))
     concat_merger = concat_list_merger or _default_concat_list_merger

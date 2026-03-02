@@ -40,17 +40,36 @@ class DataNormalizationPort(Protocol):
         """Normalize DOI to lowercase, stripped format.
 
         Handles bare DOIs, https://doi.org/, http://doi.org/, and doi: prefixes.
+
+        Args:
+            doi: Digital Object Identifier.
+
+        Returns:
+            Normalized value.
         """
         ...
 
     def normalize_pmid(self, pmid: str | int | None) -> str | None:
-        """Normalize PubMed ID to string format. Returns None for invalid inputs."""
+        """Normalize PubMed ID to string format. Returns None for invalid inputs.
+
+        Args:
+            pmid: PubMed identifier.
+
+        Returns:
+            Normalized value.
+        """
         ...
 
     def normalize_year(self, year: int | None) -> tuple[int | None, bool]:
         """Validate publication year against range [1500, 2100].
 
         Returns (year, is_warning). Warning is True if year is outside valid range.
+
+        Args:
+            year: Year.
+
+        Returns:
+            Normalized value.
         """
         ...
 
@@ -59,36 +78,85 @@ class DataNormalizationPort(Protocol):
         authors: list[str] | str | None,
         salt: str,
     ) -> str | None:
-        """Hash author names for PII protection. Accepts list, JSON, or delimited string."""
+        """Hash author names for PII protection. Accepts list, JSON, or delimited string.
+
+        Args:
+            authors: Author data in any supported format (list, JSON string, or delimited).
+            salt: Cryptographic salt for PII hashing.
+
+        Returns:
+            JSON string of hashed author names, or None if no authors found.
+        """
         ...
 
     def strip_html_tags(self, text: str | None) -> str | None:
-        """Remove HTML tags, decode entities, normalize whitespace."""
+        """Remove HTML tags, decode entities, normalize whitespace.
+
+        Args:
+            text: Input text string.
+
+        Returns:
+            The str | None result.
+        """
         ...
 
     def normalize_oa_status(self, status: str | None) -> str | None:
-        """Normalize Open Access status to lowercase."""
+        """Normalize Open Access status to lowercase.
+
+        Args:
+            status: Status value.
+
+        Returns:
+            Normalized value.
+        """
         ...
 
     def normalize_string(self, value: str | None) -> str | None:
-        """Normalize string by stripping whitespace. Returns None if empty."""
+        """Normalize string by stripping whitespace. Returns None if empty.
+
+        Args:
+            value: Input value.
+
+        Returns:
+            Normalized value.
+        """
         ...
 
     def normalize_to_string(self, value: Any) -> str | None:
-        """Convert value to string, strip whitespace, return None if empty."""
+        """Convert value to string, strip whitespace, return None if empty.
+
+        Args:
+            value: Input value.
+
+        Returns:
+            Normalized value.
+        """
         ...
 
     def parse_authors_to_list(
         self,
         authors: list[str] | str | None,
     ) -> list[str]:
-        """Parse author input (list, JSON, or delimited string) into a list of names."""
+        """Parse author input (list, JSON, or delimited string) into a list of names.
+
+        Args:
+            authors: Authors.
+
+        Returns:
+            Parsed result.
+        """
         ...
 
     def normalize_partial_date(self, date_str: str | None) -> str | None:
         """Normalize partial date to full YYYY-MM-DD (end of period strategy).
 
         Partial dates: YYYY-MM->YYYY-MM-30, YYYY->YYYY-12-31. Full dates unchanged.
+
+        Args:
+            date_str: Date str.
+
+        Returns:
+            Normalized value.
         """
         ...
 
@@ -99,6 +167,12 @@ class DataNormalizationPort(Protocol):
         """Format CrossRef date-parts to full YYYY-MM-DD (end of period strategy).
 
         Partial dates: [year,month]->YYYY-MM-30, [year]->YYYY-12-31.
+
+        Args:
+            date_parts: Date parts.
+
+        Returns:
+            The str | None result.
         """
         ...
 
@@ -128,26 +202,54 @@ class DataNormalizationPort(Protocol):
         self,
         authors: list[str] | list[dict[str, Any]] | str | None,
     ) -> str | None:
-        """Parse and normalize author names to JSON string."""
+        """Parse and normalize author names to JSON string.
+
+        Args:
+            authors: Authors.
+
+        Returns:
+            Normalized value.
+        """
         ...
 
     def normalize_author_keys(
         self,
         authors: list[str] | list[dict[str, Any]] | str | None,
     ) -> str | None:
-        """Normalize author names to short Surname_F keys (pipe-delimited)."""
+        """Normalize author names to short Surname_F keys (pipe-delimited).
+
+        Args:
+            authors: Authors.
+
+        Returns:
+            Normalized value.
+        """
         ...
 
     def normalize_affiliations(
         self,
         affiliations: list[str] | list[dict[str, Any]] | None,
     ) -> str | None:
-        """Extract, normalize, deduplicate affiliations to JSON string."""
+        """Extract, normalize, deduplicate affiliations to JSON string.
+
+        Args:
+            affiliations: Affiliations.
+
+        Returns:
+            Normalized value.
+        """
         ...
 
     def extract_affiliations_from_authors(
         self,
         authors: list[dict[str, Any]],
     ) -> list[str]:
-        """Extract unique affiliations from author objects."""
+        """Extract unique affiliations from author objects.
+
+        Args:
+            authors: Authors.
+
+        Returns:
+            Extracted value.
+        """
         ...

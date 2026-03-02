@@ -1,0 +1,1 @@
+"""UniProt adapter unit tests."""

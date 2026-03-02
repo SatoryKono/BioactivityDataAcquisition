@@ -1,7 +1,9 @@
 # Operations Runbooks (Playbooks)
-*Synced with RULES.md v5.22 (2026-02-21)*
+*Synced with RULES.md v5.23 (2026-02-21)*
 
 This section contains playbooks for handling common alerts and operational tasks.
+
+> Runtime profile for all runbooks: Local-Only single-instance (ADR-010), local filesystem storage, `MemoryLock`.
 
 ## Available Runbooks
 
@@ -28,7 +30,7 @@ This section contains playbooks for handling common alerts and operational tasks
 | [Checkpoint Debugging](checkpoint-debugging.md) | Debugging checkpoint issues | P2 |
 | [Stale Lock](stale-lock.md) | Handling stale lock situations | P1 |
 | [Vacuum Procedures](vacuum-procedures.md) | Delta Lake vacuum maintenance | P2 |
-| [Scaling and Performance Tuning](scaling.md) | Guide for scaling workers and tuning Delta Lake | P3 |
+| [Scaling and Performance Tuning](scaling.md) | Local-only performance tuning (vertical scaling + Delta maintenance) | P3 |
 
 ### Monitoring
 | Runbook | Description | Priority |
@@ -42,4 +44,4 @@ This section contains playbooks for handling common alerts and operational tasks
 - [ADR-008: Graceful Shutdown](../../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md)
 
 ---
-*Last updated: 2026-01-04*
+*Last updated: 2026-03-02*

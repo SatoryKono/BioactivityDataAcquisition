@@ -1,0 +1,101 @@
+%% BioETL — Observability Stack
+%% Logging, Metrics, Tracing architecture.
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   System / Component
+%% @nodes   24
+%% @reference  Decomposed into 09a-observability-app, 09b-observability-infra
+
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+%% @uniform width=224 height=198 max_title_len=23 max_desc_lines=9
+graph TB
+%% keep-orphan: DQMP
+    subgraph Ports["Domain Ports"]
+        LP["LoggerPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ bind(**kwargs)<br/>+ info(msg, **fields)<br/>+ warning(msg, **fields)<br/>+ error(msg, **fields)<br/>+ debug(msg, **fields)<br/>+ exception(msg, **fields)<br/>"]:::size-lg
+        MP["MetricsPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ observe_histogram(name, value, labels)<br/>+ increment_counter(name, labels)<br/>+ set_gauge(name, value, labels)<br/>+ close()<br/><br/><br/>"]:::size-lg
+        TP["TracingPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ get_tracer(name) → Tracer<br/>+ close()<br/><br/><br/><br/><br/>"]:::size-lg
+        DQMP["DQMonitorPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ add_metric(name, value)<br/>+ check_quality()<br/>+ update_baseline_from_metrics()<br/><br/><br/><br/>"]:::size-lg
+    end
+
+    subgraph AppObserver["Application Observability"]
+        PO["PipelineObserver<br/>━━━━━━━━━━━━━━━━━<br/>_metrics: MetricsPort<br/>_logger: LoggerPort<br/>_tracer: TracingPort<br/>━━━━━━━━━━━━━━━━━<br/>+ emit_event(event)<br/>+ on_preflight()<br/>+ on_execution()<br/>+ on_postrun()"]:::size-lg
+        BMR["BatchMetricsRecorder<br/>━━━━━━━━━━━━━━━━━<br/>+ track_batch_size()<br/>+ track_processed_records()<br/>+ track_error()<br/>+ track_quarantined_records()<br/><br/><br/><br/>"]:::size-lg
+        BTM["BatchTracingManager<br/>━━━━━━━━━━━━━━━━━<br/>+ start_execution_span()<br/>+ start_batch_span()<br/>+ start_layer_span()<br/>+ end_span()<br/><br/><br/><br/>"]:::size-lg
+    end
+
+    subgraph InfraLogging["Infrastructure: Logging"]
+        UL["UnifiedLogger<br/>(implements LoggerPort)<br/>━━━━━━━━━━━━━━━━━<br/>Structured JSON output<br/>Log Schema enforcement<br/>Secret filtering<br/><br/><br/><br/>"]:::size-lg
+    end
+
+    subgraph InfraMetrics["Infrastructure: Metrics"]
+        MC["MetricsCollector<br/>(implements MetricsPort)<br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        PM["PrometheusMetrics<br/>(implements MetricsPort)<br/>━━━━━━━━━━━━━━━━━<br/>Histograms, Counters,<br/>Gauges for Prometheus<br/><br/><br/><br/><br/>"]:::size-lg
+        MSA["MetricsServerAdapter<br/>━━━━━━━━━━━━━━━━━<br/>HTTP server for<br/>/metrics endpoint<br/><br/><br/><br/><br/><br/>"]:::size-lg
+    end
+
+    subgraph InfraTracing["Infrastructure: Tracing"]
+        OTT["OpenTelemetryTracer<br/>(implements TracingPort)<br/>━━━━━━━━━━━━━━━━━<br/>OTLP export<br/>Span management<br/><br/><br/><br/><br/>"]:::size-lg
+    end
+
+    subgraph InfraAnomaly["Infrastructure: Anomaly Detection"]
+        AD["AnomalyDetector<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        DS["DetectorStrategy (ABC)<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        ZSD["ZScoreDetector<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        DS --> ZSD
+        AD --> DS
+    end
+
+    subgraph AdapterMetrics["Adapter-Level Metrics"]
+        AM["AdapterMetrics<br/>━━━━━━━━━━━━━━━━━<br/>provider: str<br/>━━━━━━━━━━━━━━━━━<br/>+ measure_request()<br/>(context manager)<br/>Metrics:<br/>adapter_request_duration_seconds<br/>adapter_requests_total<br/>"]:::size-lg
+    end
+
+    subgraph External["External Systems"]
+        PROM["Prometheus Server<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        GRAFANA["Grafana Dashboards<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+        OTEL_COL["OpenTelemetry Collector<br/><br/><br/><br/><br/><br/><br/><br/><br/>"]:::size-lg
+    end
+
+    %% Port implementations
+    LP -.-> UL & SL & NOL
+    MP -.-> MC & PM & NOM
+    TP -.-> OTT & NOT
+
+    %% Application usage
+    PO --> LP & MP & TP
+    BMR --> MP
+    BTM --> TP
+
+    %% Adapter metrics
+    AM --> MP
+
+    %% Infrastructure to external
+    PM --> MSA --> PROM --> GRAFANA
+    OTT --> OTEL_COL --> JAEGER
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    classDef logging fill:#fefce8,stroke:#ca8a04
+    classDef metrics fill:#f5f3ff,stroke:#7c3aed
+    classDef tracing fill:#ffe4e6,stroke:#dc2626
+    classDef anomaly fill:#fff1f2,stroke:#dc2626
+    classDef ext fill:#f1f5f9,stroke:#64748b
+
+    class LP,MP,TP,DQMP port
+    class PO,BMR,BTM app
+    class UL,SL,NOL logging
+    class MC,PM,MSA,NOM,AM metrics
+    class OTT,NOT tracing
+    class AD,DS,ZSD anomaly
+    class PROM,GRAFANA,OTEL_COL,JAEGER ext

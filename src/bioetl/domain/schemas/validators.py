@@ -53,7 +53,14 @@ def is_valid_json(series: pd.Series) -> pd.Series:
     """
 
     def check(val: object) -> bool:
-        """Return True if *val* is null or valid JSON."""
+        """Return True if *val* is null or valid JSON.
+
+        Args:
+            val: Val.
+
+        Returns:
+            Check result as bool.
+        """
         if pd.isna(val):  # type: ignore[call-overload]
             return True
         try:
@@ -76,7 +83,14 @@ def is_valid_json_array(series: pd.Series) -> pd.Series:
     """
 
     def check(val: object) -> bool:
-        """Return True if *val* is null or a valid JSON array."""
+        """Return True if *val* is null or a valid JSON array.
+
+        Args:
+            val: Val.
+
+        Returns:
+            Check result as bool.
+        """
         if pd.isna(val):  # type: ignore[call-overload]
             return True
         try:
@@ -99,7 +113,14 @@ def is_valid_json_object(series: pd.Series) -> pd.Series:
     """
 
     def check(val: object) -> bool:
-        """Return True if *val* is null or a valid JSON object."""
+        """Return True if *val* is null or a valid JSON object.
+
+        Args:
+            val: Val.
+
+        Returns:
+            Check result as bool.
+        """
         if pd.isna(val):  # type: ignore[call-overload]
             return True
         try:
@@ -137,6 +158,9 @@ def is_non_negative(pandas_obj: pd.Series, *, min_value: float | bool = 0) -> pd
     Args:
         pandas_obj: Series to validate.
         min_value: When True (from is_non_negative=True), defaults to 0.
+
+    Returns:
+        True if the condition is met, False otherwise.
     """
     # When used as is_non_negative=True, min_value comes in as True
     actual_min = 0 if min_value is True else min_value
@@ -156,6 +180,9 @@ def is_positive(pandas_obj: pd.Series, *, min_value: int | bool = 1) -> pd.Serie
     Args:
         pandas_obj: Series to validate.
         min_value: When True (from is_positive=True), defaults to 1.
+
+    Returns:
+        True if the condition is met, False otherwise.
     """
     # When used as is_positive=True, min_value comes in as True
     actual_min = 1 if min_value is True else min_value
@@ -178,6 +205,14 @@ def in_closed_range(
 
     Usage in schema:
         field: Series[int] = pa.Field(in_closed_range={"min_val": 0, "max_val": 100})
+
+    Args:
+        pandas_obj: Pandas obj.
+        min_val: Minimum val.
+        max_val: Maximum val.
+
+    Returns:
+        The pd.Series result.
     """
     return pandas_obj.isna() | ((pandas_obj >= min_val) & (pandas_obj <= max_val))
 
@@ -191,6 +226,13 @@ def max_str_length(pandas_obj: pd.Series, *, max_len: int) -> pd.Series:
 
     Usage in schema:
         field: Series[str] = pa.Field(max_str_length={"max_len": 10000})
+
+    Args:
+        pandas_obj: Pandas obj.
+        max_len: Maximum len.
+
+    Returns:
+        The pd.Series result.
     """
     return pandas_obj.isna() | (pandas_obj.str.len() <= max_len)
 
@@ -204,6 +246,13 @@ def str_starts_with(pandas_obj: pd.Series, *, prefix: str) -> pd.Series:
 
     Usage in schema:
         field: Series[str] = pa.Field(str_starts_with={"prefix": "InChI="})
+
+    Args:
+        pandas_obj: Pandas obj.
+        prefix: Prefix.
+
+    Returns:
+        The pd.Series result.
     """
     return pandas_obj.isna() | pandas_obj.str.startswith(prefix)
 
@@ -217,5 +266,12 @@ def str_matches_pattern(pandas_obj: pd.Series, *, pattern: str) -> pd.Series:
 
     Usage in schema:
         field: Series[str] = pa.Field(str_matches_pattern={"pattern": r"^CHEMBL\\d+$"})
+
+    Args:
+        pandas_obj: Pandas obj.
+        pattern: Pattern.
+
+    Returns:
+        The pd.Series result.
     """
     return pandas_obj.isna() | pandas_obj.str.match(pattern)

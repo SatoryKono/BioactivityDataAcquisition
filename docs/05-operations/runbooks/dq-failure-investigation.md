@@ -1,5 +1,9 @@
 # DQ Failure Investigation Runbook
 
+*Reference: [RULES.md §3.1.2](../../00-project/RULES.md#312-пороги-ошибок-батча-thresholds)*
+
+> Runtime profile: Local-Only single-instance (ADR-010). DQ investigation operates on local Silver/Gold/Quarantine artifacts.
+
 ## Overview
 
 Data Quality (DQ) checks ensure data integrity throughout the pipeline. This runbook covers investigating DQ threshold violations and data quality issues.

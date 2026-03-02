@@ -159,13 +159,13 @@ Semantic Scholar API предоставляет различные лимиты:
 ### Конфигурация Input Filter
 
 ```yaml
-input-filter:
+input_filter:
   enabled: true
-  source-path: "data/input/dois.csv"
-  column-name: "doi"
-  filter-field: "doi"
-  batch-size: 100
-  fallback-column: "title"  # Поиск по заголовку при не найденном DOI
+  source_path: "data/input/dois.csv"
+  column_name: "doi"
+  filter_field: "doi"
+  batch_size: 100
+  fallback_column: "title"  # Поиск по заголовку при не найденном DOI
 ```
 
 ---
@@ -174,16 +174,16 @@ input-filter:
 
 ```bash
 # Базовый запуск с файлом DOI
-bioetl run semanticscholar_publication
+bioetl run --pipeline semanticscholar_publication
 
 # С ограничением количества записей
-bioetl run semanticscholar_publication --limit 100
+bioetl run --pipeline semanticscholar_publication --limit 100
 
 # Проверка конфигурации без выполнения
-bioetl run semanticscholar_publication --dry-run
+bioetl run --pipeline semanticscholar_publication --dry-run
 
 # Полная перезагрузка
-bioetl run semanticscholar_publication --run-type rebuild
+bioetl run --pipeline semanticscholar_publication --run-type rebuild
 ```
 
 ### Подготовка входных данных
@@ -202,7 +202,7 @@ doi,title
 ### Настройка API Key
 
 ```bash
-export BIOETL-SEMANTICSCHOLAR-API-KEY=your-api-key
+export BIOETL_SEMANTICSCHOLAR_API_KEY=your-api-key
 
 # Получить API key: https://www.semanticscholar.org/product/api
 ```
@@ -249,8 +249,8 @@ Semantic Scholar adapter реализует health check через `/paper/sear
 ## 8. Gold Filters
 
 ```yaml
-gold-filters:
-  required-fields:
+gold_filters:
+  required_fields:
     - paper-id
     - title
   ranges:
@@ -271,8 +271,8 @@ gold-filters:
 | Extractors | `src/bioetl/application/pipelines/semanticscholar/extractors.py` |
 | Адаптер | `src/bioetl/infrastructure/adapters/semanticscholar/adapter.py` |
 | Pandera Schema | `src/bioetl/domain/schemas/semanticscholar/publication.py` |
-| Unit Tests | `tests/unit/infrastructure/adapters/semanticscholar/test-adapter.py` |
-| Integration Tests | `tests/integration/adapters/test-semanticscholar.py` |
+| Unit Tests | `tests/unit/infrastructure/adapters/semanticscholar/test_adapter.py` |
+| Integration Tests | `tests/integration/adapters/test_semanticscholar.py` |
 | VCR Cassettes | `tests/fixtures/vcr/semanticscholar/` |
 
 ---

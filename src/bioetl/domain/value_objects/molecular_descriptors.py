@@ -94,7 +94,14 @@ class _BoundedIntVO(ValueObject[int]):
 
     @classmethod
     def from_raw(cls, raw: Any) -> _BoundedIntVO | None:
-        """Create from raw value; returns ``None`` on invalid input."""
+        """Create from raw value; returns ``None`` on invalid input.
+
+        Args:
+            raw: Raw input value.
+
+        Returns:
+            New instance constructed from the input.
+        """
         if raw is None:
             return None
         try:
@@ -155,7 +162,14 @@ class _BoundedFloatVO(ValueObject[float]):
 
     @classmethod
     def from_raw(cls, raw: Any) -> _BoundedFloatVO | None:
-        """Create from raw value; returns ``None`` on invalid input."""
+        """Create from raw value; returns ``None`` on invalid input.
+
+        Args:
+            raw: Raw input value.
+
+        Returns:
+            New instance constructed from the input.
+        """
         if raw is None:
             return None
         try:

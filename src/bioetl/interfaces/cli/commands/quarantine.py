@@ -45,6 +45,11 @@ def quarantine_inspect(pipeline: str, limit: int, error_code: str | None) -> Non
     Example:
         bioetl quarantine inspect --pipeline chembl_activity
         bioetl quarantine inspect --pipeline chembl_activity --error-code DQ_MISSING_FIELD
+
+    Args:
+        pipeline: Pipeline.
+        limit: Maximum number of records to process.
+        error_code: Error code.
     """
     echo_info(f"Inspecting quarantine for {pipeline} (limit {limit})...")
 
@@ -76,6 +81,10 @@ def quarantine_stats(pipeline: str, output_json: bool) -> None:
     Example:
         bioetl quarantine stats --pipeline chembl_activity
         bioetl quarantine stats --pipeline chembl_activity --json
+
+    Args:
+        pipeline: Pipeline.
+        output_json: Whether to output json.
     """
     quarantine_manager = get_quarantine_manager(pipeline)
 
@@ -136,6 +145,12 @@ def quarantine_replay(
     Example:
         bioetl quarantine replay --pipeline chembl_activity --dry-run
         bioetl quarantine replay --pipeline chembl_activity --error-code DQ_NETWORK_ERROR
+
+    Args:
+        pipeline: Pipeline.
+        error_code: Error code.
+        max_age_days: Maximum age days.
+        dry_run: Dry run mode flag.
     """
     quarantine_service = get_quarantine_service()
 
@@ -188,6 +203,12 @@ def quarantine_purge(
     Example:
         bioetl quarantine purge --pipeline chembl_activity --dry-run
         bioetl quarantine purge --pipeline chembl_activity --older-than-days 60
+
+    Args:
+        pipeline: Pipeline.
+        older_than_days: Older than days.
+        dry_run: Dry run mode flag.
+        force: Force operation flag.
     """
     quarantine_service = get_quarantine_service()
 
@@ -236,6 +257,11 @@ def quarantine_resolve(pipeline: str, payload_hash: str, status: str) -> None:
     Example:
         bioetl quarantine resolve --pipeline chembl_activity --payload-hash abc123
         bioetl quarantine resolve --pipeline chembl_activity --payload-hash abc123 --status REPROCESSED
+
+    Args:
+        pipeline: Pipeline.
+        payload_hash: Payload hash.
+        status: Status value.
     """
     quarantine_service = get_quarantine_service()
 

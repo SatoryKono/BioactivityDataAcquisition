@@ -60,6 +60,8 @@ class BasePipeline(ABC):  # noqa: B024
                 If provided, the pipeline will use this transformer instead of
                 creating one internally. This is the preferred DI approach.
 
+        Returns:
+            Newly created Self instance.
         """
         return cls(config, runtime, services, run_id, transformer=transformer)
 

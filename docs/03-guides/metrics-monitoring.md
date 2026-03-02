@@ -37,24 +37,24 @@ BioETL предоставляет комплексную систему observab
 
 | Переменная | Описание | По умолчанию |
 |------------|----------|--------------|
-| `BIOETL-METRICS-ENABLED` | Включить Prometheus метрики | `true` |
-| `BIOETL-METRICS-PORT` | Порт для Prometheus endpoint | `8000` |
-| `BIOETL-TRACING-ENABLED` | Включить OpenTelemetry tracing | `false` |
-| `BIOETL-LOG-LEVEL` | Уровень логирования | `INFO` |
-| `BIOETL-LOG-FORMAT` | Формат логов (json/text) | `json` |
+| `BIOETL_METRICS_ENABLED` | Включить Prometheus метрики | `true` |
+| `BIOETL_METRICS_PORT` | Порт для Prometheus endpoint | `8000` |
+| `BIOETL_TRACING_ENABLED` | Включить OpenTelemetry tracing | `false` |
+| `BIOETL_LOG_LEVEL` | Уровень логирования | `INFO` |
+| `BIOETL_LOG_FORMAT` | Формат логов (json/text) | `json` |
 
 ### Включение/отключение
 
 ```bash
 # Включить метрики (по умолчанию)
-export BIOETL-METRICS-ENABLED=true
-export BIOETL-METRICS-PORT=8000
+export BIOETL_METRICS_ENABLED=true
+export BIOETL_METRICS_PORT=8000
 
 # Включить tracing
-export BIOETL-TRACING-ENABLED=true
+export BIOETL_TRACING_ENABLED=true
 
 # Отключить метрики
-export BIOETL-METRICS-ENABLED=false
+export BIOETL_METRICS_ENABLED=false
 ```
 
 ---
@@ -74,7 +74,7 @@ export BIOETL-METRICS-ENABLED=false
   1. определить объект метрики в
      `src/bioetl/infrastructure/observability/metrics.py`,
   2. зарегистрировать её в `HISTOGRAMS` / `COUNTERS` / `GAUGES` в
-     `src/bioetl/infrastructure/observability/prometheus-metrics.py`.
+     `src/bioetl/infrastructure/observability/prometheus_metrics.py`.
 
 > Если в будущем потребуется typed API, helper-методы добавляются в
 > `MetricsPort` в `observability.py` и синхронно реализуются в Prometheus и
@@ -275,7 +275,7 @@ sum(rate(bioetl-records-processed-total[5m])) * 100
 
 ```bash
 # Via переменную окружения
-export BIOETL-LOG-LEVEL=DEBUG
+export BIOETL_LOG_LEVEL=DEBUG
 
 # Via CLI флаг
 bioetl run --pipeline chembl_activity --debug
@@ -288,7 +288,7 @@ bioetl run --pipeline chembl_activity --debug
 ### Включение
 
 ```bash
-export BIOETL-TRACING-ENABLED=true
+export BIOETL_TRACING_ENABLED=true
 ```
 
 ### Span Hierarchy
@@ -477,7 +477,7 @@ groups:
 
 1. Проверить что метрики включены:
    ```bash
-   echo $BIOETL-METRICS-ENABLED  # should be "true"
+   echo $BIOETL_METRICS_ENABLED  # should be "true"
    ```
 
 2. Проверить endpoint:
@@ -506,7 +506,7 @@ groups:
 
 1. Проверить что tracing включён:
    ```bash
-   echo $BIOETL-TRACING-ENABLED  # should be "true"
+   echo $BIOETL_TRACING_ENABLED  # should be "true"
    ```
 
 2. Проверить OTLP endpoint:

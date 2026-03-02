@@ -1,0 +1,190 @@
+"""Additional coverage tests for ChemblAdapter."""
+
+from __future__ import annotations
+
+from unittest.mock import AsyncMock, MagicMock
+
+import pytest
+
+from bioetl.domain.entities.chembl import ActivityRecord
+from bioetl.domain.exceptions import ExternalServiceError, RetryExhaustedError
+from bioetl.domain.types import CircuitBreakerState
+from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
+
+
+@pytest.fixture
+def mock_http_client():
+    client = AsyncMock()
+    client.__aenter__.return_value = client
+    client.__aexit__.return_value = None
+    client.circuit_breaker = MagicMock()
+    client.circuit_breaker.get_state.return_value = CircuitBreakerState.CLOSED
+    client.circuit_breaker.get_failure_count.return_value = 0
+    return client
+
+
+@pytest.fixture
+def mock_logger():
+    return MagicMock()
+
+
+@pytest.fixture
+def adapter(mock_http_client, mock_logger):
+    return ChemblAdapter(http_client=mock_http_client, logger=mock_logger)
+
+
+@pytest.mark.asyncio
+async def test_fetch_as_models_valid(adapter, mock_http_client):
+    """Test fetching as validated models."""
+    mock_response = MagicMock()
+    mock_response.json.return_value = {
+        "activities": [
+            {
+                "activity_id": "1",
+                "assay_id": "CHEMBL123",
+                "molecule_id": "CHEMBL456",
+                "pchembl_value": "7.5",
+                "standard_type": "IC50",
+                "standard_value": "30.0",
+                "standard_units": "nM",
+                "target_id": "CHEMBL789",
+            }
+        ],
+        "page_meta": {"next": None},
+    }
+    mock_http_client.get.return_value = mock_response
+
+    models = []
+    async for model in adapter.fetch_as_models("activity", validate=True):
+        models.append(model)
+
+    assert len(models) == 1
+    assert isinstance(models[0], ActivityRecord)
+    assert models[0].activity_id == "1"
+
+
+@pytest.mark.asyncio
+async def test_fetch_as_models_invalid_type(adapter):
+    """Test fetch_as_models with unsupported entity type."""
+    with pytest.raises(ValueError):
+        async for _ in adapter.fetch_as_models("unsupported_type"):
+            pass
+
+
+@pytest.mark.asyncio
+async def test_get_entity_count(adapter, mock_http_client):
+    """Test getting total entity count."""
+    mock_response = MagicMock()
+    mock_response.json.return_value = {"page_meta": {"total_count": 12345}}
+    mock_http_client.get.return_value = mock_response
+
+    count = await adapter.get_entity_count("activity")
+    assert count == 12345
+    mock_http_client.get.assert_called_with(
+        "https://www.ebi.ac.uk/chembl/api/data/activity",
+        params={"limit": 1, "format": "json"},
+    )
+
+
+@pytest.mark.asyncio
+async def test_get_source_metadata(adapter):
+    """Test retrieving source metadata."""
+    # Simulate recording a request (requires internals access or mocking)
+    adapter._request_collector.record_request("http://test", "GET", 100, 200)
+
+    metadata = adapter.get_source_metadata(api_version="33")
+    assert metadata.type == "api"
+    assert metadata.url == "https://www.ebi.ac.uk/chembl/api/data"
+    assert metadata.api_version == "33"
+    assert adapter.request_count == 0  # Should be cleared
+
+
+@pytest.mark.asyncio
+async def test_fetch_single_record_direct_success(adapter, mock_http_client):
+    """Test successful fallback to direct endpoint."""
+    mock_response = MagicMock()
+    mock_response.json.return_value = {"target_id": "CHEMBL123"}
+    mock_http_client.get.return_value = mock_response
+
+    result = await adapter._fetch_single_record_direct("target", "CHEMBL123")
+
+    assert result is not None
+    assert result["target_id"] == "CHEMBL123"
+    mock_http_client.get.assert_called_with(
+        "https://www.ebi.ac.uk/chembl/api/data/target/CHEMBL123",
+        params={"format": "json"},
+    )
+
+
+@pytest.mark.asyncio
+async def test_fetch_single_record_direct_failure(adapter, mock_http_client):
+    """Test failed fallback to direct endpoint."""
+    mock_http_client.get.side_effect = Exception("API Error")
+
+    result = await adapter._fetch_single_record_direct("target", "CHEMBL123")
+
+    assert result is None
+    adapter.logger.warning.assert_called()
+
+
+@pytest.mark.asyncio
+async def test_retry_with_split_batches(adapter, mock_http_client):
+    """Test batch splitting logic on failure."""
+
+    # Mock _fetch_batch_with_reduction to avoid complex recursion logic
+    # We just want to see if it splits
+    async def empty_async_gen(*args, **kwargs):
+        if False:
+            yield {}
+
+    adapter._fetch_batch_with_reduction = MagicMock(side_effect=empty_async_gen)
+
+    id_batch = ["1", "2", "3", "4"]
+    error = RetryExhaustedError("Fail", attempts=3)
+    seen_ids = set()
+
+    gen = adapter._retry_with_split_batches(
+        "target", id_batch, "id", None, seen_ids, "id", error
+    )
+
+    async for _ in gen:
+        pass
+
+    # Should call twice with split batches
+    assert adapter._fetch_batch_with_reduction.call_count == 2
+    args_list = adapter._fetch_batch_with_reduction.call_args_list
+    assert args_list[0][0][1] == ["1", "2"]  # First half
+    assert args_list[1][0][1] == ["3", "4"]  # Second half
+
+
+@pytest.mark.asyncio
+async def test_is_retry_exhausted_error(adapter):
+    """Test error type checking."""
+    e1 = RetryExhaustedError("Fail", attempts=3)
+    assert adapter._is_retry_exhausted_error(e1) is True
+
+    e2 = ExternalServiceError("Wrapper")
+    e2.__cause__ = e1
+    assert adapter._is_retry_exhausted_error(e2) is True
+
+    e3 = ValueError("Other")
+    assert adapter._is_retry_exhausted_error(e3) is False
+
+
+@pytest.mark.asyncio
+async def test_reset_circuit_breaker(adapter, mock_http_client):
+    """Test circuit breaker reset."""
+    adapter.reset_circuit_breaker()
+    mock_http_client.circuit_breaker.reset.assert_called_once()
+    adapter.logger.info.assert_called_with(
+        "chembl_circuit_breaker_reset", provider="chembl"
+    )
+
+
+@pytest.mark.asyncio
+async def test_clear_request_collector(adapter):
+    """Test clearing request collector."""
+    adapter._request_collector.record_request("http://test", "GET", 100, 200)
+    assert adapter.request_count == 1
+    adapter.clear_request_collector()
+    assert adapter.request_count == 0

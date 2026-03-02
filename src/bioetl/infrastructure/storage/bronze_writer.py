@@ -422,6 +422,9 @@ class BronzeWriter:
             ingestion_ts: UTC timestamp for ingestion.
             source_metadata: Optional pre-built SourceMetadata with API request
                            details for rich lineage tracking.
+
+        Returns:
+            The BronzeWriteResult result.
         """
         tracer = self._tracing.get_tracer(__name__)
         with tracer.start_as_current_span("write_bronze") as span:
@@ -674,7 +677,14 @@ class BronzeWriter:
         )
 
     async def read_bronze(self, path: str) -> AsyncIterator[dict[str, Any]]:
-        """Read and decompress Bronze file (for testing/debugging)."""
+        """Read and decompress Bronze file (for testing/debugging).
+
+        Args:
+            path: File system path.
+
+        Returns:
+            Result dictionary.
+        """
         full_path = self.base_path / path
 
         def _read_and_decompress() -> bytes:
@@ -709,6 +719,14 @@ class BronzeWriter:
         searches directly from base_path (used by CachedBronzeDataSource).
 
         Results are sorted lexicographically for deterministic ordering (ADR-014).
+
+        Args:
+            provider: Data provider name.
+            entity: Entity.
+            date: Date.
+
+        Returns:
+            Collection of batches.
         """
         # Handle flat_structure mode (provider/entity already in base_path)
         if self._flat_structure and not provider and not entity:
@@ -771,7 +789,17 @@ class BronzeWriter:
         provider: str | None = None,
         entity: str | None = None,
     ) -> dict[str, int]:
-        """Remove Bronze files older than cutoff date (RULES.md §2.1 retention)."""
+        """Remove Bronze files older than cutoff date (RULES.md §2.1 retention).
+
+        Args:
+            cutoff_date: Cutoff date.
+            dry_run: Dry run mode flag.
+            provider: Data provider name.
+            entity: Entity.
+
+        Returns:
+            Result dictionary.
+        """
         cutoff_str = cutoff_date.strftime("%Y-%m-%d")
         files, bytes_total, dirs = 0, 0, 0
 

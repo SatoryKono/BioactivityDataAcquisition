@@ -1,6 +1,6 @@
 # Data Flow
 
-*Aligned with RULES.md v5.22 (Local-Only Deployment)*
+*Aligned with RULES.md v5.23 (Local-Only Deployment)*
 
 ## Overview
 
@@ -40,11 +40,11 @@ data/output/                       # Local-Only (current)
 ├── silver/
 │   └── {provider}/{entity}/
 │       └── [{partition-cols}/]  # Optional, configured via `partition-by` in YAML
-│           └── -delta-log/
+│           └── _delta_log/
 │
 ├── gold/
 │   └── {provider}/{entity}/
-│       └── -delta-log/
+│       └── _delta_log/
 │
 ├── quarantine/
 │   └── {provider}/{entity}/
@@ -84,13 +84,13 @@ See `configs/entities/{provider}/{entity}.yaml` for specific configurations.
 
 При записи в Gold слой выполняется трансформация:
 
-1. **Фильтрация записей**: `should-write-gold()` определяет, какие записи попадают в Gold
-1. **Исключение JSON полей**: `transform-for-gold()` удаляет поля из `GOLD-EXCLUDE-FIELDS`:
+1. **Фильтрация записей**: `should_write_gold()` определяет, какие записи попадают в Gold
+1. **Исключение JSON полей**: `transform_for_gold()` удаляет поля из `GOLD_EXCLUDE_FIELDS`:
    - `molecule-hierarchy`, `molecule-properties`, `molecule-structures`
    - `molecule-synonyms`, `cross-references`, `atc-classifications`
 1. **Валидация**: Pandera схема (strict mode) проверяет плоские поля
 
-**Code Reference**: `src/bioetl/application/core/base-transformer.py` → `BaseTransformer.transform-for-gold()`
+**Code Reference**: `src/bioetl/application/core/base_transformer.py` → `BaseTransformer.transform_for_gold()`
 
 ----------------------------------------------------------------------
 

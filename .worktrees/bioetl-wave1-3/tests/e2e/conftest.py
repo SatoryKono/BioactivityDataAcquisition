@@ -1,0 +1,483 @@
+"""Fixtures for E2E tests with Local-Only architecture.
+
+E2E тесты используют локальное файловое хранилище и in-memory инфраструктуру:
+- LocalCheckpoint (файловая система)
+- MemoryLock (in-process)
+- SilverWriter (локальный Delta Lake)
+- VCR cassettes для HTTP-запросов
+
+Запуск:
+    make test-e2e       # Все E2E тесты
+    pytest tests/e2e/ -v -m e2e  # Прямой запуск
+"""
+
+from __future__ import annotations
+
+import os
+from collections.abc import Generator
+from pathlib import Path
+from typing import Any
+from uuid import uuid4
+
+import pytest
+from deltalake import DeltaTable
+
+from bioetl.domain.context import PipelineRunContext
+from bioetl.domain.exceptions.network import ExternalServiceError
+from bioetl.domain.types import RunType
+
+# Default timeout for E2E tests (seconds)
+# E2E tests run full pipelines with HTTP calls, Delta Lake operations,
+# and PyArrow imports which can be slow, especially on Python 3.14
+E2E_DEFAULT_TIMEOUT = 120
+_TRANSIENT_EXTERNAL_ERROR_MARKERS: tuple[str, ...] = (
+    "429",
+    "500",
+    "502",
+    "503",
+    "504",
+    "timeout",
+)
+
+
+_E2E_VCR_CASSETTE_DIR_BY_TEST: dict[str, str] = {
+    "test_pubchem_compound_pipeline": "pubchem",
+    "test_health_check": "pubmed",
+    "test_chembl_and_uniprot_sequential_run": "multi_provider",
+}
+
+
+_E2E_VCR_CASSETTE_NAME_OVERRIDES: dict[str, str] = {
+    "TestChEMBLPipelineE2E.test_chembl_activity_full_run": (
+        "test_chembl_pipeline_e2e_test_chembl_activity_full_run"
+    ),
+}
+
+
+def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
+    """Automatically apply default timeout to all E2E tests.
+
+    This hook runs after test collection and adds a timeout marker
+    to E2E tests that don't already have one. This ensures pipeline
+    tests have enough time to complete without timing out during
+    Delta Lake/PyArrow operations.
+    """
+    for item in items:
+        # Only apply to tests in this directory (e2e)
+        if "e2e" in str(item.fspath):
+            # Check if test already has a timeout marker
+            existing_timeout = item.get_closest_marker("timeout")
+            if existing_timeout is None:
+                # Add default E2E timeout
+                item.add_marker(pytest.mark.timeout(E2E_DEFAULT_TIMEOUT))
+
+
+@pytest.fixture
+def vcr_cassette_dir(request: pytest.FixtureRequest) -> Path:
+    """Return provider-specific cassette directory for E2E tests."""
+    test_name = request.node.name
+    provider_dir = _E2E_VCR_CASSETTE_DIR_BY_TEST.get(test_name, "chembl")
+    cassette_dir = (
+        Path(__file__).resolve().parents[1] / "fixtures" / "vcr" / provider_dir
+    )
+    cassette_dir.mkdir(parents=True, exist_ok=True)
+    return cassette_dir
+
+
+@pytest.fixture
+def vcr_cassette_name(request: pytest.FixtureRequest) -> str:
+    """Return normalized cassette file name in snake_case format."""
+    node_name = request.node.name
+    return _E2E_VCR_CASSETTE_NAME_OVERRIDES.get(node_name, node_name)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def e2e_environment():
+    """Настройка окружения для E2E тестов (Local-Only)."""
+    os.environ["BIOETL_ENV"] = "dev"
+    os.environ["BIOETL_TEST_MODE"] = "true"
+    os.environ["BIOETL_TEST_RELAXED_DQ"] = "1"  # Relax DQ thresholds for VCR cassettes
+    # Prevent shutil.get_terminal_size hangs in CI/Test environments
+    os.environ["COLUMNS"] = "80"
+    os.environ["LINES"] = "24"
+
+    # Configure pandas to avoid terminal size detection
+    import pandas as pd
+
+    pd.set_option("display.width", 80)
+    pd.set_option("display.max_columns", 20)
+
+    # Pre-import pandera engines to avoid import contention in thread pool executors.
+    # On Windows, pandera's is_geopandas_dtype() check can hang when importing
+    # during schema validation in concurrent threads. Pre-importing warms up
+    # the import cache and prevents filesystem stat hangs.
+    try:
+        import pandera.engines.pandas_engine  # noqa: F401
+    except ImportError:
+        pass  # Pandera may not have this submodule in all versions
+
+    # Register all pipelines (required for bootstrap_pipeline_runner to work)
+    from bioetl.composition.factories.pipeline_factories import register_all_pipelines
+
+    register_all_pipelines()
+
+    yield
+
+    try:
+        from bioetl.infrastructure.config import get_settings
+
+        get_settings.cache_clear()
+    except ImportError:
+        pass
+
+
+@pytest.fixture
+def e2e_data_dir(tmp_path: Path, monkeypatch) -> Generator[Path, None, None]:
+    """Создание временной директории данных с настройкой окружения.
+
+    Создаёт структуру директорий Medallion Architecture:
+    - bronze/
+    - silver/
+    - gold/
+    - checkpoints/
+    - quarantine/
+
+    IMPORTANT: Order matters:
+    1. Set env var first
+    2. Clear caches to ensure new value is picked up
+    3. Verify settings use correct path
+    """
+    from bioetl.infrastructure.config import get_pipeline_config, get_settings
+
+    data_dir = tmp_path / "bioetl_data"
+    data_dir.mkdir(parents=True, exist_ok=True)
+
+    # Create Medallion subdirectories
+    for subdir in ("bronze", "silver", "gold", "checkpoints", "quarantine"):
+        (data_dir / subdir).mkdir()
+
+    # 1. Set environment variable FIRST
+    monkeypatch.setenv("BIOETL_DATA_DIR", str(data_dir))
+
+    # 2. Clear caches to pick up new env var
+    get_settings.cache_clear()
+    get_pipeline_config.cache_clear()
+
+    # 3. Verify settings use correct path
+    settings = get_settings()
+    assert str(data_dir) in str(settings.bronze_path), (
+        f"Settings not using test data dir. Expected {data_dir} in {settings.bronze_path}"
+    )
+
+    yield data_dir
+
+    # Cleanup: clear caches
+    get_settings.cache_clear()
+    get_pipeline_config.cache_clear()
+
+
+@pytest.fixture
+def e2e_pipeline_limit() -> int:
+    """Лимит записей для E2E тестов (минимальный для скорости)."""
+    return 10
+
+
+@pytest.fixture
+def e2e_temp_storage(tmp_path: Path) -> dict[str, Path]:
+    """Temporary storage paths for E2E tests.
+
+    Returns dict with bronze, silver, gold, and checkpoints paths.
+    """
+    paths = {
+        "bronze": tmp_path / "bronze",
+        "silver": tmp_path / "silver",
+        "gold": tmp_path / "gold",
+        "checkpoints": tmp_path / "checkpoints",
+    }
+    for path in paths.values():
+        path.mkdir(parents=True, exist_ok=True)
+    return paths
+
+
+class MockRedisClient:
+    """Mock Redis client for Local-Only architecture (no real Redis)."""
+
+    async def keys(self, pattern: str) -> list:
+        """Return empty list - no locks in Local-Only mode."""
+        return []
+
+
+@pytest.fixture
+def e2e_redis_client() -> MockRedisClient:
+    """Mock Redis client for E2E tests (Local-Only architecture)."""
+    return MockRedisClient()
+
+
+class MockMinioClient:
+    """Mock MinIO client for Local-Only architecture (no real MinIO)."""
+
+    pass
+
+
+@pytest.fixture
+def e2e_minio_client() -> MockMinioClient:
+    """Mock MinIO client for E2E tests (Local-Only architecture)."""
+    return MockMinioClient()
+
+
+def create_test_context(
+    pipeline_name: str,
+    limit: int | None = 10,
+    run_type: RunType = RunType.INCREMENTAL,
+    resume: bool = False,
+    query: str | None = None,
+    filter_ids: tuple[str, ...] | None = None,
+    filter_field: str | None = None,
+) -> PipelineRunContext:
+    """Создание контекста для E2E теста.
+
+    Args:
+        pipeline_name: Имя пайплайна (например, 'chembl_activity')
+        limit: Лимит записей для извлечения
+        run_type: Тип запуска (INCREMENTAL, BACKFILL, REBUILD)
+        resume: Возобновление с чекпоинта
+        query: Поисковый запрос (для PubChem)
+        filter_ids: IDs для фильтрации (если указаны, используется вместо YAML filter)
+        filter_field: Поле для фильтрации (обязательно если указаны filter_ids)
+
+    Returns:
+        PipelineRunContext для передачи в bootstrap_pipeline_runner
+    """
+    from bioetl.domain.context import InputFilterContext
+
+    if filter_ids is not None and filter_field is not None:
+        input_filter = InputFilterContext.from_ids(filter_ids, filter_field)
+    else:
+        input_filter = InputFilterContext.disabled()
+
+    return PipelineRunContext(
+        pipeline_name=pipeline_name,
+        run_id=uuid4(),
+        run_type=run_type,
+        resume=resume,
+        limit=limit,
+        query=query,
+        input_filter=input_filter,
+    )
+
+
+def _is_transient_external_error(exc: ExternalServiceError) -> bool:
+    """Return True when ExternalServiceError is likely upstream/transient."""
+    message = str(exc).lower()
+    return any(marker in message for marker in _TRANSIENT_EXTERNAL_ERROR_MARKERS)
+
+
+async def run_pipeline_or_skip_transient(context: PipelineRunContext) -> Any:
+    """Run pipeline and skip current test on transient upstream failures."""
+    from bioetl.composition.bootstrap import bootstrap_pipeline_runner
+
+    runner = bootstrap_pipeline_runner(context)
+    try:
+        await runner.run()
+    except ExternalServiceError as exc:
+        if _is_transient_external_error(exc):
+            pytest.skip(f"Transient upstream/API error during E2E execution: {exc}")
+        raise
+    return runner
+
+
+# ============================================================================
+# Assertion Helpers
+# ============================================================================
+
+
+def assert_bronze_files_exist(data_dir: Path, provider: str, entity: str) -> list[Path]:
+    """Проверка существования Bronze-файлов.
+
+    Args:
+        data_dir: Корневая директория данных
+        provider: Имя провайдера (chembl, pubchem, etc.)
+        entity: Тип сущности (activity, molecule, etc.)
+
+    Returns:
+        Список найденных Bronze-файлов
+
+    Raises:
+        AssertionError: Если файлы не найдены
+
+    Note:
+        Handles both standard and flat_structure layouts:
+        - Standard: data_dir/output/bronze/{provider}/{entity}/{date}/
+        - Flat: data_dir/output/bronze/{date}/ (when flat_structure: true)
+    """
+    # Standard path: data_dir/output/bronze/{provider}/{entity}/
+    bronze_path = data_dir / "output" / "bronze" / provider / entity
+
+    # Flat structure path: data_dir/output/bronze/ (files directly under base)
+    flat_path = data_dir / "output" / "bronze"
+
+    # Check both locations - standard path first, then flat structure
+    if bronze_path.exists():
+        files = list(bronze_path.rglob("*.jsonl.zst"))
+        if files:
+            return files
+
+    # Try flat_structure path
+    if flat_path.exists():
+        files = list(flat_path.rglob("*.jsonl.zst"))
+        if files:
+            return files
+
+    raise AssertionError(
+        f"No Bronze files found. Checked paths:\n"
+        f"  - Standard: {bronze_path}\n"
+        f"  - Flat: {flat_path}"
+    )
+
+
+def assert_silver_table_has_records(
+    data_dir: Path, table_name: str, expected_min: int = 1
+) -> int:
+    """Проверка наличия записей в Silver Delta таблице.
+
+    Args:
+        data_dir: Корневая директория данных
+        table_name: Имя таблицы (например, 'chembl_activity')
+        expected_min: Минимальное ожидаемое количество записей
+
+    Returns:
+        Количество записей в таблице
+
+    Raises:
+        AssertionError: Если таблица пуста или записей меньше expected_min
+
+    Note:
+        Handles both standard layout (data_dir/output/silver/{table_name}/)
+        and flat_structure layout (data_dir/output/silver/) for pipelines
+        with flat_structure: true in their config.
+    """
+    # Standard path: data_dir/output/silver/{table_name}/
+    table_path = data_dir / "output" / "silver" / table_name
+
+    # Flat structure path: data_dir/output/silver/ (Delta table at root)
+    flat_path = data_dir / "output" / "silver"
+
+    # Check both locations - standard path first, then flat structure
+    if not table_path.exists():
+        # Try flat_structure path (check for _delta_log at root)
+        if flat_path.exists() and (flat_path / "_delta_log").exists():
+            table_path = flat_path
+        else:
+            raise AssertionError(f"Silver table does not exist: {table_path}")
+
+    dt = DeltaTable(str(table_path))
+    df = dt.to_pyarrow_table()
+    count = len(df)
+
+    if count < expected_min:
+        raise AssertionError(
+            f"Silver table {table_name} has {count} records, expected >= {expected_min}"
+        )
+
+    # Verify lineage fields
+    assert "_run_id" in df.column_names
+    assert "_run_type" in df.column_names
+    assert "_ingestion_ts" in df.column_names
+
+    return count
+
+
+def assert_gold_table_has_records(
+    data_dir: Path, table_name: str, expected_min: int = 1
+) -> int:
+    """Проверка наличия записей в Gold Delta таблице.
+
+    Args:
+        data_dir: Корневая директория данных
+        table_name: Имя таблицы (например, 'chembl.activity')
+        expected_min: Минимальное ожидаемое количество записей
+
+    Returns:
+        Количество записей в таблице
+
+    Raises:
+        AssertionError: Если таблица пуста или записей меньше expected_min
+
+    Note:
+        Handles both standard and flat_structure layouts.
+    """
+    # Standard path: data_dir/output/gold/{table_name}/
+    table_path = data_dir / "output" / "gold" / table_name
+
+    # Flat structure path: data_dir/output/gold/ (Delta table at root)
+    flat_path = data_dir / "output" / "gold"
+
+    # Check both locations - standard path first, then flat structure
+    if not table_path.exists():
+        # Try flat_structure path (check for _delta_log at root)
+        if flat_path.exists() and (flat_path / "_delta_log").exists():
+            table_path = flat_path
+        else:
+            raise AssertionError(f"Gold table does not exist: {table_path}")
+
+    dt = DeltaTable(str(table_path))
+    count = len(dt.to_pyarrow_table())
+
+    if count < expected_min:
+        raise AssertionError(
+            f"Gold table {table_name} has {count} records, expected >= {expected_min}"
+        )
+
+    return count
+
+
+def get_silver_records(data_dir: Path, table_name: str) -> list[dict]:
+    """Получить все записи из Silver таблицы.
+
+    Args:
+        data_dir: Корневая директория данных
+        table_name: Имя таблицы
+
+    Returns:
+        Список словарей с записями
+
+    Note:
+        Handles both standard and flat_structure layouts.
+    """
+    # Standard path: data_dir/output/silver/{table_name}/
+    table_path = data_dir / "output" / "silver" / table_name
+
+    # Try flat_structure path if standard doesn't exist
+    if not table_path.exists():
+        flat_path = data_dir / "output" / "silver"
+        if flat_path.exists() and (flat_path / "_delta_log").exists():
+            table_path = flat_path
+
+    dt = DeltaTable(str(table_path))
+    return dt.to_pyarrow_table().to_pylist()
+
+
+def get_gold_records(data_dir: Path, table_name: str) -> list[dict]:
+    """Получить все записи из Gold таблицы.
+
+    Args:
+        data_dir: Корневая директория данных
+        table_name: Имя таблицы
+
+    Returns:
+        Список словарей с записями
+
+    Note:
+        Handles both standard and flat_structure layouts.
+    """
+    # Standard path: data_dir/output/gold/{table_name}/
+    table_path = data_dir / "output" / "gold" / table_name
+
+    # Try flat_structure path if standard doesn't exist
+    if not table_path.exists():
+        flat_path = data_dir / "output" / "gold"
+        if flat_path.exists() and (flat_path / "_delta_log").exists():
+            table_path = flat_path
+
+    dt = DeltaTable(str(table_path))
+    return dt.to_pyarrow_table().to_pylist()

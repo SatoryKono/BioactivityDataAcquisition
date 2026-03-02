@@ -24,6 +24,10 @@ from pathlib import Path
 
 SVG_NS = "http://www.w3.org/2000/svg"
 ET.register_namespace("", SVG_NS)
+_OBJECT_SUFFIX_SPACING_RE = re.compile(
+    r"(?<=\S)(Mixin|Adapter|Port|Validator|Runer|Runner|Coordinator)\b"
+)
+_CLASS_METHOD_LINE_RE = re.compile(r"^\s*[+\-#~]\s*[A-Za-z_][A-Za-z0-9_]*\s*\(")
 
 SVG_DIRS = [
     Path("docs/02-architecture/mmd-diagrams/architecture/svg"),
@@ -90,6 +94,8 @@ def _extract_text_lines(node: ET.Element) -> list[str]:
 
     visit(node)
     raw = "".join(parts)
+    # Treat escaped '\n' from source labels as explicit line breaks (like <br>).
+    raw = raw.replace("\\n", "\n")
     if not raw:
         return []
 
@@ -113,7 +119,41 @@ def _extract_text_lines(node: ET.Element) -> list[str]:
     return compact
 
 
-def _sanitize_label_line(line: str) -> str:
+def _class_tokens(node: ET.Element | None) -> set[str]:
+    if node is None:
+        return set()
+    raw = node.attrib.get("class", "")
+    return {token for token in raw.split() if token}
+
+
+def _detect_label_kind(parent: ET.Element, parent_map: dict[ET.Element, ET.Element]) -> str:
+    """Infer semantic label kind from parent/ancestor class groups."""
+    chain: list[ET.Element] = [parent]
+    current = parent
+    for _ in range(3):
+        current = parent_map.get(current)
+        if current is None:
+            break
+        chain.append(current)
+
+    tokens = set().union(*(_class_tokens(node) for node in chain))
+
+    if "methods-group" in tokens:
+        return "methods"
+    if "members-group" in tokens:
+        return "members"
+    if "label-group" in tokens or "annotation-group" in tokens or "cluster-label" in tokens:
+        return "title"
+    if "edgeLabel" in tokens:
+        return "edge"
+    return "generic"
+
+
+def _is_method_signature_line(line: str) -> bool:
+    return bool(_CLASS_METHOD_LINE_RE.match(line))
+
+
+def _sanitize_label_line(line: str, label_kind: str) -> str:
     stripped = line.strip()
     if not stripped:
         return ""
@@ -126,6 +166,14 @@ def _sanitize_label_line(line: str) -> str:
 
     # Normalize slash separators for more readable fallback labels.
     stripped = re.sub(r"\s*/\s*", " / ", stripped)
+
+    # Keep UML method signatures intact in methods-group:
+    # "+fetch(entity_type)" must not become "+fetch (entity_type)".
+    if label_kind != "methods" and not _is_method_signature_line(stripped):
+        # Insert spacing around parentheses in glued tokens:
+        # "Foo(bar)" -> "Foo (bar) ", "X)(Y" -> "X) (Y".
+        stripped = re.sub(r"(?<=\S)\(", " (", stripped)
+        stripped = re.sub(r"\)(?=\S)", ") ", stripped)
 
     # Improve wrapping for long PascalCase/camelCase identifiers.
     # humanized = re.sub(r"(?<=[A-Z])(?=[A-Z][a-z])", " ", stripped)
@@ -142,10 +190,28 @@ def _estimate_wrap_chars(width: float, font_size: float) -> int:
     return max(18, min(64, estimate))
 
 
-def _wrap_label_lines(lines: list[str], max_chars: int) -> list[str]:
+def _add_suffix_spacing_for_long_object_name(
+    line: str,
+    max_chars: int,
+    label_kind: str,
+) -> str:
+    """Insert split points before common object-type suffixes on long labels."""
+    if len(line) <= max_chars:
+        return line
+    if label_kind == "methods" or _is_method_signature_line(line):
+        return line
+    return _OBJECT_SUFFIX_SPACING_RE.sub(r" \1", line)
+
+
+def _wrap_label_lines(lines: list[str], max_chars: int, label_kind: str) -> list[str]:
     wrapped: list[str] = []
     for raw in lines:
-        line = _sanitize_label_line(raw)
+        line = _sanitize_label_line(raw, label_kind=label_kind)
+        line = _add_suffix_spacing_for_long_object_name(
+            line,
+            max_chars=max_chars,
+            label_kind=label_kind,
+        )
         if not line:
             if wrapped and wrapped[-1]:
                 wrapped.append("")
@@ -160,8 +226,13 @@ def _wrap_label_lines(lines: list[str], max_chars: int) -> list[str]:
             chunks = [line]
 
         # If a token still exceeds width (no spaces), hard-wrap it.
+        # Method signatures should stay semantically intact: avoid splitting
+        # identifiers like get_completed_stages into broken fragments.
         for chunk in chunks:
             if len(chunk) <= max_chars:
+                wrapped.append(chunk)
+                continue
+            if label_kind == "methods" or _is_method_signature_line(chunk):
                 wrapped.append(chunk)
                 continue
             start = 0
@@ -209,7 +280,7 @@ def _is_fallback_text(node: ET.Element) -> bool:
     return "fo-fallback" in classes.split()
 
 
-def _build_fallback_text(fo: ET.Element) -> ET.Element | None:
+def _build_fallback_text(fo: ET.Element, label_kind: str = "generic") -> ET.Element | None:
     text_lines = _extract_text_lines(fo)
     if not text_lines:
         return None
@@ -225,7 +296,13 @@ def _build_fallback_text(fo: ET.Element) -> ET.Element | None:
     center_x = x + width / 2.0
     font_size = 14.0
     max_chars = _estimate_wrap_chars(width=width, font_size=font_size)
-    wrapped_lines = _wrap_label_lines(text_lines, max_chars=max_chars)
+    if label_kind == "methods":
+        max_chars = max(max_chars, 48)
+    wrapped_lines = _wrap_label_lines(
+        text_lines,
+        max_chars=max_chars,
+        label_kind=label_kind,
+    )
     if not wrapped_lines:
         return None
 
@@ -276,6 +353,8 @@ def add_fallbacks(path: Path) -> int:
             parent.remove(child)
             removed_empty_edge_labels += 1
 
+    parent_map = {child: parent for parent in root.iter() for child in parent}
+
     for parent in root.iter():
         children = list(parent)
         for idx, child in enumerate(children):
@@ -285,7 +364,8 @@ def add_fallbacks(path: Path) -> int:
             if idx > 0 and _is_fallback_text(children[idx - 1]):
                 parent.remove(children[idx - 1])
 
-            fallback = _build_fallback_text(child)
+            label_kind = _detect_label_kind(parent, parent_map)
+            fallback = _build_fallback_text(child, label_kind=label_kind)
             if fallback is None:
                 continue
 

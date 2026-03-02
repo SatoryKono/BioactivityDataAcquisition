@@ -1,5 +1,5 @@
 # BioETL Structure Audit & Standardization Prompt
-*Version 1.0 | Aligned with RULES.md v5.22*
+*Version 1.0 | Aligned with RULES.md v5.23*
 
 ## Цель
 

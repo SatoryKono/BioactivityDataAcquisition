@@ -1,6 +1,6 @@
 # ChEMBL Activity Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.22*
+*Version 1.2.0 | Aligned with RULES.md v5.23*
 
 ----------------------------------------------------------------------
 
@@ -418,16 +418,16 @@ Mode: Overwrite
 ```yaml
 # configs/entities/chembl/activity.yaml
 
-pipeline-name: chembl_activity
+pipeline_name: chembl_activity
 provider: chembl
-entity-type: activity
+entity_type: activity
 version: "1.2.0"
 
-primary-keys: ["activity-id"]
-silver-table: "chembl_activity"
-gold-table: "chembl_activity"
+primary_keys: ["activity-id"]
+silver_table: "chembl_activity"
+gold_table: "chembl_activity"
 
-gold-filters:
+gold_filters:
   columns:
     standard-type: [IC50, Ki, Kd, EC50, AC50, GI50, ED50, MIC, CC50]
     standard-units: [nM, uM, mM, pM, M, ug.mL-1, mg.kg-1]
@@ -436,7 +436,7 @@ gold-filters:
     standard-value:
       min: 0
       include-min: false
-  required-fields:
+  required_fields:
     - standard-type
     - standard-value
     - standard-units
@@ -447,17 +447,17 @@ sink:
     path: "data/output/bronze"
   silver:
     path: "data/output/silver"
-    primary-key: ["activity-id"]
-    partition-by: []
+    primary_key: ["activity-id"]
+    partition_by: []
   gold:
     path: "data/output/gold"
 
-input-filter:
+input_filter:
   enabled: true
-  source-path: "data/input/target.csv"
-  column-name: "target-id"
-  filter-field: "target-id"
-  batch-size: 20
+  source_path: "data/input/target.csv"
+  column_name: "target-id"
+  filter_field: "target-id"
+  batch_size: 20
 ```
 
 ----------------------------------------------------------------------

@@ -222,6 +222,9 @@ class BaseTitleFallbackHandler(ABC):
 
         Yields:
             Publication records found via title search.
+
+        Returns:
+            Processed result.
         """
         for doi in dois:
             if limit and fetched >= limit:
@@ -300,6 +303,9 @@ class BaseTitleFallbackHandler(ABC):
 
         Yields:
             Publication records found via title search.
+
+        Returns:
+            Processed result.
         """
         for entry in entries:
             if limit and fetched >= limit:

@@ -123,7 +123,7 @@ def setup-shutdown-handlers(
 ### 3. Architecture Test Enforcement
 
 ```python
-# tests/architecture/test-no-structlog-in-application-interfaces.py
+# tests/architecture/test_no_structlog_in_application_interfaces.py
 
 # All exemptions removed
 EXEMPTED-FILES: set[str] = set()  # Empty - zero tolerance
@@ -181,7 +181,7 @@ from structlog import BoundLogger  # FORBIDDEN
 Run architecture tests to verify compliance:
 
 ```bash
-pytest tests/architecture/test-no-structlog-in-application-interfaces.py -v
+pytest tests/architecture/test_no_structlog_in_application_interfaces.py -v
 ```
 
 Expected output:

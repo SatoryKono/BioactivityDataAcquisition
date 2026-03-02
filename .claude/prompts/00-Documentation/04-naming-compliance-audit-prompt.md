@@ -1,5 +1,5 @@
 # Naming Compliance Audit Prompt
-*BioETL Project — RULES.md v5.22 Alignment*
+*BioETL Project — RULES.md v5.23 Alignment*
 
 ## Цель
 

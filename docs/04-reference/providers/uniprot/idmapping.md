@@ -60,14 +60,14 @@
 **Источник:** `configs/entities/uniprot/idmapping.yaml`
 
 ```yaml
-pipeline-name: uniprot_idmapping
+pipeline_name: uniprot_idmapping
 provider: uniprot
-entity-type: idmapping
+entity_type: idmapping
 version: "1.0.0"
 
-primary-keys: ["target-chembl-id"]
-silver-table: "uniprot_idmapping"
-gold-table: "uniprot_idmapping"
+primary_keys: ["target-chembl-id"]
+silver_table: "uniprot_idmapping"
+gold_table: "uniprot_idmapping"
 
 source:
   type: file
@@ -78,16 +78,16 @@ source:
     to-db: UniProtKB
 
 # Elevated thresholds for ID mapping
-dq-overrides:
-  soft-fail-threshold: 0.30  # 30% not-found acceptable
-  hard-fail-threshold: 0.80  # 80% not-found → hard failure
+dq_overrides:
+  soft_fail_threshold: 0.30  # 30% not-found acceptable
+  hard_fail_threshold: 0.80  # 80% not-found → hard failure
 
 rate-limit:
   requests-per-second: 10.0
   burst: 20
 
-gold-filters:
-  required-fields:
+gold_filters:
+  required_fields:
     - target-chembl-id
     - mapping-status
 ```
@@ -108,7 +108,7 @@ gold-filters:
 
 ### 4.2. Transform
 
-**Transformer:** `src/bioetl/application/pipelines/uniprot/idmapping-transformer.py`
+**Transformer:** `src/bioetl/application/pipelines/uniprot/idmapping_transformer.py`
 
 1. Извлечение `target-chembl-id` и `uniprot-accession` из API response
 2. Определение `mapping-status`: `found` | `not-found`
@@ -211,12 +211,12 @@ CHEMBL9999999
 | Компонент | Путь |
 |-----------|------|
 | **Config** | `configs/entities/uniprot/idmapping.yaml` |
-| **Transformer** | `src/bioetl/application/pipelines/uniprot/idmapping-transformer.py` |
-| **Client** | `src/bioetl/infrastructure/adapters/uniprot/idmapping-client.py` |
+| **Transformer** | `src/bioetl/application/pipelines/uniprot/idmapping_transformer.py` |
+| **Client** | `src/bioetl/infrastructure/adapters/uniprot/idmapping_client.py` |
 | **Silver Schema** | `src/bioetl/infrastructure/schemas/silver.py:134-154` |
 | **Gold Schema** | `src/bioetl/infrastructure/schemas/gold.py:166-198` |
-| **Unit Tests** | `tests/unit/application/pipelines/test-idmapping-transformer.py` |
-| **Integration Tests** | `tests/integration/adapters/test-uniprot_idmapping.py` |
+| **Unit Tests** | `tests/unit/application/pipelines/test_idmapping_transformer.py` |
+| **Integration Tests** | `tests/integration/adapters/test_uniprot_idmapping.py` |
 
 ---
 

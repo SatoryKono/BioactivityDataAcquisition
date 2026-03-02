@@ -77,13 +77,13 @@ BioETL изначально проектировался с поддержкой
 # Было
 writer = BronzeWriter(
     bucket="bronze-bucket",
-    endpoint-url="http://minio:9000",
+    endpoint_url="http://minio:9000",
     access-key="...",
     secret-key="..."
 )
 
 # Стало
-writer = BronzeWriter(base-path=Path("data/bronze"))
+writer = BronzeWriter(base_path=Path("data/bronze"))
 ```
 
 ### Locking
@@ -102,30 +102,30 @@ lock = MemoryLock()
 
 | Функционал | Реализация | Файл:строки |
 |------------|------------|-------------|
-| **TTL-based expiration** | `-ttl-checker-loop()` — фоновая задача проверяет и освобождает просроченные блокировки | `memory-lock.py:43-64` |
-| **Heartbeat** | `heartbeat()` — продлевает TTL блокировки на original-ttl | `memory-lock.py:176-204` |
-| **Safety Guard** | `validate-owner()` — проверяет владельца перед записью в storage | `memory-lock.py:206-238` |
-| **Graceful Shutdown** | `aclose()` — отменяет TTL checker и освобождает все блокировки | `memory-lock.py:240-256` |
+| **TTL-based expiration** | `_ttl_checker_loop()` — фоновая задача проверяет и освобождает просроченные блокировки | `memory_lock.py:43-64` |
+| **Heartbeat** | `heartbeat()` — продлевает TTL блокировки на original_ttl | `memory_lock.py:176-204` |
+| **Safety Guard** | `validate_owner()` — проверяет владельца перед записью в storage | `memory_lock.py:206-238` |
+| **Graceful Shutdown** | `aclose()` — отменяет TTL checker и освобождает все блокировки | `memory_lock.py:240-256` |
 
 **Конфигурация по умолчанию** (из `PipelineSettings`):
-- `heartbeat-interval = 30s` (см. `config.py:238`)
-- `effective-lock-ttl = heartbeat-interval * 3 = 90s`
+- `heartbeat_interval = 30s` (см. `config.py:238`)
+- `effective_lock_ttl = heartbeat_interval * 3 = 90s`
 - TTL check interval = 1s
 
 **Пример использования:**
 
 ```python
 lock = MemoryLock()
-await lock.acquire(key="pipeline:chembl", owner-id=run-id, ttl=90)
+await lock.acquire(key="pipeline:chembl", owner_id=run_id, ttl=90)
 
 # В пайплайне — периодически продлевать
-await lock.heartbeat(key="pipeline:chembl", owner-id=run-id)
+await lock.heartbeat(key="pipeline:chembl", owner_id=run_id)
 
 # Перед записью — проверить владельца (Safety Guard)
-if not await lock.validate-owner(key="pipeline:chembl", owner-id=run-id):
+if not await lock.validate_owner(key="pipeline:chembl", owner_id=run_id):
     raise LockNotHeldError("Lock lost during processing")
 
-await lock.release(key="pipeline:chembl", owner-id=run-id)
+await lock.release(key="pipeline:chembl", owner_id=run_id)
 ```
 
 **Ограничения:**
@@ -138,11 +138,11 @@ await lock.release(key="pipeline:chembl", owner-id=run-id)
 # Было
 checkpoint = S3Checkpoint(
     bucket="checkpoints",
-    endpoint-url="..."
+    endpoint_url="..."
 )
 
 # Стало
-checkpoint = LocalCheckpoint(base-path=Path("data/checkpoints"))
+checkpoint = LocalCheckpoint(base_path=Path("data/checkpoints"))
 ```
 
 ### Configuration

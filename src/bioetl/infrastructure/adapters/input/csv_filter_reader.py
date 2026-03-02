@@ -101,7 +101,15 @@ class CsvFilterReader:
     async def load_filter_ids(
         self, source_path: str, column_name: str
     ) -> FilterLoadResult:
-        """Load unique IDs from a CSV file."""
+        """Load unique IDs from a CSV file.
+
+        Args:
+            source_path: File path for source.
+            column_name: Name of the column.
+
+        Returns:
+            Loaded FilterLoadResult.
+        """
         df = await asyncio.to_thread(self._read_csv_dataframe, source_path)
         all_ids = self._extract_column_ids(df, column_name)
         unique_ids, unique_count, duplicate_count, duplicates = (

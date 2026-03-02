@@ -35,7 +35,7 @@ configs/enums/
 ### Sync mechanism
 
 `domain/schemas/constants.py` contains pure Python frozensets (no file I/O).
-`tests/unit/domain/schemas/test-constants-yaml.py` verifies that every Python
+`tests/unit/domain/schemas/test_constants_yaml.py` verifies that every Python
 constant matches the corresponding YAML value exactly.
 
 **Workflow for ChEMBL version update:**
@@ -109,7 +109,7 @@ Generate `constants.py` from YAML via template. Rejected because:
 | Domain purity (ARCH-002) | PASS | No I/O in `constants.py` |
 | Public API unchanged | PASS | All `__all__` exports identical |
 | Types preserved | PASS | `frozenset[str]`, `tuple[float, ...]` |
-| Sync enforcement | PASS | 20 sync tests in `test-constants-yaml.py` |
+| Sync enforcement | PASS | 20 sync tests in `test_constants_yaml.py` |
 
 ## References
 
@@ -117,4 +117,4 @@ Generate `constants.py` from YAML via template. Rejected because:
 - ADR-028: Filter Rules Externalization
 - `configs/enums/chembl.yaml` — SSOT file
 - `src/bioetl/domain/schemas/constants.py` — pure Python constants
-- `tests/unit/domain/schemas/test-constants-yaml.py` — sync tests
+- `tests/unit/domain/schemas/test_constants_yaml.py` — sync tests

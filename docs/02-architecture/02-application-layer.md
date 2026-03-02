@@ -44,36 +44,36 @@
 **Базовые классы:**
 
 - **`BasePipeline`** (`base.py`) — Базовый класс для всех пайплайнов
-- **`BaseTransformer`** (`base-transformer.py`) — Базовый класс для трансформеров (Template Method паттерн)
-- **`RecordProcessor`** (`record-processor.py`) — Обработка batch-ов записей через Bronze→Silver→Gold
+- **`BaseTransformer`** (`base_transformer.py`) — Базовый класс для трансформеров (Template Method паттерн)
+- **`RecordProcessor`** (`record_processor.py`) — Обработка batch-ов записей через Bronze→Silver→Gold
 
 **Исполнение:**
 
-- **`BatchExecutor`** (`batch-executor.py`, 786 LOC) — Unified batch executor (extract→transform→write)
-- **`BatchTransformer`** (`batch-transformer.py`) — Координация трансформаций
-- **`BatchWriter`** (`batch-writer.py`) — Запись batch-ов в medallion слои
+- **`BatchExecutor`** (`batch_executor.py`, 786 LOC) — Unified batch executor (extract→transform→write)
+- **`BatchTransformer`** (`batch_transformer.py`) — Координация трансформаций
+- **`BatchWriter`** (`batch_writer.py`) — Запись batch-ов в medallion слои
 - **`PipelineRunner`** (`runner.py`) — Оркестрация жизненного цикла пайплайна
 
 **Сервисы ядра:**
 
-- **`PipelineServices`** (`pipeline-services.py`) — DI bundle портов для пайплайна
-- **`LockManager`** (`lock-manager.py`) — Координация блокировок
-- **`PreflightService`** (`preflight-service.py`) — Pre-run health checks
-- **`PostrunService`** (`postrun-service.py`) — Post-run операции (DQ, VACUUM, cleanup)
-- **`CheckpointManager`** (`checkpoint-manager.py`) — Checkpoint I/O
-- **`QuarantineManager`** (`quarantine-manager.py`) — Quarantine record handling
-- **`CleanupService`** (`cleanup-service.py`) — Bronze cleanup
+- **`PipelineServices`** (`pipeline_services.py`) — DI bundle портов для пайплайна
+- **`LockManager`** (`lock_manager.py`) — Координация блокировок
+- **`PreflightService`** (`preflight_service.py`) — Pre-run health checks
+- **`PostrunService`** (`postrun_service.py`) — Post-run операции (DQ, VACUUM, cleanup)
+- **`CheckpointManager`** (`checkpoint_manager.py`) — Checkpoint I/O
+- **`QuarantineManager`** (`quarantine_manager.py`) — Quarantine record handling
+- **`CleanupService`** (`cleanup_service.py`) — Bronze cleanup
 
 **Observability:**
 
-- **`BatchMetricsRecorder`** (`batch-metrics.py`) — Метрики per batch
-- **`BatchTracingManager`** (`batch-tracing.py`) — Tracing span management
+- **`BatchMetricsRecorder`** (`batch_metrics.py`) — Метрики per batch
+- **`BatchTracingManager`** (`batch_tracing.py`) — Tracing span management
 - **`HeartbeatTask`** (`heartbeat.py:21`) — Heartbeat мониторинг
 
 **Data Sources:**
 
-- **`FilteredDataSource`** (`filtered-data-source.py`) — Filter wrapper для data sources
-- **`IDMappingDataSource`** (`idmapping-data-source.py`) — ID mapping wrapper
+- **`FilteredDataSource`** (`filtered_data_source.py`) — Filter wrapper для data sources
+- **`IDMappingDataSource`** (`idmapping_data_source.py`) — ID mapping wrapper
 
 Подробнее о компонентах исполнения пайплайнов см. [раздел 2.4](#24-core--ядро-исполнения-пайплайнов).
 
@@ -86,11 +86,11 @@
 ```python
 # Пример инъекции трансформера в GenericPipelineFactory
 factory = GenericPipelineFactory(
-    pipeline-name="chembl_activity",
-    pipeline-class=ChEMBLActivityPipeline,
+    pipeline_name="chembl_activity",
+    pipeline_class=ChEMBLActivityPipeline,
     provider="chembl",
-    transformer-class=ActivityTransformer,  # <-- DI
-    gold-schema=ChEMBLActivityGoldSchema,
+    transformer_class=ActivityTransformer,  # <-- DI
+    gold_schema=ChEMBLActivityGoldSchema,
 )
 ```
 
@@ -98,36 +98,36 @@ factory = GenericPipelineFactory(
 
 - **MUST**: Трансформер передаётся в конструктор `BasePipeline` через параметр `transformer`
 - **MUST NOT**: Пайплайн не создаёт трансформер внутри себя
-- **Template Method**: `BaseTransformer` определяет скелет алгоритма, подклассы реализуют `-transform-impl()`. Примечание: `-extract-business-data()` — метод промежуточных базовых классов `BaseChemblTransformer` (`base-chembl-transformer.py:160`) и `BasePublicationTransformer` (`base-publication-transformer.py:54`), не `BaseTransformer`.
-- **Если трансформер не передан**: `transform-bronze-to-silver()` выбрасывает `NotImplementedError`
+- **Template Method**: `BaseTransformer` определяет скелет алгоритма, подклассы реализуют `transform_impl()`. Примечание: `extract_business_data()` — метод промежуточных базовых классов `BaseChemblTransformer` (`base_chembl_transformer.py:160`) и `BasePublicationTransformer` (`base_publication_transformer.py:54`), не `BaseTransformer`.
+- **Если трансформер не передан**: `transform_bronze_to_silver()` выбрасывает `NotImplementedError`
 
 **Доступные трансформеры (23 класса):**
 
 | Provider         | Трансформер                             | Расположение                                             |
 | ---------------- | --------------------------------------- | -------------------------------------------------------- |
-| ChEMBL           | `ActivityTransformer`                   | `pipelines/chembl/activity-transformer.py`               |
-| ChEMBL           | `AssayTransformer`                      | `pipelines/chembl/assay-transformer.py`                  |
-| ChEMBL           | `MoleculeTransformer`                   | `pipelines/chembl/molecule-transformer.py`               |
-| ChEMBL           | `TargetTransformer`                     | `pipelines/chembl/target-transformer.py`                 |
-| ChEMBL           | `PublicationTransformer`                | `pipelines/chembl/publication-transformer.py`            |
-| ChEMBL           | `AssayParametersTransformer`            | `pipelines/chembl/assay-parameters-transformer.py`       |
-| ChEMBL           | `CellLineTransformer`                   | `pipelines/chembl/cell-line-transformer.py`              |
-| ChEMBL           | `CompoundRecordTransformer`             | `pipelines/chembl/compound-record-transformer.py`        |
-| ChEMBL           | `ProteinClassTransformer`               | `pipelines/chembl/protein-class-transformer.py`          |
-| ChEMBL           | `PublicationSimilarityTransformer`      | `pipelines/chembl/publication-similarity-transformer.py` |
-| ChEMBL           | `PublicationTermTransformer`            | `pipelines/chembl/publication-term-transformer.py`       |
-| ChEMBL           | `SubcellularFractionTransformer`        | `pipelines/chembl/subcellular-fraction-transformer.py`   |
-| ChEMBL           | `TargetComponentTransformer`            | `pipelines/chembl/target-component-transformer.py`       |
-| ChEMBL           | `TissueTransformer`                     | `pipelines/chembl/tissue-transformer.py`                 |
-| ChEMBL           | `BaseChemblTransformer`                 | `pipelines/chembl/base-chembl-transformer.py`            |
+| ChEMBL           | `ActivityTransformer`                   | `pipelines/chembl/activity_transformer.py`               |
+| ChEMBL           | `AssayTransformer`                      | `pipelines/chembl/assay_transformer.py`                  |
+| ChEMBL           | `MoleculeTransformer`                   | `pipelines/chembl/molecule_transformer.py`               |
+| ChEMBL           | `TargetTransformer`                     | `pipelines/chembl/target_transformer.py`                 |
+| ChEMBL           | `PublicationTransformer`                | `pipelines/chembl/publication_transformer.py`            |
+| ChEMBL           | `AssayParametersTransformer`            | `pipelines/chembl/assay_parameters_transformer.py`       |
+| ChEMBL           | `CellLineTransformer`                   | `pipelines/chembl/cell_line_transformer.py`              |
+| ChEMBL           | `CompoundRecordTransformer`             | `pipelines/chembl/compound_record_transformer.py`        |
+| ChEMBL           | `ProteinClassTransformer`               | `pipelines/chembl/protein_class_transformer.py`          |
+| ChEMBL           | `PublicationSimilarityTransformer`      | `pipelines/chembl/publication_similarity_transformer.py` |
+| ChEMBL           | `PublicationTermTransformer`            | `pipelines/chembl/publication_term_transformer.py`       |
+| ChEMBL           | `SubcellularFractionTransformer`        | `pipelines/chembl/subcellular_fraction_transformer.py`   |
+| ChEMBL           | `TargetComponentTransformer`            | `pipelines/chembl/target_component_transformer.py`       |
+| ChEMBL           | `TissueTransformer`                     | `pipelines/chembl/tissue_transformer.py`                 |
+| ChEMBL           | `BaseChemblTransformer`                 | `pipelines/chembl/base_chembl_transformer.py`            |
 | CrossRef         | `CrossRefPublicationTransformer`        | `pipelines/crossref/transformer.py`                      |
 | OpenAlex         | `OpenAlexPublicationTransformer`        | `pipelines/openalex/transformer.py`                      |
 | PubChem          | `PubChemCompoundTransformer`            | `pipelines/pubchem/transformer.py`                       |
 | UniProt          | `UniProtProteinTransformer`             | `pipelines/uniprot/transformer.py`                       |
-| UniProt          | `IDMappingTransformer`                  | `pipelines/uniprot/idmapping-transformer.py`             |
+| UniProt          | `IDMappingTransformer`                  | `pipelines/uniprot/idmapping_transformer.py`             |
 | PubMed           | `PubMedPublicationTransformer`          | `pipelines/pubmed/transformer.py`                        |
 | Semantic Scholar | `SemanticScholarPublicationTransformer` | `pipelines/semanticscholar/transformer.py`               |
-| Common           | `BasePublicationTransformer`            | `pipelines/common/base-publication-transformer.py`       |
+| Common           | `BasePublicationTransformer`            | `pipelines/common/base_publication_transformer.py`       |
 
 ### 2.4. `core/` — Ядро Исполнения Пайплайнов
 
@@ -140,9 +140,9 @@ factory = GenericPipelineFactory(
 | Файл                              | Компонент                   | Назначение                                                               |
 | --------------------------------- | --------------------------- | ------------------------------------------------------------------------ |
 | `runner.py`                       | `PipelineRunner`            | Оркестрирует жизненный цикл пайплайна: блокировки, чекпоинты, исполнение |
-| `batch-executor.py`               | `BatchExecutor`             | Координирует data flow: извлечение → трансформация → запись (774 LOC)    |
-| `../services/medallion-lifecycle.py` | `MedallionLifecycleService` | Управляет очисткой Silver/Gold слоёв по политике, VACUUM (`application/services/`) |
-| `pipeline-services.py`            | `PipelineServices`          | DI bundle сервисов для PipelineRunner                                    |
+| `batch_executor.py`               | `BatchExecutor`             | Координирует data flow: извлечение → трансформация → запись (774 LOC)    |
+| `../services/medallion_lifecycle.py` | `MedallionLifecycleService` | Управляет очисткой Silver/Gold слоёв по политике, VACUUM (`application/services/`) |
+| `pipeline_services.py`            | `PipelineServices`          | DI bundle сервисов для PipelineRunner                                    |
 
 **`PipelineRunner`** — координатор исполнения:
 
@@ -157,7 +157,7 @@ factory = GenericPipelineFactory(
 ```python
 @dataclass(frozen=True)
 class PipelineServices:
-    data-source: DataSourcePort
+    data_source: DataSourcePort
     storage: StoragePort
     lock: LockPort
     checkpoint: CheckpointPort
@@ -165,12 +165,12 @@ class PipelineServices:
     metrics: MetricsPort
     tracing: TracingPort
     logger: LoggerPort
-    dq-monitor: DQMonitorPort | None = None
-    bronze-dq-analyzer: BronzeDQAnalyzerPort | None = None
-    silver-dq-analyzer: SilverDQAnalyzerPort | None = None
-    gold-dq-analyzer: GoldDQAnalyzerPort | None = None
-    dq-report-writer: DQReportWriterPort | None = None
-    dq-report-service: DQReportService | None = None
+    dq_monitor: DQMonitorPort | None = None
+    bronze_dq_analyzer: BronzeDQAnalyzerPort | None = None
+    silver_dq_analyzer: SilverDQAnalyzerPort | None = None
+    gold_dq_analyzer: GoldDQAnalyzerPort | None = None
+    dq_report_writer: DQReportWriterPort | None = None
+    dq_report_service: DQReportService | None = None
 ```
 
 ### 2.5. `composite/` — Composite Pipeline (ADR-026)
@@ -186,7 +186,7 @@ class PipelineServices:
 | `runner.py`        | `CompositePipelineRunner`    | Оркестрирует: seed → enrich (fan-out) → merge             |
 | `coordinator.py`   | `EnrichmentCoordinator`      | Параллельный запуск enrichers через asyncio.gather        |
 | `merger.py`        | `MergeService`               | Объединение данных из разных источников (LEFT OUTER JOIN) |
-| `key-extractor.py` | `KeyExtractorService`        | Извлечение join keys из seed pipeline                     |
+| `key_extractor.py` | `KeyExtractorService`        | Извлечение join keys из seed pipeline                     |
 | `checkpoint.py`    | `CompositeCheckpointManager` | Resume после сбоя                                         |
 
 **Workflow Composite Pipeline:**

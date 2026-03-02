@@ -1,5 +1,9 @@
 # Data Recovery Runbook
 
+*Reference: [ADR-010](../../02-architecture/decisions/ADR-010-local-only-deployment.md)*
+
+> Runtime profile: Local-Only single-instance. Recovery procedures target local Delta/JSONL data only.
+
 This runbook provides procedures for recovering data in case of corruption, accidental deletion, or other disaster scenarios.
 
 **RPO (Recovery Point Objective):** 24 hours

@@ -96,8 +96,8 @@ from bioetl.domain.ports.storage import StoragePort  # Запрещено!
 src/bioetl/domain/aggregates/
 ├── __init__.py
 ├── batch.py             # Batch Aggregate (536 LOC)
-├── pipeline-run.py      # PipelineRun Aggregate (574 LOC)
-├── quarantine-entry.py  # QuarantineEntry Aggregate (517 LOC)
+├── pipeline_run.py      # PipelineRun Aggregate (574 LOC)
+├── quarantine_entry.py  # QuarantineEntry Aggregate (517 LOC)
 └── events.py            # Domain Events (197 LOC)
 ```
 
@@ -109,7 +109,7 @@ src/bioetl/domain/aggregates/
 | `PipelineRun`     | COMPLETED only if all stages SUCCESS            | NEW → RUNNING → COMPLETED/FAILED/SHUTDOWN            |
 | `QuarantineEntry` | Controlled resolution lifecycle                 | NEW → UNDER_REVIEW → IGNORED / REPROCESSED / EXPIRED |
 
-`QuarantineStatus(StrEnum)` (актуально по `quarantine-entry.py`):
+`QuarantineStatus(StrEnum)` (актуально по `quarantine_entry.py`):
 
 - `NEW`
 - `UNDER_REVIEW`
@@ -130,18 +130,18 @@ src/bioetl/domain/aggregates/
 from bioetl.domain.aggregates import Batch
 from bioetl.domain.types import RunID
 
-batch = Batch.create(run-id=RunID(uuid4()))
-batch.add-record({"id": "1", "value": 100})
+batch = Batch.create(run_id=RunID(uuid4()))
+batch.add_record({"id": "1", "value": 100})
 batch.seal()
-batch.mark-writing()
-batch.mark-committed("silver")
+batch.mark_writing()
+batch.mark_committed("silver")
 
-events = batch.collect-events()  # [BatchCreated, BatchSealed, BatchWritten]
+events = batch.collect_events()  # [BatchCreated, BatchSealed, BatchWritten]
 ```
 
-### 2.3. `value-objects/` — Value Objects
+### 2.3. `value_objects/` — Value Objects
 
-**Расположение:** `src/bioetl/domain/value-objects/`
+**Расположение:** `src/bioetl/domain/value_objects/`
 
 Неизменяемые доменные примитивы с типобезопасностью (18 файлов).
 
@@ -175,9 +175,9 @@ events = batch.collect-events()  # [BatchCreated, BatchSealed, BatchWritten]
 Определяет простые и составные типы данных, используемые во всей системе для обеспечения консистентности и семантической
 ясности. Включает типизированные идентификаторы: `RunID`, `BatchID`, `EntityID`, `ContentHash`.
 
-### 2.5. `config.py` — Конфигурационные Value Objects
+### 2.5. `config/` — Конфигурационные Value Objects
 
-**Источник:** `src/bioetl/domain/config.py`
+**Источник:** `src/bioetl/domain/config/`
 
 Содержит dataclass Value Objects для конфигурации пайплайнов:
 
@@ -186,9 +186,9 @@ events = batch.collect-events()  # [BatchCreated, BatchSealed, BatchWritten]
 - `DQConfig` — пороги Data Quality
 - `TableConfig` — настройки таблиц
 
-### 2.6. `error-classifier.py` — Классификатор Ошибок
+### 2.6. `error_classifier.py` — Классификатор Ошибок
 
-**Источник:** `src/bioetl/domain/error-classifier.py`
+**Источник:** `src/bioetl/domain/error_classifier.py`
 
 Реализует логику классификации ошибок в соответствии с правилами из `RULES.md` (раздел 3.1.1):
 

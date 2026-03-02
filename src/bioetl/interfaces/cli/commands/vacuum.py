@@ -43,6 +43,11 @@ def vacuum_command(table: str, retention_days: int, dry_run: bool) -> None:
         bioetl maintenance vacuum chembl.activity --dry-run
 
         bioetl maintenance vacuum chembl.activity -r 30
+
+    Args:
+        table: Table.
+        retention_days: Retention days.
+        dry_run: Dry run mode flag.
     """
     lifecycle = get_lifecycle_service()
 
@@ -96,6 +101,11 @@ def vacuum_all_command(retention_days: int, dry_run: bool, layer: str) -> None:
         bioetl maintenance vacuum-all -r 30
 
         bioetl maintenance vacuum-all --layer silver
+
+    Args:
+        retention_days: Retention days.
+        dry_run: Dry run mode flag.
+        layer: Layer.
     """
     service = get_vacuum_service()
     tables_to_vacuum = service.collect_tables(layer)

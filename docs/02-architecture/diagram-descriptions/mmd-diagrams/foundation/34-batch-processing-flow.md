@@ -1,9 +1,9 @@
-# Batch Processing Flow — Extract to Write
+# Title: Batch Processing Flow — Extract to Write
 
 - Исходная диаграмма: `mmd-diagrams/foundation/34-batch-processing-flow.mmd`
 
 ## Описание
-Диаграмма описывает: RULES.md §2.1 (Data Flow), application/core/batch_executor.py. Приоритет/контекст: 9 (Score 8.44) — Core data processing loop for every batch.
+Диаграмма Title: Batch Processing Flow — Extract to Write из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате sequenceDiagram и служит базовым ориентиром для инженерного анализа, ревью изменений и обсуждения технических решений. Уровень детализации обозначен как Mixed (System / Component / Class), поэтому схема подходит одновременно для быстрой навигации по контексту и для проверки корректности зависимостей, контрактов и потоков обработки данных в рамках сценария 34-batch-processing-flow. В комментариях исходника зафиксирован фокус диаграммы: Covers: RULES.md §2.1 (Data Flow), application/core/batch_executor.py. Это снижает неоднозначность интерпретации и помогает поддерживать консистентность между визуальной документацией, ADR-решениями и реальным кодом. Значимые участники последовательностей: PipelineRunner, BatchExecutor (786 LOC), DataSourcePort (e.g., ChemblAdapter), BatchTransformer, BaseTransformer (e.g., ActivityTransformer). По этим участникам удобно валидировать порядок вызовов, точки отказа и стратегию обработки ошибок. Показательные узлы диаграммы: batch. Они позволяют быстро сопоставлять термины, роли сервисов и артефакты данных между моделью и реализацией. Дополнительно в метаданных указан показатель плотности (@nodes=n/a), что полезно при контроле читаемости и планировании декомпозиции диаграмм на более узкие представления.
 
 ## Метаданные
 - Тип: `sequenceDiagram`

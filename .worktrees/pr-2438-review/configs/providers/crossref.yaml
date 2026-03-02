@@ -1,0 +1,66 @@
+version: 1.0.0
+provider: crossref
+source:
+  batch_size: 50
+  provider_config:
+    provider: crossref
+    base_url: https://api.crossref.org
+    auth_type: email
+    mailto: ${BIOETL_CROSSREF_EMAIL}
+    client:
+      timeout_sec: 30.0
+      max_retries: 3
+    pagination:
+      page_size: 50
+      id_batch_size: 50
+      strategy: cursor
+    batch_size: 50
+    cursor_pagination: true
+  circuit_breaker:
+    failure_threshold: 5
+    recovery_timeout: 300
+  rate_limit:
+    requests_per_second: 50
+    burst: 100
+    polite_pool: true
+  health_check:
+    endpoint: /works
+    params:
+      rows: 1
+    timeout: 5
+  retry:
+    use_retry_after: true
+entities:
+- publication
+entity_notes:
+  publication:
+    description: Publication metadata via DOI resolution
+    input_mode: CSV file with DOIs
+    fallback: Title search when DOI not found (404)
+    batch_size: 50
+quality:
+  version: 1.0.0
+  provider: crossref
+  thresholds:
+    soft_fail: 0.1
+    hard_fail: 0.3
+  field_validations:
+  - field: doi
+    type: pattern
+    pattern: ^10\.\d{4,}/\S+$
+    nullable: true
+    error_message: Invalid DOI format (must match 10.XXXX/suffix, no whitespace)
+  - field: publication_year
+    type: range
+    min: 1500
+    max: 2100
+    nullable: true
+    error_message: Publication year out of valid range
+filters:
+  version: 1.0.0
+  provider: crossref
+  input_filter:
+    batch_size: 50
+  gold_filters:
+    required_fields: []
+    columns: {}

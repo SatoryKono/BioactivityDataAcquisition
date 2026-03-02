@@ -27,7 +27,15 @@ RECORD_COUNT_CRITICAL_THRESHOLD = 0.50
 def check_statistical_profile(
     df: pl.DataFrame, baseline_stats: dict[str, Any] | None
 ) -> StatisticalProfileResult:
-    """Compare statistics against baseline (MA30)."""
+    """Compare statistics against baseline (MA30).
+
+    Args:
+        df: Input DataFrame.
+        baseline_stats: Baseline stats.
+
+    Returns:
+        Check result as StatisticalProfileResult.
+    """
     if not baseline_stats:
         return StatisticalProfileResult(
             baseline_period_days=30,
@@ -103,7 +111,15 @@ def check_statistical_profile(
 def check_anomaly_detection(
     df: pl.DataFrame, baseline_stats: dict[str, Any] | None
 ) -> AnomalyDetectionResult:
-    """Detect anomalies using baseline comparison."""
+    """Detect anomalies using baseline comparison.
+
+    Args:
+        df: Input DataFrame.
+        baseline_stats: Baseline stats.
+
+    Returns:
+        Check result as AnomalyDetectionResult.
+    """
     cold_start_days = 30
     current_day = baseline_stats.get("days_since_start", 0) if baseline_stats else 0
     cold_start_mode = current_day < cold_start_days

@@ -1,6 +1,6 @@
 # BioETL: Правила Проекта
 
-*Версия: 5.22 (Unified Entity Config), 2026-02-24*
+*Версия: 5.23 (Dependency Policy Sync), 2026-03-02*
 
 ## Введение (Quick Reference)
 
@@ -254,7 +254,7 @@ if self.runtime.run_type in (RunType.REBUILD, RunType.BACKFILL):
         await self.services.storage.clear_gold(self.config.gold_table)
 ```
 
-**Проверка:** Интеграционный тест `tests/integration/test-runner-lifecycle.py::test-incremental-skips-clear`.
+**Проверка:** Интеграционный тест `tests/integration/test_runner_lifecycle.py::test-incremental-skips-clear`.
 
 ### 2.5. Стратегия Партиционирования
 
@@ -444,7 +444,7 @@ Dependencies — пайплайны, которые запускаются **п�
 dependencies:
   - pipeline: chembl_target_component
     join-keys: [component-id]       # Ключ из seed
-    silver-table: silver/chembl/target-component
+    silver_table: silver/chembl/target-component
 ```
 
 **Chained Dependencies (цепочечные зависимости):**
@@ -456,14 +456,14 @@ dependencies:
   # 1. Стандартный: ключи из seed
   - pipeline: chembl_target_component
     join-keys: [component-id]
-    silver-table: silver/chembl/target-component
+    silver_table: silver/chembl/target-component
 
   # 2. Цепочечный: ключи из предыдущего dependency
   - pipeline: chembl_protein_class
     join-keys: [protein-classification-id]  # Колонка в source таблице
-    filter-field: protein-class-id          # Поле API (если отличается)
+    filter_field: protein-class-id          # Поле API (если отличается)
     key-source: chembl_target_component     # Читать ключи отсюда
-    silver-table: silver/chembl/protein-class
+    silver_table: silver/chembl/protein-class
 ```
 
 **Поля DependencyConfig:**
@@ -710,7 +710,7 @@ content-hash → content-version → version-hash
 | `filter-ids-loaded-total`     | Counter   | pipeline                          | Загружено ID для фильтрации     |
 | `filter-ids-duplicates-total` | Counter   | pipeline                          | Дубликаты в файле фильтрации    |
 
-**Реализация:** См. `src/bioetl/infrastructure/observability/metrics.py` и `prometheus-metrics.py`.
+**Реализация:** См. `src/bioetl/infrastructure/observability/metrics.py` и `prometheus_metrics.py`.
 
 ### 3.3. Конкурентность и Блокировки
 
@@ -926,7 +926,7 @@ pip install -e ".[tests]"
 | `test-no-datetime-now-in-infrastructure`      | Блокирует `datetime.now()` в infra   | `datetime.now()`, `datetime.datetime.now()`                                  |
 | `test-no-structlog-in-application-interfaces` | Блокирует прямой импорт `structlog`  | `import structlog`, `from structlog import`                                  |
 
-**Путь:** `tests/architecture/test-no-random-in-writers.py`, `tests/architecture/test-no-datetime-now-in-infrastructure.py`, `tests/architecture/test-no-structlog-in-application-interfaces.py`
+**Путь:** `tests/architecture/test_no_random_in_writers.py`, `tests/architecture/test_no_datetime_now_in_infrastructure.py`, `tests/architecture/test_no_structlog_in_application_interfaces.py`
 
 #### Детерминистичный Jitter
 
@@ -1135,11 +1135,11 @@ async with services:  # --aenter-- инициализирует ресурсы
 
 | Тест                                       | REQ          | Проверка                  | Файл                                        |
 | ------------------------------------------ | ------------ | ------------------------- | ------------------------------------------- |
-| `test-no-random-import-in-storage-writers` | REQ-ARCH-030 | Запрет `import random`    | `test-no-random-in-writers.py`              |
-| `test-no-random-uniform-calls-in-storage`  | REQ-ARCH-030 | Запрет `random.uniform()` | `test-no-random-in-writers.py`              |
-| `test-no-random-choice-calls-in-storage`   | REQ-ARCH-030 | Запрет `random.choice()`  | `test-no-random-in-writers.py`              |
-| `test-no-datetime-now-in-infrastructure`   | REQ-ARCH-031 | Запрет `datetime.now()`   | `test-no-datetime-now-in-infrastructure.py` |
-| `test-allowed-files-still-exist`           | REQ-ARCH-031 | Валидация исключений      | `test-no-datetime-now-in-infrastructure.py` |
+| `test-no-random-import-in-storage-writers` | REQ-ARCH-030 | Запрет `import random`    | `test_no_random_in_writers.py`              |
+| `test-no-random-uniform-calls-in-storage`  | REQ-ARCH-030 | Запрет `random.uniform()` | `test_no_random_in_writers.py`              |
+| `test-no-random-choice-calls-in-storage`   | REQ-ARCH-030 | Запрет `random.choice()`  | `test_no_random_in_writers.py`              |
+| `test-no-datetime-now-in-infrastructure`   | REQ-ARCH-031 | Запрет `datetime.now()`   | `test_no_datetime_now_in_infrastructure.py` |
+| `test-allowed-files-still-exist`           | REQ-ARCH-031 | Валидация исключений      | `test_no_datetime_now_in_infrastructure.py` |
 
 #### Детерминистичный Retry Jitter
 
@@ -1231,7 +1231,7 @@ PipelineRunner.run() создаёт PipelineObserver напрямую вмест
 
 | ❌ Неверно                      | ✅ Верно                                                                                                          |
 | ------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| "PreflightService — god object" | "PreflightService (`preflight-service.py`, 818 LOC, 21 метод) имеет 4 публичных метода с единой ответственностью" |
+| "PreflightService — god object" | "PreflightService (`preflight_service.py`, 818 LOC, 21 метод) имеет 4 публичных метода с единой ответственностью" |
 | "Компонент перегружен"          | "Компонент (`file.py`, N строк) содержит M методов, делегирует K сервисам"                                        |
 | "Нет валидации X"               | "Валидация X отсутствует в `file.py` (проверено grep по 'X')"                                                     |
 
@@ -1246,7 +1246,7 @@ PipelineRunner.run() создаёт PipelineObserver напрямую вмест
 | "NoOp default = нарушение DI"       | Null Object Pattern валиден для опциональных зависимостей               | `NoOpMetrics`, `NoOpTracing`                                                                   |
 | "Optional parameter = нарушение DI" | \`policy: Policy                                                        | None = None\` — допустимый паттерн для value objects                                           |
 | "click.echo в CLI = нарушение"      | User-facing output — законная ответственность interfaces слоя           | `cli.py` confirmation prompts                                                                  |
-| "Shim file = дублирование"          | Re-export для backward compatibility валиден                            | `medallion-policy.py` (19 LOC)                                                                 |
+| "Shim file = дублирование"          | Re-export для backward compatibility валиден                            | `medallion_lifecycle.py`                                                                        |
 | "Нет автоматизации X"               | Часто уже реализовано, но не проверено                                  | `MedallionPolicy`, `DQConfig` существуют                                                       |
 
 #### 7.1.5. Причины Ложных Утверждений (REQ-ARCH-041)
@@ -1437,7 +1437,7 @@ make run-local    # запуск сэмплового пайплайна на ф
 
 ### А.1. Формирование URL для ChEMBL API
 
-URL-адреса для ChEMBL формируются в `infrastructure/adapters/chembl/entity-mapper.py`:
+URL-адреса для ChEMBL формируются в `infrastructure/adapters/chembl/entity_mapper.py`:
 
 | Компонент         | Константа/Метод                              | Значение                                |
 | ----------------- | -------------------------------------------- | --------------------------------------- |
@@ -1478,7 +1478,8 @@ URL-адреса для ChEMBL формируются в `infrastructure/adapter
 
 ## Приложение B: Политика Зависимостей
 
-- **Pinning**: Точные версии в `requirements.txt` / `pyproject.toml`.
+- **Pinning**: Базовые зависимости задаются в `pyproject.toml` диапазонами (`>=`, при необходимости с верхней границей), воспроизводимость обеспечивается зафиксированным `uv.lock`.
+- **Exact pins**: Допускаются точечные `==` для критичных инструментов при обосновании (например, нестабильные/ломающие релизы).
 - **Обновления**: Ежемесячные PR от Dependabot + ручное ревью.
 - **Безопасность**: `pip-audit` в CI. Блокировка мержа при CVE severity >= HIGH.
 
@@ -1523,13 +1524,13 @@ provider: chembl
 entity: activity
 
 pipeline:
-  pipeline-name: chembl_activity
+  pipeline_name: chembl_activity
   provider: chembl
-  entity-type: activity
+  entity_type: activity
   description: Extract biological activity records from ChEMBL API
-  business-primary-keys: [activity-id]
-  batch-size: 1000
-  dq-overrides:
+  business_primary_keys: [activity-id]
+  batch_size: 1000
+  dq_overrides:
     field-validations:
       - field: standard-value
         type: range
@@ -1564,14 +1565,14 @@ quality:
 filters:
   extraction-params:
     standard-type--in: IC50,Ki
-  silver-filters:
+  silver_filters:
     columns:
       standard-type: [IC50, Ki]
-  gold-filters:
-    required-fields: [standard-value, target-id]
+  gold_filters:
+    required_fields: [standard-value, target-id]
 
 contracts:
-  primary-key: [activity-id]
+  primary_key: [activity-id]
   merge-keys: [activity-id]
   rename-map: {run-id: -run-id}
   hash-exclude: [-ingestion-ts, -run-id]
@@ -1684,6 +1685,7 @@ fields:
 
 ## История Изменений (Changelog)
 
+- **5.23** (2026-03-02): Dependency Policy Sync. Уточнена политика зависимостей: mixed strategy (`pyproject.toml` с диапазонами + воспроизводимость через `uv.lock`), строгие `==` оставлены как исключение для критичных инструментов.
 - **5.22** (2026-02-24): Unified Entity Config. ADR-039 добавлен — Unified Entity Config Format. 21 стандартных pipeline config переведены из `configs/entities/` в `configs/entities/`; composite configs перенесены в `configs/composites/`; provider source configs — в `configs/providers/`.
 - **5.21** (2026-02-21): Deduplication Policy Implementation.
 - **5.20** (2026-02-17): Audit Sync. Future annotations (497→501, 93.8%). Тест-функций (`def test-`): ~9,442; параметризованных кейсов (`pytest --collect-only`): ~11,985. Python-файлов (~1,114→~1,161). Исправлен .importlinter gap (infrastructure→composition). Архивирован orphaned ADR-030. TYPE-002 `Any` justification — 21 инстанс.

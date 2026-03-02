@@ -1,6 +1,6 @@
 # UniProt ID Mapping Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.22*
+*Version 1.2.0 | Aligned with RULES.md v5.23*
 
 ---
 
@@ -261,15 +261,15 @@ Mode: Overwrite
 ```yaml
 # configs/entities/uniprot/idmapping.yaml
 
-pipeline-name: uniprot_idmapping
+pipeline_name: uniprot_idmapping
 provider: uniprot
-entity-type: idmapping
+entity_type: idmapping
 version: "1.1.0"
 description: "Maps ChEMBL target IDs to UniProt accessions via UniProt ID Mapping API"
 
-primary-keys: ["target-id"]
-silver-table: "uniprot_idmapping"
-gold-table: "uniprot_idmapping"
+primary_keys: ["target-id"]
+silver_table: "uniprot_idmapping"
+gold_table: "uniprot_idmapping"
 
 source:
   type: file
@@ -280,26 +280,26 @@ source:
     from-db: ChEMBL
     to-db: UniProtKB
 
-dq-overrides:
-  soft-fail-threshold: 0.30  # 30% not-found acceptable
-  hard-fail-threshold: 0.80  # 80% not-found triggers failure
+dq_overrides:
+  soft_fail_threshold: 0.30  # 30% not-found acceptable
+  hard_fail_threshold: 0.80  # 80% not-found triggers failure
 
 sink:
   bronze:
     enabled: false  # No Bronze for ID mapping
   silver:
     path: "data/output/silver"
-    primary-key: ["target-id"]
-    partition-by: []
+    primary_key: ["target-id"]
+    partition_by: []
   gold:
     path: "data/output/gold"
 
-gold-filters:
-  required-fields:
+gold_filters:
+  required_fields:
     - target-id
     - mapping-status
 
-input-filter:
+input_filter:
   enabled: false  # Input CSV IS the source
 ```
 

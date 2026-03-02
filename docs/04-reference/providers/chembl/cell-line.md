@@ -52,7 +52,7 @@
 
 ## 3. Трансформация
 
-**Файл:** `src/bioetl/application/pipelines/chembl/cell-line-transformer.py`
+**Файл:** `src/bioetl/application/pipelines/chembl/cell_line_transformer.py`
 
 ### Нормализация данных
 
@@ -93,16 +93,16 @@ entity-id = f"chembl:{cell-chembl-id}"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_cell_line
+bioetl run --pipeline chembl_cell_line
 
 # С ограничением количества записей
-bioetl run chembl_cell_line --limit 500
+bioetl run --pipeline chembl_cell_line --limit 500
 
 # Полная перезагрузка
-bioetl run chembl_cell_line --run-type rebuild
+bioetl run --pipeline chembl_cell_line --run-type rebuild
 
 # С входным фильтром по списку ID
-bioetl run chembl_cell_line --input-filter data/input/cell.csv
+bioetl run --pipeline chembl_cell_line --input-csv data/input/cell.csv
 ```
 
 ---
@@ -111,12 +111,12 @@ bioetl run chembl_cell_line --input-filter data/input/cell.csv
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/entities/chembl/cell-line.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/cell-line-transformer.py` |
-| Пайплайн | `src/bioetl/application/pipelines/chembl/cell-line.py` |
-| Схема | `src/bioetl/domain/schemas/chembl/cell-line.py` |
+| Конфигурация | `configs/entities/chembl/cell_line.yaml` |
+| Трансформер | `src/bioetl/application/pipelines/chembl/cell_line_transformer.py` |
+| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py` |
+| Схема | `src/bioetl/domain/schemas/chembl/cell_line.py` |
 | Сущность | `src/bioetl/domain/entities.py` |
-| Фабрика | `src/bioetl/composition/factories/pipeline-factories.py` |
+| Фабрика | `src/bioetl/composition/factories/pipeline_factories.py` |
 
 ---
 

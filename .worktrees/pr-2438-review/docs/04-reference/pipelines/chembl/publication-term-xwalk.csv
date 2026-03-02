@@ -1,0 +1,6 @@
+field,doc_spec,cfg_pipeline,cfg_schema,code_transformer,code_entity,code_silver_schema,code_gold_schema,json_type,nullable,primary_key,notes
+publication_id,S2.1,YES,EMPTY,publication_term_transformer.py:160,chembl.py:566,publication_term.py:21,chembl.py:424,string,false,false,OK
+term,S2.2,YES,EMPTY,publication_term_transformer.py:161,chembl.py:567,publication_term.py:26,chembl.py:425,string,false,false,OK
+term_type,S2.2,YES,EMPTY,publication_term_transformer.py:162,chembl.py:568,publication_term.py:31,chembl.py:426,string,false,false,OK
+mesh_id,S2.3,YES,EMPTY,publication_term_transformer.py:163,chembl.py:573,publication_term.py:36,chembl.py:429,string,true,false,OK
+qualifier,S2.3,YES,EMPTY,publication_term_transformer.py:164,chembl.py:576,publication_term.py:41,chembl.py:430,string,true,false,OK

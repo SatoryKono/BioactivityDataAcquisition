@@ -9,11 +9,11 @@
 ## TL;DR
 
 ```python
-# Импортируй из base-schemas для базовых классов
-from bioetl.infrastructure.schemas.base-schemas import BaseDQConfig, BaseCircuitBreakerConfig
+# Импортируй из base_schemas для базовых классов
+from bioetl.infrastructure.schemas.base_schemas import BaseDQConfig, BaseCircuitBreakerConfig
 
-# Импортируй из pipeline-config для расширенных классов
-from bioetl.infrastructure.schemas.pipeline-config import DQConfig, InputFilterConfig
+# Импортируй из pipeline_config для расширенных классов
+from bioetl.infrastructure.schemas.pipeline_config import DQConfig, InputFilterConfig
 ```
 
 ---
@@ -24,27 +24,27 @@ from bioetl.infrastructure.schemas.pipeline-config import DQConfig, InputFilterC
 
 ```
 src/bioetl/infrastructure/schemas/
-├── base-schemas.py      # Базовые классы (Single Source of Truth)
-├── pipeline-config.py   # Расширенные классы для pipeline YAML
-├── source-config.py     # Классы для configs/providers/*.yaml
-├── filter-config.py     # Классы для секций filters в configs/base|providers|entities
-├── dq-config.py         # Классы для секций quality в configs/base|providers|entities
-└── composite-config.py  # Классы для composite pipelines
+├── base_schemas.py      # Базовые классы (Single Source of Truth)
+├── pipeline_config.py   # Расширенные классы для pipeline YAML
+├── source_config.py     # Классы для configs/providers/*.yaml
+├── filter_config.py     # Классы для секций filters в configs/base|providers|entities
+├── dq_config.py         # Классы для секций quality в configs/base|providers|entities
+└── composite_config.py  # Классы для composite pipelines
 ```
 
 ### 1.2. Принцип Single Source of Truth
 
-**Каждая конфигурационная структура определена ОДИН раз в `base-schemas.py`.**
+**Каждая конфигурационная структура определена ОДИН раз в `base_schemas.py`.**
 
 Другие модули **наследуют** от базовых классов, а не дублируют поля:
 
 ```python
-# base-schemas.py - ЕДИНСТВЕННОЕ определение полей
+# base_schemas.py - ЕДИНСТВЕННОЕ определение полей
 class BaseCircuitBreakerConfig(BaseModel):
-    failure-threshold: int = Field(default=5, ge=1, le=20)
-    recovery-timeout: int = Field(default=300, ge=60, le=3600)
+    failure_threshold: int = Field(default=5, ge=1, le=20)
+    recovery_timeout: int = Field(default=300, ge=60, le=3600)
 
-# source-config.py - НАСЛЕДОВАНИЕ, не дублирование
+# source_config.py - НАСЛЕДОВАНИЕ, не дублирование
 class CircuitBreakerYamlConfig(BaseCircuitBreakerConfig):
     """Circuit breaker for source configs."""
     pass  # Поля наследуются автоматически
@@ -52,7 +52,7 @@ class CircuitBreakerYamlConfig(BaseCircuitBreakerConfig):
 
 ---
 
-## 2. Базовые Классы (base-schemas.py)
+## 2. Базовые Классы (base_schemas.py)
 
 ### 2.1. DQ Configuration
 
@@ -62,23 +62,23 @@ class CircuitBreakerYamlConfig(BaseCircuitBreakerConfig):
 | `BaseDQConfig` | Расширяет Thresholds + strict-validation |
 
 ```python
-from bioetl.infrastructure.schemas.base-schemas import BaseDQConfig
+from bioetl.infrastructure.schemas.base_schemas import BaseDQConfig
 
 config = BaseDQConfig(
     soft-fail-threshold=0.05,
     hard-fail-threshold=0.20,
     strict-validation=False,
 )
-domain-config = config.to-domain()
+domain-config = config.to_domain()
 ```
 
 ### 2.2. Resilience Configuration
 
 | Класс | Назначение |
 |-------|------------|
-| `BaseCircuitBreakerConfig` | failure-threshold, recovery-timeout |
-| `BaseRateLimitConfig` | requests-per-second, burst |
-| `BaseClientConfig` | timeout-sec, max-retries |
+| `BaseCircuitBreakerConfig` | failure_threshold, recovery_timeout |
+| `BaseRateLimitConfig` | requests_per_second, burst |
+| `BaseClientConfig` | timeout_sec, max_retries |
 
 ### 2.3. Filter Configuration
 
@@ -96,7 +96,7 @@ domain-config = config.to-domain()
 
 | Класс | Назначение |
 |-------|------------|
-| `BaseApiConfig` | API connection (base-url, rate-limit, timeout) |
+| `BaseApiConfig` | API connection (base_url, rate_limit, timeout) |
 | `BaseCsvExportConfig` | CSV export settings |
 | `BaseMaintenanceConfig` | VACUUM and maintenance settings |
 
@@ -107,7 +107,7 @@ domain-config = config.to-domain()
 ### 3.1. Добавление Новых Полей
 
 ```python
-from bioetl.infrastructure.schemas.base-schemas import BaseCircuitBreakerConfig
+from bioetl.infrastructure.schemas.base_schemas import BaseCircuitBreakerConfig
 
 class ExtendedCircuitBreakerConfig(BaseCircuitBreakerConfig):
     """Extended circuit breaker with additional fields."""
@@ -120,44 +120,44 @@ class ExtendedCircuitBreakerConfig(BaseCircuitBreakerConfig):
 ### 3.2. Переопределение Валидаторов
 
 ```python
-from bioetl.infrastructure.schemas.base-schemas import BaseDQConfig
-from pydantic import model-validator
+from bioetl.infrastructure.schemas.base_schemas import BaseDQConfig
+from pydantic import model_validator
 
 class StrictDQConfig(BaseDQConfig):
     """Stricter DQ config for production."""
 
-    @model-validator(mode="after")
-    def validate-strict-mode(self) -> StrictDQConfig:
+    @model_validator(mode="after")
+    def validate_strict_mode(self) -> StrictDQConfig:
         if self.strict-validation and self.hard-fail-threshold > 0.10:
             raise ValueError("strict mode requires hard-fail <= 0.10")
         return self
 ```
 
-### 3.3. Переопределение to-domain()
+### 3.3. Переопределение to_domain()
 
 ```python
 class CustomDQConfig(BaseDQConfig):
     """Custom DQ config with additional processing."""
 
-    def to-domain(self) -> DomainDQConfig:
+    def to_domain(self) -> DomainDQConfig:
         # Custom logic before conversion
-        result = super().to-domain()
+        result = super().to_domain()
         # Custom logic after conversion
         return result
 ```
 
 ---
 
-## 4. Паттерн to-domain()
+## 4. Паттерн to_domain()
 
-Все схемы имеют метод `to-domain()` для конвертации в immutable domain objects:
+Все схемы имеют метод `to_domain()` для конвертации в immutable domain objects:
 
 ```python
 # Infrastructure schema (Pydantic, mutable)
 pydantic-config = DQConfig(soft-fail-threshold=0.05, hard-fail-threshold=0.20)
 
 # Domain dataclass (frozen, immutable)
-domain-config = pydantic-config.to-domain()
+domain-config = pydantic-config.to_domain()
 
 # domain-config теперь можно безопасно использовать в бизнес-логике
 ```
@@ -175,25 +175,25 @@ domain-config = pydantic-config.to-domain()
 
 ❌ **Плохо:**
 ```python
-# source-config.py
+# source_config.py
 class RateLimitConfig(BaseModel):
-    requests-per-second: float = 5.0  # Дублирование!
+    requests_per_second: float = 5.0  # Дублирование!
     burst: int = 10                   # Дублирование!
 
-# pipeline-config.py
+# pipeline_config.py
 class RateLimitSourceConfig(BaseModel):
-    requests-per-second: float = 5.0  # То же самое!
+    requests_per_second: float = 5.0  # То же самое!
     burst: int = 10                   # То же самое!
 ```
 
 ✅ **Правильно:**
 ```python
-# base-schemas.py
+# base_schemas.py
 class BaseRateLimitConfig(BaseModel):
-    requests-per-second: float = Field(default=5.0, ge=0.1, le=100.0)
+    requests_per_second: float = Field(default=5.0, ge=0.1, le=100.0)
     burst: int = Field(default=10, ge=1, le=200)
 
-# source-config.py
+# source_config.py
 class RateLimitYamlConfig(BaseRateLimitConfig):
     pass  # Наследуем все поля
 ```
@@ -221,11 +221,11 @@ class BaseCircuitBreakerConfig(BaseModel):
     Provides common circuit breaker fields for both pipeline and source configs.
 
     Attributes:
-        failure-threshold: Number of consecutive failures before opening circuit.
-        recovery-timeout: Time in seconds before attempting recovery.
+        failure_threshold: Number of consecutive failures before opening circuit.
+        recovery_timeout: Time in seconds before attempting recovery.
     """
 
-    failure-threshold: int = Field(
+    failure_threshold: int = Field(
         default=5,
         ge=1,
         le=20,
@@ -233,11 +233,11 @@ class BaseCircuitBreakerConfig(BaseModel):
     )
 ```
 
-### 5.4. Добавляй model-validator для cross-field validation
+### 5.4. Добавляй model_validator для cross-field validation
 
 ```python
-@model-validator(mode="after")
-def validate-thresholds(self) -> BaseDQThresholds:
+@model_validator(mode="after")
+def validate_thresholds(self) -> BaseDQThresholds:
     """Validate that soft-fail < hard-fail."""
     if self.soft-fail-threshold >= self.hard-fail-threshold:
         raise ValueError(
@@ -254,18 +254,18 @@ def validate-thresholds(self) -> BaseDQThresholds:
 ### 6.1. Обновление Импортов
 
 ```python
-# Импортируй из base-schemas для базовых классов
-from bioetl.infrastructure.schemas.base-schemas import BaseDQConfig
+# Импортируй из base_schemas для базовых классов
+from bioetl.infrastructure.schemas.base_schemas import BaseDQConfig
 
-# Или из pipeline-config для расширенной версии:
-from bioetl.infrastructure.schemas.pipeline-config import DQConfig
+# Или из pipeline_config для расширенной версии:
+from bioetl.infrastructure.schemas.pipeline_config import DQConfig
 ```
 
 ### 6.2. Проверка Inheritance
 
 ```python
 # Проверь, что твой класс наследует от правильного базового
-from bioetl.infrastructure.schemas.base-schemas import BaseCircuitBreakerConfig
+from bioetl.infrastructure.schemas.base_schemas import BaseCircuitBreakerConfig
 
 assert issubclass(CircuitBreakerYamlConfig, BaseCircuitBreakerConfig)
 ```
@@ -277,12 +277,12 @@ assert issubclass(CircuitBreakerYamlConfig, BaseCircuitBreakerConfig)
 ### 7.1. Тесты для Базовых Классов
 
 ```python
-# tests/unit/infrastructure/schemas/test-base-schemas.py
+# tests/unit/infrastructure/schemas/test_base_schemas.py
 
-def test-to-domain-conversion():
+def test-to_domain-conversion():
     """Verify domain conversion."""
     config = BaseDQConfig(soft-fail-threshold=0.10, hard-fail-threshold=0.25)
-    domain = config.to-domain()
+    domain = config.to_domain()
 
     assert domain.soft-fail-threshold == 0.10
     assert domain.hard-fail-threshold == 0.25
@@ -291,7 +291,7 @@ def test-to-domain-conversion():
 ### 7.2. Тесты для Валидации
 
 ```python
-def test-threshold-validation():
+def test_threshold_validation():
     """Verify threshold validation."""
     with pytest.raises(ValidationError):
         BaseDQThresholds(soft-fail-threshold=0.25, hard-fail-threshold=0.20)
@@ -303,23 +303,23 @@ def test-threshold-validation():
 
 | Модуль | Класс | Базовый класс | Назначение |
 |--------|-------|---------------|------------|
-| base-schemas | `BaseDQThresholds` | BaseModel | DQ пороги |
-| base-schemas | `BaseDQConfig` | BaseDQThresholds | DQ конфиг |
-| base-schemas | `BaseCircuitBreakerConfig` | BaseModel | Circuit breaker |
-| base-schemas | `BaseRateLimitConfig` | BaseModel | Rate limit |
-| base-schemas | `BaseClientConfig` | BaseModel | HTTP client |
-| base-schemas | `BaseApiConfig` | BaseModel | API connection |
-| base-schemas | `BaseCsvExportConfig` | BaseModel | CSV export |
-| base-schemas | `BaseInputFilterConfig` | BaseModel | Input filtering |
-| base-schemas | `BaseGoldFiltersConfig` | BaseModel | Gold filters |
-| base-schemas | `BaseMaintenanceConfig` | BaseModel | Maintenance |
-| pipeline-config | `DQConfig` | - | Extended DQ (field validations) |
-| pipeline-config | `CircuitBreakerConfig` | BaseCircuitBreakerConfig | Pipeline CB |
-| pipeline-config | `InputFilterConfig` | BaseInputFilterConfig | Pipeline input filter |
-| source-config | `CircuitBreakerYamlConfig` | BaseCircuitBreakerConfig | Source CB |
-| source-config | `RateLimitYamlConfig` | BaseRateLimitConfig | Source rate limit |
-| filter-config | `InputFilterFileConfig` | BaseInputFilterConfig | Standalone filter |
-| filter-config | `GoldFiltersFileConfig` | BaseGoldFiltersConfig | Standalone gold filter |
+| base_schemas | `BaseDQThresholds` | BaseModel | DQ пороги |
+| base_schemas | `BaseDQConfig` | BaseDQThresholds | DQ конфиг |
+| base_schemas | `BaseCircuitBreakerConfig` | BaseModel | Circuit breaker |
+| base_schemas | `BaseRateLimitConfig` | BaseModel | Rate limit |
+| base_schemas | `BaseClientConfig` | BaseModel | HTTP client |
+| base_schemas | `BaseApiConfig` | BaseModel | API connection |
+| base_schemas | `BaseCsvExportConfig` | BaseModel | CSV export |
+| base_schemas | `BaseInputFilterConfig` | BaseModel | Input filtering |
+| base_schemas | `BaseGoldFiltersConfig` | BaseModel | Gold filters |
+| base_schemas | `BaseMaintenanceConfig` | BaseModel | Maintenance |
+| pipeline_config | `DQConfig` | - | Extended DQ (field validations) |
+| pipeline_config | `CircuitBreakerConfig` | BaseCircuitBreakerConfig | Pipeline CB |
+| pipeline_config | `InputFilterConfig` | BaseInputFilterConfig | Pipeline input filter |
+| source_config | `CircuitBreakerYamlConfig` | BaseCircuitBreakerConfig | Source CB |
+| source_config | `RateLimitYamlConfig` | BaseRateLimitConfig | Source rate limit |
+| filter_config | `InputFilterFileConfig` | BaseInputFilterConfig | Standalone filter |
+| filter_config | `GoldFiltersFileConfig` | BaseGoldFiltersConfig | Standalone gold filter |
 
 ---
 

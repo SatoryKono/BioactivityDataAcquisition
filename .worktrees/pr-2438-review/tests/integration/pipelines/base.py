@@ -1,0 +1,192 @@
+"""Base class for pipeline integration tests."""
+
+from __future__ import annotations
+
+import os
+from typing import Any
+from unittest.mock import patch
+from uuid import uuid4
+
+import pytest
+import structlog
+
+from bioetl.application.core.runner import PipelineRunner
+from bioetl.composition.factories.pipeline_factory import GenericPipelineFactory
+
+# Import factories to ensure they are registered/available
+from bioetl.composition.factories.storage import StorageAdapter, StorageContext
+from bioetl.composition.observability import ObservabilityBundle
+from bioetl.domain.config import RuntimeConfig
+from bioetl.domain.ports import MetricsPort
+from bioetl.infrastructure.config import Settings
+from bioetl.domain.ports import NoOpMetrics
+from bioetl.domain.ports import NoOpTracing
+from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
+from bioetl.infrastructure.storage.gold_writer import GoldWriter
+from bioetl.infrastructure.storage.silver_writer import SilverWriter
+
+logger = structlog.get_logger()
+
+
+class IntegrationPipelineTestCase:
+    """Base class for pipeline integration tests.
+
+    Provides fixtures for:
+    - Temporary local storage (Bronze/Silver/Gold/Checkpoints)
+    - Settings configuration
+    - VCR-enabled HTTP clients (via pytest-vcr on subclasses)
+    - Pipeline Runner instantiation
+    """
+
+    @pytest.fixture(autouse=True)
+    def _setup_storage(self, tmp_path):
+        """Setup temporary storage paths and patch StorageFactory."""
+        self.storage_root = tmp_path / "storage"
+        self.storage_root.mkdir()
+
+        self.bronze_path = str(self.storage_root / "bronze")
+        self.silver_path = str(self.storage_root / "silver")
+        self.gold_path = str(self.storage_root / "gold")
+        self.checkpoints_path = str(self.storage_root / "checkpoints")
+        self.json_path = str(self.storage_root / "json")
+
+        # Create directories
+        for path in [
+            self.bronze_path,
+            self.silver_path,
+            self.gold_path,
+            self.checkpoints_path,
+            self.json_path,
+        ]:
+            os.makedirs(path, exist_ok=True)
+
+        # Patch StorageFactory.create to return local paths
+        with patch(
+            "bioetl.composition.factories.storage.StorageFactory.create"
+        ) as mock_create:
+            mock_create.side_effect = self._create_local_storage_context
+            yield
+
+    def _create_local_storage_context(
+        self,
+        settings: Settings,
+        config: PipelineYamlConfig,
+        logger: structlog.BoundLogger,
+        metrics: MetricsPort,
+        tracing: Any = None,
+        metadata_coordinator: Any = None,
+        silver_validator: Any = None,
+    ) -> StorageContext:
+        """Create a StorageContext pointing to local temp paths."""
+        # Create real writers pointing to local paths
+
+        # Determine if we should save JSON (mirroring real factory logic)
+        bronze_config = config.sink.get("bronze")
+        save_json = bronze_config.save_json if bronze_config else False
+
+        adapter = StorageAdapter(
+            bronze_writer=BronzeWriter(
+                base_path=self.bronze_path,
+                logger=logger,
+                metrics=metrics,
+                save_json=save_json,
+                json_path=self.json_path if save_json else None,
+                # Lock validation at Application layer
+            ),
+            silver_writer=SilverWriter(
+                base_path=self.silver_path,
+                logger=logger,
+                csv_exporter=None,
+                # Lock validation at Application layer
+            ),
+            gold_writer=GoldWriter(
+                base_path=self.gold_path,
+                logger=logger,
+                csv_exporter=None,
+                # Lock validation at Application layer
+            ),
+        )
+
+        from pathlib import Path
+
+        return StorageContext(
+            adapter=adapter,
+            bronze_path=Path(self.bronze_path),
+            silver_path=Path(self.silver_path),
+            gold_path=Path(self.gold_path),
+            checkpoints_path=Path(self.checkpoints_path),
+        )
+
+    @pytest.fixture
+    def settings(self):
+        """Return generic settings for testing."""
+        # Use defaults, usually sufficient as we mock storage
+        # Ensure ENV is not prod to avoid acmolecule_idental S3 usage if mock fails (safety net)
+        os.environ["BIOETL_ENV"] = "dev"
+        return Settings()
+
+    @pytest.fixture
+    def runtime_config(self):
+        """Return default runtime config."""
+        from bioetl.domain.types import RunType
+
+        return RuntimeConfig(
+            run_type=RunType.INCREMENTAL,
+            heartbeat_interval=10,
+            resume=False,
+            limit=None,  # Can be overridden in tests
+        )
+
+    @pytest.fixture
+    def run_id(self):
+        return uuid4()
+
+    def create_runner(
+        self,
+        factory: GenericPipelineFactory,
+        settings: Settings,
+        runtime_config: RuntimeConfig,
+        run_id,
+        config_overrides: dict[str, Any] | None = None,
+    ) -> PipelineRunner:
+        """Create a pipeline runner with the given factory and settings.
+
+        Args:
+            factory: The pipeline factory to use.
+            settings: Application settings.
+            runtime_config: Runtime configuration.
+            run_id: UUID for the run.
+            config_overrides: Optional dictionary to update the loaded YAML config.
+        """
+        # Load config via factory (it handles loading)
+        # But we might want to override some values (e.g. limit, or sinks)
+        from bioetl.infrastructure.config import load_pipeline_config
+
+        pipeline_config = load_pipeline_config(factory.pipeline_name)
+
+        if config_overrides:
+            # Deep update or simple update? Simple for now.
+            # config is a Pydantic model. We can use `model_copy(update=...)`
+            pipeline_config = pipeline_config.model_copy(update=config_overrides)
+
+        # Create observability bundle for testing
+        # Per Unified Observability Contract, metrics must be non-None
+        observability = ObservabilityBundle(
+            logger=structlog.get_logger(),
+            metrics=NoOpMetrics(warn_on_use=False),
+            tracer=NoOpTracing(),
+        )
+
+        # Create runner
+        # Note: GenericPipelineFactory.create_runner uses BaseServicesFactory,
+        # which calls StorageFactory.create, which we patched.
+        runner = factory.create_runner(
+            run_id=run_id,
+            runtime=runtime_config,
+            settings=settings,
+            observability=observability,
+            config=pipeline_config,
+        )
+
+        return runner

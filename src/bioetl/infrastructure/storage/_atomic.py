@@ -63,6 +63,8 @@ def atomic_write(
         ...     f.write(b'{"key": "value"}')
         # File is only visible at target after successful completion
 
+    Returns:
+        Iterator over results.
     """
     # Ensure parent directory exists
     target.parent.mkdir(parents=True, exist_ok=True)

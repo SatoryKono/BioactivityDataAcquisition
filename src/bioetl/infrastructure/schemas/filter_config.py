@@ -187,7 +187,14 @@ class FilterConfigFile(BaseModel):
         cls,
         v: dict[str, str | int | bool],
     ) -> dict[str, str | int | bool]:
-        """Validate extraction params keys and values."""
+        """Validate extraction params keys and values.
+
+        Args:
+            v: Whether to v.
+
+        Returns:
+            Validated dict[str, str | int | bool].
+        """
         for key, value in v.items():
             if not key or not isinstance(key, str):
                 raise ValueError(

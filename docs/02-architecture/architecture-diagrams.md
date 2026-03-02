@@ -44,7 +44,7 @@
 
 - **Composition Layer** - Dependency Injection:
 
-  - bootstrap-pipeline() - Composition Root
+  - bootstrap_pipeline() - Composition Root
   - 8 Factories
   - PipelineRegistry
 
@@ -117,7 +117,7 @@ Ports & Adapters паттерн - ключевой архитектурный п
 
 Матрица разрешённых импортов между слоями. Enforcement через:
 
-- `tests/architecture/test-layer-contracts.py`
+- `tests/architecture/test_layer_dependencies.py`
 - `import-linter` configuration
 - CI pipeline (`make arch-test`)
 
@@ -711,7 +711,7 @@ Complete pipeline configuration с 100+ полями.
 **CLI:**
 
 ```bash
-bioetl run chembl_activity \
+bioetl run --pipeline chembl_activity \
   --run-type incremental \
   --limit 1000 \
   --data-dir /path/to/data

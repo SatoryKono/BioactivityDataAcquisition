@@ -259,7 +259,28 @@ def run(
     cached_bronze_date: str | None,
     cached_bronze_path: str | None,
 ) -> None:
-    """Run an ETL pipeline."""
+    """Run an ETL pipeline.
+
+    Args:
+        pipeline: Pipeline.
+        run_type: Type of pipeline run.
+        resume: Whether to resume.
+        start_offset: Start offset.
+        limit: Maximum number of records to process.
+        input_csv: Input csv.
+        filter_column: Filter column.
+        filter_field: Field name to apply filter on.
+        dry_run: Dry run mode flag.
+        yes: Whether to yes.
+        vacuum_after_run: Whether to vacuum after run.
+        vacuum_retention_days: Vacuum retention days.
+        debug: Whether to debug.
+        health_server: Whether to health server.
+        health_port: Health port.
+        use_cached_bronze: Whether to use cached bronze.
+        cached_bronze_date: Cached bronze date.
+        cached_bronze_path: File path for cached bronze.
+    """
     # Validate --start-offset constraints
     if start_offset is not None:
         if start_offset < 0:

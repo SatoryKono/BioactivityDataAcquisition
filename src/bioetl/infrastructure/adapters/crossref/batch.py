@@ -132,6 +132,9 @@ class DoiBatchProcessor:
 
         Yields:
             Publication records for found DOIs.
+
+        Returns:
+            Async iterator yielding fetched records.
         """
         if not dois:
             return
@@ -279,6 +282,9 @@ class SearchPaginator:
 
         Yields:
             Publication records matching the query.
+
+        Returns:
+            Result dictionary.
         """
         rows = min(limit, 100) if limit else 100
         fetched = 0

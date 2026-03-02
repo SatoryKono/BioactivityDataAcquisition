@@ -1,0 +1,136 @@
+%% View: Full | Parent: (root)
+%% Parent source: docs/02-architecture/mmd-diagrams/foundation/12-local-deployment-architecture.mmd
+%% Full reference diagram retained after decomposition.
+%% Title: Local Deployment Architecture
+%% Covers: RULES.md §5.6 (Deployment), ADR-010 (Local-Only)
+%% Updated: 2026-02-17
+%% Components: CLI, MemoryLock, Data Lake directories, Observability stack
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   Mixed (System / Component / Class)
+
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+%% @uniform width=200 height=56 max_title_len=20 max_desc_lines=1
+flowchart TB
+    subgraph External["External APIs"]
+        ChEMBL_API["🌐 ChEMBL API<br/>ebi.ac.uk/chembl"]
+        PubChem_API["🌐 PubChem API<br/>pubchem.ncbi.nlm.nih.gov"]
+        UniProt_API["🌐 UniProt API<br/>uniprot.org"]
+        PubMed_API["🌐 PubMed API<br/>eutils.ncbi.nlm.nih.gov"]
+    end
+
+    subgraph Local["Local Machine (Single Instance)"]
+        subgraph Orchestration["CLI Execution"]
+            CLI["🖥️ CLI / Manual run<br/>PipelineRunner"]
+            Schedule["⏰ Local scheduler<br/>(cron/systemd)"]
+        end
+
+        subgraph Runtime["Local Pipeline Workers"]
+            chembl_activity["📦 chembl_activity<br/>local pipeline"]
+            chembl_assay["📦 chembl_assay<br/>local pipeline"]
+            chembl_target["📦 chembl_target<br/>local pipeline"]
+            chembl_molecule["📦 chembl_molecule<br/>local pipeline"]
+            pubchem_compound["📦 pubchem_compound<br/>local pipeline"]
+            uniprot_protein["📦 uniprot_protein<br/>local pipeline"]
+        end
+
+        subgraph Locking["In-Process Locking"]
+            MemoryLock[("🔒 MemoryLock<br/>TTL 90s / heartbeat 30s")]
+        end
+
+        subgraph Data["Local filesystem (data/)"]
+            Bronze[("📁 bronze/<br/>JSONL+zstd")]
+            Silver[("📁 silver/<br/>Delta Lake")]
+            Gold[("📁 gold/<br/>Delta/Parquet")]
+            Quarantine[("📁 quarantine/<br/>Parquet")]
+            Checkpoints[("📁 checkpoints/<br/>JSON")]
+            Lineage[("📁 lineage/<br/>Parquet")]
+        end
+
+        subgraph Observability["Local Observability"]
+            Logs["📋 Local logs<br/>stdout/file"]
+            Metrics["📊 In-process metrics<br/>"]
+        end
+    end
+
+    %% External API connections
+    ChEMBL_API --> chembl_activity
+    PubChem_API --> pubchem_compound
+    UniProt_API --> uniprot_protein
+    PubMed_API --> chembl_activity
+
+    %% Orchestration to runtime
+    CLI --> chembl_activity
+    CLI --> chembl_assay
+    CLI --> chembl_target
+    CLI --> chembl_molecule
+    CLI --> pubchem_compound
+    CLI --> uniprot_protein
+    Schedule --> CLI
+
+    %% Runtime to MemoryLock
+    chembl_activity -.->|lock| MemoryLock
+    chembl_assay -.->|lock| MemoryLock
+    chembl_target -.->|lock| MemoryLock
+    chembl_molecule -.->|lock| MemoryLock
+
+    %% Runtime to local filesystem
+    chembl_activity --> Bronze
+    chembl_activity --> Silver
+    chembl_activity --> Gold
+    chembl_activity --> Quarantine
+    chembl_activity --> Checkpoints
+    chembl_activity --> Lineage
+
+    %% Runtime to local observability
+    chembl_activity --> Logs
+    chembl_activity --> Metrics
+
+    %% Styling
+    style Bronze fill:#CD7F32,color:#fff
+    style Silver fill:#C0C0C0,color:#000
+    style Gold fill:#FFD700,color:#000
+    style Quarantine fill:#e11d48,color:#fff
+    style MemoryLock fill:#4B7BEC,color:#fff
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 8 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 10 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 11 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 12 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 13 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 14 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 15 stroke:#1E293B,stroke-width:4px
+    linkStyle 16 stroke:#1E293B,stroke-width:4px
+    linkStyle 17 stroke:#1E293B,stroke-width:4px
+    linkStyle 18 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    linkStyle 19 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 20 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 21 stroke:#94A3B8,stroke-width:1px
+    linkStyle 22 stroke:#94A3B8,stroke-width:1px

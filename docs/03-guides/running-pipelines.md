@@ -123,12 +123,12 @@ bioetl run --pipeline chembl_activity --debug
 
 BioETL поддерживает запуск пайплайнов на основе локального кеша Bronze-слоя вместо выполнения HTTP-запросов к API. Это полезно для быстрой отладки трансформаций и тестирования DQ-правил на ранее загруженных данных.
 
-> **Note:** С версии 5.9.0 опция `--use-cached-bronze` **включена по умолчанию**.
-> Пайплайн сначала ищет данные в `data/output/bronze/{provider}/{entity}`.
+> **Note:** Опция `--use-cached-bronze` **выключена по умолчанию**.
+> Для запуска из кеша явно укажите флаг `--use-cached-bronze`.
 
 ```bash
-# Использовать кеш (по умолчанию)
-bioetl run --pipeline chembl_activity
+# Использовать кеш Bronze-слоя
+bioetl run --pipeline chembl_activity --use-cached-bronze
 
 # Принудительно запросить свежие данные из API
 bioetl run --pipeline chembl_activity --no-cached-bronze
@@ -193,10 +193,10 @@ provider: chembl
 entity: activity
 
 pipeline:
-  pipeline-name: chembl_activity
+  pipeline_name: chembl_activity
   provider: chembl
-  entity-type: activity
-  business-primary-keys: [activity-id]
+  entity_type: activity
+  business_primary_keys: [activity-id]
 
 quality:
   entity-field-validations:
@@ -250,7 +250,7 @@ bioetl lock release --pipeline chembl_activity --run-id <UUID>
 bioetl run --pipeline chembl_activity --debug
 
 # Via переменную окружения
-export BIOETL-LOG-LEVEL=DEBUG
+export BIOETL_LOG_LEVEL=DEBUG
 bioetl run --pipeline chembl_activity
 ```
 
@@ -285,10 +285,10 @@ curl http://localhost:8000/metrics | grep bioetl-
 
 ```bash
 # Включить (по умолчанию)
-export BIOETL-METRICS-ENABLED=true
+export BIOETL_METRICS_ENABLED=true
 
 # Отключить
-export BIOETL-METRICS-ENABLED=false
+export BIOETL_METRICS_ENABLED=false
 ```
 
 > **Подробнее:** [Metrics & Monitoring Guide](metrics-monitoring.md)
@@ -339,10 +339,10 @@ data/
 │   │       └── batch-001.jsonl.zst
 │   ├── silver/
 │   │   └── chembl/activity/
-│   │       └── -delta-log/
+│   │       └── _delta_log/
 │   └── gold/
 │       └── chembl/activity/
-│           └── -delta-log/
+│           └── _delta_log/
 ├── checkpoints/
 │   └── chembl_activity.json
 └── quarantine/

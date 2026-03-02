@@ -147,7 +147,19 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch records from PubChem. Supports SMILES/CID filtering and name search."""
+        """Fetch records from PubChem. Supports SMILES/CID filtering and name search.
+
+        Args:
+            entity_type: Entity type identifier.
+            limit: Maximum number of records to process.
+            query: Search query string.
+            filter_ids: List of identifiers to filter by.
+            filter_field: Field name to apply filter on.
+            offset: Offset.
+
+        Returns:
+            Async iterator yielding fetched records.
+        """
         if filter_ids and filter_field:
             async for record in self.fetch_filtered(
                 entity_type, filter_ids, filter_field, limit
@@ -175,7 +187,17 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
         filter_field: str,
         limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch PubChem records by filter ID list. Implements FilterableDataSourcePort."""
+        """Fetch PubChem records by filter ID list. Implements FilterableDataSourcePort.
+
+        Args:
+            entity_type: Entity type identifier.
+            filter_ids: List of identifiers to filter by.
+            filter_field: Field name to apply filter on.
+            limit: Maximum number of records to process.
+
+        Returns:
+            Async iterator yielding fetched records.
+        """
         if entity_type != "compound":
             raise ValueError(
                 f"fetch_filtered only supports 'compound', got: {entity_type}"
@@ -230,6 +252,8 @@ class PubChemAdapter(FilterableStubMixin, BaseSyncAdapter):
             >>> async for compound in adapter.fetch_as_models("compound", query="aspirin"):
             ...     logger.debug("compound_fetched", cid=compound.cid, smiles=compound.canonical_smiles)
 
+        Returns:
+            Async iterator yielding fetched records.
         """
         model_class = PUBCHEM_DTO_MODELS.get(entity_type)
         if model_class is None:

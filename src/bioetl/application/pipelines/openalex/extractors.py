@@ -89,7 +89,14 @@ def _parse_topic_dict(topic: dict[str, Any]) -> dict[str, Any] | None:
 
 
 def extract_doi(doi_url: str | None) -> str | None:
-    """Extract bare DOI from OpenAlex DOI URL."""
+    """Extract bare DOI from OpenAlex DOI URL.
+
+    Args:
+        doi_url: Doi url.
+
+    Returns:
+        Extracted value.
+    """
     if not doi_url:
         return None
     if doi_url.startswith("https://doi.org/"):
@@ -102,7 +109,14 @@ def extract_doi(doi_url: str | None) -> str | None:
 
 
 def extract_openalex_id(openalex_url: str | None) -> str | None:
-    """Extract OpenAlex ID from OpenAlex URL."""
+    """Extract OpenAlex ID from OpenAlex URL.
+
+    Args:
+        openalex_url: Openalex url.
+
+    Returns:
+        Extracted value.
+    """
     if not openalex_url:
         return None
     if "/" in openalex_url:
@@ -111,7 +125,14 @@ def extract_openalex_id(openalex_url: str | None) -> str | None:
 
 
 def extract_authors(authorships: list[dict[str, Any]]) -> list[str]:
-    """Extract author display names from authorships array."""
+    """Extract author display names from authorships array.
+
+    Args:
+        authorships: Authorships.
+
+    Returns:
+        Extracted value.
+    """
     authors = []
     for authorship in authorships:
         author = authorship.get("author", {})
@@ -198,7 +219,14 @@ def extract_author_orcids(authorships: list[dict[str, Any]]) -> list[str]:
 
 
 def extract_affiliations(authorships: list[dict[str, Any]]) -> list[str]:
-    """Extract unique affiliations from authorships (sorted)."""
+    """Extract unique affiliations from authorships (sorted).
+
+    Args:
+        authorships: Authorships.
+
+    Returns:
+        Extracted value.
+    """
 
     affiliations: set[str] = set()
     for authorship in authorships:
@@ -291,7 +319,15 @@ def extract_topics(
     topics: list[dict[str, Any]] | None,
     max_count: int = 10,
 ) -> list[dict[str, Any]]:
-    """Extract topics with hierarchical classification (domain/field/subfield/topic)."""
+    """Extract topics with hierarchical classification (domain/field/subfield/topic).
+
+    Args:
+        topics: Topics.
+        max_count: Number of max.
+
+    Returns:
+        Extracted value.
+    """
     if not topics or not isinstance(topics, list):
         return []
 
@@ -309,7 +345,14 @@ def extract_topics(
 def extract_primary_topic(
     primary_topic: dict[str, Any] | None,
 ) -> dict[str, Any] | None:
-    """Extract single most relevant topic for a work."""
+    """Extract single most relevant topic for a work.
+
+    Args:
+        primary_topic: Primary topic.
+
+    Returns:
+        Extracted value.
+    """
     if not primary_topic or not isinstance(primary_topic, dict):
         return None
     return _parse_topic_dict(primary_topic)
@@ -339,7 +382,14 @@ def _parse_grant_dict(grant: dict[str, Any]) -> dict[str, Any] | None:
 
 
 def extract_grants(grants: list[dict[str, Any]] | None) -> list[dict[str, Any]]:
-    """Extract grant/funding information from grants array."""
+    """Extract grant/funding information from grants array.
+
+    Args:
+        grants: Grants.
+
+    Returns:
+        Extracted value.
+    """
     if not grants or not isinstance(grants, list):
         return []
 
@@ -355,7 +405,14 @@ def extract_grants(grants: list[dict[str, Any]] | None) -> list[dict[str, Any]]:
 
 
 def extract_journal_info(primary_location: dict[str, Any] | None) -> dict[str, Any]:
-    """Extract journal info (journal, issn, publisher) from primary_location."""
+    """Extract journal info (journal, issn, publisher) from primary_location.
+
+    Args:
+        primary_location: Primary location.
+
+    Returns:
+        Extracted value.
+    """
     if not primary_location or not isinstance(primary_location, dict):
         return {"journal": None, "issn": None, "publisher": None}
 
@@ -371,7 +428,14 @@ def extract_journal_info(primary_location: dict[str, Any] | None) -> dict[str, A
 
 
 def reconstruct_abstract(inverted_index: dict[str, list[int]] | None) -> str | None:
-    """Reconstruct abstract from OpenAlex inverted index format."""
+    """Reconstruct abstract from OpenAlex inverted index format.
+
+    Args:
+        inverted_index: Inverted index.
+
+    Returns:
+        The str | None result.
+    """
     if not inverted_index or not isinstance(inverted_index, dict):
         return None
 
@@ -393,7 +457,14 @@ def reconstruct_abstract(inverted_index: dict[str, list[int]] | None) -> str | N
 
 
 def extract_open_access_info(open_access: dict[str, Any] | None) -> dict[str, Any]:
-    """Extract Open Access info (is_oa, oa_status)."""
+    """Extract Open Access info (is_oa, oa_status).
+
+    Args:
+        open_access: Open access.
+
+    Returns:
+        Extracted value.
+    """
     if not open_access or not isinstance(open_access, dict):
         return {"is_oa": None, "oa_status": None}
 
@@ -404,7 +475,14 @@ def extract_open_access_info(open_access: dict[str, Any] | None) -> dict[str, An
 
 
 def extract_external_ids(ids: dict[str, Any] | None) -> dict[str, Any]:
-    """Extract external identifiers (pmid, pmcid, mag_id) from ids object."""
+    """Extract external identifiers (pmid, pmcid, mag_id) from ids object.
+
+    Args:
+        ids: Ids.
+
+    Returns:
+        Extracted value.
+    """
     if not ids or not isinstance(ids, dict):
         return {"pmid": None, "pmmolecule_id": None, "mag_id": None}
 
@@ -428,7 +506,14 @@ def extract_external_ids(ids: dict[str, Any] | None) -> dict[str, Any]:
 
 
 def extract_mesh_terms(mesh: list[dict[str, Any]] | None) -> list[str]:
-    """Extract unique MeSH descriptor names from mesh array."""
+    """Extract unique MeSH descriptor names from mesh array.
+
+    Args:
+        mesh: Mesh.
+
+    Returns:
+        Extracted value.
+    """
     if not mesh or not isinstance(mesh, list):
         return []
 
@@ -447,7 +532,14 @@ def extract_mesh_terms(mesh: list[dict[str, Any]] | None) -> list[str]:
 
 
 def extract_keywords(keywords: list[dict[str, Any]] | None) -> list[str]:
-    """Extract keyword display names from keywords array."""
+    """Extract keyword display names from keywords array.
+
+    Args:
+        keywords: Keywords.
+
+    Returns:
+        Extracted value.
+    """
     if not keywords or not isinstance(keywords, list):
         return []
 
@@ -463,7 +555,14 @@ def extract_keywords(keywords: list[dict[str, Any]] | None) -> list[str]:
 
 
 def extract_biblio_info(biblio: dict[str, Any] | None) -> dict[str, Any]:
-    """Extract bibliographic info (volume, issue, page_first, page_last)."""
+    """Extract bibliographic info (volume, issue, page_first, page_last).
+
+    Args:
+        biblio: Biblio.
+
+    Returns:
+        Extracted value.
+    """
     if not biblio or not isinstance(biblio, dict):
         return {
             "volume": None,

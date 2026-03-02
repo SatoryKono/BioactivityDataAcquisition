@@ -134,7 +134,7 @@ print('Records:', len(d.get('molecules',[])))
 | Base URL | `https://api.crossref.org` |
 | Auth Type | `email` (polite pool via `mailto` parameter) |
 | Rate Limit | 50 req/sec (polite pool), burst 100 |
-| Polite Pool | `true` (requires `BIOETL-CROSSREF-EMAIL` env var) |
+| Polite Pool | `true` (requires `BIOETL_CROSSREF_EMAIL` env var) |
 | Batch Size | 50 DOIs per batch |
 | Cursor Pagination | `true` |
 | Timeout | 30.0 sec |
@@ -234,7 +234,7 @@ print('Next cursor:', msg.get('next-cursor', 'N/A')[:20], '...')
 | Base URL | `https://api.openalex.org` |
 | Auth Type | `email` (polite pool via `mailto` parameter) |
 | Rate Limit | 10 req/sec (polite pool), burst 20 |
-| Polite Pool | `true` (requires `BIOETL-OPENALEX-EMAIL` env var) |
+| Polite Pool | `true` (requires `BIOETL_OPENALEX_EMAIL` env var) |
 | Batch Size | 50 DOIs per batch |
 | Cursor Pagination | `true` |
 | Timeout | 30.0 sec |
@@ -427,8 +427,8 @@ done
 | Parameter | Value |
 |-----------|-------|
 | Base URL | `https://eutils.ncbi.nlm.nih.gov/entrez/eutils` |
-| Auth Type | `api-key` (optional, via `BIOETL-PUBMED-API-KEY` env var) |
-| Email | Required (`BIOETL-PUBMED-EMAIL` env var, default: `bioetl-bot@example.com`) |
+| Auth Type | `api-key` (optional, via `BIOETL_PUBMED_API_KEY` env var) |
+| Email | Required (`BIOETL_PUBMED_EMAIL` env var, default: `bioetl-bot@example.com`) |
 | Rate Limit (no key) | 3.0 req/sec, burst 5 |
 | Rate Limit (with key) | 10 req/sec, burst 20 |
 | Batch Size | 200 PMIDs per efetch request |
@@ -525,7 +525,7 @@ curl -s -o /dev/null -w "%{http-code}" \
 | Parameter | Value |
 |-----------|-------|
 | Base URL | `https://api.semanticscholar.org/graph/v1` |
-| Auth Type | `api-key` (via `BIOETL-SEMANTICSCHOLAR-API-KEY` env var) |
+| Auth Type | `api-key` (via `BIOETL_SEMANTICSCHOLAR_API_KEY` env var) |
 | Rate Limit (no key) | 0.1 req/sec (1 per 10 sec), burst 1 |
 | Rate Limit (with key) | 1.0 req/sec, burst 5 |
 | Sliding Window | 300 sec (5-minute window) |
@@ -643,7 +643,7 @@ curl -s -o /dev/null -w "%{http-code}\n" "https://api.semanticscholar.org/graph/
 | Parameter | Value |
 |-----------|-------|
 | Base URL | `https://rest.uniprot.org` |
-| Auth Type | `api-key` (optional, via `BIOETL-UNIPROT-API-KEY` env var) |
+| Auth Type | `api-key` (optional, via `BIOETL_UNIPROT_API_KEY` env var) |
 | Rate Limit (no key) | 10.0 req/sec, burst 20 |
 | Rate Limit (with key) | 100 req/sec, burst 200 |
 | Batch Size | 200 (source YAML), 100 IDs per OR-query (adapter constant `UNIPROT-BATCH-SIZE`) |
@@ -761,12 +761,12 @@ curl -s "https://rest.uniprot.org/uniprotkb/stream?query=accession:P62988&format
 | Provider | Auth Type | Env Variable | Polite Pool |
 |----------|-----------|-------------|-------------|
 | ChEMBL | Public | N/A | N/A |
-| CrossRef | Email | `BIOETL-CROSSREF-EMAIL` | Yes (50 req/sec) |
-| OpenAlex | Email | `BIOETL-OPENALEX-EMAIL` | Yes (10 req/sec) |
+| CrossRef | Email | `BIOETL_CROSSREF_EMAIL` | Yes (50 req/sec) |
+| OpenAlex | Email | `BIOETL_OPENALEX_EMAIL` | Yes (10 req/sec) |
 | PubChem | Public | N/A | N/A |
-| PubMed | API Key (optional) | `BIOETL-PUBMED-API-KEY`, `BIOETL-PUBMED-EMAIL` | N/A |
-| Semantic Scholar | API Key (recommended) | `BIOETL-SEMANTICSCHOLAR-API-KEY` | N/A |
-| UniProt | API Key (optional) | `BIOETL-UNIPROT-API-KEY` | N/A |
+| PubMed | API Key (optional) | `BIOETL_PUBMED_API_KEY`, `BIOETL_PUBMED_EMAIL` | N/A |
+| Semantic Scholar | API Key (recommended) | `BIOETL_SEMANTICSCHOLAR_API_KEY` | N/A |
+| UniProt | API Key (optional) | `BIOETL_UNIPROT_API_KEY` | N/A |
 
 ### Rate Limit Comparison
 

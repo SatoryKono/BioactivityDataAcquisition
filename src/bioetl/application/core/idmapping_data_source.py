@@ -127,6 +127,9 @@ class IDMappingDataSource:
         Raises:
             FileNotFoundError: If input CSV file doesn't exist (standalone mode).
             ValueError: If required column is missing from CSV.
+
+        Returns:
+            Async iterator yielding fetched records.
         """
         _ = query, filter_field
 

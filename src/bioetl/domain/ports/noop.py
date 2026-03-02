@@ -58,13 +58,26 @@ class _NoOpSpan:
 
     # Any: OTel Tracer facade (Nu...
     def set_attribute(self, key: str, value: Any) -> None:
-        """Set span attribute (no-op)."""
+        """Set span attribute (no-op).
+
+        Args:
+            key: Lookup key.
+            value: Input value.
+        """
 
     def set_status(self, status: Any) -> None:  # Any: OTel Tracer facade (Null Object)
-        """Set span status (no-op)."""
+        """Set span status (no-op).
+
+        Args:
+            status: Status value.
+        """
 
     def record_exception(self, exception: Exception) -> None:
-        """Record exception (no-op)."""
+        """Record exception (no-op).
+
+        Args:
+            exception: Exception.
+        """
 
 
 class _NoOpOtelTracer:
@@ -84,6 +97,10 @@ class _NoOpOtelTracer:
 
         Returns:
             A no-op span context manager.
+
+        Args:
+            *_args: Additional positional arguments.
+            **_kwargs: Additional keyword arguments.
         """
         return _NoOpSpan()
 
@@ -165,13 +182,31 @@ class NoOpMetrics:
     def observe_histogram(
         self, name: str, value: float, labels: dict[str, str]
     ) -> None:
-        """Observe a value for a histogram metric (no-op)."""
+        """Observe a value for a histogram metric (no-op).
+
+        Args:
+            name: Identifier name.
+            value: Input value.
+            labels: Labels.
+        """
 
     def increment_counter(self, name: str, value: int, labels: dict[str, str]) -> None:
-        """Increment a counter metric (no-op)."""
+        """Increment a counter metric (no-op).
+
+        Args:
+            name: Identifier name.
+            value: Input value.
+            labels: Labels.
+        """
 
     def set_gauge(self, name: str, value: float, labels: dict[str, str]) -> None:
-        """Set a gauge metric to a specific value (no-op)."""
+        """Set a gauge metric to a specific value (no-op).
+
+        Args:
+            name: Identifier name.
+            value: Input value.
+            labels: Labels.
+        """
 
     def inc_quarantine_records(
         self,
@@ -179,7 +214,13 @@ class NoOpMetrics:
         reason: str,
         count: int = 1,
     ) -> None:
-        """Increment quarantine records counter (no-op)."""
+        """Increment quarantine records counter (no-op).
+
+        Args:
+            pipeline: Pipeline.
+            reason: Reason description.
+            count: Count.
+        """
 
     def inc_dq_validation_failures(
         self,
@@ -188,7 +229,14 @@ class NoOpMetrics:
         severity: str,
         count: int = 1,
     ) -> None:
-        """Increment DQ validation failures counter (no-op)."""
+        """Increment DQ validation failures counter (no-op).
+
+        Args:
+            pipeline: Pipeline.
+            stage: Stage.
+            severity: Severity.
+            count: Count.
+        """
 
     def close(self) -> None:
         """No-op close. Idempotent."""

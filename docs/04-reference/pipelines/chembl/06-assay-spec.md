@@ -1,6 +1,6 @@
 # ChEMBL Assay Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.22*
+*Version 1.2.0 | Aligned with RULES.md v5.23*
 
 ----------------------------------------------------------------------
 
@@ -220,27 +220,27 @@ class AssaySchema(ETLRecordSchema):
 ## 6. Pipeline Configuration
 
 ```yaml
-pipeline-name: chembl_assay
+pipeline_name: chembl_assay
 provider: chembl
-entity-type: assay
+entity_type: assay
 version: "1.2.0"
 
-primary-keys: ["assay-id"]
-silver-table: "chembl_assay"
-gold-table: "chembl_assay"
+primary_keys: ["assay-id"]
+silver_table: "chembl_assay"
+gold_table: "chembl_assay"
 
-gold-filters:
-  required-fields:
+gold_filters:
+  required_fields:
     - description
   columns:
     confidence-score: [7, 8, 9]  # High confidence only
 
-input-filter:
+input_filter:
   enabled: true
-  source-path: "data/input/assay.csv"
-  column-name: "assay-id"
-  filter-field: "assay-id"
-  batch-size: 20
+  source_path: "data/input/assay.csv"
+  column_name: "assay-id"
+  filter_field: "assay-id"
+  batch_size: 20
 ```
 
 ----------------------------------------------------------------------

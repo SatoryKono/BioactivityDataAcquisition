@@ -1,6 +1,6 @@
 # OpenAlex Publication Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.22*
+*Version 1.2.0 | Aligned with RULES.md v5.23*
 
 ---
 
@@ -51,7 +51,7 @@ import httpx
 url = f"https://api.openalex.org/works/doi:{doi}"
 
 # By OpenAlex ID
-url = f"https://api.openalex.org/works/{openalex-id}"
+url = f"https://api.openalex.org/works/{openalex_id}"
 
 # Batch search
 url = "https://api.openalex.org/works"
@@ -68,19 +68,19 @@ params = {
 | 1 | `id` | string | No | OpenAlex ID (W[0-9]+) |
 | 2 | `doi` | string | Yes | DOI |
 | 3 | `title` | string | Yes | Title |
-| 4 | `display-name` | string | Yes | Display name |
-| 5 | `publication-year` | int | Yes | Year |
-| 6 | `publication-date` | string | Yes | Full date |
+| 4 | `display_name` | string | Yes | Display name |
+| 5 | `publication_year` | int | Yes | Year |
+| 6 | `publication_date` | string | Yes | Full date |
 | 7 | `type` | string | Yes | Work type |
 | 8 | `cited-by-count` | int | Yes | Citation count |
-| 9 | `is-oa` | boolean | Yes | Open access flag |
+| 9 | `is_oa` | boolean | Yes | Open access flag |
 | 10 | `is-retracted` | boolean | Yes | Retracted flag |
 | 11 | `open-access` | object | Yes | OA details |
 | 12 | `authorships` | array | Yes | Authors with affiliations |
 | 13 | `concepts` | array | Yes | Topic concepts |
-| 14 | `primary-location` | object | Yes | Primary source |
+| 14 | `primary_location` | object | Yes | Primary source |
 | 15 | `biblio` | object | Yes | Bibliographic info |
-| 16 | `abstract-inverted-index` | object | Yes | Abstract (inverted) |
+| 16 | `abstract_inverted_index` | object | Yes | Abstract (inverted) |
 | 17 | `language` | string | Yes | Language code |
 
 ### 3.3. Nested Structure: authorships
@@ -88,10 +88,10 @@ params = {
 | Field | Type | Description |
 |-------|------|-------------|
 | `author.id` | string | Author OpenAlex ID |
-| `author.display-name` | string | Author name |
+| `author.display_name` | string | Author name |
 | `author.orcid` | string | ORCID |
 | `institutions[*].id` | string | Institution IDs |
-| `institutions[*].display-name` | string | Institution names |
+| `institutions[*].display_name` | string | Institution names |
 | `raw-affiliation-string` | string | Raw affiliation |
 
 ### 3.4. Nested Structure: concepts
@@ -99,19 +99,19 @@ params = {
 | Field | Type | Description |
 |-------|------|-------------|
 | `id` | string | Concept OpenAlex ID |
-| `display-name` | string | Concept name |
+| `display_name` | string | Concept name |
 | `level` | int | Hierarchy level (0-5) |
 | `score` | float | Relevance score (0-1) |
 
-### 3.5. Nested Structure: primary-location
+### 3.5. Nested Structure: primary_location
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `source.id` | string | Source OpenAlex ID |
-| `source.display-name` | string | Journal/venue name |
-| `source.issn-l` | string | ISSN-L |
-| `pdf-url` | string | PDF URL |
-| `landing-page-url` | string | Landing page |
+| `source.display_name` | string | Journal/venue name |
+| `source.issn_l` | string | ISSN-L |
+| `pdf_url` | string | PDF URL |
+| `landing_page_url` | string | Landing page |
 
 ---
 
@@ -121,7 +121,7 @@ params = {
 
 | Parameter | Value |
 |-----------|-------|
-| **Entity ID Field** | `openalex-id` |
+| **Entity ID Field** | `openalex_id` |
 | **ID Source** | `from-api` |
 | **Format** | OpenAlex ID (W[0-9]+) |
 
@@ -150,16 +150,16 @@ def reconstruct-abstract(inverted-index: dict) -> str:
 
 | Nested Path | Flattened Name | Strategy |
 |-------------|----------------|----------|
-| `id` | `openalex-id` | Extract (strip URL prefix) |
-| `open-access.is-oa` | `is-oa` | Extract boolean |
-| `open-access.oa-status` | `oa-status` | Extract string |
-| `primary-location.source.display-name` | `journal` | Extract |
-| `primary-location.source.issn-l` | `issn` | Extract |
+| `id` | `openalex_id` | Extract (strip URL prefix) |
+| `open-access.is_oa` | `is_oa` | Extract boolean |
+| `open-access.oa_status` | `oa_status` | Extract string |
+| `primary_location.source.display_name` | `journal` | Extract |
+| `primary_location.source.issn_l` | `issn` | Extract |
 | `biblio.volume` | `volume` | Extract |
 | `biblio.issue` | `issue` | Extract |
 | `authorships[*]` | `authors` | JSON array |
 | `concepts[*]` | `concepts` | JSON array |
-| `abstract-inverted-index` | `abstract` | Reconstruct |
+| `abstract_inverted_index` | `abstract` | Reconstruct |
 
 ---
 
@@ -172,28 +172,28 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
     """OpenAlex Publication validation schema."""
 
     # === Primary Key ===
-    openalex-id: Series[str] = pa.Field(
+    openalex_id: Series[str] = pa.Field(
         nullable=False,
-        str-matches=r"^W\d+$",
+        str_matches=r"^W\d+$",
     )
 
     # === Core Fields ===
     doi: Series[str] = pa.Field(
         nullable=True,
-        str-matches=DOI-REGEX-PATTERN,
+        str_matches=DOI_REGEX_PATTERN,
     )
     title: Series[str] = pa.Field(nullable=True)
     abstract: Series[str] = pa.Field(nullable=True)
     year: Series[pd.Int64Dtype] = pa.Field(
         nullable=True,
-        ge=MIN-PUBLICATION-YEAR,
-        le=MAX-PUBLICATION-YEAR,
+        ge=MIN_PUBLICATION_YEAR,
+        le=MAX_PUBLICATION_YEAR,
     )
-    publication-date: Series[str] = pa.Field(
+    publication_date: Series[str] = pa.Field(
         nullable=True,
-        str-matches=r"^\d{4}-\d{2}-\d{2}$",
+        str_matches=r"^\d{4}-\d{2}-\d{2}$",
     )
-    doc-type: Series[str] = pa.Field(nullable=False)
+    doc_type: Series[str] = pa.Field(nullable=False)
 
     # === Journal ===
     journal: Series[str] = pa.Field(nullable=True)
@@ -201,14 +201,14 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
     publisher: Series[str] = pa.Field(nullable=True)
 
     # === Open Access ===
-    is-oa: Series[bool] = pa.Field(nullable=True)
-    oa-status: Series[str] = pa.Field(
+    is_oa: Series[bool] = pa.Field(nullable=True)
+    oa_status: Series[str] = pa.Field(
         nullable=True,
         isin=["gold", "green", "hybrid", "bronze", "closed"],
     )
 
     # === Metrics ===
-    citation-count: Series[pd.Int64Dtype] = pa.Field(
+    citation_count: Series[pd.Int64Dtype] = pa.Field(
         nullable=True,
         ge=0,
     )
@@ -218,13 +218,13 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
     source: Series[str] = pa.Field(nullable=False)
 
     # === Lookup Metadata ===
-    lookup-method: Series[str] = pa.Field(
-        alias="-lookup-method",
+    lookup_method: Series[str] = pa.Field(
+        alias="-lookup_method",
         nullable=False,
-        isin=["doi", "title-fallback", "title-only", "unknown"],
+        isin=["doi", "title_fallback", "title_only", "unknown"],
     )
-    original-doi: Series[str] = pa.Field(
-        alias="-original-doi",
+    original_doi: Series[str] = pa.Field(
+        alias="-original_doi",
         nullable=True,
     )
 
@@ -242,46 +242,46 @@ class OpenAlexPublicationSchema(ETLRecordSchema):
 | `doi` | ChEMBL | ChEMBL | `document.doi` |
 | `doi` | CrossRef | CrossRef | `DOI` |
 | `doi` | Semantic Scholar | S2 | `externalIds.DOI` |
-| `openalex-id` | OpenAlex Works | OpenAlex | `id` |
+| `openalex_id` | OpenAlex Works | OpenAlex | `id` |
 
 ---
 
 ## 7. Pipeline Configuration
 
 ```yaml
-pipeline-name: openalex_publication
+pipeline_name: openalex_publication
 provider: openalex
-entity-type: publication
+entity_type: publication
 version: "1.2.0"
 
-primary-keys: ["openalex-id"]
-silver-table: "openalex_publication"
-gold-table: "openalex_publication"
+primary_keys: ["openalex_id"]
+silver_table: "openalex_publication"
+gold_table: "openalex_publication"
 
 source:
   type: api
-  batch-size: 50
+  batch_size: 50
 
 sink:
   bronze:
     path: "data/output/bronze"
   silver:
     path: "data/output/silver"
-    primary-key: ["openalex-id"]
-    partition-by: []
+    primary_key: ["openalex_id"]
+    partition_by: []
   gold:
     path: "data/output/gold"
 
-gold-filters:
-  required-fields:
+gold_filters:
+  required_fields:
     - title
 
-input-filter:
+input_filter:
   enabled: true
-  source-path: "data/input/doi.csv"
-  column-name: "doi"
-  filter-field: "doi"
-  batch-size: 50
+  source_path: "data/input/doi.csv"
+  column_name: "doi"
+  filter_field: "doi"
+  batch_size: 50
 ```
 
 ---
@@ -305,5 +305,5 @@ if not result:
     url = "https://api.openalex.org/works"
     params = {"filter": f"title.search:{title}"}
     result = await client.get(url, params=params)
-    # Mark as title-fallback in -lookup-method
+    # Mark as title_fallback in -lookup_method
 ```

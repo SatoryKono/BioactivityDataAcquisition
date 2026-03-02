@@ -1,6 +1,6 @@
 # xwalk — Field-level Crosswalk Generator
 
-*Priority: critical | Version: 1.0 | Aligned with RULES.md v5.22*
+*Priority: critical | Version: 1.0 | Aligned with RULES.md v5.23*
 
 ---
 

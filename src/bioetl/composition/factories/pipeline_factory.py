@@ -404,7 +404,20 @@ def create_pipeline_factory(
     pandera_silver_schema: Any = None,  # Any: Pandera DataFrameModel...
     transformer_class: type[BaseTransformer] | None = None,
 ) -> GenericPipelineFactory[TPipeline]:
-    """Convenience function for creating pipeline factories."""
+    """Convenience function for creating pipeline factories.
+
+    Args:
+        pipeline_name: Pipeline identifier.
+        pipeline_class: Pipeline class.
+        provider: Data provider name.
+        silver_schema: Silver schema.
+        gold_schema: Gold schema.
+        pandera_silver_schema: Pandera silver schema.
+        transformer_class: Transformer class.
+
+    Returns:
+        Newly created GenericPipelineFactory[TPipeline] instance.
+    """
     return GenericPipelineFactory(
         pipeline_name=pipeline_name,
         pipeline_class=pipeline_class,

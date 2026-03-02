@@ -39,7 +39,7 @@
 
 ## 3. Трансформация
 
-**Файл:** `src/bioetl/application/pipelines/chembl/publication-term-transformer.py`
+**Файл:** `src/bioetl/application/pipelines/chembl/publication_term_transformer.py`
 
 ### Entity ID
 
@@ -71,10 +71,10 @@ entity-id = hashlib.sha256(composite.encode()).hexdigest()[:16]
 ### Gold-фильтры
 
 ```yaml
-gold-filters:
+gold_filters:
   columns:
     term-type: [MESH-HEADING, KEYWORD]  # Основные типы терминов
-  required-fields:
+  required_fields:
     - document-chembl-id
     - term
     - term-type
@@ -86,13 +86,13 @@ gold-filters:
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_publication_term
+bioetl run --pipeline chembl_publication_term
 
 # С ограничением
-bioetl run chembl_publication_term --limit 1000
+bioetl run --pipeline chembl_publication_term --limit 1000
 
 # С фильтрацией по публикациям
-bioetl run chembl_publication_term --input-filter data/input/publications.csv
+bioetl run --pipeline chembl_publication_term --input-csv data/input/publications.csv
 ```
 
 ---
@@ -104,7 +104,7 @@ Silver-таблица партиционирована по `term-type` для �
 ```yaml
 sink:
   silver:
-    partition-by: ["term-type"]
+    partition_by: ["term-type"]
 ```
 
 ---
@@ -114,10 +114,10 @@ sink:
 | Компонент | Путь |
 |-----------|------|
 | Конфигурация | `configs/entities/chembl/publication_term.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/publication-term-transformer.py` |
-| Пайплайн | `src/bioetl/application/pipelines/chembl/publication-term.py` |
-| Сущность | `src/bioetl/domain/entities/chembl-structures.py` (PublicationTerm) |
-| Схема | `src/bioetl/domain/schemas/chembl/publication-term.py` |
+| Трансформер | `src/bioetl/application/pipelines/chembl/publication_term_transformer.py` |
+| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py` |
+| Сущность | `src/bioetl/domain/entities/chembl_structures.py` (PublicationTerm) |
+| Схема | `src/bioetl/domain/schemas/chembl/publication_term.py` |
 
 ---
 
@@ -126,8 +126,8 @@ sink:
 `chembl_publication_term` — производная от `chembl_publication`. Для полного покрытия рекомендуется сначала загрузить публикации:
 
 ```bash
-bioetl run chembl_publication --limit 100
-bioetl run chembl_publication_term --limit 1000
+bioetl run --pipeline chembl_publication --limit 100
+bioetl run --pipeline chembl_publication_term --limit 1000
 ```
 
 ---

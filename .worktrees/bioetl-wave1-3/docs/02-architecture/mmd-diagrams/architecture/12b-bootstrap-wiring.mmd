@@ -1,0 +1,78 @@
+%% BioETL — Bootstrap: Wiring Graph
+%% Covers runtime assembly sequence and main dependency injection graph.
+
+%% @version 1.0.0
+%% @date    2026-02-25
+%% @type    flowchart
+%% @level   System / Component
+%% @view    bootstrap-wiring
+%% @parent  12-bootstrap-di-container.mmd
+%% @nodes   15
+%% @uniform width=400 height=56 max_title_len=40 max_desc_lines=1
+
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+graph TB
+    subgraph Composition["Composition Layer"]
+        RA["bootstrap_pipeline_runner"]:::size-sm
+        RBA["RunnerBootstrap"]:::size-sm
+        SBA["StorageBootstrap"]:::size-sm
+        CBA["CheckpointBootstrap"]:::size-sm
+        LBA["LockBootstrap"]:::size-sm
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        ADAPTER["Provider Adapter (DataSourcePort)"]:::size-sm
+        STORAGE["BronzeWriter / SilverWriter / GoldWriter"]:::size-sm
+        LOGGER["UnifiedLogger (LoggerPort)"]:::size-sm
+        METRICS["PrometheusMetrics (MetricsPort)"]:::size-sm
+        TRACER["OpenTelemetryTracer (TracingPort)"]:::size-sm
+        LOCK["MemoryLock (LockPort)"]:::size-sm
+        CHKPT["LocalCheckpoint (CheckpointPort)"]:::size-sm
+        QUAR["UnifiedQuarantine (QuarantinePort)"]:::size-sm
+    end
+
+    subgraph Application["Application Layer"]
+        PS["PipelineServices"]:::size-sm
+        RUNNER["PipelineRunner"]:::size-sm
+    end
+
+    RA --> RBA
+    RA --> SBA
+    RA --> CBA
+    RA --> LBA
+    RA -.-> ADAPTER
+    SBA --> STORAGE
+    RA --> LOGGER
+    RA --> METRICS
+    RA --> TRACER
+    LBA --> LOCK
+    CBA --> CHKPT
+    RA --> QUAR
+    ADAPTER --> PS
+    STORAGE --> PS
+    LOGGER --> PS
+    METRICS --> PS
+    TRACER --> PS
+    LOCK --> PS
+    CHKPT --> PS
+    QUAR --> PS
+    RBA --> RUNNER
+    PS --> RUNNER
+
+    classDef app fill:#f0fdf4,stroke:#16a34a
+    classDef infra fill:#fff1f2,stroke:#dc2626
+    classDef comp fill:#fff7ed,stroke:#f59e0b
+
+    class RA,RBA,SBA,CBA,LBA comp
+    class ADAPTER,STORAGE,LOGGER,METRICS,TRACER,LOCK,CHKPT,QUAR infra
+    class PS,RUNNER app

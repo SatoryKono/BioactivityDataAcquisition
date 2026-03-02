@@ -15,14 +15,14 @@ Pipeline configs имели следующие проблемы:
 
 ## Decision
 
-### 1. Единый -base.yaml (v2.0.0)
+### 1. Единый _base.yaml (v2.0.0)
 
-Файл `-base.yaml` является единым источником defaults для всех pipeline configs:
+Файл `_base.yaml` является единым источником defaults для всех pipeline configs:
 
 ```
 configs/
 ├── pipelines/
-│   ├── -base.yaml           # Unified Base Schema v2.0.0 (единый источник defaults)
+│   ├── _base.yaml           # Unified Base Schema v2.0.0 (единый источник defaults)
 │   ├── chembl/              # ChEMBL provider configs
 │   │   ├── activity.yaml
 │   │   ├── assay.yaml
@@ -49,12 +49,12 @@ configs/
 ├── sources/
 │   └── <provider>.yaml      # Provider-level API settings (7 файлов)
 └── quality/
-    ├── -defaults.yaml       # Global DQ defaults
+    ├── _defaults.yaml       # Global DQ defaults
     ├── providers/           # Provider-level DQ rules
     └── entities/            # Entity-level DQ rules
 ```
 
-**Rationale**: Единый источник defaults устраняет рассинхронизацию. Entity configs наследуют от `-base.yaml` и переопределяют только entity-specific поля.
+**Rationale**: Единый источник defaults устраняет рассинхронизацию. Entity configs наследуют от `_base.yaml` и переопределяют только entity-specific поля.
 
 ### 2. Иерархические пути для данных
 
@@ -108,7 +108,7 @@ sink:
 
 ### 4. Pydantic Schema валидация
 
-Валидация entity configs выполняется Pydantic-схемами в `src/bioetl/infrastructure/schemas/pipeline-config.py`:
+Валидация entity configs выполняется Pydantic-схемами в `src/bioetl/infrastructure/schemas/pipeline_config.py`:
 
 ```bash
 # Валидация всех конфигов
@@ -116,7 +116,7 @@ python scripts/validate_pipeline_configs.py
 ```
 
 Schema проверяет:
-- **Обязательные поля**: `pipeline-name`, `provider`, `entity-type`, `version`, `primary-keys`, `silver-table`, `gold-table`, `sink`
+- **Обязательные поля**: `pipeline-name`, `provider`, `entity_type`, `version`, `primary-keys`, `silver-table`, `gold-table`, `sink`
 - **Формат `pipeline-name`**: `^[a-z]+-[a-z-]+$`
 - **Допустимые `provider`**: `chembl`, `pubchem`, `uniprot`, `pubmed`, `crossref`, `openalex`, `semanticscholar`
 - **Структура `sink`**: обязательные `bronze.path`, `silver.path`, `silver.primary-key`, `gold.path`
@@ -194,7 +194,7 @@ dq-overrides:
 
 ### Positive
 
-1. **Единый источник defaults**: `-base.yaml` v2.0.0 — нет дублирования
+1. **Единый источник defaults**: `_base.yaml` v2.0.0 — нет дублирования
 2. **Детерминизм выходных данных**: `sort-by` во всех 21 entity configs (ADR-014)
 3. **Автоматическая валидация**: Pydantic schemas валидируют структуру
 4. **Консистентные пути**: `{layer}/{provider}/{entity}` упрощает навигацию
@@ -209,7 +209,7 @@ dq-overrides:
 
 ### Neutral
 
-1. **21 entity configs + 5 composite**: Все используют единый формат и наследование от `-base.yaml`
+1. **21 entity configs + 5 composite**: Все используют единый формат и наследование от `_base.yaml`
 2. **7 source configs**: Один на провайдера, DRY для API settings
 
 ## Alternatives Considered
@@ -222,7 +222,7 @@ Use YAML anchors/aliases for config inheritance:
 pipeline-name: chembl_activity
 ```
 
-**Rejected**: Requires multi-file anchor resolution. Current file-based inheritance через `-base.yaml` проще и поддерживается стандартными инструментами.
+**Rejected**: Requires multi-file anchor resolution. Current file-based inheritance через `_base.yaml` проще и поддерживается стандартными инструментами.
 
 ### B. Плоские пути без иерархии
 
@@ -246,12 +246,12 @@ pipeline-name: chembl_activity
 
 | Requirement | Status | Notes |
 |-------------|--------|-------|
-| `sink.silver.format: delta` | ✅ PASS | All configs inherit from `-base.yaml` |
+| `sink.silver.format: delta` | ✅ PASS | All configs inherit from `_base.yaml` |
 | `sink.silver.primary-key` | ✅ PASS | All 21 entity configs specify (auto-propagated) |
 | `sink.silver.sort-by` | ✅ PASS | All 21 entity configs (ADR-014, auto-propagated from primary-keys) |
 | `sink.gold.sort-by` | ✅ PASS | All 21 entity configs (ADR-014, auto-propagated from primary-keys) |
-| `dq-overrides` thresholds | ✅ PASS | 0.05/0.20 in `-base.yaml` defaults |
-| `circuit-breaker` settings | ✅ PASS | 5/300 in `-base.yaml` and source configs |
+| `dq-overrides` thresholds | ✅ PASS | 0.05/0.20 in `_base.yaml` defaults |
+| `circuit-breaker` settings | ✅ PASS | 5/300 in `_base.yaml` and source configs |
 | `rate-limit` per provider | ✅ PASS | In 7 source configs |
 | No hardcoded secrets | ✅ PASS | Uses `${ENV-VAR}` syntax where needed |
 | `pipeline-name` format | ✅ PASS | All match `^[a-z]+-[a-z-]+$` |
@@ -259,13 +259,13 @@ pipeline-name: chembl_activity
 
 ## References
 
-- [RULES.md v5.22, Appendix D](../../00-project/RULES.md) - Reference schema
+- [RULES.md v5.23, Appendix D](../../00-project/RULES.md) - Reference schema
 - [ADR-014: Deterministic Writes](ADR-014-deterministic-writes.md) - sort-by requirement
 - [ADR-027: DQ Rules Externalization](ADR-027-dq-rules-externalization.md) - Hierarchical DQ config
 - [03-file-policy.md](../../00-project/governance/03-file-policy.md) - File structure documentation
 - [04-extending-bioetl.md](../../00-project/governance/04-extending-bioetl.md) - Entity config template
 - [configs/base/pipeline.yaml](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/configs/base/pipeline.yaml) - Unified Base Schema v2.0.0
-- [Pipeline Pydantic Schema](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/src/bioetl/infrastructure/schemas/pipeline-config.py) - Pydantic validation schema
+- [Pipeline Pydantic Schema](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/src/bioetl/infrastructure/schemas/pipeline_config.py) - Pydantic validation schema
 
 ## Changelog
 
@@ -274,8 +274,8 @@ pipeline-name: chembl_activity
 | 2026-01-13 | Claude Code | Initial version |
 | 2026-01-14 | Claude Code | Added: Hierarchical paths `{layer}/{provider}/{entity}` |
 | 2026-01-14 | Claude Code | Added: Mandatory `sort-by` for ADR-014 compliance |
-| 2026-01-14 | Claude Code | Added: JSON Schema validation via `-schema.json` |
-| 2026-01-19 | Claude Code | Fixed: Corrected file structure (`-base.yaml` is the defaults file, not `-defaults.yaml`) |
+| 2026-01-14 | Claude Code | Added: JSON Schema validation via `_schema.json` |
+| 2026-01-19 | Claude Code | Fixed: Corrected file structure (`_base.yaml` is the defaults file, not `_defaults.yaml`) |
 | 2026-01-19 | Claude Code | Added: Source config separation (`configs/providers/`) |
 | 2026-01-19 | Claude Code | Added: Hierarchical DQ configuration reference (ADR-027) |
 | 2026-01-19 | Claude Code | Updated: Compliance matrix with verification status |
@@ -284,6 +284,6 @@ pipeline-name: chembl_activity
 | 2026-02-03 | Claude Code | Fixed: ChEMBL has 12 entity configs, pubmed uses publication.yaml |
 | 2026-02-17 | Claude Code | Fixed: Config counts (21 entity + 5 composite), ChEMBL has 14 entity configs |
 | 2026-02-17 | Claude Code | Fixed: DQ path `configs/dq/` migrated to hierarchical DQ configs (ADR-027) |
-| 2026-02-17 | Claude Code | Fixed: Removed `-schema.json` reference (validation via Pydantic schemas) |
+| 2026-02-17 | Claude Code | Fixed: Removed `_schema.json` reference (validation via Pydantic schemas) |
 | 2026-02-17 | Claude Code | Fixed: Composite directory listing (activity, assay, molecule, publication, target) |
 | 2026-02-24 | Claude Code | Superseded (partially): Entity configs consolidated into unified format (see ADR-039). Config path `configs/entities/{p}/{e}.yaml` replaced by `configs/entities/{p}/{e}.yaml`. Legacy directories removed (RF-CFG-035). |

@@ -1,5 +1,5 @@
 # Activity Schema (ChEMBL)
-*Version: 1.0.0 | Aligned with RULES.md v5.22*
+*Version: 1.0.0 | Aligned with RULES.md v5.23*
 
 ## Overview
 
@@ -452,7 +452,7 @@ Gold layer contains only records passing gold-filters:
 | Pandera Schema | `src/bioetl/domain/schemas/chembl/activity.py` |
 | Domain Entity | `src/bioetl/domain/entities/chembl_activity.py` |
 | Base Schema | `src/bioetl/domain/schemas/base.py` |
-| Transformer | `src/bioetl/application/pipelines/chembl/activity-transformer.py` |
+| Transformer | `src/bioetl/application/pipelines/chembl/activity_transformer.py` |
 | Pipeline Config | `configs/entities/chembl/activity.yaml` |
 | VCR Cassettes | `tests/fixtures/vcr/TestChemblActivityPipeline.*.yaml` |
 

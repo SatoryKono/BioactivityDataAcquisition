@@ -8,7 +8,17 @@
 %% @view    config-domain
 %% @parent  11-configuration-system.mmd
 %% @nodes   16
-
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 graph TB
 %% keep-orphan: APC, CBC, CCFG, OBS_SET, PCP, PIPE_SET, SETTINGS, SRC
     subgraph InfraSchemas["Infrastructure Schemas"]

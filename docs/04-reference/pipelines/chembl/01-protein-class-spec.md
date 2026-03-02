@@ -1,6 +1,6 @@
 # ChEMBL Protein Classification Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.22*
+*Version 1.2.0 | Aligned with RULES.md v5.23*
 
 ----------------------------------------------------------------------
 
@@ -163,7 +163,7 @@ content-hash = sha256(f"chembl{canonical-json(filtered-record)}")
 ### 5.1. Pandera Schema
 
 ```python
-# src/bioetl/domain/schemas/chembl/protein-classification.py
+# src/bioetl/domain/schemas/chembl/protein_classification.py
 
 import pandera.pandas as pa
 from pandera.typing import Series
@@ -362,24 +362,24 @@ Mode: Overwrite (reference table)
 ## 10. Pipeline Configuration
 
 ```yaml
-# configs/entities/chembl/protein-class.yaml
+# configs/entities/chembl/protein_class.yaml
 
-pipeline-name: chembl_protein_class
+pipeline_name: chembl_protein_class
 provider: chembl
-entity-type: protein-class
+entity_type: protein-class
 version: "1.2.0"
 description: "ChEMBL Protein Classification hierarchy"
 
-primary-keys: ["protein-class-id"]
-silver-table: chembl_protein_class
-gold-table: chembl_protein_class
+primary_keys: ["protein-class-id"]
+silver_table: chembl_protein_class
+gold_table: chembl_protein_class
 
-source-file: ../../sources/chembl.yaml
-batch-size: 500
-checkpoint-interval: 500
+source_file: ../../sources/chembl.yaml
+batch_size: 500
+checkpoint_interval: 500
 
-gold-filters:
-  required-fields:
+gold_filters:
+  required_fields:
     - pref-name
   columns:
     downgraded: ["0"]
@@ -389,22 +389,22 @@ sink:
     path: "data/output/bronze"
   silver:
     path: "data/output/silver"
-    primary-key: ["protein-class-id"]
-    partition-by: ["class-level"]
-    sort-by:
+    primary_key: ["protein-class-id"]
+    partition_by: ["class-level"]
+    sort_by:
       columns: ["protein-class-id"]
       ascending: true
-    csv-export:
+    csv_export:
       path: "data/output/csv/silver"
   gold:
     path: "data/output/gold"
-    sort-by:
+    sort_by:
       columns: ["class-level", "sort-order", "protein-class-id"]
       ascending: true
-    csv-export:
+    csv_export:
       path: "data/output/csv/gold"
 
-input-filter:
+input_filter:
   enabled: false
 ```
 
@@ -414,15 +414,11 @@ input-filter:
 
 ### 11.1. Unit Tests
 
-- [x] `test-protein-class-normalization.py`
-- [x] `test-protein-class-content-hash.py`
-- [x] `test-protein-class-validation.py`
+- [x] `tests/unit/application/pipelines/test_protein_class_transformer.py`
 
 ### 11.2. Integration Tests (VCR)
 
-- [x] `test-protein-class-api-fetch.py`
-- [x] `test-protein-class-pagination.py`
-- [x] `test-protein-class-error-handling.py`
+- [ ] `tests/integration/pipelines/test_chembl_protein_class.py` (не реализован)
 
 ### 11.3. Architecture Tests
 

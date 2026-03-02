@@ -7,28 +7,28 @@ This guide describes migration to the canonical schema generation flow introduce
 ## What Changed
 
 - Canonical source is now defined as:
-  - `configs/schemas/{provider}/{entity}.yaml` (field grouping and shape)
+  - `configs/entities/{provider}/{entity}.yaml` (field grouping and shape)
   - typed annotations in Silver Pandera schema classes (field typing)
 - Generated artifacts are managed via a single command:
 
 ```bash
-uv run python scripts/generate-schema-artifacts.py
+uv run python scripts/generate_schema_artifacts.py
 ```
 
 - CI now blocks pull requests when generated artifacts are stale:
 
 ```bash
-uv run python scripts/generate-schema-artifacts.py --check
+uv run python scripts/generate_schema_artifacts.py --check
 ```
 
 ## Required Developer Workflow
 
-1. Update `configs/schemas/{provider}/{entity}.yaml` and/or Silver Pandera schema classes.
+1. Update `configs/entities/{provider}/{entity}.yaml` and/or Silver Pandera schema classes.
 
 1. Regenerate artifacts locally:
 
    ```bash
-   uv run python scripts/generate-schema-artifacts.py
+   uv run python scripts/generate_schema_artifacts.py
    ```
 
 1. Commit all generated changes:
@@ -40,7 +40,7 @@ uv run python scripts/generate-schema-artifacts.py --check
 1. Run check mode before push:
 
    ```bash
-   uv run python scripts/generate-schema-artifacts.py --check
+   uv run python scripts/generate_schema_artifacts.py --check
    ```
 
 ## Notes

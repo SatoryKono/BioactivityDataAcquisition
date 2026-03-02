@@ -1,6 +1,6 @@
 # PubChem Compound Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.22*
+*Version 1.2.0 | Aligned with RULES.md v5.23*
 
 ----------------------------------------------------------------------
 
@@ -56,9 +56,9 @@ pubchem_compound
 import pubchempy as pcp
 
 # Sync library - wrapped in executor
-compound = pcp.Compound.from-cid(cid)
+compound = pcp.Compound.from_cid(cid)
 # Or batch:
-compounds = pcp.get-compounds(cid-list, namespace="cid")
+compounds = pcp.get_compounds(cid_list, namespace="cid")
 ```
 
 ### 3.2. Complete API Fields
@@ -198,35 +198,35 @@ class PubchemMoleculeSchema(ETLRecordSchema):
 ## 7. Pipeline Configuration
 
 ```yaml
-pipeline-name: pubchem_compound
+pipeline_name: pubchem_compound
 provider: pubchem
-entity-type: compound
+entity_type: compound
 version: "1.2.0"
 
-primary-keys: ["molecule-id"]
-silver-table: "pubchem_compound"
-gold-table: "pubchem_compound"
+primary_keys: ["molecule-id"]
+silver_table: "pubchem_compound"
+gold_table: "pubchem_compound"
 
 source:
   type: api
-  batch-size: 100  # PubChem allows batch requests
+  batch_size: 100  # PubChem allows batch requests
 
 sink:
   bronze:
     path: "data/output/bronze"
   silver:
     path: "data/output/silver"
-    primary-key: ["molecule-id"]
-    partition-by: []
+    primary_key: ["molecule-id"]
+    partition_by: []
   gold:
     path: "data/output/gold"
 
-input-filter:
+input_filter:
   enabled: true
-  source-path: "data/input/compound.csv"
-  column-name: "cid"
-  filter-field: "cid"
-  batch-size: 100
+  source_path: "data/input/compound.csv"
+  column_name: "cid"
+  filter_field: "cid"
+  batch_size: 100
 ```
 
 ----------------------------------------------------------------------
@@ -241,7 +241,7 @@ PubChemPy is synchronous. BioETL wraps it using `BaseSyncAdapter`:
 class PubChemAdapter(BaseSyncAdapter):
     async def fetch(self, cids: list[int]) -> list[dict]:
         # Wrapped in executor
-        return await self.-run-in-executor(pcp.get-compounds, cids, namespace="cid")
+        return await self._run_in_executor(pcp.get_compounds, cids, namespace="cid")
 ```
 
 ### 8.2. Rate Limiting

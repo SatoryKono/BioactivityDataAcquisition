@@ -1,0 +1,283 @@
+name: Tests
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [ main, master, develop ]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.claude/**'
+      - '.github/workflows/**'
+      - 'LICENSE'
+  pull_request:
+    branches: [ main, master, develop ]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.ai/**'
+      - '.claude/**'
+      - '.github/workflows/**'
+      - 'LICENSE'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Use CI hypothesis profile for faster property-based tests (10 examples instead of 50)
+  HYPOTHESIS_PROFILE: ci
+  # Optimize Python for CI
+  PYTHONDONTWRITEBYTECODE: 1
+  PYTHONUNBUFFERED: 1
+
+jobs:
+  # Smoke check: verify dependencies are installed before running tests
+  smoke-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate VCR cassette placement
+        run: python scripts/check_root_vcr_cassettes.py
+
+      - name: Validate version consistency
+        run: python scripts/check_version_consistency.py
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Cache uv and virtualenv
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/uv
+            .venv
+          key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            uv-${{ runner.os }}-py311-
+
+      - name: Install dependencies (frozen lock)
+        run: uv sync --frozen --extra dev --extra tracing
+
+      - name: Validate pipeline configs + schema links (blocking)
+        run: uv run python scripts/validate_pipeline_configs.py
+
+      - name: Validate docker-compose.yml syntax
+        run: docker compose config > /dev/null
+
+      - name: Validate docker-compose.monitoring.yml syntax
+        run: docker compose -f docker-compose.monitoring.yml config > /dev/null
+
+      - name: Smoke check (dependencies + core imports)
+        run: uv run pytest tests/smoke/ -v --tb=short
+
+  # Fast tests run first for quick feedback
+  test-fast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: smoke-check  # Only run if smoke check passes
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Cache uv and virtualenv
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/uv
+            .venv
+          key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            uv-${{ runner.os }}-py311-
+
+      - name: Cache pytest and hypothesis
+        uses: actions/cache@v4
+        with:
+          path: |
+            .pytest_cache
+            .hypothesis
+          key: pytest-fast-${{ runner.os }}-${{ hashFiles('tests/**/*.py') }}
+          restore-keys: |
+            pytest-fast-${{ runner.os }}-
+
+      - name: Install dependencies (frozen lock)
+        run: uv sync --frozen --extra dev --extra tracing
+
+      - name: Run Fast Unit Tests (no slow markers)
+        run: |
+          # Quick feedback: run unit tests without slow markers
+          # Uses HYPOTHESIS_PROFILE=fast for minimal property-based examples
+          HYPOTHESIS_PROFILE=fast uv run pytest tests/unit/ tests/architecture/ \
+            -m "not slow and not serial" \
+            -n auto --dist loadscope --max-worker-restart=0 \
+            -q --tb=short
+
+  # Full test matrix runs in parallel for comprehensive coverage
+  test-matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: smoke-check  # Allow matrix to run in parallel with fast tests for faster wall time
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+        test-group:
+          - name: unit-domain
+            path: tests/unit/domain/
+          - name: unit-application
+            path: tests/unit/application/
+          - name: unit-infrastructure
+            path: tests/unit/infrastructure/
+          - name: unit-other
+            path: tests/unit/ --ignore=tests/unit/domain/ --ignore=tests/unit/application/ --ignore=tests/unit/infrastructure/
+          - name: integration
+            path: tests/integration/
+          - name: architecture
+            path: tests/architecture/
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Cache uv and virtualenv
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/uv
+            .venv
+          key: uv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            uv-${{ runner.os }}-${{ matrix.python-version }}-
+
+      - name: Cache pytest and hypothesis
+        uses: actions/cache@v4
+        with:
+          path: |
+            .pytest_cache
+            .hypothesis
+          key: pytest-${{ matrix.python-version }}-${{ matrix.test-group.name }}-${{ runner.os }}-${{ hashFiles('tests/**/*.py') }}
+          restore-keys: |
+            pytest-${{ matrix.python-version }}-${{ matrix.test-group.name }}-${{ runner.os }}-
+
+      - name: Install dependencies (frozen lock)
+        run: uv sync --frozen --extra dev --extra tracing
+
+      - name: Run Tests (${{ matrix.test-group.name }} on Python ${{ matrix.python-version }})
+        run: |
+          uv run pytest ${{ matrix.test-group.path }} \
+            -m "not serial" \
+            -n auto --dist loadscope --max-worker-restart=0 \
+            --cov=src/bioetl \
+            --cov-report=xml:coverage-${{ matrix.test-group.name }}-py${{ matrix.python-version }}.xml \
+            -q --tb=short
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-${{ matrix.test-group.name }}-py${{ matrix.python-version }}
+          path: coverage-${{ matrix.test-group.name }}-py${{ matrix.python-version }}.xml
+          retention-days: 7
+
+  # Final coverage verification (runs full test suite with threshold)
+  coverage-verify:
+    runs-on: ubuntu-latest
+    needs: test-matrix
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Cache uv and virtualenv
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/uv
+            .venv
+          key: uv-${{ runner.os }}-py311-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            uv-${{ runner.os }}-py311-
+
+      - name: Cache pytest and hypothesis
+        uses: actions/cache@v4
+        with:
+          path: |
+            .pytest_cache
+            .hypothesis
+          key: pytest-coverage-${{ runner.os }}-${{ hashFiles('tests/**/*.py') }}
+          restore-keys: |
+            pytest-coverage-${{ runner.os }}-
+
+      - name: Install dependencies (frozen lock)
+        run: uv sync --frozen --extra dev --extra tracing
+
+      - name: Run Full Tests with Coverage Threshold (resilient)
+        run: |
+          # Final coverage verification: 85% threshold (RULES.md §4.2)
+          # Runs parallel first, then falls back to serial on xdist worker crashes.
+          uv run python scripts/ci/run_pytest_resilient.py \
+            --target tests/ \
+            --reports-dir reports/pytest \
+            --parallel-marker "not e2e and not benchmark and not serial" \
+            --parallel-addopts "-q --tb=short --ignore=tests/e2e --ignore=tests/contract -n auto --dist loadscope --max-worker-restart=0 --cov=src/bioetl --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=85" \
+            --fallback-addopts "-q --tb=short --ignore=tests/e2e --ignore=tests/contract -p no:xdist --cov=src/bioetl --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=85" \
+            --serial-marker "serial and not e2e and not benchmark" \
+            --serial-addopts "-q --tb=short -p no:xdist --ignore=tests/e2e --ignore=tests/contract" \
+            --parallel-timeout-seconds 900 \
+            --fallback-timeout-seconds 1200 \
+            --serial-timeout-seconds 1200
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage.xml
+          retention-days: 30
+
+      - name: Upload resilient pytest diagnostics
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pytest-resilient-diagnostics
+          path: reports/pytest/
+          if-no-files-found: warn
+          retention-days: 30

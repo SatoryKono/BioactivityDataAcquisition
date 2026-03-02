@@ -170,6 +170,9 @@ class CircuitBreakerDataSourceDecorator:
 
         Raises:
             CircuitBreakerOpenError: If circuit is OPEN.
+
+        Returns:
+            Async iterator yielding fetched records.
         """
         # Check circuit state before starting
         self._check_circuit_state()

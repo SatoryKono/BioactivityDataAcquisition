@@ -56,11 +56,19 @@ class BronzeDQReportConfig(BaseModel):
     )
 
     def get_format_enum(self) -> DQReportFormat:
-        """Get format as enum."""
+        """Get format as enum.
+
+        Returns:
+            Format enum.
+        """
         return DQReportFormat(self.format)
 
     def get_checks_enums(self) -> list[BronzeDQCheckType]:
-        """Get checks as enums, filtering invalid values."""
+        """Get checks as enums, filtering invalid values.
+
+        Returns:
+            Checks enums.
+        """
         result = []
         for check in self.checks:
             with contextlib.suppress(ValueError):
@@ -108,11 +116,19 @@ class SilverDQReportConfig(BaseModel):
     )
 
     def get_format_enum(self) -> DQReportFormat:
-        """Get format as enum."""
+        """Get format as enum.
+
+        Returns:
+            Format enum.
+        """
         return DQReportFormat(self.format)
 
     def get_checks_enums(self) -> list[SilverDQCheckType]:
-        """Get checks as enums, filtering invalid values."""
+        """Get checks as enums, filtering invalid values.
+
+        Returns:
+            Checks enums.
+        """
         result = []
         for check in self.checks:
             with contextlib.suppress(ValueError):
@@ -158,11 +174,19 @@ class GoldDQReportConfig(BaseModel):
     )
 
     def get_format_enum(self) -> DQReportFormat:
-        """Get format as enum."""
+        """Get format as enum.
+
+        Returns:
+            Format enum.
+        """
         return DQReportFormat(self.format)
 
     def get_checks_enums(self) -> list[GoldDQCheckType]:
-        """Get checks as enums, filtering invalid values."""
+        """Get checks as enums, filtering invalid values.
+
+        Returns:
+            Checks enums.
+        """
         result = []
         for check in self.checks:
             with contextlib.suppress(ValueError):

@@ -1,6 +1,6 @@
 # UniProt Protein Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.22*
+*Version 1.2.0 | Aligned with RULES.md v5.23*
 
 ----------------------------------------------------------------------
 
@@ -269,19 +269,19 @@ class UniprotTargetSchema(ETLRecordSchema):
 ## 7. Pipeline Configuration
 
 ```yaml
-pipeline-name: uniprot_protein
+pipeline_name: uniprot_protein
 provider: uniprot
-entity-type: protein
+entity_type: protein
 version: "1.2.0"
 
-primary-keys: ["accession"]
-silver-table: "uniprot_protein"
-gold-table: "uniprot_protein"
+primary_keys: ["accession"]
+silver_table: "uniprot_protein"
+gold_table: "uniprot_protein"
 
-source-file: ../../sources/uniprot.yaml
+source_file: ../../sources/uniprot.yaml
 
-gold-filters:
-  required-fields:
+gold_filters:
+  required_fields:
     - protein-name
     - sequence
   columns:
@@ -292,17 +292,17 @@ sink:
     path: "data/output/bronze"
   silver:
     path: "data/output/silver"
-    primary-key: ["accession"]
-    partition-by: []
+    primary_key: ["accession"]
+    partition_by: []
   gold:
     path: "data/output/gold"
 
-input-filter:
+input_filter:
   enabled: true
-  source-path: "data/input/protein.csv"
-  column-name: "accession"
-  filter-field: "accession"
-  batch-size: 100  # Higher for UniProt
+  source_path: "data/input/protein.csv"
+  column_name: "accession"
+  filter_field: "accession"
+  batch_size: 100  # Higher for UniProt
 ```
 
 ----------------------------------------------------------------------

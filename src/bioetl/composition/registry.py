@@ -51,7 +51,23 @@ class PipelineFactoryPort(Protocol):
         metrics: MetricsPort | None = ...,
         cached_bronze: CachedBronzeContext | None = ...,
     ) -> BasePipeline:
-        """Create pipeline with services."""
+        """Create pipeline with services.
+
+        Args:
+            run_id: Pipeline run identifier.
+            runtime: Runtime configuration.
+            settings: Settings object.
+            logger: Logger instance.
+            config: Configuration object.
+            filter_config: Configuration for filter.
+            tracer: Tracing instance.
+            dq_monitor: Dq monitor.
+            metrics: Metrics collector instance.
+            cached_bronze: Cached bronze.
+
+        Returns:
+            Newly created BasePipeline instance.
+        """
         ...
 
     def create_runner(
@@ -64,7 +80,20 @@ class PipelineFactoryPort(Protocol):
         config: PipelineYamlConfig | None = None,
         cached_bronze: CachedBronzeContext | None = None,
     ) -> PipelineRunner:
-        """Create pipeline runner."""
+        """Create pipeline runner.
+
+        Args:
+            run_id: Pipeline run identifier.
+            runtime: Runtime configuration.
+            settings: Settings object.
+            observability: Observability.
+            filter_config: Configuration for filter.
+            config: Configuration object.
+            cached_bronze: Cached bronze.
+
+        Returns:
+            Newly created PipelineRunner instance.
+        """
         ...
 
 
@@ -226,6 +255,9 @@ class PipelineRegistry:
         """List all registered pipeline names (unified API).
 
         Alias for list_pipelines().
+
+        Returns:
+            Collection of keys.
         """
         return self.list_pipelines()
 

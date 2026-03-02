@@ -215,7 +215,7 @@ lock:composite_publication              # Parent lock (exclusive)
 Every Gold record includes:
 ```python
 {
-    "-composite-run-id": "uuid-of-composite-run",
+    "-composite_run_id": "uuid-of-composite-run",
     "-source-providers": ["chembl", "crossref", "openalex", "pubmed"],
     "-enrichment-status": {
         "crossref": "success",
@@ -260,7 +260,7 @@ src/bioetl/
 │   │   ├── runner.py           # CompositePipelineRunner
 │   │   ├── coordinator.py      # EnrichmentCoordinator (fan-out logic)
 │   │   ├── merger.py           # MergeService (join + conflict resolution)
-│   │   ├── key-extractor.py    # KeyExtractorService
+│   │   ├── key_extractor.py    # KeyExtractorService
 │   │   └── checkpoint.py       # CompositeCheckpointManager
 │   └── core/
 │       └── runner.py           # Existing PipelineRunner (unchanged)
@@ -274,7 +274,7 @@ src/bioetl/
 │
 ├── infrastructure/
 │   └── storage/
-│       └── silver-reader.py    # SilverReader adapter for key extraction
+│       └── silver_reader.py    # SilverReader adapter for key extraction
 │
 └── interfaces/
     └── cli.py                  # Extended with composite commands
@@ -527,7 +527,7 @@ class ConflictResolution(str, Enum):
 
 **Исключения** (НЕ переименовываются):
 1. **Join keys**: `doi`, `pmid`, `pmc-id` — для совместимости с join операциями
-2. **System columns**: колонки с prefix `-` (`-run-id`, `-ingestion-ts`, etc.)
+2. **System columns**: колонки с prefix `-` (`_run_id`, `_ingestion_ts`, etc.)
 3. **Entity ID columns**: `entity-id`, `content-hash` — системные идентификаторы
 
 ### Column Ordering
@@ -536,7 +536,7 @@ class ConflictResolution(str, Enum):
 
 | Order | Group | Examples |
 |-------|-------|----------|
-| 1 | System | entity-id, content-hash, -run-id, -ingestion-ts |
+| 1 | System | entity-id, content-hash, _run_id, _ingestion_ts |
 | 2 | Identifiers | doi, pmid, pmc-id, document-chembl-id |
 | 3 | Title | title, chembl.publication.title, crossref.publication.title |
 | 4 | Abstract | abstract, chembl.publication.abstract |
@@ -575,10 +575,10 @@ class ConflictResolution(str, Enum):
 
 ### References
 
-- ColumnRenamer: `src/bioetl/application/composite/column-renamer.py`
-- ColumnOrderer: `src/bioetl/application/composite/column-orderer.py`
-- ColumnQualifier: `src/bioetl/domain/value-objects/column-qualifier.py`
-- ColumnOrderConfig: `src/bioetl/domain/value-objects/column-order.py`
+- ColumnRenamer: `src/bioetl/application/composite/column_renamer.py`
+- ColumnOrderer: `src/bioetl/application/composite/column_orderer.py`
+- ColumnQualifier: `src/bioetl/domain/value_objects/column_qualifier.py`
+- ColumnOrderConfig: `src/bioetl/domain/value_objects/column_order.py`
 
 ## Preserve All Sources Feature
 
@@ -698,7 +698,7 @@ groups:
 
 ### Integration with MergeService
 
-During `-write-merged-gold()`, `MergeService` uses the registry to filter out TRASH columns:
+During `_write_merged_gold()`, `MergeService` uses the registry to filter out TRASH columns:
 
 ```python
 if self.-field-group-registry is not None:
@@ -715,8 +715,8 @@ If no YAML config exists for a composite pipeline, bootstrap continues without t
 
 | Layer | File | Description |
 |-------|------|-------------|
-| Domain | `domain/composite/field-groups.py` | Models: FieldMapping, FieldGroupDefinition, FieldGroupRegistry |
-| Infrastructure | `infrastructure/config/field-group-loader.py` | YAML → domain object loader |
+| Domain | `domain/composite/field_groups.py` | Models: FieldMapping, FieldGroupDefinition, FieldGroupRegistry |
+| Infrastructure | `infrastructure/config/field_group_loader.py` | YAML → domain object loader |
 | Config | `configs/composites/field_groups/publication.yaml` | 8 groups, 94 fields |
 | Composition | `composition/bootstrap/runtime/composite.py` | Bootstrap integration |
 | Application | `application/composite/merger.py` | Gold filtering integration |
@@ -1065,7 +1065,7 @@ composite:
 ### Unit Tests
 
 ```python
-# tests/unit/application/composite/test-merger.py
+# tests/unit/application/composite/test_merger.py
 
 class TestMergeService:
     """Test cases for MergeService."""
@@ -1102,7 +1102,7 @@ class TestMergeService:
         ...
 
 
-# tests/unit/application/composite/test-coordinator.py
+# tests/unit/application/composite/test_coordinator.py
 
 class TestEnrichmentCoordinator:
     """Test cases for EnrichmentCoordinator."""
@@ -1134,7 +1134,7 @@ class TestEnrichmentCoordinator:
 ### Integration Tests
 
 ```python
-# tests/integration/composite/test-composite_publication.py
+# tests/integration/composite/test_composite_publication.py
 
 @pytest.mark.integration
 class TestCompositePublicationPipeline:
@@ -1176,7 +1176,7 @@ class TestCompositePublicationPipeline:
         assert result.seed-result.status == "resumed"
 
 
-# tests/integration/composite/test-enricher-failures.py
+# tests/integration/composite/test_enricher_failures.py
 
 @pytest.mark.integration
 class TestEnricherFailureScenarios:
@@ -1196,7 +1196,7 @@ class TestEnricherFailureScenarios:
 ### Architecture Tests
 
 ```python
-# tests/architecture/test-composite-imports.py
+# tests/architecture/test_composite_imports.py
 
 def test-composite-domain-has-no-infrastructure-imports():
     """domain/composite should not import from infrastructure."""
@@ -1347,5 +1347,5 @@ def run(pipeline: str, enrich-only: str | None, required-only: bool, ...):
 - ADR-010: Local-Only Deployment
 - ADR-015: Pipeline Services Lifecycle
 - ADR-020: BasePipeline Decomposition
-- RULES.md v5.22 §2.4 (Backfill/Replay)
-- RULES.md v5.22 §3.3 (Concurrency & Locks)
+- RULES.md v5.23 §2.4 (Backfill/Replay)
+- RULES.md v5.23 §3.3 (Concurrency & Locks)

@@ -212,11 +212,11 @@ bioetl run --pipeline uniprot_protein --run-type rebuild --yes
 ```yaml
 # BEFORE (5.9)
 silver-config:
-  column-groups-file: configs/schemas/chembl/activity.yaml
+  column_groups_file: configs/entities/chembl/activity.yaml
 
 # AFTER (5.14)
 silver-config:
-  data-schema-file: configs/schemas/chembl/activity.yaml
+  data_schema_file: configs/entities/chembl/activity.yaml
 ```
 
 **Note:** Old parameter still works (deprecated warning), will be removed in 6.0.
@@ -368,7 +368,7 @@ cp -r backup/data/silver/chembl.publication data/silver/
 
 ```bash
 # Disable validation levels
-export BIOETL-VALIDATION-MODE=fast  # Base only
+export BIOETL_VALIDATION_MODE=fast  # Base only
 
 # Skip composite pipelines
 # (use individual pipelines instead)

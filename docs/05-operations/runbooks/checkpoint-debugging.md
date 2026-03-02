@@ -1,256 +1,186 @@
 # Checkpoint Debugging Runbook
 
+*Reference: [ADR-010](../../02-architecture/decisions/ADR-010-local-only-deployment.md)*
+
+> Runtime profile: Local-Only single-instance. Checkpoints are local files under `data/output/checkpoints/`.
+
 ## Overview
 
-Checkpoints track pipeline progress to enable resumable execution. This runbook covers troubleshooting checkpoint-related issues.
+Checkpoints store resume state for each pipeline.
+Use this runbook to inspect, reset, and recover checkpoint files.
 
 ## Checkpoint Location
 
-```
-data/checkpoints/{provider}-{entity}.json
+```text
+data/output/checkpoints/{pipeline}.json
 ```
 
-Example: `data/checkpoints/chembl_activity.json`
+Example: `data/output/checkpoints/chembl_activity.json`
 
 ## Checkpoint Structure
 
+Actual local checkpoint format:
+
 ```json
 {
-  "provider": "chembl",
-  "entity": "activity",
-  "last-offset": 1500000,
-  "last-run-id": "run-20260102-143022-abc123",
-  "last-run-timestamp": "2026-01-02T14:30:22.123456Z",
-  "last-run-type": "incremental",
-  "total-records-processed": 1500000,
-  "schema-version": "1.0.0"
+  "pipeline": "chembl_activity",
+  "run_id": "260bb657-2682-405f-8939-900428097071",
+  "metadata": {
+    "records_processed": 1500000
+  },
+  "version": "2.0"
 }
 ```
 
 ## Common Issues
 
-### Issue 1: Pipeline Skips Records
+### Issue 1: Resume starts from unexpected position
 
-**Symptom**: Pipeline completes but some records are missing.
+**Symptom**: `--resume` starts too early or too late.
 
 **Diagnosis**:
-```bash
-# Check checkpoint offset
-cat data/checkpoints/chembl_activity.json | jq '.last-offset'
 
-# Compare with source record count
-# (provider-specific, example for ChEMBL)
-curl "https://www.ebi.ac.uk/chembl/api/data/activity?limit=1" | jq '.page-meta.total-count'
+```bash
+# Inspect checkpoint payload
+cat data/output/checkpoints/chembl_activity.json | jq
+
+# Check processed counter used for resume metadata
+cat data/output/checkpoints/chembl_activity.json | jq '.metadata.records_processed'
 ```
 
 **Resolution**:
-1. If checkpoint offset > source count: Reset checkpoint
-2. If checkpoint offset < expected: Resume should catch up
-3. If records missing within processed range: Full refresh needed
 
-### Issue 2: Duplicate Records
-
-**Symptom**: Same records appearing multiple times in Silver.
-
-**Diagnosis**:
-```python
-import polars as pl
-from deltalake import DeltaTable
-
-dt = DeltaTable("data/output/silver/chembl/activity")
-df = pl.scan-delta(str(dt)).collect()
-
-# Check for duplicates
-duplicates = df.group-by("activity-id").count().filter(pl.col("count") > 1)
-print(f"Duplicate records: {len(duplicates)}")
-```
-
-**Resolution**:
-1. Check if checkpoint was manually modified
-2. Verify content-hash is being calculated correctly
-3. Run deduplication:
-   ```bash
-   bioetl dedupe --table chembl_activity
-   ```
-
-### Issue 3: Checkpoint Corruption
-
-**Symptom**: JSON parse errors, invalid values.
-
-**Diagnosis**:
-```bash
-# Validate JSON
-python -m json.tool data/checkpoints/chembl_activity.json
-
-# Check file permissions
-ls -la data/checkpoints/
-```
-
-**Resolution**:
-1. If partially written: Restore from backup
-2. If no backup: Reset checkpoint (full refresh required)
+1. If value is stale/corrupt, backup and reset checkpoint.
+2. If state is valid but data is inconsistent, run full rebuild:
 
 ```bash
-# Backup corrupted checkpoint
-mv data/checkpoints/chembl_activity.json data/checkpoints/chembl_activity.json.corrupted
-
-# Create fresh checkpoint (optional, will be created on first run)
-echo '{}' > data/checkpoints/chembl_activity.json
-```
-
-### Issue 4: Checkpoint Not Updating
-
-**Symptom**: Pipeline runs but checkpoint offset doesn't change.
-
-**Diagnosis**:
-```bash
-# Check file modification time
-stat data/checkpoints/chembl_activity.json
-
-# Verify write permissions
-touch data/checkpoints/test && rm data/checkpoints/test
-```
-
-**Resolution**:
-1. Check file system permissions
-2. Check for disk full condition
-3. Verify checkpoint port is correctly injected
-
-### Issue 5: Wrong Offset After Schema Change
-
-**Symptom**: Pipeline processes old records after schema evolution.
-
-**Diagnosis**:
-1. Check checkpoint schema-version
-2. Compare with current schema version in code
-
-**Resolution**:
-If schema version mismatch is intentional:
-```bash
-# Full refresh with new schema
 bioetl run --pipeline chembl_activity --run-type rebuild
 ```
 
-## Manual Checkpoint Operations
+### Issue 2: Checkpoint file is missing
 
-### View Checkpoint
+**Symptom**: `--resume` does not resume and starts from beginning.
 
-```bash
-cat data/checkpoints/chembl_activity.json | python -m json.tool
-```
-
-### Reset Checkpoint
+**Diagnosis**:
 
 ```bash
-# Backup first
-cp data/checkpoints/chembl_activity.json data/checkpoints/chembl_activity.json.bak
-
-# Reset to beginning
-echo '{"provider": "chembl", "entity": "activity", "last-offset": 0}' > data/checkpoints/chembl_activity.json
+ls -la data/output/checkpoints/
 ```
 
-### Set Specific Offset
+**Resolution**:
 
-```python
-import json
+1. This is expected after successful runs (checkpoint is cleaned up).
+2. If pipeline crashed and file is still missing, rerun without `--resume` or recover from backup.
 
-checkpoint-path = "data/checkpoints/chembl_activity.json"
+### Issue 3: Checkpoint corruption
 
-with open(checkpoint-path) as f:
-    checkpoint = json.load(f)
+**Symptom**: JSON parse errors while loading checkpoint.
 
-# Set to specific offset
-checkpoint["last-offset"] = 1000000
-checkpoint["last-run-type"] = "manual-reset"
-
-with open(checkpoint-path, "w") as f:
-    json.dump(checkpoint, f, indent=2)
-```
-
-### Clear All Checkpoints
+**Diagnosis**:
 
 ```bash
-# Backup first!
-mkdir -p data/checkpoints.bak
-cp data/checkpoints/*.json data/checkpoints.bak/
-
-# Clear all
-rm data/checkpoints/*.json
+python -m json.tool data/output/checkpoints/chembl_activity.json
 ```
 
-## Checkpoint Integrity Checks
+**Resolution**:
 
-### Validate Checkpoint Consistency
+```bash
+# Backup corrupted file
+mv data/output/checkpoints/chembl_activity.json \
+   data/output/checkpoints/chembl_activity.json.corrupted
+
+# Recreate minimal valid checkpoint payload (optional)
+echo '{"pipeline":"chembl_activity","run_id":"00000000-0000-0000-0000-000000000000","metadata":{"records_processed":0},"version":"2.0"}' \
+  > data/output/checkpoints/chembl_activity.json
+```
+
+### Issue 4: File not updating
+
+**Symptom**: Pipeline runs but checkpoint timestamp does not change.
+
+**Diagnosis**:
+
+```bash
+stat data/output/checkpoints/chembl_activity.json
+
+touch data/output/checkpoints/.write-test && rm data/output/checkpoints/.write-test
+```
+
+**Resolution**:
+
+1. Verify filesystem permissions.
+2. Verify available disk space.
+3. Verify run is actually in incremental mode and checkpoint saving is reached.
+
+## Manual Operations
+
+### View checkpoint
+
+```bash
+cat data/output/checkpoints/chembl_activity.json | python -m json.tool
+```
+
+### Backup checkpoint
+
+```bash
+cp data/output/checkpoints/chembl_activity.json \
+   data/output/checkpoints/chembl_activity.$(date +%Y%m%d-%H%M%S).json
+```
+
+### Reset one checkpoint
+
+```bash
+cp data/output/checkpoints/chembl_activity.json \
+   data/output/checkpoints/chembl_activity.json.bak
+
+rm -f data/output/checkpoints/chembl_activity.json
+```
+
+### Clear all checkpoints
+
+```bash
+mkdir -p data/output/checkpoints.bak
+cp data/output/checkpoints/*.json data/output/checkpoints.bak/ 2>/dev/null || true
+rm -f data/output/checkpoints/*.json
+```
+
+## Integrity Check Script
 
 ```python
 import json
 from pathlib import Path
-from deltalake import DeltaTable
 
-def validate-checkpoint(provider: str, entity: str):
-    """Validate checkpoint against Silver table state."""
 
-    checkpoint-path = Path(f"data/output/checkpoints/{provider}-{entity}.json")
-    table-path = Path(f"data/output/silver/{provider}/{entity}")
-
-    # Load checkpoint
-    with open(checkpoint-path) as f:
-        checkpoint = json.load(f)
-
-    # Load table
-    dt = DeltaTable(str(table-path))
-    row-count = dt.to-pyarrow-table().num-rows
-
-    print(f"Checkpoint offset: {checkpoint.get('last-offset', 0)}")
-    print(f"Table row count: {row-count}")
-
-    # Check consistency
-    if checkpoint.get("total-records-processed", 0) != row-count:
-        print("WARNING: Checkpoint and table row count mismatch!")
+def validate_checkpoint(pipeline: str) -> bool:
+    checkpoint_path = Path(f"data/output/checkpoints/{pipeline}.json")
+    if not checkpoint_path.exists():
+        print(f"Checkpoint not found: {checkpoint_path}")
         return False
 
-    print("Checkpoint is consistent with table state.")
+    data = json.loads(checkpoint_path.read_text(encoding="utf-8"))
+
+    required_keys = {"pipeline", "run_id", "metadata", "version"}
+    missing = required_keys - set(data.keys())
+    if missing:
+        print(f"Missing keys: {sorted(missing)}")
+        return False
+
+    records_processed = data.get("metadata", {}).get("records_processed")
+    print(f"pipeline={data.get('pipeline')}")
+    print(f"run_id={data.get('run_id')}")
+    print(f"records_processed={records_processed}")
+    print(f"version={data.get('version')}")
     return True
 
-# Validate
-validate-checkpoint("chembl", "activity")
+
+validate_checkpoint("chembl_activity")
 ```
 
-## Backup and Recovery
+## Monitoring Recommendations
 
-### Automated Backup
+Track and alert on:
 
-Checkpoints are backed up before each run:
-```
-data/checkpoints/chembl_activity.json.bak
-```
-
-### Manual Backup
-
-```bash
-# Timestamp-based backup
-cp data/checkpoints/chembl_activity.json \
-   data/checkpoints/chembl_activity.$(date +%Y%m%d-%H%M%S).json
-```
-
-### Recovery from Backup
-
-```bash
-# List available backups
-ls -la data/checkpoints/*.bak data/checkpoints/*.json.*
-
-# Restore from backup
-cp data/checkpoints/chembl_activity.json.bak data/checkpoints/chembl_activity.json
-```
-
-## Monitoring
-
-Key metrics to track:
-- Checkpoint offset progression
-- Time since last successful update
-- Mismatch between checkpoint and table state
-
-Alert on:
-- Checkpoint not updated for > 24 hours
-- Checkpoint offset decreases (potential corruption)
-- File permission errors
+- checkpoint file load failures
+- repeated resume from same `records_processed` value
+- missing checkpoint after abnormal termination
+- write/permission errors in `data/output/checkpoints/`

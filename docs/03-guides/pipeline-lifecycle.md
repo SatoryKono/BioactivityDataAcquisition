@@ -33,17 +33,17 @@ Medallion архитектура требует идемпотентности �
 3. **Graceful release**: Освобождение в `finally` даже при ошибках
 
 ```python
-async with self.-lock-manager:
+async with self._lock_manager:
     # Блокировка захвачена
-    await self.-clear-exports()
-    await self.-checkpoint-manager.load-checkpoint()
-    await self.-executor.execute()
+    await self._clear_exports()
+    await self._checkpoint_manager.load_checkpoint()
+    await self._executor.execute()
     # Блокировка освобождается автоматически
 ```
 
-## Политика метрик (fail-fast)
+## Политика метрик (fail_fast)
 
-Параметр `BIOETL-FAIL-FAST-METRICS` управляет поведением при ошибках запуска Prometheus сервера:
+Параметр `BIOETL_FAIL_FAST_METRICS` управляет поведением при ошибках запуска Prometheus сервера:
 
 | Значение | Поведение |
 |----------|-----------|
@@ -59,12 +59,12 @@ async with self.-lock-manager:
 
 ```bash
 # Строгий режим для production
-export BIOETL-FAIL-FAST-METRICS=true
+export BIOETL_FAIL_FAST_METRICS=true
 
 # Или в конфиге
 metrics:
   port: 8000
-  fail-fast: true
+  fail_fast: true
 ```
 
 ## Graceful Shutdown

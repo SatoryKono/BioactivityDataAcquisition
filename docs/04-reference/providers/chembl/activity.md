@@ -18,12 +18,12 @@
 **Файл:** `configs/entities/chembl/activity.yaml`
 
 ```yaml
-pipeline-name: chembl_activity
+pipeline_name: chembl_activity
 provider: chembl
-entity-type: activity
+entity_type: activity
 version: "1.2.0"
-primary-keys: ["activity-id"]
-silver-table: "chembl_activity"
+primary_keys: ["activity_id"]
+silver_table: "chembl_activity"
 
 gold-filter-types:
     - IC50
@@ -51,16 +51,16 @@ sink:
         path: "data/output/silver"
         format: delta
         mode: merge
-        partition-by: ["year", "month"]
+        partition_by: ["year", "month"]
     gold:
         enabled: true
         path: "data/output/gold"
         format: delta
         mode: overwrite
 
-dq-overrides:
-    soft-fail-threshold: 0.05   # 5% ошибок → WARNING
-    hard-fail-threshold: 0.20   # 20% ошибок → FAIL BATCH
+dq_overrides:
+    soft_fail_threshold: 0.05   # 5% ошибок → WARNING
+    hard_fail_threshold: 0.20   # 20% ошибок → FAIL BATCH
 ```
 
 ----------------------------------------------------------------------
@@ -77,14 +77,14 @@ dq-overrides:
 
 | Поле                 | Тип   | Обязательное | Описание                                   |
 | -------------------- | ----- | ------------ | ------------------------------------------ |
-| `activity-id`        | `str` | **Да**       | Уникальный идентификатор записи активности |
-| `molecule-id`        | `str` | **Да**       | Канонический ID молекулы (например, `CHEMBL25`) |
-| `target-id`          | `str` | Нет          | Канонический ID мишени                     |
-| `assay-id`           | `str` | Нет          | Канонический ID анализа                    |
-| `publication-id`     | `str` | Нет          | Канонический ID публикации (provider PK)   |
-| `publication-doi`    | `str` | Нет          | DOI публикации                             |
-| `publication-pmid`   | `str` | Нет          | PubMed ID                                  |
-| `publication-pmc-id` | `str` | Нет          | PubMed Central ID                          |
+| `activity_id`        | `str` | **Да**       | Уникальный идентификатор записи активности |
+| `molecule_id`        | `str` | **Да**       | Канонический ID молекулы (например, `CHEMBL25`) |
+| `target_id`          | `str` | Нет          | Канонический ID мишени                     |
+| `assay_id`           | `str` | Нет          | Канонический ID анализа                    |
+| `publication_id`     | `str` | Нет          | Канонический ID публикации (provider PK)   |
+| `publication_doi`    | `str` | Нет          | DOI публикации                             |
+| `publication_pmid`   | `str` | Нет          | PubMed ID                                  |
+| `publication_pmc_id` | `str` | Нет          | PubMed Central ID                          |
 | `record-id`          | `int` | Нет          | Внутренний ID записи                       |
 | `src-id`             | `int` | Нет          | ID источника данных                        |
 
@@ -94,7 +94,7 @@ dq-overrides:
 | --------------------------- | ----- | ---------------------------------- |
 | `canonical-smiles`          | `str` | SMILES-формула молекулы            |
 | `molecule-pref-name`        | `str` | Предпочтительное название молекулы |
-| `parent-molecule-id`        | `str` | ID родительской молекулы           |
+| `parent-molecule_id`        | `str` | ID родительской молекулы           |
 
 #### Данные мишени
 
@@ -133,9 +133,9 @@ dq-overrides:
 
 | Поле                   | Тип     | Описание                                                             |
 | ---------------------- | ------- | -------------------------------------------------------------------- |
-| `standard-type`        | `str`   | Тип: IC50, Ki, Kd, EC50, AC50, GI50, ED50, MIC, CC50, EC50, Kd и др. |
-| `standard-value`       | `float` | Стандартизированное значение                                         |
-| `standard-units`       | `str`   | Единицы: nM, uM, и др.                                               |
+| `standard_type`        | `str`   | Тип: IC50, Ki, Kd, EC50, AC50, GI50, ED50, MIC, CC50, EC50, Kd и др. |
+| `standard_value`       | `float` | Стандартизированное значение                                         |
+| `standard_units`       | `str`   | Единицы: nM, uM, и др.                                               |
 | `standard-relation`    | `str`   | Отношение                                                            |
 | `standard-upper-value` | `float` | Верхняя граница                                                      |
 | `standard-text-value`  | `str`   | Текстовое стандартизированное значение                               |
@@ -145,7 +145,7 @@ dq-overrides:
 
 | Поле            | Тип     | Описание                       |
 | --------------- | ------- | ------------------------------ |
-| `pchembl-value` | `float` | pChEMBL = -log10(IC50 в молях) |
+| `pchembl_value` | `float` | pChEMBL = -log10(IC50 в молях) |
 
 ##### Метрики эффективности лиганда (Ligand Efficiency)
 
@@ -163,18 +163,18 @@ dq-overrides:
 | Поле               | Тип   | Описание                              |
 | ------------------ | ----- | ------------------------------------- |
 | `journal`          | `str` | Журнал публикации                     |
-| `publication-year` | `int` | Год публикации                        |
+| `publication_year` | `int` | Год публикации                        |
 
 #### Метаданные качества
 
 |Поле|Тип|Описание|
 |---|---|---|
 |`activity-comment`|`str`|Комментарий к активности|
-|`data-validity-comment`|`str`|Комментарий о валидности|
+|`data_validity_comment`|`str`|Комментарий о валидности|
 |`data-validity-description`|`str`|Описание проблемы с данными|
 |`potential-duplicate`|`int`|Флаг потенциального дубликата|
 |`manual-curation-flag`|`int`|Флаг ручной кураторской проверки (0/1)|
-|`original-activity-id`|`int`|ID исходной записи активности (traceability)|
+|`original-activity_id`|`int`|ID исходной записи активности (traceability)|
 
 #### Тип действия (Action Type)
 
@@ -192,12 +192,12 @@ dq-overrides:
 
 | Поле               | Тип   | Описание                             |
 | ------------------ | ----- | ------------------------------------ |
-| `entity-id`        | `str` | `chembl:{activity-id}`               |
+| `entity-id`        | `str` | `chembl:{activity_id}`               |
 | `content-hash`     | `str` | SHA256-хеш содержимого               |
-| `-run-id`          | `str` | UUID запуска пайплайна               |
-| `-run-type`        | `str` | `incremental`, `backfill`, `rebuild` |
-| `-source-batch-id` | `str` | UUID батча                           |
-| `-ingestion-ts`    | `str` | Timestamp загрузки (ISO8601)         |
+| `-run_id`          | `str` | UUID запуска пайплайна               |
+| `-run_type`        | `str` | `incremental`, `backfill`, `rebuild` |
+| `-source-batch_id` | `str` | UUID батча                           |
+| `-ingestion_ts`    | `str` | Timestamp загрузки (ISO8601)         |
 
 ----------------------------------------------------------------------
 
@@ -205,11 +205,11 @@ dq-overrides:
 
 ```python
 def -validate-invariants(self) -> None:
-    if not self.activity-id:
+    if not self.activity_id:
         raise ValueError("Activity ID is required")
-    if not self.molecule-id:
+    if not self.molecule_id:
         raise ValueError("Molecule ID is required")
-    if self.pchembl-value is not None and self.pchembl-value < 0:
+    if self.pchembl_value is not None and self.pchembl_value < 0:
         raise ValueError("pChemBL value must be non-negative")
 ```
 
@@ -217,7 +217,7 @@ def -validate-invariants(self) -> None:
 
 ## 4. Нормализация данных
 
-**Файл:** `src/bioetl/application/pipelines/chembl/activity-transformer.py`
+**Файл:** `src/bioetl/application/pipelines/chembl/activity_transformer.py`
 
 ### 4.1. Этапы трансформации
 
@@ -254,7 +254,7 @@ def -validate-invariants(self) -> None:
 
 ```python
 # Entity ID: уникальный бизнес-ключ
-entity-id = f"chembl:{activity-id}"
+entity-id = f"chembl:{activity_id}"
 
 # Content Hash: SHA256 для версионирования
 content-hash = sha256("chembl" + canonical-json(business-fields))
@@ -263,13 +263,13 @@ content-hash = sha256("chembl" + canonical-json(business-fields))
 ### 4.4. Поля, исключённые из хеша
 
 ```python
-META-FIELDS = {
-    "-ingestion-ts",
-    "-run-id",
-    "-run-type",
+META_FIELDS = {
+    "-ingestion_ts",
+    "-run_id",
+    "-run_type",
     "-dq-warn",
     "-dq-error",
-    "-source-batch-id",
+    "-source-batch_id",
 }
 ```
 
@@ -287,9 +287,9 @@ META-FIELDS = {
 
 ### 5.2. DQ-правила для Activity
 
-1. **`standard-value` > 0** — не null, не отрицательный
-1. **`standard-type`** ∈ {IC50, Ki, Kd, EC50, AC50, GI50, ED50, MIC, CC50, EC50, Kd, ...}
-1. **`molecule-id`** соответствует regex `^CHEMBL\d+$`
+1. **`standard_value` > 0** — не null, не отрицательный
+1. **`standard_type`** ∈ {IC50, Ki, Kd, EC50, AC50, GI50, ED50, MIC, CC50, EC50, Kd, ...}
+1. **`molecule_id`** соответствует regex `^CHEMBL\d+$`
 
 ### 5.3. Пороги ошибок
 
@@ -305,9 +305,9 @@ META-FIELDS = {
 ```python
 {
     "raw-record": {...},  # Исходная запись
-    "error-code": "INVALID-STANDARD-VALUE",
-    "error-details": "standard-value is negative",
-    "batch-id": "uuid",
+    "error_code": "INVALID-STANDARD-VALUE",
+    "error_details": "standard_value is negative",
+    "batch_id": "uuid",
     "timestamp": "2025-12-19T10:30:00Z",
 }
 ```
@@ -318,7 +318,7 @@ META-FIELDS = {
 
 ### 6.1. Bronze Layer
 
-**Файл:** `src/bioetl/infrastructure/storage/bronze-writer.py`
+**Файл:** `src/bioetl/infrastructure/storage/bronze_writer.py`
 
 ```
 Путь: bronze/v1/chembl/activity/2025-12-19/batch-{uuid}.jsonl.zst
@@ -335,12 +335,12 @@ META-FIELDS = {
 
 ```json
 {
-    "run-id": "uuid",
-    "run-type": "incremental",
-    "ingestion-ts": "2025-12-19T10:30:00Z",
+    "run_id": "uuid",
+    "run_type": "incremental",
+    "ingestion_ts": "2025-12-19T10:30:00Z",
     "provider": "chembl",
     "entity": "activity",
-    "batch-id": "uuid"
+    "batch_id": "uuid"
 }
 ```
 
@@ -348,32 +348,32 @@ META-FIELDS = {
 
 ### 6.2. Silver Layer
 
-**Файл:** `src/bioetl/infrastructure/storage/delta-writer.py`
+**Файл:** `src/bioetl/infrastructure/storage/delta_writer.py`
 
 **PyArrow Schema** (`src/bioetl/infrastructure/schemas/silver.py`):
 
 ```python
-CHEMBL-ACTIVITY-SCHEMA = pa.schema(
+CHEMBL_ACTIVITY_SCHEMA = pa.schema(
     [
         pa.field("entity-id", pa.string()),
         pa.field("content-hash", pa.string()),
-        pa.field("activity-id", pa.string()),
-        pa.field("molecule-id", pa.string()),
-        pa.field("target-id", pa.string()),
-        pa.field("assay-id", pa.string()),
-        pa.field("publication-id", pa.string()),
-        pa.field("publication-doi", pa.string()),
-        pa.field("publication-pmid", pa.string()),
-        pa.field("publication-pmc-id", pa.string()),
+        pa.field("activity_id", pa.string()),
+        pa.field("molecule_id", pa.string()),
+        pa.field("target_id", pa.string()),
+        pa.field("assay_id", pa.string()),
+        pa.field("publication_id", pa.string()),
+        pa.field("publication_doi", pa.string()),
+        pa.field("publication_pmid", pa.string()),
+        pa.field("publication_pmc_id", pa.string()),
         pa.field("journal", pa.string()),
-        pa.field("publication-year", pa.int64()),
-        pa.field("standard-type", pa.string()),
-        pa.field("standard-value", pa.float64()),
-        pa.field("standard-units", pa.string()),
-        pa.field("pchembl-value", pa.float64()),
-        pa.field("-run-id", pa.string()),
-        pa.field("-run-type", pa.string()),
-        pa.field("-ingestion-ts", pa.string()),
+        pa.field("publication_year", pa.int64()),
+        pa.field("standard_type", pa.string()),
+        pa.field("standard_value", pa.float64()),
+        pa.field("standard_units", pa.string()),
+        pa.field("pchembl_value", pa.float64()),
+        pa.field("-run_id", pa.string()),
+        pa.field("-run_type", pa.string()),
+        pa.field("-ingestion_ts", pa.string()),
         # ... всего 62 поля (включая action-type*)
     ]
 )
@@ -382,7 +382,7 @@ CHEMBL-ACTIVITY-SCHEMA = pa.schema(
 | Параметр                 | Значение                         |
 | ------------------------ | -------------------------------- |
 | **Формат**               | Delta Lake                       |
-| **Merge Key**            | `activity-id`                    |
+| **Merge Key**            | `activity_id`                    |
 | **Партиционирование**    | `year`, `month`                  |
 | **Приоритет конфликтов** | REBUILD > BACKFILL > INCREMENTAL |
 
@@ -390,19 +390,19 @@ CHEMBL-ACTIVITY-SCHEMA = pa.schema(
 
 ### 6.3. Gold Layer
 
-**Файл:** `src/bioetl/infrastructure/storage/gold-writer.py`
+**Файл:** `src/bioetl/infrastructure/storage/gold_writer.py`
 
 #### Фильтр для Gold
 
 ```python
-def should-include(self, context, record) -> bool:
+def should_include(self, context, record) -> bool:
     return all(
         [
-            record.get("standard-value") is not None,  # Есть значение
-            record.get("standard-units"),  # Есть единицы
-            record.get("target-id"),  # Есть мишень
-            record.get("standard-type") in {"IC50", "Ki", "Kd", "EC50", "AC50", "GI50", "ED50", "MIC", "CC50"},  # 9 типов
-            not record.get("data-validity-comment"),  # Нет флагов проблем
+            record.get("standard_value") is not None,  # Есть значение
+            record.get("standard_units"),  # Есть единицы
+            record.get("target_id"),  # Есть мишень
+            record.get("standard_type") in {"IC50", "Ki", "Kd", "EC50", "AC50", "GI50", "ED50", "MIC", "CC50"},  # 9 типов
+            not record.get("data_validity_comment"),  # Нет флагов проблем
         ]
     )
 ```
@@ -420,17 +420,17 @@ def should-include(self, context, record) -> bool:
 ```json
 {
     "required": [
-        "activity-id",
-        "molecule-id",
+        "activity_id",
+        "molecule_id",
         "-content-hash",
-        "-ingestion-ts"
+        "-ingestion_ts"
     ],
     "properties": {
-        "activity-id": {"type": "integer"},
-        "molecule-id": {"type": "string", "pattern": "^CHEMBL\\d+$"},
-        "standard-type": {"type": "string"},
-        "standard-value": {"type": ["number", "null"]},
-        "pchembl-value": {"type": ["number", "null"]}
+        "activity_id": {"type": "integer"},
+        "molecule_id": {"type": "string", "pattern": "^CHEMBL\\d+$"},
+        "standard_type": {"type": "string"},
+        "standard_value": {"type": ["number", "null"]},
+        "pchembl_value": {"type": ["number", "null"]}
     }
 }
 ```
@@ -461,12 +461,12 @@ ChEMBL API (/activity.json)
 │  SILVER (нормализованные данные)        │
 │  ─────────────────────────────────────  │
 │  • Формат: Delta Lake                   │
-│  • Merge by: activity-id                │
+│  • Merge by: activity_id                │
 │  • Schema: 62 поля (PyArrow)            │
 │  • Партиции: year/month                 │
 └─────────────────────────────────────────┘
          │
-         ▼ ActivityGoldFilter.should-include()
+         ▼ ActivityGoldFilter.should_include()
          │
          ├── Не прошёл? ──► (пропускаем)
          │
@@ -495,19 +495,10 @@ class BatchResult:
 
 ----------------------------------------------------------------------
 
-## 9. Watermark (инкрементальная загрузка)
+## 9. Инкрементальная загрузка
 
-**Файл:** `src/bioetl/application/pipelines/chembl/activity-watermark.py`
-
-Для инкрементальных запусков используется `activity-id` как watermark:
-
-```python
-def extract(self, context, record) -> Watermark:
-    activity-id = record.get("activity-id")
-    if activity-id is not None:
-        return Watermark.from-id(str(activity-id))
-    return Watermark.from-id("")
-```
+Отдельный watermark-модуль удалён (см. ADR-011). Инкрементальность обеспечивается
+через `run_type`, checkpoints и идемпотентный merge по ключам/хешу.
 
 ----------------------------------------------------------------------
 
@@ -517,13 +508,13 @@ def extract(self, context, record) -> Watermark:
 | ------------- | ----------------------------------------------------------------- |
 | Конфигурация  | `configs/entities/chembl/activity.yaml`                          |
 | Сущность      | `src/bioetl/domain/entities/bioactivity.py`                       |
-| Трансформер   | `src/bioetl/application/pipelines/chembl/activity-transformer.py` |
-| Gold-фильтр   | `src/bioetl/application/pipelines/chembl/activity-gold-filter.py` |
-| Watermark     | `src/bioetl/application/pipelines/chembl/activity-watermark.py`   |
+| Трансформер   | `src/bioetl/application/pipelines/chembl/activity_transformer.py` |
+| Gold-фильтр   | `configs/entities/chembl/activity.yaml` (`filters.gold_filters`)   |
+| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py`            |
 | Silver Schema | `src/bioetl/infrastructure/schemas/silver.py`                     |
-| Bronze Writer | `src/bioetl/infrastructure/storage/bronze-writer.py`              |
-| Delta Writer  | `src/bioetl/infrastructure/storage/delta-writer.py`               |
-| Gold Writer   | `src/bioetl/infrastructure/storage/gold-writer.py`                |
+| Bronze Writer | `src/bioetl/infrastructure/storage/bronze_writer.py`              |
+| Delta Writer  | `src/bioetl/infrastructure/storage/delta_writer.py`               |
+| Gold Writer   | `src/bioetl/infrastructure/storage/gold_writer.py`                |
 | Data Contract | `docs/04-reference/contracts/gold/chembl_activity-v1.0.json`                               |
 
 ----------------------------------------------------------------------
@@ -532,16 +523,16 @@ def extract(self, context, record) -> Watermark:
 
 ```bash
 # Инкрементальная загрузка (по умолчанию)
-bioetl run chembl_activity
+bioetl run --pipeline chembl_activity
 
 # С ограничением количества записей
-bioetl run chembl_activity --limit 1000
+bioetl run --pipeline chembl_activity --limit 1000
 
 # Backfill за период
-bioetl run chembl_activity --run-type backfill --start-date 2024-01-01
+bioetl run --pipeline chembl_activity --run_type backfill
 
 # Полная перезагрузка
-bioetl run chembl_activity --run-type rebuild
+bioetl run --pipeline chembl_activity --run_type rebuild
 ```
 
 ----------------------------------------------------------------------

@@ -1,0 +1,66 @@
+%% BioETL — Composite Pipeline Configuration & FSM
+%% Config hierarchy (CompositeConfig → sub-configs) and execution state machine.
+
+%% @version 1.0.0
+%% @date    2026-02-27
+%% @type    flowchart
+%% @level   System / Component
+%% @view    composite-config
+%% @parent  08-composite-pipeline.mmd
+%% @nodes   13
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+graph TB
+    subgraph Config["Composite Configuration"]
+        CC["CompositeConfig<br/>name / seed / deps / enrichers / merge"]:::size-sm
+        SC["SeedConfig"]:::size-sm
+        DC["DependencyConfig"]:::size-sm
+        EC["EnricherConfig"]:::size-sm
+        MC["MergeConfig"]:::size-sm
+        NoteConfig["Config Details:<br/>seed → deps → enrichers → merge"]:::size-sm
+    end
+
+    subgraph FSM["State Machine"]
+        INIT["INIT"]:::size-sm
+        SEED_RUN["SEED_RUNNING"]:::size-sm
+        DEP_RUN["DEPS_RUNNING"]:::size-sm
+        ENR_RUN["ENRICHERS_RUNNING"]:::size-sm
+        MERGE_RUN["MERGING"]:::size-sm
+        DONE["COMPLETED"]:::size-sm
+        FAILED["FAILED"]:::size-sm
+    end
+
+    %% Config hierarchy
+    CC --> SC
+    CC --> DC
+    CC --> EC
+    CC --> MC
+    CC -.- NoteConfig
+
+    %% FSM transitions
+    INIT --> SEED_RUN
+    SEED_RUN --> DEP_RUN
+    DEP_RUN --> ENR_RUN
+    ENR_RUN --> MERGE_RUN
+    MERGE_RUN --> DONE
+
+    %% Failure transitions
+    SEED_RUN --> FAILED
+    DEP_RUN --> FAILED
+    ENR_RUN --> FAILED
+    MERGE_RUN ==> FAILED
+
+    classDef config fill:#f5f3ff,stroke:#7c3aed
+    classDef fsm fill:#f1f5f9,stroke:#64748b
+
+    class CC,SC,DC,EC,MC,NoteConfig config
+    class INIT,SEED_RUN,DEP_RUN,ENR_RUN,MERGE_RUN,DONE,FAILED fsm

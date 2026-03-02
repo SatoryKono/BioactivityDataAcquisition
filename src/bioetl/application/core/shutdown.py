@@ -57,7 +57,11 @@ class ShutdownSignal:
         return self._requested
 
     def is_shutting_down(self) -> bool:
-        """Check if shutdown has been requested (ShutdownPort compatible)."""
+        """Check if shutdown has been requested (ShutdownPort compatible).
+
+        Returns:
+            True if the condition is met, False otherwise.
+        """
         return self._requested
 
     def request(self) -> None:

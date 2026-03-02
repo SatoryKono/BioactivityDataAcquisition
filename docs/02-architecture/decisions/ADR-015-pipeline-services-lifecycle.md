@@ -111,7 +111,7 @@ for result in results:
 Lifecycle contracts are enforced by architecture tests:
 
 ```python
-# tests/architecture/test-port-contracts.py
+# tests/architecture/test_port_contracts.py
 
 class TestAsyncPortLifecycle:
     ASYNC-IO-PORTS = [

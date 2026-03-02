@@ -192,6 +192,8 @@ class PublicationTermTransformer(BaseChemblTransformer):
         Yields:
             Dictionary of term business fields for each term.
 
+        Returns:
+            Extracted value.
         """
         terms: list[dict[str, Any]] = []
 

@@ -1,0 +1,122 @@
+%% View: Full | Parent: (root)
+%% Parent source: docs/02-architecture/mmd-diagrams/foundation/35-bootstrap-sequence.mmd
+%% Full reference diagram retained after decomposition.
+%% Title: Composition Layer Bootstrap Sequence
+%% Covers: RULES.md §1.1 (Composition Root), composition/bootstrap/runtime/
+%% Rank: 10 (Score 8.44) — Step-by-step system assembly
+%% Updated: 2026-02-17
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   Mixed (System / Component / Class)
+
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+%% @uniform width=328 height=56 max_title_len=36 max_desc_lines=1
+flowchart TB
+    subgraph Step1["Step 1: Logger"]
+        S1A["BootstrapLogger.configure()<br/>"]
+        S1B["StructlogLogger<br/>(JSON, ISO timestamps, run_id binding)"]
+    end
+
+    subgraph Step2["Step 2: Configuration"]
+        S2A["ConfigLoader.load(pipeline_name)<br/>"]
+        S2B["PipelineYamlConfig<br/>(_base.yaml merged with entity.yaml)"]
+        S2C["DQConfigLoader.load()<br/>"]
+        S2D["FilterConfigLoader.load()<br/>"]
+    end
+
+    subgraph Step3["Step 3: Observability Bundle"]
+        S3A["ObservabilityBundle<br/>"]
+        S3B["PrometheusMetrics<br/>(MetricsPort)"]
+        S3C["NoOpTracing<br/>(TracingPort, ADR-022)"]
+    end
+
+    subgraph Step4["Step 4: Storage"]
+        S4A["StorageAdapter.create_bronze()<br/>"]
+        S4B["StorageAdapter.create_silver()<br/>"]
+        S4C["StorageAdapter.create_gold()<br/>"]
+        S4D["BronzeWriter<br/>(JSONL + zstd)"]
+        S4E["SilverWriter<br/>(Delta Lake)"]
+        S4F["GoldWriter<br/>(Delta / Parquet)"]
+    end
+
+    subgraph Step5["Step 5: HTTP Client"]
+        S5A["HttpClientFactory.create(provider)<br/>"]
+        S5B["UnifiedHTTPClient<br/>"]
+        S5C["TokenBucket<br/>(rate limiter)"]
+        S5D["CircuitBreaker<br/>(threshold=5, timeout=300s)"]
+    end
+
+    subgraph Step6["Step 6: Data Source"]
+        S6A["DataSourceFactory.create(provider)<br/>"]
+        S6B["ProviderRegistry.get(provider)<br/>"]
+        S6C["Provider Adapter<br/>(e.g., ChemblAdapter)"]
+    end
+
+    subgraph Step7["Step 7: Coordination"]
+        S7A["MemoryLock<br/>(LockPort, TTL=90s)"]
+        S7B["LocalCheckpoint<br/>(CheckpointPort)"]
+        S7C["UnifiedQuarantine<br/>(QuarantinePort)"]
+    end
+
+    subgraph Step8["Step 8: Services Bundle"]
+        S8A["ServicesBuilder<br/>"]
+        S8B[".with_storage(bronze, silver, gold)<br/>"]
+        S8C[".with_lock(memory_lock)<br/>"]
+        S8D[".with_checkpoint(local_checkpoint)<br/>"]
+        S8E[".with_quarantine(unified_quarantine)<br/>"]
+        S8F[".with_logger(structlog_logger)<br/>"]
+        S8G[".with_metrics(prometheus_metrics)<br/>"]
+        S8H[".build() → PipelineServices (frozen)<br/>"]
+    end
+
+    subgraph Step9["Step 9: Runner Assembly"]
+        S9A["RunnerFactory.create_runner()<br/>"]
+        S9B["PipelineRunner<br/>(fully assembled, ready to run)"]
+    end
+
+    %% Flow
+    S1A --> S1B
+    S1B --> S2A
+    S2A --> S2B
+    S2A --> S2C & S2D
+    S2B --> S3A
+    S3A --> S3B & S3C
+    S3B --> S4A
+    S4A --> S4D
+    S4B --> S4E
+    S4C --> S4F
+    S4D & S4E & S4F --> S5A
+    S5A --> S5B
+    S5B --> S5C & S5D
+    S5B --> S6A
+    S6A --> S6B --> S6C
+    S6C --> S7A & S7B & S7C
+    S7A & S7B & S7C --> S8A
+    S8A --> S8B --> S8C --> S8D --> S8E --> S8F --> S8G --> S8H
+    S8H --> S9A --> S9B
+
+    %% Styling
+    style Step1 fill:#f5f3ff,stroke:#7c3aed
+    style Step8 fill:#ffe4e6,stroke:#dc2626
+    style Step9 fill:#f0fdf4,stroke:#16a34a
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 18 stroke:#475569,stroke-width:2px,stroke-dasharray:5,opacity:0.85

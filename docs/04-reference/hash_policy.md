@@ -3,7 +3,7 @@
 ## Назначение
 
 Hash policy фиксирует детерминированные правила расчёта `content-hash` для пары `<provider>/<entity>`.
-Файл политики хранится в `configs/hash-policy/<provider>/<entity>.yaml` и является машиночитаемым контрактом.
+Файл политики хранится в `configs/entities/<provider>/<entity>.yaml (section `hash_policy`)` и является машиночитаемым контрактом.
 
 ## Обязательная структура policy-файла
 
@@ -25,7 +25,7 @@ Hash policy фиксирует детерминированные правила
 
 Изменение hash policy (include/exclude/normalization) **MUST** сопровождаться:
 
-1. **Version bump** в `contract.version` соответствующего `configs/hash-policy/<provider>/<entity>.yaml`.
+1. **Version bump** в `contract.version` соответствующего `configs/entities/<provider>/<entity>.yaml (section `hash_policy`)`.
 1. **Migration note** в `contract.migration-note` с описанием влияния на downstream-потребителей и существующие Silver/Gold данные.
 1. Обновлением snapshot-тестов стабильности hash на фиксированных fixtures.
 

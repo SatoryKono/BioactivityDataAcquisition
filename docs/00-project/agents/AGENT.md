@@ -1,6 +1,6 @@
 # AGENT.md: Инструкции для Агента BioETL (v2.4)
 
-*Синхронизировано с RULES.md v5.22 (2026-02-21) | Дедублировано: ссылки на RULES.md*
+*Синхронизировано с RULES.md v5.23 (2026-02-21) | Дедублировано: ссылки на RULES.md*
 
 Приветствую, Коллега. Ты — **Jules**, ведущий инженер (Senior Software Engineer) на проекте BioETL. Твоя задача — развивать и поддерживать систему, строго следуя архитектурным стандартам и правилам проекта, изложенным в `docs/00-project/RULES.md`.
 
@@ -274,7 +274,7 @@ flowchart TD
 ### 7.2. Создание Нового Пайплайна
 
 1. **Конфиг:** Создай `configs/entities/{provider}/{entity}.yaml`. Определи `load-strategy` (`incremental` или `full`).
-1. **Трансформер:** Наследуй от `BaseTransformer` (`src/bioetl/application/core/base-transformer.py`).
+1. **Трансформер:** Наследуй от `BaseTransformer` (`src/bioetl/application/core/base_transformer.py`).
 1. **Пайплайн:** Создай класс в `src/bioetl/application/pipelines/`.
 1. **Фабрика:** Создай фабрику в `src/bioetl/composition/factories/`.
 1. **Регистрация:** Зарегистрируй в `PipelineRegistry` (через декоратор `@register`).

@@ -174,7 +174,11 @@ class DQConfig(BaseModel):
 
     @model_validator(mode="after")
     def validate_thresholds(self) -> DQConfig:
-        """Validate that thresholds are between 0 and 1."""
+        """Validate that thresholds are between 0 and 1.
+
+        Returns:
+            Validated DQConfig.
+        """
         DomainDQConfig.validate_thresholds(
             soft_fail_threshold=self.soft_fail_threshold,
             hard_fail_threshold=self.hard_fail_threshold,
@@ -585,7 +589,14 @@ class TransformConfig(BaseModel):
     @field_validator("version")
     @classmethod
     def validate_semver(cls, v: str | None) -> str | None:
-        """Validate that version follows semver format."""
+        """Validate that version follows semver format.
+
+        Args:
+            v: V.
+
+        Returns:
+            Validated str | None.
+        """
         if v is None:
             return v
         if not SEMVER_PATTERN.match(v):
@@ -745,7 +756,14 @@ class PipelineYamlConfig(BaseModel):
     @field_validator("batch_size")
     @classmethod
     def validate_batch_size(cls, v: int) -> int:
-        """Validate batch size limit."""
+        """Validate batch size limit.
+
+        Args:
+            v: V.
+
+        Returns:
+            Validated int.
+        """
         if v > 5000:
             raise ValueError("batch_size cannot exceed 5000 records")
         return v
@@ -753,7 +771,14 @@ class PipelineYamlConfig(BaseModel):
     @field_validator("provider")
     @classmethod
     def validate_provider(cls, v: str) -> str:
-        """Validate provider name format."""
+        """Validate provider name format.
+
+        Args:
+            v: V.
+
+        Returns:
+            Validated str.
+        """
         if not v.islower():
             raise ValueError("provider must be lowercase")
         return v
@@ -766,6 +791,9 @@ class PipelineYamlConfig(BaseModel):
         - business_primary_keys is canonical.
         - primary_keys is accepted as legacy alias.
         - If both are provided, values MUST match exactly.
+
+        Returns:
+            Validated PipelineYamlConfig.
         """
         if self.business_primary_keys is None and self.primary_keys is None:
             raise ValueError(
@@ -808,6 +836,9 @@ class PipelineYamlConfig(BaseModel):
 
         Raises:
             ValueError: If document* is used instead of publication*.
+
+        Returns:
+            Validated PipelineYamlConfig.
         """
         from bioetl.domain.registry.publication import validate_publication_entity_type
 
@@ -832,6 +863,9 @@ class PipelineYamlConfig(BaseModel):
 
         Raises:
             ValueError: If layer format violates Medallion Architecture constraints.
+
+        Returns:
+            Validated PipelineYamlConfig.
         """
         bronze_config = self.sink.get("bronze")
         silver_config = self.sink.get("silver")

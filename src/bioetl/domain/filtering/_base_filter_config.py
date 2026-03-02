@@ -30,7 +30,14 @@ class BaseFilterConfig:
 
     @classmethod
     def from_base(cls, other: BaseFilterConfig) -> Self:
-        """Create same-type filter config from another base config."""
+        """Create same-type filter config from another base config.
+
+        Args:
+            other: Other.
+
+        Returns:
+            The Self result.
+        """
         return cls(
             column_filters=other.column_filters,
             range_filters=other.range_filters,
@@ -41,7 +48,14 @@ class BaseFilterConfig:
         )
 
     def should_include(self, record: dict[str, Any]) -> bool:  # Any: record vals vary
-        """Check all filtering rules against a record."""
+        """Check all filtering rules against a record.
+
+        Args:
+            record: Single data record.
+
+        Returns:
+            True if condition is met, False otherwise.
+        """
         checks = [
             self._check_required_fields,
             self._check_exclude_if_present,
@@ -226,7 +240,11 @@ class BaseFilterConfig:
         return val <= max_val if inclusive else val < max_val
 
     def is_empty(self) -> bool:
-        """Check whether the filter configuration is empty."""
+        """Check whether the filter configuration is empty.
+
+        Returns:
+            True if the condition is met, False otherwise.
+        """
         all_filters = (
             self.column_filters,
             self.range_filters,

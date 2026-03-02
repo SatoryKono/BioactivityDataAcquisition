@@ -97,7 +97,7 @@
 
 ### 3.1. Schema Config Files (cfg-schema)
 
-**ALL** `configs/schemas/{provider}/{entity}.yaml` files contain only `column-groups: []`. This makes the `cfg-schema` column EMPTY for every field across all 22 entities. Either:
+**ALL** `configs/entities/{provider}/{entity}.yaml` files contain only `column-groups: []`. This makes the `cfg-schema` column EMPTY for every field across all 22 entities. Either:
 - These configs are intentionally unused (remove or document as deprecated)
 - They need to be populated with actual column definitions
 

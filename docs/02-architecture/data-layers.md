@@ -29,7 +29,7 @@
 **Примечание**: Если источник возвращает массив JSON, он разбивается на отдельные строки (records).
 
 ### 1.3. Реализация (Code Reference)
-*   **Writer**: `src/bioetl/infrastructure/storage/bronze-writer.py`
+*   **Writer**: `src/bioetl/infrastructure/storage/bronze_writer.py`
 *   **Логика**:
     1.  Получение батча данных от адаптера.
     2.  Добавление метаданных.
@@ -81,7 +81,7 @@ Silver слой использует стратегию **Merge/Upsert** для 
 *   **Приоритет обновлений (Conflict Resolution)**:
     При конкурентных запусках (например, Backfill vs Incremental) используется поле `-run-type`.
     Приоритет: `rebuild` > `backfill` > `incremental`.
-    *В коде*: Условный update в Delta Merge (см. `src/bioetl/infrastructure/storage/silver-writer.py`).
+    *В коде*: Условный update в Delta Merge (см. `src/bioetl/infrastructure/storage/silver_writer.py`).
 
 ### 2.5. PII и Безопасность
 *   Поля, помеченные как чувствительные (PII), **ОБЯЗАНЫ** быть хэшированы перед записью в Silver.
@@ -104,9 +104,9 @@ Silver слой использует стратегию **Merge/Upsert** для 
 
 При переходе из Silver в Gold выполняется трансформация данных:
 
-*   **Фильтрация полей**: Метод `BaseTransformer.transform-for-gold()` (`base-transformer.py:456`) использует `GOLD-EXCLUDE-FIELDS` для фильтрации полей. В текущей версии `GOLD-EXCLUDE-FIELDS = frozenset()` (пустое множество) — все Silver-поля проходят в Gold без исключения.
+*   **Фильтрация полей**: Метод `BaseTransformer.transform_for_gold()` (`base_transformer.py:456`) использует `GOLD_EXCLUDE_FIELDS` для фильтрации полей. В текущей версии `GOLD_EXCLUDE_FIELDS = frozenset()` (пустое множество) — все Silver-поля проходят в Gold без исключения.
 *   **Плоская структура**: Gold содержит только плоские (scalar) поля для оптимизации аналитических запросов.
-*   **Реализация**: `BaseTransformer.transform-for-gold()` метод с константой `GOLD-EXCLUDE-FIELDS` в `src/bioetl/application/core/base-transformer.py`.
+*   **Реализация**: `BaseTransformer.transform_for_gold()` метод с константой `GOLD_EXCLUDE_FIELDS` в `src/bioetl/application/core/base_transformer.py`.
 
 #### Пример: ChEMBL Molecule
 

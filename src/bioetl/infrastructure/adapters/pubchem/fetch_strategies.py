@@ -102,7 +102,15 @@ class PubChemFetchStrategies:
     async def fetch_by_query(
         self, query: str, limit: int | None
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch compounds by query (name search)."""
+        """Fetch compounds by query (name search).
+
+        Args:
+            query: Search query string.
+            limit: Maximum number of records to process.
+
+        Returns:
+            Async iterator yielding fetched records.
+        """
         await self._rate_limiter.acquire()
         start_time = time.perf_counter()
         compounds = await self._circuit_breaker.call(
@@ -135,7 +143,15 @@ class PubChemFetchStrategies:
     async def fetch_by_smiles(
         self, smiles_list: list[str], limit: int | None = None
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch compounds by SMILES strings."""
+        """Fetch compounds by SMILES strings.
+
+        Args:
+            smiles_list: Smiles list.
+            limit: Maximum number of records to process.
+
+        Returns:
+            Async iterator yielding fetched records.
+        """
         fetched = 0
         for smiles in smiles_list:
             if limit and fetched >= limit:
@@ -193,7 +209,16 @@ class PubChemFetchStrategies:
     async def fetch_by_cids(
         self, cid_list: list[str], limit: int | None = None, batch_size: int = 50
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch compounds by CID list."""
+        """Fetch compounds by CID list.
+
+        Args:
+            cid_list: Cid list.
+            limit: Maximum number of records to process.
+            batch_size: Number of records per batch.
+
+        Returns:
+            Async iterator yielding fetched records.
+        """
         fetched = 0
         valid_cids = self._parse_valid_cids(cid_list)
 
@@ -224,7 +249,16 @@ class PubChemFetchStrategies:
         limit: int | None = None,
         batch_size: int = 50,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Backward-compatible alias for CID-based fetch."""
+        """Backward-compatible alias for CID-based fetch.
+
+        Args:
+            molecule_id_list: Molecule id list.
+            limit: Maximum number of records to process.
+            batch_size: Number of records per batch.
+
+        Returns:
+            Async iterator yielding fetched records.
+        """
         async for record in self.fetch_by_cids(
             molecule_id_list, limit=limit, batch_size=batch_size
         ):
@@ -268,6 +302,9 @@ class PubChemFetchStrategies:
 
         Yields:
             Compound dicts with CID, SMILES, properties, etc.
+
+        Returns:
+            Async iterator yielding fetched records.
         """
         fetched = 0
         for inchikey in inchikey_list:
@@ -305,7 +342,15 @@ class PubChemFetchStrategies:
     async def fetch_substances(
         self, query: str | None, limit: int | None
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch substances from PubChem."""
+        """Fetch substances from PubChem.
+
+        Args:
+            query: Search query string.
+            limit: Maximum number of records to process.
+
+        Returns:
+            Async iterator yielding fetched records.
+        """
         if not query:
             raise ValueError("Query is required for substance search")
 
@@ -330,7 +375,15 @@ class PubChemFetchStrategies:
     async def fetch_assays(
         self, query: str | None, limit: int | None
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch assays from PubChem."""
+        """Fetch assays from PubChem.
+
+        Args:
+            query: Search query string.
+            limit: Maximum number of records to process.
+
+        Returns:
+            Async iterator yielding fetched records.
+        """
         if not query:
             raise ValueError("Query is required for assay search")
 

@@ -167,7 +167,11 @@ class ChemblHealthMixin:
         return int(status_code) if isinstance(status_code, int) else None
 
     def get_error_stats(self) -> dict[str, Any]:
-        """Get error statistics from circuit breaker for monitoring."""
+        """Get error statistics from circuit breaker for monitoring.
+
+        Returns:
+            Error stats.
+        """
         return {
             "circuit_breaker_failures": self.http_client.circuit_breaker.get_failure_count(),
             "circuit_breaker_state": self.http_client.circuit_breaker.get_state().value,

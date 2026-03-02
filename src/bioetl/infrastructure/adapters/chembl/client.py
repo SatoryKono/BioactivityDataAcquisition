@@ -805,6 +805,8 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         Yields:
             Dictionary records from ChEMBL API
 
+        Returns:
+            Async iterator yielding fetched records.
         """
         if filter_ids and filter_field:
             async for record in self._fetch_filtered(
@@ -837,6 +839,8 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         Yields:
             Dictionary records matching the filter criteria
 
+        Returns:
+            Async iterator yielding fetched records.
         """
         async for record in self._fetch_filtered(
             entity_type, limit, filter_ids, filter_field
@@ -867,6 +871,8 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         Yields:
             Dictionary records matching ALL filter criteria
 
+        Returns:
+            Async iterator yielding fetched records.
         """
         if not filters:
             return
@@ -943,7 +949,18 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
         fallback_mapping: dict[str, str],
         limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch with fallback (ChEMBL IDs always resolvable, fallback ignored)."""
+        """Fetch with fallback (ChEMBL IDs always resolvable, fallback ignored).
+
+        Args:
+            entity_type: Entity type identifier.
+            filter_ids: List of identifiers to filter by.
+            filter_field: Field name to apply filter on.
+            fallback_mapping: Fallback mapping.
+            limit: Maximum number of records to process.
+
+        Returns:
+            Async iterator yielding fetched records.
+        """
         _ = fallback_mapping  # Unused - ChEMBL IDs are always resolvable
         async for record in self._fetch_filtered(
             entity_type, limit, filter_ids, filter_field
@@ -985,6 +1002,8 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
             >>> async for activity in adapter.fetch_as_models("activity", limit=100):
             ...     logger.debug("activity_fetched", activity_id=activity.activity_id, pchembl=activity.pchembl_value)
 
+        Returns:
+            Async iterator yielding fetched records.
         """
         model_class = CHEMBL_DTO_MODELS.get(entity_type)
         if model_class is None:
@@ -1008,7 +1027,14 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
                 yield model_class.model_construct(**record)
 
     async def get_entity_count(self, entity_type: str) -> int:
-        """Get total count of entities."""
+        """Get total count of entities.
+
+        Args:
+            entity_type: Entity type identifier.
+
+        Returns:
+            Entity count.
+        """
         url = self._mapper.get_resource_url(entity_type)
         params = {"limit": 1, "format": "json"}
         with self._adapter_metrics.measure_request(f"/{entity_type}/count"):

@@ -2,6 +2,8 @@
 
 *Reference: [RULES.md §3.1.1](../../00-project/RULES.md#311-классификация-ошибок)*
 
+> Runtime profile: Local-Only single-instance (ADR-010). Troubleshooting assumes local storage and `MemoryLock`.
+
 This runbook describes how to handle critical pipeline failures (P1 incidents).
 
 ## Symptoms

@@ -639,6 +639,17 @@ class UniProtIDMappingClient(BaseHttpAdapter):
 
         Raises:
             NotImplementedError: Always, as this is not a data source.
+
+        Args:
+            entity_type: Entity type identifier.
+            limit: Maximum number of records to process.
+            query: Search query string.
+            filter_ids: List of identifiers to filter by.
+            filter_field: Field name to apply filter on.
+            offset: Offset.
+
+        Returns:
+            Async iterator yielding fetched records.
         """
         raise NotImplementedError(
             "UniProtIDMappingClient is not a DataSourcePort. "

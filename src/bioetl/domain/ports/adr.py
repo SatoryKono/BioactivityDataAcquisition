@@ -61,7 +61,11 @@ class AdrServicePort(Protocol):
     """Port for accessing and validating ADR documents."""
 
     def list_adrs(self) -> list[AdrInfo]:
-        """List ADRs available in the repository sorted by number."""
+        """List ADRs available in the repository sorted by number.
+
+        Returns:
+            Collection of adrs.
+        """
 
     def get_adr(self, number: int) -> AdrDocument:
         """Get full ADR document by number.
@@ -69,10 +73,20 @@ class AdrServicePort(Protocol):
         Raises:
             FileNotFoundError: if ADR with the given number does not exist.
             ValueError: if the ADR file is malformed.
+
+        Args:
+            number: Number.
+
+        Returns:
+            Adr.
         """
 
     def validate(self) -> AdrValidationReport:
-        """Validate ADR repository and return a summary report."""
+        """Validate ADR repository and return a summary report.
+
+        Returns:
+            Validated AdrValidationReport.
+        """
 
 
 __all__ = [

@@ -1,11 +1,11 @@
-# YAML Configuration Resolution Chain
+# Yaml Config Resolution Full
 
 - Исходная диаграмма: `mmd-diagrams/views/46-yaml-config-resolution-full.mermaid`
 
 ## Описание
-Диаграмма описывает: infrastructure/config_loader.py, infrastructure/config/, domain/config/. Приоритет/контекст: 21 (Score 7.38) — Hierarchical config merge underpins every pipeline.
+Эта views-диаграмма Yaml Config Resolution Full представляет срез типа full для родительской схемы (root) и использует нотацию unknown. Она нужна для детального анализа выбранного аспекта архитектуры без перегрузки полного графа лишними элементами. В метке view зафиксировано назначение: Full. Такой формат облегчает трассировку связей между full-версией и специализированными представлениями overview/domain/infra/dataflow, что важно для ревью, онбординга и проверки архитектурной консистентности документации. Ключевые блоки этой версии включают: YAML File Hierarchy, DQ Config Hierarchy (DQConfigLoader), Filter Config Hierarchy (FilterConfigLoader), Infrastructure Config Loaders, Domain Config Objects (Frozen). Их состав показывает, какие границы ответственности и каналы взаимодействия автор выбрал для текущего аналитического фокуса. Показательные узлы в диаграмме: YAML File Hierarchy, configs/base/pipeline.yaml (global defaults), configs/providers/{provider}.yaml (provider defaults), configs/entities/{provider}/{entity}.yaml (pipeline config), configs/providers/{provider}.yaml (source config), DQ Config Hierarchy (DQConfigLoader). По ним можно проверить корректность терминологии, соответствие имен портов/адаптеров и логичность маршрутов данных или управляющих вызовов. Диаграмма предназначена для практического использования в технических обсуждениях, регрессионной валидации диаграмм и синхронизации с кодовой структурой проекта. Она помогает быстро обнаруживать расхождения между задуманной архитектурой и фактической реализацией компонентов.
 
 ## Метаданные
-- Тип: `flowchart`
-- Уровень: `Mixed (System / Component / Class)`
-- Дата метаданных: `2026-02-24`
+- Тип: `unknown`
+- View: `Full`
+- Parent: `(root)`

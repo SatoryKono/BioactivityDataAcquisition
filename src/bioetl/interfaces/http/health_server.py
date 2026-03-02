@@ -299,7 +299,14 @@ async def run_health_server(
     health_monitor: HealthMonitorPort | None = None,
     logger: LoggerPort | None = None,
 ) -> None:
-    """Run the health server until interrupted."""
+    """Run the health server until interrupted.
+
+    Args:
+        host: Host.
+        port: Port.
+        health_monitor: Health monitor.
+        logger: Logger instance.
+    """
     server = HealthServer(
         host=host, port=port, health_monitor=health_monitor, logger=logger
     )

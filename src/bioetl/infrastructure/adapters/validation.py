@@ -131,6 +131,9 @@ def validate_records(
         ...         yield result.validated.model_dump()
         ...     else:
         ...         quarantine_writer.write(result.record, result.error)
+
+    Returns:
+        Validated Iterator[ValidationResult].
     """
     for record in records:
         yield validate_record(record, model_class, logger, context)

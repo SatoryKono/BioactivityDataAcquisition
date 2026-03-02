@@ -1,0 +1,75 @@
+%% View: Infrastructure-Mapping | Parent: 01-high-level-full.mermaid
+%% @uniform width=140 height=56 max_title_len=10 max_desc_lines=0
+flowchart TB
+%% keep-orphan: N14, N15, N16, N17, N18, N19, N20, N4
+
+    subgraph Application["Application Layer"]
+        direction TB
+        N5["Executor"]
+        N7["Runner"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N1["Storage"]
+        N3["Adapters"]
+        N4["Quarantine"]
+        N6["Boot"]
+        N8["Trans"]
+        N9["Sources"]
+        N11["Bronze"]
+        N12["Silver"]
+        N13["Gold"]
+        N14["A1"]
+        N15["A2"]
+        N16["A3"]
+        N17["A4"]
+        N18["A5"]
+        N19["A6"]
+        N20["A7"]
+    end
+
+    subgraph Composition["Composition Layer"]
+        direction TB
+        N2["Factory"]
+    end
+
+    subgraph Interfaces["Interfaces Layer"]
+        direction TB
+        N10["CLI"]
+    end
+
+    N9 ==> N3
+    N10 --> N6
+    N6 --> N2
+    N2 --> N7
+    N7 --> N5
+    N5 --> N8
+    N8 --> N3
+    N1 --> N11
+    N1 --> N12
+    N1 --> N13
+    N5 --> N1
+
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style Composition fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style Interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 4 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 5 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 6 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 7 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 8 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 9 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 10 stroke:#475569,stroke-width:2px,stroke-dasharray:5

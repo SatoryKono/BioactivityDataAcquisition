@@ -106,7 +106,14 @@ class DQReportSerializer:
     def to_dict(
         self, report: BronzeDQReport | SilverDQReport | GoldDQReport
     ) -> dict[str, Any]:  # Any: serialized values are heterogeneous
-        """Convert report to dictionary."""
+        """Convert report to dictionary.
+
+        Args:
+            report: Report.
+
+        Returns:
+            Dictionary representation.
+        """
         return to_dict(report)
 
     def _to_json(self, report: BronzeDQReport | SilverDQReport | GoldDQReport) -> str:

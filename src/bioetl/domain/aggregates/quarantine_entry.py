@@ -47,7 +47,11 @@ class QuarantineStatus(StrEnum):
     """Entry exceeded retention period."""
 
     def is_terminal(self) -> bool:
-        """Check if this is a terminal status."""
+        """Check if this is a terminal status.
+
+        Returns:
+            True if the condition is met, False otherwise.
+        """
         return self in {
             QuarantineStatus.IGNORED,
             QuarantineStatus.REPROCESSED,
@@ -55,7 +59,11 @@ class QuarantineStatus(StrEnum):
         }
 
     def can_resolve(self) -> bool:
-        """Check if entry can be resolved from this status."""
+        """Check if entry can be resolved from this status.
+
+        Returns:
+            True if the condition is met, False otherwise.
+        """
         return self in {QuarantineStatus.NEW, QuarantineStatus.UNDER_REVIEW}
 
 

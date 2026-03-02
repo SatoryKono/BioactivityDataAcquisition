@@ -75,7 +75,14 @@ class ValueObjectWithFromRaw(Protocol[V]):
 
     @classmethod
     def from_raw(cls, raw: Any) -> V | None:  # Any: raw input
-        """Create Value Object from raw value, returning None if invalid."""
+        """Create Value Object from raw value, returning None if invalid.
+
+        Args:
+            raw: Raw input value.
+
+        Returns:
+            New instance constructed from the input.
+        """
         ...
 
     @property
@@ -561,6 +568,12 @@ class BaseTransformer(ABC):
 
         Empty collections → None; single-element lists → unwrapped native type;
         multi-element lists/dicts → JSON string (orjson with OPT_SORT_KEYS).
+
+        Args:
+            value: Input value.
+
+        Returns:
+            Serialized representation.
         """
         if value is None:
             return None
@@ -654,7 +667,14 @@ class BaseTransformer(ABC):
     def entity_to_silver_record(
         self, entity: Any
     ) -> dict[str, Any]:  # Any: generic entity
-        """Convert Domain Entity to SilverRecord format using policy rename map."""
+        """Convert Domain Entity to SilverRecord format using policy rename map.
+
+        Args:
+            entity: Entity.
+
+        Returns:
+            Result dictionary.
+        """
         silver_record = dataclasses.asdict(entity)
 
         rename_map = self._contract_policy.rename_map

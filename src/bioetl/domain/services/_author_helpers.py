@@ -24,7 +24,15 @@ _AFFILIATION_KEYS = ("name", "display_name", "affiliation")
 
 
 def hash_author_name(name: str, salt: str) -> str:
-    """Hash author name with SHA-256: sha256(lowercase(name) + salt)."""
+    """Hash author name with SHA-256: sha256(lowercase(name) + salt).
+
+    Args:
+        name: Author name to hash.
+        salt: Cryptographic salt for hashing.
+
+    Returns:
+        Hexadecimal SHA-256 hash of the normalized author name.
+    """
     normalized = name.strip().lower()
     return hashlib.sha256(f"{normalized}{salt}".encode()).hexdigest()
 
@@ -32,7 +40,14 @@ def hash_author_name(name: str, salt: str) -> str:
 def parse_author_names(
     authors: list[str] | list[dict[str, Any]] | str,  # Any: heterogeneous field values
 ) -> list[str]:
-    """Parse various author formats to list of name strings."""
+    """Parse various author formats to list of name strings.
+
+    Args:
+        authors: Authors.
+
+    Returns:
+        Parsed result.
+    """
     if isinstance(authors, list):
         return [n for a in authors if (n := _extract_name_from_item(a))]
     if isinstance(authors, str):
@@ -55,7 +70,14 @@ def _extract_name_from_item(item: Any) -> str | None:  # Any: raw API JSON value
 
 
 def parse_author_string(text: str) -> list[str]:
-    """Parse author string (JSON or delimited format)."""
+    """Parse author string (JSON or delimited format).
+
+    Args:
+        text: Input text string.
+
+    Returns:
+        Parsed result.
+    """
     text = text.strip()
     if not text:
         return []
@@ -67,7 +89,14 @@ def parse_author_string(text: str) -> list[str]:
 
 
 def try_parse_json_authors(text: str) -> list[str] | None:
-    """Try to parse JSON array of authors. Returns None on parse failure."""
+    """Try to parse JSON array of authors. Returns None on parse failure.
+
+    Args:
+        text: Input text string.
+
+    Returns:
+        Result list.
+    """
     try:
         parsed = deserialize_from_json(text)
     except (ValueError, TypeError):
@@ -78,7 +107,14 @@ def try_parse_json_authors(text: str) -> list[str] | None:
 
 
 def parse_delimited_authors(text: str) -> list[str]:
-    """Parse semicolon- or comma-delimited author string."""
+    """Parse semicolon- or comma-delimited author string.
+
+    Args:
+        text: Input text string.
+
+    Returns:
+        Parsed result.
+    """
     delimiter = ";" if ";" in text else ","
     parts = text.split(delimiter) if delimiter in text else [text]
     return [part.strip() for part in parts if part.strip()]
@@ -87,7 +123,14 @@ def parse_delimited_authors(text: str) -> list[str]:
 def extract_affiliation_strings(
     affiliations: list[str] | list[dict[str, Any]],  # Any: heterogeneous field values
 ) -> list[str]:
-    """Extract affiliation strings from a mixed list of strings and dicts."""
+    """Extract affiliation strings from a mixed list of strings and dicts.
+
+    Args:
+        affiliations: Affiliations.
+
+    Returns:
+        Extracted value.
+    """
     strings: list[str] = []
     for aff in affiliations:
         extracted = _extract_single_affiliation(aff)
@@ -116,7 +159,14 @@ def _extract_single_affiliation(aff: Any) -> str | None:  # Any: raw API JSON va
 
 
 def normalize_affiliation_string(text: str) -> str | None:
-    """Normalize affiliation: HTML → whitespace → control chars → NFC → trim."""
+    """Normalize affiliation: HTML → whitespace → control chars → NFC → trim.
+
+    Args:
+        text: Input text string.
+
+    Returns:
+        Normalized value.
+    """
     if not text:
         return None
     normalized = _HTML_TAG_PATTERN.sub("", text)
@@ -129,7 +179,14 @@ def normalize_affiliation_string(text: str) -> str | None:
 
 
 def deduplicate_case_insensitive(strings: list[str]) -> list[str]:
-    """Deduplicate strings case-insensitively, keeping first occurrence."""
+    """Deduplicate strings case-insensitively, keeping first occurrence.
+
+    Args:
+        strings: Strings.
+
+    Returns:
+        Result list.
+    """
     seen: dict[str, str] = {}
     for s in strings:
         key = s.lower()
@@ -195,6 +252,9 @@ def normalize_to_surname_initial(name: str) -> str | None:
 
     Returns:
         Short key string, or None if name is empty.
+
+    Args:
+        name: Identifier name.
     """
     if not name or not name.strip():
         return None
@@ -224,7 +284,14 @@ def _collect_affiliation_values(aff_data: Any) -> list[str]:  # Any: raw API JSO
 def collect_affiliations_from_authors(
     authors: list[dict[str, Any]],  # Any: heterogeneous field values
 ) -> list[str]:
-    """Collect raw affiliation strings from author dicts."""
+    """Collect raw affiliation strings from author dicts.
+
+    Args:
+        authors: Authors.
+
+    Returns:
+        Collected results.
+    """
     result: list[str] = []
     for author in authors:
         if isinstance(author, dict) and author.get("affiliations"):

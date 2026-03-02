@@ -1,5 +1,10 @@
 # BioETL Kubernetes Manifests - Summary
 
+> **Note (ADR-010):** BioETL primary deployment model is **Local-Only** (file-based,
+> no Docker/Redis in runtime). See [ADR-010](../../02-architecture/decisions/ADR-010-local-only-deployment.md).
+> This Kubernetes material is provided for **advanced/experimental use only** and is
+> not the recommended deployment strategy.
+
 ## Files Generated
 
 ### Core Manifests
@@ -174,23 +179,23 @@ curl http://localhost:8000/metrics
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| BIOETL-ENV | prod | Environment name (dev/staging/prod) |
-| BIOETL-PIPELINE--BATCH-SIZE | 100 | Data batch size for processing |
-| BIOETL-PIPELINE--MAX-CONCURRENT-BATCHES | 4 | Concurrent batch limit |
-| BIOETL-LOG-LEVEL | INFO | Logging level |
-| BIOETL-METRICS-ENABLED | true | Enable Prometheus metrics |
-| BIOETL-METRICS-PORT | 8000 | Metrics HTTP server port |
+| BIOETL_ENV | prod | Environment name (dev/staging/prod) |
+| BIOETL_PIPELINE__BATCH_SIZE | 100 | Data batch size for processing |
+| BIOETL_PIPELINE__MAX_CONCURRENT_BATCHES | 4 | Concurrent batch limit |
+| BIOETL_LOG_LEVEL | INFO | Logging level |
+| BIOETL_METRICS_ENABLED | true | Enable Prometheus metrics |
+| BIOETL_METRICS_PORT | 8000 | Metrics HTTP server port |
 
 ### Secrets (Must Update)
 
 | Secret | Description |
 |--------|-------------|
-| BIOETL-PII-SALT-CURRENT | Random 64-char string for PII hashing |
-| BIOETL-UNIPROT-API-KEY | UniProt API access key |
-| BIOETL-OPENALEX-EMAIL | OpenAlex polite pool email |
-| BIOETL-SEMANTICSCHOLAR-API-KEY | Semantic Scholar access key |
-| BIOETL-PUBMED-API-KEY | NCBI PubMed access key |
-| BIOETL-CROSSREF-EMAIL | Crossref polite pool email |
+| BIOETL_PII_SALT_CURRENT | Random 64-char string for PII hashing |
+| BIOETL_UNIPROT_API_KEY | UniProt API access key |
+| BIOETL_OPENALEX_EMAIL | OpenAlex polite pool email |
+| BIOETL_SEMANTICSCHOLAR_API_KEY | Semantic Scholar access key |
+| BIOETL_PUBMED_API_KEY | NCBI PubMed access key |
+| BIOETL_CROSSREF_EMAIL | Crossref polite pool email |
 
 ### Resources (Adjustable)
 
@@ -246,7 +251,7 @@ kubectl port-forward -n bioetl-prod svc/prometheus 9090:9090
 | Issue | Resolution |
 |-------|-----------|
 | Pod pending | Check: PVC status, node resources, image pull |
-| Metrics 404 | Verify BIOETL-METRICS-PORT=8000 in ConfigMap |
+| Metrics 404 | Verify BIOETL_METRICS_PORT=8000 in ConfigMap |
 | Grafana no data | Check Prometheus datasource, scrape targets |
 | OOM Errors | Increase memory limits, check log volume |
 | Storage full | Check PVC usage, run cleanup tasks |

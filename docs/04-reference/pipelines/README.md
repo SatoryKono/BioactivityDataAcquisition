@@ -1,6 +1,6 @@
 # BioETL Pipeline Documentation
 
-*Updated: 2026-02-21 | Aligned with RULES.md v5.22*
+*Updated: 2026-02-21 | Aligned with RULES.md v5.23*
 
 This directory contains documentation for all BioETL pipelines, including composite pipelines.
 
@@ -100,17 +100,17 @@ Composite pipelines keep merge schema in `configs/composites/{entity}.yaml`
 | ------------------------------------------------------ | ---------------------------------------------------- |
 | `configs/entities/chembl/activity.yaml`               | `schema` section in same file                        |
 | `configs/entities/chembl/assay.yaml`                  | `schema` section in same file                        |
-| `configs/entities/chembl/assay-parameters.yaml`       | `schema` section in same file                        |
-| `configs/entities/chembl/cell-line.yaml`              | `schema` section in same file                        |
-| `configs/entities/chembl/compound-record.yaml`        | `schema` section in same file                        |
+| `configs/entities/chembl/assay_parameters.yaml`       | `schema` section in same file                        |
+| `configs/entities/chembl/cell_line.yaml`              | `schema` section in same file                        |
+| `configs/entities/chembl/compound_record.yaml`        | `schema` section in same file                        |
 | `configs/entities/chembl/molecule.yaml`               | `schema` section in same file                        |
-| `configs/entities/chembl/protein-class.yaml`          | `schema` section in same file                        |
+| `configs/entities/chembl/protein_class.yaml`          | `schema` section in same file                        |
 | `configs/entities/chembl/publication.yaml`            | `schema` section in same file                        |
 | `configs/entities/chembl/publication_similarity.yaml` | `schema` section in same file                        |
 | `configs/entities/chembl/publication_term.yaml`       | `schema` section in same file                        |
-| `configs/entities/chembl/subcellular-fraction.yaml`   | `schema` section in same file                        |
+| `configs/entities/chembl/subcellular_fraction.yaml`   | `schema` section in same file                        |
 | `configs/entities/chembl/target.yaml`                 | `schema` section in same file                        |
-| `configs/entities/chembl/target-component.yaml`       | `schema` section in same file                        |
+| `configs/entities/chembl/target_component.yaml`       | `schema` section in same file                        |
 | `configs/entities/chembl/tissue.yaml`                 | `schema` section in same file                        |
 | `configs/entities/crossref/publication.yaml`          | `schema` section in same file                        |
 | `configs/entities/openalex/publication.yaml`          | `schema` section in same file                        |

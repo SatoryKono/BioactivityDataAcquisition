@@ -2,6 +2,8 @@
 
 *Reference: [RULES.md §2.2](../../00-project/RULES.md#22-политика-дрейфа-схемы-schema-drift) and [Appendix E](../../00-project/RULES.md#приложение-e-примеры-schema-evolution)*
 
+> Runtime profile: Local-Only single-instance (ADR-010). Schema evolution steps apply to local Bronze/Silver/Gold data paths.
+
 This runbook describes how to handle schema changes in Bronze, Silver, and Gold layers.
 
 ## Scenario 1: Adding a New Field (Backward Compatible)

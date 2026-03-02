@@ -461,11 +461,11 @@ These terms should NOT be used in new code:
 
 ### Lint Script
 
-A terminology linter is available at `scripts/lint-terminology.py`:
+A terminology linter is available at `scripts/lint_terminology.py`:
 
 ```bash
 # Check for deprecated terms
-python scripts/lint-terminology.py src/bioetl/
+python scripts/lint_terminology.py src/bioetl/
 
 # Pre-commit hook (see .pre-commit-config.yaml)
 ```

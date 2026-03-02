@@ -290,6 +290,17 @@ def run_all(
         bioetl run-all --source pubchem --dry-run
 
         bioetl run-all --source chembl --run-type rebuild --yes
+
+    Args:
+        source: Data source.
+        run_type: Type of pipeline run.
+        limit: Maximum number of records to process.
+        dry_run: Dry run mode flag.
+        yes: Whether to yes.
+        list_only: Whether to list only.
+        debug: Whether to debug.
+        health_server: Whether to health server.
+        health_port: Health port.
     """
     # Validate provider has pipelines
     is_valid, error_msg = _validate_provider(source)

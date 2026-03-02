@@ -248,19 +248,19 @@ src/bioetl/
 ├── domain/
 │   ├── errors.py              # + SchemaValidationError
 │   └── models/
-│       └── gold-schema.py     # GoldSchema dataclass
+│       └── gold_schema.py     # GoldSchema dataclass
 ├── application/
 │   └── core/
-│       └── base-pipeline.py   # + validate-gold-schema()
+│       └── base_pipeline.py   # + validate_gold_schema()
 └── infrastructure/
     └── validation/
-        └── gold-validator.py  # Pandera schema validation
+        └── gold_validator.py  # Pandera schema validation
 ```
 
 ### Интеграция с Pandera
 
 ```python
-# infrastructure/validation/gold-validator.py
+# infrastructure/validation/gold_validator.py
 import pandera as pa
 
 
@@ -282,7 +282,7 @@ class GoldValidator:
 ### Тестирование
 
 ```python
-# tests/unit/application/test-gold-validation.py
+# tests/unit/application/test_gold_validation.py
 
 
 def test-strict-validation-fails-without-schema():
@@ -378,14 +378,14 @@ def test-non-strict-validation-warns-without-schema(caplog):
 | -------------------------------------- | ------------- | -------------------------------------------------------- |
 | `strict-gold-validation` флаг          | ✅ Реализован | `domain/config.py:259`                                   |
 | `GoldValidatorPort` протокол           | ✅ Реализован | `domain/ports/validation.py:41-61`                       |
-| `PanderaGoldValidator`                 | ✅ Реализован | `infrastructure/validation/pandera-validator.py:97-210`  |
-| `GoldWriter.-validate-schema-strict()` | ✅ Реализован | `infrastructure/storage/gold-writer.py:226-232`          |
-| `NoOpGoldValidator`                    | ✅ Реализован | `infrastructure/validation/pandera-validator.py:213-230` |
+| `PanderaGoldValidator`                 | ✅ Реализован | `infrastructure/validation/pandera_validator.py:97-210`  |
+| `GoldWriter._validate_schema_strict()` | ✅ Реализован | `infrastructure/storage/gold_writer.py:226-232`          |
+| `NoOpGoldValidator`                    | ✅ Реализован | `infrastructure/validation/pandera_validator.py:213-230` |
 
 **Отличия от первоначального предложения:**
 
 - Вместо `SchemaValidationError` используется `ValidationResult` с errors — более гибкий подход
-- Валидация интегрирована в `GoldWriter` через `-validate-schema-strict()` проверку
+- Валидация интегрирована в `GoldWriter` через `_validate_schema_strict()` проверку
 - Feature flag находится в `RuntimeConfig` вместо `PipelineConfig` — централизованное управление
 
 ## Related ADRs

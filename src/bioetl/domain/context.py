@@ -61,7 +61,11 @@ class CachedBronzeContext:
 
     @classmethod
     def disabled(cls) -> CachedBronzeContext:
-        """Create a disabled context (use API, not cache)."""
+        """Create a disabled context (use API, not cache).
+
+        Returns:
+            The CachedBronzeContext result.
+        """
         return cls(enabled=False, bronze_path=None, bronze_date=None)
 
     @classmethod
@@ -124,7 +128,11 @@ class InputFilterContext:
 
     @classmethod
     def disabled(cls) -> InputFilterContext:
-        """Create a disabled filter context."""
+        """Create a disabled filter context.
+
+        Returns:
+            The InputFilterContext result.
+        """
         return cls(
             enabled=False,
             source_path="",
@@ -145,7 +153,17 @@ class InputFilterContext:
         filter_field: str,
         fallback_column: str | None = None,
     ) -> InputFilterContext:
-        """Create an enabled filter context from CSV parameters."""
+        """Create an enabled filter context from CSV parameters.
+
+        Args:
+            source_path: File path for source.
+            column_name: Name of the column.
+            filter_field: Field name to apply filter on.
+            fallback_column: Fallback column.
+
+        Returns:
+            The InputFilterContext result.
+        """
         return cls(
             enabled=True,
             source_path=source_path,
@@ -168,6 +186,14 @@ class InputFilterContext:
         """Create an enabled filter context from direct IDs.
 
         Used for composite mode where IDs are passed directly without CSV file.
+
+        Args:
+            filter_ids: List of identifiers to filter by.
+            filter_field: Field name to apply filter on.
+            fallback_mapping: Fallback mapping.
+
+        Returns:
+            The InputFilterContext result.
         """
         return cls(
             enabled=True,
@@ -197,6 +223,9 @@ class InputFilterContext:
             multi_filter_ids: Mapping of field name to tuple of IDs.
             valid_combinations: Optional set of valid (field1, field2, ...)
                 tuples for client-side combination filtering.
+
+        Returns:
+            The InputFilterContext result.
         """
         fields = list(multi_filter_ids.keys())
         return cls(
@@ -310,6 +339,12 @@ class PipelineContext:
         """Bind additional context to the logger.
 
         Returns a new context with the bound logger.
+
+        Args:
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            The PipelineContext result.
         """
         new_logger = self.logger.bind(**kwargs)
         return PipelineContext(

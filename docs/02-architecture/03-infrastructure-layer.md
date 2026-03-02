@@ -76,7 +76,7 @@ PubMedAdapter                         (pubchempy)
 
 - `ThreadPoolExecutor` для изоляции блокирующего I/O
 - Собственные `TokenBucket` и `CircuitBreaker`
-- Async-обёртка через `run-in-executor()`
+- Async-обёртка через `_run_in_executor()`
 
 ### 2.2. `storage/` — Адаптеры Хранилищ
 
@@ -86,17 +86,17 @@ PubMedAdapter                         (pubchempy)
 
 Реализация разделена на три отдельных writer-а:
 
-- **`BronzeWriter`** (`bronze-writer.py`): Запись сырых данных в формате JSONL + zstd. Atomic writes через temp file + rename, генерация checksums.
-- **`SilverWriter`** (`silver-writer.py`): Запись в Delta Lake таблицы с наследованием от `BaseDeltaWriter`, ACID-транзакциями, логикой merge/upsert для идемпотентности, поддержкой Time Travel и 7-дневным VACUUM retention.
-- **`GoldWriter`** (`gold-writer.py`): Запись бизнес-готовых данных с наследованием от `BaseDeltaWriter`, строгой валидацией через Pandera, поддержкой SCD Type 2 и контрактов данных.
+- **`BronzeWriter`** (`bronze_writer.py`): Запись сырых данных в формате JSONL + zstd. Atomic writes через temp file + rename, генерация checksums.
+- **`SilverWriter`** (`silver_writer.py`): Запись в Delta Lake таблицы с наследованием от `BaseDeltaWriter`, ACID-транзакциями, логикой merge/upsert для идемпотентности, поддержкой Time Travel и 7-дневным VACUUM retention.
+- **`GoldWriter`** (`gold_writer.py`): Запись бизнес-готовых данных с наследованием от `BaseDeltaWriter`, строгой валидацией через Pandera, поддержкой SCD Type 2 и контрактов данных.
 
 Вспомогательные модули:
 
-- **`BaseDeltaWriter`** (`base-delta-writer.py`): Базовый класс для Delta Lake writers (Silver, Gold).
-- **`DeltaReader`** (`delta-reader.py`): Чтение Delta Lake таблиц.
-- **`ArrowDataConverter`** (`arrow-converter.py`): Утилиты конвертации PyArrow.
+- **`BaseDeltaWriter`** (`base_delta_writer.py`): Базовый класс для Delta Lake writers (Silver, Gold).
+- **`DeltaReader`** (`delta_reader.py`): Чтение Delta Lake таблиц.
+- **`ArrowDataConverter`** (`arrow_converter.py`): Утилиты конвертации PyArrow.
 - **`MetadataBuilder`** / **`MetadataWriter`**: Генерация и запись метаданных.
-- **`RetentionManager`** (`retention-manager.py`): Управление политиками хранения данных.
+- **`RetentionManager`** (`retention_manager.py`): Управление политиками хранения данных.
 
 ### 2.3. `locking/` — Реализация Блокировок
 

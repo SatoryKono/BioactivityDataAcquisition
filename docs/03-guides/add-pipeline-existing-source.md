@@ -24,23 +24,23 @@
 
 ```yaml
 # Inherits defaults from ../../base/pipeline.yaml
-pipeline-name: chembl_target
+pipeline_name: chembl_target
 provider: chembl
-entity-type: target
+entity_type: target
 version: "1.2.0"
 description: "Extract biological targets from ChEMBL API"
 
-business-primary-keys: ["target-chembl-id"]
-silver-table: "chembl_target"
-gold-table: "chembl_target"
+business_primary_keys: ["target-chembl-id"]
+silver_table: "chembl_target"
+gold_table: "chembl_target"
 
-source-file: ../../providers/chembl.yaml
+source_file: ../../providers/chembl.yaml
 
 # DQ rules loaded from hierarchical config files (ADR-027):
 #   1. configs/base/quality.yaml
 #   2. configs/providers/chembl.yaml#quality
 #   3. configs/entities/chembl/target.yaml#quality
-dq-config-file: ../../entities/chembl/target.yaml
+dq_config_file: ../../entities/chembl/target.yaml
 
 # Paths auto-computed by convention (ADR-029),
 # override only when different from default
@@ -49,8 +49,8 @@ sink:
     path: "data/output/bronze/chembl/target"
   silver:
     path: "data/output/silver/chembl/target"
-    primary-key: ["target-chembl-id"]
-    partition-by: ["target-type"]
+    primary_key: ["target-chembl-id"]
+    partition_by: ["target_type"]
   gold:
     path: "data/output/gold/chembl/target"
 ```
@@ -60,9 +60,9 @@ sink:
 Создайте отдельный трансформер в `src/bioetl/application/pipelines/<provider>/` (или в выделенном модуле трансформаций, если он уже используется в проекте).
 Логика Bronze -> Silver должна находиться в классе трансформера, а не в классе пайплайна.
 
-Класс должен наследовать `BaseChemblTransformer` (или `BaseTransformer`) и реализовывать `-transform-impl`.
+Класс должен наследовать `BaseChemblTransformer` (или `BaseTransformer`) и реализовывать `_transform_impl`.
 
-**Пример:** `src/bioetl/application/pipelines/chembl/target-transformer.py`
+**Пример:** `src/bioetl/application/pipelines/chembl/target_transformer.py`
 
 ```python
 from __future__ import annotations
@@ -76,23 +76,23 @@ from bioetl.domain.transformations import generate-content-hash, generate-entity
 class ChEMBLTargetTransformer(BaseChemblTransformer):
     """Bronze -> Silver трансформация для сущности ChEMBL Target."""
 
-    def -transform-impl(self, record: dict[str, Any]) -> dict[str, Any] | None:
+    def _transform_impl(self, record: dict[str, Any]) -> dict[str, Any] | None:
         if not record.get("target-chembl-id"):
             return None
 
-        target-id = str(record["target-chembl-id"])
+        target_id = str(record["target-chembl-id"])
 
         entity-id = generate-entity-id(
-            record={"target-chembl-id": target-id},
+            record={"target-chembl-id": target_id},
             provider=self.provider,
             id-field="target-chembl-id",
         )
 
         return {
             "entity-id": entity-id,
-            "target-chembl-id": target-id,
+            "target-chembl-id": target_id,
             "pref-name": record.get("pref-name"),
-            "target-type": record.get("target-type"),
+            "target_type": record.get("target_type"),
             "organism": record.get("organism"),
             "content-hash": generate-content-hash(record, self.provider),
         }
@@ -102,28 +102,28 @@ class ChEMBLTargetTransformer(BaseChemblTransformer):
 
 В v5.1 вам больше не нужно вручную менять `bootstrap.py`. Достаточно зарегистрировать новый экземпляр `GenericPipelineFactory`.
 
-Откройте `src/bioetl/composition/factories/pipeline-factories.py` и добавьте определение:
+Откройте `src/bioetl/composition/factories/pipeline_factories.py` и добавьте определение:
 
 ```python
 from bioetl.application.pipelines.chembl.target-transformer import (
     ChEMBLTargetTransformer,
 )
 from bioetl.application.pipelines.generic import GenericPipeline
-from bioetl.infrastructure.schemas.silver import CHEMBL-TARGET-SCHEMA
+from bioetl.infrastructure.schemas.silver import CHEMBL_TARGET_SCHEMA
 
 # Определение фабрики
-chembl_target-factory = GenericPipelineFactory(
-    pipeline-name="chembl_target",
-    pipeline-class=GenericPipeline,
+chembl_target_factory = GenericPipelineFactory(
+    pipeline_name="chembl_target",
+    pipeline_class=GenericPipeline,
     provider="chembl",
-    silver-schema=CHEMBL-TARGET-SCHEMA,
-    transformer-class=ChEMBLTargetTransformer,
+    silver_schema=CHEMBL_TARGET_SCHEMA,
+    transformer_class=ChEMBLTargetTransformer,
 )
 
 
-def register-all-pipelines() -> None:
+def register_all_pipelines() -> None:
     # ...
-    PipelineRegistry.register-factory(chembl_target-factory)
+    PipelineRegistry.register_factory(chembl_target_factory)
 ```
 
 Теперь пайплайн доступен для запуска:
@@ -137,5 +137,5 @@ python -m bioetl run --pipeline chembl_target
 - [ ] Конфиг YAML создан.
 - [ ] Класс трансформера реализован (Silver трансформация).
 - [ ] Схема Silver (PyArrow) определена в `infrastructure/schemas/silver.py`.
-- [ ] Пайплайн зарегистрирован в `pipeline-factories.py`.
+- [ ] Пайплайн зарегистрирован в `pipeline_factories.py`.
 - [ ] Тесты добавлены.

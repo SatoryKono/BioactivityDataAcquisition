@@ -1,7 +1,7 @@
 # BioETL Makefile
 # Production-ready ETL system for bioactivity data
 
-.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png check-diagrams-visibility diagrams-all report-diagram-padding
+.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png check-diagrams-visibility diagrams-all report-diagram-padding docs-lint
 .DEFAULT_GOAL := help
 
 # Detect uv availability (preferred package manager)
@@ -435,6 +435,11 @@ docs-serve: ## Serve documentation locally
 
 docs-build: ## Build documentation
 	$(RUN) mkdocs build
+
+docs-lint: ## Run documentation guardrails (links + config conventions + drift checks)
+	$(PY_RUN) scripts/check_doc_links.py --links
+	$(PY_RUN) scripts/check_doc_links.py --configs
+	$(PY_RUN) scripts/check_doc_links.py --legacy-paths
 
 schema-artifacts: ## Generate canonical schema artifacts (registry + contracts)
 	@echo "$(BLUE)Generating schema artifacts...$(NC)"

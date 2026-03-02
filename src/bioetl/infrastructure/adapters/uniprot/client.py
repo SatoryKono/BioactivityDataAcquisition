@@ -144,6 +144,17 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
 
         If filter_ids are provided, builds an OR-query to fetch specific accessions.
         Otherwise fetches all records matching the query.
+
+        Args:
+            entity_type: Entity type identifier.
+            limit: Maximum number of records to process.
+            query: Search query string.
+            filter_ids: List of identifiers to filter by.
+            filter_field: Field name to apply filter on.
+            offset: Offset.
+
+        Returns:
+            Async iterator yielding fetched records.
         """
         strategy = self._fetch_strategies.get(entity_type)
         if not strategy:
@@ -248,6 +259,8 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         Yields:
             Dictionary records matching the filter criteria
 
+        Returns:
+            Async iterator yielding fetched records.
         """
         if not filter_ids:
             return
@@ -291,6 +304,8 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         Yields:
             Dictionary records matching ALL filter criteria
 
+        Returns:
+            Async iterator yielding fetched records.
         """
         if not filters:
             return
@@ -429,6 +444,8 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         Yields:
             Dictionary records found via primary lookup or fallback search
 
+        Returns:
+            Async iterator yielding fetched records.
         """
         if not filter_ids:
             return
@@ -670,7 +687,14 @@ class UniProtAdapter(BaseHttpAdapter, PaginatedFetcherMixin):
         return f"UniProtAdapter(base_url='{self.base_url}', {key_info})"
 
     def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
-        """Get API request metadata and clear collector."""
+        """Get API request metadata and clear collector.
+
+        Args:
+            api_version: Api version.
+
+        Returns:
+            Source metadata.
+        """
         metadata = self._request_collector.to_source_metadata(
             source_type="api", url=self.base_url, api_version=api_version
         )

@@ -19,8 +19,8 @@
 | Файл | Паттерн | Контекст |
 |------|---------|----------|
 | `infrastructure/adapters/http/client.py` | `random.uniform()` | Retry jitter |
-| `infrastructure/storage/gold-writer.py` | `random.uniform()` | Write backoff |
-| `infrastructure/storage/bronze-writer.py` | `datetime.now()` | Ingestion timestamp |
+| `infrastructure/storage/gold_writer.py` | `random.uniform()` | Write backoff |
+| `infrastructure/storage/bronze_writer.py` | `datetime.now()` | Ingestion timestamp |
 | `infrastructure/quarantine/unified.py` | `datetime.now()` | Error timestamp |
 
 ## The Decision
@@ -54,13 +54,13 @@ class RetryConfig:
 
 ### 2. Запрет random в Storage Writers
 
-- Удалён `import random` из `gold-writer.py`
+- Удалён `import random` из `gold_writer.py`
 - `random.uniform(0, 0.1)` заменён на фиксированный `0.05`
 - Архитектурный тест `test-no-random-in-writers` блокирует регрессии
 
 ### 3. Единый Источник Времени
 
-`PipelineContext.started-at` — единственный источник timestamps для batch:
+`PipelineContext.started_at` — единственный источник timestamps для batch:
 
 ```python
 @dataclass(frozen=True)
@@ -68,22 +68,22 @@ class PipelineContext:
     run-id: RunID
     run-type: RunType
     logger: LoggerPort
-    started-at: datetime = field(default-factory=-now-utc)
+    started_at: datetime = field(default-factory=-now-utc)
 
     @classmethod
-    def create(cls, run-id, run-type, logger, started-at=None):
-        return cls(..., started-at=started-at or datetime.now(UTC))
+    def create(cls, run-id, run-type, logger, started_at=None):
+        return cls(..., started_at=started_at or datetime.now(UTC))
 ```
 
 Infrastructure компоненты получают timestamp как параметр:
 
 ```python
 # Application layer
-ingestion-ts = self.-context.started-at
+ingestion_ts = self.-context.started_at
 
 # Infrastructure layer - receives timestamp
-await bronze-writer.write-bronze(..., ingestion-ts=ingestion-ts)
-await quarantine.write(..., ingestion-ts=ingestion-ts)
+await bronze-writer.write-bronze(..., ingestion_ts=ingestion_ts)
+await quarantine.write(..., ingestion_ts=ingestion_ts)
 ```
 
 ### 4. Архитектурные Тесты
@@ -108,11 +108,11 @@ Application и interfaces слои **MUST NOT** импортировать `stru
 1. **Воспроизводимость**: Одинаковые входные данные → одинаковое поведение
 2. **Тестируемость**: Детерминистичные тесты без flakiness
 3. **Отладка**: Можно воспроизвести точную последовательность событий
-4. **Консистентность**: Все записи в batch имеют одинаковый `-ingestion-ts`
+4. **Консистентность**: Все записи в batch имеют одинаковый `_ingestion_ts`
 
 ### Компромиссы
 
-1. **API усложнение**: Дополнительные параметры (`ingestion-ts`, `deterministic`)
+1. **API усложнение**: Дополнительные параметры (`ingestion_ts`, `deterministic`)
 2. **Миграция**: Требуется обновление всех вызовов infrastructure компонентов
 3. **Backward compatibility**: Fallback на `datetime.now()` при отсутствии параметра
 
@@ -122,17 +122,17 @@ Application и interfaces слои **MUST NOT** импортировать `stru
 
 | Файл | Изменение |
 |------|-----------|
-| `domain/context.py` | Добавлен `started-at` field |
-| `application/core/record-processor.py` | Использует `context.started-at` |
+| `domain/context.py` | Добавлен `started_at` field |
+| `application/core/record_processor.py` | Использует `context.started_at` |
 | `application/core/base.py` | Использует `PipelineContext.create()` |
 | `infrastructure/adapters/http/client.py` | Добавлен `deterministic` mode |
-| `infrastructure/storage/gold-writer.py` | Удалён `random`, фиксированный backoff |
-| `infrastructure/storage/bronze-writer.py` | Принимает `ingestion-ts` параметр |
-| `infrastructure/quarantine/unified.py` | Принимает `ingestion-ts` параметр |
+| `infrastructure/storage/gold_writer.py` | Удалён `random`, фиксированный backoff |
+| `infrastructure/storage/bronze_writer.py` | Принимает `ingestion_ts` параметр |
+| `infrastructure/quarantine/unified.py` | Принимает `ingestion_ts` параметр |
 | `domain/ports/quarantine.py` | Обновлён `QuarantinePort.write()` |
 
 ### Архитектурные тесты
 
-- `tests/architecture/test-no-random-in-writers.py`
-- `tests/architecture/test-no-datetime-now-in-infrastructure.py`
-- `tests/architecture/test-no-structlog-in-application-interfaces.py`
+- `tests/architecture/test_no_random_in_writers.py`
+- `tests/architecture/test_no_datetime_now_in_infrastructure.py`
+- `tests/architecture/test_no_structlog_in_application_interfaces.py`

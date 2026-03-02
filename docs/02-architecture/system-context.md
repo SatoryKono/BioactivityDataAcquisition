@@ -1,6 +1,6 @@
 # System Context
 
-*Aligned with RULES.md v5.22 (Local-Only Deployment)*
+*Aligned with RULES.md v5.23 (Local-Only Deployment)*
 
 ## Overview
 

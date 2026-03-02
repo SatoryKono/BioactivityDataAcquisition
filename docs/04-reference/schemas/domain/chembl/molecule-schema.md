@@ -1,5 +1,5 @@
 # Molecule Schema (ChEMBL)
-*Version: 1.0.0 | Aligned with RULES.md v5.22*
+*Version: 1.0.0 | Aligned with RULES.md v5.23*
 
 ## Overview
 
@@ -146,7 +146,7 @@ The following field names have been renamed:
 - `structure-standard-inchi` → `standard-inchi`
 - `structure-standard-inchi-key` → `inchi-key`
 
-Use the migration script: `scripts/migrations/rename-structure-fields.py`
+Use the migration script: `src/tools/scripts/migrations/rename_structure_fields.py`
 
 ---
 
@@ -319,7 +319,7 @@ def -validate-invariants(self) -> None:
 | Artifact | Path |
 |----------|------|
 | Pandera Schema | `src/bioetl/domain/schemas/chembl/molecule.py` |
-| Domain Entity | `src/bioetl/domain/entities/chembl-structures.py` |
+| Domain Entity | `src/bioetl/domain/entities/chembl_structures.py` |
 | Pipeline Config | `configs/entities/chembl/molecule.yaml` |
 
 ---

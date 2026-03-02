@@ -1,6 +1,6 @@
 1# Политика файлов и директорий
 
-*Синхронизировано с RULES.md v5.22 | Последнее обновление: 2026-02-21*
+*Синхронизировано с RULES.md v5.23 | Последнее обновление: 2026-02-21*
 
 ----------------------------------------------------------------------
 
@@ -96,19 +96,19 @@ sink:
     path: "data/output/bronze/chembl/activity"
   silver:
     path: "data/output/silver/chembl/activity"
-    primary-key: ["activity-id"]
-    partition-by: []
-    sort-by:
+    primary_key: ["activity-id"]
+    partition_by: []
+    sort_by:
       columns: ["activity-id"]
       ascending: true
-    csv-export:
+    csv_export:
       path: "data/output/csv/silver/chembl/activity"
   gold:
     path: "data/output/gold/chembl/activity"
-    sort-by:
+    sort_by:
       columns: ["activity-id"]
       ascending: true
-    csv-export:
+    csv_export:
       path: "data/output/csv/gold/chembl/activity"
 ```
 
@@ -143,7 +143,7 @@ sink:
 - Перед релизом запускать allowlist-проверку:
 
 ```bash
-uv run python scripts/validate-data-dir.py
+uv run python scripts/validate_data_dir.py
 ```
 
 ----------------------------------------------------------------------
@@ -164,8 +164,8 @@ uv run python scripts/validate-data-dir.py
 Silver и Gold таблицы используют тот же паттерн:
 
 ```yaml
-silver-table: "chembl_activity"
-gold-table: "chembl_activity"
+silver_table: "chembl_activity"
+gold_table: "chembl_activity"
 ```
 
 ----------------------------------------------------------------------
@@ -189,7 +189,7 @@ configs/providers/<provider>.yaml
 ### 4.2. Ссылка из entity config
 
 ```yaml
-source-file: ../../sources/chembl.yaml
+source_file: ../../sources/chembl.yaml
 ```
 
 ----------------------------------------------------------------------

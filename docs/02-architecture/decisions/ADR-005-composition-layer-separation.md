@@ -58,7 +58,7 @@ interfaces             ✅        ✅             ✅             ✅           
 >
 > However, **best practice** is to route through Application layer services when possible
 > for better testability and consistency. See architecture tests in
-> `tests/architecture/test-interfaces-no-infrastructure.py` for tracked legacy violations.
+> `tests/architecture/test_interfaces_no_infrastructure.py` for tracked legacy violations.
 
 Key observation: `composition/` remains the primary DI layer. While `interfaces/` *can* import from `infrastructure/`, it *should prefer* using `composition/` to get fully assembled objects. If we merge composition into interfaces, we:
 - Lose the explicit separation of wiring concern
@@ -70,12 +70,12 @@ The `bootstrap` module is used by multiple entry points:
 
 ```python
 # CLI (interfaces/cli.py)
-from bioetl.composition.bootstrap import bootstrap-pipeline
-runner = bootstrap-pipeline(...)
+from bioetl.composition.bootstrap import bootstrap_pipeline
+runner = bootstrap_pipeline(...)
 
 # Integration Tests
-from bioetl.composition.bootstrap import bootstrap-pipeline
-runner = bootstrap-pipeline(...)
+from bioetl.composition.bootstrap import bootstrap_pipeline
+runner = bootstrap_pipeline(...)
 
 # Future: HTTP API, Lambda handlers, etc.
 ```

@@ -129,6 +129,10 @@ class OrganismClassificationService:
 
         Returns:
             CellularityType or None if unresolved.
+
+        Args:
+            organism_name: Name of the organism.
+            taxonomy_id: Identifier for taxonomy.
         """
         return self.classify(organism_name, taxonomy_id).organism_class
 

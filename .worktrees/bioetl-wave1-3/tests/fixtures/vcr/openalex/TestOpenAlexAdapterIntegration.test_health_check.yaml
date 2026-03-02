@@ -1,0 +1,36 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - BioETL/1.0 (mailto:bioetl-test@example.com)
+    method: GET
+    uri: https://api.openalex.org/works?per-page=1&mailto=bioetl-test%40example.com
+  response:
+    body:
+      string: |
+        {
+          "meta": {"count": 1000000, "db_response_time_ms": 5, "page": null, "per_page": 1},
+          "results": [
+            {
+              "id": "https://openalex.org/W1234567890",
+              "doi": "https://doi.org/10.1000/test",
+              "title": "Health check test",
+              "publication_year": 2024,
+              "type": "article"
+            }
+          ]
+        }
+    headers:
+      Content-Type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+version: 1

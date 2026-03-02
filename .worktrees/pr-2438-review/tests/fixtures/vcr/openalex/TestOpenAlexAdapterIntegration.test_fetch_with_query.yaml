@@ -1,0 +1,56 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - BioETL/1.0 (mailto:bioetl-test@example.com)
+    method: GET
+    uri: https://api.openalex.org/works?mailto=bioetl-test%40example.com&search=COVID-19+vaccine&cursor=*&per-page=10
+  response:
+    body:
+      string: |
+        {
+          "meta": {"count": 100, "db_response_time_ms": 30, "page": null, "per_page": 10, "next_cursor": null},
+          "results": [
+            {
+              "id": "https://openalex.org/W3100000001",
+              "doi": "https://doi.org/10.1000/vaccine-001",
+              "title": "COVID-19 vaccine development",
+              "publication_year": 2021,
+              "publication_date": "2021-01-15",
+              "type": "article",
+              "language": "en"
+            },
+            {
+              "id": "https://openalex.org/W3100000002",
+              "doi": "https://doi.org/10.1000/vaccine-002",
+              "title": "mRNA vaccines for COVID-19",
+              "publication_year": 2021,
+              "publication_date": "2021-02-20",
+              "type": "article",
+              "language": "en"
+            },
+            {
+              "id": "https://openalex.org/W3100000003",
+              "doi": "https://doi.org/10.1000/vaccine-003",
+              "title": "COVID-19 vaccine efficacy studies",
+              "publication_year": 2021,
+              "publication_date": "2021-03-10",
+              "type": "article",
+              "language": "en"
+            }
+          ]
+        }
+    headers:
+      Content-Type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+version: 1

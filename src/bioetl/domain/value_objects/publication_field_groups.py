@@ -95,12 +95,20 @@ class PublicationFieldGroup(StrEnum):
 
     @classmethod
     def gold_groups(cls) -> tuple[PublicationFieldGroup, ...]:
-        """Get all groups that should be included in Gold layer."""
+        """Get all groups that should be included in Gold layer.
+
+        Returns:
+            The tuple[PublicationFieldGroup, Ellipsis] result.
+        """
         return tuple(g for g in cls if g.include_in_gold)
 
     @classmethod
     def excluded_groups(cls) -> tuple[PublicationFieldGroup, ...]:
-        """Get all groups excluded from Gold layer."""
+        """Get all groups excluded from Gold layer.
+
+        Returns:
+            The tuple[PublicationFieldGroup, Ellipsis] result.
+        """
         return tuple(g for g in cls if not g.include_in_gold)
 
 
@@ -384,7 +392,14 @@ class FieldGroupConfig:
         """
 
         def sort_key(column: str) -> tuple[int, int, str]:
-            """Return (group_index, provider_rank, field) for ordering."""
+            """Return (group_index, provider_rank, field) for ordering.
+
+            Args:
+                column: Column name.
+
+            Returns:
+                Sort key value for ordering.
+            """
             group = self.get_group(column)
             provider_rank = self.get_provider_rank(column)
             field_name = self._extract_field(column)

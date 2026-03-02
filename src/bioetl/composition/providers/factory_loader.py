@@ -9,14 +9,22 @@ if TYPE_CHECKING:
 
 
 def get_data_source_factory() -> Any:  # Any: lazy-resolved factory ...
-    """Resolve DataSourceFactory lazily to avoid circular imports."""
+    """Resolve DataSourceFactory lazily to avoid circular imports.
+
+    Returns:
+        Data source factory.
+    """
     from bioetl.composition.factories.data_source_factory import DataSourceFactory
 
     return DataSourceFactory
 
 
 def get_http_client_factory() -> Any:  # Any: lazy-resolved factory ...
-    """Resolve HttpClientFactory lazily to avoid circular imports."""
+    """Resolve HttpClientFactory lazily to avoid circular imports.
+
+    Returns:
+        Http client factory.
+    """
     from bioetl.composition.factories.http_client_factory import HttpClientFactory
 
     return HttpClientFactory

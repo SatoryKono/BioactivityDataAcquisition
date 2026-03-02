@@ -391,6 +391,10 @@ class StoragePort(Protocol):
 
         Returns:
             Dict with layer info (path, file_count, exists) and total_files.
+
+        Args:
+            silver_table: Silver table.
+            gold_table: Gold table.
         """
         ...
 

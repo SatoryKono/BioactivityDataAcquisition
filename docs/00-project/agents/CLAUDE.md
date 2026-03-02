@@ -2,7 +2,7 @@
 
 Справочник для Claude Code при работе с репозиторием BioETL.
 
-*Синхронизировано с RULES.md v5.22 (2026-02-21) | Дедублирование: ссылки на RULES.md вместо копий | Версия: 6.5.0*
+*Синхронизировано с RULES.md v5.23 (2026-02-21) | Дедублирование: ссылки на RULES.md вместо копий | Версия: 6.5.0*
 
 ----------------------------------------------------------------------
 
@@ -165,25 +165,25 @@ src/bioetl/
 
 | Компонент                   | ❌ Ложное утверждение                                     | ✅ Реальность                                                                                                                                                                                                |
 | --------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Email в config/adapters** | "PII поля (email) требуют хэширования HashService"        | **НЕ PII**: `default-email` — технический идентификатор для NCBI API, не персональные данные. NCBI требует email для идентификации инструмента. См. `config.py:364-371`, `pubmed-client.py:38-42`            |
+| **Email в config/adapters** | "PII поля (email) требуют хэширования HashService"        | **НЕ PII**: `default-email` — технический идентификатор для NCBI API, не персональные данные. NCBI требует email для идентификации инструмента. См. `config.py:364-371`, `pubmed_client.py:38-42`            |
 | **PipelineRunner**          | "God object, слишком много ответственностей"              | **189 строк**, делегирует через `PipelineServices` bundle (`runner.py:54,89`)                                                                                                                                |
 | **bootstrap-pipeline**      | "Смешивает сборку и бизнес-логику"                        | Тонкий фасад, делегирует фабрикам: `factory.create-runner()`                                                                                                                                                 |
 | **ChEMBL Adapter**          | "Монолит 517 строк, объединяет всё"                       | **1124 строки**, делегирует через `EntityMapper`, `ErrorClassifier`, `AdapterMetrics`, `BaseHttpAdapter` (`client.py`)                                                                                       |
-| **GoldWriter**              | "Монолит 593 строки, требует декомпозиции"                | **938 строк**, делегирует CSV в `CsvExporter`, audit в `AuditPort`. Режимы OVERWRITE/APPEND/SCD2 — когезивны (`gold-writer.py`)                                                                              |
+| **GoldWriter**              | "Монолит 593 строки, требует декомпозиции"                | **938 строк**, делегирует CSV в `CsvExporter`, audit в `AuditPort`. Режимы OVERWRITE/APPEND/SCD2 — когезивны (`gold_writer.py`)                                                                              |
 | **CLI**                     | "Содержит бизнес-логику подтверждений"                    | Подтверждения — **законная** ответственность interfaces слоя                                                                                                                                                 |
 | **WriteModePolicy default** | "DeltaWriter нарушает DI"                                 | Опциональный параметр с default — валидный паттерн для value objects                                                                                                                                         |
 | **BaseTransformer**         | "Нет DQ-валидации"                                        | By design: Template Method. DQ — ответственность конкретных трансформеров                                                                                                                                    |
 | **MedallionLifecycle**      | "Не использует политики"                                  | Использует `MedallionPolicy.should-clear-silver/gold`                                                                                                                                                        |
-| **BronzeWriter**            | "Нет observability"                                       | Имеет структурированное логирование (`bronze-writer.py:197-205`)                                                                                                                                             |
+| **BronzeWriter**            | "Нет observability"                                       | Имеет структурированное логирование (`bronze_writer.py:197-205`)                                                                                                                                             |
 | **DQ/Medallion политики**   | "Нет автоматизации"                                       | Реализовано: `MedallionPolicy`, `DQConfig`, `SilverWriteMode`, `GoldWriteMode` enums                                                                                                                         |
 | **bootstrap-pipeline**      | "140+ строк, усложняет тестирование"                      | Рефакторинг в `composition/bootstrap/` (directory с `assembly/`, `cli/`, `runtime/`), делегирует через фабрики и helper-функции                                                                              |
-| **RecordProcessor**         | "Совмещает метрики/карантин/запись"                       | **Делегирует** в `BatchMetricsRecorder`, `BatchTransformer`, `BatchWriter`, `QuarantineManager` (`record-processor.py:59-85`)                                                                                |
+| **RecordProcessor**         | "Совмещает метрики/карантин/запись"                       | **Делегирует** в `BatchMetricsRecorder`, `BatchTransformer`, `BatchWriter`, `QuarantineManager` (`record_processor.py:59-85`)                                                                                |
 | **PipelineRunner**          | "Не выпускает метрики по стадиям"                         | Использует `PipelineObserver` через `PipelineServices` (`runner.py:89`)                                                                                                                                      |
-| **Write mode validation**   | "Нет валидации через Enum"                                | **Реализовано**: `SilverWriteMode`, `GoldWriteMode` enums (`delta-writer.py:53-64`, `gold-writer.py:42-54`)                                                                                                  |
+| **Write mode validation**   | "Нет валидации через Enum"                                | **Реализовано**: `SilverWriteMode`, `GoldWriteMode` enums (`delta_writer.py:53-64`, `gold_writer.py:42-54`)                                                                                                  |
 | **Архитектурные тесты**     | "Не связаны с метриками"                                  | 360 тестов в `tests/architecture/`, `make arch-test` в CI                                                                                                                                                    |
 | **MemoryLock**              | "Требуется Redis для распределённых блокировок"           | **MemoryLock достаточен** для локального запуска. Проект **by design** использует локальные пайплайны. См. §5 Блокировки.                                                                                    |
-| **MemoryMonitor**           | "Возвращает захардкоженные нули, баг"                     | **Graceful degradation** — возвращает консервативные оценки (50% использования), не нули. Это **валидный паттерн** при недоступности psutil. См. `memory-monitor.py:170-180`                                 |
-| **DQ метрики**              | "Не экспортируются в Prometheus"                          | **УЖЕ РЕАЛИЗОВАНО**: `postrun-service.py:158-163` эмитит `dq-soft-threshold-exceeded` (counter), `dq-check-duration-ms` (histogram). `DQConfig` имеет `soft-fail-threshold=0.05`, `hard-fail-threshold=0.20` |
+| **MemoryMonitor**           | "Возвращает захардкоженные нули, баг"                     | **Graceful degradation** — возвращает консервативные оценки (50% использования), не нули. Это **валидный паттерн** при недоступности psutil. См. `memory_monitor.py:170-180`                                 |
+| **DQ метрики**              | "Не экспортируются в Prometheus"                          | **УЖЕ РЕАЛИЗОВАНО**: `postrun_service.py:158-163` эмитит `dq-soft-threshold-exceeded` (counter), `dq-check-duration-ms` (histogram). `DQConfig` имеет `soft-fail-threshold=0.05`, `hard-fail-threshold=0.20` |
 | **protocols.py**            | "Пустой файл с нулевым покрытием"                         | Содержит 4 Protocol: `TransformCallback`, `GoldFilterCallback`, `GoldTransformCallback`, `TransformerPort`. См. `application/core/protocols.py`                                                              |
 | **Coverage gate**           | "Нет coverage gate в CI, нужно добавить --cov-fail-under" | **УЖЕ РЕАЛИЗОВАНО**: `Makefile:63` (`--cov-fail-under=85`), `.github/workflows/tests.yml:158`. Верификация: 2026-01-06                                                                                       |
 | **OTLPSpanExporter**        | "Ошибка Optional-аннотации, mypy --strict падает"         | **ОШИБОК НЕТ**: `uv run mypy src/bioetl --strict` → "Success: no issues found in 326 source files". Код в `tracing.py:36-44` корректен. Верификация: 2025-12-31                                              |
@@ -209,7 +209,7 @@ src/bioetl/
 1. **Backward-compatibility shims** (`from module import X; __all__ = ["X"]`):
 
    - Re-export для совместимости — НЕ дублирование
-   - Пример: `application/core/medallion-policy.py` (19 строк)
+   - Пример: `application/services/medallion_lifecycle.py`
 
 1. **Большой файл с делегированием** (500+ LOC):
 
@@ -220,13 +220,13 @@ src/bioetl/
 
    - При недоступности psutil возвращает **консервативные оценки** (50% памяти), не нули
    - Это **безопасный fallback** — лучше переоценить нагрузку, чем недооценить
-   - Реализация: `memory-monitor.py:170-180` (`-get-stats-estimate`)
+   - Реализация: `memory_monitor.py:170-180` (`-get-stats-estimate`)
    - **НЕ баг**, а продуманное поведение для кросс-платформенности
 
 1. **DQ метрики уже реализованы**:
 
    - `DQConfig` в `domain/config.py:28-40` с `soft-fail-threshold=0.05`, `hard-fail-threshold=0.20`
-   - `postrun-service.py:122-163` проверяет пороги и эмитит метрики
+   - `postrun_service.py:122-163` проверяет пороги и эмитит метрики
    - Счётчик `dq-soft-threshold-exceeded` и гистограмма `dq-check-duration-ms`
    - **НЕ требуется** дополнительная реализация
 
@@ -324,9 +324,9 @@ cat docs/99-archive/refactoring-plan.md | head -60
 
 | Агрегат           | Файл                                    | Назначение                                 |
 | ----------------- | --------------------------------------- | ------------------------------------------ |
-| `PipelineRun`     | `domain/aggregates/pipeline-run.py`     | Запуск пайплайна, события жизненного цикла |
+| `PipelineRun`     | `domain/aggregates/pipeline_run.py`     | Запуск пайплайна, события жизненного цикла |
 | `Batch`           | `domain/aggregates/batch.py`            | Батч записей, состояние обработки          |
-| `QuarantineEntry` | `domain/aggregates/quarantine-entry.py` | Карантинные записи                         |
+| `QuarantineEntry` | `domain/aggregates/quarantine_entry.py` | Карантинные записи                         |
 
 **Паттерны:**
 
@@ -382,7 +382,7 @@ cat docs/99-archive/refactoring-plan.md | head -60
    - Валидация владельца (`validate-owner()`)
    - Safety guard перед записью (`LockNotHeldError`)
 
-**Реализация:** `src/bioetl/infrastructure/locking/memory-lock.py` (256 строк)
+**Реализация:** `src/bioetl/infrastructure/locking/memory_lock.py` (256 строк)
 
 ```python
 # Полный функционал MemoryLock:

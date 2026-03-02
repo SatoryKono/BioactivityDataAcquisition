@@ -234,7 +234,14 @@ def flatten_arrow_table_for_export(table: pa.Table) -> pa.Table:
     import pyarrow as pa
 
     def is_complex_type(field_type: pa.DataType) -> bool:
-        """Check if a PyArrow type is complex (list or struct)."""
+        """Check if a PyArrow type is complex (list or struct).
+
+        Args:
+            field_type: Type of field.
+
+        Returns:
+            True if the condition is met, False otherwise.
+        """
         return bool(
             pa.types.is_list(field_type)
             or pa.types.is_large_list(field_type)
@@ -242,7 +249,14 @@ def flatten_arrow_table_for_export(table: pa.Table) -> pa.Table:
         )
 
     def serialize_column_to_json(col: pa.ChunkedArray) -> pa.Array:
-        """Serialize a column of complex values to JSON strings."""
+        """Serialize a column of complex values to JSON strings.
+
+        Args:
+            col: Col.
+
+        Returns:
+            Serialized representation.
+        """
         vals = [
             serialize_to_json(v.as_py()) if v.as_py() is not None else None for v in col
         ]

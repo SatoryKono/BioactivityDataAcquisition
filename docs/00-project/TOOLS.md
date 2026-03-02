@@ -1,6 +1,6 @@
 # BioETL: Утилиты Проекта
 
-*Версия: 2.2 | Синхронизировано с RULES.md v5.22 (2026-02-24)*
+*Версия: 2.2 | Синхронизировано с RULES.md v5.23 (2026-02-24)*
 
 ---
 
@@ -31,7 +31,7 @@
 
 Эти инструменты **импортируют** модули `bioetl` и требуют установленного пакета.
 
-### create-pipeline.py
+### create_pipeline.py
 
 **Назначение:** Генерация boilerplate-кода для новых BioETL пайплайнов.
 
@@ -56,10 +56,10 @@ tests/unit/application/pipelines/{provider}/test-{entity}.py
 **Использование:**
 ```bash
 # Создать новый пайплайн
-python src/tools/create-pipeline.py --provider chembl --entity document
+python src/tools/create_pipeline.py --provider chembl --entity document
 
 # Dry-run (preview без создания файлов)
-python src/tools/create-pipeline.py --provider pubchem --entity compound --dry-run
+python src/tools/create_pipeline.py --provider pubchem --entity compound --dry-run
 ```
 
 | Параметр | Описание |
@@ -72,7 +72,7 @@ python src/tools/create-pipeline.py --provider pubchem --entity compound --dry-r
 
 ---
 
-### verify-schema-parity.py
+### verify_schema_parity.py
 
 **Назначение:** Программная верификация соответствия схем между Domain entities и Infrastructure schemas.
 
@@ -85,7 +85,7 @@ python src/tools/create-pipeline.py --provider pubchem --entity compound --dry-r
 
 **Использование:**
 ```bash
-python src/tools/verify-schema-parity.py
+python src/tools/verify_schema_parity.py
 ```
 
 **Проверяет паритет:**
@@ -96,14 +96,14 @@ python src/tools/verify-schema-parity.py
 
 ---
 
-### file-merger.py
+### file_merger.py
 
 **Назначение:** Объединение нескольких файлов проекта в один выходной файл с метаданными.
 
 **Использование:**
 ```bash
 # Объединить файлы из директории
-python src/tools/file-merger.py --dir src/bioetl/domain/ --ext .py --output merged.txt
+python src/tools/file_merger.py --dir src/bioetl/domain/ --ext .py --output merged.txt
 ```
 
 | Параметр | Описание |
@@ -118,20 +118,20 @@ python src/tools/file-merger.py --dir src/bioetl/domain/ --ext .py --output merg
 
 Эти скрипты **НЕ импортируют** `bioetl` и используют только stdlib/внешние библиотеки.
 
-### cleanup-project.py
+### cleanup_project.py
 
 **Назначение:** Очистка кэшей, build-артефактов и временных файлов.
 
 **Использование:**
 ```bash
 # Dry-run (по умолчанию)
-python scripts/cleanup-project.py
+python scripts/cleanup_project.py
 
 # Применить изменения с архивированием логов
-python scripts/cleanup-project.py --apply --archive-logs
+python scripts/cleanup_project.py --apply --archive-logs
 
 # Полная очистка (включая логи)
-python scripts/cleanup-project.py --apply --purge-logs
+python scripts/cleanup_project.py --apply --purge-logs
 ```
 
 | Флаг | Описание |
@@ -147,44 +147,44 @@ python scripts/cleanup-project.py --apply --purge-logs
 
 ---
 
-### cleanup-consolidate.py
+### cleanup_consolidate.py
 
 **Назначение:** Консолидированный аудит очистки и качества проекта (dry-run по умолчанию).
 
 **Использование:**
 ```bash
 # Dry-run (по умолчанию)
-python scripts/cleanup-consolidate.py
+python scripts/cleanup_consolidate.py
 
 # Применить удаление .pyc/--pycache--/temp файлов
-python scripts/cleanup-consolidate.py --apply
+python scripts/cleanup_consolidate.py --apply
 ```
 
 **Что анализирует:**
-- `.pyc`, `--pycache--`, временные файлы (по шаблонам cleanup-project.py);
+- `.pyc`, `--pycache--`, временные файлы (по шаблонам cleanup_project.py);
 - YAML-конфиги без ссылок в коде/конфигах;
 - дубликаты функций в утилитарных модулях (AST);
 - неиспользуемые импорты (AST + текстовая проверка);
 - неиспользуемые зависимости по `pyproject.toml` и фактическим импортам.
 
-**Связанные инструменты:** `cleanup-project.py` — фактическая очистка кэшей и артефактов.
+**Связанные инструменты:** `cleanup_project.py` — фактическая очистка кэшей и артефактов.
 
 ---
 
-### vacuum-delta.py
+### vacuum_delta.py
 
 **Назначение:** Еженедельный VACUUM для Delta Lake таблиц Silver слоя.
 
 **Использование:**
 ```bash
 # VACUUM всех Silver таблиц
-python scripts/vacuum-delta.py
+python scripts/vacuum_delta.py
 
 # VACUUM конкретной таблицы
-python scripts/vacuum-delta.py --table silver/chembl/activity
+python scripts/vacuum_delta.py --table silver/chembl/activity
 
 # С кастомным retention
-python scripts/vacuum-delta.py --retention-days 14
+python scripts/vacuum_delta.py --retention-days 14
 ```
 
 | Параметр | Описание | Default |
@@ -199,17 +199,17 @@ python scripts/vacuum-delta.py --retention-days 14
 
 ---
 
-### salt-rotate.py
+### salt_rotate.py
 
 **Назначение:** Ротация соли для хеширования PII-данных.
 
 **Использование:**
 ```bash
 # Стандартная ротация
-python scripts/salt-rotate.py
+python scripts/salt_rotate.py
 
 # Экстренная ротация (инцидент безопасности)
-python scripts/salt-rotate.py --emergency
+python scripts/salt_rotate.py --emergency
 ```
 
 | Параметр | Описание |
@@ -221,17 +221,17 @@ python scripts/salt-rotate.py --emergency
 
 ---
 
-### dq-baseline-update.py
+### dq_baseline_update.py
 
 **Назначение:** Пересчёт baseline для Data Quality метрик.
 
 **Использование:**
 ```bash
 # Пересчитать baseline для всех пайплайнов
-python scripts/dq-baseline-update.py
+python scripts/dq_baseline_update.py
 
 # Для конкретного пайплайна
-python scripts/dq-baseline-update.py --pipeline chembl_activity
+python scripts/dq_baseline_update.py --pipeline chembl_activity
 ```
 
 | Параметр | Описание |
@@ -243,14 +243,14 @@ python scripts/dq-baseline-update.py --pipeline chembl_activity
 
 ---
 
-### verify-checksums.py
+### verify_checksums.py
 
 **Назначение:** Верификация контрольных сумм критических артефактов после DR-восстановления.
 
 **Использование:**
 ```bash
-python scripts/verify-checksums.py
-python scripts/verify-checksums.py --table silver/chembl/activity
+python scripts/verify_checksums.py
+python scripts/verify_checksums.py --table silver/chembl/activity
 ```
 
 **Ссылки:** 05-cleanup-policy.md §5.2
@@ -259,20 +259,20 @@ python scripts/verify-checksums.py --table silver/chembl/activity
 
 ---
 
-### audit-structure.py
+### audit_structure.py
 
 **Назначение:** Проверяет соответствие структуры проекта File Policy (`03-file-policy.md`).
 
 **Использование:**
 ```bash
 # Стандартный аудит
-python scripts/audit-structure.py
+python scripts/audit_structure.py
 
 # JSON вывод для CI
-python scripts/audit-structure.py --json
+python scripts/audit_structure.py --json
 
 # Строгий режим (SHOULD violations = exit 1)
-python scripts/audit-structure.py --strict
+python scripts/audit_structure.py --strict
 ```
 
 | Флаг | Описание |
@@ -284,7 +284,7 @@ python scripts/audit-structure.py --strict
 
 ---
 
-### naming-audit.py
+### naming_audit.py
 
 **Назначение:** Валидация naming conventions согласно RULES.md §2.
 
@@ -299,33 +299,33 @@ python scripts/audit-structure.py --strict
 **Использование:**
 ```bash
 # Полный аудит
-python scripts/naming-audit.py
+python scripts/naming_audit.py
 
 # CI режим (exit 1 при нарушениях)
-python scripts/naming-audit.py --check
+python scripts/naming_audit.py --check
 
 # Сохранить отчёт в файл
-python scripts/naming-audit.py --output report.md
+python scripts/naming_audit.py --output report.md
 ```
 
 **Ссылки:** RULES.md §2, docs/glossary.md
 
 ---
 
-### lint-terminology.py
+### lint_terminology.py
 
 **Назначение:** Линтер для проверки терминологии в коде и документации.
 
 **Использование:**
 ```bash
 # Проверить весь проект
-python scripts/lint-terminology.py
+python scripts/lint_terminology.py
 
 # Проверить конкретный файл
-python scripts/lint-terminology.py src/bioetl/domain/models/molecule.py
+python scripts/lint_terminology.py src/bioetl/domain/models/molecule.py
 
 # Автоисправление (где возможно)
-python scripts/lint-terminology.py --fix
+python scripts/lint_terminology.py --fix
 ```
 
 **Что проверяет:**
@@ -337,26 +337,26 @@ python scripts/lint-terminology.py --fix
 
 ---
 
-### render-diagrams.py
+### scripts/diagrams/run_diagram_checks.sh
 
 **Назначение:** Валидация и рендеринг Mermaid диаграмм из `docs/`.
 
 **Использование:**
 ```bash
-python scripts/render-diagrams.py
+bash scripts/diagrams/run_diagram_checks.sh
 ```
 
-> **Примечание:** Текущая версия — placeholder для валидации существования файлов.
+> **Примечание:** Используйте этот скрипт как основной entrypoint для проверок диаграмм.
 
 ---
 
-### config-gap-analysis.py
+### config_gap_analysis.py
 
 **Назначение:** Анализ расхождений между конфигурациями пайплайнов и фактическим кодом.
 
 **Использование:**
 ```bash
-python scripts/config-gap-analysis.py
+python scripts/config_gap_analysis.py
 ```
 
 **Что анализирует:**
@@ -377,7 +377,7 @@ python scripts/validate_pipeline_configs.py
 
 **Что проверяет:**
 - Соответствие `-schema.json` для всех entity configs
-- Обязательные поля (`pipeline-name`, `provider`, `entity-type`, etc.)
+- Обязательные поля (`pipeline_name`, `provider`, `entity-type`, etc.)
 - Корректность `sink` путей и `sort-by` конфигурации
 
 ---
@@ -388,9 +388,9 @@ python scripts/validate_pipeline_configs.py
 
 | Файл | Назначение |
 |------|------------|
-| `test-bronze-write.py` | Бенчмарки записи Bronze слоя |
-| `test-delta-write.py` | Бенчмарки Delta Lake операций |
-| `test-json-serialization.py` | Сравнение JSON encoders (stdlib vs orjson) |
+| `test_bronze_write.py` | Бенчмарки записи Bronze слоя |
+| `test_delta_write.py` | Бенчмарки Delta Lake операций |
+| `test_json_serialization.py` | Сравнение JSON encoders (stdlib vs orjson) |
 
 ```bash
 # Запуск бенчмарков
@@ -404,26 +404,26 @@ pytest src/tools/benchmarks/ -v --benchmark-only
 ```makefile
 # Очистка
 clean-dev:
-    python scripts/cleanup-project.py --apply --purge-logs
+    python scripts/cleanup_project.py --apply --purge-logs
 
 # Delta Lake maintenance
 vacuum-silver:
-    python scripts/vacuum-delta.py
+    python scripts/vacuum_delta.py
 
 # Верификация
 verify-checksums:
-    python scripts/verify-checksums.py
+    python scripts/verify_checksums.py
 
 # Аудит
 audit-structure:
-    python scripts/audit-structure.py
+    python scripts/audit_structure.py
 
 audit-naming:
-    python scripts/naming-audit.py
+    python scripts/naming_audit.py
 
 # Создание пайплайна (требует bioetl)
 new-pipeline:
-    python src/tools/create-pipeline.py --provider $(PROVIDER) --entity $(ENTITY)
+    python src/tools/create_pipeline.py --provider $(PROVIDER) --entity $(ENTITY)
 ```
 
 ---
@@ -456,23 +456,23 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from bioetl.infrastructure.logging import get-logger
+from bioetl.infrastructure.logging import get_logger
 
-logger = get-logger(--name--)
-PROJECT-ROOT = Path(--file--).parent.parent.parent
+logger = get_logger(__name__)
+PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=--doc--)
-    parser.add-argument("--dry-run", action="store-true", help="Preview only")
-    args = parser.parse-args()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--dry-run", action="store_true", help="Preview only")
+    args = parser.parse_args()
 
-    logger.info("Starting tool", tool=--name--, dry-run=args.dry-run)
+    logger.info("Starting tool", tool=__name__, dry-run=args.dry-run)
     # ... implementation ...
     return 0
 
 
-if --name-- == "--main--":
+if __name__ == "__main__":
     raise SystemExit(main())
 ```
 
@@ -498,20 +498,20 @@ import logging
 from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-logger = logging.getLogger(--name--)
+logger = logging.getLogger(__name__)
 
-PROJECT-ROOT = Path(--file--).parent.parent
+PROJECT_ROOT = Path(__file__).parent.parent
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=--doc--)
-    args = parser.parse-args()
+    parser = argparse.ArgumentParser(description=__doc__)
+    args = parser.parse_args()
 
     # ... implementation (без bioetl imports) ...
     return 0
 
 
-if --name-- == "--main--":
+if __name__ == "__main__":
     raise SystemExit(main())
 ```
 
@@ -521,19 +521,19 @@ if --name-- == "--main--":
 
 | Файл | Директория | Импортирует bioetl | Make-цель |
 |------|------------|-------------------|-----------|
-| `create-pipeline.py` | src/tools/ | Да | `make new-pipeline` |
-| `verify-schema-parity.py` | src/tools/ | Да | — |
-| `file-merger.py` | src/tools/ | Нет | — |
-| `cleanup-project.py` | scripts/ | Нет | `make clean-dev` |
-| `vacuum-delta.py` | scripts/ | Нет | `make vacuum-silver` |
-| `salt-rotate.py` | scripts/ | Нет | — |
-| `dq-baseline-update.py` | scripts/ | Нет | — |
-| `verify-checksums.py` | scripts/ | Нет | `make verify-checksums` |
-| `audit-structure.py` | scripts/ | Нет | `make audit-structure` |
-| `naming-audit.py` | scripts/ | Нет | `make audit-naming` |
-| `lint-terminology.py` | scripts/ | Нет | — |
-| `render-diagrams.py` | scripts/ | Нет | — |
-| `config-gap-analysis.py` | scripts/ | Нет | — |
+| `create_pipeline.py` | src/tools/ | Да | `make new-pipeline` |
+| `verify_schema_parity.py` | src/tools/ | Да | — |
+| `file_merger.py` | src/tools/ | Нет | — |
+| `cleanup_project.py` | scripts/ | Нет | `make clean-dev` |
+| `vacuum_delta.py` | scripts/ | Нет | `make vacuum-silver` |
+| `salt_rotate.py` | scripts/ | Нет | — |
+| `dq_baseline_update.py` | scripts/ | Нет | — |
+| `verify_checksums.py` | scripts/ | Нет | `make verify-checksums` |
+| `audit_structure.py` | scripts/ | Нет | `make audit-structure` |
+| `naming_audit.py` | scripts/ | Нет | `make audit-naming` |
+| `lint_terminology.py` | scripts/ | Нет | — |
+| `build_diagram_docs.py` | src/tools/ | Да | — |
+| `config_gap_analysis.py` | scripts/ | Нет | — |
 | `validate_pipeline_configs.py` | scripts/ | Нет | — |
 
 ---
@@ -542,14 +542,14 @@ if --name-- == "--main--":
 
 | Документ | Связанные инструменты |
 |----------|----------------------|
-| 03-file-policy.md | `audit-structure.py`, `create-pipeline.py` |
-| 05-cleanup-policy.md | `cleanup-project.py`, `vacuum-delta.py`, `verify-checksums.py` |
-| RULES.md §2 | `naming-audit.py` |
-| RULES.md §2.1.1 | `vacuum-delta.py` |
-| RULES.md §3.4.1 | `dq-baseline-update.py` |
-| RULES.md §5.4.1 | `salt-rotate.py` |
-| docs/glossary.md | `lint-terminology.py` |
-| 03-file-policy.md (configs) | `config-gap-analysis.py`, `validate_pipeline_configs.py` |
+| 03-file-policy.md | `audit_structure.py`, `create_pipeline.py` |
+| 05-cleanup-policy.md | `cleanup_project.py`, `vacuum_delta.py`, `verify_checksums.py` |
+| RULES.md §2 | `naming_audit.py` |
+| RULES.md §2.1.1 | `vacuum_delta.py` |
+| RULES.md §3.4.1 | `dq_baseline_update.py` |
+| RULES.md §5.4.1 | `salt_rotate.py` |
+| docs/glossary.md | `lint_terminology.py` |
+| 03-file-policy.md (configs) | `config_gap_analysis.py`, `validate_pipeline_configs.py` |
 
 ---
 

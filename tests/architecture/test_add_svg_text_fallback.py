@@ -84,3 +84,78 @@ def test_add_fallbacks_replaces_old_single_line_text(tmp_path: Path) -> None:
     tspans = [child for child in list(fallback_nodes[0]) if child.tag.endswith("tspan")]
     assert len(tspans) >= 3
     assert [t.text for t in tspans[:3]] == ["Title", "Value 1", "Value 2"]
+
+
+def test_sanitize_preserves_method_signature_parentheses() -> None:
+    module = _load_fallback_module()
+
+    assert (
+        module._sanitize_label_line("+fetch(entity_type, limit)", label_kind="methods")
+        == "+fetch(entity_type, limit)"
+    )
+    assert (
+        module._sanitize_label_line("DataSourcePort(fetch)", label_kind="generic")
+        == "DataSourcePort (fetch)"
+    )
+
+
+def test_suffix_spacing_skips_methods_and_applies_for_titles() -> None:
+    module = _load_fallback_module()
+
+    assert (
+        module._add_suffix_spacing_for_long_object_name(
+            "VeryLongComponentAdapter",
+            max_chars=8,
+            label_kind="methods",
+        )
+        == "VeryLongComponentAdapter"
+    )
+    assert (
+        module._add_suffix_spacing_for_long_object_name(
+            "VeryLongComponentAdapter",
+            max_chars=8,
+            label_kind="title",
+        )
+        == "VeryLongComponent Adapter"
+    )
+
+
+def test_add_fallbacks_methods_group_keeps_method_format_and_supports_escaped_newline(
+    tmp_path: Path,
+) -> None:
+    module = _load_fallback_module()
+    svg_path = tmp_path / "methods.svg"
+    svg_path.write_text(
+        """
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml">
+          <g class="node default">
+            <g class="methods-group text">
+              <g class="label">
+                <foreignObject x="0" y="0" width="460" height="90">
+                  <html:div>
+                    <html:span>
+                      <html:p>+fetch(entity_type, limit)\\n+aclose()</html:p>
+                    </html:span>
+                  </html:div>
+                </foreignObject>
+              </g>
+            </g>
+          </g>
+        </svg>
+        """.strip(),
+        encoding="utf-8",
+    )
+
+    changed = module.add_fallbacks(svg_path)
+    assert changed >= 1
+
+    root = ET.parse(svg_path).getroot()
+    fallback_nodes = [
+        elem
+        for elem in root.iter()
+        if elem.tag.endswith("text") and "fo-fallback" in elem.attrib.get("class", "")
+    ]
+    assert len(fallback_nodes) == 1
+
+    tspans = [child for child in list(fallback_nodes[0]) if child.tag.endswith("tspan")]
+    assert [t.text for t in tspans[:2]] == ["+fetch(entity_type, limit)", "+aclose()"]

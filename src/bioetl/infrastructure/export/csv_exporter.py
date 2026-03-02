@@ -68,6 +68,12 @@ class CsvExporter:
         """Clear CSV files from the export directory.
 
         Handles PermissionError gracefully on Windows when files are locked.
+
+        Args:
+            table_name: Database table name.
+
+        Returns:
+            Result list.
         """
         deleted: list[Path] = []
         if not self.base_path.exists():

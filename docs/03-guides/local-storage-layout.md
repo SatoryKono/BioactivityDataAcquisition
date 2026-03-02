@@ -20,14 +20,14 @@ data/
     ├── silver/
     │   └── {provider}/
     │       └── {entity}/                # Delta Lake table
-    │           ├── -delta-log/
+    │           ├── _delta_log/
     │           ├── part-00000-*.parquet
     │           ├── {provider}-{entity}-metadata.yaml
     │           └── silver-{provider}-{entity}-dq-report.json
     ├── gold/
     │   └── {provider}/
     │       └── {entity}/                # Delta Lake table (flattened)
-    │           ├── -delta-log/
+    │           ├── _delta_log/
     │           ├── part-00000-*.parquet
     │           ├── {provider}-{entity}-metadata.yaml
     │           └── gold-{provider}-{entity}-dq-report.json
@@ -37,7 +37,7 @@ data/
     │       └── composite-{name}-{run-id}.json
     ├── quarantine/
     │   └── common.quarantine/           # Unified quarantine table
-    │       ├── -delta-log/
+    │       ├── _delta_log/
     │       └── part-00000-*.parquet
     └── reports/
         └── dq/                          # Composite DQ reports
@@ -157,7 +157,7 @@ All file writes use atomic patterns to prevent data corruption:
 2. Fsync to ensure durability
 3. Atomic rename to final path
 
-See `src/bioetl/infrastructure/storage/-atomic.py` for implementation.
+See `src/bioetl/infrastructure/storage/_atomic.py` for implementation.
 
 ## Maintenance Operations
 
@@ -170,7 +170,7 @@ Remove old Delta Lake files:
 python -c "
 from deltalake import DeltaTable
 dt = DeltaTable('data/output/silver/chembl/activity')
-dt.vacuum(retention-hours=168)  # 7 days
+dt.vacuum(retention_hours=168)  # 7 days
 "
 ```
 
@@ -220,9 +220,9 @@ sink:
     # path defaults to: data/output/gold/chembl/activity
 ```
 
-**Resolution logic** (`src/bioetl/infrastructure/config-loader.py`):
+**Resolution logic** (`src/bioetl/infrastructure/config_loader.py`):
 ```python
-layer.setdefault("path", f"data/output/{layer-name}/{provider}/{entity-type}")
+layer.setdefault("path", f"data/output/{layer_name}/{provider}/{entity_type}")
 ```
 
 This convention ensures consistent paths across all pipelines without repetitive
@@ -230,78 +230,66 @@ configuration. Explicit paths can still be specified to override the defaults.
 
 ## Configs Structure
 
-*Reference: [ADR-027: DQ Rules Externalization](../02-architecture/decisions/ADR-027-dq-rules-externalization.md)*
+*Reference: [ADR-039: Unified Entity Config Format](../02-architecture/decisions/ADR-039-unified-entity-config-format.md)*
 
-```
+```text
 configs/
-├── quality/                              # DQ Configuration Hierarchy (ADR-027)
-│   ├── -defaults.yaml                 # Global defaults (thresholds, common validations)
-│   ├── providers/
-│   │   ├── chembl.yaml                # ChEMBL provider overrides
-│   │   ├── pubchem.yaml               # PubChem provider overrides
-│   │   └── uniprot.yaml               # UniProt provider overrides
-│   └── entities/
-│       ├── chembl/
-│       │   ├── activity.yaml          # Activity-specific rules
-│       │   ├── assay.yaml
-│       │   ├── molecule.yaml
-│       │   └── target.yaml
-│       ├── pubchem/
-│       │   └── compound.yaml
-│       └── uniprot/
-│           └── target.yaml
-│
-├── filters/                              # Filter Configuration Hierarchy (ADR-028)
-│   ├── -defaults.yaml                 # Global defaults (batch-size=100)
-│   ├── providers/
-│   │   ├── chembl.yaml                # ChEMBL batch-size=1000
-│   │   └── ...                        # Other providers
-│   └── entities/
-│       ├── chembl/
-│       │   ├── activity.yaml          # Activity-specific filters
-│       │   └── ...
-│       └── ...
-│
-├── pipelines/                         # Pipeline orchestration configs
-│   ├── -base.yaml                     # Unified base defaults (ADR-025)
-│   ├── chembl/
-│   │   ├── activity.yaml              # Convention-based path resolution
-│   │   ├── assay.yaml
-│   │   ├── molecule.yaml
-│   │   └── target.yaml
-│   ├── pubchem/
-│   │   └── compound.yaml
-│   └── uniprot/
-│       └── target.yaml
-│
-├── sources/                           # Source connection configs
+├── base/
+│   ├── pipeline.yaml
+│   ├── quality.yaml
+│   └── bronze_fixture_gaps.yaml
+├── providers/
 │   ├── chembl.yaml
+│   ├── crossref.yaml
+│   ├── openalex.yaml
 │   ├── pubchem.yaml
+│   ├── pubmed.yaml
+│   ├── semanticscholar.yaml
 │   └── uniprot.yaml
-│
-└── env/
-    └── .env.example
+├── entities/
+│   ├── chembl/
+│   │   ├── activity.yaml
+│   │   ├── assay.yaml
+│   │   ├── assay_parameters.yaml
+│   │   ├── cell_line.yaml
+│   │   ├── compound_record.yaml
+│   │   ├── molecule.yaml
+│   │   ├── protein_class.yaml
+│   │   ├── publication.yaml
+│   │   ├── publication_similarity.yaml
+│   │   ├── publication_term.yaml
+│   │   ├── subcellular_fraction.yaml
+│   │   ├── target.yaml
+│   │   ├── target_component.yaml
+│   │   └── tissue.yaml
+│   ├── crossref/publication.yaml
+│   ├── openalex/publication.yaml
+│   ├── pubchem/compound.yaml
+│   ├── pubmed/publication.yaml
+│   ├── semanticscholar/publication.yaml
+│   └── uniprot/{idmapping,protein}.yaml
+├── composites/
+│   ├── activity.yaml
+│   ├── assay.yaml
+│   ├── molecule.yaml
+│   ├── publication.yaml
+│   ├── target.yaml
+│   └── field_groups/publication.yaml
+├── enums/
+│   └── chembl.yaml
+└── naming_exceptions.yaml
 ```
 
-### DQ Config Hierarchy (ADR-027)
+### Unified Config Layers
 
-| Level | Path | Purpose |
+| Layer | Path | Purpose |
 |-------|------|---------|
-| Global | `quality/-defaults.yaml` | Base thresholds (0.05/0.20), common validations |
-| Provider | `quality/providers/{provider}.yaml` | Provider-specific overrides |
-| Entity | `quality/entities/{provider}/{entity}.yaml` | Entity-specific rules |
+| Global defaults | `configs/base/*.yaml` | Common runtime and DQ defaults |
+| Provider config | `configs/providers/{provider}.yaml` | Provider endpoint/auth/rate-limit settings |
+| Entity config | `configs/entities/{provider}/{entity}.yaml` | Unified pipeline + schema + quality + filters + contracts |
+| Composite config | `configs/composites/{entity}.yaml` | Multi-provider enrichment orchestration |
 
-### Filter Config Hierarchy (ADR-028)
-
-| Level | Path | Purpose |
-|-------|------|---------|
-| Global | `filters/-defaults.yaml` | Default batch-size (100) |
-| Provider | `filters/providers/{provider}.yaml` | Provider-specific batch sizes |
-| Entity | `filters/entities/{provider}/{entity}.yaml` | Entity-specific filter rules |
-
-**Merge order** (both hierarchies): defaults → provider → entity → inline overrides
-
-See [DQ Configuration Guide](dq-configuration.md) and [Pipeline Configuration Guide](pipeline-configuration.md) for details.
+For details, see [DQ Configuration Guide](dq-configuration.md) and [Pipeline Configuration Guide](pipeline-configuration.md).
 
 ## Migration from S3
 

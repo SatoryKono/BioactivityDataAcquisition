@@ -1,5 +1,5 @@
 # Target Schema (ChEMBL)
-*Version: 1.0.0 | Aligned with RULES.md v5.22*
+*Version: 1.0.0 | Aligned with RULES.md v5.23*
 
 ## Overview
 
@@ -255,9 +255,9 @@ def -validate-invariants(self) -> None:
 | Artifact | Path |
 |----------|------|
 | Pandera Schema | `src/bioetl/domain/schemas/chembl/target.py` |
-| Domain Entity | `src/bioetl/domain/entities/chembl-structures.py` |
+| Domain Entity | `src/bioetl/domain/entities/chembl_structures.py` |
 | Pipeline Config | `configs/entities/chembl/target.yaml` |
-| Target Component Schema | `src/bioetl/domain/schemas/chembl/target-component.py` |
+| Target Component Schema | `src/bioetl/domain/schemas/chembl/target_component.py` |
 
 ---
 

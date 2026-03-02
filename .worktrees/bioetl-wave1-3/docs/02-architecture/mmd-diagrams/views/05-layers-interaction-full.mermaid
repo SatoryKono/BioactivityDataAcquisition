@@ -1,0 +1,104 @@
+%% View: Full | Parent: (root)
+%% Parent source: docs/02-architecture/mmd-diagrams/foundation/05-layers-interaction.mmd
+%% Full reference diagram retained after decomposition.
+%% Title: Layer Interaction — Hexagonal Architecture
+%% Covers: RULES.md §1.1 (Layers), §1.2 (Ports & Adapters)
+%% Updated: 2026-02-17
+%% Components: CLI, bootstrap_pipeline, PipelineRunner, PipelineExecutor, BaseTransformer, Port interfaces, Adapters, Storage Writers
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   Mixed (System / Component / Class)
+%% @uniform width=224 height=56 max_title_len=23 max_desc_lines=0
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+
+flowchart TB
+%% keep-orphan: Entities, Exceptions, Locking, Types
+    subgraph Interfaces["Interfaces Layer"]
+        CLI[CLI Entry Point]
+    end
+
+    subgraph Composition["Composition Layer"]
+        Bootstrap[bootstrap_pipeline]
+        Registry[PipelineRegistry]
+        Factories[Factories]
+
+        Bootstrap --> Registry
+        Bootstrap --> Factories
+    end
+
+    subgraph Application["Application Layer"]
+        Runner[PipelineRunner]
+        BatchExec[BatchExecutor]
+        Transformer[BaseTransformer]
+        Services[PipelineServices]
+
+        subgraph Composite["Composite Pipeline (ADR-026)"]
+            CompositeRunner[CompositePipelineRunner]
+            Coordinator[EnrichmentCoordinator]
+            Merger[MergeService]
+        end
+
+        Runner --> BatchExec
+        BatchExec --> Transformer
+        Runner --> Services
+        CompositeRunner --> Coordinator
+        CompositeRunner --> Merger
+        CompositeRunner -.->|"delegates"| Runner
+    end
+
+    subgraph Domain["Domain Layer"]
+        Ports[Port Interfaces]
+        Types[Core Types]
+        Entities[Domain Entities]
+        Exceptions[Exception Hierarchy]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        Adapters[Data Source Adapters]
+        Storage[Storage Writers]
+        Observability[Metrics & Tracing]
+        Locking[Locks & Checkpoints]
+    end
+
+    %% Layer Dependencies
+    CLI --> Bootstrap
+    Factories --> Runner
+    Application --> Ports
+    Adapters -.->|implements| Ports
+    Storage -.->|implements| Ports
+    Observability -.->|implements| Ports
+
+    %% Styling
+    classDef domainStyle fill:#f5f3ff,stroke:#7c3aed
+    classDef appStyle fill:#f0fdf4,stroke:#16a34a
+    classDef infraStyle fill:#fff1f2,stroke:#dc2626
+    classDef compStyle fill:#fff7ed,stroke:#f59e0b
+    classDef ifaceStyle fill:#eff6ff,stroke:#2563eb
+
+    class Domain domainStyle
+    class Application appStyle
+    class Infrastructure infraStyle
+    class Composition compStyle
+    class Interfaces ifaceStyle
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style Composition fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style Interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+
+    linkStyle 0,1,4,5,7,8,9,10,11,12 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 2,3,6 stroke:#1E293B,stroke-width:4px
+    linkStyle 13 stroke:#94A3B8,stroke-width:1px

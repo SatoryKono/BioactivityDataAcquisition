@@ -16,7 +16,7 @@ def __init__(
     self,
     pipeline-name: str,
     provider: str,
-    entity-type: str,
+    entity_type: str,
     run-type: RunType,
     data-source: DataSourcePort,
     storage: StoragePort,
@@ -47,16 +47,16 @@ def __init__(
 
 - `src/bioetl/application/core/base.py` - основной класс
 - `src/bioetl/domain/config.py` - **NEW**
-- `src/bioetl/application/core/pipeline-services.py` - **NEW**
+- `src/bioetl/application/core/pipeline_services.py` - **NEW**
 - `src/bioetl/application/pipelines/chembl/activity.py` - наследник
 - `src/bioetl/application/core/runner.py` - зависит от BasePipeline
-- `src/bioetl/application/core/batch-executor.py` - зависит от BasePipeline
-- `src/bioetl/application/core/lock-manager.py` - зависит от BasePipeline
-- `src/bioetl/application/core/quarantine-manager.py` - зависит от BasePipeline
-- `tests/unit/application/test-base-pipeline.py` - тесты
-- `tests/unit/application/core/test-batch-executor.py` - тесты
-- `tests/unit/application/test-pipeline-config.py` - тесты
-- `tests/unit/application/pipelines/test-chembl_activity-unit.py` - тесты
+- `src/bioetl/application/core/batch_executor.py` - зависит от BasePipeline
+- `src/bioetl/application/core/lock_manager.py` - зависит от BasePipeline
+- `src/bioetl/application/core/quarantine_manager.py` - зависит от BasePipeline
+- `tests/unit/application/test_base_pipeline.py` - тесты
+- `tests/unit/application/core/test_batch_executor.py` - тесты
+- `tests/unit/application/test_pipeline_config.py` - тесты
+- `tests/unit/application/pipelines/test_chembl_activity_unit.py` - тесты
 
 ## Решение
 
@@ -70,7 +70,7 @@ class PipelineConfig:
     """Static pipeline configuration."""
     pipeline-name: str
     provider: str
-    entity-type: str
+    entity_type: str
     primary-keys: list[str]
     silver-table: str
     gold-table: str | None = None
@@ -137,7 +137,7 @@ class BasePipeline(ABC):
         self.-config = config
         self.-runtime = runtime
         self.-services = services
-        self.-run-id = run-id
+        self._run_id = run-id
         self.-transformer = transformer
         # ... lazy-initialized components
 ```
@@ -233,7 +233,7 @@ finally:
 ### Фаза 3: Рефакторинг BasePipeline
 
 - [x] Новый конструктор `__init__(config, runtime, services)`
-- [x] Обновление менеджеров (`from-components()`)
+- [x] Обновление менеджеров (`from_components()`)
 - [x] Lazy initialization компонентов
 - [x] `ShutdownSignal` для graceful shutdown
 
@@ -244,13 +244,13 @@ finally:
 
 ### Фаза 5: Обновление тестов
 
-- [x] `test-base-pipeline.py`
-- [x] `test-batch-executor.py`
-- [x] `test-chembl_activity-unit.py`
+- [x] `test_base_pipeline.py`
+- [x] `test_batch_executor.py`
+- [x] `test_chembl_activity_unit.py`
 
 ### Фаза 6: Удаление shim
 
-- [x] Удалить `from-params()`
+- [x] Удалить `from_params()`
 - [x] Финальное обновление документации
 
 ## Альтернативы рассмотренные
@@ -284,7 +284,7 @@ finally:
 │  │                │  │   (frozen)       │  │                    │  │
 │  │ - pipeline-name│  │ - run-type       │  │ - data-source      │  │
 │  │ - provider     │  │ - resume         │  │ - storage          │  │
-│  │ - entity-type  │  │ - limit          │  │ - lock             │  │
+│  │ - entity_type  │  │ - limit          │  │ - lock             │  │
 │  │ - primary-keys │  │                  │  │ - checkpoint       │  │
 │  │ - silver-table │  │                  │  │ - quarantine       │  │
 │  │ - batch-size   │  │                  │  │ - metrics          │  │
