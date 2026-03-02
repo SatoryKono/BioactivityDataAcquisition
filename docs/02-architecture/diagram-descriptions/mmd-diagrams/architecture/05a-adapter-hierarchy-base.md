@@ -3,7 +3,7 @@
 - Исходная диаграмма: `mmd-diagrams/architecture/05a-adapter-hierarchy-base.mmd`
 
 ## Описание
-Covers core ports, base adapters, reusable mixins, and adapter decorators..
+Диаграмма Adapter Hierarchy: Base Types показывает архитектурный срез BioETL на уровне System / Component и использует нотацию flowchart. Материал помогает понять границы ответственности модулей, точки интеграции и зависимости между компонентами в рамках сценария 05a-adapter-hierarchy-base. В исходном файле прямо зафиксирован контекст: Covers core ports, base adapters, reusable mixins, and adapter decorators.. Это описание задает ожидаемую интерпретацию схемы при техническом ревью и синхронизации документации с кодовой базой. Ключевые контейнеры/подграфы включают: Domain Layer, Infrastructure Layer. Именно через эти блоки визуализированы границы слоев и маршруты передачи управления или данных. Примеры узлов, отражающих доменную модель и инфраструктуру: Domain Layer, DataSourcePort, HealthCheckPort, Infrastructure Layer, HealthCheckProviderMixin, NotSupportedMultiFilterMixin. По этим сущностям можно проверить согласованность терминов, портов и адаптеров между диаграммой и реализацией. В метаданных указана оценка плотности (@nodes=12), что полезно для контроля читаемости, декомпозиции view-слоев и стабильного рендеринга в CI-пайплайне.
 
 ## Метаданные
 - Тип: `flowchart`

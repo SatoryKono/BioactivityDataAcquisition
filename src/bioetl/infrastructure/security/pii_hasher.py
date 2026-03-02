@@ -54,6 +54,9 @@ class SaltConfig:
 
         Returns:
             SaltConfig instance.
+
+        Args:
+            settings: Settings object.
         """
         current = (
             settings.pii_salt_current.get_secret_value()
@@ -81,6 +84,9 @@ class SaltConfig:
         - BIOETL_PII_SALT_CURRENT (required)
         - BIOETL_PII_SALT_NEXT (optional)
         - BIOETL_SALT_ROTATION_ACTIVE (optional: true/1/yes/on)
+
+        Returns:
+            The SaltConfig result.
         """
         current = os.getenv("BIOETL_PII_SALT_CURRENT", "")
         raw_next = os.getenv("BIOETL_PII_SALT_NEXT")
@@ -226,10 +232,17 @@ class Sha256PiiHasher:
 
         Returns:
             Configured Sha256PiiHasher instance.
+
+        Args:
+            settings: Settings object.
         """
         return cls(salt_config=SaltConfig.from_settings(settings))
 
     @classmethod
     def from_env(cls) -> Sha256PiiHasher:
-        """Create hasher directly from environment variables."""
+        """Create hasher directly from environment variables.
+
+        Returns:
+            The Sha256PiiHasher result.
+        """
         return cls(salt_config=SaltConfig.from_env())

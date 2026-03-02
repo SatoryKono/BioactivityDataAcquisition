@@ -11,7 +11,7 @@ External API calls (ChEMBL, PubChem, UniProt) can experience temporary failures,
 
 ## The Decision
 
-We have implemented a **state machine-based Circuit Breaker** in `infrastructure/adapters/http/circuit-breaker.py` with the following characteristics:
+We have implemented a **state machine-based Circuit Breaker** in `infrastructure/adapters/http/circuit_breaker.py` with the following characteristics:
 
 1. **Three-state machine**: CLOSED → OPEN → HALF-OPEN → CLOSED
 2. **Configurable thresholds**: `failure-threshold=5`, `recovery-timeout=300s`

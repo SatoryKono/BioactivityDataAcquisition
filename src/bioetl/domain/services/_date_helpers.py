@@ -80,6 +80,12 @@ def format_date_parts(date_parts: Sequence[Sequence[int]] | None) -> str | None:
     - Complete date [[2024, 3, 15]]: returns "2024-03-15"
     - Month-only [[2024, 3]]: returns "2024-03-31" (last day of month)
     - Year-only [[2024]]: returns "2024-12-31" (last day of year)
+
+    Args:
+        date_parts: Date parts.
+
+    Returns:
+        The str | None result.
     """
     if not date_parts:
         return None

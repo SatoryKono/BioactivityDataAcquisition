@@ -137,6 +137,8 @@ class PublicationTermDataSource(_SourceMetadataDelegationMixin):
         Yields:
             Records from the data source.
 
+        Returns:
+            Async iterator yielding fetched records.
         """
         if entity_type == self.TARGET_ENTITY_TYPE:
             # Fetch publications and extract terms
@@ -336,7 +338,11 @@ class PublicationTermDataSource(_SourceMetadataDelegationMixin):
         return compute_publication_term_entity_id(publication_id, term_type, term)
 
     async def health_check(self) -> HealthStatus:
-        """Delegate health check to wrapped adapter."""
+        """Delegate health check to wrapped adapter.
+
+        Returns:
+            The HealthStatus result.
+        """
         return await self._data_source.health_check()
 
     async def aclose(self) -> None:
@@ -392,6 +398,8 @@ class PublicationTermDataSource(_SourceMetadataDelegationMixin):
         Yields:
             Dictionary records matching the filter criteria.
 
+        Returns:
+            Async iterator yielding fetched records.
         """
         filterable = self._ensure_filterable("fetch_filtered")
 
@@ -471,6 +479,8 @@ class PublicationTermDataSource(_SourceMetadataDelegationMixin):
         Yields:
             Dictionary records matching ALL filter criteria.
 
+        Returns:
+            Async iterator yielding fetched records.
         """
         filterable = self._ensure_filterable("fetch_multi_filtered")
 
@@ -532,6 +542,8 @@ class PublicationTermDataSource(_SourceMetadataDelegationMixin):
         Yields:
             Dictionary records found via primary lookup or fallback search.
 
+        Returns:
+            Async iterator yielding fetched records.
         """
         filterable = self._ensure_filterable("fetch_filtered_with_fallback")
 

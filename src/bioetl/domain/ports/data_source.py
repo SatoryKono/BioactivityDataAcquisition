@@ -67,6 +67,9 @@ class DataSourcePort(Protocol):
 
         Yields:
             A dictionary representing a single record from the data source.
+
+        Returns:
+            Async iterator yielding fetched records.
         """
         ...
 
@@ -121,6 +124,9 @@ class FilterableDataSourcePort(DataSourcePort, Protocol):
 
         Yields:
             Dictionary records matching the filter criteria.
+
+        Returns:
+            Async iterator yielding fetched records.
         """
         ...
 
@@ -144,6 +150,9 @@ class FilterableDataSourcePort(DataSourcePort, Protocol):
 
         Yields:
             Dictionary records matching ALL filter criteria.
+
+        Returns:
+            Async iterator yielding fetched records.
         """
         ...
 
@@ -169,5 +178,8 @@ class FilterableDataSourcePort(DataSourcePort, Protocol):
 
         Yields:
             Dictionary records found via primary lookup or fallback search.
+
+        Returns:
+            Async iterator yielding fetched records.
         """
         ...

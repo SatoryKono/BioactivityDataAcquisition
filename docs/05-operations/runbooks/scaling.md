@@ -2,15 +2,18 @@
 
 This document provides guidance on scaling the BioETL platform to handle larger data volumes and improve performance.
 
-## Horizontal Scaling: Adding More Workers
+> Runtime profile: Local-Only single-instance (ADR-010). This runbook covers vertical scaling and local performance tuning only.
 
-The BioETL system is designed to be stateless, allowing for horizontal scaling by simply adding more worker nodes (e.g., Docker containers, Kubernetes pods).
+## Horizontal Scaling (Not Supported in Current Architecture)
 
-*   **Strategy**: Deploy multiple instances of the BioETL application.
-*   **Concurrency**: The distributed locking mechanism (`lock:{provider}-{entity}`) ensures that only one worker can process a specific pipeline at any given time, preventing race conditions.
-*   **Benefit**: Allows multiple different pipelines to run in parallel across the worker pool (e.g., `worker-1` runs `chembl_activity` while `worker-2` runs `pubchem_compound`).
+BioETL currently runs in Local-Only single-instance mode (ADR-010).
+Horizontal scaling and distributed lock orchestration are not supported.
 
-## Vertical Scaling: Increasing Resources
+*   **Current strategy**: Run one pipeline process at a time on a single host.
+*   **Concurrency guard**: `MemoryLock` is process-local and does not provide inter-process safety.
+*   **Recommended approach**: Scale vertically and optimize batch/IO behavior.
+
+## Vertical Scaling: Primary Tuning Strategy
 
 If a single pipeline run is slow, consider increasing the resources available to the worker.
 

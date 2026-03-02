@@ -159,6 +159,12 @@ class ColumnOrderer:
 
         Uses YAML-based column groups when configured, otherwise falls back
         to the default semantic ordering.
+
+        Args:
+            columns: List of column names.
+
+        Returns:
+            Ordered result.
         """
         if not columns:
             return []
@@ -180,7 +186,14 @@ class ColumnOrderer:
 
         # Create sort key for each column
         def sort_key(col: str) -> tuple[int, int, str]:
-            """Sort by (group, provider_rank, column_name)."""
+            """Sort by (group, provider_rank, column_name).
+
+            Args:
+                col: Col.
+
+            Returns:
+                Sort key value for ordering.
+            """
             group = self._config.get_group(col)
             provider_rank = self._config.get_provider_rank(col)
             # For alphabetical sort, use field name (not full qualified name)
@@ -349,7 +362,14 @@ class ColumnOrderer:
         """
 
         def sort_key(col: str) -> tuple[int, str]:
-            """Return (provider_index, name) placing seed columns first."""
+            """Return (provider_index, name) placing seed columns first.
+
+            Args:
+                col: Col.
+
+            Returns:
+                Sort key value for ordering.
+            """
             # Seed columns (no dot or single dot like 'field.A') come first
             parts = col.split(".")
             if len(parts) < 3:

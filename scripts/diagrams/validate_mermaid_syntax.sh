@@ -6,7 +6,11 @@ DOCS_ROOT="$REPO_ROOT/docs"
 CANONICAL_ROOT="$REPO_ROOT/docs/02-architecture/mmd-diagrams"
 SCOPE="all"
 THEME_CONFIG="$REPO_ROOT/docs/02-architecture/mmd-diagrams/theme/mermaid-config.json"
-PUPPETEER_CFG=""
+PUPPETEER_CFG="$REPO_ROOT/docs/02-architecture/mmd-diagrams/theme/puppeteer-config.json"
+[[ -f "$PUPPETEER_CFG" ]] || PUPPETEER_CFG=""
+TEMP_PUPPETEER_CFG=""
+TMP_DIR=""
+PYTHON_BIN=""
 
 usage() {
   cat <<EOF
@@ -22,6 +26,94 @@ Options:
   --puppeteer FILE    Puppeteer config JSON path
   -h, --help          Show this help
 EOF
+}
+
+cleanup_temp_files() {
+  [[ -n "$TEMP_PUPPETEER_CFG" ]] && rm -f "$TEMP_PUPPETEER_CFG" || true
+  [[ -n "$TMP_DIR" ]] && rm -rf "$TMP_DIR" || true
+}
+trap cleanup_temp_files EXIT
+
+resolve_chrome_headless_shell() {
+  local env_exec="${PUPPETEER_EXECUTABLE_PATH:-}"
+  if [[ -n "$env_exec" ]]; then
+    if [[ -x "$env_exec" ]]; then
+      echo "$env_exec"
+      return 0
+    fi
+    echo "WARN: PUPPETEER_EXECUTABLE_PATH is not executable: $env_exec" >&2
+  fi
+
+  if command -v chrome-headless-shell >/dev/null 2>&1; then
+    command -v chrome-headless-shell
+    return 0
+  fi
+
+  local cache_root="${HOME:-}/.cache/puppeteer/chrome-headless-shell"
+  if [[ -d "$cache_root" ]]; then
+    local cached_exec
+    cached_exec="$(find "$cache_root" -type f -name chrome-headless-shell 2>/dev/null | sort -V | tail -n 1 || true)"
+    if [[ -n "$cached_exec" ]] && [[ -x "$cached_exec" ]]; then
+      echo "$cached_exec"
+      return 0
+    fi
+  fi
+  return 1
+}
+
+prepare_puppeteer_cfg() {
+  local base_cfg="$1"
+  local exec_path=""
+  local out_cfg
+
+  exec_path="$(resolve_chrome_headless_shell || true)"
+
+  if [[ -z "$base_cfg" && -z "$exec_path" ]]; then
+    echo ""
+    return
+  fi
+
+  if [[ -z "$PYTHON_BIN" ]]; then
+    echo "$base_cfg"
+    return
+  fi
+
+  out_cfg="$(mktemp "${TMPDIR:-/tmp}/puppeteer-validate.XXXXXX.json")"
+  "$PYTHON_BIN" - <<'PY' "$base_cfg" "$exec_path" "$out_cfg"
+import json
+import sys
+from pathlib import Path
+
+base_cfg, exec_path, out_cfg = sys.argv[1], sys.argv[2], sys.argv[3]
+cfg: dict[str, object] = {}
+
+if base_cfg and Path(base_cfg).exists():
+    raw = Path(base_cfg).read_text(encoding="utf-8").strip()
+    if raw:
+        loaded = json.loads(raw)
+        if isinstance(loaded, dict):
+            cfg = loaded
+
+args_raw = cfg.get("args")
+args = [x for x in args_raw if isinstance(x, str)] if isinstance(args_raw, list) else []
+required_args = [
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--disable-dev-shm-usage",
+    "--disable-gpu",
+]
+for item in required_args:
+    if item not in args:
+        args.append(item)
+cfg["args"] = args
+
+if exec_path:
+    cfg["executablePath"] = exec_path
+
+Path(out_cfg).write_text(json.dumps(cfg, indent=2) + "\n", encoding="utf-8")
+PY
+  TEMP_PUPPETEER_CFG="$out_cfg"
+  echo "$out_cfg"
 }
 
 while [[ $# -gt 0 ]]; do
@@ -70,6 +162,12 @@ if ! command -v mmdc >/dev/null 2>&1; then
   exit 2
 fi
 
+if command -v python3 >/dev/null 2>&1; then
+  PYTHON_BIN="python3"
+elif command -v python >/dev/null 2>&1; then
+  PYTHON_BIN="python"
+fi
+
 if [[ "$DOCS_ROOT" != /* ]]; then
   DOCS_ROOT="$REPO_ROOT/$DOCS_ROOT"
 fi
@@ -79,8 +177,14 @@ if [[ ! -d "$DOCS_ROOT" ]]; then
   exit 2
 fi
 
-tmp_dir="$(mktemp -d)"
-trap 'rm -rf "$tmp_dir"' EXIT
+if [[ -n "$PUPPETEER_CFG" ]] || [[ -n "${PUPPETEER_EXECUTABLE_PATH:-}" ]] || [[ "$(id -u)" -eq 0 ]]; then
+  effective_cfg="$(prepare_puppeteer_cfg "$PUPPETEER_CFG")"
+  if [[ -n "$effective_cfg" ]]; then
+    PUPPETEER_CFG="$effective_cfg"
+  fi
+fi
+
+TMP_DIR="$(mktemp -d)"
 
 count=0
 failed=0
@@ -96,8 +200,8 @@ while IFS= read -r -d '' file; do
   base="$(basename "${file%.*}")"
   [[ "$base" = _* ]] && continue
   count=$((count + 1))
-  out="$tmp_dir/${count}_${base}.svg"
-  err="$tmp_dir/${count}_${base}.err"
+  out="$TMP_DIR/${count}_${base}.svg"
+  err="$TMP_DIR/${count}_${base}.err"
   echo "Validating $file"
   if ! mmdc -i "$file" -o "$out" "${mmdc_args[@]}" >/dev/null 2>"$err"; then
     # Retry once to reduce flaky Puppeteer/mmdc startup failures.

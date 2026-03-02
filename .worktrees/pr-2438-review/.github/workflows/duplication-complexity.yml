@@ -1,0 +1,225 @@
+name: Duplication and Complexity Checks
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  duplication-complexity:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python tooling
+        run: python -m pip install radon==6.0.1 xenon==0.9.3
+
+      - name: Prepare report directory
+        run: mkdir -p reports
+
+      - name: Generate Radon complexity reports
+        run: |
+          radon cc src tests -a -s > reports/radon_cc.txt
+          radon cc src tests -a -s -j > reports/radon_cc.json
+
+      - name: Enforce cyclomatic complexity threshold (CC ≤ 10)
+        run: |
+          echo "Checking overall code complexity (max CC = 10, grade B)..."
+          # Exempt complex files with justified high complexity:
+          # ChEMBL: _fetch_with_filter and _fetch_batch_with_reduction with batch processing (CC=11-12)
+          # OpenAlex: fetch_filtered_with_fallback with DOI→title fallback (CC=23)
+          # SemanticScholar: fetch_filtered_with_fallback with DOI→ID fallback (CC=22)
+          # CrossRef: fetch_batch with batch DOI resolution and fallback to individual (CC=12)
+          # PubMed: fetch_filtered_with_fallback with PMID→title fallback (CC=17)
+          # DQ analyzers: Multiple validation checks in analyze() methods (CC=11-15)
+          # Merger: _apply_explicit_rules with field conflict resolution (CC=11)
+          # CLI formatters: Presentation logic with multiple display branches (CC=11)
+          # Storage writers: _write_*_metadata with coordinator path + fallback (CC=12)
+          # Storage factory: create() with multi-layer config extraction (CC=11)
+          # Composite runner: _run_with_lock orchestration with FSM state transitions (CC=12)
+          # Metadata coordinator: create_silver_metadata, _extract_schema_metadata with schema introspection (CC=12-16)
+          # Metadata builder: _extract_schema_metadata with pandera schema introspection (CC=16)
+          # CSV filter reader: load_filter_with_fallback with DOI→title fallback mapping (CC=12)
+          # UniProt idmapping: _fetch_results with pagination and retry logic (CC=13)
+          # UniProt extractors: extract_isoform_details with multi-field parsing (CC=20), extract_ptm_by_pattern (CC=12)
+          # PubChem: fetch_by_inchikey with InChIKey resolution and fallback (CC=12)
+          # BatchWriter: _apply_system_prefix_order with column ordering logic (CC=11)
+          # PubChem: fetch_by_inchikey with multi-step InChIKey resolution (CC=11)
+          # UniProt extractors: extract_isoform_details, extract_ptm_by_pattern with complex parsing (CC=11-12)
+          # Config loader: _normalize_source_pagination with legacy pagination promotion (CC=15)
+          # Source config schema: ProviderConfigYaml, _promote_legacy_pagination with backward-compat logic (CC=14-15)
+          # __init__.py: _dispatcher_call_with_any_fallback pandera compat shim (CC=11)
+          # postrun_service.py: _write_final_metadata with metadata assembly (CC=12)
+          # FsAdrService: validate with multi-check ADR validation (CC=13), _extract_from_section with heading parsing (CC=12)
+          # config_merge: config_merge with recursive deep merge and list strategy resolution (CC=11)
+          xenon --max-absolute B --max-modules B --max-average A \
+            --exclude "tests/*,src/tools/*,src/bioetl/__init__.py,src/bioetl/application/core/postrun_service.py,src/bioetl/infrastructure/adapters/chembl/*,src/bioetl/infrastructure/adapters/openalex/*,src/bioetl/infrastructure/adapters/semanticscholar/*,src/bioetl/infrastructure/adapters/crossref/*,src/bioetl/infrastructure/adapters/pubmed/*,src/bioetl/infrastructure/adapters/uniprot/*,src/bioetl/infrastructure/adapters/pubchem/*,src/bioetl/infrastructure/adapters/input/*,src/bioetl/application/services/dq/*,src/bioetl/application/composite/*,src/bioetl/application/core/batch_writer.py,src/bioetl/application/pipelines/*/extractors/*,src/bioetl/interfaces/cli/*,src/bioetl/infrastructure/storage/silver_writer.py,src/bioetl/infrastructure/storage/gold_writer.py,src/bioetl/composition/factories/storage_factory.py,src/bioetl/composition/services/metadata_coordinator.py,src/bioetl/infrastructure/storage/metadata_builder.py,src/bioetl/infrastructure/config_loader.py,src/bioetl/infrastructure/schemas/source_config.py,src/bioetl/infrastructure/adr/*,src/bioetl/infrastructure/config_merge.py" src
+
+      - name: Strict complexity check for domain layer (CC ≤ 5)
+        run: |
+          echo "Checking domain layer complexity (max CC = 5, grade A)..."
+          xenon --max-absolute A --max-modules A --max-average A src/bioetl/domain || {
+            echo "⚠️  Domain layer has functions with CC > 5"
+            echo "Consider refactoring to keep domain logic simple"
+            exit 1
+          }
+
+      - name: Generate detailed complexity report
+        run: |
+          echo "=== Functions with CC > 5 ===" > reports/high_complexity.txt
+          radon cc src -a -s --min C >> reports/high_complexity.txt || true
+          echo "" >> reports/high_complexity.txt
+          echo "=== Maintainability Index ===" >> reports/high_complexity.txt
+          radon mi src -s >> reports/high_complexity.txt
+
+      - name: Check for critical complexity violations
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          # Read radon JSON output
+          report_path = Path("reports/radon_cc.json")
+          if not report_path.exists():
+              print("No complexity report found")
+              sys.exit(0)
+
+          with open(report_path) as f:
+              data = json.load(f)
+
+          # Exempted paths (adapter files with complex fallback logic, tools scripts)
+          EXEMPT_PATHS = {
+              "src/bioetl/infrastructure/adapters/chembl/",  # _fetch_with_filter, _fetch_batch_with_reduction (CC=11-12)
+              "src/bioetl/infrastructure/adapters/openalex/",
+              "src/bioetl/infrastructure/adapters/semanticscholar/",
+              "src/bioetl/infrastructure/adapters/crossref/",  # fetch_batch with fallback (CC=12)
+              "src/bioetl/infrastructure/adapters/pubmed/",  # fetch_filtered_with_fallback PMID→title (CC=17)
+              "src/bioetl/infrastructure/adapters/uniprot/",  # _fetch_results with pagination and retry (CC=13)
+              "src/bioetl/infrastructure/adapters/input/",  # load_filter_with_fallback DOI→title mapping (CC=12)
+              "src/bioetl/infrastructure/adapters/pubchem/",  # fetch_by_inchikey multi-step resolution (CC=11)
+              "src/bioetl/application/services/dq/",  # DQ analyzers with multiple validation checks
+              "src/bioetl/application/composite/",  # Merger with field conflict resolution
+              "src/bioetl/application/pipelines/",  # Extractors with complex parsing logic (CC=11-12)
+              "src/bioetl/interfaces/cli/",  # CLI formatters with presentation logic (CC=11)
+              "src/tools/",  # Utility scripts with complex reporting logic
+          }
+
+          # Exempted files (specific files with justified complexity)
+          EXEMPT_FILES = {
+              "src/bioetl/__init__.py",  # _dispatcher_call_with_any_fallback pandera compat shim (CC=11)
+              "src/bioetl/application/core/postrun_service.py",  # _write_final_metadata metadata assembly (CC=12)
+              "src/bioetl/infrastructure/storage/silver_writer.py",  # _write_silver_metadata (CC=12)
+              "src/bioetl/infrastructure/storage/gold_writer.py",  # _write_gold_metadata (CC=12)
+              "src/bioetl/application/core/batch_writer.py",  # _apply_system_prefix_order with column ordering (CC=12)
+              "src/bioetl/composition/factories/storage_factory.py",  # create() multi-layer config (CC=11)
+              "src/bioetl/composition/services/metadata_coordinator.py",  # create_silver_metadata, _extract_schema_metadata (CC=12-16)
+              "src/bioetl/infrastructure/storage/metadata_builder.py",  # _extract_schema_metadata with schema introspection (CC=16)
+              "src/bioetl/infrastructure/config_loader.py",  # _normalize_source_pagination with legacy promotion (CC=15)
+              "src/bioetl/infrastructure/schemas/source_config.py",  # _promote_legacy_pagination backward-compat (CC=14-15)
+              "src/bioetl/infrastructure/config_merge.py",  # config_merge() nested isinstance for type-safe deep merge (CC=12)
+              "src/bioetl/infrastructure/adr/fs_adr_service.py",  # validate + _extract_from_section ADR parsing (CC=12-13)
+              "src/bioetl/infrastructure/adr/fs_adr_service.py",  # validate() multi-field ADR validation (CC=13)
+              "src/bioetl/infrastructure/config_merge.py",  # config_merge recursive deep merge with list strategies (CC=11)
+          }
+
+          # Exempted functions (with documented reasons)
+          EXEMPT_FUNCTIONS = {
+              "fetch_filtered_with_fallback": 25,  # DOI→title fallback with batch processing
+              "_request_with_retry": 20,  # HTTP retry logic with circuit breaker
+              "fetch_batch": 15,  # CrossRef batch DOI resolution with fallback to individual
+              "_write_silver_metadata": 15,  # Metadata assembly with coordinator path + fallback (CC=12)
+              "_write_gold_metadata": 15,  # Metadata assembly with coordinator path + fallback (CC=12)
+              "load_filter_with_fallback": 15,  # CSV filter loading with multiple fallback strategies (CC=12)
+          }
+
+          violations = []
+          for filepath, functions in data.items():
+              # Skip test files - test complexity is checked separately
+              if filepath.startswith("tests/"):
+                  continue
+              # Skip exempted paths
+              if any(filepath.startswith(exempt) for exempt in EXEMPT_PATHS):
+                  continue
+              # Skip exempted files
+              if filepath in EXEMPT_FILES:
+                  continue
+              for func in functions:
+                  cc = func.get("complexity", 0)
+                  name = func.get("name", "unknown")
+                  # Check exempted functions with higher thresholds
+                  max_cc = EXEMPT_FUNCTIONS.get(name, 10)
+                  if cc > max_cc:
+                      violations.append(f"{filepath}:{func.get('lineno', '?')} - {name}() has CC={cc} (max={max_cc})")
+
+          if violations:
+              print("❌ Critical complexity violations:")
+              for v in violations:
+                  print(f"  {v}")
+              sys.exit(1)
+          else:
+              print("✅ No critical complexity violations found")
+          PY
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run jscpd for duplication detection
+        run: |
+          mkdir -p reports/jscpd
+          npx jscpd@4.0.8 src tests --config .jscpd.json --threshold 5 --format python --reporters "console,html,json" --output reports/jscpd
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: duplication-complexity-reports
+          path: reports
+          if-no-files-found: warn
+
+  constructor-args-check:
+    name: Constructor Arguments Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Check constructor argument counts
+        run: python src/tools/scripts/check_constructor_args.py --warn-only
+
+  executor-complexity:
+    name: Executor Complexity Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install tooling
+        run: python -m pip install radon==6.0.1 xenon==0.9.3
+
+      - name: Check batch_executor.py complexity (max CC = 10)
+        run: |
+          echo "Checking batch_executor.py complexity..."
+          xenon --max-absolute B --max-modules B --max-average A \
+            src/bioetl/application/core/batch_executor.py

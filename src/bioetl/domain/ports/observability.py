@@ -200,31 +200,77 @@ class LoggerPort(Protocol):
         """Bind additional context to the logger.
 
         Returns a new logger instance with the bound context.
+
+        Args:
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            Logger with bound context.
         """
         ...
 
     def info(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible a...
-        """Log an informational message."""
+        """Log an informational message.
+
+        Args:
+            _event:  event.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            The Any result.
+        """
         ...
 
     # Any: structlog-compatible a...
     def warning(self, _event: str, **kwargs: Any) -> Any:
-        """Log a warning message."""
+        """Log a warning message.
+
+        Args:
+            _event:  event.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            The Any result.
+        """
         ...
 
     # Any: structlog-compatible a...
     def error(self, _event: str, **kwargs: Any) -> Any:
-        """Log an error message."""
+        """Log an error message.
+
+        Args:
+            _event:  event.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            The Any result.
+        """
         ...
 
     # Any: structlog-compatible a...
     def debug(self, _event: str, **kwargs: Any) -> Any:
-        """Log a debug message."""
+        """Log a debug message.
+
+        Args:
+            _event:  event.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            The Any result.
+        """
         ...
 
     # Any: structlog-compatible a...
     def exception(self, _event: str, **kwargs: Any) -> Any:
-        """Log an exception with traceback."""
+        """Log an exception with traceback.
+
+        Args:
+            _event:  event.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            The Any result.
+        """
         ...
 
 
@@ -410,5 +456,8 @@ class DQMonitorPort(Protocol):
                     logger.info(f"Expected range: [{lower:.0f}, {upper:.0f}]")
                 else:
                     logger.warning("No baseline data for record_count")
+
+        Args:
+            metric_name: Name of the metric.
         """
         ...

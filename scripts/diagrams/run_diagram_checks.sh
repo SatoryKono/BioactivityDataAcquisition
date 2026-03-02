@@ -70,10 +70,12 @@ ensure_puppeteer_config() {
 
   PUPPETEER_CFG="$PUPPETEER_CFG" \
   PUPPETEER_EXECUTABLE_PATH="${PUPPETEER_EXECUTABLE_PATH:-}" \
+  HOME_DIR="${HOME:-}" \
   python3 - <<'PY'
 import json
 import os
 from pathlib import Path
+from shutil import which
 
 cfg_path = Path(os.environ["PUPPETEER_CFG"])
 cfg = {
@@ -85,6 +87,19 @@ cfg = {
     ]
 }
 exec_path = os.environ.get("PUPPETEER_EXECUTABLE_PATH", "").strip()
+if not exec_path:
+    from_path = which("chrome-headless-shell")
+    if from_path:
+        exec_path = from_path
+if not exec_path:
+    home_dir = os.environ.get("HOME_DIR", "").strip()
+    if home_dir:
+        cache_root = Path(home_dir) / ".cache/puppeteer/chrome-headless-shell"
+        candidates = sorted(
+            cache_root.glob("linux-*/chrome-headless-shell-linux64/chrome-headless-shell")
+        )
+        if candidates:
+            exec_path = str(candidates[-1])
 if exec_path:
     cfg["executablePath"] = exec_path
 
@@ -301,6 +316,30 @@ run_render_step() {
   fi
 }
 
+run_class_method_integrity_check() {
+  local class_source_dir="$REPO_ROOT/docs/02-architecture/mmd-diagrams/class-diagrams"
+  local class_svg_dir="$class_source_dir/svg"
+
+  if [[ -n "$DIAGRAM_PATH" ]]; then
+    case "$DIAGRAM_PATH" in
+      docs/02-architecture/mmd-diagrams/class-diagrams/*.mmd)
+        python3 "$REPO_ROOT/scripts/diagrams/check_class_method_render_integrity.py" \
+          --source-dir "$class_source_dir" \
+          --svg-dir "$class_svg_dir" \
+          --file "$REPO_ROOT/$DIAGRAM_PATH"
+        ;;
+      *)
+        log "DIAG-T030: class method integrity skipped (non class-diagram scope)"
+        ;;
+    esac
+    return
+  fi
+
+  python3 "$REPO_ROOT/scripts/diagrams/check_class_method_render_integrity.py" \
+    --source-dir "$class_source_dir" \
+    --svg-dir "$class_svg_dir"
+}
+
 run_pr_profile() {
   log "DIAG-T000: Mermaid operator guard (class/sequence)"
   run_operator_guard
@@ -333,6 +372,9 @@ run_pr_profile() {
   log "DIAG-T018..T023: Quality gates"
   python3 "$REPO_ROOT/scripts/diagrams/check_diagram_quality_gates.py" \
     --manifest "$SOURCE_MANIFEST"
+
+  log "DIAG-T030: class method render integrity"
+  run_class_method_integrity_check
 }
 
 run_nightly_profile() {

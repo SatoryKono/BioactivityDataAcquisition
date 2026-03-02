@@ -5,6 +5,8 @@
 **Для:** DevOps, Data Engineers, Support
 **Связанный ADR:** ADR-033
 
+> Runtime profile: Local-Only single-instance (ADR-010). Validation and triage steps assume local process/log/data context.
+
 ---
 
 ## Содержание

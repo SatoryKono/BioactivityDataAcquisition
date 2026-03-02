@@ -40,6 +40,8 @@ class PaginatedFetcherMixin:
         Yields:
             Items from the pages as they are fetched.
 
+        Returns:
+            Iterator over results.
         """
         fetched = 0
         cursor = initial_cursor

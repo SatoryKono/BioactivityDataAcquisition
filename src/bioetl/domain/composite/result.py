@@ -83,7 +83,20 @@ class EnrichmentResult:
         started_at: datetime | None = None,
         completed_at: datetime | None = None,
     ) -> EnrichmentResult:
-        """Factory for successful enrichment result."""
+        """Factory for successful enrichment result.
+
+        Args:
+            enricher_name: Enricher pipeline name.
+            records_input: Records input.
+            records_enriched: Records enriched.
+            records_not_found: Records not found.
+            duration_seconds: Duration seconds.
+            started_at: Started at.
+            completed_at: Completed at.
+
+        Returns:
+            The EnrichmentResult result.
+        """
         return cls(
             enricher_name=enricher_name,
             status=EnrichmentStatus.SUCCESS,
@@ -103,7 +116,17 @@ class EnrichmentResult:
         records_input: int = 0,
         duration_seconds: float = 0.0,
     ) -> EnrichmentResult:
-        """Factory for failed enrichment result."""
+        """Factory for failed enrichment result.
+
+        Args:
+            enricher_name: Enricher pipeline name.
+            error_message: Error message.
+            records_input: Records input.
+            duration_seconds: Duration seconds.
+
+        Returns:
+            The EnrichmentResult result.
+        """
         return cls(
             enricher_name=enricher_name,
             status=EnrichmentStatus.FAILED,
@@ -118,7 +141,15 @@ class EnrichmentResult:
         enricher_name: str,
         reason: str = "Filter excluded all records",
     ) -> EnrichmentResult:
-        """Factory for skipped enrichment result."""
+        """Factory for skipped enrichment result.
+
+        Args:
+            enricher_name: Enricher pipeline name.
+            reason: Reason description.
+
+        Returns:
+            The EnrichmentResult result.
+        """
         return cls(
             enricher_name=enricher_name,
             status=EnrichmentStatus.SKIPPED,
@@ -132,7 +163,16 @@ class EnrichmentResult:
         timeout_seconds: float,
         records_input: int = 0,
     ) -> EnrichmentResult:
-        """Factory for timeout enrichment result."""
+        """Factory for timeout enrichment result.
+
+        Args:
+            enricher_name: Enricher pipeline name.
+            timeout_seconds: Timeout seconds.
+            records_input: Records input.
+
+        Returns:
+            The EnrichmentResult result.
+        """
         return cls(
             enricher_name=enricher_name,
             status=EnrichmentStatus.TIMEOUT,
@@ -147,7 +187,15 @@ class EnrichmentResult:
         enricher_name: str,
         reason: str = "Pipeline not executed (required_only mode)",
     ) -> EnrichmentResult:
-        """Factory for not-run enrichment result."""
+        """Factory for not-run enrichment result.
+
+        Args:
+            enricher_name: Enricher pipeline name.
+            reason: Reason description.
+
+        Returns:
+            The EnrichmentResult result.
+        """
         return cls(
             enricher_name=enricher_name,
             status=EnrichmentStatus.NOT_RUN,
@@ -216,7 +264,19 @@ class DependencyResult:
         started_at: datetime | None = None,
         completed_at: datetime | None = None,
     ) -> DependencyResult:
-        """Factory for successful dependency result."""
+        """Factory for successful dependency result.
+
+        Args:
+            pipeline_name: Pipeline identifier.
+            records_extracted: Records extracted.
+            records_silver: Records silver.
+            duration_seconds: Duration seconds.
+            started_at: Started at.
+            completed_at: Completed at.
+
+        Returns:
+            The DependencyResult result.
+        """
         return cls(
             pipeline_name=pipeline_name,
             status=DependencyStatus.SUCCESS,
@@ -234,7 +294,16 @@ class DependencyResult:
         error_message: str,
         duration_seconds: float = 0.0,
     ) -> DependencyResult:
-        """Factory for failed dependency result."""
+        """Factory for failed dependency result.
+
+        Args:
+            pipeline_name: Pipeline identifier.
+            error_message: Error message.
+            duration_seconds: Duration seconds.
+
+        Returns:
+            The DependencyResult result.
+        """
         return cls(
             pipeline_name=pipeline_name,
             status=DependencyStatus.FAILED,
@@ -248,7 +317,15 @@ class DependencyResult:
         pipeline_name: str,
         reason: str = "Already completed",
     ) -> DependencyResult:
-        """Factory for skipped dependency result."""
+        """Factory for skipped dependency result.
+
+        Args:
+            pipeline_name: Pipeline identifier.
+            reason: Reason description.
+
+        Returns:
+            The DependencyResult result.
+        """
         return cls(
             pipeline_name=pipeline_name,
             status=DependencyStatus.SKIPPED,
@@ -261,7 +338,15 @@ class DependencyResult:
         pipeline_name: str,
         timeout_seconds: float,
     ) -> DependencyResult:
-        """Factory for timeout dependency result."""
+        """Factory for timeout dependency result.
+
+        Args:
+            pipeline_name: Pipeline identifier.
+            timeout_seconds: Timeout seconds.
+
+        Returns:
+            The DependencyResult result.
+        """
         return cls(
             pipeline_name=pipeline_name,
             status=DependencyStatus.TIMEOUT,
@@ -418,7 +503,11 @@ class CompositeResult:
         return sum(r.records_enriched for r in self.enrichment_results.values())
 
     def summary(self) -> dict[str, object]:
-        """Generate summary dictionary for logging/reporting."""
+        """Generate summary dictionary for logging/reporting.
+
+        Returns:
+            Summary information.
+        """
         return {
             "composite_name": self.composite_name,
             "composite_run_id": self.composite_run_id,

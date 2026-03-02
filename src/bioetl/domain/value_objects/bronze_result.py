@@ -87,7 +87,11 @@ class BronzeWriteResult:
             raise ValueError("checksum_blake2 cannot be empty")
 
     def exists(self) -> bool:
-        """Check if the written Bronze file exists on disk."""
+        """Check if the written Bronze file exists on disk.
+
+        Returns:
+            True if condition is met, False otherwise.
+        """
         return Path(self.absolute_path).exists()
 
     @property

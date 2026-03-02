@@ -61,7 +61,7 @@ OPEN → SEALED → WRITING → COMMITTED
                       ↘→ FAILED
 ```
 
-#### PipelineRun Aggregate (`domain/aggregates/pipeline-run.py`)
+#### PipelineRun Aggregate (`domain/aggregates/pipeline_run.py`)
 
 ```python
 class PipelineRun:
@@ -91,7 +91,7 @@ PENDING → RUNNING → COMPLETED
                ↘→ SHUTDOWN
 ```
 
-#### QuarantineEntry Aggregate (`domain/aggregates/quarantine-entry.py`)
+#### QuarantineEntry Aggregate (`domain/aggregates/quarantine_entry.py`)
 
 ```python
 class QuarantineEntry:
@@ -150,8 +150,8 @@ src/bioetl/domain/
 ├── aggregates/           # DDD Aggregates
 │   ├── __init__.py
 │   ├── batch.py          # Batch Aggregate (536 LOC)
-│   ├── pipeline-run.py   # PipelineRun Aggregate (574 LOC)
-│   ├── quarantine-entry.py # QuarantineEntry Aggregate (517 LOC)
+│   ├── pipeline_run.py   # PipelineRun Aggregate (574 LOC)
+│   ├── quarantine_entry.py # QuarantineEntry Aggregate (517 LOC)
 │   └── events.py         # Domain Events (197 LOC)
 ├── value-objects/        # Value Objects
 │   ├── __init__.py
@@ -196,9 +196,9 @@ src/bioetl/domain/
 ### Batch Aggregate в RecordProcessor
 
 ```python
-# application/core/record-processor.py
+# application/core/record_processor.py
 async def process-batch(self, records: list[dict]) -> None:
-    batch = Batch.create(run-id=self.-run-id)
+    batch = Batch.create(run-id=self._run_id)
 
     for record in records:
         batch.add-record(record)
@@ -231,7 +231,7 @@ async def process-batch(self, records: list[dict]) -> None:
 # application/core/runner.py
 async def run(self) -> None:
     run = PipelineRun.create(
-        run-id=self.-run-id,
+        run-id=self._run_id,
         pipeline-name=self.-config.pipeline-name,
         run-type=self.-runtime.run-type,
     )

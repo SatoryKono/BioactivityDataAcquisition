@@ -1,9 +1,9 @@
-# PipelineRunner Internal Component Diagram
+# Title: PipelineRunner Internal Component Diagram
 
 - Исходная диаграмма: `mmd-diagrams/foundation/42-pipeline-runner-class.mmd`
 
 ## Описание
-Диаграмма описывает: application/core/runner.py, application/core/pipeline_services.py. Приоритет/контекст: 17 (Score 8.06) — PipelineRunner with all DI dependencies.
+Диаграмма Title: PipelineRunner Internal Component Diagram из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате classDiagram и служит базовым ориентиром для инженерного анализа, ревью изменений и обсуждения технических решений. Уровень детализации обозначен как Mixed (System / Component / Class), поэтому схема подходит одновременно для быстрой навигации по контексту и для проверки корректности зависимостей, контрактов и потоков обработки данных в рамках сценария 42-pipeline-runner-class. В комментариях исходника зафиксирован фокус диаграммы: Covers: application/core/runner.py, application/core/pipeline_services.py. Это снижает неоднозначность интерпретации и помогает поддерживать консистентность между визуальной документацией, ADR-решениями и реальным кодом. Дополнительно в метаданных указан показатель плотности (@nodes=n/a), что полезно при контроле читаемости и планировании декомпозиции диаграмм на более узкие представления.
 
 ## Метаданные
 - Тип: `classDiagram`

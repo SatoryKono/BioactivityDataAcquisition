@@ -1,0 +1,70 @@
+%% View: Infrastructure-Mapping | Parent: 48-composite-phase-lifecycle-full.mermaid
+%% @uniform width=232 height=64 max_title_len=24 max_desc_lines=0
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL',
+    'spacing.nodeNode': 34,
+    'spacing.edgeNode': 24,
+    'spacing.edgeEdge': 12
+  }
+}}%%
+flowchart LR
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        STATE["CompositePipelineState"]
+    end
+
+    subgraph Application["Application Layer"]
+        direction TB
+        RUNNER["CompositePipelineRunner"]
+        DISPATCHER["PhaseDispatcher"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        SEED_RUNNER["PipelineRunner (seed)"]
+        DEP_COORD["DependencyCoordinator"]
+        ENRICH_COORD["EnrichmentCoordinator"]
+        MERGE_SERVICE["MergeService"]
+        CHECKPOINT["CheckpointStore"]
+        METRICS["Metrics/Tracing"]
+    end
+
+    RUNNER --> DISPATCHER
+    DISPATCHER --> SEED_RUNNER
+    DISPATCHER --> DEP_COORD
+    DISPATCHER --> ENRICH_COORD
+    DISPATCHER --> MERGE_SERVICE
+
+    SEED_RUNNER --> CHECKPOINT
+    DEP_COORD --> CHECKPOINT
+    ENRICH_COORD --> CHECKPOINT
+    MERGE_SERVICE --> CHECKPOINT
+
+    SEED_RUNNER -. updates .-> STATE
+    DEP_COORD -. updates .-> STATE
+    ENRICH_COORD -. updates .-> STATE
+    MERGE_SERVICE -. updates .-> STATE
+
+    RUNNER -. emits .-> METRICS
+    DISPATCHER -. emits .-> METRICS
+    CHECKPOINT -. recovery state .-> RUNNER
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle default stroke:#475569,stroke-width:2px

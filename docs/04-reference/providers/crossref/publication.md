@@ -134,13 +134,13 @@ CrossRef API предоставляет "polite pool" с повышенными 
 ### Конфигурация Input Filter
 
 ```yaml
-input-filter:
+input_filter:
   enabled: true
-  source-path: "data/input/dois.csv"
-  column-name: "doi"
-  filter-field: "doi"
-  batch-size: 50
-  fallback-column: "title"  # Поиск по заголовку при 404
+  source_path: "data/input/dois.csv"
+  column_name: "doi"
+  filter_field: "doi"
+  batch_size: 50
+  fallback_column: "title"  # Поиск по заголовку при 404
 ```
 
 ----------------------------------------------------------------------
@@ -149,16 +149,16 @@ input-filter:
 
 ```bash
 # Базовый запуск с файлом DOI
-bioetl run crossref_publication
+bioetl run --pipeline crossref_publication
 
 # С ограничением количества записей
-bioetl run crossref_publication --limit 100
+bioetl run --pipeline crossref_publication --limit 100
 
 # Проверка конфигурации без выполнения
-bioetl run crossref_publication --dry-run
+bioetl run --pipeline crossref_publication --dry-run
 
 # Полная перезагрузка
-bioetl run crossref_publication --run-type rebuild
+bioetl run --pipeline crossref_publication --run-type rebuild
 ```
 
 ### Подготовка входных данных
@@ -213,8 +213,8 @@ CrossRef adapter реализует health check через `/works?rows=1`:
 ## 8. Gold Filters
 
 ```yaml
-gold-filters:
-  required-fields:
+gold_filters:
+  required_fields:
     - doi
     - title
   ranges:

@@ -37,7 +37,11 @@ class ExtractionParams:
     params: Mapping[str, str | int | bool]
 
     def to_query_dict(self) -> dict[str, str | int | bool]:
-        """Return params as mutable dict for adapter consumption."""
+        """Return params as mutable dict for adapter consumption.
+
+        Returns:
+            Result dictionary.
+        """
         return dict(self.params)
 
     def to_query_string(self) -> str:
@@ -56,5 +60,9 @@ class ExtractionParams:
 
     @classmethod
     def empty(cls) -> ExtractionParams:
-        """Create an empty ExtractionParams instance."""
+        """Create an empty ExtractionParams instance.
+
+        Returns:
+            The ExtractionParams result.
+        """
         return cls(params={})

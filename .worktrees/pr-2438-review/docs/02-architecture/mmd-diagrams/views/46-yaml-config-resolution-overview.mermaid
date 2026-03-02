@@ -1,0 +1,51 @@
+%% View: Overview | Parent: 46-yaml-config-resolution-full.mermaid
+%% @uniform width=160 height=56 max_title_len=15 max_desc_lines=0
+flowchart TB
+%% keep-orphan: N10, N11, N12, N13, N14, N15, N8, N9
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        N2["dq_config_file"]
+        N5["override"]
+        N6["PIPELINE_CONFIG"]
+        N7["TABLE_CONFIG"]
+        N13["DQ_ENTITY"]
+    end
+
+    subgraph Application["Application Layer"]
+        direction TB
+        N1["PIPELINE"]
+        N3["br"]
+        N4["YAML_LOADER"]
+        N8["BASE"]
+        N10["SOURCE"]
+        N11["DQ_DEFAULTS"]
+        N14["DQ_INLINE"]
+        N15["FILTER_DEFAULTS"]
+    end
+
+    subgraph Composition["Composition Layer"]
+        direction TB
+        N9["PROVIDER_BASE"]
+        N12["DQ_PROVIDER"]
+    end
+
+    N4 --> N5
+    N6 --> N7
+    N1 --> N2
+    N1 --> N3
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Composition fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle 0 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 1 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 2 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 3 stroke:#475569,stroke-width:2px,stroke-dasharray:5

@@ -1,6 +1,6 @@
 # manual-EP — Manual Endpoint Validation Checklist
 
-*Priority: low | Version: 1.0 | Aligned with RULES.md v5.22*
+*Priority: low | Version: 1.0 | Aligned with RULES.md v5.23*
 
 ---
 

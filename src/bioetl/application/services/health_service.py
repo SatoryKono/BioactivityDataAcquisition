@@ -27,12 +27,23 @@ class DataSourceFactoryPort(Protocol):
 
     @staticmethod
     def list_providers() -> list[str]:
-        """List available provider names."""
+        """List available provider names.
+
+        Returns:
+            Collection of providers.
+        """
         ...
 
     @staticmethod
     def create(provider: str) -> Any:  # Any: polymorphic adapter
-        """Create a data source adapter for the given provider."""
+        """Create a data source adapter for the given provider.
+
+        Args:
+            provider: Data provider name.
+
+        Returns:
+            Newly created Any instance.
+        """
         ...
 
 
@@ -72,7 +83,11 @@ class HealthResult:
         return self.status in ("unhealthy", "unknown")
 
     def to_dict(self) -> dict[str, Any]:  # Any: heterogeneous health metric values
-        """Convert to dictionary for serialization."""
+        """Convert to dictionary for serialization.
+
+        Returns:
+            Dictionary representation.
+        """
         result: dict[str, Any] = {  # Any: heterogeneous health metric values
             "status": self.status,
         }
@@ -110,7 +125,11 @@ class HealthCheckSummary:
         return sum(1 for r in self.results.values() if r.is_unhealthy)
 
     def to_dict(self) -> dict[str, dict[str, Any]]:  # Any: heterogeneous health m...
-        """Convert to dictionary for serialization."""
+        """Convert to dictionary for serialization.
+
+        Returns:
+            Dictionary representation.
+        """
         return {name: result.to_dict() for name, result in self.results.items()}
 
 

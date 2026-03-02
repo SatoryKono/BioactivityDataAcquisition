@@ -34,7 +34,7 @@ composition/bootstrap/
     └── runner.py        # Сборка runner
 ```
 
-- `bootstrap-pipeline()`: Основная точка входа для создания полностью готового к работе экземпляра пайплайна. **Deprecated** — предпочтителен прямой вызов `runtime/pipeline.py`.
+- `bootstrap_pipeline()`: Основная точка входа для создания полностью готового к работе экземпляра пайплайна. **Deprecated** — предпочтителен прямой вызов `runtime/pipeline.py`.
 - `bootstrap/runtime/composite.py`: Bootstrap для Composite Pipeline (ADR-026).
 
 ### 2.2. `factories/` — Фабрики компонентов
@@ -45,27 +45,27 @@ composition/bootstrap/
 
 | Файл                          | Фабрика                                                                                     | Назначение                                                     |
 | ----------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `pipeline-factory.py`         | `GenericPipelineFactory`                                                                    | Универсальный конструктор пайплайнов (декларативно)            |
-| `pipeline-factories.py`       | Реестр фабрик                                                                               | Все зарегистрированные pipeline factories                      |
-| `data-source-factory.py`      | `DataSourceFactory`                                                                         | Создает `DataSourcePort` для провайдера                        |
-| `http-client-factory.py`      | `HttpClientFactory`                                                                         | Настроенные `UnifiedHTTPClient` с Rate Limits, Circuit Breaker |
-| `storage-factory.py`          | `StorageFactory`                                                                            | Сборка `StoragePort` (Bronze + Silver + Gold)                  |
-| `storage-adapter.py`          | `StorageAdapter`                                                                            | Создание отдельных storage адаптеров                           |
+| `pipeline_factory.py`         | `GenericPipelineFactory`                                                                    | Универсальный конструктор пайплайнов (декларативно)            |
+| `pipeline_factories.py`       | Реестр фабрик                                                                               | Все зарегистрированные pipeline factories                      |
+| `data_source_factory.py`      | `DataSourceFactory`                                                                         | Создает `DataSourcePort` для провайдера                        |
+| `http_client_factory.py`      | `HttpClientFactory`                                                                         | Настроенные `UnifiedHTTPClient` с Rate Limits, Circuit Breaker |
+| `storage_factory.py`          | `StorageFactory`                                                                            | Сборка `StoragePort` (Bronze + Silver + Gold)                  |
+| `storage_adapter.py`          | `StorageAdapter`                                                                            | Создание отдельных storage адаптеров                           |
 | `storage.py`                  | Storage helpers                                                                             | Вспомогательные функции для storage                            |
 | `bootstrap/cli/checkpoint.py` | CLI checkpoint bootstrap                                                                    | Настройка checkpoint зависимостей                              |
 | `bootstrap/cli/storage.py`    | CLI storage bootstrap                                                                       | Настройка storage зависимостей                                 |
-| `runner-factory.py`           | `RunnerFactory`                                                                             | Создание `PipelineRunner` с DI                                 |
-| `services-factory.py`         | `BaseServicesFactory / ServicesBuilder`                                                     | Создание `PipelineServices` bundle                             |
-| `transformer-factory.py`      | `transformer-factory.py — модуль с функциями register-transformer() и create-transformer()` | Создание трансформеров по провайдеру                           |
-| `dq-factory.py`               | `DQServicesFactory`                                                                         | Создание Data Quality компонентов                              |
+| `runner_factory.py`           | `RunnerFactory`                                                                             | Создание `PipelineRunner` с DI                                 |
+| `services_factory.py`         | `BaseServicesFactory / ServicesBuilder`                                                     | Создание `PipelineServices` bundle                             |
+| `transformer_factory.py`      | `transformer_factory.py — модуль с функциями register_transformer() и create_transformer()` | Создание трансформеров по провайдеру                           |
+| `dq_factory.py`               | `DQServicesFactory`                                                                         | Создание Data Quality компонентов                              |
 
 **Root-level файлы:**
 
-Также в корне `composition/` находятся: `bootstrap-contexts.py`, `bootstrap-logger.py`, `builders.py`, `entrypoints.py`, `observability.py`, `registry.py`, `types.py`.
+Также в корне `composition/` находятся: `bootstrap_contexts.py`, `bootstrap_logger.py`, `builders.py`, `entrypoints.py`, `observability.py`, `registry.py`, `types.py`.
 
 ### 2.3. Реестр провайдеров и DataSourceRegistry
 
-**Расположение:** `src/bioetl/composition/factories/data-source-factory.py:100` (DataSourceRegistry) и `src/bioetl/composition/providers/` (ProviderRegistry).
+**Расположение:** `src/bioetl/composition/factories/data_source_factory.py:100` (DataSourceRegistry) и `src/bioetl/composition/providers/` (ProviderRegistry).
 
 Централизованная регистрация всех провайдеров данных (8 провайдеров, включая `uniprot_idmapping`):
 
@@ -77,10 +77,10 @@ composition/bootstrap/
 ```python
 # Получение data source creator
 creator = DataSourceRegistry.get("chembl")
-data-source = creator(settings, config, logger)
+data_source = creator(settings, config, logger)
 
 # Или напрямую через ProviderRegistry
-data-source = ProviderRegistry.create-data-source("chembl", settings, config, logger)
+data_source = ProviderRegistry.create_data_source("chembl", settings, config, logger)
 ```
 
 **Зарегистрированные провайдеры (8 шт, включая uniprot_idmapping):**
@@ -104,18 +104,18 @@ data-source = ProviderRegistry.create-data-source("chembl", settings, config, lo
 
 - **Composition Root:** Вся логика создания объектов должна находиться как можно ближе к точке входа в приложение. В BioETL это `src/bioetl/composition/`.
 - **Dependency Injection (DI):** Объекты никогда не создают свои зависимости сами. Если пайплайну нужен доступ к базе данных, он запрашивает `StoragePort` в конструкторе, а фабрика из слоя Composition предоставляет ему конкретную реализацию.
-- **Декларативность:** Использование `GenericPipelineFactory` позволяет добавлять новые пайплайны простым объявлением в `pipeline-factories.py` без написания шаблонного кода сборки.
+- **Декларативность:** Использование `GenericPipelineFactory` позволяет добавлять новые пайплайны простым объявлением в `pipeline_factories.py` без написания шаблонного кода сборки.
 
 ### 3.1. Composite Pipeline Bootstrap (ADR-026)
 
-Для композитных пайплайнов доступна функция `bootstrap-composite-runner()`:
+Для композитных пайплайнов доступна функция `bootstrap_composite_runner()`:
 
 ```python
-from bioetl.composition.bootstrap.runtime.composite import bootstrap-composite-runner
+from bioetl.composition.bootstrap.runtime.composite import bootstrap_composite_runner
 from bioetl.domain.composite.config import CompositeConfig
 from bioetl.application.composite.runner import CompositeRuntimeConfig
 
-runner = bootstrap-composite-runner(
+runner = bootstrap_composite_runner(
     config=CompositeConfig(...),
     runtime=CompositeRuntimeConfig(...),
 )

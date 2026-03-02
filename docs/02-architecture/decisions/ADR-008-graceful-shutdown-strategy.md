@@ -1,5 +1,5 @@
 > **Superseded:** Signal handlers удалены 2025-12-31.
-> Graceful shutdown обрабатывается в CLI (run.py, run-all.py) и application/core/shutdown.py.
+> Graceful shutdown обрабатывается в CLI (run.py, run_all.py) и application/core/shutdown.py.
 > orchestration/ модуль пуст.
 
 # ADR-008: Graceful Shutdown Strategy

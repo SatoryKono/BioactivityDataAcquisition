@@ -1,6 +1,6 @@
 # ChEMBL Molecule Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.22*
+*Version 1.2.0 | Aligned with RULES.md v5.23*
 
 ----------------------------------------------------------------------
 
@@ -424,20 +424,20 @@ Mode: Overwrite
 ```yaml
 # configs/entities/chembl/molecule.yaml
 
-pipeline-name: chembl_molecule
+pipeline_name: chembl_molecule
 provider: chembl
-entity-type: molecule
+entity_type: molecule
 version: "1.2.0"
 description: "Extract molecules from ChEMBL API"
 
-primary-keys: ["molecule-id"]
-silver-table: "chembl_molecule"
-gold-table: "chembl_molecule"
+primary_keys: ["molecule-id"]
+silver_table: "chembl_molecule"
+gold_table: "chembl_molecule"
 
-source-file: ../../sources/chembl.yaml
+source_file: ../../sources/chembl.yaml
 
-gold-filters:
-  required-fields:
+gold_filters:
+  required_fields:
     - molecule-id
 
 sink:
@@ -445,21 +445,21 @@ sink:
     path: "data/output/bronze"
   silver:
     path: "data/output/silver"
-    primary-key: ["molecule-id"]
-    partition-by: ["molecule-type"]
-    csv-export:
+    primary_key: ["molecule-id"]
+    partition_by: ["molecule-type"]
+    csv_export:
       path: "data/output/csv/silver"
   gold:
     path: "data/output/gold"
-    csv-export:
+    csv_export:
       path: "data/output/csv/gold"
 
-input-filter:
+input_filter:
   enabled: true
-  source-path: "data/input/molecule.csv"
-  column-name: "molecule-id"
-  filter-field: "molecule-id"
-  batch-size: 20
+  source_path: "data/input/molecule.csv"
+  column_name: "molecule-id"
+  filter_field: "molecule-id"
+  batch_size: 20
 ```
 
 ----------------------------------------------------------------------

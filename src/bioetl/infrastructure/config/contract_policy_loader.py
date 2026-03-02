@@ -30,7 +30,15 @@ def _load_base_contract_defaults() -> dict[str, Any]:
 
 @lru_cache(maxsize=128)
 def load_pipeline_contract_policy(provider: str, entity: str) -> PipelineContractPolicy:
-    """Load typed policy from unified entity config or legacy contracts path."""
+    """Load typed policy from unified entity config or legacy contracts path.
+
+    Args:
+        provider: Data provider name.
+        entity: Entity.
+
+    Returns:
+        Loaded PipelineContractPolicy.
+    """
     base_defaults = _load_base_contract_defaults()
 
     unified_entity_path = _CONFIGS_ROOT / "entities" / provider / f"{entity}.yaml"

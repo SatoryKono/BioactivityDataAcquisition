@@ -46,7 +46,15 @@ class YamlSettingsSource(PydanticBaseSettingsSource):
     def get_field_value(
         self, field: FieldInfo, field_name: str
     ) -> tuple[Any, str, bool]:
-        """Get value of a field from YAML file."""
+        """Get value of a field from YAML file.
+
+        Args:
+            field: Field name.
+            field_name: Name of the field.
+
+        Returns:
+            Field value.
+        """
         encoding = self.config.get("env_file_encoding")
         try:
             with Path("config.yaml").open(encoding=encoding) as f:
@@ -67,7 +75,17 @@ class YamlSettingsSource(PydanticBaseSettingsSource):
         value: Any,  # Any: dynamic config value from env/yaml
         value_is_complex: bool,
     ) -> Any:  # Any: dynamic config value passed to pydantic
-        """Prepare value of a field."""
+        """Prepare value of a field.
+
+        Args:
+            field_name: Name of the field.
+            field: Field name.
+            value: Input value.
+            value_is_complex: Whether to value is complex.
+
+        Returns:
+            The Any result.
+        """
         return value
 
     def __call__(self) -> dict[str, Any]:
@@ -319,7 +337,11 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    """Get cached application settings."""
+    """Get cached application settings.
+
+    Returns:
+        Settings.
+    """
     return Settings()
 
 

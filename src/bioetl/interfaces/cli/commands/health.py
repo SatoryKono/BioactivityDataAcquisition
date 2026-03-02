@@ -51,6 +51,10 @@ def health_server_command(host: str, port: int) -> None:
 
     Example:
         bioetl health server --port 8081
+
+    Args:
+        host: Host.
+        port: Port.
     """
     click.echo(f"Starting health server on http://{host}:{port}")
     click.echo("Endpoints:")
@@ -121,13 +125,21 @@ def health_check(provider: tuple[str, ...], output_json: bool) -> None:
         bioetl health check
         bioetl health check --provider chembl --provider pubchem
         bioetl health check --json
+
+    Args:
+        provider: Data provider name.
+        output_json: Whether to output json.
     """
     import json as json_module
 
     click.echo("Running health checks...")
 
     async def run_checks() -> dict[str, dict[str, str]]:
-        """Execute health checks and return results as dictionary."""
+        """Execute health checks and return results as dictionary.
+
+        Returns:
+            Result dictionary.
+        """
         service = get_health_service()
 
         # Convert tuple to list or None for all providers

@@ -24,7 +24,15 @@ FRESHNESS_CRITICAL_HOURS = 72
 def check_record_count(
     df: pl.DataFrame, baseline_stats: dict[str, object] | None
 ) -> RecordCountResult:
-    """Check record count against baseline."""
+    """Check record count against baseline.
+
+    Args:
+        df: Input DataFrame.
+        baseline_stats: Baseline stats.
+
+    Returns:
+        Check result as RecordCountResult.
+    """
     current = len(df)
     baseline = (
         baseline_stats.get("record_count_ma30", current) if baseline_stats else current
@@ -51,7 +59,16 @@ def check_completeness(
     required_fields: list[str],
     threshold: float,
 ) -> CompletenessResult:
-    """Check completeness of required fields."""
+    """Check completeness of required fields.
+
+    Args:
+        df: Input DataFrame.
+        required_fields: Required fields.
+        threshold: Threshold value.
+
+    Returns:
+        Check result as CompletenessResult.
+    """
     if not required_fields:
         return CompletenessResult(
             required_fields={},
@@ -89,7 +106,15 @@ def check_completeness(
 def check_data_freshness(
     df: pl.DataFrame, current_time: datetime
 ) -> DataFreshnessResult:
-    """Check data freshness based on timestamp columns."""
+    """Check data freshness based on timestamp columns.
+
+    Args:
+        df: Input DataFrame.
+        current_time: Current time.
+
+    Returns:
+        Check result as DataFreshnessResult.
+    """
     timestamp_cols = ["_updated_at", "updated_at", "_ingestion_ts", "created_at"]
     max_ts = None
 

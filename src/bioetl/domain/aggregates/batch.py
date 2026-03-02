@@ -47,7 +47,11 @@ class BatchStatus(StrEnum):
     """Batch write failed."""
 
     def is_modifiable(self) -> bool:
-        """Check if records can still be added."""
+        """Check if records can still be added.
+
+        Returns:
+            True if the condition is met, False otherwise.
+        """
         return self == BatchStatus.OPEN
 
 

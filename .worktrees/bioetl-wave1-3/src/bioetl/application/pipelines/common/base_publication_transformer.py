@@ -1,0 +1,279 @@
+"""Base Publication Transformer with Template Method pattern.
+
+Provides common transformation flow for publication entities from
+different providers (OpenAlex, SemanticScholar, CrossRef).
+
+Reduces code duplication by extracting shared logic:
+- Business data extraction orchestration
+- Primary ID validation
+- Fallback lookup logging
+- Entity ID and content hash computation
+- Domain entity creation and Silver record conversion
+"""
+
+from __future__ import annotations
+
+from abc import abstractmethod
+from typing import TYPE_CHECKING, Any, cast
+
+from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.domain.mapping.publication_type_classification import (
+    classify_publication_type,
+)
+
+if TYPE_CHECKING:
+    from bioetl.domain.context import PipelineContext
+    from bioetl.domain.entities import BaseEntity
+    from bioetl.domain.types import BronzeRecord, SilverRecord
+
+
+class BasePublicationTransformer(BaseTransformer):
+    """Abstract base class for publication transformers.
+
+    Implements Template Method pattern for unified publication transformation:
+    1. Pre-extraction validation (optional hook)
+    2. Extract business data (_extract_business_data - abstract)
+    3. Validate primary ID exists
+    4. Log fallback lookup usage if applicable
+    5. Generate entity ID
+    6. Compute content hash (excluding metadata fields)
+    7. Create domain entity (_get_entity_class - abstract)
+    8. Convert to SilverRecord
+
+    Subclasses MUST implement:
+    - _extract_business_data(): Extract and normalize fields from record
+    - _get_primary_id_field(): Return primary ID field name (e.g., 'openalex_id')
+    - _get_entity_class(): Return the domain entity class
+
+    Subclasses MAY override:
+    - _pre_extract_validation(): Add validation before extraction
+    - _should_log_fallback_lookup(): Disable fallback logging (default: True)
+    - _normalize_content_fields(): Customize content field normalization
+
+    RF-NORM-04: Uniform content normalization (strip_html_tags on title/abstract).
+    """
+
+    @abstractmethod
+    def _extract_business_data(self, record: BronzeRecord) -> dict[str, Any]:
+        """Extract and normalize fields from bronze record.
+
+        Provider-specific extraction logic. Delegates to extractors module.
+
+        Args:
+            record: Raw Bronze record from provider API.
+
+        Returns:
+            Dictionary of extracted and normalized fields.
+
+        """
+        ...
+
+    @abstractmethod
+    def _get_primary_id_field(self) -> str:
+        """Return the name of the primary identifier field.
+
+        Examples:
+        - OpenAlex: 'openalex_id'
+        - SemanticScholar: 'paper_id'
+        - CrossRef: 'doi'
+
+        Returns:
+            Field name used as primary identifier in business_data.
+
+        """
+        ...
+
+    @abstractmethod
+    def _get_entity_class(self) -> type[BaseEntity]:
+        """Return the domain entity class for this publication type.
+
+        Returns:
+            Domain entity class (e.g., OpenAlexPublicationEntity).
+
+        """
+        ...
+
+    def _pre_extract_validation(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> None:
+        """Optional pre-extraction validation hook.
+
+        Override to add validation before business data extraction.
+        Raise ValueError to skip the record with validation error logging.
+
+        Default implementation does nothing.
+
+        Args:
+            context: Pipeline context with run_id, run_type, logger.
+            record: Raw Bronze record from provider API.
+            index: Sequential index of the record in the pipeline run.
+
+        Raises:
+            ValueError: If validation fails (caught by BaseTransformer.transform).
+
+        """
+
+    def _should_log_fallback_lookup(self) -> bool:
+        """Return True if fallback lookup logging is enabled.
+
+        Override to disable for providers without lookup metadata
+        (e.g., CrossRef which uses DOI-only lookup).
+
+        Returns:
+            True to log fallback usage, False to skip.
+
+        """
+        return True
+
+    _CONTENT_FIELDS: tuple[str, ...] = ("abstract",)
+    """Fields to apply ``strip_html_tags`` on after extraction (RF-NORM-04).
+
+    Only ``abstract`` by default — titles may contain angle brackets
+    (e.g. ``5' & 3' ends in DNA <structure>``) that are valid content,
+    not HTML markup.  Subclasses MAY extend to ``("title", "abstract")``.
+    """
+
+    def _normalize_content_fields(
+        self, business_data: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Apply uniform content normalization to text fields.
+
+        Strips residual HTML/XML tags from abstract (and other fields
+        listed in ``_CONTENT_FIELDS``).
+        The operation is idempotent — safe for providers that already
+        clean these fields in ``_extract_business_data``.
+
+        Subclasses MAY override to customize or extend normalization.
+
+        Args:
+            business_data: Extracted business data dictionary (mutated in-place).
+
+        Returns:
+            The same dictionary with content fields normalized.
+
+        """
+        for field in self._CONTENT_FIELDS:
+            raw = business_data.get(field)
+            if raw is not None:
+                business_data[field] = self._data_normalizer.strip_html_tags(raw)
+        return business_data
+
+    async def _transform_impl(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> SilverRecord | None:
+        """Unified publication transformation flow (Template Method).
+
+        Orchestrates the transformation process:
+        1. Pre-extraction validation (optional hook)
+        2. Extract business data
+        2a. Normalize content fields (strip HTML — RF-NORM-04)
+        3. Validate primary ID exists
+        4. Log fallback usage if applicable
+        5. Generate entity ID
+        6. Compute content hash
+        7. Create domain entity
+        8. Convert to SilverRecord
+
+        Args:
+            context: Pipeline context with run_id, run_type, logger.
+            record: Raw Bronze record from provider API.
+            index: Sequential index of the record in the pipeline run.
+
+        Returns:
+            SilverRecord if transformation successful, None if skipped.
+
+        """
+        # 1. Pre-extraction validation hook
+        self._pre_extract_validation(context, record, index)
+
+        # 2. Extract business data
+        business_data = self._extract_business_data(record)
+
+        # 2a. Uniform content normalization (RF-NORM-04)
+        self._normalize_content_fields(business_data)
+
+        # 3. Validate primary ID
+        primary_id_field = self._get_primary_id_field()
+        primary_id = business_data.get(primary_id_field)
+        if not primary_id:
+            context.logger.warning(
+                "record_skipped_no_id",
+                index=index,
+                lookup_method=business_data.get("_lookup_method"),
+            )
+            return None
+
+        # 4. Log fallback usage if applicable
+        if self._should_log_fallback_lookup():
+            lookup_method = business_data.get("_lookup_method", "unknown")
+            if lookup_method in ("title_fallback", "title_only"):
+                context.logger.info(
+                    "fallback_lookup_used",
+                    **{primary_id_field: primary_id},
+                    lookup_method=lookup_method,
+                    original_id=business_data.get("_original_id"),
+                )
+
+        # 5. Generate entity ID
+        entity_id = self.compute_entity_id(
+            source_id=primary_id,
+            record={primary_id_field: primary_id},
+        )
+
+        # 6. Compute content hash (exclude metadata fields)
+        hash_data = {k: v for k, v in business_data.items() if not k.startswith("_")}
+        content_hash = self.compute_content_hash(hash_data, exclude_none=True)
+
+        # 7. Create domain entity
+        entity = self._create_entity(
+            self._get_entity_class(),
+            context,
+            entity_id=entity_id,
+            content_hash=content_hash,
+            index=index,
+            **business_data,
+        )
+
+        # 8. Convert to SilverRecord
+        return cast("SilverRecord", self.entity_to_silver_record(entity))
+
+    def _classify_publication_type(
+        self,
+        provider: str,
+        raw_type: str | None = None,
+        raw_types_list: list[str] | None = None,
+    ) -> dict[str, str | None]:
+        """Classify publication type using the unified 3-level hierarchy.
+
+        Delegates to domain classification module.
+
+        Args:
+            provider: Provider name ("openalex", "crossref", "pubmed", "semanticscholar").
+            raw_type: Single raw type string (for OpenAlex / CrossRef).
+            raw_types_list: List of raw type strings (for PubMed / S2).
+
+        Returns:
+            Dict with keys publication_type_unified, publication_subclass,
+            publication_class (all str | None).
+
+        """
+        entry = classify_publication_type(
+            provider, raw_type=raw_type, raw_types_list=raw_types_list
+        )
+        if entry is None:
+            return {
+                "publication_type_unified": None,
+                "publication_subclass": None,
+                "publication_class": None,
+            }
+        return {
+            "publication_type_unified": entry.unified_type,
+            "publication_subclass": entry.subclass,
+            "publication_class": entry.class_code,
+        }

@@ -143,10 +143,10 @@ class HttpClientFactory:
 
 ```python
 class ChEMBLAdapter(BaseHttpAdapter):
-    async def fetch(self, entity-type: str, limit: int | None = None):
+    async def fetch(self, entity_type: str, limit: int | None = None):
         async with self.-http-client:
             response = await self.-http-client.get(
-                f"{self.base-url}/{entity-type}",
+                f"{self.base-url}/{entity_type}",
                 params={"limit": limit},
             )
             yield from response.json()["data"]

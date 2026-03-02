@@ -57,7 +57,7 @@
 | Документ | Описание | Покрытие |
 |----------|----------|----------|
 | **[Contract Tests README](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/tests/contract/silver-schemas/README.md)** | Описание контрактных тестов и snapshot-процесса | Contract tests |
-| **[Publication Schema Contracts](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/tests/contract/test-publication-schema-contracts.py)** | Тесты валидации схем публикаций | Contract tests |
+| **[Publication Schema Contracts](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/tests/contract/test_publication_schema_contracts.py)** | Тесты валидации схем публикаций | Contract tests |
 
 **Test Organization:**
 ```
@@ -221,7 +221,7 @@ cat /var/log/bioetl/pipeline.log | \
 
 1. **Изучить тесты:**
     - [Contract Tests README](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/tests/contract/silver-schemas/README.md)
-    - [Publication Schema Contracts](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/tests/contract/test-publication-schema-contracts.py)
+    - [Publication Schema Contracts](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/tests/contract/test_publication_schema_contracts.py)
 
 2. **Расширить покрытие:**
    - Base Validation: добавить edge cases для string fields (empty, whitespace, very long)
@@ -243,7 +243,7 @@ cat /var/log/bioetl/pipeline.log | \
 
 1. Определить поля в Pandera schema (`src/bioetl/domain/schemas/{provider}/publication.py`)
 2. Добавить правила в `publication-validation-schema-v3.xlsx`
-3. Сгенерировать тесты из XLSX (скрипт: `scratchpad/generate-tests.py`)
+3. Сгенерировать тесты из XLSX (автоматический генератор не зафиксирован в репозитории; выполнять вручную по шаблонам `tests/contract/`)
 4. Обновить [Field Reference](publication-fields-reference.md)
 5. Добавить провайдера в конфигурацию External Verification
 

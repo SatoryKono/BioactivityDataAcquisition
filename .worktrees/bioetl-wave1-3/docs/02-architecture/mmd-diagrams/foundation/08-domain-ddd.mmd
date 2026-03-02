@@ -1,0 +1,99 @@
+%% Title: Domain Layer — DDD Components
+%% Covers: RULES.md §1.1 (Domain Layer), §1.3 (DDD Aggregates), ADR-021
+%% Updated: 2026-02-17
+%% Components: PipelineRun, Batch, QuarantineEntry, DataSourcePort, StoragePort, LockPort
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   Mixed (System / Component / Class)
+%% @uniform width=256 height=144 max_title_len=25 max_desc_lines=6
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+
+flowchart TB
+%% keep-orphan: CheckpointPort, CriticalError, DataQualityError, DataSourcePort, HealthStatus, InvalidStateError, LockPort, Measurement, MetricsPort, QuarantinePort, RecoverableError, RunType, StoragePort, TracingPort
+    subgraph domain["Domain Layer (DDD)"]
+        subgraph ports["ports/"]
+            DataSourcePort
+            StoragePort
+            LockPort
+            CheckpointPort
+            QuarantinePort
+            MetricsPort
+            TracingPort
+        end
+
+        subgraph aggregates["aggregates/"]
+            Batch["Batch Aggregate<br/>───────────────<br/>• add_record()<br/>• quarantine_record()<br/>• seal()<br/>• mark_committed()"]
+
+            PipelineRun["PipelineRun Aggregate<br/>───────────────<br/>• start()<br/>• record_stage_success()<br/>• complete()<br/>• fail()"]
+
+            QuarantineEntry["QuarantineEntry Aggregate<br/>───────────────<br/>• mark_retrying()<br/>• mark_recovered()<br/>• mark_dead_letter()<br/>"]
+        end
+
+        subgraph events["Domain Events"]
+            BatchCreated
+            BatchSealed
+            BatchWritten
+            RunStarted
+            RunCompleted
+            RecordQuarantined
+        end
+
+        subgraph value_objects["value_objects/"]
+            RunID["RunID (UUID)<br/><br/><br/><br/><br/>"]
+            BatchID["BatchID (UUID)<br/><br/><br/><br/><br/>"]
+            EntityID["EntityID (str)<br/><br/><br/><br/><br/>"]
+            ContentHash["ContentHash (str)<br/><br/><br/><br/><br/>"]
+            Measurement["Measurement<br/>(value, unit, relation)<br/><br/><br/><br/>"]
+        end
+
+        subgraph types["types.py"]
+            RunType["RunType Enum<br/>(INCREMENTAL, BACKFILL, REBUILD)<br/><br/><br/><br/>"]
+            HealthStatus["HealthStatus Enum<br/>(HEALTHY, DEGRADED, UNHEALTHY)<br/><br/><br/><br/>"]
+        end
+
+        subgraph exceptions["exceptions/"]
+            CriticalError
+            RecoverableError
+            DataQualityError
+            InvalidStateError
+        end
+    end
+
+    %% Relationships
+    Batch --> BatchCreated
+    Batch --> BatchSealed
+    Batch --> BatchWritten
+    Batch --> RecordQuarantined
+    PipelineRun --> RunStarted
+    PipelineRun --> RunCompleted
+
+    Batch ==> RunID
+    Batch --> BatchID
+    PipelineRun --> RunID
+    QuarantineEntry --> EntityID
+    QuarantineEntry --> ContentHash
+
+    %% State machines
+    subgraph batch_states["Batch State Machine"]
+        B_SEALED --> B_WRITING["WRITING"]
+        B_WRITING --> B_COMMITTED["COMMITTED"]
+        B_WRITING --> B_FAILED["FAILED"]
+    end
+
+    subgraph run_states["PipelineRun State Machine"]
+        R_RUNNING --> R_COMPLETED["COMPLETED"]
+        R_RUNNING --> R_FAILED["FAILED"]
+        R_RUNNING --> R_SHUTDOWN["SHUTDOWN"]
+    end

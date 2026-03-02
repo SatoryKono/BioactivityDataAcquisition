@@ -129,6 +129,8 @@ class CrossRefAdapter(BaseHttpAdapter):
         Raises:
             ValueError: If entity_type is not 'work' or 'publication'.
 
+        Returns:
+            Async iterator yielding fetched records.
         """
         if entity_type not in ("work", "publication"):
             raise ValueError(
@@ -168,6 +170,14 @@ class CrossRefAdapter(BaseHttpAdapter):
 
         Raises:
             NotImplementedError: Always, as CrossRef doesn't support multi-field filtering.
+
+        Args:
+            entity_type: Entity type identifier.
+            filters: Filters.
+            limit: Maximum number of records to process.
+
+        Returns:
+            Async iterator yielding fetched records.
         """
         raise NotImplementedError(
             "CrossRef API does not support multi-field filtering. "
@@ -199,6 +209,9 @@ class CrossRefAdapter(BaseHttpAdapter):
 
         Yields:
             Publication records with `_lookup_method` field indicating resolution method.
+
+        Returns:
+            Async iterator yielding fetched records.
         """
         if entity_type not in ("work", "publication"):
             raise ValueError(
@@ -278,6 +291,8 @@ class CrossRefAdapter(BaseHttpAdapter):
             ValueError: If entity_type is invalid.
             CrossRefApiError: On API errors.
 
+        Returns:
+            Async iterator yielding fetched records.
         """
         if filter_ids:
             effective_filter_field = filter_field or "doi"

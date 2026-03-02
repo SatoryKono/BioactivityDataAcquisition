@@ -14,7 +14,14 @@ from bioetl.domain.serialization import deserialize_from_json
 
 
 def normalize_string(value: str | None) -> str | None:
-    """Normalize string by stripping whitespace, return None for empty."""
+    """Normalize string by stripping whitespace, return None for empty.
+
+    Args:
+        value: Input value.
+
+    Returns:
+        Normalized value.
+    """
     if value is None:
         return None
     stripped = value.strip()
@@ -22,7 +29,14 @@ def normalize_string(value: str | None) -> str | None:
 
 
 def normalize_to_string(value: Any) -> str | None:  # Any: raw API value for norm...
-    """Convert value to string, strip whitespace, return None if empty."""
+    """Convert value to string, strip whitespace, return None if empty.
+
+    Args:
+        value: Input value.
+
+    Returns:
+        Normalized value.
+    """
     if value is None:
         return None
     str_value = str(value).strip()
@@ -30,7 +44,14 @@ def normalize_to_string(value: Any) -> str | None:  # Any: raw API value for nor
 
 
 def normalize_doi(doi: str | None) -> str | None:
-    """Normalize DOI to lowercase, stripped format."""
+    """Normalize DOI to lowercase, stripped format.
+
+    Args:
+        doi: Digital Object Identifier.
+
+    Returns:
+        Normalized value.
+    """
     return doi.strip().lower() if doi else None
 
 
@@ -57,6 +78,12 @@ def format_date_parts(date_parts: list[list[int]] | None) -> str | None:
     """Format CrossRef date-parts [[year, month?, day?]] to ISO YYYY-MM-DD.
 
     Uses end-of-period normalization: month-only -> last day, year-only -> Dec 31.
+
+    Args:
+        date_parts: Date parts.
+
+    Returns:
+        The str | None result.
     """
     parts = _extract_date_parts(date_parts)
     if not parts:
@@ -77,7 +104,15 @@ def _format_parts_to_date(parts: list[int]) -> str:
 
 
 def parse_date_field(value: str | None, fmt: str = "%Y-%m-%d") -> date | None:
-    """Parse date string to date object, return None on error."""
+    """Parse date string to date object, return None on error.
+
+    Args:
+        value: Input value.
+        fmt: Fmt.
+
+    Returns:
+        Parsed result.
+    """
     if value is None:
         return None
     from datetime import datetime
@@ -93,20 +128,32 @@ _WHITESPACE_PATTERN = re.compile(r"\s+")
 
 
 def strip_html_tags(text: str | None) -> str | None:
-    """Remove HTML/JATS tags, decode entities, normalize whitespace."""
+    """Remove HTML/JATS tags, decode entities, normalize whitespace.
+
+    Args:
+        text: Input text string.
+
+    Returns:
+        The str | None result.
+    """
     if not text:
         return None
 
-    # Remove HTML tags
-    clean = _HTML_TAG_PATTERN.sub("", text)
+    clean = text
 
-    # Decode HTML entities (&amp; → &, &lt; → <, etc.)
-    clean = unescape(clean)
+    # Remove HTML tags (only run regex if < is present)
+    if "<" in clean:
+        clean = _HTML_TAG_PATTERN.sub("", clean)
 
-    # Normalize whitespace (collapse multiple spaces/newlines to single space)
-    clean = _WHITESPACE_PATTERN.sub(" ", clean).strip()
+    # Decode HTML entities (only unescape if & is present)
+    if "&" in clean:
+        clean = unescape(clean)
 
-    return clean if clean else None
+    # Normalize whitespace (split/join is ~3-4x faster than regex).
+    # Also handles empty/whitespace-only strings: "".split() -> [], " ".join([]) -> "".
+    clean = " ".join(clean.split())
+
+    return clean or None
 
 
 # Electronic page identifiers (e-123, E-456, e123) -- not page ranges.
@@ -184,6 +231,12 @@ def parse_page_range(page: str | None) -> tuple[str | None, str | None]:
 
     Handles standard ranges, abbreviated ranges (737-9 -> 739), electronic
     pages (e-123), supplements (S1-S15), and en/em-dash normalization.
+
+    Args:
+        page: Page.
+
+    Returns:
+        Parsed result.
     """
     stripped = _prepare_page_input(page)
     if stripped is None:
@@ -202,7 +255,14 @@ def parse_page_range(page: str | None) -> tuple[str | None, str | None]:
 
 
 def normalize_pmc_id(pmc_id: str | None) -> str | None:
-    """Normalize PMC ID to uppercase with 'PMC' prefix."""
+    """Normalize PMC ID to uppercase with 'PMC' prefix.
+
+    Args:
+        pmc_id: Identifier for pmc.
+
+    Returns:
+        Normalized value.
+    """
     if not pmc_id:
         return None
     pmc_id = pmc_id.strip()
@@ -214,7 +274,14 @@ def normalize_pmc_id(pmc_id: str | None) -> str | None:
 
 
 def extract_first_item(items: list[Any] | None) -> Any | None:  # Any: record vals vary
-    """Extract first non-None item from list."""
+    """Extract first non-None item from list.
+
+    Args:
+        items: Items.
+
+    Returns:
+        Extracted value.
+    """
     if not items or not isinstance(items, list):
         return None
     return next((item for item in items if item is not None), None)
@@ -226,7 +293,14 @@ def _is_valid_string(item: Any) -> str | None:  # Any: raw API value for normali
 
 
 def extract_first_string(items: list[str] | None) -> str | None:
-    """Extract first non-empty stripped string from list."""
+    """Extract first non-empty stripped string from list.
+
+    Args:
+        items: Items.
+
+    Returns:
+        Extracted value.
+    """
     if not items or not isinstance(items, list):
         return None
     return next((s for item in items if (s := _is_valid_string(item))), None)
@@ -275,7 +349,14 @@ def _parse_authors_string(text: str) -> list[str]:
 
 
 def parse_authors_to_list(authors: list[str] | str | None) -> list[str]:
-    """Parse author input (list, JSON string, or delimited string) to list."""
+    """Parse author input (list, JSON string, or delimited string) to list.
+
+    Args:
+        authors: Authors.
+
+    Returns:
+        Parsed result.
+    """
     if authors is None:
         return []
     if isinstance(authors, list):

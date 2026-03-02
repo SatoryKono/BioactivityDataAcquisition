@@ -1,6 +1,6 @@
 # BioETL Project Navigator
 
-*Synced with RULES.md v5.22 | Last updated: 2026-03-01*
+*Synced with RULES.md v5.23 | Last updated: 2026-03-01*
 
 > **Documentation Update:** 2026-03-01
 > - Source Code Map rewritten to match actual codebase structure (v8.0)
@@ -45,7 +45,7 @@ docs/
 ├── 00-project/                  # Project rules & governance
 │   ├── 00-map.md                # This file (Project Navigator)
 │   ├── index.md                 # Welcome page
-│   ├── RULES.md                 # Canonical rules document (v5.22)
+│   ├── RULES.md                 # Canonical rules document (v5.23)
 │   ├── glossary.md              # Ubiquitous Language terminology
 │   ├── TOOLS.md                 # Tools & Setup
 │   ├── rules-summary.md         # TL;DR of RULES.md
@@ -480,12 +480,12 @@ graph TD
 
 | Document                 | Last Updated | Status                       |
 |--------------------------|--------------|------------------------------|
-| RULES.md                 | 2026-02-24   | v5.22 (Latest)               |
-| REQUIREMENTS.md          | 2026-02-27   | v1.6 (RULES v5.22 sync)      |
+| RULES.md                 | 2026-02-24   | v5.23 (Latest)               |
+| REQUIREMENTS.md          | 2026-03-02   | v1.7 (RULES v5.23 sync)      |
 | glossary.md              | 2026-02-25   | v2.6 (Ubiquitous Language)   |
 | 00-map.md                | 2026-03-01   | v8.0 Source Code Map rewritten |
-| rules-summary.md         | 2026-02-24   | v5.22 Synced                 |
-| TOOLS.md                 | 2026-02-24   | v2.2 Synced with RULES v5.22 |
+| rules-summary.md         | 2026-02-24   | v5.23 Synced                 |
+| TOOLS.md                 | 2026-02-24   | v2.2 Synced with RULES v5.23 |
 | 03-guides/               | 2026-01-20   | Consolidated (16 guides)     |
 | 03-guides/development/   | 2026-01-26   | Config schema guidelines     |
 | ADR-001..040             | 2026-02-25   | All 40 ADRs documented       |

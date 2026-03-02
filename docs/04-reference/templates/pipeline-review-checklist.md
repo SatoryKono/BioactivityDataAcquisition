@@ -1,6 +1,6 @@
 # Pipeline Review Checklist
 
-*Synced with RULES.md v5.22 (2026-02-24)*
+*Synced with RULES.md v5.23 (2026-02-24)*
 
 Use this checklist when reviewing new or modified pipelines.
 
@@ -168,7 +168,7 @@ Use this checklist when reviewing new or modified pipelines.
 
 ## 17. Pre-flight Repository Hygiene
 
-- [ ] `uv run python scripts/validate-data-dir.py` проходит без ошибок
+- [ ] `uv run python scripts/validate_data_dir.py` проходит без ошибок
 - [ ] Тяжёлые/временные локальные артефакты вынесены в `data/local/` или `tmp/`
 - [ ] В релиз не попадают локальные артефакты (`data/local/**`, `tmp/**`)
 

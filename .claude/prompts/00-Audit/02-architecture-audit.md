@@ -1,7 +1,7 @@
 # Архитектурный аудит BioETL
 
 ## Контекст
-Прочитай RULES.md v5.22 и сопутствующие документы проекта (01-domain-objects.md, 02-etl-layers.md, 03-data-flow.md, 04-duplication-reduction.md, 05-physical-layout.md). Проведи систематический аудит кодовой базы.
+Прочитай RULES.md v5.23 и сопутствующие документы проекта (01-domain-objects.md, 02-etl-layers.md, 03-data-flow.md, 04-duplication-reduction.md, 05-physical-layout.md). Проведи систематический аудит кодовой базы.
 
 **Обязательный фокус аудита:**
 - Сохранить текущий фокус на устранении дублирования и соблюдении SRP.

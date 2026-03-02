@@ -719,14 +719,28 @@ class CompositeDQConfig:
             )
 
     def get_enricher_soft_threshold(self, enricher_name: str) -> float:
-        """Get effective soft threshold for an enricher."""
+        """Get effective soft threshold for an enricher.
+
+        Args:
+            enricher_name: Enricher pipeline name.
+
+        Returns:
+            Enricher soft threshold.
+        """
         override = self.enricher_overrides.get(enricher_name)
         if override and override.soft_fail_threshold is not None:
             return override.soft_fail_threshold
         return self.soft_fail_threshold
 
     def get_enricher_hard_threshold(self, enricher_name: str) -> float:
-        """Get effective hard threshold for an enricher."""
+        """Get effective hard threshold for an enricher.
+
+        Args:
+            enricher_name: Enricher pipeline name.
+
+        Returns:
+            Enricher hard threshold.
+        """
         override = self.enricher_overrides.get(enricher_name)
         if override and override.hard_fail_threshold is not None:
             return override.hard_fail_threshold
@@ -854,7 +868,14 @@ class CrossValidationConfig:
             )
 
     def get_pairing(self, enricher_pipeline: str) -> EnricherFieldPairing | None:
-        """Get field pairing for a specific enricher."""
+        """Get field pairing for a specific enricher.
+
+        Args:
+            enricher_pipeline: Enricher pipeline.
+
+        Returns:
+            Pairing.
+        """
         for pairing in self.enricher_pairings:
             if pairing.enricher_pipeline == enricher_pipeline:
                 return pairing
@@ -1019,14 +1040,28 @@ class CompositeConfig:
         return tuple(d.pipeline for d in self.dependencies)
 
     def get_dependency(self, pipeline_name: str) -> DependencyConfig | None:
-        """Get dependency config by pipeline name."""
+        """Get dependency config by pipeline name.
+
+        Args:
+            pipeline_name: Pipeline identifier.
+
+        Returns:
+            Dependency.
+        """
         for dep in self.dependencies:
             if dep.pipeline == pipeline_name:
                 return dep
         return None
 
     def get_enricher(self, pipeline_name: str) -> EnricherConfig | None:
-        """Get enricher config by pipeline name."""
+        """Get enricher config by pipeline name.
+
+        Args:
+            pipeline_name: Pipeline identifier.
+
+        Returns:
+            Enricher.
+        """
         for enricher in self.enrichers:
             if enricher.pipeline == pipeline_name:
                 return enricher
@@ -1038,7 +1073,11 @@ class CompositeConfig:
         return f"composite:{self.name}"
 
     def to_dict(self) -> dict[str, object]:
-        """Convert to dictionary for serialization."""
+        """Convert to dictionary for serialization.
+
+        Returns:
+            Dictionary representation.
+        """
         return {
             "name": self.name,
             "version": self.version,

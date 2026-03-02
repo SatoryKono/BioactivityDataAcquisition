@@ -1,6 +1,6 @@
 # ChEMBL Subcellular Fraction Pipeline Specification
 
-*Version 1.0.0 | Aligned with RULES.md v5.22*
+*Version 1.0.0 | Aligned with RULES.md v5.23*
 
 ----------------------------------------------------------------------
 
@@ -80,12 +80,12 @@ class ChEMBLSubcellularFractionGoldSchema(pa.DataFrameModel):
 ## 5. Pipeline Configuration
 
 ```yaml
-pipeline-name: chembl_subcellular_fraction
+pipeline_name: chembl_subcellular_fraction
 provider: chembl
-entity-type: subcellular-fraction
+entity_type: subcellular-fraction
 version: "1.0.0"
 
-primary-keys: ["subcellular-fraction"]
-silver-table: "chembl_subcellular_fraction"
-gold-table: "chembl_subcellular_fraction"
+primary_keys: ["subcellular-fraction"]
+silver_table: "chembl_subcellular_fraction"
+gold_table: "chembl_subcellular_fraction"
 ```

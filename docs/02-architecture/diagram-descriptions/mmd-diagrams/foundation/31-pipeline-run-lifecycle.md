@@ -1,9 +1,9 @@
-# Pipeline Run Lifecycle — From Config to Completion
+# Title: Pipeline Run Lifecycle — From Config to Completion
 
 - Исходная диаграмма: `mmd-diagrams/foundation/31-pipeline-run-lifecycle.mmd`
 
 ## Описание
-Диаграмма описывает: RULES.md §3 (Execution), domain/aggregates/pipeline_run.py. Приоритет/контекст: 6 (Score 8.56) — Complete state machine of pipeline execution.
+Диаграмма Title: Pipeline Run Lifecycle — From Config to Completion из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате stateDiagram и служит базовым ориентиром для инженерного анализа, ревью изменений и обсуждения технических решений. Уровень детализации обозначен как Mixed (System / Component / Class), поэтому схема подходит одновременно для быстрой навигации по контексту и для проверки корректности зависимостей, контрактов и потоков обработки данных в рамках сценария 31-pipeline-run-lifecycle. В комментариях исходника зафиксирован фокус диаграммы: Covers: RULES.md §3 (Execution), domain/aggregates/pipeline_run.py. Это снижает неоднозначность интерпретации и помогает поддерживать консистентность между визуальной документацией, ADR-решениями и реальным кодом. Дополнительно в метаданных указан показатель плотности (@nodes=n/a), что полезно при контроле читаемости и планировании декомпозиции диаграмм на более узкие представления.
 
 ## Метаданные
 - Тип: `stateDiagram`

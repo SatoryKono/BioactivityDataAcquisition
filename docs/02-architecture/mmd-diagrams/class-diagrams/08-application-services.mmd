@@ -60,8 +60,8 @@ classDiagram
             -_start_time: float
             -_root_span: Span | None
             -_phase: LifecyclePhase | None
-            +__enter__() Self
-            +__exit__(...) None
+            +\_\_enter\_\_() Self
+            +\_\_exit\_\_(...) None
             +emit_event(event) None
             +on_preflight() None
             +on_execution() None

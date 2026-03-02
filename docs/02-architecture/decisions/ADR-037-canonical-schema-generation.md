@@ -18,17 +18,17 @@
 
 Каноническим источником schema-структуры для provider/entity pair объявляются:
 
-- `configs/schemas/{provider}/{entity}.yaml` — структура column groups и
+- `configs/entities/{provider}/{entity}.yaml` — структура column groups и
   композиция полей,
 - typed annotations в Silver Pandera schema classes — типовая семантика полей.
 
-На этой основе вводится единый генератор `scripts/generate-schema-artifacts.py`,
+На этой основе вводится единый генератор `scripts/generate_schema_artifacts.py`,
 который:
 
 1. генерирует Pandera-canonical registry
    (`src/bioetl/domain/schemas/generated/registry.py`),
 1. генерирует Gold JSON contracts через существующий exporter
-   (`src/tools/scripts/generate-contracts.py`),
+   (`src/tools/scripts/generate_contracts.py`),
 1. поддерживает режим `--check` для CI gate по stale generated artifacts.
 
 ## Consequences

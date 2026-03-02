@@ -59,7 +59,12 @@ class AnomalyDetector:
         self._thresholds: dict[str, tuple[float, float]] = {}
 
     def update_baseline(self, metric_name: str, values: Sequence[float]) -> None:
-        """Update baseline with historical data."""
+        """Update baseline with historical data.
+
+        Args:
+            metric_name: Name of the metric.
+            values: Collection of values.
+        """
         if not values:
             return
         if metric_name not in self._baselines:
@@ -72,7 +77,12 @@ class AnomalyDetector:
             self._baselines[metric_name] = baseline[-self.baseline_window :]
 
     def add_baseline_value(self, metric_name: str, value: float) -> None:
-        """Add single value to baseline."""
+        """Add single value to baseline.
+
+        Args:
+            metric_name: Name of the metric.
+            value: Input value.
+        """
         self.update_baseline(metric_name, [value])
 
     def set_threshold(
@@ -81,7 +91,13 @@ class AnomalyDetector:
         min_value: float | None = None,
         max_value: float | None = None,
     ) -> None:
-        """Set absolute thresholds for a metric."""
+        """Set absolute thresholds for a metric.
+
+        Args:
+            metric_name: Name of the metric.
+            min_value: Minimum value.
+            max_value: Maximum value.
+        """
         min_val = min_value if min_value is not None else float("-inf")
         max_val = max_value if max_value is not None else float("inf")
 
@@ -172,11 +188,22 @@ class AnomalyDetector:
         )
 
     def clear_baseline(self, metric_name: str) -> None:
-        """Clear baseline for a metric."""
+        """Clear baseline for a metric.
+
+        Args:
+            metric_name: Name of the metric.
+        """
         self._baselines.pop(metric_name, None)
 
     def get_baseline_stats(self, metric_name: str) -> tuple[float, float, int] | None:
-        """Get baseline statistics (mean, stddev, count) for a metric."""
+        """Get baseline statistics (mean, stddev, count) for a metric.
+
+        Args:
+            metric_name: Name of the metric.
+
+        Returns:
+            Baseline stats.
+        """
         baseline = self._baselines.get(metric_name)
         if not baseline:
             return None

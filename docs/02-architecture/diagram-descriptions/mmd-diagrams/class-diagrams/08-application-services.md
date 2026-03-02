@@ -1,9 +1,9 @@
-# Class Diagram: Application Services
+# Class Diagram: 08 Application Services
 
 - Исходная диаграмма: `mmd-diagrams/class-diagrams/08-application-services.mmd`
 
 ## Описание
-High-level application services..
+Диаграмма Application Services показывает архитектурную модель модуля `08-application-services` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: High-level application services. На схеме отражено примерно 19 классов и 4 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: DataQualityService, DQReportService, MedallionLifecycleService, VacuumService, PipelineObserver, LifecyclePhase.
 
 ## Метаданные
 - Тип: `classDiagram`

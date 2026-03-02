@@ -76,7 +76,19 @@ def is_duplicate_record(
     logger: LoggerPort,
     metrics: AdapterMetrics,
 ) -> bool:
-    """Check if record is duplicate and add to seen set if not."""
+    """Check if record is duplicate and add to seen set if not.
+
+    Args:
+        record: Single data record.
+        pk_field: Pk field.
+        seen_ids: Collection of seen identifiers.
+        entity_type: Entity type identifier.
+        logger: Logger instance.
+        metrics: Metrics collector instance.
+
+    Returns:
+        True if the condition is met, False otherwise.
+    """
     record_id = str(record.get(pk_field, ""))
     if not record_id:
         return False

@@ -103,11 +103,22 @@ class CompositePipelineState(StrEnum):
         return frozenset(CompositePipelineState(v) for v in allowed_values)
 
     def can_transition_to(self, target: CompositePipelineState) -> bool:
-        """Check if transition to target state is valid."""
+        """Check if transition to target state is valid.
+
+        Args:
+            target: Target destination.
+
+        Returns:
+            True if the condition is met, False otherwise.
+        """
         return target in self.allowed_transitions
 
     def validate_transition(self, target: CompositePipelineState) -> None:
-        """Validate transition to target state, raising InvalidStateError if invalid."""
+        """Validate transition to target state, raising InvalidStateError if invalid.
+
+        Args:
+            target: Target destination.
+        """
         if not self.can_transition_to(target):
             from bioetl.domain.exceptions import InvalidStateError
 
@@ -119,7 +130,14 @@ class CompositePipelineState(StrEnum):
 
     @classmethod
     def from_string(cls, value: str) -> CompositePipelineState:
-        """Create CompositePipelineState from string value (case-insensitive)."""
+        """Create CompositePipelineState from string value (case-insensitive).
+
+        Args:
+            value: Input value.
+
+        Returns:
+            The CompositePipelineState result.
+        """
         try:
             return cls(value.lower())
         except ValueError:
@@ -129,7 +147,11 @@ class CompositePipelineState(StrEnum):
             ) from None
 
     def to_metric_value(self) -> int:
-        """Convert state to numeric value (0-7) for Prometheus metrics."""
+        """Convert state to numeric value (0-7) for Prometheus metrics.
+
+        Returns:
+            Computed integer value.
+        """
         return _STATE_METRIC_VALUES[self]
 
 
@@ -168,7 +190,15 @@ def can_transition(
     current: CompositePipelineState,
     target: CompositePipelineState,
 ) -> bool:
-    """Check if a state transition is valid (module-level function)."""
+    """Check if a state transition is valid (module-level function).
+
+    Args:
+        current: Current.
+        target: Target destination.
+
+    Returns:
+        True if the condition is met, False otherwise.
+    """
     return current.can_transition_to(target)
 
 
@@ -176,7 +206,12 @@ def validate_transition(
     current: CompositePipelineState,
     target: CompositePipelineState,
 ) -> None:
-    """Validate a state transition, raising InvalidStateError if invalid."""
+    """Validate a state transition, raising InvalidStateError if invalid.
+
+    Args:
+        current: Current.
+        target: Target destination.
+    """
     current.validate_transition(target)
 
 

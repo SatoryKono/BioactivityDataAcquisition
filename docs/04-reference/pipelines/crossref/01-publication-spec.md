@@ -1,6 +1,6 @@
 # CrossRef Publication Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.22*
+*Version 1.2.0 | Aligned with RULES.md v5.23*
 
 ---
 
@@ -199,41 +199,41 @@ class PublicationEnrichedSchema(ETLRecordSchema):
 ## 7. Pipeline Configuration
 
 ```yaml
-pipeline-name: crossref_publication
+pipeline_name: crossref_publication
 provider: crossref
-entity-type: publication
+entity_type: publication
 version: "1.2.0"
 
-primary-keys: ["doi"]
-silver-table: "crossref_publication"
-gold-table: "crossref_publication"
+primary_keys: ["doi"]
+silver_table: "crossref_publication"
+gold_table: "crossref_publication"
 
 source:
   type: api
-  batch-size: 50
+  batch_size: 50
 
 sink:
   bronze:
     path: "data/output/bronze"
   silver:
     path: "data/output/silver"
-    primary-key: ["doi"]
-    partition-by: []
+    primary_key: ["doi"]
+    partition_by: []
   gold:
     path: "data/output/gold"
 
-gold-filters:
-  required-fields:
+gold_filters:
+  required_fields:
     - title
   columns:
     doc-type: [PUBLICATION]
 
-input-filter:
+input_filter:
   enabled: true
-  source-path: "data/input/doi.csv"
-  column-name: "doi"
-  filter-field: "doi"
-  batch-size: 50
+  source_path: "data/input/doi.csv"
+  column_name: "doi"
+  filter_field: "doi"
+  batch_size: 50
 ```
 
 ---

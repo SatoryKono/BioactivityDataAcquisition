@@ -1,0 +1,51 @@
+%% View: Data-Flow | Parent: 04-domain-layer-class-diagram-full.mermaid
+%% @uniform width=232 height=56 max_title_len=24 max_desc_lines=0
+flowchart TB
+%% keep-orphan: N6
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        N1["PipelineConfig"]
+        N2["DataSourcePort"]
+        N3["FilterableDataSourcePort"]
+        N6["QuarantinePort"]
+        N7["TableConfig"]
+        N8["DQConfig"]
+        N9["BaseEntity"]
+        N10["PublicationEntityBase"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N4["SilverWriteMode"]
+        N5["GoldWriteMode"]
+        N11["Activity"]
+        N12["Molecule"]
+    end
+
+    N9 ==> N11
+    N9 --> N12
+    N9 --> N10
+    N3 -.-> N2
+    N1 --> N7
+    N1 --> N8
+    N7 --> N4
+    N7 --> N5
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle 0 stroke:#1E293B,stroke-width:4px
+    linkStyle 1 stroke:#1E293B,stroke-width:4px
+    linkStyle 2 stroke:#1E293B,stroke-width:4px
+    linkStyle 3 stroke:#1E293B,stroke-width:4px
+    linkStyle 4 stroke:#1E293B,stroke-width:4px
+    linkStyle 5 stroke:#1E293B,stroke-width:4px
+    linkStyle 6 stroke:#1E293B,stroke-width:4px
+    linkStyle 7 stroke:#1E293B,stroke-width:4px

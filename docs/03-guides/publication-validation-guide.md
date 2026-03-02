@@ -149,7 +149,7 @@ class PublicationSilverSchema(DataFrameModel):
 
 **Проверки:**
 - ✅ Page ordering: `page-first <= page-last`
-- ✅ Year consistency: `YEAR(publication-date) == publication-year`
+- ✅ Year consistency: `YEAR(publication_date) == publication_year`
 - ✅ Field dependencies: `IF doi THEN title IS NOT NULL`
 - ✅ Content hash integrity: `SHA256(title + abstract + ...) == content-hash`
 
@@ -160,7 +160,7 @@ class PublicationSilverSchema(DataFrameModel):
 **Пример:**
 ```python
 class StructuralValidator:
-    def validate-page-ordering(self, df: pd.DataFrame) -> pd.DataFrame:
+    def validate_page_ordering(self, df: pd.DataFrame) -> pd.DataFrame:
         """Check page-first <= page-last when both numeric."""
         mask = (
             df["page-first"].notna() &
@@ -173,7 +173,7 @@ class StructuralValidator:
 
         if not invalid.empty:
             df.loc[invalid.index, "-dq-warn"] = True
-            self.-logger.warning(
+            self._logger.warning(
                 "page-ordering-violation",
                 count=len(invalid),
                 record-ids=invalid.index.tolist()
@@ -197,7 +197,7 @@ class StructuralValidator:
 | `doi` | CrossRef | `https://api.crossref.org/works/{doi}` | GET |
 | `pmid` | PubMed | `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={pmid}` | GET |
 | `pmc-id` | PMC | `https://www.ncbi.nlm.nih.gov/pmc/articles/{pmc-id}` | GET |
-| `openalex-id` | OpenAlex | `https://api.openalex.org/works/{id}` | GET |
+| `openalex_id` | OpenAlex | `https://api.openalex.org/works/{id}` | GET |
 | `paper-id` | Semantic Scholar | `https://api.semanticscholar.org/graph/v1/paper/{id}` | GET |
 | `document-chembl-id` | ChEMBL | `https://www.ebi.ac.uk/chembl/api/data/document/{id}` | GET |
 
@@ -210,17 +210,17 @@ class StructuralValidator:
 ```yaml
 external-verification:
   enabled: true
-  batch-size: 100
+  batch_size: 100
   timeout: 10.0
-  max-retries: 3
+  max_retries: 3
   retry-delay: 1.0
   providers:
     crossref:
       enabled: true
-      rate-limit: 50  # requests per second
+      rate_limit: 50  # requests per second
     pubmed:
       enabled: true
-      rate-limit: 3
+      rate_limit: 3
 ```
 
 ---
@@ -232,10 +232,10 @@ external-verification:
 **Когда:** После External Verification
 
 **Проверки:**
-- ✅ Range constraints: `publication-year ∈ [1800, CURRENT-YEAR + 1]`
+- ✅ Range constraints: `publication_year ∈ [1800, CURRENT_YEAR + 1]`
 - ✅ Non-negative rules: `citations-received >= 0`, `citations-made >= 0`
 - ✅ Date ordering: `date-completed <= date-revised`
-- ✅ Citation logic: `citations-received >= influential-citation-count`
+- ✅ Citation logic: `citations-received >= influential-citation_count`
 
 **Результат:**
 - `PASS` → следующий уровень
@@ -244,22 +244,22 @@ external-verification:
 **Пример:**
 ```python
 class LogicalValidator:
-    def validate-publication-year-range(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Year must be in [1800, CURRENT-YEAR + 1]."""
+    def validate-publication_year-range(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Year must be in [1800, CURRENT_YEAR + 1]."""
         current-year = date.today().year
 
         invalid = df[
-            df["publication-year"].notna() &
-            ((df["publication-year"] < 1800) | (df["publication-year"] > current-year + 1))
+            df["publication_year"].notna() &
+            ((df["publication_year"] < 1800) | (df["publication_year"] > current-year + 1))
         ]
 
         if not invalid.empty:
             df.loc[invalid.index, "-dq-warn"] = True
-            self.-logger.warning(
-                "publication-year-out-of-range",
+            self._logger.warning(
+                "publication_year-out-of-range",
                 count=len(invalid),
-                min-year=invalid["publication-year"].min(),
-                max-year=invalid["publication-year"].max()
+                min-year=invalid["publication_year"].min(),
+                max-year=invalid["publication_year"].max()
             )
 
         return df
@@ -415,7 +415,7 @@ validation:
   external:
     enabled: false  # Expensive, opt-in
     timeout: 10.0
-    max-retries: 3
+    max_retries: 3
 
   logical:
     enabled: true
@@ -437,7 +437,7 @@ validation:
     providers:
       pubmed:
         enabled: true
-        rate-limit: 3
+        rate_limit: 3
 
   semantic:
     enabled: true  # Override: enable semantic for PubMed
@@ -592,7 +592,7 @@ config = ValidationConfig.load("config/pubmed-validation.yaml")
 validators = [
     BaseValidator(schema=PubMedPublicationSchema),
     StructuralValidator(config=config.structural),
-    ExternalVerifier(config=config.external, http-client=client),
+    ExternalVerifier(config=config.external, http_client=client),
     LogicalValidator(config=config.logical),
     SemanticValidator(config=config.semantic, nlp-models=models),
 ]
@@ -606,10 +606,10 @@ for validator in validators:
     # Log metrics
     logger.info(
         "validation-step-complete",
-        validator=validator.--class--.--name--,
-        records-passed=len(df[df["-dq-warn"] == False]),
-        records-warned=len(df[df["-dq-warn"] == True]),
-        records-failed=len(df[df["-dq-error"] == True]),
+        validator=validator.--class--.__name__,
+        records_passed=len(df[df["-dq-warn"] == False]),
+        records_warned=len(df[df["-dq-warn"] == True]),
+        records_failed=len(df[df["-dq-error"] == True]),
     )
 
 # Write to Delta Lake
@@ -665,7 +665,7 @@ semantic:
 ```python
 # 1. Проверить реальные значения
 df = pd.read-parquet("bronze/crossref/publication.parquet")
-print(df["doi"].value-counts())
+print(df["doi"].value_counts())
 
 # 2. Ослабить regex (temporary)
 class PublicationSilverSchema(DataFrameModel):
@@ -675,9 +675,9 @@ class PublicationSilverSchema(DataFrameModel):
     )
 
 # 3. Проверить трансформер
-# src/bioetl/application/transformers/crossref-transformer.py
-def transform-doi(raw-doi: str) -> str:
-    return raw-doi.strip().lower()  # Ensure normalization
+# src/bioetl/application/pipelines/crossref/transformer.py
+def transform_doi(raw_doi: str) -> str:
+    return raw_doi.strip().lower()  # Ensure normalization
 ```
 
 ---
@@ -698,12 +698,12 @@ def transform-doi(raw-doi: str) -> str:
 # config/pubmed-validation.yaml
 external-verification:
   timeout: 30.0  # Увеличить с 10 до 30
-  batch-size: 50  # Уменьшить batch
-  max-retries: 5
+  batch_size: 50  # Уменьшить batch
+  max_retries: 5
   retry-delay: 2.0
   providers:
     pubmed:
-      rate-limit: 2  # Снизить с 3 до 2 RPS
+      rate_limit: 2  # Снизить с 3 до 2 RPS
 ```
 
 ---
@@ -763,7 +763,7 @@ validation-duration = Histogram(
 ### 3. Batch External Verification
 
 ```python
-async def verify-dois-batch(dois: list[str]) -> dict[str, bool]:
+async def verify_dois_batch(dois: list[str]) -> dict[str, bool]:
     """Batch verify DOIs to reduce latency."""
     async with httpx.AsyncClient() as client:
         tasks = [
@@ -778,7 +778,7 @@ async def verify-dois-batch(dois: list[str]) -> dict[str, bool]:
             if isinstance(response, Exception):
                 results[doi] = None  # SKIP on error
             else:
-                results[doi] = response.status-code == 200
+                results[doi] = response.status_code == 200
 
         return results
 ```
@@ -812,10 +812,10 @@ import vcr
 
 @pytest.mark.integration
 @vcr.use-cassette("tests/fixtures/vcr/crossref-doi-valid.yaml")
-async def test-external-verification-doi():
+async def test_external_verification_doi():
     """Test DOI verification with recorded HTTP response."""
     verifier = ExternalVerifier(config=config)
-    result = await verifier.verify-doi("10.1038/nature12373")
+    result = await verifier.verify_doi("10.1038/nature12373")
 
     assert result.status == "PASS"
     assert result.found is True

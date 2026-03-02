@@ -75,7 +75,7 @@
 # Было
 def fetch(
     self,
-    entity-type: str,
+    entity_type: str,
     watermark: Watermark | None = None,
     limit: int | None = None,
 ) -> AsyncIterator[dict[str, Any]]:
@@ -84,7 +84,7 @@ def fetch(
 # Стало
 def fetch(
     self,
-    entity-type: str,
+    entity_type: str,
     limit: int | None = None,
     query: str | None = None,
 ) -> AsyncIterator[dict[str, Any]]:

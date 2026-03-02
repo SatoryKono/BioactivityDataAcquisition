@@ -83,7 +83,7 @@ All failed records are stored in a single quarantine table `common.quarantine`:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `ingestion-ts` | Timestamp | Time of incident |
+| `ingestion_ts` | Timestamp | Time of incident |
 | `pipeline` | String | Pipeline name (e.g., `chembl_activity`) |
 | `error-code` | String | Error type (e.g., `SCHEMA-VIOLATION`) |
 | `payload` | JSON/Text | Raw record (**truncated to 64KB**) |
@@ -162,7 +162,7 @@ def handle-error(error: Exception) -> None:
             error-code=error.code,
             payload=error.record,
             bronze-batch-id=batch-id,
-            ingestion-ts=context.started-at,
+            ingestion_ts=context.started_at,
         )
 ```
 
@@ -193,7 +193,7 @@ class QuarantinePort(Protocol):
         run-id: RunID | None = None,
         metadata: dict[str, Any] | None = None,
         *,
-        ingestion-ts: datetime,
+        ingestion_ts: datetime,
     ) -> None: ...
 
     async def inspect(

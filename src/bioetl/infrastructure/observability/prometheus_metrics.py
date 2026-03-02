@@ -189,24 +189,48 @@ class PrometheusMetrics(MetricsPort):
     def observe_histogram(
         self, name: str, value: float, labels: dict[str, str]
     ) -> None:
-        """Record a histogram observation for the named metric."""
+        """Record a histogram observation for the named metric.
+
+        Args:
+            name: Identifier name.
+            value: Input value.
+            labels: Labels.
+        """
         if name in HISTOGRAMS:
             HISTOGRAMS[name].labels(**labels).observe(value)
 
     def increment_counter(self, name: str, value: int, labels: dict[str, str]) -> None:
-        """Increment a counter metric by the given value."""
+        """Increment a counter metric by the given value.
+
+        Args:
+            name: Identifier name.
+            value: Input value.
+            labels: Labels.
+        """
         if name in COUNTERS:
             COUNTERS[name].labels(**labels).inc(value)
 
     def set_gauge(self, name: str, value: float, labels: dict[str, str]) -> None:
-        """Set a gauge metric to the given value."""
+        """Set a gauge metric to the given value.
+
+        Args:
+            name: Identifier name.
+            value: Input value.
+            labels: Labels.
+        """
         if name in GAUGES:
             GAUGES[name].labels(**labels).set(value)
 
     def inc_quarantine_records(
         self, pipeline: str, reason: str, count: int = 1
     ) -> None:
-        """Increment quarantine record counter with normalized reason label."""
+        """Increment quarantine record counter with normalized reason label.
+
+        Args:
+            pipeline: Pipeline.
+            reason: Reason description.
+            count: Count.
+        """
         bounded_reason = _normalize_label(reason, _ALLOWED_REASON_LABELS)
         self.increment_counter(
             "quarantine_records_total",
@@ -221,7 +245,14 @@ class PrometheusMetrics(MetricsPort):
         severity: str,
         count: int = 1,
     ) -> None:
-        """Increment DQ validation failure counter with normalized labels."""
+        """Increment DQ validation failure counter with normalized labels.
+
+        Args:
+            pipeline: Pipeline.
+            stage: Stage.
+            severity: Severity.
+            count: Count.
+        """
         bounded_stage = _normalize_label(stage, _ALLOWED_STAGE_LABELS)
         bounded_severity = _normalize_label(severity, _ALLOWED_SEVERITY_LABELS)
         self.increment_counter(

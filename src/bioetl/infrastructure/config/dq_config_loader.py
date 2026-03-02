@@ -270,6 +270,12 @@ class DQConfigLoader:
             Cross-field/conditional validations use 'name' as key.
             Field validations use composite key (field, type, severity)
             to allow multiple rules per field (e.g. error + warn ranges).
+
+            Args:
+                item: Item.
+
+            Returns:
+                Key.
             """
             if "name" in item:
                 return str(item["name"])

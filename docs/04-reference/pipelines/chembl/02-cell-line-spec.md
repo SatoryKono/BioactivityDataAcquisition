@@ -1,6 +1,6 @@
 # ChEMBL Cell Line Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.22*
+*Version 1.2.0 | Aligned with RULES.md v5.23*
 
 ----------------------------------------------------------------------
 
@@ -155,7 +155,7 @@ content-hash = sha256(f"chembl{canonical-json(filtered-record)}")
 > Migration note: public Pandera contract uses canonical PK names; legacy aliases are accepted only during transition via ingestion/transform alias mapping and will be removed in the next major release.
 
 ```python
-# src/bioetl/domain/schemas/chembl/cell-line.py
+# src/bioetl/domain/schemas/chembl/cell_line.py
 
 import pandera.pandas as pa
 from pandera.typing import Series
@@ -383,22 +383,22 @@ Mode: Overwrite
 ## 10. Pipeline Configuration
 
 ```yaml
-# configs/entities/chembl/cell-line.yaml
+# configs/entities/chembl/cell_line.yaml
 
-pipeline-name: chembl_cell_line
+pipeline_name: chembl_cell_line
 provider: chembl
-entity-type: cell-line
+entity_type: cell-line
 version: "1.2.0"
 description: "Extract cell lines from ChEMBL API"
 
-primary-keys: ["cell-id"]
-silver-table: "chembl_cell_line"
-gold-table: "chembl_cell_line"
+primary_keys: ["cell-id"]
+silver_table: "chembl_cell_line"
+gold_table: "chembl_cell_line"
 
-source-file: ../../sources/chembl.yaml
+source_file: ../../sources/chembl.yaml
 
-gold-filters:
-  required-fields:
+gold_filters:
+  required_fields:
     - cell-name
 
 sink:
@@ -406,27 +406,27 @@ sink:
     path: "data/output/bronze"
   silver:
     path: "data/output/silver"
-    primary-key: ["cell-id"]
-    partition-by: []
-    sort-by:
+    primary_key: ["cell-id"]
+    partition_by: []
+    sort_by:
       columns: ["cell-id"]
       ascending: true
-    csv-export:
+    csv_export:
       path: "data/output/csv/silver"
   gold:
     path: "data/output/gold"
-    sort-by:
+    sort_by:
       columns: ["cell-id", "cell-name"]
       ascending: true
-    csv-export:
+    csv_export:
       path: "data/output/csv/gold"
 
-input-filter:
+input_filter:
   enabled: true
-  source-path: "data/input/cell.csv"
-  column-name: "cell-id"
-  filter-field: "cell-id"
-  batch-size: 20
+  source_path: "data/input/cell.csv"
+  column_name: "cell-id"
+  filter_field: "cell-id"
+  batch_size: 20
 ```
 
 ----------------------------------------------------------------------
@@ -435,15 +435,11 @@ input-filter:
 
 ### 11.1. Unit Tests
 
-- [x] `test-cell-line-normalization.py`
-- [x] `test-cell-line-content-hash.py`
-- [x] `test-cell-line-validation.py`
+- [x] `tests/unit/application/pipelines/test_cell_line_transformer.py`
 
 ### 11.2. Integration Tests (VCR)
 
-- [x] `test-cell-line-api-fetch.py`
-- [x] `test-cell-line-filter-batch.py`
-- [x] `test-cell-line-error-handling.py`
+- [x] `tests/integration/pipelines/test_chembl_cell_line.py`
 
 ### 11.3. Architecture Tests
 

@@ -1,6 +1,6 @@
 # ChEMBL Tissue Pipeline Specification
 
-*Version 1.0.0 | Aligned with RULES.md v5.22*
+*Version 1.0.0 | Aligned with RULES.md v5.23*
 
 ---
 
@@ -73,14 +73,14 @@ Tissues represent anatomical locations and biological samples used in ChEMBL ass
 ## 5. Pipeline Configuration
 
 ```yaml
-pipeline-name: chembl_tissue
+pipeline_name: chembl_tissue
 provider: chembl
-entity-type: tissue
+entity_type: tissue
 version: "1.0.0"
 
-primary-keys: ["tissue-id"]
-silver-table: "chembl_tissue"
-gold-table: "chembl_tissue"
+primary_keys: ["tissue-id"]
+silver_table: "chembl_tissue"
+gold_table: "chembl_tissue"
 ```
 
 ---
@@ -89,13 +89,13 @@ gold-table: "chembl_tissue"
 
 ```bash
 # Incremental load
-bioetl run chembl_tissue
+bioetl run --pipeline chembl_tissue
 
 # With record limit
-bioetl run chembl_tissue --limit 500
+bioetl run --pipeline chembl_tissue --limit 500
 
 # Full rebuild
-bioetl run chembl_tissue --run-type rebuild
+bioetl run --pipeline chembl_tissue --run-type rebuild
 ```
 
 ---
@@ -106,8 +106,8 @@ bioetl run chembl_tissue --run-type rebuild
 |-----------|------|
 | Config | `configs/entities/chembl/tissue.yaml` |
 | DQ Rules | `configs/entities/chembl/tissue.yaml#quality` |
-| Schema | `configs/schemas/chembl/tissue.yaml` |
-| Transformer | `src/bioetl/application/pipelines/chembl/tissue-transformer.py` |
+| Schema | `configs/entities/chembl/tissue.yaml` |
+| Transformer | `src/bioetl/application/pipelines/chembl/tissue_transformer.py` |
 
 ---
 

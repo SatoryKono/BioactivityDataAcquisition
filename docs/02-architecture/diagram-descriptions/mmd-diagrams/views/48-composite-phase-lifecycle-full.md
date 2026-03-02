@@ -1,11 +1,11 @@
-# Composite Pipeline Phase Lifecycle (FSM)
+# Composite Phase Lifecycle Full
 
 - Исходная диаграмма: `mmd-diagrams/views/48-composite-phase-lifecycle-full.mermaid`
 
 ## Описание
-Диаграмма описывает: domain/composite/state.py, application/composite/fsm_helper.py. Приоритет/контекст: 23 (Score 7.31) — FSM governs all composite pipeline execution.
+Эта views-диаграмма Composite Phase Lifecycle Full представляет срез типа full для родительской схемы (root) и использует нотацию stateDiagram. Она нужна для детального анализа выбранного аспекта архитектуры без перегрузки полного графа лишними элементами. В метке view зафиксировано назначение: Full. Такой формат облегчает трассировку связей между full-версией и специализированными представлениями overview/domain/infra/dataflow, что важно для ревью, онбординга и проверки архитектурной консистентности документации. Диаграмма предназначена для практического использования в технических обсуждениях, регрессионной валидации диаграмм и синхронизации с кодовой структурой проекта. Она помогает быстро обнаруживать расхождения между задуманной архитектурой и фактической реализацией компонентов.
 
 ## Метаданные
 - Тип: `stateDiagram`
-- Уровень: `Mixed (System / Component / Class)`
-- Дата метаданных: `2026-02-24`
+- View: `Full`
+- Parent: `(root)`

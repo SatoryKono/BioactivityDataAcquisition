@@ -27,8 +27,8 @@
 | Команда         | Модуль             | Описание                                |
 | --------------- | ------------------ | --------------------------------------- |
 | `run`           | `run.py`           | Запуск одного пайплайна                 |
-| `run-all`       | `run-all.py`       | Запуск всех пайплайнов провайдера       |
-| `run-composite` | `run-composite.py` | Запуск композитного пайплайна (ADR-026) |
+| `run-all`       | `run_all.py`       | Запуск всех пайплайнов провайдера       |
+| `run-composite` | `run_composite.py` | Запуск композитного пайплайна (ADR-026) |
 | `export`        | `export.py`        | Экспорт данных из Gold                  |
 | `quarantine`    | `quarantine.py`    | Управление карантинными записями        |
 | `health`        | `health.py`        | Проверка здоровья провайдеров           |
@@ -38,7 +38,7 @@
 | `vacuum`        | `vacuum.py`        | VACUUM операции для Delta Lake          |
 | `cleanup`       | `cleanup.py`       | Очистка Bronze данных                   |
 
-Дополнительно в слое `interfaces/cli/` используются модули: `health-server-integration.py`, `metrics-server-integration.py`, `run-helpers.py`.
+Дополнительно в слое `interfaces/cli/` используются модули: `health_server_integration.py`, `metrics_server_integration.py`, `run_helpers.py`.
 | `maintenance` | `maintenance.py` | Maintenance операции |
 | `archive` | `archive.py` | Архивирование данных |
 
@@ -55,13 +55,13 @@ python -m bioetl run-composite --composite publication
 python -m bioetl health --provider chembl
 ```
 
-`cli.py` парсит эти аргументы, вызывает функции из `src/bioetl/composition/bootstrap.py` для инициализации системы и запускает выполнение пайплайна.
+`cli.py` парсит эти аргументы, вызывает функции из `src/bioetl/composition/bootstrap/` для инициализации системы и запускает выполнение пайплайна.
 
 ### 2.2. `http/` — HTTP Health Server
 
 **Расположение:** `src/bioetl/interfaces/http/`
 
-Содержит HTTP health endpoint (`health-server.py`) с интеграцией Prometheus metrics.
+Содержит HTTP health endpoint (`health_server.py`) с интеграцией Prometheus metrics.
 Endpoints: `/health`, `/health/live`, `/health/ready`.
 
 ### 2.3. `orchestration/` — Оркестрация (Driving Adapters)
@@ -72,8 +72,8 @@ Endpoints: `/health`, `/health/live`, `/health/ready`.
 Graceful shutdown обрабатывается непосредственно в CLI командах:
 
 - `interfaces/cli/commands/run.py`
-- `interfaces/cli/commands/run-all.py`
-- `interfaces/cli/commands/run-composite.py`
+- `interfaces/cli/commands/run_all.py`
+- `interfaces/cli/commands/run_composite.py`
   Shutdown логика вынесена в `application/core/shutdown.py`.
 
 ----------------------------------------------------------------------
@@ -113,6 +113,6 @@ Graceful shutdown обрабатывается непосредственно в
 
 ### Смежные Разделы Документации
 
-- [Composition Layer](05-composition-layer.md) — bootstrap-pipeline, фабрики
+- [Composition Layer](05-composition-layer.md) — `bootstrap_pipeline`, фабрики
 - [CLI Reference](../04-reference/cli.md) — полная документация CLI команд
 - [RULES.md §1 "Архитектура и Слои"](../00-project/RULES.md) — матрица импортов (interfaces может импортировать всё)

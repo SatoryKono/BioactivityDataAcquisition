@@ -2,6 +2,8 @@
 
 *Reference: [RULES.md §2.6](../../00-project/RULES.md#26-политика-null-и-пропущенных-значений)*
 
+> Runtime profile: Local-Only single-instance (ADR-010). Quarantine operations are performed against local storage.
+
 This runbook describes how to manage the Quarantine (Dead Letter Queue).
 
 ## Overview

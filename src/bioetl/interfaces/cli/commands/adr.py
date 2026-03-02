@@ -22,7 +22,11 @@ def adr() -> None:
 @adr.command("list")
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
 def list_command(as_json: bool) -> None:
-    """List all ADR documents."""
+    """List all ADR documents.
+
+    Args:
+        as_json: Whether to as json.
+    """
     service = get_adr_service()
     items = service.list_adrs()
     if as_json:
@@ -44,7 +48,12 @@ def list_command(as_json: bool) -> None:
 @click.argument("number", type=int)
 @click.option("--raw", is_flag=True, help="Print raw markdown content")
 def show_command(number: int, raw: bool) -> None:
-    """Show a specific ADR by number."""
+    """Show a specific ADR by number.
+
+    Args:
+        number: Number.
+        raw: Raw input value.
+    """
     service = get_adr_service()
     try:
         doc = service.get_adr(number)
@@ -68,7 +77,11 @@ def show_command(number: int, raw: bool) -> None:
 @adr.command("validate")
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
 def validate_command(as_json: bool) -> None:
-    """Validate ADR repository and print a summary."""
+    """Validate ADR repository and print a summary.
+
+    Args:
+        as_json: Whether to as json.
+    """
     service = get_adr_service()
     report = service.validate()
     if as_json:

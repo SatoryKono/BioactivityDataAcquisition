@@ -1,0 +1,241 @@
+"""ChEMBL Activity Transformer.
+
+Transforms Bronze records to Silver format (Activity entity inflation).
+Uses declarative field_specs DSL for mapping where applicable.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, cast
+
+from bioetl.application.core.base_transformer import TransformationError
+from bioetl.application.core.dict_transformers import flatten_nested_dict
+from bioetl.application.core.field_specs import (
+    FieldGroup,
+    FieldSpec,
+    float_fields,
+    int_fields,
+    map_field_groups,
+    simple_fields,
+)
+from bioetl.application.pipelines.chembl.base_chembl_transformer import (
+    BaseChemblTransformer,
+)
+from bioetl.domain.entities import Bioactivity
+from bioetl.domain.transformations import safe_float
+from bioetl.domain.value_objects import validate_taxonomy_id
+
+if TYPE_CHECKING:
+    from bioetl.domain.types import BronzeRecord, PrimaryId
+
+
+# Mapping for ligand efficiency fields extraction (nested dict)
+_LIGAND_EFFICIENCY_FIELDS: dict[str, Any] = {
+    "bei": safe_float,
+    "le": safe_float,
+    "lle": safe_float,
+    "sei": safe_float,
+}
+
+# Mapping for action type fields extraction (nested dict)
+_ACTION_TYPE_FIELDS: dict[str, Any] = {
+    "action_type": None,
+    "description": None,
+    "parent_type": None,
+}
+
+# ============================================================================
+# Declarative field groups for Activity entity
+# ============================================================================
+
+_IDENTIFIERS = FieldGroup(
+    name="identifiers",
+    fields=(
+        FieldSpec("target_chembl_id", target="target_id"),
+        FieldSpec("assay_chembl_id", target="assay_id"),
+        FieldSpec("document_chembl_id", target="publication_id"),
+        *int_fields("record_id", "src_id"),
+    ),
+)
+
+_MOLECULE_TARGET_ASSAY = FieldGroup(
+    name="molecule_target_assay",
+    fields=(
+        *simple_fields(
+            "canonical_smiles",
+            "molecule_pref_name",
+            "target_pref_name",
+            "target_organism",
+        ),
+        FieldSpec("parent_molecule_chembl_id", target="parent_molecule_id"),
+        # Standardized to 'target_taxonomy_id' for NCBI consistency (was 'tax_id')
+        FieldSpec(
+            "target_tax_id",
+            target="target_taxonomy_id",
+            converter=validate_taxonomy_id,
+        ),
+        *simple_fields(
+            "assay_type",
+            "assay_description",
+            "assay_variant_accession",
+            "assay_variant_mutation",
+            "bao_endpoint",
+            "bao_format",
+            "bao_label",
+        ),
+    ),
+)
+
+_RAW_VALUES = FieldGroup(
+    name="raw_values",
+    fields=(
+        *simple_fields("type", "units", "relation", "text_value"),
+        *float_fields("value", "upper_value"),
+    ),
+)
+
+_STANDARD_VALUES = FieldGroup(
+    name="standard_values",
+    fields=(
+        *simple_fields(
+            "standard_type",
+            "standard_units",
+            "standard_relation",
+            "standard_text_value",
+        ),
+        *float_fields("standard_value", "standard_upper_value", "pchembl_value"),
+        *int_fields("standard_flag"),
+    ),
+)
+
+_UNIT_FIELDS = FieldGroup(
+    name="units",
+    fields=simple_fields("qudt_units", "uo_units"),
+)
+
+_QUALITY_ANNOTATIONS = FieldGroup(
+    name="quality_annotations",
+    fields=(
+        FieldSpec("document_journal", target="journal"),
+        *simple_fields(
+            "activity_comment",
+            "data_validity_comment",
+            "data_validity_description",
+        ),
+        FieldSpec("document_year", target="publication_year"),
+        *int_fields(
+            "potential_duplicate",
+            "toid",
+            "manual_curation_flag",
+            "original_activity_id",
+        ),
+    ),
+)
+
+# All declarative field groups
+_ACTIVITY_GROUPS: tuple[FieldGroup, ...] = (
+    _IDENTIFIERS,
+    _MOLECULE_TARGET_ASSAY,
+    _RAW_VALUES,
+    _STANDARD_VALUES,
+    _UNIT_FIELDS,
+    _QUALITY_ANNOTATIONS,
+)
+
+
+class ActivityTransformer(BaseChemblTransformer):
+    """Transforms ChEMBL bronze records to silver.
+
+    Uses the unified Bioactivity entity for domain representation.
+    """
+
+    entity_class = Bioactivity
+    primary_id_field = "activity_id"
+
+    @staticmethod
+    def _extract_ligand_efficiency(le_data: dict[str, Any] | None) -> dict[str, Any]:
+        """Extract ligand efficiency metrics from nested dictionary.
+
+        Args:
+            le_data: Nested ligand efficiency dictionary from ChEMBL API.
+                     Expected keys: bei, le, lle, sei.
+
+        Returns:
+            Flat dictionary with prefixed keys and float-converted values.
+        """
+        return flatten_nested_dict(
+            le_data, "ligand_efficiency_", _LIGAND_EFFICIENCY_FIELDS
+        )
+
+    @staticmethod
+    def _extract_action_type(action_data: dict[str, Any] | None) -> dict[str, Any]:
+        """Extract action type fields from nested dictionary.
+
+        Args:
+            action_data: Nested action type dictionary from ChEMBL API.
+                         Expected keys: action_type, description, parent_type.
+
+        Returns:
+            Flat dictionary with prefixed keys.
+        """
+        return flatten_nested_dict(
+            action_data,
+            "action_type_",
+            _ACTION_TYPE_FIELDS,
+            renames={"action_type_action_type": "action_type"},
+        )
+
+    def _extract_business_data(
+        self,
+        record: BronzeRecord,
+        primary_id: PrimaryId,
+    ) -> dict[str, Any]:
+        """Extract Activity business data from bronze record.
+
+        Args:
+            record: Raw Bronze record from ChEMBL API.
+            primary_id: Validated activity_id value.
+
+        Returns:
+            Dictionary of Activity business fields.
+
+        """
+        # Support both unified and legacy identifier names
+        molecule_id = record.get("molecule_chembl_id") or record.get("molecule_id")
+        if not molecule_id:
+            raise TransformationError(
+                "Missing required field: molecule_chembl_id or molecule_id",
+                field="molecule_id",
+            )
+
+        business_data = {
+            # Primary and secondary identifiers (manual - need special handling)
+            "activity_id": str(primary_id),
+            "molecule_id": str(molecule_id),
+            # Declarative field groups
+            **map_field_groups(record, _ACTIVITY_GROUPS),
+            # Nested dict extraction (not declarative)
+            **self._extract_ligand_efficiency(
+                cast("dict[str, Any] | None", record.get("ligand_efficiency"))
+            ),
+            **self._extract_action_type(
+                cast("dict[str, Any] | None", record.get("action_type"))
+            ),
+            # JSON serialization
+            "activity_properties": self.serialize_json(
+                record.get("activity_properties")
+            ),
+        }
+
+        # Support both unified and legacy FK source fields from input record
+        business_data["target_id"] = business_data.get("target_id") or record.get(
+            "target_id"
+        )
+        business_data["assay_id"] = business_data.get("assay_id") or record.get(
+            "assay_id"
+        )
+        business_data["publication_id"] = business_data.get(
+            "publication_id"
+        ) or record.get("publication_id")
+
+        return business_data

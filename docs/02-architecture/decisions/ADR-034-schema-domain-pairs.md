@@ -41,11 +41,11 @@ Legacy aliases допускаются только как временный mig
 
 | Domain               | Infrastructure                                     | Purpose            |
 | -------------------- | -------------------------------------------------- | ------------------ |
-| BaseClientConfig     | BaseClientConfig (schemas/base-schemas.py)         | HTTP client config |
-| CircuitBreakerConfig | CircuitBreakerConfig (schemas/pipeline-config.py)  | Circuit breaker    |
-| DQConfig             | DQConfig (schemas/pipeline-config.py)              | Data Quality       |
-| DQReportConfig       | DQReportConfig (schemas/pipeline-config.py)        | DQ Reports         |
-| InputFilterConfig    | BaseInputFilterConfig (schemas/pipeline-config.py) | Input filters      |
+| BaseClientConfig     | BaseClientConfig (schemas/base_schemas.py)         | HTTP client config |
+| CircuitBreakerConfig | CircuitBreakerConfig (schemas/pipeline_config.py)  | Circuit breaker    |
+| DQConfig             | DQConfig (schemas/pipeline_config.py)              | Data Quality       |
+| DQReportConfig       | DQReportConfig (schemas/pipeline_config.py)        | DQ Reports         |
+| InputFilterConfig    | BaseInputFilterConfig (schemas/pipeline_config.py) | Input filters      |
 
 ## Consequences
 

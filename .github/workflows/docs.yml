@@ -35,6 +35,9 @@ jobs:
       - name: Install docs dependencies
         run: uv sync --frozen --extra docs
 
+      - name: Run documentation integrity guardrails
+        run: uv run python scripts/check_doc_links.py
+
       - name: Build docs in strict mode
         run: uv run mkdocs build --strict
 

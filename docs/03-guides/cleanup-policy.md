@@ -1,6 +1,6 @@
 # Cleanup Policy
 
-*Синхронизировано с RULES.md v5.22 (2026-02-21)*
+*Синхронизировано с RULES.md v5.23 (2026-02-21)*
 
 This document defines deterministic cleanup rules and automation for removing caches, build artifacts, and temporary files.
 
@@ -124,7 +124,7 @@ All whitelist patterns **MUST** be in `.gitignore`.
 
 ### 4.2. Cleanup Script
 
-Location: `src/tools/cleanup-project.py`
+Location: `src/tools/cleanup_project.py`
 
 | Flag             | Behavior                                     |
 | ---------------- | -------------------------------------------- |
@@ -185,13 +185,13 @@ make verify-checksums
 
 ```bash
 # Dry-run (default)
-python src/tools/cleanup-project.py
+python src/tools/cleanup_project.py
 
 # Apply with log archive
-python src/tools/cleanup-project.py --apply --archive-logs
+python src/tools/cleanup_project.py --apply --archive-logs
 
 # Full purge
-python src/tools/cleanup-project.py --apply --purge-logs
+python src/tools/cleanup_project.py --apply --purge-logs
 ```
 
 ### 6.2. Delta Lake Maintenance
@@ -295,7 +295,7 @@ async def cleanup-checkpoint(run-id: UUID) -> None:
 # Full cleanup for dev
 make clean-dev
 # Equivalent to:
-# python src/tools/cleanup-project.py --apply --purge-logs
+# python src/tools/cleanup_project.py --apply --purge-logs
 # docker-compose down -v
 ```
 

@@ -64,6 +64,10 @@ _NON_FLOW_RE = re.compile(
     r"^(classDiagram|sequenceDiagram|stateDiagram|erDiagram|mindmap|gantt|pie)",
     re.IGNORECASE,
 )
+_CLASS_DIAGRAM_RE = re.compile(r"^\s*classDiagram\b", re.IGNORECASE)
+_UNESCAPED_DUNDER_METHOD_RE = re.compile(
+    r"^\s*[+\-#~][^\n]*?(?<!\\)__[A-Za-z0-9_]+__(?=\s*\()"
+)
 _STYLE_OR_CLASSDEF_RE = re.compile(r"^\s*(style|classDef)\b")
 _HEX_COLOR_RE = re.compile(r"#[0-9a-fA-F]{6}\b")
 _SUBGRAPH_RE = re.compile(r"^\s*subgraph\b", re.IGNORECASE)
@@ -843,6 +847,42 @@ def check_label_readability(path: Path, lines: list[str]) -> list[Issue]:
     return issues
 
 
+def check_class_method_render_safety(path: Path, lines: list[str]) -> list[Issue]:
+    """Check classDiagram method signatures for known render pitfalls."""
+    issues: list[Issue] = []
+    fname = str(path)
+
+    if "class-diagrams" not in path.parts:
+        return issues
+
+    if not any(_CLASS_DIAGRAM_RE.match(line) for line in lines):
+        return issues
+
+    offenders: list[int] = []
+    for idx, line in enumerate(lines, start=1):
+        stripped = line.strip()
+        if not stripped or stripped.startswith("%%"):
+            continue
+        if _UNESCAPED_DUNDER_METHOD_RE.search(stripped):
+            offenders.append(idx)
+
+    if offenders:
+        first = ", ".join(str(x) for x in offenders[:6])
+        issues.append(
+            Issue(
+                file=fname,
+                severity="WARNING",
+                rule="CLASS-001",
+                message=(
+                    "Unescaped dunder method in classDiagram can lose underscores in SVG/PDF. "
+                    f"Use escaped form like '+\\_\\_enter\\_\\_()'. Lines: {first}"
+                ),
+            )
+        )
+
+    return issues
+
+
 def check_orphan_nodes(path: Path, lines: list[str]) -> list[Issue]:
     """Check for orphan nodes — GRAPH-001 (WARNING, ADR-040 D6).
 
@@ -922,6 +962,7 @@ def lint_file(path: Path, stale_days: int) -> list[Issue]:
     issues.extend(check_linkstyle_index_fragility(path, lines))
     issues.extend(check_nbsp_padding(path, lines))
     issues.extend(check_label_readability(path, lines))
+    issues.extend(check_class_method_render_safety(path, lines))
     issues.extend(check_orphan_nodes(path, lines))
 
     return issues

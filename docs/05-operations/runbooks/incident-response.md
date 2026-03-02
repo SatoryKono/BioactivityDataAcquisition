@@ -2,6 +2,8 @@
 
 This document outlines the standard operating procedures for responding to production incidents in the BioETL platform.
 
+> Runtime profile: Local-Only single-instance (ADR-010). Incident handling assumes local filesystem storage and `MemoryLock`.
+
 ## Severity Levels
 
 | Level | Description | Response SLA | Recovery SLA |
@@ -20,7 +22,7 @@ This document outlines the standard operating procedures for responding to produ
 *   **Action**:
     1.  Verify the key in the secrets manager (or `.env` for local).
     2.  Rotate the key: Generate a new one from the provider's portal.
-    3.  Update the environment variable `BIOETL-{PROVIDER}-API-KEY`.
+    3.  Update the environment variable `BIOETL_{PROVIDER}_{KEY}` (for example: `BIOETL_UNIPROT_API_KEY`).
     4.  Restart the pipeline.
 
 ### 2. Rate Limit Exhausted (`429 Too Many Requests`)
@@ -29,7 +31,7 @@ This document outlines the standard operating procedures for responding to produ
 *   **Diagnosis**: The configured `requests-per-second` exceeds the provider's current allowance.
 *   **Action**:
     1.  Check the provider's status page for global issues.
-    2.  Reduce the rate limit in the pipeline config (`configs/entities/{name}.yaml`):
+    2.  Reduce the rate limit in the pipeline config (`configs/entities/{provider}/{entity}.yaml`):
         ```yaml
         rate-limit:
           requests-per-second: 2  # Decrease from 5
@@ -48,14 +50,15 @@ This document outlines the standard operating procedures for responding to produ
 ### 4. Lock Timeout ("Lock expired")
 *   **Symptom**: Alert "Lock expired" fires, or pipeline refuses to start.
 *   **Severity**: P2.
-*   **Diagnosis**: A previous worker crashed without releasing the Redis lock, or a job ran longer than the 4-hour hard limit.
+*   **Diagnosis**: A previous local process crashed without releasing `MemoryLock`, or a job ran longer than the 4-hour hard limit.
 *   **Action**:
-    1.  Check for "zombie" processes on the worker nodes.
-    2.  Manually release the lock:
+    1.  Check for stuck local Python processes running this pipeline.
+    2.  Identify the lock owner `run-id` from logs (or from the failed run context).
+    3.  Manually release the lock:
         ```bash
-        make release-lock PIPELINE=chembl_activity
+        bioetl lock release --pipeline chembl_activity --run-id <RUN_ID>
         ```
-    3.  Investigate why the job took so long (performance regression?).
+    4.  Investigate why the job took so long (performance regression?).
 
 ## Escalation Policy
 

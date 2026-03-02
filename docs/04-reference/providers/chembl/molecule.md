@@ -60,7 +60,7 @@
 
 ## 3. Трансформация
 
-**Файл:** `src/bioetl/application/pipelines/chembl/molecule-transformer.py`
+**Файл:** `src/bioetl/application/pipelines/chembl/molecule_transformer.py`
 
 ### Развёртывание вложенных структур
 
@@ -96,13 +96,13 @@ entity-id = f"chembl:{molecule-chembl-id}"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_molecule
+bioetl run --pipeline chembl_molecule
 
 # С ограничением
-bioetl run chembl_molecule --limit 1000
+bioetl run --pipeline chembl_molecule --limit 1000
 
 # Полная перезагрузка
-bioetl run chembl_molecule --run-type rebuild
+bioetl run --pipeline chembl_molecule --run-type rebuild
 ```
 
 ---
@@ -112,7 +112,7 @@ bioetl run chembl_molecule --run-type rebuild
 | Компонент | Путь |
 |-----------|------|
 | Конфигурация | `configs/entities/chembl/molecule.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/molecule-transformer.py` |
+| Трансформер | `src/bioetl/application/pipelines/chembl/molecule_transformer.py` |
 | Сущность | `src/bioetl/domain/entities.py` |
 
 ---

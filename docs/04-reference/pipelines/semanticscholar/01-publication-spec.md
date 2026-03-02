@@ -1,6 +1,6 @@
 # Semantic Scholar Publication Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.22*
+*Version 1.2.0 | Aligned with RULES.md v5.23*
 
 ---
 
@@ -255,39 +255,39 @@ class SemanticScholarPublicationSchema(ETLRecordSchema):
 ## 7. Pipeline Configuration
 
 ```yaml
-pipeline-name: semanticscholar_publication
+pipeline_name: semanticscholar_publication
 provider: semanticscholar
-entity-type: publication
+entity_type: publication
 version: "1.2.0"
 
-primary-keys: ["paper-id"]
-silver-table: "semanticscholar_publication"
-gold-table: "semanticscholar_publication"
+primary_keys: ["paper-id"]
+silver_table: "semanticscholar_publication"
+gold_table: "semanticscholar_publication"
 
 source:
   type: api
-  batch-size: 100
+  batch_size: 100
 
 sink:
   bronze:
     path: "data/output/bronze"
   silver:
     path: "data/output/silver"
-    primary-key: ["paper-id"]
-    partition-by: []
+    primary_key: ["paper-id"]
+    partition_by: []
   gold:
     path: "data/output/gold"
 
-gold-filters:
-  required-fields:
+gold_filters:
+  required_fields:
     - title
 
-input-filter:
+input_filter:
   enabled: true
-  source-path: "data/input/doi.csv"
-  column-name: "doi"
-  filter-field: "doi"
-  batch-size: 100
+  source_path: "data/input/doi.csv"
+  column_name: "doi"
+  filter_field: "doi"
+  batch_size: 100
 ```
 
 ---

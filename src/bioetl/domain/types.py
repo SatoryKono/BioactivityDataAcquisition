@@ -120,7 +120,11 @@ class RunType(StrEnum):
     """Full rebuild of all data (highest priority)."""
 
     def priority(self) -> int:
-        """Return numeric priority for conflict resolution."""
+        """Return numeric priority for conflict resolution.
+
+        Returns:
+            Computed integer value.
+        """
         priorities = {
             RunType.REBUILD: 3,
             RunType.BACKFILL: 2,
@@ -163,7 +167,11 @@ class HealthStatus(StrEnum):
     """Provider is down (≥3 errors). Pipeline paused, alert P2."""
 
     def to_metric_value(self) -> int:
-        """Convert to numeric value for Prometheus metric."""
+        """Convert to numeric value for Prometheus metric.
+
+        Returns:
+            Computed integer value.
+        """
         return {
             HealthStatus.UNHEALTHY: 0,
             HealthStatus.DEGRADED: 1,
@@ -190,7 +198,11 @@ class CircuitBreakerState(StrEnum):
     """Circuit is testing recovery (1 probe request allowed)."""
 
     def to_metric_value(self) -> int:
-        """Convert to numeric value for Prometheus metric."""
+        """Convert to numeric value for Prometheus metric.
+
+        Returns:
+            Computed integer value.
+        """
         return {
             CircuitBreakerState.CLOSED: 0,
             CircuitBreakerState.HALF_OPEN: 1,
@@ -260,7 +272,11 @@ class ErrorType(StrEnum):
     """General data quality error (e.g. thresholds)."""
 
     def is_critical(self) -> bool:
-        """Check if error should fail the pipeline."""
+        """Check if error should fail the pipeline.
+
+        Returns:
+            True if the condition is met, False otherwise.
+        """
         return self in {
             ErrorType.AUTH_FAILURE,
             ErrorType.SCHEMA_MISMATCH_GOLD,
@@ -270,7 +286,11 @@ class ErrorType(StrEnum):
         }
 
     def is_recoverable(self) -> bool:
-        """Check if error should be retried."""
+        """Check if error should be retried.
+
+        Returns:
+            True if the condition is met, False otherwise.
+        """
         return self in {
             ErrorType.RATE_LIMIT,
             ErrorType.TIMEOUT,
@@ -278,7 +298,11 @@ class ErrorType(StrEnum):
         }
 
     def is_data_quality(self) -> bool:
-        """Check if error is data quality issue (skip record)."""
+        """Check if error is data quality issue (skip record).
+
+        Returns:
+            True if the condition is met, False otherwise.
+        """
         return self in {
             ErrorType.SCHEMA_VIOLATION,
             ErrorType.INVALID_DATA,
@@ -394,7 +418,11 @@ class HealthReport:
         return HealthStatus.HEALTHY
 
     def get_failures(self) -> list[ComponentHealthResult]:
-        """Return list of components with UNHEALTHY status."""
+        """Return list of components with UNHEALTHY status.
+
+        Returns:
+            Failures.
+        """
         return [r for r in self.results if r.status == HealthStatus.UNHEALTHY]
 
 

@@ -1,9 +1,11 @@
-# Application Layer Class Diagram Dataflow (Data-Flow)
+# Application Layer Class Diagram Dataflow
 
 - Исходная диаграмма: `mmd-diagrams/views/06-application-layer-class-diagram-dataflow.mermaid`
 
 ## Описание
-Декомпозированное представление типа 'Data-Flow' для родительской диаграммы `06-application-layer-class-diagram-full.mermaid`. Используется для документации конкретного архитектурного среза.
+Эта views-диаграмма Application Layer Class Diagram Dataflow представляет срез типа dataflow для родительской схемы 06-application-layer-class-diagram-full.mermaid и использует нотацию flowchart. Она нужна для детального анализа выбранного аспекта архитектуры без перегрузки полного графа лишними элементами. В метке view зафиксировано назначение: Data-Flow. Такой формат облегчает трассировку связей между full-версией и специализированными представлениями overview/domain/infra/dataflow, что важно для ревью, онбординга и проверки архитектурной консистентности документации. Ключевые блоки этой версии включают: Application Layer, Infrastructure Layer. Их состав показывает, какие границы ответственности и каналы взаимодействия автор выбрал для текущего аналитического фокуса. Показательные узлы в диаграмме: Application Layer, BaseChemblTransformer, RecordProcessor, BasePipeline, PipelineRunner, PipelineExecutor. По ним можно проверить корректность терминологии, соответствие имен портов/адаптеров и логичность маршрутов данных или управляющих вызовов. Диаграмма предназначена для практического использования в технических обсуждениях, регрессионной валидации диаграмм и синхронизации с кодовой структурой проекта. Она помогает быстро обнаруживать расхождения между задуманной архитектурой и фактической реализацией компонентов.
 
 ## Метаданные
-- Метаданные не указаны в исходном файле.
+- Тип: `flowchart`
+- View: `Data-Flow`
+- Parent: `06-application-layer-class-diagram-full.mermaid`

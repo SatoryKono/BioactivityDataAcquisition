@@ -1,0 +1,67 @@
+name: Project Automation (Cursor Commands)
+
+permissions:
+  contents: read
+
+on:
+    push:
+        branches: [ main, master, develop ]
+        paths-ignore:
+            - 'docs/**'
+            - '*.md'
+            - '.ai/**'
+            - '.claude/**'
+            - '.github/workflows/**'
+            - 'LICENSE'
+    pull_request:
+        types: [ opened, synchronize, reopened ]
+        paths-ignore:
+            - 'docs/**'
+            - '*.md'
+            - '.ai/**'
+            - '.claude/**'
+            - '.github/workflows/**'
+            - 'LICENSE'
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    validate-and-test:
+        name: Run Cursor Commands
+        runs-on: ubuntu-latest
+
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v4
+
+            -   name: Set up Python 3.11
+                uses: actions/setup-python@v5
+                with:
+                    python-version: "3.11"
+
+            -   name: Install uv
+                uses: astral-sh/setup-uv@v3
+
+            -   name: Install dependencies (frozen lock)
+                run: uv sync --frozen --extra dev --extra tracing
+
+            # /run-tests command
+            -   name: Run Tests (Coverage)
+                run: |
+                    # Exclude e2e and benchmark tests (benchmark tests require manual run)
+                    uv run pytest tests -m "not e2e and not benchmark" --ignore=tests/e2e --ignore=tests/contract \
+                      --cov=src/bioetl --cov-report=term-missing --cov-fail-under=85
+
+            # Diagram rendering is handled by .github/workflows/docs.yml
+            # via docs/02-architecture/mmd-diagrams/render.sh.
+            # Keep this workflow focused on code/test automation only.
+            -   name: Diagram Render Check (Deprecated Here)
+                run: |
+                    echo "Diagram rendering check skipped in project-automation.yml."
+                    echo "Canonical pipeline: docs.yml + mmd-diagrams/render.sh."
+
+            # Architecture checks (implied by project rules)
+            -   name: Architecture Linting
+                run: uv run lint-imports --config .importlinter

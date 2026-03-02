@@ -1,0 +1,65 @@
+%% View: Domain-Focus | Parent: 32-single-record-journey-full.mermaid
+%% @uniform width=140 height=56 max_title_len=5 max_desc_lines=0
+%%{init: {'theme': 'neutral', 'flowchart': {'defaultRenderer': 'elk'}}}%%
+flowchart TB
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        N1["HASH"]
+        N2["DQ"]
+        N3["META"]
+        N4["NORM"]
+        N5["TI"]
+        N6["BT"]
+        N7["BF"]
+        N10["API"]
+        N12["ST"]
+        N13["TFG"]
+        N14["GV"]
+        N16["CLEAN"]
+        N17["WARN"]
+        N18["GT"]
+        N19["QUAR"]
+        N20["QT"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N8["BW"]
+        N9["PSV"]
+        N11["SW"]
+        N15["GW"]
+    end
+
+    N10 --> N8
+    N8 --> N7
+    N7 --> N6
+    N6 --> N5
+    N5 --> N4
+    N4 --> N3
+    N3 --> N1
+    N1 --> N9
+    N9 --> N2
+    N16 --> N11
+    N17 --> N11
+    N11 --> N12
+    N12 --> N13
+    N13 --> N14
+    N14 --> N15
+    N15 --> N18
+    N19 --> N20
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+
+    %% linkStyle: primary 0-8,11-15 | routing 9-10 | quarantine 16
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle 0,1,2,3,4,5,6,7,8,11,12,13,14,15 stroke:#1E293B,stroke-width:3px
+    linkStyle 9,10 stroke:#16a34a,stroke-width:2px
+    linkStyle 16 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4

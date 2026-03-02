@@ -1,6 +1,6 @@
 # schema-review — Schema Coverage Checklist
 
-*Priority: medium | Version: 1.0 | Aligned with RULES.md v5.22*
+*Priority: medium | Version: 1.0 | Aligned with RULES.md v5.23*
 
 ______________________________________________________________________
 

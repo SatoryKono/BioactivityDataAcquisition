@@ -329,7 +329,19 @@ class FilteredDataSource(_SourceMetadataDelegationMixin):
         filter_field: str | None = None,
         offset: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch records with optional filtering from internal CSV config."""
+        """Fetch records with optional filtering from internal CSV config.
+
+        Args:
+            entity_type: Entity type identifier.
+            limit: Maximum number of records to process.
+            query: Search query string.
+            filter_ids: List of identifiers to filter by.
+            filter_field: Field name to apply filter on.
+            offset: Offset.
+
+        Returns:
+            Async iterator yielding fetched records.
+        """
         _ = filter_ids, filter_field  # External params ignored, use internal config
 
         if self._filter_config.enabled and self._multi_filter_ids:
@@ -345,7 +357,11 @@ class FilteredDataSource(_SourceMetadataDelegationMixin):
                 yield record
 
     async def health_check(self) -> HealthStatus:
-        """Delegate health check to wrapped adapter."""
+        """Delegate health check to wrapped adapter.
+
+        Returns:
+            The HealthStatus result.
+        """
         return await self._data_source.health_check()
 
     async def aclose(self) -> None:

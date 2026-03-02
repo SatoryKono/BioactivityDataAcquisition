@@ -115,6 +115,8 @@ class OpenAlexAdapter(BaseHttpAdapter):
         Raises:
             ValueError: If entity_type is not 'work' or 'publication'.
 
+        Returns:
+            Async iterator yielding fetched records.
         """
         if entity_type not in ("work", "publication"):
             raise ValueError(
@@ -238,6 +240,14 @@ class OpenAlexAdapter(BaseHttpAdapter):
 
         Raises:
             NotImplementedError: Always, as OpenAlex doesn't support multi-field filtering.
+
+        Args:
+            entity_type: Entity type identifier.
+            filters: Filters.
+            limit: Maximum number of records to process.
+
+        Returns:
+            Async iterator yielding fetched records.
         """
         raise NotImplementedError(
             "OpenAlex adapter does not support multi-field filtering. "
@@ -303,6 +313,9 @@ class OpenAlexAdapter(BaseHttpAdapter):
 
         Yields:
             Work records with `_lookup_method` field indicating resolution method.
+
+        Returns:
+            Async iterator yielding fetched records.
         """
         if entity_type not in ("work", "publication"):
             raise ValueError(
@@ -401,6 +414,8 @@ class OpenAlexAdapter(BaseHttpAdapter):
         Raises:
             ValueError: If entity_type is invalid or no query/filter_ids provided.
 
+        Returns:
+            Async iterator yielding fetched records.
         """
         if filter_ids:
             effective_filter_field = filter_field or "doi"

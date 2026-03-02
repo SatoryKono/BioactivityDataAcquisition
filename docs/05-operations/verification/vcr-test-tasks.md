@@ -152,7 +152,7 @@
 
 Pipeline configs exist for 15 ChEMBL entities but only 4 have dedicated integration pipeline tests (activity, cell-line, compound-record, target-component). The following entities lack VCR-backed integration/E2E pipeline tests:
 
-- [ ] `chembl/assay-parameters` -- has pipeline config `configs/entities/chembl/assay-parameters.yaml` and transformer `assay-parameters-transformer.py`, but no integration test or VCR cassette
+- [ ] `chembl/assay-parameters` -- has pipeline config `configs/entities/chembl/assay_parameters.yaml` and transformer `assay-parameters-transformer.py`, but no integration test or VCR cassette
 - [ ] `chembl/protein-class` -- has pipeline config and transformer, no integration test
 - [ ] `chembl/publication-similarity` -- has pipeline config and transformer, no integration test
 - [ ] `chembl/subcellular-fraction` -- has pipeline config and transformer, no integration test

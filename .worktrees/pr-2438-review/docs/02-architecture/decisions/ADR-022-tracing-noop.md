@@ -1,0 +1,183 @@
+# ADR-022: NoOp Tracing for Local-Only Deployment
+
+**Status:** Accepted
+**Date:** 2025-12-30
+**Decision makers:** @BioETL-Team
+**Extends:** ADR-010 (Local-Only Deployment), ADR-017 (Observability Architecture)
+
+## Context
+
+BioETL uses Local-Only Deployment (ADR-010). Distributed tracing (Jaeger, Zipkin,
+OpenTelemetry Collector) is relevant for microservice architectures but is redundant
+for a local ETL process.
+
+### Current Tracing Needs
+
+| Use Case | Local Solution |
+|----------|---------------|
+| Request correlation | `run-id` in structured logs |
+| Performance debugging | Prometheus histograms (`pipeline-duration-seconds`) |
+| Error tracking | Structured error logs with `run-id`, `stage`, `error-type` |
+| Batch traceability | `run-id` + `batch-id` in logs and metrics |
+
+### Distributed Tracing Overhead
+
+Implementing real OpenTelemetry would require:
+- Additional dependencies (`opentelemetry-api`, `opentelemetry-sdk`, exporters)
+- Running infrastructure (Jaeger/Zipkin/Tempo collector)
+- Context propagation between components
+- Memory overhead for span buffering
+
+This overhead provides no benefit for single-process local execution.
+
+## The Decision
+
+### TracingPort = OpenTelemetry Facade (deliberate choice)
+
+`TracingPort` is intentionally modeled after the **OpenTelemetry Tracing API**.
+`get-tracer()` returns an object whose interface mirrors `opentelemetry.trace.Tracer`
+(`start-as-current-span`, span context manager, `set-attribute`, `record-exception`).
+
+**Why OTel as the port surface?**
+
+1. **Industry standard** — OTel is the CNCF-graduated vendor-neutral tracing API.
+   Adopting its surface avoids inventing a bespoke abstraction.
+2. **Zero-cost migration** — switching from `NoOpTracing` to `OpenTelemetryTracer`
+   requires only a composition wiring change; application code stays the same.
+3. **Ecosystem compatibility** — any OTel-compatible backend (Jaeger, Zipkin, Tempo,
+   OTLP Collector) can be plugged in without modifying the port contract.
+4. **`Any` return type** — `get-tracer()` returns `Any` to avoid a hard dependency
+   on the `opentelemetry` package in the domain layer while preserving the OTel
+   calling convention in all implementations.
+
+### Default: NoOpTracing (Null Object Pattern)
+
+Use **Null Object Pattern** (`NoOpTracing`) as the default tracing implementation.
+Request correlation is provided via `run-id` in structured logs.
+
+### Implementation
+
+```python
+# Default: NoOpTracing (zero overhead, mirrors OTel API) — lives in domain/ports/noop.py
+from bioetl.domain.ports import NoOpTracing
+tracing = NoOpTracing()
+
+# Extension point: real OTel adapter (when distributed deployment needed)
+from bioetl.infrastructure.observability.tracing import OpenTelemetryTracer
+tracing = OpenTelemetryTracer(service-name="bioetl")
+
+# Both implementations expose the same OTel calling convention:
+otel-tracer = tracing.get-tracer("bioetl.pipeline")
+with otel-tracer.start-as-current-span("my-operation", attributes={...}):
+    ...  # works identically with NoOp or real OTel
+```
+
+### Correlation via run-id (RULES.md §4.5)
+
+All structured logs include `run-id`:
+
+```json
+{
+  "ts": "2025-12-30T10:00:00Z",
+  "level": "INFO",
+  "run-id": "550e8400-e29b-41d4-a716-446655440000",
+  "pipeline": "chembl_activity",
+  "stage": "transform",
+  "record-count": 1000
+}
+```
+
+This enables:
+- Log aggregation: `grep run-id=<uuid> logs/*.jsonl`
+- Metrics correlation: labels include `run-id` where appropriate
+- Batch tracing: `run-id` + `batch-id` for granular tracking
+
+## Justification
+
+### 1. Zero Overhead
+
+`NoOpTracing` operations are no-ops with negligible CPU/memory cost:
+
+```python
+class NoOpTracing:
+    def get-tracer(self, name: str) -> NoOpTracer:
+        return NoOpTracer()  # Stateless, no allocations per span
+
+    def close(self) -> None:
+        self.-closed = True  # Idempotent
+```
+
+### 2. TracingPort Preserved
+
+The port interface remains unchanged, preserving the extension point:
+
+```python
+@runtime-checkable
+class TracingPort(Protocol):
+    def get-tracer(self, name: str) -> Any: ...
+    def close(self) -> None: ...
+```
+
+### 3. OpenTelemetry Ready
+
+`OpenTelemetryTracer` class exists in `tracing.py` for future use:
+- Supports OTLP export (production) and Console export (debug)
+- Graceful shutdown with span flushing
+- Compatible with TracingPort interface
+
+### 4. Consistency with ADR-010
+
+Local-Only Deployment principle:
+- No external infrastructure dependencies
+- Single-process execution model
+- File-based storage (Bronze/Silver/Gold)
+
+## Implementation Files
+
+| File | Purpose |
+|------|---------|
+| `domain/ports/observability.py` | TracingPort protocol (OTel facade contract) |
+| `domain/ports/noop.py` | NoOpTracing, -NoOpOtelTracer, -NoOpSpan (default) |
+| `infrastructure/observability/tracing.py` | OpenTelemetryTracer (real OTel adapter) + NoOpTracing re-export |
+| `composition/bootstrap/runtime/observability.py` | DI wiring (`bootstrap-tracer-port`) |
+
+## Consequences
+
+### Positive
+
+- **(+) Zero overhead**: No memory/CPU cost from span collection
+- **(+) No dependencies**: OpenTelemetry packages not required for default usage
+- **(+) Simple debugging**: `run-id` in logs sufficient for local development
+- **(+) Extension point preserved**: TracingPort + OpenTelemetryTracer ready for future
+- **(+) Consistent with ADR-010**: No external infrastructure needed
+
+### Negative
+
+- **(-) No distributed tracing**: Cannot trace requests across services (not needed for local ETL)
+- **(-) No visual timeline**: No Jaeger/Zipkin UI for span visualization
+
+### Migration Path (Future)
+
+If distributed deployment becomes necessary:
+
+1. Install OpenTelemetry dependencies:
+   ```bash
+   pip install opentelemetry-api opentelemetry-sdk opentelemetry-exporter-otlp
+   ```
+
+2. Enable tracing via environment variable:
+   ```bash
+   export BIOETL-OBSERVABILITY--TRACING-ENABLED=true
+   ```
+   The bootstrap in `composition/bootstrap/runtime/observability.py` will
+   automatically return `OpenTelemetryTracer` instead of `NoOpTracing`.
+
+3. Deploy OpenTelemetry Collector or Jaeger
+
+4. This ADR should be revisited and potentially superseded
+
+## Related ADRs
+
+- **ADR-010**: Local-Only Deployment Strategy — establishes single-process model
+- **ADR-017**: Observability Architecture — defines TracingPort and NoOp pattern
+- **ADR-006**: Logger and Metrics Ports — initial observability ports design

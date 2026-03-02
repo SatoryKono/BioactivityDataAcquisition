@@ -60,7 +60,11 @@ class MetricsServerPort(Protocol):
         ...
 
     def is_running(self) -> bool:
-        """Check if the server is currently running."""
+        """Check if the server is currently running.
+
+        Returns:
+            True if the condition is met, False otherwise.
+        """
         ...
 
     def reset(self) -> None:

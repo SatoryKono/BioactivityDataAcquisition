@@ -29,12 +29,12 @@ match the documented specifications in `local-storage-layout.md` and `RULES.md`.
 
 | Aspect | Documented | Implementation | Status |
 |--------|------------|----------------|--------|
-| Path | `data/output/bronze/{provider}/{entity}/{date}/` | `bronze-writer.py:451-452` | ✅ Match |
+| Path | `data/output/bronze/{provider}/{entity}/{date}/` | `bronze_writer.py:451-452` | ✅ Match |
 | Date format | `YYYY-MM-DD` | `date.strftime("%Y-%m-%d")` | ✅ Match |
 
 **Code Reference:**
 ```python
-# bronze-writer.py:448-452
+# bronze_writer.py:448-452
 date-str = date.strftime("%Y-%m-%d")
 relative-path = (
     f"{provider}/{entity}/{date-str}/batch-{date-str}-{batch-id}.jsonl.zst"
@@ -46,14 +46,14 @@ relative-path = (
 | Aspect | Documented | Implementation | Status |
 |--------|------------|----------------|--------|
 | Compressed | `batch-{YYYY-MM-DD}-{batch-id}.jsonl.zst` | Same pattern | ✅ Match |
-| JSON copy | `batch-{YYYY-MM-DD}-{batch-id}.jsonl` | `bronze-writer.py:652-653` | ✅ Match |
+| JSON copy | `batch-{YYYY-MM-DD}-{batch-id}.jsonl` | `bronze_writer.py:652-653` | ✅ Match |
 
 ### 1.3. Sidecar Files
 
 | File Type | Documented | Implementation | Status |
 |-----------|------------|----------------|--------|
-| Metadata | `{provider}-{entity}-metadata.yaml` | `metadata-writer.py:45-47` | ✅ Match |
-| DQ Report | `batch-{date}-{provider}-{entity}-dq-report.json` | `dq-report-writer.py:89` | ✅ Match |
+| Metadata | `{provider}-{entity}-metadata.yaml` | `metadata_writer.py:45-47` | ✅ Match |
+| DQ Report | `batch-{date}-{provider}-{entity}-dq-report.json` | `dq_report_writer.py:89` | ✅ Match |
 
 ---
 
@@ -64,7 +64,7 @@ relative-path = (
 | Aspect | Documented | Implementation | Status |
 |--------|------------|----------------|--------|
 | Path | `data/output/silver/{provider}/{entity}/` | `Settings.silver-path` + table-name | ✅ Match |
-| Structure | Delta Lake with `-delta-log/` | `write-deltalake()` creates this | ✅ Match |
+| Structure | Delta Lake with `_delta_log/` | `write-deltalake()` creates this | ✅ Match |
 
 **Code Reference:**
 ```python
@@ -78,8 +78,8 @@ def silver-path(self) -> Path:
 
 | File Type | Documented | Implementation | Status |
 |-----------|------------|----------------|--------|
-| Metadata | `{provider}-{entity}-metadata.yaml` | `metadata-writer.py:45-47` | ✅ Match |
-| DQ Report | `silver-{provider}-{entity}-dq-report.json` | `dq-report-writer.py:129` | ✅ Match |
+| Metadata | `{provider}-{entity}-metadata.yaml` | `metadata_writer.py:45-47` | ✅ Match |
+| DQ Report | `silver-{provider}-{entity}-dq-report.json` | `dq_report_writer.py:129` | ✅ Match |
 
 ---
 
@@ -90,7 +90,7 @@ def silver-path(self) -> Path:
 | Aspect | Documented | Implementation | Status |
 |--------|------------|----------------|--------|
 | Path | `data/output/gold/{provider}/{entity}/` | `Settings.gold-path` + table-name | ✅ Match |
-| Structure | Delta Lake with `-delta-log/` | `write-deltalake()` creates this | ✅ Match |
+| Structure | Delta Lake with `_delta_log/` | `write-deltalake()` creates this | ✅ Match |
 
 **Code Reference:**
 ```python
@@ -104,8 +104,8 @@ def gold-path(self) -> Path:
 
 | File Type | Documented | Implementation | Status |
 |-----------|------------|----------------|--------|
-| Metadata | `{provider}-{entity}-metadata.yaml` | `metadata-writer.py:45-47` | ✅ Match |
-| DQ Report | `gold-{provider}-{entity}-dq-report.json` | `dq-report-writer.py:129` | ✅ Match |
+| Metadata | `{provider}-{entity}-metadata.yaml` | `metadata_writer.py:45-47` | ✅ Match |
+| DQ Report | `gold-{provider}-{entity}-dq-report.json` | `dq_report_writer.py:129` | ✅ Match |
 
 ---
 
@@ -116,7 +116,7 @@ def gold-path(self) -> Path:
 | Aspect | Documented | Implementation | Status |
 |--------|------------|----------------|--------|
 | Path | `data/output/checkpoints/` | `data/output/checkpoints/` | ✅ Match |
-| File naming | `{pipeline-name}.json` | `local-checkpoint.py:187` | ✅ Match |
+| File naming | `{pipeline-name}.json` | `local_checkpoint.py:187` | ✅ Match |
 | Composite | `composite-{name}-{run-id}.json` | Documented only | ℹ️ Info |
 
 **Code (`-base.py:354-357`):**
@@ -157,8 +157,8 @@ def quarantine-path(self) -> Path:
 
 | Aspect | Documented | Implementation | Status |
 |--------|------------|----------------|--------|
-| File naming | `{table-name}.csv` | `csv-exporter.py:270` | ✅ Match |
-| Location | Configured via `csv-export.path` in YAML | `storage-factory.py` | ✅ Match |
+| File naming | `{table-name}.csv` | `csv_exporter.py:270` | ✅ Match |
+| Location | Configured via `csv-export.path` in YAML | `storage_factory.py` | ✅ Match |
 
 ---
 
@@ -167,7 +167,7 @@ def quarantine-path(self) -> Path:
 **Verification of `-get-metadata-filename()` function:**
 
 ```python
-# metadata-writer.py:34-47
+# metadata_writer.py:34-47
 def -get-metadata-filename(provider: str | None, entity: str | None) -> str:
     if provider and entity:
         return f"{provider}-{entity}-metadata.yaml"  # ✅ Matches docs
@@ -183,7 +183,7 @@ All layers correctly use this function for consistent metadata naming.
 **Verification of `-build-layer-filename()` function:**
 
 ```python
-# dq-report-writer.py:106-133
+# dq_report_writer.py:106-133
 def -build-layer-filename(...) -> str:
     if provider and entity:
         return f"{layer}-{provider}-{entity}-dq-report{extension}"  # ✅ Matches docs
@@ -193,7 +193,7 @@ def -build-layer-filename(...) -> str:
 ### Bronze DQ Reports
 
 ```python
-# dq-report-writer.py:88-89
+# dq_report_writer.py:88-89
 if provider and entity and date-str:
     filename = f"batch-{date-str}-{provider}-{entity}-dq-report{extension}"  # ✅ Matches docs
 ```
@@ -234,16 +234,16 @@ All generated output is correctly placed in `data/output/` which aligns with:
 ls -la data/output/bronze/chembl/activity/
 
 # Verify Silver Delta structure
-ls -la data/output/silver/chembl/activity/-delta-log/
+ls -la data/output/silver/chembl/activity/_delta_log/
 
 # Verify Gold Delta structure
-ls -la data/output/gold/chembl/activity/-delta-log/
+ls -la data/output/gold/chembl/activity/_delta_log/
 
 # Verify checkpoint files
 ls -la data/output/checkpoints/*.json
 
 # Verify quarantine table
-ls -la data/output/quarantine/common.quarantine/-delta-log/
+ls -la data/output/quarantine/common.quarantine/_delta_log/
 ```
 
 ---
@@ -259,13 +259,13 @@ ls -la data/output/quarantine/common.quarantine/-delta-log/
 
 ### Silver Layer
 - [x] Path: `silver/{provider}/{entity}/`
-- [x] Delta Lake structure (`-delta-log/`)
+- [x] Delta Lake structure (`_delta_log/`)
 - [x] Metadata: `{provider}-{entity}-metadata.yaml`
 - [x] DQ Report: `silver-{provider}-{entity}-dq-report.json`
 
 ### Gold Layer
 - [x] Path: `gold/{provider}/{entity}/`
-- [x] Delta Lake structure (`-delta-log/`)
+- [x] Delta Lake structure (`_delta_log/`)
 - [x] Metadata: `{provider}-{entity}-metadata.yaml`
 - [x] DQ Report: `gold-{provider}-{entity}-dq-report.json`
 

@@ -28,7 +28,19 @@ def inspect_records(
     error_code: str | None = None,
     dq_status: QuarantineRecordStatus | None = None,
 ) -> list[dict[str, Any]]:
-    """Inspect quarantine records for a pipeline."""
+    """Inspect quarantine records for a pipeline.
+
+    Args:
+        base_path: Base directory path.
+        storage_options: Storage options.
+        pipeline: Pipeline.
+        limit: Maximum number of records to process.
+        error_code: Error code.
+        dq_status: Dq status.
+
+    Returns:
+        Result dictionary.
+    """
     try:
         dt = DeltaTable(base_path, storage_options=storage_options)
     except TableNotFoundError:
@@ -75,6 +87,9 @@ def replay_records(
         max_age_days: Maximum age of records to replay (default 7).
         now: Current timestamp from application layer
              (single source of time per ADR-014). Required.
+
+    Returns:
+        Result dictionary.
     """
     try:
         dt = DeltaTable(base_path, storage_options=storage_options)
@@ -108,7 +123,16 @@ def get_statistics(
     storage_options: dict[str, str] | None,
     pipeline: str,
 ) -> dict[str, Any]:
-    """Get quarantine statistics for a pipeline."""
+    """Get quarantine statistics for a pipeline.
+
+    Args:
+        base_path: Base directory path.
+        storage_options: Storage options.
+        pipeline: Pipeline.
+
+    Returns:
+        Statistics.
+    """
     empty_stats = {
         "total_records": 0,
         "by_error_code": {},

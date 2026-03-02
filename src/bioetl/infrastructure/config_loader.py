@@ -411,7 +411,14 @@ def _normalize_source_config(raw: dict[str, Any]) -> dict[str, Any]:
 
 @lru_cache(maxsize=10)
 def load_source_config(provider: str) -> SourceYamlConfig:
-    """Load source configuration from unified provider YAML."""
+    """Load source configuration from unified provider YAML.
+
+    Args:
+        provider: Data provider name.
+
+    Returns:
+        Loaded SourceYamlConfig.
+    """
     unified_path = Path(f"configs/providers/{provider}.yaml")
 
     raw_config: dict[str, Any]
@@ -648,6 +655,9 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
 
     Raises:
         ValueError: If pipeline config file doesn't exist.
+
+    Returns:
+        Loaded PipelineYamlConfig.
     """
     unified_raw: dict[str, Any] = {}
     unified_schema: dict[str, Any] | None = None

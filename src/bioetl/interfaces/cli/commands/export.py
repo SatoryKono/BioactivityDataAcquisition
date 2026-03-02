@@ -108,6 +108,16 @@ def export_command(
 
         # Export to custom directory
         bioetl export chembl.activity -o ./my_exports
+
+    Args:
+        table: Table.
+        list_tables: Whether to list tables.
+        preview: Whether to preview.
+        output_format: Output format.
+        layer: Layer.
+        output: Path to output.
+        limit: Maximum number of records to process.
+        columns: List of column names.
     """
     service = get_export_service()
 

@@ -147,7 +147,7 @@ OpenAlex предоставляет "polite pool" с повышенными ли
 | Без идентификации | 10 req/sec | Базовый доступ                         |
 | С `mailto`        | 10 req/sec | Указан email в User-Agent и параметрах |
 
-**Важно:** Переменная окружения `BIOETL-OPENALEX-EMAIL` обязательна для production.
+**Важно:** Переменная окружения `BIOETL_OPENALEX_EMAIL` обязательна для production.
 
 ### Batch DOI Resolution
 
@@ -194,13 +194,13 @@ OpenAlex API возвращает абстракты в формате inverted 
 ### Конфигурация Input Filter
 
 ```yaml
-input-filter:
+input_filter:
   enabled: true
-  source-path: "data/input/dois.csv"
-  column-name: "doi"
-  filter-field: "doi"
-  batch-size: 50
-  fallback-column: "title"  # Поиск по заголовку при неудаче DOI
+  source_path: "data/input/dois.csv"
+  column_name: "doi"
+  filter_field: "doi"
+  batch_size: 50
+  fallback_column: "title"  # Поиск по заголовку при неудаче DOI
 ```
 
 ----------------------------------------------------------------------
@@ -209,16 +209,16 @@ input-filter:
 
 ```bash
 # Базовый запуск с файлом DOI
-bioetl run openalex_publication
+bioetl run --pipeline openalex_publication
 
 # С ограничением количества записей
-bioetl run openalex_publication --limit 100
+bioetl run --pipeline openalex_publication --limit 100
 
 # Проверка конфигурации без выполнения
-bioetl run openalex_publication --dry-run
+bioetl run --pipeline openalex_publication --dry-run
 
 # Полная перезагрузка
-bioetl run openalex_publication --run-type rebuild
+bioetl run --pipeline openalex_publication --run-type rebuild
 ```
 
 ### Подготовка входных данных
@@ -238,7 +238,7 @@ doi,title
 
 | Переменная              | Описание              | Обязательна |
 | ----------------------- | --------------------- | ----------- |
-| `BIOETL-OPENALEX-EMAIL` | Email для polite pool | Да          |
+| `BIOETL_OPENALEX_EMAIL` | Email для polite pool | Да          |
 
 ----------------------------------------------------------------------
 
@@ -283,8 +283,8 @@ OpenAlex adapter реализует health check через `/works?per-page=1`:
 ## 8. Gold Filters
 
 ```yaml
-gold-filters:
-  required-fields:
+gold_filters:
+  required_fields:
     - openalex-id
     - title
   ranges:
@@ -402,19 +402,19 @@ gold-filters:
 
 | Файл                                                            | Покрытие                           |
 | --------------------------------------------------------------- | ---------------------------------- |
-| `tests/unit/infrastructure/adapters/openalex/test-adapter.py`   | Adapter methods, DOI normalization |
-| `tests/unit/infrastructure/adapters/openalex/test-fallback.py`  | Fallback logic                     |
-| `tests/unit/application/pipelines/openalex/test-extractors.py`  | All extractors                     |
-| `tests/unit/application/pipelines/openalex/test-transformer.py` | Transformation flow                |
+| `tests/unit/infrastructure/adapters/openalex/test_adapter.py`   | Adapter methods, DOI normalization |
+| `tests/unit/infrastructure/adapters/openalex/test_fallback.py`  | Fallback logic                     |
+| `tests/unit/application/pipelines/openalex/test_extractors.py`  | All extractors                     |
+| `tests/unit/application/pipelines/openalex/test_transformer.py` | Transformation flow                |
 
 ### Integration Tests
 
 | Файл                                                   | Покрытие                |
 | ------------------------------------------------------ | ----------------------- |
-| `tests/integration/adapters/openalex/test-adapter.py`  | HTTP interactions (VCR) |
-| `tests/integration/adapters/openalex/test-pipeline.py` | Transformer extractors  |
+| `tests/integration/adapters/openalex/test_adapter.py`  | HTTP interactions (VCR) |
+| `tests/integration/adapters/openalex/test_pipeline.py` | Transformer extractors  |
 
-**VCR Configuration** (для test-adapter.py):
+**VCR Configuration** (для test_adapter.py):
 
 ```python
 {

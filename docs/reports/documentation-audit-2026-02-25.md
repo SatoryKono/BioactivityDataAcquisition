@@ -3,7 +3,7 @@
 **Date:** 2026-02-25
 **Scope:** Full exhaustive audit (366 markdown files, 546 Python source files)
 **Auditor:** Claude Code (6 parallel exploration agents)
-**Project Version:** v6.0.0 | RULES.md v5.22 (resolved)
+**Project Version:** v6.0.0 | RULES.md v5.23 (resolved)
 
 ---
 
@@ -47,8 +47,8 @@ BioETL documentation is **mature and comprehensive** with strong governance foun
 
 ### CRITICAL (7 issues)
 
-**C-01. RULES.md version conflict (v5.21 vs v5.22)**
-- `PROJECT-CONTEXT.md` и `agent-memory.md` ссылаются на v5.22 (2026-02-24)
+**C-01. RULES.md version conflict (v5.21 vs v5.23)**
+- `PROJECT-CONTEXT.md` и `agent-memory.md` ссылаются на v5.23 (2026-02-24)
 - `RULES.md`, `README.md`, `TOOLS.md`, `rules-summary.md` — все на v5.21 (2026-02-21)
 - Нет единого источника истины по актуальной версии
 - **Impact:** Агенты и docs могут конфликтовать по правилам
@@ -97,7 +97,7 @@ BioETL documentation is **mature and comprehensive** with strong governance foun
 **H-02. ADR-030 naming collision** — 2 разных ADR-030 (Pagination vs Field Unification) + 4 archived variants
 **H-03. ADR-033 status unclear** — "Added" status, не "Accepted"; implementation roadmap отсутствует
 **H-04. Subagent specs duplication** — `.claude/agents/py-*.md` + `.claude/agents/subagents/*/SUBAGENT.md` + `docs/00-project/agents/orchestration/subagents/`
-**H-05. Memory file version skew** — `agent-memory.md` claims v5.22, actual RULES is v5.21
+**H-05. Memory file version skew** — `agent-memory.md` claims v5.23, actual RULES is v5.21
 **H-06. Troubleshooting underdeveloped** — 5.6 KB, covers only 5 scenarios (should be 15+)
 **H-07. migration-5.14-to-6.0.md minimal** — only 32 lines for a major version jump
 **H-08. migration-schema-artifacts.md** — empty stub with no content
@@ -143,7 +143,7 @@ BioETL documentation is **mature and comprehensive** with strong governance foun
 
 | # | Action | Files | Effort |
 |---|--------|-------|--------|
-| 1.1 | Resolve RULES.md version (determine v5.21 or v5.22, sync all dependent docs) | RULES.md, PROJECT-CONTEXT.md, agent-memory.md, TOOLS.md, rules-summary.md, 00-map.md | 1h |
+| 1.1 | Resolve RULES.md version (determine v5.21 or v5.23, sync all dependent docs) | RULES.md, PROJECT-CONTEXT.md, agent-memory.md, TOOLS.md, rules-summary.md, 00-map.md | 1h |
 | 1.2 | Update 00-map.md ADR count to 39, add ADR-035..039 references | 00-map.md | 30m |
 | 1.3 | Deprecate `docs/.../orchestration/ORCHESTRATION.md` with pointer to `.claude/agents/` | ORCHESTRATION.md (docs/) | 15m |
 | 1.4 | Archive CONFIG-GUIDE.md to 99-archive/, update internal links | CONFIG-GUIDE.md, mkdocs.yml | 30m |
@@ -216,7 +216,7 @@ BioETL documentation is **mature and comprehensive** with strong governance foun
 
 | # | Decision | Options | Recommendation |
 |---|----------|---------|----------------|
-| D-01 | Текущая версия RULES.md — v5.21 или v5.22? | (a) v5.21 + откатить PROJECT-CONTEXT; (b) v5.22 + обновить все docs | Определить и синхронизировать |
+| D-01 | Текущая версия RULES.md — v5.21 или v5.23? | (a) v5.21 + откатить PROJECT-CONTEXT; (b) v5.23 + обновить все docs | Определить и синхронизировать |
 | D-02 | Kubernetes deployment — поддерживается или deprecated? | (a) Пометить deprecated с ADR-010; (b) Документировать как optional advanced | (a) Deprecated + disclaimer |
 | D-03 | ADR-003 — Accepted (Revised) или Superseded by ADR-010? | (a) Revised in-place; (b) Superseded | (a) Accepted (Revised) + clear note |
 | D-04 | Data model docs (03-data-model/) — WIP или completed? | (a) Archive completed; (b) Keep as living docs | Уточнить статус каждого файла |

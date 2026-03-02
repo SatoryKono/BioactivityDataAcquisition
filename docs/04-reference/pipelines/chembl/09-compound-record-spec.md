@@ -1,6 +1,6 @@
 # ChEMBL Compound Record Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.22*
+*Version 1.2.0 | Aligned with RULES.md v5.23*
 
 ----------------------------------------------------------------------
 
@@ -113,26 +113,26 @@ class CompoundRecordSchema(ETLRecordSchema):
 ## 5. Pipeline Configuration
 
 ```yaml
-pipeline-name: chembl_compound_record
+pipeline_name: chembl_compound_record
 provider: chembl
-entity-type: compound-record
+entity_type: compound-record
 version: "1.2.0"
 
-primary-keys: ["record-id"]
-silver-table: "chembl_compound_record"
-gold-table: "chembl_compound_record"
+primary_keys: ["record-id"]
+silver_table: "chembl_compound_record"
+gold_table: "chembl_compound_record"
 
-gold-filters:
-  required-fields:
+gold_filters:
+  required_fields:
     - molecule-id
     - publication-id
 
-input-filter:
+input_filter:
   enabled: true
-  source-path: "data/input/molecule.csv"
-  column-name: "molecule-id"
-  filter-field: "molecule-id"
-  batch-size: 20
+  source_path: "data/input/molecule.csv"
+  column_name: "molecule-id"
+  filter_field: "molecule-id"
+  batch_size: 20
 ```
 
 ----------------------------------------------------------------------

@@ -82,6 +82,15 @@ class FilterConfigBuilder:
         """Build config for direct filter IDs mode (no CSV file).
 
         Used for composite pipelines where IDs are passed programmatically.
+
+        Args:
+            filter_ids: List of identifiers to filter by.
+            filter_field: Field name to apply filter on.
+            batch_size: Number of records per batch.
+            fallback_mapping: Fallback mapping.
+
+        Returns:
+            The InputFilterConfig result.
         """
         return InputFilterConfig(
             enabled=True,
@@ -108,6 +117,9 @@ class FilterConfigBuilder:
             valid_combinations: Valid (field1, field2, ...) tuples for
                 client-side combination filtering.
             batch_size: Number of IDs per API request.
+
+        Returns:
+            The InputFilterConfig result.
         """
         return InputFilterConfig(
             enabled=True,

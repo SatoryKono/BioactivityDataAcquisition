@@ -215,6 +215,23 @@ def run_composite(
 
     Example:
         bioetl run-composite --composite publication --seed-limit 100
+
+    Args:
+        composite: Composite.
+        resume: Whether to resume.
+        dry_run: Dry run mode flag.
+        seed_limit: Seed limit.
+        enrich_only: Enrich only.
+        required_only: Whether to required only.
+        force_enricher: Force enricher.
+        use_cached_bronze: Whether to use cached bronze.
+        cached_bronze_date: Cached bronze date.
+        cached_bronze_path: File path for cached bronze.
+        cached_bronze_enrichers: Whether to cached bronze enrichers.
+        cached_bronze_dependencies: Whether to cached bronze dependencies.
+        debug: Whether to debug.
+        health_server: Whether to health server.
+        health_port: Health port.
     """
     # Parse enrich_only into tuple
     enrich_only_tuple: tuple[str, ...] | None = None

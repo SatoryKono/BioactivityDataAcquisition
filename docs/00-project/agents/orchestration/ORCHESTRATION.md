@@ -44,8 +44,8 @@ Workflow следует принципу "Safe-by-Design":
 - **Линтинг**: `make lint` (ruff + mypy).
 - **Тесты**: `make test-unit`, `make test-integration` (VCR).
 - **Архитектура**: `pytest tests/architecture/`.
-- **Конфиги**: `python scripts/validate_pipeline_configs.py`, `python scripts/config-gap-analysis.py`.
-- **Терминология**: `python scripts/lint-terminology.py`.
+- **Конфиги**: `python scripts/validate_pipeline_configs.py`, `python scripts/config_gap_analysis.py`.
+- **Терминология**: `python scripts/lint_terminology.py`.
 
 ----------------------------------------------------------------------
 
@@ -83,7 +83,7 @@ docs/99-archive/reports/<task-id>/
 1. **Traceability**: Каждое изменение привязано к ID.
 1. **No Blind Changes**: Сначала `Plan`, потом `Implement`.
 1. **Architecture Gate**: Финальный аудит обязателен.
-1. **Config Compliance**: `config-gap-analysis.py` должен иметь 0 критических замечаний.
+1. **Config Compliance**: `config_gap_analysis.py` должен иметь 0 критических замечаний.
 1. **Zone Isolation**: Код в `src/`, конфиги в `configs/`, доки в `docs/`.
 
 ----------------------------------------------------------------------
@@ -92,4 +92,4 @@ docs/99-archive/reports/<task-id>/
 
 - Исторические отчёты в `docs/99-archive/reports/<task-id>/` могут использовать старые имена файлов (например, `04-refactoring-log.md` вместо `04-implementation-log.md`) и старую нумерацию ADR.
 - Такие артефакты считаются **валидными историческими данными** и НЕ являются ошибкой, если сохранён контекст задачи и трассируемость ID (`AUD-*`, `RF-*`, `DBG-*`, `DOC-*`, `CFG-*`).
-- Для новых задач MUST использовать текущую структуру и актуальный контекст проекта BioETL v6.0.0, RULES.md v5.22 и ADR-001..ADR-040.
+- Для новых задач MUST использовать текущую структуру и актуальный контекст проекта BioETL v6.0.0, RULES.md v5.23 и ADR-001..ADR-040.

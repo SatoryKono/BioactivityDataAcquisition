@@ -147,6 +147,9 @@ class UnifiedLogger:
                 - stage: Pipeline stage (extract, transform, load, validate, init, cleanup)
                 - dataset: Logical table name
                 - record_count: Count of records
+
+        Returns:
+            The Any result.
         """
         return self._logger.info(_event, **self._ensure_stage(kwargs))
 
@@ -162,6 +165,9 @@ class UnifiedLogger:
             **kwargs: Additional context. Recognized schema fields:
                 - stage: Pipeline stage
                 - dataset: Logical table name
+
+        Returns:
+            The Any result.
         """
         return self._logger.warning(_event, **self._ensure_stage(kwargs))
 
@@ -178,6 +184,9 @@ class UnifiedLogger:
                 - stage: Pipeline stage
                 - error_type: Classification of the error
                 - dataset: Logical table name
+
+        Returns:
+            The Any result.
         """
         return self._logger.error(_event, **self._ensure_stage(kwargs))
 
@@ -191,6 +200,9 @@ class UnifiedLogger:
         Args:
             _event: The event message
             **kwargs: Additional context
+
+        Returns:
+            The Any result.
         """
         return self._logger.debug(_event, **self._ensure_stage(kwargs))
 
@@ -206,6 +218,9 @@ class UnifiedLogger:
             **kwargs: Additional context. Recognized schema fields:
                 - stage: Pipeline stage
                 - error_type: Classification of the error
+
+        Returns:
+            The Any result.
         """
         return self._logger.exception(_event, **self._ensure_stage(kwargs))
 

@@ -72,7 +72,14 @@ class DefaultDataNormalizationService(AuthorNormalizationService):
         return doi
 
     def normalize_pmid(self, pmid: str | int | None) -> str | None:
-        """Normalize PubMed ID to string format. Returns None for invalid inputs."""
+        """Normalize PubMed ID to string format. Returns None for invalid inputs.
+
+        Args:
+            pmid: PubMed identifier.
+
+        Returns:
+            Normalized value.
+        """
         str_value = self._pmid_to_string(pmid)
         return self._validate_pmid_string(str_value) if str_value else None
 
@@ -93,7 +100,14 @@ class DefaultDataNormalizationService(AuthorNormalizationService):
         return str(int_value) if int_value > 0 else None
 
     def normalize_year(self, year: int | None) -> tuple[int | None, bool]:
-        """Validate publication year. Returns (year, is_warning) tuple."""
+        """Validate publication year. Returns (year, is_warning) tuple.
+
+        Args:
+            year: Year.
+
+        Returns:
+            Normalized value.
+        """
         if year is None:
             return None, False
         if self.config.min_publication_year <= year <= self.config.max_publication_year:
@@ -103,7 +117,15 @@ class DefaultDataNormalizationService(AuthorNormalizationService):
     def normalize_authors(
         self, authors: list[str] | str | None, salt: str
     ) -> str | None:
-        """Parse, hash, and serialize author names. Returns JSON string or None."""
+        """Parse, hash, and serialize author names. Returns JSON string or None.
+
+        Args:
+            authors: Author data in any supported format (list, JSON string, or delimited).
+            salt: Cryptographic salt for PII hashing.
+
+        Returns:
+            JSON string of hashed author names, or None if no authors found.
+        """
         author_list = self.parse_authors_to_list(authors)
         if not author_list:
             return None
@@ -120,37 +142,79 @@ class DefaultDataNormalizationService(AuthorNormalizationService):
         return hashlib.sha256(f"{normalized}{salt}".encode()).hexdigest()
 
     def strip_html_tags(self, text: str | None) -> str | None:
-        """Remove HTML tags, decode entities, normalize whitespace."""
+        """Remove HTML tags, decode entities, normalize whitespace.
+
+        Args:
+            text: Input text string.
+
+        Returns:
+            The str | None result.
+        """
         if not text:
             return None
-        clean = _HTML_TAG_PATTERN.sub("", text)
-        clean = unescape(clean)
-        clean = _WHITESPACE_PATTERN.sub(" ", clean).strip()
-        return clean if clean else None
+
+        clean = text
+        if "<" in clean:
+            clean = _HTML_TAG_PATTERN.sub("", clean)
+
+        if "&" in clean:
+            clean = unescape(clean)
+
+        # Normalize whitespace; handles empty/whitespace-only via split()/join.
+        clean = " ".join(clean.split())
+        return clean or None
 
     def normalize_oa_status(self, status: str | None) -> str | None:
-        """Normalize Open Access status to lowercase."""
+        """Normalize Open Access status to lowercase.
+
+        Args:
+            status: Status value.
+
+        Returns:
+            Normalized value.
+        """
         if not status:
             return None
         stripped = status.strip()
         return stripped.lower() if stripped else None
 
     def normalize_string(self, value: str | None) -> str | None:
-        """Normalize string by stripping whitespace."""
+        """Normalize string by stripping whitespace.
+
+        Args:
+            value: Input value.
+
+        Returns:
+            Normalized value.
+        """
         if value is None:
             return None
         stripped = value.strip()
         return stripped if stripped else None
 
     def normalize_to_string(self, value: Any) -> str | None:
-        """Convert value to string, strip whitespace, return None if empty."""
+        """Convert value to string, strip whitespace, return None if empty.
+
+        Args:
+            value: Input value.
+
+        Returns:
+            Normalized value.
+        """
         if value is None:
             return None
         str_value = str(value).strip()
         return str_value if str_value else None
 
     def parse_authors_to_list(self, authors: list[str] | str | None) -> list[str]:
-        """Parse various author formats into a list of names."""
+        """Parse various author formats into a list of names.
+
+        Args:
+            authors: Authors.
+
+        Returns:
+            Parsed result.
+        """
         if authors is None:
             return []
         if isinstance(authors, list):
@@ -259,6 +323,12 @@ class DefaultDataNormalizationService(AuthorNormalizationService):
         - Complete date [[2024, 3, 15]]: returns "2024-03-15"
         - Month-only [[2024, 3]]: returns "2024-03-31" (last day of month)
         - Year-only [[2024]]: returns "2024-12-31" (last day of year)
+
+        Args:
+            date_parts: Date parts.
+
+        Returns:
+            The str | None result.
         """
         parts = self._extract_date_parts(date_parts)
         if not parts:

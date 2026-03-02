@@ -1,0 +1,117 @@
+version: 1.0.0
+provider: chembl
+entity: cell_line
+pipeline:
+  pipeline_name: chembl_cell_line
+  provider: chembl
+  entity_type: cell_line
+  description: Extract cell lines from ChEMBL API
+  business_primary_keys:
+  - cell_id
+schema:
+  content_hash:
+    include: []
+    exclude: []
+  column_groups:
+  - name: system
+    fields:
+    - entity_id
+    - content_hash
+    - _run_id
+    - _run_type
+    - _source_batch_id
+    - _ingestion_ts
+    - _index
+  - name: business
+    fields:
+    - cell_id
+    - cell_name
+    - cell_description
+    - cell_source_tissue
+    - cell_source_organism
+    - cell_source_taxonomy_id
+    - cell_type
+    - cellosaurus_id
+    - clo_id
+    - cl_lincs_id
+    - efo_id
+  - name: dq
+    pattern: ^_dq_
+  silver:
+    include_groups:
+    - system
+    - business
+    - dq
+    exclude_fields: []
+    alias_policy: preserve
+  gold:
+    include_groups:
+    - system
+    - business
+    exclude_fields:
+    - _dq_*
+    - _source_batch_id
+    - _index
+    alias_policy: canonical
+quality:
+  version: 1.0.0
+  provider: chembl
+  entity: cell_line
+  field_validations:
+  - field: cell_id
+    type: pattern
+    pattern: ^CHEMBL\d+$
+    nullable: false
+    error_message: cell_id must match CHEMBL format
+  - field: cell_name
+    type: pattern
+    pattern: ^.{1,200}$
+    nullable: false
+    error_message: cell_name is required and must not exceed 200 chars
+  - field: cellosaurus_id
+    type: pattern
+    pattern: ^CVCL_[A-Z0-9]+$
+    nullable: true
+    error_message: cellosaurus_id must match CVCL format
+  - field: cell_source_taxonomy_id
+    type: range
+    min: 1
+    max: 10000000
+    nullable: true
+  cross_field_validations: []
+  conditional_validations: []
+  key_nullability:
+  - field: cell_id
+    key_type: merge
+    nullable: false
+filters:
+  version: 1.0.0
+  provider: chembl
+  entity: cell_line
+  input_filter:
+    enabled: true
+    source_path: data/input/cell.csv
+    column_name: cell_chembl_id
+    filter_field: cell_chembl_id
+    batch_size: 20
+  gold_filters:
+    required_fields:
+    - cell_name
+contracts:
+  primary_key:
+  - cell_id
+  merge_keys:
+  - cell_id
+  rename_map:
+    run_id: _run_id
+    run_type: _run_type
+    source_batch_id: _source_batch_id
+    ingestion_ts: _ingestion_ts
+    source: _source
+  hash_include: []
+  hash_exclude:
+  - _ingestion_ts
+  - _run_id
+  - _run_type
+  - _dq_error
+  - _dq_warn

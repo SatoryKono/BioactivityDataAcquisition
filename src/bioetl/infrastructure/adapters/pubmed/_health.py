@@ -91,7 +91,14 @@ class PubMedHealthMixin:
         return "/entrez/eutils/einfo.fcgi"
 
     def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
-        """Get API request metadata and clear collector."""
+        """Get API request metadata and clear collector.
+
+        Args:
+            api_version: Api version.
+
+        Returns:
+            Source metadata.
+        """
         metadata = self._request_collector.to_source_metadata(
             source_type="api", url=ENTREZ_API_BASE, api_version=api_version
         )

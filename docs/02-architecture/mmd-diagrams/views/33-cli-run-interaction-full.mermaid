@@ -38,7 +38,7 @@ sequenceDiagram
     participant Obs as PipelineObserver<br/>application/observability/
     end
 
-    User->>CLI: bioetl run chembl_activity<br/>--run-type incremental
+    User->>CLI: bioetl run --pipeline chembl_activity<br/>--run-type incremental
     CLI->>CLI: parse args, resolve pipeline_name
     CLI->>PRS: PipelineRunnerService.run(name, options)
     PRS->>Boot: bootstrap_pipeline(name, config)

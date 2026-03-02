@@ -49,7 +49,7 @@
 
 ## 3. Трансформация
 
-**Файл:** `src/bioetl/application/pipelines/chembl/protein-class-transformer.py`
+**Файл:** `src/bioetl/application/pipelines/chembl/protein_class_transformer.py`
 
 ### Entity ID
 
@@ -85,10 +85,10 @@ parent-id → protein-class-id
 
 ```bash
 # Полная загрузка (справочная таблица)
-bioetl run chembl_protein_class
+bioetl run --pipeline chembl_protein_class
 
 # С ограничением
-bioetl run chembl_protein_class --limit 500
+bioetl run --pipeline chembl_protein_class --limit 500
 ```
 
 ---
@@ -111,9 +111,9 @@ Gold-таблица сортируется по `class-level`, `sort-order`, `pr
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/entities/chembl/protein-class.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/protein-class-transformer.py` |
-| Пайплайн | `src/bioetl/application/pipelines/chembl/protein-class.py` |
+| Конфигурация | `configs/entities/chembl/protein_class.yaml` |
+| Трансформер | `src/bioetl/application/pipelines/chembl/protein_class_transformer.py` |
+| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py` |
 
 ---
 

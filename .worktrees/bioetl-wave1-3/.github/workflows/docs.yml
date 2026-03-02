@@ -1,0 +1,210 @@
+name: Docs & Diagrams
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - '.github/workflows/docs.yml'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - '.github/workflows/docs.yml'
+
+jobs:
+  validate-mkdocs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Validate version consistency
+        run: python scripts/check_version_consistency.py
+
+      - name: Install docs dependencies
+        run: uv sync --frozen --extra docs
+
+      - name: Build docs in strict mode
+        run: uv run mkdocs build --strict
+
+  validate-mermaid:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Mermaid CLI
+        run: npm install -g @mermaid-js/mermaid-cli@10.6.1
+
+      - name: Install Chrome headless shell for Puppeteer
+        run: npx -y puppeteer browsers install chrome-headless-shell
+
+      - name: Create Puppeteer config
+        run: |
+          cat > /tmp/puppeteer-config.json << 'EOF'
+          {
+            "args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
+          }
+          EOF
+
+      - name: Validate Mermaid diagrams (.mermaid + .mmd)
+        run: |
+          bash scripts/diagrams/validate_mermaid_syntax.sh \
+            --puppeteer /tmp/puppeteer-config.json
+
+      - name: Diagram policy lint report (non-blocking)
+        run: |
+          python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/mmd-diagrams --json > /tmp/diagram-lint.json || true
+          python3 scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json
+
+      - name: Upload diagram lint report
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagram-lint-report
+          path: /tmp/diagram-lint.json
+
+  render-diagrams:
+    needs: validate-mermaid
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Mermaid CLI + librsvg + svgo
+        run: |
+          npm install -g @mermaid-js/mermaid-cli@10.6.1 svgo
+          sudo apt-get update -qq && sudo apt-get install -y -qq librsvg2-bin
+
+      - name: Install Chrome headless shell for Puppeteer
+        run: npx -y puppeteer browsers install chrome-headless-shell
+
+      - name: Create Puppeteer config
+        run: |
+          cat > /tmp/puppeteer-config.json << 'EOF'
+          {
+            "args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
+          }
+          EOF
+
+      - name: Render diagrams with unified script
+        run: |
+          bash docs/02-architecture/mmd-diagrams/render.sh \
+            --puppeteer /tmp/puppeteer-config.json
+
+      - name: Validate rendered artifact existence (SVG/PNG)
+        run: |
+          python3 scripts/diagrams/check_diagram_artifacts.py \
+            --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
+
+      - name: Validate SVG text visibility (edge labels and node text)
+        run: |
+          python3 scripts/diagrams/check_svg_text_visibility.py \
+            --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
+
+      - name: Visual smoke regression (selected SVG baselines)
+        run: |
+          python3 scripts/diagrams/check_diagram_visual_smoke.py \
+            --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt
+
+      - name: Validate link harmonization post-processor
+        run: |
+          python3 src/tools/harmonize_link_styles.py --dry-run --fail-on-errors
+
+      - name: Diagram regression quality gates (DIAG-T018..T023)
+        run: |
+          mkdir -p reports/diagrams
+          python3 scripts/diagrams/check_diagram_quality_gates.py \
+            --manifest docs/02-architecture/mmd-diagrams/quality-gate-manifest.txt \
+            --json-out reports/diagrams/diagram-quality-report.json \
+            --markdown-out reports/diagrams/diagram-quality-report.md
+
+      - name: Upload SVG artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagrams-svg
+          path: |
+            docs/**/svg/*.svg
+
+      - name: Upload PNG artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagrams-png
+          path: |
+            docs/**/png/*.png
+
+      - name: Upload diagram quality report
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagrams-quality-report
+          path: |
+            reports/diagrams/diagram-quality-report.json
+            reports/diagrams/diagram-quality-report.md
+
+      - name: Publish diagram quality summary
+        if: always()
+        run: |
+          if [ -f reports/diagrams/diagram-quality-report.md ]; then
+            cat reports/diagrams/diagram-quality-report.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Diagram quality report was not generated." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  check-diagram-drift:
+    needs: validate-mermaid
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for source-vs-rendered drift
+        run: |
+          echo "Checking if diagram sources changed without updating rendered outputs..."
+          # Get list of changed diagram source files in PR
+          changed_diagrams=$(
+            git diff --name-only origin/main...HEAD -- \
+              ':(glob)docs/**/*.mmd' \
+              ':(glob)docs/**/*.mermaid' \
+              ':(exclude)docs/99-archive/**' || true
+          )
+          if [ -z "$changed_diagrams" ]; then
+            echo "No diagram source files changed — skipping drift check."
+            exit 0
+          fi
+
+          echo "Changed diagram sources:"
+          echo "$changed_diagrams"
+
+          # Check if corresponding SVG/PNG outputs changed too
+          changed_rendered=$(
+            git diff --name-only origin/main...HEAD -- \
+              ':(glob)docs/**/svg/*.svg' \
+              ':(glob)docs/**/png/*.png' || true
+          )
+          if [ -z "$changed_rendered" ]; then
+            echo "::warning::Diagram sources changed but no rendered outputs updated."
+            echo "Run 'make render-diagrams-all' and commit rendered SVG/PNG files."
+          else
+            echo "Rendered outputs also updated — OK."
+          fi

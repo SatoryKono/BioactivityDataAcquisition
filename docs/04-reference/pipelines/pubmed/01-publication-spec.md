@@ -1,6 +1,6 @@
 # PubMed Publication Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.22*
+*Version 1.2.0 | Aligned with RULES.md v5.23*
 
 ---
 
@@ -203,43 +203,43 @@ class ArticleSchema(ETLRecordSchema):
 ## 7. Pipeline Configuration
 
 ```yaml
-pipeline-name: pubmed_publication
+pipeline_name: pubmed_publication
 provider: pubmed
-entity-type: publications
+entity_type: publications
 version: "1.2.0"
 
-primary-keys: ["pmid"]
-silver-table: "pubmed_publication"
-gold-table: "pubmed_publication"
+primary_keys: ["pmid"]
+silver_table: "pubmed_publication"
+gold_table: "pubmed_publication"
 
 source:
   type: api
-  batch-size: 200  # E-utilities limit
+  batch_size: 200  # E-utilities limit
 
-dq-overrides:
-  soft-fail-threshold: 0.05
-  hard-fail-threshold: 0.20
+dq_overrides:
+  soft_fail_threshold: 0.05
+  hard_fail_threshold: 0.20
 
 sink:
   bronze:
     path: "data/output/bronze"
   silver:
     path: "data/output/silver"
-    primary-key: ["pmid"]
-    partition-by: []
+    primary_key: ["pmid"]
+    partition_by: []
   gold:
     path: "data/output/gold"
 
-gold-filters:
-  required-fields:
+gold_filters:
+  required_fields:
     - title
 
-input-filter:
+input_filter:
   enabled: true
-  source-path: "data/input/pubmed.csv"
-  column-name: "pmid"
-  filter-field: "pmid"
-  batch-size: 200
+  source_path: "data/input/pubmed.csv"
+  column_name: "pmid"
+  filter_field: "pmid"
+  batch_size: 200
 ```
 
 ---

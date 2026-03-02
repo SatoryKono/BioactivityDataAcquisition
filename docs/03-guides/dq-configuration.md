@@ -131,10 +131,9 @@ quality:
 ```yaml
 # configs/entities/{provider}/{entity}.yaml
 pipeline:
-  pipeline-name: {provider}-{entity}
-  dq-overrides:
-    thresholds:
-      hard-fail-threshold: 0.25
+  pipeline_name: {provider}-{entity}
+  dq_overrides:
+    hard_fail_threshold: 0.25
 ```
 
 ## Validation Types
@@ -322,12 +321,12 @@ For exceptional cases, override DQ rules directly in pipeline config:
 ```yaml
 # configs/entities/chembl/activity.yaml
 pipeline:
-  pipeline-name: chembl_activity
+  pipeline_name: chembl_activity
 
   # Temporary override for migration period
-  dq-overrides:
-    hard-fail-threshold: 0.30  # Higher tolerance during migration
-    field-validations:
+  dq_overrides:
+    hard_fail_threshold: 0.30  # Higher tolerance during migration
+    field_validations:
       - field: legacy-id
         type: required
         nullable: false
@@ -339,20 +338,20 @@ pipeline:
 
 ```python
 from pathlib import Path
-from bioetl.infrastructure.config.dq-config-loader import DQConfigLoader
+from bioetl.infrastructure.config.dq_config_loader import DQConfigLoader
 
 # Load merged config
 loader = DQConfigLoader(Path("configs"))
-dq-config = loader.load(
+dq_config = loader.load(
     provider="chembl",
     entity="activity",
     inline-overrides=None,  # Optional Level 4 overrides
 )
 
 # Access domain objects
-print(f"Soft threshold: {dq-config.soft-fail-threshold}")
-print(f"Hard threshold: {dq-config.hard-fail-threshold}")
-print(f"Field validations: {len(dq-config.field-validations)}")
+print(f"Soft threshold: {dq_config.soft_fail_threshold}")
+print(f"Hard threshold: {dq_config.hard_fail_threshold}")
+print(f"Field validations: {len(dq_config.field_validations)}")
 ```
 
 ## Validation
@@ -360,7 +359,7 @@ print(f"Field validations: {len(dq-config.field-validations)}")
 Validate all DQ configs:
 
 ```bash
-python src/tools/scripts/validate-unified-configs.py
+python src/tools/scripts/validate_unified_configs.py
 ```
 
 ## Troubleshooting
@@ -392,5 +391,5 @@ FileNotFoundError: Required DQ defaults file not found: configs/base/quality.yam
 
 - [ADR-027: DQ Rules Externalization](../02-architecture/decisions/ADR-027-dq-rules-externalization.md)
 - RULES.md §3.1.2: DQ Thresholds
-- Schema: `src/bioetl/infrastructure/schemas/dq-config.py`
-- Loader: `src/bioetl/infrastructure/config/dq-config-loader.py`
+- Schema: `src/bioetl/infrastructure/schemas/dq_config.py`
+- Loader: `src/bioetl/infrastructure/config/dq_config_loader.py`

@@ -60,8 +60,8 @@
 **Функциональные:**
 
 - **REQ-VAL-001 (MUST):** Многоуровневая валидация: base → structural → external → logical → semantic.
-- **REQ-VAL-002 (MUST):** DQ-флаги: `-dq-error` (блокирующие ошибки), `-dq-warn` (предупреждения).
-- **REQ-VAL-003 (MUST):** Карантин: записи с `-dq-error=True` → Dead Letter Queue, не попадают в Gold.
+- **REQ-VAL-002 (MUST):** DQ-флаги: `_dq_error` (блокирующие ошибки), `_dq_warn` (предупреждения).
+- **REQ-VAL-003 (MUST):** Карантин: записи с `_dq_error=True` → Dead Letter Queue, не попадают в Gold.
 - **REQ-VAL-004 (MUST):** Внешняя верификация: DOI/PMID/ORCID проверяются через авторитетные API.
 - **REQ-VAL-005 (SHOULD):** Graceful degradation: таймауты API не блокируют пайплайн (SKIP).
 
@@ -96,7 +96,7 @@
          │  - Type coercion          │
          └──┬──────────────┬─────────┘
             │ PASS         │ FAIL
-            │              └──────────► -dq-error=True → Quarantine
+            │              └──────────► _dq_error=True → Quarantine
             │
          ┌──▼──────────────────────────┐
          │  2. STRUCTURAL VALIDATION   │
@@ -105,8 +105,8 @@
          │  - content-hash consistency │
          │  - Field dependencies       │
          └──┬──────────────┬───────────┘
-            │ PASS         │ FAIL → -dq-error=True
-            │              │ WARN → -dq-warn=True
+            │ PASS         │ FAIL → _dq_error=True
+            │              │ WARN → _dq_warn=True
             │
          ┌──▼──────────────────────────┐
          │  3. EXTERNAL VERIFICATION   │
@@ -115,8 +115,8 @@
          │  - PMID in PubMed?          │
          │  - ORCID valid?             │
          └──┬──────────────┬───────────┘
-            │ PASS/SKIP    │ FAIL (PK) → -dq-error=True
-            │              │ WARN (non-PK) → -dq-warn=True
+            │ PASS/SKIP    │ FAIL (PK) → _dq_error=True
+            │              │ WARN (non-PK) → _dq_warn=True
             │
          ┌──▼──────────────────────────┐
          │  4. LOGICAL VALIDATION      │
@@ -125,7 +125,7 @@
          │  - citations ≥ 0            │
          │  - dates ordering           │
          └──┬──────────────┬───────────┘
-            │ PASS         │ WARN → -dq-warn=True
+            │ PASS         │ WARN → _dq_warn=True
             │
          ┌──▼──────────────────────────┐
          │  5. SEMANTIC VALIDATION     │
@@ -134,11 +134,11 @@
          │  - Language detection       │
          │  - Keyword relevance        │
          └──┬──────────────┬───────────┘
-            │ PASS         │ WARN → -dq-warn=True
+            │ PASS         │ WARN → _dq_warn=True
             │
          ┌──▼──────────────────────────┐
          │     Write to Silver         │
-         │  (-dq-error=False records)  │
+         │  (_dq_error=False records)  │
          └─────────────────────────────┘
 ```
 
@@ -157,7 +157,7 @@
 **Результат:**
 
 - `PASS` → переход к structural
-- `FAIL` → `-dq-error=True`, запись отклонена
+- `FAIL` → `_dq_error=True`, запись отклонена
 
 **Пример (Pandera):**
 
@@ -177,15 +177,15 @@ class ChemblPublicationSchema(PublicationBaseSchema):
 **Правила:**
 
 - `page-first ≤ page-last` (если оба числовые)
-- `content-hash == recomputed-hash(excl. -ingestion-ts, -run-id, -dq-*)`
+- `content-hash == recomputed-hash(excl. _ingestion_ts, _run_id, -dq-*)`
 - `IF corpus-id NOT NULL THEN paper-id MUST NOT be NULL` (S2)
 - `publication-year == YEAR(publication-date)` (если оба заполнены)
 
 **Результат:**
 
 - `PASS` → external verification
-- `FAIL` → `-dq-error=True` (критические: content-hash)
-- `WARN` → `-dq-warn=True` (некритические: page ordering)
+- `FAIL` → `_dq_error=True` (критические: content-hash)
+- `WARN` → `_dq_warn=True` (некритические: page ordering)
 
 #### 3. External Verification (Integration)
 
@@ -210,8 +210,8 @@ class ChemblPublicationSchema(PublicationBaseSchema):
 **Результат:**
 
 - `PASS` / `SKIP` → logical validation
-- `FAIL` (PK not found) → `-dq-error=True`
-- `WARN` (non-PK not found) → `-dq-warn=True`
+- `FAIL` (PK not found) → `_dq_error=True`
+- `WARN` (non-PK not found) → `_dq_warn=True`
 
 #### 4. Logical Validation (Service)
 
@@ -228,7 +228,7 @@ class ChemblPublicationSchema(PublicationBaseSchema):
 **Результат:**
 
 - `PASS` → semantic validation
-- `WARN` → `-dq-warn=True` (логически некорректно, но не блокирует)
+- `WARN` → `_dq_warn=True` (логически некорректно, но не блокирует)
 
 #### 5. Semantic Validation (Service, NLP)
 
@@ -243,22 +243,22 @@ class ChemblPublicationSchema(PublicationBaseSchema):
 
 **Результат:**
 
-- `PASS` / `WARN` → `-dq-warn=True`
+- `PASS` / `WARN` → `_dq_warn=True`
 - **NEVER FAIL** (семантика не блокирует)
 
 ### DQ-флаги и карантин
 
 | Флаг        | Устанавливается при | Действие                                                  |
 | ----------- | ------------------- | --------------------------------------------------------- |
-| `-dq-error` | FAIL на уровнях 1-3 | Запись → Quarantine (Dead Letter), не попадает в Silver   |
-| `-dq-warn`  | WARN на уровнях 2-5 | Запись → Silver с флагом, может быть отфильтрована в Gold |
+| `_dq_error` | FAIL на уровнях 1-3 | Запись → Quarantine (Dead Letter), не попадает в Silver   |
+| `_dq_warn`  | WARN на уровнях 2-5 | Запись → Silver с флагом, может быть отфильтрована в Gold |
 
 **Карантин:**
 
 - Путь: `data/output/quarantine/{provider}/publication/{date}/`
 - Формат: Delta Lake (для SCD Type 2)
 - Retention: 90 дней
-- Ручная проверка: `scripts/dq-review-quarantine.py`
+- Ручная проверка: через Delta Lake/Polars и SQL-запросы к `data/output/quarantine/...`
 
 ### Конфигурация DQ
 
@@ -266,7 +266,7 @@ class ChemblPublicationSchema(PublicationBaseSchema):
 
 ```
 configs/validation/
-├── -defaults.yaml                    # Глобальные пороги
+├── _defaults.yaml                    # Глобальные пороги
 ├── chembl.yaml                       # Провайдер-специфичные
 ├── pubmed/
 │   └── publication.yaml              # Entity-специфичные

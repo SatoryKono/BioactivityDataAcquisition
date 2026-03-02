@@ -1,0 +1,48 @@
+%% View: Domain-Focus | Parent: 39-medallion-invariants-full.mermaid
+%% @uniform width=140 height=56 max_title_len=6 max_desc_lines=0
+flowchart TB
+%% keep-orphan: N20
+
+    N1["Policy"]
+    N2["E2"]
+    N3["CHECK"]
+    N4["INC"]
+    N5["BF"]
+    N6["RB"]
+    N7["E1"]
+    N8["I2"]
+    N9["I3"]
+    N10["I1"]
+    N11["I4"]
+    N12["B2"]
+    N13["B3"]
+    N14["B1"]
+    N15["B4"]
+    N16["R2"]
+    N17["R3"]
+    N18["R1"]
+    N19["R4"]
+    N20["E3"]
+
+    N4 ==> N3
+    N5 --> N3
+    N6 --> N3
+    N10 --> N8
+    N8 --> N9
+    N9 --> N11
+    N14 --> N12
+    N12 --> N13
+    N13 --> N15
+    N18 --> N16
+    N16 --> N17
+    N17 --> N19
+    N7 --> N3
+    N2 --> N1
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle default stroke:#1E293B,stroke-width:4px

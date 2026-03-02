@@ -139,6 +139,8 @@ class SemanticScholarAdapter(BaseHttpAdapter):
         Yields:
             Dictionary records from Semantic Scholar API.
 
+        Returns:
+            Async iterator yielding fetched records.
         """
         if filter_ids:
             effective_filter_field = filter_field or "doi"
@@ -214,6 +216,8 @@ class SemanticScholarAdapter(BaseHttpAdapter):
         Yields:
             Publication records from Semantic Scholar (excludes null/not-found).
 
+        Returns:
+            Async iterator yielding fetched records.
         """
         if filter_field != "doi":
             self.logger.warning(
@@ -296,6 +300,8 @@ class SemanticScholarAdapter(BaseHttpAdapter):
         Yields:
             Publication records with `_lookup_method` field.
 
+        Returns:
+            Async iterator yielding fetched records.
         """
         fetched = 0
         resolved_dois: set[str] = set()
@@ -348,6 +354,13 @@ class SemanticScholarAdapter(BaseHttpAdapter):
         Raises:
             NotImplementedError: Always, as S2 doesn't support multi-field filtering.
 
+        Args:
+            entity_type: Entity type identifier.
+            filters: Filters.
+            limit: Maximum number of records to process.
+
+        Returns:
+            Async iterator yielding fetched records.
         """
         raise NotImplementedError(
             "Semantic Scholar adapter supports only DOI filtering. "

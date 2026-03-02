@@ -21,7 +21,15 @@ from bioetl.domain.value_objects.dq_report import (
 def check_referential_integrity(
     df: pl.DataFrame, reference_tables: dict[str, pl.DataFrame | pa.Table]
 ) -> ReferentialIntegrityResult:
-    """Check foreign key references."""
+    """Check foreign key references.
+
+    Args:
+        df: Input DataFrame.
+        reference_tables: Reference tables.
+
+    Returns:
+        Check result as ReferentialIntegrityResult.
+    """
     if not reference_tables:
         return ReferentialIntegrityResult(
             foreign_keys={},
@@ -95,7 +103,15 @@ def check_referential_integrity(
 def check_scd_integrity(
     df: pl.DataFrame, scd_config: dict[str, Any] | None
 ) -> SCDIntegrityResult:
-    """Check SCD (Slowly Changing Dimension) integrity."""
+    """Check SCD (Slowly Changing Dimension) integrity.
+
+    Args:
+        df: Input DataFrame.
+        scd_config: Configuration for scd.
+
+    Returns:
+        Check result as SCDIntegrityResult.
+    """
     if not scd_config:
         return SCDIntegrityResult(
             scd_type=2,

@@ -56,6 +56,16 @@ async def traced_async_operation(
     attributes: dict[str, Any] | None = None,
     tracer_name: str = "bioetl",
 ) -> AsyncGenerator[Any, None]:
-    """Async context manager for tracing spans."""
+    """Async context manager for tracing spans.
+
+    Args:
+        tracer: Tracing instance.
+        name: Identifier name.
+        attributes: Attributes.
+        tracer_name: Name of the tracer.
+
+    Returns:
+        Iterator over results.
+    """
     with _span_context(tracer, name, attributes, tracer_name) as span:
         yield span

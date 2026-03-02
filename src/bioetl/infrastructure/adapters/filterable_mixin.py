@@ -30,7 +30,17 @@ class HasFetchFiltered(Protocol):
         filter_field: str,
         limit: int | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Fetch records filtered by specific IDs."""
+        """Fetch records filtered by specific IDs.
+
+        Args:
+            entity_type: Entity type identifier.
+            filter_ids: List of identifiers to filter by.
+            filter_field: Field name to apply filter on.
+            limit: Maximum number of records to process.
+
+        Returns:
+            Async iterator yielding fetched records.
+        """
         ...
 
 
@@ -69,6 +79,8 @@ class NotSupportedMultiFilterMixin:
             NotImplementedError: Always, as the provider doesn't support
                 multi-field filtering.
 
+        Returns:
+            Async iterator yielding fetched records.
         """
         # Mark unused parameters
         del entity_type, filters, limit
@@ -119,6 +131,8 @@ class DelegatingFallbackMixin:
         Yields:
             Dictionary records matching the filter criteria.
 
+        Returns:
+            Async iterator yielding fetched records.
         """
         del fallback_mapping  # Unused - primary IDs are always resolvable
         async for record in self.fetch_filtered(

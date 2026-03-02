@@ -21,7 +21,14 @@ class ChemblMetadataMixin:
     _extraction_params: ExtractionParams
 
     def get_source_metadata(self, api_version: str | None = None) -> SourceMetadata:
-        """Get API request metadata and clear collector."""
+        """Get API request metadata and clear collector.
+
+        Args:
+            api_version: Api version.
+
+        Returns:
+            Source metadata.
+        """
         extraction_qs = self._extraction_params.to_query_string() or None
         metadata = self._request_collector.to_source_metadata(
             source_type="api",

@@ -203,7 +203,7 @@ Stage 4: E2E (на PR merge)
 └── pytest tests/e2e/ -m e2e
 
 Stage 5: Contract (ежемесячно)
-└── BIOETL-LIVE-API-TESTS=true pytest tests/contracts/
+└── BIOETL_LIVE_API_TESTS=true pytest tests/contracts/
 ```
 
 ## 7. Воспроизводимость и Проверка Зависимостей

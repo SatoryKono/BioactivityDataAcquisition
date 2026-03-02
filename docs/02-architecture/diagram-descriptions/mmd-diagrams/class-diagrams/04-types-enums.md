@@ -1,9 +1,9 @@
-# Class Diagram: Types & Enums
+# Class Diagram: 04 Types Enums
 
 - Исходная диаграмма: `mmd-diagrams/class-diagrams/04-types-enums.mmd`
 
 ## Описание
-All type aliases, NewTypes, and enumerations..
+Диаграмма Types & Enums показывает архитектурную модель модуля `04-types-enums` и фиксирует контракты, роли и отношения между сущностями слоя `Class / Interface`. Основной фокус: All type aliases, NewTypes, and enumerations. На схеме отражено примерно 19 классов и 0 связей, поэтому её удобно использовать для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга. Ключевые элементы для быстрого чтения: RunID, EntityID, ContentHash, BatchID, RunType, PublicationType.
 
 ## Метаданные
 - Тип: `classDiagram`

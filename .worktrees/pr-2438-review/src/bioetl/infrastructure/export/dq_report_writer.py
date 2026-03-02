@@ -1,0 +1,322 @@
+"""DQ report writer infrastructure.
+
+Handles writing DQ reports to the filesystem in various formats.
+Implements DQReportWriterPort from domain/ports.
+"""
+
+from __future__ import annotations
+
+import asyncio
+from pathlib import Path
+from typing import TYPE_CHECKING
+
+from bioetl.domain.services.dq_serializer import DQReportSerializer
+from bioetl.domain.value_objects.dq_report import (
+    BronzeDQReport,
+    DQReportFormat,
+    GoldDQReport,
+    SilverDQReport,
+)
+from bioetl.infrastructure.storage._atomic import atomic_write_bytes
+
+if TYPE_CHECKING:
+    from bioetl.domain.ports import LoggerPort
+
+
+class DQReportWriter:
+    """Writer for DQ reports to filesystem.
+
+    Implements DQReportWriterPort with atomic writes and
+    support for JSON, YAML, and HTML formats.
+
+    Path formats (unified structure under data/output/reports/dq/):
+    - Bronze: {base_path}/bronze/{provider}/{entity}/{date}/batch_{date}_{provider}_{entity}_dq_report{ext}
+    - Silver: {base_path}/silver/{provider}/{entity}/silver_{provider}_{entity}_dq_report{ext}
+    - Gold: {base_path}/gold/{provider}/{entity}/gold_{provider}_{entity}_dq_report{ext}
+
+    Flat structure (when flat_structure=True):
+    - Bronze: {base_path}/batch_{date}_{provider}_{entity}_dq_report{ext}
+    - Silver: {base_path}/silver_{provider}_{entity}_dq_report{ext}
+    - Gold: {base_path}/gold_{provider}_{entity}_dq_report{ext}
+    """
+
+    def __init__(
+        self,
+        base_path: str | Path,
+        logger: LoggerPort,
+        flat_structure: bool = False,
+    ) -> None:
+        """Initialize DQ report writer.
+
+        Args:
+            base_path: Base path for report storage.
+            logger: Structured logger for observability.
+            flat_structure: If True, write reports directly to base_path
+                          with {layer}_{provider}_{entity}_dq_report{ext} naming pattern.
+        """
+        self._base_path = Path(base_path)
+        self._logger = logger
+        self._serializer = DQReportSerializer()
+        self._flat_structure = flat_structure
+
+    async def write_bronze_report(
+        self,
+        report: BronzeDQReport,
+        output_path: Path | None = None,
+        format: DQReportFormat | None = None,
+        *,
+        provider: str | None = None,
+        entity: str | None = None,
+        date_str: str | None = None,  # Deprecated: no longer used in path/filename
+    ) -> Path:
+        """Write Bronze DQ report to file.
+
+        Output path structure (unified with Silver/Gold):
+        - Normal: {base_path}/bronze/{provider}/{entity}/bronze_{provider}_{entity}_dq_report.json
+        - Flat: {base_path}/bronze_{provider}_{entity}_dq_report.json
+
+        Args:
+            report: Bronze DQ report to write.
+            output_path: Output path (None = auto-generated at entity level).
+            format: Output format (None = JSON).
+            provider: Provider name for filename generation.
+            entity: Entity name for filename generation.
+            date_str: Deprecated, kept for backward compatibility (ignored).
+
+        Returns:
+            Path to the written report file.
+        """
+        format = format or DQReportFormat.JSON
+        extension = self._get_extension(format)
+
+        # Build filename - unified with Silver pattern: {layer}_{provider}_{entity}_dq_report
+        if provider and entity:
+            filename = f"bronze_{provider}_{entity}_dq_report{extension}"
+        else:
+            filename = f"bronze_{report.batch_id}_dq_report{extension}"
+
+        if output_path is None:
+            # Unified structure: {base_path}/bronze/{provider}/{entity}/ (no date subdirectory)
+            # Matches Silver/Gold pattern for consistency
+            if self._flat_structure:
+                output_path = self._base_path / filename
+            elif provider and entity:
+                output_path = self._base_path / "bronze" / provider / entity / filename
+            else:
+                # Fallback: extract from source file path (parent without date)
+                source_dir = Path(
+                    report.source_file
+                ).parent.parent  # Go up from date dir
+                output_path = self._base_path / source_dir / filename
+        else:
+            output_path = Path(output_path)
+            if output_path.is_dir():
+                output_path = output_path / filename
+
+        return await self._write_report(report, output_path, format)
+
+    def _build_layer_filename(
+        self,
+        layer: str,
+        extension: str,
+        provider: str | None,
+        entity: str | None,
+        target_table: str,
+        run_id: str,
+    ) -> str:
+        """Build filename for Silver/Gold DQ report.
+
+        Args:
+            layer: Layer name ('silver' or 'gold').
+            extension: File extension including dot.
+            provider: Provider name for filename.
+            entity: Entity name for filename.
+            target_table: Target table name (fallback for naming).
+            run_id: Run ID (fallback for naming).
+
+        Returns:
+            Generated filename.
+        """
+        if provider and entity:
+            return f"{layer}_{provider}_{entity}_dq_report{extension}"
+        if self._flat_structure:
+            flat_table_name = target_table.replace(".", "_")
+            return f"{layer}_{flat_table_name}_dq_report{extension}"
+        return f"{layer}_{run_id}_dq_report{extension}"
+
+    def _resolve_layer_output_path(
+        self,
+        layer: str,
+        output_path: Path | None,
+        extension: str,
+        provider: str | None,
+        entity: str | None,
+        target_table: str,
+        run_id: str,
+    ) -> Path:
+        """Resolve output path for Silver/Gold DQ report.
+
+        Unified path structure:
+        - Normal: {base_path}/{layer}/{provider}/{entity}/{layer}_{provider}_{entity}_dq_report{ext}
+        - Flat: {base_path}/{layer}_{provider}_{entity}_dq_report{ext}
+
+        Args:
+            layer: Layer name ('silver' or 'gold').
+            output_path: Explicit output path or None for auto-generation.
+            extension: File extension including dot.
+            provider: Provider name for filename.
+            entity: Entity name for filename.
+            target_table: Target table name.
+            run_id: Run ID.
+
+        Returns:
+            Resolved output path.
+        """
+        filename = self._build_layer_filename(
+            layer, extension, provider, entity, target_table, run_id
+        )
+
+        if output_path is not None:
+            output_path = Path(output_path)
+            # Always treat output_path as a directory and append filename.
+            # Previous logic used is_dir() which returned False for not-yet-created
+            # directories, causing the DQ report to be written as a file with the
+            # entity name (e.g. "target_component") instead of inside the directory.
+            output_path.mkdir(parents=True, exist_ok=True)
+            return output_path / filename
+
+        if self._flat_structure:
+            return self._base_path / filename
+
+        # Unified structure: {layer}/{provider}/{entity}/
+        if provider and entity:
+            return self._base_path / layer / provider / entity / filename
+
+        # Fallback: extract from table name (e.g., "chembl_activity" -> "chembl/activity")
+        if "_" in target_table:
+            parts = target_table.split("_", 1)
+            return self._base_path / layer / parts[0] / parts[1] / filename
+
+        # Last resort: use table name directly
+        return self._base_path / layer / target_table / filename
+
+    async def write_silver_report(
+        self,
+        report: SilverDQReport,
+        output_path: Path | None = None,
+        format: DQReportFormat | None = None,
+        *,
+        provider: str | None = None,
+        entity: str | None = None,
+    ) -> Path:
+        """Write Silver DQ report to file.
+
+        Args:
+            report: Silver DQ report to write.
+            output_path: Output path (None = alongside data).
+            format: Output format (None = JSON).
+            provider: Provider name for filename generation.
+            entity: Entity name for filename generation.
+
+        Returns:
+            Path to the written report file.
+        """
+        format = format or DQReportFormat.JSON
+        extension = self._get_extension(format)
+        resolved_path = self._resolve_layer_output_path(
+            "silver",
+            output_path,
+            extension,
+            provider,
+            entity,
+            report.target_table,
+            report.run_id,
+        )
+        return await self._write_report(report, resolved_path, format)
+
+    async def write_gold_report(
+        self,
+        report: GoldDQReport,
+        output_path: Path | None = None,
+        format: DQReportFormat | None = None,
+        *,
+        provider: str | None = None,
+        entity: str | None = None,
+    ) -> Path:
+        """Write Gold DQ report to file.
+
+        Args:
+            report: Gold DQ report to write.
+            output_path: Output path (None = alongside data).
+            format: Output format (None = JSON).
+            provider: Provider name for filename generation.
+            entity: Entity name for filename generation.
+
+        Returns:
+            Path to the written report file.
+        """
+        format = format or DQReportFormat.JSON
+        extension = self._get_extension(format)
+        resolved_path = self._resolve_layer_output_path(
+            "gold",
+            output_path,
+            extension,
+            provider,
+            entity,
+            report.target_table,
+            report.run_id,
+        )
+        return await self._write_report(report, resolved_path, format)
+
+    async def _write_report(
+        self,
+        report: BronzeDQReport | SilverDQReport | GoldDQReport,
+        output_path: Path,
+        format: DQReportFormat,
+    ) -> Path:
+        """Write report to file atomically.
+
+        Args:
+            report: DQ report to write.
+            output_path: Output path for report.
+            format: Output format.
+
+        Returns:
+            Path to the written report file.
+        """
+        # Ensure parent directory exists
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Serialize report
+        content = self._serializer.serialize(report, format)
+        content_bytes = content.encode("utf-8")
+
+        # Write atomically in executor
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(
+            None,
+            lambda: atomic_write_bytes(output_path, content_bytes),
+        )
+
+        self._logger.info(
+            "dq_report_written",
+            path=str(output_path),
+            layer=report.layer.value,
+            format=format.value,
+            run_id=report.run_id,
+            size_bytes=len(content_bytes),
+        )
+
+        return output_path
+
+    def _get_extension(self, format: DQReportFormat) -> str:
+        """Get file extension for format."""
+        extensions = {
+            DQReportFormat.JSON: ".json",
+            DQReportFormat.YAML: ".yaml",
+            DQReportFormat.HTML: ".html",
+        }
+        return extensions.get(format, ".json")
+
+
+__all__ = ["DQReportWriter"]

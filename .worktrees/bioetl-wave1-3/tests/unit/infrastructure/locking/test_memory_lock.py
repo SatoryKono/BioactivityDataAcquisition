@@ -1,0 +1,370 @@
+"""Unit tests for MemoryLock."""
+
+from __future__ import annotations
+
+import asyncio
+
+import pytest
+
+from bioetl.domain.locking import FencingToken
+from bioetl.infrastructure.locking.memory_lock import MemoryLock
+
+
+@pytest.fixture
+def memory_lock():
+    """Create a MemoryLock instance."""
+    return MemoryLock()
+
+
+@pytest.fixture
+def fast_ttl_lock():
+    """Create a MemoryLock with fast TTL checking for tests.
+
+    Uses aggressive interval (20ms) for faster test execution.
+    """
+    return MemoryLock(ttl_check_interval=0.02)
+
+
+@pytest.mark.unit
+class TestMemoryLock:
+    """Tests for MemoryLock."""
+
+    @pytest.mark.asyncio
+    async def test_acquire_success(self, memory_lock):
+        """Test successful lock acquisition returns FencingToken."""
+        result = await memory_lock.acquire(
+            key="test_key",
+            owner_id="owner_1",
+            wait=True,
+            exclusive=True,
+        )
+        assert result is not None
+        assert isinstance(result, FencingToken)
+        assert result.sequence == 1
+        assert result.key == "test_key"
+
+    @pytest.mark.asyncio
+    async def test_validate_fencing_token_success(self, memory_lock):
+        """Test fencing token validation succeeds for current holder."""
+        token = await memory_lock.acquire(
+            key="test_key",
+            owner_id="owner_1",
+        )
+        assert token is not None
+
+        result = await memory_lock.validate_fencing_token("test_key", token)
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_validate_fencing_token_rejects_stale(self, memory_lock):
+        """Test fencing token validation fails for stale tokens."""
+        token = await memory_lock.acquire(
+            key="test_key",
+            owner_id="owner_1",
+        )
+        assert token is not None
+        await memory_lock.release(key="test_key", owner_id="owner_1")
+
+        new_token = await memory_lock.acquire(
+            key="test_key",
+            owner_id="owner_2",
+        )
+        assert new_token is not None
+
+        result = await memory_lock.validate_fencing_token("test_key", token)
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_acquire_no_wait_when_unlocked(self, memory_lock):
+        """Test acquire with wait=False when lock is not held."""
+        result = await memory_lock.acquire(
+            key="test_key",
+            owner_id="owner_1",
+            wait=False,
+        )
+        # When wait=False and lock is not held, acquire succeeds immediately
+        assert result is not None
+        assert isinstance(result, FencingToken)
+
+    @pytest.mark.asyncio
+    async def test_acquire_timeout(self, memory_lock):
+        """Test acquire with timeout when lock is held."""
+        # First acquire the lock
+        await memory_lock.acquire(
+            key="test_key",
+            owner_id="owner_1",
+            wait=True,
+        )
+
+        # Try to acquire again with short timeout
+        result = await memory_lock.acquire(
+            key="test_key",
+            owner_id="owner_2",
+            wait=True,
+            wait_timeout=0.01,
+        )
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_release_success(self, memory_lock):
+        """Test successful lock release."""
+        await memory_lock.acquire(
+            key="test_key",
+            owner_id="owner_1",
+        )
+
+        result = await memory_lock.release(
+            key="test_key",
+            owner_id="owner_1",
+        )
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_release_unlocked(self, memory_lock):
+        """Test release when lock is not held."""
+        result = await memory_lock.release(
+            key="test_key",
+            owner_id="owner_1",
+        )
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_heartbeat_success(self, memory_lock):
+        """Test heartbeat succeeds when lock is held by owner."""
+        # Acquire lock first
+        await memory_lock.acquire(
+            key="test_key",
+            owner_id="owner_1",
+        )
+        result = await memory_lock.heartbeat(
+            key="test_key",
+            owner_id="owner_1",
+        )
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_heartbeat_fails_when_not_owned(self, memory_lock):
+        """Test heartbeat fails when lock is not held or owned by other."""
+        # Case 1: No lock
+        result = await memory_lock.heartbeat(
+            key="nonexistent_key",
+            owner_id="owner_1",
+        )
+        assert result is False
+
+        # Case 2: Owned by other
+        await memory_lock.acquire(
+            key="test_key",
+            owner_id="owner_2",
+        )
+        result = await memory_lock.heartbeat(
+            key="test_key",
+            owner_id="owner_1",
+        )
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_aclose_releases_locks(self, memory_lock):
+        """Test aclose releases all locks."""
+        await memory_lock.acquire(key="key1", owner_id="owner_1")
+        await memory_lock.acquire(key="key2", owner_id="owner_2")
+
+        await memory_lock.aclose()
+
+        # Locks should be cleared
+        assert len(memory_lock._locks) == 0
+
+
+@pytest.mark.unit
+class TestMemoryLockTTL:
+    """Tests for MemoryLock TTL expiration functionality."""
+
+    @pytest.mark.asyncio
+    async def test_lock_expires_after_ttl(self, fast_ttl_lock):
+        """Test that lock is automatically released after TTL expires."""
+        # Acquire lock with TTL (increased for CI stability)
+        result = await fast_ttl_lock.acquire(
+            key="test_key",
+            owner_id="owner_1",
+            ttl=0.3,  # 300ms TTL (increased from 100ms for CI stability)
+        )
+        assert result is not None
+
+        # Another owner cannot acquire immediately
+        result = await fast_ttl_lock.acquire(
+            key="test_key",
+            owner_id="owner_2",
+            wait=False,
+        )
+        assert result is None
+
+        # Wait for TTL to expire (TTL + check interval buffer)
+        await asyncio.sleep(0.45)
+
+        # Now another owner should be able to acquire
+        result = await fast_ttl_lock.acquire(
+            key="test_key",
+            owner_id="owner_2",
+            wait=False,
+        )
+        assert result is not None
+
+        await fast_ttl_lock.aclose()
+
+    @pytest.mark.asyncio
+    async def test_heartbeat_extends_ttl(self, fast_ttl_lock):
+        """Test that heartbeat extends the lock TTL."""
+        # Acquire lock with TTL (increased for Python 3.14 async timing issues)
+        await fast_ttl_lock.acquire(
+            key="test_key",
+            owner_id="owner_1",
+            ttl=2.0,  # 2s TTL (increased for Python 3.14 stability)
+        )
+
+        # Wait less than half the TTL
+        await asyncio.sleep(0.3)
+
+        # Heartbeat to extend TTL (resets to 2s from now)
+        result = await fast_ttl_lock.heartbeat(
+            key="test_key",
+            owner_id="owner_1",
+        )
+        assert result is True
+
+        # Wait another 0.5s (original TTL would have expired at 2s, but heartbeat extended)
+        # After heartbeat, TTL is 2s, so 0.5s wait leaves 1.5s margin for CI stability
+        await asyncio.sleep(0.5)
+
+        # Lock should still be held because heartbeat extended it
+        result = await fast_ttl_lock.acquire(
+            key="test_key",
+            owner_id="owner_2",
+            wait=False,
+        )
+        assert result is None
+
+        await fast_ttl_lock.aclose()
+
+    @pytest.mark.asyncio
+    async def test_ttl_checker_starts_only_when_needed(self):
+        """Test that TTL checker task starts only when acquiring with TTL."""
+        lock = MemoryLock(ttl_check_interval=0.1)
+
+        # No TTL checker before any acquire
+        assert lock._ttl_checker_task is None
+
+        # Acquire without TTL - no checker started
+        await lock.acquire(key="key1", owner_id="owner_1")
+        assert lock._ttl_checker_task is None
+
+        # Acquire with TTL - checker should start
+        await lock.acquire(key="key2", owner_id="owner_1", ttl=10)
+        assert lock._ttl_checker_task is not None
+        assert not lock._ttl_checker_task.done()
+
+        await lock.aclose()
+
+    @pytest.mark.asyncio
+    async def test_aclose_stops_ttl_checker(self, fast_ttl_lock):
+        """Test that aclose stops the TTL checker task."""
+        # Acquire with TTL to start the checker
+        await fast_ttl_lock.acquire(
+            key="test_key",
+            owner_id="owner_1",
+            ttl=10,
+        )
+
+        # Checker should be running
+        assert fast_ttl_lock._ttl_checker_task is not None
+
+        await fast_ttl_lock.aclose()
+
+        # Checker should be stopped and cleared
+        assert fast_ttl_lock._ttl_checker_task is None
+        assert fast_ttl_lock._closed is True
+
+    @pytest.mark.asyncio
+    async def test_lock_without_ttl_does_not_expire(self, fast_ttl_lock):
+        """Test that lock without TTL never expires automatically."""
+        # Acquire lock without TTL
+        result = await fast_ttl_lock.acquire(
+            key="test_key",
+            owner_id="owner_1",
+        )
+        assert result is not None
+
+        # Wait some time (would have expired if TTL was set)
+        await asyncio.sleep(0.3)
+
+        # Lock should still be held
+        result = await fast_ttl_lock.acquire(
+            key="test_key",
+            owner_id="owner_2",
+            wait=False,
+        )
+        assert result is None
+
+        await fast_ttl_lock.aclose()
+
+    @pytest.mark.asyncio
+    async def test_multiple_locks_with_different_ttl(self, fast_ttl_lock):
+        """Test multiple locks with different TTL values."""
+        # Acquire two locks with different TTLs (increased for CI stability)
+        await fast_ttl_lock.acquire(
+            key="short_ttl",
+            owner_id="owner_1",
+            ttl=0.3,  # 300ms (increased from 100ms for CI stability)
+        )
+        await fast_ttl_lock.acquire(
+            key="long_ttl",
+            owner_id="owner_1",
+            ttl=1.0,  # 1s (increased from 500ms for CI stability)
+        )
+
+        # Wait for short TTL to expire (with margin)
+        await asyncio.sleep(0.45)
+
+        # Short TTL lock should be available
+        result = await fast_ttl_lock.acquire(
+            key="short_ttl",
+            owner_id="owner_2",
+            wait=False,
+        )
+        assert result is not None
+
+        # Long TTL lock should still be held
+        result = await fast_ttl_lock.acquire(
+            key="long_ttl",
+            owner_id="owner_2",
+            wait=False,
+        )
+        assert result is None
+
+        await fast_ttl_lock.aclose()
+
+    @pytest.mark.asyncio
+    async def test_sequence_monotonically_increases(self, memory_lock):
+        """Test that fencing token sequence increases across acquires."""
+        # Acquire and release three times on the same key
+        sequences = []
+        for i in range(3):
+            token = await memory_lock.acquire(
+                key="test_key",
+                owner_id=f"owner_{i}",
+            )
+            assert token is not None
+            sequences.append(token.sequence)
+            await memory_lock.release(key="test_key", owner_id=f"owner_{i}")
+
+        # Sequences must be strictly increasing
+        assert sequences == [1, 2, 3]
+
+    @pytest.mark.asyncio
+    async def test_sequence_increases_across_different_keys(self, memory_lock):
+        """Test that sequence counter is global, not per-key."""
+        t1 = await memory_lock.acquire(key="key_a", owner_id="owner_1")
+        t2 = await memory_lock.acquire(key="key_b", owner_id="owner_1")
+
+        assert t1 is not None
+        assert t2 is not None
+        assert t2.sequence > t1.sequence

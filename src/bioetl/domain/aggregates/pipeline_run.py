@@ -38,7 +38,11 @@ class PipelineRunState(StrEnum):
     SHUTDOWN = "shutdown"
 
     def is_terminal(self) -> bool:
-        """Check if terminal (no more transitions)."""
+        """Check if terminal (no more transitions).
+
+        Returns:
+            True if the condition is met, False otherwise.
+        """
         return self in {
             PipelineRunState.COMPLETED,
             PipelineRunState.FAILED,

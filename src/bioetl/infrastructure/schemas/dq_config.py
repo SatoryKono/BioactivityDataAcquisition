@@ -74,6 +74,9 @@ class ThresholdsConfig(BaseModel):
 
         Raises:
             ValueError: If soft_fail is not strictly less than hard_fail.
+
+        Returns:
+            Validated ThresholdsConfig.
         """
         if self.soft_fail >= self.hard_fail:
             raise ValueError(

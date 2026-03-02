@@ -47,7 +47,7 @@
 
 ## 3. Трансформация
 
-**Файл:** `src/bioetl/application/pipelines/chembl/target-component-transformer.py`
+**Файл:** `src/bioetl/application/pipelines/chembl/target_component_transformer.py`
 
 ### Entity ID
 
@@ -61,10 +61,10 @@ entity-id = f"chembl:component-{component-id}"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_target_component
+bioetl run --pipeline chembl_target_component
 
 # С ограничением
-bioetl run chembl_target_component --limit 500
+bioetl run --pipeline chembl_target_component --limit 500
 ```
 
 ---
@@ -73,8 +73,8 @@ bioetl run chembl_target_component --limit 500
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/entities/chembl/target-component.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/target-component-transformer.py` |
+| Конфигурация | `configs/entities/chembl/target_component.yaml` |
+| Трансформер | `src/bioetl/application/pipelines/chembl/target_component_transformer.py` |
 
 ---
 

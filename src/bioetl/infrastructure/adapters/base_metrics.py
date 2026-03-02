@@ -60,6 +60,8 @@ class AdapterMetrics:
             - adapter_request_duration_seconds: Histogram with provider/endpoint labels
             - adapter_requests_total: Counter with provider/endpoint/status labels
 
+        Returns:
+            Iterator over results.
         """
         start = time.perf_counter()
         status = "success"

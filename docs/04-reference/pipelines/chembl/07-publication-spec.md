@@ -1,6 +1,6 @@
 # ChEMBL Publication (Document) Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.22*
+*Version 1.2.0 | Aligned with RULES.md v5.23*
 
 ----------------------------------------------------------------------
 
@@ -144,25 +144,25 @@ class ChemblPublicationSchema(ETLRecordSchema):
 ## 6. Pipeline Configuration
 
 ```yaml
-pipeline-name: chembl_publication
+pipeline_name: chembl_publication
 provider: chembl
-entity-type: document
+entity_type: document
 version: "1.2.0"
 
-primary-keys: ["publication-id"]
-silver-table: "chembl_publication"
-gold-table: "chembl_publication"
+primary_keys: ["publication-id"]
+silver_table: "chembl_publication"
+gold_table: "chembl_publication"
 
-gold-filters:
-  required-fields:
+gold_filters:
+  required_fields:
     - title
   columns:
     doc-type: [PUBLICATION]
 
-input-filter:
+input_filter:
   enabled: true
-  source-path: "data/input/document.csv"
-  column-name: "publication-id"
-  filter-field: "publication-id"
-  batch-size: 20
+  source_path: "data/input/document.csv"
+  column_name: "publication-id"
+  filter_field: "publication-id"
+  batch_size: 20
 ```

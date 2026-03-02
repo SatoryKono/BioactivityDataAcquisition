@@ -1,12 +1,12 @@
 ---
 name: documentation-audit
-description: Full audit and update of BioETL project documentation for v5.22+. Use when asked to review docs for staleness, reconcile docs with code, sync RULES.md and REQUIREMENTS.md, update architecture/provider/contract docs, reflect ADR-010/ADR-014/ADR-017, or identify dead documentation.
+description: Full audit and update of BioETL project documentation for v5.23+. Use when asked to review docs for staleness, reconcile docs with code, sync RULES.md and REQUIREMENTS.md, update architecture/provider/contract docs, reflect ADR-010/ADR-014/ADR-017, or identify dead documentation.
 ---
 
 # Documentation Audit
 
 ## Objective
-Perform a full documentation audit of BioETL and bring docs in sync with code and ADRs (v5.22+). Produce a clear audit report, a prioritized plan, and updated documentation changes.
+Perform a full documentation audit of BioETL and bring docs in sync with code and ADRs (v5.23+). Produce a clear audit report, a prioritized plan, and updated documentation changes.
 
 ## Required inputs (before starting)
 - Load `references/audit-checklist.md` — checklist for each audit area.
@@ -15,7 +15,7 @@ Perform a full documentation audit of BioETL and bring docs in sync with code an
 ## Workflow
 
 ### 1. Intake and scope
-- Confirm repo root and target version (v5.22+).
+- Confirm repo root and target version (v5.23+).
 - Identify doc entry points: README.md, mkdocs.yml.
 - List files under `docs/`: `rg --files docs`.
 

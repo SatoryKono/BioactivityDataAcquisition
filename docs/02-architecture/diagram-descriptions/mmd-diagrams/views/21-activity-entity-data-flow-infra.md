@@ -1,9 +1,11 @@
-# Activity Entity Data Flow Infra (Infrastructure-Mapping)
+# Activity Entity Data Flow Infra
 
 - Исходная диаграмма: `mmd-diagrams/views/21-activity-entity-data-flow-infra.mermaid`
 
 ## Описание
-Декомпозированное представление типа 'Infrastructure-Mapping' для родительской диаграммы `21-activity-entity-data-flow-full.mermaid`. Используется для документации конкретного архитектурного среза.
+Эта views-диаграмма Activity Entity Data Flow Infra представляет срез типа infra для родительской схемы 21-activity-entity-data-flow-full.mermaid и использует нотацию flowchart. Она нужна для детального анализа выбранного аспекта архитектуры без перегрузки полного графа лишними элементами. В метке view зафиксировано назначение: Infrastructure-Mapping. Такой формат облегчает трассировку связей между full-версией и специализированными представлениями overview/domain/infra/dataflow, что важно для ревью, онбординга и проверки архитектурной консистентности документации. Показательные узлы в диаграмме: Local FS, Fetch Activity Batch, Fetch Related IDs, Write Bronze, Record Lineage, Normalize Units. По ним можно проверить корректность терминологии, соответствие имен портов/адаптеров и логичность маршрутов данных или управляющих вызовов. Диаграмма предназначена для практического использования в технических обсуждениях, регрессионной валидации диаграмм и синхронизации с кодовой структурой проекта. Она помогает быстро обнаруживать расхождения между задуманной архитектурой и фактической реализацией компонентов.
 
 ## Метаданные
-- Метаданные не указаны в исходном файле.
+- Тип: `flowchart`
+- View: `Infrastructure-Mapping`
+- Parent: `21-activity-entity-data-flow-full.mermaid`

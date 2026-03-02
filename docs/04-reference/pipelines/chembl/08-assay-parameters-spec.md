@@ -1,6 +1,6 @@
 # ChEMBL Assay Parameters Pipeline Specification
 
-*Version 1.2.0 | Aligned with RULES.md v5.22*
+*Version 1.2.0 | Aligned with RULES.md v5.23*
 
 ----------------------------------------------------------------------
 
@@ -119,23 +119,23 @@ class AssayParametersSchema(ETLRecordSchema):
 ## 5. Pipeline Configuration
 
 ```yaml
-pipeline-name: chembl_assay_parameters
+pipeline_name: chembl_assay_parameters
 provider: chembl
-entity-type: assay-parameters
+entity_type: assay-parameters
 version: "1.2.0"
 
-primary-keys: ["assay-param-id"]
-silver-table: "chembl_assay_parameters"
-gold-table: "chembl_assay_parameters"
+primary_keys: ["assay-param-id"]
+silver_table: "chembl_assay_parameters"
+gold_table: "chembl_assay_parameters"
 
-gold-filters:
-  required-fields:
+gold_filters:
+  required_fields:
     - type
 
-input-filter:
+input_filter:
   enabled: true
-  source-path: "data/input/assay.csv"
-  column-name: "assay-id"
-  filter-field: "assay-id"
-  batch-size: 20
+  source_path: "data/input/assay.csv"
+  column_name: "assay-id"
+  filter_field: "assay-id"
+  batch_size: 20
 ```

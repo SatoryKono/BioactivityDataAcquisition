@@ -3,8 +3,8 @@
 BioETL command-line interface (CLI) - основной способ взаимодействия с системой.
 Построен на фреймворке **Click** для стабильности и расширяемости.
 
-**Версия:** 5.14.0
-**Дата обновления:** 2026-02-10
+**Версия:** 6.0.0
+**Дата обновления:** 2026-03-02
 
 ---
 
@@ -189,6 +189,30 @@ bioetl run-composite --composite publication --enrich-only crossref,openalex
 
 # Только обязательные enrichers
 bioetl run-composite --composite publication --required-only
+```
+
+---
+
+### `adr` — Работа с ADR
+
+Утилиты для просмотра и валидации архитектурных решений (Architecture Decision Records).
+
+#### `adr list` — Список ADR
+
+```bash
+bioetl adr list [--json]
+```
+
+#### `adr show` — Просмотр ADR
+
+```bash
+bioetl adr show <NUMBER> [--raw]
+```
+
+#### `adr validate` — Валидация ADR репозитория
+
+```bash
+bioetl adr validate [--json]
 ```
 
 ---
@@ -470,18 +494,18 @@ bioetl maintenance bronze-cleanup [OPTIONS]
 
 | Переменная               | Описание                       | По умолчанию |
 |--------------------------|--------------------------------|--------------|
-| `BIOETL-ENV`             | Окружение (`dev`, `prod`)      | `dev`        |
-| `BIOETL-DATA-DIR`        | Директория данных              | `./data`     |
-| `BIOETL-LOG-LEVEL`       | Уровень логирования            | `INFO`       |
-| `BIOETL-METRICS-ENABLED` | Включить Prometheus метрики    | `true`       |
-| `BIOETL-METRICS-PORT`    | Порт для Prometheus            | `8000`       |
-| `BIOETL-TRACING-ENABLED` | Включить OpenTelemetry tracing | `false`      |
+| `BIOETL_ENV`             | Окружение (`dev`, `prod`)      | `dev`        |
+| `BIOETL_DATA_DIR`        | Директория данных              | `./data`     |
+| `BIOETL_LOG_LEVEL`       | Уровень логирования            | `INFO`       |
+| `BIOETL_METRICS_ENABLED` | Включить Prometheus метрики    | `true`       |
+| `BIOETL_METRICS_PORT`    | Порт для Prometheus            | `8000`       |
+| `BIOETL_TRACING_ENABLED` | Включить OpenTelemetry tracing | `false`      |
 
 **API-ключи провайдеров:**
 
-- `BIOETL-UNIPROT-API-KEY`
-- `BIOETL-OPENALEX-API-KEY`
-- `BIOETL-SEMANTIC-SCHOLAR-API-KEY`
+- `BIOETL_UNIPROT_API_KEY`
+- `BIOETL_OPENALEX_EMAIL`
+- `BIOETL_SEMANTICSCHOLAR_API_KEY`
 
 ---
 

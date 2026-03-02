@@ -1,0 +1,90 @@
+%% BioETL — BatchExecutor Internal Architecture
+%% Shows the composition of BatchExecutor and its helper components.
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   System / Component
+%% @nodes   15
+%% @allow-polyline-routing
+%% @uniform width=280 height=256 max_title_len=20 max_desc_lines=12
+
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+graph TB
+    subgraph BatchExecutor["BatchExecutor"]
+        BE["BatchExecutor<br/>--------<br/>services, context, config<br/>batch_size, checkpoint_interval<br/>+ execute()<br/>+ process()"]:::size-md
+    end
+
+    subgraph Helpers["Composed Helper Components"]
+        BMM["BatchMemoryManager<br/>--------<br/>adaptive batch sizing<br/>+ check_pressure()<br/>+ maybe_recover()"]:::size-md
+        BMR["BatchMetricsRecorder<br/>--------<br/>batch and error metrics<br/>+ track_batch_size()<br/>+ track_error()"]:::size-md
+        BTM["BatchTracingManager<br/>--------<br/>execution spans<br/>+ start_batch_span()<br/>+ end_span()"]:::size-md
+        BT["BatchTransformer<br/>--------<br/>transform callbacks<br/>+ transform_batch()<br/>+ _check_dq_thresholds()"]:::size-md
+        BW["BatchWriter<br/>--------<br/>bronze/silver/gold writes<br/>+ write_bronze()<br/>+ _validate_lock()"]:::size-md
+        QM["QuarantineManager<br/>--------<br/>quarantine failed records<br/>+ quarantine_record()"]:::size-md
+        CM["CheckpointManager<br/>--------<br/>offset checkpoints<br/>+ load/save/delete"]:::size-md
+    end
+
+    subgraph DataFlow["Data Flow Through Batch"]
+        direction LR
+        RAW["Raw API Records<br/>(dict[str, Any])"]:::size-sm
+        SILVER["Silver Records<br/>(Delta Lake)"]:::size-sm
+        RAW -->|"write_bronze()"| BRONZE
+        RAW -->|"transform()"| SILVER
+        SILVER -->|"write_gold()"| GOLD
+        RAW -->|"on error"| QUAR
+    end
+
+    subgraph TransformResult["TransformResult"]
+        TR["TransformResult<br/>--------<br/>silver_records<br/>gold_records<br/>quarantined_count<br/>errors"]:::size-md
+    end
+
+    subgraph ErrorClassification["Error Classification"]
+        ECL["ErrorClassifier<br/>--------<br/>QUARANTINE / RETRY / FATAL"]:::size-md
+    end
+
+    %% Composition
+    BE --> BMM
+    BE --> BMR
+    BE --> BTM
+    BE --> BT
+    BE --> BW
+    BE --> QM
+    BE --> CM
+
+    %% Transform produces result
+    BT --> TR
+    BT --> ECL
+
+    %% Writer uses lock validation
+    BW -.->|"Safety Guard"| CM
+
+    classDef executor fill:#eff6ff,stroke:#2563eb,stroke-width:3px
+    classDef helper fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    classDef data fill:#f0fdf4,stroke:#16a34a
+    classDef result fill:#f5f3ff,stroke:#7c3aed
+    classDef error fill:#fff1f2,stroke:#dc2626
+
+    class BE executor
+    class BMM,BMR,BTM,BT,BW,QM,CM helper
+    class RAW,BRONZE,SILVER,GOLD data
+    class QUAR error
+    class TR result
+    class ECL error
+
+    %% Link styles (LBP-005)
+    linkStyle 0,1,2,3,11 stroke:#1E293B,stroke-width:3px
+    linkStyle 4,7,8,9,10,12 stroke:#16a34a,stroke-width:2px
+    linkStyle 5 stroke:#94A3B8,stroke-width:1px
+    linkStyle 6 stroke:#94A3B8,stroke-width:1px
+    linkStyle 13 stroke:#7c3aed,stroke-width:1.5px,stroke-dasharray:5

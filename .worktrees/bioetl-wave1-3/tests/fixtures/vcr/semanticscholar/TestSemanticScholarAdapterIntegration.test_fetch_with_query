@@ -1,0 +1,173 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      Host:
+      - api.semanticscholar.org
+      User-Agent:
+      - BioETL/1.0
+    method: GET
+    uri: https://api.semanticscholar.org/graph/v1/paper/search?query=CRISPR+gene+editing&fields=paperId%2CexternalIds%2Ctitle%2Cabstract%2Cyear%2CpublicationDate%2Cvenue%2Cauthors%2Cauthors.externalIds%2Cauthors.hIndex%2Cauthors.authorId%2CcitationCount%2CreferenceCount%2CisOpenAccess%2CopenAccessPdf%2Ctldr%2CfieldsOfStudy%2CpublicationTypes%2Cjournal&offset=0&limit=3
+  response:
+    body:
+      string: '{"total": 89217, "offset": 0, "next": 3, "data": [{"paperId": "8236a26eed620c341dd9cb62cad5fed494f016e7",
+        "externalIds": {"PubMedCentral": "12114816", "DOI": "10.3390/pharmaceutics17050555",
+        "CorpusId": 278069918, "PubMed": "40430848"}, "title": "Transforming Pharmacogenomics
+        and CRISPR Gene Editing with the Power of Artificial Intelligence for Precision
+        Medicine", "venue": "Pharmaceutics", "year": 2025, "referenceCount": 50, "citationCount":
+        15, "isOpenAccess": false, "openAccessPdf": {"url": "", "status": null, "license":
+        "CCBY", "disclaimer": "Notice: Paper or abstract available at https://pmc.ncbi.nlm.nih.gov/articles/PMC12114816,
+        which is subject to the license by the author or copyright owner provided
+        with this content. Please go to the source to verify the license and copyright
+        information for your use."}, "fieldsOfStudy": ["Medicine"], "tldr": {"model":
+        "tldr@v2.0.0", "text": "The synergy of artificial intelligence, pharmacogenomics,
+        and CRISPR alters precision medicine by letting customized therapeutic interventions
+        and developing moral guidelines for applying these tools in individualized
+        medicine going forward are explored."}, "publicationTypes": ["Review", "JournalArticle"],
+        "publicationDate": "2025-04-24", "journal": {"name": "Pharmaceutics", "volume":
+        "17"}, "authors": [{"authorId": "2356953771", "externalIds": {}, "hIndex":
+        2}, {"authorId": "2187096201", "externalIds": {}, "hIndex": 5}, {"authorId":
+        "4348538", "externalIds": {}, "hIndex": 45}, {"authorId": "2349063103", "externalIds":
+        {}, "hIndex": 3}], "abstract": "Background: Advancements in pharmacogenomics,
+        artificial intelligence (AI), and CRISPR gene-editing technology are revolutionizing
+        precision medicine by enabling highly individualized therapeutic strategies.
+        Artificial intelligence-driven computational techniques improve biomarker
+        discovery and drug optimization while pharmacogenomics helps to identify genetic
+        polymorphisms affecting medicine metabolism, efficacy, and toxicity. Genetically
+        editing based on CRISPR presents a precise method for changing gene expression
+        and repairing damaging mutations. This review explores the convergence of
+        these three fields to enhance improved precision medicine. Method: A methodical
+        study of the current literature was performed on the effects of pharmacogenomics
+        on drug response variability, artificial intelligence, and CRISPR in predictive
+        modeling and gene-editing applications. Results: Driven by artificial intelligence,
+        pharmacogenomics allows clinicians to classify patients and select the appropriate
+        medications depending on their DNA profiles. This reduces the side effect
+        risk and increases the therapeutic efficacy. Precision genetic modifications
+        made feasible by CRISPR technology improve therapy outcomes in oncology, metabolic
+        illnesses, neurological diseases, and other fields. The integration of artificial
+        intelligence streamlines genome-editing applications, lowers off-target effects,
+        and increases CRISPR specificity. Notwithstanding these advances, issues including
+        computational biases, moral dilemmas, and legal constraints still arise. Conclusions:
+        The synergy of artificial intelligence, pharmacogenomics, and CRISPR alters
+        precision medicine by letting customized therapeutic interventions. Clinically
+        translating, however, hinges on resolving data privacy concerns, assuring
+        equitable access, and strengthening legal systems. Future research should
+        focus on refining CRISPR gene-editing technologies, enhancing AI-driven pharmacogenomics,
+        and developing moral guidelines for applying these tools in individualized
+        medicine going forward."}, {"paperId": "40e4e9a1f4431a952014fd8bdd4827e29718b217",
+        "externalIds": {"PubMedCentral": "12825352", "DOI": "10.1002/smtd.202401632",
+        "CorpusId": 278933728, "PubMed": "40434188"}, "title": "Lipid Nanoparticles
+        for Delivery of CRISPR Gene Editing Components", "venue": "Small Methods",
+        "year": 2025, "referenceCount": 204, "citationCount": 16, "isOpenAccess":
+        false, "openAccessPdf": {"url": "", "status": null, "license": "CCBYNCND",
+        "disclaimer": "Notice: Paper or abstract available at https://pmc.ncbi.nlm.nih.gov/articles/PMC12825352,
+        which is subject to the license by the author or copyright owner provided
+        with this content. Please go to the source to verify the license and copyright
+        information for your use."}, "fieldsOfStudy": ["Medicine"], "tldr": {"model":
+        "tldr@v2.0.0", "text": "In this review, the widely used CRISPR gene editing
+        systems are first overviewed, and each component of LNPs, as well as their
+        effects on delivery, are systematically discussed."}, "publicationTypes":
+        ["Review", "JournalArticle"], "publicationDate": "2025-05-28", "journal":
+        {"name": "Small Methods", "volume": "10"}, "authors": [{"authorId": "2363804544",
+        "externalIds": {}, "hIndex": 2}, {"authorId": "2363841368", "externalIds":
+        {}, "hIndex": 2}, {"authorId": "2363974075", "externalIds": {}, "hIndex":
+        2}, {"authorId": "2023741281", "externalIds": {}, "hIndex": 14}, {"authorId":
+        "2312280467", "externalIds": {}, "hIndex": 5}, {"authorId": "2241736330",
+        "externalIds": {}, "hIndex": 27}, {"authorId": "2256557416", "externalIds":
+        {}, "hIndex": 16}], "abstract": "Gene editing has emerged as a promising therapeutic
+        option for treating genetic diseases. However, a central challenge in the
+        field is the safe and efficient delivery of these large editing tools, especially
+        in vivo. Lipid nanoparticles (LNPs) are attractive nonviral vectors due to
+        their low immunogenicity and high delivery efficiency. To maximize editing
+        efficiency, LNPs should efficiently protect gene editing components against
+        multiple biological barriers and release them into the cytoplasm of target
+        cells. In this review, the widely used CRISPR gene editing systems are first
+        overviewed. Then, each component of LNPs, as well as their effects on delivery,
+        are systematically discussed. Following this, the current LNP engineering
+        strategies to achieve non\u2010liver targeting are summarized. Finally, preclinical
+        and clinical applications of LNPs for in vivo genome editing are highlighted,
+        and perspectives for the future development of LNPs are provided."}, {"paperId":
+        "0abbdc3050d16ddd79081ef3d007abf9825dc94d", "externalIds": {"PubMedCentral":
+        "11588664", "DOI": "10.1038/s41375-024-02444-y", "CorpusId": 273627905, "PubMed":
+        "39455854"}, "title": "Leveraging CRISPR gene editing technology to optimize
+        the efficacy, safety and accessibility of CAR T-cell therapy", "venue": "Leukemia",
+        "year": 2024, "referenceCount": 252, "citationCount": 69, "isOpenAccess":
+        false, "openAccessPdf": {"url": "", "status": null, "license": "CCBYNCND",
+        "disclaimer": "Notice: Paper or abstract available at https://pmc.ncbi.nlm.nih.gov/articles/PMC11588664,
+        which is subject to the license by the author or copyright owner provided
+        with this content. Please go to the source to verify the license and copyright
+        information for your use."}, "fieldsOfStudy": ["Medicine"], "tldr": {"model":
+        "tldr@v2.0.0", "text": "Potential uses of the CRISPR system to improve results
+        of CAR T-cells therapy including optimizing efficacy and safety and, developing
+        universal CAR T-cells are summarized."}, "publicationTypes": ["Review", "JournalArticle"],
+        "publicationDate": "2024-10-25", "journal": {"name": "Leukemia", "pages":
+        "2517 - 2543", "volume": "38"}, "authors": [{"authorId": "2216353120", "externalIds":
+        {}, "hIndex": 2}, {"authorId": "2308726086", "externalIds": {}, "hIndex":
+        2}, {"authorId": "2327791970", "externalIds": {}, "hIndex": 1}, {"authorId":
+        "2327823669", "externalIds": {}, "hIndex": 2}, {"authorId": "2327610008",
+        "externalIds": {}, "hIndex": 2}, {"authorId": "2308660254", "externalIds":
+        {}, "hIndex": 2}, {"authorId": "2308721793", "externalIds": {}, "hIndex":
+        2}, {"authorId": "2308791004", "externalIds": {}, "hIndex": 2}, {"authorId":
+        "2308809621", "externalIds": {}, "hIndex": 2}, {"authorId": "2390237659",
+        "externalIds": {}, "hIndex": 1}, {"authorId": "2275639427", "externalIds":
+        {}, "hIndex": 3}, {"authorId": "2289648649", "externalIds": {}, "hIndex":
+        5}, {"authorId": "2328912612", "externalIds": {"DBLP": ["Liang Wang"]}, "hIndex":
+        4}], "abstract": "Chimeric Antigen Receptor (CAR)-T-cell therapy has revolutionized
+        cancer immune therapy. However, challenges remain including increasing efficacy,
+        reducing adverse events and increasing accessibility. Use of Clustered Regularly
+        Interspaced Short Palindromic Repeats (CRISPR) technology can effectively
+        perform various functions such as precise integration, multi-gene editing,
+        and genome-wide functional regulation. Additionally, CRISPR screening using
+        large-scale guide RNA (gRNA) genetic perturbation provides an unbiased approach
+        to understanding mechanisms underlying anti-cancer efficacy of CAR T-cells.
+        Several emerging CRISPR tools with high specificity, controllability and efficiency
+        are useful to modify CAR T-cells and identify new targets. In this review
+        we summarize potential uses of the CRISPR system to improve results of CAR
+        T-cells therapy including optimizing efficacy and safety and, developing universal
+        CAR T-cells. We discuss challenges facing CRISPR gene editing and propose
+        solutions highlighting future research directions in CAR T-cell therapy."}]}
+
+        '
+    headers:
+      Access-Control-Allow-Origin:
+      - '*'
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '9232'
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 12 Feb 2026 17:10:03 GMT
+      Via:
+      - 1.1 1676c3a98d462bc13cd970ab14c05892.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - k9tEMW5XWDmt77DydX2wgbrWdZj5a3O6PltI5YSyeaA_qbDr7jKfqQ==
+      X-Amz-Cf-Pop:
+      - AMS56-P1
+      X-Cache:
+      - Miss from cloudfront
+      x-amz-apigw-id:
+      - YrZozFOSPHcEXnA=
+      x-amzn-Remapped-Connection:
+      - keep-alive
+      x-amzn-Remapped-Content-Length:
+      - '9232'
+      x-amzn-Remapped-Date:
+      - Thu, 12 Feb 2026 17:10:03 GMT
+      x-amzn-Remapped-Server:
+      - gunicorn
+      x-amzn-RequestId:
+      - e7ca74fc-10f7-4b09-af82-23b6446ed990
+    status:
+      code: 200
+      message: OK
+version: 1

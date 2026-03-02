@@ -49,7 +49,7 @@ class TracingPort(Protocol):
 
 ### 2. Prometheus Metrics with Standardized Labels
 
-Metrics are exposed at `http://localhost:{BIOETL-METRICS-PORT}/metrics` (default: 8000).
+Metrics are exposed at `http://localhost:{BIOETL_METRICS_PORT}/metrics` (default: 8000).
 
 **Pipeline Metrics (prefix: `bioetl-`):**
 
@@ -89,11 +89,11 @@ Metrics are exposed at `http://localhost:{BIOETL-METRICS-PORT}/metrics` (default
 
 Each port has a corresponding NoOp implementation. `NoOpMetrics` and `NoOpTracing`
 live in `domain/ports/noop.py` (no I/O dependencies), while `NoOpLogger` lives in
-`infrastructure/observability/noop-logger.py` (adapter-level fallback):
+`infrastructure/observability/noop_logger.py` (adapter-level fallback):
 
 | Port | NoOp Implementation | Location |
 |------|---------------------|----------|
-| `LoggerPort` | `NoOpLogger` | `infrastructure/observability/noop-logger.py` |
+| `LoggerPort` | `NoOpLogger` | `infrastructure/observability/noop_logger.py` |
 | `MetricsPort` | `NoOpMetrics` | `domain/ports/noop.py` |
 | `TracingPort` | `NoOpTracing` | `domain/ports/noop.py` (mirrors OTel API surface) |
 
@@ -155,7 +155,7 @@ Consistent labeling across all metrics:
 All ports use `@runtime-checkable`:
 - Enables `isinstance()` checks at runtime
 - Validates adapter implementations
-- Tested by `tests/architecture/test-port-contracts.py`
+- Tested by `tests/architecture/test_port_contracts.py`
 
 ## Implementation Details
 
@@ -178,12 +178,12 @@ src/bioetl/domain/ports/
 
 src/bioetl/infrastructure/observability/
     logging.py              # StructlogLogger adapter
-    unified-logger.py       # UnifiedLogger (Log Schema enforcement)
-    logging-config.py       # Centralized structlog configuration
+    unified_logger.py       # UnifiedLogger (Log Schema enforcement)
+    logging_config.py       # Centralized structlog configuration
     metrics.py              # Prometheus metric definitions
-    prometheus-metrics.py   # PrometheusMetrics adapter
+    prometheus_metrics.py   # PrometheusMetrics adapter
     tracing.py              # OpenTelemetryTracer (real OTel facade adapter)
-    noop-logger.py          # NoOpLogger (adapter-level fallback)
+    noop_logger.py          # NoOpLogger (adapter-level fallback)
     server.py               # Prometheus HTTP server
     anomaly/                # DataQualityMonitor
 ```

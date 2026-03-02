@@ -70,7 +70,7 @@ class PipelineConfig:
 # configs/entities/chembl/publication.yaml
 pipeline-name: chembl_publication
 provider: chembl
-entity-type: publication
+entity_type: publication
 
 # Loading strategy (ADR-030, ADR-031)
 # Explicit strategy declaration
@@ -135,20 +135,20 @@ loading-strategy: full-scan-only
 - `src/bioetl/domain/config/pipeline.py` — Add `loading-strategy` field to `PipelineConfig`
 
 **Application:**
-- `src/bioetl/application/core/checkpoint-manager.py` — Use `LoadingStrategy` for validation
+- `src/bioetl/application/core/checkpoint_manager.py` — Use `LoadingStrategy` for validation
 
 **Infrastructure:**
-- `src/bioetl/infrastructure/schemas/pipeline-config.py` — Add `loading-strategy` to YAML schema
+- `src/bioetl/infrastructure/schemas/pipeline_config.py` — Add `loading-strategy` to YAML schema
 - `src/bioetl/infrastructure/config/converters.py` — Pass `loading-strategy` in conversion
 
 **Composition:**
-- `src/bioetl/composition/factories/services-factory.py` — Pass `loading-strategy` to CheckpointManager
-- `src/bioetl/composition/factories/pipeline-factory.py` — Use `config.loading-strategy`
+- `src/bioetl/composition/factories/services_factory.py` — Pass `loading-strategy` to CheckpointManager
+- `src/bioetl/composition/factories/pipeline_factory.py` — Use `config.loading-strategy`
 
 **Configs:**
 - `configs/entities/chembl/publication.yaml` — Add `loading-strategy: full-scan-only`
-- `configs/entities/chembl/publication-term.yaml` — Add `loading-strategy: full-scan-only`
-- `configs/entities/chembl/publication-similarity.yaml` — Add `loading-strategy: full-scan-only`
+- `configs/entities/chembl/publication_term.yaml` — Add `loading-strategy: full-scan-only`
+- `configs/entities/chembl/publication_similarity.yaml` — Add `loading-strategy: full-scan-only`
 - `configs/entities/pubmed/publication.yaml` — Add `loading-strategy: full-scan-only`
 - `configs/entities/crossref/publication.yaml` — Add `loading-strategy: full-scan-only`
 - `configs/entities/openalex/publication.yaml` — Add `loading-strategy: full-scan-only`
@@ -156,9 +156,9 @@ loading-strategy: full-scan-only
 
 ### Tests
 
-- `tests/unit/domain/test-medallion.py` — Test `LoadingStrategy` enum
-- `tests/unit/application/core/test-checkpoint-manager.py` — Test loading-strategy validation
-- `tests/architecture/test-force-full-scan-publication.py` — Verify publication configs
+- `tests/unit/domain/test_medallion.py` — Test `LoadingStrategy` enum
+- `tests/unit/application/core/test_checkpoint_manager.py` — Test loading-strategy validation
+- `tests/architecture/test_force_full_scan_publication.py` — Verify publication configs
 
 ## Future Work
 

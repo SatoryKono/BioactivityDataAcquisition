@@ -8,7 +8,17 @@
 %% @view    operational-ports-domain
 %% @parent  13b-operational-ports.mmd
 %% @nodes   8
-
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 graph TB
 %% keep-orphan: SHP, CBP, CKP, LGP, LKP, MMP, MTP, TRP
     subgraph Domain["Domain Operational Ports"]

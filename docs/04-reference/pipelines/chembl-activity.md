@@ -80,7 +80,7 @@ bioetl run --pipeline chembl_activity
 bioetl run --pipeline chembl_activity --limit 1000
 
 # Backfill
-bioetl run --pipeline chembl_activity --run-type backfill --start-date 2024-01-01
+bioetl run --pipeline chembl_activity --run-type backfill
 
 # Full rebuild
 bioetl run --pipeline chembl_activity --run-type rebuild
@@ -92,7 +92,7 @@ bioetl run --pipeline chembl_activity --run-type rebuild
 | ----------------- | ----------------------------------------------------------------- |
 | Configuration     | `configs/entities/chembl/activity.yaml`                          |
 | Entity Definition | `src/bioetl/domain/entities/bioactivity.py`                       |
-| Transformer       | `src/bioetl/application/pipelines/chembl/activity-transformer.py` |
+| Transformer       | `src/bioetl/application/pipelines/chembl/activity_transformer.py` |
 | Gold Filter       | `configs/entities/chembl/activity.yaml#filters`                   |
 | Data Quality      | `configs/entities/chembl/activity.yaml#quality`                   |
 | Silver Schema     | `src/bioetl/infrastructure/schemas/silver.py`                     |

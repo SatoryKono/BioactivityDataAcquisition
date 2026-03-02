@@ -633,8 +633,11 @@ nav:
                 -   "Diagram Rendering Improvement Plan 2026 02 26": plans/diagram-rendering-improvement-plan-2026-02-26.md
                 -   "Diagram Workflow Corrective Master Plan 2026 02 27": plans/diagram-workflow-corrective-master-plan-2026-02-27.md
             -   "Reports":
-                -   "Codex Branches Summary 2026 02 24": reports/codex-branches-summary-2026-02-24.md
+                -   "Overview": reports/index.md
+                -   "Documentation Cascade Audit 2026 02 27": reports/documentation-cascade-audit-2026-02-27.md
                 -   "Documentation Audit 2026 02 25": reports/documentation-audit-2026-02-25.md
+                -   "Scripts Inventory 2026 03 01": reports/scripts-inventory-2026-03-01.md
+                -   "Codex Branches Summary 2026 02 24": reports/codex-branches-summary-2026-02-24.md
             -   "Skills":
                 -   "Overview": skills/README.md
                 -   "Global Skills":

@@ -66,11 +66,11 @@ The domain layer implements Domain-Driven Design patterns:
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ------------ |
 | **ChEMBL**           | Activity, Assay, Molecule, Target, Target Component, Protein Class, Cell Line, Compound Record, Publication, Publication Term/Similarity, Subcellular Fraction, Tissue | Production | None         |
 | **PubChem**          | Compound                                                                                                                                 | Production | 5 req/sec    |
-| **UniProt**          | Protein, ID Mapping                                                                                                                      | Production | 100 req/sec  |
+| **UniProt**          | Protein, ID Mapping                                                                                                                      | Production | 10 req/sec (100 req/sec with API key) |
 | **PubMed**           | Publication                                                                                                                              | Production | 3 req/sec    |
 | **CrossRef**         | Publication                                                                                                                              | Production | Polite pool  |
 | **OpenAlex**         | Publication                                                                                                                              | Production | ~10 req/sec  |
-| **Semantic Scholar** | Publication                                                                                                                              | Production | 100 req/5min |
+| **Semantic Scholar** | Publication                                                                                                                              | Production | 0.1 req/sec (1 req/sec with API key) |
 
 ## Documentation
 
@@ -79,7 +79,7 @@ The domain layer implements Domain-Driven Design patterns:
 | [API Reference](docs/04-reference/api/index.md)           | Full API documentation with mkdocstrings    |
 | [Architecture Decisions](docs/02-architecture/decisions/) | 40 ADRs explaining design choices           |
 | [Ubiquitous Language](docs/00-project/glossary.md)        | Domain terminology and canonical naming     |
-| [RULES.md](docs/00-project/RULES.md)                      | Project governance and requirements (v5.22) |
+| [RULES.md](docs/00-project/RULES.md)                      | Project governance and requirements (v5.23) |
 | [Project Map](docs/00-project/00-map.md)                  | Documentation navigator and code map        |
 | [CLI Reference](docs/04-reference/cli.md)                 | Command-line interface documentation        |
 | [Operations Runbooks](docs/05-operations/runbooks/)       | Incident response and procedures            |
@@ -177,8 +177,8 @@ bioetl checkpoint list
 
 - Do **not** store domain datasets or reference data files in repository root.
 - Keep machine-consumed reference datasets under semantic paths in `data/` (for example, `data/input/reference/`).
-- Keep optional human-facing spreadsheet copies under `docs/reference/`.
-- Unified publication classifier canonical format is CSV at `data/input/reference/unified_classification.csv`; Excel is optional documentation copy at `docs/reference/unified_classification.xlsx`.
+- Keep optional human-facing spreadsheet copies under `docs/04-reference/schemas/` when they are needed for documentation.
+- Unified publication classifier canonical format is CSV at `data/input/reference/unified_classification.csv`; optional spreadsheet copies are non-canonical and MAY be stored in docs as needed.
 ### Local diagnostic artifacts
 
 Локальные диагностические файлы (например, `git_commit_*.txt`, `*_gitshow_err.txt`, `log_test.txt`) не должны храниться в корне репозитория и не коммитятся в Git.
@@ -309,7 +309,7 @@ Access the docs at `http://localhost:8000`.
 │   ├── 02-architecture/      # Layer docs, diagrams, ADRs (40 decisions)
 │   ├── 00-project/
 │   │   ├── glossary.md       # Ubiquitous Language glossary
-│   │   └── RULES.md          # Project governance (v5.22)
+│   │   └── RULES.md          # Project governance (v5.23)
 │   └── ...
 ├── src/
 │   └── bioetl/

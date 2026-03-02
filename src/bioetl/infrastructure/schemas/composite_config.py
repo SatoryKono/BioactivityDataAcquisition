@@ -91,7 +91,11 @@ class AggregationSchema(BaseModel):
     )
 
     def to_domain(self) -> AggregationConfig:
-        """Convert to domain AggregationConfig."""
+        """Convert to domain AggregationConfig.
+
+        Returns:
+            The AggregationConfig result.
+        """
         return AggregationConfig(
             group_by=self.group_by,
             fields=tuple(
@@ -117,7 +121,14 @@ class SeedSchema(BaseModel):
     @field_validator("output_keys")
     @classmethod
     def validate_output_keys_not_empty(cls, v: list[str]) -> list[str]:
-        """Ensure output_keys contains valid strings."""
+        """Ensure output_keys contains valid strings.
+
+        Args:
+            v: V.
+
+        Returns:
+            Validated list[str].
+        """
         if not v:
             raise ValueError("output_keys cannot be empty")
         for key in v:
@@ -126,7 +137,11 @@ class SeedSchema(BaseModel):
         return v
 
     def to_domain(self) -> SeedConfig:
-        """Convert to immutable domain SeedConfig."""
+        """Convert to immutable domain SeedConfig.
+
+        Returns:
+            The SeedConfig result.
+        """
         return SeedConfig(
             pipeline=self.pipeline,
             output_keys=tuple(self.output_keys),
@@ -199,7 +214,14 @@ class DependencySchema(BaseModel):
     @field_validator("join_keys")
     @classmethod
     def validate_join_keys_not_empty(cls, v: list[str]) -> list[str]:
-        """Ensure join_keys contains valid strings."""
+        """Ensure join_keys contains valid strings.
+
+        Args:
+            v: V.
+
+        Returns:
+            Validated list[str].
+        """
         if not v:
             raise ValueError("join_keys cannot be empty")
         for key in v:
@@ -209,7 +231,11 @@ class DependencySchema(BaseModel):
 
     @model_validator(mode="after")
     def validate_filter_fields_exclusive(self) -> Self:
-        """Ensure filter_field and filter_fields are mutually exclusive."""
+        """Ensure filter_field and filter_fields are mutually exclusive.
+
+        Returns:
+            Validated Self.
+        """
         if self.filter_field and self.filter_fields:
             raise ValueError(
                 "filter_field and filter_fields are mutually exclusive. "
@@ -218,7 +244,11 @@ class DependencySchema(BaseModel):
         return self
 
     def to_domain(self) -> DependencyConfig:
-        """Convert to immutable domain DependencyConfig."""
+        """Convert to immutable domain DependencyConfig.
+
+        Returns:
+            The DependencyConfig result.
+        """
         return DependencyConfig(
             pipeline=self.pipeline,
             join_keys=tuple(self.join_keys),
@@ -271,7 +301,14 @@ class EnricherSchema(BaseModel):
     @field_validator("join_keys")
     @classmethod
     def validate_join_keys_not_empty(cls, v: list[str]) -> list[str]:
-        """Ensure join_keys contains valid strings."""
+        """Ensure join_keys contains valid strings.
+
+        Args:
+            v: V.
+
+        Returns:
+            Validated list[str].
+        """
         if not v:
             raise ValueError("join_keys cannot be empty")
         for key in v:
@@ -281,7 +318,11 @@ class EnricherSchema(BaseModel):
 
     @model_validator(mode="after")
     def validate_aggregation_required(self) -> Self:
-        """Ensure aggregation is provided when cardinality is many_to_one."""
+        """Ensure aggregation is provided when cardinality is many_to_one.
+
+        Returns:
+            Validated Self.
+        """
         if self.cardinality == "many_to_one" and self.aggregation is None:
             raise ValueError(
                 f"Enricher '{self.pipeline}' with cardinality=many_to_one "
@@ -290,7 +331,11 @@ class EnricherSchema(BaseModel):
         return self
 
     def to_domain(self) -> EnricherConfig:
-        """Convert to immutable domain EnricherConfig."""
+        """Convert to immutable domain EnricherConfig.
+
+        Returns:
+            The EnricherConfig result.
+        """
         return EnricherConfig(
             pipeline=self.pipeline,
             join_keys=tuple(self.join_keys),
@@ -338,7 +383,11 @@ class ColumnGroupSchema(BaseModel):
 
     @model_validator(mode="after")
     def validate_fields_or_pattern(self) -> ColumnGroupSchema:
-        """Ensure at least one of fields or pattern is provided."""
+        """Ensure at least one of fields or pattern is provided.
+
+        Returns:
+            Validated ColumnGroupSchema.
+        """
         if not self.fields and not self.pattern:
             raise ValueError(
                 f"Column group '{self.name}' must have either fields or pattern"
@@ -387,7 +436,11 @@ class MergeSchema(BaseModel):
 
     @model_validator(mode="after")
     def validate_explicit_rules_requires_priorities(self) -> MergeSchema:
-        """Ensure field_priorities is provided when using explicit_rules."""
+        """Ensure field_priorities is provided when using explicit_rules.
+
+        Returns:
+            Validated MergeSchema.
+        """
         if self.conflict_resolution == "explicit_rules" and not self.field_priorities:
             raise ValueError(
                 "field_priorities required when using explicit_rules conflict resolution"
@@ -395,7 +448,11 @@ class MergeSchema(BaseModel):
         return self
 
     def to_domain(self) -> MergeConfig:
-        """Convert to immutable domain MergeConfig."""
+        """Convert to immutable domain MergeConfig.
+
+        Returns:
+            The MergeConfig result.
+        """
         field_priorities_tuples = {
             k: tuple(v) for k, v in self.field_priorities.items()
         }
@@ -436,7 +493,11 @@ class DQOverrideSchema(BaseModel):
 
     @model_validator(mode="after")
     def validate_threshold_order(self) -> DQOverrideSchema:
-        """Ensure soft_fail_threshold < hard_fail_threshold when both set."""
+        """Ensure soft_fail_threshold < hard_fail_threshold when both set.
+
+        Returns:
+            Validated DQOverrideSchema.
+        """
         if (
             self.soft_fail_threshold is not None
             and self.hard_fail_threshold is not None
@@ -448,7 +509,11 @@ class DQOverrideSchema(BaseModel):
         return self
 
     def to_domain(self) -> DQOverrideConfig:
-        """Convert to immutable domain DQOverrideConfig."""
+        """Convert to immutable domain DQOverrideConfig.
+
+        Returns:
+            The DQOverrideConfig result.
+        """
         return DQOverrideConfig(
             soft_fail_threshold=self.soft_fail_threshold,
             hard_fail_threshold=self.hard_fail_threshold,
@@ -473,7 +538,11 @@ class CompositeDQSchema(BaseModel):
 
     @model_validator(mode="after")
     def validate_threshold_order(self) -> CompositeDQSchema:
-        """Ensure soft_fail_threshold < hard_fail_threshold."""
+        """Ensure soft_fail_threshold < hard_fail_threshold.
+
+        Returns:
+            Validated CompositeDQSchema.
+        """
         if self.soft_fail_threshold >= self.hard_fail_threshold:
             raise ValueError(
                 f"soft_fail_threshold ({self.soft_fail_threshold}) must be "
@@ -482,7 +551,11 @@ class CompositeDQSchema(BaseModel):
         return self
 
     def to_domain(self) -> CompositeDQConfig:
-        """Convert to immutable domain CompositeDQConfig."""
+        """Convert to immutable domain CompositeDQConfig.
+
+        Returns:
+            The CompositeDQConfig result.
+        """
         overrides = {
             name: override.to_domain()
             for name, override in self.enricher_overrides.items()
@@ -520,7 +593,11 @@ class ExecutionSchema(BaseModel):
     )
 
     def to_domain(self) -> ExecutionConfig:
-        """Convert to immutable domain ExecutionConfig."""
+        """Convert to immutable domain ExecutionConfig.
+
+        Returns:
+            The ExecutionConfig result.
+        """
         return ExecutionConfig(
             max_concurrency=self.max_concurrency,
             checkpoint_enabled=self.checkpoint_enabled,
@@ -551,7 +628,11 @@ class LineageSchema(BaseModel):
     )
 
     def to_domain(self) -> LineageConfig:
-        """Convert to immutable domain LineageConfig."""
+        """Convert to immutable domain LineageConfig.
+
+        Returns:
+            The LineageConfig result.
+        """
         return LineageConfig(
             track_field_sources=self.track_field_sources,
             track_timestamps=self.track_timestamps,
@@ -573,7 +654,11 @@ class FieldComparisonSpecSchema(BaseModel):
     )
 
     def to_domain(self) -> FieldComparisonSpec:
-        """Convert to domain FieldComparisonSpec."""
+        """Convert to domain FieldComparisonSpec.
+
+        Returns:
+            The FieldComparisonSpec result.
+        """
         return FieldComparisonSpec(
             field_name=self.field,
             method=ComparisonMethod(self.method),
@@ -592,7 +677,11 @@ class EnricherFieldPairingSchema(BaseModel):
     )
 
     def to_domain(self) -> EnricherFieldPairing:
-        """Convert to domain EnricherFieldPairing."""
+        """Convert to domain EnricherFieldPairing.
+
+        Returns:
+            The EnricherFieldPairing result.
+        """
         return EnricherFieldPairing(
             enricher_pipeline=self.enricher_pipeline,
             fields=tuple(f.to_domain() for f in self.fields),
@@ -624,13 +713,21 @@ class CrossValidationSchema(BaseModel):
 
     @model_validator(mode="after")
     def validate_thresholds(self) -> Self:
-        """Ensure warning_threshold < error_threshold."""
+        """Ensure warning_threshold < error_threshold.
+
+        Returns:
+            Validated Self.
+        """
         if self.warning_threshold >= self.error_threshold:
             raise ValueError("warning_threshold must be < error_threshold")
         return self
 
     def to_domain(self) -> CrossValidationConfig:
-        """Convert to domain CrossValidationConfig."""
+        """Convert to domain CrossValidationConfig.
+
+        Returns:
+            The CrossValidationConfig result.
+        """
         return CrossValidationConfig(
             enabled=self.enabled,
             warning_threshold=self.warning_threshold,
@@ -681,14 +778,22 @@ class CompositeConfigSchema(BaseModel):
 
     @model_validator(mode="after")
     def validate_has_enrichers_or_dependencies(self) -> CompositeConfigSchema:
-        """Validate that at least one enricher or dependency is defined."""
+        """Validate that at least one enricher or dependency is defined.
+
+        Returns:
+            Validated CompositeConfigSchema.
+        """
         if not self.enrichers and not self.dependencies:
             raise ValueError("At least one enricher or dependency must be defined")
         return self
 
     @model_validator(mode="after")
     def validate_enricher_join_keys(self) -> CompositeConfigSchema:
-        """Validate that enricher join keys exist in seed output_keys."""
+        """Validate that enricher join keys exist in seed output_keys.
+
+        Returns:
+            Validated CompositeConfigSchema.
+        """
         if not self.enrichers:
             return self  # Skip if no enrichers
         seed_keys = set(self.seed.output_keys)
@@ -708,6 +813,9 @@ class CompositeConfigSchema(BaseModel):
         For chained dependencies (key_source != None and != "seed"),
         join_keys are taken from the key_source's Silver table,
         so they are NOT validated against seed output_keys.
+
+        Returns:
+            Validated CompositeConfigSchema.
         """
         seed_keys = set(self.seed.output_keys)
         for dep in self.dependencies:
@@ -724,7 +832,11 @@ class CompositeConfigSchema(BaseModel):
 
     @model_validator(mode="after")
     def validate_unique_enricher_names(self) -> CompositeConfigSchema:
-        """Validate that enricher pipeline names are unique."""
+        """Validate that enricher pipeline names are unique.
+
+        Returns:
+            Validated CompositeConfigSchema.
+        """
         if not self.enrichers:
             return self  # Skip if no enrichers
         names = [e.pipeline for e in self.enrichers]
@@ -735,7 +847,11 @@ class CompositeConfigSchema(BaseModel):
 
     @model_validator(mode="after")
     def validate_unique_dependency_names(self) -> CompositeConfigSchema:
-        """Validate that dependency pipeline names are unique."""
+        """Validate that dependency pipeline names are unique.
+
+        Returns:
+            Validated CompositeConfigSchema.
+        """
         names = [d.pipeline for d in self.dependencies]
         if len(names) != len(set(names)):
             duplicates = {n for n in names if names.count(n) > 1}
@@ -743,7 +859,11 @@ class CompositeConfigSchema(BaseModel):
         return self
 
     def to_domain(self) -> CompositeConfig:
-        """Convert to immutable domain CompositeConfig."""
+        """Convert to immutable domain CompositeConfig.
+
+        Returns:
+            The CompositeConfig result.
+        """
         return CompositeConfig(
             name=self.name,
             version=self.version,
@@ -779,7 +899,11 @@ class CompositeConfigFileSchema(BaseModel):
     )
 
     def to_domain(self) -> CompositeConfig:
-        """Convert to immutable domain CompositeConfig."""
+        """Convert to immutable domain CompositeConfig.
+
+        Returns:
+            The CompositeConfig result.
+        """
         return self.composite.to_domain()
 
 
@@ -814,6 +938,12 @@ def validate_composite_config_payload(
     Runtime and generated JSON Schema both use :class:`CompositeConfigFileSchema`
     as the canonical contract. Legacy files (missing `composite.version`) are
     accepted only via an explicit compatibility path.
+
+    Args:
+        payload: Data payload.
+
+    Returns:
+        Validated CompositeConfigFileSchema.
     """
 
     try:

@@ -36,6 +36,9 @@ def metrics_server_context() -> Iterator[bool]:
             # Metrics server is running
             await run_pipeline()
         # Server continues running (daemon thread)
+
+    Returns:
+        Iterator over results.
     """
     # Re-exported from entrypoints, use directly
     started = ensure_metrics_server_started()

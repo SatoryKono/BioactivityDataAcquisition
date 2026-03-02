@@ -8,7 +8,17 @@
 %% @view    observability-infra
 %% @parent  09-observability-stack.mmd
 %% @nodes   13
-
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
 graph TB
 %% keep-orphan: MC, NOM, UL
     subgraph InfraLogging["Infrastructure: Logging"]

@@ -77,15 +77,27 @@ class CircuitBreaker:
         self._emit_state_metric()
 
     def get_state(self) -> CircuitBreakerState:
-        """Get current circuit breaker state."""
+        """Get current circuit breaker state.
+
+        Returns:
+            State.
+        """
         return self._state
 
     def get_failure_count(self) -> int:
-        """Get current failure count."""
+        """Get current failure count.
+
+        Returns:
+            Failure count.
+        """
         return self._failure_count
 
     def get_trips_total(self) -> int:
-        """Get total number of times circuit has opened."""
+        """Get total number of times circuit has opened.
+
+        Returns:
+            Trips total.
+        """
         return self._trips_total
 
     def _emit_state_metric(self) -> None:
@@ -227,6 +239,12 @@ def is_circuit_breaker_error(exc: Exception) -> bool:
 
     Only connection/timeout/read errors should trigger circuit breaker,
     not business logic errors (4xx responses except 429).
+
+    Args:
+        exc: Exc.
+
+    Returns:
+        True if the condition is met, False otherwise.
     """
     if isinstance(
         exc,

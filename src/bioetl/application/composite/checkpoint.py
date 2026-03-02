@@ -83,6 +83,12 @@ class CompositeCheckpointState:
         """Create new state with seed marked as completed.
 
         Sets state to SEED_COMPLETED to indicate seed phase is done.
+
+        Args:
+            result: Operation result.
+
+        Returns:
+            New instance with the applied change.
         """
         return CompositeCheckpointState(
             composite_name=self.composite_name,
@@ -106,6 +112,13 @@ class CompositeCheckpointState:
         Sets state to DEPENDENCIES_RUNNING to indicate dependency phase is in progress.
         The transition to DEPENDENCIES_COMPLETED should be done explicitly
         via with_state() when all dependencies are done.
+
+        Args:
+            dependency_name: Dependency pipeline name.
+            result: Operation result.
+
+        Returns:
+            New instance with the applied change.
         """
         new_completed = self.completed_dependencies | {dependency_name}
         new_results = {**self.dependency_results, dependency_name: result}
@@ -131,6 +144,13 @@ class CompositeCheckpointState:
         Sets state to ENRICHING to indicate enrichment phase is in progress.
         The transition to ENRICHMENT_COMPLETED should be done explicitly
         via with_state() when all enrichers are done.
+
+        Args:
+            enricher_name: Enricher pipeline name.
+            result: Operation result.
+
+        Returns:
+            New instance with the applied change.
         """
         new_completed = self.completed_enrichers | {enricher_name}
         new_results = {**self.enrichment_results, enricher_name: result}
@@ -189,7 +209,11 @@ class CompositeCheckpointState:
         return self.seed_completed or bool(self.completed_enrichers)
 
     def to_dict(self) -> dict[str, object]:
-        """Convert to dictionary for JSON serialization."""
+        """Convert to dictionary for JSON serialization.
+
+        Returns:
+            Dictionary representation.
+        """
         return {
             "composite_name": self.composite_name,
             "run_id": self.run_id,
@@ -256,6 +280,12 @@ class CompositeCheckpointState:
         Handles backward compatibility for checkpoints without state field
         or dependency fields. Gracefully handles corrupted state values
         by defaulting to NOT_STARTED.
+
+        Args:
+            data: Input data.
+
+        Returns:
+            New instance constructed from the input.
         """
         seed_result = None
         if data.get("seed_result"):

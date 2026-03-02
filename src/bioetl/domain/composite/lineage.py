@@ -55,7 +55,14 @@ class CompositeLineageMetadata:
             object.__setattr__(self, "source_providers", tuple(self.source_providers))
 
     def has_enrichment(self, provider: str) -> bool:
-        """Check if record has successful enrichment from provider."""
+        """Check if record has successful enrichment from provider.
+
+        Args:
+            provider: Data provider name.
+
+        Returns:
+            True if the condition is met, False otherwise.
+        """
         status = self.enrichment_status.get(provider)
         return status is not None and status.status == "success"
 
@@ -67,7 +74,11 @@ class CompositeLineageMetadata:
         )
 
     def to_dict(self) -> dict[str, object]:
-        """Convert to dictionary for storage/serialization."""
+        """Convert to dictionary for storage/serialization.
+
+        Returns:
+            Dictionary representation.
+        """
         return {
             "_composite_run_id": self.composite_run_id,
             "_composite_name": self.composite_name,
@@ -87,7 +98,14 @@ class CompositeLineageMetadata:
 
     @classmethod
     def from_dict(cls, data: dict[str, object]) -> CompositeLineageMetadata:
-        """Create CompositeLineageMetadata from dictionary."""
+        """Create CompositeLineageMetadata from dictionary.
+
+        Args:
+            data: Input data.
+
+        Returns:
+            New instance constructed from the input.
+        """
         enrichment_status = _parse_enrichment_status(data.get("_enrichment_status", {}))
         enrichment_timestamps = _parse_timestamps(
             data.get("_enrichment_timestamps", {})

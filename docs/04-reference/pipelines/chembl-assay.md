@@ -94,7 +94,7 @@ bioetl run --pipeline chembl_assay --run-type rebuild
 | -------------- | -------------------------------------------------------------- |
 | Configuration  | `configs/entities/chembl/assay.yaml`                          |
 | Pipeline Logic | `src/bioetl/application/pipelines/chembl/assay.py`             |
-| Transformer    | `src/bioetl/application/pipelines/chembl/assay-transformer.py` |
+| Transformer    | `src/bioetl/application/pipelines/chembl/assay_transformer.py` |
 | Gold Filter    | `configs/entities/chembl/assay.yaml#filters`                   |
 | Data Quality   | `configs/entities/chembl/assay.yaml#quality`                   |
 | Silver Schema  | `src/bioetl/infrastructure/schemas/silver.py`                  |

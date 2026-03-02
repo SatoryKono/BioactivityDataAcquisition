@@ -13,16 +13,16 @@
 ```
 configs/
 ├── pipelines/{provider}/{entity}.yaml        # Pipeline execution settings
-├── schemas/{provider}/{entity}.yaml          # Column groups, content-hash
+├── schemas/{provider}/{entity}.yaml          # Column groups, content_hash
 ├── quality/entities/{provider}/{entity}.yaml # DQ rules
 ├── filters/entities/{provider}/{entity}.yaml # Silver/Gold filter rules
-├── contracts/pipelines/{provider}/{entity}.yaml  # PK, merge-keys
-├── hash-policy/{provider}/{entity}.yaml      # Hash algorithm config
+├── contracts/pipelines/{provider}/{entity}.yaml  # PK, merge_keys
+├── hash_policy/{provider}/{entity}.yaml      # Hash algorithm config
 ├── enums/{provider}/{entity}.yaml            # Enum values (post ADR-038)
 ├── sources/{provider}.yaml                   # Provider API settings
 ├── quality/providers/{provider}.yaml         # Provider DQ defaults
 ├── filters/providers/{provider}.yaml         # Provider filter defaults
-└── pipelines/-base.yaml                      # Global execution defaults
+└── pipelines/_base.yaml                      # Global execution defaults
 ```
 
 ### Проблемы
@@ -32,11 +32,11 @@ configs/
 3. **Именование без иерархии**: файлы не группированы по принадлежности к entity
 4. **Дублирование provider/entity**: поля `provider` и `entity` повторялись в каждом файле
 5. **Сложность тестирования**: тест для одного pipeline нуждался в фикстурах из 11 путей
-6. **`config-loader.py` перегружен**: множество ad-hoc merge функций вместо единого механизма
+6. **`config_loader.py` перегружен**: множество ad-hoc merge функций вместо единого механизма
 
 ### Катализатор
 
-ADR-037 унифицировал механизм deep-merge через `config-merge()`. После этого стало
+ADR-037 унифицировал механизм deep-merge через `config_merge()`. После этого стало
 возможным объединить файлы с гарантированной семантикой слияния.
 
 ## Decision
@@ -52,59 +52,59 @@ provider: chembl
 entity: activity
 
 pipeline:
-  pipeline-name: chembl_activity
+  pipeline_name: chembl_activity
   provider: chembl
-  entity-type: activity
+  entity_type: activity
   description: Extract biological activity records from ChEMBL API
-  business-primary-keys: [activity-id]
-  batch-size: 1000
-  dq-overrides:
-    field-validations: [...]
+  business_primary_keys: [activity-id]
+  batch_size: 1000
+  dq_overrides:
+    field_validations: [...]
 
 schema:
-  content-hash:
+  content_hash:
     include: []
     exclude: []
-  column-groups: [...]
+  column_groups: [...]
   silver:
-    include-groups: [system, business, dq]
-    exclude-fields: []
-    alias-policy: preserve
+    include_groups: [system, business, dq]
+    exclude_fields: []
+    alias_policy: preserve
   gold:
-    include-groups: [system, business]
-    exclude-fields: [-dq-*, -source-batch-id, -index]
-    alias-policy: canonical
+    include_groups: [system, business]
+    exclude_fields: [-dq-*, -source-batch-id, -index]
+    alias_policy: canonical
 
 quality:
   version: 1.1.0
   provider: chembl
   entity: activity
-  field-validations: [...]
-  cross-field-validations: [...]
-  conditional-validations: [...]
+  field_validations: [...]
+  cross-field_validations: [...]
+  conditional_validations: [...]
   key-nullability: [...]
 
 filters:
   version: 1.0.0
   provider: chembl
   entity: activity
-  input-filter: {...}
-  extraction-params: {...}
-  silver-filters: {...}
-  gold-filters: {...}
+  input_filter: {...}
+  extraction_params: {...}
+  silver_filters: {...}
+  gold_filters: {...}
 
 contracts:
-  primary-key: [activity-id]
-  merge-keys: [activity-id]
-  rename-map: {...}
-  hash-include: []
-  hash-exclude: [...]
+  primary_key: [activity-id]
+  merge_keys: [activity-id]
+  rename_map: {...}
+  hash_include: []
+  hash_exclude: [...]
 
-hash-policy:
+hash_policy:
   algorithm: sha256
-  canonicalization: provider + canonical-json-dumps(normalized-record)
-  include-fields: [...]
-  exclude-fields: [...]
+  canonicalization: provider + canonical_json_dumps(normalized_record)
+  include_fields: [...]
+  exclude_fields: [...]
   normalization: {...}
 ```
 
@@ -112,14 +112,14 @@ hash-policy:
 
 | Секция | Назначение | Соответствует |
 |--------|-----------|---------------|
-| `pipeline` | Execution settings, batch-size, DQ overrides | legacy `pipelines/{p}/{e}.yaml` |
-| `schema` | Column groups, content-hash, Silver/Gold layer filters | legacy `schemas/{p}/{e}.yaml` |
+| `pipeline` | Execution settings, batch_size, DQ overrides | legacy `pipelines/{p}/{e}.yaml` |
+| `schema` | Column groups, content_hash, Silver/Gold layer filters | legacy `schemas/{p}/{e}.yaml` |
 | `quality` | Field/cross/conditional validations, key nullability | legacy `quality/entities/{p}/{e}.yaml` |
 | `filters` | Input filter, extraction params, Silver/Gold filters | legacy `filters/entities/{p}/{e}.yaml` |
 | `contracts` | PK, merge keys, rename map, hash config | legacy `contracts/pipelines/{p}/{e}.yaml` |
-| `hash-policy` | Hash algorithm details and field selection | legacy `hash-policy/{p}/{e}.yaml` |
+| `hash_policy` | Hash algorithm details and field selection | legacy `hash_policy/{p}/{e}.yaml` |
 
-### 3. Приоритет загрузки в `load-pipeline-config()`
+### 3. Приоритет загрузки в `load_pipeline_config()`
 
 ```
 Base defaults (configs/base/pipeline.yaml)
@@ -132,7 +132,7 @@ Convention defaults (ADR-029): paths, table names, file references
     ↓
 Hierarchical filter config (ADR-028)
     ↓
-Column groups: unified schema section OR schema-file
+Column groups: unified schema section OR schema_file
     ↓
 Source section: configs/providers/{provider}.yaml
 ```
@@ -140,39 +140,39 @@ Source section: configs/providers/{provider}.yaml
 **Правило слияния**: если оба файла существуют (legacy и unified), unified section
 предоставляет defaults, legacy — overrides. Legacy имеет приоритет.
 
-### 4. Изменения в `config-loader.py`
+### 4. Изменения в `config_loader.py`
 
 #### Новые вспомогательные функции
 
 ```python
-def -load-unified-entity-raw(path: Path) -> dict[str, Any]:
+def load_unified_entity_raw(path: Path) -> dict[str, Any]:
     """Load unified entity YAML file, returning empty dict when absent."""
 
-def -get-unified-section(
-    unified-raw: dict[str, Any], section: str
+def get_unified_section(
+    unified_raw: dict[str, Any], section: str
 ) -> dict[str, Any] | None:
     """Get a dict section from unified entity config if present."""
 ```
 
 #### Обновлённые функции
 
-- `-load-column-groups-section()`: принимает `unified-schema` параметр для инлайн-схемы
-- `-deep-merge()`: делегирует в `config-merge()` (ADR-037)
-- `-load-base-config()`: упрощён, только один canonical путь
+- `load_column_groups_section()`: принимает `unified_schema` параметр для инлайн-схемы
+- `deep_merge()`: делегирует в `config_merge()` (ADR-037)
+- `load_base_config()`: упрощён, только один canonical путь
 
-#### Алгоритм `load-pipeline-config()`
+#### Алгоритм `load_pipeline_config()`
 
 ```python
-unified-raw = -load-unified-entity-raw(unified-path)      # configs/entities/
-unified-pipeline = -get-unified-section(unified-raw, "pipeline")
-unified-schema = -get-unified-section(unified-raw, "schema")
+unified_raw = load_unified_entity_raw(unified_path)      # configs/entities/
+unified_pipeline = get_unified_section(unified_raw, "pipeline")
+unified_schema = get_unified_section(unified_raw, "schema")
 
-if legacy-path.exists():
+if legacy_path.exists():
     # Legacy present — legacy overrides unified
-    entity-config = -deep-merge(unified-pipeline, legacy-entity-config)
-elif unified-pipeline:
+    entity_config = deep_merge(unified_pipeline, legacy-entity_config)
+elif unified_pipeline:
     # No legacy — unified is sole source
-    entity-config = unified-pipeline
+    entity_config = unified_pipeline
 else:
     raise ValueError(...)
 ```
@@ -215,22 +215,22 @@ configs/
 
 **Удалённые директории** (RF-CFG-035):
 - legacy provider/entity pipeline directory — перенесено в `configs/entities/`
-- `configs/schemas/{providers}/` — поглощено в `configs/entities/{p}/{e}.yaml#schema`
+- `configs/schemas/{providers}/` — поглощено в `configs/entities/{p}/{e}.yaml#schema` <!-- doc-lint: allow-legacy -->
 - legacy `quality/entities` directory — поглощено в `configs/entities/{p}/{e}.yaml#quality`
 - legacy `filters/entities` directory — поглощено в `configs/entities/{p}/{e}.yaml#filters`
 - `configs/contracts/` — поглощено в `configs/entities/{p}/{e}.yaml#contracts`
 
-### 6. Test Guard (`test-pipeline-external-schema-non-empty.py`)
+### 6. Test Guard (`test_pipeline_external_schema_non_empty.py`)
 
 Архитектурный тест обновлён для поддержки обоих форматов:
 
 ```python
-def -find-pipeline-config(provider: str, entity-type: str) -> tuple[Path | None, str]:
+def find_pipeline_config(provider: str, entity_type: str) -> tuple[Path | None, str]:
     """Find pipeline config in legacy or unified location."""
-    legacy = Path("<legacy-removed-layout>") / provider / f"{entity-type}.yaml"
+    legacy = Path("<legacy-removed-layout>") / provider / f"{entity_type}.yaml"
     if legacy.exists():
         return legacy, "legacy"
-    unified = Path("configs/entities") / provider / f"{entity-type}.yaml"
+    unified = Path("configs/entities") / provider / f"{entity_type}.yaml"
     if unified.exists():
         return unified, "unified"
     return None, ""
@@ -240,9 +240,9 @@ def -find-pipeline-config(provider: str, entity-type: str) -> tuple[Path | None,
 
 ### 7. LOC Exemption
 
-`config-loader.py` освобождён от архитектурного лимита до **725 LOC** (было 680) в
-`tests/architecture/test-code-metrics.py` — рост обусловлен добавлением `-load-unified-entity-raw()`,
-`-get-unified-section()` и обновлённой логики `load-pipeline-config()`.
+`config_loader.py` освобождён от архитектурного лимита до **725 LOC** (было 680) в
+`tests/architecture/test_code_metrics.py` — рост обусловлен добавлением `load_unified_entity_raw()`,
+`get_unified_section()` и обновлённой логики `load_pipeline_config()`.
 
 ## Consequences
 
@@ -259,13 +259,13 @@ def -find-pipeline-config(provider: str, entity-type: str) -> tuple[Path | None,
 
 1. **Большие файлы**: Unified entity config может достигать 400+ строк для сложных entity (activity: ~350 строк)
 2. **Секционный конфликт**: При merge из нескольких источников приоритет секций требует понимания алгоритма
-3. **`config-loader.py` растёт**: Поддержка двух форматов увеличивает LOC до 721
+3. **`config_loader.py` растёт**: Поддержка двух форматов увеличивает LOC до 721
 
 ### Neutral
 
-1. **Legacy fallback остаётся**: `load-pipeline-config()` продолжает проверять legacy layout перед `configs/entities/` для composites и нестандартных конфигов
+1. **Legacy fallback остаётся**: `load_pipeline_config()` продолжает проверять legacy layout перед `configs/entities/` для composites и нестандартных конфигов
 2. **21 standard pipelines** полностью переведены на unified format; composite pipelines (5) используют `configs/composites/` (ADR-026)
-3. **`-deep-merge()` делегирует в `config-merge()`** — унифицировано с ADR-037
+3. **`deep_merge()` делегирует в `config_merge()`** — унифицировано с ADR-037
 
 ## Alternatives Considered
 
@@ -300,15 +300,15 @@ includes:
 
 | Файл | Изменение |
 |------|-----------|
-| `src/bioetl/infrastructure/config-loader.py` | Добавлены `-load-unified-entity-raw()`, `-get-unified-section()`; обновлены `load-pipeline-config()`, `-load-column-groups-section()`, `-load-base-config()`, `-deep-merge()` |
-| `tests/architecture/test-pipeline-external-schema-non-empty.py` | Добавлена `-find-pipeline-config()`, поддержка unified формата |
-| `tests/architecture/test-code-metrics.py` | Exemption для `config-loader.py`: 680 → 725 LOC |
+| `src/bioetl/infrastructure/config_loader.py` | Добавлены `load_unified_entity_raw()`, `get_unified_section()`; обновлены `load_pipeline_config()`, `load_column_groups_section()`, `load_base_config()`, `deep_merge()` |
+| `tests/architecture/test_pipeline_external_schema_non_empty.py` | Добавлена `find_pipeline_config()`, поддержка unified формата |
+| `tests/architecture/test_code_metrics.py` | Exemption для `config_loader.py`: 680 → 725 LOC |
 | `configs/entities/{p}/{e}.yaml` | 21 unified entity configs (all standard pipelines) |
 
 ### Deleted Directories (RF-CFG-035)
 
 - legacy provider/entity pipeline directory (21 файлов)
-- `configs/schemas/{providers}/` (21 файлов)
+- `configs/schemas/{providers}/` (21 файлов) <!-- doc-lint: allow-legacy -->
 - legacy `quality/entities` directory (21 файлов)
 - legacy `filters/entities` directory (21 файлов)
 - `configs/contracts/` (21 файлов)
@@ -325,28 +325,28 @@ provider: {provider}
 entity: {entity}
 
 pipeline:
-  pipeline-name: {provider}-{entity}
+  pipeline_name: {provider}-{entity}
   provider: {provider}
-  entity-type: {entity}
+  entity_type: {entity}
   # ... execution settings
 
 schema:
-  column-groups: [...]
+  column_groups: [...]
   silver:
-    include-groups: [system, business, dq]
+    include_groups: [system, business, dq]
   gold:
-    include-groups: [system, business]
+    include_groups: [system, business]
 
 quality:
-  field-validations: [...]
+  field_validations: [...]
 
 filters:
-  silver-filters: {...}
-  gold-filters: {...}
+  silver_filters: {...}
+  gold_filters: {...}
 
 contracts:
-  primary-key: [...]
-  merge-keys: [...]
+  primary_key: [...]
+  merge_keys: [...]
 ```
 
 ## References
@@ -355,7 +355,7 @@ contracts:
 - [ADR-027: DQ Rules Externalization](ADR-027-dq-rules-externalization.md) — иерархические DQ правила
 - [ADR-028: Filter Rules Externalization](ADR-028-filter-rules-externalization.md) — иерархические filter правила
 - [ADR-029: Convention-based Config](ADR-029-output-metadata-unification.md) — convention defaults
-- [ADR-037: config-merge() unification](ADR-037-canonical-schema-generation.md) — deep-merge делегирование
+- [ADR-037: config_merge() unification](ADR-037-canonical-schema-generation.md) — deep-merge делегирование
 - [ADR-038: Enum Externalization](ADR-038-enum-externalization.md) — enum values в YAML
 - [Config Unification Plan](../../plans/config-unification-plan.md) — полный план рефакторинга
 

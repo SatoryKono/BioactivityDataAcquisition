@@ -40,7 +40,18 @@ class ZScoreDetector(DetectorStrategy):
         threshold: float = 2.0,
         timestamp: datetime | None = None,
     ) -> Anomaly | None:
-        """Detect anomaly using Z-score method."""
+        """Detect anomaly using Z-score method.
+
+        Args:
+            metric_name: Name of the metric.
+            current_value: Current value.
+            baseline: Baseline.
+            threshold: Threshold value.
+            timestamp: Timestamp.
+
+        Returns:
+            The Anomaly | None result.
+        """
         if len(baseline) < self.MIN_SAMPLES:
             return None
         if timestamp is None:
@@ -98,7 +109,14 @@ class ZScoreDetector(DetectorStrategy):
         )
 
     def get_severity(self, score: float) -> AnomalySeverity:
-        """Map Z-score to severity level."""
+        """Map Z-score to severity level.
+
+        Args:
+            score: Score.
+
+        Returns:
+            Severity.
+        """
         if score >= 5.0:
             return AnomalySeverity.CRITICAL
         if score >= 4.0:

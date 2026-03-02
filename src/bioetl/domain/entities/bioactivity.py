@@ -61,11 +61,19 @@ class BioactivityState(StrEnum):
     VALIDATED = "validated"
 
     def is_ready_for_silver(self) -> bool:
-        """True if NORMALIZED or VALIDATED."""
+        """True if NORMALIZED or VALIDATED.
+
+        Returns:
+            True if the condition is met, False otherwise.
+        """
         return self in (BioactivityState.NORMALIZED, BioactivityState.VALIDATED)
 
     def is_fully_validated(self) -> bool:
-        """True if VALIDATED."""
+        """True if VALIDATED.
+
+        Returns:
+            True if the condition is met, False otherwise.
+        """
         return self == BioactivityState.VALIDATED
 
 
@@ -316,7 +324,14 @@ class Bioactivity(BaseEntity):
         )
 
     def with_state(self, new_state: BioactivityState) -> Bioactivity:
-        """Create copy with new state (immutable pattern)."""
+        """Create copy with new state (immutable pattern).
+
+        Args:
+            new_state: New state.
+
+        Returns:
+            New instance with the applied change.
+        """
         from dataclasses import asdict
 
         data = asdict(self)

@@ -28,13 +28,13 @@ VACUUM выполняется **автоматически** после кажд
 
 ```
 PipelineRunner.run()
-    └── PostrunService.run-vacuum-if-enabled()
-            └── RetentionManager.vacuum(retention-hours=168)
+    └── PostrunService.run_vacuum_if_enabled()
+            └── RetentionManager.vacuum(retention_hours=168)
 ```
 
 **Реализация:**
-- `PostrunService` (`application/services/postrun-service.py:137-153`)
-- `RetentionManager` (`infrastructure/storage/retention-manager.py:57-91`)
+- `PostrunService` (`application/core/postrun_service.py:200-228`)
+- `RetentionManager` (`infrastructure/storage/retention_manager.py:57-91`)
 
 ### Конфигурация
 
@@ -52,8 +52,8 @@ config = RuntimeConfig(
 Или через переменные окружения:
 
 ```bash
-export BIOETL-VACUUM-ENABLED=true
-export BIOETL-VACUUM-RETENTION-DAYS=7
+export BIOETL_VACUUM_ENABLED=true
+export BIOETL_VACUUM_RETENTION_DAYS=7
 ```
 
 ---
@@ -127,19 +127,19 @@ bioetl maintenance vacuum-all --dry-run
 
 set -euo pipefail
 
-RETENTION-DAYS="${VACUUM-RETENTION-DAYS:-7}"
-LOG-FILE="${VACUUM-LOG-FILE:-/var/log/bioetl/vacuum.log}"
+RETENTION_DAYS="${VACUUM_RETENTION_DAYS:-7}"
+LOG_FILE="${VACUUM_LOG_FILE:-/var/log/bioetl/vacuum.log}"
 
-echo "[$(date -Iseconds)] Starting scheduled vacuum" >> "$LOG-FILE"
+echo "[$(date -Iseconds)] Starting scheduled vacuum" >> "$LOG_FILE"
 
 cd "$(dirname "$0")/.."
 
 if bioetl maintenance vacuum-all \
-    --retention-days "$RETENTION-DAYS" \
-    >> "$LOG-FILE" 2>&1; then
-    echo "[$(date -Iseconds)] Vacuum completed successfully" >> "$LOG-FILE"
+    --retention-days "$RETENTION_DAYS" \
+    >> "$LOG_FILE" 2>&1; then
+    echo "[$(date -Iseconds)] Vacuum completed successfully" >> "$LOG_FILE"
 else
-    echo "[$(date -Iseconds)] Vacuum failed with exit code $?" >> "$LOG-FILE"
+    echo "[$(date -Iseconds)] Vacuum failed with exit code $?" >> "$LOG_FILE"
     exit 1
 fi
 ```
@@ -228,5 +228,5 @@ VACUUM операции логируются с structlog pattern:
 - [ADR-001: Delta Lake vs Parquet](../02-architecture/decisions/ADR-001-delta-lake-vs-parquet.md)
 - [ADR-002: Medallion Architecture](../02-architecture/decisions/ADR-002-medallion-architecture.md)
 - [RULES.md §3.1: Medallion Architecture](../00-project/RULES.md)
-- [VacuumService](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/src/bioetl/application/services/vacuum-service.py)
-- [RetentionManager](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/src/bioetl/infrastructure/storage/retention-manager.py)
+- [VacuumService](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/src/bioetl/application/services/vacuum_service.py)
+- [RetentionManager](https://github.com/SatoryKono/BioactivityDataAcquisition2/blob/main/src/bioetl/infrastructure/storage/retention_manager.py)

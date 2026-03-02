@@ -109,6 +109,9 @@ class CachedBronzeDataSource:
         """Check health of the cached Bronze data source.
 
         Always returns HEALTHY since this is a local file-based source.
+
+        Returns:
+            The HealthStatus result.
         """
         return HealthStatus.HEALTHY
 
@@ -190,6 +193,9 @@ class CachedBronzeDataSource:
         Raises:
             CachedBronzeEmptyError: If no Bronze files found for the
                 specified provider/entity combination.
+
+        Returns:
+            Async iterator yielding fetched records.
         """
         # Log warnings for unsupported parameters
         if query:
@@ -260,6 +266,9 @@ class CachedBronzeDataSource:
 
         This is used for progress reporting. It performs a quick pass over
         the files to count records without full JSON parsing where possible.
+
+        Returns:
+            Total records.
         """
         batches = await self._list_batches_sorted()
         total = 0

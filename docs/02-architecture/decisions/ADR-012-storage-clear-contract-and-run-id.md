@@ -13,12 +13,12 @@
 `BasePipeline` генерировал новый `run-id` в конструкторе (`base.py:60`), игнорируя `run-id`, переданный из CLI через `PipelineRunContext`. Это приводило к рассинхронизации:
 
 - CLI логировал один `run-id`
-- Записи в Silver содержали другой `run-id` в метаполе `-run-id`
+- Записи в Silver содержали другой `run-id` в метаполе `_run_id`
 - Чекпоинты и блокировки использовали третий идентификатор
 
 ### Проблема 2: Reflection для очистки хранилища
 
-`PipelineRunner.-clear-exports()` использовал `hasattr()` для проверки наличия методов `clear-csv()` и `clear-delta()`:
+`PipelineRunner._clear_exports()` использовал `hasattr()` для проверки наличия методов `clear-csv()` и `clear-delta()`:
 
 ```python
 if hasattr(storage, "clear-csv"):
@@ -48,7 +48,7 @@ class BasePipeline(ABC):
         config: PipelineConfig,
         runtime: RuntimeConfig,
         services: PipelineServices,
-        run-id: RunID,  # NEW: обязательный параметр
+        run_id: RunID,  # NEW: обязательный параметр
     ) -> None:
 ```
 
@@ -57,11 +57,11 @@ class BasePipeline(ABC):
 Добавлены методы в `StoragePort` (`domain/ports/storage.py`, импорт из фасада `domain/ports/`):
 
 ```python
-def clear-silver(self, table-name: str) -> int:
+def clear_silver(self, table_name: str) -> int:
     """Clear Silver layer data for a specific table."""
     ...
 
-def clear-gold(self, table-name: str) -> int:
+def clear_gold(self, table_name: str) -> int:
     """Clear Gold layer data for a specific table."""
     ...
 ```
@@ -73,7 +73,7 @@ def clear-gold(self, table-name: str) -> int:
 Очистка выполняется **только** для destructive run types:
 
 ```python
-should-clear = self.-runtime.run-type in (RunType.REBUILD, RunType.BACKFILL)
+should_clear = self._runtime.run_type in (RunType.REBUILD, RunType.BACKFILL)
 ```
 
 | Run Type | Очистка | Обоснование |
@@ -86,7 +86,7 @@ should-clear = self.-runtime.run-type in (RunType.REBUILD, RunType.BACKFILL)
 
 ### Positive
 
-- **Трассируемость**: Один `run-id` во всех слоях и компонентах
+- **Трассируемость**: Один `run_id` во всех слоях и компонентах
 - **Типобезопасность**: Явные методы в `StoragePort` вместо reflection
 - **Data Integrity**: Incremental runs не удаляют существующие данные
 - **Тестируемость**: Можно проверить контракт через type checking
@@ -100,8 +100,8 @@ should-clear = self.-runtime.run-type in (RunType.REBUILD, RunType.BACKFILL)
 
 | Риск | Вероятность | Митигация |
 |------|-------------|-----------|
-| Чекпоинты со старым форматом | Низкая | `load()` игнорирует `run-id` в файле |
-| Дубликаты при incremental | Средняя | Merge по `content-hash` предотвращает дубли |
+| Чекпоинты со старым форматом | Низкая | `load()` игнорирует `run_id` в файле |
+| Дубликаты при incremental | Средняя | Merge по `content_hash` предотвращает дубли |
 
 ## Related ADRs
 

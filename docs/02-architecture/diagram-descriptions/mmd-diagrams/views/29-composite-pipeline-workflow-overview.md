@@ -1,9 +1,11 @@
-# Composite Pipeline Workflow Overview (Overview)
+# Composite Pipeline Workflow Overview
 
 - Исходная диаграмма: `mmd-diagrams/views/29-composite-pipeline-workflow-overview.mermaid`
 
 ## Описание
-Декомпозированное представление типа 'Overview' для родительской диаграммы `29-composite-pipeline-workflow-full.mermaid`. Используется для документации конкретного архитектурного среза.
+Эта views-диаграмма Composite Pipeline Workflow Overview представляет срез типа overview для родительской схемы 29-composite-pipeline-workflow-full.mermaid и использует нотацию flowchart. Она нужна для детального анализа выбранного аспекта архитектуры без перегрузки полного графа лишними элементами. В метке view зафиксировано назначение: Overview. Такой формат облегчает трассировку связей между full-версией и специализированными представлениями overview/domain/infra/dataflow, что важно для ревью, онбординга и проверки архитектурной консистентности документации. Показательные узлы в диаграмме: [S] CompositeConfig, [S] Seed Pipeline, [D] Seed Silver, [S] Dependencies, [S] Key Extraction, [S] Enrichment Fan-Out. По ним можно проверить корректность терминологии, соответствие имен портов/адаптеров и логичность маршрутов данных или управляющих вызовов. Диаграмма предназначена для практического использования в технических обсуждениях, регрессионной валидации диаграмм и синхронизации с кодовой структурой проекта. Она помогает быстро обнаруживать расхождения между задуманной архитектурой и фактической реализацией компонентов.
 
 ## Метаданные
-- Метаданные не указаны в исходном файле.
+- Тип: `flowchart`
+- View: `Overview`
+- Parent: `29-composite-pipeline-workflow-full.mermaid`

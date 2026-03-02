@@ -38,7 +38,7 @@
 
 ## 3. Трансформация
 
-**Файл:** `src/bioetl/application/pipelines/chembl/publication-similarity-transformer.py`
+**Файл:** `src/bioetl/application/pipelines/chembl/publication_similarity_transformer.py`
 
 ### Entity ID
 
@@ -75,10 +75,10 @@ max-tani = round(max(tid-tani, mol-tani), 6)
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_publication_similarity
+bioetl run --pipeline chembl_publication_similarity
 
 # С ограничением
-bioetl run chembl_publication_similarity --limit 1000
+bioetl run --pipeline chembl_publication_similarity --limit 1000
 ```
 
 ---
@@ -88,8 +88,8 @@ bioetl run chembl_publication_similarity --limit 1000
 | Компонент | Путь |
 |-----------|------|
 | Конфигурация | `configs/entities/chembl/publication_similarity.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/publication-similarity-transformer.py` |
-| Пайплайн | `src/bioetl/application/pipelines/chembl/publication-similarity.py` |
+| Трансформер | `src/bioetl/application/pipelines/chembl/publication_similarity_transformer.py` |
+| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py` |
 
 ---
 

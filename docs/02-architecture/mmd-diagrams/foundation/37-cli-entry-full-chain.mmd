@@ -22,9 +22,9 @@
 %% @uniform width=712 height=184 max_title_len=71 max_desc_lines=8
 flowchart TB
     subgraph CLI["Interfaces Layer (Click)"]
-        CMD["$ bioetl run chembl_activity\n--run-type incremental\n--batch-size 1000<br/><br/><br/><br/><br/><br/><br/>"]
-        PARSE["Parse CLI Arguments<br/>• pipeline_name<br/>• run_type (RunType enum)<br/>• batch_size, resume flag<br/><br/><br/><br/>"]
-        OPTS["Build RunOptions<br/>• pipeline_name<br/>• run_type<br/>• batch_size<br/>• resume: bool<br/><br/><br/>"]
+        CMD["$ bioetl run --pipeline chembl_activity\n--run-type incremental\n--resume<br/><br/><br/><br/><br/><br/><br/>"]
+        PARSE["Parse CLI Arguments<br/>• pipeline_name<br/>• run_type (RunType enum)<br/>• resume flag<br/><br/><br/><br/>"]
+        OPTS["Build RunOptions<br/>• pipeline_name<br/>• run_type<br/>• resume: bool<br/><br/><br/>"]
     end
 
     subgraph Service["Application Service Layer"]

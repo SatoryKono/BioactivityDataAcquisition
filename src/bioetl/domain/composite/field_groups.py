@@ -95,11 +95,25 @@ class FieldMapping:
         return len(self.providers)
 
     def has_provider(self, provider: str) -> bool:
-        """Check if a specific provider has this field."""
+        """Check if a specific provider has this field.
+
+        Args:
+            provider: Data provider name.
+
+        Returns:
+            True if the condition is met, False otherwise.
+        """
         return provider.lower() in (p.lower() for p in self.providers)
 
     def get_column(self, provider: str) -> str | None:
-        """Get qualified column name for a specific provider."""
+        """Get qualified column name for a specific provider.
+
+        Args:
+            provider: Data provider name.
+
+        Returns:
+            Column.
+        """
         provider_lower = provider.lower()
         for col in self.provider_columns:
             parts = col.split(".")
@@ -244,17 +258,38 @@ class FieldGroupRegistry:
         return self._field_to_group.get(field_name, self._default_group)
 
     def get_field_mapping(self, base_name: str) -> FieldMapping | None:
-        """Get FieldMapping for a base field name."""
+        """Get FieldMapping for a base field name.
+
+        Args:
+            base_name: Name of the base.
+
+        Returns:
+            Field mapping.
+        """
         return self._field_to_mapping.get(base_name.lower())
 
     def get_group_definition(
         self, group_id: FieldGroupId
     ) -> FieldGroupDefinition | None:
-        """Get FieldGroupDefinition for a group ID."""
+        """Get FieldGroupDefinition for a group ID.
+
+        Args:
+            group_id: Identifier for group.
+
+        Returns:
+            Group definition.
+        """
         return self._group_to_def.get(group_id)
 
     def is_gold_field(self, column: str) -> bool:
-        """Check if a column should be included in Gold layer."""
+        """Check if a column should be included in Gold layer.
+
+        Args:
+            column: Column name.
+
+        Returns:
+            True if the condition is met, False otherwise.
+        """
         return self.get_group(column).include_in_gold
 
     def get_gold_columns(self, columns: list[str]) -> list[str]:
@@ -286,7 +321,15 @@ class FieldGroupRegistry:
     def get_columns_by_group(
         self, columns: list[str], group: FieldGroupId
     ) -> list[str]:
-        """Get columns belonging to a specific group."""
+        """Get columns belonging to a specific group.
+
+        Args:
+            columns: List of column names.
+            group: Group.
+
+        Returns:
+            Columns by group.
+        """
         return [c for c in columns if self.get_group(c) == group]
 
     def get_ordered_columns(self, columns: list[str]) -> list[str]:
@@ -311,7 +354,14 @@ class FieldGroupRegistry:
         group_order = list(FieldGroupId)
 
         def sort_key(column: str) -> tuple[int, int, str]:
-            """Return (group_index, provider_rank, field) for ordering."""
+            """Return (group_index, provider_rank, field) for ordering.
+
+            Args:
+                column: Column name.
+
+            Returns:
+                Sort key value for ordering.
+            """
             group = self.get_group(column)
             try:
                 group_idx = group_order.index(group)
@@ -330,6 +380,9 @@ class FieldGroupRegistry:
 
         Returns:
             Dict with keys 'mapped', 'unmapped', 'system' listing columns.
+
+        Args:
+            columns: List of column names.
         """
         mapped: list[str] = []
         unmapped: list[str] = []

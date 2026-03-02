@@ -1,6 +1,6 @@
 # Расширение BioETL: Добавление новых Pipeline
 
-*Синхронизировано с RULES.md v5.22 | Последнее обновление: 2026-02-21*
+*Синхронизировано с RULES.md v5.23 | Последнее обновление: 2026-02-21*
 
 ----------------------------------------------------------------------
 
@@ -59,11 +59,11 @@
 ```yaml
 sink:
   silver:
-    sort-by:
+    sort_by:
       columns: ["primary-key-column"]  # Список колонок для сортировки
       ascending: true                   # true = ASC, false = DESC
   gold:
-    sort-by:
+    sort_by:
       columns: ["primary-key-column"]
       ascending: true
 ```
@@ -259,21 +259,21 @@ def test-<provider>-<entity>-has-sort-by():
 ### 7.1. Config
 
 ```yaml
-# configs/entities/chembl/target-component.yaml
-pipeline-name: chembl_target_component
+# configs/entities/chembl/target_component.yaml
+pipeline_name: chembl_target_component
 provider: chembl
-entity-type: target-component
+entity_type: target-component
 version: "1.0.0"
 description: "Extract target component records from ChEMBL API"
 
-business-primary-keys: ["component-id"]
-silver-table: "chembl_target_component"
-gold-table: "chembl_target_component"
+business_primary_keys: ["component-id"]
+silver_table: "chembl_target_component"
+gold_table: "chembl_target_component"
 
-source-file: ../../sources/chembl.yaml
+source_file: ../../sources/chembl.yaml
 
-gold-filters:
-  required-fields:
+gold_filters:
+  required_fields:
     - component-id
     - component-type
 
@@ -282,22 +282,22 @@ sink:
     path: "data/output/bronze/chembl/target-component"
   silver:
     path: "data/output/silver/chembl/target-component"
-    primary-key: ["component-id"]
-    partition-by: []
-    sort-by:
+    primary_key: ["component-id"]
+    partition_by: []
+    sort_by:
       columns: ["component-id"]
       ascending: true
-    csv-export:
+    csv_export:
       path: "data/output/csv/silver/chembl/target-component"
   gold:
     path: "data/output/gold/chembl/target-component"
-    sort-by:
+    sort_by:
       columns: ["component-id"]
       ascending: true
-    csv-export:
+    csv_export:
       path: "data/output/csv/gold/chembl/target-component"
 
-input-filter:
+input_filter:
   enabled: false
 ```
 

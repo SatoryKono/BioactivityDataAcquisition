@@ -57,7 +57,7 @@ Compound Record (M:1) → Source
 
 ## 4. Трансформация
 
-**Файл:** `src/bioetl/application/pipelines/chembl/compound-record-transformer.py`
+**Файл:** `src/bioetl/application/pipelines/chembl/compound_record_transformer.py`
 
 ### Логика трансформации
 
@@ -97,16 +97,16 @@ entity-id = f"chembl:{record-id}"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_compound_record
+bioetl run --pipeline chembl_compound_record
 
 # С ограничением количества записей
-bioetl run chembl_compound_record --limit 1000
+bioetl run --pipeline chembl_compound_record --limit 1000
 
 # Полная перезагрузка
-bioetl run chembl_compound_record --run-type rebuild
+bioetl run --pipeline chembl_compound_record --run-type rebuild
 
 # Dry-run (без записи)
-bioetl run chembl_compound_record --dry-run
+bioetl run --pipeline chembl_compound_record --dry-run
 ```
 
 ---
@@ -119,11 +119,11 @@ bioetl run chembl_compound_record --dry-run
 - `molecule-chembl-id`
 - `document-chembl-id`
 
-Конфигурируется в `configs/entities/chembl/compound-record.yaml`:
+Конфигурируется в `configs/entities/chembl/compound_record.yaml`:
 
 ```yaml
-gold-filters:
-  required-fields:
+gold_filters:
+  required_fields:
     - molecule-chembl-id
     - document-chembl-id
 ```
@@ -152,11 +152,11 @@ gold-filters:
 
 | Компонент | Путь |
 |-----------|------|
-| Конфигурация | `configs/entities/chembl/compound-record.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/compound-record-transformer.py` |
-| Пайплайн | `src/bioetl/application/pipelines/chembl/compound-record.py` |
+| Конфигурация | `configs/entities/chembl/compound_record.yaml` |
+| Трансформер | `src/bioetl/application/pipelines/chembl/compound_record_transformer.py` |
+| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py` |
 | Сущность | `src/bioetl/domain/entities/chembl_compound_record.py` |
-| Схема | `src/bioetl/domain/schemas/chembl/compound-record.py` |
+| Схема | `src/bioetl/domain/schemas/chembl/compound_record.py` |
 
 ---
 

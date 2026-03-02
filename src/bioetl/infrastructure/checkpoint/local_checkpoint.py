@@ -58,6 +58,11 @@ class LocalCheckpoint:
         """Save checkpoint atomically using temp file + rename.
 
         Uses run_in_executor to avoid blocking the event loop.
+
+        Args:
+            pipeline: Pipeline.
+            run_id: Pipeline run identifier.
+            metadata: Associated metadata.
         """
         loop = asyncio.get_running_loop()
         await loop.run_in_executor(None, self._save_sync, pipeline, run_id, metadata)
@@ -103,6 +108,12 @@ class LocalCheckpoint:
         """Load last checkpoint.
 
         Uses run_in_executor to avoid blocking the event loop.
+
+        Args:
+            pipeline: Pipeline.
+
+        Returns:
+            Loaded tuple[RunID, dict[str, Any]] | None.
         """
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(None, self._load_sync, pipeline)
@@ -129,6 +140,9 @@ class LocalCheckpoint:
         """Delete checkpoint.
 
         Uses run_in_executor to avoid blocking the event loop.
+
+        Args:
+            pipeline: Pipeline.
         """
         loop = asyncio.get_running_loop()
         await loop.run_in_executor(None, self._delete_sync, pipeline)
@@ -145,6 +159,9 @@ class LocalCheckpoint:
         """List all pipelines with checkpoints.
 
         Uses run_in_executor to avoid blocking the event loop.
+
+        Returns:
+            Collection of all.
         """
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(None, self._list_all_sync)
@@ -169,6 +186,12 @@ class LocalCheckpoint:
         """Check if checkpoint exists.
 
         Uses run_in_executor to avoid blocking the event loop.
+
+        Args:
+            pipeline: Pipeline.
+
+        Returns:
+            True if condition is met, False otherwise.
         """
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(None, self._exists_sync, pipeline)

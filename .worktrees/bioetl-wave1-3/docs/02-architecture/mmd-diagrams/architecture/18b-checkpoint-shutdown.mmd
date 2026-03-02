@@ -1,0 +1,73 @@
+%% BioETL — Checkpoint and Shutdown System
+%% Checkpoint and shutdown ports, managers, and pipeline lifecycle integration.
+
+%% @version 1.0.0
+%% @date    2026-02-27
+%% @type    flowchart
+%% @level   System / Component
+%% @view    checkpoint-shutdown
+%% @parent  18-lock-checkpoint-shutdown.mmd
+%% @nodes   14
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+graph TB
+%% keep-orphan: SHP
+    subgraph Ports["Domain Ports"]
+        CKP["fa:fa-flag CheckpointPort"]:::size-sm
+        SHP["fa:fa-power-off ShutdownPort"]:::size-sm
+    end
+
+    subgraph AppCheckpoint["Application: CheckpointManager"]
+        CM["CheckpointManager"]:::size-sm
+    end
+
+    subgraph AppShutdown["Application: Shutdown"]
+        SS["ShutdownSignal"]:::size-sm
+        SR["ShutdownReason"]:::size-sm
+    end
+
+    subgraph InfraCheckpoint["Infrastructure: LocalCheckpoint"]
+        LCP["LocalCheckpoint"]:::size-sm
+    end
+
+    subgraph Lifecycle["Pipeline Lifecycle"]
+        direction LR
+        START["Pipeline Start"]:::size-sm
+        ACQ["Acquire Lock"]:::size-sm
+        EXEC["Execute Batches"]:::size-sm
+        SIG["Signal received?"]:::size-sm
+        GRACEFUL["Graceful Shutdown"]:::size-sm
+        REL["Release Lock"]:::size-sm
+        END_N["Pipeline End"]:::size-sm
+    end
+
+    %% Port implementation
+    CKP -.-> LCP
+
+    %% Application composition
+    CM --> CKP
+    SS --> SR
+
+    %% Lifecycle flow
+    START --> ACQ --> EXEC --> SIG
+    SIG -->|yes| GRACEFUL --> END_N
+    SIG -->|no| REL --> END_N
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef app fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    classDef infra fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    classDef lifecycle fill:#f1f5f9,stroke:#64748b
+
+    class CKP,SHP port
+    class CM,SS,SR app
+    class LCP infra
+    class START,ACQ,EXEC,SIG,GRACEFUL,REL,END_N lifecycle

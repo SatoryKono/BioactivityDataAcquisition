@@ -18,12 +18,12 @@
 **Файл:** `configs/entities/chembl/assay.yaml`
 
 ```yaml
-pipeline-name: chembl_assay
+pipeline_name: chembl_assay
 provider: chembl
-entity-type: assay
+entity_type: assay
 version: "1.2.0"
-primary-keys: ["assay-chembl-id"]
-silver-table: "chembl_assay"
+primary_keys: ["assay-chembl-id"]
+silver_table: "chembl_assay"
 
 gold-filter-types:
     - B  # Binding
@@ -45,16 +45,16 @@ sink:
         path: "data/output/silver"
         format: delta
         mode: merge
-        partition-by: ["assay-type"]
+        partition_by: ["assay-type"]
     gold:
         enabled: true
         path: "data/output/gold"
         format: delta
         mode: overwrite
 
-dq-overrides:
-    soft-fail-threshold: 0.05   # 5% ошибок → WARNING
-    hard-fail-threshold: 0.20   # 20% ошибок → FAIL BATCH
+dq_overrides:
+    soft_fail_threshold: 0.05   # 5% ошибок → WARNING
+    hard_fail_threshold: 0.20   # 20% ошибок → FAIL BATCH
 ```
 
 ---
@@ -77,7 +77,7 @@ dq-overrides:
 | `cell-chembl-id` | `str` | Нет | ChEMBL ID клеточной линии |
 | `tissue-chembl-id` | `str` | Нет | ChEMBL ID ткани |
 | `src-id` | `int` | Нет | ID источника данных |
-| `src-assay-id` | `str` | Нет | ID анализа в источнике |
+| `src-assay_id` | `str` | Нет | ID анализа в источнике |
 | `aidx` | `str` | Нет | Внутренний индекс |
 
 #### Классификация анализа
@@ -154,10 +154,10 @@ dq-overrides:
 |------|-----|----------|
 | `entity-id` | `str` | `chembl:{assay-chembl-id}` |
 | `content-hash` | `str` | SHA256-хеш содержимого |
-| `-run-id` | `str` | UUID запуска пайплайна |
-| `-run-type` | `str` | `incremental`, `backfill`, `rebuild` |
-| `-source-batch-id` | `str` | UUID батча |
-| `-ingestion-ts` | `str` | Timestamp загрузки (ISO8601) |
+| `-run_id` | `str` | UUID запуска пайплайна |
+| `-run_type` | `str` | `incremental`, `backfill`, `rebuild` |
+| `-source-batch_id` | `str` | UUID батча |
+| `-ingestion_ts` | `str` | Timestamp загрузки (ISO8601) |
 
 ---
 
@@ -175,7 +175,7 @@ def -validate-invariants(self) -> None:
 
 ## 4. Нормализация данных
 
-**Файл:** `src/bioetl/application/pipelines/chembl/assay-transformer.py`
+**Файл:** `src/bioetl/application/pipelines/chembl/assay_transformer.py`
 
 ### 4.1. Этапы трансформации
 
@@ -266,7 +266,7 @@ content-hash = sha256(
 **PyArrow Schema** (`src/bioetl/infrastructure/schemas/silver.py`):
 
 ```python
-CHEMBL-ASSAY-SCHEMA = pa.schema([
+CHEMBL_ASSAY_SCHEMA = pa.schema([
     pa.field("entity-id", pa.string()),
     pa.field("content-hash", pa.string()),
     pa.field("assay-chembl-id", pa.string()),
@@ -279,9 +279,9 @@ CHEMBL-ASSAY-SCHEMA = pa.schema([
     pa.field("bao-format", pa.string()),
     pa.field("bao-label", pa.string()),
     pa.field("description", pa.string()),
-    pa.field("-run-id", pa.string()),
-    pa.field("-run-type", pa.string()),
-    pa.field("-ingestion-ts", pa.string()),
+    pa.field("-run_id", pa.string()),
+    pa.field("-run_type", pa.string()),
+    pa.field("-ingestion_ts", pa.string()),
     # ... всего 43 поля (39 бизнес + 4 системных)
 ])
 ```
@@ -298,10 +298,11 @@ CHEMBL-ASSAY-SCHEMA = pa.schema([
 
 #### Фильтр для Gold
 
-**Файл:** `src/bioetl/application/pipelines/chembl/assay-filter.py`
+Фильтрация для Gold настраивается в `configs/entities/chembl/assay.yaml`
+через секцию `filters.gold_filters`.
 
 ```python
-def should-include(self, -context, record) -> bool:
+def should_include(self, -context, record) -> bool:
     # Фильтр по типу анализа
     if self.preferred-types:
         assay-type = record.get("assay-type")
@@ -360,7 +361,7 @@ ChEMBL API (/assay.json)
 │  • Партиции: assay-type                 │
 └─────────────────────────────────────────┘
          │
-         ▼ AssayGoldFilter.should-include()
+         ▼ AssayGoldFilter.should_include()
          │
          ├── Не прошёл? ──► (пропускаем)
          │
@@ -389,19 +390,10 @@ ChEMBL API (/assay.json)
 
 ---
 
-## 9. Watermark (инкрементальная загрузка)
+## 9. Инкрементальная загрузка
 
-**Файл:** `src/bioetl/application/pipelines/chembl/assay-watermark.py`
-
-Для инкрементальных запусков используется `assay-chembl-id` как watermark:
-
-```python
-def extract(self, -context, record) -> Watermark:
-    assay-id = record.get("assay-chembl-id")
-    if assay-id is not None:
-        return Watermark.from-id(str(assay-id))
-    return Watermark.from-id("")
-```
+Отдельный watermark-модуль удалён (см. ADR-011). Инкрементальность обеспечивается
+через `run_type`, checkpoints и идемпотентный merge по ключам.
 
 ---
 
@@ -411,9 +403,9 @@ def extract(self, -context, record) -> Watermark:
 |-----------|------|
 | Конфигурация | `configs/entities/chembl/assay.yaml` |
 | Сущность | `src/bioetl/domain/entities.py` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/assay-transformer.py` |
-| Gold-фильтр | `src/bioetl/application/pipelines/chembl/assay-filter.py` |
-| Watermark | `src/bioetl/application/pipelines/chembl/assay-watermark.py` |
+| Трансформер | `src/bioetl/application/pipelines/chembl/assay_transformer.py` |
+| Gold-фильтр | `configs/entities/chembl/assay.yaml` (`filters.gold_filters`) |
+| Pipeline defs | `src/bioetl/application/pipelines/chembl/_pipelines.py` |
 | Silver Schema | `src/bioetl/infrastructure/schemas/silver.py` |
 | Gold Schema | `src/bioetl/infrastructure/schemas/gold.py` |
 | Data Contract | `docs/04-reference/contracts/gold/chembl_assay-v1.0.json` |
@@ -430,7 +422,7 @@ bioetl run --pipeline chembl_assay
 bioetl run --pipeline chembl_assay --limit 1000
 
 # Полная перезагрузка
-bioetl run --pipeline chembl_assay --run-type rebuild
+bioetl run --pipeline chembl_assay --run_type rebuild
 
 # С фильтрацией по ID из CSV
 bioetl run --pipeline chembl_assay --input-csv data/input/assay.csv

@@ -37,7 +37,7 @@
 
 ## 3. Трансформация
 
-**Файл:** `src/bioetl/application/pipelines/chembl/tissue-transformer.py`
+**Файл:** `src/bioetl/application/pipelines/chembl/tissue_transformer.py`
 
 ### Нормализация данных
 
@@ -77,13 +77,13 @@ entity-id = f"chembl:{tissue-id}"
 
 ```bash
 # Инкрементальная загрузка
-bioetl run chembl_tissue
+bioetl run --pipeline chembl_tissue
 
 # С ограничением количества записей
-bioetl run chembl_tissue --limit 500
+bioetl run --pipeline chembl_tissue --limit 500
 
 # Полная перезагрузка
-bioetl run chembl_tissue --run-type rebuild
+bioetl run --pipeline chembl_tissue --run-type rebuild
 ```
 
 ---
@@ -94,8 +94,8 @@ bioetl run chembl_tissue --run-type rebuild
 |-----------|------|
 | Конфигурация | `configs/entities/chembl/tissue.yaml` |
 | DQ Rules | `configs/entities/chembl/tissue.yaml#quality` |
-| Схема | `configs/schemas/chembl/tissue.yaml` |
-| Трансформер | `src/bioetl/application/pipelines/chembl/tissue-transformer.py` |
+| Схема | `configs/entities/chembl/tissue.yaml` |
+| Трансформер | `src/bioetl/application/pipelines/chembl/tissue_transformer.py` |
 
 ---
 

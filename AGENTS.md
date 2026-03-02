@@ -6,7 +6,7 @@ BioETL is a Python ETL pipeline for bioactivity data acquisition from multiple p
 
 ## Tech Stack
 
-- **Python 3.13**, **uv** for dependency management
+- **Python 3.11+** (**3.13 recommended**), **uv** for dependency management
 - **Pandera** for DataFrame schema validation
 - **Delta Lake** for Silver layer (MUST, no raw Parquet)
 - **httpx** for async HTTP, **structlog** for logging
@@ -59,8 +59,9 @@ src/bioetl/
   composition/   — DI wiring, factories, bootstrap
   interfaces/    — CLI (Click)
 configs/
-  sources/       — Provider YAML configs (chembl.yaml, pubmed.yaml, etc.)
-  pipelines/     — Pipeline and composite pipeline configs
+  providers/     — Provider YAML configs (chembl.yaml, pubmed.yaml, etc.)
+  entities/      — Unified entity pipeline configs ({provider}/{entity}.yaml)
+  composites/    — Composite pipeline configs ({entity}.yaml)
 tests/
   unit/          — Unit tests mirroring src/ structure
   integration/   — Integration tests

@@ -55,17 +55,17 @@ Open `.env` and verify the settings. For local development, the defaults are usu
 
 **Key Variables:**
 
-- `BIOETL-ENV`: Set to `dev`.
-- `BIOETL-DATA-DIR`: Directory for data storage (default: `./data`).
-- `BIOETL-LOG-LEVEL`: Logging level (default: `INFO`).
+- `BIOETL_ENV`: Set to `dev`.
+- `BIOETL_DATA_DIR`: Directory for data storage (default: `./data`).
+- `BIOETL_LOG_LEVEL`: Logging level (default: `INFO`).
 
 ### Secrets
 
 If you plan to access APIs requiring authentication (e.g., UniProt, OpenAlex), add your keys to `.env`:
 
 ```ini
-BIOETL-UNIPROT-API-KEY=your-key-here
-BIOETL-OPENALEX-API-KEY=your-email@example.com
+BIOETL_UNIPROT_API_KEY=your-key-here
+BIOETL_OPENALEX_EMAIL=your-email@example.com
 ```
 
 ## 4. Verify Installation
@@ -116,10 +116,10 @@ data/
     │       └── batch-001.jsonl.zst
     ├── silver/
     │   └── chembl/activity/
-    │       └── -delta-log/
+    │       └── _delta_log/
     ├── gold/
     │   └── chembl/activity/
-    │       └── -delta-log/
+    │       └── _delta_log/
     ├── checkpoints/
     │   └── chembl_activity.json
     └── quarantine/

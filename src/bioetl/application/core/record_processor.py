@@ -108,7 +108,16 @@ class RecordProcessor:
         batch_id: BatchID,
         start_index: int = 0,
     ) -> BatchResult:
-        """Process batch through Bronze -> Silver -> Gold with tracing."""
+        """Process batch through Bronze -> Silver -> Gold with tracing.
+
+        Args:
+            records: Collection of data records.
+            batch_id: Batch identifier.
+            start_index: Start index.
+
+        Returns:
+            Processed result.
+        """
         ingestion_ts = self._context.started_at
 
         # Write to Bronze and capture result for lineage tracking (REQ-LINEAGE-001)

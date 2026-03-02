@@ -97,7 +97,12 @@ class DQConfig:
     def validate_thresholds(
         *, soft_fail_threshold: float, hard_fail_threshold: float
     ) -> None:
-        """Validate ordering and bounds for DQ thresholds."""
+        """Validate ordering and bounds for DQ thresholds.
+
+        Args:
+            soft_fail_threshold: Soft fail threshold.
+            hard_fail_threshold: Hard fail threshold.
+        """
         if not 0.0 <= soft_fail_threshold <= 1.0:
             raise ValueError(
                 "soft_fail_threshold must be between 0.0 and 1.0 inclusive"

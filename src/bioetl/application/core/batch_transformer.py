@@ -375,6 +375,8 @@ class StreamingBatchProcessor:
         Yields:
             TransformResult for each processed sub-batch.
 
+        Returns:
+            Processed result.
         """
         current_chunk_size = chunk_size
         i = 0
@@ -409,5 +411,7 @@ class StreamingBatchProcessor:
         Yields:
             Individual records one at a time.
 
+        Returns:
+            Result dictionary.
         """
         yield from records

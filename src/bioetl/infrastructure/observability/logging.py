@@ -95,6 +95,9 @@ class StructlogLogger:
         Args:
             _event: The event name/message.
             **kwargs: Additional context for the log entry.
+
+        Returns:
+            The Any result.
         """
         return self._logger.info(_event, **kwargs)
 
@@ -105,6 +108,9 @@ class StructlogLogger:
         Args:
             _event: The event name/message.
             **kwargs: Additional context for the log entry.
+
+        Returns:
+            The Any result.
         """
         return self._logger.warning(_event, **kwargs)
 
@@ -115,6 +121,9 @@ class StructlogLogger:
         Args:
             _event: The event name/message.
             **kwargs: Additional context for the log entry.
+
+        Returns:
+            The Any result.
         """
         return self._logger.error(_event, **kwargs)
 
@@ -125,6 +134,9 @@ class StructlogLogger:
         Args:
             _event: The event name/message.
             **kwargs: Additional context for the log entry.
+
+        Returns:
+            The Any result.
         """
         return self._logger.debug(_event, **kwargs)
 
@@ -135,5 +147,8 @@ class StructlogLogger:
         Args:
             _event: The event name/message.
             **kwargs: Additional context for the log entry.
+
+        Returns:
+            The Any result.
         """
         return self._logger.exception(_event, **kwargs)

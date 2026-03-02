@@ -1,5 +1,3 @@
-# План Тестирования Регрессий Диаграмм (Draft)
-
 _Дата: 2026-02-27_  
 _Статус: Phase 1 + Phase 2 Nightly implemented (2026-02-27)_  
 _Связанные документы: diagram-modernization-program.md, 06-diagram-policy.md, ADR-040_

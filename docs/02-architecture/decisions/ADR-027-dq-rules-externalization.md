@@ -16,12 +16,12 @@ Data Quality (DQ) rules were embedded directly in pipeline YAML configuration fi
 Example of duplication:
 ```yaml
 # configs/entities/chembl/activity.yaml
-dq-overrides:
+dq_overrides:
   soft-fail-threshold: 0.05
   hard-fail-threshold: 0.20
 
 # configs/entities/chembl/molecule.yaml
-dq-overrides:
+dq_overrides:
   soft-fail-threshold: 0.05  # Duplicated
   hard-fail-threshold: 0.20  # Duplicated
 ```
@@ -41,33 +41,33 @@ configs/
 1. `configs/base/quality.yaml`
 2. `configs/providers/{provider}.yaml#quality`
 3. `configs/entities/{provider}/{entity}.yaml#quality`
-4. Inline `dq-overrides` in pipeline config (for exceptional cases)
+4. Inline `dq_overrides` in pipeline config (for exceptional cases)
 
 Pipeline configs reference DQ config via `dq-config-file`:
 ```yaml
-pipeline-name: chembl_activity
+pipeline_name: chembl_activity
 dq-config-file: ../../entities/chembl/activity.yaml
 ```
 
 > **`dq-config-file` semantics (convention-based):**
 > This field is **auto-computed** by the pipeline config loader from `provider` and
-> `entity-type` as `../../entities/{provider}/{entity-type}.yaml`. Pipeline
+> `entity_type` as `../../entities/{provider}/{entity_type}.yaml`. Pipeline
 > YAML files **SHOULD NOT** explicitly set this field — it is resolved automatically
 > via convention (ADR-029). If explicitly set, the value acts as an **override path**
 > that replaces the convention-based resolution. The `DQConfigLoader` always loads
 > the full 3-level hierarchy (`-defaults → provider → entity`) regardless of whether
 > `dq-config-file` is explicit or computed.
 >
-> Inline `dq-overrides` in pipeline YAML are applied as Level 4 on top of the
+> Inline `dq_overrides` in pipeline YAML are applied as Level 4 on top of the
 > resolved hierarchy. They are the recommended way to add entity-specific exceptions.
 
 ### Implementation Components
 
-1. **Pydantic schemas**: `src/bioetl/infrastructure/schemas/dq-config.py`
+1. **Pydantic schemas**: `src/bioetl/infrastructure/schemas/dq_config.py`
    - `ThresholdsConfig`: Validates soft-fail < hard-fail invariant
    - `DQConfigFile`: Complete schema with hierarchical validation support
 
-2. **Configuration loader**: `src/bioetl/infrastructure/config/dq-config-loader.py`
+2. **Configuration loader**: `src/bioetl/infrastructure/config/dq_config_loader.py`
    - `DQConfigLoader.load(provider, entity, inline-overrides)`: Merges configs
    - Thread-safe caching for performance
    - Deep merge with validation list concatenation
@@ -85,7 +85,7 @@ dq-config-file: ../../entities/chembl/activity.yaml
 - **Separation of Concerns**: Pipeline config focuses on orchestration
 - **Reusability**: Provider-level validations shared across entities
 - **Flexibility**: Entity-specific rules without affecting others
-- **Backward compatible**: Inline `dq-overrides` still supported as Level 4 override
+- **Backward compatible**: Inline `dq_overrides` still supported as Level 4 override
 - **Type safety**: Pydantic validation catches config errors early
 - **Performance**: Caching prevents repeated file reads
 
@@ -145,16 +145,16 @@ Store DQ rules in a database. Rejected because:
 | Requirement | Status | Implementation |
 |-------------|--------|----------------|
 | RULES.md §3.1.2 DQ Thresholds | PASS | `ThresholdsConfig` enforces 0.05/0.20 defaults |
-| soft-fail < hard-fail | PASS | `ThresholdsConfig.validate-order()` |
-| Hierarchical merge | PASS | `DQConfigLoader.-deep-merge()` |
-| Backward compatibility | PASS | Inline `dq-overrides` supported as override |
+| soft-fail < hard-fail | PASS | `ThresholdsConfig.validate_order()` |
+| Hierarchical merge | PASS | `DQConfigLoader._deep_merge()` |
+| Backward compatibility | PASS | Inline `dq_overrides` supported as override |
 
 ## References
 
 - RULES.md §3.1.2: DQ Thresholds
 - Domain config: `src/bioetl/domain/config.py`
-- Schema: `src/bioetl/infrastructure/schemas/dq-config.py`
-- Loader: `src/bioetl/infrastructure/config/dq-config-loader.py`
+- Schema: `src/bioetl/infrastructure/schemas/dq_config.py`
+- Loader: `src/bioetl/infrastructure/config/dq_config_loader.py`
 - Config files: `configs/base/quality.yaml`, `configs/providers/*.yaml#quality`, `configs/entities/*/*#quality`
 
 ## Changelog

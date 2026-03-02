@@ -2,6 +2,8 @@
 
 *Reference: [RULES.md §3.1.2](../../00-project/RULES.md#312-пороги-ошибок-батча-thresholds)*
 
+> Runtime profile: Local-Only single-instance (ADR-010). Commands and paths assume local execution context.
+
 This runbook describes how to handle pipeline failures due to high Data Quality (DQ) error rates.
 
 ## Symptoms
@@ -33,7 +35,7 @@ This runbook describes how to handle pipeline failures due to high Data Quality 
    - Update Pandera schemas in `src/bioetl/infrastructure/schemas/`.
    - Deploy new version.
 3. **If Threshold is Too Strict**:
-   - Temporarily increase threshold in `configs/entities/{pipeline}.yaml`:
+   - Temporarily increase threshold in `configs/entities/{provider}/{entity}.yaml`:
      ```yaml
      dq-overrides:
        hard-fail-threshold: 0.30  # Increase to 30%

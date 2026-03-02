@@ -54,6 +54,10 @@ def show_command(pipeline: str, output_format: str) -> None:
         bioetl config show chembl_activity
 
         bioetl config show chembl_activity --format json
+
+    Args:
+        pipeline: Pipeline.
+        output_format: Output format.
     """
     service = get_config_service()
 
@@ -84,6 +88,9 @@ def validate_command(pipeline: str) -> None:
     Examples:
 
         bioetl config validate chembl_activity
+
+    Args:
+        pipeline: Pipeline.
     """
     service = get_config_service()
 
@@ -119,6 +126,9 @@ def show_settings_command(output_format: str) -> None:
         bioetl config show-settings
 
         bioetl config show-settings --format json
+
+    Args:
+        output_format: Output format.
     """
     service = get_config_service()
     settings_info = service.get_settings()

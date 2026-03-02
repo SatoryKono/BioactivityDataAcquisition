@@ -1,11 +1,11 @@
-# Composition Root Wiring — Full DI Graph
+# Composition Root Di Graph Full
 
 - Исходная диаграмма: `mmd-diagrams/views/28-composition-root-di-graph-full.mermaid`
 
 ## Описание
-Диаграмма описывает: RULES.md §1.1 (Composition Layer), ADR-005. Приоритет/контекст: 3 (Score 9.00) — Complete dependency injection assembly.
+Эта views-диаграмма Composition Root Di Graph Full представляет срез типа full для родительской схемы (root) и использует нотацию unknown. Она нужна для детального анализа выбранного аспекта архитектуры без перегрузки полного графа лишними элементами. В метке view зафиксировано назначение: Full. Такой формат облегчает трассировку связей между full-версией и специализированными представлениями overview/domain/infra/dataflow, что важно для ревью, онбординга и проверки архитектурной консистентности документации. Ключевые блоки этой версии включают: Entry Point, Composition Factories, Logger & Observability, Client & Data Source, Storage & Services. Их состав показывает, какие границы ответственности и каналы взаимодействия автор выбрал для текущего аналитического фокуса. Показательные узлы в диаграмме: Entry Point, CLI run command, bootstrap/runtime/assembly.py, Composition Factories, Logger & Observability, BootstrapLogger • configure structlog. По ним можно проверить корректность терминологии, соответствие имен портов/адаптеров и логичность маршрутов данных или управляющих вызовов. Диаграмма предназначена для практического использования в технических обсуждениях, регрессионной валидации диаграмм и синхронизации с кодовой структурой проекта. Она помогает быстро обнаруживать расхождения между задуманной архитектурой и фактической реализацией компонентов.
 
 ## Метаданные
-- Тип: `flowchart`
-- Уровень: `Mixed (System / Component / Class)`
-- Дата метаданных: `2026-02-24`
+- Тип: `unknown`
+- View: `Full`
+- Parent: `(root)`

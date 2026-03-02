@@ -21,7 +21,11 @@ def checkpoint() -> None:
 @checkpoint.command("list")
 @click.option("--pipeline", required=True, help="Pipeline name")
 def checkpoint_list(pipeline: str) -> None:
-    """List all checkpoints."""
+    """List all checkpoints.
+
+    Args:
+        pipeline: Pipeline.
+    """
     echo_info(f"Listing checkpoints for {pipeline}...")
 
     checkpoint_manager = get_checkpoint_manager(pipeline)

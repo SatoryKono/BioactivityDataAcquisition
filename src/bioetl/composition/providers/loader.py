@@ -58,7 +58,11 @@ def ensure_providers_loaded() -> None:
 
 
 def get_loaded_status() -> bool:
-    """Return provider loading status."""
+    """Return provider loading status.
+
+    Returns:
+        Loaded status.
+    """
     return _loaded
 
 

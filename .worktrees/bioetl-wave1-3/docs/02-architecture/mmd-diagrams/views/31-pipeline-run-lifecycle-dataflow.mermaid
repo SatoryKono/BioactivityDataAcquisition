@@ -1,0 +1,55 @@
+%% View: Data-Flow | Parent: 31-pipeline-run-lifecycle-full.mermaid
+%% @uniform width=168 height=56 max_title_len=16 max_desc_lines=0
+flowchart TB
+%% keep-orphan: N4
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        N10["VALIDATING"]
+    end
+
+    subgraph Application["Application Layer"]
+        direction TB
+        N8["PREFLIGHT"]
+        N2["TRANSFORMING"]
+        N3["BATCH_DONE"]
+        N4["BatchLoop"]
+        N9["PREFLIGHT_PASSED"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N1["EXTRACTING"]
+        N5["FAILED"]
+        N6["WRITING"]
+        N7["LOCKING"]
+        N11["CHECKPOINTING"]
+        N12["DRAINING"]
+    end
+
+    N7 ==> N5
+    N8 --> N9
+    N8 --> N5
+    N9 --> N1
+    N1 --> N2
+    N2 --> N10
+    N10 --> N6
+    N6 --> N11
+    N11 --> N1
+    N11 --> N3
+    N1 --> N12
+    N2 --> N12
+    N6 --> N5
+    N1 --> N5
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle default stroke:#1E293B,stroke-width:4px

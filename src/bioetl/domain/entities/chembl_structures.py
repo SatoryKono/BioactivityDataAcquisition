@@ -430,11 +430,19 @@ class ProteinClassification(BaseEntity):
             raise ValueError(f"downgraded must be 0 or 1, got {self.downgraded}")
 
     def is_root(self) -> bool:
-        """Check if this is a root node (no parent)."""
+        """Check if this is a root node (no parent).
+
+        Returns:
+            True if the condition is met, False otherwise.
+        """
         return self.parent_id is None
 
     def is_deprecated(self) -> bool:
-        """Check if this classification is deprecated."""
+        """Check if this classification is deprecated.
+
+        Returns:
+            True if the condition is met, False otherwise.
+        """
         return self.replaced_by is not None or self.downgraded == 1
 
 

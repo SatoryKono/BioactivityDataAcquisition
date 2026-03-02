@@ -1,6 +1,6 @@
 # bot-xwalk — Automated Crosswalk Refresh
 
-*Priority: medium | Version: 1.0 | Aligned with RULES.md v5.22*
+*Priority: medium | Version: 1.0 | Aligned with RULES.md v5.23*
 
 ---
 

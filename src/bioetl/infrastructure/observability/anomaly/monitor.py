@@ -74,7 +74,14 @@ class DataQualityMonitor:
         min_threshold: float | None = None,
         max_threshold: float | None = None,
     ) -> None:
-        """Add metric to monitor."""
+        """Add metric to monitor.
+
+        Args:
+            metric_name: Name of the metric.
+            baseline: Baseline.
+            min_threshold: Minimum threshold.
+            max_threshold: Maximum threshold.
+        """
         self.detector.update_baseline(metric_name, baseline)
         if min_threshold is not None or max_threshold is not None:
             self.detector.set_threshold(metric_name, min_threshold, max_threshold)
@@ -103,7 +110,12 @@ class DataQualityMonitor:
     def update_baseline_from_metrics(
         self, metrics: dict[str, float], timestamp: datetime | None = None
     ) -> None:
-        """Update baseline with current metrics (if no anomalies)."""
+        """Update baseline with current metrics (if no anomalies).
+
+        Args:
+            metrics: Metrics collector instance.
+            timestamp: Timestamp.
+        """
         anomalies = self.check_quality(metrics, timestamp)
         critical_anomalies = [
             a for a in anomalies if a.severity == AnomalySeverity.CRITICAL
@@ -127,5 +139,8 @@ class DataQualityMonitor:
 
         Returns:
             Tuple of (mean, stddev, sample_count) or None if no baseline
+
+        Args:
+            metric_name: Name of the metric.
         """
         return self.detector.get_baseline_stats(metric_name)

@@ -37,6 +37,11 @@ def release_command(pipeline: str, run_id: str, exclusive: bool) -> None:
         bioetl lock release --pipeline chembl_activity --run-id abc123
 
         bioetl lock release --pipeline chembl_activity --run-id abc123 --exclusive
+
+    Args:
+        pipeline: Pipeline.
+        run_id: Pipeline run identifier.
+        exclusive: Whether to exclusive.
     """
     try:
         parsed_run_id = cast(RunID, UUID(run_id))
@@ -70,6 +75,10 @@ def check_command(pipeline: str, run_id: str) -> None:
     Examples:
 
         bioetl lock check --pipeline chembl_activity --run-id abc123
+
+    Args:
+        pipeline: Pipeline.
+        run_id: Pipeline run identifier.
     """
     try:
         parsed_run_id = cast(RunID, UUID(run_id))

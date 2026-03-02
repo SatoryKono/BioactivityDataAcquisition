@@ -167,7 +167,7 @@ If distributed deployment becomes necessary:
 
 2. Enable tracing via environment variable:
    ```bash
-   export BIOETL-OBSERVABILITY--TRACING-ENABLED=true
+   export BIOETL_OBSERVABILITY__TRACING_ENABLED=true
    ```
    The bootstrap in `composition/bootstrap/runtime/observability.py` will
    automatically return `OpenTelemetryTracer` instead of `NoOpTracing`.

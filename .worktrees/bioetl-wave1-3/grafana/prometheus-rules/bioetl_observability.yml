@@ -1,0 +1,56 @@
+groups:
+  - name: bioetl_chembl_assay_observability
+    rules:
+      - alert: BioETLChemblStatusCheckDegraded
+        expr: increase(bioetl_health_check_failures_total{provider="chembl"}[10m]) > 0
+        for: 2m
+        labels:
+          severity: warning
+          pipeline: chembl_assay
+          provider: chembl
+        annotations:
+          summary: "ChEMBL health-check failures detected"
+          description: "health_check_failures_total for provider=chembl increased in last 10m."
+
+      - alert: BioETLChemblPreflightDataSourceFailed
+        expr: max by (pipeline) (bioetl_pipeline_health_check_passed{pipeline="chembl_assay",component="data_source"}) == 0
+        for: 2m
+        labels:
+          severity: critical
+          pipeline: chembl_assay
+          component: data_source
+        annotations:
+          summary: "chembl_assay preflight data_source check failed"
+          description: "pipeline_health_check_passed for data_source is 0 for chembl_assay."
+
+      - alert: BioETLChemblInfrastructureValidationFailed
+        expr: max by (pipeline) (max_over_time(bioetl_infrastructure_validated{pipeline="chembl_assay"}[15m])) < 1
+        for: 2m
+        labels:
+          severity: critical
+          pipeline: chembl_assay
+        annotations:
+          summary: "chembl_assay infrastructure validation failed"
+          description: "No successful infrastructure_validated=1 for chembl_assay in last 15m."
+
+      - alert: BioETLChemblPipelineRunFailed
+        expr: increase(bioetl_pipeline_runs_total{pipeline="chembl_assay",status="failed"}[15m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          pipeline: chembl_assay
+        annotations:
+          summary: "chembl_assay run failed"
+          description: "At least one chembl_assay run failed in last 15m."
+
+      - alert: BioETLChemblRetryExhausted
+        expr: increase(bioetl_data_source_retry_exhausted_total{provider="chembl"}[15m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+          pipeline: chembl_assay
+          provider: chembl
+        annotations:
+          summary: "ChEMBL retries exhausted"
+          description: "bioetl_data_source_retry_exhausted_total increased for provider=chembl in last 15m."
+

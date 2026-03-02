@@ -64,7 +64,11 @@ class SettingsPort(Protocol):
         ...
 
     def model_dump(self) -> dict[str, Any]:
-        """Convert settings to dictionary."""
+        """Convert settings to dictionary.
+
+        Returns:
+            Model data as dictionary.
+        """
         ...
 
 
@@ -78,7 +82,11 @@ class PipelineYamlConfigPort(Protocol):
     gold_table: str | None
 
     def model_dump(self) -> dict[str, Any]:
-        """Convert configuration to dictionary."""
+        """Convert configuration to dictionary.
+
+        Returns:
+            Model data as dictionary.
+        """
         ...
 
 
@@ -87,7 +95,11 @@ class PipelineRegistryPort(Protocol):
     """Protocol for pipeline registry."""
 
     def list_pipelines(self) -> list[str]:
-        """List all registered pipeline names."""
+        """List all registered pipeline names.
+
+        Returns:
+            Collection of pipelines.
+        """
         ...
 
 

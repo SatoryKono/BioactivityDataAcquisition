@@ -53,7 +53,14 @@ def _build_gold_filters(yaml_config: PipelineYamlConfig) -> GoldFilterConfig:
 
 
 def dq_overrides_to_domain(yaml_config: PipelineYamlConfig) -> DQConfig:
-    """Convert inline DQ overrides from YAML config to domain DQConfig."""
+    """Convert inline DQ overrides from YAML config to domain DQConfig.
+
+    Args:
+        yaml_config: Configuration for yaml.
+
+    Returns:
+        The DQConfig result.
+    """
     return yaml_config.dq_overrides.to_domain()
 
 
@@ -61,7 +68,15 @@ def yaml_config_to_domain(
     yaml_config: PipelineYamlConfig,
     resolved_dq_config: DQConfig | None = None,
 ) -> PipelineConfig:
-    """Map PipelineYamlConfig to domain PipelineConfig."""
+    """Map PipelineYamlConfig to domain PipelineConfig.
+
+    Args:
+        yaml_config: Configuration for yaml.
+        resolved_dq_config: Configuration for resolved dq.
+
+    Returns:
+        The PipelineConfig result.
+    """
     source_fields = _extract_source_fields(yaml_config)
     write_mode, gold_write_mode = _extract_write_modes(yaml_config)
     silver_filters = _build_silver_filters(yaml_config)

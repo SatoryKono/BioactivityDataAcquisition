@@ -1,0 +1,4 @@
+field,doc_spec,cfg_pipeline,cfg_schema,code_transformer,code_entity,code_silver_schema,code_gold_schema,json_type,nullable,primary_key,notes
+subcellular_fraction,S2.1,YES,EMPTY,subcellular_fraction_transformer.py:125,chembl_subcellular_fraction.py:40,MISSING,chembl.py:711,string,false,true,OK
+assay_count,S2.2,YES,EMPTY,subcellular_fraction_transformer.py:126,chembl_subcellular_fraction.py:43,MISSING,chembl.py:718,integer,true,false,OK
+example_assay_chembl_id,S2.3,YES,EMPTY,subcellular_fraction_transformer.py:129,chembl_subcellular_fraction.py:46,MISSING,chembl.py:725,string,true,false,RENAME:example_assay_id->example_assay_chembl_id

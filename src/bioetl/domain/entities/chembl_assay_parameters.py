@@ -77,11 +77,19 @@ class AssayParameters(BaseEntity):
             raise ValueError(f"Invalid assay_id: {self.assay_id}")
 
     def has_numeric_value(self) -> bool:
-        """Check if parameter has numeric value (raw or standardized)."""
+        """Check if parameter has numeric value (raw or standardized).
+
+        Returns:
+            True if the condition is met, False otherwise.
+        """
         return self.value is not None or self.standard_value is not None
 
     def has_text_value(self) -> bool:
-        """Check if parameter has text value (raw or standardized)."""
+        """Check if parameter has text value (raw or standardized).
+
+        Returns:
+            True if the condition is met, False otherwise.
+        """
         return self.text_value is not None or self.standard_text_value is not None
 
     def get_comparable_value(self) -> tuple[float | None, str | None]:

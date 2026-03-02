@@ -225,6 +225,12 @@ class StorageAdapter:
         """Resolve the full path to a Delta table.
 
         Delegates to the underlying writer implementation.
+
+        Args:
+            table_name: Database table name.
+
+        Returns:
+            Table path.
         """
         return self.silver.get_table_path(table_name)
 
@@ -319,6 +325,13 @@ class StorageAdapter:
 
         Implements StoragePort.clear_silver().
         Clears both Delta tables and CSV exports (if configured).
+
+        Args:
+            table_name: Database table name.
+            dry_run: Dry run mode flag.
+
+        Returns:
+            Computed integer value.
         """
         return await self._run_clear(self.silver, table_name, dry_run)
 
@@ -327,6 +340,13 @@ class StorageAdapter:
 
         Implements StoragePort.clear_gold().
         Clears both Delta tables and CSV exports (if configured).
+
+        Args:
+            table_name: Database table name.
+            dry_run: Dry run mode flag.
+
+        Returns:
+            Computed integer value.
         """
         return await self._run_clear(self.gold, table_name, dry_run)
 
@@ -353,6 +373,12 @@ class StorageAdapter:
         """Clear CSV export files for Silver and Gold layers.
 
         Implements StoragePort.clear_csv().
+
+        Args:
+            table_name: Database table name.
+
+        Returns:
+            Computed integer value.
         """
         count = 0
         loop = asyncio.get_running_loop()
