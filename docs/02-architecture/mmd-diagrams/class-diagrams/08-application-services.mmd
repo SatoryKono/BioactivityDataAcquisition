@@ -24,30 +24,26 @@ classDiagram
             -_metrics: MetricsPort | None
             -_pipeline_name: str
             -_entity_type: str
-            +evaluate(context, executor) DQResult
+            +evaluate(context, executor): DQResult
         }
 
         class DQReportService {
-            +generate_reports(context) DQReportResult
+            +generate_reports(context): DQReportResult
         }
 
         class MedallionLifecycleService {
             <<dataclass>>
             +storage: StoragePort
             +logger: LoggerPort
-            +prepare_for_run(config, runtime) PrepareResult
-            +finalize_run(config, runtime) VacuumResult
-            +clear() None
-            +vacuum() None
-            +archive() None
+            +prepare_for_run(config, runtime): PrepareResult
+            +finalize_run(config, runtime): VacuumResult
         }
 
         class VacuumService {
             <<dataclass>>
             +storage: StoragePort
             +logger: LoggerPort
-            +vacuum_table(table_name) None
-            +vacuum_all() None
+            +vacuum_all(): None
         }
 
         class PipelineObserver {
@@ -60,12 +56,9 @@ classDiagram
             -_start_time: float
             -_root_span: Span | None
             -_phase: LifecyclePhase | None
-            +\_\_enter\_\_() Self
-            +\_\_exit\_\_(...) None
-            +emit_event(event) None
-            +on_preflight() None
-            +on_execution() None
-            +on_postrun() None
+            +\_\_enter\_\_(): Self
+            +\_\_exit\_\_(...): None
+            +emit_event(event): None
         }
 
         class LifecyclePhase {
@@ -81,70 +74,60 @@ classDiagram
 
     namespace Operational_Services {
         class HealthService {
-            +check_provider(provider, factory) HealthResult
-            +check_all(factory) HealthCheckSummary
+            +check_provider(provider, factory): HealthResult
+            +check_all(factory): HealthCheckSummary
         }
 
         class ConfigService {
-            +list_pipelines() list
-            +get_pipeline(name) PipelineConfig
+            +list_pipelines(): list
+            +get_pipeline(name): PipelineConfig
         }
 
         class ExportService {
-            +export(table_name, format, options) ExportResult
+            +export(table_name, format, options): ExportResult
         }
 
         class CheckpointService {
-            +list_checkpoints() list
-            +delete_checkpoint(key) None
+            +list_checkpoints(): list
         }
 
         class MetricsService {
-            +start_server() None
-            +stop_server() None
+            +start_server(): None
         }
 
         class ShutdownService {
-            +shutdown(reason, grace_period) None
+            +shutdown(reason, grace_period): None
         }
 
         class QuarantineService {
-            +inspect(pipeline, limit) list
-            +get_stats(pipeline) dict
-            +replay(pipeline) int
-            +purge(pipeline) int
+            +inspect(pipeline, limit): list
+            +replay(pipeline): int
         }
 
         class BronzeCleanupService {
-            +cleanup(config, dry_run) BronzeCleanupResult
+            +cleanup(config, dry_run): BronzeCleanupResult
         }
 
         class LockService {
-            +get_lock_info(key) dict | None
+            +get_lock_info(key): dict | None
         }
 
         class PipelineRunnerService {
-            +run_pipeline(config, runtime) None
+            +run_pipeline(config, runtime): None
         }
     }
 
     namespace DQ_Analyzers {
         class BronzeDQAnalyzer {
-            +analyze(records) DQMetrics
-            +check_completeness() float
-            +check_format() float
+            +analyze(records): DQMetrics
         }
 
         class SilverDQAnalyzer {
-            +analyze(delta_table) DQMetrics
-            +check_nullability() float
-            +check_schema() float
+            +analyze(delta_table): DQMetrics
         }
 
         class GoldDQAnalyzer {
-            +analyze(delta_table) DQMetrics
-            +check_pk_uniqueness() float
-            +validate_schema() float
+            +analyze(delta_table): DQMetrics
         }
     }
 
@@ -152,6 +135,10 @@ classDiagram
     DQReportService --> BronzeDQAnalyzer
     DQReportService --> SilverDQAnalyzer
     DQReportService --> GoldDQAnalyzer
+
+    note for PipelineObserver "Lifecycle hook methods moved to 08a operation catalog"
+    note for QuarantineService "get_stats/purge shown in 08a operation catalog"
+    note for BronzeDQAnalyzer "Rule-level checks shown in 08a operation catalog"
 
     style DataQualityService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style DQReportService fill:#eff6ff,stroke:#2563eb,stroke-width:2px

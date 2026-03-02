@@ -293,9 +293,6 @@ nav:
             -   "Release Checklist": 05-operations/RELEASE_CHECKLIST.md
             -   "Performance Baselines": 05-operations/performance-baselines.md
             -   "VACUUM & Retention": 05-operations/vacuum-retention.md
-            -   Deployment:
-                    -   "Kubernetes Guide": 05-operations/deployment/DEPLOYMENT_GUIDE.md
-                    -   "K8S Summary": 05-operations/deployment/K8S_SUMMARY.md
     -   Verification:
             -   "Publication Field Mapping": 05-operations/verification/publication-field-mapping-report.md
             -   "PubMed Extraction": 05-operations/verification/pubmed-extraction-verification-report.md
@@ -336,6 +333,8 @@ nav:
                     -   "Pipeline Legacy: SemanticScholar Publication": 04-reference/pipelines/semanticscholar-publication.md
             -   "Operations Extras":
                     -   "Monitoring Guide": 05-operations/01-monitoring-guide.md
+                    -   "Kubernetes Guide (Experimental)": 05-operations/deployment/DEPLOYMENT_GUIDE.md
+                    -   "K8S Summary (Experimental)": 05-operations/deployment/K8S_SUMMARY.md
                     -   "MCP Neo4j Memory Setup": 05-operations/deployment/NEO4J_MEMORY_SETUP.md
                     -   "MCP Neo4j Memory Summary": 05-operations/deployment/MCP_NEO4J_MEMORY_SUMMARY.md
                     -   "MCP Neo4j Memory Final Summary": 05-operations/deployment/MCP_NEO4J_MEMORY_FINAL_SUMMARY.md

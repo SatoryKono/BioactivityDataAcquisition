@@ -59,6 +59,7 @@ _Связанные документы: diagram-modernization-program.md, 06-dia
 | DIAG-T030 | Mermaid minor bump canary | Риск обновления CLI | canary job (planned) | Auto | Nightly/Weekly | Soft |
 | DIAG-T031 | Policy docs sync | Согласованность policy/workflow/docs | doc lint + link check | Auto | PR | Soft |
 | DIAG-T032 | Team acceptance review | Экспертная оценка читаемости | manual checklist | Manual | Sprint | Soft |
+| DIAG-T033 | Class method render integrity | Целостность сигнатур методов в classDiagram | `scripts/diagrams/check_class_method_render_integrity.py` | Auto | PR | Hard |
 
 ### 4.1 Описание тестов
 
@@ -94,6 +95,7 @@ _Связанные документы: diagram-modernization-program.md, 06-dia
 30. `DIAG-T030`: canary-проверка на minor-обновление Mermaid CLI.
 31. `DIAG-T031`: проверяет синхронность policy/workflow/docs.
 32. `DIAG-T032`: ручная экспертная проверка читаемости и понятности.
+33. `DIAG-T033`: проверяет соответствие методов между `.mmd` и `svg` без потери/разрыва идентификаторов.
 
 ## 5. Минимальный стартовый набор (обязательный до rollout)
 

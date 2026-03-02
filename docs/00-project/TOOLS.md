@@ -1,6 +1,6 @@
 # BioETL: Утилиты Проекта
 
-*Версия: 2.2 | Синхронизировано с RULES.md v5.23 (2026-02-24)*
+*Версия: 2.3 | Синхронизировано с RULES.md v5.23 (2026-03-02)*
 
 ---
 
@@ -24,6 +24,19 @@
 3. [Бенчмарки](#бенчмарки)
 4. [Интеграция с Make](#интеграция-с-make)
 5. [Добавление нового инструмента](#добавление-нового-инструмента)
+6. [Docs Toolchain](#docs-toolchain)
+
+---
+
+## Docs Toolchain
+
+- `mkdocs` pinned to `<2.0` in `pyproject.toml` to avoid known compatibility risk with current Material stack.
+- Standard docs checks:
+```bash
+python scripts/check_doc_links.py
+python -m mkdocs build -q
+```
+- Migration to MkDocs 2.x must be tracked as a dedicated task with explicit compatibility validation.
 
 ---
 

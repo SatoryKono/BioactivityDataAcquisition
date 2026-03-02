@@ -241,6 +241,9 @@ python src/tools/differentiate_linkstyle.py              # Применить
 | LINK-002 | WARN | Хрупкий singleton-паттерн в `linkStyle` (много индексных строк `1:1`) |
 | GRAPH-001 | WARN | Orphan-ноды (определены, но не в рёбрах) |
 | NBSP-001 | ERROR | Используется `&nbsp;`-padding в исходнике |
+| CLASS-001 | WARN | Неэкранированный dunder-метод в classDiagram (`__enter__`) |
+| CLASS-002 | WARN | Смешанный стиль return-нотации методов (`): Type` и `) Type`) |
+| CLASS-003 | WARN | Сигнатура метода слишком длинная для стабильного рендера (>\~88 символов) |
 
 Исключения: `-full.mermaid` reference views и `00-legend*` освобождены от SIZE-001/SIZE-002.
 
@@ -248,6 +251,9 @@ python src/tools/differentiate_linkstyle.py              # Применить
 python scripts/diagrams/lint_diagrams.py                  # Проверить всё
 python scripts/diagrams/lint_diagrams.py --json           # JSON-вывод для CI
 python scripts/diagrams/lint_diagrams.py --stale-days 120 # Свой порог
+python scripts/diagrams/check_class_method_render_integrity.py \
+  --source-dir docs/02-architecture/mmd-diagrams/class-diagrams \
+  --svg-dir docs/02-architecture/mmd-diagrams/class-diagrams/svg
 ```
 
 ### 6.2. Управление orphan-нодами

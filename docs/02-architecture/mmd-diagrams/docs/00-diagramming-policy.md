@@ -156,6 +156,35 @@ Recommended color scheme:
 | Success          | Green  | #4CAF50 |
 | External         | Blue   | #2563eb |
 
+### 4.4 Class Diagram Method Signatures (MUST for `class-diagrams/`)
+
+Чтобы методы стабильно рендерились в SVG/PDF и не теряли символы:
+
+- Экранируйте dunder-методы: `__enter__`, `__exit__`, `__aenter__`, `__aexit__`
+  - Пишите как `+\\_\\_enter\\_\\_()`, `+\\_\\_aexit\\_\\_()`
+  - Неэкранированная форма может терять `_` в финальном рендере
+- Используйте единый стиль return-нотации в рамках одной диаграммы
+  - Предпочтительный стиль: `+method(arg: Type): ReturnType`
+  - Не смешивайте с альтернативой `+method(arg: Type) ReturnType`
+- Ограничивайте длину сигнатуры метода
+  - Рекомендуемый soft-limit: до 88 символов на строку
+  - Длинные сигнатуры переносите через упрощение параметров или вынос деталей в notes
+- Избегайте тяжёлых generic-сигнатур в одном методе
+  - Вместо `Result[dict[str, list[tuple[str, int]]], ValidationError]` используйте алиас типа в комментарии/легенде
+- После изменения class-diagram запускайте проверки:
+  - `python scripts/diagrams/lint_diagrams.py <diagram.mmd>`
+  - `python scripts/diagrams/check_class_method_render_integrity.py --source-dir docs/02-architecture/mmd-diagrams/class-diagrams --svg-dir docs/02-architecture/mmd-diagrams/class-diagrams/svg`
+
+Пример (корректно):
+
+```mermaid
+classDiagram
+class ContextManagerPort {
+  +\_\_enter\_\_(): Self
+  +\_\_exit\_\_(excType: type, exc: BaseException, tb: object): bool
+}
+```
+
 ----------------------------------------------------------------------
 
 ## 5. Maintenance
