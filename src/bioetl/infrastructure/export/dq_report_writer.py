@@ -110,8 +110,13 @@ class DQReportWriter:
                 output_path = self._base_path / source_dir / filename
         else:
             output_path = Path(output_path)
-            if output_path.is_dir():
-                output_path = output_path / filename
+            # Treat explicit output_path as a directory and append filename.
+            # Using is_dir() here is unsafe for not-yet-created directories:
+            # Path(".../target").is_dir() == False before mkdir, which caused
+            # reports to be written as files named "target" and later blocked
+            # Bronze writer directory creation.
+            output_path.mkdir(parents=True, exist_ok=True)
+            output_path = output_path / filename
 
         return await self._write_report(report, output_path, format)
 

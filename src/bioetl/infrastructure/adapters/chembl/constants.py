@@ -37,10 +37,9 @@ CHEMBL_DTO_MODELS: dict[str, type[BaseModel]] = {
 }
 
 # Entity types that don't support limit/offset pagination
-# These endpoints return all records in a single response
+# These endpoints return all records in a single response.
 _NO_PAGINATION_ENTITIES: frozenset[str] = frozenset(
     {
-        "target",
         "target_component",
         "protein_class",
     }

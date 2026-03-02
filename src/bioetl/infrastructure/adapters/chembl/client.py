@@ -61,8 +61,8 @@ class ChemblAdapter(ChemblHealthMixin, ChemblMetadataMixin, BaseHttpAdapter):
 
     Pagination:
         Offset-based (``limit``/``offset`` query params, default page size
-        1000). Entities listed in ``_NO_PAGINATION_ENTITIES`` (target,
-        target_component, protein_class) are fetched in a single request.
+        1000). Entities listed in ``_NO_PAGINATION_ENTITIES``
+        (target_component, protein_class) are fetched in a single request.
         For filtered queries, IDs are batched (default batch size 20) with
         ``__in`` filter syntax; URL length is capped at 1000 characters.
 

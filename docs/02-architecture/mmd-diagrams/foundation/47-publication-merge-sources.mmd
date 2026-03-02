@@ -76,4 +76,4 @@ sequenceDiagram
 
     MS-->>CPR: MergeResult
     CPR->>FSM: transition(MERGING → COMPLETED)
-    CPR==>>CLI: CompositeResult(state=COMPLETED)
+    CPR-->>CLI: CompositeResult(state=COMPLETED)

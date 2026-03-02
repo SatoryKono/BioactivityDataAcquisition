@@ -9,6 +9,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PROFILE="pr"
 PUPPETEER_CFG="${PUPPETEER_CFG:-/tmp/puppeteer-config.json}"
+FORCE_WRITE_PUPPETEER=0
 STRICT_NIGHTLY=0
 SKIP_RENDER=0
 DIAGRAM_PATH=""
@@ -27,6 +28,7 @@ Options:
   --profile <pr|nightly|quick>   Check profile (default: pr)
   --diagram <path>               Run checks only for one .mmd/.mermaid diagram
   --puppeteer <path>             Puppeteer config path (default: /tmp/puppeteer-config.json)
+  --refresh-puppeteer-config     Rewrite Puppeteer config file if it already exists
   --text-layer <mode>            SVG text layers: dual|fo-only|fallback-only (default: fallback-only)
   --strict-nightly               Fail nightly profile on warnings
   --skip-render                  Skip render step (useful for local dry loops)
@@ -51,16 +53,143 @@ cleanup_temp_manifests() {
 trap cleanup_temp_manifests EXIT
 
 ensure_puppeteer_config() {
-  cat > "$PUPPETEER_CFG" <<'EOF'
-{
-  "args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
+  local cfg_dir
+  cfg_dir="$(dirname "$PUPPETEER_CFG")"
+  mkdir -p "$cfg_dir"
+
+  if [[ -f "$PUPPETEER_CFG" && "$FORCE_WRITE_PUPPETEER" -eq 0 ]]; then
+    log "Using existing Puppeteer config: $PUPPETEER_CFG"
+    return
+  fi
+
+  if [[ -f "$PUPPETEER_CFG" && "$FORCE_WRITE_PUPPETEER" -eq 1 ]]; then
+    log "Rewriting Puppeteer config (--refresh-puppeteer-config): $PUPPETEER_CFG"
+  else
+    log "Creating Puppeteer config: $PUPPETEER_CFG"
+  fi
+
+  PUPPETEER_CFG="$PUPPETEER_CFG" \
+  PUPPETEER_EXECUTABLE_PATH="${PUPPETEER_EXECUTABLE_PATH:-}" \
+  python3 - <<'PY'
+import json
+import os
+from pathlib import Path
+
+cfg_path = Path(os.environ["PUPPETEER_CFG"])
+cfg = {
+    "args": [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+    ]
 }
-EOF
+exec_path = os.environ.get("PUPPETEER_EXECUTABLE_PATH", "").strip()
+if exec_path:
+    cfg["executablePath"] = exec_path
+
+cfg_path.write_text(json.dumps(cfg, indent=2) + "\n", encoding="utf-8")
+PY
+}
+
+validate_puppeteer_config() {
+  if [[ ! -f "$PUPPETEER_CFG" ]]; then
+    echo "Puppeteer config does not exist: $PUPPETEER_CFG" >&2
+    exit 2
+  fi
+
+  if ! PUPPETEER_CFG="$PUPPETEER_CFG" python3 - <<'PY'
+import json
+import os
+from pathlib import Path
+
+cfg_path = Path(os.environ["PUPPETEER_CFG"])
+raw = cfg_path.read_text(encoding="utf-8")
+cfg = json.loads(raw)
+if not isinstance(cfg, dict):
+    raise ValueError("config root must be JSON object")
+
+args = cfg.get("args")
+if args is not None:
+    if not isinstance(args, list):
+        raise ValueError("'args' must be a list")
+    for idx, item in enumerate(args):
+        if not isinstance(item, str):
+            raise ValueError(f"'args[{idx}]' must be a string")
+
+executable = cfg.get("executablePath")
+if executable is not None and (not isinstance(executable, str) or not executable.strip()):
+    raise ValueError("'executablePath' must be a non-empty string")
+PY
+  then
+    echo "Invalid Puppeteer config JSON: $PUPPETEER_CFG" >&2
+    exit 2
+  fi
+}
+
+run_puppeteer_preflight() {
+  local browser_bin=""
+  local has_no_sandbox="unknown"
+  local executable_path=""
+  local preflight_lines=()
+
+  for candidate in chrome-headless-shell chromium chromium-browser google-chrome google-chrome-stable; do
+    if command -v "$candidate" >/dev/null 2>&1; then
+      browser_bin="$candidate"
+      break
+    fi
+  done
+
+  if [[ -z "$browser_bin" ]]; then
+    log "Preflight: no system Chrome/Chromium found in PATH (Puppeteer-managed browser may still work)."
+  else
+    log "Preflight: system browser found in PATH: $browser_bin"
+  fi
+
+  if [[ "$(id -u)" -eq 0 ]]; then
+    log "Preflight: running as root (requires --no-sandbox in Puppeteer args)."
+  fi
+
+  mapfile -t preflight_lines < <(
+    PUPPETEER_CFG="$PUPPETEER_CFG" python3 - <<'PY'
+import json
+import os
+from pathlib import Path
+
+cfg = json.loads(Path(os.environ["PUPPETEER_CFG"]).read_text(encoding="utf-8"))
+args = cfg.get("args", [])
+exec_path = cfg.get("executablePath", "")
+has_no_sandbox = "--no-sandbox" in args
+exec_print = exec_path if isinstance(exec_path, str) else ""
+print(f"EXEC_PATH={exec_print}")
+print(f"HAS_NO_SANDBOX={'true' if has_no_sandbox else 'false'}")
+PY
+  )
+
+  for line in "${preflight_lines[@]}"; do
+    case "$line" in
+      EXEC_PATH=*)
+        executable_path="${line#EXEC_PATH=}"
+        ;;
+      HAS_NO_SANDBOX=*)
+        has_no_sandbox="${line#HAS_NO_SANDBOX=}"
+        ;;
+    esac
+  done
+
+  if [[ -n "$executable_path" ]]; then
+    log "Preflight: Puppeteer executablePath override enabled: $executable_path"
+  else
+    log "Preflight: Puppeteer executablePath not set (auto-discovery mode)."
+  fi
+  log "Preflight: Puppeteer args include --no-sandbox: $has_no_sandbox"
 }
 
 run_syntax_check() {
   if [[ -z "$DIAGRAM_PATH" ]]; then
-    bash "$REPO_ROOT/scripts/diagrams/validate_mermaid_syntax.sh" --puppeteer "$PUPPETEER_CFG"
+    bash "$REPO_ROOT/scripts/diagrams/validate_mermaid_syntax.sh" \
+      --scope canonical \
+      --puppeteer "$PUPPETEER_CFG"
     return
   fi
 
@@ -144,6 +273,16 @@ run_lint_check() {
   fi
 }
 
+run_operator_guard() {
+  if [[ -n "$DIAGRAM_PATH" ]]; then
+    python3 "$REPO_ROOT/scripts/diagrams/fix_mermaid_operators.py" \
+      --check "$REPO_ROOT/$DIAGRAM_PATH"
+  else
+    python3 "$REPO_ROOT/scripts/diagrams/fix_mermaid_operators.py" \
+      --check "$REPO_ROOT/docs/02-architecture/mmd-diagrams"
+  fi
+}
+
 run_render_step() {
   if [[ -n "$DIAGRAM_PATH" ]]; then
     local diagram_dir
@@ -163,6 +302,9 @@ run_render_step() {
 }
 
 run_pr_profile() {
+  log "DIAG-T000: Mermaid operator guard (class/sequence)"
+  run_operator_guard
+
   log "DIAG-T001: Mermaid syntax"
   run_syntax_check
 
@@ -214,6 +356,9 @@ run_nightly_profile() {
 run_quick_profile() {
   log "Quick profile: syntax + lint + quality + nightly (light)"
 
+  log "DIAG-T000: Mermaid operator guard (class/sequence)"
+  run_operator_guard
+
   log "DIAG-T001: Mermaid syntax"
   run_syntax_check
 
@@ -247,6 +392,10 @@ while [[ $# -gt 0 ]]; do
       [[ $# -lt 2 ]] && { echo "--puppeteer requires value" >&2; exit 2; }
       PUPPETEER_CFG="$2"
       shift 2
+      ;;
+    --refresh-puppeteer-config)
+      FORCE_WRITE_PUPPETEER=1
+      shift
       ;;
     --text-layer)
       [[ $# -lt 2 ]] && { echo "--text-layer requires value" >&2; exit 2; }
@@ -286,6 +435,8 @@ if [[ -n "$DIAGRAM_PATH" ]]; then
 fi
 
 ensure_puppeteer_config
+validate_puppeteer_config
+run_puppeteer_preflight
 
 case "$PROFILE" in
   pr)      run_pr_profile ;;

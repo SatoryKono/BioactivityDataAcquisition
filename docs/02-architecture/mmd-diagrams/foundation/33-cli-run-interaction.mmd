@@ -72,4 +72,4 @@ sequenceDiagram
     Obs->>Obs: observe duration<br/>log "pipeline completed"
 
     PRS-->>CLI: RunResult(status=SUCCESS)
-    CLI==>>User: ExitCode.SUCCESS (0)
+    CLI-->>User: ExitCode.SUCCESS (0)
