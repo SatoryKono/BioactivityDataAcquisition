@@ -123,9 +123,18 @@ class DefaultDataNormalizationService(AuthorNormalizationService):
         """Remove HTML tags, decode entities, normalize whitespace."""
         if not text:
             return None
-        clean = _HTML_TAG_PATTERN.sub("", text)
-        clean = unescape(clean)
-        clean = _WHITESPACE_PATTERN.sub(" ", clean).strip()
+
+        clean = text
+        if "<" in clean:
+            clean = _HTML_TAG_PATTERN.sub("", clean)
+
+        if "&" in clean:
+            clean = unescape(clean)
+
+        if not clean or clean.isspace():
+            return None
+
+        clean = " ".join(clean.split())
         return clean if clean else None
 
     def normalize_oa_status(self, status: str | None) -> str | None:
