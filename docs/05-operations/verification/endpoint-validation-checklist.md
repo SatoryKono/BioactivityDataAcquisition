@@ -1,5 +1,8 @@
 # Manual Endpoint Validation Checklists
 
+> **Status:** Historical verification artifact (non-normative).
+> Use this report as dated evidence only; current policy source of truth is `docs/00-project/RULES.md` and active ADRs.
+
 *Generated: 2026-02-17 | Prompt 6 (manual-EP) sync workflow*
 
 Quick-reference validation checklists for all 7 BioETL data providers.

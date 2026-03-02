@@ -1,5 +1,7 @@
 # Neo4j Memory Configuration Guide
 
+> Scope note: This guide is for auxiliary Neo4j/MCP tooling only. It is not BioETL runtime deployment guidance and does not change ADR-010 Local-Only policy.
+
 ## Quick Start
 
 1. Copy .env.example to .env:

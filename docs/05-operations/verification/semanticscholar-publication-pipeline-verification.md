@@ -1,5 +1,8 @@
 # Semantic Scholar Publication Pipeline — Verification Report
 
+> **Status:** Historical verification artifact (non-normative).
+> Use this report as dated evidence only; current policy source of truth is `docs/00-project/RULES.md` and active ADRs.
+
 *Дата верификации: 2026-01-25*
 *Дата реализации: 2026-01-25*
 *Версия pipeline: 1.2.0*

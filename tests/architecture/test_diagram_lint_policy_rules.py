@@ -198,3 +198,62 @@ def test_label_readability_warns_on_too_many_node_lines() -> None:
     )
 
     assert any(issue.rule == "LABEL-002" for issue in issues)
+
+
+def test_class_rule_flags_unescaped_dunder_methods() -> None:
+    """CLASS-001 should warn when dunder methods are not escaped."""
+    lint = _load_lint_module()
+    lines = [
+        "classDiagram",
+        "class X {",
+        "+__aenter__() Self",
+        "}",
+    ]
+
+    issues = lint.check_class_method_render_safety(
+        Path("docs/02-architecture/mmd-diagrams/class-diagrams/sample.mmd"),
+        lines,
+    )
+
+    assert any(issue.rule == "CLASS-001" for issue in issues)
+
+
+def test_class_rule_flags_mixed_return_notation() -> None:
+    """CLASS-002 should warn when return notation is mixed in one class diagram."""
+    lint = _load_lint_module()
+    lines = [
+        "classDiagram",
+        "class X {",
+        "+foo() : bool",
+        "+bar() bool",
+        "}",
+    ]
+
+    issues = lint.check_class_method_render_safety(
+        Path("docs/02-architecture/mmd-diagrams/class-diagrams/sample.mmd"),
+        lines,
+    )
+
+    assert any(issue.rule == "CLASS-002" for issue in issues)
+
+
+def test_class_rule_flags_overlong_method_signature() -> None:
+    """CLASS-003 should warn when method signature length exceeds readability threshold."""
+    lint = _load_lint_module()
+    lines = [
+        "classDiagram",
+        "class X {",
+        (
+            "+very_long_method_name_with_many_parameters("
+            "parameter_one, parameter_two, parameter_three, parameter_four"
+            ") : ReturnValue"
+        ),
+        "}",
+    ]
+
+    issues = lint.check_class_method_render_safety(
+        Path("docs/02-architecture/mmd-diagrams/class-diagrams/sample.mmd"),
+        lines,
+    )
+
+    assert any(issue.rule == "CLASS-003" for issue in issues)

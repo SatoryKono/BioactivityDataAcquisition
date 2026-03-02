@@ -329,7 +329,7 @@ run_class_method_integrity_check() {
           --file "$REPO_ROOT/$DIAGRAM_PATH"
         ;;
       *)
-        log "DIAG-T030: class method integrity skipped (non class-diagram scope)"
+        log "DIAG-T033: class method integrity skipped (non class-diagram scope)"
         ;;
     esac
     return
@@ -373,7 +373,7 @@ run_pr_profile() {
   python3 "$REPO_ROOT/scripts/diagrams/check_diagram_quality_gates.py" \
     --manifest "$SOURCE_MANIFEST"
 
-  log "DIAG-T030: class method render integrity"
+  log "DIAG-T033: class method render integrity"
   run_class_method_integrity_check
 }
 

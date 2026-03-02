@@ -1,5 +1,8 @@
 # Валидация плана рефакторинга (PROMPT 1.2–4.2, CFG-001)
 
+> **Status:** Historical verification artifact (non-normative).
+> Use this report as dated evidence only; current policy source of truth is `docs/00-project/RULES.md` and active ADRs.
+
 Дата проверки: 2026-02-15
 Репозиторий: BioETL
 

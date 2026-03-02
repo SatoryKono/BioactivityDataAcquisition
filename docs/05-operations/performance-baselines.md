@@ -1,5 +1,9 @@
 # Performance Baselines
 
+*Reference: [ADR-014](../02-architecture/decisions/ADR-014-deterministic-writes.md), [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md)*
+
+> Runtime profile: Local-Only single-instance. Baselines are measured for local execution path.
+
 This document defines performance baselines for critical operations in BioETL.
 These baselines are enforced by benchmark tests in `tests/benchmarks/`.
 

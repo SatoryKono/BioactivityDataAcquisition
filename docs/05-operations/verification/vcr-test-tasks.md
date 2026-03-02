@@ -1,5 +1,8 @@
 # VCR Test Tasks
 
+> **Status:** Historical verification artifact (non-normative).
+> Use this report as dated evidence only; current policy source of truth is `docs/00-project/RULES.md` and active ADRs.
+
 *Generated: 2026-02-17 | Sync workflow Prompt 5 (vcr-tests)*
 
 ## Summary

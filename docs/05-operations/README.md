@@ -2,6 +2,8 @@
 
 *Synced with RULES.md v5.23 (2026-02-24)*
 
+> Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, `MemoryLock`.
+
 ## Overview
 
 This section contains operational documentation for managing BioETL in production.

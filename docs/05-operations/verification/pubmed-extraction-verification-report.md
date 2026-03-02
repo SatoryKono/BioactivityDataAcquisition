@@ -1,5 +1,8 @@
 # Верификация Извлечения Данных: PubMed Publication Pipeline
 
+> **Status:** Historical verification artifact (non-normative).
+> Use this report as dated evidence only; current policy source of truth is `docs/00-project/RULES.md` and active ADRs.
+
 **Дата верификации**: 2026-01-25
 **Версия кода**: commit 99e2391
 **Автор**: Claude (автоматическая верификация)
