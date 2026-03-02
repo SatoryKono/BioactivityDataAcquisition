@@ -1,5 +1,8 @@
 # Git Pre-flight Status Report — 2026-02-24
 
+> **Status:** Historical verification artifact (non-normative).
+> Use this report as dated evidence only; current policy source of truth is `docs/00-project/RULES.md` and active ADRs.
+
 ## Scope
 
 Проверка настройки `origin`, доступа к remote и статуса `HEAD..origin/main`.

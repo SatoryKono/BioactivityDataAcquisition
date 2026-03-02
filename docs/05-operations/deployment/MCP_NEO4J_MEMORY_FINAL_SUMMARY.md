@@ -1,5 +1,7 @@
 # MCP Neo4j Memory - Complete Setup Summary
 
+> Scope note: This document describes auxiliary MCP tooling setup. It is not BioETL runtime deployment guidance and does not change ADR-010 Local-Only policy.
+
 ## ✅ Production-Grade fastmcp Server Successfully Deployed
 
 A complete, production-ready Model Context Protocol server for Neo4j memory management has been built and configured.

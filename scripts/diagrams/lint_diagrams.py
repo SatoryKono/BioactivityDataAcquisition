@@ -68,6 +68,9 @@ _CLASS_DIAGRAM_RE = re.compile(r"^\s*classDiagram\b", re.IGNORECASE)
 _UNESCAPED_DUNDER_METHOD_RE = re.compile(
     r"^\s*[+\-#~][^\n]*?(?<!\\)__[A-Za-z0-9_]+__(?=\s*\()"
 )
+_CLASS_METHOD_SIGNATURE_RE = re.compile(
+    r"^\s*[+\-#~]\s*([A-Za-z_\\][A-Za-z0-9_\\]*)\s*\((.*?)\)\s*(.*)$"
+)
 _STYLE_OR_CLASSDEF_RE = re.compile(r"^\s*(style|classDef)\b")
 _HEX_COLOR_RE = re.compile(r"#[0-9a-fA-F]{6}\b")
 _SUBGRAPH_RE = re.compile(r"^\s*subgraph\b", re.IGNORECASE)
@@ -83,6 +86,7 @@ SIZE_ERROR_THRESHOLD = 35
 LABEL_WARN_LINE_CHARS = 42
 LABEL_WARN_MAX_LINES = 8
 LABEL_WARN_PADDING_BREAKS = 3
+CLASS_METHOD_WARN_LINE_CHARS = 88
 PLACEHOLDER_PATTERNS = {
     marker: re.compile(rf"\b{re.escape(marker)}\b", re.IGNORECASE)
     for marker in PLACEHOLDER_MARKERS
@@ -859,12 +863,32 @@ def check_class_method_render_safety(path: Path, lines: list[str]) -> list[Issue
         return issues
 
     offenders: list[int] = []
+    colon_return_lines: list[int] = []
+    bare_return_lines: list[int] = []
+    long_method_lines: list[tuple[int, int, str]] = []
+
     for idx, line in enumerate(lines, start=1):
         stripped = line.strip()
         if not stripped or stripped.startswith("%%"):
             continue
+
         if _UNESCAPED_DUNDER_METHOD_RE.search(stripped):
             offenders.append(idx)
+
+        method_match = _CLASS_METHOD_SIGNATURE_RE.match(stripped)
+        if not method_match:
+            continue
+
+        method_name = method_match.group(1).replace("\\_", "_")
+        tail = method_match.group(3).strip()
+        if tail:
+            if tail.startswith(":"):
+                colon_return_lines.append(idx)
+            else:
+                bare_return_lines.append(idx)
+
+        if len(stripped) > CLASS_METHOD_WARN_LINE_CHARS:
+            long_method_lines.append((idx, len(stripped), method_name))
 
     if offenders:
         first = ", ".join(str(x) for x in offenders[:6])
@@ -876,6 +900,38 @@ def check_class_method_render_safety(path: Path, lines: list[str]) -> list[Issue
                 message=(
                     "Unescaped dunder method in classDiagram can lose underscores in SVG/PDF. "
                     f"Use escaped form like '+\\_\\_enter\\_\\_()'. Lines: {first}"
+                ),
+            )
+        )
+
+    if colon_return_lines and bare_return_lines:
+        issues.append(
+            Issue(
+                file=fname,
+                severity="WARNING",
+                rule="CLASS-002",
+                message=(
+                    "Mixed method return notation in classDiagram "
+                    "(both '): Type' and ') Type'). "
+                    f"Colon lines: {', '.join(str(x) for x in colon_return_lines[:4])}; "
+                    f"bare lines: {', '.join(str(x) for x in bare_return_lines[:4])}"
+                ),
+            )
+        )
+
+    if long_method_lines:
+        preview = ", ".join(
+            f"L{line_no}:{length}({name})"
+            for line_no, length, name in long_method_lines[:6]
+        )
+        issues.append(
+            Issue(
+                file=fname,
+                severity="WARNING",
+                rule="CLASS-003",
+                message=(
+                    "Overlong method signature may wrap poorly in SVG/PDF "
+                    f"(>{CLASS_METHOD_WARN_LINE_CHARS} chars): {preview}"
                 ),
             )
         )

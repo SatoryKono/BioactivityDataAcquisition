@@ -1,5 +1,8 @@
 # Publication Pipeline Field Mapping Verification Report
 
+> **Status:** Historical verification artifact (non-normative).
+> Use this report as dated evidence only; current policy source of truth is `docs/00-project/RULES.md` and active ADRs.
+
 **Date**: 2026-01-19
 **Updated**: 2026-01-26 (Finding 1 resolved)
 **Scope**: All 7 Publication Pipelines

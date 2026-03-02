@@ -4,6 +4,7 @@
 > no Docker/Redis in runtime). See [ADR-010](../../02-architecture/decisions/ADR-010-local-only-deployment.md).
 > This Kubernetes guide is provided for **advanced/experimental use only** and is
 > not the recommended deployment strategy.
+> It is outside standard operational support runbooks and release flow.
 
 ## Overview
 
