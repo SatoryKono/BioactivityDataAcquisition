@@ -115,10 +115,25 @@ def parse_date_field(value: str | None, fmt: str = "%Y-%m-%d") -> date | None:
     """
     if value is None:
         return None
+
+    try:
+        value = value.strip()
+    except AttributeError:
+        return None
+
+    # Fast path for standard ISO format (YYYY-MM-DD) which is the most common case
+    if fmt == "%Y-%m-%d" and len(value) == 10 and value[4] == "-" and value[7] == "-":
+        try:
+            from datetime import date
+
+            return date(int(value[0:4]), int(value[5:7]), int(value[8:10]))
+        except ValueError:
+            pass  # Fall back to strptime for complex validation (e.g., leap years)
+
     from datetime import datetime
 
     try:
-        return datetime.strptime(value.strip(), fmt).date()
+        return datetime.strptime(value, fmt).date()
     except (ValueError, AttributeError):
         return None
 
