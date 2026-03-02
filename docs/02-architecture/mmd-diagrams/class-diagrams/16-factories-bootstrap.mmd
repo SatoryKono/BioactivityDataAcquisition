@@ -11,16 +11,16 @@ classDiagram
     direction LR
     class DataSourceRegistry {
         -_registry: dict~str, Callable~
-        +register(provider, entity_type, factory) None
-        +create(provider, entity_type, **kwargs) DataSourcePort
-        +list_providers() list~str~
-        +list_entities(provider) list~str~
+        +register(provider, entity_type, factory): None
+        +create(provider, entity_type, **kwargs): DataSourcePort
+        +list_providers(): list~str~
+        +list_entities(provider): list~str~
     }
 
     class TransformerFactory {
         -_registry: dict~str, Callable~
-        +register(provider, entity_type, factory) None
-        +create(provider, entity_type, **kwargs) BaseTransformer
+        +register(provider, entity_type, factory): None
+        +create(provider, entity_type, **kwargs): BaseTransformer
         
         
     }
@@ -28,13 +28,13 @@ classDiagram
     class RunnerFactory {
         -_data_source_registry: DataSourceRegistry
         -_transformer_factory: TransformerFactory
-        +create_runner(config, runtime) PipelineRunner
+        +create_runner(config, runtime): PipelineRunner
         
         
     }
 
     class DQFactory {
-        +create_dq_analyzers(config) tuple
+        +create_dq_analyzers(config): tuple
         
         
         
@@ -43,14 +43,14 @@ classDiagram
 
     class RuntimeAssembly {
         Central DI wiring
-        +assemble(config, runtime) PipelineRunner
+        +assemble(config, runtime): PipelineRunner
         
         
         
     }
 
     class RunnerBootstrap {
-        +assemble_runner(config, runtime, services) PipelineRunner
+        +assemble_runner(config, runtime, services): PipelineRunner
         
         
         
@@ -58,7 +58,7 @@ classDiagram
     }
 
     class StorageBootstrap {
-        +assemble_storage(settings) StoragePort
+        +assemble_storage(settings): StoragePort
         
         
         
@@ -66,7 +66,7 @@ classDiagram
     }
 
     class HealthBootstrap {
-        +assemble_health(settings) HealthService
+        +assemble_health(settings): HealthService
         
         
         
@@ -74,7 +74,7 @@ classDiagram
     }
 
     class CheckpointBootstrap {
-        +assemble_checkpoint(settings) CheckpointPort
+        +assemble_checkpoint(settings): CheckpointPort
         
         
         
@@ -82,7 +82,7 @@ classDiagram
     }
 
     class LockBootstrap {
-        +assemble_lock(settings) LockPort
+        +assemble_lock(settings): LockPort
         
         
         
@@ -90,7 +90,7 @@ classDiagram
     }
 
     class ProviderRegistry {
-        +register_all() None
+        +register_all(): None
         Registers all provider pipelines
         
         
@@ -99,15 +99,15 @@ classDiagram
 
     class RunnerBuilder {
         Fluent API for runner creation
-        +with_config(config) Self
-        +with_runtime(runtime) Self
-        +with_services(services) Self
-        +build() PipelineRunner
+        +with_config(config): Self
+        +with_runtime(runtime): Self
+        +with_services(services): Self
+        +build(): PipelineRunner
     }
 
     class GenericFactory {
         <<Generic T>>
-        +create(**kwargs) T
+        +create(**kwargs): T
         
         
         

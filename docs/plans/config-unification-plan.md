@@ -20,7 +20,7 @@
 - Технический эффект Phase 3: `DQConfigLoader` вырос до 322 LOC; добавлены явные архитектурные exemptions в `tests/architecture/test-code-metrics.py` как переходная мера до декомпозиции (RF-CFG-031/RF-CFG-037).
 - RF-CFG-036 выполнен: composite configs перенесены в `configs/composites/*.yaml`, `load-composite-config()` переведен на new-first path (`configs/composites`) с fallback на legacy composite path (старый каталог composite pipeline configs).
 - RF-CFG-037 выполнен: 3 реализации `deep-merge` унифицированы через `src/bioetl/infrastructure/config-merge.py::config-merge` с параметризуемыми list-стратегиями (concat keys, resolver-based merge для DQ validations).
-- RF-CFG-035 выполнен (без backward-compat периода по решению): удалены legacy dirs provider pipeline configs, `configs/schemas/{providers}`, `configs/quality/entities/`, `configs/filters/entities/`, `configs/contracts/`; тесты/инварианты переведены на unified `configs/entities/` + `configs/composites/`.
+- RF-CFG-035 выполнен (без backward-compat периода по решению): удалены legacy dirs provider pipeline configs, `configs/schemas/{providers}`, `configs/quality/entities/`, `configs/filters/entities/`, `configs/contracts/`; тесты/инварианты переведены на unified `configs/entities/` + `configs/composites/`. <!-- doc-lint: allow-legacy -->
 
 ---
 

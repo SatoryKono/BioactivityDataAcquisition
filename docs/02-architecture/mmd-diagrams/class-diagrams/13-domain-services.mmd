@@ -10,53 +10,53 @@
 classDiagram
     direction LR
     class IdentityService {
-        +compute_entity_id(provider, entity_type, source_id, record) EntityID
-        +compute_content_hash(provider, record) ContentHash
+        +compute_entity_id(provider, entity_type, source_id, record): EntityID
+        +compute_content_hash(provider, record): ContentHash
     }
 
     class NormalizationService {
-        +normalize_text(text) str
-        +normalize_values(values) dict
+        +normalize_text(text): str
+        +normalize_values(values): dict
     }
 
     class DataNormalizationService {
-        +normalize_field(value, field_type) Any
+        +normalize_field(value, field_type): Any
         
     }
 
     class AuthorNormalizationService {
-        +normalize_author_name(name) str
-        +normalize_author_list(authors) list~str~
+        +normalize_author_name(name): str
+        +normalize_author_list(authors): list~str~
     }
 
     class ActivityAggregator {
-        +aggregate(activities) AggregatedActivity
+        +aggregate(activities): AggregatedActivity
         
     }
 
     class UnitConverter {
-        +convert(value, from_unit, to_unit) float
-        +normalize_unit(unit) str
+        +convert(value, from_unit, to_unit): float
+        +normalize_unit(unit): str
     }
 
     class ValueValidator {
-        +validate(value, constraints) ValidationResult
+        +validate(value, constraints): ValidationResult
         
     }
 
     class TextSimilarity {
-        +similarity_score(text1, text2) float
-        +is_similar(text1, text2, threshold) bool
+        +similarity_score(text1, text2): float
+        +is_similar(text1, text2, threshold): bool
     }
 
     class DQMetricsCalculator {
-        +calculate(records, config) DQMetrics
+        +calculate(records, config): DQMetrics
         
     }
 
     class DQSerializer {
-        +serialize(metrics) dict
-        +deserialize(data) DQMetrics
+        +serialize(metrics): dict
+        +deserialize(data): DQMetrics
     }
 
     note for IdentityService "Deterministic IDs and content hashes"
