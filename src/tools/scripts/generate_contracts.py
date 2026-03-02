@@ -215,7 +215,7 @@ def generate_contracts() -> None:
             file_obj.write("\n")
 
         diff_report["entities"][entity] = {
-            "file": str(output_path.relative_to(PROJECT_ROOT)),
+            "file": output_path.relative_to(PROJECT_ROOT).as_posix(),
             "status": "created" if not previous_contract else "updated",
             "diff": _compute_diff(previous_contract, current_contract),
         }

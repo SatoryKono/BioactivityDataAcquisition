@@ -118,7 +118,7 @@ BioETL documentation is **mature and comprehensive** with strong governance foun
 **M-08.** docs/plans/ and docs/reports/ lack README with status
 **M-09.** Duplicate report: `codex-branches-summary-2026-02-24T13.md`
 **M-10.** `.docx` file in archive (binary, not version-control friendly)
-**M-11.** Legacy dashboard docs not fully archived (BIOETL-DATA-EXTRACTION-AND-DASHBOARDS.md in main)
+**M-11.** Legacy dashboard docs not fully archived (BIOETL-DATA-EXTRACTION-AND-DASHBOARDS.md in main) <!-- doc-lint: allow-legacy -->
 **M-12.** MONITORING-INDEX.md empty stub
 **M-13.** Data model docs (docs/03-data-model/) — unclear if completed work or WIP
 **M-14.** .claude/prompts/ lacks README explaining purpose/status
@@ -174,7 +174,7 @@ BioETL documentation is **mature and comprehensive** with strong governance foun
 | 3.4 | Fix `--init--` syntax in add-new-source.md and add-pipeline-existing-source.md | 2 files | 30m |
 | 3.5 | Complete or remove migration-schema-artifacts.md stub | 1 file | 15m |
 | 3.6 | Add dates/versions to 121 undated documents | bulk | 4h |
-| 3.7 | Move BIOETL-DATA-EXTRACTION-AND-DASHBOARDS.md to legacy | 1 file | 15m |
+| 3.7 | Move BIOETL-DATA-EXTRACTION-AND-DASHBOARDS.md to legacy | 1 file | 15m | <!-- doc-lint: allow-legacy -->
 | 3.8 | Create MONITORING-INDEX.md content | 1 file | 1h |
 
 ### Phase 4: Agent Docs Consolidation (P2, 1-2 days)

@@ -19,7 +19,7 @@ classDiagram
         +uncompressed_size: int
         +checksum_blake2: str
         +compression_ratio: float
-        +exists() bool
+        +exists(): bool
         
         
         
@@ -96,9 +96,9 @@ classDiagram
         +exclusive: bool
         +acquired_at: float | None
         +fencing_token: FencingToken | None
-        +create() LockContext
-        +is_valid() bool
-        +matches_table(table) bool
+        +create(): LockContext
+        +is_valid(): bool
+        +matches_table(table): bool
         
         
         

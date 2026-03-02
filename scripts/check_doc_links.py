@@ -18,6 +18,7 @@ Usage:
     python scripts/check_doc_links.py --specs   # Only spec file check
     python scripts/check_doc_links.py --links   # Only broken link check
     python scripts/check_doc_links.py --legacy-paths   # Only doc drift guardrails
+    python scripts/check_doc_links.py --legacy-paths-all   # Drift guardrails incl. internal nav docs
 
 Exit code: 0 = clean, 1 = violations found
 
@@ -39,7 +40,9 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DOCS_DIR = PROJECT_ROOT / "docs"
 PIPELINES_DIR = DOCS_DIR / "04-reference" / "pipelines"
 
-# Directories to skip in full-tree checks (links/specs/configs).
+# Directories to skip in full-tree checks.
+# NOTE: docs published in mkdocs nav are always included in link checks
+# even if they live under a skipped directory.
 SKIP_DIRS = frozenset(
     {
         ".venv",
@@ -53,19 +56,19 @@ SKIP_DIRS = frozenset(
         "build",
         "dist",
         "99-archive",
-        "reports",
-        "plans",
-        "skills",
     }
 )
 
 # Regex to match markdown relative links: [text](path) — excludes http(s)
 MD_LINK_RE = re.compile(r"\[([^\]]*)\]\((?!https?://|mailto:)([^)#]+)")
+INLINE_CODE_RE = re.compile(r"`[^`]*`")
 MD_PATH_RE = re.compile(r"[A-Za-z0-9_./-]+\.md")
 PYTHON_FENCE_START_RE = re.compile(r"^\s*```(?:python|py|python3)\b", re.IGNORECASE)
 FENCE_END_RE = re.compile(r"^\s*```")
 
-# Directories to skip specifically for doc drift guardrails in nav docs.
+# Directories skipped by default for drift guardrails in nav docs.
+# These sections are mostly historical/internal and can be audited with
+# `--legacy-paths-all`.
 DRIFT_SKIP_DIRS = frozenset({"99-archive", "reports", "plans", "skills"})
 
 # Optional inline marker to allow historical legacy examples in a specific line.
@@ -189,9 +192,7 @@ def check_broken_links(root: Path) -> list[tuple[Path, int, str, str]]:
     """
     broken: list[tuple[Path, int, str, str]] = []
 
-    for md_file in sorted(root.rglob("*.md")):
-        if _should_skip(md_file):
-            continue
+    for md_file in _collect_link_scan_files(root):
 
         try:
             lines = md_file.read_text(encoding="utf-8", errors="replace").splitlines()
@@ -199,7 +200,8 @@ def check_broken_links(root: Path) -> list[tuple[Path, int, str, str]]:
             continue
 
         for line_no, line in enumerate(lines, start=1):
-            for match in MD_LINK_RE.finditer(line):
+            line_for_links = INLINE_CODE_RE.sub("", line)
+            for match in MD_LINK_RE.finditer(line_for_links):
                 link_text = match.group(1)
                 raw_target = match.group(2).strip()
 
@@ -227,16 +229,35 @@ def _load_nav_docs() -> list[Path]:
     return [DOCS_DIR / rel_path for rel_path in nav_paths]
 
 
-def check_legacy_paths_in_nav_docs() -> list[tuple[Path, int, str, str]]:
+def _collect_link_scan_files(root: Path) -> list[Path]:
+    """Collect files for link checks: active tree + all existing nav docs."""
+    tree_docs = {path.resolve() for path in root.rglob("*.md") if not _should_skip(path)}
+    nav_docs = {path.resolve() for path in _load_nav_docs() if path.exists()}
+    return sorted(tree_docs | nav_docs)
+
+
+def check_missing_nav_docs() -> list[Path]:
+    """Return nav docs that do not exist on disk."""
+    return sorted(path for path in _load_nav_docs() if not path.exists())
+
+
+def check_nav_link_coverage(root: Path) -> list[Path]:
+    """Return nav docs that are unexpectedly outside link check scope."""
+    nav_docs = {path.resolve() for path in _load_nav_docs() if path.exists()}
+    scan_scope = set(_collect_link_scan_files(root))
+    return sorted(nav_docs - scan_scope)
+
+
+def check_legacy_paths_in_nav_docs(
+    include_internal: bool = False,
+) -> list[tuple[Path, int, str, str]]:
     """Find doc drift violations in active docs (mkdocs nav)."""
     violations: list[tuple[Path, int, str, str]] = []
 
     for md_file in _load_nav_docs():
-        if (
-            not md_file.exists()
-            or _should_skip(md_file)
-            or _should_skip_drift(md_file)
-        ):
+        if not md_file.exists():
+            continue
+        if not include_internal and _should_skip_drift(md_file):
             continue
 
         lines = md_file.read_text(encoding="utf-8", errors="replace").splitlines()
@@ -332,10 +353,21 @@ def main() -> int:
         action="store_true",
         help="Only check doc drift guardrails in mkdocs nav docs",
     )
+    parser.add_argument(
+        "--legacy-paths-all",
+        action="store_true",
+        help="Only check doc drift guardrails in all mkdocs nav docs, including internal sections",
+    )
     args = parser.parse_args()
 
     # Default: run all checks
-    run_all = not (args.links or args.specs or args.configs or args.legacy_paths)
+    run_all = not (
+        args.links
+        or args.specs
+        or args.configs
+        or args.legacy_paths
+        or args.legacy_paths_all
+    )
     violations = 0
 
     if run_all or args.links:
@@ -350,6 +382,30 @@ def main() -> int:
             violations += len(broken)
         else:
             print("Links: OK (no broken relative links found)")
+
+        missing_nav_docs = check_missing_nav_docs()
+        if missing_nav_docs:
+            print(f"\n{'='*60}")
+            print(f"MISSING NAV DOCS ({len(missing_nav_docs)} found)")
+            print(f"{'='*60}")
+            for filepath in missing_nav_docs:
+                rel = filepath.relative_to(PROJECT_ROOT)
+                print(f"  {rel}")
+            violations += len(missing_nav_docs)
+        else:
+            print("Nav docs: OK (all mkdocs nav files exist)")
+
+        nav_scope_gaps = check_nav_link_coverage(DOCS_DIR)
+        if nav_scope_gaps:
+            print(f"\n{'='*60}")
+            print(f"NAV LINK SCOPE GAPS ({len(nav_scope_gaps)} found)")
+            print(f"{'='*60}")
+            for filepath in nav_scope_gaps:
+                rel = filepath.relative_to(PROJECT_ROOT)
+                print(f"  {rel}")
+            violations += len(nav_scope_gaps)
+        else:
+            print("Nav link scope: OK (all nav docs are included in link checks)")
 
     if run_all or args.specs:
         missing_specs = check_spec_files()
@@ -375,8 +431,10 @@ def main() -> int:
         else:
             print("Configs: OK (all convention-based config files exist)")
 
-    if run_all or args.legacy_paths:
-        legacy_hits = check_legacy_paths_in_nav_docs()
+    if run_all or args.legacy_paths or args.legacy_paths_all:
+        legacy_hits = check_legacy_paths_in_nav_docs(
+            include_internal=args.legacy_paths_all
+        )
         if legacy_hits:
             print(f"\n{'='*60}")
             print(f"DOC DRIFT VIOLATIONS ({len(legacy_hits)} found)")

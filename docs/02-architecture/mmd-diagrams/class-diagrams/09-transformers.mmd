@@ -30,30 +30,30 @@ classDiagram
             #_data_normalizer: DataNormalizationPort
             #_contract_policy: PipelineContractPolicy
             +GOLD_EXCLUDE_FIELDS: frozenset~str~
-            +transform(ctx, record, idx) SilverRecord | None
-            #_transform_impl(ctx, record, idx)* SilverRecord | None
-            +should_write_silver(ctx, record) bool
-            +should_write_gold(ctx, record) bool
-            +transform_for_gold(ctx, silver_record) dict
-            +compute_content_hash(data, exclude_none) ContentHash
-            +compute_entity_id(source_id, record) EntityID
-            +entity_to_silver_record(entity) dict
-            +hash_pii_value(value) str
-            +hash_pii_list(values) list~str~
-            +validate_value_object(vo_class, value)$ str | None
+            +transform(ctx, record, idx): SilverRecord | None
+            #_transform_impl(ctx, record, idx): SilverRecord | None
+            +should_write_silver(ctx, record): bool
+            +should_write_gold(ctx, record): bool
+            +transform_for_gold(ctx, silver_record): dict
+            +compute_content_hash(data, exclude_none): ContentHash
+            +compute_entity_id(source_id, record): EntityID
+            +entity_to_silver_record(entity): dict
+            +hash_pii_value(value): str
+            +hash_pii_list(values): list~str~
+            +validate_value_object(vo_class, value): str | None
         }
 
         class BaseChemblTransformer {
             <<ABC>>
             +entity_class: type
             +primary_id_field: str
-            #_extract_business_data(record)* dict
+            #_extract_business_data(record): dict
         }
 
         class BasePublicationTransformer {
             <<ABC>>
-            #_extract_fields(record)* dict
-            #_build_entity(fields)* PublicationBase
+            #_extract_fields(record): dict
+            #_build_entity(fields): PublicationBase
         }
     }
 

@@ -26,6 +26,7 @@ PANDERA_REGISTRY_PATH = (
     PROJECT_ROOT / "src" / "bioetl" / "domain" / "schemas" / "generated" / "registry.py"
 )
 GENERATED_GLOB = "docs/04-reference/contracts/gold/*.json"
+GENERATED_CONTRACTS_DIR = PROJECT_ROOT / "docs" / "04-reference" / "contracts" / "gold"
 
 
 @dataclass(frozen=True)
@@ -154,20 +155,26 @@ def _write_if_changed(path: Path, content: str, check: bool) -> bool:
 
 
 def _run_gold_contract_generation(check: bool) -> bool:
+    before = _snapshot_generated_contracts()
     subprocess.run(
         [sys.executable, "src/tools/scripts/generate_contracts.py"],
         cwd=PROJECT_ROOT,
         check=True,
     )
-    result = subprocess.run(
-        ["git", "diff", "--quiet", "--", GENERATED_GLOB],
-        cwd=PROJECT_ROOT,
-        check=False,
-    )
-    stale = result.returncode != 0
+    after = _snapshot_generated_contracts()
+    stale = before != after
     if stale and check:
         _emit(f"STALE {GENERATED_GLOB}", err=True)
     return stale
+
+
+def _snapshot_generated_contracts() -> dict[str, str]:
+    """Read generated contract files into a deterministic snapshot."""
+    snapshot: dict[str, str] = {}
+    for path in sorted(GENERATED_CONTRACTS_DIR.glob("*.json")):
+        rel = path.relative_to(PROJECT_ROOT).as_posix()
+        snapshot[rel] = path.read_text(encoding="utf-8")
+    return snapshot
 
 
 def main() -> int:

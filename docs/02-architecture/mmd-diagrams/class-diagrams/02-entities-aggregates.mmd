@@ -39,8 +39,8 @@ classDiagram
         +pchembl_value: float | None
         +publication_doi: str | None
         +_state: BioactivityState
-        +from_raw() Bioactivity
-        +with_state(state) Bioactivity
+        +from_raw(): Bioactivity
+        +with_state(state): Bioactivity
     }
 
     class BioactivityState {
@@ -83,10 +83,10 @@ classDiagram
         -_status: BatchStatus
         -_records: list~BatchRecord~
         -_invalid_records: list~BatchRecord~
-        +create(batch_id) Batch
-        +add_record(record) None
-        +seal() None
-        +collect_events() list~DomainEvent~
+        +create(batch_id): Batch
+        +add_record(record): None
+        +seal(): None
+        +collect_events(): list~DomainEvent~
         
         
         
@@ -103,7 +103,7 @@ classDiagram
         +is_valid: bool
         +error: str | None
         +error_code: str | None
-        +with_validation_error(msg, code) BatchRecord
+        +with_validation_error(msg, code): BatchRecord
         
         
         
@@ -133,9 +133,9 @@ classDiagram
         -_run_id: RunID
         -_state: PipelineRunState
         -_stages: dict~str, StageResult~
-        +start_stage(name) None
-        +complete_stage(name, result) None
-        +fail_stage(name, error) None
+        +start_stage(name): None
+        +complete_stage(name, result): None
+        +fail_stage(name, error): None
         
         
         
