@@ -362,6 +362,19 @@ bash docs/02-architecture/mmd-diagrams/render.sh
 11. **Прогнать quality-gates:** `python scripts/diagrams/check_diagram_quality_gates.py --manifest docs/02-architecture/mmd-diagrams/quality-gate-manifest.txt`
 12. **Добавить в индекс:** обновить `README.md` каталога
 
+### 9.1. PR-checklist для `classDiagram`
+
+Перед merge изменений в `class-diagrams/*.mmd` проверьте:
+
+1. Все dunder-методы экранированы (`+\_\_enter\_\_()`, `+\_\_aexit\_\_(...)`), правило `CLASS-001`.
+2. Внутри одного файла не смешиваются стили return-нотации (`): Type` и `) Type`), правило `CLASS-002`.
+3. Нет перегруженных сигнатур методов длиннее ~88 символов, правило `CLASS-003`.
+4. L1-диаграмма содержит только ключевые методы, вторичные операции вынесены в companion L2 (`01a/08a/14a` и т.д.).
+5. Выполнен `python scripts/diagrams/lint_diagrams.py docs/02-architecture/mmd-diagrams/class-diagrams`.
+6. Выполнен `python scripts/diagrams/check_class_method_render_integrity.py --source-dir docs/02-architecture/mmd-diagrams/class-diagrams --svg-dir docs/02-architecture/mmd-diagrams/class-diagrams/svg`.
+7. Перерендерены изменённые диаграммы через `render.sh`, а `svg/png` артефакты обновлены.
+8. Нет drift между `.mmd` и рендер-артефактами в PR.
+
 ---
 
 ## 10. Сводная таблица инструментов

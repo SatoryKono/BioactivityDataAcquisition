@@ -11,12 +11,36 @@ from __future__ import annotations
 import platform
 import subprocess
 import sys
+from pathlib import Path
 from importlib.util import find_spec
 
 import pytest
 
-# Check if ruff is available
-_ruff_available = find_spec("ruff") is not None
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+def _resolve_ruff_cmd() -> list[str] | None:
+    """Resolve the most stable ruff command for this repository.
+
+    Prefer project-local .venv binaries to avoid formatter-version drift when
+    tests are run with a different system Python interpreter.
+    """
+    local_candidates = [
+        _REPO_ROOT / ".venv" / "Scripts" / "ruff.exe",  # Windows venv
+        _REPO_ROOT / ".venv" / "bin" / "ruff",  # POSIX venv
+    ]
+    for candidate in local_candidates:
+        if candidate.exists():
+            return [str(candidate)]
+
+    if find_spec("ruff") is not None:
+        return [sys.executable, "-m", "ruff"]
+
+    return None
+
+
+_RUFF_CMD = _resolve_ruff_cmd()
+_ruff_available = _RUFF_CMD is not None
 
 # Platform-specific hints for line ending issues
 _LINE_ENDING_HINT = (
@@ -42,7 +66,7 @@ class TestCodeFormatting:
         Run `ruff format src` to fix formatting issues.
         """
         result = subprocess.run(
-            [sys.executable, "-m", "ruff", "format", "--check", "src"],
+            [*_RUFF_CMD, "format", "--check", "src"],  # type: ignore[arg-type]
             capture_output=True,
             text=True,
         )
@@ -61,7 +85,7 @@ class TestCodeFormatting:
         Run `ruff format tests` to fix formatting issues.
         """
         result = subprocess.run(
-            [sys.executable, "-m", "ruff", "format", "--check", "tests"],
+            [*_RUFF_CMD, "format", "--check", "tests"],  # type: ignore[arg-type]
             capture_output=True,
             text=True,
         )
@@ -80,7 +104,7 @@ class TestCodeFormatting:
         Run `ruff check --select I --fix src tests` to fix import ordering issues.
         """
         result = subprocess.run(
-            [sys.executable, "-m", "ruff", "check", "--select", "I", "src", "tests"],
+            [*_RUFF_CMD, "check", "--select", "I", "src", "tests"],  # type: ignore[arg-type]
             capture_output=True,
             text=True,
         )
