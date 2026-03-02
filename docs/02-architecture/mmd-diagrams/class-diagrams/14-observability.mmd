@@ -11,12 +11,9 @@ classDiagram
     direction LR
     class LoggerPort {
         <<Protocol>>
-        +bind(**kwargs) LoggerPort
-        +info(msg, **fields) None
-        +warning(msg, **fields) None
-        +error(msg, **fields) None
-        +debug(msg, **fields) None
-        +exception(msg, **fields) None
+        +bind(**kwargs): LoggerPort
+        +info(msg, **fields): None
+        +error(msg, **fields): None
         
         
     }
@@ -25,12 +22,9 @@ classDiagram
         -_logger: BoundLogger
         -_pipeline: str
         -_run_id: str
-        +bind(**kwargs) LoggerPort
-        +info(msg, **fields) None
-        +warning(msg, **fields) None
-        +error(msg, **fields) None
-        +debug(msg, **fields) None
-        +exception(msg, **fields) None
+        +bind(**kwargs): LoggerPort
+        +info(msg, **fields): None
+        +error(msg, **fields): None
     }
 
     class StructlogLogger {
@@ -59,10 +53,8 @@ classDiagram
 
     class MetricsPort {
         <<Protocol>>
-        +observe_histogram(name, value, labels) None
-        +increment_counter(name, labels) None
-        +set_gauge(name, value, labels) None
-        +close() None
+        +observe_histogram(name, value, labels): None
+        +increment_counter(name, labels): None
         
         
         
@@ -70,10 +62,8 @@ classDiagram
     }
 
     class MetricsCollector {
-        +observe_histogram(name, value, labels) None
-        +increment_counter(name, labels) None
-        +set_gauge(name, value, labels) None
-        +close() None
+        +observe_histogram(name, value, labels): None
+        +increment_counter(name, labels): None
         
         
         
@@ -83,9 +73,8 @@ classDiagram
 
     class PrometheusMetrics {
         Integrates with prometheus_client
-        +observe_histogram() None
-        +increment_counter() None
-        +set_gauge() None
+        +observe_histogram(): None
+        +increment_counter(): None
         
         
         
@@ -106,8 +95,7 @@ classDiagram
     }
 
     class MetricsServerAdapter {
-        +start() None
-        +stop() None
+        +start(): None
         HTTP /metrics endpoint
         
         
@@ -119,8 +107,7 @@ classDiagram
 
     class TracingPort {
         <<Protocol>>
-        +get_tracer(name) Tracer
-        +close() None
+        +get_tracer(name): Tracer
         
         
         
@@ -131,8 +118,7 @@ classDiagram
 
     class OpenTelemetryTracer {
         Integrates with OpenTelemetry SDK
-        +get_tracer(name) Tracer
-        +close() None
+        +get_tracer(name): Tracer
         
         
         
@@ -143,7 +129,7 @@ classDiagram
 
     class NoOpTracing {
         <<Null Object>>
-        +get_tracer(name) NoOpTracer
+        +get_tracer(name): NoOpTracer
         
         
         
@@ -154,7 +140,7 @@ classDiagram
     }
 
     class AnomalyDetector {
-        +detect(metrics) list~Anomaly~
+        +detect(metrics): list~Anomaly~
         
         
         
@@ -167,7 +153,7 @@ classDiagram
 
     class DetectorStrategy {
         <<ABC>>
-        +detect(values, baseline) Anomaly | None
+        +detect(values, baseline): Anomaly | None
         
         
         
@@ -179,7 +165,7 @@ classDiagram
 
     class ZScoreDetector {
         +z_threshold: float
-        +detect(values, baseline) Anomaly | None
+        +detect(values, baseline): Anomaly | None
         
         
         
@@ -228,7 +214,7 @@ classDiagram
     class AdapterMetrics {
         +metrics: MetricsPort
         +provider: str
-        +measure_request() ContextManager
+        +measure_request(): ContextManager
         
         
         
@@ -255,6 +241,10 @@ classDiagram
     AnomalyDetector --> Anomaly
     Anomaly --> AnomalyType
     Anomaly --> AnomalySeverity
+
+    note for LoggerPort "warning/debug/exception moved to 14a method catalog"
+    note for MetricsPort "set_gauge/close moved to 14a method catalog"
+    note for TracingPort "close lifecycle operation moved to 14a catalog"
 
     style LoggerPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
     style MetricsPort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px

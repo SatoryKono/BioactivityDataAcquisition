@@ -11,11 +11,10 @@ classDiagram
     direction LR
     class DataSourcePort {
         <<Protocol>>
-        +fetch(entity_type, limit, query, filter_ids, filter_field) AsyncIterator~dict~
-        +health_check() HealthCheckResult
-        +aclose() None
-        +\_\_aenter\_\_() Self
-        +\_\_aexit\_\_(...) None
+        +fetch(entity_type, limit, query, filter_ids, filter_field): AsyncIterator~dict~
+        +health_check(): HealthCheckResult
+        +\_\_aenter\_\_(): Self
+        +\_\_aexit\_\_(...): None
         
         
         
@@ -24,9 +23,8 @@ classDiagram
 
     class FilterableDataSourcePort {
         <<Protocol>>
-        +fetch_filtered(entity_type, filter_ids, filter_field, limit) AsyncIterator~dict~
-        +fetch_multi_filtered(entity_type, filters, limit) AsyncIterator~dict~
-        +fetch_filtered_with_fallback(entity_type, filter_ids, filter_field, limit) AsyncIterator~dict~
+        +fetch_filtered(entity_type, filter_ids, filter_field, limit): AsyncIterator~dict~
+        +fetch_filtered_with_fallback(entity_type, ids, field, limit): AsyncIterator~dict~
         
         
         
@@ -37,24 +35,18 @@ classDiagram
 
     class StoragePort {
         <<Protocol>>
-        +write_bronze(records, config, metadata) BronzeWriteResult
-        +write_silver(records, config) SilverWriteResult
-        +write_gold(records, config) None
-        +read_silver(table_name, columns, limit) DataFrame
-        +clear_silver(table_name) None
-        +clear_gold(table_name) None
-        +vacuum(table_name, retention_hours) None
-        +archive(table_name, target_path) None
-        +health_check() HealthCheckResult
+        +write_bronze(records, config, metadata): BronzeWriteResult
+        +write_silver(records, config): SilverWriteResult
+        +write_gold(records, config): None
+        +read_silver(table_name, columns, limit): DataFrame
+        +vacuum(table_name, retention_hours): None
     }
 
     class LockPort {
         <<Protocol>>
-        +acquire(key, owner_id, ttl) FencingToken
-        +release(key, owner_id) None
-        +heartbeat(key, owner_id) None
-        +validate_owner(key, owner_id) bool
-        +validate_fencing_token(token) bool
+        +acquire(key, owner_id, ttl): FencingToken
+        +release(key, owner_id): None
+        +heartbeat(key, owner_id): None
         
         
         
@@ -63,10 +55,8 @@ classDiagram
 
     class CheckpointPort {
         <<Protocol>>
-        +save(key, data) None
-        +load(key) dict | None
-        +list_all() list
-        +delete(key) None
+        +save(key, data): None
+        +load(key): dict | None
         
         
         
@@ -76,12 +66,9 @@ classDiagram
 
     class QuarantinePort {
         <<Protocol>>
-        +write(records, pipeline, error_code) None
-        +inspect(pipeline, limit) list
-        +get_stats(pipeline) dict
-        +replay(pipeline, filter_fn) int
-        +purge(pipeline, before) int
-        +update_status(payload_hash, status) None
+        +write(records, pipeline, error_code): None
+        +inspect(pipeline, limit): list
+        +replay(pipeline, filter_fn): int
         
         
         
@@ -89,8 +76,8 @@ classDiagram
 
     class AuditPort {
         <<Protocol>>
-        +log_write(entry: AuditEntry) None
-        +get_entries(filters) list~AuditEntry~
+        +log_write(entry: AuditEntry): None
+        +get_entries(filters): list~AuditEntry~
         
         
         
@@ -102,12 +89,9 @@ classDiagram
 
     class LoggerPort {
         <<Protocol>>
-        +bind(**kwargs) LoggerPort
-        +info(msg, **fields) None
-        +warning(msg, **fields) None
-        +error(msg, **fields) None
-        +debug(msg, **fields) None
-        +exception(msg, **fields) None
+        +bind(**kwargs): LoggerPort
+        +info(msg, **fields): None
+        +error(msg, **fields): None
         
         
         
@@ -115,10 +99,9 @@ classDiagram
 
     class MetricsPort {
         <<Protocol>>
-        +observe_histogram(name, value, labels) None
-        +increment_counter(name, labels) None
-        +set_gauge(name, value, labels) None
-        +close() None
+        +observe_histogram(name, value, labels): None
+        +increment_counter(name, labels): None
+        +set_gauge(name, value, labels): None
         
         
         
@@ -128,8 +111,8 @@ classDiagram
 
     class TracingPort {
         <<Protocol>>
-        +get_tracer(name) Tracer
-        +close() None
+        +get_tracer(name): Tracer
+        +close(): None
         
         
         
@@ -141,10 +124,9 @@ classDiagram
 
     class CircuitBreakerPort {
         <<Protocol>>
-        +get_state() CircuitBreakerState
-        +get_failure_count() int
-        +call(fn) T
-        +reset() None
+        +get_state(): CircuitBreakerState
+        +call(fn): T
+        +reset(): None
         
         
         
@@ -154,9 +136,8 @@ classDiagram
 
     class RateLimiterPort {
         <<Protocol>>
-        +acquire(tokens) None
-        +try_acquire() bool
-        +available_tokens() int
+        +acquire(tokens): None
+        +try_acquire(): bool
         
         
         
@@ -167,7 +148,7 @@ classDiagram
 
     class PiiHasherPort {
         <<Protocol>>
-        +hash(value: str) str
+        +hash(value: str): str
         
         
         
@@ -180,7 +161,7 @@ classDiagram
 
     class MetadataWriterPort {
         <<Protocol>>
-        +write(path, metadata) None
+        +write(path, metadata): None
         
         
         
@@ -193,9 +174,8 @@ classDiagram
 
     class DeltaReaderPort {
         <<Protocol>>
-        +read_table(path, columns, limit) DataFrame
-        +get_schema(path) Schema
-        +get_row_count(path) int
+        +read_table(path, columns, limit): DataFrame
+        +get_schema(path): Schema
         
         
         
@@ -206,9 +186,8 @@ classDiagram
 
     class InputFilterPort {
         <<Protocol>>
-        +load_filter_ids(path, column) FilterLoadResult
-        +load_multi_column_filter(path, columns) FilterLoadResult
-        +load_filter_with_fallback(path, column, fallback) FilterLoadResult
+        +load_filter_ids(path, column): FilterLoadResult
+        +load_filter_with_fallback(path, column, fallback): FilterLoadResult
         
         
         
@@ -219,10 +198,8 @@ classDiagram
 
     class DQMonitorPort {
         <<Protocol>>
-        +add_metric(name, value) None
-        +check_quality() DQResult
-        +update_baseline_from_metrics() None
-        +get_baseline_stats() dict
+        +add_metric(name, value): None
+        +check_quality(): DQResult
         
         
         
@@ -232,8 +209,8 @@ classDiagram
 
     class JsonEncoderPort {
         <<Protocol>>
-        +encode(obj) str
-        +decode(s) Any
+        +encode(obj): str
+        +decode(s): Any
         
         
         
@@ -245,7 +222,7 @@ classDiagram
 
     class MemoryMonitorPort {
         <<Protocol>>
-        +get_stats() MemoryStats
+        +get_stats(): MemoryStats
         
         
         
@@ -257,6 +234,11 @@ classDiagram
     }
 
     DataSourcePort <|-- FilterableDataSourcePort
+
+    note for StoragePort "L2 full API: 01a-domain-ports-method-catalog.mmd"
+    note for QuarantinePort "Secondary ops moved to L2 catalog"
+    note for LoggerPort "warning/debug/exception shown in L2 catalog"
+    note for InputFilterPort "multi-column helpers shown in L2 catalog"
 
     style DataSourcePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
     style FilterableDataSourcePort fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px

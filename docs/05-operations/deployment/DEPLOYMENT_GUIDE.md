@@ -1,5 +1,6 @@
 # BioETL Kubernetes Deployment Guide
 
+> **Status:** Internal / Extended document (experimental deployment profile, non-normative for default operations).
 > **Note (ADR-010):** BioETL primary deployment model is **Local-Only** (file-based,
 > no Docker/Redis in runtime). See [ADR-010](../../02-architecture/decisions/ADR-010-local-only-deployment.md).
 > This Kubernetes guide is provided for **advanced/experimental use only** and is
