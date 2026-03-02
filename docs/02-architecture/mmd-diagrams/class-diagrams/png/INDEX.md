@@ -1,10 +1,16 @@
 # BioETL Diagrams — PNG Index
 
-_Generated: 2026-03-02T16:03:58+03:00_
+_Generated: 2026-03-02T16:23:27+03:00_
 
 ## Domain Ports
 
 ![01-domain-ports](./01-domain-ports.png)
+
+---
+
+## 01adomain Ports Method Catalog
+
+![01a-domain-ports-method-catalog](./01a-domain-ports-method-catalog.png)
 
 ---
 
@@ -50,6 +56,12 @@ _Generated: 2026-03-02T16:03:58+03:00_
 
 ---
 
+## 08aapplication Services Operation Catalog
+
+![08a-application-services-operation-catalog](./08a-application-services-operation-catalog.png)
+
+---
+
 ## Transformers
 
 ![09-transformers](./09-transformers.png)
@@ -83,6 +95,12 @@ _Generated: 2026-03-02T16:03:58+03:00_
 ## Observability
 
 ![14-observability](./14-observability.png)
+
+---
+
+## 14aobservability Method Catalog
+
+![14a-observability-method-catalog](./14a-observability-method-catalog.png)
 
 ---
 

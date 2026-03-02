@@ -59,9 +59,9 @@ classDiagram
         +deserialize(data) DQMetrics
     }
 
-    note for IdentityService "Deterministic hashing:\nEntityID = SHA256(provider:entity_type:source_id)\nContentHash = SHA256(sorted business fields)"
-    note for UnitConverter "Handles bioactivity unit\nconversions (nM, uM, etc.)"
-    note for TextSimilarity "Used for title matching\nin publication enrichment"
+    note for IdentityService "Deterministic IDs and content hashes"
+    note for UnitConverter "Bioactivity unit conversion (nM/uM)"
+    note for TextSimilarity "Title similarity for enrichment"
 
     style IdentityService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
     style NormalizationService fill:#eff6ff,stroke:#2563eb,stroke-width:2px
