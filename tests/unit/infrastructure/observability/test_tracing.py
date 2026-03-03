@@ -243,7 +243,7 @@ class TestOpenTelemetryTracerCloseExceptionHandling:
 
             # Mock the provider to raise an exception during force_flush
             otel_tracer._provider.force_flush = MagicMock(
-                side_effect=Exception("Force flush failed")
+                side_effect=RuntimeError("Force flush failed")
             )
 
             # close() should not raise
@@ -264,7 +264,7 @@ class TestOpenTelemetryTracerCloseExceptionHandling:
             # Mock the provider to raise an exception during shutdown
             otel_tracer._provider.force_flush = MagicMock()
             otel_tracer._provider.shutdown = MagicMock(
-                side_effect=Exception("Shutdown failed")
+                side_effect=RuntimeError("Shutdown failed")
             )
 
             # close() should not raise

@@ -302,12 +302,14 @@ class TestUniProtIdMappingCreatorBranches:
     """Covers override/default and seed-id branches in ID mapping creator."""
 
     @patch("bioetl.composition.providers.registration.IDMappingDataSource")
+    @patch("bioetl.composition.providers.registration.IDMappingCsvReaderAdapter")
     @patch("bioetl.composition.providers.registration.UniProtIDMappingClient")
     @patch("bioetl.composition.providers.registration._get_factories")
     def test_uses_api_overrides_and_seed_ids(
         self,
         mock_get_factories: MagicMock,
         mock_uniprot_client: MagicMock,
+        mock_idmapping_reader_adapter: MagicMock,
         mock_idmapping_data_source: MagicMock,
     ) -> None:
         mock_http_factory = MagicMock()
@@ -316,6 +318,8 @@ class TestUniProtIdMappingCreatorBranches:
         mock_http_factory.create_for_provider.return_value = mock_http_client
         mock_client = MagicMock()
         mock_uniprot_client.return_value = mock_client
+        mock_reader = MagicMock()
+        mock_idmapping_reader_adapter.return_value = mock_reader
         mock_ds = MagicMock()
         mock_idmapping_data_source.return_value = mock_ds
 
@@ -327,58 +331,68 @@ class TestUniProtIdMappingCreatorBranches:
         source = SimpleNamespace(api=source_api, input_path="data/input/custom.csv")
         pipeline_config = SimpleNamespace(source=source)
         filter_config = SimpleNamespace(direct_filter_ids=["CHEMBL1", "CHEMBL2"])
+        logger = MagicMock()
 
         result = _create_uniprot_idmapping_data_source(
             settings=MagicMock(),
             pipeline_config=pipeline_config,
-            logger=MagicMock(),
+            logger=logger,
             filter_config=filter_config,
             metrics=MagicMock(),
         )
 
+        mock_idmapping_reader_adapter.assert_called_once_with(logger=logger)
         assert (
             mock_uniprot_client.call_args.kwargs["base_url"]
             == "https://mirror.uniprot.test"
         )
         call_kwargs = mock_idmapping_data_source.call_args.kwargs
-        assert call_kwargs["input_path"].as_posix() == "data/input/custom.csv"
+        assert call_kwargs["id_source_reader"] is mock_reader
+        assert call_kwargs["input_path"] == "data/input/custom.csv"
         assert call_kwargs["from_db"] == "CHEMBL_ID"
         assert call_kwargs["to_db"] == "UniProtKB-Swiss-Prot"
         assert call_kwargs["seed_ids"] == ["CHEMBL1", "CHEMBL2"]
         assert result is mock_ds
 
     @patch("bioetl.composition.providers.registration.IDMappingDataSource")
+    @patch("bioetl.composition.providers.registration.IDMappingCsvReaderAdapter")
     @patch("bioetl.composition.providers.registration.UniProtIDMappingClient")
     @patch("bioetl.composition.providers.registration._get_factories")
     def test_uses_defaults_when_api_and_filter_missing(
         self,
         mock_get_factories: MagicMock,
         mock_uniprot_client: MagicMock,
+        mock_idmapping_reader_adapter: MagicMock,
         mock_idmapping_data_source: MagicMock,
     ) -> None:
         mock_http_factory = MagicMock()
         mock_get_factories.return_value = (MagicMock(), mock_http_factory)
         mock_http_factory.create_for_provider.return_value = MagicMock()
         mock_uniprot_client.return_value = MagicMock()
+        mock_reader = MagicMock()
+        mock_idmapping_reader_adapter.return_value = mock_reader
         mock_ds = MagicMock()
         mock_idmapping_data_source.return_value = mock_ds
 
         source = SimpleNamespace(api=None, input_path=None)
         pipeline_config = SimpleNamespace(source=source)
+        logger = MagicMock()
 
         _create_uniprot_idmapping_data_source(
             settings=MagicMock(),
             pipeline_config=pipeline_config,
-            logger=MagicMock(),
+            logger=logger,
             filter_config=None,
         )
 
+        mock_idmapping_reader_adapter.assert_called_once_with(logger=logger)
         assert (
             mock_uniprot_client.call_args.kwargs["base_url"]
             == "https://rest.uniprot.org"
         )
         call_kwargs = mock_idmapping_data_source.call_args.kwargs
-        assert call_kwargs["input_path"].as_posix() == "data/input/target.csv"
+        assert call_kwargs["id_source_reader"] is mock_reader
+        assert call_kwargs["input_path"] == "data/input/target.csv"
         assert call_kwargs["from_db"] == "ChEMBL"
         assert call_kwargs["to_db"] == "UniProtKB"
         assert call_kwargs["seed_ids"] is None

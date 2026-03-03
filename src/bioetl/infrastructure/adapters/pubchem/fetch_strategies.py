@@ -11,6 +11,8 @@ from typing import TYPE_CHECKING, Any
 
 import pubchempy as pcp
 
+from bioetl.domain.exceptions import BioETLError, NetworkError
+from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.pubchem.constants import PUBCHEM_API_BASE
 
 if TYPE_CHECKING:
@@ -32,6 +34,18 @@ class PubChemFetchStrategies:
     Delegates entity conversion to PubChemEntityMapper.
     Records API request metadata for Bronze layer enrichment.
     """
+
+    FETCH_STRATEGY_ERRORS = (
+        BioETLError,
+        NetworkError,
+        ConnectionError,
+        TimeoutError,
+        OSError,
+        ValueError,
+        TypeError,
+        RuntimeError,
+        KeyError,
+    )
 
     def __init__(
         self,
@@ -101,7 +115,7 @@ class PubChemFetchStrategies:
 
     async def fetch_by_query(
         self, query: str, limit: int | None
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch compounds by query (name search).
 
         Args:
@@ -126,7 +140,7 @@ class PubChemFetchStrategies:
                 break
             yield self._mapper.compound_to_dict(compound)
 
-    async def _fetch_single_smiles(self, smiles: str) -> list[dict[str, Any]]:
+    async def _fetch_single_smiles(self, smiles: str) -> list[BronzeRecord]:
         """Fetch compounds for a single SMILES string."""
         await self._rate_limiter.acquire()
         start_time = time.perf_counter()
@@ -142,7 +156,7 @@ class PubChemFetchStrategies:
 
     async def fetch_by_smiles(
         self, smiles_list: list[str], limit: int | None = None
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch compounds by SMILES strings.
 
         Args:
@@ -166,7 +180,7 @@ class PubChemFetchStrategies:
                         return
                     yield record
                     fetched += 1
-            except Exception as e:
+            except self.FETCH_STRATEGY_ERRORS as e:
                 self._logger.warning(
                     "smiles_fetch_failed",
                     provider=self._provider_name,
@@ -190,7 +204,7 @@ class PubChemFetchStrategies:
         """Backward-compatible alias for CID parser."""
         return self._parse_valid_cids(molecule_id_list)
 
-    async def _fetch_cid_batch(self, batch: list[int]) -> list[dict[str, Any]]:
+    async def _fetch_cid_batch(self, batch: list[int]) -> list[BronzeRecord]:
         """Fetch a batch of compounds by CID."""
         await self._rate_limiter.acquire()
         start_time = time.perf_counter()
@@ -208,7 +222,7 @@ class PubChemFetchStrategies:
 
     async def fetch_by_cids(
         self, cid_list: list[str], limit: int | None = None, batch_size: int = 50
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch compounds by CID list.
 
         Args:
@@ -234,7 +248,7 @@ class PubChemFetchStrategies:
                         return
                     yield record
                     fetched += 1
-            except Exception as e:
+            except self.FETCH_STRATEGY_ERRORS as e:
                 self._logger.warning(
                     "molecule_id_batch_fetch_failed",
                     provider=self._provider_name,
@@ -248,7 +262,7 @@ class PubChemFetchStrategies:
         molecule_id_list: list[str],
         limit: int | None = None,
         batch_size: int = 50,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Backward-compatible alias for CID-based fetch.
 
         Args:
@@ -264,7 +278,7 @@ class PubChemFetchStrategies:
         ):
             yield record
 
-    async def _fetch_single_inchikey(self, inchikey: str) -> list[dict[str, Any]]:
+    async def _fetch_single_inchikey(self, inchikey: str) -> list[BronzeRecord]:
         """Fetch compounds for a single InChIKey.
 
         PubChem supports InChIKey lookup via the 'inchikey' namespace.
@@ -290,7 +304,7 @@ class PubChemFetchStrategies:
 
     async def fetch_by_inchikey(
         self, inchikey_list: list[str], limit: int | None = None
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch compounds by InChIKey list.
 
         InChIKey is the IUPAC standard chemical identifier (27 characters).
@@ -331,7 +345,7 @@ class PubChemFetchStrategies:
                         return
                     yield record
                     fetched += 1
-            except Exception as e:
+            except self.FETCH_STRATEGY_ERRORS as e:
                 self._logger.warning(
                     "inchikey_fetch_failed",
                     provider=self._provider_name,
@@ -341,7 +355,7 @@ class PubChemFetchStrategies:
 
     async def fetch_substances(
         self, query: str | None, limit: int | None
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch substances from PubChem.
 
         Args:
@@ -374,7 +388,7 @@ class PubChemFetchStrategies:
 
     async def fetch_assays(
         self, query: str | None, limit: int | None
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[BronzeRecord]:
         """Fetch assays from PubChem.
 
         Args:

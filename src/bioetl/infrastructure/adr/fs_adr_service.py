@@ -140,7 +140,7 @@ class FsAdrService(AdrServicePort):
             # Prefer H1 as title; fall back to filename tail
             try:
                 text = p.read_text(encoding="utf-8")
-            except Exception:
+            except (OSError, UnicodeError):
                 text = ""
             title = _parse_h1_title(text) or m.group(2).replace("-", " ")
             items.append(AdrInfo(number=num, title=title, path=str(p)))
@@ -213,7 +213,10 @@ class FsAdrService(AdrServicePort):
 
             try:
                 text = p.read_text(encoding="utf-8")
-            except Exception as exc:  # pragma: no cover - rare IO error path
+            except (
+                OSError,
+                UnicodeError,
+            ) as exc:  # pragma: no cover - rare IO error path
                 issues.append(
                     AdrValidationIssue(
                         number=number,

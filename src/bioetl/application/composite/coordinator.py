@@ -47,7 +47,10 @@ _ENRICHER_EXECUTION_ERRORS = (
 )
 
 
-class EnrichmentCoordinator:
+__all__ = ["EnrichmentCoordinator", "EnrichmentCoordinatorService"]
+
+
+class EnrichmentCoordinatorService:
     """Coordinates parallel enrichment pipeline execution.
 
     Implements fan-out pattern with async gather for concurrent enrichers.
@@ -474,3 +477,7 @@ class EnrichmentCoordinator:
                 processed[name] = result
 
         return processed
+
+
+# Backward-compatible alias for iterative NAME-001 migration.
+EnrichmentCoordinator = EnrichmentCoordinatorService

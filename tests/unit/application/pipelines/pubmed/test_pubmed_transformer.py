@@ -6,12 +6,17 @@ records into Silver-layer format.
 
 from __future__ import annotations
 
+import xml.etree.ElementTree as ET
 from typing import Any
 from unittest.mock import MagicMock
 from uuid import uuid4
 
 import pytest
 
+from bioetl.application.pipelines.pubmed.extractors import (
+    AuthorExtractor,
+    DateExtractor,
+)
 from bioetl.application.pipelines.pubmed.transformer import (
     PubMedPublicationTransformer,
 )
@@ -165,6 +170,44 @@ class TestPubMedPublicationTransformer:
     def transformer(self) -> PubMedPublicationTransformer:
         """Create PubMedPublicationTransformer instance."""
         return PubMedPublicationTransformer(provider="pubmed")
+
+    def test_init_accepts_injected_extractors(self) -> None:
+        """Transformer should allow extractor overrides via DI."""
+        author_extractor = MagicMock(spec=AuthorExtractor)
+        date_extractor = MagicMock(spec=DateExtractor)
+
+        transformer = PubMedPublicationTransformer(
+            provider="pubmed",
+            author_extractor=author_extractor,
+            date_extractor=date_extractor,
+        )
+
+        assert transformer._author_extractor is author_extractor
+        assert transformer._date_extractor is date_extractor
+
+    def test_extract_author_block_uses_injected_author_extractor(self) -> None:
+        """Author normalization should use injected extractor instance."""
+        author_extractor = MagicMock(spec=AuthorExtractor)
+        author_extractor.normalize.return_value = ["Smith, J"]
+        author_extractor.parse_structured_affiliations.return_value = []
+        transformer = PubMedPublicationTransformer(
+            provider="pubmed",
+            author_extractor=author_extractor,
+        )
+
+        data_normalizer = MagicMock()
+        data_normalizer.normalize_author_list.return_value = '["Smith, J"]'
+        data_normalizer.normalize_author_keys.return_value = ["smith_j"]
+        data_normalizer.extract_affiliations_from_authors.return_value = []
+        data_normalizer.normalize_affiliations.return_value = None
+        transformer._data_normalizer = data_normalizer
+
+        article = ET.fromstring("<Article><AuthorList/></Article>")
+        raw_author_data = [{"last_name": "Smith", "initials": "J"}]
+        extracted = transformer._extract_author_block(article, raw_author_data)
+
+        author_extractor.normalize.assert_called_once_with(raw_author_data)
+        assert extracted["author_count"] == 1
 
     @pytest.mark.asyncio
     async def test_transform_minimal_xml(

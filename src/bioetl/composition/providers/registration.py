@@ -42,6 +42,7 @@ from bioetl.infrastructure.adapters.crossref.client import (
 )
 from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreaker
 from bioetl.infrastructure.adapters.http.rate_limiter import TokenBucket
+from bioetl.infrastructure.adapters.input import IDMappingCsvReaderAdapter
 from bioetl.infrastructure.adapters.openalex.client import (
     OpenAlexAdapter,
     _create_openalex_adapter,
@@ -464,7 +465,7 @@ def _create_uniprot_idmapping_data_source(
     """Create UniProt ID Mapping data source.
 
     Creates an IDMappingDataSource that:
-    1. Reads ChEMBL target IDs from input CSV file
+    1. Reads ChEMBL target IDs via an infrastructure source reader
     2. Calls UniProt ID Mapping API to map to UniProt accessions
     3. Yields records with mapping results
 
@@ -472,15 +473,13 @@ def _create_uniprot_idmapping_data_source(
         settings: Application settings.
         pipeline_config: Pipeline configuration from YAML.
         logger: LoggerPort for structured logging.
-        filter_config: Unused (filtering happens via input_path CSV).
+        filter_config: Unused (seed IDs are extracted when present).
         metrics: Optional MetricsPort for recording adapter metrics.
         pipeline_name: Pipeline name for metrics labels.
 
     Returns:
         Configured IDMappingDataSource instance.
     """
-    from pathlib import Path
-
     _, HttpClientFactory = _get_factories(
         get_data_source_factory, get_http_client_factory
     )
@@ -503,7 +502,7 @@ def _create_uniprot_idmapping_data_source(
     input_path_str = (
         getattr(pipeline_config.source, "input_path", None) or "data/input/target.csv"
     )
-    input_path = Path(input_path_str or "data/input/target.csv")
+    input_path = input_path_str or "data/input/target.csv"
 
     # Get database names from API config
     from_db = "ChEMBL"
@@ -517,8 +516,11 @@ def _create_uniprot_idmapping_data_source(
     if filter_config and filter_config.direct_filter_ids:
         seed_ids = list(filter_config.direct_filter_ids)
 
+    id_source_reader = IDMappingCsvReaderAdapter(logger=logger)
+
     return IDMappingDataSource(
         idmapping_client=idmapping_client,
+        id_source_reader=id_source_reader,
         input_path=input_path,
         logger=logger,
         from_db=from_db,

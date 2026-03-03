@@ -32,6 +32,15 @@ class AtomicWriteError(Exception):
         super().__init__(f"Atomic write failed for '{target}': {reason}")
 
 
+ATOMIC_WRITE_EXCEPTIONS = (
+    AtomicWriteError,
+    OSError,
+    ValueError,
+    TypeError,
+    RuntimeError,
+)
+
+
 @contextmanager
 def atomic_write(
     target: Path,
@@ -86,7 +95,7 @@ def atomic_write(
         # Atomic replace (works on both Unix and Windows)
         temp_path.replace(target)
 
-    except Exception as e:
+    except ATOMIC_WRITE_EXCEPTIONS as e:
         # Clean up temp file on any error
         try:
             if temp_path.exists():
@@ -168,7 +177,7 @@ class AtomicWriteGroup:
             with os.fdopen(fd, "wb") as f:
                 f.write(data)
             self._pending.append((target, temp_path, data))
-        except Exception:
+        except (OSError, ValueError, TypeError, RuntimeError):
             # Clean up on write failure
             with suppress(OSError):
                 temp_path.unlink()
@@ -190,7 +199,7 @@ class AtomicWriteGroup:
             for target, temp_path, _ in self._pending:
                 temp_path.replace(target)
                 committed.append((target, temp_path))
-        except Exception as e:
+        except (OSError, ValueError, TypeError, RuntimeError) as e:
             # Rollback: remove any committed files (best effort)
             # Note: True rollback is impossible after replace,
             # but we clean up uncommitted temps

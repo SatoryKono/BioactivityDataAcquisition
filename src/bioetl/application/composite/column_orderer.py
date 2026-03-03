@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 
     _SortFn = Callable[[list[str], tuple[str, ...]], list[str]]
 
-__all__ = ["ColumnOrderer"]
+__all__ = ["ColumnOrderer", "ColumnOrdererService"]
 
 
 def _collect_pattern_columns(
@@ -75,7 +75,7 @@ def _collect_pattern_columns(
     return sort_fn(pattern_matches, group.provider_order)
 
 
-class ColumnOrderer:
+class ColumnOrdererService:
     """Service for ordering columns by semantic groups.
 
     Orders DataFrame columns in a consistent, semantically meaningful way:
@@ -96,7 +96,7 @@ class ColumnOrderer:
     - Alphabetically for same provider
 
     Example:
-        >>> orderer = ColumnOrderer(logger)
+        >>> orderer = ColumnOrdererService(logger)
         >>> result = orderer.order_columns(df)
         >>> result.columns[:5]
         ['entity_id', '_run_id', 'doi', 'pmid', 'chembl.publication.title']
@@ -509,3 +509,7 @@ class ColumnOrderer:
             return columns
 
         return [rename_map.get(col, col) for col in columns]
+
+
+# Backward-compatible alias for iterative NAME-001 migration.
+ColumnOrderer = ColumnOrdererService

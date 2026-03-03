@@ -349,7 +349,7 @@ async def test_search_api_error(search_paginator, mock_http):
 @pytest.mark.asyncio
 async def test_search_network_error(search_paginator, mock_http, mock_logger):
     """Test search raises on network error."""
-    mock_http.get.side_effect = Exception("Network error")
+    mock_http.get.side_effect = RequestError("Network error")
 
     with pytest.raises(CrossRefApiError, match="CrossRef search failed"):
         async for _ in search_paginator.search("test"):

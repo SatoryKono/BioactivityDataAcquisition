@@ -19,6 +19,13 @@ from bioetl.domain.value_objects.dq_report import (
 # Freshness thresholds from RULES.md §3.4.1
 FRESHNESS_WARNING_HOURS = 24
 FRESHNESS_CRITICAL_HOURS = 72
+_FRESHNESS_COLUMN_ERRORS = (
+    pl.exceptions.PolarsError,
+    ValueError,
+    TypeError,
+    RuntimeError,
+    KeyError,
+)
 
 
 def check_record_count(
@@ -126,7 +133,7 @@ def check_data_freshness(
                     if isinstance(col_max, datetime):
                         max_ts = col_max
                     break
-            except Exception:
+            except _FRESHNESS_COLUMN_ERRORS:
                 # Catch all: column may not exist, wrong type, or max() unsupported.
                 # Try next candidate column for graceful fallback.
                 pass

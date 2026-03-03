@@ -9,14 +9,18 @@ from uuid import UUID, uuid4
 import yaml
 from pydantic import ValidationError
 
-from bioetl.application.composite.checkpoint import CompositeCheckpointManager
-from bioetl.application.composite.coordinator import EnrichmentCoordinator
-from bioetl.application.composite.cross_validator import EnrichmentCrossValidator
-from bioetl.application.composite.dependency_coordinator import DependencyCoordinator
+from bioetl.application.composite.checkpoint import CompositeCheckpointService
+from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
+from bioetl.application.composite.cross_validator import (
+    EnrichmentCrossValidationService,
+)
+from bioetl.application.composite.dependency_coordinator import (
+    DependencyCoordinatorService,
+)
 from bioetl.application.composite.key_extractor import KeyExtractorService
 from bioetl.application.composite.merger import MergeService
 from bioetl.application.composite.runner import (
-    CompositePipelineRunner,
+    CompositePipelineRunnerService,
     CompositeRuntimeConfig,
 )
 from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
@@ -53,6 +57,13 @@ if TYPE_CHECKING:
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.infrastructure.config import Settings
+
+# Backward-compatible aliases for iterative NAME-001 migration.
+CompositeCheckpointManager = CompositeCheckpointService
+CompositePipelineRunner = CompositePipelineRunnerService
+EnrichmentCrossValidator = EnrichmentCrossValidationService
+EnrichmentCoordinator = EnrichmentCoordinatorService
+DependencyCoordinator = DependencyCoordinatorService
 
 __all__ = [
     "CompositeRuntimeConfig",
@@ -298,10 +309,10 @@ def bootstrap_composite_runner(
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
     run_id: str | None = None,
-) -> CompositePipelineRunner:
-    """Create a CompositePipelineRunner with all dependencies.
+) -> CompositePipelineRunnerService:
+    """Create a CompositePipelineRunnerService with all dependencies.
 
-    Layer: Returns application-level runner (CompositePipelineRunner) ready
+    Layer: Returns application-level runner (CompositePipelineRunnerService) ready
     for execution.
 
     Args:
@@ -310,7 +321,7 @@ def bootstrap_composite_runner(
         run_id: Optional run ID (generated if not provided).
 
     Returns:
-        CompositePipelineRunner ready for execution.
+        CompositePipelineRunnerService ready for execution.
     """
     # CIRCULAR-DEPENDENCY: Local import required to break circular dependency.
     # Import chain: entrypoints -> _bootstrap -> bootstrap -> runtime -> composite -> entrypoints
@@ -428,7 +439,8 @@ def bootstrap_composite_runner(
         Dependencies run after the seed to populate Silver tables before enrichers.
         Unlike enrichers which read from Silver, dependencies call APIs to fetch data.
 
-        Note: Chained dependencies (key_source) are handled by DependencyCoordinator
+        Note: Chained dependencies (key_source) are handled by
+        DependencyCoordinatorService
         which provides the correct keys from the source dependency's Silver table.
 
         Configuration:
@@ -518,12 +530,12 @@ def bootstrap_composite_runner(
         logger=logger,
     )
 
-    dependency_coordinator = DependencyCoordinator(
+    dependency_coordinator = DependencyCoordinatorService(
         logger=logger,
         delta_reader=delta_reader,
     )
 
-    coordinator = EnrichmentCoordinator(
+    coordinator = EnrichmentCoordinatorService(
         logger=logger,
         dq_config=config.dq,
         max_concurrency=config.execution.max_concurrency,
@@ -533,9 +545,9 @@ def bootstrap_composite_runner(
     field_group_registry = _load_field_group_registry(config.name, logger)
 
     # Create cross-validator if enabled
-    cross_validator: EnrichmentCrossValidator | None = None
+    cross_validator: EnrichmentCrossValidationService | None = None
     if config.cross_validation.enabled:
-        cross_validator = EnrichmentCrossValidator(
+        cross_validator = EnrichmentCrossValidationService(
             config=config.cross_validation,
             logger=logger,
         )
@@ -551,7 +563,7 @@ def bootstrap_composite_runner(
     )
 
     checkpoint_dir = Path(settings.data_dir) / "checkpoints" / "composite"
-    checkpoint_manager = CompositeCheckpointManager(
+    checkpoint_manager = CompositeCheckpointService(
         composite_name=config.name,
         run_id=effective_run_id,
         checkpoint_dir=checkpoint_dir,
@@ -571,7 +583,7 @@ def bootstrap_composite_runner(
 
         quarantine_port = bootstrap_quarantine_port()
 
-    return CompositePipelineRunner(
+    return CompositePipelineRunnerService(
         config=config,
         runtime=runtime,
         seed_runner_factory=seed_runner_factory,
@@ -594,8 +606,8 @@ def bootstrap_composite_pipeline(
     config: CompositeConfig,
     runtime: CompositeRuntimeConfig,
     run_id: str | None = None,
-) -> CompositePipelineRunner:
-    """Bootstrap a CompositePipelineRunner with all dependencies.
+) -> CompositePipelineRunnerService:
+    """Bootstrap a CompositePipelineRunnerService with all dependencies.
 
 
     Args:
@@ -604,7 +616,7 @@ def bootstrap_composite_pipeline(
         run_id: Optional run ID (generated if not provided).
 
     Returns:
-        CompositePipelineRunner ready for execution.
+        CompositePipelineRunnerService ready for execution.
     """
     return bootstrap_composite_runner(config=config, runtime=runtime, run_id=run_id)
 

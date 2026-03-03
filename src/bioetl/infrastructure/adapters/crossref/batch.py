@@ -9,6 +9,9 @@ import contextlib
 import time
 from typing import TYPE_CHECKING, Any
 
+from httpx import RequestError
+
+from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.normalization import normalize_doi
 from bioetl.infrastructure.adapters.crossref.exceptions import CrossRefApiError
 
@@ -23,6 +26,20 @@ if TYPE_CHECKING:
 # Type aliases for helper class parameters
 HttpTransport = Any  # Any: untyped HTTP transport
 BaseMetrics = Any  # Any: untyped adapter metrics wrapper
+
+CROSSREF_RUNTIME_ERRORS = (
+    BioETLError,
+    NetworkError,
+    RequestError,
+    ConnectionError,
+    TimeoutError,
+    OSError,
+    ValueError,
+    TypeError,
+    RuntimeError,
+    KeyError,
+)
+CROSSREF_FALLBACK_ERRORS = (CrossRefApiError, *CROSSREF_RUNTIME_ERRORS)
 
 
 class DoiBatchProcessor:
@@ -74,6 +91,7 @@ class DoiBatchProcessor:
         """
         normalized_doi = normalize_doi(doi) or ""
         url = f"{self._api_base}/works/{normalized_doi}"
+        response: Any | None = None
 
         try:
             start_time = time.perf_counter()
@@ -85,6 +103,11 @@ class DoiBatchProcessor:
             if self._request_collector:
                 with contextlib.suppress(Exception):
                     self._request_collector.record_from_response(response, duration_ms)
+
+            if response is None:
+                raise CrossRefApiError(
+                    f"Failed to fetch DOI {normalized_doi}: no response"
+                )
 
             if response.status_code == 404:
                 self._logger.debug("crossref_doi_not_found", doi=normalized_doi)
@@ -102,7 +125,7 @@ class DoiBatchProcessor:
 
         except CrossRefApiError:
             raise
-        except Exception as e:
+        except CROSSREF_RUNTIME_ERRORS as e:
             self._logger.error(
                 "crossref_fetch_failed", doi=normalized_doi, error=str(e)
             )
@@ -117,7 +140,7 @@ class DoiBatchProcessor:
                 publication = await self.fetch_single(doi)
                 if publication:
                     yield publication
-            except Exception as e:
+            except CROSSREF_FALLBACK_ERRORS as e:
                 self._logger.debug(
                     "crossref_individual_fetch_failed", doi=doi, error=str(e)
                 )
@@ -152,6 +175,7 @@ class DoiBatchProcessor:
             "rows": str(len(normalized_dois)),
             "mailto": self._mailto,
         }
+        response: Any | None = None
 
         try:
             start_time = time.perf_counter()
@@ -165,6 +189,9 @@ class DoiBatchProcessor:
             if self._request_collector:
                 with contextlib.suppress(Exception):
                     self._request_collector.record_from_response(response, duration_ms)
+
+            if response is None:
+                raise CrossRefApiError("CrossRef batch request returned no response")
 
             if response.status_code != 200:
                 self._logger.warning(
@@ -181,7 +208,7 @@ class DoiBatchProcessor:
             for item in items:
                 yield item
 
-        except Exception as e:
+        except CROSSREF_RUNTIME_ERRORS as e:
             self._logger.warning(
                 "crossref_batch_fetch_error", error=str(e), doi_count=len(dois)
             )
@@ -225,6 +252,7 @@ class SearchPaginator:
             "cursor": cursor,
             "mailto": self._mailto,
         }
+        response: Any | None = None
 
         start_time = time.perf_counter()
         with self._metrics.measure_request("/works?query"):
@@ -237,6 +265,14 @@ class SearchPaginator:
         if self._request_collector:
             with contextlib.suppress(Exception):
                 self._request_collector.record_from_response(response, duration_ms)
+
+        if response is None:
+            self._logger.error(
+                "crossref_search_failed",
+                query=query,
+                error="no_response",
+            )
+            raise CrossRefApiError("CrossRef search failed: no response")
 
         if response.status_code != 200:
             raise CrossRefApiError(
@@ -309,6 +345,6 @@ class SearchPaginator:
 
         except CrossRefApiError:
             raise
-        except Exception as e:
+        except CROSSREF_RUNTIME_ERRORS as e:
             self._logger.error("crossref_search_failed", query=query, error=str(e))
             raise CrossRefApiError(f"CrossRef search failed: {e}") from e

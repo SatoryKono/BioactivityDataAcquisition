@@ -16,7 +16,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
-from bioetl.domain.exceptions import MetricsServerError
+from bioetl.domain.exceptions import BioETLError, MetricsServerError
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
@@ -29,6 +29,14 @@ __all__ = [
     "MetricsService",
     "StartResult",
 ]
+
+_METRICS_START_ERRORS = (
+    BioETLError,
+    OSError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+)
 
 
 @runtime_checkable
@@ -196,7 +204,7 @@ class MetricsService:
 
             self.logger.warning("Metrics server failed to start", port=port)
             return StartResult(success=False, port=port, error="Failed to bind port")
-        except Exception as e:
+        except _METRICS_START_ERRORS as e:
             return self._handle_start_error(port, e, fail_fast)
 
     def get_status(self) -> MetricsServerStatus:

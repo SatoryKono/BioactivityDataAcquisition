@@ -204,7 +204,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
                         self.span.record_exception(exc_val)
                     self.span.set_attribute("error", True)
                 self.span.__exit__(exc_type, exc_val, exc_tb)
-            except Exception:
+            except (AttributeError, RuntimeError, TypeError, ValueError):
                 # Best effort - don't fail the pipeline on tracing cleanup
                 pass
 
@@ -251,7 +251,7 @@ class PipelineObserver(AbstractContextManager["PipelineObserver"]):
         if self.span:
             try:
                 self.span.set_attribute(f"bioetl.{event_name}", True)
-            except Exception:
+            except (AttributeError, RuntimeError, TypeError, ValueError):
                 pass  # Best effort
 
     def emit_phase_started(

@@ -285,7 +285,7 @@ class TestFetchBySmiles:
         self, fetch_strategies, mock_circuit_breaker, mock_logger
     ):
         """Test that fetch_by_smiles logs warning when SMILES fetch fails."""
-        mock_circuit_breaker.call.side_effect = Exception("API error")
+        mock_circuit_breaker.call.side_effect = RuntimeError("API error")
 
         smiles_list = ["invalid_smiles"]
         results = await collect_async_iterator(
@@ -383,7 +383,7 @@ class TestFetchByCids:
         self, fetch_strategies, mock_circuit_breaker, mock_logger
     ):
         """Test that fetch_by_molecule_ids logs warning when batch fetch fails."""
-        mock_circuit_breaker.call.side_effect = Exception("API error")
+        mock_circuit_breaker.call.side_effect = RuntimeError("API error")
 
         molecule_id_list = ["2244", "3672"]
         results = await collect_async_iterator(

@@ -416,7 +416,13 @@ def _schema_columns(schema_class: Any) -> set[str]:
     """Extract column names from a Pandera DataFrameModel class."""
     try:
         schema = schema_class.to_schema()
-    except Exception as exc:  # pragma: no cover - defensive
+    except (
+        AttributeError,
+        TypeError,
+        ValueError,
+        RuntimeError,
+        ImportError,
+    ) as exc:  # pragma: no cover - defensive
         raise ValueError(f"Failed to materialize schema {schema_class}: {exc}") from exc
     return set(schema.columns.keys())
 

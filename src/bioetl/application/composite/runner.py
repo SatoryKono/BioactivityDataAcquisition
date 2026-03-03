@@ -46,15 +46,15 @@ from bioetl.domain.types import RunID
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.application.composite.checkpoint import CompositeCheckpointManager
-    from bioetl.application.composite.coordinator import EnrichmentCoordinator
+    from bioetl.application.composite.checkpoint import CompositeCheckpointService
+    from bioetl.application.composite.coordinator import EnrichmentCoordinatorService
     from bioetl.application.composite.dependency_coordinator import (
-        DependencyCoordinator,
+        DependencyCoordinatorService,
     )
     from bioetl.application.composite.key_extractor import KeyExtractorService
     from bioetl.application.composite.merger import MergeService
     from bioetl.application.composite.preflight_validator import (
-        CompositePreflightValidator,
+        CompositePreflightValidationService,
     )
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.application.services.dq_report_service import DQReportService
@@ -96,6 +96,12 @@ _QUARANTINE_WRITE_NON_FATAL_ERRORS = (
     ValueError,
     TypeError,
 )
+
+__all__ = [
+    "CompositePipelineRunner",
+    "CompositePipelineRunnerService",
+    "CompositeRuntimeConfig",
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -139,7 +145,7 @@ class CompositeRuntimeConfig:
             object.__setattr__(self, "enrich_only", tuple(self.enrich_only))
 
 
-class CompositePipelineRunner:
+class CompositePipelineRunnerService:
     """Orchestrates composite pipeline execution.
 
     Coordinates seed execution, parallel enrichment, and merge.
@@ -155,7 +161,7 @@ class CompositePipelineRunner:
         runtime: Runtime options (resume, dry_run, etc.).
 
     Example:
-        >>> runner = CompositePipelineRunner(
+        >>> runner = CompositePipelineRunnerService(
         ...     config=composite_config,
         ...     runtime=CompositeRuntimeConfig(resume=True),
         ...     seed_runner_factory=seed_factory,
@@ -177,17 +183,17 @@ class CompositePipelineRunner:
         seed_runner_factory: Callable[[], PipelineRunner],
         enricher_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner],
         key_extractor: KeyExtractorService,
-        coordinator: EnrichmentCoordinator,
+        coordinator: EnrichmentCoordinatorService,
         merger: MergeService,
-        checkpoint_manager: CompositeCheckpointManager,
+        checkpoint_manager: CompositeCheckpointService,
         logger: LoggerPort,
         lock: LockPort,
         run_id: str | None = None,
         dq_report_service: DQReportService | None = None,
-        preflight_validator: CompositePreflightValidator | None = None,
+        preflight_validator: CompositePreflightValidationService | None = None,
         dependencies_runner_factory: Callable[[str, pl.DataFrame], PipelineRunner]
         | None = None,
-        dependency_coordinator: DependencyCoordinator | None = None,
+        dependency_coordinator: DependencyCoordinatorService | None = None,
         quarantine_port: QuarantinePort | None = None,
         metrics: MetricsPort | None = None,
     ) -> None:
@@ -237,9 +243,9 @@ class CompositePipelineRunner:
         self._metrics = metrics
 
         # Initialize FSM helper for state transition logic
-        from bioetl.application.composite.fsm_helper import FSMStateHelper
+        from bioetl.application.composite.fsm_helper import FSMStateHelperService
 
-        self._fsm = FSMStateHelper(
+        self._fsm = FSMStateHelperService(
             config=config,
             logger=logger,
             run_id=self._run_id_str,
@@ -1289,3 +1295,7 @@ class CompositePipelineRunner:
                     reason="cross_validation",
                     count=written,
                 )
+
+
+# Backward-compatible alias for iterative NAME-001 migration.
+CompositePipelineRunner = CompositePipelineRunnerService

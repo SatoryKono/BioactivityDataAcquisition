@@ -27,6 +27,12 @@ from bioetl.domain.exceptions import BioETLError, CheckpointConflictError, Stora
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
+__all__ = [
+    "CompositeCheckpointManager",
+    "CompositeCheckpointService",
+    "CompositeCheckpointState",
+]
+
 
 _CHECKPOINT_READ_ERRORS = (
     json.JSONDecodeError,
@@ -380,7 +386,7 @@ class CompositeCheckpointState:
         )
 
 
-class CompositeCheckpointManager:
+class CompositeCheckpointService:
     """Manages checkpoint persistence for composite pipelines.
 
     Saves and loads checkpoint state to enable resume after failures.
@@ -393,7 +399,7 @@ class CompositeCheckpointManager:
         logger: Structured logger.
 
     Example:
-        >>> manager = CompositeCheckpointManager(
+        >>> manager = CompositeCheckpointService(
         ...     composite_name="composite_publication",
         ...     run_id="abc-123",
         ...     checkpoint_dir=Path("data/checkpoints"),
@@ -625,3 +631,7 @@ class CompositeCheckpointManager:
         """
         pattern = f"composite_{self._composite_name}_*.json"
         return list(self._checkpoint_dir.glob(pattern))
+
+
+# Backward-compatible alias for iterative NAME-001 migration.
+CompositeCheckpointManager = CompositeCheckpointService

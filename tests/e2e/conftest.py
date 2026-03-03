@@ -72,7 +72,7 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
                 item.add_marker(pytest.mark.timeout(E2E_DEFAULT_TIMEOUT))
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def vcr_cassette_dir(request: pytest.FixtureRequest) -> Path:
     """Return provider-specific cassette directory for E2E tests."""
     test_name = request.node.name
@@ -88,7 +88,13 @@ def vcr_cassette_dir(request: pytest.FixtureRequest) -> Path:
 def vcr_cassette_name(request: pytest.FixtureRequest) -> str:
     """Return normalized cassette file name in snake_case format."""
     node_name = request.node.name
-    return _E2E_VCR_CASSETTE_NAME_OVERRIDES.get(node_name, node_name)
+    qualified_name = (
+        f"{request.node.cls.__name__}.{node_name}" if request.node.cls else node_name
+    )
+    return _E2E_VCR_CASSETTE_NAME_OVERRIDES.get(
+        qualified_name,
+        _E2E_VCR_CASSETTE_NAME_OVERRIDES.get(node_name, node_name),
+    )
 
 
 @pytest.fixture(scope="session", autouse=True)

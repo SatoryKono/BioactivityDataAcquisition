@@ -1,14 +1,11 @@
 """ID Mapping Data Source.
 
 Implements DataSourcePort for ChEMBL → UniProt ID mapping pipeline.
-Reads ChEMBL target IDs from CSV and maps them to UniProt accessions.
+Loads ChEMBL target IDs via a reader port and maps them to UniProt accessions.
 """
 
 from __future__ import annotations
 
-import asyncio
-import csv
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Self
 
 from bioetl.domain.types import HealthStatus
@@ -16,14 +13,18 @@ from bioetl.domain.types import HealthStatus
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from bioetl.domain.ports import IDMappingPort, LoggerPort
+    from bioetl.domain.ports import (
+        IDMappingPort,
+        IDMappingSourceReaderPort,
+        LoggerPort,
+    )
 
 
 class IDMappingDataSource:
     """Data source for ChEMBL → UniProt ID mapping.
 
     Reads target_id values from seed filter IDs (composite mode)
-    or input CSV file (standalone mode), then maps them to UniProt
+    or external source reader (standalone mode), then maps them to UniProt
     accessions using the UniProt ID Mapping REST API.
 
     Implements DataSourcePort protocol for integration with GenericPipeline.
@@ -31,7 +32,8 @@ class IDMappingDataSource:
     Example:
         >>> data_source = IDMappingDataSource(
         ...     idmapping_client=client,
-        ...     input_path=Path("data/input/target.csv"),
+        ...     id_source_reader=reader,
+        ...     input_path="data/input/target.csv",
         ...     logger=logger,
         ... )
         >>> async for record in data_source.fetch("idmapping"):
@@ -44,7 +46,8 @@ class IDMappingDataSource:
     def __init__(
         self,
         idmapping_client: IDMappingPort,
-        input_path: Path,
+        id_source_reader: IDMappingSourceReaderPort,
+        input_path: str,
         logger: LoggerPort,
         from_db: str = "ChEMBL",
         to_db: str = "UniProtKB",
@@ -55,17 +58,19 @@ class IDMappingDataSource:
 
         Args:
             idmapping_client: UniProt ID Mapping client for API calls.
-            input_path: Path to CSV file containing ChEMBL target IDs.
+            id_source_reader: Reader port for loading source IDs.
+            input_path: Source path containing ChEMBL target IDs.
                 Used as fallback when seed_ids is not provided.
             logger: LoggerPort for structured logging.
             from_db: Source database for ID mapping (default: 'ChEMBL').
             to_db: Target database for ID mapping (default: 'UniProtKB').
-            id_column: Column name in CSV containing ChEMBL IDs.
+            id_column: Column name containing ChEMBL IDs.
             seed_ids: Pre-extracted ChEMBL target IDs from composite seed phase.
-                When provided, CSV file is not read.
+                When provided, source reader is not used.
         """
         self._client = idmapping_client
-        self._input_path = input_path
+        self._id_source_reader = id_source_reader
+        self._input_path = str(input_path)
         self._logger = logger
         self._from_db = from_db
         self._to_db = to_db
@@ -110,7 +115,7 @@ class IDMappingDataSource:
         Resolves ChEMBL IDs from one of three sources (priority order):
         1. seed_ids from constructor (composite pipeline mode)
         2. filter_ids parameter (if passed by caller)
-        3. CSV file at input_path (standalone mode)
+        3. source reader at input_path (standalone mode)
 
         Then maps them to UniProt accessions via UniProt ID Mapping API.
 
@@ -125,8 +130,8 @@ class IDMappingDataSource:
             Dicts with target_id and uniprot_accession fields.
 
         Raises:
-            FileNotFoundError: If input CSV file doesn't exist (standalone mode).
-            ValueError: If required column is missing from CSV.
+            FileNotFoundError: If input source doesn't exist (standalone mode).
+            ValueError: If required column is missing in the source.
 
         Returns:
             Async iterator yielding fetched records.
@@ -140,21 +145,24 @@ class IDMappingDataSource:
                 received=entity_type,
             )
 
-        # Step 1: Resolve ChEMBL IDs — seed_ids > filter_ids > CSV
+        # Step 1: Resolve ChEMBL IDs — seed_ids > filter_ids > source reader
         if self._seed_ids:
             chembl_ids = list(self._seed_ids)
+            source = "seed"
             self._logger.info(
                 "idmapping_using_seed_ids",
                 count=len(chembl_ids),
             )
         elif filter_ids:
             chembl_ids = list(filter_ids)
+            source = "filter"
             self._logger.info(
                 "idmapping_using_filter_ids",
                 count=len(chembl_ids),
             )
         else:
-            chembl_ids = await self._read_chembl_ids_async()
+            chembl_ids = await self._read_chembl_ids()
+            source = "csv"
 
         # Apply limit if specified
         if limit is not None:
@@ -164,7 +172,6 @@ class IDMappingDataSource:
             self._logger.warning("no_ids_to_map", input_path=str(self._input_path))
             return
 
-        source = "seed" if self._seed_ids else "csv"
         self._logger.info(
             "idmapping_fetch_started",
             source=source,
@@ -201,54 +208,26 @@ class IDMappingDataSource:
             not_mapped=len(chembl_ids) - found_count,
         )
 
-    async def _read_chembl_ids_async(self) -> list[str]:
-        """Read ChEMBL target IDs from input CSV file asynchronously.
-
-        Uses run_in_executor to avoid blocking the event loop.
+    async def _read_chembl_ids(self) -> list[str]:
+        """Read ChEMBL target IDs through the injected source reader.
 
         Returns:
             List of ChEMBL target IDs.
 
         Raises:
-            FileNotFoundError: If input file doesn't exist.
+            FileNotFoundError: If input source doesn't exist.
             ValueError: If required column is missing.
         """
-        loop = asyncio.get_running_loop()
-        return await loop.run_in_executor(None, self._read_chembl_ids_sync)
-
-    def _read_chembl_ids_sync(self) -> list[str]:
-        """Synchronous implementation of ChEMBL ID reading from CSV."""
-        if not self._input_path.exists():
-            raise FileNotFoundError(f"Input file not found: {self._input_path}")
-
-        ids: list[str] = []
-
-        with self._input_path.open(newline="", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-
-            if self._id_column not in (reader.fieldnames or []):
-                raise ValueError(
-                    f"Missing required column '{self._id_column}' in {self._input_path}"
-                )
-
-            for row in reader:
-                chembl_id = row.get(self._id_column, "").strip()
-                if chembl_id:
-                    ids.append(chembl_id)
-
-        self._logger.debug(
-            "csv_read_complete",
-            filepath=str(self._input_path),
-            record_count=len(ids),
+        return await self._id_source_reader.read_ids(
+            source_path=self._input_path,
+            id_column=self._id_column,
         )
-
-        return ids
 
     async def health_check(self) -> HealthStatus:
         """Check data source health.
 
         Verifies:
-        1. Input file exists (only in standalone mode, skipped when seed_ids provided)
+        1. Input source exists (only in standalone mode, skipped when seed_ids provided)
         2. ID Mapping API is healthy
 
         Returns:
@@ -256,13 +235,14 @@ class IDMappingDataSource:
         """
         # Skip file check when seed_ids are provided (composite mode)
         if not self._seed_ids:
-            loop = asyncio.get_running_loop()
-            file_exists = await loop.run_in_executor(None, self._input_path.exists)
+            file_exists = await self._id_source_reader.source_exists(
+                source_path=self._input_path
+            )
             if not file_exists:
                 self._logger.warning(
                     "health_check_failed",
                     reason="input_file_missing",
-                    path=str(self._input_path),
+                    path=self._input_path,
                 )
                 return HealthStatus.UNHEALTHY
 

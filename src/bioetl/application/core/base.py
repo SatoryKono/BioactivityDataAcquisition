@@ -46,6 +46,7 @@ class BasePipeline(ABC):  # noqa: B024
         services: PipelineServices,
         config: PipelineConfig,
         transformer: BaseTransformer | None = None,
+        shutdown_signal: ShutdownSignal | None = None,
     ) -> Self:
         """Create pipeline instance.
 
@@ -59,11 +60,20 @@ class BasePipeline(ABC):  # noqa: B024
             transformer: Injected transformer for Bronze→Silver transformation (DI).
                 If provided, the pipeline will use this transformer instead of
                 creating one internally. This is the preferred DI approach.
+            shutdown_signal: Optional injected shutdown signal instance.
+                If None, BasePipeline creates a default ShutdownSignal.
 
         Returns:
             Newly created Self instance.
         """
-        return cls(config, runtime, services, run_id, transformer=transformer)
+        return cls(
+            config,
+            runtime,
+            services,
+            run_id,
+            transformer=transformer,
+            shutdown_signal=shutdown_signal,
+        )
 
     def __init__(
         self,
@@ -72,6 +82,7 @@ class BasePipeline(ABC):  # noqa: B024
         services: PipelineServices,
         run_id: RunID,
         transformer: BaseTransformer | None = None,
+        shutdown_signal: ShutdownSignal | None = None,
     ) -> None:
         """Initialize pipeline definition.
 
@@ -84,6 +95,8 @@ class BasePipeline(ABC):  # noqa: B024
             transformer: Injected transformer for Bronze→Silver transformation.
                 MUST be provided via DI from GenericPipelineFactory.
                 If None, transform_bronze_to_silver() will raise NotImplementedError.
+            shutdown_signal: Optional injected shutdown signal instance.
+                If None, BasePipeline creates a default ShutdownSignal.
 
         """
         self._config = config
@@ -102,7 +115,7 @@ class BasePipeline(ABC):  # noqa: B024
             run_type=runtime.run_type,
             logger=self._logger,
         )
-        self._shutdown_signal = ShutdownSignal()
+        self._shutdown_signal = shutdown_signal or ShutdownSignal()
 
     # --- Properties for accessing config (read-only) ---
 

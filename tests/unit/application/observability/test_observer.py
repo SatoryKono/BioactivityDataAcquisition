@@ -235,7 +235,7 @@ def test_observer_handles_close_error(metrics_mock, logger_mock, tracer_mock, ru
     """O4: Error at close() doesn't fail pipeline."""
     # Configure tracer to raise error on span exit
     mock_span = tracer_mock.get_tracer.return_value.start_as_current_span.return_value
-    mock_span.__exit__ = MagicMock(side_effect=Exception("Tracer close error"))
+    mock_span.__exit__ = MagicMock(side_effect=RuntimeError("Tracer close error"))
 
     observer = PipelineObserver(
         pipeline_name="test_pipeline",

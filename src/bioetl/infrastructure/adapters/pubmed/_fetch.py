@@ -9,6 +9,9 @@ import contextlib
 import time
 from typing import TYPE_CHECKING, Any
 
+from httpx import RequestError
+
+from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.infrastructure.adapters.pubmed.xml_processor import PubMedXmlProcessor
 
 if TYPE_CHECKING:
@@ -22,6 +25,17 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 from .constants import ENTREZ_API_BASE
+
+PUBMED_FETCH_ERRORS = (
+    BioETLError,
+    NetworkError,
+    RequestError,
+    OSError,
+    ValueError,
+    TypeError,
+    RuntimeError,
+    KeyError,
+)
 
 
 class PubMedFetchMixin:
@@ -75,7 +89,7 @@ class PubMedFetchMixin:
                 )
                 return []
             return PubMedXmlProcessor.extract_all_records(root)
-        except Exception as e:
+        except PUBMED_FETCH_ERRORS as e:
             from bioetl.infrastructure.adapters.error_handling import ErrorService
 
             error_handler = ErrorService(self.logger)

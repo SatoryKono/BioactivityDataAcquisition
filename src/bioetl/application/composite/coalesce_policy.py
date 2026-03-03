@@ -5,7 +5,9 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
-from bioetl.application.composite.column_priority_orderer import ColumnPriorityOrderer
+from bioetl.application.composite.column_priority_orderer import (
+    ColumnPriorityOrdererService,
+)
 
 if TYPE_CHECKING:
     import polars as pl
@@ -14,13 +16,16 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
-class CoalescePolicy:
+__all__ = ["CoalescePolicy", "CoalescePolicyService"]
+
+
+class CoalescePolicyService:
     """Implements seed/enricher/explicit coalesce behaviors."""
 
     def __init__(
         self,
         logger: LoggerPort,
-        priority_orderer: ColumnPriorityOrderer,
+        priority_orderer: ColumnPriorityOrdererService,
     ) -> None:
         self._logger = logger
         self._priority_orderer = priority_orderer
@@ -160,7 +165,7 @@ class CoalescePolicy:
         for col in df.columns:
             if col.startswith("_"):
                 continue
-            field = CoalescePolicy.extract_field_from_qualified(col)
+            field = CoalescePolicyService.extract_field_from_qualified(col)
             field_groups.setdefault(field, []).append(col)
         return field_groups
 
@@ -221,7 +226,13 @@ class CoalescePolicy:
             return None
 
         try:
-            provider, entity = ColumnPriorityOrderer._parse_pipeline_name(seed_pipeline)
+            provider, entity = ColumnPriorityOrdererService._parse_pipeline_name(
+                seed_pipeline
+            )
             return f"{provider}.{entity}."
         except ValueError:
             return None
+
+
+# Backward-compatible alias for iterative NAME-001 migration.
+CoalescePolicy = CoalescePolicyService

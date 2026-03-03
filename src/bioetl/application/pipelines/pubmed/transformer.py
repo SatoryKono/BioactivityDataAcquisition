@@ -97,7 +97,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
-        contract_policy: Any = None,  # Any: generic policy; concrete type resolved at runtime
+        contract_policy: Any = None,  # Any: concrete type resolved at runtime
+        author_extractor: AuthorExtractor | None = None,
+        date_extractor: DateExtractor | None = None,
     ):
         """Initialize PubMed publication transformer.
 
@@ -112,6 +114,10 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             pii_hasher: Optional PII hasher for hashing author names (RULES.md §5.4).
             data_normalizer: Optional data normalization service for DOI normalization.
             contract_policy: Optional pipeline contract policy.
+            author_extractor: Optional author extractor dependency.
+                If None, defaults to AuthorExtractor().
+            date_extractor: Optional date extractor dependency.
+                If None, defaults to DateExtractor().
 
         """
         super().__init__(
@@ -127,8 +133,8 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             contract_policy=contract_policy,
         )
         self._cached_xml_root = None
-        self._author_extractor = AuthorExtractor()
-        self._date_extractor = DateExtractor()
+        self._author_extractor = author_extractor or AuthorExtractor()
+        self._date_extractor = date_extractor or DateExtractor()
 
     def _pre_extract_validation(
         self,
@@ -259,7 +265,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         # Extract author names
         author_names: list[str] = (
-            AuthorExtractor().normalize(raw_author_data) if raw_author_data else []
+            self._author_extractor.normalize(raw_author_data) if raw_author_data else []
         )
 
         # Use unified normalization (parse + serialize in one call)
@@ -272,7 +278,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         # Extract affiliations using unified service
         affiliation_strings = normalizer.extract_affiliations_from_authors(
-            cast("list[dict[str, Any]]", raw_author_data)  # Any: RawAuthor is TypedDict-like
+            cast(
+                "list[dict[str, Any]]", raw_author_data
+            )  # Any: RawAuthor is TypedDict-like
         )
 
         # Normalize affiliations using unified service (already deduplicated & sorted)
@@ -283,7 +291,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         )
 
         # Structured affiliations with identifiers (PubMed-specific)
-        structured_affs = AuthorExtractor.parse_structured_affiliations(article)
+        structured_affs = self._author_extractor.parse_structured_affiliations(article)
         processed = self._process_structured_affiliations(structured_affs)
 
         # Count from parsed JSON
@@ -304,7 +312,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             "author_count": author_count,
         }
 
-    def _extract_identifiers(self, root: ET.Element) -> dict[str, Any]:
+    def _extract_identifiers(
+        self, root: ET.Element
+    ) -> dict[str, Any]:  # Any: untyped PubMed XML/JSON values
         """Extract and normalize all identifier fields from PubMed XML root."""
         # Optimized single-pass extraction for multiple identifiers
         # Reduces XML traversals from ~7 to 2 (ELocationID + ArticleIdList)
@@ -407,7 +417,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
     def _process_structured_affiliations(
         self, affiliations: list[StructuredAffiliation]
-    ) -> list[dict[str, Any]]:
+    ) -> list[dict[str, Any]]:  # Any: untyped PubMed XML/JSON values
         """Process structured affiliations with PII handling for emails.
 
         Email addresses in affiliations are PII and must be hashed before
@@ -421,7 +431,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         """
         processed = []
         for aff in affiliations:
-            processed_aff: dict[str, Any] = {
+            processed_aff: dict[str, Any] = {  # Any: untyped PubMed XML/JSON values
                 "text": aff.get("text"),
                 "identifier": aff.get("identifier"),
                 "identifier_source": aff.get("identifier_source"),
@@ -440,7 +450,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
     def _build_authors_with_affiliations(
         self, raw_authors: list[RawAuthor]
-    ) -> list[dict[str, Any]]:
+    ) -> list[dict[str, Any]]:  # Any: untyped PubMed XML/JSON values
         """Build structured author-affiliation mapping.
 
         Links each author to their specific affiliations with identifiers.
@@ -452,7 +462,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         Returns:
             List of author objects with hashed names and affiliations.
         """
-        result: list[dict[str, Any]] = []
+        result: list[dict[str, Any]] = []  # Any: untyped PubMed XML/JSON values
 
         for author in raw_authors:
             # Build author name for hashing
@@ -478,11 +488,13 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
             name_hash = self._pii_hasher.hash_value(name) if self._pii_hasher else None
 
             # Process affiliations for this author (use pre-computed ror_id/grid_id)
-            affiliations: list[dict[str, Any]] = []
+            affiliations: list[
+                dict[str, Any]
+            ] = []  # Any: untyped PubMed XML/JSON values
             structured_affs = author.get("structured_affiliations") or []
 
             for aff in structured_affs:
-                aff_entry: dict[str, Any] = {
+                aff_entry: dict[str, Any] = {  # Any: untyped PubMed XML/JSON values
                     "text": aff.get("text"),
                     "ror_id": aff.get("ror_id"),
                     "grid_id": aff.get("grid_id"),
@@ -534,7 +546,9 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         """
         return True
 
-    def _extract_journal_data(self, article: ET.Element) -> dict[str, Any]:
+    def _extract_journal_data(
+        self, article: ET.Element
+    ) -> dict[str, Any]:  # Any: untyped PubMed XML/JSON values
         """Extract journal-related data from article XML."""
         journal_elem = article.find(".//Journal")
         pages = get_text(article.find(".//Pagination/MedlinePgn"))
@@ -646,7 +660,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         article: ET.Element,
         pubmed_data: ET.Element | None,
         medline: ET.Element | None,
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any]:  # Any: untyped PubMed XML/JSON values
         """Extract date-related data from article and MedlineCitation XML.
 
         Validates date formats before use to prevent invalid dates like

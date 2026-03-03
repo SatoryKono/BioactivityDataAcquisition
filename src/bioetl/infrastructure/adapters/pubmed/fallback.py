@@ -10,12 +10,26 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from httpx import RequestError
+
+from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.infrastructure.adapters.common import BaseTitleFallbackHandler, titles_match
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Coroutine
 
     from bioetl.domain.ports import LoggerPort
+
+PUBMED_FALLBACK_ERRORS = (
+    BioETLError,
+    NetworkError,
+    RequestError,
+    OSError,
+    ValueError,
+    TypeError,
+    RuntimeError,
+    KeyError,
+)
 
 
 class TitleFallbackHandler(BaseTitleFallbackHandler):
@@ -68,7 +82,7 @@ class TitleFallbackHandler(BaseTitleFallbackHandler):
             if results:
                 return results[0]
 
-        except Exception as e:
+        except PUBMED_FALLBACK_ERRORS as e:
             self._logger.debug(
                 "pubmed_title_search_failed",
                 title=clean_title[:50],

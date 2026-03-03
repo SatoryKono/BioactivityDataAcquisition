@@ -9,6 +9,10 @@ import contextlib
 import time
 from typing import TYPE_CHECKING, Any
 
+from httpx import RequestError
+
+from bioetl.domain.exceptions import BioETLError, NetworkError
+
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetrics
@@ -18,6 +22,17 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 from .constants import ENTREZ_API_BASE
+
+PUBMED_SEARCH_ERRORS = (
+    BioETLError,
+    NetworkError,
+    RequestError,
+    OSError,
+    ValueError,
+    TypeError,
+    RuntimeError,
+    KeyError,
+)
 
 
 class PubMedSearchMixin:
@@ -58,7 +73,7 @@ class PubMedSearchMixin:
             data = response.json()
             idlist: list[str] = data.get("esearchresult", {}).get("idlist", [])
             return idlist
-        except Exception as e:
+        except PUBMED_SEARCH_ERRORS as e:
             from bioetl.infrastructure.adapters.error_handling import ErrorService
 
             error_handler = ErrorService(self.logger)
@@ -93,7 +108,7 @@ class PubMedSearchMixin:
                 results.append(record)
 
             return results
-        except Exception as e:
+        except PUBMED_SEARCH_ERRORS as e:
             self.logger.debug(
                 "pubmed_title_search_failed",
                 title=clean_title[:50],

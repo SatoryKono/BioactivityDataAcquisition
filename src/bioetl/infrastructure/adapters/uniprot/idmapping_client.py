@@ -589,30 +589,20 @@ class UniProtIDMappingClient(BaseHttpAdapter):
         Returns:
             HealthStatus based on probe response.
         """
-        try:
-            url = f"{self.base_url}/configure/idmapping/fields"
-            with self._adapter_metrics.measure_request("/health"):
-                response = await self.http_client.get_once(url, params=None)
+        url = f"{self.base_url}/configure/idmapping/fields"
+        with self._adapter_metrics.measure_request("/health"):
+            response = await self.http_client.get_once(url, params=None)
 
-            if response.status_code != 200:
-                self.logger.warning(
-                    "health_check_degraded",
-                    provider=self.provider_name,
-                    reason="non_200_response",
-                    status_code=response.status_code,
-                )
-                return HealthStatus.DEGRADED
-
-            return HealthStatus.HEALTHY
-        except Exception as e:
-            error_type = self._error_handler.get_error_type(e)
+        if response.status_code != 200:
             self.logger.warning(
-                "health_check_failed",
+                "health_check_degraded",
                 provider=self.provider_name,
-                error_type=error_type.value,
-                error=str(e),
+                reason="non_200_response",
+                status_code=response.status_code,
             )
-            raise
+            return HealthStatus.DEGRADED
+
+        return HealthStatus.HEALTHY
 
     def _get_health_endpoint(self) -> str:
         """Get health check endpoint for ID Mapping API.

@@ -10,10 +10,10 @@ from bioetl.domain.composite.strategy import MergeStrategy
 if TYPE_CHECKING:
     import polars as pl
 
-    from bioetl.application.composite.aggregator import EnricherAggregator
-    from bioetl.application.composite.column_renamer import ColumnRenamer
-    from bioetl.application.composite.conflict_resolver import ConflictResolver
-    from bioetl.application.composite.deduplication import EnricherDeduplicator
+    from bioetl.application.composite.aggregator import EnricherAggregatorService
+    from bioetl.application.composite.column_renamer import ColumnRenamerService
+    from bioetl.application.composite.conflict_resolver import ConflictResolverService
+    from bioetl.application.composite.deduplication import EnricherDeduplicatorService
     from bioetl.domain.composite.config import (
         DependencyConfig,
         EnricherConfig,
@@ -25,7 +25,10 @@ if TYPE_CHECKING:
 JoinHow = Literal["inner", "left", "right", "full", "semi", "anti", "cross", "outer"]
 
 
-class JoinPlanner:
+__all__ = ["JoinHow", "JoinPlanner", "JoinPlannerService"]
+
+
+class JoinPlannerService:
     """Prepares and executes enricher/dependency joins with key normalization."""
 
     _NORMALIZE_JOIN_KEYS: frozenset[str] = frozenset({"doi", "pmid", "pmc_id"})
@@ -48,10 +51,10 @@ class JoinPlanner:
         self,
         merge_config: MergeConfig,
         logger: LoggerPort,
-        deduplicator: EnricherDeduplicator,
-        aggregator: EnricherAggregator,
-        renamer: ColumnRenamer,
-        conflict_resolver: ConflictResolver,
+        deduplicator: EnricherDeduplicatorService,
+        aggregator: EnricherAggregatorService,
+        renamer: ColumnRenamerService,
+        conflict_resolver: ConflictResolverService,
         field_alias_resolver: Callable[[str], dict[str, str] | None],
     ) -> None:
         self._config = merge_config
@@ -617,3 +620,7 @@ class JoinPlanner:
             )
         provider, entity = pipeline.split("_", 1)
         return provider, entity
+
+
+# Backward-compatible alias for iterative NAME-001 migration.
+JoinPlanner = JoinPlannerService
