@@ -156,6 +156,10 @@
    - дополнительно опубликованы curated подпредставления `02-architecture/**` и reference-страницы `skills/**`;
    - метрика снижена `65 -> 53` (локальная цель `<=55` достигнута);
    - orphan budget сохранён на `0`.
+12. Выполнена wave-5 корректировка:
+   - опубликованы оставшиеся `02-architecture/**` non-nav элементы и часть `skills/global/.system/**`;
+   - метрика снижена `53 -> 45` (локальная цель `<=45` достигнута);
+   - orphan budget сохранён на `0`.
 
 ## 9. Re-Audit Snapshot (2026-03-03, latest)
 
@@ -170,14 +174,13 @@
 ### Coverage Metrics
 
 - Total markdown docs under `docs/`: **675**
-- In mkdocs nav: **622**
-- Outside nav: **53**
+- In mkdocs nav: **630**
+- Outside nav: **45**
 - Orphan candidates (outside nav, zero inbound links): **0**
 
 Outside-nav distribution:
 - `99-archive`: 33
-- `skills`: 14
-- `02-architecture`: 6
+- `skills`: 12
 
 ### Drift and ADR Alignment
 
@@ -189,7 +192,7 @@ Outside-nav distribution:
 1. **P3 — Toolchain migration risk (MkDocs 2.0 advisory)**
    - `mkdocs build --strict` passes, but Material emits advisory on MkDocs 2.0 compatibility.
 2. **P2 — High non-nav volume remains intentional but large**
-   - No orphan drift, yet 53 non-nav docs still require ongoing governance discipline.
+   - No orphan drift, yet 45 non-nav docs still require ongoing governance discipline.
 
 ## 10. Curated Cleanup (Detailed)
 
@@ -217,28 +220,26 @@ Applied result:
 - aligned `qa_orchestrator` references to canonical `00-project/agents/` path;
 - excluded `docs/site/**` from KPI/nav-growth accounting as generated local artifacts.
 
-### 10.3 Residual `outside nav` Backlog (53)
+### 10.3 Residual `outside nav` Backlog (45)
 
 Current buckets after curated cleanup:
 - `99-archive/**`: 33 (`archive`, intentional non-nav)
-- `skills/**`: 14 (references/assets/system skills)
-- `02-architecture/**`: 6 (diagram support variants/indexes)
+- `skills/**`: 12 (references/assets/system skills)
 
 Sub-buckets worth prioritizing next:
-- `02-architecture/mmd-diagrams/*/png|svg/INDEX.md` style artifact indexes;
-- non-nav diagram description variants (`diagram-descriptions/mmd-diagrams/**`);
-- selected `skills/local/*/references/**` pages with recurring practical value.
+- selected `skills/local/*/references/**` pages with recurring practical value;
+- selected `skills/global/.system/**` references that should be discoverable in docs UI.
 
 ### 10.4 Proposed Next Wave (optional, P2)
 
-If objective is further reduction below `53` (for example `<=45`):
+If objective is further reduction below `45` (for example `<=40`):
 
-1. Resolve the remaining 6 architecture non-nav pages as either `internal-generated` (policy-accepted) or curated nav entries.
-2. Promote 4 to 6 high-use skill reference pages and keep asset-heavy/internal-only references outside nav.
+1. Promote 3 to 5 high-use `skills/**` reference pages and keep low-value/internal-only references outside nav.
+2. Re-evaluate whether all `skills/global/.system/**` pages should be represented in nav or linked only from catalog pages.
 3. Keep `99-archive/**` unchanged unless policy decision explicitly reclassifies archive discoverability.
 
 Expected effect:
-- estimated `not_in_nav` improvement: `-6` to `-10`;
+- estimated `not_in_nav` improvement: `-3` to `-6`;
 - orphan budget expected to remain `0` if index linkage is preserved.
 
 ### 10.5 Safety Gates for Each Wave
