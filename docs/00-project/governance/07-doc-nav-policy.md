@@ -143,6 +143,9 @@ Interpretation:
 Implementation note:
 - docs KPI and nav-growth checks ignore generated local site artifacts (`docs/site/**`, `.mkdocs-site-tmp/**`).
 - `docs/skills/global/.system/**` is treated as `internal-generated` and SHOULD remain non-nav.
+- docs KPI checks ignore generated documentation export artifacts:
+  - `docs/exports/*.merged.md`
+  - `docs/reports/docs-export-report-YYYY-MM-DD-HHMMSS.md`
 - `docs/skills/local/nci-analysis/references/**` is published in nav (wave-7 curated promotion).
 
 ### 6.5 Wave-8 Ratified Decisions (2026-03-03)

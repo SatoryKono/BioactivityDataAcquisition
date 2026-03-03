@@ -87,6 +87,10 @@ PYTHON_FENCE_START_RE = re.compile(r"^\s*```(?:python|py|python3)\b", re.IGNOREC
 FENCE_END_RE = re.compile(r"^\s*```")
 GOLD_CONTRACT_RE = re.compile(r"`([a-z0-9_]+_v1\.0\.json)`")
 CHEMBL_PROVIDER_LINK_RE = re.compile(r"\(chembl/([a-z0-9-]+)\.md\)")
+GENERATED_EXPORT_MERGED_RE = re.compile(r"^exports/.+\.merged\.md$")
+GENERATED_DOCS_EXPORT_REPORT_RE = re.compile(
+    r"^reports/docs-export-report-\d{4}-\d{2}-\d{2}-\d{6}\.md$"
+)
 
 # Directories skipped by default for drift guardrails in nav docs.
 # These sections are mostly historical/internal and can be audited with
@@ -179,6 +183,8 @@ PYTHON_SNIPPET_RULES = (
 
 def _should_skip(path: Path) -> bool:
     """Return True if path should be excluded from scanning."""
+    if _is_generated_docs_artifact(path):
+        return True
     for part in path.parts:
         if part in SKIP_DIRS:
             return True
@@ -187,8 +193,13 @@ def _should_skip(path: Path) -> bool:
 
 def _is_generated_docs_artifact(path: Path, root: Path = DOCS_DIR) -> bool:
     """Return True for generated docs artifacts excluded from nav-growth checks."""
-    rel_parts = path.relative_to(root).parts
-    return bool(rel_parts) and rel_parts[0] == "site"
+    rel_path = path.relative_to(root).as_posix()
+    rel_parts = Path(rel_path).parts
+    if bool(rel_parts) and rel_parts[0] == "site":
+        return True
+    if GENERATED_EXPORT_MERGED_RE.match(rel_path):
+        return True
+    return bool(GENERATED_DOCS_EXPORT_REPORT_RE.match(rel_path))
 
 
 def _should_skip_drift(path: Path) -> bool:
