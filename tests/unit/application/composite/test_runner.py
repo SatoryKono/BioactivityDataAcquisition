@@ -527,7 +527,7 @@ class TestCheckpointSaveErrorHandling:
         checkpoint_manager = create_mock_checkpoint_manager()
         # First save (SEED_RUNNING) fails, but pipeline should continue
         checkpoint_manager.save = AsyncMock(
-            side_effect=[StorageError("Disk full"), None, None, None]
+            side_effect=[StorageError("Disk full"), None, None, None, None, None]
         )
         logger = create_mock_logger()
 

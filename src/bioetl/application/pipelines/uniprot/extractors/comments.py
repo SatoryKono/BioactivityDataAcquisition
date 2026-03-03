@@ -254,7 +254,8 @@ class CommentExtractor:
 
     @staticmethod
     def extract_text_values(
-        comments: list[Any], comment_type: str  # Any: untyped JSON fragment from UniProt API
+        comments: list[Any],
+        comment_type: str,  # Any: untyped JSON fragment from UniProt API
     ) -> list[str]:
         """Extract text values from comments of specific type.
 

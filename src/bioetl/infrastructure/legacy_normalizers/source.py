@@ -120,7 +120,9 @@ def _normalize_source_pagination(
     provider_config: dict[str, Any],  # Any: legacy normalizer; input types vary
 ) -> None:
     """Normalize pagination and batch configuration."""
-    pagination: dict[str, Any] = _get_dict_or_empty(provider_config, "pagination")  # Any: legacy normalizer; input types vary
+    pagination: dict[str, Any] = _get_dict_or_empty(
+        provider_config, "pagination"
+    )  # Any: legacy normalizer; input types vary
 
     if provider_config.get("batch_size") is not None:
         pagination.setdefault("id_batch_size", provider_config["batch_size"])

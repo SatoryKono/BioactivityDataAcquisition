@@ -100,7 +100,8 @@ class DQConfigLoader:
         self,
         provider: str,
         entity: str,
-        inline_overrides: dict[str, Any] | None,  # Any: YAML DQ config has heterogeneous values
+        inline_overrides: dict[str, Any]
+        | None,  # Any: YAML DQ config has heterogeneous values
     ) -> dict[str, Any]:  # Any: YAML DQ config has heterogeneous values
         """Build merged config from defaults → provider → entity → inline."""
         merged = self._load_defaults_layer()
@@ -139,7 +140,8 @@ class DQConfigLoader:
         self,
         provider: str,
         entity: str,
-        inline_overrides: dict[str, Any] | None = None,  # Any: YAML DQ config has heterogeneous values
+        inline_overrides: dict[str, Any]
+        | None = None,  # Any: YAML DQ config has heterogeneous values
     ) -> DQConfig:
         """Load merged DQ config for provider/entity.
 
@@ -263,7 +265,9 @@ class DQConfigLoader:
             Merged validation list with deduplication.
         """
 
-        def get_key(item: dict[str, Any]) -> str:  # Any: YAML DQ config has heterogeneous values
+        def get_key(
+            item: dict[str, Any],
+        ) -> str:  # Any: YAML DQ config has heterogeneous values
             """Get unique key for validation item.
 
             Cross-field/conditional validations use 'name' as key.
@@ -284,7 +288,9 @@ class DQConfigLoader:
             return f"{field}:{vtype}:{severity}"
 
         # Build result map, override entries replace base entries with same key
-        result_map: dict[str, dict[str, Any]] = {}  # Any: YAML DQ config has heterogeneous values
+        result_map: dict[
+            str, dict[str, Any]
+        ] = {}  # Any: YAML DQ config has heterogeneous values
         for item in base:
             key = get_key(item)
             result_map[key] = copy.deepcopy(item)

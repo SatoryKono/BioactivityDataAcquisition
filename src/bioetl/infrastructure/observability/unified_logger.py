@@ -120,7 +120,8 @@ class UnifiedLogger:
         return new_logger
 
     def _ensure_stage(
-        self, kwargs: dict[str, Any],  # Any: structlog-compatible API
+        self,
+        kwargs: dict[str, Any],  # Any: structlog-compatible API
     ) -> dict[str, Any]:  # Any: structlog-compatible API
         """Ensure stage field is present in kwargs.
 
