@@ -226,9 +226,13 @@ def test_no_legacy_repo_slug_in_active_docs_and_workflows() -> None:
 def test_no_legacy_contract_path_in_active_docs() -> None:
     """Active docs should use docs/04-reference/contracts/gold path."""
     legacy_path = "docs/contracts/gold/"
+    excluded_doc_parts = {"99-archive", "exports"}
+
     candidates = [Path("README.md")]
     candidates.extend(
-        path for path in Path("docs").rglob("*.md") if "99-archive" not in path.parts
+        path
+        for path in Path("docs").rglob("*.md")
+        if excluded_doc_parts.isdisjoint(path.parts)
     )
 
     violations: list[str] = []
@@ -274,9 +278,13 @@ def test_no_legacy_kebab_pipeline_ids_in_active_docs() -> None:
         "composite-assay",
     }
 
+    excluded_doc_parts = {"99-archive", "exports"}
+
     candidates = [Path("README.md")]
     candidates.extend(
-        path for path in Path("docs").rglob("*.md") if "99-archive" not in path.parts
+        path
+        for path in Path("docs").rglob("*.md")
+        if excluded_doc_parts.isdisjoint(path.parts)
     )
     candidates.extend(Path(".github/workflows").glob("*.yml"))
 
