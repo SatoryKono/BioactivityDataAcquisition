@@ -530,12 +530,12 @@ def bootstrap_composite_runner(
         logger=logger,
     )
 
-    dependency_coordinator = DependencyCoordinatorService(
+    dependency_coordinator = DependencyCoordinator(
         logger=logger,
         delta_reader=delta_reader,
     )
 
-    coordinator = EnrichmentCoordinatorService(
+    coordinator = EnrichmentCoordinator(
         logger=logger,
         dq_config=config.dq,
         max_concurrency=config.execution.max_concurrency,
@@ -547,7 +547,7 @@ def bootstrap_composite_runner(
     # Create cross-validator if enabled
     cross_validator: EnrichmentCrossValidationService | None = None
     if config.cross_validation.enabled:
-        cross_validator = EnrichmentCrossValidationService(
+        cross_validator = EnrichmentCrossValidator(
             config=config.cross_validation,
             logger=logger,
         )
@@ -563,7 +563,7 @@ def bootstrap_composite_runner(
     )
 
     checkpoint_dir = Path(settings.data_dir) / "checkpoints" / "composite"
-    checkpoint_manager = CompositeCheckpointService(
+    checkpoint_manager = CompositeCheckpointManager(
         composite_name=config.name,
         run_id=effective_run_id,
         checkpoint_dir=checkpoint_dir,
@@ -583,7 +583,7 @@ def bootstrap_composite_runner(
 
         quarantine_port = bootstrap_quarantine_port()
 
-    return CompositePipelineRunnerService(
+    return CompositePipelineRunner(
         config=config,
         runtime=runtime,
         seed_runner_factory=seed_runner_factory,

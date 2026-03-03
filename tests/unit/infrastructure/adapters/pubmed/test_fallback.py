@@ -181,7 +181,7 @@ class TestSearchByTitle:
         mock_logger: MagicMock,
     ) -> None:
         """Should return None and log on exception."""
-        mock_search_fn.side_effect = Exception("Network error")
+        mock_search_fn.side_effect = RuntimeError("Network error")
 
         result = await handler._search_by_title("Test Title")
 

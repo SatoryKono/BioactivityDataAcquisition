@@ -296,7 +296,7 @@ class TestHealthCheck:
         mock_http_client: MagicMock,
     ) -> None:
         """Test unhealthy status on error."""
-        mock_http_client.get_once.side_effect = Exception("Network error")
+        mock_http_client.get_once.side_effect = RuntimeError("Network error")
 
         status = await adapter.health_check()
 
