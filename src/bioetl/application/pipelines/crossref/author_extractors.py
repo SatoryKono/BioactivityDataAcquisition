@@ -37,7 +37,7 @@ def _normalize_orcid(orcid_value: str | None) -> str | None:
     return orcid
 
 
-def _extract_author_sequence(author: dict[str, Any]) -> str | None:
+def _extract_author_sequence(author: dict[str, Any]) -> str | None:  # Any: untyped JSON fragment from Crossref API
     """Extract and validate author sequence field."""
     sequence = author.get("sequence")
     if not sequence or not isinstance(sequence, str):
@@ -46,7 +46,7 @@ def _extract_author_sequence(author: dict[str, Any]) -> str | None:
     return sequence if sequence in ("first", "additional") else None
 
 
-def _extract_author_affiliations_list(author: dict[str, Any]) -> list[str]:
+def _extract_author_affiliations_list(author: dict[str, Any]) -> list[str]:  # Any: untyped JSON fragment from Crossref API
     """Extract affiliations list from author object."""
     affiliations: list[str] = []
     aff_list = author.get("affiliation", [])
@@ -61,7 +61,7 @@ def _extract_author_affiliations_list(author: dict[str, Any]) -> list[str]:
     return affiliations
 
 
-def _build_author_detail(author: dict[str, Any]) -> dict[str, Any] | None:
+def _build_author_detail(author: dict[str, Any]) -> dict[str, Any] | None:  # Any: untyped JSON fragment from Crossref API
     """Build author detail dict from raw author object."""
     given = author.get("given", "").strip() or None
     family = author.get("family", "").strip() or None
@@ -90,7 +90,7 @@ def _build_author_detail(author: dict[str, Any]) -> dict[str, Any] | None:
     }
 
 
-def extract_author_details(publication: dict[str, Any]) -> list[dict[str, Any]]:
+def extract_author_details(publication: dict[str, Any]) -> list[dict[str, Any]]:  # Any: untyped JSON fragment from Crossref API
     """Extract full author details from CrossRef publication.
 
     Args:
@@ -101,7 +101,7 @@ def extract_author_details(publication: dict[str, Any]) -> list[dict[str, Any]]:
         given, family, name, orcid, authenticated_orcid, sequence, affiliations.
 
     """
-    author_details: list[dict[str, Any]] = []
+    author_details: list[dict[str, Any]] = []  # Any: untyped JSON fragment from Crossref API
     for author in publication.get("author", []):
         if not isinstance(author, dict):
             continue
@@ -111,7 +111,7 @@ def extract_author_details(publication: dict[str, Any]) -> list[dict[str, Any]]:
     return author_details
 
 
-def extract_author_orcids(publication: dict[str, Any]) -> list[str]:
+def extract_author_orcids(publication: dict[str, Any]) -> list[str]:  # Any: untyped JSON fragment from Crossref API
     """Extract list of ORCID identifiers from CrossRef publication.
 
     Extracts and normalizes all ORCID identifiers from the author array.

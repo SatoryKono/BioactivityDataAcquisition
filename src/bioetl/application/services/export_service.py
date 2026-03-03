@@ -21,10 +21,12 @@ if TYPE_CHECKING:
 _EXPORT_OPERATION_ERRORS = (
     StorageError,
     BioETLError,
+    ImportError,
     OSError,
     RuntimeError,
     ValueError,
     TypeError,
+    Exception,
 )
 
 

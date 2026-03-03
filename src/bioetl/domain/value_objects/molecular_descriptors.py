@@ -86,14 +86,18 @@ class _BoundedIntVO(ValueObject[int]):
     _MAX: int
     _LABEL: str
 
-    def _validate(self, value: Any) -> int:  # Any: raw input from API (str|int|float|None)
+    def _validate(
+        self, value: Any
+    ) -> int:  # Any: raw input from API (str|int|float|None)
         n = _coerce_int(value)
         if not self._MIN <= n <= self._MAX:
             raise ValueError(f"{self._LABEL} {n} outside [{self._MIN}, {self._MAX}]")
         return n
 
     @classmethod
-    def from_raw(cls, raw: Any) -> _BoundedIntVO | None:
+    def from_raw(
+        cls, raw: Any
+    ) -> _BoundedIntVO | None:  # Any: raw input from API (str|int|float|None)
         """Create from raw value; returns ``None`` on invalid input.
 
         Args:
@@ -154,14 +158,18 @@ class _BoundedFloatVO(ValueObject[float]):
     _LABEL: str
     _PRECISION: int = 10
 
-    def _validate(self, value: Any) -> float:
+    def _validate(
+        self, value: Any
+    ) -> float:  # Any: raw input from API (str|int|float|None)
         f = _coerce_float(value)
         if not self._MIN <= f <= self._MAX:
             raise ValueError(f"{self._LABEL} {f} outside [{self._MIN}, {self._MAX}]")
         return round(f, self._PRECISION)
 
     @classmethod
-    def from_raw(cls, raw: Any) -> _BoundedFloatVO | None:
+    def from_raw(
+        cls, raw: Any
+    ) -> _BoundedFloatVO | None:  # Any: raw input from API (str|int|float|None)
         """Create from raw value; returns ``None`` on invalid input.
 
         Args:
@@ -198,4 +206,6 @@ __all__ = [
     "HeavyAtomCount",
     "HydrogenBondCount",
     "LogP",
-    "Po
+    "PolarSurfaceArea",
+    "RotatableBondCount",
+]

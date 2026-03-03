@@ -223,8 +223,7 @@ class LoggerPort(Protocol):
         """
         ...
 
-    # Any: structlog-compatible API
-    def warning(self, _event: str, **kwargs: Any) -> Any:
+    def warning(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
         """Log a warning message.
 
         Args:
@@ -236,8 +235,7 @@ class LoggerPort(Protocol):
         """
         ...
 
-    # Any: structlog-compatible API
-    def error(self, _event: str, **kwargs: Any) -> Any:
+    def error(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
         """Log an error message.
 
         Args:
@@ -249,8 +247,7 @@ class LoggerPort(Protocol):
         """
         ...
 
-    # Any: structlog-compatible API
-    def debug(self, _event: str, **kwargs: Any) -> Any:
+    def debug(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
         """Log a debug message.
 
         Args:
@@ -262,8 +259,7 @@ class LoggerPort(Protocol):
         """
         ...
 
-    # Any: structlog-compatible API
-    def exception(self, _event: str, **kwargs: Any) -> Any:
+    def exception(self, _event: str, **kwargs: Any) -> Any:  # Any: structlog-compatible API
         """Log an exception with traceback.
 
         Args:

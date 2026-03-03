@@ -23,7 +23,7 @@ from bioetl.infrastructure.config_merge import config_merge
 T = TypeVar("T")
 
 
-def _load_yaml_file(path: Path) -> dict[str, Any]:
+def _load_yaml_file(path: Path) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
     """Load YAML file, returning empty dict if missing or empty."""
     if not path.exists():
         return {}
@@ -64,7 +64,7 @@ class BaseConfigLoader(ABC, Generic[T]):
         self,
         provider: str,
         entity: str,
-        inline_overrides: dict[str, Any] | None = None,
+        inline_overrides: dict[str, Any] | None = None,  # Any: YAML config has heterogeneous values
     ) -> T:
         """Load merged config for provider/entity.
 
@@ -78,7 +78,7 @@ class BaseConfigLoader(ABC, Generic[T]):
         """
         ...
 
-    def _load_yaml(self, path: Path) -> dict[str, Any]:
+    def _load_yaml(self, path: Path) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
         """Load YAML file, return empty dict if not exists.
 
         Args:
@@ -91,10 +91,10 @@ class BaseConfigLoader(ABC, Generic[T]):
 
     def _deep_merge_base(
         self,
-        base: dict[str, Any],
-        override: dict[str, Any],
+        base: dict[str, Any],  # Any: YAML config has heterogeneous values
+        override: dict[str, Any],  # Any: YAML config has heterogeneous values
         list_concat_keys: frozenset[str],
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any]:  # Any: YAML config has heterogeneous values
         """Deep merge two dicts with configurable list handling.
 
         Args:
@@ -114,10 +114,10 @@ class BaseConfigLoader(ABC, Generic[T]):
 
     def _merge_lists(
         self,
-        base: list[Any],
-        override: list[Any],
+        base: list[Any],  # Any: YAML config has heterogeneous values
+        override: list[Any],  # Any: YAML config has heterogeneous values
         key: str,
-    ) -> list[Any]:
+    ) -> list[Any]:  # Any: YAML config has heterogeneous values
         """Merge two lists. Subclasses can override for custom behavior.
 
         Default behavior: concatenate and deduplicate strings.

@@ -82,7 +82,6 @@ _NORMALIZE_DISPATCH = (
 )
 
 
-# Any: record field type varies
 def _is_excluded_key(
     key: str,
     exclude_fields: set[str] | None,
@@ -111,8 +110,8 @@ def _should_include_field(
 
 
 def normalize_for_hash(
-    record: dict[str, Any],
-    exclude_none: bool = False,  # Any: record vals vary
+    record: dict[str, Any],  # Any: record vals vary
+    exclude_none: bool = False,
     include_fields: set[str] | None = None,
     exclude_fields: set[str] | None = None,
 ) -> dict[str, Any]:  # Any: heterogeneous record values
@@ -152,8 +151,7 @@ def canonical_json_dumps(obj: dict[str, Any]) -> str:  # Any: JSON-serializable 
 
 
 def generate_content_hash(
-    # Any: record vals vary
-    record: dict[str, Any],
+    record: dict[str, Any],  # Any: record vals vary
     provider: str,
     exclude_none: bool = False,
     include_fields: set[str] | None = None,
@@ -305,8 +303,7 @@ def detect_hash_collision(
     return existing_source_id is not None and source_record_id != existing_source_id
 
 
-# Any: record field type varies
-def safe_float(value: Any, default: float | None = None) -> float | None:
+def safe_float(value: Any, default: float | None = None) -> float | None:  # Any: record field type varies
     """Safely convert value to float.
 
     Args:
@@ -324,8 +321,7 @@ def safe_float(value: Any, default: float | None = None) -> float | None:
         return default
 
 
-# Any: record field type varies
-def safe_int(value: Any, default: int | None = None) -> int | None:
+def safe_int(value: Any, default: int | None = None) -> int | None:  # Any: record field type varies
     """Safely convert value to int.
 
     Args:
@@ -343,8 +339,7 @@ def safe_int(value: Any, default: int | None = None) -> int | None:
         return default
 
 
-# Any: record field type varies
-def safe_str(value: Any, default: str | None = None) -> str | None:
+def safe_str(value: Any, default: str | None = None) -> str | None:  # Any: record field type varies
     """Safely convert value to string.
 
     Useful for fields that may come as int/float from API but need to be

@@ -30,7 +30,7 @@ class ValidationResult:
     Contains either a validated record or validation error details.
     """
 
-    record: dict[str, Any] | None = None
+    record: dict[str, Any] | None = None  # Any: validation input types vary
     """The original record data (always present)."""
 
     validated: BaseModel | None = None
@@ -42,7 +42,7 @@ class ValidationResult:
     error: str | None = None
     """Error message if validation failed."""
 
-    error_details: list[dict[str, Any]] = field(default_factory=list)
+    error_details: list[dict[str, Any]] = field(default_factory=list)  # Any: validation input types vary
     """Detailed error information from Pydantic validation."""
 
 

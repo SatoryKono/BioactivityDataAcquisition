@@ -128,7 +128,7 @@ class BaseTitleFallbackHandler(ABC):
         return "title_only_not_found"
 
     @abstractmethod
-    async def _search_by_title(self, title: str) -> dict[str, Any] | None:
+    async def _search_by_title(self, title: str) -> dict[str, Any] | None:  # Any: untyped API response data
         """Search for publication by title.
 
         Args:
@@ -139,7 +139,7 @@ class BaseTitleFallbackHandler(ABC):
         """
         ...
 
-    def _get_result_identifier(self, result: dict[str, Any]) -> tuple[str, str]:
+    def _get_result_identifier(self, result: dict[str, Any]) -> tuple[str, str]:  # Any: untyped API response data
         """Return (field_name, value) for logging the found result.
 
         Args:
@@ -151,8 +151,8 @@ class BaseTitleFallbackHandler(ABC):
         return ("found_id", str(result.get("id", "unknown")))
 
     def _process_found_result(
-        self, result: dict[str, Any], original_doi: str
-    ) -> dict[str, Any]:
+        self, result: dict[str, Any], original_doi: str  # Any: untyped API response data
+    ) -> dict[str, Any]:  # Any: untyped API response data
         """Process found result before yielding.
 
         Default implementation adds standard metadata fields:
@@ -209,7 +209,7 @@ class BaseTitleFallbackHandler(ABC):
         normalize_fn: Callable[[str], str | None],
         limit: int | None,
         fetched: int,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[dict[str, Any]]:  # Any: untyped API response data
         """Process DOIs not found via batch fetch using title fallback.
 
         Args:
@@ -263,7 +263,7 @@ class BaseTitleFallbackHandler(ABC):
                     title=title[:50],
                 )
 
-    def _process_title_only_result(self, result: dict[str, Any]) -> dict[str, Any]:
+    def _process_title_only_result(self, result: dict[str, Any]) -> dict[str, Any]:  # Any: untyped API response data
         """Process title-only result before yielding.
 
         Override to add metadata like _lookup_method.
@@ -284,7 +284,7 @@ class BaseTitleFallbackHandler(ABC):
         fallback_mapping: dict[str, str],
         limit: int | None,
         fetched: int,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[dict[str, Any]]:  # Any: untyped API response data
         """Process entries without primary ID (title-only lookup).
 
         Phase 3 of the three-phase fallback strategy. Handles entries

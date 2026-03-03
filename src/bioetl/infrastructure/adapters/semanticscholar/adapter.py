@@ -26,7 +26,7 @@ import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
-from httpx import RequestError
+from httpx import HTTPStatusError, RequestError
 
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.models.metadata import SourceMetadata
@@ -59,10 +59,12 @@ SEMANTICSCHOLAR_HEALTH_ERRORS = (
     BioETLError,
     NetworkError,
     RequestError,
+    HTTPStatusError,
     OSError,
     ValueError,
     TypeError,
     RuntimeError,
+    Exception,
 )
 
 

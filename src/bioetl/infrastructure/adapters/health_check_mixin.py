@@ -21,7 +21,7 @@ from abc import abstractmethod
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
-from httpx import RequestError
+from httpx import HTTPStatusError, RequestError
 
 from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.types import HealthStatus
@@ -38,6 +38,7 @@ HEALTH_CHECK_ERRORS = (
     BioETLError,
     NetworkError,
     RequestError,
+    HTTPStatusError,
     ConnectionError,
     TimeoutError,
     OSError,
@@ -45,6 +46,7 @@ HEALTH_CHECK_ERRORS = (
     TypeError,
     RuntimeError,
     AttributeError,
+    Exception,
 )
 
 

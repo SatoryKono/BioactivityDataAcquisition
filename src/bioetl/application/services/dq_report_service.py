@@ -37,6 +37,7 @@ _DQ_REPORT_ERRORS = (
     RuntimeError,
     ValueError,
     TypeError,
+    Exception,
 )
 
 

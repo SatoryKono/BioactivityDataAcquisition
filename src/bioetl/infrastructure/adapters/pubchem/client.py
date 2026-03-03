@@ -61,6 +61,7 @@ PUBCHEM_HEALTH_ERRORS = (
     ValueError,
     TypeError,
     RuntimeError,
+    Exception,
 )
 
 
