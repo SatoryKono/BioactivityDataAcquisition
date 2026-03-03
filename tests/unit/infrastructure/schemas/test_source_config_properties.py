@@ -15,7 +15,6 @@ import pytest
 from bioetl.infrastructure.schemas.source_config import (
     PaginationConfig,
     ProviderConfigYaml,
-    SourceSectionConfig,
     SourceYamlConfig,
 )
 

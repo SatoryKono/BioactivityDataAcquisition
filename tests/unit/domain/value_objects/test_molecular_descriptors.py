@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import math
-
 import pytest
 
 from bioetl.domain.value_objects.molecular_descriptors import (

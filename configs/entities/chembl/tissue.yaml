@@ -94,7 +94,8 @@ filters:
   silver_filters:
     required_fields: []
   gold_filters:
-    required_fields: []
+    required_fields:
+    - tissue_id
 contracts:
   primary_key:
   - tissue_id

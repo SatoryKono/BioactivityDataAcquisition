@@ -25,7 +25,7 @@ import re
 import sys
 from collections.abc import Iterator
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 
 # Configure logging for CLI output
@@ -37,7 +37,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-class ViolationType(str, Enum):
+class ViolationType(StrEnum):
     """Тип нарушения naming convention."""
 
     CAMELCASE = "camelCase вместо PascalCase/snake_case"
@@ -435,7 +435,7 @@ def format_report(results: dict[str, list[Violation]]) -> str:
             lines.append("")
 
     if total_violations == 0:
-        lines.append("✅ **No violations found. All naming conventions are followed.**")
+        lines.append("OK: **No violations found. All naming conventions are followed.**")
 
     return "\n".join(lines)
 
@@ -497,7 +497,7 @@ def main() -> int:
     # CI mode
     total_violations = sum(len(v) for v in results.values())
     if args.check and total_violations > 0:
-        logger.error("❌ Found %d naming violations", total_violations)
+        logger.error("Found %d naming violations", total_violations)
         return 1
 
     return 0

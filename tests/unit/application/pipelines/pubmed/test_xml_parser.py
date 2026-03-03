@@ -12,8 +12,6 @@ from __future__ import annotations
 
 import xml.etree.ElementTree as ET
 
-import pytest
-
 from bioetl.application.pipelines.pubmed.xml_parser import get_int, get_text
 
 
