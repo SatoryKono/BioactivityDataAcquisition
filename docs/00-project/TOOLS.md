@@ -333,13 +333,13 @@ python scripts/naming_audit.py --output report.md
 **Использование:**
 ```bash
 # Проверить весь проект
-python scripts/lint_terminology.py
+python src/tools/scripts/lint_terminology.py
 
 # Проверить конкретный файл
-python scripts/lint_terminology.py src/bioetl/domain/models/molecule.py
+python src/tools/scripts/lint_terminology.py src/bioetl/domain/models/molecule.py
 
-# Автоисправление (где возможно)
-python scripts/lint_terminology.py --fix
+# Строгий режим (дополнительные context-sensitive проверки)
+python src/tools/scripts/lint_terminology.py --strict src/bioetl/
 ```
 
 **Что проверяет:**

@@ -52,7 +52,7 @@
 5. Проверка терминологии:
 
 ```bash
-python scripts/lint_terminology.py --check
+python src/tools/scripts/lint_terminology.py --check
 ```
 
 ---
@@ -128,7 +128,7 @@ class ChemblActivityTransformer:
 - **Изменение**: Обновлён docstring класса — добавлен See Also на ADR-014
 - **Верификация**:
   ```bash
-  python scripts/lint_terminology.py --check
+  python src/tools/scripts/lint_terminology.py --check
   ```
 
 ### DOC-002
@@ -143,7 +143,7 @@ class ChemblActivityTransformer:
 
 ## Проверки
 
-- [ ] `scripts/lint_terminology.py` — OK
+- [ ] `src/tools/scripts/lint_terminology.py` — OK
 - [ ] Все `RF-*` покрыты `DOC-*`
 - [ ] CHANGELOG обновлён
 - [ ] Нет broken links в docs (если применимо)
@@ -155,7 +155,7 @@ class ChemblActivityTransformer:
 
 ```bash
 # Терминология
-python scripts/lint_terminology.py --check
+python src/tools/scripts/lint_terminology.py --check
 
 # Проверить, что все публичные классы/функции имеют docstrings
 grep -rn "class \|def " src/bioetl/<changed_module>.py | \
@@ -218,7 +218,7 @@ make audit-naming
 | [RULES-§7.1] | Docstrings: Google-стиль для всех public APIs | `grep -rn "class \|def " src/bioetl/<module>.py` |
 | [RULES-§7.2] | CHANGELOG: conventional commits | `head -30 CHANGELOG.md` |
 | [RULES-§7.3] | ADR: numbered, with status/context/decision/consequences | `ls docs/02-architecture/decisions/` |
-| [GLOSS:*] | Terminology enforcement | `python scripts/lint_terminology.py --check` |
+| [GLOSS:*] | Terminology enforcement | `python src/tools/scripts/lint_terminology.py --check` |
 
 ### Terminology Rules
 

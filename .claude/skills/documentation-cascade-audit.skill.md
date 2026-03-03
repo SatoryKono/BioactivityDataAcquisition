@@ -1001,7 +1001,7 @@ mkdocs build --strict 2>&1 | grep -c "WARNING"
 ls docs/02-architecture/decisions/ADR-*.md | wc -l
 
 # Glossary sync
-python scripts/lint_terminology.py --check
+python src/tools/scripts/lint_terminology.py --check
 
 # Architecture tests
 pytest tests/architecture/ -v --tb=short

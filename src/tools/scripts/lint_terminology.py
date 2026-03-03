@@ -5,8 +5,8 @@ Validates that code uses canonical terminology as defined in docs/glossary.md.
 This script is part of the code quality CI pipeline.
 
 Usage:
-    python scripts/lint_terminology.py src/bioetl/
-    python scripts/lint_terminology.py --strict src/bioetl/domain/
+    python src/tools/scripts/lint_terminology.py src/bioetl/
+    python src/tools/scripts/lint_terminology.py --strict src/bioetl/domain/
 
 Exit codes:
     0: No violations found
@@ -253,6 +253,11 @@ def main() -> int:
         "--strict",
         action="store_true",
         help="Enable strict mode (check context-sensitive terms)",
+    )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Compatibility alias for check mode (default behavior).",
     )
     parser.add_argument(
         "-v",

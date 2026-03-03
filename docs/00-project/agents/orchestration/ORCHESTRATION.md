@@ -46,7 +46,7 @@ Workflow следует принципу "Safe-by-Design":
 - **Тесты**: `make test-unit`, `make test-integration` (VCR).
 - **Архитектура**: `pytest tests/architecture/`.
 - **Конфиги**: `python scripts/validate_pipeline_configs.py`, `python scripts/config_gap_analysis.py`.
-- **Терминология**: `python scripts/lint_terminology.py`.
+- **Терминология**: `python src/tools/scripts/lint_terminology.py`.
 
 ----------------------------------------------------------------------
 
