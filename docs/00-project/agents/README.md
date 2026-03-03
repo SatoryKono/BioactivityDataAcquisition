@@ -11,6 +11,7 @@
 | Gemini        | [GEMINI.md](GEMINI.md)                                           | Профильный набор правил и ограничений для Gemini          |
 | Codex         | [CODEX.md](CODEX.md)                                             | Инструкции Architecture Auditor + Implementation Engineer |
 | QA Orchestrator | [qa_orchestrator.md](qa_orchestrator.md)                       | Системный prompt для иерархического QA-оркестратора       |
+| Diagram Docs Orchestrator | [diagram_docs_orchestrator.md](diagram_docs_orchestrator.md) | Агент обновления, рендера и пересборки диаграммных docx/pdf |
 | Shared memory | [memory.md](memory.md)                                           | Краткая оперативная память по проекту                     |
 | Orchestration | [orchestration/ORCHESTRATION.md](orchestration/ORCHESTRATION.md) | Порядок взаимодействия субагентов и артефакты             |
 

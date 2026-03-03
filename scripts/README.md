@@ -36,5 +36,8 @@ For new automation, use canonical paths only:
 - `scripts/diagrams/run_diagram_checks.sh`
 - `scripts/diagrams/lint_diagrams.py`
 - `scripts/diagrams/validate_mermaid_syntax.sh`
+- `scripts/diagrams/generate_with_descriptions_docx.py`
+- `scripts/diagrams/generate_with_descriptions_pdf.py`
+- `scripts/diagrams/run_diagram_docs_agent.sh`
 
 Do not add new references to legacy wrapper paths under `scripts/`.
