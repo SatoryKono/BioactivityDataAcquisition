@@ -71,3 +71,39 @@ class IDMappingPort(Protocol):
             HealthStatus indicating the current status of the service.
         """
         ...
+
+
+@runtime_checkable
+class IDMappingSourceReaderPort(Protocol):
+    """Port for reading ID mapping source identifiers from external storage.
+
+    This interface abstracts file/database access used to load source IDs
+    for mapping pipelines (e.g., ChEMBL IDs from CSV input).
+    """
+
+    async def read_ids(self, source_path: str, id_column: str) -> list[str]:
+        """Read source identifiers from the given source path.
+
+        Args:
+            source_path: Path or URI to source data.
+            id_column: Column name containing source IDs.
+
+        Returns:
+            Ordered list of non-empty source IDs.
+
+        Raises:
+            FileNotFoundError: If source does not exist.
+            ValueError: If the column is missing.
+        """
+        ...
+
+    async def source_exists(self, source_path: str) -> bool:
+        """Check whether the source path exists.
+
+        Args:
+            source_path: Path or URI to source data.
+
+        Returns:
+            True if source exists, otherwise False.
+        """
+        ...

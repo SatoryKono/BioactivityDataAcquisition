@@ -21,11 +21,22 @@ from bioetl.application.services.medallion_types import (
     PrepareResult,
     VacuumResult,
 )
+from bioetl.domain.exceptions import BioETLError, StorageError
 
 if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.medallion import MedallionPolicy
     from bioetl.domain.ports import LoggerPort, MetricsPort, StoragePort
+
+
+_LIFECYCLE_OPERATION_ERRORS = (
+    StorageError,
+    BioETLError,
+    OSError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+)
 
 
 @dataclass
@@ -182,7 +193,7 @@ class MedallionLifecycleService:
 
             return files_removed
 
-        except Exception as e:
+        except _LIFECYCLE_OPERATION_ERRORS as e:
             self.logger.error(
                 "Vacuum failed",
                 table=table,
@@ -234,7 +245,7 @@ class MedallionLifecycleService:
 
             return files_archived
 
-        except Exception as e:
+        except _LIFECYCLE_OPERATION_ERRORS as e:
             self.logger.error(
                 "Archive failed",
                 table=table,
@@ -369,7 +380,7 @@ class MedallionLifecycleService:
                 skipped=False,
             )
 
-        except Exception as e:
+        except _LIFECYCLE_OPERATION_ERRORS as e:
             self.logger.error(
                 "storage_optimization_failed",
                 pipeline=config.pipeline_name,

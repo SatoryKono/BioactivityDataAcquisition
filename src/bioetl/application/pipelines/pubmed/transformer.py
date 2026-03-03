@@ -97,7 +97,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         identity_service: IdentityService | None = None,
         pii_hasher: PiiHasherPort | None = None,
         data_normalizer: DataNormalizationPort | None = None,
-        contract_policy: Any = None,
+        contract_policy: Any = None,  # Any: generic policy; concrete type resolved at runtime
     ):
         """Initialize PubMed publication transformer.
 
@@ -166,7 +166,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
         self,
         medline: ET.Element | None,
         pubmed_data: ET.Element | None,
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any]:  # Any: untyped PubMed XML/JSON values
         """Extract MEDLINE-specific metadata."""
         medline_info = medline.find("MedlineJournalInfo") if medline else None
         citation_subsets = (
@@ -223,7 +223,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
     def _extract_classification_data(
         self, article: ET.Element, medline: ET.Element | None
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any]:  # Any: untyped PubMed XML/JSON values
         """Extract classification-related fields."""
         publication_types = ClassificationExtractor.parse_publication_types(article)
         subject_keywords = ClassificationExtractor.parse_keywords(medline)
@@ -249,7 +249,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
     def _extract_author_block(
         self, article: ET.Element, raw_author_data: list[RawAuthor]
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any]:  # Any: untyped PubMed XML/JSON values
         """Extract and process author-related fields from article XML.
 
         Uses unified normalization service for authors and affiliations.
@@ -272,7 +272,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
         # Extract affiliations using unified service
         affiliation_strings = normalizer.extract_affiliations_from_authors(
-            cast("list[dict[str, Any]]", raw_author_data)
+            cast("list[dict[str, Any]]", raw_author_data)  # Any: RawAuthor is TypedDict-like
         )
 
         # Normalize affiliations using unified service (already deduplicated & sorted)
