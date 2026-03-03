@@ -459,7 +459,9 @@ class SemanticScholarAdapter(BaseHttpAdapter):
             self._request_collector.record_from_response(response, duration_ms)
 
         # Response is JSON array
-        result: list[BronzeRecord | None] = response.json()  # Any: untyped Semantic Scholar API JSON response
+        result: list[BronzeRecord | None] = (
+            response.json()
+        )  # Any: untyped Semantic Scholar API JSON response
         return result
 
     @staticmethod
