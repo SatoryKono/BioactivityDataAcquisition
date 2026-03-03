@@ -598,7 +598,7 @@ class GoldWriter(BaseDeltaWriter):
         run_id: RunID | None,
         silver_refs: list[Any]
         | None = None,  # Any: SilverRef or SilverWriteResult (duck-typed)
-        gold_schema: GoldSchemaType | None = None,
+        gold_schema: Any | None = None,  # Any: dynamic Pandera schema class/instance
     ) -> None:
         """Write Gold layer metadata sidecar file.
 

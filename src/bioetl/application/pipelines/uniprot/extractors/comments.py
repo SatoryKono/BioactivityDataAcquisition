@@ -20,7 +20,7 @@ def _is_comment_of_type(comment: Any, comment_type: str) -> bool:  # Any: JSON
     return isinstance(comment, dict) and comment.get("commentType") == comment_type
 
 
-def _extract_reaction_data(reaction: dict[str, Any]) -> dict[str, Any]:
+def _extract_reaction_data(reaction: dict[str, Any]) -> dict[str, Any]:  # Any: untyped JSON fragment from UniProt API
     """Extract reaction data from catalytic activity.
 
     Args:
@@ -73,7 +73,7 @@ def _build_isoform_data(iso: dict[str, Any]) -> dict[str, Any]:  # Any: JSON val
     return isoform_data
 
 
-def _extract_texts_from_dict(data: dict[str, Any] | None) -> list[str]:
+def _extract_texts_from_dict(data: dict[str, Any] | None) -> list[str]:  # Any: untyped JSON fragment from UniProt API
     """Extract text values from a dict with 'texts' key.
 
     Args:
@@ -92,7 +92,7 @@ def _extract_texts_from_dict(data: dict[str, Any] | None) -> list[str]:
     ]
 
 
-def _extract_cofactor_entry(cofactor: dict[str, Any]) -> dict[str, Any]:
+def _extract_cofactor_entry(cofactor: dict[str, Any]) -> dict[str, Any]:  # Any: untyped JSON fragment from UniProt API
     """Extract data from a single cofactor entry.
 
     Args:
@@ -159,7 +159,7 @@ def _extract_list_entries(
     ]
 
 
-def _extract_kinetic_parameters(kinetics: dict[str, Any]) -> dict[str, Any]:
+def _extract_kinetic_parameters(kinetics: dict[str, Any]) -> dict[str, Any]:  # Any: untyped JSON fragment from UniProt API
     """Extract kinetic parameters (Km, Vmax) from kineticParameters dict."""
     kinetic_data: dict[str, Any] = {}  # Any: JSON values
 
@@ -182,7 +182,7 @@ def _extract_kinetic_parameters(kinetics: dict[str, Any]) -> dict[str, Any]:
     return kinetic_data
 
 
-def _extract_absorption_data(absorption: dict[str, Any]) -> dict[str, Any]:
+def _extract_absorption_data(absorption: dict[str, Any]) -> dict[str, Any]:  # Any: untyped JSON fragment from UniProt API
     """Extract absorption (spectroscopic) data."""
     abs_data: dict[str, Any] = {}  # Any: JSON values
     if absorption.get("max"):
@@ -193,7 +193,7 @@ def _extract_absorption_data(absorption: dict[str, Any]) -> dict[str, Any]:
     return abs_data
 
 
-def _extract_biophys_from_comment(comment: dict[str, Any]) -> dict[str, Any]:
+def _extract_biophys_from_comment(comment: dict[str, Any]) -> dict[str, Any]:  # Any: untyped JSON fragment from UniProt API
     """Extract biophysicochemical data from a single comment.
 
     Args:
