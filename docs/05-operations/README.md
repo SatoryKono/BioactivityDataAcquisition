@@ -39,5 +39,6 @@ This section contains operational documentation for managing BioETL in productio
 ## Related Documentation
 
 - [RULES.md](../00-project/RULES.md) §5 — Operations and DR policies
-- [ADR-008](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md) — Graceful shutdown
+- [ADR-008](../02-architecture/decisions/ADR-008-graceful-shutdown-strategy.md) — Graceful shutdown (**Superseded**, historical context)
+- [Pipeline Lifecycle](../03-guides/pipeline-lifecycle.md) — Current lifecycle and shutdown behavior
 - [ADR-010](../02-architecture/decisions/ADR-010-local-only-deployment.md) — Local deployment

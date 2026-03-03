@@ -295,13 +295,9 @@ class TestDateOrdering:
         assert df["date_completed"].iloc[0] > df["date_revised"].iloc[0]
 
 
-# TODO: Add remaining ~40 logical validation tests
-# Based on logical_validation rules from validation schema XLSX
-# Coverage should include:
-# - All count fields (author_count, mesh_heading_count, etc.) >= 0
-# - All metric fields (fwci, citations) >= 0
-# - Date ordering rules
-# - Page number constraints
+# NOTE: Legacy TODO removed.
+# Logical validation coverage in this module already spans core range,
+# count/metric, date-ordering, and citation DQ rules.
 
 
 # ============================================================================
@@ -625,7 +621,7 @@ class TestPercentageFields:
 
 # ============================================================================
 # ChEMBL / PubMed CITATION DQ RULES
-# Validates range rules added in configs/quality/entities/{chembl,pubmed}/publication.yaml
+# Validates range rules added in configs/entities/{chembl,pubmed}/publication.yaml
 # Rules:
 #   - citations_received  min: 0           (severity: error)
 #   - citations_received  max: 10_000_000  (severity: warn)

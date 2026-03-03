@@ -29,7 +29,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 03 Mar 2026 13:28:04 GMT
+      - Tue, 03 Mar 2026 14:13:52 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -411,7 +411,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 03 Mar 2026 13:28:07 GMT
+      - Tue, 03 Mar 2026 14:13:54 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -421,7 +421,7 @@ interactions:
       X-ChEMBL-in-cache:
       - 'True'
       X-ChEMBL-retrieval-time:
-      - '1.6972508430480957'
+      - '1.807647705078125'
     status:
       code: 200
       message: OK
@@ -463,7 +463,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 03 Mar 2026 13:28:07 GMT
+      - Tue, 03 Mar 2026 14:13:55 GMT
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains
       Vary:
@@ -643,6 +643,8 @@ interactions:
         vertebrates","taxonId":117571,"rank":"clade","hidden":false},{"scientificName":"Sarcopterygii","taxonId":8287,"rank":"superclass","hidden":true},{"scientificName":"Dipnotetrapodomorpha","taxonId":1338369,"rank":"clade","hidden":true},{"scientificName":"Tetrapoda","commonName":"tetrapods","taxonId":32523,"rank":"clade","hidden":true},{"scientificName":"Amniota","commonName":"amniotes","taxonId":32524,"rank":"clade","hidden":true},{"scientificName":"Mammalia","commonName":"mammals","taxonId":40674,"rank":"class","hidden":false},{"scientificName":"Theria","taxonId":32525,"rank":"clade","hidden":true},{"scientificName":"Eutheria","commonName":"placentals","taxonId":9347,"rank":"clade","hidden":false},{"scientificName":"Boreoeutheria","taxonId":1437010,"rank":"clade","hidden":true},{"scientificName":"Euarchontoglires","taxonId":314146,"rank":"superorder","hidden":false},{"scientificName":"Primates","commonName":"primates","taxonId":9443,"rank":"order","hidden":false},{"scientificName":"Haplorrhini","taxonId":376913,"rank":"suborder","hidden":false},{"scientificName":"Simiiformes","taxonId":314293,"rank":"infraorder","hidden":true},{"scientificName":"Catarrhini","taxonId":9526,"rank":"parvorder","hidden":false},{"scientificName":"Hominoidea","commonName":"apes","taxonId":314295,"rank":"superfamily","hidden":true},{"scientificName":"Hominidae","commonName":"great
         apes","taxonId":9604,"rank":"family","hidden":false},{"scientificName":"Homininae","taxonId":207598,"rank":"subfamily","hidden":true},{"scientificName":"Homo","taxonId":9605,"rank":"genus","hidden":false}],"extraAttributes":{"uniParcId":"UPI0000160563"}}]}'
     headers:
+      Accept-Ranges:
+      - bytes
       Access-Control-Allow-Credentials:
       - 'true'
       Access-Control-Allow-Headers:
@@ -662,14 +664,12 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 03 Mar 2026 13:28:12 GMT
+      - Tue, 03 Mar 2026 14:13:55 GMT
       Link:
       - <https://rest.uniprot.org/uniprotkb/search?format=json&fields=accession,id,protein_name,gene_names,organism_name,organism_id,lineage,sequence,length,mass,protein_existence,annotation_score,reviewed,date_created,date_modified,version,cc_function,cc_catalytic_activity,cc_activity_regulation,cc_subunit,cc_pathway,cc_subcellular_location,cc_tissue_specificity,cc_alternative_products,cc_disease,cc_cofactor,ph_dependence,temp_dependence,kinetics,absorption,redox_potential,cc_induction,cc_caution,cc_similarity,cc_pharmaceutical,ft_domain,ft_binding,ft_site,ft_act_site,ft_mod_res,xref_pdb,xref_chembl,xref_drugbank,xref_guidetopharmacology,go_id,xref_interpro,xref_pfam,xref_reactome,keyword&query=%2A&cursor=8e9tj6dnc2zmn891eqzsju4zn2bcf99anl&size=3>;
         rel="next"
       Strict-Transport-Security:
       - max-age=31536000; includeSubDomains
-      Transfer-Encoding:
-      - chunked
       Vary:
       - accept,accept-encoding,x-uniprot-release,x-api-deployment-date, User-Agent,
         Accept-Encoding
@@ -684,7 +684,7 @@ interactions:
       content-length:
       - '35043'
       x-cache:
-      - miss cached
+      - hit cached
     status:
       code: 200
       message: OK

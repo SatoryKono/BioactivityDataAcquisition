@@ -362,7 +362,7 @@ class TestRegistryConfigConsistency:
             except FileNotFoundError:
                 pytest.fail(
                     f"Pipeline '{pipeline_name}' is registered but has no config file. "
-                    f"Create configs/pipelines/<provider>/<entity>.yaml"
+                    f"Create configs/entities/<provider>/<entity>.yaml"
                 )
             except ValueError as e:
                 pytest.fail(f"Pipeline '{pipeline_name}' config is invalid: {e}")

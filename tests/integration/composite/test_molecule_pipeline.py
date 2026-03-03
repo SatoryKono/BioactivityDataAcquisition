@@ -381,8 +381,6 @@ class TestCompositeMoleculeConfig:
         from pathlib import Path
 
         config_path = Path("configs/composites/molecule.yaml")
-        if not config_path.exists():
-            config_path = Path("configs/pipelines/composite/molecule.yaml")
         assert config_path.exists(), f"Config file not found: {config_path}"
 
     def test_inline_schema_exists(self) -> None:
@@ -390,8 +388,6 @@ class TestCompositeMoleculeConfig:
         from pathlib import Path
 
         config_path = Path("configs/composites/molecule.yaml")
-        if not config_path.exists():
-            config_path = Path("configs/pipelines/composite/molecule.yaml")
         raw = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
         groups = raw.get("composite", {}).get("merge", {}).get("column_groups")
         assert isinstance(groups, list) and groups, (

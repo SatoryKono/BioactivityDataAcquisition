@@ -14,6 +14,7 @@ from collections.abc import AsyncIterator, Iterator
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
+from bioetl.application.core.base_transformer import FilteredOutError
 from bioetl.application.core.batch_metrics import BatchMetricsRecorder
 from bioetl.application.core.quarantine_manager import QuarantineManager
 from bioetl.domain.exceptions import DataQualityThresholdError
@@ -38,6 +39,7 @@ class TransformResult:
     silver_records: list[dict[str, Any]]
     gold_records: list[dict[str, Any]]
     quarantined_count: int
+    filtered_out_count: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -56,6 +58,7 @@ class TransformedRecord:
     silver_record: dict[str, Any] | None
     gold_record: dict[str, Any] | None
     is_quarantined: bool
+    is_filtered_out: bool = False
 
 
 class BatchTransformer:
@@ -121,6 +124,7 @@ class BatchTransformer:
         silver_records: list[dict[str, Any]] = []
         gold_records: list[dict[str, Any]] = []
         records_quarantined = 0
+        records_filtered_out = 0
 
         for index, raw_record in enumerate(records, start=start_index):
             record_context = self._context.bind_logger(
@@ -135,6 +139,15 @@ class BatchTransformer:
                     if self._gold_filter(record_context, transformed):
                         gold_record = self._gold_transform(record_context, transformed)
                         gold_records.append(gold_record)
+            except FilteredOutError as e:
+                await self._quarantine_manager.quarantine_filtered_record(
+                    raw_record,
+                    batch_id,
+                    str(e),
+                    ingestion_ts=self._context.started_at,
+                )
+                records_filtered_out += 1
+                self._batch_metrics.track_processed_records("filtered_out", 1)
             except Exception as e:
                 error_type = self._error_classifier.classify(e)
                 if error_type.is_data_quality():
@@ -158,6 +171,7 @@ class BatchTransformer:
             silver_records=silver_records,
             gold_records=gold_records,
             quarantined_count=records_quarantined,
+            filtered_out_count=records_filtered_out,
         )
 
     def _check_dq_thresholds(
@@ -254,6 +268,20 @@ class BatchTransformer:
                 gold_record=None,
                 is_quarantined=False,
             )
+        except FilteredOutError as e:
+            await self._quarantine_manager.quarantine_filtered_record(
+                raw_record,
+                batch_id,
+                str(e),
+                ingestion_ts=self._context.started_at,
+            )
+            self._batch_metrics.track_processed_records("filtered_out", 1)
+            return TransformedRecord(
+                silver_record=None,
+                gold_record=None,
+                is_quarantined=False,
+                is_filtered_out=True,
+            )
 
         except Exception as e:
             error_type = self._error_classifier.classify(e)
@@ -304,12 +332,15 @@ class BatchTransformer:
         silver_records: list[dict[str, Any]] = []
         gold_records: list[dict[str, Any]] = []
         records_quarantined = 0
+        records_filtered_out = 0
 
         for i, raw_record in enumerate(records):
             result = await self.transform_single(raw_record, batch_id, start_index + i)
 
             if result.is_quarantined:
                 records_quarantined += 1
+            elif result.is_filtered_out:
+                records_filtered_out += 1
             elif result.silver_record is not None:
                 silver_records.append(result.silver_record)
                 if result.gold_record is not None:
@@ -322,6 +353,7 @@ class BatchTransformer:
             silver_records=silver_records,
             gold_records=gold_records,
             quarantined_count=records_quarantined,
+            filtered_out_count=records_filtered_out,
         )
 
 

@@ -183,3 +183,21 @@ def test_not_in_nav_growth_detects_increase_against_reduced_baseline(
     assert baseline_exists is True
     assert current_count > baseline_count
     assert added, "Expected newly-added not-in-nav docs against reduced baseline"
+
+
+def test_gold_contract_index_matches_exports() -> None:
+    module = _load_module()
+
+    missing_in_doc, extra_in_doc = module.check_gold_contract_index()
+
+    assert missing_in_doc == []
+    assert extra_in_doc == []
+
+
+def test_chembl_provider_overview_matches_docs_inventory() -> None:
+    module = _load_module()
+
+    missing_in_readme, extra_in_readme = module.check_chembl_provider_overview()
+
+    assert missing_in_readme == []
+    assert extra_in_readme == []

@@ -352,7 +352,7 @@ class TestBusinessRulesCheck:
                 "column": "value",
                 "condition": "range",
                 "min": 0,
-                "config_path": "configs/quality/entities/chembl/activity.yaml",
+                "config_path": "configs/entities/chembl/activity.yaml",
                 "layer": "gold",
                 "field": "value",
                 "severity": "error",
@@ -365,9 +365,7 @@ class TestBusinessRulesCheck:
         assert result.rules_failed == 1
         rule_result = result.rules[0]
         assert rule_result.rule_id == "R_TRACE_01"
-        assert (
-            rule_result.config_path == "configs/quality/entities/chembl/activity.yaml"
-        )
+        assert rule_result.config_path == "configs/entities/chembl/activity.yaml"
         assert rule_result.layer == "gold"
         assert rule_result.field == "value"
         assert rule_result.severity == "error"

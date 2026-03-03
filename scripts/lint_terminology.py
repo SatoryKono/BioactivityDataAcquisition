@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Compatibility wrapper for the terminology linter.
+"""Entry point for the BioETL terminology linter.
 
-Deprecated: use src/tools/scripts/lint_terminology.py instead.
+This script delegates to the canonical implementation in
+``src/tools/scripts/lint_terminology.py`` so existing command aliases remain stable.
 """
 
 from __future__ import annotations

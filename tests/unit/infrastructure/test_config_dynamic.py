@@ -219,36 +219,16 @@ def test_load_pipeline_from_unified_entity_when_legacy_missing(tmp_path, monkeyp
 
 
 def test_load_invalid_name_format(setup_configs):
-    """Verify behavior with name that doesn't split by underscore."""
-    # This might fall back to configs/pipelines/invalidname.yaml which doesn't exist
-    with pytest.raises(ValueError, match="Configuration file not found"):
+    """Verify names without provider_entity format are rejected."""
+    with pytest.raises(ValueError, match="must be in '<provider>_<entity>' format"):
         load_pipeline_config("invalidname")
 
 
-def test_load_fallback_no_underscore(setup_configs):
-    """Verify fallback for names without underscore if file exists."""
-    # Create configs/pipelines/simple.yaml
+def test_load_name_without_separator_raises(setup_configs):
+    """Pipeline names without underscore must not resolve any config."""
     _ = setup_configs
-    pipelines_dir = Path("configs/pipelines")
-    pipelines_dir.mkdir(parents=True, exist_ok=True)
-
-    simple_config = {
-        "pipeline_name": "simple",
-        "provider": "simple",
-        "entity_type": "simple",
-        "primary_keys": ["id"],
-        "silver_table": "simple.table",
-        "batch_size": 100,
-        "checkpoint_interval": 1000,
-    }
-
-    simple_yaml = pipelines_dir / "simple.yaml"
-    simple_yaml.write_text(yaml.dump(simple_config))
-    _create_minimal_schema_for_pipeline(simple_yaml)
-
-    config = load_pipeline_config("simple")
-    assert isinstance(config, PipelineYamlConfig)
-    assert config.pipeline_name == "simple"
+    with pytest.raises(ValueError, match="must be in '<provider>_<entity>' format"):
+        load_pipeline_config("simple")
 
 
 def test_load_source_config_legacy_and_new_format_equivalent_chembl(
@@ -598,10 +578,8 @@ def test_convention_based_source_file(setup_configs, tmp_path):
     config = load_pipeline_config("testprovider_entity")
 
     # source_file should be auto-computed
-    assert config.dq_config_file == "../../quality/entities/testprovider/entity.yaml"
-    assert (
-        config.filter_config_file == "../../filters/entities/testprovider/entity.yaml"
-    )
+    assert config.dq_config_file == "../../entities/testprovider/entity.yaml"
+    assert config.filter_config_file == "../../entities/testprovider/entity.yaml"
     assert config.schema_file == "../../schemas/testprovider/entity.yaml"
 
 
@@ -691,7 +669,7 @@ def test_filter_config_merging(setup_configs, tmp_path):
         "entity_type": "entity",
         "primary_keys": ["id"],
         "silver_table": "filter.entity",
-        # filter_config_file will be auto-computed to ../../filters/entities/filtertest/entity.yaml
+        # filter_config_file will be auto-computed to ../../entities/filtertest/entity.yaml
     }
 
     _write_unified_entity_config(

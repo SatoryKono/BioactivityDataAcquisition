@@ -169,7 +169,7 @@ View-файлы с ≥3 типами связей и >5 соединениями
 - `*-full.mermaid` reference views исключены из `SIZE-001`/`SIZE-002`.
 - `00-legend*` исключены из `SIZE-001`/`SIZE-002`.
 
-Примечание по size-normalization (`scripts/uniform_diagram_sizes.py`):
+Примечание по size-normalization (`scripts/diagrams/uniform_diagram_sizes.py`):
 - `@uniform-group` задаёт групповую нормализацию высоты.
 - `@uniform-width global` (по умолчанию) использует общую ширину для всех групп.
 - `@uniform-width group` разрешает width per group для снижения `&nbsp;`-padding в перегруженных class-diagram family.

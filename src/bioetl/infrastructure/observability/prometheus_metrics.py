@@ -72,6 +72,7 @@ from bioetl.infrastructure.observability.metrics import (
 _ALLOWED_REASON_LABELS = frozenset(
     {
         "cross_validation",
+        "filtered_out_silver",
         "data_quality",
         "schema_validation",
         "transform_error",

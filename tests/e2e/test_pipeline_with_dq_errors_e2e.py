@@ -129,6 +129,7 @@ class TestDQSoftThreshold:
 
         quarantine_manager = MagicMock(spec=QuarantineManager)
         quarantine_manager.quarantine_record = AsyncMock()
+        quarantine_manager.quarantine_filtered_record = AsyncMock()
 
         # Create transformer with 10% error rate (above soft, below hard)
         error_count = 0
@@ -207,6 +208,7 @@ class TestDQSoftThreshold:
 
         quarantine_manager = MagicMock(spec=QuarantineManager)
         quarantine_manager.quarantine_record = AsyncMock()
+        quarantine_manager.quarantine_filtered_record = AsyncMock()
 
         # Only 2% error rate (below soft threshold)
         error_count = 0
@@ -287,6 +289,7 @@ class TestDQHardThreshold:
 
         quarantine_manager = MagicMock(spec=QuarantineManager)
         quarantine_manager.quarantine_record = AsyncMock()
+        quarantine_manager.quarantine_filtered_record = AsyncMock()
 
         # 25% error rate (above hard threshold)
         error_count = 0
@@ -351,6 +354,7 @@ class TestDQHardThreshold:
 
         quarantine_manager = MagicMock(spec=QuarantineManager)
         quarantine_manager.quarantine_record = AsyncMock()
+        quarantine_manager.quarantine_filtered_record = AsyncMock()
 
         # Exactly 20% error rate
         error_count = 0
@@ -412,6 +416,7 @@ class TestDQHardThreshold:
 
         quarantine_manager = MagicMock(spec=QuarantineManager)
         quarantine_manager.quarantine_record = AsyncMock()
+        quarantine_manager.quarantine_filtered_record = AsyncMock()
 
         # 19% error rate (just below hard threshold)
         error_count = 0
@@ -486,6 +491,7 @@ class TestDQQuarantineBehavior:
             quarantined_records.append(record)
 
         quarantine_manager.quarantine_record = AsyncMock(side_effect=capture_quarantine)
+        quarantine_manager.quarantine_filtered_record = AsyncMock()
 
         # Fail specific records
         failed_ids = {"2", "5", "7"}

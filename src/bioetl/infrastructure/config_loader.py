@@ -53,12 +53,10 @@ def _apply_file_reference_defaults(
     Sets source_file, dq_config_file, and filter_config_file if not specified.
     """
     config.setdefault("source_file", f"../../providers/{provider}.yaml")
-    config.setdefault(
-        "dq_config_file", f"../../quality/entities/{provider}/{entity_type}.yaml"
-    )
+    config.setdefault("dq_config_file", f"../../entities/{provider}/{entity_type}.yaml")
     config.setdefault(
         "filter_config_file",
-        f"../../filters/entities/{provider}/{entity_type}.yaml",
+        f"../../entities/{provider}/{entity_type}.yaml",
     )
     config.setdefault(
         "schema_file",
@@ -463,9 +461,8 @@ def _apply_hierarchical_filter_config(
 ) -> None:
     """Apply filter config from the hierarchical filter system (ADR-028).
 
-    Uses FilterConfigLoader to merge the full 4-level hierarchy:
-    1. defaults layer (configs/base/pipeline.yaml.filter_defaults or legacy
-       configs/filters/_defaults.yaml)
+    Uses FilterConfigLoader to merge the 4-level hierarchy:
+    1. defaults layer from configs/base/pipeline.yaml.filter_defaults
     2. providers/{provider}.yaml — provider-specific
     3. entities/{provider}/{entity}.yaml — entity-specific
     4. Inline overrides from pipeline config — highest priority
@@ -646,9 +643,9 @@ def _load_source_section(config: dict[str, Any], config_path: Path) -> None:
 def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     """Load pipeline configuration from YAML file and return typed model.
 
-    Loading order: base → unified entity (ADR-039) → legacy entity →
-    convention defaults (ADR-029) → hierarchical filters (ADR-028)
-    → column groups → source section.
+    Loading order: base → unified entity (ADR-039) →
+    convention defaults (ADR-029) → hierarchical filters (ADR-028) →
+    column groups → source section.
 
     Args:
         pipeline_name: Pipeline name (e.g., "chembl_activity").
@@ -662,36 +659,24 @@ def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     unified_raw: dict[str, Any] = {}
     unified_schema: dict[str, Any] | None = None
 
-    if "_" in pipeline_name:
-        provider, entity = pipeline_name.split("_", 1)
-        legacy_path = Path(f"configs/pipelines/{provider}/{entity}.yaml")
-        unified_path = Path(f"configs/entities/{provider}/{entity}.yaml")
-        unified_raw = _load_unified_entity_raw(unified_path)
-        unified_pipeline = _get_unified_section(unified_raw, "pipeline")
-        unified_schema = _get_unified_section(unified_raw, "schema")
+    if "_" not in pipeline_name:
+        raise ValueError(
+            f"Pipeline name must be in '<provider>_<entity>' format: {pipeline_name}"
+        )
 
-        if legacy_path.exists():
-            config_path = legacy_path
-            with open(legacy_path, encoding="utf-8") as f:
-                legacy_entity_config = yaml.safe_load(f) or {}
-            if unified_pipeline:
-                entity_config = _deep_merge(unified_pipeline, legacy_entity_config)
-            else:
-                entity_config = legacy_entity_config
-        elif unified_pipeline:
-            config_path = unified_path
-            entity_config = unified_pipeline
-        else:
-            raise ValueError(
-                f"Configuration file not found: {legacy_path} "
-                f"(and no pipeline section in {unified_path})"
-            )
-    else:
-        config_path = Path(f"configs/pipelines/{pipeline_name}.yaml")
-        if not config_path.exists():
-            raise ValueError(f"Configuration file not found: {config_path}")
-        with open(config_path, encoding="utf-8") as f:
-            entity_config = yaml.safe_load(f) or {}
+    provider, entity = pipeline_name.split("_", 1)
+    config_path = Path(f"configs/entities/{provider}/{entity}.yaml")
+    unified_raw = _load_unified_entity_raw(config_path)
+    unified_pipeline = _get_unified_section(unified_raw, "pipeline")
+    unified_schema = _get_unified_section(unified_raw, "schema")
+
+    if not unified_pipeline:
+        raise ValueError(
+            f"Configuration file not found: {config_path} "
+            "(or missing 'pipeline' section)"
+        )
+
+    entity_config = unified_pipeline
 
     defaults = _load_base_config(config_path)
 

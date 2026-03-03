@@ -4,7 +4,7 @@ Covers the stateless helper functions that can be tested without bootstrapping
 the full composition root:
 - _resolve_composite_gold_schema
 - _to_id_str
-- _resolve_composite_config_path (path resolution logic)
+- _resolve_composite_config_path
 - _build_fallback_mapping
 - _find_filter_key
 - _extract_filter_ids_from_keys
@@ -212,23 +212,14 @@ class TestToIdStr:
 class TestResolveCompositeConfigPath:
     """Tests for _resolve_composite_config_path function."""
 
-    def test_raises_file_not_found_when_neither_path_exists(
-        self, tmp_path: Path
-    ) -> None:
+    def test_raises_file_not_found_when_path_missing(self, tmp_path: Path) -> None:
         """Test that FileNotFoundError is raised when config files don't exist."""
         helpers = _import_helpers()
         fn = helpers["_resolve_composite_config_path"]
 
-        # Patch both config directories to point to non-existent locations
-        with (
-            patch(
-                "bioetl.composition.bootstrap.runtime.composite.COMPOSITE_CONFIG_DIR",
-                tmp_path / "composites",
-            ),
-            patch(
-                "bioetl.composition.bootstrap.runtime.composite.LEGACY_COMPOSITE_CONFIG_DIR",
-                tmp_path / "legacy",
-            ),
+        with patch(
+            "bioetl.composition.bootstrap.runtime.composite.COMPOSITE_CONFIG_DIR",
+            tmp_path / "composites",
         ):
             with pytest.raises(FileNotFoundError, match="Composite config not found"):
                 fn("nonexistent_pipeline")
@@ -243,43 +234,13 @@ class TestResolveCompositeConfigPath:
         config_file = primary_dir / "my_pipeline.yaml"
         config_file.write_text("composite: {}")
 
-        with (
-            patch(
-                "bioetl.composition.bootstrap.runtime.composite.COMPOSITE_CONFIG_DIR",
-                primary_dir,
-            ),
-            patch(
-                "bioetl.composition.bootstrap.runtime.composite.LEGACY_COMPOSITE_CONFIG_DIR",
-                tmp_path / "legacy",
-            ),
+        with patch(
+            "bioetl.composition.bootstrap.runtime.composite.COMPOSITE_CONFIG_DIR",
+            primary_dir,
         ):
             result = fn("my_pipeline")
 
         assert result == config_file
-
-    def test_falls_back_to_legacy_path(self, tmp_path: Path) -> None:
-        """Test that legacy path is used when primary doesn't exist."""
-        helpers = _import_helpers()
-        fn = helpers["_resolve_composite_config_path"]
-
-        legacy_dir = tmp_path / "legacy"
-        legacy_dir.mkdir()
-        legacy_file = legacy_dir / "old_pipeline.yaml"
-        legacy_file.write_text("composite: {}")
-
-        with (
-            patch(
-                "bioetl.composition.bootstrap.runtime.composite.COMPOSITE_CONFIG_DIR",
-                tmp_path / "composites",
-            ),
-            patch(
-                "bioetl.composition.bootstrap.runtime.composite.LEGACY_COMPOSITE_CONFIG_DIR",
-                legacy_dir,
-            ),
-        ):
-            result = fn("old_pipeline")
-
-        assert result == legacy_file
 
 
 # =============================================================================

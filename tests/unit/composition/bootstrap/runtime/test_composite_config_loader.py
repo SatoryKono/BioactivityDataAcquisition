@@ -46,79 +46,39 @@ def _write_yaml(path: Path, payload: dict[str, Any]) -> None:
 
 
 class TestCompositeConfigPathResolution:
-    """Tests for new composite config path with legacy fallback."""
+    """Tests for composite config path resolution."""
 
-    def test_prefers_new_path_over_legacy(
+    def test_loads_from_canonical_composites_dir(
         self,
         tmp_path: Path,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         new_dir = tmp_path / "configs" / "composites"
-        legacy_dir = tmp_path / "configs" / "pipelines" / "composite"
 
         _write_yaml(
             new_dir / "publication.yaml",
             _build_composite_payload("composite_publication_new"),
         )
-        _write_yaml(
-            legacy_dir / "publication.yaml",
-            _build_composite_payload("composite_publication_legacy"),
-        )
 
         monkeypatch.setattr(composite_runtime, "COMPOSITE_CONFIG_DIR", new_dir)
-        monkeypatch.setattr(
-            composite_runtime,
-            "LEGACY_COMPOSITE_CONFIG_DIR",
-            legacy_dir,
-        )
 
         config = composite_runtime.load_composite_config("publication")
         assert config.name == "composite_publication_new"
 
-    def test_falls_back_to_legacy_path(
+    def test_raises_file_not_found_for_missing_config(
         self,
         tmp_path: Path,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         new_dir = tmp_path / "configs" / "composites"
-        legacy_dir = tmp_path / "configs" / "pipelines" / "composite"
-
-        _write_yaml(
-            legacy_dir / "publication.yaml",
-            _build_composite_payload("composite_publication_legacy"),
-        )
 
         monkeypatch.setattr(composite_runtime, "COMPOSITE_CONFIG_DIR", new_dir)
-        monkeypatch.setattr(
-            composite_runtime,
-            "LEGACY_COMPOSITE_CONFIG_DIR",
-            legacy_dir,
-        )
-
-        config = composite_runtime.load_composite_config("publication")
-        assert config.name == "composite_publication_legacy"
-
-    def test_raises_file_not_found_with_both_paths(
-        self,
-        tmp_path: Path,
-        monkeypatch: pytest.MonkeyPatch,
-    ) -> None:
-        new_dir = tmp_path / "configs" / "composites"
-        legacy_dir = tmp_path / "configs" / "pipelines" / "composite"
-
-        monkeypatch.setattr(composite_runtime, "COMPOSITE_CONFIG_DIR", new_dir)
-        monkeypatch.setattr(
-            composite_runtime,
-            "LEGACY_COMPOSITE_CONFIG_DIR",
-            legacy_dir,
-        )
 
         with pytest.raises(FileNotFoundError) as exc_info:
             composite_runtime.load_composite_config("publication")
 
         message = str(exc_info.value)
         assert str(new_dir / "publication.yaml") in message
-        assert str(legacy_dir / "publication.yaml") in message
 
 
 class TestCompositeConfigColumnGroups:

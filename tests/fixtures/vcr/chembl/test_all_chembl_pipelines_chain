@@ -29,7 +29,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 03 Mar 2026 13:30:47 GMT
+      - Tue, 03 Mar 2026 14:16:43 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -269,7 +269,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 03 Mar 2026 13:30:49 GMT
+      - Tue, 03 Mar 2026 14:16:45 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -279,7 +279,7 @@ interactions:
       X-ChEMBL-in-cache:
       - 'True'
       X-ChEMBL-retrieval-time:
-      - '2.274979829788208'
+      - '1.7069294452667236'
     status:
       code: 200
       message: OK
@@ -313,7 +313,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 03 Mar 2026 13:30:53 GMT
+      - Tue, 03 Mar 2026 14:16:48 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -464,7 +464,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 03 Mar 2026 13:30:54 GMT
+      - Tue, 03 Mar 2026 14:16:50 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -474,7 +474,7 @@ interactions:
       X-ChEMBL-in-cache:
       - 'True'
       X-ChEMBL-retrieval-time:
-      - '0.7568542957305908'
+      - '0.7039046287536621'
     status:
       code: 200
       message: OK
@@ -508,7 +508,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 03 Mar 2026 13:30:58 GMT
+      - Tue, 03 Mar 2026 14:16:54 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -571,7 +571,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 03 Mar 2026 13:31:14 GMT
+      - Tue, 03 Mar 2026 14:16:54 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -581,7 +581,7 @@ interactions:
       X-ChEMBL-in-cache:
       - 'True'
       X-ChEMBL-retrieval-time:
-      - '0.033486366271972656'
+      - '0.15945053100585938'
     status:
       code: 200
       message: OK
@@ -615,7 +615,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 03 Mar 2026 13:31:19 GMT
+      - Tue, 03 Mar 2026 14:16:57 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -709,7 +709,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 03 Mar 2026 13:31:20 GMT
+      - Tue, 03 Mar 2026 14:16:58 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -719,7 +719,47 @@ interactions:
       X-ChEMBL-in-cache:
       - 'True'
       X-ChEMBL-retrieval-time:
-      - '0.30116724967956543'
+      - '0.13560104370117188'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Host:
+      - www.ebi.ac.uk
+      User-Agent:
+      - BioETL/5.0.0
+    method: GET
+    uri: https://www.ebi.ac.uk/chembl/api/data/status
+  response:
+    body:
+      string: '{"activities": 24267312, "chembl_db_version": "ChEMBL_36", "chembl_release_date":
+        "2025-07-28", "compound_records": 3774137, "disinct_compounds": 2878135, "publications":
+        99142, "status": "UP", "targets": 17803}'
+    headers:
+      Cache-Control:
+      - max-age=30000000, s-maxage=30000000
+      Connection:
+      - Keep-Alive
+      Content-Length:
+      - '211'
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 03 Mar 2026 14:17:01 GMT
+      Server:
+      - gunicorn/20.0.4
+      Strict-Transport-Security:
+      - max-age=0
+      Vary:
+      - Accept, Origin
     status:
       code: 200
       message: OK
@@ -777,7 +817,7 @@ interactions:
       Content-Type:
       - application/json
       Date:
-      - Tue, 03 Mar 2026 13:31:33 GMT
+      - Tue, 03 Mar 2026 14:17:02 GMT
       Server:
       - gunicorn/20.0.4
       Strict-Transport-Security:
@@ -787,7 +827,7 @@ interactions:
       X-ChEMBL-in-cache:
       - 'True'
       X-ChEMBL-retrieval-time:
-      - '0.1015174388885498'
+      - '0.38127779960632324'
     status:
       code: 200
       message: OK

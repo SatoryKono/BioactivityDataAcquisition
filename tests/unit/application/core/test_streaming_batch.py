@@ -46,6 +46,7 @@ def mock_quarantine_manager():
     """Create mock quarantine manager."""
     manager = MagicMock(spec=QuarantineManager)
     manager.quarantine_record = AsyncMock()
+    manager.quarantine_filtered_record = AsyncMock()
     return manager
 
 
@@ -186,6 +187,48 @@ class TestTransformSingle:
         assert result.is_quarantined is True
         mock_quarantine_manager.quarantine_record.assert_called_once()
 
+    async def test_transform_single_filtered_out_quasi_quarantine(
+        self,
+        mock_context,
+        mock_error_classifier,
+        mock_quarantine_manager,
+        mock_batch_metrics,
+        gold_filter_callback,
+        gold_transform_callback,
+    ):
+        """Test filtered-out record goes to quasi-quarantine."""
+        from bioetl.application.core.base_transformer import FilteredOutError
+
+        async def filtered_transform(ctx, record, index):
+            raise FilteredOutError("Record excluded by silver filters")
+
+        config = RecordProcessorConfig(
+            pipeline_name="test",
+            provider="test",
+            entity_type="test",
+            silver_schema=MagicMock(),
+            gold_schema=MagicMock(),
+        )
+
+        transformer = BatchTransformer(
+            context=mock_context,
+            config=config,
+            error_classifier=mock_error_classifier,
+            quarantine_manager=mock_quarantine_manager,
+            batch_metrics=mock_batch_metrics,
+            transform_callback=filtered_transform,
+            gold_filter_callback=gold_filter_callback,
+            gold_transform_callback=gold_transform_callback,
+        )
+
+        result = await transformer.transform_single({"id": "f"}, BatchID(uuid4()))
+
+        assert result.silver_record is None
+        assert result.gold_record is None
+        assert result.is_quarantined is False
+        assert result.is_filtered_out is True
+        mock_quarantine_manager.quarantine_filtered_record.assert_called_once()
+
 
 @pytest.mark.unit
 class TestTransformStream:
@@ -252,6 +295,56 @@ class TestTransformStream:
 
         assert len(result.silver_records) == 2
         assert result.quarantined_count == 1
+
+    async def test_transform_stream_tracks_filtered_out(
+        self,
+        mock_context,
+        mock_error_classifier,
+        mock_quarantine_manager,
+        mock_batch_metrics,
+        gold_filter_callback,
+        gold_transform_callback,
+    ):
+        """Test streaming transformation tracks filtered-out records separately."""
+        from bioetl.application.core.base_transformer import FilteredOutError
+
+        async def selective_transform(ctx, record, index):
+            if record.get("id") == "filtered":
+                raise FilteredOutError("Record excluded by silver filters")
+            return {"entity_id": record.get("id"), "value": record.get("value")}
+
+        config = RecordProcessorConfig(
+            pipeline_name="test",
+            provider="test",
+            entity_type="test",
+            silver_schema=MagicMock(),
+            gold_schema=MagicMock(),
+        )
+
+        transformer = BatchTransformer(
+            context=mock_context,
+            config=config,
+            error_classifier=mock_error_classifier,
+            quarantine_manager=mock_quarantine_manager,
+            batch_metrics=mock_batch_metrics,
+            transform_callback=selective_transform,
+            gold_filter_callback=gold_filter_callback,
+            gold_transform_callback=gold_transform_callback,
+        )
+
+        records = [
+            {"id": "good", "value": 10},
+            {"id": "filtered", "value": 8},
+            {"id": "good2", "value": 7},
+        ]
+
+        result = await transformer.transform_stream(records, BatchID(uuid4()))
+
+        assert len(result.silver_records) == 2
+        assert len(result.gold_records) == 2
+        assert result.quarantined_count == 0
+        assert result.filtered_out_count == 1
+        mock_quarantine_manager.quarantine_filtered_record.assert_called_once()
 
 
 @pytest.mark.unit

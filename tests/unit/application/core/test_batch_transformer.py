@@ -41,6 +41,7 @@ def mock_quarantine_manager():
     """Create mock quarantine manager."""
     manager = MagicMock(spec=QuarantineManager)
     manager.quarantine_record = AsyncMock()
+    manager.quarantine_filtered_record = AsyncMock()
     return manager
 
 
@@ -226,6 +227,55 @@ class TestBatchTransformerTransform:
 
         with pytest.raises(LockLostError):
             await transformer.transform_batch(records, batch_id)
+
+    async def test_transform_batch_quasi_quarantines_filtered_out(
+        self,
+        mock_context,
+        mock_error_classifier,
+        mock_quarantine_manager,
+        mock_batch_metrics,
+        gold_filter_callback,
+        gold_transform_callback,
+    ):
+        """Test that filter exclusions are captured in quasi-quarantine."""
+        from bioetl.application.core.base_transformer import FilteredOutError
+
+        async def filtered_transform(ctx, record, index):
+            if record.get("id") == "filtered":
+                raise FilteredOutError("Record excluded by silver filters")
+            return {"entity_id": record.get("id"), "value": record.get("value")}
+
+        config = RecordProcessorConfig(
+            pipeline_name="test",
+            provider="test",
+            entity_type="test",
+            silver_schema=MagicMock(),
+            gold_schema=MagicMock(),
+        )
+
+        transformer = BatchTransformer(
+            context=mock_context,
+            config=config,
+            error_classifier=mock_error_classifier,
+            quarantine_manager=mock_quarantine_manager,
+            batch_metrics=mock_batch_metrics,
+            transform_callback=filtered_transform,
+            gold_filter_callback=gold_filter_callback,
+            gold_transform_callback=gold_transform_callback,
+        )
+
+        records = [
+            {"id": "good", "value": 10},
+            {"id": "filtered", "value": 5},
+        ]
+        batch_id = BatchID(uuid4())
+
+        result = await transformer.transform_batch(records, batch_id)
+
+        assert len(result.silver_records) == 1
+        assert result.quarantined_count == 0
+        assert result.filtered_out_count == 1
+        mock_quarantine_manager.quarantine_filtered_record.assert_called_once()
 
 
 @pytest.mark.unit

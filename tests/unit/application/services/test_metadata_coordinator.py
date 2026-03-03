@@ -454,7 +454,7 @@ class TestSilverMetadata:
         provenance = [
             {
                 "rule_id": "R_TRACE_01",
-                "config_path": "configs/quality/entities/chembl/activity.yaml",
+                "config_path": "configs/entities/chembl/activity.yaml",
                 "layer": "gold",
                 "field": "value",
                 "severity": "error",

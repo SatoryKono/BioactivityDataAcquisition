@@ -139,6 +139,7 @@ class BatchExecutor:
         self.records_silver = 0
         self.records_gold = 0
         self.records_quarantined = 0
+        self.records_filtered_out = 0
 
         # Progress reporting
         self._total_records: int | None = None
@@ -486,6 +487,7 @@ class BatchExecutor:
             self.records_silver += len(result.silver_records)
             self.records_gold += len(result.gold_records)
             self.records_quarantined += result.quarantined_count
+            self.records_filtered_out += result.filtered_out_count
 
             # Track batch ID for lineage (always enabled)
             self._source_batch_ids.append(str(batch_id))
@@ -585,6 +587,7 @@ class BatchExecutor:
                 progress=f"{pct:.0f}%",
                 bronze=self.records_bronze,
                 silver=self.records_silver,
+                filtered_out=self.records_filtered_out,
                 fetched=self.records_fetched,
             )
             self._next_progress_threshold += self._progress_interval
@@ -786,5 +789,6 @@ class BatchExecutor:
             "records_silver": self.records_silver,
             "records_gold": self.records_gold,
             "records_quarantined": self.records_quarantined,
+            "records_filtered_out": self.records_filtered_out,
             "source_batch_ids": list(set(self._source_batch_ids)),
         }

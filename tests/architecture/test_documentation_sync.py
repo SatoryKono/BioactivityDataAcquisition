@@ -8,10 +8,7 @@ import yaml
 
 
 def _resolve_composite_config_dir() -> Path:
-    primary = Path("configs/composites")
-    if primary.exists() and any(primary.glob("*.yaml")):
-        return primary
-    return Path("configs/pipelines/composite")
+    return Path("configs/composites")
 
 
 def test_ports_count_matches_docs() -> None:

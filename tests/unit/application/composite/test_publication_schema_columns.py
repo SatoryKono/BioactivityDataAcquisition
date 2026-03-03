@@ -20,8 +20,6 @@ from bioetl.domain.composite.config import ColumnGroupConfig
 def publication_config() -> dict:
     """Load real publication composite config."""
     config_path = Path("configs/composites/publication.yaml")
-    if not config_path.exists():
-        config_path = Path("configs/pipelines/composite/publication.yaml")
     with open(config_path, encoding="utf-8") as f:
         return yaml.safe_load(f)
 

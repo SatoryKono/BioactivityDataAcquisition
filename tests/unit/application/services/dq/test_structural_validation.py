@@ -396,10 +396,9 @@ class TestLanguageCode:
         assert len(df["language"].iloc[0]) not in [2, 3]
 
 
-# TODO: Add remaining ~40 structural validation tests
-# Based on structural_validation rules from validation schema XLSX
-# Each rule should have 3-4 test scenarios:
-# - both_valid, inconsistent, both_null, partial_null
+# NOTE: Legacy TODO removed.
+# Structural validation coverage in this module was expanded substantially;
+# add new cases only when rules in validation schemas change.
 
 
 # ============================================================================

@@ -362,7 +362,7 @@ class TestDQReportIntegration:
                     "column": "value",
                     "condition": "range",
                     "min": 0,
-                    "config_path": "configs/quality/entities/chembl/activity.yaml",
+                    "config_path": "configs/entities/chembl/activity.yaml",
                     "layer": "gold",
                     "field": "value",
                     "severity": "error",
@@ -389,9 +389,7 @@ class TestDQReportIntegration:
         rules = report_content["checks"]["business_rules"]["rules"]
         assert len(rules) == 1
         assert rules[0]["rule_id"] == "R_TRACE_01"
-        assert (
-            rules[0]["config_path"] == "configs/quality/entities/chembl/activity.yaml"
-        )
+        assert rules[0]["config_path"] == "configs/entities/chembl/activity.yaml"
         assert rules[0]["layer"] == "gold"
         assert rules[0]["field"] == "value"
         assert rules[0]["severity"] == "error"

@@ -17,11 +17,8 @@ def _expected_contract_name(stem: str) -> str:
 
 
 def _resolve_composite_config_dir() -> Path:
-    """Resolve composite config dir with new-first + legacy fallback."""
-    primary = Path("configs/composites")
-    if primary.exists() and any(primary.glob("*.yaml")):
-        return primary
-    return Path("configs/pipelines/composite")
+    """Resolve canonical composite config dir."""
+    return Path("configs/composites")
 
 
 def test_each_composite_pipeline_has_schema_and_contract() -> None:

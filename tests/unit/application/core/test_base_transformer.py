@@ -19,11 +19,12 @@ import pytest
 
 from bioetl.application.core.base_transformer import (
     BaseTransformer,
+    FilteredOutError,
     TransformationError,
 )
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.entities import Bioactivity
-from bioetl.domain.filtering import GoldFilterConfig
+from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
 from bioetl.domain.types import RunType
 
 
@@ -272,6 +273,23 @@ class TestTemplateMethodPattern:
         mock_context.logger.warning.assert_called_once()
         call_args = mock_context.logger.warning.call_args
         assert "entity_validation_failed" in call_args[0]
+
+    @pytest.mark.asyncio
+    async def test_transform_raises_filtered_out_error(
+        self, mock_context: PipelineContext
+    ) -> None:
+        """Test transform() raises FilteredOutError when Silver filter excludes."""
+        transformer = ConcreteTransformer(
+            provider="test",
+            silver_filters=SilverFilterConfig(required_fields=("must_exist",)),
+        )
+
+        with pytest.raises(FilteredOutError):
+            await transformer.transform(mock_context, {"id": "123"}, index=0)
+
+        mock_context.logger.debug.assert_called_once()
+        call_args = mock_context.logger.debug.call_args
+        assert "silver_filter_excluded" in call_args[0]
 
 
 @pytest.mark.unit

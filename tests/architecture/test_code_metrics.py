@@ -127,7 +127,7 @@ class TestFileSizeLimits:
         "storage_factory.py": 400,  # Extracted from storage.py
         "observability.py": 500,  # Bootstrap observability + deprecated aliases + warnings.warn
         # Application layer exemptions
-        "base_transformer.py": 870,  # 867 LOC - BaseTransformer with silver_filters + contract policy + content hash identity + expanded docstrings
+        "base_transformer.py": 885,  # 880 LOC - BaseTransformer with silver_filters + contract policy + content hash identity + filtered-out quasi-quarantine routing
         "publication_term_data_source.py": 600,  # 566 LOC - Wrapper with FilterableDataSourcePort delegation
         "subcellular_fraction_data_source.py": 520,  # 518 LOC - Derived entity wrapper with FilterableDataSourcePort delegation
         "merger.py": 1855,  # 1850 LOC - MergeService with dependency join support + type-safe coalesce + column priority ordering + explicit rules + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation + composite key dependency join + cross-validation integration + field alias registry + expanded docstrings

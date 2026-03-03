@@ -61,7 +61,7 @@ detect_runner() {
     elif [[ -f ".venv/Scripts/python.exe" ]]; then
         echo ".venv/Scripts/python -m"
     else
-        log_error "No Python environment found. Run ./scripts/setup.sh first."
+        log_error "No Python environment found. Run ./scripts/dev/dev_setup.sh first."
         exit 1
     fi
 }

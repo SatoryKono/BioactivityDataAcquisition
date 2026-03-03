@@ -1,4 +1,4 @@
-"""Unit tests for contract policy loader unified/legacy resolution."""
+"""Unit tests for unified contract policy loader."""
 
 from __future__ import annotations
 
@@ -60,30 +60,31 @@ def test_load_contracts_from_unified_entity_with_base_defaults(
 
 
 @pytest.mark.unit
-def test_load_contracts_from_legacy_path_fallback(
+def test_missing_unified_contract_file_raises(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Loader should fallback to configs/contracts/pipelines path when needed."""
+    """Loader should fail when unified entity contract config is missing."""
     load_pipeline_contract_policy.cache_clear()
     monkeypatch.chdir(tmp_path)
 
-    contracts_dir = tmp_path / "configs" / "contracts" / "pipelines" / "test_provider"
-    contracts_dir.mkdir(parents=True)
-    (contracts_dir / "test_entity.yaml").write_text(
-        yaml.safe_dump(
-            {
-                "primary_key": ["id"],
-                "merge_keys": ["id"],
-                "rename_map": {"source": "_source"},
-                "hash_include": [],
-                "hash_exclude": ["_run_id"],
-            },
-            sort_keys=False,
-        ),
+    with pytest.raises(ValueError, match="Contract policy file not found"):
+        load_pipeline_contract_policy("test_provider", "test_entity")
+
+
+@pytest.mark.unit
+def test_missing_contracts_section_raises(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Loader should fail when unified entity file has no contracts section."""
+    load_pipeline_contract_policy.cache_clear()
+    monkeypatch.chdir(tmp_path)
+
+    entity_dir = tmp_path / "configs" / "entities" / "test_provider"
+    entity_dir.mkdir(parents=True)
+    (entity_dir / "test_entity.yaml").write_text(
+        yaml.safe_dump({"pipeline": {"pipeline_name": "test_provider_test_entity"}}),
         encoding="utf-8",
     )
 
-    policy = load_pipeline_contract_policy("test_provider", "test_entity")
-    assert policy.primary_key == ["id"]
-    assert policy.merge_keys == ["id"]
-    assert policy.rename_map == {"source": "_source"}
+    with pytest.raises(ValueError, match="section 'contracts' not found"):
+        load_pipeline_contract_policy("test_provider", "test_entity")

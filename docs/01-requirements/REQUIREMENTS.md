@@ -155,13 +155,13 @@
 
 #### REQ-LINEAGE-001
 - **Уровень**: MUST
-- **Описание**: Silver записи содержат `-source-batch-id` (FK)
-- **Проверка**: Проверить наличие поля `-source-batch-id` в Silver схеме
+- **Описание**: Silver записи содержат `_source_batch_id` (FK)
+- **Проверка**: Проверить наличие поля `_source_batch_id` в Silver схеме
 
 #### REQ-LINEAGE-002
 - **Уровень**: MUST
-- **Описание**: Таблица `sys.lineage-log` хранит маппинг batch-id -> Bronze файлы
-- **Проверка**: Проверить существование и схему таблицы lineage-log
+- **Описание**: Lineage metadata (`*_metadata.yaml` sidecar + metadata models) хранит маппинг batch-id -> Bronze файлы
+- **Проверка**: Проверить наличие и схему metadata sidecar/моделей lineage
 
 #### REQ-LINEAGE-003
 - **Уровень**: MUST NOT
@@ -172,7 +172,7 @@
 
 #### REQ-BACKFILL-001
 - **Уровень**: MUST
-- **Описание**: Все записи содержат `-run-id` (UUID) и `-run-type` (`incremental` | `backfill` | `rebuild`)
+- **Описание**: Все записи содержат `_run_id` (UUID) и `_run_type` (`incremental` | `backfill` | `rebuild`)
 - **Проверка**: Проверить наличие обязательных мета-полей в схеме
 
 #### REQ-BACKFILL-002
@@ -329,12 +329,12 @@
 
 #### REQ-ID-007
 - **Уровень**: MUST
-- **Описание**: Мета-поля (`-ingestion-ts`, `-run-id`, `-run-type`, `-dq-*`) исключаются из хэша
+- **Описание**: Мета-поля (`_ingestion_ts`, `_run_id`, `_run_type`, `_dq_*`) исключаются из хэша
 - **Проверка**: Unit-тест — мета-поля не влияют на хэш
 
 #### REQ-ID-008
 - **Уровень**: MUST
-- **Описание**: При коллизии хэшей (разные `-source-record-id`) — логировать обе записи
+- **Описание**: При коллизии хэшей (разные `source_record_id`) — логировать обе записи
 - **Проверка**: Тест детекции коллизий
 
 ---
