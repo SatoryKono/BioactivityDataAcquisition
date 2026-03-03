@@ -1,839 +1,243 @@
-"""Logical validation tests for numeric and date fields.
+"""Logical DQ validation tests against real check/analyzer outputs.
 
-Tests range constraints, non-negative rules, and date ordering.
-Expected: ~60 tests covering 26 logical rules from validation schema.
+These tests intentionally avoid self-fulfilling assertions and validate
+actual outputs from:
+- check_business_rules
+- GoldDQAnalyzer
+- SilverDQAnalyzer
 """
 
+from __future__ import annotations
+
+from datetime import UTC, datetime
+from unittest.mock import MagicMock
+
+import polars as pl
 import pytest
-import pandas as pd
-from datetime import date
+
+from bioetl.application.services.dq._checks_business import check_business_rules
+from bioetl.application.services.dq.gold_analyzer import GoldDQAnalyzer
+from bioetl.application.services.dq.silver_analyzer import SilverDQAnalyzer
+from bioetl.domain.value_objects.dq_report import DQCheckStatus, GoldDQCheckType, SilverDQCheckType
+
+
+def _derive_row_dq_flags(
+    *,
+    failed_rules: list[dict[str, str]],
+) -> dict[str, str | bool]:
+    """Map failed rule severities to record-level DQ flags for assertions."""
+    error_reasons = [r["reason"] for r in failed_rules if r["severity"] == "error"]
+    warn_reasons = [r["reason"] for r in failed_rules if r["severity"] == "warn"]
+
+    if error_reasons:
+        severity = "error"
+    elif warn_reasons:
+        severity = "warn"
+    else:
+        severity = "pass"
+
+    reason = " | ".join(error_reasons or warn_reasons)
+
+    return {
+        "_dq_error": bool(error_reasons),
+        "_dq_warn": bool(warn_reasons) and not bool(error_reasons),
+        "severity": severity,
+        "reason": reason,
+    }
+
+
+@pytest.fixture()
+def logical_rules() -> list[dict[str, object]]:
+    """Representative logical rules with mixed severities."""
+    return [
+        {
+            "rule_id": "pub_year_min",
+            "name": "publication_year_min",
+            "description": "publication_year must be >= 1500",
+            "column": "publication_year",
+            "condition": "range",
+            "min": 1500,
+            "severity": "error",
+            "decision": "fail",
+        },
+        {
+            "rule_id": "pub_year_max",
+            "name": "publication_year_max",
+            "description": "publication_year > 2100 is suspicious",
+            "column": "publication_year",
+            "condition": "range",
+            "max": 2100,
+            "severity": "warn",
+            "decision": "warn",
+        },
+        {
+            "rule_id": "cit_non_negative",
+            "name": "citations_non_negative",
+            "description": "citations_received must be >= 0",
+            "column": "citations_received",
+            "condition": "range",
+            "min": 0,
+            "severity": "error",
+            "decision": "fail",
+        },
+    ]
 
 
 @pytest.mark.unit
-class TestPublicationYearRange:
-    """Test publication_year ∈ [1500, CURRENT_YEAR + 1]."""
+class TestLogicalBusinessChecks:
+    """Logical validations must assert checker outputs, not hand-written conditions."""
 
-    @pytest.mark.parametrize(
-        "year,expected",
-        [
-            (1500, "PASS"),  # min boundary
-            (2024, "PASS"),  # past year
-            (2025, "PASS"),  # past year
-            (2026, "PASS"),  # current year
-            (2027, "PASS"),  # current year + 1
-            (1499, "WARN"),  # below min
-            (2028, "WARN"),  # far future (current + 2)
-            (0, "WARN"),  # zero
-            (-1, "WARN"),  # negative
-        ],
-    )
-    def test_publication_year_range(
-        self, minimal_pubmed_publication_df: pd.DataFrame, year: int, expected: str
+    def test_logical_rules_pass_without_flags(
+        self, logical_rules: list[dict[str, object]]
     ) -> None:
-        """Validate publication_year range [1500, CURRENT_YEAR + 1]."""
-        df = minimal_pubmed_publication_df.copy()
-        df["publication_year"] = year
-
-        current_year = date.today().year
-
-        if 1500 <= year <= current_year + 1:
-            assert expected == "PASS"
-        else:
-            assert expected == "WARN", f"Year {year} should warn"
-
-
-@pytest.mark.unit
-class TestCitationsReceivedNonNegative:
-    """Test citations_received >= 0."""
-
-    @pytest.mark.parametrize(
-        "value,expected",
-        [
-            (0, "PASS"),
-            (1, "PASS"),
-            (100, "PASS"),
-            (-1, "WARN"),  # negative
-            (-100, "WARN"),
-        ],
-    )
-    def test_citations_received_non_negative(
-        self,
-        minimal_openalex_publication_df: pd.DataFrame,
-        value: int,
-        expected: str,
-    ) -> None:
-        """Validate citations_received >= 0."""
-        df = minimal_openalex_publication_df.copy()
-        df["citations_received"] = value
-
-        if value >= 0:
-            assert expected == "PASS"
-        else:
-            assert expected == "WARN", f"Value {value} should warn"
-
-
-@pytest.mark.unit
-class TestCitationsMadeNonNegative:
-    """Test citations_made >= 0."""
-
-    @pytest.mark.parametrize(
-        "value,expected",
-        [
-            (0, "PASS"),
-            (50, "PASS"),
-            (-1, "WARN"),
-        ],
-    )
-    def test_citations_made_non_negative(
-        self, minimal_pubmed_publication_df: pd.DataFrame, value: int, expected: str
-    ) -> None:
-        """Validate citations_made >= 0."""
-        df = minimal_pubmed_publication_df.copy()
-        df["citations_made"] = value
-
-        if value >= 0:
-            assert expected == "PASS"
-        else:
-            assert expected == "WARN"
-
-
-@pytest.mark.unit
-class TestFWCINonNegative:
-    """Test fwci >= 0.0 (OpenAlex)."""
-
-    @pytest.mark.parametrize(
-        "value,expected",
-        [
-            (0.0, "PASS"),
-            (1.5, "PASS"),
-            (10.0, "PASS"),
-            (-0.1, "WARN"),
-            (-1.0, "WARN"),
-        ],
-    )
-    def test_fwci_non_negative(
-        self,
-        minimal_openalex_publication_df: pd.DataFrame,
-        value: float,
-        expected: str,
-    ) -> None:
-        """Validate fwci >= 0.0."""
-        df = minimal_openalex_publication_df.copy()
-        df["fwci"] = value
-
-        if value >= 0:
-            assert expected == "PASS"
-        else:
-            assert expected == "WARN"
-
-
-@pytest.mark.unit
-class TestInfluentialCitationCountNonNegative:
-    """Test influential_citation_count >= 0 (SemanticScholar)."""
-
-    @pytest.mark.parametrize(
-        "value,expected",
-        [
-            (0, "PASS"),
-            (5, "PASS"),
-            (-1, "WARN"),
-        ],
-    )
-    def test_influential_citation_count_non_negative(
-        self,
-        minimal_semanticscholar_publication_df: pd.DataFrame,
-        value: int,
-        expected: str,
-    ) -> None:
-        """Validate influential_citation_count >= 0."""
-        df = minimal_semanticscholar_publication_df.copy()
-        df["influential_citation_count"] = value
-
-        if value >= 0:
-            assert expected == "PASS"
-        else:
-            assert expected == "WARN"
-
-
-@pytest.mark.unit
-class TestCitationsRelationship:
-    """Test citations_received >= influential_citation_count."""
-
-    def test_citations_gte_influential_valid(
-        self, minimal_semanticscholar_publication_df: pd.DataFrame
-    ) -> None:
-        """PASS: citations_received >= influential_citation_count."""
-        df = minimal_semanticscholar_publication_df.copy()
-        df["citations_received"] = 10
-        df["influential_citation_count"] = 5
-
-        assert (
-            df["citations_received"].iloc[0] >= df["influential_citation_count"].iloc[0]
+        df = pl.DataFrame(
+            {
+                "publication_year": [2024],
+                "citations_received": [10],
+            }
         )
 
-    def test_citations_less_than_influential_warns(
-        self, minimal_semanticscholar_publication_df: pd.DataFrame
-    ) -> None:
-        """WARN: influential > citations -> logical inconsistency."""
-        df = minimal_semanticscholar_publication_df.copy()
-        df["citations_received"] = 5
-        df["influential_citation_count"] = 10
+        result = check_business_rules(df, logical_rules)
+        failed_rules = [
+            {
+                "severity": str(rule.severity or "error"),
+                "reason": str(rule.description or rule.name or rule.rule_id),
+            }
+            for rule in result.rules
+            if not rule.passed
+        ]
+        flags = _derive_row_dq_flags(failed_rules=failed_rules)
 
-        # Logically inconsistent
-        assert (
-            df["citations_received"].iloc[0] < df["influential_citation_count"].iloc[0]
+        assert result.status == DQCheckStatus.PASS
+        assert flags["_dq_error"] is False
+        assert flags["_dq_warn"] is False
+        assert flags["severity"] == "pass"
+        assert flags["reason"] == ""
+
+    def test_negative_citations_sets_dq_error_and_reason(
+        self, logical_rules: list[dict[str, object]]
+    ) -> None:
+        df = pl.DataFrame(
+            {
+                "publication_year": [2024],
+                "citations_received": [-1],
+            }
         )
 
+        result = check_business_rules(df, logical_rules)
+        failed_rules = [
+            {
+                "severity": str(rule.severity or "error"),
+                "reason": str(rule.description or rule.name or rule.rule_id),
+            }
+            for rule in result.rules
+            if not rule.passed
+        ]
+        flags = _derive_row_dq_flags(failed_rules=failed_rules)
 
-@pytest.mark.unit
-class TestPageNumberRanges:
-    """Test page_first >= 0, page_last >= 0 when numeric."""
+        assert result.status == DQCheckStatus.FAIL
+        assert flags["_dq_error"] is True
+        assert flags["_dq_warn"] is False
+        assert flags["severity"] == "error"
+        assert "citations_received must be >= 0" in str(flags["reason"])
 
-    @pytest.mark.parametrize(
-        "page_value,expected",
-        [
-            (0, "PASS"),
-            (1, "PASS"),
-            (100, "PASS"),
-            (-1, "WARN"),
-        ],
-    )
-    def test_page_first_non_negative(
-        self,
-        minimal_pubmed_publication_df: pd.DataFrame,
-        page_value: int,
-        expected: str,
+    def test_future_year_sets_dq_warn_without_dq_error(
+        self, logical_rules: list[dict[str, object]]
     ) -> None:
-        """Validate page_first >= 0 when numeric."""
-        df = minimal_pubmed_publication_df.copy()
-        df["page_first"] = str(page_value)
+        df = pl.DataFrame(
+            {
+                "publication_year": [2201],
+                "citations_received": [10],
+            }
+        )
 
-        if page_value >= 0:
-            assert expected == "PASS"
-        else:
-            assert expected == "WARN"
+        result = check_business_rules(df, logical_rules)
+        failed_rules = [
+            {
+                "severity": str(rule.severity or "error"),
+                "reason": str(rule.description or rule.name or rule.rule_id),
+            }
+            for rule in result.rules
+            if not rule.passed
+        ]
+        flags = _derive_row_dq_flags(failed_rules=failed_rules)
 
-
-@pytest.mark.unit
-class TestPubMonthRange:
-    """Test pub_month ∈ [1, 12] (PubMed)."""
-
-    @pytest.mark.parametrize(
-        "month,expected",
-        [
-            (1, "PASS"),
-            (6, "PASS"),
-            (12, "PASS"),
-            (0, "WARN"),
-            (13, "WARN"),
-            (-1, "WARN"),
-        ],
-    )
-    def test_pub_month_range(
-        self, minimal_pubmed_publication_df: pd.DataFrame, month: int, expected: str
-    ) -> None:
-        """Validate pub_month in [1, 12]."""
-        df = minimal_pubmed_publication_df.copy()
-        df["pub_month"] = month
-
-        if 1 <= month <= 12:
-            assert expected == "PASS"
-        else:
-            assert expected == "WARN"
+        assert result.status == DQCheckStatus.FAIL
+        assert flags["_dq_error"] is False
+        assert flags["_dq_warn"] is True
+        assert flags["severity"] == "warn"
+        assert "publication_year > 2100 is suspicious" in str(flags["reason"])
 
 
 @pytest.mark.unit
-class TestPubDayRange:
-    """Test pub_day ∈ [1, 31] (PubMed)."""
+class TestLogicalAnalyzerIntegration:
+    """Logical checks should be visible in analyzer reports."""
 
-    @pytest.mark.parametrize(
-        "day,expected",
-        [
-            (1, "PASS"),
-            (15, "PASS"),
-            (31, "PASS"),
-            (0, "WARN"),
-            (32, "WARN"),
-        ],
-    )
-    def test_pub_day_range(
-        self, minimal_pubmed_publication_df: pd.DataFrame, day: int, expected: str
+    def test_gold_analyzer_exposes_rule_severity_and_reason(
+        self, logical_rules: list[dict[str, object]]
     ) -> None:
-        """Validate pub_day in [1, 31]."""
-        df = minimal_pubmed_publication_df.copy()
-        df["pub_day"] = day
-
-        if 1 <= day <= 31:
-            assert expected == "PASS"
-        else:
-            assert expected == "WARN"
-
-
-@pytest.mark.unit
-class TestDateOrdering:
-    """Test date_completed <= date_revised (PubMed)."""
-
-    def test_date_completed_before_revised_valid(
-        self, minimal_pubmed_publication_df: pd.DataFrame
-    ) -> None:
-        """PASS: date_completed <= date_revised."""
-        df = minimal_pubmed_publication_df.copy()
-        df["date_completed"] = date(2024, 1, 1)
-        df["date_revised"] = date(2024, 1, 15)
-
-        assert df["date_completed"].iloc[0] <= df["date_revised"].iloc[0]
-
-    def test_date_completed_after_revised_warns(
-        self, minimal_pubmed_publication_df: pd.DataFrame
-    ) -> None:
-        """WARN: date_completed > date_revised -> temporal inconsistency."""
-        df = minimal_pubmed_publication_df.copy()
-        df["date_completed"] = date(2024, 1, 15)
-        df["date_revised"] = date(2024, 1, 1)
-
-        # Logically inconsistent
-        assert df["date_completed"].iloc[0] > df["date_revised"].iloc[0]
-
-
-# NOTE: Legacy TODO removed.
-# Logical validation coverage in this module already spans core range,
-# count/metric, date-ordering, and citation DQ rules.
-
-
-# ============================================================================
-# EXPANDED LOGICAL VALIDATION TESTS
-# Generated to achieve 60 tests target (26 rules × ~2 tests/rule)
-# ============================================================================
-
-
-@pytest.mark.unit
-class TestPublicationYearEdgeCases:
-    """Edge cases for publication year range validation."""
-
-    def test_year_1500_boundary_valid(
-        self, minimal_pubmed_publication_df: pd.DataFrame
-    ) -> None:
-        """PASS: year == 1500 (min boundary)."""
-        df = minimal_pubmed_publication_df.copy()
-        df["publication_year"] = 1500
-
-        assert df["publication_year"].iloc[0] == 1500
-
-    def test_year_current_plus_one_valid(
-        self, minimal_pubmed_publication_df: pd.DataFrame
-    ) -> None:
-        """PASS: year == CURRENT_YEAR + 1 (max boundary)."""
-        df = minimal_pubmed_publication_df.copy()
-        current_year = date.today().year
-        df["publication_year"] = current_year + 1
-
-        assert df["publication_year"].iloc[0] == current_year + 1
-
-    def test_year_1499_warns(self, minimal_pubmed_publication_df: pd.DataFrame) -> None:
-        """WARN: year == 1499 (below min)."""
-        df = minimal_pubmed_publication_df.copy()
-        df["publication_year"] = 1499
-
-        assert df["publication_year"].iloc[0] < 1500
-
-    def test_year_far_future_warns(
-        self, minimal_pubmed_publication_df: pd.DataFrame
-    ) -> None:
-        """WARN: year == CURRENT_YEAR + 10 (far future)."""
-        df = minimal_pubmed_publication_df.copy()
-        current_year = date.today().year
-        df["publication_year"] = current_year + 10
-
-        assert df["publication_year"].iloc[0] > current_year + 1
-
-
-@pytest.mark.unit
-class TestPublicationYearGoldFilterWarning:
-    """DQ warn for publication_year < 1950 (Gold stage filter boundary).
-
-    Two DQ range rules apply to publication_year:
-      1. range [1500, 2100] severity=error  — catches invalid years
-      2. range min=1950    severity=warn   — signals Gold-stage filtering
-
-    Expected outcomes:
-      year=1499  → error (rule 1: outside [1500, 2100])
-      year=1500  → warn  (rule 1: pass, rule 2: below 1950)
-      year=1949  → warn  (rule 1: pass, rule 2: below 1950)
-      year=1950  → pass  (both rules pass)
-      year=2024  → pass  (both rules pass)
-    """
-
-    @pytest.mark.parametrize(
-        "year,expected_severity",
-        [
-            (1499, "error"),  # below 1500 → error (existing range 1500–2100)
-            (1500, "warn"),  # valid but pre-1950 → warn
-            (1800, "warn"),  # valid but pre-1950 → warn
-            (1949, "warn"),  # just below Gold boundary → warn
-            (1950, "pass"),  # Gold boundary (inclusive) → pass
-            (1951, "pass"),  # above Gold boundary → pass
-            (2024, "pass"),  # typical year → pass
-        ],
-    )
-    def test_publication_year_gold_filter_warning(
-        self,
-        minimal_pubmed_publication_df: pd.DataFrame,
-        year: int,
-        expected_severity: str,
-    ) -> None:
-        """Validate DQ severity for publication_year relative to Gold filter boundary."""
-        df = minimal_pubmed_publication_df.copy()
-        df["publication_year"] = year
-
-        if year < 1500 or year > 2100:
-            assert expected_severity == "error", (
-                f"Year {year} outside [1500, 2100] should be error"
-            )
-        elif year < 1950:
-            assert expected_severity == "warn", (
-                f"Year {year} in [1500, 1949] should be warn (will be filtered at Gold)"
-            )
-        else:
-            assert expected_severity == "pass", f"Year {year} >= 1950 should pass"
-
-
-@pytest.mark.unit
-class TestCountFieldsNonNegative:
-    """All count fields MUST be >= 0."""
-
-    @pytest.mark.parametrize(
-        "field,value,expected",
-        [
-            ("author_count", 0, "PASS"),
-            ("author_count", 5, "PASS"),
-            ("author_count", -1, "WARN"),
-            ("mesh_heading_count", 0, "PASS"),
-            ("mesh_heading_count", 10, "PASS"),
-            ("mesh_heading_count", -5, "WARN"),
-            ("reference_count", 0, "PASS"),
-            ("reference_count", 50, "PASS"),
-            ("reference_count", -1, "WARN"),
-        ],
-    )
-    def test_count_field_non_negative(
-        self,
-        minimal_pubmed_publication_df: pd.DataFrame,
-        field: str,
-        value: int,
-        expected: str,
-    ) -> None:
-        """Parametrized test for count field ranges."""
-        df = minimal_pubmed_publication_df.copy()
-
-        # Add field if not exists
-        df[field] = value
-
-        if value >= 0:
-            assert expected == "PASS"
-        else:
-            assert expected == "WARN"
-
-
-@pytest.mark.unit
-class TestCitationFieldsExtended:
-    """Extended tests for citation counts."""
-
-    def test_citations_received_zero_valid(
-        self, minimal_openalex_publication_df: pd.DataFrame
-    ) -> None:
-        """PASS: citations_received == 0 (new publication)."""
-        df = minimal_openalex_publication_df.copy()
-        df["citations_received"] = 0
-
-        assert df["citations_received"].iloc[0] == 0
-
-    def test_citations_received_large_valid(
-        self, minimal_openalex_publication_df: pd.DataFrame
-    ) -> None:
-        """PASS: citations_received == 10000 (highly cited)."""
-        df = minimal_openalex_publication_df.copy()
-        df["citations_received"] = 10000
-
-        assert df["citations_received"].iloc[0] == 10000
-
-    def test_citations_made_zero_valid(
-        self, minimal_pubmed_publication_df: pd.DataFrame
-    ) -> None:
-        """PASS: citations_made == 0 (no references)."""
-        df = minimal_pubmed_publication_df.copy()
-        df["citations_made"] = 0
-
-        assert df["citations_made"].iloc[0] == 0
-
-
-@pytest.mark.unit
-class TestMetricFields:
-    """Test metric field ranges (FWCI, h-index, etc.)."""
-
-    @pytest.mark.parametrize(
-        "value,expected",
-        [
-            (0.0, "PASS"),
-            (1.0, "PASS"),
-            (5.5, "PASS"),
-            (-0.5, "WARN"),
-            (-10.0, "WARN"),
-        ],
-    )
-    def test_fwci_non_negative(
-        self,
-        minimal_openalex_publication_df: pd.DataFrame,
-        value: float,
-        expected: str,
-    ) -> None:
-        """FWCI (Field-Weighted Citation Impact) MUST be >= 0."""
-        df = minimal_openalex_publication_df.copy()
-        df["fwci"] = value
-
-        if value >= 0:
-            assert expected == "PASS"
-        else:
-            assert expected == "WARN"
-
-    def test_fwci_very_high_valid(
-        self, minimal_openalex_publication_df: pd.DataFrame
-    ) -> None:
-        """PASS: FWCI == 50.0 (exceptional impact)."""
-        df = minimal_openalex_publication_df.copy()
-        df["fwci"] = 50.0
-
-        assert df["fwci"].iloc[0] == 50.0
-
-
-@pytest.mark.unit
-class TestMonthDayRanges:
-    """Test month and day field ranges."""
-
-    @pytest.mark.parametrize(
-        "month,expected",
-        [
-            (1, "PASS"),  # January
-            (6, "PASS"),  # June
-            (12, "PASS"),  # December
-            (0, "WARN"),  # Invalid
-            (13, "WARN"),  # Invalid
-            (-1, "WARN"),  # Negative
-        ],
-    )
-    def test_pub_month_range(
-        self,
-        minimal_pubmed_publication_df: pd.DataFrame,
-        month: int,
-        expected: str,
-    ) -> None:
-        """pub_month MUST be in [1, 12]."""
-        df = minimal_pubmed_publication_df.copy()
-        df["pub_month"] = month
-
-        if 1 <= month <= 12:
-            assert expected == "PASS"
-        else:
-            assert expected == "WARN"
-
-    @pytest.mark.parametrize(
-        "day,expected",
-        [
-            (1, "PASS"),  # First day
-            (15, "PASS"),  # Mid-month
-            (31, "PASS"),  # Last day
-            (0, "WARN"),  # Invalid
-            (32, "WARN"),  # Invalid
-            (-5, "WARN"),  # Negative
-        ],
-    )
-    def test_pub_day_range(
-        self,
-        minimal_pubmed_publication_df: pd.DataFrame,
-        day: int,
-        expected: str,
-    ) -> None:
-        """pub_day MUST be in [1, 31]."""
-        df = minimal_pubmed_publication_df.copy()
-        df["pub_day"] = day
-
-        if 1 <= day <= 31:
-            assert expected == "PASS"
-        else:
-            assert expected == "WARN"
-
-
-@pytest.mark.unit
-class TestVolumeIssueFields:
-    """Test volume and issue field validation."""
-
-    def test_volume_non_empty_valid(
-        self, minimal_pubmed_publication_df: pd.DataFrame
-    ) -> None:
-        """PASS: volume is non-empty string."""
-        df = minimal_pubmed_publication_df.copy()
-        df["volume"] = "42"
-
-        assert len(df["volume"].iloc[0]) > 0
-
-    def test_volume_numeric_valid(
-        self, minimal_pubmed_publication_df: pd.DataFrame
-    ) -> None:
-        """PASS: volume is numeric string."""
-        df = minimal_pubmed_publication_df.copy()
-        df["volume"] = "123"
-
-        assert df["volume"].iloc[0].isnumeric()
-
-    def test_issue_non_empty_valid(
-        self, minimal_pubmed_publication_df: pd.DataFrame
-    ) -> None:
-        """PASS: issue is non-empty string."""
-        df = minimal_pubmed_publication_df.copy()
-        df["issue"] = "5"
-
-        assert len(df["issue"].iloc[0]) > 0
-
-
-@pytest.mark.unit
-class TestPercentageFields:
-    """Test percentage fields (0-100 range)."""
-
-    def test_oa_percentage_in_range(
-        self, minimal_openalex_publication_df: pd.DataFrame
-    ) -> None:
-        """PASS: OA percentage in [0, 100]."""
-        df = minimal_openalex_publication_df.copy()
-
-        # Assuming there's an OA percentage field
-        df["oa_percentage"] = 75.5
-
-        assert 0 <= df["oa_percentage"].iloc[0] <= 100
-
-    def test_oa_percentage_above_100_warns(
-        self, minimal_openalex_publication_df: pd.DataFrame
-    ) -> None:
-        """WARN: OA percentage > 100 (invalid)."""
-        df = minimal_openalex_publication_df.copy()
-        df["oa_percentage"] = 150.0
-
-        assert df["oa_percentage"].iloc[0] > 100
-
-
-# ============================================================================
-# ChEMBL / PubMed CITATION DQ RULES
-# Validates range rules added in configs/entities/{chembl,pubmed}/publication.yaml
-# Rules:
-#   - citations_received  min: 0           (severity: error)
-#   - citations_received  max: 10_000_000  (severity: warn)
-#   - citations_made      min: 0           (severity: error)
-# ============================================================================
-
-
-@pytest.mark.unit
-class TestChEMBLCitationDQRules:
-    """DQ rules for citations_received / citations_made in ChEMBL publication."""
-
-    # -- citations_received: min >= 0 (error) --------------------------------
-
-    @pytest.mark.parametrize(
-        "value,expected",
-        [
-            (0, "PASS"),
-            (1, "PASS"),
-            (500, "PASS"),
-            (-1, "ERROR"),
-            (-100, "ERROR"),
-        ],
-    )
-    def test_citations_received_non_negative(
-        self,
-        minimal_chembl_publication_df: pd.DataFrame,
-        value: int,
-        expected: str,
-    ) -> None:
-        """citations_received < 0 → DQ error (range min: 0)."""
-        df = minimal_chembl_publication_df.copy()
-        df["citations_received"] = value
-
-        if value >= 0:
-            assert expected == "PASS"
-        else:
-            assert expected == "ERROR", f"Value {value} must trigger DQ error"
-
-    # -- citations_received: max 10_000_000 (warn) ---------------------------
-
-    @pytest.mark.parametrize(
-        "value,expected",
-        [
-            (9_999_999, "PASS"),
-            (10_000_000, "PASS"),  # at boundary — not exceeded
-            (10_000_001, "WARN"),  # exceeds max threshold
-            (15_000_000, "WARN"),
-        ],
-    )
-    def test_citations_received_high_count_warns(
-        self,
-        minimal_chembl_publication_df: pd.DataFrame,
-        value: int,
-        expected: str,
-    ) -> None:
-        """citations_received > 10M → DQ warn (suspiciously high)."""
-        df = minimal_chembl_publication_df.copy()
-        df["citations_received"] = value
-
-        if value <= 10_000_000:
-            assert expected == "PASS"
-        else:
-            assert expected == "WARN", f"Value {value} must trigger DQ warn"
-
-    # -- citations_received: nullable ----------------------------------------
-
-    def test_citations_received_null_passes(
-        self, minimal_chembl_publication_df: pd.DataFrame
-    ) -> None:
-        """citations_received = None → pass (nullable: true)."""
-        df = minimal_chembl_publication_df.copy()
-        df["citations_received"] = None
-
-        assert pd.isna(df["citations_received"].iloc[0])
-
-    # -- citations_made: min >= 0 (error) ------------------------------------
-
-    @pytest.mark.parametrize(
-        "value,expected",
-        [
-            (0, "PASS"),
-            (42, "PASS"),
-            (-1, "ERROR"),
-        ],
-    )
-    def test_citations_made_non_negative(
-        self,
-        minimal_chembl_publication_df: pd.DataFrame,
-        value: int,
-        expected: str,
-    ) -> None:
-        """citations_made < 0 → DQ error (range min: 0)."""
-        df = minimal_chembl_publication_df.copy()
-        df["citations_made"] = value
-
-        if value >= 0:
-            assert expected == "PASS"
-        else:
-            assert expected == "ERROR"
-
-    # -- citations_made: nullable --------------------------------------------
-
-    def test_citations_made_null_passes(
-        self, minimal_chembl_publication_df: pd.DataFrame
-    ) -> None:
-        """citations_made = None → pass (nullable: true)."""
-        df = minimal_chembl_publication_df.copy()
-        df["citations_made"] = None
-
-        assert pd.isna(df["citations_made"].iloc[0])
-
-
-@pytest.mark.unit
-class TestPubMedCitationDQRules:
-    """DQ rules for citations_received / citations_made in PubMed publication."""
-
-    # -- citations_received: min >= 0 (error) --------------------------------
-
-    @pytest.mark.parametrize(
-        "value,expected",
-        [
-            (0, "PASS"),
-            (1, "PASS"),
-            (500, "PASS"),
-            (-1, "ERROR"),
-            (-100, "ERROR"),
-        ],
-    )
-    def test_citations_received_non_negative(
-        self,
-        minimal_pubmed_publication_df: pd.DataFrame,
-        value: int,
-        expected: str,
-    ) -> None:
-        """citations_received < 0 → DQ error (range min: 0)."""
-        df = minimal_pubmed_publication_df.copy()
-        df["citations_received"] = value
-
-        if value >= 0:
-            assert expected == "PASS"
-        else:
-            assert expected == "ERROR", f"Value {value} must trigger DQ error"
-
-    # -- citations_received: max 10_000_000 (warn) ---------------------------
-
-    @pytest.mark.parametrize(
-        "value,expected",
-        [
-            (9_999_999, "PASS"),
-            (10_000_000, "PASS"),  # at boundary — not exceeded
-            (10_000_001, "WARN"),  # exceeds max threshold
-            (15_000_000, "WARN"),
-        ],
-    )
-    def test_citations_received_high_count_warns(
-        self,
-        minimal_pubmed_publication_df: pd.DataFrame,
-        value: int,
-        expected: str,
-    ) -> None:
-        """citations_received > 10M → DQ warn (suspiciously high)."""
-        df = minimal_pubmed_publication_df.copy()
-        df["citations_received"] = value
-
-        if value <= 10_000_000:
-            assert expected == "PASS"
-        else:
-            assert expected == "WARN", f"Value {value} must trigger DQ warn"
-
-    # -- citations_received: nullable ----------------------------------------
-
-    def test_citations_received_null_passes(
-        self, minimal_pubmed_publication_df: pd.DataFrame
-    ) -> None:
-        """citations_received = None → pass (nullable: true)."""
-        df = minimal_pubmed_publication_df.copy()
-        df["citations_received"] = None
-
-        assert pd.isna(df["citations_received"].iloc[0])
-
-    # -- citations_made: min >= 0 (error) ------------------------------------
-
-    @pytest.mark.parametrize(
-        "value,expected",
-        [
-            (0, "PASS"),
-            (42, "PASS"),
-            (-1, "ERROR"),
-        ],
-    )
-    def test_citations_made_non_negative(
-        self,
-        minimal_pubmed_publication_df: pd.DataFrame,
-        value: int,
-        expected: str,
-    ) -> None:
-        """citations_made < 0 → DQ error (range min: 0)."""
-        df = minimal_pubmed_publication_df.copy()
-        df["citations_made"] = value
-
-        if value >= 0:
-            assert expected == "PASS"
-        else:
-            assert expected == "ERROR"
-
-    # -- citations_made: nullable --------------------------------------------
-
-    def test_citations_made_null_passes(
-        self, minimal_pubmed_publication_df: pd.DataFrame
-    ) -> None:
-        """citations_made = None → pass (nullable: true)."""
-        df = minimal_pubmed_publication_df.copy()
-        df["citations_made"] = None
-
-        assert pd.isna(df["citations_made"].iloc[0])
+        analyzer = GoldDQAnalyzer()
+
+        config = MagicMock()
+        config.get_checks_enums.return_value = [GoldDQCheckType.BUSINESS_RULES]
+
+        report = analyzer.analyze(
+            data=pl.DataFrame(
+                {
+                    "publication_year": [2201],
+                    "citations_received": [10],
+                }
+            ),
+            run_id="rf01-logical-gold",
+            pipeline="test_pipeline",
+            target_table="gold.test",
+            config=config,
+            timestamp=datetime.now(UTC),
+            business_rules=logical_rules,
+        )
+
+        business_rules_result = report.checks["business_rules"]
+        failed = [r for r in business_rules_result["rules"] if not r["passed"]]
+
+        assert business_rules_result["status"] == DQCheckStatus.FAIL.value
+        assert failed
+        assert failed[0]["severity"] in {"warn", "error"}
+        assert isinstance(failed[0]["description"], str)
+        assert failed[0]["description"]
+
+    def test_silver_analyzer_threshold_warn_maps_to_dq_warn(self) -> None:
+        analyzer = SilverDQAnalyzer()
+
+        config = MagicMock()
+        config.get_checks_enums.return_value = [SilverDQCheckType.RECORD_COUNT]
+
+        report = analyzer.analyze(
+            data=pl.DataFrame({"id": list(range(90))}),
+            run_id="rf01-logical-silver",
+            pipeline="test_pipeline",
+            target_table="silver.test",
+            source_batch_ids=["batch-1"],
+            config=config,
+            timestamp=datetime.now(UTC),
+            primary_keys=["id"],
+            input_record_count=100,
+            quarantined_count=10,
+            soft_fail_threshold=0.05,
+            hard_fail_threshold=0.20,
+        )
+
+        threshold_status = report.thresholds.threshold_status
+        flags = {
+            "_dq_error": threshold_status == DQCheckStatus.FAIL,
+            "_dq_warn": threshold_status == DQCheckStatus.WARN,
+            "severity": "warn" if threshold_status == DQCheckStatus.WARN else "pass",
+            "reason": "error_rate_above_soft_threshold"
+            if threshold_status == DQCheckStatus.WARN
+            else "",
+        }
+
+        assert threshold_status == DQCheckStatus.WARN
+        assert flags["_dq_error"] is False
+        assert flags["_dq_warn"] is True
+        assert flags["severity"] == "warn"
+        assert flags["reason"] == "error_rate_above_soft_threshold"
