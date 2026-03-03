@@ -1,47 +1,87 @@
-# Template for Pipeline Configuration
+# Unified Entity Config Template
 # Location: configs/entities/<provider>/<entity>.yaml
 
+version: "1.0.0"
+provider: {{provider}}
+entity: {{entity}}
+
 pipeline:
-    name: {{provider}}_{{entity}}
-    provider: {{provider}}
-    entity: {{entity}}
+  pipeline_name: {{provider}}_{{entity}}
+  provider: {{provider}}
+  entity_type: {{entity}}
+  description: "Extract {{entity}} records from {{provider}} API"
+  business_primary_keys:
+    - {{primary_key}}
+  batch_size: 100
 
-source:
-    type: api
-    load_strategy: incremental
-    watermark_field: {{watermark_field}}
+schema:
+  content_hash:
+    include: []
+    exclude: []
+  column_groups:
+    - name: system
+      fields:
+        - entity_id
+        - content_hash
+        - _run_id
+        - _run_type
+        - _source_batch_id
+        - _ingestion_ts
+        - _index
+    - name: business
+      fields:
+        - {{primary_key}}
+        # - field_1
+        # - field_2
+    - name: dq
+      pattern: ^_dq_
+  silver:
+    include_groups: [system, business, dq]
+    exclude_fields: []
+    alias_policy: preserve
+  gold:
+    include_groups: [system, business]
+    exclude_fields: [_dq_*, _source_batch_id, _index]
+    alias_policy: canonical
 
-transform:
-    version: "1.0.0"
-    steps:
-        - normalize_fields
-        - generate_content_hash
+quality:
+  version: "1.0.0"
+  provider: {{provider}}
+  entity: {{entity}}
+  field_validations:
+    - field: {{primary_key}}
+      type: required
+      nullable: false
+      error_message: "{{primary_key}} is required"
+  cross_field_validations: []
+  conditional_validations: []
 
-sink:
-    bronze:
-        path: "data/output/bronze/{{provider}}/{{entity}}"
-        format: json
+filters:
+  version: "1.0.0"
+  provider: {{provider}}
+  entity: {{entity}}
+  input_filter:
+    enabled: false
+  gold_filters:
+    required_fields:
+      - {{primary_key}}
+    columns: {}
 
-    silver:
-        path: "data/output/silver/{{provider}}/{{entity}}"
-        format: delta
-        mode: merge
-        primary_key: [ "{{primary_key}}" ]
-        forensic_retention: true
-
-    gold:
-        enabled: false
-        # path: "data/output/gold/{{provider}}/{{entity}}"
-        # format: delta
-        # mode: overwrite
-
-dq_rules:
-    soft_fail_threshold: 0.05
-    hard_fail_threshold: 0.20
-
-circuit_breaker:
-    failure_threshold: 5
-    recovery_timeout: 300
-
-rate_limit:
-    requests_per_second: 5
+contracts:
+  primary_key:
+    - {{primary_key}}
+  merge_keys:
+    - {{primary_key}}
+  rename_map:
+    run_id: _run_id
+    run_type: _run_type
+    source_batch_id: _source_batch_id
+    ingestion_ts: _ingestion_ts
+    source: _source
+  hash_include: []
+  hash_exclude:
+    - _ingestion_ts
+    - _run_id
+    - _run_type
+    - _dq_error
+    - _dq_warn

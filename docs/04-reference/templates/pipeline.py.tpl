@@ -1,73 +1,77 @@
+"""Template for a new transformer (legacy file name kept for compatibility).
+
+Location: src/bioetl/application/pipelines/<provider>/<entity>_transformer.py
 """
-Template for a new Pipeline class.
-Location: src/bioetl/application/pipelines/<provider>_<entity>.py
-"""
+
 from __future__ import annotations
 
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
-from bioetl.application.core.base import BasePipeline
-from bioetl.domain.config import PipelineConfig, RuntimeConfig
-from bioetl.application.core.pipeline_services import PipelineServices
-from bioetl.domain.transformations import generate_content_hash, generate_entity_id
-from bioetl.domain.types import Watermark
+from bioetl.application.core.base_transformer import BaseTransformer
+from bioetl.domain.services import IdentityService
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
+    from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
+    from bioetl.domain.ports import (
+        DataNormalizationPort,
+        MetricsPort,
+        PiiHasherPort,
+        TracingPort,
+    )
+    from bioetl.domain.types import BronzeRecord, SilverRecord
 
-# Default Configuration
-{{PROVIDER}}_{{ENTITY}}_CONFIG = PipelineConfig(
-    pipeline_name="{{provider}}_{{entity}}",
-    provider="{{provider}}",
-    entity_type="{{entity}}",
-    primary_keys=["{{primary_key}}"],
-    silver_table="{{provider}}.{{entity}}",
-)
 
-class {{Provider}}{{Entity}}Pipeline(BasePipeline):
-    """Pipeline for {{Provider}} {{Entity}}."""
+class {{Provider}}{{Entity}}Transformer(BaseTransformer):
+    """Transformer for {{provider}}/{{entity}} records."""
 
-    @classmethod
-    def create(
-        cls,
-        runtime: RuntimeConfig,
-        services: PipelineServices,
-        config: PipelineConfig | None = None,
-    ) -> "{{Provider}}{{Entity}}Pipeline":
-        return cls(config or {{PROVIDER}}_{{ENTITY}}_CONFIG, runtime, services)
-
-    async def transform_bronze_to_silver(
+    def __init__(
         self,
-        context: PipelineContext,
-        record: dict[str, Any],
-    ) -> dict[str, Any] | None:
-        """Transform raw record to Silver format."""
-
-        # 1. Validation / Skipping
-        pk_value = record.get("{{source_primary_key}}")
-        if not pk_value:
-            return None
-
-        # 2. ID Generation
-        entity_id = generate_entity_id(
-            record=record,
-            provider=self.provider,
-            id_field="{{source_primary_key}}",
+        provider: str = "{{provider}}",
+        entity_type: str = "{{entity}}",
+        tracer: TracingPort | None = None,
+        metrics: MetricsPort | None = None,
+        silver_filters: SilverFilterConfig | None = None,
+        gold_filters: GoldFilterConfig | None = None,
+        identity_service: IdentityService | None = None,
+        pii_hasher: PiiHasherPort | None = None,
+        data_normalizer: DataNormalizationPort | None = None,
+    ) -> None:
+        super().__init__(
+            provider=provider,
+            entity_type=entity_type,
+            tracer=tracer,
+            metrics=metrics,
+            silver_filters=silver_filters,
+            gold_filters=gold_filters,
+            identity_service=identity_service,
+            pii_hasher=pii_hasher,
+            data_normalizer=data_normalizer,
         )
 
-        # 3. Normalization
-        normalized = {
-            "entity_id": entity_id,
-            "{{primary_key}}": str(pk_value),
-            # Map other fields here
-            "field_name": record.get("source_field"),
+    async def _transform_impl(
+        self,
+        context: PipelineContext,
+        record: BronzeRecord,
+        index: int,
+    ) -> SilverRecord | None:
+        """Transform one Bronze record into a Silver record."""
+        {{primary_key}} = self._get_required_field(record, "{{primary_key}}")
+
+        business_data: dict[str, Any] = {
+            "{{primary_key}}": str({{primary_key}}),
+            # "field_1": record.get("source_field_1"),
         }
 
-        # 4. Content Hash
-        normalized["content_hash"] = generate_content_hash(normalized, self.provider)
+        entity_id = self.compute_entity_id(
+            source_id=str({{primary_key}}),
+            record={"{{primary_key}}": {{primary_key}}},
+        )
+        content_hash = self.compute_content_hash(business_data, exclude_none=True)
 
-        return normalized
-
-    def should_write_gold(self, context: PipelineContext, record: dict[str, Any]) -> bool:
-        """Filter logic for Gold layer (optional)."""
-        return True
+        silver_record: dict[str, Any] = {
+            **business_data,
+            "entity_id": entity_id,
+            "content_hash": content_hash,
+        }
+        return cast("SilverRecord", silver_record)

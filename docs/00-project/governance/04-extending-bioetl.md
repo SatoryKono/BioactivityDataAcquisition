@@ -1,322 +1,93 @@
-# Расширение BioETL: Добавление новых Pipeline
+# Extending BioETL: Providers and Pipelines
 
-*Синхронизировано с RULES.md v5.23 | Последнее обновление: 2026-02-21*
+*Synchronized with RULES.md v5.23 | Updated: 2026-03-03*
 
-----------------------------------------------------------------------
+This document is the governance playbook for extending BioETL.
 
-## Обзор
+Canonical guides:
+- [Add a new provider](../../03-guides/add-new-source.md)
+- [Add pipeline for existing provider](../../03-guides/add-pipeline-existing-source.md)
+- [Pipeline configuration](../../03-guides/pipeline-configuration.md)
 
-Данный документ описывает процесс добавления новых pipeline в BioETL,
-включая создание конфигураций, трансформеров и тестов.
+Canonical templates:
+- [Unified entity config template](../../04-reference/templates/config.yaml.tpl)
+- [Provider source config template](../../04-reference/templates/provider.yaml.tpl)
+- [Adapter template](../../04-reference/templates/source_adapter.py.tpl)
+- [Transformer template](../../04-reference/templates/pipeline.py.tpl)
+- [Pipeline factory registration template](../../04-reference/templates/factory.py.tpl)
 
-----------------------------------------------------------------------
+---
 
-## 1. Чек-лист создания нового Pipeline
+## 1. Extension Paths
 
-- [ ] Создать entity config в `configs/entities/<provider>/<entity>.yaml`
-- [ ] Валидировать через `configs/-schema/pipeline.json` и `scripts/validate_pipeline_configs.py`
-- [ ] Выбрать каноническое имя согласно [02-naming-policy.md](02-naming-policy.md)
-- [ ] Создать трансформер в `src/bioetl/application/pipelines/`
-- [ ] Зарегистрировать в `PipelineRegistry`
-- [ ] Добавить фабрику (при необходимости)
-- [ ] Написать unit и integration тесты
-- [ ] Обновить документацию провайдера
+Choose one path:
 
-----------------------------------------------------------------------
+1. New provider + first entity pipeline.
+2. New entity pipeline for existing provider.
 
-## 2. Шаблон Entity Config
+Both paths require:
+- config updates under `configs/`
+- composition registration updates
+- tests + docs sync
 
-### 2.1. Минимальный шаблон
+---
 
-```yaml
-# configs/entities/<provider>/<entity>.yaml
-# Pipeline configuration for <Provider> <Entity>.
-#
-# Uses defaults from configs/base/pipeline.yaml:
-# - dq-overrides, circuit-breaker, sink structure, maintenance, input-filter
-#
-# IMPORTANT: Use Canonical Terms from 02-naming-policy.md
-```
+## 2. Mandatory Artifacts
 
-### 2.2. Обязательные поля
+### 2.1 New provider
 
-| Поле                    | Тип    | Описание                                                                       | Требование |
-| ----------------------- | ------ | ------------------------------------------------------------------------------ | ---------- |
-| `pipeline-name`         | string | Формат `{provider}-{entity}`                                                   | MUST       |
-| `provider`              | enum   | Один из: chembl, pubchem, uniprot, pubmed, crossref, openalex, semanticscholar | MUST       |
-| `entity-type`           | string | Тип сущности                                                                   | MUST       |
-| `version`               | string | Семантическая версия `X.Y.Z`                                                   | MUST       |
-| `business-primary-keys` | array  | Первичный ключ                                                                 | MUST       |
-| `silver-table`          | string | Имя Silver таблицы                                                             | MUST       |
-| `gold-table`            | string | Имя Gold таблицы                                                               | MUST       |
-| `sink`                  | object | Конфигурация слоёв                                                             | MUST       |
-| `sink.*.sort-by`        | object | Сортировка для детерминизма                                                    | MUST       |
+- `configs/providers/{provider}.yaml`
+- `src/bioetl/infrastructure/adapters/{provider}/client.py`
+- `src/bioetl/composition/providers/registration.py` updates
+- at least one entity pipeline (`configs/entities/{provider}/{entity}.yaml` + transformer + registry)
 
-### 2.3. sort-by — Обязательное требование (ADR-014)
+### 2.2 New pipeline (existing provider)
 
-**MUST**: Каждый entity config должен содержать `sort-by` для Silver и Gold слоёв.
+- `configs/entities/{provider}/{entity}.yaml`
+- transformer under `src/bioetl/application/pipelines/{provider}/`
+- `register_all_transformers()` entry
+- `PIPELINE_CONFIGS` entry in `pipeline_factories.py`
+- Silver schema + Gold contract exports
 
-```yaml
-sink:
-  silver:
-    sort_by:
-      columns: ["primary-key-column"]  # Список колонок для сортировки
-      ascending: true                   # true = ASC, false = DESC
-  gold:
-    sort_by:
-      columns: ["primary-key-column"]
-      ascending: true
-```
+---
 
-**Почему это важно:**
+## 3. Governance Rules
 
-- Гарантирует детерминизм выходных файлов
-- Обеспечивает воспроизводимость результатов
-- Стабилизирует diff-сравнения между запусками
+MUST:
+- follow snake_case naming for provider/entity/pipeline IDs
+- keep unified entity config sections complete (`pipeline/schema/quality/filters/contracts`)
+- keep provider/entity values consistent between top-level and `pipeline.*`
+- use constructor DI, no concrete dependency creation in domain/application
+- register pipelines declaratively through `PIPELINE_CONFIGS`
 
-----------------------------------------------------------------------
+MUST NOT:
+- add legacy `configs/pipelines/**`, `configs/sources/**`, `configs/schemas/**` paths
+- add `BasePipeline` subclasses for standard provider pipelines (use `GenericPipeline` + transformer)
+- keep secrets in YAML/config files
 
-## 3. Валидация через JSON Schema
+---
 
-### 3.1. Автоматическая валидация
+## 4. Required Validation
 
-Все entity configs валидируются через `configs/-schema/pipeline.json`.
-
-**Pre-commit hook:**
-
-```yaml
-# .pre-commit-config.yaml
-- repo: local
-  hooks:
-    - id: validate-pipeline-configs
-      name: Validate pipeline configs
-      entry: python scripts/validate_pipeline_configs.py
-      language: python
-      files: ^configs/entities/.+\.yaml$
-      exclude: ^configs/entities/.*/-
-```
-
-### 3.2. Ручная валидация
+Run before PR:
 
 ```bash
-# Валидация всех entity/composite конфигов
 python scripts/validate_pipeline_configs.py --verbose
-
-# Валидация всех конфигов
-python scripts/validate_pipeline_configs.py
-
-# Строгий режим (warnings как errors)
-python scripts/validate_pipeline_configs.py --strict
+python -m pytest tests/architecture/test_registry_contracts.py -q
+python -m pytest tests/architecture/test_source_config_usage.py -q
 ```
 
-### 3.3. Структура JSON Schema
+Then run targeted unit tests for changed provider/pipeline.
 
-Схема `configs/-schema/pipeline.json` проверяет:
+---
 
-| Проверка          | Описание                                    |
-| ----------------- | ------------------------------------------- |
-| `required`        | Наличие обязательных полей                  |
-| `pattern`         | Формат `pipeline-name` (`^[a-z]+-[a-z-]+$`) |
-| `enum`            | Допустимые значения `provider`              |
-| `type`            | Типы данных полей                           |
-| `minimum/maximum` | Ограничения числовых значений               |
+## 5. Review Checklist
 
-----------------------------------------------------------------------
-
-## 4. Создание трансформера
-
-### 4.1. Шаблон трансформера
-
-```python
-# src/bioetl/application/pipelines/<provider>-<entity>.py
-"""Трансформер для <Provider> <Entity>."""
-
-from dataclasses import dataclass
-from typing import Any
-
-from bioetl.application.core.base-transformer import BaseTransformer
-
-
-@dataclass
-class <Provider><Entity>Transformer(BaseTransformer):
-    """Трансформер для обработки <entity> записей из <Provider>."""
-
-    def transform-record(self, record: dict[str, Any]) -> dict[str, Any]:
-        """Трансформация одной записи.
-
-        Args:
-            record: Сырая запись из Bronze.
-
-        Returns:
-            Трансформированная запись для Silver.
-        """
-        return {
-            "<entity>-id": record.get("<entity>-id"),
-            # ... другие поля
-        }
-
-    def validate-record(self, record: dict[str, Any]) -> bool:
-        """Валидация записи перед трансформацией.
-
-        Args:
-            record: Запись для валидации.
-
-        Returns:
-            True если запись валидна.
-        """
-        return "<entity>-id" in record
-```
-
-### 4.2. Регистрация в Registry
-
-```python
-# src/bioetl/composition/registry.py
-from bioetl.application.pipelines.<provider>-<entity> import <Provider><Entity>Transformer
-
-@register("<provider>-<entity>")
-class <Provider><Entity>Pipeline:
-    transformer-class = <Provider><Entity>Transformer
-```
-
-----------------------------------------------------------------------
-
-## 5. Тестирование
-
-### 5.1. Unit тесты трансформера
-
-```python
-# tests/unit/application/pipelines/test-<provider>-<entity>.py
-import pytest
-from bioetl.application.pipelines.<provider>-<entity> import <Provider><Entity>Transformer
-
-
-class Test<Provider><Entity>Transformer:
-    def test-transform-record-valid(self):
-        transformer = <Provider><Entity>Transformer()
-        record = {"<entity>-id": "123", ...}
-        result = transformer.transform-record(record)
-        assert result["<entity>-id"] == "123"
-
-    def test-validate-record-missing-id(self):
-        transformer = <Provider><Entity>Transformer()
-        record = {}
-        assert not transformer.validate-record(record)
-```
-
-### 5.2. Integration тесты с VCR
-
-```python
-# tests/integration/adapters/test-<provider>-<entity>.py
-import pytest
-
-@pytest.mark.vcr()
-async def test-fetch-<entity>-from-<provider>():
-    # VCR-кассета автоматически записывает HTTP-ответы
-    ...
-```
-
-### 5.3. Валидация конфига
-
-```python
-# tests/unit/configs/test-<provider>-<entity>-config.py
-import json
-import yaml
-import jsonschema
-
-
-def test-<provider>-<entity>-config-valid():
-    with open("configs/-schema/pipeline.json") as f:
-        schema = json.load(f)
-    with open("configs/entities/<provider>/<entity>.yaml") as f:
-        config = yaml.safe-load(f)
-
-    # Должен пройти без исключений
-    jsonschema.validate(config, schema)
-
-
-def test-<provider>-<entity>-has-sort-by():
-    with open("configs/entities/<provider>/<entity>.yaml") as f:
-        config = yaml.safe-load(f)
-
-    assert "sort-by" in config["sink"]["silver"]
-    assert "sort-by" in config["sink"]["gold"]
-```
-
-----------------------------------------------------------------------
-
-## 6. Документация провайдера
-
-После создания pipeline обновите документацию:
-
-1. **`docs/04-reference/providers/<provider>/README.md`** — добавить entity в список
-1. **`docs/00-map.md`** — обновить счётчик pipelines
-1. **`CLAUDE.md`** — обновить метрики (если существенные изменения)
-
-----------------------------------------------------------------------
-
-## 7. Пример: Добавление chembl_target_component
-
-### 7.1. Config
-
-```yaml
-# configs/entities/chembl/target_component.yaml
-pipeline_name: chembl_target_component
-provider: chembl
-entity_type: target-component
-version: "1.0.0"
-description: "Extract target component records from ChEMBL API"
-
-business_primary_keys: ["component-id"]
-silver_table: "chembl_target_component"
-gold_table: "chembl_target_component"
-
-source_file: ../../sources/chembl.yaml
-
-gold_filters:
-  required_fields:
-    - component-id
-    - component-type
-
-sink:
-  bronze:
-    path: "data/output/bronze/chembl/target-component"
-  silver:
-    path: "data/output/silver/chembl/target-component"
-    primary_key: ["component-id"]
-    partition_by: []
-    sort_by:
-      columns: ["component-id"]
-      ascending: true
-    csv_export:
-      path: "data/output/csv/silver/chembl/target-component"
-  gold:
-    path: "data/output/gold/chembl/target-component"
-    sort_by:
-      columns: ["component-id"]
-      ascending: true
-    csv_export:
-      path: "data/output/csv/gold/chembl/target-component"
-
-input_filter:
-  enabled: false
-```
-
-### 7.2. Валидация
-
-```bash
-# Проверить соответствие схемам
-python scripts/validate_pipeline_configs.py --verbose
-```
-
-----------------------------------------------------------------------
-
-## Связанные документы
-
-- [03-file-policy.md](03-file-policy.md) — Политика файлов
-- [ADR-014: Deterministic Writes](../../02-architecture/decisions/ADR-014-deterministic-writes.md)
-- [ADR-025: Pipeline Config Unification](../../02-architecture/decisions/ADR-025-pipeline-config-unification.md)
-- [03-guides/add-new-source.md](../../03-guides/add-new-source.md) — Добавление нового провайдера
-
-----------------------------------------------------------------------
-
-*Последнее обновление: 2026-01-14*
+- [ ] Provider/entity names follow naming policy.
+- [ ] Unified entity config added and validated.
+- [ ] Provider config updated (`entities`, `entity_notes`, rate limits).
+- [ ] Transformer implemented with DI and deterministic identity/hash.
+- [ ] `transformer_factory.py` updated.
+- [ ] `pipeline_factories.py` updated (`PIPELINE_CONFIGS`, imports).
+- [ ] Silver/Gold schemas updated and exported.
+- [ ] Unit/integration docs updated.

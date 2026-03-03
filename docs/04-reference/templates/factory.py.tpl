@@ -1,22 +1,25 @@
-"""
-Template for adding a pipeline factory in v5.1.
+"""Template for registering a pipeline in composition factories.
+
 Location: src/bioetl/composition/factories/pipeline_factories.py
 """
-from bioetl.application.pipelines.{{provider}}.{{entity}} import {{Provider}}{{Entity}}Pipeline
-from bioetl.composition.factories.pipeline_factory import GenericPipelineFactory
-from bioetl.infrastructure.schemas.silver import {{PROVIDER}}_{{ENTITY}}_SCHEMA
-from bioetl.infrastructure.schemas.gold import {{Provider}}{{Entity}}GoldSchema
 
-# 1. Define the factory instance
-{{provider}}_{{entity}}_factory = GenericPipelineFactory(
+# 1) Add imports near existing provider imports:
+# from bioetl.application.pipelines.{{provider}}.{{entity}}_transformer import {{Provider}}{{Entity}}Transformer
+# from bioetl.domain.contracts import {{Provider}}{{Entity}}GoldSchema
+# from bioetl.domain.schemas.{{provider}}.{{entity}} import {{Provider}}{{Entity}}Schema
+# from bioetl.infrastructure.schemas.silver import {{PROVIDER}}_{{ENTITY}}_SCHEMA
+
+# 2) Add entry to PIPELINE_CONFIGS tuple:
+PipelineFactoryConfig(
     pipeline_name="{{provider}}_{{entity}}",
-    pipeline_class={{Provider}}{{Entity}}Pipeline,
     provider="{{provider}}",
+    entity_type="{{entity}}",
+    transformer_class={{Provider}}{{Entity}}Transformer,
     silver_schema={{PROVIDER}}_{{ENTITY}}_SCHEMA,
-    gold_schema={{Provider}}{{Entity}}GoldSchema, # Optional
+    gold_schema={{Provider}}{{Entity}}GoldSchema,
+    pandera_silver_schema={{Provider}}{{Entity}}Schema,
+    # data_source_provider="{{provider_override}}",  # optional
 )
 
-# 2. Add to register_all_pipelines() function
-def register_all_pipelines() -> None:
-    # ... existing registrations ...
-    PipelineRegistry.register_factory({{provider}}_{{entity}}_factory)
+# 3) Register transformer in transformer_factory.py:
+# register_transformer("{{provider}}", "{{entity}}", {{Provider}}{{Entity}}Transformer)
