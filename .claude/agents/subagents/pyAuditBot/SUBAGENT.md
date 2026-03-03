@@ -124,7 +124,7 @@ find src/bioetl/ -name "*.py" -exec grep -l "soft_fail_threshold\|hard_fail_thre
 
 ```bash
 # Терминология
-python scripts/lint_terminology.py --check
+python src/tools/scripts/lint_terminology.py --check
 
 # Структура файлов
 make audit-structure
