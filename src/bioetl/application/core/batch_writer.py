@@ -15,6 +15,8 @@ from collections.abc import Awaitable, Callable, Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Literal, cast
 
+from bioetl.domain.types import BronzeRecord, GoldRecord
+
 import orjson
 
 from bioetl.application.composite.column_orderer import ColumnOrdererService
@@ -181,7 +183,7 @@ class BatchWriter:
         if not self._tracer:
             return None
 
-        attrs: dict[str, Any] = {
+        attrs: dict[str, Any] = {  # Any: tracing attribute values are str|int|bool
             "bioetl.layer": layer,
             "bioetl.record_count": record_count,
             "bioetl.provider": self._provider,
@@ -212,7 +214,7 @@ class BatchWriter:
 
     async def write_bronze(
         self,
-        records: list[dict[str, Any]],
+        records: list[BronzeRecord],
         batch_id: BatchID,
         ingestion_ts: datetime,
         source_metadata: SourceMetadata | None = None,
@@ -274,7 +276,7 @@ class BatchWriter:
 
     async def write_silver(
         self,
-        records: list[dict[str, Any]],
+        records: list[GoldRecord],
         batch_id: BatchID,
         ingestion_ts: datetime,
         bronze_refs: list[BronzeWriteResult] | None = None,
@@ -354,7 +356,7 @@ class BatchWriter:
 
     async def write_gold(
         self,
-        records: list[dict[str, Any]],
+        records: list[GoldRecord],
         silver_refs: list[SilverWriteResult] | None = None,
     ) -> None:
         """Write records to Gold layer with validation.
@@ -430,7 +432,9 @@ class BatchWriter:
             self._end_span(span, e)
             raise
 
-    def _get_schema_columns(self, schema: Any) -> set[str] | None:  # Any: schema type
+    def _get_schema_columns(
+        self, schema: Any
+    ) -> set[str] | None:  # Any: Pandera DataFrameModel class varies per entity
         """Extract column names from Pandera schema.
 
         Args:
@@ -456,7 +460,7 @@ class BatchWriter:
 
         return None
 
-    def _collect_record_columns(self, records: list[dict[str, Any]]) -> list[str]:
+    def _collect_record_columns(self, records: list[GoldRecord]) -> list[str]:
         """Collect columns from records in a stable, first-seen order."""
         columns: list[str] = []
         seen: set[str] = set()
@@ -475,8 +479,8 @@ class BatchWriter:
         return self._apply_system_prefix_order(ordered)
 
     def _apply_renames_to_records(
-        self, records: list[dict[str, Any]], rename_map: dict[str, str]
-    ) -> list[dict[str, Any]]:
+        self, records: list[GoldRecord], rename_map: dict[str, str]
+    ) -> list[GoldRecord]:
         """Apply column renames to records.
 
         Args:

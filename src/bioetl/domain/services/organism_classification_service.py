@@ -157,7 +157,9 @@ class OrganismClassificationService:
     def classify_records(
         self,
         records: list[dict[str, Any]],  # Any: untyped organism taxonomy data
-    ) -> list[tuple[dict[str, Any], OrganismClassificationResult]]:  # Any: untyped organism taxonomy data
+    ) -> list[
+        tuple[dict[str, Any], OrganismClassificationResult]
+    ]:  # Any: untyped organism taxonomy data
         """Classify a batch of records, pairing each with its result.
 
         Args:
@@ -187,7 +189,9 @@ class OrganismClassificationService:
         """
         return [self._enrich_single(record) for record in records]
 
-    def _enrich_single(self, record: dict[str, Any]) -> dict[str, Any]:  # Any: untyped organism taxonomy data
+    def _enrich_single(
+        self, record: dict[str, Any]
+    ) -> dict[str, Any]:  # Any: untyped organism taxonomy data
         """Enrich a single record with classification fields."""
         result = self._classify_record(record)
         enriched = {**record}
@@ -305,7 +309,9 @@ class OrganismClassificationService:
     # Internal helpers
     # ------------------------------------------------------------------
 
-    def _classify_record(self, record: dict[str, Any]) -> OrganismClassificationResult:  # Any: untyped organism taxonomy data
+    def _classify_record(
+        self, record: dict[str, Any]
+    ) -> OrganismClassificationResult:  # Any: untyped organism taxonomy data
         """Extract fields and classify a single record."""
         organism = record.get(self.organism_field)
         taxonomy_id = record.get(self.taxonomy_id_field)

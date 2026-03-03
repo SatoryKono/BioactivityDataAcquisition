@@ -178,7 +178,9 @@ class UniquenessResult:
     unique_count: int
     total_count: int
     duplicate_rate: float
-    column_stats: dict[str, dict[str, Any]] = field(default_factory=dict)
+    column_stats: dict[str, dict[str, Any]] = field(
+        default_factory=dict
+    )  # Any: DQ report values vary by check type
     status: DQCheckStatus = DQCheckStatus.PASS
 
 
@@ -189,7 +191,9 @@ class TypeConformanceResult:
     schema_version: str | None
     pandera_passed: bool
     errors: tuple[str, ...] = ()
-    type_coercions: dict[str, dict[str, Any]] = field(default_factory=dict)
+    type_coercions: dict[str, dict[str, Any]] = field(
+        default_factory=dict
+    )  # Any: DQ report values vary by check type
     status: DQCheckStatus = DQCheckStatus.PASS
 
     def __post_init__(self) -> None:
@@ -217,7 +221,7 @@ class NumericDistribution:
 class CategoricalDistribution:
     """Statistics for a categorical column."""
 
-    top_values: tuple[dict[str, Any], ...]
+    top_values: tuple[dict[str, Any], ...]  # Any: DQ report values vary by check type
     cardinality: int
 
     def __post_init__(self) -> None:
@@ -471,7 +475,7 @@ class BronzeDQReport:
     pipeline: str
     batch_id: str
     source_file: str
-    checks: dict[str, Any]
+    checks: dict[str, Any]  # Any: DQ report values vary by check type
     summary: DQReportSummary
 
     def __post_init__(self) -> None:
@@ -503,7 +507,7 @@ class SilverDQReport:
     pipeline: str
     source_batch_ids: tuple[str, ...]
     target_table: str
-    checks: dict[str, Any]
+    checks: dict[str, Any]  # Any: DQ report values vary by check type
     thresholds: DQThresholds
     summary: DQReportSummary
     # Cross-reference to metadata
@@ -537,7 +541,7 @@ class GoldDQReport:
     run_id: str
     pipeline: str
     target_table: str
-    checks: dict[str, Any]
+    checks: dict[str, Any]  # Any: DQ report values vary by check type
     data_freshness: DataFreshnessResult | None
     summary: DQReportSummary
 

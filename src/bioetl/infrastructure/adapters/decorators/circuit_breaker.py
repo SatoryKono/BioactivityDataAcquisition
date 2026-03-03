@@ -31,7 +31,7 @@ from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Self
 
-from bioetl.domain.exceptions import CircuitBreakerOpenError
+from bioetl.domain.exceptions import BioETLError, CircuitBreakerOpenError
 from bioetl.domain.types import CircuitBreakerState, HealthStatus
 
 if TYPE_CHECKING:
@@ -193,7 +193,7 @@ class CircuitBreakerDataSourceDecorator:
         except CircuitBreakerOpenError:
             # Re-raise CB errors
             raise
-        except Exception as exc:
+        except BioETLError as exc:
             self._record_failure(exc)
             raise
 

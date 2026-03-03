@@ -95,7 +95,7 @@ def _is_excluded_key(
 
 def _should_include_field(
     key: str,
-    value: Any,
+    value: Any,  # Any: record field type varies
     exclude_none: bool,
     include_fields: set[str] | None = None,
     exclude_fields: set[str] | None = None,

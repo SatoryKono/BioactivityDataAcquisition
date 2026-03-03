@@ -23,7 +23,12 @@ from typing import TYPE_CHECKING, Any
 
 import httpx
 
-from bioetl.domain.exceptions import CircuitBreakerOpenError, RetryExhaustedError
+from bioetl.domain.exceptions import (
+    BioETLError,
+    CircuitBreakerOpenError,
+    RecoverableError,
+    RetryExhaustedError,
+)
 from bioetl.domain.ports import NoOpMetrics, NoOpTracing
 from bioetl.domain.resilience import RetryConfig
 
@@ -322,6 +327,8 @@ class UnifiedHTTPClient:
             | httpx.ProxyError,
         ):
             return True
+        if isinstance(exc, RecoverableError):
+            return True
         # Check httpx status errors using configured retryable statuses
         if isinstance(exc, httpx.HTTPStatusError):
             return self.retry_config.is_retryable_status(exc.response.status_code)
@@ -374,7 +381,15 @@ class UnifiedHTTPClient:
                 )
             raise
 
-        except Exception as exc:
+        except (
+            BioETLError,
+            ConnectionError,
+            OSError,
+            RuntimeError,
+            TimeoutError,
+            ValueError,
+            httpx.HTTPError,
+        ) as exc:
             if not self._is_retryable_error(exc):
                 span.set_attribute("error", True)
                 span.set_attribute("error.type", type(exc).__name__)

@@ -44,7 +44,9 @@ __all__ = [
 ]
 
 
-def extract_authors(publication: dict[str, Any]) -> list[str]:
+def extract_authors(
+    publication: dict[str, Any],
+) -> list[str]:  # Any: untyped JSON fragment from Crossref API
     """Extract author names from CrossRef publication.
 
     CrossRef stores author information in an "author" array with:
@@ -89,7 +91,9 @@ def extract_authors(publication: dict[str, Any]) -> list[str]:
     return authors
 
 
-def extract_affiliations(publication: dict[str, Any]) -> list[str]:
+def extract_affiliations(
+    publication: dict[str, Any],
+) -> list[str]:  # Any: untyped JSON fragment from Crossref API
     """Extract unique affiliations from CrossRef publication.
 
     CrossRef affiliations are often nested inside author objects.
@@ -132,7 +136,9 @@ def extract_affiliations(publication: dict[str, Any]) -> list[str]:
     return sorted(affiliations)
 
 
-def extract_license_url(publication: dict[str, Any]) -> str | None:
+def extract_license_url(
+    publication: dict[str, Any],
+) -> str | None:  # Any: untyped JSON fragment from Crossref API
     """Extract first license URL from publication.
 
     CrossRef may provide multiple licenses; this returns the first URL.
@@ -161,7 +167,9 @@ def extract_license_url(publication: dict[str, Any]) -> str | None:
     return None
 
 
-def extract_journal_info(publication: dict[str, Any]) -> dict[str, Any]:
+def extract_journal_info(
+    publication: dict[str, Any],
+) -> dict[str, Any]:  # Any: untyped JSON fragment from Crossref API
     """Extract journal information from publication.
 
     Extracts journal name (container-title), ISSN list, and publisher.
@@ -193,7 +201,9 @@ def extract_journal_info(publication: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def extract_page_info(publication: dict[str, Any]) -> dict[str, Any]:
+def extract_page_info(
+    publication: dict[str, Any],
+) -> dict[str, Any]:  # Any: untyped JSON fragment from Crossref API
     """Extract pagination information from publication.
 
     Parses page range string (e.g., "123-145") into page_first and page_last.
@@ -226,7 +236,9 @@ def extract_page_info(publication: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def extract_dates(publication: dict[str, Any]) -> dict[str, Any]:
+def extract_dates(
+    publication: dict[str, Any],
+) -> dict[str, Any]:  # Any: untyped JSON fragment from Crossref API
     """Extract publication dates from date-parts fields.
 
     Formats date-parts [[year, month?, day?]] to ISO date strings using
@@ -268,7 +280,9 @@ def extract_dates(publication: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def extract_content_domain(publication: dict[str, Any]) -> dict[str, Any]:
+def extract_content_domain(
+    publication: dict[str, Any],
+) -> dict[str, Any]:  # Any: untyped JSON fragment from Crossref API
     """Extract content-domain metadata.
 
     CrossRef content-domain indicates licensing/access restrictions
@@ -301,7 +315,9 @@ def extract_content_domain(publication: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def extract_issn_by_type(publication: dict[str, Any]) -> dict[str, Any]:
+def extract_issn_by_type(
+    publication: dict[str, Any],
+) -> dict[str, Any]:  # Any: untyped JSON fragment from Crossref API
     """Extract ISSN values by type (print/electronic).
 
     Parses the issn-type array to separate print and electronic ISSNs.
@@ -349,7 +365,9 @@ def extract_issn_by_type(publication: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def extract_published_date(publication: dict[str, Any]) -> str | None:
+def extract_published_date(
+    publication: dict[str, Any],
+) -> str | None:  # Any: untyped JSON fragment from Crossref API
     """Extract 'published' date (canonical publication date).
 
     CrossRef's 'published' field is the preferred publication date,

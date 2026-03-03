@@ -77,7 +77,9 @@ def serialize_to_json(
     return _serialize_with_stdlib(data, sort_keys=sort_keys, ensure_ascii=ensure_ascii)
 
 
-def serialize_to_json_canonical(data: dict[str, Any]) -> str:  # Any: JSON values are heterogeneous
+def serialize_to_json_canonical(
+    data: dict[str, Any],
+) -> str:  # Any: JSON values are heterogeneous
     """Serialize data to canonical JSON for content hash computation.
 
     This is a convenience wrapper that always uses:
@@ -102,7 +104,9 @@ def serialize_to_json_canonical(data: dict[str, Any]) -> str:  # Any: JSON value
     return serialize_to_json(data, sort_keys=True, ensure_ascii=True)
 
 
-def deserialize_from_json(data: str | bytes) -> dict[str, Any] | list[Any]:  # Any: JSON values are heterogeneous
+def deserialize_from_json(
+    data: str | bytes,
+) -> dict[str, Any] | list[Any]:  # Any: JSON values are heterogeneous
     """Deserialize JSON string or bytes to Python object.
 
     Uses orjson when available for optimal performance.
@@ -179,22 +183,30 @@ def _serialize_with_stdlib(
     )
 
 
-def _deserialize_with_orjson(data: str | bytes) -> dict[str, Any] | list[Any]:  # Any: JSON values are heterogeneous
+def _deserialize_with_orjson(
+    data: str | bytes,
+) -> dict[str, Any] | list[Any]:  # Any: JSON values are heterogeneous
     """Deserialize using orjson."""
     assert orjson is not None
     try:
-        result: dict[str, Any] | list[Any] = orjson.loads(data)  # Any: JSON values are heterogeneous
+        result: dict[str, Any] | list[Any] = orjson.loads(
+            data
+        )  # Any: JSON values are heterogeneous
         return result
     except orjson.JSONDecodeError as e:
         raise ValueError(f"Invalid JSON: {e}") from e
 
 
-def _deserialize_with_stdlib(data: str | bytes) -> dict[str, Any] | list[Any]:  # Any: JSON values are heterogeneous
+def _deserialize_with_stdlib(
+    data: str | bytes,
+) -> dict[str, Any] | list[Any]:  # Any: JSON values are heterogeneous
     """Deserialize using stdlib json as fallback."""
     import json
 
     try:
-        result: dict[str, Any] | list[Any] = json.loads(data)  # Any: JSON values are heterogeneous
+        result: dict[str, Any] | list[Any] = json.loads(
+            data
+        )  # Any: JSON values are heterogeneous
         return result
     except json.JSONDecodeError as e:
         raise ValueError(f"Invalid JSON: {e}") from e
