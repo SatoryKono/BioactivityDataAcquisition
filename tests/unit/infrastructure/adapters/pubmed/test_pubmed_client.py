@@ -137,7 +137,7 @@ async def test_health_check_logs_error_on_exception(
     adapter, mock_http_client, mock_logger
 ):
     """Test health_check logs error details on exception."""
-    mock_http_client.get_once = AsyncMock(side_effect=Exception("Network timeout"))
+    mock_http_client.get_once = AsyncMock(side_effect=RuntimeError("Network timeout"))
 
     await adapter.health_check()
 
@@ -158,7 +158,9 @@ async def test_health_check_logs_error_on_exception(
 @pytest.mark.asyncio
 async def test_health_check_returns_unhealthy_on_exception(adapter, mock_http_client):
     """Test health_check returns UNHEALTHY when exception occurs."""
-    mock_http_client.get_once = AsyncMock(side_effect=Exception("Connection refused"))
+    mock_http_client.get_once = AsyncMock(
+        side_effect=RuntimeError("Connection refused")
+    )
 
     result = await adapter.health_check()
 

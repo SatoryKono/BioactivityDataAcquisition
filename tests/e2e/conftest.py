@@ -49,7 +49,7 @@ _E2E_VCR_CASSETTE_DIR_BY_TEST: dict[str, str] = {
 
 _E2E_VCR_CASSETTE_NAME_OVERRIDES: dict[str, str] = {
     "TestChEMBLPipelineE2E.test_chembl_activity_full_run": (
-        "test_chembl_pipeline_e2e_test_chembl_activity_full_run"
+        "test_chembl_activity_full_run"
     ),
 }
 

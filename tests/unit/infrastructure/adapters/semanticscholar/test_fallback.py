@@ -227,7 +227,7 @@ class TestSemanticScholarTitleFallbackHandler:
         self, mock_logger, mock_http_client
     ):
         """Test that search errors are caught and logged."""
-        mock_http_client.get_once.side_effect = Exception("Search failed")
+        mock_http_client.get_once.side_effect = RuntimeError("Search failed")
 
         handler = SemanticScholarTitleFallbackHandler(
             http_client=mock_http_client,

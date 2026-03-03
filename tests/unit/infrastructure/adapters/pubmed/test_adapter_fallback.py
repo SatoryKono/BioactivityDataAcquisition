@@ -164,7 +164,7 @@ class TestSearchByTitle:
         mock_logger: MagicMock,
     ) -> None:
         """Test returns empty list and logs on exception."""
-        mock_http_client.get.side_effect = Exception("Network error")
+        mock_http_client.get.side_effect = RuntimeError("Network error")
 
         results = await adapter._search_by_title("Test Title")
 

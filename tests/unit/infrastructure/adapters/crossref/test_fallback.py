@@ -174,7 +174,7 @@ async def test_search_by_title_handles_exception(mock_logger):
     """Test that search errors are caught and logged."""
 
     async def mock_search(query, limit):
-        raise Exception("Search failed")
+        raise RuntimeError("Search failed")
         yield
 
     handler = TitleFallbackHandler(logger=mock_logger, search_fn=mock_search)
