@@ -18,7 +18,11 @@ import pytest
 from bioetl.application.services.dq._checks_business import check_business_rules
 from bioetl.application.services.dq.gold_analyzer import GoldDQAnalyzer
 from bioetl.application.services.dq.silver_analyzer import SilverDQAnalyzer
-from bioetl.domain.value_objects.dq_report import DQCheckStatus, GoldDQCheckType, SilverDQCheckType
+from bioetl.domain.value_objects.dq_report import (
+    DQCheckStatus,
+    GoldDQCheckType,
+    SilverDQCheckType,
+)
 
 
 def _derive_row_dq_flags(

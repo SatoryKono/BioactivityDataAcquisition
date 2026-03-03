@@ -158,6 +158,7 @@ class PostrunService:
             ValueError,
             TypeError,
             AttributeError,
+            Exception,  # External report generation boundary can raise generic exceptions.
         )
         self._metadata_version_allowlist = (
             ImportError,
@@ -302,7 +303,7 @@ class PostrunService:
             return result
 
         except self._postrun_warning_allowlist as e:
-            if self._runtime.strict_validation:
+            if self._is_strict_validation_enabled():
                 self._logger.error(
                     "dq_report_generation_failed",
                     error=str(e),
@@ -440,7 +441,7 @@ class PostrunService:
             dt = DeltaTable(table_path)
             return dt.version()
         except (ImportError, ModuleNotFoundError) as version_error:
-            if self._runtime.strict_validation:
+            if self._is_strict_validation_enabled():
                 self._logger.error(
                     "delta_version_resolution_failed",
                     layer=layer,
@@ -462,7 +463,7 @@ class PostrunService:
             )
             return None
         except (TableNotFoundError, DeltaError) as version_error:
-            if self._runtime.strict_validation:
+            if self._is_strict_validation_enabled():
                 self._logger.error(
                     "delta_version_resolution_failed",
                     layer=layer,
@@ -484,7 +485,7 @@ class PostrunService:
             )
             return None
         except self._metadata_version_allowlist as version_error:
-            if self._runtime.strict_validation:
+            if self._is_strict_validation_enabled():
                 self._logger.error(
                     "delta_version_resolution_failed",
                     layer=layer,
@@ -505,6 +506,10 @@ class PostrunService:
                 strict_mode=False,
             )
             return None
+
+    def _is_strict_validation_enabled(self) -> bool:
+        """Return True only when strict validation is explicitly enabled."""
+        return getattr(self._runtime, "strict_validation", False) is True
 
 
 __all__ = [

@@ -181,7 +181,9 @@ class CoalescePolicy:
         return sorted(columns, key=sort_key)
 
     @classmethod
-    def _compatible_columns(cls, df: pl.DataFrame, ordered_cols: list[str]) -> list[str]:
+    def _compatible_columns(
+        cls, df: pl.DataFrame, ordered_cols: list[str]
+    ) -> list[str]:
         """Keep the leading column and all columns type-compatible with it."""
         if not ordered_cols:
             return []
@@ -194,7 +196,9 @@ class CoalescePolicy:
         return compatible_cols
 
     @staticmethod
-    def _coalesce_and_drop(df: pl.DataFrame, compatible_cols: list[str]) -> pl.DataFrame:
+    def _coalesce_and_drop(
+        df: pl.DataFrame, compatible_cols: list[str]
+    ) -> pl.DataFrame:
         """Coalesce compatible columns into first and drop the rest."""
         import polars as pl
 

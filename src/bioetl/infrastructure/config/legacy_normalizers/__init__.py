@@ -10,4 +10,3 @@ from bioetl.infrastructure.config.legacy_normalizers.source import (
 __all__ = [
     "normalize_source_config",
 ]
-

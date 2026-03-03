@@ -54,6 +54,8 @@ def test_column_order_golden_snapshot() -> None:
     fixture = json.loads(fixture_path.read_text(encoding="utf-8"))
 
     merge_service = _build_merge_service()
-    ordered_columns = merge_service._orderer.order_column_names(fixture["input_columns"])
+    ordered_columns = merge_service._orderer.order_column_names(
+        fixture["input_columns"]
+    )
 
     assert ordered_columns == fixture["expected_order"]

@@ -211,7 +211,11 @@ class JoinPlanner:
                 "Renamed dependency columns to qualified format",
                 dependency=dep.pipeline,
                 qualified_count=len(
-                    [col for col in dep_df.columns if "." in col and not col.startswith("_")]
+                    [
+                        col
+                        for col in dep_df.columns
+                        if "." in col and not col.startswith("_")
+                    ]
                 ),
             )
 
@@ -417,8 +421,12 @@ class JoinPlanner:
                 pipeline=pipeline_name,
                 left_key=left_key,
                 right_key=right_key,
-                left_columns=left_df.columns if left_key not in left_df.columns else None,
-                right_columns=right_df.columns if right_key not in right_df.columns else None,
+                left_columns=left_df.columns
+                if left_key not in left_df.columns
+                else None,
+                right_columns=right_df.columns
+                if right_key not in right_df.columns
+                else None,
             )
             return left_df
 
@@ -432,7 +440,9 @@ class JoinPlanner:
                 right_type=str(right_df[right_key].dtype),
             )
             left_df = left_df.with_columns(
-                pl.col(left_key).cast(pl.String).str.replace(r"\\.0$", "", literal=False)
+                pl.col(left_key)
+                .cast(pl.String)
+                .str.replace(r"\\.0$", "", literal=False)
             )
             right_df = right_df.with_columns(
                 pl.col(right_key)

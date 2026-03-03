@@ -93,7 +93,7 @@ class TestFileSizeLimits:
         "batch_writer.py": 575,  # 569 LOC - BatchWriter with Safety Guard + column_order + layer config filtering + key nullability
         "preflight_service.py": 845,  # 840 LOC - preflight validation (expanded) + contract policy preflight
         "preflight_validator.py": 655,  # 651 LOC - extracted preflight validators (REFACTOR-003)
-        "batch_executor.py": 795,  # 789 LOC - unified executor (memory management extracted to batch_memory_manager.py) + crash checkpoint save
+        "batch_executor.py": 860,  # 843 LOC - unified executor (memory management extracted to batch_memory_manager.py) + crash checkpoint save + structured error context
         "transformer.py": 920,  # 917 LOC - UniProtProteinTransformer with complex protein data extraction
         "gold_analyzer.py": 200,  # 192 LOC - Thin orchestrator (checks extracted to _checks_*.py modules)
         "silver_analyzer.py": 650,  # 642 LOC - Silver layer analysis with extracted helper methods
@@ -131,12 +131,14 @@ class TestFileSizeLimits:
         "publication_term_data_source.py": 600,  # 566 LOC - Wrapper with FilterableDataSourcePort delegation
         "subcellular_fraction_data_source.py": 520,  # 518 LOC - Derived entity wrapper with FilterableDataSourcePort delegation
         "merger.py": 1855,  # 1850 LOC - MergeService with dependency join support + type-safe coalesce + column priority ordering + explicit rules + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation + composite key dependency join + cross-validation integration + field alias registry + expanded docstrings
+        "join_planner.py": 620,  # 609 LOC - Composite join planning with dependency join variants + expanded docs
         "extractors.py": 580,  # 578 LOC OpenAlex, 413 CrossRef, 349 S2 (author + page parsing split to submodules) + expanded docstrings
         "column_orderer.py": 515,  # 511 LOC - Column ordering service with layer config filtering + expanded docstrings
         # UniProt extraction helpers
         "comments.py": 590,  # 587 LOC - UniProt comment extraction helpers with isoform/subcellular/disease details
         "crossrefs.py": 385,  # 381 LOC - UniProt cross-reference extraction helpers
         "features.py": 405,  # 401 LOC - UniProt feature extraction helpers (PTMs, domains)
+        "postrun_service.py": 540,  # 517 LOC - postrun orchestration with RF-04 strict/warning mode and typed error handling
     }
 
     def test_domain_files_under_limit(self, src_dir: Path) -> None:
@@ -327,6 +329,9 @@ class TestFunctionComplexity:
         "_execute_checks": 14,  # CC=13 - Silver DQ checks with nullability enforcement
         # Infrastructure schema config validation (branch #9 schema_file linkage)
         "_validate_schema_config": 17,  # CC=16 - Schema config validation with group/layer checks
+        "_extract_schema_columns": 8,  # CC=7 - Domain schema column extraction with typed handling
+        "_resolve_priority_column": 12,  # CC=11 - Composite column priority resolution
+        "apply_dependency_joins": 14,  # CC=13 - Composite dependency join planning
     }
 
     def test_domain_complexity(self, src_dir: Path) -> None:
@@ -615,7 +620,7 @@ class TestClassSize:
         "PipelineRunner": 450,  # 441 lines - includes vacuum + health check methods
         # Note: CompositePipelineRunner exemption is in Composite pipeline services section (680 lines)
         "UnifiedHTTPClient": 450,  # 427 lines - HTTP client with retry/circuit breaker
-        "PipelineObserver": 350,  # 319 lines - unified observability with lifecycle events
+        "PipelineObserver": 480,  # 452 lines - unified observability with standardized context + dual-write transition fields
         # Baseline exemptions for existing classes
         "StorageAdapter": 680,  # 675 lines - storage adapter with writers + BronzeWriteResult + SilverWriteResult + composite schemas + expanded docstrings
         "BaseTransformer": 770,  # 763 lines - Template Method with silver_filters + contract policy + content hash identity
@@ -625,9 +630,9 @@ class TestClassSize:
         "GenericPipelineFactory": 350,  # 305 lines - factory pattern
         "UniProtProteinTransformer": 800,  # 772 lines - complex protein data extraction with many fields
         "PreflightService": 545,  # 540 lines - preflight validation service
-        "PostrunService": 355,  # 349 lines - postrun service
+        "PostrunService": 450,  # 431 lines - postrun service with strict/warning rollout handling
         "BronzeWriter": 785,  # 783 lines - JSONL + zstd + MetadataCoordinator fallback + SourceMetadata + query_string extraction + async read_bronze + flat_structure + expanded docstrings
-        "BatchExecutor": 730,  # 725 lines - unified executor (memory management extracted to BatchMemoryManager) + crash checkpoint save
+        "BatchExecutor": 800,  # 778 lines - unified executor (memory management extracted to BatchMemoryManager) + crash checkpoint save + typed error handling
         "BatchWriter": 535,  # 531 lines - batch writing with Safety Guard §4.6 lock validation + SourceMetadata param + Silver lineage + DQ defaults + column_order + key nullability
         # Application core classes
         "FilteredDataSource": 355,  # 348 lines - decorator with fallback mapping + direct multi-filter support
@@ -681,6 +686,7 @@ class TestClassSize:
         "MetadataCoordinator": 480,  # 471 lines - Metadata coordination for Medallion layers + DQ provenance + composite metadata
         # Composite pipeline services (ADR-026)
         "MergeService": 1835,  # 1826 lines - Composite merge service with dependency join support + conflict resolution + column priority ordering + secondary join key prefixing + field group Gold filtering + temp join key for enricher DOI/PMID preservation + composite key dependency join
+        "JoinPlanner": 620,  # 582 lines - Composite dependency join planning with precedence rules
         "EnrichmentCoordinator": 400,  # 375 lines - Enricher orchestration service
         "EnrichmentCrossValidator": 385,  # 380 lines - Cross-validation with multi-enricher comparison + vectorized mismatch detection
         "DependencyCoordinator": 375,  # 370 lines - Chained dependency coordination with key extraction

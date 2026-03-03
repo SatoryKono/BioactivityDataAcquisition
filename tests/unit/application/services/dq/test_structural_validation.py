@@ -21,7 +21,11 @@ from bioetl.application.services.dq._checks_integrity import (
 )
 from bioetl.application.services.dq.gold_analyzer import GoldDQAnalyzer
 from bioetl.application.services.dq.silver_analyzer import SilverDQAnalyzer
-from bioetl.domain.value_objects.dq_report import DQCheckStatus, GoldDQCheckType, SilverDQCheckType
+from bioetl.domain.value_objects.dq_report import (
+    DQCheckStatus,
+    GoldDQCheckType,
+    SilverDQCheckType,
+)
 
 
 def _flags_from_status(*, status: DQCheckStatus, reason: str) -> dict[str, str | bool]:
@@ -173,7 +177,12 @@ class TestStructuralAnalyzerIntegration:
         config.get_checks_enums.return_value = [SilverDQCheckType.KEY_NULLABILITY]
 
         report = analyzer.analyze(
-            data=pl.DataFrame({"entity_id": ["e1", None], "partition_date": ["2024-01-01", "2024-01-01"]}),
+            data=pl.DataFrame(
+                {
+                    "entity_id": ["e1", None],
+                    "partition_date": ["2024-01-01", "2024-01-01"],
+                }
+            ),
             run_id="rf01-struct-silver",
             pipeline="test_pipeline",
             target_table="silver.test",
