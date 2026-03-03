@@ -100,7 +100,7 @@ class DQConfigLoader:
         self,
         provider: str,
         entity: str,
-        inline_overrides: dict[str, Any] | None,
+        inline_overrides: dict[str, Any] | None,  # Any: YAML DQ config has heterogeneous values
     ) -> dict[str, Any]:  # Any: YAML DQ config has heterogeneous values
         """Build merged config from defaults → provider → entity → inline."""
         merged = self._load_defaults_layer()
@@ -139,7 +139,7 @@ class DQConfigLoader:
         self,
         provider: str,
         entity: str,
-        inline_overrides: dict[str, Any] | None = None,
+        inline_overrides: dict[str, Any] | None = None,  # Any: YAML DQ config has heterogeneous values
     ) -> DQConfig:
         """Load merged DQ config for provider/entity.
 
@@ -199,9 +199,9 @@ class DQConfigLoader:
 
     def _deep_merge(
         self,
-        base: dict[str, Any],
-        override: dict[str, Any],
-    ) -> dict[str, Any]:
+        base: dict[str, Any],  # Any: YAML DQ config has heterogeneous values
+        override: dict[str, Any],  # Any: YAML DQ config has heterogeneous values
+    ) -> dict[str, Any]:  # Any: YAML DQ config has heterogeneous values
         """Deep merge two dicts.
 
         Rules:
@@ -231,10 +231,10 @@ class DQConfigLoader:
 
     def _merge_validation_lists_for_key(
         self,
-        base: list[Any],
-        override: list[Any],
+        base: list[Any],  # Any: YAML DQ validation items have heterogeneous types
+        override: list[Any],  # Any: YAML DQ validation items have heterogeneous types
         _key: str,
-    ) -> list[Any]:
+    ) -> list[Any]:  # Any: YAML DQ validation items have heterogeneous types
         """Adapter for config_merge list strategy callback."""
         if not all(isinstance(item, dict) for item in base) or not all(
             isinstance(item, dict) for item in override
@@ -248,9 +248,9 @@ class DQConfigLoader:
 
     def _merge_validation_lists(
         self,
-        base: list[dict[str, Any]],
-        override: list[dict[str, Any]],
-    ) -> list[dict[str, Any]]:
+        base: list[dict[str, Any]],  # Any: YAML DQ config has heterogeneous values
+        override: list[dict[str, Any]],  # Any: YAML DQ config has heterogeneous values
+    ) -> list[dict[str, Any]]:  # Any: YAML DQ config has heterogeneous values
         """Merge validation lists, avoiding duplicates by name/field.
 
         Override entries with same name/field replace base entries.
@@ -263,7 +263,7 @@ class DQConfigLoader:
             Merged validation list with deduplication.
         """
 
-        def get_key(item: dict[str, Any]) -> str:
+        def get_key(item: dict[str, Any]) -> str:  # Any: YAML DQ config has heterogeneous values
             """Get unique key for validation item.
 
             Cross-field/conditional validations use 'name' as key.
@@ -284,7 +284,7 @@ class DQConfigLoader:
             return f"{field}:{vtype}:{severity}"
 
         # Build result map, override entries replace base entries with same key
-        result_map: dict[str, dict[str, Any]] = {}
+        result_map: dict[str, dict[str, Any]] = {}  # Any: YAML DQ config has heterogeneous values
         for item in base:
             key = get_key(item)
             result_map[key] = copy.deepcopy(item)
@@ -297,8 +297,8 @@ class DQConfigLoader:
 
     def _normalize_to_file_format(
         self,
-        merged: dict[str, Any],
-    ) -> dict[str, Any]:
+        merged: dict[str, Any],  # Any: YAML DQ config has heterogeneous values
+    ) -> dict[str, Any]:  # Any: YAML DQ config has heterogeneous values
         """Normalize merged dict to DQConfigFile schema.
 
         Handles conversion from inline format (soft_fail_threshold)

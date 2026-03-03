@@ -349,7 +349,7 @@ def extract_topics(
     if not topics or not isinstance(topics, list):
         return []
 
-    result: list[dict[str, Any]] = []
+    result: list[dict[str, Any]] = []  # Any: untyped JSON fragment from OpenAlex API
     for topic in topics[:max_count]:
         if not isinstance(topic, dict):
             continue
@@ -415,7 +415,7 @@ def extract_grants(
     if not grants or not isinstance(grants, list):
         return []
 
-    result: list[dict[str, Any]] = []
+    result: list[dict[str, Any]] = []  # Any: untyped JSON fragment from OpenAlex API
     for grant in grants:
         if not isinstance(grant, dict):
             continue
