@@ -34,6 +34,7 @@ from bioetl.domain.composite.result import (
     SeedResult,
 )
 from bioetl.domain.composite.state import CompositePipelineState
+from bioetl.domain.exceptions import LockAcquisitionError
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -1165,12 +1166,12 @@ class TestLockAcquisitionFailure:
 
     @pytest.mark.asyncio
     async def test_lock_acquisition_failure_raises(self):
-        """Lock acquisition failure should raise RuntimeError."""
+        """Lock acquisition failure should raise LockAcquisitionError."""
         lock = FakeLockPort(should_acquire=False)
 
         runner, _ = create_test_runner(lock=lock)
 
-        with pytest.raises(RuntimeError, match="Could not acquire lock"):
+        with pytest.raises(LockAcquisitionError, match="Failed to acquire lock"):
             await runner.run()
 
 

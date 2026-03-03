@@ -22,9 +22,25 @@ from bioetl.domain.composite.result import (
     SeedResult,
 )
 from bioetl.domain.composite.state import CompositePipelineState
+from bioetl.domain.exceptions import BioETLError, CheckpointConflictError, StorageError
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
+
+
+_CHECKPOINT_READ_ERRORS = (
+    json.JSONDecodeError,
+    OSError,
+    TypeError,
+    ValueError,
+    StorageError,
+)
+_CHECKPOINT_WRITE_ERRORS = (
+    OSError,
+    TypeError,
+    ValueError,
+    StorageError,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -452,10 +468,24 @@ class CompositeCheckpointManager:
                     completed_enrichers=len(state.completed_enrichers),
                     hint="Use --resume flag to continue from previous progress",
                 )
-        except Exception:
-            # Silently ignore if we can't read the checkpoint
-            # (corrupted file will be overwritten anyway)
-            pass
+        except _CHECKPOINT_READ_ERRORS as e:
+            self._logger.debug(
+                "Checkpoint exists but cannot be parsed, will be overwritten",
+                composite=self._composite_name,
+                checkpoint_path=str(checkpoint_path),
+                error=str(e),
+                error_type=type(e).__name__,
+                reason_code="checkpoint_read_failed",
+            )
+        except BioETLError as e:
+            self._logger.warning(
+                "Checkpoint pre-check failed with domain error",
+                composite=self._composite_name,
+                checkpoint_path=str(checkpoint_path),
+                error=str(e),
+                error_type=type(e).__name__,
+                reason_code="unexpected_bioetl_error",
+            )
 
     async def load(self) -> CompositeCheckpointState:
         """Load checkpoint state.
@@ -500,11 +530,21 @@ class CompositeCheckpointManager:
                         completed_enrichers=list(state.completed_enrichers),
                     )
                     return state
-                except Exception as e:
+                except _CHECKPOINT_READ_ERRORS as e:
                     self._logger.warning(
                         "Failed to load checkpoint",
                         composite=self._composite_name,
                         error=str(e),
+                        error_type=type(e).__name__,
+                        reason_code="checkpoint_load_failed",
+                    )
+                except BioETLError as e:
+                    self._logger.warning(
+                        "Failed to load checkpoint",
+                        composite=self._composite_name,
+                        error=str(e),
+                        error_type=type(e).__name__,
+                        reason_code="unexpected_bioetl_error",
                     )
         else:
             # resume=False: check if existing checkpoint with progress will be overwritten
@@ -541,11 +581,24 @@ class CompositeCheckpointManager:
                 state=state.state.value,
                 completed_enrichers=len(state.completed_enrichers),
             )
-        except Exception as e:
+        except _CHECKPOINT_WRITE_ERRORS as e:
             self._logger.error(
                 "Failed to save checkpoint",
                 composite=self._composite_name,
                 error=str(e),
+                error_type=type(e).__name__,
+                reason_code="checkpoint_save_failed",
+            )
+            if temp_path.exists():
+                temp_path.unlink()
+            raise CheckpointConflictError(self._composite_name, str(e)) from e
+        except BioETLError as e:
+            self._logger.error(
+                "Failed to save checkpoint",
+                composite=self._composite_name,
+                error=str(e),
+                error_type=type(e).__name__,
+                reason_code="unexpected_bioetl_error",
             )
             if temp_path.exists():
                 temp_path.unlink()

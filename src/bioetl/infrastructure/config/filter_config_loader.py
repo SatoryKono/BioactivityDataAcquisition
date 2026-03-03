@@ -51,7 +51,7 @@ class FilterConfigLoader(
         self,
         provider: str,
         entity: str,
-        inline_overrides: dict[str, Any] | None = None,
+        inline_overrides: dict[str, Any] | None = None,  # Any: YAML filter config has heterogeneous values
     ) -> tuple[
         InputFilterConfig, SilverFilterConfig, GoldFilterConfig, ExtractionParams
     ]:
@@ -111,8 +111,8 @@ class FilterConfigLoader(
         self,
         provider: str,
         entity: str,
-        inline_overrides: dict[str, Any] | None = None,
-    ) -> dict[str, Any]:
+        inline_overrides: dict[str, Any] | None = None,  # Any: YAML filter config has heterogeneous values
+    ) -> dict[str, Any]:  # Any: YAML filter config has heterogeneous values
         """Load merged filter config hierarchy as raw dict.
 
         Same 4-level merge order as :meth:`load` but returns the merged
@@ -142,9 +142,9 @@ class FilterConfigLoader(
         self,
         provider: str,
         entity: str,
-        inline_overrides: dict[str, Any] | None = None,
-        defaults: dict[str, Any] | None = None,
-    ) -> dict[str, Any]:
+        inline_overrides: dict[str, Any] | None = None,  # Any: YAML filter config has heterogeneous values
+        defaults: dict[str, Any] | None = None,  # Any: YAML filter config has heterogeneous values
+    ) -> dict[str, Any]:  # Any: YAML filter config has heterogeneous values
         """Merge the 4-level filter config hierarchy into a single dict.
 
         Shared logic for both :meth:`load` and :meth:`load_as_dict`.
@@ -177,12 +177,12 @@ class FilterConfigLoader(
 
         return merged
 
-    def _load_defaults_layer(self) -> dict[str, Any]:
+    def _load_defaults_layer(self) -> dict[str, Any]:  # Any: YAML filter config has heterogeneous values
         """Load filter defaults from configs/base/pipeline.yaml."""
         base_pipeline_path = self._base_root / "pipeline.yaml"
         if base_pipeline_path.exists():
             base_pipeline = self._load_yaml(base_pipeline_path)
-            defaults: dict[str, Any] = {}
+            defaults: dict[str, Any] = {}  # Any: YAML filter config has heterogeneous values
 
             # input_filter defaults are still a top-level pipeline concern.
             input_filter = base_pipeline.get("input_filter")
@@ -199,7 +199,7 @@ class FilterConfigLoader(
 
         return {}
 
-    def _load_provider_layer(self, provider: str) -> dict[str, Any]:
+    def _load_provider_layer(self, provider: str) -> dict[str, Any]:  # Any: YAML filter config has heterogeneous values
         """Load provider filter layer from unified provider config."""
         unified_provider_path = self._configs_root / "providers" / f"{provider}.yaml"
         if unified_provider_path.exists():
@@ -222,7 +222,7 @@ class FilterConfigLoader(
 
         return {}
 
-    def _load_entity_layer(self, provider: str, entity: str) -> dict[str, Any]:
+    def _load_entity_layer(self, provider: str, entity: str) -> dict[str, Any]:  # Any: YAML filter config has heterogeneous values
         """Load entity filter layer from unified entity config."""
         unified_entity_path = (
             self._configs_root / "entities" / provider / f"{entity}.yaml"
@@ -249,9 +249,9 @@ class FilterConfigLoader(
 
     def _deep_merge(
         self,
-        base: dict[str, Any],
-        override: dict[str, Any],
-    ) -> dict[str, Any]:
+        base: dict[str, Any],  # Any: YAML filter config has heterogeneous values
+        override: dict[str, Any],  # Any: YAML filter config has heterogeneous values
+    ) -> dict[str, Any]:  # Any: YAML filter config has heterogeneous values
         """Deep merge two dicts with filter-specific rules.
 
         Rules:

@@ -32,6 +32,15 @@ from bioetl.domain.composite.result import (
 )
 from bioetl.domain.composite.state import CompositePipelineState
 from bioetl.domain.events import PipelineEvent
+from bioetl.domain.exceptions import (
+    BioETLError,
+    CheckpointConflictError,
+    DataQualityError,
+    LockAcquisitionError,
+    NetworkError,
+    RunnerAlreadyExecutedError,
+    StorageError,
+)
 from bioetl.domain.types import RunID
 
 if TYPE_CHECKING:
@@ -51,6 +60,42 @@ if TYPE_CHECKING:
     from bioetl.application.services.dq_report_service import DQReportService
     from bioetl.domain.composite.config import CompositeConfig, EnricherConfig
     from bioetl.domain.ports import LockPort, LoggerPort, MetricsPort, QuarantinePort
+
+
+_CHECKPOINT_NON_FATAL_ERRORS = (
+    CheckpointConflictError,
+    StorageError,
+    OSError,
+    ValueError,
+    TypeError,
+)
+_PIPELINE_EXECUTION_ERRORS = (
+    NetworkError,
+    StorageError,
+    CheckpointConflictError,
+    DataQualityError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+    OSError,
+)
+_DQ_REPORT_NON_FATAL_ERRORS = (
+    DataQualityError,
+    StorageError,
+    ImportError,
+    ModuleNotFoundError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+    OSError,
+)
+_QUARANTINE_WRITE_NON_FATAL_ERRORS = (
+    StorageError,
+    DataQualityError,
+    OSError,
+    ValueError,
+    TypeError,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -232,8 +277,6 @@ class CompositePipelineRunner:
         """
         # Protection against double execution
         if self._finished:
-            from bioetl.domain.exceptions import RunnerAlreadyExecutedError
-
             raise RunnerAlreadyExecutedError(
                 runner_type="CompositePipelineRunner",
                 run_id=self._run_id_str,
@@ -264,9 +307,7 @@ class CompositePipelineRunner:
                 ttl=3600,  # 1 hour for composite
             )
             if not acquired:
-                raise RuntimeError(
-                    f"Could not acquire lock for composite: {self._config.name}"
-                )
+                raise LockAcquisitionError(key=lock_key)
 
             try:
                 result = await self._run_with_lock()
@@ -277,7 +318,7 @@ class CompositePipelineRunner:
             finally:
                 await self._lock.release(key=lock_key, owner_id=self._run_id)
 
-        except Exception as e:
+        except _PIPELINE_EXECUTION_ERRORS as e:
             # Mark as finished with failure
             self._finished = True
             self._final_state = CompositePipelineState.FAILED
@@ -286,6 +327,20 @@ class CompositePipelineRunner:
                 composite=self._config.name,
                 run_id=self._run_id_str,
                 error=str(e),
+                error_type=type(e).__name__,
+            )
+            raise
+        except BioETLError as e:
+            # Mark as finished with failure
+            self._finished = True
+            self._final_state = CompositePipelineState.FAILED
+            self._logger.error(
+                PipelineEvent.FAILED,
+                composite=self._config.name,
+                run_id=self._run_id_str,
+                error=str(e),
+                error_type=type(e).__name__,
+                reason_code="unexpected_bioetl_error",
             )
             raise
 
@@ -385,13 +440,33 @@ class CompositePipelineRunner:
 
         try:
             seed_result = await self._run_seed()
-        except Exception as e:
+        except _PIPELINE_EXECUTION_ERRORS as e:
             self._logger.error(
                 "Seed pipeline failed",
                 composite=self._config.name,
                 run_id=self._run_id_str,
                 seed_pipeline=self._config.seed.pipeline,
                 error=str(e),
+                error_type=type(e).__name__,
+            )
+            self._fsm.log_fsm_transition(
+                from_state=CompositePipelineState.SEED_RUNNING,
+                to_state=CompositePipelineState.FAILED,
+                stage="seed_failed",
+                error=str(e),
+            )
+            failed_state = state.with_state(CompositePipelineState.FAILED)
+            await self._save_checkpoint_safe(failed_state, "seed_failed")
+            raise
+        except BioETLError as e:
+            self._logger.error(
+                "Seed pipeline failed",
+                composite=self._config.name,
+                run_id=self._run_id_str,
+                seed_pipeline=self._config.seed.pipeline,
+                error=str(e),
+                error_type=type(e).__name__,
+                reason_code="unexpected_bioetl_error",
             )
             self._fsm.log_fsm_transition(
                 from_state=CompositePipelineState.SEED_RUNNING,
@@ -596,12 +671,22 @@ class CompositePipelineRunner:
             )
             try:
                 await self._checkpoint_manager.save(state)
-            except Exception as save_error:
+            except _CHECKPOINT_NON_FATAL_ERRORS as save_error:
                 self._logger.warning(
                     "Failed to save FAILED state to checkpoint",
                     composite=self._config.name,
                     run_id=self._run_id_str,
                     error=str(save_error),
+                    error_type=type(save_error).__name__,
+                )
+            except BioETLError as save_error:
+                self._logger.warning(
+                    "Failed to save FAILED state to checkpoint",
+                    composite=self._config.name,
+                    run_id=self._run_id_str,
+                    error=str(save_error),
+                    error_type=type(save_error).__name__,
+                    reason_code="unexpected_bioetl_error",
                 )
             self._logger.error(
                 "Required enricher failed, pipeline transitioning to FAILED",
@@ -787,7 +872,7 @@ class CompositePipelineRunner:
                 # Write quarantine records for cross-validation failures
                 await self._write_cv_quarantine(merge_result)
 
-            except Exception as merge_error:
+            except _PIPELINE_EXECUTION_ERRORS as merge_error:
                 # Log FSM transition to FAILED
                 self._fsm.log_fsm_transition(
                     from_state=CompositePipelineState.MERGING,
@@ -800,6 +885,26 @@ class CompositePipelineRunner:
                     composite=self._config.name,
                     run_id=self._run_id_str,
                     error=str(merge_error),
+                    error_type=type(merge_error).__name__,
+                )
+                state = state.with_state(CompositePipelineState.FAILED)
+                await self._save_checkpoint_safe(state, "merge_failed")
+                raise
+            except BioETLError as merge_error:
+                # Log FSM transition to FAILED
+                self._fsm.log_fsm_transition(
+                    from_state=CompositePipelineState.MERGING,
+                    to_state=CompositePipelineState.FAILED,
+                    stage="merge_failed",
+                    error=str(merge_error),
+                )
+                self._logger.error(
+                    "Merge failed",
+                    composite=self._config.name,
+                    run_id=self._run_id_str,
+                    error=str(merge_error),
+                    error_type=type(merge_error).__name__,
+                    reason_code="unexpected_bioetl_error",
                 )
                 state = state.with_state(CompositePipelineState.FAILED)
                 await self._save_checkpoint_safe(state, "merge_failed")
@@ -843,13 +948,24 @@ class CompositePipelineRunner:
         # Cleanup checkpoint on success
         try:
             await self._checkpoint_manager.delete()
-        except Exception as delete_error:
+        except _CHECKPOINT_NON_FATAL_ERRORS as delete_error:
             # Checkpoint deletion failure is non-critical
             self._logger.warning(
                 "Failed to delete checkpoint",
                 composite=self._config.name,
                 run_id=self._run_id_str,
                 error=str(delete_error),
+                error_type=type(delete_error).__name__,
+            )
+        except BioETLError as delete_error:
+            # Checkpoint deletion failure is non-critical
+            self._logger.warning(
+                "Failed to delete checkpoint",
+                composite=self._config.name,
+                run_id=self._run_id_str,
+                error=str(delete_error),
+                error_type=type(delete_error).__name__,
+                reason_code="unexpected_bioetl_error",
             )
 
     def _validate_config_consistency(self) -> None:
@@ -960,13 +1076,26 @@ class CompositePipelineRunner:
         try:
             await self._checkpoint_manager.save(state)
             return True
-        except Exception as e:
+        except _CHECKPOINT_NON_FATAL_ERRORS as e:
             self._logger.warning(
                 "checkpoint_save_failed",
                 composite=self._config.name,
                 run_id=self._run_id_str,
                 operation=operation,
                 error=str(e),
+                error_type=type(e).__name__,
+                note="Resume capability may be affected",
+            )
+            return False
+        except BioETLError as e:
+            self._logger.warning(
+                "checkpoint_save_failed",
+                composite=self._config.name,
+                run_id=self._run_id_str,
+                operation=operation,
+                error=str(e),
+                error_type=type(e).__name__,
+                reason_code="unexpected_bioetl_error",
                 note="Resume capability may be affected",
             )
             return False
@@ -1088,12 +1217,22 @@ class CompositePipelineRunner:
                 run_id=self._run_id_str,
             )
 
-        except Exception as e:
+        except _DQ_REPORT_NON_FATAL_ERRORS as e:
             # DQ report generation failure should not fail the pipeline
             self._logger.warning(
                 "dq_reports_failed",
                 composite=self._config.name,
                 error=str(e),
+                error_type=type(e).__name__,
+            )
+        except BioETLError as e:
+            # DQ report generation failure should not fail the pipeline
+            self._logger.warning(
+                "dq_reports_failed",
+                composite=self._config.name,
+                error=str(e),
+                error_type=type(e).__name__,
+                reason_code="unexpected_bioetl_error",
             )
 
     async def _write_cv_quarantine(self, merge_result: MergeResult) -> None:
@@ -1122,11 +1261,20 @@ class CompositePipelineRunner:
                     ingestion_ts=now,
                 )
                 written += 1
-            except Exception as e:
+            except _QUARANTINE_WRITE_NON_FATAL_ERRORS as e:
                 self._logger.warning(
                     "Failed to write quarantine record",
                     pipeline=pipeline_name,
                     error=str(e),
+                    error_type=type(e).__name__,
+                )
+            except BioETLError as e:
+                self._logger.warning(
+                    "Failed to write quarantine record",
+                    pipeline=pipeline_name,
+                    error=str(e),
+                    error_type=type(e).__name__,
+                    reason_code="unexpected_bioetl_error",
                 )
 
         if written > 0:

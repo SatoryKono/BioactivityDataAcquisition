@@ -14,6 +14,13 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from bioetl.domain.composite.result import EnrichmentResult, EnrichmentStatus
+from bioetl.domain.exceptions import (
+    BioETLError,
+    CheckpointConflictError,
+    DataQualityError,
+    NetworkError,
+    StorageError,
+)
 
 if TYPE_CHECKING:
     import polars as pl
@@ -21,6 +28,23 @@ if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.composite.config import CompositeDQConfig, EnricherConfig
     from bioetl.domain.ports import LoggerPort
+
+
+_FILTER_CONDITION_ERRORS = (
+    ValueError,
+    TypeError,
+    RuntimeError,
+)
+_ENRICHER_EXECUTION_ERRORS = (
+    NetworkError,
+    StorageError,
+    CheckpointConflictError,
+    DataQualityError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+    OSError,
+)
 
 
 class EnrichmentCoordinator:
@@ -199,12 +223,23 @@ class EnrichmentCoordinator:
             )
             return keys
 
-        except Exception as e:
+        except _FILTER_CONDITION_ERRORS as e:
             self._logger.warning(
                 "Failed to apply filter condition",
                 enricher=enricher.pipeline,
                 condition=enricher.filter_condition,
                 error=str(e),
+                error_type=type(e).__name__,
+            )
+            return keys
+        except BioETLError as e:
+            self._logger.warning(
+                "Failed to apply filter condition",
+                enricher=enricher.pipeline,
+                condition=enricher.filter_condition,
+                error=str(e),
+                error_type=type(e).__name__,
+                reason_code="unexpected_bioetl_error",
             )
             return keys
 
@@ -347,7 +382,7 @@ class EnrichmentCoordinator:
                     records_input=records_input,
                 )
 
-            except Exception as e:
+            except _ENRICHER_EXECUTION_ERRORS as e:
                 duration = (datetime.now(tz=UTC) - started_at).total_seconds()
 
                 # Re-raise for required enrichers (logged as error)
@@ -356,6 +391,7 @@ class EnrichmentCoordinator:
                         "Required enricher failed",
                         enricher=enricher.pipeline,
                         error=str(e),
+                        error_type=type(e).__name__,
                         required=True,
                     )
                     raise
@@ -365,6 +401,38 @@ class EnrichmentCoordinator:
                     "Optional enricher failed",
                     enricher=enricher.pipeline,
                     error=str(e),
+                    error_type=type(e).__name__,
+                    required=False,
+                )
+
+                return EnrichmentResult.failed(
+                    enricher_name=enricher.pipeline,
+                    error_message=str(e),
+                    records_input=records_input,
+                    duration_seconds=duration,
+                )
+            except BioETLError as e:
+                duration = (datetime.now(tz=UTC) - started_at).total_seconds()
+
+                # Re-raise for required enrichers (logged as error)
+                if enricher.required:
+                    self._logger.error(
+                        "Required enricher failed",
+                        enricher=enricher.pipeline,
+                        error=str(e),
+                        error_type=type(e).__name__,
+                        reason_code="unexpected_bioetl_error",
+                        required=True,
+                    )
+                    raise
+
+                # Optional enricher failures are warnings (pipeline continues)
+                self._logger.warning(
+                    "Optional enricher failed",
+                    enricher=enricher.pipeline,
+                    error=str(e),
+                    error_type=type(e).__name__,
+                    reason_code="unexpected_bioetl_error",
                     required=False,
                 )
 
