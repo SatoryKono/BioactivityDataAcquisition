@@ -181,8 +181,8 @@ class BatchExecutor:
         # DQ Report data accumulation (only if DQ report service is available)
         # Collecting data adds memory overhead, so only enabled when needed
         self._bronze_records_for_dq: list[bytes] = []
-        self._silver_records_for_dq: list[dict[str, Any]] = []
-        self._gold_records_for_dq: list[dict[str, Any]] = []
+        self._silver_records_for_dq: list[dict[str, Any]] = []  # Any: record values vary by field type
+        self._gold_records_for_dq: list[dict[str, Any]] = []  # Any: record values vary by field type
         self._source_batch_ids: list[str] = []
         self._last_bronze_path: str | None = None
 
@@ -323,7 +323,7 @@ class BatchExecutor:
         offset: int | None = None,
     ) -> None:
         """Run the main extraction and processing loop."""
-        batch: list[dict[str, Any]] = []
+        batch: list[dict[str, Any]] = []  # Any: record values vary by field type
         current_batch_size = self.batch_size
         check_interval = self._memory.get_check_interval()
 
@@ -357,7 +357,7 @@ class BatchExecutor:
             await self._process_batch(batch, start_index)
 
     async def process(
-        self, records: list[dict[str, Any]], start_index: int = 0
+        self, records: list[dict[str, Any]], start_index: int = 0  # Any: record values vary by field type
     ) -> BatchResult:
         """Process a batch of records through the full ETL pipeline.
 
@@ -442,7 +442,7 @@ class BatchExecutor:
         return source_metadata
 
     async def _process_batch(
-        self, records: list[dict[str, Any]], start_index: int
+        self, records: list[dict[str, Any]], start_index: int  # Any: record values vary by field type
     ) -> None:
         """Process batch through Bronze → Silver → Gold with tracing.
 
@@ -579,7 +579,7 @@ class BatchExecutor:
             raise
 
     async def _execute_transform_with_span(
-        self, records: list[dict[str, Any]], batch_id: BatchID, start_index: int
+        self, records: list[dict[str, Any]], batch_id: BatchID, start_index: int  # Any: record values vary by field type
     ) -> TransformResult:
         """Execute transformation with extended span attributes."""
         span = self._tracing.start_layer_span(
@@ -647,7 +647,7 @@ class BatchExecutor:
         limit: int | None,
         query: str | None = None,
         offset: int | None = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> AsyncIterator[dict[str, Any]]:  # Any: record values vary by field type
         """Extract records from data source."""
         async for record in self._services.data_source.fetch(
             entity_type=self._config.entity_type,
@@ -671,11 +671,11 @@ class BatchExecutor:
 
     def _collect_dq_data(
         self,
-        records: list[dict[str, Any]],
+        records: list[dict[str, Any]],  # Any: record values vary by field type
         batch_id: BatchID,
         bronze_result: Any,  # Any: BronzeWriteResult (avoids circular import)
-        silver_records: list[dict[str, Any]],
-        gold_records: list[dict[str, Any]],
+        silver_records: list[dict[str, Any]],  # Any: record values vary by field type
+        gold_records: list[dict[str, Any]],  # Any: record values vary by field type
     ) -> None:
         """Collect data from batch processing for DQ reports.
 
@@ -707,7 +707,7 @@ class BatchExecutor:
         self._gold_records_for_dq.extend(gold_records)
 
     def _build_dataframe_from_records(
-        self, records: list[dict[str, Any]]
+        self, records: list[dict[str, Any]]  # Any: record values vary by field type
     ) -> Any | None:  # Any: pl.DataFrame (avoids polars import at module level)
         """Build a Polars DataFrame from records, returning None on failure."""
         if not records:
@@ -825,7 +825,7 @@ class BatchExecutor:
             flat_structure=self._config.flat_structure,
         )
 
-    def get_run_statistics(self) -> dict[str, Any]:
+    def get_run_statistics(self) -> dict[str, Any]:  # Any: statistics values are int|str|list
         """Get aggregated statistics for the entire pipeline run.
 
         Returns:

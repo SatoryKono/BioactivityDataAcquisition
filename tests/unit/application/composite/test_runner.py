@@ -19,6 +19,7 @@ from bioetl.application.composite.runner import (
 )
 from bioetl.domain.composite.result import SeedResult
 from bioetl.domain.composite.state import CompositePipelineState
+from bioetl.domain.exceptions import StorageError
 from bioetl.domain.locking import FencingToken
 
 _MOCK_TOKEN = FencingToken(
@@ -526,7 +527,7 @@ class TestCheckpointSaveErrorHandling:
         checkpoint_manager = create_mock_checkpoint_manager()
         # First save (SEED_RUNNING) fails, but pipeline should continue
         checkpoint_manager.save = AsyncMock(
-            side_effect=[Exception("Disk full"), None, None, None]
+            side_effect=[StorageError("Disk full"), None, None, None]
         )
         logger = create_mock_logger()
 

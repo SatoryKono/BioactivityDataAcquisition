@@ -119,8 +119,9 @@ class UnifiedLogger:
         new_logger._logger = self._logger.bind(**kwargs)
         return new_logger
 
-    # Any: structlog-compatible API
-    def _ensure_stage(self, kwargs: dict[str, Any]) -> dict[str, Any]:
+    def _ensure_stage(
+        self, kwargs: dict[str, Any],  # Any: structlog-compatible API
+    ) -> dict[str, Any]:  # Any: structlog-compatible API
         """Ensure stage field is present in kwargs.
 
         If stage is not provided, defaults to "init" for LoggerPort compatibility.

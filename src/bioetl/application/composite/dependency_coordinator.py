@@ -20,11 +20,44 @@ from typing import TYPE_CHECKING
 import polars as pl
 
 from bioetl.domain.composite.result import DependencyResult
+from bioetl.domain.exceptions import (
+    BioETLError,
+    CheckpointConflictError,
+    DataQualityError,
+    NetworkError,
+    StorageError,
+)
 
 if TYPE_CHECKING:
     from bioetl.application.core.runner import PipelineRunner
     from bioetl.domain.composite.config import DependencyConfig
     from bioetl.domain.ports import DeltaReaderPort, LoggerPort
+
+
+_KEY_FILTER_ERRORS = (
+    ValueError,
+    TypeError,
+    RuntimeError,
+)
+_DEPENDENCY_KEY_READ_ERRORS = (
+    StorageError,
+    NetworkError,
+    CheckpointConflictError,
+    DataQualityError,
+    OSError,
+    RuntimeError,
+    TypeError,
+)
+_DEPENDENCY_EXECUTION_ERRORS = (
+    NetworkError,
+    StorageError,
+    CheckpointConflictError,
+    DataQualityError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+    OSError,
+)
 
 
 class DependencyCoordinator:
@@ -255,12 +288,22 @@ class DependencyCoordinator:
                         original_count=original_count,
                         filtered_count=filtered_count,
                     )
-                except Exception as e:
+                except _KEY_FILTER_ERRORS as e:
                     self._logger.warning(
                         "Failed to apply key_filter, using all keys",
                         dependency=dependency.pipeline,
                         key_filter=dependency.key_filter,
                         error=str(e),
+                        error_type=type(e).__name__,
+                    )
+                except BioETLError as e:
+                    self._logger.warning(
+                        "Failed to apply key_filter, using all keys",
+                        dependency=dependency.pipeline,
+                        key_filter=dependency.key_filter,
+                        error=str(e),
+                        error_type=type(e).__name__,
+                        reason_code="unexpected_bioetl_error",
                     )
 
             self._logger.info(
@@ -287,7 +330,7 @@ class DependencyCoordinator:
             # Re-raise validation errors
             raise
 
-        except Exception as e:
+        except _DEPENDENCY_KEY_READ_ERRORS as e:
             # For chained dependencies, errors should be explicit, not silent
             self._logger.error(
                 "Failed to read chained dependency keys",
@@ -296,6 +339,21 @@ class DependencyCoordinator:
                 source_table=source_config.silver_table,
                 error=str(e),
                 error_type=type(e).__name__,
+            )
+            raise ValueError(
+                f"Failed to read keys for chained dependency '{dependency.pipeline}' "
+                f"from '{source_config.silver_table}': {e}"
+            ) from e
+        except BioETLError as e:
+            # For chained dependencies, errors should be explicit, not silent
+            self._logger.error(
+                "Failed to read chained dependency keys",
+                dependency=dependency.pipeline,
+                key_source=dependency.key_source,
+                source_table=source_config.silver_table,
+                error=str(e),
+                error_type=type(e).__name__,
+                reason_code="unexpected_bioetl_error",
             )
             raise ValueError(
                 f"Failed to read keys for chained dependency '{dependency.pipeline}' "
@@ -374,7 +432,7 @@ class DependencyCoordinator:
                 timeout_seconds=dependency.timeout_seconds,
             )
 
-        except Exception as e:
+        except _DEPENDENCY_EXECUTION_ERRORS as e:
             duration = (datetime.now(tz=UTC) - started_at).total_seconds()
 
             if dependency.required:
@@ -382,6 +440,7 @@ class DependencyCoordinator:
                     "Required dependency failed",
                     dependency=dependency.pipeline,
                     error=str(e),
+                    error_type=type(e).__name__,
                     required=True,
                 )
             else:
@@ -389,6 +448,34 @@ class DependencyCoordinator:
                     "Optional dependency failed",
                     dependency=dependency.pipeline,
                     error=str(e),
+                    error_type=type(e).__name__,
+                    required=False,
+                )
+
+            return DependencyResult.failed(
+                pipeline_name=dependency.pipeline,
+                error_message=str(e),
+                duration_seconds=duration,
+            )
+        except BioETLError as e:
+            duration = (datetime.now(tz=UTC) - started_at).total_seconds()
+
+            if dependency.required:
+                self._logger.error(
+                    "Required dependency failed",
+                    dependency=dependency.pipeline,
+                    error=str(e),
+                    error_type=type(e).__name__,
+                    reason_code="unexpected_bioetl_error",
+                    required=True,
+                )
+            else:
+                self._logger.warning(
+                    "Optional dependency failed",
+                    dependency=dependency.pipeline,
+                    error=str(e),
+                    error_type=type(e).__name__,
+                    reason_code="unexpected_bioetl_error",
                     required=False,
                 )
 

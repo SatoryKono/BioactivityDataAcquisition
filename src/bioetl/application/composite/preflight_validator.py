@@ -12,6 +12,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
+from bioetl.domain.exceptions import BioETLError, DataQualityError
+
 if TYPE_CHECKING:
     from bioetl.domain.composite.config import CompositeConfig
     from bioetl.domain.ports import LoggerPort
@@ -340,11 +342,22 @@ class CompositePreflightValidator:
                     else True,
                     source=source,
                 )
-        except Exception as e:
+        except (ValueError, TypeError, RuntimeError, DataQualityError) as e:
             self._logger.warning(
                 "Failed to extract fields from schema",
                 schema=schema_class.__name__,
                 error=str(e),
+                error_type=type(e).__name__,
+            )
+            # Fallback: try to get fields from class annotations
+            fields = self._extract_fields_from_annotations(schema_class, source)
+        except BioETLError as e:
+            self._logger.warning(
+                "Failed to extract fields from schema",
+                schema=schema_class.__name__,
+                error=str(e),
+                error_type=type(e).__name__,
+                reason_code="unexpected_bioetl_error",
             )
             # Fallback: try to get fields from class annotations
             fields = self._extract_fields_from_annotations(schema_class, source)

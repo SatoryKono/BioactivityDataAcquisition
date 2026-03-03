@@ -19,6 +19,13 @@ from bioetl.domain.composite.result import (
     EnrichmentResult,
     MergeResult,
 )
+from bioetl.domain.exceptions import (
+    BioETLError,
+    CheckpointConflictError,
+    DataQualityError,
+    NetworkError,
+    StorageError,
+)
 from bioetl.domain.registry.field_aliases import get_alias_map_for_provider
 
 if TYPE_CHECKING:
@@ -33,6 +40,18 @@ if TYPE_CHECKING:
     from bioetl.domain.composite.cross_validation import CrossValidationStats
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.ports import DeltaReaderPort, LoggerPort, StoragePort
+
+
+_MERGE_READ_ERRORS = (
+    StorageError,
+    NetworkError,
+    CheckpointConflictError,
+    DataQualityError,
+    OSError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+)
 
 
 def _path_to_table_name(path: str) -> str:
@@ -265,11 +284,21 @@ class MergeService:
 
             try:
                 enricher_df = await self._read_silver_table(enricher_table)
-            except Exception as error:
+            except _MERGE_READ_ERRORS as error:
                 self._logger.warning(
                     "Failed to read enricher table",
                     enricher=enricher.pipeline,
                     error=str(error),
+                    error_type=type(error).__name__,
+                )
+                continue
+            except BioETLError as error:
+                self._logger.warning(
+                    "Failed to read enricher table",
+                    enricher=enricher.pipeline,
+                    error=str(error),
+                    error_type=type(error).__name__,
+                    reason_code="unexpected_bioetl_error",
                 )
                 continue
 
@@ -303,11 +332,21 @@ class MergeService:
 
             try:
                 dep_df = await self._read_silver_table(dep.silver_table)
-            except Exception as error:
+            except _MERGE_READ_ERRORS as error:
                 self._logger.warning(
                     "Failed to read dependency table",
                     dependency=dep.pipeline,
                     error=str(error),
+                    error_type=type(error).__name__,
+                )
+                continue
+            except BioETLError as error:
+                self._logger.warning(
+                    "Failed to read dependency table",
+                    dependency=dep.pipeline,
+                    error=str(error),
+                    error_type=type(error).__name__,
+                    reason_code="unexpected_bioetl_error",
                 )
                 continue
 
