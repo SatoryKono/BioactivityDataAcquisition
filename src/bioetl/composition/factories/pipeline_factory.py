@@ -23,6 +23,24 @@ from bioetl.composition.factories.data_source_factory import (
     DataSourceCreator,
     DataSourceRegistry,
 )
+from bioetl.composition.factories.pipeline_factory_dq_helpers import (
+    extract_dq_configs as _extract_dq_configs_impl,
+)
+from bioetl.composition.factories.pipeline_factory_dq_helpers import (
+    extract_dq_output_paths as _extract_dq_output_paths_impl,
+)
+from bioetl.composition.factories.pipeline_factory_dq_helpers import (
+    extract_single_dq_config as _extract_single_dq_config_impl,
+)
+from bioetl.composition.factories.pipeline_factory_dq_helpers import (
+    get_layer_path as _get_layer_path_impl,
+)
+from bioetl.composition.factories.pipeline_factory_dq_helpers import (
+    has_flat_structure as _has_flat_structure_impl,
+)
+from bioetl.composition.factories.pipeline_factory_runner_assembly import (
+    assemble_runner_impl as _assemble_runner_impl,
+)
 from bioetl.composition.factories.services_factory import (
     BaseServicesFactory,
     ServicesBuilder,
@@ -728,259 +746,44 @@ def assemble_runner(
     strict_gold_validation: bool,
     yaml_config: PipelineYamlConfig | None = None,
 ) -> PipelineRunner:
-    """Assemble a PipelineRunner from a pipeline instance.
-
-    Handles construction of the pipeline execution graph using BatchExecutor.
-    Services are created directly here (DI pattern).
-
-    Args:
-        pipeline: Configured pipeline instance
-        observability: Unified observability bundle (logger, tracer, metrics, dq_monitor)
-        silver_schema: PyArrow schema for Silver layer
-        gold_schema: Schema for Gold layer validation
-        strict_gold_validation: Whether to enforce strict Gold validation
-        yaml_config: Original YAML config for DQ report extraction
-
-    Returns:
-        Fully initialized PipelineRunner
-    """
-    # Create Helper Components using ServicesBuilder
-    logger_port = observability.logger
-
-    # Cast loading_strategy since __post_init__ converts str to LoadingStrategy enum
-    checkpoint_manager = ServicesBuilder.create_checkpoint_manager(
-        checkpoint_port=pipeline.services.checkpoint,
-        logger=logger_port,
-        pipeline_name=pipeline.config.pipeline_name,
-        run_id=pipeline.run_id,
-        resume=pipeline.runtime.resume,
-        loading_strategy=cast(LoadingStrategy | None, pipeline.config.loading_strategy),
-    )
-
-    # Create lifecycle service (M5)
-    lifecycle_service = MedallionLifecycleService(
-        storage=pipeline.services.storage,
-        logger=logger_port,
-    )
-
-    # Create shared LockContextHolder to pass context from LockManager to RecordProcessor
-    context_holder = LockContextHolder()
-
-    # Create application services directly (DI pattern, no intermediate bundle)
-    lock_manager = LockManager.create(
-        lock_port=pipeline.services.lock,
-        run_id=pipeline.context.run_id,
-        provider=pipeline.config.provider,
-        entity_type=pipeline.config.entity_type,
-        run_type=pipeline.runtime.run_type,
-        lock_ttl=pipeline.runtime.effective_lock_ttl,
-        wait_for_lock=pipeline.runtime.wait_for_lock,
-        wait_timeout=pipeline.runtime.lock_wait_timeout,
-        heartbeat_interval=pipeline.runtime.heartbeat_interval,
-        logger=logger_port,
-        shutdown_signal=pipeline.shutdown_signal,
-        checkpoint_manager=checkpoint_manager,
-        context_holder=context_holder,
-    )
-
-    preflight_service = PreflightService(
-        config=pipeline.config,
-        context=pipeline.context,
-        logger=logger_port,
-        metrics=pipeline.services.metrics,
-    )
-
-    # Create DataQualityService for DQ evaluation
-    dq_service = DataQualityService(
-        dq_monitor=pipeline.services.dq_monitor,
-        config=pipeline.config.dq,
-        logger=logger_port,
-        metrics=pipeline.services.metrics,
-        pipeline_name=pipeline.config.pipeline_name,
-        entity_type=pipeline.config.entity_type,
-    )
-
-    # Extract DQ configs from YAML config for DQ report generation
-    dq_configs = _extract_dq_configs(yaml_config)
-
-    postrun_service = PostrunService(
-        config=pipeline.config,
-        runtime=pipeline.runtime,
-        context=pipeline.context,
-        dq_service=dq_service,
-        lifecycle_service=lifecycle_service,
-        storage=pipeline.services.storage,
-        metrics=pipeline.services.metrics,
-        logger=logger_port,
-        metadata_coordinator=pipeline.services.metadata_coordinator,
-        metadata_writer=pipeline.services.metadata_writer,
-        # DQ Report parameters
-        dq_report_service=pipeline.services.dq_report_service,
-        bronze_dq_config=dq_configs.bronze,
-        silver_dq_config=dq_configs.silver,
-        gold_dq_config=dq_configs.gold,
-    )
-
-    observer = PipelineObserver(
-        pipeline_name=pipeline.config.pipeline_name,
-        run_id=pipeline.context.run_id,
-        run_type=pipeline.runtime.run_type,
-        metrics=pipeline.services.metrics,
-        logger=logger_port,
-        tracer=observability.tracer,
-    )
-
-    # Extract sink paths for DQ report generation
-    dq_output_paths = _extract_dq_output_paths(yaml_config)
-
-    # Create unified BatchExecutor (replaces PipelineExecutor + RecordProcessor)
-    # Safety Guard §4.6: lock validation via lock_validator callback
-    batch_executor = ServicesBuilder.create_batch_executor_from_pipeline(
+    """Assemble a PipelineRunner from a pipeline instance."""
+    return _assemble_runner_impl(
         pipeline=pipeline,
+        observability=observability,
         silver_schema=silver_schema,
         gold_schema=gold_schema,
-        checkpoint_manager=checkpoint_manager,
-        shutdown_signal=pipeline.shutdown_signal,
         strict_gold_validation=strict_gold_validation,
-        lock_validator=lock_manager.validate,
-        tracer=observability.tracer,
-        # DQ report output paths for flat_structure support
-        bronze_output_path=dq_output_paths.bronze_path,
-        silver_output_path=dq_output_paths.silver_path,
-        gold_output_path=dq_output_paths.gold_path,
-        flat_structure=dq_output_paths.flat_structure,
-    )
-
-    # Assemble Runner with directly injected services (explicit DI)
-    return PipelineRunner(
-        config=pipeline.config,
-        runtime=pipeline.runtime,
-        services=pipeline.services,
-        context=pipeline.context,
-        executor=batch_executor,
-        checkpoint_manager=checkpoint_manager,
-        shutdown_signal=pipeline.shutdown_signal,
-        logger=logger_port,
-        lock_manager=lock_manager,
-        preflight=preflight_service,
-        postrun=postrun_service,
-        lifecycle_service=lifecycle_service,
-        observer=observer,
-        pipeline=pipeline,
-        tracer=observability.tracer,
+        yaml_config=yaml_config,
+        dq_configs_extractor=_extract_dq_configs,
     )
 
 
 def _extract_single_dq_config(
     sink: Any,  # Any: dynamic Pydantic sink config (heterogeneous per pipeline)
     layer_name: str,
-    config_class: Any,  # Any: Pydantic model class (...
+    config_class: Any,  # Any: Pydantic model class (layer-specific)
 ) -> Any | None:  # Any: DQ report config varies by layer
-    """Extract DQ config for a single layer.
-
-    Args:
-        sink: Sink configuration from YAML.
-        layer_name: Name of the layer ('bronze', 'silver', 'gold').
-        config_class: Pydantic config class for validation.
-
-    Returns:
-        DQ report config if enabled, None otherwise.
-
-    Raises:
-        ValidationError: If sink config exists but is invalid.
-    """
-    sink_config = sink.get(layer_name)
-    if not sink_config:
-        return None
-
-    # Check if sink_config has model_dump (is a Pydantic model)
-    if not hasattr(sink_config, "model_dump"):
-        return None
-
-    validated = config_class.model_validate(sink_config.model_dump())
-    if hasattr(validated, "dq_report") and validated.dq_report.enabled:
-        return validated.dq_report
-    return None
+    """Extract DQ config for a single layer."""
+    return _extract_single_dq_config_impl(sink, layer_name, config_class)
 
 
 def _extract_dq_configs(yaml_config: PipelineYamlConfig | None) -> DQConfigsContext:
-    """Extract DQ report configs from YAML.
-
-    Args:
-        yaml_config: Pipeline YAML configuration with sink settings.
-
-    Returns:
-        DQConfigsContext with bronze, silver, and gold DQ configurations.
-        All values may be None if DQ reports are not configured.
-    """
-    from bioetl.infrastructure.schemas.dq_report_config import (
-        BronzeSinkConfig,
-        GoldSinkConfig,
-        SilverSinkConfig,
-    )
-
-    if yaml_config is None:
-        return DQConfigsContext(bronze=None, silver=None, gold=None)
-
-    sink = getattr(yaml_config, "sink", None)
-    if sink is None:
-        return DQConfigsContext(bronze=None, silver=None, gold=None)
-
-    bronze_config = _extract_single_dq_config(sink, "bronze", BronzeSinkConfig)
-    silver_config = _extract_single_dq_config(sink, "silver", SilverSinkConfig)
-    gold_config = _extract_single_dq_config(sink, "gold", GoldSinkConfig)
-
-    return DQConfigsContext(
-        bronze=bronze_config,
-        silver=silver_config,
-        gold=gold_config,
-    )
+    """Extract DQ report configs from YAML."""
+    return _extract_dq_configs_impl(yaml_config)
 
 
 def _get_layer_path(config: Any) -> str | None:  # Any: dynamic sink layer config
     """Extract path from layer config if available."""
-    return getattr(config, "path", None) if config else None
+    return _get_layer_path_impl(config)
 
 
 def _has_flat_structure(config: Any) -> bool:  # Any: dynamic sink layer config
     """Check if layer config has flat_structure enabled."""
-    return bool(config and getattr(config, "flat_structure", False))
+    return _has_flat_structure_impl(config)
 
 
 def _extract_dq_output_paths(
     yaml_config: PipelineYamlConfig | None,
 ) -> DQOutputPathsContext:
-    """Extract DQ report output paths and flat_structure from YAML config.
-
-    Args:
-        yaml_config: Pipeline YAML configuration with sink settings.
-
-    Returns:
-        DQOutputPathsContext with bronze_path, silver_path, gold_path, and flat_structure.
-        Paths may be None if not configured.
-    """
-    if yaml_config is None:
-        return DQOutputPathsContext(
-            bronze_path=None, silver_path=None, gold_path=None, flat_structure=False
-        )
-
-    sink = getattr(yaml_config, "sink", None)
-    if sink is None:
-        return DQOutputPathsContext(
-            bronze_path=None, silver_path=None, gold_path=None, flat_structure=False
-        )
-
-    bronze_config = sink.get("bronze")
-    silver_config = sink.get("silver")
-    gold_config = sink.get("gold")
-
-    flat_structure = _has_flat_structure(silver_config) or _has_flat_structure(
-        gold_config
-    )
-
-    return DQOutputPathsContext(
-        bronze_path=_get_layer_path(bronze_config),
-        silver_path=_get_layer_path(silver_config),
-        gold_path=_get_layer_path(gold_config),
-        flat_structure=flat_structure,
-    )
+    """Extract DQ output paths and flat_structure from YAML config."""
+    return _extract_dq_output_paths_impl(yaml_config)

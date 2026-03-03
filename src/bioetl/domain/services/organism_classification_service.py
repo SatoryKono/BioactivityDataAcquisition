@@ -156,8 +156,8 @@ class OrganismClassificationService:
 
     def classify_records(
         self,
-        records: list[dict[str, Any]],
-    ) -> list[tuple[dict[str, Any], OrganismClassificationResult]]:
+        records: list[dict[str, Any]],  # Any: untyped organism taxonomy data
+    ) -> list[tuple[dict[str, Any], OrganismClassificationResult]]:  # Any: untyped organism taxonomy data
         """Classify a batch of records, pairing each with its result.
 
         Args:
@@ -170,8 +170,8 @@ class OrganismClassificationService:
 
     def enrich_records(
         self,
-        records: list[dict[str, Any]],
-    ) -> list[dict[str, Any]]:
+        records: list[dict[str, Any]],  # Any: untyped organism taxonomy data
+    ) -> list[dict[str, Any]]:  # Any: untyped organism taxonomy data
         """Enrich records with classification fields.
 
         Adds ``organism_class``, ``normalized_organism``, and
@@ -187,7 +187,7 @@ class OrganismClassificationService:
         """
         return [self._enrich_single(record) for record in records]
 
-    def _enrich_single(self, record: dict[str, Any]) -> dict[str, Any]:
+    def _enrich_single(self, record: dict[str, Any]) -> dict[str, Any]:  # Any: untyped organism taxonomy data
         """Enrich a single record with classification fields."""
         result = self._classify_record(record)
         enriched = {**record}
@@ -204,12 +204,12 @@ class OrganismClassificationService:
 
     def filter_by_cellularity(
         self,
-        records: list[dict[str, Any]],
+        records: list[dict[str, Any]],  # Any: untyped organism taxonomy data
         *,
         include: set[CellularityType] | None = None,
         exclude: set[CellularityType] | None = None,
         keep_unresolved: bool = True,
-    ) -> list[dict[str, Any]]:
+    ) -> list[dict[str, Any]]:  # Any: untyped organism taxonomy data
         """Filter records by organism cellularity type.
 
         Exactly one of ``include`` or ``exclude`` should be provided.
@@ -235,7 +235,7 @@ class OrganismClassificationService:
             ... )
             [{'assay_organism': 'Homo sapiens', 'assay_tax_id': 9606}]
         """
-        filtered: list[dict[str, Any]] = []
+        filtered: list[dict[str, Any]] = []  # Any: untyped organism taxonomy data
         for record in records:
             result = self._classify_record(record)
             if self._passes_filter(result, include, exclude, keep_unresolved):
@@ -305,7 +305,7 @@ class OrganismClassificationService:
     # Internal helpers
     # ------------------------------------------------------------------
 
-    def _classify_record(self, record: dict[str, Any]) -> OrganismClassificationResult:
+    def _classify_record(self, record: dict[str, Any]) -> OrganismClassificationResult:  # Any: untyped organism taxonomy data
         """Extract fields and classify a single record."""
         organism = record.get(self.organism_field)
         taxonomy_id = record.get(self.taxonomy_id_field)

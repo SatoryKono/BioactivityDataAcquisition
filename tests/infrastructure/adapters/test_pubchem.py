@@ -202,7 +202,7 @@ async def test_health_check_degraded_on_probe_failure(pubchem_adapter):
     _fallback_health_status() which uses circuit breaker assessment.
     With circuit breaker CLOSED + failures > 0, returns DEGRADED.
     """
-    with patch("pubchempy.get_compounds", side_effect=Exception("Connection error")):
+    with patch("pubchempy.get_compounds", side_effect=RuntimeError("Connection error")):
         status = await pubchem_adapter.health_check()
         assert status == HealthStatus.DEGRADED
 
@@ -216,7 +216,7 @@ async def test_health_check_unhealthy_after_multiple_failures(pubchem_adapter):
     # Trigger 5 failures to reach failure_threshold=5 and trip circuit breaker to OPEN
     for _ in range(5):
         with patch(
-            "pubchempy.get_compounds", side_effect=Exception("Connection error")
+            "pubchempy.get_compounds", side_effect=RuntimeError("Connection error")
         ):
             await pubchem_adapter.health_check()
 

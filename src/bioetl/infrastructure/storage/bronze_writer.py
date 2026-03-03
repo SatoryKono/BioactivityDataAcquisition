@@ -44,6 +44,14 @@ from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.infrastructure.storage._atomic import atomic_write_bytes
 
+BRONZE_WRITE_ERRORS = (
+    OSError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+    zstd.ZstdError,
+)
+
 
 class BronzeWriter:
     """Writer for Bronze layer (raw data in JSONL + zstd).
@@ -387,7 +395,7 @@ class BronzeWriter:
             # Atomic rename
             temp_path.replace(target_path)
 
-        except Exception:
+        except BRONZE_WRITE_ERRORS:
             if temp_path.exists():
                 temp_path.unlink()
             raise

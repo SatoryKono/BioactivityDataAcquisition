@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import BatchID
 
 
-class BatchTracingManager:
+class BatchTracingManagerService:
     """Manages tracing spans for batch ETL operations.
 
     Provides methods to create, configure, and close OpenTelemetry spans
@@ -253,4 +253,6 @@ class BatchTracingManager:
             span.__exit__(None, None, None)
 
 
-__all__ = ["BatchTracingManager"]
+BatchTracingManager = BatchTracingManagerService
+
+__all__ = ["BatchTracingManager", "BatchTracingManagerService"]

@@ -21,7 +21,7 @@ def _is_comment_of_type(comment: Any, comment_type: str) -> bool:  # Any: JSON
 
 
 def _extract_reaction_data(
-    reaction: dict[str, Any],
+    reaction: dict[str, Any],  # Any: untyped JSON fragment from UniProt API
 ) -> dict[str, Any]:  # Any: untyped JSON fragment from UniProt API
     """Extract reaction data from catalytic activity.
 
@@ -76,8 +76,8 @@ def _build_isoform_data(iso: dict[str, Any]) -> dict[str, Any]:  # Any: JSON val
 
 
 def _extract_texts_from_dict(
-    data: dict[str, Any] | None,
-) -> list[str]:  # Any: untyped JSON fragment from UniProt API
+    data: dict[str, Any] | None,  # Any: untyped JSON fragment from UniProt API
+) -> list[str]:
     """Extract text values from a dict with 'texts' key.
 
     Args:
@@ -97,7 +97,7 @@ def _extract_texts_from_dict(
 
 
 def _extract_cofactor_entry(
-    cofactor: dict[str, Any],
+    cofactor: dict[str, Any],  # Any: untyped JSON fragment from UniProt API
 ) -> dict[str, Any]:  # Any: untyped JSON fragment from UniProt API
     """Extract data from a single cofactor entry.
 
@@ -166,7 +166,7 @@ def _extract_list_entries(
 
 
 def _extract_kinetic_parameters(
-    kinetics: dict[str, Any],
+    kinetics: dict[str, Any],  # Any: untyped JSON fragment from UniProt API
 ) -> dict[str, Any]:  # Any: untyped JSON fragment from UniProt API
     """Extract kinetic parameters (Km, Vmax) from kineticParameters dict."""
     kinetic_data: dict[str, Any] = {}  # Any: JSON values
@@ -191,7 +191,7 @@ def _extract_kinetic_parameters(
 
 
 def _extract_absorption_data(
-    absorption: dict[str, Any],
+    absorption: dict[str, Any],  # Any: untyped JSON fragment from UniProt API
 ) -> dict[str, Any]:  # Any: untyped JSON fragment from UniProt API
     """Extract absorption (spectroscopic) data."""
     abs_data: dict[str, Any] = {}  # Any: JSON values
@@ -204,7 +204,7 @@ def _extract_absorption_data(
 
 
 def _extract_biophys_from_comment(
-    comment: dict[str, Any],
+    comment: dict[str, Any],  # Any: untyped JSON fragment from UniProt API
 ) -> dict[str, Any]:  # Any: untyped JSON fragment from UniProt API
     """Extract biophysicochemical data from a single comment.
 
@@ -254,8 +254,8 @@ class CommentExtractor:
 
     @staticmethod
     def extract_text_values(
-        comments: list[Any],
-        comment_type: str,  # Any: untyped JSON fragment from UniProt API
+        comments: list[Any],  # Any: untyped JSON fragment from UniProt API
+        comment_type: str,
     ) -> list[str]:
         """Extract text values from comments of specific type.
 

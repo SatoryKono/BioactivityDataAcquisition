@@ -20,7 +20,7 @@ from bioetl.domain.events import PipelineEvent
 if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.batch_executor import BatchExecutor
-    from bioetl.application.core.checkpoint_manager import CheckpointManager
+    from bioetl.application.core.checkpoint_manager import CheckpointManagerService
     from bioetl.application.core.lock_manager import LockManager
     from bioetl.application.core.pipeline_services import PipelineServices
     from bioetl.application.core.postrun_service import PostrunService
@@ -54,7 +54,7 @@ class PipelineRunner:
         services: PipelineServices,
         context: PipelineContext,
         executor: BatchExecutor,
-        checkpoint_manager: CheckpointManager,
+        checkpoint_manager: CheckpointManagerService,
         shutdown_signal: ShutdownSignal,
         logger: LoggerPort,
         lock_manager: LockManager,

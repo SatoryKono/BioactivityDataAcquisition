@@ -4,7 +4,7 @@ Consolidated module for creating pipeline infrastructure services.
 
 Contains:
 - BaseServicesFactory: Creates PipelineServices with all dependencies
-- ServicesBuilder: Creates CheckpointManager, RecordProcessor, BatchExecutor
+- ServicesBuilder: Creates CheckpointManagerService, RecordProcessor, BatchExecutor
 
 This module follows the DI pattern: all services are created in the
 composition layer and injected into pipeline components.
@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 from bioetl.application.core.batch_executor import BatchExecutor
-from bioetl.application.core.checkpoint_manager import CheckpointManager
+from bioetl.application.core.checkpoint_manager import CheckpointManagerService
 from bioetl.application.core.config import RecordProcessorConfig
 from bioetl.application.core.pipeline_services import PipelineServices
 from bioetl.application.core.record_processor import RecordProcessor
@@ -404,8 +404,8 @@ class ServicesBuilder:
         resume: bool,
         *,
         loading_strategy: LoadingStrategy | None = None,
-    ) -> CheckpointManager:
-        """Create configured CheckpointManager.
+    ) -> CheckpointManagerService:
+        """Create configured CheckpointManagerService.
 
         Args:
             checkpoint_port: Checkpoint storage port
@@ -417,9 +417,9 @@ class ServicesBuilder:
                 FULL_SCAN_ONLY disables checkpoint resume.
 
         Returns:
-            Configured CheckpointManager instance
+            Configured CheckpointManagerService instance
         """
-        return CheckpointManager(
+        return CheckpointManagerService(
             checkpoint_port=checkpoint_port,
             logger=logger,
             pipeline_name=pipeline_name,
@@ -581,7 +581,7 @@ class ServicesBuilder:
         pipeline: BasePipeline,
         silver_schema: pa.Schema | None,
         gold_schema: Any,  # Any: Pandera DataFrameModel (no common base type)
-        checkpoint_manager: CheckpointManager,
+        checkpoint_manager: CheckpointManagerService,
         shutdown_signal: ShutdownSignal,
         *,
         strict_gold_validation: bool = True,

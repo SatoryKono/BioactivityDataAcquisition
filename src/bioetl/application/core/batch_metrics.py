@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from bioetl.domain.types import ErrorType
 
 
-class BatchMetricsRecorder:
+class BatchMetricsRecorderService:
     """Helper to record metrics for a batch processing cycle.
 
     Encapsulates all metrics recording logic for batch ETL operations,
@@ -151,3 +151,8 @@ class BatchMetricsRecorder:
                 reason=error_type.value,
                 count=count,
             )
+
+
+BatchMetricsRecorder = BatchMetricsRecorderService
+
+__all__ = ["BatchMetricsRecorder", "BatchMetricsRecorderService"]

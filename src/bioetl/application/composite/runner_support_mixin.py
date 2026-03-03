@@ -1,3 +1,4 @@
+# mypy: disable-error-code=attr-defined
 """Support helpers for CompositePipelineRunner."""
 
 from __future__ import annotations

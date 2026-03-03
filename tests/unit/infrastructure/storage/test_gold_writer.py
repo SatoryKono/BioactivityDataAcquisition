@@ -614,8 +614,8 @@ class TestGoldWriterDeterministicBackoff:
         """
         # Simulate failure on first two attempts, success on third
         mock_write_deltalake.side_effect = [
-            Exception("Transient error 1"),
-            Exception("Transient error 2"),
+            RuntimeError("Transient error 1"),
+            RuntimeError("Transient error 2"),
             None,  # Success on third attempt
         ]
 
@@ -656,8 +656,8 @@ class TestGoldWriterDeterministicBackoff:
         # Simulate table not found, then transient errors
         mock_delta_table.side_effect = TableNotFoundError("Not found")
         mock_write_deltalake.side_effect = [
-            Exception("Transient error 1"),
-            Exception("Transient error 2"),
+            RuntimeError("Transient error 1"),
+            RuntimeError("Transient error 2"),
             None,  # Success on third attempt
         ]
 

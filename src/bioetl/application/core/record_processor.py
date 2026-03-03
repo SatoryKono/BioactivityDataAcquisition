@@ -13,10 +13,10 @@ from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.batch_executor import BatchResult
-from bioetl.application.core.batch_metrics import BatchMetricsRecorder
+from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
 from bioetl.application.core.batch_transformer import BatchTransformer, TransformResult
 from bioetl.application.core.batch_writer import BatchWriter
-from bioetl.application.core.quarantine_manager import QuarantineManager
+from bioetl.application.core.quarantine_manager import QuarantineManagerService
 from bioetl.domain.exceptions import BioETLError
 
 if TYPE_CHECKING:
@@ -81,7 +81,7 @@ class RecordProcessor:
         self._tracer = tracer
 
         pipeline_label = f"{config.provider}_{config.entity_type}"
-        self._batch_metrics = BatchMetricsRecorder(
+        self._batch_metrics = BatchMetricsRecorderService(
             services.metrics, pipeline_label, context.run_type.value
         )
 
@@ -89,7 +89,7 @@ class RecordProcessor:
             context=context,
             config=config,
             error_classifier=error_classifier,
-            quarantine_manager=QuarantineManager(
+            quarantine_manager=QuarantineManagerService(
                 quarantine_port=services.quarantine,
                 pipeline_name=config.pipeline_name,
                 metrics=services.metrics,

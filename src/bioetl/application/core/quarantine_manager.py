@@ -12,7 +12,7 @@ from bioetl.domain.ports import MetricsPort, QuarantinePort
 from bioetl.domain.types import BatchID, ErrorType
 
 
-class QuarantineManager:
+class QuarantineManagerService:
     """Manages quarantining of records that fail processing.
 
     This manager handles writing failed records to quarantine storage
@@ -141,3 +141,8 @@ class QuarantineManager:
 
         """
         return await self._quarantine.get_stats(self._pipeline_name)
+
+
+QuarantineManager = QuarantineManagerService
+
+__all__ = ["QuarantineManager", "QuarantineManagerService"]

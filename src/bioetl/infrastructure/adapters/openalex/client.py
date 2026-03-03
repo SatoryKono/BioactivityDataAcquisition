@@ -23,6 +23,9 @@ import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
+from httpx import RequestError
+
+from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
@@ -36,6 +39,17 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config import Settings
 
 OPENALEX_API_BASE = "https://api.openalex.org"
+
+OPENALEX_RUNTIME_ERRORS = (
+    BioETLError,
+    NetworkError,
+    RequestError,
+    OSError,
+    ValueError,
+    TypeError,
+    RuntimeError,
+    KeyError,
+)
 
 
 @dataclass
@@ -582,7 +596,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
             )  # Any: untyped OpenAlex API JSON response
             return results
 
-        except Exception as e:
+        except OPENALEX_RUNTIME_ERRORS as e:
             self.logger.debug(
                 "openalex_title_search_failed",
                 title=title[:50],
@@ -661,7 +675,7 @@ class OpenAlexAdapter(BaseHttpAdapter):
 
             return HealthStatus.HEALTHY
 
-        except Exception as e:
+        except OPENALEX_RUNTIME_ERRORS as e:
             self.logger.warning(
                 "openalex_health_check_failed",
                 error=str(e),

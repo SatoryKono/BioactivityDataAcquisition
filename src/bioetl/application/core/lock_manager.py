@@ -11,7 +11,7 @@ from bioetl.domain.locking import FencingToken, LockContext, LockContextHolder
 from bioetl.domain.types import RunID, RunType
 
 if TYPE_CHECKING:
-    from bioetl.application.core.checkpoint_manager import CheckpointManager
+    from bioetl.application.core.checkpoint_manager import CheckpointManagerService
     from bioetl.domain.ports import LockPort, LoggerPort
 
 
@@ -46,7 +46,7 @@ class LockManager:
         config: LockConfig,
         logger: LoggerPort,
         shutdown_signal: ShutdownSignal,
-        checkpoint_manager: CheckpointManager | None = None,
+        checkpoint_manager: CheckpointManagerService | None = None,
         context_holder: LockContextHolder | None = None,
     ) -> None:
         """Initialize LockManager with explicit dependencies.
@@ -88,7 +88,7 @@ class LockManager:
         heartbeat_interval: int,
         logger: LoggerPort,
         shutdown_signal: ShutdownSignal,
-        checkpoint_manager: CheckpointManager | None = None,
+        checkpoint_manager: CheckpointManagerService | None = None,
         context_holder: LockContextHolder | None = None,
     ) -> LockManager:
         """Create a LockManager instance.

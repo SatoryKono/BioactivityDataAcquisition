@@ -37,7 +37,7 @@ def _span_context(
 
     try:
         yield span
-    except Exception as e:
+    except BaseException as e:
         span.set_attribute("error", True)
         span.set_attribute("error.type", type(e).__name__)
         span.record_exception(e)

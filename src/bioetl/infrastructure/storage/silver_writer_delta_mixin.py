@@ -1,3 +1,4 @@
+# mypy: disable-error-code=attr-defined
 """Delta operation helpers for SilverWriter."""
 
 from __future__ import annotations

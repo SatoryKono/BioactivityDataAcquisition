@@ -180,7 +180,7 @@ class BatchDQMetrics:
     @classmethod
     def from_records(
         cls,
-        records: list[dict[str, Any]],
+        records: list[dict[str, Any]],  # Any: DQ metric values vary (int|float|str|None)
         error_count: int = 0,
         warning_count: int = 0,
         validation_errors: list[str] | None = None,
@@ -226,7 +226,7 @@ class BatchDQMetrics:
         )
 
 
-def _compute_column_stats(records: list[dict[str, Any]]) -> dict[str, ColumnStats]:
+def _compute_column_stats(records: list[dict[str, Any]]) -> dict[str, ColumnStats]:  # Any: DQ metric values vary (int|float|str|None)
     """Compute column statistics from records.
 
     Args:
@@ -247,7 +247,7 @@ def _compute_column_stats(records: list[dict[str, Any]]) -> dict[str, ColumnStat
     }
 
 
-def _collect_all_columns(records: list[dict[str, Any]]) -> set[str]:
+def _collect_all_columns(records: list[dict[str, Any]]) -> set[str]:  # Any: DQ metric values vary (int|float|str|None)
     """Collect all unique column names from records.
 
     Args:
@@ -263,7 +263,8 @@ def _collect_all_columns(records: list[dict[str, Any]]) -> set[str]:
 
 
 def _compute_single_column_stats(
-    records: list[dict[str, Any]], col_name: str
+    records: list[dict[str, Any]],  # Any: DQ metric values vary (int|float|str|None)
+    col_name: str,
 ) -> ColumnStats:
     """Compute statistics for a single column.
 
@@ -290,7 +291,7 @@ def _compute_single_column_stats(
     )
 
 
-def _filter_non_null(values: list[Any]) -> list[Any]:
+def _filter_non_null(values: list[Any]) -> list[Any]:  # Any: DQ metric values vary (int|float|str|None)
     """Filter out None values from a list.
 
     Args:
@@ -302,7 +303,7 @@ def _filter_non_null(values: list[Any]) -> list[Any]:
     return [v for v in values if v is not None]
 
 
-def _calculate_null_rate(values: list[Any], total: int) -> float:
+def _calculate_null_rate(values: list[Any], total: int) -> float:  # Any: DQ metric values vary (int|float|str|None)
     """Calculate the null rate for a list of values.
 
     Args:
@@ -334,7 +335,7 @@ def _make_hashable(value: Any) -> Any:  # Any: record vals vary
     return value
 
 
-def _calculate_unique_count(values: list[Any]) -> int:
+def _calculate_unique_count(values: list[Any]) -> int:  # Any: DQ metric values vary (int|float|str|None)
     """Calculate the count of unique values.
 
     Args:
@@ -401,11 +402,4 @@ def _extract_numeric_values(values: list[Any]) -> list[float]:
     Returns:
         List of float values.
     """
-    return [float(v) for v in values if _is_valid_numeric(v)]
-
-
-__all__ = [
-    "BatchDQMetrics",
-    "ColumnStats",
-    "SchemaDriftInfo",
-]
+    return [float(v) for v in values if 

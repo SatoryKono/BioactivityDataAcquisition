@@ -21,6 +21,9 @@ import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
+from httpx import RequestError
+
+from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.normalization import normalize_doi
 from bioetl.domain.types import BronzeRecord, HealthStatus
@@ -39,6 +42,16 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.config import Settings
 
 CROSSREF_API_BASE = "https://api.crossref.org"
+
+CROSSREF_HEALTH_ERRORS = (
+    BioETLError,
+    NetworkError,
+    RequestError,
+    OSError,
+    ValueError,
+    TypeError,
+    RuntimeError,
+)
 
 
 @dataclass
@@ -348,7 +361,7 @@ class CrossRefAdapter(BaseHttpAdapter):
 
             return HealthStatus.HEALTHY
 
-        except Exception as e:
+        except CROSSREF_HEALTH_ERRORS as e:
             self.logger.warning(
                 "crossref_health_check_failed",
                 error=str(e),

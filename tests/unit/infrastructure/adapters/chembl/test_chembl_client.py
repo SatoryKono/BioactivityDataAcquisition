@@ -197,7 +197,7 @@ async def test_fetch_with_filter_deduplicates_across_pages(adapter, mock_http_cl
 @pytest.mark.asyncio
 async def test_fetch_error(adapter, mock_http_client):
     """Test API error handling."""
-    mock_http_client.get.side_effect = Exception("API Error")
+    mock_http_client.get.side_effect = RuntimeError("API Error")
 
     with pytest.raises(ExternalServiceError):
         async for _ in adapter.fetch("activity"):
@@ -224,7 +224,7 @@ async def test_health_check_unhealthy(adapter, mock_http_client):
 
     Health status is derived from circuit breaker state: OPEN = UNHEALTHY.
     """
-    mock_http_client.get_once = AsyncMock(side_effect=Exception("Down"))
+    mock_http_client.get_once = AsyncMock(side_effect=RuntimeError("Down"))
     # Configure circuit breaker OPEN state (threshold reached)
     mock_http_client.circuit_breaker.get_state.return_value = CircuitBreakerState.OPEN
     mock_http_client.circuit_breaker.get_failure_count.return_value = 5
@@ -277,7 +277,7 @@ async def test_health_check_status_endpoint_500_returns_degraded(
 ):
     """Treat ChEMBL status endpoint 5xx as DEGRADED to avoid hard preflight block."""
 
-    class StatusProbeError(Exception):
+    class StatusProbeError(RuntimeError):
         pass
 
     error = StatusProbeError("status endpoint failed")
@@ -294,7 +294,7 @@ async def test_check_health_status_endpoint_500_returns_degraded(
 ):
     """check_health() should return DEGRADED (not UNHEALTHY) on status endpoint 5xx."""
 
-    class StatusProbeError(Exception):
+    class StatusProbeError(RuntimeError):
         pass
 
     error = StatusProbeError("status endpoint failed")
@@ -842,7 +842,7 @@ class TestChemblAdapterDirectEndpointFallback:
                 return mock_response
 
             # Unknown endpoint
-            raise Exception(f"Unexpected URL: {url}")
+            raise RuntimeError(f"Unexpected URL: {url}")
 
         mock_http_client.get = mock_get
 
