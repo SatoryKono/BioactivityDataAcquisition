@@ -159,7 +159,7 @@ def query_ignore_email(request_1: Any, request_2: Any) -> bool:
     )
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def vcr(  # type: ignore[override]
     vcr_config: dict[str, object],
     vcr_cassette_dir: Path | str,

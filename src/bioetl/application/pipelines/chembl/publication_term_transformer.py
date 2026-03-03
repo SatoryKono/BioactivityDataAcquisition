@@ -14,6 +14,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.domain.types import GoldRecord
+
 from bioetl.application.core.entity_id import compute_publication_term_entity_id
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
@@ -122,7 +124,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
         self,
         record: BronzeRecord,
         primary_id: PrimaryId,
-    ) -> dict[str, Any]:
+    ) -> GoldRecord:
         """Extract term data from the record.
 
         Handles two cases:
@@ -179,7 +181,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
 
     def extract_terms_from_document(
         self, record: BronzeRecord, publication_id: str
-    ) -> list[dict[str, Any]]:
+    ) -> list[GoldRecord]:
         """Extract and flatten all terms from a Publication record.
 
         Yields multiple term records from one publication.
@@ -195,11 +197,11 @@ class PublicationTermTransformer(BaseChemblTransformer):
         Returns:
             Extracted value.
         """
-        terms: list[dict[str, Any]] = []
+        terms: list[GoldRecord] = []
 
         # Extract MeSH terms
         raw_mesh_terms = record.get("mesh_terms")
-        mesh_terms: list[Any] = (
+        mesh_terms: list[Any] = (  # Any: untyped ChEMBL API JSON list elements
             raw_mesh_terms if isinstance(raw_mesh_terms, list) else []
         )
         for mesh in mesh_terms:
@@ -233,7 +235,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
 
         # Extract keywords
         raw_keywords = record.get("keywords")
-        keywords: list[Any] = raw_keywords if isinstance(raw_keywords, list) else []
+        keywords: list[Any] = raw_keywords if isinstance(raw_keywords, list) else []  # Any: untyped ChEMBL API JSON list elements
         for keyword in keywords:
             if isinstance(keyword, str):
                 stripped = keyword.strip()
@@ -257,7 +259,7 @@ class PublicationTermTransformer(BaseChemblTransformer):
         term_type: str,
         mesh_id: str | None,
         qualifier: str | None,
-    ) -> dict[str, Any]:
+    ) -> GoldRecord:
         """Create a single term data dictionary.
 
         Args:

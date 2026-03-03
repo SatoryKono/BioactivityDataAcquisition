@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
+from bioetl.domain.types import GoldRecord
+
 from bioetl.application.core.base_transformer import TransformationError
 from bioetl.application.core.dict_transformers import flatten_nested_dict
 from bioetl.application.core.field_specs import (
@@ -30,7 +32,7 @@ if TYPE_CHECKING:
 
 
 # Mapping for ligand efficiency fields extraction (nested dict)
-_LIGAND_EFFICIENCY_FIELDS: dict[str, Any] = {
+_LIGAND_EFFICIENCY_FIELDS: dict[str, Any] = {  # Any: converter callables or None
     "bei": safe_float,
     "le": safe_float,
     "lle": safe_float,
@@ -38,7 +40,7 @@ _LIGAND_EFFICIENCY_FIELDS: dict[str, Any] = {
 }
 
 # Mapping for action type fields extraction (nested dict)
-_ACTION_TYPE_FIELDS: dict[str, Any] = {
+_ACTION_TYPE_FIELDS: dict[str, Any] = {  # Any: converter callables or None
     "action_type": None,
     "description": None,
     "parent_type": None,
@@ -153,7 +155,7 @@ class ActivityTransformer(BaseChemblTransformer):
     primary_id_field = "activity_id"
 
     @staticmethod
-    def _extract_ligand_efficiency(le_data: dict[str, Any] | None) -> dict[str, Any]:
+    def _extract_ligand_efficiency(le_data: dict[str, Any] | None) -> dict[str, Any]:  # Any: untyped ChEMBL API JSON
         """Extract ligand efficiency metrics from nested dictionary.
 
         Args:
@@ -168,7 +170,7 @@ class ActivityTransformer(BaseChemblTransformer):
         )
 
     @staticmethod
-    def _extract_action_type(action_data: dict[str, Any] | None) -> dict[str, Any]:
+    def _extract_action_type(action_data: dict[str, Any] | None) -> dict[str, Any]:  # Any: untyped ChEMBL API JSON
         """Extract action type fields from nested dictionary.
 
         Args:
@@ -189,7 +191,7 @@ class ActivityTransformer(BaseChemblTransformer):
         self,
         record: BronzeRecord,
         primary_id: PrimaryId,
-    ) -> dict[str, Any]:
+    ) -> GoldRecord:
         """Extract Activity business data from bronze record.
 
         Args:
@@ -216,10 +218,10 @@ class ActivityTransformer(BaseChemblTransformer):
             **map_field_groups(record, _ACTIVITY_GROUPS),
             # Nested dict extraction (not declarative)
             **self._extract_ligand_efficiency(
-                cast("dict[str, Any] | None", record.get("ligand_efficiency"))
+                cast("dict[str, Any] | None", record.get("ligand_efficiency"))  # Any: untyped ChEMBL API JSON
             ),
             **self._extract_action_type(
-                cast("dict[str, Any] | None", record.get("action_type"))
+                cast("dict[str, Any] | None", record.get("action_type"))  # Any: untyped ChEMBL API JSON
             ),
             # JSON serialization
             "activity_properties": self.serialize_json(

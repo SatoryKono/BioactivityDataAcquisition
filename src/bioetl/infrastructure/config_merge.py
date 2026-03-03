@@ -10,15 +10,15 @@ import copy
 from collections.abc import Callable, Mapping
 from typing import Any
 
-ListMergeFn = Callable[[list[Any], list[Any], str], list[Any]]
+ListMergeFn = Callable[[list[Any], list[Any], str], list[Any]]  # Any: YAML config values are heterogeneous
 ListMergeResolver = Callable[[str], ListMergeFn | None]
 
 
 def _default_concat_list_merger(
-    base: list[Any],
-    override: list[Any],
+    base: list[Any],  # Any: YAML config values are heterogeneous
+    override: list[Any],  # Any: YAML config values are heterogeneous
     _key: str,
-) -> list[Any]:
+) -> list[Any]:  # Any: YAML config values are heterogeneous
     """Default list concatenation strategy.
 
     - String lists: concatenate with deduplication, preserving order.
@@ -28,7 +28,7 @@ def _default_concat_list_merger(
         isinstance(item, str) for item in override
     ):
         seen: set[str] = set()
-        merged: list[Any] = []
+        merged: list[Any] = []  # Any: YAML config values are heterogeneous
         for item in base + override:
             item_str = str(item)
             if item_str not in seen:
@@ -40,13 +40,13 @@ def _default_concat_list_merger(
 
 
 def config_merge(
-    base: Mapping[str, Any],
-    override: Mapping[str, Any],
+    base: Mapping[str, Any],  # Any: YAML config values are heterogeneous
+    override: Mapping[str, Any],  # Any: YAML config values are heterogeneous
     *,
     list_concat_keys: frozenset[str] = frozenset(),
     concat_list_merger: ListMergeFn | None = None,
     list_merger_resolver: ListMergeResolver | None = None,
-) -> dict[str, Any]:
+) -> dict[str, Any]:  # Any: YAML config values are heterogeneous
     """Deep merge two config mappings.
 
     Rules:

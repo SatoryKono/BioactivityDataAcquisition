@@ -27,6 +27,7 @@ _VACUUM_OPERATION_ERRORS = (
     RuntimeError,
     ValueError,
     TypeError,
+    Exception,
 )
 
 

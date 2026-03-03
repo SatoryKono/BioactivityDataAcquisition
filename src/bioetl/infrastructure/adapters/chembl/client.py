@@ -61,6 +61,7 @@ CHEMBL_ADAPTER_ERRORS = (
     RuntimeError,
     KeyError,
     AttributeError,
+    Exception,
 )
 
 

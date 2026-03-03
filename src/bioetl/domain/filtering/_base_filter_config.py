@@ -66,23 +66,19 @@ class BaseFilterConfig:
         ]
         return all(check(record) for check in checks)
 
-    # Any: record vals vary
-    def _check_required_fields(self, record: dict[str, Any]) -> bool:
+    def _check_required_fields(self, record: dict[str, Any]) -> bool:  # Any: record vals vary
         """Check that all required fields are present and non-empty."""
         return all(record.get(fld) not in (None, "") for fld in self.required_fields)
 
-    # Any: record vals vary
-    def _check_exclude_if_present(self, record: dict[str, Any]) -> bool:
+    def _check_exclude_if_present(self, record: dict[str, Any]) -> bool:  # Any: record vals vary
         """Check that exclusion fields are absent or empty."""
         return all(record.get(fld) in (None, "") for fld in self.exclude_if_present)
 
-    # Any: record vals vary
-    def _check_column_filters(self, record: dict[str, Any]) -> bool:
+    def _check_column_filters(self, record: dict[str, Any]) -> bool:  # Any: record vals vary
         """Check that column values match the configured filters."""
         return all(self._check_single_column(record, f) for f in self.column_filters)
 
-    # Any: record vals vary
-    def _check_single_column(self, record: dict[str, Any], f: GoldColumnFilter) -> bool:
+    def _check_single_column(self, record: dict[str, Any], f: GoldColumnFilter) -> bool:  # Any: record vals vary
         """Check a single column value against its filter operator."""
         val = record.get(f.column)
         checker = _OPERATOR_CHECKERS.get(f.operator)
@@ -90,33 +86,27 @@ class BaseFilterConfig:
             return False
         return checker(self, val, f.values)
 
-    # Any: val varies
-    def _check_op_in(self, val: Any, values: frozenset[str] | None) -> bool:
+    def _check_op_in(self, val: Any, values: frozenset[str] | None) -> bool:  # Any: val varies
         """Check the IN operator."""
         return str(val) in values  # type: ignore[operator]
 
-    # Any: val varies
-    def _check_op_not_in(self, val: Any, values: frozenset[str] | None) -> bool:
+    def _check_op_not_in(self, val: Any, values: frozenset[str] | None) -> bool:  # Any: val varies
         """Check the NOT_IN operator."""
         return str(val) not in values  # type: ignore[operator]
 
-    # Any: val varies
-    def _check_op_is_null(self, val: Any, _values: frozenset[str] | None) -> bool:
+    def _check_op_is_null(self, val: Any, _values: frozenset[str] | None) -> bool:  # Any: val varies
         """Check the IS_NULL operator."""
         return val is None or val == ""
 
-    # Any: val varies
-    def _check_op_is_not_null(self, val: Any, _values: frozenset[str] | None) -> bool:
+    def _check_op_is_not_null(self, val: Any, _values: frozenset[str] | None) -> bool:  # Any: val varies
         """Check the IS_NOT_NULL operator."""
         return val is not None and val != ""
 
-    # Any: val varies
-    def _check_op_is_empty(self, val: Any, _values: frozenset[str] | None) -> bool:
+    def _check_op_is_empty(self, val: Any, _values: frozenset[str] | None) -> bool:  # Any: val varies
         """Check the IS_EMPTY operator."""
         return self._is_empty_value(val)
 
-    # Any: val varies
-    def _check_op_is_not_empty(self, val: Any, _values: frozenset[str] | None) -> bool:
+    def _check_op_is_not_empty(self, val: Any, _values: frozenset[str] | None) -> bool:  # Any: val varies
         """Check the IS_NOT_EMPTY operator."""
         return not self._is_empty_value(val)
 
@@ -129,13 +119,11 @@ class BaseFilterConfig:
             return True
         return isinstance(val, (list, dict, set)) and len(val) == 0
 
-    # Any: record vals vary
-    def _check_range_filters(self, record: dict[str, Any]) -> bool:
+    def _check_range_filters(self, record: dict[str, Any]) -> bool:  # Any: record vals vary
         """Check that values fall within the configured ranges."""
         return all(self._check_single_range(record, f) for f in self.range_filters)
 
-    # Any: record vals vary
-    def _check_list_length_filters(self, record: dict[str, Any]) -> bool:
+    def _check_list_length_filters(self, record: dict[str, Any]) -> bool:  # Any: record vals vary
         """Check list lengths in columns against configured bounds."""
         return all(
             self._check_single_list_length(record, f) for f in self.list_length_filters
@@ -168,8 +156,7 @@ class BaseFilterConfig:
             return False
         return not (max_len is not None and length > max_len)
 
-    # Any: record vals vary
-    def _check_list_contains_filters(self, record: dict[str, Any]) -> bool:
+    def _check_list_contains_filters(self, record: dict[str, Any]) -> bool:  # Any: record vals vary
         """Check list-contains filters against record values."""
         return all(
             self._check_single_list_contains(record, f)
@@ -205,8 +192,7 @@ class BaseFilterConfig:
             return val_set.issubset(allowed)
         return bool(val_set.intersection(allowed))
 
-    # Any: record vals vary
-    def _check_single_range(self, record: dict[str, Any], f: GoldRangeFilter) -> bool:
+    def _check_single_range(self, record: dict[str, Any], f: GoldRangeFilter) -> bool:  # Any: record vals vary
         """Check a single value against a range filter."""
         val = record.get(f.column)
         if val is None or val == "":
