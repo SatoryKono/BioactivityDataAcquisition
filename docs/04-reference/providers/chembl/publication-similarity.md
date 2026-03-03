@@ -2,7 +2,7 @@
 
 **Имя пайплайна:** `chembl_publication_similarity`
 **Провайдер:** `chembl`
-**Сущность:** `publication-similarity`
+**Сущность:** `publication_similarity`
 **Версия схемы:** 1.2.0
 
 ---
@@ -19,20 +19,20 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `sim-id` | `int` | Уникальный идентификатор записи сходства |
-| `doc-1` | `int` | ID первой публикации |
-| `doc-2` | `int` | ID второй публикации |
-| `pubmed-id1` | `int` | PubMed ID первой публикации |
-| `pubmed-id2` | `int` | PubMed ID второй публикации |
+| `sim_id` | `int` | Уникальный идентификатор записи сходства |
+| `doc_1` | `int` | ID первой публикации |
+| `doc_2` | `int` | ID второй публикации |
+| `pubmed_id1` | `int` | PubMed ID первой публикации |
+| `pubmed_id2` | `int` | PubMed ID второй публикации |
 
 ### Коэффициенты Танимото
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `tid-tani` | `float` | Коэффициент Танимото по таргетам |
-| `mol-tani` | `float` | Коэффициент Танимото по молекулам |
-| `avg-tani` | `float` | Среднее значение (вычисляемое) |
-| `max-tani` | `float` | Максимальное значение (вычисляемое) |
+| `tid_tani` | `float` | Коэффициент Танимото по таргетам |
+| `mol_tani` | `float` | Коэффициент Танимото по молекулам |
+| `avg_tani` | `float` | Среднее значение (вычисляемое) |
+| `max_tani` | `float` | Максимальное значение (вычисляемое) |
 
 ---
 
@@ -43,14 +43,14 @@
 ### Entity ID
 
 ```python
-entity_id = f"chembl:{sim-id}"
+entity_id = f"chembl:{sim_id}"
 ```
 
 ### Вычисляемые метрики
 
 ```python
-avg-tani = round((tid-tani + mol-tani) / 2, 6)
-max-tani = round(max(tid-tani, mol-tani), 6)
+avg_tani = round((tid_tani + mol_tani) / 2, 6)
+max_tani = round(max(tid_tani, mol_tani), 6)
 ```
 
 Если один из коэффициентов отсутствует, используется доступное значение.
@@ -61,13 +61,13 @@ max-tani = round(max(tid-tani, mol-tani), 6)
 
 ### DQ-правила
 
-1. **`sim-id`** — обязательное
-2. **`doc-1`**, **`doc-2`** — обязательные (foreign keys)
+1. **`sim_id`** — обязательное
+2. **`doc_1`**, **`doc_2`** — обязательные (foreign keys)
 
 ### Gold-фильтры
 
-- `max-tani >= 0.5` — только значимые связи попадают в Gold
-- Обязательные поля: `sim-id`, `doc-1`, `doc-2`
+- `max_tani >= 0.5` — только значимые связи попадают в Gold
+- Обязательные поля: `sim_id`, `doc_1`, `doc_2`
 
 ---
 
@@ -93,4 +93,4 @@ bioetl run --pipeline chembl_publication_similarity --limit 1000
 
 ---
 
-*Последнее обновление: 2026-01-06*
+*Последнее обновление: 2026-03-03*

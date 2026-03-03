@@ -7,7 +7,7 @@
 %% @date    2026-02-24
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
-
+%% @nodes   23
 %%{init: {
   'flowchart': {
     'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
@@ -61,7 +61,7 @@ flowchart TB
     end
 
     subgraph Bronze["Bronze Layer (Always Append)"]
-        BZ["BronzeWriter.write_bronze()<br/>• ALWAYS append-only<br/>• Never cleared by run_type<br/>• 90-day retention policy"]
+        BZ["BronzeWriter.write_bronze()<br/>always append-only<br/>never cleared by run_type<br/>retention: 90d"]
     end
 
     %% Flow

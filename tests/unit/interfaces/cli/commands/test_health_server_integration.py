@@ -15,6 +15,7 @@ from click.testing import CliRunner
 from bioetl.interfaces.cli import cli
 from bioetl.interfaces.cli.commands.health_server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
+    add_health_server_options,
     echo_health_server_info,
     health_server_context,
 )
@@ -109,6 +110,34 @@ class TestHealthServerContext:
             assert call_kwargs["port"] == 9090
             assert call_kwargs["health_monitor"] is mock_deps.health_monitor
 
+    @pytest.mark.asyncio
+    @patch("bioetl.composition.entrypoints.get_health_server_dependencies")
+    @patch("bioetl.interfaces.http.health_server.HealthServer")
+    @patch("click.echo")
+    async def test_context_continues_when_port_in_use(
+        self,
+        mock_echo: MagicMock,
+        mock_server_cls: MagicMock,
+        mock_get_deps: MagicMock,
+    ) -> None:
+        """OSError during start should yield None and continue pipeline."""
+        mock_deps = MagicMock()
+        mock_deps.health_monitor = MagicMock()
+        mock_get_deps.return_value = mock_deps
+
+        mock_server = MagicMock()
+        mock_server.start = AsyncMock(side_effect=OSError("in use"))
+        mock_server.stop = AsyncMock()
+        mock_server_cls.return_value = mock_server
+
+        async with health_server_context(
+            enabled=True, host="127.0.0.1", port=8081
+        ) as server:
+            assert server is None
+
+        mock_echo.assert_called_once()
+        mock_server.stop.assert_not_called()
+
 
 class TestEchoHealthServerInfo:
     """Test the echo_health_server_info function."""
@@ -198,3 +227,18 @@ class TestDefaultHealthServerPort:
     def test_default_port_is_8081(self) -> None:
         """Test that default health server port is 8081."""
         assert DEFAULT_HEALTH_SERVER_PORT == 8081
+
+
+class TestAddHealthServerOptions:
+    """Tests for add_health_server_options helper."""
+
+    def test_adds_expected_click_options(self) -> None:
+        @click.command()
+        def cmd() -> None:
+            return None
+
+        updated = add_health_server_options(cmd)
+        option_names = {param.name for param in updated.params}
+
+        assert "health_server" in option_names
+        assert "health_port" in option_names

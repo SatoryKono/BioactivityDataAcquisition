@@ -251,6 +251,28 @@ class TestPublicationTransformer:
         assert result["src_id"] == 1
         assert result["_source"] == "chembl"  # System field
 
+    @pytest.mark.asyncio
+    async def test_transform_release_metadata_and_invalid_citations(
+        self, transformer, mock_context
+    ):
+        """Test release metadata extraction and invalid citation count fallback."""
+        record = {
+            "publication_id": "CHEMBL9000001",
+            "title": "Release metadata test",
+            "chembl_release": {
+                "chembl_release": "34",
+                "creation_date": "2026-01-01",
+            },
+            "citation_count": "not-a-number",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["chembl_release"] == "34"
+        assert result["creation_date"] == "2026-01-01"
+        assert result["citations_received"] is None
+
 
 @pytest.mark.unit
 class TestMoleculeTransformer:
@@ -1191,3 +1213,53 @@ class TestPublicationTermTransformer:
         assert result["term_type"] == "KEYWORD"
         assert result["mesh_id"] is None
         assert result["qualifier"] is None
+
+    @pytest.mark.asyncio
+    async def test_transform_accepts_document_chembl_id_alias(
+        self, transformer, mock_context
+    ):
+        """Test that document_chembl_id is accepted as publication_id alias."""
+        record = {
+            "document_chembl_id": "CHEMBL7777777",
+            "term": "aspirin",
+            "term_type": "KEYWORD",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["publication_id"] == "CHEMBL7777777"
+
+    @pytest.mark.asyncio
+    async def test_transform_prefers_precomputed_entity_id(
+        self, transformer, mock_context
+    ):
+        """Test that precomputed entity_id is used without recomputation."""
+        record = {
+            "publication_id": "CHEMBL1135642",
+            "term": "aspirin",
+            "term_type": "KEYWORD",
+            "entity_id": "precomputed-id-123",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["entity_id"] == "precomputed-id-123"
+
+    def test_extract_business_data_empty_when_no_nested_terms(self, transformer):
+        """Test fallback payload when raw record has no extractable terms."""
+        business_data = transformer._extract_business_data(
+            {
+                "publication_id": "CHEMBL5555555",
+                "mesh_terms": [],
+                "keywords": [],
+            },
+            "CHEMBL5555555",
+        )
+
+        assert business_data["publication_id"] == "CHEMBL5555555"
+        assert business_data["term"] == ""
+        assert business_data["term_type"] == ""
+        assert business_data["mesh_id"] is None
+        assert business_data["qualifier"] is None

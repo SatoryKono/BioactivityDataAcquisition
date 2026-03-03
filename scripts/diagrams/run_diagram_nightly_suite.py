@@ -51,6 +51,7 @@ class SvgShape:
     edge_paths: int
     edge_labels: int
     text_nodes: int
+    foreign_object_text_nodes: int
     viewbox_width: float
     viewbox_height: float
 
@@ -155,6 +156,7 @@ def analyze_svg_shape(path: Path) -> SvgShape:
     edge_paths = 0
     edge_labels = 0
     text_nodes = 0
+    foreign_object_text_nodes = 0
 
     for elem in root.iter():
         tag = elem.tag.split("}", 1)[1] if "}" in elem.tag else elem.tag
@@ -169,6 +171,10 @@ def analyze_svg_shape(path: Path) -> SvgShape:
             text = " ".join(elem.itertext()).strip()
             if text:
                 text_nodes += 1
+        if tag == "foreignObject":
+            text = " ".join(elem.itertext()).strip()
+            if text:
+                foreign_object_text_nodes += 1
 
     vb_w, vb_h = parse_viewbox(root)
     return SvgShape(
@@ -176,6 +182,7 @@ def analyze_svg_shape(path: Path) -> SvgShape:
         edge_paths=edge_paths,
         edge_labels=edge_labels,
         text_nodes=text_nodes,
+        foreign_object_text_nodes=foreign_object_text_nodes,
         viewbox_width=vb_w,
         viewbox_height=vb_h,
     )
@@ -349,13 +356,13 @@ def check_diag_t025(render_paths: list[Path]) -> list[Issue]:
             issues.append(Issue("DIAG-T025", "WARNING", str(png_rel), str(exc)))
             continue
 
-        if shape.edge_labels > 0 and shape.text_nodes == 0:
+        if shape.edge_labels > 0 and (shape.text_nodes + shape.foreign_object_text_nodes) == 0:
             issues.append(
                 Issue(
                     "DIAG-T025",
                     "WARNING",
                     str(svg_rel),
-                    "edge labels exist but no readable text nodes in SVG",
+                    "edge labels exist but no readable text in SVG (text/foreignObject)",
                 )
             )
 
@@ -611,8 +618,17 @@ def check_diag_t029(
 
         can_shape = analyze_svg_shape(canonical_svg)
         alt_shape = analyze_svg_shape(alt_svg)
-        if can_shape.text_nodes == 0 or alt_shape.text_nodes == 0:
-            issues.append(Issue("DIAG-T029", "WARNING", str(rel), "text nodes missing in one of theme renders"))
+        can_readable = can_shape.text_nodes + can_shape.foreign_object_text_nodes
+        alt_readable = alt_shape.text_nodes + alt_shape.foreign_object_text_nodes
+        if can_readable == 0 or alt_readable == 0:
+            issues.append(
+                Issue(
+                    "DIAG-T029",
+                    "WARNING",
+                    str(rel),
+                    "readable text missing in one of theme renders (text/foreignObject)",
+                )
+            )
 
     return issues
 

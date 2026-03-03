@@ -2,7 +2,7 @@
 
 **Имя пайплайна:** `crossref_publication`
 **Провайдер:** `crossref`
-**Сущность:** `publication` (CrossRef API использует термин `work`, но `entity-type` в конфигурации — `publication`, унифицирован с другими провайдерами)
+**Сущность:** `publication` (CrossRef API использует термин `work`, но `entity_type` в конфигурации — `publication`, унифицирован с другими провайдерами)
 **Версия схемы:** 1.2.0
 
 ----------------------------------------------------------------------
@@ -14,7 +14,7 @@
 ### Основные сценарии использования
 
 1. **Обогащение документов ChEMBL** — добавление цитирований к публикациям из ChEMBL Documents
-1. **Обогащение PubMed публикаций** — дополнительные метаданные (citation-count, reference-count)
+1. **Обогащение PubMed публикаций** — дополнительные метаданные (citations_received, citations_made)
 1. **Резолюция DOI** — получение полных метаданных по списку DOI
 
 ----------------------------------------------------------------------
@@ -43,27 +43,27 @@
 | ------------------ | ------------- | ------------------------------ |
 | `volume`           | `str \| None` | Том                            |
 | `issue`            | `str \| None` | Выпуск                         |
-| `page-first`       | `str \| None` | Первая страница                |
-| `page-last`        | `str \| None` | Последняя страница             |
-| `publication-year` | `int \| None` | Год публикации                 |
-| `published-print`  | `str \| None` | Дата печатной публикации (ISO) |
-| `published-online` | `str \| None` | Дата онлайн-публикации (ISO)   |
+| `page_first`       | `str \| None` | Первая страница                |
+| `page_last`        | `str \| None` | Последняя страница             |
+| `publication_year` | `int \| None` | Год публикации                 |
+| `published_print`  | `str \| None` | Дата печатной публикации (ISO) |
+| `published_online` | `str \| None` | Дата онлайн-публикации (ISO)   |
 
 ### Метрики цитирования
 
 | Поле              | Тип           | Описание                                        |
 | ----------------- | ------------- | ----------------------------------------------- |
-| `citations-received` | `int \| None` | Количество цитирований (is-referenced-by-count) |
-| `citations-made`     | `int \| None` | Количество ссылок в публикации                  |
+| `citations_received` | `int \| None` | Количество цитирований (is-referenced-by-count) |
+| `citations_made`     | `int \| None` | Количество ссылок в публикации                  |
 
 ### Классификация
 
 | Поле          | Тип           | Описание                                    |
 | ------------- | ------------- | ------------------------------------------- |
-| `doc-type`    | `str`         | Тип документа: `PUBLICATION` или `PREPRINT` |
+| `publication_type`    | `str`         | Тип документа: `PUBLICATION` или `PREPRINT` |
 | `issn`        | `list[str]`   | Список ISSN журнала                         |
 | `language`    | `str \| None` | Код языка публикации                        |
-| `license-url` | `str \| None` | URL лицензии                                |
+| `license_url` | `str \| None` | URL лицензии                                |
 | `subjects`    | `list[str]`   | Предметные области                          |
 
 ----------------------------------------------------------------------
@@ -76,7 +76,7 @@
 
 ```python
 # DOI нормализуется в lowercase и stripped
-doi = normalize-doi("10.1234/ABC.DEF")  # → "10.1234/abc.def"
+doi = normalize_doi("10.1234/ABC.DEF")  # → "10.1234/abc.def"
 ```
 
 ### Маппинг типов документов
@@ -93,7 +93,7 @@ doi = normalize-doi("10.1234/ABC.DEF")  # → "10.1234/abc.def"
 
 ```python
 # Формат entity_id
-entity_id = f"crossref:{normalized-doi}"
+entity_id = f"crossref:{normalized_doi}"
 ```
 
 ### Content Hash
@@ -127,7 +127,7 @@ CrossRef API предоставляет "polite pool" с повышенными 
 
 При получении 404 для DOI:
 
-1. Если в `fallback-mapping` есть заголовок для DOI
+1. Если в `fallback_mapping` есть заголовок для DOI
 1. Выполняется поиск по заголовку: `title:"Publication Title"`
 1. Проверяется релевантность найденного результата
 
@@ -218,7 +218,7 @@ gold_filters:
     - doi
     - title
   ranges:
-    year:
+    publication_year:
       min: 1500
       max: 2100
 ```
@@ -268,10 +268,10 @@ gold_filters:
   "authors": ["John Doe", "Jane Smith"],
   "journal": "Nature",
   "publisher": "Springer Nature",
-  "publication-year": 2013,
-  "published-print": "2013-07-25",
-  "citations-received": 1500,
-  "doc-type": "PUBLICATION",
+  "publication_year": 2013,
+  "published_print": "2013-07-25",
+  "citations_received": 1500,
+  "publication_type": "PUBLICATION",
   "source": "crossref",
   "_run_id": "...",
   "_run_type": "incremental",
@@ -282,4 +282,4 @@ gold_filters:
 
 ----------------------------------------------------------------------
 
-*Последнее обновление: 2026-02-15*
+*Последнее обновление: 2026-03-03*

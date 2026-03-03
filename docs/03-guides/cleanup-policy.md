@@ -1,6 +1,6 @@
 # Cleanup Policy
 
-*Синхронизировано с RULES.md v5.23 (2026-02-21)*
+*Синхронизировано с RULES.md v5.23 (2026-03-03)*
 
 This document defines deterministic cleanup rules and automation for removing caches, build artifacts, and temporary files.
 
@@ -14,10 +14,10 @@ This document defines deterministic cleanup rules and automation for removing ca
 
 ### 1.1. Python Artifacts
 
-- `**/--pycache--/`
-- `.pytest-cache/`
-- `.mypy-cache/`
-- `.ruff-cache/`
+- `**/__pycache__/`
+- `.pytest_cache/`
+- `.mypy_cache/`
+- `.ruff_cache/`
 - `**/*.pyc`, `**/*.pyo`, `**/*.pyd`
 
 ### 1.2. Coverage
@@ -37,20 +37,20 @@ This document defines deterministic cleanup rules and automation for removing ca
 - `**/*.log`
 - `**/*.tmp`
 - `**/*report*.txt`
-- `full-log.txt`
-- `final-report*.txt`
-- `project-rules-failures.txt`
+- `full_log.txt`
+- `final_report*.txt`
+- `project_rules_failures.txt`
 
 ### 1.5. IDE/OS
 
 - `.idea/workspace.xml`
-- `.DS-Store`
+- `.DS_Store`
 - `Thumbs.db`
-- `.ipynb-checkpoints/`
+- `.ipynb_checkpoints/`
 
 ### 1.6. JavaScript (if applicable)
 
-- `node-modules/`
+- `node_modules/`
 - `.next/`
 - `web/dist/`
 
@@ -122,25 +122,20 @@ This document defines deterministic cleanup rules and automation for removing ca
 
 All whitelist patterns **MUST** be in `.gitignore`.
 
-### 4.2. Cleanup Script
+### 4.2. Cleanup Automation (Makefile)
 
-Location: `src/tools/cleanup_project.py`
+Основной путь очистки — цели в `Makefile`:
 
-| Flag             | Behavior                                     |
-| ---------------- | -------------------------------------------- |
-| `--dry-run`      | Prints candidates and sizes (default)        |
-| `--apply`        | Deletes candidates                           |
-| `--archive-logs` | Moves logs to `reports/` instead of deleting |
-| `--purge-logs`   | Forces deletion of logs                      |
-
-Logging: Structured JSON via `UnifiedLogger`.
+| Command | Behavior |
+| --- | --- |
+| `make clean` | Удаляет Python-кэш, coverage-артефакты, build/dist |
+| `make clean-local-artifacts DRY_RUN=1` | Preview очистки локальных артефактов |
+| `make clean-local-artifacts` | Применяет локальную очистку (без удаления `.worktrees/.rollback`) |
+| `make clean-local-artifacts PURGE_WORKTREES=1` | Дополнительно очищает локальные `.worktrees/.rollback` |
+| `make clean-preflight DRY_RUN=1` | Preview preflight-очистки через `scripts/preflight_cleanup.sh` |
+| `make clean-all` | `clean` + удаление логов/временных файлов |
 
 ### 4.3. Delta Lake VACUUM (MUST)
-
-```bash
-# Weekly VACUUM for Silver tables
-make vacuum-silver RETENTION-DAYS=7
-```
 
 **VACUUM MUST** запускаться еженедельно для:
 
@@ -171,12 +166,13 @@ make quarantine-purge PIPELINE=chembl_activity
 | Class inventory unchanged | Compare `tests/project-rules/class-inventory-baseline.json` |
 | Smoke run                 | One pipeline, identical artifacts                           |
 
-### 5.2. Checksum Verification
+### 5.2. Structural Verification
 
-After cleanup, verify checksums of critical artifacts:
+After cleanup, verify repository hygiene and structure policy:
 
 ```bash
-make verify-checksums
+python3 scripts/audit_root_cleanliness.py
+python3 scripts/audit_structure.py --path .
 ```
 
 ## 6. Commands
@@ -184,40 +180,37 @@ make verify-checksums
 ### 6.1. Basic Operations
 
 ```bash
-# Dry-run (default)
-python src/tools/cleanup_project.py
+# Python/cache/build cleanup
+make clean
 
-# Apply with log archive
-python src/tools/cleanup_project.py --apply --archive-logs
-
-# Full purge
-python src/tools/cleanup_project.py --apply --purge-logs
+# Full cleanup (includes logs/temp files)
+make clean-all
 ```
 
-### 6.2. Delta Lake Maintenance
+### 6.2. Local Artifact Cleanup
 
 ```bash
-# VACUUM all Silver tables
-make vacuum-silver
+# Preview before applying cleanup
+make clean-local-artifacts DRY_RUN=1
 
-# VACUUM specific table
-make vacuum-table TABLE=silver/chembl/activity
+# Apply cleanup
+make clean-local-artifacts
+
+# Include local .worktrees/.rollback purge
+make clean-local-artifacts PURGE_WORKTREES=1
 ```
 
 ### 6.3. Quarantine Management
 
 ```bash
-# Weekly triage
-make quarantine-triage
-
 # Inspect specific pipeline
 make quarantine-inspect PIPELINE=chembl_activity
 
 # Replay after fix
-make quarantine-replay PIPELINE=chembl_activity BATCH-ID=...
+make quarantine-replay PIPELINE=chembl_activity
 
 # Purge old records
-make quarantine-purge DAYS=30
+make quarantine-purge PIPELINE=chembl_activity
 ```
 
 ## 7. CI & Pre-commit
@@ -227,7 +220,7 @@ make quarantine-purge DAYS=30
 `.pre-commit-config.yaml` **MUST** forbid:
 
 - `*.pyc`
-- `--pycache--`
+- `__pycache__/`
 - `.env` files with secrets
 
 ### 7.2. CI Workflow
@@ -241,38 +234,37 @@ Root-level audit artifacts **MUST NOT** be committed.
 | Artifact           | Generator                                                      | Frequency              | Storage Policy                                                                               |
 | ------------------ | -------------------------------------------------------------- | ---------------------- | -------------------------------------------------------------------------------------------- |
 | `coverage.json`    | Local `pytest --cov ... --cov-report=json` or CI coverage jobs | On demand / per CI run | Keep local only; attach to CI artifacts if needed; never commit to repository root           |
-| `all-fixtures.txt` | Fixture inventory/debug scripts run by maintainers             | On demand              | Keep local only; if needed for review, attach to PR/CI artifacts, not git-tracked root files |
+| `all_fixtures.txt` | Fixture inventory/debug scripts run by maintainers             | On demand              | Keep local only; if needed for review, attach to PR/CI artifacts, not git-tracked root files |
 
 Enforcement:
 
-- `.gitignore` **MUST** include `/coverage.json` and `/all-fixtures.txt`.
+- `.gitignore` **MUST** include `/coverage.json` and `/all_fixtures.txt`.
 - CI **MUST** run a root-level allowlist check from `.github/root-allowlist.txt`.
 - Any intentional new root-level tracked file **MUST** be added to `.github/root-allowlist.txt` in the same PR with justification.
 
 ### 7.4. Scheduled Jobs (SHOULD)
 
-| Job                | Schedule                  | Action                 |
-| ------------------ | ------------------------- | ---------------------- |
-| `vacuum-silver`    | Weekly (Sunday 02:00 UTC) | VACUUM Delta tables    |
-| `quarantine-purge` | Daily (03:00 UTC)         | Purge records >30 days |
-| `log-rotate`       | Daily (04:00 UTC)         | Archive logs >30 days  |
+| Job | Schedule | Action |
+| --- | --- | --- |
+| `root-hygiene` | On PR/Push | Проверка root allowlist |
+| `no-pyc-check` | On PR/Push | Блокировка `*.pyc` / `__pycache__` |
+| `preflight cleanup` | On demand | Локальная/операционная очистка перед релизом |
 
 ## 8. Disaster Recovery Cleanup
 
 ### 8.1. After DR Restore
 
 ```bash
-# 1. Verify restored data
-make verify-checksums
+# 1. Validate repository hygiene
+python3 scripts/audit_root_cleanliness.py
 
-# 2. Clean stale checkpoints
-make cleanup-checkpoints
+# 2. Run cleanup preflight
+make clean-preflight DRY_RUN=1
 
-# 3. Reset quarantine state
-make quarantine-reset
-
-# 4. Rebuild Silver (if needed)
-make full-rebuild PIPELINE=chembl_activity
+# 3. Quarantine triage for affected pipeline
+make quarantine-inspect PIPELINE=chembl_activity
+make quarantine-replay PIPELINE=chembl_activity
+make quarantine-purge PIPELINE=chembl_activity
 ```
 
 ### 8.2. Checkpoint Cleanup
@@ -292,18 +284,22 @@ async def cleanup-checkpoint(run-id: UUID) -> None:
 ### 9.1. Dev Environment
 
 ```bash
-# Full cleanup for dev
-make clean-dev
-# Equivalent to:
-# python src/tools/cleanup_project.py --apply --purge-logs
-# docker-compose down -v
+# Safe preview
+make clean-local-artifacts DRY_RUN=1
+
+# Apply local cleanup
+make clean-local-artifacts
+
+# Optional: purge local worktrees/rollback snapshots
+make clean-local-artifacts PURGE_WORKTREES=1
 ```
 
 ### 9.2. Staging Environment
 
 ```bash
-# Staging cleanup (preserve data structure)
-make clean-staging
+# Staging cleanup (preserve tracked project structure)
+make clean
+make clean-preflight
 ```
 
 ### 9.3. Prod Environment

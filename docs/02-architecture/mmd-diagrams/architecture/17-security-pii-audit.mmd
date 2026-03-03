@@ -27,7 +27,7 @@ graph TB
     end
 
     subgraph DomainTypes["Domain Types"]
-        AE["AuditEntry<br/>(frozen dataclass)<br/>--------<br/>run_id, timestamp, layer<br/>table_name, operation<br/>records_count, metadata"]:::size-md
+        AE["AuditEntry (frozen)<br/>run_id + timestamp + layer<br/>table + operation<br/>records_count + metadata"]:::size-md
         AL["AuditLayer<br/>--------<br/>BRONZE / SILVER / GOLD"]:::size-sm
         AO["AuditOperation<br/>--------<br/>WRITE / MERGE / APPEND<br/>DELETE / OVERWRITE"]:::size-sm
     end
@@ -40,7 +40,7 @@ graph TB
 
     subgraph InfraPII["Infrastructure: PII Hasher"]
         SPH["Sha256PiiHasher<br/>--------<br/>+ hash(value) -> str"]:::size-md
-        SC["SaltConfig<br/>(frozen dataclass)<br/>--------<br/>current_salt<br/>next_salt<br/>rotation_active"]:::size-md
+        SC["SaltConfig (frozen)<br/>current_salt + next_salt<br/>rotation_active"]:::size-md
     end
 
     subgraph InfraAudit["Infrastructure: Audit"]

@@ -1,6 +1,6 @@
 # Agent Memory — BioETL Project
 
-*Версия: 1.0.1 | Дата: 2026-02-24 | Синхронизировано с ORCHESTRATION.md v3.0, RULES.md v5.22*
+*Версия: 1.0.2 | Дата: 2026-03-03 | Синхронизировано с ORCHESTRATION.md v3.0, RULES.md v5.23*
 
 > **Назначение**: Полный контекст для быстрого онбординга нового чата Claude Code.
 > При старте новой сессии — попроси Claude прочитать этот файл:
@@ -19,7 +19,7 @@
 | Провайдеры | ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar (7 шт.) |
 | ADR | 40 штук (ADR-001..ADR-040), все Accepted кроме ADR-008 (Superseded) |
 | Coverage target | ≥85% overall, ≥90% domain |
-| RULES.md | v5.22 (2026-02-24) |
+| RULES.md | v5.23 (2026-03-02) |
 
 ### Ключевые файлы
 

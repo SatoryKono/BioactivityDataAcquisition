@@ -7,7 +7,7 @@
 %% @date    2026-02-24
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
-
+%% @nodes   19
 %%{init: {
   'flowchart': {
     'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
@@ -34,7 +34,7 @@ flowchart TB
 
     subgraph Bootstrap["Composition Layer"]
         BOOT["bootstrap_pipeline()<br/>→ assembly.py"]
-        ASSEMBLE["Full Assembly Sequence<br/>1. Logger<br/>2. Config<br/>3. Storage<br/>4. HTTP Client<br/>5. Adapter<br/>6. Services<br/>7. Runner"]
+        ASSEMBLE["Assembly Sequence<br/>logger -> config -> storage<br/>http -> adapter -> services<br/>runner"]
     end
 
     subgraph Execute["Application Core"]

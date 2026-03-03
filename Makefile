@@ -1,7 +1,7 @@
 # BioETL Makefile
 # Production-ready ETL system for bioactivity data
 
-.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-local-artifacts clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png check-diagrams-visibility diagrams-all report-diagram-padding docs-lint
+.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-local-artifacts clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png render-diagrams-descriptions-pdf check-diagrams-visibility check-diagrams-pdf-bounds diagrams-all report-diagram-padding docs-lint
 .DEFAULT_GOAL := help
 
 # Detect uv availability (preferred package manager)
@@ -213,6 +213,15 @@ render-diagrams-svg: diagram-preflight ## Render all docs diagrams to SVG only
 render-diagrams-png: diagram-preflight ## Render all docs diagrams to PNG only
 	@echo "$(BLUE)Rendering all diagrams (PNG only)...$(NC)"
 	bash docs/02-architecture/mmd-diagrams/render.sh --png-only
+
+render-diagrams-descriptions-pdf: ## Generate *-with-descriptions.pdf bundles with print-safe fit and bounds check
+	@echo "$(BLUE)Generating diagram description PDFs...$(NC)"
+	$(PY_RUN) scripts/diagrams/generate_with_descriptions_pdf.py
+
+check-diagrams-pdf-bounds: ## Validate existing with-descriptions PDF bundles for image clipping/overflow
+	@echo "$(BLUE)Checking with-descriptions PDF bounds...$(NC)"
+	$(PY_RUN) scripts/diagrams/check_pdf_image_bounds.py --pdf docs/02-architecture/mmd-diagrams/class-diagrams-with-descriptions.pdf
+	$(PY_RUN) scripts/diagrams/check_pdf_image_bounds.py --pdf docs/02-architecture/mmd-diagrams/foundation-diagrams-with-descriptions.pdf
 
 check-diagrams-visibility: ## Check text visibility in baseline SVG smoke set
 	@echo "$(BLUE)Checking SVG text visibility (smoke manifest)...$(NC)"

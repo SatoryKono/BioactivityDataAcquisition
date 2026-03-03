@@ -40,9 +40,9 @@ graph TB
 
     %% ── Application DQ Analyzers + Anomaly ────────────────
     subgraph AppDQ["Application DQ Analysis"]
-        BDA["BronzeDQAnalyzer<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(records)<br/>+ check_completeness()<br/>+ check_format()"]
-        SDA["SilverDQAnalyzer<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(delta_table)<br/>+ check_nullability()<br/>+ check_schema()"]
-        GDA["GoldDQAnalyzer<br/>━━━━━━━━━━━━━━━━━<br/>+ analyze(delta_table)<br/>+ check_pk_uniqueness()<br/>+ validate_schema()"]
+        BDA["BronzeDQAnalyzer<br/>analyze + completeness<br/>format checks"]
+        SDA["SilverDQAnalyzer<br/>analyze + nullability<br/>schema checks"]
+        GDA["GoldDQAnalyzer<br/>analyze + pk uniqueness<br/>schema validation"]
         AD["AnomalyDetector"]
         ZSD["ZScoreDetector<br/>(DetectorStrategy)"]
         AN["Anomaly<br/>━━━━━━━━━━━━━━━━━<br/>type: AnomalyType<br/>severity: AnomalySeverity<br/>metric_name: str"]

@@ -7,7 +7,7 @@
 %% @date    2026-02-24
 %% @type    classDiagram
 %% @level   Mixed (System / Component / Class)
-
+%% @nodes   7
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 %% @uniform class width=168 height=240 max_title_len=16 max_desc_lines=15
 classDiagram
@@ -148,8 +148,8 @@ classDiagram
     LockManager --> LockResult : returns
     BackfillLock --> LockPort : uses
 
-    note for MemoryLock "Local-only lock implementation<br/>single-process runtime<br/>TTL auto-expiration + heartbeat<br/>ownership validation<br/>defaults: ttl=90s, check=1s, hb=30s"
+    note for MemoryLock "Local-only lock<br/>single-process runtime<br/>TTL expiry + heartbeat<br/>defaults: ttl=90s, hb=30s"
 
-    note for LockManager "Lock orchestration wrapper<br/>heartbeat management<br/>lock key construction<br/>logging integration<br/>key: lock:{provider}_{entity}<br/>exclusive suffix: :exclusive"
+    note for LockManager "Lock wrapper<br/>heartbeat + key build<br/>log integration<br/>key: lock:{provider}_{entity}"
 
-    note for BackfillLock "Exclusive lock for BACKFILL/REBUILD<br/>prevents concurrent modification<br/>key suffix: :exclusive"
+    note for BackfillLock "Exclusive BACKFILL/REBUILD lock<br/>prevents concurrent modification<br/>suffix: :exclusive"

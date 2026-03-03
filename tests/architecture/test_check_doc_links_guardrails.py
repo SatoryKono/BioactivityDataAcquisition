@@ -6,15 +6,17 @@ import importlib.util
 import sys
 from pathlib import Path
 from types import ModuleType
+from uuid import uuid4
 
 
 def _load_module() -> ModuleType:
     repo_root = Path(__file__).resolve().parents[2]
     module_path = repo_root / "scripts" / "check_doc_links.py"
-    spec = importlib.util.spec_from_file_location("check_doc_links_module", module_path)
+    module_name = f"check_doc_links_module_{uuid4().hex}"
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
+    sys.modules[module_name] = module
     spec.loader.exec_module(module)
     return module
 
@@ -81,6 +83,38 @@ def test_python_snippet_guardrails_allow_explicit_legacy_marker() -> None:
     assert violations == []
 
 
+def test_path_contracts_allow_canonical_requirements_link() -> None:
+    module = _load_module()
+    source = module.DOCS_DIR / "00-project" / "RULES.md"
+    lines = ["See [Requirements](../01-requirements/REQUIREMENTS.md)."]
+
+    violations = module._check_path_contracts_for_file(source, lines)
+
+    assert violations == []
+
+
+def test_path_contracts_detect_noncanonical_requirements_link() -> None:
+    module = _load_module()
+    source = module.DOCS_DIR / "00-project" / "RULES.md"
+    lines = ["See [Requirements](REQUIREMENTS.md)."]
+
+    violations = module._check_path_contracts_for_file(source, lines)
+    rule_names = {name for _, name, _ in violations}
+
+    assert "requirements_path_contract" in rule_names
+
+
+def test_path_contracts_detect_noncanonical_governance_link() -> None:
+    module = _load_module()
+    source = module.DOCS_DIR / "00-project" / "RULES.md"
+    lines = ["Legacy link: [Policy](../99-archive/governance/policy.md)."]
+
+    violations = module._check_path_contracts_for_file(source, lines)
+    rule_names = {name for _, name, _ in violations}
+
+    assert "governance_path_contract" in rule_names
+
+
 def test_drift_rules_include_legacy_run_flag_and_path_tokens() -> None:
     module = _load_module()
     rule_names = {rule.name for rule in module.DRIFT_RULES}
@@ -101,3 +135,51 @@ def test_guardrails_pass_for_current_nav_docs() -> None:
             for path, line_no, rule, value in violations[:20]
         )
     )
+
+
+def test_not_in_nav_baseline_file_exists() -> None:
+    module = _load_module()
+
+    baseline_file = module.NOT_IN_NAV_BASELINE_FILE
+    assert baseline_file.exists(), (
+        "Missing not-in-nav baseline file: "
+        f"{baseline_file.relative_to(module.PROJECT_ROOT)}"
+    )
+
+
+def test_not_in_nav_growth_guard_passes_for_current_repo() -> None:
+    module = _load_module()
+
+    current_count, baseline_count, added, _removed, baseline_exists = (
+        module.check_not_in_nav_growth()
+    )
+
+    assert baseline_exists, "not-in-nav baseline file is missing"
+    assert current_count <= baseline_count, (
+        "Detected growth of docs outside mkdocs nav baseline: "
+        f"current={current_count}, baseline={baseline_count}, "
+        f"added_sample={added[:10]}"
+    )
+
+
+def test_not_in_nav_growth_detects_increase_against_reduced_baseline(
+    tmp_path: Path,
+) -> None:
+    module = _load_module()
+
+    current_not_in_nav = module.get_not_in_nav_docs()
+    assert current_not_in_nav, "Expected non-empty not-in-nav set for this test"
+
+    reduced_baseline = tmp_path / "not_in_nav_baseline.txt"
+    reduced_baseline.write_text(
+        "\n".join(current_not_in_nav[: max(1, len(current_not_in_nav) // 4)]) + "\n",
+        encoding="utf-8",
+    )
+
+    current_count, baseline_count, added, _removed, baseline_exists = (
+        module.check_not_in_nav_growth(baseline_file=reduced_baseline)
+    )
+
+    assert baseline_exists is True
+    assert current_count > baseline_count
+    assert added, "Expected newly-added not-in-nav docs against reduced baseline"

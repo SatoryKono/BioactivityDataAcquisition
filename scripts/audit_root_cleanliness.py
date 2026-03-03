@@ -24,7 +24,6 @@ ALLOWED_ROOT_DIRECTORIES: frozenset[str] = frozenset(
         "data",
         "docs",
         "grafana",
-        "prompts",
         "reports",
         "scripts",
         "src",

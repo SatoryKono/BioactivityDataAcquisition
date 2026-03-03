@@ -7,6 +7,7 @@
 %% @level   System / Component
 %% @nodes   33
 %% @reference  Decomposed into 08a-composite-config, 08b-composite-execution
+%% Legend: docs/02-architecture/mmd-diagrams/views/00-legend.mermaid
 
 %%{init: {
   'flowchart': {
@@ -27,7 +28,7 @@ graph TB
         DC["DependencyConfig"]:::size-lg
         EC["EnricherConfig"]:::size-lg
         MC["MergeConfig"]:::size-lg
-        NoteConfig["Config Details:<br/>• name: str<br/>• seed: SeedConfig<br/>• dependencies: DependencyConfig[]<br/>• enrichers: EnricherConfig[]<br/>• merge: MergeConfig"]:::size-lg
+        NoteConfig["Config overview<br/>seed + dependencies<br/>enrichers + merge"]:::size-lg
         CC -.- NoteConfig
     end
 

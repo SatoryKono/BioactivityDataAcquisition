@@ -14,10 +14,10 @@
 
 | Параметр | Значение | Описание |
 |---|---|---|
-| `pipeline-name` | `uniprot_protein` | Уникальное имя пайплайна. |
+| `pipeline_name` | `uniprot_protein` | Уникальное имя пайплайна. |
 | `provider` | `uniprot` | Имя провайдера данных. |
-| `entity-type` | `protein` | Тип извлекаемой сущности. |
-| `primary-keys` | `["accession"]` | Ключи для слияния в Silver-слое. |
+| `entity_type` | `protein` | Тип извлекаемой сущности. |
+| `primary_keys` | `["accession"]` | Ключи для слияния в Silver-слое. |
 
 ## 3. Процесс (ETL)
 
@@ -38,7 +38,7 @@
 |---|---|---|---|
 | **Bronze** | `jsonl` (сжатый `zstd`) | Append-only | `bronze/uniprot/protein/...` |
 | **Silver** | `delta` | Merge (по `accession`) | `uniprot_protein` |
-| **Gold** | `delta` | - | `dim-target` |
+| **Gold** | `delta` | - | `dim_target` |
 
 ## 4. Качество Данных (DQ)
 
@@ -49,3 +49,7 @@
 - [Running Pipelines](../../../03-guides/running-pipelines.md) - Запуск пайплайнов
 - [ChEMBL Activity](../chembl/activity.md) - Детальная документация (пример)
 - [Project Rules](../../../00-project/RULES.md) - Правила обработки данных
+
+---
+
+*Последнее обновление: 2026-03-03*

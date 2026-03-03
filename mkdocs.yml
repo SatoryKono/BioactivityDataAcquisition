@@ -4,6 +4,11 @@ site_url: https://SatoryKono.github.io/BioactivityDataAcquisition2/
 repo_url: https://github.com/SatoryKono/BioactivityDataAcquisition2
 repo_name: SatoryKono/BioactivityDataAcquisition2
 edit_uri: "edit/main/docs/"
+site_dir: site
+exclude_docs: |
+    reports/README.md
+    site/**
+    **/~$*.docx
 
 theme:
     name: material
@@ -80,6 +85,7 @@ nav:
                     -   "Extending BioETL": 00-project/governance/04-extending-bioetl.md
                     -   "GitHub Policy": 00-project/governance/05-github-policy.md
                     -   "Docs Publication Policy": 00-project/governance/06-doc-publication-policy.md
+                    -   "Docs Navigation Policy": 00-project/governance/07-doc-nav-policy.md
     -   Architecture:
             -   "Overview": 02-architecture/00-overview.md
             -   Layers:
@@ -307,12 +313,25 @@ nav:
                     -   "CODEX": 00-project/agents/CODEX.md
                     -   "GEMINI": 00-project/agents/GEMINI.md
                     -   "Agent Memory": 00-project/agents/memory.md
+                    -   "QA Orchestrator Prompt": 00-project/agents/qa_orchestrator.md
                     -   "Orchestration": 00-project/agents/orchestration/ORCHESTRATION.md
             -   "Project Architecture Index": 00-project/architecture-index.md
             -   "Architecture Extras":
                     -   "Diagram Policy (Canonical)": 02-architecture/06-diagram-policy.md
                     -   "Architecture Diagrams (Legacy Index)": 02-architecture/architecture-diagrams.md
                     -   "MMD README": 02-architecture/mmd-diagrams/README.md
+                    -   "MMD Diagram Descriptions": 02-architecture/mmd-diagrams/diagram-descriptions.md
+                    -   "MMD Foundation with Descriptions": 02-architecture/mmd-diagrams/foundation-diagrams-with-descriptions.md
+                    -   "MMD Class with Descriptions": 02-architecture/mmd-diagrams/class-diagrams-with-descriptions.md
+                    -   "MMD Architecture SVG Index": 02-architecture/mmd-diagrams/architecture/svg/INDEX.md
+                    -   "MMD Architecture PNG Index": 02-architecture/mmd-diagrams/architecture/png/INDEX.md
+                    -   "MMD Foundation SVG Index": 02-architecture/mmd-diagrams/foundation/svg/INDEX.md
+                    -   "MMD Foundation PNG Index": 02-architecture/mmd-diagrams/foundation/png/INDEX.md
+                    -   "MMD Views SVG Index": 02-architecture/mmd-diagrams/views/svg/INDEX.md
+                    -   "MMD Views PNG Index": 02-architecture/mmd-diagrams/views/png/INDEX.md
+                    -   "MMD Class SVG Index": 02-architecture/mmd-diagrams/class-diagrams/svg/INDEX.md
+                    -   "MMD Class PNG Index": 02-architecture/mmd-diagrams/class-diagrams/png/INDEX.md
+                    -   "MMD Class Diagram Descriptions": 02-architecture/mmd-diagrams/diagram-descriptions/class-diagrams-descriptions.md
                     -   "Diagram Views Plan": 02-architecture/mmd-diagrams/docs/diagram-views-plan.md
                     -   "Diagram Prompt Expansion": 02-architecture/mmd-diagrams/docs/PROMPT-diagram-expansion.md
                     -   "Module Consolidation Requirements": 02-architecture/module-consolidation-migration-requirements.md
@@ -364,18 +383,30 @@ nav:
                     -   "01A Hexagonal Overview": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/01a-hexagonal-overview.md
                     -   "01B Hexagonal Domain App": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/01b-hexagonal-domain-app.md
                     -   "01C Hexagonal Infra Comp": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/01c-hexagonal-infra-comp.md
+                    -   "01D Hexagonal Overview Rounded": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/01d-hexagonal-overview-rounded.md
                     -   "02 Layer Dependency Matrix": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/02-layer-dependency-matrix.md
                     -   "03 Medallion Data Flow": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/03-medallion-data-flow.md
+                    -   "03A Medallion Layers Overview": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/03a-medallion-layers-overview.md
                     -   "04 Pipeline Execution Flow": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/04-pipeline-execution-flow.md
                     -   "05 Provider Adapter Hierarchy": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/05-provider-adapter-hierarchy.md
                     -   "05A Adapter Hierarchy Base": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/05a-adapter-hierarchy-base.md
                     -   "05B Adapter Hierarchy Providers": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/05b-adapter-hierarchy-providers.md
                     -   "06 Storage Layer": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/06-storage-layer.md
+                    -   "06A Storage Writers": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/06a-storage-writers.md
+                    -   "06B Storage Support": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/06b-storage-support.md
                     -   "07 Dq System": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/07-dq-system.md
+                    -   "07A Dq Analysis": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/07a-dq-analysis.md
+                    -   "07B Dq Pipeline": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/07b-dq-pipeline.md
                     -   "08 Composite Pipeline": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/08-composite-pipeline.md
+                    -   "08A Composite Config": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/08a-composite-config.md
+                    -   "08B Composite Execution": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/08b-composite-execution.md
                     -   "09 Observability Stack": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/09-observability-stack.md
+                    -   "09A Observability App": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/09a-observability-app.md
+                    -   "09B Observability Infra": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/09b-observability-infra.md
                     -   "10 Resilience Patterns": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/10-resilience-patterns.md
                     -   "11 Configuration System": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/11-configuration-system.md
+                    -   "11A Config Loading": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/11a-config-loading.md
+                    -   "11B Config Domain": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/11b-config-domain.md
                     -   "12 Bootstrap Di Container": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/12-bootstrap-di-container.md
                     -   "12A Bootstrap Factories": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/12a-bootstrap-factories.md
                     -   "12B Bootstrap Wiring": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/12b-bootstrap-wiring.md
@@ -387,12 +418,21 @@ nav:
                     -   "13C Port Contracts Observability": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/13c-port-contracts-observability.md
                     -   "13C Validation Dq Ports": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/13c-validation-dq-ports.md
                     -   "13D Port Contracts Services": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/13d-port-contracts-services.md
+                    -   "13E Operational Ports Domain": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/13e-operational-ports-domain.md
+                    -   "13F Operational Ports Infra": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/13f-operational-ports-infra.md
                     -   "14 Cli Interface Layer": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/14-cli-interface-layer.md
+                    -   "14A Cli Commands": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/14a-cli-commands.md
+                    -   "14B Cli Routing": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/14b-cli-routing.md
                     -   "15 Batch Executor Internals": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/15-batch-executor-internals.md
                     -   "16 Transformer Hierarchy": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/16-transformer-hierarchy.md
+                    -   "16A Transformer Base": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/16a-transformer-base.md
+                    -   "16B Transformer Pub Other": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/16b-transformer-pub-other.md
                     -   "17 Security Pii Audit": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/17-security-pii-audit.md
                     -   "18 Lock Checkpoint Shutdown": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/18-lock-checkpoint-shutdown.md
+                    -   "18A Lock System": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/18a-lock-system.md
+                    -   "18B Checkpoint Shutdown": 02-architecture/diagram-descriptions/mmd-diagrams/architecture/18b-checkpoint-shutdown.md
                 -   "Class Diagrams":
+                    -   "Index": 02-architecture/diagram-descriptions/mmd-diagrams/class-diagrams/INDEX.md
                     -   "01 Domain Ports": 02-architecture/diagram-descriptions/mmd-diagrams/class-diagrams/01-domain-ports.md
                     -   "02 Entities Aggregates": 02-architecture/diagram-descriptions/mmd-diagrams/class-diagrams/02-entities-aggregates.md
                     -   "03 Value Objects": 02-architecture/diagram-descriptions/mmd-diagrams/class-diagrams/03-value-objects.md
@@ -625,21 +665,33 @@ nav:
                 -   "Diagram Modernization Program": 02-architecture/mmd-diagrams/docs/diagram-modernization-program.md
                 -   "Diagram Regression Test Plan": 02-architecture/mmd-diagrams/docs/diagram-regression-test-plan.md
             -   "Plans":
+                -   "Plans Overview": plans/README.md
                 -   "Branch Consolidation Plan": plans/branch-consolidation-plan.md
                 -   "Codex 7 Branches Consolidation Plan": plans/codex-7-branches-consolidation-plan.md
                 -   "Config Unification Plan": plans/config-unification-plan.md
+                -   "Diagrams Docs Scripts Refactor Plan": plans/DIAGRAMS_DOCS_SCRIPTS_REFACTOR_PLAN.md
                 -   "Diagram Optimization Prompts V3": plans/diagram-optimization-prompts-v3.md
+                -   "Diagram Views Improvement Plan": plans/diagram-views-improvement-plan.md
                 -   "Diagram Rendering Improvement Plan 2026 02 26": plans/diagram-rendering-improvement-plan-2026-02-26.md
                 -   "Diagram Workflow Corrective Master Plan 2026 02 27": plans/diagram-workflow-corrective-master-plan-2026-02-27.md
+            -   "Prompts":
+                -   "QA Orchestrator Prompt": 00-project/agents/qa_orchestrator.md
             -   "Reports":
                 -   "Overview": reports/index.md
                 -   "Documentation Cascade Audit 2026 02 27": reports/documentation-cascade-audit-2026-02-27.md
                 -   "Documentation Audit 2026 02 25": reports/documentation-audit-2026-02-25.md
                 -   "Scripts Inventory 2026 03 01": reports/scripts-inventory-2026-03-01.md
                 -   "Codex Branches Summary 2026 02 24": reports/codex-branches-summary-2026-02-24.md
+                -   "Documentation Audit 2026 03 03 Main": reports/documentation-audit-2026-03-03-main.md
+                -   "Documentation Audit 2026 03 03 Exhaustive": reports/documentation-audit-2026-03-03-exhaustive.md
+                -   "Branch Full Diff Matrix 2026 03 01": reports/branch-full-diff-matrix-2026-03-01.md
+                -   "Branch Full Diff Matrix Diagram Scope 2026 03 01": reports/branch-full-diff-matrix-diagram-scope-2026-03-01.md
+                -   "Branch Render Settings Diff Matrix 2026 03 01": reports/branch-render-settings-diff-matrix-2026-03-01.md
             -   "Skills":
                 -   "Overview": skills/README.md
                 -   "Global Skills":
+                    -   "Skill Creator (System)": skills/global/.system/skill-creator/SKILL.md
+                    -   "Skill Installer (System)": skills/global/.system/skill-installer/SKILL.md
                     -   "Skill": skills/global/agent-orchestration/SKILL.md
                     -   "Skill": skills/global/documentation-audit/SKILL.md
                     -   "Audit Checklist": skills/global/documentation-audit/references/audit-checklist.md
@@ -662,10 +714,26 @@ nav:
                 -   "Local Skills":
                     -   "Skills Catalog": skills/local/SKILLS-CATALOG.md
                     -   "Skill": skills/local/agent-orchestration/SKILL.md
+                    -   "Capability Discovery": skills/local/capability-discovery/SKILL.md
+                    -   "Collecting Evidence": skills/local/collecting-evidence/SKILL.md
+                    -   "Evidence Object Schema": skills/local/collecting-evidence/references/evidence-object-schema.md
+                    -   "ID Generation Rules": skills/local/collecting-evidence/references/id-generation-rules.md
+                    -   "Research Protocols": skills/local/collecting-evidence/references/research-protocols.md
+                    -   "Create PR": skills/local/create-pr/SKILL.md
+                    -   "Deep Research": skills/local/deep-research/SKILL.md
+                    -   "Deep Research Search Patterns": skills/local/deep-research/references/search-patterns.md
+                    -   "Deep Research Source Evaluation": skills/local/deep-research/references/source-evaluation.md
                     -   "Skill": skills/local/documentation-audit/SKILL.md
                     -   "Audit Checklist": skills/local/documentation-audit/references/audit-checklist.md
                     -   "Report Template": skills/local/documentation-audit/references/report-template.md
                     -   "Skill": skills/local/documentation-cascade-audit/SKILL.md
+                    -   "Generating Constrained Specs": skills/local/generating-constrained-specs/SKILL.md
+                    -   "Constrained Specs PRD Template": skills/local/generating-constrained-specs/references/prd-template.md
+                    -   "Initializing Ledger": skills/local/initializing-ledger/SKILL.md
+                    -   "Making Decisions": skills/local/making-decisions/SKILL.md
+                    -   "Decision Ledger Schema": skills/local/making-decisions/references/decision-ledger-schema.md
+                    -   "Risk Ledger Schema": skills/local/making-decisions/references/risk-ledger-schema.md
+                    -   "NCI Analysis": skills/local/nci-analysis/SKILL.md
                     -   "Skill": skills/local/new-pipeline/SKILL.md
                     -   "Skill": skills/local/public/architecture-guardian/SKILL.md
                     -   "Skill": skills/local/py-audit-bot/SKILL.md
@@ -677,6 +745,10 @@ nav:
                     -   "Skill": skills/local/py-review-orchestrator/SKILL.md
                     -   "Skill": skills/local/py-test-bot/SKILL.md
                     -   "Skill": skills/local/py-test-swarm/SKILL.md
+                    -   "Repo Config": skills/local/repo-config/SKILL.md
+                    -   "Suggest Users": skills/local/suggest-users/SKILL.md
+                    -   "Synthesizing Pillars": skills/local/synthesizing-pillars/SKILL.md
+                    -   "Synthesis Template": skills/local/synthesizing-pillars/references/synthesis-template.md
                     -   "L1 Playbook": skills/local/py-test-swarm/references/l1-playbook.md
                     -   "L2 L3 Task Brief": skills/local/py-test-swarm/references/l2-l3-task-brief.md
                     -   "Report Templates": skills/local/py-test-swarm/references/report-templates.md

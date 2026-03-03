@@ -2,7 +2,7 @@
 
 **Имя пайплайна:** `chembl_publication_term`
 **Провайдер:** `chembl`
-**Сущность:** `publication-term`
+**Сущность:** `publication_term`
 **Версия схемы:** 1.2.0
 
 ---
@@ -12,8 +12,8 @@
 Пайплайн извлекает термины (MeSH-дескрипторы, ключевые слова) из записей публикаций ChEMBL API. Это производная сущность — извлекает вложенные данные терминов из ответов API `/document` и преобразует связь 1:M (одна публикация → множество терминов) в плоскую структуру.
 
 **Типы терминов:**
-- `MESH-HEADING` — MeSH-дескрипторы
-- `MESH-QUALIFIER` — MeSH-квалификаторы/подзаголовки
+- `MESH_HEADING` — MeSH-дескрипторы
+- `MESH_QUALIFIER` — MeSH-квалификаторы/подзаголовки
 - `KEYWORD` — Ключевые слова, заданные авторами
 
 ---
@@ -24,15 +24,15 @@
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `document_chembl_id` | `str` | FK → ChEMBL ID родительской публикации |
+| `publication_id` | `str` | FK → ChEMBL ID родительской публикации |
 | `term` | `str` | Текст термина (напр., "Aspirin", "kinase inhibitor") |
-| `term-type` | `str` | Тип термина: MESH-HEADING, MESH-QUALIFIER, KEYWORD |
+| `term_type` | `str` | Тип термина: MESH_HEADING, MESH_QUALIFIER, KEYWORD |
 
 ### MeSH-специфичные поля
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `mesh-id` | `str \| None` | MeSH идентификатор (напр., "D001241") |
+| `mesh_id` | `str \| None` | MeSH идентификатор (напр., "D001241") |
 | `qualifier` | `str \| None` | MeSH квалификатор (напр., "pharmacology") |
 
 ---
@@ -46,7 +46,7 @@
 Entity ID вычисляется как SHA256-хэш композитного ключа:
 
 ```python
-composite = f"{document_chembl_id}:{term-type}:{normalized-term}"
+composite = f"{publication_id}:{term_type}:{normalized_term}"
 entity_id = hashlib.sha256(composite.encode()).hexdigest()[:16]
 ```
 
@@ -55,7 +55,7 @@ entity_id = hashlib.sha256(composite.encode()).hexdigest()[:16]
 ### Извлечение терминов
 
 Трансформер извлекает термины из двух полей публикации:
-1. `mesh-terms` — массив MeSH-терминов (heading + qualifier)
+1. `mesh_terms` — массив MeSH-терминов (heading + qualifier)
 2. `keywords` — массив ключевых слов авторов
 
 ---
@@ -64,20 +64,20 @@ entity_id = hashlib.sha256(composite.encode()).hexdigest()[:16]
 
 ### DQ-правила
 
-1. **`document_chembl_id`** — обязательное, формат `CHEMBL\d+`
+1. **`publication_id`** — обязательное, формат `CHEMBL\d+`
 2. **`term`** — обязательное, минимум 1 символ
-3. **`term-type`** — обязательное, одно из: MESH-HEADING, MESH-QUALIFIER, KEYWORD, CONCEPT
+3. **`term_type`** — обязательное, одно из: MESH_HEADING, MESH_QUALIFIER, KEYWORD
 
 ### Gold-фильтры
 
 ```yaml
 gold_filters:
   columns:
-    term-type: [MESH-HEADING, KEYWORD]  # Основные типы терминов
+    term_type: [MESH_HEADING, KEYWORD]  # Основные типы терминов
   required_fields:
-    - document_chembl_id
+    - publication_id
     - term
-    - term-type
+    - term_type
 ```
 
 ---
@@ -92,19 +92,19 @@ bioetl run --pipeline chembl_publication_term
 bioetl run --pipeline chembl_publication_term --limit 1000
 
 # С фильтрацией по публикациям
-bioetl run --pipeline chembl_publication_term --input-csv data/input/publications.csv
+bioetl run --pipeline chembl_publication_term --input-csv data/input/publication.csv
 ```
 
 ---
 
 ## 6. Партиционирование
 
-Silver-таблица партиционирована по `term-type` для эффективных запросов по типу термина.
+Silver-таблица партиционирована по `term_type` для эффективных запросов по типу термина.
 
 ```yaml
 sink:
   silver:
-    partition_by: ["term-type"]
+    partition_by: ["term_type"]
 ```
 
 ---
@@ -132,4 +132,4 @@ bioetl run --pipeline chembl_publication_term --limit 1000
 
 ---
 
-*Последнее обновление: 2026-01-05*
+*Последнее обновление: 2026-03-03*

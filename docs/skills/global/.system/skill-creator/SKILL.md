@@ -9,6 +9,11 @@ metadata:
 
 This skill provides guidance for creating effective skills.
 
+## Related System Files
+
+- [openai.yaml reference](references/openai_yaml.md)
+- [Skill Installer](../skill-installer/SKILL.md)
+
 ## About Skills
 
 Skills are modular, self-contained folders that extend Codex's capabilities by providing

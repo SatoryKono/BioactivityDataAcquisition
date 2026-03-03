@@ -12,12 +12,17 @@ PUPPETEER_CFG="${PUPPETEER_CFG:-/tmp/puppeteer-config.json}"
 FORCE_WRITE_PUPPETEER=0
 STRICT_NIGHTLY=0
 SKIP_RENDER=0
+ENFORCE_BUDGET=0
 DIAGRAM_PATH=""
 TEXT_LAYER="${TEXT_LAYER:-fallback-only}"
 SOURCE_MANIFEST="$REPO_ROOT/docs/02-architecture/mmd-diagrams/quality-gate-manifest.txt"
 RENDER_MANIFEST="$REPO_ROOT/docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt"
 TEMP_SOURCE_MANIFEST=""
 TEMP_RENDER_MANIFEST=""
+BUDGET_TMP_DIR=""
+BUDGET_QUALITY_JSON=""
+BUDGET_LINT_JSON=""
+BUDGET_NIGHTLY_JSON=""
 THEME_CONFIG="$REPO_ROOT/docs/02-architecture/mmd-diagrams/theme/mermaid-config.json"
 
 usage() {
@@ -30,6 +35,7 @@ Options:
   --puppeteer <path>             Puppeteer config path (default: /tmp/puppeteer-config.json)
   --refresh-puppeteer-config     Rewrite Puppeteer config file if it already exists
   --text-layer <mode>            SVG text layers: dual|fo-only|fallback-only (default: fallback-only)
+  --enforce-budget               Enforce diagram quality budget (blocking)
   --strict-nightly               Fail nightly profile on warnings
   --skip-render                  Skip render step (useful for local dry loops)
   -h, --help                     Show this help
@@ -38,6 +44,7 @@ Examples:
   scripts/diagrams/run_diagram_checks.sh --profile pr
   scripts/diagrams/run_diagram_checks.sh --profile pr --diagram docs/02-architecture/mmd-diagrams/foundation/30-port-adapter-mapping.mmd
   scripts/diagrams/run_diagram_checks.sh --profile pr --text-layer fallback-only
+  scripts/diagrams/run_diagram_checks.sh --profile pr --enforce-budget
   scripts/diagrams/run_diagram_checks.sh --profile nightly --strict-nightly
   scripts/diagrams/run_diagram_checks.sh --profile quick
 EOF
@@ -48,6 +55,7 @@ log() { printf '[INFO] %s\n' "$*"; }
 cleanup_temp_manifests() {
   [[ -n "$TEMP_SOURCE_MANIFEST" ]] && rm -f "$TEMP_SOURCE_MANIFEST" || true
   [[ -n "$TEMP_RENDER_MANIFEST" ]] && rm -f "$TEMP_RENDER_MANIFEST" || true
+  [[ -n "$BUDGET_TMP_DIR" ]] && rm -rf "$BUDGET_TMP_DIR" || true
 }
 
 trap cleanup_temp_manifests EXIT
@@ -340,6 +348,30 @@ run_class_method_integrity_check() {
     --svg-dir "$class_svg_dir"
 }
 
+run_budget_enforcement() {
+  local mode="$1"
+  local cmd=(
+    python3 "$REPO_ROOT/scripts/diagrams/enforce_diagram_quality_budget.py"
+    --mode "$mode"
+    --quality-report "$BUDGET_QUALITY_JSON"
+    --lint-report "$BUDGET_LINT_JSON"
+    --max-hard-failures 0
+    --max-diag-t022 0
+    --max-diag-t023 0
+    --max-lint-errors 0
+  )
+
+  if [[ "$mode" == "nightly" ]]; then
+    cmd+=(
+      --nightly-report "$BUDGET_NIGHTLY_JSON"
+      --max-nightly-errors 0
+      --max-nightly-warnings 0
+    )
+  fi
+
+  "${cmd[@]}"
+}
+
 run_pr_profile() {
   log "DIAG-T000: Mermaid operator guard (class/sequence)"
   run_operator_guard
@@ -370,8 +402,29 @@ run_pr_profile() {
     --manifest "$RENDER_MANIFEST"
 
   log "DIAG-T018..T023: Quality gates"
-  python3 "$REPO_ROOT/scripts/diagrams/check_diagram_quality_gates.py" \
-    --manifest "$SOURCE_MANIFEST"
+  if [[ "$ENFORCE_BUDGET" -eq 1 ]]; then
+    local lint_target="$REPO_ROOT/docs/02-architecture/mmd-diagrams"
+    if [[ -n "$DIAGRAM_PATH" ]]; then
+      lint_target="$REPO_ROOT/$DIAGRAM_PATH"
+    fi
+    if [[ -z "$BUDGET_TMP_DIR" ]]; then
+      BUDGET_TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/diagram-budget.XXXXXX")"
+    fi
+    BUDGET_QUALITY_JSON="$BUDGET_TMP_DIR/quality.json"
+    BUDGET_LINT_JSON="$BUDGET_TMP_DIR/lint.json"
+
+    python3 "$REPO_ROOT/scripts/diagrams/check_diagram_quality_gates.py" \
+      --manifest "$SOURCE_MANIFEST" \
+      --json-out "$BUDGET_QUALITY_JSON"
+    python3 "$REPO_ROOT/scripts/diagrams/lint_diagrams.py" \
+      "$lint_target" --json > "$BUDGET_LINT_JSON" || true
+
+    log "DIAG-BUDGET: Enforce PR budget"
+    run_budget_enforcement pr
+  else
+    python3 "$REPO_ROOT/scripts/diagrams/check_diagram_quality_gates.py" \
+      --manifest "$SOURCE_MANIFEST"
+  fi
 
   log "DIAG-T033: class method render integrity"
   run_class_method_integrity_check
@@ -388,11 +441,24 @@ run_nightly_profile() {
     --puppeteer "$PUPPETEER_CFG"
   )
 
+  if [[ "$ENFORCE_BUDGET" -eq 1 ]]; then
+    if [[ -z "$BUDGET_TMP_DIR" ]]; then
+      BUDGET_TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/diagram-budget.XXXXXX")"
+    fi
+    BUDGET_NIGHTLY_JSON="$BUDGET_TMP_DIR/nightly.json"
+    nightly_cmd+=(--json-out "$BUDGET_NIGHTLY_JSON")
+  fi
+
   if [[ "$STRICT_NIGHTLY" -eq 1 ]]; then
     nightly_cmd+=(--strict)
   fi
 
   "${nightly_cmd[@]}"
+
+  if [[ "$ENFORCE_BUDGET" -eq 1 ]]; then
+    log "DIAG-BUDGET: Enforce nightly budget"
+    run_budget_enforcement nightly
+  fi
 }
 
 run_quick_profile() {
@@ -408,8 +474,28 @@ run_quick_profile() {
   run_lint_check
 
   log "DIAG-T018..T023: Quality gates"
-  python3 "$REPO_ROOT/scripts/diagrams/check_diagram_quality_gates.py" \
-    --manifest "$SOURCE_MANIFEST"
+  if [[ "$ENFORCE_BUDGET" -eq 1 ]]; then
+    local lint_target="$REPO_ROOT/docs/02-architecture/mmd-diagrams"
+    if [[ -n "$DIAGRAM_PATH" ]]; then
+      lint_target="$REPO_ROOT/$DIAGRAM_PATH"
+    fi
+    if [[ -z "$BUDGET_TMP_DIR" ]]; then
+      BUDGET_TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/diagram-budget.XXXXXX")"
+    fi
+    BUDGET_QUALITY_JSON="$BUDGET_TMP_DIR/quality.json"
+    BUDGET_LINT_JSON="$BUDGET_TMP_DIR/lint.json"
+    python3 "$REPO_ROOT/scripts/diagrams/check_diagram_quality_gates.py" \
+      --manifest "$SOURCE_MANIFEST" \
+      --json-out "$BUDGET_QUALITY_JSON"
+    python3 "$REPO_ROOT/scripts/diagrams/lint_diagrams.py" \
+      "$lint_target" --json > "$BUDGET_LINT_JSON" || true
+
+    log "DIAG-BUDGET: Enforce quick-profile PR budget"
+    run_budget_enforcement pr
+  else
+    python3 "$REPO_ROOT/scripts/diagrams/check_diagram_quality_gates.py" \
+      --manifest "$SOURCE_MANIFEST"
+  fi
 
   log "DIAG-T024..T029: Nightly suite (light mode)"
   python3 "$REPO_ROOT/scripts/diagrams/run_diagram_nightly_suite.py" \
@@ -446,6 +532,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --strict-nightly)
       STRICT_NIGHTLY=1
+      shift
+      ;;
+    --enforce-budget)
+      ENFORCE_BUDGET=1
       shift
       ;;
     --skip-render)

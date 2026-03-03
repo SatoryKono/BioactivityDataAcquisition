@@ -36,43 +36,35 @@ logger = logging.getLogger(__name__)
 # Configuration: Allowed directories and paths
 # =============================================================================
 
-# Allowed root directories per 03-file-policy.md + project extensions
+# Allowed root directories per 03-file-policy.md §0 (tracked policy).
 ALLOWED_ROOT_DIRS: set[str] = {
-    # Core directories (03-file-policy.md §"Допустимые корневые каталоги")
-    "src",
-    "tests",
-    "docs",
-    "configs",
-    "data",
-    "qc",  # Quality Control
-    # Operational
-    "scripts",  # Operational scripts (vacuum, salt rotation, architecture checks)
-    "reports",  # Temporary reports (not committed, in .gitignore)
-    # CI/DevOps
-    ".github",
-    # IDE/Tool configs (analogous to .cursor/.trae/.windsurf)
-    ".cursor",
-    ".trae",
-    ".windsurf",
-    ".claude",
-    ".codex",
-    ".jules",
     ".ai",
     ".aiassistant",
+    ".claude",
+    ".codex",
     ".gemini",
+    ".github",
+    ".jules",
+    ".junie",
+    "assets",
+    "configs",
+    "data",
+    "docs",
+    "grafana",
+    "reports",
+    "scripts",
+    "src",
+    "tests",
+}
+
+# Local untracked directories tolerated by structural audit.
+LOCAL_TOLERATED_ROOT_DIRS: set[str] = {
+    ".cursor",
     ".idea",
     ".import_linter_cache",
-    ".junie",
+    ".trae",
     ".vscode",
-    # Infrastructure monitoring
-    "grafana",  # Grafana dashboards for observability
-    # Documentation assets
-    "assets",  # MkDocs theme assets (stylesheets, javascripts)
-    # Performance tests
-    "benchmarks",  # pytest-benchmark tests (separate from unit tests)
-    # Browsers & Tools
-    "chrome-headless-shell",  # For integration tests requiring browser
-    "prompts",  # Reusable agent prompts and templates
+    ".windsurf",
 }
 
 # Directories that SHOULD NOT be committed (generated or temp)
@@ -105,7 +97,6 @@ ALLOWED_PYTHON_PATHS: tuple[str, ...] = (
     "src/",
     "tests/",
     "scripts/",
-    "benchmarks/",  # Performance tests
     "docs/skills/",  # Agent skills scripts
     ".ai/mcp/",      # MCP server implementations
 )
@@ -206,6 +197,10 @@ def _check_root_directories(project_root: Path) -> Iterator[Violation]:
             continue
 
         name = item.name
+
+        # Local dev/tooling directories are tolerated when untracked.
+        if name in LOCAL_TOLERATED_ROOT_DIRS:
+            continue
 
         # Skip technical directories
         if _is_technical_or_generated(name):

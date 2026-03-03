@@ -23,40 +23,40 @@
 graph TB
 %% keep-orphan: LNHE, SHP
     subgraph Ports["Domain Ports"]
-        LKP["LockPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ acquire(key, owner, ttl)<br/>+ release(key, owner)<br/>+ heartbeat(key, owner)<br/>+ validate_owner(key, owner)<br/>+ validate_fencing_token(token)"]:::size-lg
-        CKP["CheckpointPort<br/>(Protocol)<br/>━━━━━━━━━━━━━━━━━<br/>+ save(key, data)<br/>+ load(key) → dict | None<br/>+ list_all() → list<br/>+ delete(key)"]:::size-lg
+        LKP["LockPort (Protocol)<br/>acquire/release/heartbeat<br/>validate_owner + validate_token"]:::size-lg
+        CKP["CheckpointPort (Protocol)<br/>save/load/list/delete"]:::size-lg
         SHP["ShutdownPort<br/>(Protocol)"]:::size-lg
     end
 
     subgraph DomainLock["Domain Lock Types"]
-        FT["FencingToken<br/>(frozen dataclass)<br/>━━━━━━━━━━━━━━━━━<br/>sequence: int<br/>key: str<br/>owner_id: RunID<br/>issued_at: float"]:::size-lg
+        FT["FencingToken<br/>sequence + key + owner_id + issued_at"]:::size-lg
         LNHE["LockNotHeldError"]:::size-lg
     end
 
     subgraph AppLock["Application: LockManager"]
-        LM["LockManager<br/>lock + run_id + config<br/>shutdown_signal<br/>acquire(timeout) -> FencingToken<br/>release()<br/>validate() -> bool"]:::size-lg
+        LM["LockManager<br/>lock + run_id + shutdown_signal<br/>acquire/release/validate"]:::size-lg
         HB["HeartbeatTask<br/>━━━━━━━━━━━━━━━━━<br/>Background async task<br/>periodically calls<br/>lock.heartbeat()"]:::size-lg
     end
 
     subgraph AppCheckpoint["Application: CheckpointManager"]
-        CM["CheckpointManager<br/>checkpoint + pipeline_name<br/>run_id + resume<br/>load_checkpoint()<br/>save_checkpoint(offset)<br/>delete_checkpoint()"]:::size-lg
+        CM["CheckpointManager<br/>checkpoint + pipeline_name + run_id<br/>load/save/delete checkpoint"]:::size-lg
     end
 
     subgraph AppShutdown["Application: Shutdown"]
-        SS["ShutdownSignal<br/>━━━━━━━━━━━━━━━━━<br/>is_requested: bool<br/>reason: ShutdownReason | None<br/>━━━━━━━━━━━━━━━━━<br/>+ request(reason)<br/>+ reset()"]:::size-lg
-        SR["ShutdownReason<br/>━━━━━━━━━━━━━━━━━<br/>SIGINT<br/>SIGTERM<br/>LOCK_LOST<br/>MEMORY_PRESSURE<br/>DQ_THRESHOLD"]:::size-lg
+        SS["ShutdownSignal<br/>is_requested + reason<br/>request(reason) + reset()"]:::size-lg
+        SR["ShutdownReason<br/>SIGINT | SIGTERM | LOCK_LOST<br/>MEMORY_PRESSURE | DQ_THRESHOLD"]:::size-lg
     end
 
     subgraph InfraLock["Infrastructure: MemoryLock"]
-        ML["MemoryLock<br/>locks + global_lock + ttl_interval<br/>acquire() -> FencingToken<br/>release() / heartbeat()<br/>validate_owner()<br/>validate_fencing_token()"]:::size-lg
+        ML["MemoryLock<br/>in-memory lock store<br/>acquire/release/heartbeat<br/>validate owner + token"]:::size-lg
     end
 
     subgraph InfraCheckpoint["Infrastructure: LocalCheckpoint"]
-        LCP["LocalCheckpoint<br/>━━━━━━━━━━━━━━━━━<br/>base_path: Path<br/>━━━━━━━━━━━━━━━━━<br/>+ save() — atomic (tmp + rename)<br/>+ load() → dict<br/>+ exists() → bool<br/>+ delete()"]:::size-lg
+        LCP["LocalCheckpoint<br/>base_path + atomic save/load<br/>exists + delete"]:::size-lg
     end
 
     subgraph SafetyGuard["Safety Guard Pattern"]
-        SG["BatchWriter._validate_lock()<br/>━━━━━━━━━━━━━━━━━<br/>Before each Silver/Gold write:<br/>1. validate lock still held<br/>2. validate fencing token<br/>3. raise LockNotHeldError if invalid<br/>Prevents split-brain writes"]:::size-lg
+        SG["validate_lock()<br/>pre-write lock+token check<br/>raise LockNotHeldError<br/>prevent split-brain"]:::size-lg
     end
 
     subgraph Lifecycle["Pipeline Lifecycle Integration"]
@@ -65,7 +65,7 @@ graph TB
         ACQ["Acquire Lock<br/>+ start heartbeat"]:::size-lg
         EXEC["Execute Batches<br/>+ save checkpoints"]:::size-lg
         SIG["Signal received?"]:::size-lg
-        GRACEFUL["Graceful shutdown:<br/>finish current batch,<br/>save checkpoint,<br/>release lock"]:::size-lg
+        GRACEFUL["Graceful shutdown<br/>finish batch + save checkpoint<br/>release lock"]:::size-lg
         REL["Release Lock<br/>+ delete checkpoint"]:::size-lg
         END["Pipeline End"]:::size-lg
         START --> ACQ --> EXEC --> SIG

@@ -7,7 +7,7 @@
 %% @date    2026-02-24
 %% @type    classDiagram
 %% @level   Mixed (System / Component / Class)
-
+%% @nodes   8
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 %% @uniform class width=168 height=240 max_title_len=16 max_desc_lines=24
 classDiagram
@@ -180,8 +180,8 @@ classDiagram
     SilverWriter ..> pyarrow : "uses pa.Table"
     SilverWriter ..> polars : "uses pl.DataFrame"
 
-    note for SilverWriter "Silver writer (delta-rs)<br/>ACID merge/upsert by content_hash<br/>optimistic concurrency<br/>lock validation before/after write<br/>optional CSV export<br/>defaults: lock=true, writer=2, reader=1"
+    note for SilverWriter "Silver writer (delta-rs)<br/>merge/upsert by hash<br/>lock check around write<br/>optional CSV"
 
-    note for WriteResult "Write operation result<br/>transaction version<br/>files added<br/>duration metrics<br/>error details if failed"
+    note for WriteResult "Write result<br/>tx version + files added<br/>duration metrics<br/>error details"
 
     note for MergeResult "MERGE operation result<br/>inserted vs updated rows<br/>deleted rows (SCD2)<br/>source total for ratio"

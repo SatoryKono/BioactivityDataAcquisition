@@ -28,7 +28,7 @@ graph LR
     subgraph CLI["CLI Interface (Click)"]
         MAIN["bioetl<br/>(main group)<br/>"]:::size-md
         subgraph RunCmds["Run Commands"]
-            RUN["bioetl run<br/>━━━━━━━━━━━━━━━━━<br/>--provider<br/>--entity<br/>--run-type<br/>--limit<br/>--resume<br/>--dry-run"]:::size-lg
+            RUN["bioetl run<br/>--provider --entity --run-type<br/>--limit --resume --dry-run"]:::size-lg
             RUN_COMP["bioetl run-composite<br/>━━━━━━━━━━━━━━━━━<br/>--config<br/>--run-type<br/>--resume"]:::size-md
         end
 

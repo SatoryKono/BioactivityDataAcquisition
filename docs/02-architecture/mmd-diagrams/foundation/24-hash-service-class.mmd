@@ -7,7 +7,7 @@
 %% @date    2026-02-24
 %% @type    classDiagram
 %% @level   Mixed (System / Component / Class)
-
+%% @nodes   5
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 %% @uniform class width=184 height=198 max_title_len=18 max_desc_lines=9
 classDiagram
@@ -66,9 +66,9 @@ classDiagram
     ContentHashService --> ContentHash : returns
     BaseTransformer --> ContentHashService : delegates to
 
-    note for ContentHashService "Content hash pipeline<br/>1) filter internal fields<br/>2) normalize values<br/>3) canonical JSON (sorted keys)<br/>4) sha256(provider + payload)<br/>excludes: _run_id, _run_type<br/>_ingestion_ts"
+    note for ContentHashService "Content hash pipeline<br/>filter internal fields<br/>normalize values<br/>canonical JSON + sha256"
 
-    note for NormalizationRules "Normalization examples<br/>3.14159265358979 -> 3.1415926536<br/>float('nan') -> null<br/>'  hello  ' -> 'hello'<br/>datetime -> YYYY-MM-DD"
+    note for NormalizationRules "Normalization examples<br/>float round(10)<br/>NaN -> null<br/>trim strings<br/>datetime -> ISO date"
 
     %% Implementation flow
     class HashFlow {

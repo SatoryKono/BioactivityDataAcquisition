@@ -7,7 +7,7 @@
 %% @date    2026-02-24
 %% @type    classDiagram
 %% @level   Mixed (System / Component / Class)
-
+%% @nodes   8
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 %% @uniform class width=208 height=240 max_title_len=21 max_desc_lines=27
 classDiagram
@@ -263,10 +263,10 @@ classDiagram
     ProviderHealthTracker --> CircuitBreaker : manages
     ProviderHealthTracker --> HealthState : tracks
 
-    note for CircuitBreaker "Circuit breaker state flow<br/>CLOSED --5 failures--> OPEN<br/>OPEN --timeout--> HALF_OPEN<br/>HALF_OPEN --success--> CLOSED<br/>HALF_OPEN --failure--> OPEN<br/>defaults: threshold=5 timeout=300s"
+    note for CircuitBreaker "State flow<br/>CLOSED -> OPEN (5 fails)<br/>OPEN -> HALF_OPEN (timeout)<br/>HALF_OPEN -> CLOSED/OPEN"
 
-    note for CircuitBreakerMetrics "Prometheus metrics<br/>state gauge: 0/1/2<br/>trips_total counter<br/>success_total counter<br/>failure_total counter"
+    note for CircuitBreakerMetrics "Prometheus metrics<br/>state gauge (0/1/2)<br/>trips_total + success_total<br/>failure_total"
 
-    note for CircuitOpenError "Raised on call while circuit is OPEN<br/>includes provider name<br/>includes retry ETA to HALF_OPEN"
+    note for CircuitOpenError "Raised when circuit is OPEN<br/>includes provider<br/>includes retry ETA"
 
-    note for ProviderHealthTracker "Provider health manager<br/>tracks breaker state + health<br/>tracks consecutive errors<br/>feeds batching/alerts/dashboard"
+    note for ProviderHealthTracker "Health manager<br/>tracks breaker + health<br/>tracks consecutive errors<br/>feeds batching/alerts"

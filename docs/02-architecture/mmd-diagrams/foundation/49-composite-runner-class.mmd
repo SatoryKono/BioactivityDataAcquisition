@@ -7,7 +7,7 @@
 %% @date    2026-02-24
 %% @type    classDiagram
 %% @level   Mixed (System / Component / Class)
-
+%% @nodes   13
 %%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 %% @uniform class width=256 height=240 max_title_len=27 max_desc_lines=22
 classDiagram
@@ -350,4 +350,4 @@ classDiagram
     FSMStateHelper --> CompositePipelineState : manages
     MergeService ..> EnrichmentCrossValidator : optional validation
 
-    note for CompositePipelineRunner "Application service (ADR-026)<br/>No business logic<br/>delegates to specialized services<br/>all deps via constructor DI"
+    note for CompositePipelineRunner "ADR-026 service<br/>no business logic<br/>delegates to helpers<br/>constructor DI"
