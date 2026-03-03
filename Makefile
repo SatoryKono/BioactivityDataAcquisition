@@ -1,7 +1,7 @@
 # BioETL Makefile
 # Production-ready ETL system for bioactivity data
 
-.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-local-artifacts sanitize-local clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png render-diagrams-descriptions-pdf check-diagrams-visibility check-diagrams-pdf-bounds diagrams-all report-diagram-padding docs-lint
+.PHONY: help install install-uv install-pip setup-plugins setup-skills test test-ci lint run-local docker-up docker-down docker-reset seed-local clean clean-local-artifacts sanitize-local clean-preflight clean-all diagram-preflight lint-diagrams report-diagrams-policy validate-diagrams-syntax render-diagrams render-diagrams-all render-diagrams-svg render-diagrams-png render-diagrams-descriptions-docx render-diagrams-descriptions-pdf run-diagram-docs-agent check-diagrams-visibility check-diagrams-pdf-bounds diagrams-all report-diagram-padding docs-lint
 .DEFAULT_GOAL := help
 
 # Detect uv availability (preferred package manager)
@@ -217,6 +217,14 @@ render-diagrams-png: diagram-preflight ## Render all docs diagrams to PNG only
 render-diagrams-descriptions-pdf: ## Generate *-with-descriptions.pdf bundles with print-safe fit and bounds check
 	@echo "$(BLUE)Generating diagram description PDFs...$(NC)"
 	$(PY_RUN) scripts/diagrams/generate_with_descriptions_pdf.py
+
+render-diagrams-descriptions-docx: ## Generate *-with-descriptions.docx bundles from Markdown
+	@echo "$(BLUE)Generating diagram description DOCX...$(NC)"
+	$(PY_RUN) scripts/diagrams/generate_with_descriptions_docx.py
+
+run-diagram-docs-agent: ## Full diagram docs pipeline (checks + docx + pdf)
+	@echo "$(BLUE)Running diagram docs agent pipeline...$(NC)"
+	bash scripts/diagrams/run_diagram_docs_agent.sh
 
 check-diagrams-pdf-bounds: ## Validate existing with-descriptions PDF bundles for image clipping/overflow
 	@echo "$(BLUE)Checking with-descriptions PDF bounds...$(NC)"

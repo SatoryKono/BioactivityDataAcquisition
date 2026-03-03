@@ -227,10 +227,18 @@ mmdc -i docs/02-architecture/mmd-diagrams/architecture/01-high-level-hexagonal.m
 
 # Build print-safe PDF bundles with descriptions
 make render-diagrams-descriptions-pdf
+
+# Build DOCX bundles with descriptions
+make render-diagrams-descriptions-docx
+
+# Full agent pipeline (checks + render + DOCX + PDF)
+make run-diagram-docs-agent
 ```
 
 Description PDF generation uses:
 - `scripts/diagrams/generate_with_descriptions_pdf.py`
+- `scripts/diagrams/generate_with_descriptions_docx.py`
+- unified orchestrator: `scripts/diagrams/run_diagram_docs_agent.sh`
 - print CSS: `docs/02-architecture/mmd-diagrams/theme/with-descriptions-print.css`
 - post-check: `scripts/diagrams/check_pdf_image_bounds.py`
 

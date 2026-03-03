@@ -678,6 +678,7 @@ nav:
                 -   "Wave 8 Policy Decisions 2026 03 03": plans/wave-8-policy-decisions-2026-03-03.md
             -   "Prompts":
                 -   "QA Orchestrator Prompt": 00-project/agents/qa_orchestrator.md
+                -   "Diagram Docs Orchestrator Agent": 00-project/agents/diagram_docs_orchestrator.md
             -   "Reports":
                 -   "Overview": reports/index.md
                 -   "Documentation Cascade Audit 2026 02 27": reports/documentation-cascade-audit-2026-02-27.md
